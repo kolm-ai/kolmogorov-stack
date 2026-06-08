@@ -18,7 +18,7 @@
 //     {notification_attempted, notification_sent, notification_error} fields
 //     in every envelope.
 //   - emitDriftAlert event_type === 'drift_detected'
-//   - emitDriftAlert is tenant-fenced (W411 invariant) — the persisted alert
+//   - emitDriftAlert is tenant-fenced (W411 invariant) - the persisted alert
 //     row carries tenant_id and listRecentAlerts filters per-row.
 //
 // HONESTY INVARIANTS (NEVER violate):
@@ -43,19 +43,19 @@ export const DRIFT_EVENT_TYPE = 'drift_detected';
 const DRIFT_ALERT_PROVIDER = 'kolm_drift_alert';
 
 // =============================================================================
-// emitDriftAlert({tenant_id, namespace, drift_result, opts}) — fire alert.
+// emitDriftAlert({tenant_id, namespace, drift_result, opts}) - fire alert.
 //
 // drift_result is the envelope returned by compareDistributions() (or any
 // shape carrying {drift_detected, severity, kl_divergence, suggested_action_text}).
 //
-// opts.notifications_sender — DI seam for tests. If provided, called as
+// opts.notifications_sender - DI seam for tests. If provided, called as
 //   await sender({tenant_id, namespace, drift_result, payload})
 // and the return is recorded under notification_sent. When omitted, we
 // lazy-import src/notifications.js and use publicConfig() / setPreferences /
 // fireThresholdAlert as best-effort dispatch hooks. Missing module yields
 // notification_attempted:true + notification_sent:false + notification_error.
 //
-// opts.eventStore — DI seam for the persistence layer (defaults to
+// opts.eventStore - DI seam for the persistence layer (defaults to
 // src/event-store.js dynamic import). Always tries to persist the alert row
 // so listRecentAlerts can read it back. Persistence failure is recorded
 // under persisted:false; the envelope still returns ok:true with alert_id.
@@ -170,7 +170,7 @@ export async function emitDriftAlert({
   }
 
   // ---------------------------------------------------------------------------
-  // Persistence (best-effort) — write the alert row to the event store.
+  // Persistence (best-effort) - write the alert row to the event store.
   // ---------------------------------------------------------------------------
   let persisted = false;
   let persisted_event_id = null;

@@ -1,4 +1,4 @@
-// W866 — kolm hardware detection.
+// W866 - kolm hardware detection.
 //
 // Single source of truth for "what GPU is on this host, and which quantization
 // methods can it run natively?" Used by:
@@ -14,7 +14,7 @@
 //
 // We do NOT report fake capabilities. If the host has no GPU, we honestly
 // report `{vendor:'cpu', native_dtypes:['fp16','bf16','int8'], supported_methods:['gguf','hqq']}`
-// — never invent NVFP4 support on a CPU box.
+// - never invent NVFP4 support on a CPU box.
 //
 // Compute capability → native dtype mapping (W871 binding):
 //   Blackwell 10.0+  → NVFP4, FP8, INT8, INT4
@@ -65,11 +65,11 @@ function dtypesForComputeCapability(cc) {
   if (major === 8 && minor >= 9) return ['fp16', 'bf16', 'int8', 'int4'];
   // Ampere (A100, RTX 30xx)
   if (major === 8) return ['fp16', 'bf16', 'int8', 'int4'];
-  // Turing (RTX 20xx, T4) — INT8 yes, INT4 limited
+  // Turing (RTX 20xx, T4) - INT8 yes, INT4 limited
   if (major === 7 && minor >= 5) return ['fp16', 'int8'];
-  // Volta (V100) — FP16 only
+  // Volta (V100) - FP16 only
   if (major === 7) return ['fp16'];
-  // Pascal and older — FP16 emulation
+  // Pascal and older - FP16 emulation
   return ['fp16'];
 }
 
@@ -207,7 +207,7 @@ function detectWindowsDxgi() {
   } catch { return null; }
 }
 
-// CPU-only honest baseline. NEVER returns null — every host has a CPU.
+// CPU-only honest baseline. NEVER returns null - every host has a CPU.
 function cpuProfile() {
   const totalRam = Math.round(os.totalmem() / 1024 / 1024 / 1024);
   return [{

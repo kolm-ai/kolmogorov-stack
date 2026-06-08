@@ -1,6 +1,6 @@
 // src/seeds-mining.js
 //
-// Wave 354 — Seed mining.
+// Wave 354 - Seed mining.
 //
 // Three importers that turn pre-existing customer artifacts into normalized
 // (input, output) training rows. Every row carries a `source` field for
@@ -8,9 +8,9 @@
 // the array is deduplicated by sha256(input) before return.
 //
 // Exports:
-//   mineFromDir(dir, opts)        — walk dir for .md/.txt/.json/.jsonl/.csv/.html
-//   mineFromChat(jsonPath, opts)  — parse ChatGPT / Claude / generic chat export
-//   mineFromCaptures(ns, opts)    — tenant-scoped capture rows -> (prompt, response)
+//   mineFromDir(dir, opts) - walk dir for .md/.txt/.json/.jsonl/.csv/.html
+//   mineFromChat(jsonPath, opts) - parse ChatGPT / Claude / generic chat export
+//   mineFromCaptures(ns, opts) - tenant-scoped capture rows -> (prompt, response)
 //
 // No new npm deps. Pure node:fs + tiny RFC4180 CSV parser inline.
 
@@ -474,7 +474,7 @@ export async function mineFromChat(jsonPath, opts = {}) {
   return dedupe(rows.filter(isUsefulPair));
 }
 
-// Template clustering — same heuristic as router.js:templateSignature.
+// Template clustering - same heuristic as router.js:templateSignature.
 function templateSignature(prompt) {
   const raw = String(prompt || '').replace(/\s+/g, ' ').trim();
   const m = raw.match(/^(.{8,200}?[\?\.!:\n])(.*)$/);
@@ -518,7 +518,7 @@ export async function mineFromCaptures(namespace, opts = {}) {
     }
     return dedupe([...clusters.values()]);
   }
-  // No clustering — direct pass-through.
+  // No clustering - direct pass-through.
   const out = [];
   for (const r of rows) {
     const prompt = r.prompt || r.input || '';

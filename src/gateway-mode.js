@@ -1,4 +1,4 @@
-// W742 — Gateway Mode (gateway-mode.js).
+// W742 - Gateway Mode (gateway-mode.js).
 //
 // Atomic items pinned (matches the W742 implementation):
 //
@@ -14,7 +14,7 @@
 //     the ONLY caller-facing path to translate `process.env.KOLM_GATEWAY_MODE`
 //     into one of the frozen `GATEWAY_MODES` values. Unknown values throw
 //     loud so callers cannot silently fall through to 'cloud' on a typo
-//     (e.g. `local-olama`) — that would re-introduce the very leak this
+//     (e.g. `local-olama`) - that would re-introduce the very leak this
 //     wave is meant to prevent.
 //   * `dispatchByMode` is the SINGLE call-site for `/v1/chat/completions`
 //     when KOLM_GATEWAY_MODE != 'cloud'. The cloud-mode path is left
@@ -23,7 +23,7 @@
 //   * No retries at this layer. Honest envelopes only. The runner above
 //     (router or CLI) decides whether to retry.
 //   * Token counts in mock mode use `Math.floor(chars / 4)` so tests are
-//     fully deterministic — same input → same usage every time.
+//     fully deterministic - same input → same usage every time.
 
 import http from 'node:http';
 import https from 'node:https';
@@ -40,13 +40,13 @@ export const GATEWAY_MODES = Object.freeze([
 ]);
 
 // ---------------------------------------------------------------------------
-// currentMode — single source of truth for KOLM_GATEWAY_MODE resolution.
+// currentMode - single source of truth for KOLM_GATEWAY_MODE resolution.
 // ---------------------------------------------------------------------------
 //
 // * Returns 'cloud' when KOLM_GATEWAY_MODE is unset, empty, or 'cloud' (so
 //   the production hot-path is unaffected by this wave for every caller
 //   that has not explicitly opted in).
-// * Throws on unknown values rather than silently falling back — a typo
+// * Throws on unknown values rather than silently falling back - a typo
 //   like `KOLM_GATEWAY_MODE=local-olama` would otherwise leak a request
 //   to the cloud teacher; failing loud surfaces the typo immediately.
 export function currentMode() {
@@ -62,7 +62,7 @@ export function currentMode() {
 }
 
 // ---------------------------------------------------------------------------
-// localOllamaCall — POST <base_url>/api/chat (Ollama's chat API).
+// localOllamaCall - POST <base_url>/api/chat (Ollama's chat API).
 // ---------------------------------------------------------------------------
 //
 // Ollama's response shape is `{message:{role,content},...}` with `eval_count`
@@ -70,7 +70,7 @@ export function currentMode() {
 //   {ok:true, content, usage:{prompt_tokens, completion_tokens}, raw_response}
 //
 // On connection refused (Ollama not running) we return a honest envelope
-// pointing at `ollama serve` rather than re-raising — the caller usually
+// pointing at `ollama serve` rather than re-raising - the caller usually
 // wants to surface this in the CLI / dashboard, not crash.
 export async function localOllamaCall({
   model,
@@ -131,7 +131,7 @@ export async function localOllamaCall({
 }
 
 // ---------------------------------------------------------------------------
-// localVllmCall — POST <base_url>/v1/chat/completions (vLLM is OpenAI-compat).
+// localVllmCall - POST <base_url>/v1/chat/completions (vLLM is OpenAI-compat).
 // ---------------------------------------------------------------------------
 //
 // vLLM returns the standard OpenAI shape so we extract content +
@@ -197,7 +197,7 @@ export async function localVllmCall({
 }
 
 // ---------------------------------------------------------------------------
-// mockGatewayCall — deterministic stub for tests + free local dev.
+// mockGatewayCall - deterministic stub for tests + free local dev.
 // ---------------------------------------------------------------------------
 //
 // Three deterministic kinds:
@@ -206,7 +206,7 @@ export async function localVllmCall({
 //   'fixed'   → returns KOLM_MOCK_RESPONSE env value, or 'mock_response_default'
 //
 // Token counts are integer-floor(chars / 4). The same inputs ALWAYS produce
-// the same outputs (including usage) so tests aren't flaky — this is W742-3
+// the same outputs (including usage) so tests aren't flaky - this is W742-3
 // (mock gateway for testing without API costs).
 export function mockGatewayCall({ messages, mockKind = 'echo' }) {
   if (!Array.isArray(messages) || messages.length === 0) {
@@ -231,7 +231,7 @@ export function mockGatewayCall({ messages, mockKind = 'echo' }) {
     };
   }
   // Deterministic token counts. Integer math so two identical inputs produce
-  // identical usage numbers — tests assert equality, not approximate equality.
+  // identical usage numbers - tests assert equality, not approximate equality.
   let promptChars = 0;
   for (const m of messages) {
     const c = typeof m.content === 'string' ? m.content : '';
@@ -252,11 +252,11 @@ export function mockGatewayCall({ messages, mockKind = 'echo' }) {
 }
 
 // ---------------------------------------------------------------------------
-// dispatchByMode — single entry point that routes to the right adapter.
+// dispatchByMode - single entry point that routes to the right adapter.
 // ---------------------------------------------------------------------------
 //
 // Honest envelopes on every failure path. If `mode` is missing or unknown
-// we return ok:false instead of throwing — callers (the router, the CLI)
+// we return ok:false instead of throwing - callers (the router, the CLI)
 // surface this envelope rather than spilling a stack to the user.
 //
 // Callers MUST NOT use this for cloud-mode dispatch; cloud-mode flows
@@ -305,7 +305,7 @@ export async function dispatchByMode(opts) {
       mockKind: opts.mockKind || process.env.KOLM_MOCK_KIND || 'echo',
     });
   }
-  // Unreachable — every member of GATEWAY_MODES is handled above. The
+  // Unreachable - every member of GATEWAY_MODES is handled above. The
   // explicit fall-through envelope below is defense-in-depth.
   return {
     ok: false,
@@ -316,7 +316,7 @@ export async function dispatchByMode(opts) {
 }
 
 // ---------------------------------------------------------------------------
-// probeReachability — used by `GET /v1/gateway/mode` to surface whether
+// probeReachability - used by `GET /v1/gateway/mode` to surface whether
 // the local backends respond. HEAD with a 1s timeout so the route is fast
 // even when both backends are down.
 // ---------------------------------------------------------------------------

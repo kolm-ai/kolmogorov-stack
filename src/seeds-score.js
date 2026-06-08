@@ -1,6 +1,6 @@
 // src/seeds-score.js
 //
-// Wave 358 — Seed quality scorer.
+// Wave 358 - Seed quality scorer.
 //
 // score(rows, opts) -> {
 //   uniqueness:    0..1   (1 - duplicate / near-duplicate rate)
@@ -65,7 +65,7 @@ function computeUniqueness(rows, threshold = 0.85) {
     if (seen.has(s)) exact++;
     else seen.add(s);
   }
-  // Near duplicates by bigram Jaccard. O(n^2) — fine for typical seed sizes.
+  // Near duplicates by bigram Jaccard. O(n^2) - fine for typical seed sizes.
   const bgs = inputs.map(bigrams);
   let near = 0;
   if (inputs.length <= 500) {
@@ -104,7 +104,7 @@ function computeCoverageForPhi(rows) {
   // BIOMETRIC + FACE flow into BIO; ANY_UNIQUE_ID flows into OTHER.
   const inferred = new Set(present);
   if (present.has('BIO')) {
-    // Don't auto-claim BIOMETRIC/FACE just because BIO is hit — leave them
+    // Don't auto-claim BIOMETRIC/FACE just because BIO is hit - leave them
     // missing so the recommendation surfaces them as distinct gaps.
   }
   const missing = ALL.filter(c => !inferred.has(c));
@@ -155,23 +155,23 @@ function computeLabelQuality(rows) {
 function recommendations(metrics) {
   const out = [];
   if (metrics.uniqueness < 0.7) {
-    out.push(`uniqueness ${metrics.uniqueness.toFixed(2)} is low — dedupe near-duplicates before training`);
+    out.push(`uniqueness ${metrics.uniqueness.toFixed(2)} is low - dedupe near-duplicates before training`);
   } else if (metrics.uniqueness >= 0.85) {
-    out.push(`uniqueness ${metrics.uniqueness.toFixed(2)} — good diversity`);
+    out.push(`uniqueness ${metrics.uniqueness.toFixed(2)} - good diversity`);
   }
   const c = metrics.coverage;
   if (c.domain === 'phi-redactor' && c.missing.length > 0) {
-    out.push(`PHI classes hit ${c.present.length}/${c.total} (missing: ${c.missing.slice(0, 6).join(', ')}${c.missing.length > 6 ? '...' : ''}) — run kolm seeds augment --target-coverage to fill`);
+    out.push(`PHI classes hit ${c.present.length}/${c.total} (missing: ${c.missing.slice(0, 6).join(', ')}${c.missing.length > 6 ? '...' : ''}) - run kolm seeds augment --target-coverage to fill`);
   } else if (c.domain === 'generic' && c.missing.length > 5) {
-    out.push(`${c.missing.length} bigrams seen only once — consider augmenting to balance`);
+    out.push(`${c.missing.length} bigrams seen only once - consider augmenting to balance`);
   }
   if (metrics.label_quality < 0.8) {
-    out.push(`label_quality ${metrics.label_quality.toFixed(2)} — some outputs are empty / identical to input / unreasonably long`);
+    out.push(`label_quality ${metrics.label_quality.toFixed(2)} - some outputs are empty / identical to input / unreasonably long`);
   } else {
-    out.push(`label_quality ${metrics.label_quality.toFixed(2)} — good`);
+    out.push(`label_quality ${metrics.label_quality.toFixed(2)} - good`);
   }
   if (metrics.row_count < 50) {
-    out.push(`only ${metrics.row_count} rows — production K-score needs at least 50 (and 200+ for distill)`);
+    out.push(`only ${metrics.row_count} rows - production K-score needs at least 50 (and 200+ for distill)`);
   }
   return out;
 }

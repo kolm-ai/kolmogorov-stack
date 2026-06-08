@@ -1,6 +1,6 @@
 // src/distill-grpo.js
 //
-// W921 — GRPO / RLVR (verifiable-reward reinforcement fine-tuning) orchestration
+// W921 - GRPO / RLVR (verifiable-reward reinforcement fine-tuning) orchestration
 // shell. Mirrors src/distill-onpolicy.js + src/distill-preference.js: a thin
 // Node shell that spawns the in-repo trainer (workers/distill/scripts/
 // train_grpo.py, which wraps apps.trainer.grpo.grpo_trainer + the verifiable
@@ -14,7 +14,7 @@
 // score minus the group mean over the group std. No value head, no critic.
 //
 // The value for kolm: the reward function is the SAME code path as the K-score
-// evaluator — train-eval mismatch becomes a hard error, not a culture.
+// evaluator - train-eval mismatch becomes a hard error, not a culture.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -82,7 +82,7 @@ export function doctor() {
   };
 }
 
-// buildPromptsJsonl(seeds, rewardSpec) — write the prompts JSONL trl forwards to
+// buildPromptsJsonl(seeds, rewardSpec) - write the prompts JSONL trl forwards to
 // the reward funcs. Each seed becomes {prompt, references|schemas|regexes|tests}
 // columns depending on the reward family. Returns { ok, path, count }.
 export function buildPromptsJsonl(seeds, rewardSpec, outPath) {
@@ -114,7 +114,7 @@ export function buildPromptsJsonl(seeds, rewardSpec, outPath) {
   return { ok: true, path: outPath, count: rows.length, family };
 }
 
-// trainGrpo(opts) — durable envelope. Spawns the trainer when present; returns
+// trainGrpo(opts) - durable envelope. Spawns the trainer when present; returns
 // an honest no_trainer_installed envelope otherwise (still writes the run dir).
 export function trainGrpo({
   promptsPath,

@@ -1,6 +1,6 @@
 // src/marketplace-finetune.js
 //
-// W825-4 — Transfer-learning entrypoint for the W825 Artifact Marketplace MVP.
+// W825-4 - Transfer-learning entrypoint for the W825 Artifact Marketplace MVP.
 //
 // Given a marketplace artifact_id:
 //   1. Verify the listing exists.
@@ -9,7 +9,7 @@
 //      it up by stable filename.
 //   3. Stub-call into the W381 distill pipeline (src/distill-pipeline.js) with
 //      a --base-artifact-id flag. We DO NOT run the full LoRA fine-tune here
-//      — that's a long-running worker. Instead we return a honest queued
+// - that's a long-running worker. Instead we return a honest queued
 //      envelope so the caller can poll and the SDK can show a status pill.
 //
 // Honesty contract: the envelope's status is 'queued' (never 'running' or
@@ -97,7 +97,7 @@ export async function finetuneFromMarketplace(opts = {}) {
   }
 
   // Step 2: queue the distill run. We do NOT spawn the full distill worker
-  // here — we just persist a queued row that the worker can pick up.
+  // here - we just persist a queued row that the worker can pick up.
   const run_id = 'distill_' + Date.now().toString(36) + '_' + crypto.randomBytes(3).toString('hex');
   try {
     await appendEvent({
@@ -130,7 +130,7 @@ export async function finetuneFromMarketplace(opts = {}) {
     max_steps,
     pipeline_module: './distill-pipeline.js',
     base_artifact_flag: '--base-artifact-id',
-    forecast_note: 'fine-tune is queued (not yet running) — the W381 pipeline will pick this row up',
+    forecast_note: 'fine-tune is queued (not yet running) - the W381 pipeline will pick this row up',
     version: MARKETPLACE_FINETUNE_VERSION,
   };
 }

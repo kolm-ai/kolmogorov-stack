@@ -1,6 +1,6 @@
 // src/kv-cache-shard.js
 //
-// Shard KV cache integration module — drop-in HuggingFace Cache replacement
+// Shard KV cache integration module - drop-in HuggingFace Cache replacement
 // that achieves ~10x KV cache compression by treating K and V differently:
 //
 //   K  : low-rank after undoing RoPE -> PCA + int4
@@ -11,14 +11,14 @@
 // Reference: github.com/krish1905/shard (Apache-2.0).
 //
 // This module is the JS-side contract for the Python Shard library. It does
-// not run Shard itself — it exposes:
+// not run Shard itself - it exposes:
 //
-//   * estimateKvCacheBytes        — bytes for the default FP16 KV cache.
-//   * estimateShardKvCacheBytes   — bytes for the Shard-compressed KV cache.
-//   * compressionRatio            — default / shard ratio.
-//   * maxContextAtVram            — integer max context that fits in VRAM.
-//   * isShardSupported            — gate (family + runtime + RoPE).
-//   * shardPassportEntry          — runtime passport kv_cache sub-object.
+//   * estimateKvCacheBytes - bytes for the default FP16 KV cache.
+//   * estimateShardKvCacheBytes - bytes for the Shard-compressed KV cache.
+//   * compressionRatio - default / shard ratio.
+//   * maxContextAtVram - integer max context that fits in VRAM.
+//   * isShardSupported - gate (family + runtime + RoPE).
+//   * shardPassportEntry - runtime passport kv_cache sub-object.
 //
 // Caveats:
 //   * Shard is a HF Cache subclass. transformers + vLLM use HF Cache;
@@ -119,8 +119,8 @@ export function estimateKvCacheBytes({
  * Shard-compressed KV cache size in bytes.
  *
  * Two regions:
- *   * Sink + window (sink_tokens + window_tokens) — FP16, 2 bytes/element
- *   * Compressed tail (context_length - sink - window) — bits_per_element / 8 bytes/element
+ *   * Sink + window (sink_tokens + window_tokens) - FP16, 2 bytes/element
+ *   * Compressed tail (context_length - sink - window) - bits_per_element / 8 bytes/element
  *
  * If context_length <= sink + window, the compressed region is empty and
  * the answer is just the FP16 region (which is what HF Cache would store

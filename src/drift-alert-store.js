@@ -1,4 +1,4 @@
-// W747 — Drift-alert sketch + webhook persistence.
+// W747 - Drift-alert sketch + webhook persistence.
 //
 // Backed by src/store.js (tables: drift_sketches, drift_webhooks). Every
 // getter enforces tenant-fence at the call site via findByTenant + a
@@ -20,7 +20,7 @@
 // `drift_warning:true` onto the next routing decision when a warning is
 // pending. Honest fallback: if drift-alert-store fails to import (e.g. in a
 // future refactor that decouples the modules) the W709 path silently
-// continues — drift_warning is best-effort, never load-bearing.
+// continues - drift_warning is best-effort, never load-bearing.
 
 import { insert, update, find, findByTenant, remove } from './store.js';
 
@@ -109,7 +109,7 @@ export function latestSnapshots(tenant_id, namespace) {
   const ns = _safeNamespace(namespace);
   let rows = [];
   try { rows = findByTenant(DRIFT_SKETCHES_TABLE, tenant_id) || []; } catch (_) { rows = []; }
-  // Defense in depth — re-check tenant + namespace.
+  // Defense in depth - re-check tenant + namespace.
   rows = rows.filter((r) =>
     r
     && (r.tenant === tenant_id || r.tenant_id === tenant_id)
@@ -215,7 +215,7 @@ export function listWebhooks(tenant_id, namespace) {
 //
 // The router sets a pending flag when shouldAlert() fires. The W709 routing
 // decision path reads + clears the flag at decision time. The flag is
-// in-process only — a server restart drops it and the next routing decision
+// in-process only - a server restart drops it and the next routing decision
 // is back to "no warning". That's intentional: drift warnings are a SOFT
 // signal whose value decays quickly. If a permanent warning is desired, the
 // caller should pin it via the webhook (durable) instead.
@@ -228,7 +228,7 @@ function _wkey(tenant_id, namespace) {
 }
 
 /**
- * Mark a drift warning as pending for this (tenant, namespace). Idempotent —
+ * Mark a drift warning as pending for this (tenant, namespace). Idempotent - 
  * repeated calls overwrite the timestamp + JSD.
  *
  * @param {string} tenant_id

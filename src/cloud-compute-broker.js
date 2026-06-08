@@ -160,7 +160,7 @@ const LANES = Object.freeze([
     command_kind: 'deploy-plan',
     backend: 'cerebras',
     strengths: ['~2,200 tok/s on 8B and ~450 tok/s on 70B (10-20x typical GPU)', 'wafer-scale CS-3', 'OpenAI-compatible endpoint'],
-    caveats: ['inference-only — no training or LoRA upload', 'pre-loaded model catalog (no custom weights)', 'streaming via OpenAI SSE on /v1/chat/completions'],
+    caveats: ['inference-only - no training or LoRA upload', 'pre-loaded model catalog (no custom weights)', 'streaming via OpenAI SSE on /v1/chat/completions'],
   },
   {
     id: 'cloudflare-workers-r2',

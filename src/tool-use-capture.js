@@ -1,4 +1,4 @@
-// W735 — Agent / Tool-Use distillation: capture-phase primitives.
+// W735 - Agent / Tool-Use distillation: capture-phase primitives.
 //
 // Closes W735-1 from KOLM_W707_SYSTEM_UPGRADE_PLAN.md line 392:
 //
@@ -20,12 +20,12 @@
 //     shapes. Returns a normalised {tool_calls,parse_source} record so
 //     downstream consumers never have to switch on the upstream vendor.
 //   * Honest absence: a non-tool-using response returns
-//     {tool_calls:[], parse_source:'none'} — pure no-op, never throws.
+//     {tool_calls:[], parse_source:'none'} - pure no-op, never throws.
 //     The W735-2 formatter detects parse_source==='none' and falls
 //     through to the legacy USER/ASSISTANT format.
-//   * Privacy: parseToolCalls() never logs raw arguments — it only
+//   * Privacy: parseToolCalls() never logs raw arguments - it only
 //     normalises shape. The capture row is what carries the data into
-//     the persisted store (where it belongs — it IS training data).
+//     the persisted store (where it belongs - it IS training data).
 //   * Additive: when a capture has no tool_calls field, the W735-2
 //     formatter falls through to the legacy USER/ASSISTANT format.
 //     Nothing about the W735 change breaks existing distill flows.
@@ -57,30 +57,30 @@ const MAX_TOOL_CALLS_PER_RESPONSE = 200;
  * Parse tool-call records out of an upstream LLM response body.
  *
  * Returns {tool_calls:[{name, arguments, id?}], parse_source:'anthropic'|
- * 'openai'|'generic'|'none'}. Never throws — pathological inputs return
+ * 'openai'|'generic'|'none'}. Never throws - pathological inputs return
  * the honest-empty envelope {tool_calls:[], parse_source:'none'}.
  *
  * Shape priority (first match wins):
  *
- *   1) Anthropic — body.content is an array, with one or more items where
+ *   1) Anthropic - body.content is an array, with one or more items where
  *      item.type === 'tool_use'. Each item has {id, name, input}.
  *
- *   2) OpenAI — body.choices[0].message.tool_calls is an array. Each item
+ *   2) OpenAI - body.choices[0].message.tool_calls is an array. Each item
  *      has {id, type:'function', function:{name, arguments:JSON_STRING}}.
  *      We also accept the legacy {message.function_call} shape (single
  *      call) as a degenerate OpenAI case.
  *
- *   3) Generic — body.function_call or body.tool_calls at top level. This
+ *   3) Generic - body.function_call or body.tool_calls at top level. This
  *      covers custom adapters, Ollama function-mode, and Mistral
  *      tool-use. We treat top-level tool_calls as an OpenAI-shaped array.
  *
- *   4) None — no recognised shape. Returns the empty envelope.
+ *   4) None - no recognised shape. Returns the empty envelope.
  *
  * The `arguments` field is ALWAYS a plain object on the returned record,
  * even when the upstream wire format used a JSON string (OpenAI's
  * convention). Parser failures on the arguments string fall through to
  * {raw_arguments: <string>} so the caller still sees what came down the
- * wire — we don't silently drop malformed payloads.
+ * wire - we don't silently drop malformed payloads.
  */
 export function parseToolCalls(response_body) {
   // Honest empty envelope. Used by every fall-through branch below.
@@ -88,7 +88,7 @@ export function parseToolCalls(response_body) {
 
   if (response_body == null) return EMPTY;
   // Body might already be parsed (object) OR be a JSON string from the
-  // wire. We tolerate both — the SDK callers vary on this.
+  // wire. We tolerate both - the SDK callers vary on this.
   let body = response_body;
   if (typeof body === 'string') {
     try { body = JSON.parse(body); }
@@ -186,7 +186,7 @@ export function parseToolCalls(response_body) {
 function _normaliseArgs(raw) {
   if (raw == null) return { value: {} };
   if (typeof raw === 'object' && !Array.isArray(raw)) {
-    // Anthropic-shape — already an object. No truncation needed for the
+    // Anthropic-shape - already an object. No truncation needed for the
     // wire payload since it was already deserialised by the caller.
     return { value: raw };
   }
@@ -214,7 +214,7 @@ function _normaliseArgs(raw) {
       return { value: {}, raw_arguments: s, ...(truncated ? { truncated: true } : {}) };
     }
   }
-  // Anything else (number, array, boolean) — surface as raw_arguments.
+  // Anything else (number, array, boolean) - surface as raw_arguments.
   return { value: {}, raw_arguments: String(raw) };
 }
 
@@ -227,7 +227,7 @@ function _normaliseArgs(raw) {
  *
  * Each capture is expected to carry a `tool_calls` array (the field added
  * by the W735-1 capture-path edit in src/router.js). Captures without
- * tool_calls are skipped — they contribute to the total-captures
+ * tool_calls are skipped - they contribute to the total-captures
  * denominator but not to any specific tool bucket.
  *
  * The optional `namespace` filter restricts the input set to captures

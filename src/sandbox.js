@@ -4,9 +4,9 @@
 // process so any outbound network call from sandboxed code is recorded and
 // blocked. Intended for two callers:
 //
-//   * `src/benchmark.js` — wraps a single artifact run, hard-fails on any
+//   * `src/benchmark.js` - wraps a single artifact run, hard-fails on any
 //     egress attempt (the manifest claims egress=0; we prove it).
-//   * `src/artifact-runner.js` — when called with `{ egress: 'block' }`, the
+//   * `src/artifact-runner.js` - when called with `{ egress: 'block' }`, the
 //     same guard runs for every recipe.run on the server, so a malicious
 //     recipe that smuggles past the DANGEROUS regex still cannot exfiltrate.
 //

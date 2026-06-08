@@ -1,4 +1,4 @@
-// W918 P5.2 — Role-based access control capability matrix for orgs.
+// W918 P5.2 - Role-based access control capability matrix for orgs.
 
 export const ROLES = Object.freeze({
   OWNER: 'owner',

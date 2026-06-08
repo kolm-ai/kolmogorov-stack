@@ -11,7 +11,7 @@
 //                      created_at, version, transport:'sneakernet'}
 //   README.txt      - one-page operator note: how to verify + unpack
 //
-// We deliberately avoid shelling out to `tar` — it's not guaranteed on
+// We deliberately avoid shelling out to `tar` - it's not guaranteed on
 // Windows hosts and the test fixture would have to special-case the
 // platform. Instead we write a minimal USTAR-compatible tar archive in
 // pure JS. The archive is uncompressed (no gzip) because:
@@ -22,7 +22,7 @@
 //   - Adding zlib only saves ~10% on already-compressed .kolm (it's a zip)
 //
 // W411 tenant fence: packSneakernet accepts opts.tenant and writes it into
-// the manifest; unpackSneakernet does NOT enforce tenant on its own — the
+// the manifest; unpackSneakernet does NOT enforce tenant on its own - the
 // caller (route layer) is responsible because the tenant_id is bound to
 // the http request, not the on-disk archive. The honest envelope surfaces
 // the manifest tenant_id so a route handler can compare.
@@ -32,9 +32,9 @@
 //
 // Honesty invariants:
 //   - packSneakernet returns ok:false when the artifact path doesn't exist
-//     — never silent passthrough.
+// - never silent passthrough.
 //   - unpackSneakernet sets verified:false when the embedded signature
-//     doesn't match the actual artifact bytes — caller MUST honor this
+//     doesn't match the actual artifact bytes - caller MUST honor this
 //     before treating the artifact as trustworthy.
 //   - The signature is HMAC over (artifact + manifest_canonical). Tampering
 //     with EITHER side breaks verify, so a swapped artifact under the same
@@ -150,7 +150,7 @@ function parseTarArchive(buf) {
     const header = buf.slice(offset, offset + TAR_BLOCK);
     // Empty block => archive terminator.
     if (header.every((b) => b === 0)) break;
-    // Parse name (NUL-terminated). The W411 contract says be conservative —
+    // Parse name (NUL-terminated). The W411 contract says be conservative - 
     // a malformed header should never silently advance the offset by a
     // wrong amount and resync on garbage. Throw loudly.
     const nameRaw = header.slice(0, 100);
@@ -184,7 +184,7 @@ function parseTarArchive(buf) {
 // =============================================================================
 
 // Build the canonical JSON form of the manifest. Sorted keys so the same
-// manifest object always hashes identically — the signature is HMAC over
+// manifest object always hashes identically - the signature is HMAC over
 // this canonical form (NOT JSON.stringify with default ordering).
 function canonicalManifestJson(manifest) {
   const keys = Object.keys(manifest).sort();
@@ -210,7 +210,7 @@ function readmeBody(manifest) {
     '',
     'unpack will verify the embedded signature against the artifact bytes',
     'and report {verified:true|false}. A false verdict means the archive',
-    'is corrupted or tampered — DO NOT load the artifact.',
+    'is corrupted or tampered - DO NOT load the artifact.',
     '',
   ].join('\n');
 }
@@ -248,7 +248,7 @@ export function packSneakernet(opts = {}) {
     return {
       ok: false,
       error: 'artifact_id_required',
-      hint: 'pass {artifact_id: string} — used in the manifest + README',
+      hint: 'pass {artifact_id: string} - used in the manifest + README',
       version: SNEAKERNET_VERSION,
     };
   }
@@ -273,7 +273,7 @@ export function packSneakernet(opts = {}) {
       ok: false,
       error: 'artifact_not_found',
       artifact_path,
-      hint: 'check the path — sneakernet packs the file as-is, no resolution magic',
+      hint: 'check the path - sneakernet packs the file as-is, no resolution magic',
       version: SNEAKERNET_VERSION,
     };
   }
@@ -295,7 +295,7 @@ export function packSneakernet(opts = {}) {
     : Math.floor(Date.now() / 1000);
 
   // Build manifest BEFORE signing. The signature covers
-  // (artifact_bytes || '\0' || manifest_canonical) — any swap on either side
+  // (artifact_bytes || '\0' || manifest_canonical) - any swap on either side
   // breaks verify.
   const manifest = {
     artifact_id,
@@ -374,7 +374,7 @@ export function packSneakernet(opts = {}) {
 //
 // When dest_dir is supplied AND verified is true, the artifact + manifest +
 // README are written there. When verified is false the files are NOT
-// written — the contract is "do not let unverified bytes escape past this
+// written - the contract is "do not let unverified bytes escape past this
 // boundary" so the caller cannot accidentally load a tampered artifact.
 export function unpackSneakernet(opts = {}) {
   const {
@@ -447,7 +447,7 @@ export function unpackSneakernet(opts = {}) {
     };
   }
 
-  // Rebuild the canonical manifest the same way the packer did — strip the
+  // Rebuild the canonical manifest the same way the packer did - strip the
   // sha256_signature slot because it's a self-reference. Then HMAC.
   const canonicalSrc = Object.assign({}, manifest);
   delete canonicalSrc.sha256_signature;

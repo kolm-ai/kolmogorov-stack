@@ -27,6 +27,23 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const KOLM_CLI = path.resolve(__dirname, '..', 'cli', 'kolm.js');
 
+// --- Hermetic capture store (test-isolation only; no product change) --------
+// listCaptures() reads src/store.js, whose DATA_DIR is frozen to KOLM_DATA_DIR
+// (else ./data) at first import. On a developer machine ./data accumulates tens
+// of thousands of rows across runs, so a freshly-written capture row is lost
+// among them and #4 cannot find its needle. Freeze the store to a fresh, empty
+// file-scoped temp dir BEFORE the first dynamic import of the daemon/store (the
+// static imports above never touch store.js). resolveKolmDir() in
+// daemon-connector ranks KOLM_HOME above KOLM_DATA_DIR, so per-subtest daemon
+// dir / config.json isolation is preserved by setting KOLM_HOME where the
+// child CLI subtests below read pid/keys from a per-test HOME/.kolm.
+const _STORE_DIR = path.join(
+  os.tmpdir(),
+  'kolm-w368-store-' + process.pid + '-' + Math.random().toString(36).slice(2),
+);
+try { fs.mkdirSync(_STORE_DIR, { recursive: true }); } catch (_) {} // deliberate: cleanup
+process.env.KOLM_DATA_DIR = _STORE_DIR;
+
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w368-' + process.pid + '-' + Math.random().toString(36).slice(2));
   try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
@@ -367,7 +384,7 @@ test('W368 #8 — kolm connect doctor without daemon + no keys exits gracefully 
   const HOME = isolatedHome();
   const r = await new Promise((resolve) => {
     const proc = spawn(process.execPath, [KOLM_CLI, 'connect', 'doctor'], {
-      env: { ...process.env, HOME, USERPROFILE: HOME, OPENAI_API_KEY: '', ANTHROPIC_API_KEY: '', OPENROUTER_API_KEY: '', GEMINI_API_KEY: '', KOLM_API_KEY: '' },
+      env: { ...process.env, HOME, USERPROFILE: HOME, KOLM_HOME: path.join(HOME, '.kolm'), OPENAI_API_KEY: '', ANTHROPIC_API_KEY: '', OPENROUTER_API_KEY: '', GEMINI_API_KEY: '', KOLM_API_KEY: '' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let stdout = ''; let stderr = '';
@@ -389,7 +406,7 @@ test('W368 #9 — kolm connect status without daemon prints NOT RUNNING (exit 0)
   const HOME = isolatedHome();
   const r = await new Promise((resolve) => {
     const proc = spawn(process.execPath, [KOLM_CLI, 'connect', 'status'], {
-      env: { ...process.env, HOME, USERPROFILE: HOME, KOLM_API_KEY: '' },
+      env: { ...process.env, HOME, USERPROFILE: HOME, KOLM_HOME: path.join(HOME, '.kolm'), KOLM_API_KEY: '' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let stdout = ''; let stderr = '';
@@ -410,7 +427,7 @@ test('W368 #10 — kolm connect config --show emits sanitized key fingerprints',
   fs.writeFileSync(path.join(HOME, '.kolm', 'config.json'), JSON.stringify({ upstream_keys: { openai: 'sk-abcdef1234567890wxyz' } }));
   const r = await new Promise((resolve) => {
     const proc = spawn(process.execPath, [KOLM_CLI, 'connect', 'config', '--show'], {
-      env: { ...process.env, HOME, USERPROFILE: HOME, KOLM_API_KEY: '' },
+      env: { ...process.env, HOME, USERPROFILE: HOME, KOLM_HOME: path.join(HOME, '.kolm'), KOLM_API_KEY: '' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let stdout = ''; let stderr = '';

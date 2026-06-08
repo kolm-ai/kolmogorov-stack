@@ -1,177 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Trust · kolm.ai</title>
-<meta name="description" content="What kolm signs, where the receipts live, and the exact gate that decides when a .kolm artifact is sigstore-attested.">
-<link rel="canonical" href="https://kolm.ai/trust">
-<meta property="og:title" content="Trust">
-<meta property="og:description" content="What kolm signs and the exact gate that decides when a .kolm artifact is sigstore-attested.">
-<meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:url" content="https://kolm.ai/trust">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Trust center · kolm.ai</title>
+<meta name="description" content="Everything on this page is checkable. Reports are Ed25519-signed and verifiable offline against our public key, findings map to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS, redacted logs are kept only for the engagement, and every report is entered in an append-only Merkle transparency log.">
+<meta name="keywords" content="trust center, Ed25519 signed evidence, offline verification, SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP, MITRE ATLAS, transparency log, RFC 6962, Merkle log, data handling, redaction, scoped keys, subprocessors, DPA">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="kolm trust center: everything here is checkable">
+<meta property="og:description" content="Offline-verifiable signed evidence, findings mapped to the frameworks your buyer cites, careful data handling, and an append-only Merkle transparency log. Nothing asserted without a way to verify it.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/trust">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Trust">
-<meta name="twitter:description" content="What kolm signs and the exact gate that decides when a .kolm artifact is sigstore-attested.">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="kolm trust center">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/trust">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"TechArticle","headline":"Trust and signature_sigstore gate","description":"The trust surface for kolm: receipts, ed25519, and the exact signature_sigstore/Rekor gate.","url":"https://kolm.ai/trust","mainEntityOfPage":"https://kolm.ai/trust","author":{"@type":"Organization","name":"kolm.ai"}}
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "kolm trust center",
+  "url": "https://kolm.ai/trust",
+  "description": "kolm's trust posture: Ed25519-signed evidence verifiable offline, findings mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS, careful data handling, and an append-only Merkle transparency log.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
+}
 </script>
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/supplement.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<script defer src="/supplement.js"></script>
-<style>
- :root{--ink:#20242a;--muted:#5d6672;--line:#dfe4e8;--bg:#fbfcfb;--panel:#fff;--accent:#2563eb;--warn:#9a6700;--bad:#b42318;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
- body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
- .wrap{max-width:920px;margin:0 auto;padding:0 24px}
- main{padding:54px 0 34px}
- .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
- h1{font-size:44px;line-height:1.08;margin:0 0 16px;font-weight:600;letter-spacing:0}
- .lede{font-size:18px;line-height:1.6;color:var(--muted);max-width:820px;margin:0 0 26px}
- section{padding:30px 0;border-top:1px solid var(--line)}
- h2{font-size:24px;margin:0 0 12px;letter-spacing:0}
- h3{font-size:17px;margin:18px 0 8px;letter-spacing:0}
- p{margin:0 0 14px;color:var(--muted)}
- code,pre{font-family:var(--mono)}
- code{background:#eef3f0;border:1px solid #dbe7e1;border-radius:4px;padding:1px 5px;color:#18382d}
- pre{background:#0d1117;color:#e6edf3;border-radius:8px;padding:16px;overflow:auto;font-size:13px;line-height:1.55}
- table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
- th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
- th{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:500}
- .ok{color:var(--accent)}.warn{color:var(--warn)}.bad{color:var(--bad)}
- ul{margin:0 0 14px;padding-left:22px;color:var(--muted)}
-</style>
 </head>
-<body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/solutions/teams">For teams</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="/enterprise">Enterprise</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
     </div>
-  </nav>
-</div>
-
-<main id="main">
-  <div class="wrap">
-    <p class="eyebrow">kolm.ai &middot; trust</p>
-    <h1>Trust surface</h1>
-    <p class="lede">What kolm signs by default, where the receipts live, and the exact field that gates external attestation. No marketing claims that we cannot verify on disk right now.</p>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
   </div>
+</header>
 
-  <section>
-    <div class="wrap">
-      <h2>Default receipt content</h2>
-      <p>Every <code>.kolm</code> artifact ships an ed25519 receipt chain that covers the manifest, the recipe source, the seed corpus split, and the K-score eval block. <code>kolm verify &lt;artifact&gt;</code> walks the chain offline against the artifact bytes.</p>
-      <table>
-        <thead><tr><th>Field</th><th>Status</th><th>Where</th></tr></thead>
+<main>
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:66ch">
+      <h1>Your buyer's reviewers will check us too. Good.</h1>
+      <p class="lede">
+        When a security team vets your agent, they turn the same scrutiny on the
+        evidence you hand them and on the company that signed it. This page is built
+        for that. Every claim here links to something a reviewer can verify, download,
+        or read the source of. Nothing is asserted without a way to check it.
+      </p>
+      <div class="trustline" aria-label="What this page stands on">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Signed, verifiable offline</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Mapped to your buyer's frameworks</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Nothing claimed we cannot show</span>
+      </div>
+    </div>
+    <div class="band" style="margin-top:var(--s6)">
+      <span class="badge badge--ok">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:13px;height:13px"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Ed25519-signed evidence
+      </span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge">Framework-mapped</span>
+      <span class="badge">Open-source verifier</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. WHY YOU CAN CHECK US -->
+<section class="section reveal" id="why">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / Why you can check us</span>
+      <h2>We hold ourselves to the bar we audit against.</h2>
+      <p class="lede">
+        We ask startups to prove their agents are safe with signed, scoped, verifiable
+        evidence. We build the same into every report we issue, and into this page. What
+        is signed is signed. What is in progress is labeled. What we do not hold, we do
+        not claim.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Independent verification</p>
+        <h3>Check any report yourself</h3>
+        <p>Every report is Ed25519-signed and checkable offline against kolm's public key. No account, no trust in our servers. The verifier is open source, so a reviewer reads it rather than takes our word.</p>
+        <p class="card__map"><a href="/verify" style="color:var(--accent)">Verify a report</a></p>
+      </div>
+      <div class="card">
+        <p class="card__k">Framework mapping</p>
+        <h3>Findings tie to standards you cite</h3>
+        <p>Each finding maps to a control your review group already uses. kolm maps to these frameworks. It does not itself hold their certifications, and this page never pretends otherwise.</p>
+        <p class="card__map"><a href="#frameworks" style="color:var(--accent)">See the mapping</a></p>
+      </div>
+      <div class="card">
+        <p class="card__k">What we do not hold</p>
+        <h3>Stated, not buried</h3>
+        <p>kolm does not currently hold a SOC 2 report or a published third-party pentest of its own. We will not claim either until it is real and verifiable.</p>
+        <p class="card__map">candid by default</p>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:var(--s7)">
+      <table class="tbl">
+        <thead>
+          <tr><th scope="col">Area</th><th scope="col">Status</th><th scope="col">Detail</th></tr>
+        </thead>
         <tbody>
-          <tr><td><code>artifact_hash</code></td><td class="ok">required</td><td>manifest, computed sha256 of zipped payload</td></tr>
-          <tr><td><code>ed25519_signature</code></td><td class="ok">required</td><td>receipt chain, key on GET <code>/v1/keys/public</code></td></tr>
-          <tr><td><code>k_score</code></td><td class="ok">required</td><td>manifest, source = real holdout split</td></tr>
-          <tr><td><code>seed_provenance</code></td><td class="ok">required</td><td>manifest, with train/holdout counts</td></tr>
-          <tr><td><code>signature_sigstore</code></td><td class="warn">optional / dry-run bundle</td><td>manifest, populated when <code>kolm sigstore-attest</code> is wired</td></tr>
+          <tr><td><b>Framework mapping</b></td><td class="mapped">Built in</td><td>Findings map to SOC 2 TSC, ISO 42001, NIST AI RMF, EU AI Act Art.12 and Art.14, OWASP and MITRE ATLAS. kolm maps to these standards, it does not hold their certifications.</td></tr>
+          <tr><td><b>kolm's own SOC 2 / pentest</b></td><td>Not held</td><td>kolm does not currently hold a SOC 2 report or a published third-party pentest of its own. We will not claim either until it is real and verifiable.</td></tr>
+          <tr><td><b>Data retention</b></td><td class="mapped">Engagement-only</td><td>Redacted logs are used for the engagement and not kept beyond it.</td></tr>
+          <tr><td><b>Attestation</b></td><td class="mapped">Ed25519 + tlog</td><td>Every report is signed and entered in an append-only Merkle transparency log.</td></tr>
+          <tr><td><b>Verification</b></td><td class="mapped">Offline</td><td>Open WebCrypto verifier, with no kolm account or server in the trust path.</td></tr>
+          <tr><td><b>Tooling license</b></td><td class="mapped">Apache-2.0</td><td>The verifier, the canonicalization, and the CLI are open and reproducible.</td></tr>
         </tbody>
       </table>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section>
-    <div class="wrap">
-      <h2>The signature_sigstore gate</h2>
-      <p><code>kolm sigstore-attest</code> attaches a sigstore bundle to the artifact and writes a <code>signature_sigstore</code> block into the manifest. In the current release this is a dry-run bundle &mdash; the signature flow runs end-to-end and the bundle shape is real, but the Rekor inclusion proof is not yet a hard production gate.</p>
-      <p>External callers that must refuse non-attested artifacts can set <code>KOLM_REQUIRE_REKOR=1</code>. With that flag, <code>kolm verify</code> escalates a missing or unverified <code>signature_sigstore.rekor_log_entry</code> to a non-zero exit code instead of a warning. Without the flag, the field stays informational so the rest of the receipt chain still verifies offline.</p>
-      <pre>$ KOLM_REQUIRE_REKOR=1 kolm verify ./examples/claims-redactor/claims-redactor.kolm
-artifact_hash ok
-ed25519 ok
-receipt chain ok
-signature_sigstore: dry-run bundle (no Rekor proof) &mdash; FAIL (KOLM_REQUIRE_REKOR=1)
-exit 2</pre>
-      <p>The plain read: today <code>signature_sigstore</code> is best-effort and is not part of the default verification gate. Setting <code>KOLM_REQUIRE_REKOR=1</code> is the explicit opt-in for callers who want to refuse anything that does not have a verifiable Rekor entry. When that becomes the default, this page will say so.</p>
+<!-- ============================================================ 3. FRAMEWORKS WE MAP TO -->
+<section class="section reveal" id="frameworks">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / Frameworks we map to</span>
+      <h2>The standards your reviewers already cite.</h2>
+      <p class="lede">
+        Every finding traces to a control your buyer's questionnaire already names, so a
+        reviewer reads the result against a framework they trust instead of one we invented.
+      </p>
     </div>
-  </section>
+    <div class="band">
+      <span class="ctrlid">SOC 2</span>
+      <span class="ctrlid">ISO 42001</span>
+      <span class="ctrlid">NIST AI RMF</span>
+      <span class="ctrlid">EU AI Act</span>
+      <span class="ctrlid">OWASP</span>
+      <span class="ctrlid">MITRE ATLAS</span>
+    </div>
+    <div class="tbl-wrap" style="margin-top:var(--s6)">
+      <table class="tbl">
+        <thead>
+          <tr><th scope="col">Framework</th><th scope="col">What it governs</th><th scope="col">kolm findings that map</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>SOC 2</b> TSC</td><td>Security, availability and confidentiality controls</td><td class="mapped">Least-privilege scopes · audit-trail integrity · evidence</td></tr>
+          <tr><td><b>ISO 42001</b></td><td>AI management system</td><td class="mapped">Model and dependency provenance · evidence</td></tr>
+          <tr><td><b>NIST AI RMF</b></td><td>AI risk, mapped, measured and managed</td><td class="mapped">Permission posture · injection resistance</td></tr>
+          <tr><td><b>EU AI Act</b> Art.12 / Art.14</td><td>Activity logging and human oversight</td><td class="mapped">Append-only audit trail · oversight hooks</td></tr>
+          <tr><td><b>OWASP</b> LLM &amp; Agentic Top 10</td><td>LLM and agent attack classes</td><td class="mapped">Prompt-injection battery · data egress</td></tr>
+          <tr><td><b>MITRE ATLAS</b></td><td>Adversarial ML tactics and techniques</td><td class="mapped">Injection · model provenance</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s4)">
+      kolm maps findings to these frameworks. It does not certify them. The EU AI Act Art.12 logging obligation carries an enforcement date of Aug 2 2026, stated as a date, not a claim of compliance.
+    </p>
+  </div>
+</section>
 
-  <section>
-    <div class="wrap">
-      <h2>What we do not claim</h2>
-      <ul>
-        <li>No SLSA Level 3 attestation. The build provenance status lives at <a href="/slsa">/slsa</a>; the short version is "Level 3 is a target, not yet shipped."</li>
-        <li>No multi-anchor timestamping. Earlier copy mentioned external timestamp anchors; that surface was removed because it was not actually wired. The only chain we publish is the ed25519 receipt chain plus the optional sigstore bundle described above.</li>
-        <li>No registry-published cosign signatures. The artifact is signed locally before upload; <code>kolm sigstore-attest</code> is the only path to an external transparency log entry.</li>
-      </ul>
+<!-- ============================================================ 4. DATA HANDLING -->
+<section class="section reveal" id="data">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / Data handling</span>
+      <h2>We see less than you think, and keep it for less time.</h2>
+      <p class="lede">
+        The audit reads redacted activity logs, not your production secrets. You redact
+        before upload, the credentials we hold are scoped and revocable, and what you
+        send is used for the engagement and not retained beyond it.
+      </p>
     </div>
-  </section>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Redaction</p>
+        <h3>Secrets stay out at the source</h3>
+        <p>You redact before anything reaches us. The scan reads the structure of agent activity, the scopes, the destinations, the trail, not the payloads underneath. Bring redacted logs, not raw data.</p>
+        <p class="card__map">ASR-3 · data egress</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Scoped keys</p>
+        <h3>Least privilege, revocable</h3>
+        <p>Where a connector is used, it holds read-only, narrowly scoped credentials, and you can revoke them the moment the audit ends. We ask for the minimum that lets the check run.</p>
+        <p class="card__map">ASR-1 · least privilege</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Retention</p>
+        <h3>Kept for the engagement, not after</h3>
+        <p>Redacted logs are used to produce the signed report and are not retained beyond the engagement. Subprocessors are listed in full, and the data terms are written down, not implied.</p>
+        <p class="card__map"><a href="/dpa" style="color:var(--accent)">DPA</a> · <a href="/subprocessors" style="color:var(--accent)">Subprocessors</a></p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s5)">
+      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 5. TRANSPARENCY LOG (the ledger, dark) -->
+<section class="section section--ink reveal" id="transparency">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / Transparency log</span>
+      <h2>Every report is logged where anyone can watch.</h2>
+      <p class="lede">
+        Each issuance is appended to a public, tamper-evident log, so a reviewer can
+        confirm the report you handed them is the one we signed and that we have not
+        quietly rewritten history. It is an append-only Merkle log in the RFC 6962
+        style, built on Ed25519 and SHA-256. It is not a blockchain.
+      </p>
+    </div>
+    <div class="split" style="align-items:start">
+      <div class="report register">
+        <div class="register__row"><span class="register__k">scheme</span><span class="register__v">rfc6962-style merkle log</span></div>
+        <div class="register__row"><span class="register__k">leaf</span><span class="register__v"><b>sha-256(canonical_report_bytes)</b></span></div>
+        <div class="register__row"><span class="register__k">sign</span><span class="register__v"><b>ed25519(issuer_sk, leaf)</b></span></div>
+        <div class="register__row"><span class="register__k">tree</span><span class="register__v">append-only <span class="ann">leaves never edited</span></span></div>
+        <div class="register__row"><span class="register__k">root</span><span class="register__v"><b>sha-256 merkle root</b> <span class="ann">signed checkpoint</span></span></div>
+        <div class="register__row"><span class="register__k">proof</span><span class="register__v"><b>inclusion proof</b> <span class="ann">per report</span></span></div>
+        <div class="register__row"><span class="register__k">monitor</span><span class="register__v">consistency proofs <span class="ann">public, watch for rewrites</span></span></div>
+        <div class="register__row"><span class="register__k">chain</span><span class="register__v"><b>none</b> <span class="ann">no tokens, no consensus network</span></span></div>
+      </div>
+      <div class="grid" style="gap:14px;align-content:start">
+        <div class="card">
+          <h3>Append-only, by construction</h3>
+          <p>New leaves are added, old ones are never changed. Altering a past entry changes the Merkle root, which breaks the signed checkpoint and is visible to anyone watching.</p>
+        </div>
+        <div class="card">
+          <h3>An inclusion proof per report</h3>
+          <p>Each report ships a proof that it sits in the tree at a fixed position. Your buyer checks the proof offline and confirms the report is the exact one we logged.</p>
+        </div>
+        <div class="card">
+          <h3>A Merkle log, plainly</h3>
+          <p>Ed25519 and SHA-256 over an append-only tree. No tokens, no consensus network, no chain in the trust path. The same primitives the verifier already checks.</p>
+        </div>
+      </div>
+    </div>
+    <div class="hero__cta" style="margin-top:var(--s7)">
+      <a class="btn btn--ghost" href="/transparency-log">Open the transparency log</a>
+      <a class="btn btn--ghost" href="/verify">Verify a report</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6. VERIFY IT YOURSELF -->
+<section class="section reveal" id="verify">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">05 / Verify it yourself</span>
+      <h2>Do not take our word. Run the check.</h2>
+      <p class="lede">
+        Verification runs in your own browser on WebCrypto, with no account, no upload,
+        and no kolm server in the trust path. Two checks, both falsifiable in front of a
+        reviewer.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">01 · Get the report</p>
+        <h3>Use the sample or your own</h3>
+        <p>Download the signed sample, or open the report your founder handed your review group. Both carry the public key and the signature inside the same canonical object.</p>
+        <p class="card__map"><a href="/sample-audit-report.json" download style="color:var(--accent)">Download the sample</a></p>
+      </div>
+      <div class="card">
+        <p class="card__k">02 · Tier 1, signature</p>
+        <h3>Edit one field, the seal breaks</h3>
+        <p>The Ed25519 signature covers the canonical bytes. Inflate the score or downgrade a finding and the match fails, on the spot, in the verifier.</p>
+        <p class="card__map">VOID on any edit</p>
+      </div>
+      <div class="card">
+        <p class="card__k">03 · Tier 2, issuer</p>
+        <h3>A rogue key clears one, fails the other</h3>
+        <p>The signing key is pinned to the keyring your buyer expects. Forge a fresh key and Tier 1 clears, but Tier 2 exposes the mismatch.</p>
+        <p class="card__map">issuer provenance</p>
+      </div>
+    </div>
+    <div class="hero__cta" style="margin-top:var(--s7)">
+      <a class="btn btn--primary" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/kolm-audit-verify.js">Read the verifier source</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 7. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Hand your reviewers a page they can check.</h2>
+    <p class="lede">Signed evidence, framework-mapped, logged where anyone can watch, and verified offline in their own browser.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/contact">Start an audit</a>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/status">Status</a>
-        <a href="/subprocessors">Subprocessors</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/about">About</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/press">Press</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
+
 </body>
 </html>

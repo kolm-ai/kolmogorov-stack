@@ -1,4 +1,4 @@
-// W-B / wrapper-completion — Google / Gemini native provider adapter.
+// W-B / wrapper-completion - Google / Gemini native provider adapter.
 //
 // Gemini's native REST surface is at
 //   POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key=API_KEY
@@ -12,12 +12,12 @@
 //
 // When the caller asks for the native shape (opts.native === true or the
 // target URL contains :generateContent) we shape the body via
-// buildGeminiNativeBody — {contents:[{role,parts:[{text}]}],
-// generationConfig:{temperature, topP, topK, maxOutputTokens, ...}} — and
+// buildGeminiNativeBody - {contents:[{role,parts:[{text}]}],
+// generationConfig:{temperature, topP, topK, maxOutputTokens, ...}} - and
 // after the upstream returns we attach the candidate's safetyRatings to
 // the envelope so the gateway-receipt path can surface it in metadata.
 //
-// W-N hardening: shared hardenedFetch — 429+backoff (max 3 retries, exp
+// W-N hardening: shared hardenedFetch - 429+backoff (max 3 retries, exp
 // schedule 500/1500/4500 ms each capped by Retry-After), AbortController
 // timeoutMs (default 60s, clamped 1-300s), malformed-JSON envelope. When
 // the OpenAI-compat alias is used the body flows through buildOpenAICompat
@@ -27,7 +27,7 @@
 //
 // Contract mirrors src/capture.js forwardOpenAI: returns
 //   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
-// Never throws on non-2xx — upstream errors flow through as-is so the
+// Never throws on non-2xx - upstream errors flow through as-is so the
 // gateway can sign + capture them. Never throws on transport failure.
 
 import {

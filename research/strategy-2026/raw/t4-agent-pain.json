@@ -1,0 +1,88 @@
+{
+  "id": "t4-agent-pain",
+  "track": "demand",
+  "prompt": "What are the biggest unsolved pain points in building, deploying, debugging, and operating AI agents in production in 2026? Quote engineers on X and engineering blogs. Cite sources.",
+  "content": "**Key unsolved pain points for AI agents in production (as of mid-2026) center on reliability, observability/debugging, security/permissions, evaluation, cost/context management, and long-term maintenance/governance.** Production deployments remain deliberately constrained (e.g., short workflows, heavy human-in-the-loop), as surveys and practitioner reports consistently show. Models and basic tooling have advanced, but infrastructure, standards, and operational practices lag, leading to high failure rates (e.g., Gartner’s prediction of >40% of agentic AI projects canceled by 2027).[[1]](https://codingscape.com/blog/build-production-ready-ai-agents-in-2026-without-deleting-your-database)[[2]](https://medium.com/@Micheal-Lanham/agent-reliability-engineering-stop-your-ai-agents-from-failing-at-3-am-f10d1ac8d2ef)\n\nHere are the biggest areas, supported by quotes from engineers on X and engineering blogs/reports (drawn from recent 2025–2026 sources).\n\n### Reliability and Compounding Errors in Multi-Step Workflows\nAgents excel at demos but falter in chained actions, where even high per-step reliability leads to low end-to-end success. Most production agents stay simple and constrained rather than fully autonomous.\n\n- From a large-scale survey of 306 practitioners and 20 case studies (shared widely on X by @dair_ai): “Reliability remains the top unsolved challenge. Practitioners can’t verify agent correctness at scale... 68% execute at most 10 steps before requiring human intervention. 47% complete fewer than 5 steps... Teams intentionally trade autonomy for reliability.” Production agents favor “predefined static workflows over open-ended autonomy” and rely on human evaluation (74%).[[3]](https://x.com/dair_ai/status/1997366943536554368)\n- Jon Radoff (engineering/analysis blog): “Agent error compounds exponentially. A 95% reliable step sounds safe—until you chain twenty of them together and the end-to-end success rate plummets to 36%. And 91% of ML models degrade in production over time. This is why most production agents remain single-purpose.”[[4]](https://meditations.metavert.io/p/the-state-of-ai-agents-in-2026)\n- X engineer @Sxsyer: “Most AI agent demos fail for a boring reason: They start with ‘how many agents can we add?’ Production agents start with: budget limits, retry logic, tool permissions, memory boundaries, human checkpoints. The hard part is not autonomy. It is control.”[[5]](https://x.com/Sxsyer/status/2062798657569910980)\n\n### Observability, Tracing, and Debugging\nNon-determinism (“ghost debugging”), long execution traces, fragmented telemetry, and lack of runtime feedback make production issues hard to diagnose. Traditional tools fall short for agent reasoning chains.\n\n- Medium engineer Michael Hannecke: “Tool calling... fails between 3% to 15% of the time in production. The worst part? I’ve experienced what the engineering teams call ‘ghost debugging’—running the exact same prompt twice and getting different results. Traditional debugging approaches are useless here... Debugging time runs 3–5x longer than traditional software.” Observability beyond standard APM is “non-negotiable.”[[6]](https://medium.com/@michael.hannecke/why-ai-agents-fail-in-production-what-ive-learned-the-hard-way-05f5df98cbe5)\n- X engineer Alvin (@7_Tolani): “Trying to deploy some ai agents this week and the most ghetto part... is trying to map out their decision making. Everything will be going smooth, then out of nowhere the agent just loses the plot entirely. The real problem is that debugging it is a total nightmare... standard memory and vector search are just too limited... graph infrastructure is the only way... but... the cost is just a joke.”[[7]](https://x.com/7_Tolani/status/2061477066609140071)\n- X engineer Tommy Bez (@TommyBez85): “Agents generate code in seconds. But debugging production issues, tracing real user paths, handling edge cases that only surface under load, that’s still almost entirely manual. The missing piece... is runtime context: letting agents see the feedback loop they’re cut off from.”[[8]](https://x.com/TommyBez85/status/2062651528092188974)\n- Substack/engineering post (Aishwarya Srinivasan): Lack of observability leads to “silent degradation in accuracy.” Full-stack needs include tracing across routing, planning, memory, execution, and infrastructure.[[9]](https://aishwaryasrinivasan.substack.com/p/building-production-ready-ai-agents)[[9]](https://aishwaryasrinivasan.substack.com/p/building-production-ready-ai-agents)\n- Multiple sources note fragmentation: Different frameworks emit incompatible telemetry, complicating cross-system analysis and standards efforts (e.g., OpenTelemetry).[[10]](https://medium.com/online-inference/why-observability-is-key-for-ai-agents-c5e74dfefdaa)\n\n### Security, Permissions, and Guardrails\nAgents often inherit excessive privileges; prompt injection is rampant; hard enforcement (vs. soft prompts) is missing. Real incidents highlight risks.\n\n- Codingscape engineering blog: “Research shows 90% of deployed agents are over-permissioned... OWASP ranks prompt injection as the #1 vulnerability... present in over 73% of systems audited in 2025.” Examples include Amazon’s Kiro agent causing outages via over-privileged actions and cases of agents “speedrun deleting” inboxes. Needs: least-privilege service accounts, deterministic approval gates/circuit breakers, input sanitization, and full audit trails.[[1]](https://codingscape.com/blog/build-production-ready-ai-agents-in-2026-without-deleting-your-database)[[1]](https://codingscape.com/blog/build-production-ready-ai-agents-in-2026-without-deleting-your-database)\n- Related: Governance maturity is low (<10–21% of companies have strong controls), with exploding non-human identities.[[4]](https://meditations.metavert.io/p/the-state-of-ai-agents-in-2026)[[11]](https://www.deloitte.com/us/en/about/press-room/state-of-ai-report-2026.html)\n\n### Evaluation, Testing, and Benchmarks\nPublic benchmarks don’t translate; programmatic judging is unreliable; CI/CD integration struggles with nondeterminism. Heavy reliance on humans persists.\n\n- Survey insights (via X and reports): “75% of interviewed teams evaluate without formal benchmarks, relying on A/B testing and direct user feedback... Creating benchmarks from scratch took one team six months...” LLM-as-judge is used but always paired with human verification.[[3]](https://x.com/dair_ai/status/1997366943536554368)\n- Google developer blog (from Agent Bake-Off): Moving to production requires shifting from prompt engineering to architecture; models advance so fast that complex harnesses become obsolete quickly.[[12]](https://developers.googleblog.com/build-better-ai-agents-5-developer-tips-from-the-agent-bake-off/)\n\n### Cost, Context Management, and Infrastructure\nHigh token overhead (e.g., MCP vs. direct calls), context pollution, expensive advanced memory (graphs), and scaling challenges.\n\n- Firecrawl engineering blog: MCP offers standardization but brings “enormous” token costs (thousands vs. hundreds); “setup is painful... token overhead is enormous.” Context loading degrades performance.[[13]](https://www.firecrawl.dev/blog/agentic-ai-trends)\n- Broader notes on RAG/memory, hybrid retrieval, and state management add complexity and cost.[[9]](https://aishwaryasrinivasan.substack.com/p/building-production-ready-ai-agents)\n\n### Maintenance, Obsolescence, and Organizational Factors\nScaffolding becomes throwaway code as base models improve; post-deployment edge cases require ongoing human effort; data/integration/governance add friction. Many pilots stall before production.\n\n- X (Aaron Levie @levie): “Building AI agents right now is a process of: 1. Build scaffolding to address a limitation... 2. The AI model gets upgraded and solves the very problem... rendering your scaffolding obsolete... you just have to accept that you are going to be writing a lot of throwaway code...”[[14]](https://x.com/levie/status/1997152030507556962)\n- X (@badlogicgames): Agents without supervision produce “unmaintainable garbage” due to poor decisions compounding; detailed specs approach hand-writing code.[[15]](https://x.com/badlogicgames/status/2033825998324551717)\n- Other reports: High implementation costs, data quality/privacy issues, workflow integration (often 80% of effort), and organizational alignment.[[16]](https://mitsloan.mit.edu/ideas-made-to-matter/agentic-ai-explained)[[17]](https://www.marketsandmarkets.com/Market-Reports/ai-agents-market-15761548.html)\n\nThese themes recur across LangChain/State of Agent Engineering resources, Anthropic/PwC/Deloitte-style surveys, practitioner Medium/Substack posts, and X discussions. Progress is happening in standards (e.g., MCP) and tools (observability platforms like LangSmith), but the gaps in verifiable reliability, deep observability, enforceable security, and sustainable operations remain the core unsolved challenges for production AI agents.[[18]](https://www.langchain.com/state-of-agent-engineering)\n\nSources are cited inline via the render component where drawn from web results; X posts are referenced directly from semantic search results.",
+  "citations": [
+    "https://codingscape.com/blog/build-production-ready-ai-agents-in-2026-without-deleting-your-database",
+    "https://medium.com/@Micheal-Lanham/agent-reliability-engineering-stop-your-ai-agents-from-failing-at-3-am-f10d1ac8d2ef",
+    "https://x.com/dair_ai/status/1997366943536554368",
+    "https://meditations.metavert.io/p/the-state-of-ai-agents-in-2026",
+    "https://x.com/Sxsyer/status/2062798657569910980",
+    "https://medium.com/@michael.hannecke/why-ai-agents-fail-in-production-what-ive-learned-the-hard-way-05f5df98cbe5",
+    "https://x.com/7_Tolani/status/2061477066609140071",
+    "https://x.com/TommyBez85/status/2062651528092188974",
+    "https://aishwaryasrinivasan.substack.com/p/building-production-ready-ai-agents",
+    "https://medium.com/online-inference/why-observability-is-key-for-ai-agents-c5e74dfefdaa",
+    "https://www.deloitte.com/us/en/about/press-room/state-of-ai-report-2026.html",
+    "https://developers.googleblog.com/build-better-ai-agents-5-developer-tips-from-the-agent-bake-off/",
+    "https://www.firecrawl.dev/blog/agentic-ai-trends",
+    "https://x.com/levie/status/1997152030507556962",
+    "https://x.com/badlogicgames/status/2033825998324551717",
+    "https://mitsloan.mit.edu/ideas-made-to-matter/agentic-ai-explained",
+    "https://www.marketsandmarkets.com/Market-Reports/ai-agents-market-15761548.html",
+    "https://www.langchain.com/state-of-agent-engineering"
+  ],
+  "searched": [
+    "https://www.langchain.com/state-of-agent-engineering",
+    "https://codingscape.com/blog/build-production-ready-ai-agents-in-2026-without-deleting-your-database",
+    "https://tao-hpu.medium.com/ai-agent-landscape-2025-2026-a-technical-deep-dive-abda86db7ae2",
+    "https://cogitx.ai/blog/ai-agents-complete-overview-2026",
+    "https://www.reddit.com/r/AIAgentsInAction/comments/1q3jq85/ai_agents_arrived_in_2025_heres_what_happened_and/",
+    "https://meditations.metavert.io/p/the-state-of-ai-agents-in-2026",
+    "https://developers.googleblog.com/build-better-ai-agents-5-developer-tips-from-the-agent-bake-off/",
+    "https://www.firecrawl.dev/blog/agentic-ai-trends",
+    "https://mitsloan.mit.edu/ideas-made-to-matter/agentic-ai-explained",
+    "https://www.youtube.com/watch?v=Jdi_6oyZoy4",
+    "https://levelup.gitconnected.com/the-2026-roadmap-to-ai-agent-mastery-5e43756c0f26",
+    "https://www.marketsandmarkets.com/Market-Reports/ai-agents-market-15761548.html",
+    "https://piwwop.com/blog/en/ai-agents-industrialization-failure-success-2026?lang=en",
+    "https://www.reddit.com/r/AI_Agents/comments/1o2a0k1/what_are_the_biggest_problems_getting_ai_agents/",
+    "https://aisera.com/blog/ai-agents-for-business/",
+    "https://medium.com/online-inference/why-observability-is-key-for-ai-agents-c5e74dfefdaa",
+    "https://aishwaryasrinivasan.substack.com/p/building-production-ready-ai-agents",
+    "https://medium.com/online-inference/mastering-ai-agent-observability-a-comprehensive-guide-b142ed3604b1",
+    "https://gradientflow.substack.com/p/are-your-ai-agents-flying-blind-in",
+    "https://medium.com/@michael.hannecke/why-ai-agents-fail-in-production-what-ive-learned-the-hard-way-05f5df98cbe5",
+    "https://medium.com/@Micheal-Lanham/agent-reliability-engineering-stop-your-ai-agents-from-failing-at-3-am-f10d1ac8d2ef",
+    "https://medium.com/@cazanlekor/when-your-ai-agents-become-black-boxes-f67090ba188b",
+    "https://medium.com/@Micheal-Lanham/stop-flying-blind-a-practical-guide-to-observability-for-ai-agents-30528599da75",
+    "https://medium.com/@ananya_95177/key-challenges-in-ai-agent-development-and-how-to-solve-them-460fceb0a6d5",
+    "https://aishwaryasrinivasan.substack.com/p/scaling-ai-agents-responsibly",
+    "https://www.deloitte.com/us/en/about/press-room/state-of-ai-report-2026.html",
+    "https://cdn.jsdelivr.net/gh/abncharts/abncharts.public.1/abnasia.org/1765455980320_www.abnasia.org.pdf",
+    "https://www.pwc.com/us/en/tech-effect/ai-analytics/ai-agent-survey.html",
+    "https://www.databricks.com/resources/ebook/state-of-ai-agents",
+    "https://prefactor.tech/learn/ai-agent-adoption-statistics",
+    "https://www.lyzr.ai/state-of-ai-agents/",
+    "https://www.youtube.com/watch?v=HB-SDtaTy34",
+    "https://www.searchyour.ai/en/the-2026-state-of-ai-agents-report-claude"
+  ],
+  "usage": {
+    "input_tokens": 36208,
+    "input_tokens_details": {
+      "cached_tokens": 16384
+    },
+    "output_tokens": 2907,
+    "output_tokens_details": {
+      "reasoning_tokens": 1200
+    },
+    "total_tokens": 39115,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 7,
+    "cost_in_usd_ticks": 703243000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 6,
+      "x_search_calls": 1,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 21683,
+      "output_tokens": 2030
+    }
+  },
+  "attempts": 1
+}

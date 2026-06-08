@@ -23,7 +23,7 @@
 //   verifyLocal({ artifact_path, signature, pubkey })
 //       PURE / OFFLINE. Re-hash the local artifact bytes and check the Ed25519
 //       signature against the supplied public key. No disk-of-state, no
-//       network, no event-store — the whole point of P2 is that a verifier with
+//       network, no event-store - the whole point of P2 is that a verifier with
 //       only (bytes, signature, pubkey) can confirm provenance on a box that
 //       has never talked to kolm.
 //
@@ -39,14 +39,14 @@
 // TENANT FENCING: every release row carries tenant_id = the OWNING org tenant.
 // All reads filter on it, exactly like src/model-entitlements.js and
 // src/groups.js. A model_id is otherwise global (a registry id or a tenant-
-// private compiled-artifact id) — fencing applies to WHO published the version,
+// private compiled-artifact id) - fencing applies to WHO published the version,
 // not to which base model exists.
 //
 // Storage: durable rows in src/store.js (table 'model_versions'), the same
 // store src/model-entitlements.js writes entitlement rows to. We ALSO mirror a
 // lightweight audit event through src/event-store.js (provider
 // 'kolm-model-update') so the publish shows up in the same event stream the
-// chargeback / audit surfaces already read — additive, never load-bearing for
+// chargeback / audit surfaces already read - additive, never load-bearing for
 // correctness.
 
 import crypto from 'node:crypto';
@@ -80,7 +80,7 @@ function _canonicalJson(v) {
   return '{' + k.map((x) => JSON.stringify(x) + ':' + _canonicalJson(v[x])).join(',') + '}';
 }
 
-// Chunked sha256 of a file on disk — mirrors src/artifact.js sha256File so
+// Chunked sha256 of a file on disk - mirrors src/artifact.js sha256File so
 // multi-GiB GGUF weights hash without tripping Node's 2 GiB readFileSync limit.
 function _sha256File(absPath) {
   const h = crypto.createHash('sha256');
@@ -109,7 +109,7 @@ function _err(message, code, status) {
 // ---------------------------------------------------------------------------
 // Semver helpers. Versions are "MAJOR.MINOR.PATCH" with optional missing
 // segments treated as 0 (so "2", "2.7", "2.7.0" all parse). Numeric compare,
-// NOT lexical — the W545 trap (lexical "1" < "7") is avoided by comparing
+// NOT lexical - the W545 trap (lexical "1" < "7") is avoided by comparing
 // integer segments.
 // ---------------------------------------------------------------------------
 function _parseVersion(v) {
@@ -139,7 +139,7 @@ function _formatVersion(parts) {
 
 // Bump the patch segment of the highest released version, or 1.0.0 when this is
 // the first release. An explicit `version` on the publish input always wins (it
-// must still be strictly greater than the current latest — enforced in
+// must still be strictly greater than the current latest - enforced in
 // publishVersion).
 function _nextVersion(latestVersion) {
   if (!latestVersion) return '1.0.0';
@@ -173,7 +173,7 @@ function _latestRelease(tenant, modelId) {
 // Resolve the Ed25519 signer. Production injects KOLM_ED25519_PRIVATE_KEY;
 // dev/CI falls back to the per-machine cached key (~/.kolm/signing-key.pem).
 // Returns { privateKey, publicKey, key_fingerprint } or throws a 503 when
-// signing is explicitly disabled (KOLM_ED25519_DISABLE=1) — publishing a
+// signing is explicitly disabled (KOLM_ED25519_DISABLE=1) - publishing a
 // version we cannot sign would defeat the offline-verifiability contract.
 function _resolveSigner() {
   const signer = loadOrCreateDefaultSigner();
@@ -300,7 +300,7 @@ export async function publishVersion({
   };
   insert(TABLE, row);
 
-  // Additive audit trail — mirrors src/model-entitlements.js attributeUsage.
+  // Additive audit trail - mirrors src/model-entitlements.js attributeUsage.
   // Best-effort; a failure here must NOT void a successfully persisted release.
   try {
     await appendEvent({
@@ -445,7 +445,7 @@ export function checkForUpdate({ tenant, model_id, current_version } = {}) {
  * Accepts the signature either as a bare base64url string OR as the full
  * release object returned by checkForUpdate/publishVersion (in which case the
  * statement fields are read from it). The artifact_sha256 / version / model_id /
- * tenant can be supplied directly or read from a release object — but the
+ * tenant can be supplied directly or read from a release object - but the
  * artifact bytes on disk are ALWAYS re-hashed; a declared sha256 that does not
  * match the bytes fails before the signature is even checked.
  *
@@ -512,7 +512,7 @@ export function verifyLocal({
     };
   }
 
-  // Re-hash the bytes ourselves — never trust a declared sha256 blindly.
+  // Re-hash the bytes ourselves - never trust a declared sha256 blindly.
   let actualSha;
   let actualBytes;
   try {

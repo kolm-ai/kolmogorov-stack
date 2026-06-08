@@ -1,6 +1,6 @@
 // src/bandit-thompson.js
 //
-// W921 — Autopilot improvement-loop decision layer: a BUDGETED, NON-STATIONARY
+// W921 - Autopilot improvement-loop decision layer: a BUDGETED, NON-STATIONARY
 // multi-armed bandit (Thompson sampling) over the autopilot's improvement
 // strategies.
 //
@@ -46,8 +46,8 @@
 // RATIO, not the sampled mean: draw mu_tilde_a (NIG) and treat cost as a
 // near-deterministic degenerate posterior; ratio_a = mu_tilde_a / max(cost_a,
 // EPSILON); recommend argmax ratio_a among budget-feasible arms. dedup (cost = 0)
-// floats to the top whenever its sampled reward > 0 — exactly the shipping
-// behavior — preserved by the epsilon floor.
+// floats to the top whenever its sampled reward > 0 - exactly the shipping
+// behavior - preserved by the epsilon floor.
 //
 // WARM-START COLD-START (Empirical-Bayes / Dynamic-Prior TS). The hard part is
 // the n = 0 cold start. Warm-start each arm's prior mean mu0_a from the caller's
@@ -121,7 +121,7 @@ function _rng(rng) {
 }
 
 // ---------------------------------------------------------------------------
-// _sampleNormal(mean, variance, rng) — Box-Muller. Seedable via rng.
+// _sampleNormal(mean, variance, rng) - Box-Muller. Seedable via rng.
 // ---------------------------------------------------------------------------
 function _sampleNormal(mean, variance, rng) {
   const r = _rng(rng);
@@ -137,7 +137,7 @@ function _sampleNormal(mean, variance, rng) {
 }
 
 // ---------------------------------------------------------------------------
-// _sampleGamma(shape, rate, rng) — Marsaglia & Tsang (2000) method.
+// _sampleGamma(shape, rate, rng) - Marsaglia & Tsang (2000) method.
 //
 // Returns a draw from Gamma(shape, rate) where rate is the inverse-scale
 // (so mean = shape / rate). One normal + one uniform per accepted draw; for
@@ -178,7 +178,7 @@ function _sampleGamma(shape, rate, rng) {
 }
 
 // ---------------------------------------------------------------------------
-// _normalGammaUpdate(prior, rewards, gamma) — discounted Normal-Gamma fold.
+// _normalGammaUpdate(prior, rewards, gamma) - discounted Normal-Gamma fold.
 //
 // rewards is ordered NEWEST FIRST (index 0 = most recent); reward j is weighted
 // gamma^j. Returns the posterior hyperparameters plus the discounted effective
@@ -227,7 +227,7 @@ function _normalGammaUpdate(prior, rewards, gamma) {
 // Posterior mean + variance of the arm-mean reward from NIG hyperparameters.
 // E[mu]   = mu_n
 // Var[mu] = beta_n / ((alpha_n - 1) * kappa_n)   (defined for alpha_n > 1;
-//           for alpha_n <= 1 the variance is heavy-tailed — we report a finite
+//           for alpha_n <= 1 the variance is heavy-tailed - we report a finite
 //           conservative proxy beta_n / (alpha_n * kappa_n) for diagnostics).
 function _posteriorMoments(post) {
   const mean = _num(post && post.mu_n, 0);
@@ -253,7 +253,7 @@ function _drawPosteriorMean(post, rng) {
 }
 
 // ---------------------------------------------------------------------------
-// Ledger I/O — best-effort event-store persistence, W411 tenant + ns fenced.
+// Ledger I/O - best-effort event-store persistence, W411 tenant + ns fenced.
 // ---------------------------------------------------------------------------
 
 async function _appendLedger({ tenant, namespace, workflow, payload }) {
@@ -297,7 +297,7 @@ async function _readLedger({ tenant, namespace, workflow, limit = 5000 }) {
 }
 
 // ---------------------------------------------------------------------------
-// recordStrategyChoice — write a pending CHOICE row at SELECT.
+// recordStrategyChoice - write a pending CHOICE row at SELECT.
 // ---------------------------------------------------------------------------
 
 /**
@@ -338,7 +338,7 @@ export async function recordStrategyChoice({
 }
 
 // ---------------------------------------------------------------------------
-// recordStrategyOutcome — fold a realized ΔK into the discounted posterior.
+// recordStrategyOutcome - fold a realized ΔK into the discounted posterior.
 //
 // IDEMPOTENT on choice_id: a duplicate outcome for the same choice_id is a
 // no-op (returns the already-recorded posterior view) so a retried cron tick
@@ -362,7 +362,7 @@ export async function recordStrategyOutcome({
     const ns = _ns(namespace);
 
     // Resolve the realized reward. Prefer an explicit realized_delta_k; otherwise
-    // derive candidate_K - base_K. NEVER clamp to 0 — negatives are real evidence
+    // derive candidate_K - base_K. NEVER clamp to 0 - negatives are real evidence
     // (the whole point of the upgrade over the cost-optimizer's clamp).
     let reward = Number(realized_delta_k);
     if (!Number.isFinite(reward)) {
@@ -426,7 +426,7 @@ export async function recordStrategyOutcome({
 }
 
 // ---------------------------------------------------------------------------
-// readStrategyPosteriors — rebuild the per-strategy discounted posterior from
+// readStrategyPosteriors - rebuild the per-strategy discounted posterior from
 // the OUTCOME ledger. Warm-starts each arm's prior mean from prior_mu (a number
 // applied to every arm, or a map strategy->mu). Unseen arms get the prior only.
 // ---------------------------------------------------------------------------
@@ -494,7 +494,7 @@ export async function readStrategyPosteriors({
 }
 
 // ---------------------------------------------------------------------------
-// sampleStrategyPosterior — draw ONE Thompson sample of a single arm's mean
+// sampleStrategyPosterior - draw ONE Thompson sample of a single arm's mean
 // reward from its discounted NIG posterior (warm-started from prior_mu).
 // ---------------------------------------------------------------------------
 
@@ -543,7 +543,7 @@ export async function sampleStrategyPosterior({
 }
 
 // ---------------------------------------------------------------------------
-// rankByThompson — the policy. Draws one (reward) sample per arm from its
+// rankByThompson - the policy. Draws one (reward) sample per arm from its
 // discounted posterior, ranks by sampled-reward-over-cost RATIO among
 // budget-feasible arms, and recommends the argmax.
 //
@@ -592,7 +592,7 @@ export async function rankByThompson({
       );
       const sampled_reward = _drawPosteriorMean(postHyper, rng);
       // Cost-aware ratio (Xia et al. 2015). Free arm (cost 0) divides by eps so
-      // it dominates at equal reward — preserves the cost-optimizer's dedup
+      // it dominates at equal reward - preserves the cost-optimizer's dedup
       // floats-to-top behavior.
       const sampled_ratio = sampled_reward / Math.max(cost, eps);
       ranked.push({

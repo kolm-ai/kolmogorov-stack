@@ -1,9 +1,9 @@
 // src/seeds-active.js
 //
-// Wave 356 — Active learning sampler.
+// Wave 356 - Active learning sampler.
 //
 // Runs a compiled .kolm artifact against an unlabeled pool and returns the N
-// rows where the artifact is LEAST CONFIDENT — those are the rows whose
+// rows where the artifact is LEAST CONFIDENT - those are the rows whose
 // labels add the most signal when filled in by a human.
 //
 // API:
@@ -142,7 +142,7 @@ export async function activeSampling(artifactPath, poolPath, opts = {}) {
             const otherStr = typeof r2.output === 'string' ? r2.output : JSON.stringify(r2.output);
             if (otherStr === baseStr) agree++;
           } catch { // deliberate: cleanup
-            // perturbation errored — adds to uncertainty
+            // perturbation errored - adds to uncertainty
           }
         }
         score = 1 - (agree / variants.length);

@@ -1,24 +1,24 @@
 // src/adversarial-prompts.js
 //
-// W762 — Adversarial Red-Team Framework: corpus + classifier.
+// W762 - Adversarial Red-Team Framework: corpus + classifier.
 //
 // Closes KOLM_W707_SYSTEM_UPGRADE_PLAN.md W762-2: "Generate adversarial
-// prompts and verify student handles correctly". Pure JavaScript — heavy
+// prompts and verify student handles correctly". Pure JavaScript - heavy
 // ML stays OUT. No actual harmful content is encoded here; the corpus is
 // composed of *framing patterns* (trigger phrases) that a robust model
 // should recognise and refuse, redirect, or sanitize. These are the
 // well-known shapes documented in public security research (OWASP LLM
-// Top 10, prompt-injection taxonomy papers) — not jailbreak payloads.
+// Top 10, prompt-injection taxonomy papers) - not jailbreak payloads.
 //
 // Two exported behaviours:
-//   1) generateAdversarialPrompts({categories,n_per_category,seed}) —
+//   1) generateAdversarialPrompts({categories,n_per_category,seed}) - 
 //      deterministic generator that combines base patterns × variants
 //      (case-flip, unicode-smuggle, base64-wrap, role-flip) so the
 //      same seed produces the same corpus every time.
-//   2) classifyPromptAdversarial(text) — pattern-match heuristic that
+//   2) classifyPromptAdversarial(text) - pattern-match heuristic that
 //      flags incoming text as adversarial. Returns evidence spans so a
 //      red-team UI can highlight why a prompt was flagged. NEVER throws
-//      — bad input returns an honest is_adversarial:false envelope.
+// - bad input returns an honest is_adversarial:false envelope.
 //
 // Production note: this is a HEURISTIC. For security-critical
 // decisions, layer a judge model behind classifyPromptAdversarial.
@@ -43,7 +43,7 @@ export const ADVERSARIAL_CATEGORIES = Object.freeze([
   'tool_hijack',
 ]);
 
-// Seed corpus — short FRAMING patterns the model should recognise. The
+// Seed corpus - short FRAMING patterns the model should recognise. The
 // strings here are placeholders/triggers, not full attack payloads.
 // Each category has >= 5 base patterns. All values frozen so tests can
 // assert the contract.
@@ -115,7 +115,7 @@ export const ADVERSARIAL_CORPUS_SEED = Object.freeze({
 });
 
 // ---------------------------------------------------------------------------
-// Internals — deterministic PRNG so {seed} produces reproducible corpora.
+// Internals - deterministic PRNG so {seed} produces reproducible corpora.
 // Mulberry32 is sufficient for shuffling test data; we are NOT using this
 // for cryptography.
 // ---------------------------------------------------------------------------
@@ -143,7 +143,7 @@ function _stringSeed(s) {
   return h;
 }
 
-// Variants — surface-level transformations the model should still detect.
+// Variants - surface-level transformations the model should still detect.
 // Returns { variant_name, transformed_text }.
 function _applyVariant(text, variant) {
   switch (variant) {
@@ -186,7 +186,7 @@ function _genId(category, idx, variant) {
 }
 
 // ---------------------------------------------------------------------------
-// generateAdversarialPrompts — public API
+// generateAdversarialPrompts - public API
 // ---------------------------------------------------------------------------
 
 export function generateAdversarialPrompts({
@@ -244,7 +244,7 @@ function _expectedFor(category) {
 }
 
 // ---------------------------------------------------------------------------
-// classifyPromptAdversarial — heuristic detector
+// classifyPromptAdversarial - heuristic detector
 // ---------------------------------------------------------------------------
 
 // Lightweight pattern atoms. Each pattern is matched case-insensitively
@@ -291,7 +291,7 @@ function _stripInvisible(s) {
 }
 
 export function classifyPromptAdversarial(text) {
-  // Guarded normalisation — NEVER throw.
+  // Guarded normalisation - NEVER throw.
   let raw = '';
   try { raw = String(text == null ? '' : text); } catch (_) { raw = ''; }
   const cleaned = _stripInvisible(raw);
@@ -303,7 +303,7 @@ export function classifyPromptAdversarial(text) {
     let m;
     try { m = cleaned.match(p.re); } catch (_) { m = null; }
     // Some patterns intentionally operate on the raw (un-stripped) text
-    // to catch zero-width smuggling — re-run on raw if cleaned missed.
+    // to catch zero-width smuggling - re-run on raw if cleaned missed.
     if (!m) {
       try { m = raw.match(p.re); } catch (_) { m = null; }
     }

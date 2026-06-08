@@ -1,4 +1,4 @@
-// W748 — Seasonal capture tagging + variants + auto-selection.
+// W748 - Seasonal capture tagging + variants + auto-selection.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 486-490):
 //   [W748-1] Seasonal capture tagging + time-series viz
@@ -13,7 +13,7 @@
 //   - HONEST about Northern-hemisphere defaults. SEASONS is biased towards
 //     the N-hemisphere meteorological convention. Tenants in the southern
 //     hemisphere flip via per-tenant settings (W748 follow-up). We never
-//     pretend the four-season carve-up is universal — the docs page calls
+//     pretend the four-season carve-up is universal - the docs page calls
 //     this out and the API envelope echoes `hemisphere:'north'` so callers
 //     can detect the bias.
 //   - SEASONAL_EVENTS are US-retail-anchored (black-friday, cyber-monday,
@@ -23,7 +23,7 @@
 //     follow-up that should land per-region overrides, not bake more
 //     hardcoded ranges in here.
 //   - tagCaptureWithSeason is IDEMPOTENT. A row that already carries a
-//     non-empty `season` field is left alone — we trust the closer-to-source
+//     non-empty `season` field is left alone - we trust the closer-to-source
 //     value over the inferred one (matches W746 teacher-version contract).
 //
 // Public surface:
@@ -45,7 +45,7 @@ export const SEASONAL_VERSION = 'w748-v1';
 // season vocabulary at runtime (W604 anti-brittleness).
 export const SEASONS = Object.freeze(['winter', 'spring', 'summer', 'fall']);
 
-// SEASONAL_EVENTS — name -> [start_month, start_day, end_month, end_day] (1-indexed,
+// SEASONAL_EVENTS - name -> [start_month, start_day, end_month, end_day] (1-indexed,
 // inclusive on both ends). Cross-year ranges (e.g. 'holiday' starts Dec 15
 // and ends Jan 5) are honoured by eventsActiveOn() via wrap-around logic.
 //
@@ -60,7 +60,7 @@ export const SEASONAL_EVENTS = Object.freeze({
 });
 
 // =============================================================================
-// _coerceDate — accept Date | ISO string | epoch-millis number. Returns a
+// _coerceDate - accept Date | ISO string | epoch-millis number. Returns a
 // Date instance or null on garbage (callers branch on null).
 // =============================================================================
 function _coerceDate(d) {
@@ -75,16 +75,16 @@ function _coerceDate(d) {
 }
 
 // =============================================================================
-// seasonFromDate(date) — N-hemisphere meteorological season for a date.
+// seasonFromDate(date) - N-hemisphere meteorological season for a date.
 //
 // Convention:
-//   winter — Dec, Jan, Feb     (getMonth() returns 11, 0, 1)
-//   spring — Mar, Apr, May     (2, 3, 4)
-//   summer — Jun, Jul, Aug     (5, 6, 7)
-//   fall   — Sep, Oct, Nov     (8, 9, 10)
+//   winter - Dec, Jan, Feb     (getMonth() returns 11, 0, 1)
+//   spring - Mar, Apr, May     (2, 3, 4)
+//   summer - Jun, Jul, Aug     (5, 6, 7)
+//   fall - Sep, Oct, Nov     (8, 9, 10)
 //
 // Returns null on unparseable input (matches the W746 freshnessDistribution
-// "garbage falls into overflow" honesty contract — we never invent a season).
+// "garbage falls into overflow" honesty contract - we never invent a season).
 // =============================================================================
 export function seasonFromDate(date) {
   const d = _coerceDate(date);
@@ -97,14 +97,14 @@ export function seasonFromDate(date) {
 }
 
 // =============================================================================
-// _inRange(month, day, sm, sd, em, ed) — true iff (month, day) falls in the
+// _inRange(month, day, sm, sd, em, ed) - true iff (month, day) falls in the
 // [(sm, sd), (em, ed)] inclusive range, with cross-year wrap-around when
 // the end is BEFORE the start (e.g. holiday 12/15 -> 1/5).
 //
 // All months 1..12 (HUMAN one-indexed), days 1..31.
 // =============================================================================
 function _inRange(month, day, sm, sd, em, ed) {
-  // Compare via packed "MMDD" integer (no leap-year edge cases — Feb 29
+  // Compare via packed "MMDD" integer (no leap-year edge cases - Feb 29
   // simply lands in any range that spans Feb).
   const cur = month * 100 + day;
   const start = sm * 100 + sd;
@@ -118,10 +118,10 @@ function _inRange(month, day, sm, sd, em, ed) {
 }
 
 // =============================================================================
-// eventsActiveOn(date) — return an array of event names active on the given
+// eventsActiveOn(date) - return an array of event names active on the given
 // date. Output is sorted alphabetically so the UI render is deterministic.
 //
-// Returns [] on unparseable input (honest — we don't guess at the calendar).
+// Returns [] on unparseable input (honest - we don't guess at the calendar).
 // =============================================================================
 export function eventsActiveOn(date) {
   const d = _coerceDate(date);
@@ -139,20 +139,20 @@ export function eventsActiveOn(date) {
 }
 
 // =============================================================================
-// tagCaptureWithSeason(captureRow) — stamp the row with season + events.
+// tagCaptureWithSeason(captureRow) - stamp the row with season + events.
 //
 // MUTATES + RETURNS the row (callers can chain). Idempotent: if the row
 // already carries a non-empty `season` string, we leave the existing
-// `season` + `seasonal_events` fields alone (closer-to-source wins —
+// `season` + `seasonal_events` fields alone (closer-to-source wins - 
 // matches W746 teacher-version contract).
 //
 // Adds:
-//   season           — string ('winter'|'spring'|'summer'|'fall'|null)
-//   seasonal_events  — array of event names (sorted, possibly empty)
+//   season - string ('winter'|'spring'|'summer'|'fall'|null)
+//   seasonal_events - array of event names (sorted, possibly empty)
 //
 // The date considered for tagging is row.captured_at OR row.created_at OR
-// Date.now() — first non-null wins. Unparseable dates -> season:null and
-// seasonal_events:[] (honest — we never guess).
+// Date.now() - first non-null wins. Unparseable dates -> season:null and
+// seasonal_events:[] (honest - we never guess).
 // =============================================================================
 export function tagCaptureWithSeason(captureRow) {
   if (!captureRow || typeof captureRow !== 'object') return captureRow;
@@ -174,7 +174,7 @@ export function tagCaptureWithSeason(captureRow) {
 }
 
 // =============================================================================
-// seasonalDistribution(captures) — count rows per season + per event.
+// seasonalDistribution(captures) - count rows per season + per event.
 //
 // Returns:
 //   {
@@ -225,11 +225,11 @@ export function seasonalDistribution(captures) {
 // actually exist for this namespace.
 //
 // Recommendation priority:
-//   1. ACTIVE EVENT match — if today is a black-friday day and a 'black-friday'
+//   1. ACTIVE EVENT match - if today is a black-friday day and a 'black-friday'
 //      variant exists, that wins (event-specific recommendations beat seasonal
 //      ones because events are tighter time windows).
-//   2. SEASON match — if no event matches, fall back to today's season.
-//   3. NULL — no recommendation. The honest fallback. `reason` always
+//   2. SEASON match - if no event matches, fall back to today's season.
+//   3. NULL - no recommendation. The honest fallback. `reason` always
 //      explains WHY so the dashboard can show a useful empty state.
 //
 // Returns:

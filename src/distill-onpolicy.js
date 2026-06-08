@@ -165,7 +165,7 @@ export function trainOnPolicy({
 }
 
 // ===========================================================================
-// W921 NEXT-1 — ROPD (Rubric-based On-policy Distillation), BLACK-BOX path.
+// W921 NEXT-1 - ROPD (Rubric-based On-policy Distillation), BLACK-BOX path.
 //
 // The shell above (doctor/trainOnPolicy) is the WHITE-BOX on-policy path: it
 // needs an external trainer that consumes teacher LOGITS, so it is useless for
@@ -180,7 +180,7 @@ export function trainOnPolicy({
 // This surface dispatches the in-repo trainer apps/trainer/ropd.py (additive;
 // the white-box shell above is unchanged). Because "teacher text" is ALWAYS
 // available for API teachers, ROPD is gated only on the trainer + (real run)
-// torch being present — never on logits.
+// torch being present - never on logits.
 // ===========================================================================
 
 export const ROPD_OBJECTIVE = 'ropd';
@@ -203,7 +203,7 @@ function _pythonBin() {
     || (process.platform === 'win32' ? 'python' : 'python3');
 }
 
-// resolveRopdTrainer() — the in-repo apps/trainer/ropd.py is the default. An
+// resolveRopdTrainer() - the in-repo apps/trainer/ropd.py is the default. An
 // explicit $KOLM_ROPD_TRAINER override that points nowhere is "no trainer",
 // not a silent fallback. KOLM_ROPD_NO_TRAINER=1 forces the no-tool path (test
 // seam, mirrors src/distill-grpo.js).
@@ -230,7 +230,7 @@ export function doctorRopd() {
       trl_version = (r.stdout || '').toString('utf8').trim();
       torch_available = true;
     }
-  } catch (_) { /* torch/trl absent — dry-run still works */ }
+  } catch (_) { /* torch/trl absent - dry-run still works */ }
   return {
     ok: !!t,
     // ready means a REAL GPU run can proceed; --dry-run only needs the trainer.
@@ -247,7 +247,7 @@ export function doctorRopd() {
   };
 }
 
-// buildRopdPromptsJsonl(seeds, outPath) — write the ROPD prompts JSONL the
+// buildRopdPromptsJsonl(seeds, outPath) - write the ROPD prompts JSONL the
 // trainer consumes. Each seed becomes {prompt, teacher_refs:[...]} using
 // teacher TEXT (black-box). Accepts seeds shaped as {prompt|input, teacher_refs
 // |teacher|response|chosen}. Returns { ok, path, count, with_refs }.
@@ -284,7 +284,7 @@ export function buildRopdPromptsJsonl(seeds, outPath) {
   return { ok: true, path: outPath, count: rows.length, with_refs: withRefs };
 }
 
-// trainRopd(opts) — durable envelope. Spawns apps/trainer/ropd.py when present;
+// trainRopd(opts) - durable envelope. Spawns apps/trainer/ropd.py when present;
 // returns a clear no_trainer_installed envelope otherwise (still creates the
 // run dir). Mirrors src/distill-grpo.js trainGrpo() exactly.
 export function trainRopd({

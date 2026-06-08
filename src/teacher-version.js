@@ -1,18 +1,18 @@
-// W746-4 — Teacher version tagging on every capture.
+// W746-4 - Teacher version tagging on every capture.
 //
 // Why this matters: teacher upgrades (Anthropic Opus 4.6 → 4.7, OpenAI gpt-4o
 // → gpt-4o-2024-08, etc.) move the conditional distribution P(output | input)
 // the student is trying to learn. A capture row that's silent about WHICH
 // teacher answered is impossible to reweight when the teacher changes.
 // Without this tag, a student trained on a mixed-vintage corpus inherits the
-// average — and you discover the drift only when production accuracy drops.
+// average - and you discover the drift only when production accuracy drops.
 //
 // Design contract:
 //   - Always returns a string. Never null. Falls back to `unknown_teacher_v0`
 //     when nothing is known so the row is still queryable (vs `null` which
 //     scatters across SQL-join semantics).
 //   - Idempotent: tagging a row that's already tagged is a no-op (preserves
-//     the existing teacher_version + teacher_provider — we trust the value
+//     the existing teacher_version + teacher_provider - we trust the value
 //     that was written closest to the actual teacher round-trip).
 //   - Env-var driven so an op can pin a specific teacher version per-deploy
 //     without code changes:
@@ -37,7 +37,7 @@ export const TEACHER_VERSION_TAG_VERSION = 'w746-v1';
 const PROVIDER_DEFAULTS = Object.freeze({
   anthropic: 'claude-opus-4-7',
   openai: 'gpt-4o',
-  // No default for other providers — they fall through to 'unknown_teacher_v0'
+  // No default for other providers - they fall through to 'unknown_teacher_v0'
   // so we don't lie about a model we haven't validated against.
 });
 
@@ -49,7 +49,7 @@ function _normProvider(p) {
 }
 
 // =============================================================================
-// currentTeacherVersion(provider) — resolve the teacher version string.
+// currentTeacherVersion(provider) - resolve the teacher version string.
 //
 // Resolution order:
 //   1. Provider-specific env: KOLM_TEACHER_VERSION_<UPPER(provider)>
@@ -80,20 +80,20 @@ export function currentTeacherVersion(provider) {
   if (p && Object.prototype.hasOwnProperty.call(PROVIDER_DEFAULTS, p)) {
     return PROVIDER_DEFAULTS[p];
   }
-  // 4. Honest fallback — we have no idea who answered, but still queryable.
+  // 4. Honest fallback - we have no idea who answered, but still queryable.
   return FALLBACK;
 }
 
 // =============================================================================
-// tagCaptureWithTeacherVersion(captureRow) — stamp the row with teacher info.
+// tagCaptureWithTeacherVersion(captureRow) - stamp the row with teacher info.
 //
 // MUTATES + RETURNS the row (callers can chain). If the row already carries
-// a non-empty `teacher_version`, this is a no-op — we trust the closer-to-source
+// a non-empty `teacher_version`, this is a no-op - we trust the closer-to-source
 // value over the inferred one.
 //
 // Adds:
-//   teacher_version  — string (never null)
-//   teacher_provider — normalised lowercase provider name (e.g. 'anthropic')
+//   teacher_version - string (never null)
+//   teacher_provider - normalised lowercase provider name (e.g. 'anthropic')
 //
 // Honest absence: when row.provider is empty/missing, teacher_provider is
 // '' (empty string, not null) and teacher_version falls through to either
@@ -117,7 +117,7 @@ export function tagCaptureWithTeacherVersion(captureRow) {
 }
 
 // =============================================================================
-// groupByTeacherVersion(captures) — count rows per teacher_version string.
+// groupByTeacherVersion(captures) - count rows per teacher_version string.
 //
 // Returns an object { [teacher_version]: count }. Rows without a teacher_version
 // field get bucketed under FALLBACK so the count is honest about how many

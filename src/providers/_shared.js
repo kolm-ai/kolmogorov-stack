@@ -1,27 +1,27 @@
-// W-N / wrapper-completion — shared fetch hardening for all 11 provider
+// W-N / wrapper-completion - shared fetch hardening for all 11 provider
 // adapters (anthropic, openai, google, deepseek, groq, together, fireworks,
 // openrouter, local-vllm, local-ollama, local-kolm).
 //
 // Implements the four gaps called out in the W-N hardening directive:
 //
-//   1. 429 with exponential backoff — read Retry-After header; sleep
+//   1. 429 with exponential backoff - read Retry-After header; sleep
 //      min(retryAfter*1000, 30000) ms then retry; max 3 retries with
 //      500ms / 1500ms / 4500ms exponential schedule (each capped by
 //      the upstream's Retry-After if present). After 3 failed retries
 //      the envelope surfaces { ok:false, error:'upstream_rate_limited',
 //      retry_after_s }.
 //
-//   2. Configurable timeout — every upstream fetch accepts a timeoutMs
+//   2. Configurable timeout - every upstream fetch accepts a timeoutMs
 //      option (default 60000 ms). AbortController wired so the request
 //      cancels cleanly; on abort the envelope surfaces
 //      { ok:false, error:'upstream_timeout', timeout_ms }.
 //
-//   3. Malformed response handling — response body parse is wrapped in
+//   3. Malformed response handling - response body parse is wrapped in
 //      try/catch. On JSON.parse failure the envelope surfaces
 //      { ok:false, error:'upstream_malformed_response',
 //        body_snippet: rawText.slice(0,500) }.
 //
-//   4. Pass-through model params — adapters that call buildOpenAIBody /
+//   4. Pass-through model params - adapters that call buildOpenAIBody /
 //      buildAnthropicBody / buildGeminiBody here forward `temperature`,
 //      `top_p`, `max_tokens` (mapped to `max_completion_tokens` for
 //      OpenAI o-series), `stop`, and `tools` (when the provider supports
@@ -105,19 +105,19 @@ function _sleep(ms, signal) {
   });
 }
 
-// hardenedFetch — the single source of truth for upstream provider POSTs.
+// hardenedFetch - the single source of truth for upstream provider POSTs.
 //
-//   * url           — full upstream URL
-//   * method        — usually 'POST'
-//   * headers       — adapter-built headers (auth, content-type, anthropic-version)
-//   * body          — raw body string (caller stringifies)
-//   * timeoutMs     — request timeout (default 60s, clamped 1-300s)
-//   * maxRetries    — number of retry attempts for 429 (default 3)
-//   * requireJson   — when true, parse failures become upstream_malformed_response
+//   * url - full upstream URL
+//   * method - usually 'POST'
+//   * headers - adapter-built headers (auth, content-type, anthropic-version)
+//   * body - raw body string (caller stringifies)
+//   * timeoutMs - request timeout (default 60s, clamped 1-300s)
+//   * maxRetries - number of retry attempts for 429 (default 3)
+//   * requireJson - when true, parse failures become upstream_malformed_response
 //                     envelopes; when false, the raw text is preserved as {_raw}
 //
 // Returns { status, json, elapsed_us, headers_retry_after_s? }. Never
-// throws — every error path becomes an envelope so the gateway pipeline
+// throws - every error path becomes an envelope so the gateway pipeline
 // keeps receipts honest.
 export async function hardenedFetch({
   url,
@@ -166,7 +166,7 @@ export async function hardenedFetch({
           status: 0,
           json: {
             ok: false,
-            // Both flat-string and {type,message} shapes — flat for the
+            // Both flat-string and {type,message} shapes - flat for the
             // W-N spec (`error:'upstream_timeout'`) so callers can pattern
             // match on the string, structured for legacy code that reads
             // err.error.type / err.error.message.
@@ -200,7 +200,7 @@ export async function hardenedFetch({
     if (res.status === 429 && attempt <= maxRetries) {
       const retryAfterMs = parseRetryAfterMs(res.headers.get('retry-after'));
       lastRetryAfterMs = retryAfterMs;
-      // Drain body so the connection can be reused — node fetch needs
+      // Drain body so the connection can be reused - node fetch needs
       // this even though we're going to discard the bytes.
       try { await res.text(); } catch (_) { /* discard */ }
       // Pick the larger of (Retry-After cap, exponential step), but
@@ -237,12 +237,12 @@ export async function hardenedFetch({
         elapsed_us,
       };
     }
-    // Non-429 — read the body and either parse or pass through.
+    // Non-429 - read the body and either parse or pass through.
     const elapsed_us = Math.round(Number(process.hrtime.bigint() - t0) / 1000);
     let text = '';
     try { text = await res.text(); } catch (_) { text = ''; }
     if (!requireJson) {
-      // Caller doesn't need parsed JSON — return raw text as a {_raw}
+      // Caller doesn't need parsed JSON - return raw text as a {_raw}
       // body so the receipt path can still hash + log it.
       return { status: res.status, json: { _raw: text }, elapsed_us };
     }
@@ -283,17 +283,17 @@ export async function hardenedFetch({
 // --------------------------------------------------------------------------
 // Body shapers for the three families that need adapter-side normalization.
 //
-//   buildOpenAICompatBody  — used by openai/openrouter/groq/together/
+//   buildOpenAICompatBody - used by openai/openrouter/groq/together/
 //                            fireworks/deepseek/local-* (OpenAI shape).
 //                            Maps max_tokens → max_completion_tokens for
 //                            the o-series + gpt-5 family.
 //
-//   buildAnthropicBody     — converts plain string `content` into the
+//   buildAnthropicBody - converts plain string `content` into the
 //                            content-block form Anthropic Messages API
 //                            documents as canonical (the API also accepts
 //                            strings but documented form is blocks).
 //
-//   buildGeminiNativeBody  — converts OpenAI-style messages to the
+//   buildGeminiNativeBody - converts OpenAI-style messages to the
 //                            Gemini native {contents:[{role,parts:[{text}]}],
 //                            generationConfig:{...}} envelope. Used when
 //                            the adapter calls the native /v1beta/models/
@@ -302,7 +302,7 @@ export async function hardenedFetch({
 // --------------------------------------------------------------------------
 
 // OpenAI families that take `max_completion_tokens` instead of `max_tokens`
-// (Reasoning models — o1, o1-mini, o3, o3-mini, o4-mini, GPT-5 lineage).
+// (Reasoning models - o1, o1-mini, o3, o3-mini, o4-mini, GPT-5 lineage).
 const O_SERIES_RE = /^(o[134]([-_].*)?$|o[134]-mini([-_].*)?$|gpt-5(.*)?$)/i;
 
 export function isOSeriesModel(model) {
@@ -313,7 +313,7 @@ export function isOSeriesModel(model) {
 // Forward only the model params the upstream provider supports. Unknown
 // keys pass through unchanged so adapter-specific features (e.g. Anthropic
 // `system`, OpenAI `response_format`, DeepSeek `frequency_penalty`) keep
-// working — we only NORMALIZE the four cross-provider standards.
+// working - we only NORMALIZE the four cross-provider standards.
 export function buildOpenAICompatBody(body) {
   const src = (body && typeof body === 'object') ? body : {};
   const out = { ...src };
@@ -341,7 +341,7 @@ export function buildAnthropicBody(body) {
       if (typeof m.content === 'string') {
         return { role: m.role, content: [{ type: 'text', text: m.content }] };
       }
-      // Already content blocks — leave alone.
+      // Already content blocks - leave alone.
       if (Array.isArray(m.content)) {
         // Normalize plain {text} entries to {type:'text', text} so the
         // upstream doesn't 400 on a missing type field.
@@ -420,7 +420,7 @@ export function buildGeminiNativeBody(body) {
 }
 
 // Extract response text from a Gemini native generateContent response.
-// Returns { text, safetyRatings, finishReason } — text is empty string
+// Returns { text, safetyRatings, finishReason } - text is empty string
 // when extraction fails (the receipt pipeline tolerates empties).
 export function extractGeminiText(response) {
   if (!response || typeof response !== 'object') {

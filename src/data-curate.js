@@ -1,23 +1,23 @@
-// KOLM Data Engine — CURATE stage (T2.x).
+// KOLM Data Engine - CURATE stage (T2.x).
 //
 // Turns a raw merged pile of {input, output} training pairs into a curated
 // set fit for distillation. The pipeline is six gated stages, each toggled by
 // its own opt and each recording what it dropped/changed so the Data Health
 // panel can show WHY a pair did or did not survive:
 //
-//   a. quality   — drop pairs whose teacher output scores below minQuality
+//   a. quality - drop pairs whose teacher output scores below minQuality
 //                  (uses the local scoreCandidateLocal heuristic below).
-//   b0. minhash  — OPT-IN (opts.minhash) Node-native MinHash/LSH near-dup
+//   b0. minhash - OPT-IN (opts.minhash) Node-native MinHash/LSH near-dup
 //                  pre-pass (src/minhash-dedup.js) that collapses exact + near-
 //                  exact dups off-GPU BEFORE the python pass. Default OFF.
-//   b. dedup     — shell to workers/distill/scripts/dedup_pairs.py for
+//   b. dedup - shell to workers/distill/scripts/dedup_pairs.py for
 //                  semantic near-dup removal. DEGRADES to a no-op (recorded)
-//                  if python / the script is unavailable — never fails curate.
-//   c. cluster   — tag each survivor with a cluster_id (reuses _bucketKey from
+//                  if python / the script is unavailable - never fails curate.
+//   c. cluster - tag each survivor with a cluster_id (reuses _bucketKey from
 //                  src/active-learning.js) and build a coverage histogram.
-//   d. cot       — drop pairs whose output leaks chain-of-thought.
-//   e. pii       — redact (NOT drop) emails / phones / SSN / card numbers.
-//   f. select    — OPT-IN (opts.target_size>0) informative-subset SELECTION
+//   d. cot - drop pairs whose output leaks chain-of-thought.
+//   e. pii - redact (NOT drop) emails / phones / SSN / card numbers.
+//   f. select - OPT-IN (opts.target_size>0) informative-subset SELECTION
 //                  (src/data-select.js) that caps survivors to a budget-bounded
 //                  diversity-aware / target-matched subset. Default OFF.
 //
@@ -27,20 +27,20 @@
 // the corresponding opt is set.
 //
 // W921 frontier upgrades (ALL opt-in; default behavior unchanged):
-//   - opts.qualityClassifier — replace the quality stage's output-only heuristic
+//   - opts.qualityClassifier - replace the quality stage's output-only heuristic
 //     with the learned per-pair quality CLASSIFIER (src/data-quality-classifier.js,
 //     FineWeb-Edu/DCLM/AlpaGasus lineage). opts.quality_mode 'percentile' (top
 //     keep_fraction, DCLM-style) | 'absolute'. Surfaces report.quality + stamps
 //     p.quality_score. Pure JS.
-//   - opts.semanticCluster — replace the 3-gram-prefix bucket cluster stage with
+//   - opts.semanticCluster - replace the 3-gram-prefix bucket cluster stage with
 //     embedding k-means + c-TF-IDF topic auto-labeling (src/data-cluster-label.js).
 //     Surfaces report.topics (named, human-readable slugs). Pure JS.
-//   - opts.detectErrors — NEW 'error' sub-stage (after cluster) running Confident-
+//   - opts.detectErrors - NEW 'error' sub-stage (after cluster) running Confident-
 //     Learning label-error detection (src/data-label-errors.js). FLAGS by default
 //     (stamps provenance.error_flag; routes to the human review queue); opt-in
 //     errorAction:'filter' drops the flagged set. Surfaces report.label_errors.
 //   - opts.diversitySelect / select_method 'k-center'|'facility-location'|'badge'
-//     — route the SELECT stage through src/data-diversity-select.js instead of the
+// - route the SELECT stage through src/data-diversity-select.js instead of the
 //     default data-select reprFilter/coverage path.
 //
 // Caveats:
@@ -48,7 +48,7 @@
 //     load; with the `ngram` backend it is coarse-but-deterministic, and when
 //     python is missing entirely the stage is skipped and recorded as such.
 //   - cluster_id from the fallback path is a 3-gram-prefix hash bucket, not a
-//     learned topic — good enough to surface coverage holes, not a taxonomy.
+//     learned topic - good enough to surface coverage holes, not a taxonomy.
 //
 // Envelope contract: every public call returns {ok:true, version:'curate-v1',
 // ...} or {ok:false, error, version:'curate-v1'}. Never throws across the API.
@@ -113,9 +113,9 @@ export function flagCot(text) {
 
 // PII regexes. Order matters in redactPii: card/SSN before phone so a 16-digit
 // card is not partially eaten by the phone matcher. Each is intentionally
-// conservative — we would rather miss an exotic format than redact prose.
+// conservative - we would rather miss an exotic format than redact prose.
 const _RE_EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
-const _RE_CARD = /\b(?:\d[ -]?){13,16}\b/g;            // 13–16 digit card-like
+const _RE_CARD = /\b(?:\d[ -]?){13,16}\b/g;            // 13-16 digit card-like
 const _RE_SSN = /\b\d{3}-\d{2}-\d{4}\b/g;              // US SSN ###-##-####
 const _RE_PHONE = /(?:\+?\d{1,3}[ .-]?)?(?:\(\d{3}\)|\d{3})[ .-]?\d{3}[ .-]?\d{4}\b/g;
 
@@ -136,7 +136,7 @@ export function redactPii(text) {
 
 // ── local quality heuristic (was imported; now a real local fn) ──────────────
 //
-// scoreCandidateLocal — output-only quality score in [0,1]. Previously imported
+// scoreCandidateLocal - output-only quality score in [0,1]. Previously imported
 // from src/distill-preference.js, but the committed module no longer exports it,
 // which left this whole module UNLOADABLE. We restore it as a real local fn
 // (spec G1 fix) so CURATE can import + run. The heuristic mirrors the survivor
@@ -455,12 +455,12 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       label_errors: null,
     };
 
-    // a. quality — drop low-scoring teacher outputs.
+    // a. quality - drop low-scoring teacher outputs.
     //    DEFAULT: the output-only scoreCandidateLocal heuristic (back-compat).
     //    OPT-IN (o.qualityClassifier): the learned per-pair quality CLASSIFIER
     //    (FineWeb-Edu/DCLM/AlpaGasus lineage) with a percentile-or-absolute
     //    threshold. Stamps p.quality_score; surfaces report.quality. Never throws
-    //    — any failure degrades to the heuristic path.
+    // - any failure degrades to the heuristic path.
     if (o.quality && o.qualityClassifier) {
       try {
         const scored = _scoreQualityLearned({ rows: work, backend: 'auto', model: o.quality_model || null });
@@ -498,10 +498,10 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       work = _runHeuristicQuality(work, o, report);
     }
 
-    // b0. minhash-predup — OPT-IN Node-native MinHash/LSH near-dup pre-pass
+    // b0. minhash-predup - OPT-IN Node-native MinHash/LSH near-dup pre-pass
     //     (runs BEFORE the python pass; catches exact + near-exact dups off-GPU
     //     so the O(n^2)-class python embedding pass only sees survivors). Pure
-    //     JS, never throws — degrades to a no-op on its own if it ever errors.
+    //     JS, never throws - degrades to a no-op on its own if it ever errors.
     if (o.minhash) {
       try {
         const pre = minhashPredup(work, {
@@ -518,12 +518,12 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           work = pre.kept;
         }
       } catch (e) {
-        // minhash pre-pass is best-effort — never fails curate.
+        // minhash pre-pass is best-effort - never fails curate.
         report.minhash = { skipped: 'error:' + String((e && e.message) || e) };
       }
     }
 
-    // b. dedup — semantic near-dup removal via python (degrades to no-op).
+    // b. dedup - semantic near-dup removal via python (degrades to no-op).
     if (o.dedup) {
       const ded = _dedupViaPython(work, ns, o.dedupThreshold);
       if (ded.note === 'ok') {
@@ -536,15 +536,15 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
         work = ded.kept;
       } else {
         report.dedup = ded.note; // 'skipped:<reason>'
-        // work unchanged — dedup degraded, pipeline continues.
+        // work unchanged - dedup degraded, pipeline continues.
       }
     }
 
-    // c. cluster — tag each survivor + build coverage histogram.
+    // c. cluster - tag each survivor + build coverage histogram.
     //    DEFAULT: the 3-gram-prefix hash bucket (back-compat).
     //    OPT-IN (o.semanticCluster): embedding k-means + c-TF-IDF topic auto-
     //    labeling (named, human-readable cluster_id slugs + report.topics).
-    //    Degrades to the bucket path on any failure — never fails curate.
+    //    Degrades to the bucket path on any failure - never fails curate.
     if (o.cluster && o.semanticCluster) {
       let labeled = null;
       try {
@@ -586,7 +586,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       report.clusters = Object.keys(coverage).length;
     }
 
-    // c2. error — OPT-IN Confident-Learning label-error detection (runs AFTER
+    // c2. error - OPT-IN Confident-Learning label-error detection (runs AFTER
     //     cluster so it has cluster_ids to compute the input->output topic-
     //     agreement confident-joint). FLAGS by default (stamps
     //     provenance.error_flag + routes to the human review queue);
@@ -616,7 +616,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
             routed_to_review: 0,
           };
           const flaggedEntries = Array.isArray(led.flagged_entries) ? led.flagged_entries : [];
-          // errorAction:'filter' — drop the flagged set (recorded).
+          // errorAction:'filter' - drop the flagged set (recorded).
           if ((o.errorAction || 'review') === 'filter' && flaggedEntries.length) {
             const drop = new Set(flaggedEntries.map((e) => e.index));
             const survivors = [];
@@ -624,7 +624,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
             report.label_errors.filtered = work.length - survivors.length;
             work = survivors;
           } else if (o.routeErrors && flaggedEntries.length) {
-            // 'review' (default) — enqueue flagged pairs to the human review queue.
+            // 'review' (default) - enqueue flagged pairs to the human review queue.
             try {
               const routed = await _routeErrorsToReview({
                 flaggedPairs: flaggedEntries.map((e) => ({
@@ -648,7 +648,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       }
     }
 
-    // d. cot — drop chain-of-thought leakage.
+    // d. cot - drop chain-of-thought leakage.
     if (o.cot) {
       const survivors = [];
       for (const p of work) {
@@ -658,7 +658,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       work = survivors;
     }
 
-    // e. pii — redact (NOT drop). Survives the pair, scrubs the output.
+    // e. pii - redact (NOT drop). Survives the pair, scrubs the output.
     if (o.pii) {
       for (const p of work) {
         const out = _pairOutput(p);
@@ -669,7 +669,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       }
     }
 
-    // f. select — OPT-IN informative-subset SELECTION (off unless target_size>0).
+    // f. select - OPT-IN informative-subset SELECTION (off unless target_size>0).
     //    CURATE only FILTERS by default; this caps the survivors to a budget-
     //    bounded, diversity-aware (or target-distribution-matched) subset so
     //    teacher tokens are spent on the most informative pairs, not near-dups.
@@ -724,7 +724,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           }
         }
       } catch (e) {
-        // selection is best-effort — never fails curate; record why it didn't run.
+        // selection is best-effort - never fails curate; record why it didn't run.
         report.selection = { skipped: 'error:' + String((e && e.message) || e) };
       }
     }

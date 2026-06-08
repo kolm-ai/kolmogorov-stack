@@ -1,6 +1,6 @@
 // src/billing-upgrade.js
 //
-// W363 — real billing upgrade flow. Every tenant always gets a working URL.
+// W363 - real billing upgrade flow. Every tenant always gets a working URL.
 //
 // Fallback chain (first match wins):
 //   1. existing Stripe Payment Link (STRIPE_PAYMENT_LINK_PRO/TEAM/ENT) via the
@@ -8,14 +8,14 @@
 //   2. Stripe Checkout Session created on the fly via plain fetch when
 //      KOLM_STRIPE_KEY + KOLM_STRIPE_PRICE_PRO/TEAM/ENT are set (no SDK; just
 //      a POST to https://api.stripe.com/v1/checkout/sessions)
-//   3. KOLM_BILLING_URL — self-hosted billing portal; the plan id is
+//   3. KOLM_BILLING_URL - self-hosted billing portal; the plan id is
 //      appended as ?plan=<plan>
 //   4. Default: https://kolm.ai/pricing#contact. We also append the
 //      upgrade request to ~/.kolm/upgrade-requests.jsonl so founders can
 //      fulfill it manually. The tenant gets a real URL; they never see
 //      "not yet wired".
 //
-// Pure ESM. ZERO new npm deps — fetch is global on Node >= 18.
+// Pure ESM. ZERO new npm deps - fetch is global on Node >= 18.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -59,7 +59,7 @@ function logUpgradeRequest(entry) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.appendFileSync(file, JSON.stringify(entry) + '\n', 'utf8');
   } catch (_) { // deliberate: cleanup
-    // Filesystem failures are non-fatal — the user still gets a working URL.
+    // Filesystem failures are non-fatal - the user still gets a working URL.
   }
 }
 
@@ -114,10 +114,10 @@ export async function resolveUpgradeUrl({ plan, tenantId, email, existingLinkFn 
   }
 
   // Path 2: Stripe Checkout Session via plain fetch.
-  // WC07 — envSecret returns null when the env is unset, empty, OR whitespace.
+  // WC07 - envSecret returns null when the env is unset, empty, OR whitespace.
   // The previous `|| ''` collapsed all three into the same empty-string falsy
   // value, but the resulting flow was identical to "no Stripe configured" so
-  // there's no observable behaviour change here — we just gain honest null
+  // there's no observable behaviour change here - we just gain honest null
   // semantics so callers don't accidentally trust `KOLM_STRIPE_KEY=""` as
   // configured. KOLM_STRIPE_BASE_URL is also an envSecret (an empty base URL
   // would resolve to "https://api.stripe.com" by default in the inner helper,
@@ -152,7 +152,7 @@ export async function resolveUpgradeUrl({ plan, tenantId, email, existingLinkFn 
     return { checkout_url: url, source: 'self_hosted' };
   }
 
-  // Path 4: default fallback — log the request and return the public pricing
+  // Path 4: default fallback - log the request and return the public pricing
   // contact URL. The tenant always gets a working link.
   logUpgradeRequest({
     at: new Date().toISOString(),

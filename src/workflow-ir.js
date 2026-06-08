@@ -1,4 +1,4 @@
-// Workflow IR — the third artifact class (workflow_capsule).
+// Workflow IR - the third artifact class (workflow_capsule).
 //
 // An IR is a frozen, replayable program that the artifact runtime walks to
 // reproduce a workflow deterministically. It is what `kolm compile <task>`
@@ -6,9 +6,9 @@
 // pass.
 //
 // Three artifact classes:
-//   rule              — JavaScript function in a sandbox (today's default)
-//   compiled_rule     — DSL → C/Rust → optional native binary (Wave 144 F)
-//   workflow_capsule  — IR over (LLM / tool / branch / artifact) nodes,
+//   rule - JavaScript function in a sandbox (today's default)
+//   compiled_rule - DSL → C/Rust → optional native binary (Wave 144 F)
+//   workflow_capsule - IR over (LLM / tool / branch / artifact) nodes,
 //                       executed by a deterministic interpreter with cached
 //                       responses for replayed inputs (this module)
 //
@@ -16,8 +16,8 @@
 //
 //   IS:
 //     - IR data model (nodes, edges, envelope) for replayable workflows
-//     - validateIr() — structural validation
-//     - interpret(ir, input, opts) — deterministic interpreter that uses
+//     - validateIr() - structural validation
+//     - interpret(ir, input, opts) - deterministic interpreter that uses
 //       cached responses when input matches a seed; otherwise calls into the
 //       caller-supplied executors (vendor LLM SDK, tool registry)
 //     - chain hash over IR shape so it can be embedded in the artifact's
@@ -25,11 +25,11 @@
 //
 //   IS NOT:
 //     - The trace → IR compiler (that's compile-ir.js)
-//     - The LLM/tool executors themselves — callers supply them as opts.exec
+//     - The LLM/tool executors themselves - callers supply them as opts.exec
 //       so the runtime can be swapped per device (local llama.cpp / remote
 //       Anthropic / hosted vLLM)
 //     - A general-purpose workflow engine (no parallelism, no retries, no
-//       compensating transactions — those would defeat reproducibility)
+//       compensating transactions - those would defeat reproducibility)
 //
 // Design constraints:
 //
@@ -169,7 +169,7 @@ function _topoOrder(ir) {
     }
   }
   if (out.length !== ir.nodes.length) {
-    throw new Error('topo failed — cycle remains after validateIr');
+    throw new Error('topo failed - cycle remains after validateIr');
   }
   return out;
 }
@@ -308,7 +308,7 @@ export async function interpret(ir, input, opts = {}) {
       }
       case NODE_KINDS.MEMORY_READ: {
         // (W269) Read from the per-run key-value scratchpad. Missing keys
-        // bind to null rather than throwing — agents commonly probe a
+        // bind to null rather than throwing - agents commonly probe a
         // memory slot to decide whether to populate it.
         const mem = opts.memory;
         const v = mem && typeof mem.get === 'function' ? (mem.get(node.key) ?? null) : null;

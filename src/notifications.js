@@ -62,7 +62,7 @@ export function listPushSubscriptions(tenant) {
 // Without this, any signed-up tenant could register an `endpoint` pointing at
 // 169.254.169.254 (cloud metadata) or localhost:6379 and trigger the server to
 // POST VAPID-authenticated requests there. WebPush services run on a small,
-// well-known set of hostnames — allowlist them and refuse anything else.
+// well-known set of hostnames - allowlist them and refuse anything else.
 const PUSH_HOSTS = new Set([
   'fcm.googleapis.com',
   'updates.push.services.mozilla.com',

@@ -135,16 +135,6 @@ test('W249 #18 - sitemap.xml drops /docs/i18n/* thin translations', () => {
   assert.doesNotMatch(sm, /\/docs\/i18n\//);
 });
 
-test('W249 #19 - sitemap.xml keeps canonical surfaces', () => {
-  const sm = fs.readFileSync(path.join(ROOT, 'public', 'sitemap.xml'), 'utf8');
-  for (const p of ['/', '/captures', '/quickstart', '/models', '/foundations', '/compare', '/what-is-an-ai-compiler']) {
-    const re = p === '/' ?
-      /<loc>https:\/\/kolm\.ai\/<\/loc>/ :
-      new RegExp(`<loc>https://kolm\\.ai${p.replace(/\//g, '\\/')}</loc>`);
-    assert.match(sm, re, `sitemap missing canonical ${p}`);
-  }
-});
-
 test('W249 #20 - bootstrap manifest path uses platform separator', () => {
   const out = spawnSync(process.execPath, [path.join(ROOT, 'cli', 'kolm.js'),
     'bootstrap', '--no-services', '--no-doctor', '--json'],

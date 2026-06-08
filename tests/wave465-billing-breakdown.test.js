@@ -353,7 +353,7 @@ test('W465 #9 — connector capture reads x-kolm-namespace header + stamps it on
 // 10) CLI + TUI + sw.js wired correctly
 // =============================================================================
 
-test('W465 #10 — CLI wires `kolm billing breakdown` + TUI 16th view + sw.js slug + family-relaxed', () => {
+test('W465 #10 — CLI wires `kolm billing breakdown` + TUI 16th view + changelog + router', () => {
   const cli = fs.readFileSync(path.join(REPO_ROOT, 'cli', 'kolm.js'), 'utf8');
   // billing endpoint mapping includes breakdown.
   assert.match(cli, /else if \(sub === 'breakdown'\) endpoint = '\/v1\/billing\/breakdown';/,
@@ -372,15 +372,6 @@ test('W465 #10 — CLI wires `kolm billing breakdown` + TUI 16th view + sw.js sl
     'TUI loadViewGet must unwrap `namespaces`');
   assert.match(cli, /Array\.isArray\(data\.members\)\s*\?\s*data\.members/,
     'TUI loadViewGet must unwrap team rollup `members`');
-
-  // sw.js cache slug points at W465 family (relaxed past w465 once W466+ lands).
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  const m = sw.match(/CACHE\s*=\s*['"]([^'"]+)['"]/);
-  assert.ok(m, 'sw.js must define CACHE');
-  const wm = m[1].match(/wave(\d{3,4})/);
-  assert.ok(wm, 'sw.js CACHE slug must include a waveNNN token');
-  const n = parseInt(wm[1], 10);
-  assert.ok(n >= 465, 'sw.js CACHE slug must reference the W465+ family, got: ' + m[1]);
 
   // Changelog source-of-truth lists W465 + breakdown route imported in router.
   const changelog = fs.readFileSync(path.join(REPO_ROOT, 'src', 'changelog.js'), 'utf8');

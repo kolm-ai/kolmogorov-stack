@@ -1,14 +1,14 @@
-// W815 — Active Learning Loop (high-information-density scorer + coverage-gap
+// W815 - Active Learning Loop (high-information-density scorer + coverage-gap
 // detector + recommend-next-capture surface + W720 feedback wiring).
 //
 // This is one of the four "T1" waves that unblock W775 (the killer
 // continuous-distillation feature). The W775 daemon imports
 // getCoverageGapsForNamespace() from this module to decide WHEN to surface
-// a re-distill prompt — so the exported signature here is LOAD-BEARING.
+// a re-distill prompt - so the exported signature here is LOAD-BEARING.
 //
 // What it does:
 //
-//   1. scoreCaptureRichness(capture, ctx) — high-information-density score
+//   1. scoreCaptureRichness(capture, ctx) - high-information-density score
 //      in [0..1]. Blends:
 //        - W711 capture-importance (the existing token-density + entropy +
 //          MinHash novelty trio) → 0.35 weight
@@ -20,24 +20,24 @@
 //          0.15 weight (so a stale capture is never higher-scored than a
 //          fresh one with the same other signals)
 //
-//   2. detectCoverageGaps(captures, opts) — bucket captures by a topic key
+//   2. detectCoverageGaps(captures, opts) - bucket captures by a topic key
 //      (W811 cluster_id when present, else a 3-gram hash bucket), compare
 //      each bucket's count to the corpus median, and rank under-represented
 //      buckets by `gap_score = (median - count) / median × demand_proxy` where
 //      demand_proxy = (production routing volume in that bucket / total
 //      routing volume) so high-traffic gaps surface first.
 //
-//   3. recommendNextCaptures(tenant_id, namespace, opts) — top-K gap buckets
+//   3. recommendNextCaptures(tenant_id, namespace, opts) - top-K gap buckets
 //      returned as actionable items {topic_cluster, gap_score,
 //      recommended_count, sample_synthetic_input?, capture_template?}.
 //
-//   4. feedToSelfImprovement(tenant_id, namespace, gaps) — for each gap,
+//   4. feedToSelfImprovement(tenant_id, namespace, gaps) - for each gap,
 //      writes ONE event-store row with feedback JSON marking
 //      {capture_candidate:true, weakness_signal:false, active_learning_gap:true}
 //      so the W720 detectUnderperformingCaptures sweep treats the gap as a
 //      seed for the next orchestrateImprovement call.
 //
-//   5. getCoverageGapsForNamespace(ns, opts) — W775-unblock contract. The
+//   5. getCoverageGapsForNamespace(ns, opts) - W775-unblock contract. The
 //      W775 background daemon polls this every minute to decide when to
 //      surface a re-distill suggestion.
 //
@@ -47,7 +47,7 @@
 //     captures exist for the namespace returns
 //     {ok:false, error:'insufficient_captures_for_coverage', n, hint:...,
 //      version:'w815-v1'}.
-//     NEVER returns a fabricated gap list under-sampled data — the daemon
+//     NEVER returns a fabricated gap list under-sampled data - the daemon
 //     would re-trigger forever.
 //   - feedToSelfImprovement is best-effort: event-store write failure does
 //     NOT throw into the caller; we return the per-gap envelope with
@@ -165,7 +165,7 @@ function _extractTimestamp(capture) {
 
 // W811 ships cluster_id on capture analytics rows. When absent we hash the
 // prompt to one of FALLBACK_BUCKET_COUNT buckets so every capture lands in a
-// deterministic bucket — duplicates collide, novel-by-text spreads.
+// deterministic bucket - duplicates collide, novel-by-text spreads.
 //
 // We use a 3-gram word-shingle prefix so prompts that share an opening phrase
 // (which is usually the most diagnostic part of intent) cluster together
@@ -206,7 +206,7 @@ function _readWeaknessSignal(capture) {
         if (fb.weakness_signal === true) return true;
         if (fb.weakness_signal === false) return false;
       }
-    } catch (_) { /* feedback was free text, not JSON — ignore */ }
+    } catch (_) { /* feedback was free text, not JSON - ignore */ }
   }
   // Some callers attach the routing decision directly.
   if (capture.routing_decision && typeof capture.routing_decision === 'object') {
@@ -218,7 +218,7 @@ function _readWeaknessSignal(capture) {
 
 // Recency component: exponential decay with RECENCY_HALFLIFE_MS half-life.
 // Returns [0..1]; 1.0 = NOW, 0.5 = 7 days ago, 0.25 = 14 days ago, etc.
-// Missing timestamp returns 0.5 (neutral — never throw, never under-score).
+// Missing timestamp returns 0.5 (neutral - never throw, never under-score).
 function _recencyScore(timestampMs, nowMs) {
   if (!Number.isFinite(timestampMs)) return 0.5;
   const dt = Math.max(0, (nowMs || _now()) - timestampMs);
@@ -253,14 +253,14 @@ function _jaccard(a, b) {
 }
 
 // ---------------------------------------------------------------------------
-// W815-1 — high-information-density scorer
+// W815-1 - high-information-density scorer
 // ---------------------------------------------------------------------------
 
 /**
  * Score a capture for training value with a four-signal blend:
  *
  *   importance × 0.35   (W711 token-density / entropy / MinHash novelty)
- *   weakness   × 0.20   (W807 weakness_signal — 1.0 when true, 0.5 when null,
+ *   weakness   × 0.20   (W807 weakness_signal - 1.0 when true, 0.5 when null,
  *                         0.0 when false)
  *   novelty    × 0.30   (per-cluster 3-gram Jaccard distance against the
  *                         reference set passed in opts.cluster_reference)
@@ -272,7 +272,7 @@ function _jaccard(a, b) {
  * @param {object} [opts]
  * @param {Set<string>} [opts.cluster_reference]   per-cluster n-gram set the
  *   caller maintains across the corpus (so novelty is bucket-relative, not
- *   global). When omitted, novelty defaults to 1.0 (max — safe over-estimate).
+ *   global). When omitted, novelty defaults to 1.0 (max - safe over-estimate).
  * @param {object}  [opts.importance_window]       optional W711 scorer
  *   window threaded through to keep stateful novelty consistent with the
  *   rolling-window contract.
@@ -328,7 +328,7 @@ export function scoreCaptureRichness(capture, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// W815-2 — coverage-gap detector
+// W815-2 - coverage-gap detector
 // ---------------------------------------------------------------------------
 
 /**
@@ -403,7 +403,7 @@ export function detectCoverageGaps(captures, opts = {}) {
   }
   const totalBuckets = counts.size;
 
-  // 2. Median bucket size — robust to outliers (one mega-bucket doesn't
+  // 2. Median bucket size - robust to outliers (one mega-bucket doesn't
   //    swamp the threshold).
   const sortedCounts = Array.from(counts.values()).sort((a, b) => a - b);
   let median = 0;
@@ -414,7 +414,7 @@ export function detectCoverageGaps(captures, opts = {}) {
       : sortedCounts[mid];
   }
   // Edge: median can be 0 if exactly one bucket has all captures. Treat that
-  // as "no gaps detectable" — every other bucket would be a 100% gap which
+  // as "no gaps detectable" - every other bucket would be a 100% gap which
   // is uninformative. Returns ok:true with empty gaps + a hint via header.
   if (median <= 0) {
     return {
@@ -477,7 +477,7 @@ export function detectCoverageGaps(captures, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// W815-3 — recommend-next-capture surface
+// W815-3 - recommend-next-capture surface
 // ---------------------------------------------------------------------------
 
 /**
@@ -492,7 +492,7 @@ export function detectCoverageGaps(captures, opts = {}) {
  *
  * sample_synthetic_input is a single canonical example prompt from the bucket
  * (deterministic: the first capture in the bucket by enqueued order). This
- * is NEVER synthetic generation — we are showing one of the captures that
+ * is NEVER synthetic generation - we are showing one of the captures that
  * already landed in the bucket as a prompt template. Synthetic generation is
  * a future surface (out of W815 scope per the W815-3 spec note "Optional").
  *
@@ -564,7 +564,7 @@ export async function recommendNextCaptures(tenantId, namespace = 'default', opt
 // findByTenant AND a per-row defense-in-depth re-check.
 async function _loadCapturesForCoverage(tenantId, namespace) {
   const candidates = [];
-  // 1. The W710 active-learning queue — every routing-decision-derived row.
+  // 1. The W710 active-learning queue - every routing-decision-derived row.
   try {
     const rows = findByTenant('active_learning_queue', tenantId) || [];
     for (const r of rows) {
@@ -584,7 +584,7 @@ async function _loadCapturesForCoverage(tenantId, namespace) {
       candidates.push(_normalizeForCoverage(r));
     }
   } catch (_) {} // deliberate: cleanup
-  // 3. canonical event-store events — the authoritative capture lake.
+  // 3. canonical event-store events - the authoritative capture lake.
   try {
     const { listEvents } = await import('./event-store.js');
     const events = await listEvents({ tenant_id: tenantId, namespace, limit: 0 });
@@ -599,13 +599,13 @@ async function _loadCapturesForCoverage(tenantId, namespace) {
 }
 
 function _normalizeForCoverage(row) {
-  // Pass through unchanged — every helper below knows how to read the
+  // Pass through unchanged - every helper below knows how to read the
   // capture-store / event-store / queue-row shapes.
   return row;
 }
 
 // ---------------------------------------------------------------------------
-// W815-4 — feed loop into W720 self-improvement
+// W815-4 - feed loop into W720 self-improvement
 // ---------------------------------------------------------------------------
 
 /**
@@ -656,7 +656,7 @@ export async function feedToSelfImprovement(tenantId, namespace, gaps) {
     return {
       ok: false,
       error: 'event_store_unavailable',
-      hint: 'src/event-store.js failed to load — cannot feed W720',
+      hint: 'src/event-store.js failed to load - cannot feed W720',
       detail: e && e.message,
       version: ACTIVE_LEARNING_VERSION,
     };
@@ -680,7 +680,7 @@ export async function feedToSelfImprovement(tenantId, namespace, gaps) {
       version: ACTIVE_LEARNING_VERSION,
     });
     // request_hash is deterministic by (namespace, cluster_id, day) so re-runs
-    // within the same day don't pile up duplicate W720 candidates — the
+    // within the same day don't pile up duplicate W720 candidates - the
     // event-store's INSERT-OR-REPLACE de-dupes them. Day-bucketed so a new
     // gap detected tomorrow still creates a fresh row.
     const dayKey = new Date().toISOString().slice(0, 10);
@@ -727,13 +727,13 @@ export async function feedToSelfImprovement(tenantId, namespace, gaps) {
 }
 
 // ---------------------------------------------------------------------------
-// W815-7 — W775-unblock contract.
+// W815-7 - W775-unblock contract.
 // ---------------------------------------------------------------------------
 
 /**
  * Coverage-gap surface consumed by the W775 continuous-distillation daemon.
  *
- * THIS SIGNATURE IS LOAD-BEARING — W775 imports it by this exact name and
+ * THIS SIGNATURE IS LOAD-BEARING - W775 imports it by this exact name and
  * destructures {ok, gaps, computed_at} from the resolved value. Do NOT
  * rename, do NOT change the return shape without coordinating with W775.
  *
@@ -768,7 +768,7 @@ export async function getCoverageGapsForNamespace(namespace, opts = {}) {
 
   const captures = await _loadCapturesForCoverage(tenantId, ns);
   // Allow opts.min_captures to lower the bar IF supplied, but never override
-  // the floor of 1 capture — gaps over zero captures is meaningless.
+  // the floor of 1 capture - gaps over zero captures is meaningless.
   const minCaptures = Number.isFinite(Number(opts && opts.min_captures))
     ? Math.max(1, Math.trunc(Number(opts.min_captures)))
     : MIN_CAPTURES_FOR_GAPS;

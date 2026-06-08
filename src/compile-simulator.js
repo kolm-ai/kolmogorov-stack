@@ -1,6 +1,6 @@
 // src/compile-simulator.js
 //
-// KOLM AUTOPILOT — COMPILE SIMULATOR.
+// KOLM AUTOPILOT - COMPILE SIMULATOR.
 //
 // A thin, PURE decision wrapper over the Quality Predictor (src/quality-predictor.js).
 // Before the autopilot spends GPU/teacher money on a recompile, it asks:
@@ -10,12 +10,12 @@
 //    minimum delta? If not, SKIP the compile."
 //
 // Every skip it logs is measurable money the autopilot did NOT spend on a
-// marginal recompile. This module never trains and never compiles — it only
+// marginal recompile. This module never trains and never compiles - it only
 // predicts two K-Scores (current vector vs current+delta) and compares the gain
 // against the ship gate threshold (default 0.02, from
 // src/improvement-orchestrator.js compareAndDecide).
 //
-// CONTRACT (cs-v1) — every exported async function returns an envelope
+// CONTRACT (cs-v1) - every exported async function returns an envelope
 //   {ok:true, version:'cs-v1', ...} | {ok:false, error:'<snake_case>', version:'cs-v1'}
 // and NEVER throws across the public API. Persistence is best-effort: if the
 // event store is unavailable the call still returns ok:true with
@@ -47,7 +47,7 @@ const DEFAULT_TENANT = 'tenant_local';
 const DEFAULT_NAMESPACE = 'default';
 
 // ---------------------------------------------------------------------------
-// Persistence — EXACT mandated pattern (copied from src/data-feedback.js).
+// Persistence - EXACT mandated pattern (copied from src/data-feedback.js).
 // Best-effort; never throws across the public API.
 // ---------------------------------------------------------------------------
 
@@ -112,8 +112,8 @@ function _clampFeature(key, value) {
 }
 
 // Apply an additive feature delta to a current feature vector. For each key in
-// the delta we start from the current numeric value, or — when the current
-// vector omits it — from the feature's neutral default, then add the delta and
+// the delta we start from the current numeric value, or - when the current
+// vector omits it - from the feature's neutral default, then add the delta and
 // clamp. Keys present only in current_features pass through unchanged so the
 // predictor sees the full vector.
 function _applyDelta(current, delta) {
@@ -127,7 +127,7 @@ function _applyDelta(current, delta) {
 }
 
 // ---------------------------------------------------------------------------
-// decideFromDeltaK — PURE decision helper (no async, no predictor, no persist).
+// decideFromDeltaK - PURE decision helper (no async, no predictor, no persist).
 // Lets callers/tests reason about a compile-vs-skip decision from a raw delta.
 // ---------------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ export function decideFromDeltaK(delta_k, min_delta_k = DEFAULT_MIN_DELTA_K) {
 }
 
 // ---------------------------------------------------------------------------
-// simulateCompile — predict K for current vs current+delta, decide compile/skip.
+// simulateCompile - predict K for current vs current+delta, decide compile/skip.
 // ---------------------------------------------------------------------------
 
 /**
@@ -204,7 +204,7 @@ export async function simulateCompile({
 
     const { decision, reason } = decideFromDeltaK(delta_k, threshold);
 
-    // Confidence is the WEAKER of the two predictions — a decision is only as
+    // Confidence is the WEAKER of the two predictions - a decision is only as
     // trustworthy as its least-supported endpoint. Basis degrades to 'heuristic'
     // if either prediction is heuristic (a single cold endpoint makes the
     // comparison cold).

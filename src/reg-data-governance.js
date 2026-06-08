@@ -1,4 +1,4 @@
-// W834-4 — Data governance reports (captures provenance + PII + consent).
+// W834-4 - Data governance reports (captures provenance + PII + consent).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md):
 //   [W834-4] Data governance reports: capture sources, PII handling,
@@ -30,7 +30,7 @@
 export const REG_DATA_GOVERNANCE_VERSION = 'w834-v1';
 
 // Canonical source enumeration. Rows missing all hints land under
-// 'unknown_source'. Frozen — adding a source class requires bumping the
+// 'unknown_source'. Frozen - adding a source class requires bumping the
 // version stamp.
 export const CAPTURE_SOURCES = Object.freeze([
   'gateway',
@@ -39,7 +39,7 @@ export const CAPTURE_SOURCES = Object.freeze([
   'unknown_source',
 ]);
 
-// Honest sentinels — auditors grep for these literals.
+// Honest sentinels - auditors grep for these literals.
 const PII_NOT_ATTACHED = 'pii_metadata_not_yet_attached';
 const CONSENT_NOT_ATTACHED = 'no_consent_records_attached';
 
@@ -49,7 +49,7 @@ function _now() {
 
 // Detect the source class from a row. Connector rows carry a connector_id
 // or daemon_connector_id; gateway rows carry a request_hash; manual rows
-// carry source_type='manual' OR no other hint. Defensive ordering — most
+// carry source_type='manual' OR no other hint. Defensive ordering - most
 // specific first.
 function _detectSource(row) {
   if (!row || typeof row !== 'object') return 'unknown_source';
@@ -61,7 +61,7 @@ function _detectSource(row) {
 }
 
 // Parse a YYYY-MM period to {fromIso, toIso} inclusive on both endpoints.
-// Returns null on invalid input — caller should treat as "no period filter".
+// Returns null on invalid input - caller should treat as "no period filter".
 function _parsePeriod(period) {
   if (typeof period !== 'string') return null;
   const m = period.match(/^(\d{4})-(\d{2})$/);
@@ -71,7 +71,7 @@ function _parsePeriod(period) {
   if (year < 1970 || year > 9999) return null;
   if (month < 1 || month > 12) return null;
   const fromIso = `${m[1]}-${m[2]}-01T00:00:00.000Z`;
-  // last day of month — using Date.UTC and back-stepping is fine for the
+  // last day of month - using Date.UTC and back-stepping is fine for the
   // calendar-month upper bound. Year/month roll over correctly via
   // Date.UTC(year, month, 0) which returns the LAST day of (year, month).
   const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
@@ -101,7 +101,7 @@ export async function capturesProvenanceReport(opts = {}) {
     return {
       ok: false,
       error: 'tenant_required',
-      hint: 'pass {tenant: <tenant_id>} — required so the report is tenant-fenced',
+      hint: 'pass {tenant: <tenant_id>} - required so the report is tenant-fenced',
       version: REG_DATA_GOVERNANCE_VERSION,
     };
   }
@@ -146,13 +146,13 @@ export async function capturesProvenanceReport(opts = {}) {
   let pii_rows_present = 0;
   let pii_rows_missing = 0;
   const pii_classes_seen = new Set();
-  // Consent records — best-effort harvest.
+  // Consent records - best-effort harvest.
   const consent_records = [];
 
   for (const row of rows) {
-    // W411 defense-in-depth — re-check tenant_id on every row.
+    // W411 defense-in-depth - re-check tenant_id on every row.
     if (!row || row.tenant_id !== String(tenant)) continue;
-    // Skip threshold/marker rows — those are governance metadata, not captures.
+    // Skip threshold/marker rows - those are governance metadata, not captures.
     if (row.provider === 'kolm_routing_threshold') continue;
     if (row.provider === 'kolm_capture_forget') continue;
     if (row.provider === 'kolm_human_review_threshold') continue;
@@ -258,7 +258,7 @@ export async function generateGovernanceReport(opts = {}) {
     return {
       ok: false,
       error: 'tenant_required',
-      hint: 'pass {tenant: <tenant_id>} — required for tenant fence',
+      hint: 'pass {tenant: <tenant_id>} - required for tenant fence',
       version: REG_DATA_GOVERNANCE_VERSION,
     };
   }
@@ -341,7 +341,7 @@ export async function generateGovernanceReport(opts = {}) {
   if (missing_attachments.length > 0) {
     lines.push('');
     for (const f of missing_attachments) {
-      lines.push(`<!-- MISSING: ${f} — attach via capture metadata + re-run report -->`);
+      lines.push(`<!-- MISSING: ${f} - attach via capture metadata + re-run report -->`);
     }
   }
   lines.push('');

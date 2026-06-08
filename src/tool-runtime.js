@@ -1,11 +1,11 @@
-// W735 — Agent / Tool-Use distillation: runtime adapter scaffold.
+// W735 - Agent / Tool-Use distillation: runtime adapter scaffold.
 //
 // Closes W735-3 + W735-4 from KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 394-395:
 //
 //   W735-3: "Runtime execute tool calls against real APIs with appropriate
 //           auth" → tool-runtime adapter scaffold. Tenants register their
 //           own tool handlers via registerTool({name, handler, auth_schema}).
-//           No built-in tool registry — kolm.ai doesn't ship a default
+//           No built-in tool registry - kolm.ai doesn't ship a default
 //           weather/search/etc. adapter (would be a security hazard +
 //           scope creep). The honest scaffold lets tenants wire their
 //           own tools without us reimplementing every SaaS API.
@@ -24,7 +24,7 @@
 //     (one might have a Slack adapter; another might have a Salesforce
 //     adapter). The tool_registry argument is supplied per-call so the
 //     scaffold never leaks tools across tenant boundaries.
-//   * Honest errors. executeToolCall() never throws — it returns a
+//   * Honest errors. executeToolCall() never throws - it returns a
 //     discriminated-union envelope {ok:true, result} OR {ok:false,
 //     error:'tool_not_found'|'auth_failed'|'tool_threw', detail}.
 //   * 90% is a goal, not a claim. accumulateAcceptanceMetrics() returns
@@ -32,7 +32,7 @@
 //     pins this as "honest measurement, not aspirational"; the public
 //     /docs/agents.html page tells operators the same thing.
 //   * Sandboxing is the tenant's job. The runtime calls the registered
-//     handler with the parsed arguments — it does NOT sandbox arbitrary
+//     handler with the parsed arguments - it does NOT sandbox arbitrary
 //     code, sign URLs, validate JSON Schema, or rate-limit the upstream
 //     API. Those concerns belong in the tenant's handler implementation
 //     (where they have the auth context to do them safely).
@@ -48,7 +48,7 @@
 export const TOOL_RUNTIME_VERSION = 'w735-v1';
 
 // Statistical floor for the W735-4 90% acceptance claim. Below this
-// sample size, the local_handling_rate is reported as `null` —
+// sample size, the local_handling_rate is reported as `null` - 
 // extrapolating from <100 captures is dishonest. This number is the
 // "honest measurement" backstop the spec calls for.
 const ACCEPTANCE_MIN_SAMPLE = 100;
@@ -62,7 +62,7 @@ const ACCEPTANCE_MIN_SAMPLE = 100;
  *
  * The registry is a plain Map (or any Map-like object supporting `set`
  * and `has`) that the caller owns. The runtime does not maintain a
- * process-wide registry — that would leak tools across tenants. Each
+ * process-wide registry - that would leak tools across tenants. Each
  * tenant scope (typically authMiddleware → req.tenant_record) is
  * responsible for instantiating its own Map and passing it through.
  *
@@ -97,7 +97,7 @@ export function registerTool(tool_registry, tool) {
 /**
  * Execute a single tool call against a per-tenant registry.
  *
- * Honest discriminated-union envelope — never throws (handler exceptions
+ * Honest discriminated-union envelope - never throws (handler exceptions
  * are caught and surfaced as `tool_threw`):
  *
  *   {ok: true,  result: <whatever handler returned>}
@@ -108,13 +108,13 @@ export function registerTool(tool_registry, tool) {
  *
  * The handler is invoked as `handler({arguments, auth_context, tool_call})`
  * so it gets the parsed arguments, the request-time auth context (api
- * keys, OAuth tokens — whatever the tenant put there), and the raw
+ * keys, OAuth tokens - whatever the tenant put there), and the raw
  * tool_call record for advanced cases (id, etc.).
  *
  * The auth_schema check is a light shape gate: if `auth_schema` declares
  * `required: ['api_key', 'workspace_id']`, executeToolCall verifies
  * those keys exist on auth_context before invoking the handler. The
- * handler is still expected to revalidate — defense in depth.
+ * handler is still expected to revalidate - defense in depth.
  */
 export async function executeToolCall(opts) {
   const { tool_call, tool_registry, auth_context } = opts || {};
@@ -132,7 +132,7 @@ export async function executeToolCall(opts) {
     return {
       ok: false,
       error: 'tool_not_found',
-      detail: 'no tool_registry supplied — registerTool() must be called first',
+      detail: 'no tool_registry supplied - registerTool() must be called first',
     };
   }
   const hasTool = typeof tool_registry.has === 'function'
@@ -156,7 +156,7 @@ export async function executeToolCall(opts) {
     };
   }
 
-  // Light auth-shape gate. The handler should re-validate — this is
+  // Light auth-shape gate. The handler should re-validate - this is
   // defense-in-depth so misregistered tools fail loud before the handler
   // runs (cheaper to debug at this boundary than inside the handler).
   if (tool.auth_schema && Array.isArray(tool.auth_schema.required)) {
@@ -171,7 +171,7 @@ export async function executeToolCall(opts) {
     }
   }
 
-  // Invoke the handler. Caught exceptions become tool_threw envelopes —
+  // Invoke the handler. Caught exceptions become tool_threw envelopes - 
   // we NEVER propagate handler errors up. The capture-side audit log
   // gets a complete record of what failed.
   try {
@@ -200,10 +200,10 @@ export async function executeToolCall(opts) {
  *
  * Inputs:
  *
- *   captures                — full set considered (used for sample_size).
- *   n_handled_locally       — how many were answered by the distilled
+ *   captures - full set considered (used for sample_size).
+ *   n_handled_locally - how many were answered by the distilled
  *                              student without escalation.
- *   n_escalated_to_teacher  — how many fell back to the teacher LLM.
+ *   n_escalated_to_teacher - how many fell back to the teacher LLM.
  *
  * Output:
  *
@@ -248,7 +248,7 @@ export function accumulateAcceptanceMetrics(opts) {
     return out;
   }
 
-  // Honest denominator — we only count captures that actually attempted a
+  // Honest denominator - we only count captures that actually attempted a
   // tool call (handled OR escalated). Captures with no tool intent don't
   // tell us anything about the local-handling rate.
   const denom = handledLocally + escalated;

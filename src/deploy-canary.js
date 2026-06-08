@@ -1,4 +1,4 @@
-// W888-D — Canary deploy delegate.
+// W888-D - Canary deploy delegate.
 //
 // Deploys to ONE device first, observes for `canaryWindowS` seconds, scrapes
 // metrics, and either promotes the rollout to the remaining devices (rolling
@@ -13,7 +13,7 @@
 //   const c = new CanaryDeploy({ pipeline, metricsProvider });
 //   const c = new CanaryDeploy({ pipeline, metricsProvider: fakeMetrics }); // tests
 //
-// metricsProvider contract (W888-D scope — real implementation in W888-E
+// metricsProvider contract (W888-D scope - real implementation in W888-E
 // `src/remote-metrics.js`):
 //   async sampleCanary(deviceId, { windowS, sinceMs }) →
 //     { error_rate, latency_p95_ms, baseline_p95_ms, request_count }
@@ -29,7 +29,7 @@
 
 import { RollingDeploy } from './deploy-rolling.js';
 
-// Default metrics provider — always returns healthy. Production callers
+// Default metrics provider - always returns healthy. Production callers
 // MUST inject a real provider (W888-E src/remote-metrics.js).
 const _stubMetricsProvider = {
   async sampleCanary(_deviceId, { baseline_p95_ms = 100 } = {}) {
@@ -125,7 +125,7 @@ export class CanaryDeploy {
       };
     }
 
-    // 4. Healthy canary — promote to remaining devices via rolling.
+    // 4. Healthy canary - promote to remaining devices via rolling.
     if (remaining.length === 0) {
       return {
         ok: true,

@@ -1,6 +1,6 @@
 // src/failure-modes.js
 //
-// W812 — Failure-Mode Visualization (T1).
+// W812 - Failure-Mode Visualization (T1).
 //
 // Sister wave to W720 (self-improvement loop) and W811 (capture analytics).
 // W812 clusters captures by topic/pattern and surfaces where the student
@@ -16,7 +16,7 @@
 //     error:'no_captures_to_cluster', hint, version}. We never silently
 //     return an empty result.
 //
-//  3. Cheap clustering — pure stdlib. We bucket by:
+//  3. Cheap clustering - pure stdlib. We bucket by:
 //       - char-3-gram Jaccard similarity (request_hash collisions first)
 //       - length bucket (short <128 / medium <512 / long >=512 chars)
 //       - first content word (heuristic topic seed)
@@ -40,10 +40,10 @@
 //
 // Exports:
 //   - FAILURE_MODES_VERSION
-//   - clusterCaptures(opts)              — main entry (W812-1, W812-5)
-//   - topRegressions(opts)               — W812-2
-//   - clusterSamples({cluster_id, ...}) — W812-3 inspector
-//   - emitClusterFailureSignals(opts)    — W812-4 W816 → W720 glue
+//   - clusterCaptures(opts) - main entry (W812-1, W812-5)
+//   - topRegressions(opts) - W812-2
+//   - clusterSamples({cluster_id, ...}) - W812-3 inspector
+//   - emitClusterFailureSignals(opts) - W812-4 W816 → W720 glue
 //   - _bucketLength / _tokenize / _firstWord / _clusterKey (test seams)
 
 import crypto from 'node:crypto';
@@ -71,7 +71,7 @@ function _bucketLength(text) {
 }
 
 // Tokenize on whitespace + lowercase. We deliberately don't strip
-// punctuation — punctuation often differentiates clusters (e.g. JSON
+// punctuation - punctuation often differentiates clusters (e.g. JSON
 // requests vs prose). The first non-empty token is the cluster's
 // topic seed.
 function _tokenize(text) {
@@ -93,7 +93,7 @@ function _firstWord(text) {
 //   - 'frontier' (anthropic/openai/google/gemini)
 //   - 'open' (openrouter/together/groq/etc.)
 //   - 'unknown'
-// We deliberately do NOT bucket by vendor when picking the cluster — the
+// We deliberately do NOT bucket by vendor when picking the cluster - the
 // cluster is topic+shape. vendor_class is used downstream when separating
 // student-vs-teacher rows within a cluster.
 function _clusterKey(ev) {
@@ -103,7 +103,7 @@ function _clusterKey(ev) {
   return first + ':' + bucket;
 }
 
-// W812-1 helper — collapse vendor to {kolm, frontier, open, unknown}.
+// W812-1 helper - collapse vendor to {kolm, frontier, open, unknown}.
 // We use this to split student-vs-teacher rows inside each cluster.
 const FRONTIER_VENDORS = new Set(['anthropic', 'openai', 'google', 'gemini', 'mistral', 'cohere']);
 const OPEN_VENDORS = new Set(['openrouter', 'together', 'groq', 'fireworks', 'replicate', 'ollama', 'vllm', 'llama_cpp', 'tgi', 'sglang']);
@@ -117,7 +117,7 @@ function _vendorClass(ev) {
   return 'unknown';
 }
 
-// W812-1 helper — is this event a "student" (compiled artifact) call.
+// W812-1 helper - is this event a "student" (compiled artifact) call.
 // Same heuristic as src/self-improvement.js but exported here so the
 // cluster can split student vs teacher rows. We treat any event with
 // vendor='kolm' OR artifact_id stamped OR workflow_id matching 'art_*'
@@ -131,16 +131,16 @@ function _isStudent(ev) {
   return false;
 }
 
-// Same K-Score reader as W720 — accepts ev.k_score / kscore / meta.k_score /
+// Same K-Score reader as W720 - accepts ev.k_score / kscore / meta.k_score /
 // eval.k_score. Returns null when nothing usable.
 //
 // W812 addendum: the canonical event-schema canonicalize() drops `k_score`,
 // `meta`, and `eval` fields. The only structured field the schema preserves
 // for free-form metadata is `feedback` (capped at 4096 chars). Emitters that
 // want their K-Score to round-trip through the event-store can stash it as
-// a JSON object in `feedback` — e.g. feedback='{"k_score":0.91}'. We try to
+// a JSON object in `feedback` - e.g. feedback='{"k_score":0.91}'. We try to
 // parse `feedback` as JSON and read .k_score / .kscore from it as a last
-// resort. Non-JSON feedback (e.g. 'fail:cluster_regression') is ignored —
+// resort. Non-JSON feedback (e.g. 'fail:cluster_regression') is ignored - 
 // we never throw on parse failure.
 function _readKScore(ev) {
   if (!ev || typeof ev !== 'object') return null;
@@ -177,7 +177,7 @@ function _clusterId(key) {
   return 'cl_' + crypto.createHash('sha256').update(String(key)).digest('hex').slice(0, 12);
 }
 
-// W812-1 / W812-5 — Main entry. Returns either:
+// W812-1 / W812-5 - Main entry. Returns either:
 //   { ok:true, clusters:[...], totals:{...}, version, threshold:{...} }
 // or honest envelope:
 //   { ok:false, error:'no_captures_to_cluster', hint, version }
@@ -256,7 +256,7 @@ export async function clusterCaptures(opts = {}) {
   const groups = new Map();
   for (const ev of events) {
     if (!ev || typeof ev !== 'object') continue;
-    // Tenant fence — defense in depth (W720 trap).
+    // Tenant fence - defense in depth (W720 trap).
     if (tenant_id && ev.tenant_id !== tenant_id) continue;
     if (namespace && ev.namespace !== namespace) continue;
     const key = _clusterKey(ev);
@@ -299,7 +299,7 @@ export async function clusterCaptures(opts = {}) {
     if (!g.last_seen || (ev.created_at && ev.created_at > g.last_seen)) {
       g.last_seen = ev.created_at;
     }
-    // Hold a small ring of rows for the inspector — keep latest 5 per
+    // Hold a small ring of rows for the inspector - keep latest 5 per
     // cluster so clusterSamples() can return three without re-reading
     // the event-store.
     g.rows.unshift({
@@ -370,7 +370,7 @@ export async function clusterCaptures(opts = {}) {
   };
 }
 
-// W812-2 — top regressions. Returns clusters where the student trails the
+// W812-2 - top regressions. Returns clusters where the student trails the
 // teacher by at least `min_delta` (default 0.05 → 5 K-Score points).
 // Output shape is a strict subset of clusterCaptures() so the dashboard
 // can render the same table partial.
@@ -393,7 +393,7 @@ export async function topRegressions(opts = {}) {
   };
 }
 
-// W812-3 — per-cluster sample inspector. Returns 3 captures with both
+// W812-3 - per-cluster sample inspector. Returns 3 captures with both
 // student and teacher outputs side-by-side. If the cluster has no
 // teacher rows we still return up to 3 student rows so the user can
 // see what the student is generating; teacher_response is then null.
@@ -414,7 +414,7 @@ export async function clusterSamples(opts = {}) {
   }
   const env = await clusterCaptures(opts);
   if (!env.ok) return env;
-  // Walk through full event-store again — we need the rows for THIS cluster
+  // Walk through full event-store again - we need the rows for THIS cluster
   // including the buffered last-5 ring per group. We invoke clusterCaptures
   // again but read the matching cluster off groups via re-scan.
   const {
@@ -509,7 +509,7 @@ export async function clusterSamples(opts = {}) {
   };
 }
 
-// W812-4 — emit per-cluster failure-signal events.  W720
+// W812-4 - emit per-cluster failure-signal events.  W720
 // detectUnderperformingCaptures consumes the canonical event-store, looking
 // at feedback prefix (negative feedback) and the failure status set. We
 // follow the W807 emitSpliceWeaknessSignal pattern: write one canonical
@@ -543,7 +543,7 @@ export async function emitClusterFailureSignals(opts = {}) {
       ok: true,
       emitted: [],
       skipped: 0,
-      hint: 'no clusters above min_delta — nothing to elevate',
+      hint: 'no clusters above min_delta - nothing to elevate',
       version: FAILURE_MODES_VERSION,
     };
   }
@@ -627,7 +627,7 @@ export async function emitClusterFailureSignals(opts = {}) {
   };
 }
 
-// Test seams — exported pure helpers so tests can pin individual contracts.
+// Test seams - exported pure helpers so tests can pin individual contracts.
 export const _bucketLength_for_test = _bucketLength;
 export const _tokenize_for_test = _tokenize;
 export const _firstWord_for_test = _firstWord;

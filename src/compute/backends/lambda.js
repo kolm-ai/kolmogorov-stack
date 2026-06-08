@@ -1,7 +1,7 @@
-// lambda — Lambda Labs Cloud (GPU rentals, no managed job queue).
+// lambda - Lambda Labs Cloud (GPU rentals, no managed job queue).
 // API: https://cloud.lambdalabs.com/api/v1 (instance-types, instances, instance-operations)
 // Env: KOLM_LAMBDA_TOKEN (or LAMBDA_API_KEY). run() honestly: lists instances or
-// provisions one and returns the SSH handle — Lambda has no programmatic exec API.
+// provisions one and returns the SSH handle - Lambda has no programmatic exec API.
 
 import https from 'node:https';
 

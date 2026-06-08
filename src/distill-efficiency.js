@@ -1,4 +1,4 @@
-// W787 — Compute-efficiency optimizations for the distill pipeline.
+// W787 - Compute-efficiency optimizations for the distill pipeline.
 //
 // Three atomic levers, each independently testable:
 //
@@ -21,7 +21,7 @@
 //           in the distill envelope so users see whether it was used.
 //
 // HONESTY CONTRACT
-//   The Node-side surface in this file is FULLY WIRED — opts validate, the
+//   The Node-side surface in this file is FULLY WIRED - opts validate, the
 //   pipeline passes env vars to the worker, the worker forwards to Python.
 //   On the Python side: train_lora.py reads KOLM_PRECISION + KOLM_GRAD_CHECKPOINT
 //   + KOLM_EARLY_STOP_* envs (W787 patch). trainer_real.py reads the same envs
@@ -41,7 +41,7 @@ import path from 'node:path';
 
 export const EFFICIENCY_VERSION = 'w787-v1';
 
-// W787-1 — early-stop defaults. patience = number of K-Score samples below the
+// W787-1 - early-stop defaults. patience = number of K-Score samples below the
 // improvement threshold before we trigger stop. delta_kscore = the minimum
 // per-sample K-Score uptick that "counts" as progress. min_steps prevents
 // stopping during the early warm-up where K-Score is dominated by noise.
@@ -51,14 +51,14 @@ export const EARLY_STOP_DEFAULTS = Object.freeze({
   min_steps: 50,
 });
 
-// W787-2 — supported precision modes. fp32 is the safe baseline; fp16 and bf16
+// W787-2 - supported precision modes. fp32 is the safe baseline; fp16 and bf16
 // are pure half-precision (saves memory but trades off numerical range);
 // mixed-fp16 / mixed-bf16 use autocast + a master fp32 copy for the optimizer
 // state (the modern standard via torch.cuda.amp). Anything outside this list
 // is rejected by normalizeEfficiencyOptions.
 export const PRECISION_MODES = Object.freeze(['fp32', 'fp16', 'bf16', 'mixed-fp16', 'mixed-bf16']);
 
-// W787-2 — friendly hints surfaced through efficiencyDoctor() output. Kept here
+// W787-2 - friendly hints surfaced through efficiencyDoctor() output. Kept here
 // (frozen, single source of truth) so docs/efficiency.html can rebuild the
 // same table from this export without forking the recommendation logic.
 export const PRECISION_HINTS = Object.freeze({
@@ -69,7 +69,7 @@ export const PRECISION_HINTS = Object.freeze({
   'mixed-bf16': 'Autocast forward in bf16, master copy in fp32; preferred on Ampere+ for stability.',
 });
 
-// W787-1 — shouldStopEarly: pure inspection of a K-Score history array.
+// W787-1 - shouldStopEarly: pure inspection of a K-Score history array.
 // Returns { stop: bool, reason: 'plateau'|'min_steps_not_met'|'history_too_short'|'no_plateau', observed_delta: number|null }.
 //
 // Algorithm: look at the LAST `patience+1` samples; compute the max - min
@@ -111,7 +111,7 @@ export function shouldStopEarly({
   return { stop: false, reason: 'no_plateau', observed_delta };
 }
 
-// W787 — normalizeEfficiencyOptions(opts): coerces a raw caller-supplied
+// W787 - normalizeEfficiencyOptions(opts): coerces a raw caller-supplied
 // efficiency block into the shape the pipeline + worker expect. Throws on
 // invalid precision; clamps numeric ranges; defaults are pulled from the
 // frozen constants above so adding a precision mode in ONE place updates
@@ -174,7 +174,7 @@ export function normalizeEfficiencyOptions(opts = {}) {
   };
 }
 
-// W787 — efficiencyDoctor: read the cached GPU probe at
+// W787 - efficiencyDoctor: read the cached GPU probe at
 // ~/.kolm/devices/local.json (written by src/device-capabilities.js
 // detectLocalDevice()), recommend a precision + gradient_checkpointing
 // setting, and return an honest envelope when no probe exists. The probe
@@ -258,7 +258,7 @@ export function efficiencyDoctor({ probePath = null } = {}) {
   };
 }
 
-// W787 — build the env-var slice that the worker / Python trainer reads. Pure
+// W787 - build the env-var slice that the worker / Python trainer reads. Pure
 // helper, exported so tests can assert the exact wire-format passed through.
 // We use KOLM_-prefixed names so a stray torch shell variable cannot collide.
 export function buildEfficiencyEnv(normalized) {
@@ -278,7 +278,7 @@ export function buildEfficiencyEnv(normalized) {
 }
 
 // =============================================================================
-// W921 — LoRA-variant / GaLore / sample-packing trainer knobs.
+// W921 - LoRA-variant / GaLore / sample-packing trainer knobs.
 //
 // Additive, opt-in, default-OFF. The SHIPPING worker (workers/distill/scripts/
 // train_lora.py) reads these via KOLM_* env vars (same threading pattern as the
@@ -306,7 +306,7 @@ export const TRAINER_OPTIMS = Object.freeze([
   'galore_adamw', 'galore_adamw_8bit', 'galore_adamw_layerwise', 'galore_adafactor',
 ]);
 
-// W921 — normalizeTrainerVariantOptions: validate the raw trainer-variant opts
+// W921 - normalizeTrainerVariantOptions: validate the raw trainer-variant opts
 // against the frozen enums, clamp numerics, and surface refusals as thrown
 // errors (fail-before-spend). Returns a normalized block consumed by
 // buildTrainerVariantEnv + the recipe loader.
@@ -372,7 +372,7 @@ export function normalizeTrainerVariantOptions(opts = {}) {
   const grad_accum = Number.isFinite(Number(raw.grad_accum)) ? Math.floor(Number(raw.grad_accum)) : 1;
   const method = raw.method ? String(raw.method).toLowerCase() : null;
 
-  // Refusals (fail-before-spend) — never silently misconfigure.
+  // Refusals (fail-before-spend) - never silently misconfigure.
   // 1. GaLore is incompatible with 4-bit params (needs full-precision weights).
   if (isGalore && method === 'qlora') {
     const err = new Error('galore optimizer is incompatible with method=qlora (4-bit params); use method=full or a non-galore optim');
@@ -398,7 +398,7 @@ export function normalizeTrainerVariantOptions(opts = {}) {
   };
 }
 
-// W921 — buildTrainerVariantEnv: emit the KOLM_* env slice the worker reads.
+// W921 - buildTrainerVariantEnv: emit the KOLM_* env slice the worker reads.
 // Default (all opts at their no-op values) emits {} so the trainer's existing
 // behavior is unchanged (backward-compat guarantee). Pure helper, exported so
 // tests can assert the exact wire format.

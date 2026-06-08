@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>For AI vendors: clear the security review · kolm.ai</title>
+<meta name="description" content="Your six-figure enterprise deal stalled the moment a CISO had to vet an autonomous agent. kolm hands you a signed evidence report your buyer verifies offline, against your own key, with no account and no server in the trust path. The four to eight week review compresses back to days.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="For AI vendors: hand your buyer evidence, not a questionnaire">
+<meta property="og:description" content="A signed, framework-mapped evidence report your buyer verifies offline against your own key. Clear the stalled security review in days, not months.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/solutions/ai-vendors">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="For AI vendors · kolm">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/solutions/ai-vendors">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "kolm Agent Security-Review Readiness Audit",
+  "serviceType": "AI agent security audit and signed evidence attestation",
+  "provider": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "description": "For AI vendors selling agents into the enterprise: an audit of your agent's permissions, audit trail, data egress and injection resistance, ending in a cryptographically signed evidence report your buyer verifies offline against your public key.",
+  "areaServed": "Worldwide",
+  "audience": { "@type": "Audience", "audienceType": "AI-native software vendors selling agents into the enterprise" }
+}
+</script>
+</head>
+<body>
+
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush hero">
+  <div class="wrap">
+    <div class="section__head" style="max-width:60ch">
+      <h1 class="hero__h1">Your deal didn't die.<br>It stalled in security review.</h1>
+      <p class="lede">
+        Your agent works. The contract is real. Then a CISO had to vet an autonomous
+        agent, and a one-week review ran four, six, eight weeks. kolm hands you a signed
+        evidence report your buyer verifies offline, against your own key. The review
+        compresses back to days.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/contact">Start an audit</a>
+        <a class="btn btn--ghost" href="/report">See a sample report</a>
+      </div>
+      <div class="trustline" aria-label="What the report gives you">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline against your key</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Mapped to SOC 2, ISO 42001, your buyer's questionnaire</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. PROOF STRIP -->
+<section class="section" style="padding-top:0;border-top:0" aria-label="Proof">
+  <div class="wrap">
+    <h2 class="sr-only">Proof at a glance</h2>
+    <hr class="rule">
+    <div class="band">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="band__item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Verified offline. No kolm server in the trust path
+      </span>
+      <span class="band__item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <a href="/transparency-log">Append-only transparency log</a>
+      </span>
+    </div>
+    <div class="band" style="padding-top:0">
+      <span class="ctrlid">SOC 2</span>
+      <span class="ctrlid">ISO 42001</span>
+      <span class="ctrlid">NIST AI RMF</span>
+      <span class="ctrlid">EU AI Act</span>
+      <span class="ctrlid">OWASP</span>
+      <span class="ctrlid">MITRE ATLAS</span>
+    </div>
+    <hr class="rule">
+  </div>
+</section>
+
+<!-- ============================================================ 3. THE STALL (situation) -->
+<section class="section reveal" id="stall">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / The stall</span>
+      <h2>A CISO will not take your word for it.</h2>
+      <p class="lede">
+        The day your agent touches customer data, the week-long review runs four to
+        eight. The contract sits in legal. The champion goes quiet. Nothing is wrong
+        with your product. There is just no way to prove the agent is safe except your
+        say-so, and a security team does not sign off on say-so.
+      </p>
+    </div>
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric__n">4 to 8 wks</span>
+        <span class="metric__l">how long a from-scratch agent review runs once a CISO is in the loop</span>
+      </div>
+      <div class="metric">
+        <span class="metric__n">1 deal</span>
+        <span class="metric__l">six figures, signed by the buyer in principle, parked in review</span>
+      </div>
+      <div class="metric">
+        <span class="metric__n">Days</span>
+        <span class="metric__l">the same review when you walk in with signed, verifiable evidence</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4. WHY THE FORM FAILS (the ledger) -->
+<section class="section section--ink reveal" id="why">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / Why the form fails</span>
+      <h2>A questionnaire no longer clears it.</h2>
+      <p class="lede">
+        A filled-in form was enough when software was deterministic. An agent decides at
+        runtime, so the reviewer wants something they can check, not read. Three things
+        are now table stakes, and a questionnaire proves none of them.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Over-permissioned</p>
+        <h3>More access than the job needs</h3>
+        <p>Most agents hold ten times the privileges they use, often on one shared key. It is the first thing a reviewer flags, and a form cannot un-flag it.</p>
+        <p class="card__map">ASR-1 · least privilege</p>
+      </div>
+      <div class="card">
+        <p class="card__k">No tamper-evidence</p>
+        <h3>A trail nobody can trust</h3>
+        <p>If the record of what your agent did can be edited after the fact, it is not evidence. Reviewers want it append-only and hash-chained, not asserted.</p>
+        <p class="card__map">ASR-2 · audit trail</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Say-so doesn't scale</p>
+        <h3>Self-attestation shifts the burden</h3>
+        <p>Every answer you write by hand becomes work the buyer's team has to take on faith or re-verify. They want proof they can run themselves.</p>
+        <p class="card__map">ASR-6 · evidence</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 5. THE SIGNED REPORT -->
+<section class="section reveal" id="report">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / The report</span>
+      <h2>What you hand the buyer.</h2>
+      <p class="lede">
+        Not a promise. One canonical object, signed with Ed25519, mapped to the controls
+        the review group already cites. They open it, verify the signature offline against
+        your public key, and trace every finding to a standard they enforce.
+      </p>
+    </div>
+    <div class="split">
+      <div class="report register">
+        <div class="register__row"><span class="register__k">schema</span><span class="register__v">kolm-audit-report-1</span></div>
+        <div class="register__row"><span class="register__k">report_id</span><span class="register__v">asrr_sample</span></div>
+        <div class="register__row"><span class="register__k">subject</span><span class="register__v">Support &amp; billing agents <span class="ann">what was assessed</span></span></div>
+        <div class="register__row"><span class="register__k">readiness_pct</span><span class="register__v"><b>0</b> <span class="ann">assessed controls only</span></span></div>
+        <div class="register__row"><span class="register__k">findings</span><span class="register__v">6 · <b>5 high</b> · 1 low</span></div>
+        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
+        <div class="register__row"><span class="register__k">key_fingerprint</span><span class="register__v"><b>410302c93becdcc3&hellip;</b></span></div>
+        <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:0XCoqRkbLg&hellip;sEjBDw</b> <span class="ann">covers the canonical bytes</span></span></div>
+        <div class="register__row"><span class="register__k">verify_url</span><span class="register__v"><b>kolm.ai/verify</b></span></div>
+      </div>
+      <div class="grid" style="gap:14px;align-content:start">
+        <div class="card">
+          <h3>Canonical payload</h3>
+          <p>Key-sorted, whitespace-free JSON. The signature covers these exact bytes, so a downgraded finding or an inflated score is self-evident the instant the buyer checks it.</p>
+        </div>
+        <div class="card">
+          <h3>Your key travels in the report</h3>
+          <p>The signature and the public key it was made with ship together. Your buyer needs nothing from us: the verifier runs offline against the key inside the report, no account, no upload.</p>
+        </div>
+        <div class="card">
+          <h3>Framework crosswalk</h3>
+          <p>Every finding maps to the control your buyer names. The reviewer reads results in the vocabulary they already enforce, not yours.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:var(--s7)">
+      <table class="tbl">
+        <thead>
+          <tr><th scope="col">Control</th><th scope="col">What it checks</th><th scope="col">Maps to</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI · NIST MANAGE-1</td></tr>
+          <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
+          <tr><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
+          <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS</td></tr>
+          <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance</td><td class="mapped">ISO 42001 · NIST MAP-1</td></tr>
+          <tr><td><b>ASR-6</b> Evidence</td><td>Signed, logged, offline-verifiable report</td><td class="mapped">SOC 2 CC7 · ISO 42001</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s4)">
+      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 6. HOW FAST (the ledger) -->
+<section class="section section--ink reveal" id="speed">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / Two clocks</span>
+      <h2>Minutes for the scan. Days for a signature with a name on it.</h2>
+      <p class="lede">
+        A stalled review runs on two clocks, and we are candid about which one needs a
+        person. State it the way you would to the buyer: minutes for the automated scan,
+        days for a named-reviewed attestation.
+      </p>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">The machine clock</p>
+        <h3>No human waits here</h3>
+        <p>Permission reads, audit-trail and egress checks, the prompt-injection battery, control-mapping and signing are compute. They run in minutes to hours, with nobody in the loop, and re-run on every deploy.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">The human clock</p>
+        <h3>A name behind the result</h3>
+        <p>For the deal where a CISO wants a person to stand behind the finding, a named co-signer reviews and signs alongside the math. That is days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s6)">
+      The crypto proves the bytes were not altered. The name proves a person reviewed them. Most deals clear on the automated report alone.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 7. PRICING POINTER -->
+<section class="section reveal" id="pricing">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">05 / Pricing</span>
+      <h2>Start free. Sign when the deal needs it.</h2>
+      <p class="lede">Every fee is flat and listed in full. No quote, no per-seat meter, no contingency. The report you hand the buyer is $750.</p>
+    </div>
+    <div class="split" style="align-items:center">
+      <div class="plate">
+        <p class="card__k">Signed Readiness Report</p>
+        <div class="tier__price">$750</div>
+        <p class="tier__sub">one-time · the full automated audit, signed and offline-verifiable</p>
+        <ul class="ledger" style="margin:var(--s5) 0">
+          <li>Permissions, audit trail, egress and injection, all four pillars</li>
+          <li>Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, MITRE ATLAS</li>
+          <li>Ed25519-signed report your buyer verifies offline, no account</li>
+          <li>Remediation checklist for every finding</li>
+        </ul>
+        <a class="btn btn--primary" href="/contact" style="width:100%">Start an audit</a>
+        <p class="hero__claim" style="text-align:center;margin-top:var(--s3)">Start with a <a href="/pricing" style="border-bottom:1px solid var(--line-2)">free scan</a> first, no card.</p>
+      </div>
+      <div>
+        <h3>Three more ways in</h3>
+        <ul class="ledger" style="margin:var(--s3) 0 var(--s4)">
+          <li><b>Scan, Free.</b> Self-serve. A signed, watermarked snapshot in minutes, no human, no call.</li>
+          <li><b>Continuous, from $299/mo.</b> Weekly or on-every-deploy re-attestation, plus a live Trust link any buyer can re-check.</li>
+          <li><b>Reviewed Attestation, $25,000 flat.</b> A named co-signer reviews and signs beside the math. The deal-closer.</li>
+        </ul>
+        <p style="color:var(--ink-2);margin:0 0 var(--s4)">
+          A point-in-time report goes stale on your next deploy: a permission granted in
+          January can still fire in August. Continuous keeps the evidence current, and the
+          EU AI Act Article 12 logging obligation has an enforcement date of August 2, 2026.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--ghost btn--sm" href="/pricing">See full pricing</a>
+          <a class="btn btn--ghost btn--sm" href="/report">See a sample report</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 8. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Clear the review. Close the deal.</h2>
+    <p class="lede">A scoped audit, a signed evidence report, and a review that moves at the speed of math instead of the speed of a questionnaire.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost" href="/pricing">See pricing</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

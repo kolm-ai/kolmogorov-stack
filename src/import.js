@@ -1,4 +1,4 @@
-// W740 — kolm import: GGUF / safetensors / ONNX -> not_kolm_compiled manifest.
+// W740 - kolm import: GGUF / safetensors / ONNX -> not_kolm_compiled manifest.
 //
 // Purpose
 // -------
@@ -19,11 +19,11 @@
 //
 // Design choices
 // --------------
-//   * Python parsers live in apps/import/{gguf,safetensors,onnx}.py — stdlib
+//   * Python parsers live in apps/import/{gguf,safetensors,onnx}.py - stdlib
 //     ONLY. Heavy parsers (onnx pip, gguf 1.0 tensor walk) are out of scope.
 //   * Node side never tries to parse the binary directly; it spawns python3
 //     and consumes the JSON envelope on stdout. Missing python3 surfaces a
-//     loud {ok:false, error:"python3_missing"} envelope — never silently
+//     loud {ok:false, error:"python3_missing"} envelope - never silently
 //     fakes a parse.
 //   * Format detection is by file magic / suffix sniff (NOT mime type). We
 //     read the first 16 bytes and compare against known signatures:
@@ -54,18 +54,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // apps/export. CLI tests and the router both call back to this module so we
 // keep the path resolution in one place.
 function _appsImportDir() {
-  // src/ is sibling to apps/ — go up one then into apps/import.
+  // src/ is sibling to apps/ - go up one then into apps/import.
   return path.resolve(__dirname, '..', 'apps', 'import');
 }
 
 // =============================================================================
-// detectFormat — sniff first 16 bytes
+// detectFormat - sniff first 16 bytes
 // =============================================================================
 
 /**
  * Return one of 'gguf' | 'safetensors' | 'onnx' | 'unknown' for `filePath`.
  *
- * The function NEVER throws — a missing file or unreadable header returns
+ * The function NEVER throws - a missing file or unreadable header returns
  * 'unknown' so callers can produce an honest envelope on top.
  *
  * Detection rules:
@@ -113,7 +113,7 @@ export function detectFormat(filePath) {
 }
 
 // =============================================================================
-// parseImportMetadata — spawn the matching python3 parser
+// parseImportMetadata - spawn the matching python3 parser
 // =============================================================================
 
 function _resolvePython() {
@@ -135,7 +135,7 @@ function _resolvePython() {
  * envelope if python3 is missing / file is missing / format is unknown.
  *
  * Options:
- *   format: 'gguf' | 'safetensors' | 'onnx'  — bypass detectFormat()
+ *   format: 'gguf' | 'safetensors' | 'onnx' - bypass detectFormat()
  *   pythonPath: override the python3 binary (mainly for tests)
  */
 export async function parseImportMetadata(filePath, opts = {}) {
@@ -182,7 +182,7 @@ export async function parseImportMetadata(filePath, opts = {}) {
       ok: false,
       error: 'import_script_missing',
       path: scriptPath,
-      hint: 'reinstall the kolm CLI — apps/import/<format>.py must ship alongside src/import.js',
+      hint: 'reinstall the kolm CLI - apps/import/<format>.py must ship alongside src/import.js',
       version: IMPORT_VERSION,
     };
   }
@@ -230,7 +230,7 @@ export async function parseImportMetadata(filePath, opts = {}) {
 }
 
 // =============================================================================
-// wrapAsKolmManifest — produce the not_kolm_compiled partial manifest
+// wrapAsKolmManifest - produce the not_kolm_compiled partial manifest
 // =============================================================================
 
 /**
@@ -303,7 +303,7 @@ export function wrapAsKolmManifest(metadata, opts = {}) {
 }
 
 // =============================================================================
-// describeFormats — for `kolm import doctor`
+// describeFormats - for `kolm import doctor`
 // =============================================================================
 
 export function describeFormats() {

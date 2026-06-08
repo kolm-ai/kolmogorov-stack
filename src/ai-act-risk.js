@@ -1,29 +1,29 @@
-// W766-2 — EU AI Act risk scoring based on an artifact's task category.
+// W766-2 - EU AI Act risk scoring based on an artifact's task category.
 //
 // The EU AI Act (Regulation (EU) 2024/1689) classifies AI systems into four
-// risk categories — minimal, limited, high, and unacceptable. The category
+// risk categories - minimal, limited, high, and unacceptable. The category
 // determines which Annex IV technical documentation requirements apply, and
 // whether a conformity assessment is needed before placing the system on the
 // EU market.
 //
 // This module exposes:
 //
-//   * AI_ACT_RISK_VERSION       — stamp 'w766-v1' so the test suite can lock.
-//   * AI_ACT_RISK_CATEGORIES    — Object.freeze()-d list of the four categories
+//   * AI_ACT_RISK_VERSION - stamp 'w766-v1' so the test suite can lock.
+//   * AI_ACT_RISK_CATEGORIES - Object.freeze()-d list of the four categories
 //                                 in canonical order so dashboards key by index.
-//   * AI_ACT_TASK_CATEGORY_MAP  — Object.freeze()-d catalog of task-category
+//   * AI_ACT_TASK_CATEGORY_MAP - Object.freeze()-d catalog of task-category
 //                                 strings -> risk_category. Sourced from
 //                                 Annex III of the EU AI Act (high-risk task list)
 //                                 plus Article 5 prohibitions (unacceptable risk).
-//   * scoreArtifactRisk         — pure function over a kolm manifest. Picks the
+//   * scoreArtifactRisk - pure function over a kolm manifest. Picks the
 //                                 category from manifest.vertical, manifest.
 //                                 task_category, or manifest.intended_use using
 //                                 the catalog. Floor is 'minimal' if nothing
-//                                 matches — NEVER null, NEVER fabricated.
-//   * classifyTaskCategory      — regex-based string classifier so callers
+//                                 matches - NEVER null, NEVER fabricated.
+//   * classifyTaskCategory - regex-based string classifier so callers
 //                                 without a structured manifest can still get
 //                                 a category guess. Confidence caps at 0.95
-//                                 (honesty contract — never 1.0).
+//                                 (honesty contract - never 1.0).
 //
 // HONESTY CONTRACT (do not violate):
 //   * scoreArtifactRisk MUST NEVER return null risk_category. The floor when
@@ -34,10 +34,10 @@
 //     craft text that hits multiple categories ambiguously.
 //   * Invalid input → honest {ok:false, error, hint} envelope. NEVER throws.
 //   * 'unacceptable' systems carry conformity_assessment_required:false
-//     because such systems are PROHIBITED on the EU market — there is no
+//     because such systems are PROHIBITED on the EU market - there is no
 //     conformity path that legalizes them.
 //
-// W604 anti-brittleness — AI_ACT_RISK_VERSION = 'w766-v1', test pins both
+// W604 anti-brittleness - AI_ACT_RISK_VERSION = 'w766-v1', test pins both
 // /^w766-/ AND the literal value.
 
 export const AI_ACT_RISK_VERSION = 'w766-v1';
@@ -56,26 +56,26 @@ export const AI_ACT_RISK_CATEGORIES = Object.freeze([
 // Spec says >=15 entries; we ship 24 so dashboards have meaningful coverage.
 //
 // Notes on a few entries:
-//   * 'social_scoring'              — Article 5(1)(c) prohibits public-authority
+//   * 'social_scoring' - Article 5(1)(c) prohibits public-authority
 //                                     social-scoring of natural persons.
-//   * 'subliminal_manipulation'     — Article 5(1)(a) prohibits subliminal
+//   * 'subliminal_manipulation' - Article 5(1)(a) prohibits subliminal
 //                                     techniques that materially distort behavior.
 //   * 'emotion_recognition_workplace'
-//                                  — Article 5(1)(f) prohibits emotion-recognition
+// - Article 5(1)(f) prohibits emotion-recognition
 //                                     in workplace + educational contexts.
 //   * 'real_time_biometric_id_public'
-//                                  — Article 5(1)(h) prohibits real-time remote
+// - Article 5(1)(h) prohibits real-time remote
 //                                     biometric identification in publicly
 //                                     accessible spaces (limited exemptions).
 //   * 'biometric_id', 'critical_infrastructure', 'employment_screening',
 //     'credit_scoring', 'medical_diagnosis', 'law_enforcement',
 //     'border_control', 'admin_of_justice'
-//                                  — Annex III high-risk categories.
+// - Annex III high-risk categories.
 //   * 'chatbot', 'generative_text', 'deepfake'
-//                                  — Article 50 transparency obligations
+// - Article 50 transparency obligations
 //                                     (limited risk).
 //   * 'spam_filter', 'recommendation', 'code_completion'
-//                                  — Implicit minimal-risk category.
+// - Implicit minimal-risk category.
 export const AI_ACT_TASK_CATEGORY_MAP = Object.freeze({
   // ---- unacceptable (Article 5 prohibitions) ----
   social_scoring: 'unacceptable',
@@ -158,9 +158,9 @@ const TRANSPARENCY_BY_CATEGORY = Object.freeze({
 });
 
 // Regex patterns used by classifyTaskCategory. Each entry is
-// {key, re, weight} — weight contributes to the confidence accumulator.
+// {key, re, weight} - weight contributes to the confidence accumulator.
 const _CLASSIFY_PATTERNS = Object.freeze([
-  // unacceptable — strongest signals.
+  // unacceptable - strongest signals.
   { key: 'social_scoring', re: /\bsocial[\s_-]+scor(?:e|ing)\b/i, weight: 0.5 },
   { key: 'subliminal_manipulation', re: /\bsubliminal\b/i, weight: 0.5 },
   { key: 'emotion_recognition_workplace', re: /\bemotion[\s_-]+(?:detection|recognition|reading)\b.*\b(?:workplace|office|employee|workers?)\b/i, weight: 0.5 },
@@ -190,7 +190,7 @@ const _CLASSIFY_PATTERNS = Object.freeze([
   { key: 'search_ranking', re: /\b(?:search[\s_-]+ranking|query[\s_-]+expansion|search[\s_-]+result)\b/i, weight: 0.25 },
 ]);
 
-// classifyTaskCategory(text) — returns { key, confidence, version } where
+// classifyTaskCategory(text) - returns { key, confidence, version } where
 // key is the catalog key (defaults to 'recommendation' on no match, since
 // 'minimal' is the broadest plausible class for free-text inputs). Confidence
 // caps at 0.95.
@@ -243,15 +243,15 @@ function _normalizeVertical(v) {
   return n.length === 0 ? null : n;
 }
 
-// scoreArtifactRisk(manifest) — return {ok:true, risk_category, task_category,
+// scoreArtifactRisk(manifest) - return {ok:true, risk_category, task_category,
 // reasoning, transparency_requirements, human_oversight_required,
 // conformity_assessment_required, version}.
 //
 // Resolution order (first match wins):
-//   1. manifest.task_category       — explicit catalog key.
-//   2. manifest.vertical            — domain → category map.
-//   3. manifest.intended_use        — free-text → classifyTaskCategory().
-//   4. fallback                     — 'minimal' floor.
+//   1. manifest.task_category - explicit catalog key.
+//   2. manifest.vertical - domain → category map.
+//   3. manifest.intended_use - free-text → classifyTaskCategory().
+//   4. fallback - 'minimal' floor.
 //
 // Honest envelope on bad input.
 export function scoreArtifactRisk(manifest) {
@@ -300,18 +300,18 @@ export function scoreArtifactRisk(manifest) {
     }
   }
 
-  // 4. Floor — NEVER null, NEVER fabricated.
+  // 4. Floor - NEVER null, NEVER fabricated.
   if (risk_category == null) {
     risk_category = 'minimal';
-    reasoning = 'no_task_category_matched — defaulting to minimal risk floor (honest); supply manifest.task_category for stronger classification';
+    reasoning = 'no_task_category_matched - defaulting to minimal risk floor (honest); supply manifest.task_category for stronger classification';
   }
 
   // Derived obligations.
   const transparency_requirements = TRANSPARENCY_BY_CATEGORY[risk_category] || [];
-  // Article 14 — human oversight is REQUIRED for high-risk systems. For
+  // Article 14 - human oversight is REQUIRED for high-risk systems. For
   // unacceptable systems, oversight is moot because the system is prohibited.
   const human_oversight_required = risk_category === 'high';
-  // Conformity assessment per Article 43 — required for high-risk.
+  // Conformity assessment per Article 43 - required for high-risk.
   // Unacceptable systems CANNOT be conformity-assessed (they are prohibited),
   // so we set this to false for clarity; the prohibition is what governs.
   const conformity_assessment_required = risk_category === 'high';

@@ -1,4 +1,4 @@
-// W820-5 — `kolm diff <a.kolm> <b.kolm>` quality-delta CLI command.
+// W820-5 - `kolm diff <a.kolm> <b.kolm>` quality-delta CLI command.
 //
 // Companion to src/kolm-diff.js (W739). The W739 envelope answers the
 // "should I roll back?" question via lineage_relation + performance + a
@@ -18,7 +18,7 @@
 // Honest fallback: when a manifest does not carry a particular field
 // (older artifacts, optional W820 fields not yet wired by the build), the
 // per-row left/right value is `null` and the delta is `null`. We NEVER
-// fabricate a zero delta from two nulls — that would silently claim "no
+// fabricate a zero delta from two nulls - that would silently claim "no
 // regression" when in fact we have no signal.
 //
 // File IO + zip-read is delegated to src/kolm-diff.js so we never
@@ -29,7 +29,7 @@ import fs from 'node:fs';
 export const ARTIFACT_DIFF_VERSION = 'w820-v1';
 
 // ----------------------------------------------------------------------------
-// _readManifest — duplicated thin wrapper around src/kolm-diff.js's private
+// _readManifest - duplicated thin wrapper around src/kolm-diff.js's private
 // reader. We avoid importing the private function (it isn't exported) and
 // instead reimplement the same minimal contract here so W820 stays
 // independently testable + W739's internal can evolve without breaking us.
@@ -79,7 +79,7 @@ async function _readManifest(filePath) {
 
 // ----------------------------------------------------------------------------
 // Extract a normalized per-axis snapshot from a manifest + receipt. Every
-// field is OPTIONAL — when absent we return null so the diff can mark the
+// field is OPTIONAL - when absent we return null so the diff can mark the
 // row "no signal". The reader supports several historical key locations
 // because the manifest schema has evolved across waves.
 // ----------------------------------------------------------------------------
@@ -93,7 +93,7 @@ export function extractSnapshot(manifest, receipt) {
   if (k && typeof k.composite === 'number') kscore = k.composite;
   else if (k && typeof k.point === 'number') kscore = k.point;
   else if (typeof manifest.k_score === 'number') kscore = manifest.k_score;
-  // capture_count — surfaced by spec-compile when present. Fallback to
+  // capture_count - surfaced by spec-compile when present. Fallback to
   // recipes_count for older spec-only artifacts.
   const capture_count = _firstNumber([
     manifest.capture_count,
@@ -172,9 +172,9 @@ function _firstString(candidates) {
 // Build a per-row delta record. Each row carries:
 //   { field, left, right, delta, changed, kind }
 // kind is one of:
-//   'numeric'  — left + right + signed delta
-//   'string'   — left + right + changed boolean (no numeric delta)
-//   'boolean'  — left + right + changed boolean (signed_at / signed)
+//   'numeric' - left + right + signed delta
+//   'string' - left + right + changed boolean (no numeric delta)
+//   'boolean' - left + right + changed boolean (signed_at / signed)
 //
 // When either side is null, delta is null. changed is set only when we
 // have signal on BOTH sides; otherwise changed === null (= "no signal").
@@ -221,7 +221,7 @@ export function diffSnapshots(left_snap, right_snap) {
     _boolRow   ('signed',          left_snap.signed,          right_snap.signed),
   ];
   const changed_count = rows.filter(r => r.changed === true).length;
-  // Roll-up verdict — purely a hint, not a CI gate. The K-Score row is the
+  // Roll-up verdict - purely a hint, not a CI gate. The K-Score row is the
   // primary signal; an axis regression on bench_pass_rate is also flagged.
   const k_row = rows.find(r => r.field === 'k_score');
   const bench_row = rows.find(r => r.field === 'bench_pass_rate');

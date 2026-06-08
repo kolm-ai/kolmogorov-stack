@@ -1,19 +1,19 @@
 // Curated base-model registry. Single source of truth for default selection.
 //
 // Selection criteria (in order):
-//   1. License — Apache 2.0 / MIT / OpenRAIL-M preferred. Llama Community
+//   1. License - Apache 2.0 / MIT / OpenRAIL-M preferred. Llama Community
 //      license has a 700M-MAU clause that scares enterprise; allowed but not
 //      default.
-//   2. Tool/structured-output behavior — Qwen 2.5 family was trained on
+//   2. Tool/structured-output behavior - Qwen 2.5 family was trained on
 //      tool-call traces; Llama 3.2 was not (only Llama 3.1 70B/405B). For a
 //      compile-once-run-anywhere artifact that has to emit JSON receipts and
 //      function calls, this is load-bearing.
-//   3. VRAM at 4-bit QLoRA — fits-in-N rules let us match the tier to the
+//   3. VRAM at 4-bit QLoRA - fits-in-N rules let us match the tier to the
 //      box. 0.5B fits in 1GB, 1.5B in 2GB, 3B in 4GB, 7B in 8GB.
-//   4. Tokenizer quality + multilingual — Qwen tokenizer is BPE w/ 151K vocab
+//   4. Tokenizer quality + multilingual - Qwen tokenizer is BPE w/ 151K vocab
 //      and handles non-Latin scripts cleanly. Llama 3.2 has 128K vocab with
 //      better English compression but weaker on CJK / Cyrillic / Arabic.
-//   5. Healthcare/medical benchmarks at scale — Qwen 2.5 3B sits within 2pp
+//   5. Healthcare/medical benchmarks at scale - Qwen 2.5 3B sits within 2pp
 //      of Llama 3.2 3B on MedQA / MMLU-medical at its size class.
 //
 // We canonicalize HuggingFace org/name. GGUF aliases (e.g. "qwen2.5:3b") are
@@ -282,7 +282,7 @@ export const MODELS = [
     architecture_features: ['PLE caching', 'MatFormer selective activation', 'conditional visual/audio parameter loading'],
     notes: 'On-device Gemma. Official 32K context. Per-Layer Embeddings: 2B effective, 5B raw weights; text, image, audio, and video inputs.',
     use_for: ['mobile', 'edge', 'multimodal', 'on-device-clinical-intake'],
-    // W349: explicit mobile-target flag — Gemma 3n was designed and verified
+    // W349: explicit mobile-target flag - Gemma 3n was designed and verified
     // for phone-class devices (MediaPipe LLM Inference, MLC, llama.cpp arm64).
     mobile_friendly: true,
   },
@@ -304,7 +304,7 @@ export const MODELS = [
     architecture_features: ['PLE caching', 'MatFormer selective activation', 'conditional visual/audio parameter loading'],
     notes: 'On-device Gemma. Official 32K context. 4B effective, 8B raw weights; text, image, audio, and video inputs.',
     use_for: ['mobile', 'edge', 'multimodal', 'on-device-clinical-intake'],
-    // W349: explicit mobile-target flag — see E2B note.
+    // W349: explicit mobile-target flag - see E2B note.
     mobile_friendly: true,
   },
 
@@ -524,7 +524,7 @@ export const TIER_BY_USE = {
   // W349: mobile = phone-class on-device. Gemma 3n E2B was designed by
   // Google for this tier (selective activation, MediaPipe-deployable,
   // verified on Pixel 8 / iPhone 15 Pro). Qwen 0.5B is too weak for
-  // multilingual on-device intake — keep it as the wasm/edge default.
+  // multilingual on-device intake - keep it as the wasm/edge default.
   mobile: 'google/gemma-3n-E2B-it',
   wasm: 'Qwen/Qwen2.5-0.5B-Instruct',
   laptop: 'Qwen/Qwen2.5-1.5B-Instruct',
@@ -640,7 +640,7 @@ export function recommend(reqs = {}) {
 
     // W349: mobile-target boost. When the caller asks for a mobile pick,
     // a phone-verified model (Gemma 3n, etc.) should beat a small generic
-    // model on license alone. mobile_friendly is a curator-set flag — the
+    // model on license alone. mobile_friendly is a curator-set flag - the
     // model card must claim phone deployment + a runtime path (MediaPipe,
     // MLC, llama.cpp arm64) before it gets set. Bonus is large enough
     // (+0.40) to overcome Apache-vs-Gemma license delta (0.30 vs 0.15).

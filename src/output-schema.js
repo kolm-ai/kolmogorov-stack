@@ -1,7 +1,7 @@
-// W809-1 — Structured output schema spec for .kolm artifacts.
+// W809-1 - Structured output schema spec for .kolm artifacts.
 //
 // Defines the canonical shape of the `output_schema` block that flows into
-// the .kolm manifest, plus a pure validator. NO ARTIFACT EDITS HERE — this
+// the .kolm manifest, plus a pure validator. NO ARTIFACT EDITS HERE - this
 // module exports the schema contract + version constant + validator. The
 // orchestrator owns the buildPayload integration (output_schema_hash chain
 // slot via the W460 byte-stability pattern); this file is the source of
@@ -23,7 +23,7 @@
 //     pre-W809 artifacts do not drift their artifact_hash on rebuild.
 //   * kind === 'json' → schema is either a JSON Schema object (draft-07 keys
 //     respected at validate time) OR a `{$ref}` pointer to an external file.
-//     A bare string is rejected — JSON kind requires structure.
+//     A bare string is rejected - JSON kind requires structure.
 //   * kind === 'xml' → schema is an XSD string OR `{$ref}`. We do not parse
 //     XSD here; the runtime validator (workers/constrained or downstream)
 //     does that. Spec-level check: schema is a non-empty string OR a $ref.
@@ -67,7 +67,7 @@ export const EMPTY_OUTPUT_SCHEMA_SPEC = Object.freeze({
 export function validateOutputSchemaSpec(spec) {
   const errors = [];
 
-  // Absence is legal — treat as empty spec. The canonicalizer downstream
+  // Absence is legal - treat as empty spec. The canonicalizer downstream
   // collapses absence to EMPTY_OUTPUT_SCHEMA_SPEC; here we just say OK.
   if (spec == null) {
     return { ok: true, errors: [] };
@@ -93,7 +93,7 @@ export function validateOutputSchemaSpec(spec) {
     errors.push('kind:unknown');
   }
 
-  // strict — boolean or absent. Reject everything else.
+  // strict - boolean or absent. Reject everything else.
   if (spec.strict !== undefined && typeof spec.strict !== 'boolean') {
     errors.push('strict:must_be_boolean');
   }
@@ -172,7 +172,7 @@ export function validateOutputSchemaSpec(spec) {
 //   const canon = canonicalizeOutputSchemaSpec(spec);
 //   if (canon !== null) { /* bind into hash chain */ }
 //
-// — guaranteeing absence/null/{}/{kind:null} all share the artifact_hash of
+// - guaranteeing absence/null/{}/{kind:null} all share the artifact_hash of
 // a pre-W809 artifact.
 // ---------------------------------------------------------------------------
 export function canonicalizeOutputSchemaSpec(spec) {
@@ -229,7 +229,7 @@ function _stableStringify(v) {
 // auto-retry harness. Returns { ok:boolean, parsed:any|null, error:string|null }.
 //
 // Pure-JS, no external deps. JSON Schema constraint checking is intentionally
-// shallow here — full JSON Schema validation is the constrained-decoder's
+// shallow here - full JSON Schema validation is the constrained-decoder's
 // job. Spec-level: we check (a) string parses to the declared kind and
 // (b) regex matches the entire output when kind === 'regex'.
 // ---------------------------------------------------------------------------
@@ -269,7 +269,7 @@ export function parseOutputAgainstSpec(output, spec) {
     }
   }
   if (canon.kind === 'xml') {
-    // Spec-level: well-formedness probe — must start with '<' and end with
+    // Spec-level: well-formedness probe - must start with '<' and end with
     // '>'. Deep XSD validation lives in the constrained decoder.
     if (text.trim().startsWith('<') && text.trim().endsWith('>')) {
       return { ok: true, parsed: text, error: null };
@@ -277,7 +277,7 @@ export function parseOutputAgainstSpec(output, spec) {
     return { ok: false, parsed: null, error: 'xml_not_well_formed' };
   }
   if (canon.kind === 'grammar') {
-    // No pure-JS GBNF parser here — the constrained decoder enforces
+    // No pure-JS GBNF parser here - the constrained decoder enforces
     // grammar-guided sampling at generate time. Spec-level: non-empty.
     if (text.length > 0) return { ok: true, parsed: text, error: null };
     return { ok: false, parsed: null, error: 'grammar_empty_output' };

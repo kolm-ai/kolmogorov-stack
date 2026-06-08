@@ -1,4 +1,4 @@
-// W711-4 — distill report blocks.
+// W711-4 - distill report blocks.
 //
 // This file is the home for diagnostic report blocks the distill pipeline
 // emits. W711 ships the importance-distribution block; W741 (planned) will
@@ -34,7 +34,7 @@ export const IMPORTANCE_BLOCK_VERSION = 'w711-v1';
  * topNByImportance / bottomNByImportance) and wraps them in the structured
  * envelope downstream diagnostic surfaces consume.
  *
- * Pure function — depends only on the inputs. No I/O.
+ * Pure function - depends only on the inputs. No I/O.
  *
  * @param {object} params
  * @param {Array<{capture_id: string, score: number, components: object}>} params.topN

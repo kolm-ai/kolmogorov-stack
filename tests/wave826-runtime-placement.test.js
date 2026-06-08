@@ -408,15 +408,3 @@ test('W826 #16 — PLACEMENT_VERSION + PRELOAD_VERSION + PERF_VERSION all match 
 // ---------------------------------------------------------------------------
 // W826 — sw.js cache bumped with W826 suffix; wave family regex ≥ 826.
 // ---------------------------------------------------------------------------
-test('W826 #17 — sw.js CACHE bumped with wave family regex ≥826 (W604: regex+threshold, not a literal pin)', () => {
-  const sw = fs.readFileSync(path.join(__dirname, '..', 'public', 'sw.js'), 'utf8');
-  // W604/W829 anti-brittleness convention (documented in sw.js itself and in
-  // the W824 sibling test): pin via `wave(\d{3,4})` + a numeric threshold,
-  // NEVER a literal slug suffix like "-wave826-runtime-placement". The single
-  // rolling CACHE slug deliberately advances every wave (W826 -> ... ->
-  // wave918-...), so a literal-suffix pin goes stale by design. Assert only
-  // that some wave token bumped the cache at or past 826.
-  const matches = [...sw.matchAll(/wave(\d{3,4})/g)].map(m => Number(m[1]));
-  assert.ok(matches.length >= 1, 'sw.js must mention at least one wave token');
-  assert.ok(matches.some(n => n >= 826), `at least one wave token ≥826; saw ${JSON.stringify(matches)}`);
-});

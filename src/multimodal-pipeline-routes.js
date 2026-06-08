@@ -1,6 +1,6 @@
 // src/multimodal-pipeline-routes.js
 //
-// W829 — Multimodal capture pipeline HTTP routes.
+// W829 - Multimodal capture pipeline HTTP routes.
 //
 // Mounts as a single one-line call from src/router.js to keep the diff
 // minimal (parallel agents are editing router.js in other waves; every
@@ -8,15 +8,15 @@
 //
 // Routes (all auth-required, tenant-scoped via req.tenant_record.id):
 //
-//   POST /v1/captures/multimodal       — record one image/audio/tool-use row
-//   POST /v1/captures/multi-turn       — append one multi-turn conversation row
-//   POST /v1/vlm-distill/run           — enqueue a VLM distillation job
-//   GET  /v1/vlm-distill/runs          — list jobs for the calling tenant
+//   POST /v1/captures/multimodal - record one image/audio/tool-use row
+//   POST /v1/captures/multi-turn - append one multi-turn conversation row
+//   POST /v1/vlm-distill/run - enqueue a VLM distillation job
+//   GET  /v1/vlm-distill/runs - list jobs for the calling tenant
 //
 // Honesty contract:
 //   - Every route returns an honest envelope. The W829-3 vlmDistillRun
 //     surface returns ok:true + real_run:false + missing_env when the
-//     teacher API key is absent — never silently "succeeds."
+//     teacher API key is absent - never silently "succeeds."
 //   - Tenant fence is enforced from req.tenant_record.id; never read from
 //     the request body.
 
@@ -50,7 +50,7 @@ function _authOrReject(req, res) {
 }
 
 export function registerMultimodalPipelineRoutes(app) {
-  // POST /v1/captures/multimodal — image / audio / tool_use / multi_turn row.
+  // POST /v1/captures/multimodal - image / audio / tool_use / multi_turn row.
   //
   // Body shape:
   //   { namespace, kind, payload, hash?, redaction_receipt? }
@@ -80,7 +80,7 @@ export function registerMultimodalPipelineRoutes(app) {
     }
   });
 
-  // POST /v1/captures/multi-turn — append a multi-turn conversation row.
+  // POST /v1/captures/multi-turn - append a multi-turn conversation row.
   //
   // Body shape:
   //   { namespace, conversation_id, conversation:[{role,content,tool_calls?,timestamp}], parent_message_id? }
@@ -106,10 +106,10 @@ export function registerMultimodalPipelineRoutes(app) {
     }
   });
 
-  // POST /v1/vlm-distill/run — enqueue a VLM distillation job.
+  // POST /v1/vlm-distill/run - enqueue a VLM distillation job.
   //
   // Body shape:
-  //   { teacher, student_model, dataset_captures } — see src/vlm-distill.js
+  //   { teacher, student_model, dataset_captures } - see src/vlm-distill.js
   // When KOLM_VLM_TEACHER_API_KEY is unset the response envelope still has
   // ok:true (because the job was enqueued honestly) but real_run:false +
   // missing_env:'KOLM_VLM_TEACHER_API_KEY' so the caller knows nothing was
@@ -135,7 +135,7 @@ export function registerMultimodalPipelineRoutes(app) {
     }
   });
 
-  // GET /v1/vlm-distill/runs — list jobs for the calling tenant.
+  // GET /v1/vlm-distill/runs - list jobs for the calling tenant.
   app.get('/v1/vlm-distill/runs', async (req, res) => {
     const trec = _authOrReject(req, res); if (!trec) return;
     try {

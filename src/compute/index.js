@@ -2,8 +2,8 @@
 //
 // Compute backend abstraction. Public API for picking where training runs.
 //
-// Mental model: every compute target — CPU, GPU, MPS, MLX, Modal, RunPod,
-// Together, Vast, the user's own SSH-reachable box — is a backend. Backends
+// Mental model: every compute target - CPU, GPU, MPS, MLX, Modal, RunPod,
+// Together, Vast, the user's own SSH-reachable box - is a backend. Backends
 // are loaded from registry.json (capability matrix) and dispatched through
 // the thin adapter modules in src/compute/backends/*.js.
 //
@@ -83,7 +83,7 @@ export async function detect({ force = false } = {}) {
   return out;
 }
 
-// Performance signal — accelerators outrank CPU even at the same cost.
+// Performance signal - accelerators outrank CPU even at the same cost.
 // Plain heuristic; not a real benchmark. Used only to break ties.
 const PERF_BIAS = {
   'local-cuda': 1.00,
@@ -166,7 +166,7 @@ export async function pick(constraints = {}) {
   };
 }
 
-// use() — flip the default backend in ~/.kolm/config.json. Doesn't run anything.
+// use() - flip the default backend in ~/.kolm/config.json. Doesn't run anything.
 export function use(name) {
   const reg = info(name);
   if (!reg) throw new Error(`unknown backend: ${name}`);
@@ -179,14 +179,14 @@ export function use(name) {
   return { backend: name, written_to: cfgPath };
 }
 
-// run() — execute one training spec against a chosen backend. Returns a
+// run() - execute one training spec against a chosen backend. Returns a
 // TrainResult shaped like the doc in audit-compute-providers-2026-05-14.md.
 // Adapters report progress through the on_progress callback (stage, pct).
 export async function run(backendName, spec, { on_progress } = {}) {
   const adapter = await loadAdapter(backendName);
   if (!adapter) throw new Error(`no adapter for backend: ${backendName}`);
   if (typeof adapter.run !== 'function') {
-    throw new Error(`adapter ${backendName} has no run() — bridge through trainer`);
+    throw new Error(`adapter ${backendName} has no run() - bridge through trainer`);
   }
   const started_at = new Date().toISOString();
   const result = await adapter.run(spec, { on_progress });

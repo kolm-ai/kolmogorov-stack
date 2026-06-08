@@ -1,4 +1,4 @@
-// Recall — the unified retrieval SDK for kolm compile and the HTTP surface.
+// Recall - the unified retrieval SDK for kolm compile and the HTTP surface.
 //
 // One small interface that wraps two substrates:
 //   - services/index/qmd.js          → BM25 + vector + RRF + reranker (the search)
@@ -49,7 +49,7 @@ export async function ingest({ tenant, namespace, paths, force = false, onProgre
     throw new Error('ingest: paths must be a non-empty array');
   }
 
-  // Phase 1 — tokenize. For each path: if it's a directory, walk it;
+  // Phase 1 - tokenize. For each path: if it's a directory, walk it;
   // otherwise tokenize the single file. Sidecars land next to originals.
   const tok = { added: 0, skipped: 0, errors: [], by_modality: {} };
   for (const p of paths) {
@@ -75,7 +75,7 @@ export async function ingest({ tenant, namespace, paths, force = false, onProgre
     }
   }
 
-  // Phase 2 — register with qmd if it's available; otherwise we still
+  // Phase 2 - register with qmd if it's available; otherwise we still
   // succeeded at writing sidecars and the user can `qmd collection add`
   // by hand later.
   let registered = false;
@@ -100,7 +100,7 @@ export async function ingest({ tenant, namespace, paths, force = false, onProgre
   return { namespace: ns, tokenized: tok, registered, embedded, embed_error };
 }
 
-// Hybrid query — returns the top-k chunks. Fast path through qmd's MCP HTTP
+// Hybrid query - returns the top-k chunks. Fast path through qmd's MCP HTTP
 // transport when available, CLI fallback otherwise.
 export async function query({ tenant, namespace, query: q, k = 12 }) {
   if (!q || typeof q !== 'string') return [];
@@ -108,7 +108,7 @@ export async function query({ tenant, namespace, query: q, k = 12 }) {
   try {
     return await qmd.query({ namespace: ns, query: q, k });
   } catch (e) {
-    // qmd not present or failed — return empty so the compile pipeline
+    // qmd not present or failed - return empty so the compile pipeline
     // degrades gracefully instead of failing the whole job.
     return [];
   }
@@ -120,7 +120,7 @@ export async function status({ tenant, namespace } = {}) {
 }
 
 // Single-file tokenize convenience. Useful for the /v1/embed endpoint that
-// accepts an upload — the caller writes to /tmp, we tokenize, sidecar lands
+// accepts an upload - the caller writes to /tmp, we tokenize, sidecar lands
 // next to it.
 export async function tokenizeFile(file, opts = {}) {
   return tokenize(file, opts);

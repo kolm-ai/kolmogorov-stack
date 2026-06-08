@@ -1,7 +1,7 @@
-// W379 — team backend: shared namespaces + RBAC + reviewer queues + approval gates.
+// W379 - team backend: shared namespaces + RBAC + reviewer queues + approval gates.
 //
 // File-only storage under $KOLM_DATA_DIR/team (or ~/.kolm/team), all writes
-// durable + idempotent. Pure ESM, zero npm deps — node:fs / node:path /
+// durable + idempotent. Pure ESM, zero npm deps - node:fs / node:path /
 // node:crypto / node:os only. Round 2 consolidator wires the routes + CLI
 // verbs; this module owns the data model.
 //
@@ -12,7 +12,7 @@
 //     invites.jsonl     # append-only invite log (one JSON per line)
 //     approvals.jsonl   # append-only approval queue (one JSON per line)
 //
-// Permission matrix (single source of truth — tests/wave379 lock this in):
+// Permission matrix (single source of truth - tests/wave379 lock this in):
 //
 //   action             | admin | reviewer | contributor | viewer
 //   -------------------+-------+----------+-------------+--------
@@ -46,7 +46,7 @@ export const ACTIONS = [
 
 const DEFAULT_INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-// Permission matrix — ordered exactly as in the table above so the test can
+// Permission matrix - ordered exactly as in the table above so the test can
 // walk it cell-by-cell.
 const PERMS = {
   admin: new Set(['capture', 'label', 'split_dataset', 'publish_artifact',
@@ -163,7 +163,7 @@ function readWorkspace() {
 function writeWorkspace(ws) {
   const fp = workspacePath();
   // Atomic-ish: write to tmp, rename. Two concurrent CLI processes can still
-  // race the rename — that's acceptable for a single-tenant local datastore.
+  // race the rename - that's acceptable for a single-tenant local datastore.
   const tmp = fp + '.tmp';
   fs.writeFileSync(tmp, JSON.stringify(ws, null, 2), 'utf8');
   fs.renameSync(tmp, fp);
@@ -472,7 +472,7 @@ export function decideApproval({ approval_id, decision, reviewer_id, comment } =
     reviewer_email: reviewer.email,
     comment: typeof comment === 'string' ? comment : null,
   };
-  // Append the new state — readApprovals takes the latest per id.
+  // Append the new state - readApprovals takes the latest per id.
   appendJsonl(approvalsPath(), updated);
   return updated;
 }
@@ -553,7 +553,7 @@ export function removeSharedNamespace({ namespace, actor_member_id } = {}) {
 //   • the member is the registered namespace_owner_id, or
 //   • the member is an admin (admins see everything).
 //
-// A namespace with no registered entry is treated as fully private — no
+// A namespace with no registered entry is treated as fully private - no
 // member (other than an admin) can see it.
 export function canSee(memberId, namespace) {
   const ws = readWorkspace();

@@ -171,7 +171,7 @@ export function trainPreference({
 }
 
 // =============================================================================
-// W921 — preference PAIR MINING from T2.3 council-disagreement rows + a local
+// W921 - preference PAIR MINING from T2.3 council-disagreement rows + a local
 // candidate scorer. ADDITIVE: existing doctor/trainPreference/OBJECTIVES are
 // untouched. These let a recipe's preference stage consume council-disagreement
 // pairs (chosen=higher-scoring council response, rejected=lower) WITHOUT a
@@ -186,7 +186,7 @@ export const PREFERENCE_MINER_VERSION = 'w921-preference-miner-1';
 
 // tokenOverlap(candidate, reference) -> Jaccard-ish overlap in [0,1] or null.
 // Returns null when either side is empty (no signal). Lowercased word-set
-// intersection over union — cheap, deterministic, mirrors eval_adapter.
+// intersection over union - cheap, deterministic, mirrors eval_adapter.
 export function tokenOverlap(candidate, reference) {
   if (typeof candidate !== 'string' || typeof reference !== 'string') return null;
   const tok = (s) => new Set(
@@ -220,7 +220,7 @@ export function scoreCandidateLocal(text, opts = {}) {
     score -= 0.25; reasons.push('refusal');
   }
 
-  // Length sanity — very short answers are usually low quality; extremely long
+  // Length sanity - very short answers are usually low quality; extremely long
   // ones often ramble. A gentle band.
   const len = t.length;
   if (len < 8) { score -= 0.15; reasons.push('too_short'); }
@@ -342,7 +342,7 @@ export function writePreferencePairs(pairs, outPath, { format = 'pref' } = {}) {
   return { ok: true, count: rows.length, format, path: outPath };
 }
 
-// W921 — extended doctor: in addition to the W480 trainer probe, report which
+// W921 - extended doctor: in addition to the W480 trainer probe, report which
 // preference TRAINER KIND is available (in_repo apps.trainer.train_preference,
 // external $KOLM_PREFERENCE_TRAINER, or none) + whether trl is importable.
 // Additive: returns a superset envelope; callers reading the W480 fields are

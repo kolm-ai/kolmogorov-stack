@@ -1,4 +1,4 @@
-// W774 — Per-language artifact evaluation for cross-lingual distillation.
+// W774 - Per-language artifact evaluation for cross-lingual distillation.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 643-648):
 //   [W774-2] Per-language eval
@@ -9,22 +9,22 @@
 // same Wilson 95% CI gating at n≥30. The two tools answer different
 // questions:
 //
-//   * W760 perLanguageKScore — "does my dataset have enough Spanish?"
-//   * W774 evaluatePerLanguage — "does my compiled student score well
+//   * W760 perLanguageKScore - "does my dataset have enough Spanish?"
+//   * W774 evaluatePerLanguage - "does my compiled student score well
 //                                on Spanish captures?"
 //
-// Both honor the n≥30 Wilson floor — never report a CI on <30 rows; the
+// Both honor the n≥30 Wilson floor - never report a CI on <30 rows; the
 // language is moved into languages_skipped_below_n30:[] so the operator
 // sees WHICH languages need more eval captures.
 //
 // Design contract:
 //   - DI seams (runOnArtifact, judge, lang_detect, storeMod) so unit
 //     tests don't need a real artifact OR a real model server.
-//   - W411 defense-in-depth tenant fence — read tenant_id from arg AND
+//   - W411 defense-in-depth tenant fence - read tenant_id from arg AND
 //     filter every returned row by tenant_id (never trust the listEvents
 //     query alone).
 //   - HONESTY FLOOR: every honest envelope on missing tenant_id, missing
-//     artifact_path, OR no captures returned — no silent zeros.
+//     artifact_path, OR no captures returned - no silent zeros.
 //
 // Public surface:
 //   - XLANG_EVAL_VERSION
@@ -33,10 +33,10 @@
 
 export const XLANG_EVAL_VERSION = 'w774-v1';
 
-// Same Wilson 95% CI floor as W760 + W741 — n>=30 is the load-bearing
+// Same Wilson 95% CI floor as W760 + W741 - n>=30 is the load-bearing
 // honesty floor for a one-sided proportion estimate. Below 30 the CI
 // width swallows the point estimate and reporting it is a "number-shaped
-// lie" (W760 phrasing — kept verbatim for grep-cohesion).
+// lie" (W760 phrasing - kept verbatim for grep-cohesion).
 const MIN_N_FOR_WILSON = 30;
 
 // =============================================================================
@@ -72,7 +72,7 @@ const MIN_N_FOR_WILSON = 30;
 //   }
 //
 // On failure:
-//   { ok:false, error, hint, version } — honest, never fabricated.
+//   { ok:false, error, hint, version } - honest, never fabricated.
 // =============================================================================
 
 export async function evaluatePerLanguage(args) {
@@ -84,13 +84,13 @@ export async function evaluatePerLanguage(args) {
   const artifact_path = a.artifact_path;
   const opts = a.opts || {};
 
-  // W411 defense-in-depth — tenant_id is MANDATORY. Surface as honest
+  // W411 defense-in-depth - tenant_id is MANDATORY. Surface as honest
   // envelope, NEVER fall through to a tenant-less listEvents call.
   if (!tenant_id || typeof tenant_id !== 'string') {
     return {
       ok: false,
       error: 'tenant_id_required',
-      hint: 'pass {tenant_id:"<canonical tenant id>"} — W411 tenant-fence is mandatory',
+      hint: 'pass {tenant_id:"<canonical tenant id>"} - W411 tenant-fence is mandatory',
       version: XLANG_EVAL_VERSION,
     };
   }
@@ -105,7 +105,7 @@ export async function evaluatePerLanguage(args) {
   }
 
   // Resolve DI seams. The lang detector defaults to W760 read-only;
-  // runOnArtifact + judge have no defaults — when missing we return an
+  // runOnArtifact + judge have no defaults - when missing we return an
   // honest envelope rather than fabricating a score.
   const lang_detect = await _resolveDetect(opts.lang_detect);
   const runOnArtifact = (typeof opts.runOnArtifact === 'function') ? opts.runOnArtifact : null;
@@ -152,7 +152,7 @@ export async function evaluatePerLanguage(args) {
     return {
       ok: false,
       error: 'no_run_on_artifact_configured',
-      hint: 'pass opts.runOnArtifact:(artifact, capture)=>{output, latency_ms} — hosted route ' +
+      hint: 'pass opts.runOnArtifact:(artifact, capture)=>{output, latency_ms} - hosted route ' +
             'has no runner DI by default; production wires this via req.app.locals',
       captures_total: captures.length,
       version: XLANG_EVAL_VERSION,
@@ -162,7 +162,7 @@ export async function evaluatePerLanguage(args) {
     return {
       ok: false,
       error: 'no_judge_configured',
-      hint: 'pass opts.judge:({input,expected,actual,lang})=>{score} — judge is the score-source ' +
+      hint: 'pass opts.judge:({input,expected,actual,lang})=>{score} - judge is the score-source ' +
             'and we never fabricate it',
       captures_total: captures.length,
       version: XLANG_EVAL_VERSION,
@@ -170,7 +170,7 @@ export async function evaluatePerLanguage(args) {
   }
 
   // Run the artifact + judge over every capture, partitioned by detected
-  // language of the input. We do NOT short-circuit on judge failures —
+  // language of the input. We do NOT short-circuit on judge failures - 
   // they are counted (per language) so the operator sees them.
   const byLang = new Map(); // lang -> [score, score, ...]
   const judgeFailuresByLang = new Map();
@@ -215,7 +215,7 @@ export async function evaluatePerLanguage(args) {
   }
 
   // Build the by_lang block. Languages with n<30 land in
-  // languages_skipped_below_n30 — never reported with a CI.
+  // languages_skipped_below_n30 - never reported with a CI.
   const byLangOut = {};
   const evaluated = [];
   const skipped = [];
@@ -272,7 +272,7 @@ export async function evaluatePerLanguage(args) {
 //
 // Diff two evaluatePerLanguage() outputs. Returns a per-language delta
 // plus a `significant` flag (true when the difference exceeds the
-// width of either CI band — a conservative heuristic, NOT a t-test).
+// width of either CI band - a conservative heuristic, NOT a t-test).
 //
 // Input:
 //   eval_a:  evaluatePerLanguage() output (ok:true shape)
@@ -288,7 +288,7 @@ export async function evaluatePerLanguage(args) {
 //     pooled_delta }
 //
 // Languages absent from BOTH eval sets land in delta:null + significant:false
-// — we never fabricate a comparison from missing data.
+// - we never fabricate a comparison from missing data.
 // =============================================================================
 
 export function compareLanguageDelta(evalA, evalB) {
@@ -315,7 +315,7 @@ export function compareLanguageDelta(evalA, evalB) {
     if (sa != null && sb != null) {
       delta = _round4(sb - sa);
       // Heuristic: significant when |delta| > the WIDER of the two CIs.
-      // This is intentionally conservative — a real t-test is W741 work.
+      // This is intentionally conservative - a real t-test is W741 work.
       const widthA = (Number.isFinite(ra.ci95_high) && Number.isFinite(ra.ci95_low))
         ? (ra.ci95_high - ra.ci95_low) : 0;
       const widthB = (Number.isFinite(rb.ci95_high) && Number.isFinite(rb.ci95_low))

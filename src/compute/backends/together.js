@@ -1,4 +1,4 @@
-// together — Together AI managed LoRA fine-tune, end-to-end from JS.
+// together - Together AI managed LoRA fine-tune, end-to-end from JS.
 //
 // Real surface: upload corpus -> POST /fine-tunes -> poll -> download adapter.
 // Auth via KOLM_TOGETHER_TOKEN (or TOGETHER_API_KEY). No python service needed.
@@ -113,18 +113,18 @@ export function estimateCost({ pairCount, baseModel, epochs = 3, avgTokensPerPai
   };
 }
 
-// run(spec, opts) — the real path. Submits a fine-tune to Together and returns
+// run(spec, opts) - the real path. Submits a fine-tune to Together and returns
 // when the adapter is downloadable. Throws on auth/timeout/upstream errors.
 //
 // spec fields consumed:
-//   spec.id                — used as suffix for the Together model name
-//   spec.base_model        — e.g. "Qwen/Qwen2.5-7B-Instruct" (must be Together-hosted)
-//   spec.target_size       — informational; e.g. "7b"
-//   spec.evals.cases       — inline pairs
-//   spec.seeds_path        — external JSONL path
-//   spec.epochs            — default 3
-//   spec.lora_r            — default 16
-//   spec.lora_alpha        — default 32
+//   spec.id - used as suffix for the Together model name
+//   spec.base_model - e.g. "Qwen/Qwen2.5-7B-Instruct" (must be Together-hosted)
+//   spec.target_size - informational; e.g. "7b"
+//   spec.evals.cases - inline pairs
+//   spec.seeds_path - external JSONL path
+//   spec.epochs - default 3
+//   spec.lora_r - default 16
+//   spec.lora_alpha - default 32
 export function buildTrainingFileForm(jsonlPath) {
   const fileName = path.basename(jsonlPath) || 'corpus.jsonl';
   const fileBlob = new Blob([fs.readFileSync(jsonlPath)], { type: 'application/x-ndjson' });

@@ -1,6 +1,6 @@
 // src/ner-recognizer.js
 //
-// W921 Phase-1 — ML/NER-style PII recognizer that sits BEHIND the regex
+// W921 Phase-1 - ML/NER-style PII recognizer that sits BEHIND the regex
 // unifier (src/pii-redactor.js -> src/phi-redactor.js) and contributes a
 // SECOND detector tier whose character-span findings are merged with the
 // deterministic regex tier by src/span-merge.js.
@@ -10,7 +10,7 @@
 //   1. recognize(text, opts) -> { spans:[{start,end,label,score}], engine,
 //                                  model_id, latency_ms }
 //      Always returns a value. NEVER throws. Callers fail OPEN to the regex
-//      tier when the NER tier is unavailable or errors — the gateway's
+//      tier when the NER tier is unavailable or errors - the gateway's
 //      fail-closed 'redact' default is preserved upstream because the regex
 //      pass always runs regardless.
 //
@@ -21,7 +21,7 @@
 //            weights are NOT bundled. loadNerSession() returns null when the
 //            runtime, tokenizer, or weights are absent.
 //        (b) A dependency-free gazetteer + context-rule recognizer ("rule"
-//            engine). This is REAL recognition logic — not a stub — that
+//            engine). This is REAL recognition logic - not a stub - that
 //            catches the exact free-text PII the regex tier provably misses:
 //            unlabeled person names ("I spoke with Maria"), free-text street
 //            addresses without a Street/Ave keyword in a label position, and
@@ -162,7 +162,7 @@ async function _loadOrt() {
 
 // Sync probe: is onnxruntime-node resolvable on this host? Used by
 // nerAvailable() for doctor/health + the namespace validator. A true result
-// here does not guarantee the GLiNER weights are present — loadNerSession()
+// here does not guarantee the GLiNER weights are present - loadNerSession()
 // is the authoritative async check.
 function _ortResolvable() {
   try {
@@ -174,7 +174,7 @@ function _ortResolvable() {
 }
 
 /**
- * loadNerSession — lazily construct (and cache) the GLiNER ONNX session,
+ * loadNerSession - lazily construct (and cache) the GLiNER ONNX session,
  * tokenizer, and resolved model id. Mirrors onnx-runner.loadOrt(): returns
  * null (never throws) when onnxruntime-node, a tokenizer, or the weights are
  * unavailable, so the recognizer transparently degrades to the rule backend.
@@ -235,7 +235,7 @@ export async function loadNerSession(opts = {}) {
 }
 
 /**
- * nerAvailable — sync probe for `kolm doctor`/health + the namespace
+ * nerAvailable - sync probe for `kolm doctor`/health + the namespace
  * validator. Reports whether the optional GLiNER ONNX backend *could* run on
  * this host (onnxruntime-node resolvable AND a model dir configured). When
  * false, recognize() still works via the dependency-free rule backend, so
@@ -275,7 +275,7 @@ export function nerStatus() {
 //
 // This is the engine that ships and runs everywhere. It deliberately targets
 // the recall gaps the deterministic regex tier (phi-redactor.js) leaves on the
-// table — unlabeled names, free-text addresses, and context-only PII — while
+// table - unlabeled names, free-text addresses, and context-only PII - while
 // scoring conservatively so the regex-source-wins tiebreak in span-merge keeps
 // deterministic detectors authoritative on overlap.
 // ---------------------------------------------------------------------------
@@ -354,7 +354,7 @@ function _ruleRecognize(text, { threshold = 0.4 } = {}) {
     const prevWord = prev ? prev.word.replace(/\.$/, '').toLowerCase() : '';
     const selfWord = t.word.replace(/\.$/, '').toLowerCase();
 
-    // A honorific ("Dr", "Mr", ...) never STARTS a name span — it only signals
+    // A honorific ("Dr", "Mr", ...) never STARTS a name span - it only signals
     // that the following capitalized token is one. Skip it; the loop body for
     // the next token sees the honorific as `prev` and treats it as a trigger,
     // so "Dr Maria Lopez" yields the span "Maria Lopez" (honorific excluded).
@@ -368,7 +368,7 @@ function _ruleRecognize(text, { threshold = 0.4 } = {}) {
     const sentenceInitial = prev ? /[.!?]$/.test(text.slice(prev.end, t.start)) : true;
     if (!honorific && !triggered) {
       // Only consider a bare cap word a name if it is followed by another cap
-      // word (e.g. "Maria Lopez") — a single bare cap word with no trigger is
+      // word (e.g. "Maria Lopez") - a single bare cap word with no trigger is
       // too ambiguous and would balloon false positives.
       const next = toks[i + 1];
       const twoCap = next && _isCapWord(next.word) && !NAME_STOPWORDS.has(next.word)
@@ -422,7 +422,7 @@ function _ruleRecognize(text, { threshold = 0.4 } = {}) {
 // ---------------------------------------------------------------------------
 
 /**
- * recognize — run NER span inference and return kolm-CLASS-labeled character
+ * recognize - run NER span inference and return kolm-CLASS-labeled character
  * spans. Tries the GLiNER ONNX backend first when configured + available,
  * otherwise runs the dependency-free rule backend. NEVER throws.
  *

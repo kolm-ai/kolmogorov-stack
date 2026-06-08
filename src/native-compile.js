@@ -1,6 +1,6 @@
 // Native compilation for compiled_rule artifacts.
 //
-// Wave 144 / Wave G — given the emitC()/emitRust() sources that Wave F bundles
+// Wave 144 / Wave G - given the emitC()/emitRust() sources that Wave F bundles
 // into the .kolm, this module *optionally* invokes a host cc / cargo / rustc
 // toolchain to produce a native binary and ship it alongside the source. The
 // binary becomes additional evidence the verifier can hash and bind into
@@ -15,7 +15,7 @@
 //      skip compilation entirely. Setting `KOLM_COMPILE_NATIVE=1` (or
 //      `opts.compileNative: true`) requests a compile *attempt*. A missing
 //      toolchain in attempt mode is reported as a `skipped` entry in the
-//      returned bundle — it does *not* throw, does *not* fail the build,
+//      returned bundle - it does *not* throw, does *not* fail the build,
 //      and does *not* alter the existing source-only manifest fields.
 //
 //   2. **Reproducibility is best-effort, not promised.** Cross-platform
@@ -23,7 +23,7 @@
 //      flags + host triple so a verifier on the same toolchain *might*
 //      reproduce, but we do not gate verification on bit-identity. The
 //      verifier (binder.js check #12) re-hashes the bundled binary against
-//      the manifest claim — that catches in-flight tampering. Recompile-
+//      the manifest claim - that catches in-flight tampering. Recompile-
 //      and-match verification is a later wave.
 //
 // Toolchain detection is done by spawning `<tool> --version` once per kind.
@@ -71,7 +71,7 @@ import path from 'node:path';
 export const NATIVE_SPEC = 'kolm-native-v1';
 
 // Suffix we append to the emitC() source to make a self-contained executable.
-// Deterministic — no timestamps, no paths, no env-derived values. The shim is
+// Deterministic - no timestamps, no paths, no env-derived values. The shim is
 // hashed and recorded so a verifier can confirm what bytes were compiled.
 const C_MAIN_SHIM = `
 
@@ -148,11 +148,11 @@ export function detectRustCompiler() {
   return null;
 }
 
-// Wave 155 §P+3 — probe a WASM compiler. Two paths:
+// Wave 155 §P+3 - probe a WASM compiler. Two paths:
 //   1. Rustc with wasm32-wasi target installed: `rustc --target=wasm32-wasi
 //      --print sysroot` exits 0 only when the target's sysroot is available.
 //      This requires `rustup target add wasm32-wasi` on the host (it is not
-//      shipped by default with rustc). We do not auto-install — we surface
+//      shipped by default with rustc). We do not auto-install - we surface
 //      the absence as a skip reason naming the rustup command.
 //   2. Clang with wasm32-wasi target: `clang --target=wasm32-wasi --version`
 //      exits 0 when clang has wasm-ld in its toolchain. This requires a
@@ -192,7 +192,7 @@ export function detectToolchains() {
   };
 }
 
-// Host triple. Used for verifier hints — "this binary was built on linux-x64;
+// Host triple. Used for verifier hints - "this binary was built on linux-x64;
 // don't expect to run it on windows-arm64." Best-effort.
 export function hostTriple() {
   return `${process.arch}-${process.platform}`;
@@ -214,7 +214,7 @@ function rmDir(dir) {
   try { fs.rmSync(dir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 }
 
-// SOURCE_DATE_EPOCH = 0 — the reproducible-builds convention for "no time
+// SOURCE_DATE_EPOCH = 0 - the reproducible-builds convention for "no time
 // information should leak into the binary." Both gcc/clang and rustc honor
 // it for timestamps they would otherwise embed. We pass it through env so
 // the compiler sub-process sees it without polluting our own process env.
@@ -253,7 +253,7 @@ function compileC({ compiler, sourceText, recipeId }) {
       // cross-version drift source); -fno-ident drops the .comment section that
       // gcc/clang stamp with the compiler version string (cross-version drift);
       // -fno-stack-clash-protection is added in known-supported case (gcc 8+,
-      // clang 11+) but kept in flags record unconditionally — unrecognized -fno-*
+      // clang 11+) but kept in flags record unconditionally - unrecognized -fno-*
       // is silently accepted as default-on by older gcc/clang per their
       // documented "unknown -fno- = no-op" behavior. Best-effort across versions.
       args = [
@@ -326,7 +326,7 @@ function compileRust({ compiler, sourceText, recipeId }) {
   }
 }
 
-// Wave 155 §P+3 — compile a single source → .wasm binary buffer. Throws on
+// Wave 155 §P+3 - compile a single source → .wasm binary buffer. Throws on
 // failure. The wasm compile reuses either the .rs or .c source the spec
 // emitted (selected by `source_kind`); we do not generate a new source.
 // Deterministic flag posture mirrors Wave 153/154 native compile: pin
@@ -400,7 +400,7 @@ function compileWasm({ wasmTool, sourceText, recipeId }) {
   }
 }
 
-// toolchainVersionHash — derive a single sha256 over the bytes that fully
+// toolchainVersionHash - derive a single sha256 over the bytes that fully
 // determine a recipe's binary output for a given compiler. Inputs:
 //   - compiler name (e.g. 'rustc', 'gcc')
 //   - compiler version string (e.g. 'rustc 1.78.0 (9b00956e5 2024-04-29)')
@@ -440,8 +440,8 @@ export function compileNativeTargets(compiled_targets, opts = {}) {
   const rustOnly = process.env.KOLM_COMPILE_NATIVE_RUST_ONLY === '1' || opts.rustOnly === true;
   if (rustOnly && toolchains.c) toolchains.c = null;
   if (cOnly && toolchains.rust) toolchains.rust = null;
-  // Wave 155 §P+3 — WASM is opt-in via its own env var or opt. WASM is its
-  // own target — a builder may want WASM without native, or native without
+  // Wave 155 §P+3 - WASM is opt-in via its own env var or opt. WASM is its
+  // own target - a builder may want WASM without native, or native without
   // WASM. The cOnly/rustOnly toggles do NOT gate WASM; WASM has its own
   // wasmOnly via KOLM_COMPILE_WASM_ONLY=1 for the same per-kind contract.
   const wasmEnabled = process.env.KOLM_COMPILE_WASM === '1' || opts.compileWasm === true;
@@ -503,7 +503,7 @@ export function compileNativeTargets(compiled_targets, opts = {}) {
         files.push({ filename: bin_filename, content: r.bin });
       } catch (e) {
         // A compile *failure* with a toolchain present is recorded as a per-
-        // recipe skip reason — still non-fatal. The build continues without
+        // recipe skip reason - still non-fatal. The build continues without
         // a native binary for this recipe. We deliberately do not throw, so
         // a broken toolchain on one machine doesn't break the JS-rule path
         // on another (the recipes.json source is still bundled).
@@ -538,9 +538,9 @@ export function compileNativeTargets(compiled_targets, opts = {}) {
       }
     }
 
-    // Wave 155 §P+3 — WASM compile. Picks the source kind from detectWasm
+    // Wave 155 §P+3 - WASM compile. Picks the source kind from detectWasm
     // (prefers Rust source when both are usable, falls back to C). The
-    // source is whichever the spec already emitted — we do not generate new.
+    // source is whichever the spec already emitted - we do not generate new.
     if (toolchains.wasm) {
       const sourceKind = toolchains.wasm.source_kind;
       const sourceText = sourceKind === 'rust' ? t.rust && t.rust.source : t.c && t.c.source;
@@ -624,7 +624,7 @@ export function compileNativeTargets(compiled_targets, opts = {}) {
   };
 }
 
-// Wave 156 §P+4 — verifier rebuild path. Public wrapper around compileC /
+// Wave 156 §P+4 - verifier rebuild path. Public wrapper around compileC /
 // compileRust / compileWasm so the binder (verifier check #13) can re-invoke
 // the same code path the original builder used over the bundled source. The
 // shim is appended internally exactly as in the original compile, so a
@@ -634,7 +634,7 @@ export function compileNativeTargets(compiled_targets, opts = {}) {
 //
 // `kind` is 'c' | 'rust' | 'wasm'. `toolchain` is a value returned by
 // detectCCompiler/detectRustCompiler/detectWasmCompiler. `sourceText` is the
-// emitted source body *without* the shim — i.e. the bytes that live in
+// emitted source body *without* the shim - i.e. the bytes that live in
 // native.c / native.rs in the zip.
 export function rebuildBinaryFromSource({ kind, sourceText, toolchain, recipeId }) {
   if (kind === 'c') {
@@ -649,7 +649,7 @@ export function rebuildBinaryFromSource({ kind, sourceText, toolchain, recipeId 
   throw new Error(`rebuildBinaryFromSource: unknown kind=${kind}`);
 }
 
-// Wave 409q — derive the honest top-level `binaries[]` summary from the
+// Wave 409q - derive the honest top-level `binaries[]` summary from the
 // nested compiled_targets.native bundle. The result is the array the manifest
 // surfaces under `manifest.binaries`; each entry is one (target, kind, recipe)
 // triple that ACTUALLY produced a binary. Toolchain skips do NOT show up here
@@ -709,7 +709,7 @@ export function buildBinariesArray(nativeBundle) {
   return out;
 }
 
-// Wave 409q — given a compiled_targets bundle (with .c.source / .rust.source
+// Wave 409q - given a compiled_targets bundle (with .c.source / .rust.source
 // per recipe), produce the canonical "src/main.*" file entries the artifact
 // builder should add to the zip ALONGSIDE the existing native.c / native.rs.
 // The honest contract the auditor wanted: even when no toolchain produced a
@@ -741,7 +741,7 @@ export function getSourceFileEntries(compiled_targets, opts = {}) {
       // an auditor can grep for to confirm a wasm target was requested
       // even when the toolchain was absent.
       const fn = single ? 'src/main.wat' : `src/${rid}/main.wat`;
-      const wat = ';; kolm wasm source stub — real wasm is compiled from\n' +
+      const wat = ';; kolm wasm source stub - real wasm is compiled from\n' +
                   ';; the sibling main.c via clang --target=wasm32-wasi or\n' +
                   ';; from main.rs via rustc --target=wasm32-wasi.\n' +
                   ';; This stub exists so a verifier can confirm a wasm\n' +

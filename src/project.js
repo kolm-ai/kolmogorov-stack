@@ -30,14 +30,14 @@ export function findProjectConfig(startDir) {
 }
 
 // Extracts:
-//   name             — project slug (defaults to dir basename)
+//   name - project slug (defaults to dir basename)
 //   version
 //   description
-//   skills_dir       — defaults to ./.kolm/skills
-//   k_min            — project-level K-score gate (defaults to 0)
-//   mcp.transport    — 'stdio' | 'http' | 'sse'
+//   skills_dir - defaults to ./.kolm/skills
+//   k_min - project-level K-score gate (defaults to 0)
+//   mcp.transport - 'stdio' | 'http' | 'sse'
 //   mcp.host / port
-//   artifacts        — [{ path, name, description, k_min, paths[], allowed_tools[] }]
+//   artifacts - [{ path, name, description, k_min, paths[], allowed_tools[] }]
 //
 // Tolerant: malformed lines are skipped silently.
 export function parseProjectYaml(text, rootDir) {
@@ -146,7 +146,7 @@ function stripQuotes(s) {
 // like `./.kolm/artifacts/*.kolm`) into an absolute list of .kolm files.
 export function resolveArtifactPaths(globOrDir, projectRoot) {
   const abs = path.resolve(projectRoot, globOrDir);
-  // Globs like *.kolm — directory + filter
+  // Globs like *.kolm - directory + filter
   if (globOrDir.includes('*')) {
     const dir = path.dirname(abs);
     const pattern = path.basename(abs);
@@ -154,7 +154,7 @@ export function resolveArtifactPaths(globOrDir, projectRoot) {
     const re = new RegExp('^' + pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
     return fs.readdirSync(dir).filter(f => re.test(f)).map(f => path.join(dir, f));
   }
-  // Directory — return all .kolm
+  // Directory - return all .kolm
   if (fs.existsSync(abs) && fs.statSync(abs).isDirectory()) {
     return fs.readdirSync(abs).filter(f => f.endsWith('.kolm')).map(f => path.join(abs, f));
   }

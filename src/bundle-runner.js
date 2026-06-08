@@ -1,4 +1,4 @@
-// W367 — recipe.bundle.mjs runner. Extracts the bundle from a .kolm zip to a
+// W367 - recipe.bundle.mjs runner. Extracts the bundle from a .kolm zip to a
 // per-run temp dir and imports it via pathToFileURL. The default export is the
 // dispatcher synthesized by src/artifact.js#buildRecipeBundleMjs.
 //
@@ -48,7 +48,7 @@ export async function runArtifactViaBundle(artifactPath, input, opts = {}) {
     throw kolmError('KOLM_E_BUNDLE_MALFORMED', `manifest.json parse failed: ${e.message}`);
   }
   if (!manifest.entry || typeof manifest.entry !== 'object') {
-    throw kolmError('KOLM_E_NO_EXECUTABLE_BUNDLE', 'manifest.entry missing — this artifact ships metadata only and cannot run via --bundle. Rebuild with a current kolm to include recipe.bundle.mjs.');
+    throw kolmError('KOLM_E_NO_EXECUTABLE_BUNDLE', 'manifest.entry missing - this artifact ships metadata only and cannot run via --bundle. Rebuild with a current kolm to include recipe.bundle.mjs.');
   }
   const entryFile = manifest.entry.file;
   const declaredSha = manifest.entry.sha256;

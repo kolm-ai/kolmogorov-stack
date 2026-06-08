@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// W240 — standalone HTTP compiler service.
+// W240 - standalone HTTP compiler service.
 //
 // node src/services/compiler.js --port=7402 [--host=127.0.0.1]
 //

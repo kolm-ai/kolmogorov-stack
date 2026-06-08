@@ -14,6 +14,7 @@ import { initSentry } from './src/sentry-init.js';
 import { synthesize } from './src/synthesis.js';
 import { createConcept, publishVersion } from './src/registry.js';
 import { all } from './src/store.js';
+import { runDueReattestations } from './src/asr-fulfillment.js';
 
 // W922 — normalize provider-key env-var names at startup. Operators keep keys in
 // Vercel/Railway under varied casings (runpod_api_key, cerebras_api,
@@ -96,385 +97,51 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 if (initOtel()) app.use(otelMiddleware());
 
-// /articles serves the index page directly (no 301 redirect) — must come
-// BEFORE express.static so the static directory-redirect doesn't fire.
-app.get('/articles', (_req, res) => {
-  res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-  res.sendFile(path.join(__dirname, 'public', 'articles', 'index.html'));
-});
-
-// /use-cases serves the index page directly. Same reasoning — public/use-cases/
-// exists as a directory, so express.static would 301-redirect /use-cases to
-// /use-cases/. Pre-empt with an explicit handler.
-app.get('/use-cases', (_req, res) => {
-  res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-  res.sendFile(path.join(__dirname, 'public', 'use-cases', 'index.html'));
-});
-
-// Explicit /docs handler — serves the docs hub HTML before express.static
-// can 301-redirect /docs to /docs/ (directory listing) since public/docs/
-// exists as the spec-asset folder.
-app.get('/docs', (_req, res) => {
-  const f = path.join(__dirname, 'public', 'docs.html');
-  if (fs.existsSync(f)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(f);
-  }
-  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-});
-
-// /cookbook is a W224 cut. The canonical destination is /docs (per CUTS dict
-// in tests/wave224-slop-cut.test.js). vercel.json declares the 301; here we
-// mirror it so self-host / direct-server.js paths follow the same contract.
-// Tests fetch with redirect:'follow' so the 301 resolves to /docs (200).
-app.get('/cookbook', (_req, res) => {
-  res.redirect(301, '/docs');
-});
-
-// /registry — same trick. public/registry/ exists (submit.html), so without
-// an explicit pre-static handler express.static fires a 301 to /registry/.
-// /atlas alias maps onto registry.html as well.
-for (const url of ['/registry', '/atlas']) {
-  app.get(url, (_req, res) => {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    res.sendFile(path.join(__dirname, 'public', 'registry.html'));
-  });
-}
-
-// /community + /device-transfer — same dir-collision pattern. public/community/
-// holds bootstrap copy (devto-article, discord-bootstrap, hn-launch) and
-// public/device-transfer/ holds device-specific guides (browser-wasm, iphone,
-// jetson). Without these explicit handlers express.static 301-redirects to the
-// trailing-slash form and then 404s since neither directory has an index.html.
-app.get('/community', (_req, res) => {
-  res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-  res.sendFile(path.join(__dirname, 'public', 'community.html'));
-});
-app.get('/device-transfer', (_req, res) => {
-  res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-  res.sendFile(path.join(__dirname, 'public', 'device-transfer.html'));
-});
-
-// Same dir-collision pattern for the rest of the top-level surfaces whose
-// names also exist as directories under public/ (marketplace/, foundations/,
-// benchmarks/, healthcare/, finance/, legal/, enterprise/, migrate/,
-// research/, security/, compare/, training/, quickstart/). Without an
-// explicit pre-static handler, express.static 301-redirects /<name> to
-// /<name>/ and then 404s because no <name>/index.html exists. Vercel handles
-// this in prod via vercel.json rewrites; this loop keeps Railway-direct and
-// local self-host serving the same set of routes.
-const DIR_COLLISION_PAGES = [
-  'marketplace', 'foundations', 'benchmarks', 'healthcare', 'finance', 'legal',
-  'enterprise', 'migrate', 'research', 'security', 'compare', 'training',
-  'quickstart',
-];
-for (const name of DIR_COLLISION_PAGES) {
-  app.get('/' + name, (_req, res) => {
-    const f = path.join(__dirname, 'public', name + '.html');
-    if (fs.existsSync(f)) {
-      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-      return res.sendFile(f);
-    }
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-  });
-}
-
-// /docs/:lang i18n alias — vercel.json:152-157 rewrites /docs/{ja,zh,es,fr,de,ko}
-// to /docs/i18n/{lang}.html. Mirror that here so Railway-direct and self-host
-// serve the same set of translated docs. Whitelist the 6 shipped locales so an
-// untranslated locale 404s cleanly instead of leaking the i18n folder layout.
-const DOCS_I18N_LANGS = new Set(['ja', 'zh', 'es', 'fr', 'de', 'ko']);
-app.get('/docs/:lang', (req, res, next) => {
-  const lang = req.params.lang;
-  if (!DOCS_I18N_LANGS.has(lang)) return next();
-  const file = path.join(__dirname, 'public', 'docs', 'i18n', lang + '.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// RFC 9116 security.txt — serve from .well-known and as a top-level
-// alias. express.static skips dot-directories on some hosts, so we serve
-// explicitly to guarantee both URLs resolve.
-const SECURITY_TXT = path.join(__dirname, 'public', '.well-known', 'security.txt');
-for (const url of ['/.well-known/security.txt', '/security.txt']) {
-  app.get(url, (_req, res) => {
-    if (!fs.existsSync(SECURITY_TXT)) return res.status(404).type('text/plain').send('not found');
-    res.type('text/plain; charset=utf-8');
-    res.set('Cache-Control', 'public, max-age=3600');
-    res.sendFile(SECURITY_TXT);
-  });
-}
-
-// vercel.json rewrites mirrored to server.js so Railway-direct + self-host
-// serves the same routes the live Vercel deploy does. Each entry maps an
-// externally-referenced path to a real on-disk asset. Mounted BEFORE
-// express.static so directory-collision 301s don't fire.
-//
-// /account/audit       (vercel.json:1103) → public/account/audit-log.html
-// /api-routes.json     (vercel.json:91-94) → public/openapi.json (canonical schema)
-// /bench/leaderboard   (vercel.json:1971) → public/bench/leaderboard.json (JSON, not HTML)
-// /security/hof        (vercel.json:197) → public/security.html (Hall of Fame folded in)
-const VERCEL_MIRROR_REWRITES = [
-  { url: '/account/audit', file: 'account/audit-log.html' },
-  { url: '/api-routes.json', file: 'openapi.json' },
-  { url: '/bench/leaderboard', file: 'bench/leaderboard.json' },
-  { url: '/security/hof', file: 'security.html' },
-  // W889-8.1 + 8.2 — vertical landing + /vs/ comparison aliases that need to
-  // resolve on Railway-direct + self-host, not only via Vercel rewrites.
-  { url: '/account/signup', file: 'signup.html' },
-  { url: '/government', file: 'government.html' },
-  { url: '/education', file: 'education.html' },
-  { url: '/customer-support', file: 'customer-support.html' },
-  { url: '/code-gen', file: 'code-gen.html' },
-  { url: '/eu-sovereign', file: 'eu-sovereign.html' },
-  { url: '/vs/openai', file: 'vs/openai.html' },
-  { url: '/vs/fireworks', file: 'vs/fireworks.html' },
-  { url: '/vs/openpipe', file: 'vs/openpipe.html' },
-  { url: '/vs/self-built', file: 'vs/self-built.html' },
-];
-for (const { url, file } of VERCEL_MIRROR_REWRITES) {
-  app.get(url, (_req, res) => {
-    const f = path.join(__dirname, 'public', file);
-    if (fs.existsSync(f)) {
-      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-      return res.sendFile(f);
-    }
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-  });
-}
-
-// Static dashboard with strong caching for hashed assets, weak for HTML.
-// /sdk.js gets a versioned alias (S6) — the unversioned URL stays for
-// back-compat but we encourage `/sdk-<sha>.js` for SRI-pinned imports.
-app.use(express.static(path.join(__dirname, 'public'), {
-  // extensions: ['html'] gives extensionless URL serving so /docs/observability,
-  // /docs/runtime, /docs/sdk, /account/captures etc. resolve to their .html
-  // siblings — matching the Vercel deploy behaviour where vercel.json:rewrites
-  // does the same fallback. Without this, the bare server returns 404 for
-  // every extensionless path that isn't explicitly listed in the SPA-route
-  // table below.
-  // redirect: false avoids the directory-collision 301 — when /docs/observability
-  // exists as BOTH a directory AND .html, the default would 301 to /docs/observability/
-  // and 404 (no index.html). Disabling the redirect lets the extensions fallback fire.
-  extensions: ['html'],
-  redirect: false,
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'public, max-age=60, must-revalidate');
-    else if (/sdk-[a-f0-9]{8,}\.js$/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    // Images, fonts, and WASM rarely change between deploys — cache 1 day.
-    else if (filePath.match(/\.(svg|png|jpg|jpeg|webp|gif|ico|woff2?|wasm)$/)) res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
-    // CSS/JS change with deploys — 1 hour with revalidate keeps deploys fresh
-    // while removing the 5-minute thrash that was hammering edge caches.
-    else if (filePath.match(/\.(css|js|map)$/)) res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
-  },
-}));
-
-// RS-1 schema bundle — canonical JSON Schemas + spec markdown live in /docs
-// so the homepage anchors (/docs#rs-1, #manifest, #receipts) and direct
-// schema fetches both work. We mount the directory at /docs-static so the
-// /docs SPA route below can still own the HTML page; specific filenames
-// are then aliased back into /docs/* via explicit routes.
-const DOCS_DIR = path.join(__dirname, 'docs');
-for (const name of ['manifest-v0.1.json', 'receipt-v0.1.json', 'rs-1.md']) {
-  app.get('/docs/' + name, (_req, res) => {
-    const file = path.join(DOCS_DIR, name);
-    if (!fs.existsSync(file)) return res.status(404).json({ error: 'spec asset not found' });
-    if (name.endsWith('.json')) res.type('application/schema+json');
-    else if (name.endsWith('.md')) res.type('text/markdown');
-    res.set('Cache-Control', 'public, max-age=300');
-    res.sendFile(file);
-  });
-}
-
-app.use('/', buildRouter());
-
-// SPA fallback for HTML routes — every public page maps to a static file under /public.
-// /compile, /run, /recall, /cloud, /manual, /mobile are the v5 (`kolm`) surfaces.
-// Legacy v4 pages (/optimize, /audit, /why, /how-it-works, /economics, /spec,
-// /receipts, /verified, /specialists) stay reachable until Sprint 1's kill-list
-// pass — the static files still live in public/.
-// Page aliases — same file serves multiple URLs.
-//  /signin → public/signup.html (one page, two tabs)
-//  /atlas  → public/registry.html (registry → atlas rename, /registry kept for back-compat)
-const ROUTE_ALIASES = {
-  '/signin': 'signup',
-  '/atlas': 'registry',
-  '/spec/grammar': 'spec-grammar',
-  '/developers': 'build-your-own',
-  '/solutions': 'use-cases/index',
-  '/teams/accept': 'teams-accept',
-  '/login': 'signup',
-  // wave 104: parity with vercel.json alias rewrites.
-  '/audit': 'audit-log',
-  '/cli': 'quickstart',
-  '/contact': 'community',
-  '/insurance': 'insurance',
-  // W403 added /datasets vercel rewrite to /docs/datasets.html. Mirror it here
-  // so Railway-direct + self-host serve the same route.
-  '/datasets': 'docs/datasets',
-  // vercel.json:242-244 redirects /trust → /security; mirror so Railway-direct
-  // resolves the 59 in-repo refs that still point at /trust (footers, CLI doc
-  // shells). Map serves the security page directly to avoid a redirect hop.
-  '/trust': 'security',
-  // vercel.json:97-99 redirects /gateway → /capture; mirror.
-  '/gateway': 'capture',
-  // vercel.json:247-249 redirects /how-it-works → /quickstart (W705 redirect).
-  // No how-it-works.html exists in /public — the destination is /quickstart.
-  '/how-it-works': 'quickstart',
-};
-// /registry + /atlas are handled BEFORE express.static (see top of file) because
-// public/registry/ exists as a subdirectory (submit.html).
-for (const route of ['/', '/dashboard', '/docs', '/signup', '/signin', '/login', '/why', '/pricing', '/status', '/account', '/how-it-works', '/device', '/compile', '/run', '/recall', '/cloud', '/k-score', '/benchmarks', '/compare', '/research', '/serve', '/evolve', '/anatomy', '/security', '/privacy', '/terms', '/healthcare', '/finance', '/legal', '/edge', '/cookbook', '/defense', '/manifesto', '/faq', '/quickstart', '/trust', '/integrations', '/press', '/vs-ollama', '/vs-rag', '/vs-fine-tune', '/vs-predibase', '/vs-openpipe', '/vs-langsmith', '/vs-mem0', '/vs-hindsight', '/vs-openai-fine-tune', '/vs-together', '/why-now', '/threat-model', '/roi', '/api', '/whitepaper', '/build-your-own', '/developers', '/solutions', '/audit-log', '/baa', '/captures', '/capture', '/enterprise', '/glossary', '/leaderboard', '/hub', '/spec', '/spec/grammar', '/models', '/compute', '/troubleshooting', '/teams', '/teams/accept', '/tunnels', '/byoc', '/airgap', '/showcase', '/sdks', '/compliance-packs', '/audit', '/cli', '/contact', '/insurance', '/health-insurance', '/distill', '/train', '/frontier-stack', '/license', '/datasets', '/gateway']) {
-  app.get(route, (_req, res) => {
-    const name = route === '/' ? 'index' : (ROUTE_ALIASES[route] || route.slice(1));
-    const file = path.join(__dirname, 'public', name + '.html');
-    if (fs.existsSync(file)) {
-      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-      return res.sendFile(file);
-    }
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
-  });
-}
-
-// Extensionless use-case URLs: /use-cases/<slug> → public/use-cases/<slug>.html
-app.get('/use-cases/:slug', (req, res, next) => {
-  const slug = req.params.slug;
-  if (!/^[a-z0-9-]+$/.test(slug)) return next();
-  const file = path.join(__dirname, 'public', 'use-cases', slug + '.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// W889-8.3 — extensionless compile pair pages: /compile/<source>-to-<format> →
-// public/compile/<slug>.html. Slugs include `.` and `_` (e.g. qwen2.5-7b-to-gguf-q4_k_m)
-// so the validation regex is permissive but still anchored.
-app.get('/compile/:slug', (req, res, next) => {
-  const slug = req.params.slug;
-  if (!/^[a-z0-9._-]+$/.test(slug)) return next();
-  const file = path.join(__dirname, 'public', 'compile', slug + '.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// W889-8.4 — /book-demo → public/book-demo.html (mirrors vercel rewrite).
-app.get('/book-demo', (req, res, next) => {
-  const file = path.join(__dirname, 'public', 'book-demo.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// Extensionless integration URLs: /integrations/<slug> → public/integrations/<slug>.html
-app.get('/integrations/:slug', (req, res, next) => {
-  const slug = req.params.slug;
-  if (!/^[a-z0-9-]+$/.test(slug)) return next();
-  const file = path.join(__dirname, 'public', 'integrations', slug + '.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// Extensionless article URLs: /articles/<slug> → public/articles/<slug>.html
-app.get('/articles/:slug', (req, res, next) => {
-  const slug = req.params.slug;
-  if (!/^[a-z0-9-]+$/.test(slug)) return next();
-  const file = path.join(__dirname, 'public', 'articles', slug + '.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// Extensionless research-article URLs: /research/<slug> → public/research/<slug>.html
-app.get('/research/:slug', (req, res, next) => {
-  const slug = req.params.slug;
-  if (!/^[a-z0-9-]+$/.test(slug)) return next();
-  const file = path.join(__dirname, 'public', 'research', slug + '.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// /cookbook/<slug>: serves recipes from public/cookbook/<slug>.html if present.
-// Vertical aliases (healthcare/finance/legal/edge) keep their canonical /<vertical> URLs;
-// /cookbook/<vertical> serves the same file so either path works.
-const COOKBOOK_VERTICALS = new Set(['healthcare', 'finance', 'legal', 'edge']);
-app.get('/cookbook/:slug', (req, res, next) => {
-  const slug = req.params.slug;
-  if (!/^[a-z0-9-]+$/.test(slug)) return next();
-  if (COOKBOOK_VERTICALS.has(slug)) {
-    const file = path.join(__dirname, 'public', slug + '.html');
-    if (fs.existsSync(file)) {
-      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-      return res.sendFile(file);
-    }
-  }
-  const file = path.join(__dirname, 'public', 'cookbook', slug + '.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// Public receipt page: /r/:hash mirrors vercel.json:200 rewrite to /r.html?hash=:hash.
-// Generic fallback below cannot handle this because the file lives at public/r.html
-// (singular) and the param is consumed via query string by the page JS, not a
-// nested file path.
-app.get('/r/:hash', (req, res, next) => {
-  const hash = req.params.hash;
-  if (!/^[a-z0-9_-]+$/i.test(hash)) return next();
-  const file = path.join(__dirname, 'public', 'r.html');
-  if (fs.existsSync(file)) {
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-    return res.sendFile(file);
-  }
-  next();
-});
-
-// Generic extensionless static fallback — mirrors Vercel's "try public/<path>.html"
-// rewrite behavior so self-host / Docker / Railway-direct serves the same routes
-// the live Vercel deploy does. Without this, the manual route list at L178 drifts
-// behind every new vercel.json rewrite (e.g. /agents /train /why-kolm /docs/api
-// /compare/* /case-studies/* /security/* /spec/* /benchmarks/*). Conservative: only
-// matches GET requests for paths without an extension and rejects traversal (..).
-// W918 Wave 2 — explicit pretty-path rewrites for routes whose slug does not
-// map 1:1 to public/<slug>.html (the dated blog posts) plus the new top-level
-// Wave 2 pages. Registered before the generic fallback so they win; keeps
-// self-host / Docker / Railway-direct in lockstep with the vercel.json rewrites.
-const W918_PRETTY_REWRITES = [
-  ['/agents', 'agents.html'],
-  ['/gateway-migration', 'gateway-migration.html'],
-  ['/hobbyist', 'hobbyist.html'],
-  ['/account/org', 'account/org.html'],
-  ['/account/members', 'account/members.html'],
-  ['/blog/distilling-agents', 'blog/2026-06-02-distilling-agents.html'],
-  ['/blog/distill-from-gateway-logs', 'blog/2026-06-04-distill-from-gateway-logs.html'],
-];
-for (const [route, file] of W918_PRETTY_REWRITES) {
+// --- Static site (the Agent Security Evidence site) ---
+// The public surface is a small, flat set of pages plus the verification
+// assets. Two page names also exist as directories (public/docs/ holds the API
+// schema + reference; public/security/ holds the Halborn report + threat
+// model), so an explicit handler serves the page before express.static can
+// collide with the directory. Every other clean URL resolves through
+// express.static's `extensions:['html']` fallback and the generic catch-all
+// below — matching the Vercel deploy's rewrite behaviour.
+for (const [route, file] of [['/docs', 'docs.html'], ['/security', 'security.html']]) {
   app.get(route, (_req, res, next) => {
     const f = path.join(__dirname, 'public', file);
-    if (fs.existsSync(f)) { res.set('Cache-Control', 'public, max-age=60, must-revalidate'); return res.sendFile(f); }
+    if (fs.existsSync(f)) {
+      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+      return res.sendFile(f);
+    }
     return next();
   });
 }
 
+// Static dashboard with strong caching for hashed assets, weak for HTML.
+app.use(express.static(path.join(__dirname, 'public'), {
+  // extensions: ['html'] gives extensionless URL serving so /how-it-works,
+  // /security/threat-model, /solutions/ai-vendors etc. resolve to their .html
+  // siblings — matching the Vercel deploy where vercel.json rewrites do the
+  // same fallback.
+  // redirect: false avoids directory-collision 301s and lets the extensions
+  // fallback fire when a name exists as both a directory and a .html file.
+  extensions: ['html'],
+  redirect: false,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'public, max-age=60, must-revalidate');
+    // Images, fonts, and WASM rarely change between deploys — cache 1 day.
+    else if (filePath.match(/\.(svg|png|jpg|jpeg|webp|gif|ico|woff2?|wasm)$/)) res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
+    // CSS/JS change with deploys — 1 hour with revalidate keeps deploys fresh.
+    else if (filePath.match(/\.(css|js|map)$/)) res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+  },
+}));
+
+app.use('/', buildRouter());
+
+// Generic extensionless static fallback — mirrors Vercel's "try public/<path>.html"
+// rewrite so self-host / Docker / Railway-direct serves the same routes the live
+// Vercel deploy does. Conservative: only GET, only extension-less paths, rejects
+// traversal (..). Resolves /<page> to public/<page>.html and /<dir> to
+// public/<dir>/index.html.
 app.get('*', (req, res, next) => {
   if (req.method !== 'GET') return next();
   const p = req.path;
@@ -500,7 +167,7 @@ const _404Path = path.join(__dirname, 'public', '404.html');
 app.use((req, res, next) => {
   if (req.method === 'GET' && req.accepts('html') && !req.path.startsWith('/v1') && !req.path.startsWith('/health') && req.path !== '/ready' && req.path !== '/404') {
     if (fs.existsSync(_404Path)) return res.status(404).sendFile(_404Path);
-    return res.status(404).type('html').send(`<!DOCTYPE html><html><head><title>404 · kolm</title><link rel="stylesheet" href="/styles.css"></head><body style="padding:48px;text-align:center;font-family:system-ui;color:#e8ecf3;background:#0a0b0e;min-height:100vh;"><h1 style="font-size:48px;margin:0;letter-spacing:-0.02em;">404</h1><p style="color:#8b94a8;margin-top:8px">That page doesn't exist.</p><p style="margin-top:24px;"><a href="/" style="color:#7dd3fc;">&larr; Home</a> &middot; <a href="/registry" style="color:#7dd3fc;">Registry</a> &middot; <a href="/docs" style="color:#7dd3fc;">Docs</a></p></body></html>`);
+    return res.status(404).type('html').send(`<!DOCTYPE html><html><head><title>404 · kolm</title></head><body style="padding:48px;text-align:center;font-family:system-ui;color:#e8ecf3;background:#0B0E12;min-height:100vh;"><h1 style="font-size:48px;margin:0;letter-spacing:-0.02em;">404</h1><p style="color:#8b94a8;margin-top:8px">That page doesn't exist.</p><p style="margin-top:24px;"><a href="/" style="color:#34D399;">&larr; Home</a> &middot; <a href="/verify" style="color:#34D399;">Verify a report</a> &middot; <a href="/docs" style="color:#34D399;">Docs</a></p></body></html>`);
   }
   next();
 });
@@ -674,8 +341,7 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   const httpServer = app.listen(PORT, () => {
     console.log('\nkolm server');
     console.log(`  home:       http://localhost:${PORT}`);
-    console.log(`  dashboard:  http://localhost:${PORT}/dashboard`);
-    console.log(`  docs:       http://localhost:${PORT}/docs`);
+    console.log(`  verify:     http://localhost:${PORT}/verify`);
     console.log(`  docs:       http://localhost:${PORT}/docs`);
     console.log(`  demo key:   ${!!demo.api_key ? 'configured' : 'missing'}`);
     console.log(`  admin key:  ${!!process.env.ADMIN_KEY ? 'configured' : 'not set'}`);
@@ -684,6 +350,28 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
     console.log('');
   });
   globalThis.__kolmServer = httpServer;
+
+  // Continuous re-attestation: in-process sweep so the product self-drives with
+  // no external scheduler. Railway runs a single long-lived web instance, and
+  // claim-then-run in asr-fulfillment makes a sweep idempotent even if one ever
+  // overlaps. Runs every KOLM_REATTEST_INTERVAL_MIN (default 30), no-op when
+  // nothing is due. Disable with KOLM_REATTEST_DISABLE=1. The external
+  // POST /v1/audit/continuous/tick (cron-secret) stays as a manual backup.
+  if (process.env.KOLM_REATTEST_DISABLE !== '1') {
+    const everyMin = Math.max(5, parseInt(process.env.KOLM_REATTEST_INTERVAL_MIN || '30', 10) || 30);
+    const sweep = () => {
+      try {
+        const r = runDueReattestations({});
+        if (r && r.ran) console.log(`[reattest] ran ${r.ran}/${r.considered} due subscriptions`);
+      } catch (e) { console.error('[reattest] sweep error:', e && e.message); }
+    };
+    const everyMs = everyMin * 60 * 1000;
+    const t = setInterval(sweep, everyMs);
+    if (t.unref) t.unref();
+    const kick = setTimeout(sweep, 60 * 1000);
+    if (kick.unref) kick.unref();
+    console.log(`  reattest:   in-process sweep every ${everyMin}m`);
+  }
 }
 
 export { app };

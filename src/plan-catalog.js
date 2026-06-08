@@ -1,4 +1,4 @@
-// W921 — canonical pricing single-source-of-truth.
+// W921 - canonical pricing single-source-of-truth.
 //
 // This is the ONE place tier pricing/quotas/credits are defined. src/router.js
 // imports PLAN_CATALOG from here (served by /v1/plans + /v1/billing/tiers), and
@@ -6,7 +6,7 @@
 // tier row, /pricing cards + comparison matrix + editorial credit row, ROI
 // tier-grid labels, and the JSON-LD Offer/AggregateOffer) from the same object
 // at build time. A coherence gate (scripts/pricing-coherence.cjs) fails the
-// build on any drift — so the HTML can never silently disagree with the backend.
+// build on any drift - so the HTML can never silently disagree with the backend.
 //
 // Keep this file dependency-free (plain data + tiny helpers) so both the server
 // and the build script can import it without pulling in the router.
@@ -37,7 +37,7 @@ export function canonicalPlanId(raw) {
   return PLAN_CATALOG[id] ? id : (PLAN_ALIASES[id] || null);
 }
 
-// Count of self-serve, fixed-price offers (excludes Enterprise/Custom) — the
+// Count of self-serve, fixed-price offers (excludes Enterprise/Custom) - the
 // number the homepage + /pricing JSON-LD AggregateOffer.offerCount must match.
 export function fixedPriceOfferCount() {
   return PLAN_ORDER.filter((id) => {

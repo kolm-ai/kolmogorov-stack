@@ -1,6 +1,6 @@
 // src/gateway-guardrail.js
 //
-// W921 — Inline prompt-injection / jailbreak guardrail for the gateway
+// W921 - Inline prompt-injection / jailbreak guardrail for the gateway
 // input stage (OWASP LLM01:2025).
 //
 // This module is the LIVE-PATH wrapper around the existing, tested
@@ -13,15 +13,15 @@
 // ever spent).
 //
 // DESIGN (two-tier, matches every production gateway):
-//   Tier 0 — heuristic/regex (this module's default detector). Zero
+//   Tier 0 - heuristic/regex (this module's default detector). Zero
 //            dependencies, sub-millisecond on inputs under 8KB. Moderate
-//            recall, brittle to paraphrase — so the default mode is
+//            recall, brittle to paraphrase - so the default mode is
 //            'detect_only' (never auto-blocks) and 'block' is opt-in per
 //            namespace. The verdict ALWAYS records detector:'heuristic'
 //            so the screening is never overclaimed.
-//   Tier 1 — a small fine-tuned transformer (Prompt-Guard-2-22M /
+//   Tier 1 - a small fine-tuned transformer (Prompt-Guard-2-22M /
 //            deberta-v3) run OUT-OF-PROCESS behind the `detector` arg.
-//            Phase-2 only — kolm core stays dependency-free. The
+//            Phase-2 only - kolm core stays dependency-free. The
 //            maxPoolChunks + classifyTransformer seams below are the
 //            forward-looking hooks; they add NO runtime dependency.
 //
@@ -29,7 +29,7 @@
 // NON-SIGNED top-level field. canonicalForSigning (receipt-schema.js)
 // iterates ALL_FIELDS only, so receipt.guardrail is stripped before
 // signing and every existing Ed25519 verifier stays byte-for-byte green
-// — the exact precedent already used for receipt.latency_breakdown.
+// - the exact precedent already used for receipt.latency_breakdown.
 //
 // HONESTY: the heuristic is a HEURISTIC. For security-critical decisions
 // layer the Phase-2 transformer behind the detector seam. The receipt
@@ -42,19 +42,19 @@ import {
 } from './adversarial-prompts.js';
 
 // ---------------------------------------------------------------------------
-// Public surface — version + modes
+// Public surface - version + modes
 // ---------------------------------------------------------------------------
 
 export const GUARDRAIL_VERSION = 'w921-v1';
 
 // The decision ladder per namespace.
-//   off          — guardrail disabled; never scans, always allow.
-//   detect_only  — scan + record the verdict, but NEVER act on it (the
+//   off - guardrail disabled; never scans, always allow.
+//   detect_only - scan + record the verdict, but NEVER act on it (the
 //                  safe conservative default; surfaces is_adversarial in
 //                  the receipt without ever rejecting a request).
-//   flag         — scan + mark action:'flag' when the score clears the
+//   flag - scan + mark action:'flag' when the score clears the
 //                  threshold, but still forward the request.
-//   block        — scan + reject (HTTP 400) when the score clears the
+//   block - scan + reject (HTTP 400) when the score clears the
 //                  threshold; below threshold the request still 'flag's so
 //                  the caller sees the near-miss.
 export const GUARDRAIL_MODES = Object.freeze(['off', 'detect_only', 'flag', 'block']);
@@ -64,18 +64,18 @@ export const GUARDRAIL_MODES = Object.freeze(['off', 'detect_only', 'flag', 'blo
 export const DEFAULT_THRESHOLD = 0.85;
 
 // ---------------------------------------------------------------------------
-// classifyHeuristic — thin normalizing adapter over classifyPromptAdversarial
+// classifyHeuristic - thin normalizing adapter over classifyPromptAdversarial
 // ---------------------------------------------------------------------------
 
 /**
- * classifyHeuristic(text) — run the in-repo regex classifier and return a
+ * classifyHeuristic(text) - run the in-repo regex classifier and return a
  * NORMALIZED verdict shaped for this module:
  *
  *   { ok, is_adversarial, categories: string[], score: number,
  *     evidence: Array<{pattern, span:[number,number], category}>,
  *     detector: 'heuristic', version }
  *
- * NEVER throws — bad input degrades to a benign envelope (score 0). The
+ * NEVER throws - bad input degrades to a benign envelope (score 0). The
  * underlying classifier already maps confidence to 0 when no pattern
  * matches and caps at 0.95 otherwise (it never claims 100% from a
  * heuristic), so `score` is a faithful pass-through of `confidence`.
@@ -125,7 +125,7 @@ export function classifyHeuristic(text) {
 }
 
 // ---------------------------------------------------------------------------
-// scoreToAction — the decision ladder
+// scoreToAction - the decision ladder
 // ---------------------------------------------------------------------------
 
 /**
@@ -159,7 +159,7 @@ export function scoreToAction(score, mode, threshold) {
 }
 
 // ---------------------------------------------------------------------------
-// applyGuardrail — the gateway's single entry point (mirrors applyMode)
+// applyGuardrail - the gateway's single entry point (mirrors applyMode)
 // ---------------------------------------------------------------------------
 
 /**
@@ -200,7 +200,7 @@ export function applyGuardrail({
   const m = GUARDRAIL_MODES.includes(mode) ? mode : 'detect_only';
   const t = Number.isFinite(threshold) ? Math.max(0, Math.min(1, threshold)) : DEFAULT_THRESHOLD;
 
-  // 'off' — fully disabled. No scan, no cost, always allow.
+  // 'off' - fully disabled. No scan, no cost, always allow.
   if (m === 'off') {
     return {
       mode: m,
@@ -303,7 +303,7 @@ function _normalizeCategoryList(list) {
 }
 
 // ---------------------------------------------------------------------------
-// buildGuardrailReceiptField — the additive non-signed receipt block
+// buildGuardrailReceiptField - the additive non-signed receipt block
 // ---------------------------------------------------------------------------
 
 /**
@@ -315,7 +315,7 @@ function _normalizeCategoryList(list) {
  * Stamped onto the signed receipt as the ADDITIVE, NON-SIGNED top-level
  * field receipt.guardrail. Because receipt-schema.canonicalForSigning
  * walks ALL_FIELDS only (and 'guardrail' is intentionally NOT in
- * ALL_FIELDS), this field is invisible to the Ed25519 signature — adding
+ * ALL_FIELDS), this field is invisible to the Ed25519 signature - adding
  * it cannot change the signed bytes, so every existing verifier stays
  * green. This is the same guarantee receipt.latency_breakdown has.
  *
@@ -339,7 +339,7 @@ export function buildGuardrailReceiptField(verdict) {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 2 seams — pluggable transformer detector + long-input chunking.
+// Phase 2 seams - pluggable transformer detector + long-input chunking.
 //
 // These are forward-looking hooks. They add NO runtime dependency: the
 // transformer lives OUT-OF-PROCESS behind an HTTP endpoint (fronted by
@@ -357,8 +357,8 @@ const CHARS_PER_TOKEN = 4;
 /**
  * maxPoolChunks(text, windowTokens, scoreFn) -> Promise<{score, window_index}>
  *
- * Phase-2 long-input handling. Injections are LOCAL — a single injected
- * span anywhere in a long document should trip the detector — so the
+ * Phase-2 long-input handling. Injections are LOCAL - a single injected
+ * span anywhere in a long document should trip the detector - so the
  * correct pooling is MAX over fixed-size windows, not mean (mean dilutes a
  * single malicious span). Splits `text` into <= windowTokens-sized windows
  * (approximated via CHARS_PER_TOKEN), scores each with the async `scoreFn`,
@@ -404,7 +404,7 @@ export async function maxPoolChunks(text, windowTokens, scoreFn) {
  *
  * Phase-2 pluggable transformer detector (Prompt-Guard-2-22M /
  * deberta-v3, served out-of-process over HTTP). Posts the text to a
- * scoring endpoint that returns P(malicious). NEVER throws — on any
+ * scoring endpoint that returns P(malicious). NEVER throws - on any
  * transport/parse failure it degrades to a benign score:0 verdict so the
  * live path is unaffected when the sidecar is down (fail-open for the
  * detector, NOT for a confirmed block). The caller wraps the returned

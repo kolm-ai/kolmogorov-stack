@@ -1,4 +1,4 @@
-// W760 — Synthetic multilingual augmentation.
+// W760 - Synthetic multilingual augmentation.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 549-553):
 //   [W760-2] Synthetic multilingual augmentation
@@ -10,11 +10,11 @@
 //
 // Design contract:
 //   - PURE shape utilities here. The translation backend is dependency-
-//     injected (W749 lineage — teacher_caller pattern) so tests never
+//     injected (W749 lineage - teacher_caller pattern) so tests never
 //     hit a real translation API.
 //   - HONESTY: every translated row carries source_type:'synthetic' and
 //     synthetic_kind:'translation' packed into the feedback JSON blob.
-//     The source_type enum is W749's CANONICAL value — we don't invent
+//     The source_type enum is W749's CANONICAL value - we don't invent
 //     a new "translated" enum.
 //   - SPEND PROTECTION: dry_run=true by default. Callers must explicitly
 //     pass dry_run=false AND a teacher_caller (or KOLM_TRANSLATOR_CMD)
@@ -48,7 +48,7 @@ const MAX_TARGETS_PER_ROW = 10;
 //
 // Note: under-represented can include languages that are NOT YET in the
 // corpus at all (current_count=0). For those we only surface them if the
-// caller explicitly passes `target_langs` — otherwise the report only
+// caller explicitly passes `target_langs` - otherwise the report only
 // covers languages we already see traffic for.
 // =============================================================================
 
@@ -92,7 +92,7 @@ export function identifyUnderrepresentedLangs(opts) {
     min_per_lang: minPer,
     hint: under.length > 0
       ? 'Each underrepresented language needs the listed number of additional captures (or synthetic augmentation via W760-2)'
-      : 'No underrepresented languages found — corpus is balanced',
+      : 'No underrepresented languages found - corpus is balanced',
     version: MULTI_AUGMENT_VERSION,
   };
 }
@@ -101,7 +101,7 @@ export function identifyUnderrepresentedLangs(opts) {
 // requestMultilingualAugmentation
 //
 // For each source row, request translations into each target language.
-// DI translator (teacher_caller) — exactly the W749 contract so tests can
+// DI translator (teacher_caller) - exactly the W749 contract so tests can
 // inject a stub. Honest envelope when no caller is configured AND
 // dry_run=false.
 //
@@ -110,7 +110,7 @@ export function identifyUnderrepresentedLangs(opts) {
 //   target_langs:   ['es', 'fr', 'de']
 //   teacher_caller: async ({input, output, target_lang, source_lang}) =>
 //                      JSON string with {input, output} translated
-//   dry_run:        default true — returns plan without calling
+//   dry_run:        default true - returns plan without calling
 //
 // Output:
 //   dry_run=true:
@@ -250,9 +250,9 @@ export async function requestMultilingualAugmentation(opts) {
 //   - feedback:    JSON blob containing synthetic_kind, target_lang,
 //                  source_lang, source_cid, generation_id
 //
-// The feedback blob mirrors W749 + W411 — downstream consumers that read
+// The feedback blob mirrors W749 + W411 - downstream consumers that read
 // source_type can filter; consumers that need the detail parse feedback
-// JSON. We do NOT mutate the original_rows array — return a NEW array.
+// JSON. We do NOT mutate the original_rows array - return a NEW array.
 // =============================================================================
 
 export function mergeAugmentedRows(originalRows, augmentedRows) {

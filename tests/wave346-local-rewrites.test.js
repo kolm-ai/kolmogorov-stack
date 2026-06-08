@@ -9,9 +9,9 @@
 // public/<path>/index.html" behavior.
 //
 // Behavior assertions (no copy):
-//   1. GET /marketplace returns 200 + text/html + body contains <html.
-//   2. The six headline clean URLs (/marketplace, /captures, /models, /tui,
-//      /value-loop, /foundations) all return 200 with HTML body.
+//   1. GET /pricing returns 200 + text/html + body contains <html.
+//   2. The six headline clean URLs (/pricing, /security, /trust, /platform,
+//      /how-it-works, /enterprise) all return 200 with HTML body.
 //   3. Traversal attempts (/..%2fserver, /a/../b) still 404.
 //   4. /v1/* paths are NOT swallowed by the static fallback (they hit the
 //      API router and return either JSON or 401).
@@ -46,11 +46,11 @@ function withServer(app, fn) {
   });
 }
 
-test('W346 #1 - GET /marketplace returns 200 with marketplace.html body', async () => {
+test('W346 #1 - GET /pricing returns 200 with pricing.html body', async () => {
   const app = await bootApp();
   await withServer(app, async (base) => {
-    const r = await fetch(base + '/marketplace');
-    assert.equal(r.status, 200, 'expected 200 for /marketplace');
+    const r = await fetch(base + '/pricing');
+    assert.equal(r.status, 200, 'expected 200 for /pricing');
     const ct = String(r.headers.get('content-type') || '');
     assert.ok(ct.includes('html'), `expected html content-type, got ${ct}`);
     const body = await r.text();
@@ -62,7 +62,7 @@ test('W346 #1 - GET /marketplace returns 200 with marketplace.html body', async 
 test('W346 #2 - core clean URLs all serve their .html locally', async () => {
   const app = await bootApp();
   await withServer(app, async (base) => {
-    for (const p of ['/marketplace', '/captures', '/models', '/tui', '/value-loop', '/foundations']) {
+    for (const p of ['/pricing', '/security', '/trust', '/platform', '/how-it-works', '/enterprise']) {
       const r = await fetch(base + p);
       assert.equal(r.status, 200, `expected 200 for ${p}, got ${r.status}`);
       const body = await r.text();

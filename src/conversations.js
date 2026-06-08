@@ -1,4 +1,4 @@
-// CONVERSATIONS — tenant-scoped chat backup over the existing event-store.
+// CONVERSATIONS - tenant-scoped chat backup over the existing event-store.
 //
 // No new table, no schema migration: every conversation is one row in the
 // canonical event-store (src/event-store.js), keyed on the conversation_id as
@@ -8,7 +8,7 @@
 // The event schema (src/event-schema.js) drops unknown keys in canonicalize(),
 // so we map the conversation onto fields the schema preserves rather than a
 // free-form blob: the full {conversation_id,title,messages,...} payload is
-// JSON-serialized into `media_extracted_text` (preserved up to 1 MiB — exactly
+// JSON-serialized into `media_extracted_text` (preserved up to 1 MiB - exactly
 // our body cap) with media_kind='transcript' + media_mime='application/json',
 // and the title is mirrored into `feedback` (cheap to read without parsing the
 // whole payload). The columns we set (namespace/provider/model/status/
@@ -16,7 +16,7 @@
 //
 // Isolation: provider tag 'kolm-chat' + namespace 'chat.conversation' keep
 // these rows out of every gateway/capture surface (lake, dataset workbench,
-// optimizer, label queue) — those read their own namespaces/providers and
+// optimizer, label queue) - those read their own namespaces/providers and
 // never ingest chat backups.
 //
 // Tenant fence: every read passes {namespace, tenant_id} to listEvents so the
@@ -174,7 +174,7 @@ function conversationFromEvent(ev) {
   };
 }
 
-// list — metadata only (never full messages). Newest first.
+// list - metadata only (never full messages). Newest first.
 export async function listConversations(tenantId, opts = {}) {
   if (!tenantId) throw new ConversationError(401, 'auth_required', 'tenant required');
   let limit = Number(opts.limit);
@@ -208,7 +208,7 @@ export async function listConversations(tenantId, opts = {}) {
   return { ok: true, conversations, count: conversations.length };
 }
 
-// get — full conversation. 404 (via ConversationError) on miss / tenant
+// get - full conversation. 404 (via ConversationError) on miss / tenant
 // mismatch / soft-deleted.
 export async function getConversation(tenantId, id) {
   if (!tenantId) throw new ConversationError(401, 'auth_required', 'tenant required');
@@ -231,7 +231,7 @@ export async function getConversation(tenantId, id) {
   };
 }
 
-// delete — soft delete. purgeEvents only supports before/namespace (not a
+// delete - soft delete. purgeEvents only supports before/namespace (not a
 // single event_id), so the honest minimal path is a tombstone upsert on the
 // same event_id with status='blocked' + json.deleted:true; list/get filter it
 // out. 404 on miss / tenant mismatch.
@@ -243,7 +243,7 @@ export async function deleteConversation(tenantId, id) {
     throw new ConversationError(404, 'not_found', 'conversation not found');
   }
   if (ev.status === 'blocked') {
-    // Already gone — idempotent success rather than a confusing 404.
+    // Already gone - idempotent success rather than a confusing 404.
     return { ok: true, deleted: true };
   }
   let prior = {};
@@ -255,7 +255,7 @@ export async function deleteConversation(tenantId, id) {
     namespace: CHAT_NAMESPACE,
     provider: CHAT_PROVIDER,
     model: prior.model || ev.model || '',
-    status: 'blocked', // tombstone marker — list/get filter status==='blocked'
+    status: 'blocked', // tombstone marker - list/get filter status==='blocked'
     source_type: 'real',
     created_at: ev.created_at, // preserve original timestamp; tombstone is a state, not a new event
     media_kind: 'transcript',

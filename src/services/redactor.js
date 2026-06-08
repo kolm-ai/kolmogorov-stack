@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// W240 — standalone HTTP redactor service.
+// W240 - standalone HTTP redactor service.
 //
 // node src/services/redactor.js --port=7401 [--host=127.0.0.1]
 //

@@ -1,6 +1,6 @@
 // src/tui-chat.js
 //
-// Wave Z — production-grade chat TUI for kolm artifacts + LLM bridges.
+// Wave Z - production-grade chat TUI for kolm artifacts + LLM bridges.
 //
 // The TUI is a thin shell over src/completions-api.js. Every model the
 // completions API accepts (kolm:<name>, kolm-path:<abs>, anthropic:..,
@@ -277,7 +277,7 @@ export const COMMANDS = {
   },
   artifacts(state) {
     const keys = Object.keys(state.artifacts);
-    if (!keys.length) return { reply: 'no artifacts loaded — try /open <path>.kolm' };
+    if (!keys.length) return { reply: 'no artifacts loaded - try /open <path>.kolm' };
     return { reply: 'loaded artifacts:\n' + keys.map(k => `  ${k} -> ${state.artifacts[k]}`).join('\n') };
   },
   system(state, args) {
@@ -344,7 +344,7 @@ function slugify(s) {
 }
 
 // ---------------------------------------------------------------------------
-// runTuiChat — the side-effecting orchestrator. Wires render + input + the
+// runTuiChat - the side-effecting orchestrator. Wires render + input + the
 // completions API together. Stops when the user types /quit or sends EOF.
 // ---------------------------------------------------------------------------
 export async function runTuiChat({ input, output, opts } = {}) {
@@ -377,7 +377,7 @@ export async function runTuiChat({ input, output, opts } = {}) {
     terminal: isTTY,
   });
 
-  // SIGWINCH (terminal resize) — just redraw.
+  // SIGWINCH (terminal resize) - just redraw.
   if (isTTY) output.on?.('resize', redraw);
 
   const pushMessage = (m) => {
@@ -449,7 +449,7 @@ export async function runTuiChat({ input, output, opts } = {}) {
 
   // Non-TTY mode: prompt and read lines without alt-screen.
   if (!isTTY) {
-    output.write(c(ANSI.gray, 'kolm chat (non-tty mode) — model=' + state.model + ', /help for commands\n'));
+    output.write(c(ANSI.gray, 'kolm chat (non-tty mode) - model=' + state.model + ', /help for commands\n'));
   }
 
   const linesP = new Promise((resolve) => {

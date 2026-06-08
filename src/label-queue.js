@@ -1,4 +1,4 @@
-// W369 — label queue.
+// W369 - label queue.
 //
 // Pulls the next N events that have no decision in ~/.kolm/labels/approvals.jsonl,
 // records a verdict (good / bad / edit) per submission. Verdicts are stored
@@ -46,7 +46,7 @@ function _loadApprovals() {
 // that have no decision. Prioritises events whose template-signature matches
 // an accepted opportunity.
 //
-// W411 — tenant scope: when `tenant` / `tenant_id` is supplied, the underlying
+// W411 - tenant scope: when `tenant` / `tenant_id` is supplied, the underlying
 // listEvents() is restricted to the caller's rows and approval rows for events
 // owned by a different tenant are ignored. This prevents tenantA's reviewer
 // from ever seeing tenantB's pending events.
@@ -101,7 +101,7 @@ export async function submitLabel(eventId, opts = {}) {
   if (!['good', 'bad', 'edit'].includes(verdict)) throw new Error('verdict must be good|bad|edit');
   const ev = await getEvent(eventId);
   if (!ev) throw new Error('event not found: ' + eventId);
-  // W411 — cross-tenant gate. When the caller supplies `tenant`/`tenant_id`,
+  // W411 - cross-tenant gate. When the caller supplies `tenant`/`tenant_id`,
   // the event's owner MUST match. The deeper approveEvent/rejectEvent enforces
   // the same check, but bailing here returns a cleaner error to the route.
   const callerTenant = opts.tenant_id || opts.tenant || null;
@@ -176,7 +176,7 @@ export async function submitLabel(eventId, opts = {}) {
 // per-reviewer and per-workflow rollups. Computes pending by reading all
 // events in the store and subtracting decided ones.
 //
-// W411 — tenant scope: when `tenant`/`tenant_id` is supplied, both the event
+// W411 - tenant scope: when `tenant`/`tenant_id` is supplied, both the event
 // total and the approvals are restricted to rows owned by that tenant. The
 // stats a caller sees never mix tenantA's pending with tenantB's approved.
 export async function labelStats(opts = {}) {
@@ -187,7 +187,7 @@ export async function labelStats(opts = {}) {
   const byWorkflow = {};
   // When a tenant filter is set, drop approvals for events that don't belong
   // to that tenant. Legacy approvals (pre-W411) without a tenant_id stamp are
-  // also dropped — fail-closed.
+  // also dropped - fail-closed.
   const filteredApprovals = {};
   for (const [eid, a] of Object.entries(approvals)) {
     if (tenantScope) {

@@ -1,4 +1,4 @@
-// W732 — kolm.yaml schema + parser + repo walker.
+// W732 - kolm.yaml schema + parser + repo walker.
 //
 // Purpose
 // -------
@@ -74,11 +74,11 @@ function tokenize(yamlText) {
     const trimmed = raw.replace(/\s+$/, '');
     if (trimmed === '') continue;
     // Full-line comments: leading whitespace + #. Don't strip inline `#`
-    // comments — values like URLs / hashes may contain them. The W732 schema
+    // comments - values like URLs / hashes may contain them. The W732 schema
     // doesn't need inline-comment support today.
     const noLead = trimmed.replace(/^\s+/, '');
     if (noLead.startsWith('#')) continue;
-    // Tab in leading whitespace is a hard fail — column math below assumes
+    // Tab in leading whitespace is a hard fail - column math below assumes
     // single-character indents and silently misnesting a config is a worse UX
     // than a loud error.
     const leading = trimmed.slice(0, trimmed.length - noLead.length);
@@ -112,7 +112,7 @@ function coerceScalar(raw) {
   if (s === 'true') return true;
   if (s === 'false') return false;
   if (s === 'null' || s === '~') return null;
-  // Integer / float — strict regex so version strings like `w732-v1` stay
+  // Integer / float - strict regex so version strings like `w732-v1` stay
   // as strings (would otherwise look like leading-int + suffix).
   if (/^-?\d+$/.test(s)) return parseInt(s, 10);
   if (/^-?\d+\.\d+$/.test(s)) return parseFloat(s);
@@ -124,7 +124,7 @@ function coerceScalar(raw) {
 // =============================================================================
 //
 // State machine reads tokens at a fixed `indent` column and recurses into
-// children whose indent is strictly greater. We never look up — once the
+// children whose indent is strictly greater. We never look up - once the
 // caller hands us a slice, we own [start..end) and stop the moment we see
 // a row whose indent is < ours (returning that row's index to the caller).
 //
@@ -255,7 +255,7 @@ export function parseKolmYaml(yamlText) {
   }
   const tokens = tokenize(yamlText);
   if (tokens.length === 0) {
-    // Honest empty-input envelope — caller decides if that's valid.
+    // Honest empty-input envelope - caller decides if that's valid.
     return { __empty: true };
   }
   // Top-level indent is whatever the first row has. The spec requires 0 for
@@ -326,10 +326,10 @@ export function validateKolmYaml(parsed) {
       }
     }
   }
-  // W736 — guardrails: optional top-level array. Each entry must have
+  // W736 - guardrails: optional top-level array. Each entry must have
   // { name, pattern, action }. Validation is delegated to the W736 module so
   // the snake_case error codes stay aligned with the runtime fence. We DO
-  // NOT throw on a missing W736 module (older deploys) — the absence collapses
+  // NOT throw on a missing W736 module (older deploys) - the absence collapses
   // to a no-op so a kolm.yaml with guardrails parses cleanly even when run
   // against a stack that does not yet ship src/guardrails.js. The W736
   // validator is loaded lazily to keep import side-effects predictable.
@@ -386,7 +386,7 @@ export function validateKolmYaml(parsed) {
 }
 
 // =============================================================================
-// Repo walker — find the nearest kolm.yaml
+// Repo walker - find the nearest kolm.yaml
 // =============================================================================
 //
 // Same algorithm as git's .gitignore / .git directory discovery: start at
@@ -404,7 +404,7 @@ export function findKolmYamlInRepo(startDir) {
     try {
       const st = fs.statSync(candidate);
       if (st.isFile()) return candidate;
-    } catch (_) { /* not present at this level — keep walking */ }
+    } catch (_) { /* not present at this level - keep walking */ }
     const parent = path.dirname(dir);
     if (parent === dir) return null;
     dir = parent;
@@ -422,7 +422,7 @@ export function findKolmYamlInRepo(startDir) {
 
 export function starterKolmYaml() {
   return [
-    '# kolm.yaml — declarative input to the kolm distill loop.',
+    '# kolm.yaml - declarative input to the kolm distill loop.',
     '# Schema: ' + KOLM_YAML_VERSION + '. Run `kolm yaml validate` to lint.',
     'version: ' + KOLM_YAML_VERSION,
     '',

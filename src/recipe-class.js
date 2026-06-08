@@ -1,4 +1,4 @@
-// Recipe-class taxonomy — Wave 144 §Q+10 / Wave 151 honest framing.
+// Recipe-class taxonomy - Wave 144 §Q+10 / Wave 151 honest framing.
 //
 // Every recipe inside a .kolm declares one of four classes. The artifact's
 // overall `artifact_class` is the most-permissive of its recipes (rule <
@@ -15,11 +15,11 @@ import fs from 'node:fs';
 
 export const RECIPE_CLASSES = ['rule', 'synthesized_rule', 'compiled_rule', 'distilled_model', 'workflow_capsule'];
 
-// Severity ordering — used to compute artifact_class from the per-recipe
+// Severity ordering - used to compute artifact_class from the per-recipe
 // classes. The artifact_class is the MAX of its recipe classes under this
 // ordering. A single `distilled_model` recipe in a bundle promotes the whole
 // artifact to `distilled_model`. A single `workflow_capsule` recipe (a graph
-// of recipes) promotes the whole artifact to `workflow_capsule` — verifier
+// of recipes) promotes the whole artifact to `workflow_capsule` - verifier
 // MUST also check the workflow_ir hash matches manifest.lineage.workflow_ir_hash.
 export const CLASS_RANK = Object.freeze({
   rule: 0,
@@ -45,7 +45,7 @@ export const CLASS_DESCRIPTIONS = Object.freeze({
   synthesized_rule: {
     short: 'Synthesized rule recipe',
     one_line: 'LLM-emitted rule code, AST-validated against a constrained DSL, then compiled like a rule recipe.',
-    honest: 'A frontier model (the teacher) emits candidate JavaScript that satisfies the spec. The candidate is parsed into a constrained AST (no I/O, no FFI, bounded loops), fuzzed against the train split, and gated on K-score against the holdout. The final artifact contains rule code, not weights — but the rule code was authored by an LLM, not by a human. Honest distinction: this is rule code generation, not knowledge distillation.',
+    honest: 'A frontier model (the teacher) emits candidate JavaScript that satisfies the spec. The candidate is parsed into a constrained AST (no I/O, no FFI, bounded loops), fuzzed against the train split, and gated on K-score against the holdout. The final artifact contains rule code, not weights - but the rule code was authored by an LLM, not by a human. Honest distinction: this is rule code generation, not knowledge distillation.',
     teacher_required: true,
     weights_required: false,
     quantization_applicable: false,
@@ -65,7 +65,7 @@ export const CLASS_DESCRIPTIONS = Object.freeze({
   distilled_model: {
     short: 'Distilled model recipe',
     one_line: 'A small open-weight base model LoRA-fine-tuned on teacher outputs, quantized, and shipped as GGUF / ONNX bytes.',
-    honest: 'A real neural network. A teacher model (frontier API or large open-weight) generates training pairs from the train split. A small base model (e.g., Llama-3.2-1B, Qwen2.5-0.5B, SmolLM2-360M) is LoRA-fine-tuned on those pairs. The adapter is quantized (GPTQ / AWQ to INT4 or INT8) and exported as GGUF or ONNX. The artifact carries real weights — model.gguf is non-empty and verifies against manifest.hashes.model_pointer. K-score is computed against the holdout, and the receipt chain captures teacher_vendor, teacher_model, student_base, distillation_method.',
+    honest: 'A real neural network. A teacher model (frontier API or large open-weight) generates training pairs from the train split. A small base model (e.g., Llama-3.2-1B, Qwen2.5-0.5B, SmolLM2-360M) is LoRA-fine-tuned on those pairs. The adapter is quantized (GPTQ / AWQ to INT4 or INT8) and exported as GGUF or ONNX. The artifact carries real weights - model.gguf is non-empty and verifies against manifest.hashes.model_pointer. K-score is computed against the holdout, and the receipt chain captures teacher_vendor, teacher_model, student_base, distillation_method.',
     teacher_required: true,
     weights_required: true,
     quantization_applicable: true,
@@ -97,7 +97,7 @@ export const CLASS_DESCRIPTIONS = Object.freeze({
 //   5. default → rule
 export function inferRecipeClass(recipe) {
   if (!recipe || typeof recipe !== 'object') return 'rule';
-  // W252b Bug 5 — detect ambiguous shapes early. A recipe that names BOTH a
+  // W252b Bug 5 - detect ambiguous shapes early. A recipe that names BOTH a
   // teacher (teacher_vendor or synthesized_by) AND weights (weights_file,
   // gguf_file, or onnx_file) cannot be honestly classified: synthesized_rule
   // (teacher emits source code) and distilled_model (teacher emits training
@@ -143,7 +143,7 @@ export function validateRecipeClass(recipe) {
       `If this is a rule-class recipe, set class='rule' or omit the field.`
     );
   }
-  // W252b Bug 3 + W258-ML-8 — every weights pointer declared by a
+  // W252b Bug 3 + W258-ML-8 - every weights pointer declared by a
   // distilled_model recipe must EXIST on disk and be NON-EMPTY at build
   // time. Earlier this checked only the FIRST non-null pointer
   // (weights_file || gguf_file || onnx_file); a recipe that named all
@@ -194,7 +194,7 @@ export function validateRecipeClass(recipe) {
       `A synthesized_rule recipe must record which teacher emitted the source (recipe.teacher_vendor or recipe.synthesized_by).`
     );
   }
-  // Wave 286 — workflow_capsule claim requires a workflow_ir block (or a
+  // Wave 286 - workflow_capsule claim requires a workflow_ir block (or a
   // workflow_ir_hash if the IR was already detached for hashing).
   if (declared === 'workflow_capsule' && !recipe.workflow_ir && !recipe.workflow_ir_hash) {
     throw new Error(
@@ -245,12 +245,12 @@ export function validateArtifactClass(manifest) {
   }
   const EMPTY_SHA = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
   if (declared === 'distilled_model') {
-    // W457 — model bytes may be proven by EITHER a legacy model_pointer doc
+    // W457 - model bytes may be proven by EITHER a legacy model_pointer doc
     // (sha256 of a small pointer JSON) OR a real bundled model_weights blob
     // (sha256 of the bytes that ride inside the zip as model.gguf / model.onnx
     // / etc). When buildAndZip is called with model_weights={filename,content},
     // hashes.model_pointer is intentionally EMPTY_SHA (the pointer doc is
-    // suppressed) and hashes.model_weights carries the real proof — accept
+    // suppressed) and hashes.model_weights carries the real proof - accept
     // that path here.
     const mp = manifest.hashes?.model_pointer;
     const mw = manifest.hashes?.model_weights;
@@ -274,7 +274,7 @@ export function validateArtifactClass(manifest) {
       return { ok: false, reason: 'artifact_class=synthesized_rule requires manifest.training to record teacher_vendor / teacher_model / synthesized_by' };
     }
   }
-  // Wave 286 — workflow_capsule artifact MUST carry the workflow_ir_hash in
+  // Wave 286 - workflow_capsule artifact MUST carry the workflow_ir_hash in
   // its lineage block so the IR shape can be byte-checked against the zip's
   // workflow_ir.json. Without this, the runtime would happily replay a tampered
   // IR.
@@ -291,11 +291,11 @@ export function validateArtifactClass(manifest) {
 export function classBadge(klass) {
   const d = CLASS_DESCRIPTIONS[klass];
   if (!d) return `unknown class: ${klass}`;
-  return `${d.short} — ${d.one_line}`;
+  return `${d.short} - ${d.one_line}`;
 }
 
 // ----------------------------------------------------------------------------
-// Wave 285 — honest source_type taxonomy.
+// Wave 285 - honest source_type taxonomy.
 //
 // `class` says WHAT a recipe behaves like at runtime (rule, synthesized_rule,
 // compiled_rule, distilled_model). `source_type` says HOW the recipe source
@@ -303,11 +303,11 @@ export function classBadge(klass) {
 // mismatch between them.
 //
 // The five honest source types:
-//   hand_written      — human author, no LLM in the loop
-//   pattern_generated — deterministic pattern-matcher emitted the code
-//   llm_emitted       — an LLM teacher emitted the source
-//   distilled         — LoRA-finetuned weights derived from teacher pairs
-//   compiled_from_dsl — emitted by a DSL → JS / native lowering
+//   hand_written - human author, no LLM in the loop
+//   pattern_generated - deterministic pattern-matcher emitted the code
+//   llm_emitted - an LLM teacher emitted the source
+//   distilled - LoRA-finetuned weights derived from teacher pairs
+//   compiled_from_dsl - emitted by a DSL → JS / native lowering
 // ----------------------------------------------------------------------------
 
 export const RECIPE_SOURCE_TYPES = Object.freeze([
@@ -339,10 +339,10 @@ export const CLASS_SOURCE_TYPE_RULES = Object.freeze({
     requires: ['distilled'],
     accepts: ['distilled'],
   },
-  // Wave 286 — a workflow_capsule's source can be a captured production trace
+  // Wave 286 - a workflow_capsule's source can be a captured production trace
   // (counts as llm_emitted when the trace contains LLM calls) OR a hand-
   // authored IR (hand_written). It can also be the output of a DSL → IR
-  // lowering (compiled_from_dsl). It is NEVER distilled — a workflow is a
+  // lowering (compiled_from_dsl). It is NEVER distilled - a workflow is a
   // graph of executors, not a model.
   workflow_capsule: {
     accepts: ['hand_written', 'llm_emitted', 'compiled_from_dsl'],

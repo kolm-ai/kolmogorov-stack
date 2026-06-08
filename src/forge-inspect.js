@@ -1,8 +1,8 @@
-// W866 — kolm inspect: model architecture + artifact passport inspection.
+// W866 - kolm inspect: model architecture + artifact passport inspection.
 //
 // Two modes:
-//   1) `kolm inspect Qwen/Qwen3-27B`           — fetch + parse HF config.json
-//   2) `kolm inspect support.kolm`             — read .kolm manifest.json
+//   1) `kolm inspect Qwen/Qwen3-27B` - fetch + parse HF config.json
+//   2) `kolm inspect support.kolm` - read .kolm manifest.json
 //
 // Returns a uniform ModelProfile object that the CLI / TUI / Account UI
 // render identically. Source of truth for "is this MoE?" / "how many active
@@ -74,7 +74,7 @@ function estimateParamsB(config) {
   let p = ((4 * h * h) + (3 * h * denseInter)) * l + 2 * v * h;
   // MoE: shared attention + per-expert MLPs. Real MoE configs expose
   // moe_intermediate_size separately from intermediate_size (e.g. Qwen3-30B-A3B
-  // has hidden=2048, moe_intermediate_size=768 — using 4*h overestimates 11x).
+  // has hidden=2048, moe_intermediate_size=768 - using 4*h overestimates 11x).
   const ne = totalExperts(config);
   if (ne && ne > 1) {
     const moeInter = config.moe_intermediate_size
@@ -218,7 +218,7 @@ export async function inspectArtifact(kolmPath) {
   let manifest;
   try {
     const { loadArtifact } = await import('./artifact-runner.js');
-    // Inspection is read-only — signature enforcement belongs to the run/serve path.
+    // Inspection is read-only - signature enforcement belongs to the run/serve path.
     const art = await loadArtifact(kolmPath, { allowInvalidSignature: true });
     manifest = art.manifest || art;
   } catch (e) {

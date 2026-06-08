@@ -22,13 +22,17 @@ terraform {
   # >= 1.5 for the strcontains() function used in outputs.
   required_version = ">= 1.5.0"
   required_providers {
+    # Pinned to the helm provider v2 line: this module uses the nested
+    # `set { name = ... value = ... }` block syntax and the `kubernetes { ... }`
+    # nested provider config, both of which the v3 provider replaced with
+    # attribute (`set = [...]`) forms. Stay on 2.x for compatibility.
     helm = {
       source  = "hashicorp/helm"
-      version = ">= 2.10.0"
+      version = "~> 2.12"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = ">= 2.20.0"
+      version = "~> 2.20"
     }
   }
 }

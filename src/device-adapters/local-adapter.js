@@ -1,8 +1,8 @@
-// W888-C — Local adapter: deploy(device, artifactPath, opts).
+// W888-C - Local adapter: deploy(device, artifactPath, opts).
 //
 // For type=local devices the "deploy" step is just a copy into
 // ~/.kolm/installed/<device_id>/<artifact_basename> followed by an optional
-// runtime spawn. We never SSH or use the network — this is the "this very
+// runtime spawn. We never SSH or use the network - this is the "this very
 // machine" path.
 //
 // Adapter contract (uniform across src/device-adapters/*):
@@ -53,7 +53,7 @@ export async function deploy(device, artifactPath, opts = {}) {
   }
 
   // Best-effort detached spawn. If the runtime binary isn't on PATH we surface
-  // a non-fatal message — the artifact is on disk regardless.
+  // a non-fatal message - the artifact is on disk regardless.
   try {
     let cmd, args;
     if (runtime === 'llama.cpp' || runtime === 'llama-cpp') {

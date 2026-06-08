@@ -1,4 +1,4 @@
-// kolm moe compose — Mixture-of-Experts composition for .kolm artifacts.
+// kolm moe compose - Mixture-of-Experts composition for .kolm artifacts.
 //
 // The pattern (Kimi / Qwen / DeepSeek): small expert models, each specialized,
 // composed at run-time via a router. Putting them together is cheaper and
@@ -8,8 +8,8 @@
 // `kolm moe compose --expert a.kolm --expert b.kolm --router router.json --out moe.kolm`
 // produces ONE composite .kolm whose recipe is a generated router function that
 // dispatches to one of the inlined expert function bodies based on the router
-// spec. The composite is still a regular .kolm — same zip layout, same runner,
-// same signature scheme — so every downstream tool (verify, run, bench, share)
+// spec. The composite is still a regular .kolm - same zip layout, same runner,
+// same signature scheme - so every downstream tool (verify, run, bench, share)
 // works without modification.
 //
 // Provenance lives in training_stats.moe so the receipt chain captures every
@@ -18,9 +18,9 @@
 // originating bytes, and confirm the manifest's provenance matches.
 //
 // Router types in v1:
-//   keyword          — first-match-wins regex over input text
-//   intent_field     — dispatch to expert whose id matches input.<field>
-//   first_match      — try each expert in order; first non-error wins
+//   keyword - first-match-wins regex over input text
+//   intent_field - dispatch to expert whose id matches input.<field>
+//   first_match - try each expert in order; first non-error wins
 //
 // What we do NOT do (v1, intentional):
 //   - embedding-similarity routing (needs a tokenizer + embedding table; lands
@@ -52,7 +52,7 @@ function isNonEmptyString(v) { return typeof v === 'string' && v.length > 0; }
 
 function validateRouter(router) {
   if (!router || typeof router !== 'object') {
-    throw err('KOLM_E_MOE_ROUTER', 'router missing — pass --router <file.json> or { type, ... }');
+    throw err('KOLM_E_MOE_ROUTER', 'router missing - pass --router <file.json> or { type, ... }');
   }
   if (!ROUTER_TYPES.includes(router.type)) {
     throw err('KOLM_E_MOE_ROUTER', `router.type must be one of: ${ROUTER_TYPES.join(', ')} (got ${JSON.stringify(router.type)})`);
@@ -85,7 +85,7 @@ function safeId(id) {
 }
 
 // Load each expert .kolm, extract its first recipe's source, hash everything.
-// We use the FIRST recipe in each expert artifact — the artifact author orders
+// We use the FIRST recipe in each expert artifact - the artifact author orders
 // recipes by specificity (most-specific first), so the first recipe is the
 // canonical entry point. If a buyer wants a non-default recipe, they should
 // rebuild the expert artifact with their preferred recipe first.
@@ -108,7 +108,7 @@ export function loadExperts(expertPaths) {
     }
     const expert_id = first.id || bundle.manifest.job_id || path.basename(p, '.kolm');
     if (seenIds.has(expert_id)) {
-      throw err('KOLM_E_MOE_EXPERTS', `duplicate expert id "${expert_id}" — each expert needs a unique recipe id`);
+      throw err('KOLM_E_MOE_EXPERTS', `duplicate expert id "${expert_id}" - each expert needs a unique recipe id`);
     }
     seenIds.add(expert_id);
     experts.push({
@@ -134,7 +134,7 @@ export function loadExperts(expertPaths) {
 // renamed and inlined.
 //
 // We use IIFE-bound inner functions so each expert's lexical scope is its own
-// — if expert A and expert B both define a helper `function pick()`, they
+// - if expert A and expert B both define a helper `function pick()`, they
 // won't collide, because each lives inside its own anonymous function body.
 export function generateRouterSource(experts, router) {
   validateRouter(router);
@@ -293,7 +293,7 @@ export async function composeMoe({ experts: expertPaths, router, outPath, jobId,
     allowEmptyEvals: evals_cases.length === 0,
     allowSeedAutoResolve: false,
     // Composite MoE artifacts can have low composite K-score on tiny eval
-    // sets — the K-score correctness contract (W258-ML-1) makes that
+    // sets - the K-score correctness contract (W258-ML-1) makes that
     // explicit. MoE composition is a structural operation; the per-expert
     // K-scores are already gated. Don't block the composite on the ship gate.
     allow_below_gate: true,

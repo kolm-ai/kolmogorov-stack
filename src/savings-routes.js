@@ -1,18 +1,18 @@
 // src/savings-routes.js
 //
-// W835 — savings-based pricing tracker HTTP routes.
+// W835 - savings-based pricing tracker HTTP routes.
 //
 // Lives as a one-call mount to keep src/router.js diff to 1 line (concurrent
-// WC07/WC14 fix agents are editing router.js in parallel — every extra line
+// WC07/WC14 fix agents are editing router.js in parallel - every extra line
 // we touch is a potential merge conflict).
 //
 // All four routes are auth-required + tenant-scoped. tenant_id is forced
 // from req.tenant_record.id; never read from request body or query string.
 //
-//   GET  /v1/savings/baseline                      — current baseline status
-//   POST /v1/savings/baseline                      — start/restart baseline window
-//   POST /v1/savings/record                        — record one teacher API call's cost
-//   GET  /v1/savings/summary?period_days=30        — saved $ + fee $ + net $
+//   GET  /v1/savings/baseline - current baseline status
+//   POST /v1/savings/baseline - start/restart baseline window
+//   POST /v1/savings/record - record one teacher API call's cost
+//   GET  /v1/savings/summary?period_days=30 - saved $ + fee $ + net $
 //
 // Honesty contract:
 //   - GET /summary returns status:'insufficient_baseline' when <7 days observed
@@ -55,7 +55,7 @@ function _periodDays(req) {
 }
 
 export function registerSavingsRoutes(r) {
-  // GET /v1/savings/baseline — show whether a baseline window is active +
+  // GET /v1/savings/baseline - show whether a baseline window is active +
   // its start time + accumulated spend so far.
   r.get('/v1/savings/baseline', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -77,7 +77,7 @@ export function registerSavingsRoutes(r) {
     }
   });
 
-  // POST /v1/savings/baseline — start (or restart) a baseline window.
+  // POST /v1/savings/baseline - start (or restart) a baseline window.
   // Body: { namespace?, start_ts? }.
   r.post('/v1/savings/baseline', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -97,7 +97,7 @@ export function registerSavingsRoutes(r) {
     }
   });
 
-  // POST /v1/savings/record — record a teacher API call cost.
+  // POST /v1/savings/record - record a teacher API call cost.
   // Body: { namespace?, provider, model, input_tokens, output_tokens, ts? }.
   r.post('/v1/savings/record', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -142,7 +142,7 @@ export function registerSavingsRoutes(r) {
     }
   });
 
-  // GET /v1/savings/summary — full savings envelope.
+  // GET /v1/savings/summary - full savings envelope.
   // Query: ?period_days=30&namespace=default[&fee_rate=0.125]
   r.get('/v1/savings/summary', async (req, res) => {
     const trec = _authOrReject(req, res);

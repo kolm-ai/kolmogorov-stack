@@ -4,7 +4,7 @@
 //
 // Why this exists: before someone rents a $2.50/hr H100 from Modal or a
 // $0.50/hr 4090 from Vast, they should see "this run will cost ~$3 and take
-// ~90 minutes." The estimator never charges anyone — it just renders a
+// ~90 minutes." The estimator never charges anyone - it just renders a
 // plausible bound from the spec shape.
 //
 // The estimate combines three signals:
@@ -23,7 +23,7 @@ import { list as listBackends, info as backendInfo } from './index.js';
 
 // Reference throughputs in tokens/sec for a 3B-parameter LoRA SFT step,
 // batch 4, seq 1024. Sourced from public Unsloth / TRL benchmarks and our
-// own dev-box measurements. Conservative — real throughput often higher.
+// own dev-box measurements. Conservative - real throughput often higher.
 const REFERENCE_TPS_3B = {
   'local-cpu': 50,
   'local-cuda': 4500,      // RTX 4090 / 5090 class
@@ -37,7 +37,7 @@ const REFERENCE_TPS_3B = {
   'vast': 5000,            // 4090 / A100 mix
   'lambda': 5500,          // A100/H100
   'replicate': 4500,       // A40/A100
-  'remote-ssh': 4000,      // unknown — assume Ampere class
+  'remote-ssh': 4000,      // unknown - assume Ampere class
   'fal': 0,                // infer-only
 };
 

@@ -1,10 +1,10 @@
 // src/export-hqq.js
 //
-// S-6 — HQQ (Half-Quadratic Quantization) export chain for ANY artifact.
+// S-6 - HQQ (Half-Quadratic Quantization) export chain for ANY artifact.
 //
 // HQQ from mobiusml is a calibration-free weight-only quantization scheme.
 // Unlike GPTQ / AWQ, HQQ runs in seconds because there is no calibration
-// pass — the algorithm solves a closed-form half-quadratic problem per layer
+// pass - the algorithm solves a closed-form half-quadratic problem per layer
 // using only the weight tensor itself. Output integrates with transformers
 // via the `hqq` package's HQQLinear modules; the saved directory is loaded
 // with HQQModelForCausalLM.from_quantized.
@@ -44,7 +44,7 @@ export const QUANT_LEVELS = Object.freeze([
 
 export const RUNTIME_HINT = 'hqq+transformers';
 
-// HQQ is fast — minutes not hours, even for 70B. Per-B-param wall time on
+// HQQ is fast - minutes not hours, even for 70B. Per-B-param wall time on
 // CPU is the bottleneck; GPU is 10x faster but rarely needed for quantize.
 const SECONDS_PER_B_PARAM_CPU = 35;
 const SECONDS_PER_B_PARAM_GPU = 5;
@@ -98,7 +98,7 @@ export function previewExport({ artifact, quant, target_dir, gpu = false }) {
   const weight_bytes = fp16_bytes * (parsed.bits / 16);
   const num_weights = fp16_bytes / 2;
   const num_groups = parsed.group_size > 0 ? num_weights / parsed.group_size : 1;
-  // HQQ stores per-group scale + zero in fp16 each — 32 bits per group.
+  // HQQ stores per-group scale + zero in fp16 each - 32 bits per group.
   const group_overhead = num_groups * 4;
   const projected_size_bytes = Math.round(weight_bytes + group_overhead);
   const per_b = gpu ? SECONDS_PER_B_PARAM_GPU : SECONDS_PER_B_PARAM_CPU;

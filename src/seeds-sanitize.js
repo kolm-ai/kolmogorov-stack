@@ -1,6 +1,6 @@
 // src/seeds-sanitize.js
 //
-// Wave 357 — PHI-safe seed sanitizer.
+// Wave 357 - PHI-safe seed sanitizer.
 //
 // API:
 //   sanitize(rows, opts) -> { kept, dropped }
@@ -11,7 +11,7 @@
 //     of the input characters, the row contains real PHI and is dropped.
 //   - Special case: if the row's `expected` (or `output`) equals the redacted
 //     form of the input, the row IS a phi-redactor training pair by
-//     definition — keep it even if many chars are masked.
+//     definition - keep it even if many chars are masked.
 //   - Returns {kept, dropped} arrays. Each dropped row carries `reason` and
 //     `mask_ratio`.
 

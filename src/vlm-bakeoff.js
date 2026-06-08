@@ -1,6 +1,6 @@
 // src/vlm-bakeoff.js
 //
-// W771 — Vision-language bake-off harness.
+// W771 - Vision-language bake-off harness.
 //
 // Replays captured vision turns through a single compiled .kolm artifact
 // (the student VLM) and scores its output against the captured teacher
@@ -98,7 +98,7 @@ function _imageKindFromRow(row) {
     }
   }
   // Best-effort: peek at the row's image_urls for a URL pattern that
-  // hints at screenshot/diagram. Conservative — defaults to 'other'.
+  // hints at screenshot/diagram. Conservative - defaults to 'other'.
   const urls = Array.isArray(row.image_urls) ? row.image_urls : [];
   for (const u of urls) {
     if (typeof u !== 'string') continue;
@@ -111,7 +111,7 @@ function _imageKindFromRow(row) {
 }
 
 // =============================================================================
-// runVlmBakeoff — replay vision captures through a single artifact, score.
+// runVlmBakeoff - replay vision captures through a single artifact, score.
 // =============================================================================
 //
 // Inputs:

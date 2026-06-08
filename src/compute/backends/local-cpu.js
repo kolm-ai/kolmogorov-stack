@@ -1,4 +1,4 @@
-// local-cpu — always available, slow, no GPU. Detect reports cores + RAM.
+// local-cpu - always available, slow, no GPU. Detect reports cores + RAM.
 // No API. run() spawns the command on this box via node:child_process.
 // Env: KOLM_TRAINER_BACKEND=local for the training bridge; run() is generic exec.
 
@@ -19,7 +19,7 @@ export async function test() {
   return { ok: true, latency_ms: Date.now() - t0, device: 'cpu', cores: os.cpus().length };
 }
 
-// run({ image, command, env, timeoutMs }) — `image` is ignored (no container
+// run({ image, command, env, timeoutMs }) - `image` is ignored (no container
 // runtime on local). `command` is argv. Returns the same envelope as remote
 // backends so callers can treat all backends uniformly.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {

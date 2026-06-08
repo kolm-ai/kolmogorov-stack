@@ -1,9 +1,9 @@
-// W826-4 — pre-load performance estimate ("~25 tok/s on your hardware").
+// W826-4 - pre-load performance estimate ("~25 tok/s on your hardware").
 //
 // Closes KOLM_W707_SYSTEM_UPGRADE_PLAN.md W826-4 (line 1126): "Performance
 // estimate before load: '~25 tok/s on your hardware'."
 //
-// Pure prediction layer — never blocks load, never reaches the network. The
+// Pure prediction layer - never blocks load, never reaches the network. The
 // numbers it returns are FORECASTS, not measurements: the UI surfaces them
 // alongside a "verify with real run" affordance so users understand the
 // distinction (W604 honesty contract).
@@ -29,7 +29,7 @@
 //         Qwen2.5-3B INT4   → ~60 tok/s (extrapolated)
 //         DeepSeek-R1-32B INT4 → ~11.5 tok/s
 //     - Functional form: base_tok_s ≈ K_quant / sqrt(params_b)
-//       (memory-bandwidth-bound scaling — empirically the right shape for
+//       (memory-bandwidth-bound scaling - empirically the right shape for
 //        decode throughput on a single GPU).
 //     - K_quant = 65 for INT4 / Q4 / NF4 (default), 45 for INT8, 32 for BF16.
 //
@@ -38,10 +38,10 @@
 //   base_ttft ≈ 80ms + 8ms × params_b for full_gpu (prefill dominated).
 //
 // `source` is one of:
-//   'curve_fit'  — synthesized from the formula above (default path).
-//   'cached_run' — a real prior benchmark exists in the event store for this
+//   'curve_fit' - synthesized from the formula above (default path).
+//   'cached_run' - a real prior benchmark exists in the event store for this
 //                  exact (artifact_id, placement, gpu_name) triple.
-//   'fallback'   — could not look up params from registry; conservative
+//   'fallback' - could not look up params from registry; conservative
 //                  numbers returned + reason field populated.
 //
 // W604 anti-brittleness: PERF_VERSION matches /^w826-/ so a v1.x bump inside
@@ -60,7 +60,7 @@ export const PERF_VERSION = 'w826-v1';
 
 // Placement penalty factors. Each is the fraction of full-GPU throughput
 // retained at that placement. cpu_only and nvme_mmap intentionally rounded
-// down — better to under-promise; if reality is faster the user is happy.
+// down - better to under-promise; if reality is faster the user is happy.
 export const PLACEMENT_PENALTY = Object.freeze({
   full_gpu: 1.0,
   hybrid: 0.4,
@@ -123,7 +123,7 @@ export function estimatePerformance(opts = {}) {
 
   // Look up params_b from MODELS registry. Most artifacts are compiled from a
   // base in MODELS, so this hits for the common case. When it misses (e.g.
-  // user-uploaded weights), we still return numbers — but with a fallback
+  // user-uploaded weights), we still return numbers - but with a fallback
   // source label so the UI can show "estimate is rough."
   let modelHit = null;
   if (artifact_id) {
@@ -157,7 +157,7 @@ export function estimatePerformance(opts = {}) {
 
   // TTFT inverse-scales with penalty: nvme_mmap takes ~10x as long to first
   // token because the prefill weights must page in from disk. We invert the
-  // penalty (capped at 1/0.05 = 20x). Cap is important — otherwise cpu_only
+  // penalty (capped at 1/0.05 = 20x). Cap is important - otherwise cpu_only
   // would inflate ttft to absurd numbers.
   const inverse = Math.min(20, 1 / Math.max(0.05, penalty));
   const ttft_ms_estimate = Math.round(_baseTtftMs(params_b) * inverse);

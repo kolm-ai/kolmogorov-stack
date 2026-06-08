@@ -1,4 +1,4 @@
-// W833-4 — Per-language K-Score reporting in artifact manifest.
+// W833-4 - Per-language K-Score reporting in artifact manifest.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md line 1200):
 //   [W833-4] Per-language K-Score reporting in artifact manifest.
@@ -22,7 +22,7 @@
 //   * readPerLangKScores returns null + honest reason when the manifest
 //     lacks the block; never returns {} that looks like "evaluated but
 //     scored 0 everywhere."
-//   * Manifest mutation is COPY-ON-WRITE — we return a new manifest
+//   * Manifest mutation is COPY-ON-WRITE - we return a new manifest
 //     object rather than mutating in place, so callers can compare
 //     before/after and surface diffs cleanly.
 //
@@ -52,7 +52,7 @@ export const OVERALL_LANG_DIST_KEY = 'overall_lang_distribution';
 //                                  values drop the lang (we never write
 //                                  a fabricated score).
 //   args.overall_lang_distribution: optional output of W833-1
-//                                  distributionByLang() — folded into
+//                                  distributionByLang() - folded into
 //                                  the manifest under OVERALL_LANG_DIST_KEY.
 //   args.gated_at_n:               optional integer; the n>=N floor used
 //                                  for the per-lang Wilson CI (defaults
@@ -93,7 +93,7 @@ export function annotateManifest(args) {
     };
   }
 
-  // Sanitize scores — only finite 0..1 values land in the manifest.
+  // Sanitize scores - only finite 0..1 values land in the manifest.
   // Non-finite / out-of-range scores are dropped (we'd rather have a
   // smaller honest map than fabricate a clamped value).
   const cleanScores = {};
@@ -109,7 +109,7 @@ export function annotateManifest(args) {
   const written = {};
   const langKeys = Object.keys(cleanScores).sort();
   if (langKeys.length === 0) {
-    // Honest sentinel — we were asked to write the block but no valid
+    // Honest sentinel - we were asked to write the block but no valid
     // scores survived sanitization. Operators see "we tried" rather
     // than thinking the block is missing.
     written[PER_LANG_KSCORE_KEY] = {
@@ -133,7 +133,7 @@ export function annotateManifest(args) {
     };
   }
   if (distIn) {
-    // Pass through the distribution snapshot verbatim — we don't validate
+    // Pass through the distribution snapshot verbatim - we don't validate
     // its shape because W833-1 distributionByLang already emits a stable
     // {by_lang, total, underrepresented, version} envelope.
     written[OVERALL_LANG_DIST_KEY] = {
@@ -142,7 +142,7 @@ export function annotateManifest(args) {
     };
   }
 
-  // Copy-on-write — caller can diff old vs new.
+  // Copy-on-write - caller can diff old vs new.
   const newManifest = { ...m, ...written };
 
   return {
@@ -157,7 +157,7 @@ export function annotateManifest(args) {
 // readPerLangKScores
 //
 // Read the per-language K-Score block from an artifact manifest. Returns
-// null + honest reason when the block is missing — NEVER returns {} that
+// null + honest reason when the block is missing - NEVER returns {} that
 // looks like "evaluated everywhere and scored 0."
 //
 // Input:
@@ -184,7 +184,7 @@ export function readPerLangKScores(manifest) {
     return {
       ok: false,
       error: 'no_per_lang_kscore_block',
-      hint: 'manifest lacks ' + PER_LANG_KSCORE_KEY + ' — call annotateManifest() first',
+      hint: 'manifest lacks ' + PER_LANG_KSCORE_KEY + ' - call annotateManifest() first',
       version: LINGUAL_MANIFEST_VERSION,
     };
   }

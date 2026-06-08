@@ -1,4 +1,4 @@
-// W833-3 — Multilingual mixture training.
+// W833-3 - Multilingual mixture training.
 
 import { detectLanguage as _w833_1_detectLanguage } from './lingual-detect.js';
 //
@@ -9,14 +9,14 @@ import { detectLanguage as _w833_1_detectLanguage } from './lingual-detect.js';
 //   * W774 sampleBalanced() returns a FINITE selection of capture IDs
 //     based on a strategy (uniform / sqrt_inverse / log_inverse / traffic
 //     weighted). It selects ONCE up to max_n and stops.
-//   * W833-3 buildMixture() returns a stateful ITERATOR — caller can pull
+//   * W833-3 buildMixture() returns a stateful ITERATOR - caller can pull
 //     rows indefinitely and the iterator keeps drawing per lang_weights.
 //     This is the API distill loops want: "give me the next training row
 //     according to the multilingual mixture I configured" rather than
 //     "select 100 rows now and that's it."
 //   * autoBalanceWeights() turns a distributionByLang() output into a
 //     suggested weights map that floors underrepresented langs at 0.05
-//     each — closes the loop from W833-1 detection → W833-3 mixture
+//     each - closes the loop from W833-1 detection → W833-3 mixture
 //     without an operator hand-typing weights.
 //
 // Honesty contract:
@@ -38,7 +38,7 @@ import { detectLanguage as _w833_1_detectLanguage } from './lingual-detect.js';
 export const LINGUAL_MIXTURE_VERSION = 'w833-v1';
 
 // Floor for underrepresented languages when autoBalanceWeights() is
-// called. Tuned to 0.05 (5%) per the W833 spec line — any lang already
+// called. Tuned to 0.05 (5%) per the W833 spec line - any lang already
 // above this stays at its observed ratio (or higher), any lang below
 // gets lifted to 0.05.
 const DEFAULT_UNDERREP_FLOOR = 0.05;
@@ -53,12 +53,12 @@ const DEFAULT_UNDERREP_FLOOR = 0.05;
 //
 // Input:
 //   opts.captures:     [{input|prompt|prompt_redacted|...}, ...]
-//   opts.lang_weights: {en:0.5, es:0.2, zh:0.3} — unnormalized OK.
+//   opts.lang_weights: {en:0.5, es:0.2, zh:0.3} - unnormalized OK.
 //                      Languages NOT in this map are excluded entirely.
-//   opts.lang_detect:  DI sync (text) => {lang} — defaults to W833-1
+//   opts.lang_detect:  DI sync (text) => {lang} - defaults to W833-1
 //                      detectLanguage; tests pass deterministic stubs.
 //   opts.with_replacement: boolean (default false). When true the
-//                          iterator never returns null — it cycles the
+//                          iterator never returns null - it cycles the
 //                          per-lang buckets and re-draws. When false
 //                          (default) an exhausted lang is dropped from
 //                          contention; iterator returns null when ALL
@@ -92,7 +92,7 @@ export function buildMixture(opts) {
     return {
       ok: false,
       error: 'empty_captures',
-      hint: 'pass {captures:[...]} with at least one row — buildMixture never fabricates from zero rows',
+      hint: 'pass {captures:[...]} with at least one row - buildMixture never fabricates from zero rows',
       version: LINGUAL_MIXTURE_VERSION,
     };
   }
@@ -102,7 +102,7 @@ export function buildMixture(opts) {
     return {
       ok: false,
       error: 'empty_lang_weights',
-      hint: 'pass {lang_weights:{en:0.5, es:0.3, ...}} — buildMixture needs at least one weighted language',
+      hint: 'pass {lang_weights:{en:0.5, es:0.3, ...}} - buildMixture needs at least one weighted language',
       version: LINGUAL_MIXTURE_VERSION,
     };
   }
@@ -118,7 +118,7 @@ export function buildMixture(opts) {
     return {
       ok: false,
       error: 'invalid_lang_weights',
-      hint: 'lang_weights must sum to >0 — got all-zero / non-finite map',
+      hint: 'lang_weights must sum to >0 - got all-zero / non-finite map',
       version: LINGUAL_MIXTURE_VERSION,
     };
   }
@@ -154,7 +154,7 @@ export function buildMixture(opts) {
   // exhausted; for with_replacement mode we wrap around.
   const cursors = new Map();
   for (const lang of targetLangs) cursors.set(lang, 0);
-  // Live weights — when a lang is exhausted in without_replacement mode
+  // Live weights - when a lang is exhausted in without_replacement mode
   // we zero its weight and renormalize the rest on the fly. This keeps
   // the per-row draw fair across the surviving langs.
   const liveWeights = { ...normalized };
@@ -179,7 +179,7 @@ export function buildMixture(opts) {
       pick -= w;
     }
     if (!chosen) {
-      // Floating-point underflow guard — pick the first surviving lang.
+      // Floating-point underflow guard - pick the first surviving lang.
       for (const lang of targetLangs) {
         if ((liveWeights[lang] || 0) > 0) { chosen = lang; break; }
       }
@@ -188,7 +188,7 @@ export function buildMixture(opts) {
 
     const pool = bucketsByLang.get(chosen) || [];
     if (pool.length === 0) {
-      // Pool is empty for this lang — drop it and recurse once.
+      // Pool is empty for this lang - drop it and recurse once.
       liveWeights[chosen] = 0;
       return iterator();
     }
@@ -198,7 +198,7 @@ export function buildMixture(opts) {
       if (withReplacement) {
         cursors.set(chosen, 0);
       } else {
-        // Exhausted without replacement — drop this lang from the mix.
+        // Exhausted without replacement - drop this lang from the mix.
         liveWeights[chosen] = 0;
         return iterator();
       }
@@ -228,11 +228,11 @@ export function buildMixture(opts) {
 // langs (so the resulting weights still sum to 1.0).
 //
 // Input:
-//   dist:            output of distributionByLang() — { by_lang:{...},
+//   dist:            output of distributionByLang() - { by_lang:{...},
 //                    total, underrepresented:[{lang, ratio, target_ratio}],
 //                    version }
 //   opts.floor:      per-lang floor (default 0.05)
-//   opts.target_langs:  ISO list to consider — defaults to the union of
+//   opts.target_langs:  ISO list to consider - defaults to the union of
 //                       dist.by_lang and dist.underrepresented langs.
 //
 // Output:
@@ -307,7 +307,7 @@ export function autoBalanceWeights(dist, opts) {
       for (const lang of langs) sum += raw[lang];
     }
   } else if (sum < 1.0 && sum > 0) {
-    // Sum below 1.0 — scale up proportionally so the weights still sum
+    // Sum below 1.0 - scale up proportionally so the weights still sum
     // to 1.0 (caller treats the map as a probability distribution).
     const scale = 1.0 / sum;
     for (const lang of langs) raw[lang] *= scale;
@@ -318,7 +318,7 @@ export function autoBalanceWeights(dist, opts) {
   if (sum > 0) {
     for (const lang of langs) weights[lang] = _round4(raw[lang] / sum);
   } else {
-    // Degenerate — fall back to equal split.
+    // Degenerate - fall back to equal split.
     const eq = _round4(1 / langs.length);
     for (const lang of langs) weights[lang] = eq;
   }

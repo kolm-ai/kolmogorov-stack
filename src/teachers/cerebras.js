@@ -172,7 +172,7 @@ export async function chat(model, messages, opts = {}) {
       lastErr = err;
       lastStatus = 0;
       lastBodySnippet = String(err && err.message ? err.message : err).slice(0, 400);
-      // Network-layer failure (DNS, TCP, AbortError, etc.) — retry on the
+      // Network-layer failure (DNS, TCP, AbortError, etc.) - retry on the
       // same schedule as transient HTTP errors.
       if (attempt < BACKOFF_MS.length && !(err && err.name === 'AbortError')) {
         continue;

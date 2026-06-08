@@ -1,10 +1,16 @@
 // W529 — meta-test: pin the release-verify lock-in test suite is itself
 // audit-resistant.
 //
-// We've shipped W490 + W524 + W525 + W526 + W527 + W528 as a structural
+// We've shipped W524 + W526 + W527 + W528 + W530 + W531 as a structural
 // hardening suite for scripts/release-verify.cjs. Without a meta-test,
 // someone could (a) delete one of these files and never notice, or
 // (b) add a new release-verify lock-in that doesn't follow the contract.
+//
+// NOTE (2026 teardown): the W490 (openapi-sync) and W525 (sdk-manifest)
+// lock-in *test files* were retired with the multi-surface compiler product
+// and removed from SUITE below. Their gates still exist in release-verify.cjs
+// (gateOpenapiSync / gateSdkManifest), and the gate names remain referenced by
+// the surviving suite files, so #9's gate-coverage check still holds.
 //
 // Pin:
 //   1. The suite enumeration — every expected file exists.
@@ -27,9 +33,7 @@ const REPO = path.resolve(import.meta.dirname, '..');
 const TESTS = path.join(REPO, 'tests');
 
 const SUITE = [
-  { file: 'wave490-release-verify-openapi-gate.test.js', minTests: 9 },
   { file: 'wave524-release-verify-helpers.test.js',      minTests: 8 },
-  { file: 'wave525-release-verify-sdk-manifest-gate.test.js', minTests: 9 },
   { file: 'wave526-release-verify-json-mode.test.js',    minTests: 10 },
   { file: 'wave527-allow-logged-out-passthrough.test.js', minTests: 10 },
   { file: 'wave528-release-verify-exit-codes.test.js',   minTests: 10 },

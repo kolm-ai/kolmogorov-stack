@@ -1,4 +1,4 @@
-// W866 — MoE expert activation analysis + pruning.
+// W866 - MoE expert activation analysis + pruning.
 //
 // For an MoE artifact, read the eval set, run inference (or use cached router
 // decisions from receipts), and report:
@@ -13,7 +13,7 @@
 //
 // This module is the data side. UI (CLI, TUI, Account) renders the bar chart
 // from `analyzeExperts(...)`. Pruning execution lands in W874 large-model
-// streaming-quant — this just identifies candidates and reports estimated cost.
+// streaming-quant - this just identifies candidates and reports estimated cost.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -66,7 +66,7 @@ export async function analyzeExperts(artifactPath, { threshold = DEFAULT_PRUNE_T
   // Determine if it's a directory or a .kolm file
   const isDir = fs.existsSync(artifactPath) && fs.statSync(artifactPath).isDirectory();
   const artifactDir = isDir ? artifactPath : path.dirname(artifactPath);
-  // Pull architecture from artifact manifest (async — forge-inspect.inspectArtifact
+  // Pull architecture from artifact manifest (async - forge-inspect.inspectArtifact
   // is async because it dynamic-imports src/artifact-runner.js).
   let inspected;
   try {

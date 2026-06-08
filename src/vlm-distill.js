@@ -1,4 +1,4 @@
-// W829-3 — VLM (Vision-Language Model) distillation entrypoint.
+// W829-3 - VLM (Vision-Language Model) distillation entrypoint.
 //
 // Teaches a smaller VLM to mimic a large VLM teacher (GPT-4V, Claude 3
 // Vision, Gemini Vision) on a corpus of captured (image, prompt → response)
@@ -56,16 +56,16 @@ function readJob(run_id) {
   catch (_) { return null; }
 }
 
-// vlmDistillRun({teacher, student_model, dataset_captures}) — enqueue (or
+// vlmDistillRun({teacher, student_model, dataset_captures}) - enqueue (or
 // run) a VLM distillation job.
 //
 // Inputs:
-//   teacher           — one of SUPPORTED_TEACHERS
-//   student_model     — string model identifier (e.g. 'Qwen2.5-VL-2B')
-//   dataset_captures  — array of capture rows OR a string namespace key
+//   teacher - one of SUPPORTED_TEACHERS
+//   student_model - string model identifier (e.g. 'Qwen2.5-VL-2B')
+//   dataset_captures - array of capture rows OR a string namespace key
 //                       (a downstream wave will resolve the namespace to
 //                       actual rows from the W829-1 capture lake).
-//   tenant            — optional, stamped on the job record
+//   tenant - optional, stamped on the job record
 //
 // Output: envelope (see honesty contract above).
 export function vlmDistillRun({ teacher, student_model, dataset_captures, tenant } = {}) {

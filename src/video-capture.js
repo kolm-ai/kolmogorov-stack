@@ -1,8 +1,8 @@
-// W773 — Video capture detector + capture-store bridge.
+// W773 - Video capture detector + capture-store bridge.
 //
 // Detects video blocks in inbound messages (URL + base64 + future-shape
 // blocks) and records a capture row whose RAW VIDEO BYTES ARE NEVER
-// PERSISTED — privacy + storage. Only the URL / hashed identifier and
+// PERSISTED - privacy + storage. Only the URL / hashed identifier and
 // downstream-sampled frame URLs travel into the event-store.
 //
 // Atomic guarantees pinned by tests/wave773-video-distill.test.js:
@@ -34,7 +34,7 @@
 //   These are the five MIMEs major frontier vendors (OpenAI Whisper-V,
 //   Anthropic claude-3.5-sonnet vision-video, Gemini video understanding)
 //   accept as of 2026-Q2. AVI and MKV are widely produced by screen
-//   recorders even when not directly accepted by every vendor — including
+//   recorders even when not directly accepted by every vendor - including
 //   them lets the capture detect the file BEFORE upload + reject it with
 //   an honest message instead of after a 500.
 
@@ -59,7 +59,7 @@ export const SUPPORTED_VIDEO_MIMES = Object.freeze([
 const MAX_BYTE_COUNT_ESTIMATE = 1024 * 1024 * 1024;
 
 // =============================================================================
-// detectVideoCapture — scan a single inbound message for video blocks.
+// detectVideoCapture - scan a single inbound message for video blocks.
 // Handles three encodings:
 //   1. base64 inline:    {type:'video', source:{type:'base64', media_type:'video/mp4', data:'...'}}
 //   2. URL block (OpenAI future shape): {type:'video_url', video_url:{url:'https://...'}}
@@ -82,17 +82,17 @@ export function detectVideoCapture(message) {
   if (Array.isArray(message.content)) {
     for (const block of message.content) {
       if (!block || typeof block !== 'object') continue;
-      // Type 1 — Anthropic-style video block w/ base64 source.
+      // Type 1 - Anthropic-style video block w/ base64 source.
       if (block.type === 'video') {
         blocks.push(block);
         continue;
       }
-      // Type 2 — OpenAI-style video_url block.
+      // Type 2 - OpenAI-style video_url block.
       if (block.type === 'video_url') {
         blocks.push(block);
         continue;
       }
-      // Type 3 — generic media block with media_type/mime_type.
+      // Type 3 - generic media block with media_type/mime_type.
       const mt = block.mime_type || block.media_type
         || (block.source && (block.source.mime_type || block.source.media_type));
       if (typeof mt === 'string' && mt.startsWith('video/')) {
@@ -119,7 +119,7 @@ export function detectVideoCapture(message) {
 }
 
 // =============================================================================
-// normalizeVideoBlock — collapse the three block shapes into one envelope.
+// normalizeVideoBlock - collapse the three block shapes into one envelope.
 // Returns the canonical shape OR an honest envelope on bad input.
 //
 // Canonical success shape:
@@ -131,7 +131,7 @@ export function detectVideoCapture(message) {
 //
 // byte_count_estimate is capped at 1 GiB (MAX_BYTE_COUNT_ESTIMATE). A
 // caller passing 100 GiB gets 1 GiB and a `byte_count_capped:true` flag
-// so the cap is OBSERVABLE — never silent.
+// so the cap is OBSERVABLE - never silent.
 // =============================================================================
 export function normalizeVideoBlock(block) {
   if (!block || typeof block !== 'object') {
@@ -149,17 +149,17 @@ export function normalizeVideoBlock(block) {
   let source = 'unknown';
   let byte_count_raw = null;
 
-  // Type 2 — {type:'video_url', video_url:{url:'...'}}
+  // Type 2 - {type:'video_url', video_url:{url:'...'}}
   if (block.type === 'video_url' && block.video_url && typeof block.video_url === 'object') {
     url = String(block.video_url.url || '');
     mime_type = String(block.video_url.mime_type || block.mime_type || _mimeFromUrl(url) || 'video/mp4');
     source = 'video_url';
     if (block.video_url.byte_count != null) byte_count_raw = Number(block.video_url.byte_count);
   }
-  // Type 1 — {type:'video', source:{type:'base64'|'url', ...}}
+  // Type 1 - {type:'video', source:{type:'base64'|'url', ...}}
   else if (block.type === 'video' && block.source && typeof block.source === 'object') {
     if (block.source.type === 'base64') {
-      // base64 — synthesize a data: URL placeholder (the actual data is
+      // base64 - synthesize a data: URL placeholder (the actual data is
       // ELIDED downstream; we never persist the bytes).
       url = 'data:' + String(block.source.media_type || 'video/mp4') + ';base64,<elided>';
       mime_type = String(block.source.media_type || 'video/mp4');
@@ -178,14 +178,14 @@ export function normalizeVideoBlock(block) {
       source = 'url';
     }
   }
-  // Type 3 — generic mime_type with url
+  // Type 3 - generic mime_type with url
   else if (typeof block.url === 'string') {
     url = block.url;
     mime_type = String(block.mime_type || block.media_type || _mimeFromUrl(url) || 'video/mp4');
     source = 'url';
   }
 
-  // Missing URL/data — honest envelope.
+  // Missing URL/data - honest envelope.
   if (!url) {
     return {
       ok: false,
@@ -219,7 +219,7 @@ export function normalizeVideoBlock(block) {
     byte_count_capped = true;
   }
 
-  // duration_s_estimate — honest null when unknown. NEVER fabricate.
+  // duration_s_estimate - honest null when unknown. NEVER fabricate.
   const duration_s_estimate = (block.duration_s != null && Number.isFinite(Number(block.duration_s)))
     ? Number(block.duration_s)
     : null;
@@ -249,7 +249,7 @@ function _mimeFromUrl(url) {
   return null;
 }
 
-// Stable hash for a video URL — used as a dedup key so the same video
+// Stable hash for a video URL - used as a dedup key so the same video
 // uploaded twice does not double-bill capture rows. We hash the URL
 // rather than the bytes (which we never see).
 function _hashUrl(url) {
@@ -257,7 +257,7 @@ function _hashUrl(url) {
 }
 
 // =============================================================================
-// captureVideoMessage — bridge into the event-store. NEVER persists raw
+// captureVideoMessage - bridge into the event-store. NEVER persists raw
 // video bytes; only URL + hashed identifier + downstream-sampled frame
 // references.
 //
@@ -282,7 +282,7 @@ export async function captureVideoMessage({
     return {
       ok: false,
       error: 'tenant_id_required',
-      hint: 'pass {tenant_id} — capture rows are tenant-scoped',
+      hint: 'pass {tenant_id} - capture rows are tenant-scoped',
       version: VIDEO_CAPTURE_VERSION,
     };
   }
@@ -303,7 +303,7 @@ export async function captureVideoMessage({
     ? Number(opts.frame_count_extracted)
     : 0;
 
-  // Build a capture-row partial. Honesty contract — the row carries
+  // Build a capture-row partial. Honesty contract - the row carries
   // has_video + counts + hashes. NEVER the bytes, NEVER the URL in full
   // when the source is base64 (the URL is the data: header literal).
   const event_id = 'vidcap_' + crypto.randomBytes(8).toString('hex');
@@ -344,11 +344,11 @@ export async function captureVideoMessage({
       frame_count_extracted,
       response_head: response != null ? String(response).slice(0, 200) : null,
     },
-    // Honesty hint — explicit declaration that bytes are not on disk.
+    // Honesty hint - explicit declaration that bytes are not on disk.
     raw_video_bytes_persisted: false,
   };
 
-  // DI seam — tests inject appendEventFn. Default uses event-store.
+  // DI seam - tests inject appendEventFn. Default uses event-store.
   const appendEventFn = (opts && typeof opts.appendEventFn === 'function')
     ? opts.appendEventFn
     : null;

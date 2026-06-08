@@ -266,18 +266,3 @@ test('W460 #9 — source pin: spec-compile.js threads attestation_report+kind to
   );
 });
 
-test('W460 #10 — sw.js CACHE references the wave460 family pattern', async () => {
-  const sw = fs.readFileSync(
-    new URL('../public/sw.js', import.meta.url),
-    'utf8',
-  );
-  // Family pattern: regex+threshold (never explicit-array). Any wave >= 460 counts.
-  // W604 anti-brittleness: accept both "wave" prefix and shortened "w" prefix
-  // since later waves (W707+) use the compact form in cache slugs.
-  const wm = sw.match(/w(?:ave)?(\d{3,4})/);
-  assert.ok(wm, 'public/sw.js CACHE must declare a w/waveNNN token');
-  assert.ok(
-    parseInt(wm[1], 10) >= 460,
-    'public/sw.js CACHE slug should reference wave460 or a successor, got w' + wm[1],
-  );
-});

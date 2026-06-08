@@ -1,4 +1,4 @@
-// W737 — marketplace artifact listing store (in-memory + event-store backed).
+// W737 - marketplace artifact listing store (in-memory + event-store backed).
 //
 // W737-1 ("Browse by vertical, task type, K-Score, hardware target") needs a
 // catalog that publishers can register into. The W342/W263 marketplace.js
@@ -33,7 +33,7 @@ import { appendEvent, listEvents } from './event-store.js';
 
 export const MARKETPLACE_STORE_VERSION = 'w737-store-v1';
 
-// W737-1 spec — the four facet axes.
+// W737-1 spec - the four facet axes.
 export const W737_VERTICALS = Object.freeze([
   'medical', 'legal', 'code', 'finance', 'support', 'general',
 ]);
@@ -60,7 +60,7 @@ export function _resetForTests() {
 // the process restarts. Returns Array<listing>.
 //
 // Trap: the event-schema `feedback` field is coerced to a STRING (max 4096
-// chars) by canonicalize() in src/event-schema.js — passing an object would
+// chars) by canonicalize() in src/event-schema.js - passing an object would
 // land as "[object Object]" on disk. We stringify JSON on write and parse on
 // read so the listing payload roundtrips cleanly.
 async function _loadCache() {
@@ -141,7 +141,7 @@ export async function registerArtifact(opts = {}) {
     namespace: 'kolm_marketplace',
     provider: 'kolm_marketplace_listing',
     status: 'ok',
-    // canonicalize() coerces feedback to a string (max 4096) — JSON.stringify
+    // canonicalize() coerces feedback to a string (max 4096) - JSON.stringify
     // the payload so it roundtrips. _loadCache() JSON.parse on read.
     feedback: JSON.stringify(listing),
   });
@@ -153,7 +153,7 @@ export async function registerArtifact(opts = {}) {
 // listArtifactsForBrowse({vertical, task_type, min_kscore, hardware_target,
 //                         publisher_id, limit=20, offset=0})
 //
-// Returns the filtered listing array. Honest empty when no listings exist —
+// Returns the filtered listing array. Honest empty when no listings exist - 
 // callers wrap into the W737 envelope.
 export async function listArtifactsForBrowse(filter = {}) {
   const all = await _loadCache();

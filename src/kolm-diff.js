@@ -1,4 +1,4 @@
-// W739 — `kolm diff <a.kolm> <b.kolm>`.
+// W739 - `kolm diff <a.kolm> <b.kolm>`.
 //
 // Real implementation that replaces the W732 honest-placeholder stub. Reads
 // two .kolm artifacts (zip archives) by file path, extracts both manifests,
@@ -9,15 +9,15 @@
 //
 // W739-2: `kolm diff` shows the performance delta + roll-back recommendation.
 // The recommendation is one of:
-//   * 'roll_back'    — at least one axis regressed by >0.02 between A → B
-//   * 'promote'      — every axis improved or stayed unchanged
-//   * 'inconclusive' — mixed-but-not-bad-enough-to-roll-back, OR insufficient
+//   * 'roll_back' - at least one axis regressed by >0.02 between A → B
+//   * 'promote' - every axis improved or stayed unchanged
+//   * 'inconclusive' - mixed-but-not-bad-enough-to-roll-back, OR insufficient
 //                      data to decide (e.g. one side missing k_score axes)
 //
 // Honest envelopes:
-//   * file_not_found        — either path does not exist on disk
-//   * not_a_kolm_artifact   — file is not a valid zip / missing manifest.json
-//   * manifest_unreadable   — manifest.json present but did not parse as JSON
+//   * file_not_found - either path does not exist on disk
+//   * not_a_kolm_artifact - file is not a valid zip / missing manifest.json
+//   * manifest_unreadable - manifest.json present but did not parse as JSON
 //
 // Pure file IO + zip read + JSON parse. The compare logic lives in
 // src/artifact-lineage.js#compareArtifactPerformance so unit tests can call
@@ -37,7 +37,7 @@ function loadAdmZip() {
     return require('adm-zip');
   } catch {
     try {
-      // ESM fallback — `await import` is impossible in a sync function, so
+      // ESM fallback - `await import` is impossible in a sync function, so
       // we use Node's createRequire trick. Callers go through the async
       // _readManifest path which uses `await import` directly.
       return null;
@@ -132,7 +132,7 @@ async function _readManifest(filePath) {
   return { ok: true, manifest, manifest_json };
 }
 
-// W739-2 — diff two .kolm artifacts by file path. Returns the full envelope
+// W739-2 - diff two .kolm artifacts by file path. Returns the full envelope
 // described at the top of this file. Always exits with ok:true on a successful
 // read; the recommendation field carries the operator-actionable verdict so
 // CI / dashboards can branch on it without re-implementing the threshold.
@@ -148,7 +148,7 @@ export async function diffArtifacts(a_path, b_path) {
   return _assembleDiffEnvelope(a_read.manifest, b_read.manifest);
 }
 
-// W739-2 / W739-3 — diff two manifests already loaded into memory. The router
+// W739-2 / W739-3 - diff two manifests already loaded into memory. The router
 // route resolves CIDs → manifests through a tenant-fenced loader and then
 // calls this function so the file-IO path stays in the CLI only.
 export function diffManifests(a_manifest, b_manifest) {
@@ -167,7 +167,7 @@ function _assembleDiffEnvelope(a_manifest, b_manifest) {
   const lineage_relation = _lineageRelation(a_manifest, b_manifest);
   const performance = compareArtifactPerformance(a, b);
   const recommendation = (performance && performance.ok) ? performance.recommendation : 'inconclusive';
-  // Roll-back hint — operator-facing, informational. Honest: explains the
+  // Roll-back hint - operator-facing, informational. Honest: explains the
   // exact command to pin the prior artifact when the recommendation is
   // roll_back; otherwise points to the kolm verify / kolm score flows.
   let roll_back_hint;
@@ -203,12 +203,12 @@ function _metaFromManifest(m) {
 }
 
 // Determine the relationship between A and B's lineage chains.
-//   * descendant   — A.cid is on B's ancestor chain (B descended from A)
-//   * ancestor     — B.cid is on A's ancestor chain (A descended from B)
-//   * sibling      — A.parent_cid === B.parent_cid (both non-null + equal)
-//   * unrelated    — otherwise (including either side missing parent_cid)
+//   * descendant - A.cid is on B's ancestor chain (B descended from A)
+//   * ancestor - B.cid is on A's ancestor chain (A descended from B)
+//   * sibling - A.parent_cid === B.parent_cid (both non-null + equal)
+//   * unrelated - otherwise (including either side missing parent_cid)
 //
-// We can only look one step up via parent_cid in each manifest — to detect
+// We can only look one step up via parent_cid in each manifest - to detect
 // deeper ancestor / descendant relations we'd need to walk the chain, which
 // requires a loader (handled by walkLineage in artifact-lineage.js). For the
 // file-IO diffArtifacts entry point we surface the one-step relation; for the

@@ -21,7 +21,7 @@
 //   { type: "command", command: "...", timeout_ms: 5000 }
 //
 // Discovery: walks up from cwd looking for kolm.yaml. Returns silently if no
-// project file is present — hooks are opt-in. Each hook is spawned with the
+// project file is present - hooks are opt-in. Each hook is spawned with the
 // project root as cwd so relative scripts ("./scripts/...") just work.
 //
 // The dispatcher never throws on hook failure unless exit code is exactly 2.
@@ -63,7 +63,7 @@ export function findKolmYamlWithHooks(startDir) {
   return null;
 }
 
-// Hand-parse the `hooks:` block. We only support the shapes documented above —
+// Hand-parse the `hooks:` block. We only support the shapes documented above - 
 // arrays of strings, arrays of {command, timeout_ms} flow objects, and inline
 // `Event: ["a", "b"]` syntax. Anything more exotic should use a YAML parser
 // (we'll pull one in v0.2 if needed).
@@ -150,7 +150,7 @@ function parseInlineList(s) {
 }
 
 function parseFlowObject(s) {
-  // Match `{command: "...", timeout_ms: 5000}` — single-level only.
+  // Match `{command: "...", timeout_ms: 5000}` - single-level only.
   const inner = s.replace(/^\{/, '').replace(/\}\s*$/, '');
   const obj = {};
   for (const part of inner.split(',')) {
@@ -189,7 +189,7 @@ function normalizeHook(v) {
 // Caller decides whether to bail on `blocked`. `event` must be one of
 // VALID_EVENTS; payload is the JSON object sent to each hook on stdin.
 export async function runHooks(event, payload, opts = {}) {
-  // WC07 — accept the full envBool truth-table: '1', 'true', 'yes', 'on'
+  // WC07 - accept the full envBool truth-table: '1', 'true', 'yes', 'on'
   // (case-insensitive) all disable hooks. Previously only the literal '1'
   // matched, so the documented `KOLM_HOOKS_OFF=true` was silently a no-op.
   // envBool with fallback=false keeps hooks ON by default and only flips OFF

@@ -1,4 +1,4 @@
-// W279 — BYO air-gap enterprise compiler site-license tier.
+// W279 - BYO air-gap enterprise compiler site-license tier.
 //
 // The hosted tiers (Team / Business / Enterprise) on /pricing cover the
 // 99% case: kolm.ai runs the compiler, customers ship .kolm artifacts
@@ -14,7 +14,7 @@
 //
 // Honest scope:
 //   - The numbers are price BANDS, not quotes. A real quote depends on
-//     org size, support level, and deployment topology — fields the
+//     org size, support level, and deployment topology - fields the
 //     /enterprise/inquiry flow captures.
 //   - Compliance certifications listed are the postures the deployment
 //     can support given customer-side controls. kolm.ai does not hold
@@ -111,7 +111,7 @@ export function getSiteLicenseTier(id) {
   return SITE_LICENSE_TIERS.find(t => t.id === id) || null;
 }
 
-// Quote helper — given a tier id and an annual seat count hint, return a
+// Quote helper - given a tier id and an annual seat count hint, return a
 // rough price within the band. Used by the inquiry flow to pre-fill a
 // starting number before the deal team takes over.
 export function approximateQuote(tierId, opts = {}) {

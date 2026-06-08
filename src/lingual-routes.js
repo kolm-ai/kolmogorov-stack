@@ -1,4 +1,4 @@
-// W833 — HTTP routes for cross-lingual foundation enhancements.
+// W833 - HTTP routes for cross-lingual foundation enhancements.
 //
 // Wired by router.js via `registerLingualRoutes(r)` to keep the W833
 // diff against router.js to a single import + a single call line
@@ -17,7 +17,7 @@
 //
 // Honesty contract (mirrors W774):
 //   * Every route is auth-gated via req.tenant_record (401 on missing).
-//   * W411 defense-in-depth — listEvents is re-filtered by tenant_id
+//   * W411 defense-in-depth - listEvents is re-filtered by tenant_id
 //     server-side AND the lingual-* modules carry their own fence inside.
 //   * Empty namespace / missing artifact → honest envelopes; never
 //     fabricate a distribution / kscore from zero rows.
@@ -54,7 +54,7 @@ export function mountLingualRoutes(app) {
           order: 'desc',
         });
       } catch (_) { rows = []; }
-      // W411 defense-in-depth — never trust a single fence.
+      // W411 defense-in-depth - never trust a single fence.
       rows = (rows || []).filter((rr) => rr && rr.tenant_id === req.tenant_record.id);
       const captures = rows.map((rr) => ({
         cid: rr.event_id || rr.cid,
@@ -103,7 +103,7 @@ export function mountLingualRoutes(app) {
         teacher,
         opts: {
           storeMod: es,
-          // Default: do NOT auto-write rows from the hosted route — the
+          // Default: do NOT auto-write rows from the hosted route - the
           // synthetic rows go back in the response and the operator
           // explicitly POSTs them via /v1/capture/log if they want them
           // persisted. This avoids accidental teacher-spend on a typo.
@@ -192,7 +192,7 @@ export function mountLingualRoutes(app) {
         });
       }
 
-      // Try the registry first — production wires artifact metadata
+      // Try the registry first - production wires artifact metadata
       // through registry.findByCid / registry.lookup.
       let manifest = null;
       try {

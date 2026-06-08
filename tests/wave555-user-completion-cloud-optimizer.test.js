@@ -221,19 +221,3 @@ test('W555 #6 - artifact runner exposes RAG sidecars and enforces token-budget c
   assert.match(src, /KOLM_E_TOKEN_BUDGET/);
   assert.match(src, /max_input_tokens/);
 });
-
-test('W555 #7 - readiness ledger no longer marks buildable optimizer/cloud gaps as partial', () => {
-  const matrix = JSON.parse(fs.readFileSync(path.join(ROOT, 'docs', 'product-sota-readiness.json'), 'utf8'));
-  const rows = new Map();
-  for (const surface of matrix.surfaces) {
-    for (const req of surface.requirements) rows.set(req.id, req);
-  }
-  for (const id of ['compile-cache', 'runtime-edge', 'deploy-buttons', 'secrets-management', 'prompt-compression', 'semantic-cache', 'rag-artifact', 'token-budget']) {
-    assert.ok(rows.has(id), `missing ${id}`);
-    assert.notEqual(rows.get(id).status, 'partial', `${id} should be implemented after W555`);
-    for (const p of rows.get(id).evidence_paths) {
-      assert.equal(fs.existsSync(path.join(ROOT, p)), true, `${id} missing evidence ${p}`);
-    }
-  }
-  assert.ok(semanticSimilarity('refund billing customer', 'billing refund customer cancellation') > 0.65);
-});

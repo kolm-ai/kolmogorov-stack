@@ -1,4 +1,4 @@
-// src/saml-acs.js — real SAML 2.0 Assertion Consumer Service (ACS) consumption.
+// src/saml-acs.js - real SAML 2.0 Assertion Consumer Service (ACS) consumption.
 //
 // ES module (repo is "type":"module"). Validates a base64 SAMLResponse
 // end-to-end with node:crypto only:
@@ -11,7 +11,7 @@
 //   4. Clock-skew tolerance on every time bound.
 //   5. Extract NameID + <AttributeStatement> attributes.
 //   6. create-or-link a tenant user (matched to the configured tenant) and
-//      issue a kolm session key — the same ks_ key the kolm_session cookie
+//      issue a kolm session key - the same ks_ key the kolm_session cookie
 //      carries everywhere else in this codebase.
 //
 // ── Limitation (documented, intentional) ────────────────────────────────────
@@ -147,7 +147,7 @@ function _findElementById(xml, id) {
 //
 // Verifies the enveloped XML signature. Returns { ok, signedElement } where
 // signedElement is the canonical element whose digest the signature covers
-// (Response or Assertion) — claims MUST be read only from this element.
+// (Response or Assertion) - claims MUST be read only from this element.
 export function _verifyXmlSignature(xml, certPem) {
   const sig = _findEl(xml, 'Signature');
   if (!sig) return { ok: false, error: 'no_signature' };
@@ -163,7 +163,7 @@ export function _verifyXmlSignature(xml, certPem) {
   const algo = _algoFor(sigMethod);
 
   // 1) Verify the SignedInfo block itself against the cert public key. The
-  // signature is computed over the canonical SignedInfo bytes — reconstruct
+  // signature is computed over the canonical SignedInfo bytes - reconstruct
   // the exact <SignedInfo>...</SignedInfo> region from the document.
   const siMatch = /<((?:[\w.-]+:)?SignedInfo)\b[\s\S]*?<\/\1>/i.exec(sig.full);
   if (!siMatch) return { ok: false, error: 'signedinfo_extract_failed' };
@@ -233,10 +233,10 @@ function _checkTimeWindow({ notBefore, notOnOrAfter }, now, skewMs) {
 //     it up by the asserted email),
 //   - record / refresh an sso_users link row keyed by `${tenant}:${nameId}`,
 //   - mint a fresh session key for that tenant via rotateTenantKey (so the
-//     browser gets a usable credential — same trade-off as OAuth signin).
+//     browser gets a usable credential - same trade-off as OAuth signin).
 // If no matching tenant exists and allowJitProvision is on, provision one.
 //
-// SECURITY: an EXPLICIT tenant hint is authoritative — if the caller names a
+// SECURITY: an EXPLICIT tenant hint is authoritative - if the caller names a
 // tenant (id or name) that does not resolve, we DO NOT fall back to matching by
 // the asserted email. Silent email fallback would let one tenant's IdP log a
 // user into a different tenant when email addresses collide. The email match is
@@ -406,11 +406,11 @@ export async function consumeAssertion(opts) {
   }
 
   // Mint a fresh session key for this tenant. rotateTenantKey returns the raw
-  // ks_ key (only the hash is persisted) — caller sets it as the kolm_session
+  // ks_ key (only the hash is persisted) - caller sets it as the kolm_session
   // cookie, exactly like /v1/signup and the OAuth callback do.
   const sessionKey = rotateTenantKey(tenantId);
 
-  // Audit row for the SSO session (no secret stored — key_prefix only).
+  // Audit row for the SSO session (no secret stored - key_prefix only).
   const sessionId = 'sso_' + crypto.randomBytes(12).toString('hex');
   insert('sso_sessions', {
     id: sessionId,

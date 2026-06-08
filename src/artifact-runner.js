@@ -1,4 +1,4 @@
-// .kolm artifact runner — opens a signed zip, verifies the signature, and
+// .kolm artifact runner - opens a signed zip, verifies the signature, and
 // executes one of its recipes against a given input. This is the "Run" leg
 // of the four-engine compose: every other engine has fed forward; this is
 // the one that actually emits an output for an end-user input.
@@ -40,7 +40,7 @@ import { canonicalJson } from './cid.js';
 import { ragLibFor } from './rag.js';
 import { estimateTokens } from './optimization.js';
 
-// W287 — supported runtime_target values for dispatchRuntime. The historical
+// W287 - supported runtime_target values for dispatchRuntime. The historical
 // default is 'js' (every artifact built before W287 had no runtime_target
 // field, which decodes to 'js' for back-compat). The other four route to
 // per-target runners in src/runners/. Any value outside this set throws
@@ -73,7 +73,7 @@ const MAX_AUDIT_INPUT_PREVIEW = 200;
 // invalidates the entry. File shape:
 //   { version: 2, entries: [{ sha, recorded_at, bytes, hmac }, ...] }
 // Old `{trusted:{}}` files are still readable via the back-compat loader so
-// existing installs don't lose their trust list — but pre-W253 entries are
+// existing installs don't lose their trust list - but pre-W253 entries are
 // considered unverifiable and not honored unless KOLM_TRUST_CLOUD_LEGACY=1
 // is set explicitly.
 const CLOUD_TRUST_PATH = path.join(os.homedir(), '.kolm', 'cloud-trusted.json');
@@ -91,7 +91,7 @@ function getOrCreateTrustSecret() {
     try { fs.chmodSync(CLOUD_TRUST_SECRET_PATH, 0o600); } catch {} // deliberate: cleanup
     return fresh;
   } catch {
-    // Memory fallback if we can't write — entries from this session aren't
+    // Memory fallback if we can't write - entries from this session aren't
     // persistable but at least won't crash callers.
     return 'kolm-fallback-' + crypto.randomBytes(16).toString('hex');
   }
@@ -110,7 +110,7 @@ function loadCloudTrust() {
     const j = JSON.parse(fs.readFileSync(CLOUD_TRUST_PATH, 'utf8'));
     if (Array.isArray(j)) return { version: 2, entries: j };
     if (j && Array.isArray(j.entries)) return { version: j.version || 2, entries: j.entries };
-    // Legacy `{trusted: {sha: {meta}}}` shape — migrate in memory but do not
+    // Legacy `{trusted: {sha: {meta}}}` shape - migrate in memory but do not
     // persist HMACs we can't recompute (no original `recorded_at` match).
     if (j && j.trusted && typeof j.trusted === 'object') {
       const entries = [];
@@ -226,7 +226,7 @@ function structuralIntegrityOk(manifest_json, signature) {
   } catch (e) { return { ok: false, reason: String(e.message || e) }; }
 }
 
-// W481 — Ed25519 structural-integrity fallback. Used when HMAC verification
+// W481 - Ed25519 structural-integrity fallback. Used when HMAC verification
 // fails (caller does not hold the matching RECIPE_RECEIPT_SECRET) AND the
 // artifact is not in the local cloud-trust list. This is the path that lets
 // PUBLISHED artifacts (marketplace, fleet-shared, registry-pack) verify on
@@ -238,8 +238,8 @@ function structuralIntegrityOk(manifest_json, signature) {
 //   (c) the Ed25519 signature verifies against the canonical receipt body
 //       (stripped of signature_ed25519 + signature_sigstore, matching the
 //       sign-time canonicalization in src/artifact.js).
-// This is structural integrity — it proves the receipt has not been mangled
-// since signing — but it does NOT claim the signing key is the original kolm
+// This is structural integrity - it proves the receipt has not been mangled
+// since signing - but it does NOT claim the signing key is the original kolm
 // builder's key. binder.js check #17 ("Signature policy (Ed25519)") is where
 // callers opt in to the stronger "must be signed by Ed25519" policy gate.
 function ed25519IntegrityOk(manifest_json, signature, receipt_json) {
@@ -247,13 +247,13 @@ function ed25519IntegrityOk(manifest_json, signature, receipt_json) {
     const integrity = structuralIntegrityOk(manifest_json, signature);
     if (!integrity.ok) return integrity;
     if (!receipt_json) {
-      return { ok: false, reason: 'no receipt.json found — Ed25519 fallback requires a v0.1+ receipt block' };
+      return { ok: false, reason: 'no receipt.json found - Ed25519 fallback requires a v0.1+ receipt block' };
     }
     let receipt;
     try { receipt = JSON.parse(receipt_json); }
     catch (e) { return { ok: false, reason: `receipt JSON parse failed: ${e.message}` }; }
     if (!receipt || typeof receipt !== 'object' || !receipt.signature_ed25519) {
-      return { ok: false, reason: 'receipt has no signature_ed25519 block — re-sign with Ed25519 (unset KOLM_ED25519_DISABLE) or set RECIPE_RECEIPT_SECRET locally to match the issuer' };
+      return { ok: false, reason: 'receipt has no signature_ed25519 block - re-sign with Ed25519 (unset KOLM_ED25519_DISABLE) or set RECIPE_RECEIPT_SECRET locally to match the issuer' };
     }
     // Match the sign-time canonicalization (src/artifact.js + binder.js check
     // #5): Ed25519 was signed over canonical(receipt WITH HMAC, WITHOUT
@@ -401,7 +401,7 @@ export function loadArtifact(artifactPath, opts = {}) {
         signatureMode = 'cloud-trusted';
       }
     } else {
-      // W481 — Ed25519 structural-integrity fallback. The artifact carries a
+      // W481 - Ed25519 structural-integrity fallback. The artifact carries a
       // self-describing Ed25519 receipt: signature + public key both bundled
       // inside receipt.json. When the local HMAC secret does not match
       // (verifier didn't sign this artifact themselves; bytes weren't
@@ -454,11 +454,11 @@ export function loadArtifact(artifactPath, opts = {}) {
     model,
     pack,
     index,
-    // W287 — raw zip entries so dispatchRuntime + per-target runners can read
+    // W287 - raw zip entries so dispatchRuntime + per-target runners can read
     // bytes like target.wasm / target/linux-x64/recipe / model.gguf without
     // re-opening the zip. Keys are entry names; values are Buffers.
     entries,
-    // W891 — entries too large for a Buffer (Trinity-500 4.6 GB GGUF) are
+    // W891 - entries too large for a Buffer (Trinity-500 4.6 GB GGUF) are
     // declared here instead. Runners (gguf-runner) stream them to disk via
     // extractEntryToFile(artifact_path, name, dest).
     large_entries: largeEntries,
@@ -469,15 +469,15 @@ export function loadArtifact(artifactPath, opts = {}) {
   };
 }
 
-// W891 — re-exported so runners can stream-extract large entries without
+// W891 - re-exported so runners can stream-extract large entries without
 // taking a separate dep on src/zip-large.js.
 export { extractEntryToFile as extractArtifactEntryToFile };
 
-// W287 — declarative health probe for a runtime target. Returns
+// W287 - declarative health probe for a runtime target. Returns
 // { ok: true } when the manifest's declared runtime_target is supported on
 // this host and its required configuration is present, or
 // { ok: false, reason } otherwise. This is the "can I actually run this?"
-// gate the binder + UI surface — loadArtifact is structural-only and never
+// gate the binder + UI surface - loadArtifact is structural-only and never
 // throws on a missing runner; callers ask runtimeAvailable BEFORE attempting
 // dispatchRuntime so they can present a clean "install llama.cpp to run"
 // instead of catching KOLM_E_GGUF_RUNTIME_MISSING after the fact.
@@ -523,7 +523,7 @@ export function runtimeAvailable(manifest) {
   return { ok: false, reason: `unhandled runtime_target ${JSON.stringify(target)}` };
 }
 
-// W287 — runtime dispatch. Reads manifest.runtime_target (default 'js' for
+// W287 - runtime dispatch. Reads manifest.runtime_target (default 'js' for
 // back-compat) and routes the call to the matching runner. The JS path
 // preserves the historical semantics (compileJs + recipe loop in runArtifact),
 // so existing artifacts continue to execute unchanged. Non-JS targets bypass
@@ -539,7 +539,7 @@ export async function dispatchRuntime(bundle, input, opts = {}) {
   // For non-js targets, gate on runtimeAvailable so missing deps surface as
   // KOLM_E_UNSUPPORTED_RUNTIME with the binder-readable reason. The actual
   // runner can still throw a more specific code (KOLM_E_TARGET_MISSING etc.)
-  // when bundle bytes are missing — that is handled inside each runner.
+  // when bundle bytes are missing - that is handled inside each runner.
   if (target !== 'js') {
     const probe = runtimeAvailable(bundle.manifest);
     if (!probe.ok) {
@@ -556,7 +556,7 @@ export async function dispatchRuntime(bundle, input, opts = {}) {
   throw kolmError('KOLM_E_UNSUPPORTED_RUNTIME', `unhandled runtime_target ${JSON.stringify(target)}`);
 }
 
-// W287 — JS runner extracted from runArtifact so dispatchRuntime can call
+// W287 - JS runner extracted from runArtifact so dispatchRuntime can call
 // it directly without re-loading the artifact. Walks the recipe array in
 // order, returns the first recipe that compiles + executes within the
 // timeout. Output shape matches runArtifact's return value.
@@ -600,7 +600,7 @@ async function runJsTarget(bundle, input, opts = {}) {
 
 // Run the artifact against a single input. Returns { output, recipe_id, latency_us, receipt, audit }.
 //
-// W409d — runArtifact now routes ALL targets (js + wasm + native + gguf + onnx)
+// W409d - runArtifact now routes ALL targets (js + wasm + native + gguf + onnx)
 // through dispatchRuntime(). The JS path goes through the same dispatcher as
 // non-JS targets, so the runtime_target manifest field is honored end-to-end
 // at the primary run/eval entry. Previously runArtifact had its own embedded
@@ -612,7 +612,7 @@ async function runJsTarget(bundle, input, opts = {}) {
 // Recipe dispatch (JS target): try each recipe in order, return the first
 // that compiles + executes within the timeout without throwing. The artifact
 // author orders recipes by specificity (most-specific first); the runner
-// trusts that order. Non-JS targets have no recipe loop — their entrypoint
+// trusts that order. Non-JS targets have no recipe loop - their entrypoint
 // is whatever the manifest declares (entrypoint.binary, target.wasm,
 // runtime_target_config.{gguf,onnx}_path).
 //
@@ -682,7 +682,7 @@ export async function runArtifact(artifactPath, input, opts = {}) {
 
   // Normalize the dispatcher result into the historical runArtifact return
   // shape. JS path carries recipe_id/recipe_name; non-JS paths set them to
-  // null because there is no recipe — the entrypoint is the manifest's
+  // null because there is no recipe - the entrypoint is the manifest's
   // declared binary/wasm/gguf/onnx target.
   const us = Number(process.hrtime.bigint() - t0) / 1000;
   const recipe_id = dispatched.recipe_id || null;
@@ -721,7 +721,7 @@ export async function runArtifact(artifactPath, input, opts = {}) {
 }
 
 // Re-run the embedded eval suite against the artifact's recipes. This is
-// what backs `kolm eval <artifact>` — recompute K-score axes from scratch
+// what backs `kolm eval <artifact>` - recompute K-score axes from scratch
 // to confirm the bundle still passes.
 //
 // opts.cases overrides the embedded cases (used by `kolm eval --examples <file>`
@@ -740,7 +740,7 @@ export async function evalArtifact(artifactPath, opts = {}) {
   const latencies = [];
   let passed = 0;
   const errors = [];
-  // W345 — comparator pulled from artifact manifest so eval and bench score
+  // W345 - comparator pulled from artifact manifest so eval and bench score
   // the same artifact identically. Default is 'subset_equal' (the canonical
   // matcher). Embedded evals.comparator wins when set; opts.comparator is the
   // CLI override.
@@ -780,7 +780,7 @@ export async function evalArtifact(artifactPath, opts = {}) {
 //
 // W345: this local copy is retained as a safety reference. The active scoring
 // path goes through src/case-scorer.js::scoreCase so eval and bench share one
-// implementation — if you change semantics here, also update case-scorer.js.
+// implementation - if you change semantics here, also update case-scorer.js.
 function matches(actual, expected) {
   if (expected === undefined || expected === null) return actual !== undefined;
   if (typeof expected === 'function') return expected(actual);
@@ -819,7 +819,7 @@ export function inspectArtifact(artifactPath) {
     signature_valid: bundle.signature_valid,
     signature_mode: bundle.signature_mode || 'hmac-local',
     recipe_names: (bundle.recipes.recipes || []).slice(0, 8).map(r => r.name),
-    // Wave 151 — honest taxonomy surface on every inspect result. Callers
+    // Wave 151 - honest taxonomy surface on every inspect result. Callers
     // (CLI text mode, /r/:hash page, the binder, third-party tooling) read
     // artifact_class to know what they are looking at without having to parse
     // recipes.json. artifact_class_breakdown lets them show "6 rule + 1
@@ -827,7 +827,7 @@ export function inspectArtifact(artifactPath) {
     artifact_class: bundle.manifest.artifact_class || 'rule',
     artifact_class_breakdown: bundle.manifest.artifact_class_breakdown || null,
     license: bundle.manifest.license || null,
-    // R-1 — runtime passports surface. Pre-R-1 artifacts have no key (default []
+    // R-1 - runtime passports surface. Pre-R-1 artifacts have no key (default []
     // so callers branching on `.length` see "no targets probed" without a
     // separate null check). Post-R-1 artifacts always carry the array.
     runtime_passports: Array.isArray(bundle.manifest.runtime_passports)

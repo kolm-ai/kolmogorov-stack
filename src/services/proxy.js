@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// W240 — standalone HTTP capture-and-forward proxy service.
+// W240 - standalone HTTP capture-and-forward proxy service.
 //
 // node src/services/proxy.js --port=7403 [--host=127.0.0.1]
 //                             [--upstream=https://api.openai.com]
@@ -261,7 +261,7 @@ export function createProxyServer({ upstream = DEFAULT_UPSTREAM, defaultNamespac
         const persist = writeCapture(namespace, row);
 
         // W252: never falsely report durable when the write failed. Mirrors
-        // the W212 capture-path contract in src/router.js — failed durable
+        // the W212 capture-path contract in src/router.js - failed durable
         // write must surface 507 Insufficient Storage + x-kolm-capture-durable:
         // false, NOT a 2xx with durable:true (which silently dropped the row).
         if (!persist.durable) {

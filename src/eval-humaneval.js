@@ -1,7 +1,7 @@
-// W758-2 — HumanEval runner (honest scaffold).
+// W758-2 - HumanEval runner (honest scaffold).
 //
-// HumanEval — Chen et al. 2021 ("Evaluating Large Language Models Trained
-// on Code") — 164 Python programming problems, each ships a function
+// HumanEval - Chen et al. 2021 ("Evaluating Large Language Models Trained
+// on Code") - 164 Python programming problems, each ships a function
 // signature + docstring + canonical solution + unit tests. Source at
 // huggingface.co/datasets/openai_humaneval (MIT). pass@k is the standard
 // metric: fraction of problems for which the model's k samples pass all
@@ -18,7 +18,7 @@
 //     execution.py sandbox). When sandbox_cmd is null we return honest
 //     { ok:false, error:'no_code_sandbox_configured' } and refuse to
 //     score. NEVER fall through to eval().
-//   - pass@1 is the only metric we surface — pass@10/pass@100 require
+//   - pass@1 is the only metric we surface - pass@10/pass@100 require
 //     multiple samples and a temperature > 0 generation policy; that's
 //     out of scope until W762 (sample-once-per-problem at temp=0).
 //
@@ -41,7 +41,7 @@ function _defaultPackDir() {
   return path.join(home, '.kolm', 'bench-packs', 'humaneval');
 }
 
-// parseHumanEvalJsonl(text) — JSONL parser (one JSON object per line).
+// parseHumanEvalJsonl(text) - JSONL parser (one JSON object per line).
 // Returns rows with the standard HumanEval schema: { task_id, prompt,
 // canonical_solution, test, entry_point }. Skips blank lines and rows
 // missing any required field.
@@ -71,7 +71,7 @@ export function parseHumanEvalJsonl(text) {
   return out;
 }
 
-// loadHumanEvalPack({pack_dir}) — looks for HumanEval.jsonl in pack_dir.
+// loadHumanEvalPack({pack_dir}) - looks for HumanEval.jsonl in pack_dir.
 // Returns { ok:true, rows, n } OR honest { ok:false, error:'bench_pack_not_local' }.
 export function loadHumanEvalPack({ pack_dir = null } = {}) {
   const dir = pack_dir || process.env[HUMANEVAL_PACK_PATH_ENV] || _defaultPackDir();
@@ -119,9 +119,9 @@ export function loadHumanEvalPack({ pack_dir = null } = {}) {
   return { ok: true, rows, n: rows.length, path: found, version: HUMANEVAL_VERSION };
 }
 
-// _extractCode(raw) — pull out python code from a model response. Models
+// _extractCode(raw) - pull out python code from a model response. Models
 // commonly wrap in ```python ... ``` fences; we strip those. If no fence
-// is present we use the raw text. We do NOT try to repair syntax — that
+// is present we use the raw text. We do NOT try to repair syntax - that
 // would mask real model errors.
 export function extractCodeFromResponse(raw) {
   if (typeof raw !== 'string') return '';
@@ -196,7 +196,7 @@ export async function runHumanEval({
     }
     const code = extractCodeFromResponse(raw);
     // The sandbox composes (code + '\n' + test + '\n' + check(<entry_point>)).
-    // Sandbox is responsible for the actual exec env — Node side never
+    // Sandbox is responsible for the actual exec env - Node side never
     // imports or eval()s the result.
     let verdict;
     try { verdict = await sandbox_cmd(code, row.test, row.entry_point); }

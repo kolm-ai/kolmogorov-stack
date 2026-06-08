@@ -3,52 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
-<title>Verify a .kolm artifact · kolm.ai</title>
-<meta name="description" content="Verify any .kolm artifact: drop a file into the browser verifier, paste a receipt CID against the public registry, or run the standalone CLI offline. Three paths, one spec.">
-<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Verify a kolm evidence report offline, in your browser · kolm.ai</title>
+<meta name="description" content="Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. No account, no upload, no kolm server in the trust path. You verify against the public key, not against our word.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Verify a kolm evidence report offline, in your browser">
+<meta property="og:description" content="Real Ed25519 verification running in your own browser. No account, no upload, no server in the trust path. Try to tamper with the report, the seal reads VOID.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/verify">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Verify a kolm evidence report offline">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/verify">
-<meta property="og:title" content="Verify a .kolm artifact" />
-<meta property="og:description" content="Three ways to verify a .kolm artifact: browser, CLI, or hosted registry." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kolm.ai/verify" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <style>
- .vf-shell{max-width:980px;margin:0 auto;padding:48px 24px 96px}
- .vf-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
- .vf-shell h1{font-size:34px;font-weight:500;letter-spacing:-0.012em;margin:0 0 10px;color:var(--ink)}
- .vf-shell .lede{font-size:15.5px;color:var(--ink-mute);max-width:66ch;margin:0 0 36px;line-height:1.65}
- .vf-paths{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 40px}
- @media(max-width:820px){.vf-paths{grid-template-columns:1fr}}
- .vf-card{display:flex;flex-direction:column;gap:10px;padding:24px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);text-decoration:none;color:var(--ink);min-height:240px;transition:border-color 140ms,transform 140ms}
- .vf-card:hover{border-color:var(--accent);transform:translateY(-1px)}
- .vf-card .chip{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-faint);padding:3px 8px;border:1px solid var(--line);border-radius:999px;align-self:flex-start;margin-bottom:4px}
- .vf-card h2{font-size:17.5px;font-weight:500;margin:0;color:var(--ink);letter-spacing:-0.005em}
- .vf-card p{margin:6px 0 0;color:var(--ink-mute);font-size:13.5px;line-height:1.6}
- .vf-card .est{margin-top:auto;font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;padding-top:14px}
- .vf-paste{margin:0 0 36px;padding:22px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
- .vf-paste h3{margin:0 0 10px;font-size:15px;font-weight:500;color:var(--ink);font-family:var(--mono);letter-spacing:0.02em}
- .vf-paste .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
- .vf-paste input{flex:1 1 360px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:12.5px}
- .vf-paste input:focus{outline:none;border-color:var(--accent)}
- .vf-paste button{padding:10px 18px;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:#fff;font-family:var(--mono);font-size:12px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase}
- .vf-paste button:hover{transform:translateY(-1px)}
- .vf-paste .hint{margin:8px 0 0;font-size:12px;color:var(--ink-faint);font-family:var(--mono)}
- .vf-spec{margin:32px 0 0;padding-top:24px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink-mute);line-height:1.75}
- .vf-spec code{background:var(--bg-elev);padding:2px 6px;border-radius:3px;font-size:12.5px;color:var(--accent)}
- .vf-spec a{color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--line)}
- .vf-spec a:hover{border-bottom-style:solid}
- .vf-checks{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 0}
- @media(max-width:760px){.vf-checks{grid-template-columns:repeat(2,1fr)}}
- .vf-check{padding:11px 13px;border:1px solid var(--line);border-radius:6px;background:var(--bg-card)}
- .vf-check b{display:block;font-family:var(--mono);font-size:11.5px;color:var(--ink);margin:0 0 3px;letter-spacing:0.02em}
- .vf-check span{font-size:12px;color:var(--ink-mute);line-height:1.45}
+  /* page-local: the paste verifier */
+  .vrf { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); align-items: start; }
+  @media (max-width: 900px) { .vrf { grid-template-columns: 1fr; } }
+  .vrf__pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+  .vrf__panehead { display: flex; align-items: center; gap: 10px; padding: 12px var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-2); }
+  .vrf__panehead h3 { font-size: 14px; }
+  .vrf__panehead .vw__status { margin-left: auto; }
+  .vrf textarea {
+    width: 100%; min-height: 340px; resize: vertical; border: 0; outline: 0; display: block;
+    background: var(--bg-1); color: var(--ink); font-family: var(--mono); font-size: 12.5px;
+    line-height: 1.6; padding: var(--s4); tab-size: 2;
+  }
+  .vrf textarea::placeholder { color: var(--ink-faint); }
+  .vrf__bar { display: flex; gap: var(--s2); padding: var(--s3) var(--s4); border-top: 1px solid var(--line); flex-wrap: wrap; background: var(--bg-2); }
+  .vrf__out { padding: var(--s4); min-height: 340px; }
+  .vrf__empty { color: var(--ink-3); font-family: var(--mono); font-size: 12.5px; }
+  .vrf.drag .vrf__pane:first-child { border-color: var(--ok-edge); box-shadow: 0 0 0 1px var(--ok-edge) inset; }
+  .vw__fields { margin-bottom: var(--s4); }
+  .pin { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); margin-top: var(--s3); }
+  .pin input { accent-color: var(--ok); }
 </style>
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/warm-paper.css">
-<script defer src="/nav.js"></script>
-  <meta property="og:image" content="https://kolm.ai/og/verify.svg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -57,7 +67,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/verify",
-  "description": "Verify any .kolm artifact: drop a file into the browser verifier, paste a receipt CID against the public registry, or run the standalone CLI offline. Three paths, one spec.",
+  "description": "Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. No account, no upload, no kolm server in the trust path. You verify against the public key, not against our word.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -71,144 +81,484 @@
 }
 </script>
 </head>
-<body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/solutions/teams">For teams</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="/enterprise">Enterprise</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
     </div>
-  </nav>
-</div>
-
-<main id="main" class="vf-shell">
-<p class="vf-eyebrow">Verify</p>
-<h1>Three ways to verify a .kolm artifact.</h1>
-<p class="lede">Every .kolm carries a signature chain, a frozen-eval hash, and a K-score the receipt was issued against. Pick the verifier that matches what you have &mdash; a file, a receipt ID, or a regulated machine that can&rsquo;t reach the public registry.</p>
-
-<div class="vf-paste">
-  <h3>Paste a receipt CID</h3>
-  <div class="row">
-    <input id="vf-cid" type="text" placeholder="rcpt_01KYC1ZVTGDCW3FX06JQSC" aria-label="Receipt CID" spellcheck="false" autocomplete="off">
-    <button type="button" id="vf-cid-go">Verify &rarr;</button>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
   </div>
-  <p class="hint">Receipt IDs start with <code>rcpt_</code>. We fetch the receipt, recompute the hash chain, and show every input that fed it.</p>
-</div>
+</header>
 
-<div class="vf-paths">
-  <a class="vf-card" href="/account/onboarding/path-verify">
-    <span class="chip">Path 1</span>
-    <h2>Browser drop-in.</h2>
-    <p>Drag a <code>.kolm</code> file (or paste a content hash) into the in-browser verifier. Walks every signature, hash chain entry, and lifecycle transition. No account needed; fully offline-capable.</p>
-    <span class="est">~30 s &middot; no install</span>
-  </a>
-  <a class="vf-card" href="/verify-cli">
-    <span class="chip">Path 2</span>
-    <h2>Standalone CLI.</h2>
-    <p>The free <code>kolm verify</code> binary. Apache-2.0, no login, no telemetry, no network call required. Conforms to <a href="/spec/rs-1" style="color:inherit;border-bottom:1px dashed var(--line)">RS-1</a> and ships for Linux / macOS / Windows.</p>
-    <span class="est">~60 s &middot; air-gap friendly</span>
-  </a>
-  <a class="vf-card" href="/verify-prod">
-    <span class="chip">Path 3</span>
-    <h2>Hosted registry.</h2>
-    <p>Production-signed receipts from <code>kolm.ai</code> with full chain-of-custody. Useful for compliance reviewers who want a third-party attestation that the receipt was emitted by our key.</p>
-    <span class="est">live &middot; cryptographically signed</span>
-  </a>
-</div>
+<main>
 
-<div class="vf-spec">
-  <p><b>What gets checked.</b> Every verifier runs the same four-step check against the <a href="/spec/rs-1">RS-1 v2.1</a> reference spec. If any check fails, the verifier prints which one and exits non-zero.</p>
-  <div class="vf-checks">
-    <div class="vf-check"><b>signature chain</b><span>Detached Ed25519 sig over the manifest, walked from leaf to root.</span></div>
-    <div class="vf-check"><b>manifest schema</b><span>Required fields, lifecycle stage, K-score gate, and provenance pins.</span></div>
-    <div class="vf-check"><b>frozen-eval hash</b><span>Eval set hashes must match the value the artifact was trained against.</span></div>
-    <div class="vf-check"><b>K-score recompute</b><span>Replay the held-out eval, compare to the issued K-score within tolerance.</span></div>
+<!-- ============================================================ 1. THE VERIFIER (the workspace) -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:72ch">
+      <h1>Verify a report, in your own browser.</h1>
+      <p class="lede">
+        Paste a report, load the sample, or drop a <span class="mono">.json</span> file.
+        Every check runs in <em>this</em> browser, with no account, no upload, and no
+        kolm server in the path. Two things are checked: the Ed25519 signature proves
+        the bytes are untampered, and the signing key is matched against kolm's published
+        issuer keyring, so a report re-signed with someone else's key cannot pass as ours.
+      </p>
+    </div>
+
+    <div class="vrf" id="vrf">
+      <!-- input -->
+      <div class="vrf__pane">
+        <div class="vrf__panehead">
+          <h3>Evidence report (JSON)</h3>
+          <span class="vw__status" id="inStatus">paste · load · drop</span>
+        </div>
+        <label class="sr-only" for="src">Evidence report JSON</label>
+        <textarea id="src" spellcheck="false" placeholder='{
+  "schema": "kolm-audit-report-1",
+  "report_id": "asrr_...",
+  "summary": { "readiness_pct": 0, "blocking_count": 5, "tamper_evident": false, ... },
+  ...
+  "signature_ed25519": { "alg": "ed25519", "public_key": "-----BEGIN PUBLIC KEY-----...", "signature": "..." }
+}
+
+Paste an evidence report (or a receipt) here, or press "Load sample report".'></textarea>
+        <div class="vrf__bar">
+          <button class="btn btn--primary btn--sm" id="verifyBtn" type="button">Verify</button>
+          <button class="btn btn--ghost btn--sm" id="sampleBtn" type="button">Load sample report</button>
+          <button class="btn btn--ghost btn--sm" id="sampleRcptBtn" type="button">Load sample receipt</button>
+          <button class="btn btn--ghost btn--sm" id="tamperBtn" type="button">Tamper a field</button>
+          <button class="btn btn--ghost btn--sm" id="forgeBtn" type="button">Forge with a rogue key</button>
+          <button class="btn btn--ghost btn--sm" id="clearBtn" type="button">Clear</button>
+        </div>
+        <label class="pin" style="padding:0 var(--s4) var(--s4)">
+          <input type="checkbox" id="pinChk" checked>
+          Require a recognized kolm issuer key (recommended). Proves the report was signed by kolm, not just by a valid key.
+        </label>
+      </div>
+
+      <!-- output -->
+      <div class="vrf__pane">
+        <div class="vrf__panehead">
+          <h3>Verification</h3>
+          <span class="vw__status" id="outStatus">idle</span>
+        </div>
+        <div class="vrf__out" id="out">
+          <p class="vrf__empty">Load the sample or paste a report, then press <b class="ok-text">Verify</b>. Nothing is pre-filled; every check runs in your browser.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="band" style="margin-top:var(--s5)">
+      <span class="band__item"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:14px;height:14px;color:var(--ok)"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> in-browser WebCrypto · Ed25519 (RFC 8037)</span>
+      <span class="band__item">SHA-256 key fingerprint, recomputed locally</span>
+      <span class="band__item">Open verifier: <a href="/kolm-audit-verify.js" style="color:var(--ink);border-bottom:1px solid var(--ok-edge)">kolm-audit-verify.js</a></span>
+    </div>
   </div>
-  <p style="margin-top:18px">No verifier sends anything to <code>kolm.ai</code> by default. Path 3 only contacts our registry to read the public receipt &mdash; the verification itself runs in your environment. See the <a href="/security">security model</a> and <a href="/spec/rs-1">RS-1 spec</a> for the full guarantee surface.</p>
-</div>
+</section>
+
+<!-- ============================================================ 2. THE TWO CHECKS (the ledger) -->
+<section class="section section--ink reveal" id="checks-explainer">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / The two checks</span>
+      <h2>They don't trust us. They check the math.</h2>
+      <p class="lede">A valid signature alone is not enough. A forger can sign their own edited report with their own key. Both tiers have to hold.</p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Why offline</p>
+        <h3>Nothing for us to fake</h3>
+        <p>Asymmetric signatures need only the public key, and it travels inside the report. kolm is never in the verification path, so there is no back end to quietly return a green check.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Tier 1 · signature</p>
+        <h3>Untampered since signing</h3>
+        <p>The report is signed by the holder of the embedded key and has not changed by a single byte since. Edit one field and the signature fails in red. Try <span class="mono">Tamper a field</span>.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Tier 2 · issuer</p>
+        <h3>And actually ours</h3>
+        <p>The embedded key is matched against kolm's published keyring. Re-sign an edited report with an attacker's own key and tier 1 passes, but tier 2 exposes it. Try <span class="mono">Forge with a rogue key</span>.</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s6)">
+      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 3. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Hand your buyer a report they can check.</h2>
+    <p class="lede">A signed evidence report your buyer verifies right here, against your key, with no account and no server in the trust path.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost" href="/report">See the report</a>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<script>
-(function(){
-  var input=document.getElementById("vf-cid");
-  var btn=document.getElementById("vf-cid-go");
-  function go(){
-    var v=(input.value||"").trim();
-    if(!v)return input.focus();
-    var cid=v.replace(/^[\s\/]*/,"").replace(/\/.*$/,"");
-    window.location.href="/v1/verify/"+encodeURIComponent(cid);
-  }
-  btn.addEventListener("click",go);
-  input.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();go();}});
-})();
-</script>
-
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/status">Status</a>
-        <a href="/subprocessors">Subprocessors</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/about">About</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/press">Press</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
+
+<script type="module">
+  import { verifyReceipt } from '/kolm-verify.js';
+  import { verifyAuditReport, issuerProvenance, canonicalizeReport, keyFingerprintFromPem, normalizePem, AUDIT_REPORT_SCHEMA } from '/kolm-audit-verify.js';
+
+  // The page verifies BOTH artifacts kolm signs: an Agent Security-Review
+  // evidence *report* (schema kolm-audit-report-1, the deal-unblocking
+  // deliverable) and an inference *receipt*. We pick the verifier + the field
+  // view from the pasted JSON's schema, so a buyer can paste either.
+  const isAuditReport = (o) => !!(o && typeof o === 'object' && o.schema === AUDIT_REPORT_SCHEMA);
+
+  const $ = (id) => document.getElementById(id);
+  const src = $('src'), out = $('out'), outStatus = $('outStatus'), inStatus = $('inStatus');
+  const pinChk = $('pinChk');
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sleep = (ms) => reduce ? Promise.resolve() : new Promise((r) => setTimeout(r, ms));
+
+  // kolm's published keyring of trusted issuer keys. INLINED here so issuer
+  // provenance works even with the network unplugged (view-source it: these are
+  // the exact keys this page trusts). At load we also fetch the canonical
+  // /keys/kolm-issuers.json over the same TLS origin and merge fresh/rotated
+  // entries in, but the inlined copy is the offline anchor, not the fetch.
+  //
+  // status: "demo" signs the sample report only; "production" signs real
+  // evidence. A report whose embedded key matches NO entry here is, at best,
+  // "untampered since someone signed it", not a kolm-issued report.
+  const KOLM_ISSUERS = {
+    schema: 'kolm-issuer-keyring-1',
+    issuers: [
+      {
+        kid: 'kolm-demo-2026',
+        label: 'kolm demo issuer',
+        status: 'demo',
+        public_key: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAcNW1vj5BUnzmEjH6iAdKM2p5of35Oe6znRifqpuLF7A=\n-----END PUBLIC KEY-----\n',
+      },
+      {
+        kid: 'kolm-prod-2026',
+        label: 'kolm production issuer',
+        status: 'production',
+        public_key: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAI1W4RkabFYhAOfk3DB+hE3CZWexFJE/7KFZ3X2G1+bk=\n-----END PUBLIC KEY-----\n',
+      },
+    ],
+  };
+
+  // Merge the canonical published keyring over the inlined one (by kid). Best-
+  // effort: a failed/offline fetch leaves the inlined anchor in place.
+  async function refreshKeyring() {
+    try {
+      const r = await fetch('/keys/kolm-issuers.json', { cache: 'no-store' });
+      if (!r.ok) return;
+      const fresh = await r.json();
+      if (!fresh || !Array.isArray(fresh.issuers)) return;
+      const byKid = new Map(KOLM_ISSUERS.issuers.map((i) => [i.kid, i]));
+      for (const i of fresh.issuers) { if (i && i.public_key) byKid.set(i.kid || i.fingerprint || i.public_key, i); }
+      KOLM_ISSUERS.issuers = Array.from(byKid.values());
+    } catch (_) { /* offline: keep the inlined anchor */ }
+  }
+  refreshKeyring();
+
+  const CHECK = '<svg class="mk" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:15px;height:15px"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const CROSS = '<svg class="mk" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:15px;height:15px"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function setStatus(el, text, kind) {
+    el.textContent = text; el.classList.remove('is-ok', 'is-bad');
+    if (kind) el.classList.add(kind === 'ok' ? 'is-ok' : 'is-bad');
+  }
+
+  function row(k, v) {
+    let s = String(v);
+    if (s.length > 44) s = s.slice(0, 32) + '…' + s.slice(-8);
+    return `<div class="vw__row"><span class="vw__key">${esc(k)}</span><span class="vw__val">${esc(s)}</span></div>`;
+  }
+
+  function renderFields(receipt) {
+    const show = ['receipt_id', 'model', 'provider', 'input_hash', 'output_hash', 'cost_usd', 'signing_key_id'];
+    let rows = '';
+    for (const k of show) {
+      if (!(k in receipt)) continue;
+      rows += row(k, receipt[k]);
+    }
+    return rows ? `<div class="vw__fields">${rows}</div>` : '';
+  }
+
+  function renderAuditFields(report) {
+    const s = report.summary || {};
+    let rows = '';
+    rows += row('report_id', report.report_id || 'n/a');
+    if (report.subject && report.subject.name) rows += row('subject', report.subject.name);
+    if (report.generated_at) rows += row('generated', report.generated_at);
+    rows += row('readiness', s.readiness_pct == null ? 'n/a' : s.readiness_pct + '%');
+    rows += row('deal-blockers', s.blocking_count ?? 0);
+    rows += row('tamper-evident trail', s.tamper_evident ? 'yes' : 'no');
+    if (Array.isArray(report.findings)) rows += row('findings', report.findings.length);
+    const sig = report.signature_ed25519 || {};
+    if (sig.key_fingerprint) rows += row('key fingerprint', sig.key_fingerprint);
+    return rows ? `<div class="vw__fields">${rows}</div>` : '';
+  }
+
+  async function appendCheck(checksEl, ok, name, detail, animate) {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'vw__check ' + (ok === null ? '' : (ok ? 'ok' : 'bad'));
+    rowEl.innerHTML = (ok === null ? '' : (ok ? CHECK : CROSS)) + `<span>${esc(name)}${detail ? ' · ' + esc(String(detail)) : ''}</span>`;
+    checksEl.appendChild(rowEl);
+    void rowEl.offsetWidth; requestAnimationFrame(() => rowEl.classList.add('show'));
+    if (animate) await sleep(200);
+    return rowEl;
+  }
+
+  async function run() {
+    let text = src.value.trim();
+    if (!text) { setStatus(outStatus, 'no input', 'bad'); out.innerHTML = '<p class="vrf__empty">Paste a report or load the sample first.</p>'; return; }
+    let doc;
+    try { doc = JSON.parse(text); }
+    catch (e) {
+      setStatus(outStatus, 'invalid JSON', 'bad');
+      out.innerHTML = `<div class="vw__checks"><div class="vw__check bad show">${CROSS}<span>input is not valid JSON · ${esc(e.message)}</span></div></div>`;
+      return;
+    }
+
+    const auditMode = isAuditReport(doc);
+    setStatus(outStatus, 'verifying…', null);
+    out.innerHTML = (auditMode ? renderAuditFields(doc) : renderFields(doc)) + '<div class="vw__checks" id="checks"></div>';
+    const checksEl = $('checks');
+
+    // Tier 1, cryptographic integrity: signed by the holder of the embedded
+    // key, untampered since. (No pin opt here; issuer provenance is tier 2.)
+    let result;
+    try { result = auditMode ? await verifyAuditReport(doc) : await verifyReceipt(doc); }
+    catch (e) { result = { ok: false, reason: 'verifier error: ' + e.message, checks: [] }; }
+
+    for (const c of result.checks) await appendCheck(checksEl, c.ok, c.name, c.detail, true);
+    if (result.reason && !result.ok) await appendCheck(checksEl, false, result.reason, '', false);
+
+    // Receipts: integrity is the whole verdict.
+    if (!auditMode) {
+      setStatus(outStatus, result.ok ? 'Verified offline' : 'Not verified', result.ok ? 'ok' : 'bad');
+      return;
+    }
+
+    // Tier 2, issuer provenance: is the embedded key one kolm publishes? This
+    // is the check that stops a forger who re-signs an edited report with their
+    // OWN key (tier 1 would still pass for that forgery, try the rogue-key
+    // button). Always shown; the checkbox decides whether it gates the verdict.
+    const prov = issuerProvenance(doc, KOLM_ISSUERS);
+    const require = pinChk.checked;
+    if (prov.recognized) {
+      const tag = prov.status === 'production' ? 'production issuer' : (prov.status ? prov.status + ' issuer' : 'issuer');
+      await appendCheck(checksEl, true, 'recognized kolm issuer key', `${prov.label || prov.kid || 'kolm'} (${tag})`, true);
+    } else {
+      await appendCheck(checksEl, require ? false : null, require ? 'NOT a recognized kolm issuer key' : 'issuer key not in kolm keyring (not required)',
+        'the embedded key is not one kolm publishes', true);
+    }
+
+    // Compose the headline verdict from both tiers.
+    let level, label;
+    if (!result.ok) { level = 'bad'; label = 'Not verified: altered or invalid signature'; }
+    else if (prov.recognized) {
+      level = 'ok';
+      label = prov.status === 'demo' ? 'Verified: kolm demo issuer, untampered' : 'Verified: kolm-issued, untampered';
+    } else if (require) {
+      level = 'bad';
+      label = 'Untampered, but NOT a kolm-issued report';
+    } else {
+      level = 'ok';
+      label = 'Signature intact (issuer not verified)';
+    }
+
+    if (result.ok && !prov.recognized) {
+      await appendCheck(checksEl, null,
+        require
+          ? 'A valid signature alone does not make a report kolm-issued. Anyone can sign their own edited report with their own key. Pinning to kolm’s published issuer key is what proves it came from us.'
+          : 'Signature is intact, but the issuer was not checked against kolm’s keyring. Tick the box above to require a recognized kolm issuer key.',
+        '', false);
+    }
+    setStatus(outStatus, label, level === 'ok' ? 'ok' : 'bad');
+  }
+
+  async function loadSample(url, label) {
+    setStatus(inStatus, 'loading…', null);
+    try {
+      const r = await fetch(url, { cache: 'no-store' });
+      src.value = JSON.stringify(await r.json(), null, 2);
+      setStatus(inStatus, label + ' loaded', 'ok');
+      run();
+    } catch (e) { setStatus(inStatus, 'load failed', 'bad'); }
+  }
+
+  function tamper() {
+    let doc;
+    try { doc = JSON.parse(src.value); } catch (e) { setStatus(inStatus, 'load a report first', 'bad'); return; }
+    if (isAuditReport(doc)) {
+      // Downgrade the headline a buyer reads: bump readiness to 100%. The
+      // signature must reject the altered bytes.
+      if (doc.summary && typeof doc.summary === 'object') {
+        doc.summary.readiness_pct = 100;
+        doc.summary.blocking_count = 0;
+        setStatus(inStatus, 'tampered: summary.readiness_pct', 'bad');
+      } else { doc.report_id = 'tampered'; setStatus(inStatus, 'tampered: report_id', 'bad'); }
+      src.value = JSON.stringify(doc, null, 2);
+      run();
+      return;
+    }
+    const k = ['output_hash', 'input_hash', 'model'].find((f) => f in doc) || Object.keys(doc)[0];
+    const v = doc[k];
+    if (typeof v === 'string') {
+      const m = v.match(/[0-9a-f]/i); const i = v.indexOf(m ? m[0] : v[0]);
+      doc[k] = v.slice(0, i) + (v[i].toLowerCase() === 'a' ? 'b' : 'a') + v.slice(i + 1);
+    } else if (typeof v === 'number') doc[k] = v + 1; else doc[k] = 'tampered';
+    src.value = JSON.stringify(doc, null, 2);
+    setStatus(inStatus, 'tampered: ' + k, 'bad');
+    run();
+  }
+
+  // --- Forge: re-sign an EDITED report with a rogue key minted in-browser. ---
+  // This is the attack the issuer-provenance check defends against: tier-1
+  // crypto will PASS (the bytes are validly signed by *a* key), but the embedded
+  // key is not in kolm's keyring, so tier-2 fails and the verdict is not green.
+  function _bytesToBase64(bytes) {
+    let bin = ''; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]); return btoa(bin);
+  }
+  function _spkiDerToPem(der) {
+    const b64 = _bytesToBase64(new Uint8Array(der));
+    return `-----BEGIN PUBLIC KEY-----\n${(b64.match(/.{1,64}/g) || [b64]).join('\n')}\n-----END PUBLIC KEY-----\n`;
+  }
+  async function forge() {
+    let doc;
+    try { doc = JSON.parse(src.value); } catch (e) { setStatus(inStatus, 'load a report first', 'bad'); return; }
+    if (!isAuditReport(doc)) { setStatus(inStatus, 'load an evidence report first', 'bad'); return; }
+    if (!(window.crypto && crypto.subtle && crypto.subtle.generateKey)) { setStatus(inStatus, 'WebCrypto Ed25519 unavailable', 'bad'); return; }
+    try {
+      // Attacker edits the headline a buyer reads…
+      if (doc.summary && typeof doc.summary === 'object') { doc.summary.readiness_pct = 100; doc.summary.blocking_count = 0; }
+      doc.findings = [];
+      // …then re-signs the edited bytes with their OWN freshly-minted key.
+      const kp = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+      const pubPem = _spkiDerToPem(await crypto.subtle.exportKey('spki', kp.publicKey));
+      const fp = await keyFingerprintFromPem(pubPem);
+      delete doc.signature_ed25519;
+      const canonical = canonicalizeReport(doc);
+      const sigBuf = await crypto.subtle.sign('Ed25519', kp.privateKey, new TextEncoder().encode(canonical));
+      doc.signature_ed25519 = {
+        spec: 'kolm-ed25519-v1', alg: 'ed25519',
+        public_key: pubPem, key_fingerprint: fp,
+        signature: _bytesToBase64(new Uint8Array(sigBuf)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+        signed_at: doc.generated_at,
+      };
+      src.value = JSON.stringify(doc, null, 2);
+      setStatus(inStatus, 'forged: re-signed with a rogue key', 'bad');
+      run();
+    } catch (e) { setStatus(inStatus, 'forge failed: ' + e.message, 'bad'); }
+  }
+
+  // theme toggle is handled by /kolm-2026.js (shared).
+
+  $('verifyBtn').addEventListener('click', run);
+  $('sampleBtn').addEventListener('click', () => loadSample('/sample-audit-report.json', 'sample report'));
+  $('sampleRcptBtn').addEventListener('click', () => loadSample('/sample-receipt.json', 'sample receipt'));
+  $('tamperBtn').addEventListener('click', tamper);
+  $('forgeBtn').addEventListener('click', forge);
+  // Re-run when the issuer requirement is toggled so the verdict updates live.
+  pinChk.addEventListener('change', () => { if (src.value.trim()) run(); });
+  $('clearBtn').addEventListener('click', () => { src.value = ''; setStatus(inStatus, 'paste · load · drop', null); setStatus(outStatus, 'idle', null); out.innerHTML = '<p class="vrf__empty">Cleared. Load the sample or paste a report, then press Verify.</p>'; });
+
+  // drag-and-drop a .json file
+  const vrf = $('vrf');
+  ['dragenter', 'dragover'].forEach((ev) => vrf.addEventListener(ev, (e) => { e.preventDefault(); vrf.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach((ev) => vrf.addEventListener(ev, (e) => { e.preventDefault(); if (ev !== 'drop' && e.target !== vrf && vrf.contains(e.relatedTarget)) return; vrf.classList.remove('drag'); }));
+  vrf.addEventListener('drop', async (e) => {
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!file) return;
+    src.value = await file.text();
+    setStatus(inStatus, 'dropped: ' + file.name, 'ok');
+    run();
+  });
+</script>
 </body>
 </html>

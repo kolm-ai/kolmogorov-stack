@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Transparency log: append-only, per-report inclusion proofs · kolm.ai</title>
+<meta name="description" content="Every kolm evidence report is entered into an append-only, hash-chained transparency log that returns a per-report Merkle inclusion proof, so a reviewer can confirm a report was logged when it claims and was never quietly replaced.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Transparency log: per-report inclusion proofs">
+<meta property="og:description" content="An append-only, hash-chained log with per-report Merkle inclusion proofs. Confirm a report was logged when it claims and never replaced.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/transparency-log">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="kolm transparency log">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/transparency-log">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "kolm",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "url": "https://kolm.ai/transparency-log",
+  "description": "Every kolm evidence report is entered into an append-only, hash-chained transparency log that returns a per-report Merkle inclusion proof, so a reviewer can confirm a report was logged when it claims and was never quietly replaced.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "kolm.ai",
+    "@id": "https://kolm.ai/#org"
+  }
+}
+</script>
+</head>
+<body>
+
+<hr class="foil-strip" aria-hidden="true">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:66ch">
+      <span class="idx">01 / Transparency log</span>
+      <h1>A report can't be quietly replaced.</h1>
+      <p class="lede">A signature proves a report wasn't altered. The transparency log proves something else: that this exact report existed when it claims, and that a different one wasn't slipped in later. Every report becomes a leaf in an append-only, hash-chained Merkle log, each shipping with its own inclusion proof.</p>
+    </div>
+  </div>
+</section>
+
+<!-- what it adds -->
+<section class="section reveal" style="border-top:0;padding-top:0">
+  <div class="wrap">
+    <div class="section__head"><span class="idx">02 / What the log adds</span></div>
+    <div class="grid grid--3">
+      <div class="card"><p class="card__k">Append-only</p><h3>You can add, never edit</h3><p>Entries are chained by hash. Rewriting any past entry changes every hash after it, so tampering is self-evident.</p></div>
+      <div class="card"><p class="card__k">Inclusion proof</p><h3>Proof per report</h3><p>Each report carries a Merkle proof binding it to the log's root, checkable without trusting the log operator.</p></div>
+      <div class="card"><p class="card__k">No replacement</p><h3>History you can rely on</h3><p>A reviewer can confirm the report they hold is the one that was logged, not a quietly swapped re-issue.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- how it works -->
+<section class="section section--ink reveal">
+  <div class="wrap split" style="align-items:center">
+    <div>
+      <span class="idx">03 / How it works</span>
+      <h2>Hash the report, append the leaf, return the path.</h2>
+      <p class="lede" style="margin-bottom:16px">When a report is signed, its hash is appended as a leaf to the Merkle tree. The log returns the audit path from that leaf to the root. Anyone can recompute the path and confirm the leaf is included. The chained roots make removing or reordering history detectable.</p>
+      <p class="card__map">RFC 6962-style Merkle log · SHA-256 leaves · per-report audit path</p>
+    </div>
+    <div class="report">
+      <div><span class="lbl">leaf</span>   &nbsp; <span class="h">sha256(report)</span></div>
+      <div><span class="lbl">append</span> &nbsp; tree.add(leaf) &rarr; index</div>
+      <div><span class="lbl">root</span>   &nbsp; <span class="h">merkle_root</span> <span class="ann">chained</span></div>
+      <div><span class="lbl">proof</span>  &nbsp; <span class="h">audit_path(index)</span></div>
+      <div><span class="lbl">verify</span> &nbsp; <span class="h">recompute &rarr; root</span> <span class="ann">offline</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- what it is not -->
+<section class="section reveal">
+  <div class="wrap split" style="align-items:center">
+    <div>
+      <span class="idx">04 / What it is not</span>
+      <h2>Math reviewers already accept.</h2>
+      <p class="lede" style="margin-bottom:16px">Enterprise security teams are wary of crypto custody and public-chain exposure, so we keep none of that in the path. The transparency log is the same well-understood, Sigstore-style construction reviewers know from software supply-chain security. It's offline-verifiable, with zero tokens, wallets, or chains to trust.</p>
+      <div class="hero__cta">
+        <a class="btn btn--ghost btn--sm" href="/report">Anatomy of a report</a>
+        <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      </div>
+    </div>
+    <div class="grid" style="gap:14px">
+      <div class="card"><p class="card__k">Offline</p><h3>No network to verify</h3><p>The inclusion proof checks against the report itself, with no network call needed.</p></div>
+      <div class="card"><p class="card__k">Familiar</p><h3>Supply-chain lineage</h3><p>The same transparency-log idea behind modern artifact signing.</p></div>
+      <div class="card"><p class="card__k">No custody</p><h3>Nothing to hold</h3><p>No tokens, no wallets, no chain in the enterprise trust path.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Signed, logged, and checkable by anyone.</h2>
+    <div class="hero__cta"><a class="btn btn--primary" href="/verify">Verify a report</a><a class="btn btn--ghost" href="/platform">See the platform</a></div>
+  </div>
+</section>
+</main>
+
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

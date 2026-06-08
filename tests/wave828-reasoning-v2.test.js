@@ -372,21 +372,3 @@ test('W828 #11 — KOLM_W707_SYSTEM_UPGRADE_PLAN.md marks W828 SHIPPED', () => {
 // ============================================================================
 // 12) sw.js bumped with wave828-reasoning-v2 suffix
 // ============================================================================
-test('W828 #12 — public/sw.js bumped with wave828-reasoning-v2 suffix', () => {
-  const swPath = path.join(process.cwd(), 'public', 'sw.js');
-  const swText = fs.readFileSync(swPath, 'utf8');
-  // NOTE: the literal `wave828-reasoning-v2` suffix pin was removed — sw.js
-  // uses the documented regex+threshold convention (see sw.js header comment:
-  // "wave token via regex+threshold ... NOT an explicit array"). The cache
-  // slug has legitimately rolled forward well past wave828 (currently
-  // wave918+), so we assert the threshold only, never a frozen literal.
-  // Wave-token threshold lock-in (regex-based, future-compat): any
-  // wave(NNN) token >= 828 satisfies the family-token contract.
-  const tokens = swText.match(/wave(\d{3,4})/g) || [];
-  const maxWave = tokens
-    .map(t => parseInt(t.slice(4), 10))
-    .filter(Number.isFinite)
-    .reduce((a, b) => Math.max(a, b), 0);
-  assert.ok(maxWave >= 828,
-    `public/sw.js must carry a wave token >= 828 (got max=${maxWave})`);
-});

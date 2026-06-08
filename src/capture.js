@@ -1,4 +1,4 @@
-// Capture proxy — drop-in replacement for Anthropic / OpenAI APIs that
+// Capture proxy - drop-in replacement for Anthropic / OpenAI APIs that
 // records (input, output, latency_us, model, namespace, tenant) tuples on
 // every call. The customer points OPENAI_BASE_URL, ANTHROPIC_BASE_URL, or
 // OPENROUTER_BASE_URL at `https://kolm.ai/v1/capture/<provider>` and passes
@@ -14,7 +14,7 @@
 // produced by distill ships to the customer; no copy is retained.
 
 import crypto from 'node:crypto';
-// W-N — shared fetch hardening: 429+backoff retries (max 3), AbortController
+// W-N - shared fetch hardening: 429+backoff retries (max 3), AbortController
 // timeouts (default 60s, clamped 1-300s), malformed-JSON envelopes. Used by
 // forwardAnthropic / forwardOpenAI / forwardOpenRouter below alongside the
 // W-M Vercel teacher-chat proxy fallback (which is in this file).
@@ -24,10 +24,10 @@ import {
   buildAnthropicBody as _w_N_buildAnthropicBody,
   DEFAULT_TIMEOUT_MS as _W_N_DEFAULT_TIMEOUT_MS,
 } from './providers/_shared.js';
-// W784 — Capture-processor plugin discovery. captureProcessorPlugins() returns
+// W784 - Capture-processor plugin discovery. captureProcessorPlugins() returns
 // plugins of kind "capture-processor" so the gateway can fold third-party
 // transformers (e.g. domain-specific PII redactors) into the capture pipeline.
-// Discovery only at this layer — the plugin's entry script does the actual
+// Discovery only at this layer - the plugin's entry script does the actual
 // transform per row. See src/plugins.js + /docs/plugins.html.
 import { captureProcessorPlugins as _w784CaptureProcessorPlugins } from './plugins.js';
 export function listW784CaptureProcessorPlugins() {
@@ -128,7 +128,7 @@ export function modelFromBody(body, provider) {
 // Vercel teacher-chat fallback
 //
 // W-M wave / wrapper-completion. The Railway service that hosts /v1/* does
-// NOT see Vercel env vars — vendor API keys (ANTHROPIC_API_KEY, OPENAI_*,
+// NOT see Vercel env vars - vendor API keys (ANTHROPIC_API_KEY, OPENAI_*,
 // GOOGLE_*, XAI_*) live on the kolm.ai Vercel deployment because that's where
 // /v1/teacher/chat already runs and accepts a kolm bearer. When the gateway
 // dispatch path lands on Railway and finds NO local provider key, it should
@@ -232,7 +232,7 @@ async function _proxyViaTeacherChat({ vendor, body, proxyBearer, proxyBase }) {
             // Native Anthropic keys for the receipt reader's primary lookup.
             input_tokens:  usage.input_tokens  || usage.prompt_tokens     || 0,
             output_tokens: usage.output_tokens || usage.completion_tokens || 0,
-            // Pass through char counts too — useful for debugging.
+            // Pass through char counts too - useful for debugging.
             input_chars:   usage.input_chars   || 0,
             output_chars: usage.output_chars   || 0,
           },
@@ -241,7 +241,7 @@ async function _proxyViaTeacherChat({ vendor, body, proxyBearer, proxyBase }) {
         elapsed_us,
       };
     }
-    // openai / openrouter — already openai-compat.
+    // openai / openrouter - already openai-compat.
     return {
       status: 200,
       json: {
@@ -259,7 +259,7 @@ async function _proxyViaTeacherChat({ vendor, body, proxyBearer, proxyBase }) {
     };
   }
 
-  // Failure path — surface the proxy's status so shouldFallback() in
+  // Failure path - surface the proxy's status so shouldFallback() in
   // gateway-router can advance the chain (503 from the Vercel side when
   // its keys are missing too is 5xx, which IS fallback-eligible).
   return {
@@ -363,20 +363,20 @@ export function promptHash(prompt) {
   return crypto.createHash('sha256').update(prompt || '', 'utf8').digest('hex').slice(0, 16);
 }
 
-// W713-1 — reasoning-trace extraction.
+// W713-1 - reasoning-trace extraction.
 //
 // When the teacher is a reasoning model (Claude with thinking blocks, OpenAI
 // o1/o3 with reasoning_tokens, DeepSeek-R1 with <think>...</think>), we want
 // to capture the chain-of-thought, not just the final answer. The student
-// then learns to reproduce the reasoning process — see apps/trainer/distill_cot.py
+// then learns to reproduce the reasoning process - see apps/trainer/distill_cot.py
 // for the training-side formatter and src/chat-templates.js (kolm-think) for
 // the chat-template wrapper that bytes-match this envelope.
 //
-// Honesty contract: returns null when no reasoning is detected (NOT {} — null
+// Honesty contract: returns null when no reasoning is detected (NOT {} - null
 // is the honest "no trace present" signal; {} would be confusable with "empty
 // trace recorded"). Never throws; malformed inputs return null.
 //
-// Output envelope shape (stable across providers — distill_cot.py reads this):
+// Output envelope shape (stable across providers - distill_cot.py reads this):
 //   {
 //     provider: 'anthropic' | 'openai' | 'generic',
 //     blocks?: [{ type: 'thinking', text: '...' }, { type: 'text', text: '...' }],
@@ -392,7 +392,7 @@ export function extractReasoningTrace(response, provider) {
     if (provider === 'generic' || provider === 'deepseek' || provider === 'ollama') {
       return _extractGenericReasoning(response);
     }
-    // Unknown provider — try generic as the best-effort fallback, never throw.
+    // Unknown provider - try generic as the best-effort fallback, never throw.
     return _extractGenericReasoning(response);
   } catch (_) {
     return null;
@@ -439,7 +439,7 @@ function _extractOpenAIReasoning(response) {
   if (typeof msg.reasoning === 'string') reasoningText = msg.reasoning;
   else if (msg.reasoning && typeof msg.reasoning.content === 'string') reasoningText = msg.reasoning.content;
   else if (typeof msg.reasoning_content === 'string') reasoningText = msg.reasoning_content;
-  // No reasoning tokens AND no inline reasoning text — honest null.
+  // No reasoning tokens AND no inline reasoning text - honest null.
   if (reasoningTokens === 0 && !reasoningText) return null;
   const out = {
     provider: 'openai',
@@ -458,7 +458,7 @@ export function parseThinkBlocks(text) {
   const openIdx = text.indexOf('<think>');
   if (openIdx === -1) return null;
   const closeIdx = text.indexOf('</think>', openIdx);
-  if (closeIdx === -1) return null;  // unbalanced — honest null
+  if (closeIdx === -1) return null;  // unbalanced - honest null
   const thinking = text.slice(openIdx + '<think>'.length, closeIdx);
   const answer = text.slice(closeIdx + '</think>'.length);
   return {
@@ -492,7 +492,7 @@ function _extractGenericReasoning(response) {
   };
 }
 
-// W828-1 — AUTO-DETECT reasoning capability from response shape.
+// W828-1 - AUTO-DETECT reasoning capability from response shape.
 //
 // W713 required the caller to pass provider:'anthropic'|'openai'|'generic'.
 // W828 sniffs the response shape itself so the capture path doesn't need
@@ -511,7 +511,7 @@ function _extractGenericReasoning(response) {
 //   * else → { has_traces:false }
 //
 // Honesty contract: never throws on malformed input; missing/null/non-object →
-// { has_traces:false } (NOT null — callers branch on has_traces directly).
+// { has_traces:false } (NOT null - callers branch on has_traces directly).
 // Order: Anthropic shape first (richest signal), then OpenAI reasoning_tokens,
 // then DeepSeek reasoning_content (shares OpenAI choices[] shape but field is
 // distinct), then Gemini. A response cannot be more than one of these in
@@ -521,7 +521,7 @@ export function autoDetectReasoningCapability(response) {
     return { has_traces: false };
   }
   try {
-    // Anthropic extended-thinking — content[].type === 'thinking'.
+    // Anthropic extended-thinking - content[].type === 'thinking'.
     if (Array.isArray(response.content)) {
       for (const block of response.content) {
         if (block && typeof block === 'object' && block.type === 'thinking') {
@@ -533,7 +533,7 @@ export function autoDetectReasoningCapability(response) {
         }
       }
     }
-    // OpenAI o-series reasoning tokens — usage.completion_tokens_details.reasoning_tokens
+    // OpenAI o-series reasoning tokens - usage.completion_tokens_details.reasoning_tokens
     // (current shape) or usage.reasoning_tokens (early preview / spec stub).
     const usage = response.usage;
     if (usage && typeof usage === 'object') {
@@ -550,7 +550,7 @@ export function autoDetectReasoningCapability(response) {
         };
       }
     }
-    // DeepSeek-R1 OpenAI-compatible adapter — message.reasoning_content.
+    // DeepSeek-R1 OpenAI-compatible adapter - message.reasoning_content.
     if (Array.isArray(response.choices) && response.choices[0]) {
       const msg = response.choices[0].message;
       if (msg && typeof msg === 'object' && typeof msg.reasoning_content === 'string'
@@ -562,7 +562,7 @@ export function autoDetectReasoningCapability(response) {
         };
       }
     }
-    // Gemini thinking — candidates[0].content.parts[*].thinking.
+    // Gemini thinking - candidates[0].content.parts[*].thinking.
     if (Array.isArray(response.candidates) && response.candidates[0]) {
       const cand = response.candidates[0];
       const content = cand && cand.content;
@@ -580,13 +580,13 @@ export function autoDetectReasoningCapability(response) {
       }
     }
   } catch (_) {
-    // Defense-in-depth — malformed shapes should never throw.
+    // Defense-in-depth - malformed shapes should never throw.
     return { has_traces: false };
   }
   return { has_traces: false };
 }
 
-// W828-1 — autoExtractReasoningTrace: thin wrapper around extractReasoningTrace
+// W828-1 - autoExtractReasoningTrace: thin wrapper around extractReasoningTrace
 // that uses autoDetectReasoningCapability to pick the provider so callers in
 // the capture path (src/router.js, src/vision-capture.js) don't have to
 // hardcode the provider when the response shape already tells the story.

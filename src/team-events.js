@@ -35,7 +35,7 @@ import os from 'node:os';
 
 export const TEAM_EVENTS_VERSION = 'team-events-v2';
 
-// Kinds an event can be. Adding a kind here is a contract change — bump
+// Kinds an event can be. Adding a kind here is a contract change - bump
 // TEAM_EVENTS_VERSION and migrate.
 export const EVENT_KINDS = Object.freeze({
   POSITIVE:           'positive',            // a captured input/output pair
@@ -173,7 +173,7 @@ export async function append(team, event) {
   };
   // Every non-review_decision event lands in the 'pending' review state
   // (W293). review_decision events do not themselves have a review state
-  // — they describe one for the event they reference.
+  // - they describe one for the event they reference.
   if (event.kind !== EVENT_KINDS.REVIEW_DECISION) {
     enriched.review = { state: 'pending', created_at: ts };
   }
@@ -352,7 +352,7 @@ export async function exportSeeds(team, opts = {}) {
   return rows;
 }
 
-// Redaction pass — caller supplies the redactor (so privacy policy stays
+// Redaction pass - caller supplies the redactor (so privacy policy stays
 // pluggable). The redactor function gets (event.payload) and returns a new
 // payload + a redaction_map. The result event is identical except for the
 // payload and a `redaction.kept` array listing kept-token classes.
@@ -372,7 +372,7 @@ export function redactForExport(events, redactor) {
   });
 }
 
-// Stats helper — gives the compile pipeline a quick view of what's in the
+// Stats helper - gives the compile pipeline a quick view of what's in the
 // team log so it can decide whether to retrain.
 export async function stats(team) {
   const events = await read(team);
@@ -399,11 +399,11 @@ export async function _resetForTest(team) {
   try { await fs.unlink(file); } catch (e) { if (e.code !== 'ENOENT') throw e; }
 }
 
-// ─── W409t — team-learning approval (private-by-default) ───────────────────
+// ─── W409t - team-learning approval (private-by-default) ───────────────────
 //
 // PROBLEM W409t closes:
 //   The original team-events log treats every captured event as a "team
-//   event" — append() lands the row in the team's shared chain and
+//   event" - append() lands the row in the team's shared chain and
 //   exportSeeds() feeds it into the next training set as soon as a reviewer
 //   marks it `approved`. The audit called this out: "local reviewed-event
 //   export, not 'everyone trains the shared team database' by default".
@@ -427,17 +427,17 @@ export async function _resetForTest(team) {
 //      user_id is absent from the manifest by construction.
 //
 // New CLI verbs (wired in cli/kolm.js):
-//   kolm team export [--approved-only]   — write a team bundle to stdout / file
-//   kolm team import <bundle>            — merge an inbound bundle
-//   kolm team approve <event_hash>       — flip team_approval to 'approved'
-//   kolm team queue                      — list events pending team approval
+//   kolm team export [--approved-only] - write a team bundle to stdout / file
+//   kolm team import <bundle> - merge an inbound bundle
+//   kolm team approve <event_hash> - flip team_approval to 'approved'
+//   kolm team queue - list events pending team approval
 
 export const TEAM_APPROVAL_STATES = Object.freeze(['pending', 'approved', 'rejected']);
 export const NAMESPACE_POLICIES = Object.freeze(['manual', 'auto', 'never']);
 
 // Anonymize a contributor's user_id (or email) into a stable hash. The team
 // log + downstream artifacts only ever see this hash. Returns a 32-hex prefix
-// for compactness — sha256 over the salted user_id.
+// for compactness - sha256 over the salted user_id.
 export function contributorHash(userId, { salt } = {}) {
   if (userId == null) return null;
   const s = String(userId);
@@ -533,7 +533,7 @@ export async function getTeamApproval(team, eventHash) {
 
 // Approve a local event for team promotion. The decision lands in
 // team_approvals.jsonl (separate from the event chain so the local chain
-// stays untouched). `contributor` is the raw user_id — it is HASHED before
+// stays untouched). `contributor` is the raw user_id - it is HASHED before
 // landing in the record; the raw value never persists. (W409t)
 export async function approveForTeam(team, opts = {}) {
   _validateTeam(team);
@@ -582,7 +582,7 @@ export async function rejectForTeam(team, opts = {}) {
   return rec;
 }
 
-// Approval queue — surfaces local events that are NOT yet team-approved.
+// Approval queue - surfaces local events that are NOT yet team-approved.
 // Filters reviewable kinds (positives + corrections) by default; opts.kinds
 // overrides. Each row carries {hash, kind, namespace, review_state,
 // team_approval_state} so the UI can render the queue + reason-to-approve.
@@ -620,7 +620,7 @@ export async function listApprovalQueue(team, opts = {}) {
 // (or auto-policy by namespace). Each emitted row also carries lineage_hash
 // + contributor_hash + team_id so a downstream team-dataset builder can
 // prove which contributor approved which seed without ever holding raw
-// user_ids. The reviewer state is still consulted — only events that are
+// user_ids. The reviewer state is still consulted - only events that are
 // BOTH reviewed-approved AND team-approved make the cut. (W409t)
 export async function exportApprovedForTeam(team, opts = {}) {
   _validateTeam(team);
@@ -690,7 +690,7 @@ export async function exportApprovedForTeam(team, opts = {}) {
   return rows;
 }
 
-// buildTeamDataset — convenience wrapper. Returns
+// buildTeamDataset - convenience wrapper. Returns
 //   { dataset_id, team_id, rows, contributor_hashes, lineage_hashes,
 //     event_count, built_at }
 // `dataset_id` is content-addressed over the canonical (sorted) row hash
@@ -713,7 +713,7 @@ export async function buildTeamDataset(team, opts = {}) {
   };
 }
 
-// buildTeamArtifactMetadata — produces the metadata block a downstream
+// buildTeamArtifactMetadata - produces the metadata block a downstream
 // `kolm compile` will embed in the artifact manifest. It records the
 // contributor_hashes that contributed seeds, never the raw user_ids.
 // `dataset` is the output of buildTeamDataset (or any object with the same
@@ -722,7 +722,7 @@ export function buildTeamArtifactMetadata(dataset, opts = {}) {
   if (!dataset || !dataset.dataset_id) throw new Error('dataset required');
   // CRITICAL: refuse to build metadata from a dataset that already carries a
   // raw user identity field. This is the last-mile guard before bytes hit a
-  // manifest — even if upstream code accidentally attached raw user_ids,
+  // manifest - even if upstream code accidentally attached raw user_ids,
   // they NEVER make it into the artifact.
   const FORBIDDEN_FIELDS = ['user_id', 'user_email', 'user', 'email', 'actor'];
   for (const f of FORBIDDEN_FIELDS) {
@@ -746,7 +746,7 @@ export function buildTeamArtifactMetadata(dataset, opts = {}) {
 // Export the team's approved events as a portable bundle. The bundle can
 // then be shipped over any transport (git push, S3, signed URL) and merged
 // at the other side via importTeamBundle. The bundle carries no raw user
-// identity — only contributor_hash references. (W409t)
+// identity - only contributor_hash references. (W409t)
 export async function exportTeamBundle(team, opts = {}) {
   _validateTeam(team);
   const approvedOnly = opts.approved_only !== false;
@@ -785,7 +785,7 @@ export async function exportTeamBundle(team, opts = {}) {
 // the appended row's payload, so the merged chain remains tamper-evident
 // for the local audit trail. Returns counts of what landed.
 //
-// Inbound approvals are appended verbatim to team_approvals.jsonl — they
+// Inbound approvals are appended verbatim to team_approvals.jsonl - they
 // reference inbound event hashes by lineage, never by raw user_id.
 export async function importTeamBundle(team, bundle) {
   _validateTeam(team);
@@ -811,7 +811,7 @@ export async function importTeamBundle(team, bundle) {
   }
   if (Array.isArray(bundle.approvals)) {
     for (const a of bundle.approvals) {
-      // Inbound approvals reference inbound event hashes — keep them in the
+      // Inbound approvals reference inbound event hashes - keep them in the
       // approval log so the lineage chain remains verifiable.
       await _appendApprovalRecord(team, { ...a, _imported_from: bundle.team_id });
     }
@@ -819,7 +819,7 @@ export async function importTeamBundle(team, bundle) {
   return { imported, bundle_id: bundle.bundle_id || null, team_id: team };
 }
 
-// Helper for tests + the W409t CLI verb — wipes the team-approval state
+// Helper for tests + the W409t CLI verb - wipes the team-approval state
 // files for a given team (NOT the event log itself, use _resetForTest for
 // that). NEVER call outside NODE_ENV=test.
 export async function _resetTeamApprovalForTest(team) {

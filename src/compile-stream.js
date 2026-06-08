@@ -1,4 +1,4 @@
-// W910 Track B — compile-stream.js
+// W910 Track B - compile-stream.js
 // Server-Sent Events helper for /v1/compile/stream/:job. Provides a
 // reload-safe SSE writer + a deterministic stub event stream so the no-code
 // /account/create-model compile overlay has something to render without
@@ -6,13 +6,13 @@
 // this with live progress; the contract is the same either way.
 //
 // Event sequence (stubbed):
-//   1. step.preparing   — pending → running → done
-//   2. step.train.pass1 — pending → running → done (k_score emitted)
-//   3. step.train.pass2 — pending → running → done (k_score emitted)
-//   4. step.train.pass3 — pending → running → done (k_score emitted)
-//   5. step.quantize    — pending → running → done
-//   6. step.sign        — pending → running → done
-//   7. done             — { slug, artifact_url, k_score, duration_s }
+//   1. step.preparing - pending → running → done
+//   2. step.train.pass1 - pending → running → done (k_score emitted)
+//   3. step.train.pass2 - pending → running → done (k_score emitted)
+//   4. step.train.pass3 - pending → running → done (k_score emitted)
+//   5. step.quantize - pending → running → done
+//   6. step.sign - pending → running → done
+//   7. done - { slug, artifact_url, k_score, duration_s }
 //
 // Reattach: clients can re-connect with ?cursor=N and skip already-seen
 // events. The stub emits 22 events over ~5 seconds (300ms cadence) so the UI
@@ -20,7 +20,7 @@
 
 import { setTimeout as delay } from 'node:timers/promises';
 
-// step labels exposed in the UI — keep in sync with create-model.html
+// step labels exposed in the UI - keep in sync with create-model.html
 export const COMPILE_STEPS = [
   { id: 'preparing',   label: 'Preparing dataset' },
   { id: 'train.pass1', label: 'Train pass 1' },
@@ -30,11 +30,11 @@ export const COMPILE_STEPS = [
   { id: 'sign',        label: 'Sign + receipt' },
 ];
 
-// Deterministic K-Score progression per pass — keeps the stub UI legible.
+// Deterministic K-Score progression per pass - keeps the stub UI legible.
 const K_SCORE_BY_PASS = { 1: 0.71, 2: 0.83, 3: 0.91 };
 
 // Build the canonical event log for a job id. Used both for SSE replay AND
-// reattach (cursor skip). Pure — no I/O, no Date.now() — so the same job
+// reattach (cursor skip). Pure - no I/O, no Date.now() - so the same job
 // always produces the same log shape.
 export function buildEventLog(jobId) {
   const events = [];
@@ -106,7 +106,7 @@ export async function streamCompile(req, res, jobId, opts = {}) {
 export function estimateCompile({ describe = '', recipe = 'default', target_vram_gb = 24 } = {}) {
   const chars = String(describe || '').length;
   const tokens = Math.round(chars / 4);
-  const baseUsd = 0.40; // floor — covers smallest job
+  const baseUsd = 0.40; // floor - covers smallest job
   const perTokenUsd = 0.00008;
   const recipeMultiplier = { default: 1.0, support: 1.0, code: 1.4, medical: 1.8, legal: 1.6, financial: 1.5 }[recipe] || 1.0;
   const vramMultiplier = target_vram_gb >= 80 ? 3.2 : target_vram_gb >= 48 ? 2.1 : target_vram_gb >= 24 ? 1.0 : 0.6;

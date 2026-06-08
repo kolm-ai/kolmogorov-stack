@@ -1,6 +1,6 @@
 // src/data-feedback.js
 //
-// KOLM DATA ENGINE — FEEDBACK stage (closes the 6-stage loop).
+// KOLM DATA ENGINE - FEEDBACK stage (closes the 6-stage loop).
 //
 // Pipeline position: INGEST → CURATE → AUGMENT → TRAIN → EVALUATE → [FEEDBACK].
 //
@@ -18,7 +18,7 @@
 //   costPrune({pairs, max_cost_usd, avg_input_tokens, avg_output_tokens})
 //
 // Persistence is best-effort via src/event-store.js. The public API never
-// throws — every return path is an envelope {ok, version, ...}.
+// throws - every return path is an envelope {ok, version, ...}.
 //
 // Reuses (no new deps):
 //   - getCoverageGapsForNamespace (src/active-learning.js) for real gap data
@@ -45,7 +45,7 @@ const PRUNE_VENDOR = 'openai';
 const PRUNE_MODEL = 'gpt-4o-mini';
 
 // ---------------------------------------------------------------------------
-// Persistence — EXACT mandated pattern. Best-effort; never throws across API.
+// Persistence - EXACT mandated pattern. Best-effort; never throws across API.
 // ---------------------------------------------------------------------------
 
 async function _persist({ tenant, namespace, workflow, payload }) {
@@ -93,7 +93,7 @@ function _decodeFeedback(row) {
 }
 
 // ---------------------------------------------------------------------------
-// identifyProdGaps — find production coverage gaps, map each to an augment action.
+// identifyProdGaps - find production coverage gaps, map each to an augment action.
 // ---------------------------------------------------------------------------
 
 /**
@@ -150,7 +150,7 @@ export async function identifyProdGaps({ tenant, namespace, opts, injectGaps } =
 }
 
 // ---------------------------------------------------------------------------
-// proposeRecompile — persist a proposal row. NEVER starts training.
+// proposeRecompile - persist a proposal row. NEVER starts training.
 // ---------------------------------------------------------------------------
 
 /**
@@ -202,7 +202,7 @@ export async function proposeRecompile({ tenant, namespace, gaps } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// latestProposal — read back the newest recompile proposal.
+// latestProposal - read back the newest recompile proposal.
 // ---------------------------------------------------------------------------
 
 /**
@@ -225,7 +225,7 @@ export async function latestProposal({ tenant, namespace } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// recordABResult — persist an A/B comparison outcome.
+// recordABResult - persist an A/B comparison outcome.
 // ---------------------------------------------------------------------------
 
 /**
@@ -261,12 +261,12 @@ export async function recordABResult({ tenant, namespace, variant_a, variant_b, 
 }
 
 // ---------------------------------------------------------------------------
-// scheduleRecompile — validate a cron-ish descriptor (pure; no real cron).
+// scheduleRecompile - validate a cron-ish descriptor (pure; no real cron).
 // ---------------------------------------------------------------------------
 
 /**
  * Pure validation. Confirms `cron` is a non-empty string and returns a schedule
- * descriptor. Does NOT register a real cron job — the autopilot owns scheduling.
+ * descriptor. Does NOT register a real cron job - the autopilot owns scheduling.
  * @returns {{ok:boolean, version:string, schedule?:object, error?:string}}
  */
 export function scheduleRecompile({ cron, namespace } = {}) {
@@ -275,7 +275,7 @@ export function scheduleRecompile({ cron, namespace } = {}) {
     return { ok: false, error: 'empty_cron', version: FEEDBACK_VERSION };
   }
   const ns = (namespace && String(namespace)) || 'default';
-  // next_hint is a human-readable acknowledgement, NOT a computed fire time —
+  // next_hint is a human-readable acknowledgement, NOT a computed fire time - 
   // we deliberately do not own a cron parser here.
   const next_hint = `validated; the autopilot tick will honor cron '${cronStr}' for namespace '${ns}'`;
   return {
@@ -290,7 +290,7 @@ export function scheduleRecompile({ cron, namespace } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// costPrune — greedily keep highest-value pairs under a USD ceiling.
+// costPrune - greedily keep highest-value pairs under a USD ceiling.
 // ---------------------------------------------------------------------------
 
 // Per-pair USD estimate using the same heuristic as estimateBatchCost: each
@@ -309,7 +309,7 @@ function _perPairCostUsd(avgIn, avgOut) {
 
 // Value proxy: longer non-empty outputs are treated as higher value. Empty
 // outputs score 0 and are dropped first. (Caveat: a length proxy, not a
-// learned quality signal — see module header.)
+// learned quality signal - see module header.)
 function _outputText(pair) {
   if (pair == null) return '';
   if (typeof pair === 'string') return '';
@@ -345,7 +345,7 @@ export function costPrune({ pairs, max_cost_usd, avg_input_tokens, avg_output_to
   let est = 0;
   if (Number.isFinite(ceiling) && ceiling > 0 && perPair > 0) {
     for (const item of ranked) {
-      // Empty-output pairs carry no value under the proxy — never keep them.
+      // Empty-output pairs carry no value under the proxy - never keep them.
       if (item.len <= 0) continue;
       const next = est + perPair;
       // Greedy: stop once adding this pair would exceed the ceiling.
@@ -354,7 +354,7 @@ export function costPrune({ pairs, max_cost_usd, avg_input_tokens, avg_output_to
       est = next;
     }
   } else if (perPair === 0) {
-    // Reference model returned no price — cost cap is meaningless, keep all
+    // Reference model returned no price - cost cap is meaningless, keep all
     // non-empty pairs (est stays 0). Defensive fall-through.
     for (const item of ranked) {
       if (item.len <= 0) continue;

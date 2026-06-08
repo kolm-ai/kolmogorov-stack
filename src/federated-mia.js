@@ -1,6 +1,6 @@
 // src/federated-mia.js
 //
-// W830-2 — Membership-Inference Attack (MIA) resistance verifier.
+// W830-2 - Membership-Inference Attack (MIA) resistance verifier.
 //
 // Closes the audit gap on "verifiable privacy claim" for federated /
 // distilled artifacts. The federated layer (src/federated-learning.js +
@@ -10,17 +10,17 @@
 //
 // What's missing is the FLIP side: how do we prove, after the fact, that
 // a shipped artifact resists membership-inference? An attacker who held a
-// candidate input asks "was this row in your training set?" — they should
+// candidate input asks "was this row in your training set?" - they should
 // only be able to win that game at the rate set by the privacy budget.
 //
-// HONEST SCOPE — what this module IS and IS NOT:
+// HONEST SCOPE - what this module IS and IS NOT:
 //
 //   IS:
 //   - A protocol contract for plugging shadow-model MIA evaluations into
 //     the artifact verifier. Takes shadow_models, train_set, holdout_set
 //     and produces { auc_attack, p_member_threshold }.
 //   - An honest-stub when shadow_models are not provided. We DO NOT silently
-//     return ok:true — we return {ok:false, error:'mia_requires_shadow_models'}.
+//     return ok:true - we return {ok:false, error:'mia_requires_shadow_models'}.
 //   - A verdict envelope for artifact-time MIA check given live attack
 //     probabilities: 'passing' when AUC ≤ p_threshold, 'leaking' otherwise.
 //   - A DP claim auditor: dpEpsilonAudit reads manifest.privacy.dp_epsilon
@@ -28,7 +28,7 @@
 //
 //   IS NOT:
 //   - A trained MIA attacker. The shadow-model attack callers feed in are
-//     opaque to this module — we score the output, not implement the model.
+//     opaque to this module - we score the output, not implement the model.
 //   - A DP accountant. dpEpsilonAudit READS the claimed epsilon; it does
 //     NOT recompute the cumulative budget across rounds (that's the job of
 //     src/federated-learning.js _composePrivacyBudget when running rounds).
@@ -53,7 +53,7 @@ export const FEATURE_STATE_DESCRIPTION =
 export const DEFAULT_P_MEMBER_THRESHOLD = 0.55;
 
 // --------------------------------------------------------------------------
-// calibrateMIA — compute the attack AUC from N shadow models trained on
+// calibrateMIA - compute the attack AUC from N shadow models trained on
 // disjoint shards of the same data distribution as the target artifact.
 //
 //   shadow_models : array of {predict_proba(x) -> [p_member, p_nonmember]}.
@@ -66,9 +66,9 @@ export const DEFAULT_P_MEMBER_THRESHOLD = 0.55;
 // when the input is too small to mount the attack honestly.
 // --------------------------------------------------------------------------
 export function calibrateMIA({ shadow_models = [], train_set = [], holdout_set = [] } = {}) {
-  // Honest stub — refuse to fabricate an AUC when we don't have the shadow
+  // Honest stub - refuse to fabricate an AUC when we don't have the shadow
   // models. A "missing shadow models" path that returned auc=0 would
-  // silently certify every artifact as MIA-resistant — exactly the failure
+  // silently certify every artifact as MIA-resistant - exactly the failure
   // the federated module was built to prevent.
   if (!Array.isArray(shadow_models) || shadow_models.length < 3) {
     return {
@@ -146,7 +146,7 @@ export function calibrateMIA({ shadow_models = [], train_set = [], holdout_set =
 }
 
 // --------------------------------------------------------------------------
-// verifyArtifactMIAResistance — given an artifact_id and a list of
+// verifyArtifactMIAResistance - given an artifact_id and a list of
 // test_inputs, produce a {passing|leaking} verdict at the caller-supplied
 // p_threshold. Threads through to calibrateMIA when the caller has shadow
 // models available; otherwise returns honest-stub.
@@ -195,7 +195,7 @@ export function verifyArtifactMIAResistance({
       install_hint: calib.install_hint,
       attack_auc: null,
       p_at_threshold: p_threshold,
-      detail: 'calibration failed — see error/install_hint',
+      detail: 'calibration failed - see error/install_hint',
     };
   }
   const passing = calib.auc_attack <= p_threshold;
@@ -212,13 +212,13 @@ export function verifyArtifactMIAResistance({
     n_holdout: calib.n_holdout,
     detail: passing
       ? 'attack AUC <= p_threshold; artifact resists MIA at this confidence level'
-      : 'attack AUC > p_threshold; artifact LEAKS membership signal — investigate DP budget',
+      : 'attack AUC > p_threshold; artifact LEAKS membership signal - investigate DP budget',
     verified_at: new Date().toISOString(),
   };
 }
 
 // --------------------------------------------------------------------------
-// dpEpsilonAudit — verifiable claim envelope for a manifest's claimed DP
+// dpEpsilonAudit - verifiable claim envelope for a manifest's claimed DP
 // epsilon. Reads manifest.privacy.dp_epsilon and reports whether the claim
 // is structurally well-formed + records the audit method.
 //
@@ -285,7 +285,7 @@ export function dpEpsilonAudit({ artifact_manifest } = {}) {
     verified,
     detail,
     audited_at: new Date().toISOString(),
-    // Provenance — a downstream verifier signs the digest of this envelope
+    // Provenance - a downstream verifier signs the digest of this envelope
     // to make the claim non-repudiable in the artifact chain.
     audit_digest: _digest({
       artifact_manifest_hash: _digest(artifact_manifest),

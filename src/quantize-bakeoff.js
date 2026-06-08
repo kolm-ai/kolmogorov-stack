@@ -1,7 +1,7 @@
-// W719-3 — DAQ mixed-precision bakeoff harness.
+// W719-3 - DAQ mixed-precision bakeoff harness.
 //
 // Atomic item:
-//   "Could push K-Score from 0.91 to 0.95+ without increasing size" — bakeoff
+//   "Could push K-Score from 0.91 to 0.95+ without increasing size" - bakeoff
 //   harness across candidate per-layer profiles. Each profile is a complete
 //   DAQ profile (output of buildDaqProfile) that the harness ships to
 //   workers/quantize/scripts/quantize.py --mixed-precision <profile.json>,
@@ -12,7 +12,7 @@
 //     install_hint:..., results:null} and exit-3 caller path
 //   - eval_set empty → {ok:false, error:'no_eval_set', results:null}
 //   - python crashes mid-bake → {ok:true, results:[..., {error:..., accepted:false}]}
-//     (per-profile failures DO NOT abort the whole sweep — that's the bakeoff
+//     (per-profile failures DO NOT abort the whole sweep - that's the bakeoff
 //     contract: surface every candidate's verdict)
 //
 // Scoring:
@@ -41,9 +41,9 @@ const WORKER_PATH = path.resolve(__dirname, '..', 'workers', 'quantize', 'script
 /**
  * Run the mixed-precision quantize bakeoff over a list of candidate profiles.
  *
- * @param {string} model_path — path to the HF model directory to quantize
- * @param {Array<Array<object>>} candidate_profiles — array of DAQ profile arrays
- * @param {Array<object>} eval_set — captures with {input, output} for scoring
+ * @param {string} model_path - path to the HF model directory to quantize
+ * @param {Array<Array<object>>} candidate_profiles - array of DAQ profile arrays
+ * @param {Array<object>} eval_set - captures with {input, output} for scoring
  * @returns {Promise<{
  *   ok: boolean,
  *   error?: string,
@@ -59,16 +59,16 @@ const WORKER_PATH = path.resolve(__dirname, '..', 'workers', 'quantize', 'script
  * }>}
  */
 export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, eval_set) {
-  // Honesty gate #1 — worker not on disk → unavailable envelope.
+  // Honesty gate #1 - worker not on disk → unavailable envelope.
   if (!fs.existsSync(WORKER_PATH)) {
     return {
       ok: false,
       error: 'worker_unavailable',
-      install_hint: 'workers/quantize/scripts/quantize.py missing — reinstall kolm from source',
+      install_hint: 'workers/quantize/scripts/quantize.py missing - reinstall kolm from source',
       results: null,
     };
   }
-  // Honesty gate #2 — model path must exist + look like an HF model.
+  // Honesty gate #2 - model path must exist + look like an HF model.
   if (!model_path || !fs.existsSync(model_path)) {
     return {
       ok: false,
@@ -77,7 +77,7 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
       results: null,
     };
   }
-  // Honesty gate #3 — eval_set drives kscore. Empty → no scoring possible.
+  // Honesty gate #3 - eval_set drives kscore. Empty → no scoring possible.
   if (!Array.isArray(eval_set) || eval_set.length === 0) {
     return {
       ok: false,
@@ -158,7 +158,7 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
     try {
       const receipt = JSON.parse(fs.readFileSync(path.join(outDir, 'quantize-receipt.json'), 'utf8'));
       const hashes = receipt.output_files_sha256 || {};
-      // Sum the file sizes on disk (shards) — receipt only carries hashes.
+      // Sum the file sizes on disk (shards) - receipt only carries hashes.
       let bytes = 0;
       for (const rel of Object.keys(hashes)) {
         try { bytes += fs.statSync(path.join(outDir, rel)).size; } catch { /* shard rotated away */ }
@@ -202,13 +202,13 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
   // Sort descending by kscore for caller-friendly top-N selection.
   results.sort((a, b) => b.kscore - a.kscore);
 
-  // W350-style cleanup — drop the per-profile out dirs but KEEP the receipt
+  // W350-style cleanup - drop the per-profile out dirs but KEEP the receipt
   // chain by leaving tmpRoot to OS GC. Bakeoff is informational, not signed.
   return { ok: true, results };
 }
 
 function scoreJaccard(profile, eval_set) {
-  // The profile itself is informational — without an actual student to run, we
+  // The profile itself is informational - without an actual student to run, we
   // synthesize a deterministic surrogate score derived from the profile's
   // weighted-avg-bits (higher bits ≈ closer to bf16 baseline ≈ higher score).
   // This is honest because the only way to get a REAL kscore is to load the
@@ -227,7 +227,7 @@ function scoreJaccard(profile, eval_set) {
   }
   // Surrogate: average weight_bits / 8 (uniform-int8 baseline = 1.0).
   // Eval set length factors in modestly so larger eval sets get a small bump
-  // (reflects coverage credit — same surrogate spirit as W466 multimodal).
+  // (reflects coverage credit - same surrogate spirit as W466 multimodal).
   let sum = 0;
   for (const layer of profile) sum += layer.weight_bits;
   const avgBits = sum / profile.length;

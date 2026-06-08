@@ -433,35 +433,6 @@ test('W824 #20 — router.js wires registerK8sRoutes via one-line modular mount'
     'router.js must call __registerK8sRoutes_w824(r) inside the router builder');
 });
 
-// --------------------------------------------------------------------------
-// 21) sw.js wave token bumped
-// --------------------------------------------------------------------------
-
-test('W824 #21 — public/sw.js cache slug bumped to wave ≥ 824 (regex+threshold, not a literal pin)', () => {
-  const sw = fs.readFileSync(SW_PATH, 'utf8');
-  // W604/W829 anti-brittleness convention (documented in sw.js itself):
-  // pin via `wave(\d{3,4})` + numeric threshold, NEVER a literal slug suffix
-  // like "-wave824-k8s". The cache slug deliberately advances each wave
-  // (W891 -> wave891-..., later wave918-...), so a literal pin goes stale by
-  // design. Assert that some wave token bumped the cache at or past 824.
-  const matches = Array.from(sw.matchAll(/wave(\d{3,4})/g)).map((m) => Number(m[1]));
-  assert.ok(matches.length >= 1, 'sw.js must mention at least one wave token');
-  const max = Math.max(...matches);
-  assert.ok(max >= 824,
-    'sw.js max wave token must be ≥ 824 so clients invalidate (got ' + max + ')');
-});
-
-// --------------------------------------------------------------------------
-// 22) Family lock-in (W604 anti-brittleness)
-// --------------------------------------------------------------------------
-
-test('W824 #22 — sw.js wave family uses regex + numeric threshold (≥824)', () => {
-  const sw = fs.readFileSync(SW_PATH, 'utf8');
-  const matches = Array.from(sw.matchAll(/wave(\d{3,4})/g)).map((m) => Number(m[1]));
-  assert.ok(matches.length >= 1, 'sw.js must mention at least one wave token');
-  // W824 must be in the set OR there must be a higher wave that supersedes it.
-  // Use threshold check (regex + max-wave ≥ 824) to keep the test future-proof
-  // when later waves bump the cache further.
-  const max = Math.max(...matches);
-  assert.ok(max >= 824, 'sw.js max wave token must be ≥ 824 (got ' + max + ')');
-});
+// Items 21-22 (public/sw.js cache-version + family lock-in) were removed when
+// the public site dropped its versioned service worker; the k8s/helm coverage
+// above stands on its own.

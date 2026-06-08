@@ -294,7 +294,7 @@ function detectAddress(text) {
 //
 // Heuristic: capitalized-token bigram where the FIRST token hits FIRST_NAMES
 // and the SECOND token hits LAST_NAMES. Single-name detection is intentionally
-// off (too noisy). This is a conservative detector by design — we'd rather
+// off (too noisy). This is a conservative detector by design - we'd rather
 // miss a name than redact "Smith" in "Adam Smith's invisible hand".
 
 const NAME_BIGRAM_RE = /\b([A-Z][a-z'\-]{1,20})\s+([A-Z][a-z'\-]{1,20})\b/g;
@@ -501,7 +501,7 @@ function detectDatabaseUrl(text) {
 // Internal hostname -------------------------------------------------------
 //
 // FQDNs ending in .internal / .corp / .local plus dotted-quad RFC1918 hosts.
-// We deliberately do NOT match private IPs here — those go via detectIp() so
+// We deliberately do NOT match private IPs here - those go via detectIp() so
 // they can be sub-classified.
 
 const INTERNAL_HOST_RE = /\b(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?)*\.(?:internal|corp|local|intranet|lan|i\.example|svc\.cluster\.local))\b/gi;
@@ -527,7 +527,7 @@ let _customerIdReSrc = null;
 function _customerIdRe() {
   const envSrc = process.env.KOLM_CUSTOMER_ID_PATTERN;
   // Resolve the *effective* source. If the env var is set but invalid we
-  // silently fall back to the default — but we still key the cache off the
+  // silently fall back to the default - but we still key the cache off the
   // env-string the caller passed, so the next legitimate change re-invalidates.
   let src = envSrc || DEFAULT_CUSTOMER_ID_SRC;
   if (envSrc) {
@@ -557,7 +557,7 @@ function detectCustomerId(text) {
 
 // Cache the parsed terms file by mtime so the privacy hot-path doesn't
 // re-read + re-JSON.parse on every scan() call. recordCapture() can scan
-// up to 200 items per /v1/capture/log request — the per-call disk hit was
+// up to 200 items per /v1/capture/log request - the per-call disk hit was
 // a measurable tax. (WC15)
 let _proprietaryTermsCache = null;
 let _proprietaryTermsMtime = 0;
@@ -599,7 +599,7 @@ function _escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 // Compiled-regex cache keyed by the same mtime as the terms cache. Without
 // this, detectProprietary was paying `new RegExp(term, 'gi')` per term per
-// scan call — quadratic compile cost on the hot capture path. (WC15)
+// scan call - quadratic compile cost on the hot capture path. (WC15)
 let _proprietaryRegexCache = null;
 let _proprietaryRegexMtime = -1;
 let _proprietaryRegexPath = null;

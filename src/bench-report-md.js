@@ -13,7 +13,7 @@ export function renderMarkdownReport(report) {
   const r = report;
   const paths = r.paths || {};
 
-  lines.push(`# Kolm vs. LLM — Head-to-Head Benchmark`);
+  lines.push(`# Kolm vs. LLM - Head-to-Head Benchmark`);
   lines.push('');
   lines.push(`**Artifact**: \`${r.artifact}\``);
   lines.push(`**Artifact sha256**: \`${r.artifact_sha256}\``);
@@ -40,7 +40,7 @@ export function renderMarkdownReport(report) {
   for (const key of ['kolm-js', 'kolm-native', 'llm-api', 'local-llm']) {
     const p = paths[key];
     if (!p || p.skipped) {
-      lines.push(`| ${key} | – | – | – | – | – | _skipped: ${escMd(p?.reason || 'not run')}_ |`);
+      lines.push(`| ${key} | - | - | - | - | - | _skipped: ${escMd(p?.reason || 'not run')}_ |`);
       continue;
     }
     const l = p.latency_us || {};
@@ -55,16 +55,16 @@ export function renderMarkdownReport(report) {
   for (const key of ['kolm-js', 'kolm-native', 'llm-api', 'local-llm']) {
     const p = paths[key];
     if (!p || p.skipped) {
-      lines.push(`| ${key} | – | – | – | _skipped_ |`);
+      lines.push(`| ${key} | - | - | - | _skipped_ |`);
       continue;
     }
     const c = p.correctness || {};
-    const pct = c.accuracy != null ? (c.accuracy * 100).toFixed(1) + '%' : '–';
+    const pct = c.accuracy != null ? (c.accuracy * 100).toFixed(1) + '%' : ' - ';
     lines.push(`| ${key} | ${fmtNum(c.graded)} | ${fmtNum(c.passed)} | ${pct} | ${c.comparator || 'exact'} |`);
   }
   lines.push('');
 
-  // Head-to-head — speedup ratios over kolm-js baseline.
+  // Head-to-head - speedup ratios over kolm-js baseline.
   lines.push(`## Head-to-head (vs. kolm-js p50)`);
   lines.push('');
   const h2h = r.head_to_head || {};
@@ -76,10 +76,10 @@ export function renderMarkdownReport(report) {
     for (const key of Object.keys(h2h)) {
       const e = h2h[key];
       if (e.skipped) {
-        lines.push(`| ${key} | – | – | – | _skipped: ${escMd(e.skipped)}_ |`);
+        lines.push(`| ${key} | - | - | - | _skipped: ${escMd(e.skipped)}_ |`);
         continue;
       }
-      lines.push(`| ${key} | ${fmtNum(e.p50_other_us)} | ${fmtNum(e.p50_kolm_js_us)} | ${e.p50_latency_ratio != null ? e.p50_latency_ratio + '×' : '–'} | ${e.summary || ''} |`);
+      lines.push(`| ${key} | ${fmtNum(e.p50_other_us)} | ${fmtNum(e.p50_kolm_js_us)} | ${e.p50_latency_ratio != null ? e.p50_latency_ratio + '×' : ' - '} | ${e.summary || ''} |`);
     }
   }
   lines.push('');
@@ -91,18 +91,18 @@ export function renderMarkdownReport(report) {
   for (const key of ['kolm-js', 'kolm-native', 'llm-api', 'local-llm']) {
     const p = paths[key];
     if (!p || p.skipped) {
-      lines.push(`| ${key} | – | – | _skipped_ |`);
+      lines.push(`| ${key} | - | - | _skipped_ |`);
       continue;
     }
     const c = p.cost || {};
-    const per = c.per_call_usd != null ? '$' + Number(c.per_call_usd).toFixed(6) : '–';
-    const perM = c.per_million_calls_usd != null ? '$' + Number(c.per_million_calls_usd).toFixed(2) : '–';
+    const per = c.per_call_usd != null ? '$' + Number(c.per_call_usd).toFixed(6) : ' - ';
+    const perM = c.per_million_calls_usd != null ? '$' + Number(c.per_million_calls_usd).toFixed(2) : ' - ';
     const notes = [p.model && `model ${p.model}`, p.vendor && `vendor ${p.vendor}`].filter(Boolean).join('; ');
     lines.push(`| ${key} | ${per} | ${perM} | ${notes || (c.model || '')} |`);
   }
   lines.push('');
 
-  // First few correctness failures (if any) — surfaces the actual model
+  // First few correctness failures (if any) - surfaces the actual model
   // mismatches so a reviewer doesn't have to spelunk into the JSON to see
   // what went wrong. Limited to first 5 per path so the report stays
   // skimmable on 1000-row runs.
@@ -121,7 +121,7 @@ export function renderMarkdownReport(report) {
       lines.push(`### ${block.key}`);
       lines.push('');
       for (const f of block.fails.slice(0, 5)) {
-        lines.push(`- **${f.id}** — expected \`${escMd(JSON.stringify(f.expected))}\`, got \`${escMd(JSON.stringify(f.got))}\`${f.error ? ` (error: ${escMd(f.error)})` : ''}`);
+        lines.push(`- **${f.id}** - expected \`${escMd(JSON.stringify(f.expected))}\`, got \`${escMd(JSON.stringify(f.got))}\`${f.error ? ` (error: ${escMd(f.error)})` : ''}`);
       }
       lines.push('');
     }
@@ -134,7 +134,7 @@ export function renderMarkdownReport(report) {
 }
 
 function fmtNum(v) {
-  if (v == null) return '–';
+  if (v == null) return ' - ';
   if (typeof v !== 'number') return String(v);
   if (v >= 1000) return Math.round(v).toLocaleString('en-US');
   return String(v);

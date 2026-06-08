@@ -1,4 +1,4 @@
-// R-3 — kolm serve runtime auto-detection.
+// R-3 - kolm serve runtime auto-detection.
 //
 // Single source of truth for "given an artifact + a hardware probe, which
 // inference runtime should we boot?". Used by:
@@ -55,7 +55,7 @@ export const RUNTIME_SELECTION = Object.freeze({
   }),
 });
 
-// /health response schema — exported as a constant so the OpenAPI builder
+// /health response schema - exported as a constant so the OpenAPI builder
 // (R-9 / S-10) can re-use the shape without redeclaring it.
 export const HEALTH_SCHEMA = Object.freeze({
   type: 'object',
@@ -71,7 +71,7 @@ export const HEALTH_SCHEMA = Object.freeze({
 
 // /metrics response schema (Prometheus text exposition envelope wrapping a
 // fixed metric set). The schema describes the parsed-JSON sibling at
-// /metrics.json — the text endpoint remains the canonical Prometheus form.
+// /metrics.json - the text endpoint remains the canonical Prometheus form.
 export const METRICS_SCHEMA = Object.freeze({
   type: 'object',
   required: ['runtime', 'request_count', 'latency_p50_ms', 'tok_s_p50', 'memory_mb', 'uptime_s'],

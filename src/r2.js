@@ -1,4 +1,4 @@
-// Cloudflare R2 client — uses Cloudflare REST API (Bearer api_token).
+// Cloudflare R2 client - uses Cloudflare REST API (Bearer api_token).
 // No AWS SDK dependency; works with a single account-scoped api token that has R2 read/write.
 //
 // Env required at runtime (Vercel: cloudflare_account_id + Cloudflare_api_token):

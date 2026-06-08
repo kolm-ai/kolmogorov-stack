@@ -1,4 +1,4 @@
-// Wave 359 — kolm make: one verb, idea -> shipped artifact.
+// Wave 359 - kolm make: one verb, idea -> shipped artifact.
 //
 // Exports an async iterator that walks the 7-step pipeline and yields a
 // MakeEvent per step transition. The CLI (cmdMake) is the only renderer; this
@@ -21,7 +21,7 @@
 //   - ZERO new npm deps. Everything is node:* or already-vendored src/*.
 //   - No "not_yet_wired", no "honest scope" comments. Each step either
 //     produces a real result OR yields a status:'err' with a clean hint.
-//   - The 7-step contract is invariant. A skip ("no seeds — recipe handles
+//   - The 7-step contract is invariant. A skip ("no seeds - recipe handles
 //     it") still yields a status:'ok' event with detail.skipped:true so the
 //     caller can render the strip without branching.
 
@@ -40,7 +40,7 @@ const STEPS = [
   { step: 7, name: 'sign + receipt' },
 ];
 
-// Intent classifier — local, deterministic. We do NOT call src/intent.js
+// Intent classifier - local, deterministic. We do NOT call src/intent.js
 // (that module is the assistant's verb classifier, a different surface).
 // The pipeline-make classifier is template-oriented: name -> {redactor,
 // extractor, classifier, summarizer, blank} so step 4 can pick a recipe.
@@ -110,7 +110,7 @@ function readJsonlRows(file) {
       const expected = row.expected != null ? row.expected : (row.output != null ? row.output : (row.response != null ? row.response : null));
       if (input == null || expected == null) continue;
       out.push({ input, expected, tags: row.tags || [], source: row.source || `file:${path.basename(file)}` });
-    } catch { /* skip malformed line — never crash a mine */ }
+    } catch { /* skip malformed line - never crash a mine */ }
   }
   return out;
 }
@@ -157,7 +157,7 @@ function buildSpec({ intent, plan, seeds }) {
   if (intent.template === 'classifier') {
     return classifierSpec(jobId, intent.description);
   }
-  // Default / summarizer / blank — emit a passthrough spec the user can edit
+  // Default / summarizer / blank - emit a passthrough spec the user can edit
   // post-build. Still a real, runnable artifact (the recipe just echoes).
   return blankSpec(jobId, intent.description, plan);
 }
@@ -354,7 +354,7 @@ async function emitReceipt({ artifactPath, manifest, k_score, evals_report, prod
 //   quant       quant override for step 3
 //   kGate       composite K-score gate (default 0.85 via env)
 //   force       allow step 6 to PASS the gate event even on failure (caller
-//               chooses to ship anyway — step 6 still reports the verdict).
+//               chooses to ship anyway - step 6 still reports the verdict).
 export async function* make(opts = {}) {
   const name = opts.name || 'kolm-artifact';
   const outPath = opts.outPath ? path.resolve(opts.outPath) : path.resolve(process.cwd(), `${slugify(name)}.kolm`);
@@ -474,7 +474,7 @@ export async function* make(opts = {}) {
     } else {
       yield ev(6, 'err', { production_ready: false, reasons: prodVerdict.reasons }, 'pass --force to ship anyway (with reasons recorded in the receipt)');
       // Continue to step 7 so the user still gets a signed receipt that
-      // records the failure — auditors can read why this artifact did not
+      // records the failure - auditors can read why this artifact did not
       // pass and verify the gate ran.
     }
   } catch (e) {

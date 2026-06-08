@@ -1,4 +1,4 @@
-// Remote-access tunnel — broker between a public URL and a user-run .kolm
+// Remote-access tunnel - broker between a public URL and a user-run .kolm
 // runtime on the operator's hardware.
 //
 // Honest framing: kolm.ai is the relay. Requests land here at /r/<token>/...,
@@ -36,7 +36,7 @@ export function registerTunnel({ tenantId, tenantName, teamId = null, name = 'tu
   if (!tenantId) throw new Error('tenantId required');
   const token = newToken();
   const now = new Date();
-  // W936 — a `stable` team-model endpoint must not expire on the 7-day idle TTL
+  // W936 - a `stable` team-model endpoint must not expire on the 7-day idle TTL
   // (members share one persistent URL). Use a 100-year expiry so every existing
   // expires_at check and purgeExpired() naturally treats it as live.
   const STABLE_TTL_MS = 100 * 365 * 24 * 60 * 60 * 1000;
@@ -128,7 +128,7 @@ export function forwardRequest(token, { method, headers, path, body }) {
     }
     const ent = live.get(token);
     if (!ent) {
-      return reject(Object.assign(new Error('no agent connected — start `kolm tunnel` on your machine'), { status: 502 }));
+      return reject(Object.assign(new Error('no agent connected - start `kolm tunnel` on your machine'), { status: 502 }));
     }
     const bodyText = body == null ? '' : (Buffer.isBuffer(body) ? body.toString('utf8') : String(body));
     if (Buffer.byteLength(bodyText, 'utf8') > MAX_PAYLOAD_BYTES) {

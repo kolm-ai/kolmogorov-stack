@@ -1,4 +1,4 @@
-// W831-3 — Sneakernet bundle with Ed25519 signatures.
+// W831-3 - Sneakernet bundle with Ed25519 signatures.
 //
 // Purpose
 // -------
@@ -21,21 +21,21 @@
 //     transfer chain weeks later.
 //
 // Wire format (USTAR tar archive, deterministic file order):
-//   artifact.kolm           — the .kolm payload, byte-identical to source
-//   manifest.json           — {artifact_id, sha256_artifact, created_at,
+//   artifact.kolm - the .kolm payload, byte-identical to source
+//   manifest.json - {artifact_id, sha256_artifact, created_at,
 //                              signer_pubkey_b64, recipient_pubkey_b64,
 //                              version, transport, tenant}
-//   signature.bin           — raw 64-byte Ed25519 signature
-//   kolm-airgap-receipt.json — {signature_ok, recipient_ok, signer_fpr,
+//   signature.bin - raw 64-byte Ed25519 signature
+//   kolm-airgap-receipt.json - {signature_ok, recipient_ok, signer_fpr,
 //                               recipient_fpr, verified_at, version}
 //
 // We deliberately produce a binary signature.bin (NOT base64) because:
 //   (a) it round-trips through tar without encoding ambiguity
-//   (b) crypto.verify accepts Buffer directly — no decode step
+//   (b) crypto.verify accepts Buffer directly - no decode step
 //   (c) the spec line in W831-3 says "signature.bin"
 //
 // W411 tenant fence: opts.tenant is recorded in the manifest; verify does NOT
-// enforce tenant — the route layer compares manifest.tenant to req.tenant_record.id
+// enforce tenant - the route layer compares manifest.tenant to req.tenant_record.id
 // before treating the bundle as belonging to the calling tenant.
 //
 // W604 version stamp: AIRGAP_SNEAKERNET_VERSION = 'w831-v1'. Consumers MUST
@@ -43,12 +43,12 @@
 //
 // Honesty invariants:
 //   - createSneakernetBundle returns ok:false when artifact OR signing key
-//     is missing — never silent passthrough.
+//     is missing - never silent passthrough.
 //   - verifySneakernetBundle returns BOTH signature_ok AND recipient_ok as
 //     booleans. A tampered bundle yields signature_ok:false; a bundle signed
 //     by the wrong recipient (or missing recipient) yields recipient_ok:false.
 //   - Signature verification uses crypto.verify('ed25519', ...) which is the
-//     node:crypto built-in — no third-party deps.
+//     node:crypto built-in - no third-party deps.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -58,7 +58,7 @@ export const AIRGAP_SNEAKERNET_VERSION = 'w831-v1';
 
 // =============================================================================
 // Minimal USTAR-compatible tar writer / reader. Same shape as src/sneakernet.js
-// (W779) — we don't share code on purpose, because that module's signature
+// (W779) - we don't share code on purpose, because that module's signature
 // path is HMAC-SHA256 and we want the Ed25519 path to evolve independently
 // without risk of cross-coupling.
 // =============================================================================
@@ -152,7 +152,7 @@ function sha256Hex(buf) {
 
 // Canonical JSON: sorted keys so the same manifest object always hashes the
 // same way. The Ed25519 signature is over canonical(manifest), not the
-// pretty-printed manifest.json that ships in the tarball — that distinction
+// pretty-printed manifest.json that ships in the tarball - that distinction
 // is what lets us pretty-print manifest.json without breaking verify.
 function canonicalManifestJson(manifest) {
   const keys = Object.keys(manifest).sort();
@@ -170,7 +170,7 @@ function loadSigningKey(signing_key_path) {
   if (head.startsWith('-----BEGIN')) {
     return crypto.createPrivateKey({ key: bytes, format: 'pem' });
   }
-  // Raw seed (32 bytes) — wrap in PKCS#8 DER for createPrivateKey.
+  // Raw seed (32 bytes) - wrap in PKCS#8 DER for createPrivateKey.
   if (bytes.length === 32) {
     // RFC 8410 PKCS#8 prefix for Ed25519: 0x302e020100300506032b657004220420
     const prefix = Buffer.from('302e020100300506032b657004220420', 'hex');
@@ -205,7 +205,7 @@ function publicFromPrivate(privateKey) {
 }
 
 // Render a public key to base64 of its raw 32-byte form. We export the SPKI
-// DER and slice off the prefix — Node's exportKey({format:'jwk'}) gives the
+// DER and slice off the prefix - Node's exportKey({format:'jwk'}) gives the
 // raw key as 'x' but that's also base64url so let's keep one consistent path.
 function publicKeyToRawB64(pubKey) {
   const der = pubKey.export({ format: 'der', type: 'spki' });
@@ -236,7 +236,7 @@ function signingPayload(artifactBytes, manifestCanonical) {
   ]);
 }
 
-// createSneakernetBundle({...}) — pack a .kolm into a tarball with Ed25519
+// createSneakernetBundle({...}) - pack a .kolm into a tarball with Ed25519
 // signature + receipt.
 //
 // Returns:
@@ -248,7 +248,7 @@ function signingPayload(artifactBytes, manifestCanonical) {
 //   artifact_path       local .kolm to pack
 //   signing_key_path    local Ed25519 private key (PEM or raw 32-byte seed)
 //   output_usb_path     target tarball path (parent dir will be created)
-//   recipient_pubkey_path  optional path to the recipient's public key — if
+//   recipient_pubkey_path  optional path to the recipient's public key - if
 //                          supplied, embedded into manifest so the receiver
 //                          can confirm the bundle was intended for them.
 //                          If omitted, recipient_pubkey_b64 is null and
@@ -362,7 +362,7 @@ export function createSneakernetBundle(opts = {}) {
   const signature = crypto.sign(null, signingPayload(artifactBytes, manifestCanonical), signingKey);
 
   // Pre-compute a receipt the receiver may use as a starting record. The
-  // signature_ok / recipient_ok are populated on verify, not pack — the
+  // signature_ok / recipient_ok are populated on verify, not pack - the
   // receipt here is a SKELETON the receiver fills in.
   const receipt = {
     signer_fpr: signerFpr,
@@ -406,7 +406,7 @@ export function createSneakernetBundle(opts = {}) {
   };
 }
 
-// verifySneakernetBundle({...}) — open a tarball, recompute the canonical
+// verifySneakernetBundle({...}) - open a tarball, recompute the canonical
 // signing payload, run crypto.verify('ed25519', ...) against the trusted
 // pubkey, AND compare the manifest's recipient slot to the trusted pubkey
 // to confirm we are the intended recipient.
@@ -420,7 +420,7 @@ export function createSneakernetBundle(opts = {}) {
 //   bundle_path           tarball produced by createSneakernetBundle
 //   trusted_pubkey_path   local file holding the signer's Ed25519 public key
 //                         (PEM or raw 32 bytes). The receiver MUST have this
-//                         out-of-band — sneakernet does NOT bootstrap trust.
+//                         out-of-band - sneakernet does NOT bootstrap trust.
 //   extract_to            optional dir to extract artifact.kolm into; if
 //                         signature_ok && recipient_ok the artifact is written
 //                         there; otherwise NOT (refuses to let unverified
@@ -525,7 +525,7 @@ export function verifySneakernetBundle(opts = {}) {
   try {
     signature_ok = crypto.verify(null, payload, trustedPub, signature) === true;
   } catch (_) {
-    // Malformed signature or wrong algorithm — fail closed.
+    // Malformed signature or wrong algorithm - fail closed.
     signature_ok = false;
   }
 

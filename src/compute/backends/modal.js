@@ -1,4 +1,4 @@
-// modal — Modal Labs serverless GPU. No public REST API; SDK is gRPC.
+// modal - Modal Labs serverless GPU. No public REST API; SDK is gRPC.
 // CLI: https://modal.com/docs/reference/cli/run
 // Env: KOLM_MODAL_TOKEN (translated to MODAL_TOKEN_ID + MODAL_TOKEN_SECRET).
 // run() shells out to the `modal` CLI if present, else returns guidance.
@@ -35,7 +35,7 @@ async function _modalAvailable() {
   }
 }
 
-// run({ image, command, env, timeoutMs }) — `image` is the modal script
+// run({ image, command, env, timeoutMs }) - `image` is the modal script
 // reference like "script.py::function" or a deployed app name. `command`
 // becomes positional args passed to `modal run`.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {

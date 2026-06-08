@@ -1,13 +1,13 @@
-// W811 — Capture Analytics Dashboard primitive.
+// W811 - Capture Analytics Dashboard primitive.
 //
 // Pairs with:
-//   - W716 capture-stats (TAAS) — `src/capture-stats.js` already exposes
+//   - W716 capture-stats (TAAS) - `src/capture-stats.js` already exposes
 //     output-length / vocab-entropy / reasoning-depth / tool-use signals over
 //     a flat capture array. W811 builds on top of it by adding per-CLUSTER
 //     summaries, an IDR (Important-Distinct-Recent) staleness gauge, CSV
 //     export, and a per-cluster gap signal emitted to the canonical
 //     event-store so W815 (active-learning) can pick it up.
-//   - W720 self-improvement loop — W811 is the read-only analytics surface;
+//   - W720 self-improvement loop - W811 is the read-only analytics surface;
 //     the gap-signal event we write is the "you should re-capture in cluster
 //     X" hint the W815 loop consumes.
 //
@@ -32,7 +32,7 @@
 //   - Empty namespace ⇒ {ok:false, error:'no_captures', hint:'...', version}
 //     never silently returns an empty cluster list.
 //   - K-Score breakdown returns {kscore:null, n_samples:0, status:'no_samples'}
-//     when a cluster has zero scoreable rows — never NaN, never 0 fabricated.
+//     when a cluster has zero scoreable rows - never NaN, never 0 fabricated.
 //   - The IDR gauge is a number in [0,1]. Empty windows give a defined value
 //     (1.0 = fully stale) with `status` annotated; NEVER NaN.
 //
@@ -52,7 +52,7 @@
 //     3. greedy clustering: for each row, find the closest existing centroid
 //        by cosine-on-sparse-vec; if max similarity < CLUSTER_SIM_THRESHOLD
 //        spawn a new cluster.
-//     4. cap clusters at MAX_CLUSTERS — overflow rows go to bucket
+//     4. cap clusters at MAX_CLUSTERS - overflow rows go to bucket
 //        '__overflow__' with status:'overflow'.
 //
 // EXTERNAL DEPS: none. node:crypto for the cluster id only.
@@ -71,7 +71,7 @@ export const CLUSTER_SIM_THRESHOLD = 0.30;
 
 // Hard cap on cluster count per call. Above this every additional row
 // goes to the __overflow__ bucket. A namespace with > MAX_CLUSTERS
-// distinct prompts is almost certainly under-distilled — surface the
+// distinct prompts is almost certainly under-distilled - surface the
 // truncation honestly instead of silently merging unrelated tasks.
 export const MAX_CLUSTERS = 64;
 
@@ -85,7 +85,7 @@ export const MAX_ROWS_PER_CALL = 20000;
 export const IDR_RECENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 export const IDR_COMPARISON_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
-// W811-7 — event-store kind we emit so W815 (active-learning) can subscribe.
+// W811-7 - event-store kind we emit so W815 (active-learning) can subscribe.
 // Carries the cluster summary + gap-signal score per cluster.
 export const GAP_SIGNAL_EVENT_KIND = 'capture_cluster_gap_signal_w811';
 
@@ -181,7 +181,7 @@ function _addToCentroid(centroid, fp, n) {
 // =============================================================================
 
 // Pull all captures for (tenant, namespace) from the store. Mirrors the
-// fence pattern used by src/capture-anomaly.js — findByTenant + inner
+// fence pattern used by src/capture-anomaly.js - findByTenant + inner
 // (tenant || tenant_id) re-check + namespace match (accepting both
 // `namespace` and `corpus_namespace` because capture-store writes the
 // latter while the canonical event-schema writes the former).
@@ -206,7 +206,7 @@ function _readCaptures(tenant_id, namespace, opts = {}) {
 }
 
 // =============================================================================
-// W811-1 — clustering pipeline
+// W811-1 - clustering pipeline
 // =============================================================================
 
 /**
@@ -248,7 +248,7 @@ export function clusterCaptures(captures, opts = {}) {
     const prompt = _toText(cap && (cap.prompt || cap.request));
     const fp = fingerprintPrompt(prompt);
     if (!Object.keys(fp).length) {
-      // Empty prompts can't cluster — bucket as overflow rather than fabricate.
+      // Empty prompts can't cluster - bucket as overflow rather than fabricate.
       overflow_n += 1;
       continue;
     }
@@ -267,7 +267,7 @@ export function clusterCaptures(captures, opts = {}) {
       if (cap && (cap.event_id || cap.id)) c.ids.push(String(cap.event_id || cap.id));
       continue;
     }
-    // No good match — open a new centroid, unless we're at the cap.
+    // No good match - open a new centroid, unless we're at the cap.
     if (centroids.length >= maxClusters) {
       overflow_n += 1;
       continue;
@@ -310,7 +310,7 @@ export function clusterCaptures(captures, opts = {}) {
 }
 
 // =============================================================================
-// W811-2 — per-cluster K-Score breakdown
+// W811-2 - per-cluster K-Score breakdown
 // =============================================================================
 
 // Extract a K-Score from a single capture row if one is recorded. We accept
@@ -385,7 +385,7 @@ export function kscoreBreakdown(clusters, captures) {
 }
 
 // =============================================================================
-// W811-3 — IDR (Important-Distinct-Recent) staleness gauge
+// W811-3 - IDR (Important-Distinct-Recent) staleness gauge
 // =============================================================================
 
 // Helper to read a timestamp from a row; accepts created_at / ts / time_ms.
@@ -405,7 +405,7 @@ function _ts(row) {
  * captures.
  *
  * Importance proxy = clustered (in any non-overflow cluster), so the
- * weight is 1 — single-occurrence prompts get equal weight.
+ * weight is 1 - single-occurrence prompts get equal weight.
  *
  * Distinct = unique row count.
  *
@@ -462,10 +462,10 @@ export function idrStalenessGauge(captures, opts = {}) {
 }
 
 // =============================================================================
-// W811-4 — CSV export
+// W811-4 - CSV export
 // =============================================================================
 
-// CSV field escape — quote fields containing comma, quote, or newline.
+// CSV field escape - quote fields containing comma, quote, or newline.
 function _csvField(v) {
   if (v == null) return '';
   const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
@@ -510,7 +510,7 @@ export function clustersToCsv(clusters, breakdown) {
 }
 
 // =============================================================================
-// W811-7 — emit per-cluster gap signal → W815
+// W811-7 - emit per-cluster gap signal → W815
 // =============================================================================
 
 // gap_signal score per cluster. Higher = bigger gap:
@@ -555,7 +555,7 @@ export function parseGapSignal(event) {
 }
 
 // Emit one gap-signal event per cluster into the canonical event-store.
-// Best-effort — never throws (the analytics call must succeed even if the
+// Best-effort - never throws (the analytics call must succeed even if the
 // event-store is misconfigured). Returns the array of events successfully
 // emitted (length 0 on full failure).
 //
@@ -567,7 +567,7 @@ export function parseGapSignal(event) {
 //   - completion_tokens = cluster.n (volume proxy)
 //   - feedback = GAP_SIGNAL_FEEDBACK_PREFIX + JSON.stringify(payload)
 //     (rides the only multi-purpose free-string column that survives
-//     canonicalize() — see GAP_SIGNAL_FEEDBACK_PREFIX comment)
+//     canonicalize() - see GAP_SIGNAL_FEEDBACK_PREFIX comment)
 async function _emitGapSignals({ tenant_id, namespace, clusters, breakdown, staleness }) {
   const out = [];
   const bdMap = new Map();
@@ -641,7 +641,7 @@ export async function analyzeNamespace(opts = {}) {
     return {
       ok: false,
       error: 'missing_tenant_id',
-      hint: 'pass {tenant_id} — analytics are per-tenant, never cross-tenant',
+      hint: 'pass {tenant_id} - analytics are per-tenant, never cross-tenant',
       version: CAPTURE_ANALYTICS_VERSION,
     };
   }
@@ -649,7 +649,7 @@ export async function analyzeNamespace(opts = {}) {
     return {
       ok: false,
       error: 'missing_namespace',
-      hint: 'pass {namespace} — pick one with `kolm captures list --by-namespace`',
+      hint: 'pass {namespace} - pick one with `kolm captures list --by-namespace`',
       version: CAPTURE_ANALYTICS_VERSION,
     };
   }
@@ -707,7 +707,7 @@ export async function analyzeNamespace(opts = {}) {
 }
 
 // =============================================================================
-// CSV variant — for `--csv` CLI flag and the dashboard download button.
+// CSV variant - for `--csv` CLI flag and the dashboard download button.
 // =============================================================================
 export async function analyzeNamespaceCsv(opts = {}) {
   const env = await analyzeNamespace({ ...opts, emit_gap_signal: false });
@@ -719,7 +719,7 @@ export async function analyzeNamespaceCsv(opts = {}) {
   };
 }
 
-// Test seam — internal helpers re-exported so the test file can exercise
+// Test seam - internal helpers re-exported so the test file can exercise
 // each branch without scaffolding new fixtures.
 export const __internals = {
   _toText,

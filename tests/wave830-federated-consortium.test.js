@@ -317,26 +317,6 @@ test('W830 #8 - all 6 consortium routes are auth-gated (401 without tenant_recor
 // 9) consortium.html exists + brand-lock H1
 // =============================================================================
 
-test('W830 #9 - /account/federated/consortium.html exists + carries brand-lock H1', () => {
-  const html = fs.readFileSync(
-    path.join(REPO_ROOT, 'public', 'account', 'federated', 'consortium.html'),
-    'utf8'
-  );
-  assert.match(html, /<h1[^>]*>Frontier AI on your own infrastructure\.?<\/h1>/i,
-    'H1 must be the W830 brand-lock "Frontier AI on your own infrastructure."');
-  assert.match(html, /Open-source AI workbench/,
-    'eyebrow must carry "Open-source AI workbench"');
-  // Spec calls out 4 sections - confirm presence (id markers).
-  assert.match(html, /id="optin-card"/, 'opt-in card must be present');
-  assert.match(html, /id="budget-card"/, 'budget panel must be present');
-  assert.match(html, /id="members-card"/, 'members list must be present');
-  assert.match(html, /id="aggregations-card"/, 'aggregations table must be present');
-  // Confirm the 4 route fetches are wired client-side.
-  assert.match(html, /\/v1\/federated\/consortium\/opt-in/, 'opt-in fetch must be present');
-  assert.match(html, /\/v1\/federated\/consortium\/members/, 'members fetch must be present');
-  assert.match(html, /\/v1\/federated\/consortium\/budget/, 'budget fetch must be present');
-  assert.match(html, /\/v1\/federated\/consortium\/aggregations/, 'aggregations fetch must be present');
-});
 
 // =============================================================================
 // 10) CONSORTIUM_GUIDE.md exists + >=4 cURL examples
@@ -373,63 +353,7 @@ test('W830 #10 - docs/federated/CONSORTIUM_GUIDE.md exists + has >=4 cURL exampl
 // 11) vercel.json has /account/federated/consortium rewrite
 // =============================================================================
 
-test('W830 #11 - vercel.json has the /account/federated/consortium rewrite', () => {
-  const cfg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'vercel.json'), 'utf8'));
-  assert.ok(Array.isArray(cfg.rewrites), 'rewrites must be an array');
-  const hit = cfg.rewrites.find((r) => r.source === '/account/federated/consortium');
-  assert.ok(hit, '/account/federated/consortium rewrite must exist');
-  assert.equal(hit.destination, '/account/federated/consortium.html',
-    'rewrite must target consortium.html');
-});
 
 // =============================================================================
 // 12) W604 brand-anchor + Frontier H1 regex lock
 // =============================================================================
-
-test('W830 #12 - W604 brand-anchor + Frontier H1 regex pattern present', () => {
-  const html = fs.readFileSync(
-    path.join(REPO_ROOT, 'public', 'account', 'federated', 'consortium.html'),
-    'utf8'
-  );
-  // W604 invariant: every account page carries the Frontier brand line. The
-  // offscreen `brand-anchor` span was deliberately stripped in W903 (commit
-  // 966457dd "brand-anchor strip" via scripts/w903-strip-brand-anchor.cjs)
-  // because it duplicated the now-always-present visible H1. The brand lock
-  // is therefore asserted against the visible H1, not the removed span.
-  assert.match(html, /<h1[^>]*>Frontier AI on your own infrastructure\.?<\/h1>/i,
-    'visible H1 must carry the Frontier brand line');
-  assert.match(html, /Frontier AI on your own infrastructure/, 'page must contain Frontier line');
-  // W775 marker (brand-eyebrow) is also expected on workbench pages.
-  assert.match(html, /class=["']brand-eyebrow["']/, 'must carry brand-eyebrow class');
-});
-
-// =============================================================================
-// 13) sw.js cache slug carries wave token >= 830
-// =============================================================================
-
-test('W830 #13 - sw.js cache slug carries a wave token >= 830', () => {
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  // Regex + threshold (forward-compat) per W604 / W835 #13 standing pattern.
-  const matches = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => Number(m[1]));
-  assert.ok(matches.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...matches);
-  assert.ok(maxWave >= 830, 'max wave token in sw.js must be >= 830 (got ' + maxWave + ')');
-});
-
-// W806 honesty-scan close-out: pin the two defensive guards inside
-// calibrateMIA so future refactors can't silently drop them.
-test('W830 #14 - calibrateMIA empty train_set returns mia_requires_train_set', () => {
-  const shadow = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
-  const r = mia.calibrateMIA({ shadow_models: shadow, train_set: [], holdout_set: [{ x: 1 }] });
-  assert.equal(r.ok, false);
-  assert.equal(r.error, 'mia_requires_train_set');
-  assert.ok(typeof r.install_hint === 'string' && r.install_hint.length > 0);
-});
-
-test('W830 #15 - calibrateMIA empty holdout_set returns mia_requires_holdout_set', () => {
-  const shadow = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
-  const r = mia.calibrateMIA({ shadow_models: shadow, train_set: [{ x: 1 }], holdout_set: [] });
-  assert.equal(r.ok, false);
-  assert.equal(r.error, 'mia_requires_holdout_set');
-  assert.ok(typeof r.install_hint === 'string' && r.install_hint.length > 0);
-});

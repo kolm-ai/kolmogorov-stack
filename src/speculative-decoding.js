@@ -1,6 +1,6 @@
 // src/speculative-decoding.js
 //
-// W916-I1 — Speculative decoding integration module. Sister of
+// W916-I1 - Speculative decoding integration module. Sister of
 // src/kv-cache-shard.js. Provides the Node-side contract for the Python
 // speculative path in apps/trainer/speculative.py and apps/runtime/serve.py.
 //
@@ -8,17 +8,17 @@
 //   The target model is the big one (Qwen 7B, Llama 14B, ...). The draft model
 //   is a small fast model (1.5B / 3B) that proposes K tokens; the target then
 //   verifies them in a single forward pass. When the proposals match, we get
-//   K tokens for the cost of one big-model forward — typical wins are 2x–3x
+//   K tokens for the cost of one big-model forward - typical wins are 2x - 3x
 //   tokens/sec, sometimes more for code.
 //
 // What this module exposes:
-//   * DRAFT_PAIRINGS                — well-known target -> draft auto-picks.
-//   * pickDraft(target, opts)       — resolve auto -> concrete draft, or null.
-//   * resolveSpeculative(flag, ...) — resolve the CLI's --speculative value
+//   * DRAFT_PAIRINGS - well-known target -> draft auto-picks.
+//   * pickDraft(target, opts) - resolve auto -> concrete draft, or null.
+//   * resolveSpeculative(flag, ...) - resolve the CLI's --speculative value
 //                                     ('auto' | 'off' | '<model>') into a final
 //                                     { mode, draft_model, reason }.
-//   * isSpeculativeSupported(...)   — gate on runtime + draft availability.
-//   * speculativePassportEntry()    — runtime-passport.kv_cache-style sub-object
+//   * isSpeculativeSupported(...) - gate on runtime + draft availability.
+//   * speculativePassportEntry() - runtime-passport.kv_cache-style sub-object
 //                                     describing the spec-decoding configuration.
 //
 // Why mirror DRAFT_PAIRINGS in two languages: the Python (apps/trainer/
@@ -34,11 +34,11 @@ export const DEFAULT_NUM_SPECULATIVE_TOKENS = 5;
 
 // Runtimes that accept a draft-model handoff. llama.cpp has its own
 // speculative path (`--draft-model`) but the kolm Python serve does not
-// drive it today — keep it out of this gate until that path lands.
+// drive it today - keep it out of this gate until that path lands.
 export const SUPPORTED_RUNTIMES = Object.freeze(['transformers', 'vllm']);
 
 // Known good target -> draft pairings. Keys are lower-case canonical model ids.
-// Mirrors apps/trainer/speculative.py DRAFT_PAIRINGS — keep them in sync.
+// Mirrors apps/trainer/speculative.py DRAFT_PAIRINGS - keep them in sync.
 export const DRAFT_PAIRINGS = Object.freeze({
   'qwen/qwen2.5-7b-instruct':        'Qwen/Qwen2.5-1.5B-Instruct',
   'qwen/qwen2.5-14b-instruct':       'Qwen/Qwen2.5-3B-Instruct',
@@ -68,7 +68,7 @@ export function pickDraft(targetId) {
   const key = targetId.toLowerCase().trim();
   if (DRAFT_PAIRINGS[key]) return DRAFT_PAIRINGS[key];
   // Try the family-prefix fallback: e.g. someone passes
-  // "qwen/qwen2.5-7b-instruct-awq" — strip a known suffix and retry once.
+  // "qwen/qwen2.5-7b-instruct-awq" - strip a known suffix and retry once.
   const stripped = key.replace(/-(awq|gptq|bnb-4bit|nf4|fp8|fp16|bf16|q[0-9]_[a-z][_a-z]*)$/i, '');
   if (stripped !== key && DRAFT_PAIRINGS[stripped]) return DRAFT_PAIRINGS[stripped];
   return null;
@@ -122,7 +122,7 @@ export function resolveSpeculative({ flag, target, runtime, numSpeculativeTokens
     ? Math.floor(numSpeculativeTokens)
     : DEFAULT_NUM_SPECULATIVE_TOKENS;
   const rawFlag = (typeof flag === 'string') ? flag.trim() : '';
-  // Explicit off — never run speculative decoding even if a pairing exists.
+  // Explicit off - never run speculative decoding even if a pairing exists.
   if (rawFlag.toLowerCase() === 'off' || rawFlag.toLowerCase() === 'none' || rawFlag.toLowerCase() === 'false') {
     return {
       mode: 'off',
@@ -132,7 +132,7 @@ export function resolveSpeculative({ flag, target, runtime, numSpeculativeTokens
       num_speculative_tokens: n,
     };
   }
-  // Auto — look up via the DRAFT_PAIRINGS registry.
+  // Auto - look up via the DRAFT_PAIRINGS registry.
   if (!rawFlag || rawFlag.toLowerCase() === 'auto' || rawFlag.toLowerCase() === 'on') {
     const picked = pickDraft(target);
     const gate = isSpeculativeSupported({ runtime, draft: picked });
@@ -182,14 +182,14 @@ export function formatSpeculativeBanner(resolved) {
     return `speculative decoding: OFF (${resolved.reason})`;
   }
   if (resolved.mode === 'unsupported') {
-    return `speculative decoding: SKIPPED — ${resolved.reason}`;
+    return `speculative decoding: SKIPPED - ${resolved.reason}`;
   }
   return `speculative decoding: ${resolved.draft_model} (${resolved.mode}, K=${resolved.num_speculative_tokens})`;
 }
 
 /**
  * Build the runtime-passport speculative sub-object. Mirrors the shape of
- * shardPassportEntry — additive sub-document attached to the passport via
+ * shardPassportEntry - additive sub-document attached to the passport via
  * addSpeculativeDecodingToPassport(passport, this).
  *
  * `measured` carries:

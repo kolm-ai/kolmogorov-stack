@@ -1,4 +1,4 @@
-// W237 — Multi-node Tailscale mesh + GKE-scale recipe.
+// W237 - Multi-node Tailscale mesh + GKE-scale recipe.
 //
 // Two concerns:
 //
@@ -6,7 +6,7 @@
 //      kolm. We discover the mesh via `tailscale status --json`, plan which
 //      node gets which role (coordinator / inference / capture / mentor) and
 //      ship a JSON deployment plan the user can inspect before executing.
-//      Deployment uses `tailscale ssh` to run kolm verbs on each node — no
+//      Deployment uses `tailscale ssh` to run kolm verbs on each node - no
 //      bespoke control plane, no agent installed, just SSH over the tailnet.
 //
 //   2. GKE-scale recipe: the SAME plan transpiles to Kubernetes manifests
@@ -53,8 +53,8 @@ export function discoverNodes(opts = {}) {
 }
 
 // Build a deployment plan. Inputs:
-//   - artifact: { name, hash, recipe_classes } — the .kolm to ship
-//   - nodes:    [{ hostname, addrs, ... }] — output of discoverNodes() or hand-supplied
+//   - artifact: { name, hash, recipe_classes } - the .kolm to ship
+//   - nodes:    [{ hostname, addrs, ... }] - output of discoverNodes() or hand-supplied
 //   - opts:     { replicas, mentor_node, capture_node }
 //
 // Output: { schema_version, plan_id, artifact, assignments: [{node, role, port}], ... }
@@ -135,11 +135,11 @@ function roleCommand(role, artifactName, port) {
 }
 
 // Emit a shell script the user can run to deploy via `tailscale ssh`.
-// We do NOT execute — we emit. The user reviews and runs.
+// We do NOT execute - we emit. The user reviews and runs.
 export function toTailscaleShellScript(plan) {
   const lines = [
     '#!/usr/bin/env bash',
-    '# kolm mesh deploy script — auto-generated. Review before running.',
+    '# kolm mesh deploy script - auto-generated. Review before running.',
     `# plan_id: ${plan.plan_id}`,
     `# integrity_hash: ${plan.integrity_hash}`,
     'set -euo pipefail',

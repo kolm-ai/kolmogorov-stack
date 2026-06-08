@@ -1,6 +1,6 @@
-// W758-1 — MMLU runner harness (honest scaffold).
+// W758-1 - MMLU runner harness (honest scaffold).
 //
-// MMLU (Massive Multitask Language Understanding) — Hendrycks et al. 2020 —
+// MMLU (Massive Multitask Language Understanding) - Hendrycks et al. 2020 - 
 // 57 academic subjects, multi-choice A/B/C/D, ~14k test rows. Source of
 // truth at huggingface.co/datasets/cais/mmlu (Apache-2.0). The official
 // archive ships per-subject CSV files: question, A, B, C, D, answer.
@@ -9,7 +9,7 @@
 //   - This module does NOT bundle the MMLU dataset. We ship a HARNESS that
 //     scores rows from a locally provided pack. If the pack is absent we
 //     return an honest envelope { ok:false, error:'bench_pack_not_local',
-//     hint, expected_path } — NEVER a fake number.
+//     hint, expected_path } - NEVER a fake number.
 //   - This module does NOT ship a runtime that calls your .kolm artifact.
 //     The caller supplies `runOnArtifact(artifact_path, prompt) -> string`
 //     via dependency injection so tests have a deterministic seam and the
@@ -17,7 +17,7 @@
 //     route layer omits a runOnArtifact, we return an honest envelope
 //     { ok:false, error:'runtime_not_wired', hint } NOT 200 with zeroes.
 //   - Accuracy is exact-match on the letter answer. Output normalization is
-//     conservative — trim/upper, grab the first A|B|C|D character. We do
+//     conservative - trim/upper, grab the first A|B|C|D character. We do
 //     NOT pattern-match longer rationale text; that would silently inflate
 //     scores on models that emit "I think the answer is B because ..." and
 //     deflate scores on models that emit "B".
@@ -106,7 +106,7 @@ function _defaultPackDir() {
   return path.join(home, '.kolm', 'bench-packs', 'mmlu');
 }
 
-// parseMMLUCsv(text) — RFC 4180-flavoured CSV parser scoped to the MMLU
+// parseMMLUCsv(text) - RFC 4180-flavoured CSV parser scoped to the MMLU
 // schema: 6 columns (question, A, B, C, D, answer). Supports embedded
 // quotes ("a ""quoted"" word"), embedded newlines inside quoted fields,
 // commas in quoted fields. Does NOT support escaped backslashes or BOM
@@ -114,7 +114,7 @@ function _defaultPackDir() {
 //
 // `subject` is taken from the optional 7th column if present (we synthesize
 // one when re-packing); falls back to 'unknown' otherwise. Callers usually
-// pass subject via the filename (foo_test.csv -> foo) — loadMMLUPack does.
+// pass subject via the filename (foo_test.csv -> foo) - loadMMLUPack does.
 export function parseMMLUCsv(text, defaultSubject = 'unknown') {
   if (typeof text !== 'string') return [];
   const rows = [];
@@ -186,11 +186,11 @@ export function parseMMLUCsv(text, defaultSubject = 'unknown') {
   return out;
 }
 
-// loadMMLUPack({pack_dir, subjects=null}) — returns an array of MMLU rows
+// loadMMLUPack({pack_dir, subjects=null}) - returns an array of MMLU rows
 // from a local pack OR an honest envelope when the pack is absent. The
 // pack layout is the HF release shape: <pack_dir>/test/<subject>_test.csv.
 // When subjects is null we read every subject in MMLU_CATEGORIES that has
-// a matching file (missing subjects are tolerated — partial packs are
+// a matching file (missing subjects are tolerated - partial packs are
 // useful for smoke tests).
 //
 // Returns either { ok:true, rows, n, subjects } OR
@@ -238,25 +238,25 @@ export function loadMMLUPack({ pack_dir = null, subjects = null } = {}) {
   return { ok: true, rows, n: rows.length, subjects: seen, version: MMLU_VERSION };
 }
 
-// _normalizeLetter(s) — extract the predicted MMLU letter from `s`.
-// Deliberately conservative — see HONESTY CONTRACT.
+// _normalizeLetter(s) - extract the predicted MMLU letter from `s`.
+// Deliberately conservative - see HONESTY CONTRACT.
 //
 // Priority order (first match wins):
-//   1) A standalone letter at start of string ('B', 'B.', 'B)', 'B —').
+//   1) A standalone letter at start of string ('B', 'B.', 'B)', 'B - ').
 //   2) An "answer is X" or "the answer: X" pattern (case-insensitive).
 //   3) The very last standalone A|B|C|D in the string (most models emit
 //      their final answer last).
 //   4) A bare A|B|C|D anywhere in the string (last-resort fallback).
 //
-// We do NOT just scan for the first A|B|C|D — that would mis-attribute on
+// We do NOT just scan for the first A|B|C|D - that would mis-attribute on
 // "The answer is B" (matches A in "Answer"). Returns null when nothing
 // plausible is found.
 function _normalizeLetter(s) {
   if (s == null) return null;
   const text = String(s).trim();
   if (!text) return null;
-  // 1) Leading letter — strict boundary so 'Anatomy' (A) doesn't match.
-  const lead = text.match(/^([ABCD])(?:[\s.,):\-—]|$)/i);
+  // 1) Leading letter - strict boundary so 'Anatomy' (A) doesn't match.
+  const lead = text.match(/^([ABCD])(?:[\s.,):\- - ]|$)/i);
   if (lead) return lead[1].toUpperCase();
   // 2) "the answer is X" / "answer: X" / "Answer is X" patterns.
   const pat = text.match(/answer\s*(?:is|:)\s*\*?\s*([ABCD])\b/i);
@@ -269,7 +269,7 @@ function _normalizeLetter(s) {
   return any ? any[0] : null;
 }
 
-// formatMMLUPrompt(row) — canonical 4-choice prompt template. Matches the
+// formatMMLUPrompt(row) - canonical 4-choice prompt template. Matches the
 // reference scoring harness in the MMLU paper (Hendrycks et al. 2020 §4.1).
 export function formatMMLUPrompt(row) {
   return (
@@ -285,7 +285,7 @@ export function formatMMLUPrompt(row) {
 // runMMLU({artifact_path, pack_dir, n_samples, subjects, runOnArtifact}).
 //
 // runOnArtifact MUST be a callable (sync or async) of shape
-// (artifact_path, prompt) -> string. It is mandatory — when omitted the
+// (artifact_path, prompt) -> string. It is mandatory - when omitted the
 // harness returns honest { ok:false, error:'runtime_not_wired' }.
 //
 // n_samples truncates to the first N rows for fast smoke tests; null runs

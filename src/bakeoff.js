@@ -16,15 +16,15 @@
 // `recommended` as the highest score_per_dollar (with a small bias toward
 // >=90% pass rate so a 1% pass rate doesn't win on cost alone).
 //
-// W409p — adds privacy_class + deterministic columns + a recommendation
+// W409p - adds privacy_class + deterministic columns + a recommendation
 // verdict from a closed enum {keep_frontier, distill, compile_rule,
 // use_local_backbone, needs_human} computed from the four columns:
 //
 //   keep_frontier      -> recommended is a frontier model (best q/$ at scale)
-//   distill            -> a smaller model passes >= 0.85 — distill candidate
+//   distill            -> a smaller model passes >= 0.85 - distill candidate
 //   compile_rule       -> the synthesized rule alone passes >= 0.85
 //   use_local_backbone -> the local backbone (gemma/qwen/phi) passes >= 0.85
-//   needs_human        -> nothing clears the 0.85 gate — escalate to labeling
+//   needs_human        -> nothing clears the 0.85 gate - escalate to labeling
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -33,10 +33,10 @@ import os from 'node:os';
 
 import { callLLM, isConfigured, describeConfig } from './llm-call.js';
 import { runArtifact } from './artifact-runner.js';
-// W784 — Eval-metric plugin discovery. bakeoffMetricPlugins() returns plugins
+// W784 - Eval-metric plugin discovery. bakeoffMetricPlugins() returns plugins
 // of kind "eval-metric" so the bakeoff loop can fold third-party metrics
 // alongside K-Score / parse-failure / context-faithfulness. Discovery only
-// at this layer — the plugin's entry script does the actual scoring per row.
+// at this layer - the plugin's entry script does the actual scoring per row.
 // See src/plugins.js + /docs/plugins.html.
 import { bakeoffMetricPlugins as _w784BakeoffMetricPlugins } from './plugins.js';
 export function listW784MetricPlugins() {
@@ -44,12 +44,12 @@ export function listW784MetricPlugins() {
     return { ok: true, kind: 'eval-metric', total: 0, plugins: [], errors: [] };
   }
 }
-// W809-3 — parse_failure_rate track. parseOutputAgainstSpec returns
+// W809-3 - parse_failure_rate track. parseOutputAgainstSpec returns
 // {ok,parsed,error} so the bakeoff summary can count parse failures alongside
 // pass_rate (never substituted for K-Score).
 import { parseOutputAgainstSpec as _w809ParseOutputAgainstSpec } from './output-schema.js';
-// W734-5 — context-faithfulness axis. computeContextFaithfulness returns a
-// 0..1 score (or null when retrieved_context is absent — honest absence, NOT
+// W734-5 - context-faithfulness axis. computeContextFaithfulness returns a
+// 0..1 score (or null when retrieved_context is absent - honest absence, NOT
 // 0) for how much of a contestant's response is grounded in the retrieved
 // chunks. Per-call score is averaged across rows in summarize().
 import { computeContextFaithfulness as _w734ComputeContextFaithfulness } from './rag-capture.js';
@@ -83,7 +83,7 @@ export const DEFAULT_CONTESTANTS = [
   'gpt-4o-mini',
 ];
 
-// W409p — privacy class lookup per contestant. local-* contestants are
+// W409p - privacy class lookup per contestant. local-* contestants are
 // 'local' (PHI stays on device). Frontier API calls leak to the vendor.
 // 'public' = no data leaves device (cache / rule). 'frontier' = leaks to
 // vendor over public internet. 'byo-vendor' = leaks only to vendor under
@@ -101,7 +101,7 @@ export const PRIVACY_CLASSES = {
   'claude-opus-4-7': 'frontier',
 };
 
-// W409p — deterministic flag per contestant family. cache + rule + sampled
+// W409p - deterministic flag per contestant family. cache + rule + sampled
 // local artifacts are deterministic. Frontier API calls aren't (temperature
 // 0 helps but the vendor still mutates models without notice).
 export const DETERMINISM_TABLE = {
@@ -117,7 +117,7 @@ export const DETERMINISM_TABLE = {
   'claude-opus-4-7': false,
 };
 
-// W409p — closed enum of recommendation verdicts. Tests assert the verdict
+// W409p - closed enum of recommendation verdicts. Tests assert the verdict
 // is one of these labels (never a free-text string).
 export const RECOMMENDATION_VERDICTS = [
   'keep_frontier',
@@ -452,11 +452,11 @@ function summarize(name, calls, opts) {
     name, pass_rate: 0, avg_latency_ms: 0, avg_cost_usd: 0, calls: 0, score_per_dollar: 0,
     privacy_class: classifyPrivacy(name), deterministic: classifyDeterminism(name),
     quality: 0,
-    // W809-3 — parse_failure_rate is emitted ALONGSIDE pass_rate, never as
+    // W809-3 - parse_failure_rate is emitted ALONGSIDE pass_rate, never as
     // a substitute. NaN here would poison downstream filters; pin to 0 for
     // the empty-calls path so the column is always numeric.
     parse_failure_rate: 0,
-    // W734-5 — context_faithfulness is null on the empty-calls path so the
+    // W734-5 - context_faithfulness is null on the empty-calls path so the
     // column is honestly absent (we have NO data to score), not falsely 0.
     context_faithfulness: null,
   };
@@ -467,10 +467,10 @@ function summarize(name, calls, opts) {
   // score_per_dollar: pass per dollar. Floor cost at $1e-6 so zero-cost
   // contestants don't blow up to Infinity.
   const score_per_dollar = passRate / Math.max(avgCostUsd, 1e-6);
-  // W809-3 — parse_failure_rate track. When the caller passes
+  // W809-3 - parse_failure_rate track. When the caller passes
   // opts.schema_spec we parse every contestant's `got` string against the
   // spec and report the fraction that failed. This is ALWAYS computed when
-  // a spec is present and is NEVER substituted for pass_rate — both ride
+  // a spec is present and is NEVER substituted for pass_rate - both ride
   // out alongside K-Score so the UI can show "passed 0.92 / parse-fail 0.04".
   // No spec → parse_failure_rate is null (column present, value honest).
   let parseFailureRate = null;
@@ -491,11 +491,11 @@ function summarize(name, calls, opts) {
       parseFailureRate = null;
     }
   }
-  // W734-5 — context_faithfulness axis. For every call that carries a
+  // W734-5 - context_faithfulness axis. For every call that carries a
   // retrieved_context array (passed through on the row / call shape),
   // compute the TF-presence score. Average across rows; honest null when
   // NO call carried retrieved_context (RAG-free bakeoff). This is NEVER
-  // 0 for the absent case — the bakeoff UI / verdict logic relies on
+  // 0 for the absent case - the bakeoff UI / verdict logic relies on
   // null to mean "axis not applicable to this dataset".
   let contextFaithfulness = null;
   try {
@@ -515,28 +515,28 @@ function summarize(name, calls, opts) {
     }
     contextFaithfulness = cfCount === 0 ? null : (cfSum / cfCount);
   } catch (_e) {
-    // Honest absence on heuristic failure — never 0 (would lie).
+    // Honest absence on heuristic failure - never 0 (would lie).
     contextFaithfulness = null;
   }
   return {
     name,
     pass_rate: passRate,
-    quality: passRate,          // W409p — alias the bakeoffs UI reads.
+    quality: passRate,          // W409p - alias the bakeoffs UI reads.
     avg_latency_ms: Math.round(avgLatencyMs * 10) / 10,
     avg_cost_usd: avgCostUsd,
     score_per_dollar,
     privacy_class: classifyPrivacy(name),
     deterministic: classifyDeterminism(name),
     calls: calls.length,
-    // W809-3 — parse_failure_rate next to (never replacing) pass_rate.
+    // W809-3 - parse_failure_rate next to (never replacing) pass_rate.
     parse_failure_rate: parseFailureRate,
-    // W734-5 — context_faithfulness axis. 0..1 OR null (honest absence
+    // W734-5 - context_faithfulness axis. 0..1 OR null (honest absence
     // when no call carried retrieved_context).
     context_faithfulness: contextFaithfulness,
   };
 }
 
-// W409p — produce a recommendation verdict from the closed enum. Inputs:
+// W409p - produce a recommendation verdict from the closed enum. Inputs:
 // the ranked contestant array + the recommended name. The verdict tells the
 // caller what to do next, not just who passed first.
 export function recommendationVerdict(results, recommendedName) {
@@ -587,14 +587,14 @@ export async function bakeoff(datasetId, { contestants, opts = {} } = {}) {
   for (const r of results) r.recommended = (r.name === recommended);
   // Sort: pass_rate desc, then score_per_dollar desc.
   results.sort((a, b) => (b.pass_rate - a.pass_rate) || (b.score_per_dollar - a.score_per_dollar));
-  // W409p — verdict from the closed enum.
+  // W409p - verdict from the closed enum.
   const verdict = recommendationVerdict(results, recommended);
   return {
     dataset_id: typeof datasetId === 'string' ? datasetId : 'inline',
     rows_used: rows.length,
     contestants: results,
     recommended,
-    recommendation: verdict,        // W409p — closed-enum verdict.
+    recommendation: verdict,        // W409p - closed-enum verdict.
     recommendation_verdict: verdict, // explicit alias so downstream readers
                                      // don't have to guess at the key name.
     columns: ['name', 'pass_rate', 'avg_latency_ms', 'avg_cost_usd', 'privacy_class', 'deterministic'],

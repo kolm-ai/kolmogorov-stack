@@ -1,20 +1,20 @@
-// src/intent.js — natural-language intent dispatcher.
+// src/intent.js - natural-language intent dispatcher.
 //
 // The contract: given a free-form English instruction ("show me my captures"),
 // resolve it to a concrete kolm verb + argv WITHOUT requiring an LLM round-trip
 // for the 80% case. The classifier ships with three layers, evaluated in order:
 //
-//   1. KEYWORD FAST PATH  — exact-match table of common phrases. Zero latency,
+//   1. KEYWORD FAST PATH - exact-match table of common phrases. Zero latency,
 //      zero deps, deterministic. Covers ~50 of the most common asks.
-//   2. REGEX + HEURISTIC  — pattern extractors for namespace, file path, count,
+//   2. REGEX + HEURISTIC - pattern extractors for namespace, file path, count,
 //      etc. Routes phrasings the keyword path missed but whose structure is
 //      mechanical ("compile a redactor from ./notes/" → cmdCompile + path arg).
-//   3. LLM FALLBACK       — if KOLM_LLM_PROVIDER (or KOLM_INTENT_LLM) is set
+//   3. LLM FALLBACK - if KOLM_LLM_PROVIDER (or KOLM_INTENT_LLM) is set
 //      and a key exists, ask the configured model for a verb. If no LLM is
 //      configured, we rank verbs by token-overlap against VERB_DESCRIPTIONS
 //      and return the top-3 as alternatives so the caller can present a
 //      disambiguation prompt. Either way the function NEVER throws "not
-//      implemented" — we always return some Intent so the dispatcher can
+//      implemented" - we always return some Intent so the dispatcher can
 //      decide what to do.
 //
 // The intent classifier is ESM-only, has zero npm deps, and is consumed by the
@@ -29,11 +29,11 @@
 //     IntentContext = { cwd, artifacts: string[],
 //                       captures_summary: [{namespace, count}], current_tenant? }
 //
-//   VERB_DESCRIPTIONS — one entry per supported verb (name, one-line
+//   VERB_DESCRIPTIONS - one entry per supported verb (name, one-line
 //     description, sample phrasings, sample args). Mirrored in AGENT_GUIDE.md
 //     so AI agents and humans see the same surface.
 //
-//   listVerbs() → string[]  — the verb names in VERB_DESCRIPTIONS, stable
+//   listVerbs() → string[] - the verb names in VERB_DESCRIPTIONS, stable
 //                              order, for completion + docs builders.
 //
 // All input normalisation collapses whitespace, lowercases, and strips
@@ -44,16 +44,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // ---------------------------------------------------------------------------
-// VERB_DESCRIPTIONS — the single-source-of-truth table the keyword path,
+// VERB_DESCRIPTIONS - the single-source-of-truth table the keyword path,
 // the overlap-ranker, and AGENT_GUIDE.md all read from. Keep it stable.
 //
 // Each entry:
-//   verb        — the CLI verb to dispatch (matches cli/kolm.js dispatch table)
-//   desc        — one-line plain-English description (what it does)
-//   when        — when a user would want this (used by overlap-ranker)
-//   phrasings   — exact phrases that mean "run this verb". Triggers fast path.
-//   examples    — full command lines (mirror to AGENT_GUIDE.md "Recipes")
-//   args        — sample args for `kolm do --dry-run` output (advisory)
+//   verb - the CLI verb to dispatch (matches cli/kolm.js dispatch table)
+//   desc - one-line plain-English description (what it does)
+//   when - when a user would want this (used by overlap-ranker)
+//   phrasings - exact phrases that mean "run this verb". Triggers fast path.
+//   examples - full command lines (mirror to AGENT_GUIDE.md "Recipes")
+//   args - sample args for `kolm do --dry-run` output (advisory)
 // ---------------------------------------------------------------------------
 
 export const VERB_DESCRIPTIONS = [
@@ -211,9 +211,9 @@ export const VERB_DESCRIPTIONS = [
     when: 'Bootstrap a new project directory.',
     phrasings: ['init', 'initialize', 'init project', 'new project', 'bootstrap project'],
     examples: ['kolm init --name my-app'] },
-  // W848 — guided setup wizard. Maps every "I am new, where do I start"
+  // W848 - guided setup wizard. Maps every "I am new, where do I start"
   // shape to the interactive picker so the chat box surfaces a real CLI.
-  { verb: 'quickstart', desc: 'Guided setup wizard — pick wrapper or studio, walk through setup step by step.',
+  { verb: 'quickstart', desc: 'Guided setup wizard - pick wrapper or studio, walk through setup step by step.',
     when: 'You are new to kolm and want the most direct path to a working install.',
     phrasings: ['quickstart', 'quick start', 'wizard', 'setup', 'set up',
       'set me up', 'guide me', 'walk me through', 'walk me through setup',
@@ -400,7 +400,7 @@ export const VERB_DESCRIPTIONS = [
     when: 'One-shot natural-language question.',
     phrasings: ['ask', 'ask kolm'],
     examples: ['kolm ask "what is my k score?"'] },
-  { verb: 'do', desc: 'Natural-language dispatcher — classify and run any verb.',
+  { verb: 'do', desc: 'Natural-language dispatcher - classify and run any verb.',
     when: 'You do not remember the verb name; describe the task.',
     // W848: bare 'do' was matching the word "do" in any input ("ok do it"
     // → kolm do at 90% confidence). Drop the bare token + 'run command'
@@ -430,7 +430,7 @@ export const VERB_DESCRIPTIONS = [
     phrasings: ['fix', 'auto fix', 'patch artifact', 'fix the kolm'],
     examples: ['kolm fix phi-redactor.kolm --apply'] },
 
-  // W412 — W409 canonical control-plane verbs reach the NL classifier so
+  // W412 - W409 canonical control-plane verbs reach the NL classifier so
   // `kolm do "show me spend"` resolves to `kolm lake stats`, not a fallback.
   { verb: 'lake', desc: 'Canonical telemetry lake stats / tail / export / storage.',
     when: 'You want to see calls / spend / models / providers across all captures.',
@@ -476,24 +476,24 @@ export const VERB_DESCRIPTIONS = [
       'rank by k score', 'rank by k-score', 'rank by cost'],
     examples: ['kolm bakeoff --dataset ds_xxx', 'kolm bakeoff --namespace support'] },
 
-  // W853 — surface W700-W834 shipped features in the NL classifier so the
+  // W853 - surface W700-W834 shipped features in the NL classifier so the
   // homepage chat box + `kolm do` can dispatch them. Without these entries the
   // verb dispatches in cli/kolm.js work but the natural-language frontdoor
   // does not see them, which is exactly the "advertised feature, broken chat"
   // pattern the user called out.
-  { verb: 'diagnose', desc: 'W741 — K-score category breakdown + remediation hints for an artifact.',
+  { verb: 'diagnose', desc: 'W741 - K-score category breakdown + remediation hints for an artifact.',
     when: 'An artifact passed but you want to know which categories are weakest.',
     phrasings: ['diagnose', 'diagnostic', 'breakdown', 'show diagnosis', 'category breakdown',
       'k score breakdown', 'kscore breakdown', 'weak categories', 'where does it fail',
       'why is k-score low', 'show k-score by category'],
     examples: ['kolm diagnose phi-redactor.kolm', 'kolm diagnose --json'] },
-  { verb: 'gateway', desc: 'W742 — Switch routing mode (cloud / local-ollama / local-vllm / mirror).',
+  { verb: 'gateway', desc: 'W742 - Switch routing mode (cloud / local-ollama / local-vllm / mirror).',
     when: 'You want to move traffic to a local runtime or compare against cloud.',
     phrasings: ['gateway', 'gateway mode', 'switch gateway', 'route through ollama',
       'route through vllm', 'local ollama', 'local vllm', 'mirror traffic',
       'switch to local', 'point gateway at', 'change routing'],
     examples: ['kolm gateway status', 'kolm gateway switch local-ollama'] },
-  { verb: 'route', desc: 'W709 — Confidence routing: cheap base model for the easy 90%, premium teacher for the long tail.',
+  { verb: 'route', desc: 'W709 - Confidence routing: cheap base model for the easy 90%, premium teacher for the long tail.',
     when: 'You want to cut frontier-model spend by routing only low-confidence requests to the expensive model.',
     phrasings: ['confidence routing', 'confidence router', 'route by confidence',
       'route the easy', 'cheap model for easy', 'easy 90%', 'easy 90 percent',
@@ -501,90 +501,90 @@ export const VERB_DESCRIPTIONS = [
       'frontier only when', 'route only when uncertain', 'route on confidence',
       'fallback to frontier', 'cheap then expensive', 'route doctor'],
     examples: ['kolm route doctor --profile balanced', 'kolm route doctor --namespace support --json'] },
-  { verb: 'import', desc: 'W740 — Import a GGUF / safetensors / Ollama model into kolm.',
+  { verb: 'import', desc: 'W740 - Import a GGUF / safetensors / Ollama model into kolm.',
     when: 'You already have weights and want a .kolm wrapper around them.',
     phrasings: ['import', 'import model', 'import weights', 'load gguf', 'load safetensors',
       'import safetensors', 'import gguf', 'import from file', 'wrap my weights',
       'bring my own model'],
     examples: ['kolm import qwen-7b.gguf --as qwen-7b', 'kolm import --from ollama llama3'] },
-  { verb: 'migrate', desc: 'W743 — Migrate models from Ollama / LM Studio / vLLM into kolm.',
+  { verb: 'migrate', desc: 'W743 - Migrate models from Ollama / LM Studio / vLLM into kolm.',
     when: 'You used to run Ollama/LM Studio and want kolm to take over.',
     phrasings: ['migrate', 'migrate from ollama', 'migrate from lm studio', 'migrate from vllm',
       'migrate from lmstudio', 'import models', 'move from ollama', 'switch from ollama'],
     examples: ['kolm migrate from ollama', 'kolm migrate from lm-studio'] },
-  { verb: 'pack', desc: 'W779 — Sneakernet pack/unpack: bundle artifacts for offline transfer.',
+  { verb: 'pack', desc: 'W779 - Sneakernet pack/unpack: bundle artifacts for offline transfer.',
     when: 'You need to move .kolm artifacts to an airgapped network.',
     phrasings: ['pack', 'pack sneakernet', 'sneakernet', 'bundle for offline', 'create offline bundle',
       'offline bundle', 'airgap bundle', 'pack for transfer', 'export for airgap'],
     examples: ['kolm pack ./artifacts --out bundle.tar', 'kolm pack unpack bundle.tar'] },
-  { verb: 'pipeline', desc: 'W821 — Compose multiple artifacts into a chained inference pipeline.',
+  { verb: 'pipeline', desc: 'W821 - Compose multiple artifacts into a chained inference pipeline.',
     when: 'You want one .kolm to call another (redactor → classifier → summarizer).',
     phrasings: ['pipeline', 'compose artifacts', 'chain artifacts', 'build a pipeline',
       'chain models', 'orchestrate', 'pipe artifacts', 'pipeline orchestrator'],
     examples: ['kolm pipeline create --steps redact,classify,summarize', 'kolm pipeline run pipeline.kolmp'] },
-  { verb: 'lineage', desc: 'W739 — Show provenance graph for an artifact (captures → dataset → distill → quantize).',
+  { verb: 'lineage', desc: 'W739 - Show provenance graph for an artifact (captures → dataset → distill → quantize).',
     when: 'Audit / compliance: which captures trained this artifact?',
     phrasings: ['lineage', 'artifact lineage', 'show lineage', 'show dependencies', 'dependency graph',
       'provenance', 'show provenance', 'where did this come from', 'training history'],
     examples: ['kolm lineage phi-redactor.kolm', 'kolm lineage --json'] },
-  { verb: 'guardrails', desc: 'W736 — Attach safety guardrails (refusal patterns, output schemas, jailbreak filters) to a .kolm.',
+  { verb: 'guardrails', desc: 'W736 - Attach safety guardrails (refusal patterns, output schemas, jailbreak filters) to a .kolm.',
     when: 'You want to constrain what the artifact is allowed to emit.',
     phrasings: ['guardrails', 'add guardrails', 'safety rules', 'refusal rules', 'jailbreak filter',
       'output schema', 'constrain output', 'block patterns'],
     examples: ['kolm guardrails attach phi-redactor.kolm --policy refuse-pii.json',
       'kolm guardrails list'] },
-  { verb: 'tool', desc: 'W735 — Enable tool / function calling for an artifact (web search, RAG, custom tools).',
+  { verb: 'tool', desc: 'W735 - Enable tool / function calling for an artifact (web search, RAG, custom tools).',
     when: 'You want the model to call tools, not just emit text.',
     phrasings: ['tool', 'tool use', 'tools', 'function calling', 'enable tool use', 'enable tools',
       'enable agents', 'attach tools', 'register a tool'],
     examples: ['kolm tool register web_search ./tools/web.json', 'kolm tool list'] },
-  { verb: 'long-context', desc: 'W781 — Warn before sending a prompt that exceeds the model context window.',
+  { verb: 'long-context', desc: 'W781 - Warn before sending a prompt that exceeds the model context window.',
     when: 'You want pre-flight checks for over-long prompts.',
     phrasings: ['long context', 'long-context', 'context window', 'check context length',
       'will this fit', 'context overflow', 'warn about long prompts'],
     examples: ['kolm long-context check input.txt', 'kolm long-context --model qwen-7b'] },
-  { verb: 'approvals', desc: 'W782 — Team approval queue for sensitive operations (deploys, key rotations, exports).',
+  { verb: 'approvals', desc: 'W782 - Team approval queue for sensitive operations (deploys, key rotations, exports).',
     when: 'You want a human gate before a teammate runs something risky.',
     phrasings: ['approvals', 'approval queue', 'pending approvals', 'review approvals',
       'team approval', 'request approval', 'approve operation'],
     examples: ['kolm approvals queue', 'kolm approvals approve op_xxx'] },
-  { verb: 'chargeback', desc: 'W783 — Per-team / per-cost-center chargeback report from event-store ledger.',
+  { verb: 'chargeback', desc: 'W783 - Per-team / per-cost-center chargeback report from event-store ledger.',
     when: 'Finance wants a breakdown by team or project.',
     phrasings: ['chargeback', 'cost center', 'team chargeback', 'chargeback report',
       'cost by team', 'who is spending what', 'team spend report'],
     examples: ['kolm chargeback --period 2026-05', 'kolm chargeback --by team'] },
-  { verb: 'failure-modes', desc: 'W812 — Catalogue of known failure modes for an artifact (OOM, latency tails, refusal misses).',
+  { verb: 'failure-modes', desc: 'W812 - Catalogue of known failure modes for an artifact (OOM, latency tails, refusal misses).',
     when: 'You want to anticipate what breaks before deploying.',
     phrasings: ['failure modes', 'known failures', 'what breaks', 'common failures',
       'failure catalog', 'show known failures'],
     examples: ['kolm failure-modes phi-redactor.kolm', 'kolm failure-modes --json'] },
-  { verb: 'active-learn', desc: 'W815 — Active-learning loop: surface coverage gaps and queue rows for human review.',
+  { verb: 'active-learn', desc: 'W815 - Active-learning loop: surface coverage gaps and queue rows for human review.',
     when: 'You want the dataset to grow toward weak coverage areas.',
     phrasings: ['active learn', 'active learning', 'coverage gaps', 'find weak coverage',
       'queue uncertain rows', 'active sampling'],
     examples: ['kolm active-learn --namespace support', 'kolm active-learn --dataset ds_xxx'] },
-  { verb: 'failure-to-capture-loop', desc: 'W816 — Auto-capture on production failure: turn outages into training data.',
+  { verb: 'failure-to-capture-loop', desc: 'W816 - Auto-capture on production failure: turn outages into training data.',
     when: 'A prod error should become a labelled example in your dataset.',
     phrasings: ['failure to capture', 'failure to capture loop', 'capture on failure',
       'turn errors into training data', 'capture incidents'],
     examples: ['kolm failure-to-capture-loop --namespace support', 'kolm failure-to-capture-loop status'] },
-  { verb: 'federated', desc: 'W830 — Federated consortium: share approvals / weights with differential privacy across orgs.',
+  { verb: 'federated', desc: 'W830 - Federated consortium: share approvals / weights with differential privacy across orgs.',
     when: 'You belong to a consortium that pools training signal without sharing raw data.',
     phrasings: ['federated', 'federated learning', 'consortium', 'federated consortium',
       'share with privacy', 'differential privacy', 'pool training signal', 'federated approvals'],
     examples: ['kolm federated join <consortium-url>', 'kolm federated status'] },
-  { verb: 'lingual', desc: 'W833 — Cross-lingual coverage: which languages does this artifact actually serve?',
+  { verb: 'lingual', desc: 'W833 - Cross-lingual coverage: which languages does this artifact actually serve?',
     when: 'You support multiple languages and want per-language K-score.',
     phrasings: ['lingual', 'cross lingual', 'cross-lingual', 'language coverage', 'per language',
       'which languages', 'multilingual'],
     examples: ['kolm lingual phi-redactor.kolm', 'kolm lingual --langs en,es,zh'] },
-  { verb: 'regulatory', desc: 'W834 — EU AI Act / GDPR / SOC 2 regulatory packet for a .kolm.',
+  { verb: 'regulatory', desc: 'W834 - EU AI Act / GDPR / SOC 2 regulatory packet for a .kolm.',
     when: 'You need a compliance packet for auditors / regulators.',
     phrasings: ['regulatory', 'regulation', 'eu ai act', 'gdpr packet', 'soc 2 packet',
       'compliance packet', 'audit packet', 'regulatory pack'],
     examples: ['kolm regulatory pack phi-redactor.kolm --framework eu-ai-act',
       'kolm regulatory --framework gdpr'] },
-  { verb: 'cloud', desc: 'W785 — Cloud control plane: targets, readiness, train, and `cloud distill` for rented-GPU jobs.',
+  { verb: 'cloud', desc: 'W785 - Cloud control plane: targets, readiness, train, and `cloud distill` for rented-GPU jobs.',
     when: 'You do not have a local GPU and want kolm to rent one for the distill.',
     phrasings: ['cloud', 'cloud distill', 'cloud-distill', 'rent gpu', 'rent a gpu', 'rented distill',
       'distill in the cloud', 'submit cloud distill', 'runpod distill', 'no local gpu',
@@ -612,7 +612,7 @@ const PHRASING_INDEX = (() => {
   return idx;
 })();
 
-// W852 — fuzzy vocabulary. Single source of truth for what counts as a "real
+// W852 - fuzzy vocabulary. Single source of truth for what counts as a "real
 // word" the classifier knows. Built from every phrasing token + every verb
 // name. Used by fuzzyCorrect() below to repair typos like "whjere" → "where",
 // "captres" → "captures", "distil" → "distill" before keyword matching.
@@ -649,7 +649,7 @@ function _edit1(a, b) {
     }
     return diffs === 1;
   }
-  // single insert/delete — walk both strings, allow one skip
+  // single insert/delete - walk both strings, allow one skip
   const [s, t] = la < lb ? [a, b] : [b, a]; // s shorter
   let i = 0, j = 0, skipped = false;
   while (i < s.length && j < t.length) {
@@ -662,7 +662,7 @@ function _edit1(a, b) {
 }
 
 function fuzzyCorrect(normalized) {
-  // W852 — typo repair pass. For each token of length >= 5 that is not already
+  // W852 - typo repair pass. For each token of length >= 5 that is not already
   // in vocab, try to find a single-edit-distance neighbour and substitute it.
   // Returns the corrected string, or null if nothing changed.
   if (!normalized) return null;
@@ -679,7 +679,7 @@ function fuzzyCorrect(normalized) {
   return changed ? toks.join(' ') : null;
 }
 
-// W852 — subcommand-aware workflows for verbs that accept a sub-verb. When
+// W852 - subcommand-aware workflows for verbs that accept a sub-verb. When
 // the user pastes `$ kolm quickstart wrapper` we want to surface the wrapper
 // walk-through, not the generic 3-step picker.
 const SUBCOMMAND_WORKFLOWS = {
@@ -704,7 +704,7 @@ const SUBCOMMAND_WORKFLOWS = {
 };
 
 // ---------------------------------------------------------------------------
-// W863 — PER-VERB CONFIDENCE FLOORS.
+// W863 - PER-VERB CONFIDENCE FLOORS.
 //
 // Before W863 we had a single flat 0.55 floor that routed below-threshold
 // overlap matches to `ask`. That under-served two opposite cases:
@@ -723,16 +723,16 @@ const SUBCOMMAND_WORKFLOWS = {
 
 const DEFAULT_VERB_FLOOR = 0.55;
 const VERB_CONFIDENCE_FLOORS = {
-  // Destructive or paid actions — require high confidence before dispatching.
+  // Destructive or paid actions - require high confidence before dispatching.
   compile: 0.70, distill: 0.70, publish: 0.70, pull: 0.70, deploy: 0.70,
   cloud: 0.70, federated: 0.70, quantize: 0.65, export: 0.65, migrate: 0.65,
   import: 0.65, 'cloud train': 0.70, fix: 0.65, build: 0.65, tune: 0.65,
   'rotate keys': 0.80, redact: 0.65, anonymize: 0.65, pack: 0.65,
-  // Read-only / informational — safe to dispatch at lower confidence.
+  // Read-only / informational - safe to dispatch at lower confidence.
   what: 0.45, whoami: 0.45, status: 0.45, health: 0.45, list: 0.45,
   metrics: 0.45, version: 0.45, jobs: 0.45, sessions: 0.45, logs: 0.45,
   lake: 0.50, opportunities: 0.50, hub: 0.50, lineage: 0.50,
-  // Conversational / fallback — even lower (still produces helpful output).
+  // Conversational / fallback - even lower (still produces helpful output).
   ask: 0.30, chat: 0.40, next: 0.45,
 };
 
@@ -744,7 +744,7 @@ function verbFloor(verb) {
 }
 
 // ---------------------------------------------------------------------------
-// W863 — SESSION-SCOPED PRONOUN RESOLUTION.
+// W863 - SESSION-SCOPED PRONOUN RESOLUTION.
 //
 // When the user issues a follow-up like "verify it", "run that one", or "use
 // the same namespace", we need to bind the pronoun to the most-recent named
@@ -753,7 +753,7 @@ function verbFloor(verb) {
 // successful dispatch). resolvePronouns() rewrites the input string in place
 // so the rest of the pipeline sees the resolved form.
 //
-// The substitutions are intentionally narrow — we only match well-known
+// The substitutions are intentionally narrow - we only match well-known
 // pronoun phrasings so we don't accidentally clobber a literal noun like
 // "the artifact called widget". The match must occupy a word boundary on
 // both sides, and we only rewrite once per pronoun class per call.
@@ -782,7 +782,7 @@ function resolvePronouns(text, context) {
   for (const rule of PRONOUN_RULES) {
     const ref = slot[rule.kind];
     if (!ref) continue;
-    // Only the FIRST match per rule is replaced — pronouns refer to a single
+    // Only the FIRST match per rule is replaced - pronouns refer to a single
     // referent; multiple "it" tokens would still bind the same noun, but our
     // simple greedy rewrite is enough for the common one-pronoun case.
     if (rule.re.test(out)) {
@@ -805,7 +805,7 @@ function normalize(text) {
   if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
     s = s.slice(1, -1).trim();
   }
-  // W850 — strip leading shell prompt (`$ `, `> `, `% `, `# `) and an
+  // W850 - strip leading shell prompt (`$ `, `> `, `% `, `# `) and an
   // optional `kolm ` brand prefix so users who paste a command verbatim
   // ("$ kolm distill captures") get the same classification as a goal
   // phrasing. Without this the literal `$` muddies substring matching
@@ -833,7 +833,7 @@ function tokens(text) {
 // ---------------------------------------------------------------------------
 
 // W848: short common English words must not be eligible for the substring
-// branch — they fire on any input containing the word ("ok do it", "run a
+// branch - they fire on any input containing the word ("ok do it", "run a
 // test", "show me", "make sense"). Phrases ≤ 4 chars OR single-token
 // phrases in this set never enter the substring sweep.
 const KEYWORD_SUBSTRING_STOP = new Set([
@@ -858,7 +858,7 @@ function keywordMatch(normalizedText) {
   if (bestPrefix) {
     return { verb: bestPrefix.verb, confidence: 0.95, source: 'keyword', matchedPhrase: bestPrefix.phrase };
   }
-  // longest substring — W848: gated. A short stop-phrase like 'do' or
+  // longest substring - W848: gated. A short stop-phrase like 'do' or
   // 'run' must NOT be allowed to substring-match inside a larger sentence;
   // it produces nonsense like `$ kolm do` for "ok do it". Require either
   // (a) phrase length > 4 OR (b) multi-token phrase NOT in stop set.
@@ -883,7 +883,7 @@ function keywordMatch(normalizedText) {
 // like "show captures in namespace support" produces args ['captures',
 // '--namespace', 'support'] for cmdTail.
 //
-// Order matters — first match wins.
+// Order matters - first match wins.
 // ---------------------------------------------------------------------------
 
 const REGEX_RULES = [
@@ -917,7 +917,7 @@ const REGEX_RULES = [
       source: 'regex',
     }),
   },
-  // multi-teacher distill — "distill from anthropic and openai together",
+  // multi-teacher distill - "distill from anthropic and openai together",
   // "multi-teacher distillation", "teacher council with claude, gpt, gemini".
   // Maps to the real cli verb: `kolm distill --teachers <a,b,c> --weights auto`.
   // Extracts known vendor/model slugs when present; falls back to a
@@ -929,7 +929,7 @@ const REGEX_RULES = [
       // raw[0] is only the *matched* keyword ("multi-teacher"); we need the
       // *full* input to scan for vendor/model names downstream. The regex
       // engine populates `raw.input` with the original string for arrays
-      // returned by String.prototype.match — use that first.
+      // returned by String.prototype.match - use that first.
       const text = raw.input || raw[0] || '';
       const found = [];
       const slug = (s) => s.toLowerCase().trim();
@@ -962,7 +962,7 @@ const REGEX_RULES = [
   },
   // "distill from <vendor a> and <vendor b>" / "distill with anthropic and openai"
   // The `(?:[^,]{0,30}\s+)?` slop tolerates intervening words like
-  // "distill a model from anthropic and openai" — we still anchor the
+  // "distill a model from anthropic and openai" - we still anchor the
   // vendor list to "from|with|using" so we don't capture arbitrary text.
   {
     pattern: /distill\s+(?:[^,]{0,30}\s+)?(?:from|with|using)\s+([\w.\-]+(?:\s*[, ]\s*(?:and\s+)?[\w.\-]+){1,})(?:\s+together)?/i,
@@ -994,7 +994,7 @@ const REGEX_RULES = [
       };
     },
   },
-  // W853 — federated consortium: "set up a federated consortium", "join the
+  // W853 - federated consortium: "set up a federated consortium", "join the
   // federated network", "share approvals across orgs with privacy". Keyword
   // fast path otherwise loses to "set up" → quickstart because of bag-of-words
   // scoring, so we anchor the federated intent with a regex pre-pass.
@@ -1016,7 +1016,7 @@ const REGEX_RULES = [
       };
     },
   },
-  // W853 — confidence routing: "route the easy 90% to a cheap model" and the
+  // W853 - confidence routing: "route the easy 90% to a cheap model" and the
   // sibling shapes the homepage chip set uses. Maps to `kolm route doctor`
   // (W709). Sits before keyword fast path so "route" doesn't collide with the
   // /v1/intent/ask 'ask' fallback at confidence 0.4.
@@ -1157,14 +1157,14 @@ function regexMatch(normalizedText, original) {
 }
 
 // ---------------------------------------------------------------------------
-// 3. LLM FALLBACK — opt-in. Reads KOLM_LLM_PROVIDER ('anthropic' | 'openai').
+// 3. LLM FALLBACK - opt-in. Reads KOLM_LLM_PROVIDER ('anthropic' | 'openai').
 // If a provider + key is configured, we ask the LLM to pick a verb; otherwise
 // we rank verbs by token-overlap with the description table.
 // ---------------------------------------------------------------------------
 
 function overlapRank(normalizedText, k = 3) {
   const inputTokens = new Set(tokens(normalizedText));
-  // W848: stop-word filter expanded — "rate kolm /10" was overlap-matching
+  // W848: stop-word filter expanded - "rate kolm /10" was overlap-matching
   // 'airgap' because the brand word "kolm" appeared in every verb haystack.
   // Conversational opener tokens (ok/sure/yes/no/thanks/good/bad/cool/wow/
   // rate/rating/score) and the brand token itself must drop out.
@@ -1200,7 +1200,7 @@ function overlapRank(normalizedText, k = 3) {
 }
 
 async function llmClassify(text, providerConfig) {
-  // Provider abstraction — keep zero npm deps. We use native fetch.
+  // Provider abstraction - keep zero npm deps. We use native fetch.
   const provider = providerConfig.provider;
   const verbList = VERB_DESCRIPTIONS.map(v => `${v.verb}: ${v.desc}`).join('\n');
   const prompt = [
@@ -1302,7 +1302,7 @@ function llmConfig() {
 
 // W848: regex for affirmative followups. If the previous turn returned a
 // workflow recipe and the user says "ok do it" / "run it" / "go" / "yes",
-// short-circuit to a run-previous result instead of re-classifying — which
+// short-circuit to a run-previous result instead of re-classifying - which
 // produced absurd matches like `$ kolm do` (90% confidence on the word "do").
 //
 // The regex accepts three shapes:
@@ -1318,7 +1318,7 @@ const FOLLOWUP_AFFIRM_RE = new RegExp(
 );
 
 export async function classifyIntent(text, context = {}) {
-  // W863 — pronoun pre-pass. If the caller supplied last_artifact /
+  // W863 - pronoun pre-pass. If the caller supplied last_artifact /
   // last_namespace / last_dataset on context, rewrite "verify it" →
   // "verify <artifact_path>" BEFORE we normalize or classify. The resolved
   // string flows through the rest of the pipeline unchanged so the regex
@@ -1340,7 +1340,7 @@ export async function classifyIntent(text, context = {}) {
     normalized,
   });
 
-  // W852 — when the user pastes `$ kolm <verb> <sub>` we lose <sub> after
+  // W852 - when the user pastes `$ kolm <verb> <sub>` we lose <sub> after
   // normalize() strips the prompt + the kolm prefix and keywordMatch picks
   // only the verb. Stash the tail so SUBCOMMAND_WORKFLOWS can route on it.
   const subMatch = original.match(/^\s*[$>%#]?\s*(?:kolm\s+)?(\w+)\s+(\S+)/i);
@@ -1350,7 +1350,7 @@ export async function classifyIntent(text, context = {}) {
     return baseEnvelope({ verb: 'what', args: [], confidence: 0.5, source: 'empty' });
   }
 
-  // W848: 0. AFFIRMATIVE FOLLOWUP — if caller passed previous_workflow in
+  // W848: 0. AFFIRMATIVE FOLLOWUP - if caller passed previous_workflow in
   // context, an "ok do it" style reply means "run the recipe you just gave
   // me." Echo the previous workflow's first command back.
   const prevWf = context && context.previous_workflow;
@@ -1368,7 +1368,7 @@ export async function classifyIntent(text, context = {}) {
 
   // 1. KEYWORD FAST PATH
   let kw = keywordMatch(normalized);
-  // W852 — if exact-keyword match misses, repair typos and re-try BEFORE
+  // W852 - if exact-keyword match misses, repair typos and re-try BEFORE
   // dropping to regex/overlap. Catches "whjere are my captures" → "where are
   // my captures" → tail captures, with source:'keyword_fuzzy'.
   if (!kw) {
@@ -1379,7 +1379,7 @@ export async function classifyIntent(text, context = {}) {
     }
   }
   if (kw) {
-    // W852 — subcommand-aware dispatch. If we have a verb + sub-verb and
+    // W852 - subcommand-aware dispatch. If we have a verb + sub-verb and
     // SUBCOMMAND_WORKFLOWS knows it, return the verb plus the sub in args so
     // expandToWorkflow short-circuits (args.length>0) and the synth path
     // emits the subcommand-specific recipe.
@@ -1401,7 +1401,7 @@ export async function classifyIntent(text, context = {}) {
     }
     if (kw.verb === 'distill') {
       const r = regexMatch(normalized, original);
-      // W853 — if the regex extracted --teachers (multi-teacher / council
+      // W853 - if the regex extracted --teachers (multi-teacher / council
       // pattern), prefer that envelope verbatim. The keyword fast-path's
       // default `--from-captures` would mask the council recipe.
       if (r && r.verb === 'distill' && r.args && r.args.includes('--teachers')) {
@@ -1455,7 +1455,7 @@ export async function classifyIntent(text, context = {}) {
   }
   const [top, ...rest] = ranked;
   // W863: per-verb confidence floor. Destructive verbs (compile, distill,
-  // publish) require ≥0.70 before we dispatch them as a confident pick — a
+  // publish) require ≥0.70 before we dispatch them as a confident pick - a
   // wrong call here costs the user money or ships an artifact they did not
   // intend. Informational verbs (status, what, list) are happy at ≥0.45.
   // Fall back to the W848 default 0.55 for anything not in the table.
@@ -1467,7 +1467,7 @@ export async function classifyIntent(text, context = {}) {
   if (top.confidence < floor) {
     // If we suppressed top because it was a destructive verb under a
     // higher floor, but a cheaper informational alternative passes its
-    // own floor, prefer that — it's safer and more often what the user
+    // own floor, prefer that - it's safer and more often what the user
     // actually wanted ("show me X" matching loosely on a paid action).
     const safer = rest.find(r => r.confidence >= verbFloor(r.verb));
     if (safer) {
@@ -1502,7 +1502,7 @@ function pickContextualNamespace(normalized, context) {
 // ---------------------------------------------------------------------------
 // Snapshot helpers used by `kolm what` and `kolm next`.
 //
-// These are NOT pure — they read disk. Kept here next to the classifier so the
+// These are NOT pure - they read disk. Kept here next to the classifier so the
 // dispatcher in cli/kolm.js stays thin.
 // ---------------------------------------------------------------------------
 
@@ -1511,7 +1511,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
   // capture-store probe (which reads from a process-wide SQLite path that
   // is not parameterized by HOME). This keeps tests deterministic.
   const SANDBOX_MODE = home != null;
-  // W432 — accept tenant_id (or tenant alias) from the caller so HTTP routes
+  // W432 - accept tenant_id (or tenant alias) from the caller so HTTP routes
   // that ride on snapshotContext can scope lake/opportunities/datasets reads
   // to the authenticated tenant. Falls back to current_tenant from the local
   // config (CLI default), then to 'local' (which existing local-only verbs
@@ -1568,7 +1568,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
   out.counts.artifacts = out.artifacts.length;
 
   // Enrich each artifact with manifest metadata if we can read it.
-  // W389 — production_ready is computed via the canonical productionReady()
+  // W389 - production_ready is computed via the canonical productionReady()
   // from src/production-ready.js (the same module cmdVerify, cmdRun, and the
   // marketplace install gate use). A stale manifest.production_ready field
   // was previously read here, which disagreed with `kolm verify` for any
@@ -1579,7 +1579,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
   // The productionReady() probe runs INDEPENDENT of loadArtifact() so a
   // bundle whose signature trust entry is missing (e.g., a curated example
   // checked into the repo) still receives a faithful production_ready
-  // boolean — same answer `kolm verify` prints — instead of silently
+  // boolean - same answer `kolm verify` prints - instead of silently
   // dropping the field when loadArtifact() throws.
   const { productionReady: _prodReady } = await import('./production-ready.js');
   for (const a of out.artifacts) {
@@ -1653,7 +1653,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
     } catch (_) {} // deliberate: cleanup
   }
 
-  // W457 — TELEMETRY RECONCILIATION (P0 release blocker).
+  // W457 - TELEMETRY RECONCILIATION (P0 release blocker).
   //
   // Before W457, `kolm what` aggregated from src/capture-store.js (the legacy
   // 'observations' JSON store), while `kolm lake stats` / `kolm lake storage`
@@ -1737,7 +1737,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
   out.counts.captures = out.captures_summary.reduce((s, r) => s + r.count, 0);
   out.counts.namespaces = out.captures_summary.length;
 
-  // W412 — canonical lake + opportunities + datasets, so `kolm next` reads from
+  // W412 - canonical lake + opportunities + datasets, so `kolm next` reads from
   // the same source the optimizer and bake-off do. All three are best-effort:
   // a thrown import just leaves the field unset and the recommender falls
   // through. We never let an intent snapshot fail because of a downstream
@@ -1749,7 +1749,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
     try {
       const lakeMod = await import('./lake.js');
       if (typeof lakeMod.lakeStats === 'function') {
-        // W432 — tenant_id scopes the lake aggregator to the calling tenant
+        // W432 - tenant_id scopes the lake aggregator to the calling tenant
         // when present. When null (local CLI default), lakeStats falls back
         // to its existing behavior.
         const stats = await lakeMod.lakeStats(_explicitTenant ? { tenant_id: _explicitTenant } : {});
@@ -1764,7 +1764,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
     try {
       const oppMod = await import('./opportunity-engine.js');
       if (typeof oppMod.findOpportunities === 'function') {
-        // W432 — tenant_id scopes the opportunity engine so /v1/intent/next
+        // W432 - tenant_id scopes the opportunity engine so /v1/intent/next
         // never surfaces another tenant's optimization opportunities.
         const opps = await oppMod.findOpportunities(_explicitTenant ? { tenant_id: _explicitTenant } : {});
         out.opportunities = (opps || []).slice(0, 5).map((o) => ({
@@ -1780,7 +1780,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
     try {
       const dsMod = await import('./dataset-workbench.js');
       if (typeof dsMod.listDatasets === 'function') {
-        // W432 — tenant_id scopes dataset listing for HTTP callers.
+        // W432 - tenant_id scopes dataset listing for HTTP callers.
         const datasets = await dsMod.listDatasets(_explicitTenant ? { tenant_id: _explicitTenant } : {});
         out.datasets = (datasets || []).slice(0, 5).map((d) => ({
           id: d.id,
@@ -1797,7 +1797,7 @@ export async function snapshotContext({ cwd = process.cwd(), home = null, tenant
   return out;
 }
 
-// W412 — given a {providers: {openai: {calls: 12}, ...}} style map, return
+// W412 - given a {providers: {openai: {calls: 12}, ...}} style map, return
 // the key with the highest value of `field`. Returns null on empty maps.
 function pickTopKey(map, field) {
   if (!map || typeof map !== 'object') return null;
@@ -1844,7 +1844,7 @@ export function recommendNext(snapshot) {
     recs.push({
       action: 'login',
       command: 'kolm login',
-      why: 'no API key in ~/.kolm/config.json — login first so cloud verbs work.',
+      why: 'no API key in ~/.kolm/config.json - login first so cloud verbs work.',
       rank: 100,
     });
   }
@@ -1852,7 +1852,7 @@ export function recommendNext(snapshot) {
     recs.push({
       action: 'build_first_artifact',
       command: 'kolm build my-first-artifact',
-      why: 'no .kolm artifacts found yet — the one-shot build verb scaffolds, compiles, and verifies in one step.',
+      why: 'no .kolm artifacts found yet - the one-shot build verb scaffolds, compiles, and verifies in one step.',
       rank: 95,
     });
   } else {
@@ -1884,7 +1884,7 @@ export function recommendNext(snapshot) {
     recs.push({
       action: 'distill_ready_namespace',
       command: `kolm distill --from-captures --namespace ${top.namespace}`,
-      why: `namespace '${top.namespace}' has ${top.count} captured pairs — past the distill threshold. Auto-distill builds a specialist LoRA.`,
+      why: `namespace '${top.namespace}' has ${top.count} captured pairs - past the distill threshold. Auto-distill builds a specialist LoRA.`,
       rank: 92,
     });
   } else if (ns.length) {
@@ -1909,12 +1909,12 @@ export function recommendNext(snapshot) {
     recs.push({
       action: 'watch_running_job',
       command: `kolm watch ${running[0].id}`,
-      why: `${running.length} background job(s) still running — \`kolm watch\` tails the live log.`,
+      why: `${running.length} background job(s) still running - \`kolm watch\` tails the live log.`,
       rank: 80,
     });
   }
 
-  // W412 — opportunity engine recommendations. Rank by estimated savings so
+  // W412 - opportunity engine recommendations. Rank by estimated savings so
   // the biggest dollar-value cluster wins. Skip privacy_leak in the dollar
   // path (it has its own dedicated suggestion below).
   const opps = snapshot.opportunities || [];
@@ -1937,12 +1937,12 @@ export function recommendNext(snapshot) {
     recs.push({
       action: 'fix_privacy_leak',
       command: `kolm opportunities --namespace ${top.namespace || 'default'} --type privacy_leak`,
-      why: `${privacyOpps.length} privacy-leak opportunity(ies) detected — sensitive_data passed through with policy=allow. Inspect and fix before promoting.`,
+      why: `${privacyOpps.length} privacy-leak opportunity(ies) detected - sensitive_data passed through with policy=allow. Inspect and fix before promoting.`,
       rank: 99,
     });
   }
 
-  // W412 — datasets that exist but have no bake-off yet.
+  // W412 - datasets that exist but have no bake-off yet.
   const dsets = snapshot.datasets || [];
   if (dsets.length) {
     const top = dsets[0];
@@ -1956,7 +1956,7 @@ export function recommendNext(snapshot) {
     }
   }
 
-  // W412 — lake-level baseline. If a tenant has any spend at all, surface
+  // W412 - lake-level baseline. If a tenant has any spend at all, surface
   // `kolm lake stats` so they discover the dollar-level dashboard.
   if (snapshot.lake && snapshot.lake.total_spend_usd > 0) {
     const spend = snapshot.lake.total_spend_usd.toFixed(2);
@@ -1980,13 +1980,13 @@ export function recommendNext(snapshot) {
 }
 
 // ---------------------------------------------------------------------------
-// W847 — expandToWorkflow. Bridges the gap between "classifier picked the
+// W847 - expandToWorkflow. Bridges the gap between "classifier picked the
 // right verb" and "the user wanted a multi-step recipe, not a bare command."
 //
 // Problem the fix solves: when a free-tier visitor types a goal in plain
 // English ("compile a model to blur porn", "cut my OpenAI bill in half",
 // "fit deepseek 32B on a 5090"), classifyIntent correctly returns the
-// closing verb (compile, lake, quantize) — but with no args. The /v1/free/chat
+// closing verb (compile, lake, quantize) - but with no args. The /v1/free/chat
 // surface rendered `$ kolm compile` and called it a day, which is useless: the
 // user can't run that. expandToWorkflow returns the actual recipe a human
 // would walk through, with each step's CLI + a one-line why.
@@ -1997,7 +1997,7 @@ export function recommendNext(snapshot) {
 // (whoami, status, doctor, version, list, what, health, metrics) are already
 // one-shot and never expanded.
 //
-// Returns null when no workflow expansion applies — the caller should render
+// Returns null when no workflow expansion applies - the caller should render
 // the bare command in that case.
 // ---------------------------------------------------------------------------
 
@@ -2020,19 +2020,19 @@ const WORKFLOWS = {
       { cmd: 'kolm distill --from-captures --namespace <name>',        why: 'Train the specialist LoRA from the dataset.' },
     ],
   },
-  // W853 — multi-teacher distillation (teacher council). The classifier
+  // W853 - multi-teacher distillation (teacher council). The classifier
   // routes any "multi-teacher", "teacher council", or "distill from <vendor a>
   // and <vendor b>" question here. expandToWorkflow promotes single-teacher
   // distill workflows to this one whenever cls.args contains '--teachers'.
   multi_teacher_distill: {
-    summary: 'Distill with a teacher council — multiple frontier teachers, per-capture best-of, full attribution chain.',
+    summary: 'Distill with a teacher council - multiple frontier teachers, per-capture best-of, full attribution chain.',
     steps: [
       { cmd: 'kolm capture --provider openai --as ks_proxy',                                                    why: 'Route real traffic through the kolm proxy so pairs land in a tenant namespace.' },
       { cmd: 'kolm capture --provider anthropic --as ks_anthropic_proxy',                                       why: 'Add a second provider so the council has more than one teacher to weigh.' },
       { cmd: 'kolm tail captures --namespace <name>',                                                           why: 'Watch live pairs accumulate. You need ~1000 to cross the auto-distill threshold.' },
       { cmd: 'kolm dataset create --namespace <name>',                                                          why: 'Promote captures into a reviewable train/holdout split.' },
       { cmd: 'kolm distill --teachers claude-opus-4-7,gpt-4o,gemini-2.5-pro --weights auto --namespace <name>', why: 'Rank teachers per capture with the W718 teacher-council. --weights auto blends domain, task, verifier, human, cost, and risk signals.' },
-      { cmd: 'kolm verify <artifact>.kolm --binder council.html',                                               why: 'The receipt chain records which teacher won each token — auditable end to end.' },
+      { cmd: 'kolm verify <artifact>.kolm --binder council.html',                                               why: 'The receipt chain records which teacher won each token - auditable end to end.' },
     ],
     namespace_hint: '<name>',
   },
@@ -2125,15 +2125,15 @@ const WORKFLOWS = {
       { cmd: 'kolm install claude-code --apply',                       why: 'Wire the running server into Claude Code config in one step.' },
     ],
   },
-  // W848 — quickstart wizard. When someone asks "where do i start" the chat
+  // W848 - quickstart wizard. When someone asks "where do i start" the chat
   // surfaces the actual `kolm quickstart` command + the two paths so they can
   // pick before running.
   quickstart: {
     summary: 'Pick wrapper or studio, then walk through setup step by step.',
     steps: [
       { cmd: 'kolm quickstart',                                        why: 'Interactive picker. Choose wrapper (gateway + capture) or studio (browser UI).' },
-      { cmd: 'kolm quickstart wrapper',                                why: 'Skip the picker — start the wrapper walk-through directly.' },
-      { cmd: 'kolm quickstart studio',                                 why: 'Skip the picker — start the studio walk-through directly.' },
+      { cmd: 'kolm quickstart wrapper',                                why: 'Skip the picker - start the wrapper walk-through directly.' },
+      { cmd: 'kolm quickstart studio',                                 why: 'Skip the picker - start the studio walk-through directly.' },
     ],
   },
 };
@@ -2141,7 +2141,7 @@ const WORKFLOWS = {
 const VERB_NEEDS_ARGS = new Set([
   'compile', 'distill', 'run', 'bench', 'verify', 'replay', 'bakeoff',
   'dataset', 'quantize', 'export', 'capture', 'lake', 'fix', 'serve',
-  // W848 — quickstart never takes args from the chat; we always want the
+  // W848 - quickstart never takes args from the chat; we always want the
   // workflow expansion (which exposes the wrapper/studio sub-paths) instead
   // of a bare `$ kolm quickstart` reply.
   'quickstart',
@@ -2150,7 +2150,7 @@ const VERB_NEEDS_ARGS = new Set([
 export function expandToWorkflow(intent, originalQuestion) {
   if (!intent || !intent.verb) return null;
   const verb = intent.verb;
-  // W852 — if a subcommand-aware workflow matches, use it FIRST regardless of
+  // W852 - if a subcommand-aware workflow matches, use it FIRST regardless of
   // whether intent.args has the subverb in it. This is what makes pasting
   // `$ kolm quickstart wrapper` actually pick the wrapper recipe instead of
   // the generic 3-step picker.
@@ -2162,7 +2162,7 @@ export function expandToWorkflow(intent, originalQuestion) {
       steps: subwf.steps.map(s => ({ cmd: s.cmd, why: s.why })),
     };
   }
-  // W853 — multi-teacher distill: when the regex extracted --teachers, route to
+  // W853 - multi-teacher distill: when the regex extracted --teachers, route to
   // the council recipe even though args.length > 0, because the user benefits
   // from seeing the full capture→dataset→distill→verify pipeline with their
   // chosen vendors threaded through.
@@ -2174,7 +2174,7 @@ export function expandToWorkflow(intent, originalQuestion) {
       const teacherList = teachersCsv ? String(teachersCsv).split(',').map(s => s.trim()).filter(Boolean) : [];
       const q853 = String(originalQuestion || '').toLowerCase();
       // Prefer goal phrasing ("for support", "to handle tickets") over `from`
-      // because `from <vendor>` is the teacher list itself — extracting that
+      // because `from <vendor>` is the teacher list itself - extracting that
       // as the namespace produces nonsense like `--namespace anthropic-and-openai`.
       // Also blacklist obvious vendor / model tokens from a fallback `from`
       // match so generic phrasings still land somewhere sensible.
@@ -2204,20 +2204,20 @@ export function expandToWorkflow(intent, originalQuestion) {
         const provider = providerByModel[model] || (model.includes('claude') ? 'anthropic' : model.includes('gpt') ? 'openai' : model.includes('gemini') ? 'gemini' : 'anthropic');
         return {
           cmd: `kolm capture --provider ${provider} --model ${model} --as ks_${provider}_proxy`,
-          why: `Front ${provider} (${model}) as a captured teacher — every reply gets logged with full attribution.`,
+          why: `Front ${provider} (${model}) as a captured teacher - every reply gets logged with full attribution.`,
         };
       }) : [
-        { cmd: 'kolm capture --provider anthropic --as ks_anthropic_proxy', why: 'Front Anthropic Claude — every reply gets logged.' },
-        { cmd: 'kolm capture --provider openai --as ks_openai_proxy', why: 'Front OpenAI GPT — same dataset, second teacher.' },
+        { cmd: 'kolm capture --provider anthropic --as ks_anthropic_proxy', why: 'Front Anthropic Claude - every reply gets logged.' },
+        { cmd: 'kolm capture --provider openai --as ks_openai_proxy', why: 'Front OpenAI GPT - same dataset, second teacher.' },
       ];
       const distillStepIdx = wf.steps.findIndex(s => s.cmd.startsWith('kolm distill'));
       const baseDistill = distillStepIdx >= 0 ? wf.steps[distillStepIdx] : null;
       const distillCmd = baseDistill
         ? (teachersCsv ? `kolm distill --teachers ${teachersCsv} --weights auto --namespace ${safeHint853}` : baseDistill.cmd.replace(/<name>/g, safeHint853))
         : `kolm distill --teachers ${teacherList.join(',') || 'claude-opus-4-7,gpt-4o'} --weights auto --namespace ${safeHint853}`;
-      const tailStep = { cmd: `kolm tail captures --namespace ${safeHint853}`, why: 'Watch both feeds land in one namespace — confirms attribution before you spend on a distill.' };
+      const tailStep = { cmd: `kolm tail captures --namespace ${safeHint853}`, why: 'Watch both feeds land in one namespace - confirms attribution before you spend on a distill.' };
       const datasetStep = { cmd: `kolm dataset create --namespace ${safeHint853}`, why: 'Freeze captures into a dataset so the distill is reproducible.' };
-      const distillStep = { cmd: distillCmd, why: 'Run the council — kolm weighs each teacher per capture and picks the best-of label, then trains your student on the merged signal.' };
+      const distillStep = { cmd: distillCmd, why: 'Run the council - kolm weighs each teacher per capture and picks the best-of label, then trains your student on the merged signal.' };
       const verifyStep = { cmd: `kolm verify <artifact>.kolm --binder council.html`, why: 'Binder shows which teacher won which row + the agreement matrix.' };
       const steps853 = [...teacherSteps, tailStep, datasetStep, distillStep, verifyStep];
       return {
@@ -2228,7 +2228,7 @@ export function expandToWorkflow(intent, originalQuestion) {
     }
   }
   // If the classifier already extracted concrete args, the user knows what they
-  // want — no expansion needed.
+  // want - no expansion needed.
   if (intent.args && intent.args.length > 0) return null;
   if (!VERB_NEEDS_ARGS.has(verb)) return null;
   const wf = WORKFLOWS[verb];
@@ -2254,7 +2254,7 @@ export function expandToWorkflow(intent, originalQuestion) {
     cmd: safeHint ? s.cmd.replace(/<name>/g, safeHint).replace(/<artifact>/g, safeHint) : s.cmd,
     why: s.why,
   }));
-  // W850 — only surface namespace_hint when at least one step actually
+  // W850 - only surface namespace_hint when at least one step actually
   // substituted the placeholder. `quickstart` steps are literal subcommands
   // (kolm quickstart wrapper / studio) with no <name>, so a hint extraction
   // ("wrapper") would mislead the user into thinking they should rename it.

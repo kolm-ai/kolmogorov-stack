@@ -1,4 +1,4 @@
-// W463 — Agent Trace Compilation MVP.
+// W463 - Agent Trace Compilation MVP.
 //
 // Closes audit P1 Agent Trace cluster open item: "trace storage schema
 // + replay verification + workflow IR across providers." The trace

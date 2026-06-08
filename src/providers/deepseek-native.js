@@ -1,4 +1,4 @@
-// W-B / wrapper-completion — DeepSeek native provider adapter.
+// W-B / wrapper-completion - DeepSeek native provider adapter.
 //
 // DeepSeek's own platform (https://api.deepseek.com) is OpenAI-compatible.
 // Bearer auth. Models include deepseek-chat (V4 Pro), deepseek-reasoner
@@ -13,7 +13,7 @@
 //
 // Contract mirrors src/capture.js forwardOpenAI: returns
 //   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
-// Never throws on non-2xx — upstream errors flow through as-is so the
+// Never throws on non-2xx - upstream errors flow through as-is so the
 // gateway can sign + capture them. Never throws on transport failure.
 
 import { hardenedFetch, buildOpenAICompatBody, DEFAULT_TIMEOUT_MS } from './_shared.js';

@@ -1,4 +1,4 @@
-// W712 — progressive distillation + capability gating.
+// W712 - progressive distillation + capability gating.
 //
 // Three sequential distill passes with K-Score axis gates between them. Each
 // pass narrows the training corpus and targets a different capability:
@@ -13,12 +13,12 @@
 //   Pass 3 (edge)      : filter to captures the Pass-2 student got wrong on a
 //                        held-out slice (caller-supplied failures list).
 //                        gate = K-Score axis E (edge/energy) >= 0.55
-//                        terminal pass — success is "graduated".
+//                        terminal pass - success is "graduated".
 //
 // Why F / R / E? src/kscore.js already exposes those axis letters as part of
 // the v2 composite (F=fairness, R=robustness, E=energy). For progressive
 // distillation we REPURPOSE the same letters as proxies for format /
-// reasoning / edge — the K-Score machinery doesn't change shape, the caller
+// reasoning / edge - the K-Score machinery doesn't change shape, the caller
 // just plumbs the right number into the matching axis name. This keeps the
 // gate evaluator a pure shape-checker (no axis-letter remap to maintain) and
 // lets the existing K-Score pretty-printer surface progressive results
@@ -27,7 +27,7 @@
 // Honesty contracts:
 //   * filterCapturesForPass NEVER throws on missing fields. A capture without
 //     reasoning_trace AND without a usable token count is dropped from pass-2
-//     (not silently kept) — the filter must produce an honest subset.
+//     (not silently kept) - the filter must produce an honest subset.
 //   * evaluateGate returns a STRUCTURED need-more envelope on failure. The
 //     `count` is a gap estimate: max(50, round((threshold - score) * 1000)).
 //     Never silently fake a "passed" verdict.
@@ -54,7 +54,7 @@ export const PASS_GATES = Object.freeze({
 
 // Pass 2 multi-step proxy: a capture qualifies when reasoning_trace is
 // present OR the response token-count exceeds this floor. The 200-token
-// floor is a heuristic — a typical multi-step CoT response runs ~250 tokens;
+// floor is a heuristic - a typical multi-step CoT response runs ~250 tokens;
 // anything shorter is rarely multi-step. Re-tune via run-meta later.
 const MULTI_STEP_TOKEN_FLOOR = 200;
 
@@ -66,12 +66,12 @@ const GAP_MIN = 50;
 const GAP_MULTIPLIER = 1000;
 
 // -------------------------------------------------------------------------
-// filterCapturesForPass — pure subset filter.
+// filterCapturesForPass - pure subset filter.
 //
 // Pass 1: returns the full input array (uniform pass).
 // Pass 2: keeps rows where reasoning_trace != null OR token_count > 200.
 // Pass 3: returns the caller-provided failures array verbatim (the W712
-//         spec says "only on pass-2 failures" — the CALLER knows which
+//         spec says "only on pass-2 failures" - the CALLER knows which
 //         rows the pass-2 student got wrong; this function is a passthrough
 //         so the test surface stays pure).
 //
@@ -118,7 +118,7 @@ function _resolveTokenCount(capture) {
 }
 
 // -------------------------------------------------------------------------
-// evaluateGate — pure gate-decision function.
+// evaluateGate - pure gate-decision function.
 //
 // Returns one of:
 //   { ok: true,  pass, axis, score, threshold, advanced_to_pass, label }
@@ -191,7 +191,7 @@ function _classNameForPass(pass) {
 }
 
 // -------------------------------------------------------------------------
-// buildGateEnvelope — wrap a gate-evaluator result for HTTP/CLI surfaces.
+// buildGateEnvelope - wrap a gate-evaluator result for HTTP/CLI surfaces.
 //
 // Adds:
 //   * progressive_version stamp
@@ -235,7 +235,7 @@ export function buildGateEnvelope(gateResult, opts = {}) {
 }
 
 // -------------------------------------------------------------------------
-// CLI translation helpers — keep CLI tests pure-Node-ish (no spawn loop).
+// CLI translation helpers - keep CLI tests pure-Node-ish (no spawn loop).
 // -------------------------------------------------------------------------
 
 // gateFromKScoreAxesPath: load a K-Score axes JSON (e.g. run-meta.json) and

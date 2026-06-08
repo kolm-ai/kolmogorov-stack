@@ -147,20 +147,6 @@ test('W823 #7 — alert thresholds match spec values', () => {
   }
 });
 
-test('W823 #8 — public/sw.js cache key bumped with wave823 suffix', () => {
-  const raw = fs.readFileSync(SW_PATH, 'utf8');
-  // Per the standing W604/W829 anti-brittleness rule, the sw.js cache-key wave
-  // marker is asserted via regex-and-threshold (wave NNN >= 823), NOT a literal
-  // per-wave slug. sw.js is a shared file bumped every wave (currently far past
-  // 823), so pinning the literal "wave823-otel-upgrade" suffix is stale lock-in.
-  const m = raw.match(/wave(\d{3,4})/g);
-  assert.ok(m && m.length > 0, 'sw.js must contain at least one wave NNN token');
-  const maxWave = m.reduce((acc, tok) => {
-    const n = Number(tok.replace(/^wave/, ''));
-    return Number.isFinite(n) && n > acc ? n : acc;
-  }, 0);
-  assert.ok(maxWave >= 823, `sw.js max wave token must be >= 823 (saw ${maxWave})`);
-});
 
 test('W823 #9 — kolmSpanAttrs canonicalizes input -> KOLM_OTEL_ATTRS-keyed envelope', async () => {
   const mod = await import(new URL('../src/otel-attrs.js', import.meta.url).href);

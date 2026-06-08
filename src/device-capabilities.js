@@ -39,7 +39,7 @@ import { spawnSync } from 'node:child_process';
 import { DEVICES, info as deviceInfo, detectLocal } from './devices.js';
 import { info as modelInfo, fitsOn, trainOn } from './models.js';
 
-// WC14 — leading-`-` guard mirrored from src/device-install.js#_assertSafeFlag.
+// WC14 - leading-`-` guard mirrored from src/device-install.js#_assertSafeFlag.
 // Local copy (not import) to avoid a circular dep with device-install.js, which
 // already imports from this file. Any device-profile value that flows into a
 // CLI argv position must run through this so a profile cannot smuggle an
@@ -524,7 +524,7 @@ export function compatibleArtifacts(deviceProfile, artifactsList) {
 // ====================================================================
 // W888-C fleet API extensions.
 // Adds detectHardwareRemote / healthCheck / pingAll / recordDeployment
-// on top of the W372 device registry. Keeps the lazy ssh2 contract — only
+// on top of the W372 device registry. Keeps the lazy ssh2 contract - only
 // imports src/device-ssh.js when actually opening an SSH connection.
 // ====================================================================
 
@@ -540,7 +540,7 @@ function _isSshKind(device) {
   return true;
 }
 
-// detectHardwareRemote(deviceId) — opens an SSHConnection, runs
+// detectHardwareRemote(deviceId) - opens an SSHConnection, runs
 // SSHConnection.detectHardware(), persists the snapshot into the device record
 // under `hardware_snapshot` (with a `detected_at` timestamp), and returns it.
 //
@@ -571,7 +571,7 @@ export async function detectHardwareRemote(deviceId) {
       source = 'ssh-error';
     }
   } else {
-    // Local-like — re-use the existing detector but reshape into the
+    // Local-like - re-use the existing detector but reshape into the
     // remote-style snapshot for consistency.
     const local = await detectLocalDevice();
     snapshot = {
@@ -606,7 +606,7 @@ export async function detectHardwareRemote(deviceId) {
   return { device_id: deviceId, source, snapshot, error };
 }
 
-// healthCheck(deviceId) — composite probe: reachability + hardware snapshot +
+// healthCheck(deviceId) - composite probe: reachability + hardware snapshot +
 // list of installed artifacts at ~/.kolm/installed/. Reads the install dir
 // over SSH (`ls -1`) for ssh devices, or the local filesystem otherwise.
 export async function healthCheck(deviceId) {
@@ -667,7 +667,7 @@ export async function healthCheck(deviceId) {
   };
 }
 
-// pingAll() — concurrent reachability fan-out across every registered device.
+// pingAll() - concurrent reachability fan-out across every registered device.
 // Used by `kolm devices health --all` and the account fleet dashboard
 // loader. Returns one row per device.
 export async function pingAll() {
@@ -700,7 +700,7 @@ export async function pingAll() {
   return { devices: results, total: results.length, elapsed_ms: Date.now() - t0 };
 }
 
-// recordDeployment(deviceId, payload) — append-only deployment journal stamped
+// recordDeployment(deviceId, payload) - append-only deployment journal stamped
 // on the device record. Used by src/deploy-pipeline.js#record() step so
 // `kolm devices show` and the account UI can surface "last deploy = artifact
 // X at time T".

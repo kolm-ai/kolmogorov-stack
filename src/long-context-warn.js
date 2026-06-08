@@ -51,7 +51,7 @@ export const DEFAULT_HIST_BUCKETS = 10;
 // nothing statistically.
 const MIN_SAMPLES_FOR_WARN = 20;
 
-// Maximum window — anyone asking for 10000 days is asking for a full table
+// Maximum window - anyone asking for 10000 days is asking for a full table
 // scan and the request was almost certainly a typo. Cap matches the
 // W770 audit-export HARD_MAX_ROWS philosophy.
 const MAX_WINDOW_DAYS = 365;

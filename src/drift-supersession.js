@@ -1,6 +1,6 @@
 // src/drift-supersession.js
 //
-// Wave 167 (M+3 + M+4) — drift detection + supersession chain. The lifecycle
+// Wave 167 (M+3 + M+4) - drift detection + supersession chain. The lifecycle
 // roadmap Wave 144 Doc 3 §7 named four tiers; M+3 and M+4 close them:
 //
 //   M+1 (W14x)  - stale notification (artifact age vs ship date)
@@ -41,7 +41,7 @@
 //   CRON (M+3 scheduler scaffold):
 //     buildDriftCronConfig       - emit a JSON config a tenant can drop
 //                                  into their OS scheduler (cron, systemd
-//                                  timer, k8s CronJob) — does NOT itself
+//                                  timer, k8s CronJob) - does NOT itself
 //                                  fork a daemon
 //     validateDriftCronConfig    - re-validate config from the wire
 //     toCrontabLine              - emit a crontab-syntax line invoking
@@ -49,7 +49,7 @@
 //
 // Honest scope: this module BUILDS, VALIDATES, COMPARES, and EMITS scheduler
 // scaffolding. It does NOT itself fork a daemon, schedule an OS job, or
-// re-run a distillation pipeline. Those are downstream concerns — kolm
+// re-run a distillation pipeline. Those are downstream concerns - kolm
 // gives the tenant the manifest blocks + verifier semantics + scheduler
 // config; the tenant wires it into their own cron / k8s / systemd. This
 // keeps kolm pure: every effect a tenant relies on is captured by a
@@ -122,13 +122,13 @@ function blockHash(obj) {
 // Names exactly ONE predecessor artifact_hash (chains form by walking
 // predecessor → predecessor.supersession_provenance.predecessor_artifact_hash
 // recursively until the genesis artifact). A predecessor's CID is optional
-// — when present a tenant can fetch the predecessor binder from IPFS to
+// - when present a tenant can fetch the predecessor binder from IPFS to
 // confirm it actually verified before being superseded.
 //
 // drift_signals is an OPTIONAL array of objects, populated when
 // reason === 'drift_detected'. Each entry mirrors the DriftReport signal
 // shape (axis, baseline, current, delta, status) so the supersession block
-// is self-contained — a verifier doesn't need the original DriftReport
+// is self-contained - a verifier doesn't need the original DriftReport
 // JSON to understand WHY the supersession happened.
 // ---------------------------------------------------------------------------
 
@@ -400,7 +400,7 @@ export function snapshotFromManifest(manifest, receipt = null, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Drift detection — compare two snapshots, emit signals.
+// Drift detection - compare two snapshots, emit signals.
 // ---------------------------------------------------------------------------
 
 function classify(delta, warnTh, failTh) {
@@ -460,7 +460,7 @@ export function detectDrift(baselineSnap, currentSnap, userTolerances = {}) {
     });
   }
 
-  // per-axis k_score (R, F, E, Z, T, A, S, L, C, V — whatever the manifest carries)
+  // per-axis k_score (R, F, E, Z, T, A, S, L, C, V - whatever the manifest carries)
   if (baselineSnap.k_score && currentSnap.k_score
       && baselineSnap.k_score.axes && currentSnap.k_score.axes) {
     const allAxes = new Set([
@@ -530,14 +530,14 @@ export function detectDrift(baselineSnap, currentSnap, userTolerances = {}) {
     baseline: baselineSnap.artifact_hash,
     current: currentSnap.artifact_hash,
     status: baselineSnap.artifact_hash === currentSnap.artifact_hash ? 'within' : 'drift',
-    reason: 'informational — artifact_hash drift is expected on rebuild',
+    reason: 'informational - artifact_hash drift is expected on rebuild',
   });
 
   return signals;
 }
 
 // ---------------------------------------------------------------------------
-// Drift report — the persisted artifact of a drift detection run.
+// Drift report - the persisted artifact of a drift detection run.
 // ---------------------------------------------------------------------------
 
 export function buildDriftReport(input = {}) {
@@ -619,7 +619,7 @@ export function loadDriftReport(filePath) {
 //
 // Emits a JSON config a tenant drops into their scheduler. Does NOT itself
 // fork a daemon. Reason: kolm should not own a long-running scheduler
-// process — that's the OS's job, and every regulated tenant already has
+// process - that's the OS's job, and every regulated tenant already has
 // their own (cron, systemd timer, k8s CronJob, Airflow DAG, GitHub Actions
 // schedule). The config carries enough information for `kolm drift detect`
 // to be re-run on schedule with the same baseline + tolerances.

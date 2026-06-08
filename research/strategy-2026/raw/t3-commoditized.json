@@ -1,0 +1,91 @@
+{
+  "id": "t3-commoditized",
+  "track": "bulldozer",
+  "prompt": "Which AI startup categories or specific products have been commoditized, disrupted, or killed by frontier-model releases and native platform/lab features in 2025-2026? Give concrete examples of startups that got disrupted or had to pivot. Cite sources.",
+  "content": "**AI coding assistants/IDEs and thin \"wrapper\" products (e.g., simple domain-specific chat interfaces or basic content generators) were among the most heavily commoditized or disrupted categories in 2025–2026.** Frontier labs (OpenAI, Anthropic, Google) rapidly added native features, agents, and specialized tools (e.g., coding agents, enterprise integrations), while improving core model capabilities reduced the need for third-party UIs or routing layers. This led to margin compression for API-dependent startups, feature parity (or superiority) from natives, access cutoffs during competitive maneuvers, and widespread shutdowns/pivots among seed-to-Series A wrappers.[[1]](https://ideaproof.io/startup-failures-2026)[[2]](https://skooloflife.medium.com/99-of-ai-startups-will-be-dead-by-2026-heres-why-bfc974edd968)\n\n**Key disrupted categories and patterns**:\n- **AI coding tools and IDEs**: Labs built or enhanced their own offerings (Anthropic’s Claude Code/Claude Code terminal agent, OpenAI’s Codex and related tools, Google’s Gemini Code Assist/Gemini Enterprise), eroding differentiation for third-party products reliant on those models. Competition intensified around SWE-bench-style coding performance and enterprise adoption.[[3]](https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/)[[4]](https://www.saastr.com/whos-winning-enterprise-ai-now-claude-up-128-gemini-up-48-openai-down-8-grok-still-a-rounding-error/)\n- **Thin AI wrappers** (e.g., PDF/document chat tools, basic content generators, simple agent harnesses): These were commoditized as frontier models improved (better reasoning, longer context, native multimodal/file handling) and platforms added similar UIs or free/cheap features. Gross margins often fell below 20% due to inference costs without proprietary moats.[[1]](https://ideaproof.io/startup-failures-2026)[[5]](https://dev.to/dev_tips/the-graveyard-of-ai-startups-startups-that-forgot-to-build-real-value-5ad9)\n- **AI agent/automation platforms**: Pricing experiments and native enterprise features (e.g., from Salesforce, ServiceNow, or labs) forced pivots or relaunches.[[6]](https://www.the-ai-corner.com/p/saas-defense-playbook-ai-era-survival-guide-2026)\n\n**Concrete examples**:\n- **Windsurf (AI-powered coding IDE, formerly associated with Codeium)**: In mid-2025, it was reportedly in advanced talks for a ~$3B acquisition by OpenAI to bolster its coding ecosystem. Anthropic responded by cutting off access to its Claude models (key for Windsurf’s performance), citing competitive concerns—this degraded the product in real time during negotiations. The OpenAI deal ultimately collapsed (partly due to Microsoft’s veto over Copilot overlap). Windsurf faced significant disruption; reports noted it as a high-profile case of labs competing with (or sabotaging) customers/builders in the coding space. Cursor remained a strong independent player but operated in an increasingly crowded field with lab-native alternatives.[[7]](https://newmr.org/blog/windsurfs-rise-fall-and-the-lessons-for-your-companys-ai-strategy/)[[8]](https://www.klover.ai/ai-strategy-windsurf-acquired-by-openai-then-google-then-cognition-ai/)[[9]](https://windowsforum.com/threads/windsurf-ai-ide-faces-disruption-after-anthropic-cuts-off-claude-3-access.369221/)\n- **Jasper and Copy.ai** (content generation platforms): Earlier momentum was kneecapped by ChatGPT’s improvements and native features; they pivoted toward enterprise/model routing but faced ongoing pressure and valuation/leadership challenges as the pattern repeated with newer models. Similar dynamics hit many 2023–2025-era wrappers.[[2]](https://skooloflife.medium.com/99-of-ai-startups-will-be-dead-by-2026-heres-why-bfc974edd968)\n- **Salesforce Agentforce** (AI agent platform for customer workflows): Initial high pricing ($2 per conversation) was rejected by procurement; it was relaunched/pivoted as “Flex Credits” at a much lower rate (~$0.10 per action) after market pushback and competition from native AI features elsewhere.[[6]](https://www.the-ai-corner.com/p/saas-defense-playbook-ai-era-survival-guide-2026)\n- **Anonymous/aggregate wrappers** (e.g., tools like ChatWithMyPDF.xyz-style PDF chat or basic agents): Dozens to hundreds of seed-to-Series A startups shut down or pivoted in waves through 2025 into Q1 2026, citing feature parity with native OpenAI/Anthropic/Google tools and unsustainable inference costs. Reports reference over 200 such cases in prior years with the trend accelerating.[[1]](https://ideaproof.io/startup-failures-2026)[[5]](https://dev.to/dev_tips/the-graveyard-of-ai-startups-startups-that-forgot-to-build-real-value-5ad9)[[10]](https://prometai.app/blog/why-startups-fail)\n\n**Broader context**: Enterprise LLM spend shifted toward Anthropic (Claude strong in coding) and Google, pressuring pure wrappers. Labs increasingly enforced terms or built direct-to-customer products, a classic “platform risk” dynamic. Survivors emphasized proprietary data, deep integrations, or non-AI moats.[[3]](https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/)[[4]](https://www.saastr.com/whos-winning-enterprise-ai-now-claude-up-128-gemini-up-48-openai-down-8-grok-still-a-rounding-error/)\n\nSources include analyses from Menlo VC, IdeaProof, Brookings, news reports on Windsurf (NewMR, TechCrunch references via secondary coverage), and industry roundups. Trends are corroborated across multiple 2025–2026 reports but specific shutdown names are often anonymized in public summaries.",
+  "citations": [
+    "https://ideaproof.io/startup-failures-2026",
+    "https://skooloflife.medium.com/99-of-ai-startups-will-be-dead-by-2026-heres-why-bfc974edd968",
+    "https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/",
+    "https://www.saastr.com/whos-winning-enterprise-ai-now-claude-up-128-gemini-up-48-openai-down-8-grok-still-a-rounding-error/",
+    "https://dev.to/dev_tips/the-graveyard-of-ai-startups-startups-that-forgot-to-build-real-value-5ad9",
+    "https://www.the-ai-corner.com/p/saas-defense-playbook-ai-era-survival-guide-2026",
+    "https://newmr.org/blog/windsurfs-rise-fall-and-the-lessons-for-your-companys-ai-strategy/",
+    "https://www.klover.ai/ai-strategy-windsurf-acquired-by-openai-then-google-then-cognition-ai/",
+    "https://windowsforum.com/threads/windsurf-ai-ide-faces-disruption-after-anthropic-cuts-off-claude-3-access.369221/",
+    "https://prometai.app/blog/why-startups-fail"
+  ],
+  "searched": [
+    "https://www.facebook.com/raydalio/posts/the-reality-is-that-ai-is-so-revolutionary-and-so-disruptive-that-its-very-hard-/1318964116245994/",
+    "https://tomtunguz.com/",
+    "https://news.ycombinator.com/item?id=46888441",
+    "https://www.1strespondernews.com/first-dry/Before-ChatGPT-a-Generation-of-AI-Startups-Faces-Disruption-as-Billions-Flow-to-Frontier-Models-31-6494",
+    "https://www.jpmorgan.com/content/dam/jpmorgan/documents/wealth-management/outlook-2026.pdf",
+    "https://www.the-ai-corner.com/p/saas-defense-playbook-ai-era-survival-guide-2026",
+    "https://www.instagram.com/reel/DWZvhyNjD91/",
+    "https://mergersandinquisitions.com/ai-for-financial-modeling/",
+    "https://ftsg.com/",
+    "https://www.citadelsecurities.com/news-and-insights/2026-global-intelligence-crisis/",
+    "https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/",
+    "https://www.youtube.com/watch?v=-FVl-hbBTOY&vl=en",
+    "https://www.saastr.com/whos-winning-enterprise-ai-now-claude-up-128-gemini-up-48-openai-down-8-grok-still-a-rounding-error/",
+    "https://www.linkedin.com/posts/rubendominguezibar_this-chart-says-everything-about-the-ai-race-activity-7406823994047348736-6YWz",
+    "https://www.facebook.com/groups/claudecommunity/posts/1008702478337084/",
+    "https://skooloflife.medium.com/99-of-ai-startups-will-be-dead-by-2026-heres-why-bfc974edd968",
+    "https://www.softwareseni.com/comparing-openai-anthropic-and-google-for-startup-ai-development-in-2025/",
+    "https://www.instagram.com/reel/DV_yjTCDe-r/",
+    "https://www.brookings.edu/articles/what-happens-when-ai-companies-compete-with-their-customers/",
+    "https://www.facebook.com/vaibhavsisintyofficial/posts/-openai-just-flipped-the-switchsam-altman-has-put-the-entire-company-on-pause-fo/1301373362006784/",
+    "https://ideaproof.io/startup-failures-2026",
+    "https://www.linkedin.com/pulse/ai-wrapper-trap-why-startups-without-ip-dying-how-purushothaman-zpwic",
+    "https://dev.to/dev_tips/the-graveyard-of-ai-startups-startups-that-forgot-to-build-real-value-5ad9",
+    "https://www.scribd.com/document/991291592/Sherlocked-Why-AI-Wrapper-Startups-Are-Failing",
+    "https://www.reddit.com/r/ArtificialInteligence/comments/1n0rj68/99_of_ai_start_ups_will_be_dead_by_2026/",
+    "https://www.facebook.com/adamtran.co/posts/-99-of-ai-startups-will-fail-by-2026-heres-why-what-is-your-moator-are-you-just-/723164420071751/",
+    "https://www.mohsindev369.dev/blog/failed-ai-startups-analysis-2024",
+    "https://www.teamblind.com/post/too-many-ai-wrapper-startups-k15hbck2",
+    "https://prometai.app/blog/why-startups-fail",
+    "https://www.instagram.com/p/DWhW6DuCRNi/",
+    "https://www.youtube.com/watch?v=ZTSrz2z2jNg",
+    "https://codingplainenglish.medium.com/cursor-vs-copilot-vs-codeium-the-real-winner-in-2025-2f88d4c24787",
+    "https://www.reddit.com/r/cscareerquestions/comments/1o6746m/in_2025_october_many_companiea_encourage_devs_to/",
+    "https://cline.bot/blog/5-best-cursor-ai-alternatives-for-startups-in-2025",
+    "https://www.digitalapplied.com/blog/ai-coding-tools-comparison-december-2025",
+    "https://newmr.org/blog/windsurfs-rise-fall-and-the-lessons-for-your-companys-ai-strategy/",
+    "https://www.youtube.com/watch?v=urEaHW-emY4",
+    "https://www.klover.ai/ai-strategy-windsurf-acquired-by-openai-then-google-then-cognition-ai/",
+    "https://www.reddit.com/r/LocalLLM/comments/1l3a2t2/anthropic_shutting_out_windsurf_this_is_why_im_so/",
+    "https://windowsforum.com/threads/windsurf-ai-ide-faces-disruption-after-anthropic-cuts-off-claude-3-access.369221/",
+    "https://www.newcomer.co/p/a-week-of-confrontation-trump-and",
+    "https://community.openai.com/t/openai-is-acquiring-windsurf-for-3-billion/1253475",
+    "https://www.promarket.org/2025/05/20/the-antitrust-agencies-should-block-openais-windsurf-acquisition-to-support-ai-innovation/",
+    "https://forum.cursor.com/t/openai-agrees-to-acquire-windsurf/86872"
+  ],
+  "usage": {
+    "input_tokens": 29185,
+    "input_tokens_details": {
+      "cached_tokens": 16128
+    },
+    "output_tokens": 2351,
+    "output_tokens_details": {
+      "reasoning_tokens": 1348
+    },
+    "total_tokens": 31536,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 8,
+    "cost_in_usd_ticks": 654243500,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 8,
+      "x_search_calls": 0,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 14949,
+      "output_tokens": 1347
+    }
+  },
+  "attempts": 1
+}

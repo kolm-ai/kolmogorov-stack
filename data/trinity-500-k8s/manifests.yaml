@@ -1,0 +1,181 @@
+# kolm deploy — kubernetes manifests (vllm, 1 gpu)
+# artifact:  trinity-500-q4km-test
+# namespace: default
+# generator: r4-v1
+#
+# kubectl create namespace default  # if it does not exist
+# kubectl apply -f .
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kolm-trinity-500-q4km-test-config
+  namespace: default
+  labels:
+    app.kubernetes.io/name: kolm-trinity-500-q4km-test
+    app.kubernetes.io/managed-by: kolm
+data:
+  artifact_id: "trinity-500-q4km-test"
+  runtime: "vllm"
+  port: "8000"
+  served_model_name: "trinity-500-q4km-test"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kolm-trinity-500-q4km-test-models
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kolm-trinity-500-q4km-test-init-download
+  namespace: default
+spec:
+  backoffLimit: 4
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kolm-trinity-500-q4km-test
+        app.kubernetes.io/component: init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: download
+          image: curlimages/curl:8.10.1
+          env:
+            - name: KOLM_REGISTRY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: kolm-registry-secret
+                  key: url
+                  optional: true
+            - name: KOLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kolm-registry-secret
+                  key: api_key
+                  optional: true
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -eu
+              dest=/models/trinity-500-q4km-test
+              if [ -e "$dest" ]; then
+                echo "artifact trinity-500-q4km-test already present, skipping download"
+                exit 0
+              fi
+              mkdir -p "$(dirname "$dest")"
+              auth=""
+              if [ -n "${KOLM_API_KEY:-}" ]; then auth="-H Authorization: Bearer $KOLM_API_KEY"; fi
+              curl -fsSL $auth "${KOLM_REGISTRY_URL}/artifacts/trinity-500-q4km-test" -o "$dest"
+          volumeMounts:
+            - name: models
+              mountPath: /models
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: kolm-trinity-500-q4km-test-models
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kolm-trinity-500-q4km-test
+  namespace: default
+  labels:
+    app.kubernetes.io/name: kolm-trinity-500-q4km-test
+    app.kubernetes.io/managed-by: kolm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kolm-trinity-500-q4km-test
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kolm-trinity-500-q4km-test
+    spec:
+      containers:
+        - name: runtime
+          image: vllm/vllm-openai:latest
+          imagePullPolicy: IfNotPresent
+          args: ["--model", "/models/trinity-500-q4km-test", "--port", "8000", "--host", "0.0.0.0", "--served-model-name", "trinity-500-q4km-test"]
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+            requests:
+              nvidia.com/gpu: 1
+              cpu: "2"
+              memory: "16Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: models
+              mountPath: /models
+              readOnly: true
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: kolm-trinity-500-q4km-test-models
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kolm-trinity-500-q4km-test
+  namespace: default
+  labels:
+    app.kubernetes.io/name: kolm-trinity-500-q4km-test
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: kolm-trinity-500-q4km-test
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kolm-trinity-500-q4km-test
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kolm-trinity-500-q4km-test
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

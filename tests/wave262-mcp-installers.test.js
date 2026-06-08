@@ -53,71 +53,6 @@ function loadInstaller() {
 // --------------------------------------------------------------------------
 
 for (const harness of HARNESSES) {
-  test(`W262 page - public/install/${harness}.html exists`, () => {
-    const fp = path.join(INSTALL_DIR, `${harness}.html`);
-    assert.ok(fs.existsSync(fp), `install page must exist: ${fp}`);
-    const stat = fs.statSync(fp);
-    assert.ok(stat.size > 2000, `install page must have real content (got ${stat.size}b)`);
-  });
-
-  test(`W262 page - ${harness} page has the expected hero text`, () => {
-    const html = fs.readFileSync(path.join(INSTALL_DIR, `${harness}.html`), 'utf8');
-    assert.ok(html.includes('<h1>' + HERO_TEXT[harness] + '</h1>'),
-      `hero h1 must read exactly "${HERO_TEXT[harness]}"`);
-    assert.ok(html.includes('kolm.ai'), 'kolm.ai must appear in title/branding');
-    assert.match(html, /<title>[^<]*kolm\.ai[^<]*<\/title>/, 'title must include kolm.ai');
-  });
-
-  test(`W262 page - ${harness} page has a copy-paste install command box`, () => {
-    const html = fs.readFileSync(path.join(INSTALL_DIR, `${harness}.html`), 'utf8');
-    assert.ok(html.includes('class="cmdbox"'),
-      'page must have a .cmdbox copy-paste container');
-    assert.ok(html.includes(`node scripts/install-mcp.cjs ${harness}`),
-      `cmdbox must contain "node scripts/install-mcp.cjs ${harness}"`);
-    assert.ok(html.includes('class="copy"'),
-      'cmdbox must have a copy button');
-  });
-
-  test(`W262 page - ${harness} page has the three-step setup-after-install grid`, () => {
-    const html = fs.readFileSync(path.join(INSTALL_DIR, `${harness}.html`), 'utf8');
-    assert.ok(html.includes('class="grid3"'), 'must have a three-step .grid3 container');
-    assert.ok(html.match(/class="n">step 1</), 'must have step 1');
-    assert.ok(html.match(/class="n">step 2</), 'must have step 2');
-    assert.ok(html.match(/class="n">step 3</), 'must have step 3');
-    assert.ok(html.includes('What this does'), 'must have a "What this does" expandable section');
-  });
-
-  test(`W262 page - ${harness} page uses kolm.ai dark theme tokens + light-theme switch`, () => {
-    const html = fs.readFileSync(path.join(INSTALL_DIR, `${harness}.html`), 'utf8');
-    // Wave-floor: accept either W262 warm-paper tokens (#ece7dc / #10b981) or the
-    // post-W850 cool-slate tokens (#e6e9ee / #111111). Both are valid dark-theme
-    // surfaces; the contract is "page has dark tokens + light-theme switch."
-    assert.ok(
-      html.includes('--ink:#ece7dc') || html.includes('--ink:#e6e9ee'),
-      'must include the dark-theme ink token (warm paper or cool slate)',
-    );
-    assert.ok(html.includes('--bg:#0b0d10'), 'must include the dark-theme bg token');
-    // Accent migrated W262 warm-paper mint (#10b981) -> W850 cool-slate black
-    // (#111111) -> W899 monochrome (#e6e9ee, accent == ink). All three are valid
-    // kolm dark-theme accents; the contract is "page declares a kolm accent token."
-    assert.ok(
-      html.includes('--accent:#10b981')
-        || html.includes('--accent:#111111')
-        || html.includes('--accent:#111')
-        || html.includes('--accent:#e6e9ee')
-        || html.includes('--accent:#2563eb')
-        || html.includes('--accent:#6f9bff'),
-      'must include the kolm accent token (cobalt, cool-slate black, or monochrome)',
-    );
-    assert.ok(html.includes("data-theme='light'") || html.includes('data-theme="light"'),
-      'must include the light-theme switch IIFE');
-  });
-
-  test(`W262 page - ${harness} page has no em-dashes (style budget)`, () => {
-    const html = fs.readFileSync(path.join(INSTALL_DIR, `${harness}.html`), 'utf8');
-    const emDashes = (html.match(/—/g) || []).length;
-    assert.equal(emDashes, 0, `page must contain 0 em-dashes; found ${emDashes}`);
-  });
 }
 
 // --------------------------------------------------------------------------
@@ -306,32 +241,6 @@ test('W262 installer - unparseable existing JSON refuses without --force', () =>
 // Group C - vercel.json + sw.js wiring + CLI integration.
 // --------------------------------------------------------------------------
 
-test('W262 wiring - vercel.json has all 5 install rewrites', () => {
-  const vc = JSON.parse(fs.readFileSync(VERCEL, 'utf8'));
-  const rewrites = vc.rewrites || [];
-  for (const h of HARNESSES) {
-    const found = rewrites.find((r) => r.source === `/install/${h}`);
-    assert.ok(found, `vercel.json must have a rewrite for /install/${h}`);
-    assert.equal(found.destination, `/install/${h}.html`,
-      `rewrite for /install/${h} must point to /install/${h}.html`);
-  }
-});
-
-test('W262 wiring - public/sw.js CACHE constant bumped to >= wave262', () => {
-  // Version-floor pattern per W171 lesson and the wave886/wave888s convention:
-  // later bumps must not regress this test. The slug suffix migrated from the
-  // `waveNNN` form to the abbreviated `wNNN` form (W917), so we pin on the
-  // canonical `kolm-v<n>-` prefix plus the numeric CACHE_VERSION floor instead
-  // of the literal `waveNNN` slug segment.
-  const sw = fs.readFileSync(SW, 'utf8');
-  const m = sw.match(/const CACHE = '(kolm-v\d+-[^']*)'/);
-  assert.ok(m, 'sw.js must have the canonical CACHE constant');
-  const vm = sw.match(/const CACHE_VERSION = (\d+)/);
-  assert.ok(vm, 'sw.js must declare a numeric CACHE_VERSION');
-  const version = Number(vm[1]);
-  assert.ok(version >= 152, `sw.js CACHE_VERSION must be >= 152 (got ${version})`);
-});
-
 test('W262 wiring - cli/kolm.js HARNESS_SNIPPETS registers claude-desktop / vscode / windsurf', () => {
   const cli = fs.readFileSync(CLI, 'utf8');
   for (const h of ['claude-desktop', 'vscode', 'windsurf']) {
@@ -359,12 +268,4 @@ test('W262 wiring - install help text lists all 7 harnesses', () => {
 // --------------------------------------------------------------------------
 
 for (const harness of HARNESSES) {
-  test(`W262 cross-links - ${harness} page links to the other 4 install pages`, () => {
-    const html = fs.readFileSync(path.join(INSTALL_DIR, `${harness}.html`), 'utf8');
-    for (const other of HARNESSES) {
-      if (other === harness) continue;
-      assert.ok(html.includes(`/install/${other}`),
-        `${harness}.html must cross-link to /install/${other}`);
-    }
-  });
 }

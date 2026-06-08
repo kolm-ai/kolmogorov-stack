@@ -1,15 +1,15 @@
-// W720-2/3 — self-improvement orchestrator.
+// W720-2/3 - self-improvement orchestrator.
 //
 // Two-leg primitive that powers `kolm distill improve`:
 //
-//   orchestrateImprovement({tenant_id, namespace, candidates, opts}) — kicks
+//   orchestrateImprovement({tenant_id, namespace, candidates, opts}) - kicks
 //     off a re-distill round with curriculum + (optional) teacher council. The
 //     orchestrator returns immediately with {run_id, poll_url}; the actual
 //     distill runs OFFLINE as a detached worker so the CLI / server caller is
 //     never blocked.
 //
 //   compareAndDecide({tenant_id, base_artifact_id, candidate_artifact_id,
-//     gate}) — reads K-Score from both artifacts and emits a decision of
+//     gate}) - reads K-Score from both artifacts and emits a decision of
 //     'promote' | 'hold' | 'rollback'. When `auto_promote:true` is passed in
 //     the gate the promote decision additionally writes a promoted.json file
 //     under ~/.kolm/registry/<artifact_id>/.
@@ -54,7 +54,7 @@ function _distillRunsDir() {
   return d;
 }
 
-// Atomic JSON write — never partial-write a JSON file.
+// Atomic JSON write - never partial-write a JSON file.
 //   .tmp + rename is the W720 memory trap requirement.
 function _atomicWriteJson(target, obj) {
   const dir = path.dirname(target);
@@ -75,12 +75,12 @@ function _nextRoundForArtifact(baseArtifactId) {
     if (Number.isFinite(Number(p.self_improvement_round))) {
       return Number(p.self_improvement_round) + 1;
     }
-  } catch { /* ignore — first round */ }
+  } catch { /* ignore - first round */ }
   return 1;
 }
 
 // ---------------------------------------------------------------------------
-// orchestrateImprovement — non-blocking re-distill kickoff.
+// orchestrateImprovement - non-blocking re-distill kickoff.
 // ---------------------------------------------------------------------------
 //
 // Returns:
@@ -108,7 +108,7 @@ export async function orchestrateImprovement(opts = {}) {
     return {
       ok: false,
       error: 'no_candidates',
-      hint: 'pass candidates from detectUnderperformingCaptures({...}) — empty list is a no-op',
+      hint: 'pass candidates from detectUnderperformingCaptures({...}) - empty list is a no-op',
       improvement_version: IMPROVEMENT_VERSION,
     };
   }
@@ -137,7 +137,7 @@ export async function orchestrateImprovement(opts = {}) {
   }
 
   // Resolve base artifact (first candidate's current_artifact_id wins; the
-  // orchestrator does not arbitrate which artifact gets re-distilled — that
+  // orchestrator does not arbitrate which artifact gets re-distilled - that
   // decision is the CLI's).
   const baseArtifactId = candidates.find((c) => c && c.current_artifact_id)?.current_artifact_id || null;
   const round = _nextRoundForArtifact(baseArtifactId);
@@ -193,7 +193,7 @@ export async function orchestrateImprovement(opts = {}) {
     };
   }
 
-  // Spawn the distill worker OFFLINE — do not await its iterator. The
+  // Spawn the distill worker OFFLINE - do not await its iterator. The
   // distill-pipeline iterator is async, but the orchestrator's contract is
   // non-blocking, so we kick the first .next() into a queued microtask and
   // return immediately. Any subsequent iteration / cleanup happens off the
@@ -202,7 +202,7 @@ export async function orchestrateImprovement(opts = {}) {
   // We pass tenant_id + namespace forward so the distill-pipeline corpus read
   // is tenant-fenced (matches the W422 P0-4 default).
   if (subOpts.skip_spawn !== true) {
-    // Fire-and-forget — never await. The pipeline writes its own run-meta
+    // Fire-and-forget - never await. The pipeline writes its own run-meta
     // (overwriting our stub in places) plus progress.jsonl + manifest.json.
     queueMicrotask(() => {
       // Errors here are non-fatal for the orchestrator caller; we wrap in
@@ -228,7 +228,7 @@ export async function orchestrateImprovement(opts = {}) {
             if (ev && ev.done) break;
             if (count > 1000) break;
           }
-        } catch (_) { /* worker errors land in the worker log — orchestrator does not surface */ }
+        } catch (_) { /* worker errors land in the worker log - orchestrator does not surface */ }
       })().catch(() => {});
     });
   }
@@ -252,7 +252,7 @@ export async function orchestrateImprovement(opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// compareAndDecide — promote / hold / rollback gate.
+// compareAndDecide - promote / hold / rollback gate.
 // ---------------------------------------------------------------------------
 //
 // Reads K-Score from both artifacts via src/artifact-runner.js loadArtifact
@@ -264,11 +264,11 @@ export async function orchestrateImprovement(opts = {}) {
 //                    distill --eval first', ...}
 //
 // Decision rules:
-//   'promote'  — candidate_kscore >= base_kscore + min_kscore_delta AND
+//   'promote' - candidate_kscore >= base_kscore + min_kscore_delta AND
 //                regressions.length <= max_regression_classes
-//   'hold'     — within +/- min_kscore_delta of base (close call — human
+//   'hold' - within +/- min_kscore_delta of base (close call - human
 //                review)
-//   'rollback' — candidate strictly worse (delta < -min_kscore_delta)
+//   'rollback' - candidate strictly worse (delta < -min_kscore_delta)
 //
 // When the caller passes `auto_promote:true` in gate AND decision==='promote',
 // we write ~/.kolm/registry/<candidate_artifact_id>/promoted.json with
@@ -340,7 +340,7 @@ export async function compareAndDecide(opts = {}) {
   }
 
   const delta = candidateScore - baseScore;
-  // Compute "regressions" — the candidate's per-class regression set minus
+  // Compute "regressions" - the candidate's per-class regression set minus
   // anything the base already failed (which would not count as new regression).
   const regressions = candidateRegressions.filter((cls) => !baseRegressions.includes(cls));
 
@@ -410,7 +410,7 @@ export async function compareAndDecide(opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// _readKScoreFromArtifact — reads K-Score from a .kolm OR a registry stub.
+// _readKScoreFromArtifact - reads K-Score from a .kolm OR a registry stub.
 // ---------------------------------------------------------------------------
 //
 // Resolution order:
@@ -423,7 +423,7 @@ export async function compareAndDecide(opts = {}) {
 async function _readKScoreFromArtifact(artifactId) {
   if (!artifactId) return { ok: false, detail: 'empty_artifact_id' };
 
-  // 1+2 — registry stub (preferred read path; matches what we write in
+  // 1+2 - registry stub (preferred read path; matches what we write in
   // compareAndDecide promote branch).
   try {
     const dir = path.join(_registryDir(), String(artifactId));
@@ -455,7 +455,7 @@ async function _readKScoreFromArtifact(artifactId) {
     }
   } catch (_) { /* fall through */ }
 
-  // 3 — .kolm artifact under ~/.kolm/artifacts/
+  // 3 - .kolm artifact under ~/.kolm/artifacts/
   const candidates = [
     path.join(_kolmDir(), 'artifacts', String(artifactId) + '.kolm'),
     path.join(_kolmDir(), 'artifacts', String(artifactId)),
@@ -496,6 +496,6 @@ function _extractKScore(manifest) {
   return null;
 }
 
-// Test-only seam — exported under `_` so external callers cannot rely on it.
+// Test-only seam - exported under `_` so external callers cannot rely on it.
 export const _atomicWriteJsonForTest = _atomicWriteJson;
 export const _readKScoreFromArtifactForTest = _readKScoreFromArtifact;

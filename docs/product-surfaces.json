@@ -445,9 +445,6 @@
         "/sdk-current.json",
         "/v1/product/experience",
         "/v1/product/graph",
-        "/v1/product/frontier-lab",
-        "/v1/product/frontier-contracts",
-        "/v1/product/operator-kernels",
         "/v1/evidence/readiness",
         "/v1/packages/release-readiness",
         "/v1/packages/release-readiness/template",
@@ -460,9 +457,6 @@
         "server.js",
         "src/product-experience.js",
         "src/evidence-readiness.js",
-        "src/product-frontier-lab.js",
-        "src/product-frontier-contracts.js",
-        "src/product-frontier-operator-kernels.js",
         "src/package-release-readiness.js",
         "scripts/build-api-ref.cjs",
         "scripts/build-openapi.cjs",
@@ -479,12 +473,6 @@
       "doc_paths": [
         "docs/PRODUCT.md",
         "docs/product-journeys.json",
-        "docs/product-frontier-lab.json",
-        "docs/research/product-frontier-lab-2026-05-23.md",
-        "docs/product-frontier-implementation-contracts.json",
-        "docs/research/product-frontier-implementation-contracts-2026-05-23.md",
-        "docs/product-frontier-operator-kernels.json",
-        "docs/research/product-frontier-operator-kernels-2026-05-23.md",
         "docs/package-release-readiness.md",
         "docs/format-governance-packet.md",
         "docs/research/api-docs-contract-drift-audit-2026-05-12.md",
@@ -512,8 +500,6 @@
           "npm run verify:governance-packets",
           "npm run lint:refs",
           "npm run verify:package-release",
-          "npm run verify:frontier-contracts",
-          "npm run verify:operator-kernels",
           "node --test --test-concurrency=1 tests/wave591-package-local-build-contract.test.js"
         ],
         "prod_gates": [
@@ -600,45 +586,6 @@
           "id": "product-graph",
           "method": "GET",
           "path": "/v1/product/graph",
-          "auth": "none",
-          "mode": "safe",
-          "expect": [
-            200
-          ],
-          "checks": [
-            "json"
-          ]
-        },
-        {
-          "id": "product-frontier-lab",
-          "method": "GET",
-          "path": "/v1/product/frontier-lab",
-          "auth": "none",
-          "mode": "safe",
-          "expect": [
-            200
-          ],
-          "checks": [
-            "json"
-          ]
-        },
-        {
-          "id": "product-frontier-contracts",
-          "method": "GET",
-          "path": "/v1/product/frontier-contracts",
-          "auth": "none",
-          "mode": "safe",
-          "expect": [
-            200
-          ],
-          "checks": [
-            "json"
-          ]
-        },
-        {
-          "id": "product-operator-kernels",
-          "method": "GET",
-          "path": "/v1/product/operator-kernels",
           "auth": "none",
           "mode": "safe",
           "expect": [

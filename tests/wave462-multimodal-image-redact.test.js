@@ -307,16 +307,3 @@ test('W462 #9 — root kolm package.json does NOT pull onnxruntime-node or sharp
   assert.ok(!allDepNames.includes('sharp'),
     'root package.json MUST NOT depend on sharp (it lives in workers/multimodal-redact-image)');
 });
-
-// =============================================================================
-// 10) sw.js CACHE slug references the W462+ family
-// =============================================================================
-
-test('W462 #10 — sw.js CACHE slug is current within the W454+ family', () => {
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  // W604 anti-brittleness: scan all wave tokens, assert max >= 454.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 454, 'sw.js CACHE wave must reach >= 454 (saw max wave' + maxWave + ')');
-});

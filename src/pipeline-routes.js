@@ -1,4 +1,4 @@
-// W821 [T2] — HTTP routes for the pipeline orchestrator.
+// W821 [T2] - HTTP routes for the pipeline orchestrator.
 //
 // We export a SINGLE registerPipelineRoutes(router, deps) function that bolts
 // the W821 endpoints onto an existing express.Router(). This module-side
@@ -59,7 +59,7 @@ function _tenantId(req) {
   return 'anonymous';
 }
 
-// derive_route_frequencies — walks the event-store for kind='pipeline_run'
+// derive_route_frequencies - walks the event-store for kind='pipeline_run'
 // events under this pipeline_id + tenant, returns {intent_or_default: count}.
 // Used by the /kscore endpoint. Dynamic import so the routes load in
 // environments without event-store (we just return {} -> no_eval_data).

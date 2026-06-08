@@ -1,6 +1,6 @@
 // src/conformal.js
 //
-// W921 — Conformal / calibrated uncertainty for the K-Score prediction.
+// W921 - Conformal / calibrated uncertainty for the K-Score prediction.
 //
 // Replaces quality-predictor.js's admittedly-fabricated confidence-scaled band
 // (heuristic half = 0.26 - 0.32*confidence; learned half = 0.155 - 0.11*conf)
@@ -8,14 +8,14 @@
 // true K at a stated rate, plus an ABSTAIN signal when the interval straddles
 // the ship gate.
 //
-// SPLIT (INDUCTIVE) CONFORMAL — REGRESSION (Lei et al. 2018; Angelopoulos &
+// SPLIT (INDUCTIVE) CONFORMAL - REGRESSION (Lei et al. 2018; Angelopoulos &
 // Bates 2021):
 //   1. Hold out a calibration set disjoint from the predictor fit.
 //   2. Nonconformity score s_i = |y_i - f_hat(x_i)| (abs residual).
 //   3. qhat = the b-th order statistic of {s_i}, b = ceil((n+1)*(1-alpha)).
 //   4. For a new point: C(x) = [f_hat(x) - qhat, f_hat(x) + qhat], clamped to
 //      [0,1].
-//   THEOREM (exchangeability): 1-alpha <= P(Y in C(x)) <= 1-alpha + 1/(n+1) —
+//   THEOREM (exchangeability): 1-alpha <= P(Y in C(x)) <= 1-alpha + 1/(n+1) - 
 //   finite-sample, distribution-free.
 //
 // SMALL-n GUARD: if b > n (n < 1/alpha - 1) qhat is undefined and the only
@@ -109,7 +109,7 @@ export function splitConformalQuantile(scores, alpha) {
 }
 
 /**
- * conformalQuantile — empirical (n+1)(1-alpha) quantile of scores. Alias kept
+ * conformalQuantile - empirical (n+1)(1-alpha) quantile of scores. Alias kept
  * for parity with the judge-conformal spec naming; returns the numeric qhat
  * (Infinity when undercalibrated).
  * @returns {number}
@@ -135,7 +135,7 @@ export function localizedScore(residual, sigma) {
 }
 
 /**
- * sigmaEstimate — local difficulty estimate for x via the spread of the k
+ * sigmaEstimate - local difficulty estimate for x via the spread of the k
  * nearest calibration rows. Distance is Euclidean over numeric feature vectors
  * when x and calRows[i].x are arrays; otherwise falls back to the global
  * residual std. Returns a value floored to EPS.
@@ -228,7 +228,7 @@ function _rowResidual(row) {
 }
 
 // =============================================================================
-// predictInterval — the focused split-conformal core (residuals, alpha).
+// predictInterval - the focused split-conformal core (residuals, alpha).
 // =============================================================================
 //
 // Given a point prediction and a pool of calibration residuals, return a
@@ -306,7 +306,7 @@ export function predictInterval(residuals, alpha = 0.10, opts = {}) {
 }
 
 // =============================================================================
-// conformalInterval — calibration-row entry point (spec signature).
+// conformalInterval - calibration-row entry point (spec signature).
 // =============================================================================
 //
 // Computes residuals from a pool of labelled calibration rows and delegates to
@@ -429,7 +429,7 @@ export function mondrianCalibrate({ rows, groupKey = (r) => r.namespace, alpha =
 }
 
 /**
- * applyConformal — resolve an interval for (category, yhat) from a Mondrian
+ * applyConformal - resolve an interval for (category, yhat) from a Mondrian
  * mapping, falling back to pooled when the category is below floor.
  *
  * @returns {{ lo, hi, midpoint, qhat, coverage_target, status, group }}
@@ -466,7 +466,7 @@ export function applyConformal(mapping, category, yhat, { clamp01 = true } = {})
 }
 
 // =============================================================================
-// ACI — Adaptive Conformal Inference (online level update for drift).
+// ACI - Adaptive Conformal Inference (online level update for drift).
 // =============================================================================
 
 /**
@@ -543,7 +543,7 @@ export function selectiveDecision({ lo, hi, gate = 0.85 } = {}) {
 }
 
 /**
- * decideFromConformal — compile-simulator decision from a proposed candidate's
+ * decideFromConformal - compile-simulator decision from a proposed candidate's
  * conformal interval vs the ship gate + the current-vs-proposed K delta.
  *
  *   straddle the gate                          -> 'abstain'
@@ -655,7 +655,7 @@ export function conformalCoverageReport({ rows, alpha = 0.10, groupKey } = {}) {
 }
 
 // =============================================================================
-// recordConformalOutcome — best-effort durable feedback for ACI.
+// recordConformalOutcome - best-effort durable feedback for ACI.
 // =============================================================================
 //
 // Persists a (issued interval, observed K, miscovered?) tuple to the event

@@ -1,4 +1,4 @@
-// W918 P1.1 — OpenAI fine-tuning JSONL importer.
+// W918 P1.1 - OpenAI fine-tuning JSONL importer.
 //
 // Ingests an OpenAI fine-tuning JSONL file (either format) and emits kolm
 // capture rows ready to feed into the distill / eval pipelines.
@@ -20,7 +20,7 @@
 // ts   = ISO 8601 ingest timestamp (single value per parse call)
 // namespace defaults to "openai-finetune"; the caller can override.
 //
-// Malformed rows do NOT throw — they are skipped and recorded in the
+// Malformed rows do NOT throw - they are skipped and recorded in the
 // `errors` array as { line, reason } so the caller can surface them.
 
 import fs from 'node:fs';

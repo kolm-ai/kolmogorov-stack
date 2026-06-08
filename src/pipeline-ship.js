@@ -1,9 +1,9 @@
-// Wave 360 — kolm ship: artifact -> marketplace.
+// Wave 360 - kolm ship: artifact -> marketplace.
 //
 // Async iterator yielding ShipEvent = { step, name, status, detail?, hint? }.
 //
 // Steps:
-//   1 verify production_ready   productionReady() — refuse unless --force
+//   1 verify production_ready   productionReady() - refuse unless --force
 //   2 sign                      attest receipt with Ed25519 (best-effort);
 //                               attestArtifactWithRekor only when
 //                               KOLM_SIGSTORE_REKOR_URL is set, else
@@ -66,7 +66,7 @@ export async function* ship(artifactPath, opts = {}) {
     baseReceipt.production_ready = !!(prodVerdict && prodVerdict.ok);
     baseReceipt.shipped_signature = { alg: 'sha256-anchor', value: sha256.slice(0, 32) };
 
-    // Best-effort Ed25519 sign of the canonical receipt — if the local key
+    // Best-effort Ed25519 sign of the canonical receipt - if the local key
     // exists, attach the bundle so a third party can verify the artifact
     // without ever touching Rekor.
     try {
@@ -85,7 +85,7 @@ export async function* ship(artifactPath, opts = {}) {
         });
         if (bundle) baseReceipt.signature_sigstore = bundle;
       }
-    } catch { /* leave the sha256 anchor — no key is fine */ }
+    } catch { /* leave the sha256 anchor - no key is fine */ }
 
     fs.writeFileSync(receiptPath, JSON.stringify(baseReceipt, null, 2));
     signResult = { receipt_path: receiptPath, sha256, signed: !!baseReceipt.signature_sigstore };
@@ -130,7 +130,7 @@ export async function* ship(artifactPath, opts = {}) {
 }
 
 function postJson(url, body, headers, timeoutMs) {
-  // Direct node:http path — fetch() has caused libuv crashes on Windows
+  // Direct node:http path - fetch() has caused libuv crashes on Windows
   // process.exit() in this codebase (see W304 trap); native http is safe.
   return new Promise((resolve, reject) => {
     let parsed;

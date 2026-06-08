@@ -1,4 +1,4 @@
-// W834-1 — EU AI Act Annex IV technical-documentation auto-generator.
+// W834-1 - EU AI Act Annex IV technical-documentation auto-generator.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 1202-1209):
 //   [W834-1] EU AI Act technical-docs auto-generator from artifact manifest.
@@ -9,9 +9,9 @@
 // that an EU compliance team can paste directly into a regulatory dossier.
 //
 // Why a separate module from ai-act-export.js:
-//   * ai-act-export.js targets the API consumer — its envelope nests Annex IV
+//   * ai-act-export.js targets the API consumer - its envelope nests Annex IV
 //     fields under .annex_iv for programmatic walking.
-//   * reg-eu-aiact-docs.js targets the human auditor — emits free-flowing
+//   * reg-eu-aiact-docs.js targets the human auditor - emits free-flowing
 //     markdown with section headings every regulatory reviewer expects, and
 //     calls out MISSING fields with structured action hints.
 //   * Distinct version stamp ('w834-v1') so downstream tooling that locks on
@@ -20,7 +20,7 @@
 //
 // HONESTY CONTRACT (matches W766, W768):
 //   * Fields missing from the manifest emit
-//       `<!-- MISSING: <field> — <recommended action> -->`
+//       `<!-- MISSING: <field> - <recommended action> -->`
 //     so a reviewer reading the rendered output can grep for "MISSING" and
 //     immediately see every gap with a recommended remediation.
 //   * NEVER fabricates training-data sources, accuracy numbers, or
@@ -62,13 +62,13 @@ const RECOMMENDED_ACTIONS = Object.freeze({
   vertical: 'set manifest.vertical to the industry vertical (medical, financial, hr, ...)',
   hardware_targets: 'set manifest.hardware_targets to the deployment-target enumeration (e.g. ["rtx-5090","h100"])',
   training_data_sources: 'set manifest.training_data_sources to the data-source enumeration (e.g. [{source:"customer_captures",n:50000},{source:"public_corpus",name:"...",license:"..."}])',
-  k_score: 'set manifest.k_score (or manifest.metrics.k_score) — empty K-Score forfeits the EU performance-metric declaration',
+  k_score: 'set manifest.k_score (or manifest.metrics.k_score) - empty K-Score forfeits the EU performance-metric declaration',
   redaction_classes_used: 'set manifest.redaction_classes_used to the list of PII redactors that ran on training data',
   human_oversight_measures: 'set manifest.human_oversight_measures or call POST /v1/reg/hil/threshold to declare review thresholds',
   postmarket_monitoring_plan: 'set manifest.postmarket_monitoring_plan or attach a Confluence/Notion link describing alert + recall procedures',
-  cybersecurity_measures: 'set manifest.cybersecurity_measures — describe encryption at rest, key rotation, attestation hardware',
+  cybersecurity_measures: 'set manifest.cybersecurity_measures - describe encryption at rest, key rotation, attestation hardware',
   standards_applied: 'set manifest.standards_applied to the standards enumeration (e.g. ["ISO/IEC 27001:2022","ISO/IEC 42001:2023","NIST AI RMF 1.0"])',
-  conformity_assessment_plan: 'set manifest.conformity_assessment_plan — for high-risk systems describe Article 43 third-party audit cadence',
+  conformity_assessment_plan: 'set manifest.conformity_assessment_plan - for high-risk systems describe Article 43 third-party audit cadence',
 });
 
 function _now() {
@@ -76,16 +76,16 @@ function _now() {
 }
 
 // Format a MISSING marker. We use HTML comment syntax so the marker is
-// invisible in rendered markdown/HTML but greppable in the source — a
+// invisible in rendered markdown/HTML but greppable in the source - a
 // reviewer can `grep "<!-- MISSING"` to enumerate every gap.
 function _missing(field) {
   const action = RECOMMENDED_ACTIONS[field] || `set manifest.${field}`;
-  return `<!-- MISSING: ${field} — ${action} -->`;
+  return `<!-- MISSING: ${field} - ${action} -->`;
 }
 
 // Pull a field from a manifest with optional alias list. Returns null if
 // the field (and every alias) is missing or empty. We DELIBERATELY treat the
-// empty string + empty array as missing — a regulator submission should not
+// empty string + empty array as missing - a regulator submission should not
 // carry blank fields that look like attestation.
 function _pull(manifest, field, aliases = []) {
   const keys = [field, ...aliases];
@@ -134,11 +134,11 @@ function _renderValue(v) {
 // Build the regulator-submission-ready Annex IV doc.
 //
 // Inputs:
-//   artifact_manifest  — the kolm artifact manifest.json contents
-//   tenant_metadata    — optional {legal_name, dpo_contact, eu_representative}
-//                        — provides legal-entity boilerplate for the cover
-//   opts.format        — 'markdown' (default) | 'html'
-//   opts.generated_at  — ISO timestamp; defaults to now() (override for tests)
+//   artifact_manifest - the kolm artifact manifest.json contents
+//   tenant_metadata - optional {legal_name, dpo_contact, eu_representative}
+// - provides legal-entity boilerplate for the cover
+//   opts.format - 'markdown' (default) | 'html'
+//   opts.generated_at - ISO timestamp; defaults to now() (override for tests)
 //
 // Returns:
 //   { ok:true, version, format, generated_at, body, missing_fields[] }
@@ -358,7 +358,7 @@ export function generateTechnicalDocs(opts = {}) {
 
   // Assemble the full doc.
   const lines = [];
-  lines.push('# EU AI Act — Annex IV Technical Documentation');
+  lines.push('# EU AI Act - Annex IV Technical Documentation');
   lines.push('');
   lines.push(`_Generated by kolm.ai ${REG_EU_AIACT_DOCS_VERSION} at ${generated_at}_`);
   lines.push('');
@@ -388,15 +388,15 @@ export function generateTechnicalDocs(opts = {}) {
   };
 }
 
-// _markdownToHtml(md) — minimal markdown -> HTML renderer suitable for the
+// _markdownToHtml(md) - minimal markdown -> HTML renderer suitable for the
 // regulator-portal paste workflow. We DO NOT pull in a full markdown parser
 // (would add a runtime dep); this handler covers the small subset our
 // emitter produces: headings, bullets, bold spans, and HTML comments
-// (which pass through verbatim — they MUST stay greppable).
+// (which pass through verbatim - they MUST stay greppable).
 function _markdownToHtml(md) {
   const lines = md.split('\n');
   const out = ['<!DOCTYPE html>', '<html><head><meta charset="utf-8">',
-    '<title>EU AI Act — Annex IV Technical Documentation</title>',
+    '<title>EU AI Act - Annex IV Technical Documentation</title>',
     '</head><body>'];
   let inList = false;
   for (const line of lines) {
@@ -413,7 +413,7 @@ function _markdownToHtml(md) {
       if (!inList) { out.push('<ul>'); inList = true; }
       out.push(`<li>${_inlineMd(line.replace(/^- /, ''))}</li>`);
     } else if (/^<!-- /.test(line)) {
-      // Pass HTML comments through verbatim — MISSING markers MUST stay
+      // Pass HTML comments through verbatim - MISSING markers MUST stay
       // greppable in the rendered output too.
       out.push(line);
     } else if (line.trim() === '') {

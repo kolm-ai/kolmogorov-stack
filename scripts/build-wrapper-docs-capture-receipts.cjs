@@ -113,7 +113,7 @@ ${body}
 
 <footer class="ks-foot">
   <div class="ks-wrap">
-    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></p>
   </div>
 </footer>
 

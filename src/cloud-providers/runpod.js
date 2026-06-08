@@ -26,12 +26,12 @@
 //   1. RunPod's GraphQL schema changes without notice. Every mutation is
 //      executed via `_callRunPodAPI(query, variables)` and wrapped in try/
 //      catch so a schema drift returns a structured error envelope with
-//      the mutation name + docs URL — never a stack trace at the call site.
+//      the mutation name + docs URL - never a stack trace at the call site.
 //   2. The exact mutation strings for `podCreate`, `podStop`, `endpointCreate`
 //      are marked TODO with their docs URL where the shape isn't pinned by
 //      a public spec. Callers can override mutations via the `mutations`
 //      option to the constructor for forward-compat.
-//   3. We do NOT upload model weights to RunPod object storage here — the
+//   3. We do NOT upload model weights to RunPod object storage here - the
 //      caller is expected to either (a) bake the weights into the endpoint
 //      template image or (b) point `config.modelUrl` at an HTTPS-reachable
 //      .kolm artifact that the endpoint worker fetches at cold-start. This
@@ -47,7 +47,7 @@ const SERVERLESS_HOST = 'api.runpod.ai';
 const POLL_INTERVAL_MS = 2000;
 const DEFAULT_DOCS_URL = 'https://docs.runpod.io/api-reference/graphql';
 
-// Known GPU SKU labels. We do NOT enforce membership at the API call site —
+// Known GPU SKU labels. We do NOT enforce membership at the API call site - 
 // RunPod's GPU catalog grows. The list is exported so the Studio UI can show
 // a sensible default picker, and we map common short names to RunPod's IDs.
 export const RUNPOD_GPU_CATALOG = Object.freeze({
@@ -333,7 +333,7 @@ export class RunPodProvider {
         err.code = 'artifact_not_found'; throw err;
       }
       const stat = fs.statSync(artifactPath); size = stat.size;
-      // For benchmark we never inline — too big. Caller must publish to ObjectStore
+      // For benchmark we never inline - too big. Caller must publish to ObjectStore
       // and pass artifactUrl, or we just send the sha + path so the worker can
       // refuse politely.
       const buf = fs.readFileSync(artifactPath);

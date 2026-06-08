@@ -1,0 +1,17 @@
+{
+  "name": "text-classifier",
+  "title": "Text Classifier",
+  "icon": "tag",
+  "description": "Multi-class text labeling with a configurable label set. Distills a calibrated classifier whose confidence is trustworthy enough to drive an auto-route gate.",
+  "default_describe": "Classify the input into exactly one of the provided labels. Output JSON: {label, confidence}. Confidence must reflect actual reliability; below 0.7, return label 'uncertain' for human review.",
+  "sample_csv_url": "/samples/text-classifier.csv",
+  "recommended_student": "qwen2.5-7b-instruct",
+  "recommended_target": "gguf-q4km",
+  "recommended_gate": 0.88,
+  "expected_kscore": 0.90,
+  "eval_criteria": ["label_accuracy", "calibration", "uncertain_when_low_conf", "schema_match"],
+  "input_col": "text",
+  "output_col": "label_json",
+  "use_cases": ["intent routing", "spam vs ham", "topic tagging", "policy classification"],
+  "minimum_rows": 50
+}

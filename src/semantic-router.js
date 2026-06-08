@@ -1,10 +1,10 @@
-// W921 — semantic-router: cost/latency/quality-aware request routing.
+// W921 - semantic-router: cost/latency/quality-aware request routing.
 //
 // Ships the TRAINING-FREE Avengers-Pro cluster/KNN router family (DAI'25;
 // justified by LLMRouterBench 2026 which found clustering routers match
 // trained neural routers and that embedder quality is negligible). It picks,
 // per request, the cheapest model in the namespace chain that still clears a
-// quality bar — instead of always firing the static primary or relying on a
+// quality bar - instead of always firing the static primary or relying on a
 // caller-supplied confidence number kolm never computes.
 //
 // Recipe (Avengers-Pro):
@@ -18,13 +18,13 @@
 // Safety contract (the whole point of shipping this carefully):
 //   - default OFF per-namespace (route_mode:'static'); caller opts in.
 //   - cold-start guard: a cluster with < min_samples outcomes reverts to the
-//     static chain and stamps cold_start:true — NEVER silently downgrades a
+//     static chain and stamps cold_start:true - NEVER silently downgrades a
 //     hard prompt on no data.
 //   - quality floor: a cheaper model whose measured cluster accuracy is below
 //     namespace.min_quality (default 0.8) is never placed first.
 //   - caller x-kolm-confidence still wins (back-compat).
 //   - cost_usd of 0/missing is treated as UNKNOWN (skip the cost term) rather
-//     than "free" — guards the w920 estimator-returns-0 bug from corrupting
+//     than "free" - guards the w920 estimator-returns-0 bug from corrupting
 //     the ordering.
 //   - reorder/trim ONLY: dispatchWithFallback fallback semantics are
 //     unchanged and the chain is never emptied.
@@ -56,12 +56,12 @@ const DEFAULT_MIN_QUALITY = 0.8;
 const DEFAULT_MIN_SAMPLES = 20;
 
 // --------------------------------------------------------------------------
-// MULTI-SIGNAL ROUTING (NEXT-5) — opt-in, additive.
+// MULTI-SIGNAL ROUTING (NEXT-5) - opt-in, additive.
 //
 // Frontier routers blend MORE than the legacy alpha cost<->quality term.
 // Web-confirmed (2026): RouteLLM (ICLR'25, similarity-weighted Elo + cost
-// threshold), Avengers-Pro (DAI'25, arXiv 2508.12631 — embed -> cluster ->
-// performance-efficiency score), and RouterWise (arXiv 2604.10907, 2026-04 —
+// threshold), Avengers-Pro (DAI'25, arXiv 2508.12631 - embed -> cluster ->
+// performance-efficiency score), and RouterWise (arXiv 2604.10907, 2026-04 - 
 // proves per-model latency is NOT fixed but a function of request LOAD on the
 // shared GPU pool, making load a first-class routing determinant). NEXT-5 in
 // KOLM_W921_FRONTIER_REVIEW.md asks to fuse multiple signals into one weighted
@@ -81,7 +81,7 @@ const DEFAULT_MIN_SAMPLES = 20;
 // opts.route_weights). A signal whose weight is 0/absent is dropped entirely.
 //
 // HARD INVARIANT: when route_weights is absent (null/undefined/empty/all-zero)
-// scoreRoute's behavior is BYTE-IDENTICAL to the legacy alpha/beta path — the
+// scoreRoute's behavior is BYTE-IDENTICAL to the legacy alpha/beta path - the
 // multi-signal branch is never entered. This preserves the cold-start/static
 // fallback and every existing test.
 // --------------------------------------------------------------------------
@@ -95,7 +95,7 @@ export const ROUTE_SIGNALS = Object.freeze(['quality', 'cost', 'latency', 'load'
 const _LOWER_IS_BETTER = Object.freeze(new Set(['cost', 'latency', 'load']));
 
 // A neutral default weight set used ONLY for documentation / introspection.
-// Never applied implicitly — multi-signal mode requires explicit route_weights.
+// Never applied implicitly - multi-signal mode requires explicit route_weights.
 export const DEFAULT_ROUTE_WEIGHTS = Object.freeze({
   quality: 1.0,
   cost: 1.0,
@@ -135,10 +135,10 @@ function _minMaxNorm(values) {
 }
 
 // --------------------------------------------------------------------------
-// normalizeRouteWeights — parse a caller route_weights object into a clean
+// normalizeRouteWeights - parse a caller route_weights object into a clean
 // map of {signal -> non-negative finite weight} restricted to ROUTE_SIGNALS,
 // dropping zero/negative/NaN/unknown keys. Returns null when nothing usable
-// remains (so the caller falls back to the legacy alpha/beta path — the whole
+// remains (so the caller falls back to the legacy alpha/beta path - the whole
 // back-compat contract). Pure + deterministic (no clock / no global state).
 // --------------------------------------------------------------------------
 export function normalizeRouteWeights(weights) {
@@ -156,7 +156,7 @@ export function normalizeRouteWeights(weights) {
 }
 
 // --------------------------------------------------------------------------
-// blendSignals — the pure multi-signal weighted-blend core. Given per-candidate
+// blendSignals - the pure multi-signal weighted-blend core. Given per-candidate
 // ORIENTED-and-normalized signal values (each already in [0,1], higher better)
 // and a normalized weight map, returns the weighted score per candidate with
 // weights renormalized over ONLY the signals present for that candidate (so a
@@ -192,15 +192,15 @@ export function blendSignals(normedSignalsByKey, weights) {
 }
 
 // --------------------------------------------------------------------------
-// estimateModelCost — thin wrapper over cost-estimator.estimateCost using a
+// estimateModelCost - thin wrapper over cost-estimator.estimateCost using a
 // length-based token estimate BEFORE dispatch. Returns the USD cost or 0 when
 // the model is not in the price table (the caller MUST treat 0 as "unknown",
-// never "free" — see the cost guard in scoreRoute).
+// never "free" - see the cost guard in scoreRoute).
 // --------------------------------------------------------------------------
 export function estimateModelCost({ provider, model, est_input_tokens, est_output_tokens }) {
   const pin = Number.isFinite(Number(est_input_tokens)) ? Number(est_input_tokens) : 0;
   const pout = Number.isFinite(Number(est_output_tokens)) ? Number(est_output_tokens) : 0;
-  // estimateCost takes prompt_tokens/completion_tokens (not input/output) —
+  // estimateCost takes prompt_tokens/completion_tokens (not input/output) - 
   // map across the naming gap the live dispatch path also bridges.
   return estimateCost({
     provider,
@@ -211,7 +211,7 @@ export function estimateModelCost({ provider, model, est_input_tokens, est_outpu
 }
 
 // --------------------------------------------------------------------------
-// ClusterRouterStats — per-namespace k-means centroids + per-(cluster,model)
+// ClusterRouterStats - per-namespace k-means centroids + per-(cluster,model)
 // running outcome stats. Durable via snapshot()/restore() so the gateway can
 // persist it per namespace as JSON between process restarts.
 // --------------------------------------------------------------------------
@@ -259,7 +259,7 @@ export class ClusterRouterStats {
     return cell;
   }
 
-  // update — fold ONE observed outcome into the (cluster,model) cell.
+  // update - fold ONE observed outcome into the (cluster,model) cell.
   //   won:        boolean quality label (accepted / judged-correct). When
   //               null/undefined the outcome counts toward n but not wins
   //               (latency/cost still accumulate so the cost/latency terms
@@ -307,7 +307,7 @@ export class ClusterRouterStats {
     };
   }
 
-  // scoreModel — raw per-model aggregates for one cluster (or top-p window
+  // scoreModel - raw per-model aggregates for one cluster (or top-p window
   // if clusterId is an array). The normalized x is computed by scoreRoute
   // across the candidate set (min-max needs all candidates); here we return
   // the building blocks plus a self-normalized convenience x (accuracy as the
@@ -327,7 +327,7 @@ export class ClusterRouterStats {
     return { quality_norm, cost_norm, latency_norm, x, n: agg.n };
   }
 
-  // snapshot/restore — durable per-namespace JSON. Centroids + counts +
+  // snapshot/restore - durable per-namespace JSON. Centroids + counts +
   // flattened stats. Plain JSON (no Map) so it survives JSON.stringify.
   snapshot() {
     const stats = {};
@@ -381,7 +381,7 @@ function _clamp01(x) {
 }
 
 // --------------------------------------------------------------------------
-// reorderChainByScore — pure reorder/trim of a static chain by per-model
+// reorderChainByScore - pure reorder/trim of a static chain by per-model
 // score. NEVER empties the chain and never drops the only viable provider.
 //   scoresByModel: Record<modelKey, number> (higher = preferred).
 //   min_quality:   entries flagged below the floor (score === -Infinity, or a
@@ -411,7 +411,7 @@ export function reorderChainByScore(chain, scoresByModel, { min_quality = DEFAUL
   });
   const out = decorated.map((d) => d.entry);
   // Safety: never return empty (the input was non-empty so this holds), and
-  // never lose the only viable provider — we trim NOTHING here; trimming is a
+  // never lose the only viable provider - we trim NOTHING here; trimming is a
   // deliberate caller choice in scoreRoute via the rejected[] list. The
   // preserve_local_floor flag is honored by scoreRoute which decides what to
   // exclude; reorder itself only reorders, so the floor is structurally safe.
@@ -421,7 +421,7 @@ export function reorderChainByScore(chain, scoresByModel, { min_quality = DEFAUL
 }
 
 // --------------------------------------------------------------------------
-// scoreRoute — the entry point the gateway calls in dispatch stage 3.
+// scoreRoute - the entry point the gateway calls in dispatch stage 3.
 //
 // Returns a decision object with a reordered/trimmed ordered_chain plus the
 // non-signed receipt fields. Falls back to the static chain (cold_start:true)
@@ -448,7 +448,7 @@ export function scoreRoute({
   const topP = Number.isFinite(Number(opts.top_p)) ? Number(opts.top_p)
     : (Number.isFinite(Number(cfg.top_p)) ? Number(cfg.top_p) : DEFAULT_TOP_P);
 
-  // (NEXT-5) Multi-signal weighted blend — OPT-IN. Resolved from opts first,
+  // (NEXT-5) Multi-signal weighted blend - OPT-IN. Resolved from opts first,
   // then namespaceConfig.route_weights. normalizeRouteWeights returns null when
   // no usable (positive, finite) weight exists, in which case scoreRoute stays
   // BYTE-IDENTICAL to the legacy alpha/beta path below. This is the entire
@@ -492,7 +492,7 @@ export function scoreRoute({
     };
   };
 
-  // (5) Caller x-kolm-confidence still wins — reproduces today's
+  // (5) Caller x-kolm-confidence still wins - reproduces today's
   // pre_routed_to_fallback short-circuit. We do NOT second-guess an explicit
   // caller signal.
   if (callerConfidence != null && typeof callerConfidence === 'number') {
@@ -556,7 +556,7 @@ export function scoreRoute({
   const priceFn = typeof costFn === 'function' ? costFn : estimateModelCost;
 
   // similarity (NEXT-5): cosine of the prompt vector to the assigned cluster
-  // centroid — the Avengers-Pro/RouteLLM "embedding-similarity-to-cluster"
+  // centroid - the Avengers-Pro/RouteLLM "embedding-similarity-to-cluster"
   // signal. Per-candidate similarity is identical here (all candidates share
   // the same top cluster), so it acts as a confidence weight on this cluster's
   // learned stats rather than a per-model discriminator; it still varies the
@@ -608,14 +608,14 @@ export function scoreRoute({
   }
 
   // Cold-start guard: if NO candidate has min_samples outcomes in the window,
-  // we have no responsible basis to reorder — revert to the static chain.
+  // we have no responsible basis to reorder - revert to the static chain.
   const maxN = rows.reduce((m, r) => Math.max(m, r.n), 0);
   if (maxN < minSamples) {
     return buildStatic('cold_start_below_min_samples', { cluster_id: clusterId, n_samples: totalSamples });
   }
 
   // ------------------------------------------------------------------------
-  // (NEXT-5) MULTI-SIGNAL BRANCH — only when route_weights is present. Builds
+  // (NEXT-5) MULTI-SIGNAL BRANCH - only when route_weights is present. Builds
   // a per-candidate weighted blend over the requested signals; the quality
   // floor + reorder/trim safety + rejected[] machinery below the legacy path
   // are mirrored here so the safety contract is identical. When route_weights
@@ -729,7 +729,7 @@ export function scoreRoute({
 }
 
 // --------------------------------------------------------------------------
-// _scoreRouteMultiSignal — the NEXT-5 weighted-blend scorer. Pure given its
+// _scoreRouteMultiSignal - the NEXT-5 weighted-blend scorer. Pure given its
 // inputs (rows already carry every raw signal; no clock / RNG / global read).
 // Mirrors the legacy path's quality-floor + reorder/trim + rejected[] safety
 // EXACTLY so the multi-signal mode never violates a contract the legacy mode
@@ -745,7 +745,7 @@ export function scoreRoute({
 //   similarity: shared clusterSimilarity for every candidate (cluster-fit
 //               confidence; constant within the set => normalizes to itself).
 // A candidate missing a signal gets null for it (blendSignals renormalizes the
-// weights over only the present signals — never penalized into oblivion).
+// weights over only the present signals - never penalized into oblivion).
 // --------------------------------------------------------------------------
 function _scoreRouteMultiSignal({
   rows, routeWeights, clusterSimilarity, minQuality, alpha, beta,
@@ -848,7 +848,7 @@ function _scoreRouteMultiSignal({
   }
 
   const headScored = scored.find((s) => modelKey(s.provider, s.model) === headKey);
-  // The reported route_score is the BLENDED score (0..1) of the head — a
+  // The reported route_score is the BLENDED score (0..1) of the head - a
   // floored head would be negative, so clamp to the blended value for display.
   const route_score = headScored
     ? _clamp01(headScored.below_quality_floor ? headScored.blended_score : headScored.score)
@@ -869,7 +869,7 @@ function _scoreRouteMultiSignal({
     embedder: EMBEDDER_ID,
     cold_start: false,
     reason: 'multi_signal_reorder',
-    // Additive audit block — the kolm moat: a SIGNED, inspectable record of
+    // Additive audit block - the kolm moat: a SIGNED, inspectable record of
     // exactly which signals + weights produced the order.
     route_weights: { ...routeWeights },
     route_signals: signalsOut,
@@ -878,7 +878,7 @@ function _scoreRouteMultiSignal({
 }
 
 // --------------------------------------------------------------------------
-// buildRouterDecisionBlock — the non-signed receipt.router_decision block
+// buildRouterDecisionBlock - the non-signed receipt.router_decision block
 // (mirrors latency_breakdown). canonicalForSigning walks ALL_FIELDS only, so
 // attaching this is signature-neutral.
 // --------------------------------------------------------------------------
@@ -887,7 +887,7 @@ export function buildRouterDecisionBlock({ scored, alpha, beta = DEFAULT_BETA, c
   const isCold = cold_start == null ? !!s.cold_start : !!cold_start;
   // route_mode reflects HOW the order was decided: 'static' on cold-start,
   // 'semantic' when the multi-signal blend ran (reason === 'multi_signal_*'),
-  // else 'cost_quality' (the legacy alpha/beta path — unchanged for back-compat).
+  // else 'cost_quality' (the legacy alpha/beta path - unchanged for back-compat).
   let routeMode = 'cost_quality';
   if (isCold) routeMode = 'static';
   else if (typeof s.reason === 'string' && s.reason.startsWith('multi_signal')) routeMode = 'semantic';
@@ -905,7 +905,7 @@ export function buildRouterDecisionBlock({ scored, alpha, beta = DEFAULT_BETA, c
     cold_start: isCold,
     reason: s.reason || null,
   };
-  // ADDITIVE multi-signal audit fields — present ONLY when scoreRoute ran the
+  // ADDITIVE multi-signal audit fields - present ONLY when scoreRoute ran the
   // multi-signal branch (route_weights/route_signals set). Absent => the block
   // shape is byte-identical to the legacy block. This is the auditable edge:
   // the receipt records exactly which signals + weights produced the order.
@@ -918,7 +918,7 @@ export function buildRouterDecisionBlock({ scored, alpha, beta = DEFAULT_BETA, c
 }
 
 // --------------------------------------------------------------------------
-// trainClustersFromLake — offline mini-batch k-means over lake observation
+// trainClustersFromLake - offline mini-batch k-means over lake observation
 // rows. CLI-invokable (`kolm route train`). Embeds each row's prompt text
 // (prompt_redacted, falling back to request_hash) and clusters into k
 // centroids, then folds each row's outcome into per-(cluster,model) stats so
@@ -953,7 +953,7 @@ export async function trainClustersFromLake({ tenant, namespace, k = DEFAULT_K, 
 
   const kk = Math.max(1, Math.min(Math.trunc(Number(k) || DEFAULT_K), samples.length || 1));
   if (!samples.length) {
-    // Nothing to train on — return an untrained shell (assign -> -1, scoreRoute
+    // Nothing to train on - return an untrained shell (assign -> -1, scoreRoute
     // will cold-start). Never fabricate centroids.
     return new ClusterRouterStats({ k: kk });
   }
@@ -984,7 +984,7 @@ export async function trainClustersFromLake({ tenant, namespace, k = DEFAULT_K, 
 }
 
 // Deterministic mini-batch k-means (cosine on L2-normalized vectors, so the
-// centroid is the L2-normalized mean — spherical k-means). Seeded init picks
+// centroid is the L2-normalized mean - spherical k-means). Seeded init picks
 // the first k DISTINCT vectors so a fixed corpus yields fixed centroids
 // (important for the deterministic-assign unit test).
 function _kmeans(vectors, k, dim, maxIter = 25) {

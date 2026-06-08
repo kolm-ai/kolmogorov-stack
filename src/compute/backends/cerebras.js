@@ -1,4 +1,4 @@
-// cerebras — Cerebras Cloud Inference (CS-3 wafer-scale).
+// cerebras - Cerebras Cloud Inference (CS-3 wafer-scale).
 //
 // Cerebras Cloud Inference exposes an OpenAI-compatible /v1/chat/completions
 // endpoint at api.cerebras.ai. The standout feature is per-token latency:
@@ -18,7 +18,7 @@ const adapter = createOpenAICompatibleAdapter({
   docs: 'https://inference-docs.cerebras.ai/api-reference/chat-completions',
 });
 
-// Default base URL — only applied when none of the env vars are set. We do
+// Default base URL - only applied when none of the env vars are set. We do
 // this by overriding detect/run to fall back to api.cerebras.ai/v1 when the
 // API key is present but the base URL isn't.
 const CEREBRAS_DEFAULT_BASE = 'https://api.cerebras.ai/v1';

@@ -1,4 +1,4 @@
-// KOLM Data Engine — Confident-Learning / label-error detection (W921).
+// KOLM Data Engine - Confident-Learning / label-error detection (W921).
 //
 // The CURATE quality gate scores SURFACE FORM only (length, CoT leak, refusal,
 // PII) and the dedup gate kills near-duplicates. NEITHER asks the load-bearing
@@ -39,7 +39,7 @@
 //
 // Envelope contract: detectLabelErrors returns {ok, version:'label-error-v1', ...}
 // and NEVER throws across the public API. Degrades cleanly: no embeddings / no
-// teacher -> backend records the path that ran, ok:true. Pure JS, zero new deps —
+// teacher -> backend records the path that ran, ok:true. Pure JS, zero new deps - 
 // reuses src/embedding.js (the deterministic 256-d hash-bag embedder).
 
 import { embed as _embedText, cosine as _cosineVec } from './embedding.js';
@@ -94,7 +94,7 @@ function _softmax(sims, beta = 8) {
 
 // Build a stable cluster index map from whatever cluster field the pairs carry.
 // Pairs with no cluster id all share a single bucket (the detector then becomes
-// a no-op for off-diagonal since there is only one class — reported plainly).
+// a no-op for off-diagonal since there is only one class - reported plainly).
 function _clusterIndexMap(pairs, clusterField) {
   const map = new Map(); // cluster_id string -> dense index
   const idxOf = new Array(pairs.length);
@@ -109,7 +109,7 @@ function _clusterIndexMap(pairs, clusterField) {
 }
 
 // Mean-pool member OUTPUT embeddings into a unit centroid per cluster. Works on
-// any cluster id (real k-means slug or 3-gram-prefix bucket — coarser, but exact).
+// any cluster id (real k-means slug or 3-gram-prefix bucket - coarser, but exact).
 function _centroidsFromClusters(outputEmbeddings, clusterIdxOf, clusterCount) {
   const dim = outputEmbeddings.length ? outputEmbeddings[0].length : 0;
   const centroids = Array.from({ length: clusterCount }, () => new Array(dim).fill(0));
@@ -133,7 +133,7 @@ function _centroidsFromClusters(outputEmbeddings, clusterIdxOf, clusterCount) {
 // ── scoreOutputClusterProbs ───────────────────────────────────────────────────
 
 /**
- * scoreOutputClusterProbs(outputEmbeddings, centroids) — for each output embed,
+ * scoreOutputClusterProbs(outputEmbeddings, centroids) - for each output embed,
  * cosine to every cluster centroid, softmax to p̂(output in cluster j; x).
  * @param {number[][]} outputEmbeddings  N x d
  * @param {number[][]} centroids          K x d
@@ -151,7 +151,7 @@ export function scoreOutputClusterProbs(outputEmbeddings, centroids) {
 // ── confidentJointAgreement (Confident Learning core) ─────────────────────────
 
 /**
- * confidentJointAgreement — Confident-Learning confident-joint over the
+ * confidentJointAgreement - Confident-Learning confident-joint over the
  * (input-cluster -> output-cluster) agreement. Per-cluster self-confidence
  * threshold t_j = mean p̂(output in j) over pairs whose INPUT is in cluster j.
  * A pair is a confident off-diagonal label-error candidate when its output's
@@ -262,7 +262,7 @@ function _reflectionToScore(verdict) {
 }
 
 /**
- * bsDetectorConfidence — CLEAR/BSDetector confidence C = beta*O + (1-beta)*S.
+ * bsDetectorConfidence - CLEAR/BSDetector confidence C = beta*O + (1-beta)*S.
  *   O = mean over k samples of (alpha*s_i + (1-alpha)*r_i)
  *   S in {0,0.5,1} from a self-reflection grade (default 0.5 if no grader)
  * The teacher caller is fully injectable so this is unit-testable with stubs and
@@ -320,7 +320,7 @@ export async function bsDetectorConfidence({ input, output, sample, reflect, alp
 // ── routeErrorsToReview (best-effort enqueue bridge) ──────────────────────────
 
 /**
- * routeErrorsToReview — materialize each flagged pair as a reviewable event so
+ * routeErrorsToReview - materialize each flagged pair as a reviewable event so
  * the existing human review queue can surface it (closing the F6.7 hook). The
  * event-store + label-queue modules are injectable so this is testable in
  * isolation and never hard-requires them; missing modules degrade to a recorded
@@ -388,7 +388,7 @@ export async function routeErrorsToReview({ flaggedPairs, tenant, namespace, met
 // ── detectLabelErrors (headline orchestrator) ─────────────────────────────────
 
 /**
- * detectLabelErrors — orchestrates the offline Confident-Learning detector (and
+ * detectLabelErrors - orchestrates the offline Confident-Learning detector (and
  * the CLEAR/BSDetector teacher path when a sampler is supplied). FLAGS by
  * default; never drops. Returns a well-formed envelope and never throws.
  *

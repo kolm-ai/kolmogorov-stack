@@ -1,4 +1,4 @@
-// W287 — WASM runtime target for .kolm artifacts.
+// W287 - WASM runtime target for .kolm artifacts.
 //
 // A .kolm with manifest.runtime_target='wasm' ships a `target.wasm` zip
 // entry that is a wasm32-wasi module exposing _start as its entrypoint.
@@ -13,10 +13,10 @@
 // stdout back as a JSON line.
 //
 // Errors:
-//   KOLM_E_TARGET_MISSING       — bundle has no target.wasm entry
-//   KOLM_E_WASM_INSTANTIATE     — the wasm bytes could not be compiled
-//   KOLM_E_WASM_RUNTIME         — wasi execution threw or exited non-zero
-//   KOLM_E_RECIPE_TIMEOUT       — wasi run exceeded the per-call timeout
+//   KOLM_E_TARGET_MISSING - bundle has no target.wasm entry
+//   KOLM_E_WASM_INSTANTIATE - the wasm bytes could not be compiled
+//   KOLM_E_WASM_RUNTIME - wasi execution threw or exited non-zero
+//   KOLM_E_RECIPE_TIMEOUT - wasi run exceeded the per-call timeout
 
 import { WASI } from 'node:wasi';
 import crypto from 'node:crypto';

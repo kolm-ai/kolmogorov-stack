@@ -1,6 +1,6 @@
 // src/serve-config.js
 //
-// W921 Run / Serve & Deploy — the deterministic SERVE-CONFIG picker.
+// W921 Run / Serve & Deploy - the deterministic SERVE-CONFIG picker.
 //
 // One pure module that, given (a hardware profile + a model/artifact descriptor
 // + a workload hint), chooses the serving knobs that make a kolm artifact run at
@@ -45,12 +45,12 @@
 //           llamacpp, reason, version }
 //
 // Design rules honored throughout:
-//   * Deterministic — no wall-clock reads, no Math.random; the only host probe
+//   * Deterministic - no wall-clock reads, no Math.random; the only host probe
 //     is the caller-supplied `hardware` object (never read implicitly).
-//   * Honest gates — an impossible (dtype, compute-capability) triple returns
+//   * Honest gates - an impossible (dtype, compute-capability) triple returns
 //     supported:false + gate.blocked + a non-empty fallback_chain rather than a
 //     config the runtime would reject or silently degrade.
-//   * Additive — this is a NEW module; it imports nothing that mutates existing
+//   * Additive - this is a NEW module; it imports nothing that mutates existing
 //     behavior and changes no existing default.
 //
 // Sources (cited inline at each gate): vLLM quantization + speculative_config +
@@ -262,7 +262,7 @@ export function vllmQuantizationString(kernel) {
 }
 
 // Cited per-kernel speedup estimates vs the naive dequant path (NOT measured
-// here — these are published references the passport surfaces as "est"). The
+// here - these are published references the passport surfaces as "est"). The
 // probe upgrades them to measured_speedup_x.
 const KERNEL_SPEEDUP_EST = Object.freeze({
   awq_marlin: { x: 10.9, basis: 'jarvislabs H200 Qwen2.5-32B awq 68->741 tok/s' },
@@ -314,7 +314,7 @@ export function resolveServingKernel(quantDescriptor, computeCapability, opts = 
   });
 
   const method = _lower(d.method);
-  // Unquantized / unknown — no kernel string; vLLM uses bf16/fp16 path.
+  // Unquantized / unknown - no kernel string; vLLM uses bf16/fp16 path.
   if (!method) {
     return result({ kernel: 'none', gate: { reason: 'no quant method on artifact; serving unquantized', blocked: false } });
   }
@@ -348,7 +348,7 @@ export function resolveServingKernel(quantDescriptor, computeCapability, opts = 
 
   // ---- compressed-tensors ----
   if (method === 'compressed-tensors') {
-    // W4A8-INT silently runs W4A16 on current vLLM (issue #38064) — warn, don't over-promise.
+    // W4A8-INT silently runs W4A16 on current vLLM (issue #38064) - warn, don't over-promise.
     const actInt8 = _lower(d.activation_dtype) === 'int8';
     return result({
       kernel: 'compressed-tensors',
@@ -403,7 +403,7 @@ export function resolveServingKernel(quantDescriptor, computeCapability, opts = 
       });
     }
 
-    // W4A16 — the common case. Marlin (sm_80+) or Machete (Hopper).
+    // W4A16 - the common case. Marlin (sm_80+) or Machete (Hopper).
     if (bits === 4 && marlinGroupOk && cap.marlin_w4a16) {
       if (cap.machete_w4a16 && preferMachete && !isAwq) {
         // Machete is the W4A16 winner on Hopper for GPTQ-shape checkpoints.
@@ -439,7 +439,7 @@ export function resolveServingKernel(quantDescriptor, computeCapability, opts = 
     });
   }
 
-  // Unknown method — pass through as the raw string (vLLM auto-detect).
+  // Unknown method - pass through as the raw string (vLLM auto-detect).
   return result({ kernel: method, vllm_quantization: vllmQuantizationString(method), gate: { reason: `unrecognized method ${method}; passing through`, blocked: false } });
 }
 
@@ -480,7 +480,7 @@ export function servingKernelPassportEntry({ resolved, compute_capability, measu
 // blow-up. Eviction presses (StreamingLLM/SnapKV/H2O/PyramidKV) run on the
 // transformers engine via NVIDIA kvpress; KIVI is the quant axis (transformers
 // QuantizedCache and vLLM kv_cache_dtype). vLLM/PagedAttention can ONLY honor
-// the quant axis + sliding window, never pluggable eviction — the dispatcher is
+// the quant axis + sliding window, never pluggable eviction - the dispatcher is
 // explicit about runtime_can_enforce. Refs:
 //   StreamingLLM arXiv:2309.17453   H2O arXiv:2306.14048
 //   SnapKV arXiv:2404.14469         PyramidKV arXiv:2406.02069
@@ -598,7 +598,7 @@ export function selectKvCachePolicy({
   if (_isFiniteNumber(residual_length)) params.residual_length = residual_length;
   if (spec.nbits != null && params.nbits == null) params.nbits = spec.nbits;
 
-  // Param validation — reject impossible values rather than ship a broken config.
+  // Param validation - reject impossible values rather than ship a broken config.
   if (params.budget != null && (params.budget <= 0 || params.budget > 1)) {
     return Object.freeze({
       policy, kind: spec.kind, params,
@@ -686,7 +686,7 @@ export function emitKvPolicyVllmConfig(policy, kvCacheDtype = 'auto') {
     out.kv_cache_dtype = kvCacheDtype === 'auto' ? 'fp8' : kvCacheDtype;
     out.note = `${p} requested; vLLM enforces the quant axis via kv_cache_dtype=${out.kv_cache_dtype} (2-bit eviction not a vLLM KV dtype)`;
   } else if (kind === 'eviction' || kind === 'compress') {
-    out.note = `${p} is a transformers-engine eviction policy; vLLM (PagedAttention) cannot enforce it — emit on the transformers serve path`;
+    out.note = `${p} is a transformers-engine eviction policy; vLLM (PagedAttention) cannot enforce it - emit on the transformers serve path`;
   }
   return out;
 }

@@ -1,6 +1,6 @@
 // src/export-gguf.js
 //
-// S-1 — Generic GGUF export chain for ANY artifact (not just Trinity).
+// S-1 - Generic GGUF export chain for ANY artifact (not just Trinity).
 //
 // Pipeline:
 //   1. Locate llama.cpp binaries (convert_hf_to_gguf.py + llama-quantize +
@@ -13,7 +13,7 @@
 //   5. Embed kolm metadata: general.name, general.quantized_by='kolm-forge',
 //      kolm.kscore, kolm.artifact_hash, llm.context_length.
 //   6. Split files into shards if the result is >50GB (sharded GGUF format).
-//   7. Coherence test — load via llama-cli, generate 100 tokens against a
+//   7. Coherence test - load via llama-cli, generate 100 tokens against a
 //      smoke prompt, parse output (non-empty + no obvious garbage).
 //   8. Compute quality_delta vs FP16 baseline if the artifact passport
 //      carries a `baseline_metric` field.
@@ -40,7 +40,7 @@ import path from 'node:path';
 export const GGUF_EXPORT_VERSION = 'export-gguf-v1';
 
 // Every quantization level the chain accepts. Maps 1:1 to the llama-quantize
-// argument values (case-insensitive — we upper-case before spawn).
+// argument values (case-insensitive - we upper-case before spawn).
 export const QUANT_LEVELS = Object.freeze([
   // K-quants
   'Q2_K', 'Q3_K_S', 'Q3_K_M', 'Q3_K_L',
@@ -82,7 +82,7 @@ const COHERENCE_TOKENS = 100;
 
 // Locate convert_hf_to_gguf.py (the HF-to-GGUF converter). Returns absolute
 // path or null. The script comes with a llama.cpp checkout, NOT with a built
-// binary — so we look in source directories + env hints.
+// binary - so we look in source directories + env hints.
 export function locateConvertScript() {
   const env = process.env.LLAMA_CPP_CONVERT || process.env.KOLM_LLAMA_CONVERT;
   if (env && fs.existsSync(env)) return env;
@@ -174,8 +174,8 @@ export function probeGgufToolchain() {
   if (!convert) missing.push('convert_hf_to_gguf.py');
   if (!quantize) missing.push('llama-quantize');
   if (!cli) missing.push('llama-cli');
-  // imatrix only required for IQ quants — caller checks
-  // split only required for >50GB — caller checks
+  // imatrix only required for IQ quants - caller checks
+  // split only required for >50GB - caller checks
   const hint = missing.length
     ? [
       'Install llama.cpp toolchain:',
@@ -214,7 +214,7 @@ function _runCmd(bin, args, opts = {}) {
   };
 }
 
-// Step 2 — Convert HF dir to F16 GGUF. Returns { ok, gguf_path, wall_ms,
+// Step 2 - Convert HF dir to F16 GGUF. Returns { ok, gguf_path, wall_ms,
 // stderr }. The caller decides whether the resulting f16 is the final output
 // or an intermediate for quantize.
 export function convertHfToGguf({ hfDir, outFile, dtype = 'f16', convertScript = null }) {
@@ -243,7 +243,7 @@ export function convertHfToGguf({ hfDir, outFile, dtype = 'f16', convertScript =
   return { ok: true, gguf_path: outFile, wall_ms: r.wall_ms };
 }
 
-// Step 3 — Build importance matrix. CORPUS_PATH must be a text file (one
+// Step 3 - Build importance matrix. CORPUS_PATH must be a text file (one
 // example per line); we accept jsonl + auto-extract the user-visible field.
 export function buildImatrix({ ggufBase, corpusPath, outFile, chunks = 200, ngl = 99, imatrixBin = null }) {
   const bin = imatrixBin || locateBinary('llama-imatrix');
@@ -293,7 +293,7 @@ export function buildImatrix({ ggufBase, corpusPath, outFile, chunks = 200, ngl 
   return { ok: true, imatrix_path: outFile, wall_ms: r.wall_ms };
 }
 
-// Step 4 — Quantize the F16 base to a target level.
+// Step 4 - Quantize the F16 base to a target level.
 export function quantize({ ggufBase, outFile, quant, imatrixPath = null, quantizeBin = null, extraMetadata = {} }) {
   const bin = quantizeBin || locateBinary('llama-quantize');
   if (!bin) {
@@ -310,7 +310,7 @@ export function quantize({ ggufBase, outFile, quant, imatrixPath = null, quantiz
     return { ok: false, error: `imatrix_required_for_${q}`, hint: 'build an imatrix with buildImatrix() first' };
   }
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  // Step 5 — embed metadata kv-overrides. llama-quantize accepts repeated
+  // Step 5 - embed metadata kv-overrides. llama-quantize accepts repeated
   // --override-kv KEY=type:value flags. We forward provenance fields the
   // forge knows about so a downstream loader can read them.
   const overrides = [];
@@ -340,7 +340,7 @@ export function quantize({ ggufBase, outFile, quant, imatrixPath = null, quantiz
   return { ok: true, gguf_path: outFile, wall_ms: r.wall_ms, size_bytes: fs.statSync(outFile).size };
 }
 
-// Step 6 — Split a >SHARD_THRESHOLD GGUF into shards. Returns { ok, shards:[]
+// Step 6 - Split a >SHARD_THRESHOLD GGUF into shards. Returns { ok, shards:[]
 // (absolute paths) } or { ok:false } if no split tool present. If the file is
 // below the threshold we return a single-element shards list with the
 // original path (so the caller treats single-file and multi-shard outputs
@@ -372,7 +372,7 @@ export function maybeSplit({ ggufPath, splitBin = null, thresholdBytes = SHARD_T
   return { ok: true, shards, split: true, size_bytes: stat.size };
 }
 
-// Step 7 — Coherence test. Run llama-cli with a small prompt + 100 token
+// Step 7 - Coherence test. Run llama-cli with a small prompt + 100 token
 // budget. Parse the output and return a verdict + the raw response.
 export function coherenceTest({ ggufPath, prompt = COHERENCE_PROMPT, maxTokens = COHERENCE_TOKENS, cliBin = null, timeoutMs = 120_000 }) {
   const bin = cliBin || locateBinary('llama-cli');
@@ -407,13 +407,13 @@ export function coherenceTest({ ggufPath, prompt = COHERENCE_PROMPT, maxTokens =
   }
   const out = (r.stdout || '').trim();
   // Parse: non-empty + at least some alphabetic characters + not a wall of
-  // repeated single tokens. We do NOT score quality here — that's the
+  // repeated single tokens. We do NOT score quality here - that's the
   // measureQuality() helper below.
   const hasText = /[A-Za-z]/.test(out);
   const tokens = out.split(/\s+/).filter(Boolean);
   const uniqueRatio = tokens.length ? new Set(tokens).size / tokens.length : 0;
   const looksGarbage = !hasText || (tokens.length > 8 && uniqueRatio < 0.15);
-  // Rough tok/s — llama.cpp prints a perf summary on stderr; we'll honor
+  // Rough tok/s - llama.cpp prints a perf summary on stderr; we'll honor
   // either source if available, otherwise compute from wall time.
   let tok_s = null;
   const perfMatch = (r.stderr || '').match(/eval time\s*=\s*([\d.]+)\s*ms\s*\/\s*(\d+)\s*runs/);
@@ -436,12 +436,12 @@ export function coherenceTest({ ggufPath, prompt = COHERENCE_PROMPT, maxTokens =
   };
 }
 
-// Step 8 — Quality delta vs FP16 baseline. Returns null when the artifact
+// Step 8 - Quality delta vs FP16 baseline. Returns null when the artifact
 // passport carries no baseline metric to compare against. Otherwise returns
 // (quant_metric - baseline_metric). The caller decides whether negative is
 // "worse" (typical for accuracy) or "better" (latency).
 //
-// This is a placeholder hook — the actual eval logic lives in
+// This is a placeholder hook - the actual eval logic lives in
 // scripts/benchmark.py / src/benchmark-evidence.js. exportGguf() invokes it
 // only if {artifact.passport.baseline_metric, artifact.eval_runner} are both
 // supplied (the caller must wire the eval). For the in-process path we just
@@ -469,7 +469,7 @@ export function computeQualityDelta({ baselineMetric, quantMetric }) {
  * @param {string} args.outputPath   - Final .gguf destination
  * @param {string} args.imatrixSource- Path to corpus (jsonl/txt) for IQ quants
  * @param {string} args.ggufBase     - Optional: skip conversion, use this F16 base
- * @param {boolean} args.dryRun      - If true, plan only — no spawns
+ * @param {boolean} args.dryRun      - If true, plan only - no spawns
  * @param {boolean} args.skipCoherence - If true, skip step 7
  * @returns {Promise<object>} { ok, steps, runtime_passport, output_path }
  */
@@ -605,7 +605,7 @@ export async function exportGguf({
   // ----- Step 6: shard if >50GB -----
   const split = maybeSplit({ ggufPath: finalPath, splitBin: probe.components.split });
   steps.split = split;
-  // Note: split.ok=false is non-fatal if the file is below the threshold —
+  // Note: split.ok=false is non-fatal if the file is below the threshold - 
   // we never reach the split branch in that case. If split was attempted and
   // failed for a too-large file, we surface but do NOT abort (the unsharded
   // file is still usable, just unwieldy).

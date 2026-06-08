@@ -1,0 +1,17 @@
+{
+  "name": "data-analyst",
+  "title": "Data Analyst",
+  "icon": "chart",
+  "description": "Translate natural-language analytics questions into SQL or Python plus a one-line interpretation. Distills an analyst that admits when a question needs more data.",
+  "default_describe": "Translate the question into SQL (default) or Python. Emit the query and a one-line interpretation of what it computes. Never invent table names, column names, or join keys. If the question cannot be answered with the given schema, say so explicitly.",
+  "sample_csv_url": "/samples/data-analyst.csv",
+  "recommended_student": "qwen2.5-7b-instruct",
+  "recommended_target": "gguf-q4km",
+  "recommended_gate": 0.86,
+  "expected_kscore": 0.88,
+  "eval_criteria": ["query_validity", "schema_grounded", "no_inventions", "interpretation_correct"],
+  "input_col": "question_with_schema",
+  "output_col": "query_and_interpretation",
+  "use_cases": ["ad-hoc analytics", "BI assistant", "dashboard query gen", "data exploration"],
+  "minimum_rows": 50
+}

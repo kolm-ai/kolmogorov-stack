@@ -1,6 +1,6 @@
 // src/tenant-holdout.js
 //
-// Wave 165 (N+5) — tenant shadow corpus. The eval-credibility ladder Wave
+// Wave 165 (N+5) - tenant shadow corpus. The eval-credibility ladder Wave
 // 144 Doc 2 §7 named five tiers; N+5 is the layer ABOVE external + adversarial
 // (W164 N+3/N+4):
 //
@@ -16,7 +16,7 @@
 // can replay), and unlike external holdouts (shipped under repo root so
 // every verifier can re-anchor), the shadow corpus is uploaded once to the
 // tenant's own server storage and the .kolm artifact records ONLY the
-// {tenant_id, corpus_id, corpus_sha256, accuracy} — never the corpus rows
+// {tenant_id, corpus_id, corpus_sha256, accuracy} - never the corpus rows
 // themselves.
 //
 // Why this matters: HIPAA-covered tenants, banking BAA holders, and any
@@ -249,7 +249,7 @@ export function validateTenantShadowBlock(block) {
   const { hash: declared, ...rest } = block;
   const recomputed = sha256(canonicalJson(rest));
   if (declared !== recomputed) {
-    throw new Error(`tenant-shadow: block hash drift — declared ${declared}, recomputed ${recomputed}`);
+    throw new Error(`tenant-shadow: block hash drift - declared ${declared}, recomputed ${recomputed}`);
   }
   return block;
 }

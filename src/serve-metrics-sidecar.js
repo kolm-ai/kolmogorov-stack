@@ -1,18 +1,18 @@
-// R-3 — kolm serve metrics sidecar.
+// R-3 - kolm serve metrics sidecar.
 //
 // Thin /metrics endpoint that surfaces basic counters parsed from the runtime
 // child process's stdout/stderr. llama-server, vLLM, and ollama all log a line
 // per completion that we can grep for request count + token throughput.
 //
-// We DO NOT proxy /v1/chat/completions — the runtime handles that natively
+// We DO NOT proxy /v1/chat/completions - the runtime handles that natively
 // (llama.cpp's --server, vLLM's OpenAI-compat). The sidecar runs on a side
 // port (default: runtime_port + 1) and just answers /metrics + /health.
 //
 // Counters surfaced:
-//   request_count   — total completion requests seen in the log stream
-//   latency_p50_ms  — median wall-clock latency across the rolling window
-//   tok_s_p50       — median tokens/sec across the rolling window
-//   memory_mb       — RSS of the runtime PID (best-effort; 0 if PID unknown)
+//   request_count - total completion requests seen in the log stream
+//   latency_p50_ms - median wall-clock latency across the rolling window
+//   tok_s_p50 - median tokens/sec across the rolling window
+//   memory_mb - RSS of the runtime PID (best-effort; 0 if PID unknown)
 //
 // Format: Prometheus text exposition. Anyone with a scrape config can wire
 // this in without a custom translator.
@@ -76,9 +76,9 @@ function readRssMb(pid) {
  * Start the metrics sidecar HTTP server.
  *
  * @param {Object} opts
- * @param {number} opts.port       — sidecar HTTP port
- * @param {number} [opts.runtimePid] — PID of the runtime child for /proc lookup
- * @param {string} [opts.runtime]  — runtime name for the metric label
+ * @param {number} opts.port - sidecar HTTP port
+ * @param {number} [opts.runtimePid] - PID of the runtime child for /proc lookup
+ * @param {string} [opts.runtime] - runtime name for the metric label
  * @returns {Object} { server, ingest(line), counters }
  *   counters is a live ref; ingest(line) updates it.
  */
@@ -144,7 +144,7 @@ export function startMetricsSidecar(opts = {}) {
       return;
     }
     res.writeHead(404, { 'content-type': 'text/plain' });
-    res.end('not found — try /metrics or /health\n');
+    res.end('not found - try /metrics or /health\n');
   });
   if (port) server.listen(port);
 

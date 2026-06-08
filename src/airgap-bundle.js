@@ -1,25 +1,25 @@
-// W869 T4 — `kolm bundle airgap` builder.
+// W869 T4 - `kolm bundle airgap` builder.
 //
 // Produces a single .tar.gz containing everything an air-gapped operator
 // needs to stand up the kolm stack with zero network egress:
 //
-//   cli/           — kolm CLI entry point
-//   src/           — runtime modules
-//   apps/          — Python workers (distill, eval, export, runtime, trainer)
-//   package.json   — pinned dependency manifest
+//   cli/ - kolm CLI entry point
+//   src/ - runtime modules
+//   apps/ - Python workers (distill, eval, export, runtime, trainer)
+//   package.json - pinned dependency manifest
 //   package-lock.json (when present)
-//   node_modules/  — installed production dependencies (omitted unless --with-node-modules)
-//   docs/          — offline doc mirror
-//   wheels/        — optional Python wheelhouse (--with-wheels)
-//   models/        — optional default model weights (--with-models, points at KOLM_MODELS_DIR)
-//   MANIFEST.json  — {created_at, git_sha?, sha256_tree, files[], options, version}
-//   BUNDLE-README.md — operator instructions, env matrix snippet, deploy checklist
+//   node_modules/ - installed production dependencies (omitted unless --with-node-modules)
+//   docs/ - offline doc mirror
+//   wheels/ - optional Python wheelhouse (--with-wheels)
+//   models/ - optional default model weights (--with-models, points at KOLM_MODELS_DIR)
+//   MANIFEST.json - {created_at, git_sha?, sha256_tree, files[], options, version}
+//   BUNDLE-README.md - operator instructions, env matrix snippet, deploy checklist
 //
 // Honest envelope. Every failure returns {ok:false, error, hint}.
 // Success returns {ok:true, path, sha256, size_bytes, file_count, manifest}.
 //
 // We use the `archiver` dep (already in package.json) for tar+gzip rather
-// than rolling our own — it's battle-tested for large trees and handles
+// than rolling our own - it's battle-tested for large trees and handles
 // long filenames + UTF-8 properly, which sneakernet.js's USTAR writer does
 // not. The format is identical to `tar -czf` so any POSIX `tar -xzf` on
 // the target host can extract it.
@@ -36,7 +36,7 @@ const __dirname = path.dirname(__filename);
 
 export const AIRGAP_BUNDLE_VERSION = 'w869-v1';
 
-// Tree exclusions — never include these in the tar regardless of root.
+// Tree exclusions - never include these in the tar regardless of root.
 // .git is huge and useless on a target host; .DS_Store is mac noise;
 // __pycache__ + .pyc are build droppings; *.test.js + tests/ are dev-only.
 const ALWAYS_EXCLUDE = new Set([
@@ -60,11 +60,11 @@ const ALWAYS_EXCLUDE = new Set([
   'coverage',
   'htmlcov',
   '.tox',
-  'target',          // rust/maven build output (kept out — see --with-... flags for opt-in)
+  'target',          // rust/maven build output (kept out - see --with-... flags for opt-in)
   'dist',            // generic build output
   'build',           // generic build output
-  '.kolm',           // user state — never bundle
-  '.env',            // secrets — never bundle
+  '.kolm',           // user state - never bundle
+  '.env',            // secrets - never bundle
   '.env.local',
   '.env.production',
   'logs',
@@ -168,11 +168,11 @@ function readmeBody({ created_at, git_sha, options, file_count, total_bytes }) {
     'Self-contained tarball for deploying kolm into a network-isolated environment.',
     '',
     '- **Created:** ' + created_at,
-    '- **Git SHA:** ' + (git_sha || '(unknown — built outside a git checkout)'),
+    '- **Git SHA:** ' + (git_sha || '(unknown - built outside a git checkout)'),
     '- **Bundle version:** ' + AIRGAP_BUNDLE_VERSION,
     '- **Files:** ' + file_count,
     '- **Uncompressed payload:** ' + sizeMb + ' MB',
-    '- **node_modules included:** ' + (options.with_node_modules ? 'yes' : 'no — run `npm ci --omit=dev` on the target after extract'),
+    '- **node_modules included:** ' + (options.with_node_modules ? 'yes' : 'no - run `npm ci --omit=dev` on the target after extract'),
     '- **Python wheels included:** ' + (options.with_wheels ? 'yes (wheels/)' : 'no'),
     '- **Model weights included:** ' + (options.with_models ? 'yes (models/)' : 'no'),
     '',
@@ -231,11 +231,11 @@ function readmeBody({ created_at, git_sha, options, file_count, total_bytes }) {
     '',
     'By design, the following are NOT shipped:',
     '',
-    '- `.env` / secrets — supply via your secret manager',
-    '- `.git` history — not needed at runtime',
-    '- Test fixtures (`tests/`) — not needed at runtime',
-    '- User data (`~/.kolm`) — generated per-tenant on the target host',
-    '- TLS certificates — install via your reverse proxy (Nginx/Caddy)',
+    '- `.env` / secrets - supply via your secret manager',
+    '- `.git` history - not needed at runtime',
+    '- Test fixtures (`tests/`) - not needed at runtime',
+    '- User data (`~/.kolm`) - generated per-tenant on the target host',
+    '- TLS certificates - install via your reverse proxy (Nginx/Caddy)',
     '',
     'See `docs/self-hosted-deploy-complete.md` for the full env-var matrix,',
     'SSO/SAML/SCIM setup, Postgres setup, systemd unit, and runbook.',
@@ -279,7 +279,7 @@ function planContents(repoRoot, opts) {
     if (fs.existsSync(nm)) {
       includes.push({ rel: 'node_modules', abs: nm, kind: 'dir' });
     } else {
-      missing.push('node_modules (--with-node-modules requested, but directory missing — run `npm ci` first)');
+      missing.push('node_modules (--with-node-modules requested, but directory missing - run `npm ci` first)');
     }
   }
 
@@ -288,7 +288,7 @@ function planContents(repoRoot, opts) {
     if (fs.existsSync(wh)) {
       includes.push({ rel: 'wheels', abs: wh, kind: 'dir' });
     } else {
-      missing.push('wheels (--with-wheels requested, but directory missing — see docs/airgap-build.md for `pip wheel` build steps)');
+      missing.push('wheels (--with-wheels requested, but directory missing - see docs/airgap-build.md for `pip wheel` build steps)');
     }
   }
 
@@ -297,7 +297,7 @@ function planContents(repoRoot, opts) {
     if (fs.existsSync(modelsRoot)) {
       includes.push({ rel: 'models', abs: modelsRoot, kind: 'dir' });
     } else {
-      missing.push('models (--with-models requested, but ' + modelsRoot + ' missing — set --models-dir or KOLM_MODELS_DIR)');
+      missing.push('models (--with-models requested, but ' + modelsRoot + ' missing - set --models-dir or KOLM_MODELS_DIR)');
     }
   }
 
@@ -342,7 +342,7 @@ function buildManifest({ includes, repoRoot, opts, created_at, git_sha }) {
   };
 }
 
-// Public API. Synchronous Promise — the caller awaits the archiver close
+// Public API. Synchronous Promise - the caller awaits the archiver close
 // event. Defensive: caller controls dest_path; we never write to a path
 // that already exists unless opts.force is set.
 export async function buildAirgapBundle(opts = {}) {
@@ -354,7 +354,7 @@ export async function buildAirgapBundle(opts = {}) {
     return {
       ok: false,
       error: 'dest_path_required',
-      hint: 'pass {dest_path: "/path/to/kolm-airgap.tar.gz"} — must end in .tar.gz',
+      hint: 'pass {dest_path: "/path/to/kolm-airgap.tar.gz"} - must end in .tar.gz',
       version: AIRGAP_BUNDLE_VERSION,
     };
   }
@@ -362,7 +362,7 @@ export async function buildAirgapBundle(opts = {}) {
     return {
       ok: false,
       error: 'dest_path_extension',
-      hint: 'dest_path must end in .tar.gz or .tgz — got ' + path.basename(destPath),
+      hint: 'dest_path must end in .tar.gz or .tgz - got ' + path.basename(destPath),
       version: AIRGAP_BUNDLE_VERSION,
     };
   }
@@ -380,7 +380,7 @@ export async function buildAirgapBundle(opts = {}) {
       ok: false,
       error: 'repo_root_invalid',
       repo_root: repoRoot,
-      hint: 'repo_root must contain package.json — run `kolm bundle airgap` from the kolm checkout',
+      hint: 'repo_root must contain package.json - run `kolm bundle airgap` from the kolm checkout',
       version: AIRGAP_BUNDLE_VERSION,
     };
   }
@@ -413,7 +413,7 @@ export async function buildAirgapBundle(opts = {}) {
     return {
       ok: false,
       error: 'archiver_module_missing',
-      hint: 'run `npm install` in the repo root — archiver@^7 is a declared dep',
+      hint: 'run `npm install` in the repo root - archiver@^7 is a declared dep',
       version: AIRGAP_BUNDLE_VERSION,
     };
   }

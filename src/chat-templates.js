@@ -1,4 +1,4 @@
-// W234 — chat templates + Qwen Thinking Mode preset embedded in .kolm.
+// W234 - chat templates + Qwen Thinking Mode preset embedded in .kolm.
 //
 // A .kolm artifact carries a `chat_template` block in its manifest so the
 // runtime applies the right BOS/EOS/system/user/assistant markers without
@@ -20,21 +20,21 @@ import crypto from 'node:crypto';
 
 export const TEMPLATE_REGISTRY_VERSION = '1.0.0';
 
-// W713-3 — kolm-think template version constant. MUST agree byte-for-byte
+// W713-3 - kolm-think template version constant. MUST agree byte-for-byte
 // with apps/trainer/distill_cot.py KOLM_THINK_TEMPLATE_VERSION so a .kolm
 // artifact baked under one version is identified consistently on either side
 // of the JS/Python boundary. Bump on any change to wrapAssistantWithThinking()
 // output shape.
 export const KOLM_THINK_TEMPLATE_VERSION = 'w713-v1';
 
-// W713-3 — JS side of the kolm-think byte-exact contract. The Python helper
+// W713-3 - JS side of the kolm-think byte-exact contract. The Python helper
 // apps/trainer/distill_cot.format_capture_with_cot(mode='inline_think_tags')
 // MUST emit the same bytes for the same (assistantText, reasoningText) input.
-// Format: `<think>${reasoningText}</think>${assistantText}` — no whitespace,
+// Format: `<think>${reasoningText}</think>${assistantText}` - no whitespace,
 // no newlines inserted. The student learns to emit thinking before answer.
 // Honesty contract:
 //   - reasoningText == null / undefined / '' → returns assistantText unchanged
-//     (no empty <think></think> shell — that would teach the model a bad
+//     (no empty <think></think> shell - that would teach the model a bad
 //     pattern of always opening a thinking block even when it has nothing).
 //   - assistantText == null / undefined → coerced to '' (we never throw from
 //     a formatter on the training-data path).
@@ -161,7 +161,7 @@ export const TEMPLATES = Object.freeze({
     apply: (history) => history.map((m) => m.content).join('\n\n'),
   },
   'kolm-think': {
-    // W713-3 — chain-of-thought template. On assistant turns where the caller
+    // W713-3 - chain-of-thought template. On assistant turns where the caller
     // provides reasoning_text (per-message field), we wrap the content with
     // <think>...</think> using wrapAssistantWithThinking(). This is the
     // training-time template the kolm distill pipeline uses when CoT mode
@@ -196,7 +196,7 @@ export const TEMPLATES = Object.freeze({
       parts.push('<|im_start|>assistant\n');
       return parts.join('\n');
     },
-    // Inference-time helpers — strip the thinking envelope from the visible
+    // Inference-time helpers - strip the thinking envelope from the visible
     // answer, or extract just the thinking block for telemetry.
     extractAnswer: (text) => {
       const s = String(text || '');

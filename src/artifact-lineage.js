@@ -2,13 +2,13 @@
 //
 // Two manifest blocks the runtime + verifier care about:
 //
-//   capability — what the artifact NEEDS to run. Compared against the host's
+//   capability - what the artifact NEEDS to run. Compared against the host's
 //                device profile by src/device-capabilities.js#meetsRequirement
 //                at load time. Includes minimum VRAM, supported runtimes,
 //                required modalities, and (when applicable) the TEE
 //                attestation flavor the artifact insists on.
 //
-//   lineage    — where the artifact CAME FROM. A graph of pointers back to
+//   lineage - where the artifact CAME FROM. A graph of pointers back to
 //                the inputs that produced it: parent artifact (re-distill),
 //                source trace ids (workflow_capsule), team event head hash
 //                (folded team-learning corpus), federated round id (when the
@@ -159,7 +159,7 @@ const LINEAGE_FIELDS = new Set([
   'source', 'parent_artifact_hash', 'source_trace_ids', 'workflow_ir_hash',
   'team_event_head_hash', 'federated_round_id', 'teacher', 'student_base',
   'distillation_method', 'training_corpus_hash', 'compile_seed', 'notes',
-  // W921 — model-merge (multi-parent) lineage. All additive + omitted when
+  // W921 - model-merge (multi-parent) lineage. All additive + omitted when
   // empty so pre-W921 artifacts stay byte-identical under the W460 law.
   'parent_artifact_hashes', 'merge_method', 'merge_weights', 'merge_density',
   'source_adapter_hashes',
@@ -167,10 +167,10 @@ const LINEAGE_FIELDS = new Set([
 const VALID_SOURCES = new Set([
   'rule_synthesis', 'workflow_compile', 'distillation',
   'federated_aggregation', 'rebuild',
-  // W921 — a merged artifact is a first-class multi-parent node.
+  // W921 - a merged artifact is a first-class multi-parent node.
   'model_merge',
 ]);
-// W921 — frozen catalog of supported LoRA-adapter merge methods. Kept in sync
+// W921 - frozen catalog of supported LoRA-adapter merge methods. Kept in sync
 // with workers/distill/scripts/merge_adapters.py + src/model-merge.js so the
 // recorded merge_method can never drift from what the trainer actually ran.
 export const VALID_MERGE_METHODS = new Set([
@@ -253,7 +253,7 @@ export function buildLineage(input = {}) {
     out.notes = input.notes;
   }
 
-  // W921 — multi-parent merge fields. parent_artifact_hashes is the array
+  // W921 - multi-parent merge fields. parent_artifact_hashes is the array
   // analogue of parent_artifact_hash (the single-parent slot is KEPT for
   // back-compat). Each entry is a hex64 artifact cid. Omitted when empty so
   // the W460 byte-stability law holds for non-merge artifacts.
@@ -265,7 +265,7 @@ export function buildLineage(input = {}) {
       if (!HEX64_RE.test(h)) throw new Error(`parent_artifact_hashes entry must be hex64: ${h}`);
     }
     if (input.parent_artifact_hashes.length > 0) {
-      // Sort for canonical, content-addressed stability — order of inputs on
+      // Sort for canonical, content-addressed stability - order of inputs on
       // the CLI must not change the lineage hash.
       out.parent_artifact_hashes = [...input.parent_artifact_hashes].sort();
     }
@@ -326,7 +326,7 @@ export function buildLineage(input = {}) {
   if (out.source === 'federated_aggregation' && !out.federated_round_id) {
     throw new Error("source='federated_aggregation' requires federated_round_id");
   }
-  // W921 — a model_merge node MUST name >= 2 source parents and the method
+  // W921 - a model_merge node MUST name >= 2 source parents and the method
   // used, else the receipt cannot prove which adapters produced the weights
   // (the X04 'every number traces to a measurement' contract for merges).
   if (out.source === 'model_merge') {
@@ -374,7 +374,7 @@ export default {
 };
 
 // =============================================================================
-// W739 — Model Lineage Tracking: parent_cid chain + walk + perf comparison.
+// W739 - Model Lineage Tracking: parent_cid chain + walk + perf comparison.
 //
 // W707-W835 plan items W739-1..W739-4:
 //
@@ -392,7 +392,7 @@ export default {
 //           operators the data they need; the routing layer that uses it
 //           lands in W777. For W739 the chain + diff are the foundation.
 //
-//   W739-4  Model lineage tracking baked into the file format itself — the
+//   W739-4  Model lineage tracking baked into the file format itself - the
 //           hash chain anchored at parent_cid means a tamperer cannot rewrite
 //           history without invalidating every descendant's receipt.
 //
@@ -404,7 +404,7 @@ export const LINEAGE_VERSION = 'w739-v1';
 
 const PARENT_CID_RE = /^[0-9a-f]{64}$/;
 
-// W739-1 — set a parent_cid on a manifest. The cid MUST be sha256-hex
+// W739-1 - set a parent_cid on a manifest. The cid MUST be sha256-hex
 // (64 lowercase hex chars) OR explicitly null. Anything else throws so a
 // malformed lineage pointer is caught at build time, not at the first
 // `kolm lineage <cid>` walk on a deployed artifact.
@@ -428,7 +428,7 @@ export function setParentCid(manifest, parent_cid) {
   return { ...manifest, parent_cid };
 }
 
-// W739-1 — read a parent_cid off a manifest. Returns null when absent or
+// W739-1 - read a parent_cid off a manifest. Returns null when absent or
 // when the manifest carries the explicit null sentinel.
 export function getParentCid(manifest) {
   if (!manifest || typeof manifest !== 'object') return null;
@@ -438,7 +438,7 @@ export function getParentCid(manifest) {
   return v;
 }
 
-// W921 — set the multi-parent cid list on a manifest for a merged artifact.
+// W921 - set the multi-parent cid list on a manifest for a merged artifact.
 // Mirrors setParentCid byte-stability: an empty/absent array OMITS the slot so
 // non-merge artifacts stay byte-identical (W460). Each cid must be sha256-hex
 // (64 lowercase hex) or the call throws at build time, not at first walk.
@@ -467,7 +467,7 @@ export function setMergeParents(manifest, parentCids) {
   return { ...manifest, parent_cids: [...parentCids].sort() };
 }
 
-// W921 — read the multi-parent cid list off a manifest. Returns [] when absent.
+// W921 - read the multi-parent cid list off a manifest. Returns [] when absent.
 // Falls back to the single parent_cid (W739) so a merged-or-not manifest can be
 // walked uniformly.
 export function getMergeParents(manifest) {
@@ -481,7 +481,7 @@ export function getMergeParents(manifest) {
   return single ? [single] : [];
 }
 
-// W921 — fan-out lineage walk. Unlike walkLineage (single linear chain), this
+// W921 - fan-out lineage walk. Unlike walkLineage (single linear chain), this
 // follows BOTH parent_cids[] (merge parents) AND parent_cid (single-parent) so
 // a merged artifact resolves to ALL its source adapters. Returns a DAG view:
 // nodes keyed by cid + edges. Cycle-safe via a visited Set; bounded by
@@ -489,7 +489,7 @@ export function getMergeParents(manifest) {
 //
 // loadArtifact(cid) -> { manifest?, k_score, created_at, parent_cid?, parent_cids? }
 //   (manifest is optional; parent_cid / parent_cids may be top-level or nested
-//    under manifest — both shapes are accepted)
+//    under manifest - both shapes are accepted)
 export async function walkLineageDag(loadArtifact, leafCid, opts = {}) {
   if (typeof loadArtifact !== 'function') {
     throw new Error('walkLineageDag: loadArtifact must be a function');
@@ -553,11 +553,11 @@ export async function walkLineageDag(loadArtifact, leafCid, opts = {}) {
   };
 }
 
-// W739-1 / W739-4 — walk a lineage chain starting at `leafCid` by following
+// W739-1 / W739-4 - walk a lineage chain starting at `leafCid` by following
 // parent_cid pointers. The loader is dependency-injected so this module
 // stays pure (tests pass a mock; the router passes a tenant-fenced
 // loader; the CLI passes a local-artifacts loader). Cycle-safe via a
-// visited Set — a malicious or corrupted chain that loops back on
+// visited Set - a malicious or corrupted chain that loops back on
 // itself terminates with truncated:true instead of running forever.
 //
 // loadArtifact(cid) → { manifest, k_score, created_at, parent_cid }
@@ -589,7 +589,7 @@ export async function walkLineage(loadArtifact, leafCid, opts = {}) {
   let truncated = false;
   for (let depth = 0; depth < max_depth; depth++) {
     if (visited.has(cursor)) {
-      // Cycle detected — the chain folded back on itself. Stop walking
+      // Cycle detected - the chain folded back on itself. Stop walking
       // and surface truncated:true so the operator sees the loop.
       truncated = true;
       break;
@@ -624,7 +624,7 @@ export async function walkLineage(loadArtifact, leafCid, opts = {}) {
           version: LINEAGE_VERSION,
         };
       }
-      // Parent pointer dangled — record the gap and stop.
+      // Parent pointer dangled - record the gap and stop.
       truncated = true;
       break;
     }
@@ -641,7 +641,7 @@ export async function walkLineage(loadArtifact, leafCid, opts = {}) {
     cursor = parent_cid;
   }
   // If we hit max_depth and the last row STILL had a parent_cid, the chain
-  // was longer than max_depth — flag truncated:true.
+  // was longer than max_depth - flag truncated:true.
   if (!truncated && chain.length === max_depth) {
     const tail = chain[chain.length - 1];
     if (tail && tail.parent_cid) truncated = true;
@@ -655,7 +655,7 @@ export async function walkLineage(loadArtifact, leafCid, opts = {}) {
   };
 }
 
-// W739-2 — compare two artifacts' performance metadata. Operators use this
+// W739-2 - compare two artifacts' performance metadata. Operators use this
 // to decide whether to roll back a freshly-shipped artifact.
 //
 // Inputs (both meta objects look like):
@@ -692,7 +692,7 @@ export function compareArtifactPerformance(a_meta, b_meta) {
   const a_axes = (a_meta.k_score && typeof a_meta.k_score === 'object') ? a_meta.k_score : a_meta;
   const b_axes = (b_meta.k_score && typeof b_meta.k_score === 'object') ? b_meta.k_score : b_meta;
   // Track every numeric axis that exists in BOTH inputs. Non-numeric or
-  // missing-on-either-side axes are silently dropped — we never invent a
+  // missing-on-either-side axes are silently dropped - we never invent a
   // delta for a field we cannot measure.
   const SHARED_AXES = new Set();
   for (const k of Object.keys(a_axes || {})) {
@@ -719,7 +719,7 @@ export function compareArtifactPerformance(a_meta, b_meta) {
   let regression_summary;
   if (SHARED_AXES.size === 0) {
     recommendation = 'inconclusive';
-    regression_summary = 'no shared numeric axes between a and b — cannot compare';
+    regression_summary = 'no shared numeric axes between a and b - cannot compare';
   } else if (bigDropAxes.length > 0) {
     recommendation = 'roll_back';
     regression_summary = `regression on ${bigDropAxes.length} axis${bigDropAxes.length === 1 ? '' : 'es'}: ` +
@@ -729,7 +729,7 @@ export function compareArtifactPerformance(a_meta, b_meta) {
     recommendation = 'promote';
     regression_summary = `no regression; ${improveAxes.length} axis${improveAxes.length === 1 ? '' : 'es'} improved`;
   } else if (smallDropAxes.length > 0) {
-    // Mixed — some axes worsened (but not past the regression threshold) and
+    // Mixed - some axes worsened (but not past the regression threshold) and
     // possibly others improved. Cannot cleanly promote; cannot demand
     // roll-back either. Inconclusive: ship the comparison, let the operator
     // decide.

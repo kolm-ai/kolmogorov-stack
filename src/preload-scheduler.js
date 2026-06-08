@@ -1,12 +1,12 @@
-// W725 — Predictive preloading scheduler.
+// W725 - Predictive preloading scheduler.
 //
 // Closes W707-plan W725 (lines 324-328): "Coding queries at 9am, writing at
 // 2pm → preload" + "Multi-namespace setups → predict next namespace" +
 // "Eliminate cold-start latency entirely".
 //
-// HONEST SCOPE — this module ships the PREDICTION + SCHEDULER PRIMITIVE.
+// HONEST SCOPE - this module ships the PREDICTION + SCHEDULER PRIMITIVE.
 // Actual cache pre-warming (loading model weights / KV cache into GPU memory
-// ahead of the predicted query) is the runtime responsibility — the W724
+// ahead of the predicted query) is the runtime responsibility - the W724
 // memory-tier and W726 spec-compile/kernel-selector hooks consume our
 // `schedulePreload()` output to decide what to materialize. This module's
 // outputs are pure data; no side-effects on hot caches.
@@ -16,7 +16,7 @@
 //   1. TIME-BUCKET model (W725-1):
 //      Bucket history by hour-of-day (0-23). For the target hour, return the
 //      top-3 namespaces by observed query frequency in that bucket. Naive
-//      Bayes — no smoothing, no priors — because cold-start is the failure
+//      Bayes - no smoothing, no priors - because cold-start is the failure
 //      mode we are trying to ELIMINATE, not the failure mode we are trying
 //      to model. Empty bucket -> empty array (NOT a guess).
 //
@@ -111,7 +111,7 @@ function _safeTenantSegment(tenant) {
 }
 
 // Resolve the per-tenant history file. Always creates parent dirs. Never
-// returns a shared path — if the tenant parameter is missing or invalid,
+// returns a shared path - if the tenant parameter is missing or invalid,
 // this throws BEFORE touching the filesystem (W454+ pattern: never default
 // to a shared file).
 export function _historyFile(tenant) {
@@ -152,7 +152,7 @@ export function _readHistoryFile(tenant) {
   return out;
 }
 
-// recordQuery — append one query observation to the tenant's history file.
+// recordQuery - append one query observation to the tenant's history file.
 //
 // Required: tenant, namespace, timestamp (ms epoch).
 // Side effects: appends one JSONL row; no other state mutated. Returns the
@@ -179,10 +179,10 @@ export function recordQuery({ tenant, namespace, timestamp } = {}) {
 }
 
 // =============================================================================
-// Prediction 1 — time-bucket model
+// Prediction 1 - time-bucket model
 // =============================================================================
 
-// Hour bucket of a millis-epoch timestamp. UTC; intentional — bucket math
+// Hour bucket of a millis-epoch timestamp. UTC; intentional - bucket math
 // should be reproducible across regions. If a caller needs local-time
 // buckets they can pre-shift the timestamps before calling.
 function _hourBucket(ts) {
@@ -192,7 +192,7 @@ function _hourBucket(ts) {
   return d.getUTCHours();
 }
 
-// predictByTimeBucket — for the target hour bucket, return the top-3 most-
+// predictByTimeBucket - for the target hour bucket, return the top-3 most-
 // frequent namespaces observed in history. Algorithm:
 //
 //   1. Filter history rows whose hour-bucket == `hour`.
@@ -207,7 +207,7 @@ function _hourBucket(ts) {
 // Returns [] when the bucket has no observations (NOT a guess).
 //
 // Insufficient history is encoded by an empty array, not an honest envelope,
-// because this is a HOT-PATH predictor — the runtime calls it on every query
+// because this is a HOT-PATH predictor - the runtime calls it on every query
 // and an envelope on the empty-history case would balloon GC.
 export function predictByTimeBucket({ hour, recent_history } = {}) {
   if (!Number.isFinite(hour)) return [];
@@ -242,7 +242,7 @@ export function predictByTimeBucket({ hour, recent_history } = {}) {
 }
 
 // =============================================================================
-// Prediction 2 — Markov chain (1st order)
+// Prediction 2 - Markov chain (1st order)
 // =============================================================================
 
 // Build a 1st-order transition table from a chronological history array.
@@ -255,7 +255,7 @@ export function predictByTimeBucket({ hour, recent_history } = {}) {
 // Note: same-namespace transitions (A -> A) are NOT filtered. They represent
 // repeated queries against the same namespace, which the predictor should
 // model (high-affinity loops are real). The scoring step never recommends
-// the `current_namespace` itself in the top-3 — see predictNextNamespace.
+// the `current_namespace` itself in the top-3 - see predictNextNamespace.
 function _buildTransitionTable(history) {
   if (!Array.isArray(history) || history.length < 2) return new Map();
   // Stable sort by timestamp; rows with missing timestamps go last (treated
@@ -283,7 +283,7 @@ function _buildTransitionTable(history) {
   return table;
 }
 
-// predictNextNamespace — return top-3 next namespaces for current_namespace,
+// predictNextNamespace - return top-3 next namespaces for current_namespace,
 // sorted by transition probability (count / sum(counts for from)).
 //
 // Returns [] when:
@@ -291,7 +291,7 @@ function _buildTransitionTable(history) {
 //   - no transitions can be derived (history.length < 2)
 //
 // We DO include self-transitions in the score because they are real signal,
-// but we exclude `current_namespace` from the OUTPUT — a recommendation to
+// but we exclude `current_namespace` from the OUTPUT - a recommendation to
 // "preload the namespace you are already in" is useless to the runtime
 // (it's already warm).
 export function predictNextNamespace({ recent_history, current_namespace } = {}) {
@@ -319,10 +319,10 @@ export function predictNextNamespace({ recent_history, current_namespace } = {})
 }
 
 // =============================================================================
-// Composition — schedulePreload
+// Composition - schedulePreload
 // =============================================================================
 
-// schedulePreload — compose time-bucket + Markov predictions into a single
+// schedulePreload - compose time-bucket + Markov predictions into a single
 // ranked list. Output shape:
 //
 //   [
@@ -353,7 +353,7 @@ export function predictNextNamespace({ recent_history, current_namespace } = {})
 // namespace for deterministic ties.
 //
 // When BOTH inputs are empty, returns []. This is the "cold-start, no
-// history yet" case — the honest answer is "no recommendation", not a
+// history yet" case - the honest answer is "no recommendation", not a
 // guess.
 export function schedulePreload({ now_ts, recent_history, current_namespace } = {}) {
   const hour = Number.isFinite(now_ts) ? _hourBucket(now_ts) : new Date().getUTCHours();
@@ -416,13 +416,13 @@ export function _safeTenantForTest(tenant) {
   return _safeTenantSegment(tenant);
 }
 
-// Internal helper exposed for tests — derive the hour bucket of a ts. Pure
+// Internal helper exposed for tests - derive the hour bucket of a ts. Pure
 // function so tests can assert UTC determinism.
 export function _hourBucketForTest(ts) {
   return _hourBucket(ts);
 }
 
-// Internal helper exposed for tests + bench — buildTransitionTable surface
+// Internal helper exposed for tests + bench - buildTransitionTable surface
 // for inspection.
 export function _buildTransitionTableForTest(history) {
   const table = _buildTransitionTable(history);

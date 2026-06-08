@@ -1,13 +1,13 @@
-// W761-3 — Cryptographic binding of captures to verified teacher responses.
+// W761-3 - Cryptographic binding of captures to verified teacher responses.
 //
 // Why this exists:
 //   Capture poisoning attacks fall into two categories that the W808 statistical
 //   anomaly detector + W750 copyright heuristic cannot catch:
-//     1) MITM injection — an attacker on the wire to the teacher swaps the
+//     1) MITM injection - an attacker on the wire to the teacher swaps the
 //        response body before it reaches the proxy. Statistical anomaly only
 //        flags rows that DRIFT from the baseline; a poisoned response carefully
 //        crafted to mimic baseline tone slips through.
-//     2) Cache poisoning — an attacker who can write to the response cache (or
+//     2) Cache poisoning - an attacker who can write to the response cache (or
 //        the staged_captures store) inserts adversarial rows that were never
 //        produced by the configured teacher at all.
 //
@@ -20,10 +20,10 @@
 // Honesty contract (W761 INVARIANT):
 //   - HMAC key is REQUIRED. Without KOLM_TEACHER_HMAC_KEY set, the binding API
 //     returns { ok:false, error:'hmac_key_not_configured' } HONESTLY. We do
-//     NOT silent-pass with an empty key — that would be cryptographic theater.
+//     NOT silent-pass with an empty key - that would be cryptographic theater.
 //   - Keys shorter than 32 bytes are REFUSED with hmac_key_too_short. 32 bytes
 //     is the minimum for SHA-256 HMAC to retain full collision resistance.
-//   - Verification uses crypto.timingSafeEqual — never `===` on HMAC bytes.
+//   - Verification uses crypto.timingSafeEqual - never `===` on HMAC bytes.
 //
 // Anti-brittleness (W604):
 //   - TEACHER_HMAC_VERSION is `w761-vN.M` and consumers MUST match with a
@@ -38,7 +38,7 @@ export const TEACHER_HMAC_KEY_ENV = 'KOLM_TEACHER_HMAC_KEY';
 export const MIN_KEY_BYTES = 32;
 
 // -----------------------------------------------------------------------------
-// Key loader — honest envelopes for misconfiguration.
+// Key loader - honest envelopes for misconfiguration.
 // -----------------------------------------------------------------------------
 
 // Returns a Buffer carrying the configured HMAC key, OR throws with an Error
@@ -52,7 +52,7 @@ function _loadKeyOrThrow() {
     e.hint = `Set ${TEACHER_HMAC_KEY_ENV} to a 32+ byte random value: openssl rand -hex 32`;
     throw e;
   }
-  // Accept hex or raw — the env var is most-commonly hex from openssl rand.
+  // Accept hex or raw - the env var is most-commonly hex from openssl rand.
   // Hex 64 chars → 32 bytes; raw 32+ char string is also acceptable.
   let buf;
   if (/^[0-9a-fA-F]+$/.test(raw) && raw.length % 2 === 0) {
@@ -70,7 +70,7 @@ function _loadKeyOrThrow() {
 }
 
 // Short fingerprint of the active key so post-hoc verification can detect
-// key rotation. We expose first 16 hex chars of sha256(key) — too short for
+// key rotation. We expose first 16 hex chars of sha256(key) - too short for
 // a recovery attack, long enough to distinguish two production keys.
 export function _keyFingerprint(keyBuf) {
   return crypto.createHash('sha256').update(keyBuf).digest('hex').slice(0, 16);
@@ -83,7 +83,7 @@ export function _keyFingerprint(keyBuf) {
 // Canonical hash chain. The string concatenated under HMAC is deliberately
 // minimal: only fields the verifier will replay. response_body is hashed
 // separately so the binding can carry a fixed-length token regardless of body
-// size — the verifier rehashes the body and compares.
+// size - the verifier rehashes the body and compares.
 function _hashChainMessage({ teacher_id, request_hash, response_body, timestamp_ms }) {
   const bodyHash = crypto.createHash('sha256')
     .update(String(response_body == null ? '' : response_body))
@@ -118,7 +118,7 @@ export function bindTeacherResponse({ teacher_id, request_hash, response_body, r
       ok: false,
       error: 'missing_field',
       field: 'request_hash',
-      hint: 'pass {request_hash: sha256(canonical_request_body)} — the same value capture-store uses for dedupe',
+      hint: 'pass {request_hash: sha256(canonical_request_body)} - the same value capture-store uses for dedupe',
       version: TEACHER_HMAC_VERSION,
     };
   }
@@ -127,7 +127,7 @@ export function bindTeacherResponse({ teacher_id, request_hash, response_body, r
       ok: false,
       error: 'missing_field',
       field: 'response_body',
-      hint: 'pass {response_body: "<raw body string or canonical JSON>"} — empty string is acceptable if the upstream really returned no body',
+      hint: 'pass {response_body: "<raw body string or canonical JSON>"} - empty string is acceptable if the upstream really returned no body',
       version: TEACHER_HMAC_VERSION,
     };
   }
@@ -142,7 +142,7 @@ export function bindTeacherResponse({ teacher_id, request_hash, response_body, r
   const response_hmac = crypto.createHmac(HMAC_ALGORITHM, key).update(msg).digest('hex');
   const key_fingerprint = _keyFingerprint(key);
 
-  // response_headers is intentionally NOT covered by the HMAC — middleware
+  // response_headers is intentionally NOT covered by the HMAC - middleware
   // routinely adds / strips headers (CDN, gateway, observability) and a
   // header-binding would force a rebind on every hop. We record a HASH of
   // the headers so callers can detect header tampering as a SEPARATE
@@ -218,7 +218,7 @@ export function verifyTeacherResponse({ binding, response_body } = {}) {
   }
   // Detect key rotation BEFORE we run the expensive HMAC compute. If the
   // active key's fingerprint differs from the binding's fingerprint, the row
-  // was bound under a different key — surface that explicitly so the audit
+  // was bound under a different key - surface that explicitly so the audit
   // trail records the rotation rather than reading "signature mismatch".
   const activeFingerprint = _keyFingerprint(key);
   if (activeFingerprint !== binding.key_fingerprint) {
@@ -226,7 +226,7 @@ export function verifyTeacherResponse({ binding, response_body } = {}) {
       ok: false,
       valid: false,
       reason: 'hmac_key_mismatch_post_rotation',
-      detail: 'binding.key_fingerprint does not match the active KOLM_TEACHER_HMAC_KEY — this row was bound under a different key, so the signature cannot be re-derived',
+      detail: 'binding.key_fingerprint does not match the active KOLM_TEACHER_HMAC_KEY - this row was bound under a different key, so the signature cannot be re-derived',
       active_key_fingerprint: activeFingerprint,
       binding_key_fingerprint: binding.key_fingerprint,
       version: TEACHER_HMAC_VERSION,
@@ -281,21 +281,21 @@ export function verifyTeacherResponse({ binding, response_body } = {}) {
     ok: true,
     valid: false,
     reason: 'signature_mismatch',
-    detail: 'response_body does not match the bound HMAC — body was mutated post-binding OR a different body was passed for verification',
+    detail: 'response_body does not match the bound HMAC - body was mutated post-binding OR a different body was passed for verification',
     version: TEACHER_HMAC_VERSION,
   };
 }
 
-// Attach a binding envelope onto a capture row in-place. Idempotent — if
+// Attach a binding envelope onto a capture row in-place. Idempotent - if
 // capture_row.teacher_binding is already present we leave it alone and
 // return the unchanged row.
 //
 // Returns the (possibly mutated) capture row reference. Pure aside from the
-// idempotent attach mutation — no I/O.
+// idempotent attach mutation - no I/O.
 export function attachBindingToCapture(capture_row, binding) {
   if (!capture_row || typeof capture_row !== 'object') return capture_row;
   if (capture_row.teacher_binding && typeof capture_row.teacher_binding === 'object') {
-    // Idempotent — already bound. Surface a hint flag so the caller knows
+    // Idempotent - already bound. Surface a hint flag so the caller knows
     // the no-op happened intentionally.
     capture_row._teacher_binding_skipped = 'already_bound';
     return capture_row;
@@ -337,7 +337,7 @@ export function verifyCaptureBinding(capture_row) {
       ok: false,
       valid: false,
       reason: 'binding_missing_fields',
-      detail: 'capture_row.teacher_binding is absent — this row was never bound to a verified teacher response',
+      detail: 'capture_row.teacher_binding is absent - this row was never bound to a verified teacher response',
       version: TEACHER_HMAC_VERSION,
     };
   }

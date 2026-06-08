@@ -1,11 +1,11 @@
-// W235 — signed-receipt benchmarks.
+// W235 - signed-receipt benchmarks.
 //
 // A "benchmark receipt" is a single throughput / latency / vram observation
 // captured on a specific (model, hw_tier, backend, quant, runner) and signed
 // with a sha256 attestation hash over the canonical JSON of the record body.
 // The hash is what makes it auditable: anyone can recompute it and verify the
 // receipt has not been tampered with. We do not yet wrap these in Sigstore /
-// Rekor signatures — that lives in the receipt-chain track (W164-W167) and
+// Rekor signatures - that lives in the receipt-chain track (W164-W167) and
 // will absorb these records once they ride alongside the .kolm artifact.
 //
 // Why this matters: ROCm / Vulkan performance claims are the load-bearing
@@ -55,7 +55,7 @@ export function verifyReceipt(rec) {
   return { ok: actual === expected, expected, actual };
 }
 
-// W235 — canonical benchmark records. Mix of NVIDIA + AMD spanning consumer +
+// W235 - canonical benchmark records. Mix of NVIDIA + AMD spanning consumer +
 // datacenter + workstation tiers. Each record is signed at module-load time
 // so we ship the hash baked in; verifyReceipt() recomputes and confirms.
 //

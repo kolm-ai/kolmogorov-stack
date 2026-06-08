@@ -1,21 +1,21 @@
 // src/extraction-guard.js
 //
-// W765 — Prompt Extraction Defense: runtime extraction-attempt guard.
+// W765 - Prompt Extraction Defense: runtime extraction-attempt guard.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 582-586):
 //   [W765-2] Runtime guardrails that detect/block extraction attempts
 //
 // Design contract:
-//   - PURE JS regex. NEVER throws on any input. Heavy ML stays OUT —
+//   - PURE JS regex. NEVER throws on any input. Heavy ML stays OUT - 
 //     this is a fast first line of defense in the request pipeline.
 //   - HONESTY FLOOR: guardRuntimeRequest NEVER silent-passes a matched
 //     attempt. If a match fires and policy is `block` / `log_and_block`
-//     / `redirect_to_safe_response`, the action is one of those three —
+//     / `redirect_to_safe_response`, the action is one of those three - 
 //     we never quietly let it through.
 //   - DEFENSE LAYERING with W762: W762 (src/adversarial-prompts.js)
 //     also catches "ignore previous instructions" via its
 //     classifyPromptAdversarial heuristic. W765 catching the same
-//     pattern is INTENTIONAL — defense in depth. The two modules cover
+//     pattern is INTENTIONAL - defense in depth. The two modules cover
 //     different threat surfaces (W762 is a broader red-team
 //     classifier; W765 is system-prompt-extraction-specific) so
 //     overlapping matches are correct, not a bug.
@@ -34,7 +34,7 @@ export const EXTRACTION_GUARD_VERSION = 'w765-v1';
 //
 // 10+ frozen named regex patterns covering the most common shapes of
 // system-prompt extraction attacks documented in public security
-// research (OWASP LLM Top 10 — "LLM06: Sensitive Information
+// research (OWASP LLM Top 10 - "LLM06: Sensitive Information
 // Disclosure", and the prompt-injection taxonomy literature).
 //
 // Naming convention: `<family>_<flavor>` so audit logs and detection
@@ -102,7 +102,7 @@ export const EXTRACTION_PATTERNS = Object.freeze([
 // Policies the runtime guard understands.
 //
 // Frozen so tests can assert the contract. The W765 spec pins exactly
-// these four — the default `log_and_block` combines an audit log entry
+// these four - the default `log_and_block` combines an audit log entry
 // with a blocked action so operators can SEE attempted extractions
 // while still refusing them.
 // ---------------------------------------------------------------------------
@@ -122,7 +122,7 @@ const DEFAULT_RECOMMENDED_RESPONSE = 'I cannot share my system prompt.';
 // ---------------------------------------------------------------------------
 
 /**
- * detectExtractionAttempt — pure regex pass over `text`. Returns:
+ * detectExtractionAttempt - pure regex pass over `text`. Returns:
  *
  *   {
  *     ok: true,
@@ -133,7 +133,7 @@ const DEFAULT_RECOMMENDED_RESPONSE = 'I cannot share my system prompt.';
  *   }
  *
  * Confidence scales with the number of distinct pattern families that
- * fire. NEVER throws — bad input returns is_extraction_attempt:false
+ * fire. NEVER throws - bad input returns is_extraction_attempt:false
  * with an honest empty patterns_matched array.
  */
 export function detectExtractionAttempt(text) {
@@ -155,7 +155,7 @@ export function detectExtractionAttempt(text) {
       m = null;
     }
     if (!m) continue;
-    // Two-pass families (verbatim + co_re) — require both hits.
+    // Two-pass families (verbatim + co_re) - require both hits.
     if (p.co_re) {
       let mm;
       try {
@@ -175,7 +175,7 @@ export function detectExtractionAttempt(text) {
   }
   const is_extraction_attempt = patterns_matched.length > 0;
   // Confidence: 1 family → 0.6, 2 → 0.8, 3+ → 0.95. Caps at 0.95 because
-  // even a 3-pattern hit isn't ground truth — a sophisticated attacker
+  // even a 3-pattern hit isn't ground truth - a sophisticated attacker
   // could craft novel patterns we don't recognize, so we never report 1.0.
   let confidence = 0;
   if (patterns_matched.length === 1) confidence = 0.6;
@@ -191,7 +191,7 @@ export function detectExtractionAttempt(text) {
 }
 
 /**
- * guardRuntimeRequest — wrap detectExtractionAttempt with a policy
+ * guardRuntimeRequest - wrap detectExtractionAttempt with a policy
  * decision. Returns:
  *
  *   {
@@ -205,7 +205,7 @@ export function detectExtractionAttempt(text) {
  *
  * Honesty invariant: if detection.is_extraction_attempt is TRUE, action
  * is NEVER 'pass'. Even under policy='log_only' we still record the
- * attempt — silent passthrough on a matched attack would defeat the
+ * attempt - silent passthrough on a matched attack would defeat the
  * purpose of the guard.
  */
 export function guardRuntimeRequest({
@@ -222,7 +222,7 @@ export function guardRuntimeRequest({
   }
   const detection = detectExtractionAttempt(request_text);
   if (!detection.is_extraction_attempt) {
-    // No attempt detected — pass through.
+    // No attempt detected - pass through.
     return {
       ok: true,
       version: EXTRACTION_GUARD_VERSION,
@@ -230,7 +230,7 @@ export function guardRuntimeRequest({
       detection,
     };
   }
-  // Attempt detected — apply policy.
+  // Attempt detected - apply policy.
   if (policy === 'block') {
     return {
       ok: true,
@@ -258,7 +258,7 @@ export function guardRuntimeRequest({
       recommended_response: DEFAULT_RECOMMENDED_RESPONSE,
     };
   }
-  // log_and_block (default) — combine both for production. The action
+  // log_and_block (default) - combine both for production. The action
   // is BLOCK (we refuse to serve the request) AND logged:true so
   // operators can see the attempt in audit logs.
   return {

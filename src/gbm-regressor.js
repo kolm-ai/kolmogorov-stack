@@ -1,4 +1,4 @@
-// W921 Phase-1 — gbm-regressor: a REAL pure-JS gradient-boosted regression-tree
+// W921 Phase-1 - gbm-regressor: a REAL pure-JS gradient-boosted regression-tree
 // meta-model, built to replace the depth-1 stump GBM in src/kolm-meta-trainer.js
 // (W832). This module is intentionally STANDALONE and contract-free of the meta
 // feature schema so it can be reused anywhere a small-n tabular regressor is
@@ -37,7 +37,7 @@
 //   - We are not XGBoost / LightGBM at billion-row scale. The split scan is an
 //     exact O(n log n) sort-per-feature-per-node brute force, correct and fast
 //     at the n <= ~50k tabular regime kolm targets, NOT a histogram engine.
-//   - No native categorical handling — the caller hands us numeric vectors.
+//   - No native categorical handling - the caller hands us numeric vectors.
 //   - Squared-error objective only (the meta-task is regression in [0,1]).
 
 // =============================================================================
@@ -219,7 +219,7 @@ function leafWeight(grad, hess, rowIdx, lambda) {
     H += hess[rowIdx[i]];
   }
   // w* = -G / (H + lambda). Squared-loss grad is the NEGATIVE residual, so this
-  // resolves to the (regularized) mean residual — the correct boosting step.
+  // resolves to the (regularized) mean residual - the correct boosting step.
   return -G / (H + lambda);
 }
 

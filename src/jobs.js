@@ -1,4 +1,4 @@
-// W229 — minimal job registry for long-running compile / distill / eval.
+// W229 - minimal job registry for long-running compile / distill / eval.
 //
 // W253 backend#7: storage is now per-job-file (one JSON per job in
 // $KOLM_JOBS_DIR/jobs/<id>.json) instead of an append-only JSONL. The legacy
@@ -8,10 +8,10 @@
 // prune() concurrently could truncate each other's in-flight updates, and a
 // single update() write no longer rewrites the entire registry.
 //
-// kolm jobs        — list every job, newest first
-// kolm jobs <id>   — show one job's manifest + tail of log
-// kolm jobs prune  — drop completed jobs older than 7 days
-// kolm watch <id>  — tail log file with follow semantics
+// kolm jobs - list every job, newest first
+// kolm jobs <id> - show one job's manifest + tail of log
+// kolm jobs prune - drop completed jobs older than 7 days
+// kolm watch <id> - tail log file with follow semantics
 
 import fs from 'node:fs';
 import path from 'node:path';

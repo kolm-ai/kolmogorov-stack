@@ -1,4 +1,4 @@
-// W910-D — One-click RunPod cloud deploy.
+// W910-D - One-click RunPod cloud deploy.
 //
 // Higher-level surface above src/cloud-providers/runpod.js. The lower-level
 // module owns GraphQL traffic + serverless polling; this module owns the
@@ -22,9 +22,9 @@
 //      or kolm.ai registry URL).
 //   2. RunPod's `podFindAndDeployOnDemand` mutation shape has changed twice
 //      in the last 18 months. We default to the current shape but accept
-//      `opts.mutations` for forward-compat — see src/cloud-providers/runpod.js
+//      `opts.mutations` for forward-compat - see src/cloud-providers/runpod.js
 //      for the same override pattern.
-//   3. Cost numbers in the cost-confirm UI are informational only — RunPod
+//   3. Cost numbers in the cost-confirm UI are informational only - RunPod
 //      bills directly via their console. We never hold a credit card on
 //      behalf of the user for GPU time.
 
@@ -34,7 +34,7 @@ const POD_GRAPHQL_URL = 'https://api.runpod.io/graphql';
 const DOCS_URL = 'https://docs.runpod.io/pods/manage-pods';
 
 // Approximate per-hour pricing as of 2026-05. Used only for the cost-confirm
-// modal — real billing comes from RunPod directly. Values are deliberately
+// modal - real billing comes from RunPod directly. Values are deliberately
 // rounded up so we never under-quote the user.
 export const RUNPOD_GPU_PRICING_USD_HR = Object.freeze({
   'RTX A4000':           0.30,
@@ -77,7 +77,7 @@ export function priceForGpu(gpuLabel) {
 function _podMutations() {
   return {
     // POST a new pod. The `gpuTypeId` is the human-readable label
-    // (e.g. "NVIDIA RTX A4000") not the numeric id — RunPod's resolver
+    // (e.g. "NVIDIA RTX A4000") not the numeric id - RunPod's resolver
     // accepts both.
     deployPod: {
       query: `mutation DeployPod($input: PodFindAndDeployOnDemandInput!) {
@@ -133,7 +133,7 @@ function _podMutations() {
   };
 }
 
-// _callGraphQL — thin wrapper around fetch. Returns parsed `data` or throws
+// _callGraphQL - thin wrapper around fetch. Returns parsed `data` or throws
 // a tagged error. Identical contract to cloud-providers/runpod.js so callers
 // can treat error envelopes interchangeably.
 async function _callGraphQL({ apiKey, query, variables, opName, fetchImpl, proxy }) {
@@ -253,7 +253,7 @@ function _missingKeyError() {
 //
 // The container is expected to expose an OpenAI-compatible /v1/chat/completions
 // on port 8000 once warm. The OpenAI URL is reported as pending until the pod
-// transitions to RUNNING and `runtime.ports` shows a public port — callers
+// transitions to RUNNING and `runtime.ports` shows a public port - callers
 // should poll getPodStatus() until openai_url is set.
 export async function provisionPod(opts = {}) {
   const apiKey = _resolveApiKey(opts);
@@ -379,7 +379,7 @@ export async function getPodStatus(podId, opts = {}) {
   const pod = data.pod || {};
   const runtime = pod.runtime || {};
   const ports = Array.isArray(runtime.ports) ? runtime.ports : [];
-  // Locate the public HTTP port mapped from container 8000 — that's the
+  // Locate the public HTTP port mapped from container 8000 - that's the
   // OpenAI-compatible endpoint.
   const publicPort = ports.find((p) => p && p.isIpPublic && (p.privatePort === 8000 || p.publicPort)) || null;
   const openaiUrl = publicPort ? `https://${pod.id}-${publicPort.publicPort}.proxy.runpod.net/v1` : null;

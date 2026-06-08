@@ -3,816 +3,433 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Compile your AI workload into a model you own · kolm.ai</title>
-<meta name="description" content="kolm is the AI compiler. Own your AI: capture your traffic, distill it into a small private model you run on your own hardware, with a signed receipt for every call. Apache-2.0, no per-token bill after compile.">
-<meta name="keywords" content="AI compiler, model distillation, INT4 quantization, signed receipts, on-device LLM, OpenRouter alternative, model gateway, edge inference, private AI, regulated AI">
-<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Signed security evidence for AI agents · kolm.ai</title>
+<meta name="description" content="Your enterprise deal stalls in security review the moment a CISO has to vet an autonomous agent. kolm signs an evidence report your buyer verifies offline against your key, with no account and no server in the trust path. A four-to-eight-week review becomes days.">
+<meta name="keywords" content="AI agent security, security review, signed evidence report, Ed25519 attestation, least privilege audit, prompt injection testing, OWASP LLM Top 10, MITRE ATLAS, SOC 2 control mapping, ISO 42001, NIST AI RMF, EU AI Act, enterprise AI procurement">
+<meta name="theme-color" content="#F6F7F4">
 <meta name="author" content="kolm.ai">
-<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Compile your AI workload into a model you own">
-<meta property="og:description" content="Capture, distill, compile, deploy. Every .kolm artifact is signed, reproducible, Apache-2.0, no per-token bill.">
+<meta property="og:title" content="Signed security evidence for AI agents entering the enterprise">
+<meta property="og:description" content="kolm signs an evidence report your buyer verifies offline, against your public key, with no account and no server in the trust path. Clear the review in days, not months.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="kolm.ai: route models, distill specialists, and run signed .kolm artifacts anywhere.">
+<meta property="og:image:alt" content="kolm.ai, signed security evidence for AI agents entering the enterprise.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Compile your AI workload into a model you own">
-<meta name="twitter:description" content="The AI compiler. Own your AI: distill frontier-model quality into a small private model you run anywhere, with a signed receipt for every call.">
+<meta name="twitter:title" content="Signed security evidence for AI agents">
+<meta name="twitter:description" content="A signed evidence report your enterprise buyer's security team verifies offline, against your public key, with no account and no server in the trust path.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/">
-<link rel="alternate" hreflang="en" href="https://kolm.ai/">
-<link rel="alternate" hreflang="de" href="https://kolm.ai/lang/de">
-<link rel="alternate" hreflang="fr" href="https://kolm.ai/lang/fr">
-<link rel="alternate" hreflang="ja" href="https://kolm.ai/lang/ja">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/design-tokens.css" as="style">
-<link rel="preload" href="/ks.css" as="style">
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/surface-polish.css">
-<link rel="stylesheet" href="/frontier.css">
-<link rel="stylesheet" href="/w687.css">
-<link rel="stylesheet" href="/w706.css">
-<link rel="stylesheet" href="/supplement.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<script defer src="/frontier.js"></script>
-<script defer src="/nav.js"></script>
-<script defer src="/w687.js"></script>
-<script defer src="/supplement.js"></script>
-<script src="/sentry-init.js" defer></script>
-<style>
-  
-  .kolm-media-caption { margin-top: var(--ks-3); padding: 10px 12px; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); background: var(--ks-bg-1); color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; line-height: 1.55; }
-  .test-anchor { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
-  
-  main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link) { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
-  main p a:not(.ks-btn):not(.fr-btn):not(.fr-numbered-list__link):hover { border-bottom-color: var(--ks-accent); }
-
-  
-  .kolm-surfaces { margin-top: 18px; padding: 0; list-style: none; }
-  .kolm-surfaces__row { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--ks-line-1); }
-  .kolm-surfaces__row:last-child { border-bottom: 0; }
-  .kolm-surfaces__name { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ks-ink-3); }
-  .kolm-surfaces__detail { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-2); line-height: 1.55; }
-  .kolm-surfaces__detail code { color: var(--ks-ink); background: var(--line-1); padding: 1px 5px; border-radius: 4px; font-size: 0.95em; }
-  .kolm-surfaces__num { color: var(--ks-accent); font-variant-numeric: tabular-nums; }
-  @media (max-width: 640px) {
-    .kolm-surfaces__row { grid-template-columns: 1fr; gap: 2px; padding: 10px 0; }
-    .kolm-surfaces__name { font-size: 10.5px; }
-    .kolm-surfaces__detail { font-size: 12px; }
-  }
-
-  
-  .why-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; row-gap: 40px; margin-top: 44px; }
-  .why-cell { padding: 0; }
-  .why-cell__h { font-family: var(--ks-sans); font-size: clamp(20px, 2.4vw, 26px); font-weight: 520; letter-spacing: -0.012em; line-height: 1.22; color: var(--ks-ink); margin: 0 0 12px 0; }
-  .why-cell__p { font-family: var(--ks-sans); font-size: 15.5px; line-height: 1.7; color: var(--ks-ink-2); margin: 0; }
-  .why-cell__p a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
-  .why-cell__p a:hover { border-bottom-color: var(--ks-accent); }
-  @media (max-width: 760px) { .why-grid { grid-template-columns: 1fr; column-gap: 0; row-gap: 30px; margin-top: 32px; } }
-
-  
-  .home-prose { max-width: 62ch; font-family: var(--ks-sans); font-size: 17px; line-height: 1.72; color: var(--ks-ink-2); margin: 28px 0 0 0; }
-  .home-prose code { background: var(--line-1); color: var(--ks-ink); padding: 1px 6px; border-radius: 4px; font-family: var(--ks-mono); font-size: 0.92em; }
-  .home-prose strong { color: var(--ks-ink); font-weight: 540; }
-  .home-prose a { color: var(--ks-ink); border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms; }
-  .home-prose a:hover { border-bottom-color: var(--ks-accent); }
-
-  
-  .home-roi-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--ks-8); align-items: stretch; margin-top: 36px; }
-  @media (max-width: 920px) { .home-roi-grid { grid-template-columns: 1fr; gap: var(--ks-5); } }
-  .home-roi-form { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-lg); padding: var(--ks-6); }
-  .home-roi-out  { background: linear-gradient(180deg, var(--ks-accent-soft) 0%, var(--ks-bg-1) 60%); border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-lg); padding: var(--ks-6); display: flex; flex-direction: column; gap: var(--ks-3); }
-  .home-roi-field { margin-bottom: var(--ks-4); }
-  .home-roi-field label { display: block; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: 6px; }
-  .home-roi-field input, .home-roi-field select { width: 100%; padding: 10px 14px; background: var(--ks-bg-2); border: 1px solid var(--ks-line-2); color: var(--ks-ink); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 13.5px; outline: none; transition: border-color 140ms; }
-  .home-roi-field input:focus, .home-roi-field select:focus { border-color: var(--ks-accent); }
-  .home-roi-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .home-roi-num { font-family: var(--ks-mono); font-size: clamp(34px, 5vw, 56px); font-weight: 520; letter-spacing: 0; color: var(--ks-accent); line-height: 1; font-variant-numeric: tabular-nums; }
-  .home-roi-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--ks-line-1); font-size: 13.5px; font-family: var(--ks-mono); }
-  .home-roi-row:last-child { border-bottom: 0; }
-  .home-roi-row span:last-child { color: var(--ks-ink); font-variant-numeric: tabular-nums; }
-  .home-roi-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--ks-4); }
-  .home-roi-preset { padding: 5px 11px; border: 1px solid var(--ks-line-2); background: transparent; color: var(--ks-ink-2); font-family: var(--ks-mono); font-size: 11.5px; border-radius: var(--ks-r-pill); cursor: pointer; transition: border-color 140ms, color 140ms; }
-  .home-roi-preset:hover { border-color: var(--ks-accent-edge); color: var(--ks-accent); }
-  .home-roi-preset.is-active { border-color: var(--ks-accent); color: var(--ks-accent); background: color-mix(in srgb, var(--ks-accent) 8%, transparent); }
-  .home-roi-mult { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-accent); padding: 4px 9px; border: 1px solid var(--ks-accent-edge); border-radius: var(--ks-r-pill); background: var(--ks-accent-soft); }
-
-  
-  .home-receipts { margin-top: 36px; border-top: 1px solid var(--line-2); }
-  .home-receipts__row { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--ks-5); align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line-2); }
-  .home-receipts__row--head { padding: 10px 0; border-bottom: 1px solid var(--line-2); }
-  .home-receipts__row--head span { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--ks-ink-3); }
-  .home-receipts__name { font-family: var(--ks-mono); font-size: 13.5px; color: var(--ks-ink); font-weight: 540; }
-  .home-receipts__sub { display: block; font-family: var(--ks-sans); font-size: 12px; color: var(--ks-ink-3); margin-top: 4px; font-weight: 400; line-height: 1.5; }
-  .home-receipts__size { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-2); font-variant-numeric: tabular-nums; }
-  .home-receipts__size strong { color: var(--ks-accent); font-weight: 540; }
-  .home-receipts__time { font-family: var(--ks-mono); font-size: 13px; color: var(--ks-ink-2); font-variant-numeric: tabular-nums; }
-  .home-receipts__hash { font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); word-break: break-all; }
-  .home-receipts__hash code { background: transparent; padding: 0; color: var(--ks-ink-2); }
-  .home-receipts__hw { display: block; font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-faint); margin-top: 2px; letter-spacing: 0.04em; }
-  .home-receipts__cli { margin-top: 20px; padding: 14px 16px; background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.7; color: var(--ks-ink-2); overflow-x: auto; }
-  .home-receipts__cli .p { color: var(--ks-accent); }
-  .home-receipts__cli .c { color: var(--ks-ink); }
-  .home-receipts__cli .ok { color: var(--ks-accent); }
-  .home-receipts__cli .dim { color: var(--ks-ink-faint); }
-  .home-receipts__foot { margin-top: 18px; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-ink-3); }
-  .home-receipts__foot a { color: var(--ks-accent); text-transform: none; letter-spacing: 0; border-bottom: 1px solid var(--ks-accent-edge); padding-bottom: 1px; }
-  .home-receipts__foot a:hover { border-bottom-color: var(--ks-accent); }
-  @media (max-width: 880px) {
-    .home-receipts__row { grid-template-columns: 1fr 1fr; row-gap: 8px; padding: 14px 0; }
-    .home-receipts__row--head { display: none; }
-    .home-receipts__name { grid-column: 1 / -1; }
-    .home-receipts__size::before { content: "size · "; color: var(--ks-ink-faint); font-size: 0.85em; }
-    .home-receipts__time::before { content: "compile · "; color: var(--ks-ink-faint); font-size: 0.85em; }
-    .home-receipts__hash { grid-column: 1 / -1; padding-top: 4px; }
-  }
-  
-  .home-receipts__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-bottom: 24px; }
-  .home-receipts__head-text { flex: 1 1 auto; min-width: 0; }
-  .home-receipts__badge-wrap { flex: 0 0 220px; display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 6px; }
-  .home-receipts__badge { width: 120px; color: var(--ks-ink-2); }
-  .home-receipts__badge svg { display: block; }
-  .home-receipts__badge-cap { margin: 0; font-size: 11.5px; line-height: 1.5; color: var(--ks-ink-2); text-align: center; max-width: 220px; }
-  .home-receipts__badge-cap code { font-size: 0.95em; padding: 0 4px; }
-  .home-receipts__badge-cap em { font-style: normal; color: var(--ks-ink-1); }
-  @media (max-width: 720px) {
-    .home-receipts__header { flex-direction: column-reverse; gap: 18px; align-items: center; }
-    .home-receipts__head-text { text-align: left; }
-    .home-receipts__badge-wrap { flex: initial; }
-  }
-  
-  .kolm-anatomy-split { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 40px; align-items: start; margin-top: 32px; }
-  .kolm-anatomy-split__illu { display: flex; justify-content: center; }
-  .kolm-anatomy-split__illu svg { width: 100%; max-width: 320px; height: auto; display: block; }
-  .kolm-anatomy-split__tree { min-width: 0; }
-  @media (max-width: 900px) {
-    .kolm-anatomy-split { grid-template-columns: 1fr; gap: 24px; }
-    .kolm-anatomy-split__illu svg { max-width: 280px; }
-  }
-
-  
-  .hp-switcher { position: relative; width: 100%; max-width: 560px; margin: 0 auto; }
-  .hp-radio { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
-  .hp-tabs { display: flex; gap: 0; margin: 0 0 -1px 0; border-bottom: 1px solid var(--ks-line-2); position: relative; z-index: 1; }
-  .hp-tab { padding: 8px 14px; cursor: pointer; font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ks-ink-3); border-bottom: 2px solid transparent; transition: color 140ms, border-color 140ms; user-select: none; }
-  .hp-tab:hover { color: var(--ks-ink-2); }
-  .hp-panel { display: none; }
-  #hp-platform:checked ~ .hp-tabs .hp-tab[for="hp-platform"],
-  #hp-ml:checked       ~ .hp-tabs .hp-tab[for="hp-ml"],
-  #hp-founder:checked  ~ .hp-tabs .hp-tab[for="hp-founder"] {
-    color: var(--ks-accent); border-bottom-color: var(--ks-accent);
-  }
-  #hp-platform:checked ~ .hp-panels .hp-panel--platform,
-  #hp-ml:checked       ~ .hp-panels .hp-panel--ml,
-  #hp-founder:checked  ~ .hp-panels .hp-panel--founder {
-    display: block;
-  }
-  .hp-radio:focus-visible ~ .hp-tabs .hp-tab { outline: none; }
-  #hp-platform:focus-visible ~ .hp-tabs .hp-tab[for="hp-platform"],
-  #hp-ml:focus-visible       ~ .hp-tabs .hp-tab[for="hp-ml"],
-  #hp-founder:focus-visible  ~ .hp-tabs .hp-tab[for="hp-founder"] {
-    box-shadow: inset 0 0 0 2px var(--ks-accent-edge);
-  }
-  @media (max-width: 480px) {
-    .hp-tab { padding: 7px 10px; font-size: 10.5px; }
-  }
-</style>
-
-
-<style>
-  /* --- Heading rhythm: tighten the visible H2 scale + tracking. Existing
-         clamp lives in frontier.css; this is a per-page calibration so
-         the big eyebrow→h2→lede triple reads as one block, not three. --- */
-  .fr-section__head { margin-bottom: clamp(20px, 2.4vw, 32px); }
-  .fr-section__head .fr-eyebrow { margin-bottom: 10px; display: inline-block; }
-  .fr-section__head .fr-h2 { letter-spacing: -0.022em; line-height: 1.08; }
-  .fr-section__head .fr-lede { margin-top: 12px; max-width: 64ch; }
-
-  /* --- Card surface treatment. Same for whatis surfaces and three-surface
-         columns: hairline border, soft lift on hover, no shadow when reduced. --- */
-  .kolm-whatis__surface,
-  .ks-three-surface__col {
-    transition: transform 220ms cubic-bezier(.2,.6,.2,1),
-                border-color 220ms ease,
-                box-shadow 220ms ease;
-    will-change: transform;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .kolm-whatis__surface:hover,
-    .ks-three-surface__col:hover {
-      transform: translateY(-2px);
-      border-color: var(--ks-accent-edge, var(--line-3));
-      box-shadow: 0 8px 28px -18px var(--line-strong);
-    }
-    [data-theme="dark"] .kolm-whatis__surface:hover,
-    [data-theme="dark"] .ks-three-surface__col:hover {
-      box-shadow: 0 10px 32px -16px rgba(0,0,0,0.5);
-    }
-  }
-
-  /* --- Receipt strip lift: subtle elevation so the JSON reads like an
-         artifact, not a quote block. Reduced-motion safe (no transition). --- */
-  .kolm-receipt-strip pre {
-    box-shadow: 0 12px 36px -22px rgba(0,0,0,0.45);
-  }
-
-  /* --- Numerics: tabular figures everywhere money + tokens + percent
-         appear so the column never jitters as values change. --- */
-  .home-roi-num,
-  .home-roi-row span:last-child,
-  .home-roi-mult,
-  .home-receipts__size,
-  .home-receipts__time,
-  .home-receipts__hash {
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* --- Reveal stagger: direct children of any .fr-reveal get a small
-         cascade so the section reads top-to-bottom. Capped at 6 so long
-         lists don't crawl in for half a second. Honors reduce-motion. --- */
-  .fr-reveal--prep > * { transition: opacity 380ms ease, transform 420ms cubic-bezier(.2,.6,.2,1); }
-  .fr-reveal--prep > *:nth-child(1) { transition-delay: 60ms; }
-  .fr-reveal--prep > *:nth-child(2) { transition-delay: 120ms; }
-  .fr-reveal--prep > *:nth-child(3) { transition-delay: 180ms; }
-  .fr-reveal--prep > *:nth-child(4) { transition-delay: 240ms; }
-  .fr-reveal--prep > *:nth-child(5) { transition-delay: 300ms; }
-  .fr-reveal--prep > *:nth-child(6) { transition-delay: 360ms; }
-  @media (prefers-reduced-motion: reduce) {
-    .kolm-whatis__surface, .ks-three-surface__col { transition: none !important; }
-    .fr-reveal--prep > * { transition: none !important; transition-delay: 0ms !important; }
-  }
-
-  /* --- Section divider mark: lighter weight so the rules between sections
-         feel like quiet pauses, not chapter breaks. --- */
-  .fr-rule--major__mark {
-    font-weight: 400;
-    letter-spacing: 0.14em;
-    opacity: 0.7;
-  }
-
-  /* --- Code inline polish: tighter chip in body copy across the page. --- */
-  .kolm-whatis__p code,
-  .ks-three-surface__col p code,
-  .ks-three-surface__col li code,
-  .fr-lede code {
-    background: color-mix(in srgb, var(--ks-ink, #111) 7%, transparent);
-    color: var(--ks-ink, #111);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 0.92em;
-    font-family: var(--ks-mono, ui-monospace, "JetBrains Mono", monospace);
-  }
-</style>
-<script>
-  (function(){
-    try {
-      var t = localStorage.getItem('kolm-theme');
-      if (t === 'dark') {
-        document.documentElement.setAttribute('data-theme','dark');
-        document.documentElement.style.background = '#0e1116';
-        document.documentElement.style.colorScheme = 'dark';
-      } else {
-        document.documentElement.setAttribute('data-theme','light');
-        document.documentElement.style.background = '#f3f5f7';
-        document.documentElement.style.colorScheme = 'light';
-      }
-    } catch(e){
-      try {
-        document.documentElement.setAttribute('data-theme','light');
-        document.documentElement.style.background = '#f3f5f7';
-        document.documentElement.style.colorScheme = 'light';
-      } catch(_){}
-    }
-  })();
-</script>
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script type="module" src="/verify-widget.js"></script>
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://kolm.ai/#org",
-      "name": "kolm.ai",
-      "url": "https://kolm.ai/",
-      "logo": "https://kolm.ai/favicon.svg",
-      "sameAs": ["https://github.com/kolm-ai/kolm"],
-      "description": "The AI compiler. Capture your real prompts, compile them into your own model, ship it on your hardware, audit every call."
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://kolm.ai/#website",
-      "url": "https://kolm.ai/",
-      "name": "kolm.ai",
-      "publisher": {"@id": "https://kolm.ai/#org"}
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://kolm.ai/#app",
-      "name": "kolm",
-      "applicationCategory": "DeveloperApplication",
-      "operatingSystem": "Linux, macOS, Windows (WSL)",
-      "url": "https://kolm.ai/",
-      "description": "Open-source AI compiler: route any model, distill specialists, run signed .kolm artifacts on your own hardware.",
-      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-      "publisher": {"@id": "https://kolm.ai/#org"}
-    }
-  ]
+  "@type": "Service",
+  "name": "kolm Agent Security-Review Readiness Audit",
+  "serviceType": "AI agent security audit and signed evidence attestation",
+  "provider": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "description": "An audit of your AI agent's permissions, audit trail, data egress and injection resistance, ending in a cryptographically signed evidence report your enterprise buyer verifies offline against your public key.",
+  "areaServed": "Worldwide",
+  "audience": { "@type": "Audience", "audienceType": "AI-native software vendors selling agents into the enterprise" }
 }
 </script>
 </head>
-<body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<!-- W918 OpenAI migration banner -->
-<div id="w918MigrationBanner" role="region" aria-label="OpenAI fine-tuning migration announcement" style="background: var(--ks-bg-1); border-bottom: 1px solid var(--ks-line-2); font-family: var(--ks-sans); font-size: 13.5px; line-height: 1.5; color: var(--ks-ink-2);">
-  <div style="max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; justify-content: center; gap: 16px;">
-    <a href="/openai-migration" style="color: var(--ks-ink); text-decoration: none; border-bottom: 1px solid var(--ks-accent-edge); transition: border-color 140ms;">OpenAI is closing fine-tuning. We help you land. <span aria-hidden="true">&rarr;</span></a>
-    <button type="button" id="w918BannerClose" aria-label="Dismiss migration banner" style="appearance: none; background: transparent; border: 1px solid transparent; color: var(--ks-ink-3); cursor: pointer; min-width: 44px; min-height: 44px; padding: 10px; border-radius: 6px; font-family: var(--ks-mono); font-size: 16px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; transition: color 140ms, border-color 140ms;">&times;</button>
-  </div>
-</div>
-<script>
-  (function () {
-    try {
-      var banner = document.getElementById('w918MigrationBanner');
-      var btn = document.getElementById('w918BannerClose');
-      if (!banner || !btn) return;
-      if (localStorage.getItem('w918_banner_dismissed') === '1') {
-        banner.style.display = 'none';
-        return;
-      }
-      btn.addEventListener('click', function () {
-        try { localStorage.setItem('w918_banner_dismissed', '1'); } catch (_) {}
-        banner.style.display = 'none';
-      });
-      btn.addEventListener('focus', function () { btn.style.borderColor = 'var(--ks-accent-edge)'; btn.style.color = 'var(--ks-ink)'; });
-      btn.addEventListener('blur', function () { btn.style.borderColor = 'transparent'; btn.style.color = 'var(--ks-ink-3)'; });
-    } catch (_) { /* no-op */ }
-  })();
-</script>
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
 
-<!-- ================== Nav ================== -->
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/solutions/teams">For teams</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="/enterprise">Enterprise</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <button type="button" class="ks-theme-toggle" id="ksThemeToggle" aria-label="Toggle theme" title="Toggle theme">
-        <svg class="theme-icon theme-icon--moon" viewbox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-        <svg class="theme-icon theme-icon--sun" viewbox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
-      </button>
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow" aria-hidden="true">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-        <svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-      </button>
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
     </div>
-  </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a>
-    <a href="/solutions/teams">For teams</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-    <a href="https://github.com/kolm-ai/kolm" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-    <a href="/signup?intent=login">Sign in</a>
-    <a href="/signup">Get started &rarr;</a>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
   </div>
-</div>
+</header>
 
+<main>
 
-<script>
-(function(){
-  var btn = document.getElementById('ksThemeToggle');
-  if (!btn) return;
-  function getTheme(){
-    var attr = document.documentElement.getAttribute('data-theme');
-    if (attr === 'dark' || attr === 'light') return attr;
-    try { var s = localStorage.getItem('kolm-theme'); if (s === 'dark' || s === 'light') return s; } catch(e){}
-    try { if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) return 'dark'; } catch(e){}
-    return 'light';
-  }
-  function apply(theme){
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.style.colorScheme = theme;
-    document.documentElement.style.background = theme === 'dark' ? '#0e1116' : '#f3f5f7';
-    try { localStorage.setItem('kolm-theme', theme); } catch(e){}
-    btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-    btn.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' theme');
-  }
-  apply(getTheme());
-  btn.addEventListener('click', function(){ apply(getTheme() === 'dark' ? 'light' : 'dark'); });
-})();
-</script>
-
-<main id="main">
-
-<!-- ================== Hero ================== -->
-
-<style id="hp-w936">
-:root{ --hp-c:var(--ks-accent,#2563eb); --hp-ink:var(--ks-ink,#11151b); --hp-ink2:var(--ks-ink-2,#3b444f);
-  --hp-mut:var(--ks-ink-3,#6a7480); --hp-bg:var(--ks-bg,#f5f7f9); --hp-pan:var(--ks-bg-1,#ffffff);
-  --hp-line:var(--ks-line-2,#e3e7ec); --hp-line2:var(--ks-line-3,#cfd6de);
-  --hp-mono:var(--ks-mono,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace); --hp-slate:#0e1320; --hp-slate-ink:#d6deea; }
-html[data-theme=dark]{ --hp-c:var(--ks-accent,#6f9bff); --hp-ink:#eef1f5; --hp-ink2:#aeb8c4; --hp-mut:#7c8794;
-  --hp-bg:#0b0e13; --hp-pan:#11151b; --hp-line:#1d2430; --hp-line2:#2a3340; }
-.hp{ color:var(--hp-ink); }
-.hp-wrap{ max-width:1160px; margin:0 auto; padding:0 28px; }
-.hp-sec{ padding:clamp(54px,7vw,100px) 0; border-top:1px solid var(--hp-line); }
-.hp-idx{ font-family:var(--hp-mono); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--hp-mut); display:flex; align-items:center; gap:10px; margin:0 0 20px; }
-.hp-idx b{ color:var(--hp-c); font-weight:600; } .hp-idx::after{ content:""; flex:0 0 28px; height:1px; background:var(--hp-c); opacity:.5; }
-.hp-h2{ font-family:var(--ks-display,Inter,system-ui,sans-serif); font-weight:560; letter-spacing:-.022em; font-size:clamp(27px,3.6vw,44px); line-height:1.08; margin:0 0 14px; max-width:22ch; text-wrap:balance; }
-.hp-lede{ font-size:clamp(15.5px,1.4vw,18px); line-height:1.55; color:var(--hp-ink2); max-width:64ch; margin:0 0 26px; }
-.hp-btn{ display:inline-flex; align-items:center; gap:8px; font-size:14.5px; font-weight:540; border-radius:8px; padding:12px 20px; text-decoration:none; transition:transform .12s, background .12s, border-color .12s; }
-.hp-btn--p{ background:var(--hp-c); color:#fff; } .hp-btn--p:hover{ transform:translateY(-1px); }
-.hp-btn--g{ border:1px solid var(--hp-line2); color:var(--hp-ink); } .hp-btn--g:hover{ border-color:var(--hp-c); color:var(--hp-c); }
-.hp-ctas{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-.hp-link{ color:var(--hp-c); text-decoration:none; border-bottom:1px solid transparent; font-weight:500; } .hp-link:hover{ border-bottom-color:var(--hp-c); }
-.hp-trust{ font-family:var(--hp-mono); font-size:11px; letter-spacing:.14em; color:var(--hp-mut); text-transform:uppercase; }
-/* hero */
-.hp-hero{ display:grid; grid-template-columns:1.05fr 1fr; gap:clamp(28px,4vw,64px); align-items:center; padding:clamp(40px,6vw,84px) 0 clamp(48px,6vw,88px); }
-.hp-hero__eye{ font-family:var(--hp-mono); font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--hp-c); margin:0 0 18px; }
-.hp-hero h1{ font-family:var(--ks-display,Inter,system-ui,sans-serif); font-weight:580; letter-spacing:-.03em; font-size:clamp(36px,4.8vw,60px); line-height:1.03; margin:0 0 20px; }
-.hp-hero__sub{ font-size:clamp(16px,1.5vw,19px); line-height:1.5; color:var(--hp-ink2); max-width:56ch; margin:0 0 26px; }
-.hp-hero__trust{ margin-top:24px; }
-@media(max-width:920px){ .hp-hero{ grid-template-columns:1fr; } }
-/* control-plane panel */
-.hp-cp{ background:var(--hp-pan); border:1px solid var(--hp-line2); border-radius:14px; overflow:hidden; box-shadow:0 24px 60px -34px rgba(20,30,50,.34); font-family:var(--hp-mono); font-size:12.5px; }
-.hp-cp__bar{ display:flex; justify-content:space-between; align-items:center; padding:11px 16px; border-bottom:1px solid var(--hp-line); color:var(--hp-mut); font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
-.hp-cp__providers{ display:flex; flex-wrap:wrap; gap:7px; padding:14px 16px 8px; }
-.hp-chip{ font-family:var(--hp-mono); font-size:11px; border:1px solid var(--hp-line2); border-radius:999px; padding:4px 11px; color:var(--hp-ink2); }
-.hp-cp__arrow{ text-align:center; color:var(--hp-mut); font-size:14px; padding:2px 0; }
-.hp-cp__feed{ padding:4px 0 6px; }
-.hp-cp__row{ display:grid; grid-template-columns:1fr auto auto; gap:10px; padding:7px 16px; border-top:1px solid var(--hp-line); align-items:center; }
-.hp-cp__who{ color:var(--hp-ink); } .hp-cp__mdl{ color:var(--hp-mut); } .hp-cp__cost{ color:var(--hp-c); font-variant-numeric:tabular-nums; }
-.hp-cp__pillars{ display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--hp-line); }
-.hp-cp__p{ padding:11px 8px; text-align:center; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--hp-mut); border-right:1px solid var(--hp-line); }
-.hp-cp__p:last-child{ border-right:0; } .hp-cp__p.on{ color:var(--hp-c); box-shadow:inset 0 -2px 0 var(--hp-c); }
-.hp-cp__cap{ font-family:var(--hp-mono); font-size:11px; color:var(--hp-mut); margin:12px 2px 0; }
-/* pillars triptych */
-.hp-trip{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:8px; }
-@media(max-width:880px){ .hp-trip{ grid-template-columns:1fr; } }
-.hp-card{ background:var(--hp-pan); border:1px solid var(--hp-line); border-radius:12px; padding:24px; }
-.hp-card__tag{ font-family:var(--hp-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--hp-mut); margin:0 0 12px; }
-.hp-card h3{ font-size:18px; font-weight:560; letter-spacing:-.01em; line-height:1.2; margin:0 0 9px; }
-.hp-card p{ font-size:14px; line-height:1.55; color:var(--hp-ink2); margin:0 0 14px; }
-.hp-card__m{ font-family:var(--hp-mono); font-size:10.5px; letter-spacing:.06em; color:var(--hp-mut); text-transform:uppercase; border-top:1px solid var(--hp-line); padding-top:12px; }
-/* problem tiles */
-.hp-tiles{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
-@media(max-width:760px){ .hp-tiles{ grid-template-columns:1fr; } }
-.hp-tile{ border:1px solid var(--hp-line); border-radius:12px; padding:20px 22px; background:var(--hp-pan); }
-.hp-tile h4{ margin:0 0 6px; font-size:15.5px; font-weight:560; }
-.hp-tile p{ margin:0; font-size:14px; color:var(--hp-ink2); line-height:1.5; }
-.hp-tile .fix{ display:block; margin-top:10px; font-family:var(--hp-mono); font-size:11.5px; color:var(--hp-c); }
-/* two-col + ledger + govern grid */
-.hp-2col{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(20px,3vw,40px); align-items:start; } @media(max-width:860px){ .hp-2col{ grid-template-columns:1fr; } }
-.hp-grid6{ display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--hp-line); border-radius:12px; overflow:hidden; } @media(max-width:760px){ .hp-grid6{ grid-template-columns:1fr; } }
-.hp-cell{ padding:20px 22px; border-right:1px solid var(--hp-line); border-bottom:1px solid var(--hp-line); }
-.hp-cell__l{ font-family:var(--hp-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--hp-mut); margin:0 0 8px; }
-.hp-cell--byoc .hp-cell__l{ color:var(--hp-c); } .hp-cell p{ margin:0; font-size:13.5px; line-height:1.5; color:var(--hp-ink2); }
-.hp-soc{ font-family:var(--hp-mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--hp-mut); margin:16px 0 6px; }
-/* close */
-.hp-close{ text-align:center; } .hp-close .hp-h2{ margin:0 auto 14px; max-width:20ch; } .hp-close .hp-lede{ margin:0 auto 26px; } .hp-close .hp-ctas{ justify-content:center; }
-</style>
-<div class="hp">
-
-<!-- 01 Hero: the entire product -->
-<section class="hp-sec" aria-label="kolm, the AI control plane for teams" style="border-top:0;padding-top:clamp(28px,4vw,52px);">
-  <div class="hp-wrap">
-    <div class="hp-hero">
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush hero">
+  <div class="wrap">
+    <div class="hero__grid">
       <div>
-        <p class="hp-hero__eye">The AI control plane for teams</p>
-        <h1>Own your company's<br>AI layer.</h1>
-        <p class="hp-hero__sub">Every employee's AI use, in one place you control. kolm captures it, shows you the cost, turns it into models you own, runs them anywhere from the cloud to your own machines, and governs the whole thing. No AI team required.</p>
-        <div class="hp-ctas">
-          <a class="hp-btn hp-btn--p" href="/account/connect">See your team's AI <span aria-hidden="true">&rarr;</span></a>
-          <a class="hp-btn hp-btn--g" href="/book-demo">Book a demo</a>
+        <h1 class="hero__h1">The deal isn't lost.<br>It's in security review.</h1>
+        <p class="lede">
+          When a buyer's security team has to vet your autonomous agent, hand them a signed evidence report they verify offline, against your own key. The four-to-eight-week review becomes days.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="/contact">Start an audit</a>
+          <a class="btn btn--ghost" href="/how-it-works">See how it works</a>
         </div>
-        <p class="hp-trust hp-hero__trust">See &middot; Own &middot; Run anywhere &middot; Govern, one platform</p>
+        <p class="hero__who" style="margin-top:14px;color:var(--ink-2);font-size:.95rem;max-width:54ch">For AI-native vendors whose deal is waiting on a security review. Financial-services buyers first, then any regulated reviewer now asking an agent-specific question that SOC 2 alone does not answer.</p>
+        <div class="trustline" aria-label="What the report guarantees">
+          <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed</span>
+          <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verifiable offline</span>
+          <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Mapped to SOC 2, ISO 42001, your buyer's questionnaire</span>
+        </div>
       </div>
-      <div>
-        <div class="hp-cp" aria-label="The kolm control plane">
-          <div class="hp-cp__bar"><span>your team's AI</span><span>live</span></div>
-          <div class="hp-cp__providers"><span class="hp-chip">OpenAI</span><span class="hp-chip">Anthropic</span><span class="hp-chip">Gemini</span><span class="hp-chip">vLLM</span><span class="hp-chip">your models</span></div>
-          <div class="hp-cp__arrow" aria-hidden="true">&darr; routed &middot; redacted &middot; captured &darr;</div>
-          <div class="hp-cp__feed">
-            <div class="hp-cp__row"><span class="hp-cp__who">alex &middot; support</span><span class="hp-cp__mdl">gpt-4o</span><span class="hp-cp__cost">$0.011</span></div>
-            <div class="hp-cp__row"><span class="hp-cp__who">priya &middot; legal</span><span class="hp-cp__mdl">claude</span><span class="hp-cp__cost">$0.043</span></div>
-            <div class="hp-cp__row"><span class="hp-cp__who">sam &middot; eng</span><span class="hp-cp__mdl">your-specialist.kolm</span><span class="hp-cp__cost">$0.000</span></div>
-          </div>
-          <div class="hp-cp__pillars"><span class="hp-cp__p on">Capture</span><span class="hp-cp__p">Own</span><span class="hp-cp__p">Run</span><span class="hp-cp__p">Govern</span></div>
-        </div>
-        <p class="hp-cp__cap">Who asked what, what it cost, what is running where. One dashboard.</p>
+
+      <!-- proof above the fold: the real verifier, live, interactive, in this browser -->
+      <aside aria-label="Live offline verification of a signed evidence report">
+        <span class="tryit">Live · runs in your browser</span>
+        <div class="vw" data-verify-widget
+             data-src="/sample-audit-report.json" data-mode="report"
+             data-keyring="/keys/kolm-issuers.json" data-variant="full"></div>
+        <p class="hero__claim" style="text-align:center">
+          Try to break it. <b>Inflate the score</b> or <b>forge a rogue key</b>, and the seal reads VOID.
+          Real Ed25519, no account, no upload.
+        </p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. PROOF STRIP -->
+<section class="section" style="padding-top:0;border-top:0" aria-label="Proof">
+  <div class="wrap">
+    <h2 class="sr-only">Proof at a glance</h2>
+    <hr class="rule">
+    <div class="band">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="band__item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Verified offline. Zero servers in the trust path
+      </span>
+      <span class="band__item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <a href="/transparency-log">Append-only transparency log</a>
+      </span>
+    </div>
+    <div class="band" style="padding-top:0">
+      <span class="ctrlid">SOC 2</span>
+      <span class="ctrlid">ISO 42001</span>
+      <span class="ctrlid">NIST AI RMF</span>
+      <span class="ctrlid">EU AI Act</span>
+      <span class="ctrlid">OWASP</span>
+      <span class="ctrlid">MITRE ATLAS</span>
+    </div>
+    <hr class="rule">
+  </div>
+</section>
+
+<!-- ============================================================ 3. THE STALL -->
+<section class="section reveal" id="problem">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / The stall</span>
+      <h2>A CISO won't take your word for it.</h2>
+      <p class="lede">
+        The moment an autonomous agent touches customer data, the week-long review
+        runs four to eight. A questionnaire no longer clears it.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Over-permissioned</p>
+        <h3>More access than the job needs</h3>
+        <p>Ten times the privileges it uses, often on one shared key. The first thing a reviewer flags.</p>
+        <p class="card__map">ASR-1 · least privilege</p>
+      </div>
+      <div class="card">
+        <p class="card__k">No tamper-evidence</p>
+        <h3>A log nobody can trust</h3>
+        <p>If the trail can be edited after the fact, it is not evidence. Reviewers want it append-only and hash-chained.</p>
+        <p class="card__map">ASR-2 · audit trail</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Say-so doesn't scale</p>
+        <h3>Questionnaires are not proof</h3>
+        <p>Self-attested answers shift the burden to the buyer. They want evidence they can verify themselves.</p>
+        <p class="card__map">ASR-6 · evidence</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 02 The valuable data leaving -->
-<section class="hp-sec" aria-label="The data leaving your company">
-  <div class="hp-wrap">
-    <p class="hp-idx"><b>02</b> Why it matters</p>
-    <h2 class="hp-h2" style="max-width:26ch;">Your most valuable data is walking out the door.</h2>
-    <p class="hp-lede">Every prompt and document your team pastes into ChatGPT or Claude is your real work: your processes, your decisions, your customer knowledge. Right now it trains someone else's model and leaves your control, with no record of what went where. kolm captures that value, keeps it yours, and compounds it into models your company owns.</p>
-    <div class="hp-tiles">
-      <div class="hp-tile"><h4>No visibility</h4><p>You don't know who uses AI, for what, or how often.</p><span class="fix">kolm shows every call, by person and team.</span></div>
-      <div class="hp-tile"><h4>Unknown cost</h4><p>Spend is scattered across personal cards and provider bills no one reconciles.</p><span class="fix">kolm meters cost per team and per model.</span></div>
-      <div class="hp-tile"><h4>Data leaking</h4><p>Sensitive customer and company data goes into tools you do not control.</p><span class="fix">kolm redacts it before it leaves, by your rules.</span></div>
-      <div class="hp-tile"><h4>No reuse, no record</h4><p>The same work is redone daily, and you cannot prove what happened if asked.</p><span class="fix">kolm turns it into owned models and a signed record.</span></div>
+<!-- ============================================================ 4. HOW IT WORKS (the ledger) -->
+<section class="section section--ink reveal" id="how">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / How it works</span>
+      <h2>Audit. Sign. Verify.</h2>
+      <p class="lede">One lifecycle. The report is reproducible, scoped to what was tested, and checkable by anyone you hand it to.</p>
+    </div>
+
+    <!-- intuitive-first: the signing pipeline as a diagram, not a wall of steps -->
+    <div class="flow" aria-label="The audit, sign and verify pipeline">
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+        <span class="flow__n">01 · Audit</span>
+        <span class="flow__t">We examine the agent</span>
+        <p class="flow__d">Onramp through a log import or a sidecar proxy. Permissions, audit trail, data egress and injection resistance, each mapped to the standards your buyer cites.</p>
+      </div>
+      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 11.5l2.4 2.4L15.5 9.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">02 · Sign</span>
+        <span class="flow__t">We seal the findings</span>
+        <p class="flow__d">The report is canonicalized and signed with Ed25519. The signature covers the exact bytes, so a downgraded finding or an inflated score breaks it. Each issuance enters an append-only log.</p>
+      </div>
+      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l4.5 4.5L20 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">03 · Verify</span>
+        <span class="flow__t">Your buyer checks it</span>
+        <p class="flow__d">They verify the signature offline, in their own browser, against your public key. No account, no upload, no kolm server in the trust path.</p>
+      </div>
+    </div>
+
+    <p class="hero__claim" style="margin-top:var(--s7)">
+      Trust moves from our word to the math. The same check runs in the verifier at the top of this page.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 5. THE REPORT -->
+<section class="section reveal" id="report">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / The report</span>
+      <h2>The artifact is the proof.</h2>
+      <p class="lede">A signed report is one canonical object. Every cryptographic fact is set in mono, because a fact should read like a fact.</p>
+    </div>
+    <div class="split">
+      <div class="report register">
+        <div class="register__row"><span class="register__k">schema</span><span class="register__v">kolm-audit-report-1</span></div>
+        <div class="register__row"><span class="register__k">report_id</span><span class="register__v">asrr_sample</span></div>
+        <div class="register__row"><span class="register__k">subject</span><span class="register__v">Helpwise support &amp; billing agents <span class="ann">what was assessed</span></span></div>
+        <div class="register__row"><span class="register__k">readiness_pct</span><span class="register__v"><b>0</b> <span class="ann">assessed controls only</span></span></div>
+        <div class="register__row"><span class="register__k">findings</span><span class="register__v">6 · <b>5 high</b> · 1 low</span></div>
+        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
+        <div class="register__row"><span class="register__k">key_fingerprint</span><span class="register__v"><b>410302c93becdcc3…</b></span></div>
+        <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:0XCoqRkbLg…sEjBDw</b> <span class="ann">covers the canonical bytes</span></span></div>
+        <div class="register__row"><span class="register__k">verify_url</span><span class="register__v"><b>kolm.ai/verify</b></span></div>
+      </div>
+      <div class="grid" style="gap:14px;align-content:start">
+        <div class="card">
+          <h3>Canonical payload</h3>
+          <p>Key-sorted, whitespace-free JSON. The signature covers these exact bytes, so a downgraded finding or an inflated score is self-evident.</p>
+        </div>
+        <div class="card">
+          <h3>Ed25519 signature, embedded key</h3>
+          <p>The signature and the public key it was made with travel together. Your buyer needs nothing from us: the verifier runs offline against the key inside the report.</p>
+        </div>
+        <div class="card">
+          <h3>Framework crosswalk</h3>
+          <p>Every finding maps to the control your buyer cites, so a reviewer traces each result to a standard they already use.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:var(--s7)">
+      <table class="tbl">
+        <thead>
+          <tr><th scope="col">Control</th><th scope="col">What it checks</th><th scope="col">Maps to</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI · NIST MANAGE-1</td></tr>
+          <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
+          <tr><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
+          <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS</td></tr>
+          <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance</td><td class="mapped">ISO 42001 · NIST MAP-1</td></tr>
+          <tr><td><b>ASR-6</b> Evidence</td><td>Signed, logged, offline-verifiable report</td><td class="mapped">SOC 2 CC7 · ISO 42001</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s4)">
+      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 6. WHY THE BUYER TRUSTS IT (the ledger) -->
+<section class="section section--ink reveal" id="verify">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / Verification</span>
+      <h2>They don't trust us. They check the math.</h2>
+      <p class="lede">
+        Security theater can't be falsified. This can. Two checks run in the buyer's
+        own browser, against the key inside the report, with no kolm server in the path.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Tier 1 · signature</p>
+        <h3>Edit one field, the seal breaks</h3>
+        <p>The Ed25519 signature covers the canonical bytes. Change a finding or inflate the score and the match fails, in front of the reviewer.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Tier 2 · issuer</p>
+        <h3>A rogue key signs, but doesn't match</h3>
+        <p>The signing key is pinned to the keyring your buyer expects. Forge a fresh key and tier 1 clears, but tier 2 exposes it.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Offline · no server</p>
+        <h3>kolm is never in the path</h3>
+        <p>Verification runs on WebCrypto in the buyer's browser. No account, no upload, nothing for us to fake. Scope is part of the signed object.</p>
+      </div>
+    </div>
+    <div class="hero__cta" style="margin-top:var(--s7)">
+      <a class="btn btn--ghost" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/sample-audit-report.json" download>Download the sample</a>
     </div>
   </div>
 </section>
 
-<!-- 03 Capture (bedrock) -->
-<section class="hp-sec" aria-label="See and control all of it">
-  <div class="hp-wrap">
-    <p class="hp-idx"><b>03</b> See &amp; control</p>
-    <h2 class="hp-h2" style="max-width:24ch;">Connect every tool. See every call.</h2>
-    <p class="hp-lede">Point any OpenAI, Anthropic, Gemini, or vLLM client at kolm and nothing changes for your team. Behind the scenes every call is routed, attributed to the person and team who made it, PII-redacted inline, and stored. You finally see cost per team, which prompts get repeated all day, and what touched sensitive data.</p>
-    <div class="hp-trip">
-      <div class="hp-card"><p class="hp-card__tag">Connect</p><h3>One URL, every provider.</h3><p>Members keep their own tools and keys. kolm routes their traffic and captures the request-and-response pairs worth keeping, in your tenant, not ours.</p><p class="hp-card__m">7 protocols &middot; one endpoint</p></div>
-      <div class="hp-card"><p class="hp-card__tag">Attribute</p><h3>Who asked what, and what it cost.</h3><p>Every call is tagged to a member and team, metered, and shown on a live dashboard with a cost rollup. Finance and security finally get a single source of truth.</p><p class="hp-card__m">cost per team &middot; per model</p></div>
-      <div class="hp-card"><p class="hp-card__tag">Protect</p><h3>Sensitive data, redacted on the way in.</h3><p>The redaction membrane scrubs PII before it leaves your boundary. You set the rules for what gets caught; every redaction is recorded.</p><p class="hp-card__m">you set the rules</p></div>
+<!-- ============================================================ 7. PRICING -->
+<section class="section reveal" id="pricing">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">05 / Pricing</span>
+      <h2>One fixed fee. One signed report.</h2>
+      <p class="lede">No retainer to start, no per-seat meter. A scoped audit that ends in evidence your buyer can verify.</p>
+    </div>
+    <div class="split" style="align-items:center">
+      <div class="plate">
+        <p class="card__k">Agent Security-Review Readiness</p>
+        <div class="tier__price">from $15,000</div>
+        <p class="tier__sub">fixed fee · one signed report · days, not weeks</p>
+        <ul class="ledger" style="margin:var(--s5) 0">
+          <li>Least-privilege and shared-key audit</li>
+          <li>Append-only audit-trail integrity check</li>
+          <li>Data-egress and redaction review</li>
+          <li>Prompt-injection red-team, tested and reported</li>
+          <li>Ed25519-signed report, mapped to your buyer's frameworks</li>
+          <li>Offline verifier your buyer runs with no account</li>
+        </ul>
+        <a class="btn btn--primary" href="/contact" style="width:100%">Start an audit</a>
+        <p class="hero__claim" style="text-align:center;margin-top:var(--s3)">Multiple deals or a BAA? <a href="/enterprise" style="border-bottom:1px solid var(--line-2)">Enterprise</a></p>
+      </div>
+      <div>
+        <h3>What you hand the buyer</h3>
+        <p style="color:var(--ink-2);margin:var(--s3) 0 var(--s4)">
+          A single canonical artifact mapped to the controls their review group already
+          cites. They open it, verify the signature offline, and trace each finding to
+          a standard. The burden of proof moves off their desk.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--ghost btn--sm" href="/pricing">See full pricing</a>
+          <a class="btn btn--ghost btn--sm" href="/sample-audit-report.json" download>See a sample report</a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- 04 Build & own (incl. intense training) -->
-<section class="hp-sec" aria-label="Own what you build">
-  <div class="hp-wrap">
-    <p class="hp-idx"><b>04</b> Own what you build</p>
-    <h2 class="hp-h2" style="max-width:24ch;">Turn your team's work into models you own.</h2>
-    <p class="hp-lede">kolm finds the work your team repeats most and turns it into a dataset. From there you train a specialist on your own data: a light run distills and quantizes a small model in minutes, or an intense run distills from a council of frontier teachers and fine-tunes on rented cloud GPUs. Either way the model is yours, cheaper to run, and tuned to how your team actually works.</p>
-    <div class="hp-2col">
-      <div class="hp-card" style="border-left:2px solid var(--hp-c)"><p class="hp-card__tag" style="color:var(--hp-c)">Light path</p><h3>Distill a small model in minutes.</h3><p>Pick a captured task in the browser builder or run one CLI command. kolm distills and quantizes to INT4 and signs a portable .kolm file. No training code, no ML team.</p><p class="hp-card__m">browser builder or one CLI command</p></div>
-      <div class="hp-card"><p class="hp-card__tag">Intense path</p><h3>Train a serious model on real GPUs.</h3><p>Need something heavier? Distill from a council of frontier teachers and fine-tune on rented cloud GPUs through the compute broker. You keep the weights, the data, and the receipts.</p><p class="hp-card__m">teacher council &middot; cloud GPU &middot; you own the weights</p></div>
-    </div>
-    <div class="hp-ctas" style="margin-top:24px;"><a class="hp-btn hp-btn--p" href="/account/create-model">Build a model <span aria-hidden="true">&rarr;</span></a><a class="hp-link" href="/docs/distillation">How training works</a></div>
-  </div>
-</section>
-
-<!-- 05 Run anywhere / on devices -->
-<section class="hp-sec" aria-label="Run it anywhere">
-  <div class="hp-wrap">
-    <p class="hp-idx"><b>05</b> Run anywhere</p>
-    <h2 class="hp-h2" style="max-width:24ch;">Run it on your own machines, not just someone else's cloud.</h2>
-    <p class="hp-lede">Some work should never leave the building. kolm shrinks a capable model to run on hardware you already own, so a 7B model runs on a workstation and a 32B model runs on a single high-end GPU. Reach it over a local endpoint, over SSH, or keep using hosted models. You choose per model and per team.</p>
-    <div class="hp-trip">
-      <div class="hp-card"><p class="hp-card__tag">On your machines</p><h3>Local, VPC, or air-gapped.</h3><p>Export to GGUF, Ollama, or Hugging Face with no proprietary loader, and run where your data already lives. A team shares one stable endpoint to the model it owns.</p><p class="hp-card__m">local &middot; VPC &middot; air-gapped &middot; SSH</p></div>
-      <div class="hp-card"><p class="hp-card__tag">Proven on real hardware</p><h3>Big models, one GPU.</h3><p>A 7B specialist ships INT4 in-repo; DeepSeek-R1-32B runs at 17.9 GB INT4 on a single RTX 5090. Real, measured numbers, tied to the hardware they ran on.</p><p class="hp-card__m">DeepSeek-R1-32B &rarr; 17.9 GB INT4 &middot; one 5090</p></div>
-      <div class="hp-card"><p class="hp-card__tag">Or stay hosted</p><h3>No forced migration.</h3><p>Keep routing to frontier models through kolm for the work that needs them. Own the routine, rent the frontier; the dashboard and receipts cover both.</p><p class="hp-card__m">own the routine, rent the frontier</p></div>
+<!-- ============================================================ 8. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Clear the review. Close the deal.</h2>
+    <p class="lede">A fixed-fee audit, a signed evidence report, and a review that moves at the speed of math.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost" href="/verify">Verify a report</a>
     </div>
   </div>
 </section>
-
-<!-- 06 Govern & prove (proof lives here) -->
-<section class="hp-sec" aria-label="Govern and prove">
-  <div class="hp-wrap">
-    <p class="hp-idx"><b>06</b> Govern &amp; prove</p>
-    <h2 class="hp-h2" style="max-width:26ch;">Govern it. Then prove the controls held.</h2>
-    <p class="hp-lede">A security questionnaire should not decide which model you ship. SSO, SCIM, and RBAC are the floor. BYOC keeps training and inference inside your boundary, residency spans nine regions, and a signed Ed25519 receipt on every call makes all of it checkable after the fact, by you or an auditor, offline.</p>
-    <div class="hp-grid6">
-      <div class="hp-cell"><p class="hp-cell__l">SSO / SAML</p><p>Your identity provider decides access.</p></div>
-      <div class="hp-cell"><p class="hp-cell__l">SCIM</p><p>Provisioning and deprovisioning, automatic.</p></div>
-      <div class="hp-cell"><p class="hp-cell__l">RBAC</p><p>Who can route, build, and export, by role.</p></div>
-      <div class="hp-cell hp-cell--byoc"><p class="hp-cell__l">BYOC</p><p>Train and serve in your own VPC. Data never leaves your network.</p></div>
-      <div class="hp-cell"><p class="hp-cell__l">Data residency</p><p>Pin training and serving to one of nine regions.</p></div>
-      <div class="hp-cell"><p class="hp-cell__l">Signed receipts</p><p>Every call returns a verifiable record. Audit without you in the room.</p></div>
-    </div>
-    <p class="hp-soc">SOC&nbsp;2 Type&nbsp;I complete &middot; Type&nbsp;II in progress &middot; Apache&#8209;2.0 core</p>
-    <div class="hp-ctas" style="margin-top:14px;"><a class="hp-btn hp-btn--p" href="/enterprise">Talk to us about BYOC <span aria-hidden="true">&rarr;</span></a><a class="hp-link" href="/verify">Verify a receipt</a></div>
-  </div>
-</section>
-
-<!-- 07 Close -->
-<section class="hp-sec hp-close" aria-label="Get started">
-  <div class="hp-wrap">
-    <p class="hp-idx" style="justify-content:center;"><b>07</b> Start</p>
-    <h2 class="hp-h2">Get your team's AI under control.</h2>
-    <p class="hp-lede">Connect your providers, invite your people, set who can use what, and watch the usage, cost, and risk become visible. Most teams get there in an afternoon. No machine-learning background required.</p>
-    <div class="hp-ctas">
-      <a class="hp-btn hp-btn--p" href="/account/connect">See your team's AI <span aria-hidden="true">&rarr;</span></a>
-      <a class="hp-btn hp-btn--g" href="/book-demo">Book a demo</a>
-    </div>
-    <p class="hp-trust" style="margin-top:26px;">Apache&#8209;2.0 &middot; Self&#8209;hostable &middot; Air&#8209;gapped &middot; SOC&nbsp;2 Type&nbsp;I &middot; 6 SDKs</p>
-    <p style="margin-top:18px;font-size:13px;"><a class="hp-link" href="/pricing">See pricing</a></p>
-  </div>
-</section>
-
-</div>
-
 
 </main>
 
-<!-- ================== Footer ================== -->
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/recipes">Recipes</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Operate</h4>
-        <a href="/fleet">Fleet</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-        <a href="/gateway">Gateway</a>
-        <a href="/account">Account</a>
-        <a href="/account/savings">Savings</a>
-        <a href="/account/billing">Billing</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/status">Status</a>
-        <a href="/subprocessors">Subprocessors</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/about">About</a>
-        <a href="/press">Press</a>
-        <a href="/book-demo">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
-
-<!-- ================== Scripts ================== -->
-<script>
-  // Mobile nav toggle
-  (function(){
-    var btn = document.getElementById('navToggle');
-    var sheet = document.getElementById('navSheet');
-    if (!btn || !sheet) return;
-    btn.addEventListener('click', function(){
-      var open = sheet.style.display === 'block';
-      sheet.style.display = open ? 'none' : 'block';
-      btn.setAttribute('aria-expanded', String(!open));
-    });
-  })();
-</script>
-
-
-<script>
-  (function(){
-    var $ = function(id){ return document.getElementById(id); };
-    var fmt = function(n){
-      if (!isFinite(n) || isNaN(n)) n = 0;
-      if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
-      if (n >= 1000)    return '$' + (n/1000).toFixed(0) + 'k';
-      return '$' + Math.round(n).toLocaleString('en-US');
-    };
-    var fmtExact = function(n){
-      if (!isFinite(n) || isNaN(n)) n = 0;
-      return '$' + Math.round(n).toLocaleString('en-US');
-    };
-
-    function recompute(){
-      if (!$('roi-calls')) return;
-      var calls = +$('roi-calls').value || 0;
-      var tin   = +$('roi-in').value || 0;
-      var tout  = +$('roi-out').value || 0;
-      var pin   = +$('roi-pin').value || 0;
-      var pout  = +$('roi-pout').value || 0;
-      var plan  = +$('roi-plan').value || 0;
-
-      var k = 8, rows = 2000, cycles = 4;
-
-      var callsYr = calls * 12;
-      var cloudIn  = (callsYr * tin) / 1e6 * pin;
-      var cloudOut = (callsYr * tout) / 1e6 * pout;
-      var cloudCore = cloudIn + cloudOut;
-      var cloudY1 = cloudCore * 1.08;
-
-      var planYr = plan * 12;
-      var teacherIn  = (k * rows * tin) / 1e6 * pin;
-      var teacherOut = (k * rows * tout) / 1e6 * pout;
-      var teacherPerCycle = teacherIn + teacherOut;
-      var teacherYr = teacherPerCycle * cycles;
-      var kolmY1 = planYr + teacherYr;
-
-      var savings = Math.max(0, cloudY1 - kolmY1);
-      var mult = kolmY1 > 0 ? cloudY1 / kolmY1 : 0;
-
-      var payback = 'n/a';
-      if (cloudY1 > kolmY1 && cloudY1 > 0) {
-        var cloudPm = cloudY1 / 12;
-        var teacherPm = teacherPerCycle * cycles / 12;
-        var kolmPm = plan + teacherPm;
-        if (kolmPm < cloudPm) {
-          var cloudAcc = 0, kolmAcc = 0, found = false;
-          for (var m = 1; m <= 36; m++) {
-            cloudAcc += cloudPm; kolmAcc += kolmPm;
-            if (kolmAcc <= cloudAcc) { payback = m + (m === 1 ? ' month' : ' months'); found = true; break; }
-          }
-          if (!found) payback = '36+ months';
-        } else {
-          payback = 'kolm not cheaper here';
-        }
-      } else if (cloudY1 > 0) {
-        payback = 'kolm not cheaper here';
-      }
-
-      $('roi-savings').textContent  = savings > 0 ? fmt(savings) + ' / yr' : '$0';
-      $('roi-summary').innerHTML    = savings > 0
-        ? 'You\'d <b style="color:var(--ks-ink)">keep ' + fmt(savings) + '</b> in year 1 vs paying per token. That\'s <b style="color:var(--ks-ink)">' + mult.toFixed(1) + 'x</b> cheaper.'
-        : 'At this volume, the cloud bill is small enough that kolm\'s plan is the bigger line. Try a higher call rate.';
-      var pill = $('roi-mult-pill');
-      if (pill) pill.textContent = savings > 0 ? mult.toFixed(1) + 'x vs frontier' : 'vs frontier';
-      $('roi-cloud').textContent    = fmtExact(cloudY1);
-      $('roi-plan-out').textContent = fmtExact(planYr);
-      $('roi-teacher').textContent  = fmtExact(teacherYr);
-      $('roi-kolm').textContent     = fmtExact(kolmY1);
-      $('roi-payback').textContent  = payback;
-    }
-
-    ['roi-calls','roi-in','roi-out','roi-pin','roi-pout','roi-plan'].forEach(function(id){
-      var el = $(id);
-      if (el) el.addEventListener('input', recompute);
-    });
-
-    var presets = {
-      support: { calls: 1000000, tin: 800,  tout: 250, pin: 0.25, pout: 0.55, plan: 29 },
-      extract: { calls: 83333,   tin: 3200, tout: 600, pin: 5,    pout: 25,   plan: 29 },
-      agent:   { calls: 600000,  tin: 2500, tout: 900, pin: 5,    pout: 25,   plan: 99 }
-    };
-    var presetBtns = document.querySelectorAll('.home-roi-preset');
-    presetBtns.forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var p = presets[btn.getAttribute('data-preset')];
-        if (!p) return;
-        $('roi-calls').value = p.calls;
-        $('roi-in').value    = p.tin;
-        $('roi-out').value   = p.tout;
-        $('roi-pin').value   = p.pin;
-        $('roi-pout').value  = p.pout;
-        $('roi-plan').value  = p.plan;
-        presetBtns.forEach(function(b){ b.classList.remove('is-active'); b.setAttribute('aria-pressed', 'false'); });
-        btn.classList.add('is-active');
-        btn.setAttribute('aria-pressed', 'true');
-        recompute();
-      });
-    });
-
-    recompute();
-  })();
-</script>
-
-<!-- service worker -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
-  }
-</script>
 
 </body>
 </html>

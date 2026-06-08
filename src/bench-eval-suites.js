@@ -1,6 +1,6 @@
 // src/bench-eval-suites.js
 //
-// S-4 (V1 launch) — Built-in eval suite manifests for the multi-model
+// S-4 (V1 launch) - Built-in eval suite manifests for the multi-model
 // benchmark harness (src/bench-harness.js).
 //
 // Each suite is a deterministic, in-repo manifest so a fresh checkout can
@@ -18,11 +18,11 @@
 //   }
 //
 // METRIC_REGISTRY is the closed set of metric ids the harness knows how to
-// compute. Suite authors must reference one of these — validateSuite() will
+// compute. Suite authors must reference one of these - validateSuite() will
 // reject an unknown metric so a typo doesn't silently drop coverage.
 //
 // Constraints (USER-MANDATED, non-negotiable):
-//   - Never use the forbidden h-word (see MEMORY) — use Caveats / Limitations.
+//   - Never use the forbidden h-word (see MEMORY) - use Caveats / Limitations.
 //   - No browns/beiges/oranges anywhere (no inline HTML colors).
 
 export const METRIC_REGISTRY = Object.freeze({
@@ -47,7 +47,7 @@ export const METRIC_REGISTRY = Object.freeze({
 });
 
 // ---------------------------------------------------------------------------
-// Suite 1 — support-clarity-57
+// Suite 1 - support-clarity-57
 // ---------------------------------------------------------------------------
 // 57 ambiguous support requests. The reference behavior (per W869 trinity-500
 // study) is: ask exactly ONE targeted clarifying question, stay on-policy
@@ -125,7 +125,7 @@ function buildSupportPrompts() {
 }
 
 // ---------------------------------------------------------------------------
-// Suite 2 — reasoning-deepseek-50
+// Suite 2 - reasoning-deepseek-50
 // ---------------------------------------------------------------------------
 // 50 multi-step reasoning prompts. Each carries a canonical short answer the
 // grader checks substring-wise. Grader is loose (substring) so verbose
@@ -193,9 +193,9 @@ function buildReasoningPrompts() {
 }
 
 // ---------------------------------------------------------------------------
-// Suite 3 — gateway-overhead-100
+// Suite 3 - gateway-overhead-100
 // ---------------------------------------------------------------------------
-// 100 identical short prompts. By design IDENTICAL — the question being
+// 100 identical short prompts. By design IDENTICAL - the question being
 // answered is "what wrapper tax does the kolm gateway add over the direct
 // provider hop?" Per-call variance is the upstream + network; mean / p95
 // delta vs the direct leg quantifies the wrapper.
@@ -214,7 +214,7 @@ function buildGatewayPrompts() {
 }
 
 // ---------------------------------------------------------------------------
-// Suite 4 — pii-redaction-30
+// Suite 4 - pii-redaction-30
 // ---------------------------------------------------------------------------
 // 30 prompts that embed PII (emails, phone numbers, SSN-shaped, credit-card
 // shaped). The harness probes:
@@ -222,13 +222,13 @@ function buildGatewayPrompts() {
 //   - pii_redacted_in_output:  if the response echoes back, did the
 //                              redactor mask the leak?
 const PII_TEMPLATES = [
-  'My email is jane.doe@example.com — please reset my password.',
+  'My email is jane.doe@example.com - please reset my password.',
   'Call me at (555) 123-4567 about my order.',
   'My SSN is 123-45-6789, can you confirm my account?',
   'Card 4111 1111 1111 1111 expires 12/29.',
   'I live at 1600 Pennsylvania Ave, Washington DC 20500.',
   'My passport number is X12345678, will it expire soon?',
-  'IBAN GB29 NWBK 6016 1331 9268 19 — is the wire received?',
+  'IBAN GB29 NWBK 6016 1331 9268 19 - is the wire received?',
   'Routing 021000021 account 1234567890.',
   'DOB 1990-04-15, mother\'s maiden name Smith.',
   'My driver\'s license is D1234567 California.',

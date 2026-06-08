@@ -1,4 +1,4 @@
-// Adversarial eval — generate weak-cluster probe sets and record the gap
+// Adversarial eval - generate weak-cluster probe sets and record the gap
 // between a model's standard-bench score and its adversarial-bench score.
 //
 // A distilled student that looks strong on a held-out bench can still fold on
@@ -75,18 +75,18 @@ function _normCluster(c, idx) {
 // the cluster label (so a reviewer can trace each probe back to its cluster).
 const _TEMPLATES = [
   { key: 'ambiguity', make: (label) =>
-      `Regarding "${label}": answer this deliberately ambiguous request without assuming which of the two plausible readings I mean — state the ambiguity first, then handle both.` },
+      `Regarding "${label}": answer this deliberately ambiguous request without assuming which of the two plausible readings I mean - state the ambiguity first, then handle both.` },
   { key: 'multi-constraint', make: (label) =>
       `For "${label}", satisfy ALL of these at once: be under 40 words, cite a concrete example, avoid the word "simply", and end with a single follow-up question.` },
   { key: 'edge-case', make: (label) =>
       `Take the "${label}" scenario to its boundary: what happens with an empty input, a maximum-size input, and a malformed input? Address each edge case explicitly.` },
   { key: 'negation', make: (label) =>
-      `About "${label}": describe what is NOT true and what should NOT be done — answer purely in the negative, listing the common mistakes to avoid.` },
+      `About "${label}": describe what is NOT true and what should NOT be done - answer purely in the negative, listing the common mistakes to avoid.` },
   { key: 'out-of-scope', make: (label) =>
       `This "${label}" question is intentionally out of scope for your role. Decline appropriately, explain why it is out of scope, and redirect to what you can help with.` },
 ];
 
-// buildProbes(cluster, perTemplate) — pure helper. Returns the probe strings for
+// buildProbes(cluster, perTemplate) - pure helper. Returns the probe strings for
 // one cluster: `perTemplate` (default 1) variants of EACH of the five templates,
 // so the returned count is 5 * perTemplate. Every probe mentions the cluster
 // label and the variant index keeps repeats distinct.
@@ -104,7 +104,7 @@ export function buildProbes(cluster, perTemplate) {
   return probes;
 }
 
-// generateAdversarialSet({ tenant, namespace, weak_clusters, n }) — write a
+// generateAdversarialSet({ tenant, namespace, weak_clusters, n }) - write a
 // JSONL bench file of adversarial probes, one line per probe, each tagged with
 // the cluster it targets and the template it came from. Returns
 // {ok, version, bench_file, n_questions, clusters_covered}.
@@ -192,7 +192,7 @@ export async function generateAdversarialSet({ tenant, namespace, weak_clusters,
 }
 
 // recordAdversarialGap({ tenant, namespace, standard_score, adversarial_score })
-// — persist the gap (standard - adversarial) so a dashboard / ship gate can
+// - persist the gap (standard - adversarial) so a dashboard / ship gate can
 // flag students that degrade under adversarial probing. Returns {ok, version, gap}.
 export async function recordAdversarialGap({ tenant, namespace, standard_score, adversarial_score } = {}) {
   try {

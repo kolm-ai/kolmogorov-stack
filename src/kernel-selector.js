@@ -1,4 +1,4 @@
-// W726 — Batch-vs-latency kernel selector.
+// W726 - Batch-vs-latency kernel selector.
 //
 // Two orthogonal axes that decide which compiled kernel a `.kolm` artifact
 // should use at runtime:
@@ -15,7 +15,7 @@
 //       when the hint says so OR a runtime probe sees serving conditions.
 //
 // The selection is PURE. Callers (CLI `kolm run`, server-side compile
-// dispatch, tests) pass everything in — we never poke at real sockets or
+// dispatch, tests) pass everything in - we never poke at real sockets or
 // libuv internals inside this module. The runtime probe takes the
 // already-observed concurrent_connections count as input so this module
 // stays trivially unit-testable.
@@ -64,9 +64,9 @@ function normalizeHintWord(raw) {
   return null;
 }
 
-// selectKernelProfile — pure function. Returns one of:
-//   'latency'  — default, batch_size_hint=1
-//   'batching' — batch_size_hint=32
+// selectKernelProfile - pure function. Returns one of:
+//   'latency' - default, batch_size_hint=1
+//   'batching' - batch_size_hint=32
 //
 // Inputs (all optional):
 //   workload_hint        : explicit user-supplied workload word
@@ -75,7 +75,7 @@ function normalizeHintWord(raw) {
 //   concurrency_estimate : observed concurrent-connection count; >= 4 -> batching
 //
 // The function NEVER throws. Bad input falls through to the default branch
-// rather than rejecting the build — selection is advisory.
+// rather than rejecting the build - selection is advisory.
 export function selectKernelProfile({ workload_hint, env, concurrency_estimate } = {}) {
   // Rule 1 + 2 (precedence): explicit hint, then env.KOLM_WORKLOAD.
   // Both go through the same normalize+lookup so a typo in either path
@@ -86,16 +86,16 @@ export function selectKernelProfile({ workload_hint, env, concurrency_estimate }
   if (envWord) return WORKLOAD_WORD_TO_PROFILE[envWord];
   // Rule 3: concurrency signal. Threshold 4 matches probeRuntimeWorkload so
   // that selecting from a runtime snapshot lines up with selecting from a
-  // probed snapshot — there is no two-thresholds-drifting bug.
+  // probed snapshot - there is no two-thresholds-drifting bug.
   if (typeof concurrency_estimate === 'number' && Number.isFinite(concurrency_estimate)
       && concurrency_estimate >= 4) {
     return 'batching';
   }
-  // Rule 4: default — single-user desktop. Matches W726-2 brief.
+  // Rule 4: default - single-user desktop. Matches W726-2 brief.
   return 'latency';
 }
 
-// probeRuntimeWorkload — pure function. Returns 'serving' or 'desktop'.
+// probeRuntimeWorkload - pure function. Returns 'serving' or 'desktop'.
 //
 // Callers (server bootstrap, CLI `kolm run --workload-probe`) pass in the
 // runtime snapshot they have. We do NOT poke at real sockets here so the

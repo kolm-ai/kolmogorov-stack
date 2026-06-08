@@ -1,24 +1,24 @@
 // src/reg-routes.js
 //
-// W834 — regulatory compliance toolkit HTTP routes.
+// W834 - regulatory compliance toolkit HTTP routes.
 //
 // Lives as a one-call mount (registerRegRoutes(app)) to keep src/router.js
-// diff to a single import + a single call — parallel W83x agents are editing
+// diff to a single import + a single call - parallel W83x agents are editing
 // router.js, so every extra line is a potential merge conflict.
 //
 // Seven routes, all auth-required + tenant-scoped via req.tenant_record.id:
 //
-//   POST /v1/reg/eu-aiact-docs      — generate the Annex IV technical-docs blob
-//   POST /v1/reg/classify-risk      — classify against the intended-use enum
-//   POST /v1/reg/hil/threshold      — set the per-namespace HIL threshold
-//   GET  /v1/reg/hil/threshold      — read back the threshold
-//   GET  /v1/reg/data-governance    — emit the data-governance markdown report
-//   POST /v1/reg/model-card         — emit the extended model card
-//   POST /v1/reg/grc-export         — emit a vendor-shaped GRC payload
+//   POST /v1/reg/eu-aiact-docs - generate the Annex IV technical-docs blob
+//   POST /v1/reg/classify-risk - classify against the intended-use enum
+//   POST /v1/reg/hil/threshold - set the per-namespace HIL threshold
+//   GET  /v1/reg/hil/threshold - read back the threshold
+//   GET  /v1/reg/data-governance - emit the data-governance markdown report
+//   POST /v1/reg/model-card - emit the extended model card
+//   POST /v1/reg/grc-export - emit a vendor-shaped GRC payload
 //
 // Honesty contract:
 //   * All routes return honest envelopes; never throw across the boundary.
-//   * tenant_id is sourced from req.tenant_record.id — NEVER from body/query.
+//   * tenant_id is sourced from req.tenant_record.id - NEVER from body/query.
 //   * Modules are imported lazily inside the handler so cold daemons that
 //     never touch the regulatory surface don't pay for the imports.
 //
@@ -52,7 +52,7 @@ function _requireManifest(req, res, body, version) {
     res.status(400).json({
       ok: false,
       error: 'artifact_id_lookup_not_yet_wired',
-      hint: 'pass {"artifact_manifest": {...inline manifest...}} — artifact_id resolution is on the W834-followup roadmap.',
+      hint: 'pass {"artifact_manifest": {...inline manifest...}} - artifact_id resolution is on the W834-followup roadmap.',
       version,
     });
     return null;
@@ -72,7 +72,7 @@ function _requireManifest(req, res, body, version) {
 
 export function registerRegRoutes(r) {
   // ---------------------------------------------------------------------
-  // W834-1 — POST /v1/reg/eu-aiact-docs
+  // W834-1 - POST /v1/reg/eu-aiact-docs
   // ---------------------------------------------------------------------
   r.post('/v1/reg/eu-aiact-docs', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -99,7 +99,7 @@ export function registerRegRoutes(r) {
   });
 
   // ---------------------------------------------------------------------
-  // W834-2 — POST /v1/reg/classify-risk
+  // W834-2 - POST /v1/reg/classify-risk
   // ---------------------------------------------------------------------
   r.post('/v1/reg/classify-risk', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -129,7 +129,7 @@ export function registerRegRoutes(r) {
   });
 
   // ---------------------------------------------------------------------
-  // W834-3 — POST /v1/reg/hil/threshold
+  // W834-3 - POST /v1/reg/hil/threshold
   // ---------------------------------------------------------------------
   r.post('/v1/reg/hil/threshold', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -139,7 +139,7 @@ export function registerRegRoutes(r) {
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} alongside {namespace, threshold} — threshold is durable and gates EVERY subsequent decision in this namespace.',
+        hint: 'send {"confirm": true} alongside {namespace, threshold} - threshold is durable and gates EVERY subsequent decision in this namespace.',
         version: 'w834-v1',
       });
     }
@@ -162,7 +162,7 @@ export function registerRegRoutes(r) {
   });
 
   // ---------------------------------------------------------------------
-  // W834-3 — GET /v1/reg/hil/threshold?namespace=X
+  // W834-3 - GET /v1/reg/hil/threshold?namespace=X
   // ---------------------------------------------------------------------
   r.get('/v1/reg/hil/threshold', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -195,7 +195,7 @@ export function registerRegRoutes(r) {
   });
 
   // ---------------------------------------------------------------------
-  // W834-4 — GET /v1/reg/data-governance?namespace=X&period=YYYY-MM
+  // W834-4 - GET /v1/reg/data-governance?namespace=X&period=YYYY-MM
   // ---------------------------------------------------------------------
   r.get('/v1/reg/data-governance', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -225,7 +225,7 @@ export function registerRegRoutes(r) {
   });
 
   // ---------------------------------------------------------------------
-  // W834-5 — POST /v1/reg/model-card
+  // W834-5 - POST /v1/reg/model-card
   // ---------------------------------------------------------------------
   r.post('/v1/reg/model-card', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -252,7 +252,7 @@ export function registerRegRoutes(r) {
   });
 
   // ---------------------------------------------------------------------
-  // W834-6 — POST /v1/reg/grc-export
+  // W834-6 - POST /v1/reg/grc-export
   // ---------------------------------------------------------------------
   r.post('/v1/reg/grc-export', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -280,7 +280,7 @@ export function registerRegRoutes(r) {
       const mod = await import('./reg-grc-connectors.js');
       const result = mod.exportByVendor(report, vendor);
       // Note: result.ok=false with error='no_grc_creds' is the HONEST
-      // happy path when env-vars aren't set — we return 200 with the
+      // happy path when env-vars aren't set - we return 200 with the
       // payload still computed so the operator can manually upload. Only
       // genuinely-malformed input returns a 400.
       if (!result.ok && (result.error === 'unknown_vendor' || result.error === 'report_required' || result.error === 'vendor_required')) {

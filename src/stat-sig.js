@@ -1,6 +1,6 @@
 // src/stat-sig.js
 //
-// W778 — Statistical significance testing + auto-rollback gate.
+// W778 - Statistical significance testing + auto-rollback gate.
 //
 // Companion of W777 (A/B router): W777 splits traffic + records outcomes,
 // W778 decides "did the new arm actually win?". The gate combines three
@@ -10,14 +10,14 @@
 //   2. The Welch's t-test p-value across the two kscore distributions is
 //      below `alpha` (default 0.05).
 //   3. The arm-B mean beats arm-A by at least `min_effect_size` in absolute
-//      kscore (default 0.01 — never promote a hairline win).
+//      kscore (default 0.01 - never promote a hairline win).
 //
 // Welch's t-test (not Student's) because the two arms are independent samples
 // with unequal variances by default. Welch-Satterthwaite degrees of freedom
 // keep the test honest when sample sizes differ.
 //
 // W604 anti-brittleness:
-//   - STAT_SIG_VERSION = 'w778-vN' — consumers MUST match /^w778-/ NOT literal
+//   - STAT_SIG_VERSION = 'w778-vN' - consumers MUST match /^w778-/ NOT literal
 //     equality so a v1.x bump within the same wave doesn't break callers.
 //   - Threshold knobs (alpha, min_n, min_effect_size) are exported defaults
 //     so the route + CLI + dashboard share one truth, and so a future test
@@ -396,7 +396,7 @@ export async function gate(args = {}) {
 }
 
 // =============================================================================
-// W921 — Sequential / always-valid A/B testing (anytime-valid inference).
+// W921 - Sequential / always-valid A/B testing (anytime-valid inference).
 // =============================================================================
 //
 // A fixed-horizon test (welchT/gate above) controls Type-I error ONLY if you
@@ -423,7 +423,7 @@ export async function gate(args = {}) {
 //       which only covers at one t). It supplies the anytime-valid INTERVAL.
 //
 // Group Sequential Testing (GST) is deliberately NOT used: it requires a
-// pre-committed max sample size + a finite peek schedule — incompatible with
+// pre-committed max sample size + a finite peek schedule - incompatible with
 // an open-ended, schedule-free cron that never knows its horizon.
 //
 // W604 anti-brittleness: NEW version tag 'w921-seq-v1' kept distinct from
@@ -437,10 +437,10 @@ export const SEQ_STAT_SIG_VERSION = 'w921-seq-v1';
 export const DEFAULT_N_TUNE = 10000;
 
 /**
- * tau_sq — the only mSPRT tuning knob. CRITICAL: it MUST be a fixed constant
+ * tau_sq - the only mSPRT tuning knob. CRITICAL: it MUST be a fixed constant
  * (chosen up front, NOT re-estimated per step from the data) or the running
- * likelihood ratio stops being a test martingale and Ville's inequality — the
- * source of the anytime-valid guarantee — no longer holds. Re-anchoring tau_sq
+ * likelihood ratio stops being a test martingale and Ville's inequality - the
+ * source of the anytime-valid guarantee - no longer holds. Re-anchoring tau_sq
  * to the running pooled variance every tick inflates the realized A/A
  * false-positive rate.
  *
@@ -460,7 +460,7 @@ function _chooseTauSq({ min_effect_size, var_pooled } = {}) {
 }
 
 /**
- * log Lambda_n — the mSPRT mixture log-likelihood-ratio, computed in log space.
+ * log Lambda_n - the mSPRT mixture log-likelihood-ratio, computed in log space.
  *
  *   Lambda_n = sqrt( V / (V + n*tau_sq) )
  *              * exp( n^2 * tau_sq * (mu_a - mu_b)^2 / (2 * V * (V + n*tau_sq)) )
@@ -474,7 +474,7 @@ function _mixtureLogLR(n, mean_a, mean_b, var_pooled, tau_sq) {
   const V = var_pooled;
   if (!(V > 0) || !(n > 0)) return 0; // no signal
   const denom = V + n * tau_sq;
-  // 0.5 * log( V / (V + n*tau_sq) ) — always <= 0.
+  // 0.5 * log( V / (V + n*tau_sq) ) - always <= 0.
   const logScale = 0.5 * (Math.log(V) - Math.log(denom));
   const diff = mean_a - mean_b;
   const expTerm = (n * n * tau_sq * diff * diff) / (2 * V * denom);
@@ -545,7 +545,7 @@ export function msprtAlwaysValidPValue({ samples_a, samples_b, tau_sq, min_effec
     // that Var(mu_a_n - mu_b_n) = V_n / n. For two independent arms each with
     // n observations Var(mu_a - mu_b) = varA/n + varB/n, so V_n = varA + varB.
     // (Using the average instead of the sum halves V_n, doubles the exponent,
-    // and inflates the A/A false-positive rate — the canonical Johari/Robbins
+    // and inflates the A/A false-positive rate - the canonical Johari/Robbins
     // mixture LR uses the difference variance.)
     const varA = m2A / (k - 1);
     const varB = m2B / (k - 1);
@@ -558,7 +558,7 @@ export function msprtAlwaysValidPValue({ samples_a, samples_b, tau_sq, min_effec
     // variance estimate (monotone non-decreasing) is a conservative stabilizer:
     // it never lets V shrink below a value already observed, can only SHRINK the
     // exponent relative to the raw plug-in, and so can only REDUCE the rejection
-    // rate — preserving the anytime-valid Type-I guarantee. It restores
+    // rate - preserving the anytime-valid Type-I guarantee. It restores
     // realized A/A FPR to <= alpha while leaving power essentially intact (once
     // an effect is real, V stabilizes and the running max == the estimate).
     if (varInst > Vmax) Vmax = varInst;
@@ -595,7 +595,7 @@ export function msprtAlwaysValidPValue({ samples_a, samples_b, tau_sq, min_effec
 }
 
 /**
- * rho — the single GAVI tuning parameter, chosen to minimize the confidence-
+ * rho - the single GAVI tuning parameter, chosen to minimize the confidence-
  * sequence width near n_tune samples.
  *
  *   rho = n_tune / ( log(log(e/(1-c)^2)) - 2*log(1-c) ),  c = 1 - alpha
@@ -677,7 +677,7 @@ export function gaviConfidenceSequence({ samples_a, samples_b, alpha = 0.05, n_t
 }
 
 /**
- * sequentialGate — the always-valid replacement for gate().
+ * sequentialGate - the always-valid replacement for gate().
  *
  * Returns a promote/rollback/continue decision that is safe under unlimited
  * peeking. The mSPRT avp drives 'promote' (B significantly beats A) and the
@@ -792,7 +792,7 @@ export async function sequentialGate({
 }
 
 /**
- * update(samples_a, samples_b, opts) — streaming convenience wrapper exposing
+ * update(samples_a, samples_b, opts) - streaming convenience wrapper exposing
  * the anytime-valid verdict as { decision, e_value, ci }.
  *
  * The e-value is the mSPRT mixture likelihood ratio Lambda_n (an e-value /

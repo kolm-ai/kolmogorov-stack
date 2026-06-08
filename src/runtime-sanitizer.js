@@ -1,6 +1,6 @@
 // src/runtime-sanitizer.js
 //
-// W762 — Adversarial Red-Team Framework: runtime input sanitizer.
+// W762 - Adversarial Red-Team Framework: runtime input sanitizer.
 //
 // Closes KOLM_W707_SYSTEM_UPGRADE_PLAN.md W762-3 + W762-4:
 //   3) Runtime input sanitization layer.
@@ -10,15 +10,15 @@
 // request. The sanitizer wraps a user-supplied handler with one of
 // four policies, chosen by the operator at deploy time:
 //
-//   block               — return 4xx-style envelope, NEVER forward
-//   redact              — strip matched spans, forward sanitized text
-//   fallback_to_teacher — route adversarial requests to the W709
+//   block - return 4xx-style envelope, NEVER forward
+//   redact - strip matched spans, forward sanitized text
+//   fallback_to_teacher - route adversarial requests to the W709
 //                         entropy-aware confidence router (caller
 //                         supplies fallback_handler). When no handler
 //                         is configured, emit an honest
-//                         no_fallback_handler_configured envelope —
+//                         no_fallback_handler_configured envelope - 
 //                         we NEVER silently passthrough.
-//   passthrough         — record classification but forward unchanged.
+//   passthrough - record classification but forward unchanged.
 //                         For honest A/B experiments only.
 //
 // W709 routing integration point: production wires
@@ -41,7 +41,7 @@ export const SANITIZE_POLICIES = Object.freeze([
 export const DEFAULT_POLICY = 'fallback_to_teacher';
 
 // Replace each matched span in `text` with `[REDACTED]`. Spans may
-// overlap because multiple patterns can hit the same region —
+// overlap because multiple patterns can hit the same region - 
 // we merge overlapping spans before substitution to avoid double
 // replacements / index drift.
 function _redactSpans(text, evidence) {
@@ -77,7 +77,7 @@ function _redactSpans(text, evidence) {
 }
 
 // Main public API. Returns an envelope describing what we did and
-// the consequence. NEVER throws — defensive try/catch in every branch
+// the consequence. NEVER throws - defensive try/catch in every branch
 // because this sits on the request hot-path.
 export async function sanitizeInput({
   text,
@@ -87,7 +87,7 @@ export async function sanitizeInput({
   // Defensive input normalization.
   const inputText = typeof text === 'string' ? text : (text == null ? '' : String(text));
 
-  // Validate policy. Unknown policies are NOT silently coerced — we
+  // Validate policy. Unknown policies are NOT silently coerced - we
   // return an honest envelope so the operator notices the typo.
   if (!SANITIZE_POLICIES.includes(policy)) {
     return {
@@ -104,7 +104,7 @@ export async function sanitizeInput({
   try {
     classification = classifyPromptAdversarial(inputText);
   } catch (e) {
-    // Should be unreachable — classifier is supposed to NEVER throw.
+    // Should be unreachable - classifier is supposed to NEVER throw.
     classification = {
       ok: false,
       is_adversarial: false,
@@ -129,7 +129,7 @@ export async function sanitizeInput({
     };
   }
 
-  // Adversarial input — branch on policy.
+  // Adversarial input - branch on policy.
   switch (policy) {
     case 'block':
       return {
@@ -206,7 +206,7 @@ export async function sanitizeInput({
   }
 }
 
-// wrapForRuntime — turn an arbitrary request handler into a sanitizer-
+// wrapForRuntime - turn an arbitrary request handler into a sanitizer-
 // gated handler. The wrapped handler receives {sanitized, original,
 // classification, sanitizer_action} as additional context.
 //
@@ -228,7 +228,7 @@ export function wrapForRuntime(handler, opts = {}) {
       : '';
     const env = await sanitizeInput({ text, policy, fallback_handler });
 
-    // Block / fallback / unknown-policy paths short-circuit — the
+    // Block / fallback / unknown-policy paths short-circuit - the
     // underlying handler is NEVER reached.
     if (env.action === 'block' || env.action === 'fallback_to_teacher' || env.error) {
       return {

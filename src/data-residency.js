@@ -1,6 +1,6 @@
 // src/data-residency.js
 //
-// W769 — Data Residency + Geo-Fence.
+// W769 - Data Residency + Geo-Fence.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 609-614):
 //   [W769-1] Data residency tagging on every capture (EU stays EU)
@@ -16,7 +16,7 @@
 //   - HONESTY FLOOR:
 //       * inferRegionFromTenant defaults to DEFAULT_REGION when undetermined.
 //         Never silently guesses EU just because the tenant carries an
-//         ambiguous country code — DEFAULT_REGION is GLOBAL, the explicit
+//         ambiguous country code - DEFAULT_REGION is GLOBAL, the explicit
 //         "we don't know, treat as unrestricted" sentinel.
 //       * enforceRegionPolicy NEVER silent-passes a cross-region request.
 //         A capture tagged EU_WEST against target_region=US_EAST returns
@@ -139,7 +139,7 @@ const RESIDENCY_PROVIDER = 'kolm_data_residency';
 const RESIDENCY_MODEL_TAG = 'capture-tag';
 const RESIDENCY_MODEL_NS_DEFAULT = 'namespace-default-region';
 
-// Internal — pick the event-store driver. opts.eventStore lets tests inject
+// Internal - pick the event-store driver. opts.eventStore lets tests inject
 // a fresh module instance (useful when KOLM_DATA_DIR was just rerolled).
 function _eventStore(opts) {
   return (opts && opts.eventStore) || defaultEventStore;
@@ -151,13 +151,13 @@ function _eventStore(opts) {
 // Walks REGIONS.iso_3166_codes for each region in order, matching the
 // tenant's country_code (case-insensitive). Returns the first match's id,
 // or DEFAULT_REGION when nothing matches. Multiple regions can claim the
-// same ISO code (US_EAST + US_WEST both list 'US') — the resolution order
+// same ISO code (US_EAST + US_WEST both list 'US') - the resolution order
 // is the Object.keys() iteration order of REGIONS, which falls back to
 // US_EAST first. Tenants that want US_WEST must explicitly opt in via
 // configureNamespaceRegion or tagCapture.
 //
 // Honest fallback: when tenant_record is null/undefined/missing
-// country_code, we return DEFAULT_REGION (GLOBAL) — never guess.
+// country_code, we return DEFAULT_REGION (GLOBAL) - never guess.
 // ---------------------------------------------------------------------------
 export function inferRegionFromTenant(tenant_record) {
   if (!tenant_record || typeof tenant_record !== 'object') return DEFAULT_REGION;
@@ -191,7 +191,7 @@ function _validateRegion(region) {
 // ---------------------------------------------------------------------------
 // tagCapture({tenant_id, capture_id, region, confirm:true}): persists a
 // residency tag for one capture. The tag is keyed by (tenant_id, capture_id)
-// and the latest-write-wins rule of the event-store applies — calling
+// and the latest-write-wins rule of the event-store applies - calling
 // tagCapture twice for the same (tenant, capture) replaces the prior tag.
 //
 // confirm:true REQUIRED. The flag matches the W765 / W764 confirm pattern:
@@ -264,7 +264,7 @@ export async function tagCapture({
 //
 // HONESTY: when no tag exists for the (tenant, capture) pair, we return
 // {ok:false, error:'untagged'} with a hint to call /v1/residency/tag-capture
-// — never silently return GLOBAL. The caller may interpret untagged as
+// - never silently return GLOBAL. The caller may interpret untagged as
 // implicit GLOBAL but the API must surface the distinction.
 // ---------------------------------------------------------------------------
 export async function getCaptureRegion({
@@ -322,7 +322,7 @@ export async function getCaptureRegion({
 // ---------------------------------------------------------------------------
 // configureNamespaceRegion({tenant_id, namespace, region, confirm:true}):
 // pins the default region for a namespace. Does NOT retroactively tag
-// existing captures — only future captures inherit the new default via
+// existing captures - only future captures inherit the new default via
 // inferRegionFromTenant + namespace lookup. This is intentional: rewriting
 // historical residency claims is itself a compliance event that needs a
 // separate migration audit trail.
@@ -444,7 +444,7 @@ export function enforceRegionPolicy({ tenant_id, capture, target_region } = {}) 
       version: DATA_RESIDENCY_VERSION,
     };
   }
-  // Exact match — always allowed.
+  // Exact match - always allowed.
   if (captureRegion === target_region) {
     return {
       ok: true,
@@ -479,7 +479,7 @@ export function enforceRegionPolicy({ tenant_id, capture, target_region } = {}) 
       version: DATA_RESIDENCY_VERSION,
     };
   }
-  // Region mismatch — fail-closed with hint.
+  // Region mismatch - fail-closed with hint.
   return {
     ok: true,
     allowed: false,

@@ -1,6 +1,6 @@
-// W727 — Student-as-Draft Speculative Decoding (consumer-facing).
+// W727 - Student-as-Draft Speculative Decoding (consumer-facing).
 //
-// "Student proposes N tokens, teacher verifies/corrects in parallel" — the
+// "Student proposes N tokens, teacher verifies/corrects in parallel" - the
 // classic Leviathan/Chen speculative decoding setup, exposed as a single
 // orchestration shell that consumer-facing endpoints (notably
 // /v1/chat/completions?accelerate=true wired in src/router.js) can call
@@ -9,18 +9,18 @@
 // W707 plan items wired here:
 //
 //   W727-1  acceleratedChatCompletion({messages, namespace, accelerate,
-//           n_draft_tokens}) — orchestrates one round of student-as-draft +
+//           n_draft_tokens}) - orchestrates one round of student-as-draft +
 //           teacher verification, returning the accepted-prefix and a
 //           teacher-corrected suffix.
 //
 //   W727-2  Compose with W709 confidence routing (when
 //           src/confidence-routing.js OR src/runtime-confidence-router.js
 //           returns route='student-only' with confidence > threshold, the
-//           teacher verification step is bypassed entirely — speculative-
+//           teacher verification step is bypassed entirely - speculative-
 //           decoding's worst-case overhead is the teacher round-trip, so a
 //           high-confidence student answer should never pay it).
 //
-//   W727-3  benchAcceptanceRate({task_class, samples}) — reports mean
+//   W727-3  benchAcceptanceRate({task_class, samples}) - reports mean
 //           acceptance rate per draft round + mean tokens per draft round +
 //           mean wall-clock speedup, keyed by task class
 //           (extraction/generation/reasoning).
@@ -31,11 +31,11 @@
 //     returns {ok:false, error:'no_kernel', hint:'set
 //     KOLM_SPEC_DECODE_BACKEND=<llama-cpp|vllm|tgi|sglang>'}. We NEVER
 //     silently fall through to the pure-teacher path and pretend we
-//     accelerated — that would lie about the acceptance rate AND about the
+//     accelerated - that would lie about the acceptance rate AND about the
 //     speedup, both of which exist on the public dashboard.
 //
 //   - When a mock/test backend is injected via opts.backend (dependency
-//     injection — pure-function-friendly), acceptance_rate is a real number
+//     injection - pure-function-friendly), acceptance_rate is a real number
 //     in [0,1] computed from the per-token verification outcomes returned
 //     by the backend. No fake numbers.
 //
@@ -55,7 +55,7 @@ import crypto from 'node:crypto';
 
 export const ACCELERATE_VERSION = 'w727-v1';
 
-// Recognized backends. We never instantiate these directly here — the
+// Recognized backends. We never instantiate these directly here - the
 // orchestrator is a thin shell. The W727 module's job is to detect that
 // SOMETHING is wired and to refuse loudly when nothing is. The actual
 // generation calls happen inside opts.backend (dependency injection in
@@ -80,7 +80,7 @@ const TASK_CLASS_BASELINES = Object.freeze({
  * Detect a configured speculative-decoding backend. Detection precedence:
  *
  *   1. process.env.KOLM_SPEC_DECODE_BACKEND  (explicit operator opt-in)
- *   2. src/spec-decode.js trainer presence    (W480 reused — if the trainer
+ *   2. src/spec-decode.js trainer presence    (W480 reused - if the trainer
  *      is on PATH the operator has at least built a pair, so a server-side
  *      inference path is plausible)
  *
@@ -93,7 +93,7 @@ export function detectSpecDecodeBackend(env = process.env) {
     if (KNOWN_BACKENDS.includes(explicit)) {
       return { ok: true, backend: explicit, source: 'env' };
     }
-    // Unknown name — refuse loudly. A typo'd "vllm-server" would otherwise
+    // Unknown name - refuse loudly. A typo'd "vllm-server" would otherwise
     // silently fall through to the bench's no_kernel path while looking
     // configured to the operator.
     return {
@@ -112,9 +112,9 @@ export function detectSpecDecodeBackend(env = process.env) {
 }
 
 // ---------------------------------------------------------------------------
-// W709/W807 compose — best-effort confidence-router consultation. Returns a
+// W709/W807 compose - best-effort confidence-router consultation. Returns a
 // route decision {route, confidence, source} or null on any error / module
-// missing. Treats the absence of either module as "no compose available" —
+// missing. Treats the absence of either module as "no compose available" - 
 // which is the honest no-op the plan calls for, not a failure.
 // ---------------------------------------------------------------------------
 async function _consultConfidenceRouter(probe) {
@@ -251,7 +251,7 @@ export async function acceleratedChatCompletion(opts = {}) {
       };
     }
     // The router supplies the real backend at production wiring time. When
-    // detect says "ok" but no backend was injected we still refuse — we'd
+    // detect says "ok" but no backend was injected we still refuse - we'd
     // rather honestly say "no backend bridge" than fabricate token counts.
     return {
       ok: false,
@@ -262,7 +262,7 @@ export async function acceleratedChatCompletion(opts = {}) {
     };
   }
 
-  // W709/W807 compose — high-confidence student path skips teacher verify.
+  // W709/W807 compose - high-confidence student path skips teacher verify.
   let routerNote = null;
   let bypassTeacher = false;
   try {
@@ -279,7 +279,7 @@ export async function acceleratedChatCompletion(opts = {}) {
 
   const t0 = _now();
 
-  // STEP 1 — student proposes n_draft_tokens.
+  // STEP 1 - student proposes n_draft_tokens.
   let proposal;
   try {
     proposal = await chosenBackend.propose({ messages, n });
@@ -288,7 +288,7 @@ export async function acceleratedChatCompletion(opts = {}) {
       ok: false,
       error: 'student_propose_failed',
       detail: (e && e.message) || String(e),
-      hint: 'opts.backend.propose threw — check the backend bridge',
+      hint: 'opts.backend.propose threw - check the backend bridge',
       version: ACCELERATE_VERSION,
     };
   }
@@ -296,7 +296,7 @@ export async function acceleratedChatCompletion(opts = {}) {
   const draftCost = Number((proposal && proposal.cost_micro_usd) || 0);
   const draftCount = draftTokens.length;
 
-  // STEP 2 — teacher verifies in parallel UNLESS the confidence-router
+  // STEP 2 - teacher verifies in parallel UNLESS the confidence-router
   // signaled a bypass. Bypass means we accept every student token by
   // construction and pay zero teacher cost.
   let acceptedCount = draftCount;
@@ -315,7 +315,7 @@ export async function acceleratedChatCompletion(opts = {}) {
         ok: false,
         error: 'teacher_verify_failed',
         detail: (e && e.message) || String(e),
-        hint: 'opts.backend.verify threw — check the teacher bridge',
+        hint: 'opts.backend.verify threw - check the teacher bridge',
         version: ACCELERATE_VERSION,
       };
     }
@@ -386,7 +386,7 @@ export async function acceleratedChatCompletion(opts = {}) {
  * Required opts:
  *
  *   task_class   one of 'extraction'|'generation'|'reasoning'
- *   samples      number — at least 1
+ *   samples      number - at least 1
  *
  * Optional:
  *
@@ -512,6 +512,6 @@ export default {
   acceleratedChatCompletion,
   benchAcceptanceRate,
 };
-// Quiet unused-import lint for crypto — kept available for future
+// Quiet unused-import lint for crypto - kept available for future
 // request-hash work without churning imports across the file.
 void crypto;

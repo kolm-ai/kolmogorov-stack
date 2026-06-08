@@ -1,0 +1,44 @@
+{
+  "run_id": "w888n-2026-05-26T12-17-59-094Z",
+  "generated_at": "2026-05-26T12:18:05.373Z",
+  "started_at": "2026-05-26T12:17:59.098Z",
+  "dry_run": true,
+  "budget_usd": 50,
+  "cost_usd": 0,
+  "budget_aborted": false,
+  "counts": {
+    "seeds_in": 954,
+    "seeds_processed": 50,
+    "seeds_limit": 50,
+    "kept": 50,
+    "disagreed": 0,
+    "rejected": 0
+  },
+  "bucket_kept": {
+    "docs": 50
+  },
+  "teacher_models": [
+    {
+      "provider": "anthropic",
+      "model": "claude-opus-4-7"
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-4o"
+    }
+  ],
+  "similarity_threshold": 0.85,
+  "similarity_metric": "jaccard_token_set",
+  "capture_namespace": "assistant-distill-2026-05-26",
+  "capture_available": true,
+  "env": {
+    "node_version": "v24.14.0",
+    "os": "win32-x64"
+  },
+  "outputs": {
+    "pairs": "data/assistant-corpus/training-pairs.jsonl",
+    "disagreements": "data/assistant-corpus/disagreements.jsonl",
+    "rejected": "data/assistant-corpus/rejected.jsonl"
+  },
+  "version": "w888n-v1"
+}

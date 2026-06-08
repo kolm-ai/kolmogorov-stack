@@ -1,17 +1,17 @@
 // src/mcp-gateway-routes.js
 //
-// W921 BET-4 — HTTP routes for the governed MCP tool-gateway.
+// W921 BET-4 - HTTP routes for the governed MCP tool-gateway.
 //
 // Exports register(r, deps) so the orchestrator mounts the whole surface with
 // ONE call (import + register) and does NOT edit src/router.js's body. Mirrors
 // the modular-mount convention used by src/govern-routes.js / src/ab-routes.js.
 //
 // Routes:
-//   POST /v1/mcp/dispatch     — govern one MCP tools/call: sign + return a
+//   POST /v1/mcp/dispatch - govern one MCP tools/call: sign + return a
 //                               receipt binding {tool, args_hash, result_hash,
 //                               tenant, ts}. Returns the UNMODIFIED tool result
 //                               (passthrough contract) alongside the receipt.
-//   GET  /v1/mcp/verify/:id   — fetch a previously-dispatched receipt for THIS
+//   GET  /v1/mcp/verify/:id - fetch a previously-dispatched receipt for THIS
 //                               tenant + a deterministic Ed25519 verify result.
 //
 // Tenant fence: tenant_id is forced from req.tenant_record.id and NEVER read
@@ -19,15 +19,15 @@
 // (the verify route filters on req.tenant_record.id).
 //
 // deps (all injectable seams so the routes unit-test without a live stack):
-//   authMiddleware — real middleware from src/auth.js. Falls back to a stamp-
+//   authMiddleware - real middleware from src/auth.js. Falls back to a stamp-
 //                    only gate that sets req.tenant_record={id:'anonymous'} for
 //                    local-daemon/tests (never sufficient for prod).
-//   getSigner      — () -> {privateKey,publicKey,key_fingerprint}. FALLBACK:
+//   getSigner - () -> {privateKey,publicKey,key_fingerprint}. FALLBACK:
 //                    mcp-gateway.signMcpReceipt calls loadOrCreateDefaultSigner.
-//   store          — { insert(table,row), findByTenant(table,tenant) } from
+//   store - { insert(table,row), findByTenant(table,tenant) } from
 //                    src/store.js. FALLBACK: a process-local Map so dispatch +
 //                    verify round-trip works in tests with no DB.
-//   execute        — optional ({tool,args,tenant}) -> CallToolResult. When a
+//   execute - optional ({tool,args,tenant}) -> CallToolResult. When a
 //                    dispatch body carries no precomputed `result`, this invokes
 //                    the registered MCP server. Without it (and without a body
 //                    result) the dispatch records an empty result.
@@ -107,7 +107,7 @@ function _makePersistence(deps) {
 }
 
 /**
- * register(r, deps) — single-line modular mount.
+ * register(r, deps) - single-line modular mount.
  */
 export function register(r, deps = {}) {
   if (!r || typeof r.get !== 'function' || typeof r.post !== 'function') {

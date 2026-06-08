@@ -240,7 +240,7 @@ export async function handleAssistant(req, _res, deps) {
           narration: 'Tell me what the recipe should do. Example: "compile a recipe that classifies support tickets by urgency".',
         };
       }
-      // Real compile — creates a compile job, runs it (sync on serverless,
+      // Real compile - creates a compile job, runs it (sync on serverless,
       // fire-and-forget on long-running nodes). Caller polls `data.poll`.
       const out = await deps.compile({ task });
       const done = out.status === 'completed';
@@ -294,7 +294,7 @@ export async function handleAssistant(req, _res, deps) {
       return {
         ok: true,
         intent: 'tune',
-        narration: 'Tune is a local CLI loop — the trainer never leaves your laptop. Run: kolm tune init && kolm tune capture-on && kolm tune step --airgap. The dashboard shows promoted revisions when you push them back. See /evolve for the full pipeline.',
+        narration: 'Tune is a local CLI loop - the trainer never leaves your laptop. Run: kolm tune init && kolm tune capture-on && kolm tune step --airgap. The dashboard shows promoted revisions when you push them back. See /evolve for the full pipeline.',
         next_steps: [
           { label: 'open /evolve', href: '/evolve' },
           { label: 'docs/TUNE.md', href: '/docs' },
@@ -333,7 +333,7 @@ export async function handleAssistant(req, _res, deps) {
       } else if (billing?.sales_required) {
         narration = billing.message || `Enterprise requires an architecture review. Open ${billing.contact_url || '/enterprise/inquiry'} to continue.`;
       } else if (billing?.plan_change_pending) {
-        narration = `Logged your ${target} request. Open ${billing.checkout_url} to talk to a human — we'll provision the upgrade within one business day.`;
+        narration = `Logged your ${target} request. Open ${billing.checkout_url} to talk to a human - we'll provision the upgrade within one business day.`;
       } else if (billing?.checkout_url || billing?.billing_url) {
         narration = `Open the secure billing link to switch to ${target}. Plan flips when payment clears.`;
       } else {
@@ -377,7 +377,7 @@ export async function handleAssistant(req, _res, deps) {
 // (airGap:true) is deterministic and never calls a network: classification
 // is a keyword match over the input text, and seed examples are emitted
 // from a small template library. Networked mode delegates seed expansion
-// to src/llm-call.js (KOLM_LLM_* env) — when unconfigured it falls back to
+// to src/llm-call.js (KOLM_LLM_* env) - when unconfigured it falls back to
 // a deterministic template+synonym path inside synthesis.js so callers
 // always get usable rows.
 //

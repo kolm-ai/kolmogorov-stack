@@ -1,10 +1,10 @@
 // Trust-moat bootstrap: guarantee an Ed25519 signing key exists + persists so kolm
 // NEVER ships unsigned artifacts/receipts (the live prod instance had signing_key:missing,
-// which the SOTA review flagged as existential — provenance is the whole moat).
+// which the SOTA review flagged as existential - provenance is the whole moat).
 //
 // Strategy: if no explicit key is provided via KOLM_ED25519_PRIVATE_KEY, place the key
-// under the durable data volume (KOLM_DATA_DIR/keys) — NOT ~/.kolm which is ephemeral on
-// a fresh container — generate one on first boot, and point KOLM_ED25519_KEY_STORE at it so
+// under the durable data volume (KOLM_DATA_DIR/keys) - NOT ~/.kolm which is ephemeral on
+// a fresh container - generate one on first boot, and point KOLM_ED25519_KEY_STORE at it so
 // the signer, keys.js, and /health all agree. Idempotent; safe at every boot.
 import fs from 'node:fs';
 import path from 'node:path';

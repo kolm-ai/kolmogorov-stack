@@ -1,13 +1,13 @@
 // src/region-aware-sampler.js
 //
-// W769-3 — Region-aware distillation sampler.
+// W769-3 - Region-aware distillation sampler.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 609-614):
 //   [W769-3] Region-aware distillation (only captures from target region)
 //
 // Design contract:
 //   - PURE filter. NEVER throws on bad input. Heavy distillation logic stays
-//     OUT of this module — its only job is to narrow a candidate pool to the
+//     OUT of this module - its only job is to narrow a candidate pool to the
 //     captures whose residency tag matches a target region.
 //   - HONESTY FLOOR: filterCapturesByRegion is FAIL-CLOSED. An untagged
 //     capture is EXCLUDED from any non-GLOBAL target, never silently
@@ -19,7 +19,7 @@
 //     downstream sampling step.
 //   - Distillation rank: not opinionated here. The sampler returns the
 //     filtered subset in newest-first order so a downstream curriculum
-//     module (W720+) can apply its own ranking — region filter is the
+//     module (W720+) can apply its own ranking - region filter is the
 //     hard residency gate, not a quality signal.
 //
 // Public surface:
@@ -33,7 +33,7 @@ import * as defaultEventStore from './event-store.js';
 
 export const REGION_SAMPLER_VERSION = 'w769-v1';
 
-// Internal — pick the event-store driver. opts.eventStore lets tests inject
+// Internal - pick the event-store driver. opts.eventStore lets tests inject
 // a fresh module instance (useful when KOLM_DATA_DIR was just rerolled).
 function _eventStore(opts) {
   return (opts && opts.eventStore) || defaultEventStore;
@@ -64,11 +64,11 @@ function _eventStore(opts) {
 export function filterCapturesByRegion(captures, target_region) {
   if (!Array.isArray(captures)) return [];
   if (!target_region || typeof target_region !== 'string') {
-    // Bad target — fail-closed (return empty).
+    // Bad target - fail-closed (return empty).
     return [];
   }
   if (!Object.prototype.hasOwnProperty.call(REGIONS, target_region)) {
-    // Unknown target — fail-closed (return empty). Callers SHOULD validate
+    // Unknown target - fail-closed (return empty). Callers SHOULD validate
     // upstream; we double-check here as the honesty floor.
     return [];
   }
@@ -82,7 +82,7 @@ export function filterCapturesByRegion(captures, target_region) {
       continue;
     }
     if (!tag) {
-      // Untagged capture into a non-GLOBAL target — FAIL-CLOSED, excluded.
+      // Untagged capture into a non-GLOBAL target - FAIL-CLOSED, excluded.
       continue;
     }
     if (tag === target_region) {
@@ -94,7 +94,7 @@ export function filterCapturesByRegion(captures, target_region) {
       out.push(c);
       continue;
     }
-    // Region mismatch (e.g. tag=EU_WEST, target=US_EAST) — excluded.
+    // Region mismatch (e.g. tag=EU_WEST, target=US_EAST) - excluded.
   }
   return out;
 }
@@ -174,7 +174,7 @@ export async function sampleForDistillation({
     if (!t || t.model !== 'capture-tag') continue;
     const cid = t.request_hash;
     if (!cid) continue;
-    // listEvents returns newest-first — first write wins so we keep
+    // listEvents returns newest-first - first write wins so we keep
     // the latest tag.
     if (!tagByCapture.has(cid)) {
       tagByCapture.set(cid, t.response_redacted);

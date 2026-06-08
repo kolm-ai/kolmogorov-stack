@@ -1,4 +1,4 @@
-// W730 — Prometheus exporter.
+// W730 - Prometheus exporter.
 //
 // Closes W730-1 from KOLM_W707_SYSTEM_UPGRADE_PLAN.md (line 370):
 //   "src/prometheus-exporter.js exposing /metrics endpoint in Prometheus
@@ -11,7 +11,7 @@
 //     it via _resetForTests(). No timers, no auto-scrape, no I/O. Callers
 //     pipe renderMetrics() out to whatever surface they want (HTTP route,
 //     stdout for cron, log shipper).
-//   * Prometheus text exposition format v0.0.4 — HELP/TYPE lines per
+//   * Prometheus text exposition format v0.0.4 - HELP/TYPE lines per
 //     metric, then zero-or-more sample rows. Honest empty-state: a
 //     registered metric with no samples still emits HELP+TYPE (no rows),
 //     which is Prometheus-correct (scrapers report `absent()` and you
@@ -19,7 +19,7 @@
 //   * Sibling-module composition: when W724 (memory-tier), W726
 //     (kernel-selector), W727 (accelerate), W729 (load-queue) ship,
 //     callers stitch values in via setGauge / incCounter / observeHistogram.
-//     The exporter does NOT import those siblings — keeps the dependency
+//     The exporter does NOT import those siblings - keeps the dependency
 //     graph one-way and the module fully unit-testable.
 //   * Label-value escaping: backslash, double-quote, and newline get the
 //     Prometheus escape treatment so a malicious or careless namespace
@@ -38,11 +38,11 @@
 
 export const PROMETHEUS_EXPORTER_VERSION = 'w730-v1';
 
-// Default histogram buckets — sensible defaults for "acceptance rate"
+// Default histogram buckets - sensible defaults for "acceptance rate"
 // (0..1 fraction) and HTTP latency (sub-millisecond → minute scale). When
 // a callsite wants a different distribution, pass `buckets:[..]` to
 // registerMetric. We keep these conservative and well-tested rather than
-// inheriting the prom-client defaults — the W707 wave doesn't want a
+// inheriting the prom-client defaults - the W707 wave doesn't want a
 // third-party SDK dependency for this exporter.
 const DEFAULT_HISTOGRAM_BUCKETS = Object.freeze([
   0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10,
@@ -85,7 +85,7 @@ export function _resetForTests() {
 // We pre-register them at module-import time so a scrape immediately after
 // boot returns the canonical HELP/TYPE block even if the runtime hasn't
 // produced any samples yet (honest empty-state). Callers in router.js,
-// memory-tier.js, etc. just call setGauge/incCounter/observeHistogram —
+// memory-tier.js, etc. just call setGauge/incCounter/observeHistogram - 
 // they don't need to remember to register first.
 
 function _preRegisterCanonicalMetrics() {
@@ -126,7 +126,7 @@ function _preRegisterCanonicalMetrics() {
     help: 'HTTP request duration in seconds by method, route, and status.',
     labelnames: ['method', 'route', 'status'],
   });
-  // W890-15 — V1 production-monitoring spec names (KOLM_W888 Part K-1).
+  // W890-15 - V1 production-monitoring spec names (KOLM_W888 Part K-1).
   // These six metrics are the canonical scrape contract for dashboards and
   // alerting. The kolm_* siblings above remain for internal infrastructure
   // signal (queues, kernels, decoding); the gateway_*/captures_*/artifacts_*
@@ -178,7 +178,7 @@ _preRegisterCanonicalMetrics();
 // =============================================================================
 
 /**
- * Register a metric. Idempotent — calling twice with the same shape is a
+ * Register a metric. Idempotent - calling twice with the same shape is a
  * no-op; calling with a CONFLICTING shape (different type) throws so the
  * mistake surfaces at boot, not at scrape.
  */
@@ -211,7 +211,7 @@ export function registerMetric(spec) {
     if (existing.type !== type) {
       throw new Error(`registerMetric: "${name}" already registered as ${existing.type}, cannot re-register as ${type}`);
     }
-    // Idempotent — keep existing labelnames + buckets to preserve samples.
+    // Idempotent - keep existing labelnames + buckets to preserve samples.
     return;
   }
   _registry.set(name, { type, help, labelnames, buckets });
@@ -292,7 +292,7 @@ export function observeHistogram(name, labels, value) {
 }
 
 // =============================================================================
-// renderMetrics — Prometheus text exposition format v0.0.4
+// renderMetrics - Prometheus text exposition format v0.0.4
 // =============================================================================
 
 /**
@@ -300,12 +300,12 @@ export function observeHistogram(name, labels, value) {
  * single string ready to write to an HTTP response or stdout.
  *
  * Honest empty-state: a metric with no samples still emits its HELP and
- * TYPE lines but no rows. This is Prometheus-correct — scrapers report
+ * TYPE lines but no rows. This is Prometheus-correct - scrapers report
  * `absent()` and the metric stays in the registry.
  */
 export function renderMetrics() {
   const out = [];
-  // Sort by name so the output is deterministic across boots — easier to
+  // Sort by name so the output is deterministic across boots - easier to
   // diff in CI and stable under partial reloads.
   const names = Array.from(_registry.keys()).sort();
   for (const name of names) {

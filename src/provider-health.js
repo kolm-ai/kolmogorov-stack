@@ -1,4 +1,4 @@
-// W921 — provider-health: per-provider circuit breaker + health-aware load
+// W921 - provider-health: per-provider circuit breaker + health-aware load
 // balancing for the gateway dispatch chain.
 //
 // PROBLEM. src/gateway-router.js:dispatchWithFallback walks the fallback
@@ -10,17 +10,17 @@
 // exactly this.
 //
 // THIS MODULE implements two cooperating PASSIVE-health layers (inferred
-// from real outcomes — no synthetic probes):
+// from real outcomes - no synthetic probes):
 //
-//   LAYER 1 — PER-PROVIDER CIRCUIT BREAKER (Resilience4j 3-state machine):
+//   LAYER 1 - PER-PROVIDER CIRCUIT BREAKER (Resilience4j 3-state machine):
 //     CLOSED   normal; outcomes recorded into a fixed-size sliding window.
 //     OPEN     tripped; provider SKIPPED in chain selection for cooldown_ms.
 //     HALF_OPEN after cooldown, admit `permitted_in_half_open` trials;
 //              success -> CLOSE, any failure -> re-OPEN with EXPONENTIALLY
-//              growing cooldown (base x consecutive_ejections, capped — the
+//              growing cooldown (base x consecutive_ejections, capped - the
 //              Envoy growth rule).
 //     TRIP CONDITIONS (OR'd):
-//       (a) consecutive_failures >= threshold (Envoy default 5) — INLINE.
+//       (a) consecutive_failures >= threshold (Envoy default 5) - INLINE.
 //       (b) failure_rate >= 0.5 over the last sliding_window_size outcomes,
 //           gated by minimum_calls (Resilience4j cold-start gate).
 //       (c) IMMEDIATE trip on terminal-class 401/403/404 (LiteLLM rule).
@@ -29,14 +29,14 @@
 //     RETRY-AFTER AWARE: a 429 with Retry-After sets cooldown =
 //     max(cooldown_ms, retry_after_ms).
 //
-//   LAYER 2 — HEALTH-AWARE LOAD BALANCING (head selection among equivalent
+//   LAYER 2 - HEALTH-AWARE LOAD BALANCING (head selection among equivalent
 //     providers): 'weighted' (weighted-random shuffle; OPEN -> weight 0),
 //     'latency' (lowest EWMA p50 among CLOSED), or 'health' (success_rate x
 //     (1 - normalized latency penalty)). The LB chooses the HEAD; the
 //     breaker decides who is ELIGIBLE.
 //
 // SAFETY VALVE (Envoy max_ejection_percent / panic): NEVER eject the last
-// eligible provider — if dropping every OPEN entry would leave zero, return
+// eligible provider - if dropping every OPEN entry would leave zero, return
 // the chain anyway (FAIL-OPEN). This is the single most important invariant:
 // the breaker can only ever IMPROVE availability, never self-inflict an
 // outage.
@@ -45,7 +45,7 @@
 // metrics.js "resets on restart, V1 not persisting"). A store.js-backed
 // distributed breaker is documented Phase-2 for multi-instance fleets.
 //
-// Zero npm deps — pure JS (Map + arithmetic), matching kolm's
+// Zero npm deps - pure JS (Map + arithmetic), matching kolm's
 // metrics.js / lake.js zero-dep ethos.
 //
 // Public surface (singleton-backed module functions + makeRegistry factory):
@@ -103,7 +103,7 @@ function _newState() {
 }
 
 // --------------------------------------------------------------------------
-// ProviderHealthRegistry — the breaker + LB engine. All time is injected
+// ProviderHealthRegistry - the breaker + LB engine. All time is injected
 // via an optional nowMs argument so tests are fully deterministic.
 // --------------------------------------------------------------------------
 
@@ -205,7 +205,7 @@ export class ProviderHealthRegistry {
     // (c) terminal-class: immediate trip regardless of window/consecutive.
     if (TERMINAL_STATUSES.includes(Number(status))) return true;
     if (!isFailure) return false;
-    // (a) consecutive failures inline trip — catches hard-down hosts instantly.
+    // (a) consecutive failures inline trip - catches hard-down hosts instantly.
     if (st.consecutive_failures >= this.cfg.consecutive_failure_threshold) return true;
     // (b) failure-rate trip, gated by minimum_calls.
     if (st.window.length >= this.cfg.minimum_calls) {
@@ -247,7 +247,7 @@ export class ProviderHealthRegistry {
       st.consecutive_failures += 1;
     } else {
       // 2xx OR a non-fallback 4xx (e.g. 400 caller's fault) decays the
-      // consecutive failure counter — the provider is demonstrably alive.
+      // consecutive failure counter - the provider is demonstrably alive.
       st.consecutive_failures = 0;
     }
 
@@ -283,7 +283,7 @@ export class ProviderHealthRegistry {
       return;
     }
 
-    // CLOSED — evaluate trip conditions.
+    // CLOSED - evaluate trip conditions.
     if (this._shouldTrip(st, status, isFailure)) {
       this._openCircuit(st, now, retryAfterMs);
     }
@@ -307,7 +307,7 @@ export class ProviderHealthRegistry {
         st.half_open_in_flight += 1;
         return false; // allow the trial
       }
-      return true; // trial budget exhausted — keep skipping
+      return true; // trial budget exhausted - keep skipping
     }
     return false; // closed
   }
@@ -347,7 +347,7 @@ export class ProviderHealthRegistry {
 
   // ---- public: health score (0..1) --------------------------------------
   // success_rate x (1 - normalized latency penalty). Unknown provider => 1
-  // (optimistic — never penalize a provider we have no data on).
+  // (optimistic - never penalize a provider we have no data on).
   healthScore(providerKey) {
     const st = this._map.get(this._key(providerKey));
     if (!st || st.total_calls === 0) return 1;
@@ -464,7 +464,7 @@ export class ProviderHealthRegistry {
 
     // PANIC FAIL-OPEN invariant: never reduce the chain to zero eligible
     // entries. If every provider is OPEN, return the ORIGINAL chain
-    // unchanged and flag it — the breaker can only improve availability.
+    // unchanged and flag it - the breaker can only improve availability.
     if (eligible.length === 0) {
       return {
         chain: inputChain,
@@ -520,7 +520,7 @@ export class ProviderHealthRegistry {
   // ---- public (Phase-2-optional): Envoy success-rate outlier sweep -------
   // Flags providers whose success_rate < mean - stdev x factor across the
   // pool, gated by minimum_hosts + per-provider request_volume. Returns the
-  // list of provider keys that would be ejected (does NOT mutate state — the
+  // list of provider keys that would be ejected (does NOT mutate state - the
   // caller decides whether to act, preserving the fail-open invariant).
   successRateOutlierSweep(poolKeys = null) {
     const keys = Array.isArray(poolKeys) && poolKeys.length

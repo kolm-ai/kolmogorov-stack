@@ -1,6 +1,6 @@
 // src/secure-training.js
 //
-// Secure-training guarantee — the enforcement point.
+// Secure-training guarantee - the enforcement point.
 //
 // A rented GPU pod is a THIRD-PARTY machine. Public/open data may be uploaded to
 // one; sensitive or customer data must NOT leave the customer's boundary. The
@@ -17,7 +17,7 @@
 
 import { scan } from './privacy-membrane.js';
 
-// The operator's / customer's own metal — data never leaves the boundary.
+// The operator's / customer's own metal - data never leaves the boundary.
 export const LOCAL_BACKENDS = new Set([
   'local-cpu', 'local-cuda', 'local-mps', 'local-mlx', 'local-rocm', 'local-directml',
 ]);
@@ -42,7 +42,7 @@ export function isThirdPartyBackend(backend) {
   return THIRD_PARTY_BACKENDS.has(backend) && !LOCAL_BACKENDS.has(backend);
 }
 
-// classifyTrainingData(samples, opts) — scan up to `sampleLimit` rows of the
+// classifyTrainingData(samples, opts) - scan up to `sampleLimit` rows of the
 // corpus and report whether it carries sensitive classes (PII/PHI/secrets/...).
 // Accepts a string, an array of strings, or an array of {prompt,completion}-ish
 // objects. Conservative: any detected class marks the corpus sensitive.
@@ -64,7 +64,7 @@ function safeStringify(v) {
   try { return JSON.stringify(v); } catch { return String(v); }
 }
 
-// assertPodEligible(opts) — the gate. Returns { ok:true, mode, sensitive } when
+// assertPodEligible(opts) - the gate. Returns { ok:true, mode, sensitive } when
 // the (data, backend) pair is allowed; throws SecureTrainingError otherwise.
 //
 //   sensitivity : the classifyTrainingData() result, OR a boolean
@@ -104,7 +104,7 @@ export function assertPodEligible({ sensitivity, backend, byoc = false, airgap =
   );
 }
 
-// teardownPolicy(backend) — what a third-party pod MUST do with the corpus.
+// teardownPolicy(backend) - what a third-party pod MUST do with the corpus.
 // The orchestrator encrypts the corpus + adapter at rest on the rented disk and
 // shreds the workspace before releasing the instance. Local backends are no-ops
 // (the data is already on the owner's machine).

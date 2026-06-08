@@ -1,4 +1,4 @@
-// Wave 381 — tokenizer training API.
+// Wave 381 - tokenizer training API.
 //
 // Thin Node-side API over the pure-JS BPE worker at
 // workers/tokenizer-train/train.mjs. Heavy ML stays in workers/ per repo
@@ -19,7 +19,7 @@
 //   DEFAULT_VOCAB_SIZES = [4000, 8000, 16000, 32000]
 //
 // The worker is invoked via child_process.spawnSync (synchronous from the
-// caller's POV — we await a result, and the merge loop is fast enough for
+// caller's POV - we await a result, and the merge loop is fast enough for
 // vocab_size<=32000 on a typical 1MB corpus). For very large corpora the
 // pipeline orchestrator (src/compile-pipeline.js) can spawn the worker
 // detached and watch its output asynchronously; trainTokenizer itself
@@ -97,7 +97,7 @@ export async function trainTokenizer({
     seed,
     special_tokens: specials,
   });
-  // Spawn the worker async — capture stdout + stderr and resolve with the
+  // Spawn the worker async - capture stdout + stderr and resolve with the
   // parsed envelope. We do NOT detach here because the caller needs the
   // result inline; compile-pipeline.js can choose to detach for very large
   // corpora by reading the same envelope from the log file instead.
@@ -145,7 +145,7 @@ export async function trainTokenizer({
 }
 
 // Load a previously-trained tokenizer file and return encode/decode helpers.
-// The encode loop is a greedy longest-match scan over the merged vocab —
+// The encode loop is a greedy longest-match scan over the merged vocab - 
 // matches the BPE merge semantics from the worker without re-running the
 // merge loop. For an OOV character we emit the <unk> id (or skip if <unk> is
 // absent from the vocab).
@@ -173,7 +173,7 @@ export function loadTokenizer(tokPath) {
     const ids = [];
     let i = 0;
     while (i < s.length) {
-      // Skip whitespace — the worker pre-tokenizer drops it. Treating spaces
+      // Skip whitespace - the worker pre-tokenizer drops it. Treating spaces
       // as <unk> blows up the OOV rate on prose corpora and tanks the
       // compression metric vs GPT-4 since GPT-4's tokenizer includes a
       // leading-space variant of every common word.
@@ -181,7 +181,7 @@ export function loadTokenizer(tokPath) {
       let matched = null;
       // Greedy longest-match over the (non-special) vocab.
       for (const t of sortedByLen) {
-        // Allow matches even when t ends with "</w>" — strip the suffix
+        // Allow matches even when t ends with "</w>" - strip the suffix
         // and match the literal characters then re-add the </w> token id.
         const tBare = t.endsWith('</w>') ? t.slice(0, -4) : t;
         if (!tBare) continue;

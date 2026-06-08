@@ -1,4 +1,4 @@
-// W287 — native subprocess runtime target for .kolm artifacts.
+// W287 - native subprocess runtime target for .kolm artifacts.
 //
 // A .kolm with manifest.runtime_target='native' carries a precompiled
 // binary inside the zip (typically under target/<triple>/<name>). The
@@ -14,11 +14,11 @@
 //     style shebang interpretation)
 //
 // Errors:
-//   KOLM_E_TARGET_MISSING        — entrypoint.binary missing from manifest or zip
-//   KOLM_E_NATIVE_RUNTIME        — child crashed, exited non-zero, or stdout
+//   KOLM_E_TARGET_MISSING - entrypoint.binary missing from manifest or zip
+//   KOLM_E_NATIVE_RUNTIME - child crashed, exited non-zero, or stdout
 //                                  was not parseable JSON
-//   KOLM_E_RECIPE_TIMEOUT        — wall-clock budget exceeded
-//   KOLM_E_NATIVE_PLATFORM       — refused to run on this platform (Windows
+//   KOLM_E_RECIPE_TIMEOUT - wall-clock budget exceeded
+//   KOLM_E_NATIVE_PLATFORM - refused to run on this platform (Windows
 //                                  without .exe suffix)
 
 import { spawn } from 'node:child_process';

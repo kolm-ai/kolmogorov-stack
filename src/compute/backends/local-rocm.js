@@ -1,4 +1,4 @@
-// local-rocm — AMD MI / RDNA3 via rocm-smi.
+// local-rocm - AMD MI / RDNA3 via rocm-smi.
 // No API. run() spawns command with HIP_VISIBLE_DEVICES wired.
 // Env: caller can pass HIP_VISIBLE_DEVICES; otherwise defaults to "0".
 
@@ -34,7 +34,7 @@ export async function test() {
   return { ok: d.available, latency_ms: Date.now() - t0, ...d };
 }
 
-// run({ image, command, env, timeoutMs }) — spawns command with HIP env wired.
+// run({ image, command, env, timeoutMs }) - spawns command with HIP env wired.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {
   const t0 = Date.now();
   const det = await detect();

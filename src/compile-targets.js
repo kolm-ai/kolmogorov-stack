@@ -122,7 +122,7 @@ export function validateCompileTarget(target, manifest) {
   }
   const info = COMPILE_TARGET_INFO[target];
   if (!info) {
-    throw new Error(`compile target ${target} missing descriptor — registry inconsistency`);
+    throw new Error(`compile target ${target} missing descriptor - registry inconsistency`);
   }
   const m = manifest || {};
   for (const field of info.required_artifact_fields) {

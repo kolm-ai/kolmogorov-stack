@@ -1,4 +1,4 @@
-// W718 — MULTI-TEACHER ENSEMBLE BLENDING (Teacher Council)
+// W718 - MULTI-TEACHER ENSEMBLE BLENDING (Teacher Council)
 //
 // Implements the Teacher Council weighting formula from the 2026-05-24
 // research doc Breakthrough 3 (docs/research/kolm-billion-dollar-distillation-
@@ -16,11 +16,11 @@
 //
 // Why softmax: the formula returns a *distribution* over teachers per capture,
 // not a hard winner. The downstream blender (blendTargets) can either pick
-// argmax (text outputs — picking a weighted mean of two distinct strings is
+// argmax (text outputs - picking a weighted mean of two distinct strings is
 // meaningless) OR weighted-mean across logits (numeric vectors).
 //
 // Honesty contract:
-//   - Default reliability is 0.5 for an unknown (teacher, domain, task) — never
+//   - Default reliability is 0.5 for an unknown (teacher, domain, task) - never
 //     fabricated, never 1.0. The caller MUST run a bakeoff to upgrade the
 //     prior.
 //   - cost / risk are LOWERED contributions (gamma_cost / gamma_risk are
@@ -31,24 +31,24 @@
 //
 // Tenant fence: this module is PURE compute. It does not read or write the
 // event-store. The caller (distill-pipeline.js) is responsible for tenant
-// scoping. Per W604 the math is gentle on zero-population edge cases —
+// scoping. Per W604 the math is gentle on zero-population edge cases - 
 // computeTeacherWeights([], ...) returns [] not a divide-by-zero.
 
 export const TEACHER_COUNCIL_VERSION = 'w718-v1';
 
-// W718 — gamma defaults. Tuned to put human preference > domain/task
+// W718 - gamma defaults. Tuned to put human preference > domain/task
 // reliability > verifier agreement > cost > risk. Operators who want a
 // different mix pass opts.gamma to computeTeacherWeights().
 //
 // Why these specific numbers:
-//   - gamma_human (1.2) — outranks all reliability signals because a real
+//   - gamma_human (1.2) - outranks all reliability signals because a real
 //     human preference rating is the highest-information signal we have.
-//   - gamma_domain / gamma_task (1.0) — equal-weighted reliability priors.
-//   - gamma_verifier (0.8) — slightly downweighted vs. reliability because an
+//   - gamma_domain / gamma_task (1.0) - equal-weighted reliability priors.
+//   - gamma_verifier (0.8) - slightly downweighted vs. reliability because an
 //     auto-verifier (regex / classifier) is more brittle than a real human.
-//   - gamma_cost (0.3) — a small cost penalty. Cost matters but should not
+//   - gamma_cost (0.3) - a small cost penalty. Cost matters but should not
 //     dominate quality. Operators on a budget can raise this to 1.0+.
-//   - gamma_risk (0.6) — a moderate policy-risk penalty. A capture flagged
+//   - gamma_risk (0.6) - a moderate policy-risk penalty. A capture flagged
 //     'high_risk' (e.g. tool-use that touches prod, regulated-data prompts)
 //     should bias toward the most conservative teacher.
 export const GAMMA_DEFAULTS = Object.freeze({
@@ -60,7 +60,7 @@ export const GAMMA_DEFAULTS = Object.freeze({
   risk: 0.6,
 });
 
-// W718 — softmax helper. Numerically stable (subtract max before exp). Returns
+// W718 - softmax helper. Numerically stable (subtract max before exp). Returns
 // an array of probabilities summing to ~1.0 within float epsilon.
 function softmax(logits) {
   if (!Array.isArray(logits) || logits.length === 0) return [];
@@ -68,13 +68,13 @@ function softmax(logits) {
   const exps = logits.map((x) => Math.exp(x - m));
   const sum = exps.reduce((a, b) => a + b, 0);
   if (!Number.isFinite(sum) || sum <= 0) {
-    // Degenerate input — uniform fallback.
+    // Degenerate input - uniform fallback.
     return logits.map(() => 1 / logits.length);
   }
   return exps.map((e) => e / sum);
 }
 
-// W718 — extract a capture's domain + task + risk + cost-normalisation hints.
+// W718 - extract a capture's domain + task + risk + cost-normalisation hints.
 // Captures in this codebase are NOT uniformly shaped (the event-store row, the
 // approval row, the distill seed, and the bakeoff row all differ), so we
 // accept several aliases and fall back gracefully when a field is missing.
@@ -96,7 +96,7 @@ function _captureRisk(capture) {
   return 0;
 }
 
-// W718 — pull verifier_agreement / human_preference signals OFF the capture
+// W718 - pull verifier_agreement / human_preference signals OFF the capture
 // (per-teacher dict). The capture row may carry pre-computed per-teacher
 // scores from a prior verification pass; if not, we fall back to a neutral
 // 0.5 prior so the math doesn't crash.
@@ -118,7 +118,7 @@ function _clamp01(x) {
   return Math.max(0, Math.min(1, n));
 }
 
-// W718 — normalized cost per teacher. Operators can pass opts.cost_table
+// W718 - normalized cost per teacher. Operators can pass opts.cost_table
 // mapping teacher slug -> USD/call. We rank-normalize (most-expensive teacher
 // gets 1.0, cheapest gets 0.0) so the cost penalty is scale-invariant. A
 // teacher absent from the table is treated as median (0.5) so its weight
@@ -137,7 +137,7 @@ function _normalizedCosts(teachers, costTable) {
   return raw.map((c) => (c == null ? 0.5 : (c - min) / (max - min)));
 }
 
-// W718 — compute per-teacher softmax weight for a single capture.
+// W718 - compute per-teacher softmax weight for a single capture.
 //
 // teachers       : array of teacher slugs (['claude-opus-4-7', 'gpt-4o', ...])
 // capture        : the row whose target we're trying to blend. May carry
@@ -147,7 +147,7 @@ function _normalizedCosts(teachers, costTable) {
 // reliability    : optional TeacherReliabilityTable instance OR a plain
 //                  function (teacher, domain, task) => {domain, task} numbers
 //                  in [0,1]. When null/undefined every teacher gets 0.5 in
-//                  both axes — pure "no information" prior.
+//                  both axes - pure "no information" prior.
 // opts           :
 //   gamma        : override GAMMA_DEFAULTS. Partial overrides merged.
 //   cost_table   : {teacher_slug: usd_per_call} for cost normalisation.
@@ -225,7 +225,7 @@ export function computeTeacherWeights(teachers, capture, reliability, opts = {})
   return rows;
 }
 
-// W718 — pick the highest-weight teacher for a single capture, with an
+// W718 - pick the highest-weight teacher for a single capture, with an
 // English-language explanation of WHY. Used by distill-pipeline.js to stamp
 // per-capture metadata so the receipt chain can answer "why did capture #42
 // route to gpt-4o instead of claude-opus-4-7?".
@@ -271,7 +271,7 @@ export function selectTeacherForCapture(teachers, capture, reliability, opts = {
   };
 }
 
-// W718 — blend per-teacher target signals into a single distillation target.
+// W718 - blend per-teacher target signals into a single distillation target.
 //
 // teacher_signals[]  : one entry per teacher, in the same order as `weights`.
 //                      Each entry is EITHER:
@@ -293,7 +293,7 @@ export function blendTargets(teacher_signals, weights) {
   if (!Array.isArray(weights) || weights.length !== teacher_signals.length) {
     throw new Error('blendTargets: weights array must align with teacher_signals length');
   }
-  // Argmax fallback — picks the highest-weighted teacher's signal verbatim.
+  // Argmax fallback - picks the highest-weighted teacher's signal verbatim.
   const argmax = () => {
     let maxIdx = 0;
     let maxW = -Infinity;
@@ -306,14 +306,14 @@ export function blendTargets(teacher_signals, weights) {
   // Detect mode from the first non-null signal.
   const first = teacher_signals.find((s) => s != null);
   if (first == null) return null;
-  // Text mode — weighted mean is meaningless; return argmax.
+  // Text mode - weighted mean is meaningless; return argmax.
   if (typeof first === 'string') return argmax();
-  // Mixed types — fall back to argmax (defensive: never silently mix strings
+  // Mixed types - fall back to argmax (defensive: never silently mix strings
   // with numbers).
   for (const s of teacher_signals) {
     if (s != null && typeof s !== typeof first) return argmax();
   }
-  // Number mode — weighted mean.
+  // Number mode - weighted mean.
   if (typeof first === 'number') {
     let acc = 0;
     let wsum = 0;
@@ -326,7 +326,7 @@ export function blendTargets(teacher_signals, weights) {
     }
     return wsum > 0 ? acc / wsum : 0;
   }
-  // Vector mode — element-wise weighted mean. All vectors must align in length
+  // Vector mode - element-wise weighted mean. All vectors must align in length
   // OR we fall back to argmax (defensive).
   if (Array.isArray(first)) {
     const dim = first.length;
@@ -344,7 +344,7 @@ export function blendTargets(teacher_signals, weights) {
     if (wsum <= 0) return argmax();
     return out.map((v) => v / wsum);
   }
-  // Object-with-.logits mode — blend the .logits field and pass-through
+  // Object-with-.logits mode - blend the .logits field and pass-through
   // everything else from the winner.
   if (typeof first === 'object' && Array.isArray(first.logits)) {
     const logitSignals = teacher_signals.map((s) => (s && Array.isArray(s.logits)) ? s.logits : null);
@@ -352,7 +352,7 @@ export function blendTargets(teacher_signals, weights) {
     const winner = argmax();
     return Object.assign({}, winner, { logits: blendedLogits });
   }
-  // Unknown shape — argmax.
+  // Unknown shape - argmax.
   return argmax();
 }
 

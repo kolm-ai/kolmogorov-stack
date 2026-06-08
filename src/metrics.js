@@ -1,7 +1,7 @@
 // LM-7 - V1 launch product analytics (2026-05-26).
 //
 // Server-side daily counters for V1 launch instrumentation. No browser SDKs
-// (no Mixpanel/Segment/PostHog) and no PII — every row is bucketed on
+// (no Mixpanel/Segment/PostHog) and no PII - every row is bucketed on
 // (date, tenant, plan_tier, kind, outcome) only. Region + namespace_id are
 // optional dimensional tags also bucketed at write time so we never persist
 // a raw user input string.
@@ -14,11 +14,11 @@
 //     /v1/metrics/snapshot endpoint reports under `_dropped` so the surface
 //     is at least observable.
 //   - Daily resolution. The row key is (UTC date | tenant | plan_tier |
-//     kind | outcome). Sub-day buckets are intentionally not stored — V1
+//     kind | outcome). Sub-day buckets are intentionally not stored - V1
 //     dashboards only chart day-over-day.
 //   - Snapshot day-cap is enforced at 90. Callers asking for >90 get 90
 //     back; <1 is normalized to 1.
-//   - No analytics SDKs in the browser per user privacy directive — this
+//   - No analytics SDKs in the browser per user privacy directive - this
 //     module is server-side ONLY. The frontend should never POST to
 //     /v1/metrics/event from page JS. The route is reserved for first-party
 //     server-side instrumentation by the kolm router itself.
@@ -35,7 +35,7 @@ export const SNAPSHOT_MAX_DAYS = 90;
 export const SNAPSHOT_MIN_DAYS = 1;
 
 // In-process drop counter so caller / operator can see dropped metric writes.
-// Resets on process restart — V1 is intentionally not persisting this.
+// Resets on process restart - V1 is intentionally not persisting this.
 let _droppedTotal = 0;
 
 function _utcDateKey(ms) {
@@ -155,7 +155,7 @@ export function recordEvent(opts = {}) {
 // sums count across outcomes. Caller-supplied `kind` filters at read time
 // (write-time bucketing is unchanged).
 //
-// Returns a clean envelope on missing storage — never throws.
+// Returns a clean envelope on missing storage - never throws.
 // ---------------------------------------------------------------------------
 export function getSnapshot(opts = {}) {
   const tenant = _safeStr(opts.tenant);
@@ -208,7 +208,7 @@ export function getSnapshot(opts = {}) {
   return out;
 }
 
-// Test / operator hook — read the in-process drop counter without forcing
+// Test / operator hook - read the in-process drop counter without forcing
 // a snapshot fetch. Kept tiny on purpose; not a metric itself.
 export function _droppedCount() {
   return _droppedTotal;

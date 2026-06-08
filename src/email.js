@@ -1,4 +1,4 @@
-// Transactional email via Resend HTTP API. No SDK dep — built-in fetch.
+// Transactional email via Resend HTTP API. No SDK dep - built-in fetch.
 //
 // Configuration:
 //   RESEND_API_KEY          - re_... from https://resend.com/api-keys
@@ -8,7 +8,7 @@
 //   EMAIL_REPLY_TO          - optional, defaults to EMAIL_FROM
 //
 // If RESEND_API_KEY is unset, sendMail() returns { skipped: true } so the rest
-// of the app never blocks on email — every email path is best-effort.
+// of the app never blocks on email - every email path is best-effort.
 
 const RESEND_URL = 'https://api.resend.com/emails';
 
@@ -61,7 +61,7 @@ export async function sendWelcome({ email, apiKey, plan, billingUrl }) {
     `Your API key:`,
     `  ${apiKey}`,
     ``,
-    `Save it. We don't store the raw key — only a hash. You can rotate any time from`,
+    `Save it. We don't store the raw key - only a hash. You can rotate any time from`,
     `  https://kolm.ai/account`,
     ``,
     `Plan: ${planLabel}`,
@@ -70,7 +70,7 @@ export async function sendWelcome({ email, apiKey, plan, billingUrl }) {
     lines.push('', `Complete payment to activate your paid tier:`, `  ${billingUrl}`);
     lines.push('', `Until payment is confirmed, your account is on the Free tier.`);
   }
-  lines.push('', `Docs: https://kolm.ai/docs`, `Quickstart: https://kolm.ai/quickstart`, '', `— kolm`);
+  lines.push('', `Docs: https://kolm.ai/docs`, `Quickstart: https://kolm.ai/quickstart`, '', ` - kolm`);
   return sendMail({
     to: email,
     subject,
@@ -89,7 +89,7 @@ export async function sendBillingActivated({ email, plan, quota }) {
     ``,
     `Manage at https://kolm.ai/account.`,
     ``,
-    `— kolm`,
+    ` - kolm`,
   ].join('\n');
   return sendMail({ to: email, subject, text, tags: [{ name: 'kind', value: 'billing_activated' }] });
 }
@@ -105,7 +105,7 @@ export async function sendBillingFailed({ email, plan }) {
     `Your account stays active during the retry window. If all retries fail your tenant`,
     `will downgrade to the Free tier.`,
     ``,
-    `— kolm`,
+    ` - kolm`,
   ].join('\n');
   return sendMail({ to: email, subject, text, tags: [{ name: 'kind', value: 'billing_failed' }] });
 }
@@ -115,7 +115,7 @@ function escapeHtml(s) {
 }
 
 // ---------------------------------------------------------------------------
-// Wave 253 sec#5 — setup-token flow.
+// Wave 253 sec#5 - setup-token flow.
 //
 // Background: pre-W253 the welcome email carried the raw API key in plaintext
 // in the message body AND inside Resend's request log. A leak of EMAIL_FROM's
@@ -190,7 +190,7 @@ export function cacheRawKeyForReveal(apiKeyId, rawKey, opts = {}) {
   if (!apiKeyId || !rawKey) return;
   const exp = Date.now() + (opts.ttlSec || SETUP_TTL_SEC) * 1000;
   RAW_KEY_CACHE.set(String(apiKeyId), { key: String(rawKey), exp });
-  // Lazy GC — sweep on every set so the map never grows unbounded.
+  // Lazy GC - sweep on every set so the map never grows unbounded.
   const now = Date.now();
   for (const [k, v] of RAW_KEY_CACHE) {
     if (v.exp < now) RAW_KEY_CACHE.delete(k);
@@ -208,7 +208,7 @@ export function consumeRawKeyForReveal(apiKeyId) {
 }
 
 // ---------------------------------------------------------------------------
-// LM-8 (V1 launch 2026-05-26) — transactional email surface.
+// LM-8 (V1 launch 2026-05-26) - transactional email surface.
 //
 // Three template helpers + one sendEmail() façade. The transport is Resend
 // over plain fetch (no SDK dep). If RESEND_API_KEY is unset OR the network
@@ -222,7 +222,7 @@ export function consumeRawKeyForReveal(apiKeyId) {
 //   { ok: true, delivered: false, queued: true } - local outbox fallback
 //   { ok: true, delivered: false, queued: false, reason } - bad input (no to/subject/body)
 //
-// Templates (tEmail*) are pure functions — they return {subject, html, text}
+// Templates (tEmail*) are pure functions - they return {subject, html, text}
 // and do not perform IO. That keeps unit tests synchronous and lets the
 // caller pre-render the body for audit logs before sending.
 // ---------------------------------------------------------------------------
@@ -244,7 +244,7 @@ function _appendOutbox(envelope) {
     nodeFs.appendFileSync(EMAIL_OUTBOX_PATH, JSON.stringify(envelope) + '\n');
     return true;
   } catch (_e) {
-    // Even the outbox is best-effort — disk full, read-only FS, etc. We log
+    // Even the outbox is best-effort - disk full, read-only FS, etc. We log
     // and swallow rather than throw because email is never load-bearing for
     // the calling handler.
     try { console.error('[email] outbox write failed', _e && _e.message); } catch (_) {} // deliberate: cleanup
@@ -253,7 +253,7 @@ function _appendOutbox(envelope) {
 }
 
 export async function sendEmail({ to, subject, html, text, tag } = {}) {
-  // Bad-input guard. We do not throw — the caller is always fire-and-forget.
+  // Bad-input guard. We do not throw - the caller is always fire-and-forget.
   if (!to || !subject || (!html && !text)) {
     return { ok: true, delivered: false, queued: false, reason: 'missing_fields' };
   }
@@ -291,7 +291,7 @@ export async function sendEmail({ to, subject, html, text, tag } = {}) {
       body: JSON.stringify(body),
     });
     if (!res.ok) {
-      // Resend rejected (4xx/5xx). Treat as a transport failure — queue locally
+      // Resend rejected (4xx/5xx). Treat as a transport failure - queue locally
       // so the audit trail is preserved and an operator can replay later.
       _appendOutbox({ ...envelope, _resend_status: res.status });
       return { ok: true, delivered: false, queued: true };
@@ -326,14 +326,14 @@ function _ctaButton(label, href) {
   return `<p style="margin:20px 0"><a href="${_esc(href)}" style="display:inline-block;padding:10px 18px;background:#0b0b0d;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">${_esc(label)}</a></p>`;
 }
 
-// Signup confirmation — sent fire-and-forget on /v1/signup success.
+// Signup confirmation - sent fire-and-forget on /v1/signup success.
 // Single CTA to /account/overview (per LM-8 spec). Plan label appears in
 // both subject and body so the recipient can disambiguate multi-tenant signups.
 export function tEmailSignup({ email, tenant_id, plan_tier } = {}) {
   const plan = String(plan_tier || 'free').toLowerCase();
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
   const acctUrl = 'https://kolm.ai/account/overview';
-  const subject = `Welcome to kolm — your ${planLabel} account is live`;
+  const subject = `Welcome to kolm - your ${planLabel} account is live`;
   const textLines = [
     `Welcome to kolm.`,
     ``,
@@ -350,7 +350,7 @@ export function tEmailSignup({ email, tenant_id, plan_tier } = {}) {
     ``,
     `Reply to this email if you hit any friction.`,
     ``,
-    `— kolm`,
+    ` - kolm`,
   ];
   const html = _wrapHtml([
     `Welcome to <strong>kolm</strong>.`,
@@ -363,17 +363,54 @@ export function tEmailSignup({ email, tenant_id, plan_tier } = {}) {
   return { subject, html, text: textLines.join('\n') };
 }
 
-// Compile-done — sent on both success and failure paths.
+// Signed Readiness Report ready - sent fire-and-forget after a $750 purchase
+// clears (Stripe webhook). Single CTA to the shareable Trust link the buyer
+// hands their reviewer. readiness_pct + subject_name are optional context.
+export function tEmailReportReady({ email, report_id, trust_url, readiness_pct, subject_name } = {}) {
+  const url = trust_url || 'https://kolm.ai/dashboard';
+  const pct = (readiness_pct == null || readiness_pct === '') ? null : `${readiness_pct}%`;
+  const subj = subject_name || 'your agent fleet';
+  const subject = 'Your Signed Readiness Report is ready';
+  const textLines = [
+    `Your Signed Readiness Report is ready.`,
+    ``,
+    `Subject:   ${subj}`,
+    pct ? `Readiness: ${pct} (assessed controls)` : null,
+    `Report id: ${report_id || '(pending)'}`,
+    ``,
+    `Share this link with your buyer's security review group. It renders the`,
+    `signed report and lets them verify the Ed25519 signature offline, with no`,
+    `kolm account:`,
+    `  ${url}`,
+    ``,
+    `The report is unwatermarked and distributable. The signature covers every`,
+    `byte, so a single altered finding breaks verification.`,
+    ``,
+    `Questions: dev@kolm.ai`,
+    ``,
+    ` - kolm`,
+  ].filter((l) => l != null);
+  const html = _wrapHtml([
+    `Your <strong>Signed Readiness Report</strong> is ready.`,
+    `<div style="background:#f6f5f2;padding:12px;border-radius:6px;font:12px/1.55 ui-monospace,Menlo,monospace"><div>Subject: ${_esc(subj)}</div>${pct ? `<div>Readiness: ${_esc(pct)} (assessed controls)</div>` : ''}<div>Report: ${_esc(report_id || '(pending)')}</div></div>`,
+    `Share this link with your buyer's security review group. It renders the signed report and lets them verify the Ed25519 signature offline, with no kolm account.`,
+    _ctaButton('Open the Trust link', url),
+    `<p style="margin:24px 0 0 0;font:12px/1.55 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#555">The report is unwatermarked and distributable. The signature covers every byte, so a single altered finding breaks verification. &nbsp;·&nbsp; Questions: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></p>`,
+  ]);
+  return { subject, html, text: textLines.join('\n') };
+}
+
+// Compile-done - sent on both success and failure paths.
 // k_score and duration_s are optional (failure path may not have them).
 export function tEmailCompileDone({ email, tenant_id, artifact_id, status, k_score, duration_s } = {}) {
   const ok = String(status) === 'success';
   const aid = artifact_id || '(unknown)';
   const aHref = `https://kolm.ai/account/artifacts/${encodeURIComponent(aid)}`;
   const subject = ok
-    ? `Compile finished — ${aid}`
-    : `Compile failed — ${aid}`;
-  const dur = (typeof duration_s === 'number') ? `${duration_s.toFixed(1)}s` : '—';
-  const k = (typeof k_score === 'number') ? k_score.toFixed(3) : '—';
+    ? `Compile finished - ${aid}`
+    : `Compile failed - ${aid}`;
+  const dur = (typeof duration_s === 'number') ? `${duration_s.toFixed(1)}s` : ' - ';
+  const k = (typeof k_score === 'number') ? k_score.toFixed(3) : ' - ';
   const verb = ok ? 'completed' : 'failed';
   const textLines = [
     `Your compile job ${verb}.`,
@@ -389,7 +426,7 @@ export function tEmailCompileDone({ email, tenant_id, artifact_id, status, k_sco
       : `Open the compile log to see the failure detail:`,
     `  ${aHref}`,
     ``,
-    `— kolm`,
+    ` - kolm`,
   ];
   const statusBadge = ok
     ? `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:#e6f7ec;color:#0a5;font-weight:600">success</span>`
@@ -405,9 +442,9 @@ export function tEmailCompileDone({ email, tenant_id, artifact_id, status, k_sco
   return { subject, html, text: textLines.join('\n') };
 }
 
-// Usage alert — fires at 80% and 100% of the monthly gateway-call cap.
+// Usage alert - fires at 80% and 100% of the monthly gateway-call cap.
 // `threshold` is 80 or 100. Upgrade CTA appears for non-enterprise tiers
-// only — enterprise has bespoke billing terms and a /pricing link would be
+// only - enterprise has bespoke billing terms and a /pricing link would be
 // noise.
 export function tEmailUsageAlert({ email, tenant_id, threshold, used, cap, plan_tier } = {}) {
   const th = Number(threshold) || 0;
@@ -421,7 +458,7 @@ export function tEmailUsageAlert({ email, tenant_id, threshold, used, cap, plan_
     ? `${Math.round((usedN / capN) * 100)}%`
     : `${th}%`;
   const subject = isAt100
-    ? `Usage cap reached — kolm gateway calls are paused`
+    ? `Usage cap reached - kolm gateway calls are paused`
     : `You have used 80% of your monthly kolm gateway cap`;
   const acctUrl = 'https://kolm.ai/account/overview';
   const priceUrl = 'https://kolm.ai/pricing';
@@ -448,7 +485,7 @@ export function tEmailUsageAlert({ email, tenant_id, threshold, used, cap, plan_
   } else {
     textLines.push(`Contact your kolm account rep to raise the cap.`);
   }
-  textLines.push('', '— kolm');
+  textLines.push('', ' - kolm');
 
   const ctaHtml = isEnterprise
     ? _ctaButton('Open account overview', acctUrl)

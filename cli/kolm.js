@@ -2927,9 +2927,6 @@ FLAGS
   --packages    include local package-release readiness for SDK/runtime/install channels
   --benchmarks  include comparative benchmark evidence readiness
   --quality     include quality-judge calibration evidence
-  --frontier-lab include the research-to-build experiment portfolio contract
-  --frontier-contracts include the implementation-agent handoff contracts
-  --operator-kernels include the backend operator-kernel build contract
 
 WHY IT EXISTS
   This is the operator-readable contract that prevents account, CLI, TUI,
@@ -31841,9 +31838,6 @@ async function cmdSurfaces(args) {
   const includePackages = args.includes('--packages') || includeGraph;
   const includeBenchmarks = args.includes('--benchmarks') || includeGraph;
   const includeQuality = args.includes('--quality') || includeGraph;
-  const includeFrontierLab = args.includes('--frontier-lab') || includeGraph;
-  const includeFrontierContracts = args.includes('--frontier-contracts') || includeGraph;
-  const includeOperatorKernels = args.includes('--operator-kernels') || includeGraph;
   const out = {
     ok: true,
     contract: validateProductExperience(),
@@ -31869,18 +31863,6 @@ async function cmdSurfaces(args) {
   if (includeQuality) {
     const { runQualityCalibration } = await import('../src/quality-calibration.js');
     out.quality_calibration = runQualityCalibration();
-  }
-  if (includeFrontierLab) {
-    const { buildProductFrontierLab } = await import('../src/product-frontier-lab.js');
-    out.frontier_lab = buildProductFrontierLab();
-  }
-  if (includeFrontierContracts) {
-    const { buildProductFrontierContracts } = await import('../src/product-frontier-contracts.js');
-    out.frontier_contracts = buildProductFrontierContracts();
-  }
-  if (includeOperatorKernels) {
-    const { buildProductFrontierOperatorKernels } = await import('../src/product-frontier-operator-kernels.js');
-    out.operator_kernels = buildProductFrontierOperatorKernels();
   }
   if (graph && graph.ok === false) out.graph_error = graph;
   if (closeout && closeout.ok === false) out.closeout_error = closeout;

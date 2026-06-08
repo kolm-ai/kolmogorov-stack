@@ -416,7 +416,7 @@ export async function getAbStatus({ tenant, ab_test_id } = {}) {
   const kscore_a = mean(samples_a);
   const kscore_b = mean(samples_b);
   let sig_test = null;
-  // W921 — additive anytime-valid (GAVI) interval so the dashboard can render a
+  // W921 - additive anytime-valid (GAVI) interval so the dashboard can render a
   // peeking-safe confidence sequence alongside the legacy fixed-horizon CI. This
   // does NOT replace sig_test (welchT); it is a strict additive field.
   let sequential = null;
@@ -464,11 +464,11 @@ export async function getAbStatus({ tenant, ab_test_id } = {}) {
 }
 
 // =============================================================================
-// W921 — sequentialDecision: anytime-valid (mSPRT / GAVI) A/B verdict.
+// W921 - sequentialDecision: anytime-valid (mSPRT / GAVI) A/B verdict.
 //
 // Reads the SAME per-arm kscore samples as autoRollback's legacy gate path, then
 // runs the always-valid sequentialGate (src/stat-sig.js) which is valid at every
-// sample size simultaneously — safe for the autopilot's continuous per-tick
+// sample size simultaneously - safe for the autopilot's continuous per-tick
 // peeking. This is ADDITIVE: it does not modify recordOutcome / readSamples /
 // autoRollback's default decision; consumers (e.g. the deploy guardrail) opt in
 // by calling this explicitly.

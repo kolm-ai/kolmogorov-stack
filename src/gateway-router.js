@@ -1,10 +1,10 @@
-// W-B + W-E / wrapper-completion — gateway provider router with confidence-
+// W-B + W-E / wrapper-completion - gateway provider router with confidence-
 // aware local-first dispatch and frontier fallback chain.
 //
 // Pulls together:
 //   - src/provider-registry.js      (PROVIDERS table + resolveAdapter)
 //   - src/capture.js                (forwardAnthropic / forwardOpenAI /
-//                                    forwardOpenRouter — existing primitives)
+//                                    forwardOpenRouter - existing primitives)
 //   - src/providers/*.js            (8 W-B adapters)
 //   - src/pii-redactor.js           (4-mode applyMode)
 //   - src/receipt-schema.js +
@@ -83,11 +83,11 @@ function _resolveUrl(providerId, override) {
 }
 
 // --------------------------------------------------------------------------
-// dispatchToProvider — fire ONE attempt and shape the envelope.
+// dispatchToProvider - fire ONE attempt and shape the envelope.
 // --------------------------------------------------------------------------
 
 /**
- * dispatchToProvider — call exactly one upstream.
+ * dispatchToProvider - call exactly one upstream.
  *
  * @param provider  one of SUPPORTED_PROVIDER_IDS
  * @param body      raw request body (OpenAI-compat ChatCompletionsRequest)
@@ -169,7 +169,7 @@ export async function dispatchToProvider({
 }
 
 // --------------------------------------------------------------------------
-// shouldFallback — the predicate that decides "advance to the next chain
+// shouldFallback - the predicate that decides "advance to the next chain
 // entry on this failure". Mirrors the fallback contract in the wrapper
 // spec (timeout / 429 / 5xx → fallback chain).
 // --------------------------------------------------------------------------
@@ -177,18 +177,18 @@ export async function dispatchToProvider({
 // W-N: derive the fallback reason from the envelope status + json error
 // type. We MUST stay within the receipt-schema fallback_reason enum
 // (low_confidence | class_mismatch | upstream_timeout | upstream_429 |
-// upstream_5xx | poison_detected | null) — see src/receipt-schema.js.
+// upstream_5xx | poison_detected | null) - see src/receipt-schema.js.
 // The new W-N envelopes (upstream_rate_limited / upstream_malformed_response
 // / transport_error) all map back to one of those three upstream_* values.
 const _FALLBACK_REASON_BY_RESULT = (result) => {
   const status = result && result.status;
-  // 429 — schema label is 'upstream_429' regardless of whether the
+  // 429 - schema label is 'upstream_429' regardless of whether the
   // adapter exhausted retries (W-N) or the upstream returned 429 directly.
   if (status === 429) return 'upstream_429';
-  // 5xx — covers both raw upstream 5xx and W-N synthetic 502
+  // 5xx - covers both raw upstream 5xx and W-N synthetic 502
   // (upstream_malformed_response). Schema label is 'upstream_5xx'.
   if (status >= 500 && status < 600) return 'upstream_5xx';
-  // status:0 — W-N AbortController timeout OR transport error. Both
+  // status:0 - W-N AbortController timeout OR transport error. Both
   // collapse to the schema label 'upstream_timeout'. The precise reason
   // is preserved in attempts[].json.error for debugging.
   if (status === 0) return 'upstream_timeout';
@@ -204,12 +204,12 @@ export function shouldFallback(result) {
 }
 
 // --------------------------------------------------------------------------
-// dispatchWithFallback — run through a chain of [{provider, upstreamKey,
+// dispatchWithFallback - run through a chain of [{provider, upstreamKey,
 // url?, route_decision?}] entries until one succeeds or we exhaust them.
 // --------------------------------------------------------------------------
 
 /**
- * dispatchWithFallback — walk a fallback chain.
+ * dispatchWithFallback - walk a fallback chain.
  *
  * @param chain       Array of dispatch entries. Each entry needs at least
  *                    {provider}; optionally url, upstreamKey, route_decision.
@@ -248,9 +248,9 @@ export async function dispatchWithFallback({
   let lastReason = null;
   for (let i = 0; i < chain.length; i++) {
     const entry = chain[i] || {};
-    // W921 — health-aware failover: skip a provider whose circuit breaker is
+    // W921 - health-aware failover: skip a provider whose circuit breaker is
     // OPEN (recently hard-down) rather than burning a full upstream timeout on
-    // it. Fail-open panic invariant: NEVER skip the LAST candidate — if every
+    // it. Fail-open panic invariant: NEVER skip the LAST candidate - if every
     // provider's circuit is open, still attempt one so the gateway never goes
     // dark. A thrown breaker degrades to "allow" (attempt the provider).
     const _isLast = i === chain.length - 1;
@@ -286,13 +286,13 @@ export async function dispatchWithFallback({
 }
 
 // --------------------------------------------------------------------------
-// selectRoute — decide whether this namespace should attempt LOCAL first
+// selectRoute - decide whether this namespace should attempt LOCAL first
 // (W807 ConfidenceRouter) or go straight to FRONTIER. The decision plus
 // the resolved provider id becomes the first entry in the chain.
 // --------------------------------------------------------------------------
 
 /**
- * selectRoute — apply the ConfidenceRouter (W807) policy.
+ * selectRoute - apply the ConfidenceRouter (W807) policy.
  *
  * @param namespaceConfig  per-namespace gateway.toml config:
  *                         { primary: 'local:trinity-500'|'anthropic:claude-...',
@@ -300,7 +300,7 @@ export async function dispatchWithFallback({
  *                           confidence_threshold: 0.7 }
  * @param confidence       optional pre-scored confidence (0..1). When
  *                         undefined we don't second-guess the namespace's
- *                         primary — the local artifact will score itself
+ *                         primary - the local artifact will score itself
  *                         inside its own forward() and the result may
  *                         later trigger fallback via shouldFallback.
  *
@@ -319,7 +319,7 @@ export function selectRoute({ namespaceConfig, confidence } = {}) {
 
   // Pre-scored override: if the caller already has a confidence score
   // (e.g. last-call moving average), short-circuit when it's below the
-  // threshold — go straight to frontier without firing the local first.
+  // threshold - go straight to frontier without firing the local first.
   if (isLocal && typeof confidence === 'number' && confidence < threshold) {
     const fb = parseChainEntry((cfg.fallback || [])[0] || '');
     return {

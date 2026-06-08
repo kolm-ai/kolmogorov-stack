@@ -4,9 +4,9 @@
 // knows how to shell out to the `modal` CLI for `modal run` jobs.
 //
 // This file adds:
-//   * detect() — env probe + CLI availability check (never throws).
-//   * ModalProvider class — submitCompileJob / submitBenchmark / createServingEndpoint /
-//     listEndpoints / stopEndpoint / getEndpointMetrics — same shape as
+//   * detect() - env probe + CLI availability check (never throws).
+//   * ModalProvider class - submitCompileJob / submitBenchmark / createServingEndpoint /
+//     listEndpoints / stopEndpoint / getEndpointMetrics - same shape as
 //     src/cloud-providers/runpod.js so callers can swap providers.
 //
 // Caveats / Constraints / Limitations:
@@ -14,12 +14,12 @@
 //      by the `modal` Python CLI. We shell out to `modal run script.py::fn`
 //      to submit work and `modal app list` to enumerate apps. There is no
 //      public schema lookup, so timeouts + parsing are best-effort.
-//   2. We do NOT bundle a Modal Python script template here — the caller is
+//   2. We do NOT bundle a Modal Python script template here - the caller is
 //      expected to point us at an existing kolm modal worker script via
 //      `MODAL_COMPILE_REF` env or `opts.compileRef`. The default is the
 //      stub at scripts/modal/compile_worker.py which the bootstrap creates.
 //   3. For listEndpoints / getEndpointMetrics we shell out to `modal app
-//      list --json` and `modal app stats <name>` — if Modal renames the
+//      list --json` and `modal app stats <name>` - if Modal renames the
 //      flags the parse will fail and we surface a structured error envelope
 //      rather than masking it.
 

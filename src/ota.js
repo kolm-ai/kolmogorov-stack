@@ -1,4 +1,4 @@
-// W888-E — OTA (over-the-air update) policy engine.
+// W888-E - OTA (over-the-air update) policy engine.
 //
 // Per-namespace policy table persisted under <data_dir>/ota-policies.json:
 //   {
@@ -8,14 +8,14 @@
 //   }
 //
 // Policies:
-//   - manual    (default) — no-op. promote() just appends to ota-pending.json.
-//   - notify    — write the pending update to <data_dir>/ota-pending.json and
+//   - manual    (default) - no-op. promote() just appends to ota-pending.json.
+//   - notify - write the pending update to <data_dir>/ota-pending.json and
 //                 return. No fleet action taken.
-//   - canary    — auto-deploy to the canary device first (filtered by the
+//   - canary - auto-deploy to the canary device first (filtered by the
 //                 namespace policy's tag, default 'canary'), observe, promote.
-//   - rolling   — auto-deploy rolling to all tagged devices.
-//   - immediate — deploy to all at once. Emits a warning that this skips the
-//                 canary observation window — operators should only pick this
+//   - rolling - auto-deploy rolling to all tagged devices.
+//   - immediate - deploy to all at once. Emits a warning that this skips the
+//                 canary observation window - operators should only pick this
 //                 for non-production tags.
 //
 // Public surface:
@@ -68,7 +68,7 @@ function _pendingPath() {
   return path.join(_ensureDir(dir), 'ota-pending.json');
 }
 
-// The W888-E directive specifically calls out `data/ota-pending.json` — keep
+// The W888-E directive specifically calls out `data/ota-pending.json` - keep
 // a second writer for the repo-relative path so the file shows up where the
 // directive promised. Best-effort: ignored if the cwd is not the repo.
 function _repoPendingPath() {
@@ -152,7 +152,7 @@ export async function promote({ namespace, artifactPath, fleet = null, deviceCap
     return { ok: true, namespace, policy, action: 'pending_written', path: _pendingPath(), repo_pending_path: rp, repo_wrote };
   }
 
-  // Modes that touch the fleet — instantiate it now (lazy so manual/notify
+  // Modes that touch the fleet - instantiate it now (lazy so manual/notify
   // never need to know about the deploy pipeline).
   const f = fleet || new RealFleet({ deviceCaps });
   const tag = cfg.tag || null;

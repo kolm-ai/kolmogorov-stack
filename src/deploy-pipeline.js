@@ -1,18 +1,18 @@
-// W888-D — Remote deploy pipeline.
+// W888-D - Remote deploy pipeline.
 //
 // DeployPipeline.deploy({ artifactPath, deviceId, config }) runs the 6-step
 // pipeline from the W888 directive:
 //
-//   1. preflight     — verify artifact exists + signature shape, device online,
+//   1. preflight - verify artifact exists + signature shape, device online,
 //                      hardware fits the artifact runtime passport, disk space.
-//   2. upload        — SFTP push the .kolm bytes to the remote, sha256 verify.
-//   3. ensureRuntime — check llama-server / vllm / ollama presence; with
+//   2. upload - SFTP push the .kolm bytes to the remote, sha256 verify.
+//   3. ensureRuntime - check llama-server / vllm / ollama presence; with
 //                      --auto-install + a known package manager, install it.
-//   4. start         — generate the runtime invocation, spawn as detached
+//   4. start - generate the runtime invocation, spawn as detached
 //                      process (nohup ... &), capture the PID + endpoint URL.
-//   5. smokeTest     — POST 5 eval examples to the local serving endpoint
+//   5. smokeTest - POST 5 eval examples to the local serving endpoint
 //                      (via remote curl loop) and check for valid JSON shape.
-//   6. record        — call deviceCapabilities.recordDeployment().
+//   6. record - call deviceCapabilities.recordDeployment().
 //
 // Returns:
 //   { success: bool, endpoint: 'http://host:port', steps: [{ok, step, detail, elapsed_ms}, ...], device_id, artifact_id }
@@ -65,7 +65,7 @@ const RUNTIME_PROBES = {
   ollama: 'command -v ollama',
 };
 
-// W890-6 — every value that lands in an SSH command payload must pass a
+// W890-6 - every value that lands in an SSH command payload must pass a
 // strict allowlist. The ssh2 channel API does not shell-escape its argument;
 // the remote shell does the parsing, so backticks, $(, ;, &, |, <, >, quotes
 // and newlines must be rejected before any conn.exec(`...`) interpolation.
@@ -193,7 +193,7 @@ export class DeployPipeline {
       steps: [],
       elapsed_ms: 0,
     };
-    // W888-D — deployment id minted up-front so every code path (success +
+    // W888-D - deployment id minted up-front so every code path (success +
     // failure + dry-run) can write a journal entry with the same id.
     const deploymentId = 'dep_' + crypto.randomBytes(8).toString('hex');
     out.deployment_id = deploymentId;
@@ -227,7 +227,7 @@ export class DeployPipeline {
     const dryRun = !!config.dryRun;
     const remoteDir = config.remoteDir || '~/.kolm/installed';
 
-    // W890-6 — validate runtime + remoteDir before any conn.exec() that
+    // W890-6 - validate runtime + remoteDir before any conn.exec() that
     // interpolates them into a shell command. Fail closed.
     try {
       _assertSafeRemoteDir(remoteDir);
@@ -248,7 +248,7 @@ export class DeployPipeline {
           { prompt: 'Count to 3.' },
         ];
 
-    // Resolve device first — preflight reads it too, but we want a clear
+    // Resolve device first - preflight reads it too, but we want a clear
     // early error if the deviceId is wrong.
     let device = null;
     try { device = await this._deviceCaps.getDevice(deviceId); }
@@ -389,7 +389,7 @@ export class DeployPipeline {
       const smokeTest = await runStep('smokeTest', async () => {
         const c = await openConn();
         // Wait briefly for the server to bind, then drive 5 example POSTs via
-        // remote curl. We don't deep-check quality — only shape: non-empty
+        // remote curl. We don't deep-check quality - only shape: non-empty
         // body + 200 status.
         await c.exec(`for i in $(seq 1 10); do nc -z 127.0.0.1 ${port} 2>/dev/null && break; sleep 1; done`, { timeoutMs: 15_000 });
         const results = [];
@@ -480,7 +480,7 @@ export class DeployPipeline {
     return r;
   }
 
-  // W888-D — rollback(deviceId): replay the most recent deployed entry from
+  // W888-D - rollback(deviceId): replay the most recent deployed entry from
   // data/deployments.jsonl that is older than the latest entry for the device.
   // Returns { ok, target_entry, replay, rollback_info }.
   async rollback({ deviceId, config = {} } = {}) {

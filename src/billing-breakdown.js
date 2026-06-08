@@ -1,6 +1,6 @@
 // src/billing-breakdown.js
 //
-// W465 — per-namespace cost attribution + team-level rollup.
+// W465 - per-namespace cost attribution + team-level rollup.
 //
 // Reads from the event-store (the authoritative cost ledger) and produces
 // two shapes: per-namespace breakdown for one tenant in a billing period,
@@ -13,14 +13,14 @@
 //     and the event rows already carry `namespace`, `tenant_id`,
 //     `tokens_in`, `tokens_out`, and `cost_micro_usd` (W411 parity fields).
 //     Doing this off the meters would have required a schema migration
-//     plus rewriting every increment call-site — the event-store carries
+//     plus rewriting every increment call-site - the event-store carries
 //     the same data losslessly.
 //
 //  2. Tenant-fenced at the source by passing `tenant_id` to listEvents.
 //     The route layer is responsible for forcing tenant_id from the auth
 //     middleware, never from request body.
 //
-//  3. The team rollup walks members synchronously (small N — most teams
+//  3. The team rollup walks members synchronously (small N - most teams
 //     are <25 seats per W409y limits) and aggregates per-member totals.
 //     Members the caller is not allowed to read are still included in
 //     aggregate counts but their per-tenant detail is omitted unless the
@@ -92,7 +92,7 @@ export async function tenantNamespaceBreakdown({ tenant_id, period }) {
   let totalTokensOut = 0;
   for (const ev of rows) {
     if (!ev) continue;
-    // Defense in depth — the route filter already pinned tenant_id, but
+    // Defense in depth - the route filter already pinned tenant_id, but
     // pin again so this helper is safe to call directly from internal code.
     if (ev.tenant_id && tenant_id && ev.tenant_id !== tenant_id) continue;
     const ns = ev.namespace || 'default';
@@ -132,7 +132,7 @@ export async function tenantNamespaceBreakdown({ tenant_id, period }) {
     totalTokensOut += cOut;
   }
   // Sort by cost_micro_usd desc so the most expensive namespace surfaces
-  // at the top — the dashboard reads namespaces[0] for the call-out.
+  // at the top - the dashboard reads namespaces[0] for the call-out.
   const namespaces = Array.from(byNs.values())
     .map(acc => ({
       namespace: acc.namespace,

@@ -1,7 +1,7 @@
-// vast — Vast.ai marketplace (GPU rentals via SSH, no managed job queue).
+// vast - Vast.ai marketplace (GPU rentals via SSH, no managed job queue).
 // API: https://console.vast.ai/api/v0 (instances, ask_offers, asks)
 // Env: KOLM_VAST_TOKEN (or VAST_API_KEY) + SSH key. run() lists instances or
-// honestly returns a handle — vast.ai has no programmatic exec API.
+// honestly returns a handle - vast.ai has no programmatic exec API.
 
 import https from 'node:https';
 import os from 'node:os';
@@ -89,7 +89,7 @@ export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 *
     latency_ms: Date.now() - t0,
     mode: 'ssh-handles',
     instance_count: rows.length,
-    next_step: 'vast.ai has no exec API — copy one ssh line and run it manually',
+    next_step: 'vast.ai has no exec API - copy one ssh line and run it manually',
   };
 }
 

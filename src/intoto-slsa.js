@@ -1,11 +1,11 @@
 // src/intoto-slsa.js
 //
-// W921 Phase-1 — in-toto v1 Statement + SLSA Provenance v1, DSSE-enveloped.
+// W921 Phase-1 - in-toto v1 Statement + SLSA Provenance v1, DSSE-enveloped.
 //
 // WHY: kolm already proves a lot cryptographically (HMAC integrity, Ed25519
 // receipt signatures, a cosign-bundle-shaped sigstore block) but it all speaks
-// kolm-dialect. A buyer's CI/CD policy gate — cosign verify-attestation,
-// kyverno, conftest, in-toto-verify, GUAC, Tekton Chains — cannot consume a
+// kolm-dialect. A buyer's CI/CD policy gate - cosign verify-attestation,
+// kyverno, conftest, in-toto-verify, GUAC, Tekton Chains - cannot consume a
 // .kolm artifact's provenance without a custom parser. This module emits the
 // 2025 ML supply-chain consensus shape: an in-toto v1 Statement (subject
 // digests + predicateType) carrying a SLSA Provenance v1 predicate
@@ -14,13 +14,13 @@
 // SAME Ed25519 key already used for signature_ed25519 (no new key custody).
 //
 // SCOPE HONESTY (mirrors src/provenance.js discipline): this is SLSA Build L2
-// SHAPE — signed and non-forgeable because the signing key is custodied — NOT
+// SHAPE - signed and non-forgeable because the signing key is custodied - NOT
 // Build L3. L3 requires a hardened, isolated builder with OIDC/Fulcio identity
 // binding, which kolm does not provide. We never assert hardened-builder
 // properties. The string is "SLSA Provenance v1 (Build L2 shape)".
 //
 // SUBJECT-DIGEST CORRECTNESS: subjects are PLAIN sha256 over the actual zipped
-// bytes (supplied by the caller as a digestMap), NEVER hashes.model_pointer —
+// bytes (supplied by the caller as a digestMap), NEVER hashes.model_pointer - 
 // that field folds a "\x00parent_cid:<cid>" suffix for lineage-chained
 // artifacts (artifact.js W739), so a zip-byte recomputation would mismatch.
 //
@@ -37,13 +37,13 @@ import { sign as ed25519Sign, verify as ed25519Verify, keyFingerprint } from './
 import { canonicalJson } from './cid.js';
 
 // ---------------------------------------------------------------------------
-// Spec constants (authoritative type URIs — primary sources).
+// Spec constants (authoritative type URIs - primary sources).
 // ---------------------------------------------------------------------------
 export const INTOTO_STATEMENT_TYPE = 'https://in-toto.io/Statement/v1';
 export const SLSA_PROVENANCE_PREDICATE_TYPE = 'https://slsa.dev/provenance/v1';
 export const INTOTO_DSSE_PAYLOAD_TYPE = 'application/vnd.in-toto+json';
 export const KOLM_BUILD_TYPE = 'https://kolm.ai/compile/v1';
-// Honest conformance bar — see header. NEVER bump to L3 without a hardened,
+// Honest conformance bar - see header. NEVER bump to L3 without a hardened,
 // identity-bound builder.
 export const KOLM_SLSA_CONFORMANCE = 'SLSA Provenance v1 (Build L2 shape)';
 
@@ -58,7 +58,7 @@ const HEX64_RE = /^[0-9a-f]{64}$/;
 //     zeros.
 //   - "+" in the spec is byte concatenation.
 //
-// The Ed25519 signature is computed over these PAE bytes — NOT the raw
+// The Ed25519 signature is computed over these PAE bytes - NOT the raw
 // Statement. A char-length-vs-byte-length bug or a base64url slip makes the
 // signature verify in kolm but FAIL in cosign, so this is the #1 interop trap.
 //
@@ -88,7 +88,7 @@ export function pae(payloadType, payloadBytes) {
 // ---------------------------------------------------------------------------
 // in-toto v1 ResourceDescriptors derived from a kolm lineage object
 // (src/artifact-lineage.js shape). These become the SLSA resolvedDependencies
-// (a.k.a. materials) — what WENT IN: teacher, student base, training corpus.
+// (a.k.a. materials) - what WENT IN: teacher, student base, training corpus.
 //
 // Degrades gracefully: no lineage -> []. No fabricated entries; we only emit a
 // descriptor when the underlying datum exists.
@@ -148,7 +148,7 @@ export function resourceDescriptorsFromLineage(lineage) {
 
 // ---------------------------------------------------------------------------
 // SLSA Provenance v1 predicate. The two SLSA-REQUIRED fields are
-// buildDefinition.buildType and runDetails.builder.id — both always set.
+// buildDefinition.buildType and runDetails.builder.id - both always set.
 // ---------------------------------------------------------------------------
 export function buildSlsaProvenancePredicate({
   manifest = {},
@@ -245,7 +245,7 @@ export function buildInTotoStatement({ subjects, predicateType, predicate }) {
 // ---------------------------------------------------------------------------
 // DSSE envelope. The signature is STANDARD base64 (cosign/DSSE require it,
 // NOT base64url). kolm's ed25519.sign returns base64url, so we re-encode via
-// Buffer.from(sig, 'base64url').toString('base64') — the exact pattern
+// Buffer.from(sig, 'base64url').toString('base64') - the exact pattern
 // src/sigstore.js:209 already uses.
 // ---------------------------------------------------------------------------
 export function buildDsseEnvelope({ statement, privateKey, publicKey, key_fingerprint }) {
@@ -385,7 +385,7 @@ export function verifyInTotoAgainstArtifact(envelope, digestMap, { publicKey } =
 // string for the sidecar provenance.intoto.dsse.json.
 //
 // `subjectDigests` maps entry name -> sha256 hex of the actual bytes. The
-// caller (artifact.js) supplies these from the zipped bytes — NOT from
+// caller (artifact.js) supplies these from the zipped bytes - NOT from
 // hashes.model_pointer (which may be lineage-folded). If omitted, the artifact
 // itself (<jobId>.kolm with artifact_hash) is used as the single subject.
 // ---------------------------------------------------------------------------

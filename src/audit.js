@@ -2,7 +2,7 @@
 //
 // Every load-bearing tenant operation (compile started, compile completed,
 // artifact downloaded, run, plan change, key rotation, team invite/accept,
-// tunnel created, byoc deploy) writes one row here. Rows are append-only —
+// tunnel created, byoc deploy) writes one row here. Rows are append-only - 
 // they are never updated or deleted from this module. Each row carries the
 // HMAC-SHA256 of (prev_event_hash || event_payload), so a leak that tampers
 // with history breaks the chain at the first mutated row.
@@ -23,7 +23,7 @@ import { effectiveReceiptSecret } from './env.js';
 const TABLE = 'audit_events';
 const CHAIN_VERSION = 1;
 
-// Operations we audit. New op codes are fine — keep them stable; the chain
+// Operations we audit. New op codes are fine - keep them stable; the chain
 // hashes the op code so renaming an old op breaks verification of past rows.
 export const AUDIT_OPS = Object.freeze({
   // Compile + artifact lifecycle
@@ -44,7 +44,7 @@ export const AUDIT_OPS = Object.freeze({
   PLAN_CHANGED: 'billing.plan_changed',
   PLAN_CANCELED: 'billing.plan_canceled',
   STRIPE_EVENT: 'billing.stripe_event',
-  // W450 — account settings updates (per-tenant user-settings surface)
+  // W450 - account settings updates (per-tenant user-settings surface)
   SETTINGS_UPDATED: 'settings.updated',
   // Teams + tunnels + BYOC
   TEAM_CREATED: 'teams.created',
@@ -58,11 +58,11 @@ export const AUDIT_OPS = Object.freeze({
   // Eval surface (Wave 165 N+5 tenant shadow corpus + future N+7 auditor)
   EVAL_TENANT_HOLDOUT_SAVE: 'eval.tenant_holdout.save',
   EVAL_TENANT_HOLDOUT_DELETE: 'eval.tenant_holdout.delete',
-  // W461 — federated approval-row sharing (hash-only cross-org decisions)
+  // W461 - federated approval-row sharing (hash-only cross-org decisions)
   FEDERATED_OPTIN: 'federated.optin',
   FEDERATED_OPTOUT: 'federated.optout',
   FEDERATED_SHARE: 'federated.share',
-  // W715 — cross-namespace transfer learning: emitted when a tenant
+  // W715 - cross-namespace transfer learning: emitted when a tenant
   // shares its namespace fingerprint (hash-only, opt-in) so sibling new
   // namespaces can pick a warm-start checkpoint. Payload records
   // recipient namespaces but NEVER the raw bag contents.
@@ -98,7 +98,7 @@ function canonicalisePayload(payload) {
 
 function previousChainHashFor(tenant_id) {
   // Last row for this tenant by insertion order. We rely on rows being a flat
-  // append-only sequence — both json + sqlite drivers iterate in insertion
+  // append-only sequence - both json + sqlite drivers iterate in insertion
   // order.
   const rows = all(TABLE).filter(r => r.tenant_id === tenant_id);
   if (!rows.length) return ''.padEnd(64, '0');
@@ -113,7 +113,7 @@ export function appendAudit({ tenant_id, tenant_name = null, actor = null, op, p
   const secret = chainSecret();
   // In dev without a configured secret, the receipt module returns DEV secret;
   // in production env.js makes the secret mandatory. Never write rows with no
-  // chain key — that defeats the point of the table.
+  // chain key - that defeats the point of the table.
   if (!secret) throw new Error('audit chain disabled: no receipt secret available');
 
   // W258-BE-5: previously did previousChainHashFor → compute → insert

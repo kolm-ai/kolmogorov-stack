@@ -1,25 +1,25 @@
-// W236 — Hermes-agent recipe export + self-growing agent blueprint.
+// W236 - Hermes-agent recipe export + self-growing agent blueprint.
 //
 // Two concerns live here:
 //
-//   1. `exportHermesAgent(artifact)` — take a .kolm artifact manifest and emit
+//   1. `exportHermesAgent(artifact)` - take a .kolm artifact manifest and emit
 //      a Hermes-4-compatible agent definition: a system prompt + the tool
 //      schema NousResearch uses for tool-calling. The artifact's recipes
 //      become tools. The artifact's chat_template (W234) becomes the prompt
 //      wrapping. Output is a single JSON object the user can hand to a
 //      Hermes runtime (vLLM, llama.cpp, hf transformers serve).
 //
-//   2. `buildSelfGrowingBlueprint(opts)` — a YAML/JSON blueprint describing
+//   2. `buildSelfGrowingBlueprint(opts)` - a YAML/JSON blueprint describing
 //      an agent that captures its own interactions, distills new specialists
 //      when capture thresholds fire (W215), and exposes the grown specialists
 //      as new tools without a human in the loop. The blueprint is the
-//      machine-readable contract for "self-growing" — kolm runs the loop;
+//      machine-readable contract for "self-growing" - kolm runs the loop;
 //      kolm does not hide what the loop is doing.
 //
 // Why this matters: the @sudoingX 2026-05-17 thread calls out Hermes as the
 // agent layer most worth shipping a clean export to. The blueprint side
 // addresses the user's "FINISH OUR ENTIRE PRODUCT OFFERING" + "We should be
-// so frontier as to offer these features in product" — a self-growing agent
+// so frontier as to offer these features in product" - a self-growing agent
 // is the difference between "you can use kolm" and "kolm runs the loop".
 
 import crypto from 'node:crypto';
@@ -28,7 +28,7 @@ export const BLUEPRINT_SCHEMA_VERSION = '1.0.0';
 export const HERMES_TOOL_SCHEMA_VERSION = 'hermes-fn-v1';
 
 // The system-prompt framing Hermes is trained on for tool-call mode. Keep
-// terse — the artifact's own system prompt slots in below.
+// terse - the artifact's own system prompt slots in below.
 const HERMES_SYSTEM_PREAMBLE =
   'You are a function-calling AI. You can call the tools below by emitting a ' +
   '<tool_call>{"name": "<tool>", "arguments": {...}}</tool_call> block. ' +
@@ -140,7 +140,7 @@ export function buildSelfGrowingBlueprint(opts = {}) {
   return { ...body, integrity_hash };
 }
 
-// Validate a blueprint. Returns { ok, problems }. Conservative — only flags
+// Validate a blueprint. Returns { ok, problems }. Conservative - only flags
 // shapes the runtime would reject; tolerates extra fields for forward-compat.
 export function validateBlueprint(bp) {
   const problems = [];
@@ -197,7 +197,7 @@ export function mergeBlueprints(base, override) {
 }
 
 // Serialize a blueprint to canonical YAML-lite (deterministic key order,
-// 2-space indent). We don't depend on a YAML lib — the format is simple
+// 2-space indent). We don't depend on a YAML lib - the format is simple
 // enough to handle inline and the user can pipe to `yq` if they want strict.
 export function blueprintToYaml(bp) {
   const lines = [];

@@ -1,6 +1,6 @@
 // src/distill-bridge.js
 //
-// W364 — wires the two router distill endpoints (the specialist arm of
+// W364 - wires the two router distill endpoints (the specialist arm of
 // /v1/distill/from-captures and /v1/specialists/auto-distill) to the
 // real workers/distill/distill.mjs entrypoint.
 //
@@ -13,7 +13,7 @@
 //   * the actual ML pipeline ('full' mode) only runs when the worker's
 //     own --doctor reports python+torch ready. Otherwise it falls through
 //     to 'collect' mode which still produces a manifest + training pairs.
-//   * tenants always get { job_id, status, poll_url } — never 503.
+//   * tenants always get { job_id, status, poll_url } - never 503.
 //
 // Configuration knobs (all optional):
 //   KOLM_DISTILL_WORKER_CMD       full path to distill.mjs (default: workers/distill/distill.mjs)
@@ -49,7 +49,7 @@ function pickTeacher() {
 // so the existing worker entrypoint (which is file-driven) can consume them
 // unchanged.
 //
-// W430 (audit P1-6) — preserve the 7 training-metadata fields that W411 P0 #2
+// W430 (audit P1-6) - preserve the 7 training-metadata fields that W411 P0 #2
 // pinned in src/distill-pipeline.js:153-173 (source_type, tenant_id, approved,
 // redaction_policy, holdout_only, fixed_output, event_id). The previous shape
 // `{id, input, output}` stripped every audit-relevant attribute on its way to
@@ -57,13 +57,13 @@ function pickTeacher() {
 // for any tenant whose distill ran through the bridge (the entire
 // /v1/distill/from-captures + /v1/specialists/auto-distill surface). The
 // worker's readSeeds() at workers/distill/distill.mjs:443 accepts any extra
-// fields verbatim, so threading them through is safe — it just makes the
+// fields verbatim, so threading them through is safe - it just makes the
 // receipt match the training input.
 //
-// W430 fail-closed parity — match the W411 P0 #8 holdout chokepoint at
+// W430 fail-closed parity - match the W411 P0 #8 holdout chokepoint at
 // src/distill-pipeline.js:190-195: a row flagged holdout_only=true MUST
 // never reach the worker as a training seed. The bridge's whole corpus IS
-// the train split (there is no holdout/train split here — the bridge is the
+// the train split (there is no holdout/train split here - the bridge is the
 // curated train side), so we strip holdout_only rows defensively before the
 // JSONL write. Counted on the job record meta so the receipt is honest.
 function writeWorkerInputs({ tmpDir, namespace, captures, baseModel }) {
@@ -76,7 +76,7 @@ function writeWorkerInputs({ tmpDir, namespace, captures, baseModel }) {
   const rows = captures.map((c, i) => {
     const input = c.variable_input || c.prompt || c.input || '';
     const output = c.response || c.output || '';
-    // W430 — forward the 7 named metadata fields verbatim when present. We
+    // W430 - forward the 7 named metadata fields verbatim when present. We
     // never invent values; absent fields stay absent so the receipt reflects
     // ground truth. The worker treats extra fields as opaque (readSeeds is
     // shape-tolerant), and train.jsonl/holdout.jsonl carry them through.
@@ -131,7 +131,7 @@ export async function startDistillJob({
   // Mode picks: 'stub' when no teacher key (still produces a manifest),
   // 'collect' when a teacher is configured (real teacher calls + pair
   // collection), 'full' when KOLM_DISTILL_FULL=1 (and python+torch ready
-  // — the worker self-degrades to collect if not).
+  // - the worker self-degrades to collect if not).
   let mode;
   if (process.env.KOLM_DISTILL_FULL === '1' && teacher) mode = 'full';
   else if (teacher) mode = 'collect';
@@ -142,7 +142,7 @@ export async function startDistillJob({
   });
 
   // Register the job FIRST so the log path exists before we spawn.
-  // W430 — surface holdout_excluded on the job record so the receipt audit
+  // W430 - surface holdout_excluded on the job record so the receipt audit
   // can prove the W411 P0 #8 chokepoint fired even on the bridge path.
   const rec = jobs.create({
     kind: 'distill',

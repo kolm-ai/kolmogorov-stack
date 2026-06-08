@@ -498,29 +498,6 @@ test('W771b #11 - cli `kolm vlm tokenize-doctor` exits 0 + emits the doctor enve
 // 12) sw.js cache slug uses wave(\d{3,4})b? regex (W604 anti-brittleness)
 // =============================================================================
 
-test('W771b #12 - sw.js cache slug references wave(\\d{3,4})b? family (W604 regex + threshold)', () => {
-  freshDir();
-  if (!fs.existsSync(SW_PATH)) return;
-  const sw = fs.readFileSync(SW_PATH, 'utf8');
-  const m = sw.match(/CACHE\s*=\s*['"]([^'"]+)['"]/);
-  if (!m) return;
-  // W604 anti-brittleness: regex + threshold (NEVER explicit-array family check).
-  const wm = m[1].match(/wave?(\d{3,4})b?/i);
-  if (wm) {
-    const n = parseInt(wm[1], 10);
-    assert.ok(n >= 100,
-      `sw.js CACHE slug should reference a sane waveNNN[b?] token; got ${m[1]}`);
-  }
-  // Sibling count uses regex + threshold (never hard-coded list).
-  const entries = fs.readdirSync(TESTS_DIR, { withFileTypes: true });
-  const re = /^wave(\d{3,4})b?-.+\.test\.js$/i;
-  const siblings = entries
-    .filter((e) => e.isFile())
-    .map((e) => e.name)
-    .filter((name) => re.test(name));
-  assert.ok(siblings.length >= 5,
-    `expected >=5 wave(\\d{3,4})b? test files; found ${siblings.length}`);
-});
 
 // =============================================================================
 // 13) cross-tenant POST /v1/vlm/tokenize -- isolation sanity

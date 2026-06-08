@@ -1,4 +1,4 @@
-// W232 — git-native .kolm-state directory + checkpoint / import-chat / merge.
+// W232 - git-native .kolm-state directory + checkpoint / import-chat / merge.
 //
 // Layout (per project, sibling to package.json):
 //   .kolm-state/
@@ -12,7 +12,7 @@
 //     HEAD                    # last-touched checkpoint id (one line)
 //
 // All writes are durable + idempotent + git-friendly (line-delimited, no
-// binary embedding — artifacts stay on disk and are referenced by path+hash).
+// binary embedding - artifacts stay on disk and are referenced by path+hash).
 
 import fs from 'node:fs';
 import path from 'node:path';

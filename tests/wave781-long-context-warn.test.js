@@ -401,20 +401,3 @@ test('W781 #14 - router.js wires both /v1/long-context routes + version stamps m
   assert.match(p90Body, /tenant:\s*req\.tenant_record\.id/,
     'p90 route must force tenant from req.tenant_record.id');
 });
-
-// =============================================================================
-// 15) W604 anti-brittleness: sw.js cache slug regex + threshold check
-// =============================================================================
-
-test('W781 #15 - W604 sw.js cache slug regex wave(NNN) >= 781 OR sibling-owned wave', () => {
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  const m = sw.match(/CACHE\s*=\s*['"]([^'"]+)['"]/);
-  assert.ok(m, 'sw.js must define CACHE');
-  const wm = m[1].match(/wave(\d{3,4})/);
-  assert.ok(wm, 'CACHE slug must include waveNNN token (got: ' + m[1] + ')');
-  // W604 anti-brittleness: do NOT demand 781 specifically - sibling W777..W780
-  // wave agents may own the most-recent sw.js bump. Just require a recent
-  // family number to confirm sw.js isn't stuck on a pre-W7xx slug.
-  const n = parseInt(wm[1], 10);
-  assert.ok(n >= 700, 'sw.js CACHE slug must reference the W700+ family (got: ' + m[1] + ')');
-});

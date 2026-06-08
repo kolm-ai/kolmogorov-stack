@@ -1,16 +1,16 @@
 // src/transparency-anchor.js
 //
-// W921 Govern / Receipts & Compliance — Merkle-tree BATCH anchoring of per-call
+// W921 Govern / Receipts & Compliance - Merkle-tree BATCH anchoring of per-call
 // receipts + tamper-evident receipt chains + two-level offline inclusion proofs.
 //
 // PROBLEM (from the Sigstore/Rekor spec): a per-call gateway receipt today is
-// only as trustworthy as kolm's private-key custody — a host compromise can
+// only as trustworthy as kolm's private-key custody - a host compromise can
 // mint a key and forge a "verified" receipt after the fact, and nobody can
 // prove a receipt EXISTED at time T. Anchoring each receipt to a transparency
 // log 1:1 is wrong: public logs batch writes and take seconds per entry, so
 // per-call anchoring would add seconds of latency to every call.
 //
-// CORRECT DESIGN — CLIENT-SIDE MERKLE BATCHING + SINGLE ROOT ANCHOR:
+// CORRECT DESIGN - CLIENT-SIDE MERKLE BATCHING + SINGLE ROOT ANCHOR:
 //   HOT PATH (unchanged latency): compute the receipt's RFC 6962 leaf hash and
 //     enqueue (leaf, receipt_id). No network. ~one sha256, microseconds.
 //   BATCHER (off hot path): drain the queue on a timer/size trigger, build ONE
@@ -18,7 +18,7 @@
 //     O(log n) audit path per leaf.
 //   ANCHOR (one network call per BATCH): sign batch_root + (optionally) submit
 //     ONE transparency-log entry per batch. On any failure degrade to
-//     state:'local' + retry — anchoring NEVER blocks/fails a served call.
+//     state:'local' + retry - anchoring NEVER blocks/fails a served call.
 //   STAMP-BACK: each receipt gains an `anchor` block {batch_id, leaf_index,
 //     audit_path, batch_root, checkpoint} OUTSIDE the signed canonical body.
 //   VERIFY (offline, no kolm trust): LEVEL A recompute leaf -> walk audit_path
@@ -149,7 +149,7 @@ export function governReceiptBatch(receipts, opts = {}) {
 // Sign the batch root as a Tree Head checkpoint, and (optionally) submit ONE
 // transparency-log entry per batch via an injected submitFn (e.g. a Rekor v2
 // client). On any failure OR when no submitFn is configured, degrade to
-// state:'local' with the kolm-signed checkpoint — NEVER throws, NEVER blocks a
+// state:'local' with the kolm-signed checkpoint - NEVER throws, NEVER blocks a
 // served call.
 // ---------------------------------------------------------------------------
 export async function anchorBatch(batch, opts = {}) {
@@ -221,7 +221,7 @@ export function verifyReceiptAnchor({ receipt, anchor, pinnedLogKeyPem = null } 
   if (!anchor || typeof anchor !== 'object') {
     return { ok: false, level_a: { ok: false, reason: 'no_anchor' }, level_b: { ok: false, reason: 'no_anchor' } };
   }
-  // LEVEL A — receipt inclusion within the batch.
+  // LEVEL A - receipt inclusion within the batch.
   const leaf = receipt ? anchorLeafHash(receipt).toString('hex') : anchor.leaf_hash;
   const level_a = verifyInclusion({
     leafHash: leaf,
@@ -231,7 +231,7 @@ export function verifyReceiptAnchor({ receipt, anchor, pinnedLogKeyPem = null } 
     root: anchor.batch_root,
   });
 
-  // LEVEL B — checkpoint signature over the batch root.
+  // LEVEL B - checkpoint signature over the batch root.
   let level_b;
   if (!anchor.checkpoint) {
     level_b = { ok: false, reason: 'not_anchored' };
@@ -260,7 +260,7 @@ export function verifyReceiptAnchor({ receipt, anchor, pinnedLogKeyPem = null } 
 }
 
 // ---------------------------------------------------------------------------
-// ReceiptAnchorBatcher — bounded in-process queue + size/timer-triggered
+// ReceiptAnchorBatcher - bounded in-process queue + size/timer-triggered
 // batcher. Off the hot path; the only hot-path call is enqueue() (non-blocking).
 // ---------------------------------------------------------------------------
 export class ReceiptAnchorBatcher {

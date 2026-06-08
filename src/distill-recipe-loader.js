@@ -1,6 +1,6 @@
 // src/distill-recipe-loader.js
 //
-// T1.6 — one-shot recipe loader. Resolves a recipe by name OR path, validates
+// T1.6 - one-shot recipe loader. Resolves a recipe by name OR path, validates
 // the 6 required top-level sections, and returns a normalized object plus a
 // content hash. The CLI's `kolm distill --recipe <name>` uses this to dispatch
 // the matching orchestrator script (today: trinity-2000-v2-run.mjs); future
@@ -8,16 +8,16 @@
 //
 // Validation philosophy: a recipe is a contract between the user and the
 // pipeline. If a key is missing or malformed we fail BEFORE any teacher spend
-// — the upstream of the cost-preview gate (T1.2) and the preflight gate
+// - the upstream of the cost-preview gate (T1.2) and the preflight gate
 // (T1.1). Wrong types are errors, not silent coercions.
 //
-// Schema (v1, flat JSON, no DSL yet — T3.1 evolves this into composable YAML):
+// Schema (v1, flat JSON, no DSL yet - T3.1 evolves this into composable YAML):
 //   name             string  (required)
 //   version          string  (required)
 //   description      string  (optional)
 //   seeds            object  (required)
 //     .target        number  (required)
-//     .generator     string  (required — path relative to repo)
+//     .generator     string  (required - path relative to repo)
 //     .buckets       object<string,number>  (optional)
 //   teachers         array   (required, length >= 1)
 //     [].slug        string  (required, "vendor:model" shape)
@@ -26,7 +26,7 @@
 //     [].source      string  (optional)
 //   scrub            object  (optional but recommended)
 //     .cot           object
-//       .markers_path  string  (path to cot_markers.json — T1.5)
+//       .markers_path  string  (path to cot_markers.json - T1.5)
 //       .strategy      string
 //       .drop_if_no_close_tag  boolean
 //   train            object  (required)
@@ -57,7 +57,7 @@ import { fileURLToPath } from 'node:url';
 const _here = path.dirname(fileURLToPath(import.meta.url));
 const _repoRoot = path.resolve(_here, '..');
 
-// Orchestrator dispatch — each recipe name (or family prefix) maps to a runner
+// Orchestrator dispatch - each recipe name (or family prefix) maps to a runner
 // script. New recipes plug in here OR use the recipe's optional `orchestrator`
 // field. Kept tiny on purpose: T1.6 is about the loader contract; T3.1 will
 // generalize via the DSL.
@@ -67,11 +67,11 @@ const ORCHESTRATOR_MAP = {
 
 const VALID_TRAIN_METHODS = new Set(['qlora', 'lora', 'full']);
 
-// W921 — additive recipe vocabulary.
+// W921 - additive recipe vocabulary.
 // Distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default; the
 // logit-level objectives (forward_kl/reverse_kl/jsd/distillm2/gkd) require a
 // LOCAL teacher (logits), enforced by _validateDistill.
-// W921 — 'ropd' (rubric-based on-policy distillation) is black-box: it scores
+// W921 - 'ropd' (rubric-based on-policy distillation) is black-box: it scores
 // rollouts with teacher TEXT only (no logits), so it is valid with API teachers
 // and is intentionally NOT in LOGIT_OBJECTIVES.
 const VALID_OBJECTIVES = new Set(['seqkd', 'forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd', 'ropd']);
@@ -240,7 +240,7 @@ function _validateTrain(train) {
     }
   }
 
-  // W921 — optional LoRA-variant / optimizer / packing knobs. Closed-enum,
+  // W921 - optional LoRA-variant / optimizer / packing knobs. Closed-enum,
   // fail-before-spend. All optional; absence keeps the legacy default path.
   if (train.lora_variant !== undefined && !VALID_LORA_VARIANTS.has(train.lora_variant)) {
     issues.push(`train.lora_variant must be one of: ${Array.from(VALID_LORA_VARIANTS).join(', ')} (got ${JSON.stringify(train.lora_variant)})`);
@@ -251,7 +251,7 @@ function _validateTrain(train) {
   if (train.optim !== undefined && !VALID_OPTIMS.has(train.optim)) {
     issues.push(`train.optim must be one of: ${Array.from(VALID_OPTIMS).join(', ')} (got ${JSON.stringify(train.optim)})`);
   }
-  // GaLore is incompatible with 4-bit (qlora) — refuse before spend.
+  // GaLore is incompatible with 4-bit (qlora) - refuse before spend.
   if (typeof train.optim === 'string' && train.optim.startsWith('galore') && train.method === 'qlora') {
     issues.push('train.optim galore_* is incompatible with method=qlora (4-bit params); use method=full');
   }
@@ -277,7 +277,7 @@ function _validateTrain(train) {
   return issues;
 }
 
-// W921 — optional `distill` section: selects the distillation OBJECTIVE (loss).
+// W921 - optional `distill` section: selects the distillation OBJECTIVE (loss).
 // distillm2 / gkd / *_kl require a LOCAL teacher (logits); we refuse them on an
 // API-only recipe (fail-before-spend) so the receipt never claims a logit-level
 // objective it could not have computed.
@@ -313,7 +313,7 @@ function _validateDistill(distill, recipe) {
   return issues;
 }
 
-// W921 — optional `grpo` section: verifiable-reward RL fine-tuning stage.
+// W921 - optional `grpo` section: verifiable-reward RL fine-tuning stage.
 function _validateGrpo(grpo) {
   const issues = [];
   if (grpo === undefined) return issues; // optional
@@ -349,7 +349,7 @@ function _validateGrpo(grpo) {
   return issues;
 }
 
-// W921 — optional `preference` section: SimPO/ORPO/KTO/DPO/SPPO stage.
+// W921 - optional `preference` section: SimPO/ORPO/KTO/DPO/SPPO stage.
 function _validatePreference(pref) {
   const issues = [];
   if (pref === undefined) return issues;
@@ -369,7 +369,7 @@ function _validatePreference(pref) {
   return issues;
 }
 
-// W921 — optional `synth` section: synthetic-data cold-start AUGMENT stage.
+// W921 - optional `synth` section: synthetic-data cold-start AUGMENT stage.
 function _validateSynth(synth) {
   const issues = [];
   if (synth === undefined) return issues;
@@ -416,7 +416,7 @@ function _validateScrub(scrub) {
   return issues;
 }
 
-// Public — load + validate a recipe. Returns the envelope above. Throws ONLY
+// Public - load + validate a recipe. Returns the envelope above. Throws ONLY
 // on programmer errors (bad argument types); recipe-validation failures are
 // returned as ok:false envelopes for clean CLI/server error paths.
 export function loadRecipe(nameOrPath, opts = {}) {
@@ -467,7 +467,7 @@ export function loadRecipe(nameOrPath, opts = {}) {
   issues.push(..._validateTeachers(recipe.teachers));
   issues.push(..._validateScrub(recipe.scrub));
   issues.push(..._validateTrain(recipe.train));
-  // W921 — additive opt-in sections. All optional; a recipe without them is
+  // W921 - additive opt-in sections. All optional; a recipe without them is
   // validated exactly as before (backward-compat).
   issues.push(..._validateDistill(recipe.distill, recipe));
   issues.push(..._validateGrpo(recipe.grpo));
@@ -526,7 +526,7 @@ export function loadRecipe(nameOrPath, opts = {}) {
   };
 }
 
-// Public — list known recipes under <repoRoot>/recipes/ as {name, path, valid}.
+// Public - list known recipes under <repoRoot>/recipes/ as {name, path, valid}.
 // Used by `kolm distill --list-recipes` and the W910 Track B UI catalog.
 export function listRecipes() {
   const dir = path.join(_repoRoot, 'recipes');

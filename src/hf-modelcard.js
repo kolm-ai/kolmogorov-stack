@@ -1,6 +1,6 @@
 // src/hf-modelcard.js
 //
-// S-3 — HuggingFace model card generator.
+// S-3 - HuggingFace model card generator.
 //
 // Given a kolm passport.json (kolm.passport/1 shape, see src/runtime-passport.js
 // for the runtime-target sibling) plus an optional multi-model benchmark JSON,
@@ -31,7 +31,7 @@
 // sibling is the W768 governance-platform card driven from a kolm manifest
 // (HF v0.3 schema, OneTrust/ServiceNow/OpenPages mappings). This module is
 // the Hub-publishing card driven from a distill-run passport + a multi-model
-// benchmark — different inputs, different output shape, different audience.
+// benchmark - different inputs, different output shape, different audience.
 //
 // Constraints (USER-MANDATED, NON-NEGOTIABLE):
 //   - Do not use the banned word anywhere in code, comments, or output.
@@ -41,7 +41,7 @@
 //     the legacy word ourselves.
 //   - No emojis in generated output.
 //   - ESM only. Node 20+ builtins (`node:fs`, `node:path`). No new deps.
-//   - YAML serializer is bundled inline — js-yaml is not on the dep tree and
+//   - YAML serializer is bundled inline - js-yaml is not on the dep tree and
 //     the passport already shows the shape can be templated.
 //
 // Public API:
@@ -77,7 +77,7 @@ export const HF_REQUIRED_FIELDS = Object.freeze([
 
 // Recognised numeric axes we know how to surface as HF `metrics`. Anything
 // outside this allow-list is still rendered in the Evaluation body, but is
-// not promoted into the frontmatter — the Hub metric registry is strict.
+// not promoted into the frontmatter - the Hub metric registry is strict.
 const KNOWN_METRIC_AXES = Object.freeze({
   asks_one_question_pct:    { type: 'asks_one_question_rate',  scale: 0.01, name: 'Asks One Clarifying Question' },
   no_inventions_pct:        { type: 'no_inventions_rate',      scale: 0.01, name: 'No Fabricated Facts' },
@@ -91,7 +91,7 @@ const KNOWN_METRIC_AXES = Object.freeze({
 });
 
 // ---------------------------------------------------------------------------
-// _yaml — minimal pure-JS YAML emitter sufficient for HF frontmatter.
+// _yaml - minimal pure-JS YAML emitter sufficient for HF frontmatter.
 //
 // Supports: scalars (string/number/boolean/null), flow + block sequences,
 // nested maps. Keys are emitted in insertion order so a caller can pin
@@ -264,7 +264,7 @@ function _detectFormats(artifactDir) {
         if (lower.endsWith('.mlx')) formats.add('mlx');
       }
     } catch { // deliberate: cleanup
-      // Directory may not exist — that is fine.
+      // Directory may not exist - that is fine.
     }
   }
   return Array.from(formats);
@@ -321,7 +321,7 @@ function _modelIndexResults(benchmark, passportId, displayName) {
 }
 
 // ---------------------------------------------------------------------------
-// validateModelCardFields — return { ok, missing } for the HF-required fields.
+// validateModelCardFields - return { ok, missing } for the HF-required fields.
 // We are lenient: any field present in the passport OR in the explicit `tags`
 // / `license` / `language` overrides is accepted. The check exists so a CLI
 // caller can fail fast on a known-incomplete passport before publishing.
@@ -358,7 +358,7 @@ export function validateModelCardFields(passport, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// generateModelCard — main entry point. Returns { readme, frontmatter }.
+// generateModelCard - main entry point. Returns { readme, frontmatter }.
 // ---------------------------------------------------------------------------
 export function generateModelCard(opts = {}) {
   const passport = (opts.passport && typeof opts.passport === 'object') ? opts.passport : {};
@@ -385,9 +385,9 @@ export function generateModelCard(opts = {}) {
     if (typeof passport.recipe.lora_rank === 'number') autoTags.add('lora');
     if (typeof passport.recipe.precision === 'string') autoTags.add(passport.recipe.precision.toLowerCase());
   }
-  // Council tag — flagship feature.
+  // Council tag - flagship feature.
   if (Array.isArray(passport.council) && passport.council.length >= 2) autoTags.add('teacher-council');
-  // Base-model family tag — strip vendor + size suffix.
+  // Base-model family tag - strip vendor + size suffix.
   if (typeof base_model === 'string') {
     const fam = base_model.split('/').pop() || '';
     const famLower = fam.toLowerCase();
@@ -455,7 +455,7 @@ export function generateModelCard(opts = {}) {
   frontmatter.tags = tags;
   if (datasets.length > 0) frontmatter.datasets = datasets;
   if (metrics.length > 0) frontmatter.metrics = metrics.map((m) => m.type);
-  // Pipeline tag — the Hub treats anything not in its registry as inert, so
+  // Pipeline tag - the Hub treats anything not in its registry as inert, so
   // we only emit when we can credibly infer one.
   frontmatter.pipeline_tag = 'text-generation';
   if (modelIndex) frontmatter['model-index'] = modelIndex;
@@ -638,12 +638,12 @@ function _renderBody({ passport, benchmark, displayName, base_model, license, ta
     lines.push('');
   }
 
-  // Limitations  (NEVER the legacy word — see top-of-file constraint.)
+  // Limitations  (NEVER the legacy word - see top-of-file constraint.)
   lines.push('## Limitations');
   lines.push('');
   lines.push('- Pilot-scale model. Benchmarks above are narrow (same-domain, same-distribution as training).');
-  lines.push('- Council weighting may be unbalanced — see the training-data table for actual row counts per teacher.');
-  lines.push('- Single-judge eval — LLM-judged axes use one judge model. Cross-validation with a second judge is on the roadmap.');
+  lines.push('- Council weighting may be unbalanced - see the training-data table for actual row counts per teacher.');
+  lines.push('- Single-judge eval - LLM-judged axes use one judge model. Cross-validation with a second judge is on the roadmap.');
   lines.push('- Throughput numbers on hardware other than the training device are forecasts, not measurements, unless explicitly noted.');
   if (publishingStatus && typeof publishingStatus === 'object') {
     lines.push('');
@@ -684,17 +684,17 @@ function _renderBody({ passport, benchmark, displayName, base_model, license, ta
 }
 
 // ---------------------------------------------------------------------------
-// writeModelCard — convenience for the CLI: load passport.json + optional
+// writeModelCard - convenience for the CLI: load passport.json + optional
 // benchmark from an artifact directory, generate the card, write it as
 // `README.md` in that directory. Returns where it landed + the frontmatter.
 //
 // options:
-//   benchmarkPath  — explicit path to benchmark JSON; otherwise we look at
+//   benchmarkPath - explicit path to benchmark JSON; otherwise we look at
 //                    merged/benchmark-summary.json then benchmark-summary.json.
-//   passportPath   — explicit path to passport JSON; otherwise we look at
+//   passportPath - explicit path to passport JSON; otherwise we look at
 //                    merged/passport.json then passport.json.
-//   outFile        — output filename (default 'README.md').
-//   subdir         — write the README into a subdir (default 'merged/qwen-merged'
+//   outFile - output filename (default 'README.md').
+//   subdir - write the README into a subdir (default 'merged/qwen-merged'
 //                    when present, else the artifactDir itself).
 //   ...all generateModelCard opts are passed through.
 // ---------------------------------------------------------------------------
@@ -723,7 +723,7 @@ export function writeModelCard({ artifactDir, options = {} } = {}) {
   for (const bp of benchmarkCandidates) {
     if (fs.existsSync(bp)) {
       try { benchmark = JSON.parse(fs.readFileSync(bp, 'utf8')); break; }
-      catch { /* ignore parse error — fall through to no-benchmark path */ }
+      catch { /* ignore parse error - fall through to no-benchmark path */ }
     }
   }
 
@@ -739,7 +739,7 @@ export function writeModelCard({ artifactDir, options = {} } = {}) {
     library_name: options.library_name,
   });
 
-  // Output location: prefer the qwen-merged dir (HF-Hub convention — that's
+  // Output location: prefer the qwen-merged dir (HF-Hub convention - that's
   // where the safetensors live) when present; fall back to artifactDir.
   let outDir = artifactDir;
   if (!options.subdir) {

@@ -1,6 +1,6 @@
 // src/marketplace-routes.js
 //
-// W825 [T3] — HTTP routes for the Artifact Marketplace MVP.
+// W825 [T3] - HTTP routes for the Artifact Marketplace MVP.
 //
 // We export ONE function registerMarketplaceRoutes(r) that mounts every W825
 // route onto an existing express.Router(). The one-liner mount pattern keeps
@@ -10,27 +10,27 @@
 // Routes (all under /v1/marketplace/w825/* to avoid collision with the W737
 // /v1/marketplace/{search,listings,reviews,...} routes that already exist):
 //
-//   GET    /v1/marketplace/listings           — public read, browse listings.
+//   GET    /v1/marketplace/listings - public read, browse listings.
 //                                                Returns {ok, rows[], total,
 //                                                page, limit, sort_by}.
-//   POST   /v1/marketplace/upload             — publish a new listing.
+//   POST   /v1/marketplace/upload - publish a new listing.
 //                                                Auth-gated; requires manifest
 //                                                signature verification.
 //                                                400 on signature_invalid.
-//   GET    /v1/marketplace/download/:id       — stream artifact bytes.
+//   GET    /v1/marketplace/download/:id - stream artifact bytes.
 //                                                Records download counter.
 //                                                402 if listing.paid AND
 //                                                tenant lacks entitlement.
-//   POST   /v1/marketplace/finetune           — queue a transfer-learning
+//   POST   /v1/marketplace/finetune - queue a transfer-learning
 //                                                fine-tune from a marketplace
 //                                                artifact_id. Auth-gated.
-//   POST   /v1/marketplace/rate               — submit 1-5 star rating +
+//   POST   /v1/marketplace/rate - submit 1-5 star rating +
 //                                                review_text. Anti-gaming:
 //                                                403 unless account_age >= 7d
 //                                                AND has prior download.
-//   GET    /v1/marketplace/ratings/:id        — public read of aggregate
+//   GET    /v1/marketplace/ratings/:id - public read of aggregate
 //                                                ratings + raw rating rows.
-//   POST   /v1/marketplace/payout-cycle       — admin/forecast: aggregate
+//   POST   /v1/marketplace/payout-cycle - admin/forecast: aggregate
 //                                                revenue ledger and emit
 //                                                payout rows. Auth-gated.
 //
@@ -193,7 +193,7 @@ export function registerMarketplaceRoutes(r) {
         paid: body.paid,
         price_micro_usd: body.price_micro_usd,
       });
-      // Audit row — append-only chain. Best-effort; never fail the request on
+      // Audit row - append-only chain. Best-effort; never fail the request on
       // a chain write.
       try {
         await tryAppendAudit({
@@ -259,7 +259,7 @@ export function registerMarketplaceRoutes(r) {
       // anti-gaming check on the rate route).
       recordDownload(listing.id);
       recordDownloadEvent({ listing_id: listing.id, tenant_id: tenant.id });
-      // Ledger row for revenue share — only paid listings.
+      // Ledger row for revenue share - only paid listings.
       if (listing.paid && listing.price_micro_usd > 0) {
         await recordRevenue({
           listing_id: listing.id,
@@ -282,7 +282,7 @@ export function registerMarketplaceRoutes(r) {
           },
         });
       } catch (_e) { /* best-effort */ }
-      // Stream the bytes. If the artifact_uri is remote, surface as 501 — the
+      // Stream the bytes. If the artifact_uri is remote, surface as 501 - the
       // MVP only streams local files. (Future revisions can proxy s3:// / https://.)
       const uri = listing.artifact_uri;
       if (!uri) {

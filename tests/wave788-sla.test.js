@@ -204,7 +204,7 @@ test('W788 #9 — bad surface / missing tenant rejects loudly with .code', () =>
   assert.ok(err4 && err4.code === 'invalid_surface');
 });
 
-test('W788 #10 — router exposes /v1/sla/{rollup,dashboard,series} + CLI wires sla verb + sw.js wave>=788 + sla.html lives', () => {
+test('W788 #10 — router exposes /v1/sla/{rollup,dashboard,series} + CLI wires sla verb', () => {
   // Router source-pin: imports sla-rollup + exposes three routes.
   const router = fs.readFileSync(path.join(REPO_ROOT, 'src', 'router.js'), 'utf8');
   assert.match(router, /from\s+['"]\.\/sla-rollup\.js['"]/, 'router must import sla-rollup.js');
@@ -224,20 +224,7 @@ test('W788 #10 — router exposes /v1/sla/{rollup,dashboard,series} + CLI wires 
   // CLI mentions the rollup subcommand + supports --surface flag.
   assert.match(cli, /sub === 'rollup'/, 'cmdSla must handle `rollup` subcommand');
   assert.match(cli, /--surface/, 'cmdSla must mention --surface');
-
-  // sw.js wave token (regex+threshold pattern — NEVER explicit array).
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  const m = sw.match(/CACHE\s*=\s*['"]([^'"]+)['"]/);
-  assert.ok(m, 'sw.js must define CACHE');
-  const waveMatches = [...m[1].matchAll(/wave(\d{3,4})/g)].map(x => parseInt(x[1], 10));
-  assert.ok(waveMatches.length, 'sw.js CACHE slug must include at least one waveNNN token');
-  assert.ok(waveMatches.some(n => n >= 788),
-    'sw.js CACHE slug must reference the W788+ family (saw waves: ' + waveMatches.join(',') + ')');
-
-  // SLA dashboard page exists with the persistent-rollup wiring marker.
-  const slaPath = path.join(REPO_ROOT, 'public', 'account', 'sla.html');
-  assert.ok(fs.existsSync(slaPath), '/account/sla.html must exist');
-  const slaHtml = fs.readFileSync(slaPath, 'utf8');
-  assert.match(slaHtml, /w788-3-sla/, 'sla.html must carry the W788-3 marker');
-  assert.match(slaHtml, /\/v1\/sla\/dashboard/, 'sla.html script must fetch /v1/sla/dashboard');
+  // The retired sw.js cache-version + the old /account/sla.html console page
+  // assertions were removed with the public-site teardown; the router + CLI
+  // coverage above is the load-bearing contract.
 });

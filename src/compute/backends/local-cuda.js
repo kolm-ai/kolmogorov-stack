@@ -1,4 +1,4 @@
-// local-cuda — NVIDIA GPU on this box. Detection via nvidia-smi.
+// local-cuda - NVIDIA GPU on this box. Detection via nvidia-smi.
 // No API. run() spawns the command with CUDA_VISIBLE_DEVICES wired.
 // Env: caller can pass env.CUDA_VISIBLE_DEVICES; otherwise inherited.
 
@@ -42,7 +42,7 @@ export async function test() {
   return { ok: d.available, latency_ms: Date.now() - t0, ...d };
 }
 
-// run({ image, command, env, timeoutMs }) — spawns command with GPU env wired.
+// run({ image, command, env, timeoutMs }) - spawns command with GPU env wired.
 // Detects + reports `gpu_available` so callers can fall back to CPU if needed.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {
   const t0 = Date.now();

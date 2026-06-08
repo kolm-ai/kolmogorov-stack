@@ -1,8 +1,8 @@
 // Provider-key env-var name normalization.
 //
 // Operators keep their keys in Vercel/Railway under whatever casing the dashboard
-// gave them — `runpod_api_key`, `cerebras_api`, `anthropic_api_key`,
-// `Cloudflare_api_token`, `google_api_key`, ... — but the code reads canonical
+// gave them - `runpod_api_key`, `cerebras_api`, `anthropic_api_key`,
+// `Cloudflare_api_token`, `google_api_key`, ... - but the code reads canonical
 // UPPER_SNAKE names (`RUNPOD_API_KEY`, `CEREBRAS_API_KEY`, ...). Without this,
 // a key the operator configured is silently never found (the exact bug that made
 // "test frontier with runpod" fail: the key was in Vercel as `runpod_api_key`,

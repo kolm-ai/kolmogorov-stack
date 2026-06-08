@@ -11,7 +11,7 @@
 
 import { PROVIDERS } from './provider-registry.js';
 
-// W921 — resolve the price row AND a status so a $0 result from an UNKNOWN model
+// W921 - resolve the price row AND a status so a $0 result from an UNKNOWN model
 // is distinguishable from a genuinely-free call. estimateCostDetailed surfaces
 // the status; estimateCost keeps its numeric contract (existing callers
 // unchanged). estimator_status: 'priced' | 'unpriced_model' | 'unknown_provider'.
@@ -67,11 +67,11 @@ function _resolveTeacherSlug(slug) {
   return { provider: null, model: s };
 }
 
-// W921 — batch teacher-cost estimate used by the data-engine cost optimizer
+// W921 - batch teacher-cost estimate used by the data-engine cost optimizer
 // (rankStrategies) and the augment cost-preview. teachers: [{slug, rows}]; each
 // row is one teacher call (avg_input prompt + avg_output completion). Returns
 // {total_usd, per_teacher, unknown_models, assumptions}. Unknown slugs price at
-// $0 and are reported in unknown_models — we never invent a price.
+// $0 and are reported in unknown_models - we never invent a price.
 export function estimateBatchCost({ teachers = [], avg_input_tokens = 256, avg_output_tokens = 384 } = {}) {
   const ain = Number(avg_input_tokens) || 0;
   const aout = Number(avg_output_tokens) || 0;

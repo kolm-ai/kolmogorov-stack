@@ -1,4 +1,4 @@
-// W287 — ONNX runtime target for .kolm artifacts.
+// W287 - ONNX runtime target for .kolm artifacts.
 //
 // A .kolm with manifest.runtime_target='onnx' carries an ONNX model file
 // inside the zip (path declared by manifest.runtime_target_config.onnx_path).
@@ -16,10 +16,10 @@
 //   - For string-typed schemas, input is wrapped as a 1-element string tensor.
 //
 // Errors:
-//   KOLM_E_TARGET_MISSING            — onnx_path missing from manifest or zip
-//   KOLM_E_ONNX_RUNTIME_MISSING      — onnxruntime-node not installed
-//   KOLM_E_ONNX_RUNTIME              — session creation or run threw
-//   KOLM_E_RECIPE_TIMEOUT            — wall-clock budget exceeded
+//   KOLM_E_TARGET_MISSING - onnx_path missing from manifest or zip
+//   KOLM_E_ONNX_RUNTIME_MISSING - onnxruntime-node not installed
+//   KOLM_E_ONNX_RUNTIME - session creation or run threw
+//   KOLM_E_RECIPE_TIMEOUT - wall-clock budget exceeded
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';

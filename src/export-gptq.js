@@ -1,6 +1,6 @@
 // src/export-gptq.js
 //
-// S-6 — GPTQ (auto-gptq / GPTQModel) export chain for ANY artifact.
+// S-6 - GPTQ (auto-gptq / GPTQModel) export chain for ANY artifact.
 //
 // GPTQ is the classic Hessian-calibrated weight-only quantization scheme from
 // Frantar et al. (2022). The current maintained implementation is GPTQModel

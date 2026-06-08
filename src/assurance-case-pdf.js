@@ -1,4 +1,4 @@
-// R-6 — Assurance case PDF renderer.
+// R-6 - Assurance case PDF renderer.
 //
 // Separate module from src/assurance-case.js so the JSON path never has to
 // import pdfkit (pdfkit is heavy + ships native fonts; pulling it into every
@@ -22,7 +22,7 @@
 //   Controls section (table)
 //     - framework | control_id | label | status | evidence_id
 //
-// Colour palette (constrained — NO browns / beiges / oranges per spec):
+// Colour palette (constrained - NO browns / beiges / oranges per spec):
 //   ink:        #111111
 //   muted:      #555555
 //   rule:       #cccccc
@@ -38,10 +38,10 @@ export const COLOR = Object.freeze({
   ink:    '#111111',
   muted:  '#555555',
   rule:   '#cccccc',
-  ok:     '#166534', // green — implemented
-  warn:   '#0e7490', // cyan — package-gated
-  bad:    '#991b1b', // red — external-proof-needed
-  info:   '#1d4ed8', // blue — certification-gated
+  ok:     '#166534', // green - implemented
+  warn:   '#0e7490', // cyan - package-gated
+  bad:    '#991b1b', // red - external-proof-needed
+  info:   '#1d4ed8', // blue - certification-gated
 });
 
 function _statusColour(status) {
@@ -66,7 +66,7 @@ export async function renderAssuranceCasePdf(envelope, outputStream) {
     const mod = await import('pdfkit');
     PDFDocumentCtor = mod.default || mod;
   } catch (e) {
-    const err = new Error(`pdfkit not installed — install via 'npm install pdfkit'. underlying: ${e.message}`);
+    const err = new Error(`pdfkit not installed - install via 'npm install pdfkit'. underlying: ${e.message}`);
     err.code = 'PDFKIT_UNAVAILABLE';
     throw err;
   }
@@ -189,11 +189,11 @@ function _renderControls(doc, envelope) {
 
     for (const c of grouped[fwLabel]) {
       if (doc.y > 720) doc.addPage();
-      doc.font('Helvetica-Bold').fontSize(10).fillColor(COLOR.ink).text(`${c.control_id} — ${c.label || ''}`);
+      doc.font('Helvetica-Bold').fontSize(10).fillColor(COLOR.ink).text(`${c.control_id} - ${c.label || ''}`);
       doc.font('Helvetica').fontSize(9).fillColor(_statusColour(c.implementation_status))
         .text(`status: ${c.implementation_status || 'unknown'}`);
       doc.fillColor(COLOR.ink);
-      doc.font('Courier').fontSize(9).text('evidence: ' + (c.evidence_id || '(none — request from vendor)'));
+      doc.font('Courier').fontSize(9).text('evidence: ' + (c.evidence_id || '(none - request from vendor)'));
       doc.moveDown(0.4);
     }
     doc.moveDown(0.4);
@@ -207,7 +207,7 @@ function _renderFooter(doc, envelope) {
     doc.switchToPage(i);
     const bottom = doc.page.height - 36;
     doc.text(
-      `kolm.ai trust packet — ${envelope.spec || ''} — page ${i + 1 - range.start} of ${range.count}`,
+      `kolm.ai trust packet - ${envelope.spec || ''} - page ${i + 1 - range.start} of ${range.count}`,
       doc.page.margins.left,
       bottom,
       { align: 'center', width: doc.page.width - doc.page.margins.left - doc.page.margins.right }

@@ -1,6 +1,6 @@
 // src/data-engine.js
 //
-// KOLM Data Engine — the ORCHESTRATOR (W921).
+// KOLM Data Engine - the ORCHESTRATOR (W921).
 //
 // One real entry point that chains the six existing data-engine stage modules
 // in order so `kolm compile --auto` has a single seam to call:
@@ -29,7 +29,7 @@
 //       stages:{ ingest, curate, augment, evaluate, feedback } }
 //   On a fatal pre-flight failure (e.g. no pairs to work with at all) the
 //   ingest slot carries { ok:false, error } and later stages are marked skipped
-//   with that reason — the top-level envelope still returns ok:true so a caller
+//   with that reason - the top-level envelope still returns ok:true so a caller
 //   can inspect every slot uniformly.
 
 import fs from 'node:fs';
@@ -55,7 +55,7 @@ function _skip(reason) {
 }
 
 // A uniform failure slot for a stage that threw. We never let a stage exception
-// escape this module — it lands here so later independent stages keep running.
+// escape this module - it lands here so later independent stages keep running.
 function _fail(error) {
   return { ok: false, error: String((error && error.message) || error) };
 }
@@ -98,7 +98,7 @@ async function _runIngest({ tenant, namespace, opts }) {
     source = 'existing';
   }
 
-  // A write-side ingest that explicitly failed is surfaced — but we still try to
+  // A write-side ingest that explicitly failed is surfaced - but we still try to
   // read whatever is already on disk so a prior corpus can carry the run.
   const writeError = writeResult && writeResult.ok === false ? writeResult.error : null;
 
@@ -212,7 +212,7 @@ async function _runAugment({ tenant, namespace, seedPairs, opts }) {
       gate: estCost > 0
         ? `preview-only: est_cost_usd=${estCost} requires opts.approve_cost_usd >= ${estCost}`
         : 'preview-only: no approval supplied (est_cost_usd=0)',
-      // Drop the bulky candidates array from the preview slot — keep the count.
+      // Drop the bulky candidates array from the preview slot - keep the count.
       candidates: undefined,
     };
   }
@@ -226,7 +226,7 @@ async function _runAugment({ tenant, namespace, seedPairs, opts }) {
   });
 
   if (!applied || applied.ok !== true) {
-    // Application failed after approval — surface it but keep the preview info.
+    // Application failed after approval - surface it but keep the preview info.
     return {
       ok: false,
       version: preview.version,
@@ -253,7 +253,7 @@ async function _runAugment({ tenant, namespace, seedPairs, opts }) {
 //
 // Runs ONLY when opts.run_dir is provided (the dir a TRAIN step wrote eval
 // artifacts into). Without it there is nothing trained to score, so the slot is
-// a clean skip — never an error.
+// a clean skip - never an error.
 // ---------------------------------------------------------------------------
 async function _runEvaluate({ tenant, namespace, opts }) {
   const runDir = (typeof opts.run_dir === 'string' && opts.run_dir.trim()) ? opts.run_dir : null;
@@ -312,7 +312,7 @@ async function _runFeedback({ tenant, namespace, opts }) {
 }
 
 // ---------------------------------------------------------------------------
-// orchestratePipeline — the single public entry point.
+// orchestratePipeline - the single public entry point.
 // ---------------------------------------------------------------------------
 
 /**
@@ -321,7 +321,7 @@ async function _runFeedback({ tenant, namespace, opts }) {
  * { ok:false, error } failure, or a { skipped:true, reason } skip.
  *
  * @param {object}  args
- * @param {string}  args.tenant      tenant id — fences every downstream call.
+ * @param {string}  args.tenant      tenant id - fences every downstream call.
  * @param {string} [args.namespace]  data namespace (default 'default').
  * @param {object} [args.opts]       per-stage controls:
  *   describe / data / docs        - ingest source selectors (mutually precedence-ordered)

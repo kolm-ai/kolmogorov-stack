@@ -1,4 +1,4 @@
-// W888-D — On-device benchmark runner.
+// W888-D - On-device benchmark runner.
 //
 // testDevice({ artifactPath, deviceId, evalSet }) deploys the artifact
 // (dry-run preflight + upload only, no serve), then drives a benchmark

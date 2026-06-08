@@ -1,4 +1,4 @@
-// W760 — Per-language K-Score breakdown.
+// W760 - Per-language K-Score breakdown.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 549-553):
 //   [W760-1] Per-language K-Score reporting → language detect + axis split
@@ -10,11 +10,11 @@
 // by detected lang and reports a K-Score per partition.
 //
 // Design contract:
-//   - SIBLING of src/kscore.js — DO NOT mutate kscore.js. We import
+//   - SIBLING of src/kscore.js - DO NOT mutate kscore.js. We import
 //     computeKScore() read-only and fan it out across language buckets.
 //   - Wilson 95% CI gated at n>=30 PER LANGUAGE. Below 30 the bucket
 //     reports k_score=null AND ci=null (honesty floor, mirrors W741).
-//   - INSUFFICIENT envelope when no language has >=30 rows — we don't
+//   - INSUFFICIENT envelope when no language has >=30 rows - we don't
 //     silently substitute a tiny-n estimate.
 //   - perLanguageConfidenceThreshold() returns the W709 fallback
 //     threshold scaled per language. Lower-quality languages get a LOWER
@@ -30,7 +30,7 @@ import { detectLang, SUPPORTED_LANGS } from './lang-detect.js';
 
 export const KSCORE_PER_LANG_VERSION = 'w760-v1';
 
-// Wilson CI floor — same threshold as src/diagnostic.js. Below 30 rows
+// Wilson CI floor - same threshold as src/diagnostic.js. Below 30 rows
 // per language we report point estimate as null because a confidence
 // band drawn from <30 samples is a number-shaped lie.
 const MIN_N_FOR_PER_LANG_CI = 30;
@@ -40,7 +40,7 @@ const MIN_N_FOR_PER_LANG_CI = 30;
 // (synthetic augmentation).
 const MIN_N_FOR_PER_LANG_ANY = 30;
 
-// W709 fallback default threshold — confidence below this routes to
+// W709 fallback default threshold - confidence below this routes to
 // teacher. Per-lang ratio is clamped [0.5, 1.5] so a single very-weak
 // language can't push the threshold to zero (and a very-strong language
 // can't push it to 1.0 = always-fallback).
@@ -86,7 +86,7 @@ export function perLanguageKScore(opts) {
     return {
       ok: false,
       error: 'kscore_module_signature_mismatch',
-      hint: 'src/kscore.js no longer exports computeKScore — update kscore-per-language.js',
+      hint: 'src/kscore.js no longer exports computeKScore - update kscore-per-language.js',
       version: KSCORE_PER_LANG_VERSION,
     };
   }
@@ -130,7 +130,7 @@ export function perLanguageKScore(opts) {
   for (const [lang, arr] of buckets.entries()) {
     const n = arr.length;
     if (n < MIN_N_FOR_PER_LANG_ANY) {
-      // Honest floor — we have rows for this language but not enough to
+      // Honest floor - we have rows for this language but not enough to
       // report a K-Score. Caller sees the count + null score.
       byLang[lang] = {
         n,
@@ -156,7 +156,7 @@ export function perLanguageKScore(opts) {
   }
 
   // ── Compute pooled K-Score over ALL rows (including any with fallback
-  // langs / unknown — the pooled estimate is what kscore.js would give if
+  // langs / unknown - the pooled estimate is what kscore.js would give if
   // you ignored language). This is the comparison point that lets callers
   // see how much per-language variance the pooled number is hiding.
   let pooled = null;
@@ -196,7 +196,7 @@ export function perLanguageKScore(opts) {
 //   k_lang=0.42, k_pooled=0.85 → ratio 0.49 → clamped 0.5 → threshold 0.35
 //
 // Honest envelope when by_lang_kscore is missing the requested lang OR
-// the pooled value is null — never silently return the default.
+// the pooled value is null - never silently return the default.
 // =============================================================================
 
 export function perLanguageConfidenceThreshold(opts) {
@@ -217,7 +217,7 @@ export function perLanguageConfidenceThreshold(opts) {
     return {
       ok: false,
       error: 'no_per_lang_kscore',
-      hint: 'pass {by_lang_kscore} — the by_lang block from perLanguageKScore()',
+      hint: 'pass {by_lang_kscore} - the by_lang block from perLanguageKScore()',
       version: KSCORE_PER_LANG_VERSION,
     };
   }
@@ -228,7 +228,7 @@ export function perLanguageConfidenceThreshold(opts) {
       ok: false,
       error: 'no_data_for_lang',
       lang,
-      hint: 'per-lang K-Score missing or null for ' + lang + ' — add captures or enable synthetic augmentation',
+      hint: 'per-lang K-Score missing or null for ' + lang + ' - add captures or enable synthetic augmentation',
       version: KSCORE_PER_LANG_VERSION,
     };
   }
@@ -236,7 +236,7 @@ export function perLanguageConfidenceThreshold(opts) {
     return {
       ok: false,
       error: 'no_pooled_kscore',
-      hint: 'pooled K-Score is null — compute pooled estimate before requesting per-lang threshold',
+      hint: 'pooled K-Score is null - compute pooled estimate before requesting per-lang threshold',
       version: KSCORE_PER_LANG_VERSION,
     };
   }

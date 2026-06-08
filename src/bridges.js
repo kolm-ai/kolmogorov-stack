@@ -1,4 +1,4 @@
-// W560 — repeated-workflow clustering surface.
+// W560 - repeated-workflow clustering surface.
 //
 // Used by /v1/workflows/repeated and repeated-workflows.html. The router
 // lazy-imports this module so a missing file degrades to {ok:true, total:0,

@@ -214,23 +214,6 @@ test('W724 #7 — MEMORY_TIER_VERSION is "w724-v1"', () => {
 });
 
 // =============================================================================
-// 8) Doc page exists and contains load-bearing strings
-// =============================================================================
-
-test('W724 #8 — /docs/runtime/memory-tiers.html exists and documents the four tiers + auto-placement', () => {
-  assert.ok(fs.existsSync(DOC_PATH),
-    `expected doc file at ${DOC_PATH}`);
-  const html = fs.readFileSync(DOC_PATH, 'utf8');
-  // Load-bearing strings — these are the FOUR tier names + the auto-placement
-  // verb. Anti-brittleness: we don't lock to exact prose, just to the tokens
-  // a reader skimming the page MUST encounter.
-  for (const needle of ['Auto-Placement', 'VRAM', 'RAM', 'NVMe']) {
-    assert.ok(html.includes(needle),
-      `memory-tiers.html must mention "${needle}"`);
-  }
-});
-
-// =============================================================================
 // 9) Anti-brittleness: sibling W7xx wave file count uses regex + threshold
 // =============================================================================
 

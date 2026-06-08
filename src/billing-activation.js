@@ -1,34 +1,34 @@
 // src/billing-activation.js
 //
-// P0 — Stripe billing ACTIVATION readiness + on-the-fly Checkout for the
+// P0 - Stripe billing ACTIVATION readiness + on-the-fly Checkout for the
 // PRICE-ID path. This is the module an operator "turns on" by setting price-id
 // env vars in Railway/Vercel; the code here is ready the moment they do.
 //
 // Why this exists alongside billing-upgrade.js / stripe.js:
-//   * stripe.js          — webhook signature verify + amount->plan mapping.
-//   * billing-upgrade.js — resolveUpgradeUrl(): a 4-path fallback that always
+//   * stripe.js - webhook signature verify + amount->plan mapping.
+//   * billing-upgrade.js - resolveUpgradeUrl(): a 4-path fallback that always
 //                          returns *some* working URL (payment link -> checkout
 //                          session -> self-hosted -> manual). It never tells
 //                          the operator which env vars are missing.
-//   * billing-activation — this file. The strict counterpart: a single source
+//   * billing-activation - this file. The strict counterpart: a single source
 //                          of truth for "is real Stripe Checkout configured?"
 //                          and a checkout creator that FAILS LOUD with the exact
 //                          env var names when it is not. The /v1/billing/ready
 //                          probe + the release-verify `billing-tiers` gate read
 //                          from here.
 //
-// Convention parity (do NOT diverge — these are the same env names the rest of
+// Convention parity (do NOT diverge - these are the same env names the rest of
 // the codebase already reads):
 //   * Secret key:  STRIPE_SECRET_KEY (env-normalize maps stripe_api_key ->
 //                  STRIPE_SECRET_KEY; KOLM_STRIPE_KEY is the legacy alias read
 //                  by billing-upgrade.js). We accept all three via envSecret.
-//   * Price ids:   KOLM_STRIPE_PRICE_<PLAN> — IDENTICAL to STRIPE_PRICE_ENVS in
+//   * Price ids:   KOLM_STRIPE_PRICE_<PLAN> - IDENTICAL to STRIPE_PRICE_ENVS in
 //                  billing-upgrade.js so a single set of env vars powers BOTH
 //                  the fallback path and this strict path. STRIPE_PRICE_<PLAN>
 //                  is accepted as a secondary alias for operators who name them
 //                  the Stripe-dashboard way.
 //
-// ZERO new npm deps. No Stripe SDK — Stripe's REST API over global fetch, the
+// ZERO new npm deps. No Stripe SDK - Stripe's REST API over global fetch, the
 // same approach billing-upgrade.js already uses (Node >= 18).
 
 import { envSecret } from './env.js';
@@ -87,13 +87,13 @@ export function priceIdFor(plan) {
   return null;
 }
 
-// billingReady — is real Stripe Checkout fully configured to charge customers?
+// billingReady - is real Stripe Checkout fully configured to charge customers?
 //
 // Returns { ready, missing[], secret_key, webhook_secret, livemode, prices }.
 // `missing` lists the EXACT env var names the operator must set in
 // Railway/Vercel. The webhook secret is required for the activation to be
 // end-to-end useful (it's what flips the tenant's plan after payment), so its
-// absence is reported in missing[] too — matching the existing
+// absence is reported in missing[] too - matching the existing
 // /v1/billing/tiers `stripe.ready` semantics.
 export function billingReady({ plans } = {}) {
   const wanted = Array.isArray(plans) && plans.length
@@ -107,7 +107,7 @@ export function billingReady({ plans } = {}) {
   const haveSecret = !!secret;
 
   // A plan is chargeable via EITHER a Checkout-API price id (KOLM_STRIPE_PRICE_<PLAN>)
-  // OR a hosted Stripe Payment Link (STRIPE_PAYMENT_LINK_<PLAN> — the path
+  // OR a hosted Stripe Payment Link (STRIPE_PAYMENT_LINK_<PLAN> - the path
   // src/billing-upgrade.js already uses). Payment links collect revenue with just the
   // links + webhook secret (no Stripe secret key), so the secret key is only required
   // when no payment link covers a plan.
@@ -160,7 +160,7 @@ export class BillingNotConfiguredError extends Error {
 }
 
 // Stripe REST: POST /v1/checkout/sessions (form-urlencoded, Bearer auth). No
-// SDK — same shape as billing-upgrade.js createStripeCheckoutSession, lifted
+// SDK - same shape as billing-upgrade.js createStripeCheckoutSession, lifted
 // here so the strict path is self-contained and returns the full session
 // object (id + url) rather than just a URL string.
 async function postCheckoutSession({ priceId, customerEmail, tenantId, plan, successUrl, cancelUrl, apiKey, baseUrl, quantity, fetchImpl }) {
@@ -210,12 +210,12 @@ async function postCheckoutSession({ priceId, customerEmail, tenantId, plan, suc
   }
 }
 
-// createCheckoutSession — start a real Stripe Checkout for a tenant upgrading
+// createCheckoutSession - start a real Stripe Checkout for a tenant upgrading
 // to a paid plan, using the operator-configured PRICE ID for that plan.
 //
 // @param {object} opts
 //   opts.tenant      tenant id string OR object with .id (required)
-//   opts.plan        paid plan id (required; canonicalized — 'team' -> 'teams')
+//   opts.plan        paid plan id (required; canonicalized - 'team' -> 'teams')
 //   opts.email       customer email to prefill (optional)
 //   opts.quantity    seat quantity (default 1)
 //   opts.successUrl  override success redirect (optional)
@@ -242,7 +242,7 @@ export async function createCheckoutSession(opts = {}) {
   if (!payable) {
     const err = new Error(
       'plan must be a self-serve paid plan (one of: ' + selfServePaidPlans().join(', ') +
-      '). Enterprise is sales-led — route it to /v1/sales/demo-request.'
+      '). Enterprise is sales-led - route it to /v1/sales/demo-request.'
     );
     err.code = 'invalid_plan';
     err.statusCode = 400;

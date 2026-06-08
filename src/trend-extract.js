@@ -1,12 +1,12 @@
-// W757 — Trend extraction over the cross-namespace pattern lake.
+// W757 - Trend extraction over the cross-namespace pattern lake.
 //
 // Pairs with src/pattern-lake.js and src/dp-aggregation.js to expose:
-//   - emergingPatterns({window_days, min_growth_ratio}) — bigrams whose
+//   - emergingPatterns({window_days, min_growth_ratio}) - bigrams whose
 //     recent-window count grows by >= min_growth_ratio over the prior window
-//   - summarizeTrends() — global rollup used by GET /v1/lake/trends
+//   - summarizeTrends() - global rollup used by GET /v1/lake/trends
 //
 // HONESTY CONTRACT:
-//   - Pure read paths — no contribution side effects. The lake's write API
+//   - Pure read paths - no contribution side effects. The lake's write API
 //     is exclusively contributePattern in pattern-lake.js.
 //   - When there is insufficient history, the response is an honest
 //     `insufficient_history` envelope with the actual window size + the
@@ -14,7 +14,7 @@
 //   - Tenant identity NEVER appears in the output. Every emerging bigram is
 //     a sha256 hash; the rollup carries aggregate counts only.
 //
-// W411 — defense-in-depth filters per row inside the loops, even though the
+// W411 - defense-in-depth filters per row inside the loops, even though the
 // lake's contribute path already enforces consent + opt-in.
 
 import { listEvents } from './event-store.js';
@@ -58,7 +58,7 @@ function _histogram(rows) {
   return histogram;
 }
 
-// emergingPatterns({window_days, min_growth_ratio}) — bigrams whose count
+// emergingPatterns({window_days, min_growth_ratio}) - bigrams whose count
 // inside the last window_days grew by >= min_growth_ratio compared to the
 // equally-sized prior window. Returns an honest `insufficient_history`
 // envelope when not enough rows are available.
@@ -79,7 +79,7 @@ export async function emergingPatterns({
     limit: 0,
   });
 
-  // W411 — apply opt-in re-fence per row INSIDE the loop so a row whose
+  // W411 - apply opt-in re-fence per row INSIDE the loop so a row whose
   // opt-in was revoked never participates in the trend computation.
   const recent = [];
   const prior = [];
@@ -135,7 +135,7 @@ export async function emergingPatterns({
   };
 }
 
-// summarizeTrends() — the GET /v1/lake/trends payload. Aggregate-only,
+// summarizeTrends() - the GET /v1/lake/trends payload. Aggregate-only,
 // hash-free at the top level. Surfaces:
 //   - total_contributors: distinct tenant_ids with at least one contribution
 //   - total_namespaces:   distinct (tenant_id, namespace) pairs opted-in
@@ -152,7 +152,7 @@ export async function summarizeTrends() {
   const contributors = new Set();
   const namespaces = new Set();
   const verticalCounts = new Map();
-  // Best-effort vertical id list — kept in-sync with src/verticals.js
+  // Best-effort vertical id list - kept in-sync with src/verticals.js
   // canonical order. Importing the catalog would be cleaner but would couple
   // this module to the verticals module's loading cost on every summary call.
   const KNOWN_VERTICAL_IDS = ['legal', 'medical', 'code', 'finance', 'support'];

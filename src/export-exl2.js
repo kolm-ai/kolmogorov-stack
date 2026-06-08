@@ -1,6 +1,6 @@
 // src/export-exl2.js
 //
-// S-6 — EXL2 (exllamav2) export chain for ANY artifact.
+// S-6 - EXL2 (exllamav2) export chain for ANY artifact.
 //
 // EXL2 is turboderp's variable-bitrate per-layer quantization format. Unlike
 // fixed-bit formats (GPTQ w4, AWQ w4), EXL2 lets you target a fractional
@@ -167,7 +167,7 @@ export function previewExport({ artifact, quant, target_dir }) {
 
 // Actually run the export. Returns a Promise that resolves to an envelope
 // matching the GGUF chain's shape. Tool-not-installed cases return
-// { ok:false, error, install_hint } WITHOUT raising — the caller handles UX.
+// { ok:false, error, install_hint } WITHOUT raising - the caller handles UX.
 export async function runExport({ artifact, quant, target_dir }) {
   if (!artifact || typeof artifact !== 'object') {
     throw new Error('runExport: artifact required');

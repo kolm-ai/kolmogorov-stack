@@ -1,4 +1,4 @@
-// SCIM 2.0 provisioning + deprovisioning (RFC 7644) — P0.
+// SCIM 2.0 provisioning + deprovisioning (RFC 7644) - P0.
 //
 // The existing /v1/scim/v2/Users GET (list) + POST (create) routes live inline
 // in src/router.js and persist to the `scim_users` table via store.insert with
@@ -19,7 +19,7 @@
 //
 //   listGroups / getGroup / createGroup / patchGroup / replaceGroup / deleteGroup
 //     SCIM Group <-> kolm rbac role binding. A Group whose displayName matches
-//     a kolm rbac role (owner/admin/member/billing — see src/rbac.js ROLES)
+//     a kolm rbac role (owner/admin/member/billing - see src/rbac.js ROLES)
 //     grants that role to its members; removing a member or deleting the Group
 //     revokes the grant.
 //
@@ -182,7 +182,7 @@ function revokeUserAccess(tenantId, row) {
     }
   } catch { /* best-effort */ }
 
-  // 2) Revoke API keys bound to this seat (member-scoped keys only — never the
+  // 2) Revoke API keys bound to this seat (member-scoped keys only - never the
   //    tenant's default/owner key, which is not a per-user credential).
   try {
     const keyRows = findByField(API_KEYS, 'tenant_id', tenantId);
@@ -284,7 +284,7 @@ export function patchUser(tenantId, scimId, ops, host) {
         patch.emails = Array.isArray(value) ? value : [];
         break;
       default:
-        // Unknown attribute — accept silently (forward-compatible).
+        // Unknown attribute - accept silently (forward-compatible).
         break;
     }
   }
@@ -418,7 +418,7 @@ function memberEmail(tenantId, member) {
 }
 
 // Grant or revoke the group's rbac role for a set of members. The grant is
-// applied to the org_members row (upserted) — never the seat lifecycle.
+// applied to the org_members row (upserted) - never the seat lifecycle.
 function applyRole(tenantId, role, members, grant) {
   if (!role) return;
   for (const m of members || []) {
@@ -444,7 +444,7 @@ function applyRole(tenantId, role, members, grant) {
           });
         }
       } else if (existing) {
-        // Revoke the GRANT by demoting to the lowest role — do NOT remove the
+        // Revoke the GRANT by demoting to the lowest role - do NOT remove the
         // seat (seat lifecycle belongs to the User resource, not the group).
         update(ORG_MEMBERS, (row) => row.id === existing.id && row.tenant_id === tenantId, {
           role: DEMOTE_ROLE, updated_at: nowIso(),
@@ -596,7 +596,7 @@ export function patchGroup(tenantId, scimId, ops, host) {
       }
       continue;
     }
-    // Unknown path — accept silently (forward-compatible).
+    // Unknown path - accept silently (forward-compatible).
   }
 
   update(GROUPS, (g) => g.id === scimId && g.tenant_id === tenantId, {

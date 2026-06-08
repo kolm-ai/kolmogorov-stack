@@ -1,4 +1,4 @@
-// W756 — KolmBench v1 public spec + leaderboard.
+// W756 - KolmBench v1 public spec + leaderboard.
 //
 // Ships the four deliverables from KOLM_W707_SYSTEM_UPGRADE_PLAN.md
 // lines 521-526:
@@ -17,7 +17,7 @@
 //            toolkit) land. We never silently fake a v2 seed dataset.
 //
 // Honesty contract (W604/W460/W411 laws):
-//   - validateSubmission returns stable snake_case error codes — every
+//   - validateSubmission returns stable snake_case error codes - every
 //     mismatch maps to one of: missing_task_id, missing_response,
 //     unknown_task_id, duplicate_task_id, invalid_artifact_cid_format,
 //     submission_empty. Tests pin every code.
@@ -34,7 +34,7 @@
 // Tenant-fenced access: this module reads ONLY the static
 // public/bench/leaderboard.json file plus pure-compute helpers. Any future
 // event-store read MUST go through findByTenant + defense-in-depth, but the
-// current surface intentionally has zero per-tenant state — the leaderboard
+// current surface intentionally has zero per-tenant state - the leaderboard
 // is a global, deliberately-curated public artifact.
 
 import fs from 'node:fs';
@@ -48,9 +48,9 @@ const LEADERBOARD_PATH = path.join(REPO_ROOT, 'public', 'bench', 'leaderboard.js
 
 export const KOLMBENCH_VERSION = 'w756-v1';
 
-// KOLMBENCH_V1_SPEC — frozen catalog of the v1 benchmark scope.
+// KOLMBENCH_V1_SPEC - frozen catalog of the v1 benchmark scope.
 //
-// task_count is the target task count for the v1 pack — the canonical pack
+// task_count is the target task count for the v1 pack - the canonical pack
 // is being curated (W756-4 dependency on W757 lake + W766 consent). Until the
 // pack drops, submission rows are validated against the AUTHORITATIVE_TASKS
 // list below (a deliberately small starter set so the contract is testable
@@ -58,14 +58,14 @@ export const KOLMBENCH_VERSION = 'w756-v1';
 // trying validate() can match it.
 //
 // Schema:
-//   version            — w756-v1
-//   name               — public display name
-//   task_count         — number of tasks in the AUTHORITATIVE_TASKS list
-//   categories         — frozen axis split. Tests pin this exactly.
-//   scoring            — high-level description of how K-Score composes
-//   license            — CC-BY-4.0 (open submission, attribution required)
-//   submission_format  — JSONL row schema
-//   verification       — receipt requirement for self-hosted runs
+//   version - w756-v1
+//   name - public display name
+//   task_count - number of tasks in the AUTHORITATIVE_TASKS list
+//   categories - frozen axis split. Tests pin this exactly.
+//   scoring - high-level description of how K-Score composes
+//   license - CC-BY-4.0 (open submission, attribution required)
+//   submission_format - JSONL row schema
+//   verification - receipt requirement for self-hosted runs
 export const AUTHORITATIVE_TASKS = Object.freeze([
   // reasoning (8)
   'reason-001-arithmetic-word', 'reason-002-deduction-chain', 'reason-003-counterfactual',
@@ -107,24 +107,24 @@ export const KOLMBENCH_V1_SPEC = Object.freeze({
   verification: 'Ed25519 receipt required for self-hosted runs',
 });
 
-// CID format used by /v1/verify/:cid — sha256:<hex64>. Plus we accept the
+// CID format used by /v1/verify/:cid - sha256:<hex64>. Plus we accept the
 // 'pending_<id>' placeholder string (matches the W751 vertical stub pattern)
 // so an early-stage entry can reference a not-yet-compiled artifact without
 // the validator rejecting the submission outright. Anything else fails the
 // invalid_artifact_cid_format check.
 const ARTIFACT_CID_RE = /^(sha256:[a-f0-9]{64}|pending_[a-z0-9_-]+)$/;
 
-// validateSubmission(rows) — pure function. Returns { ok, errors[] } with
+// validateSubmission(rows) - pure function. Returns { ok, errors[] } with
 // snake_case error codes. NEVER throws on caller-supplied bytes.
 //
 // Error code list (stable, snake_case, tested per-code):
-//   submission_empty               — rows is missing / empty / not an array
-//   missing_task_id                — a row has no task_id string
-//   missing_response               — a row has no response string
-//   unknown_task_id                — task_id is not in AUTHORITATIVE_TASKS
-//   duplicate_task_id              — same task_id appears in 2+ rows
-//   invalid_artifact_cid_format    — artifact_cid_or_null doesn't match CID regex
-//                                    (null is allowed — that's the API-only path)
+//   submission_empty - rows is missing / empty / not an array
+//   missing_task_id - a row has no task_id string
+//   missing_response - a row has no response string
+//   unknown_task_id - task_id is not in AUTHORITATIVE_TASKS
+//   duplicate_task_id - same task_id appears in 2+ rows
+//   invalid_artifact_cid_format - artifact_cid_or_null doesn't match CID regex
+//                                    (null is allowed - that's the API-only path)
 export function validateSubmission(rows) {
   const errors = [];
   if (!Array.isArray(rows) || rows.length === 0) {
@@ -174,7 +174,7 @@ export function validateSubmission(rows) {
   return { ok: errors.length === 0, errors };
 }
 
-// scoreSubmission(rows, expectedTasks) — HONEST stub. The auto-scoring pack
+// scoreSubmission(rows, expectedTasks) - HONEST stub. The auto-scoring pack
 // is offline pending the v1 reference-judge corpus (which ships with the
 // W757 lake + a separate W807 judge-bot wave). We never paint a synthetic
 // k_score on an unscored submission.
@@ -196,7 +196,7 @@ export function scoreSubmission(rows, expectedTasks = AUTHORITATIVE_TASKS) {
       validation_errors: v.errors,
     };
   }
-  // Optional coverage hint — purely informational, NEVER a score.
+  // Optional coverage hint - purely informational, NEVER a score.
   const expected = Array.isArray(expectedTasks) ? expectedTasks : AUTHORITATIVE_TASKS;
   const covered = rows.filter((r) => r && typeof r.task_id === 'string' && expected.includes(r.task_id)).length;
   return {
@@ -212,7 +212,7 @@ export function scoreSubmission(rows, expectedTasks = AUTHORITATIVE_TASKS) {
   };
 }
 
-// readLeaderboard() — read and return the static leaderboard object. Returns
+// readLeaderboard() - read and return the static leaderboard object. Returns
 // an HONEST empty-state envelope when the file is missing OR unparseable so
 // CI / the /v1/kolmbench/leaderboard route never 500s on a corrupted file.
 export function readLeaderboard() {
@@ -257,7 +257,7 @@ export function readLeaderboard() {
   };
 }
 
-// appendLeaderboardEntry(entry) — atomically append + sort-by-k_score-desc.
+// appendLeaderboardEntry(entry) - atomically append + sort-by-k_score-desc.
 //
 // HONEST: verified is forced to false unless { ed25519_receipt_path } is
 // supplied AND it points to a readable file. The receipt verification itself
@@ -299,7 +299,7 @@ export function appendLeaderboardEntry({
     }
   }
   // Read existing leaderboard. If the file is missing, start with a clean
-  // entries[] — atomicity below still writes the canonical envelope.
+  // entries[] - atomicity below still writes the canonical envelope.
   let current;
   try {
     current = readLeaderboard();
@@ -334,7 +334,7 @@ export function appendLeaderboardEntry({
   };
   // Atomic write: write to a sibling .tmp, then rename. Rename is atomic on
   // POSIX + sufficient on Windows for our concurrency profile (one writer at
-  // a time + best-effort durability — the canonical store is the event-log
+  // a time + best-effort durability - the canonical store is the event-log
   // upstream, this file is a cached read-projection).
   const tmpPath = LEADERBOARD_PATH + '.tmp.' + process.pid + '.' + Date.now();
   try {
@@ -360,7 +360,7 @@ export function appendLeaderboardEntry({
   };
 }
 
-// getV2SeedTaskCandidates(opts) — W756-4 placeholder. The "curated most-
+// getV2SeedTaskCandidates(opts) - W756-4 placeholder. The "curated most-
 // challenging captures, anonymized, with consent" dataset requires the
 // W757 cross-namespace lake (so we can pull captures across tenants safely)
 // AND the W766 consent toolkit (so callers can opt in to having their
@@ -383,7 +383,7 @@ export function getV2SeedTaskCandidates(_opts = {}) {
 
 // Tenant-fenced lookup helper for future W756-N extensions that aggregate
 // per-tenant KolmBench events (e.g. a private "your team's score" view). Not
-// wired into a route today — the public leaderboard is global — but exported
+// wired into a route today - the public leaderboard is global - but exported
 // so the contract pattern is grep-able for the parallel-agent next-wave
 // surface. Defense-in-depth: filter twice in case the store driver returns a
 // permissive row.

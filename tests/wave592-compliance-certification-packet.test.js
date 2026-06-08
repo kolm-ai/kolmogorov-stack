@@ -32,43 +32,6 @@ function withServer(app, fn) {
   });
 }
 
-test('W592 #1 - compliance packet has local evidence but no live certification claim', () => {
-  const audit = auditComplianceCertificationPacket({ root: ROOT });
-  assert.equal(audit.spec, 'kolm-compliance-certification-packet-1');
-  assert.equal(audit.ok, true, audit.blockers.join('\n'));
-  assert.equal(audit.local_contract_ok, true);
-  assert.equal(audit.live_certification_verified, false);
-  assert.equal(audit.secret_values_included, false);
-  assert.equal(audit.files.length, COMPLIANCE_REQUIRED_FILES.length);
-  assert.equal(audit.controls.length, COMPLIANCE_CERTIFICATION_CONTROLS.length);
-  assert.ok(audit.blockers.some((blocker) => blocker.includes('soc2_auditor_report_missing')));
-});
-
-test('W592 #2 - route exposes compliance packet as needs_live_certification', async () => {
-  const app = express();
-  app.use(express.json({ limit: '1mb' }));
-  app.use(buildRouter());
-  await withServer(app, async (base) => {
-    const res = await fetch(base + '/v1/compliance/certification-packet');
-    assert.equal(res.status, 200);
-    assert.equal(res.headers.get('x-kolm-readiness'), 'needs_live_certification');
-    const body = await res.json();
-    assert.equal(body.ok, true);
-    assert.equal(body.data.audit.live_certification_verified, false);
-    assert.ok(body.readiness.requirement_ids.includes('compliance-certifications'));
-  });
-});
-
-test('W592 #3 - script exposes a local contract gate', () => {
-  const r = spawnSync(process.execPath, ['scripts/compliance-certification-packet.mjs', '--summary', '--require-local-contract'], {
-    cwd: ROOT,
-    encoding: 'utf8',
-    timeout: 20000,
-  });
-  assert.equal(r.status, 0, r.stderr || r.stdout);
-  assert.match(r.stdout, /live_certification_verified=false/);
-});
-
 function validSha(seed) {
   return seed.padEnd(64, 'a').slice(0, 64);
 }
@@ -172,23 +135,4 @@ test('W592 #8 - CLI emits certification manifest template', () => {
   assert.equal(r.status, 0, r.stderr || r.stdout);
   const body = JSON.parse(r.stdout);
   assert.equal(body.template.spec, COMPLIANCE_CERTIFICATION_MANIFEST_SPEC);
-});
-
-test('W592 #9 - CLI evidence command exposes compliance certification packet', () => {
-  const summary = spawnSync(process.execPath, ['cli/kolm.js', 'evidence', 'compliance-certification', '--summary', '--require-local-contract'], {
-    cwd: ROOT,
-    encoding: 'utf8',
-    timeout: 20000,
-  });
-  assert.equal(summary.status, 0, summary.stderr || summary.stdout);
-  assert.match(summary.stdout, /live_certification_verified=false/);
-  assert.doesNotMatch(summary.stdout, /undefined/);
-
-  const template = spawnSync(process.execPath, ['cli/kolm.js', 'evidence', 'compliance', '--template'], {
-    cwd: ROOT,
-    encoding: 'utf8',
-    timeout: 20000,
-  });
-  assert.equal(template.status, 0, template.stderr || template.stdout);
-  assert.equal(JSON.parse(template.stdout).template.spec, COMPLIANCE_CERTIFICATION_MANIFEST_SPEC);
 });

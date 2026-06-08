@@ -1,6 +1,6 @@
 // src/pretokenize-provenance.js
 //
-// Wave 148 — bridge between the isolated apps/trainer/pretokenize_run.py
+// Wave 148 - bridge between the isolated apps/trainer/pretokenize_run.py
 // Python tokenization step and the in-process artifact builder. Reads a
 // pretokenize output dir (manifest.json + tokens.idx + tokens.pack),
 // recomputes per-file sha256 from disk, verifies declared hashes when
@@ -8,7 +8,7 @@
 // bind into the artifact hash (sibling of `lineage`, `export`, `moe`).
 //
 // Mirrors src/moe-provenance.js (wave 147) including the security boundary:
-// foreign manifest.json without `kolm_pretokenize: true` THROWS — there is
+// foreign manifest.json without `kolm_pretokenize: true` THROWS - there is
 // no scan-driven fallback because we cannot infer which file is the idx vs
 // the pack from extension alone.
 //
@@ -79,7 +79,7 @@ function hashFile(absPath) {
 
 // Parse the fixed 24-byte tokens.idx header and return { seq_count, vocab_size }.
 // Throws on bad magic or version. Used to cross-check the manifest's claim
-// against the bytes on disk — protects against a manifest that says seq_count=10
+// against the bytes on disk - protects against a manifest that says seq_count=10
 // over a file that has seq_count=0.
 function parseIdxHeader(absPath) {
   const fd = fs.openSync(absPath, 'r');

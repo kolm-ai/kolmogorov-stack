@@ -1,4 +1,4 @@
-// Subroutine library — reusable primitives that synthesized generators can call.
+// Subroutine library - reusable primitives that synthesized generators can call.
 // Smaller generators, higher quality, more correct.
 // Versioned so generators pin a snapshot.
 

@@ -1,6 +1,6 @@
 // src/bench-harness.js
 //
-// S-4 (V1 launch) — multi-model benchmark harness.
+// S-4 (V1 launch) - multi-model benchmark harness.
 //
 // Runs the same eval suite (from src/bench-eval-suites.js) across N model
 // endpoints and produces a "model rows × metric columns" comparison report
@@ -19,7 +19,7 @@
 // object the caller wants to inject directly.
 //
 // Constraints (USER-MANDATED, non-negotiable):
-//   - Never use the forbidden h-word (see MEMORY) — use Caveats / Limitations.
+//   - Never use the forbidden h-word (see MEMORY) - use Caveats / Limitations.
 //   - No browns/beiges/oranges anywhere (no inline HTML colors).
 //   - No emojis.
 //   - --dry-run path produces a stub report without needing any API keys.
@@ -42,7 +42,7 @@ export const validateSuite = suitesValidate;
 export { METRIC_REGISTRY };
 
 // ---------------------------------------------------------------------------
-// runBench — the top-level harness entry.
+// runBench - the top-level harness entry.
 // ---------------------------------------------------------------------------
 export async function runBench(opts = {}) {
   const {
@@ -114,7 +114,7 @@ export async function runBench(opts = {}) {
   const comparison_md = buildMarkdownReport({ rows, suite, n: N, ts, dry_run });
 
   // Write artifacts when an outDir is supplied. We do NOT make the directory
-  // implicitly — caller decides.
+  // implicitly - caller decides.
   let comparison_json_path = null;
   let comparison_md_path   = null;
   if (outDir) {
@@ -146,7 +146,7 @@ export async function runBench(opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// buildMarkdownReport — emit the W869-shape markdown table + Caveats section.
+// buildMarkdownReport - emit the W869-shape markdown table + Caveats section.
 // ---------------------------------------------------------------------------
 export function buildMarkdownReport({ rows, suite, n, ts, dry_run = false, opts = {} } = {}) {
   if (!suite) throw new Error('buildMarkdownReport: suite is required');
@@ -154,7 +154,7 @@ export function buildMarkdownReport({ rows, suite, n, ts, dry_run = false, opts 
   const metrics = Array.isArray(suite.metrics) ? suite.metrics : [];
 
   const lines = [];
-  lines.push(`# ${suite.id} comparison — ${ts || new Date().toISOString().slice(0, 10)}`);
+  lines.push(`# ${suite.id} comparison - ${ts || new Date().toISOString().slice(0, 10)}`);
   lines.push('');
   lines.push(`Suite: ${suite.id} (${suite.description})`);
   lines.push(`Prompts: N=${n}`);
@@ -181,7 +181,7 @@ export function buildMarkdownReport({ rows, suite, n, ts, dry_run = false, opts 
   lines.push('');
   lines.push('- Latency samples are wall-clock (ms) and include any wrapper / proxy hops.');
   lines.push('- `cost_per_1k_usd` is computed from published per-token rates and the response usage block; missing usage data yields 0.');
-  lines.push('- Behavior rates (`asks_one_question_rate`, `judge_*`) come from a lightweight grader; the W869 study uses Gemini-2.5-Pro as the judge — wire the same judge via the `judge` option for reproducibility.');
+  lines.push('- Behavior rates (`asks_one_question_rate`, `judge_*`) come from a lightweight grader; the W869 study uses Gemini-2.5-Pro as the judge - wire the same judge via the `judge` option for reproducibility.');
   lines.push('- Sample sizes are small by default (suite size); for production claims rerun with `--n 200` or larger and report a confidence interval.');
   if (dry_run) {
     lines.push('- This run was performed in dry-run mode; no upstream provider was invoked. Re-run without `--dry-run` for live numbers.');
@@ -197,7 +197,7 @@ export function buildMarkdownReport({ rows, suite, n, ts, dry_run = false, opts 
 }
 
 function formatMetricHeader(m) {
-  // Pretty header per metric id. We don't fight the metric id — readers
+  // Pretty header per metric id. We don't fight the metric id - readers
   // grepping for `mean_ms` need to find it in the rendered output too.
   const meta = METRIC_REGISTRY[m];
   if (!meta) return m;
@@ -233,7 +233,7 @@ function escapeMd(s) {
 }
 
 // ---------------------------------------------------------------------------
-// resolveModelTarget — string id OR full spec → { id, transport, send() }.
+// resolveModelTarget - string id OR full spec → { id, transport, send() }.
 //
 // Recognized string shapes:
 //   "trinity-500"                 → local gateway → trinity (via kolm gateway)
@@ -297,7 +297,7 @@ export function resolveModelTarget(spec, ctx = {}) {
   if (provider === 'deepseek')  return makeDeepSeekTarget ({ id: raw, model: raw, ctx });
   if (provider === 'google')    return makeGoogleTarget   ({ id: raw, model: raw, ctx });
 
-  // Unknown — return a target that fails per-call so the row shows the
+  // Unknown - return a target that fails per-call so the row shows the
   // limitation rather than crashing the whole bench.
   return makeUnknownTarget({ id: raw });
 }
@@ -674,7 +674,7 @@ function makeLocalGgufTarget({ id, ggufPath }) {
         return errorEnvelope(`llama_cli_exit_${r.status || 'err'}`, { ms });
       }
       const text = (r.stdout || '').trim();
-      // llama.cpp prints "eval time = X ms / Y runs" on stderr — extract
+      // llama.cpp prints "eval time = X ms / Y runs" on stderr - extract
       // output token count when present, otherwise approximate.
       let out_tok = 0;
       const perfMatch = (r.stderr || '').match(/eval time\s*=\s*[\d.]+\s*ms\s*\/\s*(\d+)\s*runs/);
@@ -699,7 +699,7 @@ function makeUnknownTarget({ id }) {
 }
 
 // ---------------------------------------------------------------------------
-// runViaGateway — POST /v1/gateway/dispatch through the kolm wrapper. Re-used
+// runViaGateway - POST /v1/gateway/dispatch through the kolm wrapper. Re-used
 // by makeGatewayTarget but exported so callers (and benchmarks) can dispatch
 // ad-hoc.
 // ---------------------------------------------------------------------------
@@ -724,7 +724,7 @@ export async function runViaGateway(model, prompt, bearer, base) {
     const ms = nowMs() - t0;
     const json = await safeJson(res);
     if (!res.ok) return errorEnvelope(`gateway_http_${res.status}`, { ms, raw: json });
-    // Gateway envelopes vary by provider — peek at common shapes.
+    // Gateway envelopes vary by provider - peek at common shapes.
     let text = '';
     if (json && json.choices && json.choices[0]) {
       text = (json.choices[0].message?.content || json.choices[0].text || '').trim();
@@ -747,7 +747,7 @@ export async function runViaGateway(model, prompt, bearer, base) {
 }
 
 // ---------------------------------------------------------------------------
-// runSuiteAgainstTarget — drives one target through every prompt in the
+// runSuiteAgainstTarget - drives one target through every prompt in the
 // suite, summarizes into a single row + returns per-sample arrays so callers
 // (and the markdown report) can chart distributions.
 // ---------------------------------------------------------------------------
@@ -796,7 +796,7 @@ function synthDrySample(target, prompt) {
 }
 
 // ---------------------------------------------------------------------------
-// summarizeRow — collapse N samples into the canonical metric columns.
+// summarizeRow - collapse N samples into the canonical metric columns.
 // ---------------------------------------------------------------------------
 function summarizeRow({ id, samples, suite, target, judge }) {
   const ok = samples.filter((s) => !s.error);
@@ -819,7 +819,7 @@ function summarizeRow({ id, samples, suite, target, judge }) {
     row[m] = computeMetric(m, { samples, ok, lat, chars, totalIn, totalOut, suite, target, judge });
   }
   // Always include cost estimate when we have token data and a known model,
-  // even if the metric isn't in the suite list — operators read this.
+  // even if the metric isn't in the suite list - operators read this.
   if (row.cost_per_1k_usd == null) {
     row.cost_per_1k_usd = estimateCostPer1k({ provider: target.provider, model: target.model, totalIn, totalOut, n: ok.length });
   }
@@ -919,7 +919,7 @@ function extractObviousPii(text) {
 }
 
 // ---------------------------------------------------------------------------
-// Cost estimate — wraps src/cost-estimator if importable; falls back to a
+// Cost estimate - wraps src/cost-estimator if importable; falls back to a
 // minimal lookup so dry-run + unit tests have no hard dep.
 // ---------------------------------------------------------------------------
 function estimateCostPer1k({ provider, model, totalIn, totalOut, n }) {
@@ -932,7 +932,7 @@ function estimateCostPer1k({ provider, model, totalIn, totalOut, n }) {
     // provider registry isn't fully resolvable (e.g. minimal CI).
      
     const importer = (s) => import(s);
-    // We can't await dynamically here without going async — fall back to
+    // We can't await dynamically here without going async - fall back to
     // the minimal inline table. The full registry path runs via the
     // optional async helper estimateCostAsync below for callers that want
     // the precise number.

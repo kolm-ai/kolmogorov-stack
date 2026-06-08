@@ -1,4 +1,4 @@
-// W888-C — SSH adapter: deploy(device, artifactPath, opts).
+// W888-C - SSH adapter: deploy(device, artifactPath, opts).
 //
 // Wraps src/device-ssh.js#SSHConnection to upload an artifact via SFTP +
 // run the runtime-install + start path. This is the "happy path" for any
@@ -35,9 +35,9 @@ const RUNTIME_START_CMDS = {
   'llama-cpp': ({ remotePath, port, bindHost }) => `nohup llama-server -m ${JSON.stringify(remotePath)} --port ${Number(port)} --host ${JSON.stringify(bindHost)} > /tmp/kolm-deploy.log 2>&1 & echo $!`,
 };
 
-// W890-6 — input validation for any value interpolated into an SSH command
+// W890-6 - input validation for any value interpolated into an SSH command
 // payload. The connection itself uses ssh2's per-channel API (no shell escape
-// at the SSH layer), but the remote shell still parses the command string —
+// at the SSH layer), but the remote shell still parses the command string - 
 // so any caller-supplied path or runtime name must match a strict allowlist.
 //
 // _assertSafeRemoteDir: POSIX-shell-safe path; only [A-Za-z0-9_./~-] allowed.
@@ -75,7 +75,7 @@ export async function deploy(device, artifactPath, opts = {}) {
   const autoInstall = !!opts.autoInstall;
   const dryRun = !!opts.dryRun;
 
-  // W890-6 — validate every value that lands in an SSH command payload.
+  // W890-6 - validate every value that lands in an SSH command payload.
   try {
     _assertSafeRemoteDir(remoteDir);
     _assertSafeRuntime(runtime);

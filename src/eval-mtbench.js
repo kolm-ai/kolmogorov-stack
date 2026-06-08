@@ -1,7 +1,7 @@
-// W758-3 — MT-Bench runner (honest scaffold).
+// W758-3 - MT-Bench runner (honest scaffold).
 //
-// MT-Bench — Zheng et al. 2023 ("Judging LLM-as-a-Judge with MT-Bench and
-// Chatbot Arena") — 80 multi-turn conversations across 8 categories.
+// MT-Bench - Zheng et al. 2023 ("Judging LLM-as-a-Judge with MT-Bench and
+// Chatbot Arena") - 80 multi-turn conversations across 8 categories.
 // Source at github.com/lm-sys/FastChat (Apache-2.0); the official pack is
 // shipped as a JSONL file (question.jsonl) where each row has 2 turns and
 // an optional reference_answer for math/coding/reasoning categories.
@@ -9,7 +9,7 @@
 // Scoring is GPT-4-as-judge: an external strong model rates each turn 1-10.
 // We do NOT bundle a judge model. The caller MUST supply a `judge`
 // callable; when missing we return an honest envelope. We NEVER silently
-// fall through to length-as-score or any other proxy metric — that would
+// fall through to length-as-score or any other proxy metric - that would
 // fabricate authority for an unscored model.
 //
 // HONESTY CONTRACT (do not violate):
@@ -50,7 +50,7 @@ function _defaultPackDir() {
   return path.join(home, '.kolm', 'bench-packs', 'mtbench');
 }
 
-// parseMTBenchJsonl(text) — JSONL parser. Each row: { question_id, category,
+// parseMTBenchJsonl(text) - JSONL parser. Each row: { question_id, category,
 // turns: [t1, t2], reference?: [r1, r2] }. We tolerate either `question_id`
 // or `id` (FastChat uses the former; some forks normalize the field name).
 // Skips rows without 2 turns.
@@ -80,7 +80,7 @@ export function parseMTBenchJsonl(text) {
   return out;
 }
 
-// loadMTBenchPack({pack_dir}) — returns rows OR honest envelope.
+// loadMTBenchPack({pack_dir}) - returns rows OR honest envelope.
 export function loadMTBenchPack({ pack_dir = null } = {}) {
   const dir = pack_dir || process.env[MTBENCH_PACK_PATH_ENV] || _defaultPackDir();
   const candidates = [
@@ -136,7 +136,7 @@ export function loadMTBenchPack({ pack_dir = null } = {}) {
 // score. We surface the per-turn score, the mean per question, the mean
 // per category, and the overall mean. by_question is capped at 16 entries.
 //
-// Honest envelopes for every missing dependency — see HONESTY CONTRACT.
+// Honest envelopes for every missing dependency - see HONESTY CONTRACT.
 export async function runMTBench({
   artifact_path = null,
   pack_dir = null,
@@ -162,7 +162,7 @@ export async function runMTBench({
         'MT-Bench requires GPT-4 or comparable judge to score responses 1-10. ' +
         'Set ' + MTBENCH_JUDGE_CMD_ENV + ' to a path that calls a judge model, ' +
         'or pass --judge-cmd. We refuse to fall through to length-as-score or ' +
-        'any other heuristic — that would fabricate authority for an unscored model.',
+        'any other heuristic - that would fabricate authority for an unscored model.',
       version: MTBENCH_VERSION,
     };
   }
@@ -192,7 +192,7 @@ export async function runMTBench({
     catch (e) {
       v1 = { score: 0, rationale: String(e && e.message || e) };
     }
-    // Turn 2 — thread turn-1 history.
+    // Turn 2 - thread turn-1 history.
     const history = [
       { role: 'user', content: t1 },
       { role: 'assistant', content: resp1 },

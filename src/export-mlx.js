@@ -1,6 +1,6 @@
 // src/export-mlx.js
 //
-// S-6 — MLX (Apple Silicon) export chain for ANY artifact.
+// S-6 - MLX (Apple Silicon) export chain for ANY artifact.
 //
 // MLX is Apple's open-source array framework for unified-memory Macs (M1/M2/
 // M3/M4). The `mlx-lm` package provides a `mlx_lm.convert` entrypoint that

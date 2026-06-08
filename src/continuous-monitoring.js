@@ -1,6 +1,6 @@
 // src/continuous-monitoring.js
 //
-// W767-4 — Continuous-monitoring dashboard surface (SOC 2 Type II).
+// W767-4 - Continuous-monitoring dashboard surface (SOC 2 Type II).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 596-601):
 //   [W767-4] Continuous-monitoring dashboard (depends W730 Prometheus/Grafana
@@ -15,7 +15,7 @@
 //   * snapshot NEVER returns "green" for a control whose signal source is
 //     unavailable. The status is the explicit literal 'unknown' and the
 //     control's current_value is null. Fabricating a green when the source
-//     is offline would make this surface worse than useless — auditors would
+//     is offline would make this surface worse than useless - auditors would
 //     trust a dashboard that lies.
 //   * snapshot is tenant-fenced (defense-in-depth W411): even though the
 //     route layer pins tenant_id, every signal that reads tenant-scoped
@@ -41,7 +41,7 @@ export const MONITORING_VERSION = 'w767-v1';
 // firm. The `signal` is the operational metric kolm continuously emits; the
 // `source` is the kolm module that produces it.
 //
-// >=12 entries — TSC sampling expects a baseline of controls under
+// >=12 entries - TSC sampling expects a baseline of controls under
 // continuous monitoring, not a single aggregate health pill.
 //
 // Frozen so callers cannot mutate the contract by accident.
@@ -148,7 +148,7 @@ export const MONITORING_CONTROLS = Object.freeze([
   }),
   Object.freeze({
     id: 'A1.2',
-    name: 'Availability — uptime',
+    name: 'Availability - uptime',
     signal: 'uptime_pct_30d',
     source: 'health',
     description: 'Trailing 30-day uptime percentage.',
@@ -157,7 +157,7 @@ export const MONITORING_CONTROLS = Object.freeze([
   }),
   Object.freeze({
     id: 'PI1.4',
-    name: 'Processing integrity — verification',
+    name: 'Processing integrity - verification',
     signal: 'receipt_verify_failures_last_24h',
     source: 'binder',
     description: 'Artifact receipt verification failures in the last 24h.',
@@ -166,7 +166,7 @@ export const MONITORING_CONTROLS = Object.freeze([
   }),
   Object.freeze({
     id: 'C1.1',
-    name: 'Confidentiality — data classification',
+    name: 'Confidentiality - data classification',
     signal: 'unredacted_sensitive_captures_count',
     source: 'w764_pii_scan',
     description: 'Captures marked sensitive but currently unredacted.',
@@ -175,7 +175,7 @@ export const MONITORING_CONTROLS = Object.freeze([
   }),
   Object.freeze({
     id: 'P3.2',
-    name: 'Privacy — choice and consent',
+    name: 'Privacy - choice and consent',
     signal: 'forget_requests_pending',
     source: 'w764_capture_forget',
     description: 'Outstanding right-to-erasure (capture forget) requests.',
@@ -195,7 +195,7 @@ export const MONITORING_CONTROLS = Object.freeze([
 //                                 value >= 95% of threshold => yellow
 //                                 value <  95% of threshold => red
 //
-// If value is null/undefined/not-finite we return 'unknown' — NEVER green.
+// If value is null/undefined/not-finite we return 'unknown' - NEVER green.
 // This is the load-bearing honesty invariant: a dashboard that fabricates
 // green when a probe is offline is worse than no dashboard at all.
 // ---------------------------------------------------------------------------
@@ -224,7 +224,7 @@ function _grade(value, target, direction) {
 const _DEFAULT_PROVIDERS = {
   // audit_log: lazy import; counts events in the last 24h matching a
   // particular shape. We do a single listEvents pass and let the caller
-  // filter — this keeps the implementation honest for the test fakes.
+  // filter - this keeps the implementation honest for the test fakes.
   audit_log: async (ctx) => {
     const es = ctx.eventStore;
     if (!es || typeof es.listEvents !== 'function') return { ok: false };
@@ -236,9 +236,9 @@ const _DEFAULT_PROVIDERS = {
         limit: 0,
         order: 'desc',
       });
-      // Defense in depth — re-filter by tenant_id.
+      // Defense in depth - re-filter by tenant_id.
       const filtered = (rows || []).filter((r) => r && r.tenant_id === ctx.tenant_id);
-      // Use the row count as a generic numeric — control-specific shaping
+      // Use the row count as a generic numeric - control-specific shaping
       // requires modules we deliberately do not couple to here.
       return { ok: true, value: filtered.length };
     } catch (_) {
@@ -311,7 +311,7 @@ export async function snapshot(tenant_id, opts = {}) {
           current_value = Number(r.value);
           // Allow the provider to OVERRIDE status explicitly. If it does
           // not, grade with the threshold rule. We still NEVER let a
-          // provider return null+green — _grade(null,...) returns 'unknown'.
+          // provider return null+green - _grade(null,...) returns 'unknown'.
           status = (typeof r.status === 'string') ? r.status : _grade(
             current_value,
             ctrl.target_threshold,
@@ -324,7 +324,7 @@ export async function snapshot(tenant_id, opts = {}) {
       }
     }
 
-    // Honesty invariant — re-assert. If current_value is null we MUST be
+    // Honesty invariant - re-assert. If current_value is null we MUST be
     // unknown, regardless of what a buggy provider may have returned.
     if (current_value == null) status = 'unknown';
 

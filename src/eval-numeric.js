@@ -1,10 +1,10 @@
-// W759 — Numerical Accuracy Eval.
+// W759 - Numerical Accuracy Eval.
 //
 // Extract numbers from model outputs and verify mathematical correctness.
 // Used by:
-//   - POST /v1/numeric/eval                — pre-flight a response against an
+//   - POST /v1/numeric/eval - pre-flight a response against an
 //                                            expected answer + arithmetic check
-//   - GET  /v1/numeric/namespace-flag/:ns  — flag namespaces with high numeric
+//   - GET  /v1/numeric/namespace-flag/:ns - flag namespaces with high numeric
 //                                            content so distillation gets the
 //                                            calculator tool wired in
 //   - `kolm numeric eval|calc|flag-namespace`
@@ -16,7 +16,7 @@
 //     claim is the caller's problem.
 //   - All arithmetic is delegated to src/calculator-tool.js evalSafeArithmetic.
 //     We NEVER call eval(), new Function(), vm.runInNewContext, or any other
-//     dynamic-code path. The DRY re-export is the security contract — a single
+//     dynamic-code path. The DRY re-export is the security contract - a single
 //     audit on calculator-tool.js covers both surfaces.
 //   - When extractEquations sees `2 + 3 = 5`, it parses BOTH sides via the
 //     safe evaluator. If either side fails to parse, the equation is dropped
@@ -69,7 +69,7 @@ export { CALCULATOR_VERSION, evalSafeArithmetic };
 //
 // The extraction is intentionally permissive on the LHS (`-` and `+` are
 // stripped, thousands separators normalised) and conservative on the RHS
-// (a trailing letter without a space — e.g. `5x` — is NOT treated as a unit
+// (a trailing letter without a space - e.g. `5x` - is NOT treated as a unit
 // because `x` is far more often an algebraic variable than a unit).
 export function extractNumbers(text) {
   if (typeof text !== 'string' || !text) return [];
@@ -164,12 +164,12 @@ export function extractNumbers(text) {
     _claim(start, end);
   }
 
-  // 5) Plain float / int — possibly followed by a unit token.
+  // 5) Plain float / int - possibly followed by a unit token.
   //    The unit is a whitespace-separated word made of letters. We are
   //    conservative on purpose: arbitrary English words like "maybe" or
   //    "things" must NOT be treated as units, so we use a curated allow-list
   //    for BOTH the 2-char and the longer cases. Anything not on the list is
-  //    extracted as a unitless number — the prose surrounding the number is
+  //    extracted as a unitless number - the prose surrounding the number is
   //    the caller's problem, not the extractor's.
   const numberRe = /(-?\d+(?:\.\d+)?)(\s+)?([A-Za-z]+)?/g;
   const SHORT_UNITS = new Set([
@@ -222,7 +222,7 @@ export function extractNumbers(text) {
     if (sep && unitCandidate) {
       // Both short and long units must be on the allow-list; an arbitrary
       // English word adjacent to a number is NOT a unit. This is conservative
-      // by design — the test "the answer is 42 maybe" must yield unit:null.
+      // by design - the test "the answer is 42 maybe" must yield unit:null.
       const lower = unitCandidate.toLowerCase();
       const isUnit = SHORT_UNITS.has(lower) || LONG_UNITS.has(lower);
       if (isUnit) {
@@ -250,7 +250,7 @@ export function extractNumbers(text) {
 // ─── equation extraction ─────────────────────────────────────────────────────
 // Find `<lhs> = <rhs>` patterns where both sides parse as numbers OR
 // arithmetic. Returns [{lhs_expr, rhs_expr, lhs_value, rhs_value, span}].
-// Both sides go through evalSafeArithmetic — no eval, no Function.
+// Both sides go through evalSafeArithmetic - no eval, no Function.
 export function extractEquations(text) {
   if (typeof text !== 'string' || !text) return [];
   const out = [];
@@ -307,7 +307,7 @@ export function verifyEquation({ lhs_value, rhs_value, tolerance_pct = 0.001 } =
 // ─── arithmetic verification (DRY re-export) ─────────────────────────────────
 // verifyArithmetic is the public name for evalSafeArithmetic. The DRY
 // re-export keeps the security contract on a single function in
-// calculator-tool.js — both surfaces go through the same audited evaluator.
+// calculator-tool.js - both surfaces go through the same audited evaluator.
 export function verifyArithmetic(expr) {
   return evalSafeArithmetic(expr);
 }
@@ -408,7 +408,7 @@ export function numericContentRatio(text) {
   // A token is "numeric" if extractNumbers, applied to JUST that token, yields
   // at least one hit AND the hit's span covers most of the token (>= 50%).
   // This is a cheap proxy that avoids the per-token allocation cost of
-  // running the full extractNumbers — we use a regex pre-check.
+  // running the full extractNumbers - we use a regex pre-check.
   const numericLike = /^[-]?[$£€¥]?\d[\d.,]*(?:[eE][-+]?\d+)?%?$/;
   let count = 0;
   for (const tok of tokens) {
@@ -428,7 +428,7 @@ export function numericContentRatio(text) {
 //   {ok:true, namespace, ..., flagged:false, captures_seen:0,
 //    note:'empty_namespace'}   when no captures exist
 //
-// Honesty contract — we ALWAYS return ok:true with a structured envelope on
+// Honesty contract - we ALWAYS return ok:true with a structured envelope on
 // empty namespaces (matches the "honest envelope vs silent fallthrough"
 // pattern from W462/W464). The caller distinguishes "no data" from
 // "low-numeric" via captures_seen.
@@ -463,7 +463,7 @@ export function flagHighNumericNamespace({
   } catch (_) {
     rows = [];
   }
-  // Defense-in-depth tenant fence inside the loop — never trust the upstream
+  // Defense-in-depth tenant fence inside the loop - never trust the upstream
   // table filter alone (W465 trap).
   const filtered = rows.filter((r) => {
     if (!r) return false;
@@ -484,7 +484,7 @@ export function flagHighNumericNamespace({
       sample_n: 0,
       captures_seen: 0,
       note: 'empty_namespace',
-      hint: 'no captures found in this namespace yet — flag is informational',
+      hint: 'no captures found in this namespace yet - flag is informational',
       version: NUMERIC_EVAL_VERSION,
     };
   }
@@ -506,7 +506,7 @@ export function flagHighNumericNamespace({
     flagged,
     sample_n: sample.length,
     captures_seen: filtered.length,
-    hint: 'Distillation of numerical content requires calculator tool — see W759 docs',
+    hint: 'Distillation of numerical content requires calculator tool - see W759 docs',
     version: NUMERIC_EVAL_VERSION,
   };
 }

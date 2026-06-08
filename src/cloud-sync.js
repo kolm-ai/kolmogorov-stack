@@ -1,10 +1,10 @@
-// W378 — cloud-sync: privacy-gated outbound event sync.
+// W378 - cloud-sync: privacy-gated outbound event sync.
 //
 // The local daemon writes every captured round-trip to the local event-store
 // (src/event-store.js). This module is the (opt-in) bridge that pushes those
 // rows to a cloud namespace so a team can share a corpus across machines.
 //
-// SECURITY POSTURE: the default state is `disabled` — *nothing* leaves the
+// SECURITY POSTURE: the default state is `disabled` - *nothing* leaves the
 // device until the user actively sets a state. Even after opt-in, the per-
 // privacy-class blocklist gives the user a kill-switch per class (e.g.
 // "never send rows that touched SSN") which is enforced before the HTTP
@@ -21,7 +21,7 @@
 //                    | status, namespace. NEVER prompt or response text.
 //   redacted_only    | metadata + prompt_redacted + response_redacted +
 //                    | sensitive_classes + redaction_count. VAR_* placeholders
-//                    | only — never the original strings from the vault.
+//                    | only - never the original strings from the vault.
 //   raw_enabled      | everything in the canonical event (including
 //                    | raw_prompt_path / raw_response_path pointers).
 //                    | still gated by per-class blocklist.
@@ -40,7 +40,7 @@
 // =============================================================================
 // HTTP
 // =============================================================================
-// node:http(s) directly — NOT fetch (W305 lesson: undici's keep-alive socket
+// node:http(s) directly - NOT fetch (W305 lesson: undici's keep-alive socket
 // pool crashes libuv on process.exit() under Windows). Per-request agent.
 // Auth: Bearer api_key read from ~/.kolm/config.json. Missing key for a non-
 // localhost cloud_base throws CloudSyncError('not_configured').
@@ -60,14 +60,14 @@ import crypto from 'node:crypto';
 import { listEvents } from './event-store.js';
 import { ALL_CLASSES as MEMBRANE_CLASSES } from './privacy-membrane.js';
 
-// PRIVACY_CLASSES — single source of truth for class identifiers used in:
+// PRIVACY_CLASSES - single source of truth for class identifiers used in:
 //   1. event.sensitive_classes (written by the daemon via privacy-membrane.scan)
 //   2. classes_blocked_from_sync (user's per-class kill switch)
 //   3. settings UI checkboxes
 //
 // We re-export privacy-membrane.ALL_CLASSES so the blocklist semantics match
 // the detector exactly. If scan() emits class 'ssn' the blocklist key MUST
-// be 'ssn' — earlier the cloud-sync constant was the HIPAA Safe Harbor
+// be 'ssn' - earlier the cloud-sync constant was the HIPAA Safe Harbor
 // uppercase set ('SSN', 'NAME', ...) which silently broke the gate because
 // no event ever carried those class strings. Reconciled W380.
 export const PRIVACY_CLASSES = Object.freeze([...MEMBRANE_CLASSES]);
@@ -75,7 +75,7 @@ export const PRIVACY_CLASSES = Object.freeze([...MEMBRANE_CLASSES]);
 // HIPAA Safe Harbor grouping for UI display. The /settings page groups the
 // per-class checkboxes under these buckets so a HIPAA-aware reviewer can find
 // the controls they expect. Each bucket lists the canonical lowercase class
-// IDs that map to that Safe Harbor identifier. Buckets are display-only —
+// IDs that map to that Safe Harbor identifier. Buckets are display-only - 
 // the wire format is always the lowercase canonical class.
 export const HIPAA_SAFE_HARBOR = Object.freeze({
   NAME:  ['name'],
@@ -111,7 +111,7 @@ const REDACTED_FIELDS = Object.freeze([
 ]);
 
 // Raw mode uploads the canonical event verbatim (every key the schema knows).
-// We don't whitelist a field list — we ship what the event-store gave us.
+// We don't whitelist a field list - we ship what the event-store gave us.
 const RAW_MODE_SENTINEL = '__ALL_FIELDS__';
 
 export class CloudSyncError extends Error {
@@ -211,7 +211,7 @@ function _validateState(state) {
   return typeof state === 'string' && STATES.includes(state);
 }
 
-// getSyncState() — returns the persisted config, falling back to defaults if
+// getSyncState() - returns the persisted config, falling back to defaults if
 // the state file is missing or corrupt. Always returns the full shape.
 export function getSyncState() {
   const raw = _readJson(_statePath(), null);
@@ -225,7 +225,7 @@ export function getSyncState() {
 }
 
 // setSyncState({state?, cloud_base?, namespace?, classes_blocked_from_sync?})
-// Partial update — only provided keys overwrite. Throws CloudSyncError on
+// Partial update - only provided keys overwrite. Throws CloudSyncError on
 // invalid state enum or unknown privacy class.
 export function setSyncState(patch = {}) {
   const cur = getSyncState();
@@ -290,7 +290,7 @@ function _projectEvent(event, fields) {
   return out;
 }
 
-// _appendAudit({op, state, count, reasons, audit_id?, extra}) — append a
+// _appendAudit({op, state, count, reasons, audit_id?, extra}) - append a
 // single row to audit.jsonl. Audit IDs are generated here so callers don't
 // have to construct them. Each row gets a wall-clock timestamp.
 function _appendAudit(row) {
@@ -309,7 +309,7 @@ function _appendAudit(row) {
   return audit_id;
 }
 
-// auditLog({limit=50}) — return recent audit rows in reverse-chrono order.
+// auditLog({limit=50}) - return recent audit rows in reverse-chrono order.
 export function auditLog({ limit = 50 } = {}) {
   const p = _auditPath();
   if (!fs.existsSync(p)) return [];
@@ -381,7 +381,7 @@ function _isLocalBase(base) {
   return false;
 }
 
-// pushEvents({since, limit=100, dryRun=false}) — read events from event-store,
+// pushEvents({since, limit=100, dryRun=false}) - read events from event-store,
 // filter by state + per-class blocklist, POST to cloud. Returns
 // {pushed, skipped, blocked, audit_id, reasons}.
 export async function pushEvents({ since, limit = 100, dryRun = false } = {}) {
@@ -518,7 +518,7 @@ export async function pushEvents({ since, limit = 100, dryRun = false } = {}) {
     );
   }
 
-  // Success — update last_push_at + write audit.
+  // Success - update last_push_at + write audit.
   const cur = getSyncState();
   cur.last_push_at = new Date().toISOString();
   _atomicWrite(_statePath(), JSON.stringify(cur, null, 2));
@@ -541,7 +541,7 @@ export async function pushEvents({ since, limit = 100, dryRun = false } = {}) {
   };
 }
 
-// pullEvents({since, limit=100}) — for Team-tier shared-namespace pulls. Issues
+// pullEvents({since, limit=100}) - for Team-tier shared-namespace pulls. Issues
 // GET ${cloud_base}/v1/sync/outbox?namespace=...&since=...&limit=... and
 // returns {pulled, audit_id}. The caller is responsible for writing the pulled
 // rows back into the local event-store (the consolidator wires this).
@@ -633,7 +633,7 @@ export async function pullEvents({ since, limit = 100 } = {}) {
   return { pulled: events.length, audit_id, events };
 }
 
-// Reset hook for tests — wipes the on-disk state + audit log. Does NOT touch
+// Reset hook for tests - wipes the on-disk state + audit log. Does NOT touch
 // the event-store (callers reset that themselves).
 export function _resetForTests() {
   const dir = _syncDir();

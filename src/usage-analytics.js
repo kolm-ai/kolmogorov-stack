@@ -1,4 +1,4 @@
-// W265 — usage analytics aggregator.
+// W265 - usage analytics aggregator.
 //
 // The /dashboard page (public/dashboard.html) needs deterministic
 // aggregation primitives over the three load-bearing tables in
@@ -10,7 +10,7 @@
 //
 // Design:
 //   - All aggregators take an array as input. They do not touch the
-//     store — callers pull rows themselves with whatever filter applies
+//     store - callers pull rows themselves with whatever filter applies
 //     (tenant, since, namespace). That makes them trivially testable.
 //   - Latency percentiles are computed from `latency_us`; missing values
 //     are skipped, NOT counted as zero.
@@ -19,7 +19,7 @@
 //   - Day buckets are UTC YYYY-MM-DD strings derived from the row's
 //     timestamp (`ts` or `timestamp` or `recorded_at`).
 //   - Drift signal axes come from team-events with kind='drift_observation'
-//     payload.signal — we tally counts per (axis) where axis is the
+//     payload.signal - we tally counts per (axis) where axis is the
 //     payload.signal.axis or payload.axis hint, falling back to 'unknown'.
 
 function _percentile(sorted, p) {

@@ -1,6 +1,6 @@
 // src/sigstore.js
 //
-// Wave 150 — sigstore (cosign-compatible) signature bundle for .kolm receipts.
+// Wave 150 - sigstore (cosign-compatible) signature bundle for .kolm receipts.
 //
 // Per the Wave 144 plan §Q+9: HMAC (Wave 0) is symmetric integrity; Ed25519
 // (Wave 149) is asymmetric provenance; sigstore is the public-transparency
@@ -9,13 +9,13 @@
 // transparency log (Rekor) at a specific moment, so any later observer can
 // prove the artifact existed and was attested to before that moment.
 //
-// Three operating modes — picked at build time, no flag needed:
+// Three operating modes - picked at build time, no flag needed:
 //
 //   1. dry-run (default, offline-safe).
 //      No network call. Bundle is emitted with `dry_run: true` and
 //      `rekor_log_entry: null`. The bundle's `messageSignature` still verifies
 //      against the embedded Ed25519 public key (which is the same key used for
-//      `signature_ed25519`), so it's a real, structurally-valid bundle — it
+//      `signature_ed25519`), so it's a real, structurally-valid bundle - it
 //      just hasn't been pinned to a transparency log yet. CI and offline
 //      builds always end up here.
 //
@@ -24,7 +24,7 @@
 //      and embeds the resulting `{logIndex, integratedTime, logID,
 //      signedEntryTimestamp, inclusionProof}` block. If submission fails (5xx,
 //      timeout, DNS), the build falls back to dry-run with a warning rather
-//      than failing — production builds shouldn't block on Rekor uptime.
+//      than failing - production builds shouldn't block on Rekor uptime.
 //
 //   3. disabled (KOLM_SIGSTORE_DISABLE=1).
 //      No sigstore block emitted at all. signature_alg reverts to
@@ -38,12 +38,12 @@
 //     (when KOLM_SIGSTORE_REKOR_URL is set) and confirm the entry's body
 //     matches the bundle's. When no network access, accept inclusionProof as
 //     embedded evidence.
-//   * If `dry_run: true`, report `warn` rather than `fail` — the build was
+//   * If `dry_run: true`, report `warn` rather than `fail` - the build was
 //     offline; user can run `kolm sigstore-attest <artifact>` to publish.
 //
 // Bundle structure mirrors cosign's bundle.json v0.2 with kolm-specific
 // extensions (we use Ed25519 instead of x509 cert chain because we already
-// have the public key in `signature_ed25519` — no Fulcio dependency).
+// have the public key in `signature_ed25519` - no Fulcio dependency).
 
 import crypto from 'node:crypto';
 import { sign as edSign, verify as edVerify, keyFingerprint } from './ed25519.js';
@@ -67,7 +67,7 @@ export function rekorUrl() {
 }
 
 // ---------------------------------------------------------------------------
-// digest — sha256 of the canonical payload as a hex string. The Rekor
+// digest - sha256 of the canonical payload as a hex string. The Rekor
 // hashedrekord schema wants the algorithm name and the digest as a base64
 // string of the raw bytes; cosign uses lowercase hex; we keep both forms in
 // the bundle so verifiers in either ecosystem can re-derive.
@@ -80,7 +80,7 @@ export function payloadDigestHex(payloadCanonical) {
 }
 
 // ---------------------------------------------------------------------------
-// hashedrekordBody — the canonical JSON body that gets POSTed to
+// hashedrekordBody - the canonical JSON body that gets POSTed to
 // /api/v1/log/entries. Cosign-compatible (rekord types are the canonical
 // representation Rekor accepts for arbitrary signed content).
 // ---------------------------------------------------------------------------
@@ -109,7 +109,7 @@ export function hashedrekordBody({ publicKey, signatureB64, digestHex }) {
 }
 
 // ---------------------------------------------------------------------------
-// submitToRekor — POST a hashedrekord entry to a Rekor instance. Returns
+// submitToRekor - POST a hashedrekord entry to a Rekor instance. Returns
 // `{ uuid, logIndex, integratedTime, logID, signedEntryTimestamp,
 //    inclusionProof }` on success, or `null` on any failure (the caller
 // degrades to dry-run with a warning).
@@ -150,7 +150,7 @@ export async function submitToRekor({ publicKey, signatureB64, digestHex, url, t
 }
 
 // ---------------------------------------------------------------------------
-// fetchRekorEntryByLogIndex — GET /api/v1/log/entries?logIndex=N to confirm
+// fetchRekorEntryByLogIndex - GET /api/v1/log/entries?logIndex=N to confirm
 // an embedded log entry is still present in Rekor's tree. Used by the
 // verifier when re-checking inclusion. Returns the raw entry, or null on
 // any failure (the verifier treats null as "could not re-confirm, embedded
@@ -180,16 +180,16 @@ export async function fetchRekorEntryByLogIndex(logIndex, { url, timeoutMs } = {
 }
 
 // ---------------------------------------------------------------------------
-// buildSigstoreBundle — synchronous local bundle assembly. Does NOT submit
+// buildSigstoreBundle - synchronous local bundle assembly. Does NOT submit
 // to Rekor (that's the async `attestWithRekor` path below). Returns a
 // dry-run bundle that is structurally valid + verifiable offline.
 //
 // Inputs:
-//   privateKey       — PEM Ed25519 private (sign the payload)
-//   publicKey        — PEM Ed25519 public (embed in bundle)
-//   key_fingerprint  — short hex fingerprint of public key
-//   payloadCanonical — the canonical JSON string this bundle attests to
-//   signed_at        — ISO8601 timestamp; defaults to now
+//   privateKey - PEM Ed25519 private (sign the payload)
+//   publicKey - PEM Ed25519 public (embed in bundle)
+//   key_fingerprint - short hex fingerprint of public key
+//   payloadCanonical - the canonical JSON string this bundle attests to
+//   signed_at - ISO8601 timestamp; defaults to now
 //
 // Output: a cosign-compatible bundle plus kolm metadata
 // (rekor_log_entry: null, dry_run: true).
@@ -237,7 +237,7 @@ export function buildSigstoreBundle({ privateKey, publicKey, key_fingerprint, pa
 }
 
 // ---------------------------------------------------------------------------
-// attestWithRekor — async path. Builds the local bundle, then submits to
+// attestWithRekor - async path. Builds the local bundle, then submits to
 // Rekor and merges the resulting log entry. Falls back to dry-run if the
 // network call fails (caller still gets a valid bundle).
 // ---------------------------------------------------------------------------
@@ -261,7 +261,7 @@ export async function attestWithRekor(input, { url, timeoutMs } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// verifySigstoreBundle — checks the bundle's signature against the canonical
+// verifySigstoreBundle - checks the bundle's signature against the canonical
 // payload. Does NOT (by itself) re-fetch Rekor; that's the caller's choice
 // because re-fetching needs network. Returns:
 //   { ok, reason?, key_fingerprint?, dry_run, rekor_log_index?, digest_hex }
@@ -423,7 +423,7 @@ export function verifyRekorInclusionProof(rekor, digestB64, sigB64) {
   }
   let computed = rfc6962LeafHash(entryBytes);
   // RFC 6962 inclusion proof algorithm (deterministic walk based on
-  // logIndex / treeSize). siblings are consumed in order — left or right
+  // logIndex / treeSize). siblings are consumed in order - left or right
   // determined by the index bit at each level.
   let index = Number(proof.logIndex);
   let size = Number(proof.treeSize);
@@ -440,13 +440,13 @@ export function verifyRekorInclusionProof(rekor, digestB64, sigB64) {
     // the current node is the LEFT child; otherwise it's the RIGHT child.
     if (index % 2 === 1 || index + 1 === size) {
       if (index === size - 1 && index % 2 === 0) {
-        // Lone right-edge node — no sibling consumed at this level.
+        // Lone right-edge node - no sibling consumed at this level.
         index = Math.floor(index / 2);
         size = Math.ceil(size / 2);
-        // Re-loop without advancing cursor — but the proof.hashes list
+        // Re-loop without advancing cursor - but the proof.hashes list
         // already excludes phantom siblings by Rekor's convention, so
         // skip this iteration by short-circuiting up.
-        cursor = sib; // unused — kept for static analyzer
+        cursor = sib; // unused - kept for static analyzer
         continue;
       }
       computed = rfc6962InnerHash(sib, computed);
@@ -459,7 +459,7 @@ export function verifyRekorInclusionProof(rekor, digestB64, sigB64) {
   let claimedRoot;
   try { claimedRoot = Buffer.from(proof.rootHash, 'base64'); }
   catch (e) {
-    // Try hex as a fallback — Rekor v1 emits hex, v2 base64.
+    // Try hex as a fallback - Rekor v1 emits hex, v2 base64.
     try { claimedRoot = Buffer.from(proof.rootHash, 'hex'); }
     catch (_) { return { present: true, verified: false, reason: `rootHash decode failed: ${e.message}` }; }
   }
@@ -495,7 +495,7 @@ export function fabricateRekorEntry({ logIndex = 1, integratedTime = Math.floor(
 }
 
 // ---------------------------------------------------------------------------
-// attestArtifactWithRekor — Wave 162 (Q+9). Takes a .kolm artifact path that
+// attestArtifactWithRekor - Wave 162 (Q+9). Takes a .kolm artifact path that
 // already carries a dry-run signature_sigstore block (Wave 150 build emits
 // one by default whenever Ed25519 + sigstore are enabled), submits the
 // embedded digest+signature+publicKey to a Rekor instance, and rewrites the
@@ -505,9 +505,9 @@ export function fabricateRekorEntry({ logIndex = 1, integratedTime = Math.floor(
 // buildPayload always emits dry-run); this function is async and lives off
 // the build hot-path so a slow or absent Rekor instance never blocks a
 // build. Callers:
-//   * buildAndZip in artifact.js — invoked when KOLM_SIGSTORE_REKOR_URL is
+//   * buildAndZip in artifact.js - invoked when KOLM_SIGSTORE_REKOR_URL is
 //     set, post-build, before returning to the user.
-//   * cmdSigstoreAttest in cli/kolm.js — invoked by `kolm sigstore-attest`.
+//   * cmdSigstoreAttest in cli/kolm.js - invoked by `kolm sigstore-attest`.
 //
 // Strip-order safety: signature_sigstore lives OUTSIDE both the Ed25519 and
 // HMAC signed payloads (verifier strips it from both before re-canonicalizing).

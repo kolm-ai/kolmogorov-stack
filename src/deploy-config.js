@@ -53,7 +53,7 @@ export const DOCKER_HEALTHCHECK = Object.freeze({
 export const HPA_CUSTOM_METRIC_NAME = 'kolm_requests_active';
 export const HPA_CUSTOM_METRIC_AVG_VALUE = 10;
 
-// kolm-verify binary slot — the air-gap bundle reserves this filename so a
+// kolm-verify binary slot - the air-gap bundle reserves this filename so a
 // procurement reviewer always knows where to look. The placeholder hash is
 // used when the operator has not yet dropped a real binary into the pre-bundle
 // staging directory; downstream MANIFEST.sha256 includes the placeholder so
@@ -64,7 +64,7 @@ export const KOLM_VERIFY_PLACEHOLDER_SHA256 =
   '0'.repeat(64);
 
 // ---------------------------------------------------------------------------
-// generateDockerCompose — v2. Calls v1 to get the base YAML, then re-injects
+// generateDockerCompose - v2. Calls v1 to get the base YAML, then re-injects
 // the explicit healthcheck stanza so the contract is stable regardless of
 // which runtime branch the v1 generator picked.
 // ---------------------------------------------------------------------------
@@ -90,7 +90,7 @@ export function generateDockerCompose(opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// generateKubernetesManifests — v2. Calls v1 then appends a second HPA
+// generateKubernetesManifests - v2. Calls v1 then appends a second HPA
 // document that scales on the custom `kolm_requests_active` metric.
 // ---------------------------------------------------------------------------
 export function generateKubernetesManifests(opts = {}) {
@@ -101,7 +101,7 @@ export function generateKubernetesManifests(opts = {}) {
   // Custom-metric HPA. The metric is published by the kolm metrics sidecar
   // (src/serve-metrics-sidecar.js, surfaced via Prometheus) and picked up
   // by the prometheus-adapter. averageValue is the value EACH POD should
-  // be at — total in-flight = averageValue * replica count.
+  // be at - total in-flight = averageValue * replica count.
   const customHpa = [
     '---',
     'apiVersion: autoscaling/v2',
@@ -133,11 +133,11 @@ export function generateKubernetesManifests(opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// generateAirgapBundle — v2. Calls v1 to write the tarball, then augments
+// generateAirgapBundle - v2. Calls v1 to write the tarball, then augments
 // the returned envelope with a `manifest_entries` array that includes the
 // kolm-verify binary slot.
 //
-// The v1 implementation does not write a real binary into runtime/bin/ —
+// The v1 implementation does not write a real binary into runtime/bin/ - 
 // it leaves a `.keep` placeholder. v2 contributes the MANIFEST contract
 // slot (so the reviewer always sees the kolm-verify line in the manifest
 // list); the operator is expected to drop the real binary at
@@ -177,7 +177,7 @@ export function generateAirgapBundle(opts = {}) {
   };
 }
 
-// Re-export the v1 vLLM config generator unchanged — no v2 deltas needed.
+// Re-export the v1 vLLM config generator unchanged - no v2 deltas needed.
 export { generateVllmConfig };
 
 export default {

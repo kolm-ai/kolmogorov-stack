@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>What we test · kolm.ai</title>
+<meta name="description" content="Four pillars (permissions, audit trail, data egress, injection) and six ASR controls, each mapped to the standard your buyer's reviewers already cite: SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP, MITRE ATLAS. Every finding traces to the crosswalk and ships in a signed report.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="What we test: four pillars, six controls, one crosswalk">
+<meta property="og:description" content="The checks a security reviewer runs, run first. Each control maps to a standard your buyer already cites, and every finding ships in a signed, offline-verifiable report.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/checks">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="What we test · kolm.ai">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/checks">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "kolm Agent Security-Review Readiness Audit",
+  "serviceType": "AI agent security audit and signed evidence attestation",
+  "provider": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "description": "An audit of an AI agent across four pillars (permissions, audit trail, data egress, injection) and six ASR controls, each mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS, ending in a cryptographically signed evidence report the buyer verifies offline.",
+  "areaServed": "Worldwide",
+  "audience": { "@type": "Audience", "audienceType": "AI-native software vendors selling agents into the enterprise" }
+}
+</script>
+</head>
+<body>
+
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:70ch">
+      <h1>What a reviewer flags, named and tested first.</h1>
+      <p class="lede">
+        When a CISO sits down to vet your agent, they work a checklist: what it can
+        touch, what it records, where data goes, and whether it can be talked out of
+        its instructions. We test all four, map each result to the standard they
+        already cite, and sign it. The report says exactly what was tested, and what
+        was not.
+      </p>
+      <div class="band">
+        <span class="ctrlid">SOC 2</span>
+        <span class="ctrlid">ISO 42001</span>
+        <span class="ctrlid">NIST AI RMF</span>
+        <span class="ctrlid">EU AI Act Art.12 / 14</span>
+        <span class="ctrlid">OWASP LLM &amp; Agentic</span>
+        <span class="ctrlid">MITRE ATLAS</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. WHAT A REVIEWER FLAGS (situation) -->
+<section class="section reveal" id="flags">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / What a reviewer flags</span>
+      <h2>A questionnaire stopped clearing it.</h2>
+      <p class="lede">
+        The moment your agent can touch customer data and act on its own, the week-long
+        review runs four to eight. The reviewer stops reading your answers and starts
+        asking for evidence. Three findings draw the first red marks.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Over-permissioned</p>
+        <h3>More access than the job needs</h3>
+        <p>An agent holding ten times the scopes it uses, often on one shared key, is the first thing a reviewer circles.</p>
+        <p class="card__map">ASR-1 · least privilege</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Editable trail</p>
+        <h3>A log nobody can trust</h3>
+        <p>If the activity record can be changed after the fact, it is not evidence. Reviewers want it append-only and hash-chained.</p>
+        <p class="card__map">ASR-2 · audit trail</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Unredacted egress</p>
+        <h3>Data that leaves in the clear</h3>
+        <p>Where the agent sends data, and whether sensitive fields are masked before they go, decides whether a reviewer signs off.</p>
+        <p class="card__map">ASR-3 · data egress</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3. THE FOUR PILLARS -->
+<section class="section reveal" id="pillars">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / The four pillars</span>
+      <h2>Four pillars. Every check has a control behind it.</h2>
+      <p class="lede">
+        We test what a reviewer tests: what the agent can touch, what it records,
+        where data goes, and whether it can be turned against its instructions. Each
+        pillar carries a control id you can trace to the crosswalk below.
+      </p>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">Pillar 01 · Permissions</p>
+        <h3>Least privilege</h3>
+        <p>Scopes the agent holds versus the scopes it actually uses. Shared keys, standing grants, and high-impact actions reachable without a confirmation are surfaced with the calls that prove them.</p>
+        <p class="card__map">ASR-1 · maps to SOC 2 CC6</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Pillar 02 · Audit trail</p>
+        <h3>A record that cannot be edited</h3>
+        <p>Whether agent activity is logged append-only, hash-chained, and retained, so the record a reviewer reads is the record that happened, not one rewritten after the fact.</p>
+        <p class="card__map">ASR-2 · maps to EU AI Act Art.12</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Pillar 03 · Data egress</p>
+        <h3>Where data goes, and what is masked</h3>
+        <p>Every destination the agent can reach, the approved sub-processors behind them, and proof that sensitive fields are redacted before they leave the boundary.</p>
+        <p class="card__map">ASR-3 · maps to OWASP LLM02</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Pillar 04 · Injection</p>
+        <h3>Can it be talked out of its rules</h3>
+        <p>Direct and indirect prompt injection, guardrail bypass, and system-prompt extraction, run as a battery with reproductions. Tested and reported, not warranted.</p>
+        <p class="card__map">ASR-4 · maps to OWASP LLM01</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s6)">
+      Two more controls round out the catalog. ASR-5 provenance and ASR-6 evidence extend the four pillars into the supply chain and the report itself. All six appear in the crosswalk.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 4. THE CROSSWALK (the ledger) -->
+<section class="section section--ink reveal" id="crosswalk">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / The crosswalk</span>
+      <h2>Six controls, mapped to the standard your buyer cites.</h2>
+      <p class="lede">
+        ASR-1 through ASR-6. Each row is one control, what it checks, and the framework
+        a review group already uses. Every finding in the signed report points back to
+        a row here, so a reviewer traces each result to a standard, not to our word.
+      </p>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr><th scope="col">Control</th><th scope="col">What it checks</th><th scope="col">Maps to</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI · NIST MANAGE-1</td></tr>
+          <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
+          <tr><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
+          <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS</td></tr>
+          <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance</td><td class="mapped">ISO 42001 · NIST MAP-1</td></tr>
+          <tr><td><b>ASR-6</b> Evidence</td><td>Signed, logged, offline-verifiable report</td><td class="mapped">SOC 2 CC7 · ISO 42001</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s6)">
+      The mapping travels inside the signed object. Open the report, follow any finding to its control, and follow that control to the framework clause the reviewer reads from.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 5. WHAT WE DO NOT WARRANT -->
+<section class="section reveal" id="scope">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / What we do not warrant</span>
+      <h2>What we assess, and what we will not claim.</h2>
+      <p class="lede">
+        An accurate report names its edges. We are precise about what is assessed, what
+        is only tested and reported, and where the line sits. The scope statement is
+        part of the signed object, so a reviewer reads it with the findings.
+      </p>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">Assessed</p>
+        <h3>Stated as a posture</h3>
+        <ul class="ledger" style="margin-top:var(--s4)">
+          <li>Permission posture against what the agent actually uses</li>
+          <li>Redaction of sensitive fields before egress</li>
+          <li>Audit-trail integrity, append-only and hash-chained</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card__k">Tested and reported</p>
+        <h3>Shown, not promised</h3>
+        <p>Injection is run as a battery with reproductions a reviewer can replay. We report what held and what did not. We do not warrant that the agent is secure, and you should distrust anyone who does.</p>
+        <p class="card__map">ASR-4 · OWASP LLM01 · MITRE ATLAS</p>
+      </div>
+    </div>
+    <div class="plate" style="margin-top:var(--s6)">
+      <p class="card__k">Scope, verbatim in the report</p>
+      <p class="mono" style="margin-top:var(--s3);font-size:14px;line-height:1.7;color:var(--ink-2)">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Run the catalog against your agent.</h2>
+    <p class="lede">All four pillars, six controls, each mapped to the framework your buyer cites, ending in a signed report they verify offline.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost" href="/report">See a sample report</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

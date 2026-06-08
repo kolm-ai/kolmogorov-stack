@@ -1,0 +1,17 @@
+{
+  "name": "sales-qualifier",
+  "title": "Sales Qualifier",
+  "icon": "target",
+  "description": "Score inbound leads on BANT (budget, authority, need, timing) and route to SDR / AE / nurture. Distills a calibrated classifier that explains its score.",
+  "default_describe": "Score the lead on BANT (1-10 each axis) and assign a routing label: sdr, ae, or nurture. Always include a one-sentence rationale that quotes the lead text. Never invent company size, revenue, or job title.",
+  "sample_csv_url": "/samples/sales-qualifier.csv",
+  "recommended_student": "qwen2.5-7b-instruct",
+  "recommended_target": "gguf-q4km",
+  "recommended_gate": 0.85,
+  "expected_kscore": 0.87,
+  "eval_criteria": ["bant_calibration", "routing_accuracy", "rationale_traceability", "no_inventions"],
+  "input_col": "lead_text",
+  "output_col": "qualification_json",
+  "use_cases": ["inbound lead scoring", "MQL routing", "deal-stage advance", "win-loss replay"],
+  "minimum_rows": 50
+}

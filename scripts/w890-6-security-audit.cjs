@@ -320,8 +320,7 @@ function auditAuthCoverage() {
   const documentedPublicLiterals = new Set([
     // Marketing / catalog (read-only, no tenant state)
     '/v1/pricing', '/v1/plans', '/v1/billing/tiers',
-    '/v1/product/experience', '/v1/product/graph', '/v1/product/frontier-lab',
-    '/v1/product/frontier-contracts', '/v1/product/operator-kernels',
+    '/v1/product/experience', '/v1/product/graph',
     // Status + retry surfaces (no tenant state)
     '/v1/status/subscribe', '/v1/loop/try',
     // Public spec / governance / packets (catalogs + stateless validators)

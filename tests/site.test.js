@@ -142,28 +142,27 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   '?',
 ];
 
-// W224 deleted /run /recall /serve /anatomy (now permanent 301 redirects in
-// vercel.json — they MUST NOT appear in sitemap or Google reads ranked URLs
-// that 301 elsewhere). Sitemap must list the canonical surfaces only.
+// Canonical surfaces of the Agent Security Evidence site. Sitemap must list
+// every primary route so search engines index the surfaces we sell from.
 const REQUIRED_SITEMAP_ROUTES = [
   '/',
-  '/compile',
-  '/k-score',
-  '/benchmarks',
-  '/compare',
-  '/research',
+  '/verify',
+  '/how-it-works',
+  '/platform',
+  '/checks',
+  '/report',
+  '/transparency-log',
   '/pricing',
+  '/trust',
+  '/research',
   '/docs',
-  '/quickstart',
+  '/changelog',
+  '/enterprise',
   '/security',
   '/privacy',
   '/terms',
-  '/articles',
-  '/articles/ai-compiler',
-  '/articles/hipaa-on-device',
-  '/articles/k-sample-verified-inference',
-  '/articles/kolm-file-format',
-  '/articles/speculative-decoding-recipes',
+  '/solutions/ai-vendors',
+  '/solutions/enterprise-buyers',
 ];
 
 // W224 cut routes — these MUST NOT appear in sitemap. Negative assertion locks
@@ -173,6 +172,9 @@ const FORBIDDEN_SITEMAP_ROUTES = [
   '/agents', '/defense', '/evolve', '/bounty', '/bounties',
   '/cloud', '/edge', '/cookbook', '/playground',
   '/onboarding', '/showcase', '/openai',
+  // Cutover-retired: /soc2 now 308-redirects to /trust (no soc2.html). A
+  // redirect source must never appear in the sitemap, so lock it out here.
+  '/soc2',
 ];
 
 const STALE_SOURCE_PATTERNS = [
@@ -298,20 +300,6 @@ test('static text assets have clean encoding and current brand tokens', () => {
   }
 
   assert.deepEqual(failures, []);
-});
-
-test('signup wires API-key auth and OAuth surfaces', () => {
-  const signup = fs.readFileSync(path.join('public', 'signup.html'), 'utf8');
-
-  assert.match(signup, /\/v1\/signup/);
-  assert.match(signup, /\/v1\/signin/);
-  assert.match(signup, /kolm_api_key/);
-  assert.match(signup, /recipeApiKey/);
-  assert.match(signup, /Continue with Google/);
-  assert.match(signup, /Continue with GitHub/);
-  assert.match(signup, /\/v1\/oauth\//);
-  assert.match(signup, /tryOAuth\(['"]google['"]\)/);
-  assert.match(signup, /tryOAuth\(['"]github['"]\)/);
 });
 
 test('server and source text assets have clean encoding', () => {

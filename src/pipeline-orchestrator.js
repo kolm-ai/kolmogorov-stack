@@ -1,4 +1,4 @@
-// W821 [T2] — Artifact composition / pipeline orchestration.
+// W821 [T2] - Artifact composition / pipeline orchestration.
 //
 // Sits on top of W738 (kolm.pipeline.yaml parser + runtime runner) and adds:
 //
@@ -10,7 +10,7 @@
 //     {artifact_used, intent, prediction, latency_ms} envelope. The runtime
 //     itself is dependency-injected so tests don't need a real .kolm loader
 //     and so the production path can swap in src/artifact-runner.js.
-//   - Pipeline-LEVEL K-Score (`computePipelineKScore(...)`) — a frequency-
+//   - Pipeline-LEVEL K-Score (`computePipelineKScore(...)`) - a frequency-
 //     weighted average of per-route k_scores. Routes that the classifier
 //     actually picks get weighted heavily; cold routes don't drag the
 //     headline number around.
@@ -45,7 +45,7 @@
 //   - no matching route -> falls back to default; only fails if no default.
 //   - dependency-injected runtime missing -> {ok:false, error:'runtime_required'}
 // computePipelineKScore returns {ok:false, status:'no_eval_data', ...} when
-// route_frequencies is empty or every route has null/undefined kscore — never
+// route_frequencies is empty or every route has null/undefined kscore - never
 // fabricates a number.
 
 import { kolmError } from './kolm-error.js';
@@ -88,7 +88,7 @@ export const PIPELINE_SCHEMA = Object.freeze({
 // implementation.
 
 function _trimComment(line) {
-  // Strip `# ...` outside quoted strings. Tiny state machine — good enough
+  // Strip `# ...` outside quoted strings. Tiny state machine - good enough
   // for the subset above.
   let out = '';
   let i = 0;
@@ -398,7 +398,7 @@ export function validatePipeline(parsed) {
 // orchestrate({pipeline, input, runtime}) -> async
 //
 //   pipeline  - parsed + validated pipeline object (call validatePipeline first)
-//   input     - the request input (string OR object — passed through to the
+//   input     - the request input (string OR object - passed through to the
 //               classifier_artifact verbatim)
 //   runtime   - dependency-injected adapter:
 //                 runtime.runArtifact(artifactPath, input) -> Promise<{ok, output}>
@@ -424,7 +424,7 @@ export function validatePipeline(parsed) {
 //
 // Latency: top-level Date.now() bookends; we don't try to break out
 // classify vs route timings here (the W738 runtime does that with more
-// detail — callers who need it can use runPipeline()).
+// detail - callers who need it can use runPipeline()).
 export async function orchestrate({ pipeline, input, runtime } = {}) {
   const t0 = Date.now();
   if (!pipeline || typeof pipeline !== 'object') {
@@ -595,7 +595,7 @@ function _matchesIntent(match, intent) {
 //     headline number around).
 //   eval_set: { '<intent-or-default>': { k_score: <0..1>, n_eval: <int> } }
 //     Per-route K-Score from a prior eval run; n_eval is how many cases the
-//     score was computed over (used to weight uncertain scores down — a
+//     score was computed over (used to weight uncertain scores down - a
 //     route with 5 evals counts less than one with 500).
 //
 // Returns:
@@ -605,7 +605,7 @@ function _matchesIntent(match, intent) {
 //
 // Formula:
 //   For each route i with frequency f_i > 0 AND a known k_score k_i:
-//     w_i = f_i  (we DO NOT downweight by n_eval here — that's an eval-quality
+//     w_i = f_i  (we DO NOT downweight by n_eval here - that's an eval-quality
 //                signal, surfaced separately so the operator can decide)
 //   weighted_k_score = sum(w_i * k_i) / sum(w_i)
 //
@@ -725,7 +725,7 @@ export function listPipelines({ tenant_id } = {}) {
 
 // getPipeline(id, {tenant_id}) -> {id, name, tenant_id, yaml, parsed, ...} OR null
 //
-// Tenant fence is load-bearing — never return a row from another tenant.
+// Tenant fence is load-bearing - never return a row from another tenant.
 export function getPipeline(id, { tenant_id } = {}) {
   const rows = _readIndex();
   const row = rows.find((r) => r && r.id === id);
@@ -792,7 +792,7 @@ export function deletePipeline(id, { tenant_id } = {}) {
   return { ok: true, id };
 }
 
-// _resetForTests() — wipes the pipelines dir + index. Used by tests with a
+// _resetForTests() - wipes the pipelines dir + index. Used by tests with a
 // scoped HOME / KOLM_DATA_DIR; safe no-op when the dir is missing.
 export function _resetForTests() {
   const dir = _pipelinesDir();

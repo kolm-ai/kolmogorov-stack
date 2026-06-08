@@ -1,0 +1,18 @@
+{
+  "name": "medical-coding",
+  "title": "Medical Coding",
+  "icon": "stethoscope",
+  "description": "Map clinical notes to ICD-10 / CPT codes with a strict no-invention gate. PHI redaction required upstream; output codes only, no diagnostic prose.",
+  "default_describe": "Map clinical notes to ICD-10-CM and CPT codes. Output a JSON array of codes with rationale phrases lifted verbatim from the note. Never invent codes. If the note does not support a code, do not emit it.",
+  "sample_csv_url": "/samples/medical-coding.csv",
+  "recommended_student": "qwen2.5-7b-instruct",
+  "recommended_target": "gguf-q5km",
+  "recommended_gate": 0.92,
+  "expected_kscore": 0.93,
+  "eval_criteria": ["code_validity", "no_inventions", "rationale_traceability", "phi_clean"],
+  "input_col": "clinical_note",
+  "output_col": "codes_json",
+  "use_cases": ["ICD-10 mapping", "CPT capture", "HCC risk-adjustment", "claims pre-bill review"],
+  "minimum_rows": 50,
+  "requires_pii_mode": "hipaa"
+}

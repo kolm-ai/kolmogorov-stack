@@ -1,20 +1,20 @@
 // src/govern-provenance.js
 //
-// W921 Govern / Receipts & Compliance — in-toto v1 / SLSA Provenance v1 build
+// W921 Govern / Receipts & Compliance - in-toto v1 / SLSA Provenance v1 build
 // provenance for .kolm artifacts, exposed as the high-level, artifact-shaped
 // API the task brief names: buildSlsaProvenance(artifact) -> in-toto statement.
 //
 // This module is a THIN, ergonomic facade over the already-built + tested
 // src/intoto-slsa.js (it imports those primitives; it does NOT re-implement
 // PAE/DSSE/Statement assembly). The reason it exists separately: intoto-slsa.js
-// speaks in {manifest, hashes, lineage, ed25519Signer, subjectDigests} — the
+// speaks in {manifest, hashes, lineage, ed25519Signer, subjectDigests} - the
 // shape artifact.js holds at build time. A caller who has a higher-level
 // "artifact" object (manifest + cid + artifact_hash + lineage + per-file
 // digests) wants a single buildSlsaProvenance(artifact) call. This adapter
 // normalizes that object into the intoto-slsa.js inputs and returns either the
 // in-toto Statement (unsigned) or a full DSSE-enveloped attestation (signed).
 //
-// SCOPE / Constraints: this emits "SLSA Provenance v1 (Build L2 shape)" — signed
+// SCOPE / Constraints: this emits "SLSA Provenance v1 (Build L2 shape)" - signed
 // and non-forgeable because the key is custodied, NOT Build L3 (which requires a
 // hardened, identity-bound builder kolm does not provide). We never assert
 // hardened-builder properties. The conformance string is re-exported verbatim
@@ -45,7 +45,7 @@ const HEX64_RE = /^[0-9a-f]{64}$/i;
 //
 // Accepts several shapes so the same call works whether the caller passes a
 // raw .kolm manifest, a {manifest,hashes,lineage,...} bag, or a richer object.
-// Tolerant of missing fields — degrades, never throws on shape.
+// Tolerant of missing fields - degrades, never throws on shape.
 // ---------------------------------------------------------------------------
 function _normalizeArtifact(artifact = {}) {
   const a = artifact && typeof artifact === 'object' ? artifact : {};
@@ -87,7 +87,7 @@ function _normalizeArtifact(artifact = {}) {
 // envelope).
 //
 // resolvedDependencies (SLSA materials) enumerate WHAT WENT IN: teacher,
-// student base, training corpus, recipes/evals — reconstructable by a verifier.
+// student base, training corpus, recipes/evals - reconstructable by a verifier.
 // ---------------------------------------------------------------------------
 export function buildSlsaProvenance(artifact, opts = {}) {
   const n = _normalizeArtifact(artifact);
@@ -135,7 +135,7 @@ export function buildSlsaProvenance(artifact, opts = {}) {
 // Build the Statement and wrap it in a DSSE envelope signed with the supplied
 // Ed25519 signer ({privateKey, publicKey, key_fingerprint}). Returns the parsed
 // envelope, its JSON string (for the sidecar provenance.intoto.dsse.json), and
-// the Statement. NEVER folds the envelope into any hash — it is a seal.
+// the Statement. NEVER folds the envelope into any hash - it is a seal.
 // ---------------------------------------------------------------------------
 export function signSlsaProvenance(artifact, signer, opts = {}) {
   if (!signer || !signer.privateKey) {

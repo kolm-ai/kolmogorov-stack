@@ -1,25 +1,25 @@
-// W775+ — Full Autopilot Mode (the capstone).
+// W775+ - Full Autopilot Mode (the capstone).
 //
 // tickAutopilotFull layers the autopilot intelligence components on top of the
 // W775 heartbeat (src/autopilot-daemon.js tickAutopilot, the tested path) and
 // adds the propose-only-default auto-deploy guardrail.
 //
 // One full tick:
-//   0. (optional) bootstrapFromDescription — seed corpus + recipe from a phrase.
-//   1. W775 heartbeat (tickAutopilot) — unchanged: WATCH (W815 gaps) + drift gate.
+//   0. (optional) bootstrapFromDescription - seed corpus + recipe from a phrase.
+//   1. W775 heartbeat (tickAutopilot) - unchanged: WATCH (W815 gaps) + drift gate.
 //   2. derive the current data feature vector from raw-pairs.jsonl.
-//   3. ② Cost Optimizer  — rankStrategies under budget  -> plan.
-//   4. ④ Compile Simulator — simulateCompile on the recommended move -> compile|skip.
-//   5. ⑥ Temporal Analyzer — seasonal/temporal coverage gaps (advisory).
-//   6. ③ Failure Analyst  — only when an eval artifact is supplied.
-//   7. ⑧ Deploy guardrail — propose-only by default; --auto gates on 5 conditions.
-//   8. ⑦ Flywheel — record a K-Score point when a fresh candidate K is known.
+//   3. ② Cost Optimizer - rankStrategies under budget  -> plan.
+//   4. ④ Compile Simulator - simulateCompile on the recommended move -> compile|skip.
+//   5. ⑥ Temporal Analyzer - seasonal/temporal coverage gaps (advisory).
+//   6. ③ Failure Analyst - only when an eval artifact is supplied.
+//   7. ⑧ Deploy guardrail - propose-only by default; --auto gates on 5 conditions.
+//   8. ⑦ Flywheel - record a K-Score point when a fresh candidate K is known.
 //
 // Returns the W775 envelope (ok, action, namespace, version:w775-*) PLUS
 // {plan, simulate_decision, deploy_decision, temporal, failure, features,
 //  bootstrap, kscore_recorded, lifecycle_version}.
 //
-// AUTO-DEPLOY GUARDRAIL (high blast radius — explicit):
+// AUTO-DEPLOY GUARDRAIL (high blast radius - explicit):
 //   Default is PROPOSE-ONLY: a compile-worthy candidate writes a
 //   DEPLOY_PROPOSED ledger row and stops. opts.auto===true is the ONLY path to
 //   an autonomous deploy, and a deploy (DEPLOY_EXECUTED) fires ONLY when ALL of
@@ -29,9 +29,9 @@
 //     (3) adversarial + safety eval pass (opts.eval_pass === true)
 //     (4) W813 drift gate green
 //     (5) 48h grace elapsed since DEPLOY_PROPOSED with no DEPLOY_OBJECTED
-//   Grace is derived from the proposed-row timestamp (cron re-evaluates — no
+//   Grace is derived from the proposed-row timestamp (cron re-evaluates - no
 //   long-lived process). The execute path reuses compareAndDecide's tested
-//   promote/rollback receipt write — never a second deploy code path.
+//   promote/rollback receipt write - never a second deploy code path.
 
 import {
   tickAutopilot,
@@ -44,13 +44,13 @@ import { compareAndDecide } from './improvement-orchestrator.js';
 
 export const LIFECYCLE_VERSION = 'apl-v1';
 
-// Reuse the daemon's tenant-fenced event-store helpers — ONE shared write/read
+// Reuse the daemon's tenant-fenced event-store helpers - ONE shared write/read
 // path (risk #4: no per-component persistence sprawl).
 const _writeAutopilotEvent = daemonInternals._writeAutopilotEvent;
 const _readLatestAutopilotEvent = daemonInternals._readLatestAutopilotEvent;
 const _isDriftRed = daemonInternals._isDriftRed;
 
-// Strategy feature-delta priors — maps a recommended strategy name back to the
+// Strategy feature-delta priors - maps a recommended strategy name back to the
 // feature-space delta the simulator should score.
 const STRATEGIES = costInternals.STRATEGIES;
 
@@ -66,22 +66,22 @@ export const DEPLOY_WORKFLOW = Object.freeze({
 
 const GRACE_MS = 48 * 60 * 60 * 1000; // 48 hours
 
-// W921 — ship gate on the K-Score composite scale (mirrors src/kscore.js +
+// W921 - ship gate on the K-Score composite scale (mirrors src/kscore.js +
 // quality-predictor.js). Used by the conformal-lower-bound advisory below.
 const SHIP_GATE = 0.85;
 
-// W921 — strategy-feature priors live in the cost-optimizer (re-exported here as
+// W921 - strategy-feature priors live in the cost-optimizer (re-exported here as
 // STRATEGIES). The bandit advisory warms each arm's prior mean from the
 // cost-optimizer's per-strategy predicted_delta_k (the exact number the greedy
 // path uses today), so at zero observed outcomes the bandit ranking matches the
-// greedy ranking — no day-0 regression.
+// greedy ranking - no day-0 regression.
 
 function _ns(namespace) {
   return String(namespace || 'default').slice(0, 128);
 }
 
 // ---------------------------------------------------------------------------
-// W921 — always-valid (mSPRT / GAVI) sequential A/B advisory.
+// W921 - always-valid (mSPRT / GAVI) sequential A/B advisory.
 //
 // The autopilot peeks the SAME accumulating A/B samples on every cron tick; a
 // fixed-horizon test inflates Type-I error toward 1 under that peeking. The
@@ -127,7 +127,7 @@ async function _sequentialAdvisory({ tenant, opts }) {
   }
 }
 
-// W921 — conformal-lower-bound advisory for the candidate K-Score interval.
+// W921 - conformal-lower-bound advisory for the candidate K-Score interval.
 // When the caller supplies the candidate's conformal interval (candidate_ci,
 // e.g. from quality-predictor.predicted_interval / inferKolmMeta), report
 // whether the LOWER bound clears the ship gate. Additive: advisory by default,
@@ -158,7 +158,7 @@ function _budgetUsd(v) {
   return m ? Number(m[1]) : undefined;
 }
 
-// Read raw-pairs for a namespace without throwing — a cold namespace yields [].
+// Read raw-pairs for a namespace without throwing - a cold namespace yields [].
 async function _safeRawPairs(namespace) {
   try {
     const ing = await import('./data-ingest.js');
@@ -170,7 +170,7 @@ async function _safeRawPairs(namespace) {
   }
 }
 
-// Derive the predictor's recognized feature vector from raw-pairs alone — cheap
+// Derive the predictor's recognized feature vector from raw-pairs alone - cheap
 // and real (no event-store dependency): n_pairs, dup_fraction (by input hash),
 // teacher_diversity (distinct source_ref). coverage_score / avg_quality come
 // from a curate run and are supplied via opts.features when available.
@@ -211,7 +211,7 @@ function _eventTs(row) {
 }
 
 // ---------------------------------------------------------------------------
-// W921 — bandit strategy-ranking advisory (ADDITIVE, OPT-IN).
+// W921 - bandit strategy-ranking advisory (ADDITIVE, OPT-IN).
 //
 // When opts.use_bandit === true the autopilot consults the budgeted,
 // non-stationary Thompson-sampling bandit (src/bandit-thompson.js) as a SECOND
@@ -228,7 +228,7 @@ function _eventTs(row) {
 //
 // Deterministic: opts.rng (a seeded function) flows straight through to the
 // sampler, so a test can pin the draw. Any import/throw falls back to a null
-// advisory — the autopilot never regresses because the bandit is unavailable.
+// advisory - the autopilot never regresses because the bandit is unavailable.
 // ---------------------------------------------------------------------------
 async function _banditAdvisory({ tenant, namespace, opts, plan, baseK, baseFeatures }) {
   if (!opts || opts.use_bandit !== true) {
@@ -286,7 +286,7 @@ async function _banditAdvisory({ tenant, namespace, opts, plan, baseK, baseFeatu
   }
 }
 
-// W921 — OBSERVE leg of the bandit loop. When the bandit is in use AND a fresh
+// W921 - OBSERVE leg of the bandit loop. When the bandit is in use AND a fresh
 // REALIZED candidate K is known, fold ΔK = candidate_K - base_K into the
 // discounted posterior so the next tick learns from this round. Best-effort;
 // idempotent on choice_id. Never throws.
@@ -334,7 +334,7 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
   const minDelta = (opts && Number.isFinite(Number(opts.min_kscore_delta))) ? Number(opts.min_kscore_delta) : 0.02;
   const maxReg = (opts && Number.isFinite(Number(opts.max_regression_classes))) ? Number(opts.max_regression_classes) : 0;
 
-  // W921 — ADDITIVE guardrail signals the deploy gate can consult. Both are
+  // W921 - ADDITIVE guardrail signals the deploy gate can consult. Both are
   // advisory by default (attached to the envelope, never block) and become
   // fail-closed conditions only under the explicit opt-in flags
   // (enforce_sequential / enforce_conformal). With neither an ab_test_id nor a
@@ -374,7 +374,7 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
 
   // (1)+(2) compareAndDecide ⇒ promote + regressions bound. base_kscore /
   // candidate_kscore overrides (when supplied) let the gate run without a real
-  // .kolm on disk — the tested decision logic is unchanged.
+  // .kolm on disk - the tested decision logic is unchanged.
   let compare = null;
   if (candidateArtifactId && baseArtifactId) {
     compare = await compareAndDecide({
@@ -394,7 +394,7 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
   if (!conditions.promote) failed.push('not_promote');
   if (!conditions.regressions_ok) failed.push('regressions');
 
-  // (3) adversarial + safety eval pass — fail-closed unless explicitly asserted.
+  // (3) adversarial + safety eval pass - fail-closed unless explicitly asserted.
   conditions.eval_pass = !!(opts && opts.eval_pass === true);
   if (!conditions.eval_pass) failed.push('eval');
 
@@ -424,13 +424,13 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
   conditions.grace = grace.satisfied;
   if (!conditions.grace) failed.push('grace');
 
-  // (6) W921 OPT-IN — always-valid sequential A/B promote. Off by default
+  // (6) W921 OPT-IN - always-valid sequential A/B promote. Off by default
   // (enforce_sequential!==true) so existing deploy behavior is unchanged. When
   // enabled AND an ab_test_id is in scope, EXECUTE additionally requires the
   // anytime-valid gate to say 'promote'; absent an ab_test_id the condition is
   // N/A (true) so the K-delta path for no-A/B-traffic is preserved.
   // W921 NOW-4: close the peeking hole. When a REAL A/B test is in scope
-  // (sequential.applicable — an ab_test_id with enough samples), the fixed-
+  // (sequential.applicable - an ab_test_id with enough samples), the fixed-
   // horizon K-delta decision is statistically invalid under continuous cron
   // peeking, so EXECUTE now REQUIRES the anytime-valid (mSPRT/GAVI) gate to say
   // 'promote' BY DEFAULT. Operators can opt out with enforce_sequential===false.
@@ -447,7 +447,7 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
     if (!conditions.sequential_promote) failed.push('sequential');
   }
 
-  // (7) W921 OPT-IN — conformal lower bound clears the ship gate. Off by default
+  // (7) W921 OPT-IN - conformal lower bound clears the ship gate. Off by default
   // (enforce_conformal!==true). When enabled AND a candidate interval is in
   // scope, EXECUTE additionally requires the conformal LOWER bound >= ship gate
   // (deploy on the certified floor, not the point estimate); absent a candidate
@@ -525,7 +525,7 @@ async function _evaluateDeploy({ tenant, namespace, opts, simulate }) {
 }
 
 // ---------------------------------------------------------------------------
-// objectToDeploy — a human (or a guard) vetoes a proposed deploy. Writes a
+// objectToDeploy - a human (or a guard) vetoes a proposed deploy. Writes a
 // DEPLOY_OBJECTED row; the next --auto tick's grace check sees it and holds.
 // ---------------------------------------------------------------------------
 export async function objectToDeploy({ tenant, namespace, reason } = {}) {
@@ -541,7 +541,7 @@ export async function objectToDeploy({ tenant, namespace, reason } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// tickAutopilotFull — the full lifecycle tick.
+// tickAutopilotFull - the full lifecycle tick.
 // ---------------------------------------------------------------------------
 export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
   if (!tenant || typeof tenant !== 'string') {
@@ -577,7 +577,7 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     ? o.features
     : _deriveFeatures(await _safeRawPairs(ns));
 
-  // 3. ② Cost Optimizer — rank strategies under budget.
+  // 3. ② Cost Optimizer - rank strategies under budget.
   let plan;
   try {
     plan = await rankStrategies({
@@ -591,7 +591,7 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     plan = { ok: false, error: String((e && e.message) || e) };
   }
 
-  // 3b. W921 — bandit strategy-ranking advisory (ADDITIVE, opt-in via
+  // 3b. W921 - bandit strategy-ranking advisory (ADDITIVE, opt-in via
   // opts.use_bandit). Warm-started from the greedy plan so n=0 == greedy. This
   // is a SECOND opinion only; plan.recommended (the simulator input below) is
   // unchanged unless opts.bandit_decides === true.
@@ -601,7 +601,7 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     tenant, namespace: ns, opts: o, plan, baseK, baseFeatures: features,
   });
 
-  // 4. ④ Compile Simulator — should we compile the recommended move?
+  // 4. ④ Compile Simulator - should we compile the recommended move?
   // Default: the greedy cost-optimizer's recommended strategy. The bandit pick
   // is consulted ONLY when the operator explicitly opts in (bandit_decides), and
   // even then we never recommend a move the bandit's advisory could not produce.
@@ -622,7 +622,7 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     simulate = { ok: false, error: String((e && e.message) || e) };
   }
 
-  // 5. ⑥ Temporal coverage (advisory — informs WHICH data to acquire next).
+  // 5. ⑥ Temporal coverage (advisory - informs WHICH data to acquire next).
   let temporal = null;
   if (o.skip_temporal !== true) {
     try {
@@ -636,7 +636,7 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     }
   }
 
-  // 6. ③ Failure Analyst — only when an eval artifact is supplied.
+  // 6. ③ Failure Analyst - only when an eval artifact is supplied.
   let failure = null;
   if (o.eval_path || o.run_dir) {
     try {
@@ -653,7 +653,7 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
   // 7. ⑧ Deploy guardrail (propose-only default).
   const deploy_decision = await _evaluateDeploy({ tenant, namespace: ns, opts: o, simulate });
 
-  // 8. ⑦ Flywheel — record a K point when a fresh candidate K is known and the
+  // 8. ⑦ Flywheel - record a K point when a fresh candidate K is known and the
   // caller asked us to (record_kscore:true). The chart on namespaces.html reads
   // these via GET /v1/kscore/series.
   let kscore_recorded = null;
@@ -671,8 +671,8 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     }
   }
 
-  // 8b. W921 — bandit OBSERVE leg. When the bandit is in use AND a REALIZED
-  // candidate K is supplied (opts.candidate_kscore — the realized post-distill K,
+  // 8b. W921 - bandit OBSERVE leg. When the bandit is in use AND a REALIZED
+  // candidate K is supplied (opts.candidate_kscore - the realized post-distill K,
   // NOT the simulator's predicted K), fold ΔK = candidate_K - base_K into the
   // discounted posterior so the next tick learns which strategy actually paid
   // off. Additive + best-effort; the loop closes only when the caller hands us a
@@ -719,7 +719,7 @@ export async function tickAutopilotFull({ tenant, namespace, opts = {} } = {}) {
     failure,
     deploy_decision,
     kscore_recorded,
-    // W921 — additive bandit advisory + OBSERVE result (null unless opts.use_bandit).
+    // W921 - additive bandit advisory + OBSERVE result (null unless opts.use_bandit).
     bandit,
     bandit_observe,
   };

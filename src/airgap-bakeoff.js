@@ -1,4 +1,4 @@
-// W831-4 — Air-gapped bakeoff harness.
+// W831-4 - Air-gapped bakeoff harness.
 //
 // Purpose
 // -------
@@ -12,7 +12,7 @@
 //   1. Verify air-gap shape (same dial-failure guard as airgap-distill.js).
 //   2. For each artifact in opts.artifacts, run the dataset rows through a
 //      local scoring callback (defaults to whichever local backend the
-//      artifact targets — CPU / CUDA / MLX / MPS via apps/runtime/backends/local_*).
+//      artifact targets - CPU / CUDA / MLX / MPS via apps/runtime/backends/local_*).
 //   3. Rank artifacts by mean score, ascending or descending per metric.
 //
 // The dataset MUST be a local jsonl file (no remote dataset_id, no HTTP
@@ -47,7 +47,7 @@ const PROBE_URL = 'https://example.com';
 const PROBE_TIMEOUT_MS = 50;
 
 // Same dial-failure guard as airgap-distill.js. We deliberately do NOT share
-// code — the two callers want independent evolution paths (different env
+// code - the two callers want independent evolution paths (different env
 // guards, different envelope fields) so a refactor on one doesn't risk the
 // other.
 async function assertNetworkUnreachable(fetchImpl) {
@@ -77,7 +77,7 @@ async function assertNetworkUnreachable(fetchImpl) {
 }
 
 // Default scorer: lowercase-tokenize both sides and compute Jaccard overlap.
-// Returns 0..1. Empty actual or empty expected returns 0 — a perfect-empty
+// Returns 0..1. Empty actual or empty expected returns 0 - a perfect-empty
 // match is meaningless for a distillation benchmark.
 function jaccardScorer(actual, expected) {
   const a = String(actual || '').toLowerCase().match(/[a-z0-9]+/g) || [];
@@ -94,7 +94,7 @@ function jaccardScorer(actual, expected) {
 // Default invokeFn: pure-JS deterministic stub used in tests + when the caller
 // hasn't wired a real local backend. In production the route layer passes
 // a real invokeFn that shells out to apps/runtime/backends/local_cpu.py or
-// similar. We never network — if invokeFn isn't supplied, we return a stub
+// similar. We never network - if invokeFn isn't supplied, we return a stub
 // "no_local_invoker_configured" envelope per row rather than try a remote call.
 async function defaultInvokeFn({ artifact, input }) {
   // Deterministic echo so tests get reproducible scores. Real callers always
@@ -183,7 +183,7 @@ export async function airgapBakeoff(opts = {}) {
     return {
       ok: false,
       error: 'artifacts_required',
-      hint: 'pass {artifacts: [{id, path}, ...]} — at least one artifact',
+      hint: 'pass {artifacts: [{id, path}, ...]} - at least one artifact',
       tenant,
       version: AIRGAP_BAKEOFF_VERSION,
     };
@@ -219,7 +219,7 @@ export async function airgapBakeoff(opts = {}) {
       ok: false,
       error: (e && e.code) || 'airgap_violation',
       detail: String((e && e.message) || e),
-      hint: 'Air-gapped bakeoff refused — network egress detected',
+      hint: 'Air-gapped bakeoff refused - network egress detected',
       tenant,
       version: AIRGAP_BAKEOFF_VERSION,
     };

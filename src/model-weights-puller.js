@@ -1,4 +1,4 @@
-// W386 — model-weights puller.
+// W386 - model-weights puller.
 //
 // Streaming download of GGUF / safetensors files from HuggingFace, with:
 //   - resumable Range requests (re-pulls a partial file from byte N)
@@ -8,7 +8,7 @@
 //   - on-disk cache index at ~/.kolm/models/index.json so list/clear works
 //     without re-walking the directory tree
 //
-// W305/W348 lesson — DO NOT use global fetch(). Streaming over many MB on
+// W305/W348 lesson - DO NOT use global fetch(). Streaming over many MB on
 // Windows with the undici keep-alive pool crashes libuv on process.exit
 // with STATUS_STACK_BUFFER_OVERRUN. Everything here is node:https request
 // → IncomingMessage stream → fs.WriteStream. No fetch, no AbortController,
@@ -36,7 +36,7 @@ export function ensureCacheDir(dir) {
   return dir;
 }
 
-// Disk index — single JSON file at <cacheDir>/index.json. Each entry keys on
+// Disk index - single JSON file at <cacheDir>/index.json. Each entry keys on
 // `${model_id}::${variant}::${file_path}` and records bytes + downloaded_at +
 // sha256 (or null if unverified). Light enough to rewrite atomically on each
 // successful pull.
@@ -77,7 +77,7 @@ export function localPathFor(cacheDir, row, file) {
 }
 
 // ---------------------------------------------------------------------------
-// Network primitives — all node:https / node:http. Follows redirects (HF
+// Network primitives - all node:https / node:http. Follows redirects (HF
 // resolve URLs 302 to a signed S3/cdn-lfs URL).
 // ---------------------------------------------------------------------------
 
@@ -138,7 +138,7 @@ export async function probeFile(urlStr, opts = {}) {
       headers: { Range: 'bytes=0-1023', ...(opts.headers || {}) },
       timeoutMs: opts.timeoutMs || 15_000,
     });
-    // Drain — we don't need the body.
+    // Drain - we don't need the body.
     r.res.resume();
     const contentRange = r.headers['content-range'];
     let total = null;
@@ -172,7 +172,7 @@ export async function probeVariant(row) {
 // Streaming download. Supports resume via Range. Verifies sha256 if provided.
 // Atomic: writes to <dest>.part, then renames to <dest> on success.
 //
-// onProgress({ bytes_done, bytes_total, file }) — called every ~256KB.
+// onProgress({ bytes_done, bytes_total, file }) - called every ~256KB.
 // ---------------------------------------------------------------------------
 export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
   const url = hfResolveUrl(row.hf_repo, row.hf_revision, file.path);
@@ -186,7 +186,7 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
     if (file.bytes && sz === file.bytes) {
       return { ok: true, bytes: sz, path: dest, resumed: false, already_cached: true };
     }
-    // Size mismatch — re-download.
+    // Size mismatch - re-download.
     try { fs.unlinkSync(dest); } catch (_) {} // deliberate: cleanup
   }
 
@@ -205,7 +205,7 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
   if (already > 0) headers.Range = `bytes=${already}-`;
   const r = await requestFollow(url, { method: 'GET', headers, timeoutMs: timeoutMs || DEFAULT_TIMEOUT_MS });
   if (r.statusCode === 416) {
-    // Range not satisfiable — server says we've already got the whole thing.
+    // Range not satisfiable - server says we've already got the whole thing.
     fs.renameSync(part, dest);
     return { ok: true, bytes: already, path: dest, resumed: true, already_cached: false };
   }
@@ -218,7 +218,7 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
 
   // Validate we got a partial-response if we asked for one.
   if (already > 0 && r.statusCode !== 206) {
-    // Server ignored Range — start over.
+    // Server ignored Range - start over.
     try { fs.unlinkSync(part); } catch (_) {} // deliberate: cleanup
     already = 0;
   }

@@ -1,4 +1,4 @@
-// W807 — confidence-aware adaptive routing (next-generation).
+// W807 - confidence-aware adaptive routing (next-generation).
 //
 // W709 shipped a per-call routing decision (student vs teacher) based on
 // first-token entropy from an entire response. W807 is the NEXT generation:
@@ -11,7 +11,7 @@
 //
 //   - W709 returns a single decision for an already-known full token stream.
 //   - W807 maintains an O(1) sliding window over a stream so the decision is
-//     made AS the student is generating — enabling mid-response teacher
+//     made AS the student is generating - enabling mid-response teacher
 //     splices (W807-2) and per-token threshold telemetry (W807-3).
 //   - W709's threshold is a single nats value. W807 ships a NAMED threshold
 //     TABLE so users (and the dashboard) can opt into preset risk profiles
@@ -23,7 +23,7 @@
 //     and stamp `threshold_profile_unknown:<name>` on the reason so the
 //     caller can debug without silent miscalibration.
 //   - If the adapter returns NO top_logprobs we tag reason='no_top_logprobs'
-//     and emit route='student' — NEVER silently switch to "always teacher".
+//     and emit route='student' - NEVER silently switch to "always teacher".
 //   - Every splice event written into the event-store via W720 carries
 //     {capture_candidate:true, weakness_signal:true} so detectUnderperforming
 //     Captures picks it up in the next sweep.
@@ -42,13 +42,13 @@ export const VERSION = 'w807-v1';
 
 // Named thresholds in NATs. Calibration rationale per profile:
 //
-//   aggressive (0.85)   — only splice on genuinely confused windows. Student
+//   aggressive (0.85) - only splice on genuinely confused windows. Student
 //                          stays in the driver's seat. Lowest teacher cost,
 //                          highest risk of student error.
-//   balanced   (0.7)    — ≈ log(2)+ε: splice when student is at-or-past
+//   balanced   (0.7) - ≈ log(2)+ε: splice when student is at-or-past
 //                          50/50 between its top two candidates over the
 //                          window. Production default.
-//   conservative (0.55) — splice early; favor teacher quality over cost.
+//   conservative (0.55) - splice early; favor teacher quality over cost.
 //
 // Higher number = higher entropy tolerated before splicing.
 export const THRESHOLD_TABLE = Object.freeze({
@@ -109,7 +109,7 @@ function shannonEntropyFromProbs(probs) {
 // Returns a finite number in nats. Returns 0 when the input is empty/invalid.
 export function tokenEntropy(logits) {
   if (logits == null) return 0;
-  // Single OpenAI-v1 row — pluck top_logprobs.
+  // Single OpenAI-v1 row - pluck top_logprobs.
   if (!Array.isArray(logits) && typeof logits === 'object' && Array.isArray(logits.top_logprobs)) {
     return tokenEntropy(logits.top_logprobs);
   }
@@ -147,7 +147,7 @@ export function tokenEntropy(logits) {
     const norm = exps.map((x) => x / z);
     return shannonEntropyFromProbs(norm);
   }
-  // Object array — assume OpenAI-shaped {logprob} entries.
+  // Object array - assume OpenAI-shaped {logprob} entries.
   let sum = 0;
   for (const cand of logits) {
     if (cand == null) continue;
@@ -237,7 +237,7 @@ export function streamingEntropyWindow(window = 8) {
 }
 
 // ---------------------------------------------------------------------------
-// W807-6 — wire-into-W720
+// W807-6 - wire-into-W720
 // ---------------------------------------------------------------------------
 
 /**
@@ -251,7 +251,7 @@ export function streamingEntropyWindow(window = 8) {
  * the splice succeeded (the response contains both student + teacher
  * tokens) and 'teacher' when the only segment was the teacher (e.g. the
  * student aborted at token 0).  Pure student rows are NOT written by this
- * helper — they are not weakness signals.
+ * helper - they are not weakness signals.
  *
  * Honest envelope: routing-events writer failure NEVER throws into the
  * generation path; we return {ok:false, error:'<code>'} instead.
@@ -259,7 +259,7 @@ export function streamingEntropyWindow(window = 8) {
  * @param {Object} opts
  * @param {string} opts.tenant_id
  * @param {string} [opts.namespace='default']
- * @param {Object} opts.splice_event  — output of spliceToTeacher OR an
+ * @param {Object} opts.splice_event - output of spliceToTeacher OR an
  *                                       aggregate {splice_events:[],
  *                                       local_tokens, teacher_tokens,
  *                                       threshold_used, threshold_profile}
@@ -358,12 +358,12 @@ export async function emitSpliceWeaknessSignal(opts = {}) {
       ok: false,
       error: 'routing_events_write_failed',
       detail: e && e.message ? e.message : String(e),
-      hint: 'src/routing-events.js recordRoutingDecision failed — capture will not surface in W720',
+      hint: 'src/routing-events.js recordRoutingDecision failed - capture will not surface in W720',
       version: VERSION,
     };
   }
 
-  // Second write — emit a canonical event row through the event-store so
+  // Second write - emit a canonical event row through the event-store so
   // src/self-improvement.js detectUnderperformingCaptures sees it. We add
   // capture_candidate:true + weakness_signal:true to feedback so a future
   // event-schema update can elevate these without re-walking the events.

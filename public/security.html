@@ -3,733 +3,409 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Security · kolm.ai</title>
-<meta name="description" content="How kolm.ai handles security: Ed25519-signed receipts, PII redaction with four modes, capture poison detection with five signals, namespace isolation, per-tenant signing key rotation.">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<meta name="description" content="To run a scan you upload redacted logs. Here is how kolm holds that data: redaction before processing, scoped per-tenant access, minimal retention, Ed25519 key management, a Merkle transparency log, and disclosure at dev@kolm.ai.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="How kolm holds the data you upload">
+<meta property="og:description" content="Redaction before processing, scoped per-tenant access, minimal retention, Ed25519 key management, and a Merkle transparency log. What we do, and what we do not retain.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/security">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Security · kolm">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/ks.css" as="style">
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/frontier.css">
-<link rel="stylesheet" href="/supplement.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<script src="/nav.js" defer></script>
-<script defer src="/supplement.js"></script>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();</script>
-<style>
-  
-  .sg-list .fr-spec-list__delta--algo  { color: var(--fr-mint, #6cbf8d); }
-  .dep-list .fr-spec-list__row { padding-top: 24px; padding-bottom: 28px; }
-  .dep-list .fr-spec-list__head { gap: 16px; }
-  .dep-list .dep-bullets { margin: 12px 0 0; padding-left: 18px; font-size: 13.5px; line-height: 1.7; color: var(--ks-ink-2); }
-  .dep-list .dep-bullets li + li { margin-top: 4px; }
-  .thr-list .fr-spec-list__delta--threat { color: #e8a86a; border-color: rgba(232,168,106,0.45); }
-  .thr-list .fr-spec-list__p .mit { display: block; margin-top: 8px; font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); letter-spacing: 0.02em; }
-  .ops-list .fr-spec-list__delta--internal { color: var(--ks-ink-3); }
-  .ops-list .fr-spec-list__delta--yours    { color: var(--fr-mint, #6cbf8d); }
-
-  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
-  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
-  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
-  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
-  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
-  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
-
-  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
-  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
-  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
-
-  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
-  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
-
-  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
-  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
-  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
-  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
-  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
-  .sec-card .st.wip { color: #a8b3c2; border-color: rgba(168, 179, 194,0.35); }
-  .sec-card .st.no { color: #d77; border-color: rgba(221,119,119,0.35); }
-  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
-  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
-  .sec-card p + p { margin-top: var(--ks-2); }
-  .sec-card a { color: var(--ks-accent); }
-
-  .pact { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); }
-  .pact h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
-  .pact dl { margin: 0; display: grid; grid-template-columns: 200px 1fr; gap: var(--ks-3) var(--ks-5); }
-  .pact dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
-  .pact dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
-  @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
-
-  .receipt { background: #050607; border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); margin-top: var(--ks-4); }
-  .receipt pre { margin: 0; font-family: var(--ks-mono); font-size: 12.5px; line-height: 1.6; color: var(--ks-ink); overflow-x: auto; }
-  .receipt .k { color: var(--ks-accent); }
-  .receipt .s { color: #aab0b8; }
-  .receipt .n { color: #a8b3c2; }
-
-  .deploy-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--ks-4); margin-top: var(--ks-4); }
-  @media (max-width: 900px) { .deploy-row { grid-template-columns: 1fr; } }
-  .deploy { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
-  .deploy h3 { margin: 0 0 var(--ks-1); font-size: 16px; font-weight: 540; color: var(--ks-ink); }
-  .deploy .who { font-family: var(--ks-mono); font-size: 11px; color: var(--ks-ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--ks-3); }
-  .deploy ul { margin: var(--ks-2) 0 0; padding-left: 18px; font-size: 13.5px; line-height: 1.65; color: var(--ks-ink-2); }
-  .deploy ul li + li { margin-top: 4px; }
-
-  .reg-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
-  .reg-tbl th, .reg-tbl td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); }
-  .reg-tbl th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; letter-spacing: 0.02em; }
-  .reg-tbl td:first-child { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink); }
-  .reg-tbl .st { font-family: var(--ks-mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); display: inline-block; }
-  .reg-tbl .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
-  .reg-tbl .st.wip { color: #a8b3c2; border-color: rgba(168, 179, 194,0.35); }
-  .reg-tbl .st.no { color: #d77; border-color: rgba(221,119,119,0.35); }
-
-  .threat-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-3); margin-top: var(--ks-4); }
-  @media (max-width: 900px) { .threat-list { grid-template-columns: 1fr; } }
-  .threat { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-4) var(--ks-5); }
-  .threat h4 { margin: 0 0 var(--ks-1); font-size: 14px; font-weight: 540; color: var(--ks-ink); }
-  .threat p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--ks-ink-2); }
-  .threat .mit { display: block; margin-top: var(--ks-2); font-family: var(--ks-mono); font-size: 11.5px; color: var(--ks-ink-3); }
-
-  
-  .sec-jump { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: var(--ks-6); padding-top: var(--ks-4); border-top: 1px dashed var(--ks-line-2); }
-  .sec-jump a { font-family: var(--ks-mono); font-size: 11.5px; letter-spacing: 0.02em; color: var(--ks-ink-3); padding: 6px 10px; border: 1px solid var(--ks-line-2); border-radius: 999px; text-decoration: none; transition: color 120ms ease, border-color 120ms ease, background 120ms ease; }
-  .sec-jump a:hover { color: var(--ks-ink); border-color: var(--ks-accent-edge); background: var(--ks-accent-soft); text-decoration: none; }
-</style>
-  <meta property="og:title" content="Security">
-  <meta property="og:description" content="How kolm keeps your data, your weights, and your audit trail inside boundaries you control. Signing, retention, BAA, SOC 2 Type I, Type II observation, HIPAA, GDPR, FedRAMP Mod, IL5/IL6 patterns, ISO 27001, key management (local / KMS / HSM), deployment modes, and a dated roadmap.">
-  <meta property="og:image" content="https://kolm.ai/og/security.svg">
-  <meta property="og:url" content="https://kolm.ai/security">
-  <meta property="og:type" content="website">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "@type": "WebPage",
+  "name": "Security at kolm.ai",
   "url": "https://kolm.ai/security",
-  "description": "How kolm keeps your data, your weights, and your audit trail inside boundaries you control. Signing, retention, BAA, SOC 2 Type I, Type II observation, HIPAA, GDPR, FedRAMP Mod, IL5/IL6 patterns, ISO 27001, key management (local / KMS / HSM), deployment modes, and a dated roadmap.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "@id": "https://kolm.ai/#org"
-  }
+  "description": "How kolm holds the redacted logs you upload: redaction before processing, scoped per-tenant access, minimal retention, Ed25519 key management, a Merkle transparency log, and responsible disclosure.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
 </head>
-<body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<div class="ks-nav-wrap">
-  <header class="ks-nav">
-    <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-      <nav class="ks-nav__links" aria-label="Primary">
-        <a href="/product">Product</a>
-        <a href="/solutions/teams">For teams</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
-      </nav>
-      <div class="ks-nav__cta">
-        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
-        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:68ch">
+      <h1>You are handing us logs. Here is what we do with them.</h1>
+      <p class="lede">
+        To run a scan you upload redacted logs. This page is the operational record of
+        how we hold that data: what we process, what we keep, and what we discard. Concrete,
+        not reassuring. The signing facts below are the same ones your buyer checks offline.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/verify">Verify a report</a>
+        <a class="btn btn--ghost" href="/contact">Start an audit</a>
+      </div>
+      <div class="trustline" aria-label="How kolm holds your data">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Redacted before it reaches us</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Processed in scope, then discarded</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed, verifiable offline</span>
       </div>
     </div>
-  </header>
-</div>
+  </div>
+</section>
 
-<main id="main" data-test="wf22-security-page">
-
-<section style="background:var(--ks-bg-1);border-bottom:1px solid var(--ks-line-2);padding:14px 0;">
-  <div class="ks-wrap" style="display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:space-between;align-items:center;">
-    <div style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;">
-      <span style="font-family:var(--ks-mono);font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ks-ink-3);">Trust center</span>
-      <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--ks-accent-edge);border-radius:999px;font-family:var(--ks-mono);font-size:11.5px;color:var(--ks-accent);">
-        <span style="display:inline-block;width:6px;height:6px;border-radius:999px;background:var(--ks-accent);"></span>SOC 2 Type I attested
+<!-- ============================================================ 2. POSTURE STRIP -->
+<section class="section" style="padding-top:0;border-top:0" aria-label="Posture at a glance">
+  <div class="wrap">
+    <h2 class="sr-only">Posture at a glance</h2>
+    <hr class="rule">
+    <div class="band">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="band__item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        AES-256 at rest, TLS 1.3 in transit
       </span>
-      <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--ks-line-2);border-radius:999px;font-family:var(--ks-mono);font-size:11.5px;color:var(--ks-ink-2);">HIPAA BAA available</span>
-      <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--ks-line-2);border-radius:999px;font-family:var(--ks-mono);font-size:11.5px;color:var(--ks-ink-2);">GDPR Art. 28 DPA</span>
-      <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid var(--ks-line-2);border-radius:999px;font-family:var(--ks-mono);font-size:11.5px;color:var(--ks-ink-2);">Apache-2.0 + signed receipts</span>
+      <span class="band__item">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <a href="/transparency-log">Merkle transparency log (RFC 6962 style)</a>
+      </span>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;">
-      <a href="/status" style="font-family:var(--ks-mono);font-size:11.5px;color:var(--ks-ink-2);text-decoration:none;border:1px solid var(--ks-line-2);border-radius:6px;padding:5px 10px;">Status →</a>
-      <a href="/dpa" style="font-family:var(--ks-mono);font-size:11.5px;color:var(--ks-ink-2);text-decoration:none;border:1px solid var(--ks-line-2);border-radius:6px;padding:5px 10px;">DPA →</a>
-      <a href="/acceptable-use" style="font-family:var(--ks-mono);font-size:11.5px;color:var(--ks-ink-2);text-decoration:none;border:1px solid var(--ks-line-2);border-radius:6px;padding:5px 10px;">AUP →</a>
+    <div class="band" style="padding-top:0">
+      <span class="ctrlid">SSO + MFA</span>
+      <span class="ctrlid">Quarterly access review</span>
+      <span class="ctrlid">Per-tenant isolation</span>
+      <span class="ctrlid">Minimal retention</span>
+      <span class="ctrlid">SBOM per release</span>
+    </div>
+    <hr class="rule">
+  </div>
+</section>
+
+<!-- ============================================================ 3. HOW WE HOLD YOUR DATA -->
+<section class="section reveal" id="data">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / How we hold your data</span>
+      <h2>The data you send is redacted, scoped, and short-lived.</h2>
+      <p class="lede">
+        You are evaluating a vendor with your own logs. Reasonable people want to know exactly
+        what leaves their side and how long it lives on ours. The answer is small: redacted input
+        in, a signed report out, and very little kept in between.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card reveal">
+        <p class="card__k">What you send</p>
+        <h3>Redacted logs, not raw traffic</h3>
+        <p>A scan runs on logs you redact before upload. Secrets, customer identifiers, and payloads you strip stay on your side. We work from exactly what you choose to send.</p>
+        <p class="card__map">ASR-3 · data egress</p>
+      </div>
+      <div class="card reveal">
+        <p class="card__k">What we touch</p>
+        <h3>Only what the engagement scopes</h3>
+        <p>Processing is bounded by the scope in your engagement. Access is scoped per tenant with per-row fences, so one tenant's data is never in another's query path.</p>
+        <p class="card__map">ASR-1 · least privilege</p>
+      </div>
+      <div class="card reveal">
+        <p class="card__k">What we keep</p>
+        <h3>The signed artifact, not your raw data</h3>
+        <p>The output is one signed evidence report and its log entry. Raw uploaded logs are not retained past the run that produced it. The report is the record; the inputs are not.</p>
+        <p class="card__map">ASR-6 · evidence</p>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="sec-hero">
-  <div class="ks-wrap">
-    <div class="eyebrow">Security &middot; privacy &middot; compliance</div>
-    <h1>Your data, your weights, <b>your boundary.</b></h1>
-    <p class="lede">Kolm is an open-source compiler. It runs inside your own infrastructure, on-prem, or in an air-gapped enclave. Every artifact ships with a signed receipt that names the teacher, the base model, the eval pack, and the K-score axes. A security engineer, a compliance reviewer, or an auditor can verify the chain years later without trusting us.</p>
-    <div class="cta-row">
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Read the quickstart <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise deployment</a>
-      <a href="#soc2" class="ks-btn ks-btn--ghost">SOC 2 status</a>
-      <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a .kolm artifact</a>
+<!-- ============================================================ 4. DATA HANDLING (the ledger / dark beat) -->
+<section class="section section--ink reveal" id="handling">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / Data handling</span>
+      <h2>Redact. Process in scope. Retain only the artifact.</h2>
+      <p class="lede">
+        One short lifecycle. Redaction happens on your side first, processing stays inside the
+        assessed scope, and what persists afterward is the signed report, not your uploads.
+      </p>
     </div>
-    <nav class="sec-jump" aria-label="Jump to security section">
-      <a href="#boundary">Boundary</a>
-      <a href="#training">Training</a>
-      <a href="#signing">Signing</a>
-      <a href="#deployment">Deployment</a>
-      <a href="#compliance">Compliance</a>
-      <a href="#soc2">SOC 2</a>
-      <a href="#hipaa">HIPAA</a>
-      <a href="#baa">BAA</a>
-      <a href="#residency">Residency</a>
-      <a href="#keys">Key management</a>
-      <a href="#retention">Retention</a>
-      <a href="#threat">Threat model</a>
-      <a href="#ops">Operations</a>
-      <a href="#roadmap">Roadmap</a>
-      <a href="#reach">Contact</a>
-    </nav>
+
+    <div class="flow" aria-label="The redact, process and retain lifecycle">
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h9M4 18h13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M15.5 10.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+        <span class="flow__n">01 · Redact</span>
+        <span class="flow__t">You strip it first</span>
+        <p class="flow__d">Logs are redacted on your side before upload. Field-level redaction removes secrets and customer identifiers before anything reaches our processing.</p>
+      </div>
+      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 11.5l2.4 2.4L15.5 9.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">02 · Process</span>
+        <span class="flow__t">We work in scope</span>
+        <p class="flow__d">Processing runs against the redacted input inside the assessed scope. Data is encrypted in transit (TLS 1.3) and at rest (AES-256), isolated per tenant.</p>
+      </div>
+      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h8l4 4v14H7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 14.5l2 2 3.5-3.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">03 · Retain</span>
+        <span class="flow__t">We keep the report</span>
+        <p class="flow__d">What persists is the signed report and its log entry. Raw uploads are not retained beyond the run. Minimal retention by default, not by request.</p>
+      </div>
+    </div>
+
+    <div class="grid grid--3" style="margin-top:var(--s7)">
+      <div class="card">
+        <p class="card__k">Encryption</p>
+        <h3>AES-256 at rest, TLS 1.3 in transit</h3>
+        <p>Data in the hosted control plane is encrypted at rest with AES-256 (AWS KMS, per-tenant data keys). Client traffic uses TLS 1.3 with HSTS.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Isolation</p>
+        <h3>Per-tenant, per-namespace, per-row</h3>
+        <p>Data is isolated at the tenant and namespace level, with per-row tenant fences inside every query handler. Defense in depth, not a single boundary.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Access</p>
+        <h3>SSO-gated, MFA-enforced, reviewed quarterly</h3>
+        <p>Engineering access to the control plane is SSO-gated and MFA-enforced, reviewed quarterly. Production access is written to an immutable audit store.</p>
+      </div>
+    </div>
+
+    <p class="hero__claim" style="margin-top:var(--s7)">
+      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+    </p>
   </div>
 </section>
 
-<section class="sec-section" id="boundary">
-  <div class="ks-wrap">
-    <h2>Data-flow boundary</h2>
-    <p class="sub">The default deployment never sends customer prompts, completions, or model weights to kolm.ai infrastructure. The compiler runs on your machines; only signed receipts and (optionally) public registry pointers leave the boundary.</p>
-    <div class="pact">
-      <h3>What stays inside your network</h3>
-      <dl>
-        <dt>Captures</dt><dd>Raw prompts and completions land in <code>~/.kolm/events</code> or whichever path <code>KOLM_DATA_DIR</code> points to. Tenant-scoped by namespace and never replicated upstream.</dd>
-        <dt>Distilled datasets</dt><dd>Teacher-student pairs are generated by your distill workers against the teacher endpoint you configure. We do not see them.</dd>
-        <dt>Model weights</dt><dd>Quantized INT4/INT8 weights are written next to your captures. The .kolm artifact is a zip on your filesystem.</dd>
-        <dt>Eval pack runs</dt><dd>K-score evaluations execute against the artifact locally. The numeric scores and axes are computed in-process.</dd>
-        <dt>Logs and traces</dt><dd>Trace IDs, request bodies, and tool outputs are in your observability stack. Use the OTLP exporter if you want them in Datadog or Grafana.</dd>
-      </dl>
+<!-- ============================================================ 5. SIGNING KEY MANAGEMENT -->
+<section class="section reveal" id="signing">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / Signing key management</span>
+      <h2>One Ed25519 key signs every report. The private half stays put.</h2>
+      <p class="lede">
+        The signature your buyer checks is only as good as the key behind it. We keep that key
+        small, single-purpose, and rotated, and we publish the fingerprint so verification needs
+        nothing from us at check time.
+      </p>
     </div>
-    <div class="pact" style="margin-top:var(--ks-4)">
-      <h3>What does cross the boundary (only if you opt in)</h3>
-      <dl>
-        <dt>Receipt CIDs</dt><dd>If you publish to the public registry, a content-addressed hash of the receipt (no weights, no captures) becomes resolvable at <code>kolm.ai/verify/&lt;cid&gt;</code> for downstream verifiers.</dd>
-        <dt>Telemetry (off by default)</dt><dd>Opt-in usage counters help us prioritize. Set <code>KOLM_TELEMETRY=0</code> to disable; the CLI never sends prompts or completions either way.</dd>
-        <dt>Anthropic / OpenAI calls</dt><dd>Only if you use the hosted teacher path. Bring-your-own-key and self-hosted vLLM, SGLang, and TGI teachers keep all traffic in your network.</dd>
-      </dl>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="training">
-  <div class="ks-wrap">
-    <h2>Training data boundary</h2>
-    <p class="sub">A rented GPU is someone else's machine. kolm enforces a simple rule before any corpus is uploaded: public data may train on a rented pod; sensitive or customer data may not. The rent path classifies the corpus and refuses to send PII, PHI, secrets, or other sensitive classes to a third-party pod. This is enforced in code, not policy text.</p>
-    <div class="pact">
-      <h3>Where each kind of data trains</h3>
-      <dl>
-        <dt>Public or open data</dt><dd>May train on a rented pod (RunPod, Vast, Lambda, and similar). Nothing else about your account leaves with it.</dd>
-        <dt>Sensitive or customer data</dt><dd>Trains on local hardware, an air-gapped host, or BYOC (your own cloud), so it never crosses your boundary. The compiler refuses a rented pod for this data unless you pass an explicit, logged override that acknowledges the data will leave.</dd>
-        <dt>On a rented pod</dt><dd>The corpus and adapter are encrypted at rest, and the workspace is shredded on teardown before the instance is released. No corpus is left behind on a machine you no longer hold.</dd>
-      </dl>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="signing">
-  <div class="ks-wrap">
-    <h2>Signing and verification</h2>
-    <p class="sub">Every .kolm artifact ships with an Ed25519 signature over a content-addressed receipt. The receipt names the inputs that produced the artifact and the K-score that gated it. Verification is offline and reproducible.</p>
-    <ul class="fr-spec-list sg-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Ed25519 over the receipt CID</h3><span class="fr-spec-list__delta">ALGORITHM &middot; live</span></div>
-        <p class="fr-spec-list__p">The receipt is canonicalized to JCS, hashed (SHA-256), and signed. The signature, the public key fingerprint, and the receipt body all sit in the artifact zip. Any developer or auditor with the artifact can verify without contacting us.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>kolm verify works air-gapped</h3><span class="fr-spec-list__delta">OFFLINE &middot; live</span></div>
-        <p class="fr-spec-list__p">The verifier is a static binary. No network, no registry lookup, no truthfulness service in the middle. Hand a .kolm file to an auditor on a USB stick and they can verify the chain on a laptop.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Per-tenant signing keys</h3><span class="fr-spec-list__delta">KEY-ROTATION &middot; live</span></div>
-        <p class="fr-spec-list__p">The CLI generates an Ed25519 keypair on first use and stores it at <code>~/.kolm/keys</code>. Rotate with <code>kolm keys rotate</code>; previous receipts remain verifiable because the public key fingerprint is embedded.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Artifact hash binds to receipt</h3><span class="fr-spec-list__delta">TAMPER-EVIDENCE &middot; live</span></div>
-        <p class="fr-spec-list__p">The artifact hash is computed over the canonical zip and embedded in the receipt. Editing weights, swapping an eval pack, or rewriting the K-score after the fact invalidates the signature.</p>
-      </li>
-    </ul>
-    <div class="receipt">
-<pre><span class="s">// signed receipt embedded in every .kolm artifact</span>
-{
-  <span class="k">"version"</span>: <span class="s">"kolm-receipt-1"</span>,
-  <span class="k">"artifact_cid"</span>: <span class="s">"bafkreieq...4f7c"</span>,
-  <span class="k">"compiler_version"</span>: <span class="s">"kolm-0.41.0"</span>,
-  <span class="k">"compiled_at"</span>: <span class="s">"2026-05-22T18:14:02Z"</span>,
-  <span class="k">"teacher"</span>: { <span class="k">"id"</span>: <span class="s">"claude-opus-4-7"</span>, <span class="k">"endpoint"</span>: <span class="s">"https://api.anthropic.com"</span> },
-  <span class="k">"base_model"</span>: { <span class="k">"id"</span>: <span class="s">"Qwen/Qwen2.5-7B-Instruct"</span>, <span class="k">"sha256"</span>: <span class="s">"a3c1...d10b"</span> },
-  <span class="k">"eval_pack"</span>: { <span class="k">"id"</span>: <span class="s">"ks-finance-2026-q2"</span>, <span class="k">"cid"</span>: <span class="s">"bafkreif5...8a21"</span> },
-  <span class="k">"k_score"</span>: { <span class="k">"composite"</span>: <span class="n">84.6</span>, <span class="k">"verdict"</span>: <span class="s">"ship"</span> },
-  <span class="k">"axes"</span>: { <span class="k">"faithfulness"</span>: <span class="n">87</span>, <span class="k">"coverage"</span>: <span class="n">82</span>, <span class="k">"calibration"</span>: <span class="n">79</span>, <span class="k">"truthfulness"</span>: <span class="n">91</span>, <span class="k">"cost"</span>: <span class="n">84</span> },
-  <span class="k">"signed_at"</span>: <span class="s">"2026-05-22T18:14:08Z"</span>,
-  <span class="k">"signature"</span>: <span class="s">"ed25519:9c4f...e801"</span>,
-  <span class="k">"public_key"</span>: <span class="s">"ed25519:2dba...77c4"</span>
-}</pre>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="deployment">
-  <div class="ks-wrap">
-    <h2>Deployment modes</h2>
-    <p class="sub">Pick the boundary that matches your regulator. The same compiler, the same CLI, the same receipts; only the network shape changes.</p>
-    <ul class="fr-spec-list dep-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Inside your AWS, GCP, or Azure</h3><span class="fr-spec-list__delta">VPC-RESIDENT &middot; default</span></div>
-        <p class="fr-spec-list__p">Compiler workers run in a private subnet. Teacher calls go to Anthropic, OpenAI, or your self-hosted endpoint over your VPC routes. Receipts written to S3/GCS with object-lock.</p>
-        <ul class="dep-bullets">
-          <li>Default for SaaS teams with vendor data</li>
-          <li>BAA-eligible when paired with HIPAA-aware teacher path</li>
-          <li>One-VPC reference Terraform in <a href="/enterprise">enterprise</a></li>
+    <div class="split" style="align-items:flex-start">
+      <div>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px">
+          <li><span class="ok-text">+</span> Reports are canonicalized to JCS, hashed with SHA-256, then signed with Ed25519</li>
+          <li><span class="ok-text">+</span> The private key stays in the signing service; only the public key fingerprint travels in the report</li>
+          <li><span class="ok-text">+</span> Editing any field after signing invalidates the signature, in front of the reviewer</li>
+          <li><span class="ok-text">+</span> Rotation runs via <span class="mono">kolm keys rotate</span> on a defined cadence</li>
+          <li><span class="ok-text">+</span> Prior reports stay verifiable because each carries the fingerprint it was signed with</li>
         </ul>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Your own hardware</h3><span class="fr-spec-list__delta">ON-PREM &middot; regulated</span></div>
-        <p class="fr-spec-list__p">CLI installed on workstations, distill runs on an RTX 5090 or H100 box, artifacts written to a CIFS or S3-compatible store you operate. No outbound calls if you bring your own teacher.</p>
-        <ul class="dep-bullets">
-          <li>Default for regulated payors and providers</li>
-          <li>Works with self-hosted vLLM, SGLang, TGI</li>
-          <li>See <a href="/healthcare">healthcare</a> for HIPAA path</li>
-        </ul>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>No network at all</h3><span class="fr-spec-list__delta">AIR-GAPPED &middot; sealed</span></div>
-        <p class="fr-spec-list__p">CLI and runtimes are static binaries. Move artifacts and eval packs in on a sealed disk; the verifier works offline. Used by defense and intelligence pilots.</p>
-        <ul class="dep-bullets">
-          <li>kolm verify is a single static binary</li>
-          <li>Eval packs are CIDs, not URLs</li>
-          <li>Receipts verifiable on a clean laptop</li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section class="sec-section" id="compliance">
-  <div class="ks-wrap">
-    <h2>Regulatory posture</h2>
-    <p class="sub">Plain scope: what is live, what is in progress, what is not on the roadmap. We do not claim certifications we do not hold.</p>
-    <table class="reg-tbl">
-      <thead>
-        <tr><th>Standard</th><th>Status</th><th>Notes</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>SOC 2 Type I</td><td><span class="st live">Available</span></td><td>Report available under NDA. See <a href="#soc2" style="color:var(--ks-accent)">SOC 2 detail</a> below.</td></tr>
-        <tr><td>SOC 2 Type II</td><td><span class="st wip">In observation</span></td><td>Observation window underway. Expected Q4 2026. <a href="#soc2" style="color:var(--ks-accent)">Detail</a>.</td></tr>
-        <tr><td>HIPAA</td><td><span class="st live">BAA available</span></td><td>PHI never crosses the kolm.ai boundary by default. See <a href="#hipaa" style="color:var(--ks-accent)">HIPAA detail</a> + <a href="#baa" style="color:var(--ks-accent)">BAA</a> below.</td></tr>
-        <tr><td>GDPR</td><td><span class="st live">DPA available</span></td><td>Data Processing Addendum and SCCs available. EU residency on request.</td></tr>
-        <tr><td>FedRAMP Moderate</td><td><span class="st wip">Pilot</span></td><td>Two federal pilots underway in GovCloud. Not yet authorized.</td></tr>
-        <tr><td>FedRAMP High</td><td><span class="st no">Roadmap</span></td><td>Inherits FedRAMP Mod controls. Follows Mod authorization, not before.</td></tr>
-        <tr><td>DoD IL5 / IL6</td><td><span class="st wip">Pattern docs</span></td><td>Air-gapped enclave deployment pattern documented for IL5/IL6 enclaves. Customer-side ATO; no Kolm-managed cloud at this level.</td></tr>
-        <tr><td>ISO 27001</td><td><span class="st wip">Mapped</span></td><td>Controls mapped, audit window opens Q1 2027.</td></tr>
-        <tr><td>Australian IRAP</td><td><span class="st no">Not in scope</span></td><td>No Australian-resident Kolm-managed cloud today. VPC and air-gapped paths support IRAP-equivalent posture for customer-managed deployments.</td></tr>
-        <tr><td>PCI DSS</td><td><span class="st no">Not in scope</span></td><td>Kolm does not process card data; not on the roadmap.</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<section class="sec-section" id="soc2">
-  <div class="ks-wrap">
-    <h2>SOC 2 &middot; Type I available, Type II in observation</h2>
-    <p class="sub">Bundled into the security page so procurement can read the posture without leaving the trust surface. Detailed control mappings and the most recent report live under NDA &mdash; email <code>security@kolm.ai</code> with your DocuSign reference.</p>
-    <ul class="fr-spec-list sg-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Type I &middot; Q1 2026 attest</h3><span class="fr-spec-list__delta">REPORT &middot; under NDA</span></div>
-        <p class="fr-spec-list__p">Independent CPA firm issued a Type I attest covering the hosted control plane, public registry, and the compiler-as-a-service path. Scope explicitly excludes customer-resident VPC and air-gapped deployments because they are not Kolm-operated. Trust Services Criteria covered: Security, Availability, Confidentiality. Privacy criteria added in Type II.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Type II &middot; observation window Q2 2026 -> Q4 2026</h3><span class="fr-spec-list__delta">REPORT &middot; expected Q4 2026</span></div>
-        <p class="fr-spec-list__p">Six-month observation underway with the same firm. Adds Privacy criterion, change-management evidence, vulnerability-management evidence, and incident-response evidence under a sustained window. Interim controls evidence available to enterprise customers under NDA at any point during the window.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>What the report covers</h3><span class="fr-spec-list__delta">SCOPE &middot; precise</span></div>
-        <p class="fr-spec-list__p">Hosted control plane (kolm.ai), hosted registry (verifies CIDs and serves the public index), compiler-as-a-service workers (the path that runs distill on Kolm-managed GPUs when a customer opts in). Excludes: customer-resident compiler workers, customer-managed signing keys, captures that never leave the customer VPC.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Out of scope (and why that's the right scope)</h3><span class="fr-spec-list__delta">SCOPE &middot; plain</span></div>
-        <p class="fr-spec-list__p">Customer VPC deployments are not in the SOC 2 scope because Kolm has no operational access to them &mdash; the right control framework there is the customer&rsquo;s own (often their own SOC 2 or ISO 27001). The same logic applies to on-prem and air-gapped: zero Kolm-side operational footprint means zero Kolm-side audit footprint. Our job is to give your auditor a verifiable artifact chain; their job is to certify your environment.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>How to get the report</h3><span class="fr-spec-list__delta">PROCESS &middot; 1 business day</span></div>
-        <p class="fr-spec-list__p">Email <code>security@kolm.ai</code> with company name and a DocuSign-ready NDA (or use ours). We return the report within one business day with a fresh PDF and the auditor&rsquo;s contact for follow-up questions.</p>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section class="sec-section" id="hipaa">
-  <div class="ks-wrap">
-    <h2>HIPAA &middot; BAA available, PHI never crosses the kolm.ai boundary by default</h2>
-    <p class="sub">For covered entities, business associates, and EHR vendors. The compiler is designed so PHI in your prompts and completions stays inside your own infrastructure or on-prem; the BAA covers the narrow surface where Kolm processes hashes and metadata.</p>
-    <table class="reg-tbl">
-      <thead>
-        <tr><th>HIPAA category</th><th>Where it lives</th><th>What Kolm sees</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Raw PHI in prompts / completions</td><td>Your VPC or on-prem (<code>~/.kolm/events</code>)</td><td>Nothing &mdash; captures stay tenant-local, never replicated upstream.</td></tr>
-        <tr><td>Distilled teacher-student pairs</td><td>Your distill worker (same network as the teacher endpoint)</td><td>Nothing &mdash; pairs are generated against your teacher; we do not see them.</td></tr>
-        <tr><td>Quantized weights (INT4/INT8)</td><td>Your object store next to the captures</td><td>Nothing &mdash; weights live in the .kolm artifact zip on your filesystem.</td></tr>
-        <tr><td>Receipt CIDs (hashes, no PHI)</td><td>Public registry (opt-in only)</td><td>Hash + signature + K-score numbers. No prompt text, no PHI.</td></tr>
-        <tr><td>Eval-pack run telemetry</td><td>Your local eval runner</td><td>Aggregate K-score numbers; rows stay local. PHI from eval set never leaves.</td></tr>
-        <tr><td>Audit logs (your operational record)</td><td>Your SIEM (Splunk, Datadog, OS log)</td><td>Nothing unless you ship them to Kolm; we never poll your audit log.</td></tr>
-      </tbody>
-    </table>
-    <p class="sub" style="margin-top:var(--ks-5)">Three things make this contract enforceable: (1) the compiler is open-source, so the network paths are auditable; (2) the receipt format binds the artifact hash to the signing key, so you can verify any deployed weights came from your own distill run; (3) the BAA explicitly enumerates the narrow surface where Kolm processes hashes &mdash; if the architecture changes, the BAA changes too.</p>
-    <div class="receipt" style="margin-top:var(--ks-4)">
-<pre><span class="s">// HIPAA-shaped deployment: same compiler, all PHI stays inside</span>
-$ <span class="k">export</span> KOLM_DATA_DIR=/secure/phi-namespace/kolm
-$ <span class="k">export</span> KOLM_TELEMETRY=0                  <span class="s"># belt-and-braces: telemetry already excludes PHI</span>
-$ kolm capture log <span class="s">"&lt;chart summary prompt with PHI&gt;"</span>  <span class="s"># lands at /secure/phi-namespace/kolm/events</span>
-$ kolm distill --teacher https://vllm.internal/v1   <span class="s"># teacher inside your own infrastructure, PHI never egresses</span>
-$ kolm compile && kolm verify          <span class="s"># signed receipt: only hashes + K-score axes</span>
-$ <span class="s"># optional, off by default:</span>
-$ <span class="s"># kolm publish &lt;cid&gt;                  # publishes hash to /verify/&lt;cid&gt;, no PHI</span></pre>
+      </div>
+      <div class="report register">
+        <div class="register__row"><span class="register__k">key_id</span><span class="register__v"><b>kolm-prod-2026</b></span></div>
+        <div class="register__row"><span class="register__k">algorithm</span><span class="register__v">ed25519</span></div>
+        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
+        <div class="register__row"><span class="register__k">fingerprint</span><span class="register__v"><b>fa562154...c0a4</b></span></div>
+        <div class="register__row"><span class="register__k">private_key</span><span class="register__v">stays in the signer <span class="ann">not in any report</span></span></div>
+        <div class="register__row"><span class="register__k">rotation</span><span class="register__v">defined cadence <span class="ann">kolm keys rotate</span></span></div>
+        <div class="register__row"><span class="register__k">prior_reports</span><span class="register__v"><b>remain verifiable</b></span></div>
+      </div>
     </div>
-    <p class="sub" style="margin-top:var(--ks-5)">For a full row-by-row mapping of HIPAA Security Rule sections (164.308 administrative, 164.310 physical, 164.312 technical) to compiler controls, see <a href="/hipaa-mapping" style="color:var(--ks-accent)">the HIPAA mapping detail page</a> &mdash; that page is the procurement-grade evidence; this section is the architectural summary.</p>
   </div>
 </section>
 
-<section class="sec-section" id="baa">
-  <div class="ks-wrap">
-    <h2>Business Associate Agreement &middot; standard terms, narrow surface</h2>
-    <p class="sub">The Kolm BAA covers the compiler-as-a-service path (hosted distill / hosted compile / hosted registry) and the audit log shipping path. It deliberately does not promise things we cannot enforce &mdash; like custody of PHI that never reaches our infrastructure.</p>
-    <ul class="fr-spec-list sg-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Surface in scope</h3><span class="fr-spec-list__delta">SCOPE &middot; narrow</span></div>
-        <p class="fr-spec-list__p">Hosted control-plane API (key issuance, namespace metadata), hosted registry (receipt CID resolution), hosted distill workers if you opt in (rare; most HIPAA tenants run distill in their VPC), audit-log shipping if you opt in. Default deployment uses none of these for PHI &mdash; the BAA still covers the metadata path because some sites need it for procurement sign-off.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Surface deliberately out of scope</h3><span class="fr-spec-list__delta">SCOPE &middot; clear</span></div>
-        <p class="fr-spec-list__p">Captures on your machines, weights on your machines, teacher endpoints you operate, eval-pack runs inside your network. The BAA does not assign Kolm responsibility for storage we never touch &mdash; that would be a fiction that hurts you in incident response.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Breach notification &middot; 60 days (HIPAA Breach Notification Rule)</h3><span class="fr-spec-list__delta">BREACH &middot; 60 day</span></div>
-        <p class="fr-spec-list__p">If a breach affects the in-scope surface, Kolm notifies the covered entity within 60 days of discovery (the HIPAA statutory ceiling). In practice we commit to 72 hours in the contract attachment so customers can meet faster downstream notification windows.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Subcontractors</h3><span class="fr-spec-list__delta">CHAIN &middot; documented</span></div>
-        <p class="fr-spec-list__p">All cloud subcontractors that touch BAA-scope data (AWS, Cloudflare for the hosted control plane only) sign downstream BAAs. The list is in the BAA appendix and updated when subcontractors change. No model-provider subcontractor sees PHI under the default deployment.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Termination &middot; data return / destruction</h3><span class="fr-spec-list__delta">EXIT &middot; clean</span></div>
-        <p class="fr-spec-list__p">On termination, Kolm returns or destroys all PHI in the in-scope surface within 30 days and provides a signed destruction certificate. Customer-resident data is unaffected because it never reached Kolm in the first place.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>How to execute</h3><span class="fr-spec-list__delta">PROCESS &middot; 5 business days typical</span></div>
-        <p class="fr-spec-list__p">Email <code>security@kolm.ai</code> requesting the BAA. We return either our standard form (covers 95% of cases) or accept yours with a redline pass. Typical signing window from request to fully-executed: five business days for our form, ten for customer-paper. See <a href="/baa" style="color:var(--ks-accent)">the BAA terms page</a> for the standard-form text.</p>
-      </li>
+<!-- ============================================================ 6. TRANSPARENCY LOG -->
+<section class="section reveal" id="transparency">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / Transparency log</span>
+      <h2>Every signature lands in a Merkle log you can audit.</h2>
+      <p class="lede">
+        A signature you cannot situate in a record is a signature you have to take on faith. Each
+        signed report is appended to a public log, so a reviewer can confirm it was issued and
+        never quietly altered.
+      </p>
+    </div>
+    <div class="split" style="align-items:flex-start">
+      <div>
+        <p>Each signed report is appended to a transparency log structured after RFC 6962. Entries are SHA-256 hashed into a Merkle tree, so no entry can be edited or removed without changing the root. Every report ships with an inclusion proof a reviewer checks independently.</p>
+        <p style="margin-top:16px">This is a Merkle log, not a blockchain. An Ed25519 and SHA-256 append-only structure, with no tokens, no wallets, and no distributed ledger. The log is public and anyone can recompute the root.</p>
+        <a class="btn btn--ghost" href="/transparency-log" style="margin-top:24px;display:inline-flex">View the transparency log</a>
+      </div>
+      <div class="report register">
+        <div class="register__row"><span class="register__k">structure</span><span class="register__v">rfc6962-merkle</span></div>
+        <div class="register__row"><span class="register__k">hash</span><span class="register__v">sha-256</span></div>
+        <div class="register__row"><span class="register__k">append_only</span><span class="register__v"><b>true</b> <span class="ann">no edits, no deletes</span></span></div>
+        <div class="register__row"><span class="register__k">tree_size</span><span class="register__v">1428 <span class="ann">illustrative</span></span></div>
+        <div class="register__row"><span class="register__k">root</span><span class="register__v"><b>sha256:7b91...c0a4</b></span></div>
+        <div class="register__row"><span class="register__k">inclusion</span><span class="register__v">per-report proof</span></div>
+        <div class="register__row"><span class="register__k">live_root</span><span class="register__v">kolm.ai/transparency-log</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 7. RESPONSIBLE DISCLOSURE -->
+<section class="section reveal" id="disclosure">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">05 / Responsible disclosure</span>
+      <h2>Found something? Tell us, and you are covered.</h2>
+      <p class="lede">
+        If you find a security issue in our hosted services, signing pipeline, CLI, or evidence
+        format, report it to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> with a writeup,
+        reproduction steps, and the impact you assessed.
+      </p>
+    </div>
+    <ul class="ledger" style="margin:0 0 var(--s6)">
+      <li>We acknowledge within 24 hours and triage within 72 hours</li>
+      <li>Coordinated disclosure window of 90 days from a verified report</li>
+      <li>We aim to remediate well before the window closes, and we say so proactively if a fix needs longer</li>
+      <li>We do not pursue legal action against researchers acting in good faith under this policy</li>
     </ul>
+    <div class="grid grid--3">
+      <div class="card reveal">
+        <p class="card__k">Dependency hygiene</p>
+        <h3>Critical CVEs in 7 days</h3>
+        <p>Critical CVEs in dependencies are patched within 7 days, high severity within 30. A CycloneDX SBOM ships with every CLI release, signed and verifiable against the release tag.</p>
+      </div>
+      <div class="card reveal">
+        <p class="card__k">Supply chain</p>
+        <h3>Signed, reproducible releases</h3>
+        <p>CLI releases are signed and built from a reproducible script in the public repository, so a downstream consumer can audit the dependency tree and confirm the bytes.</p>
+      </div>
+      <div class="card reveal">
+        <p class="card__k">Incident response</p>
+        <h3>On-call, with a written follow-up</h3>
+        <p>An on-call rotation covers the hosted gateway and signing pipeline. Post-incident reviews are shared with affected enterprise customers within 14 days of closure.</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s4)">
+      To be exact about kolm itself: we do not currently hold a SOC 2 report, and there is no published third-party penetration test of our own infrastructure. We will not list either until it exists and can be verified. What we offer today is evidence you can check yourself: the signing facts above, the Merkle log, and the open verifier. Questions? Email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.
+    </p>
   </div>
 </section>
 
-<section class="sec-section" id="residency">
-  <div class="ks-wrap">
-    <h2>Data residency</h2>
-    <p class="sub">Captures, receipts, and eval-pack runs are tenant-scoped. Pick the residency boundary that matches your regulator; the same compiler and CLI run identically in every shape.</p>
-    <table class="reg-tbl">
-      <thead>
-        <tr><th>Boundary</th><th>Status</th><th>What lives there</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>US-East (Virginia)</td><td><span class="st live">Default &middot; available</span></td><td>Hosted control plane and public registry CIDs. Captures stay on your machines unless you explicitly publish a receipt CID.</td></tr>
-        <tr><td>US-West (Oregon)</td><td><span class="st live">Enterprise &middot; available</span></td><td>Mirror of the US-East registry for low-latency reads. No additional data; same captures-on-your-machines posture.</td></tr>
-        <tr><td>EU-West (Frankfurt)</td><td><span class="st live">Enterprise &middot; available</span></td><td>For GDPR-covered tenants. Registry CIDs and control-plane metadata stay inside <code>eu-central-1</code>. DPA and SCCs available.</td></tr>
-        <tr><td>Customer VPC (any region)</td><td><span class="st live">VPC-resident &middot; available</span></td><td>Compiler workers, captures, weights, and the K-score evaluator all run inside your network. Receipts written to your S3/GCS/Azure object store with object-lock. No data leaves the VPC unless you opt in.</td></tr>
-        <tr><td>Air-gapped / on-prem</td><td><span class="st live">Enclave &middot; available</span></td><td>For IL5/IL6, classified, or zero-egress deployments. Static CLI + verifier binary shipped via signed tarball. <code>kolm verify</code> works with no network. Receipts hand-carried out as zip files.</td></tr>
-      </tbody>
-    </table>
-    <p class="sub" style="margin-top: var(--ks-5)">Region choice is a deploy-time decision, not a per-tenant runtime one. To migrate a tenant between regions, contact <a href="/contact" style="color:var(--ks-accent)">enterprise support</a>; we coordinate a window with you and re-sign the receipt manifest at the new boundary.</p>
-  </div>
-</section>
-
-<section class="sec-section" id="keys">
-  <div class="ks-wrap">
-    <h2>Key management</h2>
-    <p class="sub">Signing keys are the trust root for every artifact. Kolm defaults to a local Ed25519 keypair so you can verify offline on day one, then upgrades cleanly to a managed KMS or an HSM when your security review requires it.</p>
-    <ul class="fr-spec-list sg-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Default &middot; local Ed25519 keypair</h3><span class="fr-spec-list__delta">LOCAL &middot; live</span></div>
-        <p class="fr-spec-list__p">Generated on first <code>kolm keys init</code> at <code>~/.kolm/keys</code> with 0600 perms. Public key fingerprint embedded in every receipt; private key never leaves the machine. Sufficient for solo engineers, hackathons, and the quickstart.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Managed &middot; AWS KMS / GCP KMS / Azure Key Vault</h3><span class="fr-spec-list__delta">KMS &middot; live</span></div>
-        <p class="fr-spec-list__p">Configure with <code>kolm sign --kms aws://arn:... </code> (also <code>gcp://projects/...</code> and <code>azure://vaults/...</code>). The private key never leaves the KMS; the CLI sends only the canonical receipt hash for signature. Per-call signing is auditable via your KMS provider's CloudTrail / Cloud Audit Logs / Azure Monitor.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Self-managed &middot; HashiCorp Vault Transit</h3><span class="fr-spec-list__delta">VAULT &middot; live</span></div>
-        <p class="fr-spec-list__p">For teams running Vault. Configure with <code>kolm sign --vault https://vault.acme.internal --key-name kolm-prod</code>. Same hash-only signing contract; key custody stays under your Vault policy.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>HSM-backed &middot; PKCS#11 (YubiHSM, AWS CloudHSM, Thales)</h3><span class="fr-spec-list__delta">HSM &middot; enterprise</span></div>
-        <p class="fr-spec-list__p">For FedRAMP-Mod-plus deployments or any policy that requires FIPS 140-3 Level 3 hardware. Configure with <code>kolm sign --pkcs11-lib /opt/cloudhsm/lib/libcloudhsm_pkcs11.so --slot 0 --key-label kolm-prod</code>. Key material never extractable; tamper-evident audit logs from the HSM are the immutable record.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Rotation policy</h3><span class="fr-spec-list__delta">ROTATION &middot; live</span></div>
-        <p class="fr-spec-list__p"><code>kolm keys rotate</code> generates a new keypair and writes a rotation receipt that links the new fingerprint to the prior one (signed by both). Previously issued artifacts remain verifiable because every receipt embeds the public key it was signed with. Recommended cadence: 12 months for local keys, per-KMS-policy for managed keys.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Forward &middot; zero-knowledge receipts</h3><span class="fr-spec-list__delta">ROADMAP &middot;</span></div>
-        <p class="fr-spec-list__p">A privacy mode where the receipt commits to the artifact hash + K-score axes via a STARK / Groth16 proof, so an external verifier can confirm the gate verdict without learning the eval-pack contents or the per-axis numbers. Spec will land at <code>/spec/zk-receipts</code> when the back-end work in lands; until then this row is roadmap, not shipping &mdash; we do not link a URL we have not built.</p>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section class="sec-section" id="retention">
-  <div class="ks-wrap">
-    <h2>Retention and deletion</h2>
-    <p class="sub">Captures, receipts, and eval runs are tenant-scoped and namespace-scoped. You set retention; we never apply a default lifetime to your data.</p>
-    <ul class="fr-spec-list sg-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Per-namespace retention</h3><span class="fr-spec-list__delta">CAPTURES &middot; live</span></div>
-        <p class="fr-spec-list__p">Set <code>retention_days</code> per namespace via <code>kolm namespace set-retention &lt;ns&gt; --days 90</code>. Older captures are deleted by the local rotator. Receipts that reference deleted captures remain verifiable because they only embed hashes.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Subject deletion</h3><span class="fr-spec-list__delta">RIGHT-TO-DELETE &middot; live</span></div>
-        <p class="fr-spec-list__p">Pass a deletion request to <code>kolm capture delete --subject &lt;id&gt;</code>. The CLI removes raw rows and writes a tombstone receipt so auditors can prove the deletion happened without recovering the data.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Artifact lifecycle</h3><span class="fr-spec-list__delta">ARTIFACTS &middot; live</span></div>
-        <p class="fr-spec-list__p">.kolm artifacts live in your object store. The compiler never deletes them. Use your bucket lifecycle to age artifacts; the receipt CID stays verifiable as long as the receipt is preserved (the receipt is a few kilobytes).</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Registry takedown</h3><span class="fr-spec-list__delta">REGISTRY &middot; live</span></div>
-        <p class="fr-spec-list__p">If you publish a receipt CID to the public registry, you can request takedown at <a href="/contact" style="color:var(--ks-accent)">trust contact</a>. Takedown removes the CID from the public index; downstream verifiers with the receipt zip continue to verify.</p>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section class="sec-section" id="threat">
-  <div class="ks-wrap">
-    <h2>Threat model</h2>
-    <p class="sub">What the compiler does and does not defend against, with the mitigation that handles each class.</p>
-    <ul class="fr-spec-list thr-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Tampered weights post-compile</h3><span class="fr-spec-list__delta fr-spec-list__delta--threat">INTEGRITY &middot; defended</span></div>
-        <p class="fr-spec-list__p">An operator swaps the INT4 weights in a deployed artifact and tries to ship the same receipt.<span class="mit">mitigation &middot; artifact hash bound to signed receipt; kolm verify fails</span></p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Spoofed K-score</h3><span class="fr-spec-list__delta fr-spec-list__delta--threat">INTEGRITY &middot; defended</span></div>
-        <p class="fr-spec-list__p">A team edits the K-score JSON to claim a higher gate verdict than the eval pack produced.<span class="mit">mitigation &middot; K-score and axes signed in receipt; verifier recomputes if eval pack present</span></p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Stolen API key</h3><span class="fr-spec-list__delta fr-spec-list__delta--threat">AUTH &middot; defended</span></div>
-        <p class="fr-spec-list__p">A leaked CLI API key is used to publish to the hosted registry or call hosted teachers.<span class="mit">mitigation &middot; rotate with <code>kolm keys rotate</code>; per-tenant rate limits; audit log</span></p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Captures exfiltrated from disk</h3><span class="fr-spec-list__delta fr-spec-list__delta--threat">OS &middot; out-of-scope</span></div>
-        <p class="fr-spec-list__p">An attacker with filesystem access reads <code>~/.kolm/events</code> directly.<span class="mit">mitigation &middot; out of scope for the compiler; use OS-level encryption (LUKS, BitLocker, FileVault)</span></p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Supply-chain on the CLI</h3><span class="fr-spec-list__delta fr-spec-list__delta--threat">SUPPLY-CHAIN &middot; defended</span></div>
-        <p class="fr-spec-list__p">A compromised release pushes a backdoored kolm binary.<span class="mit">mitigation &middot; releases signed; SBOM published; reproducible build script in repo</span></p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Prompt injection on captures</h3><span class="fr-spec-list__delta fr-spec-list__delta--threat">RUNTIME &middot; defended</span></div>
-        <p class="fr-spec-list__p">A captured prompt contains instructions that try to manipulate downstream distill or scoring.<span class="mit">mitigation &middot; eval pack runs are sandboxed; teacher calls are scoped per row</span></p>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section class="sec-section" id="ops">
-  <div class="ks-wrap">
-    <h2>Operational security</h2>
-    <p class="sub">How we run kolm.ai the service; how you should run the compiler in your environment.</p>
-    <ul class="fr-spec-list ops-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Least-privilege access</h3><span class="fr-spec-list__delta fr-spec-list__delta--internal">INTERNAL &middot; kolm.ai</span></div>
-        <p class="fr-spec-list__p">Engineering access to the hosted control plane is SSO-gated, MFA-enforced, and reviewed quarterly. Production access is logged to an immutable audit store.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Vulnerability response</h3><span class="fr-spec-list__delta fr-spec-list__delta--internal">INTERNAL &middot; kolm.ai</span></div>
-        <p class="fr-spec-list__p">Critical CVEs in dependencies patched within 7 days; high within 30. Disclosure window is 90 days from a verified report. Email <code>security@kolm.ai</code> with a writeup.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Incident response</h3><span class="fr-spec-list__delta fr-spec-list__delta--internal">INTERNAL &middot; kolm.ai</span></div>
-        <p class="fr-spec-list__p">On-call rotation for the hosted gateway and registry. Post-incident reviews shared with affected enterprise customers within 14 days.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Network egress</h3><span class="fr-spec-list__delta fr-spec-list__delta--yours">YOUR-SIDE &middot; operator</span></div>
-        <p class="fr-spec-list__p">For VPC deployments, allowlist only the teacher endpoint(s) you use and (optionally) the public registry. Everything else stays inside.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Key custody</h3><span class="fr-spec-list__delta fr-spec-list__delta--yours">YOUR-SIDE &middot; operator</span></div>
-        <p class="fr-spec-list__p">Signing keys live in <code>~/.kolm/keys</code> by default. For multi-engineer teams, move them to your KMS (AWS, GCP, Azure, HashiCorp Vault) and configure <code>kolm sign --kms</code>.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Audit log shipping</h3><span class="fr-spec-list__delta fr-spec-list__delta--yours">YOUR-SIDE &middot; operator</span></div>
-        <p class="fr-spec-list__p">The CLI emits structured JSON to <code>~/.kolm/audit.log</code>. Tail it into Splunk, Datadog, or your SIEM. Receipts are the durable record; the audit log is the operational one.</p>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section class="sec-section" id="roadmap">
-  <div class="ks-wrap">
-    <h2>Forward roadmap (dated, not aspirational)</h2>
-    <p class="sub">Every item below has a public commitment date or a defined trigger condition. If a date slips, we will update this section in the next deploy and surface the slip in <a href="/changelog" style="color:var(--ks-accent)">/changelog</a>.</p>
-    <table class="reg-tbl">
-      <thead>
-        <tr><th>Item</th><th>Target</th><th>Trigger / dependency</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>SOC 2 Type II report</td><td><span class="st wip">Q4 2026</span></td><td>Observation window opened Q2 2026; auditor engaged; awaiting end-of-window report. Customers under NDA can see interim controls evidence today.</td></tr>
-        <tr><td>ISO 27001 audit</td><td><span class="st wip">Q1 2027 audit window</span></td><td>Controls already mapped against Annex A. Audit firm selected; engagement letter pending procurement.</td></tr>
-        <tr><td>FedRAMP Moderate ATO</td><td><span class="st wip">Sponsor-dependent</span></td><td>Two pilots underway in AWS GovCloud. Authorization timeline follows the sponsoring agency&rsquo;s P-ATO review.</td></tr>
-        <tr><td>Third-party penetration test</td><td><span class="st wip">Annual cadence</span></td><td>Annual third-party pen-test against the hosted control plane. Most recent report available under NDA to enterprise customers via <code>security@kolm.ai</code>.</td></tr>
-        <tr><td>SBOM publishing</td><td><span class="st live">Per release &middot; live</span></td><td>Every CLI release attaches a CycloneDX SBOM. Signed; verifiable against the release tag.</td></tr>
-        <tr><td>Zero-knowledge receipts</td><td><span class="st wip">Spec Q3 2026 / impl Q4 2026</span></td><td>Privacy-preserving K-score attestation. Spec at <code>/spec/zk-receipts</code> when ships; reference verifier follows in the same wave.</td></tr>
-        <tr><td>Multi-region disaster recovery</td><td><span class="st live">Live &middot; cross-region replication</span></td><td>Registry CIDs replicated across US-East and US-West. EU-West tenants stay region-pinned; cross-region failover within the EU on roadmap for Q3 2026.</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<section class="sec-section" id="reach">
-  <div class="ks-wrap">
-    <h2>Reach the security and compliance team</h2>
-    <p class="sub">For BAA requests, SOC 2 reports under NDA, vulnerability disclosure, or a deployment review with a security engineer.</p>
-    <ul class="fr-spec-list sg-list">
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Vulnerability disclosure</h3><span class="fr-spec-list__delta">SECURITY@ &middot; 24h ack</span></div>
-        <p class="fr-spec-list__p">Email <code>security@kolm.ai</code> with a writeup. We acknowledge within 24 hours and aim to triage within 72.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>BAA and DPA</h3><span class="fr-spec-list__delta">HIPAA &middot; GDPR</span></div>
-        <p class="fr-spec-list__p">For HIPAA-covered workloads or EU data subjects. <a href="/baa">BAA terms</a> &middot; <a href="/contact">DPA request</a>.</p>
-      </li>
-      <li class="fr-spec-list__row">
-        <div class="fr-spec-list__head"><h3>Enterprise deployment review</h3><span class="fr-spec-list__delta">ENTERPRISE &middot; SE-led</span></div>
-        <p class="fr-spec-list__p">For regulated payors, providers, and federal pilots. A solutions engineer walks your security team through the VPC, on-prem, or air-gapped path. <a href="/enterprise">Book a review</a>.</p>
-      </li>
-    </ul>
-    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/k-score" class="ks-btn ks-btn--ghost">How the K-score gate works</a>
-      <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a .kolm artifact</a>
+<!-- ============================================================ 8. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Checkable beats claimed.</h2>
+    <p class="lede">Pull a report, edit a byte, watch the seal break. The same Ed25519 key signs everything we issue, and every signature lands in the log.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/transparency-log">View the transparency log</a>
     </div>
   </div>
 </section>
 
 </main>
 
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/about">About</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
 
-<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix w662-residency w662-keys w662-roadmap -->
-<div style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden" aria-hidden="true">
-  <span data-test="w260-soc2-type-1">SOC 2 Type I</span>
-  <span data-test="w662-residency">Data residency: US-East, US-West, EU-West, Customer VPC, Air-gapped</span>
-  <span data-test="w662-keys">Key management: local Ed25519, AWS KMS, GCP KMS, Azure Key Vault, HashiCorp Vault, PKCS#11 HSM</span>
-  <span data-test="w662-roadmap">Forward roadmap dated: SOC 2 Type II Q4 2026, ISO 27001 Q1 2027 audit window, zero-knowledge receipts</span>
-</div>
-
-<div hidden data-w806-anchors="wave189-kms-rotation">
-<p>wave 189 KMS rotation surface stamp.</p>
-<p>Rotation triggers: cadence, compromise, personnel.</p>
-<p>Default cadence: 365 days. Overlap window: 30 days for retired keys.</p>
-<p>KMS targets: AWS KMS, GCP, Azure Key Vault, HashiCorp Vault.</p>
-<p>Cryptoperiod grounding: NIST SP 800-57.</p>
-<p>Cross-references: RS-1 sections 7.9 and 7.10.</p>
-<a href="/spec/rs-1#section-7-9">RS-1 7.9</a>
-<a href="/spec/rs-1#section-7-10">RS-1 7.10</a>
-<p>CLI verbs: kolm keys list, kolm keys rotate, kolm keys export.</p>
-<p>Manifest field: signature.key_id (implemented as key_fingerprint).</p>
-<p>Plain scope: kolm ships the rotation receipt format; the customer owns the KMS hook.</p>
-<p>KMS api_status sentinel: <code>awaiting_operator_hook</code> (plain-state token returned by /v1/keys/rotate when the operator KMS hook is not yet registered).</p>
-<a href="/threat-model">Threat model</a>
-<a href="/drift">Drift surface</a>
-<p>wave 193 shipped: kolm keys rotate is wired in the CLI.</p>
-</div>
-<section class="section kms-section" hidden data-w806-anchors="wave189-kms-section">
-  <style>
-    .kms-section { --accent: #2563eb; --warn: #a8b3c2; --bad: #ff6b91; }
-  </style>
-  <p>KMS rotation section. Wave 189 lock-in tokens declared.</p>
-</section>
-
-<div hidden aria-hidden="true" data-w260-anchors="security-posture-summary" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
-  <section data-w260="posture-summary">
-    <h2>Security posture summary</h2>
-    <ul>
-      <li>HIPAA Security Rule mapping documented end-to-end; BAA available under standard MSA for Enterprise customers and on request for Team customers; live today.</li>
-      <li>GDPR Article 28 Data Processing Addendum (DPA) shipped; Standard Contractual Clauses (SCCs) baked into the DPA for EU data transfers; live today.</li>
-      <li>Halborn penetration test completed April 2026; full summary letter available under MNDA via security@kolm.ai.</li>
-      <li>SOC 2 Type I attestation is available under MNDA alongside the Halborn pentest, Vanta posture monitoring, and CAIQ-Lite for fast vendor assessments. The closure retired the "Q3 2026 target" language when the letter shipped.</li>
-      <li>Bug bounty program runs through HackerOne; payouts from $500 floor for low-severity findings to $10,000 ceiling for critical findings. Report responsibly at security@kolm.ai or via the HackerOne private program (invite on request).</li>
-      <li>Encryption at rest: AES-256 via AWS KMS with per-tenant data keys. Encryption in transit: TLS 1.3 with HSTS + certificate pinning on the kolm.ai gateway.</li>
-      <li>Per-tenant data isolation enforced at the event-store layer; per-namespace partitioning within each tenant; defense-in-depth via per-row tenant fences inside every query handler.</li>
-      <li>Audit log export covers per-tenant mutations; 7-year retention per HIPAA Security Rule 164.316(b)(2); GDPR Article 17 right to erasure honored within 30 days.</li>
-    </ul>
-  </section>
-</div>
 </body>
 </html>

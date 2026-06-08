@@ -1,12 +1,12 @@
 // src/export-fp8.js
 //
-// S-6 — FP8 (8-bit float) export chain for ANY artifact.
+// S-6 - FP8 (8-bit float) export chain for ANY artifact.
 //
 // FP8 is a native 8-bit floating point format that runs at hardware speed on
 // NVIDIA Hopper (sm_90 / H100) and Ada (sm_89 / 4090). Two encodings:
-//   * e4m3 — 4 exponent bits, 3 mantissa bits. Higher precision, narrower
+//   * e4m3-4 exponent bits, 3 mantissa bits. Higher precision, narrower
 //     dynamic range. Standard choice for weights and activations.
-//   * e5m2 — 5 exponent bits, 2 mantissa bits. Lower precision, wider
+//   * e5m2-5 exponent bits, 2 mantissa bits. Lower precision, wider
 //     dynamic range. Used for gradients in training and for activations with
 //     extreme dynamic range.
 //
@@ -35,7 +35,7 @@ import path from 'node:path';
 
 export const FP8_EXPORT_VERSION = 'export-fp8-v1';
 
-// e4m3 / e5m2 — weight-only or weight+activation FP8 (W8A8 / W8A16).
+// e4m3 / e5m2 - weight-only or weight+activation FP8 (W8A8 / W8A16).
 // w8a8  = weights + activations both FP8 e4m3 (max speedup, more cal)
 // w8a16 = weights FP8 e4m3, activations FP16 (recommended default)
 export const QUANT_LEVELS = Object.freeze([

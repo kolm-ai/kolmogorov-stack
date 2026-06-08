@@ -1,4 +1,4 @@
-// W831 — HTTP routes for the offline / air-gapped integration.
+// W831 - HTTP routes for the offline / air-gapped integration.
 //
 // Modular mount keeps the src/router.js diff to a single import + a single
 // call line (see meta-routes.js + pipeline-routes.js for the same pattern).
@@ -39,7 +39,7 @@
 // W604 version stamp: 'w831-v1'.
 //
 // Honesty invariants:
-//   - 401 returned on missing auth — never a quiet success.
+//   - 401 returned on missing auth - never a quiet success.
 //   - 4xx returned on caller-input errors (missing path, malformed dataset).
 //   - 5xx returned on internal / I/O errors WITH detail strings; never silent.
 

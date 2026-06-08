@@ -1,0 +1,4155 @@
+{
+  "generated_at": "2026-05-26T12:03:52.526Z",
+  "count": 244,
+  "verbs": [
+    {
+      "verb": "init",
+      "dispatcher": "cmdInit",
+      "all_dispatchers": [
+        "cmdInit"
+      ],
+      "flags": [
+        "--description",
+        "--force",
+        "--from",
+        "--mcp",
+        "--name",
+        "--spec"
+      ],
+      "help_summary": "kolm init - scaffold a kolm.yaml at the current directory."
+    },
+    {
+      "verb": "signup",
+      "dispatcher": "cmdSignup",
+      "all_dispatchers": [
+        "cmdSignup"
+      ],
+      "flags": [
+        "--email",
+        "--from",
+        "--name",
+        "--network",
+        "--plan",
+        "--spec"
+      ],
+      "help_summary": "kolm signup - provision a new tenant + API key from the CLI."
+    },
+    {
+      "verb": "login",
+      "dispatcher": "cmdLogin",
+      "all_dispatchers": [
+        "cmdLogin"
+      ],
+      "flags": [
+        "--email",
+        "--key",
+        "--network"
+      ],
+      "help_summary": "kolm login - save an API key to ~/.kolm/config.json."
+    },
+    {
+      "verb": "whoami",
+      "dispatcher": "cmdWhoami",
+      "all_dispatchers": [
+        "cmdWhoami"
+      ],
+      "flags": [
+        "--allow-logged-out",
+        "--email",
+        "--json",
+        "--key"
+      ],
+      "help_summary": "kolm whoami - echo the current tenant + plan + cloud base."
+    },
+    {
+      "verb": "artifact",
+      "dispatcher": "cmdArtifact",
+      "all_dispatchers": [
+        "cmdArtifact"
+      ],
+      "flags": [
+        "--artifact",
+        "--help",
+        "--json",
+        "--reason",
+        "--slow-ms",
+        "--to"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "artifacts",
+      "dispatcher": "cmdArtifacts",
+      "all_dispatchers": [
+        "cmdArtifacts"
+      ],
+      "flags": [
+        "--json",
+        "--key",
+        "--limit",
+        "--reason"
+      ],
+      "help_summary": "kolm artifacts - list, show, and diff compiled .kolm artifacts."
+    },
+    {
+      "verb": "status",
+      "dispatcher": "cmdStatus",
+      "all_dispatchers": [
+        "cmdStatus"
+      ],
+      "flags": [
+        "--json",
+        "--limit"
+      ],
+      "help_summary": "kolm status - one-line snapshot of where you are. No network."
+    },
+    {
+      "verb": "health",
+      "dispatcher": "cmdHealth",
+      "all_dispatchers": [
+        "cmdHealth"
+      ],
+      "flags": [
+        "--auth",
+        "--capture",
+        "--json",
+        "--ready",
+        "--require-auth",
+        "--require-capture",
+        "--require-ready",
+        "--slow-ms",
+        "--timeout-ms"
+      ],
+      "help_summary": "kolm health - ping the configured cloud base + report timing."
+    },
+    {
+      "verb": "metrics",
+      "dispatcher": "cmdW730Metrics",
+      "all_dispatchers": [
+        "cmdW730Metrics",
+        "cmdMetrics"
+      ],
+      "flags": [
+        "--data-binary",
+        "--install-extension",
+        "--list-extensions"
+      ],
+      "help_summary": "kolm metrics - local dashboard summary from ~/.kolm/jobs.jsonl. No network."
+    },
+    {
+      "verb": "vscode",
+      "dispatcher": "cmdW731VscodeInstall",
+      "all_dispatchers": [
+        "cmdW731VscodeInstall"
+      ],
+      "flags": [
+        "--file",
+        "--install-extension",
+        "--list-extensions",
+        "--version"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "otel",
+      "dispatcher": "cmdW733OtelStatus",
+      "all_dispatchers": [
+        "cmdW733OtelStatus"
+      ],
+      "flags": [
+        "--context",
+        "--prompt",
+        "--response"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "rag",
+      "dispatcher": "cmdRag",
+      "all_dispatchers": [
+        "cmdRag"
+      ],
+      "flags": [
+        "--ext",
+        "--index",
+        "--json",
+        "--max-bytes",
+        "--name",
+        "--top-k"
+      ],
+      "help_summary": "kolm rag - airgapped local retrieval (BM25, no embedder, no network)."
+    },
+    {
+      "verb": "tool",
+      "dispatcher": "cmdW735ToolPatterns",
+      "all_dispatchers": [
+        "cmdW735ToolPatterns"
+      ],
+      "flags": [
+        "--hardware",
+        "--min-kscore",
+        "--namespace",
+        "--task",
+        "--top-n",
+        "--vertical"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "guardrails",
+      "dispatcher": "cmdW736Guardrails",
+      "all_dispatchers": [
+        "cmdW736Guardrails"
+      ],
+      "flags": [
+        "--file",
+        "--input",
+        "--response"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "changelog",
+      "dispatcher": "cmdChangelog",
+      "all_dispatchers": [
+        "cmdChangelog"
+      ],
+      "flags": [
+        "--json",
+        "--limit",
+        "--since",
+        "--tag"
+      ],
+      "help_summary": "kolm changelog - public wave history. No auth, no tenant data."
+    },
+    {
+      "verb": "billing",
+      "dispatcher": "cmdBilling",
+      "all_dispatchers": [
+        "cmdBilling"
+      ],
+      "flags": [
+        "--by",
+        "--email",
+        "--json",
+        "--key",
+        "--limit",
+        "--period",
+        "--since",
+        "--team-id",
+        "--until"
+      ],
+      "help_summary": "kolm billing - tenant usage + plan + invoice + breakdown surface. (W409i + W465)"
+    },
+    {
+      "verb": "savings",
+      "dispatcher": "cmdSavings",
+      "all_dispatchers": [
+        "cmdSavings"
+      ],
+      "flags": [
+        "--artifact-id",
+        "--compile-cost-usd",
+        "--deployed-at-ms",
+        "--frontier-model",
+        "--frontier-provider",
+        "--input-tokens",
+        "--json",
+        "--key",
+        "--model",
+        "--namespace",
+        "--output-tokens",
+        "--period-days",
+        "--provider",
+        "--start"
+      ],
+      "help_summary": "kolm savings - savings-based pricing tracker (baseline vs post-kolm). (W835)"
+    },
+    {
+      "verb": "support-bundle",
+      "dispatcher": "cmdSupportBundle",
+      "all_dispatchers": [
+        "cmdSupportBundle"
+      ],
+      "flags": [
+        "--json",
+        "--out"
+      ],
+      "help_summary": "kolm support-bundle - redacted local dump for enterprise support."
+    },
+    {
+      "verb": "key",
+      "dispatcher": "cmdKey",
+      "all_dispatchers": [
+        "cmdKey"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": "kolm key - api-key inspection (NOT the receipt-signing keys — use 'kolm keys' for that)."
+    },
+    {
+      "verb": "new",
+      "dispatcher": "cmdNew",
+      "all_dispatchers": [
+        "cmdNew"
+      ],
+      "flags": [
+        "--base-model",
+        "--budget-usd",
+        "--calibration-rows",
+        "--catalog",
+        "--context-tokens",
+        "--device",
+        "--examples",
+        "--existing-artifact",
+        "--force",
+        "--from",
+        "--holdout",
+        "--holdout-pairs",
+        "--json",
+        "--label-noise",
+        "--model",
+        "--name",
+        "--namespace",
+        "--no-local-gpu",
+        "--once",
+        "--out",
+        "--params-b",
+        "--preference-pairs",
+        "--privacy",
+        "--privacy-mode",
+        "--real-pairs",
+        "--repeat-rate",
+        "--rows",
+        "--runtime",
+        "--simulate",
+        "--spec",
+        "--summary",
+        "--synthetic-pairs",
+        "--target-latency-ms",
+        "--task",
+        "--teacher-agreement",
+        "--yes"
+      ],
+      "help_summary": "kolm new - scaffold a spec.json you can compile into a .kolm."
+    },
+    {
+      "verb": "build",
+      "dispatcher": "cmdBuild",
+      "all_dispatchers": [
+        "cmdBuild"
+      ],
+      "flags": [
+        "--allow-below-gate",
+        "--examples",
+        "--force",
+        "--from",
+        "--json",
+        "--no-baseline",
+        "--no-skill",
+        "--out",
+        "--seeds",
+        "--spec",
+        "--trace",
+        "--yes"
+      ],
+      "help_summary": "kolm build - one-shot wrapper: scaffold + seed + compile + verify."
+    },
+    {
+      "verb": "compile",
+      "dispatcher": "cmdCompile",
+      "all_dispatchers": [
+        "cmdCompile",
+        "cmdCompileWorkload_w726"
+      ],
+      "flags": [
+        "--adversarial-holdout",
+        "--airgap",
+        "--allow-below-gate",
+        "--as-mcp",
+        "--attestation-kind",
+        "--attestation-report",
+        "--auditor-attestation",
+        "--base-model",
+        "--budget",
+        "--class",
+        "--cloud",
+        "--comparator",
+        "--confirm",
+        "--data",
+        "--deploy-hook",
+        "--detach",
+        "--distill-provenance",
+        "--drift-report",
+        "--dry-run",
+        "--email",
+        "--examples",
+        "--export",
+        "--export-from",
+        "--export-provenance",
+        "--external-holdout",
+        "--format",
+        "--format-v2",
+        "--from",
+        "--gate",
+        "--gate-cve-policy",
+        "--gate-latency-budget",
+        "--gate-stability",
+        "--gguf-base",
+        "--help",
+        "--holdout-ratio",
+        "--input",
+        "--json",
+        "--k-min",
+        "--license",
+        "--mcp",
+        "--merged-dir",
+        "--moe-provenance",
+        "--multi-device",
+        "--namespace",
+        "--no-fit-check",
+        "--no-skill",
+        "--out",
+        "--output-schema",
+        "--params-b",
+        "--pick-best",
+        "--pretokenize-provenance",
+        "--rent",
+        "--seeds",
+        "--spec",
+        "--split-seed",
+        "--supersession-authorized-by",
+        "--supersession-drift-report",
+        "--supersession-notes",
+        "--supersession-of",
+        "--supersession-reason",
+        "--target",
+        "--tenant-shadow-corpus",
+        "--tier",
+        "--tokenizer",
+        "--trace",
+        "--vram-gb"
+      ],
+      "help_summary": "kolm compile - build a .kolm artifact (cloud-synthesised or local spec)."
+    },
+    {
+      "verb": "train",
+      "dispatcher": "cmdTrain",
+      "all_dispatchers": [
+        "cmdTrain"
+      ],
+      "flags": [
+        "--job-id",
+        "--json",
+        "--namespace",
+        "--output-schema",
+        "--spec",
+        "--watch"
+      ],
+      "help_summary": "kolm train - build a .kolm artifact from a spec or distill a captured namespace."
+    },
+    {
+      "verb": "make",
+      "dispatcher": "cmdMake",
+      "all_dispatchers": [
+        "cmdMake"
+      ],
+      "flags": [
+        "--base-model",
+        "--force",
+        "--from",
+        "--json",
+        "--no-sign",
+        "--out",
+        "--quant",
+        "--seeds",
+        "--tier"
+      ],
+      "help_summary": "kolm make - one verb, idea -> shipped artifact. (Wave 359)"
+    },
+    {
+      "verb": "ship",
+      "dispatcher": "cmdShip",
+      "all_dispatchers": [
+        "cmdShip"
+      ],
+      "flags": [
+        "--force",
+        "--json",
+        "--slug",
+        "--watch"
+      ],
+      "help_summary": "kolm ship - publish a .kolm artifact to the marketplace. (Wave 360)"
+    },
+    {
+      "verb": "run",
+      "dispatcher": "cmdRun",
+      "all_dispatchers": [
+        "cmdRun",
+        "cmdRunWorkloadProbe_w726",
+        "cmdRunAutoPlace_w724"
+      ],
+      "flags": [
+        "--bundle",
+        "--force",
+        "--input",
+        "--json",
+        "--params",
+        "--strict"
+      ],
+      "help_summary": "kolm config set ${key} ${value} --scope user"
+    },
+    {
+      "verb": "eval",
+      "dispatcher": "cmdEval",
+      "all_dispatchers": [
+        "cmdEval"
+      ],
+      "flags": [
+        "--examples",
+        "--json",
+        "--out",
+        "--spec",
+        "--trace"
+      ],
+      "help_summary": "kolm eval - re-run a .kolm's embedded eval set and show per-case results."
+    },
+    {
+      "verb": "benchmark",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": "kolm bench - reproducible artifact benchmark (alias: benchmark)."
+    },
+    {
+      "verb": "bench",
+      "dispatcher": "cmdBenchmark",
+      "all_dispatchers": [
+        "cmdBenchmark"
+      ],
+      "flags": [
+        "--all-targets",
+        "--axes",
+        "--compare",
+        "--corpus",
+        "--device",
+        "--input",
+        "--json",
+        "--md",
+        "--models",
+        "--out",
+        "--reproduce",
+        "--runs",
+        "--target"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "score",
+      "dispatcher": "cmdScore",
+      "all_dispatchers": [
+        "cmdScore"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": "kolm score - print this artifact's K-score (per-artifact, not per-model)."
+    },
+    {
+      "verb": "list",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": "kolm list - show every local .kolm artifact (alias: kolm ls)."
+    },
+    {
+      "verb": "ls",
+      "dispatcher": "cmdList",
+      "all_dispatchers": [
+        "cmdList"
+      ],
+      "flags": [
+        "--from",
+        "--json",
+        "--yes"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "inspect",
+      "dispatcher": "cmdInspect",
+      "all_dispatchers": [
+        "cmdInspect"
+      ],
+      "flags": [
+        "--format",
+        "--format-version",
+        "--json",
+        "--model",
+        "--out",
+        "--pick-best",
+        "--runtime-passport"
+      ],
+      "help_summary": "kolm inspect - show what a .kolm artifact is, in plain text."
+    },
+    {
+      "verb": "eject",
+      "dispatcher": "cmdEject",
+      "all_dispatchers": [
+        "cmdEject"
+      ],
+      "flags": [
+        "--json",
+        "--out",
+        "--print"
+      ],
+      "help_summary": "kolm eject - unpack a .kolm into a directory of its parts. No lock-in."
+    },
+    {
+      "verb": "diff",
+      "dispatcher": "cmdW739Diff",
+      "all_dispatchers": [
+        "cmdW739Diff"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": "kolm diff - compare two .kolm manifests field by field."
+    },
+    {
+      "verb": "lineage",
+      "dispatcher": "cmdW739Lineage",
+      "all_dispatchers": [
+        "cmdW739Lineage"
+      ],
+      "flags": [
+        "--json",
+        "--max-depth"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "verify",
+      "dispatcher": "cmdVerify",
+      "all_dispatchers": [
+        "cmdVerify"
+      ],
+      "flags": [
+        "--attestation",
+        "--binder",
+        "--format-strict",
+        "--guardrails",
+        "--json",
+        "--sample",
+        "--validate-schema"
+      ],
+      "help_summary": "kolm verify - run every offline check kolm makes about an artifact"
+    },
+    {
+      "verb": "passport",
+      "dispatcher": "cmdPassport",
+      "all_dispatchers": [
+        "cmdPassport"
+      ],
+      "flags": [
+        "--artifact",
+        "--format",
+        "--out",
+        "--output",
+        "--workspace"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "assurance",
+      "dispatcher": "cmdAssurance",
+      "all_dispatchers": [
+        "cmdAssurance"
+      ],
+      "flags": [
+        "--artifact",
+        "--format",
+        "--help",
+        "--out",
+        "--output",
+        "--workspace"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "procurement",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "vendor-pack",
+      "dispatcher": "cmdProcurement",
+      "all_dispatchers": [
+        "cmdProcurement"
+      ],
+      "flags": [
+        "--format",
+        "--help",
+        "--json",
+        "--out",
+        "--print"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "sig",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "caiq",
+      "dispatcher": "cmdProcurement",
+      "all_dispatchers": [
+        "cmdProcurement"
+      ],
+      "flags": [
+        "--format",
+        "--help",
+        "--json",
+        "--out",
+        "--print"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "sigstore-attest",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": "kolm sigstore-attest - upgrade a dry-run sigstore block to a"
+    },
+    {
+      "verb": "attest",
+      "dispatcher": "cmdSigstoreAttest",
+      "all_dispatchers": [
+        "cmdSigstoreAttest"
+      ],
+      "flags": [
+        "--json",
+        "--rekor-url"
+      ],
+      "help_summary": "kolm attest - alias for 'kolm sigstore-attest'. See: kolm sigstore-attest --help."
+    },
+    {
+      "verb": "test",
+      "dispatcher": "cmdTest",
+      "all_dispatchers": [
+        "cmdTest"
+      ],
+      "flags": [
+        "--adversarial",
+        "--all",
+        "--failures-only",
+        "--full",
+        "--help",
+        "--json",
+        "--persona",
+        "--provider",
+        "--regression",
+        "--report",
+        "--skip",
+        "--storage"
+      ],
+      "help_summary": "kolm test - regression + adversarial probes against a .kolm artifact."
+    },
+    {
+      "verb": "serve",
+      "dispatcher": "cmdServe",
+      "all_dispatchers": [
+        "cmdServe"
+      ],
+      "flags": [
+        "--artifact",
+        "--context-length",
+        "--create-namespace",
+        "--docker",
+        "--dry-run",
+        "--gpu-layers",
+        "--gpus",
+        "--helm",
+        "--host",
+        "--http",
+        "--json",
+        "--k8s",
+        "--kv-cache",
+        "--mcp",
+        "--model",
+        "--name",
+        "--namespace",
+        "--no-hw-detect",
+        "--out",
+        "--port",
+        "--rm",
+        "--runtime"
+      ],
+      "help_summary": "kolm serve - expose .kolm artifacts as MCP tools or as an HTTP server."
+    },
+    {
+      "verb": "tui",
+      "dispatcher": "cmdTui",
+      "all_dispatchers": [
+        "cmdTui"
+      ],
+      "flags": [
+        "--closeout",
+        "--json",
+        "--views"
+      ],
+      "help_summary": "kolm tui - terminal command center for the kolm product loop."
+    },
+    {
+      "verb": "repl",
+      "dispatcher": "cmdRepl",
+      "all_dispatchers": [
+        "cmdRepl"
+      ],
+      "flags": [
+        "--help",
+        "--json"
+      ],
+      "help_summary": "kolm repl - generic interactive REPL that dispatches any kolm verb."
+    },
+    {
+      "verb": "publish",
+      "dispatcher": "cmdPublish",
+      "all_dispatchers": [
+        "cmdPublish"
+      ],
+      "flags": [
+        "--name",
+        "--out",
+        "--private",
+        "--public",
+        "--team",
+        "--visibility"
+      ],
+      "help_summary": "kolm publish - upload a .kolm artifact to the hub."
+    },
+    {
+      "verb": "pull",
+      "dispatcher": "cmdPull",
+      "all_dispatchers": [
+        "cmdPull"
+      ],
+      "flags": [
+        "--input",
+        "--out"
+      ],
+      "help_summary": "kolm pull - download a .kolm artifact from the hub by handle."
+    },
+    {
+      "verb": "hub",
+      "dispatcher": "cmdHub",
+      "all_dispatchers": [
+        "cmdHub"
+      ],
+      "flags": [
+        "--input",
+        "--install-extension",
+        "--json",
+        "--limit",
+        "--out",
+        "--public",
+        "--release",
+        "--search",
+        "--source"
+      ],
+      "help_summary": "kolm hub - browse the unified artifact gallery (curated seeds + user-published)."
+    },
+    {
+      "verb": "marketplace",
+      "dispatcher": "cmdW737Marketplace",
+      "all_dispatchers": [
+        "cmdW737Marketplace",
+        "cmdMarketplace"
+      ],
+      "flags": [
+        "--cid",
+        "--file",
+        "--hardware",
+        "--hardware-target",
+        "--min-k",
+        "--min-kscore",
+        "--price",
+        "--rating",
+        "--response",
+        "--stars",
+        "--task",
+        "--task-type",
+        "--text",
+        "--vertical"
+      ],
+      "help_summary": "kolm marketplace - browse, install, and publish .kolm artifacts on the verifiable hub."
+    },
+    {
+      "verb": "sdk",
+      "dispatcher": "cmdSdk",
+      "all_dispatchers": [
+        "cmdSdk"
+      ],
+      "flags": [
+        "--category",
+        "--force",
+        "--help",
+        "--json",
+        "--license",
+        "--min-k",
+        "--verified"
+      ],
+      "help_summary": "kolm sdk - introspect, install, and bootstrap the official Kolm SDKs."
+    },
+    {
+      "verb": "capture",
+      "dispatcher": "cmdCapture",
+      "all_dispatchers": [
+        "cmdCapture"
+      ],
+      "flags": [
+        "--as",
+        "--bottom",
+        "--json",
+        "--label",
+        "--namespace",
+        "--ocr",
+        "--prompt",
+        "--provider",
+        "--response",
+        "--top"
+      ],
+      "help_summary": "kolm capture - drop-in proxy for OpenAI / Anthropic / OpenRouter that captures (input, output) pairs."
+    },
+    {
+      "verb": "captures",
+      "dispatcher": "cmdCapturesReview",
+      "all_dispatchers": [
+        "cmdCapturesReview",
+        "cmdCapturesAnalyticsW811"
+      ],
+      "flags": [
+        "--allow",
+        "--auto-allow-since",
+        "--block",
+        "--csv",
+        "--json",
+        "--limit",
+        "--list-pending",
+        "--namespace",
+        "--reason",
+        "--reviewer",
+        "--tenant",
+        "--tenant-id"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "labels",
+      "dispatcher": "cmdLabels",
+      "all_dispatchers": [
+        "cmdLabels"
+      ],
+      "flags": [
+        "--base-model",
+        "--budget",
+        "--budget-usd",
+        "--co-reviewers",
+        "--existing-artifact",
+        "--format",
+        "--holdout",
+        "--holdout-pairs",
+        "--json",
+        "--label-noise",
+        "--latency-ms",
+        "--local-worker",
+        "--mode",
+        "--model",
+        "--namespace",
+        "--no-redact",
+        "--out",
+        "--output",
+        "--preference-pairs",
+        "--privacy",
+        "--privacy-mode",
+        "--ranked-pairs",
+        "--real-pairs",
+        "--reason",
+        "--repeat-rate",
+        "--reviewer",
+        "--rows",
+        "--seeds",
+        "--simulate",
+        "--spec",
+        "--split-seed",
+        "--student-base",
+        "--synthetic-pairs",
+        "--target",
+        "--target-latency-ms",
+        "--task",
+        "--teacher",
+        "--teacher-agreement",
+        "--teachers",
+        "--team-approval",
+        "--workflow"
+      ],
+      "help_summary": "kolm labels - download the captured corpus as JSONL or JSON."
+    },
+    {
+      "verb": "distill",
+      "dispatcher": "cmdDistill",
+      "all_dispatchers": [
+        "cmdDistill"
+      ],
+      "flags": [
+        "--auto-arch",
+        "--base-model",
+        "--class",
+        "--contrastive",
+        "--curriculum",
+        "--detach",
+        "--early-stop-patience",
+        "--from-captures",
+        "--grad-checkpoint",
+        "--gradient-checkpointing",
+        "--help",
+        "--importance-weighted",
+        "--local-worker",
+        "--mixed-precision",
+        "--multi-device",
+        "--namespace",
+        "--precision",
+        "--progressive",
+        "--resume-from-active-queue",
+        "--target",
+        "--target-size",
+        "--teachers",
+        "--tier",
+        "--weights"
+      ],
+      "help_summary": "kolm distill - auto-distill a captured namespace into a local LoRA via the kolm trainer bridge."
+    },
+    {
+      "verb": "spec-decode",
+      "dispatcher": "cmdSpecDecode",
+      "all_dispatchers": [
+        "cmdSpecDecode"
+      ],
+      "flags": [
+        "--base",
+        "--draft-kind",
+        "--json",
+        "--namespace",
+        "--pairs",
+        "--remote"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "moe",
+      "dispatcher": "cmdMoe",
+      "all_dispatchers": [
+        "cmdMoe"
+      ],
+      "flags": [],
+      "help_summary": "kolm moe - compose multiple .kolm experts into one router-dispatched composite."
+    },
+    {
+      "verb": "nl",
+      "dispatcher": "cmdNl",
+      "all_dispatchers": [
+        "cmdNl"
+      ],
+      "flags": [
+        "--airgap",
+        "--class",
+        "--help",
+        "--json",
+        "--network",
+        "--no-network",
+        "--offline",
+        "--out"
+      ],
+      "help_summary": "kolm nl - natural-language recipe scaffolder. Describe a recipe in"
+    },
+    {
+      "verb": "tokenize",
+      "dispatcher": "cmdTokenize",
+      "all_dispatchers": [
+        "cmdTokenize"
+      ],
+      "flags": [],
+      "help_summary": "kolm tokenize - pretokenize text with a kolm-owned byte-level BPE tokenizer."
+    },
+    {
+      "verb": "extract",
+      "dispatcher": "cmdExtract",
+      "all_dispatchers": [
+        "cmdExtract"
+      ],
+      "flags": [
+        "--json",
+        "--lang",
+        "--ocr",
+        "--out",
+        "--target",
+        "--vision"
+      ],
+      "help_summary": "kolm extract - pull text out of PDFs, HTML, JSON, plain text, and images."
+    },
+    {
+      "verb": "doc",
+      "dispatcher": "cmdDoc",
+      "all_dispatchers": [
+        "cmdDoc"
+      ],
+      "flags": [],
+      "help_summary": "kolm doc - multimodal document completeness checks."
+    },
+    {
+      "verb": "config",
+      "dispatcher": "cmdConfig",
+      "all_dispatchers": [
+        "cmdConfig"
+      ],
+      "flags": [
+        "--json",
+        "--scope",
+        "--show-secrets"
+      ],
+      "help_summary": "kolm config - inspect or set config keys."
+    },
+    {
+      "verb": "yaml",
+      "dispatcher": "cmdW732YamlSync",
+      "all_dispatchers": [
+        "cmdW732YamlSync"
+      ],
+      "flags": [
+        "--file"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "yaml-diff",
+      "dispatcher": "cmdW732Diff",
+      "all_dispatchers": [
+        "cmdW732Diff"
+      ],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "hmac",
+      "dispatcher": "cmdHmac",
+      "all_dispatchers": [
+        "cmdHmac"
+      ],
+      "flags": [
+        "--force",
+        "--json",
+        "--key",
+        "--out"
+      ],
+      "help_summary": "kolm hmac - rotate and inspect the per-tenant receipt-signing key."
+    },
+    {
+      "verb": "keygen",
+      "dispatcher": "cmdKeygen",
+      "all_dispatchers": [
+        "cmdKeygen"
+      ],
+      "flags": [
+        "--force",
+        "--json",
+        "--key",
+        "--out"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "pubkey",
+      "dispatcher": "cmdPubkey",
+      "all_dispatchers": [
+        "cmdPubkey"
+      ],
+      "flags": [
+        "--json",
+        "--key"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "keys",
+      "dispatcher": "cmdKeys",
+      "all_dispatchers": [
+        "cmdKeys"
+      ],
+      "flags": [
+        "--calibration-rows",
+        "--context",
+        "--device",
+        "--json",
+        "--kms",
+        "--memory-gb",
+        "--name",
+        "--overlap-days",
+        "--params",
+        "--params-b",
+        "--preference-tuned",
+        "--privacy-mode",
+        "--quality-floor",
+        "--runtime",
+        "--task"
+      ],
+      "help_summary": "kolm keys - Ed25519 signing key rotation lifecycle (wave 193)."
+    },
+    {
+      "verb": "auditor",
+      "dispatcher": "cmdAuditor",
+      "all_dispatchers": [
+        "cmdAuditor"
+      ],
+      "flags": [
+        "--accreditation",
+        "--auditor-id",
+        "--key",
+        "--notes",
+        "--out",
+        "--scope"
+      ],
+      "help_summary": "kolm auditor - third-party attestation lifecycle (wave 166, N+7)."
+    },
+    {
+      "verb": "audit",
+      "dispatcher": "cmdW770AuditExport",
+      "all_dispatchers": [
+        "cmdW770AuditExport",
+        "cmdAudit"
+      ],
+      "flags": [
+        "--artifact-id",
+        "--dest-dir",
+        "--format",
+        "--from",
+        "--help",
+        "--max",
+        "--out",
+        "--sneakernet",
+        "--to"
+      ],
+      "help_summary": "kolm audit - read-only per-tenant audit ledger. Same view the web"
+    },
+    {
+      "verb": "audit-export",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "ae",
+      "dispatcher": "cmdW770AuditExport",
+      "all_dispatchers": [
+        "cmdW770AuditExport"
+      ],
+      "flags": [
+        "--artifact-id",
+        "--dest-dir",
+        "--format",
+        "--from",
+        "--help",
+        "--max",
+        "--out",
+        "--sneakernet",
+        "--to"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "long-context",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "longctx",
+      "dispatcher": "cmdW781LongCtx",
+      "all_dispatchers": [
+        "cmdW781LongCtx"
+      ],
+      "flags": [
+        "--artifact-id",
+        "--channel",
+        "--help",
+        "--id",
+        "--input-length",
+        "--namespace",
+        "--reason",
+        "--status",
+        "--ttl-days",
+        "--window-days"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "approvals",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "approval",
+      "dispatcher": "cmdW782Approval",
+      "all_dispatchers": [
+        "cmdW782Approval"
+      ],
+      "flags": [
+        "--artifact-id",
+        "--channel",
+        "--format",
+        "--group-by",
+        "--help",
+        "--id",
+        "--namespace",
+        "--out",
+        "--period",
+        "--reason",
+        "--status",
+        "--ttl-days"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "chargeback",
+      "dispatcher": "cmdW783Chargeback",
+      "all_dispatchers": [
+        "cmdW783Chargeback"
+      ],
+      "flags": [
+        "--format",
+        "--group-by",
+        "--help",
+        "--out",
+        "--period"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "pack",
+      "dispatcher": "cmdW779Sneakernet",
+      "all_dispatchers": [
+        "cmdW779Sneakernet"
+      ],
+      "flags": [
+        "--artifact-id",
+        "--base",
+        "--dest-dir",
+        "--help",
+        "--json",
+        "--out",
+        "--shell",
+        "--sneakernet"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "unpack",
+      "dispatcher": "cmdW779Sneakernet",
+      "all_dispatchers": [
+        "cmdW779Sneakernet"
+      ],
+      "flags": [
+        "--artifact-id",
+        "--base",
+        "--dest-dir",
+        "--help",
+        "--json",
+        "--out",
+        "--shell",
+        "--sneakernet"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "vlm",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "vision",
+      "dispatcher": "cmdW771Vlm",
+      "all_dispatchers": [
+        "cmdW771Vlm"
+      ],
+      "flags": [
+        "--confirm",
+        "--help",
+        "--limit",
+        "--max",
+        "--namespace",
+        "--stdin"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "audio",
+      "dispatcher": "cmdW772Audio",
+      "all_dispatchers": [
+        "cmdW772Audio"
+      ],
+      "flags": [
+        "--confirm",
+        "--help",
+        "--json",
+        "--langs",
+        "--limit",
+        "--max",
+        "--model",
+        "--namespace",
+        "--strategy",
+        "--target-langs",
+        "--with-mel",
+        "--with-text-tokens"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "video",
+      "dispatcher": "cmdW773Video",
+      "all_dispatchers": [
+        "cmdW773Video"
+      ],
+      "flags": [
+        "--artifact-path",
+        "--confirm",
+        "--duration-s",
+        "--fps-target",
+        "--help",
+        "--input-length",
+        "--json",
+        "--limit",
+        "--max-bytes",
+        "--max-frames",
+        "--max-n",
+        "--message-file",
+        "--model",
+        "--namespace",
+        "--num-frames",
+        "--path",
+        "--sampling-strategy",
+        "--strategy",
+        "--uri",
+        "--window-days"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "settings",
+      "dispatcher": "cmdSettings",
+      "all_dispatchers": [
+        "cmdSettings"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": "kolm settings - per-tenant account settings. Same surface as"
+    },
+    {
+      "verb": "quantize",
+      "dispatcher": "cmdQuantize",
+      "all_dispatchers": [
+        "cmdQuantize"
+      ],
+      "flags": [
+        "--doctor",
+        "--help",
+        "--in",
+        "--local-worker",
+        "--method",
+        "--mixed-precision",
+        "--out",
+        "--scaffold"
+      ],
+      "help_summary": "kolm quantize - quantize a compiled adapter via the isolated quantize worker (wave 195)."
+    },
+    {
+      "verb": "hardware",
+      "dispatcher": "cmdHardware",
+      "all_dispatchers": [
+        "cmdHardware"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "fit",
+      "dispatcher": "cmdFit",
+      "all_dispatchers": [
+        "cmdFit"
+      ],
+      "flags": [
+        "--batch",
+        "--context",
+        "--ctx",
+        "--json",
+        "--kv-precision",
+        "--model",
+        "--params-b",
+        "--pick-best",
+        "--quant",
+        "--target",
+        "--vram",
+        "--vram-gb"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "experts",
+      "dispatcher": "cmdExperts",
+      "all_dispatchers": [
+        "cmdExperts"
+      ],
+      "flags": [
+        "--artifact",
+        "--bars",
+        "--ids",
+        "--json",
+        "--prune-experts",
+        "--runtime",
+        "--spec",
+        "--threshold"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "forge",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "hw",
+      "dispatcher": "cmdHardware",
+      "all_dispatchers": [
+        "cmdHardware"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "quant",
+      "dispatcher": "cmdQuantize",
+      "all_dispatchers": [
+        "cmdQuantize"
+      ],
+      "flags": [
+        "--doctor",
+        "--help",
+        "--in",
+        "--local-worker",
+        "--method",
+        "--mixed-precision",
+        "--out",
+        "--scaffold"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "merge",
+      "dispatcher": "cmdMerge",
+      "all_dispatchers": [
+        "cmdMerge"
+      ],
+      "flags": [
+        "--alpha",
+        "--dry-run",
+        "--evaluator",
+        "--json",
+        "--method",
+        "--output",
+        "--project"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "export",
+      "dispatcher": "cmdExport",
+      "all_dispatchers": [
+        "cmdExport"
+      ],
+      "flags": [
+        "--backend",
+        "--base",
+        "--base-model",
+        "--create",
+        "--device",
+        "--doctor",
+        "--downgrade",
+        "--downgrade-v1",
+        "--dry-run",
+        "--dtype",
+        "--epsilon",
+        "--format",
+        "--gpu-count",
+        "--gpu-memory-utilization",
+        "--json",
+        "--max-model-len",
+        "--merged-dir",
+        "--model-path",
+        "--name",
+        "--namespace",
+        "--opset",
+        "--out",
+        "--output",
+        "--params-b",
+        "--port",
+        "--preview",
+        "--q4",
+        "--quant",
+        "--quantization",
+        "--quantize",
+        "--runtime",
+        "--tensor-parallel-size"
+      ],
+      "help_summary": "kolm export - convert a .kolm into a target-runtime artifact (gguf, mlx, onnx, coreml, tensorrt)."
+    },
+    {
+      "verb": "hf",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "huggingface",
+      "dispatcher": "cmdHfModelcard",
+      "all_dispatchers": [
+        "cmdHfModelcard"
+      ],
+      "flags": [
+        "--base-model",
+        "--benchmark",
+        "--dry-run",
+        "--help",
+        "--license",
+        "--out",
+        "--tag",
+        "--target-repo"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "runtime",
+      "dispatcher": "cmdRuntime",
+      "all_dispatchers": [
+        "cmdRuntime"
+      ],
+      "flags": [
+        "--json",
+        "--limit",
+        "--policy",
+        "--port",
+        "--set",
+        "--since"
+      ],
+      "help_summary": "kolm runtime - per-call policy decider + runtime-target builder. (W372 + W219)"
+    },
+    {
+      "verb": "load",
+      "dispatcher": "cmdW729LoadStatus",
+      "all_dispatchers": [
+        "cmdW729LoadStatus"
+      ],
+      "flags": [
+        "--capacity",
+        "--json",
+        "--message",
+        "--n-draft-tokens",
+        "--samples",
+        "--stats",
+        "--task-class"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "route",
+      "dispatcher": "cmdRoute",
+      "all_dispatchers": [
+        "cmdRoute"
+      ],
+      "flags": [
+        "--json",
+        "--namespace",
+        "--profile",
+        "--tenant"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "accelerate",
+      "dispatcher": "cmdW727Accelerate",
+      "all_dispatchers": [
+        "cmdW727Accelerate"
+      ],
+      "flags": [
+        "--base-n",
+        "--json",
+        "--max-n",
+        "--message",
+        "--n-draft-tokens",
+        "--prompt",
+        "--prompts",
+        "--samples",
+        "--seed",
+        "--task-class"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "its",
+      "dispatcher": "cmdW728InferenceScale",
+      "all_dispatchers": [
+        "cmdW728InferenceScale"
+      ],
+      "flags": [
+        "--base-n",
+        "--http",
+        "--json",
+        "--max-n",
+        "--prompt",
+        "--prompts",
+        "--seed",
+        "--version"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "active-learn",
+      "dispatcher": "cmdActiveLearn",
+      "all_dispatchers": [
+        "cmdActiveLearn"
+      ],
+      "flags": [
+        "--feed-w720",
+        "--json",
+        "--min-captures",
+        "--namespace",
+        "--tenant",
+        "--tenant-id",
+        "--top"
+      ],
+      "help_summary": "kolm active-learn - W815 active-learning coverage-gap detector."
+    },
+    {
+      "verb": "meta",
+      "dispatcher": "cmdW832Meta",
+      "all_dispatchers": [
+        "cmdW832Meta"
+      ],
+      "flags": [
+        "--features",
+        "--json",
+        "--namespace"
+      ],
+      "help_summary": "kolm meta - W832 kolm-meta meta-distillation model."
+    },
+    {
+      "verb": "autopilot",
+      "dispatcher": "cmdW775Autopilot",
+      "all_dispatchers": [
+        "cmdW775Autopilot"
+      ],
+      "flags": [
+        "--help",
+        "--json",
+        "--namespace",
+        "--tenant",
+        "--tenant-id",
+        "--window-days"
+      ],
+      "help_summary": "kolm autopilot - W775 continuous-background-distill daemon."
+    },
+    {
+      "verb": "failure-modes",
+      "dispatcher": "cmdW745FailureModes",
+      "all_dispatchers": [
+        "cmdW745FailureModes",
+        "cmdFailureModes"
+      ],
+      "flags": [
+        "--dry-run",
+        "--json",
+        "--limit",
+        "--name",
+        "--out",
+        "--path",
+        "--top"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "failure-to-capture-loop",
+      "dispatcher": "cmdW816Loop",
+      "all_dispatchers": [
+        "cmdW816Loop"
+      ],
+      "flags": [
+        "--detect",
+        "--json",
+        "--min-delta",
+        "--min-samples",
+        "--namespace",
+        "--tenant",
+        "--tenant-id",
+        "--top",
+        "--top-k",
+        "--window-days"
+      ],
+      "help_summary": "kolm failure-to-capture-loop - W816 failure-mode -> capture recommendation glue."
+    },
+    {
+      "verb": "ab",
+      "dispatcher": "cmdW777Ab",
+      "all_dispatchers": [
+        "cmdW777Ab"
+      ],
+      "flags": [
+        "--ab-test-id",
+        "--arm",
+        "--arm-a",
+        "--arm-b",
+        "--hash",
+        "--json",
+        "--namespace",
+        "--reason",
+        "--request-hash",
+        "--sample-target",
+        "--split",
+        "--target"
+      ],
+      "help_summary": "kolm ab - W777 A/B testing."
+    },
+    {
+      "verb": "stat-sig",
+      "dispatcher": "cmdW778StatSig",
+      "all_dispatchers": [
+        "cmdW778StatSig"
+      ],
+      "flags": [
+        "--ab-test-id",
+        "--alpha",
+        "--id",
+        "--json",
+        "--min-effect",
+        "--min-effect-size",
+        "--min-n",
+        "--samples-a",
+        "--samples-b"
+      ],
+      "help_summary": "kolm stat-sig - W778 statistical significance + auto-rollback gate."
+    },
+    {
+      "verb": "jobs",
+      "dispatcher": "cmdJobs",
+      "all_dispatchers": [
+        "cmdJobs"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": "kolm jobs - inspect the local jobs registry (~/.kolm/jobs.jsonl). (W229)"
+    },
+    {
+      "verb": "lake",
+      "dispatcher": "cmdW757Lake",
+      "all_dispatchers": [
+        "cmdW757Lake",
+        "cmdLake"
+      ],
+      "flags": [
+        "--capture-id",
+        "--confirm",
+        "--consent",
+        "--help",
+        "--id",
+        "--input",
+        "--namespace"
+      ],
+      "help_summary": "kolm lake - data-plane analytics for the local event store. (W369)"
+    },
+    {
+      "verb": "optimize",
+      "dispatcher": "cmdOptimize",
+      "all_dispatchers": [
+        "cmdOptimize"
+      ],
+      "flags": [
+        "--json",
+        "--min-calls",
+        "--namespace",
+        "--since",
+        "--top",
+        "--watch"
+      ],
+      "help_summary": "kolm optimize - ranked savings opportunities from the lake. (W369)"
+    },
+    {
+      "verb": "opportunities",
+      "dispatcher": "cmdOpportunities",
+      "all_dispatchers": [
+        "cmdOpportunities"
+      ],
+      "flags": [
+        "--json",
+        "--min-calls",
+        "--namespace",
+        "--since",
+        "--top"
+      ],
+      "help_summary": "kolm opportunities - top-level alias for 'kolm optimize list'. (W409m)"
+    },
+    {
+      "verb": "dataset",
+      "dispatcher": "cmdDataset",
+      "all_dispatchers": [
+        "cmdDataset"
+      ],
+      "flags": [
+        "--approved-only",
+        "--auto-approve",
+        "--create-dataset",
+        "--fix",
+        "--format",
+        "--from-namespace",
+        "--from-opp",
+        "--from-opportunity",
+        "--json",
+        "--limit",
+        "--namespace",
+        "--out",
+        "--ratio",
+        "--reason",
+        "--seed",
+        "--source-type",
+        "--train-ratio"
+      ],
+      "help_summary": "kolm dataset - labeled training corpora derived from captured events. (W369)"
+    },
+    {
+      "verb": "label",
+      "dispatcher": "cmdLabel",
+      "all_dispatchers": [
+        "cmdLabel"
+      ],
+      "flags": [
+        "--json",
+        "--namespace",
+        "--reason",
+        "--workflow"
+      ],
+      "help_summary": "kolm label - reviewer queue: triage candidate rows one at a time. (W369)"
+    },
+    {
+      "verb": "demo",
+      "dispatcher": "cmdDemo",
+      "all_dispatchers": [
+        "cmdDemo"
+      ],
+      "flags": [
+        "--confirm",
+        "--count",
+        "--json",
+        "--namespace"
+      ],
+      "help_summary": "kolm demo - close-the-loop seeded demo so optimize / dataset / bakeoff have data. (W396)"
+    },
+    {
+      "verb": "watch",
+      "dispatcher": "cmdWatch",
+      "all_dispatchers": [
+        "cmdWatch"
+      ],
+      "flags": [
+        "--interval-ms",
+        "--namespace"
+      ],
+      "help_summary": "kolm watch - tail the log of a specific job. (W229)"
+    },
+    {
+      "verb": "resume",
+      "dispatcher": "cmdResume",
+      "all_dispatchers": [
+        "cmdResume"
+      ],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "rescue",
+      "dispatcher": "cmdRescue",
+      "all_dispatchers": [
+        "cmdRescue"
+      ],
+      "flags": [
+        "--watch"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "sessions",
+      "dispatcher": "cmdSessions",
+      "all_dispatchers": [
+        "cmdSessions"
+      ],
+      "flags": [
+        "--detach",
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "checkpoint",
+      "dispatcher": "cmdCheckpoint",
+      "all_dispatchers": [
+        "cmdCheckpoint"
+      ],
+      "flags": [
+        "--label",
+        "--namespace",
+        "--project",
+        "--source"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "import",
+      "dispatcher": "cmdW740Import",
+      "all_dispatchers": [
+        "cmdW740Import",
+        "cmdImportChat"
+      ],
+      "flags": [
+        "--backend",
+        "--out"
+      ],
+      "help_summary": "kolm import - W740 symmetric counterpart to \"kolm export\". Wraps a"
+    },
+    {
+      "verb": "import-chat",
+      "dispatcher": "cmdImportChat",
+      "all_dispatchers": [
+        "cmdImportChat"
+      ],
+      "flags": [
+        "--evaluator",
+        "--namespace",
+        "--output",
+        "--project",
+        "--source"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "agent",
+      "dispatcher": "cmdAgent",
+      "all_dispatchers": [
+        "cmdAgent"
+      ],
+      "flags": [
+        "--base-model",
+        "--id",
+        "--mentor-model",
+        "--namespace",
+        "--out",
+        "--template"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "init-agent",
+      "dispatcher": "cmdInitAgent",
+      "all_dispatchers": [
+        "cmdInitAgent"
+      ],
+      "flags": [
+        "--dry-run",
+        "--force",
+        "--git",
+        "--template",
+        "--tmux"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "services",
+      "dispatcher": "cmdServices",
+      "all_dispatchers": [
+        "cmdServices"
+      ],
+      "flags": [
+        "--host",
+        "--port",
+        "--tail"
+      ],
+      "help_summary": "kolm services - manage the 3-process split (redactor, compiler, proxy)."
+    },
+    {
+      "verb": "bootstrap",
+      "dispatcher": "cmdBootstrap",
+      "all_dispatchers": [
+        "cmdBootstrap"
+      ],
+      "flags": [
+        "--force",
+        "--json",
+        "--no-doctor",
+        "--no-services",
+        "--profile"
+      ],
+      "help_summary": "kolm bootstrap - one-shot post-install setup for ~/.kolm."
+    },
+    {
+      "verb": "proxy",
+      "dispatcher": "cmdProxy",
+      "all_dispatchers": [
+        "cmdProxy"
+      ],
+      "flags": [
+        "--help",
+        "--json",
+        "--lang",
+        "--namespace",
+        "--port",
+        "--sdk",
+        "--upstream"
+      ],
+      "help_summary": "kolm proxy - enterprise drop-in proxy in front of an upstream model API."
+    },
+    {
+      "verb": "connect",
+      "dispatcher": "cmdConnect",
+      "all_dispatchers": [
+        "cmdConnect"
+      ],
+      "flags": [
+        "--help"
+      ],
+      "help_summary": "kolm connect - THE WEDGE. Local daemon that captures every OpenAI / Anthropic / OpenRouter / Gemini SDK call, redacts, costs, latency-tracks, persists, and forwards upstream with your own API key."
+    },
+    {
+      "verb": "remote",
+      "dispatcher": "cmdRemote",
+      "all_dispatchers": [
+        "cmdRemote"
+      ],
+      "flags": [
+        "--base-model",
+        "--dataset",
+        "--gpu",
+        "--help",
+        "--hours",
+        "--in-",
+        "--json",
+        "--kind",
+        "--message",
+        "--model",
+        "--out-",
+        "--provider",
+        "--recipe"
+      ],
+      "help_summary": "kolm remote - rent compute when local hardware is weak."
+    },
+    {
+      "verb": "mesh",
+      "dispatcher": "cmdMesh",
+      "all_dispatchers": [
+        "cmdMesh"
+      ],
+      "flags": [
+        "--artifact",
+        "--capture",
+        "--cmd",
+        "--image",
+        "--json",
+        "--mentor",
+        "--namespace",
+        "--nodes",
+        "--out",
+        "--replicas"
+      ],
+      "help_summary": "kolm mesh - multi-node Tailscale mesh + GKE-scale recipe (single box -> cluster)."
+    },
+    {
+      "verb": "migrate",
+      "dispatcher": "cmdW743Migrate",
+      "all_dispatchers": [
+        "cmdW743Migrate",
+        "cmdMigrate"
+      ],
+      "flags": [
+        "--base",
+        "--dry-run",
+        "--kind",
+        "--limit",
+        "--name",
+        "--out",
+        "--path",
+        "--samples",
+        "--seeds",
+        "--threshold"
+      ],
+      "help_summary": "kolm migrate - rewrite a legacy v1 spec as a v2-stamped spec."
+    },
+    {
+      "verb": "wrap",
+      "dispatcher": "cmdWrap",
+      "all_dispatchers": [
+        "cmdWrap"
+      ],
+      "flags": [
+        "--backend",
+        "--out"
+      ],
+      "help_summary": "kolm wrap - emit a wrap-class spec around an external trainer config."
+    },
+    {
+      "verb": "tail",
+      "dispatcher": "cmdTail",
+      "all_dispatchers": [
+        "cmdTail"
+      ],
+      "flags": [
+        "--json",
+        "--limit",
+        "--namespace",
+        "--since",
+        "--since-last-compile"
+      ],
+      "help_summary": "kolm tail - live tail of captured events (SSE from /v1/capture/stream)."
+    },
+    {
+      "verb": "bridges",
+      "dispatcher": "cmdBridges",
+      "all_dispatchers": [
+        "cmdBridges"
+      ],
+      "flags": [
+        "--json",
+        "--limit",
+        "--namespace",
+        "--since",
+        "--since-last-compile"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "replay",
+      "dispatcher": "cmdReplay",
+      "all_dispatchers": [
+        "cmdReplay"
+      ],
+      "flags": [
+        "--against",
+        "--concept-id",
+        "--json",
+        "--limit",
+        "--local-worker",
+        "--mode",
+        "--namespace",
+        "--no-redact",
+        "--out",
+        "--preview",
+        "--redact",
+        "--seeds",
+        "--spec",
+        "--split-seed",
+        "--student-base",
+        "--teacher",
+        "--version-id"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "sync",
+      "dispatcher": "cmdSync",
+      "all_dispatchers": [
+        "cmdSync"
+      ],
+      "flags": [
+        "--all",
+        "--branch",
+        "--bundle",
+        "--rebase"
+      ],
+      "help_summary": "kolm sync - cloud-sync of local state, plus legacy git-mirror helpers. (W384)"
+    },
+    {
+      "verb": "profile",
+      "dispatcher": "cmdProfile",
+      "all_dispatchers": [
+        "cmdProfile"
+      ],
+      "flags": [
+        "--base-model",
+        "--default-target"
+      ],
+      "help_summary": "kolm profile - named CLI profile snapshots (~/.kolm/profiles/). (W229)"
+    },
+    {
+      "verb": "drift",
+      "dispatcher": "cmdW813Drift",
+      "all_dispatchers": [
+        "cmdW813Drift"
+      ],
+      "flags": [
+        "--artifact-path",
+        "--auto-remediate",
+        "--baseline-days",
+        "--confirm",
+        "--dry-run",
+        "--duration-s",
+        "--fallback-rate-lift",
+        "--fps-target",
+        "--help",
+        "--json",
+        "--kl-threshold",
+        "--limit",
+        "--live",
+        "--live-fallback-rate",
+        "--lookback-days",
+        "--max-frames",
+        "--max-n",
+        "--message-file",
+        "--namespace",
+        "--strategy",
+        "--tenant",
+        "--tenant-id",
+        "--training",
+        "--training-fallback-rate"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "install",
+      "dispatcher": "cmdInstall",
+      "all_dispatchers": [
+        "cmdInstall"
+      ],
+      "flags": [
+        "--apply",
+        "--dry-run",
+        "--force",
+        "--format",
+        "--json",
+        "--loop",
+        "--mcp",
+        "--query-gpu"
+      ],
+      "help_summary": "kolm install - wire the kolm MCP server into a frontier-agent harness."
+    },
+    {
+      "verb": "tune",
+      "dispatcher": "cmdTune",
+      "all_dispatchers": [
+        "cmdTune"
+      ],
+      "flags": [
+        "--airgap",
+        "--alpha",
+        "--artifact",
+        "--base",
+        "--base-model",
+        "--batch-size",
+        "--dropout",
+        "--epochs",
+        "--force",
+        "--interval",
+        "--lr",
+        "--rank",
+        "--rev"
+      ],
+      "help_summary": "kolm tune - evolve an artifact's local adapter from a skeleton LoRA into a living model."
+    },
+    {
+      "verb": "team",
+      "dispatcher": "cmdTeam",
+      "all_dispatchers": [
+        "cmdTeam"
+      ],
+      "flags": [
+        "--by",
+        "--comment",
+        "--help",
+        "--owner",
+        "--role",
+        "--seats"
+      ],
+      "help_summary": "kolm team - multi-tenant workspace management."
+    },
+    {
+      "verb": "tunnel",
+      "dispatcher": "cmdTunnel",
+      "all_dispatchers": [
+        "cmdTunnel"
+      ],
+      "flags": [
+        "--artifact",
+        "--help",
+        "--name",
+        "--team",
+        "--token"
+      ],
+      "help_summary": "kolm tunnel - remote access to a self-hosted .kolm via a signed reverse tunnel."
+    },
+    {
+      "verb": "cloud",
+      "dispatcher": "cmdCloud",
+      "all_dispatchers": [
+        "cmdCloud"
+      ],
+      "flags": [
+        "--artifact",
+        "--artifact-id",
+        "--base",
+        "--base-model",
+        "--billing-token",
+        "--budget",
+        "--budget-usd",
+        "--capture-window",
+        "--catalog",
+        "--context",
+        "--dataset",
+        "--gpu",
+        "--gpu-sku",
+        "--help",
+        "--json",
+        "--limit",
+        "--mode",
+        "--model",
+        "--name",
+        "--namespace",
+        "--no-local-gpu",
+        "--out",
+        "--params-b",
+        "--plan",
+        "--privacy",
+        "--provider",
+        "--reason",
+        "--recipe",
+        "--recipe-id",
+        "--region",
+        "--remote",
+        "--rows",
+        "--seeds",
+        "--smoke",
+        "--status",
+        "--storage-provider",
+        "--target",
+        "--team",
+        "--vram",
+        "--vram-tier",
+        "--window",
+        "--workload"
+      ],
+      "help_summary": "kolm cloud - real GPU fine-tunes + bring-your-own-cloud deploys."
+    },
+    {
+      "verb": "surfaces",
+      "dispatcher": "cmdSurfaces",
+      "all_dispatchers": [
+        "cmdSurfaces"
+      ],
+      "flags": [
+        "--benchmarks",
+        "--closeout",
+        "--frontier-contracts",
+        "--frontier-lab",
+        "--graph",
+        "--json",
+        "--operator-kernels",
+        "--packages",
+        "--quality",
+        "--readiness"
+      ],
+      "help_summary": "kolm surfaces - product journey map for users and operators."
+    },
+    {
+      "verb": "packages",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": "kolm packages - package release readiness for SDK, runtime, and installer channels."
+    },
+    {
+      "verb": "package",
+      "dispatcher": "cmdPackages",
+      "all_dispatchers": [
+        "cmdPackages"
+      ],
+      "flags": [
+        "--json",
+        "--summary"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "evidence",
+      "dispatcher": "cmdEvidence",
+      "all_dispatchers": [
+        "cmdEvidence"
+      ],
+      "flags": [
+        "--help",
+        "--json",
+        "--reason",
+        "--require-external-ready",
+        "--require-final",
+        "--require-local-contract",
+        "--summary"
+      ],
+      "help_summary": "kolm evidence - local proof packets for open product readiness gates."
+    },
+    {
+      "verb": "airgap",
+      "dispatcher": "cmdAirgap",
+      "all_dispatchers": [
+        "cmdAirgap"
+      ],
+      "flags": [
+        "--force",
+        "--help",
+        "--json",
+        "--models-dir",
+        "--omit",
+        "--out",
+        "--probe",
+        "--repo-root",
+        "--with-models",
+        "--with-node-modules",
+        "--with-wheels"
+      ],
+      "help_summary": "kolm airgap - hard-offline mode (no network egress)."
+    },
+    {
+      "verb": "bundle",
+      "dispatcher": "cmdBundle",
+      "all_dispatchers": [
+        "cmdBundle"
+      ],
+      "flags": [
+        "--airgap",
+        "--artifact",
+        "--force",
+        "--format",
+        "--help",
+        "--json",
+        "--models-dir",
+        "--out",
+        "--output",
+        "--repo-root",
+        "--runtime",
+        "--with-models",
+        "--with-node-modules",
+        "--with-wheels"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "deploy",
+      "dispatcher": "cmdDeploy",
+      "all_dispatchers": [
+        "cmdDeploy"
+      ],
+      "flags": [
+        "--airgap",
+        "--all",
+        "--artifact",
+        "--auto-install",
+        "--bind-host",
+        "--canary",
+        "--canary-observe-s",
+        "--canary-rollout",
+        "--confirm",
+        "--device",
+        "--dry-run",
+        "--help",
+        "--interval-s",
+        "--json",
+        "--namespace",
+        "--once",
+        "--out",
+        "--output",
+        "--policy",
+        "--port",
+        "--rolling",
+        "--runtime",
+        "--tag"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "compute",
+      "dispatcher": "cmdCompute",
+      "all_dispatchers": [
+        "cmdCompute"
+      ],
+      "flags": [
+        "--airgap",
+        "--auto-provision",
+        "--backend",
+        "--budget",
+        "--budjet",
+        "--confirm",
+        "--force",
+        "--help",
+        "--infer-only",
+        "--json",
+        "--min-vram",
+        "--spec"
+      ],
+      "help_summary": "kolm compute - where training runs (local CPU/GPU, cloud, or hybrid)."
+    },
+    {
+      "verb": "doctor",
+      "dispatcher": "cmdDoctor",
+      "all_dispatchers": [
+        "cmdDoctor"
+      ],
+      "flags": [
+        "--allow-logged-out",
+        "--cask",
+        "--class",
+        "--cloud",
+        "--detect-hw",
+        "--disable-pip-version-check",
+        "--dry-run",
+        "--email",
+        "--fix",
+        "--format",
+        "--from-captures",
+        "--from-git",
+        "--help",
+        "--install",
+        "--json",
+        "--key",
+        "--local-worker",
+        "--loop",
+        "--no-audit",
+        "--no-fund",
+        "--port",
+        "--postgres",
+        "--proto",
+        "--query-gpu",
+        "--remote",
+        "--reproduce",
+        "--runtime",
+        "--s3",
+        "--ssh",
+        "--target",
+        "--task",
+        "--tier",
+        "--tlsv1",
+        "--upgrade",
+        "--version",
+        "--yes"
+      ],
+      "help_summary": "kolm doctor - sanity-check the environment."
+    },
+    {
+      "verb": "teacher",
+      "dispatcher": "cmdTeacher",
+      "all_dispatchers": [
+        "cmdTeacher"
+      ],
+      "flags": [
+        "--detach",
+        "--host",
+        "--json",
+        "--namespace",
+        "--port",
+        "--set",
+        "--show",
+        "--teacher"
+      ],
+      "help_summary": "kolm teacher - show where teacher API keys come from and where kolm puts things."
+    },
+    {
+      "verb": "loop",
+      "dispatcher": "cmdLoop",
+      "all_dispatchers": [
+        "cmdLoop"
+      ],
+      "flags": [
+        "--loop"
+      ],
+      "help_summary": "kolm loop - run the value-loop smoke against an in-process router."
+    },
+    {
+      "verb": "logs",
+      "dispatcher": "cmdLogs",
+      "all_dispatchers": [
+        "cmdLogs"
+      ],
+      "flags": [
+        "--artifact",
+        "--expert",
+        "--json",
+        "--limit",
+        "--out",
+        "--router",
+        "--since"
+      ],
+      "help_summary": "kolm logs - tail the local run-history log."
+    },
+    {
+      "verb": "ask",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": "kolm ask - ask in plain English. Routes through the deterministic"
+    },
+    {
+      "verb": "intent",
+      "dispatcher": "cmdAsk",
+      "all_dispatchers": [
+        "cmdAsk"
+      ],
+      "flags": [
+        "--airgap",
+        "--apply",
+        "--binder",
+        "--count",
+        "--examples",
+        "--from",
+        "--help",
+        "--intent",
+        "--json",
+        "--offline",
+        "--once",
+        "--out",
+        "--preview",
+        "--seeds",
+        "--spec",
+        "--strategy",
+        "--target",
+        "--task",
+        "--yes"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "chat",
+      "dispatcher": "cmdChat",
+      "all_dispatchers": [
+        "cmdChat"
+      ],
+      "flags": [
+        "--airgap",
+        "--budget",
+        "--examples",
+        "--flag-style",
+        "--help",
+        "--json",
+        "--name",
+        "--offline",
+        "--once",
+        "--online",
+        "--yes"
+      ],
+      "help_summary": "kolm chat - interactive natural-language session that EXECUTES commands."
+    },
+    {
+      "verb": "quickstart",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": "kolm quickstart - guided setup wizard."
+    },
+    {
+      "verb": "wizard",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "setup",
+      "dispatcher": "cmdQuickstart",
+      "all_dispatchers": [
+        "cmdQuickstart"
+      ],
+      "flags": [
+        "--as",
+        "--count",
+        "--email",
+        "--help",
+        "--json",
+        "--lang",
+        "--limit",
+        "--local-worker",
+        "--namespace",
+        "--out",
+        "--port",
+        "--provider",
+        "--sdk",
+        "--seeds",
+        "--spec",
+        "--stub-model",
+        "--upstream",
+        "--yes"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "studio",
+      "dispatcher": "cmdStudio",
+      "all_dispatchers": [
+        "cmdStudio"
+      ],
+      "flags": [
+        "--help",
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "menu",
+      "dispatcher": "cmdMenu",
+      "all_dispatchers": [
+        "cmdMenu"
+      ],
+      "flags": [
+        "--help",
+        "--json",
+        "--tail"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "email",
+      "dispatcher": "cmdEmailOutbox",
+      "all_dispatchers": [
+        "cmdEmailOutbox"
+      ],
+      "flags": [
+        "--help",
+        "--json",
+        "--tail"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "chat-tui",
+      "dispatcher": "cmdChatTui",
+      "all_dispatchers": [
+        "cmdChatTui"
+      ],
+      "flags": [
+        "--as",
+        "--help",
+        "--lang",
+        "--local-worker",
+        "--model",
+        "--open",
+        "--out",
+        "--port",
+        "--provider",
+        "--registry",
+        "--sdk",
+        "--seeds",
+        "--system"
+      ],
+      "help_summary": "kolm chat-tui - terminal model cockpit for signed artifacts."
+    },
+    {
+      "verb": "completion",
+      "dispatcher": "cmdCompletion",
+      "all_dispatchers": [
+        "cmdCompletion"
+      ],
+      "flags": [
+        "--dry-run",
+        "--rc",
+        "--shell"
+      ],
+      "help_summary": "kolm completion - emit a shell completion script."
+    },
+    {
+      "verb": "upgrade",
+      "dispatcher": "cmdUpgrade",
+      "all_dispatchers": [
+        "cmdUpgrade"
+      ],
+      "flags": [
+        "--from",
+        "--json",
+        "--local-llm-url",
+        "--seed-rng",
+        "--strategy"
+      ],
+      "help_summary": "kolm upgrade - check for a newer kolm release."
+    },
+    {
+      "verb": "update",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": "kolm update - self-install the latest kolm from the canonical github source."
+    },
+    {
+      "verb": "self-update",
+      "dispatcher": "cmdUpdate",
+      "all_dispatchers": [
+        "cmdUpdate"
+      ],
+      "flags": [
+        "--backend",
+        "--base-model",
+        "--device",
+        "--dry-run",
+        "--force",
+        "--json",
+        "--out",
+        "--prefix",
+        "--preview",
+        "--quant"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "models",
+      "dispatcher": "cmdModels",
+      "all_dispatchers": [
+        "cmdModels"
+      ],
+      "flags": [
+        "--arch",
+        "--backend",
+        "--cache-dir",
+        "--concurrency",
+        "--device",
+        "--english-only",
+        "--family",
+        "--hw-tier",
+        "--id",
+        "--json",
+        "--license",
+        "--max-vram",
+        "--mobile",
+        "--modality",
+        "--model",
+        "--no-probe",
+        "--notes",
+        "--out",
+        "--params",
+        "--permissive",
+        "--pulled",
+        "--quant",
+        "--real",
+        "--runtime",
+        "--source-url",
+        "--tier",
+        "--tool-use",
+        "--train-device",
+        "--use",
+        "--variant",
+        "--vram"
+      ],
+      "help_summary": "kolm models - inspect the local model registry (license + size + recommendation)."
+    },
+    {
+      "verb": "gpu",
+      "dispatcher": "cmdGpu",
+      "all_dispatchers": [
+        "cmdGpu"
+      ],
+      "flags": [
+        "--dry-run",
+        "--index-url",
+        "--json",
+        "--no-build-isolation",
+        "--upgrade",
+        "--version",
+        "--yes"
+      ],
+      "help_summary": "kolm gpu - detect, doctor, and stress-test the local accelerator."
+    },
+    {
+      "verb": "seeds",
+      "dispatcher": "cmdSeeds",
+      "all_dispatchers": [
+        "cmdSeeds"
+      ],
+      "flags": [
+        "--help"
+      ],
+      "help_summary": "kolm seeds - honest, local-first training-data helpers."
+    },
+    {
+      "verb": "trace",
+      "dispatcher": "cmdTrace",
+      "all_dispatchers": [
+        "cmdTrace"
+      ],
+      "flags": [
+        "--from",
+        "--help",
+        "--json",
+        "--remote",
+        "--strict",
+        "--to"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "ir",
+      "dispatcher": "cmdIr",
+      "all_dispatchers": [
+        "cmdIr"
+      ],
+      "flags": [
+        "--help",
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "device",
+      "dispatcher": "cmdDevice",
+      "all_dispatchers": [
+        "cmdDevice"
+      ],
+      "flags": [
+        "--help",
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "cc",
+      "dispatcher": "cmdCc",
+      "all_dispatchers": [
+        "cmdCc"
+      ],
+      "flags": [
+        "--help",
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "fl",
+      "dispatcher": "cmdFl",
+      "all_dispatchers": [
+        "cmdFl"
+      ],
+      "flags": [
+        "--help",
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "federated",
+      "dispatcher": "cmdFederated",
+      "all_dispatchers": [
+        "cmdFederated"
+      ],
+      "flags": [
+        "--epsilon",
+        "--help",
+        "--json",
+        "--limit",
+        "--local",
+        "--namespace",
+        "--note",
+        "--peer",
+        "--peers",
+        "--reason",
+        "--scope",
+        "--since",
+        "--surface",
+        "--window-hours"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "sla",
+      "dispatcher": "cmdSla",
+      "all_dispatchers": [
+        "cmdSla"
+      ],
+      "flags": [
+        "--gpu",
+        "--help",
+        "--hours",
+        "--json",
+        "--model-size",
+        "--provider",
+        "--region",
+        "--surface",
+        "--tokens",
+        "--window-hours"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "carbon",
+      "dispatcher": "cmdCarbon",
+      "all_dispatchers": [
+        "cmdCarbon"
+      ],
+      "flags": [
+        "--gpu",
+        "--help",
+        "--hours",
+        "--json",
+        "--model-size",
+        "--provider",
+        "--region",
+        "--tokens",
+        "--utilization"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "plugin",
+      "dispatcher": "cmdPlugin",
+      "all_dispatchers": [
+        "cmdPlugin"
+      ],
+      "flags": [
+        "--help",
+        "--json",
+        "--kind",
+        "--remote"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "namespace",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "ns",
+      "dispatcher": "cmdNamespace",
+      "all_dispatchers": [
+        "cmdNamespace"
+      ],
+      "flags": [
+        "--artifact",
+        "--capture-mode",
+        "--display-name",
+        "--help",
+        "--json",
+        "--limit",
+        "--namespace",
+        "--reason",
+        "--redact-mode",
+        "--route-chain",
+        "--set",
+        "--to"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "receipts",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "receipt",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "anonymize",
+      "dispatcher": "cmdAnonymize",
+      "all_dispatchers": [
+        "cmdAnonymize"
+      ],
+      "flags": [
+        "--count",
+        "--expand",
+        "--from",
+        "--json",
+        "--out",
+        "--seed-rng",
+        "--strategy",
+        "--yes"
+      ],
+      "help_summary": "kolm anonymize - rule-based PII redaction. Default is 1:1 (N rows in -> N rows out)."
+    },
+    {
+      "verb": "redact",
+      "dispatcher": "cmdRedact",
+      "all_dispatchers": [
+        "cmdRedact"
+      ],
+      "flags": [
+        "--classes",
+        "--help",
+        "--ids",
+        "--input",
+        "--json",
+        "--map",
+        "--media",
+        "--mime",
+        "--names",
+        "--output",
+        "--path",
+        "--remote"
+      ],
+      "help_summary": "kolm redact - token-level PHI/PII redaction wrapper for any teacher API call."
+    },
+    {
+      "verb": "media",
+      "dispatcher": "cmdMedia",
+      "all_dispatchers": [
+        "cmdMedia"
+      ],
+      "flags": [
+        "--all",
+        "--dir",
+        "--doctor",
+        "--face-model",
+        "--face-model-url",
+        "--force",
+        "--help",
+        "--input",
+        "--json",
+        "--kind",
+        "--lang",
+        "--map",
+        "--max-bytes",
+        "--mime",
+        "--mode",
+        "--model",
+        "--output",
+        "--path",
+        "--plain",
+        "--plate-model",
+        "--plate-model-url",
+        "--remote",
+        "--strength",
+        "--threshold",
+        "--upgrade",
+        "--uri",
+        "--version",
+        "--yes"
+      ],
+      "help_summary": "kolm media - multimodal tokenization and redaction worker. OCR, PDF-text, whisper."
+    },
+    {
+      "verb": "reinject",
+      "dispatcher": "cmdReinject",
+      "all_dispatchers": [
+        "cmdReinject"
+      ],
+      "flags": [
+        "--expand",
+        "--help",
+        "--input",
+        "--map",
+        "--output"
+      ],
+      "help_summary": "kolm reinject - reverse the kolm redact mapping after a teacher API call."
+    },
+    {
+      "verb": "improve",
+      "dispatcher": "cmdImprove",
+      "all_dispatchers": [
+        "cmdImprove"
+      ],
+      "flags": [
+        "--dry-run",
+        "--epsilon",
+        "--json",
+        "--tail"
+      ],
+      "help_summary": "kolm improve - re-distill an artifact from recent low-confidence captures."
+    },
+    {
+      "verb": "instant",
+      "dispatcher": "cmdInstant",
+      "all_dispatchers": [
+        "cmdInstant"
+      ],
+      "flags": [
+        "--base-model",
+        "--compile",
+        "--out",
+        "--recipe",
+        "--schema",
+        "--spec",
+        "--teacher"
+      ],
+      "help_summary": "kolm instant - synthesise a recipe from a one-line task description."
+    },
+    {
+      "verb": "version",
+      "dispatcher": "cmdVersion",
+      "all_dispatchers": [
+        "cmdVersion"
+      ],
+      "flags": [
+        "--json",
+        "--offline",
+        "--short",
+        "--version"
+      ],
+      "help_summary": "kolm version - print CLI version and the server contract version."
+    },
+    {
+      "verb": "do",
+      "dispatcher": "cmdDo",
+      "all_dispatchers": [
+        "cmdDo"
+      ],
+      "flags": [
+        "--dry-run",
+        "--json"
+      ],
+      "help_summary": "kolm do - natural-language intent dispatcher."
+    },
+    {
+      "verb": "what",
+      "dispatcher": "cmdWhat",
+      "all_dispatchers": [
+        "cmdWhat"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": "kolm what - one-screen snapshot of where you are."
+    },
+    {
+      "verb": "next",
+      "dispatcher": "cmdNext",
+      "all_dispatchers": [
+        "cmdNext"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": "kolm quantize --local-worker --mixed-precision ${mode} --in <hf_model_dir> --out <quantized_dir>"
+    },
+    {
+      "verb": "explain",
+      "dispatcher": "cmdExplain",
+      "all_dispatchers": [
+        "cmdExplain"
+      ],
+      "flags": [
+        "--json"
+      ],
+      "help_summary": "kolm explain <artifact.kolm> - plain-English description of an artifact."
+    },
+    {
+      "verb": "fix",
+      "dispatcher": "cmdFix",
+      "all_dispatchers": [
+        "cmdFix"
+      ],
+      "flags": [
+        "--apply",
+        "--examples",
+        "--json",
+        "--out",
+        "--spec"
+      ],
+      "help_summary": "kolm fix <artifact.kolm> - auto-iterate on a failing artifact."
+    },
+    {
+      "verb": "synth",
+      "dispatcher": "cmdSynth",
+      "all_dispatchers": [
+        "cmdSynth"
+      ],
+      "flags": [
+        "--artifact",
+        "--from",
+        "--json",
+        "--modes",
+        "--workflow"
+      ],
+      "help_summary": "kolm synth - synthetic training-data generator (wave 371)."
+    },
+    {
+      "verb": "sim",
+      "dispatcher": "cmdSim",
+      "all_dispatchers": [
+        "cmdSim"
+      ],
+      "flags": [
+        "--against",
+        "--holdout-from-sim",
+        "--json",
+        "--sim",
+        "--stub-model",
+        "--type"
+      ],
+      "help_summary": "kolm sim - workload + adversary simulators (wave 371)."
+    },
+    {
+      "verb": "bakeoff",
+      "dispatcher": "cmdBakeoff",
+      "all_dispatchers": [
+        "cmdBakeoff"
+      ],
+      "flags": [
+        "--artifact",
+        "--contestants",
+        "--dataset",
+        "--frontier",
+        "--json",
+        "--limit",
+        "--local",
+        "--modality",
+        "--namespace",
+        "--remote",
+        "--stub-model"
+      ],
+      "help_summary": "kolm bakeoff - score-per-dollar bakeoff across cache/rule/small/frontier (wave 371) + multimodal (W466)."
+    },
+    {
+      "verb": "devices",
+      "dispatcher": "cmdDevices",
+      "all_dispatchers": [
+        "cmdDevices"
+      ],
+      "flags": [
+        "--all",
+        "--all-devices",
+        "--arch",
+        "--artifact",
+        "--class",
+        "--detect",
+        "--device",
+        "--json",
+        "--memory-mb",
+        "--offline",
+        "--profile",
+        "--profile-class",
+        "--quantization",
+        "--ram-gb",
+        "--supported-targets"
+      ],
+      "help_summary": "kolm devices - operator-registered device fleet. (W372)"
+    },
+    {
+      "verb": "install-device",
+      "dispatcher": "cmdInstallDevice",
+      "all_dispatchers": [
+        "cmdInstallDevice"
+      ],
+      "flags": [
+        "--device",
+        "--force",
+        "--json"
+      ],
+      "help_summary": "kolm install-device - push a .kolm artifact onto a registered device. (W372)"
+    },
+    {
+      "verb": "test-device",
+      "dispatcher": "cmdTestDevice",
+      "all_dispatchers": [
+        "cmdTestDevice"
+      ],
+      "flags": [
+        "--all-devices",
+        "--auto-install",
+        "--device",
+        "--json",
+        "--port",
+        "--runtime"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "test-quants",
+      "dispatcher": "cmdTestQuants",
+      "all_dispatchers": [
+        "cmdTestQuants"
+      ],
+      "flags": [
+        "--auto-install",
+        "--device",
+        "--json",
+        "--k-score-gate",
+        "--ladder",
+        "--port",
+        "--runtime"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "fleet",
+      "dispatcher": "cmdW888eFleet",
+      "all_dispatchers": [
+        "cmdW888eFleet"
+      ],
+      "flags": [
+        "--all",
+        "--canary",
+        "--canary-observe-s",
+        "--confirm",
+        "--help",
+        "--interval-s",
+        "--json",
+        "--namespace",
+        "--once",
+        "--rolling",
+        "--tag"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "privacy",
+      "dispatcher": "cmdPrivacy",
+      "all_dispatchers": [
+        "cmdPrivacy"
+      ],
+      "flags": [
+        "--base",
+        "--block",
+        "--branch",
+        "--json",
+        "--namespace",
+        "--smoke",
+        "--state"
+      ],
+      "help_summary": "kolm privacy - privacy-membrane scan / smoke / policy / report. (W384)"
+    },
+    {
+      "verb": "pipeline",
+      "dispatcher": "cmdW821Pipeline",
+      "all_dispatchers": [
+        "cmdW821Pipeline",
+        "cmdW738Pipeline",
+        "cmdPipeline"
+      ],
+      "flags": [
+        "--base-model",
+        "--benchmark",
+        "--dry-run",
+        "--eval-set",
+        "--file",
+        "--input",
+        "--input-json",
+        "--license",
+        "--name",
+        "--out",
+        "--target-repo"
+      ],
+      "help_summary": "kolm pipeline - end-to-end compile pipeline (tokenize -> distill -> compile). (W384)"
+    },
+    {
+      "verb": "diagnose",
+      "dispatcher": "cmdW741Diagnose",
+      "all_dispatchers": [
+        "cmdW741Diagnose"
+      ],
+      "flags": [
+        "--json",
+        "--message",
+        "--model"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "gateway",
+      "dispatcher": "cmdW742Gateway",
+      "all_dispatchers": [
+        "cmdW742Gateway"
+      ],
+      "flags": [
+        "--detach",
+        "--half-life",
+        "--message",
+        "--mock-kind",
+        "--model",
+        "--namespace",
+        "--port",
+        "--toml",
+        "--yes"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "staleness",
+      "dispatcher": "cmdW746Staleness",
+      "all_dispatchers": [
+        "cmdW746Staleness"
+      ],
+      "flags": [
+        "--half-life",
+        "--top",
+        "--yes"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "drift-alert",
+      "dispatcher": "cmdW747DriftAlert",
+      "all_dispatchers": [
+        "cmdW747DriftAlert"
+      ],
+      "flags": [
+        "--help",
+        "--kind",
+        "--samples",
+        "--threshold"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "copyright-scan",
+      "dispatcher": "cmdW750Copyright",
+      "all_dispatchers": [
+        "cmdW750Copyright"
+      ],
+      "flags": [
+        "--help"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "seasonal",
+      "dispatcher": "cmdW748Seasonal",
+      "all_dispatchers": [
+        "cmdW748Seasonal"
+      ],
+      "flags": [
+        "--category",
+        "--confirm",
+        "--count",
+        "--help",
+        "--json"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "synthetic",
+      "dispatcher": "cmdW749Synthetic",
+      "all_dispatchers": [
+        "cmdW749Synthetic"
+      ],
+      "flags": [
+        "--category",
+        "--confirm",
+        "--count",
+        "--help",
+        "--json",
+        "--strategy"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "vertical",
+      "dispatcher": "cmdW751Verticals",
+      "all_dispatchers": [
+        "cmdW751Verticals"
+      ],
+      "flags": [
+        "--airgap",
+        "--artifact",
+        "--auto-place",
+        "--capacity",
+        "--capture-id",
+        "--cid",
+        "--compare",
+        "--container",
+        "--dry-run",
+        "--expected",
+        "--file",
+        "--format",
+        "--hardware",
+        "--hardware-target",
+        "--help",
+        "--json",
+        "--min-kscore",
+        "--namespace",
+        "--no-color",
+        "--no-unicode",
+        "--offline-installer",
+        "--out",
+        "--placement-only",
+        "--plain",
+        "--sample-n",
+        "--short",
+        "--sneakernet",
+        "--stats",
+        "--surface",
+        "--task",
+        "--task-type",
+        "--text",
+        "--threshold",
+        "--tolerance-pct",
+        "--top",
+        "--version",
+        "--vertical",
+        "--window-hours",
+        "--workload",
+        "--workload-probe",
+        "--workspace"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "kolmbench",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "kb",
+      "dispatcher": "cmdW756Kolmbench",
+      "all_dispatchers": [
+        "cmdW756Kolmbench"
+      ],
+      "flags": [
+        "--confirm",
+        "--dry-run",
+        "--ed25519-receipt",
+        "--model",
+        "--namespace",
+        "--receipt",
+        "--submitter",
+        "--target-langs",
+        "--text"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "numeric",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "num",
+      "dispatcher": "cmdW759Numeric",
+      "all_dispatchers": [
+        "cmdW759Numeric"
+      ],
+      "flags": [
+        "--artifact",
+        "--expected",
+        "--help",
+        "--judge-cmd",
+        "--namespace",
+        "--pack-dir",
+        "--sample-n",
+        "--sandbox-cmd",
+        "--subjects",
+        "--text",
+        "--threshold",
+        "--tolerance-pct"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "lang",
+      "dispatcher": "cmdW760Lang",
+      "all_dispatchers": [
+        "cmdW760Lang"
+      ],
+      "flags": [
+        "--binding-file",
+        "--capture-id",
+        "--confirm",
+        "--dry-run",
+        "--help",
+        "--namespace",
+        "--reason",
+        "--request-hash",
+        "--response-body",
+        "--sample-n",
+        "--target-langs",
+        "--teacher",
+        "--text",
+        "--timestamp-ms"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "poison",
+      "dispatcher": "cmdW761Poison",
+      "all_dispatchers": [
+        "cmdW761Poison"
+      ],
+      "flags": [
+        "--artifact",
+        "--binding-file",
+        "--capture-id",
+        "--categories",
+        "--confirm",
+        "--help",
+        "--namespace",
+        "--policy",
+        "--reason",
+        "--request-hash",
+        "--response-body",
+        "--sample-n",
+        "--seed",
+        "--teacher",
+        "--text",
+        "--timestamp-ms"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "redteam",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "rt",
+      "dispatcher": "cmdW762Redteam",
+      "all_dispatchers": [
+        "cmdW762Redteam"
+      ],
+      "flags": [
+        "--artifact",
+        "--categories",
+        "--confirm",
+        "--help",
+        "--policy",
+        "--seed",
+        "--strategy",
+        "--system-prompt",
+        "--text"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "forget",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "mit",
+      "dispatcher": "cmdW764Mit",
+      "all_dispatchers": [
+        "cmdW764Mit"
+      ],
+      "flags": [
+        "--artifact",
+        "--capture-id",
+        "--confirm",
+        "--format",
+        "--help",
+        "--include-environmental",
+        "--namespace",
+        "--out",
+        "--reason",
+        "--text",
+        "--threshold"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "pextract",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "px",
+      "dispatcher": "cmdW765Pextract",
+      "all_dispatchers": [
+        "cmdW765Pextract"
+      ],
+      "flags": [
+        "--confirm",
+        "--format",
+        "--help",
+        "--manifest",
+        "--output",
+        "--policy",
+        "--sbom",
+        "--strategy",
+        "--system-prompt",
+        "--text"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "sbom",
+      "dispatcher": "cmdW763Sbom",
+      "all_dispatchers": [
+        "cmdW763Sbom"
+      ],
+      "flags": [
+        "--artifact",
+        "--capture-id",
+        "--confirm",
+        "--format",
+        "--help",
+        "--manifest",
+        "--namespace",
+        "--output",
+        "--reason",
+        "--sbom",
+        "--text",
+        "--threshold"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "model-card",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "mc",
+      "dispatcher": "cmdW768ModelCard",
+      "all_dispatchers": [
+        "cmdW768ModelCard"
+      ],
+      "flags": [
+        "--format",
+        "--from",
+        "--help",
+        "--include-environmental",
+        "--manifest",
+        "--max",
+        "--out",
+        "--to"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "cert",
+      "dispatcher": "cmdW767Cert",
+      "all_dispatchers": [
+        "cmdW767Cert"
+      ],
+      "flags": [
+        "--artifact",
+        "--confirm",
+        "--format",
+        "--help",
+        "--intended-use",
+        "--manifest",
+        "--namespace",
+        "--period",
+        "--report",
+        "--threshold",
+        "--vendor"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "regulatory",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "reg",
+      "dispatcher": "cmdW834Regulatory",
+      "all_dispatchers": [
+        "cmdW834Regulatory"
+      ],
+      "flags": [
+        "--artifact",
+        "--consortium-id",
+        "--contrib-id",
+        "--epsilon",
+        "--format",
+        "--help",
+        "--intended-use",
+        "--manifest",
+        "--namespace",
+        "--period",
+        "--report",
+        "--threshold",
+        "--vendor"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "ai-act",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "aiact",
+      "dispatcher": "cmdW766AiAct",
+      "all_dispatchers": [
+        "cmdW766AiAct"
+      ],
+      "flags": [
+        "--confirm",
+        "--format",
+        "--from",
+        "--help",
+        "--namespace",
+        "--out",
+        "--threshold",
+        "--to"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "residency",
+      "dispatcher": "cmdW769Residency",
+      "all_dispatchers": [
+        "cmdW769Residency"
+      ],
+      "flags": [
+        "--capture-id",
+        "--confirm",
+        "--help",
+        "--namespace",
+        "--prefer",
+        "--region",
+        "--residency",
+        "--target"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "region",
+      "dispatcher": "cmdW780Region",
+      "all_dispatchers": [
+        "cmdW780Region"
+      ],
+      "flags": [
+        "--confirm",
+        "--help",
+        "--limit",
+        "--max",
+        "--namespace",
+        "--prefer",
+        "--residency",
+        "--stdin"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "xlang",
+      "dispatcher": null,
+      "all_dispatchers": [],
+      "flags": [],
+      "help_summary": ""
+    },
+    {
+      "verb": "multilingual",
+      "dispatcher": "cmdW774Xlang",
+      "all_dispatchers": [
+        "cmdW774Xlang"
+      ],
+      "flags": [
+        "--confirm",
+        "--count",
+        "--help",
+        "--langs",
+        "--max",
+        "--namespace",
+        "--strategy",
+        "--target",
+        "--target-langs",
+        "--teacher",
+        "--weights"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "lingual",
+      "dispatcher": "cmdW833Lingual",
+      "all_dispatchers": [
+        "cmdW833Lingual"
+      ],
+      "flags": [
+        "--auto-remediate",
+        "--confirm",
+        "--count",
+        "--dry-run",
+        "--fallback-rate-lift",
+        "--help",
+        "--json",
+        "--kl-threshold",
+        "--limit",
+        "--live",
+        "--live-fallback-rate",
+        "--namespace",
+        "--target",
+        "--teacher",
+        "--training",
+        "--training-fallback-rate",
+        "--weights"
+      ],
+      "help_summary": ""
+    },
+    {
+      "verb": "agents",
+      "dispatcher": "cmdAgents",
+      "all_dispatchers": [
+        "cmdAgents"
+      ],
+      "flags": [
+        "--app",
+        "--codebase",
+        "--json",
+        "--limit",
+        "--since",
+        "--task"
+      ],
+      "help_summary": "kolm agents - dev-agent telemetry (sessions, recommendations, failures). (W384)"
+    },
+    {
+      "verb": "shell-init",
+      "dispatcher": "cmdShellInit",
+      "all_dispatchers": [
+        "cmdShellInit"
+      ],
+      "flags": [
+        "--base",
+        "--base-url",
+        "--json",
+        "--providers",
+        "--shell"
+      ],
+      "help_summary": "kolm shell-init - emit a shell-export snippet for sh/bash/zsh/fish/pwsh/cmd. (W384)"
+    }
+  ]
+}

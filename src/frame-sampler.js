@@ -1,9 +1,9 @@
-// W773 — Video frame-sampling SPEC builder.
+// W773 - Video frame-sampling SPEC builder.
 //
 // Pure JS. Builds a PORTABLE JSON sampling SPEC consumed downstream by the
 // Python trainer (apps/trainer/video_distill.py) which is where the actual
 // frame extraction lives (ffmpeg + cv2). The split keeps the heavy media
-// deps out of Node — Node only emits the contract; Python honors it.
+// deps out of Node - Node only emits the contract; Python honors it.
 //
 // Atomic guarantees pinned by tests/wave773-video-distill.test.js:
 //
@@ -22,23 +22,23 @@
 //
 // HONESTY INVARIANTS:
 //  - buildSamplingSpec MUST NOT return {ok:true, sampling_indices:[]} on
-//    valid input — that would silently report "no frames" while claiming
+//    valid input - that would silently report "no frames" while claiming
 //    success. The empty-on-success case only arises from bad input and is
 //    surfaced as {ok:false, error:'<kind>'}.
 //  - estimateExtractedFrames is the SAME math the trainer dry-run uses;
 //    if you change one, change the other.
 //
 // Why 'keyframe' + 'scene_change' are separate strategies:
-//   keyframe       — extract I-frames per the container's GOP metadata.
+//   keyframe - extract I-frames per the container's GOP metadata.
 //                    Cheap, deterministic, but density varies wildly by
 //                    encoder (some screen recorders emit one I-frame per
 //                    minute; some hand-cam emits one per second).
-//   scene_change   — run a pixel-diff threshold across decoded frames
+//   scene_change - run a pixel-diff threshold across decoded frames
 //                    looking for cut points. More accurate for tutorials
 //                    and presentations, more expensive than keyframe.
-//   uniform        — fps_target evenly across the duration. Deterministic
+//   uniform - fps_target evenly across the duration. Deterministic
 //                    + cheap + good for surveillance / continuous footage.
-//   adaptive       — start uniform, densify around high-motion regions
+//   adaptive - start uniform, densify around high-motion regions
 //                    using a motion histogram. Most accurate, slowest.
 
 export const FRAME_SAMPLER_VERSION = 'w773-v1';
@@ -65,14 +65,14 @@ const DEFAULT_MAX_FRAMES = 64;
 const HARD_FRAME_CAP = 1024;
 
 // =============================================================================
-// estimateExtractedFrames — pure estimator. Trainer dry-run consults this so
+// estimateExtractedFrames - pure estimator. Trainer dry-run consults this so
 // total_frames_estimated never lies about effort.
 //
 // Math:
 //   raw = duration_s * fps_target   (or strategy-specific density)
 //   capped = min(raw, max_frames, HARD_FRAME_CAP)
 //
-// NEVER returns 0 for a valid (>0 duration_s, >0 fps_target) input — the
+// NEVER returns 0 for a valid (>0 duration_s, >0 fps_target) input - the
 // floor is 1. A clip exists, so at least one representative frame must
 // be sampled.
 // =============================================================================
@@ -101,8 +101,8 @@ export function estimateExtractedFrames(duration_s, strategy, fps_target, max_fr
 }
 
 // =============================================================================
-// buildSamplingSpec — emits a PORTABLE JSON spec the Python trainer reads.
-// Pure function — no I/O. The spec rides into the trainer's --frame-sampler-spec
+// buildSamplingSpec - emits a PORTABLE JSON spec the Python trainer reads.
+// Pure function - no I/O. The spec rides into the trainer's --frame-sampler-spec
 // arg as a path to a JSON file the JS caller wrote.
 //
 // Spec shape on success:
@@ -129,7 +129,7 @@ export function buildSamplingSpec({
   fps_target = DEFAULT_FPS_TARGET,
   max_frames = DEFAULT_MAX_FRAMES,
 } = {}) {
-  // Duration validation — zero / negative / NaN / Infinity all invalid.
+  // Duration validation - zero / negative / NaN / Infinity all invalid.
   const dur = Number(video_duration_s);
   if (!Number.isFinite(dur) || dur <= 0) {
     return {
@@ -140,7 +140,7 @@ export function buildSamplingSpec({
     };
   }
 
-  // Strategy validation — closed enum.
+  // Strategy validation - closed enum.
   if (typeof strategy !== 'string' || !SAMPLING_STRATEGIES.includes(strategy)) {
     return {
       ok: false,
@@ -151,7 +151,7 @@ export function buildSamplingSpec({
     };
   }
 
-  // fps_target validation — must be positive finite.
+  // fps_target validation - must be positive finite.
   const fps = Number(fps_target);
   if (!Number.isFinite(fps) || fps <= 0) {
     return {
@@ -162,7 +162,7 @@ export function buildSamplingSpec({
     };
   }
 
-  // max_frames validation — when present, must be positive integer.
+  // max_frames validation - when present, must be positive integer.
   const cap = Number(max_frames);
   if (!Number.isFinite(cap) || cap <= 0) {
     return {
@@ -188,12 +188,12 @@ export function buildSamplingSpec({
   // for adaptive we emit uniform offsets as a baseline and let the trainer
   // densify around motion peaks (the trainer SPEC carries the strategy
   // string so it knows to do the densification pass). For keyframe and
-  // scene_change the offsets are HINTS — the trainer snaps to the nearest
+  // scene_change the offsets are HINTS - the trainer snaps to the nearest
   // actual keyframe / scene change before extraction.
   const sampling_indices = [];
   if (expected > 0) {
     if (expected === 1) {
-      // Single frame — take the midpoint so a thumbnail is representative.
+      // Single frame - take the midpoint so a thumbnail is representative.
       sampling_indices.push(Number((dur / 2).toFixed(3)));
     } else {
       // Evenly spaced. Step = duration / (n - 1) hits both endpoints; we

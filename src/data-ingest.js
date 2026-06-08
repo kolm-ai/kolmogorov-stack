@@ -1,6 +1,6 @@
 // src/data-ingest.js
 //
-// W910 Track A — Data Ingestion. W921 — KOLM Data Engine INGEST stage.
+// W910 Track A - Data Ingestion. W921 - KOLM Data Engine INGEST stage.
 //
 // TWO layers live here:
 //
@@ -134,7 +134,7 @@ function filterRows(rawRows) {
 }
 
 // =============================================================================
-// W921 INGEST stage — persistent, namespace-scoped raw-pairs.
+// W921 INGEST stage - persistent, namespace-scoped raw-pairs.
 //
 // Every pair appended to <KOLM_DATA_DIR>/<ns>/raw-pairs.jsonl carries:
 //   id, input, output, source_type, ingested_at, source_ref,
@@ -224,7 +224,7 @@ function _appendRawPairs(namespace, pairs, sourceMeta) {
   return { n_written: lines.length, dupes_skipped: dupes, ids, path: target };
 }
 
-// ---- A2/W921: ingestDescribe({namespace, description, n}) — SEED prompts -----
+// ---- A2/W921: ingestDescribe({namespace, description, n}) - SEED prompts -----
 //
 // Writes n seed pairs whose OUTPUT IS EMPTY: they are prompts spanning the
 // described task, to be filled by a later AUGMENT/collect stage. This is the
@@ -286,7 +286,7 @@ function buildSeedPrompts(description, n) {
   return seeds;
 }
 
-// ---- W921: ingestFile({namespace, file}) — JSONL of {input,output} ----------
+// ---- W921: ingestFile({namespace, file}) - JSONL of {input,output} ----------
 export async function ingestFile({ namespace, file } = {}) {
   if (!file) return { ok: false, error: 'input_not_found', version: INGEST_VERSION };
   const abs = path.resolve(file);
@@ -323,7 +323,7 @@ export async function ingestFile({ namespace, file } = {}) {
   };
 }
 
-// ---- W921: ingestDocs({namespace, docs_dir}) — chunk .md → reference output -
+// ---- W921: ingestDocs({namespace, docs_dir}) - chunk .md → reference output -
 //
 // Each Markdown chunk becomes one pair: the heading is the input, the chunk
 // TEXT is the reference output (so every written pair has a non-empty output).
@@ -373,7 +373,7 @@ async function ingestDocsStage({ namespace, docs_dir } = {}) {
   };
 }
 
-// ---- W921: ingestFrom({namespace, source, file}) — provider exports ---------
+// ---- W921: ingestFrom({namespace, source, file}) - provider exports ---------
 //
 // Each supported provider exports request/response logs in its own shape. We
 // extract the USER INPUT (and the assistant output when present) so every
@@ -489,7 +489,7 @@ export async function ingestFrom({ namespace, source, file } = {}) {
   };
 }
 
-// ---- W921: ingestPairs({namespace, pairs}) — in-memory source ---------------
+// ---- W921: ingestPairs({namespace, pairs}) - in-memory source ---------------
 export async function ingestPairs({ namespace, pairs } = {}) {
   const list = Array.isArray(pairs) ? pairs : [];
   const ingested_at = new Date().toISOString();
@@ -510,7 +510,7 @@ export async function ingestPairs({ namespace, pairs } = {}) {
   };
 }
 
-// ---- W921: ingestCombined({namespace, sources:[...]}) — merge + dedupe -------
+// ---- W921: ingestCombined({namespace, sources:[...]}) - merge + dedupe -------
 //
 // sources: [{kind:'file', file} | {kind:'pairs', pairs}]. Each contributes to
 // the SAME namespace; dedupe by explicit id is enforced across contributions
@@ -649,7 +649,7 @@ function parseCsvFile(text, forcedDelim, filename, opts) {
   for (let i = 1; i < grid.length; i++) {
     const row = grid[i];
     if (!row) continue;
-    // Empty fields are pushed through so filterRows can count the drop —
+    // Empty fields are pushed through so filterRows can count the drop - 
     // silent drops here would hide bad-data signals from the user.
     const input = row.length > inPick.index ? String(row[inPick.index] || '').trim() : '';
     const output = row.length > outPick.index ? String(row[outPick.index] || '').trim() : '';
@@ -751,7 +751,7 @@ export async function ingestDescribe(description, opts = {}) {
   };
 }
 
-// W921 — object-arg entry consumed by the autopilot bootstrap. Seeds the
+// W921 - object-arg entry consumed by the autopilot bootstrap. Seeds the
 // namespace's persistent raw-pairs.jsonl (empty-output prompts, no teacher
 // spend) and returns the {ok:true, rows, n_written, path, dupes_skipped}
 // envelope the bootstrap gates on (it reads seed.ok, seed.n_written,
@@ -947,7 +947,7 @@ async function walkDocs(absDir) {
 }
 
 function chunkDocument(text, ext) {
-  // .md: split on ATX headings (`#`, `##`, ...) — heading text is the chunk
+  // .md: split on ATX headings (`#`, `##`, ...) - heading text is the chunk
   //      heading, body is everything until the next heading.
   // .txt/.html: split on blank-line paragraphs; first paragraph treated as
   //      pseudo-heading if it ends without punctuation.

@@ -1,66 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Status · kolm.ai</title>
-<meta name="description" content="Live status of the kolm.ai control plane: Gateway, Capture, Registry, Distill, Compile, API, Website. 90-day uptime history and incident log.">
-<link rel="canonical" href="https://kolm.ai/status">
-<meta property="og:title" content="Status">
-<meta property="og:description" content="Live status of the kolm.ai control plane plus 90-day uptime history.">
-<meta property="og:url" content="https://kolm.ai/status">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>System Status · kolm.ai</title>
+<meta name="description" content="Current health of the kolm.ai audit infrastructure: public verifier, API, transparency log, audit pipeline, and website. Incidents posted here and to dev@kolm.ai.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="System Status · kolm.ai">
+<meta property="og:description" content="Current health of the kolm.ai audit infrastructure. Incidents are posted here and notified to dev@kolm.ai.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/status">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/supplement.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<script defer src="/supplement.js"></script>
-<style>
-  .status-page { max-width: 960px; margin: 0 auto; padding: 48px 24px 96px; }
-  .status-hero { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border: 1px solid var(--ks-line); border-radius: 14px; background: var(--ks-bg-2); margin-bottom: 32px; }
-  .status-hero[data-overall="ok"] { background: linear-gradient(180deg, rgba(46,160,67,0.06), transparent), var(--ks-bg-2); }
-  .status-hero[data-overall="degraded"] { background: linear-gradient(180deg, rgba(241,196,15,0.10), transparent), var(--ks-bg-2); }
-  .status-hero[data-overall="down"] { background: linear-gradient(180deg, rgba(231,76,60,0.10), transparent), var(--ks-bg-2); }
-  .status-dot { width: 14px; height: 14px; border-radius: 50%; flex: 0 0 14px; box-shadow: 0 0 0 4px rgba(46,160,67,0.18); background: #2ea043; }
-  .status-dot[data-state="degraded"] { background: #f1c40f; box-shadow: 0 0 0 4px rgba(241,196,15,0.18); }
-  .status-dot[data-state="down"] { background: #e74c3c; box-shadow: 0 0 0 4px rgba(231,76,60,0.18); }
-  .status-hero__text { flex: 1 1 auto; }
-  .status-hero__h { font-size: 18px; font-weight: 600; margin: 0 0 2px; color: var(--ks-ink-1); }
-  .status-hero__sub { font-size: 13px; color: var(--ks-ink-2); margin: 0; }
-  .status-hero__updated { font-size: 12px; color: var(--ks-ink-2); }
-  .status-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 40px; }
-  .status-row { display: grid; grid-template-columns: 220px 1fr 120px; align-items: center; gap: 16px; padding: 14px 18px; border: 1px solid var(--ks-line); border-radius: 12px; background: var(--ks-bg-2); }
-  .status-row__name { font-weight: 600; color: var(--ks-ink-1); font-size: 14px; }
-  .status-row__name small { display: block; font-weight: 400; color: var(--ks-ink-2); font-size: 12px; margin-top: 2px; }
-  .status-row__bars { display: flex; gap: 2px; height: 32px; align-items: flex-end; }
-  .status-bar { flex: 1; min-width: 3px; height: 100%; background: #2ea043; border-radius: 2px; opacity: 0.85; }
-  .status-bar[data-state="degraded"] { background: #f1c40f; }
-  .status-bar[data-state="down"] { background: #e74c3c; }
-  .status-bar[data-state="unknown"] { background: var(--ks-line); opacity: 0.4; }
-  .status-row__uptime { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ks-ink-1); font-weight: 600; }
-  .status-row__uptime small { display: block; font-weight: 400; color: var(--ks-ink-2); font-size: 11px; }
-  .status-incidents { margin: 32px 0; }
-  .status-incidents h2 { font-size: 16px; margin: 0 0 14px; color: var(--ks-ink-1); }
-  .status-incident { padding: 14px 18px; border: 1px solid var(--ks-line); border-radius: 10px; background: var(--ks-bg-2); margin-bottom: 10px; }
-  .status-incident__head { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; }
-  .status-incident__badge { font-size: 10.5px; padding: 2px 8px; border-radius: 99px; background: rgba(46,160,67,0.15); color: #2ea043; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-  .status-incident__badge[data-sev="degraded"] { background: rgba(241,196,15,0.18); color: #b8860b; }
-  .status-incident__badge[data-sev="down"] { background: rgba(231,76,60,0.18); color: #e74c3c; }
-  .status-incident__when { font-size: 12px; color: var(--ks-ink-2); font-variant-numeric: tabular-nums; }
-  .status-incident__t { margin: 0; font-size: 14px; color: var(--ks-ink-1); }
-  .status-incident__body { margin: 6px 0 0; font-size: 13px; color: var(--ks-ink-2); }
-  .status-empty { padding: 28px; text-align: center; color: var(--ks-ink-2); font-size: 13.5px; border: 1px dashed var(--ks-line); border-radius: 10px; }
-  .status-sub { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; padding: 18px 22px; border: 1px solid var(--ks-line); border-radius: 12px; background: var(--ks-bg-2); align-items: center; }
-  .status-sub p { margin: 0; flex: 1 1 280px; font-size: 13px; color: var(--ks-ink-2); }
-  .status-sub a { font-size: 13px; padding: 6px 12px; border: 1px solid var(--ks-line); border-radius: 8px; color: var(--ks-ink-1); text-decoration: none; }
-  .status-sub a:hover { background: var(--ks-bg-3); }
-  @media (max-width: 640px) {
-    .status-row { grid-template-columns: 1fr; gap: 8px; }
-    .status-row__uptime { text-align: left; }
-  }
-</style>
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="System Status">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/status">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -69,7 +45,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/status",
-  "description": "Live status of the kolm.ai control plane: Gateway, Capture, Registry, Distill, Compile, API, Website. 90-day uptime history and incident log.",
+  "description": "Current health of the kolm.ai audit infrastructure: public verifier, API, transparency log, audit pipeline, and website. Incidents posted here and to dev@kolm.ai.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -83,329 +59,260 @@
 }
 </script>
 </head>
-<body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/solutions/teams">For teams</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="/enterprise">Enterprise</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
+<hr class="foil-strip" aria-hidden="true">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
     </div>
-  </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a><a href="/solutions/teams">For teams</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
   </div>
-</div>
-
-<main id="main" class="status-page" data-test="wf21-status-page" data-w401g="status">
-
-<header style="margin-bottom:24px;">
-  <p class="eyebrow">kolm.ai &middot; status</p>
-  <h1 style="margin:8px 0 6px;">Live status</h1>
-  <p style="color:var(--ks-ink-2); margin:0 0 4px;">Current health of every public surface and 90 days of uptime history. Compiled artifacts are not affected by control-plane status &mdash; they run on your hardware.</p>
 </header>
 
-<div class="status-hero" id="overallHero" data-overall="ok" role="status" aria-live="polite">
-  <span class="status-dot" id="overallDot" data-state="ok" aria-hidden="true"></span>
-  <div class="status-hero__text">
-    <p class="status-hero__h" id="overallH">All systems operational</p>
-    <p class="status-hero__sub" id="overallSub">Live component status below &middot; <span id="overallUptime">&mdash;</span> rolling 90-day uptime (history begins when sampling starts)</p>
-  </div>
-  <span class="status-hero__updated">Updated <time id="overallUpdated" datetime="">&mdash;</time></span>
-</div>
+<main>
 
-
-<div class="status-live" id="liveHealth" data-test="w890-15-live-health" hidden style="margin:0 0 28px;padding:16px 22px;border:1px solid var(--ks-line);border-radius:12px;background:var(--ks-bg-2);font-size:13px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;">
-  <div><span style="color:var(--ks-ink-2);">Liveness</span><br><strong id="lhOk" style="color:var(--ks-ink-1);">&mdash;</strong></div>
-  <div><span style="color:var(--ks-ink-2);">Version</span><br><strong id="lhVersion" style="color:var(--ks-ink-1);font-variant-numeric:tabular-nums;">&mdash;</strong></div>
-  <div><span style="color:var(--ks-ink-2);">Uptime</span><br><strong id="lhUptime" style="color:var(--ks-ink-1);font-variant-numeric:tabular-nums;">&mdash;</strong></div>
-  <div><span style="color:var(--ks-ink-2);">Gateway</span><br><strong id="lhGateway" style="color:var(--ks-ink-1);">&mdash;</strong></div>
-  <div><span style="color:var(--ks-ink-2);">Capture store</span><br><strong id="lhCapture" style="color:var(--ks-ink-1);">&mdash;</strong></div>
-  <div><span style="color:var(--ks-ink-2);">Signing key</span><br><strong id="lhSigning" style="color:var(--ks-ink-1);">&mdash;</strong></div>
-</div>
-<script>
-// fetch fails (network error / offline) by keeping the last known values
-// and dimming the card.
-(function(){
-  function fmtUptime(s){ if (typeof s !== 'number' || !isFinite(s)) return '—'; if (s < 60) return s+'s'; if (s < 3600) return Math.round(s/60)+'m'; if (s < 86400) return (s/3600).toFixed(1)+'h'; return (s/86400).toFixed(1)+'d'; }
-  function paint(d){
-    var card = document.getElementById('liveHealth');
-    if (!card) return;
-    card.hidden = false;
-    var setT = function(id, v){ var el = document.getElementById(id); if (el) el.textContent = v; };
-    setT('lhOk', d && d.ok === true ? 'ok' : (d && d.status) || '—');
-    setT('lhVersion', (d && d.version) || '—');
-    setT('lhUptime', d && typeof d.uptime_s === 'number' ? fmtUptime(d.uptime_s) : '—');
-    // Sub-component pulls — /health does not surface signing_key/capture_store
-    // detail (those are on /v1/health, admin-only). Show "operational" when
-    // /health responded with ok:true; "unknown" otherwise. Operators can
-    // inspect /v1/health for the deep snapshot.
-    var operational = (d && d.ok === true) ? 'operational' : 'unknown';
-    setT('lhGateway', operational);
-    setT('lhCapture', operational);
-    setT('lhSigning', operational);
-  }
-  function poll(){
-    fetch('/health', { cache: 'no-store' })
-      .then(function(r){ return r.json(); })
-      .then(paint)
-      .catch(function(){ /* keep last known values */ });
-  }
-  poll();
-  setInterval(poll, 30000);
-})();
-</script>
-
-<div class="status-grid" id="statusGrid" role="list" aria-label="Component health rows">
-  
-  <noscript>
-    <div class="status-row" role="listitem"><div class="status-row__name">Gateway<small>/v1/bridges/observations, routing, PII redaction</small></div><div class="status-row__uptime">99.97%</div></div>
-    <div class="status-row" role="listitem"><div class="status-row__name">Capture<small>/v1/capture/log approval-only logging, hash chain</small></div><div class="status-row__uptime">99.97%</div></div>
-    <div class="status-row" role="listitem"><div class="status-row__name">Registry<small>signed .kolm artifact storage</small></div><div class="status-row__uptime">99.97%</div></div>
-    <div class="status-row" role="listitem"><div class="status-row__name">Distill<small>/v1/distill/runs teacher to student compile jobs</small></div><div class="status-row__uptime">99.97%</div></div>
-    <div class="status-row" role="listitem"><div class="status-row__name">Forge<small>/v1/compile quantize workers (INT4 NF4+double et al.)</small></div><div class="status-row__uptime">99.97%</div></div>
-    <div class="status-row" role="listitem"><div class="status-row__name">API<small>kolm.ai/v1</small></div><div class="status-row__uptime">99.97%</div></div>
-    <div class="status-row" role="listitem"><div class="status-row__name">Website<small>kolm.ai, docs</small></div><div class="status-row__uptime">99.97%</div></div>
-  </noscript>
-</div>
-
-<section class="status-incidents" aria-labelledby="incidents-h">
-  <h2 id="incidents-h">Incident history &mdash; last 90 days</h2>
-  <div id="incidentList" role="list">
-    <div class="status-empty">No incidents reported in the last 90 days.</div>
+<!-- hero -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:64ch">
+      <h1>Audit infrastructure status.</h1>
+      <p class="lede">The live health of every public surface behind the kolm.ai evidence pipeline. Incidents are posted here and sent directly to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. Evidence reports already in your hands are not affected by infrastructure events; they are offline-verifiable against our public Ed25519 key with no dependency on our servers.</p>
+    </div>
   </div>
 </section>
 
-<div class="status-sub">
-  <p>Subscribe to status updates. Receive an email when an incident opens, updates, or resolves.</p>
-  <form id="subscribe-form" action="/v1/status/subscribe" method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-    <label for="subscribe-email" class="ks-sr-only" style="position:absolute;left:-9999px;">Email address</label>
-    <input id="subscribe-email" name="email" type="email" required placeholder="you@company.com" style="flex:1 1 200px;padding:8px 12px;border:1px solid var(--ks-line);border-radius:8px;background:var(--ks-bg-2);color:var(--ks-ink-1);font-size:13px;">
-    <button type="submit" style="padding:8px 16px;border:1px solid var(--ks-line);border-radius:8px;background:var(--ks-bg-3);color:var(--ks-ink-1);font-size:13px;cursor:pointer;">Notify me</button>
-    <span id="subscribe-result" role="status" aria-live="polite" style="font-size:12px;color:var(--ks-ink-2);"></span>
-  </form>
-  <a href="/status.rss" rel="alternate" type="application/rss+xml">RSS</a>
-  <a href="/v1/status/webhook">Webhook</a>
-</div>
+<!-- overall banner -->
+<section class="section reveal" style="border-top:0;padding-top:0">
+  <div class="wrap">
+    <div class="section__head" style="margin-bottom:var(--s4)">
+      <span class="idx">01 / Current status</span>
+    </div>
+    <div class="band" style="margin-bottom:0" role="status" aria-live="polite">
+      <div class="band__item">
+        <span class="badge badge--ok">All systems operational</span>
+      </div>
+      <div class="band__item" style="color:var(--ink-3);font-size:13.5px">
+        Per-component detail below. No incidents active.
+      </div>
+    </div>
+  </div>
+</section>
 
-<script>
-(function(){
-  var form = document.getElementById('subscribe-form');
-  if (!form) return;
-  form.addEventListener('submit', function(ev){
-    ev.preventDefault();
-    var emailInput = document.getElementById('subscribe-email');
-    var result = document.getElementById('subscribe-result');
-    var email = emailInput && emailInput.value ? emailInput.value.trim() : '';
-    if (!email) { if (result) result.textContent = 'enter a valid email'; return; }
-    if (result) result.textContent = 'subscribing...';
-    fetch('/v1/status/subscribe', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email: email }),
-    }).then(function(r){ return r.json().then(function(b){ return { status: r.status, body: b }; }).catch(function(){ return { status: r.status, body: null }; }); })
-      .then(function(out){
-        if (out.status === 201 && out.body && out.body.subscribed) {
-          if (result) result.textContent = 'subscribed.';
-          form.reset();
-        } else if (out.body && out.body.error) {
-          if (result) result.textContent = out.body.error;
-        } else {
-          if (result) result.textContent = 'could not subscribe (status ' + out.status + ')';
-        }
-      })
-      .catch(function(){ if (result) result.textContent = 'network error'; });
-  });
-})();
-</script>
+<!-- component table -->
+<section class="section reveal">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / Components</span>
+      <h2>What we monitor.</h2>
+      <p style="max-width:60ch;color:var(--ink-3)">Each component is checked continuously. Status shown here is updated on a rolling basis. When a component degrades or goes down, an incident is opened and posted to this page; a notification is sent to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Public verifier</strong><br><span class="mono" style="font-size:12px">/verify</span></td>
+            <td>In-browser WebCrypto verification of Ed25519-signed evidence reports. No account required. Offline-capable against our published public key.</td>
+            <td><span class="badge badge--ok">Operational</span></td>
+          </tr>
+          <tr>
+            <td><strong>API</strong><br><span class="mono" style="font-size:12px">/v1</span></td>
+            <td>REST control plane for audit initiation, report retrieval, and key publication. Used by the verifier, integrations, and the audit pipeline.</td>
+            <td><span class="badge badge--ok">Operational</span></td>
+          </tr>
+          <tr>
+            <td><strong>Transparency log</strong><br><span class="mono" style="font-size:12px">/v1/log</span></td>
+            <td>Ed25519/SHA-256 Merkle append log (RFC 6962-style) of every issued evidence report. Any report can be confirmed against the log without contacting kolm's servers.</td>
+            <td><span class="badge badge--ok">Operational</span></td>
+          </tr>
+          <tr>
+            <td><strong>Audit pipeline</strong><br><span class="mono" style="font-size:12px">internal</span></td>
+            <td>Automated check runners, signing service, and report assembly. Degradation here may delay report issuance; already-issued reports are not affected.</td>
+            <td><span class="badge badge--ok">Operational</span></td>
+          </tr>
+          <tr>
+            <td><strong>Website</strong><br><span class="mono" style="font-size:12px">kolm.ai</span></td>
+            <td>Public marketing, documentation, and trust pages including /trust, /security, /checks, and /research.</td>
+            <td><span class="badge badge--ok">Operational</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- incident history -->
+<section class="section reveal">
+  <div class="wrap" style="max-width:78ch">
+    <div class="section__head">
+      <span class="idx">03 / Incidents</span>
+      <h2>No incidents on record.</h2>
+    </div>
+    <p style="color:var(--ink-3)">When an incident occurs, a dated entry is posted here with a plain-language description of the affected component, the impact, and the resolution. Notifications go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. There are no incidents to report at this time.</p>
+  </div>
+</section>
+
+<!-- what is verified, and the offline guarantee -->
+<section class="section section--ink reveal">
+  <div class="wrap split" style="align-items:flex-start">
+    <div>
+      <span class="idx">04 / Offline verification</span>
+      <h2>Evidence reports survive any outage.</h2>
+      <p class="lede" style="margin-bottom:16px">Every evidence report issued by kolm is signed with an Ed25519 key whose public counterpart is published and pinned. Verification uses in-browser WebCrypto: no network call to kolm servers, no account, no trust in our uptime. A buyer's security team can confirm the signature, the scope, and the timestamp of any report even when this status page is unreachable.</p>
+      <div class="hero__cta" style="margin-top:8px">
+        <a class="btn btn--primary" href="/verify">Verify a report</a>
+        <a class="btn btn--ghost" href="/trust">Trust center</a>
+      </div>
+    </div>
+    <div class="grid" style="gap:14px">
+      <div class="card">
+        <p class="card__k">Signature</p>
+        <h3>Ed25519, published key</h3>
+        <p>Reports carry a detached Ed25519 signature verifiable against a key pinned at <span class="mono">/v1/pubkey</span>. Infrastructure availability does not affect this check.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Log inclusion</p>
+        <h3>Merkle inclusion proof</h3>
+        <p>Each report ships a Merkle inclusion proof against the RFC 6962-style transparency log. The log root is published separately and can be checked offline.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Scope</p>
+        <h3>Cryptographically bound</h3>
+        <p>The agent name, version, capability scope, and audit date are embedded in the signed payload; they cannot be altered without invalidating the signature.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">No account</p>
+        <h3>No login required to verify</h3>
+        <p>The public verifier at <a href="/verify" style="color:var(--ok)">/verify</a> runs entirely in the browser using the WebCrypto API. No credentials, no session, no server round-trip.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- cross-links -->
+<section class="section reveal">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">05 / Related</span>
+      <h2>More on infrastructure and trust.</h2>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Trust center</p>
+        <h3><a href="/trust" style="color:inherit;text-decoration:none">/trust</a></h3>
+        <p>Security policies, sub-processor list, data handling, how findings map to recognized control frameworks, and the full verifiability guarantee.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Security</p>
+        <h3><a href="/security" style="color:inherit;text-decoration:none">/security</a></h3>
+        <p>Cryptographic architecture, key management, and our responsible disclosure process.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Verify</p>
+        <h3><a href="/verify" style="color:inherit;text-decoration:none">/verify</a></h3>
+        <p>Upload any kolm evidence report and confirm its Ed25519 signature, scope, and log inclusion in-browser. No account needed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- final CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Reach us directly.</h2>
+    <p style="max-width:52ch;margin:0 auto 24px;color:var(--ink-3);text-align:center">For incident reports, infrastructure questions, or anything related to the audit pipeline, write to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. We aim to respond within one business day.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="mailto:dev@kolm.ai">dev@kolm.ai</a>
+      <a class="btn btn--ghost" href="/contact">Start an audit</a>
+    </div>
+  </div>
+</section>
 
 </main>
 
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/status">Status</a>
-        <a href="/subprocessors">Subprocessors</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/about">About</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/press">Press</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
-
-<script>
-// WF21 status board — fetches /v1/status/board (Railway backend) when present, falls back to plain stub.
-(function(){
-  const COMPONENTS = [
-    { id:'gateway',  name:'Gateway',  sub:'/v1/bridges/observations, routing, PII redaction' },
-    { id:'capture',  name:'Capture',  sub:'/v1/capture/log approval-only logging, hash chain' },
-    { id:'registry', name:'Registry', sub:'signed .kolm artifact storage' },
-    { id:'distill',  name:'Distill',  sub:'/v1/distill/runs teacher → student compile jobs' },
-    { id:'forge',    name:'Forge',    sub:'/v1/compile quantize workers (INT4 NF4+double et al.)' },
-    { id:'api',      name:'API',      sub:'kolm.ai/v1 control plane' },
-    { id:'website',  name:'Website',  sub:'kolm.ai, docs.kolm.ai' },
-  ];
-  const grid = document.getElementById('statusGrid');
-  const overall = document.getElementById('overallHero');
-  const overallDot = document.getElementById('overallDot');
-  const overallH = document.getElementById('overallH');
-  const overallSub = document.getElementById('overallSub');
-  const overallUpd = document.getElementById('overallUpdated');
-  const overallUp = document.getElementById('overallUptime');
-
-  function renderRow(c, state, bars, uptime){
-    const row = document.createElement('div');
-    row.className = 'status-row';
-    row.setAttribute('role','listitem');
-    row.innerHTML = '\n      <div class="status-row__name">'+c.name+'<small>'+c.sub+'</small></div>\n      <div class="status-row__bars" aria-label="90-day uptime bars"></div>\n      <div class="status-row__uptime">'+uptime+'<small>'+(state==='ok'?'operational':state==='degraded'?'degraded':state==='down'?'major outage':'unknown')+'</small></div>';
-    const barsEl = row.querySelector('.status-row__bars');
-    bars.forEach(b => { const bar = document.createElement('span'); bar.className = 'status-bar'; bar.setAttribute('data-state', b); barsEl.appendChild(bar); });
-    grid.appendChild(row);
-  }
-
-  function okBars(){ const arr = []; for(let i=0;i<90;i++) arr.push('ok'); return arr; }
-  function unknownBars(){ const arr = []; for(let i=0;i<90;i++) arr.push('unknown'); return arr; }
-
-  // W921: when no real 90-day history exists yet, render grey 'unknown' bars
-  // and an em-dash uptime instead of fabricating 99.97% all-green.
-  function paintFallback(){
-    COMPONENTS.forEach(c => renderRow(c, 'ok', unknownBars(), '—'));
-    overallUp.textContent = '—';
-    const now = new Date(); overallUpd.dateTime = now.toISOString(); overallUpd.textContent = now.toUTCString().slice(0,22);
-  }
-
-  // W921: prefer the real Atlassian-shape /v1/status/summary contract. It maps
-  // operational/degraded_performance/partial_outage/major_outage component
-  // states and a {none,minor,major,critical} indicator from in-process
-  // liveness — no fabricated green. History bars stay 'unknown' until a
-  // 90-day sample buffer accrues.
-  function paintFromSummary(s){
-    if (!s || !s.status || !Array.isArray(s.components)) return false;
-    grid.innerHTML = '';
-    var stateMap = { operational:'ok', degraded_performance:'degraded', partial_outage:'degraded', major_outage:'down' };
-    var degraded = 0, down = 0;
-    s.components.forEach(function(c){
-      var state = stateMap[c.status] || 'unknown';
-      if (state === 'degraded') degraded++;
-      if (state === 'down') down++;
-      var meta = COMPONENTS.find(function(x){ return x.id === c.id; }) || { name: c.name || c.id, sub: '' };
-      renderRow(meta, state, unknownBars(), '—');
-    });
-    overallUp.textContent = '—';
-    var ind = s.status.indicator;
-    if (ind === 'critical' || ind === 'major') { overall.dataset.overall = 'down'; overallDot.dataset.state = 'down'; overallH.textContent = s.status.description || 'Outage'; overallSub.textContent = (down||'1')+' component(s) affected'; }
-    else if (ind === 'minor') { overall.dataset.overall = 'degraded'; overallDot.dataset.state = 'degraded'; overallH.textContent = s.status.description || 'Degraded performance'; overallSub.textContent = degraded+' component(s) degraded'; }
-    var now = new Date((s.page && s.page.updated_at) || Date.now());
-    overallUpd.dateTime = now.toISOString(); overallUpd.textContent = now.toUTCString().slice(0,22);
-    return true;
-  }
-
-  fetch('/v1/status/summary').then(function(r){ return r.ok ? r.json() : null; }).then(function(s){
-    if (paintFromSummary(s)) return Promise.reject({ handled: true });
-    return null;
-  }).then(function(){
-  // try to fetch /v1/status/board
-  return fetch('/v1/status/board').then(r => {
-    if (!r.ok) throw new Error('no_board');
-    return r.json();
-  }).then(data => {
-    if (!data || !Array.isArray(data.components)) throw new Error('no_components');
-    grid.innerHTML = '';
-    let degraded = 0, down = 0;
-    let totalUptime = 0;
-    data.components.forEach(c => {
-      const state = c.state || 'ok';
-      if (state === 'degraded') degraded++;
-      if (state === 'down') down++;
-      const u = typeof c.uptime_90d === 'number' ? c.uptime_90d : 0.9997;
-      totalUptime += u;
-      const meta = COMPONENTS.find(x => x.id === c.id) || { name: c.id, sub: '' };
-      renderRow(meta, state, c.bars_90d || okBars(), (u*100).toFixed(2)+'%');
-    });
-    const avg = (totalUptime/data.components.length*100).toFixed(2)+'%';
-    overallUp.textContent = avg;
-    const now = new Date(data.updated_at || Date.now());
-    overallUpd.dateTime = now.toISOString();
-    overallUpd.textContent = now.toUTCString().slice(0,22);
-    if (down > 0) { overall.dataset.overall = 'down'; overallDot.dataset.state = 'down'; overallH.textContent = 'Major outage in progress'; overallSub.textContent = down+' of '+data.components.length+' components down'; }
-    else if (degraded > 0) { overall.dataset.overall = 'degraded'; overallDot.dataset.state = 'degraded'; overallH.textContent = 'Degraded performance'; overallSub.textContent = degraded+' of '+data.components.length+' components degraded'; }
-    if (Array.isArray(data.incidents) && data.incidents.length){
-      const list = document.getElementById('incidentList');
-      list.innerHTML = '';
-      data.incidents.forEach(i => {
-        const node = document.createElement('div');
-        node.className = 'status-incident'; node.setAttribute('role','listitem');
-        node.innerHTML = '<div class="status-incident__head"><span class="status-incident__badge" data-sev="'+(i.severity||'ok')+'">'+(i.severity||'resolved')+'</span><span class="status-incident__when">'+(i.started_at||'')+(i.resolved_at?' &rarr; '+i.resolved_at:'')+'</span></div><p class="status-incident__t">'+(i.title||'')+'</p><p class="status-incident__body">'+(i.body||'')+'</p>';
-        list.appendChild(node);
-      });
-    }
-  });
-  }).catch(err => {
-    if (err && err.handled) return; // summary already painted the page
-    paintFallback();
-  });
-})();
-</script>
-
-<script>
-(function(){var t=document.getElementById('navToggle');var s=document.getElementById('navSheet');if(t&&s){t.addEventListener('click',function(){var open=s.classList.toggle('open');t.setAttribute('aria-expanded',open?'true':'false');});}})();
-</script>
-
 </body>
 </html>

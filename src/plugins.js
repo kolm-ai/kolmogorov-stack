@@ -1,4 +1,4 @@
-// W784 — Plugin architecture (third-party quantization / runtime / capture / eval).
+// W784 - Plugin architecture (third-party quantization / runtime / capture / eval).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 729-735):
 //   [W784-1] Custom quantization methods plug into the forge
@@ -9,7 +9,7 @@
 //
 // Design choices:
 //
-//   1. ONE unified contract — every plugin is a directory under
+//   1. ONE unified contract - every plugin is a directory under
 //      ~/.kolm/plugins/<name>/ with a plugin.json manifest and an
 //      entry script. Four `kinds` (quantization / runtime / capture-processor
 //      / eval-metric) discriminate dispatch; we don't fork the contract per
@@ -17,10 +17,10 @@
 //      similar surface): one loader + one validator + one disk layout.
 //
 //   2. Tenant-scoped under ~/.kolm/plugins. Tenants on a shared host get
-//      plugins.dir overridden via KOLM_PLUGINS_DIR — tests use this to
+//      plugins.dir overridden via KOLM_PLUGINS_DIR - tests use this to
 //      isolate fixtures (mirrors W783 test pattern).
 //
-//   3. Honest envelopes only — loadPlugins returns
+//   3. Honest envelopes only - loadPlugins returns
 //      {ok, kind, plugins:[], errors:[]} where errors is per-plugin
 //      (no_manifest / bad_manifest / unknown_kind / bad_entry). Never throws
 //      on a single malformed plugin; surfaces the error and keeps loading
@@ -41,11 +41,11 @@
 //   - PLUGIN_KINDS (frozen)
 //   - PLUGIN_DEFAULTS (frozen)
 //   - PluginError (extends Error)
-//   - pluginsDir() — resolves the on-disk root (KOLM_PLUGINS_DIR or ~/.kolm/plugins)
-//   - listPlugins() — directory listing {ok, plugins:[{name,kind,version,...}]}
-//   - loadPlugins({kind}) — filtered by kind
-//   - registerPlugin({manifest_path}) — validates + copies into pluginsDir
-//   - readManifest(path) — single-shot manifest read+validate
+//   - pluginsDir() - resolves the on-disk root (KOLM_PLUGINS_DIR or ~/.kolm/plugins)
+//   - listPlugins() - directory listing {ok, plugins:[{name,kind,version,...}]}
+//   - loadPlugins({kind}) - filtered by kind
+//   - registerPlugin({manifest_path}) - validates + copies into pluginsDir
+//   - readManifest(path) - single-shot manifest read+validate
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -67,7 +67,7 @@ export const PLUGIN_KINDS = Object.freeze([
   'eval-metric',
 ]);
 
-// Manifest fields required for a valid plugin. Closed set — a manifest with
+// Manifest fields required for a valid plugin. Closed set - a manifest with
 // extra fields is fine (forward compat), but missing required field => reject.
 const REQUIRED_FIELDS = Object.freeze(['name', 'version', 'kinds', 'entry']);
 
@@ -75,7 +75,7 @@ const REQUIRED_FIELDS = Object.freeze(['name', 'version', 'kinds', 'entry']);
 // traversal via name="../etc/passwd" and keeps the on-disk layout sane.
 const NAME_RE = /^[a-z][a-z0-9-]{0,63}$/;
 
-// Manifest filename. Capital-M intentional — matches npm "package.json"
+// Manifest filename. Capital-M intentional - matches npm "package.json"
 // convention but kolm-namespaced so a plugin can also be an npm package.
 const MANIFEST_FILE = 'plugin.json';
 
@@ -91,7 +91,7 @@ export const PLUGIN_DEFAULTS = Object.freeze({
 });
 
 // =============================================================================
-// PluginError — single error class so callers can `catch (e) { if (e instanceof
+// PluginError - single error class so callers can `catch (e) { if (e instanceof
 // PluginError) ... }`. Carries .code so envelopes can stamp a machine-readable
 // reason.
 // =============================================================================
@@ -105,7 +105,7 @@ export class PluginError extends Error {
 }
 
 // =============================================================================
-// pluginsDir() — resolves the on-disk plugin root. Override via
+// pluginsDir() - resolves the on-disk plugin root. Override via
 // KOLM_PLUGINS_DIR (tests use this); otherwise ~/.kolm/plugins per W411 /
 // W783 convention (HOME or USERPROFILE).
 // =============================================================================
@@ -127,7 +127,7 @@ function _ensureDir(p) {
 }
 
 // =============================================================================
-// readManifest(manifest_path) — single-shot read + validate. Returns
+// readManifest(manifest_path) - single-shot read + validate. Returns
 // {ok:true, manifest} or {ok:false, error, detail}. Never throws.
 // =============================================================================
 export function readManifest(manifest_path) {
@@ -176,7 +176,7 @@ export function readManifest(manifest_path) {
       version: PLUGIN_VERSION,
     };
   }
-  // version shape — relaxed semver-ish; we don't reject 0.0.1-alpha+sha.
+  // version shape - relaxed semver-ish; we don't reject 0.0.1-alpha+sha.
   if (typeof parsed.version !== 'string' || !parsed.version) {
     return {
       ok: false,
@@ -216,7 +216,7 @@ export function readManifest(manifest_path) {
       version: PLUGIN_VERSION,
     };
   }
-  // Path-traversal defense — entry must be a relative path under the
+  // Path-traversal defense - entry must be a relative path under the
   // plugin dir, not an absolute path or `../`.
   if (path.isAbsolute(parsed.entry) || parsed.entry.includes('..')) {
     return {
@@ -239,7 +239,7 @@ function _safeReaddir(dir) {
 
 function _enrichPluginEntry(plugin_dir, manifest) {
   const entry_path = path.join(plugin_dir, manifest.entry);
-  // We do NOT require entry_path to exist at load time — a half-installed
+  // We do NOT require entry_path to exist at load time - a half-installed
   // plugin should surface the missing file via the entry_exists flag, not
   // by silently filtering it out (caller decides what to do).
   let entry_exists = false;
@@ -262,7 +262,7 @@ function _enrichPluginEntry(plugin_dir, manifest) {
 }
 
 // =============================================================================
-// listPlugins() — directory listing. Returns {ok, dir, total, plugins:[],
+// listPlugins() - directory listing. Returns {ok, dir, total, plugins:[],
 // errors:[]}. Plugins is the success set; errors is the per-entry failure set
 // (typed by readManifest's error codes). Never throws.
 // =============================================================================
@@ -308,7 +308,7 @@ export function listPlugins() {
 }
 
 // =============================================================================
-// loadPlugins({kind}) — filtered by kind. The hook points (forge / runtime /
+// loadPlugins({kind}) - filtered by kind. The hook points (forge / runtime /
 // capture / bakeoff) call this with their kind and iterate plugins.
 //
 // Envelope:
@@ -359,9 +359,9 @@ function _copyDirSync(src, dst) {
 }
 
 // =============================================================================
-// registerPlugin({manifest_path}) — validates the manifest, then copies the
+// registerPlugin({manifest_path}) - validates the manifest, then copies the
 // containing directory into ~/.kolm/plugins/<name>/. Throws PluginError on
-// validation failure (caller asked us to do exactly one thing — we tell them
+// validation failure (caller asked us to do exactly one thing - we tell them
 // loudly if we can't).
 //
 // Why copy not symlink: Windows symlinks require admin or developer mode,
@@ -389,7 +389,7 @@ export function registerPlugin(opts) {
   }
   const manifest = r.manifest;
   const src_dir = path.dirname(manifest_path);
-  // Ensure the entry file exists at the SOURCE before we copy — half-installed
+  // Ensure the entry file exists at the SOURCE before we copy - half-installed
   // plugins should fail loud at registration, not at load.
   const src_entry = path.join(src_dir, manifest.entry);
   let entryOk = false;
@@ -436,7 +436,7 @@ export function registerPlugin(opts) {
 }
 
 // =============================================================================
-// getPlugin(name) — single-plugin lookup. Returns honest 404 envelope when
+// getPlugin(name) - single-plugin lookup. Returns honest 404 envelope when
 // missing instead of throwing.
 // =============================================================================
 export function getPlugin(name) {
@@ -486,19 +486,19 @@ export function getPlugin(name) {
 }
 
 // =============================================================================
-// Surface hook helpers — thin wrappers around loadPlugins so the four surface
+// Surface hook helpers - thin wrappers around loadPlugins so the four surface
 // integration points all use the same import. Each is a no-op "extension
 // point" stub: callers iterate the returned plugins and dispatch to the
-// entry script on demand. We deliberately do NOT execute the entry here —
+// entry script on demand. We deliberately do NOT execute the entry here - 
 // see design note (4) at the top of this file.
 //
-//   forgeQuantizationPlugins() — workers/quantize calls this to discover
+//   forgeQuantizationPlugins() - workers/quantize calls this to discover
 //                                 third-party quant methods
-//   runtimeAdapterPlugins()    — src/router.js /v1/run calls this to
+//   runtimeAdapterPlugins() - src/router.js /v1/run calls this to
 //                                 discover third-party runtimes
-//   captureProcessorPlugins()  — src/capture.js calls this to discover
+//   captureProcessorPlugins() - src/capture.js calls this to discover
 //                                 capture transformers
-//   bakeoffMetricPlugins()     — src/bakeoff.js calls this to discover
+//   bakeoffMetricPlugins() - src/bakeoff.js calls this to discover
 //                                 custom eval metrics
 // =============================================================================
 export function forgeQuantizationPlugins() {

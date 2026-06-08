@@ -1,4 +1,4 @@
-// W834-5 — Extended model card (HF standard + per-language K-Score +
+// W834-5 - Extended model card (HF standard + per-language K-Score +
 // per-risk-category gate status + teacher attribution).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md):
@@ -8,20 +8,20 @@
 // src/model-card-emit.js. W834-5 EXTENDS that base by adding three regulator-
 // facing sub-sections that the base card does not carry:
 //
-//   * per_language_kscore       — wires to W760/W833 cross-lingual K-Score.
+//   * per_language_kscore - wires to W760/W833 cross-lingual K-Score.
 //                                 Per-locale calibrated accuracy +
 //                                 Wilson 95% CI per locale. Empty when no
 //                                 multilingual evaluation has been wired.
 //   * per_risk_category_gate_status
-//                               — for each gate in W834-2's REQUIRED_GATES,
+// - for each gate in W834-2's REQUIRED_GATES,
 //                                 emit {gate, satisfied:bool, evidence}.
 //                                 Wires to src/reg-risk-classify.js +
 //                                 src/reg-hil.js to attest to gate readiness.
-//   * teacher_attribution       — explicit attribution to the teacher model
+//   * teacher_attribution - explicit attribution to the teacher model
 //                                 (HF derivative-model standard requires
 //                                 disclosing the base model + its license).
 //
-// Output is HF model card YAML frontmatter + markdown — the standard format
+// Output is HF model card YAML frontmatter + markdown - the standard format
 // HF Hub ingests. We re-export the existing buildModelCard pieces from
 // src/model-card-emit.js so callers can opt into the extended fields without
 // breaking the W768 surface.
@@ -34,7 +34,7 @@
 //     satisfied:true claim.
 //   * teacher_attribution returns {teacher_model:null, license:null,
 //     attribution_required:bool} when the manifest does not declare a teacher
-//     — and attribution_required is true iff manifest.base_model_was_distilled
+// - and attribution_required is true iff manifest.base_model_was_distilled
 //     is truthy (a kolm distilled artifact MUST attribute the teacher).
 //
 // W604 anti-brittleness: REG_MODEL_CARD_EXTENDED_VERSION = 'w834-v1'. Tests
@@ -204,7 +204,7 @@ function _buildTeacherAttribution(manifest) {
       link: null,
       attribution_required,
       honest_note: attribution_required
-        ? 'attribution required but no teacher_model declared — set manifest.teacher_model'
+        ? 'attribution required but no teacher_model declared - set manifest.teacher_model'
         : 'no teacher; not a derivative model',
     };
   }
@@ -226,11 +226,11 @@ function _buildTeacherAttribution(manifest) {
 //   * teacher_attribution
 //
 // opts:
-//   gates_required[]    — REQUIRED to gate the per_risk_category block;
+//   gates_required[] - REQUIRED to gate the per_risk_category block;
 //                         pass classifyArtifactRisk(...).gates_required from
 //                         W834-2.
-//   format              — 'json' (default) | 'huggingface'
-//   include_environmental — passed through to buildModelCard.
+//   format - 'json' (default) | 'huggingface'
+//   include_environmental - passed through to buildModelCard.
 //
 // Returns:
 //   { ok:true, version, base_version, generated_at, format, card,
@@ -250,7 +250,7 @@ export function buildExtendedModelCard(manifest, opts = {}) {
     };
   }
 
-  // Base card via W768 emitter — always JSON internally so we can append
+  // Base card via W768 emitter - always JSON internally so we can append
   // the extensions before final-formatting.
   const base = buildModelCard(manifest, {
     format: 'json',

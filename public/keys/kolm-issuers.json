@@ -1,0 +1,24 @@
+{
+  "schema": "kolm-issuer-keyring-1",
+  "updated_at": "2026-06-08",
+  "issuers": [
+    {
+      "kid": "kolm-demo-2026",
+      "label": "kolm demo issuer",
+      "status": "demo",
+      "alg": "ed25519",
+      "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAcNW1vj5BUnzmEjH6iAdKM2p5of35Oe6znRifqpuLF7A=\n-----END PUBLIC KEY-----\n",
+      "fingerprint": "410302c93becdcc3a8091ef0c33c24ed",
+      "note": "Signs the public sample report on /verify only. NOT a production evidence signer. A report signed by this key is recognized as a kolm demo, never as production-issued evidence."
+    },
+    {
+      "kid": "kolm-prod-2026",
+      "label": "kolm production issuer",
+      "status": "production",
+      "alg": "ed25519",
+      "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAI1W4RkabFYhAOfk3DB+hE3CZWexFJE/7KFZ3X2G1+bk=\n-----END PUBLIC KEY-----\n",
+      "fingerprint": "fa562154f99c95f48a45d04272943435",
+      "note": "Production evidence signer for kolm.ai. A report whose embedded key matches this entry is kolm-issued production evidence, signed by the live audit service."
+    }
+  ]
+}

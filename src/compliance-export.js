@@ -1,17 +1,17 @@
 // src/compliance-export.js
 //
-// W921 Govern / Receipts & Compliance — compliance evidence export.
+// W921 Govern / Receipts & Compliance - compliance evidence export.
 //
 // complianceExport({framework}) assembles a tenant-fenced evidence BUNDLE that
 // maps kolm's existing, on-disk control substrate (Ed25519-signed receipts, the
 // HMAC audit chain, drift signals, lifecycle transitions, provenance
-// attestations) onto the controls of a named framework — SOC 2 (Trust Services
+// attestations) onto the controls of a named framework - SOC 2 (Trust Services
 // Criteria), GDPR (data-protection articles) and the EU AI Act (Art. 12
 // record-keeping + Art. 50 transparency + Art. 72 post-market monitoring).
 //
 // Plus three LIVE EU-AI-Act report builders (Art. 12 logging conformance, Art.
 // 72 post-market report, Art. 12 signed log-stream export) that fold real
-// receipt/audit/drift/lifecycle evidence into Article-shaped views — every
+// receipt/audit/drift/lifecycle evidence into Article-shaped views - every
 // finding citing verifiable evidence ids, gaps RECORDED not hidden.
 //
 // CONSTRAINTS CONTRACT (preserved): coverage gaps are recorded, not hidden; a
@@ -38,19 +38,19 @@ export const FRAMEWORKS = Object.freeze({
     controls: [
       { id: 'CC7.2', name: 'System monitoring / anomaly detection', evidence: ['drift_signals', 'audit_chain'] },
       { id: 'CC7.3', name: 'Security incident evaluation', evidence: ['risk_events', 'lifecycle'] },
-      { id: 'CC6.1', name: 'Logical access — cryptographic integrity of records', evidence: ['receipt_signatures', 'audit_chain'] },
+      { id: 'CC6.1', name: 'Logical access - cryptographic integrity of records', evidence: ['receipt_signatures', 'audit_chain'] },
       { id: 'CC4.1', name: 'Monitoring of controls (ongoing evaluation)', evidence: ['drift_signals'] },
-      { id: 'A1.2', name: 'Processing integrity — verifiable outputs', evidence: ['receipt_signatures', 'provenance'] },
+      { id: 'A1.2', name: 'Processing integrity - verifiable outputs', evidence: ['receipt_signatures', 'provenance'] },
       { id: 'CC3.2', name: 'Risk identification & change management', evidence: ['lifecycle', 'substantial_modifications'] },
     ],
   },
   gdpr: {
     label: 'GDPR (EU 2016/679)',
     controls: [
-      { id: 'Art.5(2)', name: 'Accountability — demonstrate compliance', evidence: ['audit_chain', 'receipt_signatures'] },
+      { id: 'Art.5(2)', name: 'Accountability - demonstrate compliance', evidence: ['audit_chain', 'receipt_signatures'] },
       { id: 'Art.25', name: 'Data protection by design (PII redaction at the gateway)', evidence: ['redaction'] },
       { id: 'Art.30', name: 'Records of processing activities', evidence: ['audit_chain', 'receipt_coverage'] },
-      { id: 'Art.32', name: 'Security of processing — integrity & confidentiality', evidence: ['receipt_signatures', 'audit_chain'] },
+      { id: 'Art.32', name: 'Security of processing - integrity & confidentiality', evidence: ['receipt_signatures', 'audit_chain'] },
       { id: 'Art.33', name: 'Breach notification readiness (tamper-evident trail)', evidence: ['audit_chain', 'risk_events'] },
     ],
   },
@@ -58,7 +58,7 @@ export const FRAMEWORKS = Object.freeze({
     label: 'EU AI Act (Regulation 2024/1689)',
     controls: [
       { id: 'Art.12', name: 'Automatic record-keeping (logging over the lifetime)', evidence: ['receipt_coverage', 'audit_chain', 'retention'] },
-      { id: 'Art.50(2)', name: 'Transparency — machine-readable AI-output marking', evidence: ['provenance', 'content_credentials'] },
+      { id: 'Art.50(2)', name: 'Transparency - machine-readable AI-output marking', evidence: ['provenance', 'content_credentials'] },
       { id: 'Art.72', name: 'Post-market monitoring', evidence: ['drift_signals', 'lifecycle', 'risk_events'] },
       { id: 'Art.15', name: 'Accuracy, robustness & cybersecurity', evidence: ['drift_signals', 'receipt_signatures'] },
       { id: 'Art.26(6)', name: 'Deployer log retention (>= 6 months)', evidence: ['retention'] },
@@ -106,7 +106,7 @@ function receiptIdOf(row) {
 }
 
 // ===========================================================================
-// extractRiskRelevantEvents — Art. 12(2)(a) events that may present an Art.
+// extractRiskRelevantEvents - Art. 12(2)(a) events that may present an Art.
 // 79(1) risk or substantial modification.
 // ===========================================================================
 export function extractRiskRelevantEvents(rows = [], lifecycleEvents = []) {
@@ -129,7 +129,7 @@ export function extractRiskRelevantEvents(rows = [], lifecycleEvents = []) {
 }
 
 // ===========================================================================
-// detectSubstantialModification — model/artifact changes across the window.
+// detectSubstantialModification - model/artifact changes across the window.
 // ===========================================================================
 export function detectSubstantialModification(rows = []) {
   const sorted = rows.slice().sort((a, b) => Date.parse(a.at || 0) - Date.parse(b.at || 0));
@@ -181,7 +181,7 @@ export function summarizePostMarketFindings({ driftSignals, lifecycleHistory, ri
 }
 
 // ===========================================================================
-// buildArt12LoggingConformance — Art. 12 automatic-logging conformance view.
+// buildArt12LoggingConformance - Art. 12 automatic-logging conformance view.
 // ===========================================================================
 export function buildArt12LoggingConformance(opts = {}) {
   if (!opts.tenant_id) return { ok: false, error: 'tenant_id_required', version: AI_ACT_MONITORING_VERSION };
@@ -252,7 +252,7 @@ export function buildArt12LoggingConformance(opts = {}) {
 }
 
 // ===========================================================================
-// buildArt72PostMarketReport — Art. 72 element-shaped report.
+// buildArt72PostMarketReport - Art. 72 element-shaped report.
 // ===========================================================================
 export function buildArt72PostMarketReport(opts = {}) {
   if (!opts.tenant_id) return { ok: false, error: 'tenant_id_required', version: AI_ACT_MONITORING_VERSION };
@@ -316,7 +316,7 @@ export function buildArt72PostMarketReport(opts = {}) {
 }
 
 // ===========================================================================
-// exportArt12LogStream — immutable tamper-evident export + signed coverage
+// exportArt12LogStream - immutable tamper-evident export + signed coverage
 // manifest. Hashes-only by default (no raw content leaves the boundary).
 // ===========================================================================
 export function exportArt12LogStream(opts = {}) {
@@ -379,7 +379,7 @@ export function exportArt12LogStream(opts = {}) {
 }
 
 // ===========================================================================
-// complianceExport({framework}) — the headline evidence-bundle assembler.
+// complianceExport({framework}) - the headline evidence-bundle assembler.
 // ===========================================================================
 export function complianceExport(opts = {}) {
   const framework = normFramework(opts.framework);

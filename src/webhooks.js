@@ -25,8 +25,8 @@
 //   namespace/created_at/schema_version) are auto-filled by newEvent().
 //
 //   Two namespaces, both tenant-fenced:
-//     kolm-webhooks/subscriptions  — create/update/delete subscription ops
-//     kolm-webhooks/deliveries     — per-attempt delivery audit records
+//     kolm-webhooks/subscriptions - create/update/delete subscription ops
+//     kolm-webhooks/deliveries - per-attempt delivery audit records
 //
 // Conventions: ESM ("type":"module"), Node >= 20 (global fetch + node:crypto).
 // Strict tenant fencing: every read/write is keyed by tenant id; nothing is ever
@@ -60,7 +60,7 @@ const DELIVERY_TIMEOUT_MS = 10_000;
 // ---------------------------------------------------------------------------
 // Event-store envelope. We hand appendEvent() the canonical fields it validates
 // on, and stash the webhook payload as JSON in `media_extracted_text` (the only
-// large free-text field canonicalize() preserves — same trick conversations.js
+// large free-text field canonicalize() preserves - same trick conversations.js
 // uses). `model` carries a cheap discriminator (create/update/delete/delivery).
 // ---------------------------------------------------------------------------
 async function persist(tenant, namespace, opKind, webhookPayload) {

@@ -1,0 +1,90 @@
+{
+  "id": "s5-signed-evidence-tech",
+  "track": "sota",
+  "prompt": "What is the 2026 STATE OF THE ART for cryptographically verifiable security/compliance evidence, technically? Cover Sigstore (cosign/Fulcio/Rekor), in-toto attestations, SLSA provenance, C2PA content credentials, RFC 6962 / trillian transparency logs, and Ed25519 vs ECDSA vs PQC signatures. kolm signs reports with Ed25519, offers offline browser verify, two-tier (signature + issuer-keyring provenance), and a Merkle transparency log. What would a sophisticated security buyer or auditor SCRUTINIZE or expect that kolm might lack (key rotation/revocation, timestamping/RFC3161, a public transparency log with inclusion proofs, a documented trust root, reproducibility)? Cite standards/projects. List concrete hardening kolm should add to be credibly SOTA.",
+  "content": "**In 2026, the state of the art (SOTA) for cryptographically verifiable security/compliance evidence centers on layered, auditable attestation systems that combine strong signatures, structured provenance claims, and public or verifiable transparency mechanisms.** These provide tamper-evidence, non-repudiation, identity binding, and third-party auditability without relying on a single trusted party. Core projects and standards include Sigstore (cosign/Fulcio/Rekor), in-toto attestations, SLSA provenance, C2PA Content Credentials, and RFC 6962-style transparency logs (implemented in Trillian and similar systems). Signature choices emphasize classical algorithms like Ed25519 or ECDSA today, with post-quantum (PQC) hybrids emerging for forward security.\n\n### Key SOTA Components\n- **Sigstore ecosystem** (widely adopted for software supply chain): \n  - **Cosign** signs artifacts (containers, binaries, SBOMs) and attestations. \n  - **Fulcio** issues short-lived certificates bound to OIDC identities (e.g., GitHub Actions, Google) for \"keyless\" signing. \n  - **Rekor** is a public transparency log recording signing events (signatures, certificates, attestations) for auditability.[[1]](https://oneuptime.com/blog/post/2026-01-25-sigstore-supply-chain-security/view)\n\n  Signing events are logged immutably; verifiers check signatures against Fulcio roots (distributed via TUF) and Rekor entries. This eliminates long-lived key management risks.\n\n- **in-toto attestations**: A framework for signed statements (using DSSE envelopes) about supply-chain steps. Predicates describe materials, commands, and outputs. Compatible with Sigstore; the second-most common attestation type in Rekor.[[2]](https://www.chainguard.dev/unchained/a-toolbox-for-a-secure-software-supply-chain)\n\n- **SLSA provenance**: Uses the in-toto format for build provenance attestations (predicate type `https://slsa.dev/provenance/v1`). Describes how an artifact was built (builder identity, materials, invocation). SLSA levels (0–4) define increasing requirements for build integrity and provenance completeness. Often signed via Sigstore.[[1]](https://oneuptime.com/blog/post/2026-01-25-sigstore-supply-chain-security/view)\n\n- **C2PA Content Credentials**: An open standard (Coalition for Content Provenance and Authenticity) for tamper-evident provenance manifests on media/content (images, video, audio, PDFs, generative AI outputs). Includes assertions about origin, edits, and creators; signed manifests with a trust model. Widely adopted by Adobe, Microsoft, Google, etc., for \"nutrition label\"-style metadata.[[3]](https://c2pa.org/)\n\n- **Transparency logs (RFC 6962 / Trillian)**: Append-only Merkle trees enabling public auditability. RFC 6962 defines Certificate Transparency (CT) with Signed Certificate Timestamps (SCTs), inclusion proofs, and consistency proofs. Trillian is Google's production implementation (used for CT, binary transparency, etc.). Logs support monitoring for mis-issuance or tampering; gossip and witnesses enhance security. Newer variants (e.g., Static CT API) exist alongside RFC 6962 deployments.[[4]](https://datatracker.ietf.org/doc/html/rfc6962)\n\n- **Signature algorithms**: Ed25519 (EdDSA over Curve25519) is preferred for speed, small signatures/keys (32-byte keys, 64-byte sigs), determinism, and side-channel resistance. ECDSA (e.g., P-256) is common in PKI but slower for verification and less resistant to certain implementation issues. PQC signatures (e.g., ML-DSA/Dilithium, FN-DSA/Falcon) are maturing for quantum resistance; hybrids (classical + PQC) are the emerging SOTA approach for long-term assets. Ed25519 remains dominant for most verifiable evidence in 2026 due to maturity and performance.\n\nThese systems emphasize **public verifiability**, short-lived credentials where possible, structured claims (not just raw signatures), and reproducibility/audit trails.\n\n### Analysis of kolm Relative to SOTA\nkolm uses Ed25519 signatures (strong choice, aligned with SOTA for performance/security), offers offline/browser-based verification (valuable for usability), a two-tier model (signature + issuer-keyring provenance, providing basic identity binding), and a Merkle transparency log (core tamper-evidence mechanism).\n\n**Areas a sophisticated buyer or auditor would scrutinize or expect kolm to address (potential gaps vs. SOTA):**\n- **Key rotation/revocation**: SOTA (Sigstore/Fulcio) favors short-lived certificates to minimize revocation needs. Long-lived keys require robust rotation, CRLs/OCSP equivalents, or automated mechanisms. An internal or non-standard Merkle log may lack standardized revocation signaling.\n- **Timestamping (RFC 3161)**: Trusted timestamps from Time Stamping Authorities provide non-repudiation independent of signer clock or key lifetime. Common in PKI and advanced attestation systems; missing or non-standard timestamping weakens long-term verifiability.\n- **Public transparency log with inclusion proofs**: RFC 6962/Trillian-style public logs enable anyone to audit (inclusion + consistency proofs, monitors, gossip). A proprietary/internal Merkle log, even if cryptographically sound, lacks ecosystem-wide auditability, third-party witnesses, and standardized proof formats.\n- **Documented trust root**: SOTA systems explicitly define roots (e.g., Fulcio CA roots distributed via TUF in Sigstore; C2PA trust registries). Undocumented or opaque roots undermine verifiability.\n- **Reproducibility**: SLSA provenance and in-toto explicitly capture build steps, materials, and environments for verifiable/reproducible builds. Basic signing + provenance may not reach SLSA Level 2+ requirements.\n\nC2PA-style structured manifests for content/media and PQC readiness are additional SOTA expectations for broader applicability.\n\n### Concrete Hardening Recommendations for kolm to Reach Credible SOTA\nTo match or exceed 2026 SOTA:\n1. **Adopt or emulate Sigstore patterns**: Integrate short-lived certificate issuance (Fulcio-like, OIDC-bound) or hybrid keyless flows; log all events to a Rekor-compatible or public transparency log.\n2. **Standardize attestations**: Support in-toto DSSE envelopes and SLSA provenance predicates (v1) for build/compliance claims, enabling higher SLSA levels.\n3. **Add RFC 3161 timestamping**: Integrate trusted TSA timestamps into signatures or bundles for non-repudiation.\n4. **Enhance transparency log**: Make it public (or federated) following RFC 6962 structures; expose inclusion proofs, consistency proofs, and Signed Tree Heads. Support monitoring/gossip protocols (Trillian ecosystem tools).\n5. **Formalize trust root and PKI**: Document roots explicitly (e.g., via TUF metadata); implement key rotation policies, short-lived credentials, and revocation (CRL/OCSP or log-based).\n6. **Support reproducibility and structured claims**: Add SLSA/in-toto provenance for builds; consider C2PA manifests for media/content use cases.\n7. **Signature and crypto hardening**: Retain Ed25519 as primary; add hybrid PQC support (e.g., Ed25519 + ML-DSA) for future-proofing; ensure side-channel resistance and deterministic signing.\n8. **Ecosystem alignment**: Publish verification libraries/SDKs compatible with existing tools; enable offline + online modes with standardized proof formats.\n\nThese changes would align kolm with production systems used by Google, GitHub, Adobe, and open-source ecosystems, making it credible for high-assurance security/compliance buyers and auditors. References include the Sigstore project documentation, SLSA/in-toto specs, C2PA technical specification, RFC 6962, and Trillian implementations.",
+  "citations": [
+    "https://oneuptime.com/blog/post/2026-01-25-sigstore-supply-chain-security/view",
+    "https://www.chainguard.dev/unchained/a-toolbox-for-a-secure-software-supply-chain",
+    "https://c2pa.org/",
+    "https://datatracker.ietf.org/doc/html/rfc6962"
+  ],
+  "searched": [
+    "https://www.youtube.com/watch?v=SdP4VRk-GD4",
+    "https://eprint.iacr.org/2021/453",
+    "https://github.com/IntelLabs/atlas-transparency-log",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC11585852/",
+    "https://research.swtch.com/tlog",
+    "https://transparency.dev/articles/logs-a-verifiable-transport-layer/",
+    "https://www.researchgate.net/publication/356457189_Merkle_2_A_Low-Latency_Transparency_Log_System",
+    "https://postquantum.com/security-pqc/googles-merkle-tree-mtc-https/",
+    "https://google.github.io/trillian/docs/TransparentLogging.html",
+    "https://www.douglas.stebila.ca/files/research/papers/ESORICS-DGHS16.pdf",
+    "https://www.reddit.com/r/DMARC/comments/1obzzom/ed25519_dkim_signatures_still_missing_everywhere/",
+    "https://forum.gitlab.com/t/the-ed25519-key-for-signing-not-working/90280",
+    "https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ed25519/",
+    "https://ed25519.cr.yp.to/",
+    "https://pkg.go.dev/crypto/ed25519",
+    "https://www.linkedin.com/posts/petterkolm_nyucourant-nyu-zksnark-activity-7044646390181842944-7G0i",
+    "https://ideas.repec.org/a/spr/digfin/v5y2023i3d10.1007_s42521-023-00085-x.html",
+    "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4330421",
+    "https://scholar.google.com/citations?user=DNymBhAAAAAJ&hl=en",
+    "https://web3.bitget.com/wallet/kolm-wallet",
+    "https://oneuptime.com/blog/post/2026-01-25-sigstore-supply-chain-security/view",
+    "https://docs.sigstore.dev/cosign/verifying/attestation/",
+    "https://cycode.com/blog/securing-artifacts-keyless-signing-with-sigstore-and-ci-mon/",
+    "https://docs.sigstore.dev/cosign/signing/overview/",
+    "https://github.com/sigstore/cosign/blob/main/CHANGELOG.md",
+    "https://www.chainguard.dev/unchained/a-toolbox-for-a-secure-software-supply-chain",
+    "https://arxiv.org/html/2503.00271v1",
+    "https://app.opencve.io/cve/?vendor=sigstore",
+    "https://aquilax.ai/blog/supply-chain-artifact-signing-slsa",
+    "https://sbomify.com/2024/08/12/what-is-sigstore/",
+    "https://c2pa.org/",
+    "https://contentcredentials.org/",
+    "https://www.linkedin.com/help/linkedin/answer/a6282984",
+    "https://en.wikipedia.org/wiki/Content_Authenticity_Initiative",
+    "https://contentauthenticity.org/how-it-works",
+    "https://media.defense.gov/2025/Jan/29/2003634788/-1/-1/1/CSI-CONTENT-CREDENTIALS.PDF",
+    "https://helpx.adobe.com/creative-cloud/apps/adobe-content-authenticity/content-credentials/overview.html",
+    "https://www.youtube.com/watch?v=wMnVHeXPb6c",
+    "https://blog.google/innovation-and-ai/products/google-gen-ai-content-transparency-c2pa/",
+    "https://www.envisioning.com/research/prism/c2pa-content-credentials",
+    "https://datatracker.ietf.org/doc/html/rfc6962",
+    "https://letsencrypt.org/2025/08/14/rfc-6962-logs-eol",
+    "https://cryptography.io/en/42.0.3/x509/certificate-transparency/",
+    "https://www.linkedin.com/pulse/rfc-6962-still-rules-web-pki-despite-being-obsoleted-corey-bonnell-ylb5e",
+    "https://support.apple.com/en-us/103703",
+    "https://certificate.transparency.dev/howctworks/",
+    "https://x509errors.org/guides/gnutls-cert-transparency",
+    "https://dev.to/veritaschain/building-cryptographic-audit-trails-for-ai-trading-systems-a-deep-dive-into-rfc-6962-based-6aa",
+    "https://www.infoq.com/articles/tls-certificate-transparency/"
+  ],
+  "usage": {
+    "input_tokens": 27494,
+    "input_tokens_details": {
+      "cached_tokens": 5952
+    },
+    "output_tokens": 2714,
+    "output_tokens_details": {
+      "reasoning_tokens": 1126
+    },
+    "total_tokens": 30208,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 6,
+    "cost_in_usd_ticks": 649029000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 6,
+      "x_search_calls": 0,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 17465,
+      "output_tokens": 2081
+    }
+  },
+  "attempts": 1
+}

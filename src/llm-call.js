@@ -5,7 +5,7 @@
 // LM-Studio / ollama instance running in OpenAI-compat mode). Native
 // Anthropic Messages API when KOLM_LLM_PROVIDER=anthropic.
 //
-// Configuration via environment variables (all optional — `isConfigured()`
+// Configuration via environment variables (all optional - `isConfigured()`
 // returns false when no key/url is set so callers can deterministically
 // fall back to a non-network path):
 //
@@ -193,9 +193,9 @@ function extractJsonArray(text) {
   }
 }
 
-// generateVariations({seed, count, hint}) — calls the LLM to fan out a
+// generateVariations({seed, count, hint}) - calls the LLM to fan out a
 // single (input, output) seed pair into `count` semantically-equivalent
-// variations. Concurrency 4 — splits the request into ceil(count/4)
+// variations. Concurrency 4 - splits the request into ceil(count/4)
 // batches so we stay polite with rate-limited APIs but still finish in
 // reasonable wall time. Each batch returns up to ~6 rows; we trim to the
 // requested count. Caller is responsible for the deterministic fallback
@@ -220,7 +220,7 @@ ${seedJson}
 ${hint ? `HINT: ${hint}\n` : ''}Generate exactly ${n} semantically-equivalent variations.
 Vary phrasing, syntax, and surface form of the INPUT while preserving the underlying task.
 Keep the OUTPUT shape identical to the seed (same JSON keys / same answer kind / same level of detail).
-Batch index: ${batchIdx + 1}/${batches} — make this batch DISTINCT from other batches (vary along a different axis).
+Batch index: ${batchIdx + 1}/${batches} - make this batch DISTINCT from other batches (vary along a different axis).
 
 Output ONLY the JSON array.`;
   };

@@ -511,7 +511,7 @@ function matchGpuName(name, vramMiB, sm) {
 }
 
 // ============================================================================
-// W409s — device target PROFILES.
+// W409s - device target PROFILES.
 //
 // Orthogonal axis to DEVICES (W211/W372 fleet registry). PROFILES describes
 // the W409s "target device class" contract used by `kolm devices detect`
@@ -527,14 +527,14 @@ function matchGpuName(name, vramMiB, sm) {
 //   vram_gb                  discrete VRAM, or null when unified
 //   arch                     'arm64' | 'x64' | 'wasm32'
 //   cuda_capability          'sm_xx' or null
-//   neural_engine            bool — Apple ANE / Tensor NPU / Hexagon NPU
+//   neural_engine            bool - Apple ANE / Tensor NPU / Hexagon NPU
 //   accelerator              short label for the accelerator
 //   min_artifact_size_mb     smallest artifact this profile makes sense for
 //   max_artifact_size_mb     largest artifact this profile can host
 //   supported_targets        ['js','wasm','gguf','onnx','native-cuda','native-metal']
-//   offline_capable          bool — can run without network egress
+//   offline_capable          bool - can run without network egress
 //   runtime_status           'production' | 'foundation'
-//                            — 'foundation' means "we have the device profile
+// - 'foundation' means "we have the device profile
 //                              and the artifact schema but NO runtime ships
 //                              yet; do not claim iOS/Android runtime as ready".
 // ============================================================================
@@ -546,7 +546,7 @@ export const PROFILE_CLASSES = [
 export const SUPPORTED_TARGETS = ['js', 'wasm', 'gguf', 'onnx', 'native-cuda', 'native-metal'];
 
 export const PROFILES = [
-  // ----- Mobile (foundation — runtime not yet shipped) -----
+  // ----- Mobile (foundation - runtime not yet shipped) -----
   {
     id: 'iphone-15-pro-profile',
     name: 'iPhone 15 Pro / 16 Pro',
@@ -579,7 +579,7 @@ export const PROFILES = [
     supported_targets: ['gguf', 'onnx'],
     offline_capable: true,
     runtime_status: 'foundation',
-    notes: 'A18 Pro NPU. Foundation — same caveat as iPhone 15 Pro profile.',
+    notes: 'A18 Pro NPU. Foundation - same caveat as iPhone 15 Pro profile.',
   },
   {
     id: 'pixel-8-pro-profile',
@@ -596,7 +596,7 @@ export const PROFILES = [
     supported_targets: ['gguf', 'onnx'],
     offline_capable: true,
     runtime_status: 'foundation',
-    notes: 'Tensor G3/G4 NPU. Foundation — no Android runtime ships yet.',
+    notes: 'Tensor G3/G4 NPU. Foundation - no Android runtime ships yet.',
   },
   {
     id: 'galaxy-s24-ultra-profile',
@@ -613,7 +613,7 @@ export const PROFILES = [
     supported_targets: ['gguf', 'onnx'],
     offline_capable: true,
     runtime_status: 'foundation',
-    notes: 'Hexagon NPU. Foundation — no Android runtime ships yet.',
+    notes: 'Hexagon NPU. Foundation - no Android runtime ships yet.',
   },
 
   // ----- Desktop (CPU) -----
@@ -838,7 +838,7 @@ export async function detectProfile(hints = {}) {
   let source = 'fallback';
   let confidence = 0.5;
 
-  // Hint override — caller passed an explicit profile_class or accelerator
+  // Hint override - caller passed an explicit profile_class or accelerator
   // hint. Useful for the server POST endpoint to test specific shapes.
   if (hints.profile_id) {
     const p = showProfile(hints.profile_id);
@@ -899,7 +899,7 @@ export async function detectProfile(hints = {}) {
     } catch {} // deliberate: cleanup
   }
 
-  // Honest fallback — match CPU arch + RAM only.
+  // Honest fallback - match CPU arch + RAM only.
   if (!pick) {
     pick = arch === 'arm64' ? showProfile('desktop-cpu-arm64') : showProfile('desktop-cpu-x64');
     source = 'fallback';
@@ -918,7 +918,7 @@ export async function detectProfile(hints = {}) {
 // Recommend a target + quantization for either the current device, or for an
 // artifact whose manifest declares supported_targets + memory_requirement_mb +
 // quantization_required + offline_capable. Honest fallback if no profile
-// matches — returns reason:'no_compatible_profile'.
+// matches - returns reason:'no_compatible_profile'.
 export async function recommendForProfile(opts = {}) {
   const target = opts.profile || (await detectProfile(opts.hints || {})).profile;
   if (!target) {

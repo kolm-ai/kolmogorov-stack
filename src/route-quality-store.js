@@ -1,11 +1,11 @@
-// W921 NEXT-6 — route-quality-store: persist the routing QUALITY label + the
+// W921 NEXT-6 - route-quality-store: persist the routing QUALITY label + the
 // (redacted) prompt context so the semantic router's quality term can be
 // TRAINED instead of cold-started.
 //
 // THE GAP (KOLM_W921_FRONTIER_REVIEW.md, NEXT-6):
 //   src/semantic-router.js already SCORES a quality term per (cluster, model),
 //   but nothing persists the realized per-cluster OUTCOME, so the term ships
-//   cold-started — `trainClustersFromLake` can only fall back to a weak
+//   cold-started - `trainClustersFromLake` can only fall back to a weak
 //   accepted/transport-ok win. This module closes that loop: every realized
 //   route outcome (was the cheap model actually good enough?) lands as a
 //   durable, tenant-fenced row, and `getClusterQualityStats` reads them back
@@ -14,7 +14,7 @@
 //
 // DESIGN (mirrors src/routing-events.js, the established dual-write pattern):
 //   - We REUSE the canonical event-store (src/event-store.js appendEvent) as
-//     the durable sink — no new storage engine, no new schema. The event
+//     the durable sink - no new storage engine, no new schema. The event
 //     schema (src/event-schema.js) is CLOSED: any field outside EVENT_FIELDS
 //     is silently dropped by canonicalize(). So the structured route-quality
 //     payload (cluster_id, realized_quality, model, prompt context, the win
@@ -37,7 +37,7 @@
 //     wall-clock or a global RNG. recordRouteOutcome stamps the caller's `now`
 //     (defaults to a fixed sentinel only when omitted, see _nowIso).
 //   - getClusterQualityStats / trainRouteWeights are pure functions of the
-//     rows they read — same rows in, same stats/weights out, byte-for-byte.
+//     rows they read - same rows in, same stats/weights out, byte-for-byte.
 //   - No signing happens here (we persist, we do not seal). If a caller wants
 //     a signed receipt of an outcome they sign elsewhere with src/ed25519.js;
 //     this module deliberately stays a plain durable store.
@@ -91,7 +91,7 @@ function _modelKey(model) {
 }
 
 // Bounded, redaction-aware prompt context. The router does NOT need the raw
-// prompt — only enough to (a) re-embed for clustering and (b) audit. We store
+// prompt - only enough to (a) re-embed for clustering and (b) audit. We store
 // the caller-supplied text TRUNCATED; callers are expected to pass already-
 // redacted text (prompt_redacted), matching the lake's redaction contract. We
 // never widen privacy: the cap here is below the schema's prompt_redacted cap.
@@ -116,7 +116,7 @@ function _nowIso(now) {
 }
 
 // --------------------------------------------------------------------------
-// recordRouteOutcome — persist ONE realized per-(cluster,model) outcome.
+// recordRouteOutcome - persist ONE realized per-(cluster,model) outcome.
 //
 //   tenant            REQUIRED. Tenant fence; a tenant-less write throws.
 //   namespace         routing namespace (default 'default').
@@ -185,7 +185,7 @@ export async function recordRouteOutcome({
   const latMs = Math.max(0, Math.trunc(_num(latency_ms, 0)));
   const createdAt = _nowIso(now);
 
-  // The structured route-quality payload — every field the router/training loop
+  // The structured route-quality payload - every field the router/training loop
   // needs, stamped into the one free-form schema field (`feedback`). cluster_id
   // / realized_quality / win / model live ONLY here (the closed schema has no
   // column for them), so getClusterQualityStats parses this back out.
@@ -254,7 +254,7 @@ function _parseOutcomeRow(row, expectedTenant) {
 }
 
 // --------------------------------------------------------------------------
-// getClusterQualityStats — read back this tenant's route-quality outcomes and
+// getClusterQualityStats - read back this tenant's route-quality outcomes and
 // fold them into per-(cluster,model) running stats in EXACTLY the shape
 // src/semantic-router.js ClusterRouterStats consumes.
 //
@@ -362,7 +362,7 @@ export async function getClusterQualityStats({
 }
 
 // --------------------------------------------------------------------------
-// trainRouteWeights — derive a SUGGESTED route_weights object (the multi-signal
+// trainRouteWeights - derive a SUGGESTED route_weights object (the multi-signal
 // blend weights src/semantic-router.js normalizeRouteWeights/scoreRoute
 // consume) from the realized outcomes.
 //

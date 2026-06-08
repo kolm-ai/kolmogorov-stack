@@ -1,13 +1,13 @@
 // src/judge-calibration.js
 //
-// W921 — Judge calibration with conformal prediction intervals + multi-judge
+// W921 - Judge calibration with conformal prediction intervals + multi-judge
 // disagreement for the K-score / release gate.
 //
 // Turns a scalar ship/no-ship gate into a CALIBRATED THREE-STATE decision with
 // finite-sample coverage guarantees and an explicit ABSTAIN zone, plus a
 // multi-judge disagreement signal that detects when the gate itself is
 // unreliable. Pure JS (no numeric dep) so it runs in the K-score hot path and
-// in a no-Python recalibration CLI — deliberately mirrors src/bradley-terry.js.
+// in a no-Python recalibration CLI - deliberately mirrors src/bradley-terry.js.
 //
 // THREE LAYERS:
 //   1. Split-conformal interval on the judge/K score. Nonconformity
@@ -26,7 +26,7 @@
 //   ABSTAIN if interval straddles GATE, or spread >= sigma_max, or quorum unmet
 //   REJECT  if conformal upper bound < GATE
 // Falls back to the exact legacy scalar decision when no calibration exists
-// (basis:'scalar_fallback') — zero behavior change for existing users.
+// (basis:'scalar_fallback') - zero behavior change for existing users.
 
 export const CONFORMAL_SPEC = 'kolm-split-conformal-1';
 export const GATE_DECISION_VERSION = 'kolm-gate-decision-1';
@@ -44,7 +44,7 @@ export const DEFAULT_QUORUM = 2;
 
 function _isFiniteNum(x) { return typeof x === 'number' && Number.isFinite(x); }
 
-// conformalQuantile(scores, alpha) — the ceil((n+1)(1-alpha))/n empirical
+// conformalQuantile(scores, alpha) - the ceil((n+1)(1-alpha))/n empirical
 // quantile of nonconformity scores. Returns +Infinity when the required rank
 // exceeds n (the coverage level cannot be met from this calibration set), which
 // the interval builder turns into the trivial [min,max] band.
@@ -62,7 +62,7 @@ export function conformalQuantile(scores, alpha = DEFAULT_ALPHA) {
   return s[rank - 1];
 }
 
-// fitSplitConformal(residuals, alpha) — fit qhat on absolute residuals.
+// fitSplitConformal(residuals, alpha) - fit qhat on absolute residuals.
 export function fitSplitConformal(residuals, alpha = DEFAULT_ALPHA) {
   const clean = (Array.isArray(residuals) ? residuals : []).filter(_isFiniteNum).map(Math.abs);
   const n = clean.length;
@@ -78,7 +78,7 @@ export function fitSplitConformal(residuals, alpha = DEFAULT_ALPHA) {
   };
 }
 
-// ordinalBoundaryAdjust(lower, upper) — Theorem-1 coverage-preserving shrink
+// ordinalBoundaryAdjust(lower, upper) - Theorem-1 coverage-preserving shrink
 // for discrete integer-rubric scores. Round the interval INWARD (ceil lower,
 // floor upper) so the integer interval is a subset that still covers; never
 // widen. If the shrink would invert the interval (lo>hi), snap both to the
@@ -97,7 +97,7 @@ export function ordinalBoundaryAdjust(lower, upper, ratingMin = 1, ratingMax = 1
   return { lower: lo, upper: hi };
 }
 
-// conformalInterval(yhat, qhat, opts) — build the prediction interval around a
+// conformalInterval(yhat, qhat, opts) - build the prediction interval around a
 // new prediction. clamp01 keeps continuous [0,1] K-scores in range; ordinal
 // applies the integer-rubric shrink.
 export function conformalInterval(yhat, qhat, opts = {}) {
@@ -105,7 +105,7 @@ export function conformalInterval(yhat, qhat, opts = {}) {
   if (!_isFiniteNum(yhat)) throw new Error('conformalInterval: yhat must be a number');
   let lower, upper;
   if (qhat === Infinity || qhat === null) {
-    // Unbounded — trivial coverage band.
+    // Unbounded - trivial coverage band.
     lower = clamp01 ? 0 : (ordinal ? ratingMin : -Infinity);
     upper = clamp01 ? 1 : (ordinal ? ratingMax : Infinity);
   } else {
@@ -125,7 +125,7 @@ export function conformalInterval(yhat, qhat, opts = {}) {
   return { lower, upper, midpoint, width };
 }
 
-// fitMondrianConformal(rowsByCategory, alpha, minPairs) — per-category +
+// fitMondrianConformal(rowsByCategory, alpha, minPairs) - per-category +
 // pooled split-conformal. rowsByCategory: { coding:[{yhat,y},...], ... }.
 export function fitMondrianConformal(rowsByCategory, alpha = DEFAULT_ALPHA, minPairs = MIN_PAIRS_PER_CATEGORY) {
   const by_category = {};
@@ -155,7 +155,7 @@ export function fitMondrianConformal(rowsByCategory, alpha = DEFAULT_ALPHA, minP
   };
 }
 
-// applyConformal(mapping, category, yhat) — look up the right qhat (category
+// applyConformal(mapping, category, yhat) - look up the right qhat (category
 // first, never silently pooled) and build the interval for a new prediction.
 // Returns status:'insufficient_data' when the category lacks data (the caller
 // decides whether to fall back to pooled EXPLICITLY).
@@ -171,7 +171,7 @@ export function applyConformal(mapping, category, yhat, opts = {}) {
   if (cat && cat.status === 'insufficient_data') {
     return { status: 'insufficient_data', qhat: null, coverage_target, n_pairs: cat.n, scope: 'category' };
   }
-  // Unknown category — if explicitly allowed, fall back to pooled.
+  // Unknown category - if explicitly allowed, fall back to pooled.
   if (opts.allow_pooled && mapping.pooled && mapping.pooled.status === 'ok' && _isFiniteNum(mapping.pooled.qhat)) {
     const iv = conformalInterval(yhat, mapping.pooled.qhat, { clamp01: true, ...opts });
     return { status: 'ok', ...iv, qhat: mapping.pooled.qhat, coverage_target, n_pairs: mapping.pooled.n, scope: 'pooled' };
@@ -188,7 +188,7 @@ function _pstdev(a) {
   return Math.sqrt(_mean(a.map((x) => (x - m) * (x - m))));
 }
 
-// judgeDisagreement(perJudgeScores) — spread (population stdev) + range over a
+// judgeDisagreement(perJudgeScores) - spread (population stdev) + range over a
 // panel of per-judge scalar scores. unreliable is left to the caller's
 // sigma_max threshold (decideGate); here we report the raw signals.
 export function judgeDisagreement(perJudgeScores, opts = {}) {
@@ -213,7 +213,7 @@ export function judgeDisagreement(perJudgeScores, opts = {}) {
 
 // ── Three-state gate fusion ────────────────────────────────────────────────
 
-// decideGate(args) — fuse a conformal interval + judge disagreement into a
+// decideGate(args) - fuse a conformal interval + judge disagreement into a
 // three-state decision. When `conformal` is null and `judge_spread` is null,
 // falls back to the legacy scalar decision (composite >= gate) with
 // basis:'scalar_fallback' so existing users see zero change.
@@ -274,7 +274,7 @@ export function decideGate({
       reasons.push('downgraded_ship_to_abstain_on_panel');
     }
   } else if (havePanel) {
-    // No conformal interval — use the scalar composite but let the panel force
+    // No conformal interval - use the scalar composite but let the panel force
     // abstain when unreliable.
     const scalarShip = _isFiniteNum(composite) && composite >= gate;
     if (!scalarShip) {
@@ -288,7 +288,7 @@ export function decideGate({
       reasons.push(`scalar_above_gate:${composite.toFixed(3)}>=${gate}`);
     }
   } else {
-    // Pure scalar fallback — exactly the legacy decision.
+    // Pure scalar fallback - exactly the legacy decision.
     const scalarShip = _isFiniteNum(composite) && composite >= gate;
     state = scalarShip ? 'ship' : 'reject';
     reasons.push(scalarShip
@@ -311,7 +311,7 @@ export function decideGate({
   };
 }
 
-// _attachGateDecision(envelope, input) — ADDITIVE decoration of a K-score
+// _attachGateDecision(envelope, input) - ADDITIVE decoration of a K-score
 // envelope. NEVER mutates ships/weights/axes; sets envelope.gate_decision only.
 // `input` carries the optional conformal mapping + category + panel signals.
 export function attachGateDecision(envelope, input = {}) {
@@ -339,7 +339,7 @@ export function attachGateDecision(envelope, input = {}) {
     sigma_max: _isFiniteNum(input.sigma_max) ? input.sigma_max : DEFAULT_SIGMA_MAX,
     quorum: Number.isInteger(input.quorum) ? input.quorum : DEFAULT_QUORUM,
   });
-  // Additive only — do not touch any existing field.
+  // Additive only - do not touch any existing field.
   return { ...envelope, gate_decision: decision };
 }
 

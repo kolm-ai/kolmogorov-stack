@@ -1,13 +1,13 @@
 /**
  * src/otel-attrs.js
  *
- * W823-1 — OpenTelemetry span attribute envelope helper.
+ * W823-1 - OpenTelemetry span attribute envelope helper.
  *
  * Canonicalizes a free-form input object into the W823-compliant kolm.*
  * attribute envelope so call sites don't have to know the W733/W823 wire
  * keys. The output is a flat `{ key: value }` map ready to drop into:
  *
- *   - otel.startSpan(name, attrs)         (kolm-native exporter — src/otel.js)
+ *   - otel.startSpan(name, attrs)         (kolm-native exporter - src/otel.js)
  *   - span.setAttributes(attrs)           (@opentelemetry/api Span)
  *   - emitSpan({name, attrs}) wrappers    (host-side instrumentation)
  *
@@ -31,7 +31,7 @@
  *     buyer's existing instrumentation library).
  *   - Keeping the canonicalization in one pure function makes it trivially
  *     testable and prevents key drift across call sites.
- *   - We never invent new keys here — every output key lives in
+ *   - We never invent new keys here - every output key lives in
  *     src/otel.js#KOLM_OTEL_ATTRS so the contract has one source of truth.
  *
  * Honesty contract:
@@ -95,7 +95,7 @@ function kolmSpanAttrs(input) {
     out[KOLM_OTEL_ATTRS.NAMESPACE] = input.namespace;
   }
 
-  // Numeric passthroughs — Number.isFinite gates so NaN never crosses the
+  // Numeric passthroughs - Number.isFinite gates so NaN never crosses the
   // OTel boundary.
   const tcP50 = _finite(input.token_confidence_p50);
   if (tcP50 !== null) out[KOLM_OTEL_ATTRS.TOKEN_CONFIDENCE_P50] = tcP50;
@@ -112,7 +112,7 @@ function kolmSpanAttrs(input) {
   const ent = _finite(input.routing_entropy_nats);
   if (ent !== null) out[KOLM_OTEL_ATTRS.ROUTING_ENTROPY_NATS] = ent;
 
-  // Privacy boundary — raw tenant_id NEVER crosses to OTel; only the
+  // Privacy boundary - raw tenant_id NEVER crosses to OTel; only the
   // 12-char sha256 prefix.
   if (input.tenant_id) {
     const hashed = _hashTenant(input.tenant_id);

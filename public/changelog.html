@@ -3,70 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
-<title>Changelog · kolm.ai</title>
-<meta name="description" content="Dated release notes for the kolm compiler, CLI, runtimes, and SDKs. Every shipped wave links to the receipt and the verified outcome.">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Changelog: what shipped, with dates · kolm.ai</title>
+<meta name="description" content="A running log of what kolm has shipped: the open offline verifier, the published Agent Security Readiness checklist, framework mappings, and the append-only transparency log.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Changelog: what shipped, with dates">
+<meta property="og:description" content="What shipped, with dates: the offline verifier, the ASR checklist, framework mappings, and the append-only transparency log.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/changelog">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Changelog: what shipped, with dates">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/changelog">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/ks.css" as="style">
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/frontier.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<style>
-  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
-  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
-  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
-  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
-  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
-  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
-
-  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
-  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
-  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
-
-  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
-  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
-
-  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
-  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
-  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
-  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
-  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
-  .sec-card .st.wip { color: #a8b3c2; border-color: rgba(168, 179, 194,0.35); }
-  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
-  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
-  .sec-card p + p { margin-top: var(--ks-2); }
-  .sec-card a { color: var(--ks-accent); }
-
-  .month-head { position: sticky; top: 0; z-index: 5; background: rgba(7,9,12,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--ks-line-1); padding: var(--ks-3) 0 var(--ks-2); margin: 0 0 var(--ks-5); }
-  .month-head h3 { margin: 0; font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ks-ink-3); }
-
-  .entry { display: grid; grid-template-columns: 220px 1fr; gap: var(--ks-5); padding: var(--ks-5) 0; border-bottom: 1px solid var(--ks-line-1); }
-  @media (max-width: 760px) { .entry { grid-template-columns: 1fr; gap: var(--ks-2); } }
-  .entry .meta { font-family: var(--ks-mono); font-size: 12px; color: var(--ks-ink-3); letter-spacing: 0.04em; }
-  .entry .meta .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-accent-edge); color: var(--ks-accent); margin-top: var(--ks-2); }
-  .entry h4 { margin: 0 0 var(--ks-2); font-size: 17px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
-  .entry p { margin: 0; font-size: 14.5px; line-height: 1.65; color: var(--ks-ink-2); max-width: 72ch; }
-  .entry p + p { margin-top: var(--ks-2); }
-  .entry a { color: var(--ks-accent); }
-  .entry .tags { margin-top: var(--ks-2); display: flex; flex-wrap: wrap; gap: 6px; }
-  .entry .tags span { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--ks-line-2); color: var(--ks-ink-3); text-transform: uppercase; }
-
-  .sub-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
-  .sub-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); }
-  .sub-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
-  .sub-card code { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-accent); }
-</style>
-  <meta property="og:title" content="Changelog">
-  <meta property="og:description" content="Dated release notes for the kolm compiler, CLI, runtimes, and SDKs. Every shipped wave links to the receipt and the verified outcome.">
-  <meta property="og:image" content="https://kolm.ai/og/changelog.svg">
-  <meta property="og:url" content="https://kolm.ai/changelog">
-  <meta property="og:type" content="website">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -75,7 +45,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/changelog",
-  "description": "Dated release notes for the kolm compiler, CLI, runtimes, and SDKs. Every shipped wave links to the receipt and the verified outcome.",
+  "description": "A running log of what kolm has shipped: the open offline verifier, the published Agent Security Readiness checklist, framework mappings, and the append-only transparency log.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -89,575 +59,159 @@
 }
 </script>
 </head>
-<body class="ks">
-<span class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">kolm.ai - the AI compiler. Not Kolm therapeutics, Kolm band, Kolm engines, or Petter Kolm.</span>
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-    
-    <!-- KOLM_NAV_BEGIN (W221) -->
-    <nav class="site-nav" aria-label="Primary">
-    <div class="nav-item nav-item--product has-mega">
-      <a class="nav-top" href="/about" aria-haspopup="true" aria-expanded="false">About</a>
-      <div class="mega-menu" role="menu" aria-label="product menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/about">Overview</a>
-          <a href="/quickstart">Quickstart</a>
-          <a href="/capture">Gateway</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Build</p>
-          <a href="/training">Training loop</a>
-          <a href="/distill">Distill</a>
-          <a href="/compile">Compile</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Run</p>
-          <a href="/runtimes">Runtimes</a>
-          <a href="/models">Models</a>
-          <a href="/docs/devices">Devices</a>
-          <a href="/trust">Verify</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--proof has-mega">
-      <a class="nav-top" href="/proof" aria-haspopup="true" aria-expanded="false">Proof</a>
-      <div class="mega-menu" role="menu" aria-label="proof menu">
-        <div class="mega-col">
-          <p class="mega-h">Benchmarks</p>
-          <a href="/proof">Proof overview</a>
-          <a href="/benchmarks">Benchmarks</a>
-          <a href="/compare">Compare</a>
-          <a href="/leaderboard">Leaderboard</a>
-          <a href="/k-score">K-score</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Receipts</p>
-          <a href="/verify">Verify a receipt</a>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--docs has-mega">
-      <a class="nav-top" href="/docs" aria-haspopup="true" aria-expanded="false">Docs</a>
-      <div class="mega-menu" role="menu" aria-label="docs menu">
-        <div class="mega-col">
-          <p class="mega-h">Start</p>
-          <a href="/capture">API gateway</a>
-          <a href="/docs/cli">CLI</a>
-          <a href="/docs/sdk">SDKs</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Reference</p>
-          <a href="/docs">Docs home</a>
-          <a href="/docs/api">API reference</a>
-          <a href="/api">HTTP routes</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Operate</p>
-          <a href="/integrations">Integrations</a>
-          <a href="/docs/privacy">Privacy membrane</a>
-          <a href="/docs/datasets">Datasets</a>
-          <a href="/docs/distillation">Distillation</a>
-          <a href="/docs/verify">Verification</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--pricing has-mega">
-      <a class="nav-top" href="/pricing" aria-haspopup="true" aria-expanded="false">Pricing</a>
-      <div class="mega-menu" role="menu" aria-label="pricing menu">
-        <div class="mega-col">
-          <p class="mega-h">Buy</p>
-          <a href="/pricing">Plans</a>
-          <a href="/pricing#roi">ROI calculator</a>
-          <a href="/nonprofits">Nonprofits</a>
-        </div>
-      </div>
-    </div>
-    <div class="nav-item nav-item--enterprise has-mega">
-      <a class="nav-top" href="/enterprise" aria-haspopup="true" aria-expanded="false">Enterprise</a>
-      <div class="mega-menu" role="menu" aria-label="enterprise menu">
-        <div class="mega-col">
-          <p class="mega-h">Deploy</p>
-          <a href="/enterprise">Enterprise overview</a>
-          <a href="/self-host">Self-host</a>
-          <a href="/airgap">Air-gap</a>
-        </div>
-        <div class="mega-col">
-          <p class="mega-h">Trust</p>
-          <a href="/trust">Trust center</a>
-          <a href="/security">Security</a>
-          <a href="/compliance">Compliance</a>
-          <a href="/baa">BAA</a>
-        </div>
-      </div>
-    </div>
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
     </nav>
-    <!-- KOLM_NAV_END (W221) -->
-    
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
 
-<main id="main">
+<main>
 
-<section class="sec-hero">
-  <div class="ks-wrap">
-    <div class="eyebrow">Changelog &middot; release notes &middot; receipts</div>
-    <h1>What <b>shipped,</b> when, and how to verify it.</h1>
-    <p class="lede">Every entry is a shipped change with a real artifact behind it. A developer or a compliance reviewer can take any line item, follow the receipt link, and confirm the build with a signed CLI invocation. Aspirations live on the roadmap, not here.</p>
-    <div class="cta-row">
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/roadmap" class="ks-btn ks-btn--ghost">See the roadmap</a>
-      <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a .kolm artifact</a>
-      <a href="/status" class="ks-btn ks-btn--ghost">System status</a>
+<!-- ============================================================ HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:62ch">
+      <h1>What shipped, with dates.</h1>
+      <p class="lede">A short, plain record of what's live: we list what's shipped, not what's promised.</p>
     </div>
   </div>
 </section>
 
-<section class="sec-section" id="subscribe">
-  <div class="ks-wrap">
-    <h2>Subscribe</h2>
-    <p class="sub">No RSS form yet. Three plain ways to stay in the loop while we wire one up.</p>
-    <div class="grid-3">
-      <div class="sub-card">
-        <h3>Email digest</h3>
-        <p>Send a note to <a href="mailto:trust@kolm.ai?subject=changelog%20subscribe" style="color:var(--ks-accent)">trust@kolm.ai</a> with subject "changelog subscribe". One email per month. No tracking pixels.</p>
-      </div>
-      <div class="sub-card">
-        <h3>Watch the repo</h3>
-        <p>Star or watch <a href="https://github.com/kolm-ai/kolm" rel="noopener">kolm-ai/kolm</a> on GitHub. Tagged releases link back to the matching entry on this page.</p>
-      </div>
-      <div class="sub-card">
-        <h3>Check the CLI</h3>
-        <p>Run <code style="font-family:var(--ks-mono);color:var(--ks-accent)">kolm changelog</code> from the installed CLI. The CLI tails the same JSON this page renders from.</p>
-      </div>
+<!-- ============================================================ 01. SHIPPED -->
+<section class="section reveal">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / Shipped</span>
+      <h2>What's live now.</h2>
     </div>
-  </div>
-</section>
-
-<!-- CHANGELOG_AUTO_BEGIN -->
-<!-- CHANGELOG_AUTO_END -->
-
-<section class="sec-section" id="may-2026">
-  <div class="ks-wrap">
-    <div class="month-head"><h3>May 2026</h3></div>
-
-    <div class="entry">
-      <div class="meta">2026-05-26<br><span class="pill"></span></div>
-      <div>
-        <h4>Trinity-500: distilled 7B student published with GGUF, model card, and benchmark</h4>
-        <p>The Trinity-500 council distill (Claude, GPT-4o, DeepSeek-R1 as teachers) shipped end-to-end on an RTX 5090: 410 council pairs, LoRA adapter trained in 79 seconds, and full GGUF quant ladder (Q4_K_M, Q5_K_M, Q8_0, IQ4_XS). The model card is generated from the passport file so provenance is verifiable. Benchmark (n=57): trinity-500 reaches 96.5% asks-1Q, 100% judge-clarify, and 100% judge-on-policy at 1.24 s and 210 chars per response &mdash; beats claude-haiku-4-5 and ties gpt-4o-mini at half the chars. See <a href="/models">/models</a>.</p>
-        <div class="tags"><span>distill</span><span>models</span><span>gguf</span><span>benchmark</span></div>
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">2026 · June</p>
+        <h3>Site rebuilt around verifiable evidence</h3>
+        <p>A ground-up redesign around verifiable evidence: a live in-browser verifier on the homepage, the report anatomy, and the four-pillar check catalog. Everything centers on a signed artifact you can check yourself.</p>
       </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-26<br><span class="pill"></span></div>
-      <div>
-        <h4>Teacher proxy is now the production default + new <code>kolm teacher</code> verb</h4>
-        <p>Distill workers and the bake-off harness now route through the hosted teacher proxy by default, so the same artifact compiles identically whether you have a frontier provider key locally or not. A new <code>kolm teacher</code> CLI verb prints provider status, where keys come from, and where the compiled bytes land. The dotfile loader reads <code>~/.kolm/.env</code> so credentials never live in shell history.</p>
-        <div class="tags"><span>cli</span><span>distill</span><span>gateway</span></div>
+      <div class="card">
+        <p class="card__k">2026 · June</p>
+        <h3>Open offline verifier</h3>
+        <p>A dependency-free WebCrypto Ed25519 verifier, shipped open. The browser widget, CLI, and library share one canonicalization. Paste a report and the check runs in-page, with a tamper demo to prove altered evidence can't pass.</p>
       </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-26<br><span class="pill"></span></div>
-      <div>
-        <h4>Gateway wrapper close-out: receipts at 100%, signed Vercel fallback path</h4>
-        <p>The gateway wrapper surface closed out with a Vercel teacher-chat proxy fallback. Post-ship prod benchmark: 10/10 receipts and 10/10 upstream 2xx, mean dispatch latency 2.48 s, $0.307 per 1 000 calls vs. $0.301 direct &mdash; a 2% wrapper tax with full capture + signed receipts on every call. See <a href="/gateway">/gateway</a> and verify any receipt at <a href="/verify-prod">/verify-prod</a>.</p>
-        <div class="tags"><span>gateway</span><span>receipts</span><span>benchmarks</span></div>
+      <div class="card">
+        <p class="card__k">2026 · June</p>
+        <h3>Agent Security Readiness (ASR) checklist</h3>
+        <p>Published openly under CC0: the six-control readiness checklist for agentic products, each control mapped into SOC 2, NIST AI RMF, EU AI Act, and the OWASP LLM &amp; Agentic Top 10.</p>
       </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-25<br><span class="pill"></span></div>
-      <div>
-        <h4>Cool-slate visual system replaces warm-paper across every public surface</h4>
-        <p>The binding cool-slate visual system replaces the prior warm-paper redesign across every public page. Inline pitch-black style blocks were stripped from 476 files via an automated scrubber and replaced with the design-tokens layer. The atmospheric backdrop is a CSS-only radial plus grain, no PNG. Dark-mode tokens were tuned for contrast without inverting brand. Studio CLI/TUI ships an ASCII banner and an accessible <code>--plain</code> flag pre-dispatch.</p>
-        <div class="tags"><span>design-system</span><span>accessibility</span><span>tui</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-24<br><span class="pill"></span></div>
-      <div>
-        <h4>Real CLI chat in the hero (same component pre- and post-auth)</h4>
-        <p>The homepage hero now embeds the real CLI chat (<code>kolm-chat.js</code>) backed by a public <code>/v1/free/chat</code> route with a 20-request-per-IP-per-day soft limit. The same component renders pre- and post-auth, so signed-in users see their tenant context light up without a UI swap. The "How it works" duplicate was deduped into four deep-dive cards naming the actual innovations &mdash; capture, distill, compile, verify &mdash; rather than restating the pipeline three times.</p>
-        <div class="tags"><span>homepage</span><span>chat</span><span>quickstart</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-23<br><span class="pill"></span></div>
-      <div>
-        <h4>Frontier quantization sprint: MoE awareness + full quant ladder + hardware-aware select</h4>
-        <p>Closed ten gaps to match or beat the public frontier on quantization. The full ladder is wired end-to-end (GGUF, EXL2, GPTQ, AWQ, NVFP4, FP8, HQQ), MoE models are routed through expert-aware quantization, large models above 100 B are handled via streaming, and a new hardware-aware selector picks the format that fits the target device. <code>kolm serve</code>, <code>kolm bench</code>, and the CI gates were updated together. See <a href="/forge">/forge</a>.</p>
-        <div class="tags"><span>quantize</span><span>models</span><span>forge</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-22<br><span class="pill"></span></div>
-      <div>
-        <h4>First-principles homepage rebuild around frontier quantization</h4>
-        <p>The home page now leads with the verified DeepSeek-R1 32B INT4 path: 61.0 GB to 17.9 GB in 125 seconds on an RTX 5090, then 11.5 tokens per second on the same card. The hero shows the actual reproducible transcript. The frontier quantize matrix lists four sizes that have been distilled and run end-to-end. See <a href="/benchmarks">the benchmarks page</a><a href="/compare" hidden aria-hidden="true">compare</a> for raw numbers.</p>
-        <div class="tags"><span>homepage</span><span>quantize</span><span>r1-32b</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-22<br><span class="pill"></span></div>
-      <div>
-        <h4>Visual system facelift: design tokens, illustration bands, nav icons</h4>
-        <p>The site now ships a single design-tokens.css plus a deterministic kolm-svg.js illustration helper. Hero and lede copy were tightened across nine pages, nav icons unified across 134 pages, and the homepage copy was rewritten before. No client-side animation on prefers-reduced-motion.</p>
-        <div class="tags"><span>design-system</span><span>accessibility</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-21<br><span class="pill"></span></div>
-      <div>
-        <h4>SSO / SAML / SCIM behind the enterprise plan + Qwen2.5-32B INT4 verified</h4>
-        <p>Six new SSO routes land behind a plan gate. SAML metadata and the SCIM ServiceProviderConfig are PUBLIC per SAML 2.0 §5.2 and RFC 7644 §4 so federation can complete; the rest return HTTP 402 on a free plan and HTTP 503 with an install hint on the enterprise plan until the stub is filled. Separately, Qwen2.5-3B-Instruct quantized from 5.8 GB to 2.0 GB in 13.85 seconds on an RTX 5090 via bitsandbytes 0.49.2 NF4 plus double quantization. See <a href="/enterprise">/enterprise</a> for the SSO checklist.</p>
-        <div class="tags"><span>sso</span><span>enterprise</span><span>quantize</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-20<br><span class="pill"></span></div>
-      <div>
-        <h4>Total completion green: release-verify all seven gates pass</h4>
-        <p>The release-verify driver now runs lint-refs, the full test suite (4006 tests), the SDK smoke loop, the doctor check, the whoami round-trip, claim verification, and billing-tier proofs back to back. Output is JSON. A red gate fails the wave; we stopped shipping anything that does not clear all seven.</p>
-        <div class="tags"><span>release-verify</span><span>ci</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>First-class C and Rust SDKs (single-header stb-style)</h4>
-        <p>New sdk/c/ ships kolm.h with a KOLM_IMPLEMENTATION guard and a libcurl backend, plus a kolm-cli demo and a Makefile. New sdk/rust/ ships the kolm crate v0.1.0 over ureq with no async runtime. Both cover /v1/whoami, /v1/health, /v1/verify, /v1/changelog, /v1/intent/ask, and /v1/capture/log. No JSON parser bundled, on purpose. See <a href="/sdks">/sdks</a>.</p>
-        <div class="tags"><span>sdk</span><span>c</span><span>rust</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>Multimodal bake-off with tenant-fenced replay</h4>
-        <p>Replays captures with image, audio, video, or PDF payloads through each compiled .kolm artifact and scores by Jaccard token overlap against the captured base response. Heavy embeddings stay opt-in through a worker hook. New POST /v1/multimodal/bakeoff route, kolm bakeoff multimodal sub-command, and a TUI 17th view bound to M.</p>
-        <div class="tags"><span>multimodal</span><span>bakeoff</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>Per-namespace billing breakdown with team rollup</h4>
-        <p>New billing-breakdown source pulls from the event store (the authoritative cost ledger), sorts by cost descending, and returns rollups gated by tenant role: owners and admins see every namespace, members and viewers see their own. Connector captures now thread the x-kolm-namespace header through so attribution is not stuck on "default". See <a href="/pricing">/pricing</a>.</p>
-        <div class="tags"><span>billing</span><span>governance</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>Audio voiceprint scrub (third media-redact primitive)</h4>
-        <p>Thin Node shell that spawns an external Python anonymizer via a priority chain: VOICEPRINT_REDACT_CMD env override, pyannote-audio-redact on PATH, then ~/.kolm/scripts/voiceprint-redact.py. If nothing is installed, the API returns redacted_audio:null and a 503 with an install hint. Never silent passthrough.</p>
-        <div class="tags"><span>privacy</span><span>media</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>Agent trace compile and verify</h4>
-        <p>Wraps the trace capture and the workflow-IR compile into one loop: compile a trace into a replay artifact, then verify that the artifact reproduces every step. Cache-hit replay returns the original output without re-running the LLM or tool steps. Foreign trace IDs fail loud with HTTP 403.</p>
-        <div class="tags"><span>agents</span><span>replay</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>Image PII redaction (faces and license plates)</h4>
-        <p>Isolated worker package with YOLO-format ONNX face and plate detection via onnxruntime-node, plus sharp for blur or mask composite. Optional deps stay in the worker so the root install stays light. POST /v1/multimodal/redact-image plus a doctor sub-route plus a CLI kolm media image-doctor.</p>
-        <div class="tags"><span>privacy</span><span>vision</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>Federated approval-row sharing with Laplace noise</h4>
-        <p>Only the approval hash crosses tenant boundaries: sha256 of namespace plus input hash plus decision kind. Raw input and output text never leave the tenant. Peer counts are differentially private (epsilon = 1.0, Laplace scale = 1.0). Opt-in registry is durable.</p>
-        <div class="tags"><span>federated</span><span>differential-privacy</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>TEE attestation embed (PCCS, SNP, Nitro, NRAS)</h4>
-        <p>The compiler now accepts an attestation report and pins its hash into the artifact hash through the receipt. Editing the report post-build invalidates the signature. Verification is loud-fail-by-default: state=shape_ok, verified=false, until a tenant registers a real crypto verifier.</p>
-        <div class="tags"><span>confidential-compute</span><span>attestation</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>Distill reliability: teacher fallback and resume</h4>
-        <p>Distill workers now retry across an ordered teacher list with deduplication; KOLM_DISTILL_TEACHER accepts a comma list. New params teacher_fallback and resume_from let a wave pick up where the last one died, with a monotonic step counter and tenant fencing on the resumed run.</p>
-        <div class="tags"><span>distill</span><span>reliability</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-19<br><span class="pill"></span></div>
-      <div>
-        <h4>DoD 12-step end-to-end test</h4>
-        <p>One in-process test walks all twelve steps of the documented Definition of Done: tenant signup, whoami, base URL, thirty captures, intent suggestion, distill from captures, bake-off, full compile, artifact load with Ed25519 sidecar, run with the kolm-audit-1 envelope, drift snapshot and detect on a 23-point K-drop, and re-compile since the snapshot.</p>
-        <div class="tags"><span>e2e</span><span>dod</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-05-18<br><span class="pill"></span></div>
-      <div>
-        <h4>Transcript scrub (first media-redact primitive)</h4>
-        <p>Worker package for transcript-side PII scrub backed by a configurable pattern set. No-silent-pass contract identical to the audio and image redactors: never silent passthrough; missing detector returns a 503 plus install hint plus a null redacted field.</p>
-        <div class="tags"><span>privacy</span><span>transcripts</span></div>
+      <div class="card">
+        <p class="card__k">2026 · Q1</p>
+        <h3>Transparency log + inclusion proofs</h3>
+        <p>Every report enters an append-only, hash-chained Merkle log and ships with a per-report inclusion proof, so a report can be shown to have been logged and never quietly replaced.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="sec-section" id="apr-2026">
-  <div class="ks-wrap">
-    <div class="month-head"><h3>April 2026</h3></div>
-
-    <div class="entry">
-      <div class="meta">2026-04-29<br><span class="pill"></span></div>
-      <div>
-        <h4>Service-worker family floor migration</h4>
-        <p>Explicit-array sw.js lock-ins were a footgun every wave: changing the wave required editing test files. Migrated all family checks to a regex plus numeric threshold so the lock-in moves forward automatically when sw.js bumps.</p>
-        <div class="tags"><span>infra</span><span>tests</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-04-22<br><span class="pill"></span></div>
-      <div>
-        <h4>Drift snapshot and verdict bands</h4>
-        <p>Drift snapshots compress the K-score and per-axis composite into a small JSON blob. The drift detect endpoint compares two snapshots and returns a verdict band: within, degraded, broken. The bands gate auto-promotion of new artifacts behind a numeric threshold rather than developer eyeball.</p>
-        <div class="tags"><span>drift</span><span>k-score</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-04-12<br><span class="pill"></span></div>
-      <div>
-        <h4>Workflow-IR compile path for traced agents</h4>
-        <p>Agent traces compile into a deterministic workflow-IR that captures every tool call plus its arguments plus its output. The IR replays bit-for-bit on a clean machine. This is what the trace compile wraps a wave later.</p>
-        <div class="tags"><span>agents</span><span>workflow-ir</span></div>
-      </div>
+<!-- ============================================================ 02. NOT YET LISTED -->
+<section class="section section--ink reveal">
+  <div class="wrap">
+    <div class="section__head" style="max-width:62ch">
+      <span class="idx">02 / Not yet listed</span>
+      <h2>What we won't claim yet.</h2>
+      <p class="lede">kolm does not yet hold a SOC 2 report or a published third-party pentest of its own. We'll list either here only once it is real and verifiable.</p>
     </div>
   </div>
 </section>
 
-<section class="sec-section" id="mar-2026">
-  <div class="ks-wrap">
-    <div class="month-head"><h3>March 2026</h3></div>
-
-    <div class="entry">
-      <div class="meta">2026-03-28<br><span class="pill"></span></div>
-      <div>
-        <h4>Quantize matrix v1 with bitsandbytes 0.49</h4>
-        <p>Locked the NF4 plus double-quant path across Qwen2.5-0.5B, Qwen2.5-3B, Qwen2.5-7B, and DeepSeek-R1-Distill-Qwen-32B. The matrix on the homepage and the <a href="/benchmarks">benchmarks page</a> is generated from this wave.</p>
-        <div class="tags"><span>quantize</span><span>benchmarks</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-03-14<br><span class="pill"></span></div>
-      <div>
-        <h4>Receipts v2 with JCS canonicalization</h4>
-        <p>The receipt body is now canonicalized to JCS before hashing, so a receipt produced on Windows and a receipt produced on Linux from the same inputs share an artifact CID. The artifact hash binds back into the signed body so post-build edits invalidate the signature.</p>
-        <div class="tags"><span>receipts</span><span>signing</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-03-02<br><span class="pill"></span></div>
-      <div>
-        <h4>Verifier ships as a single static binary</h4>
-        <p>kolm verify is now a static cross-compiled binary with no network calls. A compliance reviewer can verify a .kolm artifact on a clean laptop with no Node, no Python, no registry, no truthfulness service in the loop.</p>
-        <div class="tags"><span>verify</span><span>airgap</span></div>
-      </div>
-    </div>
+<!-- ============================================================ CLOSE -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>See the latest, verify it yourself.</h2>
+    <div class="hero__cta"><a class="btn btn--primary" href="/verify">Verify a report</a><a class="btn btn--ghost" href="/research">Read the research</a></div>
   </div>
 </section>
-
-<section class="sec-section" id="feb-2026">
-  <div class="ks-wrap">
-    <div class="month-head"><h3>February 2026</h3></div>
-
-    <div class="entry">
-      <div class="meta">2026-02-19<br><span class="pill"></span></div>
-      <div>
-        <h4>Claim verification gate in release-verify</h4>
-        <p>The release-verify driver now greps every public surface for a quantified claim ("17.9 GB", "11.5 tok/s", "125 seconds") and asserts a backing artifact lives at the cited path. A claim with no receipt fails the gate.</p>
-        <div class="tags"><span>claims</span><span>release-verify</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-02-04<br><span class="pill"></span></div>
-      <div>
-        <h4>Frontier methods card on the homepage</h4>
-        <p>A new section maps each frontier-quality method (SpQR, AWQ, variational speculative decoding, MoE distillation) to its current ship status with a "verify-before-ship" annotation where the path is not yet end-to-end.</p>
-        <div class="tags"><span>homepage</span><span>frontier</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="jan-2026">
-  <div class="ks-wrap">
-    <div class="month-head"><h3>January 2026</h3></div>
-
-    <div class="entry">
-      <div class="meta">2026-01-26<br><span class="pill"></span></div>
-      <div>
-        <h4>SOC 2 Type I readiness packet under NDA</h4>
-        <p>Current scope: SOC 2 Type I controls evidence is available to procurement and compliance reviewers under NDA; certification remains auditor-gated. SOC 2 Type II observation window starts now; target Q4 2026. See <a href="/soc2">/soc2</a>.</p>
-        <div class="tags"><span>compliance</span><span>soc2</span></div>
-      </div>
-    </div>
-
-    <div class="entry">
-      <div class="meta">2026-01-15<br><span class="pill"></span></div>
-      <div>
-        <h4>No-silent-pass contract on every surface</h4>
-        <p>Locked the wording rules across the site: zero marketing fluff (no superlatives such as "10x", no breakthrough adjectives, no claims about speed without a number), em-dash budget per page, plain-scope vocabulary in five of ten high-traffic pages, persona signal in every hero. Tests enforce the floor.</p>
-        <div class="tags"><span>copy</span><span>truthfulness</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="how-to-read">
-  <div class="ks-wrap">
-    <h2>How to read this page</h2>
-    <p class="sub">Format and reading guide for engineers, procurement reviewers, and auditors who landed here from a sales deck.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">format</span><span class="st live">Stable</span></div>
-        <h3>Every entry is a shipped change</h3>
-        <p>If a line item appears here, the artifact behind it is reachable from <a href="/verify-prod">/verify-prod</a> by CID. Plans, roadmap items, and in-flight work do not appear on this page &mdash; they live on the <a href="/roadmap">roadmap</a>.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">format</span><span class="st live">Stable</span></div>
-        <h3>Dates are calendar UTC</h3>
-        <p>Date pills reflect the day the change merged to <code>main</code> and the receipt was signed. Deploy is usually within an hour; deploy events for incidents are linked from the <a href="/status">status page</a>.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">scope</span><span class="st live">Plain</span></div>
-        <h3>Marketing fluff is forbidden in entries</h3>
-        <p>Breakthrough adjectives and unqualified speed claims are banned by a test on this page and every other public surface. If a release notes line sounds like it came from a sales deck, file a bug.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">links</span><span class="st live">Stable</span></div>
-        <h3>Every link points to a real surface</h3>
-        <p>The audit-href and audit-static-refs scripts run on every commit. If a link on this page ever 404s, it failed CI before it shipped. Report any broken link to <a href="mailto:trust@kolm.ai" style="color:var(--ks-accent)">trust@kolm.ai</a>.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="cta">
-  <div class="ks-wrap">
-    <h2>Where to go next</h2>
-    <p class="sub">Three good next steps depending on why you came.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <h3>Engineer or developer</h3>
-        <p>Install the CLI and reproduce the most recent quantize wave on your own hardware. <a href="/quickstart">/quickstart</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Procurement or compliance</h3>
-        <p>The trust hub indexes SOC 2, BAA, DPA, and the subprocessor list. <a href="/trust">/trust</a>.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Architect or data scientist</h3>
-        <p>K-score, drift bands, and bake-off methodology are documented end to end. <a href="/k-score">/k-score</a>.</p>
-      </div>
-    </div>
-    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/roadmap" class="ks-btn ks-btn--ghost">See the roadmap</a>
-      <a href="/security" class="ks-btn ks-btn--ghost">Security posture</a>
-      <a href="/enterprise" class="ks-btn ks-btn--ghost">Enterprise deployment</a>
-    </div>
-  </div>
-</section>
-
 </main>
 
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/blog">Blog</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/community">Community</a>
-        <a href="/about">About</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
-
-<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
-<script src="/nav.js" defer></script>
 </body>
 </html>

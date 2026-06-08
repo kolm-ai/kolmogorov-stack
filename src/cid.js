@@ -1,7 +1,7 @@
 // Content-identifier (CID) for .kolm artifacts.
 //
 // A CID is a deterministic, content-addressed identifier that any verifier
-// can recompute from the artifact bytes alone — no server, no registry, no
+// can recompute from the artifact bytes alone - no server, no registry, no
 // authentication. Two artifacts with identical content produce the same CID;
 // any byte difference (even a re-zipped file order) produces a different CID.
 //
@@ -9,11 +9,11 @@
 // digest algorithms can be added without breaking back-compat).
 //
 // CID inputs (canonical sorted-key JSON over the manifest's `hashes` block):
-//   - model_pointer  — sha256 of model.gguf bytes
-//   - recipes_json   — sha256 of recipes.json bytes
-//   - lora_bin       — sha256 of lora.bin bytes
-//   - index_bin      — sha256 of index.sqlite-vec bytes
-//   - evals_json     — sha256 of evals.json bytes
+//   - model_pointer - sha256 of model.gguf bytes
+//   - recipes_json - sha256 of recipes.json bytes
+//   - lora_bin - sha256 of lora.bin bytes
+//   - index_bin - sha256 of index.sqlite-vec bytes
+//   - evals_json - sha256 of evals.json bytes
 //
 // The K-score, receipt, and signature are deliberately NOT in the CID. Those
 // are the *seal* on the bundle; the CID is the *identity* of the bundle. A
@@ -23,7 +23,7 @@
 //
 // Deduplication: two compile jobs that yield the same CID (same task spec,
 // same recipes, same evals, same base model pointer) can be deduped by the
-// registry to a single artifact row. The audit log is never deduped — every
+// registry to a single artifact row. The audit log is never deduped - every
 // compile remains a distinct event.
 
 import crypto from 'node:crypto';
@@ -44,7 +44,7 @@ function sha256Hex(input) {
 }
 
 // Compute a CID from a manifest's `hashes` block. Pass the manifest object's
-// hashes — not the receipt — so the CID is independent of signing key
+// hashes - not the receipt - so the CID is independent of signing key
 // rotation and remains stable across re-seals of identical content.
 export function cidFromManifestHashes(hashes) {
   if (!hashes || typeof hashes !== 'object') {
@@ -69,7 +69,7 @@ export function cidFromManifestHashes(hashes) {
   return `${CID_VERSION}:${DEFAULT_DIGEST}:${digest}`;
 }
 
-// Verify a CID against a manifest's hashes block — symmetric helper for the
+// Verify a CID against a manifest's hashes block - symmetric helper for the
 // verifier. Returns true when the CID matches; false otherwise (never throws).
 export function verifyCidAgainstManifestHashes(cid, hashes) {
   try {

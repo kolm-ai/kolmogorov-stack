@@ -1,4 +1,4 @@
-// W918 P3.4 — OpenRouter generation history importer.
+// W918 P3.4 - OpenRouter generation history importer.
 //
 // Ingests OpenRouter generation-history exports and emits kolm capture rows
 // for the gateway-refugees wedge. OpenRouter ships history in two shapes:
@@ -35,7 +35,7 @@
 //     latency_ms: <number|null>,
 //     meta: { /* raw provider fields kept for receipt provenance */ } }
 //
-// Malformed rows do NOT throw — they are skipped, counted in `skipped`, and
+// Malformed rows do NOT throw - they are skipped, counted in `skipped`, and
 // recorded in `parseErrors` as { idx, reason } so the caller can surface them.
 
 import fs from 'node:fs';
@@ -197,7 +197,7 @@ function pickNumber(value) {
 function pickCost(row) {
   // OpenRouter exposes `total_cost` in USD on web exports; the API uses
   // `usage.cost`. Either path may be absent (caller may have disabled cost
-  // tracking) — null is fine.
+  // tracking) - null is fine.
   const candidates = [
     row.total_cost,
     row.totalCost,
@@ -240,7 +240,7 @@ function pickSourceId(row) {
 }
 
 function buildMeta(row) {
-  // Keep raw provider fields for receipt provenance — downstream verifiers
+  // Keep raw provider fields for receipt provenance - downstream verifiers
   // use these to attribute training data to the originating teacher call.
   const meta = {};
   const keysToKeep = [
@@ -337,7 +337,7 @@ export function parse(text, _opts = {}) {
       } else if (parsed && typeof parsed === 'object' && Array.isArray(parsed.generations)) {
         arr = parsed.generations;
       } else if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        // A single bare generation row pasted into a file — wrap it.
+        // A single bare generation row pasted into a file - wrap it.
         arr = [parsed];
       }
     } catch (_e) {
@@ -358,7 +358,7 @@ export function parse(text, _opts = {}) {
     return out;
   }
 
-  // JSONL path — one JSON object per non-empty line.
+  // JSONL path - one JSON object per non-empty line.
   const lines = text.replace(/\r\n/g, '\n').split('\n');
   let idx = -1;
   for (const raw of lines) {

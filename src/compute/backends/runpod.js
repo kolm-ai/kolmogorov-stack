@@ -1,4 +1,4 @@
-// runpod — RunPod serverless endpoints.
+// runpod - RunPod serverless endpoints.
 // API: https://docs.runpod.io/serverless/endpoints/job-operations
 // Env: KOLM_RUNPOD_TOKEN (or RUNPOD_API_KEY) + KOLM_RUNPOD_ENDPOINT_ID. run() POSTs job, polls.
 
@@ -74,7 +74,7 @@ function _req(method, host, pathname, headers, body) {
   });
 }
 
-// run({ image, command, env, timeoutMs }) — `image` overrides the serverless
+// run({ image, command, env, timeoutMs }) - `image` overrides the serverless
 // endpoint id (default env.KOLM_RUNPOD_ENDPOINT_ID). `command` becomes the
 // `input` payload (parsed via env.RUNPOD_INPUT_JSON or {prompt: command...}).
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {

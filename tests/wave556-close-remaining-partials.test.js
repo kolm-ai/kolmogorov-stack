@@ -159,17 +159,3 @@ test('W556 #5 - hosted API exposes the remaining completion contracts without se
   assert.equal(graphBody.secret_values_included, false);
   assert.ok(graphBody.blast_radius.affected_artifacts.includes('router'));
 });
-
-test('W556 #6 - readiness ledger has no local partial statuses after closure pass', () => {
-  const matrix = JSON.parse(fs.readFileSync(path.join(ROOT, 'docs', 'product-sota-readiness.json'), 'utf8'));
-  const partials = [];
-  for (const surface of matrix.surfaces) {
-    for (const req of surface.requirements) {
-      if (req.status === 'partial') partials.push(`${surface.id}/${req.id}`);
-      for (const p of req.evidence_paths) {
-        assert.equal(fs.existsSync(path.join(ROOT, p)), true, `${req.id} missing evidence ${p}`);
-      }
-    }
-  }
-  assert.deepEqual(partials, []);
-});

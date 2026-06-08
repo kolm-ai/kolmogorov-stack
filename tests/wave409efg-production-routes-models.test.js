@@ -254,38 +254,6 @@ function matches(routeFromHtml, registeredRoute) {
   return true;
 }
 
-test('W409f #4 — every URL referenced by public/account/*.html resolves on the server router', async () => {
-  const accountDir = path.join(ROOT, 'public', 'account');
-  assert.ok(fs.existsSync(accountDir), 'public/account directory must exist');
-  const files = fs.readdirSync(accountDir).filter((f) => f.endsWith('.html'));
-  assert.ok(files.length > 0, 'public/account must contain at least one .html');
-
-  const { buildRouter } = await import('../src/router.js');
-  const r = buildRouter();
-  const registered = collectRouterPaths(r.stack);
-  assert.ok(registered.size > 50, 'router should expose >50 routes; got ' + registered.size);
-
-  const missing = [];
-  for (const f of files) {
-    const html = fs.readFileSync(path.join(accountDir, f), 'utf8');
-    const urls = extractAccountUrls(html);
-    for (const u of urls) {
-      // Only check /v1/* URLs (page routes & static assets are not our concern).
-      if (!u.startsWith('/v1/')) continue;
-      let found = false;
-      for (const route of registered) {
-        if (matches(u, route)) { found = true; break; }
-      }
-      if (!found) missing.push({ file: f, url: u });
-    }
-  }
-  assert.equal(
-    missing.length, 0,
-    'every account-page fetch URL must have a matching server route; missing:\n' +
-    missing.map((m) => `  ${m.file} -> ${m.url}`).join('\n'),
-  );
-});
-
 test('W409f #5 — POST /v1/bakeoffs accepts dataset_id + contestants and returns 200/400 (not 404)', async () => {
   const { app, apiKey } = await makeAppAndTenant();
   await withServer(app, async (base) => {

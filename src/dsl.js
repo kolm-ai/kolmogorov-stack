@@ -1,15 +1,15 @@
-// rule-dsl-v1 — constrained AST for kolm rule recipes.
+// rule-dsl-v1 - constrained AST for kolm rule recipes.
 //
 // Wave F (compiled_rule class) needs to ship .kolm artifacts whose recipes are
 // authored as a tiny structured AST rather than free-form JavaScript. The same
 // AST is then emitted to:
 //   - JavaScript (the artifact-runner already runs JS, so the JS path keeps
 //     working without changes)
-//   - C99 source (native.c) — emitted into the .kolm for Wave G to compile
-//   - Rust source (native.rs) — emitted into the .kolm for Wave G to compile
+//   - C99 source (native.c) - emitted into the .kolm for Wave G to compile
+//   - Rust source (native.rs) - emitted into the .kolm for Wave G to compile
 //
 // The DSL is intentionally tiny. It expresses lookup/normalize/format style
-// rules (greeter, phone normalizer, SSN redactor, ICD-10 lookup) — the recipe
+// rules (greeter, phone normalizer, SSN redactor, ICD-10 lookup) - the recipe
 // class the user singled out as "deterministic finite-state transformations"
 // (plan §3.1). Anything more complicated (model-class recipes) goes through
 // the distilled_model class in Wave J/K, not through this DSL.
@@ -196,7 +196,7 @@ function checkCompilable(node, path, target) {
 }
 
 // ---------------------------------------------------------------------------
-// JS interpreter — used by tests and as the runtime fallback for compiled_rule
+// JS interpreter - used by tests and as the runtime fallback for compiled_rule
 // artifacts until Wave G wires actual native execution. The emitJs codegen
 // below produces a function with equivalent semantics so artifact-runner.js
 // works unchanged.
@@ -383,7 +383,7 @@ export function emitC(dsl, opts = {}) {
 }
 
 const C_HEADER = `/*
- * native.c — emitted by kolm rule-dsl-v1 codegen.
+ * native.c - emitted by kolm rule-dsl-v1 codegen.
  * Compile: cc -std=c99 -O2 native.c -o native
  * Run:     ./native '<input string>'
  *
@@ -673,7 +673,7 @@ function cExpr(n, ctx) {
     case 'trim':  return `k_trim(a, ${cExpr(n.arg, ctx)})`;
     case 'len': {
       // len returns size_t; we coerce to a string for downstream concat/eq.
-      // For eq with a numeric literal we compare as size_t — codegen handles
+      // For eq with a numeric literal we compare as size_t - codegen handles
       // that in the eq branch.
       return `({ char __nbuf[32]; snprintf(__nbuf, sizeof(__nbuf), \"%zu\", k_len(${cExpr(n.arg, ctx)})); k_strdup_a(a, __nbuf); })`;
     }
@@ -767,7 +767,7 @@ export function emitRust(dsl, opts = {}) {
     `pub fn recipe_spec() -> &'static str { ${rsLit(DSL_SPEC)} }\n`;
 }
 
-const RS_HEADER = `// native.rs — emitted by kolm rule-dsl-v1 codegen.
+const RS_HEADER = `// native.rs - emitted by kolm rule-dsl-v1 codegen.
 // Compile: rustc --edition 2021 -O native.rs -o native --crate-type bin
 // or place in a crate's lib.rs and add a #[no_mangle] extern "C" wrapper.
 // Generated. Do not edit by hand.

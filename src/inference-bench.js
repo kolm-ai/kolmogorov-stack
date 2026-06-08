@@ -1,6 +1,6 @@
 // src/inference-bench.js
 //
-// inference-economics (P1) — harden + benchmark the EXISTING inference
+// inference-economics (P1) - harden + benchmark the EXISTING inference
 // primitives. This module does NOT rebuild speculative decoding, the bench
 // harness, or the compute backends. It is a thin, reproducible benchmark
 // runner that:
@@ -10,7 +10,7 @@
 //      vllm.js, sglang.js, tgi.js, and trt-llm.js already speak).
 //   2. Measures $/1k-token, end-to-end latency (mean / p50 / p95), and
 //      tokens/sec, with and without speculative decoding when the endpoint
-//      advertises it (resolved via src/speculative-decoding.js — we never
+//      advertises it (resolved via src/speculative-decoding.js - we never
 //      claim a speedup we did not actually measure).
 //   3. Writes a SIGNED result (content sha256 digest + optional ed25519
 //      detached signature, identical primitive to the receipt/evidence path)
@@ -18,25 +18,25 @@
 //   4. Emits a comparison ROW shaped for public/benchmarks/inference-matrix.json
 //      so the website's $/1k-token + tok/s table traces to a measurement.
 //
-// Relationship to siblings (read before editing — do NOT duplicate):
-//   src/bench-harness.js              — multi-model eval-suite harness. We
+// Relationship to siblings (read before editing - do NOT duplicate):
+//   src/bench-harness.js - multi-model eval-suite harness. We
 //                                       reuse its cost-per-1k math contract
 //                                       and its honest "missing usage -> 0"
 //                                       convention. This module is the
 //                                       throughput/economics complement: it
 //                                       measures tok/s + $/1k under (no-)spec
 //                                       decoding rather than answer behavior.
-//   src/speculative-decoding.js       — DRAFT_PAIRINGS + resolveSpeculative.
+//   src/speculative-decoding.js - DRAFT_PAIRINGS + resolveSpeculative.
 //                                       We import resolveSpeculative/pickDraft
 //                                       to label the spec-decode arm honestly.
-//   src/speculative-teacher.js        — student-draft / teacher-verify loop
+//   src/speculative-teacher.js - student-draft / teacher-verify loop
 //                                       (acceptance math). Out of scope here;
 //                                       this module benchmarks an already-
 //                                       served endpoint, it does not train.
-//   src/compute/backends/openai-compatible.js — the wire shape we POST.
+//   src/compute/backends/openai-compatible.js - the wire shape we POST.
 //
-// Constraints (USER-MANDATED, non-negotiable — match bench-harness.js):
-//   - Never use the forbidden h-word (see MEMORY) — use Caveats / Limitations.
+// Constraints (USER-MANDATED, non-negotiable - match bench-harness.js):
+//   - Never use the forbidden h-word (see MEMORY) - use Caveats / Limitations.
 //   - No browns/beiges/oranges; no emojis.
 //   - --dry-run path produces a deterministic, signed stub result with NO
 //     network and NO API keys, so a fresh checkout + CI can exercise the path.
@@ -72,7 +72,7 @@ export const DEFAULT_PROMPTS = Object.freeze([
 ]);
 
 // ---------------------------------------------------------------------------
-// runInferenceBench — the top-level entry.
+// runInferenceBench - the top-level entry.
 //
 // opts:
 //   endpoint        string   OpenAI-compatible base URL (no trailing slash
@@ -80,7 +80,7 @@ export const DEFAULT_PROMPTS = Object.freeze([
 //                            http://127.0.0.1:8000. Ignored under dry_run.
 //   model           string   model id sent in the request body. Required for
 //                            a live run; defaulted under dry_run.
-//   api_key         string   bearer; default $KOLM_BENCH_OAI_KEY (optional —
+//   api_key         string   bearer; default $KOLM_BENCH_OAI_KEY (optional - 
 //                            many local servers need none).
 //   prompts         string[] override prompt set (default DEFAULT_PROMPTS).
 //   repeats         number   how many times to replay the prompt set per arm
@@ -118,7 +118,7 @@ export async function runInferenceBench(opts = {}) {
   const numSpec = clampInt(o.num_speculative_tokens, DEFAULT_NUM_SPECULATIVE_TOKENS, 1, 64);
 
   if (!dry_run && (!model || typeof model !== 'string')) {
-    return honest('missing_model', 'pass opts.model — the OpenAI-compatible model id to benchmark');
+    return honest('missing_model', 'pass opts.model - the OpenAI-compatible model id to benchmark');
   }
 
   const endpoint = (o.endpoint || process.env.KOLM_BENCH_OAI_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
@@ -152,7 +152,7 @@ export async function runInferenceBench(opts = {}) {
   // We pass the draft hint to the endpoint via the OpenAI `extra_body`-style
   // fields vLLM/SGLang accept. If the endpoint ignores it, the arm still
   // produces numbers but `spec_decode_applied` reflects only what we asked
-  // for — we do NOT assert the server honored it.
+  // for - we do NOT assert the server honored it.
   let withSpec = null;
   let specArmReason = spec.reason;
   if (spec.supported && spec.draft_model) {
@@ -230,7 +230,7 @@ export async function runInferenceBench(opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// runArm — replay the prompt set `repeats` times against the OpenAI-compatible
+// runArm - replay the prompt set `repeats` times against the OpenAI-compatible
 // endpoint, collect per-call latency + token counts, summarize.
 // ---------------------------------------------------------------------------
 async function runArm({ arm, endpoint, apiKey, model, prompts, repeats, maxTokens, priceIn, priceOut, fetchImpl, speculative }) {
@@ -340,7 +340,7 @@ function errorArm(arm, error, { speculative }) {
 // Deterministic offline stub arm: derives stable latency / token counts from a
 // content hash so dry-run + CI produce a signed, reproducible result with no
 // network. The speculative arm gets a modest deterministic edge so the schema's
-// "with spec" column is exercised — clearly flagged dry_run so nobody mistakes
+// "with spec" column is exercised - clearly flagged dry_run so nobody mistakes
 // it for a measurement.
 function synthArm(arm, { model, prompts, repeats, maxTokens, priceIn, priceOut, draft = null }) {
   const samples = [];
@@ -368,7 +368,7 @@ function synthArm(arm, { model, prompts, repeats, maxTokens, priceIn, priceOut, 
 }
 
 // ---------------------------------------------------------------------------
-// Signing — content sha256 digest (always) + optional detached ed25519
+// Signing - content sha256 digest (always) + optional detached ed25519
 // signature (when a key is supplied). Same crypto primitives the receipt /
 // evidence path uses; degrades to a verifiable content hash with no key so a
 // fresh checkout still produces a signed-shape result.
@@ -442,7 +442,7 @@ export function verifyResult(result) {
 }
 
 // ---------------------------------------------------------------------------
-// buildMatrixRow — shape one row for public/benchmarks/inference-matrix.json.
+// buildMatrixRow - shape one row for public/benchmarks/inference-matrix.json.
 // ---------------------------------------------------------------------------
 export function buildMatrixRow(result) {
   const b = (result.arms && result.arms.baseline) || {};
@@ -475,7 +475,7 @@ export function buildMatrixRow(result) {
 }
 
 // ---------------------------------------------------------------------------
-// appendRowToMatrix — additive append of a row to the matrix file, preserving
+// appendRowToMatrix - additive append of a row to the matrix file, preserving
 // the schema + placeholder. De-dupes by content_digest so re-runs replace.
 // ---------------------------------------------------------------------------
 export function appendRowToMatrix(matrixPath, row) {

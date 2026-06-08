@@ -1,4 +1,4 @@
-// W888-C — Adapter index: maps device.type → adapter module.
+// W888-C - Adapter index: maps device.type → adapter module.
 //
 // Usage:
 //   import { adapterFor } from './device-adapters/index.js';

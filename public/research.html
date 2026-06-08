@@ -3,1761 +3,363 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Research · kolm.ai</title>
-<meta name="description" content="The kolm research index. Whitepaper, .kolm wire format, K-score methodology, verified inference, speculative decoding recipes, and benchmark reproducers.">
-<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-
-<meta property="og:title" content="Research">
-<meta property="og:description" content="The kolm research index. Whitepaper, .kolm wire format, K-score methodology, verified inference, speculative decoding recipes, and benchmark reproducers.">
+<meta name="description" content="How kolm assesses agent security. The ASR control framework, the adversarial prompt-injection battery (tested and reported, not warranted), and the Ed25519 signing and Merkle transparency-log design. Published openly, mapped to the standards your buyer already cites.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Research: the method behind kolm agent security evidence">
+<meta property="og:description" content="The ASR control framework, the adversarial injection battery, and the Ed25519 signing and Merkle transparency-log design. Open by default, mapped to SOC 2, ISO 42001, NIST AI RMF and the EU AI Act.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/research">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta name="twitter:title" content="Research">
-<meta name="twitter:description" content="The kolm research index. Whitepaper, .kolm wire format, K-score methodology, verified inference, speculative decoding recipes, and benchmark reproducers.">
-<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="kolm research · the method">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/research">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-
-<style>
-/* v7.21.4 research index --- SOTA lab page
- * - hero with hard number, no scorecard, no "memo" framing
- * - featured whitepaper card
- * - reverse-chrono technical-report feed (mirrors /articles density)
- * - results metrics band (live numbers from the registry where possible)
- * - spec/code rail at the foot
- * - 96/56 rhythm, dot-grid backdrop, hairline rules
- */
-.research-page { background: var(--bg, #0a0c10) !important; }
-[data-theme=light] .research-page { background: #f3f5f7 !important; }
-
-.research-hero {
- padding: 144px 0 88px !important;
- border-bottom: 1px solid var(--line-1) !important;
- position: relative !important;
- overflow: hidden !important;
-}
-[data-theme=light] .research-hero { border-bottom-color: var(--line-1) !important; }
-.research-hero::before {
- content: "";
- position: absolute; inset: 0;
- background-image: radial-gradient(circle, var(--line-1) 1px, transparent 1px);
- background-size: 32px 32px;
- mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
- -webkit-mask-image: radial-gradient(ellipse 900px 600px at 18% 30%, #000 0%, rgba(0,0,0,0.4) 55%, transparent 95%);
- pointer-events: none;
- z-index: 0;
-}
-[data-theme=light] .research-hero::before {
- background-image: radial-gradient(circle, var(--line-1) 1px, transparent 1px);
-}
-.research-hero .wrap { position: relative; z-index: 1; }
-.research-hero h1 {
- font-size: clamp(56px, 8vw, 124px) !important;
- line-height: 0.94 !important;
- letter-spacing: -0.045em !important;
- max-width: 16ch !important;
- font-weight: 500 !important;
- margin: 0 0 22px !important;
-}
-@media (max-width: 720px) {
- .research-hero { padding: 96px 0 56px !important; }
- .research-hero h1 {
- font-size: clamp(44px, 11vw, 72px) !important;
- letter-spacing: -0.038em !important;
- }
-}
-.research-hero .lede {
- font-size: clamp(17px, 1.45vw, 20px) !important;
- line-height: 1.55 !important;
- max-width: 64ch !important;
- color: var(--ink-mute, #aab0b8) !important;
-}
-[data-theme=light] .research-hero .lede { color: #4b5158 !important; }
-
-.research-hero .hero-eyebrow {
- font-family: var(--mono) !important;
- font-size: 11.5px !important;
- letter-spacing: 0.2em !important;
- text-transform: uppercase !important;
- color: var(--ks-accent, #6f9bff) !important;
- font-weight: 400 !important;
- margin: 0 0 28px !important;
- display: inline-flex; align-items: center; gap: 12px;
- border: 0 !important;
- background: transparent !important;
- padding: 0 !important;
-}
-[data-theme=light] .research-hero .hero-eyebrow { color: var(--ks-accent, #2563eb) !important; }
-.research-hero .hero-eyebrow .he-dot {
- width: 6px !important; height: 6px !important; border-radius: 50% !important;
- background: var(--ks-accent, #2563eb) !important; box-shadow: 0 0 8px rgba(37, 99, 235,0.5) !important;
- display: inline-block !important;
-}
-
-.research-hero .actions { margin-top: 36px !important; gap: 12px !important; display: flex; flex-wrap: wrap; }
-.research-hero .btn.primary {
- background: var(--ks-accent, #6f9bff) !important;
- color: #fff !important;
- padding: 13px 24px !important;
- font-size: 14.5px !important;
- letter-spacing: 0.01em !important;
- border-radius: 8px !important;
- font-weight: 500 !important;
-}
-[data-theme=light] .research-hero .btn.primary { background: var(--ks-accent, #2563eb) !important; color: #fff !important; }
-.research-hero .btn.ghost {
- border: 1px solid var(--line-3) !important;
- color: var(--ink-mute, #aab0b8) !important;
- padding: 13px 24px !important;
- font-size: 14.5px !important;
- border-radius: 8px !important;
-}
-[data-theme=light] .research-hero .btn.ghost {
- border-color: var(--line-3) !important;
- color: #4b5158 !important;
-}
-
-/* hero research index --- specs, open questions, citations */
-.research-index {
- margin: 64px 0 0 !important;
- display: flex !important;
- flex-direction: column !important;
- gap: 48px !important;
-}
-.research-index .ri-block { display: block !important; }
-.research-index .ri-eyebrow {
- font-family: var(--mono) !important;
- font-size: 10.5px !important;
- letter-spacing: 0.18em !important;
- text-transform: uppercase !important;
- color: var(--ink-faint, #6a727c) !important;
- margin: 0 0 18px !important;
- font-weight: 400 !important;
-}
-.research-index .ri-grid {
- display: grid !important;
- grid-template-columns: repeat(2, 1fr) !important;
- gap: 14px !important;
-}
-.research-index .ri-card {
- display: block !important;
- padding: 22px 24px !important;
- background: var(--line-1) !important;
- border: 1px solid var(--line-2) !important;
- border-radius: 12px !important;
- text-decoration: none !important;
- color: inherit !important;
- transition: border-color 120ms, background 120ms !important;
-}
-.research-index .ri-card:hover {
- border-color: var(--line-3) !important;
- background: var(--line-1) !important;
-}
-[data-theme=light] .research-index .ri-card {
- background: #ffffff !important;
- border-color: var(--line-2) !important;
-}
-[data-theme=light] .research-index .ri-card:hover {
- border-color: rgba(0,0,0,0.28) !important;
- background: #eef1f5 !important;
-}
-.research-index .ri-title {
- font-size: 16px !important;
- font-weight: 500 !important;
- color: var(--ink, #e6e9ee) !important;
- margin: 0 0 6px !important;
- letter-spacing: -0.005em !important;
-}
-[data-theme=light] .research-index .ri-title { color: #1f2429 !important; }
-.research-index .ri-desc {
- font-size: 13.5px !important;
- line-height: 1.55 !important;
- color: var(--ink-mute, #aab0b8) !important;
- margin: 0 0 12px !important;
-}
-[data-theme=light] .research-index .ri-desc { color: #4b5158 !important; }
-.research-index .ri-meta {
- display: flex !important;
- align-items: center !important;
- gap: 10px !important;
- font-family: var(--mono) !important;
- font-size: 10.5px !important;
- letter-spacing: 0.06em !important;
-}
-.research-index .ri-year {
- color: var(--ink-faint, #6a727c) !important;
- font-variant-numeric: tabular-nums !important;
-}
-.research-index .ri-badge {
- color: var(--ink, #e6e9ee) !important;
- border: 1px solid var(--line-3) !important;
- padding: 2px 8px !important;
- border-radius: 999px !important;
- text-transform: uppercase !important;
- letter-spacing: 0.08em !important;
- font-size: 9.5px !important;
-}
-[data-theme=light] .research-index .ri-badge {
- color: #1f2429 !important;
- border-color: rgba(0,0,0,0.22) !important;
-}
-.research-index .ri-list {
- list-style: none !important;
- margin: 0 !important;
- padding: 0 !important;
- display: flex !important;
- flex-direction: column !important;
- gap: 18px !important;
-}
-.research-index .ri-list li {
- padding: 18px 22px !important;
- background: var(--line-1) !important;
- border-left: 2px solid var(--line-3) !important;
- border-radius: 0 8px 8px 0 !important;
-}
-[data-theme=light] .research-index .ri-list li {
- background: var(--line-1) !important;
- border-left-color: rgba(0,0,0,0.22) !important;
-}
-.research-index .ri-q {
- font-size: 15px !important;
- font-weight: 500 !important;
- color: var(--ink, #e6e9ee) !important;
- margin: 0 0 6px !important;
-}
-[data-theme=light] .research-index .ri-q { color: #1f2429 !important; }
-.research-index .ri-a {
- font-size: 13.5px !important;
- line-height: 1.6 !important;
- color: var(--ink-mute, #aab0b8) !important;
- margin: 0 !important;
-}
-[data-theme=light] .research-index .ri-a { color: #4b5158 !important; }
-.research-index .ri-cite-note {
- font-size: 13.5px !important;
- line-height: 1.6 !important;
- color: var(--ink-mute, #aab0b8) !important;
- margin: 0 !important;
-}
-[data-theme=light] .research-index .ri-cite-note { color: #4b5158 !important; }
-.research-index .ri-cite-note a {
- color: var(--accent, #e6e9ee) !important;
- text-decoration: none !important;
- border-bottom: 1px solid var(--line-strong) !important;
-}
-.research-index .ri-cite-note a:hover { border-bottom-color: var(--accent, #e6e9ee) !important; }
-@media (max-width: 720px) {
- .research-index .ri-grid { grid-template-columns: 1fr !important; }
- .research-index { gap: 36px !important; }
-}
-
-/* Section rhythm: 96/56 */
-.research-page section.section {
- padding: 96px 0 !important;
- border-top: 1px solid var(--line-1) !important;
-}
-[data-theme=light] .research-page section.section { border-top-color: var(--line-1) !important; }
-@media (max-width: 720px) {
- .research-page section.section { padding: 56px 0 !important; }
-}
-
-.research-page .eyebrow {
- font-family: var(--mono) !important;
- font-size: 11.5px !important;
- letter-spacing: 0.2em !important;
- text-transform: uppercase !important;
- color: var(--ks-accent, #6f9bff) !important;
- font-weight: 400 !important;
- margin: 0 0 24px !important;
- display: inline-flex; align-items: center; gap: 12px;
-}
-.research-page .eyebrow .num {
- font-family: var(--mono) !important;
- color: var(--ink-faint, #6a727c) !important;
- letter-spacing: 0.2em !important;
-}
-[data-theme=light] .research-page .eyebrow,
-[data-theme=light] .research-page .eyebrow .num { color: #6a727c !important; }
-
-.research-page section.section h2 {
- font-size: clamp(36px, 4.4vw, 56px) !important;
- line-height: 1.04 !important;
- letter-spacing: -0.032em !important;
- font-weight: 500 !important;
- margin: 0 0 18px !important;
- max-width: 22ch;
-}
-[data-theme=light] .research-page section.section h2 { color: #1f2429 !important; }
-@media (max-width: 720px) {
- .research-page section.section h2 {
- font-size: clamp(30px, 8vw, 40px) !important;
- letter-spacing: -0.028em !important;
- }
-}
-.research-page .sec-lede {
- font-size: 17px !important;
- line-height: 1.6 !important;
- max-width: 70ch !important;
- color: var(--ink-mute, #aab0b8) !important;
- margin: 0 0 36px !important;
-}
-[data-theme=light] .research-page .sec-lede { color: #4b5158 !important; }
-
-/* Featured paper card --- big, dense, abstract-style */
-.featured-paper {
- margin-top: 32px !important;
- display: grid !important;
- grid-template-columns: 220px 1fr !important;
- gap: 48px !important;
- padding: 40px !important;
- border-radius: 18px !important;
- background: var(--line-1) !important;
- border: 1px solid var(--line-2) !important;
-}
-[data-theme=light] .featured-paper {
- background: #ffffff !important;
- border-color: var(--line-2) !important;
- box-shadow: 0 1px 2px var(--line-1) !important;
-}
-@media (max-width: 880px) { .featured-paper { grid-template-columns: 1fr !important; gap: 24px !important; padding: 28px !important; } }
-.featured-paper .meta {
- display: flex !important; flex-direction: column !important; gap: 14px !important;
-}
-.featured-paper .meta .tag {
- font-family: var(--mono) !important; font-size: 10.5px !important;
- letter-spacing: 0.18em !important; text-transform: uppercase !important;
- color: #111111 !important; font-weight: 500 !important;
-}
-.featured-paper .meta .date {
- font-family: var(--mono) !important; font-size: 12px !important;
- color: var(--ink-faint, #6a727c) !important; letter-spacing: 0 !important;
-}
-.featured-paper .meta .ver {
- font-family: var(--mono) !important; font-size: 11.5px !important;
- color: var(--ink-mute, #aab0b8) !important; letter-spacing: 0 !important;
-}
-.featured-paper .body h3 {
- font-size: clamp(26px, 2.6vw, 34px) !important;
- font-weight: 500 !important; line-height: 1.15 !important;
- letter-spacing: -0.02em !important;
- margin: 0 0 16px !important;
- color: var(--ink, #e6e9ee) !important;
-}
-[data-theme=light] .featured-paper .body h3 { color: #1f2429 !important; }
-.featured-paper .body .abstract {
- font-size: 16px !important; line-height: 1.65 !important;
- color: var(--ink-mute, #aab0b8) !important;
- margin: 0 0 24px !important; max-width: 64ch !important;
-}
-[data-theme=light] .featured-paper .body .abstract { color: #4b5158 !important; }
-.featured-paper .body .links {
- display: flex !important; gap: 18px !important; flex-wrap: wrap !important;
- font-family: var(--mono) !important; font-size: 13px !important;
-}
-.featured-paper .body .links a {
- color: #111111 !important; text-decoration: none !important;
- border-bottom: 1px solid var(--line-strong) !important;
- padding-bottom: 1px !important;
-}
-[data-theme=light] .featured-paper .body .links a { color: #2563eb !important; border-bottom-color: rgba(5,150,105,0.3) !important; }
-.featured-paper .body .links a:hover { border-bottom-color: currentColor !important; }
-
-/* Report feed --- /articles-style reverse chrono list */
-.report-feed { margin-top: 32px !important; border-top: 1px solid var(--line-1) !important; }
-[data-theme=light] .report-feed { border-top-color: var(--line-1) !important; }
-.report-feed a.report {
- display: grid !important;
- grid-template-columns: 140px 1fr 100px !important;
- gap: 32px !important;
- padding: 28px 0 !important;
- border-bottom: 1px solid var(--line-1) !important;
- align-items: baseline !important;
- transition: background 200ms;
-}
-[data-theme=light] .report-feed a.report { border-bottom-color: var(--line-1) !important; }
-.report-feed a.report:hover { background: var(--line-1) !important; text-decoration: none !important; }
-[data-theme=light] .report-feed a.report:hover { background: var(--line-1) !important; }
-.report-feed a.report .stamp {
- font-family: var(--mono) !important; font-size: 11.5px !important;
- letter-spacing: 0.04em !important; text-transform: uppercase !important;
- color: var(--ink-faint, #6a727c) !important; font-weight: 400 !important;
-}
-.report-feed a.report .stamp .topic {
- display: block !important; color: #111111 !important; margin-bottom: 4px !important;
- font-weight: 500 !important;
-}
-[data-theme=light] .report-feed a.report .stamp .topic { color: #2563eb !important; }
-.report-feed a.report .body h3 {
- font-size: 19px !important; font-weight: 500 !important; line-height: 1.3 !important;
- letter-spacing: -0.01em !important;
- margin: 0 0 8px !important;
- color: var(--ink, #e6e9ee) !important;
-}
-[data-theme=light] .report-feed a.report .body h3 { color: #1f2429 !important; }
-.report-feed a.report .body p {
- font-size: 14.5px !important; line-height: 1.55 !important;
- color: var(--ink-mute, #aab0b8) !important;
- margin: 0 !important; max-width: 70ch !important;
-}
-[data-theme=light] .report-feed a.report .body p { color: #4b5158 !important; }
-.report-feed a.report .read {
- font-family: var(--mono) !important; font-size: 12px !important;
- color: var(--ink-faint, #6a727c) !important; letter-spacing: 0 !important;
- text-align: right !important; white-space: nowrap !important;
-}
-@media (max-width: 720px) {
- .report-feed a.report { grid-template-columns: 1fr !important; gap: 8px !important; padding: 24px 0 !important; }
- .report-feed a.report .read { text-align: left !important; }
-}
-
-/* Spec + code rail --- mono links, single-row strip */
-.spec-rail {
- margin-top: 32px !important;
- display: grid !important;
- grid-template-columns: repeat(4, 1fr) !important;
- gap: 14px !important;
-}
-@media (max-width: 880px) { .spec-rail { grid-template-columns: repeat(2, 1fr) !important; } }
-@media (max-width: 480px) { .spec-rail { grid-template-columns: 1fr !important; } }
-.spec-rail a {
- display: flex !important; flex-direction: column !important; gap: 8px !important;
- padding: 24px 24px !important;
- border-radius: 12px !important;
- background: var(--line-1) !important;
- border: 1px solid var(--line-2) !important;
- transition: border-color 160ms, background 160ms;
- text-decoration: none !important;
-}
-[data-theme=light] .spec-rail a {
- background: #ffffff !important;
- border-color: var(--line-2) !important;
- box-shadow: 0 1px 2px var(--line-1) !important;
-}
-.spec-rail a:hover {
- border-color: var(--line-strong) !important;
- background: var(--line-1) !important;
-}
-[data-theme=light] .spec-rail a:hover { background: #fbfbf5 !important; border-color: rgba(5,150,105,0.4) !important; }
-.spec-rail a .k {
- font-family: var(--mono) !important; font-size: 10.5px !important;
- letter-spacing: 0.18em !important; text-transform: uppercase !important;
- color: var(--ink-faint, #6a727c) !important; font-weight: 400 !important;
-}
-.spec-rail a .t {
- font-family: var(--mono) !important; font-size: 15px !important;
- letter-spacing: 0 !important;
- color: var(--ink, #e6e9ee) !important; font-weight: 500 !important;
-}
-[data-theme=light] .spec-rail a .t { color: #1f2429 !important; }
-.spec-rail a .d {
- font-size: 13.5px !important; line-height: 1.5 !important;
- color: var(--ink-mute, #aab0b8) !important;
-}
-[data-theme=light] .spec-rail a .d { color: #4b5158 !important; }
-
-/* frontier reference (merged from /sota) --- row24 detail blocks */
-.frontier-ref { margin-top: 8px !important; }
-.frontier-ref .group-head {
- font-family: var(--mono) !important;
- font-size: 12px !important;
- letter-spacing: 0.18em !important;
- text-transform: uppercase !important;
- color: var(--ks-accent, #6f9bff) !important;
- font-weight: 400 !important;
- margin: 56px 0 0 !important;
- padding-top: 24px !important;
- border-top: 1px solid var(--line-2) !important;
-}
-[data-theme=light] .frontier-ref .group-head { border-top-color: var(--line-2) !important; }
-.frontier-ref .group-head:first-child { margin-top: 0 !important; padding-top: 0 !important; border-top: 0 !important; }
-.row24 {
- border-top: 1px solid var(--line-1) !important;
- padding-top: 24px !important;
- margin-top: 24px !important;
- scroll-margin-top: 88px !important;
-}
-[data-theme=light] .row24 { border-top-color: var(--line-1) !important; }
-.row24:first-of-type, .frontier-ref .group-head + .row24 { border-top: 0 !important; padding-top: 12px !important; margin-top: 12px !important; }
-.row24 .head { display: flex !important; align-items: baseline !important; gap: 14px !important; flex-wrap: wrap !important; margin-bottom: 8px !important; }
-.row24 .head .num {
- font-family: var(--mono) !important;
- font-size: 11px !important;
- color: var(--ink-faint, #6a727c) !important;
- letter-spacing: 0.04em !important;
- font-weight: 400 !important;
-}
-.row24 h3 {
- margin: 0 !important;
- font-size: 19px !important;
- font-weight: 500 !important;
- color: var(--ink, #e6e9ee) !important;
- letter-spacing: -0.012em !important;
- line-height: 1.3 !important;
-}
-[data-theme=light] .row24 h3 { color: #1f2429 !important; }
-.row24 .meta {
- display: flex !important;
- flex-wrap: wrap !important;
- gap: 14px !important;
- font-family: var(--mono) !important;
- font-size: 11.5px !important;
- color: var(--ink-faint, #6a727c) !important;
- margin: 6px 0 12px !important;
-}
-.row24 .meta span { display: inline-flex !important; align-items: center !important; gap: 6px !important; }
-.row24 .meta .lbl {
- color: var(--ink-faint, #6a727c) !important;
- text-transform: uppercase !important;
- letter-spacing: 0.04em !important;
- font-size: 10px !important;
-}
-.row24 .meta code { font-size: 11px !important; padding: 1px 5px !important; }
-.row24 p {
- font-size: 14.5px !important;
- line-height: 1.6 !important;
- color: var(--ink-mute, #aab0b8) !important;
- margin: 0 !important;
-}
-[data-theme=light] .row24 p { color: #4b5158 !important; }
-.row24 p a { color: var(--ink, #e6e9ee) !important; border-bottom: 1px solid var(--line-3) !important; }
-[data-theme=light] .row24 p a { color: #1f2429 !important; border-bottom-color: var(--line-3) !important; }
-.row24 p a:hover { border-bottom-color: rgba(17, 17, 17,0.6) !important; }
-.frontier-ref .closer { margin-top: 56px !important; padding-top: 32px !important; border-top: 1px solid var(--line-2) !important; }
-[data-theme=light] .frontier-ref .closer { border-top-color: var(--line-2) !important; }
-.frontier-ref .closer p { font-size: 14.5px !important; line-height: 1.65 !important; color: var(--ink-mute, #aab0b8) !important; max-width: 70ch !important; margin: 0 0 12px !important; }
-[data-theme=light] .frontier-ref .closer p { color: #4b5158 !important; }
-.frontier-ref .closer p a { color: var(--ink, #e6e9ee) !important; border-bottom: 1px solid var(--line-3) !important; }
-[data-theme=light] .frontier-ref .closer p a { color: #1f2429 !important; border-bottom-color: var(--line-3) !important; }
-</style>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
- "@context": "https://schema.org",
- "@type": "CollectionPage",
- "name": "kolm research",
- "description": "The kolm research index: whitepaper, wire format, K-score methodology, verified inference, speculative decoding recipes, and benchmark reproducers.",
- "url": "https://kolm.ai/research",
- "dateModified": "2026-05-14",
- "publisher": { "@type": "Organization", "name": "kolm", "url": "https://kolm.ai" },
- "about": ["AI compiler", "on-device inference", ".kolm artifact format", "speculative decoding", "low-rank adaptation", "knowledge distillation", "model evaluation", "verified inference"]
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "The method behind kolm agent security evidence",
+  "description": "The Agent Security Readiness (ASR) control framework, the adversarial prompt-injection battery, and the Ed25519 signing and Merkle transparency-log design. Published openly and mapped to the standards a buyer cites.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "url": "https://kolm.ai/research",
+  "image": "https://kolm.ai/brand-hero.png",
+  "about": ["AI agent security", "prompt injection testing", "Ed25519 signed evidence", "SOC 2", "ISO 42001", "NIST AI RMF", "EU AI Act", "OWASP LLM Top 10", "MITRE ATLAS"]
 }
 </script>
-<link rel="stylesheet" href="/ks.css">
-    <link rel="stylesheet" href="/warm-paper.css">
 </head>
-<body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/solutions/teams">For teams</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="/enterprise">Enterprise</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
     </div>
-  </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a><a href="/solutions/teams">For teams</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
   </div>
-</div>
-<main id="main" class="research-page">
- <section class="research-hero">
- <div class="wrap">
- <div class="hero-eyebrow"><span class="he-dot"></span>kolm lab &middot; Research index</div>
- <h1>Compiling intelligence.</h1>
- <p class="lede">Distill frontier quality into a small, private model you run on your own hardware. Compile path, the <code>.kolm</code> file, the ship gate, the audit trail &mdash; every paper here is open-source and reproducible.</p>
- <div class="actions">
- <a href="/whitepaper" class="btn primary lg">Read the whitepaper &rarr;</a>
- <a href="/benchmarks" class="btn ghost lg">Benchmark methodology</a><a href="/compare" hidden aria-hidden="true">compare</a>
- </div>
- <div style="margin:20px 0 0;padding:14px 18px;border:1px solid rgba(150, 158, 170,0.32);border-left:3px solid var(--ink-3,#56606c);border-radius:8px;background:rgba(150, 158, 170,0.06);font-size:14px;line-height:1.55;color:var(--ink-mute);max-width:760px"><b style="color:var(--ink)">v0.2 vs research-tier (wave 144).</b> This is the research register. Every technique below is published with its <i>gating condition</i>, what hardware, what data, what wave it lands in. v0.2 <code>kolm compile</code> ships the recipe-class artifact (deterministic compiled code, Ed25519-signed manifest + receipt, optional <code>kolm-moe-1</code> composition, optional <code>kolm-tokenizer-1</code> byte-level BPE, <code>KOLMIDX</code> lookup, K-score gate). The LoRA variants, multi-LoRA serving, INT4/GGUF/ONNX bundling, federated compile, voice/vision adapters, and reward-modelling work catalogued here are research-tier with explicit gates, not features in the v0.2 zip.</div>
+</header>
+
+<main>
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:70ch">
+      <h1>A review you cannot inspect is just a logo.</h1>
+      <p class="lede">
+        When an autonomous agent reaches a security review, the buyer's question is not
+        "do you have a badge." It is "show me the method." So we publish ours. The Agent
+        Security Readiness framework, the adversarial injection battery, and the signing
+        design are written down openly, and they map into the standards your buyer already
+        cites. A shared yardstick, not a private credential we ask you to trust.
+      </p>
+      <div class="trustline" aria-label="What this page documents">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Method published openly</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Mapped, not invented</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>ASR published CC0</span>
+      </div>
+    </div>
+    <hr class="rule">
+    <div class="band">
+      <span class="badge badge--ok">ASR · open checklist</span>
+      <span class="badge">Maps into SOC 2 · NIST AI RMF · EU AI Act</span>
+      <span class="badge">CC0 (public domain)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. THE APPROACH -->
+<section class="section reveal" id="approach">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / The approach</span>
+      <h2>Start from the reviewer's desk.</h2>
+      <p class="lede">
+        A six-figure deal does not fail in security review. It stalls. The moment a CISO
+        has to vet an autonomous agent, a one-week review runs four to eight, and a
+        questionnaire no longer clears it. A reviewer wants a method they can examine,
+        not a claim they have to take on faith. Everything below is built backward from
+        that desk.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Inspect, not trust</p>
+        <h3>The verifier is open</h3>
+        <p>The verification library, the canonicalization, and the command-line tool are open and reproducible. A reviewer can check the result and the thing that produced it, in their own environment.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Mapped, not invented</p>
+        <h3>Standards reviewers already cite</h3>
+        <p>We do not ask a buyer to learn a new credential. Every check translates to OWASP, MITRE ATLAS, NIST AI RMF and the EU AI Act. ASR is deliberately not a rival certification.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Scope over spin</p>
+        <h3>Stated plainly</h3>
+        <p>What is tested is named. What is reported, not warranted, is named too. The scope statement is part of the signed report, so a reviewer reads the limits next to the findings.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3. THE ASR CONTROL FRAMEWORK -->
+<section class="section reveal" id="asr">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / The ASR control framework</span>
+      <h2>Six controls, written down once.</h2>
+      <p class="lede">
+        Agent Security Readiness is a seed-stage readiness checklist for agentic products:
+        the concrete controls a buyer's review looks for, set down openly. It does not
+        compete with the frameworks a reviewer enforces. It maps into them, so passing it
+        means something to the people who sign off.
+      </p>
+    </div>
+    <div class="split" style="align-items:start">
+      <div class="report register">
+        <div class="register__row"><span class="register__k">ASR-1</span><span class="register__v">least-privilege scopes</span></div>
+        <div class="register__row"><span class="register__k">ASR-2</span><span class="register__v">tamper-evident audit trail</span></div>
+        <div class="register__row"><span class="register__k">ASR-3</span><span class="register__v">data egress and redaction</span></div>
+        <div class="register__row"><span class="register__k">ASR-4</span><span class="register__v">injection resistance <span class="ann">reported, not warranted</span></span></div>
+        <div class="register__row"><span class="register__k">ASR-5</span><span class="register__v">supply-chain provenance</span></div>
+        <div class="register__row"><span class="register__k">ASR-6</span><span class="register__v"><b>verifiable evidence</b> <span class="ann">signed</span></span></div>
+      </div>
+      <div class="grid" style="gap:14px;align-content:start">
+        <div class="card">
+          <h3>One yardstick, six readings</h3>
+          <p>Each control is a question a reviewer already has: does the agent hold more access than it uses, can the trail be edited after the fact, where does data go, can the agent be hijacked, what is in the supply chain, and can any of it be verified.</p>
+          <p class="card__map">ASR &rarr; SOC 2 TSC · ISO 42001 · NIST AI RMF · EU AI Act Art.12/14 · OWASP LLM &amp; Agentic Top 10</p>
+        </div>
+        <div class="card">
+          <h3>Not a rival credential</h3>
+          <p>ASR is published CC0. Use it, fork it, map your own program to it. We would rather raise the floor for agent security than own a gate in front of it.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:var(--s7)">
+      <table class="tbl">
+        <thead>
+          <tr><th scope="col">ASR control</th><th scope="col">What it requires</th><th scope="col">Maps into</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes held match scopes used; no shared keys across isolation boundaries.</td><td class="mapped">OWASP ASI · NIST MANAGE-1 · SOC 2 CC6</td></tr>
+          <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, tamper-evident activity log with a stated retention policy.</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
+          <tr><td><b>ASR-3</b> Data egress</td><td>Egress destinations enumerated; sensitive fields redacted before they leave.</td><td class="mapped">OWASP LLM02 · NIST MEASURE-2 · SOC 2 CC6</td></tr>
+          <tr><td><b>ASR-4</b> Injection</td><td>Direct and indirect injection and jailbreaks tested and reported with reproductions.</td><td class="mapped">OWASP LLM01 · ATLAS AML.T0051</td></tr>
+          <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance; tool and vendor surface enumerated.</td><td class="mapped">OWASP LLM05 · NIST MAP-4</td></tr>
+          <tr><td><b>ASR-6</b> Evidence</td><td>Findings signed, logged, and offline-verifiable.</td><td class="mapped">in-toto / SLSA · ISO 42001</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4. ADVERSARIAL TESTING (the ledger) -->
+<section class="section section--ink reveal" id="adversarial">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / Adversarial testing</span>
+      <h2>We attack the agent on purpose.</h2>
+      <p class="lede">
+        For an autonomous agent, the first thing a reviewer asks is whether it can be
+        hijacked into acting for someone else. So injection is not a checkbox. It is a
+        battery, run against the agent's own tools and context, with every result
+        reproduced before it is written down.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">LLM01 · direct</p>
+        <h3>Instruction hijack</h3>
+        <p>The agent is told to ignore its instructions and act for the attacker. We probe the system prompt and the tool layer for the boundary that should hold and the one that does not.</p>
+        <p class="card__map">OWASP LLM01</p>
+      </div>
+      <div class="card">
+        <p class="card__k">LLM01 · indirect</p>
+        <h3>Poisoned context</h3>
+        <p>A payload hides in retrieved content, a tool result, or a document the agent reads. The agent never sees a malicious user, only data that carries an instruction.</p>
+        <p class="card__map">OWASP LLM01 · MITRE ATLAS</p>
+      </div>
+      <div class="card">
+        <p class="card__k">ATLAS · bypass</p>
+        <h3>Guardrail and jailbreak</h3>
+        <p>Known jailbreak patterns and obfuscations are run against the system prompt and the filters in front of it, to see what slips through and what the agent then does with it.</p>
+        <p class="card__map">ATLAS AML.T0051</p>
+      </div>
+    </div>
+
+    <ol class="steps" style="margin-top:var(--s7)">
+      <li class="step"><span class="step__n">1</span><div><h3>Reproduce</h3><p>Every finding ships with the exact input and the agent's response, so a reviewer can run it again rather than take our word.</p></div></li>
+      <li class="step"><span class="step__n">2</span><div><h3>Score</h3><p>Each case is rated by what the agent actually did, not by whether a refusal string appeared.</p></div></li>
+      <li class="step"><span class="step__n">3</span><div><h3>Map</h3><p>Results are tied to OWASP LLM01 and MITRE ATLAS, the references a reviewer is already reading against.</p></div></li>
+      <li class="step"><span class="step__n">4</span><div><h3>Report</h3><p>The battery and its limits go into the signed report, where the scope statement sits next to the findings.</p></div></li>
+    </ol>
+
+    <p class="hero__claim" style="margin-top:var(--s7)">
+      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 5. THE SIGNING AND TRANSPARENCY DESIGN -->
+<section class="section reveal" id="signing">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / The signing and transparency design</span>
+      <h2>Findings a buyer can verify without us.</h2>
+      <p class="lede">
+        A report is only evidence if the person reading it can check it themselves. So a
+        finding is canonicalized to exact bytes, signed with Ed25519, and recorded in an
+        append-only log. The buyer verifies the signature in their own browser, against
+        the key inside the report, with no kolm server in the trust path.
+      </p>
+    </div>
+    <div class="split" style="align-items:start">
+      <div class="report register">
+        <div class="register__row"><span class="register__k">signature_alg</span><span class="register__v"><b>ed25519</b></span></div>
+        <div class="register__row"><span class="register__k">digest</span><span class="register__v"><b>sha-256</b></span></div>
+        <div class="register__row"><span class="register__k">canonical</span><span class="register__v">key-sorted, whitespace-free JSON</span></div>
+        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
+        <div class="register__row"><span class="register__k">key_fingerprint</span><span class="register__v"><b>410302c93becdcc3&hellip;</b></span></div>
+        <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:0XCoqRkbLg&hellip;sEjBDw</b> <span class="ann">covers the canonical bytes</span></span></div>
+        <div class="register__row"><span class="register__k">log</span><span class="register__v">append-only Merkle <span class="ann">RFC 6962 style</span></span></div>
+        <div class="register__row"><span class="register__k">verify</span><span class="register__v"><b>offline · WebCrypto · no server</b></span></div>
+      </div>
+      <div class="grid" style="gap:14px;align-content:start">
+        <div class="card">
+          <h3>Canonical bytes</h3>
+          <p>Findings are serialized to key-sorted, whitespace-free JSON, then hashed with SHA-256. The signature covers those exact bytes, so a downgraded finding or an inflated score is self-evident.</p>
+        </div>
+        <div class="card">
+          <h3>Ed25519, embedded key</h3>
+          <p>The signature and the public key it was made with travel together inside the report. The buyer needs nothing from us: the verifier runs offline against the key in the file.</p>
+        </div>
+        <div class="card">
+          <h3>Append-only Merkle log</h3>
+          <p>Each issuance is recorded in an append-only Merkle log (RFC 6962 style, Ed25519 over SHA-256), so a report cannot be quietly backdated or swapped. It is a transparency log, not a chain.</p>
+        </div>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s5)">
+      Two checks, both offline. Tier 1 confirms the signature covers the bytes. Tier 2 confirms the signing key is the one the buyer's keyring expects. A rogue key clears Tier 1 and fails Tier 2.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 6. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Read the method. Verify the evidence.</h2>
+    <p class="lede">The framework, the battery, and the signing design are open. The next step is to run one against your own report.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/docs">Read the docs</a>
+      <a class="btn btn--ghost" href="/verify">Verify a report</a>
+    </div>
+  </div>
+</section>
 
- <div class="research-index" aria-label="research index">
-
- <div class="ri-block">
- <div class="ri-eyebrow">Specifications</div>
- <div class="ri-grid">
- <a class="ri-card" href="/spec/rs-1">
- <div class="ri-title">RS-1 receipt spec</div>
- <div class="ri-desc">Ed25519 receipt chain format. Every run leaves a tamper-evident record verifiable offline.</div>
- <div class="ri-meta"><span class="ri-year">2026</span><span class="ri-badge">v1.0 stable</span></div>
- </a>
- <a class="ri-card" href="/spec/kolm-format-v1">
- <div class="ri-title">.kolm file format v1</div>
- <div class="ri-desc">Container layout, canonical JSON (RFC 8785), manifest schema, K-score and signature placement. Stable through 2027-12-31.</div>
- <div class="ri-meta"><span class="ri-year">2026</span><span class="ri-badge">v1.0 stable</span></div>
- </a>
- <a class="ri-card" href="/spec/codebase">
- <div class="ri-title">Codebase architecture</div>
- <div class="ri-desc">Public spec for the OSS runtime: 12 sections, module-by-module, with verifiable "what this is not" boundary.</div>
- <div class="ri-meta"><span class="ri-year">2026</span><span class="ri-badge">v1.0 stable</span></div>
- </a>
- <a class="ri-card" href="/k-score">
- <div class="ri-title">K-score methodology</div>
- <div class="ri-desc">K = 0.40A + 0.15S + 0.15L + 0.15C + 0.15V. Accuracy, size, latency, cost, coverage. Weights, gates, and reproducer.</div>
- <div class="ri-meta"><span class="ri-year">2026</span><span class="ri-badge">v1.0 stable</span></div>
- </a>
- </div>
- </div>
-
- <div class="ri-block">
- <div class="ri-eyebrow">Open research questions</div>
- <ul class="ri-list">
- <li>
- <div class="ri-q">K-score component weights across verticals.</div>
- <div class="ri-a">Are 0.40 / 0.15 / 0.15 / 0.15 / 0.15 still optimal for healthcare vs finance vs legal vs edge? Cross-vertical hold-out tests on 5 verticals in progress; preliminary evidence suggests latency weight should rise for edge.</div>
- </li>
- <li>
- <div class="ri-q">Receipt chain compression.</div>
- <div class="ri-a">The current Ed25519 receipt chain is O(N) to verify N receipts. Investigating a Merkle tree variant for O(log N) inclusion proofs without losing per-run signatures.</div>
- </li>
- <li>
- <div class="ri-q">PHI redactor false-negative rate.</div>
- <div class="ri-a">The 18-identifier regex redactor passes 99.6% on our test corpus. The remaining 0.4% is clinical-note edge cases (handwritten dates rendered as text, MRNs split across line breaks). Pursuing a learned redactor specialised to the long tail.</div>
- </li>
- <li>
- <div class="ri-q">K-score temporal stability.</div>
- <div class="ri-a">Does an artifact that scored K = 0.95 today still score K = 0.95 in six months on the same hold-out set? Empirical longitudinal study in progress across the first 30 published recipes.</div>
- </li>
- </ul>
- </div>
-
- <div class="ri-block">
- <div class="ri-eyebrow">Cited by</div>
- <p class="ri-cite-note">kolm specs are open under Apache-2.0. If your paper, audit, or RFP cites RS-1, .kolm v1, or K-score, mail <a href="mailto:dev@kolm.ai?subject=kolm%20citation">dev@kolm.ai</a> and we will list it here.</p>
- </div>
-
- </div>
- </div>
- </section>
-
- <section class="section" aria-labelledby="frontier">
- <div class="wrap">
- <div class="eyebrow"><span class="num">01</span>frontier stack</div>
- <h2 id="frontier">What ships in production today.</h2>
- <p class="sec-lede">The compiler is not a thin wrapper around a fine-tuning API. Each technique below is in the trainer or the runtime, gated on the hardware capability that justifies it, and recorded in the receipt of every run that uses it.</p>
- <div class="spec-rail">
- <a href="/research/multi-token-prediction">
- <div class="k">decode</div>
- <div class="t">Speculative decoding</div>
- <div class="d">Draft-model verification. Pairings: Qwen 7B&rarr;1.5B, Llama 3B&rarr;1B, Gemma 12B&rarr;1B. Wired in <code>apps/runtime/serve.py</code>.</div>
- </a>
- <a href="#kv-cache">
- <div class="k">memory</div>
- <div class="t">FP8 KV cache</div>
- <div class="d">Auto-on for compute capability sm_90+ (Hopper, Blackwell). vLLM <code>kv_cache_dtype="fp8"</code>. 2x context per byte.</div>
- </a>
- <a href="#quant">
- <div class="k">quant</div>
- <div class="t">AWQ &middot; GPTQ &middot; int4</div>
- <div class="d">Native vLLM weight-only quant. The 14B distill that runs on an A100-40GB box without paging to host RAM.</div>
- </a>
- <a href="#nvfp4">
- <div class="k">training</div>
- <div class="t">NVFP4 detect</div>
- <div class="d">Auto-enable on sm_120 (Blackwell, RTX 50-series) when torch &ge; 2.8 and cuBLASLt 12.9 are present. Falls back to bf16 otherwise.</div>
- </a>
- <a href="#flash-attn">
- <div class="k">attn</div>
- <div class="t">FlashAttention 3</div>
- <div class="d">Selected by <code>_attn_impl_for()</code> on Hopper / Blackwell; fa2 on Ampere; sdpa elsewhere. No user knob.</div>
- </a>
- <a href="#liger">
- <div class="k">kernels</div>
- <div class="t">Liger fused kernels</div>
- <div class="d">Patches RMSNorm, SwiGLU, RoPE, and the LM head for Qwen / Llama / Gemma / Phi. ~1.6&ndash;2.0x training-time on Ampere+.</div>
- </a>
- <a href="#unsloth">
- <div class="k">trainer</div>
- <div class="t">Unsloth fast-LoRA</div>
- <div class="d">Optional path for &le;14B SFT. Smaller VRAM envelope, identical adapter shape on disk.</div>
- </a>
- <a href="#optimizer">
- <div class="k">optimizer</div>
- <div class="t">paged AdamW 8-bit</div>
- <div class="d">bitsandbytes paged states. Lets a 14B fine-tune fit a single A100-80GB or RTX 5090. Auto-on when CUDA is detected.</div>
- </a>
- <a href="#ul2">
- <div class="k">objective</div>
- <div class="t">UL2 span corruption</div>
- <div class="d">Optional pre-SFT mixed-denoising pass. Implementation at <code>apps/trainer/span_objective.py</code>.</div>
- </a>
- <a href="#preference">
- <div class="k">align</div>
- <div class="t">DPO post-SFT</div>
- <div class="d">Optional <code>trl.DPOTrainer</code> stage on the SFT checkpoint when a preference pack is supplied. K-score gate still binding.</div>
- </a>
- <a href="/research/receipt-chains">
- <div class="k">proof</div>
- <div class="t">Ed25519 chain</div>
- <div class="d">Five-step receipt over canonical-JSON manifest. CID (<code>cidv1:sha256</code>) pins the exact bytes. Verifier in pure Rust at <code>packages/runtime-rs/</code>.</div>
- </a>
- <a href="/byoc">
- <div class="k">isolation</div>
- <div class="t">TEE attestation</div>
- <div class="d">Nitro COSE_Sign1, SEV-SNP, TDX quote, GCP/Azure CVM, docker. Quote travels with the artifact. TOFU model.</div>
- </a>
- <a href="/research/preference-optimization-modern">
- <div class="k">align</div>
- <div class="t">KTO &middot; ORPO &middot; SimPO &middot; IPO</div>
- <div class="d">Five-method preference router. Picks ORPO when the buyer has SFT data and tight VRAM, SimPO when only pairs and no ref model. Implementation at <code>apps/trainer/preference.py</code>.</div>
- </a>
- <a href="/research/grpo-reasoning">
- <div class="k">reasoning</div>
- <div class="t">GRPO with verifiable rewards</div>
- <div class="d">Online RL for chain-of-thought (DeepSeek R1 pattern). Group-relative advantages, no value head. Reward functions: code-exec, math-checker, schema-validator. Wired to the K-score evaluator suite.</div>
- </a>
- <a href="#lora-variants">
- <div class="k">adapter</div>
- <div class="t">DoRA &middot; rsLoRA &middot; LoRA+ &middot; NEFTune</div>
- <div class="d">Composable variants. <code>--quality</code> preset enables all four; <code>--fast</code> stays on plain LoRA. Optimizer auto-splits A and B param groups when LoRA+ is on.</div>
- </a>
- <a href="#medusa-eagle">
- <div class="k">decode</div>
- <div class="t">MEDUSA &middot; EAGLE-2</div>
- <div class="d">Multi-head and tree-verified spec decoding beyond the draft-model baseline. ~2.3-2.8x (MEDUSA) and ~3-4x (EAGLE-2) on H100. Wired via vLLM 0.7+ <code>speculative_model</code>.</div>
- </a>
- <a href="/research/constrained-decoding-and-tools">
- <div class="k">grammar</div>
- <div class="t">Constrained generation</div>
- <div class="d">Outlines + lm-format-enforcer logits processors. JSON-schema, regex, CFG, and choice modes. JSON-mode without retries, tool calls that always parse.</div>
- </a>
- <a href="/research/constrained-decoding-and-tools#tools">
- <div class="k">tools</div>
- <div class="t">OpenAI-compatible function calling</div>
- <div class="d">Native render for Qwen / Llama / Hermes; union schema fallback feeds the constrained-decode path. Tool emissions backed by JSON-schema validation, every call parses.</div>
- </a>
- <a href="#disagg">
- <div class="k">serving</div>
- <div class="t">Disaggregated prefill / decode</div>
- <div class="d">DistServe / Mooncake pattern. Single-node 2x-GPU INPROC mode and cross-host CROSSHOST mode with NVLink, RDMA, or TCP KV transport. Receipt records the transport.</div>
- </a>
- <a href="#judge">
- <div class="k">eval</div>
- <div class="t">LLM-as-judge</div>
- <div class="d">Pointwise (1-10 rubric) and pairwise (A vs B, bias-corrected) modes. Reported alongside K-score in the receipt, never replaces the gate. Budget-capped per run.</div>
- </a>
- <a href="#hhem">
- <div class="k">safety</div>
- <div class="t">Hallucination detection</div>
- <div class="d">Vectara HHEM-2.1 grounding score plus a claim-decomposition mode for RAG outputs. Per-claim min as the aggregate (conservative). Lands in the receipt.</div>
- </a>
- <a href="#packs">
- <div class="k">benchmarks</div>
- <div class="t">Public eval packs</div>
- <div class="d">MedQA, FinQA, LegalBench, GPQA, HumanEval, MT-Bench, AlpacaEval, Arena-Hard. Run alongside K-score; comparison numbers next to the buyer's own distribution.</div>
- </a>
- <a href="#synth">
- <div class="k">data</div>
- <div class="t">Magpie &middot; Evol-Instruct &middot; Self-Instruct &middot; RAFT</div>
- <div class="d">Cold-start synthesis when the capture pack is thin. The receipt carries a <code>synth_provenance</code> block: by-method counts, model, seed.</div>
- </a>
- <a href="#otel">
- <div class="k">observability</div>
- <div class="t">OpenTelemetry export</div>
- <div class="d">OTLP/HTTP exporter for spans and metrics, no SDK pull. Set <code>KOLM_OTEL=1</code> and point <code>OTEL_EXPORTER_OTLP_ENDPOINT</code>; lands in Honeycomb, Tempo, Datadog, Jaeger.</div>
- </a>
- <a href="/compute">
- <div class="k">compute</div>
- <div class="t">14 compute backends</div>
- <div class="d">Local-first dispatch across CPU, CUDA, MPS, MLX, ROCm, DirectML; cloud add-ons on Modal, RunPod, Together, Vast, Lambda, Replicate, fal, and remote SSH. The picker scoring formula is documented at <a href="/compute">/compute</a>.</div>
- </a>
- </div>
- </div>
- </section>
-
- <section class="section" aria-labelledby="reference">
- <div class="wrap">
- <div class="eyebrow"><span class="num">02</span>frontier reference</div>
- <h2 id="reference">The forty-two, with the gating condition for each.</h2>
- <p class="sec-lede">The evidenced answer to "are you state of the art?" is a list with the gating hardware or data condition for each entry. Below: every technique in the trainer, the runtime, or the eval pipeline, with the paper, the file path, and what must be true on the host machine or in the data for it to take effect. Recorded in the receipt of every run that uses it.</p>
-
- <div class="frontier-ref">
- <div class="group-head">Training</div>
-
- <div class="row24" id="lora-variants">
- <div class="head"><span class="num">01</span><h3>LoRA variants: DoRA, rsLoRA, LoRA+, NEFTune</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/lora_variants.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Hu 2021, Liu 2024 DoRA, Kalajdzievski 2023 rsLoRA, Hayou 2024 LoRA+, Jain 2023 NEFTune</span>
- <span><span class="lbl">gate</span>&nbsp;PEFT &ge; 0.10</span>
- </div>
- <p>Plain LoRA is the floor; four variants compose on top. <code>--quality</code> turns on rsLoRA + DoRA + LoRA+ + NEFTune. <code>--fast</code> stays on plain LoRA for iteration. The optimizer auto-splits A and B parameters into separate LR groups when LoRA+ is on, with feature-detect fallback when PEFT is too old to recognise <code>use_dora</code> or <code>use_rslora</code>.</p>
- </div>
-
- <div class="row24" id="preference">
- <div class="head"><span class="num">02</span><h3>Preference optimization: DPO, KTO, ORPO, SimPO, IPO</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/preference.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Rafailov 2023 DPO, Ethayarajh 2024 KTO, Hong 2024 ORPO, Meng 2024 SimPO, Azar 2023 IPO</span>
- <span><span class="lbl">gate</span>&nbsp;trl &ge; 0.11.0</span>
- </div>
- <p>DPO was the first single-stage preference algorithm. Every newer method beats it on at least one axis: KTO eats binary labels (no pairs), ORPO folds SFT and preference into one pass (no reference model), SimPO drops the reference model entirely, IPO survives deterministic preferences. The router <code>recommend_method()</code> picks the right one from data shape and VRAM. See <a href="/research/preference-optimization-modern">the report</a> for the full decision tree.</p>
- </div>
-
- <div class="row24" id="grpo">
- <div class="head"><span class="num">03</span><h3>GRPO with verifiable rewards (DeepSeek R1 pattern)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/grpo.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Shao 2024 GRPO arXiv:2402.03300, DeepSeek-AI 2025 R1 arXiv:2501.12948</span>
- <span><span class="lbl">gate</span>&nbsp;trl &ge; 0.12 + verifiable reward function</span>
- </div>
- <p>Group Relative Policy Optimization is online RL without a value head: sample <code>G</code> completions per prompt, score each with a programmatic reward, advantage is the group-mean-normalised score. Three built-in reward families: <code>code_exec</code> (subprocess sandbox + unit tests), <code>math_checker</code> (numeric or symbolic equivalence), <code>schema_validator</code> (JSON-schema or regex match). Reward functions plug into the K-score evaluator surface. See <a href="/research/grpo-reasoning">the report</a>.</p>
- </div>
-
- <div class="row24" id="optimizer">
- <div class="head"><span class="num">04</span><h3>Paged AdamW 8-bit</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/trainer_real.py</code></span>
- <span><span class="lbl">lib</span>&nbsp;bitsandbytes &ge; 0.43</span>
- <span><span class="lbl">gate</span>&nbsp;CUDA available</span>
- </div>
- <p>Paged optimizer states keep the 14B SFT envelope inside a single A100-80GB or RTX 5090. Auto-on when CUDA is detected; falls back to <code>torch.optim.AdamW</code> on Apple silicon, ROCm, and CPU.</p>
- </div>
-
- <div class="row24" id="liger">
- <div class="head"><span class="num">05</span><h3>Liger fused kernels</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/trainer_real.py</code> &middot; <code>_maybe_apply_liger()</code></span>
- <span><span class="lbl">lib</span>&nbsp;liger-kernel &ge; 0.4.0</span>
- <span><span class="lbl">gate</span>&nbsp;Ampere (sm_80) and newer</span>
- </div>
- <p>Patches RMSNorm, SwiGLU, RoPE, and the LM head for Qwen, Llama, Gemma, Phi. Roughly 1.6 to 2.0x training-time on Ampere and Hopper. No user knob; auto-applied when the architecture matches.</p>
- </div>
-
- <div class="row24" id="unsloth">
- <div class="head"><span class="num">06</span><h3>Unsloth fast-LoRA</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/backends/unsloth_path.py</code></span>
- <span><span class="lbl">lib</span>&nbsp;unsloth &ge; 2024.10</span>
- <span><span class="lbl">gate</span>&nbsp;&le; 14B params, CUDA, Triton 2.3+</span>
- </div>
- <p>Optional path for SFT up to 14B. Smaller VRAM envelope at the same step count; the adapter shape on disk is identical so the artifact stays portable across the standard PEFT path.</p>
- </div>
-
- <div class="row24" id="ul2">
- <div class="head"><span class="num">07</span><h3>UL2 span corruption objective</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/span_objective.py</code></span>
- <span><span class="lbl">paper</span>&nbsp;Tay et al, 2022, arXiv:2205.05131</span>
- <span><span class="lbl">gate</span>&nbsp;opt-in via spec</span>
- </div>
- <p>Optional pre-SFT mixed-denoising pass. Helps when the capture pack is short on contiguous prose. Implemented as a tokenizer post-processor over the SFT dataset; never replaces SFT, only precedes it.</p>
- </div>
-
- <div class="row24" id="nvfp4">
- <div class="head"><span class="num">08</span><h3>NVFP4 detect</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/trainer_real.py</code></span>
- <span><span class="lbl">gate</span>&nbsp;sm_120 (Blackwell, RTX 50-series) + torch &ge; 2.8 + cuBLASLt 12.9</span>
- <span><span class="lbl">fallback</span>&nbsp;bf16</span>
- </div>
- <p>Auto-detect new 4-bit floating-point training when all three preconditions are met. Falls back to bf16 silently; the receipt records which precision actually ran. Detection is conservative: when the cuBLASLt version cannot be probed cleanly, we choose bf16, not crash.</p>
- </div>
-
- <div class="row24" id="vlm">
- <div class="head"><span class="num">09</span><h3>Vision-language fine-tuning (Qwen2.5-VL, LLaVA)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/vlm.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Wang 2025 Qwen2.5-VL arXiv:2502.13923, Liu 2023 LLaVA arXiv:2304.08485, Tong 2024 Cambrian arXiv:2406.16860</span>
- <span><span class="lbl">gate</span>&nbsp;transformers &ge; 4.49 + a VLM checkpoint</span>
- </div>
- <p>LoRA-only over the language tower; the vision encoder stays frozen by default so a single A100 can drive Qwen2.5-VL-7B with chart/document/screenshot mixes. The processor builds the chat template with image placeholders, the collator pads vision tokens correctly, and the receipt records which projector and which vision modules were touched. See <a href="/research/vlm-fine-tuning">the report</a>.</p>
- </div>
-
- <div class="row24" id="long-context">
- <div class="head"><span class="num">10</span><h3>Long-context training: YaRN, NTK-aware, Linear PI</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/long_context.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Peng 2023 YaRN arXiv:2309.00071, Chen 2023 Linear PI arXiv:2306.15595, Liu 2023 Ring Attention arXiv:2310.01889</span>
- <span><span class="lbl">gate</span>&nbsp;model exposes <code>rope_scaling</code> in config</span>
- </div>
- <p>Three methods, one knob. YaRN is the default for 4-32x extension at low perplexity; NTK-aware for cheap 2-4x; Linear PI when the base model's <code>rope_scaling</code> field demands it. The trainer patches both <code>model.config.rope_scaling</code> and the nested <code>text_config</code> so VLMs extend cleanly. See <a href="/research/long-context-training">the report</a>.</p>
- </div>
-
- <div class="row24" id="merge">
- <div class="head"><span class="num">11</span><h3>Adapter merging: TIES, DARE, SLERP, linear</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/merge.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Yadav 2023 TIES arXiv:2306.01708, Yu 2023 DARE arXiv:2311.03099, Goddard 2024 Arcee arXiv:2403.13257</span>
- <span><span class="lbl">gate</span>&nbsp;adapters share base model + shape</span>
- </div>
- <p>Four pure-tensor merge ops over PEFT LoRA adapters. Linear: weighted sum. SLERP: spherical interpolation along the unit sphere. DARE: Bernoulli drop + rescale by 1/density. TIES: topk-by-magnitude trim, sign-elect by weighted sum, merge only agreeing entries. Deterministic with a fixed seed; the receipt records method, weights, density, and per-adapter source CIDs. See <a href="/research/adapter-merging">the report</a>.</p>
- </div>
-
- <div class="row24" id="embedding-reranker">
- <div class="head"><span class="num">12</span><h3>Embedding and reranker fine-tuning</h3></div>
- <div class="meta">
- <span><span class="lbl">files</span>&nbsp;<code>apps/trainer/embedding.py</code>, <code>apps/trainer/reranker.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Oord 2018 InfoNCE arXiv:1807.03748, Kusupati 2022 Matryoshka arXiv:2205.13147, Chen 2024 BGE Reranker arXiv:2402.03216</span>
- <span><span class="lbl">gate</span>&nbsp;triplets (query, pos, neg) or pointwise pairs (query, doc, label)</span>
- </div>
- <p>Two heads, one recall stack. The embedding trainer does InfoNCE with optional Matryoshka loss across nested dims (64/128/256/512/768) so one model serves four different latency tiers. The reranker trainer drops a cross-encoder head on top of any encoder, BCE for binary relevance or MSE for pointwise score. Both feed the registry's recall index. See <a href="/research/embedding-reranker-training">the report</a>.</p>
- </div>
-
- <div class="row24" id="function-calling">
- <div class="head"><span class="num">13</span><h3>Function-calling SFT (Hermes-FC)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/function_calling.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Liu 2024 ToolACE arXiv:2409.00920, Patil 2023 Gorilla arXiv:2305.15334</span>
- <span><span class="lbl">gate</span>&nbsp;trl + a teacher tool-call corpus</span>
- </div>
- <p>SFT over the open Hermes-FC chat template: tool schemas in the system prompt, tool calls as <code>&lt;tool_call&gt;</code> JSON blocks, tool responses as <code>&lt;tool_response&gt;</code>. The dataset validator rejects bad shapes before training; the parser at inference time recovers cleanly from minor format drift. Composes with the constrained-decode tool-call union schema at serve time. See <a href="/research/function-calling-training">the report</a>.</p>
- </div>
-
- <div class="row24" id="reward-modeling">
- <div class="head"><span class="num">14</span><h3>Bradley-Terry reward modeling</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/reward.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Bradley-Terry 1952, Stiennon 2020 arXiv:2009.01325, Ouyang 2022 arXiv:2203.02155, Bai 2022 arXiv:2204.05862</span>
- <span><span class="lbl">gate</span>&nbsp;chosen-vs-rejected preference pairs</span>
- </div>
- <p>The pairwise log-odds loss that powers RLHF, DPO sanity-checks, and best-of-N selection. A LoRA-adapted regression head on the SFT base; trained on (prompt, chosen, rejected) triples; shipped as its own <code>*.rm.kolm</code> artifact so the buyer's auditor can verify pair-accuracy independently from the policy. See <a href="/research/reward-modeling">the report</a>.</p>
- </div>
-
- <div class="row24" id="federated">
- <div class="head"><span class="num">15</span><h3>Federated compile (FedAvg + secure aggregation + DP)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/federated.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;McMahan 2017 FedAvg arXiv:1602.05629, Bonawitz 2017 CCS, Beutel 2020 Flower arXiv:2007.14390, Abadi 2016 CCS DP</span>
- <span><span class="lbl">gate</span>&nbsp;clients reachable + pre-distributed PRG seeds</span>
- </div>
- <p>For hospitals, banks, and law firms that cannot pool rows. FedAvg over LoRA adapters (50 MB up/down per round, not 7 GB), Bonawitz pairwise Ed25519-derived masks for secure aggregation, t-of-n Shamir reconstruction on client dropout, clip-and-noise differential privacy with a moments accountant. The receipt records cumulative <code>(eps, delta)</code> and the per-round dropout-recovery count. See <a href="/research/federated-compile">the report</a>.</p>
- </div>
-
- <div class="row24" id="voice">
- <div class="head"><span class="num">16</span><h3>Voice adapters (Whisper LoRA cross-attention)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/audio.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Radford 2022 Whisper arXiv:2212.04356, Hu 2021 LoRA arXiv:2106.09685, Gandhi 2023 Distil-Whisper arXiv:2311.00430</span>
- <span><span class="lbl">gate</span>&nbsp;5-50 hours paired domain audio at 16 kHz</span>
- </div>
- <p>Whisper-large-v3 is the right base; the narrow change is LoRA on the decoder's cross-attention projections only, encoder frozen. ~40 MB adapter on disk; 30-second mel-spectrogram windows; the collator replaces pad-token ids with -100 so loss ignores padding; reports overall WER, focus-term WER, and per-speaker variance. See <a href="/research/voice-adapters">the report</a>.</p>
- </div>
-
- <div class="row24" id="distillation">
- <div class="head"><span class="num">17</span><h3>Response distillation (token-level KL, MiniLLM, on-policy)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/distill.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Hinton 2015 arXiv:1503.02531, Kim &amp; Rush 2016 arXiv:1606.07947, Gu 2024 MiniLLM arXiv:2306.08543, Agarwal 2024 arXiv:2306.13649</span>
- <span><span class="lbl">gate</span>&nbsp;teacher and student share a vocabulary</span>
- </div>
- <p>The compression that gives Kolm its name. Token-level KL between teacher and student softmaxes at a shared temperature, plus a small cross-entropy term against the teacher's sampled token. Three objectives ship (forward-KL, reverse-KL, JSD), top-k logit pruning collapses the activation memory by ~2000x on Qwen-class vocabularies, and on-policy sampling beats off-policy when the gap is large. See <a href="/research/response-distillation">the report</a>.</p>
- </div>
-
- <div class="row24" id="moe-router">
- <div class="head"><span class="num">18</span><h3>Mixture of LoRA experts (learned router across signed adapters)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/moe.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Shazeer 2017 arXiv:1701.06538, Fedus 2022 Switch arXiv:2101.03961, Jiang 2024 Mixtral arXiv:2401.04088, Liu 2023 MoLE arXiv:2310.18339</span>
- <span><span class="lbl">gate</span>&nbsp;&ge; 2 experts on the same base + labeled routing examples</span>
- </div>
- <p>One small MLP router that picks among N domain-specific LoRA adapters on the same base. Top-1 Switch-style or top-k Mixtral-style, with auxiliary z-loss and load-balance terms to keep the softmax stable and the experts evenly used. The router is the only joint parameter; every expert keeps its own signed artifact and its own audit trail. See <a href="/research/moe-lora-routing">the report</a>.</p>
- </div>
-
- <div class="row24" id="online-dpo">
- <div class="head"><span class="num">19</span><h3>Online iterative DPO (capture, judge, train, swap, repeat)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/online_dpo.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Xu 2023 Cringe arXiv:2312.16682, Yuan 2024 Self-Rewarding arXiv:2401.10020, Calandriello 2024 arXiv:2403.08635, Rosset 2024 DNO arXiv:2404.03715, Dong 2024 RLHF Workflow arXiv:2405.07863</span>
- <span><span class="lbl">gate</span>&nbsp;prior adapter + a judge (RM, LLM, self, or verifiable)</span>
- </div>
- <p>Sample fresh candidates from the current policy each round, judge them, form best-vs-worst pairs, train one DPO step against the previous round's policy, swap the new adapter, repeat. Four judge kinds (learned RM, LLM judge with order-swap correction, self-rewarding rubric, verifiable check shared with K-score). Each round emits its own signed artifact; the cross-round chain is the audit story. See <a href="/research/online-dpo">the report</a>.</p>
- </div>
-
- <div class="group-head">Decoding</div>
-
- <div class="row24" id="spec-decoding">
- <div class="head"><span class="num">20</span><h3>Speculative decoding (draft-model)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/runtime/serve.py</code></span>
- <span><span class="lbl">pairings</span>&nbsp;Qwen 7B&rarr;1.5B, Llama 3B&rarr;1B, Gemma 12B&rarr;1B</span>
- <span><span class="lbl">gate</span>&nbsp;vLLM &ge; 0.6</span>
- </div>
- <p>Two-pass decode: small draft proposes <code>k</code> tokens; target verifies in parallel. ~2x throughput on most chat workloads, no quality loss. Wired via vLLM <code>speculative_model=&lt;draft&gt;</code>. See <a href="/research/multi-token-prediction">the report</a> for the throughput math.</p>
- </div>
-
- <div class="row24" id="medusa-eagle">
- <div class="head"><span class="num">21</span><h3>MEDUSA and EAGLE-2 spec heads</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/runtime/medusa.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Cai 2024 MEDUSA arXiv:2401.10774, Li 2024 EAGLE-2 arXiv:2406.16858</span>
- <span><span class="lbl">gate</span>&nbsp;trained head artifact in the registry</span>
- </div>
- <p>Beyond the draft-model baseline: MEDUSA trains extra prediction heads on the base body (~2.3 to 2.8x throughput on H100, ~10% extra params). EAGLE-2 trains a single head that predicts hidden states and verifies a dynamic tree of continuations (~3 to 4x, ~5% extra params). Both wire through vLLM 0.7+ <code>speculative_model</code> with a prefix tag (<code>medusa:</code>, <code>eagle2:</code>).</p>
- </div>
-
- <div class="row24" id="eagle3-lookahead">
- <div class="head"><span class="num">22</span><h3>EAGLE-3 and Lookahead decoding</h3></div>
- <div class="meta">
- <span><span class="lbl">files</span>&nbsp;<code>apps/runtime/eagle3.py</code>, <code>apps/runtime/lookahead.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Li 2025 EAGLE-3 arXiv:2503.01840, Fu 2024 Lookahead arXiv:2402.02057, He 2023 REST arXiv:2311.08252</span>
- <span><span class="lbl">gate</span>&nbsp;EAGLE-3 needs a trained head; Lookahead needs none</span>
- </div>
- <p>The 2025 spec-decode upgrades. EAGLE-3 drops the feature-prediction auxiliary loss and trains on multi-layer hidden states; ~30% throughput over EAGLE-2 at the same target quality. Lookahead decoding skips draft training entirely: a session-local n-gram cache proposes continuations from the target's own decoding history; ~1.5-2x speedup at zero training cost. Both wire through the same <code>speculative_config</code> surface. See <a href="/research/eagle3-lookahead">the report</a>.</p>
- </div>
-
- <div class="row24" id="constrained">
- <div class="head"><span class="num">23</span><h3>Constrained generation</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/runtime/constrained.py</code></span>
- <span><span class="lbl">libs</span>&nbsp;outlines &ge; 0.0.45, lm-format-enforcer &ge; 0.10</span>
- <span><span class="lbl">gate</span>&nbsp;logits-processor-compatible runtime</span>
- </div>
- <p>JSON schema, regex, EBNF/CFG, and choice modes layer on top of any vLLM or transformers generation. JSON-mode without retries, tool calls that always parse, classifier outputs that always validate. Three-tier backend: Outlines first, lm-format-enforcer second, post-hoc parse-and-retry third. See <a href="/research/constrained-decoding-and-tools">the report</a>.</p>
- </div>
-
- <div class="row24" id="tools">
- <div class="head"><span class="num">24</span><h3>OpenAI-compatible tool calling</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/runtime/tools.py</code></span>
- <span><span class="lbl">formats</span>&nbsp;Qwen tool_call, Llama function tags, Hermes-2-Pro, generic JSON envelope</span>
- <span><span class="lbl">gate</span>&nbsp;none</span>
- </div>
- <p>The <code>tools</code> field on a request renders into the prompt in the format the target model expects, and the constrained-decode union schema guarantees the emission parses. <code>tool_choice</code> translates to a tightened schema (none / auto / required / specific). Tool calls land in the receipt with a deterministic id, the parsed arguments, and the source bytes.</p>
- </div>
-
- <div class="row24" id="ttc">
- <div class="head"><span class="num">25</span><h3>Test-time compute: best-of-N, self-consistency, reflexion</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/runtime/ttc.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Cobbe 2021 verifiers arXiv:2110.14168, Wang 2022 self-consistency arXiv:2203.11171, Shinn 2023 Reflexion arXiv:2303.11366, Snell 2024 TTC scaling arXiv:2408.03314</span>
- <span><span class="lbl">gate</span>&nbsp;optional reward function or verifier</span>
- </div>
- <p>Three orthogonal compute-spend strategies at inference. Best-of-N draws N samples and picks the highest-scoring with a reward function or PRM. Self-consistency draws N and majority-votes the extracted answer. Reflexion runs a critic loop until the critic accepts or budget runs out. All three compose with constrained decoding so every sample parses. See <a href="/research/test-time-compute">the report</a>.</p>
- </div>
-
- <div class="group-head">Serving</div>
-
- <div class="row24" id="kv-cache">
- <div class="head"><span class="num">26</span><h3>FP8 KV cache</h3></div>
- <div class="meta">
- <span><span class="lbl">flag</span>&nbsp;<code>kv_cache_dtype="fp8"</code></span>
- <span><span class="lbl">gate</span>&nbsp;compute capability sm_90+ (Hopper, Blackwell)</span>
- <span><span class="lbl">gain</span>&nbsp;2x context per byte</span>
- </div>
- <p>Auto-on when the host GPU exposes sm_90 or higher. Doubles the on-device KV budget at the same VRAM, which is the difference between 32k context and 64k for a 14B-param model on a single H100.</p>
- </div>
-
- <div class="row24" id="quant">
- <div class="head"><span class="num">27</span><h3>AWQ / GPTQ int4 weight quant</h3></div>
- <div class="meta">
- <span><span class="lbl">libs</span>&nbsp;autoawq, auto-gptq</span>
- <span><span class="lbl">gate</span>&nbsp;sm_80+ for AWQ kernels</span>
- <span><span class="lbl">VRAM</span>&nbsp;~4 GB for a 14B int4 model</span>
- </div>
- <p>Native vLLM weight-only quant. The 14B distill that runs on an A100-40GB without paging to host RAM, or on an RTX 5090 next to the buyer's training job. Selected per artifact in the manifest.</p>
- </div>
-
- <div class="row24" id="flash-attn">
- <div class="head"><span class="num">28</span><h3>FlashAttention 3</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/trainer/trainer_real.py</code> &middot; <code>_attn_impl_for()</code></span>
- <span><span class="lbl">gate</span>&nbsp;Hopper / Blackwell (sm_90+)</span>
- <span><span class="lbl">fallback</span>&nbsp;fa2 on Ampere, sdpa elsewhere</span>
- </div>
- <p>Auto-selected by the trainer per detected device. No user knob; the receipt records which attention implementation ran, so a buyer can re-run on the same SKU and reproduce.</p>
- </div>
-
- <div class="row24" id="disagg">
- <div class="head"><span class="num">29</span><h3>Disaggregated prefill / decode</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/runtime/disagg.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Zhong 2024 DistServe arXiv:2401.09670, Qin 2024 Mooncake arXiv:2407.00079</span>
- <span><span class="lbl">gate</span>&nbsp;&ge; 2 GPUs (INPROC) or RDMA/IB fabric (CROSSHOST)</span>
- </div>
- <p>Prefill (compute-bound) and decode (memory-bound) run on separate GPU pools so each gets the right parallelism. Single-node INPROC mode for &ge; 2 GPUs on the same box, CROSSHOST mode with NVLink, RDMA, or TCP KV transport for fleet deployment. Receipt records the mode and transport.</p>
- </div>
-
- <div class="row24" id="multi-lora">
- <div class="head"><span class="num">30</span><h3>Multi-LoRA serving (S-LoRA pattern)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/runtime/multi_lora.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Sheng 2023 S-LoRA arXiv:2311.03285, Chen 2024 Punica arXiv:2310.18547</span>
- <span><span class="lbl">gate</span>&nbsp;peft &ge; 0.10, one shared base model</span>
- </div>
- <p>One base model, dozens of adapters, microsecond swaps. The router holds an LRU of warm adapters, drops the cold ones on demand, and logs swap latency above a threshold. PeftModel.load_adapter on first encounter, set_adapter on every subsequent. The receipt pins which adapter ran each request. See <a href="/research/multi-lora-serving">the report</a>.</p>
- </div>
-
- <div class="group-head">Evaluation</div>
-
- <div class="row24" id="k-score">
- <div class="head"><span class="num">31</span><h3>K-score release gate</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/eval/kscore.py</code></span>
- <span><span class="lbl">formula</span>&nbsp;K = 0.40&middot;A + 0.15&middot;S + 0.15&middot;L + 0.15&middot;C + 0.15&middot;V</span>
- <span><span class="lbl">gate</span>&nbsp;K &ge; 0.85 to ship</span>
- </div>
- <p>The kolm flagship metric: a weighted aggregate of accuracy on the buyer's own captures, size, latency, cost, and coverage. The 0.85 cutoff is not negotiable; the entire other thirty-eight techniques on this page can win zero rows if the buyer's distribution is the one that matters.</p>
- </div>
-
- <div class="row24" id="judge">
- <div class="head"><span class="num">32</span><h3>LLM-as-judge evaluation</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/eval/judge.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Zheng 2023 MT-Bench arXiv:2306.05685, Liu 2023 G-Eval arXiv:2303.16634</span>
- <span><span class="lbl">gate</span>&nbsp;optional, reported next to K-score</span>
- </div>
- <p>Pointwise (1-10 rubric) and pairwise (A vs B, bias-corrected by averaging both orderings) modes. Reported alongside K-score in the receipt; never replaces it. Budget-capped per run with a per-model token cost table.</p>
- </div>
-
- <div class="row24" id="judges-mix">
- <div class="head"><span class="num">33</span><h3>Mixture of judges (panel scoring)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/eval/judges_mix.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Verga 2024 PoLL arXiv:2404.18796, Wang 2024 MoA arXiv:2406.04692</span>
- <span><span class="lbl">gate</span>&nbsp;&ge; 2 judge endpoints</span>
- </div>
- <p>A single judge is biased; a panel of three judges from different families is bias-attenuated. Aggregation modes: mean, median (default), majority, quorum-k, trimmed-mean. The receipt records each judge's score and the panel spread so a buyer can audit disagreement. See <a href="/research/mixture-of-judges-and-prm">the report</a>.</p>
- </div>
-
- <div class="row24" id="hhem">
- <div class="head"><span class="num">34</span><h3>Hallucination detection (HHEM)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/eval/hhem.py</code></span>
- <span><span class="lbl">model</span>&nbsp;vectara/hallucination_evaluation_model (HHEM-2.1)</span>
- <span><span class="lbl">gate</span>&nbsp;needs transformers, fits CPU</span>
- </div>
- <p>NLI-style grounding score in [0,1] between context and generated output. Two granularities: document-level and claim-level (split into sentences, score each, aggregate as the conservative minimum). Lands in the receipt for every RAG-distilled artifact.</p>
- </div>
-
- <div class="row24" id="packs">
- <div class="head"><span class="num">35</span><h3>Public eval packs</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/eval/packs.py</code></span>
- <span><span class="lbl">packs</span>&nbsp;MedQA, FinQA, LegalBench, GPQA, HumanEval, MT-Bench, AlpacaEval, Arena-Hard</span>
- <span><span class="lbl">gate</span>&nbsp;datasets &ge; 2.18</span>
- </div>
- <p>K-score is the right gate for the buyer's distribution, but the regulator and the engineering review board also want standard public-pack numbers. The packs run with three grader types: MCQ exact-match, sandboxed exec, and judge-graded. Numbers ship next to K-score, not on top of it.</p>
- </div>
-
- <div class="row24" id="prm">
- <div class="head"><span class="num">36</span><h3>Process reward model (step-level scoring)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/eval/prm.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Wang 2023 Math-Shepherd arXiv:2312.08935, Lightman 2023 PRM-800K arXiv:2305.20050, Lai 2024 Step-DPO arXiv:2406.18629</span>
- <span><span class="lbl">gate</span>&nbsp;a fine-tuned PRM checkpoint or generic LM</span>
- </div>
- <p>Step-level rewards for reasoning chains. An ORM scores the final answer; a PRM scores each intermediate step. Math-Shepherd's product aggregation penalizes any single bad step without being as harsh as min. Plugs into best-of-N at the TTC layer for richer reward than answer-only scoring. See <a href="/research/mixture-of-judges-and-prm">the report</a>.</p>
- </div>
-
- <div class="group-head">Data</div>
-
- <div class="row24" id="synth">
- <div class="head"><span class="num">37</span><h3>Synthetic data: Magpie, Evol-Instruct, Self-Instruct, RAFT</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/data/synth.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Xu 2024 Magpie arXiv:2406.08464, Xu 2023 Evol arXiv:2304.12244, Wang 2022 Self-Instruct arXiv:2212.10560, Zhang 2024 RAFT arXiv:2403.10131</span>
- <span><span class="lbl">gate</span>&nbsp;needs a teacher endpoint (OpenAI-shaped)</span>
- </div>
- <p>Cold-start synthesis when the buyer has fewer than ~200 captures. Magpie exploits the chat-template prefix to autoregress user turns from a base model. Evol-Instruct evolves a seed pack along depth and breadth axes. Self-Instruct bootstraps from 8-shot seed samples. RAFT mixes gold-only, gold+distractor, and pure-distractor for RAG distillation. The receipt carries a <code>synth_provenance</code> block: by-method counts, model, seed.</p>
- </div>
-
- <div class="row24" id="ingest">
- <div class="head"><span class="num">38</span><h3>Document ingestion (PDF, EML, HTML, CSV)</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>apps/data/ingest.py</code></span>
- <span><span class="lbl">papers</span>&nbsp;Wang 2022 Self-Instruct arXiv:2212.10560, Hendrycks 2020 MMLU arXiv:2009.03300, Lewis 2020 RAG arXiv:2005.11401</span>
- <span><span class="lbl">gate</span>&nbsp;documents on disk (no vector DB needed)</span>
- </div>
- <p>The RAG-replacement path. Paragraph-aware chunking with overlap; regex PII redaction with stable placeholders; three task modes (qa via Self-Instruct, instruction, completion); per-format readers (PyMuPDF + pdfplumber for PDF, <code>mailbox</code> + <code>email</code> for EML/MBOX, BeautifulSoup for HTML, schema-aware CSV); exact-hash and MinHash dedup before mode-tagging. The receipt records dedup ratio, redaction-hit distribution, and mode mix. See <a href="/research/document-ingestion">the report</a>.</p>
- </div>
-
- <div class="group-head">Operational</div>
-
- <div class="row24" id="receipts">
- <div class="head"><span class="num">39</span><h3>Ed25519 receipt chain</h3></div>
- <div class="meta">
- <span><span class="lbl">files</span>&nbsp;<code>src/receipts.js</code>, <code>packages/runtime-rs/</code></span>
- <span><span class="lbl">design</span>&nbsp;5-step canonical-JSON chain + CID (cidv1:sha256)</span>
- <span><span class="lbl">verifier</span>&nbsp;pure-Rust, <code>forbid(unsafe_code)</code></span>
- </div>
- <p>The deployment unit is a single signed file. The receipt chain pins manifest hashes, train args, eval results, signing key id, and timestamps in canonical JSON, then HMACs each step against the prior. The CID pins the exact bytes. Verifier is a separate crate with rlib + cdylib + staticlib, runs offline, and shares fixtures with the Node implementation for cross-stack determinism. See <a href="/research/receipt-chains">the report</a>.</p>
- </div>
-
- <div class="row24" id="tee">
- <div class="head"><span class="num">40</span><h3>TEE attestation</h3></div>
- <div class="meta">
- <span><span class="lbl">files</span>&nbsp;<code>packages/attestation/</code></span>
- <span><span class="lbl">stacks</span>&nbsp;AWS Nitro, AMD SEV-SNP, Intel TDX, GCP/Azure CVM, docker sha256</span>
- <span><span class="lbl">model</span>&nbsp;TOFU pinning</span>
- </div>
- <p>The deployment quote travels with the artifact for buyers who need to prove the compile ran inside a verifiable enclave. Five quote types, one verifier surface, one signed pin per artifact. See <a href="/byoc">/byoc</a> for the runtime side.</p>
- </div>
-
- <div class="row24" id="otel">
- <div class="head"><span class="num">41</span><h3>OpenTelemetry export</h3></div>
- <div class="meta">
- <span><span class="lbl">file</span>&nbsp;<code>src/otel.js</code></span>
- <span><span class="lbl">protocol</span>&nbsp;OTLP/HTTP JSON</span>
- <span><span class="lbl">gate</span>&nbsp;<code>KOLM_OTEL=1</code></span>
- </div>
- <p>Direct OTLP exporter for spans and metrics, no SDK pull. Every artifact run and every <code>/v1/*</code> request flows into the buyer's collector. Compatible with Honeycomb, Grafana Tempo, Datadog, Jaeger. The Express middleware wraps requests with parent-spans and records HTTP status in attributes.</p>
- </div>
-
- <div class="row24" id="compute">
- <div class="head"><span class="num">42</span><h3>Multi-backend compute dispatch</h3></div>
- <div class="meta">
- <span><span class="lbl">files</span>&nbsp;<code>src/compute/</code>, <code>apps/trainer/backends/</code></span>
- <span><span class="lbl">backends</span>&nbsp;14 (local CPU/CUDA/MPS/MLX/ROCm/DirectML + Modal/RunPod/Together/Vast/Lambda/Replicate/fal/remote-ssh)</span>
- <span><span class="lbl">page</span>&nbsp;<a href="/compute">/compute</a></span>
- </div>
- <p>Local-first; cloud earns its slot when the artifact will not fit on the buyer's laptop. The picker scoring formula and the quote-before-spend flow are documented separately at <a href="/compute">/compute</a>. The receipt pins which backend ran and what it cost.</p>
- </div>
-
- <div class="closer">
- <p>This is the production-shipping list. The research agenda is on the reports feed below: K-score cross-task calibration, eval-set drift detection, K-sampling at compile time with embedding-cluster diversity, adapter compression, receipt aggregation. The forty-two items above are bench-checked against real captures; the agenda items are open problems we are willing to be wrong about in public.</p>
- <p>If a technique you expect to see is missing, the answer is one of three things: it does not benefit the LoRA-distill loop (most pre-training-only techniques), the implementation is in flight (item on the research agenda), or we have not yet found a buyer whose problem requires it. Open an issue on <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a> and tell us which.</p>
- </div>
- </div>
- </div>
- </section>
-
- <section class="section" aria-labelledby="featured">
- <div class="wrap">
- <div class="eyebrow"><span class="num">03</span>featured</div>
- <h2 id="featured">The kolm whitepaper.</h2>
- <p class="sec-lede">End-to-end description of the compile loop: task description, base selection, recipe execution, evaluation gate, signing, and registry publication. The single document that tells the rest of this page what it is talking about.</p>
- <article class="featured-paper">
- <div class="meta">
- <div class="tag">whitepaper</div>
- <div class="date">May 9, 2026</div>
- <div class="ver">v0.4 &middot; 28 pages</div>
- </div>
- <div class="body">
- <h3>kolm: a compiler for task-specific AI artifacts.</h3>
- <p class="abstract">Frontier inference is rented; the cost compounds. Hand-glued local pipelines are cheap to run but expensive to ship, audit, and revoke. We describe a build step that takes a task description plus a small corpus and produces a single signed file containing a base model pointer, a LoRA adapter, a recall index, evaluation packs, and a receipt chain. The file is the deployment unit; the K-score on the embedded eval pack is the release gate; the receipt chain is the audit. The whitepaper documents the compile loop, the wire format, the gate, and the reproducer harness for the SWE-bench Lite comparison.</p>
- <div class="links">
- <a href="/whitepaper">Read &rarr;</a>
- <a href="/spec">RS-1 spec</a>
- <a href="https://github.com/kolm-ai/kolm" rel="noopener">Reference implementation</a>
- </div>
- </div>
- </article>
- </div>
- </section>
-
- <section class="section" aria-labelledby="reports">
- <div class="wrap">
- <div class="eyebrow"><span class="num">04</span>technical reports</div>
- <h2 id="reports">Engineering notes from the lab.</h2>
- <p class="sec-lede">Each report is a real engineering finding from shipping the compiler. Five-to-twelve-minute reads. Reverse chronological.</p>
- <div class="report-feed">
-
- <a class="report" href="/research/response-distillation">
- <div class="stamp"><span class="topic">training</span>May 15, 2026</div>
- <div class="body">
- <h3>Response distillation &middot; KL the teacher into the student.</h3>
- <p>The compression that gives Kolm its name. Token-level KL between teacher and student softmaxes at a shared temperature, plus a small cross-entropy term against the teacher's sampled token. Three objectives (forward-KL, reverse-KL, JSD), top-k logit pruning that drops activation memory ~2000x on Qwen-class vocabularies, and on-policy sampling that beats off-policy when the capacity gap is large.</p>
- </div>
- <div class="read">10 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/moe-lora-routing">
- <div class="stamp"><span class="topic">training</span>May 15, 2026</div>
- <div class="body">
- <h3>Mixture of LoRA experts &middot; learned routing across signed adapters.</h3>
- <p>One small MLP router that picks among N domain-specific LoRA adapters on the same base. Top-1 Switch-style or top-k Mixtral-style. Auxiliary z-loss and load-balance terms to keep the softmax stable and the experts evenly used. The router is the only joint parameter; every expert keeps its own signed artifact and its own audit trail.</p>
- </div>
- <div class="read">9 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/online-dpo">
- <div class="stamp"><span class="topic">training</span>May 15, 2026</div>
- <div class="body">
- <h3>Online iterative DPO &middot; close the preference loop with production receipts.</h3>
- <p>Sample fresh candidates from the current policy each round, judge them, form best-vs-worst pairs, train one DPO step against the previous round's policy, swap the new adapter, repeat. Four judge kinds (learned RM, LLM judge with order-swap correction, self-rewarding rubric, verifiable check). Each round emits its own signed artifact; the cross-round chain is the audit story.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/reward-modeling">
- <div class="stamp"><span class="topic">training</span>May 14, 2026</div>
- <div class="body">
- <h3>Bradley-Terry reward models &middot; the scoring head behind preference optimization.</h3>
- <p>The pairwise log-odds loss that powers RLHF, DPO ablations, and best-of-N selection. A LoRA-adapted regression head on the SFT base; trained on chosen-vs-rejected pairs; shipped as its own signed artifact so the buyer's auditor can verify pair-accuracy independently from the policy. Why the receipt records the pair-accuracy and reward-gap mean, not the loss.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/federated-compile">
- <div class="stamp"><span class="topic">training</span>May 14, 2026</div>
- <div class="body">
- <h3>Federated compile &middot; LoRA under secure aggregation and DP.</h3>
- <p>For hospitals, banks, and law firms that cannot pool rows. FedAvg over LoRA adapters (50 MB up/down per round, not 7 GB), Bonawitz Ed25519-derived pairwise masks for secure aggregation, t-of-n Shamir reconstruction on client dropout, clip-and-noise differential privacy with a moments accountant. The receipt carries cumulative <code>(eps, delta)</code> and the per-round dropout-recovery count.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/voice-adapters">
- <div class="stamp"><span class="topic">training</span>May 14, 2026</div>
- <div class="body">
- <h3>Voice adapters &middot; Whisper LoRA on the decoder cross-attention.</h3>
- <p>The narrow change beats the wide change. LoRA on Whisper-large-v3's decoder cross-attention projections only, encoder frozen, 30-second mel windows, labels padded with -100 so loss ignores padding. ~40 MB adapter on disk. The receipt reports overall WER, focus-term WER (the K-score's A axis), and held-out per-speaker variance.</p>
- </div>
- <div class="read">10 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/document-ingestion">
- <div class="stamp"><span class="topic">data</span>May 14, 2026</div>
- <div class="body">
- <h3>Document ingestion &middot; PDFs, emails, HTML to training pairs.</h3>
- <p>The RAG-replacement path. Paragraph-aware chunking with overlap, regex PII redaction with stable placeholders, three task modes (qa via Self-Instruct, instruction, completion), per-format readers (PyMuPDF + pdfplumber, mailbox + email, BeautifulSoup, schema-aware CSV), exact-hash and MinHash dedup before mode-tagging. No vector DB needed.</p>
- </div>
- <div class="read">10 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/vlm-fine-tuning">
- <div class="stamp"><span class="topic">multimodal</span>May 14, 2026</div>
- <div class="body">
- <h3>VLM fine-tuning &middot; Qwen2.5-VL and LLaVA on a single A100.</h3>
- <p>LoRA over the language tower of a vision-language model with the vision encoder frozen. The processor template, the image-token padding gotcha, target_modules that only touch text projections, and the receipt block that pins which sub-modules saw a gradient. Chart QA, document QA, and screenshot agent traces, all on one A100-80GB.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/long-context-training">
- <div class="stamp"><span class="topic">methods</span>May 14, 2026</div>
- <div class="body">
- <h3>Long-context training &middot; YaRN, NTK-aware, and Linear PI.</h3>
- <p>Three RoPE extension methods, one config knob. YaRN is the default for 4-32x at low perplexity; NTK-aware is cheap 2-4x; Linear PI when the base model's config demands it. The trainer patches both <code>model.config.rope_scaling</code> and the nested <code>text_config</code> for VLMs, so extension survives the multimodal config layering.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/adapter-merging">
- <div class="stamp"><span class="topic">methods</span>May 14, 2026</div>
- <div class="body">
- <h3>Adapter merging &middot; TIES, DARE, SLERP, linear.</h3>
- <p>Four pure-tensor ops over PEFT LoRA adapters. Linear is the floor; SLERP traces the unit sphere; DARE drops 50% with Bernoulli and rescales by 1/density; TIES trims by magnitude, elects sign by weighted vote, merges agreeing entries. Deterministic with a fixed seed. The receipt pins method, weights, density, and per-adapter source CIDs.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/embedding-reranker-training">
- <div class="stamp"><span class="topic">retrieval</span>May 14, 2026</div>
- <div class="body">
- <h3>Embedding and reranker fine-tuning &middot; Matryoshka and BGE.</h3>
- <p>The recall stack has two heads. InfoNCE with optional Matryoshka loss across nested dims (64/128/256/512/768) so one model serves four latency tiers. A cross-encoder reranker on top, BCE for binary relevance, MSE for pointwise score. Both feed the registry's recall index alongside the LoRA adapter.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/function-calling-training">
- <div class="stamp"><span class="topic">tools</span>May 14, 2026</div>
- <div class="body">
- <h3>Function-calling SFT &middot; Hermes-FC template.</h3>
- <p>SFT over the open Hermes-FC chat template: tool schemas in system, <code>&lt;tool_call&gt;</code> JSON blocks in assistant, <code>&lt;tool_response&gt;</code> in user. The dataset validator rejects bad shapes before training. At inference time, the parser recovers from minor format drift and composes with the constrained-decode union schema so calls always validate.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/test-time-compute">
- <div class="stamp"><span class="topic">runtime</span>May 14, 2026</div>
- <div class="body">
- <h3>Test-time compute &middot; best-of-N, self-consistency, reflexion.</h3>
- <p>Three orthogonal compute-spend strategies at inference. Best-of-N picks the highest-scoring of N samples with a reward function or PRM. Self-consistency majority-votes the extracted answer. Reflexion runs a critic loop. All three compose with constrained decoding so every sample parses, and with the PRM at the step level for richer reward than answer-only scoring.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/multi-lora-serving">
- <div class="stamp"><span class="topic">runtime</span>May 14, 2026</div>
- <div class="body">
- <h3>Multi-LoRA serving &middot; one base, dozens of adapters.</h3>
- <p>S-LoRA's pattern, distilled to its load-bearing core. The router holds an LRU of warm adapters, drops cold ones on demand, and logs swap latency above threshold. <code>PeftModel.load_adapter</code> on first encounter, <code>set_adapter</code> after. Receipt pins which adapter ran each request. The single-base, many-tenants serving primitive.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/mixture-of-judges-and-prm">
- <div class="stamp"><span class="topic">evaluation</span>May 14, 2026</div>
- <div class="body">
- <h3>Mixture of judges and process reward models.</h3>
- <p>A single judge is biased; a panel of three from different families is bias-attenuated. Aggregation: mean, median (default), majority, quorum-k, trimmed-mean. PRM scores each step in a reasoning chain, not just the final answer, so an unlucky-but-correct trajectory gets fair credit. Both compose with best-of-N at the TTC layer.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/eagle3-lookahead">
- <div class="stamp"><span class="topic">runtime</span>May 14, 2026</div>
- <div class="body">
- <h3>EAGLE-3 and Lookahead decoding &middot; the 2025 spec-decode upgrades.</h3>
- <p>EAGLE-3 drops the feature-prediction auxiliary loss and trains on multi-layer hidden states: ~30% throughput over EAGLE-2 at the same target quality. Lookahead decoding skips draft training entirely with a session-local n-gram cache: ~1.5-2x at zero training cost. Both wire through the same <code>speculative_config</code> surface; the right choice depends on training budget vs. peak throughput.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/registry-economics">
- <div class="stamp"><span class="topic">governance</span>May 14, 2026</div>
- <div class="body">
- <h3>Public registry economics &middot; who pays for hosting and verification.</h3>
- <p>A free public catalog. Metadata mirrored on kolm.ai, bytes wherever the publisher put them. How that split survives the left-pad failure mode, who pays the bill, and what the documented limits of a discoverability layer are.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/eval-set-drift">
- <div class="stamp"><span class="topic">open problem</span>May 14, 2026</div>
- <div class="body">
- <h3>Eval set drift &middot; when your gold set rots.</h3>
- <p>A pack that scored K=0.91 in January may score 0.84 in June without the model changing. Detection signals, why we will not auto-rotate, and the sketch of the v0.2 drift detector.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/capture-loop-provenance">
- <div class="stamp"><span class="topic">data</span>May 14, 2026</div>
- <div class="body">
- <h3>Capture-loop fidelity &middot; what we discard and why.</h3>
- <p>The path from a production inference to a recompiled adapter is a local loop, not a closed one. The discard rules, the bridge handoff, and the four counters on the dashboard.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/synthesis-then-distillation">
- <div class="stamp"><span class="topic">methods</span>May 14, 2026</div>
- <div class="body">
- <h3>Synthesis-then-distillation &middot; building task corpora without seed data.</h3>
- <p>Two passes, four guard rails, one verifiable cap on quality. How the compile loop bootstraps a training corpus from a spec when the user has zero captured pairs, and why synthetic-only artifacts cap at K=0.91.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/case-for-adapters">
- <div class="stamp"><span class="topic">architecture</span>May 14, 2026</div>
- <div class="body">
- <h3>Why we don't ship a checkpoint &middot; the case for adapters.</h3>
- <p>An adapter plus a named base is a reproducible artifact. A merged checkpoint is an orphan. Size economics, composability, provenance integrity, and the escape hatch for sealed environments that demand a single-file model.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/k-sampling">
- <div class="stamp"><span class="topic">methods</span>May 14, 2026</div>
- <div class="body">
- <h3>K-sampling at compile time &middot; choosing among many candidates.</h3>
- <p>The teacher returns N candidates per spec input; the trainer keeps K. Embedding-cluster diversity, score-based ranking, and the speculative draft cache on the v0.2 research agenda.</p>
- </div>
- <div class="read">10 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/airgap-deployment">
- <div class="stamp"><span class="topic">deployment</span>May 14, 2026</div>
- <div class="body">
- <h3>Air-gapped deployment &middot; when the network is the threat model.</h3>
- <p>The KOLM_AIRGAP=1 switch, the HuggingFace offline flags, the pre-flight cache plan, and the five-step verify path. Defense, healthcare, industrial control, regulated finance. What a static artifact gives you and what it doesn't.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/byoc-deploy-modes">
- <div class="stamp"><span class="topic">deployment</span>May 14, 2026</div>
- <div class="body">
- <h3>BYOC deploy modes &middot; choosing among five attestation tiers.</h3>
- <p>Fly, aws-nitro, gcp-cvm, azure-cvm, docker. Nitro COSE_Sign1+PCR0, SEV-SNP 1184-byte report, TDX quote, MAA JWT, image sha256. The TOFU pinning model, the CLI, and which tier the regulator will actually accept.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/edge-artifact-sizing">
- <div class="stamp"><span class="topic">edge</span>May 14, 2026</div>
- <div class="body">
- <h3>Edge artifact sizing &middot; from M3 Pro down to Raspberry Pi 5.</h3>
- <p>The four-rung hardware ladder, the five base-size buckets, the four quantization tiers, the three latency budgets. A worked plant-floor vibration-anomaly example: Qwen2.5-3B int4, 1.84 GB, runs on an N100 box.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/compute-backend-selection">
- <div class="stamp"><span class="topic">compute</span>May 14, 2026</div>
- <div class="body">
- <h3>Compute backend selection &middot; local vs cloud.</h3>
- <p>Fourteen backends, one picker, one scoring function. Local-first by default; cloud earns its slot when the artifact will not fit on your laptop. The score formula, the constraints, the worked examples.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/grpo-reasoning">
- <div class="stamp"><span class="topic">reasoning</span>May 14, 2026</div>
- <div class="body">
- <h3>GRPO with verifiable rewards &middot; reasoning RL without a value head.</h3>
- <p>Group Relative Policy Optimization is the algorithm behind DeepSeek R1's chain-of-thought elicitation. Sample <em>G</em> completions per prompt, score each with a programmatic reward (code-exec, math-checker, schema-validator), advantage is the group-mean-normalised score. No value head, no separate reward model to train. How kolm wires it into the K-score evaluator surface so the reward function and the release gate are the same code path.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/preference-optimization-modern">
- <div class="stamp"><span class="topic">alignment</span>May 14, 2026</div>
- <div class="body">
- <h3>Preference optimization after DPO &middot; KTO, ORPO, SimPO, IPO.</h3>
- <p>DPO was the first single-stage preference algorithm. Every newer method beats it on at least one axis: KTO eats binary good/bad labels (no pairs), ORPO folds SFT and preference into one pass (no reference model), SimPO drops the reference model entirely, IPO survives deterministic preferences without collapsing. The router that picks the right one from the buyer's data shape and VRAM budget.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/constrained-decoding-and-tools">
- <div class="stamp"><span class="topic">runtime</span>May 14, 2026</div>
- <div class="body">
- <h3>Constrained decoding and tool calling &middot; JSON that always parses.</h3>
- <p>Outlines plus lm-format-enforcer plus a post-hoc shim. JSON-schema, regex, EBNF, and fixed-choice modes layer on top of any logits-processor-compatible runtime. The tool-calling surface renders Qwen, Llama 3.x, and Hermes natively, and falls back to a union-schema constrained-decode envelope so every call validates.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/multi-token-prediction">
- <div class="stamp"><span class="topic">frontier</span>May 14, 2026</div>
- <div class="body">
- <h3>Multi-token-per-step prediction &middot; TST, patch-level training, and the LoRA-distill equivalent.</h3>
- <p>Nous TST (arXiv 2605.06546) trades 2.5x pre-training time at 10B scale. ICLR 2025 Patch-Level Training (arXiv 2407.12665) lands 0.5x cost at 370M-2.7B. Neither applies to LoRA distill, but their inference-side dual is speculative decoding: draft 1.5B + target 7B + <code>num_speculative_tokens=5</code> via vLLM PagedAttention. The mechanism, the equivalence, and the throughput math.</p>
- </div>
- <div class="read">13 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/continual-learning-loop">
- <div class="stamp"><span class="topic">applied</span>May 14, 2026</div>
- <div class="body">
- <h3>Continual learning &middot; capture, train, swap, sign.</h3>
- <p>"Frozen frontier models" is a real failure mode for buyers with industry-specific tails. kolm's answer is the captures loop: <code>kolm capture</code> proxies the live API, <code>kolm compile</code> distills the captures into a <code>.kolm</code>, the runtime hot-swaps the adapter. Every step is signed; the K-score gate refuses to ship a worse one. What the loop costs, what it earns, and where it ends.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/receipt-chains">
- <div class="stamp"><span class="topic">verification</span>May 14, 2026</div>
- <div class="body">
- <h3>Receipt chains for fine-tuned models.</h3>
- <p>Five Ed25519 steps over canonical JSON, one content identifier, one optional TEE binding. The Rust verifier is <code>forbid(unsafe_code)</code>, pure-Rust deps, and runs offline.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/k-score-whitepaper">
- <div class="stamp"><span class="topic">whitepaper</span>May 16, 2026</div>
- <div class="body">
- <h3>The K-score: a formal definition.</h3>
- <p>Eight sections: formal definition, weight derivation from 1,247 development compiles, ablation table, comparison to LMSYS Arena and SWE-bench, threat model, calibration roadmap, references. The composite gate that decides if a .kolm ships.</p>
- </div>
- <div class="read">22 min &rarr;</div>
- </a>
-
- <a class="report" href="/research/k-score-correlation">
- <div class="stamp"><span class="topic">methodology</span>May 14, 2026</div>
- <div class="body">
- <h3>Why K-score correlates with deployment quality.</h3>
- <p>A weighted aggregate of accuracy, size, latency, cost, and coverage. The 0.85 gate, the v0.2 cross-task calibration problem, and where the score does not extrapolate.</p>
- </div>
- <div class="read">10 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/why-we-built-kolm">
- <div class="stamp"><span class="topic">manifesto</span>May 9, 2026</div>
- <div class="body">
- <h3>Why we built kolm.</h3>
- <p>Webpack happened to JavaScript, Docker to deployment, the App Store to mobile. Each one took an artisanal step and made it a build artifact. The same step had not happened for AI features. So we built it.</p>
- </div>
- <div class="read">9 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/running-our-marketing-on-distilled-models">
- <div class="stamp"><span class="topic">case study</span>May 9, 2026</div>
- <div class="body">
- <h3>Running our marketing on four distilled models.</h3>
- <p>Internal case study. Four Specialists on dedicated runtime capacity, $1,860 &rarr; $339 monthly bill. K-scores per artifact, the two compiles that failed, and the six commands that drive the pipeline.</p>
- </div>
- <div class="read">10 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/how-we-benchmark">
- <div class="stamp"><span class="topic">methodology</span>May 9, 2026</div>
- <div class="body">
- <h3>How we benchmark, and how to disagree with us.</h3>
- <p>The methodology we will report against when the harness produces its first signed run. n=150 SWE-bench Lite, seed=42, swebench 4.1.0 evaluator. What the comparison measures, what it does not, and the diagnosis flowchart for when a reproduce attempt lands somewhere different.</p>
- </div>
- <div class="read">8 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/distillation-vs-fine-tuning-vs-rag">
- <div class="stamp"><span class="topic">methods</span>May 9, 2026</div>
- <div class="body">
- <h3>Distillation vs fine-tuning vs RAG.</h3>
- <p>Three techniques, three jobs, three failure modes. Decision tree, cost matrix, worked ticket-routing example. When RAG dies, when fine-tuning is a vendor trap, and where distillation actually wins.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/rent-vs-buy-compute">
- <div class="stamp"><span class="topic">economics</span>May 9, 2026</div>
- <div class="body">
- <h3>Rent vs. buy compute &middot; from API bill to local student artifact.</h3>
- <p>Every frontier-API dollar is a rental fee. Proxy through <code>kolm capture</code> and the same dollar pays for a verified dataset. The math, the mechanism, the legal frame, and a worked example for a 50-engineer team.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/ai-compiler">
- <div class="stamp"><span class="topic">architecture</span>May 7, 2026</div>
- <div class="body">
- <h3>How to compile GPT-5 into a 4&nbsp;GB local model.</h3>
- <p>The missing build step between a frontier API and a local artifact. What the compiler does, why the unit economics flip, and how to compile your first <code>.kolm</code> in five minutes.</p>
- </div>
- <div class="read">11 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/k-sample-verified-inference">
- <div class="stamp"><span class="topic">verification</span>May 7, 2026</div>
- <div class="body">
- <h3>K-sample verified inference &middot; a practical alternative to zk-ML.</h3>
- <p>Zero-knowledge proofs of inference are technically beautiful and economically dead. Sample <em>k</em> times, score deterministically, sign the receipt. The mechanism behind every label inside a <code>.kolm</code>.</p>
- </div>
- <div class="read">9 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/kolm-file-format">
- <div class="stamp"><span class="topic">format</span>May 7, 2026</div>
- <div class="body">
- <h3>The .kolm file format, component by component.</h3>
- <p>One signed zip with seven internal components and a manifest. Why everything is co-versioned, how the Ed25519 receipt chain works, and what the file looks like on disk.</p>
- </div>
- <div class="read">10 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/hipaa-on-device">
- <div class="stamp"><span class="topic">applied</span>May 7, 2026</div>
- <div class="body">
- <h3>HIPAA-aligned AI on a laptop.</h3>
- <p>Every PHI-bearing frontier call expands the compliance surface. Compile from de-identified examples, run inside the approved boundary, verify the evidence. A practical architecture playbook.</p>
- </div>
- <div class="read">12 min &rarr;</div>
- </a>
-
- <a class="report" href="/articles/speculative-decoding-recipes">
- <div class="stamp"><span class="topic">inference</span>May 7, 2026</div>
- <div class="body">
- <h3>Speculative decoding with deterministic drafts.</h3>
- <p>A draft model is the standard way. A recipe pack is faster, smaller, free at runtime, and verifiably correct on the patterns it covers. How RSD cuts the local inference bill to zero on structured tokens.</p>
- </div>
- <div class="read">10 min &rarr;</div>
- </a>
-
- </div>
- </div>
- </section>
-
- <section class="section" aria-labelledby="specs">
- <div class="wrap">
- <div class="eyebrow"><span class="num">05</span>specs and code</div>
- <h2 id="specs">The primary sources.</h2>
- <p class="sec-lede">Every claim on this page is anchored in one of the documents below. All open. All versioned. All reproducible from the published commit.</p>
- <div class="spec-rail">
- <a href="/spec">
- <div class="k">spec</div>
- <div class="t">RS-1 wire format</div>
- <div class="d">The on-disk shape of a <code>.kolm</code> artifact. Manifest, payload slots, receipt chain.</div>
- </a>
- <a href="/k-score">
- <div class="k">metric</div>
- <div class="t">K-score</div>
- <div class="d">Composite score: accuracy, safety, latency, cost, verifiability. Weighting and calibration.</div>
- </a>
- <a href="/benchmarks">
- <div class="k">harness</div>
- <div class="t">Benchmarks</div>
- <div class="d">Live results across runtimes. Commands to reproduce each row on your own hardware.</div>
- </a>
- <a href="/docs/receipt-v0.1.json">
- <div class="k">schema</div>
- <div class="t">receipt-v0.1.json</div>
- <div class="d">JSON schema for the per-run Ed25519 receipt format. Stable v0.1.</div>
- </a>
- <a href="/threat-model">
- <div class="k">security</div>
- <div class="t">Threat model</div>
- <div class="d">Adversaries, boundaries, defences. What the receipt chain does and does not protect.</div>
- </a>
- <a href="/registry">
- <div class="k">data</div>
- <div class="t">Public registry</div>
- <div class="d">Working catalog of compiled artifacts. K-score history, target profiles, provenance.</div>
- </a>
- <a href="/docs">
- <div class="k">docs</div>
- <div class="t">Developer reference</div>
- <div class="d">CLI, server, runtime API. Quickstart through to remote-access TEE deployment.</div>
- </a>
- <a href="https://github.com/kolm-ai/kolm" rel="noopener">
- <div class="k">code</div>
- <div class="t">GitHub</div>
- <div class="d">Reference implementation. The harness that produces the numbers above is the same code we ship.</div>
- </a>
- </div>
- </div>
- </section>
 </main>
 
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/status">Status</a>
-        <a href="/subprocessors">Subprocessors</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/about">About</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/press">Press</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>

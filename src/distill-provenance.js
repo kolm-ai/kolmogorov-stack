@@ -1,14 +1,14 @@
 // src/distill-provenance.js
 //
-// Wave 144 — bridge between the isolated workers/distill output dir and the
+// Wave 144 - bridge between the isolated workers/distill output dir and the
 // in-process artifact builder. Reads the worker's manifest.json + training-
 // pairs.jsonl, recomputes hashes, and emits a validated lineage block
 // (source='distillation') that buildAndZip will hash into the artifact.
 //
 // Inputs:
 //   loadDistillProvenance(dirPath, opts)
-//     dirPath  — path to a workers/distill output dir (contains manifest.json)
-//     opts.cwd — base for resolving relative paths
+//     dirPath - path to a workers/distill output dir (contains manifest.json)
+//     opts.cwd - base for resolving relative paths
 //
 // Returns:
 //   {
@@ -74,7 +74,7 @@ export function loadDistillProvenance(dirPath, opts = {}) {
 
   // Recompute training-pairs hash from disk so the lineage cannot drift from
   // what the worker recorded. If the file is missing (stub mode) we accept a
-  // null hash but still emit a lineage block — the block just records that
+  // null hash but still emit a lineage block - the block just records that
   // the artifact came from a distill provenance dir, not that a training
   // corpus was produced.
   let trainingCorpusHash64 = null;
@@ -108,11 +108,11 @@ export function loadDistillProvenance(dirPath, opts = {}) {
     : null;
 
   // buildLineage demands teacher + student_base for source='distillation'.
-  // Stub-mode worker manifests have neither — for those we fall back to
+  // Stub-mode worker manifests have neither - for those we fall back to
   // source='rebuild' (just records provenance dir) so the artifact still
   // carries a lineage block but doesn't lie about being distilled.
   //
-  // Wave 158 — distillation_method now respects worker manifest field if
+  // Wave 158 - distillation_method now respects worker manifest field if
   // present (set by --distillation-method CLI flag); falls back to old
   // derive-from-ml_pipeline_run behavior so legacy manifests keep working.
   const distillMethod = workerManifest.distillation_method
@@ -139,7 +139,7 @@ export function loadDistillProvenance(dirPath, opts = {}) {
     worker_version: workerManifest.worker_version || null,
     teacher_vendor: workerManifest.teacher_vendor || null,
     teacher_model: workerManifest.teacher_model || null,
-    // wave 158 — cross-vendor distillation provenance. Verifier check #15
+    // wave 158 - cross-vendor distillation provenance. Verifier check #15
     // reads these to confirm the distillation provenance is complete
     // (teacher_vendor + teacher_model + student_base + distillation_method
     // are all required when the lineage source is 'distillation').
@@ -153,14 +153,14 @@ export function loadDistillProvenance(dirPath, opts = {}) {
     training_pairs_collected: workerManifest.training_pairs_collected || 0,
     training_pairs_hash: workerManifest.training_pairs_hash || null,
     redaction_map_hash: workerManifest.redaction_map_hash || null,
-    // wave 157 — receipt-chain extension. redact_class + teacher_call_log_hash
+    // wave 157 - receipt-chain extension. redact_class + teacher_call_log_hash
     // + reinjection_log_hash flow through to the artifact manifest so verifier
     // check #14 can confirm a PHI workload's auditor-replay surface is intact.
     redact_class: workerManifest.redact_class || null,
     teacher_call_log_hash: workerManifest.teacher_call_log_hash || null,
     reinjection_log_hash: workerManifest.reinjection_log_hash || null,
     ml_pipeline_run: !!workerManifest.ml_pipeline_run,
-    // wave 145 — teacher-holdout pass-through for K-score T axis.
+    // wave 145 - teacher-holdout pass-through for K-score T axis.
     // Worker writes these only when --teacher-holdout was set AND a teacher
     // was configured. Null otherwise. Verifier can replay (offline) the
     // teacher_holdout_log to confirm the recorded accuracy was actually

@@ -3,8 +3,8 @@
 // Three responsibilities, all tenant-fenced through the canonical event store:
 //
 //   1. checkBudget(tenant)  -> { allowed, spent_usd, cap_usd, remaining, pct, plan }
-//      Sums the tenant's rolling-window USD spend from the event-store — the
-//      authoritative cost ledger — and compares to a per-tenant cap resolved
+//      Sums the tenant's rolling-window USD spend from the event-store - the
+//      authoritative cost ledger - and compares to a per-tenant cap resolved
 //      from config override -> ctx -> plan default -> global default. The spend
 //      read reuses the exact pattern src/billing-breakdown.js uses
 //      (listEvents({tenant_id, since, until}) then sum estimated_cost_usd, with
@@ -34,7 +34,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 // Rolling spend window. Monthly caps are billed over a 30-day trailing window.
 export const BILLING_WINDOW_MS = 30 * DAY_MS;
 
-// Monthly USD cap per plan. enterprise is contractual / invoiced — no hard
+// Monthly USD cap per plan. enterprise is contractual / invoiced - no hard
 // gateway cap (Infinity). Override per-tenant via config (see resolveCapUsd).
 export const PLAN_CAPS = Object.freeze({
   free: 5,
@@ -148,7 +148,7 @@ export async function readTenantSpendUsd(tenant, opts = {}) {
     let total = 0;
     for (const ev of rows) {
       if (!ev) continue;
-      // Defense in depth — listEvents already pinned tenant_id, but pin again
+      // Defense in depth - listEvents already pinned tenant_id, but pin again
       // so this helper is safe to call directly from internal code.
       if (ev.tenant_id && tenant && ev.tenant_id !== tenant) continue;
       // Never count our own budget-alert rows as spend.
@@ -199,7 +199,7 @@ export async function checkBudget(tenant, opts = {}) {
 
 // In-process dedupe so the same threshold isn't re-emitted every request.
 // Keyed by `${tenant}:${threshold}:${windowBucket}`, reset per billing window.
-// NOTE: per-process only — for a multi-instance deployment the budget_alert
+// NOTE: per-process only - for a multi-instance deployment the budget_alert
 // event itself is the durable record; dedupe is a best-effort emission guard.
 const _alertSent = new Map();
 
@@ -217,7 +217,7 @@ function _windowBucket() {
 // 'rate_limited' for the 80% warning (both valid status enum values),
 // source_type 'synthetic' (system-generated, not a real capture), and the full
 // alert detail JSON-encoded into `feedback` (a 4096-char free-text field that
-// survives canonicalize). estimated_cost_usd is 0 — alert rows add no spend.
+// survives canonicalize). estimated_cost_usd is 0 - alert rows add no spend.
 export async function emitBudgetAlerts(tenant, status, _opts = {}) {
   const fired = [];
   if (!status || status.cap_usd == null) return fired; // unlimited / no cap
@@ -248,7 +248,7 @@ export async function emitBudgetAlerts(tenant, status, _opts = {}) {
         });
         fired.push(thr);
       } catch (_) {
-        // Append failed — drop the dedupe key so a later request retries.
+        // Append failed - drop the dedupe key so a later request retries.
         _alertSent.delete(key);
       }
     }
@@ -308,7 +308,7 @@ export function enforceBudget(options = {}) {
     try {
       status = await checkBudget(tenant, { ctx: _authCtx(req) });
     } catch (_) {
-      return next(); // fail-open on internal error — never block on a caps bug
+      return next(); // fail-open on internal error - never block on a caps bug
     }
 
     // Best-effort alerts; never block the request on alert failure.
@@ -342,7 +342,7 @@ export function enforceBudget(options = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// abuse throttle — per-tenant token bucket (HTTP 429)
+// abuse throttle - per-tenant token bucket (HTTP 429)
 // ---------------------------------------------------------------------------
 
 // Per-process token buckets keyed by tenant (or IP for anon). For cluster-wide

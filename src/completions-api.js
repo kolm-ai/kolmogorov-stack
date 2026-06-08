@@ -1,6 +1,6 @@
 // src/completions-api.js
 //
-// Wave Y — OpenAI-compatible chat completions endpoint that bridges
+// Wave Y - OpenAI-compatible chat completions endpoint that bridges
 // to either:
 //   1. A local kolm artifact      (model = "kolm:<artifact-name>")
 //   2. A local kolm artifact path (model = "kolm-path:<absolute-or-relative-path>")
@@ -12,7 +12,7 @@
 // The point: a tenant can point any existing OpenAI-SDK client (LangChain,
 // LlamaIndex, the openai npm package, Continue.dev, Cursor, ChatGPT clones,
 // LiteLLM proxies) at this endpoint and silently get a kolm artifact in
-// the loop — no SDK changes, no protocol negotiation.
+// the loop - no SDK changes, no protocol negotiation.
 //
 // Request shape (subset of openai chat/completions we honor):
 //   {
@@ -70,7 +70,7 @@ const DEFAULT_REGISTRY_DIRS = [
 // `req` is the parsed JSON body. `opts.registryDirs` overrides the kolm:
 // search path. `opts.artifactByName` is an optional map from short-name to
 // absolute path (highest priority). Streaming is handled separately via
-// streamChatCompletion (below) — this entry point returns the full response
+// streamChatCompletion (below) - this entry point returns the full response
 // in one shot for non-streaming clients.
 // ---------------------------------------------------------------------------
 export async function handleChatCompletion(req, opts = {}) {
@@ -149,7 +149,7 @@ function isFallbackableError(e) {
 // (each chunk a string already prefixed with "data: " and terminated with
 // "\n\n"). When the bridge target supports streaming, we forward chunks
 // as they arrive; for kolm artifacts (which return a single result in
-// sub-millisecond time) we emit ONE delta then the terminator — same shape,
+// sub-millisecond time) we emit ONE delta then the terminator - same shape,
 // same parser path, so OpenAI-SDK clients work unchanged.
 // ---------------------------------------------------------------------------
 export async function* streamChatCompletion(req, opts = {}) {
@@ -234,7 +234,7 @@ async function resolveModel(model, opts) {
     return { kind: 'gemini', modelId: id, displayModel: model };
   }
 
-  // Bare names — fall back to kolm lookup, then refuse if not found.
+  // Bare names - fall back to kolm lookup, then refuse if not found.
   const abs = lookupArtifactByName(model, opts);
   if (abs) return { kind: 'kolm', artifactPath: abs, displayModel: `kolm:${model}` };
 
@@ -266,7 +266,7 @@ function lookupArtifactByName(name, opts) {
 }
 
 // ---------------------------------------------------------------------------
-// kolm path — load the artifact, run it on the last user message's content.
+// kolm path - load the artifact, run it on the last user message's content.
 //
 // The artifact's recipe.schema.input shapes how we coerce the message
 // content. If the recipe expects an object with a `text` field, we wrap
@@ -392,7 +392,7 @@ async function* streamAnthropicCompletion(req, resolved, _opts, id, created) {
 
 // ---------------------------------------------------------------------------
 // OpenAI bridge (non-streaming + streaming). We do not require the openai
-// SDK as a dep — we hit /v1/chat/completions directly via fetch so anyone
+// SDK as a dep - we hit /v1/chat/completions directly via fetch so anyone
 // who set OPENAI_API_KEY gets bridging without npm-installing extra weight.
 // ---------------------------------------------------------------------------
 function openAiProviderConfig() {
@@ -491,7 +491,7 @@ async function* streamOpenAiCompatibleCompletion(req, resolved, provider, _opts,
     const text = await r.text();
     throw apiError(r.status, 'upstream_error', `${provider.vendor} upstream returned ${r.status}: ${text.slice(0, 200)}`);
   }
-  // Forward chunks verbatim — openai SSE format is already what our client
+  // Forward chunks verbatim - openai SSE format is already what our client
   // wants. We rewrite the model field so the client sees "openai:gpt-..."
   // instead of the bare id.
   const reader = r.body.getReader();
@@ -520,7 +520,7 @@ async function* streamOpenAiCompatibleCompletion(req, resolved, provider, _opts,
 }
 
 // ---------------------------------------------------------------------------
-// /v1/models — list bridge-able models.
+// /v1/models - list bridge-able models.
 //
 // For a tenant pointing their OpenAI SDK at us, this is the first call
 // they'll make. We return the kolm artifacts in the search path plus a
@@ -554,7 +554,7 @@ export async function handleListModels(opts = {}) {
       }
     } catch { /* ignore */ }
   }
-  // Bridge targets (always advertised even if no key — clients can detect
+  // Bridge targets (always advertised even if no key - clients can detect
   // and fall back; the actual call will 503 if the key is missing).
   out.push({ id: 'anthropic:claude-haiku-4-5', object: 'model', created: 0, owned_by: 'anthropic', kind: 'bridge' });
   out.push({ id: 'anthropic:claude-sonnet-4-6', object: 'model', created: 0, owned_by: 'anthropic', kind: 'bridge' });
@@ -624,7 +624,7 @@ function coerceInputForBundle(text, bundle) {
         const only = propNames[0];
         return { [only]: text };
       }
-      // Multiple fields — best effort: stuff into 'text' or 'input'.
+      // Multiple fields - best effort: stuff into 'text' or 'input'.
       if (propNames.includes('text')) return { text };
       if (propNames.includes('input')) return { input: text };
       if (propNames.includes('query')) return { query: text };

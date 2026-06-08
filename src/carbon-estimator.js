@@ -124,7 +124,7 @@ export const GRID_CARBON_KGCO2_PER_KWH = Object.freeze({
 // Source: published research (Patterson et al. 2021, Luccioni et al. 2024,
 // EpochAI 2024 inference-cost surveys). These cover the inference-time
 // energy of a single forward pass on hosted frontier hardware (H100 class)
-// at typical batch sizes. They are MODELED upper bounds — vendor-internal
+// at typical batch sizes. They are MODELED upper bounds - vendor-internal
 // power draw is not disclosed.
 //
 // Wh per 1k tokens. The published range is ~0.2-0.5 Wh/1k for small models

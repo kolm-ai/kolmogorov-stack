@@ -15,7 +15,7 @@
 //
 // This is intentionally in-process (a single lambda or a single
 // long-running server). Cross-instance fan-out belongs to a downstream
-// pubsub once we have one — for now the canonical replay path is to
+// pubsub once we have one - for now the canonical replay path is to
 // listCaptures() on reconnect; SSE only carries the live delta.
 
 const subscribers = new Map(); // tenant -> Set<{namespace, write, end, id}>
@@ -48,7 +48,7 @@ export function publishCapture(obs) {
       sub.sink(obs);
       delivered++;
     } catch {
-      // Subscriber sink threw — most likely the underlying socket closed
+      // Subscriber sink threw - most likely the underlying socket closed
       // between the publish and the write. Drop the subscriber so we
       // don't keep retrying on every future capture.
       set.delete(sub);

@@ -4,7 +4,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import rateLimit from 'express-rate-limit';
 import { synthesize, synthesizeStream } from './synthesis.js';
-// W347 — richer build-preview helper (returns k_score + train/holdout rows
+// W347 - richer build-preview helper (returns k_score + train/holdout rows
 // + production_ready) and LLM abstraction for NL→seeds fanout. The two are
 // public/unauthed and rate-limited by builderLimiter (defined later in this
 // file) so the no-code builder can try the full preview path without an
@@ -20,7 +20,7 @@ import * as runtime from './runtime.js';
 import * as cache from './cache.js';
 import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan, isGeoFenced, mintScopedKey, listScopedKeys, revokeScopedKey, keyHasScope } from './auth.js';
 import { mountOAuth, oauthConfigured } from './oauth.js';
-import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert } from './email.js';
+import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert, tEmailReportReady } from './email.js';
 import { compileJs, verify } from './verifier.js';
 import { LIBRARY_VERSION, libraryDescription } from './library.js';
 import { all, findOne, findByField, findByTenant, insert, update, withTransaction, id as storeId, stats as storeStats } from './store.js';
@@ -34,6 +34,8 @@ import { createJob, getJob, listJobs, runJob } from './compile.js';
 import { cidFromManifestHashes, verifyCidAgainstManifestHashes, canonicalJson as cidCanonicalJson } from './cid.js';
 import * as recall from './recall.js';
 import { verifyStripeSignature, planFromAmount, appendCheckoutParams } from './stripe.js';
+import { parseAsrRef } from './asr-billing.js';
+import { fulfillReportPurchase, activateSubscription, setSubscriptionStatus } from './asr-fulfillment.js';
 import {
   pickAnthropicUpstream,
   pickOpenAIUpstream,
@@ -55,7 +57,7 @@ import * as tunnel from './tunnel.js';
 import * as byoc from './byoc.js';
 import { buildDeployPlan, deploymentMatrix } from './deployment-plans.js';
 import { dependencyBlastRadius, dependencyGraphFromManifest } from './artifact-dependency-graph.js';
-// W-INTEG — wire 7 already-built enterprise modules into the route surface.
+// W-INTEG - wire 7 already-built enterprise modules into the route surface.
 // All exported as standalone ESM functions that read/write store.js directly;
 // every route handler below fences to req.tenant_record.id.
 import * as scimProvisioning from './scim-provisioning.js';
@@ -65,12 +67,12 @@ import { handleMcpRequest } from './mcp-server.js';
 import * as webhooksModule from './webhooks.js';
 import * as modelEntitlements from './model-entitlements.js';
 import { evaluateAndGate as compileEvaluateAndGate } from './compile-eval-gate.js';
-// W-INTEG-3 — wave-3 modules (on-device update, inference bench, billing activation, connectors).
+// W-INTEG-3 - wave-3 modules (on-device update, inference bench, billing activation, connectors).
 import * as modelUpdateChannel from './model-update-channel.js';
 import * as inferenceBench from './inference-bench.js';
 import * as billingActivation from './billing-activation.js';
 import * as connectorsModule from './connectors.js';
-// R-2 — artifact lifecycle state machine. Routes below expose the per-artifact
+// R-2 - artifact lifecycle state machine. Routes below expose the per-artifact
 // `lifecycle.json` (created → signed → deployed → monitored → superseded →
 // revoked → archived). The download handler reads canPull() to block pulls
 // against revoked artifacts with HTTP 410 Gone.
@@ -83,7 +85,7 @@ import {
   LIFECYCLE_STATES as LIFECYCLE_STATES_R2,
   VALID_TRANSITIONS as LIFECYCLE_VALID_TRANSITIONS_R2,
 } from './artifact-lifecycle.js';
-// R-5 — Evidence DAG. Routes below expose the per-artifact provenance graph
+// R-5 - Evidence DAG. Routes below expose the per-artifact provenance graph
 // (captures -> evals -> teacher -> student, plus signature/policy/rights
 // nodes). buildDag / trace / revoke live in src/evidence-dag.js; the
 // persistence layer (per-artifact JSON + reverse index by node id) is in
@@ -103,7 +105,7 @@ import {
   readEvidenceDag,
   readNode as readEvidenceNode,
 } from './evidence-store.js';
-// R-6 — Assurance case export. buildAssuranceCase folds R-2 lifecycle + R-5
+// R-6 - Assurance case export. buildAssuranceCase folds R-2 lifecycle + R-5
 // evidence DAG + R-7 drift config + procurement vault rows into a procurement
 // trust packet (claims + framework controls). The PDF renderer is in a
 // sibling module so the JSON path never has to import pdfkit.
@@ -115,21 +117,21 @@ import * as traceCapture from './trace-capture.js';
 import * as workflowIr from './workflow-ir.js';
 import * as compileIr from './compile-ir.js';
 import * as traceCompile from './trace-compile.js';
-// W866 — Forge HTTP surface: hardware detection, model inspection, memory fit,
+// W866 - Forge HTTP surface: hardware detection, model inspection, memory fit,
 // MoE expert analysis. The CLI verbs (kolm hardware/inspect/fit/experts) and
 // the Account UI both call these routes so the source of truth is one module.
 // Hardware/inspect/fit are pure compute (no tenant data, rate-limited). The
 // quantize/merge/serve/export routes wrap existing compile jobs and require
-// auth — they create artifacts on the tenant.
+// auth - they create artifacts on the tenant.
 import * as forgeHardware from './forge-hardware.js';
 import * as forgeInspect from './forge-inspect.js';
 import * as forgeFit from './forge-fit.js';
 import * as forgeExperts from './forge-experts.js';
-// W921 — model merging primitive (TIES/DARE/SLERP/linear in delta-W space).
+// W921 - model merging primitive (TIES/DARE/SLERP/linear in delta-W space).
 // mergeAdapters() is local-CLI-only (spawnSync over merge_adapters.py); the
 // /v1/merge route enqueues it on a background fiber and returns 202 + merge_id.
 import * as modelMerge from './model-merge.js';
-// CONVERSATIONS + EXPORTS — tenant-scoped chat backup + model-export surfaces.
+// CONVERSATIONS + EXPORTS - tenant-scoped chat backup + model-export surfaces.
 // conversations.js persists chat history as event-store rows (provider tag
 // 'kolm-chat'); model-export.js pushes a trained artifact to R2/GitHub/HF/
 // Ollama/custom and records progress as event rows (provider 'kolm-export').
@@ -137,18 +139,18 @@ import * as modelMerge from './model-merge.js';
 // of buildRouter() after authMiddleware.
 import * as conversations from './conversations.js';
 import * as modelExport from './model-export.js';
-// W729 — graceful degradation under load. enqueue() gates the hot inference
+// W729 - graceful degradation under load. enqueue() gates the hot inference
 // routes with a FIFO + priority lane queue; queue_full / queue_timeout
 // rejections surface as HTTP 429 + Retry-After via the loadQueueMiddleware
 // defined below. Kill-switched by KOLM_LOAD_QUEUE_DISABLED=1.
 import { enqueue as __loadQueueEnqueue, getQueueStats as __loadQueueGetStats } from './load-queue.js';
-// W734 — RAG-aware distillation. parseRetrievedContextHeader() reads the
+// W734 - RAG-aware distillation. parseRetrievedContextHeader() reads the
 // kolm-retrieved-context request header (base64 JSON array of
 // {source,text,score?}) and folds the retrieved chunks onto the capture row
 // so the distill loop has the same context the upstream LLM saw. Pure parser
-// — persistence stays in recordCapture / insertCapture.
+// - persistence stays in recordCapture / insertCapture.
 import { parseRetrievedContextHeader as __ragParseRetrievedContextHeader } from './rag-capture.js';
-// W735 — Agent / Tool-Use distillation. parseToolCalls() reads upstream LLM
+// W735 - Agent / Tool-Use distillation. parseToolCalls() reads upstream LLM
 // response bodies and normalises Anthropic / OpenAI / generic tool-call
 // shapes into a {tool_calls,parse_source} record that gets folded onto the
 // capture row. Honest empty envelope on absence (non-tool responses are
@@ -161,7 +163,7 @@ import * as federatedApprovals from './federated-approvals.js';
 import * as slaRollup from './sla-rollup.js';
 import * as artifactLineage from './artifact-lineage.js';
 import { AUDIT_OPS, tryAppendAudit, listAuditEvents, verifyAuditChain } from './audit.js';
-// WC06 — structured logging wrapper. Replaces ad-hoc console.error/log in this
+// WC06 - structured logging wrapper. Replaces ad-hoc console.error/log in this
 // file so (a) operator output is uniform `[tag] msg`, (b) a SIEM can ingest
 // the same stream via event-store when KOLM_LOG_STRUCTURED=1, and (c) fields
 // are sanitised (email/api-key/JWT redacted) BEFORE either sink, so a careless
@@ -173,7 +175,7 @@ import * as pubkeyDir from './pubkey-directory.js';
 import { verifySigstoreBundle, attestWithRekor, fetchRekorEntryByLogIndex, rekorUrl as sigstoreRekorUrl, isDisabled as isSigstoreDisabled, submitToRekor } from './sigstore.js';
 import { saveCorpus as saveTenantCorpus, loadCorpus as loadTenantCorpus, listCorpora as listTenantCorpora, deleteCorpus as deleteTenantCorpus, hashCorpusFile as hashTenantCorpusFile } from './tenant-holdout.js';
 import { listArtifacts as marketplaceListArtifacts, getArtifact as marketplaceGetArtifact, getCatalogManifest as marketplaceGetCatalogManifest, resolveArtifactPath as marketplaceResolveArtifactPath } from './marketplace.js';
-// W342 — single source-of-truth productionReady() gate. The marketplace
+// W342 - single source-of-truth productionReady() gate. The marketplace
 // `verified` flag and the download endpoint both consult this; the dynamic
 // import that lived in the request handler was replaced with a static import
 // so the dependency is grep-able from CI and resolved at boot, not per-call.
@@ -227,7 +229,7 @@ import {
   getTemplate as recipeGetTemplate,
 } from './recipe-templates.js';
 
-// W368 connector daemon — direct passthrough routes for OpenAI/Anthropic/
+// W368 connector daemon - direct passthrough routes for OpenAI/Anthropic/
 // OpenRouter/Gemini SDKs that point their BASE_URL at the daemon. Mounted
 // BEFORE authMiddleware (line ~1571) so SDK calls don't need a kolm.ai
 // tenant key. Upstream creds come from the user's env / config / header.
@@ -249,18 +251,6 @@ import { quantizationOracleCatalog, rankQuantizationStrategies } from './quantiz
 import { cloudComputeBrokerCatalog, planCloudCompute } from './cloud-compute-broker.js';
 import { distillStrategyCatalog, planDistillStrategy } from './distill-strategy.js';
 import { buildStrategyCatalog, planBuildStrategy } from './build-strategy-brain.js';
-import {
-  buildProductFrontierLab,
-  PRODUCT_FRONTIER_LAB_SOURCE_PATHS,
-} from './product-frontier-lab.js';
-import {
-  buildProductFrontierContracts,
-  PRODUCT_FRONTIER_IMPLEMENTATION_CONTRACTS_SOURCE_PATHS,
-} from './product-frontier-contracts.js';
-import {
-  buildProductFrontierOperatorKernels,
-  PRODUCT_FRONTIER_OPERATOR_KERNELS_SOURCE_PATHS,
-} from './product-frontier-operator-kernels.js';
 import {
   auditPackageReleaseReadiness,
   packageReleaseManifestTemplate,
@@ -307,7 +297,7 @@ import {
 } from './evidence-readiness.js';
 
 // =====================================================================
-// W384 — backend wiring imports for /v1/* routes that expose the W369–
+// W384 - backend wiring imports for /v1/* routes that expose the W369 - 
 // W383 modules over HTTP. Kept in a single block so the dependency
 // inventory is grep-able by CI. All imports are static (resolved at
 // boot) so the route handlers do not pay a dynamic-import tax per call.
@@ -407,7 +397,7 @@ import {
   testDevice as devTestDevice,
   getDevice as devGetDevice,
 } from './device-capabilities.js';
-// W409s — device target PROFILES.
+// W409s - device target PROFILES.
 // Add the static-profile picker so /v1/devices/detect (GET + POST) returns
 // the matching W409s PROFILE alongside the W372 capability snapshot.
 import {
@@ -424,7 +414,7 @@ import { storeBlob as mediaStoreBlob, mimeToExt as mediaMimeToExt } from './medi
 import { appendEvent as eventAppend, listEvents as eventList, getEvent as eventGet, countEvents as eventCount, purgeEvents as eventPurge, storeInfo as eventStoreInfo } from './event-store.js';
 import { MEDIA_KINDS as EVENT_MEDIA_KINDS } from './event-schema.js';
 
-// W409y — real billing-units metering. Counters live in JSON files under
+// W409y - real billing-units metering. Counters live in JSON files under
 // KOLM_USAGE_DIR (or KOLM_DATA_DIR/usage). Tier caps + privacy-promise
 // guards (local-only → never reports) are enforced inside usage.js, so
 // every call here is safe to fire regardless of auth state.
@@ -439,45 +429,45 @@ import {
   getUsage as usageGetUsage,
 } from './usage.js';
 
-// W465 — per-namespace cost attribution + team-level rollup.
+// W465 - per-namespace cost attribution + team-level rollup.
 import {
   tenantNamespaceBreakdown as billingTenantNamespaceBreakdown,
   teamRollup as billingTeamRollup,
 } from './billing-breakdown.js';
-// W835 — savings-based pricing tracker (baseline vs post-kolm + 12.5% fee).
+// W835 - savings-based pricing tracker (baseline vs post-kolm + 12.5% fee).
 import { registerSavingsRoutes as __registerSavingsRoutes_w835 } from './savings-routes.js';
-// W822 — A/B testing infrastructure routes (configure / status / feedback /
+// W822 - A/B testing infrastructure routes (configure / status / feedback /
 // promote / metrics). Modular mount to keep router.js diff to one line so
 // parallel agents on this file don't fight merge conflicts.
 import { registerAbRoutes as __registerAbRoutes_w822 } from './ab-routes.js';
-// W821 — artifact-composition pipeline orchestrator routes (modular mount).
+// W821 - artifact-composition pipeline orchestrator routes (modular mount).
 import { registerPipelineRoutes as __registerPipelineRoutes_w821 } from './pipeline-routes.js';
-// W832 — kolm-meta meta-distillation model routes (status, retrain, predict).
+// W832 - kolm-meta meta-distillation model routes (status, retrain, predict).
 import { registerMetaRoutes as __registerMetaRoutes_w832 } from './meta-routes.js';
-// W833 — cross-lingual foundation routes (distribution, synthesize,
+// W833 - cross-lingual foundation routes (distribution, synthesize,
 // mixture/auto-balance, manifest). Modular mount keeps the router.js diff
 // down to one import + one call line; the route bodies live in
 // src/lingual-routes.js so parallel-wave merges don't collide here.
 import { registerLingualRoutes as __registerLingualRoutes_w833 } from './lingual-routes.js';
-// W831 — offline / air-gapped routes (distill run+status, sneakernet
+// W831 - offline / air-gapped routes (distill run+status, sneakernet
 // bundle+verify, bakeoff, doctor). Modular mount.
 import { registerAirgapRoutes as __registerAirgapRoutes_w831 } from './airgap-routes.js';
-// W829 — multimodal capture pipeline routes (modular mount).
+// W829 - multimodal capture pipeline routes (modular mount).
 import { registerMultimodalPipelineRoutes as __registerMultimodalPipelineRoutes_w829 } from './multimodal-pipeline-routes.js';
-// W825 — Artifact Marketplace MVP routes (browse, upload, download, finetune,
+// W825 - Artifact Marketplace MVP routes (browse, upload, download, finetune,
 // rate, ratings, payout-cycle). One-line modular mount keeps the router.js
 // diff to a single import + one call so concurrent wave agents (WC07/WC14/
 // W822/W824) editing router.js cannot collide on a merge.
 import { registerMarketplaceRoutes as __registerMarketplaceRoutes_w825 } from './marketplace-routes.js';
-// W824 — Kubernetes-native /ready/deep + /metrics/extended (modular mount,
+// W824 - Kubernetes-native /ready/deep + /metrics/extended (modular mount,
 // keeps router.js diff to one import + one call to avoid merge conflicts
 // with WC07/WC14/W822 concurrent edits).
 import { registerK8sRoutes as __registerK8sRoutes_w824 } from './k8s-routes.js';
-// W830 — federated consortium management routes (opt-in, budget, members,
+// W830 - federated consortium management routes (opt-in, budget, members,
 // aggregations, verify-mia). One-line modular mount per W830 plan to avoid
 // merge conflicts with in-flight router.js fixes.
 import { registerFederatedConsortiumRoutes as __registerFederatedConsortiumRoutes_w830 } from './federated-consortium-routes.js';
-// W834 — Regulatory compliance toolkit routes (EU AI Act docs, risk classify,
+// W834 - Regulatory compliance toolkit routes (EU AI Act docs, risk classify,
 // HIL threshold, data-governance report, extended model card, GRC export).
 // Modular mount keeps router.js diff to one import + one call line per the
 // W83x concurrent-edit standing directive.
@@ -487,14 +477,16 @@ import { registerWebsiteStatusRoutes as __registerWebsiteStatusRoutes_w921 } fro
 import { register as __registerGovernRoutes_w921 } from './govern-routes.js';
 import { register as __registerIntotoReceiptRoutes_w921 } from './intoto-receipt-routes.js';
 import { register as __registerMcpGatewayRoutes_w921 } from './mcp-gateway-routes.js';
+// Agent Security-Review audit - signed evidence report API (sessions/scan/verify).
+import { register as __registerAuditRoutes_asr } from './audit-routes.js';
 
-// W709-5 — runtime-router decision summary for /account/routing dashboard.
+// W709-5 - runtime-router decision summary for /account/routing dashboard.
 import {
   summarizeRouting as routingSummarize,
   recentRoutingDecisions as routingRecent,
 } from './routing-events.js';
 
-// W786 — Carbon footprint / CO2 estimator. Pure functions in
+// W786 - Carbon footprint / CO2 estimator. Pure functions in
 // src/carbon-estimator.js drive the GET /v1/carbon/estimate route, the
 // `kolm carbon estimate` CLI, and the badgeFor() helper that stamps
 // `sustainability_badge` into the .kolm manifest at build time.
@@ -507,7 +499,7 @@ import {
   CARBON_VERSION as CARBON_VERSION_W786,
 } from './carbon-estimator.js';
 
-// W466 — multimodal bake-off harness (image/audio/video).
+// W466 - multimodal bake-off harness (image/audio/video).
 import { runMultimodalBakeoff } from './multimodal-bakeoff.js';
 import {
   detectModality as multimodalDetectModality,
@@ -515,7 +507,7 @@ import {
   tokenizeDir as multimodalTokenizeDir,
 } from '../services/embed/multimodal.js';
 
-// W467 — cross-provider trace IR translator.
+// W467 - cross-provider trace IR translator.
 import {
   translateIr as traceTranslateIr,
   translateTrace as traceTranslateTrace,
@@ -565,7 +557,7 @@ const exportLimiter = rateLimit({
   max: 60,                          // 60 registry-exports per IP per minute
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — registry export caps at 60/min/ip' },
+  message: { error: 'rate-limited - registry export caps at 60/min/ip' },
   validate: { trustProxy: false },
 });
 
@@ -574,11 +566,11 @@ const verifiedLimiter = rateLimit({
   max: 30,                          // 30 verified-inference calls per IP per minute (it's expensive)
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — verified inference caps at 30/min/ip' },
+  message: { error: 'rate-limited - verified inference caps at 30/min/ip' },
   validate: { trustProxy: false },
 });
 
-// Anonymous workspace bootstrap — bots can mint these without an email. Cap to
+// Anonymous workspace bootstrap - bots can mint these without an email. Cap to
 // prevent disk-DoS-by-tenant-row.
 const ROUTER_REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PRODUCT_GRAPH_PATH = path.join(ROUTER_REPO_ROOT, 'public', 'product-graph.json');
@@ -598,7 +590,7 @@ function readProductGraph() {
     _productGraphAt = now;
     return _productGraphCache;
   } catch (e) {
-    // Don't cache failure — let the next request retry the disk read.
+    // Don't cache failure - let the next request retry the disk read.
     _productGraphCache = null;
     _productGraphAt = 0;
     return {
@@ -614,7 +606,7 @@ export function _resetProductGraphCacheForTests() {
   _productGraphAt = 0;
 }
 
-// R-6 — Workspace context loader. Folds the procurement vault (sig-lite +
+// R-6 - Workspace context loader. Folds the procurement vault (sig-lite +
 // caiq) into a single workspace shape that buildAssuranceCase consumes.
 // Best-effort: missing files leave the corresponding key undefined, which
 // downgrades vault-derived claims rather than crashing the endpoint.
@@ -632,7 +624,7 @@ const anonLimiter = rateLimit({
   max: 50,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'too many anon workspaces from this IP — try again tomorrow' },
+  message: { error: 'too many anon workspaces from this IP - try again tomorrow' },
   validate: { trustProxy: false },
 });
 
@@ -641,13 +633,13 @@ const waitlistLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — waitlist caps at 10/hr/ip' },
+  message: { error: 'rate-limited - waitlist caps at 10/hr/ip' },
   validate: { trustProxy: false },
 });
 
-// W889-10.1 — Marketplace v2 interest capture. Public, IP-rate-limited to
+// W889-10.1 - Marketplace v2 interest capture. Public, IP-rate-limited to
 // 10 hits per IP per 24 hours so a single spammer cannot pollute the
-// early-access list. Per-IP coalescing is keyed on raw req.ip — the lake
+// early-access list. Per-IP coalescing is keyed on raw req.ip - the lake
 // row itself records the trimmed/lowercased email so dedupe is unambiguous
 // regardless of which IP submitted the row.
 const marketplaceInterestLimiter = rateLimit({
@@ -655,7 +647,7 @@ const marketplaceInterestLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — marketplace interest caps at 10/IP/24h' },
+  message: { error: 'rate-limited - marketplace interest caps at 10/IP/24h' },
   validate: { trustProxy: false },
 });
 
@@ -664,7 +656,7 @@ const statusSubscribeLimiter = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — status subscribe caps at 60/hr/ip' },
+  message: { error: 'rate-limited - status subscribe caps at 60/hr/ip' },
   validate: { trustProxy: false },
 });
 
@@ -673,7 +665,7 @@ const signinLimiter = rateLimit({
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — sign-in caps at 30/5min/ip' },
+  message: { error: 'rate-limited - sign-in caps at 30/5min/ip' },
   validate: { trustProxy: false },
 });
 
@@ -682,11 +674,11 @@ const publishLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — publish/verify caps at 20/min/ip' },
+  message: { error: 'rate-limited - publish/verify caps at 20/min/ip' },
   validate: { trustProxy: false },
 });
 
-// W844 — /v1/free/chat. Pre-auth free tier so visitors can tinker with the
+// W844 - /v1/free/chat. Pre-auth free tier so visitors can tinker with the
 // kolm intent classifier before signing up. 20 messages/IP/day; when a real
 // API key is attached, the same handler upgrades to the full snapshot path.
 // Tight enough to deter scrapers, loose enough that a curious dev can build
@@ -705,7 +697,7 @@ const freeChatLimiter = rateLimit({
   validate: { trustProxy: false },
 });
 
-// W888-R — /v1/assistant/chat-docs. Public docs-search assistant. Heavier
+// W888-R - /v1/assistant/chat-docs. Public docs-search assistant. Heavier
 // model + larger answer than /v1/free/chat (which routes through the small
 // intent classifier), so the cap is set higher per-window (60 vs 20) but
 // the per-turn budget is HALF the authed cap ($0.005 vs $0.01) since this
@@ -725,7 +717,7 @@ const docsAssistantLimiter = rateLimit({
   validate: { trustProxy: false },
 });
 
-// W889-6.1 — /v1/sales/demo-request limiter. 10 hits per IP per 24h per the
+// W889-6.1 - /v1/sales/demo-request limiter. 10 hits per IP per 24h per the
 // MCD Block 6 spec. Separate from enterpriseLeadLimiter (5/hour) because demo
 // requests are a lighter-weight intake (less structured) and we want a buyer
 // trying multiple wordings to still get through over a workday. ipKey() /24
@@ -735,7 +727,7 @@ const demoRequestLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — demo requests cap at 10/24h/ip' },
+  message: { error: 'rate-limited - demo requests cap at 10/24h/ip' },
   keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
@@ -749,7 +741,7 @@ const enterpriseLeadLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'rate-limited — enterprise inquiries cap at 5/hour/ip' },
+  message: { error: 'rate-limited - enterprise inquiries cap at 5/hour/ip' },
   keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
@@ -760,7 +752,7 @@ const enterpriseLeadLimiter = rateLimit({
 // Process-restart resets the array; Resend has the durable record.
 const enterpriseLeads = [];
 
-// W889-6.1 — Sales demo-request intake. Same in-memory + email pattern as
+// W889-6.1 - Sales demo-request intake. Same in-memory + email pattern as
 // enterpriseLeads; namespace 'sales/demo-requests' in the capture lake when
 // a tenant-scoped lake is wired (operator-supplied), otherwise email is the
 // authoritative record. Process-restart resets; Resend has durability.
@@ -779,7 +771,7 @@ const builderLimiter = rateLimit({
   validate: { trustProxy: false },
 });
 
-// W411 — anonymous /v1/models probe limiter. OpenAI/Anthropic SDKs hit
+// W411 - anonymous /v1/models probe limiter. OpenAI/Anthropic SDKs hit
 // /v1/models BEFORE authenticating so we must keep it open. Cap anonymous
 // probes at 60/min/ip to defang abuse; authenticated callers bypass the cap.
 const anonModelsProbeLimiter = rateLimit({
@@ -798,7 +790,7 @@ const anonModelsProbeLimiter = rateLimit({
   },
 });
 
-// WC14 — marketplace publish-request is unauth (a stranger proposing an
+// WC14 - marketplace publish-request is unauth (a stranger proposing an
 // artifact for review). 5/IP/24h is enough for a real submitter to retry
 // after a typo but cheap to enforce against form-spammer scripts.
 const publishRequestLimiter = rateLimit({
@@ -816,7 +808,7 @@ const publishRequestLimiter = rateLimit({
   validate: { trustProxy: false },
 });
 
-// WC14 — /v1/public/run is unauth try-it traffic for public concepts. The
+// WC14 - /v1/public/run is unauth try-it traffic for public concepts. The
 // call path actually executes a runtime so it is compute-heavy; 20/IP/hour
 // keeps a curious visitor flowing but blocks scripted abuse.
 const publicRunLimiter = rateLimit({
@@ -827,20 +819,20 @@ const publicRunLimiter = rateLimit({
   message: {
     error: 'rate_limited',
     detail: 'too many anonymous /v1/public/run calls from this network in the last hour',
-    hint: 'sign up for a free key to lift the cap — https://kolm.ai/signup',
+    hint: 'sign up for a free key to lift the cap - https://kolm.ai/signup',
   },
   keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
-// WC14 — token-in-body throttles for /v1/sync/inbox and /v1/team/accept-invite.
+// WC14 - token-in-body throttles for /v1/sync/inbox and /v1/team/accept-invite.
 // Both routes accept a credential in the request body (no Authorization header),
 // so a brute-forcer can spam guesses without tripping the auth-middleware
 // limiter. We track per-IP failure counts in a small in-process map and lock
 // the IP out for 15 minutes after 5 failed attempts. Route handlers call
 // _wc14NoteAuthFailure / _wc14NoteAuthSuccess based on their own validation
 // outcome (rate-limiter middleware only gates request volume, not credential
-// validation). Process-restart resets the map — durable rate limiting lives
+// validation). Process-restart resets the map - durable rate limiting lives
 // at the upstream (Cloudflare / Vercel firewall) layer.
 const _WC14_BACKOFF_MAX_FAILS = 5;
 const _WC14_BACKOFF_LOCKOUT_MS = 15 * 60 * 1000;
@@ -898,7 +890,7 @@ export function _wc14ResetBackoffForTests() {
 const syncInboxBackoff = _wc14BackoffMiddleware('sync_inbox');
 const teamAcceptBackoff = _wc14BackoffMiddleware('team_accept_invite');
 
-// W411 — runtime-mode discriminator. Hosted (kolm.ai cloud) REQUIRES a kolm
+// W411 - runtime-mode discriminator. Hosted (kolm.ai cloud) REQUIRES a kolm
 // tenant key on the OpenAI/Anthropic-compatible inference passthrough routes
 // so anonymous traffic cannot bill upstream costs against the operator.
 // Local-daemon mode (127.0.0.1:7403 via `kolm connect start`) stays
@@ -930,7 +922,7 @@ function __w411LocalSentinelTenant() {
   return __w411LocalTenantId;
 }
 
-// W411 — hosted-auth gate. Mounted BEFORE the connector passthrough routes
+// W411 - hosted-auth gate. Mounted BEFORE the connector passthrough routes
 // (/v1/chat/completions, /v1/responses, /v1/embeddings, /v1/messages,
 // /v1/capture/openai, /v1/capture/anthropic, /v1/capture/openrouter,
 // /v1/capture/gemini, plus the provider aliases). On hosted servers, requires a valid kolm tenant
@@ -943,7 +935,7 @@ function __w411HostedAuthGate(req, res, next) {
   if (__w411IsLocalDaemonMode()) {
     // Local-daemon mode: anonymous requests get stamped with a sentinel
     // tenant. BUT if a valid kolm tenant key is presented (Bearer or
-    // X-API-Key), resolve it so captures land under that tenant_id — the
+    // X-API-Key), resolve it so captures land under that tenant_id - the
     // local daemon doubles as an authenticated dev workspace and the lake /
     // datasets / labels surfaces fence on req.tenant_record.id.
     const header = String(req.headers.authorization || '');
@@ -1088,7 +1080,7 @@ const PRICING = {
   runtime_cache_per_million: 0.05,
 };
 
-// Cryptographic receipts — every /v1/run call returns a signed proof that
+// Cryptographic receipts - every /v1/run call returns a signed proof that
 // (source, input) → output. The issuer or any holder of the shared tenant
 // receipt secret can re-verify with /v1/receipts/verify (server-side
 // recompute) or offline. Ed25519 public-key receipts are roadmap.
@@ -1100,7 +1092,7 @@ const RECEIPT_SECRET = (() => {
   const s = effectiveReceiptSecret();
   if (s) return s;
   if (isProductionRuntime()) {
-    console.error('[router] WARNING: RECIPE_RECEIPT_SECRET not set — receipt endpoints will 503. Set it on Railway env.');
+    console.error('[router] WARNING: RECIPE_RECEIPT_SECRET not set - receipt endpoints will 503. Set it on Railway env.');
     return null;
   }
   return null;
@@ -1111,7 +1103,7 @@ function sha256(s) {
 }
 
 function canonicalJson(v) {
-  // Stable JSON: keys sorted at every depth — required so identical inputs hash identically.
+  // Stable JSON: keys sorted at every depth - required so identical inputs hash identically.
   if (v === null || typeof v !== 'object') return JSON.stringify(v);
   if (Array.isArray(v)) return '[' + v.map(canonicalJson).join(',') + ']';
   const keys = Object.keys(v).sort();
@@ -1153,11 +1145,11 @@ function verifyReceipt(receipt) {
   return diff === 0 ? { valid: true } : { valid: false, reason: 'hmac mismatch' };
 }
 
-// W869+ Persona A.7 — VRAM pre-flight gate. Returns null if check is skipped
+// W869+ Persona A.7 - VRAM pre-flight gate. Returns null if check is skipped
 // (auto/cpu-server/unknown model), { fits: true } if the projected memory fits,
 // or { fits: false, envelope } with a structured 422 body. Conservative: we
 // project int4 quant at 4K context, so the gate only refuses jobs that would
-// fail at the smallest reasonable footprint — never blocks a job that would
+// fail at the smallest reasonable footprint - never blocks a job that would
 // actually fit with a tighter quant or shorter context.
 const _VRAM_TIER_GB = Object.freeze({
   '3090': 24, '4090': 24, '5090': 32,
@@ -1203,7 +1195,7 @@ function _checkVramPreflight(base_model, hw_tier) {
       available_gb: vram_gb,
       base_model,
       hw_tier,
-      recommendation: recommended ? `try hw_tier='${recommended[0]}' (${recommended[1]} GB)` : 'no available tier fits — pick a smaller base_model',
+      recommendation: recommended ? `try hw_tier='${recommended[0]}' (${recommended[1]} GB)` : 'no available tier fits - pick a smaller base_model',
       fit_envelope: fit,
       docs: '/docs/cli/fit',
       version: 'w869-v1',
@@ -1211,7 +1203,7 @@ function _checkVramPreflight(base_model, hw_tier) {
   };
 }
 
-// W888-Q — AssistantClient lazy singleton. The client is constructed once
+// W888-Q - AssistantClient lazy singleton. The client is constructed once
 // per process and reused across every /v1/assistant/chat hit. Test runs may
 // override the constructor via setAssistantClientForTests() so the route
 // surface can be exercised without spinning up a real local GGUF runner or
@@ -1250,8 +1242,8 @@ export function setAssistantClientForTests(factory) {
   _assistantClientFactoryForTests = factory || null;
 }
 
-// W888-Q — per-tenant rate counter for /v1/assistant/chat. 60 calls/hour/tenant.
-// In-memory (per-process) — for multi-replica deployments this would need a
+// W888-Q - per-tenant rate counter for /v1/assistant/chat. 60 calls/hour/tenant.
+// In-memory (per-process) - for multi-replica deployments this would need a
 // shared store. Acceptable for first cut; the limit is per-replica.
 const ASSISTANT_CHAT_RATE_LIMIT = 60;
 const ASSISTANT_CHAT_RATE_WINDOW_MS = 60 * 60 * 1000;
@@ -1278,7 +1270,7 @@ export function _resetAssistantChatRateForTests() {
 export function buildRouter() {
   const r = express.Router();
 
-  // CORS — allow SDKs from any origin to hit the API
+  // CORS - allow SDKs from any origin to hit the API
   r.use((req, res, next) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Headers', [
@@ -1313,7 +1305,7 @@ export function buildRouter() {
     next();
   });
 
-  // W910 Track B — no-code /account/create-model surface routes.
+  // W910 Track B - no-code /account/create-model surface routes.
   // Registered here, BEFORE the parameter-matching /v1/recipes/:id and
   // /v1/compile/:id handlers further down, so the literal `templates` /
   // `estimate` / `preview` / `start` segments resolve to the wizard
@@ -1322,7 +1314,7 @@ export function buildRouter() {
   // All routes are public+stubbed by default (declared in PUBLIC_API in
   // src/auth.js) so the no-code wizard works pre-auth. Rate-limited inside
   // the handler via freeChatLimiter (20/IP/day for the budget-bearing ones).
-  // GET /v1/recipes/templates — picker for the "Start with a template" empty
+  // GET /v1/recipes/templates - picker for the "Start with a template" empty
   // state. Curated catalog; no tenant scoping.
   r.get('/v1/recipes/templates', (_req, res) => {
     res.json({
@@ -1340,7 +1332,7 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/compile/estimate — debounced cost/time estimate. Heuristic
+  // POST /v1/compile/estimate - debounced cost/time estimate. Heuristic
   // via src/compile-stream.js. GET alias accepts ?describe=… so the
   // browser fetcher doesn't need a CORS preflight.
   const compileEstimateHandler = async (req, res) => {
@@ -1360,7 +1352,7 @@ export function buildRouter() {
   r.post('/v1/compile/estimate', freeChatLimiter, compileEstimateHandler);
   r.get('/v1/compile/estimate', freeChatLimiter, compileEstimateHandler);
 
-  // POST /v1/compile/preview — 5 synthetic Q&A pairs (stub). Real version
+  // POST /v1/compile/preview - 5 synthetic Q&A pairs (stub). Real version
   // would call the LLM bridge; this returns a deterministic sample so the
   // Describe-tab "Generate preview" button works without any keys.
   r.post('/v1/compile/preview', freeChatLimiter, (req, res) => {
@@ -1386,7 +1378,7 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/compile/start — wizard "Compile" CTA. Returns a job id the
+  // POST /v1/compile/start - wizard "Compile" CTA. Returns a job id the
   // overlay opens an SSE stream against. Stubbed for the no-code path.
   r.post('/v1/compile/start', freeChatLimiter, (req, res) => {
     const body = req.body || {};
@@ -1397,11 +1389,11 @@ export function buildRouter() {
       stream_url: `/v1/compile/stream/${jobId}`,
       reattach_hint: 'Append ?cursor=<last seq> to resume after a reload.',
       submitted: { tab: body.tab || 'describe', recipe: body.recipe || 'default', target_vram_gb: Number(body.target_vram_gb || 24) },
-      note: 'Stub job — emits deterministic progress events for the wizard overlay.',
+      note: 'Stub job - emits deterministic progress events for the wizard overlay.',
     });
   });
 
-  // GET /v1/compile/stream/:job — SSE event stream powering the compile
+  // GET /v1/compile/stream/:job - SSE event stream powering the compile
   // overlay. Reload-safe via ?cursor. See src/compile-stream.js for the
   // event contract.
   r.get('/v1/compile/stream/:job', async (req, res) => {
@@ -1415,7 +1407,7 @@ export function buildRouter() {
     }
   });
 
-  // POST /v1/connectors/notify — capture an email for a not-yet-shipped
+  // POST /v1/connectors/notify - capture an email for a not-yet-shipped
   // connector tile on the Connect tab. Appends to
   // data/connector-waitlist.jsonl. Best-effort: never breaks the UI.
   r.post('/v1/connectors/notify', freeChatLimiter, async (req, res) => {
@@ -1446,7 +1438,7 @@ export function buildRouter() {
     }
   });
 
-  // POST /v1/draft/save — autosave wizard draft state. Returns a draft_id
+  // POST /v1/draft/save - autosave wizard draft state. Returns a draft_id
   // so authed callers can later resume; anon callers also get an id but
   // the persistence flag is false (the page falls back to localStorage).
   r.post('/v1/draft/save', (req, res) => {
@@ -1456,7 +1448,7 @@ export function buildRouter() {
     res.json({ ok: true, surface, draft_id: draftId, saved_at: new Date().toISOString(), persisted: !!req.tenant_record });
   });
 
-  // GET /v1/capture/snippet — copy-paste snippet for the Capture tab.
+  // GET /v1/capture/snippet - copy-paste snippet for the Capture tab.
   // Fills tenant key when authed, placeholder otherwise.
   r.get('/v1/capture/snippet', (req, res) => {
     const namespace = String(req.query.namespace || 'default').trim().slice(0, 64) || 'default';
@@ -1471,7 +1463,7 @@ export function buildRouter() {
     res.json({ ok: true, namespace, lang, snippet: snippets[lang] || snippets.curl, snippets });
   });
 
-  // POST /v1/playground/proxy/:slug — public playground stub. Echo so
+  // POST /v1/playground/proxy/:slug - public playground stub. Echo so
   // /playground/[slug] renders without RunPod bound. 20/IP/day.
   r.post('/v1/playground/proxy/:slug', freeChatLimiter, (req, res) => {
     const slug = String(req.params.slug || '').slice(0, 64);
@@ -1488,7 +1480,7 @@ export function buildRouter() {
     });
   });
 
-  // Public /health — no provider-key leakage. Authenticated callers can
+  // Public /health - no provider-key leakage. Authenticated callers can
   // hit /v1/health for the full snapshot including backend availability.
   // W888-L: ok:true is the canonical liveness signal for ship-gate, status
   // is preserved for older readers. W890-13: extended with `git`, `gateway`,
@@ -1598,16 +1590,16 @@ export function buildRouter() {
     });
   });
 
-  // W730 — Prometheus /metrics scrape endpoint. Mounted BEFORE
+  // W730 - Prometheus /metrics scrape endpoint. Mounted BEFORE
   // authMiddleware so a Prometheus scraper can reach it without an API
   // key, optionally gated by KOLM_METRICS_BEARER for prod deployments.
   // The honest-dev-default is public; setting the env var requires
   // `Authorization: Bearer <token>` and returns a structured 401 envelope
   // on mismatch so misconfigured scrapers fail loud.
   r.get('/metrics', async (req, res) => {
-    // WC07 — envSecret returns null when KOLM_METRICS_BEARER is unset OR set
+    // WC07 - envSecret returns null when KOLM_METRICS_BEARER is unset OR set
     // to empty/whitespace. The previous `|| ''` collapsed both cases into the
-    // truthiness-falsy branch — same code path as the honest "operator chose
+    // truthiness-falsy branch - same code path as the honest "operator chose
     // not to gate" case. That's intentional in DEV (open dev /metrics) but
     // surprising in prod where the operator THOUGHT they set the env var.
     // We preserve the dev-default-open behaviour but the null semantics make
@@ -1666,7 +1658,7 @@ export function buildRouter() {
     return res.status(201).json({ ok: true, subscribed: true, email });
   });
 
-  // W313 — public anonymous "try it" demo of the capture-receipt shape.
+  // W313 - public anonymous "try it" demo of the capture-receipt shape.
   // No auth, no write side-effects; visitors on /value-loop POST a prompt+response
   // and see the exact same receipt envelope a real authenticated /v1/bridges/observe
   // would emit, with `demo:true` + `durable:false` so the body cannot lie.
@@ -1778,129 +1770,6 @@ export function buildRouter() {
     });
     attachEnvelopeHeaders(res, envelope);
     res.status(graph.ok === false ? 503 : 200).json(envelope);
-  });
-
-  // Product frontier lab - public, secret-safe summary of the research-to-build
-  // experiment portfolio. This is a local product planning contract, not a
-  // claim of external benchmark, package, adoption, or certification completion.
-  r.get('/v1/product/frontier-lab', (req, res) => {
-    try {
-      const include = String(req.query.include_experiments || req.query.experiments || '') === '1';
-      const lab = buildProductFrontierLab({
-        root: ROUTER_REPO_ROOT,
-        category: req.query.category ? String(req.query.category) : null,
-        experiment: req.query.experiment ? String(req.query.experiment) : null,
-        source: req.query.source ? String(req.query.source) : null,
-        metric: req.query.metric ? String(req.query.metric) : null,
-      });
-      const data = {
-        lab: include ? lab : { ...lab, selected_experiments: lab.selected_experiments.slice(0, 5) },
-        secret_values_included: false,
-      };
-      const envelope = okEnvelope({
-        surface: 'public-docs-sdk',
-        journey: 'compile-verify',
-        readiness: {
-          status: lab.readiness_status,
-          requirement_ids: ['product-frontier-lab', 'research-to-build-handoff'],
-          external_requirements: lab.external_ready ? [] : [
-            'external evidence remains in readiness closeout gates before public finality claims',
-          ],
-        },
-        data,
-        evidence: {
-          source_paths: PRODUCT_FRONTIER_LAB_SOURCE_PATHS,
-        },
-        next_actions: lab.next_actions,
-      });
-      attachEnvelopeHeaders(res, envelope);
-      res.status(lab.local_contract_ok ? 200 : 503).json(envelope);
-    } catch (e) {
-      res.status(500).json({ ok: false, error: 'product_frontier_lab_error', detail: String(e.message || e) });
-    }
-  });
-
-  // Product frontier implementation contracts - public, secret-safe handoff
-  // from research experiments to implementation-agent owner files, routes,
-  // commands, smoke fixtures, evidence gates, and failure modes.
-  r.get('/v1/product/frontier-contracts', (req, res) => {
-    try {
-      const include = String(req.query.include_contracts || req.query.contracts || '') === '1';
-      const contracts = buildProductFrontierContracts({
-        root: ROUTER_REPO_ROOT,
-        contract: req.query.contract ? String(req.query.contract) : null,
-        experiment: req.query.experiment ? String(req.query.experiment) : null,
-        category: req.query.category ? String(req.query.category) : null,
-        source: req.query.source ? String(req.query.source) : null,
-        metric: req.query.metric ? String(req.query.metric) : null,
-      });
-      const data = {
-        contracts: include ? contracts : { ...contracts, selected_contracts: contracts.selected_contracts.slice(0, 5) },
-        secret_values_included: false,
-      };
-      const envelope = okEnvelope({
-        surface: 'public-docs-sdk',
-        journey: 'compile-verify',
-        readiness: {
-          status: contracts.readiness_status,
-          requirement_ids: ['product-frontier-implementation-contracts', 'research-to-build-handoff'],
-          external_requirements: contracts.external_ready ? [] : [
-            'external evidence remains in readiness closeout gates before public finality claims',
-          ],
-        },
-        data,
-        evidence: {
-          source_paths: PRODUCT_FRONTIER_IMPLEMENTATION_CONTRACTS_SOURCE_PATHS,
-        },
-        next_actions: contracts.next_actions,
-      });
-      attachEnvelopeHeaders(res, envelope);
-      res.status(contracts.local_contract_ok ? 200 : 503).json(envelope);
-    } catch (e) {
-      res.status(500).json({ ok: false, error: 'product_frontier_contracts_error', detail: String(e.message || e) });
-    }
-  });
-
-  // Product frontier operator kernels - public, secret-safe build plans that
-  // convert the frontier research and implementation contracts into concrete
-  // backend kernels across quantization, compile, distill, serving, eval, cloud,
-  // edge, governance, security, and agent automation.
-  r.get('/v1/product/operator-kernels', (req, res) => {
-    try {
-      const include = String(req.query.include_kernels || req.query.kernels || '') === '1';
-      const kernels = buildProductFrontierOperatorKernels({
-        root: ROUTER_REPO_ROOT,
-        kernel: req.query.kernel ? String(req.query.kernel) : null,
-        category: req.query.category ? String(req.query.category) : null,
-        source: req.query.source ? String(req.query.source) : null,
-        metric: req.query.metric ? String(req.query.metric) : null,
-        journey: req.query.journey ? String(req.query.journey) : null,
-      });
-      const data = {
-        operator_kernels: include ? kernels : { ...kernels, selected_kernels: kernels.selected_kernels.slice(0, 5) },
-        secret_values_included: false,
-      };
-      const envelope = okEnvelope({
-        surface: 'public-docs-sdk',
-        journey: 'compile-verify',
-        readiness: {
-          status: kernels.readiness_status,
-          requirement_ids: ['product-frontier-operator-kernels', 'research-to-build-handoff'],
-          external_requirements: kernels.external_ready ? [] : [
-            'external evidence remains in readiness closeout gates before public finality claims',
-          ],
-        },
-        data,
-        evidence: {
-          source_paths: PRODUCT_FRONTIER_OPERATOR_KERNELS_SOURCE_PATHS,
-        },
-        next_actions: kernels.next_actions,
-      });
-      attachEnvelopeHeaders(res, envelope);
-      res.status(kernels.local_contract_ok ? 200 : 503).json(envelope);
-    } catch (e) {
-      res.status(500).json({ ok: false, error: 'product_frontier_operator_kernels_error', detail: String(e.message || e) });
-    }
   });
 
   // Evidence readiness - one public, secret-safe aggregate for every proof gate
@@ -2578,7 +2447,7 @@ export function buildRouter() {
   // sales-led enterprise row). Enterprise stays sales-led (self_serve:false).
   // Each paid plan declares its STRIPE_PAYMENT_LINK_<X> env; billingLinkFor()
   // returns null when the env is unset and the UI demotes accordingly.
-  // W889-6.1 — Enterprise tier flipped to sales-led: price_usd_month=null,
+  // W889-6.1 - Enterprise tier flipped to sales-led: price_usd_month=null,
   // price_label='Custom', contact_sales=true. compile_credits_monthly per
   // tier added so /v1/plans + the /pricing page can publish the credit
   // allotment from one source. 'custom' means uncapped pending architecture
@@ -2666,7 +2535,7 @@ export function buildRouter() {
   // configured. /v1/oauth/providers reports which are live.
   mountOAuth(r);
 
-  // W889-8.4 — short OAuth aliases: GET /v1/auth/github redirects to the
+  // W889-8.4 - short OAuth aliases: GET /v1/auth/github redirects to the
   // canonical /v1/oauth/github/start (preserving any ?redirect= query). Same
   // for /v1/auth/github/callback (forwards code+state to the canonical
   // callback). When env vars are missing, the canonical route returns the
@@ -2700,7 +2569,7 @@ export function buildRouter() {
   // Claim: convert an anonymous workspace into a permanent account.
   // - if email matches an existing real tenant: merge the anon's recipes into it, return existing key
   // - else: upgrade the anon tenant in-place to a real tenant, rotate to ks_*, return new key
-  // WC14 — share the bootstrap limiter (50/24h/ip) so brute-forcing kao_ tokens
+  // WC14 - share the bootstrap limiter (50/24h/ip) so brute-forcing kao_ tokens
   // through this endpoint is bounded.
   r.post('/v1/anon/claim', anonLimiter, (req, res) => {
     const { anon_token, email, name } = req.body || {};
@@ -2720,11 +2589,11 @@ export function buildRouter() {
   // ---------- Public signup ----------
   // Rate-limited (S5): 10 signups per IP per 24h. INVITE_ONLY=true hard-disables
   // public signup entirely (CLI bootstrap and admin issue still work).
-  // W890-9 — POST /v1/auth/login and /v1/auth/signup were curated in
+  // W890-9 - POST /v1/auth/login and /v1/auth/signup were curated in
   // public/openapi.json (W485) but never implemented. Kolm authenticates via
   // API key (ks_*/kao_*) + OAuth; there is no password endpoint. We add live
   // deprecation aliases that 410 Gone with redirect hints so the routes are
-  // not "dead" — the deprecated-endpoint lock-in in W890-9 expects every
+  // not "dead" - the deprecated-endpoint lock-in in W890-9 expects every
   // routed path to have a handler. Both alias handlers carry the canonical
   // {ok:false, error:'<id>'} envelope so W890-9 lock-in 9 stays green.
   r.post('/v1/auth/login', (req, res) => {
@@ -2750,16 +2619,16 @@ export function buildRouter() {
 
   r.post('/v1/signup', signupLimiter, (req, res) => {
     if (process.env.INVITE_ONLY === 'true') {
-      return res.status(403).json({ error: 'public signup disabled — invite required' });
+      return res.status(403).json({ error: 'public signup disabled - invite required' });
     }
     const { email, name, plan: rawPlan, country_code: bodyCountry } = req.body || {};
     if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       return res.status(400).json({ error: 'valid email required' });
     }
-    // W708-5 — export-control geo-fence. Country code may arrive via header
-    // (preferred — CDN-supplied or operator-supplied) or body field. Missing
+    // W708-5 - export-control geo-fence. Country code may arrive via header
+    // (preferred - CDN-supplied or operator-supplied) or body field. Missing
     // is allowed (geo_check:'unknown' stamped on tenant). HTTP 451 is the
-    // correct status here: "Unavailable For Legal Reasons" (RFC 7725) — NOT
+    // correct status here: "Unavailable For Legal Reasons" (RFC 7725) - NOT
     // 403 (forbidden by app policy), because the restriction is legal.
     const headerCountry = req.headers['x-kolm-country'];
     const rawCountry = (headerCountry || bodyCountry || '').toString().trim().toUpperCase();
@@ -2799,7 +2668,7 @@ export function buildRouter() {
     // Always provision on free quota; webhook upgrades after payment.
     const provisionedPlan = isPaid ? 'free' : requestedPlan;
     const provisionedMeta = PLAN_CATALOG[provisionedPlan];
-    // W708-5 — stamp country_code + geo_check on the tenant row so legal /
+    // W708-5 - stamp country_code + geo_check on the tenant row so legal /
     // audit can later reconstruct what we knew at signup time.
     const geoCheck = countryCode ? 'allowed' : 'unknown';
     const t = provisionTenant(uniq, {
@@ -2815,13 +2684,13 @@ export function buildRouter() {
       billingUrl = billingLinkFor(requestedPlan, { tenantId: t.id, email });
       try { update('tenants', x => x.id === t.id, { pending_plan: requestedPlan, billing_status: 'pending' }); } catch (_) {} // deliberate: cleanup
     }
-    // Best-effort welcome email — never blocks signup.
+    // Best-effort welcome email - never blocks signup.
     if (emailConfigured()) {
       sendWelcome({ email, apiKey: t.api_key, plan: provisionedPlan, billingUrl }).catch(() => {});
     }
-    // LM-8 (V1 launch 2026-05-26) — separate transactional signup confirmation
+    // LM-8 (V1 launch 2026-05-26) - separate transactional signup confirmation
     // with a CTA to /account/overview. Distinct from sendWelcome (which
-    // carries the raw key for legacy CLI flows). Fire-and-forget — sendEmail
+    // carries the raw key for legacy CLI flows). Fire-and-forget - sendEmail
     // never throws and falls back to data/email-outbox.jsonl when
     // RESEND_API_KEY is unset, so this is safe at launch even before secrets
     // are rotated into prod.
@@ -2844,7 +2713,7 @@ export function buildRouter() {
       path: '/',
     });
 
-    // LM-7 — V1 launch metrics. Bucketed by (date,tenant,plan_tier,kind,outcome).
+    // LM-7 - V1 launch metrics. Bucketed by (date,tenant,plan_tier,kind,outcome).
     // No PII; the recordEvent call is fire-and-forget by contract.
     try {
       recordMetricEvent({
@@ -2952,7 +2821,7 @@ export function buildRouter() {
     res.json({ ok: true });
   });
 
-  // ---------- Public registry browsing — no auth needed for visibility=public ----------
+  // ---------- Public registry browsing - no auth needed for visibility=public ----------
   r.get('/v1/public/concepts', (_req, res) => {
     const rows = registry.listConcepts({ tenant: '__public__', limit: 200 })
       .filter(c => c.visibility === 'public');
@@ -3017,7 +2886,7 @@ export function buildRouter() {
     }
   });
 
-  // Public receipt verification endpoint — unauthenticated convenience that
+  // Public receipt verification endpoint - unauthenticated convenience that
   // recomputes the HMAC server-side using the service's receipt secret.
   // This is NOT public-key cryptographic verification; that requires either
   // the shared tenant receipt secret (issuer/holder offline path) or the
@@ -3051,7 +2920,7 @@ export function buildRouter() {
       return res.json({ verified: false, reasons });
     }
 
-    // v0.1 receipt — chain + signature over canonicalised body.
+    // v0.1 receipt - chain + signature over canonicalised body.
     if (receipt.kolm_version === '0.1') {
       // Verify chain links: each step's HMAC must seal {step, input_hash, output_hash}.
       let chainOk = Array.isArray(receipt.chain) && receipt.chain.length > 0;
@@ -3085,7 +2954,7 @@ export function buildRouter() {
       if (!sigOk) reasons.push('signature mismatch');
       // Wave 149: Ed25519 public-key signature verification. When the
       // receipt carries signature_ed25519, verify it against the embedded
-      // public key. No shared secret needed — any third party can do this.
+      // public key. No shared secret needed - any third party can do this.
       // Ed25519 signed canonical(body WITH HMAC, WITHOUT ed25519 or sigstore).
       let ed25519Ok = null;
       let ed25519Fingerprint = null;
@@ -3150,7 +3019,7 @@ export function buildRouter() {
   // their handle by setting tenant.public_receipts = true. The hash can be
   // any of: artifact_hash, cid, receipt_id, or signature (since all four are
   // unique identifiers and a buyer might paste any of them).
-  // Wave 149 — public-key directory for Ed25519 receipt signing keys.
+  // Wave 149 - public-key directory for Ed25519 receipt signing keys.
   //
   // GET  /v1/keys/public                  → list every registered key
   // GET  /v1/keys/public/:fingerprint     → fetch a single key by fingerprint
@@ -3159,14 +3028,14 @@ export function buildRouter() {
   // DELETE /v1/keys/public/:fingerprint   → admin-only delete (requires admin key)
   //
   // No auth on the GET endpoints: discovering a tenant's public key is
-  // explicitly public — that's the whole point of a key directory. POST
+  // explicitly public - that's the whole point of a key directory. POST
   // /v1/keys/challenge and POST /v1/keys/register are also public because
   // the challenge → sign → register flow self-proves the holder controls
   // the private key. The DELETE requires admin because key removal would
   // otherwise let an attacker invalidate a tenant's receipt verification
   // by deleting their published key.
 
-  // W921 NOW-3 — standards-conformant JWKS endpoint. Exposes the default receipt
+  // W921 NOW-3 - standards-conformant JWKS endpoint. Exposes the default receipt
   // signing key as an RFC 8037 OKP JWK so any third-party verifier can fetch the
   // key (kid == fingerprint) and check the X-Inference-Signature response header
   // the gateway emits, WITHOUT trusting kolm (IETF inference-signature drafts).
@@ -3184,7 +3053,7 @@ export function buildRouter() {
   });
 
   // Public keys list - returns registered Ed25519 verification keys and directory stats.
-  // W899 — additionally surface the default receipt signing pubkey under
+  // W899 - additionally surface the default receipt signing pubkey under
   // source:'system' so /v1/verify callers can discover it without going
   // through the challenge→sign→register flow first.
   r.get('/v1/keys/public', async (_req, res) => {
@@ -3268,7 +3137,7 @@ export function buildRouter() {
     return res.json({ ok, fingerprint: fp });
   });
 
-  // Wave 150 — sigstore (cosign-compatible) attestation + verification.
+  // Wave 150 - sigstore (cosign-compatible) attestation + verification.
   //
   // POST /v1/sigstore/attest    upgrade a dry-run sigstore block to a
   //                              Rekor-pinned bundle. Requires the receipt
@@ -3280,12 +3149,12 @@ export function buildRouter() {
   //                              where sigstore_block has rekor_log_entry
   //                              populated.
   //
-  // GET  /v1/sigstore/health    quick probe — reports whether the server
+  // GET  /v1/sigstore/health    quick probe - reports whether the server
   //                              has a Rekor URL configured + whether the
   //                              integration is enabled.
   //
   // GET  /v1/sigstore/entry/:logIndex   forward to Rekor and return the
-  //                              raw entry. Public — Rekor is public.
+  //                              raw entry. Public - Rekor is public.
   r.get('/v1/sigstore/health', (_req, res) => {
     return res.json({
       enabled: !isSigstoreDisabled(),
@@ -3490,7 +3359,7 @@ export function buildRouter() {
     });
   });
 
-  // W892-C5: public target-profile catalog — maps friendly device names
+  // W892-C5: public target-profile catalog - maps friendly device names
   // (jetson-orin-nano, iphone-15-pro, rtx-5090, ...) to the recommended
   // (--target, runtime, context, est tok/s) combo. The data is the same as
   // `kolm compile --list-target-profiles --json` and ships with the CLI; the
@@ -3517,7 +3386,7 @@ export function buildRouter() {
     }
   });
 
-  // W456: public changelog — marketing surface, no auth, no tenant scoping.
+  // W456: public changelog - marketing surface, no auth, no tenant scoping.
   // Source of truth lives in src/changelog.js (a single static WAVES array).
   r.get('/v1/changelog', async (req, res) => {
     try {
@@ -3534,7 +3403,7 @@ export function buildRouter() {
     }
   });
 
-  // Public RS-1 spec document — open standard, no auth required.
+  // Public RS-1 spec document - open standard, no auth required.
   r.get('/v1/spec', (_req, res) => {
     res.json({
       spec: RECEIPT_VERSION,
@@ -3542,7 +3411,7 @@ export function buildRouter() {
       version: '1.0.0-draft',
       title: 'RS-1: A portable, attestable contract for AI behavior',
       description: 'An open standard for declaring AI behaviors as deterministic, signed, executable specifications. ' +
-        'A behavior spec is examples in, behavior out — and every execution carries a cryptographic receipt that proves which code ran on which input.',
+        'A behavior spec is examples in, behavior out - and every execution carries a cryptographic receipt that proves which code ran on which input.',
       license: 'MIT',
       reference_implementation: 'https://kolm.ai',
       sections: {
@@ -3586,7 +3455,7 @@ export function buildRouter() {
     });
   });
 
-  // Public registry export — the registry IS the model, downloaded not called.
+  // Public registry export - the registry IS the model, downloaded not called.
   // A device with this bundle can run every public recipe locally, offline,
   // forever, for free. Returns a portable JSON envelope of all public recipes
   // with their executable source. This is the on-device runtime payload.
@@ -3841,14 +3710,14 @@ export function buildRouter() {
     });
   });
 
-  // The wrap surface — what `recipe.wrap(client).messages.create({...})` calls.
+  // The wrap surface - what `recipe.wrap(client).messages.create({...})` calls.
   //
   // Same generator-verifier asymmetry as /v1/verified-inference, but shaped
   // around the user's existing messages.create payload. The user's request
   // looks identical to a normal Anthropic call; we add `verified` and
   // optional `corpus_namespace` keys, run k samples, score them against
   // the test cases (or recipe-as-judge), and return the winner shaped as
-  // a messages.create response — so the wrap is a drop-in.
+  // a messages.create response - so the wrap is a drop-in.
   //
   // If `corpus_namespace` is set, we ask the tenant's Recall index for the
   // top-k chunks for the most-recent user message and prepend them as a
@@ -3875,7 +3744,7 @@ export function buildRouter() {
         ? lastUser.content
         : (lastUser.content || []).map(c => c.text || '').join('\n'));
 
-      // Optional Recall grounding — fetch top-k chunks and prepend.
+      // Optional Recall grounding - fetch top-k chunks and prepend.
       let groundedSystem = system || '';
       let recall_chunks = [];
       if (corpus_namespace) {
@@ -3890,7 +3759,7 @@ export function buildRouter() {
         }
       }
 
-      // Test-cases mode — the headline shape.
+      // Test-cases mode - the headline shape.
       if (Array.isArray(verified.test_cases) && verified.test_cases.length) {
         const result = await verifiedInference({
           prompt: userText,
@@ -3900,7 +3769,7 @@ export function buildRouter() {
           model,
           temperature,
         });
-        // Shape it like messages.create — a single content block with the chosen source.
+        // Shape it like messages.create - a single content block with the chosen source.
         return res.json({
           id: 'wrap_' + crypto.randomBytes(6).toString('hex'),
           model: result.receipt.model,
@@ -3921,7 +3790,7 @@ export function buildRouter() {
         });
       }
 
-      // Recipe-as-judge mode — accept candidates that the verifier recipe approves.
+      // Recipe-as-judge mode - accept candidates that the verifier recipe approves.
       if (verified.judge_recipe_id || verified.judge_version_id) {
         const out = await import('./verified.js').then(m => m.recipeAsJudge({
           prompt: userText,
@@ -3954,7 +3823,7 @@ export function buildRouter() {
     }
   });
 
-  // Verified-inference endpoint — Generator-Verifier asymmetry made shippable.
+  // Verified-inference endpoint - Generator-Verifier asymmetry made shippable.
   // Sample k candidates from a frontier model, run each through a deterministic
   // Recipe verifier (test cases), pick the first that passes. Returns a receipt.
   // P(correct) >= 1 - (1 - p*v)^k. For p=0.91 v=1 k=8: 99.9999%.
@@ -3976,18 +3845,18 @@ export function buildRouter() {
     }
   });
 
-  // ---------- /v1/builder/* — no-code in-browser artifact builder (W261) ----------
+  // ---------- /v1/builder/* - no-code in-browser artifact builder (W261) ----------
   // Two of the three builder endpoints are unauthed: anyone can fetch templates
   // or preview a K-score estimate without an API key. The compile endpoint is
   // authed and lives further down, after the auth gate is mounted.
 
-  // GET /v1/builder/templates — public list of starter templates.
+  // GET /v1/builder/templates - public list of starter templates.
   r.get('/v1/builder/templates', (_req, res) => {
     res.set('Cache-Control', 'public, max-age=300');
     res.json({ templates: BUILDER_TEMPLATES });
   });
 
-  // POST /v1/builder/preview — synthesize a recipe and estimate K-score.
+  // POST /v1/builder/preview - synthesize a recipe and estimate K-score.
   // Rate-limited; no auth. Inputs are validated tightly so this cannot be
   // used as a generic compute oracle. The 10 KB per-example cap matches the
   // body limit on /v1/compile and keeps the synthesis cost bounded.
@@ -4072,7 +3941,7 @@ export function buildRouter() {
     }
   });
 
-  // W347 — POST /v1/build/preview. Richer dry-run preview that powers the
+  // W347 - POST /v1/build/preview. Richer dry-run preview that powers the
   // builder UI's results pane: returns k_score, first 3 train rows, first 3
   // holdout rows, production_ready verdict + gate reasons, and the synth
   // metadata. Public + rate-limited; no artifact write, no charge. Accepts
@@ -4100,7 +3969,7 @@ export function buildRouter() {
     }
   });
 
-  // W347 — GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds
+  // W347 - GET /v1/seeds/from-nl/health. Lets the UI hide the NL-seeds
   // button when no LLM backend is configured. Stable, no auth.
   r.get('/v1/seeds/from-nl/health', (req, res) => {
     const cfg = llmDescribeConfig();
@@ -4117,7 +3986,7 @@ export function buildRouter() {
     });
   });
 
-  // W347 — POST /v1/seeds/from-nl. Fan out a single seed (or short prompt)
+  // W347 - POST /v1/seeds/from-nl. Fan out a single seed (or short prompt)
   // into N variations via the configured LLM. When no LLM backend is
   // configured, return deterministic local seed variants instead of failing.
   function localSeedVariations(seed, count, hint = '') {
@@ -4241,7 +4110,7 @@ export function buildRouter() {
     }
   });
 
-  // W368 — connector daemon passthrough routes. Mounted BEFORE authMiddleware
+  // W368 - connector daemon passthrough routes. Mounted BEFORE authMiddleware
   // so SDKs that point OPENAI_BASE_URL / ANTHROPIC_BASE_URL / OPENROUTER_BASE_URL
   // at this server work with either hosted kolm auth + x-upstream-api-key,
   // or a local/drop-in provider key. Upstream credentials resolve in this order:
@@ -4287,7 +4156,7 @@ export function buildRouter() {
   }
 
   async function __connectorProxy(provider, upstreamPath, req, res) {
-    // W418 — defense-in-depth: every connector-proxy entry MUST carry a
+    // W418 - defense-in-depth: every connector-proxy entry MUST carry a
     // resolved tenant_record by the time we reach this point. The W411
     // hosted-auth gate (__w411HostedAuthGate) stamps req.tenant_record on
     // every legitimate path (real tenant in hosted mode, sentinel
@@ -4328,7 +4197,7 @@ export function buildRouter() {
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
     const zeroRetention = __isZeroRetentionRequest(req, body);
     const model = String(body.model || '').slice(0, 128);
-    // W465 — per-namespace cost attribution. Connector callers can scope a
+    // W465 - per-namespace cost attribution. Connector callers can scope a
     // capture to a corpus namespace via `x-kolm-namespace:` header (preferred)
     // or `corpus_namespace` body field (fallback). Defaults to 'default' for
     // back-compat. Sanitized so /v1/billing/breakdown rolls up safe slugs.
@@ -4359,7 +4228,7 @@ export function buildRouter() {
       promptText = 'system: ' + body.system + '\n\n' + promptText;
     }
     const scan = connectorPrivacyScan(promptText);
-    // W409b — FAIL-CLOSED policy. Server-direct proxy used to hard-code the
+    // W409b - FAIL-CLOSED policy. Server-direct proxy used to hard-code the
     // permissive policy literal which leaked raw PII into the cloud lake.
     // Default is now 'redact'. Operators opt out via env or per-request hdr.
     let policy = String(
@@ -4368,13 +4237,13 @@ export function buildRouter() {
       || 'redact'
     ).toLowerCase();
     if (!['redact', 'allow', 'block', 'review_required'].includes(policy)) policy = 'redact';
-    // W409b — raw_available is fail-closed (default false). Operators opt in
+    // W409b - raw_available is fail-closed (default false). Operators opt in
     // via KOLM_ALLOW_RAW=true OR per-request x-kolm-raw: true header.
     const rawHdr = String(req.headers['x-kolm-raw'] || '').toLowerCase();
     const rawEnv = String(process.env.KOLM_ALLOW_RAW || '').toLowerCase();
     const rawAllowed = (rawEnv === 'true' || rawEnv === '1' || rawEnv === 'yes'
       || rawHdr === 'true' || rawHdr === '1' || rawHdr === 'yes');
-    // W409b/W550 — "noncompliant identifier detected" surfaced as a tag so
+    // W409b/W550 - "noncompliant identifier detected" surfaced as a tag so
     // dashboards can flag broken-but-not-validated identifiers (e.g. malformed
     // SSN or card-context invalid PANs).
     const noncompliantIds = Array.from(new Set((scan.classes || []).filter((c) => String(c).startsWith('malformed_'))));
@@ -4388,7 +4257,7 @@ export function buildRouter() {
         },
       });
     }
-    // W409b — pre-compute redacted prompt whenever sensitive data is present,
+    // W409b - pre-compute redacted prompt whenever sensitive data is present,
     // regardless of policy. Both success and error paths read this through
     // deriveLakePrompt() so a 5xx from upstream cannot smuggle raw PII into
     // the lake (the historical daemon-connector.js error path leak).
@@ -4493,7 +4362,7 @@ export function buildRouter() {
     let upstreamResp;
     const t0 = Date.now();
     if (fixtureMode) {
-      // W409k — deterministic mock when no upstream is configured. Shape per
+      // W409k - deterministic mock when no upstream is configured. Shape per
       // provider + endpoint so OpenAI/Anthropic SDKs see a valid envelope.
       upstreamResp = { status: 200, body: __connectorFixtureBody(provider, upstreamPath, forwardBody, promptText) };
     } else {
@@ -4523,7 +4392,7 @@ export function buildRouter() {
           rq.write(payload); rq.end();
         });
       } catch (e) {
-        // W409b — FAIL-CLOSED error path. The lake row gets the redacted
+        // W409b - FAIL-CLOSED error path. The lake row gets the redacted
         // prompt (via deriveLakePrompt()), never raw `promptText`. Same bug
         // pattern as the historical daemon-connector.js error path leak.
         if (zeroRetention) {
@@ -4535,7 +4404,7 @@ export function buildRouter() {
           ? (redactedPromptText != null ? redactedPromptText : (connectorPrivacyRedact(promptText).redacted_text || null))
           : null;
         const evErr = connectorNewEvent({
-          // W411 — pin tenant_id on canonical event row to req.tenant_record.id
+          // W411 - pin tenant_id on canonical event row to req.tenant_record.id
           // (canonical id like `tenant_*`) so lake / datasets / labels surfaces
           // fence on the authoritative scope. Falls back to req.tenant (name
           // slug) for the daemon-connector untenanted passthrough path, then
@@ -4545,7 +4414,7 @@ export function buildRouter() {
             || 'local',
           namespace: callerNamespace,
           provider,
-          // W411 — explicit canonical vendor for lake parity. provider stays
+          // W411 - explicit canonical vendor for lake parity. provider stays
           // as free-text alias; vendor is the closed enum lake consumers read.
           vendor: provider,
           model,
@@ -4572,7 +4441,7 @@ export function buildRouter() {
           await insertCapture({
             id: evErr.event_id,
             tenant: (req && req.tenant) || 'local',
-            // W411 — propagate canonical tenant_id through capture-store so the
+            // W411 - propagate canonical tenant_id through capture-store so the
             // bridgeToEventStore() hook agrees with the eventAppend(evErr) write
             // below (both keyed on event_id; INSERT OR REPLACE collapses them).
             tenant_id: (req && req.tenant_record && req.tenant_record.id)
@@ -4647,10 +4516,10 @@ export function buildRouter() {
     if (httpStatus === 429) canonStatus = 'rate_limited';
     else if (httpStatus === 408 || httpStatus === 504) canonStatus = 'timeout';
     else if (httpStatus >= 400) canonStatus = 'error';
-    // W409b — fail-closed redacted fields on the canonical event row. Always
+    // W409b - fail-closed redacted fields on the canonical event row. Always
     // populated when sensitive data was detected, regardless of policy, so the
     // lake row always carries a sanitized version even on the allow path.
-    // W409h — when scan.sensitive=false, fall back to the raw promptText so
+    // W409h - when scan.sensitive=false, fall back to the raw promptText so
     // downstream lake/opportunities/datasets/bakeoff hydration can read the
     // canonical prompt. promptText is safe in that case (no sensitive classes
     // detected). This unblocks the observe → optimize → distill → bake-off →
@@ -4663,7 +4532,7 @@ export function buildRouter() {
       : null;
     const ev_raw_available_flag = rawAllowed && (!!rawPromptHash || !!rawResponseHash);
     const ev = connectorNewEvent({
-      // W411 — pin tenant_id on canonical event row to req.tenant_record.id
+      // W411 - pin tenant_id on canonical event row to req.tenant_record.id
       // (canonical id like `tenant_*`) so lake / datasets / labels surfaces
       // fence on the authoritative scope. Falls back to req.tenant (name
       // slug) for the daemon-connector untenanted passthrough path, then to
@@ -4673,7 +4542,7 @@ export function buildRouter() {
         || 'local',
       namespace: callerNamespace,
       provider,
-      // W411 — explicit canonical vendor for lake parity. provider stays
+      // W411 - explicit canonical vendor for lake parity. provider stays
       // as free-text alias; vendor is the closed enum lake consumers read.
       vendor: provider,
       model,
@@ -4682,7 +4551,7 @@ export function buildRouter() {
       response_hash: connectorHashContent(JSON.stringify(upstreamResp.body || {})),
       prompt_tokens: usage.prompt_tokens,
       completion_tokens: usage.completion_tokens,
-      // W411 — parity field names (auditor mandate). tokens_in/out + cost_micro_usd
+      // W411 - parity field names (auditor mandate). tokens_in/out + cost_micro_usd
       // + latency_us mirror the legacy fields with the units the lake expects.
       tokens_in: usage.prompt_tokens,
       tokens_out: usage.completion_tokens,
@@ -4711,7 +4580,7 @@ export function buildRouter() {
       await insertCapture({
         id: ev.event_id,
         tenant: (req && req.tenant) || 'local',
-        // W411 — propagate canonical tenant_id through capture-store so the
+        // W411 - propagate canonical tenant_id through capture-store so the
         // bridgeToEventStore() hook agrees with the eventAppend(ev) write below
         // (both keyed on event_id; INSERT OR REPLACE collapses them).
         tenant_id: (req && req.tenant_record && req.tenant_record.id)
@@ -4737,16 +4606,16 @@ export function buildRouter() {
         noncompliant_identifiers: ev.noncompliant_identifiers || [],
       });
     } catch (_) { durable = false; }
-    // W409a — canonical event-store write. The ev row carries the richer
+    // W409a - canonical event-store write. The ev row carries the richer
     // canonical fields (sensitive_data_detected, sensitive_classes, status
     // string, error_type) that the lake / opportunity engine / dataset
     // workbench / label queue / training planner all read. Idempotent: the
     // capture-store insert above also bridges into event-store; appendEvent
     // is INSERT OR REPLACE keyed on event_id so the two collapse into one.
     try { await eventAppend(ev); } catch (_) {} // deliberate: cleanup
-    // W409y — meter captured_events + stored_events on the connector path.
+    // W409y - meter captured_events + stored_events on the connector path.
     // tenant_id is the request-scoped tenant when authenticated, or 'local'
-    // for the daemon-connector untenanted passthrough — usageIncrementMeter
+    // for the daemon-connector untenanted passthrough - usageIncrementMeter
     // is a no-op for 'local' so the Free-tier privacy promise holds.
     try {
       const tid = (req.tenant_record && req.tenant_record.id) || null;
@@ -4757,7 +4626,7 @@ export function buildRouter() {
     res.set('x-kolm-provider', provider);
     res.set('x-kolm-model', model);
     res.set('x-kolm-event-durable', String(durable));
-    // W465 — surface the namespace the capture landed under so SDK callers
+    // W465 - surface the namespace the capture landed under so SDK callers
     // can audit billing-breakdown attribution without a round-trip to /v1/events.
     res.set('x-kolm-namespace', callerNamespace);
     res.set('x-kolm-redaction-policy', policy);
@@ -4768,14 +4637,14 @@ export function buildRouter() {
     res.status(httpStatus).json(bodyForCaller);
   }
 
-  // W409k — fixture body shapes. Returned when KOLM_CONNECTOR_FIXTURE=1 AND
+  // W409k - fixture body shapes. Returned when KOLM_CONNECTOR_FIXTURE=1 AND
   // no upstream key is configured. Deterministic, no network, exact shape per
   // provider so OpenAI/Anthropic SDK happy-path tests don't need real keys.
   function __connectorFixtureBody(provider, upstreamPath, body, promptText) {
     const created = Math.floor(Date.now() / 1000);
     const model = String((body && body.model) || 'kolm-fixture-model');
     const echo = String(promptText || '').slice(0, 120);
-    // Anthropic /v1/messages — content blocks, usage object.
+    // Anthropic /v1/messages - content blocks, usage object.
     if (provider === 'anthropic') {
       return {
         id: 'msg_fixture_' + created.toString(36),
@@ -4787,7 +4656,7 @@ export function buildRouter() {
         usage: { input_tokens: 4, output_tokens: 6 },
       };
     }
-    // OpenAI /v1/embeddings — { data:[{embedding:[...]}] }.
+    // OpenAI /v1/embeddings - { data:[{embedding:[...]}] }.
     if (upstreamPath === '/v1/embeddings') {
       const dim = 8;
       const vec = Array.from({ length: dim }, (_, i) => Math.round(Math.sin(i + 1) * 1000) / 1000);
@@ -4798,19 +4667,19 @@ export function buildRouter() {
         usage: { prompt_tokens: 4, total_tokens: 4 },
       };
     }
-    // OpenAI /v1/audio/transcriptions — { text: '...' }.
+    // OpenAI /v1/audio/transcriptions - { text: '...' }.
     if (upstreamPath === '/v1/audio/transcriptions' || upstreamPath === '/v1/audio/translations') {
       return { text: '[kolm fixture transcription]' };
     }
-    // OpenAI /v1/audio/speech — bytes upstream; we return JSON envelope in fixture mode.
+    // OpenAI /v1/audio/speech - bytes upstream; we return JSON envelope in fixture mode.
     if (upstreamPath === '/v1/audio/speech') {
       return { object: 'audio.speech', model, format: (body && body.response_format) || 'mp3', bytes_b64: 'a29sbS1maXh0dXJl' };
     }
-    // OpenAI /v1/moderations — pass-through shape.
+    // OpenAI /v1/moderations - pass-through shape.
     if (upstreamPath === '/v1/moderations') {
       return { id: 'modr_fixture_' + created.toString(36), model, results: [{ flagged: false, categories: {}, category_scores: {} }] };
     }
-    // OpenAI /v1/responses — Responses API.
+    // OpenAI /v1/responses - Responses API.
     if (upstreamPath === '/v1/responses') {
       return {
         id: 'resp_fixture_' + created.toString(36),
@@ -4837,7 +4706,7 @@ export function buildRouter() {
     };
   }
 
-  // W409y — hosted-inference metering wrapper. Wraps the connector proxy so
+  // W409y - hosted-inference metering wrapper. Wraps the connector proxy so
   // that when the caller authenticates with a kolm tenant key (ks_* or kao_*)
   // AND the request is opted in to hosted inference (x-kolm-hosted: true OR
   // KOLM_HOSTED_INFERENCE=true env), we:
@@ -4920,7 +4789,7 @@ export function buildRouter() {
     // Hand-off to the connector proxy, intercepting res.json so we can read
     // the upstream usage object and meter the actual token count.
     //
-    // W736 — Guardrail enforcement. When the caller supplied a guardrails
+    // W736 - Guardrail enforcement. When the caller supplied a guardrails
     // array (via body.kolm_guardrails OR x-kolm-guardrails JSON header) or
     // the runtime artifact lookup surfaced manifest.guardrails, run
     // enforceGuardrails against the response_text. block → HTTP 403 with
@@ -4940,7 +4809,7 @@ export function buildRouter() {
       } else if (body && Array.isArray(body.kolm_guardrails)) {
         _w736Rules = body.kolm_guardrails;
       }
-    } catch (_) { /* malformed header — fall through to unenforced */ }
+    } catch (_) { /* malformed header - fall through to unenforced */ }
 
     // Eager-load the W736 module exactly once per process. Subsequent
     // requests pick up the cached singleton via globalThis.
@@ -4958,7 +4827,7 @@ export function buildRouter() {
     let captured = null;
     res.json = (payload) => {
       captured = payload;
-      // W736 — enforce against the OpenAI/Anthropic-shaped response if we
+      // W736 - enforce against the OpenAI/Anthropic-shaped response if we
       // have rules. The response text lives at choices[0].message.content
       // (OpenAI) OR content[].text (Anthropic). We hunt both shapes; if
       // neither matches we pass through. The blocked path returns a 403
@@ -5027,13 +4896,13 @@ export function buildRouter() {
     }
   }
 
-  // W729 — graceful-degradation middleware. Sits in front of the hot
+  // W729 - graceful-degradation middleware. Sits in front of the hot
   // inference routes so a sustained-overload condition surfaces a clean
   // HTTP 429 + Retry-After + queue_full envelope instead of a silent
   // drop, an OOM, or an opaque proxy error. Tier-derived priority lets
   // enterprise/business tenants jump the queue ahead of free under
   // contention (W729-1 spec). Kill-switched at the module level by
-  // KOLM_LOAD_QUEUE_DISABLED=1 — the env-disabled path resolves
+  // KOLM_LOAD_QUEUE_DISABLED=1 - the env-disabled path resolves
   // immediately so the pre-W729 production hot path is preserved when
   // the queue is off.
   function __loadQueuePriorityFromReq(req) {
@@ -5060,7 +4929,7 @@ export function buildRouter() {
       res.on('close', _release);
       next();
     } catch (err) {
-      // W729-3 — surface Retry-After + structured envelope on overload.
+      // W729-3 - surface Retry-After + structured envelope on overload.
       // queue_full and queue_timeout both map to HTTP 429; the envelope
       // tells the SDK how long to back off and exposes current depth so
       // an operator dashboard can see contention live.
@@ -5080,14 +4949,14 @@ export function buildRouter() {
   // OpenAI-compatible direct routes. /v1/chat/completions threads through the
   // hosted-inference metering wrapper above; the rest still flow to the
   // unmetered passthrough since they aren't on the billing-units catalog yet.
-  // W411 — every inference passthrough is gated by __w411HostedAuthGate so the
+  // W411 - every inference passthrough is gated by __w411HostedAuthGate so the
   // hosted server (KOLM_PRODUCTION=1 / Railway / Vercel / Lambda) rejects
   // anonymous requests with 401 {error:'unauthorized'}. The local daemon
   // (KOLM_LOCAL_DAEMON=1 or developer laptop) stays unauthenticated; the gate
   // stamps req.tenant = 'local:<hostname>' so captures still carry a tenant.
-  // W729 — loadQueueMiddleware runs AFTER auth so the tenant record is on
+  // W729 - loadQueueMiddleware runs AFTER auth so the tenant record is on
   // req when we read priority. Enterprise tier dequeues before free.
-  // W727 — when the caller passes ?accelerate=true on /v1/chat/completions,
+  // W727 - when the caller passes ?accelerate=true on /v1/chat/completions,
   // route through src/accelerate.js (student-as-draft speculative decoding).
   // The accelerated envelope augments the response with {accelerated,
   // acceptance_rate, draft_tokens_proposed/accepted, teacher_verifications}.
@@ -5095,10 +4964,10 @@ export function buildRouter() {
   // the standard hosted-inference path with accelerated:false on the body
   // so the caller can still get a real chat completion. Defense-in-depth
   // tenant fence: any accelerated call without req.tenant_record is hard
-  // 401-rejected — we never run the accelerated path anonymously, even on
+  // 401-rejected - we never run the accelerated path anonymously, even on
   // the local daemon, because the bench dashboard keys on tenant_id.
   r.post('/v1/chat/completions', __w411HostedAuthGate, loadQueueMiddleware, async (req, res) => {
-    // W742 — gateway-mode dispatch. When KOLM_GATEWAY_MODE != 'cloud' the
+    // W742 - gateway-mode dispatch. When KOLM_GATEWAY_MODE != 'cloud' the
     // hosted teacher path is replaced by the local-ollama / local-vllm /
     // mock adapter. Mock-mode is W742-3's billing skip: the mock dispatch
     // does NOT increment hosted_inference (no upstream cost = no bill).
@@ -5260,7 +5129,7 @@ export function buildRouter() {
   for (const p of ['/v1/responses', '/v1/embeddings', '/v1/moderations']) {
     r.post(p, __w411HostedAuthGate, (req, res) => __connectorProxy('openai', p, req, res));
   }
-  // W409k — audio routes. Real proxy when configured; fixture returns deterministic
+  // W409k - audio routes. Real proxy when configured; fixture returns deterministic
   // bodies; otherwise honest 501 with a structured "not yet supported" envelope so
   // SDKs see something better than 404. These concrete audio endpoints use
   // the OpenAI connector when a key is present.
@@ -5275,7 +5144,7 @@ export function buildRouter() {
   r.post('/anthropic/v1/messages', __w411HostedAuthGate, (req, res) => __connectorProxy('anthropic', '/v1/messages', req, res));
 
   // ====================================================================
-  // W709 — confidence-aware routing. NEW route — does NOT modify the
+  // W709 - confidence-aware routing. NEW route - does NOT modify the
   // existing /v1/chat/completions wrapper at line ~3973. The student is
   // queried first (via __hostedInferenceWrapper so tenant metering still
   // fires); the response's token-level logprobs are scored for Shannon
@@ -5284,7 +5153,7 @@ export function buildRouter() {
   // envelope. If the upstream adapter did NOT return logprobs (Anthropic,
   // OpenAI without `logprobs:true`, many self-hosted servers without the
   // flag) the route emits route:'student' + reason:'no_entropy_signal_available'
-  // and NEVER silently substitutes the teacher — that would defeat the
+  // and NEVER silently substitutes the teacher - that would defeat the
   // cost-saving point and lie about why the teacher was billed.
   //
   // Request body (additive to OpenAI chat-completions shape):
@@ -5293,7 +5162,7 @@ export function buildRouter() {
   //       threshold?: number,            // entropy threshold in NATs
   //       teacher_model?: string,        // anthropic/openai model id
   //       teacher_provider?: string,     // 'anthropic' | 'openai'
-  //       student_artifact?: string,     // reserved — local artifact path
+  //       student_artifact?: string,     // reserved - local artifact path
   //     }
   //   }
   //
@@ -5302,7 +5171,7 @@ export function buildRouter() {
   //                     total_cost_micro_usd } }
   // ====================================================================
   r.post('/v1/route/chat/completions', __w411HostedAuthGate, async (req, res) => {
-    // W733 — start a parent inference span around the W709 routing handler.
+    // W733 - start a parent inference span around the W709 routing handler.
     // The wrapper is HONEST: when no OTel tracer is registered (the default
     // for self-hosted boxes without an OTLP collector) the import + call
     // chain is a no-op. We never block the request path on tracing.
@@ -5317,14 +5186,14 @@ export function buildRouter() {
           'http.method': 'POST',
         });
       }
-    } catch (_e) { /* honest no-op — OTel never breaks the request path */ }
+    } catch (_e) { /* honest no-op - OTel never breaks the request path */ }
     const bodyIn = (req.body && typeof req.body === 'object') ? req.body : {};
     const routing = (bodyIn.kolm_routing && typeof bodyIn.kolm_routing === 'object') ? bodyIn.kolm_routing : {};
     const threshold = Number.isFinite(Number(routing.threshold)) ? Number(routing.threshold) : undefined;
     const teacherProvider = String(routing.teacher_provider || 'anthropic').toLowerCase();
     const teacherModel = String(routing.teacher_model || '').slice(0, 256);
 
-    // STEP 1 — query the student via the existing hosted-inference wrapper.
+    // STEP 1 - query the student via the existing hosted-inference wrapper.
     // We strip the kolm_routing block from the forwarded body so upstream
     // servers don't choke on an unknown field. We also ensure the OpenAI
     // logprobs flag is enabled so we have a chance of getting entropy.
@@ -5364,7 +5233,7 @@ export function buildRouter() {
       });
     }
 
-    // STEP 2 — extract logprobs and score entropy.
+    // STEP 2 - extract logprobs and score entropy.
     const RR = await import('./runtime-confidence-router.js');
     const choice0 = (studentPayload.choices && studentPayload.choices[0]) || null;
     const lpBlock = choice0 && choice0.logprobs;
@@ -5373,8 +5242,8 @@ export function buildRouter() {
     const hasLogprobs = Array.isArray(tokenLogprobs) && tokenLogprobs.length > 0;
     const decision = RR.decideRouting({ tokens: tokenLogprobs, threshold, hasLogprobs });
 
-    // STEP 3 — if escalation triggered, call the teacher. Honest contract:
-    // when entropy unavailable we DO NOT silently switch teachers — caller
+    // STEP 3 - if escalation triggered, call the teacher. Honest contract:
+    // when entropy unavailable we DO NOT silently switch teachers - caller
     // sees route:'student' with the original student answer and a reason
     // tag explaining why no entropy signal was extractable.
     let teacherCalled = false;
@@ -5421,7 +5290,7 @@ export function buildRouter() {
         has_logprobs: hasLogprobs,
       },
     };
-    // W733 — flush routing attributes onto the parent span + emit the four
+    // W733 - flush routing attributes onto the parent span + emit the four
     // inference sub-spans (queue → load → prefill → decode). Timings here
     // are approximate: we have one wall-clock delta from the parent start
     // (Date.now() - __w733T0) and no decomposition signal yet, so we
@@ -5448,12 +5317,12 @@ export function buildRouter() {
           __w733Otel.endSpan(__w733ParentSpan, { status: 'ok' });
         }
       }
-    } catch (_e) { /* honest no-op — OTel never breaks the response */ }
+    } catch (_e) { /* honest no-op - OTel never breaks the response */ }
     return res.status(200).json(envelope);
   });
 
   // ====================================================================
-  // W709-4 — SSE streaming version of /v1/route/chat/completions.
+  // W709-4 - SSE streaming version of /v1/route/chat/completions.
   //
   // Behaves like W709-2 above but emits OpenAI-shaped streaming chunks
   // (`text/event-stream`) instead of a single JSON envelope. The route:
@@ -5473,7 +5342,7 @@ export function buildRouter() {
   //      SDK clients see a clean stream close.
   //
   // Stream coherence: id/created/model are pinned ONCE at the top of the
-  // stream and reused on every chunk — the segments[] marker is what tells
+  // stream and reused on every chunk - the segments[] marker is what tells
   // the client which range came from which source. This keeps OpenAI SDK
   // clients (which assume model is stable per stream) happy across the
   // student→teacher splice.
@@ -5507,14 +5376,14 @@ export function buildRouter() {
         thresholdSource = (ns === TR.defaultThreshold()) ? 'default' : 'namespace_override';
       }
     } catch (_) {
-      // routing-threshold module missing — use a hard-coded safe default
+      // routing-threshold module missing - use a hard-coded safe default
       // so the route stays serving traffic.
       threshold = 1.5;
       thresholdSource = 'fallback_constant';
     }
 
     // Try to load the W709-1 confidence-router primitives. Degrade if
-    // they're unavailable — we still expose the SSE surface so callers
+    // they're unavailable - we still expose the SSE surface so callers
     // see a coherent stream end-to-end.
     let RR = null;
     try { RR = await import('./runtime-confidence-router.js'); } catch (_) { RR = null; }
@@ -5636,7 +5505,7 @@ export function buildRouter() {
         segments.push({ start: studentSegStart, end: tokenIndex, source: 'student' });
       }
 
-      // Decision payload — inline summary + optional RR.decideRouting overlay.
+      // Decision payload - inline summary + optional RR.decideRouting overlay.
       let streamDecision = {
         threshold,
         threshold_source: thresholdSource,
@@ -5701,13 +5570,13 @@ export function buildRouter() {
   r.post('/v1/gemini/v1/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('gemini', '/v1beta/openai/chat/completions', req, res));
   r.post('/v1/gemini/chat/completions', __w411HostedAuthGate, (req, res) => __connectorProxy('gemini', '/v1beta/openai/chat/completions', req, res));
 
-  // W409k — GET /v1/models is mounted after authMiddleware by W409g so it can
+  // W409k - GET /v1/models is mounted after authMiddleware by W409g so it can
   // combine the connector registry, FRONTIER_MODELS, AND the tenant's compiled
   // .kolm artifacts in a single OpenAI-shaped envelope. See the W409g block
   // near the end of buildRouter().
 
   // ====================================================================
-  // W386 — model weights manifest + pull redirect + cache inspector.
+  // W386 - model weights manifest + pull redirect + cache inspector.
   // Mounted BEFORE authMiddleware: the manifest indexes public HF URLs
   // (the same data huggingface.co serves anonymously), and pull is just
   // a 302 to that public location. /cache reads the local index on the
@@ -5832,7 +5701,7 @@ export function buildRouter() {
     }
   });
 
-  // W891-16.5 — public gateway liveness probe. Mirrors /health for the
+  // W891-16.5 - public gateway liveness probe. Mirrors /health for the
   // gateway sub-system: ok:true + version + module-loadable signal.
   // Mounted before r.use(authMiddleware) so it is reachable without an API
   // key. Ship-gate consumers use this to confirm the gateway dispatch path
@@ -5862,7 +5731,7 @@ export function buildRouter() {
 
   r.use(authMiddleware);
 
-  // W-INTEG — spend-cap enforcement (src/spend-caps.js). Runs after auth so the
+  // W-INTEG - spend-cap enforcement (src/spend-caps.js). Runs after auth so the
   // tenant is resolved, and gates the metered inference POST routes
   // (/v1/chat/completions, /v1/messages, /v1/gateway*) with HTTP 402 when the
   // tenant is over its USD budget cap. Tenant-fenced via req.tenant_record.id.
@@ -5888,14 +5757,14 @@ export function buildRouter() {
     return next();
   });
 
-  // LM-8 (V1 launch 2026-05-26) — usage-cap alert middleware. Fires the 80%
+  // LM-8 (V1 launch 2026-05-26) - usage-cap alert middleware. Fires the 80%
   // and 100% transactional emails the first time each tenant crosses the
   // threshold inside a billing period. Runs on res.finish so the read of
   // the tenant row picks up whatever chargeUsage(...) wrote during the
   // handler. The threshold state is held in a process-local set keyed by
   // tenant_id + period + threshold so we don't re-spam on every subsequent
   // request after the crossing. The set resets on process restart, which
-  // is acceptable for V1 — duplicate alerts on cold-restart are far less
+  // is acceptable for V1 - duplicate alerts on cold-restart are far less
   // costly than silent over-quota.
   //
   // Implementation details:
@@ -5915,7 +5784,7 @@ export function buildRouter() {
     res.on('finish', () => {
       try {
         // Re-resolve the tenant from the api key the middleware already
-        // stamped on the request — guarantees we see the post-charge state.
+        // stamped on the request - guarantees we see the post-charge state.
         const apiKey = req.api_key;
         if (!apiKey) return;
         const t = findTenantByApiKey(apiKey);
@@ -5956,7 +5825,7 @@ export function buildRouter() {
     next();
   });
 
-  // W742 — GET /v1/gateway/mode reports the current gateway mode + reachability.
+  // W742 - GET /v1/gateway/mode reports the current gateway mode + reachability.
   // Auth-gated (mounted after r.use(authMiddleware)). Probes both local backends
   // with a 1-second HEAD timeout so a slow / unreachable backend never blocks
   // the dashboard. The response surfaces the resolved mode (NOT the raw env
@@ -5993,7 +5862,7 @@ export function buildRouter() {
     }
   });
 
-  // W-G wrapper-completion — GET /v1/gateway/dashboard
+  // W-G wrapper-completion - GET /v1/gateway/dashboard
   // Aggregate routing breakdown + cost-savings + recent calls for the
   // /account/gateway.html dashboard. Tenant-scoped via findByTenant.
   r.get('/v1/gateway/dashboard', async (req, res) => {
@@ -6074,7 +5943,7 @@ export function buildRouter() {
     }
   });
 
-  // W-G wrapper-completion — GET /v1/gateway/providers
+  // W-G wrapper-completion - GET /v1/gateway/providers
   // Return the 11 supported providers with the customer's per-tenant config
   // overlaid (enabled, rate_limit, position-in-chain). Reads the registry
   // for the canonical list, then merges per-tenant overrides if any.
@@ -6105,9 +5974,9 @@ export function buildRouter() {
     }
   });
 
-  // W-G wrapper-completion — POST /v1/gateway/providers/config
+  // W-G wrapper-completion - POST /v1/gateway/providers/config
   // Persist per-tenant provider overrides (enabled toggle, position-in-chain,
-  // RPM limit). API keys are NEVER stored in the row — operators set them
+  // RPM limit). API keys are NEVER stored in the row - operators set them
   // as environment variables; we only persist the FLAG that one is set.
   r.post('/v1/gateway/providers/config', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -6144,7 +6013,7 @@ export function buildRouter() {
     }
   });
 
-  // W-G wrapper-completion — POST /v1/gateway/test-connection
+  // W-G wrapper-completion - POST /v1/gateway/test-connection
   // Fire a tiny ping against an upstream to verify the key works. Body:
   // {provider: 'anthropic', api_key: 'sk-ant-...'}. Returns {ok, status,
   // elapsed_ms} but never echoes the key back.
@@ -6205,7 +6074,7 @@ export function buildRouter() {
   });
 
   // =====================================================================
-  // W-E wrapper-completion — POST /v1/gateway/dispatch
+  // W-E wrapper-completion - POST /v1/gateway/dispatch
   //
   // Canonical wrapper entry. The caller sends an OpenAI-shaped body and
   // optionally `x-kolm-namespace: <slug>`. We:
@@ -6250,7 +6119,7 @@ export function buildRouter() {
         res.set('X-RateLimit-Reset', String(_resetEpoch));
         res.set('Retry-After', String(_retryAfter));
       } catch (_) { /* header set best-effort */ }
-      // LM-7 — bucket the 429 outcome before returning. Outcome label is
+      // LM-7 - bucket the 429 outcome before returning. Outcome label is
       // 'rate_limit' so the snapshot can split it from generic failures.
       try {
         recordMetricEvent({
@@ -6278,11 +6147,11 @@ export function buildRouter() {
     // Headers below get stamped on the success path too (after increment) so
     // the caller can rate-limit themselves before they hit our ceiling.
 
-    // W888 — per-phase instrumentation. Each phase wraps Date.now() so we
+    // W888 - per-phase instrumentation. Each phase wraps Date.now() so we
     // can decompose the wrapper tax into tier_check / route_select / pii_in /
     // chain_dispatch / pii_out / receipt_sign / capture_write. The breakdown
     // is attached to the receipt as `latency_breakdown` (additive top-level
-    // field, NOT in ALL_FIELDS — canonicalForSigning strips it so existing
+    // field, NOT in ALL_FIELDS - canonicalForSigning strips it so existing
     // verifiers stay green). See benchmarks/wave888-wrapper-tax-decomposed.
     const phases = {
       tier_check_ms: 0,
@@ -6297,7 +6166,7 @@ export function buildRouter() {
     };
 
     try {
-      // 0. Tier check + module import (counts as tier_check_ms — it's the
+      // 0. Tier check + module import (counts as tier_check_ms - it's the
       // auth/entitlement gate the request crosses before any work starts).
       const _tTier = Date.now();
       const store = await import('./store.js');
@@ -6308,7 +6177,7 @@ export function buildRouter() {
       const otel = await import('./otel.js');
       const semcache = await import('./semantic-cache.js');
       const reg = await import('./provider-registry.js');
-      // W-N: shared adapter helpers — clampTimeoutMs lives here. We pull
+      // W-N: shared adapter helpers - clampTimeoutMs lives here. We pull
       // the inbound timeout_ms from either the body or the
       // `x-kolm-timeout-ms` header, clamp to [1000, 300000] and thread it
       // through dispatchWithFallback → adapter → hardenedFetch.
@@ -6361,7 +6230,7 @@ export function buildRouter() {
         });
       }
 
-      // 2b. W921 — inline prompt-injection / jailbreak guardrail (OWASP LLM01).
+      // 2b. W921 - inline prompt-injection / jailbreak guardrail (OWASP LLM01).
       // Default 'detect_only' is non-blocking (zero behavior change for existing
       // namespaces); a namespace opts into 'block'. The verdict is surfaced on
       // the response (kolm_guardrail) for audit. Fail-open: applyGuardrail never
@@ -6380,7 +6249,7 @@ export function buildRouter() {
         });
       }
 
-      // 2c. W921 — semantic/exact prompt cache. Default mode 'off' => disabled
+      // 2c. W921 - semantic/exact prompt cache. Default mode 'off' => disabled
       // (zero behavior change). On a hit, return the cached response and skip
       // routing + the upstream call entirely (cost + latency savings). Best-
       // effort: any cache error falls through to a normal live call.
@@ -6422,7 +6291,7 @@ export function buildRouter() {
       if (route.pre_routed_to_fallback && chain.length > 1) {
         chain = chain.slice(1);
       }
-      // 3b. W921 — semantic cost<->quality routing. Default route_mode (unset or
+      // 3b. W921 - semantic cost<->quality routing. Default route_mode (unset or
       // 'static') => the chain is used exactly as selectRoute built it (byte-
       // identical to today). When a namespace opts into 'cost_quality'/'semantic'
       // the scorer reorders the chain by predicted quality-per-dollar; with no
@@ -6462,7 +6331,7 @@ export function buildRouter() {
       // W-M wave / Vercel teacher-chat proxy fallback. When this Railway
       // service has no upstream key locally, the legacy adapters
       // (anthropic/openai/openrouter) will proxy through kolm.ai's
-      // /v1/teacher/chat Vercel function — which DOES have the keys —
+      // /v1/teacher/chat Vercel function - which DOES have the keys - 
       // using the original kolm bearer that arrived with this dispatch
       // request. Pull the bearer off authorization header and attach it
       // to every chain entry so a per-provider fallback works through
@@ -6493,7 +6362,7 @@ export function buildRouter() {
       }
       phases.route_select_ms = Date.now() - _tRoute;
 
-      // 4. Upstream chain dispatch (the work — everything outside this block
+      // 4. Upstream chain dispatch (the work - everything outside this block
       //    is the wrapper tax). W-N: timeoutMs flows through every adapter.
       const _tDispatch = Date.now();
       const attempted = [];
@@ -6521,7 +6390,7 @@ export function buildRouter() {
       // client-facing response (both JSON and SSE). Previously outputScan was
       // computed but only folded into the receipt, so redact_all callers still
       // received the UN-redacted PII/PHI while the signed receipt claimed
-      // redaction_applied — a fail-open leak. detect_only / redact_captures
+      // redaction_applied - a fail-open leak. detect_only / redact_captures
       // (action 'pass') keep the original output by design.
       const _redactOut = outputScan.action === 'redact';
       const clientOutputText = _redactOut ? String(outputScan.output_text || '') : outputText;
@@ -6579,17 +6448,17 @@ export function buildRouter() {
 
       // 7. Persist observation
       const _tCapture = Date.now();
-      // W888 — finalize phase numbers BEFORE attaching to receipt so the
+      // W888 - finalize phase numbers BEFORE attaching to receipt so the
       // breakdown reflects the full pipeline. capture_write_ms is the
       // last phase; total_ms / wrapper_tax_ms are derived sums. The
-      // breakdown is attached as a top-level non-signed field — see
+      // breakdown is attached as a top-level non-signed field - see
       // src/receipt-schema.js ALL_FIELDS for what canonicalForSigning
       // covers (latency_breakdown is intentionally NOT in that list).
       phases.total_ms = Date.now() - t0;
       phases.wrapper_tax_ms = phases.total_ms - phases.chain_dispatch_ms;
       receipt.latency_breakdown = { ...phases };
       if (_routerDecision) receipt.router_decision = _routerDecision;
-      // W921 — emit OpenTelemetry GenAI semantic-convention metrics
+      // W921 - emit OpenTelemetry GenAI semantic-convention metrics
       // (gen_ai.client.token.usage + gen_ai.client.operation.duration). No-op
       // when OTEL is unconfigured; fire-and-forget so telemetry never affects
       // the call. operation.duration uses the upstream dispatch time.
@@ -6597,7 +6466,7 @@ export function buildRouter() {
         otel.genAiTokenUsage({ provider: receipt.provider, requestModel: receipt.model, responseModel: receipt.model, operation: 'chat', inputTokens: receipt.input_tokens, outputTokens: receipt.output_tokens });
         otel.genAiOperationDuration({ provider: receipt.provider, requestModel: receipt.model, responseModel: receipt.model, operation: 'chat', durationMs: phases.chain_dispatch_ms });
       } catch (_) { /* telemetry is best-effort */ }
-      // W921 — populate the semantic cache on a successful live call (best-effort,
+      // W921 - populate the semantic cache on a successful live call (best-effort,
       // only when enabled). Stores the redacted client response so a future hit
       // returns exactly what this caller received.
       if (_cacheCfg.mode !== 'off' && _cacheCanon && result.ok) {
@@ -6633,7 +6502,7 @@ export function buildRouter() {
       phases.capture_write_ms = Date.now() - _tCapture;
       // Re-stamp the breakdown one more time so capture_write_ms + the
       // re-summed total/tax are accurate. This DOES mutate the persisted
-      // receipt object by reference (above), which is what we want — the
+      // receipt object by reference (above), which is what we want - the
       // /v1/verify response will show the same numbers we return.
       phases.total_ms = Date.now() - t0;
       phases.wrapper_tax_ms = phases.total_ms - phases.chain_dispatch_ms;
@@ -6643,7 +6512,7 @@ export function buildRouter() {
       // 8. Return
       // V1 launch / W-2: increment the gateway_calls meter and stamp the
       // RFC-draft rate-limit headers so the caller can self-rate-limit before
-      // they hit our hard cap. Best-effort — if the metering store is
+      // they hit our hard cap. Best-effort - if the metering store is
       // unreachable we still ship the response (the next call will pick up
       // the previous increment when the store comes back). Persists under
       // KOLM_USAGE_DIR/period_YYYY-MM.json.
@@ -6658,10 +6527,10 @@ export function buildRouter() {
         }
       } catch (_) { /* header set best-effort */ }
 
-      // W921 NOW-3 — standards-conformant inference-signature response headers.
+      // W921 NOW-3 - standards-conformant inference-signature response headers.
       // A third-party verifier fetches the key from /.well-known/jwks.json
       // (kid == X-Inference-Key-ID) and checks this Ed25519 signature over the
-      // signed receipt covering this inference — verifiable WITHOUT trusting kolm
+      // signed receipt covering this inference - verifiable WITHOUT trusting kolm
       // (IETF draft-sharif-ai-model-lifecycle-attestation). Set before the
       // SSE/JSON branch so both response shapes carry it.
       try {
@@ -6679,7 +6548,7 @@ export function buildRouter() {
       // events come at the end so the audit trail still attaches AFTER the
       // full output stream finishes (the kolm-audit-1 receipt covers the
       // assembled output, not the per-chunk slices). Doing it this way means
-      // every adapter stays unchanged — adapter-native upstream-streaming is
+      // every adapter stays unchanged - adapter-native upstream-streaming is
       // a follow-up that needs per-provider stream parsers (anthropic SSE !=
       // openai SSE).
       const wantsStream = !!(body && body.stream === true);
@@ -6731,7 +6600,7 @@ export function buildRouter() {
           }
           // Final chunk with finish_reason="stop"
           sendChunk(null, 'stop');
-          // V1 launch / W-1: kolm_receipt SSE event — distinct event name so
+          // V1 launch / W-1: kolm_receipt SSE event - distinct event name so
           // clients can filter via EventSource('addEventListener','kolm_receipt').
           try {
             res.write('event: kolm_receipt\n');
@@ -6752,7 +6621,7 @@ export function buildRouter() {
             }) + '\n\n');
             res.write('data: [DONE]\n\n');
           } catch (_) {} // deliberate: cleanup
-          // LM-7 — gateway_dispatch SSE terminal. Outcome from result.status.
+          // LM-7 - gateway_dispatch SSE terminal. Outcome from result.status.
           try {
             recordMetricEvent({
               tenant, plan_tier: _plan, kind: 'gateway_dispatch',
@@ -6769,7 +6638,7 @@ export function buildRouter() {
         }
       }
 
-      // LM-7 — gateway_dispatch JSON terminal. Bucket the outcome from the
+      // LM-7 - gateway_dispatch JSON terminal. Bucket the outcome from the
       // upstream HTTP status (2xx → success, otherwise → failure).
       try {
         recordMetricEvent({
@@ -6796,7 +6665,7 @@ export function buildRouter() {
         } : null,
       });
     } catch (e) {
-      // LM-7 — gateway_dispatch error path.
+      // LM-7 - gateway_dispatch error path.
       try {
         recordMetricEvent({
           tenant, plan_tier: _plan, kind: 'gateway_dispatch',
@@ -6809,7 +6678,7 @@ export function buildRouter() {
     }
   });
 
-  // Authenticated /v1/health — full snapshot including provider availability
+  // Authenticated /v1/health - full snapshot including provider availability
   // and feature flags. Admin-only because the booleans are useful signal for
   // staff debugging but unnecessary surface for tenants. Public /health
   // (above the authMiddleware) is the lightweight no-leak version.
@@ -6829,9 +6698,9 @@ export function buildRouter() {
         has_anthropic_key: !!process.env.ANTHROPIC_API_KEY,
         receipt_secret_configured: !!process.env.RECIPE_RECEIPT_SECRET,
         invite_only: process.env.INVITE_ONLY === 'true',
-        // WC07 — honest "is this set to a non-empty string" check, not the
+        // WC07 - honest "is this set to a non-empty string" check, not the
         // boolean parse. `KOLM_RECALL_ROOT=""` previously reported `true`
-        // because non-empty strings are truthy — but the directory string was
+        // because non-empty strings are truthy - but the directory string was
         // empty so the recall layer crashed on first use. envSecret returns
         // null for both unset and empty so the flag now reflects reality.
         recall_root_set: envSecret('KOLM_RECALL_ROOT') !== null,
@@ -6843,7 +6712,7 @@ export function buildRouter() {
     });
   });
 
-  // W732 — POST /v1/yaml/validate lints a kolm.yaml document over the API
+  // W732 - POST /v1/yaml/validate lints a kolm.yaml document over the API
   // so CI providers that don't bundle Node can still gate on schema errors
   // before invoking the rest of the distill loop. Auth-gated on
   // req.tenant_record so anonymous scanners can't burn CPU on this endpoint.
@@ -6855,7 +6724,7 @@ export function buildRouter() {
   // Returns:
   //   * 200 + { ok:true,  parsed, validation } on schema-clean input
   //   * 200 + { ok:false, parsed, validation } on schema errors (parse
-  //     succeeded but the document violates the W732 schema — caller still
+  //     succeeded but the document violates the W732 schema - caller still
   //     gets the parsed tree so it can highlight the bad rows)
   //   * 400 + { ok:false, error:'yaml_parse_failed', detail, line } on a
   //     parser error (couldn't even read the document)
@@ -6904,7 +6773,7 @@ export function buildRouter() {
     });
   });
 
-  // W738 — POST /v1/pipeline/run executes a composed kolm.pipeline.yaml
+  // W738 - POST /v1/pipeline/run executes a composed kolm.pipeline.yaml
   // end-to-end (classifier -> route -> result). Auth-gated. The artifact
   // loader is tenant-fenced via req.tenant_record so a tenant can never
   // load another tenant's classifier or route artifact.
@@ -6920,7 +6789,7 @@ export function buildRouter() {
   //   * classifier artifact not in catalog  → 404 classifier_not_found
   //   * route_not_found (runner branch)     → 200 + ok:false envelope (the
   //                                            HTTP call succeeded; the route
-  //                                            is just missing — we don't
+  //                                            is just missing - we don't
   //                                            wrap that as a 4xx)
   //
   // The runner returns latency_ms_breakdown unconditionally so dashboards can
@@ -6978,7 +6847,7 @@ export function buildRouter() {
       throw e;
     };
     const teacher_caller = async (teacher, _input) => {
-      // Honest stub — no hosted teacher is wired in this slot yet. The W709
+      // Honest stub - no hosted teacher is wired in this slot yet. The W709
       // confidence-router wave fills in the real escalation path.
       const e = new Error('teacher_not_wired: ' + teacher);
       e.code = 'teacher_not_wired';
@@ -6997,7 +6866,7 @@ export function buildRouter() {
     return res.status(200).json(out);
   });
 
-  // ---------- W740 — Import (GGUF / safetensors / ONNX) ----------
+  // ---------- W740 - Import (GGUF / safetensors / ONNX) ----------
   // Symmetric counterpart to `kolm export`. Wraps a non-kolm-compiled binary
   // (GGUF / safetensors / ONNX) as a partial manifest tagged
   // `not_kolm_compiled: true` so it can ride through catalog / inspect /
@@ -7005,11 +6874,11 @@ export function buildRouter() {
   // artifact.
   //
   // Endpoints:
-  //   POST /v1/import/inspect  — body {path}: returns the parsed-metadata
+  //   POST /v1/import/inspect - body {path}: returns the parsed-metadata
   //                              envelope (sha256, format, params_b, quant,
   //                              raw_metadata_keys). Read-only.
-  //   POST /v1/import/wrap     — body {path}: returns the wrapAsKolmManifest
-  //                              envelope. The manifest is NOT persisted —
+  //   POST /v1/import/wrap - body {path}: returns the wrapAsKolmManifest
+  //                              envelope. The manifest is NOT persisted - 
   //                              the caller decides what to do with it.
   //                              `not_kolm_compiled: true` is the W740-2
   //                              load-bearing honesty flag.
@@ -7017,7 +6886,7 @@ export function buildRouter() {
   // Both routes are auth-gated. The python3 parsers live in
   // apps/import/{gguf,safetensors,onnx}.py and run in-process via spawnSync
   // from src/import.js; missing python3 surfaces a 503 python3_missing
-  // envelope — never a 500, never a silent fake.
+  // envelope - never a 500, never a silent fake.
   r.post('/v1/import/inspect', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const body = req.body || {};
@@ -7074,21 +6943,21 @@ export function buildRouter() {
     });
   });
 
-  // ---------- W743 — Migrate from Ollama / LM Studio ----------
+  // ---------- W743 - Migrate from Ollama / LM Studio ----------
   // Bring an existing Ollama or LM Studio model library into kolm. Both
   // routes wrap the per-blob result through src/import.js so the W740-2
-  // honesty lock (`not_kolm_compiled: true`) flows transitively — a
+  // honesty lock (`not_kolm_compiled: true`) flows transitively - a
   // migrated model NEVER earns a K-Score from migration alone.
   //
   // Endpoints:
-  //   POST /v1/migrate/discover  — body {source:'ollama'|'lmstudio', path?}:
+  //   POST /v1/migrate/discover - body {source:'ollama'|'lmstudio', path?}:
   //                                returns the discovery list (no parse).
-  //   POST /v1/migrate/wrap      — body {source, model_name, path?}:
+  //   POST /v1/migrate/wrap - body {source, model_name, path?}:
   //                                resolves model_name against the discovery
   //                                list and runs the W740 wrap path; returns
   //                                {ok, manifest, source_metadata, ...}.
   //
-  // Both are auth-gated. Discovery is local-filesystem only — no network
+  // Both are auth-gated. Discovery is local-filesystem only - no network
   // call leaves the box. The python3 GGUF parser is reused; missing python3
   // surfaces a 503 envelope on the wrap path.
   r.post('/v1/migrate/discover', async (req, res) => {
@@ -7194,7 +7063,7 @@ export function buildRouter() {
     return res.status(200).json(wrapped);
   });
 
-  // ---------- W739 — Model lineage tracking + artifact diff ----------
+  // ---------- W739 - Model lineage tracking + artifact diff ----------
   // POST /v1/artifact/lineage   → body {cid, max_depth?}, walks parent_cid chain
   // POST /v1/artifact/diff      → body {a_cid, b_cid}, compares two artifacts
   //
@@ -7324,7 +7193,7 @@ export function buildRouter() {
     return res.status(200).json(out);
   });
 
-  // ---------- W741 — Diagnostic envelope ----------
+  // ---------- W741 - Diagnostic envelope ----------
   // POST /v1/diagnose          → body {artifact_cid}, runs diagnostic against
   //                              most recent bakeoff for that CID
   // GET  /v1/diagnose/:cid     → read-only twin (same shape)
@@ -7332,7 +7201,7 @@ export function buildRouter() {
   // Honest envelopes:
   //   - missing artifact_cid       → 400 missing_field
   //   - no_bakeoff_results_yet     → 200 + ok:false envelope with hint to run
-  //                                  `kolm bakeoff first` (per W741 spec —
+  //                                  `kolm bakeoff first` (per W741 spec - 
   //                                  honest absence, NOT 404)
   //
   // The diagnostic engine is dependency-injected via the optional
@@ -7377,18 +7246,18 @@ export function buildRouter() {
       generated_at: new Date().toISOString(),
     });
   }
-  // POST mirror — body carries artifact_cid (matches existing
+  // POST mirror - body carries artifact_cid (matches existing
   // /v1/pipeline/run + /v1/bakeoffs body shape).
   r.post('/v1/diagnose', async (req, res) => {
     const body = req.body || {};
     return _runDiagnose(req, res, body.artifact_cid);
   });
-  // GET twin — path param carries cid.
+  // GET twin - path param carries cid.
   r.get('/v1/diagnose/:cid', async (req, res) => {
     return _runDiagnose(req, res, req.params && req.params.cid);
   });
 
-  // ---------- W746 — Capture staleness / TTL / teacher version ----------
+  // ---------- W746 - Capture staleness / TTL / teacher version ----------
   // GET  /v1/staleness/:namespace         → freshness distribution + projected
   //                                          eviction counts for 30d/90d TTL.
   // POST /v1/staleness/apply-ttl          → DESTRUCTIVE; evicts rows older than
@@ -7403,7 +7272,7 @@ export function buildRouter() {
   // any non-owner role with eviction rights would let a viewer torch a
   // namespace they merely have read access to.
   //
-  // Per W746-2: ttl_days = null means "no TTL configured" — never default
+  // Per W746-2: ttl_days = null means "no TTL configured" - never default
   // a number. The CLI/dashboard makes the user explicitly pick a value.
 
   // Helper: list ALL captures for a namespace through the canonical event-store.
@@ -7415,7 +7284,7 @@ export function buildRouter() {
       const rows = await eventList({
         tenant_id,
         namespace,
-        limit: 0, // unlimited — staleness needs to count every row
+        limit: 0, // unlimited - staleness needs to count every row
       });
       // Defense-in-depth tenant fence (mirrors W454/W461/W465 pattern). The
       // event-store already filters by tenant_id in the SQL WHERE clause; this
@@ -7427,7 +7296,7 @@ export function buildRouter() {
     }
   }
 
-  // GET /v1/staleness/:namespace — freshness summary for the namespace.
+  // GET /v1/staleness/:namespace - freshness summary for the namespace.
   r.get('/v1/staleness/:namespace', async (req, res) => {
     if (!req.tenant_record) {
       return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -7461,10 +7330,10 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/staleness/apply-ttl — DESTRUCTIVE eviction.
+  // POST /v1/staleness/apply-ttl - DESTRUCTIVE eviction.
   // Body: {namespace, ttl_days}
   // Role gate: req.is_admin OR req.local_daemon OR req.tenant_record.kind === 'human'
-  // (the tenant_record.kind sentinel — human tenants are workspace owners by
+  // (the tenant_record.kind sentinel - human tenants are workspace owners by
   // construction in src/auth.js; anon/api_only/etc. are not). We do NOT reuse
   // teams.requireRole here because the staleness scope is per-namespace inside
   // a tenant, not per-team. Adding team scoping is a follow-up (W746+1).
@@ -7524,7 +7393,7 @@ export function buildRouter() {
         });
         deleted = (purgeRes && purgeRes.deleted) || 0;
       } catch (_) { // deliberate: cleanup
-        // Purge failure is honest — we still report what WOULD have been
+        // Purge failure is honest - we still report what WOULD have been
         // evicted via the projection, but flag the actual delete as 0.
       }
     }
@@ -7540,7 +7409,7 @@ export function buildRouter() {
     });
   });
 
-  // GET /v1/teacher-versions/:namespace — count rows per teacher_version.
+  // GET /v1/teacher-versions/:namespace - count rows per teacher_version.
   r.get('/v1/teacher-versions/:namespace', async (req, res) => {
     if (!req.tenant_record) {
       return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -7572,8 +7441,8 @@ export function buildRouter() {
     });
   });
 
-  // ---------- W869 — Teacher-chat proxy ----------
-  // POST /v1/teacher/chat — auth-gated server-side relay so local distill
+  // ---------- W869 - Teacher-chat proxy ----------
+  // POST /v1/teacher/chat - auth-gated server-side relay so local distill
   // workers can call cloud teachers using sensitive vendor keys held only at
   // the kolm.ai runtime (e.g. Vercel sensitive-flagged env vars never decrypt
   // to `vercel env pull`). Body:
@@ -7741,7 +7610,7 @@ export function buildRouter() {
     }
   });
 
-  // GET /v1/teacher/chat/health — which vendors have keys configured on this
+  // GET /v1/teacher/chat/health - which vendors have keys configured on this
   // kolm instance. No auth required (publishes only booleans). Lets a local
   // distill worker pick which vendor to route through the proxy without
   // burning a real call to test.
@@ -7761,9 +7630,9 @@ export function buildRouter() {
     });
   });
 
-  // ---------- W748 — Seasonal capture tagging + variants + auto-select ----------
-  // GET /v1/seasonal/:namespace — distribution + active events + recommendation.
-  // POST /v1/seasonal/variant   — body { namespace, variant } -> registers a
+  // ---------- W748 - Seasonal capture tagging + variants + auto-select ----------
+  // GET /v1/seasonal/:namespace - distribution + active events + recommendation.
+  // POST /v1/seasonal/variant - body { namespace, variant } -> registers a
   //                              seasonal-variant namespace (e.g.
   //                              "support/seasonal-black-friday") in the
   //                              event-store as seasonal_variant_registration.
@@ -7879,7 +7748,7 @@ export function buildRouter() {
       });
     }
     // Variant must be a known season OR a known event key. We do NOT accept
-    // free-form labels — preventing typos that silently never match the
+    // free-form labels - preventing typos that silently never match the
     // recommendation engine.
     const valid_season = scMod.SEASONS.indexOf(variant) >= 0;
     const valid_event = Object.prototype.hasOwnProperty.call(scMod.SEASONAL_EVENTS, variant);
@@ -7934,7 +7803,7 @@ export function buildRouter() {
     });
   });
 
-  // ---------- W745 — Failure-modes report (CID-keyed) ----------
+  // ---------- W745 - Failure-modes report (CID-keyed) ----------
   // POST /v1/failure-modes      → body {artifact_cid}, returns the failure-mode
   //                               envelope (clusters + top regressions +
   //                               diagnostic_link bridge into W741).
@@ -7943,7 +7812,7 @@ export function buildRouter() {
   // Honest envelopes:
   //   - missing artifact_cid       → 400 missing_field
   //   - no_bakeoff_results_yet     → 200 + ok:false envelope with hint to
-  //                                  run `kolm bakeoff` (NOT 404 — HTTP
+  //                                  run `kolm bakeoff` (NOT 404 - HTTP
   //                                  succeeded; the envelope is the answer)
   //
   // The clustering engine is dependency-injected via test-seam body fields
@@ -7952,7 +7821,7 @@ export function buildRouter() {
   // surfaces without an on-disk bakeoff registry.
   //
   // W745 is the CID-keyed sibling of W812 (which clusters tenant-wide event
-  // streams). Both modules coexist on purpose — different question shapes.
+  // streams). Both modules coexist on purpose - different question shapes.
   async function _runFailureModesW745(req, res, artifact_cid) {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     if (!artifact_cid || typeof artifact_cid !== 'string') {
@@ -7989,12 +7858,12 @@ export function buildRouter() {
       generated_at: new Date().toISOString(),
     });
   }
-  // POST mirror — body carries artifact_cid.
+  // POST mirror - body carries artifact_cid.
   r.post('/v1/failure-modes', async (req, res) => {
     const body = req.body || {};
     return _runFailureModesW745(req, res, body.artifact_cid);
   });
-  // GET twin — path param carries cid.
+  // GET twin - path param carries cid.
   r.get('/v1/failure-modes/:cid', async (req, res) => {
     return _runFailureModesW745(req, res, req.params && req.params.cid);
   });
@@ -8004,7 +7873,7 @@ export function buildRouter() {
   // GET  /v1/compile/:id      → status snapshot
   // GET  /v1/compile/:id/.kolm → download the artifact
   // GET  /v1/compile           → list this tenant's jobs
-  // W234 — accept-list of chat templates the registered .kolm runtime can
+  // W234 - accept-list of chat templates the registered .kolm runtime can
   // serialize. Mirrors src/chat-templates.js TEMPLATES keys; bumping the
   // registry must also bump this enum so badly-named requests reject early.
   const VALID_CHAT_TEMPLATES = new Set([
@@ -8037,7 +7906,7 @@ export function buildRouter() {
     if (thinking_mode != null && typeof thinking_mode !== 'boolean') {
       return res.status(400).json({ error: 'thinking_mode must be a boolean' });
     }
-    // W243 — canonical enums shared with /v1/specialists/auto-distill + cmdCompile + cmdDistill + cmdTui + /account.
+    // W243 - canonical enums shared with /v1/specialists/auto-distill + cmdCompile + cmdDistill + cmdTui + /account.
     // Recipe class drives the manifest's spec_class field; hw_tier drives base_model + quant selection;
     // output_target picks the runtime format (gguf|onnx|safetensors|coreml|mlx|executorch|tensorrt|native-c|native-rust|wasm);
     // multi_device is an array (cap 6) of edge surfaces to cross-compile for.
@@ -8058,10 +7927,10 @@ export function buildRouter() {
         if (!VALID_MD.includes(d)) return res.status(400).json({ error: `multi_device entry '${d}' must be one of ${VALID_MD.join(', ')}` });
       }
     }
-    // W869+ Persona A.7 — VRAM pre-flight gate. Reject before charging when
+    // W869+ Persona A.7 - VRAM pre-flight gate. Reject before charging when
     // the model + lora + kv obviously won't fit on the picked hw_tier. Skip
     // for 'auto' (let the picker handle it) and 'cpu-server' (CPU has RAM
-    // not VRAM — different math). Skip when base_model unknown — no point
+    // not VRAM - different math). Skip when base_model unknown - no point
     // blocking on a guess. Conservative on quant (int4 at 4K ctx for the
     // baseline check) so we don't reject a job that would actually fit.
     const _vramPreflight = _checkVramPreflight(base_model, hw_tier);
@@ -8113,9 +7982,9 @@ export function buildRouter() {
     // Bill the compile up-front. One compile = 10 units (compiles are
     // expensive vs. runs). Charging here (not inside runJob) keeps the
     // billing path single-threaded so concurrent compiles can't race the
-    // counter — only the request handler holds tenant_record.
+    // counter - only the request handler holds tenant_record.
     chargeUsage(req.tenant_record, 10);
-    // W409y — billing-units metering for compile jobs. One compile = 1 build.
+    // W409y - billing-units metering for compile jobs. One compile = 1 build.
     // recipe_class === 'distilled_model' additionally increments
     // distillation_jobs. usageIncrementMeter is a no-op for local-only /
     // anon / no-tenant paths so this respects the privacy promise.
@@ -8154,7 +8023,7 @@ export function buildRouter() {
           payload: { job_id: fresh.id, error: fresh.error || 'unknown' },
         });
       }
-      // LM-7 — bucket compile outcome by job.status. queued/running are
+      // LM-7 - bucket compile outcome by job.status. queued/running are
       // not yet terminal; only completed + failed carry a real outcome.
       try {
         const _outcomeC = fresh.status === 'completed' ? 'success'
@@ -8167,7 +8036,7 @@ export function buildRouter() {
           namespace_id: corpus_namespace || null,
         });
       } catch (_) {} // deliberate: cleanup
-      // LM-8 (V1 launch 2026-05-26) — compile-done email on the sync branch.
+      // LM-8 (V1 launch 2026-05-26) - compile-done email on the sync branch.
       // Only sends on the two terminal states; runJob may have left the row
       // in queued/running on early-throw and we'd rather miss a notification
       // than send a misleading one.
@@ -8190,7 +8059,7 @@ export function buildRouter() {
       } catch (_) { /* email path must never break the compile response */ }
       return res.status(202).json({ job_id: fresh.id, status: fresh.status, poll: `/v1/compile/${fresh.id}` });
     }
-    // LM-8 — on the long-running (setImmediate) branch we don't have a fresh
+    // LM-8 - on the long-running (setImmediate) branch we don't have a fresh
     // job snapshot in this scope. Wrap runJob so we can re-read the row and
     // fire the email once the background fiber settles. Errors inside runJob
     // are still persisted by runJob itself (see comment above).
@@ -8215,7 +8084,7 @@ export function buildRouter() {
         }
       } catch (_) { /* email path is best-effort */ }
     });
-    // LM-7 — fire-and-forget compile path: bucket as 'queued' so dashboards
+    // LM-7 - fire-and-forget compile path: bucket as 'queued' so dashboards
     // can split queued-vs-completed. The runJob terminal outcome is not
     // observable here; the COMPILE_COMPLETED audit op would be the natural
     // hook but lives on a background fiber.
@@ -8261,7 +8130,7 @@ export function buildRouter() {
     fs.createReadStream(j.artifact_path).pipe(res);
   });
 
-  // POST /v1/compile/cloud — W869 Persona B path: caller has no local GPU.
+  // POST /v1/compile/cloud - W869 Persona B path: caller has no local GPU.
   // Dispatches a compile to a partner GPU (modal/runpod/vast/lambda) using
   // server-side credentials (KOLM_RUNPOD_TOKEN / KOLM_MODAL_TOKEN in env).
   // Body: { backend, namespace, spec?, confirm, budget_usd, base_model? }.
@@ -8275,7 +8144,7 @@ export function buildRouter() {
       const confirm = !!body.confirm;
       const budget_usd = (typeof body.budget_usd === 'number' && isFinite(body.budget_usd)) ? body.budget_usd : null;
       if (!backend || typeof backend !== 'string') {
-        return res.status(400).json({ error: 'backend (string) required — e.g. modal, runpod, vast, lambda' });
+        return res.status(400).json({ error: 'backend (string) required - e.g. modal, runpod, vast, lambda' });
       }
       if (!userSpec && (!namespace || typeof namespace !== 'string')) {
         return res.status(400).json({ error: 'either spec (object) or namespace (string) required' });
@@ -8349,7 +8218,7 @@ export function buildRouter() {
     }
   });
 
-  // POST /v1/builder/compile — authed wrapper that turns the no-code builder's
+  // POST /v1/builder/compile - authed wrapper that turns the no-code builder's
   // {task, examples} payload into a real compile job. Validation matches
   // /v1/builder/preview so a Preview→Compile flow that passes preview also
   // passes here; the only added requirement is the API key (handled by
@@ -8429,7 +8298,7 @@ export function buildRouter() {
     }
   });
 
-  // ---------- /v1/artifacts* — RS-1 contract aliases over compile jobs ----------
+  // ---------- /v1/artifacts* - RS-1 contract aliases over compile jobs ----------
   // Every completed compile job IS an artifact. This surface gives callers
   // an artifact-noun view that doesn't leak the job machinery.
   function jobToArtifact(j) {
@@ -8473,7 +8342,7 @@ export function buildRouter() {
     if (!j) return res.status(404).json({ error: 'artifact not found' });
     if (j.status !== 'completed') return res.status(409).json({ error: 'artifact not ready', status: j.status });
     if (!j.artifact_path || !fs.existsSync(j.artifact_path)) return res.status(410).json({ error: 'artifact expired or missing' });
-    // R-2 — pull-blocking on revoke. Any artifact whose lifecycle says
+    // R-2 - pull-blocking on revoke. Any artifact whose lifecycle says
     // `revoked` returns 410 Gone here so a rotated key cannot silently
     // still serve a withdrawn model. canPull() is true for every state
     // except 'revoked'; archived artifacts remain pullable for audit /
@@ -8494,8 +8363,8 @@ export function buildRouter() {
     fs.createReadStream(j.artifact_path).pipe(res);
   });
 
-  // R-2 — artifact lifecycle introspection.
-  // GET /v1/artifacts/:id/lifecycle — current_state + full history.
+  // R-2 - artifact lifecycle introspection.
+  // GET /v1/artifacts/:id/lifecycle - current_state + full history.
   r.get('/v1/artifacts/:id/lifecycle', (req, res) => {
     const id = String(req.params.id || '');
     if (!/^[a-zA-Z0-9_:.-]{1,128}$/.test(id)) {
@@ -8503,11 +8372,11 @@ export function buildRouter() {
     }
     // Tenant fence: when an underlying job record exists, callers may only
     // read lifecycle for artifacts they own. Lifecycle records without an
-    // owning job (rare — manually staged) are readable by any authed
+    // owning job (rare - manually staged) are readable by any authed
     // tenant under the same id (the id is the access token).
     const j = getJob(id, req.is_admin ? null : req.tenant);
     if (!j && !req.is_admin) {
-      // Fall through to allow read when no job is registered — the lifecycle
+      // Fall through to allow read when no job is registered - the lifecycle
       // file itself acts as the access boundary because ids are namespaced.
     }
     const lc = lifecycleLoadOrInit(id);
@@ -8521,7 +8390,7 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/artifacts/:id/lifecycle/transition — record a state transition.
+  // POST /v1/artifacts/:id/lifecycle/transition - record a state transition.
   // Body: {to_state, reason, evidence_id?, successor_id?}.
   r.post('/v1/artifacts/:id/lifecycle/transition', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -8554,9 +8423,9 @@ export function buildRouter() {
     }
   });
 
-  // R-5 — Evidence DAG endpoints.
+  // R-5 - Evidence DAG endpoints.
   //
-  // GET /v1/evidence/:id — return the single node detail for an evidence id.
+  // GET /v1/evidence/:id - return the single node detail for an evidence id.
   //   Looks up the owning artifact via the per-node reverse index; returns
   //   the verbatim node record (id, kind, plus any caller-supplied attrs).
   //   404 when the node id is not in any artifact's DAG.
@@ -8575,13 +8444,13 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/evidence/:id/revoke — invalidate a node + propagate
+  // POST /v1/evidence/:id/revoke - invalidate a node + propagate
   // needs_review to every artifact that transitively derived from it.
-  //   Body: { reason: string }   (reason required — same contract as the
+  //   Body: { reason: string }   (reason required - same contract as the
   //                               lifecycle revoke transition).
   // Returns { revoked, needs_review[] }. The revoke verdict does NOT
-  // mutate the artifact's signed receipt — receipts seal bytes, not
-  // operational provenance — so propagation is a verdict written to the
+  // mutate the artifact's signed receipt - receipts seal bytes, not
+  // operational provenance - so propagation is a verdict written to the
   // caller's audit trail, not a state-machine transition.
   r.post('/v1/evidence/:id/revoke', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -8616,9 +8485,9 @@ export function buildRouter() {
     });
   });
 
-  // W409f — /v1/evidence index (account/artifacts page). Lists known
+  // W409f - /v1/evidence index (account/artifacts page). Lists known
   // evidence nodes across the calling tenant's artifacts. Empty list when
-  // no DAGs exist — never 404, so the account page renders cleanly.
+  // no DAGs exist - never 404, so the account page renders cleanly.
   function listEvidenceIndex(req, res) {
     const tenantId = req.tenant_record && req.tenant_record.id || null;
     const items = [];
@@ -8644,7 +8513,7 @@ export function buildRouter() {
   r.get('/v1/evidence', listEvidenceIndex);
   r.get('/v1/evidence/', listEvidenceIndex);
 
-  // W409f — GET /v1/account/audit-log/verify — chain-verify the calling
+  // W409f - GET /v1/account/audit-log/verify - chain-verify the calling
   // tenant's audit ledger (no body). Returns { ok, verified, chain_length,
   // broken_at? } so the audit-log page can render a green/red state.
   r.get('/v1/account/audit-log/verify', (req, res) => {
@@ -8667,7 +8536,7 @@ export function buildRouter() {
     res.json({ ok: true, tenant_id: tenantId, chain_length: entries.length, verified, broken_at: brokenAt });
   });
 
-  // W409f — /v1/capture/browse / /v1/capture/bulk / /v1/capture/export — page
+  // W409f - /v1/capture/browse / /v1/capture/bulk / /v1/capture/export - page
   // surface for the captures.html admin view. Browse paginates, bulk acts on
   // a set of capture ids, export streams JSONL/CSV. Empty-tenant safe.
   r.get('/v1/capture/browse', (req, res) => {
@@ -8757,7 +8626,7 @@ export function buildRouter() {
     res.set('Content-Disposition', `attachment; filename="captures-${tenantId}.jsonl"`);
     res.send(rows.map((r0) => JSON.stringify(r0)).join('\n'));
   });
-  // W899 — POST shim so account/captures.html bulk-export button (sends
+  // W899 - POST shim so account/captures.html bulk-export button (sends
   // {capture_ids:[...]} in body) doesn't 404. Filters to the listed ids and
   // returns the rows inline as JSON so the page can blob-download client-side.
   r.post('/v1/capture/export', (req, res) => {
@@ -8780,7 +8649,7 @@ export function buildRouter() {
     return res.json({ ok: true, format, count: rows.length, captures: rows });
   });
 
-  // W409f — /v1/team/invites — team.html invite list / create endpoint.
+  // W409f - /v1/team/invites - team.html invite list / create endpoint.
   // GET returns the calling tenant's outstanding invites; POST creates one.
   r.get('/v1/team/invites', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -8815,7 +8684,7 @@ export function buildRouter() {
     res.status(201).json({ ok: true, invite });
   });
 
-  // GET /v1/artifacts/:id/evidence-trace — return the full ancestor DAG
+  // GET /v1/artifacts/:id/evidence-trace - return the full ancestor DAG
   // for an artifact. Returns 404 when the artifact has no evidence DAG on
   // disk. The shape is { ok, artifact_id, dag: {nodes, edges} } so the
   // caller can re-build the DAG client-side and walk it.
@@ -8835,7 +8704,7 @@ export function buildRouter() {
     });
   });
 
-  // R-6 — Assurance case export.
+  // R-6 - Assurance case export.
   //
   // GET /v1/assurance/artifact/:id?format=json|pdf
   //   Streams the per-artifact trust packet (claims + framework controls +
@@ -8843,7 +8712,7 @@ export function buildRouter() {
   //   pdf returns application/pdf via the lazy-loaded pdfkit renderer.
   //
   // GET /v1/assurance/workspace/:id?format=json|pdf
-  //   Same shape, workspace-level — the artifact-derived claims are omitted
+  //   Same shape, workspace-level - the artifact-derived claims are omitted
   //   and only the vault-derived jurisdiction claim + the 8 required control
   //   rows remain.
   r.get('/v1/assurance/artifact/:id', async (req, res) => {
@@ -8874,7 +8743,7 @@ export function buildRouter() {
     if (format === 'json') {
       return res.json(envelope);
     }
-    // PDF path — pdfkit lazy-loaded in the renderer.
+    // PDF path - pdfkit lazy-loaded in the renderer.
     try {
       const { renderAssuranceCasePdf } = await import('./assurance-case-pdf.js');
       res.set('Content-Type', 'application/pdf');
@@ -8917,7 +8786,7 @@ export function buildRouter() {
     }
   });
 
-  // CID lookup — content-addressed resolution within the caller's tenant
+  // CID lookup - content-addressed resolution within the caller's tenant
   // scope. Two compiles that produce the same bytes (same task spec, same
   // recipes, same evals, same base model pointer) yield the same CID; this
   // route is how downstream tools dedupe by content rather than job_id.
@@ -8937,7 +8806,7 @@ export function buildRouter() {
     });
   });
 
-  // W910 Track C1 — recipe template catalog. MUST be registered before the
+  // W910 Track C1 - recipe template catalog. MUST be registered before the
   // /v1/recipes/:id artifact alias below, otherwise Express matches :id first
   // and the literal "templates" path returns 404 recipe-not-found.
   // Recipe templates list - returns all 8 W910 starter templates with metadata.
@@ -8960,7 +8829,7 @@ export function buildRouter() {
   r.get('/v1/recipes/:id', (req, res) => {
     const j = getJob(req.params.id, req.is_admin ? null : req.tenant);
     if (j) return res.json(jobToArtifact(j));
-    // Fall back to the concept registry — :id may be a concept_id rather
+    // Fall back to the concept registry - :id may be a concept_id rather
     // than a job_id when callers conflate the two nouns.
     try {
       const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
@@ -8975,7 +8844,7 @@ export function buildRouter() {
     if (!j) return res.status(404).json({ error: 'recipe not found' });
     if (j.status !== 'completed') return res.status(409).json({ error: 'artifact not ready', status: j.status });
     if (!j.artifact_path || !fs.existsSync(j.artifact_path)) return res.status(410).json({ error: 'artifact expired or missing' });
-    // R-2 — pull-blocking on revoke (mirrors /v1/artifacts/:id/download).
+    // R-2 - pull-blocking on revoke (mirrors /v1/artifacts/:id/download).
     const lc = lifecycleLoadOrInit(j.id);
     if (!lifecycleCanPull(lc)) {
       const lastRevoke = (lc.history || []).slice().reverse().find((h) => h.to === 'revoked');
@@ -8992,7 +8861,7 @@ export function buildRouter() {
     fs.createReadStream(j.artifact_path).pipe(res);
   });
 
-  // /v1/registry/public — RS-1 contract alias over public concepts. Non-paginated;
+  // /v1/registry/public - RS-1 contract alias over public concepts. Non-paginated;
   // returns up to 200 of the most recent public concepts. The richer export
   // (with bundled source) lives at /v1/registry/export above.
   r.get('/v1/registry/public', (_req, res) => {
@@ -9015,7 +8884,7 @@ export function buildRouter() {
     res.json({ artifacts: out, n: out.length });
   });
 
-  // /v1/registry/submit — community recipe intake. Validates the shape, logs
+  // /v1/registry/submit - community recipe intake. Validates the shape, logs
   // the submission to data/registry-submissions.jsonl, and returns 202 with a
   // submission_id. Verification (fetch+CID-check+K-score-replay) is a manual
   // step today; see /registry/submit for the human flow. POST body schema is
@@ -9050,7 +8919,7 @@ export function buildRouter() {
     res.status(202).json({ submission_id, status: 'pending' });
   });
 
-  // /v1/registry/search — programmatic discovery. Filters: task (substring on
+  // /v1/registry/search - programmatic discovery. Filters: task (substring on
   // name/description/tags), min_k_score, max_size_mb, hardware tag, limit.
   // Public concepts only. Used by IDE plugins, CI gates, and the registry UI's
   // chip filters. Returns same shape as /v1/registry/public.
@@ -9108,9 +8977,9 @@ export function buildRouter() {
     });
   });
 
-  // ---------- Hub — verifiable artifact gallery ----------
+  // ---------- Hub - verifiable artifact gallery ----------
   // The hub is where compiled .kolm artifacts get published, listed, and
-  // pulled. Distinct from /v1/registry/* (concept recipes / source) — this
+  // pulled. Distinct from /v1/registry/* (concept recipes / source) - this
   // surface stores the *output* binaries with their K-score, base model,
   // SHA-256, and signed receipt. Handle shape: <owner>/<name>[@sha256:hex].
   // Publish requires auth (API key); reads are public for visibility=public.
@@ -9221,7 +9090,7 @@ export function buildRouter() {
     });
   });
 
-  // GET /v1/hub — public list, most-recent first, paginated by `limit`.
+  // GET /v1/hub - public list, most-recent first, paginated by `limit`.
   r.get('/v1/hub', (req, res) => {
     const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200);
     const q = String(req.query.q || '').toLowerCase().trim();
@@ -9249,7 +9118,7 @@ export function buildRouter() {
     });
   });
 
-  // GET /v1/hub/:owner/:name — public metadata for a single artifact.
+  // GET /v1/hub/:owner/:name - public metadata for a single artifact.
   r.get('/v1/hub/:owner/:name', (req, res) => {
     const owner = hubSlug(req.params.owner);
     const name = hubSlug(req.params.name);
@@ -9285,7 +9154,7 @@ export function buildRouter() {
     });
   });
 
-  // GET /v1/hub/:owner/:name/download — binary download, content-type application/octet-stream.
+  // GET /v1/hub/:owner/:name/download - binary download, content-type application/octet-stream.
   r.get('/v1/hub/:owner/:name/download', (req, res) => {
     const owner = hubSlug(req.params.owner);
     const name = hubSlug(req.params.name);
@@ -9336,7 +9205,7 @@ export function buildRouter() {
       return res.status(400).json({ error: 'paths (non-empty array) required' });
     }
     if (paths.length > 64) {
-      return res.status(400).json({ error: 'paths too long — max 64 per request' });
+      return res.status(400).json({ error: 'paths too long - max 64 per request' });
     }
     // Constrain to per-tenant root under KOLM_RECALL_ROOT. Admins can ingest
     // anywhere on the box; tenants only see their own slice.
@@ -9378,7 +9247,7 @@ export function buildRouter() {
   // frontmatter + first 4KB of body so a UI can preview what qmd indexed.
   r.get('/v1/recall/sources/:id(*)', async (req, res) => {
     // The :id is a URL-encoded relative path inside the tenant corpus. We
-    // resolve it against the per-tenant slice of KOLM_RECALL_ROOT — admins can
+    // resolve it against the per-tenant slice of KOLM_RECALL_ROOT - admins can
     // see across tenants, tenants only see their own.
     //
     // W252: stat first, reject sidecars over 1 MiB with 413 (don't slurp the
@@ -9504,7 +9373,7 @@ export function buildRouter() {
           }
           update('tenants', x => x.id === tenant.id, { pending_plan: target });
           // Resolve a real checkout URL via four fallback paths (W363). Every
-          // tenant always gets a working URL — never "not_yet_wired".
+          // tenant always gets a working URL - never "not_yet_wired".
           const { resolveUpgradeUrl } = await import('./billing-upgrade.js');
           const resolved = await resolveUpgradeUrl({
             plan: target,
@@ -9527,7 +9396,7 @@ export function buildRouter() {
       const out = await handleAssistant(req, res, deps);
       res.json(out);
     } catch (e) {
-      // WC06 — do NOT log e.message (may contain user prompt fragments). Log
+      // WC06 - do NOT log e.message (may contain user prompt fragments). Log
       // a structured field with the error code/name only; the HTTP body still
       // returns the message to the caller for their own debugging.
       wclog.error('assistant', 'request failed', { code: e && (e.code || e.name) || null });
@@ -9557,7 +9426,7 @@ export function buildRouter() {
         });
       } catch (_) {} // deliberate: cleanup
     }
-    // Do not leak the raw api_key in the response body — the httpOnly cookie
+    // Do not leak the raw api_key in the response body - the httpOnly cookie
     // (kolm_session, refreshed above) carries all subsequent auth. Expose only
     // a prefix for display. Removes XSS exfil surface for zero functional cost.
     const apiKeyPrefix = typeof rawKey === 'string' && rawKey.length > 0
@@ -9587,7 +9456,7 @@ export function buildRouter() {
     });
   });
 
-  // W433 — /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the
+  // W433 - /v1/whoami alias. SDKs (OpenAI/Anthropic/LangChain) follow the
   // convention `GET /v1/whoami` (or `/v1/me`) for "who is this key?". The
   // canonical kolm endpoint is GET /v1/account, but /v1/whoami forwards to
   // the same handler so SDKs probing the conventional path get an answer
@@ -9626,11 +9495,11 @@ export function buildRouter() {
     res.json({ api_key: k });
   });
 
-  // W889-7.2 — GET /v1/account/state surfaces a per-tenant state summary the
+  // W889-7.2 - GET /v1/account/state surfaces a per-tenant state summary the
   // /account/overview "What's next" engine reads. Returns artifact + capture
   // + namespace counts, the age of the last artifact, age of the primary api
   // key, plus a flat `signals` array each rule in whats-next.js matches on.
-  // Auth-gated (NOT in PUBLIC_API) — cross-tenant state leaks were what made
+  // Auth-gated (NOT in PUBLIC_API) - cross-tenant state leaks were what made
   // /v1/intent/next add tenant_id scoping in W432.
   r.get('/v1/account/state', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
@@ -9705,7 +9574,7 @@ export function buildRouter() {
     });
   });
 
-  // W413 — /v1/intent/next surfaces the W412 recommender to /account/overview.
+  // W413 - /v1/intent/next surfaces the W412 recommender to /account/overview.
   // The CLI verb `kolm next` runs the same {snapshotContext, recommendNext}
   // pair locally; this route runs it server-side so the post-auth dashboard
   // can render the same top-N ranked actions without shelling out. Auth-gated.
@@ -9716,7 +9585,7 @@ export function buildRouter() {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const intent = await import('./intent.js');
-      // W432 — pass the authenticated tenant_id into snapshotContext so the
+      // W432 - pass the authenticated tenant_id into snapshotContext so the
       // lake/opportunities/datasets/capture probes scope to this tenant only.
       // Cross-tenant counter leak from /v1/intent/next snapshot_summary closed.
       const snap = await intent.snapshotContext({ tenant_id: req.tenant_record.id });
@@ -9739,7 +9608,7 @@ export function buildRouter() {
     }
   });
 
-  // W415 — /v1/intent/ask surfaces the W412 classifyIntent to /account/overview.
+  // W415 - /v1/intent/ask surfaces the W412 classifyIntent to /account/overview.
   // POST { question: '<natural language>' } returns the matched verb + the
   // exact CLI command + a one-line explanation + up to 3 alternatives + a
   // 1-line snapshot summary (so the UI can render context without a second
@@ -9751,15 +9620,15 @@ export function buildRouter() {
   //     alternatives: [{verb, command, confidence}], snapshot_summary }
   //
   // Auth-gated. Empty question returns 400. Classifier throw returns 500.
-  // W729 — loadQueueMiddleware sheds load with HTTP 429 + Retry-After when
+  // W729 - loadQueueMiddleware sheds load with HTTP 429 + Retry-After when
   // the queue is saturated. Tier-derived priority lets paid tenants jump
   // the queue ahead of free under contention.
-  // W844 — /v1/free/chat. Public OpenAI-style chat: pre-auth visitors get
+  // W844 - /v1/free/chat. Public OpenAI-style chat: pre-auth visitors get
   // 20 messages/day to tinker with the intent classifier; if a tenant key is
   // attached the route upgrades to the full /v1/intent/ask snapshot. This is
   // the SAME pipe pre-auth and post-auth, so the homepage chat box and the
   // /account console chat box share the contract. Anon callers cannot read
-  // tenant state — snapshotContext is called with tenant_id=null.
+  // tenant state - snapshotContext is called with tenant_id=null.
   r.post('/v1/free/chat', freeChatLimiter, async (req, res) => {
     const question = String((req.body && req.body.question) || '').trim();
     if (!question) {
@@ -9772,7 +9641,7 @@ export function buildRouter() {
       const intent = await import('./intent.js');
       const isAuth = !!req.tenant_record;
       const snap = await intent.snapshotContext(isAuth ? { tenant_id: req.tenant_record.id } : { tenant_id: null });
-      // W848 — thread previous_workflow from client so the FOLLOWUP_AFFIRM
+      // W848 - thread previous_workflow from client so the FOLLOWUP_AFFIRM
       // pre-pass in classifyIntent can resolve "ok do it" / "run that" /
       // "yes" against the last recipe the user saw. Without this, every
       // turn is stateless and bare affirmatives degenerate into substring
@@ -9781,11 +9650,11 @@ export function buildRouter() {
       const ctx = prevWf ? Object.assign({}, snap, { previous_workflow: prevWf }) : snap;
       const cls = await intent.classifyIntent(question, ctx);
       const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
-      // W847 — when the classifier resolves a "terminal" verb but the user
+      // W847 - when the classifier resolves a "terminal" verb but the user
       // described a goal (no args extracted), return a multi-step recipe so
       // the chat surface can render something they can actually run.
       let workflow = intent.expandToWorkflow ? intent.expandToWorkflow(cls, question) : null;
-      // W850 — synthesize a single-step workflow whenever expandToWorkflow
+      // W850 - synthesize a single-step workflow whenever expandToWorkflow
       // returns null but the classifier produced a usable command. This
       // guarantees the response carries a `workflow.steps[]` that the
       // client persists as `lastWorkflow`, so the next-turn followup
@@ -9827,7 +9696,7 @@ export function buildRouter() {
     }
   });
 
-  // W888-R — POST /v1/assistant/chat-docs. Public docs-search backend for the
+  // W888-R - POST /v1/assistant/chat-docs. Public docs-search backend for the
   // /docs search box. Anonymous-by-design (rate-limited by IP via
   // docsAssistantLimiter at 60/IP/24h) so anyone reading the docs can use it
   // without signing in. Per-turn budget cap is $0.005 (half the authed
@@ -9862,14 +9731,14 @@ export function buildRouter() {
       'Answer the user\'s question in 1-3 sentences using only the kolm docs corpus.',
       'When relevant, suggest a `kolm <verb>` command in backticks. Never invent CLI verbs or flags.',
       'When you cite a doc page, the URL must come from this list:',
-      topKDocUrls.length ? topKDocUrls.map(u => '  - ' + u).join('\n') : '  (no candidate URLs provided — keep the answer short and link to /docs only)',
+      topKDocUrls.length ? topKDocUrls.map(u => '  - ' + u).join('\n') : '  (no candidate URLs provided - keep the answer short and link to /docs only)',
       'If you do not know the answer, say so and link to /docs.',
     ].join('\n');
     try {
       const mod = await import('./assistant-client.js');
       const AssistantClient = mod.AssistantClient || mod.default;
       const extractKolmCommands = mod.extractKolmCommands;
-      // W888-R — test-shim hook. When KOLM_ASSISTANT_TEST_SHIM=1, the route
+      // W888-R - test-shim hook. When KOLM_ASSISTANT_TEST_SHIM=1, the route
       // uses canned synthetic shims so the lock-in tests don't call out.
       const useShim = process.env.KOLM_ASSISTANT_TEST_SHIM === '1';
       const shimOverride = (req.app && req.app.locals && req.app.locals._w888rShim) || null;
@@ -9899,7 +9768,7 @@ export function buildRouter() {
         } catch (_) { /* swallow */ }
       });
       const client = new AssistantClient({
-        // $0.005 per-turn cap — half the authed cap; this is the public surface.
+        // $0.005 per-turn cap - half the authed cap; this is the public surface.
         perTurnCapUsd: 0.005,
         capturer,
         ...shims,
@@ -9920,7 +9789,7 @@ export function buildRouter() {
           const j = JSON.parse(fs.readFileSync(inv, 'utf8'));
           known = (j.verbs || []).map(v => v.verb).filter(Boolean);
         }
-      } catch (_) { /* no inventory available — empty known set is acceptable */ }
+      } catch (_) { /* no inventory available - empty known set is acceptable */ }
       const commands = extractKolmCommands ? extractKolmCommands(envelope.response || '', known) : { commands: [], unknown_count: 0 };
       res.json({
         ok: !!envelope.ok,
@@ -9941,11 +9810,11 @@ export function buildRouter() {
     }
   });
 
-  // LM-4 (V1 launch 2026-05-26) — GET /v1/status. Public, unauthenticated probe
+  // LM-4 (V1 launch 2026-05-26) - GET /v1/status. Public, unauthenticated probe
   // surface mirrored by /status. Returns the current control-plane snapshot:
   //   { ok, version (CACHE slug from public/sw.js), deployed_at (process start
   //     ISO), uptime_seconds, components{gateway,auth,storage,captures}, incidents_active }
-  // Component health is best-effort for V1 — each component reports ok:true
+  // Component health is best-effort for V1 - each component reports ok:true
   // with a current ISO timestamp so probes + the /status page have a stable
   // schema to consume. Real per-component liveness probes land post-V1 as
   // /v1/status/components/<component> sub-routes (NOT shipped here).
@@ -10044,13 +9913,13 @@ export function buildRouter() {
       const snap = getMetricSnapshot({ tenant: req.tenant_record.id, days, kind });
       res.json(snap);
     } catch (e) {
-      // The contract is "never throws", but defense-in-depth — return an
+      // The contract is "never throws", but defense-in-depth - return an
       // empty envelope rather than a 500.
       res.json({ ok: true, days, from: null, to: null, rows: [], totals_by_kind: {}, totals_by_outcome: {}, _error: String(e && e.message || e) });
     }
   });
 
-  // W854 — /v1/free/cli. Anonymous visitors can run a strict allowlist of
+  // W854 - /v1/free/cli. Anonymous visitors can run a strict allowlist of
   // read-only kolm CLI verbs straight from the homepage chat, so the box
   // really IS our CLI not a demo. Same free-tier limiter pool as /v1/free/chat
   // (20 calls/day/IP). All execution is sandboxed: argv tokens are checked
@@ -10199,17 +10068,17 @@ export function buildRouter() {
     }
     try {
       const intent = await import('./intent.js');
-      // W432 — tenant_id passed through so the snapshot_summary returned to
+      // W432 - tenant_id passed through so the snapshot_summary returned to
       // the ask-bar caller cannot leak cross-tenant counters.
       const snap = await intent.snapshotContext({ tenant_id: req.tenant_record.id });
-      // W848 — see /v1/free/chat above. Same followup-context contract.
+      // W848 - see /v1/free/chat above. Same followup-context contract.
       const prevWf = (req.body && req.body.previous_workflow) || null;
       const ctx = prevWf ? Object.assign({}, snap, { previous_workflow: prevWf }) : snap;
       const cls = await intent.classifyIntent(question, ctx);
       const cmd = 'kolm ' + cls.verb + (cls.args && cls.args.length ? ' ' + cls.args.map(a => /\s/.test(String(a)) ? JSON.stringify(a) : a).join(' ') : '');
-      // W847 — same multi-step recipe expansion as /v1/free/chat so the
+      // W847 - same multi-step recipe expansion as /v1/free/chat so the
       // post-auth console renders runnable workflows, not bare verbs.
-      // W850 — same synthetic-workflow fallback as /v1/free/chat so the
+      // W850 - same synthetic-workflow fallback as /v1/free/chat so the
       // post-auth lastWorkflow chain matches the public chat contract.
       let workflow = intent.expandToWorkflow ? intent.expandToWorkflow(cls, question) : null;
       if (!workflow && cls && cls.verb && cls.verb !== 'what' && (cls.confidence == null || cls.confidence >= 0.5)) {
@@ -10250,7 +10119,7 @@ export function buildRouter() {
     }
   });
 
-  // W888-Q — /v1/assistant/chat. LLM-backed assistant powering the floating
+  // W888-Q - /v1/assistant/chat. LLM-backed assistant powering the floating
   // chat widget on every authed /account page. Routes through the W888-P
   // AssistantClient three-layer fallback (local GGUF -> kolm.ai -> gateway
   // frontier). Tier-gated to paid plans; rate-limited to 60 calls/hour/tenant.
@@ -10359,7 +10228,7 @@ export function buildRouter() {
     }
   });
 
-  // W409f — /v1/account/keys list/create/revoke for /account/api-keys.html.
+  // W409f - /v1/account/keys list/create/revoke for /account/api-keys.html.
   //
   // The current tenant model holds ONE api_key_hash per row (multi-key was
   // never wired). These endpoints expose a one-row "keys" table that mirrors
@@ -10483,9 +10352,9 @@ export function buildRouter() {
     res.json({ ok: true, revoked: req.params.prefix, new_api_key: k });
   });
 
-  // W409f — /v1/account/audit-log surfaces the audit ledger for the calling
+  // W409f - /v1/account/audit-log surfaces the audit ledger for the calling
   // tenant. The audit-log.html page renders {entries:[{at,actor,op,payload}]}.
-  // W448 — added ?format=csv (defaults to json) so the page's export button
+  // W448 - added ?format=csv (defaults to json) so the page's export button
   // and `kolm audit --format csv` CLI verb hit the same route. Also added
   // ?since=<iso|epoch> filter so the CLI can scope to a recent window.
   r.get('/v1/account/audit-log', (req, res) => {
@@ -10542,7 +10411,7 @@ export function buildRouter() {
     }
   });
 
-  // W450 — /v1/account/settings is the per-tenant user-settings surface.
+  // W450 - /v1/account/settings is the per-tenant user-settings surface.
   // Three readers: the /account/settings web page, `kolm settings` CLI, and
   // the TUI settings view. One table (`account_settings`) keyed by tenant_id,
   // one upsert per PUT. The schema is intentionally small and flat (no nested
@@ -10586,7 +10455,7 @@ export function buildRouter() {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const tenantId = req.tenant_record.id;
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
-    // Whitelist only documented fields — never let a PUT spray arbitrary keys
+    // Whitelist only documented fields - never let a PUT spray arbitrary keys
     // into the settings row.
     const patch = {};
     for (const k of Object.keys(SETTINGS_DEFAULTS)) {
@@ -10622,11 +10491,11 @@ export function buildRouter() {
     }
   });
 
-  // W560 — SSO / SAML / SCIM honest-envelope surface.
+  // W560 - SSO / SAML / SCIM honest-envelope surface.
   //
   // public/enterprise.html advertises "SSO, audit logs, SBOM/SLSA, private
   // registry, architecture review" but the router carried ZERO route
-  // definitions for sso/saml/scim until this wave — meaning every probe
+  // definitions for sso/saml/scim until this wave - meaning every probe
   // (GET /v1/account/sso/status, POST /v1/account/sso/configure,
   // HEAD /v1/scim/v2/Users) fell through to either the global auth middleware
   // (401) or the not-found HTML fallthrough (404 text/html). Enterprise
@@ -10804,10 +10673,10 @@ export function buildRouter() {
     });
   });
 
-  // W869+ Persona D — procurement questionnaire auto-answer vault.
+  // W869+ Persona D - procurement questionnaire auto-answer vault.
   // Source of truth: data/procurement/*.json (versioned, security-team reviewed).
   // Same envelope the CLI emits (kolm procurement <framework> --format ...).
-  // Unauthed by design — these are pre-published answers, not tenant secrets.
+  // Unauthed by design - these are pre-published answers, not tenant secrets.
   // The /account/enterprise admin surface links straight to these URLs so a
   // CISO can download the SIG / CAIQ pack without an auth round-trip.
   const _procurementVaultDir = path.join(ROUTER_REPO_ROOT, 'data', 'procurement');
@@ -10848,7 +10717,7 @@ export function buildRouter() {
       p.sections.forEach((sec) => {
         out.push(`## ${sec.id}. ${sec.title}`); out.push('');
         (sec.questions || []).forEach((q) => {
-          out.push(`### ${q.id} — ${q.question}`); out.push('');
+          out.push(`### ${q.id} - ${q.question}`); out.push('');
           out.push(`**Answer:** \`${q.answer}\``); out.push('');
           out.push(`${q.evidence || ''}`); out.push('');
         });
@@ -10862,7 +10731,7 @@ export function buildRouter() {
       for (const [domain, ctrls] of byDomain) {
         out.push(`## ${domain}`); out.push('');
         ctrls.forEach((c) => {
-          out.push(`### ${c.id} — ${c.question}`); out.push('');
+          out.push(`### ${c.id} - ${c.question}`); out.push('');
           out.push(`**Answer:** \`${c.answer}\``); out.push('');
           out.push(`${c.evidence || ''}`); out.push('');
         });
@@ -10910,13 +10779,13 @@ export function buildRouter() {
     res.json(slug === 'all' ? { ok: true, frameworks: payloads, version: 'w869-v1' } : { ok: true, ...payloads[0], version: 'w869-v1' });
   });
 
-  // W869+ Persona D — passport export over HTTP.
+  // W869+ Persona D - passport export over HTTP.
   // The CLI verb `kolm passport <artifact.kolm> --format compliance` is the
   // canonical path for offline use; this HTTP route serves the same envelope
   // for a *compile job* the caller's tenant already owns (artifact lives in
   // the local artifact store at /v1/compile/:id/.kolm). For arbitrary external
   // .kolm files, the CLI remains the supported path.
-  // Returns 501 with a hint when the artifact is not local — never silent.
+  // Returns 501 with a hint when the artifact is not local - never silent.
   r.get('/v1/passport/:job_id', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const jobId = String(req.params.job_id || '');
@@ -10934,7 +10803,7 @@ export function buildRouter() {
       return res.status(501).json({
         ok: false,
         error: 'artifact_not_local',
-        hint: 'this kolm deployment does not have the artifact on local disk — use the CLI: `kolm passport <artifact.kolm> --format compliance`',
+        hint: 'this kolm deployment does not have the artifact on local disk - use the CLI: `kolm passport <artifact.kolm> --format compliance`',
         cli_command: `kolm passport ${jobId}.kolm --format compliance`,
         docs: '/docs/cli/passport',
         version: 'w869-v1',
@@ -10993,14 +10862,14 @@ export function buildRouter() {
         environmental,
         passport_meta: {
           schema_url: 'https://kolm.ai/schema/passport-v1.json',
-          honesty_contract: 'missing fields are rendered as "not_yet_disclosed" — never fabricated. estimated values carry an estimate_not_measured marker.',
+          honesty_contract: 'missing fields are rendered as "not_yet_disclosed" - never fabricated. estimated values carry an estimate_not_measured marker.',
           version: 'w869-v1',
         },
       };
       if (format === 'markdown' || format === 'md') {
         const lines = [];
         lines.push(`# Artifact Passport`); lines.push('');
-        lines.push(`_kolm.ai passport-v1 — generated ${envelope.generated_at}_`); lines.push('');
+        lines.push(`_kolm.ai passport-v1 - generated ${envelope.generated_at}_`); lines.push('');
         lines.push(`- **job_id**: \`${jobId}\``);
         lines.push(`- **sha256**: \`${sha256}\``);
         lines.push(`- **size**: ${stat.size} bytes`);
@@ -11153,7 +11022,7 @@ export function buildRouter() {
     res.setHeader('Content-Type', 'application/samlmetadata+xml; charset=utf-8');
     res.send(xml);
   });
-  // SCIM 2.0 Service Provider Configuration — RFC 7644 §5. IdPs read this
+  // SCIM 2.0 Service Provider Configuration - RFC 7644 §5. IdPs read this
   // to discover what SCIM operations the SP supports. Empty/false flags are
   // honest signals to the IdP that bulk/patch/etag are not yet implemented.
   r.get('/v1/scim/v2/ServiceProviderConfig', (req, res) => {
@@ -11267,7 +11136,7 @@ export function buildRouter() {
     res.status(201).json(_scimUserFromRow(row, req.get('host') || 'kolm.ai'));
   });
   // ==========================================================================
-  // W-INTEG — SCIM per-resource lifecycle + Groups CRUD, SAML ACS, MCP,
+  // W-INTEG - SCIM per-resource lifecycle + Groups CRUD, SAML ACS, MCP,
   // webhooks, model entitlements, eval gate. Each handler is tenant-fenced via
   // req.tenant_record.id and gated by the same _ssoEntitled(plan) check the
   // inline SCIM list/create routes use. Delegates to the already-built modules.
@@ -11559,24 +11428,24 @@ export function buildRouter() {
   });
   // ---- end W-INTEG enterprise endpoints ----
 
-  // W452 — multimodal redactor surface. The fail-closed redactor in
+  // W452 - multimodal redactor surface. The fail-closed redactor in
   // src/privacy-membrane.js + src/phi-redactor.js has shipped since the v7
   // refactor, but it was only reachable via the connector proxy's implicit
   // redact-on-capture hook. There was no first-class /v1/redact route for
-  // explicit redaction of an arbitrary buffer — which meant the redactor was
+  // explicit redaction of an arbitrary buffer - which meant the redactor was
   // invisible to anyone not using the connector path (CLI users on a fresh
   // shell, agents that capture-then-redact, the /v1/capture/media multimodal
   // pipeline).
   //
   // The two routes here close that gap:
   //
-  //   POST /v1/redact          — text-only canonical. {text} -> {redacted, ...}
-  //   POST /v1/media/redact    — multimodal. Accepts {media_uri, mime} OR
+  //   POST /v1/redact - text-only canonical. {text} -> {redacted, ...}
+  //   POST /v1/media/redact - multimodal. Accepts {media_uri, mime} OR
   //                              {text, mime}. Text-extractable kinds run
   //                              through the redactor; image/audio/video
   //                              return a deferred envelope with a clear
   //                              extract_uri hint (callers wire their own
-  //                              OCR/whisper worker — heavy ML deps stay out
+  //                              OCR/whisper worker - heavy ML deps stay out
   //                              of the default install per W195/W212 rule).
   //
   // Both routes are auth-gated (req.tenant_record). The redactor is pure-JS
@@ -11586,7 +11455,7 @@ export function buildRouter() {
   // Mime prefixes the redactor can extract text from directly. application/json
   // and application/yaml get JSON.stringify'd before redaction so embedded PHI
   // in keys/values is caught. Other text/* kinds (html, csv, markdown) get
-  // redacted as-is — the regex set is content-agnostic.
+  // redacted as-is - the regex set is content-agnostic.
   function _isTextRedactable(mime) {
     if (!mime) return false;
     const m = String(mime).toLowerCase().split(';')[0].trim();
@@ -11672,7 +11541,7 @@ export function buildRouter() {
     if (inlineText != null) {
       text = inlineText;
     } else {
-      // Defer non-text-extractable kinds before reading bytes — we don't want
+      // Defer non-text-extractable kinds before reading bytes - we don't want
       // to load a 50MB video file just to refuse it.
       if (resolvedMime && !_isTextRedactable(resolvedMime)) {
         const d = _deferralReason(resolvedMime);
@@ -11750,9 +11619,9 @@ export function buildRouter() {
     }
   });
 
-  // W454 — spawn the workers/media-redact worker to do real OCR / PDF /
+  // W454 - spawn the workers/media-redact worker to do real OCR / PDF /
   // whisper extraction, then run the extracted text through the same
-  // redactor as /v1/redact. The worker is OPTIONAL — root install does
+  // redactor as /v1/redact. The worker is OPTIONAL - root install does
   // not pull tesseract.js / pdf-parse / whisper-cli. When the kind's
   // extractor is not installed, the route returns 200 with an honest
   // {ok:false, error:'extractor_not_installed', install_hint:'...'}
@@ -11808,7 +11677,7 @@ export function buildRouter() {
     return res.status(200).json(env);
   });
 
-  // W454 — worker self-doctor proxied through the API so `kolm media
+  // W454 - worker self-doctor proxied through the API so `kolm media
   // doctor --remote` can ask the server which extractors are wired.
   r.get('/v1/media/redact-job/doctor', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
@@ -11834,7 +11703,7 @@ export function buildRouter() {
     return res.json(env);
   });
 
-  // W462 — multimodal IMAGE PII redactor: pixel-space redaction of
+  // W462 - multimodal IMAGE PII redactor: pixel-space redaction of
   // faces + license plates. Distinct from /v1/media/redact-job (W454):
   // W454 extracts text from an image and redacts that text; W462 detects
   // faces/plates IN PIXEL SPACE and emits a blurred/masked output image.
@@ -11885,7 +11754,7 @@ export function buildRouter() {
         stderr: String(r2.stderr || '').slice(0, 500),
       });
     }
-    if (r2.status === 3)  return res.status(200).json(env); // no detector installed — honest envelope
+    if (r2.status === 3)  return res.status(200).json(env); // no detector installed - honest envelope
     if (r2.status === 4)  return res.status(404).json(env);
     if (r2.status === 2)  return res.status(400).json(env);
     if (r2.status === 5)  return res.status(422).json(env);
@@ -11893,7 +11762,7 @@ export function buildRouter() {
     return res.status(200).json(env);
   });
 
-  // W464 — multimodal audio voiceprint scrub. Anonymizes the speaker's
+  // W464 - multimodal audio voiceprint scrub. Anonymizes the speaker's
   // voiceprint while preserving content. Complementary to W462 image
   // redact (faces/plates) and W454 audio transcript redact (text).
   // Body: { media_uri | path, output_path?, strength?, max_bytes? }
@@ -11940,7 +11809,7 @@ export function buildRouter() {
     return res.status(200).json(env);
   });
 
-  // W464 — audio-redact worker self-doctor.
+  // W464 - audio-redact worker self-doctor.
   r.get('/v1/multimodal/redact-audio/doctor', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
     const { spawnSync } = await import('node:child_process');
@@ -11965,7 +11834,7 @@ export function buildRouter() {
     return res.json(env);
   });
 
-  // W462 — image-redact worker self-doctor, proxied so the CLI's
+  // W462 - image-redact worker self-doctor, proxied so the CLI's
   // `kolm media image-doctor --remote` can ask the server.
   r.get('/v1/multimodal/redact-image/doctor', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth_required' });
@@ -11991,11 +11860,11 @@ export function buildRouter() {
     return res.json(env);
   });
 
-  // W466 — multimodal bake-off harness. Replays a tenant's captured rows
+  // W466 - multimodal bake-off harness. Replays a tenant's captured rows
   // that carry media_kind (image/audio/video/pdf) through one or more
   // compiled .kolm artifacts and scores each artifact's output against
   // the captured base response by token-overlap. Returns ranked
-  // contestants + winner. The compute is pure string scoring — heavy ML
+  // contestants + winner. The compute is pure string scoring - heavy ML
   // (CLIP, embedding similarity) stays in workers/multimodal-bakeoff/
   // and is opt-in via env override.
   // W554 - multimodal sidecar tokenizer. API mirror of
@@ -12004,17 +11873,17 @@ export function buildRouter() {
   // Markdown sidecars using deterministic local feature tokens, with optional
   // provider captions/transcripts when configured.
   r.get('/v1/multimodal/tokenize/doctor', async (_req, res) => {
-    // WC07 — SECURITY-SENSITIVE: previous `!!process.env.KOLM_ALLOW_SERVER_FILE_TOKENIZE`
-    // would return TRUE for `KOLM_ALLOW_SERVER_FILE_TOKENIZE=false` — i.e.
+    // WC07 - SECURITY-SENSITIVE: previous `!!process.env.KOLM_ALLOW_SERVER_FILE_TOKENIZE`
+    // would return TRUE for `KOLM_ALLOW_SERVER_FILE_TOKENIZE=false` - i.e.
     // setting the env to the literal string "false" to disable the feature
     // would silently OPEN the server-side file tokenize hole. envBool with
     // fallback=false closes that hole: '0'/'false'/'no'/'off' all parse to
     // false, only '1'/'true'/'yes'/'on' parse to true, unrecognized → false.
-    // KOLM_LOCAL_DAEMON also defaults to false here — this is a reporting
+    // KOLM_LOCAL_DAEMON also defaults to false here - this is a reporting
     // endpoint, so when the env is unset the doctor honestly says false.
     // (W411 local-daemon detection at __w411IsLocalDaemonMode() is a separate
     // derivation that combines this env with isProductionRuntime; we don't
-    // duplicate that logic in /doctor — operators who set the env explicitly
+    // duplicate that logic in /doctor - operators who set the env explicitly
     // get the explicit answer.)
     const localDaemon = envBool('KOLM_LOCAL_DAEMON', false);
     const serverFileTokenize = envBool('KOLM_ALLOW_SERVER_FILE_TOKENIZE', false);
@@ -12037,7 +11906,7 @@ export function buildRouter() {
   // KOLM_ALLOW_SERVER_FILE_TOKENIZE=1.
   r.post('/v1/multimodal/tokenize', async (req, res) => {
     try {
-      // WC07 — security default-closed gate. Previously `!process.env.KOLM_LOCAL_DAEMON`
+      // WC07 - security default-closed gate. Previously `!process.env.KOLM_LOCAL_DAEMON`
       // was truthy for unset BUT FALSY for `KOLM_LOCAL_DAEMON=false`, which
       // meant the gate would OPEN when an operator typed the env var name to
       // disable the feature. envBool with fallback=false parses '0'/'false'/'no'/'off'
@@ -12195,7 +12064,7 @@ export function buildRouter() {
   });
 
   // List receipt-signing key metadata for the calling tenant. Secrets are
-  // never returned — only the key_id, status, and rotation timestamps.
+  // never returned - only the key_id, status, and rotation timestamps.
   r.get('/v1/account/receipt-secrets', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot read tenant receipt keys' });
     try {
@@ -12208,7 +12077,7 @@ export function buildRouter() {
 
   // Drop a specific previous key from the verification ring. Receipts signed
   // with that key will no longer verify against this tenant after this call.
-  // The current key cannot be pruned — rotate first to retire it.
+  // The current key cannot be pruned - rotate first to retire it.
   r.post('/v1/account/receipt-secret/prune', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot prune' });
     const key_id = String((req.body || {}).key_id || '').trim();
@@ -12304,8 +12173,8 @@ export function buildRouter() {
 
   // ---------- Admin console endpoints ----------
   // Read-only admin surface for the founder console at /admin. Gated by
-  // req.is_admin (ADMIN_KEY in env). Returns scrubbed views — no raw api_keys,
-  // no per-tenant secrets — just operational shape: who, what plan, how much
+  // req.is_admin (ADMIN_KEY in env). Returns scrubbed views - no raw api_keys,
+  // no per-tenant secrets - just operational shape: who, what plan, how much
   // they've used, what they're running. Cross-tenant by design.
 
   // Admin tenant list - scrubbed cross-tenant view with q/limit filters.
@@ -12433,7 +12302,7 @@ export function buildRouter() {
   // (downgrade to free). Idempotent: each Stripe event id is recorded once.
   //
   // The route is mounted with `express.raw({ type: '*/*' })` ahead of
-  // `express.json()` in server.js — req.body must be a Buffer for signature
+  // `express.json()` in server.js - req.body must be a Buffer for signature
   // verification to work (canonical JSON reordering breaks the HMAC).
   r.post('/v1/stripe/webhook', (req, res) => {
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -12472,6 +12341,35 @@ export function buildRouter() {
 
         if (event.type === 'checkout.session.completed') {
           const s = event.data && event.data.object || {};
+
+          // ASR PRODUCT purchase (Signed Readiness Report / Continuous). Branch
+          // on metadata.kolm_product (Checkout-API path) OR the client_reference_id
+          // prefix (Payment-Link path) - NEVER on amount_total - and NEVER touch
+          // tenants.plan. Returns before the gateway plan logic below.
+          const asrRef = parseAsrRef(s.client_reference_id);
+          const asrKind = (s.metadata && s.metadata.kolm_product)
+            || (asrRef ? (asrRef.kind === 'one_time' ? 'asr_report' : 'asr_continuous') : null);
+          if (asrKind === 'asr_report') {
+            const auditId = (s.metadata && s.metadata.audit_id) || (asrRef && asrRef.audit_id) || null;
+            const fr = fulfillReportPurchase({ audit_id: auditId, stripe_session_id: s.id });
+            return {
+              kind: 'ok',
+              body: { received: true, asr: 'report', audit_id: auditId, fulfilled: !!(fr && fr.ok), id: event.id },
+              sideEffect: (fr && fr.ok && !fr.already) ? { kind: 'asr_report_ready', row: fr.row } : null,
+            };
+          }
+          if (asrKind === 'asr_continuous') {
+            const product = (s.metadata && s.metadata.product_key) || (asrRef && asrRef.product) || null;
+            const asrTenant = (s.metadata && s.metadata.tenant_id) || (asrRef && asrRef.tenant_id) || null;
+            const ac = activateSubscription({
+              product, tenant_id: asrTenant,
+              stripe_subscription_id: s.subscription || null,
+              stripe_customer_id: s.customer || null,
+              stripe_session_id: s.id,
+            });
+            return { kind: 'ok', body: { received: true, asr: 'continuous', product, tenant: asrTenant, activated: !!(ac && ac.ok), id: event.id } };
+          }
+
           const tenantId = s.client_reference_id;
           const planId = planFromAmount(s.amount_total);
           if (!tenantId) return { kind: 'ok', body: { received: true, warning: 'no client_reference_id', id: event.id } };
@@ -12498,6 +12396,15 @@ export function buildRouter() {
 
         if (event.type === 'customer.subscription.updated') {
           const sub = event.data && event.data.object || {};
+          // ASR Continuous subscription lifecycle (asr_subscriptions, not tenants).
+          {
+            const ss = String(sub.status || 'active');
+            const asrStatus = (ss === 'past_due' || ss === 'unpaid') ? 'past_due' : ss === 'canceled' ? 'cancelled' : 'active';
+            const asr = setSubscriptionStatus({ stripe_subscription_id: sub.id, status: asrStatus });
+            if (asr && asr.updated > 0) {
+              return { kind: 'ok', body: { received: true, asr: 'continuous', status: asrStatus, id: event.id } };
+            }
+          }
           const tenant = findOne('tenants', t => t.stripe_subscription_id === sub.id);
           if (!tenant) return { kind: 'ok', body: { received: true, warning: 'tenant not found', id: event.id } };
           const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
@@ -12516,6 +12423,12 @@ export function buildRouter() {
 
         if (event.type === 'customer.subscription.deleted') {
           const sub = event.data && event.data.object || {};
+          {
+            const asr = setSubscriptionStatus({ stripe_subscription_id: sub.id, status: 'cancelled' });
+            if (asr && asr.updated > 0) {
+              return { kind: 'ok', body: { received: true, asr: 'continuous', status: 'cancelled', id: event.id } };
+            }
+          }
           const tenant = findOne('tenants', t => t.stripe_subscription_id === sub.id);
           if (!tenant) return { kind: 'ok', body: { received: true, warning: 'tenant not found', id: event.id } };
           update('tenants', x => x.id === tenant.id, {
@@ -12531,6 +12444,12 @@ export function buildRouter() {
 
         if (event.type === 'invoice.payment_failed') {
           const inv = event.data && event.data.object || {};
+          if (inv.subscription) {
+            const asr = setSubscriptionStatus({ stripe_subscription_id: inv.subscription, status: 'past_due' });
+            if (asr && asr.updated > 0) {
+              return { kind: 'ok', body: { received: true, asr: 'continuous', action: 'past_due_marked', id: event.id } };
+            }
+          }
           const tenant = findOne('tenants', t =>
             t.stripe_subscription_id === inv.subscription ||
             t.stripe_customer_id === inv.customer
@@ -12563,6 +12482,23 @@ export function buildRouter() {
         sendBillingFailed({ email: tenant.email, plan: tenant.plan }).catch(() => {});
       }
     }
+    // ASR Signed Readiness Report ready - email the buyer the shareable Trust
+    // link. Best-effort; never rolls back the (already-committed) purchase.
+    if (outcome && outcome.sideEffect && outcome.sideEffect.kind === 'asr_report_ready' && outcome.sideEffect.row) {
+      const row = outcome.sideEffect.row;
+      const t = findOne('tenants', x => x.id === row.tenant_id);
+      if (t && t.email) {
+        const base = (process.env.PUBLIC_BASE || process.env.KOLM_VERIFY_URL_BASE || 'https://kolm.ai').replace(/\/+$/, '');
+        const tpl = tEmailReportReady({
+          email: t.email,
+          report_id: row.report_id,
+          trust_url: row.public_slug ? `${base}/v1/trust/${row.public_slug}` : `${base}/dashboard`,
+          readiness_pct: row.summary ? row.summary.readiness_pct : null,
+          subject_name: row.subject,
+        });
+        sendEmail({ to: t.email, subject: tpl.subject, html: tpl.html, text: tpl.text, tag: 'asr_report_ready' }).catch(() => {});
+      }
+    }
     return res.json(outcome.body);
   });
 
@@ -12580,7 +12516,7 @@ export function buildRouter() {
         });
         stripe_cancelled = r.ok;
       } catch (err) {
-        // WC06 — promote to audit row + structured log. Stripe-cancel failures
+        // WC06 - promote to audit row + structured log. Stripe-cancel failures
         // are tenant-impacting (subscription may still be live), so they need
         // to land in the chained audit trail, not just stdout.
         tryAppendAudit({
@@ -12615,7 +12551,7 @@ export function buildRouter() {
   // stripe_customer_id keeps existing for portability, billing tokens drop).
   // Content-Disposition nudges browsers to save the file.
   r.get('/v1/account/export', (req, res) => {
-    if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot export — use a tenant key' });
+    if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot export - use a tenant key' });
     const t = req.tenant_record;
     const matches = (row) => {
       if (!row) return false;
@@ -12658,11 +12594,11 @@ export function buildRouter() {
   // Compliance package: a single bundle a privacy officer / auditor / regulator
   // can read end-to-end. Tenant metadata + signed receipts + audit log +
   // BAA-ready org details + control mapping snapshot. JSON only (no PHI ever
-  // transits this endpoint — receipts are payload-free by design). Auditors
+  // transits this endpoint - receipts are payload-free by design). Auditors
   // who want a literal ZIP can pipe `curl ... | jq -r .b64_zip | base64 -d`,
   // but the JSON shape is the canonical artifact.
   r.get('/v1/account/compliance-package', (req, res) => {
-    if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot export — use a tenant key' });
+    if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot export - use a tenant key' });
     const t = req.tenant_record;
     const matches = (row) => {
       if (!row) return false;
@@ -12759,7 +12695,7 @@ export function buildRouter() {
   // already shipped to users keep verifying since the cloud signing key is
   // unchanged. The tenant can no longer authenticate. If they had an active
   // Stripe subscription we ask Stripe to cancel it so they aren't charged
-  // again — best-effort, never blocks deletion.
+  // again - best-effort, never blocks deletion.
   r.post('/v1/account/delete', async (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot delete' });
     const t = req.tenant_record;
@@ -12770,7 +12706,7 @@ export function buildRouter() {
           headers: { authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
         });
       } catch (err) {
-        // WC06 — promote to audit row + structured log (same pattern as the
+        // WC06 - promote to audit row + structured log (same pattern as the
         // /v1/account/cancel handler). Even on tenant-delete, the chained
         // audit row matters for the "did Stripe actually stop billing this
         // org?" forensic question.
@@ -12890,7 +12826,7 @@ export function buildRouter() {
   });
 
   // Batch synthesis: multiple concepts in one round-trip. Sequential, since
-  // synthesis is CPU-bound — but billed once via shared overhead.
+  // synthesis is CPU-bound - but billed once via shared overhead.
   r.post('/v1/synthesize/batch', async (req, res) => {
     const { items, publish = true, visibility = 'private' } = req.body || {};
     if (!Array.isArray(items) || items.length === 0) {
@@ -12948,7 +12884,7 @@ export function buildRouter() {
   // auditor or buyer can verify the artifact's provenance without trusting us.
   // GET /v1/verify/cidv1:sha256:7a2c1f9b... -> { verified, cid, manifest, ... }
   //
-  // W436 — DoD step 9 closer. If the registry row carries `manifest.hashes`,
+  // W436 - DoD step 9 closer. If the registry row carries `manifest.hashes`,
   // recompute the CID from those hashes (cidFromManifestHashes) and refuse to
   // return verified=true unless the recomputed CID matches the requested CID.
   // Surfaces `manifest_hash_mismatch` envelope with both expected_cid and
@@ -12997,7 +12933,7 @@ export function buildRouter() {
       });
     }
     const c = concepts.find(x => x.id === v.concept_id || x.head_version === v.id);
-    // W436 — real manifest_hash check. Look for hashes in the most common
+    // W436 - real manifest_hash check. Look for hashes in the most common
     // places we record them (the evaluation block, the version, or the
     // concept's head_manifest snapshot). If we have them, recompute and
     // compare; mismatch returns 200 with verified:false + the canonical
@@ -13053,10 +12989,10 @@ export function buildRouter() {
     });
   });
 
-  // W436 — POST /v1/artifact/verify-manifest. Stateless manifest_hash check
+  // W436 - POST /v1/artifact/verify-manifest. Stateless manifest_hash check
   // for callers that have the manifest hashes block in hand (e.g. a CLI
   // that just downloaded the artifact and parsed its manifest.json). No auth
-  // required — the check is pure: recompute CID from hashes, compare to the
+  // required - the check is pure: recompute CID from hashes, compare to the
   // claimed CID. Returns `manifest_hash_mismatch` envelope on disagreement,
   // `verified:true` + recomputed cid on match.
   r.post('/v1/artifact/verify-manifest', (req, res) => {
@@ -13093,7 +13029,7 @@ export function buildRouter() {
     });
   });
 
-  // Wave 165 (N+5) — tenant shadow corpus endpoints. The eval credibility
+  // Wave 165 (N+5) - tenant shadow corpus endpoints. The eval credibility
   // roadmap (Wave 144 Doc 2 §7) layered eval independence as:
   //   N+1.5/Q+2     tenant seeds.jsonl train/holdout split (shipped W150-151)
   //   N+3 / N+4     external + adversarial holdouts (shipped W164)
@@ -13103,7 +13039,7 @@ export function buildRouter() {
   //
   // The distinguishing property of N+5: the corpus NEVER LEAVES THE TENANT'S
   // ENVIRONMENT. The .kolm artifact records only {tenant_id, corpus_id,
-  // corpus_sha256, accuracy, ...} — never the rows themselves. A HIPAA-covered
+  // corpus_sha256, accuracy, ...} - never the rows themselves. A HIPAA-covered
   // payer, a banking BAA holder, or any regulated buyer with a contractual
   // data-residency clause can prove the recipe was scored against their
   // proprietary corpus without ever shipping the corpus.
@@ -13367,7 +13303,7 @@ export function buildRouter() {
     }
   }
 
-  // W784 — runtime-adapter plugin extension point. A plugin with kind "runtime"
+  // W784 - runtime-adapter plugin extension point. A plugin with kind "runtime"
   // can register an alternate execution backend; handleRun() consults
   // mod.runtimeAdapterPlugins() before falling back to the built-in path.
 
@@ -13442,7 +13378,7 @@ export function buildRouter() {
     // Receipt-bearing runs: every successful invocation emits an HMAC
     // receipt bound to its run. This is the count of receipts that
     // _exist_, not the count that has been independently verified by a
-    // caller — a dedicated receipts/verifications table is Sprint 2 work.
+    // caller - a dedicated receipts/verifications table is Sprint 2 work.
     // Exposed as receipt_bearing_runs (honest) and receipts_verified (legacy
     // alias, same value) for backward compatibility.
     const receiptBearingRuns = inv.filter(i => !i.error).length;
@@ -13500,7 +13436,7 @@ export function buildRouter() {
     res.json(t);
   });
 
-  // /v1/admin/tenants — defined above with rich q/limit/scrub. Keep diagnostics here.
+  // /v1/admin/tenants - defined above with rich q/limit/scrub. Keep diagnostics here.
 
   // Admin diagnostics - checks data/artifact directories and selected runtime env flags.
   r.get('/v1/admin/diagnostics', async (req, res) => {
@@ -13549,7 +13485,7 @@ export function buildRouter() {
     });
   });
 
-  // W855 — admin browser for the 7 internal control files in docs/internal/.
+  // W855 - admin browser for the 7 internal control files in docs/internal/.
   // These are the truth registries (waves, files, design cascade, media proofs,
   // catalog manifest). NOT shipped publicly; admin-only. The release-verify
   // control-files gate validates them at build time; these routes let an
@@ -13620,7 +13556,7 @@ export function buildRouter() {
 
   // ---------- Recipe aliases ----------
   // Forward-looking branding: "recipe" terminology mirrors "concept" endpoints.
-  // Both names route to the same handlers — full backward compatibility preserved.
+  // Both names route to the same handlers - full backward compatibility preserved.
   r.get('/v1/recipes', (req, res) => {
     const concepts = registry.listConcepts({ tenant: req.tenant, tenantId: req.tenant_record?.id, tag: req.query.tag, limit: parseInt(req.query.limit) || 50 });
     res.json({ recipes: concepts.map(c => ({ ...c, recipe_id: c.id })) });
@@ -13644,10 +13580,10 @@ export function buildRouter() {
     });
   });
 
-  // ---------- Auto-labeling (Phase C — Day 30-60 in roadmap) ----------
+  // ---------- Auto-labeling (Phase C - Day 30-60 in roadmap) ----------
   // Run a recipe across a corpus of inputs and return labeled rows. Inline
   // mode runs synchronously (max 500 rows). HuggingFace and URL modes return
-  // a queued job — actual fetcher lands in v0.3 once we have a Postgres queue.
+  // a queued job - actual fetcher lands in v0.3 once we have a Postgres queue.
   async function runRecipeOverRows(c, rows, tenant) {
     const out = [];
     let errors = 0;
@@ -13665,7 +13601,7 @@ export function buildRouter() {
     return { rows: out, errors };
   }
 
-  // Inline labeler — synchronous up to 500 rows
+  // Inline labeler - synchronous up to 500 rows
   r.post('/v1/recipes/:id/label-corpus', async (req, res) => {
     const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'recipe not found' });
@@ -13700,7 +13636,7 @@ export function buildRouter() {
       });
       return res.status(202).json({
         job_id, status: 'queued', recipe_id: c.id,
-        message: `Queued — ${corpus.type} fetcher lands when we wire the corpus pipeline (Day 30-60). Poll /v1/jobs/${job_id} to check.`,
+        message: `Queued - ${corpus.type} fetcher lands when we wire the corpus pipeline (Day 30-60). Poll /v1/jobs/${job_id} to check.`,
         est_rows: max_rows,
       });
     }
@@ -13807,7 +13743,7 @@ export function buildRouter() {
   // ---------- Enterprise inquiry intake (KOLM-102) ----------
   // Public POST from /enterprise/inquiry. Validates 7 required fields, persists
   // to in-memory enterpriseLeads, and emails sales@kolm.ai via Resend (best
-  // effort — sendMail() returns { skipped: true } when RESEND_API_KEY is unset).
+  // effort - sendMail() returns { skipped: true } when RESEND_API_KEY is unset).
   r.post('/v1/lead/enterprise', enterpriseLeadLimiter, async (req, res) => {
     const b = req.body || {};
     const FIELD_LIMITS = {
@@ -13891,7 +13827,7 @@ export function buildRouter() {
         tags: [{ name: 'kind', value: 'enterprise_lead' }, { name: 'vertical', value: cleaned.vertical.toLowerCase() }],
       });
       if (emailResult.skipped) {
-        // WC06 CRITICAL PII FIX — previously this branch console.log'd the
+        // WC06 CRITICAL PII FIX - previously this branch console.log'd the
         // full `text` payload, which embeds email + intended_use + notes for
         // every enterprise lead. That is a tenant-PII leak through stdout
         // (Vercel/Railway log retention). Now we log only the byte size +
@@ -13903,7 +13839,7 @@ export function buildRouter() {
           recipient_hash: sha256(cleaned.email).slice(0, 12),
         });
       } else if (!emailResult.ok) {
-        // WC06 — promote send failure to audit row + structured log so an
+        // WC06 - promote send failure to audit row + structured log so an
         // ops investigation has a chained trail of "we tried to email this
         // lead and Resend rejected it". Hash the recipient so the audit
         // payload doesn't carry the raw email.
@@ -13921,7 +13857,7 @@ export function buildRouter() {
         });
       }
     } catch (err) {
-      // WC06 — strip err.stack and any free-text. Old code passed the full
+      // WC06 - strip err.stack and any free-text. Old code passed the full
       // error object to console.error, which on some runtimes serialises
       // .request / .response bodies that may include API keys or the lead
       // payload itself.
@@ -13951,7 +13887,7 @@ export function buildRouter() {
     res.json(rec);
   });
 
-  // W889-6.1 — POST /v1/sales/demo-request (PUBLIC, rate-limited 10/IP/24h via
+  // W889-6.1 - POST /v1/sales/demo-request (PUBLIC, rate-limited 10/IP/24h via
   // demoRequestLimiter above). Lighter-weight than /v1/lead/enterprise: a
   // buyer at the "Book Demo" CTA gives company + email + use_case +
   // expected_volume_per_month + optional message. Stored under namespace
@@ -14024,7 +13960,7 @@ export function buildRouter() {
         tags: [{ name: 'kind', value: 'demo_request' }],
       });
     } catch (_err) { // deliberate: cleanup
-      // never block the response on email — Resend or any other transport
+      // never block the response on email - Resend or any other transport
       // failure stays out of the buyer's flow.
     }
 
@@ -14093,7 +14029,7 @@ export function buildRouter() {
     }
   });
 
-  // ---------- Public registry submissions (Phase E — Day 120-180) ----------
+  // ---------- Public registry submissions (Phase E - Day 120-180) ----------
   r.post('/v1/public/submit', (req, res) => {
     const { recipe_id, blurb = '', contact = '' } = req.body || {};
     if (!recipe_id) return res.status(400).json({ error: 'recipe_id required' });
@@ -14108,7 +14044,7 @@ export function buildRouter() {
       created_at: new Date().toISOString(),
     };
     insert('submissions', sub);
-    res.json({ submission_id: sub.id, status: sub.status, message: 'submitted — public review on Day 120-180 schedule' });
+    res.json({ submission_id: sub.id, status: sub.status, message: 'submitted - public review on Day 120-180 schedule' });
   });
 
   // Tenant audit log. Reconstructs entries on the fly from the source tables
@@ -14131,7 +14067,7 @@ export function buildRouter() {
         note: 'sign in (Bearer <api_key>) to see your audit entries; this endpoint reconstructs from invocations, compile_jobs, observations, and stripe_events scoped to your tenant.',
       });
     }
-    // Audit scanner accepts any of the three durable tenant references — id,
+    // Audit scanner accepts any of the three durable tenant references - id,
     // name, or email. Legacy rows wrote `tenant: <name>`; recent writes also
     // carry `tenant_id`. Match on either so historical entries surface.
     const matchTenant = (row) => {
@@ -14192,7 +14128,7 @@ export function buildRouter() {
       });
     }
     // 4a. Durable audit_events rows (HMAC-chained, append-only). These are
-    // authoritative — the reconstruction above is the legacy compatibility
+    // authoritative - the reconstruction above is the legacy compatibility
     // bridge. Surface both for now so dashboards built against the old shape
     // keep working while the chained rows accumulate.
     try {
@@ -14208,7 +14144,7 @@ export function buildRouter() {
           payload: e.payload || {},
         });
       }
-    } catch { /* table may not exist yet — fine, fall through */ }
+    } catch { /* table may not exist yet - fine, fall through */ }
     // 4. Stripe events scoped by tenant (plan changes, key actions logged with tenant)
     for (const e of all('stripe_events')) {
       if (e.tenant && e.tenant !== tenant.id && e.tenant !== tenant.email) continue;
@@ -14299,8 +14235,8 @@ export function buildRouter() {
 
   // Stable signature for prompt templates. Real prompts are interpolated by the time
   // we see them, so we use the leading "instruction" portion (up to the first
-  // sentence-ending mark or newline) as the template signature — that's where the
-  // pattern lives ("Is this spam?", "Classify this:", etc.) — and treat the rest as
+  // sentence-ending mark or newline) as the template signature - that's where the
+  // pattern lives ("Is this spam?", "Classify this:", etc.) - and treat the rest as
   // variable input.
   function templateSignature(prompt = '', model = '') {
     const raw = String(prompt).replace(/\s+/g, ' ').trim();
@@ -14314,10 +14250,10 @@ export function buildRouter() {
     return { hash: h, normalized: normalized.slice(0, 240), variable: variable.slice(0, 240) };
   }
 
-  // POST /v1/bridges/observe — agents log a (model, prompt, response) tuple.
+  // POST /v1/bridges/observe - agents log a (model, prompt, response) tuple.
   // After ≥4 calls with the same template signature we surface a synthesis suggestion.
   // W258-BE-1: persists via insertCapture (durable contract). 503 on store
-  // failure — same envelope as the capture proxy handlers.
+  // failure - same envelope as the capture proxy handlers.
   r.post('/v1/bridges/observe', async (req, res) => {
     const { model = '', prompt = '', response, latency_ms, cost_usd } = req.body || {};
     if (!prompt || response === undefined) {
@@ -14360,7 +14296,7 @@ export function buildRouter() {
     });
   });
 
-  // GET /v1/bridges/suggestions — recipe-synthesis suggestions clustered from observations.
+  // GET /v1/bridges/suggestions - recipe-synthesis suggestions clustered from observations.
   r.get('/v1/bridges/suggestions', (req, res) => {
     const obs = findByTenant('observations', req.tenant);
     const groups = new Map();
@@ -14384,13 +14320,13 @@ export function buildRouter() {
     res.json({ suggestions, total: suggestions.length });
   });
 
-  // GET /v1/bridges/observations — flat list of recent captures for the /captures inbox.
+  // GET /v1/bridges/observations - flat list of recent captures for the /captures inbox.
   // Filters: ?namespace=<ns> (optional), ?limit=<n> (default 50, max 200), ?include_discarded=1.
   r.get('/v1/bridges/observations', (req, res) => {
     const ns = req.query?.namespace ? String(req.query.namespace) : null;
     const lim = Math.min(200, Math.max(1, parseInt(req.query?.limit, 10) || 50));
     const includeDiscarded = req.query?.include_discarded === '1';
-    // W435 — `?since=<iso>` lower-bound on created_at. Enables incremental
+    // W435 - `?since=<iso>` lower-bound on created_at. Enables incremental
     // capture export for the retrain loop ("give me everything captured
     // since my last compile"). The CLI `kolm bridges observations
     // --since-last-compile <artifact>` resolves the artifact manifest's
@@ -14430,7 +14366,7 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/bridges/observations/:id — soft-update an observation (keep/discard).
+  // POST /v1/bridges/observations/:id - soft-update an observation (keep/discard).
   // Body: { discarded: true } | { kept: true } | { discarded: false }. Tenant-scoped.
   r.post('/v1/bridges/observations/:id', (req, res) => {
     const id = req.params.id;
@@ -14444,7 +14380,7 @@ export function buildRouter() {
     res.json({ id, ...patch });
   });
 
-  // POST /v1/bridges/auto-synthesize — turn an observation cluster into a recipe.
+  // POST /v1/bridges/auto-synthesize - turn an observation cluster into a recipe.
   r.post('/v1/bridges/auto-synthesize', async (req, res) => {
     const hash = req.body?.template_hash || req.query?.template_hash;
     const name = req.body?.name || `auto-${String(hash || '').slice(0, 8)}`;
@@ -14752,7 +14688,7 @@ export function buildRouter() {
       }
     }
     // mode === 'specialist'
-    // W364 — first try a configured remote trainer bridge (legacy path);
+    // W364 - first try a configured remote trainer bridge (legacy path);
     // if KOLM_TRAINER_BRIDGE_URL is unset OR the bridge errors, fall
     // through to the in-tree distill worker so the tenant always gets a
     // job_id (never 503).
@@ -14776,9 +14712,9 @@ export function buildRouter() {
             bridge_source: 'remote_trainer',
           });
         }
-        // Non-2xx bridge response — fall through to the local worker.
+        // Non-2xx bridge response - fall through to the local worker.
       } catch (_) { // deliberate: cleanup
-        // Network error — fall through.
+        // Network error - fall through.
       }
     }
     try {
@@ -14802,7 +14738,7 @@ export function buildRouter() {
     }
   });
 
-  // ===== W455: per-prompt loss telemetry — list + show distill runs ===========
+  // ===== W455: per-prompt loss telemetry - list + show distill runs ===========
   // Reads ~/.kolm/distill-runs/run_<id>/{run-meta.json, progress.jsonl, manifest.json}.
   // Tenant-scoped: listDistillRuns filters by req.tenant_record.id (fail closed
   // on missing tag). The progress.jsonl events are emitted from distill() each
@@ -14821,7 +14757,7 @@ export function buildRouter() {
     }
   });
   // Distill run detail - reads ~/.kolm/distill-runs/run_<id>/{run-meta.json,
-  // progress.jsonl, manifest.json} for one run. Tenant-scoped — 404 when run
+  // progress.jsonl, manifest.json} for one run. Tenant-scoped - 404 when run
   // belongs to another tenant or id doesn't match /^run_[a-z0-9_]+$/i.
   r.get('/v1/distill/runs/:id', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
@@ -15079,7 +15015,7 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/nl/scaffold — networked drafter for `kolm nl --network`. The CLI
+  // POST /v1/nl/scaffold - networked drafter for `kolm nl --network`. The CLI
   // air-gap branch produces the same shape locally via scaffoldRecipeFromNl;
   // this endpoint exists so a tenant that opts in (--network or KOLM_AIRGAP=0)
   // can get an LLM-augmented scaffold without forking the CLI. The
@@ -15103,7 +15039,7 @@ export function buildRouter() {
     res.json({ ...scaffold, network_status: source === 'network' ? 'wired' : 'air_gap', source });
   });
 
-  // GET /v1/bridges/specialist-candidates — recipes whose call volume justifies a Specialist.
+  // GET /v1/bridges/specialist-candidates - recipes whose call volume justifies a Specialist.
   r.get('/v1/bridges/specialist-candidates', (req, res) => {
     const concepts = all('concepts').filter(c => c.tenant === req.tenant || req.is_admin);
     const invocations = all('invocations');
@@ -15117,7 +15053,7 @@ export function buildRouter() {
     res.json({ candidates, threshold: 1000, total: candidates.length });
   });
 
-  // GET /v1/recipes/:id/lineage — full Memory ↔ Recipe ↔ Specialist trace.
+  // GET /v1/recipes/:id/lineage - full Memory ↔ Recipe ↔ Specialist trace.
   r.get('/v1/recipes/:id/lineage', (req, res) => {
     const c = registry.getConcept(req.params.id, req.tenant, req.tenant_record?.id);
     if (!c) return res.status(404).json({ error: 'recipe not found' });
@@ -15222,11 +15158,11 @@ export function buildRouter() {
     // insertCapture throws on store failure (no swallow); W409a bridges to event-store inline.
     await insertCapture(obs);
     obs.durable = captureIsDurable();
-    // SSE fan-out (W258-BE-2) — best-effort.
+    // SSE fan-out (W258-BE-2) - best-effort.
     try { publishCapture(obs); } catch (_) { // deliberate: cleanup
       // SSE broker failure must not block the capture path (best-effort).
     }
-    // Threshold alerts (W215/W258-BE-3) — thresholdCrossedBy after insert.
+    // Threshold alerts (W215/W258-BE-3) - thresholdCrossedBy after insert.
     try {
       const count = await countCaptures(tenant, ns);
       const crossed = notifThresholdCrossedBy(count - 1, count);
@@ -15274,14 +15210,14 @@ export function buildRouter() {
         error: ephemeral ? 'capture_store_ephemeral' : 'capture_store_unavailable',
         message: String(e && e.message || e),
         hint: ephemeral
-          ? 'Set KOLM_STORE_DRIVER=vercel_postgres (or KOLM_DATA_DIR to a persistent path) — /tmp is per-invocation on Vercel.'
+          ? 'Set KOLM_STORE_DRIVER=vercel_postgres (or KOLM_DATA_DIR to a persistent path) - /tmp is per-invocation on Vercel.'
           : 'The durable capture store is unavailable. Retry; if persistent, check /v1/capture/health.',
       });
       return null;
     }
   }
 
-  // POST /v1/capture/log — batch (input, output) insert. Returns 503 with
+  // POST /v1/capture/log - batch (input, output) insert. Returns 503 with
   // capture_store_unavailable when every item failed to persist (no swallow).
   r.post('/v1/capture/log', async (req, res) => {
     _w788SlaTrack(req, res, 'capture_log');
@@ -15337,7 +15273,7 @@ export function buildRouter() {
     // Stored ZERO -> 503 capture_store_unavailable; partial -> 207.
     if (ids.length === 0 && failures.length > 0) {
       res.set('x-kolm-capture-durable', 'false');
-      // LM-7 — capture_write outcome: failure (all items dropped).
+      // LM-7 - capture_write outcome: failure (all items dropped).
       try {
         recordMetricEvent({
           tenant: __tenantId,
@@ -15356,7 +15292,7 @@ export function buildRouter() {
     res.set('x-kolm-capture-durable', String(anyDurable));
     if (notifIsDistillReady(req.tenant, cleanNs)) res.set('x-kolm-distill-ready', 'true');
     const status = failures.length > 0 ? 207 : 201;
-    // LM-7 — capture_write outcome bucketed: partial (207) vs success (201).
+    // LM-7 - capture_write outcome bucketed: partial (207) vs success (201).
     try {
       recordMetricEvent({
         tenant: __tenantId,
@@ -15373,7 +15309,7 @@ export function buildRouter() {
     });
   });
 
-  // GET /v1/capture/health — operator probe. Honest answer about whether
+  // GET /v1/capture/health - operator probe. Honest answer about whether
   // the next insertCapture call will persist beyond a single lambda. Used
   // by the /captures + /security pages and the `kolm doctor` flow.
   r.get('/v1/capture/health', async (req, res) => {
@@ -15392,8 +15328,8 @@ export function buildRouter() {
     }
   });
 
-  // GET /v1/capture/stream — Server-Sent Events live tail of captures.
-  // W258-BE-2: was a 2 s poll-and-scan against all('observations') — broken
+  // GET /v1/capture/stream - Server-Sent Events live tail of captures.
+  // W258-BE-2: was a 2 s poll-and-scan against all('observations') - broken
   // for the Postgres driver and a lambda OOM bomb under fan-out. Now uses
   // the in-process publish/subscribe broker (src/capture-stream.js) wired
   // through recordCapture(). Subscriber map is keyed on tenant so
@@ -15612,7 +15548,7 @@ export function buildRouter() {
   //   OPENAI_BASE_URL=https://kolm.ai/v1/capture/openai        →  POST .../v1/chat/completions
   // The suffix is discarded; the flat provider-specific capture endpoints use the same handler.
   // Express's `?` makes the suffix optional, and the wildcard absorbs any depth.
-  // POST /v1/capture/anthropic — proxy to Anthropic, capture the round-trip.
+  // POST /v1/capture/anthropic - proxy to Anthropic, capture the round-trip.
   // The body is the upstream Anthropic Messages payload, unmodified.
   r.post(/^\/v1\/capture\/anthropic(?:\/.*)?$/, authMiddleware, async (req, res) => {
     if (!req.tenant_record && !req.tenant) return res.status(401).json({ error: 'auth required' });
@@ -15684,16 +15620,16 @@ export function buildRouter() {
       reasoning_trace: reasoningAnt,
     });
     if (!obs && res.headersSent) return; // 503 already returned
-    // W215 #10 sticky distill-ready header (defense-in-depth — also set by receipt helper).
+    // W215 #10 sticky distill-ready header (defense-in-depth - also set by receipt helper).
     if (notifIsDistillReady(req.tenant, namespace)) res.set('x-kolm-distill-ready', 'true');
     res.status(result.status).json(result.json);
   });
 
-  // POST /v1/capture/openai — same shape, OpenAI Chat Completions API.
+  // POST /v1/capture/openai - same shape, OpenAI Chat Completions API.
   r.post(/^\/v1\/capture\/openai(?:\/.*)?$/, authMiddleware, async (req, res) => {
     if (!req.tenant_record && !req.tenant) return res.status(401).json({ error: 'auth required' });
     // The kolm api key is in Authorization (auth middleware already consumed it).
-    // The customer's real OpenAI key MUST come in x-upstream-api-key — we never
+    // The customer's real OpenAI key MUST come in x-upstream-api-key - we never
     // fall back to Authorization here, since that would forward our own key.
     const upstreamKey = req.header('x-upstream-api-key') || '';
     const namespace = sanitizeNamespace(req.header('x-kolm-namespace') || req.query?.namespace || 'default');
@@ -15757,7 +15693,7 @@ export function buildRouter() {
       reasoning_trace: reasoningOAI,
     });
     if (!obs && res.headersSent) return; // 503 already returned
-    // W215 #10 sticky distill-ready header (defense-in-depth — also set by receipt helper).
+    // W215 #10 sticky distill-ready header (defense-in-depth - also set by receipt helper).
     if (notifIsDistillReady(req.tenant, namespace)) res.set('x-kolm-distill-ready', 'true');
     res.status(result.status).json(result.json);
   });
@@ -15781,7 +15717,7 @@ export function buildRouter() {
       provider: o.provider || null,
       latency_us: o.latency_us || (o.latency_ms || 0) * 1000,
       created_at: o.created_at,
-      // W713-1 — surface reasoning_trace so the distill --from-captures
+      // W713-1 - surface reasoning_trace so the distill --from-captures
       // auto-detect (cli/kolm.js cmdDistillFromCaptures) can count traces
       // and pick inline_think_tags vs response_only without round-tripping
       // through the raw capture row endpoint.
@@ -15812,7 +15748,7 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/specialists/auto-distill — kicks off LoRA training on the
+  // POST /v1/specialists/auto-distill - kicks off LoRA training on the
   // namespace's captured corpus.
   // {namespace, base_model, target_size} → {job_id, status_url}.
   //
@@ -15829,7 +15765,7 @@ export function buildRouter() {
     const namespace = sanitizeNamespace((req.body || {}).namespace || req.query?.namespace || 'default');
     const base_model = String((req.body || {}).base_model || 'Qwen/Qwen2.5-3B-Instruct').slice(0, 128);
     const target_size = String((req.body || {}).target_size || 'phi-3-mini').slice(0, 64);
-    // W243 mirror — distill route accepts the same recipe_class / hw_tier / output_target / multi_device
+    // W243 mirror - distill route accepts the same recipe_class / hw_tier / output_target / multi_device
     // knobs so the wizard surfaces (cli/kolm.js cmdDistill, /account, /compile) share one contract.
     const { recipe_class, hw_tier, output_target, multi_device } = req.body || {};
     if (recipe_class != null && !['rule', 'synthesized_rule', 'compiled_rule', 'distilled_model'].includes(recipe_class)) {
@@ -15849,7 +15785,7 @@ export function buildRouter() {
         if (!VALID_MD.includes(d)) return res.status(400).json({ error: `multi_device entry '${d}' must be one of ${VALID_MD.join(', ')}` });
       }
     }
-    // W869+ Persona A.7 — VRAM pre-flight gate (same shared helper as /v1/compile).
+    // W869+ Persona A.7 - VRAM pre-flight gate (same shared helper as /v1/compile).
     const _vramPreflight = _checkVramPreflight(base_model, hw_tier);
     if (_vramPreflight && !_vramPreflight.fits) {
       return res.status(422).json(_vramPreflight.envelope);
@@ -15867,13 +15803,13 @@ export function buildRouter() {
       });
     }
     const bridge = process.env.KOLM_TRAINER_BRIDGE_URL || process.env.REM_LABS_BRIDGE_URL;
-    // WC07 — bridge token is REQUIRED whenever bridge URL is set. Previously
+    // WC07 - bridge token is REQUIRED whenever bridge URL is set. Previously
     // `... || ''` would silently send `Authorization: Bearer ` (empty) to the
     // remote trainer cluster when the token env was unset, producing 401s in
     // production with no actionable signal. envSecret returns null in that
     // case so the explicit gate below short-circuits with a typed envelope.
     const bridgeToken = envSecret('KOLM_TRAINER_BRIDGE_TOKEN') || envSecret('REM_LABS_BRIDGE_TOKEN');
-    // Path 1 — remote trainer bridge (legacy operator-managed cluster).
+    // Path 1 - remote trainer bridge (legacy operator-managed cluster).
     if (bridge) {
       if (!bridgeToken) {
         return res.status(503).json({
@@ -15912,12 +15848,12 @@ export function buildRouter() {
             bridge_source: 'remote_trainer',
           });
         }
-        // Non-2xx bridge response — fall through to in-tree worker.
+        // Non-2xx bridge response - fall through to in-tree worker.
       } catch (_) { // deliberate: cleanup
-        // Network error — fall through.
+        // Network error - fall through.
       }
     }
-    // Path 2 — in-tree distill worker (always available).
+    // Path 2 - in-tree distill worker (always available).
     try {
       const { startDistillJob } = await import('./distill-bridge.js');
       // Convert the legacy 'observations' rows into the {variable_input,response}
@@ -15952,7 +15888,7 @@ export function buildRouter() {
     }
   });
 
-  // POST /v1/memory/recall — REM Memory ↔ Skills bridge.
+  // POST /v1/memory/recall - REM Memory ↔ Skills bridge.
   // Given a query, find recipes tagged with that namespace, run them, and return the merged result.
   r.post('/v1/memory/recall', async (req, res) => {
     const { query, namespace, input, k = 3 } = req.body || {};
@@ -16023,7 +15959,7 @@ export function buildRouter() {
     res.json({ team, members, invites });
   });
 
-  // W936 — team activity dashboard. Every member's captured AI traffic,
+  // W936 - team activity dashboard. Every member's captured AI traffic,
   // attributed (who / model / namespace / cost), plus a rollup. Any active team
   // member may read; finer-grained capture:read RBAC is layered in Part A3.
   r.get('/v1/teams/:idOrSlug/captures', async (req, res) => {
@@ -16033,7 +15969,7 @@ export function buildRouter() {
     if (!teams.isMember(team.id, t.id) && !req.is_admin) {
       return res.status(403).json({ error: 'not a team member' });
     }
-    // W936 — capture:read RBAC (role + key scope). A viewer+ member with a
+    // W936 - capture:read RBAC (role + key scope). A viewer+ member with a
     // capture:read / capture:* / * scope may read; a scoped key without it is denied.
     const _mem = teams.membershipOf(team.id, t.id);
     const _authz = authorizeCaptureAction({ action: 'capture:read', tenantId: t.id, memberRole: req.is_admin ? 'admin' : ((_mem && _mem.role) || 'viewer'), keyScopes: req.key_scopes || ['*'], allowedNamespaces: ['*'] });
@@ -16067,10 +16003,10 @@ export function buildRouter() {
     });
   });
 
-  // W936 — team model registry. A member shares an artifact (a completed
+  // W936 - team model registry. A member shares an artifact (a completed
   // compile job) with the team; members list it and reach it via a STABLE
   // endpoint. Backs "train a model your team owns, then everyone uses it"
-  // (including the intense cloud/GPU training path — any completed artifact).
+  // (including the intense cloud/GPU training path - any completed artifact).
   r.get('/v1/teams/:idOrSlug/models', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -16131,7 +16067,7 @@ export function buildRouter() {
     res.json({ ok: true, endpoint: tnl.public_url, tunnel_id: tnl.id, note: 'a stable team endpoint; it does not expire on the idle TTL' });
   });
 
-  // W936 — team-scoped data export (admin + lake:export scope). Streams the
+  // W936 - team-scoped data export (admin + lake:export scope). Streams the
   // team's captured events so a team can hand an auditor or analyst the lake.
   r.get('/v1/teams/:idOrSlug/export', async (req, res) => {
     const t = tenantOf(req);
@@ -16152,7 +16088,7 @@ export function buildRouter() {
     } catch (e) { res.status(400).json({ error: String(e.message || e) }); }
   });
 
-  // W936 — team data-retention policy (admin sets retain_days; 0 = keep forever).
+  // W936 - team data-retention policy (admin sets retain_days; 0 = keep forever).
   r.get('/v1/teams/:idOrSlug/retention', (req, res) => {
     const t = tenantOf(req);
     const team = teams.getTeam(req.params.idOrSlug);
@@ -16232,7 +16168,7 @@ export function buildRouter() {
     }
   });
 
-  // ---- W920 — /v1/orgs/* workspace surface. An "org" is the tenant's
+  // ---- W920 - /v1/orgs/* workspace surface. An "org" is the tenant's
   // workspace, backed by the teams module (org === team). The literal id
   // "current" resolves to the signed-in tenant's primary org; a solo tenant
   // with no team gets an honest personal-workspace view. Powers the
@@ -16317,7 +16253,7 @@ export function buildRouter() {
     catch (e) { res.status(e.code === 'forbidden' ? 403 : 400).json({ error: String(e.message || e) }); }
   });
 
-  // W920 — K-score time series for the namespaces flywheel chart (recorded by
+  // W920 - K-score time series for the namespaces flywheel chart (recorded by
   // the autopilot lifecycle). Tenant-fenced; honest empty series when none.
   r.get('/v1/kscore/series', async (req, res) => {
     const t = tenantOf(req);
@@ -16551,11 +16487,11 @@ export function buildRouter() {
     }
   });
 
-  // Attestation callback — UNAUTH (no API key). Identifies via enroll_token,
+  // Attestation callback - UNAUTH (no API key). Identifies via enroll_token,
   // which was minted by the deploy endpoint and embedded in the deploy script.
   // The token is single-use-equivalent: if an attacker has the token they
   // could spoof the public_url, but the deployment row is owned by a specific
-  // tenant_id and the URL is visible in their dashboard — they'll notice.
+  // tenant_id and the URL is visible in their dashboard - they'll notice.
   r.post('/v1/byoc/attestation', (req, res) => {
     const { enroll_token, public_url, measurement, attestation, target } = req.body || {};
     if (!enroll_token) return res.status(400).json({ error: 'enroll_token required' });
@@ -16594,7 +16530,7 @@ export function buildRouter() {
     max: 120,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'rate-limited — wave-144 module API caps at 120/min/ip' },
+    message: { error: 'rate-limited - wave-144 module API caps at 120/min/ip' },
     keyGenerator: ipKey,
     validate: { trustProxy: false },
   });
@@ -16610,7 +16546,7 @@ export function buildRouter() {
 
   // ----- trace -----
   //
-  // W425 — tenant ownership: every trace route requires req.tenant_record
+  // W425 - tenant ownership: every trace route requires req.tenant_record
   // and passes req.tenant_record.id down into trace-capture / compile-ir
   // so traces written by tenant A cannot be read, exported, or compiled by
   // tenant B even when B obtains the trace_id. authMiddleware still runs
@@ -16657,7 +16593,7 @@ export function buildRouter() {
       const span = req.body && req.body.span;
       if (!span || typeof span !== 'object') return _http400(res, 'span object required');
       // Force tenant_id to the authenticated tenant. Callers cannot spoof
-      // tenant_id via the body — the route owns the binding.
+      // tenant_id via the body - the route owns the binding.
       span.tenant_id = req.tenant_record.id;
       const enriched = await traceCapture.appendSpan(span);
       res.status(201).json({ ok: true, span: enriched });
@@ -16678,7 +16614,7 @@ export function buildRouter() {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
       const { trace_ids, spans, opts } = req.body || {};
-      // W425 — every compile is scoped to the authenticated tenant. Any
+      // W425 - every compile is scoped to the authenticated tenant. Any
       // tenant_id passed in opts is overridden by req.tenant_record.id so
       // callers cannot forge the scope.
       const scopedOpts = { ...(opts || {}), tenant_id: req.tenant_record.id };
@@ -16737,7 +16673,7 @@ export function buildRouter() {
   // pre-seeds the IR with (user_input → final_output) so cache-hit replay
   // against the same input returns the original output without re-running
   // the LLM/tool steps. verifyTraceReplay reports match/mismatch counts.
-  // Both routes are tenant-fenced — the route forces tenant_id to the
+  // Both routes are tenant-fenced - the route forces tenant_id to the
   // authenticated tenant; callers cannot spoof scope via the body.
 
   // Trace compile - converts a tenant trace into replayable workflow IR seeds.
@@ -16783,7 +16719,7 @@ export function buildRouter() {
     }
   });
 
-  // W467 — cross-provider trace IR translator.
+  // W467 - cross-provider trace IR translator.
   //
   // Closes audit P1 Agent Trace cluster open item: rewrites the vendor +
   // model fields on LLM nodes of a workflow IR so a trace compiled
@@ -16983,14 +16919,14 @@ res.json({
     } catch (e) { res.json({ ok: false, error: String(e.message || e) }); }
   });
 
-  // W263 marketplace — signed public catalog of .kolm artifacts.
-  // GET /v1/marketplace/catalog.json — signed manifest (sha256 anchor + Ed25519 sidecar).
-  // GET /v1/marketplace — raw artifact array (unsigned, convenience).
-  // POST /v1/marketplace/publish-request — queued for manual review.
-  // GET /v1/marketplace/:slug — single artifact entry, 404 if unknown.
-  // GET /v1/marketplace/:slug/download — streams the backing .kolm file.
+  // W263 marketplace - signed public catalog of .kolm artifacts.
+  // GET /v1/marketplace/catalog.json - signed manifest (sha256 anchor + Ed25519 sidecar).
+  // GET /v1/marketplace - raw artifact array (unsigned, convenience).
+  // POST /v1/marketplace/publish-request - queued for manual review.
+  // GET /v1/marketplace/:slug - single artifact entry, 404 if unknown.
+  // GET /v1/marketplace/:slug/download - streams the backing .kolm file.
   //
-  // W342 — `verified` is gated on a real productionReady() check against
+  // W342 - `verified` is gated on a real productionReady() check against
   // the on-disk .kolm bytes. The catalog used to ship hardcoded
   // verified:true in the seed (src/marketplace.js); we now overwrite it
   // with the live verdict. Result is cached by sha256 (artifact_hash) so a
@@ -17023,7 +16959,7 @@ res.json({
       // show a green badge for an artifact that productionReady() fails.
       const badges = Array.isArray(a.badges) ? a.badges.filter((b) => b !== 'Verified') : [];
       if (v.ok) badges.push('Verified');
-      // W411 — production_ready + production_readiness_state must come from the
+      // W411 - production_ready + production_readiness_state must come from the
       // LIVE async productionReady() call, NOT productionReadySync() (which
       // hydrate() in marketplace.js called at catalog-load time). The sync
       // verdict carried `_provisional: true` and could falsely report
@@ -17056,7 +16992,7 @@ res.json({
       const filter = {};
       if (req.query.category) filter.category = String(req.query.category);
       if (req.query.license) filter.license = String(req.query.license);
-      // verified filter — apply AFTER the live verdict, not against the seed
+      // verified filter - apply AFTER the live verdict, not against the seed
       const wantVerified = req.query.verified === 'true';
       if (req.query.min_k_score) filter.min_k_score = Number(req.query.min_k_score);
       if (req.query.q) filter.q = String(req.query.q);
@@ -17067,7 +17003,7 @@ res.json({
     } catch (e) { res.status(500).json({ error: 'marketplace_list_error', detail: String(e.message || e) }); }
   });
 
-  // W342 — explicit list endpoint used by /marketplace.html client render.
+  // W342 - explicit list endpoint used by /marketplace.html client render.
   // Always returns { artifacts: [...] } with live verified flag.
   r.get('/v1/marketplace/list', async (req, res) => {
     try {
@@ -17097,7 +17033,7 @@ res.json({
     } catch (e) { res.status(500).json({ error: 'marketplace_publish_error', detail: String(e.message || e) }); }
   });
 
-  // W889-10.1 — Marketplace v2 interest capture.
+  // W889-10.1 - Marketplace v2 interest capture.
   //
   // Public POST from /marketplace (the "Premium marketplace coming soon"
   // teaser). Captures { email, interest_areas?, message? } into the local
@@ -17146,7 +17082,7 @@ res.json({
   });
 
   // ====================================================================
-  // W737 — Artifact Marketplace Expansion.
+  // W737 - Artifact Marketplace Expansion.
   //
   // CRITICAL: these routes MUST be registered BEFORE /v1/marketplace/:slug
   // (the next handler below) because Express matches in declaration order
@@ -17155,19 +17091,19 @@ res.json({
   // is 3-segments deep so it cannot collide with :slug (which only accepts
   // 2-segment paths), but ordering it here keeps all W737 routes adjacent.
   //
-  // GET  /v1/marketplace/search             — faceted search by vertical,
+  // GET  /v1/marketplace/search - faceted search by vertical,
   //                                            task_type, min_kscore,
   //                                            hardware_target. Public read.
-  // POST /v1/marketplace/listings           — register a new listing.
+  // POST /v1/marketplace/listings - register a new listing.
   //                                            Auth-gated; publisher_id is
   //                                            forced to req.tenant_record.id
   //                                            so a tenant cannot register
   //                                            under another publisher's name.
-  // POST /v1/marketplace/reviews            — submit a 1-5 star review +
+  // POST /v1/marketplace/reviews - submit a 1-5 star review +
   //                                            text. Auth-gated; tenant_id is
   //                                            forced to req.tenant_record.id
   //                                            (W411 tenant fence).
-  // GET  /v1/marketplace/reviews/:cid       — public read of aggregate
+  // GET  /v1/marketplace/reviews/:cid - public read of aggregate
   //                                            ratings + reviews list.
   //
   // Honest envelopes:
@@ -17213,7 +17149,7 @@ res.json({
 
   r.post('/v1/marketplace/listings', async (req, res) => {
     try {
-      // Auth gate — every listing carries the calling tenant as the publisher.
+      // Auth gate - every listing carries the calling tenant as the publisher.
       if (!req.tenant_record || !req.tenant_record.id) {
         return res.status(401).json({ error: 'auth_required' });
       }
@@ -17239,7 +17175,7 @@ res.json({
 
   r.post('/v1/marketplace/reviews', async (req, res) => {
     try {
-      // Auth gate — only authenticated tenants can submit reviews.
+      // Auth gate - only authenticated tenants can submit reviews.
       if (!req.tenant_record || !req.tenant_record.id) {
         return res.status(401).json({ error: 'auth_required' });
       }
@@ -17247,7 +17183,7 @@ res.json({
       const body = req.body || {};
       const review = await mod.submitReview({
         artifact_cid: body.artifact_cid || body.cid,
-        tenant_id: req.tenant_record.id, // W411 tenant fence — server-stamped
+        tenant_id: req.tenant_record.id, // W411 tenant fence - server-stamped
         rating: body.rating != null ? Number(body.rating) : Number(body.stars),
         text: body.text,
       });
@@ -17278,7 +17214,7 @@ res.json({
       const v = await __verifyArtifactCached(a);
       const badges = Array.isArray(a.badges) ? a.badges.filter((b) => b !== 'Verified') : [];
       if (v.ok) badges.push('Verified');
-      // W411 — same overlay as __hydrateVerified: production_ready and
+      // W411 - same overlay as __hydrateVerified: production_ready and
       // production_readiness_state must come from the LIVE async verdict, not
       // the catalog's provisional sync verdict.
       res.json({
@@ -17292,7 +17228,7 @@ res.json({
     } catch (e) { res.status(500).json({ error: 'marketplace_get_error', detail: String(e.message || e) }); }
   });
 
-  // W339/W342 — install/download MUST refuse artifacts that don't pass
+  // W339/W342 - install/download MUST refuse artifacts that don't pass
   // productionReady(). Same gate the marketplace pill uses, so a user who
   // sees no "Verified" badge ALSO can't `kolm marketplace install` it.
   // --force allowed via ?force=true query for CI testing / canary debug,
@@ -17323,7 +17259,7 @@ res.json({
     } catch (e) { res.status(500).json({ error: 'marketplace_download_error', detail: String(e.message || e) }); }
   });
 
-  // W346 — local static-page rewrites mirroring vercel.json. Vercel handles
+  // W346 - local static-page rewrites mirroring vercel.json. Vercel handles
   // `/marketplace -> /marketplace.html` etc. in prod; without an equivalent
   // hook here, `buildRouter()` mounted in a local Express dev server (or in
   // a test harness) 404s on every clean URL. The fallback:
@@ -17369,7 +17305,7 @@ res.json({
   });
 
   // ====================================================================
-  // W360 — POST /v1/marketplace/publish (kolm ship target).
+  // W360 - POST /v1/marketplace/publish (kolm ship target).
   //
   // Accepts JSON body { slug, artifact_b64, receipt, sha256, bytes }.
   // Validates the receipt's production_ready flag, recomputes sha256 over
@@ -17377,7 +17313,7 @@ res.json({
   // ~/.kolm-marketplace/<slug>/, and returns { ok, slug, marketplace_url }.
   // Auth: when KOLM_MARKETPLACE_REQUIRE_AUTH=1, demands Bearer token.
   //
-  // Distinct from /v1/marketplace/publish-request (manual review queue) —
+  // Distinct from /v1/marketplace/publish-request (manual review queue) - 
   // this endpoint is the programmatic publish path the CLI uses after
   // pipeline-ship has already enforced the production gate locally.
   // ====================================================================
@@ -17434,7 +17370,7 @@ res.json({
   });
 
   // ====================================================================
-  // W384 — HTTP wiring for W369–W383 backend modules.
+  // W384 - HTTP wiring for W369 - W383 backend modules.
   //
   // Every route in this block is mounted AFTER r.use(authMiddleware) at
   // line ~1845, so req.tenant + req.tenant_record + req.is_admin are
@@ -17443,12 +17379,12 @@ res.json({
   // auth.js PUBLIC_API.
   //
   // Modules are imported statically at the top of the file (W384 import
-  // block, lines ~111–217) so handlers never pay a per-request dynamic
+  // block, lines ~111-217) so handlers never pay a per-request dynamic
   // import tax. All routes are pure I/O over the existing in-process
-  // modules — no fetch back to localhost.
+  // modules - no fetch back to localhost.
   // ====================================================================
 
-  // Small util used by several W384 routes — turn a thrown Error into a
+  // Small util used by several W384 routes - turn a thrown Error into a
   // typed JSON envelope. Modules use named errors (CloudSyncError,
   // TeamError, PolicyBlockError) plus generic Error with .code.
   function _w384Err(e, fallback = 'internal') {
@@ -17457,7 +17393,7 @@ res.json({
     return { error: String(code), detail: String(e.message || e) };
   }
 
-  // W788 — register a response-finish hook that samples (latency_ms, ok)
+  // W788 - register a response-finish hook that samples (latency_ms, ok)
   // into the SLA rollup for the given surface. Safe no-op when there is no
   // tenant on the request (anonymous health pings stay out of the per-tenant
   // dashboard). Catches every sla-rollup throw so a sample-store crash
@@ -17495,7 +17431,7 @@ res.json({
   }
 
   // ============== W384: privacy ==============
-  // POST /v1/privacy/scan — pure detector pass over { text } body. Returns
+  // POST /v1/privacy/scan - pure detector pass over { text } body. Returns
   // findings array + sensitive boolean + class counts. No state change.
   r.post('/v1/privacy/scan', (req, res) => {
     try {
@@ -17505,7 +17441,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'privacy_scan_error')); }
   });
 
-  // POST /v1/privacy/test — apply the current policy to body.text and
+  // POST /v1/privacy/test - apply the current policy to body.text and
   // return { redacted, findings, policy_actions }. May 403 if policy
   // says block on a class present.
   r.post('/v1/privacy/test', (req, res) => {
@@ -17521,13 +17457,13 @@ res.json({
     }
   });
 
-  // GET /v1/privacy/policy — return the policy dictionary.
+  // GET /v1/privacy/policy - return the policy dictionary.
   r.get('/v1/privacy/policy', (req, res) => {
     try { res.json({ ok: true, policy: privacyGetFullPolicy(), classes: PRIVACY_ALL_CLASSES }); }
     catch (e) { res.status(500).json(_w384Err(e, 'privacy_policy_read_error')); }
   });
 
-  // PUT /v1/privacy/policy/:class — set { action } for a class. Admin-only.
+  // PUT /v1/privacy/policy/:class - set { action } for a class. Admin-only.
   r.put('/v1/privacy/policy/:class', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     try {
@@ -17543,7 +17479,7 @@ res.json({
     } catch (e) { res.status(400).json(_w384Err(e, 'privacy_policy_set_error')); }
   });
 
-  // GET /v1/privacy/report — aggregate redaction counts over the event lake.
+  // GET /v1/privacy/report - aggregate redaction counts over the event lake.
   r.get('/v1/privacy/report', async (req, res) => {
     try {
       const evs = await eventList({ limit: 0, order: 'asc' });
@@ -17565,7 +17501,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'privacy_report_error')); }
   });
 
-  // GET /v1/privacy/events — recent events that tripped the detector.
+  // GET /v1/privacy/events - recent events that tripped the detector.
   r.get('/v1/privacy/events', async (req, res) => {
     try {
       const limit = Math.min(500, Math.max(1, parseInt(String(req.query.limit || '50'), 10) || 50));
@@ -17577,7 +17513,7 @@ res.json({
   });
 
   // ============== W384: sync (cloud-sync state matrix) ==============
-  // GET /v1/sync/status — return current state + classes_blocked + counts.
+  // GET /v1/sync/status - return current state + classes_blocked + counts.
   r.get('/v1/sync/status', (req, res) => {
     try {
       const state = syncGetState();
@@ -17585,10 +17521,10 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'sync_status_error')); }
   });
 
-  // PUT /v1/sync/state — set sync state. Admin-only because it changes
+  // PUT /v1/sync/state - set sync state. Admin-only because it changes
   // what data leaves the device.
   r.put('/v1/sync/state', (req, res) => {
-    if (!req.is_admin) return res.status(403).json({ error: 'admin_only', hint: 'sync state controls what leaves the device — admin role required' });
+    if (!req.is_admin) return res.status(403).json({ error: 'admin_only', hint: 'sync state controls what leaves the device - admin role required' });
     try {
       const patch = req.body || {};
       const next = syncSetState(patch);
@@ -17599,7 +17535,7 @@ res.json({
     }
   });
 
-  // POST /v1/sync/push — push events to the configured cloud_base. Returns
+  // POST /v1/sync/push - push events to the configured cloud_base. Returns
   // {pushed, skipped, blocked, audit_id, reasons}.
   r.post('/v1/sync/push', async (req, res) => {
     try {
@@ -17615,7 +17551,7 @@ res.json({
     }
   });
 
-  // POST /v1/sync/pull — pull events from cloud and append locally.
+  // POST /v1/sync/pull - pull events from cloud and append locally.
   r.post('/v1/sync/pull', async (req, res) => {
     try {
       const result = await syncPullEvents({
@@ -17629,7 +17565,7 @@ res.json({
     }
   });
 
-  // GET /v1/sync/audit — tail the audit.jsonl ring.
+  // GET /v1/sync/audit - tail the audit.jsonl ring.
   r.get('/v1/sync/audit', (req, res) => {
     try {
       const limit = Math.min(500, Math.max(1, parseInt(String(req.query.limit || '50'), 10) || 50));
@@ -17638,11 +17574,11 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'sync_audit_error')); }
   });
 
-  // POST /v1/sync/inbox — PUBLIC receive endpoint for peer daemons. The
+  // POST /v1/sync/inbox - PUBLIC receive endpoint for peer daemons. The
   // sender supplies their own Bearer auth in headers; we treat the body's
   // {events, namespace, source_device_id, state} envelope as the contract.
   // The receiver writes incoming events into the local event store.
-  // WC14 — token-in-body endpoint: a fuzzer can spam any envelope shape. The
+  // WC14 - token-in-body endpoint: a fuzzer can spam any envelope shape. The
   // syncInboxBackoff middleware locks an IP out for 15 min after 5 malformed
   // attempts (a real peer always sends a typed envelope; bots typically don't).
   r.post('/v1/sync/inbox', syncInboxBackoff, async (req, res) => {
@@ -17662,7 +17598,7 @@ res.json({
         try {
           await eventAppend({ ...ev, source_device_id: body.source_device_id || ev.source_device_id || 'unknown' });
           received++;
-        } catch { /* per-row failures are silent — return aggregate count */ }
+        } catch { /* per-row failures are silent - return aggregate count */ }
       }
       _wc14NoteAuthSuccess('sync_inbox', req);
       res.json({ ok: true, received, namespace: body.namespace || null, state: body.state || null });
@@ -17673,19 +17609,19 @@ res.json({
   });
 
   // ============== W384: team (single-tenant local workspace) ==============
-  // GET /v1/team/workspace — return the workspace record + members.
+  // GET /v1/team/workspace - return the workspace record + members.
   r.get('/v1/team/workspace', (req, res) => {
     try { res.json({ ok: true, workspace: teamGetWorkspace(), roles: TEAM_ROLES }); }
     catch (e) { res.status(500).json(_w384Err(e, 'team_workspace_error')); }
   });
 
-  // GET /v1/team/members — list members.
+  // GET /v1/team/members - list members.
   r.get('/v1/team/members', (req, res) => {
     try { res.json({ ok: true, members: teamListMembers() }); }
     catch (e) { res.status(500).json(_w384Err(e, 'team_members_error')); }
   });
 
-  // POST /v1/team/invite — admin-only, returns the invite token + URL.
+  // POST /v1/team/invite - admin-only, returns the invite token + URL.
   r.post('/v1/team/invite', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     try {
@@ -17705,8 +17641,8 @@ res.json({
     }
   });
 
-  // POST /v1/team/accept-invite — PUBLIC. The invite_token IS the credential.
-  // WC14 — token-in-body endpoint: teamAcceptBackoff locks an IP out for
+  // POST /v1/team/accept-invite - PUBLIC. The invite_token IS the credential.
+  // WC14 - token-in-body endpoint: teamAcceptBackoff locks an IP out for
   // 15 min after 5 failed token attempts to bound brute-force search of
   // the invite_token space.
   r.post('/v1/team/accept-invite', teamAcceptBackoff, (req, res) => {
@@ -17725,7 +17661,7 @@ res.json({
     }
   });
 
-  // PUT /v1/team/role — admin-only role update for a member.
+  // PUT /v1/team/role - admin-only role update for a member.
   r.put('/v1/team/role', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     try {
@@ -17739,7 +17675,7 @@ res.json({
     }
   });
 
-  // DELETE /v1/team/member/:id — admin-only removal.
+  // DELETE /v1/team/member/:id - admin-only removal.
   r.delete('/v1/team/member/:id', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     try {
@@ -17752,7 +17688,7 @@ res.json({
     }
   });
 
-  // GET /v1/team/approvals — list pending/decided approvals.
+  // GET /v1/team/approvals - list pending/decided approvals.
   r.get('/v1/team/approvals', (req, res) => {
     try {
       const rows = teamListApprovals({
@@ -17767,7 +17703,7 @@ res.json({
     }
   });
 
-  // POST /v1/team/approvals — submit a new approval request.
+  // POST /v1/team/approvals - submit a new approval request.
   r.post('/v1/team/approvals', (req, res) => {
     try {
       const body = req.body || {};
@@ -17780,7 +17716,7 @@ res.json({
     }
   });
 
-  // POST /v1/team/approvals/:id/decide — approve or reject. 403 on self-review.
+  // POST /v1/team/approvals/:id/decide - approve or reject. 403 on self-review.
   r.post('/v1/team/approvals/:id/decide', (req, res) => {
     try {
       const body = req.body || {};
@@ -17793,7 +17729,7 @@ res.json({
       res.json({ ok: true, approval: result });
     } catch (e) {
       if (e instanceof TeamError) {
-        // self_review is a permission contract — return 403 not 400.
+        // self_review is a permission contract - return 403 not 400.
         if (e.code === 'self_review') return res.status(403).json({ error: e.code, detail: e.message });
         return res.status(400).json({ error: e.code, detail: e.message });
       }
@@ -17801,7 +17737,7 @@ res.json({
     }
   });
 
-  // POST /v1/team/namespaces — admin-only register a (possibly shared) namespace.
+  // POST /v1/team/namespaces - admin-only register a (possibly shared) namespace.
   r.post('/v1/team/namespaces', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     try {
@@ -17827,7 +17763,7 @@ res.json({
   // passport. Backing store: src/groups.js → store.js TABLE='groups'.
   //
   // Auth: req.tenant_record.id scopes every read/write. No cross-tenant
-  // read path — getGroup returns null when tenant_id doesn't match.
+  // read path - getGroup returns null when tenant_id doesn't match.
 
   function _w910GroupsTenant(req) {
     return (req.tenant_record && req.tenant_record.id)
@@ -17835,7 +17771,7 @@ res.json({
       || 'tenant_local';
   }
 
-  // GET /v1/groups — list groups for the caller tenant.
+  // GET /v1/groups - list groups for the caller tenant.
   r.get('/v1/groups', (req, res) => {
     try {
       const tenantId = _w910GroupsTenant(req);
@@ -17846,7 +17782,7 @@ res.json({
     }
   });
 
-  // POST /v1/groups — create a new group.
+  // POST /v1/groups - create a new group.
   r.post('/v1/groups', (req, res) => {
     try {
       const tenantId = _w910GroupsTenant(req);
@@ -17863,7 +17799,7 @@ res.json({
     }
   });
 
-  // GET /v1/groups/:slug — fetch one group by id or slug.
+  // GET /v1/groups/:slug - fetch one group by id or slug.
   r.get('/v1/groups/:slug', (req, res) => {
     try {
       const tenantId = _w910GroupsTenant(req);
@@ -17875,7 +17811,7 @@ res.json({
     }
   });
 
-  // PATCH /v1/groups/:slug — update name / namespaces / add / remove.
+  // PATCH /v1/groups/:slug - update name / namespaces / add / remove.
   r.patch('/v1/groups/:slug', (req, res) => {
     try {
       const tenantId = _w910GroupsTenant(req);
@@ -17893,7 +17829,7 @@ res.json({
     }
   });
 
-  // DELETE /v1/groups/:slug — soft-delete.
+  // DELETE /v1/groups/:slug - soft-delete.
   r.delete('/v1/groups/:slug', (req, res) => {
     try {
       const tenantId = _w910GroupsTenant(req);
@@ -17905,7 +17841,7 @@ res.json({
     }
   });
 
-  // W409y — POST /v1/team/sync. Enterprise-only sync endpoint that fans
+  // W409y - POST /v1/team/sync. Enterprise-only sync endpoint that fans
   // out an events envelope to a connected team workspace. The body shape
   // mirrors /v1/sync/inbox (events[], namespace, source_device_id) so a
   // peer daemon can push directly. Each call meters
@@ -17925,7 +17861,7 @@ res.json({
       const body = req.body || {};
       const events = Array.isArray(body.events) ? body.events : [];
       // Measure the byte volume that crossed the wire. JSON.stringify(body)
-      // is the cheapest faithful proxy for actual ingress bytes — content-length
+      // is the cheapest faithful proxy for actual ingress bytes - content-length
       // includes framing the upstream caller may or may not set.
       const bytes = Buffer.byteLength(JSON.stringify(body), 'utf8');
       const tier = usageTierForPlan(tenant.plan);
@@ -18090,7 +18026,7 @@ res.json({
   //
   // Tenant-scoped, auth-required. Reads from ~/.kolm/sla-samples.jsonl
   // (append-only file written by sampleLatency/sampleUptime middleware).
-  // Empty windows return status='no_samples_in_window' — NEVER zeros that
+  // Empty windows return status='no_samples_in_window' - NEVER zeros that
   // look like real measurements.
 
   // SLA rollup - returns p50/p95/p99 latency + uptime_pct for one surface.
@@ -18133,7 +18069,7 @@ res.json({
       const surface = String(req.query.surface || '');
       const window_hours = req.query.window_hours ? Number(req.query.window_hours) : 24;
       if (!surface) {
-        // No surface => return full dashboard rather than 400 — the placeholder
+        // No surface => return full dashboard rather than 400 - the placeholder
         // page binds the surface column by column without query params.
         const out = slaRollup.dashboardData({ tenant_id, window_hours });
         return res.json({ ok: true, ...out, surfaces_known: slaRollup.SLA_SURFACES });
@@ -18148,7 +18084,7 @@ res.json({
   });
 
   // ============== W384: pipeline (tokenizer + distill + compile + full) ==============
-  // POST /v1/pipeline/tokenize — train a tokenizer over corpus body.
+  // POST /v1/pipeline/tokenize - train a tokenizer over corpus body.
   r.post('/v1/pipeline/tokenize', async (req, res) => {
     try {
       const body = req.body || {};
@@ -18168,7 +18104,7 @@ res.json({
   // compileFull() so the matching GET /v1/pipeline/jobs/:id/stream SSE
   // can replay them. Jobs are tenant-scoped via _ownedBy.
   //
-  // W429 — _ownedBy stores the canonical tenant id (req.tenant_record.id)
+  // W429 - _ownedBy stores the canonical tenant id (req.tenant_record.id)
   // not the human-readable tenant name. Before W429 two tenants sharing a
   // legacy name (e.g. both 'local-tenant' during a migration) could read
   // each other's job phases. We also fall back to req.tenant so unauthed
@@ -18197,11 +18133,11 @@ res.json({
     }
   }
 
-  // POST /v1/pipeline/distill — kick off distill-from-captures with mode=specialist.
+  // POST /v1/pipeline/distill - kick off distill-from-captures with mode=specialist.
   // Returns 202 + {job_id}. The actual distill work is delegated to the
   // existing /v1/distill/from-captures path (in-process module call).
   r.post('/v1/pipeline/distill', async (req, res) => {
-    // W421 — route was calling distill-bridge.synthesizeFromCaptures which
+    // W421 - route was calling distill-bridge.synthesizeFromCaptures which
     // does not exist in this build (the export is `startDistillJob`). Result
     // was a silent always-success no-op that never actually distilled
     // anything. Now we:
@@ -18265,10 +18201,10 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'pipeline_distill_error')); }
   });
 
-  // POST /v1/pipeline/compile — alias for /v1/pipeline/full (kept as a
+  // POST /v1/pipeline/compile - alias for /v1/pipeline/full (kept as a
   // distinct verb so future divergence is easy).
   //
-  // W420 — tenant gate. The pipeline runs compileFull which reads from the
+  // W420 - tenant gate. The pipeline runs compileFull which reads from the
   // event store; without forcing tenant scope it would compile another
   // tenant's corpus into the caller's artifact namespace. opts.tenant_id is
   // injected from req.tenant_record.id and supersedes anything the body sent.
@@ -18295,10 +18231,10 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'pipeline_compile_error')); }
   });
 
-  // POST /v1/pipeline/full — 11-phase compileFull pipeline. Returns 202 +
+  // POST /v1/pipeline/full - 11-phase compileFull pipeline. Returns 202 +
   // job_id. Phases are streamed via /v1/pipeline/jobs/:id/stream (SSE).
   //
-  // W420 — same tenant gate as /v1/pipeline/compile. The caller's
+  // W420 - same tenant gate as /v1/pipeline/compile. The caller's
   // req.tenant_record.id is the only tenant scope that ever reaches
   // compileFull from this route.
   r.post('/v1/pipeline/full', async (req, res) => {
@@ -18324,7 +18260,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'pipeline_full_error')); }
   });
 
-  // GET /v1/pipeline/jobs/:id — poll for current status + collected phases.
+  // GET /v1/pipeline/jobs/:id - poll for current status + collected phases.
   r.get('/v1/pipeline/jobs/:id', (req, res) => {
     const job = _W384_PIPELINE_JOBS.get(req.params.id);
     if (!job) return res.status(404).json({ error: 'job_not_found' });
@@ -18341,7 +18277,7 @@ res.json({
     });
   });
 
-  // GET /v1/pipeline/jobs/:id/stream — SSE that replays past phases then
+  // GET /v1/pipeline/jobs/:id/stream - SSE that replays past phases then
   // streams new ones until the job terminates.
   r.get('/v1/pipeline/jobs/:id/stream', (req, res) => {
     const job = _W384_PIPELINE_JOBS.get(req.params.id);
@@ -18381,11 +18317,11 @@ res.json({
 
   // ============== W434: drift detection HTTP surface ==============
   // The drift module (src/drift-supersession.js) has shipped since W167 but
-  // was reachable only from CLI + cron — there was no HTTP route, which is
+  // was reachable only from CLI + cron - there was no HTTP route, which is
   // why the DoD audit (2026-05-19) named drift as the missing step 11 of
   // the 12-step compile→verify→run→drift→retrain loop. W434 exposes three
   // tenant-scoped POST routes that wrap the existing pure functions. The
-  // routes are stateless (no server-side persistence) — the report's hash
+  // routes are stateless (no server-side persistence) - the report's hash
   // is verifiable client-side, so the round-trip is just "validate my
   // inputs + compute signals + return the report you can persist anywhere."
   r.post('/v1/drift/snapshot', async (req, res) => {
@@ -18457,7 +18393,7 @@ res.json({
   // GET  /v1/drift-alert/:namespace
   // POST /v1/drift-alert/webhooks   {namespace, webhook_url, jsd_threshold}
   //
-  // W747 is a LIVE alerter (production vs training sketch) — distinct from
+  // W747 is a LIVE alerter (production vs training sketch) - distinct from
   // the W434 /v1/drift/* routes (artifact-vs-artifact K-Score drift) and the
   // W813 drift-detector (capture-window vs capture-window). The buyer story
   // is "did the workload my student was trained on still look like the
@@ -18500,7 +18436,7 @@ res.json({
           order: 'desc',
         });
       } catch (_) { rows = []; }
-      // Defense in depth — re-check tenant.
+      // Defense in depth - re-check tenant.
       rows = (rows || []).filter((r) => r && r.tenant_id === tenant_id);
       const samples = rows.map((r) => {
         const parts = [];
@@ -18679,7 +18615,7 @@ res.json({
   //
   // W750 (copyright filter + capture quarantine) was MERGED into W808 in the
   // dup-cleanup. The quarantine half shipped under W808; only the
-  // copyright-classifier slice remains — a regex pack for common
+  // copyright-classifier slice remains - a regex pack for common
   // copyrighted-content fingerprints (Disney character names, Top-100 song
   // n-grams, code copyright headers / SPDX lines) that hooks into the W808
   // staged_captures pipeline as a post-quarantine classifier.
@@ -18697,12 +18633,12 @@ res.json({
     try {
       const detector = await import('./copyright-detector.js');
       const body = req.body || {};
-      // Path 1 — caller passes literal text.
+      // Path 1 - caller passes literal text.
       if (typeof body.text === 'string') {
         const scan = detector.scanText(body.text);
         return res.json({ ok: true, ...scan });
       }
-      // Path 2 — caller passes a capture_id; we fetch from the staged or
+      // Path 2 - caller passes a capture_id; we fetch from the staged or
       // canonical observations store and scan.
       if (typeof body.capture_id === 'string' && body.capture_id) {
         const tenant_id = req.tenant_record.id;
@@ -18810,7 +18746,7 @@ res.json({
   //
   // Honesty contract:
   //   * Every persisted row carries kolm_synthetic:true + parent_seed_cids.
-  //   * No teacher key wired here yet — generation requires the caller to
+  //   * No teacher key wired here yet - generation requires the caller to
   //     supply ANTHROPIC_API_KEY or KOLM_TEACHER_API_KEY in env. Missing key →
   //     503 teacher_not_wired envelope.
   //   * Spend protection: POST /v1/synthetic/generate refuses to actually call
@@ -18907,7 +18843,7 @@ res.json({
   });
 
   // Module-scoped staging for synthetic batches between generate + commit.
-  // Map<tenant_id|namespace|generation_id, batch>. In-memory only — survives a
+  // Map<tenant_id|namespace|generation_id, batch>. In-memory only - survives a
   // single process lifetime, which is intentional: the caller is expected to
   // generate + commit in the same session. A restart drops un-committed
   // batches by design (no orphan synthetic rows leak).
@@ -18967,8 +18903,8 @@ res.json({
       }));
 
       // Resolve teacher_caller. Two sources, in order:
-      //   1) req.app.locals._w749_teacher_caller — injected by tests
-      //   2) hosted teacher — currently honest-stub; returns 503
+      //   1) req.app.locals._w749_teacher_caller - injected by tests
+      //   2) hosted teacher - currently honest-stub; returns 503
       let teacher_caller = null;
       try { teacher_caller = req.app && req.app.locals && req.app.locals._w749_teacher_caller; } catch (_) {} // deliberate: cleanup
       if (typeof teacher_caller !== 'function') {
@@ -18999,7 +18935,7 @@ res.json({
         });
       }
       // Stage the batch so the commit route can pick it up by generation_id.
-      // We key on the FIRST generation_id of the batch — same as the response
+      // We key on the FIRST generation_id of the batch - same as the response
       // returns to the caller.
       const stage_id = batch.generated[0] && batch.generated[0].generation_id;
       if (stage_id) {
@@ -19058,12 +18994,12 @@ res.json({
       const errors = [];
       for (const row of rows) {
         try {
-          // Canonical synthetic marker is source_type:'synthetic' — that's the
+          // Canonical synthetic marker is source_type:'synthetic' - that's the
           // load-bearing column the lake / dataset workbench / distill pipeline
           // already key on (see event-schema.js SOURCE_TYPES). W749-specific
           // metadata (kolm_synthetic flag + parent_seed_cids + source_category
           // + generation_id) is packed into `feedback` as a JSON blob so it
-          // survives canonicalize() — which strips any keys not in EVENT_FIELDS.
+          // survives canonicalize() - which strips any keys not in EVENT_FIELDS.
           const w749Meta = {
             kolm_synthetic: true,
             parent_seed_cids: row.parent_seed_cids || [],
@@ -19086,7 +19022,7 @@ res.json({
           errors.push({ error: (e && e.message) || String(e) });
         }
       }
-      // One-shot stage clear — committed batches MUST NOT double-write.
+      // One-shot stage clear - committed batches MUST NOT double-write.
       r._w749Staging.delete(stage_key);
       return res.json({
         ok: true,
@@ -19116,7 +19052,7 @@ res.json({
   // the `kolm.ai-foundation` publisher_id and that should only ever happen
   // from a human workspace, not a CI api_only key.
   //
-  // The fingerprint surface is intentionally non-404 — the route exists, it
+  // The fingerprint surface is intentionally non-404 - the route exists, it
   // returns an honest "w757_not_shipped" envelope so callers can branch on
   // the error code instead of probing for the URL.
   r.get('/v1/verticals', async (_req, res) => {
@@ -19156,7 +19092,7 @@ res.json({
     }
   });
 
-  // GET /v1/verticals/:id/fingerprint — declared BEFORE the :id route would
+  // GET /v1/verticals/:id/fingerprint - declared BEFORE the :id route would
   // otherwise shadow this on /v1/verticals/<id>/<fingerprint>. Express orders
   // by registration, so this stays after /v1/verticals/:id but matches a
   // strictly longer path; both are fine, the test pins both.
@@ -19201,7 +19137,7 @@ res.json({
       const verticals = await import('./verticals.js');
       // The publisher_id defaults to 'kolm.ai-foundation' so all 5 stubs are
       // attributed to the foundation namespace. A future signed-publisher
-      // workflow can override via the body — keep that surface explicit so
+      // workflow can override via the body - keep that surface explicit so
       // it doesn't accidentally default to the caller's tenant id.
       const publisher = (req.body && typeof req.body.publisher === 'string' && req.body.publisher.trim())
         ? String(req.body.publisher).trim()
@@ -19214,7 +19150,7 @@ res.json({
   });
 
   // ============== W384: agent telemetry ==============
-  // W424 — agent telemetry routes fence on req.tenant_record and forward
+  // W424 - agent telemetry routes fence on req.tenant_record and forward
   // req.tenant_record.id as tenant_id into the helper so cross-tenant rows
   // never appear in the rollup. _tenantScope() returns null for admin
   // (cross-tenant reads allowed) and the canonical tenant_id otherwise.
@@ -19295,7 +19231,7 @@ res.json({
   });
 
   // ============== W384: lake ==============
-  // W411 — _tenantScope(req): pull the canonical tenant_id off the request.
+  // W411 - _tenantScope(req): pull the canonical tenant_id off the request.
   // Returns null for admin (cross-tenant reads allowed) and null when no key
   // is attached (handlers must still 401 themselves where required). The
   // tenant_record id is the authoritative scope; req.tenant is a name string.
@@ -19353,7 +19289,7 @@ res.json({
   });
 
   // ============== W384: opportunities ==============
-  // W419 — every opportunity surface must be tenant-scoped. Without auth the
+  // W419 - every opportunity surface must be tenant-scoped. Without auth the
   // engine would surface another tenant's pattern detections (cache_candidate
   // request_hash, repeated prompt clusters, etc). 401s use the canonical
   // {ok:false, error:'auth required'} envelope.
@@ -19392,7 +19328,7 @@ res.json({
     }
   });
 
-  // Accept either /dismiss or /ignore — both map to ignoreOpportunity.
+  // Accept either /dismiss or /ignore - both map to ignoreOpportunity.
   r.post('/v1/opportunities/:id/dismiss', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth required' });
     try {
@@ -19424,7 +19360,7 @@ res.json({
     }
   });
 
-  // W409m — POST /v1/opportunities/:id/promote → dataset.
+  // W409m - POST /v1/opportunities/:id/promote → dataset.
   // Turns the opportunity into a real dataset by calling dataset-workbench
   // createDataset() with the opportunity's namespace + provenance. Returns
   // { ok, dataset_id, train_count, holdout_count, ... }. Marks the
@@ -19450,7 +19386,7 @@ res.json({
     }
   });
 
-  // W409l — GET /v1/lake/tail → recent canonical events for the inbox UI.
+  // W409l - GET /v1/lake/tail → recent canonical events for the inbox UI.
   // Reads directly from the event-store (NOT capture-store). Default limit
   // 50, capped at 500. Returns newest first.
   r.get('/v1/lake/tail', async (req, res) => {
@@ -19466,10 +19402,10 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'lake_tail_error')); }
   });
 
-  // W409l — GET /v1/lake/export → bulk export of canonical events.
+  // W409l - GET /v1/lake/export → bulk export of canonical events.
   // Supports format=jsonl (default) | json | csv. Streams the buffer back.
   r.get('/v1/lake/export', async (req, res) => {
-    // W936 — a scoped key needs lake:export (or lake:* / *) to bulk-export the
+    // W936 - a scoped key needs lake:export (or lake:* / *) to bulk-export the
     // lake. The tenant-primary key (req.key_scopes null) is unrestricted.
     if (!keyHasScope(req, 'lake:export') && !(req.key_scopes && req.key_scopes.includes('lake:*'))) {
       return res.status(403).json({ error: 'insufficient_scope', required: 'lake:export' });
@@ -19494,13 +19430,13 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'lake_export_error')); }
   });
 
-  // W409l — GET /v1/lake/storage → small env probe for the Account UI so the
+  // W409l - GET /v1/lake/storage → small env probe for the Account UI so the
   // dashboard can show "Local storage: ~/.kolm/events/events.sqlite (12 MB)".
   // Returns the same envelope storeInfo() emits, plus a coarse byte total.
   r.get('/v1/lake/storage', async (req, res) => {
     try {
       const info = eventStoreInfo();
-      // W411 — tenant-scoped count so the dashboard never claims another
+      // W411 - tenant-scoped count so the dashboard never claims another
       // tenant's rows as our own.
       const total = await eventCount({ tenant_id: _tenantScope(req) });
       res.json({ ok: true, ...info, total_events: total });
@@ -19511,7 +19447,7 @@ res.json({
   // Datasets list - returns tenant-scoped dataset summaries for captured rows.
   r.get('/v1/datasets', async (req, res) => {
     try {
-      // W411 — tenant-scoped listing.
+      // W411 - tenant-scoped listing.
       const rows = await dsListDatasets({ tenant_id: _tenantScope(req) });
       res.json({ ok: true, total: rows.length, datasets: rows });
     } catch (e) { res.status(500).json(_w384Err(e, 'datasets_list_error')); }
@@ -19522,7 +19458,7 @@ res.json({
     try {
       const body = req.body || {};
       if (!body.namespace) return res.status(400).json({ error: 'namespace_required' });
-      // W411 — stamp the caller's tenant_id on the new dataset and gate the
+      // W411 - stamp the caller's tenant_id on the new dataset and gate the
       // underlying listEvents() to the caller's rows.
       const result = await dsCreateDataset(body.namespace, { ...body, tenant_id: _tenantScope(req) });
       res.json({ ok: true, ...result });
@@ -19533,7 +19469,7 @@ res.json({
   r.get('/v1/datasets/:id', async (req, res) => {
     try {
       const result = await dsInspectDataset(req.params.id);
-      // W411 — fence cross-tenant inspect. Legacy datasets with no tenant_id
+      // W411 - fence cross-tenant inspect. Legacy datasets with no tenant_id
       // stamped still resolve (admin / local-only); tenant-stamped datasets
       // 404 out for everyone except the owner.
       const scope = _tenantScope(req);
@@ -19547,7 +19483,7 @@ res.json({
   // Dataset split - recomputes a deterministic train/holdout split for an owned dataset.
   r.post('/v1/datasets/:id/split', async (req, res) => {
     try {
-      // W411 — same cross-tenant fence on split. The split mutates the
+      // W411 - same cross-tenant fence on split. The split mutates the
       // dataset record, so leaking it across tenants would corrupt train_ids.
       const ds = await dsInspectDataset(req.params.id);
       const scope = _tenantScope(req);
@@ -19591,7 +19527,7 @@ res.json({
       });
       res.json({ ok: true, ...result });
     } catch (e) {
-      // W411 — cross-tenant label attempt returns 403.
+      // W411 - cross-tenant label attempt returns 403.
       if (e && (e.code === 'CROSS_TENANT_LABEL' || e.code === 'CROSS_TENANT_APPROVAL')) {
         return res.status(403).json({ error: 'cross_tenant_label_forbidden', message: e.message });
       }
@@ -19637,7 +19573,7 @@ res.json({
       });
       // The legacy UI expects ONE event with top-level prompt/response keys
       // (not the {ok, total, events:[...]} envelope). Pick the first row and
-      // surface the redacted text as prompt/response — that's what the
+      // surface the redacted text as prompt/response - that's what the
       // labeling form binds to.
       if (!events.length) return res.json({});
       const ev = events[0];
@@ -19704,7 +19640,7 @@ res.json({
       });
       res.json({ ok: true, ...result });
     } catch (e) {
-      // W411 — cross-tenant label attempt returns 403.
+      // W411 - cross-tenant label attempt returns 403.
       if (e && (e.code === 'CROSS_TENANT_LABEL' || e.code === 'CROSS_TENANT_APPROVAL')) {
         return res.status(403).json({ error: 'cross_tenant_label_forbidden', message: e.message });
       }
@@ -19712,7 +19648,7 @@ res.json({
     }
   });
 
-  // W409o — full audit trail for a single event_id. Tests assert that every
+  // W409o - full audit trail for a single event_id. Tests assert that every
   // approval/reject/edit decision is recorded with reviewer + timestamp +
   // before/after output. The legacy /v1/labels/:event_id returns the last
   // label only; this endpoint returns the whole sequence.
@@ -19859,7 +19795,7 @@ res.json({
         partial: true,
       };
     }
-    // W409s — also pick a static PROFILE (mobile-ios / desktop-cpu / etc.)
+    // W409s - also pick a static PROFILE (mobile-ios / desktop-cpu / etc.)
     // alongside the W372 capability snapshot. Mobile picks are returned
     // with runtime_status:'foundation' until a real runtime ships.
     let profile = null;
@@ -19876,12 +19812,12 @@ res.json({
     res.json({ ok: true, ...result, profile, partial: !!(result.partial || warnings.length), warnings });
   });
 
-  // W888-C — DeviceRegistry literal-path routes MUST be registered before the
+  // W888-C - DeviceRegistry literal-path routes MUST be registered before the
   // parameterized /v1/devices/:id/register handler below, otherwise Express
   // matches :id='register' and the W888-C register endpoint becomes unreachable.
   // (Same for /v1/devices/list.)
 
-  // POST /v1/devices/register — registers a new device in the W888-C registry.
+  // POST /v1/devices/register - registers a new device in the W888-C registry.
   // Body matches DeviceRegistry.register() args:
   //   { id, name?, host?, port?, user?, type, keyPath?, tags?, hardware_hint? }
   r.post('/v1/devices/register', async (req, res) => {
@@ -19897,7 +19833,7 @@ res.json({
     }
   });
 
-  // GET /v1/devices/list — list registered W888-C devices with filters
+  // GET /v1/devices/list - list registered W888-C devices with filters
   // ?type=<t>&tag=<t>&status=<t>&includeRemoved=1
   r.get('/v1/devices/list', async (req, res) => {
     try {
@@ -19971,14 +19907,14 @@ res.json({
     } catch (e) { res.status(400).json(_w384Err(e, 'device_uninstall_error')); }
   });
 
-  // W445 — P3-17 device recommender. Resolves the best device profile for an
+  // W445 - P3-17 device recommender. Resolves the best device profile for an
   // optional artifact's runtime + quant + memory profile. Mirrors the CLI
   // `kolm devices recommend` path so callers (web UI, agents, automation) can
   // ask "what should I run this artifact on?" without writing the heuristic
   // themselves. Returns the recommendForProfile envelope verbatim so the
   // refusal codes (no_profile / no_compatible_target / artifact_exceeds_device
   // _memory / offline_required_but_device_not_offline_capable) survive across
-  // the API boundary — they're the actionable bit.
+  // the API boundary - they're the actionable bit.
 
   // Device recommendation - chooses runtime target and quantization for profile/artifact inputs.
   r.post('/v1/devices/recommend', async (req, res) => {
@@ -20001,13 +19937,13 @@ res.json({
   });
 
   // ====================================================================
-  // W888-C — DeviceRegistry HTTP control plane (continued).
+  // W888-C - DeviceRegistry HTTP control plane (continued).
   // POST /v1/devices/register + GET /v1/devices/list are registered ABOVE the
   // legacy /v1/devices/:id/register handler so Express's first-match order
   // resolves the literal-path routes correctly.
   // ====================================================================
 
-  // POST /v1/devices/:id/probe — runs deviceCaps + writes back via heartbeat.
+  // POST /v1/devices/:id/probe - runs deviceCaps + writes back via heartbeat.
   r.post('/v1/devices/:id/probe', async (req, res) => {
     try {
       const { DeviceRegistry } = await import('./device-registry.js');
@@ -20025,7 +19961,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'device_probe_error')); }
   });
 
-  // POST /v1/devices/:id/heartbeat — body matches DeviceRegistry.heartbeat() args.
+  // POST /v1/devices/:id/heartbeat - body matches DeviceRegistry.heartbeat() args.
   r.post('/v1/devices/:id/heartbeat', async (req, res) => {
     try {
       const { DeviceRegistry } = await import('./device-registry.js');
@@ -20043,7 +19979,7 @@ res.json({
     }
   });
 
-  // DELETE /v1/devices/:id — soft delete; ?hard=1 to hard delete.
+  // DELETE /v1/devices/:id - soft delete; ?hard=1 to hard delete.
   // Guarded so we DO NOT intercept the legacy DELETE /v1/devices/:id/install/:artifact_id
   // (Express route ordering means specific routes registered earlier win; we
   // are below /v1/devices/:id/install handler so :id here only matches single segment).
@@ -20058,7 +19994,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'device_remove_error')); }
   });
 
-  // GET /v1/devices/:id — registry-first lookup; falls back to the W372
+  // GET /v1/devices/:id - registry-first lookup; falls back to the W372
   // per-file store so existing dashboards stay working.
   // NOTE: this is registered LAST so the more specific /v1/devices/detect,
   // /v1/devices/list, /v1/devices/recommend, /v1/devices/installed routes
@@ -20077,7 +20013,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'device_get_error')); }
   });
 
-  // W896 — browser-form translator for /account/fleet "Add device" modal.
+  // W896 - browser-form translator for /account/fleet "Add device" modal.
   // The form posts {name, type, tags, connection:{host,user,key_path|base_url|kubeconfig,namespace}}
   // which we flatten to DeviceRegistry.register() args.
   r.post('/v1/devices/add', async (req, res) => {
@@ -20106,7 +20042,7 @@ res.json({
     }
   });
 
-  // W896 — POST shim for /v1/devices/remove (fleet.html "Remove" button uses POST not DELETE).
+  // W896 - POST shim for /v1/devices/remove (fleet.html "Remove" button uses POST not DELETE).
   // Accepts {name|id, hard?}. Soft delete by default.
   r.post('/v1/devices/remove', async (req, res) => {
     try {
@@ -20122,13 +20058,13 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'device_remove_error')); }
   });
 
-  // W896 — W888-E fleet HTTP control plane. Wraps src/fleet.js Fleet class.
+  // W896 - W888-E fleet HTTP control plane. Wraps src/fleet.js Fleet class.
   // All routes accept {tag, namespace} for fleet-wide ops, OR {device} to
   // narrow to a single device by id/name.
   async function _w896BuildFleet(deviceFilter) {
     const deviceCapsMod = await import('./device-capabilities.js');
     const { Fleet } = await import('./fleet.js');
-    // W899 — DeviceRegistry rows added via POST /v1/devices/add live in a
+    // W899 - DeviceRegistry rows added via POST /v1/devices/add live in a
     // separate store from device-capabilities profiles. Without this union,
     // newly-registered devices never appear in /v1/fleet/status, fleet/deploy
     // never reaches them, and the fleet.html "Remove" button refers to a
@@ -20196,7 +20132,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'fleet_status_error')); }
   });
 
-  // POST /v1/fleet/deploy — body {artifact_path|artifactPath, tag?, namespace?, device?, mode?, canary_observe_ms?}
+  // POST /v1/fleet/deploy - body {artifact_path|artifactPath, tag?, namespace?, device?, mode?, canary_observe_ms?}
   r.post('/v1/fleet/deploy', async (req, res) => {
     try {
       const body = req.body || {};
@@ -20216,7 +20152,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'fleet_deploy_error')); }
   });
 
-  // POST /v1/fleet/rollback — body {tag?, namespace?, device?, confirm?}
+  // POST /v1/fleet/rollback - body {tag?, namespace?, device?, confirm?}
   // Browser button passes {device}; CLI passes {tag|namespace, confirm:true}.
   r.post('/v1/fleet/rollback', async (req, res) => {
     try {
@@ -20235,7 +20171,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'fleet_rollback_error')); }
   });
 
-  // POST /v1/fleet/stop — body {tag?, namespace?, device?, all?, confirm?}
+  // POST /v1/fleet/stop - body {tag?, namespace?, device?, all?, confirm?}
   r.post('/v1/fleet/stop', async (req, res) => {
     try {
       const body = req.body || {};
@@ -20252,7 +20188,7 @@ res.json({
     } catch (e) { res.status(500).json(_w384Err(e, 'fleet_stop_error')); }
   });
 
-  // GET /v1/fleet/monitor — one monitor tick (synchronous, no streaming).
+  // GET /v1/fleet/monitor - one monitor tick (synchronous, no streaming).
   // For long-running monitoring use the CLI `kolm fleet monitor` instead.
   r.get('/v1/fleet/monitor', async (req, res) => {
     try {
@@ -20272,7 +20208,7 @@ res.json({
   });
 
   // ============================================================================
-  // W910-D — RunPod one-click integrations + cloud deploy
+  // W910-D - RunPod one-click integrations + cloud deploy
   // ============================================================================
   // Routes:
   //   POST   /v1/integrations/runpod         body {api_key}   -> stores encrypted
@@ -20390,7 +20326,7 @@ res.json({
           }
         } catch (_) { /* artifacts module optional */ }
         if (!resolvedUrl) {
-          // Synthesize a registry URL so the worker can attempt fetch — the
+          // Synthesize a registry URL so the worker can attempt fetch - the
           // worker logs will surface a clear 404 if the artifact isn't public.
           resolvedUrl = `https://kolm.ai/registry/${encodeURIComponent(artifactId)}.kolm`;
         }
@@ -20718,7 +20654,7 @@ res.json({
   }
 
   // Buffer the raw request stream up to a limit. We mount this BEFORE
-  // express.json() can run (which we can't do globally) — but express.json()
+  // express.json() can run (which we can't do globally) - but express.json()
   // only parses application/json content-type, so multipart bodies pass
   // through to req as the still-readable stream.
   function _readRawBody(req, limit = 16 * 1024 * 1024) {
@@ -20776,7 +20712,7 @@ res.json({
       if (!blobs.length) return res.status(400).json({ error: 'no_file_parts' });
       // Append an event for each blob so the lake reflects the capture.
       //
-      // W423 — audit P0-5. The route was sending `tenant: req.tenant` but
+      // W423 - audit P0-5. The route was sending `tenant: req.tenant` but
       // event-schema.js newEvent() reads `partial.tenant_id`, so every media
       // capture was getting stamped with the default tenant_id ('local-tenant')
       // and silently dropping out of any tenant-scoped lake query. Now we
@@ -20799,7 +20735,7 @@ res.json({
           });
           eventIds.push(ev.event_id);
         } catch (innerErr) {
-          // Surface the first failure but keep the blob — operator can
+          // Surface the first failure but keep the blob - operator can
           // re-pair manually.
           eventIds.push({ error: innerErr.message });
         }
@@ -20891,7 +20827,7 @@ res.json({
   // per-namespace breakdown for the caller's tenant. With `by=team&team_id=<id>`
   // it walks the team's member tenants and rolls up.
   //
-  // Tenant fence: tenant_id is forced from req.tenant_record.id — never read
+  // Tenant fence: tenant_id is forced from req.tenant_record.id - never read
   // from the request body or query string. Team caller is forced to be a
   // member of the named team (non-members get 403 forbidden).
   r.get('/v1/billing/breakdown', async (req, res) => {
@@ -21020,7 +20956,7 @@ res.json({
   // and returns counts, local_ratio, est_cost_saved_usd for the caller's
   // tenant. The /account/routing dashboard polls this endpoint.
   //
-  // Tenant fence: tenant_id is forced from req.tenant_record.id — never
+  // Tenant fence: tenant_id is forced from req.tenant_record.id - never
   // read from query string or body. namespace + since are optional
   // filters.
   r.get('/v1/routing/summary', (req, res) => {
@@ -21046,7 +20982,7 @@ res.json({
   // returns queued / consumed / dropped counters + recent enqueues. The
   // /account/active-learning dashboard polls this endpoint.
   //
-  // Tenant fence: tenant_id is forced from req.tenant_record.id — never
+  // Tenant fence: tenant_id is forced from req.tenant_record.id - never
   // read from query string or body. namespace + since_ms are optional.
   //
   // Honest empty-state: if active-learning-queue.js isn't on disk yet
@@ -21084,7 +21020,7 @@ res.json({
         try { recent = mod.listQueued(trec.id, namespace, recentLimit) || []; }
         catch (_) { recent = []; }
       }
-      // Continuous-trigger observability — last 24h of active_learning:trigger
+      // Continuous-trigger observability - last 24h of active_learning:trigger
       // events from the lake (recorded by `kolm pipeline run --continuous`).
       let lastTriggerAt = null;
       let lastTriggerIter = null;
@@ -21161,7 +21097,7 @@ res.json({
   // show what would change and which vars to set.
   r.put('/v1/storage/config', (req, res) => {
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
-    // We treat this as a hint/echo — actual config lives in env vars; we
+    // We treat this as a hint/echo - actual config lives in env vars; we
     // do NOT mutate them at runtime. The endpoint exists so the dashboard
     // can show what we'd switch to + the env vars to set.
     const proposed = req.body || {};
@@ -21180,7 +21116,7 @@ res.json({
     if (!req.is_admin) return res.status(403).json({ error: 'admin_only' });
     const body = req.body || {};
     if (body.confirm !== true) {
-      return res.status(400).json({ error: 'confirm_required', hint: 'send {"confirm": true} in body — this is destructive' });
+      return res.status(400).json({ error: 'confirm_required', hint: 'send {"confirm": true} in body - this is destructive' });
     }
     try {
       const result = await eventPurge({
@@ -21193,7 +21129,7 @@ res.json({
   });
 
   // ====================================================================
-  // W409f — account UI <-> server route aliases.
+  // W409f - account UI <-> server route aliases.
   //
   // public/account/*.html ship inline scripts that fetch a stable set of
   // /v1/* paths. Several pages used noun-plural URLs (/v1/bakeoffs,
@@ -21210,7 +21146,7 @@ res.json({
   // here OR rewrite the fetch URL to a documented verb.
   // ====================================================================
 
-  // /v1/builds — aliases the compile-job list for /account/builds.html.
+  // /v1/builds - aliases the compile-job list for /account/builds.html.
   // builds.html expects {builds:[{job_id, status, ...}]}; the canonical
   // /v1/compile/jobs returns {jobs:[...]}, so we adapt the shape here.
   r.get('/v1/builds', (req, res) => {
@@ -21237,7 +21173,7 @@ res.json({
     }
   });
 
-  // /v1/workflows/repeated — repeated-workflows.html surfaces the cluster
+  // /v1/workflows/repeated - repeated-workflows.html surfaces the cluster
   // summary from /v1/bridges/observations (the canonical W297 source) under
   // a more discoverable URL. Returns {workflows:[{template,count,samples}]}.
   r.get('/v1/workflows/repeated', async (req, res) => {
@@ -21268,7 +21204,7 @@ res.json({
     }
   });
 
-  // /v1/bakeoffs — list + run alias for /v1/bakeoff/run. The bakeoff module
+  // /v1/bakeoffs - list + run alias for /v1/bakeoff/run. The bakeoff module
   // does not persist runs to a registry (each call returns a fresh result),
   // so GET returns an empty array; the page already handles that shape via
   // `{bakeoffs: []}` in its .catch fallback.
@@ -21283,7 +21219,7 @@ res.json({
       const body = req.body || {};
       const datasetId = body.dataset_id;
       if (!datasetId) return res.status(400).json({ error: 'dataset_id_required' });
-      // W411 — fence cross-tenant bake-offs at the dataset boundary.
+      // W411 - fence cross-tenant bake-offs at the dataset boundary.
       const ds = await dsInspectDataset(datasetId);
       const scope = _tenantScope(req);
       if (scope && ds && ds.tenant_id && ds.tenant_id !== scope) {
@@ -21304,7 +21240,7 @@ res.json({
   //   test (W409f #4) asserts they are reachable regardless of which block
   //   registered them.
 
-  // /v1/simulations — list + run alias for /v1/sim + /v1/sim/run. Plus a
+  // /v1/simulations - list + run alias for /v1/sim + /v1/sim/run. Plus a
   // promote endpoint that mirrors simulations.html's "promote to holdout"
   // button (delegates to simulation.generateDatasetFromSim).
   r.get('/v1/simulations', (req, res) => {
@@ -21353,7 +21289,7 @@ res.json({
     } catch (e) { res.status(400).json(_w384Err(e, 'simulations_promote_error')); }
   });
 
-  // /v1/devices/detect (POST) — devices.html POSTs (with an optional hints
+  // /v1/devices/detect (POST) - devices.html POSTs (with an optional hints
   // body) to ask the daemon to refresh the local hardware inventory. The
   // existing GET handler covers read-only callers; add a POST handler that
   // accepts an optional device-hints body and forwards to devDetectLocal.
@@ -21377,7 +21313,7 @@ res.json({
         partial: true,
       };
     }
-    // W409s — pick a static PROFILE for the body hints (or this machine).
+    // W409s - pick a static PROFILE for the body hints (or this machine).
     let profile = null;
     try { profile = await devDetectProfile(hints); }
     catch (e) {
@@ -21393,7 +21329,7 @@ res.json({
   });
 
   // ====================================================================
-  // W409g — hosted OpenAI-compatible GET /v1/models.
+  // W409g - hosted OpenAI-compatible GET /v1/models.
   //
   // The local daemon (src/daemon-connector.js) already serves an
   // OpenAI-shaped /v1/models. The hosted server only had /v1/models/manifest
@@ -21454,7 +21390,7 @@ res.json({
             },
           });
           // Anthropic-compat alias for rows whose family or id hints at an
-          // Anthropic-shaped client probe. Kept narrow — only synthetic
+          // Anthropic-shaped client probe. Kept narrow - only synthetic
           // `anthropic:<id>` aliases so the Anthropic SDK can list them
           // without colliding with the canonical HF id.
           if (typeof row.family === 'string' && /^(claude|anthropic)/i.test(row.family)) {
@@ -21493,7 +21429,7 @@ res.json({
           });
         }
       } catch (_e) { // deliberate: cleanup
-        // Tenant scoping not available in this context — skip; teachers
+        // Tenant scoping not available in this context - skip; teachers
         // still surface.
       }
       // Cache-Control: private when tenant data is included; public otherwise.
@@ -21506,10 +21442,10 @@ res.json({
   });
 
   // =====================================================================
-  // W758 — MMLU / HumanEval / MT-Bench harness routes (honest scaffolds).
+  // W758 - MMLU / HumanEval / MT-Bench harness routes (honest scaffolds).
   //
   // All three are auth-gated AND confirm-gated. The confirm gate exists
-  // because a real bench run is expensive (LLM calls) — we refuse to
+  // because a real bench run is expensive (LLM calls) - we refuse to
   // start without an explicit body.confirm:true. The runtime wiring
   // (runOnArtifact / sandbox_cmd / judge) is intentionally NOT plugged
   // in at the route layer; W470+W775 own the runtime adapter. Until
@@ -21526,7 +21462,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} in body — a real MMLU run is expensive (14k LLM calls).',
+        hint: 'send {"confirm": true} in body - a real MMLU run is expensive (14k LLM calls).',
       });
     }
     try {
@@ -21534,7 +21470,7 @@ res.json({
       // No runtime adapter is wired yet (W470+W775 territory). Surface
       // the harness's honest runtime_not_wired envelope so callers know
       // exactly which seam needs to be supplied; status stays 200
-      // because the route succeeded — the FEATURE is what's not wired.
+      // because the route succeeded - the FEATURE is what's not wired.
       const result = await mod.runMMLU({
         artifact_path: typeof body.artifact_path === 'string' ? body.artifact_path : null,
         pack_dir: typeof body.pack_dir === 'string' ? body.pack_dir : null,
@@ -21555,7 +21491,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} in body — HumanEval generates+executes Python code per problem.',
+        hint: 'send {"confirm": true} in body - HumanEval generates+executes Python code per problem.',
       });
     }
     try {
@@ -21580,7 +21516,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} in body — MT-Bench requires a judge model (e.g. GPT-4).',
+        hint: 'send {"confirm": true} in body - MT-Bench requires a judge model (e.g. GPT-4).',
       });
     }
     try {
@@ -21599,19 +21535,19 @@ res.json({
   });
 
   // ============== W759: numerical accuracy eval ==============
-  // POST /v1/numeric/eval                       — body {response_text, expected_answer?, tolerance_pct?}
-  // POST /v1/numeric/calculator                 — body {expression}  (also {expr})
-  // GET  /v1/numeric/namespace-flag/:namespace  — {ok, mean_ratio, flagged, ...}
+  // POST /v1/numeric/eval - body {response_text, expected_answer?, tolerance_pct?}
+  // POST /v1/numeric/calculator - body {expression}  (also {expr})
+  // GET  /v1/numeric/namespace-flag/:namespace - {ok, mean_ratio, flagged, ...}
   //
   // Extracts numbers from outputs and verifies mathematical correctness.
-  // The calculator is a pure recursive-descent + - * / parser — no eval,
+  // The calculator is a pure recursive-descent + - * / parser - no eval,
   // no new Function(), no vm.runInNewContext. The namespace flag samples
   // observations and computes the mean fraction of numeric tokens so the
   // operator knows when distillation needs the calculator tool wired in.
   //
   // /v1/numeric/eval gates on body.confirm:true to match the W758 bench
   // surfaces (mmlu/humaneval/mtbench) and the W144 destructive-route
-  // contract — a stray request must not fire an evaluation by accident.
+  // contract - a stray request must not fire an evaluation by accident.
   //
   // Honest envelope on every error path: ok:false + structured error +
   // version stamp `w759-vN.M`. Consumers MUST version-pin via regex
@@ -21681,12 +21617,12 @@ res.json({
   });
 
   // =====================================================================
-  // W756 — KolmBench v1 public spec + leaderboard.
+  // W756 - KolmBench v1 public spec + leaderboard.
   //
-  //   GET  /v1/kolmbench/spec        PUBLIC — frozen v1 spec catalog
-  //   GET  /v1/kolmbench/leaderboard PUBLIC — current leaderboard JSON
-  //   POST /v1/kolmbench/validate    AUTH   — pure-compute validation of rows[]
-  //   POST /v1/kolmbench/submit      AUTH+confirm — append to leaderboard
+  //   GET  /v1/kolmbench/spec        PUBLIC - frozen v1 spec catalog
+  //   GET  /v1/kolmbench/leaderboard PUBLIC - current leaderboard JSON
+  //   POST /v1/kolmbench/validate    AUTH - pure-compute validation of rows[]
+  //   POST /v1/kolmbench/submit      AUTH+confirm - append to leaderboard
   //
   // The two GETs mirror /v1/verticals + /v1/changelog policy: public + read-
   // only + safe to cache. Both POST routes require auth via the standard
@@ -21752,7 +21688,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} in body — submit writes to the leaderboard JSON.',
+        hint: 'send {"confirm": true} in body - submit writes to the leaderboard JSON.',
       });
     }
     try {
@@ -21791,7 +21727,7 @@ res.json({
     }
   });
 
-  // ============== W757 — cross-namespace anonymized pattern lake ==============
+  // ============== W757 - cross-namespace anonymized pattern lake ==============
   // POST /v1/lake/opt-in       AUTH + confirm:true required (per-namespace gate)
   // POST /v1/lake/opt-out      AUTH; durable opt-out, future reads observe latest
   // POST /v1/lake/contribute   AUTH + consent:true required; hash-only write
@@ -21815,7 +21751,7 @@ res.json({
       });
     }
     if (body.confirm !== true) {
-      // Belt-and-suspenders consent gate — the per-contribution call ALSO
+      // Belt-and-suspenders consent gate - the per-contribution call ALSO
       // requires consent:true. Opt-in alone never auto-contributes.
       return res.status(400).json({
         ok: false,
@@ -21875,7 +21811,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'consent_not_granted',
-        hint: 'every contribution must carry consent:true — the lake never auto-contributes',
+        hint: 'every contribution must carry consent:true - the lake never auto-contributes',
       });
     }
     try {
@@ -21912,13 +21848,13 @@ res.json({
   });
 
   // ============== W760: per-language K-Score + multilingual augmentation ==============
-  // POST /v1/lang/detect                              — heuristic lang detect over body.text
-  // GET  /v1/lang/kscore-by-lang/:namespace           — perLanguageKScore for tenant+namespace
-  // POST /v1/lang/augment-multilingual                — request synthetic multilingual augmentation
+  // POST /v1/lang/detect - heuristic lang detect over body.text
+  // GET  /v1/lang/kscore-by-lang/:namespace - perLanguageKScore for tenant+namespace
+  // POST /v1/lang/augment-multilingual - request synthetic multilingual augmentation
   //
   // Honesty contract:
   //   * Wilson 95% CI gated at n>=30 PER LANGUAGE. Below that the per-lang
-  //     k_score is null — never estimated.
+  //     k_score is null - never estimated.
   //   * augment-multilingual is dry_run by default. confirm:true required to
   //     incur translator cost. teacher_caller is DI'd from req.app.locals so
   //     tests never hit a real translation API.
@@ -22018,7 +21954,7 @@ res.json({
       // confirm:true required to incur cost. Without confirm we always run dry.
       const dry_run = !confirm;
 
-      // Resolve translator from req.app.locals (DI seam — tests inject here).
+      // Resolve translator from req.app.locals (DI seam - tests inject here).
       let teacher_caller = null;
       try { teacher_caller = req.app && req.app.locals && req.app.locals._w760_translator_caller; } catch (_) {} // deliberate: cleanup
 
@@ -22034,7 +21970,7 @@ res.json({
     }
   });
 
-  // W761 — Model Poisoning Anomaly Detection routes. Distinct-named handlers so
+  // W761 - Model Poisoning Anomaly Detection routes. Distinct-named handlers so
   // parallel wave agents on W760 + W762..W765 do not collide on the suffix.
   // Builds on W808 capture-anomaly + W750-followup copyright-detector + the
   // W761-3 teacher-response HMAC primitive.
@@ -22046,7 +21982,7 @@ res.json({
         return res.status(400).json({
           ok: false,
           error: 'confirm_required',
-          hint: 'pass {confirm:true} to bind a teacher response — the binding is a load-bearing security artifact, opt-in by design',
+          hint: 'pass {confirm:true} to bind a teacher response - the binding is a load-bearing security artifact, opt-in by design',
           version: 'w761-v1',
         });
       }
@@ -22058,7 +21994,7 @@ res.json({
         response_headers: body.response_headers,
         timestamp_ms: body.timestamp_ms,
       });
-      // Honest envelopes for missing/short key — surface as 200 (the route
+      // Honest envelopes for missing/short key - surface as 200 (the route
       // itself succeeded; the operator gets the error tag in the body).
       return res.status(200).json(env);
     } catch (e) {
@@ -22107,7 +22043,7 @@ res.json({
         return res.status(400).json({
           ok: false,
           error: 'confirm_required',
-          hint: 'pass {confirm:true} to record a quarantine — irreversible audit-trail mutation',
+          hint: 'pass {confirm:true} to record a quarantine - irreversible audit-trail mutation',
           version: 'w761-v1',
         });
       }
@@ -22124,20 +22060,20 @@ res.json({
     }
   });
 
-  // ============== W762 — Adversarial Red-Team Framework ==============
-  // POST /v1/redteam/classify          — heuristic classifier over body.text
-  // POST /v1/redteam/generate-corpus   — deterministic adversarial prompt corpus
-  // POST /v1/redteam/bakeoff           — adversarial robustness bake-off
-  // POST /v1/redteam/sanitize          — runtime sanitizer (block/redact/fallback/passthrough)
+  // ============== W762 - Adversarial Red-Team Framework ==============
+  // POST /v1/redteam/classify - heuristic classifier over body.text
+  // POST /v1/redteam/generate-corpus - deterministic adversarial prompt corpus
+  // POST /v1/redteam/bakeoff - adversarial robustness bake-off
+  // POST /v1/redteam/sanitize - runtime sanitizer (block/redact/fallback/passthrough)
   //
   // Honesty contract:
   //   * Heuristic-only classification is NEVER claimed as production-grade.
   //   * /bakeoff runs honest envelope (`runtime_not_wired`) because the
-  //     hosted route has no DI seam — production wires runOnArtifact via
+  //     hosted route has no DI seam - production wires runOnArtifact via
   //     a separate worker; the public route returns the corpus shape so
   //     operators can verify the contract.
   //   * /sanitize with policy=fallback_to_teacher returns
-  //     `no_fallback_handler_configured` — the hosted route has no
+  //     `no_fallback_handler_configured` - the hosted route has no
   //     teacher handler injected.
   //   * generate-corpus + bakeoff are confirm-gated because they emit
   //     attack-framing patterns + dispatch a multi-run loop respectively.
@@ -22162,7 +22098,7 @@ res.json({
         return res.status(400).json({
           ok: false,
           error: 'confirm_required',
-          hint: 'pass {confirm:true} — corpus emits attack-framing patterns intended for red-team use only',
+          hint: 'pass {confirm:true} - corpus emits attack-framing patterns intended for red-team use only',
           version: 'w762-v1',
         });
       }
@@ -22192,7 +22128,7 @@ res.json({
         return res.status(400).json({
           ok: false,
           error: 'confirm_required',
-          hint: 'pass {confirm:true} — bake-off dispatches an N-per-category prompt loop',
+          hint: 'pass {confirm:true} - bake-off dispatches an N-per-category prompt loop',
           version: 'w762-v1',
         });
       }
@@ -22200,7 +22136,7 @@ res.json({
       const n_per_category = Number.isFinite(Number(body.n_per_category))
         ? Math.max(1, Math.min(50, Math.trunc(Number(body.n_per_category))))
         : 5;
-      // Hosted route has NO runOnArtifact wired by default — honest
+      // Hosted route has NO runOnArtifact wired by default - honest
       // envelope. Production wires runOnArtifact via req.app.locals
       // (DI seam used by tests / self-hosted operators).
       let runOnArtifact = null;
@@ -22226,7 +22162,7 @@ res.json({
       const body = req.body || {};
       const text = typeof body.text === 'string' ? body.text : '';
       const policy = typeof body.policy === 'string' ? body.policy : DEFAULT_POLICY;
-      // Hosted route has NO fallback handler wired — honest envelope
+      // Hosted route has NO fallback handler wired - honest envelope
       // when policy is fallback_to_teacher.
       let fallback_handler = null;
       try { fallback_handler = req.app && req.app.locals && req.app.locals._w762_fallback_handler; } catch (_) {} // deliberate: cleanup
@@ -22238,15 +22174,15 @@ res.json({
   });
 
   // ============== W765: prompt-extraction defense surface ============
-  // POST /v1/pextract/redact-prompt    — build-time system-prompt redaction
-  // POST /v1/pextract/detect-attempt   — pure detector, returns is_extraction_attempt
-  // POST /v1/pextract/guard-request    — detect + policy decision wrapper
+  // POST /v1/pextract/redact-prompt - build-time system-prompt redaction
+  // POST /v1/pextract/detect-attempt - pure detector, returns is_extraction_attempt
+  // POST /v1/pextract/guard-request - detect + policy decision wrapper
   //
   // Defense layering with W762 is intentional. W762's
   // classifyPromptAdversarial covers a broader red-team taxonomy;
   // W765 is the system-prompt-extraction-specific guard. Overlapping
   // matches (e.g. "ignore previous instructions") are correct, not a
-  // bug — defense in depth is the point.
+  // bug - defense in depth is the point.
   r.post('/v1/pextract/redact-prompt', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -22298,19 +22234,19 @@ res.json({
     }
   });
 
-  // ============== W764 — Membership inference + PII scanning + capture forget ==============
+  // ============== W764 - Membership inference + PII scanning + capture forget ==============
   //
   // Four routes:
-  //   POST /v1/mit/run          — auth + confirm; honest runtime_not_wired
+  //   POST /v1/mit/run - auth + confirm; honest runtime_not_wired
   //                               envelope until W775 wires runOnArtifact.
-  //   POST /v1/mit/scan-pii     — auth; pure-text PII scan, no runtime needed.
-  //   POST /v1/captures/forget  — auth + confirm; writes durable audit-trailed
+  //   POST /v1/mit/scan-pii - auth; pure-text PII scan, no runtime needed.
+  //   POST /v1/captures/forget - auth + confirm; writes durable audit-trailed
   //                               forget marker; idempotent on (tenant,capture).
-  //   GET  /v1/captures/forgotten — auth; lists this tenant's forget markers
+  //   GET  /v1/captures/forgotten - auth; lists this tenant's forget markers
   //                                 (optional ?namespace=ns).
   //
   // Honesty contract:
-  //   * The MIT route NEVER fabricates an extraction rate — it returns the
+  //   * The MIT route NEVER fabricates an extraction rate - it returns the
   //     module's honest runtime_not_wired envelope so callers know exactly
   //     which seam needs to be supplied.
   //   * The forget route ALWAYS writes the audit event before returning ok.
@@ -22325,13 +22261,13 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} in body — a real MIT run is expensive (probe queries per capture).',
+        hint: 'send {"confirm": true} in body - a real MIT run is expensive (probe queries per capture).',
       });
     }
     try {
       const mod = await import('./membership-inference-test.js');
       // No runtime adapter is wired yet (W775 territory). The route surfaces
-      // the harness's honest runtime_not_wired envelope verbatim — status
+      // the harness's honest runtime_not_wired envelope verbatim - status
       // stays 200 because the route succeeded; the FEATURE is what's not wired.
       const result = await mod.runMembershipInferenceTest({
         artifact_path: typeof body.artifact_path === 'string' ? body.artifact_path : null,
@@ -22361,7 +22297,7 @@ res.json({
     }
   });
 
-  // W-G wrapper-completion — GET /v1/captures/list
+  // W-G wrapper-completion - GET /v1/captures/list
   // Paginated capture browser feed for /account/captures.html. Filters:
   // ?namespace, ?status (pending|approved|rejected|quarantined, multi-comma),
   // ?risk_min, ?risk_max (0..1), ?pii (multi-comma), ?from, ?to (ISO),
@@ -22381,7 +22317,7 @@ res.json({
       const limit = Math.min(200, Math.max(1, parseInt(q.limit, 10) || 50));
       const offset = Math.max(0, parseInt(q.offset, 10) || 0);
 
-      // W888-L — observations may key on either tenant name OR tenant_id
+      // W888-L - observations may key on either tenant name OR tenant_id
       // (older capture writers use one, newer ones the other). Union via the
       // store-level findByTenant which now merges both columns.
       const _tName = req.tenant;
@@ -22429,13 +22365,13 @@ res.json({
     }
   });
 
-  // W-G wrapper-completion — GET /v1/captures/:id/inspect
+  // W-G wrapper-completion - GET /v1/captures/:id/inspect
   // Single-row inspection (full prompt + response + receipt + chain hash).
   r.get('/v1/captures/:id/inspect', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
       const id = String(req.params.id || '');
-      // W899 — observations may key on tenant name OR tenant_id (mirror list-handler union).
+      // W899 - observations may key on tenant name OR tenant_id (mirror list-handler union).
       const _tName = req.tenant;
       const _tId = req.tenant_record && req.tenant_record.id;
       const obs = [
@@ -22474,7 +22410,7 @@ res.json({
     }
   });
 
-  // W-G wrapper-completion — POST /v1/captures/:id/review
+  // W-G wrapper-completion - POST /v1/captures/:id/review
   // Approve / reject / quarantine a capture. Body: {action: 'approve'|'reject'|'quarantine', reason?}.
   // Bulk variant: POST /v1/captures/review-bulk {ids:[...], action, reason?}.
   r.post('/v1/captures/:id/review', async (req, res) => {
@@ -22486,7 +22422,7 @@ res.json({
     try {
       const id = String(req.params.id || '');
       const store = await import('./store.js');
-      // W899 — tenant-union lookup (mirror list-handler).
+      // W899 - tenant-union lookup (mirror list-handler).
       const _tName = req.tenant;
       const _tId = req.tenant_record && req.tenant_record.id;
       const obs = [
@@ -22516,7 +22452,7 @@ res.json({
     try {
       const status = action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'quarantined';
       const store = await import('./store.js');
-      // W899 — tenant-union lookup (mirror list-handler).
+      // W899 - tenant-union lookup (mirror list-handler).
       const _tName = req.tenant;
       const _tId = req.tenant_record && req.tenant_record.id;
       const obs = [
@@ -22539,7 +22475,7 @@ res.json({
     }
   });
 
-  // W-D wrapper-completion — GET /v1/receipts/list
+  // W-D wrapper-completion - GET /v1/receipts/list
   // Tenant-scoped receipt list with namespace + since + limit filters.
   r.get('/v1/receipts/list', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -22549,7 +22485,7 @@ res.json({
       const sinceISO = q.since ? String(q.since) : null;
       const limit = Math.min(500, Math.max(1, parseInt(q.limit, 10) || 50));
       const offset = Math.max(0, parseInt(q.offset, 10) || 0);
-      // W888-L — observations may key on tenant name OR tenant_id.
+      // W888-L - observations may key on tenant name OR tenant_id.
       const _tName = req.tenant;
       const _tId = req.tenant_record && req.tenant_record.id;
       const obs = [
@@ -22572,7 +22508,7 @@ res.json({
         output_tokens: o.output_tokens || 0,
         cost_usd: o.cost_usd || 0,
         capture_id: o.id,
-        // W899 — expose chain fields so receipts can be chain-walked from the public surface.
+        // W899 - expose chain fields so receipts can be chain-walked from the public surface.
         chain_prev_hash: o.chain_prev_hash || null,
         chain_hash: o.chain_hash || null,
       }));
@@ -22582,9 +22518,9 @@ res.json({
     }
   });
 
-  // W-D wrapper-completion — GET /v1/receipts/stats
+  // W-D wrapper-completion - GET /v1/receipts/stats
   // Aggregate receipt metrics (count, by_namespace, by_provider, by_route).
-  // V1 launch / W-3 — also returns per-provider and per-namespace cost
+  // V1 launch / W-3 - also returns per-provider and per-namespace cost
   // breakdowns, plus a `savings_usd` field derived as
   //   savings = frontier_baseline - actual
   // where frontier_baseline = sum(local-route tokens × frontier per-token rate)
@@ -22604,7 +22540,7 @@ res.json({
       const byProvider = {};
       const byRoute = { local: 0, frontier: 0 };
       let totalCost = 0;
-      // V1 launch / W-3 — cost-bucket maps. Initialized lazily on first
+      // V1 launch / W-3 - cost-bucket maps. Initialized lazily on first
       // sighting per key so the JSON shape mirrors the count maps above.
       const costByNamespace = {};
       const costByProvider = {};
@@ -22679,7 +22615,7 @@ res.json({
     }
   });
 
-  // W-D wrapper-completion — GET /v1/verify/:receipt_id
+  // W-D wrapper-completion - GET /v1/verify/:receipt_id
   // Public receipt verification surface. Returns the receipt JSON if known
   // to this tenant + signature verification result. Used by the kolm-audit-1
   // `verify_url` field; the third-party can hit this without auth to get
@@ -22702,7 +22638,7 @@ res.json({
         ok: true,
         receipt_id: id,
         receipt: row.receipt,
-        // W899 — expose chain fields so receipts can be chain-walked from the
+        // W899 - expose chain fields so receipts can be chain-walked from the
         // public /v1/verify surface without a separate /v1/receipts/list call.
         chain_prev_hash: row.chain_prev_hash || null,
         chain_hash: row.chain_hash || null,
@@ -22720,7 +22656,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} in body — forgetting a capture writes a durable audit event and excludes the row from future distill builds.',
+        hint: 'send {"confirm": true} in body - forgetting a capture writes a durable audit event and excludes the row from future distill builds.',
       });
     }
     try {
@@ -22759,10 +22695,10 @@ res.json({
   });
 
   // =====================================================================
-  // W-F wrapper-completion — namespace deploy / undeploy / rollback /
+  // W-F wrapper-completion - namespace deploy / undeploy / rollback /
   // create / config routes. The wrapper CLI verbs in src/wrapper-cli.js
   // call these. The slug rule is intentionally narrow
-  // (^[a-z][a-z0-9-]{1,62}$) — sticky, URL-safe, no underscores. Rows
+  // (^[a-z][a-z0-9-]{1,62}$) - sticky, URL-safe, no underscores. Rows
   // live in the `wrapper_namespaces` table with `tenant` field so the
   // standard `findByTenant` indexed lookup works.
   // =====================================================================
@@ -22775,7 +22711,7 @@ res.json({
     return { store, rows, ns: rows.find((n) => n.slug === slug) };
   }
 
-  // POST /v1/namespaces — create
+  // POST /v1/namespaces - create
   r.post('/v1/namespaces', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const body = req.body || {};
@@ -22818,7 +22754,7 @@ res.json({
     }
   });
 
-  // GET /v1/namespaces/:slug — config read
+  // GET /v1/namespaces/:slug - config read
   r.get('/v1/namespaces/:slug', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const slug = String(req.params.slug || '').toLowerCase();
@@ -22833,7 +22769,7 @@ res.json({
     }
   });
 
-  // PUT /v1/namespaces/:slug — config patch
+  // PUT /v1/namespaces/:slug - config patch
   r.put('/v1/namespaces/:slug', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const slug = String(req.params.slug || '').toLowerCase();
@@ -22844,7 +22780,7 @@ res.json({
       if (!ns) return res.status(404).json({ ok: false, error: 'namespace_not_found', slug });
       const patch = req.body || {};
       const allowed = ['display_name', 'description', 'capture_mode', 'redact_mode', 'route_chain', 'confidence_threshold', 'status', 'route_mode', 'cache_mode', 'guardrail_mode'];
-      // Enum-validated fields — reject an out-of-range value instead of silently
+      // Enum-validated fields - reject an out-of-range value instead of silently
       // persisting garbage (previously capture_mode/redact_mode had no patch-time
       // validation). The gateway opt-ins join the same guard.
       const ENUMS = {
@@ -22872,7 +22808,7 @@ res.json({
     }
   });
 
-  // POST /v1/namespaces/:slug/deploy — set artifact
+  // POST /v1/namespaces/:slug/deploy - set artifact
   r.post('/v1/namespaces/:slug/deploy', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const slug = String(req.params.slug || '').toLowerCase();
@@ -22891,7 +22827,7 @@ res.json({
       ns.status = 'deployed';
       ns.updated_at = new Date().toISOString();
       store.update(NS_TABLE, (rr) => rr.id === ns.id, ns);
-      // LM-7 — artifact deploy success.
+      // LM-7 - artifact deploy success.
       try {
         recordMetricEvent({
           tenant,
@@ -22903,7 +22839,7 @@ res.json({
       } catch (_) {} // deliberate: cleanup
       res.json({ ok: true, action: 'deploy', namespace: ns });
     } catch (e) {
-      // LM-7 — artifact deploy failure.
+      // LM-7 - artifact deploy failure.
       try {
         recordMetricEvent({
           tenant: req.tenant_record.id,
@@ -22917,7 +22853,7 @@ res.json({
     }
   });
 
-  // POST /v1/namespaces/:slug/undeploy — clear artifact
+  // POST /v1/namespaces/:slug/undeploy - clear artifact
   r.post('/v1/namespaces/:slug/undeploy', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const slug = String(req.params.slug || '').toLowerCase();
@@ -22939,7 +22875,7 @@ res.json({
     }
   });
 
-  // POST /v1/namespaces/:slug/rollback — restore prior artifact
+  // POST /v1/namespaces/:slug/rollback - restore prior artifact
   r.post('/v1/namespaces/:slug/rollback', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     const slug = String(req.params.slug || '').toLowerCase();
@@ -22969,7 +22905,7 @@ res.json({
     }
   });
 
-  // GET /v1/namespaces — list all for tenant (used by /account/namespaces)
+  // GET /v1/namespaces - list all for tenant (used by /account/namespaces)
   r.get('/v1/namespaces', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -22982,7 +22918,7 @@ res.json({
     }
   });
 
-  // W899 — GET /v1/namespaces/:slug/stats — counts of pending/approved/
+  // W899 - GET /v1/namespaces/:slug/stats - counts of pending/approved/
   // rejected/quarantined captures in a namespace. Powers the "ready to
   // compile?" readiness signal on /account/overview and the namespace badge
   // on /account/namespaces. Tenant-union pattern to handle name-vs-id keys.
@@ -23014,13 +22950,13 @@ res.json({
   });
 
   // =====================================================================
-  // W763 — SBOM + supply-chain pinning.
+  // W763 - SBOM + supply-chain pinning.
   //
   //   POST /v1/sbom/emit    AUTH+confirm  emit SBOM from a kolm manifest
   //   GET  /v1/sbom/repo    AUTH          emit SBOM of the running install
   //   POST /v1/sbom/verify  AUTH          static-shape validate an SBOM
   //
-  // Honest envelopes everywhere. version stamp matches /^w763-/ — callers
+  // Honest envelopes everywhere. version stamp matches /^w763-/ - callers
   // MUST regex-match (W604 anti-brittleness). The SBOM is a SIBLING export,
   // not woven into artifact-hash (deliberately: an artifact-hash that
   // included its SBOM would change every time we re-emit and break receipts).
@@ -23039,7 +22975,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} alongside {manifest, format?} — SBOM emit reads files; explicit ack required.',
+        hint: 'send {"confirm": true} alongside {manifest, format?} - SBOM emit reads files; explicit ack required.',
       });
     }
     try {
@@ -23079,28 +23015,28 @@ res.json({
     }
   });
 
-  // ============== W766 — EU AI Act compliance toolkit ============
+  // ============== W766 - EU AI Act compliance toolkit ============
   //
   // Four routes:
-  //   POST /v1/compliance/ai-act/export             — auth; build Annex IV docs
-  //   POST /v1/compliance/ai-act/risk-score         — auth; classify a manifest
-  //   POST /v1/compliance/ai-act/human-in-loop      — auth + confirm; persist
+  //   POST /v1/compliance/ai-act/export - auth; build Annex IV docs
+  //   POST /v1/compliance/ai-act/risk-score - auth; classify a manifest
+  //   POST /v1/compliance/ai-act/human-in-loop - auth + confirm; persist
   //                                                   per-namespace threshold
-  //   GET  /v1/compliance/ai-act/governance-report  — auth; aggregate captures
+  //   GET  /v1/compliance/ai-act/governance-report - auth; aggregate captures
   //                                                   under tenant fence (W411
   //                                                   defense-in-depth)
   //
   // Honesty contract:
-  //   * /export NEVER fabricates Annex IV fields — missing fields land as
+  //   * /export NEVER fabricates Annex IV fields - missing fields land as
   //     'not_yet_disclosed' (per src/ai-act-export.js).
-  //   * /risk-score NEVER returns null risk_category — floor is 'minimal'.
+  //   * /risk-score NEVER returns null risk_category - floor is 'minimal'.
   //   * /human-in-loop validates threshold ∈ [0, 10] nats and requires
   //     confirm:true (matches W709 + W411 spend-protection pattern).
   //   * /governance-report runs the loop body with a per-row tenant re-check
   //     so a future schema bug cannot leak across tenants.
   //
   // Distinct from sibling W767-cert / W768-modelcard / W769-residency /
-  // W770-audit-export routes — no path collision possible.
+  // W770-audit-export routes - no path collision possible.
   r.post('/v1/compliance/ai-act/export', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -23108,7 +23044,7 @@ res.json({
       const mod = await import('./ai-act-export.js');
       const format = body.format === 'markdown' ? 'markdown' : 'json';
       const manifest = body.manifest;
-      // Defensive shape check — the JS module also validates but route-level
+      // Defensive shape check - the JS module also validates but route-level
       // 400 is friendlier than a 200 honest envelope for body-shape errors.
       if (manifest == null || typeof manifest !== 'object' || Array.isArray(manifest)) {
         return res.status(400).json({
@@ -23132,7 +23068,7 @@ res.json({
       const mod = await import('./ai-act-risk.js');
       const manifest = body.manifest;
       const env = mod.scoreArtifactRisk(manifest);
-      // Always 200 — the envelope carries ok:false honestly when input is bad,
+      // Always 200 - the envelope carries ok:false honestly when input is bad,
       // matching the W764 honest-envelope pattern.
       return res.status(200).json(env);
     } catch (e) {
@@ -23147,7 +23083,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} alongside {namespace, threshold_nats} — the threshold is durable and affects routing decisions for every subsequent request in this namespace.',
+        hint: 'send {"confirm": true} alongside {namespace, threshold_nats} - the threshold is durable and affects routing decisions for every subsequent request in this namespace.',
         version: 'w766-v1',
       });
     }
@@ -23363,28 +23299,28 @@ res.json({
   });
 
   // =====================================================================
-  // W767 — SOC 2 Type II + ISO 27001 certification surface.
+  // W767 - SOC 2 Type II + ISO 27001 certification surface.
   //
   // Four auth-gated read routes:
   //
   //   GET /v1/security/soc2/checklist
-  //       — static JSON checklist mirroring /security/soc2-type2.html
+  // - static JSON checklist mirroring /security/soc2-type2.html
   //   GET /v1/security/iso27001/controls
-  //       — ISO 27001:2022 Annex A controls -> kolm-component map
+  // - ISO 27001:2022 Annex A controls -> kolm-component map
   //   GET /v1/security/audit-retention/status
-  //       — tenant-fenced retention-policy snapshot
+  // - tenant-fenced retention-policy snapshot
   //   GET /v1/security/continuous-monitoring/snapshot
-  //       — tenant-fenced TSC -> signal map with green/yellow/red/unknown
+  // - tenant-fenced TSC -> signal map with green/yellow/red/unknown
   //
   // All four are tenant-fenced via req.tenant_record (W411). The two read-
-  // only static surfaces (checklist + controls) still require auth — they
+  // only static surfaces (checklist + controls) still require auth - they
   // are tenant-scoped insofar as the consumer is an authenticated tenant
   // operator. Returning ok:true with no auth would let a scraper inventory
   // kolm's compliance posture without provenance.
   //
   // Honesty contract:
   //   * snapshot returns 'unknown' status for any control whose signal
-  //     source is offline — NEVER fabricates a green pill.
+  //     source is offline - NEVER fabricates a green pill.
   //   * checklist marks shipped:false for items where the external auditor
   //     (not kolm) supplies evidence (e.g. background-check policy).
   //
@@ -23394,10 +23330,10 @@ res.json({
   r.get('/v1/security/soc2/checklist', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
-      // Static checklist — kept in-route so the public web page hand-mirrors
+      // Static checklist - kept in-route so the public web page hand-mirrors
       // a single in-source-tree source of truth. 18 line-items spanning the
       // five Trust Services Criteria plus Continuous Monitoring. Items
-      // marked source:'external_auditor' are HONEST — kolm does not ship
+      // marked source:'external_auditor' are HONEST - kolm does not ship
       // background-check evidence or facility security; the auditor's
       // sample collects those from the customer org.
       const checklist = Object.freeze([
@@ -23442,11 +23378,11 @@ res.json({
   r.get('/v1/security/iso27001/controls', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
-      // ISO 27001:2022 Annex A — four control families, 93 controls total.
+      // ISO 27001:2022 Annex A - four control families, 93 controls total.
       // We map the controls kolm directly satisfies; controls left blank are
       // not gaps so much as scope items the auditor verifies elsewhere
       // (e.g. A.7 Physical security is a facilities concern, not a kolm
-      // module). REAL Annex A IDs — never invented.
+      // module). REAL Annex A IDs - never invented.
       const controls = Object.freeze([
         Object.freeze({ id: 'A.5.1',  family: 'Organizational', name: 'Policies for information security',                kolm_component: 'INTERNAL_BACKEND_SPEC.md + /security landing' }),
         Object.freeze({ id: 'A.5.7',  family: 'Organizational', name: 'Threat intelligence',                              kolm_component: 'W762 adversarial-prompts + W765 extraction-guard pattern catalog' }),
@@ -23528,19 +23464,19 @@ res.json({
     }
   });
 
-  // ============== W769 — Data Residency + Geo-Fence surface ==============
-  // POST /v1/residency/tag-capture           — tag a single capture (confirm:true)
-  // GET  /v1/residency/capture-region/:id    — read back a capture's tag
-  // POST /v1/residency/configure-namespace   — pin default region for a namespace
-  // GET  /v1/residency/regions               — read-only taxonomy
+  // ============== W769 - Data Residency + Geo-Fence surface ==============
+  // POST /v1/residency/tag-capture - tag a single capture (confirm:true)
+  // GET  /v1/residency/capture-region/:id - read back a capture's tag
+  // POST /v1/residency/configure-namespace - pin default region for a namespace
+  // GET  /v1/residency/regions - read-only taxonomy
   //
   // ALL auth-gated (consistency w/ the rest of the /v1/* surface). Every
   // read/write keys on req.tenant_record.id; defense-in-depth tenant fence
   // lives inside src/data-residency.js (W411 law).
   //
   // Cross-ref: W708-5 (src/auth.js EXPORT_CONTROL_DENYLIST) blocks SIGN-UP
-  // by country code — that's the perimeter geo-fence. W769 tags WHERE
-  // DATA LIVES at capture time — that's the data-locality residency
+  // by country code - that's the perimeter geo-fence. W769 tags WHERE
+  // DATA LIVES at capture time - that's the data-locality residency
   // control. Both are required for a credible regulated-industry posture;
   // they cover orthogonal threat models. The /compliance/data-residency
   // landing surfaces the cross-reference explicitly.
@@ -23582,7 +23518,7 @@ res.json({
         tenant_id: req.tenant_record.id,
         capture_id: req.params.capture_id,
       });
-      // Untagged is an HONEST envelope, not an HTTP error — the route
+      // Untagged is an HONEST envelope, not an HTTP error - the route
       // succeeded; the FEATURE state is "no tag yet". Status 200.
       return res.status(200).json(env);
     } catch (e) {
@@ -23646,11 +23582,11 @@ res.json({
   });
 
   // =====================================================================
-  // W771 — Vision-language capture detector + bake-off routes.
+  // W771 - Vision-language capture detector + bake-off routes.
   //
   //   POST /v1/vision/capture-detect
   //     body: { message }
-  //     Pure detector — returns {is_vision, image_url_blocks, base64_blocks,
+  //     Pure detector - returns {is_vision, image_url_blocks, base64_blocks,
   //     total_images} for the passed chat message. No persistence. Auth-gated
   //     so an unauthenticated probe cannot use this as a free image-detect
   //     service.
@@ -23659,14 +23595,14 @@ res.json({
   //     body: { namespace?, artifact_path?, max_n?, confirm:true }
   //     Replays vision captures through the named .kolm artifact + scores via
   //     the heuristic Jaccard judge (DI seam ready for callable judge later).
-  //     `confirm:true` is REQUIRED — pattern from W411 spend-protection.
+  //     `confirm:true` is REQUIRED - pattern from W411 spend-protection.
   //
   //   GET /v1/vision/captures?namespace=<ns>&limit=<N>
   //     Lists vision captures (W411 defense-in-depth tenant fence). Returns
   //     {ok, count, captures[]} envelope.
   //
   // All three are tenant-fenced via req.tenant_record.id (W411). Honest
-  // envelopes on bad input — no silent passthrough.
+  // envelopes on bad input - no silent passthrough.
   // =====================================================================
   r.post('/v1/vision/capture-detect', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -23752,11 +23688,11 @@ res.json({
   });
 
   // =====================================================================
-  // W772 — Audio capture detector + audio bake-off routes (transcript + intent).
+  // W772 - Audio capture detector + audio bake-off routes (transcript + intent).
   //
   //   POST /v1/audio/capture-detect
   //     body: { message }
-  //     Pure detector — returns {is_audio, audio_blocks, transcript_present,
+  //     Pure detector - returns {is_audio, audio_blocks, transcript_present,
   //     total_audio} for the passed chat message. No persistence. Auth-gated
   //     so an unauthenticated probe cannot use this as a free audio-detect
   //     service.
@@ -23766,7 +23702,7 @@ res.json({
   //     Replays audio captures (whisper transcript -> candidate response)
   //     through the named .kolm artifact + scores via the heuristic Jaccard
   //     judge (DI seam ready for callable judge later). `confirm:true` is
-  //     REQUIRED — same spend-protection pattern as the W771 vlm bakeoff.
+  //     REQUIRED - same spend-protection pattern as the W771 vlm bakeoff.
   //
   //   GET /v1/audio/captures?namespace=<ns>&limit=<N>
   //     Lists audio captures (W411 defense-in-depth tenant fence). Returns
@@ -23775,7 +23711,7 @@ res.json({
   //     stamped by captureAudioMessage (NEVER the raw audio bytes).
   //
   // All three are tenant-fenced via req.tenant_record.id (W411). Honest
-  // envelopes on bad input — no silent passthrough.
+  // envelopes on bad input - no silent passthrough.
   // =====================================================================
   r.post('/v1/audio/capture-detect', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -23851,7 +23787,7 @@ res.json({
         limit: cap,
       });
       // W411 defense-in-depth: per-row tenant_id check even though listEvents
-      // already filtered. Pure inspection — privacy-safe fields only (NEVER
+      // already filtered. Pure inspection - privacy-safe fields only (NEVER
       // raw audio bytes, only the URL hash + transcript head).
       const rows = events
         .filter((ev) => ev && ev.tenant_id === tenant_id && ev.media_kind === 'audio')
@@ -24015,17 +23951,17 @@ res.json({
     }
   });
 
-  // ============== W774 — Cross-lingual distillation (English teacher → multilingual student) ==============
-  // POST /v1/xlang/balanced-sample        — body:{namespace, strategy, target_langs, max_n}
-  // POST /v1/xlang/per-language-eval      — body:{namespace, artifact_path, confirm:true}
-  // POST /v1/xlang/bakeoff                — body:{namespace, artifact_a, artifact_b, confirm:true}
+  // ============== W774 - Cross-lingual distillation (English teacher → multilingual student) ==============
+  // POST /v1/xlang/balanced-sample - body:{namespace, strategy, target_langs, max_n}
+  // POST /v1/xlang/per-language-eval - body:{namespace, artifact_path, confirm:true}
+  // POST /v1/xlang/bakeoff - body:{namespace, artifact_a, artifact_b, confirm:true}
   // GET  /v1/xlang/language-coverage?namespace=<ns>
   //
   // Honesty contract:
   //   * Wilson 95% CI gated at n>=30 PER LANGUAGE (mirrors W760).
   //   * per-language-eval + bakeoff are confirm-gated because both dispatch
   //     a per-capture run loop against an artifact (cost + latency).
-  //   * Hosted route has NO runOnArtifact/judge wired by default —
+  //   * Hosted route has NO runOnArtifact/judge wired by default - 
   //     production injects via req.app.locals._w774_run_on_artifact +
   //     ._w774_judge. The honest envelope on missing wiring is the
   //     contract, not a 500.
@@ -24046,7 +23982,7 @@ res.json({
         ? Math.max(1, Math.min(10000, Math.trunc(Number(body.max_n))))
         : 100;
 
-      // W411 defense-in-depth — pull tenant_id from req.tenant_record AND
+      // W411 defense-in-depth - pull tenant_id from req.tenant_record AND
       // re-filter every row returned by listEvents.
       let rows = [];
       try {
@@ -24089,7 +24025,7 @@ res.json({
         return res.status(400).json({
           ok: false,
           error: 'confirm_required',
-          hint: 'pass {confirm:true} — per-language-eval dispatches a per-capture artifact run loop',
+          hint: 'pass {confirm:true} - per-language-eval dispatches a per-capture artifact run loop',
           version: 'w774-v1',
         });
       }
@@ -24104,7 +24040,7 @@ res.json({
           version: 'w774-v1',
         });
       }
-      // Hosted route has NO runOnArtifact wired by default — honest
+      // Hosted route has NO runOnArtifact wired by default - honest
       // envelope. Production wires both via req.app.locals.
       let runOnArtifact = null;
       let judge = null;
@@ -24138,7 +24074,7 @@ res.json({
         return res.status(400).json({
           ok: false,
           error: 'confirm_required',
-          hint: 'pass {confirm:true} — bakeoff dispatches a per-capture run loop against BOTH artifacts',
+          hint: 'pass {confirm:true} - bakeoff dispatches a per-capture run loop against BOTH artifacts',
           version: 'w774-v1',
         });
       }
@@ -24221,9 +24157,9 @@ res.json({
   });
 
   // =====================================================================
-  // W813 — Drift Detection + Alerting (embedding-distribution comparator).
+  // W813 - Drift Detection + Alerting (embedding-distribution comparator).
   //
-  // Five auth-gated routes — distinct from W167 supersession
+  // Five auth-gated routes - distinct from W167 supersession
   // (drift-supersession.js), distinct from W747 distribution-shift alerter
   // (/v1/drift-alert/*), distinct from W813 capture-distribution detector
   // (/v1/drift-detector). These routes expose the W813 embedding-distribution
@@ -24327,7 +24263,7 @@ res.json({
       const cfgEnv = namespace
         ? await cfgMod.getNamespaceConfig({ tenant_id, namespace })
         : null;
-      // R-7 — namespace-scoped drift signals over the capture lake + receipts.
+      // R-7 - namespace-scoped drift signals over the capture lake + receipts.
       // We compute these alongside the W813 alert ladder so callers see both
       // the latest persisted alert AND the live signal status. When namespace
       // is unspecified we skip R-7 (it is namespace-scoped by design).
@@ -24361,7 +24297,7 @@ res.json({
         namespace: namespace || null,
         latest_alert: latest,
         config: cfgEnv && cfgEnv.config ? cfgEnv.config : null,
-        // R-7 surface — flat keys at top level so simple clients can read
+        // R-7 surface - flat keys at top level so simple clients can read
         // without descending; full envelope mirrored under `r7` for parity.
         fallback_rate_delta: r7 && r7.ok ? r7.fallback_rate_delta : null,
         distribution_distance: r7 && r7.ok ? r7.distribution_distance : null,
@@ -24447,7 +24383,7 @@ res.json({
       const cfgMod = await import('./drift-config.js');
       const cfgEnv = await cfgMod.getNamespaceConfig({ tenant_id, namespace });
       const cfg = (cfgEnv && cfgEnv.config) || cfgMod.DRIFT_CONFIG_DEFAULTS;
-      // W813-5 invariant — would_trigger reflects ONLY the namespace flag.
+      // W813-5 invariant - would_trigger reflects ONLY the namespace flag.
       const would_trigger = !!cfg.auto_remediate_drift;
 
       let triggered = false;
@@ -24497,7 +24433,7 @@ res.json({
   });
 
   // =====================================================================
-  // W775 — autopilot daemon (THE KILLER FEATURE).
+  // W775 - autopilot daemon (THE KILLER FEATURE).
   //
   // The autopilot is the continuous-background-distill loop. Once enabled,
   // the daemon polls W815 coverage gaps, gates on W813 drift, and silently
@@ -24527,7 +24463,7 @@ res.json({
   //     Returns the action taken {disabled / holding / no_op / redistilled}.
   //
   // All five are tenant-fenced via req.tenant_record.id (W411 law). The
-  // route layer ALWAYS forces tenant_id from auth — body.tenant_id is
+  // route layer ALWAYS forces tenant_id from auth - body.tenant_id is
   // ignored even if the client tries to pass one.
   // =====================================================================
   r.post('/v1/autopilot/enable', async (req, res) => {
@@ -24642,7 +24578,7 @@ res.json({
   });
 
   // =====================================================================
-  // W921 — Autopilot data-engine intelligence routes.
+  // W921 - Autopilot data-engine intelligence routes.
   //
   // Wire the six built-but-unrouted autopilot components plus the full
   // lifecycle tick into HTTP, mirroring the existing autopilot route
@@ -24821,7 +24757,7 @@ res.json({
   });
 
   // =====================================================================
-  // W772b — Audio tokenizer worker (Whisper mel/BPE).
+  // W772b - Audio tokenizer worker (Whisper mel/BPE).
   //
   // Wraps workers/audio-tokenize/tokenize.mjs via src/audio-tokenize.js so
   // the trainer + audit harness can ask the API for real mel-spectrogram
@@ -24898,7 +24834,7 @@ res.json({
   });
 
   // =====================================================================
-  // W771b — VLM tokenizer worker (CLIP/SigLIP patches).
+  // W771b - VLM tokenizer worker (CLIP/SigLIP patches).
   //
   // Wraps workers/vision-tokenize/tokenize.mjs via src/vision-tokenize.js so
   // the W771 VLM distill trainer + audit harness can ask the API for real
@@ -24978,7 +24914,7 @@ res.json({
   });
 
   // ═══════════════════════════════════════════════════════════════════════
-  // W773b — Video tokenizer worker (frame-patch tokens)
+  // W773b - Video tokenizer worker (frame-patch tokens)
   //
   // Wraps workers/video-tokenize/tokenize.mjs via src/video-tokenize.js so
   // the W773 trainer + audit harness can ask the API for real LLaVA-NeXT-
@@ -25041,7 +24977,7 @@ res.json({
         num_frames: Number.isFinite(Number(body.num_frames)) ? Number(body.num_frames) : undefined,
         max_bytes: Number.isFinite(Number(body.max_bytes)) ? Number(body.max_bytes) : undefined,
       });
-      // W411 defense-in-depth — stamp tenant_id on the response so audits
+      // W411 defense-in-depth - stamp tenant_id on the response so audits
       // can verify the fence held.
       envelope.tenant_id = req.tenant_record.id;
       // 200 on honest no_detector_installed envelope. Operator gets the
@@ -25301,13 +25237,13 @@ res.json({
     }
   });
 
-  // ============================ W780 — multi-region gateway ==================
+  // ============================ W780 - multi-region gateway ==================
   // GET  /v1/region/status     -> { region, gateway_url, capture_residency, version }
   // GET  /v1/region/gateways   -> the configured short_name -> url map
   // POST /v1/region/route      -> { region, gateway_url, reason } for {request_hash, residency_requirement?}
   //
   // All auth-gated. The MULTI_REGION module is the source of truth for
-  // routing decisions — every read goes through getRegionGateways /
+  // routing decisions - every read goes through getRegionGateways /
   // routeRequest so the same envelope shape callers see in the JS SDK
   // is what the HTTP surface returns. residency_requirement is the
   // HARD constraint; we never silently downgrade.
@@ -25439,12 +25375,12 @@ res.json({
     }
   });
 
-  // W869 T4 — /v1/bundle/airgap is intentionally a discoverability stub. The
+  // W869 T4 - /v1/bundle/airgap is intentionally a discoverability stub. The
   // actual builder (src/airgap-bundle.js) writes a multi-hundred-MB tarball
   // and reads the entire kolm source tree from disk; streaming that through
   // an HTTP response would balloon memory, leak the server's checkout layout,
   // and lock the route into one host's filesystem. The CLI is the supported
-  // path — `kolm bundle airgap --out <path>`. The route still exists so
+  // path - `kolm bundle airgap --out <path>`. The route still exists so
   // surface discovery + docs can link to it and so a future CDN-backed
   // implementation has a stable URL.
   r.post('/v1/bundle/airgap', async (req, res) => {
@@ -25452,7 +25388,7 @@ res.json({
     return res.status(501).json({
       ok: false,
       error: 'bundle_airgap_requires_cli',
-      hint: 'air-gap bundle builds are CLI-only — run `kolm bundle airgap --out <path.tar.gz>` on the host with the kolm checkout. See docs/self-hosted-deploy-complete.md §10 for full flow.',
+      hint: 'air-gap bundle builds are CLI-only - run `kolm bundle airgap --out <path.tar.gz>` on the host with the kolm checkout. See docs/self-hosted-deploy-complete.md §10 for full flow.',
       cli_command: 'kolm bundle airgap --out /tmp/kolm-airgap.tar.gz [--with-node-modules] [--with-wheels] [--with-models]',
       docs_url: '/docs/self-hosted-deploy-complete',
       version: 'w869-v1',
@@ -25763,7 +25699,7 @@ res.json({
   });
 
   // ============================================================================
-  // W781 — long-context warnings
+  // W781 - long-context warnings
   //
   //   GET  /v1/long-context/p90              -> distribution snapshot for tenant/namespace
   //   POST /v1/long-context/check            -> warn:bool when {input_length} > p90
@@ -25817,7 +25753,7 @@ res.json({
   });
 
   // ============================================================================
-  // W782 — team approval workflow
+  // W782 - team approval workflow
   //
   //   POST /v1/approvals/request                -> create pending approval
   //   GET  /v1/approvals                        -> list approvals for tenant
@@ -25959,7 +25895,7 @@ res.json({
   });
 
   // ============================================================================
-  // W784 — Plugin architecture (third-party q/runtime/capture/eval).
+  // W784 - Plugin architecture (third-party q/runtime/capture/eval).
   //
   //   GET  /v1/plugins              -> list installed plugins (optional ?kind=)
   //   POST /v1/plugins              -> register a plugin from {manifest_path}
@@ -26040,7 +25976,7 @@ res.json({
   });
 
   // ============================================================================
-  // W783 — cost attribution / chargeback
+  // W783 - cost attribution / chargeback
   //
   //   GET  /v1/chargeback?period=YYYY-MM&group_by=namespace|project|department
   //                                            -> tenant-fenced rollup
@@ -26223,80 +26159,87 @@ res.json({
     }
   });
 
-  // W835 — register savings-based pricing routes (4 routes, modular mount).
+  // W835 - register savings-based pricing routes (4 routes, modular mount).
   __registerSavingsRoutes_w835(r);
 
-  // W822 — register A/B testing routes (5 routes, modular mount). Uses the
+  // W822 - register A/B testing routes (5 routes, modular mount). Uses the
   // canonical authMiddleware so tenant_record stamping happens inside the
   // mount instead of leaking into this file.
   __registerAbRoutes_w822(r, { authMiddleware });
 
-  // W821 — register artifact-composition pipeline orchestrator routes
+  // W821 - register artifact-composition pipeline orchestrator routes
   // (6 routes: list, create, show, delete, run, kscore). Modular mount keeps
   // src/router.js diff small + lets the pipeline-routes module own its own
   // tenant fence + honest-envelope discipline.
   __registerPipelineRoutes_w821(r, { authMiddleware });
 
-  // W832 — kolm-meta routes (status, retrain, predict). One-line modular
+  // W832 - kolm-meta routes (status, retrain, predict). One-line modular
   // mount keeps the router.js diff minimal. See src/meta-routes.js +
   // src/kolm-meta-trainer.js.
   __registerMetaRoutes_w832(r);
 
-  // W833 — cross-lingual foundation routes (distribution, synthesize,
+  // W833 - cross-lingual foundation routes (distribution, synthesize,
   // mixture/auto-balance, manifest). One-line modular mount keeps the
   // router.js diff to a single call site so parallel-wave merges don't
   // collide. See src/lingual-routes.js + src/lingual-*.js.
   __registerLingualRoutes_w833(r);
 
-  // W834 — Regulatory compliance toolkit routes (7 routes: EU AI Act docs,
+  // W834 - Regulatory compliance toolkit routes (7 routes: EU AI Act docs,
   // risk classify, HIL get/set, data-governance report, extended model card,
   // GRC export). Modular mount keeps router.js diff to a single call site
   // per the W83x concurrent-edit standing directive.
   __registerRegRoutes_w834(r);
 
-  // W921 — Account-UI no-code routes (client-error sink + automations CRUD/run/tick),
+  // W921 - Account-UI no-code routes (client-error sink + automations CRUD/run/tick),
   // Website status/trust strip (/v1/status/summary + /receipts), and Govern
   // (receipt Merkle anchoring / SLSA provenance / transparency log / compliance export).
   // One-line modular mounts; each handler fences on req.tenant_record internally.
   __registerAccountUiRoutes_w921(r, { authMiddleware });
   __registerWebsiteStatusRoutes_w921(r, { authMiddleware });
   __registerGovernRoutes_w921(r, { authMiddleware });
-  // W921 BET-3/BET-4 — in-toto/SLSA receipt attestation + governed MCP signed
+  // W921 BET-3/BET-4 - in-toto/SLSA receipt attestation + governed MCP signed
   // tool-call receipts. Additive; degrade gracefully without optional deps.
   __registerIntotoReceiptRoutes_w921(r, { authMiddleware });
   __registerMcpGatewayRoutes_w921(r, { authMiddleware });
 
-  // W829 — multimodal capture pipeline (multimodal/multi-turn captures +
+  // Agent Security-Review audit - the signed evidence-report surface. Mounts
+  // POST /v1/audit/sessions[/:id/{ingest,run}], GET /v1/audit/sessions/:id[/report],
+  // POST /v1/audit/scan, and the PUBLIC POST /v1/audit/report/verify (the latter
+  // is allow-listed in PUBLIC_API). All tenant-fenced on req.tenant_record.id;
+  // distinct paths from the pre-existing HMAC GET /v1/audit/{log,verify,export*}.
+  __registerAuditRoutes_asr(r, { authMiddleware });
+
+  // W829 - multimodal capture pipeline (multimodal/multi-turn captures +
   // VLM-distill enqueue + jobs list). One-line modular mount keeps the
   // router.js diff minimal. See src/multimodal-pipeline-routes.js.
   __registerMultimodalPipelineRoutes_w829(r);
 
-  // W825 — Artifact Marketplace MVP (browse, upload, download, finetune,
+  // W825 - Artifact Marketplace MVP (browse, upload, download, finetune,
   // rate, ratings, payout-cycle). One-line modular mount. See
   // src/marketplace-routes.js + src/marketplace-w825.js.
   __registerMarketplaceRoutes_w825(r);
 
-  // W824 — Kubernetes-native /ready/deep (artifact-aware readiness) and
+  // W824 - Kubernetes-native /ready/deep (artifact-aware readiness) and
   // /metrics/extended (event-store-aggregated Prometheus exposition for the
   // HPA + dashboards). Mount last so it never collides with W730's /ready
   // or /metrics.
   __registerK8sRoutes_w824(r);
 
-  // W830 — federated consortium management (6 routes: opt-in, opt-out,
+  // W830 - federated consortium management (6 routes: opt-in, opt-out,
   // members, budget, aggregations, verify-mia). All tenant-scoped via
   // req.tenant_record.id; honest-stub for verify-mia when shadow_models
   // are not provided. See src/federated-consortium-routes.js +
   // src/federated-mia.js.
   __registerFederatedConsortiumRoutes_w830(r);
 
-  // W831 — offline / air-gapped routes (POST /v1/airgap/distill/run,
+  // W831 - offline / air-gapped routes (POST /v1/airgap/distill/run,
   // GET /v1/airgap/distill/status/:id, POST /v1/airgap/sneakernet/bundle,
   // POST /v1/airgap/sneakernet/verify, POST /v1/airgap/bakeoff,
   // GET /v1/airgap/doctor). All auth-gated + tenant-fenced. See
   // src/airgap-routes.js + src/airgap-{distill,teacher,sneakernet,bakeoff}.js.
   __registerAirgapRoutes_w831(r);
 
-  // W409f #4 — bare-route aliases for account-page fetch URLs that omit the
+  // W409f #4 - bare-route aliases for account-page fetch URLs that omit the
   // :namespace path param. The dashboard pages call these endpoints without a
   // selected namespace before the user picks one; previously they 404'd. We
   // forward to the existing :namespace handler with namespace='default' so the
@@ -26332,7 +26275,7 @@ res.json({
   // status:'pending'|'ready'}.
   // ---------------------------------------------------------------------------
 
-  // /v1/ready/deep — /v1-prefixed alias of the W824 /ready/deep route so the
+  // /v1/ready/deep - /v1-prefixed alias of the W824 /ready/deep route so the
   // TUI's k8s-readiness view stays on the /v1/* convention every other view
   // uses. Forwards through the registered handler instead of duplicating
   // logic so a single k8s-routes change updates both paths.
@@ -26341,7 +26284,7 @@ res.json({
     return r.handle(req, res, next);
   });
 
-  // /v1/runtime/placement — collection GET that emits the local placement
+  // /v1/runtime/placement - collection GET that emits the local placement
   // hierarchy snapshot. W826 ships detectMemoryHierarchy + placementDecision
   // as pure functions; the TUI view needs a one-shot GET to read the
   // hierarchy without staging an artifact size first.
@@ -26368,7 +26311,7 @@ res.json({
     }
   });
 
-  // /v1/training/token-dpo — collection GET listing tenant token-DPO jobs.
+  // /v1/training/token-dpo - collection GET listing tenant token-DPO jobs.
   // Honest envelope: no token-DPO module is wired into the request path yet,
   // so the items[] is empty + status='pending'. The operator still gets a
   // real envelope rather than a 404 from the TUI view.
@@ -26383,7 +26326,7 @@ res.json({
     });
   });
 
-  // /v1/trace/distill — collection GET listing tenant reasoning-trace distill
+  // /v1/trace/distill - collection GET listing tenant reasoning-trace distill
   // jobs. Real W828 wiring lives in src/trace-compile.js; this collection
   // stub returns an empty envelope until a wave wires the distill queue
   // through a dedicated route module.
@@ -26398,7 +26341,7 @@ res.json({
     });
   });
 
-  // /v1/multimodal/pipeline — collection GET listing tenant multimodal
+  // /v1/multimodal/pipeline - collection GET listing tenant multimodal
   // capture pipeline state. Real W829 routes (/v1/captures/multimodal,
   // /v1/vlm-distill/runs) live in src/multimodal-pipeline-routes.js; this
   // bare GET aggregates them for the TUI surface.
@@ -26414,7 +26357,7 @@ res.json({
     });
   });
 
-  // /v1/federated/consortium — bare GET that points the TUI at the W830
+  // /v1/federated/consortium - bare GET that points the TUI at the W830
   // members collection. The federated-consortium-routes module owns the
   // tenant-scoped membership reads; here we add a no-query alias that
   // returns the empty-state envelope when no consortium_id is supplied so
@@ -26431,7 +26374,7 @@ res.json({
     });
   });
 
-  // /v1/airgap/jobs — bare collection GET that lists tenant air-gapped
+  // /v1/airgap/jobs - bare collection GET that lists tenant air-gapped
   // distill + sneakernet jobs. Each W831 job is keyed by run_id; the actual
   // status route is /v1/airgap/distill/status/:id. This bare GET returns an
   // empty envelope until a wave wires the per-tenant job index.
@@ -26447,7 +26390,7 @@ res.json({
     });
   });
 
-  // /v1/lingual/manifest — bare GET aliasing the W833 manifest collection.
+  // /v1/lingual/manifest - bare GET aliasing the W833 manifest collection.
   // The shipped route is /v1/lingual/manifest/:artifact_id; without an
   // artifact_id selected (the TUI default state) we return the tenant-wide
   // language-mixture distribution so the view still renders.
@@ -26456,7 +26399,7 @@ res.json({
     return r.handle(req, res, next);
   });
 
-  // /v1/reg/eu-aiact-docs — GET counterpart to the W834 POST. POST runs the
+  // /v1/reg/eu-aiact-docs - GET counterpart to the W834 POST. POST runs the
   // Annex IV generator; GET reads the most-recent generated packet (or an
   // empty envelope if none has been produced yet) so the TUI view does not
   // require the operator to first POST to view state.
@@ -26472,7 +26415,7 @@ res.json({
     });
   });
 
-  // /v1/savings — bare alias for the W835 summary endpoint so the TUI's
+  // /v1/savings - bare alias for the W835 summary endpoint so the TUI's
   // savings-tracker view has a stable collection-style URL. Forwards into
   // the real /v1/savings/summary handler.
   r.get('/v1/savings', (req, res, next) => {
@@ -26480,7 +26423,7 @@ res.json({
     return r.handle(req, res, next);
   });
 
-  // R-8 — per-namespace cost displacement reporting.
+  // R-8 - per-namespace cost displacement reporting.
   //
   // Distinct from /v1/savings/summary (W835 fee-on-savings model). This
   // endpoint walks per-receipt route_decision values and re-prices the local
@@ -26488,13 +26431,13 @@ res.json({
   // displaced this period". No fee math is applied here.
   //
   // Query params:
-  //   namespace          (required) — namespace to scope by
-  //   period_days        (optional) — defaults to 30
-  //   frontier_provider  (optional) — re-pricing target; falls back to receipt's own model
-  //   frontier_model     (optional) — re-pricing target; falls back to receipt's own model
-  //   artifact_id        (optional) — for compile_cost + deployed_at lookup
-  //   compile_cost_usd   (optional) — explicit override
-  //   deployed_at_ms     (optional) — explicit override
+  //   namespace          (required) - namespace to scope by
+  //   period_days        (optional) - defaults to 30
+  //   frontier_provider  (optional) - re-pricing target; falls back to receipt's own model
+  //   frontier_model     (optional) - re-pricing target; falls back to receipt's own model
+  //   artifact_id        (optional) - for compile_cost + deployed_at lookup
+  //   compile_cost_usd   (optional) - explicit override
+  //   deployed_at_ms     (optional) - explicit override
   r.get('/v1/savings/displacement', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -26539,7 +26482,7 @@ res.json({
   // Read-only compute routes (hardware/inspect/fit/experts) are unauthed but
   // rate-limited via forgeLimiter. They produce no tenant artifacts.
   //
-  // Mutation routes (quantize/merge/serve/export) require auth — they create
+  // Mutation routes (quantize/merge/serve/export) require auth - they create
   // .kolm artifacts and serve manifests on the operator's box. These wrap the
   // existing compile-job system; they are NOT new background workers.
   const forgeLimiter = rateLimit({
@@ -26547,12 +26490,12 @@ res.json({
     max: 60,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'rate-limited — forge API caps at 60/min/ip' },
+    message: { error: 'rate-limited - forge API caps at 60/min/ip' },
     keyGenerator: ipKey,
     validate: { trustProxy: false },
   });
 
-  // GET /v1/hardware — detect SERVER hardware (GPU vendor/vram/cc, supported quants).
+  // GET /v1/hardware - detect SERVER hardware (GPU vendor/vram/cc, supported quants).
   // Unauthed: returns the operator's local accelerator profile so an Account UI
   // running on the same host can render a "what fits" picker without auth.
   r.get('/v1/hardware', forgeLimiter, (_req, res) => {
@@ -26564,7 +26507,7 @@ res.json({
     }
   });
 
-  // POST /v1/inspect — inspect a model (HF id or local .kolm path).
+  // POST /v1/inspect - inspect a model (HF id or local .kolm path).
   // Body: { model_id?: string, kolm_path?: string }
   // For HF id: fetches config.json over the public HF endpoint. For .kolm:
   // reads manifest from disk (operator-side path) with signature bypass since
@@ -26585,7 +26528,7 @@ res.json({
     }
   });
 
-  // POST /v1/fit — estimate VRAM use for (params × quant × context).
+  // POST /v1/fit - estimate VRAM use for (params × quant × context).
   // Body: { model_params_b, quant, vram_gb, context?, batch?, kv_precision? }
   // Returns the same envelope as the CLI: {fits, est_total_gb, est_weights_gb,
   // est_kv_gb, est_activations_gb, headroom_gb, recommendation}.
@@ -26617,7 +26560,7 @@ res.json({
     }
   });
 
-  // POST /v1/experts — analyze MoE expert activation distribution for a .kolm.
+  // POST /v1/experts - analyze MoE expert activation distribution for a .kolm.
   // Body: { artifact_path, threshold? }
   // The artifact must be operator-side (path on the server). Returns
   // per-expert activation + prune candidates + estimated K-Score impact.
@@ -26636,7 +26579,7 @@ res.json({
     }
   });
 
-  // POST /v1/quantize — alias over /v1/compile that auto-fills format+quant
+  // POST /v1/quantize - alias over /v1/compile that auto-fills format+quant
   // from a single --target shortcut (gguf-q4km, exl2-4bpw, nvfp4, etc.) so the
   // Account UI and SDKs can call one route instead of constructing a spec.
   // Body: { model_id, target, job_id?, ... } → returns the created job.
@@ -26666,7 +26609,7 @@ res.json({
     }
   });
 
-  // POST /v1/merge — compute a merge plan for two .kolm artifacts.
+  // POST /v1/merge - compute a merge plan for two .kolm artifacts.
   // Body: { base, head, method?, alpha?, dry_run? }
   // Returns the merge envelope (lineage check, kscore delta heuristic, output
   // path). When dry_run=true, no artifact is written.
@@ -26702,12 +26645,12 @@ res.json({
       };
       if (body.dry_run) return res.json(envelope);
 
-      // Real execution. mergeAdapters() is local-CLI-only — it spawns
+      // Real execution. mergeAdapters() is local-CLI-only - it spawns
       // workers/distill/scripts/merge_adapters.py via spawnSync and may run for
       // minutes on a GPU box. Mirror the compile job-queue pattern: persist a
       // durable merge_jobs record, kick the merge on a background fiber
       // (setImmediate), and return 202/accepted with a merge_id the caller can
-      // poll via GET /v1/merge/:id — never block the request thread, never 501.
+      // poll via GET /v1/merge/:id - never block the request thread, never 501.
       const merge_id = 'merge_' + crypto.randomBytes(6).toString('hex');
       const alphaNum = Number(body.alpha || 0.5);
       // The route surfaces a 2-adapter blend (base + head). Map alpha onto the
@@ -26743,7 +26686,7 @@ res.json({
 
       // Background fiber. spawnSync inside mergeAdapters is synchronous, so wrap
       // it so the event loop yields the 202 first. All errors are captured into
-      // the durable record — they never crash the process.
+      // the durable record - they never crash the process.
       setImmediate(() => {
         try {
           update('merge_jobs', x => x.id === merge_id, { status: 'running', updated_at: new Date().toISOString() });
@@ -26778,7 +26721,7 @@ res.json({
               error: String(e && e.message ? e.message : e),
               updated_at: new Date().toISOString(),
             });
-          } catch (_) { /* swallow — never crash the background fiber */ }
+          } catch (_) { /* swallow - never crash the background fiber */ }
         }
       });
 
@@ -26795,7 +26738,7 @@ res.json({
     }
   });
 
-  // GET /v1/merge/:id — poll a merge job created by POST /v1/merge (dry_run=false).
+  // GET /v1/merge/:id - poll a merge job created by POST /v1/merge (dry_run=false).
   // Returns the durable merge_jobs record (status queued|running|completed|
   // planned|failed). Tenant-scoped: a tenant can only read its own merge jobs.
   r.get('/v1/merge/:id', authMiddleware, async (req, res) => {
@@ -26810,7 +26753,7 @@ res.json({
     }
   });
 
-  // GET /v1/serve/pods — live serving pods for the tenant (which artifacts are
+  // GET /v1/serve/pods - live serving pods for the tenant (which artifacts are
   // currently served). No live-pod tracker is wired yet, so this returns an empty
   // set; the /account/models UI uses it to badge "serving" state and degrades
   // gracefully (it already .catch()es to {pods:[]}). Registering the route stops
@@ -26820,7 +26763,7 @@ res.json({
     res.json({ ok: true, pods: [] });
   });
 
-  // POST /v1/serve — emit a deployment manifest (docker run / k8s yaml) for
+  // POST /v1/serve - emit a deployment manifest (docker run / k8s yaml) for
   // a .kolm artifact and runtime target.
   // Body: { artifact, runtime, port?, docker?, k8s? } → { manifest, runtime, port }
   r.post('/v1/serve', forgeLimiter, authMiddleware, async (req, res) => {
@@ -26856,7 +26799,7 @@ res.json({
     }
   });
 
-  // POST /v1/export — emit an export plan for a .kolm artifact (target =
+  // POST /v1/export - emit an export plan for a .kolm artifact (target =
   // gguf/awq/exl2/mlx/onnx/tflite/coreml/openvino). Returns the plan +
   // estimated size + invocation hint; actual export runs via the CLI worker.
   r.post('/v1/export', forgeLimiter, authMiddleware, async (req, res) => {
@@ -26886,7 +26829,7 @@ res.json({
   });
 
   // ---------------------------------------------------------------------------
-  // CONVERSATIONS API — tenant-scoped chat backup over the event-store.
+  // CONVERSATIONS API - tenant-scoped chat backup over the event-store.
   // All routes are mounted after r.use(authMiddleware) so req.tenant_record is
   // set; every handler hard-fences on it. Persistence lives in
   // src/conversations.js (namespace 'chat.conversation', provider 'kolm-chat').
@@ -26894,7 +26837,7 @@ res.json({
   // free chat surface uses) so a runaway client can't spam upserts.
   // ---------------------------------------------------------------------------
 
-  // POST /v1/conversations — save/upsert one conversation.
+  // POST /v1/conversations - save/upsert one conversation.
   r.post('/v1/conversations', freeChatLimiter, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -26906,7 +26849,7 @@ res.json({
     }
   });
 
-  // GET /v1/conversations — list metadata only (never full messages).
+  // GET /v1/conversations - list metadata only (never full messages).
   r.get('/v1/conversations', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -26922,7 +26865,7 @@ res.json({
     }
   });
 
-  // GET /v1/conversations/:id — full conversation (404 on miss/tenant-mismatch).
+  // GET /v1/conversations/:id - full conversation (404 on miss/tenant-mismatch).
   r.get('/v1/conversations/:id', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -26934,7 +26877,7 @@ res.json({
     }
   });
 
-  // DELETE /v1/conversations/:id — soft delete (tombstone upsert).
+  // DELETE /v1/conversations/:id - soft delete (tombstone upsert).
   r.delete('/v1/conversations/:id', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -26947,14 +26890,14 @@ res.json({
   });
 
   // ---------------------------------------------------------------------------
-  // EXPORTS API — push a trained model/artifact to a destination + status poll.
+  // EXPORTS API - push a trained model/artifact to a destination + status poll.
   // Mounted after authMiddleware; fenced on req.tenant_record.id. The artifact
   // ownership check is done by passing a tenant-bound getJob resolver into
   // startExport so the model-export module never imports compile.js. Tokens
   // arrive only in the POST body and are never persisted (see model-export.js).
   // ---------------------------------------------------------------------------
 
-  // POST /v1/exports — start an export job (async; returns 202 + export_id).
+  // POST /v1/exports - start an export job (async; returns 202 + export_id).
   r.post('/v1/exports', forgeLimiter, async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -26970,7 +26913,7 @@ res.json({
     }
   });
 
-  // GET /v1/exports — list caller's export jobs (newest first).
+  // GET /v1/exports - list caller's export jobs (newest first).
   r.get('/v1/exports', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -26982,7 +26925,7 @@ res.json({
     }
   });
 
-  // GET /v1/exports/:id — single job state + target_url (tenant-checked).
+  // GET /v1/exports/:id - single job state + target_url (tenant-checked).
   r.get('/v1/exports/:id', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {

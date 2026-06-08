@@ -1,9 +1,9 @@
-// W287 — GGUF runtime target for .kolm artifacts.
+// W287 - GGUF runtime target for .kolm artifacts.
 //
 // A .kolm with manifest.runtime_target='gguf' carries a quantized GGUF
 // model inside the zip (path declared by manifest.runtime_target_config.gguf_path).
 // Execution requires llama.cpp's `llama-cli` binary on the host; we do NOT
-// take llama.cpp as a hard npm dep — the binary is detected at runtime via
+// take llama.cpp as a hard npm dep - the binary is detected at runtime via
 // the LLAMA_CPP_BIN env var or PATH lookup. A missing binary raises a clean
 // KOLM_E_GGUF_RUNTIME_MISSING with a hint, never a silent fallback to JS.
 //
@@ -13,10 +13,10 @@
 //   3. `llama` on PATH (older builds)
 //
 // Errors:
-//   KOLM_E_TARGET_MISSING            — gguf_path missing from manifest or zip
-//   KOLM_E_GGUF_RUNTIME_MISSING      — llama.cpp binary not found on host
-//   KOLM_E_GGUF_RUNTIME              — llama-cli crashed or exited non-zero
-//   KOLM_E_RECIPE_TIMEOUT            — wall-clock budget exceeded (default 30s
+//   KOLM_E_TARGET_MISSING - gguf_path missing from manifest or zip
+//   KOLM_E_GGUF_RUNTIME_MISSING - llama.cpp binary not found on host
+//   KOLM_E_GGUF_RUNTIME - llama-cli crashed or exited non-zero
+//   KOLM_E_RECIPE_TIMEOUT - wall-clock budget exceeded (default 30s
 //                                      since model inference is much slower
 //                                      than the 1s recipe budget; callers can
 //                                      override via opts.timeoutMs)

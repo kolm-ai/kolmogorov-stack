@@ -1,4 +1,4 @@
-// W921 NEXT-3 — FP4-aware PTQ calibration PLANNER (the JS picker).
+// W921 NEXT-3 - FP4-aware PTQ calibration PLANNER (the JS picker).
 //
 // This is the deterministic, dependency-free decision layer that sits in front
 // of workers/quantize/scripts/quantize.py --calib-fp4. It answers two
@@ -6,7 +6,7 @@
 //
 //   1) SHOULD we run the BATQuant-style FP4-aware calibration for this target?
 //      -> yes only when the export target is an FP4 family (nvfp4 / mxfp4 /
-//         fp4 / a w4a4 / w4a8 quant level) — the calibration recovers FP4/INT4
+//         fp4 / a w4a4 / w4a8 quant level) - the calibration recovers FP4/INT4
 //         error and is pointless for fp8 / int8 / fp16 targets.
 //
 //   2) WHICH exact python flags realize that calibration?
@@ -156,7 +156,7 @@ export function buildFp4CalibPlan(args = {}) {
 /**
  * Convenience: given a target + the base quantize.py argv (method/in/out/…),
  * return the argv with the FP4 calibration flags appended when applicable.
- * Pure — does not mutate the input array.
+ * Pure - does not mutate the input array.
  *
  * @param {string[]} baseArgv
  * @param {object} planArgs  forwarded to buildFp4CalibPlan

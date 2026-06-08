@@ -1,4 +1,4 @@
-// W834-2 — Risk classification per task category (EU AI Act Annex III).
+// W834-2 - Risk classification per task category (EU AI Act Annex III).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md):
 //   [W834-2] Risk classification per task category
@@ -23,11 +23,11 @@
 //   * tier MUST be one of {prohibited, high_risk, limited_risk, minimal_risk}.
 //     NEVER null. NEVER fabricated.
 //   * basis MUST cite the EU AI Act article(s) the tier derives from. Empty
-//     basis on an explicit catalog key is a contract violation — the test
+//     basis on an explicit catalog key is a contract violation - the test
 //     suite locks on basis.length >= 1 for every Annex III enumerator.
 //   * gates_required is the canonical list of operational gates. Each gate
 //     name is a stable string that downstream code (e.g. src/reg-hil.js,
-//     src/audit-export.js) checks against verbatim — adding a new gate
+//     src/audit-export.js) checks against verbatim - adding a new gate
 //     requires bumping the version stamp.
 //   * Unknown intended_use → tier='minimal_risk' floor with explicit
 //     reasoning string `no_intended_use_match`. NEVER throws.
@@ -57,7 +57,7 @@ export const RISK_TIERS = Object.freeze([
 //   - 'fundamental_rights_impact_assessment'
 //                               → Article 27 FRIA (high-risk deployment)
 //   - 'eu_database_registration'→ Article 71 EU database registration
-// Frozen — adding a new gate requires bumping REG_RISK_CLASSIFY_VERSION.
+// Frozen - adding a new gate requires bumping REG_RISK_CLASSIFY_VERSION.
 export const REQUIRED_GATES = Object.freeze([
   'mandatory_human_review',
   'accuracy_threshold',
@@ -73,15 +73,15 @@ export const REQUIRED_GATES = Object.freeze([
 //   { tier, basis[], gates_required[] }
 //
 // Sourced from:
-//   - Article 5         — prohibited practices (social_scoring,
+//   - Article 5 - prohibited practices (social_scoring,
 //                         biometric_identify_realtime_public, ...)
-//   - Annex III §1-§8   — high-risk enumeration (biometric ID,
+//   - Annex III §1-§8 - high-risk enumeration (biometric ID,
 //                         critical infra, education, employment, essential
 //                         services, law enforcement, migration & border,
 //                         administration of justice)
-//   - Article 50        — limited-risk transparency obligations
+//   - Article 50 - limited-risk transparency obligations
 //                         (chatbot, deepfake, generative content)
-//   - implicit minimal  — everything else with no Annex III hit
+//   - implicit minimal - everything else with no Annex III hit
 //
 // The catalog uses snake_case keys matching the W766 task-category map so
 // callers can pass either label vocabulary and get a coherent answer.
@@ -365,8 +365,8 @@ export const INTENDED_USE_CATALOG = Object.freeze({
 // fire before deployment.
 //
 // Inputs:
-//   manifest      — kolm artifact manifest.json contents (used for hints + reasoning)
-//   intended_use  — REQUIRED enumeration key (see INTENDED_USE_CATALOG)
+//   manifest - kolm artifact manifest.json contents (used for hints + reasoning)
+//   intended_use - REQUIRED enumeration key (see INTENDED_USE_CATALOG)
 //
 // Returns:
 //   { ok:true, tier, basis[], gates_required[], reasoning, version, intended_use, manifest_hint }
@@ -379,7 +379,7 @@ export function classifyArtifactRisk(opts = {}) {
     return {
       ok: false,
       error: 'intended_use_required',
-      hint: 'pass {intended_use: "medical_dx" | "credit_scoring" | "hiring" | "social_scoring" | "biometric_identify" | "general_chat" | "code_assist" | ...} — see INTENDED_USE_CATALOG for the full enumeration',
+      hint: 'pass {intended_use: "medical_dx" | "credit_scoring" | "hiring" | "social_scoring" | "biometric_identify" | "general_chat" | "code_assist" | ...} - see INTENDED_USE_CATALOG for the full enumeration',
       supported: Object.keys(INTENDED_USE_CATALOG),
       version: REG_RISK_CLASSIFY_VERSION,
     };
@@ -402,7 +402,7 @@ export function classifyArtifactRisk(opts = {}) {
     };
   }
 
-  // Fallback — unknown intended_use. Floor to minimal_risk with explicit
+  // Fallback - unknown intended_use. Floor to minimal_risk with explicit
   // reasoning so a reviewer can see the assignment is a FLOOR, not an
   // attestation. Documentation gate still applies so the artifact still
   // carries an Annex IV blob.
@@ -411,7 +411,7 @@ export function classifyArtifactRisk(opts = {}) {
     tier: 'minimal_risk',
     basis: ['EU_AIACT_Recital_27'],
     gates_required: ['documentation'],
-    reasoning: `no_intended_use_match for '${intended_use}' — defaulted to minimal_risk floor (honest); supply an INTENDED_USE_CATALOG key for stronger classification`,
+    reasoning: `no_intended_use_match for '${intended_use}' - defaulted to minimal_risk floor (honest); supply an INTENDED_USE_CATALOG key for stronger classification`,
     intended_use,
     manifest_hint: manifest.vertical || manifest.task_category || null,
     version: REG_RISK_CLASSIFY_VERSION,

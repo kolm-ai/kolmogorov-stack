@@ -1,4 +1,4 @@
-// W888-D — Rolling deploy delegate.
+// W888-D - Rolling deploy delegate.
 //
 // Zero-downtime cutover for multi-replica devices. The pipeline calls this
 // module when `config.rolling === true` OR `--rolling` is passed.

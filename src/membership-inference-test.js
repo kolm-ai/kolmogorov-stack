@@ -1,10 +1,10 @@
-// W764-1 — Membership Inference Test harness.
+// W764-1 - Membership Inference Test harness.
 //
 // Membership inference is the canonical privacy attack against a trained
 // model: given a candidate prompt/response pair, an attacker tries to
 // determine whether that exact row was in the training corpus. If the
 // attacker can answer that question reliably, the model has memorized
-// individual rows — a GDPR / CCPA hazard and a leak path for any private
+// individual rows - a GDPR / CCPA hazard and a leak path for any private
 // capture that landed in distillation.
 //
 // HONESTY CONTRACT (do not violate):
@@ -15,23 +15,23 @@
 //     score. (Same DI seam as W758 bench harnesses.)
 //   - This module does NOT bundle a leak threshold beyond a Jaccard token
 //     overlap. A high Jaccard score means "the artifact emitted a response
-//     that substantially overlaps the original training response" — it is
+//     that substantially overlaps the original training response" - it is
 //     a NECESSARY signal for memorization, not sufficient on its own. The
 //     route layer and the operator interpret the score; we report the
 //     number, the per-attack breakdown, and the leaked rows.
 //   - Captures list is required; an empty list returns honest
 //     { ok:false, error:'no_captures_to_test' } NOT silent ok:true.
 //
-// Four attack kinds (frozen — re-order is a deliberate breaking change):
-//   exact_prompt_replay         — replay the captured prompt verbatim.
-//   paraphrase_prompt           — naive word-shuffle paraphrase of the
+// Four attack kinds (frozen - re-order is a deliberate breaking change):
+//   exact_prompt_replay - replay the captured prompt verbatim.
+//   paraphrase_prompt - naive word-shuffle paraphrase of the
 //                                 captured prompt. Catches models that
 //                                 leak under near-synonyms.
-//   partial_prompt_completion   — feed the first half of the prompt and
+//   partial_prompt_completion - feed the first half of the prompt and
 //                                 score against the FULL original response.
 //                                 If the artifact completes "in the style
 //                                 of" the captured row, that's a leak.
-//   unique_token_probe          — extract the rarest >=6-char token from
+//   unique_token_probe - extract the rarest >=6-char token from
 //                                 the original response, embed it in an
 //                                 unrelated prompt, and check whether the
 //                                 artifact emits the same token. Catches
@@ -57,7 +57,7 @@ export const MIT_ATTACK_KINDS = Object.freeze([
   'unique_token_probe',
 ]);
 
-// _tokens(text) — case-insensitive whitespace+punctuation tokenization.
+// _tokens(text) - case-insensitive whitespace+punctuation tokenization.
 // Pure: same input always yields same output. Empty/null safe.
 function _tokens(text) {
   if (text == null) return [];
@@ -66,7 +66,7 @@ function _tokens(text) {
   return s.split(/[^a-z0-9_-]+/i).filter((t) => t.length > 0);
 }
 
-// _ngrams(arr, k) — sliding-window k-grams over a token array. We use
+// _ngrams(arr, k) - sliding-window k-grams over a token array. We use
 // 5-grams by default because shorter windows over-match on common phrases
 // ("the answer is") and longer windows under-match when the model has
 // paraphrased even one word.
@@ -79,7 +79,7 @@ function _ngrams(arr, k) {
   return out;
 }
 
-// _jaccard(setA, setB) — pure Jaccard similarity over two Sets.
+// _jaccard(setA, setB) - pure Jaccard similarity over two Sets.
 // Returns 0..1. Both empty returns 0 (degenerate; no overlap is provable).
 function _jaccard(setA, setB) {
   if (!(setA instanceof Set) || !(setB instanceof Set)) return 0;
@@ -90,7 +90,7 @@ function _jaccard(setA, setB) {
   return union === 0 ? 0 : inter / union;
 }
 
-// jaccardOverlap(a, b, k=5) — exported convenience wrapper used by the
+// jaccardOverlap(a, b, k=5) - exported convenience wrapper used by the
 // route layer and tests. Tokenize → k-gram → Jaccard. Default k=5.
 export function jaccardOverlap(a, b, k = 5) {
   const grA = new Set(_ngrams(_tokens(a), k));
@@ -98,7 +98,7 @@ export function jaccardOverlap(a, b, k = 5) {
   return _jaccard(grA, grB);
 }
 
-// _paraphrase(prompt) — naive word-shuffle. Reverses the token order
+// _paraphrase(prompt) - naive word-shuffle. Reverses the token order
 // of every-other 4-token window. Cheap and deterministic; serves as a
 // "the model can't have memorized this exact wording" probe without
 // pulling in a translation model.
@@ -113,7 +113,7 @@ function _paraphrase(prompt) {
   return out.join(' ');
 }
 
-// _firstHalf(prompt) — partial-prompt-completion probe. We pull the first
+// _firstHalf(prompt) - partial-prompt-completion probe. We pull the first
 // ~half of the tokens; the artifact must complete the rest.
 function _firstHalf(prompt) {
   const toks = _tokens(prompt);
@@ -122,7 +122,7 @@ function _firstHalf(prompt) {
   return toks.slice(0, half).join(' ');
 }
 
-// _rarestLongToken(response) — pick the rarest token of length >=6
+// _rarestLongToken(response) - pick the rarest token of length >=6
 // from the response. The unique-token probe wraps this token in an
 // unrelated prompt; if the artifact emits the same rare token, that's
 // strong evidence of verbatim memorization.
@@ -141,7 +141,7 @@ function _rarestLongToken(response) {
   return best;
 }
 
-// _buildAttackPrompt(kind, capture) — produce the probe string for one
+// _buildAttackPrompt(kind, capture) - produce the probe string for one
 // attack kind on one capture. Returns null when the kind has no plausible
 // probe for the given capture (e.g. unique_token_probe when the response
 // has no >=6-char tokens).
@@ -162,7 +162,7 @@ function _buildAttackPrompt(kind, capture) {
   return null;
 }
 
-// _evidenceSnippet(response) — short, redaction-safe snippet for the
+// _evidenceSnippet(response) - short, redaction-safe snippet for the
 // leaked_captures payload. Cap at 200 chars so even a noisy response
 // does not balloon the API envelope.
 function _evidenceSnippet(response) {
@@ -255,7 +255,7 @@ export async function runMembershipInferenceTest({
         emitted = await runOnArtifact(artifact_path, probe);
         if (emitted == null) emitted = '';
       } catch (_) {
-        // Treat a thrown error as "no emission" — the artifact failed
+        // Treat a thrown error as "no emission" - the artifact failed
         // the probe defensively, which is the non-leak outcome.
         emitted = '';
       }

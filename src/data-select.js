@@ -1,33 +1,33 @@
-// KOLM Data Engine — diversity-aware / distribution-matched SELECT stage (W921).
+// KOLM Data Engine - diversity-aware / distribution-matched SELECT stage (W921).
 //
 // CURATE today only FILTERS (drop low-quality, near-dup, CoT). It never SELECTS
 // a budget-bounded subset. Pure-pointwise (top-N by score) selection produces
 // REDUNDANT batches: the richest items cluster in one region of input space, so
 // each new teacher token buys little new information. This module scores SETS,
-// not points — picking the most diverse / representative subset under a budget.
+// not points - picking the most diverse / representative subset under a budget.
 //
 // kolm's economics: distillation spends teacher tokens per pair, so "train on
 // the 5K most diverse, equal K-Score at 1/10 the cost" is the whole point.
 //
 // Methods (all over an embedding of each pair):
-//   - repr-filter (DEFAULT, pure-JS, zero-dep) — DEITA-style score-descending
+//   - repr-filter (DEFAULT, pure-JS, zero-dep) - DEITA-style score-descending
 //     greedy: ADD a pair only if its max cosine SIMILARITY to the already-
 //     selected set is < (1 - diversity_tau); stop at the budget. "Score-first,
-//     diversity-gated" — the safe default (Liu et al., ICLR'24).
-//   - k-center / facility-location / badge — shell to the optional python
+//     diversity-gated" - the safe default (Liu et al., ICLR'24).
+//   - k-center / facility-location / badge - shell to the optional python
 //     worker workers/data/scripts/select_subset.py; on ANY python failure we
 //     DEGRADE to repr-filter and stamp backend_used truthfully. (The python
 //     worker is authored separately; this module never requires it.)
 //
 // DSIR-style distribution matching: selectInformativeSubset(items, target_n,
 // opts) selects a subset whose embedding distribution MATCHES a target
-// distribution (a reference corpus, or — absent one — maximal coverage of the
+// distribution (a reference corpus, or - absent one - maximal coverage of the
 // pool's own feature space), the importance-resampling complement of the
 // diversity greedy. Used by INGEST/CURATE to match a domain target.
 //
 // Envelope contract: selectDiverseSubset returns {ok, version:'select-v1', ...}
 // and NEVER throws / hangs; on any failure it degrades and reports the path it
-// actually ran. ZERO new npm deps — reuses src/embedding.js (deterministic
+// actually ran. ZERO new npm deps - reuses src/embedding.js (deterministic
 // hash-bag embedder) + node:crypto via that module. Fully backward-compatible:
 // no select opt => CURATE behaves exactly as before (the caller gates on it).
 
@@ -115,14 +115,14 @@ function _localScore(p) {
 // ── repr-filter (pure-JS DEITA-style greedy) ─────────────────────────────────
 
 /**
- * reprFilterSelect(pairs, scores, B, tau) — score-descending greedy: walk pairs
+ * reprFilterSelect(pairs, scores, B, tau) - score-descending greedy: walk pairs
  * best-score-first, ADD a pair only if its max cosine similarity to the already-
  * selected set is < tau (i.e. cosine distance to nearest selected > 1-tau);
  * stop at budget B. Pure JS, O(B^2) on the selected set.
  * @param {object[]} pairs
  * @param {number[]|null} scores  per-pair score (descending order); null => local heuristic
  * @param {number} B  budget (count)
- * @param {number} [tau=0.9]  similarity ceiling — higher tau = looser dedup
+ * @param {number} [tau=0.9]  similarity ceiling - higher tau = looser dedup
  * @returns {{selected_indices:number[], kept:object[], coverage_radius:number}}
  */
 export function reprFilterSelect(pairs, scores, B, tau = 0.9) {
@@ -290,7 +290,7 @@ function _selectViaPython(pairs, method, B, embeddings) {
 // ── selectDiverseSubset (headline orchestrator) ──────────────────────────────
 
 /**
- * selectDiverseSubset — budget-bounded diversity-aware selection. Returns an
+ * selectDiverseSubset - budget-bounded diversity-aware selection. Returns an
  * honest envelope; NEVER throws. repr-filter runs in pure JS; the other methods
  * shell to python and DEGRADE to repr-filter on any failure, stamping
  * backend_used truthfully.
@@ -363,7 +363,7 @@ export async function selectDiverseSubset({
     out.report.degrade_reason = viaPy.reason;
     return out;
   } catch (e) {
-    // last-resort: never throw — return the whole pool truthfully.
+    // last-resort: never throw - return the whole pool truthfully.
     const all = Array.from({ length: n }, (_, i) => i);
     return {
       ...base,
@@ -414,7 +414,7 @@ function _finish(base, rows, selectedIdx, coverage, backend) {
 // ── selectInformativeSubset (DSIR/DEITA distribution-matched) ────────────────
 
 /**
- * selectInformativeSubset(items, target_n, opts) — distribution-matched subset
+ * selectInformativeSubset(items, target_n, opts) - distribution-matched subset
  * selection (DSIR importance-resampling flavor). Selects target_n items whose
  * embedding distribution MATCHES a target:
  *   - opts.target_embeddings / opts.target_items given => match that reference
@@ -526,7 +526,7 @@ export function selectInformativeSubset(items, target_n, opts = {}) {
 // ── selectDiverseBatch (active-learning helper) ──────────────────────────────
 
 /**
- * selectDiverseBatch(items, B, opts) — pick B DIVERSE items spanning the gap
+ * selectDiverseBatch(items, B, opts) - pick B DIVERSE items spanning the gap
  * surface (not B from the hottest cluster). Reused by active-learning
  * recommendNextCaptures + the W775 daemon. Synchronous, pure-JS.
  * @param {object[]} items

@@ -1,13 +1,13 @@
 // src/model-merge.js
 //
-// W921 — Model merging as a SHIPPING feature.
+// W921 - Model merging as a SHIPPING feature.
 //
 // Combine N per-skill distilled LoRA adapters into one artifact via
 // TIES / DARE-TIES / DELLA / SLERP / linear, computed correctly in delta-W
 // space with SVD re-factorization, and bound into the .kolm lineage chain as a
 // first-class multi-parent merge node.
 //
-// This module is a Node orchestration shell — the heavy weight math runs in
+// This module is a Node orchestration shell - the heavy weight math runs in
 // workers/distill/scripts/merge_adapters.py (PEFT add_weighted_adapter for the
 // supported combos + a from-scratch DELLA path). When torch/peft are absent we
 // return a durable, no-tool envelope (mirrors src/distill-preference.js +
@@ -38,7 +38,7 @@ import { buildLineage, VALID_MERGE_METHODS } from './artifact-lineage.js';
 const _here = path.dirname(fileURLToPath(import.meta.url));
 const _repoRoot = path.resolve(_here, '..');
 
-// Frozen catalog — kept identical to artifact-lineage.VALID_MERGE_METHODS and
+// Frozen catalog - kept identical to artifact-lineage.VALID_MERGE_METHODS and
 // merge_adapters.py's method choices. SLERP is two-model-only (rejected for
 // N!=2). magnitude_prune is a single-adapter sparsifier but we still require
 // >=2 for a "merge".
@@ -79,7 +79,7 @@ function _hashAdapterDir(dir) {
       .sort();
     const h = crypto.createHash('sha256');
     if (names.length === 0) {
-      // No peft layout files — hash the whole dir listing instead.
+      // No peft layout files - hash the whole dir listing instead.
       for (const n of fs.readdirSync(dir).sort()) h.update(n);
       return h.digest('hex');
     }
@@ -168,7 +168,7 @@ function resolveTrainer() {
   const envCmd = process.env.KOLM_MERGE_TRAINER;
   if (envCmd) {
     // An explicit override that points nowhere is an error, NOT a silent
-    // fallback to the in-repo script — return null so the caller surfaces it.
+    // fallback to the in-repo script - return null so the caller surfaces it.
     return fs.existsSync(envCmd) ? { script: envCmd, source: 'env' } : null;
   }
   const inRepo = path.join(_repoRoot, 'workers', 'distill', 'scripts', 'merge_adapters.py');
@@ -180,7 +180,7 @@ function _pythonBin() {
   return process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
 }
 
-// W921 — dry-run plan envelope. Pure (no spawn, no GPU). Validates inputs,
+// W921 - dry-run plan envelope. Pure (no spawn, no GPU). Validates inputs,
 // resolves weights, checks same-base, and estimates output size. Reused by the
 // CLI --dry-run path so it agrees byte-for-byte with the real run's plan.
 export function planMerge({ adapters, method = 'ties', weights = null, density = 0.5, svdRank = null } = {}) {
@@ -200,14 +200,14 @@ export function planMerge({ adapters, method = 'ties', weights = null, density =
   if (!wres.ok) return wres;
 
   // Same-base check. Adapters trained on different base models silently
-  // produce garbage — surface it (the real run hard-gates on it).
+  // produce garbage - surface it (the real run hard-gates on it).
   const bases = list.map((a) => _readAdapterBase(a.dir));
   const knownBases = bases.filter(Boolean);
   const uniqueBases = [...new Set(knownBases)];
   const same_base = uniqueBases.length <= 1;
   let warning = null;
   if (uniqueBases.length > 1) {
-    warning = `adapters disagree on base_model: ${uniqueBases.join(' vs ')} — merge will be refused`;
+    warning = `adapters disagree on base_model: ${uniqueBases.join(' vs ')} - merge will be refused`;
   }
 
   // Rough output-size estimate: sum of adapter_model sizes / N (a merged
@@ -245,7 +245,7 @@ export function planMerge({ adapters, method = 'ties', weights = null, density =
   };
 }
 
-// W921 — bind a multi-parent merge lineage block onto a merged manifest.
+// W921 - bind a multi-parent merge lineage block onto a merged manifest.
 // parentCids are the FULL hex64 artifact cids; sourceAdapterHashes are the
 // hex16 adapter-dir shorthashes. Returns the manifest with a validated
 // lineage{source:'model_merge', ...} block.
@@ -284,7 +284,7 @@ export function doctor() {
   };
 }
 
-// W921 — orchestrate a real N-adapter merge. Durable: always writes the plan +
+// W921 - orchestrate a real N-adapter merge. Durable: always writes the plan +
 // merge-summary stub + a lineage record into outDir, even when the trainer is
 // absent (trainer_kicked:false). When torch/peft + the worker are present we
 // spawn merge_adapters.py and parse its merge-summary.json.
@@ -343,7 +343,7 @@ export function mergeAdapters({
         ...(sourceAdapterHashes.length ? { source_adapter_hashes: sourceAdapterHashes } : {}),
       });
     } else {
-      // No artifact cids available (raw adapter dirs) — record the merge in a
+      // No artifact cids available (raw adapter dirs) - record the merge in a
       // 'rebuild' lineage that still names the method + adapter hashes, so the
       // receipt is not silent even when the inputs aren't .kolm artifacts.
       lineageNote = 'no_artifact_cids: parents were raw adapter dirs, not .kolm artifacts; merge bound to source_adapter_hashes only';

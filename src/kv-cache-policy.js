@@ -8,11 +8,11 @@
 //   { backend: 'default', reason, fallback: null }
 //
 // Inputs:
-//   * format       — runtime/format identifier ('transformers', 'vllm',
+//   * format - runtime/format identifier ('transformers', 'vllm',
 //                    'llama.cpp', 'mlx', 'ollama', 'gguf', 'safetensors', ...)
-//   * modelMeta    — { family, has_rope, num_hidden_layers, ... }
-//   * hardware     — { vram_gb, device } (currently advisory only)
-//   * requested    — 'auto' (default) | 'shard' (force) | 'default' (force)
+//   * modelMeta - { family, has_rope, num_hidden_layers, ... }
+//   * hardware - { vram_gb, device } (currently advisory only)
+//   * requested - 'auto' (default) | 'shard' (force) | 'default' (force)
 //
 // 'shard' is chosen when:
 //   * requested === 'shard' (force, regardless of compatibility), OR
@@ -57,7 +57,7 @@ function _resolveRuntime(format) {
   if (Object.prototype.hasOwnProperty.call(FORMAT_TO_RUNTIME, key)) {
     return FORMAT_TO_RUNTIME[key];
   }
-  // Unknown format — pass through if it already matches a supported runtime.
+  // Unknown format - pass through if it already matches a supported runtime.
   if (SUPPORTED_RUNTIMES.includes(key)) return key;
   return null;
 }
@@ -66,9 +66,9 @@ function _resolveRuntime(format) {
  * Resolve a KV cache backend request.
  *
  * Returns { backend, reason, fallback } where:
- *   backend  — 'shard' | 'default'
- *   reason   — short explanation suitable for logs / passport / --dry-run
- *   fallback — backend to retry with if `backend` errors; null when N/A
+ *   backend - 'shard' | 'default'
+ *   reason - short explanation suitable for logs / passport / --dry-run
+ *   fallback - backend to retry with if `backend` errors; null when N/A
  */
 export function selectKvCache({
   format,
@@ -92,7 +92,7 @@ export function selectKvCache({
     };
   }
   if (requested === 'shard') {
-    // Force Shard — but still record whether the gate would have allowed it,
+    // Force Shard - but still record whether the gate would have allowed it,
     // so the passport carries the reason.
     const gate = isShardSupported({
       model_family: family || 'unknown',

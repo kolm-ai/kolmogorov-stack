@@ -1,5 +1,0 @@
-# Proxy reconciliation note — 2026-05-26
-
-Scope: surgical fix to `public/privacy.html` only. The "Anthropic, OpenAI, Google" teacher-path bullet (around line 284) previously claimed "We do not proxy these calls and we do not see the traffic." That claim was false for two specific code paths: the free `/v1/free/chat` surface (src/router.js line 8510, src/capture.js) and the W-M Vercel teacher-chat fallback (api/teacher-chat.js line 244). The bullet has been rewritten in plain English to acknowledge that BYOK does not proxy, while the free tier and the Vercel fallback do proxy through kolm's own provider account, with gateway metadata logging applying to those paths.
-
-No new contractual clauses, indemnity terms, BYOK obligations, or upstream-provider acceptable-use carryovers were added. The effective date on privacy.html (2026-05-22) was intentionally left intact for counsel to decide on a re-version. The broader 7A counsel-review work flagged in `public/legal/audit-2026-05-26.md` (findings #154–159 and the "Recommended language" section) remains pending and is out of scope for this reconciliation.

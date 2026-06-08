@@ -1,4 +1,4 @@
-// Wave 361 — kolm train --watch: stream training progress as TrainEvents.
+// Wave 361 - kolm train --watch: stream training progress as TrainEvents.
 //
 // Async iterator yielding TrainEvent = { step, name, status, detail?, hint? }.
 //

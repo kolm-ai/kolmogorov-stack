@@ -1,9 +1,9 @@
-// W710-1 — active-learning queue.
+// W710-1 - active-learning queue.
 //
 // Wave 709 ships a confidence router that emits a routing_decisions row on
 // every request. Rows where the student model couldn't carry the response on
 // its own (route='teacher' or route='mixed') are exactly the prompts the
-// student needs MORE training data for — they are the highest-value examples
+// student needs MORE training data for - they are the highest-value examples
 // for the next distillation pass.
 //
 // This module is the bridge: every non-'student' routing decision is enqueued
@@ -32,13 +32,13 @@
 //
 // Honesty contracts:
 //   - enqueueFromRoutingDecision throws on missing tenant_id (matches W709
-//     recordRoutingDecision behavior — never write tenant-less rows).
+//     recordRoutingDecision behavior - never write tenant-less rows).
 //   - consumeQueue is atomic: it reads, marks all candidate rows 'consumed' in
 //     a single store mutation pass, then returns them. Two concurrent calls
 //     will each only see rows whose status is still 'queued' when the second
 //     pass runs (single-process serialization via the synchronous store API).
 //   - requeueStale ONLY touches rows whose status is exactly 'consumed' and
-//     whose consumed_at_ms is older than the threshold — it never resurrects
+//     whose consumed_at_ms is older than the threshold - it never resurrects
 //     a 'dropped' row (dropped is a terminal user-visible action).
 
 import crypto from 'node:crypto';
@@ -85,7 +85,7 @@ function _routeOf(rd) {
 }
 
 function _eligible(route) {
-  // The queue exists to capture HIGH-VALUE training rows — the ones the
+  // The queue exists to capture HIGH-VALUE training rows - the ones the
   // student model couldn't handle alone. Pure-student responses are skipped
   // because they're already covered by the existing checkpoint.
   return route === 'teacher' || route === 'mixed';
@@ -99,7 +99,7 @@ function _eligible(route) {
  * or {ok:false, reason:'duplicate_trace'} when a row for this trace already
  * exists in 'queued' state (prevents double-enqueue from retried requests).
  *
- * Throws on missing tenantId — never silently writes tenant-less rows.
+ * Throws on missing tenantId - never silently writes tenant-less rows.
  *
  * @param {string} tenantId
  * @param {string} namespace
@@ -118,7 +118,7 @@ export function enqueueFromRoutingDecision(tenantId, namespace, routingDecision)
   }
 
   // Dedupe: if a 'queued' row with the same trace_id already exists, skip.
-  // We do NOT dedupe across already-consumed rows — those represent prior
+  // We do NOT dedupe across already-consumed rows - those represent prior
   // training passes that already saw the row, and a re-routing event is a
   // signal that the student still needs the example.
   const trace_id = routingDecision && routingDecision.trace_id
@@ -198,7 +198,7 @@ export function listQueued(tenantId, namespace, limit = 100) {
  * synchronous in-memory + JSON-flush layer. Two consumeQueue calls in the
  * same event loop tick cannot interleave because each `update()` call runs
  * to completion synchronously. After the first call returns, the second
- * call's `listQueued()` snapshot will reflect the post-update state — so
+ * call's `listQueued()` snapshot will reflect the post-update state - so
  * the second consumer never re-sees rows the first one took.
  *
  * Tenant-fenced.
@@ -229,7 +229,7 @@ export function consumeQueue(tenantId, namespace, max) {
   } catch (_) {
     // If the update failed (e.g. transient flush error) we return an empty
     // array rather than handing the caller rows we couldn't persist as
-    // consumed — that would let two consumers see the same data.
+    // consumed - that would let two consumers see the same data.
     return [];
   }
   // Return the candidates with their new status reflected. Re-fetch by id

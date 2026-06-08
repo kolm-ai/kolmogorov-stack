@@ -1,8 +1,8 @@
-// W775+ — Autopilot bootstrap. Turns a plain-English description into a
+// W775+ - Autopilot bootstrap. Turns a plain-English description into a
 // ready-to-run namespace in one call:
 //
 //   bootstrapFromDescription({description, namespace, budget_usd})
-//     1. seeds raw-pairs.jsonl via ingestDescribeEngine (no teacher spend —
+//     1. seeds raw-pairs.jsonl via ingestDescribeEngine (no teacher spend - 
 //        templated question stems span the described domain; outputs are left
 //        empty for the AUGMENT/collect stage to fill).
 //     2. synthesizes a VALID distill recipe (passes distill-recipe-loader's
@@ -12,7 +12,7 @@
 //
 // This is the entry point behind `kolm autopilot "<describe>" --namespace ...`
 // (non-verb first arg) and `kolm compile --auto --describe "<...>"`. It writes
-// NO model and spends NO tokens — it only prepares the corpus + recipe so the
+// NO model and spends NO tokens - it only prepares the corpus + recipe so the
 // first autopilot tick has something to plan against.
 //
 // Persistence: the seed write is logged by data-ingest itself (provider
@@ -30,7 +30,7 @@ import { loadRecipe } from './distill-recipe-loader.js';
 export const BOOTSTRAP_VERSION = 'apb-v1';
 
 // Defaults for the synthesized recipe. Conservative, single-teacher, QLoRA on
-// a 7B student — the same shape the Trinity recipe uses, sized down so a
+// a 7B student - the same shape the Trinity recipe uses, sized down so a
 // described namespace is runnable without further edits.
 const DEFAULT_SEED_TARGET = 200;
 const DEFAULT_STUDENT_BASE = 'Qwen/Qwen2.5-7B-Instruct';
@@ -47,7 +47,7 @@ function _kolmDir() {
 }
 
 // Tenant-fenced recipe location. We deliberately do NOT write into the repo's
-// recipes/ dir (that is shared, version-controlled space) — each tenant's
+// recipes/ dir (that is shared, version-controlled space) - each tenant's
 // generated recipe lives under its own data dir and is referenced by absolute
 // path, which loadRecipe accepts.
 function _recipePath(tenant, namespace) {
@@ -79,12 +79,12 @@ function _synthesizeRecipe({ description, namespace, seedTarget }) {
     description: String(description || '').slice(0, 500),
     // The orchestrator is the Trinity runner; loadRecipe resolves it only if
     // the file exists in this tree, otherwise returns orchestrator:null (the
-    // recipe is still valid — the autopilot tick drives orchestrateImprovement,
+    // recipe is still valid - the autopilot tick drives orchestrateImprovement,
     // not the recipe runner).
     orchestrator: 'scripts/trinity-2000-v2-run.mjs',
     seeds: {
       target: seedTarget,
-      // generator is validated as a non-empty string only (not existence) —
+      // generator is validated as a non-empty string only (not existence) - 
       // it documents where seeds come from for this autopilot recipe.
       generator: 'src/data-ingest.js#ingestDescribeEngine',
     },
@@ -108,7 +108,7 @@ function _synthesizeRecipe({ description, namespace, seedTarget }) {
 }
 
 // ---------------------------------------------------------------------------
-// bootstrapFromDescription — the one-call namespace primer.
+// bootstrapFromDescription - the one-call namespace primer.
 // ---------------------------------------------------------------------------
 export async function bootstrapFromDescription({ tenant, namespace, description, budget_usd, n } = {}) {
   const desc = String(description || '').trim();

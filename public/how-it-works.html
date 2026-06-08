@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>How it works · kolm.ai</title>
+<meta name="description" content="A six-figure deal stalls the moment a CISO has to vet an autonomous agent. kolm runs one lifecycle, audit, sign, verify, ending in an Ed25519-signed report your buyer checks offline against your key, with no kolm server in the trust path. The four-to-eight-week review compresses back to days.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="How it works: Audit, Sign, Verify">
+<meta property="og:description" content="One pipeline that turns your word into math. An Ed25519-signed evidence report your buyer verifies offline against your key, with no kolm server in the trust path, plus continuous re-attestation on every deploy.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/how-it-works">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="How it works: Audit, Sign, Verify">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/how-it-works">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How kolm works: Audit, Sign, Verify",
+  "description": "kolm audits an AI agent, signs the findings with Ed25519, and lets the enterprise buyer verify the report offline against the issuer's public key, with no kolm server in the trust path.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "step": [
+    { "@type": "HowToStep", "name": "Audit", "text": "Onramp through a log import or a sidecar proxy. kolm examines permissions, audit trail, data egress and injection resistance, each mapped to the standards the buyer cites." },
+    { "@type": "HowToStep", "name": "Sign", "text": "The report is canonicalized and signed with Ed25519. The signature covers the exact bytes, so a downgraded finding or an inflated score breaks it. Each issuance enters an append-only log." },
+    { "@type": "HowToStep", "name": "Verify", "text": "The buyer verifies the signature offline, in their own browser, against the issuer's public key. No account, no upload, no kolm server in the trust path." }
+  ]
+}
+</script>
+</head>
+<body>
+
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:68ch">
+      <h1>From stalled review to signed proof.</h1>
+      <p class="lede">
+        A six-figure deal stops the moment a CISO has to vet an autonomous agent. kolm runs one
+        lifecycle, audit, sign, verify, that turns your word into math your buyer can check. An
+        Ed25519-signed report, verified offline against your own key, with no kolm server in the
+        trust path. The four-to-eight-week review compresses back to days.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/contact">Start an audit</a>
+        <a class="btn btn--ghost" href="/verify">Verify a report</a>
+      </div>
+      <div class="trustline" aria-label="What the report guarantees">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline, no kolm server in the path</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Re-attested on every deploy</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. THE STALL -->
+<section class="section reveal" id="stall">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / The stall</span>
+      <h2>The deal stalls on one question: can they take your word?</h2>
+      <p class="lede">
+        A one-week security review runs four to eight the moment an autonomous agent touches
+        customer data. The buyer's review group cannot accept a self-attested questionnaire on
+        faith, and you have no way to prove the agent is least-privileged, logged and injection-tested
+        in a form they can check themselves.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">The clock</p>
+        <h3>One week becomes eight</h3>
+        <p>A CISO who has to vet an agent reopens every assumption. The schedule slips, the champion goes quiet, and a deal that was ready to sign sits in a queue.</p>
+        <p class="card__map">ASR-1 · least privilege</p>
+      </div>
+      <div class="card">
+        <p class="card__k">The burden</p>
+        <h3>Say-so does not scale</h3>
+        <p>Self-attested answers shift the burden of proof onto the buyer. They want evidence they can verify, not a promise that the trail cannot be edited after the fact.</p>
+        <p class="card__map">ASR-2 · audit trail</p>
+      </div>
+      <div class="card">
+        <p class="card__k">The fix</p>
+        <h3>Make trust checkable</h3>
+        <p>Hand them one signed artifact they verify on their own machine. The conversation moves from whether they believe you to whether the math checks out.</p>
+        <p class="card__map">ASR-6 · evidence</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3. AUDIT. SIGN. VERIFY. (the ledger) -->
+<section class="section section--ink reveal" id="pipeline">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / Audit, Sign, Verify</span>
+      <h2>One pipeline. Three moves.</h2>
+      <p class="lede">Audit the agent, sign the findings, hand your buyer a report they verify themselves. Each step is reproducible, scoped to what was tested, and checkable by anyone you give it to.</p>
+    </div>
+
+    <!-- intuitive-first: the signing pipeline as a diagram, not a wall of steps -->
+    <div class="flow" aria-label="The audit, sign and verify pipeline">
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+        <span class="flow__n">01 · Audit</span>
+        <span class="flow__t">We examine the agent</span>
+        <p class="flow__d">Onramp through a log import or a sidecar proxy. Permissions, audit trail, data egress and injection resistance, each mapped to the standards your buyer cites.</p>
+      </div>
+      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 11.5l2.4 2.4L15.5 9.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">02 · Sign</span>
+        <span class="flow__t">We seal the findings</span>
+        <p class="flow__d">The report is canonicalized and signed with Ed25519. The signature covers the exact bytes, so a downgraded finding or an inflated score breaks it. Each issuance enters an append-only log.</p>
+      </div>
+      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l4.5 4.5L20 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">03 · Verify</span>
+        <span class="flow__t">Your buyer checks it</span>
+        <p class="flow__d">They verify the signature offline, in their own browser, against your public key. No account, no upload, no kolm server in the trust path.</p>
+      </div>
+    </div>
+
+    <p class="hero__claim" style="margin-top:var(--s7)">
+      Trust moves from our word to the math. The same Ed25519 check runs in the verifier your buyer opens.
+    </p>
+    <div class="hero__cta" style="margin-top:var(--s5)">
+      <a class="btn btn--ghost" href="/verify">Verify the sample now</a>
+      <a class="btn btn--ghost" href="/report">Anatomy of a report</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4. ONRAMP -->
+<section class="section reveal" id="onramp">
+  <div class="wrap split" style="align-items:flex-start">
+    <div>
+      <span class="idx">03 / Onramp</span>
+      <h2>Two ways in, no rebuild.</h2>
+      <p class="lede" style="margin-bottom:20px">
+        You do not change the agent to audit it. Point us at the evidence and we go to work,
+        through a log import for the fastest first read or a sidecar proxy for a live capture.
+      </p>
+      <div class="hero__cta"><a class="btn btn--ghost btn--sm" href="/checks">See the full check catalog</a></div>
+    </div>
+    <div class="grid" style="gap:14px">
+      <div class="card">
+        <p class="card__k">Onramp A</p>
+        <h3>Import your logs</h3>
+        <p>Bring observability exports from LiteLLM, Helicone or Portkey. We normalize tool calls, scopes and traffic. No code change, the fastest path to a first read.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Onramp B</p>
+        <h3>Run a sidecar proxy</h3>
+        <p>Route the agent through a sidecar or MCP proxy for a live, append-only capture of exactly what it does (calls, tools and data paths) with tamper-evident hashing.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">What we look at</p>
+        <h3>Permissions · trail · egress · injection</h3>
+        <p>Least-privilege analysis of every scope held versus the scopes actually used, audit-trail completeness and retention, where data can leave, and a red-team pass for prompt injection and jailbreaks.</p>
+      </div>
+    </div>
+  </div>
+  <div class="wrap">
+    <p class="hero__claim" style="margin-top:var(--s6)">
+      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 5. TWO CLOCKS (the ledger) -->
+<section class="section section--ink reveal" id="clocks">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / Two clocks</span>
+      <h2>Minutes for the scan. Days for a name on it.</h2>
+      <p class="lede">A review stalls on two different clocks. We compress both, and we are candid about which one needs a person.</p>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">The machine clock</p>
+        <h3>No human waits here</h3>
+        <p>Permission reads, audit-trail and egress checks, and the prompt-injection battery are compute. They run in minutes to hours and re-run on every deploy, with nobody in the loop. The free scan, the signed report, and both continuous plans need no person.</p>
+        <p class="card__map">minutes to hours · automated</p>
+      </div>
+      <div class="card">
+        <p class="card__k">The human clock</p>
+        <h3>A name behind the result</h3>
+        <p>Some reviewers want a person to stand behind the finding, not a machine that approved a machine. A named co-signer reviews and signs alongside the math. That is days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.</p>
+        <p class="card__map">days · bounded by an SLA</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s6)">
+      Minutes for the automated scan, days for a named co-signed attestation. The automated tiers add no human. The reviewed attestation adds one, on purpose.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 6. CONTINUOUS -->
+<section class="section reveal" id="continuous">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">05 / Continuous</span>
+      <h2>A point-in-time report goes stale on the next deploy.</h2>
+      <p class="lede">
+        A permission granted in January can still fire in August. Continuous re-attests weekly or on
+        every deploy and exposes a live Trust link you hand any buyer, so the evidence they check is
+        never older than your last release.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Versioned</p>
+        <h3>Every report carries a spec version</h3>
+        <p>When the agent changes, we re-run the affected checks and re-sign. You do not pay for a full audit again to keep the evidence current.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Provable history</p>
+        <h3>The log shows nothing was swapped</h3>
+        <p>Each issuance enters an append-only Merkle log (Ed25519 and SHA-256, RFC 6962 style), so a reviewer can confirm a report was issued when it claims and never quietly replaced.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Live Trust link</p>
+        <h3>One link your buyer re-checks</h3>
+        <p>Hand any reviewer a live link that always resolves to the current signed report. No new email, no waiting on you, no human in the loop.</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s6)">
+      Your enterprise buyer's 2026 vendor questionnaires already ask whether your system can automatically log agent events, citing EU AI Act Article 12 (current enforcement date August 2 2026; a proposed Digital Omnibus delay for some high-risk systems is not yet law). Continuous keeps that audit-trail evidence current, so you answer with proof, not a promise.
+    </p>
+    <div class="hero__cta" style="margin-top:var(--s5)">
+      <a class="btn btn--ghost" href="/trust">See a live Trust link</a>
+      <a class="btn btn--ghost" href="/pricing">See pricing</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 7. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Clear the review. Close the deal.</h2>
+    <p class="lede">One audit, one signed evidence report, and a review that moves at the speed of math.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost" href="/verify">Verify a report</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Wave 381 — compile pipeline orchestrator.
+// Wave 381 - compile pipeline orchestrator.
 //
 // The "captured calls → owned model" full chain. Emits async events for each
 // phase so a watcher (CLI --watch, websocket, log tail) can stream progress
@@ -81,7 +81,7 @@ function _writePhaseLog(jobId, phase, payload) {
   fs.appendFileSync(p, line, 'utf8');
 }
 
-// Wave 409c — auditor mandate. The bundle phase used to emit a fake
+// Wave 409c - auditor mandate. The bundle phase used to emit a fake
 // identity echo recipe + hard-coded pass_rate_positive: 0.95 + a stub
 // seed_provenance with production_ready:true. That let a pipeline that
 // never actually evaluated anything ship a .kolm labelled production-ready.
@@ -110,7 +110,7 @@ function _canonicalJson(value) {
 }
 
 // Hash a single (input, output) pair deterministically. The row hash is the
-// auditor's primary disjointness probe — train.rowhash ∩ holdout.rowhash must
+// auditor's primary disjointness probe - train.rowhash ∩ holdout.rowhash must
 // be empty by construction. We use both prompt+response so a benign rewrite
 // of either side is enough to break the equivalence (false-positive bias is
 // fine; we err on the side of "treat as distinct").
@@ -158,7 +158,7 @@ function _isEchoRecipe(recipe) {
   return /\becho\b/i.test(recipe.source) && /\bechoed\s*:/i.test(recipe.source);
 }
 
-// Phase 7 — bundle. Produces a .kolm via src/artifact.js. The auditor mandate
+// Phase 7 - bundle. Produces a .kolm via src/artifact.js. The auditor mandate
 // forces honest provenance: real row hashes, real disjointness gating, and an
 // explicit eval_provenance flag. The historical W381 path emitted an identity
 // echo recipe + 0.95 pass_rate; we keep that path runnable for tests/demos but
@@ -241,7 +241,7 @@ async function _bundlePhase({
   const evalProvenance = hasRealEvalResult ? 'real_eval' : 'placeholder';
   const passRate = hasRealEvalResult ? Number(opts.eval_result.pass_rate) : 0;
 
-  // Production_ready synthesis — the bundle phase's honest verdict on whether
+  // Production_ready synthesis - the bundle phase's honest verdict on whether
   // this artifact deserves the production_ready:true stamp on seed_provenance.
   // The full productionReady() gate runs in the verdict phase; this is the
   // first line of defence so a stub artifact's manifest is never even hashed
@@ -276,7 +276,7 @@ async function _bundlePhase({
     seedReasons.push('no seeds available (corpus was empty)');
   }
 
-  // W411 P0 #8 + #10 — honest receipt audit fields. holdout_excluded_count is
+  // W411 P0 #8 + #10 - honest receipt audit fields. holdout_excluded_count is
   // the number of pairs the distill() boundary refused as holdout_only;
   // row_hash_dedupe_count is the number of duplicate (prompt, response) rows
   // collapsed by createDataset() before split. Both are forwarded into the
@@ -309,7 +309,7 @@ async function _bundlePhase({
     synthetic_count: sourceCounts.synthetic_count,
     eval_provenance: evalProvenance,
     eval_source: hasRealEvalResult ? 'tenant_captured' : 'self_generated',
-    // W411 P0 #8 + #10 — dedupe + holdout audit.
+    // W411 P0 #8 + #10 - dedupe + holdout audit.
     holdout_excluded_count: holdoutExcludedCount,
     row_hash_dedupe_count: rowHashDedupeCount,
   };
@@ -337,7 +337,7 @@ async function _bundlePhase({
     base_model: plan.backbone || 'qwen-0.5b',
     recipes,
     training_stats: {
-      // Wave 409c — was hard-coded to 0.95. Now 0 unless a real eval ran.
+      // Wave 409c - was hard-coded to 0.95. Now 0 unless a real eval ran.
       pass_rate_positive: passRate,
       latency_p50_us: 200,
       cost_usd_per_call: 0,
@@ -349,7 +349,7 @@ async function _bundlePhase({
     seed_provenance: seedProvenance,
     extra_files,
     artifact_class: 'rule',
-    // Wave 409c — a placeholder eval produces a sub-gate K-score by
+    // Wave 409c - a placeholder eval produces a sub-gate K-score by
     // construction (pass_rate=0). We DO still want the artifact to materialize
     // so the user / verifier can inspect the honest non-production verdict;
     // the productionReady() gate is the load-bearing reject path (k_score and
@@ -370,14 +370,14 @@ async function _bundlePhase({
       eval_provenance: evalProvenance,
       row_overlap_count: overlap.overlap_count,
       source_counts: sourceCounts,
-      // W411 P0 #8 + #10 — surface to compileFull's yield/log path.
+      // W411 P0 #8 + #10 - surface to compileFull's yield/log path.
       holdout_excluded_count: holdoutExcludedCount,
       row_hash_dedupe_count: rowHashDedupeCount,
     },
   };
 }
 
-// Optional quantize phase — calls into the workers/quantize/quantize.mjs
+// Optional quantize phase - calls into the workers/quantize/quantize.mjs
 // worker via spawnSync. Skipped when opts.quantize is falsy. Honest exit:
 // emits {phase:'quantize', precision, skipped:true} when the worker doctor
 // reports the python stack is missing.
@@ -412,7 +412,7 @@ async function _quantizePhase({ jobId, distillResult, opts }) {
   };
 }
 
-// Optional sign phase — when opts.no_sign is set this is a no-op. The
+// Optional sign phase - when opts.no_sign is set this is a no-op. The
 // artifact.js build path already signs (HMAC chain) unconditionally; this
 // phase records an Ed25519 sidecar when KOLM_SIGNING_KEY is set.
 async function _signPhase({ jobId, artifactResult, opts }) {
@@ -431,7 +431,7 @@ async function _signPhase({ jobId, artifactResult, opts }) {
     artifact_hash: artifactResult ? artifactResult.artifact_hash : null,
     ed25519_attached: false,
   };
-  // WC07 — signing is OPTIONAL; only emit a sidecar when the operator has
+  // WC07 - signing is OPTIONAL; only emit a sidecar when the operator has
   // explicitly set KOLM_SIGNING_KEY to a non-empty trimmed value. The previous
   // bare `process.env.KOLM_SIGNING_KEY` truthy check let `KOLM_SIGNING_KEY=""`
   // and `KOLM_SIGNING_KEY="   "` pass the guard, after which ed.sign() would
@@ -458,13 +458,13 @@ async function _signPhase({ jobId, artifactResult, opts }) {
 // Main pipeline. Yields phase events; the caller drives the iterator.
 //
 // Wave 409c flags (auditor mandate):
-//   opts.allow_stub      — accept identity / echo recipes as production_ready.
+//   opts.allow_stub - accept identity / echo recipes as production_ready.
 //                          Default false. Only honored when plan.task is
 //                          explicitly 'echo'.
-//   opts.allow_synthetic — accept synthetic-only training seeds. Default false:
+//   opts.allow_synthetic - accept synthetic-only training seeds. Default false:
 //                          a corpus that contains zero real captured events is
 //                          rejected.
-//   opts.eval_result     — { pass_rate, cases?, coverage? } from a real eval
+//   opts.eval_result - { pass_rate, cases?, coverage? } from a real eval
 //                          run. When absent, eval_provenance is stamped
 //                          'placeholder' and productionReady() returns false.
 export async function* compileFull({ namespace, opts = {} } = {}) {
@@ -477,14 +477,14 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   const installTarget = opts.install_target || null;
   const allowStub = !!opts.allow_stub;
   const allowSynthetic = !!opts.allow_synthetic;
-  // W411 — tenant fence: the compile pipeline must only ingest rows owned by
+  // W411 - tenant fence: the compile pipeline must only ingest rows owned by
   // the calling tenant. Routes (router.js) pass tenant_id from req.tenant_record.id;
   // CLI / local-daemon callers leave it null and get the global view.
   const tenantScope = opts.tenant_id || opts.tenant || null;
 
   // 1. plan ----------------------------------------------------------------
   // Pull a sample of events from the namespace and run the training planner.
-  // W439 — opts.since filters the corpus to events created strictly AFTER the
+  // W439 - opts.since filters the corpus to events created strictly AFTER the
   // given timestamp. Used by `kolm compile --since-last-compile` to drive
   // incremental retrain over only the new approvals since the previous
   // artifact's created_at. cmdCompile resolves last-compile to the artifact
@@ -535,7 +535,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     job_id: jobId,
     pair_count: corpusPairs.length,
     stats: corpusStats,
-    // W439 — surface incremental-retrain window on the phase event so
+    // W439 - surface incremental-retrain window on the phase event so
     // watchers / logs can confirm the --since filter was applied.
     since: corpusStats && corpusStats.since ? corpusStats.since : null,
     dropped_since: corpusStats && corpusStats.dropped_since ? corpusStats.dropped_since : 0,
@@ -554,7 +554,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   let trainPairs = [];
   let holdoutPairs = [];
   try {
-    // W409n/W409o — pass approvedOnly through so that pipelines built with
+    // W409n/W409o - pass approvedOnly through so that pipelines built with
     // --approved-only see exactly the rows that passed human review; the
     // unapproved-row-never-in-split invariant is enforced at dataset creation
     // time so the rest of the pipeline (split, bundle, distill) inherits it.
@@ -574,7 +574,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
       min_train: MIN_PRODUCTION_TRAIN,
       min_holdout: MIN_PRODUCTION_HOLDOUT,
     });
-    // W411 P0 #10 — propagate row-hash dedupe count from createDataset into
+    // W411 P0 #10 - propagate row-hash dedupe count from createDataset into
     // the splitInfo envelope so the bundle phase can fold it into the
     // seed_provenance receipt.
     if (ds && Number.isFinite(ds.row_hash_dedupe_count)) {
@@ -600,7 +600,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
       holdout_count: splitInfo.holdout_count,
       split_signature: splitInfo.split_signature,
     };
-    // W369 disjointness gate — splitDataset already asserts; we re-check
+    // W369 disjointness gate - splitDataset already asserts; we re-check
     // for the strict-mode test path (#18).
     const trainSet = new Set(splitInfo.train_ids);
     for (const h of splitInfo.holdout_ids) {
@@ -612,7 +612,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
         }
       }
     }
-    // Wave 409c — content-based disjointness (row-hash intersection). The
+    // Wave 409c - content-based disjointness (row-hash intersection). The
     // identity-based check above guards against the same event_id ending up
     // in both buckets, but two distinct event_ids carrying the same
     // (prompt, response) pair would still pass that probe. Verifier checks
@@ -632,7 +632,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
       }
     }
   } catch (e) {
-    // Wave 409c — gated stub fallback. Previously this branch fired silently
+    // Wave 409c - gated stub fallback. Previously this branch fired silently
     // whenever the workbench rejected the corpus, which meant an empty
     // namespace still produced a .kolm. Now the fallback requires explicit
     // allow_stub or force; without either we re-throw so the pipeline fails
@@ -670,7 +670,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     task_type: plan.task,
     hw_tier: opts.hw_tier,
   });
-  // W411 P0 #1 — distillation MUST see trainPairs only, never the full
+  // W411 P0 #1 - distillation MUST see trainPairs only, never the full
   // corpus. Previously this passed `corpusPairs` (the entire namespace,
   // including holdout rows), so the artifact was trained on its own eval
   // set and the K-score "honest holdout" claim was a lie. trainPairs is
@@ -741,7 +741,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     ml_pipeline_run: !!quantizeInfo.ml_pipeline_run,
   };
 
-  // 6.5. recipe_synthesis (W438) — opt-in via opts.synthesize_recipe. Builds a
+  // 6.5. recipe_synthesis (W438) - opt-in via opts.synthesize_recipe. Builds a
   // real JS classifier/regex recipe from trainPairs via src/synthesis.js
   // (pattern strategy, CPU-only, no GPU/teacher needed) and scores it against
   // holdoutPairs via src/verifier.js. Produces real eval_result so the
@@ -754,7 +754,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   // exercised by tests/wave438-rented-distill.test.js (env-gated).
   let synthesizedRecipes = null;
   let synthEvalResult = null;
-  // W451 — synth path defaults ON when no teacher API is wired AND the caller
+  // W451 - synth path defaults ON when no teacher API is wired AND the caller
   // didn't pass explicit recipes. Without this default, a tenant with real
   // captures who runs `kolm pipeline make --namespace foo` (no --allow-stub,
   // no teacher env-var) gets a hard error from the bundle phase ("stub-only
@@ -798,7 +798,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
           // NOT "holdout fraction of corpus". We declared holdoutCases.length
           // eval cases and verified all of them, so V = 1.0. The previous
           // formula (holdoutCases / total_corpus) penalized real-eval coverage
-          // for being a proper train/holdout split — exactly backwards.
+          // for being a proper train/holdout split - exactly backwards.
           coverage: holdoutCases.length > 0 ? 1.0 : 0,
         };
         _writePhaseLog(jobId, 'recipe_synthesis', {
@@ -824,7 +824,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   }
 
   // 7. bundle --------------------------------------------------------------
-  // Wave 409c — compute honest source-type stats from corpusPairs metadata.
+  // Wave 409c - compute honest source-type stats from corpusPairs metadata.
   // Pairs that came from the event store carry an event_id; explicit
   // synthetic pairs (passed in via opts.synthetic_pairs) are counted
   // separately. The approved_count comes from the approvals.jsonl file (if
@@ -855,13 +855,13 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   if (sourceSeedCount > 0 && syntheticCount === sourceSeedCount && !allowSynthetic && !force) {
     throw new Error('compileFull: synthetic-only seeds (' + syntheticCount + '/' + sourceSeedCount + '); pass opts.allow_synthetic or opts.force to override');
   }
-  // W438 — fold synthesized recipe + eval_result into bundle opts so the
+  // W438 - fold synthesized recipe + eval_result into bundle opts so the
   // existing _bundlePhase contract (opts.recipes, opts.eval_result) picks
   // them up. Caller-supplied opts.recipes / opts.eval_result still win.
   // allow_below_gate defaults to true on the synth path because the
   // pattern-strategy synthClassifier is bursty on small holdouts (n<20) and
   // we want the artifact to materialize so productionReady() can record the
-  // honest low-K verdict — the verdict gate is the load-bearing reject path,
+  // honest low-K verdict - the verdict gate is the load-bearing reject path,
   // not the buildPayload throw. Caller can still pass allow_below_gate:false
   // to force the throw (release pipelines).
   const bundleOpts = (synthesizedRecipes || synthEvalResult)
@@ -889,7 +889,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     seed_production_ready: artifactResult._wave409c ? artifactResult._wave409c.seed_production_ready : null,
     seed_reasons: artifactResult._wave409c ? artifactResult._wave409c.seed_reasons : [],
     eval_provenance: artifactResult._wave409c ? artifactResult._wave409c.eval_provenance : 'unknown',
-    // W411 P0 #8 + #10 — surface dedupe + holdout chokepoint counters on the
+    // W411 P0 #8 + #10 - surface dedupe + holdout chokepoint counters on the
     // bundle phase yield so watchers can see them without re-reading the .kolm.
     holdout_excluded_count: artifactResult._wave409c ? (artifactResult._wave409c.holdout_excluded_count || 0) : 0,
     row_hash_dedupe_count: artifactResult._wave409c ? (artifactResult._wave409c.row_hash_dedupe_count || 0) : 0,
@@ -923,7 +923,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     reasons: verdict.reasons,
   };
 
-  // Strict / force semantics — if strict + verdict failed AND force not set,
+  // Strict / force semantics - if strict + verdict failed AND force not set,
   // we skip install and emit done with production_ready:false.
   const shouldInstall = !noInstall && installTarget && (verdict.ok || force);
   if (strict && !verdict.ok && !force) {

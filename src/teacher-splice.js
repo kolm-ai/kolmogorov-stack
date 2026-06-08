@@ -1,16 +1,16 @@
-// W807-2 — mid-response teacher splice + W807-5 per-tenant latency budget.
+// W807-2 - mid-response teacher splice + W807-5 per-tenant latency budget.
 //
 // When the streaming entropy window (src/confidence-router.js) exceeds the
 // active threshold, the runtime calls spliceToTeacher() to ask the teacher
 // to continue from the student's current token state. The function returns
 // a structured envelope that the runtime (orchestrator's src/runtime-wrap.js
-// — owned by W809) merges into the response metadata schema (W807-3).
+// - owned by W809) merges into the response metadata schema (W807-3).
 //
 // Honest-by-default contract:
 //
 //   - Teacher unreachable / non-2xx / timeout → finish-locally + stamp
 //     fallback_failed:true on the envelope. The function NEVER throws
-//     into the generation path — the worst case is "you get the student's
+//     into the generation path - the worst case is "you get the student's
 //     completion plus an error stamp."
 //
 //   - Per-tenant max_splice_delay_ms (W807-5). When exceeded → degrade-to-
@@ -19,7 +19,7 @@
 //     env KOLM_MAX_SPLICE_DELAY_MS, tenant-config getMaxSpliceDelayMs(),
 //     hard default 8_000 ms.
 //
-//   - No real teacher call here — the actual teacher HTTP call is a
+//   - No real teacher call here - the actual teacher HTTP call is a
 //     pluggable callback (opts.teacher_call). Tests inject a deterministic
 //     stub; production wires the same routing-adapter src/runtime-wrap.js
 //     uses for the per-call route. This split is what lets us unit-test
@@ -100,7 +100,7 @@ function withTimeout(promise, ms, code) {
       err.code = code || 'splice_timeout';
       reject(err);
     }, ms) : null;
-    // node's setTimeout returns a Timeout object — .unref() exists in node
+    // node's setTimeout returns a Timeout object - .unref() exists in node
     // but not in browser. Guard so this file stays bundleable.
     try { timer && timer.unref && timer.unref(); } catch (_) {} // deliberate: cleanup
   });
@@ -136,7 +136,7 @@ function _now() { return Date.now(); }
  *                                                   {text|tokens, completion_tokens?}
  *                                                  If absent, returns
  *                                                  {ok:false, error:'no_teacher_call_wired'}.
- * @returns {Promise<Object>} W807-3 schema (single-splice flavor — the
+ * @returns {Promise<Object>} W807-3 schema (single-splice flavor - the
  *          orchestrator merges multiple calls into a top-level envelope).
  */
 export async function spliceToTeacher(opts = {}) {
@@ -178,7 +178,7 @@ export async function spliceToTeacher(opts = {}) {
     };
   }
 
-  // Budget exceeded BEFORE we even start? Defensive — caller may have
+  // Budget exceeded BEFORE we even start? Defensive - caller may have
   // queued for a long time. Degrade-to-local immediately + warn.
   // (Most production paths will never hit this; main check is the timeout
   // wrapping the teacher_call below.)
@@ -219,7 +219,7 @@ export async function spliceToTeacher(opts = {}) {
     const errCode = teacherError.code || 'teacher_unreachable';
     // Per W807-5, emit a warning event into the event-store so operators see
     // the budget-exceeded count on the confidence dashboard. Failure to
-    // write the warning is non-fatal — the splice envelope is authoritative.
+    // write the warning is non-fatal - the splice envelope is authoritative.
     if (errCode === 'splice_budget_exceeded' && tenant_id) {
       try {
         const es = await import('./event-store.js');
@@ -305,7 +305,7 @@ export async function spliceToTeacher(opts = {}) {
 }
 
 /**
- * Reset the in-memory tenant-budget registry. Test seam — production never
+ * Reset the in-memory tenant-budget registry. Test seam - production never
  * calls this.
  */
 export function _resetTenantBudgetsForTests() {

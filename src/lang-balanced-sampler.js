@@ -1,4 +1,4 @@
-// W774 — Language-balanced sampler for cross-lingual distillation.
+// W774 - Language-balanced sampler for cross-lingual distillation.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 643-648):
 //   [W774-1] Distill from English teacher → multilingual student handling
@@ -36,18 +36,18 @@ export const LANG_BALANCED_VERSION = 'w774-v1';
 // Four balance strategies. Each one re-weights the per-language target
 // share differently. Frozen so callers cannot mutate the contract.
 //
-//   uniform           — every target language gets 1/N of the budget.
+//   uniform - every target language gets 1/N of the budget.
 //                       Best when downstream eval weights all languages
 //                       equally (per-language K-Score reporting, W760).
-//   sqrt_inverse      — weight ∝ 1/sqrt(traffic_count_for_lang). Gives
+//   sqrt_inverse - weight ∝ 1/sqrt(traffic_count_for_lang). Gives
 //                       rare languages MORE samples than uniform but less
-//                       than full inverse — the canonical NMT balance
+//                       than full inverse - the canonical NMT balance
 //                       (Arivazhagan et al, 2019, "Massively Multilingual
 //                       Neural Machine Translation in the Wild").
-//   log_inverse       — weight ∝ 1/log(1+traffic_count_for_lang). Even
+//   log_inverse - weight ∝ 1/log(1+traffic_count_for_lang). Even
 //                       softer than sqrt; helps when extreme tail
 //                       languages would otherwise dominate.
-//   traffic_weighted  — weight ∝ traffic_count_for_lang. Mirrors W760's
+//   traffic_weighted - weight ∝ traffic_count_for_lang. Mirrors W760's
 //                       per-language K-Score "honest about what the
 //                       student will see in production" framing.
 export const BALANCE_STRATEGIES = Object.freeze([
@@ -91,7 +91,7 @@ export const DEFAULT_TARGET_LANGS = Object.freeze([
 //   }
 //
 // On failure:
-//   { ok:false, error, hint, version } — honest, never fabricated.
+//   { ok:false, error, hint, version } - honest, never fabricated.
 // =============================================================================
 
 export async function sampleBalanced(opts) {
@@ -109,12 +109,12 @@ export async function sampleBalanced(opts) {
     return {
       ok: false,
       error: 'empty_captures',
-      hint: 'pass {captures:[...]} with at least one row — sampleBalanced never fabricates from zero rows',
+      hint: 'pass {captures:[...]} with at least one row - sampleBalanced never fabricates from zero rows',
       version: LANG_BALANCED_VERSION,
     };
   }
 
-  // Resolve lang detector — DI or fall back to W760's pure-JS detect.
+  // Resolve lang detector - DI or fall back to W760's pure-JS detect.
   const detectFn = await _resolveDetect(o.lang_detect);
 
   // Partition captures by detected language. Captures whose language is
@@ -185,7 +185,7 @@ export async function sampleBalanced(opts) {
 
   // Pull samples per language up to the budget. When a language has FEWER
   // available captures than its budget, we take what's there (no fabrication
-  // and no with-replacement bootstrapping — honest finite supply).
+  // and no with-replacement bootstrapping - honest finite supply).
   const selectedCids = [];
   const byLangOut = {};
   for (const lang of targetLangs) {
@@ -224,7 +224,7 @@ export async function sampleBalanced(opts) {
 // =============================================================================
 // assessLanguageCoverage
 //
-// Pure shape utility — reports which target languages are present AND
+// Pure shape utility - reports which target languages are present AND
 // missing in the capture pool. Used by /v1/xlang/language-coverage and
 // the W774 frontend to surface gaps BEFORE the operator runs a balanced
 // sample.
@@ -242,7 +242,7 @@ export async function sampleBalanced(opts) {
 //   }
 //
 // Empty captures returns ok:true with coverage_score:0 and ALL target
-// langs in missing_langs — NOT a silent ok:true with coverage_score:1.
+// langs in missing_langs - NOT a silent ok:true with coverage_score:1.
 // (The honesty invariant: empty pool is honestly empty, not "complete".)
 // =============================================================================
 

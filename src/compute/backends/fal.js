@@ -1,4 +1,4 @@
-// fal — fal.ai serverless inference queue.
+// fal - fal.ai serverless inference queue.
 // API: https://docs.fal.ai/model-endpoints/queue + https://queue.fal.run/{app_id}
 // Env: KOLM_FAL_TOKEN (or FAL_KEY). run() submits to queue, polls, returns result.
 
@@ -43,7 +43,7 @@ function _req(method, host, pathname, headers, body) {
   });
 }
 
-// run({ image, command, env, timeoutMs }) — `image` is the fal app id
+// run({ image, command, env, timeoutMs }) - `image` is the fal app id
 // (e.g. "fal-ai/any-llm"). `command` becomes the JSON `input` payload via
 // env.FAL_INPUT_JSON or falls back to {prompt: command.join(' ')}.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {

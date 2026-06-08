@@ -1,4 +1,4 @@
-// W738 — kolm.pipeline.yaml schema + parser.
+// W738 - kolm.pipeline.yaml schema + parser.
 //
 // Purpose
 // -------
@@ -17,7 +17,7 @@
 // Reuses the W732 hand-rolled YAML parser (src/kolm-yaml.js) so we do NOT
 // add a js-yaml dependency. package.json supply-chain surface stays clean.
 // The W732 parser covers everything the W738 schema needs (mappings, nested
-// mappings, scalar values, comments) — we just bolt on a W738-shaped
+// mappings, scalar values, comments) - we just bolt on a W738-shaped
 // validator.
 //
 // Schema (`PIPELINE_YAML_VERSION = 'w738-v1'`)
@@ -33,16 +33,16 @@
 //     escalation: { teacher: claude-sonnet-4-6 }
 //
 // `classifier.artifact_cid` is required and must look like a real cid
-// (bafk... or sha256-... — we accept both shapes).
+// (bafk... or sha256-... - we accept both shapes).
 //
 // `routes` is a mapping of label -> target. Each target is exactly ONE of:
-//   * `{ artifact_cid: <cid> }`  — load that artifact and run it on the input.
-//   * `{ teacher: <model_id> }`  — escalate to a hosted teacher (no local
+//   * `{ artifact_cid: <cid> }` - load that artifact and run it on the input.
+//   * `{ teacher: <model_id> }` - escalate to a hosted teacher (no local
 //                                  artifact required).
 //
 // Honesty contract
 // ----------------
-// validatePipelineYaml() returns { ok, errors } — every error surfaced (not
+// validatePipelineYaml() returns { ok, errors } - every error surfaced (not
 // just the first) so a CI run prints the full repair list. parsePipelineYaml
 // throws an Error with .code in snake_case (matches the W732 contract).
 //
@@ -55,7 +55,7 @@ import { parseKolmYaml } from './kolm-yaml.js';
 
 export const PIPELINE_YAML_VERSION = 'w738-v1';
 
-// Loose cid shape — accepts the two cid flavours kolm currently emits:
+// Loose cid shape - accepts the two cid flavours kolm currently emits:
 //   * IPFS-style "bafk..." or "bafy..." (base32-ish identifiers)
 //   * sha256-prefixed hex ("sha256-<64 hex>")
 //
@@ -183,7 +183,7 @@ export function validatePipelineYaml(parsed) {
         continue;
       }
       if (hasCid && hasTeacher) {
-        // Ambiguous intent — surface loud so the operator picks one.
+        // Ambiguous intent - surface loud so the operator picks one.
         _push(errors, base, 'must_not_have_both_artifact_cid_and_teacher');
         continue;
       }
@@ -232,7 +232,7 @@ export function collectReferencedCids(parsed) {
 // the CLI emits without duplicating the string.
 export function starterPipelineYaml() {
   return [
-    '# kolm.pipeline.yaml — compose specialist artifacts into a routed pipeline.',
+    '# kolm.pipeline.yaml - compose specialist artifacts into a routed pipeline.',
     '# Schema: ' + PIPELINE_YAML_VERSION + '. Run `kolm pipeline validate` to lint.',
     'version: ' + PIPELINE_YAML_VERSION,
     'name: support-triage',

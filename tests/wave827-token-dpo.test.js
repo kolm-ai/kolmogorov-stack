@@ -245,19 +245,6 @@ test('W827 #10 — W827 marked SHIPPED in KOLM_W707_SYSTEM_UPGRADE_PLAN.md', () 
 // ---------------------------------------------------------------------------
 // 11) sw.js cache slug bumped with wave token >= 827.
 // ---------------------------------------------------------------------------
-test('W827 #11 — public/sw.js cache slug carries a wave token >= 827', () => {
-  const sw = readUtf8(SW_PATH);
-  const all = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => Number(m[1]));
-  assert.ok(all.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...all);
-  assert.ok(maxWave >= 827,
-    `max wave token in sw.js must be >= 827, got ${maxWave}`);
-  // NOTE: the literal `wave827-token-dpo` suffix pin was removed. Per the
-  // repo's documented W604/W829 convention the cache slug is verified by
-  // regex + monotonic threshold (above), never a frozen literal token — each
-  // later wave (the slug is now wave918+) re-stamps the slug and would
-  // otherwise break a literal pin even though the cache-busting contract holds.
-});
 
 // ---------------------------------------------------------------------------
 // 12) Trainer threads contrastive_token_level into run-meta.

@@ -146,11 +146,11 @@ ${relatedHtml}
     <div class="ks-footer__grid">
       <div>
         <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
-        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+        <p class="ks-footer__tagline">The AI control plane for teams. Capture, own, and govern your company’s AI.</p>
       </div>
       <div>
         <h4>Product</h4>
-        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+        <ul><li><a href="/capture">Gateway</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
       </div>
       <div>
         <h4>Build</h4>
@@ -177,13 +177,13 @@ const docs = [
     slug: 'gateway',
     title: 'Gateway — the gateway around any LLM provider',
     desc: 'The kolm gateway sits in front of 11 LLM providers (OpenAI, Anthropic, Google, DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-kolm), signs an Ed25519 receipt on every call, captures the trace for replay, and routes locally-first via a confidence gate.',
-    eyebrow: 'Wrapper / Gateway',
-    h1: 'One wrapper. Eleven providers. Every call signed.',
+    eyebrow: 'Gateway',
+    h1: 'One gateway. Every provider. Every call captured and signed.',
     lede: 'The kolm gateway is the receipt-signed, capture-on, locally-first proxy in front of every LLM you call. <code>POST /v1/gateway/dispatch</code> takes an OpenAI-shaped request, walks a namespace-configured routing chain (local artifact → frontier fallback), runs the response through a 4-mode PII redactor + 5-signal poison detector, signs a 19-field <code>kolm-audit-1</code> receipt with Ed25519, and stamps a capture row that can be approved into a training set.',
     sections: [
       {
         h2: 'What the gateway adds on top of a raw provider call',
-        html: `<p>The minimum surface to call a frontier LLM in production is a key, a URL, and a retry loop. The kolm gateway is the next layer up — what you'd otherwise build over six months as your wrapper grows. Every dispatch goes through these stages:</p>
+        html: `<p>The minimum surface to call a frontier LLM in production is a key, a URL, and a retry loop. The kolm gateway is the next layer up — what you'd otherwise build over six months as your gateway grows. Every dispatch goes through these stages:</p>
 <table>
   <thead><tr><th>Stage</th><th>What it does</th><th>Code path</th></tr></thead>
   <tbody>
@@ -229,7 +229,7 @@ const docs = [
     slug: 'gateway-providers',
     title: 'Gateway providers — 11 adapter shapes',
     desc: 'OpenAI, Anthropic, Google (Gemini), DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-kolm. Same OpenAI-shaped input; per-provider routing rules.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Eleven providers. One shape.',
     lede: 'Every gateway call uses an OpenAI-shaped request (<code>model</code>, <code>messages</code>, <code>max_tokens</code>) and the gateway picks the adapter from the model name or an explicit <code>provider</code> field. The adapter list covers every frontier provider that ships an HTTP API, plus two local backends (vLLM, Ollama) and the local-kolm artifact path.',
     sections: [
@@ -283,7 +283,7 @@ anthropic_key            # short lower</code></pre>
     slug: 'gateway-receipts',
     title: 'Gateway receipts — Ed25519, kolm-audit-1 schema',
     desc: 'Every /v1/gateway/dispatch call is stamped with a 19-field kolm-audit-1 receipt signed with Ed25519. Verify online (/v1/verify/:id) or offline with the public key.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Every call gets a receipt. Every receipt is signed.',
     lede: 'The receipt is the proof. It records what was asked, what was returned (as hashes, not content), which provider answered, the routing decision, the capture decision, and the cost — then signs the whole envelope with Ed25519. Verify online or offline. Rotate the key without breaking old receipts (the public key is embedded in each signature block).',
     sections: [
@@ -355,7 +355,7 @@ ls ~/.kolm/signing-keys/                          # signer history
     slug: 'gateway-captures',
     title: 'Gateway captures — the hash-chain training lake',
     desc: 'Every gateway call writes a capture row to the configured lake (JSONL / SQLite / Postgres / S3) with a hash-chain prev_chain_hash so tampering is detectable. Captures feed the distill flywheel.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Every call captured. Every chain provable.',
     lede: 'The capture lake is where every <code>capture_eligible:true</code> trace lands. Each row carries a <code>prev_chain_hash</code> (HMAC over sorted-key JSON) so a tampered row breaks the chain at exactly the point it was edited. Four backends ship by default. The lake feeds the distill flywheel: approve a slice, train a local artifact, route to it via the namespace chain, mark the falls-back-to-frontier rows as fresh captures, repeat.',
     sections: [
@@ -421,7 +421,7 @@ kolm captures redact cap_01KYC1... --mode redact_captures   # one-off PII scrub 
     slug: 'gateway-pii',
     title: 'Gateway PII — four modes over eleven entity types',
     desc: 'detect | redact | block | off, applied on input + output independently. 11 entities: email, phone, ssn, credit card, ipv4, ipv6, JWT, generic API key, AWS key, OpenAI key, postal address.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Privacy is a deployment switch, not a feature gate.',
     lede: 'The PII redactor runs on every <code>/v1/gateway/dispatch</code> call. Four modes, applied independently on input and output. Set per-namespace (<code>kolm namespace config support --pii redact</code>) or per-call (<code>?pii=block</code>). The redactor is regex-based with a tiny entropy check for keys, so it runs in microseconds and has no model dependency.',
     sections: [
@@ -482,9 +482,9 @@ pii_mode = "block"</code></pre>`,
     slug: 'gateway-confidence-router',
     title: 'Gateway confidence router (W807)',
     desc: 'Local-first routing: try the local artifact, measure confidence, fall back to frontier if below threshold. Every fallback is automatically capture_eligible:true.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Local first. Frontier on doubt. Capture the doubt.',
-    lede: 'The confidence router (introduced in W807) is the link between Wrapper and Studio. It runs your local <code>.kolm</code> artifact first, measures the response confidence, and falls back to a frontier provider only when the local model isn\'t sure. Every fallback is tagged <code>capture_eligible:true</code> — that\'s the row you want to add to the next distill.',
+    lede: 'The confidence router (introduced in W807) is the link between the gateway and the compiler. It runs your local <code>.kolm</code> artifact first, measures the response confidence, and falls back to a frontier provider only when the local model isn\'t sure. Every fallback is tagged <code>capture_eligible:true</code> — that\'s the row you want to add to the next distill.',
     sections: [
       {
         h2: 'How the gate decides',
@@ -534,7 +534,7 @@ kolm namespace config code \\
     slug: 'gateway-namespaces',
     title: 'Gateway namespaces — per-route policy',
     desc: 'A namespace bundles routing chain + confidence threshold + PII mode + capture lake + signing key. One project can have many; each is independently auditable.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'A namespace is one policy bundle.',
     lede: 'Namespaces are how the gateway separates concerns. A namespace bundles a routing chain, a confidence threshold, a PII mode, a capture lake destination, and a signing key. <code>support</code> can route local-first with PII-redact; <code>compliance</code> can hard-block PII and never capture; <code>sandbox</code> can be off-everything for unit tests.',
     sections: [
@@ -594,7 +594,7 @@ curl -X POST https://kolm.ai/v1/gateway/dispatch/support ...</code></pre>`,
     slug: 'gateway-deploy',
     title: 'Gateway deploy — Docker, compose, k8s, BYOC',
     desc: 'Three first-class deploy targets: Docker Compose (single-host), Helm chart (k8s), and BYOC (your own cloud) bundle. Every target ships the same image with provider keys mounted from secrets.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Deploy the gateway where your data is.',
     lede: 'The gateway image is the same regardless of where it runs. The deploy targets differ in how secrets are mounted, where the lake lives, and how the receipt-signing keys are rotated. Pick the target that matches your trust boundary.',
     sections: [
@@ -634,7 +634,7 @@ helm install gateway kolm/gateway \\
     slug: 'gateway-cli',
     title: 'Gateway CLI — full verb tree',
     desc: 'kolm gateway / captures / receipts / namespace, with every sub-verb listed and a one-line example.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Every gateway operation has a CLI verb.',
     lede: 'The CLI surface mirrors the HTTP API exactly. Anything you can do with <code>curl</code>, you can do with <code>kolm gateway ...</code>. Output defaults to human-readable; add <code>--json</code> for scripts.',
     sections: [
@@ -705,9 +705,9 @@ helm install gateway kolm/gateway \\
     slug: 'gateway-api',
     title: 'Gateway HTTP API',
     desc: 'POST /v1/gateway/dispatch, GET /v1/verify/:id, GET /v1/captures/list, and every namespace + receipts endpoint.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Every CLI verb has an HTTP route.',
-    lede: 'The HTTP surface is the source of truth — the CLI is a thin wrapper over it. Auth via <code>Authorization: Bearer ks_...</code>. Namespace via header (<code>x-kolm-namespace: support</code>) or path (<code>/v1/gateway/dispatch/support</code>).',
+    lede: 'The HTTP surface is the source of truth — the CLI is a thin gateway over it. Auth via <code>Authorization: Bearer ks_...</code>. Namespace via header (<code>x-kolm-namespace: support</code>) or path (<code>/v1/gateway/dispatch/support</code>).',
     sections: [
       {
         h2: 'Dispatch',
@@ -766,7 +766,7 @@ POST   /v1/namespaces/&lt;ns&gt;/undeploy</code></pre>`,
     slug: 'gateway-sdk',
     title: 'Gateway SDK — JS, Python, others',
     desc: 'Thin wrappers around /v1/gateway/dispatch in @kolm-ai/sdk (Node), kolm (Python), kolm-mcp (MCP), kolm-vscode, plus C and Rust SDKs.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Talk to the gateway in your language of choice.',
     lede: 'Every SDK exposes the same shape: a constructor that takes a base URL + API key, a <code>dispatch()</code> method that takes an OpenAI-shaped body, and helpers to verify receipts. The full source for each SDK is in <code>sdk/&lt;lang&gt;/</code> in the monorepo.',
     sections: [
@@ -826,7 +826,7 @@ print(res['kolm_receipt']['receipt_id'])</code></pre>`,
     slug: 'gateway-toml',
     title: 'gateway.toml — the persistent config file',
     desc: 'The file form of every CLI flag. Stored at ./gateway.toml or ~/.kolm/gateway.toml; the gateway reads it at startup and per-namespace.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'One file. Every gateway setting.',
     lede: '<code>gateway.toml</code> is the persistent form of every <code>kolm gateway</code> + <code>kolm namespace</code> flag. The gateway reads it from <code>./gateway.toml</code> (project-local) and merges in <code>~/.kolm/gateway.toml</code> (user-global). CLI flags override both.',
     sections: [
@@ -897,7 +897,7 @@ capture_lake          = "s3"</code></pre>`,
     slug: 'gateway-compose',
     title: 'Gateway with Docker Compose',
     desc: 'Single-host deploy. docker compose up brings up the gateway, Postgres for the lake, and Caddy for TLS.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Single command. Production-shaped.',
     lede: 'The <code>deploy/compose</code> folder ships a three-service stack: the gateway, Postgres for the capture lake, and Caddy for TLS. Provider keys come from <code>.env</code>; the Ed25519 signing key is auto-generated on first start and persisted to a Docker volume.',
     sections: [
@@ -973,7 +973,7 @@ curl https://gateway.example.com/health</code></pre>
     slug: 'gateway-byoc',
     title: 'Gateway BYOC — bring your own cloud',
     desc: 'Air-gapped / on-prem deploy. kolm bundle airgap produces a tarball with the image, Helm chart, migrations, and a deploy checklist.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Deploy where your data lives. No bytes to kolm.',
     lede: 'BYOC is for deployments that cannot send data out — regulated industries, classified networks, sovereign-cloud requirements. <code>kolm bundle airgap</code> produces a self-contained tarball; <code>kolm passport export --format compliance</code> produces a compliance manifest that lists every dependency + every receipt-signing decision.',
     sections: [
@@ -1020,7 +1020,7 @@ tar -tzf kolm-gateway-airgap-2026-05-26.tar.gz | head
     slug: 'gateway-faq',
     title: 'Gateway FAQ',
     desc: 'Common questions about routing, billing, latency, signing keys, capture lake backends, and PII modes.',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'Frequently asked.',
     lede: 'Quick answers to the questions we get most often. Cross-linked to the doc that goes deeper.',
     sections: [
@@ -1050,7 +1050,7 @@ tar -tzf kolm-gateway-airgap-2026-05-26.tar.gz | head
       },
       {
         h2: 'Can I send a request that bypasses the gateway pipeline entirely?',
-        html: `<p>Yes — <code>POST /v1/teacher/chat</code> is the no-wrapper proxy. Useful for benchmarking the gateway overhead. It does NOT sign a receipt or write to the capture lake.</p>`,
+        html: `<p>Yes — <code>POST /v1/teacher/chat</code> is the direct proxy. Useful for benchmarking the gateway overhead. It does NOT sign a receipt or write to the capture lake.</p>`,
       },
     ],
     related: [
@@ -1064,7 +1064,7 @@ tar -tzf kolm-gateway-airgap-2026-05-26.tar.gz | head
     slug: 'gateway-bench',
     title: 'Gateway benchmark — overhead + savings axis',
     desc: 'Live benchmark against kolm.ai measuring three legs: direct (teacher proxy → anthropic), full gateway (PII + chain + receipt + capture), and local-trinity-500 (projected from W869).',
-    eyebrow: 'Wrapper / Gateway',
+    eyebrow: 'Gateway',
     h1: 'How much does the gateway cost you?',
     lede: 'The W887 benchmark runs three legs through <code>kolm.ai</code> with N identical prompts each, then writes <code>benchmarks/wave887-wrapper-prod-&lt;date&gt;.{json,md}</code> with latency p50/p95/mean and cost-per-1k. Leg C projects the local-trinity-500 numbers from the W869 bench (n=57, mean 1.24s/210 chars, $0 upstream) to show the savings axis without needing a running local <code>kolm serve</code>.</p>',
     sections: [
@@ -1122,7 +1122,7 @@ function productPage() {
 <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Gateway &middot; kolm.ai">
-<meta property="og:description" content="One wrapper. Eleven providers. Every call signed.">
+<meta property="og:description" content="One gateway. Every provider. Every call captured and signed.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/gateway">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -1194,8 +1194,8 @@ pre::-webkit-scrollbar-thumb{background:rgba(230,233,238,0.18);border-radius:4px
 <main id="main" tabindex="-1"><div class="wrap">
 
 <header class="hero">
-  <p class="eyebrow">Wrapper / Gateway</p>
-  <h1>One wrapper. Eleven providers.<br>Every call signed.</h1>
+  <p class="eyebrow">Gateway</p>
+  <h1>One gateway. Eleven providers.<br>Every call signed.</h1>
   <p class="lede">The kolm gateway is the receipt-signed, capture-on, locally-first proxy in front of every LLM you call. Open-source, ~3–8 ms overhead, ships as a single binary or Docker compose.</p>
   <div class="cta">
     <a class="btn-primary" href="/signup">Get a key &rarr;</a>
@@ -1280,11 +1280,11 @@ curl https://kolm.ai/v1/verify/&lt;receipt_id&gt;</code></pre>
     <div class="ks-footer__grid">
       <div>
         <a href="/" class="ks-nav__brand"><span class="ks-nav__mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg></span><span>kolm<b>.ai</b></span></a>
-        <p class="ks-footer__tagline">Compile any AI model. Run it anywhere.</p>
+        <p class="ks-footer__tagline">The AI control plane for teams. Capture, own, and govern your company’s AI.</p>
       </div>
       <div>
         <h4>Product</h4>
-        <ul><li><a href="/wrapper">Overview</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
+        <ul><li><a href="/capture">Gateway</a></li><li><a href="/gateway">Gateway</a></li><li><a href="/capture">Capture</a></li><li><a href="/security">Security &amp; receipts</a></li><li><a href="/docs/gateway">Gateway docs</a></li></ul>
       </div>
       <div>
         <h4>Build</h4>

@@ -1,6 +1,6 @@
 // src/cost-optimizer.js
 //
-// KOLM AUTOPILOT — COST OPTIMIZER.
+// KOLM AUTOPILOT - COST OPTIMIZER.
 //
 // The autopilot has a fixed monthly budget and a target K-Score (src/kscore.js
 // composite scale, [0,1], ship gate 0.85). At every tick it must answer one
@@ -12,13 +12,13 @@
 // would apply to the current data, plus how that delta translates into teacher
 // token spend):
 //   dedup        deduplicates the corpus: mainly drops dup_fraction, with a
-//                tiny n_pairs loss. NEARLY FREE — local embedding compute, no
-//                teacher tokens — so at equal ΔK it must rank ABOVE every paid
+//                tiny n_pairs loss. NEARLY FREE - local embedding compute, no
+//                teacher tokens - so at equal ΔK it must rank ABOVE every paid
 //                strategy.
 //   ingest-more  acquires + labels more pairs: raises n_pairs. Cost scales with
 //                the new-pair count (teacher tokens to label them).
 //   gap-fill     targets coverage holes: raises coverage_score AND n_pairs.
-//                COSTLY — the teacher generates targeted pairs.
+//                COSTLY - the teacher generates targeted pairs.
 //   preference   SimPO/KTO over existing disagreement: raises avg_quality.
 //                Low-to-moderate cost (re-scores existing pairs, no new corpus).
 //   evol         Evol-Instruct: raises avg_quality AND coverage_score.
@@ -31,7 +31,7 @@
 // predicted_delta_k / max(est_cost_usd, EPSILON) so free strategies float to
 // the top. The whole computation is read-only over the data; nothing trains.
 //
-// CONTRACT (co-v1) — the autopilot tick and the CLI/HTTP surfaces import
+// CONTRACT (co-v1) - the autopilot tick and the CLI/HTTP surfaces import
 // rankStrategies against this EXACT shape:
 //   rankStrategies({tenant, namespace, budget_usd, target_kscore,
 //     current_features, teacher_spec}) -> {
@@ -80,7 +80,7 @@ const AVG_OUTPUT_TOKENS = 384;
 
 // Floor used as the denominator for delta_k_per_dollar. A free strategy
 // (est_cost_usd === 0) divides by this tiny epsilon, yielding a very large
-// yield so it ranks ABOVE any paid strategy at equal ΔK — exactly the behavior
+// yield so it ranks ABOVE any paid strategy at equal ΔK - exactly the behavior
 // the autopilot wants (spend the free win first).
 const SMALL_EPSILON = 1e-6;
 
@@ -106,7 +106,7 @@ const DEDUP_COST_USD = 0;
 const STRATEGIES = Object.freeze({
   dedup: {
     // Removes duplicates: big dup_fraction drop, small n_pairs loss. No teacher
-    // tokens — local embedding pass only.
+    // tokens - local embedding pass only.
     delta: { dup_fraction: -0.10, n_pairs: -20 },
     new_pairs: 0,
     free: true,
@@ -118,7 +118,7 @@ const STRATEGIES = Object.freeze({
     free: false,
   },
   'gap-fill': {
-    // Targets coverage holes: lifts coverage AND adds pairs. Costly — every new
+    // Targets coverage holes: lifts coverage AND adds pairs. Costly - every new
     // pair is teacher-generated against a targeted prompt.
     delta: { coverage_score: +0.15, n_pairs: +150 },
     new_pairs: 150,
@@ -143,7 +143,7 @@ const STRATEGIES = Object.freeze({
 const STRATEGY_ORDER = Object.freeze(Object.keys(STRATEGIES));
 
 // ---------------------------------------------------------------------------
-// Persistence — EXACT mandated pattern (copied from src/data-feedback.js).
+// Persistence - EXACT mandated pattern (copied from src/data-feedback.js).
 // Best-effort; never throws across the public API.
 // ---------------------------------------------------------------------------
 
@@ -225,7 +225,7 @@ function _estCostUsd(spec, teacherSlug) {
 }
 
 // ---------------------------------------------------------------------------
-// rankStrategies — the public optimizer.
+// rankStrategies - the public optimizer.
 // ---------------------------------------------------------------------------
 
 /**
@@ -262,7 +262,7 @@ export async function rankStrategies({
     const teacherSlug = _teacherSlug(teacher_spec);
 
     // Baseline K at the current vector. A failure here means the predictor can't
-    // score the input at all — surface its error verbatim (e.g. features_required,
+    // score the input at all - surface its error verbatim (e.g. features_required,
     // no_recognized_features) rather than fabricate a plan.
     const basePred = await predictKScore({ tenant: t, namespace: ns, features: current_features });
     if (!basePred || basePred.ok !== true || !Number.isFinite(Number(basePred.kscore_predicted))) {
@@ -319,7 +319,7 @@ export async function rankStrategies({
 
     // Recommend the highest-yield strategy that fits the budget. A strategy with
     // zero predicted ΔK still has a defined yield (0), so we also require it to
-    // actually move K — recommending a no-op move would waste a tick.
+    // actually move K - recommending a no-op move would waste a tick.
     let recommended = null;
     for (const r of ranked) {
       if (r.fits_budget && r.predicted_delta_k > 0) { recommended = r.strategy; break; }
@@ -354,7 +354,7 @@ export async function rankStrategies({
 }
 
 // Exposed for tests + downstream introspection. Not part of the stable
-// contract — do not rely on these from other modules.
+// contract - do not rely on these from other modules.
 export const __internals = Object.freeze({
   STRATEGIES,
   STRATEGY_ORDER,

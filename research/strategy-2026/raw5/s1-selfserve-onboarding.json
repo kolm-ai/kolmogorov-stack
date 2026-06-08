@@ -1,0 +1,93 @@
+{
+  "id": "s1-selfserve-onboarding",
+  "track": "sota",
+  "prompt": "kolm.ai sells an Agent Security-Review Readiness product: an AI vendor uploads their agent logs and gets a cryptographically signed (Ed25519), offline-verifiable evidence report mapped to SOC2/ISO42001/NIST AI RMF/EU AI Act/OWASP/MITRE that they hand their enterprise buyer's security team. We want to sell it OFF THE SHELF (self-serve, zero sales touch). Research how SOTA bottoms-up security/compliance SaaS (Vanta, Drata, Snyk, Aikido, Socket, Wiz) design SELF-SERVE ONBOARDING in 2026: the exact steps from signup to first value, time-to-first-value targets, the friction-killers (no credit card for trial, instant scan, templated connectors), and what an onboarding MUST have to convert a technical buyer without a demo. Cite specifics (URLs, @handle+date). End with a concrete list of what kolm's onboarding needs to be off-the-shelf.",
+  "content": "**SOTA bottoms-up security/compliance SaaS (Vanta, Drata, Snyk, Aikido, Socket, Wiz) emphasize product-led growth with frictionless self-serve onboarding that delivers rapid \"first value\" (typically a scan, visibility dashboard, or compliance checklist progress) in minutes, often without sales touch.**[[1]](https://www.aikido.dev/)[[2]](https://workos.com/blog/snyk-vs-workos-ai-security-platform-enterprise-authentication)\n\nThis converts technical buyers (devs, security engineers, compliance leads) by prioritizing instant gratification, OAuth/templated connectors, sandbox/demo modes, and guided in-product flows over demos or credit cards.\n\n### Exact Steps, Time-to-First-Value, and Friction-Killers (2025–2026 Patterns)\n**Aikido Security** (unified code-to-runtime, bottoms-up for small teams/devs):  \n- \"Start for Free\" button on homepage → No CC required.  \n- Sign up/login with VCS (GitHub/GitLab/Bitbucket OAuth).  \n- Select repos (or demo/sandbox repo explicitly offered if you don't want to connect real ones).  \n- Read-only access granted; scans run immediately.  \n- First value: Results/alerts in ~30 seconds (or \"See results in 30sec\" marketing). Auto-triage, AutoFix PRs, prioritized issues.  \n- Friction-killers: No CC, demo repo option, read-only/no keys stored, free tier/forever access noted in product videos. Self-serve → paid motion for SMBs.[[1]](https://www.aikido.dev/)[[3]](https://www.youtube.com/watch?v=qUGobPWywL0)\n\n**Snyk** (devsec platform):  \n- Free account signup at snyk.io.  \n- Immediate connect GitHub/GitLab/etc. repos.  \n- Begin scanning vulnerabilities/code/dependencies right away.  \n- First value: Scan results and fixes in minutes; IDE/CLI integration options. Learning paths for onboarding.  \n- Friction-killers: Free tier, direct repo connection, no heavy setup.[[2]](https://workos.com/blog/snyk-vs-workos-ai-security-platform-enterprise-authentication)\n\n**Drata** (compliance automation):  \n- Signup/login triggers Welcome Questionnaire + Quick Start guided checklist (new experience for post-Feb 2026 users).  \n- Steps: Enter company info → Connect core integrations (IdP for personnel, infra/VCS/ticketing providers) → Scope frameworks/requirements → Review gaps/controls → Policies/personnel setup.  \n- First value: Progress on continuous compliance evidence/monitoring (checklist % complete); initial framework readiness.  \n- Friction-killers: Structured in-product checklist; self-serve viable for teams with compliance expertise (though optional support available).[[4]](https://help.drata.com/en/articles/13265650-quick-start-guide)\n\n**Wiz** (cloud security, agentless bottoms-up):  \n- Free trial request or marketplace signup.  \n- Deploy templated connectors (e.g., CloudFormation for AWS read-only roles; similar for other clouds).  \n- First value: Full visibility/risk graph in ~5 minutes (\"Take 5 minutes to set up\").  \n- Friction-killers: Agentless/read-only, auto-generated scripts/templates, fast scans.[[5]](https://www.wiz.io/)\n\n**Socket** (supply-chain/dependency security):  \n- Self-service signup + payment plans.  \n- GitHub integration or CLI/firewall install.  \n- Instant package scans on install/PRs.  \n- First value: Malicious/ risky dep detection immediately.  \n- Friction-killers: Self-service plans, zero-friction CLI/MCP options.[[6]](https://socket.dev/blog/announcing-self-service-payment-plans)\n\n**Vanta** (compliance): More demo-heavy for full enterprise flows (\"request a demo\"), but self-serve elements exist via integrations, policy templates, Trust Center, and trial access. Quick wins via connectors and checklists; less purely bottoms-up than Aikido/Snyk for technical users.[[7]](https://www.vanta.com/resources/new-in-vanta-december-2025)\n\n**Common patterns across these tools (2026 state-of-the-art)**:  \n- **Time-to-first-value targets**: 30 seconds (Aikido scans) to 5–15 minutes (Wiz visibility, Snyk/Drata initial results/checklist). Goal is an \"aha\" moment before any payment or human interaction.  \n- **Friction-killers**: No credit card for trials/free tiers; OAuth/one-click templated connectors (VCS, cloud, IdP); sandbox/demo repos or sample data; read-only/minimal-privilege access; guided in-product checklists/tours; instant scans without manual uploads where possible.  \n- **Conversion for technical buyers without demo**: Immediate actionable output (scan results, risk graph, compliance progress, fix suggestions) + clear next steps. Trust signals like SOC 2 attestations or verifiable outputs help. Product-led motion works best when the tool feels like a natural extension of dev workflows.[[3]](https://www.youtube.com/watch?v=qUGobPWywL0)\n\n### What kolm.ai Onboarding Needs to Be Off-the-Shelf\nTo match this model for Agent Security-Review Readiness (log upload → cryptographically signed Ed25519 offline-verifiable report mapped to SOC 2/ISO 42001/NIST AI RMF/EU AI Act/OWASP/MITRE):  \n- **Signup**: Email/Google/GitHub OAuth only; no CC required for trial/free tier with limited reports or sample data.  \n- **Instant first value (<60 seconds)**: Upload interface (drag-and-drop or sample agent logs) → immediate processing → downloadable signed PDF/report preview with framework mappings and verification instructions (e.g., how to verify Ed25519 signature offline).  \n- **Friction-killers**: Templated \"connectors\" or upload presets (e.g., common agent log formats from LangChain, AutoGen, etc.); demo/sandbox mode with pre-loaded example logs; read-only/no persistent storage of sensitive logs beyond processing; guided checklist (\"Upload logs → Review mappings → Download signed evidence\").  \n- **Technical buyer conversion**: In-product \"Trust Center\"-style page showing sample verified reports; one-click \"Verify signature\" tool or instructions; clear export for enterprise security teams; progress indicators (\"X% mapped to NIST/EU AI Act\").  \n- **Additional must-haves**: Self-serve pricing tiers visible immediately; in-app education (tooltips on frameworks/Ed25519); optional \"shareable link\" for buyers; seamless upgrade path without sales. Aim for \"upload → signed report in hand\" as the core loop, mirroring Aikido's 30-second results or Wiz's 5-minute visibility.[[1]](https://www.aikido.dev/)\n\nThis setup enables true zero-touch sales while building trust through verifiable, cryptographically strong outputs tailored to enterprise security reviews.",
+  "citations": [
+    "https://www.aikido.dev/",
+    "https://workos.com/blog/snyk-vs-workos-ai-security-platform-enterprise-authentication",
+    "https://www.youtube.com/watch?v=qUGobPWywL0",
+    "https://help.drata.com/en/articles/13265650-quick-start-guide",
+    "https://www.wiz.io/",
+    "https://socket.dev/blog/announcing-self-service-payment-plans",
+    "https://www.vanta.com/resources/new-in-vanta-december-2025"
+  ],
+  "searched": [
+    "https://www.vanta.com/resources/new-in-vanta-february-2026",
+    "https://www.vanta.com/resources/vanta-2025-year-in-review",
+    "https://www.vanta.com/resources/how-to-streamline-your-employee-onboarding-offboarding-process",
+    "https://www.vanta.com/resources/new-in-vanta-march-2026",
+    "https://www.youtube.com/watch?v=dqMvbQ_41Fo",
+    "https://www.complyjet.com/blog/vanta-pricing-guide-2025",
+    "https://www.valuecase.com/articles/how-to-choose-customer-onboarding-software",
+    "https://www.vanta.com/resources/new-in-vanta-december-2025",
+    "https://www.vanta.com/resources/3-steps-to-kick-off-first-time-compliance-in-2026",
+    "https://www.vanta.com/",
+    "https://help.drata.com/en/articles/13265650-quick-start-guide",
+    "https://drata.com/customers/success",
+    "https://drata.com/solutions/size/startup",
+    "https://www.cycoresecure.com/frameworks/drata-implementation-services",
+    "https://drata.com/customers/sign-in-solutions",
+    "https://getdx.com/podcast/snyk-developer-experience/",
+    "https://snyk.io/blog/snyk-developer-security-platform-2022-review/",
+    "https://snyk.io/blog/5-principles-of-snyk-developer-experience/",
+    "https://workos.com/blog/snyk-vs-workos-ai-security-platform-enterprise-authentication",
+    "https://www.reddit.com/r/devops/comments/1abjv58/what_is_snyk_pricing_is_snyk_expensive/",
+    "https://www.aikido.dev/",
+    "https://help.aikido.dev/code-scanning/connect-your-source-code/connect-gitlab-self-managed-server-to-aikido",
+    "https://aikidosecurity.recruitee.com/o/account-executive-smb-us",
+    "https://www.youtube.com/watch?v=qUGobPWywL0",
+    "https://www.g2.com/products/aikido-security/reviews?page=5&qs=pros-and-cons",
+    "https://socket.dev/blog/announcing-self-service-payment-plans",
+    "https://socket.dev/pricing",
+    "https://github.com/SocketDev/socket-mcp",
+    "https://socket.dev/",
+    "https://docs.socket.dev/docs/local-socket-mcp",
+    "https://www.wiz.io/free-trial",
+    "https://www.reddit.com/r/cybersecurity/comments/1c1s9r2/wiz_is_insert_your_experience/",
+    "https://www.youtube.com/watch?v=okqu-a3UABA",
+    "https://www.wiz.io/",
+    "https://docs.cloud.google.com/architecture/partners/id-prioritize-security-risks-with-wiz",
+    "https://www.youtube.com/watch?v=aN5lwSCBQ84",
+    "https://thehackernews.com/videos/2025/03/wiz-15-minute-demo-secure-everything.html",
+    "https://uit.stanford.edu/service/wiz/faq",
+    "https://aws.amazon.com/marketplace/pp/prodview-ibgbkrqusncsm",
+    "https://www.wiz.io/blog/2026-cloud-security-action-plan",
+    "https://sentry.zendesk.com/hc/en-us/articles/25957836053403-Onboarding-Sentry-in-Vanta-as-a-vendor-for-self-serve-plans",
+    "https://www.vanta.com/company/careers",
+    "https://complydog.com/alternatives/vanta",
+    "https://www.reddit.com/r/cybersecurity/comments/1ch0v4g/self_serve_try_before_you_buy_compliance_software/",
+    "https://www.vanta.com/resources/building-a-comprehensive-trust-center",
+    "https://episki.com/compare/vs/vanta-vs-secureframe",
+    "https://jobs.ashbyhq.com/vanta/ae0fc39f-d207-4ef9-bf56-ca3eee285d2c",
+    "https://thecompliancemastery.com/comparisons/vanta-vs-secfix/",
+    "https://dailyremote.com/remote-job/senior-fullstack-software-engineer-self-serve-4399743"
+  ],
+  "usage": {
+    "input_tokens": 32139,
+    "input_tokens_details": {
+      "cached_tokens": 12288
+    },
+    "output_tokens": 2295,
+    "output_tokens_details": {
+      "reasoning_tokens": 914
+    },
+    "total_tokens": 34434,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 9,
+    "cost_in_usd_ticks": 780088500,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 9,
+      "x_search_calls": 0,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 21676,
+      "output_tokens": 1744
+    }
+  },
+  "attempts": 1
+}

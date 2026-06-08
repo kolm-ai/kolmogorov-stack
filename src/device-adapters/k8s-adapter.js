@@ -1,8 +1,8 @@
-// W888-C — Kubernetes adapter: deploy(device, artifactPath, opts).
+// W888-C - Kubernetes adapter: deploy(device, artifactPath, opts).
 //
 // Renders a minimal Deployment + Service manifest for the artifact, then
 // either prints it (--dry-run / stdout-only) or shells out to `kubectl apply`.
-// We deliberately do NOT pull in @kubernetes/client-node — `kubectl` on PATH
+// We deliberately do NOT pull in @kubernetes/client-node - `kubectl` on PATH
 // + a kubeconfig is the de-facto contract.
 //
 // Adapter contract (uniform across src/device-adapters/*):
@@ -102,7 +102,7 @@ export async function deploy(device, artifactPath, opts = {}) {
     return { ok: true, deployment_id, message: `manifest rendered (${manifest.split('\n').length} lines)`, raw };
   }
 
-  // Spawn kubectl — graceful skip if not on PATH.
+  // Spawn kubectl - graceful skip if not on PATH.
   const args = ['apply', '-f', '-'];
   if (dryRun) args.push('--dry-run=client', '-o', 'yaml');
   if (namespace) { args.push('-n', namespace); }

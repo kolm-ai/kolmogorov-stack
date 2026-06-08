@@ -1,4 +1,4 @@
-// W918 P3.3 — LiteLLM proxy log export importer.
+// W918 P3.3 - LiteLLM proxy log export importer.
 //
 // Ingests a LiteLLM proxy log export (JSONL) and emits kolm capture rows
 // ready to feed into the distill / eval pipelines.
@@ -65,7 +65,7 @@
 // vertex/, cohere/, gemini/, ollama/, ...) is preserved verbatim because
 // downstream tooling uses it to attribute training data to a teacher.
 //
-// Malformed rows do NOT throw — they are skipped and recorded in the
+// Malformed rows do NOT throw - they are skipped and recorded in the
 // `errors` array as { line, reason } so the caller can surface them.
 
 import fs from 'node:fs';
@@ -188,7 +188,7 @@ function assistantFromResponse(response) {
 }
 
 function detectShape(obj) {
-  // Shape 3 — langfuse: explicit input/output keys with no OpenAI-style
+  // Shape 3 - langfuse: explicit input/output keys with no OpenAI-style
   // messages/response. Detected first because LiteLLM-via-langfuse rows can
   // still carry a stray `model` and would otherwise look ambiguous.
   const hasInputOutput =
@@ -199,13 +199,13 @@ function detectShape(obj) {
     Object.prototype.hasOwnProperty.call(obj, 'response');
   if (hasInputOutput && !hasMessagesOrResponse) return 'langfuse';
 
-  // Shape 2 — SpendLogs: messages and/or response arrive as JSON strings,
+  // Shape 2 - SpendLogs: messages and/or response arrive as JSON strings,
   // and the row commonly carries startTime / endTime / spend columns.
   const messagesIsString = typeof obj.messages === 'string';
   const responseIsString = typeof obj.response === 'string';
   if (messagesIsString || responseIsString) return 'spendlogs';
 
-  // Shape 1 — proxy log JSONL: messages array + response object.
+  // Shape 1 - proxy log JSONL: messages array + response object.
   return 'proxy';
 }
 
@@ -324,7 +324,7 @@ function pickApiBase(obj) {
 }
 
 function pickModel(obj) {
-  // Preserve the full prefixed name (e.g. "azure/gpt-4o") verbatim — this is
+  // Preserve the full prefixed name (e.g. "azure/gpt-4o") verbatim - this is
   // load-bearing for downstream provenance.
   if (typeof obj.model === 'string' && obj.model) return obj.model;
   if (typeof obj.model_name === 'string' && obj.model_name) return obj.model_name;

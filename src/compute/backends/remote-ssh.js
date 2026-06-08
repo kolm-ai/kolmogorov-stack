@@ -1,4 +1,4 @@
-// remote-ssh — bring-your-own GPU over SSH.
+// remote-ssh - bring-your-own GPU over SSH.
 // No HTTP API. Uses native `ssh` binary via node:child_process.
 // Env: KOLM_REMOTE_HOST (user@host[:port]) + KOLM_REMOTE_SSH_KEY (default ~/.ssh/id_ed25519).
 
@@ -29,13 +29,13 @@ export async function test() {
   }
 }
 
-// Parse "user@host" or "user@host:port" — ssh CLI uses -p for port.
+// Parse "user@host" or "user@host:port" - ssh CLI uses -p for port.
 function _parseHost(raw) {
   const m = String(raw).match(/^(.*?)(?::(\d+))?$/);
   return { hostspec: m[1], port: m[2] ? Number(m[2]) : null };
 }
 
-// run({ image, command, env, timeoutMs }) — `image` is ignored (we don't ship
+// run({ image, command, env, timeoutMs }) - `image` is ignored (we don't ship
 // containers over SSH; that's the user's job). `command` is the shell command
 // to execute. `env` is shipped as `KEY=VAL ...` prefix in the remote shell.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {
@@ -49,7 +49,7 @@ export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 *
   }
   const { hostspec, port } = _parseHost(det.host);
   // Build remote command: env-prefix + the user command joined as one shell string.
-  // We deliberately do NOT bash-escape — the caller already passes shell-safe argv.
+  // We deliberately do NOT bash-escape - the caller already passes shell-safe argv.
   const envPrefix = Object.entries(env || {})
     .filter(([k]) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(k))
     .map(([k, v]) => `${k}=${JSON.stringify(String(v))}`)

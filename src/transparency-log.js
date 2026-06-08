@@ -1,6 +1,6 @@
 // src/transparency-log.js
 //
-// W921 Govern / Receipts & Compliance — append-only, verifiable, tamper-evident
+// W921 Govern / Receipts & Compliance - append-only, verifiable, tamper-evident
 // transparency log.
 //
 // WHAT THIS IS
@@ -9,13 +9,13 @@
 //     1) HASH CHAIN (tamper-evident): every entry stores
 //        prev_hash + entry_hash = SHA256(prev_hash || canonical(entry_body)).
 //        Mutating any historical entry breaks the chain at the first edit, just
-//        like src/audit.js — but here the chain is Ed25519-attestable, not
+//        like src/audit.js - but here the chain is Ed25519-attestable, not
 //        HMAC-secret-gated, so a third party can verify it WITHOUT kolm's
 //        secret.
 //     2) MERKLE ROOT (RFC 6962 / RFC 9162): the whole log (or any consistent
 //        prefix) hashes to a single Merkle Tree Head over RFC 6962 leaf hashes
 //        of the canonical entry bodies. Any entry has an O(log n) inclusion
-//        proof that verifies offline against a signed Tree Head — the exact
+//        proof that verifies offline against a signed Tree Head - the exact
 //        Certificate-Transparency / Sigstore-Rekor witness model.
 //
 //   The two together give "an append-only public witness recorded entry E at
@@ -28,7 +28,7 @@
 //   sibling: same append-only discipline, but offline-verifiable by anyone with
 //   the log's public key. It is purely additive and owns its own collection.
 //
-// REUSE: src/merkle.js (RFC 6962/9162 primitives — never re-implemented here),
+// REUSE: src/merkle.js (RFC 6962/9162 primitives - never re-implemented here),
 //        src/ed25519.js (sign/verify/keyFingerprint), node:crypto.
 //
 // This module is a leaf in the import graph (merkle.js + ed25519.js + crypto).
@@ -94,7 +94,7 @@ function entryBodyBytes(entry) {
 }
 
 // ---------------------------------------------------------------------------
-// TransparencyLog — an append-only log instance.
+// TransparencyLog - an append-only log instance.
 //
 // Storage is pluggable: pass a `store` with insert/find (kolm's src/store.js
 // shape) to persist, OR omit it for a pure in-memory log (tests / dry-run).
@@ -209,7 +209,7 @@ export class TransparencyLog {
   // verifyChain() -> { ok, total, breaks[], last_hash }
   //
   // Walk the hash chain, recompute prev/entry hashes from the canonical bodies,
-  // report any break. This needs NO secret — it is pure SHA-256 over public
+  // report any break. This needs NO secret - it is pure SHA-256 over public
   // bytes (unlike the HMAC audit chain in src/audit.js).
   // -------------------------------------------------------------------------
   verifyChain() {
@@ -334,7 +334,7 @@ export function verifyTreeHeadSignature(signed, pinnedPublicKeyPem = null) {
 //   (1) seq is strictly the next index (after.tree_size === before.tree_size+1)
 //   (2) the entry links to the prior head (prev_hash === before.last_entry_hash)
 //   (3) the new entry's leaf is INCLUDED in the after Tree Head at its seq
-//       (RFC 9162 inclusion proof) — i.e. the append is consistent, the log was
+//       (RFC 9162 inclusion proof) - i.e. the append is consistent, the log was
 //       not silently rewritten.
 //
 // `before`/`after` are TreeHead-like { tree_size, root_hash, last_entry_hash? }.
@@ -380,6 +380,70 @@ export function verifyTransparencyAppend({ before, entry, after, proof }) {
     }
   }
   return { ok: true, appended_at_end, prev_linked, included, seq: entry.seq };
+}
+
+// ---------------------------------------------------------------------------
+// verifyInclusionProof(proof, opts?) -> { ok, reason?, root?, checkpoint? }
+//
+// Stand-alone, fully OFFLINE verification of a single inclusion proof - the
+// shape returned by TransparencyLog#inclusionProof(seq):
+//   { leaf_hash, leaf_index, tree_size, audit_path[hex...], root_hash }
+//
+// This is the function a browser widget or an SDK port calls to confirm
+// "entry E really is in the log committed by root R" WITHOUT trusting kolm:
+// it is pure RFC 9162 SHA-256 over the supplied bytes. No network, no secret.
+//
+// opts.signedTreeHead (optional): a signed checkpoint (from signTreeHead). When
+//   supplied, the proof's root_hash AND tree_size must match the checkpoint,
+//   and the checkpoint's Ed25519 signature must verify - so a single call
+//   answers "is E in the log, and is that log state signed by the operator?".
+// opts.pinnedPublicKeyPem (optional): pin the checkpoint key (defeats key
+//   substitution); forwarded to verifyTreeHeadSignature.
+//
+// Accepts both snake_case (server/JSON shape) and camelCase (merkle.js shape)
+// field names so it is forgiving to either caller. NEVER throws.
+// ---------------------------------------------------------------------------
+export function verifyInclusionProof(proof, opts = {}) {
+  if (!proof || typeof proof !== 'object') return { ok: false, reason: 'no_proof' };
+  if (proof.ok === false) return { ok: false, reason: proof.reason || 'proof_marked_not_ok' };
+
+  const leaf_hash = proof.leaf_hash ?? proof.leafHash;
+  const leaf_index = proof.leaf_index ?? proof.leafIndex;
+  const tree_size = proof.tree_size ?? proof.treeSize;
+  const audit_path = proof.audit_path ?? proof.inclusionPath ?? proof.path;
+  const root_hash = proof.root_hash ?? proof.root;
+
+  if (leaf_hash == null) return { ok: false, reason: 'missing leaf_hash' };
+  if (root_hash == null) return { ok: false, reason: 'missing root_hash' };
+  if (!Array.isArray(audit_path)) return { ok: false, reason: 'missing/!array audit_path' };
+
+  // If a signed checkpoint is supplied, bind the proof to it BEFORE the math:
+  // the root we verify into must be the signed one, not a root the caller
+  // pulled from the same untrusted source as the proof.
+  let checkpoint;
+  if (opts.signedTreeHead) {
+    const sth = opts.signedTreeHead;
+    const sthRoot = sth.root_hash || (sth.root_b64 ? Buffer.from(sth.root_b64, 'base64').toString('hex') : null);
+    if (sthRoot && String(sthRoot).toLowerCase() !== String(root_hash).toLowerCase()) {
+      return { ok: false, reason: 'proof root_hash != signed checkpoint root_hash' };
+    }
+    if (sth.tree_size != null && Number(sth.tree_size) !== Number(tree_size)) {
+      return { ok: false, reason: `proof tree_size ${tree_size} != checkpoint tree_size ${sth.tree_size}` };
+    }
+    const sig = verifyTreeHeadSignature(sth, opts.pinnedPublicKeyPem || null);
+    if (!sig.ok) return { ok: false, reason: `checkpoint signature: ${sig.reason}` };
+    checkpoint = { verified: true, key_id: sig.key_id, tree_size: sth.tree_size, root_hash: sthRoot };
+  }
+
+  const inc = verifyInclusion({
+    leafHash: leaf_hash,
+    leafIndex: leaf_index,
+    treeSize: tree_size,
+    inclusionPath: audit_path,
+    root: root_hash,
+  });
+  if (!inc.ok) return { ok: false, reason: inc.reason, checkpoint };
+  return { ok: true, root: inc.root, leaf_index, tree_size, checkpoint };
 }
 
 // ---------------------------------------------------------------------------

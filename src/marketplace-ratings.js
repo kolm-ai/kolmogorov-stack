@@ -1,6 +1,6 @@
 // src/marketplace-ratings.js
 //
-// W825-5 — Rating + review for the W825 Artifact Marketplace MVP.
+// W825-5 - Rating + review for the W825 Artifact Marketplace MVP.
 //
 // Storage: ~/.kolm/marketplace/ratings.jsonl. Each row is one tenant's rating
 // for one listing. A tenant may overwrite their own prior rating (later row
@@ -15,7 +15,7 @@
 //
 // Both gates throw Error with .code='RATING_FORBIDDEN' so the route layer can
 // map to HTTP 403 without leaking which gate failed (we DO surface the
-// failed gate name on the error message for debug — the HTTP body picks the
+// failed gate name on the error message for debug - the HTTP body picks the
 // generic code).
 
 import fs from 'node:fs';
@@ -46,7 +46,7 @@ function _ensureDir() {
 }
 
 // _readJsonl(path): returns [] for missing/corrupt files. Per-row JSON.parse
-// is tolerant — a malformed line is skipped.
+// is tolerant - a malformed line is skipped.
 function _readJsonl(p) {
   if (!fs.existsSync(p)) return [];
   let raw = '';
@@ -87,7 +87,7 @@ export function tenantHasDownloaded({ listing_id, tenant_id }) {
 }
 
 // _accountAgeDays(tenant): compute how many full days since tenant.created_at.
-// Returns Infinity if created_at is missing — auth.js stamps this on every
+// Returns Infinity if created_at is missing - auth.js stamps this on every
 // new tenant so a missing field is treated as "old enough" rather than
 // "block forever". (Old tenants minted pre-W411 may carry no created_at.)
 export function _accountAgeDays(tenant) {

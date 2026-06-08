@@ -7,7 +7,7 @@
 // Why byte-level: every UTF-8 string round-trips losslessly through the
 // initial 256-byte alphabet. No <unk> on emoji, no <unk> on CJK, no <unk>
 // on arbitrary bytes from binary blobs. The tokenizer cannot fail to encode
-// any input — worst case it falls back to 1-byte-per-token.
+// any input - worst case it falls back to 1-byte-per-token.
 //
 // Why BPE and not WordPiece/SentencePiece: BPE is the simplest greedy merge
 // algorithm and it's what GPT-2/Llama/Qwen/DeepSeek use. Implementable in
@@ -28,7 +28,7 @@ export const SPECIAL_TOKENS = ['<pad>', '<unk>', '<s>', '</s>'];
 
 // Pre-tokenization pattern: split on whitespace/punct boundaries while
 // keeping the whitespace attached to the FOLLOWING token (GPT-2-ish).
-// This is intentionally simple — the BPE merge step handles the rest.
+// This is intentionally simple - the BPE merge step handles the rest.
 const PRETOK_RE = /\s*[\p{L}\p{N}]+|\s*[^\s\p{L}\p{N}]+|\s+/gu;
 
 function pretokenize(text) {
@@ -119,7 +119,7 @@ export class KolmTokenizer {
       if (!t) { bytes.push(this._byteToId.get('?'.charCodeAt(0))); return; }
       if (t.kind === 'byte') { bytes.push(t.value); return; }
       if (t.kind === 'special') {
-        // Specials don't render — they're metadata. Caller should filter
+        // Specials don't render - they're metadata. Caller should filter
         // before decode if they want pure text.
         return;
       }

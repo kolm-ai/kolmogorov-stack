@@ -1,4 +1,4 @@
-// W738-2 — pipeline runtime: classifier -> route -> result.
+// W738-2 - pipeline runtime: classifier -> route -> result.
 //
 // runPipeline() is the orchestrator that turns a parsed kolm.pipeline.yaml
 // into one end-to-end inference. The shape is deliberately dependency-
@@ -12,12 +12,12 @@
 //     teacher_caller,     // async (teacher_id, input) -> string
 //   })
 //
-// Phases (timed with real Date.now() deltas — no estimates):
+// Phases (timed with real Date.now() deltas - no estimates):
 //
-//   1. classify  — load the classifier artifact + run it on input.
+//   1. classify - load the classifier artifact + run it on input.
 //                  The classifier's `run()` MUST return a label string;
 //                  anything else fails loud with classifier_invalid_output.
-//   2. route     — look up routes[label]:
+//   2. route - look up routes[label]:
 //                  * route has artifact_cid → load + run the artifact.
 //                  * route has teacher     → call teacher_caller.
 //                  * route not found       → honest { ok:false } envelope
@@ -52,7 +52,7 @@ function _normaliseArtifact(loaded) {
 
 // Helper: stringify a classifier's output so we can compare it against the
 // pipeline's route labels. Numbers become strings, booleans become "true"/
-// "false". We do NOT JSON-stringify objects — that's a sign the classifier
+// "false". We do NOT JSON-stringify objects - that's a sign the classifier
 // returned a structured payload instead of a label, and we want to fail
 // loud (classifier_invalid_output) so the operator notices.
 function _coerceLabel(out) {
@@ -112,7 +112,7 @@ export async function runPipeline(opts) {
   }
 
   // ── Phase 1: classify ────────────────────────────────────────────────────
-  // Wall-clock for the classify phase — load + run combined. Tests pin this
+  // Wall-clock for the classify phase - load + run combined. Tests pin this
   // to a number (>= 0), not the precise value.
   const tClassifyStart = Date.now();
   let classifierArtifact;
@@ -275,7 +275,7 @@ export async function runPipeline(opts) {
     if (typeof teacher_caller !== 'function') {
       // Honest "we need an escalation handler" envelope. Tests can call the
       // runner without a teacher and still verify route_not_found / artifact
-      // branches — but if the YAML asks for escalation we MUST have a caller.
+      // branches - but if the YAML asks for escalation we MUST have a caller.
       return {
         ok: false,
         error: 'teacher_caller_required',
@@ -339,7 +339,7 @@ export async function runPipeline(opts) {
 }
 
 // =============================================================================
-// compilePipeline — W738-3
+// compilePipeline - W738-3
 // =============================================================================
 //
 // Produces a JSON sidecar describing the composed pipeline. parent_cids
@@ -410,7 +410,7 @@ export async function compilePipeline(yamlText, opts) {
     }
   }
 
-  // Stable sidecar shape — sort the cid list so the same pipeline produces
+  // Stable sidecar shape - sort the cid list so the same pipeline produces
   // the same bytes regardless of how the operator ordered route labels.
   const sidecar = {
     artifact_kind: 'kolm.pipeline',

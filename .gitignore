@@ -181,6 +181,21 @@ data/*.tmp
 data/*.corrupt-*
 data/*.log.err
 audit/
+# Large local model/training/runtime artifacts — never commit (2026-06-09 cleanup)
+data/*.kolm
+data/**/*.kolm
+data/trinity-airgap/
+data/trinity-ollama-q4km/
+data/*-adapter/
+data/kolm-reason-*/
+data/fc-qwen*/
+data/observations.json.*
+data/*.jsonl
+data/**/*.tar.gz
+data/**/tokenizer.json
+data/**/optimizer.pt
+data/**/*.safetensors
+data/**/*.gguf
 # Malformed-path debris from prior shell path-separator bugs
 C:Users*
 *TEMPcurate_smoke_out.txt

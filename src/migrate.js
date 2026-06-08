@@ -1,4 +1,4 @@
-// W743 — kolm migrate: bring Ollama and LM Studio model libraries into kolm.
+// W743 - kolm migrate: bring Ollama and LM Studio model libraries into kolm.
 //
 // Purpose
 // -------
@@ -13,7 +13,7 @@
 // Migration is local-only. We read filesystem metadata, hash the blobs that
 // `kolm import` would have hashed anyway, and emit `wrapAsKolmManifest()` from
 // src/import.js. The wrapped manifest inherits `not_kolm_compiled:true` from
-// W740 — a migrated model NEVER earns a K-Score from migration alone. To
+// W740 - a migrated model NEVER earns a K-Score from migration alone. To
 // claim it is kolm-compiled, the user has to run `kolm distill` on real seeds.
 //
 // Design choices
@@ -25,7 +25,7 @@
 //   * Ollama layout: <root>/manifests/registry.ollama.ai/library/<name>/<tag>
 //     points at a JSON manifest whose `layers[].digest` (sha256:<hex>) names
 //     blobs in <root>/blobs/sha256-<hex>. We pick the layer whose
-//     `mediaType` is "application/vnd.ollama.image.model" — that's the GGUF.
+//     `mediaType` is "application/vnd.ollama.image.model" - that's the GGUF.
 //   * LM Studio layout: a publisher/repo/<file>.gguf tree under the cache
 //     root. We walk for *.gguf files; LM Studio also stores .json sidecars
 //     but those are not needed for the W740 wrap (which only reads the GGUF
@@ -79,7 +79,7 @@ function _join(...parts) {
 // Ollama default storage. Per docs the linux/mac path is `~/.ollama/models`,
 // the windows path is `%USERPROFILE%\.ollama\models`. We surface both for
 // every platform so the candidate array is the same regardless of os.platform
-// — the caller's existence check decides which one wins.
+// - the caller's existence check decides which one wins.
 export const OLLAMA_DEFAULT_PATHS = (function () {
   const home = _home();
   const out = [];
@@ -100,7 +100,7 @@ export const LMSTUDIO_DEFAULT_PATHS = (function () {
   const home = _home();
   const lad = _localAppData();
   const out = [];
-  // macOS — both legacy "Application Support" and current "Caches" locations.
+  // macOS - both legacy "Application Support" and current "Caches" locations.
   if (home) {
     out.push(path.join(home, 'Library', 'Caches', 'lm-studio', 'models'));
     out.push(path.join(home, 'Library', 'Application Support', 'lm-studio', 'models'));
@@ -109,7 +109,7 @@ export const LMSTUDIO_DEFAULT_PATHS = (function () {
   if (home) {
     out.push(path.join(home, '.cache', 'lm-studio', 'models'));
   }
-  // Windows — current LM Studio default + legacy.
+  // Windows - current LM Studio default + legacy.
   if (lad) {
     out.push(path.join(lad, 'LM Studio', 'models'));
     out.push(path.join(lad, 'LMStudio', 'models'));
@@ -126,7 +126,7 @@ export const LMSTUDIO_DEFAULT_PATHS = (function () {
 })();
 
 // =============================================================================
-// _envelope — small helper so every honest-fail shape carries the version stamp
+// _envelope - small helper so every honest-fail shape carries the version stamp
 // =============================================================================
 
 function _failEnvelope(error, extra) {
@@ -137,7 +137,7 @@ function _failEnvelope(error, extra) {
 }
 
 // =============================================================================
-// discoverOllamaModels — read <root>/manifests/registry.ollama.ai/library/
+// discoverOllamaModels - read <root>/manifests/registry.ollama.ai/library/
 // =============================================================================
 //
 // Layout (Ollama 0.1+):
@@ -148,7 +148,7 @@ function _failEnvelope(error, extra) {
 //   { layers: [{ mediaType, size, digest: "sha256:<hex>" }, ...] }
 //
 // We pick the layer with `mediaType === "application/vnd.ollama.image.model"`
-// (the GGUF). If that mediaType is absent we fall back to the LARGEST layer —
+// (the GGUF). If that mediaType is absent we fall back to the LARGEST layer - 
 // older Ollama builds didn't always set the mediaType correctly.
 //
 // Returns an array of:
@@ -276,12 +276,12 @@ export function discoverOllamaModels(rootPath) {
 }
 
 // =============================================================================
-// discoverLmStudioModels — walk <root> for *.gguf files
+// discoverLmStudioModels - walk <root> for *.gguf files
 // =============================================================================
 //
 // LM Studio writes models in a publisher/repo/<file>.gguf tree (or sometimes
 // publisher/repo/<variant>/<file>.gguf). We just walk recursively for *.gguf
-// — anything we find is a candidate. Filename gives `name`; the parent
+// - anything we find is a candidate. Filename gives `name`; the parent
 // directory chain gives the publisher/repo context.
 //
 // Returns:
@@ -356,7 +356,7 @@ export function discoverLmStudioModels(rootPath, opts = {}) {
 }
 
 // =============================================================================
-// migrateOllamaModel — wrap a single Ollama entry via W740 import path
+// migrateOllamaModel - wrap a single Ollama entry via W740 import path
 // =============================================================================
 
 export async function migrateOllamaModel(modelEntry, opts = {}) {
@@ -392,7 +392,7 @@ export async function migrateOllamaModel(modelEntry, opts = {}) {
 }
 
 // =============================================================================
-// migrateLmStudioModel — wrap a single LM Studio entry via W740 import path
+// migrateLmStudioModel - wrap a single LM Studio entry via W740 import path
 // =============================================================================
 
 export async function migrateLmStudioModel(modelEntry, opts = {}) {
@@ -426,7 +426,7 @@ export async function migrateLmStudioModel(modelEntry, opts = {}) {
 }
 
 // =============================================================================
-// runMigrationDryRun — discovery only, no parse
+// runMigrationDryRun - discovery only, no parse
 // =============================================================================
 
 export function runMigrationDryRun(opts) {
@@ -463,7 +463,7 @@ export function runMigrationDryRun(opts) {
 }
 
 // =============================================================================
-// _firstExistingDefault — pick the first per-platform candidate that exists
+// _firstExistingDefault - pick the first per-platform candidate that exists
 // =============================================================================
 
 function _firstExistingDefault(source) {
@@ -477,7 +477,7 @@ function _firstExistingDefault(source) {
 }
 
 // =============================================================================
-// describeMigrationSources — for `kolm migrate doctor`
+// describeMigrationSources - for `kolm migrate doctor`
 // =============================================================================
 
 export function describeMigrationSources() {

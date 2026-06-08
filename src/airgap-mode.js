@@ -5,7 +5,7 @@
 // when KOLM_AIRGAP=1 is set:
 //
 //   - isAirgapped() reads process.env.KOLM_AIRGAP === '1' at call time. Never
-//     cached — operators flip the switch mid-process via /v1/airgap/test or
+//     cached - operators flip the switch mid-process via /v1/airgap/test or
 //     CLI `kolm airgap enable` and the next call MUST see the new state.
 //   - localTeacherUrl() reads process.env.KOLM_LOCAL_TEACHER_URL (the canonical
 //     env var for the local-Ollama / kolm-local-teacher endpoint). When set,
@@ -18,7 +18,7 @@
 //     hint, version) so callers can catch + reflect back to operators.
 //   - testNetworkLeak({fetch}) attempts a probe (always returns the honest
 //     envelope; DOES NOT actually attempt a real network call by default
-//     since tests do not want to depend on internet — they verify the shape).
+//     since tests do not want to depend on internet - they verify the shape).
 //   - captureFromLocalOllama({prompt, model, fetch}) uses localTeacherUrl()
 //     and returns the honest envelope when the URL is not configured.
 //
@@ -27,14 +27,14 @@
 // layer in src/router.js does the tenant_id resolution and threads it in.
 //
 // W604 version stamp: AIRGAP_MODE_VERSION = 'w779-v1'. Consumers MUST match
-// /^w779-/ — never an explicit equality so future w779-v2 ships do not
+// /^w779-/ - never an explicit equality so future w779-v2 ships do not
 // silently break the contract.
 //
 // Honesty invariants:
 //   - wrapFetch NEVER silently mutates the URL. It either passes through
 //     to the original fetch or throws the airgap_blocks_network envelope.
 //   - captureFromLocalOllama never falls back to a public model when
-//     KOLM_LOCAL_TEACHER_URL is unset — the honest envelope surfaces the
+//     KOLM_LOCAL_TEACHER_URL is unset - the honest envelope surfaces the
 //     missing config so the operator can fix it.
 //   - testNetworkLeak with `actuallyProbe:false` (the default) returns the
 //     shape envelope without making real network calls. Tests MUST NOT
@@ -58,14 +58,14 @@ const LOOPBACK_HOSTS = Object.freeze([
 
 // Read the airgap switch fresh from env on every call. Operators can flip
 // KOLM_AIRGAP=1 mid-process (via the daemon endpoint or shell export) and
-// the next call MUST honor the new state — caching here would be a bug.
+// the next call MUST honor the new state - caching here would be a bug.
 export function isAirgapped() {
   return process.env.KOLM_AIRGAP === '1';
 }
 
 // Read the local-teacher URL fresh from env. Returns null when unset so
 // callers can branch cleanly. The URL points at a local-Ollama or
-// kolm-local-teacher HTTP endpoint — same-host, no internet round trip.
+// kolm-local-teacher HTTP endpoint - same-host, no internet round trip.
 export function localTeacherUrl() {
   const u = process.env.KOLM_LOCAL_TEACHER_URL;
   if (!u || typeof u !== 'string' || !u.trim()) return null;
@@ -81,13 +81,13 @@ function isLoopbackUrl(urlStr) {
     const parsed = new URL(urlStr);
     host = parsed.hostname.toLowerCase();
   } catch (_) {
-    // Malformed URL — be safe and treat as non-loopback. wrapFetch will
+    // Malformed URL - be safe and treat as non-loopback. wrapFetch will
     // block it under airgap. This is the conservative path: if we can't
     // parse the host we can't prove it's local, so we treat it as remote.
     return false;
   }
   // Strip IPv6 brackets if present (URL.hostname already does this but be
-  // defensive — some Node versions don't).
+  // defensive - some Node versions don't).
   if (host.startsWith('[') && host.endsWith(']')) host = host.slice(1, -1);
   for (const lh of LOOPBACK_HOSTS) {
     const stripped = lh.startsWith('[') && lh.endsWith(']') ? lh.slice(1, -1) : lh;
@@ -110,7 +110,7 @@ function matchesLocalTeacher(urlStr) {
   } catch (_) {
     return false;
   }
-  // Same host + same port + same scheme. Path is intentionally ignored — the
+  // Same host + same port + same scheme. Path is intentionally ignored - the
   // teacher endpoint may expose multiple paths under the same origin.
   if (a.hostname.toLowerCase() !== b.hostname.toLowerCase()) return false;
   if (a.protocol !== b.protocol) return false;
@@ -141,7 +141,7 @@ function airgapBlockEnvelope(urlStr) {
 
 // Wrap the given fetch function so calls are blocked when airgapped UNLESS
 // the URL is loopback or matches KOLM_LOCAL_TEACHER_URL. When not airgapped
-// the wrapper is transparent — passes every call through.
+// the wrapper is transparent - passes every call through.
 //
 // The wrapper does NOT install itself globally; the caller decides where to
 // inject it. This keeps the seam testable (DI: pass a stub fetch) and
@@ -172,7 +172,7 @@ export function wrapFetch(originalFetch) {
 }
 
 // Probe for a network leak. Default behavior (actuallyProbe:false) returns
-// the shape envelope without making any real network calls — tests use this
+// the shape envelope without making any real network calls - tests use this
 // to assert the contract without depending on internet. When actuallyProbe
 // is true AND a probe URL is supplied, the function uses the wrapped fetch
 // to attempt a call; the throw is caught and reported.
@@ -203,7 +203,7 @@ export async function testNetworkLeak(opts = {}) {
         // Expected when airgapped + non-local. Honest record: this is the
         // shape we want.
         if (!e.airgap_blocked) {
-          // Transport-level error (DNS, refused) — still no leak, but record
+          // Transport-level error (DNS, refused) - still no leak, but record
           // for operator visibility.
           hits.push({ url, leak_reason: 'transport_error', detail: String(e && e.message || e) });
         }
@@ -228,7 +228,7 @@ export async function testNetworkLeak(opts = {}) {
 //
 // W411 tenant fence: opts.tenant is preserved in the envelope so downstream
 // capture-stream code can attribute the row to the right tenant. We do NOT
-// write to the event store here — the route layer does that after we
+// write to the event store here - the route layer does that after we
 // return.
 export async function captureFromLocalOllama(opts = {}) {
   const { prompt, model, tenant = null, fetch: fetchImpl, timeoutMs = 30000 } = opts;
@@ -236,7 +236,7 @@ export async function captureFromLocalOllama(opts = {}) {
     return {
       ok: false,
       error: 'prompt_required',
-      hint: 'pass {prompt: string} — the user message to send to the local teacher',
+      hint: 'pass {prompt: string} - the user message to send to the local teacher',
       version: AIRGAP_MODE_VERSION,
     };
   }
@@ -254,12 +254,12 @@ export async function captureFromLocalOllama(opts = {}) {
     return {
       ok: false,
       error: 'no_fetch_available',
-      hint: 'no global fetch and no opts.fetch supplied — Node 18+ ships fetch by default',
+      hint: 'no global fetch and no opts.fetch supplied - Node 18+ ships fetch by default',
       version: AIRGAP_MODE_VERSION,
     };
   }
   // Use the wrapped fetch so even an unconfigured KOLM_AIRGAP=1 honors the
-  // contract — the teacher URL is allowed by matchesLocalTeacher() so this
+  // contract - the teacher URL is allowed by matchesLocalTeacher() so this
   // is always going to succeed when the URL is reachable.
   const wrapped = wrapFetch(real);
   const endpoint = teacher.replace(/\/$/, '') + '/api/generate';
@@ -309,14 +309,14 @@ export async function captureFromLocalOllama(opts = {}) {
   } catch (e) {
     if (timer) clearTimeout(timer);
     if (e && e.airgap_blocked) {
-      // Should not happen — the teacher URL is allowed. But honest-envelope
+      // Should not happen - the teacher URL is allowed. But honest-envelope
       // anyway in case the URL parser rejected it for some reason.
       return e.envelope;
     }
     return {
       ok: false,
       error: 'local_teacher_unreachable',
-      hint: `Could not reach ${teacher} — is the local-Ollama daemon running? Try: curl ${teacher}/api/tags`,
+      hint: `Could not reach ${teacher} - is the local-Ollama daemon running? Try: curl ${teacher}/api/tags`,
       detail: String(e && e.message || e),
       version: AIRGAP_MODE_VERSION,
     };

@@ -1,4 +1,4 @@
-// W-B / wrapper-completion — Fireworks provider adapter.
+// W-B / wrapper-completion - Fireworks provider adapter.
 //
 // Fireworks AI is an OpenAI-compatible inference service
 // (https://api.fireworks.ai/inference/v1). Bearer auth. Models include
@@ -6,14 +6,14 @@
 // accounts/fireworks/models/mixtral-8x22b-instruct,
 // accounts/fireworks/models/deepseek-r1, and many community-served weights.
 //
-// W-N hardening: shared hardenedFetch — 429+backoff (max 3 retries, exp
+// W-N hardening: shared hardenedFetch - 429+backoff (max 3 retries, exp
 // schedule 500/1500/4500 ms each capped by Retry-After), AbortController
 // timeoutMs (default 60s, clamped 1-300s), malformed-JSON envelope,
 // OpenAI-compat body normalizer.
 //
 // Contract mirrors src/capture.js forwardOpenAI: returns
 //   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
-// Never throws on non-2xx — upstream errors flow through as-is so the
+// Never throws on non-2xx - upstream errors flow through as-is so the
 // gateway can sign + capture them. Never throws on transport failure.
 
 import { hardenedFetch, buildOpenAICompatBody, DEFAULT_TIMEOUT_MS } from './_shared.js';

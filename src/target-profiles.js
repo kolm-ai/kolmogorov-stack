@@ -1,4 +1,4 @@
-// W892-C5 — target-profile lookup table.
+// W892-C5 - target-profile lookup table.
 //
 // `kolm compile --target-profile <name>` translates a friendly device name
 // (jetson-orin-nx, raspberry-pi-5, iphone-15-pro, ...) into the right
@@ -130,7 +130,7 @@ export const TARGET_PROFILES = Object.freeze({
     name: 'mac-mini-m2',
     label: 'Mac mini (M2 / M2 Pro, 8-24 GB unified)',
     family: 'desktop',
-    vram_gb: 24, // unified memory — treat as shared VRAM
+    vram_gb: 24, // unified memory - treat as shared VRAM
     target: 'mlx-int4',
     runtime: 'mlx',
     est_tok_s_7b: 38,

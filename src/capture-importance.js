@@ -1,4 +1,4 @@
-// W711-1 — capture importance scorer.
+// W711-1 - capture importance scorer.
 //
 // Wave 709 attached `routing_decision` (with entropy_summary) to every
 // captured request. Wave 710 piped non-student rows into an active-learning
@@ -16,7 +16,7 @@
 //   entropy_proxy     = if a W709 routing_decision is attached, use
 //                       entropy_summary.max directly (already computed in the
 //                       router). Otherwise we approximate via the
-//                       unique-word-ratio of the response — a cheap stand-in
+//                       unique-word-ratio of the response - a cheap stand-in
 //                       for token-level entropy when routing wasn't logged.
 //
 //   novelty           = MinHash-style cosine distance between this capture's
@@ -59,7 +59,7 @@ const NGRAM_K = 5;
 // -------------------------------------------------------------------------
 // Token counters. We do NOT pull a real tokenizer here (that would require
 // torch+transformers in the JS path). The whitespace-split is a known
-// underestimate (the BPE-equivalent multiplier is ~1.3x) — but the score is
+// underestimate (the BPE-equivalent multiplier is ~1.3x) - but the score is
 // a RATIO, so the multiplier cancels and the ranking stays correct.
 // -------------------------------------------------------------------------
 
@@ -203,7 +203,7 @@ function _jaccardDistance(a, b) {
 
 /**
  * Create a rolling novelty window. The returned object encapsulates the only
- * stateful piece of the scorer — pure scoreCapture() composes cleanly when
+ * stateful piece of the scorer - pure scoreCapture() composes cleanly when
  * called with the window threaded through opts.window, or you can use the
  * object's own .score() / .add() methods directly.
  *
@@ -242,7 +242,7 @@ export function createScorerWindow(maxSize = 1000) {
       const { response } = _extractPromptResponse(capture);
       const sh = _shingles(response);
       if (window.length === 0) return 1.0;
-      // We want the MINIMUM Jaccard distance (= max similarity) — the most
+      // We want the MINIMUM Jaccard distance (= max similarity) - the most
       // similar prior capture is the one that bounds how novel this one is.
       let minDist = 1.0;
       for (const w of window) {
@@ -262,12 +262,12 @@ export function createScorerWindow(maxSize = 1000) {
 /**
  * Score a single capture for training value.
  *
- * @param {object} capture  capture row (W144/W709/W454 shape — best-effort
+ * @param {object} capture  capture row (W144/W709/W454 shape - best-effort
  *                          field extraction; never throws on unknown shape).
  * @param {object} [opts]
  * @param {object} [opts.window]  optional scorer window (createScorerWindow).
  *                                When absent, novelty defaults to 1.0 (treat
- *                                as maximally novel — the safe over-estimate
+ *                                as maximally novel - the safe over-estimate
  *                                so a stateless caller never under-weights).
  * @returns {{
  *   score: number,
@@ -313,7 +313,7 @@ export function scoreCapture(capture, opts = {}) {
  * Score `captures` (a list) and return the top-N by importance, descending.
  *
  * Single-pass through a shared scorer window so novelty is computed against
- * the running prefix — the FIRST capture is always the most novel (window is
+ * the running prefix - the FIRST capture is always the most novel (window is
  * empty), and subsequent duplicates get progressively lower novelty.
  *
  * @param {Array<object>} captures

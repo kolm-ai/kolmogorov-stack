@@ -1,6 +1,6 @@
 // K-score public benchmark suite (kolm-bench v1).
 //
-// W275 — K-score deep work. The public bench is the answer to:
+// W275 - K-score deep work. The public bench is the answer to:
 //   "Is K-score a real metric or an internal vanity number?"
 // Anyone with kolm installed can run `kolm bench`, get axis-level scores
 // against a frozen 30-case suite, and send the resulting signed receipt for
@@ -12,7 +12,7 @@
 // Design notes:
 // - 4 task classes (classification, extraction, generation, code) × 7-8
 //   cases each = 30 frozen cases. Inputs are short; the bench tests scorer
-//   honesty, not model capability — it's the contract between artifact
+//   honesty, not model capability - it's the contract between artifact
 //   and gate, not a leaderboard for the underlying model.
 // - Each case carries a frozen reference output + per-axis target.
 //   The scorer function receives `{input, reference, axis_targets}` and

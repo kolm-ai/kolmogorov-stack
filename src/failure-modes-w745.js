@@ -1,4 +1,4 @@
-// W745 — Failure modes dashboard (CID-keyed; complementary to W812).
+// W745 - Failure modes dashboard (CID-keyed; complementary to W812).
 //
 // W745 vs W812 split:
 //   - W812 (src/failure-modes.js) clusters tenant-wide capture events by
@@ -12,30 +12,30 @@
 //     (W741 diagnostic envelope).
 //
 // Both modules coexist on purpose. W812 answers "where is THIS TENANT
-// regressing right now?" — W745 answers "where does THIS ARTIFACT diverge
+// regressing right now?" - W745 answers "where does THIS ARTIFACT diverge
 // most from the bakeoff baseline?"
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 466-471):
 //   [W745-1] Dashboard of where student diverges most from teacher
 //   [W745-2] Cluster captures by topic/pattern, show per-cluster K-Scores
 //            (W757 fingerprinting will supersede; this is the heuristic
-//            placeholder — envelope is honest about it via the
+//            placeholder - envelope is honest about it via the
 //            `clustering:"heuristic_keyword_v1"` field, NOT the eventual
 //            `"w757_fingerprint"` value).
 //   [W745-3] "Your support bot scores 0.97 on refunds but 0.62 on billing
-//            disputes" — top regressions panel.
+//            disputes" - top regressions panel.
 //   [W745-4] Bridge to W741 diagnostic (link from each cluster envelope to
 //            /account/diagnose?cid=<artifact_cid>).
 //
 // Design contract:
 //   - PURE HEURISTIC. No LLM calls. clusterByKeywords() tokenises capture
 //     inputs, drops a small stopword list, builds top-3 1- and 2-grams,
-//     and clusters captures that share >=2 n-grams. Deterministic — same
+//     and clusters captures that share >=2 n-grams. Deterministic - same
 //     input produces the same cluster_ids.
 //   - clusterKScore reuses the same Wilson 95% CI methodology as
 //     src/diagnostic.js (n>=30 floor; null below). The CI helper is
 //     inlined rather than imported because src/diagnostic.js keeps it
-//     private — we honour the same honesty floor here.
+//     private - we honour the same honesty floor here.
 //   - topRegressions returns deltas relative to the artifact's
 //     overall_k_score so the panel can rank "where the student diverges
 //     most from the teacher" without per-row teacher labels.
@@ -43,7 +43,7 @@
 //     `diagnostic_link:"/account/diagnose?cid=<artifact_cid>"`.
 //
 // Public surface:
-//   - FAILURE_MODES_VERSION ('w745-v1' — distinct from W812 'w812-v1')
+//   - FAILURE_MODES_VERSION ('w745-v1' - distinct from W812 'w812-v1')
 //   - clusterByKeywords(captures, {min_cluster_size=10})
 //   - clusterKScore(cluster, bakeoffRows)
 //   - topRegressions(clusters, overall_k_score, {top_n=5})
@@ -51,11 +51,11 @@
 
 export const FAILURE_MODES_VERSION = 'w745-v1';
 
-// Honesty floor — Wilson 95% CI only when n >= 30 (matches src/diagnostic.js
+// Honesty floor - Wilson 95% CI only when n >= 30 (matches src/diagnostic.js
 // MIN_N_FOR_CI). Below this the CI is null and the dashboard says shaky.
 const MIN_N_FOR_CI = 30;
 
-// Minimum cluster size — below this a candidate cluster is dropped (signal
+// Minimum cluster size - below this a candidate cluster is dropped (signal
 // would be noise on a 3-row bucket). Caller can override per-call.
 const DEFAULT_MIN_CLUSTER_SIZE = 10;
 
@@ -63,7 +63,7 @@ const DEFAULT_MIN_CLUSTER_SIZE = 10;
 // per-cluster card pattern. Caller can override per-call.
 const DEFAULT_TOP_N = 5;
 
-// Tiny built-in stopword list. Kept short on purpose — the clustering is
+// Tiny built-in stopword list. Kept short on purpose - the clustering is
 // about TOPICAL keywords, not English grammar. Larger lists drift into
 // linguistic territory that ought to be a real fingerprint model (W757).
 const STOPWORDS = new Set([
@@ -97,7 +97,7 @@ export function clusterByKeywords(captures, opts) {
   const minSize = Number.isFinite(o.min_cluster_size) ? o.min_cluster_size : DEFAULT_MIN_CLUSTER_SIZE;
   if (!Array.isArray(captures) || captures.length === 0) return [];
 
-  // Step 1 — per-capture top n-gram set.
+  // Step 1 - per-capture top n-gram set.
   const rows = [];
   for (const cap of captures) {
     if (!cap || typeof cap !== 'object') continue;
@@ -110,7 +110,7 @@ export function clusterByKeywords(captures, opts) {
     rows.push({ cid: String(id), ngrams, ngramSet: new Set(ngrams) });
   }
 
-  // Step 2 — greedy cluster: assign each row to the existing cluster whose
+  // Step 2 - greedy cluster: assign each row to the existing cluster whose
   // founder shares >=2 n-grams (best-overlap wins; ties go to the lower-index
   // existing cluster). Else start a new candidate cluster. Deterministic
   // because captures are processed in input order.
@@ -138,7 +138,7 @@ export function clusterByKeywords(captures, opts) {
     }
   }
 
-  // Step 3 — drop clusters below min_cluster_size; format the survivors.
+  // Step 3 - drop clusters below min_cluster_size; format the survivors.
   const out = [];
   for (const c of clusters) {
     if (c.members.length < minSize) continue;
@@ -166,7 +166,7 @@ export function clusterByKeywords(captures, opts) {
       top_keywords: topKeywords,
       count: c.members.length,
       sample_cids: member_cids.slice(0, 3),
-      _all_cids: member_cids, // internal — used by clusterKScore + generateFailureModeReport
+      _all_cids: member_cids, // internal - used by clusterKScore + generateFailureModeReport
     });
   }
   // Sort by count desc; tiebreak by cluster_id asc for stable diff.
@@ -182,7 +182,7 @@ export function clusterByKeywords(captures, opts) {
 //
 // Join cluster._all_cids (or sample_cids fallback) to bakeoffRows; return
 // {cluster_id, n, k_score, k_score_ci_lo, k_score_ci_hi}. Wilson 95% CI when
-// n>=30; null below (honesty contract — matches src/diagnostic.js).
+// n>=30; null below (honesty contract - matches src/diagnostic.js).
 // =============================================================================
 
 export function clusterKScore(cluster, bakeoffRows) {
@@ -305,7 +305,7 @@ export function generateFailureModeReport(artifact_cid, captures, bakeoffRows, o
     };
   }
   const captureList = Array.isArray(captures) ? captures : [];
-  // Overall k_score — unweighted mean over bakeoff rows (matches W741).
+  // Overall k_score - unweighted mean over bakeoff rows (matches W741).
   const allK = bakeoffRows
     .map((r) => Number(r && r.k_score))
     .filter((k) => Number.isFinite(k));
@@ -341,7 +341,7 @@ export function generateFailureModeReport(artifact_cid, captures, bakeoffRows, o
     failure_modes_version: FAILURE_MODES_VERSION,
     artifact_cid,
     overall_k_score,
-    clustering: 'heuristic_keyword_v1', // W745-2 honesty — NOT 'w757_fingerprint' yet
+    clustering: 'heuristic_keyword_v1', // W745-2 honesty - NOT 'w757_fingerprint' yet
     cluster_count: clusters.length,
     clusters,
     top_regressions,
@@ -401,7 +401,7 @@ function _intersectionSize(a, b) {
 
 function _shortHash(s) {
   // Deterministic FNV-1a 32-bit hex. Avoids node:crypto so the helper is
-  // pure-JS portable — clusterByKeywords stays usable in any runtime.
+  // pure-JS portable - clusterByKeywords stays usable in any runtime.
   let h = 0x811c9dc5;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);
@@ -416,7 +416,7 @@ function _round4(x) {
 }
 
 // Wilson 95% CI on a 0..1 proportion. Caller enforces n>=MIN_N_FOR_CI.
-// Inlined intentionally — src/diagnostic.js keeps the same helper private,
+// Inlined intentionally - src/diagnostic.js keeps the same helper private,
 // and we want clusterKScore to honour the identical honesty floor.
 function _wilson95(p, n) {
   if (n < 1) return { lo: 0, hi: 0 };

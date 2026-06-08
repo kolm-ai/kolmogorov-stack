@@ -1,4 +1,4 @@
-// W826-3 — predictive runtime preload using Markov-style transition matrix.
+// W826-3 - predictive runtime preload using Markov-style transition matrix.
 //
 // Closes KOLM_W707_SYSTEM_UPGRADE_PLAN.md W826-3 (line 1125): "Pre-load
 // heuristic: analyze inference patterns → preload likely-next artifact."
@@ -11,7 +11,7 @@
 //      first-order transition matrix from artifact_id A → artifact_id B.
 //      Returns the top-3 most-frequently-used artifacts plus a confidence
 //      score (0..1) reflecting how many transition samples we had to fit the
-//      matrix. Pure read — never writes.
+//      matrix. Pure read - never writes.
 //
 //   2. preloadDecision({current_artifact_id, hierarchy, top_artifacts})
 //      Pure function. No I/O. Given the currently-loaded artifact and the
@@ -27,10 +27,10 @@
 //   - Empty event store → returns top_artifacts:[] with confidence:0. NEVER
 //     fabricates a recommendation from zero data.
 //   - Single-event window → confidence:0 (no transitions observable).
-//   - Foreign-tenant events are NEVER read — tenant filter is mandatory at
+//   - Foreign-tenant events are NEVER read - tenant filter is mandatory at
 //     the listEvents call site. (event-store also defense-in-depth filters.)
 //   - preloadDecision NEVER picks warm_to_vram when current artifact already
-//     consumes >= 70% of GPU free VRAM — only mmap_only or skip.
+//     consumes >= 70% of GPU free VRAM - only mmap_only or skip.
 //
 // TODO(future-wave-runtime): `kolm run` and `kolm serve` should call
 //   analyzeInferencePatterns once at boot (cold-start prediction) and once
@@ -49,12 +49,12 @@ export const PRELOAD_VERSION = 'w826-v1';
 export const PRELOAD_ACTIONS = Object.freeze(['warm_to_vram', 'mmap_only', 'skip']);
 
 // Top-K predictions returned. 3 is the established sibling default (W725
-// preload-scheduler uses TOP_K=3) — small enough to fit on a single VRAM
+// preload-scheduler uses TOP_K=3) - small enough to fit on a single VRAM
 // budget, large enough to absorb a single mispredict.
 export const TOP_K = 3;
 
 // Minimum transition pairs needed before we trust the matrix. Below this,
-// confidence stays at 0 even if a transition pattern exists — protects against
+// confidence stays at 0 even if a transition pattern exists - protects against
 // over-fitting to a 2-sample sequence.
 export const MIN_TRANSITIONS_FOR_CONFIDENCE = 5;
 
@@ -85,7 +85,7 @@ export const VRAM_SATURATION_THRESHOLD = 0.7;
 //
 // Confidence model: linear ramp from 0 to 1.0 as transition_count goes from
 // MIN_TRANSITIONS_FOR_CONFIDENCE (0.0) to 50 (1.0). Capped at 1.0. Below
-// MIN_TRANSITIONS_FOR_CONFIDENCE we honestly return 0 — never lie.
+// MIN_TRANSITIONS_FOR_CONFIDENCE we honestly return 0 - never lie.
 
 export async function analyzeInferencePatterns(opts = {}) {
   const tenant = opts.tenant;
@@ -133,7 +133,7 @@ export async function analyzeInferencePatterns(opts = {}) {
     return _emptyAnalysis(window_hours, 'no_inference_events');
   }
 
-  // Defense-in-depth tenant fence — listEvents already filtered, but if a
+  // Defense-in-depth tenant fence - listEvents already filtered, but if a
   // legacy row slipped through (e.g. a backfilled pre-W411 row whose
   // tenant_id was inferred to 'default'), strip it here too.
   const tenantSafe = inferenceEvents.filter(ev => ev.tenant_id === tenant);
@@ -209,7 +209,7 @@ export async function analyzeInferencePatterns(opts = {}) {
 }
 
 // Internal: extract an artifact_id from a heterogeneous event row. The event
-// schema doesn't have a hard `artifact_id` column — runtime replays stamp it
+// schema doesn't have a hard `artifact_id` column - runtime replays stamp it
 // into various sub-fields depending on the producer. We accept all four common
 // keys (compileSpec output, runtime.js getCompiled, W725 preload-scheduler,
 // W354 capture replay). Honest fallback: null when none of the keys are
@@ -223,7 +223,7 @@ function _artifactIdOf(ev) {
   // artifact identifier on `ev.model` and `cache_hit:true` (the canonical
   // schema strips unknown top-level keys, so `artifact_id` does not survive
   // unless explicitly added to event-schema.js). Accept (provider==='kolm' OR
-  // cache_hit===true) AS A RUNTIME-INFERENCE MARKER — both of these are set
+  // cache_hit===true) AS A RUNTIME-INFERENCE MARKER - both of these are set
   // by src/runtime.js getCompiled(); LLM rows from openai/anthropic don't
   // share that combination. Honest fallback: null when none match.
   if (typeof ev.model === 'string' && ev.model) {
@@ -275,7 +275,7 @@ function _emptyAnalysis(window_hours, reason) {
 //   [{artifact_id, action: 'warm_to_vram' | 'mmap_only' | 'skip', rationale}]
 //
 // Logic:
-//   - skip the current_artifact_id (already loaded — nothing to do).
+//   - skip the current_artifact_id (already loaded - nothing to do).
 //   - no GPU → mmap_only for everything (CPU path uses madvise/page-cache).
 //   - GPU free VRAM saturated (>= VRAM_SATURATION_THRESHOLD already filled by
 //     an estimated working set) → mmap_only.
@@ -306,7 +306,7 @@ export function preloadDecision(opts = {}) {
       return { artifact_id: aid, action: 'mmap_only', rationale: 'no_gpu' };
     }
     // Saturation check: if the GPU is already running tight (>= threshold
-    // fraction of free_gb consumed by the current artifact's working set —
+    // fraction of free_gb consumed by the current artifact's working set - 
     // we estimate at 1.0 GB per active artifact as a coarse floor), then
     // warming a second artifact would evict the first. Stay in mmap.
     const gpu = hierarchy.gpu[0];

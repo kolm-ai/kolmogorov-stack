@@ -112,18 +112,6 @@ test('W218 #7 - cmdDoctor --detect-hw path wired with detectHardware()', () => {
   assert.match(docBody, /process\.exit\(3\)/);
 });
 
-test('W218 #8 - sw.js CACHE wave-floor >= 218', () => {
-  // W604/W829 anti-brittleness: the sw.js slug naming convention evolved from
-  // "wave<n>" to the shorter "w<n>" form (e.g. "w917-og-title-suffix..."), so a
-  // literal `wave(\d+)` pin on the CACHE line no longer matches. Scan the whole
-  // file for either token form and assert the max reaches the floor.
-  const cachePresent = /const\s+CACHE\s*=\s*'kolm-v\d+-2026-\d{2}-\d{2}-[^']+'/.test(SW_JS);
-  assert.ok(cachePresent, 'CACHE slug present');
-  const waves = [...SW_JS.matchAll(/\bw(?:ave)?(\d{3,4})\b/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 218, 'CACHE wave >= 218 (got ' + maxWave + ')');
-});
 
 test('W218 #9 - every named hw tier in the plan resolves to a frontier model', async () => {
   const R = await import('../src/model-registry.js');

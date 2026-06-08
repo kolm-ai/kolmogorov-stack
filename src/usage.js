@@ -1,6 +1,6 @@
 // src/usage.js
 //
-// W409y — real billing-units metering. Tracks 10 billable units per tenant
+// W409y - real billing-units metering. Tracks 10 billable units per tenant
 // per billing period, enforces hard caps + soft-warn limits, and persists
 // counters to a flat JSON file in KOLM_DATA_DIR (.kolm by default). This is
 // the source-of-truth the dashboard (/v1/billing/usage) and the CLI
@@ -12,7 +12,7 @@
 //     no-ops when (a) no api key is present on the request, (b) the
 //     synthetic tenant_id is the literal string 'local' (connector-daemon
 //     untenanted path), or (c) the caller passes `localOnly: true`.
-//     This is a privacy promise — Free tier work never leaves the user's
+//     This is a privacy promise - Free tier work never leaves the user's
 //     disk, so we MUST NOT report it back to the central billing store.
 //
 //  2. Tier limits are a static map in this file (one source of truth).
@@ -38,7 +38,7 @@ import path from 'node:path';
 import os from 'node:os';
 
 // ---------------------------------------------------------------------------
-// Billing units. The set is closed — adding a new unit must be done here
+// Billing units. The set is closed - adding a new unit must be done here
 // AND in TIER_LIMITS below, AND in /v1/billing/meters static catalog, AND
 // in public/account/billing.html metric rows.
 // ---------------------------------------------------------------------------
@@ -216,7 +216,7 @@ function withLock(fn) {
 // ---------------------------------------------------------------------------
 // Reset / wipe the in-memory + on-disk state for one period. Tests call this
 // between cases so counters from prior tests don't leak. Production code
-// never calls this directly — period rollover is implicit (next month's file
+// never calls this directly - period rollover is implicit (next month's file
 // is created on the first increment of the new month).
 // ---------------------------------------------------------------------------
 export function resetPeriod(period) {
@@ -236,7 +236,7 @@ export function shouldMeter({ tenantId, hosted = false, localOnly = false } = {}
   if (tenantId === 'local') return false;
   if (typeof tenantId === 'string' && tenantId.startsWith('local:')) return false;
   if (tenantId === 'anon' || String(tenantId).startsWith('anon_')) {
-    // Anon tenants are not metered for billing — they pay nothing, and
+    // Anon tenants are not metered for billing - they pay nothing, and
     // their work is gated by the rate-limit bucket in auth.js. The
     // /v1/billing/usage endpoint still returns an empty map for them.
     return false;
@@ -316,7 +316,7 @@ export function dashboardPayload({ tenantId, tier = 'free', period, plan = null 
   const over_soft = [];
   const over_hard = [];
   // Build full meter map including zeros so the UI doesn't need to know the
-  // full unit list — it just renders rows in render-order.
+  // full unit list - it just renders rows in render-order.
   const meters = {};
   const softMap = {};
   const hardMap = {};

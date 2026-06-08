@@ -3,7 +3,7 @@
 // W813-2 spec: per-namespace override of kl_threshold + fallback_rate_lift.
 // W813-5 spec: auto_remediate_drift opt-in flag. When true (AND the operator
 // hits the auto-remediate endpoint with dry_run:false) the W720 orchestrator
-// is invoked to re-distill. Default is OFF — auto-trigger is a P0 trust
+// is invoked to re-distill. Default is OFF - auto-trigger is a P0 trust
 // violation when implicit.
 //
 // Atomic guarantees pinned by tests/wave813-drift-detection.test.js:
@@ -19,7 +19,7 @@
 //       { kl_threshold: 0.10, fallback_rate_lift: 0.20, auto_remediate_drift: false }
 //     Fail-safe: auto_remediate_drift NEVER auto-enables.
 //   - getNamespaceConfig is tenant-fenced via storeMod.all + per-row filter
-//     (W411 defense-in-depth law — same trap as W761/W770 where findByTenant
+//     (W411 defense-in-depth law - same trap as W761/W770 where findByTenant
 //     would silently miss rows due to field-key mismatch).
 //
 // HONESTY INVARIANTS (NEVER violate):
@@ -36,7 +36,7 @@ export const DRIFT_CONFIG_VERSION = 'w813-v1';
 export const DRIFT_CONFIG_PROVIDER = 'kolm_drift_config';
 
 // Fail-safe defaults. auto_remediate_drift is FALSE by default per W813-5
-// invariant — implicit auto-trigger would be a P0 trust violation.
+// invariant - implicit auto-trigger would be a P0 trust violation.
 export const DRIFT_CONFIG_DEFAULTS = Object.freeze({
   kl_threshold: DEFAULT_KL_THRESHOLD,
   fallback_rate_lift: DEFAULT_FALLBACK_RATE_LIFT,
@@ -53,7 +53,7 @@ const FBL_MAX_INCLUSIVE = 1;
 // validateConfig({kl_threshold, fallback_rate_lift, auto_remediate_drift})
 // -> {ok:true, normalized} or honest envelope.
 //
-// Strict — out-of-range / wrong-type values are REJECTED, not silently coerced.
+// Strict - out-of-range / wrong-type values are REJECTED, not silently coerced.
 // =============================================================================
 export function validateConfig(input = {}) {
   const out = {};
@@ -229,10 +229,10 @@ export async function setNamespaceConfig({
 //
 // W411 defense-in-depth: the config rows live in the event store; we list
 // events for the tenant + provider then re-check per-row tenant_id before
-// trusting the row. Same trap as W761/W770 — never use findByTenant on
+// trusting the row. Same trap as W761/W770 - never use findByTenant on
 // canonical store tables that key on `tenant_id` instead of `tenant`.
 //
-// opts.storeMod — DI seam for tests (storeMod.all('events') style). When
+// opts.storeMod - DI seam for tests (storeMod.all('events') style). When
 // absent we use eventStore.listEvents which itself does in-driver fencing.
 // =============================================================================
 export async function getNamespaceConfig({

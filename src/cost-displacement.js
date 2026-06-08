@@ -1,4 +1,4 @@
-// R-8 — Cost displacement reporting.
+// R-8 - Cost displacement reporting.
 //
 // Distinct from src/savings-tracker.js (W835):
 //
@@ -6,7 +6,7 @@
 //                            fee-on-savings model. Operator marks a moment
 //                            in time as "baseline started" and we compare
 //                            spend before/after that marker. Used for the
-//                            kolm.ai pricing fee — the 12.5% of saved spend.
+//                            kolm.ai pricing fee - the 12.5% of saved spend.
 //
 //   - cost-displacement.js: THIS FILE. Per-namespace, per-receipt reasoning
 //                            using ConfidenceRouter's route_decision tag.
@@ -14,7 +14,7 @@
 //                            gone to frontier, what would this have cost?"
 //                            vs "what did it actually cost?". The delta is
 //                            the value the local artifact + ConfidenceRouter
-//                            displaced. No fee math — this is operator-facing
+//                            displaced. No fee math - this is operator-facing
 //                            "what did kolm save me this month" without the
 //                            pricing model baked in.
 //
@@ -32,17 +32,17 @@
 //       period_days, since_ms, until_ms,
 //       receipt_count, local_count, frontier_count, frontier_fallback_count,
 //     },
-//     // Provenance — never silent on missing data.
+//     // Provenance - never silent on missing data.
 //     ok_status: 'computed' | 'no_receipts' | 'no_route_decisions' | ...
 //   }
 //
 // Cost model:
 //
 //   For each receipt we trust `cost_usd` as the actual cost. We do NOT
-//   re-price from a rate card here — the receipt already carries the
+//   re-price from a rate card here - the receipt already carries the
 //   authoritative number because the router stamped it at decision time.
 //
-//   For BASELINE we need "what would frontier have cost?" — that depends on
+//   For BASELINE we need "what would frontier have cost?" - that depends on
 //   the route_decision:
 //
 //     route_decision = 'frontier'          : actual cost (no displacement)
@@ -60,7 +60,7 @@
 // pins tenant_id to req.tenant_record.id and forwards namespace as-is).
 // This module accepts those already-scoped inputs and never reaches across.
 //
-// Pure JS — no model imports.
+// Pure JS - no model imports.
 
 import * as store from './store.js';
 import { PROVIDER_RATE_CARD } from './savings-tracker.js';
@@ -70,7 +70,7 @@ export const COST_DISPLACEMENT_VERSION = 'r8-v1';
 export const DEFAULT_PERIOD_DAYS = 30;
 
 // =============================================================================
-// Helpers — row scoping + timestamp parsing
+// Helpers - row scoping + timestamp parsing
 // =============================================================================
 
 function _rowTimestampMs(row) {
@@ -134,7 +134,7 @@ function _frontierCostForReceipt(receipt, frontierProvider, frontierModel) {
 }
 
 // =============================================================================
-// Artifact passport reads — compile_cost + deployed_at for cumulative math.
+// Artifact passport reads - compile_cost + deployed_at for cumulative math.
 // =============================================================================
 
 // Best-effort read of compile_cost + deployed_at from the artifact passport.
@@ -292,14 +292,14 @@ export function computeDisplacement(opts = {}) {
       }
     } else if (decision === 'frontier') {
       frontierCount++;
-      // No displacement — would have gone to frontier anyway.
+      // No displacement - would have gone to frontier anyway.
       baselineCost += actual;
     } else if (decision === 'frontier_fallback') {
       fallbackCount++;
       // We already paid full frontier price; no displacement here either.
       baselineCost += actual;
     } else {
-      // Receipts without route_decision (older rows) — best we can say is
+      // Receipts without route_decision (older rows) - best we can say is
       // that what we paid is what we would have paid. No savings claim.
       unknownRouteCount++;
       baselineCost += actual;
@@ -350,14 +350,14 @@ export function computeDisplacement(opts = {}) {
   } else {
     const monthlyRate = (savings / days) * 30;
     if (monthlyRate <= 0) {
-      // No net savings yet — payback period is undefined; report it.
+      // No net savings yet - payback period is undefined; report it.
       payback_period_months = null;
     } else {
       payback_period_months = compileCost / monthlyRate;
     }
   }
 
-  // ok_status — be loud about partials.
+  // ok_status - be loud about partials.
   let ok_status = 'computed';
   if (unrepricedCount > 0) ok_status = 'partial:' + unrepricedCount + '_unrepriced';
   if (localCount + frontierCount + fallbackCount === 0) {
@@ -408,7 +408,7 @@ export function computeDisplacement(opts = {}) {
  * Look up `model` in the frozen PROVIDER_RATE_CARD (savings-tracker.js's
  * source of truth) and return USD cost. Searches every provider for the
  * model string; returns 0 when no match. We do NOT scale prices, infer
- * discounts, or invent costs — public list price only.
+ * discounts, or invent costs - public list price only.
  *
  * Both arguments are coerced to numbers; non-finite values are treated as 0.
  */
@@ -520,13 +520,13 @@ export async function calculateSavings(namespace, period = {}) {
       const outT = Number(r.output_tokens) || 0;
       baseline = estimateFrontierCost(inT, outT, model);
       // If we couldn't price (unknown model), the row contributes its
-      // actual cost (which is $0 for local) — never invent.
+      // actual cost (which is $0 for local) - never invent.
       if (baseline === 0 && (inT > 0 || outT > 0)) baseline = actual;
     } else if (decision === 'frontier' || decision === 'frontier_fallback') {
       frontier_calls++;
       baseline = actual;
     } else {
-      // Older row without route_decision — count it as frontier so we don't
+      // Older row without route_decision - count it as frontier so we don't
       // overstate savings.
       frontier_calls++;
       baseline = actual;

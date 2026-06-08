@@ -1,6 +1,6 @@
 // src/audit-retention.js
 //
-// W767-3 — Audit-log retention extension to 12 months (SOC 2 Type II requirement).
+// W767-3 - Audit-log retention extension to 12 months (SOC 2 Type II requirement).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 596-601):
 //   [W767-3] Audit-log retention extension to 12 months (Type II requirement)
@@ -22,8 +22,8 @@
 //   - enforceRetentionPolicy DEFAULTS to dry-run (opts.dry_run=true) and
 //     RETURNS a count of would-be-evicted events. Live eviction requires
 //     opts.confirm:true PLUS opts.dry_run:false. Anything else returns
-//     {ok:false, error:'confirm_required'} — destruction MUST be opt-in.
-//   - Tenant-fenced everywhere — defense-in-depth W411: every row read or
+//     {ok:false, error:'confirm_required'} - destruction MUST be opt-in.
+//   - Tenant-fenced everywhere - defense-in-depth W411: every row read or
 //     count is re-filtered by tenant_id inside the helper even if the caller
 //     already passed tenant_id as a query parameter.
 //
@@ -32,7 +32,7 @@
 // in-memory fake; production code passes nothing and falls through to the
 // real modules.
 //
-// W604 anti-brittleness: version stamp matches /^w767-/ — callers MUST
+// W604 anti-brittleness: version stamp matches /^w767-/ - callers MUST
 // regex-match. Never literal-compare 'w767-v1'.
 
 import * as defaultEventStore from './event-store.js';
@@ -46,7 +46,7 @@ export const DEFAULT_RETENTION_DAYS = 365;
 // orgs claiming Type I controls, so the setter rejects it.
 export const MIN_RETENTION_DAYS = 90;
 
-// 7-year ceiling — HIPAA + GDPR right-to-erasure exception cases. Going
+// 7-year ceiling - HIPAA + GDPR right-to-erasure exception cases. Going
 // above 7y converts "audit log" into a forever-store which conflicts with
 // the right-to-erasure principle of GDPR Art. 17.
 export const MAX_RETENTION_DAYS = 2555;
@@ -61,7 +61,7 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 // ---------------------------------------------------------------------------
 // Read the runtime-effective retention floor from env. Returns DEFAULT when
 // unset. Rejects (falls through to DEFAULT with a console.error in debug mode)
-// when the parsed value is below MIN — never silently honors a sub-floor
+// when the parsed value is below MIN - never silently honors a sub-floor
 // configuration because that would defeat the SOC 2 Type I claim.
 // ---------------------------------------------------------------------------
 export function getCurrentRetentionDays() {
@@ -196,13 +196,13 @@ async function _resolveTenantDays(tenant_id, es) {
       return n;
     }
   } catch (_) { // deliberate: cleanup
-    // event-store unreachable — fall back to env/DEFAULT.
+    // event-store unreachable - fall back to env/DEFAULT.
   }
   return getCurrentRetentionDays();
 }
 
 // ---------------------------------------------------------------------------
-// getRetentionStatus(tenant_id) — read-only snapshot of the tenant's
+// getRetentionStatus(tenant_id) - read-only snapshot of the tenant's
 // effective retention policy plus the audit-event volume currently in that
 // window.
 //
@@ -223,7 +223,7 @@ async function _resolveTenantDays(tenant_id, es) {
 //   }
 //
 // HONEST: returns ok:false 'tenant_required' when tenant_id is missing/empty.
-// NEVER fabricates a "global" status row — every retention policy is
+// NEVER fabricates a "global" status row - every retention policy is
 // per-tenant.
 // ---------------------------------------------------------------------------
 export async function getRetentionStatus(tenant_id, opts = {}) {
@@ -251,7 +251,7 @@ export async function getRetentionStatus(tenant_id, opts = {}) {
   } catch (_) {
     rowsInWindow = [];
   }
-  // Defense in depth — re-filter by tenant_id even though listEvents already
+  // Defense in depth - re-filter by tenant_id even though listEvents already
   // accepted the filter (W411).
   rowsInWindow = (rowsInWindow || []).filter((r) => r && r.tenant_id === tenant_id);
 
@@ -281,7 +281,7 @@ export async function getRetentionStatus(tenant_id, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// enforceRetentionPolicy(tenant_id, opts) — count events that have aged past
+// enforceRetentionPolicy(tenant_id, opts) - count events that have aged past
 // the tenant's retention window and (in live mode) evict them.
 //
 // Defaults:
@@ -303,7 +303,7 @@ export async function getRetentionStatus(tenant_id, opts = {}) {
 //
 // Honesty invariants:
 //   - dry_run NEVER calls a delete primitive.
-//   - confirm:true alone (without dry_run:false) is still a dry run — we
+//   - confirm:true alone (without dry_run:false) is still a dry run - we
 //     require BOTH flags so an accidental confirm cannot trigger destruction.
 // ---------------------------------------------------------------------------
 export async function enforceRetentionPolicy(tenant_id, opts = {}) {
@@ -334,7 +334,7 @@ export async function enforceRetentionPolicy(tenant_id, opts = {}) {
   } catch (_) {
     rows = [];
   }
-  // Defense in depth — re-filter by tenant_id. NEVER trust the upstream
+  // Defense in depth - re-filter by tenant_id. NEVER trust the upstream
   // alone.
   rows = (rows || []).filter((r) => r && r.tenant_id === tenant_id);
 
@@ -370,7 +370,7 @@ export async function enforceRetentionPolicy(tenant_id, opts = {}) {
   }
 
   // Live mode requires confirm:true. We reject the call rather than silently
-  // dropping to a dry run — that would be a different failure mode operators
+  // dropping to a dry run - that would be a different failure mode operators
   // could miss in noisy logs.
   if (!confirm) {
     return {

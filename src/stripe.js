@@ -58,7 +58,7 @@ const AMOUNT_TO_PLAN = {
   9900:   'teams',       // Team $99
   14900:  'teams',       // legacy team link
   49900:  'business',    // Business $499 (was Team $499 in pre-wave4 catalog)
-  149900: 'enterprise',  // legacy Enterprise $1,499 link — pre-W889-6.1
+  149900: 'enterprise',  // legacy Enterprise $1,499 link - pre-W889-6.1
   299900: 'enterprise',  // legacy enterprise link
 };
 

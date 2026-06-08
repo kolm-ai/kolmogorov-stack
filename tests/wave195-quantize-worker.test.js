@@ -178,14 +178,6 @@ test('14. HELP.quantize text declares the opt-in / isolated-worker honest scope'
     'HELP.quantize must reference the workers/quantize/ path');
 });
 
-test('15. sw.js CACHE wave segment >= 195 (wave-floor regex, not literal)', () => {
-  const sw = fs.readFileSync(SW, 'utf8');
-  // W604 anti-brittleness: scan all wave tokens, assert max >= 195.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 195, 'sw.js CACHE wave must reach >= 195 (saw max wave' + maxWave + ')');
-});
 
 test('16. Worker package.json mirrors workers/distill/package.json shape', () => {
   const distillPkg  = JSON.parse(fs.readFileSync(path.join(REPO, 'workers', 'distill', 'package.json'), 'utf8'));

@@ -1,11 +1,11 @@
-// W749 — Synthetic capture augmentation: gap detection, coverage report,
+// W749 - Synthetic capture augmentation: gap detection, coverage report,
 // importance upweighting, and teacher-driven rare-case generation.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 492-497):
 //   [W749-1] Use teacher to generate synthetic variations covering gaps
 //            → this module (DI teacher_caller; never silently mixes with real)
 //   [W749-2] UI prompt: "I see you have 200 refund queries but zero escalation
-//            — generate 50 escalation examples from teacher?"
+// - generate 50 escalation examples from teacher?"
 //            → detectGaps() + /account/synthetic.html consume the same envelope
 //   [W749-3] Automated rare-case detection in capture analysis
 //            → generateCoverageReport() returns rare_buckets[] sorted by rarity
@@ -20,7 +20,7 @@
 //     bakeoffs) can filter or up-weight synthetic-vs-real explicitly. We never
 //     silently mix the two.
 //   - SPEND PROTECTION: requestSyntheticBatch surfaces a cost estimate. The
-//     HTTP route's `confirm:true` gate is the canonical hand-off — callers who
+//     HTTP route's `confirm:true` gate is the canonical hand-off - callers who
 //     skip it get an honest envelope with the estimate instead of a charge.
 //   - Coverage uses Gini coefficient on bucket counts. Uniform = 0; one bucket
 //     holding everything = ~1.0. The math is the standard discrete formula.
@@ -39,7 +39,7 @@ import { clusterByKeywords } from './failure-modes-w745.js';
 
 export const SYNTHETIC_VERSION = 'w749-v1';
 
-// Default minimum captures per category — below this a category is considered
+// Default minimum captures per category - below this a category is considered
 // a "gap" and surfaced for synthetic top-up. Caller can override.
 const DEFAULT_MIN_PER_CATEGORY = 50;
 
@@ -54,7 +54,7 @@ const MIN_TARGET_COUNT = 1;
 
 // Teacher cost estimate (USD per generated row). Used by requestSyntheticBatch
 // AND by the route's WARNING envelope. 0.002 is roughly claude-3.5-sonnet rates
-// at ~1k tokens in/out — a sane round number. Callers can override via
+// at ~1k tokens in/out - a sane round number. Callers can override via
 // opts.cost_per_row_usd if they have a hosted-model contract that prices
 // differently.
 const DEFAULT_COST_PER_ROW_USD = 0.002;
@@ -97,7 +97,7 @@ export function detectGaps(captures, opts) {
 
   const rows = [];
   if (targetList) {
-    // Caller specified the full set — fill missing with zero, gap = minPer.
+    // Caller specified the full set - fill missing with zero, gap = minPer.
     for (const name of targetList) {
       if (typeof name !== 'string' || !name.length) continue;
       const current = counts.get(name) || 0;
@@ -112,7 +112,7 @@ export function detectGaps(captures, opts) {
       });
     }
   } else {
-    // No target list — surface only categories the corpus already has, that
+    // No target list - surface only categories the corpus already has, that
     // happen to be below the threshold.
     for (const c of cat.categories) {
       if (c.count >= minPer) continue;
@@ -139,9 +139,9 @@ export function detectGaps(captures, opts) {
 //
 // Bucket the captures (by category OR by keyword cluster) and compute:
 //   - count + pct per bucket
-//   - rarity_score per bucket — high score = rare bucket = up-weight in sampler
+//   - rarity_score per bucket - high score = rare bucket = up-weight in sampler
 //   - rare_buckets[] sorted by rarity desc
-//   - gini_coefficient — 0 = uniform, ~1 = one bucket dominates
+//   - gini_coefficient - 0 = uniform, ~1 = one bucket dominates
 //
 // Math:
 //   rarity_score(b) = -log(pct + epsilon) / log(total)
@@ -176,7 +176,7 @@ export function generateCoverageReport(captures, opts) {
   // Build the bucket list using the requested strategy.
   let bucketRows = [];
   if (strategy === 'keyword') {
-    // W745 keyword clustering — single-shot ngram intersect. min_cluster_size:1
+    // W745 keyword clustering - single-shot ngram intersect. min_cluster_size:1
     // so even a single-row "cluster" gets coverage representation; the rarity
     // score then naturally bubbles it to the top of the rare list.
     const clusters = clusterByKeywords(arr, { min_cluster_size: 1 });
@@ -202,7 +202,7 @@ export function generateCoverageReport(captures, opts) {
   }
 
   // Compute pct + rarity_score per bucket. The pct is a true fraction of the
-  // bucket count to total (NOT the bucket count to total of bucketed rows —
+  // bucket count to total (NOT the bucket count to total of bucketed rows - 
   // those should equal under both strategies).
   const denomLog = Math.log(Math.max(2, total));
   const buckets = bucketRows.map((b) => {
@@ -246,14 +246,14 @@ export function generateCoverageReport(captures, opts) {
   };
 }
 
-// _giniCoefficient — discrete Gini on a non-negative integer count vector.
+// _giniCoefficient - discrete Gini on a non-negative integer count vector.
 // Returns 0 when all counts are equal (perfect uniformity) and approaches 1
 // when one bucket holds everything.
 function _giniCoefficient(counts) {
   if (!Array.isArray(counts) || counts.length === 0) return 0;
   const n = counts.length;
   if (n === 1) {
-    // Single bucket — by convention Gini is 1 (all mass concentrated in one
+    // Single bucket - by convention Gini is 1 (all mass concentrated in one
     // bucket). The standard pairwise formula would return 0 with n=1, which
     // is misleading for a coverage report. We surface concentration honestly.
     return counts[0] > 0 ? 1 : 0;
@@ -268,7 +268,7 @@ function _giniCoefficient(counts) {
   }
   if (sumValues === 0) return 0;
   const g = sumDiffs / (2 * n * sumValues);
-  // Clamp to [0,1] — floating-point noise can push it microscopically out.
+  // Clamp to [0,1] - floating-point noise can push it microscopically out.
   return Math.max(0, Math.min(1, g));
 }
 
@@ -362,7 +362,7 @@ export async function requestSyntheticBatch(opts) {
     return {
       ok: false,
       error: 'teacher_caller_required',
-      hint: 'requestSyntheticBatch is DI — pass {teacher_caller: async (prompt) => string}',
+      hint: 'requestSyntheticBatch is DI - pass {teacher_caller: async (prompt) => string}',
       version: SYNTHETIC_VERSION,
     };
   }
@@ -446,7 +446,7 @@ export async function requestSyntheticBatch(opts) {
   };
 }
 
-// _parseTeacherRow — accept either JSON or raw text. JSON path is the
+// _parseTeacherRow - accept either JSON or raw text. JSON path is the
 // preferred shape; raw text falls into {input:"", output:raw}.
 function _parseTeacherRow(raw) {
   if (raw == null) return { input: '', output: '' };

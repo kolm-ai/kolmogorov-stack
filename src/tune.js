@@ -12,7 +12,7 @@
 //                                   --airgap passes KOLM_AIRGAP=1 to the trainer, which
 //                                   disables HF Hub, blocks fetch, refuses any non-local
 //                                   model path. If python+torch+peft are absent, exits
-//                                   with a clean install message — does not silently fail.
+//                                   with a clean install message - does not silently fail.
 //   4. `kolm tune eval [--rev vN]`  runs artifact's embedded evals against the candidate
 //                                   adapter, recomputes K-score delta vs current head.
 //   5. `kolm tune promote --rev N`  K-score(N) ≥ K-score(head) AND ≥ 0.85? Move v<N> into
@@ -23,7 +23,7 @@
 //                                   and surface the failure via `kolm logs`.
 //
 // The capture buffer is artifact-scoped. The trainer is artifact-scoped. The K-score
-// gate is global. This is the "living model" loop — every successful interaction is
+// gate is global. This is the "living model" loop - every successful interaction is
 // a training signal; every step is gated by the same K-score that compiled the artifact.
 //
 // Airgap guarantees:
@@ -71,7 +71,7 @@ export function listRevisions(d) {
     .sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
 }
 
-// init — write the skeleton adapter_config.json + tune-config.json (kolm metadata).
+// init - write the skeleton adapter_config.json + tune-config.json (kolm metadata).
 // Returns { tuneDir, revision: 'v0', config }.
 export function initAdapter({ artifactPath, baseModel, rank = 8, alpha = 16, targetModules = null, dropout = 0.05 }) {
   if (!fs.existsSync(artifactPath)) throw new Error('artifact not found: ' + artifactPath);
@@ -126,7 +126,7 @@ function writeTuneConfig(artifactPath, cfg) {
 
 export function setCaptureFlag(artifactPath, on) {
   const cfg = readTuneConfig(artifactPath);
-  if (!cfg) throw new Error('not initialized — run `kolm tune init --artifact ' + path.basename(artifactPath) + ' --base <model>` first');
+  if (!cfg) throw new Error('not initialized - run `kolm tune init --artifact ' + path.basename(artifactPath) + ' --base <model>` first');
   cfg.captures_on = !!on;
   writeTuneConfig(artifactPath, cfg);
   return cfg;
@@ -166,7 +166,7 @@ export function runTuneStep({ artifactPath, epochs = 1, airgap = false, batchSiz
   const d = ensureTuneDir(artifactPath);
   const captures = path.join(d, 'captures.jsonl');
   if (!fs.existsSync(captures) || captureCount(artifactPath) === 0) {
-    throw new Error('no captures yet — run `kolm tune capture-on` and then `kolm run` a few times to collect training data');
+    throw new Error('no captures yet - run `kolm tune capture-on` and then `kolm run` a few times to collect training data');
   }
   const trainer = path.join(process.cwd(), 'scripts', 'tune-step.py');
   if (!fs.existsSync(trainer)) {
@@ -175,7 +175,7 @@ export function runTuneStep({ artifactPath, epochs = 1, airgap = false, batchSiz
     if (fs.existsSync(altTrainer)) {
       return runTuneStepWith(altTrainer, { artifactPath, d, epochs, airgap, batchSize, lr });
     }
-    throw new Error('tune-step.py trainer missing — reinstall kolm or set KOLM_TUNE_TRAINER=/path/to/tune-step.py');
+    throw new Error('tune-step.py trainer missing - reinstall kolm or set KOLM_TUNE_TRAINER=/path/to/tune-step.py');
   }
   return runTuneStepWith(trainer, { artifactPath, d, epochs, airgap, batchSize, lr });
 }
@@ -209,7 +209,7 @@ function runTuneStepWith(trainer, { artifactPath, d, epochs, airgap, batchSize, 
     // try `python3`
     const py3 = spawnSync('python3', args, { env, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
     if (py3.error) {
-      throw new Error('python not found on PATH — install Python 3.10+ (with `pip install torch peft transformers datasets`)');
+      throw new Error('python not found on PATH - install Python 3.10+ (with `pip install torch peft transformers datasets`)');
     }
     return parseTrainerOutput(py3, next, airgap);
   }

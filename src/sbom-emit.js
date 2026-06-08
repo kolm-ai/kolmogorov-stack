@@ -1,4 +1,4 @@
-// W763 — SBOM emission + verification (pure JS, no heavy deps).
+// W763 - SBOM emission + verification (pure JS, no heavy deps).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 569-574):
 //   [W763-1] "SBOM for every .kolm artifact and every kolm release"
@@ -14,16 +14,16 @@
 // auditor can verify the supply chain matches a known-good snapshot.
 //
 // Design contract:
-//   - PURE shape utilities — NO disk IO that touches the artifact, NO
+//   - PURE shape utilities - NO disk IO that touches the artifact, NO
 //     mutation of package-lock.json, NO modification of artifact.js
 //     (the SBOM is a SIBLING export, not woven into artifact-hash).
 //   - TWO formats: CycloneDX 1.5 + SPDX 2.3. Both are JSON-shape only;
 //     XML and tag-value variants are out of scope for W763.
 //   - HONEST envelopes everywhere: empty deps → ok:true + component_count:0
 //     (no silent fabrication); missing input → ok:false + structured error.
-//   - W604 ANTI-BRITTLE: version stamp matches /^w763-/ — callers MUST
+//   - W604 ANTI-BRITTLE: version stamp matches /^w763-/ - callers MUST
 //     regex-match, not literal-compare.
-//   - DO NOT EDIT package-lock.json — pinning every transitive dep is a
+//   - DO NOT EDIT package-lock.json - pinning every transitive dep is a
 //     sustained audit, not a one-shot ship. We DOCUMENT the recommendation
 //     in /security/sbom.html and EMIT SBOMs that surface what's pinned vs not.
 
@@ -40,7 +40,7 @@ const CYCLONEDX_SPEC = '1.5';
 // SPDX spec version we emit. 2.3 mirrors the SPDX-License-List/PEP-639 line.
 const SPDX_VERSION = 'SPDX-2.3';
 
-// Schema URLs are informational only — we DO NOT fetch them at runtime
+// Schema URLs are informational only - we DO NOT fetch them at runtime
 // (offline-friendly contract). Callers can pin against them downstream.
 const CYCLONEDX_SCHEMA_URL = 'http://cyclonedx.org/schema/bom-1.5.schema.json';
 const SPDX_SCHEMA_URL = 'https://spdx.github.io/spdx-spec/v2.3/';
@@ -50,7 +50,7 @@ const SPDX_SCHEMA_URL = 'https://spdx.github.io/spdx-spec/v2.3/';
 //   - npm package-lock integrity strings are of shape "sha512-<b64>".
 //   - We convert to the CycloneDX hash shape {alg:'SHA-512', content:<hex>}.
 //   - On parse failure we emit {alg:'SHA-512', content:'unknown'} rather
-//     than throwing — never crash the SBOM emit over one bad row.
+//     than throwing - never crash the SBOM emit over one bad row.
 // =============================================================================
 function _normalizeIntegrity(integrity) {
   if (typeof integrity !== 'string' || !integrity.includes('-')) return null;
@@ -111,7 +111,7 @@ function _emitCycloneDX(components, opts) {
 //   - packages: array of {SPDXID, name, downloadLocation}
 //
 // We populate checksums and packageVersion when known; NOASSERTION when not
-// (the SPDX-canonical honest sentinel — never invent a value).
+// (the SPDX-canonical honest sentinel - never invent a value).
 // =============================================================================
 function _emitSPDX(components, opts) {
   const docName = (opts && opts.doc_name) || 'kolm-stack-sbom';
@@ -206,7 +206,7 @@ function _componentsFromLock(lock) {
 //   manifest.bom           → pre-shaped array of {name, version, hash?}
 //
 // We accept all three to match historical artifact-shape variation. Missing
-// dep block → empty components list (NOT an error — many recipe-tier
+// dep block → empty components list (NOT an error - many recipe-tier
 // artifacts genuinely have no runtime deps).
 // =============================================================================
 function _componentsFromManifest(manifest) {
@@ -314,7 +314,7 @@ function _componentsFromRequirements(text) {
 // PUBLIC: emitSbomFromManifest({manifest, format})
 //
 // Manifest can be either an object or a string path to a JSON file. We do
-// the path-read here (NOT inside artifact.js — keeps SBOM as a sibling
+// the path-read here (NOT inside artifact.js - keeps SBOM as a sibling
 // export) and emit the requested shape.
 // =============================================================================
 export function emitSbomFromManifest(opts) {
@@ -386,7 +386,7 @@ export function emitSbomFromManifest(opts) {
 // =============================================================================
 // PUBLIC: emitSbomFromPackageLock({lock_path, format})
 //
-// Reads a package-lock.json file and emits an SBOM. Tenant-agnostic — this
+// Reads a package-lock.json file and emits an SBOM. Tenant-agnostic - this
 // is meta-information about the kolm install itself, not about any
 // tenant's compiled artifact.
 // =============================================================================
@@ -507,7 +507,7 @@ export function emitSbomFromPython(opts) {
       hashed_count: 0,
       unhashed_count: 0,
       note: 'no_components_parsed',
-      hint: 'requirements.txt parsed to zero components — check the file for valid pip lines',
+      hint: 'requirements.txt parsed to zero components - check the file for valid pip lines',
     };
   }
   if (hashed_count === 0) {
@@ -567,7 +567,7 @@ export function emitSbomFromPython(opts) {
 export function verifySbomShape(sbom) {
   const errors = [];
   // Reject primitives (null, undefined, number, string, boolean) AND non-plain
-  // containers (Array). An SBOM is canonically a plain JSON object — anything
+  // containers (Array). An SBOM is canonically a plain JSON object - anything
   // else is a caller bug, not a malformed SBOM, so ok:false is the honest signal.
   if (
     sbom === null ||

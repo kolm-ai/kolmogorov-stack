@@ -1,6 +1,6 @@
 // src/autopilot-savings.js
 //
-// W775 — autopilot savings telemetry.
+// W775 - autopilot savings telemetry.
 //
 // The autopilot daemon (src/autopilot-daemon.js) silently re-routes matching
 // queries to the local distilled model via the W807 confidence router. The
@@ -12,13 +12,13 @@
 //   For every routing-decision row with route in {student, mixed}, the
 //   `teacher_cost_micro_usd` field holds the cost that would have been paid
 //   if the router had escalated to the teacher. That is the saved spend.
-//   For route='teacher' rows there is no saving — the escalation actually
+//   For route='teacher' rows there is no saving - the escalation actually
 //   happened. We never claim savings on rows that did not exist (e.g.
-//   "what if you had used the autopilot from day 1") — that would be
+//   "what if you had used the autopilot from day 1") - that would be
 //   fabrication, not telemetry.
 //
 //   `baseline_micro_usd` is the sum of (student + teacher) cost on every
-//   row in the window — i.e. what the workload would have cost if EVERY
+//   row in the window - i.e. what the workload would have cost if EVERY
 //   call had hit the teacher at the rate observed during this window.
 //   This gives the user a denominator: "you saved $X out of a possible
 //   $Y baseline." Without it the savings number is meaningless.
@@ -27,7 +27,7 @@
 //
 //   billing-breakdown.js aggregates by namespace and provider for the
 //   billing page. It does NOT segment by routing decision (student vs
-//   teacher vs mixed) and it does NOT compute "savings" — that is a
+//   teacher vs mixed) and it does NOT compute "savings" - that is a
 //   W775-specific concept that only makes sense for autopilot users.
 //   Keeping the two modules separate means a future refactor of either
 //   one cannot regress the other.
@@ -46,11 +46,11 @@
 //   - When no routing rows exist in the window, returns:
 //       {ok:true, total_saved_micro_usd:0, baseline_micro_usd:0,
 //        breakdown_by_day:[], n:0, version}
-//     (NOT an error — a fresh tenant with no autopilot activity is valid.)
+//     (NOT an error - a fresh tenant with no autopilot activity is valid.)
 //
 //   - When tenant_id is missing, returns:
 //       {ok:false, error:'tenant_id_required', version}
-//     (NEVER throws into the route handler — the route catches and 401s.)
+//     (NEVER throws into the route handler - the route catches and 401s.)
 //
 //   - When window_days is non-finite or out of range, falls back to 30 and
 //     stamps `window_days_clamped:<original>` so the caller can debug.
@@ -143,7 +143,7 @@ export async function computeSavings(opts = {}) {
   }
   if (!Array.isArray(rows)) rows = [];
 
-  // Tenant fence — defense in depth.
+  // Tenant fence - defense in depth.
   rows = rows.filter(r => r && (r.tenant === tenant_id || r.tenant_id === tenant_id));
   if (namespace) rows = rows.filter(r => r && r.namespace === namespace);
 

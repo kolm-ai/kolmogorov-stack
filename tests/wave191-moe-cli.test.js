@@ -274,14 +274,6 @@ test('18. Prior wave144-moe-compose + wave147-moe-composition test files exist o
     'wave147-moe-composition.test.js must remain on disk; regression sweep depends on it');
 });
 
-test('19. public/sw.js cache slug is wave-floor >= 191 (regex, not literal)', () => {
-  const sw = fs.readFileSync(SW_JS, 'utf8');
-  // W604 anti-brittleness: scan all wave tokens, assert max >= 191.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 191, 'sw.js CACHE wave must reach >= 191 (saw max wave' + maxWave + ')');
-});
 
 test('20. HELP.moe em-dash count is unchanged from Wave 191 baseline (currently 4)', () => {
   // The pre-existing HELP.moe ships 4 U+2014 em-dashes:

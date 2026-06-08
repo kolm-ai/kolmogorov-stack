@@ -1,4 +1,4 @@
-// W833-2 — Synthetic translation via teacher for underrepresented languages.
+// W833-2 - Synthetic translation via teacher for underrepresented languages.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md line 1198):
 //   [W833-2] Synthetic translation via teacher for underrepresented
@@ -16,14 +16,14 @@
 // Honesty contract:
 //   * NEVER fabricate translations. If no teacher is wired
 //     (KOLM_TEACHER_API_KEY missing AND teacher!='local'), return the
-//     no_teacher_configured envelope — the operator sees install_hint
+//     no_teacher_configured envelope - the operator sees install_hint
 //     + requested_count + generated_count:0.
 //   * Every generated row carries synthetic_translation:true PLUS
 //     source_lang/target_lang/synth_provider/synth_model/synth_at so
 //     downstream tooling can filter out synthetic rows from human-graded
 //     evals (key for honest K-Score reporting).
 //   * The 'local' teacher path is intentionally a stub that returns a
-//     prefix-tagged echo — the point is for test runs + CI dry-runs to
+//     prefix-tagged echo - the point is for test runs + CI dry-runs to
 //     exercise the row-stamping discipline WITHOUT requiring a real
 //     translation model. Production wires the teacher via env vars.
 //
@@ -36,7 +36,7 @@ export const LINGUAL_SYNTH_VERSION = 'w833-v1';
 
 const SUPPORTED_TEACHERS = Object.freeze(['anthropic', 'openai', 'local']);
 
-// Synthetic-translation row count cap — bounded so a runaway loop can't
+// Synthetic-translation row count cap - bounded so a runaway loop can't
 // burn the teacher budget. Operators can pass higher counts but we still
 // honor the request shape (the cap surfaces in generated_count vs
 // requested_count so it's not silent truncation).
@@ -55,13 +55,13 @@ const MAX_SYNTH_PER_CALL = 1000;
 //   args.count:         desired number of synthetic rows
 //   args.teacher:       'anthropic' | 'openai' | 'local'
 //   args.opts:          (optional) {
-//     source_captures,  // [{input, output, lang?}] — explicit pool;
+//     source_captures,  // [{input, output, lang?}] - explicit pool;
 //                       // when omitted, the caller is expected to wire
 //                       // the storeMod DI seam OR pass an empty pool
 //                       // (we return no_source_captures honest envelope).
 //     storeMod,         // {listEvents, appendEvent} DI seam
 //     translateFn,      // async ({text, source_lang, target_lang, teacher})
-//                       //   => {text, model?} — DI for unit tests.
+//                       //   => {text, model?} - DI for unit tests.
 //                       //   When omitted we use the built-in path:
 //                       //   'local' → echo with [target_lang] prefix,
 //                       //   'anthropic'/'openai' → require api_key env
@@ -99,19 +99,19 @@ export async function synthesizeForUnderrepresented(args) {
   // ── Argument-shape envelopes (return BEFORE touching teacher / store) ────
   if (!tenant || typeof tenant !== 'string') {
     return _honest('tenant_required',
-      'pass {tenant:"<canonical tenant id>"} — W411 tenant-fence is mandatory',
+      'pass {tenant:"<canonical tenant id>"} - W411 tenant-fence is mandatory',
       requested_count);
   }
   if (!target_lang || typeof target_lang !== 'string') {
     return _honest('target_lang_required',
-      'pass {target_lang:"es"} — the language to synthesize INTO',
+      'pass {target_lang:"es"} - the language to synthesize INTO',
       requested_count);
   }
   if (!teacher || !SUPPORTED_TEACHERS.includes(teacher)) {
     return {
       ok: false,
       error: 'unsupported_teacher',
-      hint: 'pass {teacher:"anthropic"|"openai"|"local"} — local is a stub for CI',
+      hint: 'pass {teacher:"anthropic"|"openai"|"local"} - local is a stub for CI',
       supported: SUPPORTED_TEACHERS.slice(),
       requested_count,
       generated_count: 0,
@@ -120,12 +120,12 @@ export async function synthesizeForUnderrepresented(args) {
   }
   if (requested_count <= 0) {
     return _honest('count_required',
-      'pass {count:N} with N>=1 — synthesizeForUnderrepresented never fabricates from count<=0',
+      'pass {count:N} with N>=1 - synthesizeForUnderrepresented never fabricates from count<=0',
       requested_count);
   }
 
   // ── Teacher wiring check (honesty floor) ─────────────────────────────────
-  // The 'local' teacher is always available — it's the test/CI stub. Real
+  // The 'local' teacher is always available - it's the test/CI stub. Real
   // providers REQUIRE the env var; absence surfaces as the
   // no_teacher_configured envelope so operators see exactly what to set.
   if (teacher !== 'local') {
@@ -148,7 +148,7 @@ export async function synthesizeForUnderrepresented(args) {
 
   // ── Source-capture pool ──────────────────────────────────────────────────
   // Either an explicit pool (opts.source_captures) OR a storeMod DI seam.
-  // Both honor the W411 tenant fence — the storeMod path filters every
+  // Both honor the W411 tenant fence - the storeMod path filters every
   // returned row by tenant defense-in-depth.
   let pool = [];
   if (Array.isArray(opts.source_captures) && opts.source_captures.length > 0) {
@@ -166,7 +166,7 @@ export async function synthesizeForUnderrepresented(args) {
   }
   if (pool.length === 0) {
     return _honest('no_source_captures',
-      'no captures available to translate — populate the namespace first',
+      'no captures available to translate - populate the namespace first',
       requested_count);
   }
 
@@ -181,7 +181,7 @@ export async function synthesizeForUnderrepresented(args) {
   const out = [];
   const at = new Date().toISOString();
   const synth_provider = teacher;
-  // The 'model' field is provider-specific — defaults match the
+  // The 'model' field is provider-specific - defaults match the
   // KOLM_DISTILL_TEACHER convention used elsewhere.
   let synth_model = (teacher === 'anthropic') ? 'claude-3-5-sonnet-latest'
                   : (teacher === 'openai')   ? 'gpt-4o'
@@ -230,7 +230,7 @@ export async function synthesizeForUnderrepresented(args) {
       synth_at: at,
     };
 
-    // Optional persistence — defaults to write:true. When the storeMod DI
+    // Optional persistence - defaults to write:true. When the storeMod DI
     // seam exposes appendEvent we route through it; otherwise rows are
     // returned in-memory and the caller is responsible for persistence.
     const write = (opts.write !== false);
@@ -241,7 +241,7 @@ export async function synthesizeForUnderrepresented(args) {
           namespace,
           prompt_redacted: translated_input,
           response_redacted: translated_output,
-          // synth provenance — folded onto the row so downstream filters
+          // synth provenance - folded onto the row so downstream filters
           // (W760 per-language K-Score etc) can exclude synthetic rows
           // from human-graded eval pools.
           extra: {
@@ -283,13 +283,13 @@ export async function synthesizeForUnderrepresented(args) {
 //                          generated_count:0 result (the env-var check
 //                          above already guards real provider paths; this
 //                          path runs only when env was present but the
-//                          translateFn DI seam wasn't injected — i.e.
+//                          translateFn DI seam wasn't injected - i.e.
 //                          missing network adapter, not missing key).
 // =============================================================================
 
 async function _builtinTranslate({ text, source_lang, target_lang, teacher }) {
   if (teacher === 'local') {
-    // Local stub — deterministic, prefix-tagged. NOT a real translation.
+    // Local stub - deterministic, prefix-tagged. NOT a real translation.
     const tag = '[' + target_lang + ']';
     return { text: tag + ' ' + text, model: 'local-echo' };
   }

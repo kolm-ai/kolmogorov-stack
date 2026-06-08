@@ -1,6 +1,6 @@
 // src/merkle.js
 //
-// W921 Phase-1 — RFC 6962 / RFC 9162 Merkle tree primitives.
+// W921 Phase-1 - RFC 6962 / RFC 9162 Merkle tree primitives.
 //
 // These are the shared, dependency-free building blocks for transparency-log
 // receipt anchoring (src/receipt-anchor.js) AND for fixing the existing
@@ -83,7 +83,7 @@ function largestPow2LessThan(n) {
 //
 // `leaves` is an array of 32-byte leaf hashes (the output of leafHash). For
 // convenience, raw Buffers/strings are coerced through toBuf but are assumed
-// to already be leaf hashes — callers wanting record bytes hashed should map
+// to already be leaf hashes - callers wanting record bytes hashed should map
 // leafHash over their records first (see buildTree / hashLeaves).
 //
 //   MTH({})   = SHA256()           (empty tree = hash of empty input)
@@ -104,7 +104,7 @@ export function computeRoot(leaves) {
 // ---------------------------------------------------------------------------
 // RFC 6962 audit (inclusion) path for the leaf at `index` in a tree of the
 // given leaves. Returns an array of 32-byte sibling hashes, ordered from the
-// leaf level up to (but excluding) the root — exactly what verifyInclusion
+// leaf level up to (but excluding) the root - exactly what verifyInclusion
 // consumes. PATH(m, D[n]) per RFC 6962 §2.1.1:
 //   PATH(m, D[1]) = {}
 //   for n > 1, k = largest 2^x < n:
@@ -136,14 +136,14 @@ export function inclusionPath(leaves, index) {
 // ---------------------------------------------------------------------------
 // RFC 9162 §2.1.3.2 verify_inclusion. Pure SHA-256, no network. Returns
 // { ok, reason?, root? } where `root` is the hex of the recomputed root on
-// success (handy for diagnostics). NEVER throws — bad input returns ok:false.
+// success (handy for diagnostics). NEVER throws - bad input returns ok:false.
 //
 // Args:
-//   leafHash       — 32-byte leaf hash (Buffer|Uint8Array|hex string)
-//   leafIndex (m)  — 0-based position of the leaf
-//   treeSize  (n)  — number of leaves in the tree
-//   inclusionPath  — array of 32-byte sibling hashes (Buffer|Uint8Array|hex)
-//   root           — expected Merkle root (Buffer|Uint8Array|hex string)
+//   leafHash - 32-byte leaf hash (Buffer|Uint8Array|hex string)
+//   leafIndex (m) - 0-based position of the leaf
+//   treeSize  (n) - number of leaves in the tree
+//   inclusionPath - array of 32-byte sibling hashes (Buffer|Uint8Array|hex)
+//   root - expected Merkle root (Buffer|Uint8Array|hex string)
 // ---------------------------------------------------------------------------
 export function verifyInclusion({ leafHash, leafIndex, treeSize, inclusionPath, root }) {
   let leaf, rootBuf, path;

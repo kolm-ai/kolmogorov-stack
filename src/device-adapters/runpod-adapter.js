@@ -1,4 +1,4 @@
-// W888-C — RunPod adapter stub.
+// W888-C - RunPod adapter stub.
 //
 // Deferred to W888-B cloud module (src/cloud-providers/runpod.js already
 // ships the serving-endpoint create path). This adapter exists so the

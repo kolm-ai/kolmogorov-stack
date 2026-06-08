@@ -1,4 +1,4 @@
-// W831-2 — Local-only teacher gateway.
+// W831-2 - Local-only teacher gateway.
 //
 // Purpose
 // -------
@@ -15,16 +15,16 @@
 //   - 127.0.0.1  (canonical IPv4 loopback)
 //   - localhost  (the hostname that resolves to loopback)
 //   - ::1        (canonical IPv6 loopback; with or without [...] brackets)
-//   - 0.0.0.0    (bind-all sentinel — some local daemons bind to this; from
+//   - 0.0.0.0    (bind-all sentinel - some local daemons bind to this; from
 //                 the caller's perspective this still resolves to loopback)
 //   - unix:/...  (unix-domain-socket pseudo-URL used by llama.cpp local mode)
 //
 // Anything else throws PolicyBlockError. This is INTENTIONALLY narrower than
-// W779's wrapFetch (which also allows KOLM_LOCAL_TEACHER_URL — that flag is
+// W779's wrapFetch (which also allows KOLM_LOCAL_TEACHER_URL - that flag is
 // for non-airgap convenience). W831 air-gap mode does NOT trust an env var
 // to override the policy; the URL itself MUST be local.
 //
-// W411 tenant fence: this module has no tenant state — it's a pure URL
+// W411 tenant fence: this module has no tenant state - it's a pure URL
 // predicate. The route layer enforces auth before calling.
 //
 // W604 version stamp: AIRGAP_TEACHER_VERSION = 'w831-v1'. Consumers MUST
@@ -36,7 +36,7 @@
 //   - We do NOT attempt DNS resolution. "localhost" is treated as local by
 //     name; if an operator has hijacked /etc/hosts to point localhost at a
 //     public IP, they have bigger problems than our predicate.
-//   - We do NOT trust the protocol (http vs https) — the policy is host-based.
+//   - We do NOT trust the protocol (http vs https) - the policy is host-based.
 
 import { URL } from 'node:url';
 
@@ -75,7 +75,7 @@ export function verifyTeacherIsLocal(opts = {}) {
   const url = teacher_url.trim();
 
   // Unix-domain-socket pseudo-URL: 'unix:/var/run/llama.sock' or
-  // 'unix:///var/run/llama.sock'. By definition this is local — sockets are
+  // 'unix:///var/run/llama.sock'. By definition this is local - sockets are
   // bound to a path on the same filesystem.
   if (/^unix:/.test(url)) {
     return {
@@ -100,7 +100,7 @@ export function verifyTeacherIsLocal(opts = {}) {
   }
   let host = parsed.hostname.toLowerCase();
   // Strip IPv6 brackets if present (URL.hostname does this in current Node,
-  // but be defensive — some old Node versions don't).
+  // but be defensive - some old Node versions don't).
   if (host.startsWith('[') && host.endsWith(']')) host = host.slice(1, -1);
 
   // Allow scheme = file: as a (rare) local mode where llama.cpp embeds the
@@ -111,7 +111,7 @@ export function verifyTeacherIsLocal(opts = {}) {
       host: '',
       scheme: 'file',
       port: null,
-      kind: 'unix-socket', // close enough — "no network, local resource"
+      kind: 'unix-socket', // close enough - "no network, local resource"
       teacher_url: url,
       version: AIRGAP_TEACHER_VERSION,
     };

@@ -1,4 +1,4 @@
-// W409a — one-shot migration: backfill the canonical event-store from every
+// W409a - one-shot migration: backfill the canonical event-store from every
 // row currently in the capture-store.
 //
 // Why this exists
@@ -75,7 +75,7 @@ export async function run(opts = {}) {
 
   const legacy = _drainLegacyStore();
   const driver = await _drainPluggableDriver();
-  // De-dupe by id (or event_id) — both stores can hold the same row when
+  // De-dupe by id (or event_id) - both stores can hold the same row when
   // a deploy switched drivers mid-flight.
   const seen = new Set();
   const all = [];

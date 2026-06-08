@@ -1,15 +1,15 @@
-// W729 — Graceful degradation under load: FIFO queue with priority lanes,
+// W729 - Graceful degradation under load: FIFO queue with priority lanes,
 // timeout, capacity, and overflow plumbing to a hosted teacher endpoint.
 //
 // Closes W729-1 / W729-2 / W729-3 / W729-4 from KOLM_W707_SYSTEM_UPGRADE_PLAN.md
 // (lines 359-367):
 //
-//   W729-1 — FIFO queue with priority lanes and timeout (high-priority for
+//   W729-1 - FIFO queue with priority lanes and timeout (high-priority for
 //            paid tiers; expired requests get clean 429 not silent drop).
-//   W729-2 — Overflow to teacher API via W709 routing plumbing (when local
+//   W729-2 - Overflow to teacher API via W709 routing plumbing (when local
 //            capacity saturated, route to hosted teacher).
-//   W729-3 — HTTP 429 + Retry-After surfaced to the caller; clients back off.
-//   W729-4 — Horizontal scaling doc + scaffold (single-page scaffold in
+//   W729-3 - HTTP 429 + Retry-After surfaced to the caller; clients back off.
+//   W729-4 - Horizontal scaling doc + scaffold (single-page scaffold in
 //            public/docs/runtime/horizontal-scaling.html).
 //
 // Honesty contract:
@@ -34,12 +34,12 @@
 //
 // Public surface:
 //
-//   LOAD_QUEUE_VERSION                           — schema stamp ('w729-v1')
-//   PRIORITY_LANES                               — ordered priority names
+//   LOAD_QUEUE_VERSION - schema stamp ('w729-v1')
+//   PRIORITY_LANES - ordered priority names
 //   enqueue({req, priority, timeout_ms, onOverflow}) → Promise<{ok, ...}>
-//   getQueueStats()                              — {depth, capacity, by_priority}
-//   setCapacity(n)                               — admin-only adjust
-//   _resetForTests()                             — singleton reset
+//   getQueueStats() - {depth, capacity, by_priority}
+//   setCapacity(n) - admin-only adjust
+//   _resetForTests() - singleton reset
 
 export const LOAD_QUEUE_VERSION = 'w729-v1';
 
@@ -66,7 +66,7 @@ function _freshState() {
 }
 
 /**
- * Reset the singleton — TESTS ONLY. Production callers MUST NOT use this.
+ * Reset the singleton - TESTS ONLY. Production callers MUST NOT use this.
  * Exported so tests/wave729-load-queue.test.js can guarantee no state leak
  * between assertions.
  */
@@ -75,7 +75,7 @@ export function _resetForTests() {
 }
 
 /**
- * Return a snapshot of queue state. Pure read — does NOT mutate.
+ * Return a snapshot of queue state. Pure read - does NOT mutate.
  *
  * Shape: {depth, capacity, by_priority:{enterprise,business,starter,free}}
  * `depth` is the SUM of all priority lanes plus in-flight slots so an
@@ -116,10 +116,10 @@ export function setCapacity(n) {
  * structured envelope when the queue times out or fills.
  *
  * Options:
- *   req            — opaque request handle passed through to overflow cb
- *   priority       — one of PRIORITY_LANES; defaults to 'free'
- *   timeout_ms     — how long to wait before queue_timeout (default 60_000)
- *   onOverflow     — async callback (req) → result. Invoked when queue is
+ *   req - opaque request handle passed through to overflow cb
+ *   priority - one of PRIORITY_LANES; defaults to 'free'
+ *   timeout_ms - how long to wait before queue_timeout (default 60_000)
+ *   onOverflow - async callback (req) → result. Invoked when queue is
  *                    full AND KOLM_TEACHER_OVERFLOW_URL is set. Returns
  *                    {ok:true, overflowed:true, ...result}. If unset,
  *                    enqueue rejects with {code:'queue_full'}.
@@ -164,7 +164,7 @@ export async function enqueue(opts) {
 
   // Capacity saturated. Try overflow before queueing. W729-2 says the
   // overflow path is invoked when "local capacity saturated, route to
-  // hosted teacher" — meaning the W709 teacher endpoint absorbs the
+  // hosted teacher" - meaning the W709 teacher endpoint absorbs the
   // request and the caller gets a real response instead of a 429.
   const overflowUrl = String(process.env.KOLM_TEACHER_OVERFLOW_URL || '');
   if (overflowUrl && typeof o.onOverflow === 'function') {
@@ -197,7 +197,7 @@ export async function enqueue(opts) {
     };
     // Reject if queue depth would exceed 4x capacity. This is the
     // backstop against unbounded memory growth under a sustained
-    // overload — the caller gets queue_full instead of OOM.
+    // overload - the caller gets queue_full instead of OOM.
     const stats = getQueueStats();
     if (stats.depth >= _state.capacity * 4) {
       return reject({

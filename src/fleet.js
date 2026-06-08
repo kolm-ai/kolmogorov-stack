@@ -1,4 +1,4 @@
-// W888-E — Fleet management surface.
+// W888-E - Fleet management surface.
 //
 // Wraps src/deploy-pipeline.js + src/device-capabilities.js with multi-device
 // orchestration: status / deploy (rolling|canary|all) / monitor / rollback /

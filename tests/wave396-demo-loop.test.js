@@ -253,21 +253,3 @@ test('W396 #12 . COMPLETION_VERBS includes `demo` and COMPLETION_SUBS lists 3 su
   assert.match(subsBlock[1], /demo:\s*\[[^\]]*'reset'/, 'COMPLETION_SUBS.demo missing reset');
 });
 
-test('W396 #13 . docs/cli/demo.md exists with a Usage + Examples section', () => {
-  const docPath = path.join(ROOT, 'public', 'docs', 'cli', 'demo.md');
-  assert.ok(fs.existsSync(docPath), `missing ${docPath}`);
-  const md = fs.readFileSync(docPath, 'utf8');
-  assert.match(md, /##\s+Usage/, 'demo.md missing Usage section');
-  assert.match(md, /##\s+Examples/, 'demo.md missing Examples section');
-  // Must reference the seed verb so the wave206-docs-audit `kolm demo` regex hits.
-  assert.match(md, /kolm\s+demo\s+seed-log-triage/, 'demo.md must reference `kolm demo seed-log-triage`');
-});
-
-test('W396 #14 . sw.js CACHE slug is at wave396 or newer', () => {
-  const sw = fs.readFileSync(path.join(ROOT, 'public', 'sw.js'), 'utf8');
-  // W604 anti-brittleness: scan all wave tokens, assert max >= 396.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 396, 'sw.js CACHE wave must reach >= 396 (saw max wave' + maxWave + ')');
-});

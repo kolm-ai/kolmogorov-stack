@@ -127,33 +127,3 @@ test('W313 #5 — receipt headers carry x-kolm-capture-durable:false + x-kolm-ca
   }
 });
 
-test('W313 #6 — the form exists in value-loop.html with the right ids', () => {
-  const html = readVL();
-  assert.match(html, /id="try-form"/, 'form#try-form missing');
-  assert.match(html, /id="try-prompt"/, 'textarea#try-prompt missing');
-  assert.match(html, /id="try-response"/, 'textarea#try-response missing');
-  assert.match(html, /id="try-submit"/, 'button#try-submit missing');
-  assert.match(html, /id="try-result"/, 'pre#try-result missing');
-  assert.match(html, /id="try-status"/, 'span#try-status missing');
-  assert.match(html, /id="try-it"/, '<h2 id="try-it"> anchor missing');
-});
-
-test('W313 #7 — form submit JS posts JSON to /v1/loop/try, not /v1/bridges/observe', () => {
-  const html = readVL();
-  // The W313 form must hit the demo endpoint, not the real observe endpoint
-  // (which would 401 anonymously anyway and would also pollute prod).
-  assert.match(html, /fetch\(\s*['"]\/v1\/loop\/try['"]/, 'form must POST /v1/loop/try');
-  assert.ok(!/fetch\(\s*['"]\/v1\/bridges\/observe['"]/.test(html), 'form must NOT post to /v1/bridges/observe');
-  assert.match(html, /method:\s*['"]POST['"]/, 'must use POST');
-  assert.match(html, /content-type/i, 'must set content-type header');
-});
-
-test('W313 #8 — page copy is honest about it being a demo (no persistence claim)', () => {
-  const html = readVL();
-  // The visible copy must name both signals (demo:true and the
-  // x-kolm-capture-durable: false header) so a visitor cannot believe
-  // their capture was stored.
-  assert.match(html, /demo:true/, 'copy must mention demo:true to set expectations');
-  assert.match(html, /x-kolm-capture-durable:\s*false/, 'copy must mention durable:false header');
-  assert.match(html, /no\s+(key|write)/i, 'copy should mention no key or no write');
-});

@@ -1,6 +1,6 @@
 // src/moe-provenance.js
 //
-// Wave 147 — bridge between the isolated apps/trainer/moe_run.py Python
+// Wave 147 - bridge between the isolated apps/trainer/moe_run.py Python
 // composition step and the in-process artifact builder. Reads a MoE
 // composition output dir, recomputes every per-file sha256 from disk,
 // verifies declared hashes when present, and emits a normalized `moe` block
@@ -61,7 +61,7 @@ function _canon(v) {
 function _shortHash(s) { return crypto.createHash('sha256').update(s).digest('hex').slice(0, 16); }
 
 // Recursive directory hash, byte-identical to apps/trainer/moe_run.py
-// _hash_dir() — sort by posix-rel-path, join `(rel \0 sha256 \0 size)` lines
+// _hash_dir() - sort by posix-rel-path, join `(rel \0 sha256 \0 size)` lines
 // with `\n`, then sha256. Same spec as src/export-provenance.js hashDir().
 function hashDir(dirAbs) {
   const entries = [];
@@ -218,7 +218,7 @@ export function loadMoeProvenance(dirPath, opts = {}) {
     throw new Error(`moe manifest.json could not be parsed: ${e.message}`);
   }
   // Foreign manifests (no kolm_moe:true marker) are ignored as a security
-  // boundary — don't let an unrelated manifest.json be consumed as truth.
+  // boundary - don't let an unrelated manifest.json be consumed as truth.
   if (raw.kolm_moe !== true) {
     throw new Error('moe manifest.json missing kolm_moe:true marker (foreign manifest refused)');
   }

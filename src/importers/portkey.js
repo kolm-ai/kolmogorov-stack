@@ -1,4 +1,4 @@
-// W918 P3.1 — Portkey trace export importer.
+// W918 P3.1 - Portkey trace export importer.
 //
 // Ingests a Portkey trace / log export (JSONL) and emits kolm capture rows
 // ready to feed into the distill / eval pipelines. Portkey ships several
@@ -55,7 +55,7 @@
 //        the call-site time).
 // namespace defaults to "portkey"; the caller can override.
 //
-// Malformed rows do NOT throw — they are skipped and recorded in the
+// Malformed rows do NOT throw - they are skipped and recorded in the
 // `errors` array as { line, reason } so the caller can surface them.
 
 import fs from 'node:fs';
@@ -205,7 +205,7 @@ function fromTraceShape(obj) {
   if (!request && !response) {
     return { error: 'trace shape missing both request and response' };
   }
-  // Input — either OpenAI chat messages, an Anthropic-style messages array,
+  // Input - either OpenAI chat messages, an Anthropic-style messages array,
   // or a plain prompt string carried at request.prompt.
   let input = null;
   if (request) {
@@ -219,7 +219,7 @@ function fromTraceShape(obj) {
       input = request.input;
     }
   }
-  // Output — chat completion choices, plain string, or Anthropic content[].
+  // Output - chat completion choices, plain string, or Anthropic content[].
   let output = null;
   if (response) {
     if (Array.isArray(response.choices)) {
@@ -284,7 +284,7 @@ function fromLogsShape(obj) {
   if (!request && !response) {
     return { error: 'logs shape: request_body and response_body both unparseable' };
   }
-  // Reuse the trace extractor — the parsed bodies have the same internal
+  // Reuse the trace extractor - the parsed bodies have the same internal
   // structure (chat completions style).
   const fused = { request: request || {}, response: response || {} };
   const extracted = fromTraceShape(fused);
@@ -381,7 +381,7 @@ export function parse(text, opts = {}) {
     try {
       arr = JSON.parse(trimmed);
     } catch (e) {
-      // Fall through to JSONL handling — maybe it just happens to start with [.
+      // Fall through to JSONL handling - maybe it just happens to start with [.
       arr = null;
     }
     if (Array.isArray(arr)) {
@@ -398,7 +398,7 @@ export function parse(text, opts = {}) {
     }
   }
 
-  // JSONL path — split on newlines, ignore blank lines.
+  // JSONL path - split on newlines, ignore blank lines.
   const lines = text.replace(/\r\n/g, '\n').split('\n');
   for (let i = 0; i < lines.length; i++) {
     const lineNo = i + 1;

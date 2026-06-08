@@ -1,23 +1,23 @@
-// W-C / wrapper-completion — unified PII redactor for the gateway.
+// W-C / wrapper-completion - unified PII redactor for the gateway.
 //
 // The gateway runs PII scans TWICE per request (stage 3 on input, stage 7
-// on output — see the 11-stage pipeline in the wrapper spec). The same
+// on output - see the 11-stage pipeline in the wrapper spec). The same
 // 4-mode contract applies to both:
 //
-//   detect_only      — emit findings to receipt.redaction_applied,
+//   detect_only - emit findings to receipt.redaction_applied,
 //                      pass the text through unchanged
-//   redact_captures  — pass the original through to the client,
+//   redact_captures - pass the original through to the client,
 //                      redact the text that goes into the capture row
-//   redact_all       — redact both response-to-client AND capture row
-//   block            — reject the request with 400 if PII found in input
+//   redact_all - redact both response-to-client AND capture row
+//   block - reject the request with 400 if PII found in input
 //
 // This module is a THIN UNIFIER around the existing redactor primitives:
-//   - src/phi-redactor.js   — HIPAA 18 + 3 kolm extensions, regex detectors
-//   - src/prompt-redactor.js — system-prompt strategies (placeholder /
+//   - src/phi-redactor.js - HIPAA 18 + 3 kolm extensions, regex detectors
+//   - src/prompt-redactor.js - system-prompt strategies (placeholder /
 //                              paraphrase / remove_literal_constraints /
 //                              extract_behavior_only)
 //
-// We deliberately do NOT add new detectors here — that's the job of
+// We deliberately do NOT add new detectors here - that's the job of
 // phi-redactor.js. Our job is to expose ONE function the gateway calls,
 // regardless of which side of the pipeline we're on, and to return a
 // shape the receipt builder can fold straight into redaction_applied.
@@ -60,7 +60,7 @@ export const DETECTOR_NAMES = Object.freeze([
 
 // Map a phi.CLASSES entry to a DETECTOR_NAMES entry. Anything outside
 // the friendly list falls back to lower-cased class name (so OTHER →
-// "other", BIO → "bio", etc. — never undefined).
+// "other", BIO → "bio", etc. - never undefined).
 function _normalizeClass(c) {
   const s = String(c || '').toLowerCase();
   if (s === 'fax') return 'phone';
@@ -69,7 +69,7 @@ function _normalizeClass(c) {
 }
 
 /**
- * scanPii — run the phi-redactor over the text WITHOUT applying any
+ * scanPii - run the phi-redactor over the text WITHOUT applying any
  * substitution. Returns a finding list the gateway uses for the
  * receipt.redaction_applied summary field, plus the raw set of classes
  * that were hit.
@@ -87,7 +87,7 @@ export function scanPii({ text, classes, names, addresses, ids } = {}) {
   const { map } = phi.redact(text, opts);
   const counts = new Map();
   for (const token of Object.keys(map || {})) {
-    // tokens are [PHI_<CLASS>_<INDEX>] — parse CLASS out
+    // tokens are [PHI_<CLASS>_<INDEX>] - parse CLASS out
     const m = /\[PHI_([A-Z]+)_\d+\]/.exec(token);
     if (!m) continue;
     const key = _normalizeClass(m[1]);
@@ -99,7 +99,7 @@ export function scanPii({ text, classes, names, addresses, ids } = {}) {
 }
 
 /**
- * applyMode — the gateway's single entry point.
+ * applyMode - the gateway's single entry point.
  *
  * - detect_only:    output = text, capture = text, redaction_applied populated.
  * - redact_captures: output = text, capture = REDACTED.
@@ -192,7 +192,7 @@ export function applyMode({ text, mode, classes, names, addresses, ids } = {}) {
 }
 
 /**
- * shouldBlock — convenience predicate the gateway uses BEFORE forwarding
+ * shouldBlock - convenience predicate the gateway uses BEFORE forwarding
  * to upstream. Returns true if `mode === 'block'` and the scan found
  * any PII. The gateway then returns HTTP 400 with the block_reason.
  */

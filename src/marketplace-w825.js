@@ -1,6 +1,6 @@
 // src/marketplace-w825.js
 //
-// W825 [T3] — Artifact Marketplace MVP, data layer.
+// W825 [T3] - Artifact Marketplace MVP, data layer.
 //
 // W737 already ships `src/marketplace.js` (curated seed catalog + event-store
 // `kolm_marketplace_listing` registration). W825 is the MVP UPGRADE that adds
@@ -15,7 +15,7 @@
 //     fields, normalises numeric/string types, and stamps `created_at` on a
 //     fresh row (preserved on updates).
 //
-// The file is kept small and pure on purpose — the route layer
+// The file is kept small and pure on purpose - the route layer
 // (src/marketplace-routes.js) sits on top of it and adds auth, signature
 // verification, audit emission, and the download stream.
 //
@@ -28,7 +28,7 @@
 //   }
 //
 // Honesty contract:
-//   - listListings() never throws — missing/corrupt file => []
+//   - listListings() never throws - missing/corrupt file => []
 //   - upsertListing() throws Error with .code='LISTING_INVALID' on bad input
 //   - rating_avg / rating_count / downloads default to 0 (NEVER null) so the
 //     UI can render a number without branching
@@ -43,7 +43,7 @@ import crypto from 'node:crypto';
 
 export const MARKETPLACE_W825_VERSION = 'w825-mvp-v1';
 
-// W825 facet axes — match the public UI sidebar exactly.
+// W825 facet axes - match the public UI sidebar exactly.
 export const W825_VERTICALS = Object.freeze([
   'customer service', 'legal', 'health', 'code', 'finance', 'education',
   'translation', 'support', 'medical', 'general',
@@ -158,7 +158,7 @@ function _normalize(row) {
 
 // validateListing(row): throws Error with .code='LISTING_INVALID' on any bad
 // field; returns the normalised row otherwise. Caller is responsible for
-// signature verification — that lives in the route layer because it needs
+// signature verification - that lives in the route layer because it needs
 // access to the verifier helpers + per-tenant audit.
 function _validate(input) {
   const row = _normalize(input);
@@ -196,16 +196,16 @@ function _validate(input) {
 // an empty array, never throws. Sort + pagination on top of the filter.
 //
 // filter:
-//   vertical          — exact case-insensitive match
-//   task_type         — exact case-insensitive match
-//   k_score_min       — drops rows whose k_score is null or below the floor
-//   hardware          — substring match against ANY hardware_targets entry
-//   teacher           — substring match against teacher_model
-//   publisher_tenant_id — exact match for "my listings" view
-//   paid              — true|false strict bool match
-//   sort_by           — one of W825_SORT_MODES (default 'newest')
-//   page              — 1-indexed page number (default 1)
-//   limit             — page size (1..200, default 24)
+//   vertical - exact case-insensitive match
+//   task_type - exact case-insensitive match
+//   k_score_min - drops rows whose k_score is null or below the floor
+//   hardware - substring match against ANY hardware_targets entry
+//   teacher - substring match against teacher_model
+//   publisher_tenant_id - exact match for "my listings" view
+//   paid - true|false strict bool match
+//   sort_by - one of W825_SORT_MODES (default 'newest')
+//   page - 1-indexed page number (default 1)
+//   limit - page size (1..200, default 24)
 export function listListings(filter = {}) {
   const all = _readAll();
   const vertical = filter.vertical ? String(filter.vertical).toLowerCase() : null;
@@ -321,7 +321,7 @@ export function _resetForTests() {
   try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch { /* best-effort */ }
 }
 
-// _digestPath(p): convenience for the route layer — sha256 of the file at p
+// _digestPath(p): convenience for the route layer - sha256 of the file at p
 // in hex. Used to compare a published manifest_sha256 against the bytes the
 // downloader will stream. Returns null when the file is missing.
 export function _digestPath(p) {

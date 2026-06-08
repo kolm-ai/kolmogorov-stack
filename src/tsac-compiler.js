@@ -1,8 +1,8 @@
-// W721 — TSAC compiler. Walks captured task attention traces and picks the
+// W721 - TSAC compiler. Walks captured task attention traces and picks the
 // cheapest sparsity pattern per (layer, head) that preserves quality.
 //
 // Companion to src/tsac-profile.js (schema + validators). The compiler is
-// HEURISTIC-ONLY (per the wave brief: "NO heavy ML in Node — keep it pure
+// HEURISTIC-ONLY (per the wave brief: "NO heavy ML in Node - keep it pure
 // compute"). Real per-head KL telemetry collection happens upstream during
 // distillation; this module consumes the resulting attention_traces[] on
 // each capture and emits a TSAC profile compatible with the
@@ -15,7 +15,7 @@
 //        count captures whose attention map similarity to that pattern's
 //        canonical signature exceeds the SIMILARITY_THRESHOLD (0.7).
 //     3. Pick the pattern with the highest hit count (ties broken by the
-//        order in DEFAULT_PREFILL_PATTERNS — dense first, then
+//        order in DEFAULT_PREFILL_PATTERNS - dense first, then
 //        vertical_slash, then blocked_local, etc.).
 //     4. If no pattern hits > MIN_HITS_FOR_SPARSE captures, fall back to
 //        vertical_slash with a high dense_fallback_threshold (the safety
@@ -24,14 +24,14 @@
 //     5. Decode policy defaults to query_page_topk with page_topk=16
 //        UNLESS the head is tagged is_safety_critical (then dense).
 //
-// The compiler is intentionally string-matching cheap — no embeddings, no
+// The compiler is intentionally string-matching cheap - no embeddings, no
 // learned classifiers, no Python dependency. The real cost discrimination
 // lives in the serve-time kernel cost model, which is a future wave.
 //
 // Honesty contract:
 //   * Insufficient captures (< 8) → {ok:false, error:'insufficient_captures_for_tsac'}.
 //   * No captures carry attention_traces[] → {ok:false, error:'no_attention_telemetry'}.
-//   * The returned profile is run through validateProfile before return —
+//   * The returned profile is run through validateProfile before return - 
 //     a programming error that produces an invalid entry fails loudly here.
 
 import { canonicalJsonStringify, validateProfile, hashProfile } from './tsac-profile.js';
@@ -165,7 +165,7 @@ export function compileTsacProfile({ task_name, captures, opts = {} }) {
         denseFallback = DEFAULT_DENSE_FALLBACK_THRESHOLD;
         coveredHeadCount += 1;
       } else {
-        // No telemetry hits for this head — start with vertical_slash and a
+        // No telemetry hits for this head - start with vertical_slash and a
         // high dense fallback so the serve-time guard pulls back to dense
         // until more captures arrive.
         chosenPrefill = 'vertical_slash';
@@ -202,13 +202,13 @@ export function compileTsacProfile({ task_name, captures, opts = {} }) {
     entries,
   };
 
-  // Defense in depth — never return an invalid profile.
+  // Defense in depth - never return an invalid profile.
   const v = validateProfile(profile);
   if (!v.ok) {
     return {
       ok: false,
       error: 'internal_validation_failed',
-      hint: 'compileTsacProfile produced an invalid profile — this is a bug',
+      hint: 'compileTsacProfile produced an invalid profile - this is a bug',
       validation_errors: v.errors.slice(0, 10),
     };
   }

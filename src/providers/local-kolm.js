@@ -1,4 +1,4 @@
-// W-B / wrapper-completion — local-.kolm artifact provider adapter.
+// W-B / wrapper-completion - local-.kolm artifact provider adapter.
 //
 // When a namespace is configured with `primary = "local:<artifact>"`,
 // the ConfidenceRouter (W807) wants to dispatch the request to a
@@ -7,7 +7,7 @@
 // http://127.0.0.1:8765/v1/chat/completions (OpenAI-compatible). The
 // resolver here just forwards.
 //
-// W-N hardening: shared hardenedFetch — 429+backoff (max 3 retries),
+// W-N hardening: shared hardenedFetch - 429+backoff (max 3 retries),
 // AbortController timeoutMs (default 60s, clamped 1-300s), malformed-JSON
 // envelope, OpenAI-compat body normalizer. A local kolm-serve hitting a
 // 429 is rare but possible (operator-set rate limit); honoring it keeps
@@ -15,7 +15,7 @@
 //
 // Contract mirrors src/capture.js forwardOpenAI: returns
 //   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
-// Never throws on non-2xx — upstream errors flow through as-is so the
+// Never throws on non-2xx - upstream errors flow through as-is so the
 // gateway can sign + capture them. Never throws on transport failure.
 
 import { hardenedFetch, buildOpenAICompatBody, DEFAULT_TIMEOUT_MS } from './_shared.js';

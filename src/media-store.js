@@ -1,4 +1,4 @@
-// W377 — media-store: content-addressable blob storage for multimodal captures.
+// W377 - media-store: content-addressable blob storage for multimodal captures.
 //
 // Heavy bytes (PDFs, screenshots, audio clips, video frames, browser traces)
 // do NOT live in the events SQLite/JSONL log. They live on disk at
@@ -8,7 +8,7 @@
 // blobs out of band.
 //
 // Honors:
-//   - KOLM_DATA_DIR (overrides ~/.kolm — same env var event-store.js reads)
+//   - KOLM_DATA_DIR (overrides ~/.kolm - same env var event-store.js reads)
 //   - KOLM_MEDIA_DIR (overrides ~/.kolm/events/raw entirely)
 //   - HOME / USERPROFILE
 //
@@ -146,9 +146,9 @@ function _pathToUri(p) {
   return 'file:' + p;
 }
 
-// storeBlob(buffer, {mime, kind}) — content-addressable write. Writes to
+// storeBlob(buffer, {mime, kind}) - content-addressable write. Writes to
 // <mediaDir>/<sha256>.<ext>. If the file already exists (same content) we
-// skip the write and just return the same descriptor — deterministic by
+// skip the write and just return the same descriptor - deterministic by
 // design. kind is echoed back so callers can stash it on the event row
 // without a second lookup; we do NOT persist it on disk because the event
 // table already owns the kind field.
@@ -169,8 +169,8 @@ export async function storeBlob(buffer, opts = {}) {
   let already = false;
   try { await fsp.stat(abs); already = true; } catch {} // deliberate: cleanup
   if (!already) {
-    // writeFile is atomic enough for our purposes — single fs.write under the
-    // hood — and idempotent on retry because the filename is content-addressed.
+    // writeFile is atomic enough for our purposes - single fs.write under the
+    // hood - and idempotent on retry because the filename is content-addressed.
     await fsp.writeFile(abs, buffer);
   }
   return {
@@ -204,14 +204,14 @@ export async function deleteBlob(uri) {
   } catch (e) {
     // Idempotent: ENOENT is a no-op. Any other error surfaces.
     if (!e || e.code !== 'ENOENT') {
-      // Swallow the error rather than throw — the caller asked for delete,
+      // Swallow the error rather than throw - the caller asked for delete,
       // and a missing file is "already deleted" semantically.
       if (e && e.code !== 'ENOENT') return;
     }
   }
 }
 
-// listBlobs() — enumerate everything currently in the media dir. Returns one
+// listBlobs() - enumerate everything currently in the media dir. Returns one
 // row per file with {uri, hash, bytes, mime, ext}. The hash is parsed from
 // the filename rather than recomputed so listing is O(files), not O(bytes).
 export async function listBlobs() {
@@ -229,7 +229,7 @@ export async function listBlobs() {
     // Composite extensions like 'tool.json' need a 2-segment match.
     let ext = name.slice(dot + 1).toLowerCase();
     let hash = name.slice(0, dot);
-    // Re-check for composite ext (tool.json — two-segment).
+    // Re-check for composite ext (tool.json - two-segment).
     const compositeDot = hash.lastIndexOf('.');
     if (compositeDot > 0) {
       const composite = hash.slice(compositeDot + 1) + '.' + ext;

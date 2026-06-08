@@ -1,11 +1,11 @@
-// W718 — TEACHER RELIABILITY TABLE + mini-bakeoff bootstrapper.
+// W718 - TEACHER RELIABILITY TABLE + mini-bakeoff bootstrapper.
 //
 // Companion to src/teacher-council.js. Owns the (teacher, domain, task) ->
 // reliability prior that the Teacher Council formula consumes. Persists to
 // disk so a prior bakeoff's results survive process restarts.
 //
 // Honesty contract:
-//   - Unknown (teacher, domain, task) defaults to 0.5 — explicit "I have no
+//   - Unknown (teacher, domain, task) defaults to 0.5 - explicit "I have no
 //     information" prior, never fabricated 1.0.
 //   - runMiniBakeoff() returns honest envelopes on missing bakeoff.js or
 //     empty captures: never invents synthetic reliability numbers.
@@ -23,7 +23,7 @@ import os from 'node:os';
 export const TEACHER_WEIGHTS_VERSION = 'w718-v1';
 export const DEFAULT_RELIABILITY = 0.5;
 
-// W718 — TeacherReliabilityTable. Lazy-init structure:
+// W718 - TeacherReliabilityTable. Lazy-init structure:
 //   _data[teacher][domain][task] = {domain: number, task: number, samples: int}
 //
 // We track samples separately from reliability so a later update can compute
@@ -141,7 +141,7 @@ export class TeacherReliabilityTable {
   }
 }
 
-// W718 — runMiniBakeoff. Honest envelope contract:
+// W718 - runMiniBakeoff. Honest envelope contract:
 //   - If src/bakeoff.js cannot be imported (e.g. running in a stripped
 //     environment), return {ok:false, error:'bakeoff_unavailable', ...} and
 //     a random-init table. NEVER throw.
@@ -215,10 +215,10 @@ export async function runMiniBakeoff(teachers, captures, opts = {}) {
   };
 }
 
-// W718 — random-init table for the honest-fallback path. We seed each
+// W718 - random-init table for the honest-fallback path. We seed each
 // (teacher, default, generation) slot with a SMALL random offset around 0.5
 // (uniform in [0.4, 0.6]) so the council formula has SOMETHING to softmax
-// over — uniform 0.5 produces uniform softmax weights, which collapses the
+// over - uniform 0.5 produces uniform softmax weights, which collapses the
 // council to round-robin. The offset is deterministic per teacher (FNV hash)
 // so test runs are reproducible.
 function _randomInitTable(teachers, opts = {}) {
@@ -257,7 +257,7 @@ function deepClone(o) {
   return out;
 }
 
-// W718 — default persist path: ~/.kolm/teacher-reliability.json
+// W718 - default persist path: ~/.kolm/teacher-reliability.json
 export function defaultPersistPath() {
   const base = process.env.KOLM_DATA_DIR
     ? path.resolve(process.env.KOLM_DATA_DIR)

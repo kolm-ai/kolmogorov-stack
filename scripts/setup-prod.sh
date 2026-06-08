@@ -87,7 +87,7 @@ set_var KOLM_ALLOW_JSON_STORE "true"
 # 4. Set RESEND_API_KEY in scripts/.env.production (re_... key)
 set_var RESEND_API_KEY "${RESEND_API_KEY:-}"
 set_var EMAIL_FROM     "${EMAIL_FROM:-kolm <hello@kolm.ai>}"
-set_var EMAIL_REPLY_TO "${EMAIL_REPLY_TO:-rodneyyesep@gmail.com}"
+set_var EMAIL_REPLY_TO "${EMAIL_REPLY_TO:-dev@kolm.ai}"
 
 echo ""
 echo "done. Trigger a redeploy for changes to take effect:"

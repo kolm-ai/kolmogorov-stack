@@ -1,7 +1,7 @@
 // Sandbox + test harness for candidate generators.
 // Two execution paths:
-//   1. JS generators — sandboxed via node:vm with a frozen `lib` global.
-//   2. WASM generators — instantiated via WebAssembly with no imports.
+//   1. JS generators - sandboxed via node:vm with a frozen `lib` global.
+//   2. WASM generators - instantiated via WebAssembly with no imports.
 // Production should harden with isolated-vm or wasmtime; this is the demo substrate.
 
 import vm from 'node:vm';
@@ -14,34 +14,34 @@ const DEFAULT_TIMEOUT_MS = 150;
 // can reach `Function` via `this.constructor.constructor` and escape an empty
 // context). We block the canonical escape primitives via a string scan before
 // the source ever reaches the compiler. Synthesized recipes never need any of
-// these — they operate on the `lib` argument only.
+// these - they operate on the `lib` argument only.
 // [token, friendly-hint]. Hint shown in the error message so authors don't
 // have to dig through kolm help compile to learn the workaround.
 const DANGEROUS = [
   [/\bprocess\b/,             'process',             'access env via lib.params (set in spec.recipes[].params)'],
-  [/\brequire\b/,             'require',             'recipes are sandboxed — use only the frozen lib helpers'],
-  [/\bmodule\b/,              'module',              'recipes do NOT use module.exports — just declare top-level function generate(input, lib)'],
-  [/\bglobal(This)?\b/,       'global / globalThis', 'no globals — pass everything through lib or the input arg'],
-  [/\b__dirname\b/,           '__dirname',           'no filesystem — recipes are pure functions on (input, lib)'],
-  [/\b__filename\b/,          '__filename',          'no filesystem — recipes are pure functions on (input, lib)'],
-  [/\bimport\s*\(/,           'import()',            'dynamic imports disabled — all deps must come through lib'],
-  [/\bFunction\s*\(/,         'Function()',          'no dynamic code — write straight JS'],
-  [/\beval\s*\(/,             'eval()',              'no dynamic code — write straight JS'],
-  [/\bconstructor\b/,         'constructor',         'avoid .constructor access — pre-construct instances if you need them'],
+  [/\brequire\b/,             'require',             'recipes are sandboxed - use only the frozen lib helpers'],
+  [/\bmodule\b/,              'module',              'recipes do NOT use module.exports - just declare top-level function generate(input, lib)'],
+  [/\bglobal(This)?\b/,       'global / globalThis', 'no globals - pass everything through lib or the input arg'],
+  [/\b__dirname\b/,           '__dirname',           'no filesystem - recipes are pure functions on (input, lib)'],
+  [/\b__filename\b/,          '__filename',          'no filesystem - recipes are pure functions on (input, lib)'],
+  [/\bimport\s*\(/,           'import()',            'dynamic imports disabled - all deps must come through lib'],
+  [/\bFunction\s*\(/,         'Function()',          'no dynamic code - write straight JS'],
+  [/\beval\s*\(/,             'eval()',              'no dynamic code - write straight JS'],
+  [/\bconstructor\b/,         'constructor',         'avoid .constructor access - pre-construct instances if you need them'],
   [/\bprototype\b/,           'prototype',           'use Object.hasOwn(obj, k) instead of .hasOwnProperty; iterate via Object.keys()'],
-  [/\bArrayBuffer\b/,         'ArrayBuffer',         'no typed arrays — use plain JS arrays/strings'],
-  [/\bSharedArrayBuffer\b/,   'SharedArrayBuffer',   'no typed arrays — use plain JS arrays/strings'],
-  [/\bAtomics\b/,             'Atomics',             'no shared memory primitives — recipes are single-shot'],
+  [/\bArrayBuffer\b/,         'ArrayBuffer',         'no typed arrays - use plain JS arrays/strings'],
+  [/\bSharedArrayBuffer\b/,   'SharedArrayBuffer',   'no typed arrays - use plain JS arrays/strings'],
+  [/\bAtomics\b/,             'Atomics',             'no shared memory primitives - recipes are single-shot'],
   // Hardening additions (no legitimate fixture uses these as of 2026-05-14;
   // re-check with `grep -c` against data/versions.json before removing).
-  [/\bReflect\b/,             'Reflect',             'use direct property access — no Reflect.* meta-programming'],
-  [/\bProxy\b/,               'Proxy',               'no proxies — build plain objects'],
-  [/\bWeakRef\b/,             'WeakRef',             'no weak refs — recipes are short-lived pure functions'],
-  [/\bFinalizationRegistry\b/, 'FinalizationRegistry', 'no finalizers — recipes are short-lived pure functions'],
-  [/\bsetTimeout\b/,          'setTimeout',          'no timers — recipes must be synchronous'],
-  [/\bsetInterval\b/,         'setInterval',         'no timers — recipes must be synchronous'],
-  [/\bsetImmediate\b/,        'setImmediate',        'no timers — recipes must be synchronous'],
-  [/\bqueueMicrotask\b/,      'queueMicrotask',      'no microtasks — recipes must be synchronous'],
+  [/\bReflect\b/,             'Reflect',             'use direct property access - no Reflect.* meta-programming'],
+  [/\bProxy\b/,               'Proxy',               'no proxies - build plain objects'],
+  [/\bWeakRef\b/,             'WeakRef',             'no weak refs - recipes are short-lived pure functions'],
+  [/\bFinalizationRegistry\b/, 'FinalizationRegistry', 'no finalizers - recipes are short-lived pure functions'],
+  [/\bsetTimeout\b/,          'setTimeout',          'no timers - recipes must be synchronous'],
+  [/\bsetInterval\b/,         'setInterval',         'no timers - recipes must be synchronous'],
+  [/\bsetImmediate\b/,        'setImmediate',        'no timers - recipes must be synchronous'],
+  [/\bqueueMicrotask\b/,      'queueMicrotask',      'no microtasks - recipes must be synchronous'],
 ];
 
 // Strip JS comments + string literals before sandbox scanning. Otherwise an
@@ -122,7 +122,7 @@ export function compileJs(source) {
 }
 
 function runWithTimeout(fn, ms) {
-  // Cooperative timeout — JS generators are short and side-effect-free.
+  // Cooperative timeout - JS generators are short and side-effect-free.
   // Real isolation: isolated-vm with hard CPU limit.
   const start = Date.now();
   const result = fn();

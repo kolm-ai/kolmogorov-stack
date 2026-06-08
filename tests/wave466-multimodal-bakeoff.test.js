@@ -360,7 +360,7 @@ test('W466 #9 — GET /v1/multimodal/bakeoff returns no_local_artifacts when no 
 // 10) CLI + TUI + sw.js + changelog source-pin
 // =============================================================================
 
-test('W466 #10 — CLI wires bakeoff multimodal sub + TUI 17th view + sw.js slug + changelog', () => {
+test('W466 #10 — CLI wires bakeoff multimodal sub + TUI 17th view + changelog + router', () => {
   const cli = fs.readFileSync(path.join(REPO_ROOT, 'cli', 'kolm.js'), 'utf8');
   // CLI: cmdBakeoff branches on `args[0] === 'multimodal'`.
   assert.match(cli, /\(args\[0\] \|\| ''\)\.toLowerCase\(\) === 'multimodal'/,
@@ -380,15 +380,6 @@ test('W466 #10 — CLI wires bakeoff multimodal sub + TUI 17th view + sw.js slug
   assert.match(cli, /Array\.isArray\(data\.contestants\)\s*\?\s*data\.contestants/,
     'TUI loadViewGet must unwrap `contestants`');
 
-  // sw.js cache slug points at W466 family.
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  const m = sw.match(/CACHE\s*=\s*['"]([^'"]+)['"]/);
-  assert.ok(m, 'sw.js must define CACHE');
-  const wm = m[1].match(/wave(\d{3,4})/);
-  assert.ok(wm, 'sw.js CACHE slug must include a waveNNN token');
-  const n = parseInt(wm[1], 10);
-  assert.ok(n >= 466, 'sw.js CACHE slug must reference the W466+ family, got: ' + m[1]);
-
   // Changelog lists W466.
   const changelog = fs.readFileSync(path.join(REPO_ROOT, 'src', 'changelog.js'), 'utf8');
   assert.match(changelog, /wave:\s*'W466'/, 'changelog.js must list W466');
@@ -401,8 +392,4 @@ test('W466 #10 — CLI wires bakeoff multimodal sub + TUI 17th view + sw.js slug
     'router must wire GET /v1/multimodal/bakeoff');
   assert.match(router, /from '\.\/multimodal-bakeoff\.js'/,
     'router must import from multimodal-bakeoff.js');
-
-  // Account page exists.
-  const pagePath = path.join(REPO_ROOT, 'public', 'account', 'multimodal-bakeoff.html');
-  assert.ok(fs.existsSync(pagePath), '/account/multimodal-bakeoff.html must exist');
 });

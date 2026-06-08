@@ -1,4 +1,4 @@
-// W736 — Guardrail Compilation.
+// W736 - Guardrail Compilation.
 //
 // Purpose
 // -------
@@ -27,7 +27,7 @@
 // Honesty contract
 // ----------------
 // validateGuardrailRules returns { ok:false, errors:[] } with snake_case
-// codes — never throws. The runtime fence returns the canonical
+// codes - never throws. The runtime fence returns the canonical
 // `blocked_by_guardrail` envelope on a `block` action; warn/rewrite
 // actions pass the response through with an annotation so the caller
 // can surface "we substituted X for Y" or "this response tripped rule N"
@@ -82,14 +82,14 @@ function globToRegex(g) {
 // Rule parser
 // ----------------------------------------------------------------------------
 //
-// A rule is { name, pattern, action }. Pattern accepts three forms — keyword,
+// A rule is { name, pattern, action }. Pattern accepts three forms - keyword,
 // glob, or raw regex (the bare string is treated as a regex). Action is one
 // of block/warn/rewrite. Rewrite rules MAY carry a `replacement` field; the
 // default replacement is `[redacted]` so an honest rewrite is observable.
 //
 // parseGuardrailRules returns the raw array unchanged when valid (so callers
 // can pass the result straight back into enforceGuardrails). It throws on
-// non-array input — that path is reserved for "developer literally passed
+// non-array input - that path is reserved for "developer literally passed
 // the wrong type"; tenant input goes through validateGuardrailRules below.
 
 export function parseGuardrailRules(rules) {
@@ -120,7 +120,7 @@ export function parseGuardrailRules(rules) {
 // Schema validator
 // ----------------------------------------------------------------------------
 //
-// Reports EVERY error (not just the first) — same pattern as
+// Reports EVERY error (not just the first) - same pattern as
 // validateKolmYaml so a CI run surfaces the full repair list. Codes are
 // snake_case for programmable callers.
 
@@ -213,7 +213,7 @@ function compileRule(rule) {
 }
 
 // Map keyed on the canonical JSON of the rules array; value is the
-// compiled array of { rule, regex } pairs. Bounded at 256 entries — past
+// compiled array of { rule, regex } pairs. Bounded at 256 entries - past
 // that we evict the oldest (Map iteration order is insertion order) so a
 // long-running router process does not accumulate compiled rule sets for
 // every tenant forever.
@@ -244,7 +244,7 @@ function compileRules(rules) {
 //   { ok:false, error:'blocked_by_guardrail', rule_name, hint, matched_at }
 //
 // The `enforcements` array on the pass-through path lists every warn/rewrite
-// that fired during evaluation — empty when no rule matched. Rewrites are
+// that fired during evaluation - empty when no rule matched. Rewrites are
 // applied left-to-right (rule order is canonical, set by the tenant in
 // kolm.yaml) and the response string is mutated incrementally so callers
 // see the final post-rewrite text.
@@ -300,7 +300,7 @@ export function enforceGuardrails(response_text, rules) {
 }
 
 // ----------------------------------------------------------------------------
-// Manifest binding — hashGuardrails
+// Manifest binding - hashGuardrails
 // ----------------------------------------------------------------------------
 //
 // Canonical sha256 over the sorted-key JSON of the rules array. Used as
@@ -328,7 +328,7 @@ function canonical(value) {
 }
 
 // ----------------------------------------------------------------------------
-// Verify-time replay — verifyGuardrailsAgainstTraces
+// Verify-time replay - verifyGuardrailsAgainstTraces
 // ----------------------------------------------------------------------------
 //
 // Used by `kolm verify --guardrails`. Given a (rules, traces) pair, replays
@@ -338,7 +338,7 @@ function canonical(value) {
 //   { ok:false, total, violations:[{trace_idx, rule_name, ...}] }
 //
 // Traces is whatever the artifact's `example_traces` block (or analogous
-// fixture array) carries — each entry must have a string `.output`. We
+// fixture array) carries - each entry must have a string `.output`. We
 // tolerate missing/malformed entries (skip them) so a partial fixture set
 // does not crash verify; the count goes into `total` so callers see the
 // denominator.

@@ -1,10 +1,10 @@
 // src/data-augment.js
 //
-// KOLM DATA ENGINE — stage 3 of 6: AUGMENT.
+// KOLM DATA ENGINE - stage 3 of 6: AUGMENT.
 //
 // Turns a small set of seed pairs (and coverage signals from the CURATE stage)
 // into a larger set of PROMPT CANDIDATES that a later COLLECT/TRAIN step fills
-// with teacher outputs. Augmentation here is templated / heuristic — there are
+// with teacher outputs. Augmentation here is templated / heuristic - there are
 // NO live teacher calls in this module. Generated rows therefore carry an
 // empty `output` ('') on purpose: they are prompts awaiting synthesis. Seed
 // outputs that already exist are preserved where a strategy rewrites a prompt
@@ -14,11 +14,11 @@
 // the shared cost estimator so the user sees the teacher bill BEFORE any
 // expensive collect step runs.
 //
-//   gap-fill     — target under-covered / zero-example categories.
-//   evol         — Evol-Instruct-style complexity escalation of each seed.
-//   persona      — rewrite each seed prompt from N personas.
-//   adversarial  — ambiguity / negation / multi-constraint / out-of-scope.
-//   doc-update   — regenerate prompts whose reference output should change
+//   gap-fill - target under-covered / zero-example categories.
+//   evol - Evol-Instruct-style complexity escalation of each seed.
+//   persona - rewrite each seed prompt from N personas.
+//   adversarial - ambiguity / negation / multi-constraint / out-of-scope.
+//   doc-update - regenerate prompts whose reference output should change
 //                  because a source doc changed.
 //
 // Public-API contract:
@@ -406,7 +406,7 @@ export async function augment({ tenant, namespace, strategy, pairs, seedPairs, o
 // Accepts externally-supplied fix pairs (the Failure Analyst writes here) and
 // appends them to augment-pairs.jsonl with provenance.strategy:'failure-fix'.
 // Unlike augment(), these carry real outputs (the corrected answer) and are
-// always written — there is no preview gate, because the caller already
+// always written - there is no preview gate, because the caller already
 // decided these are corrections to land.
 export async function appendFixPairs({ tenant, namespace, fix_pairs } = {}) {
   try {

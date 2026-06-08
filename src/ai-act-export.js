@@ -1,4 +1,4 @@
-// W766-1 + W766-3 + W766-4 — EU AI Act technical documentation export,
+// W766-1 + W766-3 + W766-4 - EU AI Act technical documentation export,
 // human-in-the-loop config, and data governance reports.
 //
 // Annex IV of Regulation (EU) 2024/1689 enumerates the technical-documentation
@@ -9,21 +9,21 @@
 // kolm artifact manifest and emits an Annex-IV-shaped envelope.
 //
 // HONESTY CONTRACT (do not violate):
-//   * Fields the manifest does NOT carry are stamped 'not_yet_disclosed' —
+//   * Fields the manifest does NOT carry are stamped 'not_yet_disclosed' - 
 //     NEVER fabricated. A regulator reading the output must be able to tell
 //     "this builder has not yet attested to X" vs "X is empty by design".
 //   * buildGovernanceReport runs every event-store read under a per-row
 //     tenant filter (W411 defense-in-depth). The query filter alone is not
-//     enough — a future schema bug could leak across tenants, so the loop
+//     enough - a future schema bug could leak across tenants, so the loop
 //     body always re-checks row.tenant_id.
 //   * humanInLoopConfig validates threshold ∈ [0, 10] nats. NEVER persists an
 //     out-of-range value. Out-of-range → honest ok:false envelope.
 //
-// DI testing seam — every external interaction (storeMod, eventStore) can be
+// DI testing seam - every external interaction (storeMod, eventStore) can be
 // overridden via opts so tests can pass in-memory fakes and avoid the real
 // disk/sqlite paths.
 //
-// W604 anti-brittleness — AI_ACT_EXPORT_VERSION = 'w766-v1', test pins both
+// W604 anti-brittleness - AI_ACT_EXPORT_VERSION = 'w766-v1', test pins both
 // /^w766-/ AND the literal value.
 
 import {
@@ -47,7 +47,7 @@ export const ANNEX_IV_FIELDS = Object.freeze([
   'postmarket_monitoring_plan',
 ]);
 
-// Honest placeholder string — a regulator reading the export must see that
+// Honest placeholder string - a regulator reading the export must see that
 // the builder has not yet attested to this field.
 const NOT_YET_DISCLOSED = 'not_yet_disclosed';
 
@@ -55,7 +55,7 @@ function _nowIso() {
   return new Date().toISOString();
 }
 
-// _disclosedOr(value, fallback) — return the manifest value if it's a non-empty
+// _disclosedOr(value, fallback) - return the manifest value if it's a non-empty
 // string OR a non-empty object. Otherwise return the NOT_YET_DISCLOSED string.
 // We deliberately do NOT coerce numbers / booleans because Annex IV fields are
 // all narrative or structured-object fields per the regulation text.
@@ -73,11 +73,11 @@ function _disclosedOr(value) {
   return NOT_YET_DISCLOSED;
 }
 
-// buildTechnicalDocumentation(manifest, opts) — return the Annex IV envelope.
+// buildTechnicalDocumentation(manifest, opts) - return the Annex IV envelope.
 //
 // opts:
 //   format               'json' | 'markdown'  default 'json'
-//   risk_category        override the derived risk_category (rare —
+//   risk_category        override the derived risk_category (rare - 
 //                        used when an external assessor has already classified
 //                        the system).
 //
@@ -194,7 +194,7 @@ export function buildTechnicalDocumentation(manifest, opts = {}) {
   return envelope;
 }
 
-// _renderMarkdown(envelope) — emit a human-readable Annex IV markdown table
+// _renderMarkdown(envelope) - emit a human-readable Annex IV markdown table
 // in JSON-envelope form so callers that asked for markdown still get a
 // JSON-parseable response (markdown sits in the .markdown field).
 function _renderMarkdown(envelope) {
@@ -237,7 +237,7 @@ function _renderMarkdown(envelope) {
 }
 
 // buildGovernanceReport({tenant_id, namespace, manifest_ids, time_range,
-// storeMod, eventStore}) — aggregate captures via tenant-fenced read +
+// storeMod, eventStore}) - aggregate captures via tenant-fenced read +
 // per-row tenant filter (W411 defense-in-depth).
 //
 // Returns:
@@ -265,7 +265,7 @@ export async function buildGovernanceReport(opts = {}) {
     };
   }
 
-  // DI seam — accept opts.eventStore for tests; fall back to the real module.
+  // DI seam - accept opts.eventStore for tests; fall back to the real module.
   let eventStore = opts.eventStore;
   if (!eventStore) {
     try {
@@ -284,7 +284,7 @@ export async function buildGovernanceReport(opts = {}) {
   // Pull captures (the dataset rows). The event-store stores everything as
   // "events"; captures are the rows that have a request_hash / response_hash.
   // We use listEvents tenant_id filter, then re-filter in the loop body
-  // (W411 defense-in-depth — never trust the query filter alone).
+  // (W411 defense-in-depth - never trust the query filter alone).
   const query = {
     tenant_id,
     limit: 10000,
@@ -325,9 +325,9 @@ export async function buildGovernanceReport(opts = {}) {
   const by_namespace = {};
 
   for (const row of rows) {
-    // Defense-in-depth — re-check tenant_id on every row.
+    // Defense-in-depth - re-check tenant_id on every row.
     if (!row || row.tenant_id !== tenant_id) continue;
-    // Skip routing-threshold marker rows and forget markers — those are
+    // Skip routing-threshold marker rows and forget markers - those are
     // governance metadata, not captures.
     if (row.provider === 'kolm_routing_threshold') continue;
     if (row.provider === 'kolm_capture_forget') continue;
@@ -363,7 +363,7 @@ export async function buildGovernanceReport(opts = {}) {
         } catch (_) { /* not JSON, skip */ }
       }
     }
-    // Risk category — derive once per row if we can find a task hint.
+    // Risk category - derive once per row if we can find a task hint.
     if (typeof row.task_category === 'string') {
       const sc = scoreArtifactRisk({ task_category: row.task_category });
       if (sc.ok && sc.risk_category === 'high') count_high_risk += 1;
@@ -412,7 +412,7 @@ export async function buildGovernanceReport(opts = {}) {
 }
 
 // humanInLoopConfig({tenant_id, namespace, threshold_nats, eventStore,
-// routingThresholdMod}) — persist the per-namespace human-review threshold.
+// routingThresholdMod}) - persist the per-namespace human-review threshold.
 //
 // Backed by W709's setNamespaceThreshold (event-store appendEvent under
 // provider='kolm_human_review_threshold'). Threshold validated ∈ [0, 10] nats.
@@ -440,7 +440,7 @@ export async function humanInLoopConfig(opts = {}) {
     return {
       ok: false,
       error: 'namespace_required',
-      hint: 'namespace is required — thresholds are per-namespace',
+      hint: 'namespace is required - thresholds are per-namespace',
       version: AI_ACT_EXPORT_VERSION,
     };
   }
@@ -464,7 +464,7 @@ export async function humanInLoopConfig(opts = {}) {
     };
   }
 
-  // DI seam — accept opts.eventStore + opts.routingThresholdMod for tests.
+  // DI seam - accept opts.eventStore + opts.routingThresholdMod for tests.
   let eventStore = opts.eventStore;
   if (!eventStore) {
     try {
@@ -480,7 +480,7 @@ export async function humanInLoopConfig(opts = {}) {
   }
 
   // Write a durable marker. We use our own provider tag so the
-  // routing-threshold subsystem (W709) is not implicitly overridden — this is
+  // routing-threshold subsystem (W709) is not implicitly overridden - this is
   // a distinct knob: "below this confidence, route to a HUMAN reviewer",
   // whereas W709's threshold is "below this confidence, route to TEACHER".
   // Both subsystems can read each other's markers later if desired.
@@ -520,11 +520,11 @@ export async function humanInLoopConfig(opts = {}) {
   };
 }
 
-// getHumanInLoopThreshold({tenant_id, namespace, eventStore}) — read back the
+// getHumanInLoopThreshold({tenant_id, namespace, eventStore}) - read back the
 // most recent threshold for a (tenant, namespace) pair. Returns null if no
 // override has been configured.
 //
-// Defense-in-depth tenant fence — listEvents tenant_id filter AND per-row
+// Defense-in-depth tenant fence - listEvents tenant_id filter AND per-row
 // tenant_id re-check.
 export async function getHumanInLoopThreshold(opts = {}) {
   const { tenant_id = null, namespace = null } = opts || {};

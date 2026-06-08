@@ -1,4 +1,4 @@
-// Wave 339 — single source-of-truth productionReady() verdict.
+// Wave 339 - single source-of-truth productionReady() verdict.
 //
 // Trust bug surfaced in design-partner trial: compile, run, verify, and
 // marketplace each had their own gate logic and could disagree (a K-score
@@ -25,7 +25,7 @@
 //   }
 //
 // Reads a .kolm file OR an already-parsed manifest object. Optional opts:
-//   { kGate, capture }  — kGate overrides KOLM_K_GATE / 0.85; capture is the
+//   { kGate, capture } - kGate overrides KOLM_K_GATE / 0.85; capture is the
 //                         capture-store module (DI for tests).
 
 import fs from 'node:fs';
@@ -36,7 +36,7 @@ import { readEntryFromLargeZip } from './zip-large.js';
 // Re-export so spec-compile.js can keep importing from one place.
 export { MIN_PRODUCTION_HOLDOUT, MIN_PRODUCTION_TRAIN };
 
-// Default ship gate — matches src/kscore.js GATE and cli/kolm.js kGate().
+// Default ship gate - matches src/kscore.js GATE and cli/kolm.js kGate().
 // Kept here so spec-compile.js, cmdRun, cmdVerify, and the marketplace all
 // resolve the same value when KOLM_K_GATE is unset.
 export const DEFAULT_K_GATE = 0.85;
@@ -54,7 +54,7 @@ export function resolveKGate(override) {
 
 // Compute the production_ready boolean from a hydrated seedSplit record.
 // Mirrors the AND gate in src/spec-compile.js (extracted so compile and the
-// other callers share one definition — see W339 #2). Returns true when:
+// other callers share one definition - see W339 #2). Returns true when:
 //   - train_count >= MIN_PRODUCTION_TRAIN
 //   - holdout_count >= MIN_PRODUCTION_HOLDOUT
 //   - every leakage channel is clean (input/output/near-dup/grouped overlap)
@@ -75,7 +75,7 @@ export function computeSeedProductionReady(seedSplit) {
 // (already a root dep). Throws on missing manifest.json so a corrupt file
 // fails loud instead of silently returning ok:false.
 //
-// W891-2.2 — Trinity GGUF .kolm artifacts exceed Node's 2 GiB readFileSync
+// W891-2.2 - Trinity GGUF .kolm artifacts exceed Node's 2 GiB readFileSync
 // limit (a Q4_K_M for a 7B model is ~4.4 GB; the .kolm wraps it with ~5 KB of
 // metadata). When the file fits in Buffer we use AdmZip for parity with the
 // rest of the codebase. When it doesn't we fall back to a Zip64-aware
@@ -95,16 +95,16 @@ async function loadManifestFromArtifact(artifactPath) {
   return JSON.parse(bytes.toString('utf8'));
 }
 
-// W891-3.1 — readEntryFromLargeZip is now imported from src/zip-large.js
+// W891-3.1 - readEntryFromLargeZip is now imported from src/zip-large.js
 // so artifact-runner + airgap bundler + production-ready share one Zip64
 // implementation. See the import at the top of this file.
 
-// W367 — executable-bundle gate. For rule / synthesized_rule / compiled_rule
+// W367 - executable-bundle gate. For rule / synthesized_rule / compiled_rule
 // artifacts the manifest must declare manifest.entry.{file, sha256}, the named
 // file must exist in the zip, and its sha256 must match the declaration.
 // Without this gate a .kolm that ships only metadata (manifest + recipes.json
 // + signature) could pass productionReady() while having nothing for a host to
-// actually run — directly contradicting the "same file runs on a laptop, a
+// actually run - directly contradicting the "same file runs on a laptop, a
 // phone, or an air-gapped server" homepage claim.
 async function loadEntryFileBytes(artifactPath, entryFile) {
   const stat = fs.statSync(artifactPath);
@@ -129,7 +129,7 @@ async function evalExecutableBundle(artifactPathOrManifest, manifest) {
   // Manifest-only path (no zip on disk to crack open). We cannot verify the
   // entry file exists nor re-hash its bytes; the gate is vacuously ok with an
   // informational note. The strict check fires when a real artifact path is
-  // supplied (the cli/router callers — every place a buyer actually runs the
+  // supplied (the cli/router callers - every place a buyer actually runs the
   // .kolm). Pre-W367 in-memory manifests (e.g., the spec-compile dry-run
   // happy-path fixtures in tests/wave339-production-verdict.test.js) keep
   // returning ok:true so the new gate doesn't retroactively fail them.
@@ -139,9 +139,9 @@ async function evalExecutableBundle(artifactPathOrManifest, manifest) {
     }
     return { ok: true, note: 'manifest-only evaluation (zip not available for entry sha256 re-check)' };
   }
-  // Real artifact path supplied — strict mode.
+  // Real artifact path supplied - strict mode.
   if (!manifest.entry || typeof manifest.entry !== 'object') {
-    return { ok: false, reason: 'artifact.no_executable_bundle: manifest.entry block missing — artifact ships metadata only and cannot run' };
+    return { ok: false, reason: 'artifact.no_executable_bundle: manifest.entry block missing - artifact ships metadata only and cannot run' };
   }
   const file = manifest.entry.file;
   const declared = manifest.entry.sha256;
@@ -184,17 +184,17 @@ function evalSeedProvenance(manifest) {
   if (sp.production_ready === false) {
     return { ok: false, reason: 'seed_provenance.production_ready=false (leakage or under-sized split)' };
   }
-  // Wave 409c — auditor mandate. eval_provenance must be 'real_eval' for a
+  // Wave 409c - auditor mandate. eval_provenance must be 'real_eval' for a
   // production_ready artifact. 'placeholder' (synthetic pass_rate or no eval
   // actually ran) is rejected; 'unknown' is tolerated for backward compat
   // with pre-W409c artifacts that did not set the field.
   if (sp.eval_provenance === 'placeholder') {
     return { ok: false, reason: 'seed_provenance.eval_provenance=placeholder (no real eval run; pass_rate was injected)' };
   }
-  // Wave 409aa — synthetic-only artifacts cannot claim production_ready.
+  // Wave 409aa - synthetic-only artifacts cannot claim production_ready.
   // When every seed came from synthetic generation (synthetic_count > 0 and
   // source_seed_count == 0), the train+holdout split is measuring the
-  // synthesizer against itself — not real captured tenant IO. The gate
+  // synthesizer against itself - not real captured tenant IO. The gate
   // returns an explicit enum so the structured verifier can surface
   // `synthetic_only_in_production` rather than a generic seed_provenance
   // failure. production_ready=true on a synthetic-only artifact is the
@@ -204,7 +204,7 @@ function evalSeedProvenance(manifest) {
   if (sp.production_ready === true && synC > 0 && srcC === 0) {
     return {
       ok: false,
-      reason: 'synthetic_only_in_production: seed_provenance.synthetic_count>0 and source_seed_count=0 — every row was synthesized; the K-score does not measure real-world generalization',
+      reason: 'synthetic_only_in_production: seed_provenance.synthetic_count>0 and source_seed_count=0 - every row was synthesized; the K-score does not measure real-world generalization',
       kind: 'synthetic_only_in_production',
     };
   }
@@ -223,7 +223,7 @@ function evalKScore(manifest, kGate) {
 function evalHoldoutSplit(manifest) {
   const sp = manifest.seed_provenance;
   if (!sp) {
-    return { ok: false, train_count: 0, holdout_count: 0, reason: 'no holdout split — built without --seeds' };
+    return { ok: false, train_count: 0, holdout_count: 0, reason: 'no holdout split - built without --seeds' };
   }
   const train = Number(sp.train_count) || 0;
   const holdout = Number(sp.holdout_count) || 0;
@@ -233,7 +233,7 @@ function evalHoldoutSplit(manifest) {
   if (holdout < MIN_PRODUCTION_HOLDOUT) {
     return { ok: false, train_count: train, holdout_count: holdout, reason: `holdout_count ${holdout} < MIN_PRODUCTION_HOLDOUT ${MIN_PRODUCTION_HOLDOUT}` };
   }
-  // Leakage channels — re-check so a tampered seed_provenance.production_ready
+  // Leakage channels - re-check so a tampered seed_provenance.production_ready
   // can't lie about a clean split. Same AND as computeSeedProductionReady().
   const lr = sp || {};
   const channels = ['input_overlap_count', 'output_overlap_count', 'near_duplicate_count', 'grouped_overlap_count'];
@@ -248,7 +248,7 @@ function evalHoldoutSplit(manifest) {
 function evalDrift(manifest, driftMax) {
   // drift_report block is optional. When present, prefer its top-level
   // drift_score (drift-supersession.js convention). When absent the gate is
-  // vacuously ok — drift is opt-in, not a blocker for first compile.
+  // vacuously ok - drift is opt-in, not a blocker for first compile.
   const block = manifest.drift_report;
   if (!block || typeof block !== 'object') return { ok: true };
   const dscore = typeof block.drift_score === 'number'
@@ -259,11 +259,11 @@ function evalDrift(manifest, driftMax) {
   return { ok: false, drift_score: dscore, reason: `drift_score ${dscore.toFixed(4)} exceeds max ${driftMax}` };
 }
 
-// W407e — live eval parity gate. The trust bug surfaced when a user ran
+// W407e - live eval parity gate. The trust bug surfaced when a user ran
 // `kolm verify demo-log-triage.kolm` (production_ready:true, K=0.864) but
 // `kolm eval demo-log-triage.kolm` reported 7/10 (70%). Verify was trusting
-// the EMBEDDED eval block in the artifact zip — built once at compile time
-// against the recipe-as-of-then — but never re-ran the embedded cases
+// the EMBEDDED eval block in the artifact zip - built once at compile time
+// against the recipe-as-of-then - but never re-ran the embedded cases
 // against the recipe-as-shipped. If the bundled recipe drifts (or the
 // compiler over-counted), verify keeps printing the stale build-time score
 // while every other surface (`kolm eval`, the marketplace bench-off, a real
@@ -274,7 +274,7 @@ function evalDrift(manifest, driftMax) {
 // accuracy is more than 5 points below the gate (or, when comparable, more
 // than 5 points below the embedded eval's claimed accuracy). It is only
 // meaningful when the zip is on disk AND the artifact ships eval cases AND
-// the runner can execute the bundle — distilled_model and manifest-only
+// the runner can execute the bundle - distilled_model and manifest-only
 // callers pass through (other gates already enforce shape).
 async function evalParity(artifactPathOrManifest, manifest, opts) {
   if (typeof artifactPathOrManifest !== 'string') {
@@ -286,7 +286,7 @@ async function evalParity(artifactPathOrManifest, manifest, opts) {
   }
   const kGate = resolveKGate(opts && opts.kGate);
   // 5-point drift floor mirrors the user-reported "verify says K 0.86 / eval
-  // says 70%" gap — anything inside the band is treated as eval noise (a
+  // says 70%" gap - anything inside the band is treated as eval noise (a
   // tolerance-vs-tolerance mismatch); anything outside is a real parity break.
   const driftFloorPts = 5;
   const driftFloor = driftFloorPts / 100;
@@ -294,7 +294,7 @@ async function evalParity(artifactPathOrManifest, manifest, opts) {
   try {
     ({ evalArtifact } = await import('./artifact-runner.js'));
   } catch (e) {
-    // Runner not importable in this context (test stub, partial install) —
+    // Runner not importable in this context (test stub, partial install) - 
     // do not punish the artifact for a host gap. The other gates still apply.
     return { ok: true, _skipped: `artifact-runner unavailable: ${e.message}` };
   }
@@ -304,7 +304,7 @@ async function evalParity(artifactPathOrManifest, manifest, opts) {
   } catch (e) {
     // Distinguish environment failures from real parity drift. Signature /
     // load errors mean the host doesn't possess the secret needed to open
-    // the bundle (RECIPE_RECEIPT_SECRET, cloud-trust list) — those are
+    // the bundle (RECIPE_RECEIPT_SECRET, cloud-trust list) - those are
     // already policed by the binder's signature check and the
     // executable_bundle gate. They are NOT eval drift. We skip the gate so
     // a host gap doesn't masquerade as a parity break.
@@ -320,13 +320,13 @@ async function evalParity(artifactPathOrManifest, manifest, opts) {
     return { ok: true, _skipped: 'no embedded eval cases to re-run' };
   }
   const liveAcc = typeof live.accuracy === 'number' ? live.accuracy : (live.passed / live.n);
-  // W443 — fix: previously this compared liveAcc to k_score.composite, but
+  // W443 - fix: previously this compared liveAcc to k_score.composite, but
   // composite K bundles 5 axes (A·S·L·C·V) and is structurally higher than
   // accuracy alone (the S/L/C/V baseline pulls K up to ~0.60 even at A=0).
   // A live rerun can never approach K when K=0.88 and A=0.75. The correct
   // embedded reference is the accuracy axis the K-score actually stored
   // (k_score.accuracy) or, when present, the dedicated evals.accuracy field.
-  // The composite is kept as informational diagnostic only — not a gate.
+  // The composite is kept as informational diagnostic only - not a gate.
   const evalsAcc = (manifest.evals && typeof manifest.evals.accuracy === 'number')
     ? manifest.evals.accuracy
     : null;
@@ -341,7 +341,7 @@ async function evalParity(artifactPathOrManifest, manifest, opts) {
   // The kGate term ensures even a gateless artifact must keep live accuracy
   // near the ship gate; the embedded_acc term enforces parity with whatever
   // accuracy the artifact previously committed to. Composite K is no longer a
-  // floor (it's not the same scale as accuracy) — kept on the return envelope
+  // floor (it's not the same scale as accuracy) - kept on the return envelope
   // for diagnostic transparency.
   const floors = [kGate - driftFloor];
   if (embeddedAcc != null) floors.push(embeddedAcc - driftFloor);
@@ -357,7 +357,7 @@ async function evalParity(artifactPathOrManifest, manifest, opts) {
       embedded_accuracy: embeddedAcc,
       composite,
       drift_floor_pts: driftFloorPts,
-      reason: `eval_parity: live rerun ${live.passed}/${live.n} (${liveStr}) drifted from ${claim} by more than ${driftFloorPts}pts — rebuild required`,
+      reason: `eval_parity: live rerun ${live.passed}/${live.n} (${liveStr}) drifted from ${claim} by more than ${driftFloorPts}pts - rebuild required`,
     };
   }
   return {
@@ -383,7 +383,7 @@ async function evalDurability(opts) {
     if (durable) return { ok: true, driver };
     return { ok: false, driver, reason: `store driver ${driver || '?'} is ephemeral (writes do not survive process restart)` };
   } catch (_e) {
-    // capture-store unavailable — local-only artifacts pass through.
+    // capture-store unavailable - local-only artifacts pass through.
     return { ok: true };
   }
 }
@@ -407,11 +407,11 @@ export async function productionReady(artifactPathOrManifest, opts = {}) {
   const holdout_split = evalHoldoutSplit(manifest);
   const drift = evalDrift(manifest, driftMax);
   const durability = await evalDurability(opts);
-  // W367 — executable bundle gate. Must come last so a manifest-only failure
+  // W367 - executable bundle gate. Must come last so a manifest-only failure
   // here doesn't shadow a more diagnostic failure earlier (seed provenance,
   // k-score, etc.).
   const executable_bundle = await evalExecutableBundle(artifactPathOrManifest, manifest);
-  // W407e — live-eval parity gate. Runs after executable_bundle so a missing
+  // W407e - live-eval parity gate. Runs after executable_bundle so a missing
   // entry surfaces with the more specific message; only fires when the bundle
   // is intact enough to re-run.
   const eval_parity = executable_bundle.ok
@@ -427,7 +427,7 @@ export async function productionReady(artifactPathOrManifest, opts = {}) {
   return { ok, gates, reasons };
 }
 
-// W409e — Synchronous variant: PROVISIONAL ONLY.
+// W409e - Synchronous variant: PROVISIONAL ONLY.
 //
 // Skips the durability, executable_bundle, and eval_parity gates because all
 // three require async I/O (capture-store dynamic import, adm-zip + entry sha
@@ -472,7 +472,7 @@ export function productionReadySync(manifest, opts = {}) {
   return { ok, gates, reasons, _provisional: true };
 }
 
-// W409e — verifier helper. Returns true when the verdict came from
+// W409e - verifier helper. Returns true when the verdict came from
 // productionReady() (the async path with bundle + eval_parity + durability
 // run). Used by callers that publish `production_ready:true` for an artifact
 // on disk: they MUST refuse to set the flag from a provisional sync verdict.

@@ -1,7 +1,7 @@
-// W369 — event-store: schema-validated wrapper over a local SQLite file.
+// W369 - event-store: schema-validated wrapper over a local SQLite file.
 //
 // Storage layout: a single SQLite file at ~/.kolm/events/events.sqlite. We
-// own the schema (one events table, JSON column) — separate from src/store.js
+// own the schema (one events table, JSON column) - separate from src/store.js
 // which is the multi-purpose row store the server uses. We never want a
 // rogue daemon-connector write to corrupt the rest of the kolm store.
 //
@@ -12,7 +12,7 @@
 //     writes do not corrupt the whole log.
 //
 // Honors:
-//   - KOLM_DATA_DIR (overrides ~/.kolm — used by tests with a temp HOME)
+//   - KOLM_DATA_DIR (overrides ~/.kolm - used by tests with a temp HOME)
 //   - KOLM_EVENT_STORE_PATH (point at any file; overrides KOLM_DATA_DIR)
 //   - HOME (Linux/macOS), USERPROFILE (Windows)
 //
@@ -69,7 +69,7 @@ function _ensureDirs() {
   _eventsDir = path.join(base, 'events');
   fs.mkdirSync(_eventsDir, { recursive: true });
   // Self-heal: on a mounted volume, an events dir created by an earlier root-owned
-  // deploy can be unwritable for a later non-root process — every append then fails
+  // deploy can be unwritable for a later non-root process - every append then fails
   // EACCES (broke conversation backup). If the default dir isn't writable, fall back
   // to a fresh app-owned sibling under the SAME data root, so writes succeed AND
   // persist on the volume. If even the data root is unwritable, the operator must fix
@@ -88,7 +88,7 @@ function _ensureDirs() {
   _jsonlPath = path.join(_eventsDir, 'events.jsonl');
   // Final guard: a store file left root-owned by a prior root-deploy can't be opened
   // for append (EACCES) even when its dir is writable. Switch to an app-owned alternate
-  // name in the same (writable) dir — a fresh file is created app-owned, always writable.
+  // name in the same (writable) dir - a fresh file is created app-owned, always writable.
   if (!_appendable(_dbPath)) _dbPath = path.join(_eventsDir, 'events-app.sqlite');
   if (!_appendable(_jsonlPath)) _jsonlPath = path.join(_eventsDir, 'events-app.jsonl');
 }
@@ -142,7 +142,7 @@ function _openSqlite() {
       CREATE INDEX IF NOT EXISTS idx_events_media_hash ON events(media_hash);
       CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
     `);
-    // W377 — additive ALTER TABLE for older DBs that pre-date the media_*
+    // W377 - additive ALTER TABLE for older DBs that pre-date the media_*
     // columns. SQLite has no ADD COLUMN IF NOT EXISTS, so we read pragma
     // table_info and only add what is missing. Idempotent + crash-safe.
     try {
@@ -172,7 +172,7 @@ function _openSqlite() {
 
 // Lazily pick the driver and return its name.
 //
-// W411 — KOLM_EVENT_STORE_DRIVER='jsonl' forces the JSONL path even when
+// W411 - KOLM_EVENT_STORE_DRIVER='jsonl' forces the JSONL path even when
 // node:sqlite is available. Used by migration/backfill tests that need to
 // seed a pre-W411 events.jsonl file directly. Production code should not
 // set this env var.
@@ -188,7 +188,7 @@ function _ensureDriver() {
   return _driver;
 }
 
-// Reset module state — only for tests that switch HOME / KOLM_DATA_DIR.
+// Reset module state - only for tests that switch HOME / KOLM_DATA_DIR.
 export function _resetForTests() {
   try { if (_db) _db.close(); } catch {} // deliberate: cleanup
   _db = null;
@@ -244,7 +244,7 @@ export async function appendEvent(partial = {}) {
     );
   } else {
     _ensureDirs();
-    // W552 — JSONL fallback stays append-only on write. Earlier W411 code
+    // W552 - JSONL fallback stays append-only on write. Earlier W411 code
     // scanned and rewrote the whole file when the same event_id appeared,
     // which made connector capture O(n^2) because capture-store bridge +
     // canonical event append intentionally re-emit the same event_id. Read
@@ -261,7 +261,7 @@ function _jsonlAll() {
   _ensureDirs();
   if (!fs.existsSync(_jsonlPath)) return [];
   const text = fs.readFileSync(_jsonlPath, 'utf8');
-  // W411 P0 #6 — last-write-wins dedupe by event_id when reading back. Defends
+  // W411 P0 #6 - last-write-wins dedupe by event_id when reading back. Defends
   // against legacy JSONL files (pre-W411) that contain duplicate event_id
   // lines from blind appends. listEvents/getEvent/countEvents all funnel
   // through here, so dedupe at the read layer guarantees idempotent semantics
@@ -277,7 +277,7 @@ function _jsonlAll() {
       seen.set(row.event_id, row);
     } catch {} // deliberate: cleanup
   }
-  // W411 addendum #9 — apply backfillLegacy to every read so legacy JSONL rows
+  // W411 addendum #9 - apply backfillLegacy to every read so legacy JSONL rows
   // (pre-W411, missing tenant_id/source_type/review_state/production_eligible)
   // surface as canonical events with safe defaults. Idempotent on already-
   // canonical rows.
@@ -287,12 +287,12 @@ function _jsonlAll() {
 function _matchEvent(ev, q) {
   if (!ev) return false;
   if (q.namespace && ev.namespace !== q.namespace) return false;
-  // W411 — accept both `tenant_id` (canonical) and `tenant` (shorthand used
+  // W411 - accept both `tenant_id` (canonical) and `tenant` (shorthand used
   // by route handlers that pass req.tenant_record.id directly). Either one
   // restricts the read to that tenant; the seam is enforced here.
   const tenantFilter = q.tenant_id || q.tenant;
   if (tenantFilter && ev.tenant_id !== tenantFilter) return false;
-  // W936 — team attribution filters (team dashboard "who asked what").
+  // W936 - team attribution filters (team dashboard "who asked what").
   if (q.team_id && ev.team_id !== q.team_id) return false;
   if (q.actor_id && ev.actor_id !== q.actor_id) return false;
   if (q.provider && ev.provider !== q.provider) return false;
@@ -309,7 +309,7 @@ function _matchEvent(ev, q) {
 // Returns an array of events (newest first by default). limit defaults to
 // 1000; pass 0 for unlimited (sparingly).
 //
-// W411 — `tenant` is a shorthand alias for `tenant_id`. Both filter on the
+// W411 - `tenant` is a shorthand alias for `tenant_id`. Both filter on the
 // canonical `tenant_id` column; route handlers that read req.tenant_record.id
 // can pass either name without renaming at the call site.
 export async function listEvents(query = {}) {
@@ -335,7 +335,7 @@ export async function listEvents(query = {}) {
     let rows = db.prepare(sql).all(...args).map(r => {
       try { return backfillLegacy(JSON.parse(r.json)); } catch { return null; }
     }).filter(Boolean);
-    // W936 — team_id/actor_id live in the JSON payload, not as indexed columns,
+    // W936 - team_id/actor_id live in the JSON payload, not as indexed columns,
     // so filter them post-parse (same place query.filter applies).
     if (query.team_id) rows = rows.filter(r => r.team_id === query.team_id);
     if (query.actor_id) rows = rows.filter(r => r.actor_id === query.actor_id);
@@ -409,14 +409,14 @@ export function streamEvents(cb) {
 //   format = 'jsonl' (default) | 'json' | 'csv'.
 // Returns a string buffer.
 //
-// W411 — tenant_id forwarded to listEvents so routes that call /v1/lake/export
+// W411 - tenant_id forwarded to listEvents so routes that call /v1/lake/export
 // only export the caller's rows.
 export async function exportEvents(opts = {}) {
   const fmt = (opts.format || 'jsonl').toLowerCase();
   const rows = await listEvents({
     namespace: opts.namespace,
     tenant_id: opts.tenant_id || opts.tenant || null,
-    team_id: opts.team_id || null, // W936 — team-scoped export
+    team_id: opts.team_id || null, // W936 - team-scoped export
     since: opts.since,
     until: opts.until,
     limit: opts.limit == null ? 0 : opts.limit,
@@ -441,7 +441,7 @@ export async function exportEvents(opts = {}) {
 
 export async function countEvents(query = {}) {
   const drv = _ensureDriver();
-  // W411 — alias as in listEvents.
+  // W411 - alias as in listEvents.
   const tenantFilter = query.tenant_id || query.tenant;
   if (drv === 'sqlite') {
     const db = _openSqlite();
@@ -458,7 +458,7 @@ export async function countEvents(query = {}) {
   return (_jsonlAll().filter(ev => _matchEvent(ev, query))).length;
 }
 
-// W377 — filterByMediaKind({media_kind, namespace?, tenant_id?, limit?}).
+// W377 - filterByMediaKind({media_kind, namespace?, tenant_id?, limit?}).
 // Convenience wrapper for the multimodal loaders that only care about, say,
 // every 'pdf' or every 'audio' row. Forwards everything else to listEvents so
 // you still get namespace + tenant + time-window filtering for free.

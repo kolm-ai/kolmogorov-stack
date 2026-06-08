@@ -1,4 +1,4 @@
-// W888-C — Modal adapter stub.
+// W888-C - Modal adapter stub.
 //
 // Deferred to W888-B cloud module (src/cloud-providers/modal.js already
 // ships the function-deploy path). This adapter exists so the adapter

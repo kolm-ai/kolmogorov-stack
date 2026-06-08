@@ -1,15 +1,15 @@
 // src/build-preview.js
 //
-// W347 — Dry-run build preview helper. Powers POST /v1/build/preview.
+// W347 - Dry-run build preview helper. Powers POST /v1/build/preview.
 //
 // Why this exists: the builder UI (public/builder.html) needs to show the
 // caller a real K-score, the first few train + holdout rows, the
-// production_ready verdict, and which gates would block ship — WITHOUT
+// production_ready verdict, and which gates would block ship - WITHOUT
 // writing an artifact, charging the tenant, or spawning a synthesis job.
 //
 // Inputs:
-//   spec              — spec.json-shaped object (name, task, output_spec, ...)
-//   seeds_jsonl_text  — raw JSONL text (one row per line, canonical
+//   spec - spec.json-shaped object (name, task, output_spec, ...)
+//   seeds_jsonl_text - raw JSONL text (one row per line, canonical
 //                       {input,output} or legacy {prompt,completion} shape).
 //
 // Outputs:
@@ -78,7 +78,7 @@ function parseJsonlText(text) {
 
 function shapeSpec(specIn) {
   if (!specIn || typeof specIn !== 'object') return null;
-  // Defensive subset — the preview path only needs name + task + output_spec.
+  // Defensive subset - the preview path only needs name + task + output_spec.
   return {
     name: typeof specIn.name === 'string' ? specIn.name.slice(0, 128) : 'preview',
     task: typeof specIn.task === 'string' ? specIn.task.slice(0, 8000) : '',
@@ -156,7 +156,7 @@ export async function buildPreview({ spec, seeds_jsonl_text } = {}) {
   // --- run productionReady on a synthetic preview manifest -----------------
   // The preview manifest mimics what spec-compile.js would emit at compile
   // time so the same gate checks fire. We do NOT lie about durability or
-  // drift here — we use the sync helper which records durability as skipped.
+  // drift here - we use the sync helper which records durability as skipped.
   const previewManifest = {
     name: specShaped.name,
     k_score,

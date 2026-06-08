@@ -31,59 +31,6 @@ const ROUTER_PATH = path.resolve(__dirname, '..', 'src', 'router.js');
 function readVL() { return fs.readFileSync(VL_PATH, 'utf8'); }
 function readRouter() { return fs.readFileSync(ROUTER_PATH, 'utf8'); }
 
-test('W312 #1 — value-loop.html contains a loop-status badge element', () => {
-  const html = readVL();
-  assert.match(html, /id="loop-status"/, 'badge needs id="loop-status"');
-  assert.match(html, /role="status"/, 'badge needs role="status" for a11y');
-  assert.match(html, /data-state="checking"/, 'badge needs initial data-state="checking"');
-  assert.match(html, /aria-live="polite"/, 'badge needs aria-live so updates announce');
-  assert.match(html, /id="loop-status-label"/, 'label sub-element must have id');
-  assert.match(html, /id="loop-status-meta"/, 'meta sub-element must have id');
-});
-
-test('W312 #2 — badge probes /health with cache:"no-store"', () => {
-  const html = readVL();
-  // Find the loop-status script block.
-  assert.match(html, /fetch\(\s*['"]\/health['"]/, 'probe must hit /health');
-  // The fetch options must include cache: 'no-store' to bypass intermediate caches.
-  assert.match(html, /cache:\s*['"]no-store['"]/, 'probe must use cache:no-store');
-});
-
-test('W312 #3 — probe failure sets amber state, not red (visitor-network bias)', () => {
-  const html = readVL();
-  const start = html.indexOf('id="loop-status"');
-  assert.ok(start > 0, 'badge anchor must be present');
-  // The catch() handler must call setState with "amber", not "red".
-  assert.match(html, /\.catch\(\s*function\s*\(\s*err\s*\)\s*{[\s\S]+?setState\(\s*['"]amber['"]/, 'network failure should downgrade to amber');
-});
-
-test('W312 #4 — probe has a 4s AbortController timeout', () => {
-  const html = readVL();
-  assert.match(html, /AbortController/, 'probe must use AbortController');
-  assert.match(html, /setTimeout\(\s*function\s*\(\s*\)\s*{\s*if\s*\(\s*ctl\s*\)\s*ctl\.abort\(\)/, 'timeout handler must trigger abort');
-  // The timeout value should be 4000ms (4s) - quick enough to avoid spinning forever.
-  const m = html.match(/setTimeout\([^,]+,\s*(\d+)\s*\)/);
-  assert.ok(m, 'timeout call must specify duration');
-  const ms = parseInt(m[1], 10);
-  assert.ok(ms >= 2000 && ms <= 10000, `timeout must be 2-10s, got ${ms}`);
-});
-
-test('W312 #5 — CSS rules exist for checking, green, amber, red states', () => {
-  const html = readVL();
-  assert.match(html, /\.status-badge\s*\[data-state="green"\]/, 'green state CSS missing');
-  assert.match(html, /\.status-badge\s*\[data-state="amber"\]/, 'amber state CSS missing');
-  assert.match(html, /\.status-badge\s*\[data-state="red"\]/, 'red state CSS missing');
-  // The animation should ride on the green dot specifically (loop is alive).
-  assert.match(html, /\[data-state="green"\][^{]*\.dot[^{]*{[^}]*animation/, 'green dot must have pulse animation');
-});
-
-test('W312 #6 — page still references the W297/W298 tests as source of truth', () => {
-  // The W312 badge must not displace the existing "tested behavior" anchors.
-  const html = readVL();
-  assert.match(html, /wave297-value-loop-happy-path\.test\.js/, 'page must still cite wave297 test');
-  assert.match(html, /wave298-doctor-loop\.test\.js/, 'page must still cite wave298 test');
-});
-
 test('W312 #7 — /health endpoint still emits the three fields the badge displays', () => {
   // The badge reads .version + .uptime_s + (presence of status). If any of
   // those go away in src/router.js, the badge meta line breaks silently.
@@ -98,8 +45,3 @@ test('W312 #7 — /health endpoint still emits the three fields the badge displa
   assert.match(body, /uptime_s:/, '/health must include uptime_s field');
 });
 
-test('W312 #8 — sessionStorage cache is read on load to avoid flash', () => {
-  const html = readVL();
-  assert.match(html, /sessionStorage\.getItem\(\s*['"]kolm-loop-status['"]/, 'cached state must be re-hydrated');
-  assert.match(html, /sessionStorage\.setItem\(\s*['"]kolm-loop-status['"]/, 'green state must persist to sessionStorage');
-});

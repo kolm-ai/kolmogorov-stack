@@ -1,0 +1,17 @@
+{
+  "name": "customer-support",
+  "title": "Customer Support",
+  "icon": "headset",
+  "description": "Tier-1 support replies grounded in your KB. Distills a friendly, accurate triage agent that escalates the cases it cannot answer.",
+  "default_describe": "Respond to customer inquiries in a friendly, accurate tone. Always quote the order ID and the SKU when present. Never invent shipping dates, refund amounts, or warranty terms; escalate to a human when the answer requires policy lookup.",
+  "sample_csv_url": "/samples/customer-support.csv",
+  "recommended_student": "qwen2.5-7b-instruct",
+  "recommended_target": "gguf-q4km",
+  "recommended_gate": 0.85,
+  "expected_kscore": 0.88,
+  "eval_criteria": ["intent_match", "tone_match", "no_inventions", "stays_in_scope"],
+  "input_col": "ticket",
+  "output_col": "reply",
+  "use_cases": ["ticket triage", "order status replies", "shipping FAQ", "returns workflow"],
+  "minimum_rows": 50
+}

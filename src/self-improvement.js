@@ -1,7 +1,7 @@
-// W720-1 — self-improvement loop: detect underperforming captures via route events.
+// W720-1 - self-improvement loop: detect underperforming captures via route events.
 //
 // Sister to W775 (Continuous background distillation). This module is the
-// *detection* primitive — it scans the event-store for telemetry rows that
+// *detection* primitive - it scans the event-store for telemetry rows that
 // signal "this capture / artifact is underperforming" so the orchestrator
 // (src/improvement-orchestrator.js) can decide which captures to re-distill.
 //
@@ -32,7 +32,7 @@ import crypto from 'node:crypto';
 export const SELF_IMPROVEMENT_VERSION = 'w720-v1';
 
 // Sentinel values we treat as a failure status. The canonical event-schema
-// closed enum is {'ok', 'error', 'timeout', 'rate_limited', 'blocked'} — any
+// closed enum is {'ok', 'error', 'timeout', 'rate_limited', 'blocked'} - any
 // non-'ok' value is a failure for self-improvement purposes.
 const FAILURE_STATUS = new Set(['error', 'timeout', 'rate_limited', 'blocked']);
 
@@ -47,7 +47,7 @@ function _isFailureEvent(ev, kscoreThreshold) {
   if (ev.status && FAILURE_STATUS.has(String(ev.status).toLowerCase())) return true;
   // Reviewer-set rejection.
   if (ev.review_state === 'rejected') return true;
-  // Numeric K-Score regression signal — payload may live on the raw row OR on
+  // Numeric K-Score regression signal - payload may live on the raw row OR on
   // a `kscore` / `k_score` field in the canonical event blob.
   const k = _readKScore(ev);
   if (Number.isFinite(k) && k < kscoreThreshold) return true;
@@ -88,8 +88,8 @@ function _candidateKey(ev) {
 
 function _readCurrentArtifactId(ev) {
   // Captures that already ran through a compiled artifact may stamp the
-  // artifact_id on the event row. Several spots — runArtifact() in
-  // artifact-runner.js (line 521, 643) — surface k_score via the returned
+  // artifact_id on the event row. Several spots - runArtifact() in
+  // artifact-runner.js (line 521, 643) - surface k_score via the returned
   // envelope; we look at the same nesting positions we read kscore from.
   if (ev.artifact_id) return String(ev.artifact_id);
   if (ev.meta && ev.meta.artifact_id) return String(ev.meta.artifact_id);
@@ -124,7 +124,7 @@ export async function detectUnderperformingCaptures(opts = {}) {
   const kscoreThreshold = 1 - Number(min_kscore_delta);
   const minFailureRate = Number(min_failure_rate);
 
-  // Compute the time window — null when window_days<=0 means "all history".
+  // Compute the time window - null when window_days<=0 means "all history".
   let sinceMs = null;
   if (Number.isFinite(window_days) && window_days > 0) {
     sinceMs = Date.now() - window_days * 24 * 60 * 60 * 1000;
@@ -139,7 +139,7 @@ export async function detectUnderperformingCaptures(opts = {}) {
       return {
         ok: false,
         error: 'event_store_unavailable',
-        hint: 'src/event-store.js does not export listEvents — check the install',
+        hint: 'src/event-store.js does not export listEvents - check the install',
         self_improvement_version: SELF_IMPROVEMENT_VERSION,
       };
     }
@@ -217,7 +217,7 @@ export async function detectUnderperformingCaptures(opts = {}) {
     }
   }
 
-  // Reduce to candidate rows — only emit groups that meet the failure_rate gate.
+  // Reduce to candidate rows - only emit groups that meet the failure_rate gate.
   const candidates = [];
   for (const g of groups.values()) {
     const failure_rate = g.total_events === 0 ? 0 : g.failure_count / g.total_events;
@@ -256,13 +256,13 @@ export async function detectUnderperformingCaptures(opts = {}) {
   };
 }
 
-// Pure-helper test seam — exported so tests can assert the failure-detection
+// Pure-helper test seam - exported so tests can assert the failure-detection
 // edge cases without seeding a full event store.
 export function _isFailureEventForTest(ev, kscoreThreshold) {
   return _isFailureEvent(ev, kscoreThreshold);
 }
 
-// Pure-helper test seam — exported so tests can assert the candidate key
+// Pure-helper test seam - exported so tests can assert the candidate key
 // derivation without spinning up the store.
 export function _candidateKeyForTest(ev) {
   return _candidateKey(ev);

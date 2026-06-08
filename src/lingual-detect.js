@@ -1,4 +1,4 @@
-// W833-1 — Language distribution detector (FOUNDATION on top of W760).
+// W833-1 - Language distribution detector (FOUNDATION on top of W760).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md line 1197):
 //   [W833-1] Language distribution detector.
@@ -12,7 +12,7 @@
 //     Latin-script disambiguation. The point is to give the cross-lingual
 //     planner a SINGLE distribution-summary API that the rest of W833
 //     (mixture, manifest, synthesize) shares.
-//   * The trigram model is 11 langs × top-15 trigrams = 165 entries —
+//   * The trigram model is 11 langs × top-15 trigrams = 165 entries - 
 //     small enough to bake as a const map. No model file, no Python.
 //
 // Design contract:
@@ -34,13 +34,13 @@ export const LINGUAL_DETECT_VERSION = 'w833-v1';
 
 // 11 most-common languages for the W833 cross-lingual mixture surface,
 // PLUS the 'unknown' sentinel returned on low-confidence inputs. Kept
-// tight on purpose — every additional language costs trigram baseline
+// tight on purpose - every additional language costs trigram baseline
 // space and detector time without lifting per-language K-Score.
 export const SUPPORTED_LANGS_W833 = Object.freeze([
   'en', 'es', 'zh', 'ja', 'ko', 'fr', 'de', 'pt', 'ru', 'ar', 'hi',
 ]);
 
-// Default underrepresentation target — any lang that draws less than 5%
+// Default underrepresentation target - any lang that draws less than 5%
 // of the corpus is flagged for synthesis/oversampling. Operators can
 // override per call.
 const DEFAULT_TARGET_RATIO = 0.05;
@@ -51,7 +51,7 @@ const DEFAULT_TARGET_RATIO = 0.05;
 // We trust a script-class hit (CJK / Cyrillic / Arabic / Devanagari /
 // Hangul / hiragana-katakana) over trigram analysis because those scripts
 // are unambiguous one-to-one with the target language for W833's 11-lang
-// surface. The threshold is 20% of non-ws chars in the target block —
+// surface. The threshold is 20% of non-ws chars in the target block - 
 // identical floor to W760 for cohesion.
 // =============================================================================
 
@@ -62,7 +62,7 @@ const SCRIPT_RANGES = Object.freeze({
   ja_chars: /[぀-ゟ゠-ヿｦ-ﾟ]/g,
   // Hangul (Korean).
   ko_chars: /[가-힯ᄀ-ᇿ㄰-㆏]/g,
-  // Cyrillic (mapped to ru for W833 — Bulgarian/Ukrainian out-of-scope).
+  // Cyrillic (mapped to ru for W833 - Bulgarian/Ukrainian out-of-scope).
   ru_chars: /[Ѐ-ӿ]/g,
   // Arabic + Arabic Supplement + Extended-A + Presentation Forms-A/B.
   ar_chars: /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/g,
@@ -131,7 +131,7 @@ export function detectLanguage(text) {
   }
   const jaHits = scriptHits.ja_chars;
   const zhHitsRaw = scriptHits.zh_chars;
-  // Japanese commonly mixes kanji + kana — kana presence forces zh→ja.
+  // Japanese commonly mixes kanji + kana - kana presence forces zh→ja.
   let zhScore = zhHitsRaw / totalNonWs;
   let jaScore = jaHits / totalNonWs;
   if (jaHits > 0 && zhHitsRaw > 0) {
@@ -203,7 +203,7 @@ export function detectLanguage(text) {
 //   opts.target_ratio:  per-lang floor (default 0.05 = 5%)
 //   opts.target_langs:  ISO list to evaluate (default SUPPORTED_LANGS_W833)
 //   opts.lang_detect:   DI sync (text) => {lang, confidence, source}
-//                       — defaults to the W833 detectLanguage above
+// - defaults to the W833 detectLanguage above
 //
 // Output:
 //   { by_lang:{en:0.62, es:0.15, ...},   // fractional shares (sum~1.0,
@@ -214,7 +214,7 @@ export function detectLanguage(text) {
 //   }
 //
 // Empty captures returns total:0 + empty by_lang + ALL target_langs in
-// underrepresented (honest — empty pool is honestly empty, not "balanced").
+// underrepresented (honest - empty pool is honestly empty, not "balanced").
 // =============================================================================
 
 export function distributionByLang(captures, opts) {
@@ -262,7 +262,7 @@ export function distributionByLang(captures, opts) {
       });
     }
   }
-  // Sort alphabetically for stability — the operator scanning the list
+  // Sort alphabetically for stability - the operator scanning the list
   // expects a deterministic ordering.
   underrepresented.sort((a, b) => a.lang < b.lang ? -1 : 1);
 

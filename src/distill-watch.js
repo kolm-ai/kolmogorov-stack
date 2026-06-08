@@ -1,13 +1,13 @@
-// T2.6 — distill-watch: a local-first live training dashboard.
+// T2.6 - distill-watch: a local-first live training dashboard.
 //
 // Reads a distill run's progress.jsonl and serves a dependency-free HTML page
 // on localhost with a loss sparkline + ETA + cost-burnt + CoT-flag count, auto
 // refreshing. Everything here is Node built-ins only (node:http, node:fs,
-// node:path, node:os) — ZERO npm deps, so it runs the same on a fresh box.
+// node:path, node:os) - ZERO npm deps, so it runs the same on a fresh box.
 //
 // Runs live at ~/.kolm/distill-runs/<run_id>/ (matching src/distill-pipeline.js
 // _kolmDir() resolution). The progress file is
-// ~/.kolm/distill-runs/<run_id>/progress.jsonl — each line a JSON object that
+// ~/.kolm/distill-runs/<run_id>/progress.jsonl - each line a JSON object that
 // MAY carry any of: { step, total_steps, loss, eval_loss, epoch, lr, ts,
 // cost_usd, cot_flags, tokens, elapsed_s }. Every field is treated as optional:
 // a missing/garbled line never crashes the reader, and an absent file renders a
@@ -51,7 +51,7 @@ function _num(v) { return typeof v === 'number' && Number.isFinite(v) ? v : null
 //
 // Pure: no server, no mutation of inputs. Returns the envelope shape documented
 // in the task. On any read/parse trouble we still return ok:true with whatever
-// we could recover (exists:false or a partial points array) — a dashboard
+// we could recover (exists:false or a partial points array) - a dashboard
 // should degrade, not error.
 export function readProgress(runId, opts = {}) {
   try {
@@ -205,15 +205,15 @@ function _esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 function _fmtNum(v, digits = 4) {
-  if (v == null || !Number.isFinite(v)) return '—';
+  if (v == null || !Number.isFinite(v)) return ' - ';
   return Number(v).toFixed(digits);
 }
 function _fmtCost(v) {
-  if (v == null || !Number.isFinite(v)) return '$—';
+  if (v == null || !Number.isFinite(v)) return '$ - ';
   return '$' + Number(v).toFixed(4);
 }
 function _fmtEta(sec) {
-  if (sec == null || !Number.isFinite(sec)) return '—';
+  if (sec == null || !Number.isFinite(sec)) return ' - ';
   if (sec <= 0) return 'done';
   const s = Math.round(sec);
   const h = Math.floor(s / 3600);
@@ -295,22 +295,22 @@ export function renderDashboardHtml(progress) {
   }
 
   const s = p.summary || {};
-  const runId = p.run_id || '—';
+  const runId = p.run_id || ' - ';
   const waiting = !p.exists || !(p.points && p.points.length);
 
   const spark = renderSparkline(p.points || []);
   const lastLoss = _fmtNum(s.last_loss);
   const evalLoss = _fmtNum(s.eval_loss);
-  const pct = s.pct == null ? '—' : `${s.pct}%`;
+  const pct = s.pct == null ? ' - ' : `${s.pct}%`;
   const eta = _fmtEta(s.eta_seconds);
   const cost = _fmtCost(s.cost_usd);
   const cot = s.cot_flags == null ? '0' : String(s.cot_flags);
-  const steps = s.steps == null ? '—' : String(s.steps);
-  const total = s.total_steps == null ? '—' : String(s.total_steps);
-  const tps = s.tok_per_s == null ? '—' : String(s.tok_per_s);
+  const steps = s.steps == null ? ' - ' : String(s.steps);
+  const total = s.total_steps == null ? ' - ' : String(s.total_steps);
+  const tps = s.tok_per_s == null ? ' - ' : String(s.tok_per_s);
 
   const waitingBanner = waiting
-    ? `<div class="wait">waiting for first progress line — run hasn't written to <code>progress.jsonl</code> yet.</div>`
+    ? `<div class="wait">waiting for first progress line - run hasn't written to <code>progress.jsonl</code> yet.</div>`
     : '';
 
   // Embed the data so the no-JS render already shows real numbers, and the JS
@@ -323,7 +323,7 @@ export function renderDashboardHtml(progress) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="refresh" content="5">
-<title>kolm distill watch — ${_esc(runId)}</title>
+<title>kolm distill watch - ${_esc(runId)}</title>
 <style>
   :root{ --text:#1f2937; --mute:#56606c; --mute2:#525a64; --line:#a8b3c2; --line2:#dde1e7; --s1:#f3f5f7; --s2:#eef1f4; --s3:#e6eaef; }
   *{box-sizing:border-box}

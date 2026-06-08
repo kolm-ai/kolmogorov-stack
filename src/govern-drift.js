@@ -1,6 +1,6 @@
 // src/govern-drift.js
 //
-// W921 Govern / Receipts & Compliance — standard drift statistics: PSI,
+// W921 Govern / Receipts & Compliance - standard drift statistics: PSI,
 // MMD (RBF + median-heuristic + permutation p-value) and ADWIN2.
 //
 // WHY: kolm's bespoke SPC detector is fine for a thin baseline, but a buyer's
@@ -9,7 +9,7 @@
 // Gavaldà ADWIN2). This module provides them as pure, zero-dependency,
 // deterministic-under-seed functions that produce corroborating evidence
 // (each with its own sample floor and threshold ladder). They never flip a
-// primary SPC verdict — they are additional signals under a standard_signals
+// primary SPC verdict - they are additional signals under a standard_signals
 // block, with a named test + threshold + p-value cite-able by assurance-case.
 //
 // All math is from primary sources (cited inline). Zero new package.json deps.
@@ -25,7 +25,7 @@ export const MMD_ALPHA = 0.05;
 export const MMD_MAX_SAMPLES = 512;
 // ADWIN2 default confidence.
 export const ADWIN_DELTA = 0.002;
-// Sample floors — below these we report status:'ok' with a note, never alert.
+// Sample floors - below these we report status:'ok' with a note, never alert.
 export const MIN_PSI_SAMPLES = 20;
 export const MIN_MMD_SAMPLES = 8;
 
@@ -49,7 +49,7 @@ function asFiniteNumbers(arr) {
 }
 
 // ===========================================================================
-// PSI — Population Stability Index
+// PSI - Population Stability Index
 //
 //   PSI = Σ_bins (observed% - expected%) * ln(observed% / expected%)
 //   bins = baseline-derived quantile edges (deciles default), reused for BOTH
@@ -57,7 +57,7 @@ function asFiniteNumbers(arr) {
 //   Ladder: <0.1 ok, 0.1..0.25 warn, >=0.25 alert.
 // ===========================================================================
 
-// psiBins — baseline quantile bin edges (length = bins+1). Deciles default.
+// psiBins - baseline quantile bin edges (length = bins+1). Deciles default.
 export function psiBins(baselineScalars, bins = 10) {
   const xs = asFiniteNumbers(baselineScalars).slice().sort((a, b) => a - b);
   const nBins = Math.max(2, Math.floor(bins) || 10);
@@ -144,7 +144,7 @@ export function populationStabilityIndex(baselineScalars, lookbackScalars, opts 
 }
 
 // ===========================================================================
-// MMD — Maximum Mean Discrepancy (Gretton 2012)
+// MMD - Maximum Mean Discrepancy (Gretton 2012)
 //
 //   MMD^2_u = 1/(m(m-1)) Σ_{i≠j} k(x_i,x_j) + 1/(n(n-1)) Σ_{i≠j} k(y_i,y_j)
 //             - 2/(mn) Σ_{i,j} k(x_i,y_j)   (unbiased U-statistic)
@@ -272,7 +272,7 @@ export function mmdPermutationTest(X0, Y0, opts = {}) {
 }
 
 // ===========================================================================
-// ADWIN2 (Bifet & Gavaldà 2007) — adaptive windowing change detector over a
+// ADWIN2 (Bifet & Gavaldà 2007) - adaptive windowing change detector over a
 // stream of bounded real values. Exponential-histogram buckets; cut threshold
 //   epsilon_cut = sqrt(2 * m * v * deltaPrime) + (2/3) * m * deltaPrime
 //   m = harmonic mean of the two subwindow sizes; deltaPrime = ln(2 ln(n)/delta).
@@ -332,7 +332,7 @@ export function adwin2(opts = {}) {
         const mean1 = sum1 / n1;
         const eps = adwinEpsilonCut(n0, n1, variance(), width, delta);
         if (Math.abs(mean0 - mean1) > eps) {
-          // drop the oldest bucket (subwindow W0 head) — older data is stale.
+          // drop the oldest bucket (subwindow W0 head) - older data is stale.
           drift = true;
           nDetections++;
           changePoint = n0;
@@ -399,7 +399,7 @@ export function detectAdwinOverSeries(series, opts = {}) {
 }
 
 // ===========================================================================
-// computeStandardSignals — orchestrator producing the standard_signals block.
+// computeStandardSignals - orchestrator producing the standard_signals block.
 // ===========================================================================
 export function computeStandardSignals(input = {}) {
   const opts = input.opts || {};

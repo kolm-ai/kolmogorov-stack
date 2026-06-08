@@ -9,10 +9,10 @@
 // Honest scope:
 //
 //   IS:
-//     - traceToIr(trace_id, opts) — read the trace via trace-capture.readTrace,
+//     - traceToIr(trace_id, opts) - read the trace via trace-capture.readTrace,
 //       filter to replayable spans (LLM, TOOL, BRANCH, ARTIFACT, USER_INPUT),
 //       emit nodes + edges + seeds, return the IR
-//     - tracesToIr(trace_ids, opts) — multi-trace fold: merges multiple runs
+//     - tracesToIr(trace_ids, opts) - multi-trace fold: merges multiple runs
 //       of the same workflow into one IR by accumulating seeds for repeated
 //       input shapes; nodes/edges must match across traces or compile fails
 //     - per-trace fingerprinting so duplicate-shape traces collapse
@@ -29,12 +29,12 @@
 import * as traceCapture from './trace-capture.js';
 import { WORKFLOW_IR_VERSION, NODE_KINDS, hashIr, validateIr, interpret as interpretIr } from './workflow-ir.js';
 
-// W409w — step-kind classification surfaced on every replayable IR node.
+// W409w - step-kind classification surfaced on every replayable IR node.
 // Existing NODE_KINDS describes the wire shape (llm / tool / branch / ...);
 // STEP_KINDS layers a semantic on top so a runtime can decide whether to
 // invoke an LLM, execute a deterministic table lookup, or hand off to a
 // human reviewer. The classification is stamped during compile by walking
-// N traces of the same workflow shape — see _classifyStep.
+// N traces of the same workflow shape - see _classifyStep.
 export const STEP_KINDS = Object.freeze({
   DETERMINISTIC:  'deterministic',   // output is a pure function of input across all traces
   LLM_REQUIRED:   'llm_required',    // output varies for same input, or is natural language
@@ -66,10 +66,10 @@ function _spanToNode(span, spanIdToNodeId) {
         vendor: span.payload.vendor,
         model: span.payload.model,
         // Prompt is captured verbatim; the compile pass does not template-ify.
-        // Future pass: parameter extraction — replace literal substrings with
+        // Future pass: parameter extraction - replace literal substrings with
         // ${input} placeholders when they match the user input.
         prompt_template: span.payload.prompt,
-        // Captured response — used as the seed-cache fallback for this node.
+        // Captured response - used as the seed-cache fallback for this node.
         captured_response: span.payload.response,
         tokens_in: span.payload.tokens_in,
         tokens_out: span.payload.tokens_out,
@@ -113,7 +113,7 @@ function _spanToNode(span, spanIdToNodeId) {
 // Compile one trace into an IR. Returns {ir, dropped: [...]} where dropped
 // lists the span ids skipped (IO/STATE) so the compile pass is auditable.
 //
-// W425 — tenant ownership: when `opts.tenant_id` is supplied, the trace is
+// W425 - tenant ownership: when `opts.tenant_id` is supplied, the trace is
 // only loaded for matching tenants; foreign-tenant compiles fail loud with
 // a `tenant_mismatch` error so an attacker cannot pull another tenant's
 // workflow shape via /v1/ir/compile. The resulting IR is stamped with the
@@ -159,7 +159,7 @@ export function spansToIr(spans, opts = {}) {
   const userInputs = replayable.filter(s => s.kind === traceCapture.SPAN_KINDS.USER_INPUT);
   const rootSpan = userInputs.length > 0 ? userInputs[0] : replayable[0];
 
-  // Mint a node id per span. Use the span_id directly — short, unique, and
+  // Mint a node id per span. Use the span_id directly - short, unique, and
   // already in the trace's span_id space.
   const spanIdToNodeId = new Map();
   for (const s of replayable) spanIdToNodeId.set(s.span_id, 'n_' + s.span_id);
@@ -301,7 +301,7 @@ export async function tracesToIr(trace_ids, opts = {}) {
   if (!Array.isArray(trace_ids) || trace_ids.length === 0) {
     throw new Error('trace_ids must be a non-empty array');
   }
-  // W425 — tenant ownership: pass opts.tenant_id through to traceToIr so
+  // W425 - tenant ownership: pass opts.tenant_id through to traceToIr so
   // any cross-tenant trace_id in the list trips `tenant_mismatch` instead
   // of silently merging seeds from another tenant.
   const tenant_id = (opts && opts.tenant_id != null && opts.tenant_id !== '')
@@ -316,11 +316,11 @@ export async function tracesToIr(trace_ids, opts = {}) {
   for (let i = 1; i < compiled.length; i++) {
     const shape = _shapeFingerprint(compiled[i].ir);
     if (shape !== canonicalShape) {
-      throw new Error(`trace ${trace_ids[i]} has divergent shape from ${trace_ids[0]} — split into separate capsules or expand the IR coverage`);
+      throw new Error(`trace ${trace_ids[i]} has divergent shape from ${trace_ids[0]} - split into separate capsules or expand the IR coverage`);
     }
   }
   // Merge seeds. Drop duplicates by input key. Cross-trace duplicate inputs
-  // with diverging outputs are a real bug worth surfacing — but we accept
+  // with diverging outputs are a real bug worth surfacing - but we accept
   // the first seen and surface conflicts via the `conflicts` array so the
   // caller can decide whether to ship or split.
   const seen = new Map();
@@ -356,21 +356,21 @@ function _shapeFingerprint(ir) {
 }
 
 // =====================================================================
-// W409w — Workflow compression: parameter extraction + step classification.
+// W409w - Workflow compression: parameter extraction + step classification.
 //
 // Compile N traces of the same workflow shape directly from span arrays
 // (no file I/O) and emit an IR whose LLM/TOOL nodes carry:
-//   * step_kind            — STEP_KINDS.{DETERMINISTIC, LLM_REQUIRED,
+//   * step_kind - STEP_KINDS.{DETERMINISTIC, LLM_REQUIRED,
 //                            HUMAN_REQUIRED, TOOL_CALL}
-//   * prompt_template      — literal substrings replaced with {{var_N}}
+//   * prompt_template - literal substrings replaced with {{var_N}}
 //                            placeholders where positions differ across
 //                            traces with the same skeleton
-//   * args_template        — same templating for tool args (string fields)
-//   * lookup_table         — only for DETERMINISTIC tool nodes; maps the
+//   * args_template - same templating for tool args (string fields)
+//   * lookup_table - only for DETERMINISTIC tool nodes; maps the
 //                            captured input -> captured output so the
 //                            runtime can resolve without an executor
 // And, at the IR level:
-//   * parameters[]         — enumerates the hoisted {{var_N}} placeholders,
+//   * parameters[] - enumerates the hoisted {{var_N}} placeholders,
 //                            each with `bound_to_input:true`/`source:'input'`
 //                            so the runtime knows to substitute the user
 //                            input when running against new values.
@@ -378,11 +378,11 @@ function _shapeFingerprint(ir) {
 // The compile pass is the deliberate companion to the auditor finding that
 // pre-W409w compile-ir.js shipped literal prompts and called parameter
 // extraction "future work". Same module, no breaking change to the wire
-// shape — new fields are additive, old callers ignore them.
+// shape - new fields are additive, old callers ignore them.
 // =====================================================================
 
 // Public: compile N raw span arrays (each one a single trace) directly.
-// Tests and the trace-driven CLI both call this — no ~/.kolm/traces I/O.
+// Tests and the trace-driven CLI both call this - no ~/.kolm/traces I/O.
 export function compileWorkflowFromTraces(traces, opts = {}) {
   if (!Array.isArray(traces) || traces.length === 0) {
     throw new Error('compileWorkflowFromTraces: traces must be a non-empty array');
@@ -397,11 +397,11 @@ export function compileWorkflowFromTraces(traces, opts = {}) {
     const { ir, dropped } = spansToIr(spans, { ...opts, source_trace_id: spans[0]?.trace_id || null });
     return { ir: _canonicalizeIr(ir), dropped, spans };
   });
-  // All traces must share the same skeleton — refuse to merge divergent shapes.
+  // All traces must share the same skeleton - refuse to merge divergent shapes.
   const canonShape = _shapeFingerprint(compiled[0].ir);
   for (let i = 1; i < compiled.length; i++) {
     if (_shapeFingerprint(compiled[i].ir) !== canonShape) {
-      throw new Error(`compileWorkflowFromTraces: trace ${i} has divergent shape from trace 0 — split into separate workflows or capture more samples`);
+      throw new Error(`compileWorkflowFromTraces: trace ${i} has divergent shape from trace 0 - split into separate workflows or capture more samples`);
     }
   }
   // Walk the per-trace IRs in lockstep node-by-node. For each non-INPUT,
@@ -454,7 +454,7 @@ export function compileWorkflowFromTraces(traces, opts = {}) {
       });
       // Human checkpoint: any span flagged requires_human:true takes priority.
       const wantsHuman = toolSpans.some((s) => s && s.payload && s.payload.requires_human === true);
-      // Args templating (string fields only — keep objects/numbers literal so
+      // Args templating (string fields only - keep objects/numbers literal so
       // the runtime can call the tool with the right type).
       const argSamples = toolSpans.map((s) => (s && s.payload && s.payload.args) || {});
       const { templatedArgs, holes: argHoles } = _hoistArgsPlaceholders(argSamples, inputsPerTrace, newParamName);
@@ -482,7 +482,7 @@ export function compileWorkflowFromTraces(traces, opts = {}) {
       }
       merged.captured_result_examples = outputs;
     } else {
-      // BRANCH / ARTIFACT — leave as-is for now; classify as tool_call so the
+      // BRANCH / ARTIFACT - leave as-is for now; classify as tool_call so the
       // runtime defaults to the executor.
       merged.step_kind = STEP_KINDS.TOOL_CALL;
     }
@@ -511,7 +511,7 @@ export function compileWorkflowFromTraces(traces, opts = {}) {
 }
 
 // =====================================================================
-// W409w — runner that honors step_kind and resolves {{var_N}} against the
+// W409w - runner that honors step_kind and resolves {{var_N}} against the
 // workflow's user input. The classic interpret() in workflow-ir.js handles
 // the cache-hit path; we delegate to it when the input matches a seed.
 // On a cache miss we walk the IR ourselves so:
@@ -528,7 +528,7 @@ export async function runCompiledWorkflow(ir, input, opts = {}) {
       return { output: seed.output, cache_hit: true, trace: { _cache_hit: true } };
     }
   }
-  // Cache miss — walk the IR. We use the existing topological order.
+  // Cache miss - walk the IR. We use the existing topological order.
   const order = _topoOrder(ir);
   const env = {};
   const trace = {};
@@ -556,7 +556,7 @@ export async function runCompiledWorkflow(ir, input, opts = {}) {
       }
       case NODE_KINDS.TOOL: {
         const args = _substituteTemplateDeep(node.args_template, input);
-        // 1) Deterministic step with a lookup table — never call the LLM.
+        // 1) Deterministic step with a lookup table - never call the LLM.
         if (node.step_kind === STEP_KINDS.DETERMINISTIC && node.lookup_table) {
           const key = _propKey(input);
           if (key != null && Object.prototype.hasOwnProperty.call(node.lookup_table, key)) {
@@ -564,7 +564,7 @@ export async function runCompiledWorkflow(ir, input, opts = {}) {
             trace[id] = { kind: 'tool', step_kind: 'deterministic', source: 'lookup_table', value: env[id] };
             break;
           }
-          // Lookup table miss — fall through to the tool executor. Still no LLM.
+          // Lookup table miss - fall through to the tool executor. Still no LLM.
           if (!opts.exec || !opts.exec.tool) {
             throw new Error(`runCompiledWorkflow: deterministic step ${id} missed lookup_table and no exec.tool wired`);
           }
@@ -573,7 +573,7 @@ export async function runCompiledWorkflow(ir, input, opts = {}) {
           trace[id] = { kind: 'tool', step_kind: 'deterministic', source: 'executor', value: v };
           break;
         }
-        // 2) Human approval — fire the human handler if wired, else throw.
+        // 2) Human approval - fire the human handler if wired, else throw.
         if (node.step_kind === STEP_KINDS.HUMAN_REQUIRED) {
           if (opts.exec && opts.exec.human) {
             const v = await opts.exec.human({ id, tool_name: node.tool_name, step_kind: node.step_kind }, args);
@@ -677,7 +677,7 @@ function _hoistPlaceholders(prompts, inputs, newParamName) {
   // If every input string appears in its corresponding prompt at a stable
   // location (start, middle or end is fine), we can hoist by replacing those
   // substrings with one placeholder. We need the substring to be present in
-  // every trace's prompt — only then is the substitution lossless.
+  // every trace's prompt - only then is the substitution lossless.
   // Find one placeholder that maps "this prompt position == this trace's
   // input" across every trace.
   if (inputs.every((v) => typeof v === 'string' && v.length > 0)) {
@@ -700,7 +700,7 @@ function _hoistPlaceholders(prompts, inputs, newParamName) {
       return { template, holes };
     }
   }
-  // Fall back to trace-0's prompt verbatim. Better than nothing — the seed
+  // Fall back to trace-0's prompt verbatim. Better than nothing - the seed
   // cache still handles exact-match replay, and llm_required is the worst
   // case for a generalization miss.
   return { template: prompts[0] || '', holes };
@@ -728,7 +728,7 @@ function _hoistArgsPlaceholders(argSamples, inputs, newParamName) {
       continue;
     }
     // Otherwise use the trace-0 value (literal). Differences across traces
-    // for non-input fields are recorded only as captured_examples — the
+    // for non-input fields are recorded only as captured_examples - the
     // generalization runtime won't try to vary them.
     out[k] = vals[0];
   }
@@ -736,7 +736,7 @@ function _hoistArgsPlaceholders(argSamples, inputs, newParamName) {
 }
 
 // Substitute {{var_N}} placeholders in a string with the workflow input
-// (every placeholder currently binds to the same input — see _hoistPlaceholders).
+// (every placeholder currently binds to the same input - see _hoistPlaceholders).
 function _substituteTemplate(template, input) {
   if (typeof template !== 'string') return template;
   return template.replace(/\{\{var_\d+\}\}/g, () => typeof input === 'string' ? input : JSON.stringify(input));

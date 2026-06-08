@@ -1,33 +1,33 @@
 // src/account-ui-routes.js
 //
-// W921 Account UI / No-Code — server routes for two client modules that need a
+// W921 Account UI / No-Code - server routes for two client modules that need a
 // backend touchpoint. Exports a single `registerAccountUiRoutes(router, deps)`
 // that bolts the routes onto an existing express.Router(), so the wire-up in
 // src/router.js is one line and parallel-agent merge conflicts stay at zero.
 //
 // Routes:
-//   POST /v1/client-error          (spec 47) — public, IP-rate-limited, redacted
+//   POST /v1/client-error          (spec 47) - public, IP-rate-limited, redacted
 //                                   breadcrumb sink for the global client error
 //                                   boundary. Append-only. Returns 204.
-//   POST   /v1/automations          (spec 49) — create an automation
-//   GET    /v1/automations          (spec 49) — list (tenant-fenced)
-//   PATCH  /v1/automations/:id       (spec 49) — enable/disable (confirm)
-//   DELETE /v1/automations/:id       (spec 49) — delete (confirm)
-//   POST   /v1/automations/:id/run   (spec 49) — manual "run again"
-//   POST   /v1/automations/tick      (spec 49) — platform-cron dispatcher,
+//   POST   /v1/automations          (spec 49) - create an automation
+//   GET    /v1/automations          (spec 49) - list (tenant-fenced)
+//   PATCH  /v1/automations/:id       (spec 49) - enable/disable (confirm)
+//   DELETE /v1/automations/:id       (spec 49) - delete (confirm)
+//   POST   /v1/automations/:id/run   (spec 49) - manual "run again"
+//   POST   /v1/automations/tick      (spec 49) - platform-cron dispatcher,
 //                                   gated by KOLM_CRON_SECRET (NOT tenant-authed)
 //
 // deps:
-//   authMiddleware — real middleware from src/auth.js. Without it the tenant
+//   authMiddleware - real middleware from src/auth.js. Without it the tenant
 //     routes fall through to a stamp-only no-op gate (tests/local only).
-//   eventStore — { appendEvent, listEvents } (src/event-store.js); when absent
+//   eventStore - { appendEvent, listEvents } (src/event-store.js); when absent
 //     the automation routes run against an in-process Map (test/dev mode) so
 //     the surface is exercisable without the durable ledger wired.
-//   runRecipe(tenant_id, recipe_id) -> Promise<actionResult> — the recipe-run
+//   runRecipe(tenant_id, recipe_id) -> Promise<actionResult> - the recipe-run
 //     ACTION (router handleRun / runtime.runConcept). Optional; when absent
 //     "run again" returns a not_wired envelope rather than firing a fake job.
-//   cronSecret — process.env.KOLM_CRON_SECRET equivalent (fail-closed if unset).
-//   now() — injectable clock for tests.
+//   cronSecret - process.env.KOLM_CRON_SECRET equivalent (fail-closed if unset).
+//   now() - injectable clock for tests.
 
 export const ACCOUNT_UI_ROUTES_VERSION = 'w921-account-ui-v1';
 export const AUTOMATION_PROVIDER = 'kolm_automation';

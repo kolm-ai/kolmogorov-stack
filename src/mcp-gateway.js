@@ -1,10 +1,10 @@
 // src/mcp-gateway.js
 //
-// W921 BET-4 — governed MCP tool-gateway with SIGNED tool-call receipts.
+// W921 BET-4 - governed MCP tool-gateway with SIGNED tool-call receipts.
 //
 // Every MCP `tools/call` invocation that flows through the gateway produces an
 // Ed25519-signed receipt binding {tool name, args hash, result hash, tenant,
-// timestamp} so a compliance reviewer can later PROVE which tool did what — the
+// timestamp} so a compliance reviewer can later PROVE which tool did what - the
 // natural extension of kolm's receipt thesis into the fastest-growing slice of
 // the gateway market (Bifrost / Portkey / LiteLLM all gateway tool calls; none
 // emit a signed, third-party-checkable tool-call record).
@@ -21,7 +21,7 @@
 //     The gateway invokes the underlying tool (or accepts a precomputed
 //     `result`) and returns the UNMODIFIED tool result plus a signed receipt.
 //     The "passthrough contract" is the guarantee that the bytes returned to
-//     the caller are exactly what the tool produced — the receipt binds those
+//     the caller are exactly what the tool produced - the receipt binds those
 //     exact bytes via their hash so a verifier can confirm no middle layer
 //     altered them.
 //   - buildMcpReceipt({...}) -> unsigned mcp-tool-call-1 receipt object
@@ -31,7 +31,7 @@
 //   - mcpToolCallId() -> "mtc_<26-char base32 ULID-ish>"
 //
 // Design constraints (per the wave directive):
-//   * ADDITIVE + opt-in. This module imports — never edits — src/ed25519.js,
+//   * ADDITIVE + opt-in. This module imports - never edits - src/ed25519.js,
 //     src/gateway-receipt.js, src/cid.js. It reuses the EXACT canonical-JSON
 //     helper (cid.canonicalJson), the Ed25519 signer/verifier, and the
 //     receipt-id ULID idiom from gateway-receipt.js (FALLBACK pattern: when no
@@ -41,7 +41,7 @@
 //     global RNG: `now` and `signer` (and the receipt id, when reproducibility
 //     is needed) are injected. A fresh random id is only minted when the caller
 //     does not pin one, exactly like buildAndSignReceipt.
-//   * The result is bound by HASH, not by value — args/results can be large or
+//   * The result is bound by HASH, not by value - args/results can be large or
 //     sensitive; only their sha256 enters the receipt. A tamper on either the
 //     args or the result changes its hash and the signature stops verifying.
 
@@ -56,13 +56,13 @@ import {
 export const MCP_RECEIPT_SCHEMA = 'mcp-tool-call-1';
 export const MCP_GATEWAY_VERSION = 'w921-mcp-gateway-v1';
 
-// Crockford-style base32 (no I, L, O, U) — same alphabet family as
+// Crockford-style base32 (no I, L, O, U) - same alphabet family as
 // gateway-receipt.js so receipt ids read consistently across the product.
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 // Fields the signature covers, in CANONICAL ORDER. canonicalForSigning sorts
 // keys anyway (via cid.canonicalJson), but listing the contract here documents
-// exactly what a verifier is trusting. signature_ed25519 is NEVER in this set —
+// exactly what a verifier is trusting. signature_ed25519 is NEVER in this set - 
 // a signature cannot cover itself.
 export const MCP_SIGNED_FIELDS = Object.freeze([
   'schema',
@@ -92,7 +92,7 @@ function _hashCanonical(value) {
 }
 
 /**
- * hashMcpArgs — sha256 over canonical-JSON of the MCP `arguments` object.
+ * hashMcpArgs - sha256 over canonical-JSON of the MCP `arguments` object.
  * Determinism: key order does not matter; value changes do.
  */
 export function hashMcpArgs(args) {
@@ -100,9 +100,9 @@ export function hashMcpArgs(args) {
 }
 
 /**
- * hashMcpResult — sha256 over the canonical-JSON of the FULL tool result
- * (content + structuredContent + isError). Binding the whole result — not just
- * the text — means a tamper on any content block, the structured payload, or
+ * hashMcpResult - sha256 over the canonical-JSON of the FULL tool result
+ * (content + structuredContent + isError). Binding the whole result - not just
+ * the text - means a tamper on any content block, the structured payload, or
  * the error flag is detectable.
  */
 export function hashMcpResult(result) {
@@ -128,11 +128,11 @@ function _normalizeResult(result) {
 }
 
 /**
- * mcpToolCallId — fresh id like mtc_01J... . Sortable: the leading 6 bytes are
+ * mcpToolCallId - fresh id like mtc_01J... . Sortable: the leading 6 bytes are
  * a big-endian millisecond timestamp, the trailing 10 are random. Accepts an
  * optional injected clock so a caller that wants a fully reproducible id can
  * pass `now`; the random tail still uses crypto.randomBytes (an id is metadata,
- * NOT part of any determinism contract a verifier relies on — the signature
+ * NOT part of any determinism contract a verifier relies on - the signature
  * covers whatever id ends up in the receipt).
  */
 export function mcpToolCallId(now) {
@@ -161,21 +161,21 @@ function _isoFrom(now) {
 }
 
 /**
- * buildMcpReceipt — assemble (but DO NOT sign) an mcp-tool-call-1 receipt.
+ * buildMcpReceipt - assemble (but DO NOT sign) an mcp-tool-call-1 receipt.
  *
  * Inputs:
- *   - tool         (string, REQUIRED) — MCP tool name (tools/call params.name)
- *   - tenant       (string, REQUIRED) — tenant id (forced from req.tenant_record
+ *   - tool         (string, REQUIRED) - MCP tool name (tools/call params.name)
+ *   - tenant       (string, REQUIRED) - tenant id (forced from req.tenant_record
  *                                       by the route; never trusted from body)
- *   - args         (object)           — MCP tools/call params.arguments
- *   - result       (object|array|null)— MCP CallToolResult (content/structured/isError)
- *   - args_hash    (string)           — override (else derived from args)
- *   - result_hash  (string)           — override (else derived from result)
- *   - now          (number|string|Date)— injected clock (determinism)
- *   - call_id      (string)           — pin for reproducibility (else minted)
- *   - transport    (string)           — 'stdio' | 'http' | 'sse' | null
- *   - server_id    (string|null)      — MCP server registry id, if any
- *   - is_error     (bool)             — override (else read from result.isError)
+ *   - args         (object) - MCP tools/call params.arguments
+ *   - result       (object|array|null) - MCP CallToolResult (content/structured/isError)
+ *   - args_hash    (string) - override (else derived from args)
+ *   - result_hash  (string) - override (else derived from result)
+ *   - now          (number|string|Date) - injected clock (determinism)
+ *   - call_id      (string) - pin for reproducibility (else minted)
+ *   - transport    (string) - 'stdio' | 'http' | 'sse' | null
+ *   - server_id    (string|null) - MCP server registry id, if any
+ *   - is_error     (bool) - override (else read from result.isError)
  *
  * Returns a plain object with MCP_SIGNED_FIELDS populated. Pure + deterministic
  * given (tool, tenant, args/args_hash, result/result_hash, now, call_id).
@@ -217,7 +217,7 @@ export function buildMcpReceipt(opts = {}) {
   };
 }
 
-// canonicalForSigning — emit ONLY the signed fields, in a deterministic byte
+// canonicalForSigning - emit ONLY the signed fields, in a deterministic byte
 // layout, with signature_ed25519 stripped. Reuses cid.canonicalJson (sorted
 // keys) so the bytes match across implementations.
 function _canonicalForSigning(receipt) {
@@ -231,11 +231,11 @@ function _canonicalForSigning(receipt) {
 export { _canonicalForSigning as canonicalMcpReceipt };
 
 /**
- * signMcpReceipt — attach an Ed25519 signature_ed25519 block.
+ * signMcpReceipt - attach an Ed25519 signature_ed25519 block.
  *
  * `signer` is an injected {privateKey, publicKey, key_fingerprint}. FALLBACK
  * (matching gateway-receipt.buildAndSignReceipt): when no signer is supplied we
- * call loadOrCreateDefaultSigner() — the same per-machine cached key the rest of
+ * call loadOrCreateDefaultSigner() - the same per-machine cached key the rest of
  * the product signs with. Pass `signed_at` (or rely on receipt.timestamp) to
  * keep the signature time deterministic.
  *
@@ -266,14 +266,14 @@ export function signMcpReceipt(receipt, signer, opts = {}) {
 }
 
 /**
- * verifyMcpReceipt — recompute canonical over the signed fields and check the
+ * verifyMcpReceipt - recompute canonical over the signed fields and check the
  * attached Ed25519 signature. Pure (no network, no secrets). Returns
  * { ok, key_fingerprint?, reason? }.
  *
  * Detects: a tamper on tool / args_hash / result_hash / tenant_id / timestamp /
  * is_error / transport / server_id (any signed field), a swapped public key
  * whose fingerprint claim no longer matches its bytes, and a missing/garbled
- * signature block — all via verifySignatureBlock in src/ed25519.js.
+ * signature block - all via verifySignatureBlock in src/ed25519.js.
  */
 export function verifyMcpReceipt(receipt) {
   if (!receipt || typeof receipt !== 'object') {
@@ -291,9 +291,9 @@ export function verifyMcpReceipt(receipt) {
 }
 
 /**
- * wrapToolCall — the gateway entry point. Governs ONE MCP tools/call:
+ * wrapToolCall - the gateway entry point. Governs ONE MCP tools/call:
  *   1. resolves the tool result (either a precomputed `result`, or by invoking
- *      the injected `execute({tool,args})` — which may be async),
+ *      the injected `execute({tool,args})` - which may be async),
  *   2. hashes args + result,
  *   3. builds + signs the receipt binding {tool, args_hash, result_hash,
  *      tenant, ts},
@@ -302,20 +302,20 @@ export function verifyMcpReceipt(receipt) {
  * Inputs:
  *   - tool      (string, REQUIRED)
  *   - tenant    (string, REQUIRED)
- *   - args      (object)               — tools/call params.arguments
- *   - result    (object|array)         — precomputed CallToolResult (optional)
- *   - execute   (fn({tool,args}) -> result|Promise) — invoked iff no `result`
- *   - signer    (Ed25519 signer)       — injected; FALLBACK to default signer
- *   - now       (number|string|Date)   — injected clock (determinism)
- *   - call_id   (string)               — pin for reproducible ids
- *   - transport / server_id            — provenance metadata (signed)
+ *   - args      (object) - tools/call params.arguments
+ *   - result    (object|array) - precomputed CallToolResult (optional)
+ *   - execute   (fn({tool,args}) -> result|Promise) - invoked iff no `result`
+ *   - signer    (Ed25519 signer) - injected; FALLBACK to default signer
+ *   - now       (number|string|Date) - injected clock (determinism)
+ *   - call_id   (string) - pin for reproducible ids
+ *   - transport / server_id - provenance metadata (signed)
  *
  * Returns { result_passthrough_contract, receipt } where:
  *   result_passthrough_contract = {
  *     result,            // EXACTLY the bytes the tool produced (unaltered)
  *     unaltered: true,   // the gateway promise: it did not touch the result
  *     bound_by: 'result_hash',
- *     result_hash,       // the hash the receipt signs — recompute to confirm
+ *     result_hash,       // the hash the receipt signs - recompute to confirm
  *   }
  *
  * This function is async only because `execute` may be async; when a `result`
@@ -354,7 +354,7 @@ export async function wrapToolCall(opts = {}) {
 
   return {
     result_passthrough_contract: {
-      result,            // unmodified — the gateway is a pass-through for bytes
+      result,            // unmodified - the gateway is a pass-through for bytes
       unaltered: true,
       bound_by: 'result_hash',
       result_hash,

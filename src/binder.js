@@ -7,20 +7,20 @@
 // contains every piece of evidence kolm produces about an artifact, laid out
 // in the order a reviewer reads:
 //
-//   1. Verification summary  — pass/fail/warn per check, top-of-page
-//   2. Identity              — CID, artifact hash, base model, tier
-//   3. K-score evidence      — composite + raw axes + gate pass/fail
-//   4. Manifest hashes       — sha256 over every file inside the .kolm
-//   5. Audit chain           — 5-step HMAC chain (task→seeds→recipes→evals→package)
-//   6. Credential signer     — provenance credential, signer namespace, parent
-//   7. Eval coverage         — case count, pass-rate, judge id
-//   8. Reproduction recipe   — the four commands needed to re-verify from disk
+//   1. Verification summary - pass/fail/warn per check, top-of-page
+//   2. Identity - CID, artifact hash, base model, tier
+//   3. K-score evidence - composite + raw axes + gate pass/fail
+//   4. Manifest hashes - sha256 over every file inside the .kolm
+//   5. Audit chain - 5-step HMAC chain (task→seeds→recipes→evals→package)
+//   6. Credential signer - provenance credential, signer namespace, parent
+//   7. Eval coverage - case count, pass-rate, judge id
+//   8. Reproduction recipe - the four commands needed to re-verify from disk
 //
 // The binder is offline-verifiable: every claim it makes can be re-checked by
 // running `kolm verify` against the same artifact bytes. The HTML embeds the
 // recomputed CID and chain hash, so a buyer who suspects tampering can re-run
 // the open-source verifier and compare. The HMAC verification itself requires
-// the same RECIPE_RECEIPT_SECRET that produced the artifact — by design, only
+// the same RECIPE_RECEIPT_SECRET that produced the artifact - by design, only
 // the issuer (and parties they share the secret with) can produce a green
 // "signature verified" check. A buyer who lacks the secret still sees the
 // chain structure and per-step input/output hashes; they just see the
@@ -38,7 +38,7 @@
 //
 //     kolm verify <artifact.kolm> --binder out.html
 //
-// No external dependencies. The CSS is print-optimized — letter-sized pages,
+// No external dependencies. The CSS is print-optimized - letter-sized pages,
 // no animations, no web fonts. Opens identically in Chrome, Safari, Firefox,
 // and as a PDF when "Save as PDF" is invoked from the browser's print dialog.
 
@@ -68,7 +68,7 @@ import {
 } from './drift-supersession.js';
 import { checkCorpusLicensing } from './licensing-allowlist.js';
 import AdmZip from 'adm-zip';
-// W715 — privacy proof for cross-namespace transfer learning: every
+// W715 - privacy proof for cross-namespace transfer learning: every
 // fingerprint share writes one audit row through the existing per-tenant
 // HMAC chain so a tenant can later prove which sibling namespaces saw a
 // given fingerprint_id. Imported lazily inside recordFingerprintShare so
@@ -99,21 +99,21 @@ function esc(s) {
 }
 
 function fmtBytes(n) {
-  if (!n && n !== 0) return '—';
+  if (!n && n !== 0) return ' - ';
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
   return `${(n / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 function fmtMicros(us) {
-  if (us == null) return '—';
+  if (us == null) return ' - ';
   if (us < 1000) return `${us} µs`;
   if (us < 1_000_000) return `${(us / 1000).toFixed(1)} ms`;
   return `${(us / 1_000_000).toFixed(2)} s`;
 }
 
 function fmtCost(c) {
-  if (c == null) return '—';
+  if (c == null) return ' - ';
   if (c === 0) return '$0.00';
   if (c < 0.0001) return `$${c.toExponential(2)}`;
   return `$${c.toFixed(4)}`;
@@ -170,7 +170,7 @@ function credentialStructuralIntegrityOk(credential, manifest) {
 }
 
 // ---------------------------------------------------------------------------
-// Verification harness — runs every check the binder reports on. Each check
+// Verification harness - runs every check the binder reports on. Each check
 // returns `{ name, status: 'pass'|'fail'|'warn', detail }`. A failing check
 // produces a red row at the top of the binder and a non-zero exit code from
 // the CLI; a warning produces a yellow row but keeps the binder valid.
@@ -190,7 +190,7 @@ async function verifyArtifact(bundle) {
     ? isArtifactPathCloudTrusted(bundle.artifact_path)
     : null;
 
-  // 1. Signature already verified by loadArtifact — if we got here, the
+  // 1. Signature already verified by loadArtifact - if we got here, the
   // legacy signature.sig HMAC matched, or the artifact is cloud-trusted.
   checks.push({
     name: 'Manifest signature (legacy HMAC)',
@@ -202,7 +202,7 @@ async function verifyArtifact(bundle) {
       : (bundle.signature_error || 'signature.sig did not verify (mismatch)'),
   });
 
-  // 2. CID round-trip — recompute from manifest hashes, compare to embedded.
+  // 2. CID round-trip - recompute from manifest hashes, compare to embedded.
   const manifest = bundle.manifest;
   if (manifest.hashes) {
     let recomputed;
@@ -220,7 +220,7 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Content identifier (CID) round-trip',
       status: 'warn',
-      detail: 'manifest is missing the hashes block — cannot recompute CID',
+      detail: 'manifest is missing the hashes block - cannot recompute CID',
     });
   }
 
@@ -229,7 +229,7 @@ async function verifyArtifact(bundle) {
   // a `distilled_model` claim requires real weights (non-empty model_pointer +
   // a real base_model), a `compiled_rule` claim requires compiled_targets, a
   // `synthesized_rule` claim requires teacher attribution. This is the
-  // pre-Wave-144 failure mode the audit caught — "polished marketing site over
+  // pre-Wave-144 failure mode the audit caught - "polished marketing site over
   // hardcoded JS templates pretending to be a distilled model." The verifier
   // catches it now so a buyer reading the binder cannot be misled even if a
   // future build path drifts.
@@ -239,7 +239,7 @@ async function verifyArtifact(bundle) {
     name: 'Artifact class consistency (honest taxonomy)',
     status: classCheck.ok ? 'pass' : 'fail',
     detail: classCheck.ok
-      ? `artifact_class='${declaredClass}' matches contents — ${classBadge(declaredClass)}`
+      ? `artifact_class='${declaredClass}' matches contents - ${classBadge(declaredClass)}`
       : classCheck.reason,
   });
 
@@ -254,7 +254,7 @@ async function verifyArtifact(bundle) {
   //                (on Windows the binary must end in .exe)
   //       - gguf:   manifest.runtime_target_config.gguf_path set + bytes present
   //       - onnx:   manifest.runtime_target_config.onnx_path set + bytes present
-  // Failing this is a fail (not a warn) — a manifest declaring native but
+  // Failing this is a fail (not a warn) - a manifest declaring native but
   // missing the binary is misleading metadata and a buyer pulling the
   // artifact would catch the failure at first run, not at verify time.
   const declaredTarget = manifest.runtime_target || 'js';
@@ -314,7 +314,7 @@ async function verifyArtifact(bundle) {
     detail: rtCheck.reason,
   });
 
-  // 4. Receipt chain — every step's HMAC verifies under the same secret.
+  // 4. Receipt chain - every step's HMAC verifies under the same secret.
   // If the secret isn't available we report "structural" pass + "unverified".
   // When the artifact is cloud-trusted (sha256 recorded in
   // ~/.kolm/cloud-trusted.json by `kolm compile` cloud path), HMAC verification
@@ -329,7 +329,7 @@ async function verifyArtifact(bundle) {
       detail: 'no receipt.json found; this is pre-v0.1 artifact format',
     });
   } else {
-    // Wave 149 — Ed25519 verification runs FIRST when present. Unlike HMAC
+    // Wave 149 - Ed25519 verification runs FIRST when present. Unlike HMAC
     // it needs no shared secret, so a third-party verifier (cloud or local)
     // can prove provenance from receipt bytes alone. The check strips
     // `signature_ed25519` from the receipt body and asks ed25519.js to
@@ -355,11 +355,11 @@ async function verifyArtifact(bundle) {
       checks.push({
         name: 'Receipt signature (Ed25519, public-key)',
         status: 'warn',
-        detail: 'no signature_ed25519 block — artifact built before Wave 149 or with KOLM_ED25519_DISABLE=1; HMAC integrity check below stands in until re-signed',
+        detail: 'no signature_ed25519 block - artifact built before Wave 149 or with KOLM_ED25519_DISABLE=1; HMAC integrity check below stands in until re-signed',
       });
     }
 
-    // Wave 150 — sigstore (cosign-compatible) transparency-log bundle. Adds
+    // Wave 150 - sigstore (cosign-compatible) transparency-log bundle. Adds
     // a third verification layer: the bundle's messageSignature is checked
     // against the canonical receipt body (sans sigstore block). If the
     // bundle was Rekor-pinned (not dry-run), the embedded logIndex +
@@ -375,7 +375,7 @@ async function verifyArtifact(bundle) {
           checks.push({
             name: 'Receipt signature (Sigstore bundle)',
             status: 'warn',
-            detail: `bundle structurally valid (sha256 ${sigstoreResult.digest_hex.slice(0, 12)}…) — dry-run, not yet recorded in Rekor transparency log; run \`kolm sigstore-attest <artifact>\` to publish`,
+            detail: `bundle structurally valid (sha256 ${sigstoreResult.digest_hex.slice(0, 12)}…) - dry-run, not yet recorded in Rekor transparency log; run \`kolm sigstore-attest <artifact>\` to publish`,
           });
         } else {
           const li = sigstoreResult.rekor_log_index;
@@ -397,7 +397,7 @@ async function verifyArtifact(bundle) {
       checks.push({
         name: 'Receipt signature (Sigstore bundle)',
         status: 'warn',
-        detail: 'no signature_sigstore block — artifact built before Wave 150 or with KOLM_SIGSTORE_DISABLE=1; Ed25519 stands in as the public-key signature',
+        detail: 'no signature_sigstore block - artifact built before Wave 150 or with KOLM_SIGSTORE_DISABLE=1; Ed25519 stands in as the public-key signature',
       });
     }
 
@@ -419,10 +419,10 @@ async function verifyArtifact(bundle) {
       checks.push({
         name: 'Audit chain (HMAC receipt)',
         status: 'warn',
-        detail: `chain structure ok (${receipt.chain?.length || 0} steps); HMAC unverified — RECIPE_RECEIPT_SECRET not present in this environment`,
+        detail: `chain structure ok (${receipt.chain?.length || 0} steps); HMAC unverified - RECIPE_RECEIPT_SECRET not present in this environment`,
       });
     } else {
-      // W481 — try every candidate secret (env primary, MARKETPLACE_FIXTURE_SECRET
+      // W481 - try every candidate secret (env primary, MARKETPLACE_FIXTURE_SECRET
       // for in-repo seed artifacts, DEV_RECEIPT_SECRET for legacy dev-signed
       // artifacts). Accept on the first match so verify works on a fresh
       // checkout without env setup AND on a user's machine that has compiled
@@ -458,7 +458,7 @@ async function verifyArtifact(bundle) {
     }
   }
 
-  // 4. K-score gate — composite ≥ 0.85.
+  // 4. K-score gate - composite ≥ 0.85.
   const k = manifest.k_score;
   if (!k) {
     checks.push({
@@ -489,7 +489,7 @@ async function verifyArtifact(bundle) {
     const zip = new AdmZip(bundle.artifact_path);
     const e = zip.getEntries().find(x => x.entryName === 'credential.json');
     if (e) credential = JSON.parse(e.getData().toString('utf8'));
-  } catch { /* swallow — credential is optional */ }
+  } catch { /* swallow - credential is optional */ }
 
   if (!credential) {
     checks.push({
@@ -520,7 +520,7 @@ async function verifyArtifact(bundle) {
         detail: `credential present (${credential.spec || 'unknown spec'}); signature unverified without RECIPE_RECEIPT_SECRET`,
       });
     } else {
-      // W481 — try every candidate secret (env primary, MARKETPLACE_FIXTURE_SECRET,
+      // W481 - try every candidate secret (env primary, MARKETPLACE_FIXTURE_SECRET,
       // legacy DEV_RECEIPT_SECRET). Same fallback chain as the audit chain
       // check above so in-repo marketplace seed artifacts verify on any host.
       let matched = null;
@@ -540,7 +540,7 @@ async function verifyArtifact(bundle) {
     }
   }
 
-  // 6. Eval coverage — at least one case ran. When every case is
+  // 6. Eval coverage - at least one case ran. When every case is
   // auto-synthesized from the task description (no user-provided examples),
   // downgrade to warn so the buyer knows the gate cleared on synthetic eval
   // input. One real user-provided case is enough to flip the status to pass.
@@ -552,7 +552,7 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Eval coverage',
       status: 'warn',
-      detail: 'artifact ships zero eval cases — K-score reflects training pass-rate only',
+      detail: 'artifact ships zero eval cases - K-score reflects training pass-rate only',
     });
   } else if (autoN === n) {
     checks.push({
@@ -568,7 +568,7 @@ async function verifyArtifact(bundle) {
     });
   }
 
-  // 7. Seed gate (Q+2) — independence of train and holdout.
+  // 7. Seed gate (Q+2) - independence of train and holdout.
   // The pre-Wave-144 build derived eval cases from the recipe at compile time
   // (input_hash == recipes_json hash by construction), so the K-score's
   // accuracy axis was tautological. The seed gate splits a real seeds.jsonl
@@ -585,7 +585,7 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Seed gate (train/holdout independence)',
       status: 'fail',
-      detail: 'manifest.seed_provenance is missing or eval_source=self_generated — K-score was computed against compile-time eval cases derived from the recipe itself (tautological). Re-build with --seeds pointing at a real seeds.jsonl.',
+      detail: 'manifest.seed_provenance is missing or eval_source=self_generated - K-score was computed against compile-time eval cases derived from the recipe itself (tautological). Re-build with --seeds pointing at a real seeds.jsonl.',
     });
   } else if (sp.eval_source === 'empty') {
     checks.push({
@@ -597,13 +597,13 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Seed gate (train/holdout independence)',
       status: 'fail',
-      detail: `manifest carries seed_provenance but train_hash=${sp.train_hash ? 'set' : 'missing'} / holdout_hash=${sp.holdout_hash ? 'set' : 'missing'} — the seed split did not complete.`,
+      detail: `manifest carries seed_provenance but train_hash=${sp.train_hash ? 'set' : 'missing'} / holdout_hash=${sp.holdout_hash ? 'set' : 'missing'} - the seed split did not complete.`,
     });
   } else if (sp.train_hash === sp.holdout_hash) {
     checks.push({
       name: 'Seed gate (train/holdout independence)',
       status: 'fail',
-      detail: 'train_hash and holdout_hash are identical — the split degenerated and the K-score is not measuring generalization.',
+      detail: 'train_hash and holdout_hash are identical - the split degenerated and the K-score is not measuring generalization.',
     });
   } else if ((sp.input_overlap_count || 0) > 0 || (sp.output_overlap_count || 0) > 0) {
     checks.push({
@@ -615,20 +615,20 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Seed gate (train/holdout independence)',
       status: 'warn',
-      detail: `${sp.grouped_overlap_count} row${sp.grouped_overlap_count === 1 ? '' : 's'} share a grouping-key tag (member_id/claim_id) between train and holdout — same-entity leakage may be inflating the K-score.`,
+      detail: `${sp.grouped_overlap_count} row${sp.grouped_overlap_count === 1 ? '' : 's'} share a grouping-key tag (member_id/claim_id) between train and holdout - same-entity leakage may be inflating the K-score.`,
     });
   } else if (sp.holdout_count < (sp.min_holdout || 10)) {
     const verdict = sp.production_ready === true ? 'fail' : 'warn';
     checks.push({
       name: 'Seed gate (train/holdout independence)',
       status: verdict,
-      detail: `holdout_count=${sp.holdout_count} is below the production threshold (${sp.min_holdout || 10}). K-score should be labeled "sample check" not a production gate. ${verdict === 'fail' ? 'production_ready=true is inconsistent with the small holdout — re-build.' : 'add more captured rows to seeds.jsonl before relying on this number.'}`,
+      detail: `holdout_count=${sp.holdout_count} is below the production threshold (${sp.min_holdout || 10}). K-score should be labeled "sample check" not a production gate. ${verdict === 'fail' ? 'production_ready=true is inconsistent with the small holdout - re-build.' : 'add more captured rows to seeds.jsonl before relying on this number.'}`,
     });
   } else if (sp.eval_source === 'synthetic_starter') {
     checks.push({
       name: 'Seed gate (train/holdout independence)',
       status: 'warn',
-      detail: `holdout cleared (${sp.holdout_count} rows, ${sp.comparator}) but eval_source=synthetic_starter — K-score measured on illustrative public-domain data, not captured tenant IO. Replace seeds with real captured IO before publishing this K-score.`,
+      detail: `holdout cleared (${sp.holdout_count} rows, ${sp.comparator}) but eval_source=synthetic_starter - K-score measured on illustrative public-domain data, not captured tenant IO. Replace seeds with real captured IO before publishing this K-score.`,
     });
   } else {
     checks.push({
@@ -695,7 +695,7 @@ async function verifyArtifact(bundle) {
   // 10. Workflow IR recompute. When the lineage points at a workflow_ir_hash
   // (source='workflow_compile' makes this required), the artifact zip must
   // ship workflow_ir.json and the verifier recomputes hashIr() to confirm the
-  // IR shipped == IR claimed. Failing this is a fail — a claim with no IR
+  // IR shipped == IR claimed. Failing this is a fail - a claim with no IR
   // shipped is a metadata-only assertion that does not satisfy the
   // production-ready gate.
   if (lineage && lineage.workflow_ir_hash) {
@@ -705,7 +705,7 @@ async function verifyArtifact(bundle) {
       const zip = new AdmZip(bundle.artifact_path);
       const e = zip.getEntries().find(x => x.entryName === 'workflow_ir.json');
       if (e) irText = e.getData().toString('utf8');
-    } catch { /* swallow — handled below */ }
+    } catch { /* swallow - handled below */ }
     if (!irText) {
       checks.push({
         name: 'Workflow IR recompute',
@@ -779,7 +779,7 @@ async function verifyArtifact(bundle) {
         const zip = new AdmZip(bundle.artifact_path);
         const e = zip.getEntries().find(x => x.entryName === 'attestation_report.json');
         if (e) report = JSON.parse(e.getData().toString('utf8'));
-      } catch { /* swallow — handled below */ }
+      } catch { /* swallow - handled below */ }
       if (report) {
         try {
           const fresh = await verifyAttestation(cc.kind, report);
@@ -817,14 +817,14 @@ async function verifyArtifact(bundle) {
           });
         }
       } else {
-        // No report bundled — trust the embedded state but downgrade
+        // No report bundled - trust the embedded state but downgrade
         // CRYPTOGRAPHICALLY_VERIFIED to warn because we cannot replay.
         const isVerified = cc.state === CC_STATES.CRYPTOGRAPHICALLY_VERIFIED && cc.verified === true;
         checks.push({
           name: 'Attestation state',
           status: isVerified ? 'warn' : 'fail',
           detail: isVerified
-            ? `${cc.kind} state=${cc.state} (verifier=${cc.verifier || 'none'}) but attestation_report.json not bundled — verifier cannot replay the check.`
+            ? `${cc.kind} state=${cc.state} (verifier=${cc.verifier || 'none'}) but attestation_report.json not bundled - verifier cannot replay the check.`
             : `${cc.kind} state=${cc.state} (verifier=${cc.verifier || 'none'}); below CRYPTOGRAPHICALLY_VERIFIED.`,
         });
       }
@@ -835,7 +835,7 @@ async function verifyArtifact(bundle) {
   // rustc) alongside the C and Rust sources when the builder had a toolchain.
   // Each compiled_targets.recipes[rid].{c,rust}.bin block claims a filename +
   // bin_hash; the verifier opens the zip, re-hashes the bundled bytes, and
-  // confirms they match. Absent .bin blocks are skipped silently — pre-Wave-G
+  // confirms they match. Absent .bin blocks are skipped silently - pre-Wave-G
   // artifacts and any artifact built without KOLM_COMPILE_NATIVE=1 fall
   // through here. A mismatch is a hard fail: the artifact claims a binary
   // exists and hashes to X, but the bundle disagrees.
@@ -846,7 +846,7 @@ async function verifyArtifact(bundle) {
       const rec = ct.recipes[rid];
       if (rec.c && rec.c.bin) claims.push({ rid, kind: 'c', bin: rec.c.bin });
       if (rec.rust && rec.rust.bin) claims.push({ rid, kind: 'rust', bin: rec.rust.bin });
-      // Wave 155 — wasm sub-block (no source file of its own; reuses .c/.rs).
+      // Wave 155 - wasm sub-block (no source file of its own; reuses .c/.rs).
       if (rec.wasm && rec.wasm.bin) claims.push({ rid, kind: 'wasm', bin: rec.wasm.bin });
     }
     if (claims.length > 0) {
@@ -888,7 +888,7 @@ async function verifyArtifact(bundle) {
     }
   }
 
-  // Wave 409q — top-level binaries[] integrity check. The honest manifest
+  // Wave 409q - top-level binaries[] integrity check. The honest manifest
   // surfaces a `binaries` array that pins every (target, kind, recipe) tuple
   // the build actually produced. The verifier opens the zip, finds each
   // entry's filename, re-hashes the bytes, and confirms the match. Failure
@@ -956,13 +956,13 @@ async function verifyArtifact(bundle) {
   // Check #12 (cheap, always on) catches naive tampering with the bundled
   // bytes. Check #13 (expensive, opt-in) catches the subtler case where the
   // binary in the zip does not actually correspond to what the pinned
-  // toolchain would produce from the bundled source — i.e. where the source +
+  // toolchain would produce from the bundled source - i.e. where the source +
   // toolchain pin look correct but the binary is forged.
   //
   // Skip-graceful by design: no matching toolchain on host = skip with reason
   // naming the pin; version drift = skip; source missing = skip; compile
   // failure = skip. Hard fail is reserved for "rebuild succeeded but bin_hash
-  // differs" — the actual reproducibility break the check is meant to catch.
+  // differs" - the actual reproducibility break the check is meant to catch.
   if (ct && ct.recipes && typeof ct.recipes === 'object') {
     const rebuildOptedIn = process.env.KOLM_VERIFY_REBUILD === '1';
     const rebuildClaims = [];
@@ -975,7 +975,7 @@ async function verifyArtifact(bundle) {
         rebuildClaims.push({ rid, kind: 'rust', bin: rec.rust.bin, sourceFilename: rec.rust.filename });
       }
       if (rec.wasm && rec.wasm.bin) {
-        // wasm reuses the .c or .rs source — pick by source_kind.
+        // wasm reuses the .c or .rs source - pick by source_kind.
         const skind = rec.wasm.bin.source_kind || 'rust';
         const srcFn = skind === 'rust' ? (rec.rust && rec.rust.filename) : (rec.c && rec.c.filename);
         if (srcFn) {
@@ -987,7 +987,7 @@ async function verifyArtifact(bundle) {
       checks.push({
         name: 'Build reproducibility',
         status: 'warn',
-        detail: `${rebuildClaims.length} native binary claim(s) eligible for deterministic rebuild; skipped (set KOLM_VERIFY_REBUILD=1 to enable — the cheap bin_hash re-check in check #12 still ran)`,
+        detail: `${rebuildClaims.length} native binary claim(s) eligible for deterministic rebuild; skipped (set KOLM_VERIFY_REBUILD=1 to enable - the cheap bin_hash re-check in check #12 still ran)`,
       });
     } else if (rebuildClaims.length > 0 && rebuildOptedIn) {
       const NC = await import('./native-compile.js');
@@ -1072,7 +1072,7 @@ async function verifyArtifact(bundle) {
   // This check is the gate that converts the "we redacted" claim from a
   // recorded string into something a third party can verify. Without it,
   // a tampered manifest could carry redact_class='phi' without any of the
-  // logs actually existing — a buyer would have no signal.
+  // logs actually existing - a buyer would have no signal.
   const training = manifest.training || {};
   const declaredRedactClass = training.redact_class || null;
   if (declaredRedactClass && declaredRedactClass !== 'none') {
@@ -1122,7 +1122,7 @@ async function verifyArtifact(bundle) {
             }
           }
         }
-      } catch { /* zip read failure is non-fatal — main hash claim still stands */ }
+      } catch { /* zip read failure is non-fatal - main hash claim still stands */ }
       if (bundledLogChecked && logHashMatch === false) {
         checks.push({
           name: 'PHI redactor receipt integrity',
@@ -1138,7 +1138,7 @@ async function verifyArtifact(bundle) {
       } else {
         const replay = bundledLogChecked
           ? `; bundled teacher-call-log.jsonl re-hashed and scanned (0 raw identifiers detected)`
-          : `; teacher-call-log.jsonl not bundled — verifier confirmed hash claims only`;
+          : `; teacher-call-log.jsonl not bundled - verifier confirmed hash claims only`;
         checks.push({
           name: 'PHI redactor receipt integrity',
           status: 'pass',
@@ -1203,7 +1203,7 @@ async function verifyArtifact(bundle) {
 
   // 16. K-score teacher-delta axis T (wave 160, Q+3c). When the artifact carries
   // a distillation lineage AND the distillation_method produces real student
-  // weights (lora, qlora, full-ft — anything that fine-tunes a base model), the
+  // weights (lora, qlora, full-ft - anything that fine-tunes a base model), the
   // receipt must record the teacher's accuracy on the SAME holdout the student
   // was scored against, so the K-score V2 T axis (= student_holdout /
   // teacher_holdout) can be computed and the cost/quality tradeoff is legible.
@@ -1211,7 +1211,7 @@ async function verifyArtifact(bundle) {
   // Per Wave 144 Doc 7 §4.7: A/T = 1.0 means the student matches the teacher;
   // A/T = 0.9 means the student is at 90% of teacher accuracy on the same
   // holdout. Without this axis a buyer cannot distinguish "5x cheaper at 95% of
-  // teacher accuracy" from "5x cheaper at 60% of teacher accuracy" — Pablo's
+  // teacher accuracy" from "5x cheaper at 60% of teacher accuracy" - Pablo's
   // point about K-score being self-graded becomes architecturally impossible.
   //
   // For prompt-distill (no fine-tune, recipe is teacher-as-judge codegen) the
@@ -1263,7 +1263,7 @@ async function verifyArtifact(bundle) {
   // DEFAULT signer; check #17 makes Ed25519 a CONTRACT. Either side can demand
   // public-key signing: the artifact (via manifest.policy.require_ed25519) or
   // the verifier (via env KOLM_REQUIRE_ED25519=1). When either is true, an
-  // HMAC-only receipt is a hard fail — HMAC is a symmetric MAC, anyone who can
+  // HMAC-only receipt is a hard fail - HMAC is a symmetric MAC, anyone who can
   // verify it can also forge it, so a third-party signature claim cannot rest
   // on HMAC alone. The companion check #5 ("Receipt signature (Ed25519,
   // public-key)") already verifies the signature itself; check #17's job is to
@@ -1287,7 +1287,7 @@ async function verifyArtifact(bundle) {
       checks.push({
         name: 'Signature policy (Ed25519)',
         status: 'fail',
-        detail: `${src} but receipt carries only HMAC integrity (signature_alg=${receipt?.signature_alg || '?'}). HMAC is a symmetric MAC and cannot prove provenance to a third party — re-sign with Ed25519 (unset KOLM_ED25519_DISABLE, or set KOLM_ED25519_PRIVATE_KEY_PATH=/path/to/key.pem) or relax the policy.`,
+        detail: `${src} but receipt carries only HMAC integrity (signature_alg=${receipt?.signature_alg || '?'}). HMAC is a symmetric MAC and cannot prove provenance to a third party - re-sign with Ed25519 (unset KOLM_ED25519_DISABLE, or set KOLM_ED25519_PRIVATE_KEY_PATH=/path/to/key.pem) or relax the policy.`,
       });
     } else if (ed25519CheckResult && ed25519CheckResult.status === 'pass') {
       checks.push({
@@ -1299,14 +1299,14 @@ async function verifyArtifact(bundle) {
       checks.push({
         name: 'Signature policy (Ed25519)',
         status: 'fail',
-        detail: `policy requires Ed25519 but the signature_ed25519 verification did not pass — see prior "Receipt signature (Ed25519, public-key)" check for the failure reason`,
+        detail: `policy requires Ed25519 but the signature_ed25519 verification did not pass - see prior "Receipt signature (Ed25519, public-key)" check for the failure reason`,
       });
     }
   } else if (ed25519Present) {
     checks.push({
       name: 'Signature policy (Ed25519)',
       status: 'pass',
-      detail: `policy does not require Ed25519 (manifest.policy.require_ed25519 missing or false; env KOLM_REQUIRE_ED25519 not set) but receipt carries an Ed25519 signature anyway — verification status above`,
+      detail: `policy does not require Ed25519 (manifest.policy.require_ed25519 missing or false; env KOLM_REQUIRE_ED25519 not set) but receipt carries an Ed25519 signature anyway - verification status above`,
     });
   } else {
     checks.push({
@@ -1318,12 +1318,12 @@ async function verifyArtifact(bundle) {
 
   // 18. Transparency policy (Rekor) (wave 162, Q+9). Wave 150 made sigstore
   // the DEFAULT third signature layer; Wave 162 makes Rekor pinning a
-  // CONTRACT. Sigstore is dry-run by default — the bundle is structurally
+  // CONTRACT. Sigstore is dry-run by default - the bundle is structurally
   // valid and verifies offline against the embedded Ed25519 public key, but
   // it has not been recorded in a publicly-readable, append-only transparency
   // log. Rekor is what turns "I signed this offline" into "I signed this AND
   // a public log proves it existed at this moment, before any later claim of
-  // when/by-whom" — the difference between a notarized document and an
+  // when/by-whom" - the difference between a notarized document and an
   // unsigned letter.
   //
   // Either side can demand a pinned bundle: the artifact (via
@@ -1378,7 +1378,7 @@ async function verifyArtifact(bundle) {
       checks.push({
         name: 'Transparency policy (Rekor)',
         status: 'fail',
-        detail: `policy requires Rekor pinning but the Sigstore bundle verification did not pass — see prior "Receipt signature (Sigstore bundle)" check for the failure reason`,
+        detail: `policy requires Rekor pinning but the Sigstore bundle verification did not pass - see prior "Receipt signature (Sigstore bundle)" check for the failure reason`,
       });
     }
   } else if (sigstorePresent && !sigstoreDryRun) {
@@ -1386,7 +1386,7 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Transparency policy (Rekor)',
       status: 'pass',
-      detail: `policy does not require Rekor (manifest.policy.require_rekor missing or false; env KOLM_REQUIRE_REKOR not set) but the bundle is pinned to Rekor anyway (logIndex=${li}) — verification status above`,
+      detail: `policy does not require Rekor (manifest.policy.require_rekor missing or false; env KOLM_REQUIRE_REKOR not set) but the bundle is pinned to Rekor anyway (logIndex=${li}) - verification status above`,
     });
   } else if (sigstorePresent) {
     checks.push({
@@ -1414,7 +1414,7 @@ async function verifyArtifact(bundle) {
   // sha256 matches the declared sha256, and the export_block round-trips.
   // Fail when: any target is missing, any hash drifts, or the block hash
   // mismatches its canonical recomputation.
-  // Pass (informational) when: manifest.export is absent — most artifacts
+  // Pass (informational) when: manifest.export is absent - most artifacts
   // are rule-class or distilled without a native export, so no bound
   // targets is the common case, not an error.
   if (!manifest.export) {
@@ -1479,9 +1479,9 @@ async function verifyArtifact(bundle) {
           }
         }
         if (missingRows.length > 0) {
-          exportFail = `manifest.export claims ${validated.targets.length} target(s) but ${missingRows.length} not found in zip:\n  ${missingRows.join('\n  ')}\n  the bridge bundles every declared target inside the .kolm — missing files mean the build emitted the manifest but failed to attach the bytes.`;
+          exportFail = `manifest.export claims ${validated.targets.length} target(s) but ${missingRows.length} not found in zip:\n  ${missingRows.join('\n  ')}\n  the bridge bundles every declared target inside the .kolm - missing files mean the build emitted the manifest but failed to attach the bytes.`;
         } else if (driftRows.length > 0) {
-          exportFail = `manifest.export target sha256 drift in ${driftRows.length} of ${validated.targets.length} target(s):\n  ${driftRows.join('\n  ')}\n  declared hash and recomputed hash differ — either the bytes inside the .kolm were tampered with after build, or the manifest was rewritten to claim a hash that doesn't match the file.`;
+          exportFail = `manifest.export target sha256 drift in ${driftRows.length} of ${validated.targets.length} target(s):\n  ${driftRows.join('\n  ')}\n  declared hash and recomputed hash differ - either the bytes inside the .kolm were tampered with after build, or the manifest was rewritten to claim a hash that doesn't match the file.`;
         } else {
           // All targets present, all hashes match, block round-trips.
           const fmts = Array.from(new Set(validated.targets.map(t => t.format))).sort().join(', ');
@@ -1507,23 +1507,23 @@ async function verifyArtifact(bundle) {
 
   // 20. External / adversarial holdouts (wave 164, N+3 / N+4). The eval
   // credibility roadmap (Wave 144 Doc 2 §7) layered eval independence as:
-  //   N+1.5/Q+2  — tenant seeds.jsonl train/holdout split (seed_provenance,
+  //   N+1.5/Q+2 - tenant seeds.jsonl train/holdout split (seed_provenance,
   //                already checked at #2)
-  //   N+3        — external public benchmark holdouts (kind='external')
-  //   N+4        — adversarial cross-family LLM-pair holdouts (kind='adversarial')
-  //   N+5 (w165) — tenant shadow corpus endpoint
-  //   N+6 (w160) — teacher-delta T axis (already shipped)
-  //   N+7 (w166) — third-party auditor attestation
+  //   N+3 - external public benchmark holdouts (kind='external')
+  //   N+4 - adversarial cross-family LLM-pair holdouts (kind='adversarial')
+  //   N+5 (w165) - tenant shadow corpus endpoint
+  //   N+6 (w160) - teacher-delta T axis (already shipped)
+  //   N+7 (w166) - third-party auditor attestation
   //
   // This check confirms the manifest.external_holdout_provenance block
   // round-trips through validateExternalHoldoutBlock AND each declared
   // holdout's JSONL still exists on disk at the catalog path with a
   // byte-identical sha256. If a builder shipped accuracy=1.0 on a holdout
   // they secretly edited after the build, the file_sha256 in the manifest
-  // mismatches what's on disk — this check fires.
+  // mismatches what's on disk - this check fires.
   //
   // Pass (informational) when: manifest.external_holdout_provenance absent
-  // — the seeds.jsonl gate (check #2) is the floor; external + adversarial
+  // - the seeds.jsonl gate (check #2) is the floor; external + adversarial
   // are upgrades a tenant opts into by passing --external-holdout <name>
   // or --adversarial-holdout <name> at compile time.
   // Pass when: block validates, every named holdout's file_sha256 matches,
@@ -1534,7 +1534,7 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'External / adversarial holdouts',
       status: 'pass',
-      detail: `no manifest.external_holdout_provenance block — only the tenant's seeds.jsonl holdout (check #2) is scoring this recipe. Add \`--external-holdout presidio-synthetic-v1\` or \`--adversarial-holdout cross-family-pair-v1\` (or both) to score against independent corpora documented in holdouts/catalog.json.`,
+      detail: `no manifest.external_holdout_provenance block - only the tenant's seeds.jsonl holdout (check #2) is scoring this recipe. Add \`--external-holdout presidio-synthetic-v1\` or \`--adversarial-holdout cross-family-pair-v1\` (or both) to score against independent corpora documented in holdouts/catalog.json.`,
     });
   } else {
     let extFail = null;
@@ -1616,7 +1616,7 @@ async function verifyArtifact(bundle) {
   }
 
   // 21. Tenant shadow corpus (wave 165, N+5). The eval-credibility ladder's
-  // N+5 tier — a per-tenant labeled holdout corpus that NEVER leaves the
+  // N+5 tier - a per-tenant labeled holdout corpus that NEVER leaves the
   // tenant's environment. Unlike external_holdout (corpus ships under
   // repo root + every verifier can re-anchor) and unlike seeds.jsonl (corpus
   // ships inside the .kolm), tenant_shadow corpus bytes stay on the tenant's
@@ -1626,22 +1626,22 @@ async function verifyArtifact(bundle) {
   //
   // This check has THREE branches because the verifier's relationship to
   // tenant storage determines what it can prove:
-  //   (a) absent: pass+informational — no block, only seeds.jsonl + external
+  //   (a) absent: pass+informational - no block, only seeds.jsonl + external
   //       layers are scoring. Suggests --tenant-shadow-corpus upgrade.
   //   (b) present + corpus reachable on disk + bytes match: pass with re-anchor
   //       evidence (tenant-internal or air-gapped verifier with storage access)
   //   (c) present + corpus NOT reachable + schema/hash round-trip clean: pass
-  //       with informational ("external verifier — corpus stays on tenant
+  //       with informational ("external verifier - corpus stays on tenant
   //       infrastructure; verified schema + block hash only"). This is the
   //       common case for an auditor with the .kolm but no tenant access.
-  //   (d) present + reanchored but bytes drift: FAIL — corpus was edited
+  //   (d) present + reanchored but bytes drift: FAIL - corpus was edited
   //       post-build OR manifest tampered to claim different corpus.
-  //   (e) present + schema/hash drift: FAIL — block was tampered with.
+  //   (e) present + schema/hash drift: FAIL - block was tampered with.
   if (!manifest.tenant_shadow_corpus_provenance) {
     checks.push({
       name: 'Tenant shadow corpus',
       status: 'pass',
-      detail: `no manifest.tenant_shadow_corpus_provenance block — only the tenant's seeds.jsonl holdout (check #2) and any external/adversarial layers (check #20) are scoring this recipe. Upload a tenant-private labeled corpus via POST /v1/eval/tenant_holdout and pass \`--tenant-shadow-corpus <tenant_id>:<corpus_id>\` at compile time to add an N+5 layer the corpus bytes for which never leave your infrastructure.`,
+      detail: `no manifest.tenant_shadow_corpus_provenance block - only the tenant's seeds.jsonl holdout (check #2) and any external/adversarial layers (check #20) are scoring this recipe. Upload a tenant-private labeled corpus via POST /v1/eval/tenant_holdout and pass \`--tenant-shadow-corpus <tenant_id>:<corpus_id>\` at compile time to add an N+5 layer the corpus bytes for which never leave your infrastructure.`,
     });
   } else {
     const raw = Array.isArray(manifest.tenant_shadow_corpus_provenance)
@@ -1690,7 +1690,7 @@ async function verifyArtifact(bundle) {
         const head = (() => {
           if (reCount === total) return `${total} tenant shadow corpus block(s) re-anchored from tenant storage; every declared corpus_sha256 matches on-disk bytes`;
           if (extCount === total) return `${total} tenant shadow corpus block(s) validated by schema + block hash (verifier is external to tenant infrastructure; HIPAA data-never-leaves-tenant residency upheld)`;
-          return `${total} tenant shadow corpus block(s) total — ${reCount} re-anchored from tenant storage, ${extCount} schema-only (verifier missing storage access for those tenants)`;
+          return `${total} tenant shadow corpus block(s) total - ${reCount} re-anchored from tenant storage, ${extCount} schema-only (verifier missing storage access for those tenants)`;
         })();
         checks.push({
           name: 'Tenant shadow corpus',
@@ -1716,7 +1716,7 @@ async function verifyArtifact(bundle) {
   // party with their own Ed25519 key observed this artifact's verification
   // outputs and stands behind them." For the auditor signature to mean
   // anything, the auditor's key fingerprint MUST differ from the builder's
-  // — otherwise the same party is signing both layers, defeating the entire
+  // - otherwise the same party is signing both layers, defeating the entire
   // purpose of independent attestation.
   //
   // Five branches:
@@ -1732,7 +1732,7 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Third-party auditor attestation',
       status: 'pass',
-      detail: `no manifest.auditor_attestation_provenance block — only the builder's own Ed25519 signature (check above) attests to this artifact's verification outputs. To add an independent layer of attestation: (1) auditor runs \`kolm auditor keygen --out auditor.key\` (Ed25519 keypair, stays on auditor's HSM/laptop), (2) auditor runs \`kolm auditor sign <artifact.kolm> --key auditor.key --auditor-id <slug> --out attestation.json\`, (3) tenant re-builds with \`--auditor-attestation attestation.json\`. The attestation's signed claims bind cryptographically to artifact_hash + eval_score + k_score, so any post-attestation tamper breaks the signature.`,
+      detail: `no manifest.auditor_attestation_provenance block - only the builder's own Ed25519 signature (check above) attests to this artifact's verification outputs. To add an independent layer of attestation: (1) auditor runs \`kolm auditor keygen --out auditor.key\` (Ed25519 keypair, stays on auditor's HSM/laptop), (2) auditor runs \`kolm auditor sign <artifact.kolm> --key auditor.key --auditor-id <slug> --out attestation.json\`, (3) tenant re-builds with \`--auditor-attestation attestation.json\`. The attestation's signed claims bind cryptographically to artifact_hash + eval_score + k_score, so any post-attestation tamper breaks the signature.`,
     });
   } else {
     const raw = Array.isArray(manifest.auditor_attestation_provenance)
@@ -1754,7 +1754,7 @@ async function verifyArtifact(bundle) {
       // persisted) so crossCheckAttestation can match the auditor's signed
       // hash claims against the artifact this binder is examining.
       const manifestCrossView = { ...manifest };
-      // artifact_hash is the canonical source — comes from the receipt.
+      // artifact_hash is the canonical source - comes from the receipt.
       manifestCrossView.__artifact_hash = bundle.receipt?.artifact_hash || null;
       // external_holdout_hash is just the block's own short hash (per
       // artifact.js artifact_hash_input.external_holdout_hash = block.hash).
@@ -1790,7 +1790,7 @@ async function verifyArtifact(bundle) {
       const passSummaries = [];
       const failReasons = [];
       for (const b of validatedAll) {
-        // (e) auditor key MUST differ from builder key — third-party means
+        // (e) auditor key MUST differ from builder key - third-party means
         // a distinct party. If the same fingerprint signs both, attestation
         // adds no independence.
         if (builderFingerprint && b.key_fingerprint === builderFingerprint) {
@@ -1818,7 +1818,7 @@ async function verifyArtifact(bundle) {
         checks.push({
           name: 'Third-party auditor attestation',
           status: 'pass',
-          detail: `${total} third-party auditor attestation block(s) verified — each signature valid against its embedded Ed25519 public key, every signed claim (artifact_hash + eval_score + k_score + external/tenant-shadow hashes when present) matches the current manifest, and every auditor key fingerprint differs from the builder's. ${passSummaries.join('; ')}`,
+          detail: `${total} third-party auditor attestation block(s) verified - each signature valid against its embedded Ed25519 public key, every signed claim (artifact_hash + eval_score + k_score + external/tenant-shadow hashes when present) matches the current manifest, and every auditor key fingerprint differs from the builder's. ${passSummaries.join('; ')}`,
         });
       }
     }
@@ -1850,7 +1850,7 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Supersession chain',
       status: 'pass',
-      detail: `no manifest.supersession_provenance block — this artifact has no recorded predecessor. To declare this artifact supersedes a prior one, rebuild with \`kolm compile <spec> --supersession-of <predecessor.kolm> --supersession-reason <reason>\` (valid reasons: ${SUPERSESSION_REASONS.join(', ')}). When reason='drift_detected', also pass --supersession-drift-report <report.json> so the evidence for retirement is bound into the manifest.`,
+      detail: `no manifest.supersession_provenance block - this artifact has no recorded predecessor. To declare this artifact supersedes a prior one, rebuild with \`kolm compile <spec> --supersession-of <predecessor.kolm> --supersession-reason <reason>\` (valid reasons: ${SUPERSESSION_REASONS.join(', ')}). When reason='drift_detected', also pass --supersession-drift-report <report.json> so the evidence for retirement is bound into the manifest.`,
     });
   } else {
     let ssFail = null;
@@ -1909,7 +1909,7 @@ async function verifyArtifact(bundle) {
     checks.push({
       name: 'Drift report',
       status: 'pass',
-      detail: `no manifest.drift_report block — no recurring drift detection result has been bound into this artifact. To emit a drift report against a baseline artifact, run \`kolm drift detect <current.kolm> --baseline <baseline.kolm> --out drift.json\` and embed it on the next rebuild. For continuous monitoring, run \`kolm drift cron --baseline <baseline.kolm> --current <current.kolm> --cadence "0 */6 * * *" --out drift-cron.json\` and drop the emitted crontab line into your scheduler.`,
+      detail: `no manifest.drift_report block - no recurring drift detection result has been bound into this artifact. To emit a drift report against a baseline artifact, run \`kolm drift detect <current.kolm> --baseline <baseline.kolm> --out drift.json\` and embed it on the next rebuild. For continuous monitoring, run \`kolm drift cron --baseline <baseline.kolm> --current <current.kolm> --cadence "0 */6 * * *" --out drift-cron.json\` and drop the emitted crontab line into your scheduler.`,
     });
   } else {
     let drFail = null;
@@ -1926,12 +1926,12 @@ async function verifyArtifact(bundle) {
       if (dr.verdict === 'breach') {
         // Surface the breached axes specifically.
         const breachedAxes = dr.signals.filter(s => s.status === 'breach').map(s => s.axis).join(', ');
-        drFail = `manifest.drift_report verdict='breach' — axes that breached tolerance: ${breachedAxes}. ${verdictDetail}. Re-distill the recipe (or use --supersession-of with --supersession-reason=drift_detected to ship a corrected successor).`;
+        drFail = `manifest.drift_report verdict='breach' - axes that breached tolerance: ${breachedAxes}. ${verdictDetail}. Re-distill the recipe (or use --supersession-of with --supersession-reason=drift_detected to ship a corrected successor).`;
       } else if (dr.verdict === 'drift') {
         checks.push({
           name: 'Drift report',
           status: 'pass',
-          detail: `WARN — ${verdictDetail}. Signals moved past the warn band but stayed inside the fail band. Schedule a re-distillation against current production traffic before the next cadence interval.`,
+          detail: `WARN - ${verdictDetail}. Signals moved past the warn band but stayed inside the fail band. Schedule a re-distillation against current production traffic before the next cadence interval.`,
         });
       } else {
         checks.push({
@@ -1986,7 +1986,7 @@ async function verifyArtifact(bundle) {
 
 function renderHead(bundle) {
   const m = bundle.manifest;
-  const title = `${esc(m.task || 'kolm artifact')} — compliance binder`;
+  const title = `${esc(m.task || 'kolm artifact')} - compliance binder`;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -2053,9 +2053,9 @@ function renderSummary(checks, manifest) {
   const warned = checks.filter(c => c.status === 'warn').length;
   const verdict = failed > 0 ? 'fail' : (warned > 0 ? 'warn' : 'pass');
   const verdictText = failed > 0
-    ? `${failed} check${failed === 1 ? '' : 's'} failed — do not deploy`
+    ? `${failed} check${failed === 1 ? '' : 's'} failed - do not deploy`
     : warned > 0
-      ? `passes with ${warned} warning${warned === 1 ? '' : 's'} — review below`
+      ? `passes with ${warned} warning${warned === 1 ? '' : 's'} - review below`
       : `all ${checks.length} checks passed`;
   const rows = checks.map(c => `
     <div class="check-row">
@@ -2082,17 +2082,17 @@ function renderIdentity(manifest) {
 <section>
   <h2>Identity</h2>
   <dl class="grid">
-    <dt>Task</dt><dd>${esc(manifest.task || '—')}</dd>
-    <dt>Spec</dt><dd>${esc(manifest.spec || '—')}</dd>
+    <dt>Task</dt><dd>${esc(manifest.task || ' - ')}</dd>
+    <dt>Spec</dt><dd>${esc(manifest.spec || ' - ')}</dd>
     <dt>Tier</dt><dd>${esc(manifest.tier || 'recipe')}</dd>
-    <dt>Base model</dt><dd>${esc(manifest.base_model || '—')}</dd>
-    <dt>Runtime</dt><dd>${esc(manifest.runtime || '—')}</dd>
-    <dt>Job ID</dt><dd>${esc(manifest.job_id || '—')}</dd>
-    <dt>CID</dt><dd>${esc(manifest.cid || '—')}</dd>
-    <dt>Created at</dt><dd>${esc(manifest.created_at || '—')}</dd>
+    <dt>Base model</dt><dd>${esc(manifest.base_model || ' - ')}</dd>
+    <dt>Runtime</dt><dd>${esc(manifest.runtime || ' - ')}</dd>
+    <dt>Job ID</dt><dd>${esc(manifest.job_id || ' - ')}</dd>
+    <dt>CID</dt><dd>${esc(manifest.cid || ' - ')}</dd>
+    <dt>Created at</dt><dd>${esc(manifest.created_at || ' - ')}</dd>
     <dt>Target device</dt><dd>${esc(manifest.target_device || 'unpinned')}</dd>
     <dt>Train device</dt><dd>${esc(manifest.train_device || 'unpinned')}</dd>
-    <dt>Judge</dt><dd>${esc(manifest.judge_id || '—')}</dd>
+    <dt>Judge</dt><dd>${esc(manifest.judge_id || ' - ')}</dd>
     <dt>Size on disk</dt><dd>${fmtBytes(k.size_bytes)}</dd>
   </dl>
 </section>`;
@@ -2149,8 +2149,8 @@ function renderKScore(manifest) {
     </div>`).join('');
   const gate = k.gate || 0.85;
   const verdictText = k.composite >= gate
-    ? `composite ${k.composite.toFixed(4)} ≥ gate ${gate.toFixed(2)} — artifact ships`
-    : `composite ${k.composite.toFixed(4)} below gate ${gate.toFixed(2)} — artifact should not ship`;
+    ? `composite ${k.composite.toFixed(4)} ≥ gate ${gate.toFixed(2)} - artifact ships`
+    : `composite ${k.composite.toFixed(4)} below gate ${gate.toFixed(2)} - artifact should not ship`;
   const formula = isV2
     ? `K2 = 0.30·A + 0.10·S + 0.10·L + 0.10·C + 0.10·V + 0.05·R + 0.05·T + 0.10·F + 0.05·E + 0.05·Z (missing axes redistribute weight over present axes). The gate is ${gate.toFixed(2)}.`
     : `K = 0.40·A + 0.15·S + 0.15·L + 0.15·C + 0.15·V, on the unit interval. The gate is ${gate.toFixed(2)}.`;
@@ -2165,15 +2165,15 @@ function renderKScore(manifest) {
 
 function renderHashes(manifest) {
   const h = manifest.hashes || {};
-  // P1-10 receipt cleanup — flag empty slots so a buyer of a rule-class artifact
+  // P1-10 receipt cleanup - flag empty slots so a buyer of a rule-class artifact
   // never sees "lora_bin: e3b0c4..." and assumes there's a LoRA inside. EMPTY_SHA
   // is the canonical sentinel meaning "this slot is intentionally absent; the
   // file does not ride inside the zip". We label it explicitly.
   const EMPTY_SHA = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
   const SLOT_LABELS = {
     model_pointer: 'no model weights bundled (this is a rule-class artifact; no GGUF/ONNX inside)',
-    lora_bin: 'no LoRA bundled (rule-class — recipes execute as pure JS, no learned weights)',
-    index_bin: 'no retrieval index bundled (rule-class — no vector lookup at runtime)',
+    lora_bin: 'no LoRA bundled (rule-class - recipes execute as pure JS, no learned weights)',
+    index_bin: 'no retrieval index bundled (rule-class - no vector lookup at runtime)',
   };
   const rows = Object.keys(h).sort().map(k => {
     const v = h[k];
@@ -2183,7 +2183,7 @@ function renderHashes(manifest) {
       return `
     <tr>
       <td class="mono">${esc(k)}</td>
-      <td><em>intentionally empty (sha256 of zero bytes)${label ? ` — ${esc(label)}` : ''}</em></td>
+      <td><em>intentionally empty (sha256 of zero bytes)${label ? ` - ${esc(label)}` : ''}</em></td>
     </tr>`;
     }
     return `
@@ -2195,7 +2195,7 @@ function renderHashes(manifest) {
   return `
 <section>
   <h2>Manifest hashes</h2>
-  <p>sha256 over each file inside the .kolm zip. The CID is derived from this table via canonical JSON. Slots flagged "intentionally empty" do <em>not</em> ride inside the artifact bytes — they are the explicit "this slot is absent" sentinel (sha256 of zero bytes).</p>
+  <p>sha256 over each file inside the .kolm zip. The CID is derived from this table via canonical JSON. Slots flagged "intentionally empty" do <em>not</em> ride inside the artifact bytes - they are the explicit "this slot is absent" sentinel (sha256 of zero bytes).</p>
   <table>
     <thead><tr><th style="width: 180px">File</th><th>sha256 / status</th></tr></thead>
     <tbody>${rows}</tbody>
@@ -2219,31 +2219,31 @@ function renderChain(receipt) {
   <h2>Audit chain</h2>
   <p>Five-step HMAC chain. Each step seals the previous step's output hash. A verifier with the receipt secret recomputes every step's HMAC to detect tampering.</p>
   ${rows}
-  <p style="margin-top: 12px;"><strong>Receipt body signature:</strong> <code class="mono">${esc(receipt.signature || '—')}</code></p>
-  <p><strong>Signature algorithm:</strong> ${esc(receipt.signature_alg || '—')} &nbsp; <strong>Signed at:</strong> ${esc(receipt.signed_at || '—')} &nbsp; <strong>Signed by:</strong> ${esc(receipt.signed_by || '—')}</p>
+  <p style="margin-top: 12px;"><strong>Receipt body signature:</strong> <code class="mono">${esc(receipt.signature || ' - ')}</code></p>
+  <p><strong>Signature algorithm:</strong> ${esc(receipt.signature_alg || ' - ')} &nbsp; <strong>Signed at:</strong> ${esc(receipt.signed_at || ' - ')} &nbsp; <strong>Signed by:</strong> ${esc(receipt.signed_by || ' - ')}</p>
 </section>`;
 }
 
 function renderCredential(credential) {
   if (!credential) {
-    return `<section><h2>Provenance credential</h2><p>Not present — artifact predates kolm-credential/0.1.</p></section>`;
+    return `<section><h2>Provenance credential</h2><p>Not present - artifact predates kolm-credential/0.1.</p></section>`;
   }
   const a = credential.assertions || {};
   const rows = Object.keys(a).sort().map(k => `
-    <tr><td class="mono">${esc(k)}</td><td class="mono">${esc(String(a[k] ?? '—'))}</td></tr>
+    <tr><td class="mono">${esc(k)}</td><td class="mono">${esc(String(a[k] ?? ' - '))}</td></tr>
   `).join('');
   return `
 <section>
   <h2>Provenance credential</h2>
-  <p>Self-contained credential binding the artifact to its assertions. Schema: <code>${esc(credential.spec || '—')}</code>. Verifies under the same secret as the receipt chain.</p>
+  <p>Self-contained credential binding the artifact to its assertions. Schema: <code>${esc(credential.spec || ' - ')}</code>. Verifies under the same secret as the receipt chain.</p>
   <dl class="grid">
-    <dt>Type</dt><dd>${esc(credential.type || '—')}</dd>
-    <dt>Claim generator</dt><dd>${esc(credential.claim_generator || '—')}</dd>
-    <dt>Artifact hash</dt><dd>${esc(credential.artifact_hash || '—')}</dd>
-    <dt>CID</dt><dd>${esc(credential.cid || '—')}</dd>
-    <dt>Signature alg</dt><dd>${esc(credential.signature_alg || '—')}</dd>
-    <dt>Signed at</dt><dd>${esc(credential.signed_at || '—')}</dd>
-    <dt>Signature</dt><dd>${esc(credential.signature || '—')}</dd>
+    <dt>Type</dt><dd>${esc(credential.type || ' - ')}</dd>
+    <dt>Claim generator</dt><dd>${esc(credential.claim_generator || ' - ')}</dd>
+    <dt>Artifact hash</dt><dd>${esc(credential.artifact_hash || ' - ')}</dd>
+    <dt>CID</dt><dd>${esc(credential.cid || ' - ')}</dd>
+    <dt>Signature alg</dt><dd>${esc(credential.signature_alg || ' - ')}</dd>
+    <dt>Signed at</dt><dd>${esc(credential.signed_at || ' - ')}</dd>
+    <dt>Signature</dt><dd>${esc(credential.signature || ' - ')}</dd>
   </dl>
   <h3>Assertions</h3>
   <table>
@@ -2271,7 +2271,7 @@ function renderEvals(evals, manifest) {
   return `
 <section>
   <h2>Eval coverage</h2>
-  <p><strong>${evals.cases.length}</strong> case${evals.cases.length === 1 ? '' : 's'} embedded. Judge: <code>${esc(manifest.judge_id || '—')}</code>. Eval set hash: <code class="mono">${esc(manifest.evals?.hash || '—')}</code>.</p>
+  <p><strong>${evals.cases.length}</strong> case${evals.cases.length === 1 ? '' : 's'} embedded. Judge: <code>${esc(manifest.judge_id || ' - ')}</code>. Eval set hash: <code class="mono">${esc(manifest.evals?.hash || ' - ')}</code>.</p>
   <table>
     <thead><tr><th style="width: 30px">#</th><th>Input</th><th>Expected</th></tr></thead>
     <tbody>${rows}</tbody>
@@ -2367,7 +2367,7 @@ export async function writeBinder(artifactPath, outPath) {
 }
 
 // ---------------------------------------------------------------------------
-// Wave 409aa — Structured verifier helper.
+// Wave 409aa - Structured verifier helper.
 //
 // `verifyArtifactStructured(artifactPath)` wraps `loadArtifact` + `verifyArtifact`
 // and TRANSLATES the first failing check (or the loadArtifact throw) into a
@@ -2377,7 +2377,7 @@ export async function writeBinder(artifactPath, outPath) {
 //   { ok: false, reason: '<enum>', detail: '<human>', failing_field: '<path>',
 //                manifest?, receipt?, checks? }
 //
-// Stable `reason` enum (Wave 409aa contract — DO NOT rename without bumping
+// Stable `reason` enum (Wave 409aa contract - DO NOT rename without bumping
 // the binder spec):
 //
 //   'signature_invalid'                  - signature.sig HMAC failed; Ed25519
@@ -2437,7 +2437,7 @@ function translateCheck(check) {
 }
 
 /**
- * Structured verifier — Wave 409aa contract.
+ * Structured verifier - Wave 409aa contract.
  *
  * @param {string} artifactPath - path to a .kolm file
  * @param {object} [opts]
@@ -2448,7 +2448,7 @@ function translateCheck(check) {
  */
 export async function verifyArtifactStructured(artifactPath, opts = {}) {
   const runProductionCheck = opts.runProductionCheck !== false;
-  // Step 1 — load. loadArtifact throws KOLM_E_SIGNATURE_INVALID for HMAC
+  // Step 1 - load. loadArtifact throws KOLM_E_SIGNATURE_INVALID for HMAC
   // mismatch; translate that immediately so the caller doesn't have to.
   let bundle;
   try {
@@ -2466,7 +2466,7 @@ export async function verifyArtifactStructured(artifactPath, opts = {}) {
     }
     // CID round-trip is computed AFTER load; a load-time throw that is not
     // a signature failure (zip corrupt, file missing) maps to a manifest
-    // hash mismatch — the artifact bytes can no longer be reconciled.
+    // hash mismatch - the artifact bytes can no longer be reconciled.
     return {
       ok: false,
       reason: 'manifest_hash_mismatch',
@@ -2475,7 +2475,7 @@ export async function verifyArtifactStructured(artifactPath, opts = {}) {
     };
   }
 
-  // Step 2 — manifest-file-hash gate. Re-hash every file in the zip and
+  // Step 2 - manifest-file-hash gate. Re-hash every file in the zip and
   // compare against manifest.hashes. The CID-round-trip check (#2) covers
   // the rolled-up CID, but the auditor mandate is more specific: a verifier
   // must reject a SINGLE file mutation even when the manifest itself is
@@ -2497,7 +2497,7 @@ export async function verifyArtifactStructured(artifactPath, opts = {}) {
     }
   }
 
-  // Step 3 — run the full verifyArtifact() check matrix.
+  // Step 3 - run the full verifyArtifact() check matrix.
   const { checks, credential } = await verifyArtifact(bundle);
   const failed = checks.find((c) => c.status === 'fail');
   if (failed) {
@@ -2524,10 +2524,10 @@ export async function verifyArtifactStructured(artifactPath, opts = {}) {
     };
   }
 
-  // Step 4 — productionReady() cross-check. An artifact whose seed_provenance
+  // Step 4 - productionReady() cross-check. An artifact whose seed_provenance
   // claims production_ready=true MUST also pass the runtime gates (eval
   // parity, durability, executable bundle). If any one fails we surface
-  // `production_check_failed_on_install` — the marketplace-install path
+  // `production_check_failed_on_install` - the marketplace-install path
   // refuses to ship the artifact in that case.
   if (runProductionCheck && manifest && manifest.seed_provenance && manifest.seed_provenance.production_ready === true) {
     let verdict = null;
@@ -2581,7 +2581,7 @@ export async function verifyArtifactStructured(artifactPath, opts = {}) {
 // Re-hash every file inside the .kolm bundle against the manifest.hashes
 // claim. Returns {ok:true} when every slot matches its declared sha256, or
 // {ok:false, reason, failing_field} on first mismatch. Skips the slots that
-// the manifest deliberately leaves empty (EMPTY_SHA — recognised by being
+// the manifest deliberately leaves empty (EMPTY_SHA - recognised by being
 // the sha256 of a zero-byte buffer).
 function recheckBundledFileHashes(bundle, hashes) {
   const entries = bundle.entries || {};
@@ -2601,7 +2601,7 @@ function recheckBundledFileHashes(bundle, hashes) {
   for (const k of Object.keys(slotMap)) {
     const declared = hashes[k];
     if (typeof declared !== 'string' || declared.length < 32) continue;
-    if (declared === EMPTY) continue; // empty slot — file may be absent
+    if (declared === EMPTY) continue; // empty slot - file may be absent
     const entry = entries[slotMap[k]];
     if (!entry) {
       return {
@@ -2643,17 +2643,17 @@ function recheckBundledFileHashes(bundle, hashes) {
   return { ok: true };
 }
 
-// W715-5 — privacy proof for cross-namespace transfer learning.
+// W715-5 - privacy proof for cross-namespace transfer learning.
 //
 // Writes an audit row recording that a tenant's namespace fingerprint
 // (hash-only, opt-in) was shared with the listed recipient namespaces.
 // The audit chain proves what left the tenant without exposing the bag
-// contents — the fingerprint_id is a hash, and recipient_namespaces are
+// contents - the fingerprint_id is a hash, and recipient_namespaces are
 // the sibling namespace IDs the share targets.
 //
 // Returns the inserted audit row (with event_hash + seq) for callers
 // who want to attach it to a binder receipt. Never throws on missing
-// args — returns null instead so a degraded-mode caller can keep going.
+// args - returns null instead so a degraded-mode caller can keep going.
 export function recordFingerprintShare(tenant_id, namespace, fingerprint_id, recipient_namespaces) {
   if (!tenant_id || !namespace || !fingerprint_id) return null;
   const recipients = Array.isArray(recipient_namespaces)

@@ -1,4 +1,4 @@
-// local-directml — Windows DX12 via torch-directml.
+// local-directml - Windows DX12 via torch-directml.
 // No API. run() spawns command on this box (Windows-aware shell).
 // Env: caller env passed through; PATH must include python with torch-directml.
 
@@ -27,7 +27,7 @@ export async function test() {
   return { ok: d.available, latency_ms: Date.now() - t0, ...d };
 }
 
-// run({ image, command, env, timeoutMs }) — spawns command on this box.
+// run({ image, command, env, timeoutMs }) - spawns command on this box.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {
   const t0 = Date.now();
   const det = await detect();

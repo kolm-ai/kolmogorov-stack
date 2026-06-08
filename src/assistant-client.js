@@ -1,4 +1,4 @@
-// W888-P — AssistantClient: shared client for kolm-assistant-1.5b.
+// W888-P - AssistantClient: shared client for kolm-assistant-1.5b.
 // Three-layer fallback: local GGUF -> api.kolm.ai/v1/assistant/chat -> gateway frontier.
 // Shims (localShim/apiShim/gatewayShim) short-circuit fetch+spawn in tests.
 // Consumers: cmdChat / cmdAssistantNlOneShot (P), /v1/assistant/chat (Q),
@@ -91,7 +91,7 @@ async function tryLocal(opts) {
     }
   }
   if (!fs.existsSync(opts.localGgufPath)) {
-    return { ok: false, latency_ms: nowMs() - t0, reason: 'gguf_not_installed', install_hint: 'kolm doctor — run with --fix to install the local assistant' };
+    return { ok: false, latency_ms: nowMs() - t0, reason: 'gguf_not_installed', install_hint: 'kolm doctor - run with --fix to install the local assistant' };
   }
   if (!fs.existsSync(opts.llamaCliPath)) {
     return { ok: false, latency_ms: nowMs() - t0, reason: 'llama_cli_not_installed', install_hint: 'see kolm doctor' };
@@ -147,7 +147,7 @@ async function tryApi(opts) {
   if (opts.apiShim) {
     try {
       const res = await opts.apiShim({ url, prompt: opts.prompt, system: opts.system, max_tokens: opts.max_tokens, apiKey: opts.apiKey });
-      // Caller MUST return { ok, response?, status?, reason? } — we honor it.
+      // Caller MUST return { ok, response?, status?, reason? } - we honor it.
       return {
         ok: !!res.ok,
         response: String(res && res.response != null ? res.response : ''),
@@ -302,7 +302,7 @@ export class AssistantClient {
   }
 
   // Probe all three layers and report their readiness. No real request goes
-  // out — we only check presence + shim availability.
+  // out - we only check presence + shim availability.
   async health() {
     const localGgufPresent = !!(this.localShim || fs.existsSync(this.localGgufPath));
     const llamaCliPresent = !!(this.localShim || fs.existsSync(this.llamaCliPath));
@@ -449,7 +449,7 @@ export class AssistantClient {
         ts: new Date().toISOString(),
       });
     } catch (e) {
-      // Swallow — capture failure must not fail the turn.
+      // Swallow - capture failure must not fail the turn.
       if (process.env.KOLM_DEBUG) {
          
         console.error('[assistant-client] capture failed:', e.message);
@@ -464,7 +464,7 @@ export class AssistantClient {
   }
 }
 
-// Convenience factory — most call sites just want a default-configured
+// Convenience factory - most call sites just want a default-configured
 // client; pass overrides only when injecting test shims.
 export function newAssistantClient(opts = {}) {
   return new AssistantClient(opts);

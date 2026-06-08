@@ -1,6 +1,6 @@
 // src/external-holdout.js
 //
-// Wave 164 (N+3 / N+4) — external benchmark holdouts AND adversarial cross-
+// Wave 164 (N+3 / N+4) - external benchmark holdouts AND adversarial cross-
 // family LLM-pair holdouts. The eval credibility memo (Wave 144 Doc 2 §7)
 // named these as the layers ABOVE the seeds.jsonl train/holdout gate (W144
 // Q+2 / N+1.5):
@@ -23,7 +23,7 @@
 // over a hash-pinned corpus, not over rows the recipe synthesized from.
 //
 // Honest scope: this module loads a curated holdout, validates its shape +
-// hash, and runs the recipe over it. It does NOT generate the holdout — the
+// hash, and runs the recipe over it. It does NOT generate the holdout - the
 // `holdouts/external/*.jsonl` and `holdouts/adversarial/*.jsonl` files
 // shipped under repo root are the static corpora. New holdouts can be added
 // by dropping a JSONL into one of those dirs and an entry into
@@ -31,7 +31,7 @@
 //
 // Why this matters: the seeds.jsonl gate (Q+2) makes K-score non-tautological
 // for any tenant who has captured 50+ real IO rows. But the holdout is the
-// TENANT'S — it shares distribution with the recipe's training data.
+// TENANT'S - it shares distribution with the recipe's training data.
 // External + adversarial holdouts answer a different question: "does this
 // recipe also work on data the tenant didn't curate?" That's the question
 // regulated procurement actually asks.
@@ -107,7 +107,7 @@ export function validateCatalogEntry(entry) {
   if (!entry || typeof entry !== 'object') {
     throw new Error('external-holdout: catalog entry must be an object');
   }
-  // W252b Bug 6 — expected_sha256 is now REQUIRED, not recommended. Without
+  // W252b Bug 6 - expected_sha256 is now REQUIRED, not recommended. Without
   // it the verifier has no way to confirm the on-disk holdout file has not
   // drifted from what the catalog declares, and the whole point of the
   // external-holdout layer is corpus-identity provenance. Adding a row to
@@ -172,7 +172,7 @@ export function loadHoldout(name, opts = {}) {
   }
   const file_sha256 = hashHoldoutFile(filePath);
   if (entry.expected_sha256 && entry.expected_sha256 !== file_sha256) {
-    throw new Error(`external-holdout: '${name}' file sha256 drift — catalog expected ${entry.expected_sha256}, file is ${file_sha256}`);
+    throw new Error(`external-holdout: '${name}' file sha256 drift - catalog expected ${entry.expected_sha256}, file is ${file_sha256}`);
   }
 
   const loaded = loadSeeds(filePath);
@@ -290,7 +290,7 @@ export function validateExternalHoldoutBlock(block) {
   const { hash: declared, ...rest } = block;
   const recomputed = sha256(canonicalJson(rest));
   if (declared !== recomputed) {
-    throw new Error(`external-holdout: block hash drift — declared ${declared}, recomputed ${recomputed}`);
+    throw new Error(`external-holdout: block hash drift - declared ${declared}, recomputed ${recomputed}`);
   }
   return block;
 }

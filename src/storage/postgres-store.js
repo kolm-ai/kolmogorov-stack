@@ -11,13 +11,13 @@
 // Caveats / Constraints / Limitations:
 //   1. `pg` is lazy-imported. If the env var is not set, this module never
 //      touches `pg` so the production install does not require it.
-//   2. We do NOT manage the `pg.Pool` lifecycle for the caller — call
+//   2. We do NOT manage the `pg.Pool` lifecycle for the caller - call
 //      `await store.close()` from your shutdown handler.
 //   3. PII redaction happens BEFORE rows hit insert(); this store does not
 //      scrub. If you bypass the capture pipeline and call insert() directly,
 //      the raw text lands in JSONB columns as-is.
 //   4. The chain_hash column is a SHA-256 hex digest of canonical JSON of the
-//      capture row — kept identical to the JSONL chain so a Postgres-backed
+//      capture row - kept identical to the JSONL chain so a Postgres-backed
 //      tenant can still verify receipts against the same hash chain logic.
 //   5. We use NUMERIC/JSONB/TIMESTAMPTZ types only. No vendor-specific types,
 //      so this works on Postgres 12+ AND on the Postgres-compatible front of
@@ -55,7 +55,7 @@ function _newId() {
   return 'cap_' + crypto.randomBytes(12).toString('hex');
 }
 
-// Lazy pg load. We require this module to be optional — `npm install` of the
+// Lazy pg load. We require this module to be optional - `npm install` of the
 // base stack does NOT bring in `pg` unless the user opts in.
 async function _loadPg() {
   try {

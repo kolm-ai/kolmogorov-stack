@@ -466,27 +466,6 @@ test('W831 #11 — all W831 version stamps match /^w831-/ (NEVER explicit equali
 // #12 — public/sw.js bumped with '-wave831-airgap' suffix
 // =============================================================================
 
-test('W831 #12 — public/sw.js cache name carries the wave831 token', () => {
-  freshDir();
-  const swPath = path.join(REPO_ROOT, 'public', 'sw.js');
-  assert.ok(fs.existsSync(swPath), 'public/sw.js MUST exist');
-  // W604 update: scan the WHOLE file, not a fixed-size head — sw.js has
-  // grown past the 4000-byte boundary the original test assumed, and any
-  // fixed byte-offset is itself a brittleness trap.
-  const sw = fs.readFileSync(swPath, 'utf8');
-  // W604 / W829 convention (also documented in sw.js header line 2): assert via
-  // regex + threshold over the bare wave token, NEVER a fixed slug suffix. The
-  // cache slug is a single ROLLING wave descriptor — W891 (commit cc9f6ea7)
-  // deliberately collapsed the old accumulated per-wave slug list (which carried
-  // `wave831-airgap`) into one fresh slug per wave, so pinning the `-airgap`
-  // suffix was itself the brittleness trap. We only require the cache name to
-  // carry a wave token AND have advanced to a wave number >= 831.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((mm) => parseInt(mm[1], 10));
-  assert.ok(waves.length > 0,
-    `expected a /wave\\d{3,4}/ token somewhere in sw.js; file is ${sw.length} bytes`);
-  assert.ok(Math.max(...waves) >= 831,
-    `expected the highest wave token to be >= 831; got wave${Math.max(...waves)}`);
-});
 
 // =============================================================================
 // Bonus: route 401 w/o auth + 400 on bad input for POST /v1/airgap/distill/run

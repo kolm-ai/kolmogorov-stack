@@ -1,0 +1,69 @@
+{
+  "id": "s12-offtheshelf-deal-killers",
+  "track": "sota",
+  "prompt": "What are the most common reasons a self-serve / off-the-shelf B2B SECURITY product fails to convert or loses the deal in 2026? Find verbatim founder and buyer accounts (@handle+date) and post-mortems: missing SSO, no audit-log export, weak/incomplete docs, no human support option, trust gaps (no SOC2), broken onboarding, no integrations, pricing opacity, slow time-to-value, no sandbox. Rank the deal-killers by frequency/severity for a product like kolm (signed agent-security evidence, founder-led, self-serve with a premium human tier). Conclude with the prioritized anti-patterns kolm must avoid and the single highest-ROI fix to be off-the-shelf sellable.",
+  "content": "**The most common deal-killers for self-serve/off-the-shelf B2B security products in 2025–2026 center on trust/compliance friction, authentication requirements, integration gaps, and poor self-serve experiences that prevent quick proof of value.** These are drawn from founder/buyer discussions on X and related analyses (general SaaS post-mortems emphasize churn from bad onboarding and \"no market need,\" but security-specific threads highlight procurement blockers like SOC 2 and SSO).[[1]](https://peterclaridge.com/5-reasons-why-b2b-saas-startups-fail)[[2]](https://www.webapper.com/saas-startups-fail/)\n\nVerbatim accounts (with @handle + date) and post-mortems directly addressing the queried issues:\n\n- **Trust gaps (no SOC 2)**: @jorilallo (Jan 31, 2024): “SOC2 is a cancer in our industry... costs $20k and takes non-trivial amount of time yearly for a documentation that in the end has very little to do with actual security... startups are selling to each others and requiring SOC2 cert...” @haridigresses (Mar 20, 2026): Long rant calling SOC-2 “90%... security theater,” noting it adds friction/costs, killed pragmatic pre-2017 pilots, and is now “table stakes” that hurts deals. @frantzfries (Aug 20, 2025): “we need a new standard, SOC2 is cooked at this point... some startups hit checkboxes and get the same cert in a couple days... zero faith as a buyer.” @clovrahq (Mar 27, 2026): “A prospect asked... ‘Are you SOC 2 compliant?’ They weren’t. They lost a $240K deal that week.” @ReaperGallery (Mar 13, 2026): “Over a third of B2B SaaS companies have lost an enterprise deal because they lacked a security certification like SOC 2. The audit log is always one of the first things they check.”[[3]](https://x.com/jorilallo/status/1752783996826665257)[[4]](https://x.com/haridigresses/status/2035070060050493541)\n\n- **Missing SSO**: @JedFrankowski (Jun 7, 2026): Enterprise buyers “require SSO, and rebuild quotes for it came in at $50K+... Contracts that had been waiting on that requirement started moving” after shipping it affordably.[[5]](https://x.com/JedFrankowski/status/2063637106577088691)\n\n- **No integrations / slow time-to-value / broken onboarding**: @stefabrudan (Jun 6, 2026): “we lost $500K in signed contracts... every deal had the same shape: ‘can you integrate with our TMS?’... every yes meant weeks of custom engineering... every ‘we’ll come back to you’ meant the deal was already dead.” Multiple threads note self-serve churn spikes when onboarding stalls or value isn’t immediate (e.g., Reddit/SaaS discussions on post-signup drop-off).[[6]](https://x.com/stefabrudan/status/2063283884003832032)\n\n- **No audit-log export / evidence gaps**: Tied directly to SOC 2 threads (e.g., @ReaperGallery above; competitors lose deals when logs can’t be proven tamper-proof during reviews).\n\n- Other issues (pricing opacity, weak docs, no sandbox, no human support option) appear less in verbatim security-specific posts but surface in broader SaaS failure analyses as contributors to low conversion or churn once a prospect engages. No sandbox or opaque pricing often kills self-serve trials; incomplete docs frustrate technical buyers.\n\n**Ranking by frequency/severity for a Kolm-like product** (signed agent-security evidence; founder-led self-serve with premium human tier; targets security-conscious buyers who need quick evidence but may escalate to humans):\n\n1. **Trust gaps (no SOC 2 / equivalent)** — Highest frequency/severity. Multiple explicit “lost $X deal” stories; it’s table stakes for enterprise/security buyers and a recurring founder complaint. Self-serve alone rarely overcomes this without strong signals.[[7]](https://x.com/clovrahq/status/2037543004953538890)\n\n2. **Missing SSO** — Very high for B2B/enterprise motion. Direct blocker in auth/security reviews; easy to quote as a hard requirement.\n\n3. **No integrations (or slow/custom ones)** — High; explicit $500k lost pipeline example. Security tools often need to plug into existing stacks (SIEM, IdP, ticketing).\n\n4. **No audit-log export / weak evidence capabilities** — High in security context (first thing checked in reviews).\n\n5. **Broken onboarding / slow time-to-value** — High for self-serve; leads to immediate churn or “didn’t convert” after signup. Self-serve security tools suffer when users can’t quickly see signed evidence or value.\n\n6. **No sandbox / trial friction** — Medium-high; prevents self-serve proof without commitment.\n\n7. **Weak/incomplete docs** — Medium; frustrates technical evaluators.\n\n8. **Pricing opacity** — Medium; common SaaS complaint but less deal-killing than compliance/auth in security.\n\n9. **No human support option** — Lower (Kolm’s premium tier mitigates this); self-serve buyers often prefer it initially, but complex deals escalate.\n\n**Prioritized anti-patterns Kolm must avoid**:\n- Delaying or skipping SOC 2 (or strong equivalent trust signals like public pen-test results, transparent evidence processes, or founder-backed guarantees) — this is the #1 conversation killer.\n- Requiring custom SSO work or lacking easy SAML/OIDC support.\n- Making integrations or audit-log/evidence export painful or manual.\n- Weak self-serve onboarding that doesn’t deliver immediate signed evidence or value (e.g., no guided sandbox flow).\n- Opaque pricing or no clear self-serve → premium human upgrade path.\n- Sparse or outdated docs that don’t cover security buyer questions (questionnaires, evidence examples, compliance mappings).\n\n**Single highest-ROI fix to be off-the-shelf sellable**: Prioritize SOC 2 readiness (or a credible substitute like automated evidence collection + public transparency on controls) combined with native SSO support. This directly addresses the most-cited deal-killers, unlocks enterprise/self-serve trust, and lets the product’s core strength (signed agent-security evidence) shine in trials without procurement friction. Pair it with a polished sandbox + one-click audit export for self-serve velocity; the premium human tier then becomes a natural upsell for complex needs rather than a necessity to close base deals. This sequence turns the product from “interesting but blocked” into a credible off-the-shelf option.",
+  "citations": [
+    "https://peterclaridge.com/5-reasons-why-b2b-saas-startups-fail",
+    "https://www.webapper.com/saas-startups-fail/",
+    "https://x.com/jorilallo/status/1752783996826665257",
+    "https://x.com/haridigresses/status/2035070060050493541",
+    "https://x.com/JedFrankowski/status/2063637106577088691",
+    "https://x.com/stefabrudan/status/2063283884003832032",
+    "https://x.com/clovrahq/status/2037543004953538890"
+  ],
+  "searched": [
+    "https://www.youtube.com/watch?v=K448XtAsGJg",
+    "https://www.sturdy.ai/blog/the-three-biggest-problems-facing-b2b-saas-in-2025",
+    "https://peterclaridge.com/5-reasons-why-b2b-saas-startups-fail",
+    "https://www.reddit.com/r/Entrepreneur/comments/1ew5ghe/saas_is_really_tough_here_are_the_top_reasons/",
+    "https://www.chargebee.com/blog/why-saas-companies-fail/",
+    "https://www.webapper.com/saas-startups-fail/",
+    "https://www.youtube.com/watch?v=Mcw9xgNeYhE",
+    "https://news.ycombinator.com/item?id=46888441",
+    "https://www.failory.com/startups/saas-failures",
+    "https://leanb2bbook.com/blog/b2b-saas-companies-fail/?srsltid=AfmBOorOBKXyp3ko0LRcyZe1AkxYvHyVkmmaWWkNcCBqhmISor-DdEd_",
+    "https://developmentcorporate.com/saas/saas-deals-fail-solution-design/",
+    "https://www.capchase.com/top-25-b2b-saas-founder-list",
+    "https://kitrum.com/blog/4-reasons-why-saas-startups-fail/",
+    "https://www.antler.co/blog/5-mistakes-early-stage-b2b-saas-startups-make",
+    "https://agilevision.io/blog/6-common-challenges-of-b2b-saas-products-and-how-to-address-them-effectively/",
+    "https://onramp.us/blog/self-serve-customer-onboarding",
+    "https://www.reddit.com/r/SaaS/comments/1mjrklw/why_do_so_many_saas_customers_leave_right_after/",
+    "https://churnkey.co/subscription-heroes/samuel-hulick/",
+    "https://getbruin.com/use-cases/saas/churn-by-onboarding-channel/",
+    "https://www.facebook.com/groups/startuphustlechat/posts/1818140668551169/",
+    "https://userpilot.com/blog/self-serve-onboarding-saas/",
+    "https://www.linkedin.com/posts/tobindonal_old-way-of-onboarding-clients-to-a-platform-activity-7336787891500568576-IcNI",
+    "https://saasclub.io/podcast/prosperstack-tony-sternberg-309/",
+    "https://www.everafter.ai/blog/rethinking-saas-customer-onboarding-process",
+    "https://stonly.com/blog/enterprise-saas-onboarding"
+  ],
+  "usage": {
+    "input_tokens": 29708,
+    "input_tokens_details": {
+      "cached_tokens": 13824
+    },
+    "output_tokens": 2739,
+    "output_tokens_details": {
+      "reasoning_tokens": 1383
+    },
+    "total_tokens": 32447,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 6,
+    "cost_in_usd_ticks": 594673000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 2,
+      "x_search_calls": 4,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 15918,
+      "output_tokens": 1912
+    }
+  },
+  "attempts": 1
+}

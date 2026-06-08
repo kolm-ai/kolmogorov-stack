@@ -1,4 +1,4 @@
-// W383 — agent-telemetry: per-agent + per-session analytics over event-store.
+// W383 - agent-telemetry: per-agent + per-session analytics over event-store.
 //
 // Reads from src/event-store.js (W369). Groups events by app_id + session_id.
 // Produces dashboards: "which model works best for codex on Rust code",
@@ -7,16 +7,16 @@
 //
 // ─── ACCEPTANCE HEURISTIC: HONEST LIMITS ─────────────────────────────────────
 // We do NOT have a ground-truth "did the user accept this answer?" signal in
-// most cases — the canonical event schema (W369) has an `accepted` field, but
+// most cases - the canonical event schema (W369) has an `accepted` field, but
 // agents rarely fill it (claude-code, codex, cursor all stream and forget).
 // So we infer acceptance from temporal patterns within a session:
 //
 //   - If the user re-prompts within 90s on the SAME file_hint or with the SAME
-//     template_signature, we mark the earlier event 'corrected' — they were
+//     template_signature, we mark the earlier event 'corrected' - they were
 //     fixing what we gave them.
 //   - If they wait 90s-300s before re-prompting (different file/template), we
-//     mark 'pending' — they may have kept the answer, may have walked away.
-//   - If gap > 300s or no next event in this session, we mark 'accepted' —
+//     mark 'pending' - they may have kept the answer, may have walked away.
+//   - If gap > 300s or no next event in this session, we mark 'accepted' - 
 //     they moved on. Could mean "great answer" or "gave up entirely".
 //
 // This is best-effort. Confidence (0.0-1.0) reflects how clean the signal is:
@@ -120,13 +120,13 @@ function _groupBy(events, keyFn) {
 
 // ─── inferAcceptance ────────────────────────────────────────────────────────
 // For each event, walk forward in the same session and decide whether the user
-// re-prompted (corrected) or moved on (accepted). Read-only — returns a new
+// re-prompted (corrected) or moved on (accepted). Read-only - returns a new
 // array of {...event, acceptance_signal, acceptance_confidence}.
 export function inferAcceptance({
   events,
   acceptance_window_s = WINDOWS.acceptance_s,
   correction_window_s = WINDOWS.correction_s,
-  // W424 — tenant_id (default null): if supplied, drop any event whose
+  // W424 - tenant_id (default null): if supplied, drop any event whose
   // ev.tenant_id does not match. Defensive: the helpers above already gate
   // listEvents() by tenant, but inferAcceptance is also exported and may be
   // handed an unscoped event list from another caller.
@@ -179,7 +179,7 @@ export function inferAcceptance({
         annotated.set(cur.event_id, {
           ...cur,
           acceptance_signal: 'accepted',
-          acceptance_confidence: 0.6, // moderate — could be "great" or "gave up"
+          acceptance_confidence: 0.6, // moderate - could be "great" or "gave up"
         });
         continue;
       }
@@ -207,7 +207,7 @@ export function inferAcceptance({
         continue;
       }
 
-      // 4) Within correction window but no semantic match — ambiguous.
+      // 4) Within correction window but no semantic match - ambiguous.
       if (gapS <= W_CORR) {
         annotated.set(cur.event_id, {
           ...cur,
@@ -217,7 +217,7 @@ export function inferAcceptance({
         continue;
       }
 
-      // 5) Gap > correction window — user truly moved on.
+      // 5) Gap > correction window - user truly moved on.
       // Confidence climbs with the gap (capped 0.95).
       const conf = 0.7 + Math.min(0.25, (gapS - W_CORR) / (W_CORR * 4) * 0.25);
       annotated.set(cur.event_id, {
@@ -239,7 +239,7 @@ export function inferAcceptance({
 // ─── listAgents ─────────────────────────────────────────────────────────────
 // One entry per distinct app_id present in the event store. Sums cost+tokens,
 // counts sessions+events, tracks first_seen + last_seen.
-// W424 — tenant_id (default null for legacy local callers) scopes the
+// W424 - tenant_id (default null for legacy local callers) scopes the
 // underlying listEvents() so cross-tenant rows never leak into the rollup.
 export async function listAgents(opts = {}) {
   const since = _parseSince(opts.since);
@@ -279,7 +279,7 @@ export async function listAgents(opts = {}) {
 
 // ─── listSessions ───────────────────────────────────────────────────────────
 // Per-session rollup. Optional app_id + since filter. Default limit 50.
-// W424 — tenant_id (default null) gates listEvents() so a session rollup never
+// W424 - tenant_id (default null) gates listEvents() so a session rollup never
 // crosses tenants.
 export async function listSessions(opts = {}) {
   const appId = opts.app_id || null;
@@ -346,7 +346,7 @@ export async function listSessions(opts = {}) {
 
 // ─── getSession ─────────────────────────────────────────────────────────────
 // Full detail for one session: header + every event (annotated).
-// W424 — tenant_id (default null) scopes the underlying listEvents() so a
+// W424 - tenant_id (default null) scopes the underlying listEvents() so a
 // session_id observed in another tenant cannot be returned to the caller.
 export async function getSession({ session_id, tenant_id = null } = {}) {
   if (!session_id) return null;
@@ -374,7 +374,7 @@ export async function getSession({ session_id, tenant_id = null } = {}) {
     _heuristic: {
       acceptance_window_s: WINDOWS.acceptance_s,
       correction_window_s: WINDOWS.correction_s,
-      note: 'best-effort inference — see src/agent-telemetry.js header for limits',
+      note: 'best-effort inference - see src/agent-telemetry.js header for limits',
     },
   };
 }
@@ -384,7 +384,7 @@ export async function getSession({ session_id, tenant_id = null } = {}) {
 // share the Pareto front, weighted score = 0.7 * acceptance_rate
 // - 0.3 * normalized_cost picks the winner. Returns reason string so the
 // dashboard can show "we picked X because Y".
-// W424 — tenant_id (default null) gates listEvents() so model-recommendation
+// W424 - tenant_id (default null) gates listEvents() so model-recommendation
 // stats never aggregate across tenants.
 export async function recommendModel(opts = {}) {
   const { app_id = null, codebase_hint = null, task_hint = null, since = null, tenant_id = null } = opts;
@@ -400,7 +400,7 @@ export async function recommendModel(opts = {}) {
       recommended_model: null,
       score: 0,
       candidates: [],
-      reason: 'no events match the filter — recommendation requires at least one event with a model field',
+      reason: 'no events match the filter - recommendation requires at least one event with a model field',
     };
   }
 
@@ -479,8 +479,8 @@ export async function recommendModel(opts = {}) {
   } else if (front.length === 1) {
     reason += ' Single Pareto-optimal candidate (no other model is both as accurate and as cheap).';
   }
-  if (codebase_hint) reason += ` (codebase_hint=${codebase_hint} — not yet a separate signal; logged for future routing.)`;
-  if (task_hint) reason += ` (task_hint=${task_hint} — not yet a separate signal; logged for future routing.)`;
+  if (codebase_hint) reason += ` (codebase_hint=${codebase_hint} - not yet a separate signal; logged for future routing.)`;
+  if (task_hint) reason += ` (task_hint=${task_hint} - not yet a separate signal; logged for future routing.)`;
 
   return {
     recommended_model: winner.model,
@@ -493,7 +493,7 @@ export async function recommendModel(opts = {}) {
 // ─── topFailingPromptShapes ─────────────────────────────────────────────────
 // Ranks template_signature shapes by acceptance_rate ascending (worst first),
 // then count descending (most painful shapes surface). Returns at most `limit`.
-// W424 — tenant_id (default null) gates listEvents() so failing-shape rankings
+// W424 - tenant_id (default null) gates listEvents() so failing-shape rankings
 // never leak prompts from another tenant.
 export async function topFailingPromptShapes(opts = {}) {
   const { app_id = null, since = null, limit = 10, tenant_id = null } = opts;
@@ -543,7 +543,7 @@ export async function topFailingPromptShapes(opts = {}) {
 
 // ─── agentTelemetryStats ────────────────────────────────────────────────────
 // Top-level dashboard summary. Cheap one-call snapshot for the headline page.
-// W424 — tenant_id (default null) scopes listEvents() so headline totals never
+// W424 - tenant_id (default null) scopes listEvents() so headline totals never
 // sum rows belonging to another tenant.
 export async function agentTelemetryStats(opts = {}) {
   const since = _parseSince(opts.since);
@@ -560,7 +560,7 @@ export async function agentTelemetryStats(opts = {}) {
       _heuristic: {
         acceptance_window_s: WINDOWS.acceptance_s,
         correction_window_s: WINDOWS.correction_s,
-        note: 'best-effort inference — see src/agent-telemetry.js header for limits',
+        note: 'best-effort inference - see src/agent-telemetry.js header for limits',
       },
     };
   }
@@ -621,7 +621,7 @@ export async function agentTelemetryStats(opts = {}) {
     _heuristic: {
       acceptance_window_s: WINDOWS.acceptance_s,
       correction_window_s: WINDOWS.correction_s,
-      note: 'best-effort inference — see src/agent-telemetry.js header for limits',
+      note: 'best-effort inference - see src/agent-telemetry.js header for limits',
     },
   };
 }

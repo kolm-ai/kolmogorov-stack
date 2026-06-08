@@ -40,7 +40,7 @@ let DATA_DIR = PREFERRED_DATA_DIR;
 if (!probeWritable(DATA_DIR)) {
   const fallback = path.join(os.tmpdir(), 'kolm-data');
   if (probeWritable(fallback)) {
-    console.error(`[store] WARNING: KOLM_DATA_DIR ${DATA_DIR} is not writable (EACCES or similar). Falling back to ${fallback}. State written here will NOT survive container restarts — fix volume permissions to recover persistence.`);
+    console.error(`[store] WARNING: KOLM_DATA_DIR ${DATA_DIR} is not writable (EACCES or similar). Falling back to ${fallback}. State written here will NOT survive container restarts - fix volume permissions to recover persistence.`);
     DATA_DIR = fallback;
   } else {
     console.error(`[store] FATAL: neither ${DATA_DIR} nor ${fallback} is writable. Persistent state operations will throw at write time.`);
@@ -560,7 +560,7 @@ export function storeDriver() {
 }
 
 // =============================================================================
-// W808-2 — staged_captures table (capture quarantine).
+// W808-2 - staged_captures table (capture quarantine).
 //
 // New rows from the proxy capture path land HERE first (not in the canonical
 // `observations` table). Each row carries a `quarantine_until` deadline
@@ -574,11 +574,11 @@ export function storeDriver() {
 // This module DOES NOT touch the existing `observations` table schema. It
 // only adds parallel staging + a one-way promotion verb. If the staged
 // table is empty the proxy can fall back to direct-write into observations
-// (when KOLM_W808_STAGING=0) — that env-gate lives in src/proxy.js, not
+// (when KOLM_W808_STAGING=0) - that env-gate lives in src/proxy.js, not
 // here.
 //
 // All getters/setters are tenant-scoped via the canonical `tenant_id` field
-// (W411). The driver itself does not enforce the fence — callers must.
+// (W411). The driver itself does not enforce the fence - callers must.
 // =============================================================================
 
 // W808-2 default quarantine window. Exported so the proxy + tests can
@@ -589,7 +589,7 @@ export const W808_STAGED_TABLE = 'staged_captures';
 // Insert a new staged capture row. Mints a synthetic id if absent.
 // Always stamps quarantine_until (now+24h by default). Returns the row.
 //
-// Callers MUST pass row.tenant_id — we error out otherwise to keep the
+// Callers MUST pass row.tenant_id - we error out otherwise to keep the
 // W411 fence loud (silent default-tenant rows poison the whole baseline).
 export function insertStagedCapture(row, opts = {}) {
   if (!row || typeof row !== 'object') {
@@ -625,7 +625,7 @@ export function listStagedCaptures({ tenant_id, namespace = null, includeBlocked
   const rows = findByField(W808_STAGED_TABLE, 'tenant_id', tenant_id);
   const out = [];
   for (const r of rows) {
-    // Inner-loop tenant fence — never trust the index alone (W411).
+    // Inner-loop tenant fence - never trust the index alone (W411).
     if (String(r.tenant_id) !== String(tenant_id)) continue;
     if (namespace && String(r.namespace || r.corpus_namespace || 'default') !== String(namespace)) continue;
     if (!includeBlocked && r.quarantine_state === 'blocked') continue;
@@ -664,7 +664,7 @@ export function markStagedAnomaly(staged_capture_id, { tenant_id, reasons = [], 
     });
 }
 
-// Manual block — operator chose to refuse this capture forever. Returns 0/1.
+// Manual block - operator chose to refuse this capture forever. Returns 0/1.
 export function blockStagedCapture(staged_capture_id, { tenant_id, reason, reviewer = null } = {}) {
   if (!staged_capture_id) return 0;
   if (!reason || typeof reason !== 'string') {
@@ -681,7 +681,7 @@ export function blockStagedCapture(staged_capture_id, { tenant_id, reason, revie
     });
 }
 
-// Manual allow — operator chose to override anomaly flag / quarantine timer
+// Manual allow - operator chose to override anomaly flag / quarantine timer
 // and promote NOW. Returns the promoted row (or null if not found / blocked).
 // The actual insert into `observations` is delegated to a callback so this
 // module stays decoupled from src/capture-store.js.
@@ -699,7 +699,7 @@ export function promoteStagedCapture(staged_capture_id, { tenant_id, reviewer = 
     const deadline = Date.parse(row.quarantine_until || '');
     if (Number.isFinite(deadline) && Date.now() < deadline) return null;
   }
-  // Promote — delegate the insert; mark staged row as promoted on success.
+  // Promote - delegate the insert; mark staged row as promoted on success.
   if (typeof insertObservation === 'function') {
     try { insertObservation(row); } catch (e) {
       // Re-throw with context so the caller's audit trail records the failure.
@@ -718,7 +718,7 @@ export function promoteStagedCapture(staged_capture_id, { tenant_id, reviewer = 
   return { ...row, quarantine_state: 'promoted' };
 }
 
-// Auto-allow sweep — promote every staged row whose quarantine_until has
+// Auto-allow sweep - promote every staged row whose quarantine_until has
 // elapsed AND that carries no anomaly flag AND no block. Returns
 // { promoted, skipped, blocked, anomalous }.
 export function autoAllowSinceQuarantine({ tenant_id, since_ms = W808_DEFAULT_QUARANTINE_MS, insertObservation } = {}) {
@@ -746,7 +746,7 @@ export function autoAllowSinceQuarantine({ tenant_id, since_ms = W808_DEFAULT_QU
   return { promoted, skipped, blocked, anomalous };
 }
 
-// Reset hook for tests — empties the staged_captures table.
+// Reset hook for tests - empties the staged_captures table.
 export function _resetStagedCapturesForTests() {
   remove(W808_STAGED_TABLE, () => true);
 }

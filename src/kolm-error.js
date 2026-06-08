@@ -1,9 +1,9 @@
-// WC05 — typed error primitive for retiring the ~793 untyped `throw new Error(...)`
+// WC05 - typed error primitive for retiring the ~793 untyped `throw new Error(...)`
 // call sites without a big-bang refactor. New code throws `kolmError(code, message,
 // { detail, status, retryable, install_hint })`; callers up the stack can branch on
 // `err.code` (snake_case) instead of regex-matching `err.message`.
 //
-// Pairs with `errorEnvelope()` in src/envelope.js — the field names line up so a
+// Pairs with `errorEnvelope()` in src/envelope.js - the field names line up so a
 // route handler can do:
 //
 //   try { ... } catch (err) {

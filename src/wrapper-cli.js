@@ -1,4 +1,4 @@
-// W-F / wrapper-completion — 22 CLI sub-verbs for the Kolm Wrapper surface.
+// W-F / wrapper-completion - 22 CLI sub-verbs for the Kolm Wrapper surface.
 //
 // This module is the spine of `kolm gateway *`, `kolm captures *`,
 // `kolm receipts *`, and the wrapper-specific `kolm namespace *` actions.
@@ -8,36 +8,36 @@
 //
 // Verb taxonomy (22 sub-verbs):
 //
-//   kolm gateway start                — boot src/server.js as gateway
-//   kolm gateway health               — GET /v1/health + /v1/gateway/dashboard
-//   kolm gateway providers            — GET /v1/gateway/providers
-//   kolm gateway routes               — GET /v1/gateway/dashboard.routes
+//   kolm gateway start - boot src/server.js as gateway
+//   kolm gateway health - GET /v1/health + /v1/gateway/dashboard
+//   kolm gateway providers - GET /v1/gateway/providers
+//   kolm gateway routes - GET /v1/gateway/dashboard.routes
 //
-//   kolm captures list                — GET /v1/captures/list (filtered)
-//   kolm captures inspect <id>        — GET /v1/captures/:id/inspect
-//   kolm captures approve <id>        — POST /v1/captures/:id/review approve
-//   kolm captures reject <id>         — POST /v1/captures/:id/review reject
-//   kolm captures quarantine <id>     — POST /v1/captures/:id/review quarantine
-//   kolm captures stats               — GET /v1/receipts/stats (capture facet)
-//   kolm captures export              — GET /v1/captures/list paginated → file
-//   kolm captures purge               — POST /v1/captures/forget bulk
+//   kolm captures list - GET /v1/captures/list (filtered)
+//   kolm captures inspect <id> - GET /v1/captures/:id/inspect
+//   kolm captures approve <id> - POST /v1/captures/:id/review approve
+//   kolm captures reject <id> - POST /v1/captures/:id/review reject
+//   kolm captures quarantine <id> - POST /v1/captures/:id/review quarantine
+//   kolm captures stats - GET /v1/receipts/stats (capture facet)
+//   kolm captures export - GET /v1/captures/list paginated → file
+//   kolm captures purge - POST /v1/captures/forget bulk
 //
-//   kolm receipts verify <id>         — GET /v1/verify/:id (offline-aware)
-//   kolm receipts list                — GET /v1/receipts/list
-//   kolm receipts export              — GET /v1/receipts/list paginated → file
-//   kolm receipts stats               — GET /v1/receipts/stats
+//   kolm receipts verify <id> - GET /v1/verify/:id (offline-aware)
+//   kolm receipts list - GET /v1/receipts/list
+//   kolm receipts export - GET /v1/receipts/list paginated → file
+//   kolm receipts stats - GET /v1/receipts/stats
 //
-//   kolm namespace create <slug>      — POST /v1/namespaces
-//   kolm namespace config <slug>      — GET|PUT /v1/namespaces/:slug
-//   kolm namespace deploy <slug>      — POST /v1/namespaces/:slug/deploy
-//   kolm namespace undeploy <slug>    — POST /v1/namespaces/:slug/undeploy
-//   kolm namespace rollback <slug>    — POST /v1/namespaces/:slug/rollback
+//   kolm namespace create <slug> - POST /v1/namespaces
+//   kolm namespace config <slug> - GET|PUT /v1/namespaces/:slug
+//   kolm namespace deploy <slug> - POST /v1/namespaces/:slug/deploy
+//   kolm namespace undeploy <slug> - POST /v1/namespaces/:slug/undeploy
+//   kolm namespace rollback <slug> - POST /v1/namespaces/:slug/rollback
 //
 // Every handler prints a single JSON envelope on stdout, sets process.exitCode
 // when something is wrong, and avoids killing the process so the parent CLI's
 // `withErrorContext` wrapper can still annotate the failure. Caveats: every
 // network call surfaces its raw status; nothing in this module retries on
-// non-2xx — that's the upstream router's job.
+// non-2xx - that's the upstream router's job.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -109,7 +109,7 @@ function _hasFlag(args, name) {
 //
 // Every wrapper verb that reads/writes namespace metadata, captures, or
 // receipts must work without a server. The lake lives under
-// process.env.KOLM_DATA_DIR (or ~/.kolm) — see W-C capture lake spec.
+// process.env.KOLM_DATA_DIR (or ~/.kolm) - see W-C capture lake spec.
 
 function _kolmHome() {
   return process.env.KOLM_DATA_DIR || path.join(os.homedir(), '.kolm');
@@ -203,7 +203,7 @@ function _qs(params) {
  *
  * Boots the gateway in-process via `node src/server.js` and tails the child's
  * pid/port. Honors --foreground (default) and --detach. Caveat: this spawns a
- * sibling node, not a daemon — graceful shutdown on Ctrl-C is the user's
+ * sibling node, not a daemon - graceful shutdown on Ctrl-C is the user's
  * responsibility.
  */
 export async function gatewayStart(args) {
@@ -253,7 +253,7 @@ export async function gatewayStart(args) {
     child.unref();
     _emit({
       ok: true, mode: 'detached', pid: child.pid, port: Number(port), bind,
-      hint: 'gateway started in background — `kill ' + child.pid + '` to stop',
+      hint: 'gateway started in background - `kill ' + child.pid + '` to stop',
       version: WRAPPER_CLI_VERSION,
     });
     return;
@@ -288,7 +288,7 @@ export async function gatewayStart(args) {
 export async function gatewayHealth(args) {
   const base = _flag(args, 'base') || _envBase();
   const key = _apiKey();
-  // Local probe of upstream backends — always computed so the test contract
+  // Local probe of upstream backends - always computed so the test contract
   // (`reachable` + `unreachable` arrays of provider ids) holds even offline.
   const reg = await import('./provider-registry.js');
   let mode;
@@ -339,7 +339,7 @@ export async function gatewayProviders(args) {
   const key = _apiKey();
   // Local provider registry is the source of truth for the list. The server
   // enriches with per-tenant overrides when a key is present, but the verb
-  // is usable offline (no API key) — the test contract just needs the 11
+  // is usable offline (no API key) - the test contract just needs the 11
   // canonical provider ids visible.
   const reg = await import('./provider-registry.js');
   const localProviders = Object.entries(reg.PROVIDERS).map(([id, cfg]) => ({
@@ -365,7 +365,7 @@ export async function gatewayProviders(args) {
   }
   const r = await _get(base + '/v1/gateway/providers', key);
   if (!r.ok) {
-    // Surface the offline fallback rather than refusing — the local list
+    // Surface the offline fallback rather than refusing - the local list
     // is still valid even when the server side errors.
     _emit({
       ok: true, source: 'local-registry', key_present: true,
@@ -377,7 +377,7 @@ export async function gatewayProviders(args) {
     return;
   }
   const serverProviders = (r.json && r.json.providers) || [];
-  // Merge — local entries authoritative for list shape, server-side
+  // Merge - local entries authoritative for list shape, server-side
   // overrides (enabled, rate_limit_rpm) layered on by provider_id.
   const byId = new Map(localProviders.map((p) => [p.id, { ...p }]));
   for (const sp of serverProviders) {
@@ -479,7 +479,7 @@ export async function gatewayRoutes(args) {
  *
  * Reports current gateway-mode + per-backend reachability. Re-exposes the
  * existing W742 envelope under a `reachability` object key that the test
- * suite + dashboards consume — this keeps the legacy flat fields too
+ * suite + dashboards consume - this keeps the legacy flat fields too
  * (ollama_reachable / vllm_reachable) so anything reading the old shape
  * still works.
  */
@@ -533,7 +533,7 @@ function _parseCallFlags(args) {
 }
 
 // Compute a [0..1] confidence score from an OpenAI-shaped logprobs payload.
-// We use the first token's exp(logprob) as a proxy — high entropy ⇒ low score.
+// We use the first token's exp(logprob) as a proxy - high entropy ⇒ low score.
 // Returns null when no logprobs are present (callers default to "trust local").
 function _confidenceFromResponse(json) {
   try {
@@ -580,13 +580,13 @@ function _extractContent(json) {
 function _runRiskScan(text) {
   const out = [];
   const len = (text || '').length;
-  // 1) Output length anomaly — 99p chat-completions reply on 4o/4o-mini is
+  // 1) Output length anomaly - 99p chat-completions reply on 4o/4o-mini is
   //    ~20k chars; we trip at 32k to avoid false positives on long but
   //    legitimate replies.
   if (len > 32_000) {
     out.push({ signal: 'output_length_anomaly', kind: 'output_length_anomaly', length: len, threshold: 32_000 });
   }
-  // 2) Repetition signal — same 24-char window > 8 times.
+  // 2) Repetition signal - same 24-char window > 8 times.
   if (text && len > 200) {
     const window = text.slice(0, 24);
     let matches = 0;
@@ -595,7 +595,7 @@ function _runRiskScan(text) {
       if (matches > 8) { out.push({ signal: 'output_repetition', kind: 'output_repetition', sample: window }); break; }
     }
   }
-  // 3) Single-character dominance — when one byte value covers >95% of the
+  // 3) Single-character dominance - when one byte value covers >95% of the
   //    output, the response is almost certainly degenerate (model crash,
   //    upstream filler, or adversarial flood). Cheap O(n) scan.
   if (text && len > 256) {
@@ -611,7 +611,7 @@ function _runRiskScan(text) {
       out.push({ signal: 'single_char_dominance', kind: 'single_char_dominance', char: String.fromCharCode(maxCh), ratio: Number(ratio.toFixed(4)) });
     }
   }
-  // 4) Low Shannon entropy — bits/char < 1.0 means the output is
+  // 4) Low Shannon entropy - bits/char < 1.0 means the output is
   //    near-monoglyphic. Independent of #3 (an alphabet of 5 chars used
   //    uniformly has entropy ~2.3 but no single-char dominance).
   if (text && len > 256) {
@@ -641,7 +641,7 @@ function _runRiskScan(text) {
  *   1. parse + build OpenAI-compat body
  *   2. (optional) input PII via pii-redactor.applyMode
  *   3. dispatchWithFallback over a single-entry chain (provider resolves
- *      its upstream URL from PROVIDERS — KOLM_UPSTREAM_<PROVIDER>_BASE
+ *      its upstream URL from PROVIDERS - KOLM_UPSTREAM_<PROVIDER>_BASE
  *      env override is honored)
  *   4. (optional) output PII scan + receipt-merge
  *   5. (optional) build + sign kolm-audit-1 receipt (loadOrCreateDefaultSigner)
@@ -657,7 +657,7 @@ export async function gatewayCall(args) {
 
   const provider = _providerForModel(flags.provider, flags.model);
   const modelText = _modelText(flags.model);
-  // Whole-pipeline timer — gateway_overhead = totalMs - upstreamMs.
+  // Whole-pipeline timer - gateway_overhead = totalMs - upstreamMs.
   const callT0 = process.hrtime.bigint();
 
   // ── 1. Optional input redaction
@@ -850,7 +850,7 @@ export async function gatewayCall(args) {
       base_url: _envBase(),
     });
     // `buildAndSignReceipt` returns { receipt: {...19 fields...}, signed_at,
-    // key_fingerprint } — the canonical receipt is nested under `.receipt`.
+    // key_fingerprint } - the canonical receipt is nested under `.receipt`.
     // Expose both new (receipt_id / signature_ed25519) and legacy (id /
     // signature) field names so downstream callers reading either shape
     // keep working.
@@ -871,7 +871,7 @@ export async function gatewayCall(args) {
     } catch (_) { /* receipt envelope still ships even if persist fails */ }
   }
 
-  // ── 5. Persist capture (if requested) — append to ~/.kolm/captures.jsonl
+  // ── 5. Persist capture (if requested) - append to ~/.kolm/captures.jsonl
   if (flags.capture) {
     try {
       const home = process.env.KOLM_DATA_DIR || path.join(os.homedir(), '.kolm');
@@ -879,7 +879,7 @@ export async function gatewayCall(args) {
       const lakePath = path.join(home, 'captures.jsonl');
       // Read the last full row so we can HMAC over its canonical form for the
       // hash-chain link. We use HMAC-SHA256(KOLM_RECEIPT_SIGNING_KEY,
-      // JSON.stringify(prev, sortedKeys)) — this matches the audit-side test
+      // JSON.stringify(prev, sortedKeys)) - this matches the audit-side test
       // contract (#3) which recomputes the same digest.
       let prevRow = null;
       try {
@@ -896,7 +896,7 @@ export async function gatewayCall(args) {
         prevChainHash = crypto.createHmac('sha256', signingKey).update(canonical).digest('hex');
       } else if (prevRow) {
         // Fall back to plain sha256 when no signing key is configured so the
-        // chain still links — but the test contract requires HMAC so callers
+        // chain still links - but the test contract requires HMAC so callers
         // wanting verifiable chains must set KOLM_RECEIPT_SIGNING_KEY.
         const sortedKeys = Object.keys(prevRow).sort();
         const canonical = JSON.stringify(prevRow, sortedKeys);
@@ -914,7 +914,7 @@ export async function gatewayCall(args) {
         input: (flags.redact === 'redact_captures' || flags.redact === 'redact_all') ? scrubbedInput : messageOut,
         output: (flags.redact === 'redact_captures' || flags.redact === 'redact_all') ? scrubbedOutput : outputText,
         prev_chain_hash: prevChainHash,
-        // Risk signals + quarantine state — 3+ signals auto-quarantines.
+        // Risk signals + quarantine state - 3+ signals auto-quarantines.
         risk_signals: risk,
         status: autoQuarantine ? 'quarantined' : 'pending',
         quarantine_reason: autoQuarantine ? 'auto_3_signals' : null,
@@ -1043,11 +1043,11 @@ export async function capturesList(args) {
         try { return JSON.parse(line); } catch (_) { return null; }
       }).filter(Boolean);
     }
-  } catch (_) { /* lake unreadable — fall through to server */ }
+  } catch (_) { /* lake unreadable - fall through to server */ }
   if (ns) localRows = localRows.filter((r) => r.namespace === ns);
   const statusFilter = _flag(args, 'status');
   if (statusFilter) localRows = localRows.filter((r) => r.status === statusFilter);
-  // Newest-first — `kolm captures list --limit 1` returns the most recent
+  // Newest-first - `kolm captures list --limit 1` returns the most recent
   // capture, which matches the test contract (#9 redact_captures iteration
   // reads back the row from the current call, not the very first row in the
   // lake).
@@ -1159,7 +1159,7 @@ export async function capturesQuarantine(args) { return _reviewOne(args, 'quaran
  *
  * Synthetic-seed verb for benchmark/load tests. Writes N rows to
  * ~/.kolm/captures.jsonl with the same hash-chain link semantics as a real
- * gateway call. Returns { ok:true, count, ids_file } — the ids_file is a
+ * gateway call. Returns { ok:true, count, ids_file } - the ids_file is a
  * newline-separated list of capture_ids suitable for piping into
  * `captures approve --bulk-from <file>`.
  */
@@ -1201,7 +1201,7 @@ export async function capturesSeed(args) {
     ids.push(id);
     prevRow = row;
   }
-  // Single bulk write — 1000 rows must finish in well under 5s.
+  // Single bulk write - 1000 rows must finish in well under 5s.
   fs.appendFileSync(lakePath, out.join('\n') + '\n');
   const idsFile = path.join(home, 'seed-ids-' + Date.now() + '.txt');
   fs.writeFileSync(idsFile, ids.join('\n') + '\n');
@@ -1225,16 +1225,16 @@ export async function capturesStats(args) {
  *                      [--limit N] [--since ISO]
  *
  * Streams pages of /v1/captures/list to a local file. Caveat: the server
- * returns redacted bodies — raw originals are NEVER exposed, even via this
+ * returns redacted bodies - raw originals are NEVER exposed, even via this
  * verb. To get raw text you must run the gateway in detect_only mode and
  * read the local backend directly (JSONL/SQLite/Postgres).
  *
  * Formats:
- *   jsonl   — one JSON row per line (single file)
- *   json    — pretty-printed JSON array (single file)
- *   parquet — single .parquet blob (requires parquetjs-lite). Schema derived
+ *   jsonl - one JSON row per line (single file)
+ *   json - pretty-printed JSON array (single file)
+ *   parquet - single .parquet blob (requires parquetjs-lite). Schema derived
  *             from the first row's known capture columns.
- *   hf      — HuggingFace `datasets` on-disk format. --out is a DIRECTORY
+ *   hf - HuggingFace `datasets` on-disk format. --out is a DIRECTORY
  *             containing dataset_info.json, state.json, and a single
  *             data-00000-of-00001.arrow file (requires apache-arrow).
  */
@@ -1308,7 +1308,7 @@ export async function capturesExport(args) {
     const schema = new pq.ParquetSchema(_captureParquetFields(all[0]));
     const w = await pq.ParquetWriter.openFile(schema, out);
     try {
-      // batch via appendRow loop — parquetjs-lite buffers internally per page
+      // batch via appendRow loop - parquetjs-lite buffers internally per page
       for (const row of all) await w.appendRow(_captureRowToParquet(row));
     } finally {
       await w.close();
@@ -1496,9 +1496,9 @@ export async function capturesPurge(args) {
  * kolm receipts verify <receipt_id> [--offline path] [--json]
  *
  * Two paths:
- *   online  — GET https://kolm.ai/v1/verify/:id, server recomputes canonical
+ *   online - GET https://kolm.ai/v1/verify/:id, server recomputes canonical
  *             + verifies attached signature, returns {ok, verify, receipt}.
- *   offline — read a local receipt JSON file, run verifyReceipt in-process.
+ *   offline - read a local receipt JSON file, run verifyReceipt in-process.
  *             No network.
  */
 export async function receiptsVerify(args) {
@@ -1546,7 +1546,7 @@ export async function receiptsVerify(args) {
         // signed_by detection: if the receipt's embedded key_fingerprint
         // matches the current signer the receipt was signed under the
         // active key; otherwise (post-rotation) it was signed under the
-        // previous key — surface that to the caller.
+        // previous key - surface that to the caller.
         let signedBy = null;
         try {
           const ed = await import('./ed25519.js');
@@ -1572,7 +1572,7 @@ export async function receiptsVerify(args) {
   } catch (_) { /* local read failed; fall through to online */ }
 
   const base = _flag(args, 'base') || _envBase();
-  // /v1/verify/:id is intentionally public — no key required, the signature
+  // /v1/verify/:id is intentionally public - no key required, the signature
   // is the trust anchor. If the user passed a key we'll forward it (some
   // deploys may scope verify by tenant).
   const r = await _get(base + '/v1/verify/' + encodeURIComponent(id), _apiKey() || null);
@@ -1605,9 +1605,9 @@ export async function receiptsList(args) {
  * audit + signature reverification.
  *
  * Formats:
- *   jsonl — one JSON receipt per line (single file)
- *   json  — pretty-printed JSON array (single file)
- *   csv   — kolm-audit-1 layout: 19 columns with CRLF row terminator (Excel
+ *   jsonl - one JSON receipt per line (single file)
+ *   json - pretty-printed JSON array (single file)
+ *   csv - kolm-audit-1 layout: 19 columns with CRLF row terminator (Excel
  *           compat). Empty cells where the receipts/list summary endpoint
  *           does not surface the field (e.g. signature_b64 requires the full
  *           receipt blob from /v1/verify/:id).
@@ -1631,7 +1631,7 @@ export async function receiptsExport(args) {
   const fd = fs.openSync(out, 'w');
   let written = 0; let offset = 0; const pageSize = 200;
   const all = [];
-  // kolm-audit-1 column order — keep aligned with /v1/verify/:id receipt shape.
+  // kolm-audit-1 column order - keep aligned with /v1/verify/:id receipt shape.
   const csvHeader = [
     'schema_version', 'receipt_id', 'namespace_id', 'tenant_id', 'route_decision',
     'provider', 'model', 'input_tokens', 'output_tokens', 'input_hash',
@@ -1666,7 +1666,7 @@ export async function receiptsExport(args) {
   _emit({ ok: true, written, out, format, namespace: ns || null, route: route || null, version: WRAPPER_CLI_VERSION });
 }
 
-// Tiny CSV writer — escapes per RFC 4180: wrap any cell containing comma,
+// Tiny CSV writer - escapes per RFC 4180: wrap any cell containing comma,
 // quote, CR, or LF in double-quotes; double-double-quote any embedded quote.
 function _csvEscape(v) {
   if (v === null || v === undefined) return '';
@@ -1768,7 +1768,7 @@ export async function receiptsRotateKey(args) {
  *                              [--description "..."] [--json]
  *
  * Creates a fresh namespace record. Server enforces slug rules
- * (^[a-z][a-z0-9-]{1,62}$). The slug is sticky — it cannot be renamed.
+ * (^[a-z][a-z0-9-]{1,62}$). The slug is sticky - it cannot be renamed.
  */
 export async function nsCreate(args) {
   const slug = (args && args[0] && !args[0].startsWith('--')) ? args[0] : _flag(args, 'slug');
@@ -1802,8 +1802,8 @@ export async function nsCreate(args) {
 }
 
 /**
- * kolm namespace config <slug>            — GET current config
- * kolm namespace config <slug> --set k=v  — PUT partial update
+ * kolm namespace config <slug> - GET current config
+ * kolm namespace config <slug> --set k=v - PUT partial update
  */
 export async function nsConfig(args) {
   const slug = (args && args[0] && !args[0].startsWith('--')) ? args[0] : _flag(args, 'slug');
@@ -1857,7 +1857,7 @@ export async function nsConfig(args) {
     }
     patch[k] = v;
   }
-  // Local-first write — autocreates if missing.
+  // Local-first write - autocreates if missing.
   if (!_nsRead(slug)) _nsWrite(slug, { slug, created_at: new Date().toISOString() });
   const updated = _nsWrite(slug, patch);
   // Best-effort server sync.
@@ -1910,7 +1910,7 @@ export async function nsUndeploy(args)  { return _namespaceAction(args, 'undeplo
 /** kolm namespace rollback <slug> [--to <artifact_id>] [--reason "..."] */
 export async function nsRollback(args)  { return _namespaceAction(args, 'rollback'); }
 
-/** kolm namespace status <slug>  — local-first deployment snapshot */
+/** kolm namespace status <slug> - local-first deployment snapshot */
 export async function nsStatus(args) {
   const slug = (args && args[0] && !args[0].startsWith('--')) ? args[0] : _flag(args, 'slug');
   if (!slug) { _die({ ok: false, error: 'missing_slug', hint: 'usage: kolm namespace status <slug>', version: WRAPPER_CLI_VERSION }, 2); return; }
@@ -1984,7 +1984,7 @@ export const NAMESPACE_WRAPPER_VERBS = Object.freeze({
 
 export function gatewayHelp() {
   const lines = ['kolm gateway <subcommand> [args]', ''];
-  for (const [k, v] of Object.entries(GATEWAY_VERBS)) lines.push('  ' + k.padEnd(10) + ' — ' + v.help);
+  for (const [k, v] of Object.entries(GATEWAY_VERBS)) lines.push('  ' + k.padEnd(10) + ' - ' + v.help);
   lines.push('');
   lines.push('  legacy: status | set <mode> | test-call --message "..."');
   return lines.join('\n');
@@ -1992,7 +1992,7 @@ export function gatewayHelp() {
 
 export function capturesHelp() {
   const lines = ['kolm captures <subcommand> [args]', ''];
-  for (const [k, v] of Object.entries(CAPTURES_VERBS)) lines.push('  ' + k.padEnd(10) + ' — ' + v.help);
+  for (const [k, v] of Object.entries(CAPTURES_VERBS)) lines.push('  ' + k.padEnd(10) + ' - ' + v.help);
   lines.push('');
   lines.push('  legacy: review --list-pending | --allow ID | --block ID');
   lines.push('          analytics --namespace <ns>');
@@ -2001,13 +2001,13 @@ export function capturesHelp() {
 
 export function receiptsHelp() {
   const lines = ['kolm receipts <subcommand> [args]', ''];
-  for (const [k, v] of Object.entries(RECEIPTS_VERBS)) lines.push('  ' + k.padEnd(8) + ' — ' + v.help);
+  for (const [k, v] of Object.entries(RECEIPTS_VERBS)) lines.push('  ' + k.padEnd(8) + ' - ' + v.help);
   return lines.join('\n');
 }
 
 export function namespaceWrapperHelp() {
-  const lines = ['kolm namespace <subcommand> [args] — wrapper additions', ''];
-  for (const [k, v] of Object.entries(NAMESPACE_WRAPPER_VERBS)) lines.push('  ' + k.padEnd(10) + ' — ' + v.help);
+  const lines = ['kolm namespace <subcommand> [args] - wrapper additions', ''];
+  for (const [k, v] of Object.entries(NAMESPACE_WRAPPER_VERBS)) lines.push('  ' + k.padEnd(10) + ' - ' + v.help);
   lines.push('');
   lines.push('  pre-existing: fingerprint | warm-start-suggest | verticals');
   return lines.join('\n');

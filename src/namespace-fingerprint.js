@@ -1,4 +1,4 @@
-// src/namespace-fingerprint.js — W715 cross-namespace transfer learning.
+// src/namespace-fingerprint.js - W715 cross-namespace transfer learning.
 //
 // Closes W707 system-upgrade item: "New user starts with zero captures →
 // bootstrap from anonymized patterns of similar namespaces". The mechanism
@@ -18,7 +18,7 @@
 //
 // VERTICAL STUBS (W715-3):
 //   The vertical dictionary below is a SCAFFOLD for W751-W755 (per-vertical
-//   warm-start libraries). It is intentionally tiny — ~20 seed terms each —
+//   warm-start libraries). It is intentionally tiny - ~20 seed terms each - 
 //   enough to route a brand-new namespace to one of {legal, medical, code,
 //   finance, support, general}. W751-W755 will replace the per-vertical
 //   stub arrays with curated, attested term lists; the function shape
@@ -40,7 +40,7 @@ export const TOP_TERMS_K = 32;
 export const MIN_TOKEN_LENGTH = 2;
 export const MAX_TOKEN_LENGTH = 32;
 
-// VERTICAL_STUBS — scaffold for W751-W755. Each list is a tiny seed of
+// VERTICAL_STUBS - scaffold for W751-W755. Each list is a tiny seed of
 // distinctive single-word terms for the vertical. The matcher is dumb on
 // purpose: count overlap between captured tokens and each vertical's
 // dictionary, pick the max. Tie → 'general'. Do NOT add PII categories
@@ -121,7 +121,7 @@ function _extractText(capture) {
   if (typeof capture.response === 'string') parts.push(capture.response);
   if (typeof capture.completion === 'string') parts.push(capture.completion);
   if (typeof capture.assistant === 'string') parts.push(capture.assistant);
-  // Tool-call style messages — pull every string-typed message[].content.
+  // Tool-call style messages - pull every string-typed message[].content.
   if (Array.isArray(capture.messages)) {
     for (const m of capture.messages) {
       if (m && typeof m.content === 'string') parts.push(m.content);
@@ -160,7 +160,7 @@ export function verticalGuess(token_counts) {
 // computeFingerprint({captures, namespace}) → fingerprint object.
 //
 // Honest empty: captures=[] returns {ok:true, n_captures:0, ...} with empty
-// hashes — never throws. (W715 standing directive #1.)
+// hashes - never throws. (W715 standing directive #1.)
 //
 // Privacy lock: returned object passes through JSON.stringify with NO raw
 // capture text (W715 test #8 enforces).
@@ -170,7 +170,7 @@ export function computeFingerprint(opts = {}) {
 
   if (captures.length === 0) {
     // Honest empty envelope. Same shape as the populated path so consumers
-    // never have to branch — they just see n_captures=0 + zeroed hashes.
+    // never have to branch - they just see n_captures=0 + zeroed hashes.
     return {
       version: FINGERPRINT_VERSION,
       namespace,
@@ -186,7 +186,7 @@ export function computeFingerprint(opts = {}) {
   }
 
   // Count single tokens (for vertical guess) + bigrams (for the top-terms
-  // hash array — bigrams give better discrimination than unigrams over
+  // hash array - bigrams give better discrimination than unigrams over
   // small N while still being privacy-safe under sha256).
   const token_counts = Object.create(null);
   const bigram_counts = Object.create(null);
@@ -201,7 +201,7 @@ export function computeFingerprint(opts = {}) {
 
   // token_bag_hash = sha256 over the sorted (term, count) pairs of EVERY
   // bigram. This is determinstic across calls on the same captures. It is
-  // intentionally a single hash (not a vector) — used as a quick "are these
+  // intentionally a single hash (not a vector) - used as a quick "are these
   // two fingerprints byte-identical?" check for caching / dedup.
   const bagEntries = Object.entries(bigram_counts).sort((a, b) => a[0] < b[0] ? -1 : 1);
   const bagCanonical = bagEntries.map(([k, v]) => k + ':' + v).join('|');
@@ -210,7 +210,7 @@ export function computeFingerprint(opts = {}) {
   // top_terms_hash_array = sha256(bigram) for the top-K bigrams by count,
   // breaking ties alphabetically. K=32 is enough to compute Jaccard over.
   // We hash each bigram individually so the receiver sees a vector of
-  // opaque IDs — they cannot reverse a hash to a phrase but they CAN take
+  // opaque IDs - they cannot reverse a hash to a phrase but they CAN take
   // set intersections (the W715 cosineSimilarity primitive).
   const ranked = Object.entries(bigram_counts).sort((a, b) => {
     if (b[1] !== a[1]) return b[1] - a[1];
@@ -237,7 +237,7 @@ export function computeFingerprint(opts = {}) {
   };
 }
 
-// cosineSimilarity(fp1, fp2) — Jaccard over top_terms_hash_array (the
+// cosineSimilarity(fp1, fp2) - Jaccard over top_terms_hash_array (the
 // hashed bigram set), since the underlying tokens are opaque. Named
 // `cosineSimilarity` because callers think in cosine-of-vectors terms,
 // but Jaccard is the honest math for a set of opaque hashes:
@@ -260,11 +260,11 @@ export function cosineSimilarity(fp1, fp2) {
   return union === 0 ? 0 : inter / union;
 }
 
-// findNearestNamespaces(target_fp, candidate_fps, k) — ranked list of the
+// findNearestNamespaces(target_fp, candidate_fps, k) - ranked list of the
 // top-K siblings by cosineSimilarity, descending. Each entry is
 // {namespace, fingerprint_id, similarity, vertical_guess,
 //  warm_start_checkpoint_path?}. The optional checkpoint path is
-// preserved from the candidate fingerprint when present — that is the
+// preserved from the candidate fingerprint when present - that is the
 // hook W715-2 trainer reads with --warm-start-from-fingerprint.
 export function findNearestNamespaces(target_fp, candidate_fps, k = 5) {
   if (!target_fp || !Array.isArray(candidate_fps)) return [];

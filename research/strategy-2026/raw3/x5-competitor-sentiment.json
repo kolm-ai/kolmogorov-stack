@@ -1,0 +1,49 @@
+{
+  "id": "x5-competitor-sentiment",
+  "track": "xval",
+  "prompt": "Search X for founder/practitioner sentiment about Vanta, Drata, Secureframe, SafeBase, Whistic, Conveyor, Vorlon, Lakera, Prompt Security in 2026 — what people love, hate, find missing, especially re: AI-AGENT-specific security/attestation. Quote posts. Cite.",
+  "content": "**Limited public X discussion in 2026 on these specific tools from founders/practitioners, with Vanta dominating mentions due to its heavy positioning around AI/agentic compliance.** Other tools (Drata, Secureframe, etc.) appear far less frequently in recent posts. Sentiment is sparse overall, but Vanta highlights AI-specific features like Shadow AI detection and risk agents, while broader practitioner views touch on compliance platform flaws (e.g., auditor conflicts). AI-agent attestation needs (auditability, identity, authorization) are discussed more generally than tied to these vendors.[[1]](https://x.com/TrustVanta/status/2061844285889077317)[[2]](https://x.com/ZackKorman/status/2034939061798834442)\n\nKey themes from 2026 posts (primarily since Jan 2026):\n\n### Vanta\nVanta brands itself as the \"#1 Agentic Trust Platform\" and emphasizes AI-era challenges like Shadow AI (70% of its 16k+ customers), builder roles shipping AI workflows (311% YoY growth in titles like \"GTM engineer\"), and increased vendor risk (42% more vendors, 1 in 3 high/critical risk). It launched a \"Vanta Agent for Risk\" to unify internal/third-party risk and reveal AI activity. CEO Christina Caci noted: “Trust is a defining problem of the AI era, and these new AI companies are getting more scrutiny, more questions, more security review, more questionnaires, just more, more, more.”[[1]](https://x.com/TrustVanta/status/2061844285889077317)[[3]](https://x.com/TrustVanta/status/2061878113957548316)\n\n- **Positive practitioner view**: One user completed their annual SOC2 audit via Vanta, noting it audited MDM configs, device destruction certificates, and patched vulnerabilities thoroughly (\"Honestly, it was painful. But we passed each test and I know we do right by our users. Delve is a known 'shortcut'. Never considered it.\").[[4]](https://x.com/stkenned/status/2034812413288358005)\n- **Criticism of the space (including Vanta/Drata)**: \"The Delve stuff is bad, but all of these compliance platforms (Vanta, Drata, etc) have their 'trusted auditors' they recommend. That is the core issue that corrupts this space.\"[[2]](https://x.com/ZackKorman/status/2034939061798834442)\n- Vanta also stresses \"no AI sprinkle\"—real engineering via their \"Trustcraft\" framework (no customer data training, dogfooding on their own program, strict evals).[[5]](https://x.com/TrustVanta/status/2062942923931443557)\n\nVanta's focus directly addresses AI-agent needs like visibility into autonomous workflows and proving trust/attestation amid rising scrutiny.\n\n### Drata and Secureframe\nMentions are mostly comparative/critical in the compliance space. One post groups them with Vanta as incumbents with funding/breadth advantages; a suggested strategy for newer tools is targeting early-stage startups' first SOC2 via free readiness assessments and fast time-to-audit metrics.[[6]](https://x.com/harjjotsinghh/status/2062830126442967473) No strong AI-agent-specific praise or complaints surfaced in results.\n\n### Lakera\nAppears as a guardrail/adapter option in open-source AI agent platforms (e.g., alongside Presidio and Llama Guard for 18 built-in guardrails in a self-improving agent tool). This implies utility in prompt/execution security layers for agents, but no direct founder/practitioner reviews.[[7]](https://x.com/hasantoxr/status/2047636566680760576)\n\n### Other Tools (SafeBase, Whistic, Conveyor, Vorlon, Prompt Security)\nNo prominent 2026 X posts from founders/practitioners matching the criteria. Keyword searches surfaced mostly unrelated \"conveyor\" or general \"prompt security\" content (e.g., red-teaming libraries or unrelated AI discussions). These appear less visible on X compared to Vanta's marketing push.[[8]](https://x.com/ToxicSteve10800/status/2063615241749938689)[[9]](https://x.com/VivekIntel/status/2063501355197587763)\n\n### Broader AI-Agent Security/Attestation Sentiment\nPosts highlight gaps these tools could address but often note they're unsolved:\n- Enterprise AI agent adoption hinges on compliance/attestation (identity, auditability, proving actions under authority/permissions) over pure security— \"Black boxes don't survive audits.\"[[10]](https://x.com/gateway_eth/status/2024827308469846126)\n- Reports note 98% of agents ship vulnerable (e.g., to prompt injection, data exfil); missing pillars include specific authorization (vs. broad OAuth), true audit logs (beyond LLM traces), and accountability. Gartner called AI agents \"the architectural problem nobody has solved.\"[[11]](https://x.com/Basemail_ai/status/2062709196433555590)\n- Guardrails, behavioral rules, verifiable attestations (e.g., ZK proofs), and layered oversight are recurring needs.[[12]](https://x.com/AISecHub/status/2022292973430448462)[[13]](https://x.com/aiquickbriefs/status/2061783167460098103)\n\n**Overall**: Vanta leads in visible AI/agentic positioning and has mixed but concrete user feedback on audits. The compliance tool space draws criticism for structural issues. Direct AI-agent attestation features are emerging (e.g., Vanta's risk agent) but practitioner quotes on gaps in authorization/auditability suggest room for improvement across vendors. Discussions are more about the category's challenges than head-to-head tool love/hate. More targeted founder conversations may exist off-X or in niche communities.",
+  "citations": [
+    "https://x.com/TrustVanta/status/2061844285889077317",
+    "https://x.com/ZackKorman/status/2034939061798834442",
+    "https://x.com/TrustVanta/status/2061878113957548316",
+    "https://x.com/stkenned/status/2034812413288358005",
+    "https://x.com/TrustVanta/status/2062942923931443557",
+    "https://x.com/harjjotsinghh/status/2062830126442967473",
+    "https://x.com/hasantoxr/status/2047636566680760576",
+    "https://x.com/ToxicSteve10800/status/2063615241749938689",
+    "https://x.com/VivekIntel/status/2063501355197587763",
+    "https://x.com/gateway_eth/status/2024827308469846126",
+    "https://x.com/Basemail_ai/status/2062709196433555590",
+    "https://x.com/AISecHub/status/2022292973430448462",
+    "https://x.com/aiquickbriefs/status/2061783167460098103"
+  ],
+  "searched": [],
+  "usage": {
+    "input_tokens": 27036,
+    "input_tokens_details": {
+      "cached_tokens": 4096
+    },
+    "output_tokens": 2360,
+    "output_tokens_details": {
+      "reasoning_tokens": 1273
+    },
+    "total_tokens": 29396,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 6,
+    "cost_in_usd_ticks": 653942000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 0,
+      "x_search_calls": 6,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 14648,
+      "output_tokens": 1368
+    }
+  },
+  "attempts": 1
+}

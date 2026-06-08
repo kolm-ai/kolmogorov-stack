@@ -1,4 +1,4 @@
-// W233 — detached-session layer on top of src/jobs.js.
+// W233 - detached-session layer on top of src/jobs.js.
 //
 // Three primitives the CLI consumes:
 //
@@ -52,10 +52,10 @@ export function rescueSupport() {
     }
   }
   if (PLATFORM === 'darwin') {
-    return { supported: false, reason: 'macOS has no reptyr equivalent — use `tmux pipe-pane` / `script -F /dev/fd/N`' };
+    return { supported: false, reason: 'macOS has no reptyr equivalent - use `tmux pipe-pane` / `script -F /dev/fd/N`' };
   }
   if (PLATFORM === 'win32') {
-    return { supported: false, reason: 'Windows has no reptyr equivalent — use `kolm watch <job-id>` to tail the log path' };
+    return { supported: false, reason: 'Windows has no reptyr equivalent - use `kolm watch <job-id>` to tail the log path' };
   }
   return { supported: false, reason: 'unknown platform: ' + PLATFORM };
 }
@@ -164,7 +164,7 @@ export function rescue({ pid }) {
   if (!support.supported) {
     return { ok: false, pid: n, reason: support.reason, workaround: 'kolm watch <job-id>  (if the orphan was launched via `kolm <verb> --detach`)' };
   }
-  // Linux + reptyr — hand control to reptyr so it owns the TTY swap.
+  // Linux + reptyr - hand control to reptyr so it owns the TTY swap.
   // We don't capture output; reptyr takes over stdin/stdout/stderr directly.
   child_process.spawnSync(support.path, [String(n)], { stdio: 'inherit' });
   return { ok: true, pid: n, tool: support.tool };

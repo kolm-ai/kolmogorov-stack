@@ -3,105 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem("kolm-theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="#0e1116";document.documentElement.style.colorScheme="dark";}else{document.documentElement.setAttribute("data-theme","light");document.documentElement.style.background="#f3f5f7";document.documentElement.style.colorScheme="light";}}catch(e){}})();</script>
-<title>BAA · kolm.ai</title>
-<meta name="description" content="Business Associate Agreement for HIPAA coverage. Who needs it, what kolm does and does not do under the BAA, the standard terms, and how to execute. Scope: kolm is a business associate when handling PHI on">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Business Associate Agreement · kolm.ai</title>
+<meta name="description" content="kolm's Business Associate Agreement for regulated engagements involving Protected Health Information (PHI). Scope, permitted uses, safeguards, subcontractor flow-down, and how to execute.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Business Associate Agreement">
+<meta property="og:description" content="kolm's Business Associate Agreement for regulated audit engagements involving Protected Health Information (PHI). Scope, permitted uses, safeguards, and how to execute.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/baa">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Business Associate Agreement">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/baa">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/ks.css" as="style">
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/design-tokens.css">
-<link rel="stylesheet" href="/frontier.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<style>
-  .sec-hero { padding: var(--ks-10) 0 var(--ks-8); border-bottom: 1px solid var(--ks-line-1); }
-  .sec-hero .eyebrow { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ks-ink-3); margin-bottom: var(--ks-3); }
-  .sec-hero h1 { margin: 0 0 var(--ks-4); font-size: clamp(36px, 5vw, 56px); font-weight: 560; letter-spacing: -0.02em; line-height: 1.05; color: var(--ks-ink); }
-  .sec-hero h1 b { color: var(--ks-accent); font-weight: 560; }
-  .sec-hero p.lede { margin: 0 0 var(--ks-6); font-size: 18px; line-height: 1.55; color: var(--ks-ink-2); max-width: 64ch; }
-  .sec-hero .cta-row { display: flex; flex-wrap: wrap; gap: var(--ks-3); }
-
-  .sec-section { padding: var(--ks-9) 0; border-bottom: 1px solid var(--ks-line-1); }
-  .sec-section h2 { margin: 0 0 var(--ks-2); font-size: clamp(24px, 3vw, 32px); font-weight: 560; letter-spacing: -0.015em; color: var(--ks-ink); }
-  .sec-section .sub { margin: 0 0 var(--ks-6); font-size: 15px; color: var(--ks-ink-3); max-width: 64ch; line-height: 1.6; }
-
-  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ks-4); }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ks-4); }
-  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
-
-  .sec-card { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-5); }
-  .sec-card .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ks-3); margin-bottom: var(--ks-3); }
-  .sec-card .tag { font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ks-ink-3); }
-  .sec-card .st { font-family: var(--ks-mono); font-size: 11px; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--ks-line-2); }
-  .sec-card .st.live { color: var(--ks-accent); border-color: var(--ks-accent-edge); }
-  .sec-card .st.wip { color: #a8b3c2; border-color: rgba(168, 179, 194,0.35); }
-  .sec-card .st.no { color: #d77; border-color: rgba(221,119,119,0.35); }
-  .sec-card h3 { margin: 0 0 var(--ks-2); font-size: 16px; font-weight: 540; color: var(--ks-ink); letter-spacing: -0.005em; }
-  .sec-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink-2); }
-  .sec-card p + p { margin-top: var(--ks-2); }
-  .sec-card a { color: var(--ks-accent); }
-  .sec-card ul { margin: var(--ks-2) 0 0; padding-left: 18px; font-size: 13.5px; line-height: 1.65; color: var(--ks-ink-2); }
-  .sec-card ul li + li { margin-top: 4px; }
-  .sec-card code { font-family: var(--ks-mono); font-size: 12.5px; background: #050607; border: 1px solid var(--ks-line-2); border-radius: 4px; padding: 1px 6px; color: var(--ks-ink); }
-
-  .pact { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); }
-  .pact h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; color: var(--ks-ink); letter-spacing: -0.005em; }
-  .pact dl { margin: 0; display: grid; grid-template-columns: 220px 1fr; gap: var(--ks-3) var(--ks-5); }
-  .pact dt { font-family: var(--ks-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ks-ink-3); text-transform: uppercase; padding-top: 2px; }
-  .pact dd { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ks-ink); }
-  .pact dd code { font-family: var(--ks-mono); font-size: 12.5px; background: #050607; border: 1px solid var(--ks-line-2); border-radius: 4px; padding: 1px 6px; color: var(--ks-ink); }
-  .pact dd a { color: var(--ks-accent); }
-  @media (max-width: 900px) { .pact dl { grid-template-columns: 1fr; gap: var(--ks-1) var(--ks-3); } .pact dt { padding-top: 0; } .pact dd { margin-bottom: var(--ks-3); } }
-
-  
-  .does-stack { margin-top: var(--ks-4); display: flex; flex-direction: column; gap: var(--ks-6); }
-  .does, .doesnt { padding: 0; background: transparent; border: 0; }
-  .does h3, .doesnt h3 { margin: 0 0 var(--ks-3); font-size: 18px; font-weight: 560; letter-spacing: -0.005em; display: flex; align-items: baseline; gap: 14px; }
-  .does h3::before { content: 'IN SCOPE'; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; color: var(--ks-accent); font-weight: 500; }
-  .doesnt h3::before { content: 'OUT OF SCOPE'; font-family: var(--ks-mono); font-size: 10.5px; letter-spacing: 0.08em; color: #a8b3c2; font-weight: 500; }
-  .does h3 { color: var(--ks-ink); }
-  .doesnt h3 { color: var(--ks-ink); }
-  .does ul, .doesnt ul { margin: 0; padding-left: 18px; font-size: 14.5px; line-height: 1.7; color: var(--ks-ink-2); max-width: 78ch; }
-  .does ul li + li, .doesnt ul li + li { margin-top: var(--ks-2); }
-  .does ul li b, .doesnt ul li b { color: var(--ks-ink); font-weight: 540; }
-  .does-divider { border: 0; height: 1px; background: var(--ks-line-1); margin: 0; }
-
-  .terms-tbl { width: 100%; border-collapse: collapse; margin-top: var(--ks-4); font-size: 14px; }
-  .terms-tbl th, .terms-tbl td { padding: var(--ks-3) var(--ks-4); text-align: left; border-bottom: 1px solid var(--ks-line-1); color: var(--ks-ink-2); vertical-align: top; line-height: 1.6; }
-  .terms-tbl th { background: var(--ks-bg-1); color: var(--ks-ink); font-weight: 540; font-size: 13px; }
-  .terms-tbl td:first-child { color: var(--ks-ink); font-weight: 540; width: 28%; font-size: 13.5px; }
-  .terms-tbl td:nth-child(2) { font-family: var(--ks-mono); font-size: 12.5px; color: var(--ks-ink-3); width: 18%; }
-
-  .req-flow { background: var(--ks-bg-1); border: 1px solid var(--ks-line-2); border-radius: var(--ks-r-md); padding: var(--ks-6); margin-top: var(--ks-4); }
-  .req-flow ol { margin: 0; padding-left: 22px; color: var(--ks-ink-2); font-size: 14px; line-height: 1.7; }
-  .req-flow ol li { margin-bottom: var(--ks-3); }
-  .req-flow ol li:last-child { margin-bottom: 0; }
-  .req-flow ol li b { color: var(--ks-ink); font-weight: 540; }
-  .req-flow ol li code { font-family: var(--ks-mono); font-size: 12.5px; background: #050607; border: 1px solid var(--ks-line-2); border-radius: 4px; padding: 1px 6px; color: var(--ks-ink); }
-  .req-flow ol li a { color: var(--ks-accent); }
-</style>
-  <meta property="og:title" content="BAA">
-  <meta property="og:description" content="Business Associate Agreement for HIPAA coverage. Who needs it, what kolm does and does not do under the BAA, the standard terms, and how to execute. Scope: kolm is a business associate when handling PHI on customer behalf.">
-  <meta property="og:image" content="https://kolm.ai/og/baa.svg">
-  <meta property="og:url" content="https://kolm.ai/baa">
-  <meta property="og:type" content="website">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "@type": "WebPage",
+  "name": "Business Associate Agreement",
   "url": "https://kolm.ai/baa",
-  "description": "Business Associate Agreement for HIPAA coverage. Who needs it, what kolm does and does not do under the BAA, the standard terms, and how to execute. Scope: kolm is a business associate when handling PHI on customer behalf.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
+  "description": "kolm's Business Associate Agreement for regulated engagements involving Protected Health Information (PHI). Scope, permitted uses, safeguards, subcontractor flow-down, and how to execute.",
   "publisher": {
     "@type": "Organization",
     "name": "kolm.ai",
@@ -110,291 +52,229 @@
 }
 </script>
 </head>
-<body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<div class="ks-nav-wrap">
-  <header class="ks-nav">
-    <div class="ks-wrap ks-nav__row">
-      <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-      <nav class="ks-nav__links" aria-label="Primary">
-        <a href="/product">Product</a>
-        <a href="/solutions/teams">For teams</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/docs">Docs</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a>
-      </nav>
-      <div class="ks-nav__cta">
-        <a href="/signup" class="ks-btn ks-btn--ghost">Sign in</a>
-        <a href="/quickstart" class="ks-btn ks-btn--primary">Quickstart <span class="ks-btn-arrow">&rarr;</span></a>
-      </div>
+<hr class="foil-strip" aria-hidden="true">
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
     </div>
-  </header>
-</div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
 
-<main id="main">
+<main>
 
-<section class="sec-hero">
-  <div class="ks-wrap">
-    <div class="eyebrow"><a href="/security#baa" style="color:var(--ks-ink-3); text-decoration:none">&larr; Security</a> &middot; BAA terms</div>
-    <h1>Business Associate Agreement, <b>signed.</b></h1>
-    <p class="lede">If you are a covered entity, or a business associate passing protected health information through kolm, we sign the BAA. The compiler runs inside your own infrastructure by default; the receipt chain is verifiable offline; the BAA names what we touch and what we will not. Scope: we are a business associate when handling PHI on customer behalf, not a covered entity ourselves.</p>
-    <div class="cta-row">
-      <a href="/contact" class="ks-btn ks-btn--primary">Request the BAA <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/hipaa-mapping" class="ks-btn ks-btn--ghost">HIPAA Security Rule mapping</a>
-      <a href="/security" class="ks-btn ks-btn--ghost">Security overview</a>
-      <a href="/soc2" class="ks-btn ks-btn--ghost">SOC 2 status</a>
+<!-- Hero -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:64ch">
+      <span class="idx">01 / Business Associate</span>
+      <h1>Business Associate Agreement</h1>
+      <p class="lede">When an audit engagement touches a Covered Entity's Protected Health Information (PHI), kolm may act as a Business Associate under 45 CFR Parts 160 and 164. This agreement sets the permitted uses and disclosures of PHI, the safeguards we apply, and each party's obligations for the life of the engagement.</p>
+      <p style="font-size:14px;color:var(--ink-3);margin-top:0">Last updated: <strong>2026-06-07</strong></p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="mailto:dev@kolm.ai">Request the BAA</a>
+        <a class="btn btn--ghost" href="/trust">Trust center</a>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="sec-section" id="who">
-  <div class="ks-wrap">
-    <h2>Who needs the BAA</h2>
-    <p class="sub">If protected health information (PHI) touches the kolm CLI, the hosted control plane, or the optional hosted teacher path, you need a BAA in place before production traffic flows. A few common paths so a compliance reviewer can locate themselves.</p>
-    <ul class="fr-spec-list">
-      <li>
-        <div class="fr-spec-list__head">
-          <h3 class="fr-spec-list__name">Provider, payor, or clearinghouse</h3>
-          <span class="fr-spec-list__delta">covered entity &middot; BAA required</span>
-        </div>
-        <p class="fr-spec-list__p">Hospital systems, health plans, dental and behavioral practices, claims clearinghouses. Any time you put PHI into the compiler (captures, prompts, training pairs), the BAA must be executed first.</p>
-      </li>
-      <li>
-        <div class="fr-spec-list__head">
-          <h3 class="fr-spec-list__name">Downstream business associate</h3>
-          <span class="fr-spec-list__delta">business associate &middot; BAA required</span>
-        </div>
-        <p class="fr-spec-list__p">A SaaS vendor, ML platform, or contract research organization that receives PHI from a covered entity and routes any of it through kolm. The customer signs a BAA with kolm; kolm becomes a subcontractor business associate.</p>
-      </li>
-      <li>
-        <div class="fr-spec-list__head">
-          <h3 class="fr-spec-list__name">Clinical research with PHI</h3>
-          <span class="fr-spec-list__delta">research &middot; BAA available</span>
-        </div>
-        <p class="fr-spec-list__p">IRB-approved studies that compile models against de-identified or limited-data-set inputs. The BAA covers the kolm side; the IRB and the data-use agreement cover the upstream side.</p>
-      </li>
-      <li>
-        <div class="fr-spec-list__head">
-          <h3 class="fr-spec-list__name">Healthcare workloads without PHI</h3>
-          <span class="fr-spec-list__delta" style="color:var(--ink-4,#a8b3c2)">no PHI &middot; BAA optional</span>
-        </div>
-        <p class="fr-spec-list__p">If your captures are de-identified to the HIPAA Safe Harbor standard, or you are compiling on synthetic data only, the BAA is optional. We will still sign one on request so a procurement reviewer has the paperwork on file.</p>
-      </li>
+<!-- Long-form legal prose -->
+<section class="section reveal">
+  <div class="wrap" style="max-width:78ch">
+    <span class="idx">02 / Agreement</span>
+
+    <h2>1. Definitions</h2>
+    <p>The following definitions apply throughout this Business Associate Agreement and are drawn from 45 CFR Part 160 and Subparts A and E of 45 CFR Part 164 unless a more specific definition is given below.</p>
+    <ul>
+      <li><strong>Business Associate.</strong> kolm.ai ("kolm"), which provides AI-agent audit, attestation, and evidence services to Covered Entities and their downstream Business Associates. kolm is not itself a Covered Entity.</li>
+      <li><strong>Covered Entity.</strong> The healthcare provider, health plan, or healthcare clearinghouse that executes this Agreement and whose audit engagement may involve Protected Health Information (PHI).</li>
+      <li><strong>Protected Health Information (PHI).</strong> Individually identifiable health information, as defined at 45 CFR 160.103, created, received, maintained, or transmitted by kolm on behalf of the Covered Entity in the course of an audit engagement.</li>
+      <li><strong>Security Incident.</strong> The attempted or successful unauthorized access, use, disclosure, modification, or destruction of information or interference with system operations in an information system that processes PHI, as defined at 45 CFR 164.304.</li>
+      <li><strong>Subcontractor.</strong> A person or entity that creates, receives, maintains, or transmits PHI on behalf of kolm in support of an audit engagement. Subcontractors are listed at <a href="/trust" style="color:var(--ok)">/trust</a>.</li>
     </ul>
+
+    <h2>2. Scope and applicability</h2>
+    <p>This Business Associate Agreement applies when, and only when, a kolm audit engagement involves PHI belonging to the Covered Entity. kolm's standard agent-security audit process does not require access to PHI; this agreement covers regulated engagements where the Covered Entity chooses to include PHI-bearing data as part of the evidence scope. If no PHI is in scope, this agreement has no operative effect.</p>
+    <p>Engagements where PHI may be in scope include: AI-agent audits for healthcare providers or payors where the agent under review processes patient records; red-team assessments of systems that handle clinical notes or claims data; and audit-report generation where the evidence set includes PHI-derived inputs provided by the Covered Entity.</p>
+
+    <h2>3. Permitted uses and disclosures of PHI</h2>
+    <p>kolm may use or disclose PHI received from, or created on behalf of, the Covered Entity only as follows:</p>
+    <ul>
+      <li>As necessary to perform the audit services described in the master engagement agreement, including generating the cryptographically signed evidence report delivered to the Covered Entity.</li>
+      <li>As required by applicable law, provided that kolm notifies the Covered Entity of the legal requirement prior to disclosure, to the extent permitted by that law.</li>
+      <li>For the proper management and administration of kolm's operations, or to carry out legal responsibilities of kolm, provided the disclosure is required by law or kolm obtains reasonable assurances from the recipient that the PHI will be held confidentially and used or further disclosed only as required by law or for the purpose for which it was disclosed, and that any breaches will be reported to kolm.</li>
+      <li>To report violations of law to appropriate federal and state authorities, consistent with 45 CFR 164.502(j)(1).</li>
+    </ul>
+    <p>PHI is processed only as permitted under this agreement and the applicable Security Rule safeguards. kolm will not use or disclose PHI for marketing purposes, for training shared or general-purpose models, or for any purpose not expressly permitted by this agreement or required by law.</p>
+
+    <h2>4. Safeguards</h2>
+    <p>kolm will implement and maintain administrative, physical, and technical safeguards that reasonably and appropriately protect the confidentiality, integrity, and availability of any PHI that kolm creates, receives, maintains, or transmits on behalf of the Covered Entity, in accordance with 45 CFR Part 164 Subpart C (the Security Rule).</p>
+    <ul>
+      <li><strong>Administrative safeguards (45 CFR 164.308).</strong> Risk analysis conducted prior to any engagement that is in scope; workforce training on PHI handling; designated security responsibility; and documented policies for PHI access control and incident response.</li>
+      <li><strong>Physical safeguards (45 CFR 164.310).</strong> Facility access controls, workstation use and security policies, and device and media controls governing any systems where PHI is temporarily processed during the audit engagement.</li>
+      <li><strong>Technical safeguards (45 CFR 164.312).</strong> Unique user identification, emergency access procedure, automatic log-off, encryption and decryption of PHI in transit and at rest, audit controls, integrity controls, and transmission security.</li>
+      <li><strong>Organizational requirements (45 CFR 164.314).</strong> Subcontractor agreements substantially equivalent to this agreement; policies and procedures maintained in written form; documentation retained for six years from creation or last effective date, whichever is later.</li>
+    </ul>
+
+    <h2>5. Subcontractor flow-down</h2>
+    <p>To the extent that kolm uses a Subcontractor to create, receive, maintain, or transmit PHI on kolm's behalf in the course of an audit engagement, kolm will execute a written agreement with that Subcontractor requiring the Subcontractor to comply with the same restrictions, conditions, and requirements that apply to kolm under this Business Associate Agreement, consistent with 45 CFR 164.308(b)(3) and 164.314(a).</p>
+    <p>Subcontractors that may receive PHI in the course of an audit engagement are listed on the trust page at <a href="/trust" style="color:var(--ok)">/trust</a>. The Covered Entity will receive prior written notice before any new Subcontractor with potential PHI exposure is added to the engagement. If the Covered Entity objects to the addition of a Subcontractor within fourteen days of notice, the parties will work in good faith to resolve the objection; if the objection cannot be resolved, the Covered Entity may terminate the engagement without penalty with respect to the Subcontractor change.</p>
+
+    <h2>6. Reporting of impermissible use or disclosure; Security Incidents</h2>
+    <p>kolm will report to the Covered Entity any use or disclosure of PHI not provided for by this agreement of which kolm becomes aware. Reporting obligations are as follows:</p>
+    <ul>
+      <li><strong>Breach of unsecured PHI.</strong> Written notice to the Covered Entity within thirty (30) calendar days of discovery by kolm, as required by 45 CFR 164.410. The notice will include the identification of each individual whose unsecured PHI has been, or is reasonably believed to have been, accessed, acquired, used, or disclosed; a brief description of what happened; the types of PHI involved; the steps individuals should take to protect themselves; a brief description of what kolm is doing to investigate, mitigate, and prevent further occurrences; and contact information for the Covered Entity's questions.</li>
+      <li><strong>Security Incidents.</strong> kolm will report Security Incidents to the Covered Entity within thirty (30) calendar days of discovery. Unsuccessful security incidents (e.g., pings, port scans, and similar probes that do not result in access to PHI) are reported in summary form on a quarterly basis.</li>
+      <li><strong>Impermissible use or disclosure.</strong> Any other use or disclosure of PHI not permitted by this agreement will be reported to the Covered Entity within thirty (30) calendar days of discovery. Notification under this subsection does not itself constitute a determination that a breach requiring individual notification has occurred; that determination remains with the Covered Entity.</li>
+    </ul>
+
+    <h2>7. Access, amendment, and accounting of disclosures</h2>
+    <h3>7.1 Access by the Covered Entity</h3>
+    <p>To the extent kolm maintains PHI in a designated record set on behalf of the Covered Entity, kolm will make such PHI available to the Covered Entity or, at the Covered Entity's direction, to the applicable individual within ten (10) business days of a written request, so as to enable the Covered Entity to meet its obligations under 45 CFR 164.524. PHI held by kolm in the course of an audit engagement is not ordinarily part of a designated record set; if the Covered Entity instructs kolm that certain PHI is part of such a set, kolm will treat it accordingly.</p>
+
+    <h3>7.2 Amendment</h3>
+    <p>To the extent kolm maintains PHI in a designated record set on behalf of the Covered Entity, kolm will make such PHI available for amendment and will incorporate any amendments directed by the Covered Entity within ten (10) business days of a written request, so as to enable the Covered Entity to meet its obligations under 45 CFR 164.526. Amendments are recorded with a tombstone entry in the audit trail; the original signed evidence report is not altered.</p>
+
+    <h3>7.3 Accounting of disclosures</h3>
+    <p>kolm will maintain and make available, within thirty (30) business days of a written request, the information required to provide an accounting of disclosures of PHI as necessary to enable the Covered Entity to respond to a request by an individual for an accounting under 45 CFR 164.528. kolm will retain records of PHI disclosures for six (6) years from the date of the disclosure or the last effective date of this agreement, whichever is later.</p>
+
+    <h2>8. Return or destruction of PHI at termination</h2>
+    <p>Upon termination of this agreement, kolm will, at the Covered Entity's election, either return to the Covered Entity all PHI received from or created on behalf of the Covered Entity, or destroy all such PHI and provide the Covered Entity with written certification of destruction. Return will be in a verifiable, machine-readable format; destruction will be via methods that render the PHI unreadable, indecipherable, and otherwise cannot be reconstructed. kolm will sign a destruction certificate for the Covered Entity's records.</p>
+    <p>The return or destruction will be completed within thirty (30) calendar days of the termination effective date. If return or destruction is not feasible, kolm will extend the protections of this agreement to the PHI and limit further uses and disclosures to those purposes that make the return or destruction infeasible, for as long as kolm retains the PHI.</p>
+
+    <h2>9. Term and termination</h2>
+    <h3>9.1 Term</h3>
+    <p>This agreement is effective as of the date both parties execute the master engagement agreement and remains in effect until that agreement terminates or expires, unless terminated earlier under this section.</p>
+
+    <h3>9.2 Termination for cause</h3>
+    <p>Either party may terminate this agreement if the other party materially breaches a material provision of this agreement and fails to cure the breach within thirty (30) calendar days of receiving written notice specifying the breach. The Covered Entity may terminate immediately upon written notice to kolm if the Covered Entity determines that a cure is not possible.</p>
+
+    <h3>9.3 Effect of termination</h3>
+    <p>Sections 3 (Permitted uses and disclosures), 4 (Safeguards), 7.3 (Accounting of disclosures), and 8 (Return or destruction) survive termination. Upon termination, the obligations in Section 8 apply immediately.</p>
+
+    <h2>10. Miscellaneous</h2>
+    <h3>10.1 Governing law</h3>
+    <p>This agreement is governed by the laws of the State of Delaware, without regard to conflict-of-laws principles, except to the extent federal law (including HIPAA, 45 CFR Parts 160 and 164) preempts or supersedes state law. For federal agency customers, state government customers, and customers in jurisdictions where local rules require a different governing law, the parties will negotiate an appropriate modification.</p>
+
+    <h3>10.2 Indemnification</h3>
+    <p>Each party will indemnify, defend, and hold harmless the other party from and against claims, losses, liabilities, costs, and expenses (including reasonable legal fees) arising out of or relating to the indemnifying party's breach of this agreement or negligent or willful acts or omissions in connection with its obligations under this agreement. Liability caps and carve-outs are negotiated in the master engagement agreement; this agreement does not impose or waive any caps on its own.</p>
+
+    <h3>10.3 Regulatory compliance</h3>
+    <p>This agreement is intended to comply with HIPAA and the HITECH Act as implemented in 45 CFR Parts 160 and 164. To the extent any provision of this agreement conflicts with an applicable requirement of those regulations, the regulations control. The parties will amend this agreement as necessary to comply with changes in applicable law.</p>
+
+    <h3>10.4 No third-party beneficiaries</h3>
+    <p>This agreement is for the sole benefit of the Covered Entity and kolm and does not create any rights in any third party, except as required by applicable law.</p>
+
+    <h3>10.5 Entire agreement</h3>
+    <p>This Business Associate Agreement, together with the master engagement agreement into which it is incorporated, constitutes the entire agreement of the parties with respect to the subject matter hereof and supersedes all prior negotiations, representations, or agreements relating to the same subject matter.</p>
+
+    <h2>11. How to execute this agreement</h2>
+    <p>Regulated engagements involving PHI require a countersigned copy of this agreement before any PHI-bearing data is included in the audit scope. The process is as follows:</p>
+    <ul>
+      <li>Email <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a> with your legal entity name, whether you are a Covered Entity or a downstream Business Associate, and whether you would like the kolm template or prefer to provide your own for redline. The contact form at <a href="/contact" style="color:var(--ok)">/contact</a> may also be used.</li>
+      <li>kolm will deliver the template the same business day. Material redlines are returned within five business days of receipt.</li>
+      <li>A countersigned PDF is returned within two business days of agreed final text. A sales call is not required to execute the agreement.</li>
+      <li>Once the agreement is in place, you are added to the Subcontractor notice list so that any future subprocessor change with PHI exposure reaches you with the prior notice this agreement requires.</li>
+      <li>For OCR audits, IRB reviews, or downstream Covered Entity evidence requests, kolm responds to written evidence requests within five business days. The signed evidence report is verifiable offline; many audit questions resolve at that layer without further correspondence.</li>
+    </ul>
+    <p>All BAA inquiries and breach reports go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. Acknowledged within one business day.</p>
+
   </div>
 </section>
 
-<section class="sec-section" id="scope">
-  <div class="ks-wrap">
-    <h2>Scope of coverage</h2>
-    <p class="sub">The BAA covers the components where PHI may transit or be processed on the customer's behalf. Most of the stack runs on customer hardware; the BAA is precise about which surface area on the kolm side is in scope.</p>
-    <div class="pact">
-      <h3>What the BAA covers</h3>
-      <dl>
-        <dt>Compiler in customer VPC</dt><dd>The CLI, distill workers, and quantization runtimes installed by the customer. PHI processed here never leaves customer infrastructure in the default deployment.</dd>
-        <dt>Captures with PHI</dt><dd>Tenant-scoped capture rows stored at <code>~/.kolm/events</code> or wherever <code>KOLM_DATA_DIR</code> points. We do not touch these in the default deployment; if the customer opts into the hosted control plane for retention reporting only, the metadata is in scope.</dd>
-        <dt>Signed receipts and artifacts</dt><dd>Receipts may reference PHI-derived inputs by content hash; the BAA covers the integrity, retention, and disclosure of those references on the kolm side of the boundary.</dd>
-        <dt>Hosted teacher path (opt-in)</dt><dd>If the customer routes PHI-bearing prompts through the optional hosted teacher path, both kolm and the teacher subprocessor (Anthropic or OpenAI) handle the traffic under their own BAAs.</dd>
-        <dt>Hosted registry metadata</dt><dd>If the customer publishes a receipt CID to the public registry, the BAA scope covers the registry's handling of that metadata. The receipt body itself does not include raw PHI; only content-addressed hashes.</dd>
-      </dl>
-    </div>
-    <div class="pact" style="margin-top:var(--ks-4)">
-      <h3>What the BAA does not cover</h3>
-      <dl>
-        <dt>Self-hosted teacher endpoints</dt><dd>If the customer brings their own teacher (self-hosted vLLM, SGLang, TGI, or a private endpoint), traffic does not flow through kolm and is governed by the customer's own controls.</dd>
-        <dt>Customer's storage backend</dt><dd>S3, GCS, on-prem object stores. The customer's existing BAAs with those providers govern those tiers; kolm does not interpose.</dd>
-        <dt>Workstation OS and disk encryption</dt><dd>FileVault, BitLocker, LUKS, and OS-level access controls are the customer's responsibility, even when the CLI is installed locally.</dd>
-        <dt>Identity provider</dt><dd>SSO and MFA are operated by the customer's IdP. kolm consumes signed assertions; the IdP's own BAA covers that tier.</dd>
-      </dl>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="does">
-  <div class="ks-wrap">
-    <h2>What kolm does and does not do under the BAA</h2>
-    <p class="sub">A direct list. The plain version of "shared responsibility" rather than the vague version.</p>
-    <div class="does-stack">
-      <div class="does">
-        <h3>What kolm does</h3>
-        <ul>
-          <li><b>Sign artifacts and receipts.</b> Every .kolm artifact ships with an Ed25519 signature over a content-addressed receipt naming the teacher, base model, eval pack, and K-score verdict. Verifiable offline by an auditor.</li>
-          <li><b>Score with K-score and gate.</b> The compiler runs the eval pack and records the verdict in the signed receipt. A real verdict, not a marketing claim.</li>
-          <li><b>Honor retention controls.</b> Per-namespace retention you set with <code>kolm namespace set-retention</code>. Subject-deletion via <code>kolm capture delete --subject</code> with a tombstone receipt for the auditor.</li>
-          <li><b>Notify on suspected breach.</b> Within 30 days of discovery on the kolm side of the boundary, per the BAA. Forensic timeline shared with the affected covered entity.</li>
-          <li><b>Return or destroy data at termination.</b> On termination, customer data on the hosted side is returned in a verifiable export or destroyed; kolm signs a destruction certificate.</li>
-          <li><b>Operate a trust mailbox.</b> <code>trust@kolm.ai</code> for BAA requests, breach reports, and audit support questions. Acknowledged within one business day.</li>
-        </ul>
-      </div>
-      <hr class="does-divider">
-      <div class="doesnt">
-        <h3>What kolm does not do</h3>
-        <ul>
-          <li><b>Store PHI in our infrastructure.</b> The default deployment keeps captures and weights on customer hardware. We do not replicate them upstream.</li>
-          <li><b>Route PHI through our network.</b> Unless the customer opts into the hosted teacher path, no PHI-bearing prompt transits kolm.ai.</li>
-          <li><b>Sell or share PHI for marketing.</b> The BAA prohibits secondary use; we do not have an internal use case for customer PHI to begin with.</li>
-          <li><b>Use PHI to train shared models.</b> Distilled student weights derived from customer captures live in the customer's namespace and do not feed any kolm-side model.</li>
-          <li><b>Act as a covered entity.</b> Kolm is not a provider, payor, or clearinghouse. We are a business associate when handling PHI on customer behalf; this page does not promise something we are not.</li>
-          <li><b>Sub-contract without notice.</b> Subprocessors are listed publicly at <a href="/soc2">/soc2</a>. Any new subprocessor that would touch PHI requires prior notice.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="terms">
-  <div class="ks-wrap">
-    <h2>Standard BAA terms</h2>
-    <p class="sub">The clauses a healthcare procurement reviewer expects. Defaults shown; redlines accepted within standard markup.</p>
-    <table class="terms-tbl">
-      <thead>
-        <tr><th>Clause</th><th>Default</th><th>Note</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Permitted uses and disclosures</td><td>Per BAA</td><td>Only as needed to perform the services in the master agreement, plus required-by-law disclosures. No secondary use for marketing, research, or model training.</td></tr>
-        <tr><td>Safeguards</td><td>Administrative, physical, technical</td><td>HIPAA Security Rule controls per the mapping at <a href="/hipaa-mapping">/hipaa-mapping</a>. Mapped to SOC 2 controls; the SOC 2 report is the operational evidence.</td></tr>
-        <tr><td>Reporting of impermissible use</td><td>Within 30 days</td><td>Of discovery. Forensic timeline, scope of affected PHI, and remediation summary. Breach notice obligations on the covered entity remain with the covered entity.</td></tr>
-        <tr><td>Subcontractor flow-down</td><td>Required</td><td>Each subprocessor with potential PHI exposure executes a written agreement with terms substantially similar to this BAA.</td></tr>
-        <tr><td>Access by the covered entity</td><td>Within 10 days</td><td>Of a designated request, kolm provides the PHI in our possession to enable the covered entity to respond to a Section 164.524 request.</td></tr>
-        <tr><td>Amendment by the covered entity</td><td>Within 10 days</td><td>Of a designated request, kolm makes the PHI available for amendment per Section 164.526. Tombstone receipts preserve the audit trail.</td></tr>
-        <tr><td>Accounting of disclosures</td><td>6 years</td><td>kolm retains a structured log of disclosures of PHI for the period the rule requires and makes it available on request per Section 164.528.</td></tr>
-        <tr><td>Return or destroy at termination</td><td>30 days</td><td>Of termination, with a destruction certificate or a verifiable export. If return or destruction is infeasible, the protections survive for as long as the data is retained.</td></tr>
-        <tr><td>Indemnification</td><td>Mutual</td><td>Each party indemnifies the other for breaches caused by its own negligence or willful misconduct. Caps and carve-outs negotiated in the master agreement, not the BAA.</td></tr>
-        <tr><td>Governing law</td><td>Delaware</td><td>Default. Negotiable for federal pilots, state-government customers, and EU tenants where local rules apply.</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<section class="sec-section" id="execute">
-  <div class="ks-wrap">
-    <h2>How to execute the BAA</h2>
-    <p class="sub">A real process. We do not gate the BAA behind a sales call; a compliance engineer can drive it from request to counter-signature without ever touching a calendar.</p>
-    <div class="req-flow">
-      <ol>
-        <li><b>Email <code>trust@kolm.ai</code></b> with the legal entity name, the covered-entity or business-associate role, and whether you want the kolm template or want us to redline yours. Use the <a href="/contact">contact form</a> if you prefer.</li>
-        <li><b>Template delivery</b> &middot; we send the kolm BAA template the same business day. The template references the HIPAA Security Rule mapping at <a href="/hipaa-mapping">/hipaa-mapping</a> and the SOC 2 report as Schedule 1.</li>
-        <li><b>Redlines accepted</b> &middot; within standard markup. We will accept your standard BAA template; healthcare procurement teams routinely send AHA, NIST, or institution-specific variants. Material redlines come back within five business days.</li>
-        <li><b>Counter-signature</b> &middot; counter-signed PDF returned within two business days of agreed text. We do not require a sales call to sign.</li>
-        <li><b>Subprocessor list refresh</b> &middot; once the BAA is in place, you are added to the notice list at <a href="/soc2">/soc2</a> so any future subprocessor change reaches you with the prior notice the BAA requires.</li>
-        <li><b>Audit support</b> &middot; for OCR audits, IRB reviews, or downstream covered-entity audits, a security engineer responds to evidence requests within five business days. The receipt chain itself is verifiable offline; most audit questions resolve there.</li>
-      </ol>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="scope">
-  <div class="ks-wrap">
-    <h2>Scope</h2>
-    <p class="sub">What we will say to your auditor that we also say on this page. No marketing rewrite at execution time.</p>
-    <div class="grid-2">
-      <div class="sec-card">
-        <div class="row"><span class="tag">posture</span><span class="st live">Business associate</span></div>
-        <h3>We sign the BAA; we are not a covered entity</h3>
-        <p>Kolm is not a provider, payor, or clearinghouse. When the customer puts PHI through the compiler, we become a business associate to the customer; we are not regulated as a covered entity ourselves and this page does not claim we are.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">posture</span><span class="st live">Default keeps PHI inside</span></div>
-        <h3>The default deployment keeps PHI on customer hardware</h3>
-        <p>Captures, weights, and eval-pack runs live on the customer side. The hosted control plane handles signup, registry, and the verify endpoint; the BAA scope on the kolm side is narrow because the data path is narrow.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">posture</span><span class="st live">Verifiable, not promised</span></div>
-        <h3>The receipt chain replaces "trust us"</h3>
-        <p>Every artifact is signed. An auditor can verify the chain offline against the eval pack, the K-score axes, and the teacher / base-model identifiers in the receipt. The BAA references this; the receipt does the work.</p>
-      </div>
-      <div class="sec-card">
-        <div class="row"><span class="tag">posture</span><span class="st wip">Where we will say no</span></div>
-        <h3>What we will not put into the BAA</h3>
-        <p>We will not promise zero subprocessors (we list them publicly), will not waive prior notice on subprocessor changes, will not accept unbounded indemnification, and will not represent that we are a covered entity. Real boundary; real agreement.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="sec-section" id="reach">
-  <div class="ks-wrap">
-    <h2>Reach the trust team</h2>
-    <p class="sub">For BAA execution, breach reporting, audit evidence requests, or a deployment review with a security engineer who has shipped to HIPAA workloads.</p>
-    <div class="grid-3">
-      <div class="sec-card">
-        <h3>Trust contact</h3>
-        <p>Email <code>trust@kolm.ai</code> or use the <a href="/contact">contact form</a>. Acknowledged within one business day; template back the same day.</p>
-      </div>
-      <div class="sec-card">
-        <h3>HIPAA Security Rule mapping</h3>
-        <p>Per-control mapping for 164.308 / .310 / .312 / .314 / .316 at <a href="/hipaa-mapping">/hipaa-mapping</a>. The BAA Schedule 1 references the same table.</p>
-      </div>
-      <div class="sec-card">
-        <h3>Healthcare deployment review</h3>
-        <p>For hospital systems, payors, and life-sciences customers, a solutions engineer walks your privacy and security teams through the boundary. <a href="/healthcare">Healthcare overview</a> &middot; <a href="/enterprise">Book a review</a>.</p>
-      </div>
-    </div>
-    <div style="margin-top:var(--ks-6); display:flex; flex-wrap:wrap; gap:var(--ks-3)">
-      <a href="/quickstart" class="ks-btn ks-btn--primary">Install the CLI <span class="ks-btn-arrow">&rarr;</span></a>
-      <a href="/verify-prod" class="ks-btn ks-btn--ghost">Verify a .kolm artifact</a>
-      <a href="/soc2" class="ks-btn ks-btn--ghost">SOC 2 status</a>
+<section class="section section--ink reveal cta-final">
+  <div class="wrap">
+    <h2>Start a regulated engagement.</h2>
+    <p class="lede" style="text-align:center;max-width:60ch;margin:0 auto 24px">For audit engagements that involve Protected Health Information, email us to initiate the BAA process. No sales call required to countersign.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="mailto:dev@kolm.ai">Email dev@kolm.ai</a>
+      <a class="btn btn--ghost" href="/trust">Trust center</a>
     </div>
   </div>
 </section>
 
 </main>
 
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a><a href="/compare" hidden aria-hidden="true">compare</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/about">About</a>
-        <a href="/why-kolm">Why kolm</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub &rarr;</a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
 
-<!-- w220-claim w260-trust w271-frontier w335-claim w373-receipts w408-quantize-matrix -->
 </body>
 </html>

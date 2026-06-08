@@ -1,11 +1,11 @@
-// W751-W755 — Vertical foundation students.
+// W751-W755 - Vertical foundation students.
 //
 // Five verticals (legal, medical, code, finance, support) each get:
-//   [W7Vx-1] Fingerprint capture lake by vertical    — W757-blocked, honest stub
-//   [W7Vx-2] Pre-train base student per vertical     — W715/W757-blocked, honest stub
-//   [W7Vx-3] Publish kolm-V-7b to marketplace        — register with honest
+//   [W7Vx-1] Fingerprint capture lake by vertical - W757-blocked, honest stub
+//   [W7Vx-2] Pre-train base student per vertical - W715/W757-blocked, honest stub
+//   [W7Vx-3] Publish kolm-V-7b to marketplace - register with honest
 //                                                       "pending compilation" envelope
-//   [W7Vx-4] Landing page /verticals/V.html          — case-study skeleton
+//   [W7Vx-4] Landing page /verticals/V.html - case-study skeleton
 //
 // W751-W755 items 1+2 (vertical fingerprint + per-vertical pre-train) require
 // the W757 fingerprinting pipeline + W715 cross-namespace transfer math. Both
@@ -26,7 +26,7 @@
 //     distill pipeline, the cid will flip to a real sha256-pinned content
 //     hash and the pending_distill flag will clear.
 //
-// Brand-lock: NO emoji icons in the catalog data — the standing user rule
+// Brand-lock: NO emoji icons in the catalog data - the standing user rule
 // bans emojis from shipped artifacts/files. Landing pages use pure CSS for
 // visual differentiation; the vertical metadata carries only string fields.
 
@@ -34,24 +34,24 @@ import { registerArtifact, getListingByCid } from './marketplace-store.js';
 
 export const VERTICALS_VERSION = 'w751-v1';
 
-// VERTICALS — frozen catalog of the 5 W751-W755 verticals.
+// VERTICALS - frozen catalog of the 5 W751-W755 verticals.
 //
 // Schema:
-//   id                  — lowercase string, URL-safe (matches the
+//   id - lowercase string, URL-safe (matches the
 //                          /verticals/<id>.html landing page filename)
-//   name                — human-readable title-case (UI display)
-//   tagline             — one-line marketing description (landing page lede)
-//   target_kscore       — the K-Score target the eventual distilled student
+//   name - human-readable title-case (UI display)
+//   tagline - one-line marketing description (landing page lede)
+//   target_kscore - the K-Score target the eventual distilled student
 //                          should hit; surfaced on the landing page as the
 //                          "goal" pill. Honest: the live kscore is null until
 //                          the student is compiled, target is the spec target.
-//   common_tasks        — the 5 most common tasks for this vertical; the
+//   common_tasks - the 5 most common tasks for this vertical; the
 //                          first entry doubles as the registered task_type on
 //                          the marketplace stub (W737 task_type facet).
-//   model_slug          — canonical foundation-student slug
+//   model_slug - canonical foundation-student slug
 //                          ('kolm-<id>-7b'). Matches the marketplace listing
 //                          slug AND the future kolm-pull artifact name.
-//   marketplace_status  — always 'pending_distill' at W751-v1 (until the
+//   marketplace_status - always 'pending_distill' at W751-v1 (until the
 //                          W757 + W715 pipeline produces a real compile).
 //
 // Frozen via Object.freeze on each entry AND on the outer array. Tests pin
@@ -145,7 +145,7 @@ function _mapTaskToW737Facet(task) {
   return 'support';
 }
 
-// getVertical(id) — returns the frozen vertical entry or null.
+// getVertical(id) - returns the frozen vertical entry or null.
 //
 // Case-insensitive on the id so /v1/verticals/LEGAL returns the same row as
 // /v1/verticals/legal. Returns null (NOT throws) for an unknown id so the
@@ -156,14 +156,14 @@ export function getVertical(id) {
   return VERTICALS.find((v) => v.id === want) || null;
 }
 
-// listVerticals() — returns the frozen array. Exposed as a function (not a
+// listVerticals() - returns the frozen array. Exposed as a function (not a
 // re-export) so the route handler can wrap it in an honest envelope without
 // callers mutating the underlying frozen catalog.
 export function listVerticals() {
   return VERTICALS;
 }
 
-// registerVerticalArtifact(vertical_id, publisher) — registers a stub
+// registerVerticalArtifact(vertical_id, publisher) - registers a stub
 // artifact entry in the W737 marketplace with the honest-pending shape.
 //
 // The cid is 'pending_<id>' so:
@@ -173,7 +173,7 @@ export function listVerticals() {
 //     with a real sha256 cid and this stub stays in the ledger as the
 //     "foundation announcement" entry (event-store append-only).
 //
-// Honesty contract — every field that the marketplace surface might use to
+// Honesty contract - every field that the marketplace surface might use to
 // imply readiness is explicitly null/false:
 //   - kscore: null              (NEVER fake; W737 facet supports null)
 //   - pending_distill: true     (visible-in-catalog pending flag)
@@ -192,7 +192,7 @@ export async function registerVerticalArtifact(vertical_id, publisher = 'kolm.ai
     name: vertical.model_slug,
     description:
       'Foundation student for ' + vertical.name +
-      ' — pending W751-W755 compilation (W757 fingerprinting required)',
+      ' - pending W751-W755 compilation (W757 fingerprinting required)',
     vertical: vertical.id,
     common_tasks: vertical.common_tasks.slice(),
     target_kscore: vertical.target_kscore,
@@ -215,7 +215,7 @@ export async function registerVerticalArtifact(vertical_id, publisher = 'kolm.ai
   return listing;
 }
 
-// registerAllVerticalStubs(publisher) — bulk-register all 5 verticals.
+// registerAllVerticalStubs(publisher) - bulk-register all 5 verticals.
 //
 // Idempotent: if a stub for a given slug already exists (the slug is
 // 'pending_<id>' which is also the cid, and getListingByCid is checked
@@ -245,7 +245,7 @@ export async function registerAllVerticalStubs(publisher = 'kolm.ai-foundation')
   };
 }
 
-// verticalFingerprintStub(vertical_id) — W751 honest envelope for the W757-
+// verticalFingerprintStub(vertical_id) - W751 honest envelope for the W757-
 // blocked fingerprint surface.
 //
 // SYNC contract preserved (W751 #7 + #14 sibling tests pin the literal
@@ -276,7 +276,7 @@ export function verticalFingerprintStub(vertical_id) {
     blocked_by: 'W757',
     vertical: v ? v.id : String(vertical_id || ''),
     hint:
-      'vertical fingerprint extraction requires W757 — coming in plan. ' +
+      'vertical fingerprint extraction requires W757 - coming in plan. ' +
       'Until then, capture per-namespace via /v1/capture/log and distill ' +
       'through /v1/distill. For the W757-wired async surface, call ' +
       'extractVerticalFingerprint(id) from src/pattern-lake.js.',

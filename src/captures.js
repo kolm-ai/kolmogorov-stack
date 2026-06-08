@@ -1,10 +1,10 @@
-// W829 — Multimodal capture lake.
+// W829 - Multimodal capture lake.
 //
 // Distinct from src/capture.js (which is the proxy-forwarding layer for
 // Anthropic/OpenAI/OpenRouter) and from src/capture-store.js (which is the
 // observation-row database adapter). This module is the FILESYSTEM
-// capture-lake plumbing for HETEROGENEOUS captures — image, audio,
-// tool-use, multi-turn — that the W454 transcript + W462 image + W464
+// capture-lake plumbing for HETEROGENEOUS captures - image, audio,
+// tool-use, multi-turn - that the W454 transcript + W462 image + W464
 // audio redactors already process row-by-row.
 //
 // Storage layout (one JSONL file per (namespace,kind,hash) tuple):
@@ -36,7 +36,7 @@ export const W829_VERSION = 'w829-v1';
 
 export const MULTIMODAL_KINDS = ['image', 'audio', 'tool_use', 'multi_turn'];
 
-// Sanitize a namespace label — same closed alphabet as src/capture.js so
+// Sanitize a namespace label - same closed alphabet as src/capture.js so
 // downstream tooling can join across stores without re-encoding. Empty
 // resolves to 'default'.
 export function sanitizeNamespace(raw) {
@@ -54,7 +54,7 @@ export function sanitizeHashToken(raw) {
   return s || null;
 }
 
-// Same for conversation_id — closed alphabet so a tenant can't smuggle a
+// Same for conversation_id - closed alphabet so a tenant can't smuggle a
 // '../' segment into a JSONL filename.
 export function sanitizeConversationId(raw) {
   if (raw == null) return null;
@@ -62,7 +62,7 @@ export function sanitizeConversationId(raw) {
   return s || null;
 }
 
-// Resolve ~/.kolm at call time — never at module load — so a test that
+// Resolve ~/.kolm at call time - never at module load - so a test that
 // rewrites HOME / USERPROFILE / KOLM_DATA_DIR can isolate its writes.
 export function captureLakeRoot() {
   // KOLM_DATA_DIR takes precedence over HOME so the test harness can pin
@@ -101,7 +101,7 @@ export function resolveMultiTurnPath({ namespace, conversation_id }) {
   return { root, dir, file, namespace: ns, conversation_id: cid };
 }
 
-// W829-1 — append one heterogeneous capture row to the JSONL.
+// W829-1 - append one heterogeneous capture row to the JSONL.
 //
 // Returns an honest envelope. Throws ONLY on programmer error (bad kind,
 // missing hash) so the caller can distinguish "you passed garbage" from
@@ -169,13 +169,13 @@ export function recordMultimodalCapture({ tenant, namespace, kind, payload, hash
   };
 }
 
-// W829-4 — append a multi-turn conversation row. Append-only: each call
+// W829-4 - append a multi-turn conversation row. Append-only: each call
 // adds a new line so the JSONL is the full conversation transcript.
 //
 // `conversation` is the WHOLE turn list as-of-now. Callers that want pure
 // incremental append should pass only the new turns + parent_message_id so
 // the file is naturally ordered. Either pattern works (full snapshot vs
-// incremental) — we don't try to reconcile.
+// incremental) - we don't try to reconcile.
 export function recordMultiTurnCapture({ tenant, namespace, conversation, conversation_id, parent_message_id }) {
   if (!tenant) {
     return { ok: false, error: 'tenant_required', version: W829_VERSION };

@@ -32,8 +32,58 @@ function keyPath() {
   return path.join(rootDir(), 'secrets-vault.key');
 }
 
+const IS_WIN32 = process.platform === 'win32';
+
 function ensureDir() {
-  fs.mkdirSync(rootDir(), { recursive: true });
+  // 0o700 so secret material is never group/other-traversable on POSIX.
+  fs.mkdirSync(rootDir(), { recursive: true, mode: 0o700 });
+  // mkdir's `mode` is masked by umask and ignored if the dir already exists,
+  // so tighten explicitly on POSIX and verify it took.
+  if (!IS_WIN32) {
+    try {
+      fs.chmodSync(rootDir(), 0o700);
+      const mode = fs.statSync(rootDir()).mode & 0o777;
+      if (mode & 0o077) {
+        throw Object.assign(
+          new Error(`secrets dir ${rootDir()} is group/other-accessible (mode ${mode.toString(8)}); refusing to store secrets`),
+          { code: 'vault_dir_insecure' },
+        );
+      }
+    } catch (e) {
+      if (e && e.code === 'vault_dir_insecure') throw e;
+      // chmod/stat unsupported on this fs - surface, don't silently proceed.
+      throw Object.assign(
+        new Error(`cannot secure secrets dir ${rootDir()}: ${e.message}`),
+        { code: 'vault_dir_chmod_failed' },
+      );
+    }
+  }
+}
+
+// Write a file containing secret material with owner-only permissions, then
+// VERIFY the resulting mode on POSIX. A secrets vault that silently leaves its
+// key world-readable is a real vulnerability, so this fails loudly rather than
+// swallowing a chmod error (the old `try { chmod } catch {}` did the latter).
+// On win32 POSIX modes don't apply; we rely on the user-profile ACL and skip.
+function writePrivateFile(p, data) {
+  fs.writeFileSync(p, data, { mode: 0o600 });
+  if (IS_WIN32) return;
+  try {
+    fs.chmodSync(p, 0o600);
+    const mode = fs.statSync(p).mode & 0o777;
+    if (mode & 0o077) {
+      throw Object.assign(
+        new Error(`secret file ${p} is group/other-accessible (mode ${mode.toString(8)})`),
+        { code: 'vault_file_insecure' },
+      );
+    }
+  } catch (e) {
+    if (e && e.code === 'vault_file_insecure') throw e;
+    throw Object.assign(
+      new Error(`cannot secure secret file ${p}: ${e.message}`),
+      { code: 'vault_file_chmod_failed' },
+    );
+  }
 }
 
 function getOrCreateKey() {
@@ -45,8 +95,7 @@ function getOrCreateKey() {
     if (buf.length === KEY_BYTES) return buf;
   }
   const key = crypto.randomBytes(KEY_BYTES);
-  fs.writeFileSync(p, key.toString('hex'), 'utf8');
-  try { fs.chmodSync(p, 0o600); } catch {} // deliberate: cleanup
+  writePrivateFile(p, key.toString('hex'));
   return key;
 }
 
@@ -67,8 +116,7 @@ function readVault() {
 
 function writeVault(vault) {
   ensureDir();
-  fs.writeFileSync(vaultPath(), JSON.stringify(vault, null, 2), 'utf8');
-  try { fs.chmodSync(vaultPath(), 0o600); } catch {} // deliberate: cleanup
+  writePrivateFile(vaultPath(), JSON.stringify(vault, null, 2));
 }
 
 export function encrypt(value) {

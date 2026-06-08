@@ -17,7 +17,7 @@
 //      so any consumer (CLI, API, verifier endpoint, audit log) can tell at
 //      a glance that no cryptographic chain was walked.
 //
-//   4. A pluggable interface — registerAttestationVerifier(kind, fn) — for
+//   4. A pluggable interface - registerAttestationVerifier(kind, fn) - for
 //      tenants who want to wire a real PCCS / AMD VCEK / AWS KMS / NRAS
 //      verifier. When a real verifier is registered, the state advances to
 //      CRYPTOGRAPHICALLY_VERIFIED.
@@ -47,7 +47,7 @@ export const STATES = Object.freeze({
 });
 
 // Attestation kinds the registry understands. Mirrors KNOWN_ATTESTATIONS
-// in src/device-capabilities.js. Keep these in sync — adding a kind here
+// in src/device-capabilities.js. Keep these in sync - adding a kind here
 // without also adding it there means a device claims support for an
 // attestation type the runtime can't validate.
 export const KINDS = Object.freeze({
@@ -112,7 +112,7 @@ export const REPORT_SHAPES = Object.freeze({
 });
 
 // Pluggable verifier registry. Default is shape-only stub. Real verifiers
-// register here at runtime — e.g., `registerAttestationVerifier('pccs',
+// register here at runtime - e.g., `registerAttestationVerifier('pccs',
 // pccsCryptoVerifier)` from a tenant-supplied trust-root module.
 const _verifiers = new Map();
 
@@ -257,7 +257,7 @@ export async function verifyAttestation(kind, report, opts = {}) {
   }
 }
 
-// Manifest snippet builder — used by spec-compile.js when an artifact
+// Manifest snippet builder - used by spec-compile.js when an artifact
 // declares a `target_device` with a tee. Embeds the state into the manifest
 // under `confidential_compute`. The verifier endpoint re-runs verifyAttestation
 // on the embedded report (when present) and compares states.
@@ -284,7 +284,7 @@ export function manifestBlock(kind, attestationState) {
   };
 }
 
-// W409v — Confidential compute metadata + plugin-only "verified" claim.
+// W409v - Confidential compute metadata + plugin-only "verified" claim.
 //
 // The audit said: "defaults to shape-only verification". W409v keeps that
 // honest default but adds two surfaces a downstream artifact / manifest
@@ -293,19 +293,19 @@ export function manifestBlock(kind, attestationState) {
 //   1. A canonical set of provider names every artifact metadata block uses,
 //      and a registerVerifier(provider, fn) plugin interface alongside the
 //      kind-based registerAttestationVerifier already shipped.
-//   2. A verifier function — verifyConfidentialCompute(metadata) — that
+//   2. A verifier function - verifyConfidentialCompute(metadata) - that
 //      returns {verified:false, reason:'shape_only_no_plugin'} unless a
 //      plugin for the metadata's provider returns ok:true.
 //
 // The metadata fields the artifact carries (tests assert these):
 //   - attestation_provider           e.g. 'azure-tdx' | 'gcp-tdx' | 'aws-nitro' | 'sev-snp'
 //   - attestation_report_hash        sha256 of the report bytes
-//   - trusted_execution_required     bool — does the artifact REQUIRE TEE?
+//   - trusted_execution_required     bool - does the artifact REQUIRE TEE?
 //   - enclave_image_hash             sha256 of the enclave image
 //   - gpu_attestation_hash           sha256 of the GPU attestation report
 //
-// Provider names recognised by W409v. The set is open — registerVerifier
-// can register any provider — but these are the names product copy + the
+// Provider names recognised by W409v. The set is open - registerVerifier
+// can register any provider - but these are the names product copy + the
 // device-catalog use, so the table here is the canonical list.
 export const PROVIDERS = Object.freeze([
   'azure-tdx',
@@ -337,7 +337,7 @@ export function listRegisteredProviderVerifiers() {
   return Array.from(_provider_verifiers.keys()).sort();
 }
 
-// ALWAYS-TRUE fake verifier — for testing only. Real builds MUST NOT
+// ALWAYS-TRUE fake verifier - for testing only. Real builds MUST NOT
 // register this. The presence of `__fake__: true` on the return value
 // gives downstream auditors a marker they can flag.
 export function fakeVerifier(_metadata, _opts) {

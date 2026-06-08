@@ -1,4 +1,4 @@
-// W888-D — Quant-ladder Pareto frontier per device.
+// W888-D - Quant-ladder Pareto frontier per device.
 //
 // testQuants({ baseArtifactPath, deviceId, quantLadder }) walks a list of
 // quant variants (Q8_0, Q6_K, ..., Q2_K), filters to the ones that actually
@@ -27,7 +27,7 @@ import * as deviceCaps from './device-capabilities.js';
 import { testDevice } from './test-device.js';
 
 const DEFAULT_QUANT_LADDER = ['Q8_0', 'Q6_K', 'Q5_K_M', 'Q4_K_M', 'IQ4_XS', 'Q3_K_M', 'Q2_K'];
-// W888-D spec ladder: [Q4_K_M, Q5_K_M, Q8_0, IQ4_XS, fp16] — the 5-quant
+// W888-D spec ladder: [Q4_K_M, Q5_K_M, Q8_0, IQ4_XS, fp16] - the 5-quant
 // frontier the deploy wizard surfaces. CLI default still uses the wider
 // ladder; the spec-shape ladder is what testQuantsW888d() runs.
 export const W888D_QUANT_LADDER = ['Q4_K_M', 'Q5_K_M', 'Q8_0', 'IQ4_XS', 'fp16'];
@@ -141,7 +141,7 @@ export async function testQuants({
       });
       continue;
     }
-    // Run a tiny bench (one context, no shard pivot — quant comparison is the axis here).
+    // Run a tiny bench (one context, no shard pivot - quant comparison is the axis here).
     try {
       const td = await testDevice({
         artifactPath: artifact, deviceId,

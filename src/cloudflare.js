@@ -1,4 +1,4 @@
-// Cloudflare zone API client — WAF custom rules, rate-limit rules, Email Routing.
+// Cloudflare zone API client - WAF custom rules, rate-limit rules, Email Routing.
 // Uses the same account-scoped Bearer API token as src/r2.js. Adds the ability
 // to discover zones for kolm.ai and apply hardening rules idempotently.
 //
@@ -6,7 +6,7 @@
 //   CLOUDFLARE_ACCOUNT_ID  (alias: cloudflare_account_id)
 //   CLOUDFLARE_API_TOKEN   (alias: Cloudflare_api_token)
 // Optional:
-//   CLOUDFLARE_ZONE_ID     (alias: cloudflare_zone_id) — skips zone discovery
+//   CLOUDFLARE_ZONE_ID     (alias: cloudflare_zone_id) - skips zone discovery
 //   KOLM_DOMAIN            (default: kolm.ai)
 //
 // Token scopes needed: Zone.Zone (read), Zone.Firewall Services (edit),
@@ -76,7 +76,7 @@ export async function listCustomRules(zone_id) {
 
 // Replace the entire custom ruleset atomically. Cloudflare's API treats
 // the rules list as the source of truth, so we PUT the full set on every
-// apply. Idempotent — passing the same rules twice produces the same state.
+// apply. Idempotent - passing the same rules twice produces the same state.
 export async function putCustomRules(zone_id, rules) {
   const rid = await customRulesetId(zone_id);
   if (rid) {
@@ -86,7 +86,7 @@ export async function putCustomRules(zone_id, rules) {
       body: JSON.stringify({ rules }),
     });
   }
-  // No ruleset exists yet — create one with the rules attached.
+  // No ruleset exists yet - create one with the rules attached.
   return cfFetch(`${API}/zones/${zone_id}/rulesets`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -273,7 +273,7 @@ export async function bootstrapZoneHardening({ domain = KOLM_DOMAIN } = {}) {
   await putRateLimitRules(zone_id, rlRules);
   out.applied.rate_limit_rules = rlRules.length;
 
-  // Email Routing — soft enable. If the API rejects (token lacks scope, or
+  // Email Routing - soft enable. If the API rejects (token lacks scope, or
   // the zone hasn't accepted the DNS records yet), we still surface the WAF
   // + rate-limit work as applied.
   try {

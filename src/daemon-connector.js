@@ -1,4 +1,4 @@
-// W368 — local daemon-connector. THE WEDGE.
+// W368 - local daemon-connector. THE WEDGE.
 //
 // Usage from the user's POV:
 //
@@ -16,14 +16,14 @@
 // ~/.kolm/daemon.pid so `kolm connect status|stop` can find it.
 //
 // The daemon mounts a slim express app with new "direct forwarding" routes
-// and a /v1/health snapshot. It does NOT mount the big buildRouter() — the
+// and a /v1/health snapshot. It does NOT mount the big buildRouter() - the
 // connector daemon is a focused local proxy, not the full kolm.ai surface.
 // (The same direct-forwarding routes are also added to buildRouter() so the
 // cloud deployment supports them, see src/router.js.)
 //
 // Persistence: every captured round-trip is written via insertCapture() from
 // src/capture-store.js. The default driver is the local SQLite store under
-// ~/.kolm/events/events.sqlite — durable, queryable, survives reboots.
+// ~/.kolm/events/events.sqlite - durable, queryable, survives reboots.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -38,7 +38,7 @@ import { estimateCost, extractUsage } from './cost-estimator.js';
 import { newEvent, hashContent } from './event-schema.js';
 import { scan as privacyScan, redact as privacyRedact, reinsert as privacyReinsert } from './privacy-membrane.js';
 import { insertCapture, isDurable as captureIsDurable, driverName as captureDriverName, health as captureStoreHealth } from './capture-store.js';
-// W409a — event-store is the canonical telemetry plane. Every capture row we
+// W409a - event-store is the canonical telemetry plane. Every capture row we
 // write to capture-store is ALSO appended here so the lake / opportunity
 // engine / dataset workbench / label queue / training planner all see it.
 // appendEvent is INSERT OR REPLACE keyed on event_id → idempotent against a
@@ -60,7 +60,7 @@ function configPath(dataDir) { return path.join(resolveKolmDir(dataDir), 'config
 function eventsDir(dataDir) { return path.join(resolveKolmDir(dataDir), 'events'); }
 function rawDir(dataDir) { return path.join(eventsDir(dataDir), 'raw'); }
 
-// W411 — local daemon sentinel tenant_id. Captures from an unauthenticated
+// W411 - local daemon sentinel tenant_id. Captures from an unauthenticated
 // local proxy still carry a tenant so the lake / opportunities / datasets
 // path has something queryable. Falls back to 'local:host' if hostname()
 // blows up for whatever reason.
@@ -134,7 +134,7 @@ export function resolveUpstreamKey(provider, req) {
   return null;
 }
 
-// W407b — Read privacy policy from ~/.kolm/config.json. Defaults to 'redact'
+// W407b - Read privacy policy from ~/.kolm/config.json. Defaults to 'redact'
 // (fail-safe: never let raw PII reach the lake unless the user opts in via
 // `kolm connect config --set privacy_policy=allow` or KOLM_PRIVACY_POLICY=allow).
 function loadPolicy() {
@@ -144,7 +144,7 @@ function loadPolicy() {
   return 'redact';
 }
 
-// W409b — raw opt-in resolver. Returns true ONLY when the operator explicitly
+// W409b - raw opt-in resolver. Returns true ONLY when the operator explicitly
 // authorizes raw bytes to land on disk. Two opt-in vectors:
 //   1. env KOLM_ALLOW_RAW=true (global, persists across the daemon's lifetime)
 //   2. per-request header x-kolm-raw: true (caller-scoped, audit-friendly)
@@ -157,7 +157,7 @@ function isRawAllowed(req) {
   return false;
 }
 
-// W409b — sidecar raw store. When raw is explicitly authorized, the bytes go to
+// W409b - sidecar raw store. When raw is explicitly authorized, the bytes go to
 // ~/.kolm/events/raw/<sha256>.txt and the event row carries a pointer +
 // content hash. The lake table itself NEVER stores inline raw text; consumers
 // that want the raw payload must read the sidecar file (gated behind the same
@@ -289,7 +289,7 @@ function extractCompletionText(json, provider) {
   return String(first.text || '');
 }
 
-// W409k — fixture mode for the local daemon. When the operator points an SDK
+// W409k - fixture mode for the local daemon. When the operator points an SDK
 // at the daemon with no upstream key set AND opts into KOLM_CONNECTOR_FIXTURE=1,
 // we return a deterministic mock shaped like the upstream's real response so
 // integration tests + offline-dev sessions can still exercise the full
@@ -375,7 +375,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
   const rawAllowed = isRawAllowed(req);
   const promptText = extractPromptText(body, provider);
   const scan = privacyScan(promptText);
-  // W409b/W550 — surface "noncompliant identifier detected" so the warning is
+  // W409b/W550 - surface "noncompliant identifier detected" so the warning is
   // not swallowed. malformed_* classes flow through as normal sensitive_class
   // values AND light up this dedicated tag for dashboards/auditors.
   const noncompliantIds = Array.from(new Set((scan.classes || []).filter((c) => String(c).startsWith('malformed_'))));
@@ -395,7 +395,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
   let forwardBody = body;
   let placeholderMap = null;
   let redactedPromptText = null;
-  // W409b — fail-closed: pre-compute the redacted prompt up front whenever
+  // W409b - fail-closed: pre-compute the redacted prompt up front whenever
   // sensitive data is present, regardless of policy. The success and error
   // paths both reach for `redactedPromptText`, so a 5xx from upstream can
   // never smuggle raw PII into the lake (the historical bug at the old
@@ -429,7 +429,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
       if (typeof forwardBody.prompt === 'string') forwardBody.prompt = swap(forwardBody.prompt);
     }
   }
-  // W409b — derive the canonical lake-form prompt up front. The default is
+  // W409b - derive the canonical lake-form prompt up front. The default is
   // redacted regardless of policy: only the operator's explicit raw opt-in
   // (KOLM_ALLOW_RAW=true / x-kolm-raw header) lets raw bytes reach the lake
   // table, and even then only if policy=allow. Otherwise the redacted form is
@@ -447,7 +447,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
       return rs.redacted_text || rs.redacted || '';
     } catch (_) { return ''; }
   }
-  // W409b — sidecar raw persistence (only when explicitly opted in).
+  // W409b - sidecar raw persistence (only when explicitly opted in).
   let rawPromptHash = null;
   let rawResponseHash = null;
   let rawPromptPath = null;
@@ -474,7 +474,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
   }
   let upstreamResp;
   if (fixtureMode && !upstreamKey) {
-    // W409k — local fixture mode: skip the network entirely and return a
+    // W409k - local fixture mode: skip the network entirely and return a
     // deterministic mock so tests can exercise the connector surface without
     // configuring real upstream keys. The event still flows through the
     // canonical pipeline tagged source_type:'simulated'.
@@ -482,7 +482,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
   } else try {
     upstreamResp = await forwardRaw({ url: upstreamUrl, method: 'POST', headers, body: forwardBody });
   } catch (e) {
-    // W409b — FAIL-CLOSED error path. The old code stuffed raw `promptText`
+    // W409b - FAIL-CLOSED error path. The old code stuffed raw `promptText`
     // into the observation row when forwardRaw threw; that meant any 5xx
     // from upstream leaked PII to the lake. We now persist the redacted
     // form (via deriveLakePrompt()) on this path, identical to success.
@@ -526,7 +526,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
     try {
       await insertCapture(eventToObservationRow(ev, lakePromptOnError, ''));
     } catch (_) { durable = false; }
-    // W409a — canonical event-store write (additional to capture-store). The
+    // W409a - canonical event-store write (additional to capture-store). The
     // ev built above already carries every canonical field; appendEvent is
     // idempotent (INSERT OR REPLACE) so the bridge inside insertCapture and
     // this explicit append collapse to one row.
@@ -562,7 +562,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
       bodyForCaller = walk(bodyForCaller);
     } catch (_) { bodyForCaller = upstreamResp.body; }
   }
-  // W409b — sidecar raw response only when opt-in. Off by default.
+  // W409b - sidecar raw response only when opt-in. Off by default.
   if (zeroRetention) {
     return {
       status: upstreamResp.status,
@@ -588,7 +588,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
   if (httpStatus === 429) canonStatus = 'rate_limited';
   else if (httpStatus === 408 || httpStatus === 504) canonStatus = 'timeout';
   else if (httpStatus >= 400) canonStatus = 'error';
-  // W409b — fail-closed prompt_redacted/response_redacted: always populated
+  // W409b - fail-closed prompt_redacted/response_redacted: always populated
   // when sensitive data was detected, regardless of policy, so the lake row
   // always carries a sanitized version even on the allow path.
   const promptRedactedField = scan.sensitive
@@ -617,7 +617,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
     sensitive_classes: scan.classes,
     redaction_count: placeholderMap ? Object.keys(placeholderMap).length : 0,
     redaction_policy: policy,
-    // W409k — simulated source when the daemon synthesized the response.
+    // W409k - simulated source when the daemon synthesized the response.
     source_type: (fixtureMode && !upstreamKey) ? 'simulated' : 'real',
     raw_available: rawAllowed && (!!rawPromptHash || !!rawResponseHash),
     raw_prompt_hash: rawPromptHash,
@@ -631,7 +631,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
   // (their LLM call succeeded) while making the storage problem visible via
   // x-kolm-event-durable: false header.
   let durable = true;
-  // W409b — derive lake-form text via the helpers so policy + raw opt-in are
+  // W409b - derive lake-form text via the helpers so policy + raw opt-in are
   // honored uniformly. The raw bytes only land in the sidecar (if at all).
   const lakePrompt = deriveLakePrompt();
   const lakeResponse = respTextForLake;
@@ -640,7 +640,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
   } catch (_) {
     durable = false;
   }
-  // W409a — canonical event-store write (additional to capture-store). We pass
+  // W409a - canonical event-store write (additional to capture-store). We pass
   // the lake-redacted prompt/response so the event row's prompt_redacted /
   // response_redacted columns carry the post-policy text. Idempotent: same
   // event_id collapses with the bridge fired from insertCapture above.
@@ -665,7 +665,7 @@ async function proxyOne({ provider, upstreamPath, req }) {
 // src/capture-store.js insertCapture. Keeps the dashboard + distill paths
 // reading the same store.
 //
-// W409b — every persisted row now carries the redaction_policy + raw_available
+// W409b - every persisted row now carries the redaction_policy + raw_available
 // + noncompliant_identifiers tags so a downstream auditor can sweep the lake
 // and answer "did any row land here under the wrong policy?" without
 // re-running detection.
@@ -689,7 +689,7 @@ function eventToObservationRow(ev, promptText, respText) {
     redaction_count: ev.redaction_count,
     event_id: ev.event_id,
     created_at: ev.created_at,
-    // W409b privacy provenance — persisted alongside every capture row.
+    // W409b privacy provenance - persisted alongside every capture row.
     redaction_policy: ev.redaction_policy || 'redact',
     raw_available: ev.raw_available === true,
     raw_prompt_hash: ev.raw_prompt_hash || null,
@@ -813,11 +813,11 @@ export function buildDaemonApp({ dataDir } = {}) {
       res.set('x-kolm-provider', out.event.provider || provider);
       res.set('x-kolm-model', String(out.event.model || ''));
       res.set('x-kolm-event-durable', String(out.durable !== false));
-      // W409b — surface privacy provenance on the response so SDK callers can
+      // W409b - surface privacy provenance on the response so SDK callers can
       // assert fail-closed behavior without reading the lake.
       res.set('x-kolm-redaction-policy', String(out.event.redaction_policy || 'redact'));
       res.set('x-kolm-raw-available', String(out.event.raw_available === true));
-      // W409k — fixture marker (simulated source) for SDK callers + tests.
+      // W409k - fixture marker (simulated source) for SDK callers + tests.
       if (out.event.source_type === 'simulated') res.set('x-kolm-fixture', 'true');
       if (Array.isArray(out.event.noncompliant_identifiers) && out.event.noncompliant_identifiers.length) {
         res.set('x-kolm-noncompliant-identifiers', out.event.noncompliant_identifiers.join(','));
@@ -851,7 +851,7 @@ export function buildDaemonApp({ dataDir } = {}) {
     handlePassthrough('gemini', upstreamPath, req, res);
   });
 
-  // /v1/health — daemon snapshot for `kolm connect status|doctor`.
+  // /v1/health - daemon snapshot for `kolm connect status|doctor`.
   app.get('/v1/health', async (_req, res) => {
     let storage = path.join(resolveKolmDir(dataDir), 'events', 'events.sqlite');
     let storageHealth = null;
@@ -890,10 +890,10 @@ export function buildDaemonApp({ dataDir } = {}) {
     });
   });
 
-  // /health — public lightweight probe, no secrets, matches `kolm health` shape.
+  // /health - public lightweight probe, no secrets, matches `kolm health` shape.
   app.get('/health', (_req, res) => res.json({ status: 'ok', version: DAEMON_VERSION, kind: 'connector_daemon' }));
 
-  // W407b — GET /v1/models. OpenAI-shaped {object:'list', data:[...]} listing
+  // W407b - GET /v1/models. OpenAI-shaped {object:'list', data:[...]} listing
   // every model the daemon knows about across all configured providers (read
   // from PROVIDERS[*].cost_per_1k, the declared static lists). Does NOT call
   // any upstream; this is local metadata so SDKs that auto-discover models
@@ -910,7 +910,7 @@ export function buildDaemonApp({ dataDir } = {}) {
           created,
           owned_by: provId,
         });
-        // W409k — Anthropic-compat alias. The hosted server emits prefixed
+        // W409k - Anthropic-compat alias. The hosted server emits prefixed
         // `anthropic:<id>` rows so the Anthropic SDK can list Claude models
         // without colliding with their canonical OpenAI-shaped ids. The
         // daemon must be a SUPERSET of the server surface so SDKs auto-
@@ -927,7 +927,7 @@ export function buildDaemonApp({ dataDir } = {}) {
         }
       }
     }
-    // W409k — also surface FRONTIER_MODELS (the kolm-teacher catalogue) so
+    // W409k - also surface FRONTIER_MODELS (the kolm-teacher catalogue) so
     // the daemon's /v1/models is a SUPERSET of the hosted server's. SDKs
     // that auto-discover models via the daemon (dev tunnels, byoc) see the
     // same teacher catalogue as the hosted surface.
@@ -1015,7 +1015,7 @@ export async function stopDaemon(target) {
   return true;
 }
 
-// Check daemon status — reads PID file + checks if alive.
+// Check daemon status - reads PID file + checks if alive.
 export function daemonStatus() {
   const rec = readPidRecord();
   if (!rec) return { running: false };

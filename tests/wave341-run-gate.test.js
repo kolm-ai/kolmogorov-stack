@@ -30,7 +30,9 @@ import { spawn } from 'node:child_process';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const CLI_PATH = path.resolve(ROOT, 'cli', 'kolm.js');
-const FIXTURE = path.resolve(ROOT, 'public', 'registry-pack', 'phi-redactor.kolm');
+// The public/registry-pack/ marketplace surface was retired in the 2026 site
+// teardown; the not-production_ready fixture survives at its build-staging path.
+const FIXTURE = path.resolve(ROOT, 'scripts', 'registry-pack-tmp', 'phi-redactor.kolm');
 
 function runCli(args) {
   return new Promise((resolve) => {

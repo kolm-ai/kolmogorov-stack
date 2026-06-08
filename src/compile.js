@@ -4,7 +4,7 @@
 // engines participate: Recall (multimodal substrate), Distill (verified
 // inference labels), Decompose (recipe pack), Run (artifact bundling).
 //
-// Wave 282 — every build path now routes through `src/spec-compile.js`. The
+// Wave 282 - every build path now routes through `src/spec-compile.js`. The
 // pre-W282 pipeline synthesized fake eval cases from the task description
 // when the caller provided no examples and shipped the resulting artifact
 // with an essentially-meaningless K-score. Per audit finding C1 that path
@@ -21,7 +21,7 @@ import { compileSpec } from './spec-compile.js';
 import { prepareSeedSplit, hashSeeds } from './seeds.js';
 import { TEMPLATES as CHAT_TEMPLATES, pickTemplate, manifestBlock } from './chat-templates.js';
 
-// W234 — resolve the chat_template block that gets stamped into the artifact
+// W234 - resolve the chat_template block that gets stamped into the artifact
 // manifest. Callers can either name a template explicitly (chat_template) or
 // rely on inference from the base_model name. thinking_mode is a per-job
 // override that opts in to (or out of) the qwen-3-thinking scratchpad even
@@ -60,12 +60,12 @@ const VALID_PRESETS = new Set([
   'instant',        // TAID-inspired zero-shot
 ]);
 
-// W716-3 — Mixture-of-Experts recipe scaffold.
+// W716-3 - Mixture-of-Experts recipe scaffold.
 //
 // Emits a kolm.yaml-style block from an arch spec produced by
 // src/student-arch-recommender.js#recommendArch. Gated behind
 // KOLM_ENABLE_MOE because the recipe ships before the full mixture
-// trainer does — production_ready:false is stamped on the output so
+// trainer does - production_ready:false is stamped on the output so
 // downstream code can refuse to ship until the trainer lands.
 //
 // Honest contract:
@@ -102,7 +102,7 @@ export function buildMoeRecipe(arch_spec) {
     ? !/^(1|true|yes|on)$/i.test(String(process.env.KOLM_ENABLE_MOE))
     : true;
 
-  // yaml-style block (string + structured both — caller picks the form
+  // yaml-style block (string + structured both - caller picks the form
   // they want to thread into the spec).
   const yamlBlock =
     'recipe:\n' +
@@ -119,7 +119,7 @@ export function buildMoeRecipe(arch_spec) {
     '    depth: ' + (Number(arch_spec.depth) || 0) + '\n' +
     '    hidden_dim: ' + (Number(arch_spec.hidden_dim) || 0) + '\n' +
     '    num_attention_heads: ' + (Number(arch_spec.num_attention_heads) || 0) + '\n' +
-    '  production_ready: false   # W716-3 — recipe scaffold; trainer pending\n';
+    '  production_ready: false   # W716-3 - recipe scaffold; trainer pending\n';
 
   return {
     ok: true,
@@ -248,15 +248,15 @@ function slugify(s) {
 }
 
 // Run the orchestrator. Fire-and-forget on long-running nodes; awaited on
-// serverless. Wave 282 — every successful path produces an artifact via
+// serverless. Wave 282 - every successful path produces an artifact via
 // `compileSpec` (the same code that `kolm compile --spec -` runs). There is
-// no longer a "synthesize-and-zip without a real eval set" branch — the spec-compile
+// no longer a "synthesize-and-zip without a real eval set" branch - the spec-compile
 // seed gate is the only build path.
 export async function runJob(job, ctx) {
   try {
     setStatus(job, 'running', { progress: 5 });
 
-    // Stage 1 — Recall.
+    // Stage 1 - Recall.
     setStage(job, 'recall.start');
     let recall_chunks = [];
     if (ctx.recall && job.corpus_namespace) {
@@ -278,7 +278,7 @@ export async function runJob(job, ctx) {
     const negatives = examples.filter(e => e && e.kind === 'negative');
     if (positives.length === 0) {
       setStatus(job, 'failed', {
-        error: 'no_seeds_provided: compile refused — at least one positive example (an {input, output} pair) is required so the artifact has a real evaluation set. Pre-Wave-282 builds synthesized fake eval cases from the task description; that path is closed.',
+        error: 'no_seeds_provided: compile refused - at least one positive example (an {input, output} pair) is required so the artifact has a real evaluation set. Pre-Wave-282 builds synthesized fake eval cases from the task description; that path is closed.',
         error_code: 'KOLM_E_NO_SEEDS',
         progress: 25,
         failed_at: new Date().toISOString(),
@@ -286,10 +286,10 @@ export async function runJob(job, ctx) {
       return;
     }
 
-    // Wave 283 — split the seeds BEFORE synthesis so the teacher only ever
+    // Wave 283 - split the seeds BEFORE synthesis so the teacher only ever
     // sees train rows. Pre-W283 we passed every positive to ctx.synthesize,
     // which meant the holdout the K-score later measured against had been
-    // seen at recipe-construction time — a textbook leakage and a real
+    // seen at recipe-construction time - a textbook leakage and a real
     // audit finding. Now we write seeds.jsonl first, run prepareSeedSplit
     // deterministically (same split_seed compileSpec will use later), and
     // feed only `train` to synthesis. The manifest carries
@@ -325,7 +325,7 @@ export async function runJob(job, ctx) {
       synthesis_input_hash: synthesisInputHash,
     });
 
-    // Stage 2 — Distill: synthesize a JS recipe from the train slice only.
+    // Stage 2 - Distill: synthesize a JS recipe from the train slice only.
     setStage(job, 'distill.start');
     let synthesis_result = null;
     try {
@@ -357,7 +357,7 @@ export async function runJob(job, ctx) {
     }
     setStatus(job, 'running', { progress: 60 });
 
-    // Stage 3 — Decompose: register the synthesized recipe as a real
+    // Stage 3 - Decompose: register the synthesized recipe as a real
     // concept so the caller can POST /v1/recipes/{id}/run against their
     // freshly compiled artifact.
     setStage(job, 'decompose.start');
@@ -401,13 +401,13 @@ export async function runJob(job, ctx) {
     });
     setStatus(job, 'running', { progress: 80 });
 
-    // Stage 4 — Package via compileSpec. The seeds.jsonl was already written
+    // Stage 4 - Package via compileSpec. The seeds.jsonl was already written
     // in the pre-split phase above; compileSpec will re-run the deterministic
     // split (same split_seed) so the holdout the K-score is measured against
     // is identical to the holdout we held back from the teacher.
     setStage(job, 'package.start');
 
-    // Honest artifact_class — strategy 'claude' means an LLM teacher emitted
+    // Honest artifact_class - strategy 'claude' means an LLM teacher emitted
     // the source (synthesized_rule). Strategy 'pattern' is deterministic
     // template matching with no teacher (rule). The audit (C2) requires
     // build-time class enforcement so we never default to a claim the bytes
@@ -472,7 +472,7 @@ export async function runJob(job, ctx) {
     const threshold = typeof job.k_threshold === 'number' ? job.k_threshold : 0.85;
     if (typeof composite === 'number' && composite < threshold) {
       setStatus(job, 'failed', {
-        error: `k_score ${composite.toFixed(3)} below threshold ${threshold.toFixed(2)} — no artifact shipped`,
+        error: `k_score ${composite.toFixed(3)} below threshold ${threshold.toFixed(2)} - no artifact shipped`,
         error_code: 'KOLM_E_K_SCORE_BELOW_THRESHOLD',
         k_score: composite,
         artifact_path: null,

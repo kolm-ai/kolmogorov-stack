@@ -1,4 +1,4 @@
-// KOLM Data Engine — data-scaling-law / Chinchilla-style data-budget model (W921).
+// KOLM Data Engine - data-scaling-law / Chinchilla-style data-budget model (W921).
 //
 // Replaces the hand-tuned, single-anchor, log-saturating pairs heuristic with a
 // DATA-DRIVEN scaling curve fitted per (tenant, namespace) from observed
@@ -6,7 +6,7 @@
 // reach target K, and is the next batch worth the spend?" with a defensible
 // number instead of a fixed +500/+150 prior.
 //
-// MODEL: the RECTIFIED SCALING LAW (Lin et al., arXiv:2402.02314) — the only
+// MODEL: the RECTIFIED SCALING LAW (Lin et al., arXiv:2402.02314) - the only
 // published law that captures the small-data "pre-power phase" that IS kolm's
 // regime (sub-1000 pairs). In loss space:
 //
@@ -14,7 +14,7 @@
 //
 //   D    = n_pairs (fine-tune data size)
 //   B>0  = initial-loss scale
-//   D_l>=0 = "pre-learned data size" — how much signal the base model already
+//   D_l>=0 = "pre-learned data size" - how much signal the base model already
 //            carries from pretraining (large D_l => flat-then-bends curve). This
 //            term is what makes the law fit at small n where a vanilla power law
 //            fails.
@@ -25,7 +25,7 @@
 // link L = -ln(K) (K=1 -> L=0, K->0 -> L->inf, strictly decreasing): fit the law
 // in L-space (where the power-law math holds), map predictions back via
 // K_hat(D) = exp(-L_hat(D)). The K-domain curve is monotone-increasing and
-// saturating in D — exactly the shape the heuristic hand-approximates, fitted.
+// saturating in D - exactly the shape the heuristic hand-approximates, fitted.
 //
 // FITTING (Hitchhiker's-Guide recipe, arXiv:2410.11840): minimize HUBER loss of
 // the LOG-residual r = ln(L_hat) - ln(L_obs) over log-parameterized positive
@@ -34,13 +34,13 @@
 // fit RMSD; gate "trust the fit" on RMSD <= gate AND n_points >= min_points.
 //
 // DERIVED QUANTITIES the autopilot consumes:
-//   kHatAtSize(fit, D)         — point estimate of K at any data size
-//   marginalDkPerRow(fit, D)   — analytic dK_hat/dD, the true economic signal
-//   pairsToTarget(fit, K)      — closed-form data size to hit a target K
-//   recommendDataBudget(...)   — acquire | stop | switch_strategy + cost
+//   kHatAtSize(fit, D) - point estimate of K at any data size
+//   marginalDkPerRow(fit, D) - analytic dK_hat/dD, the true economic signal
+//   pairsToTarget(fit, K) - closed-form data size to hit a target K
+//   recommendDataBudget(...) - acquire | stop | switch_strategy + cost
 //
 // CAVEATS CONTRACT: cold start (n_points<min) or junk fit (rmsd>gate) returns
-// basis:'insufficient', ok:true, no params — the caller falls through to its
+// basis:'insufficient', ok:true, no params - the caller falls through to its
 // existing heuristic. Determinism: identical points + seed grid => identical
 // params (bit-stable). Pure JS, zero new deps. NEVER throws across the public
 // API.
@@ -96,7 +96,7 @@ function _huber(r, delta) {
 }
 
 /**
- * _huberLogResidualLoss(theta, points, delta) — sum of Huber(ln L_hat - ln L_obs)
+ * _huberLogResidualLoss(theta, points, delta) - sum of Huber(ln L_hat - ln L_obs)
  * @param {number[]} theta  [lnB, lnD_l_p1, beta, lnE]
  * @param {Array<[number,number]>} points  [[D, L_obs], ...]
  * @param {number} delta
@@ -118,7 +118,7 @@ export function _huberLogResidualLoss(theta, points, delta = 1e-3) {
 // ── pure-JS Nelder-Mead simplex ───────────────────────────────────────────────
 
 /**
- * _nelderMead(objective, x0, opts) — downhill simplex (Nelder-Mead 1965).
+ * _nelderMead(objective, x0, opts) - downhill simplex (Nelder-Mead 1965).
  * Deterministic given x0. No external numeric deps.
  * @param {(x:number[])=>number} objective
  * @param {number[]} x0
@@ -188,7 +188,7 @@ export function _nelderMead(objective, x0, opts = {}) {
 // ── seed grid ─────────────────────────────────────────────────────────────────
 
 /**
- * _seedInitializations(points) — grid of starting thetas + a closed-form linear
+ * _seedInitializations(points) - grid of starting thetas + a closed-form linear
  * seed. The loss surface is non-convex so we fit from each and keep the best.
  * @param {Array<[number,number]>} points  [[D, L_obs], ...]
  * @returns {number[][]}  array of theta seeds
@@ -215,7 +215,7 @@ export function _seedInitializations(points) {
 // ── fit ───────────────────────────────────────────────────────────────────────
 
 /**
- * fitDataScalingLaw — fit the rectified law to observed (n_pairs, K) points.
+ * fitDataScalingLaw - fit the rectified law to observed (n_pairs, K) points.
  * Points are provided directly OR (when omitted) read from kscore-timeseries for
  * the (tenant, namespace) via the injectable loader.
  *
@@ -296,7 +296,7 @@ function _normalizePoints(pts) {
     } else continue;
     if (Number.isFinite(D) && D > 0 && Number.isFinite(K)) out.push([D, K]);
   }
-  // de-dup on D keeping last, sort ascending — stable input to the fitter
+  // de-dup on D keeping last, sort ascending - stable input to the fitter
   const byD = new Map();
   for (const [D, K] of out) byD.set(D, K);
   return [...byD.entries()].sort((a, b) => a[0] - b[0]);
@@ -363,7 +363,7 @@ export function pairsToTarget(fit, k_target) {
 }
 
 /**
- * recommendDataBudget — acquire | stop | switch_strategy with a projected cost.
+ * recommendDataBudget - acquire | stop | switch_strategy with a projected cost.
  * Advisory ONLY to data acquisition; never a deploy trigger.
  * @returns {{recommend, pairs_to_target, marginal_dk_per_row, projected_cost_to_target_usd, reason}}
  */

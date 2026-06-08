@@ -1,14 +1,14 @@
-// Teams (orgs) — multi-tenant shared workspaces.
+// Teams (orgs) - multi-tenant shared workspaces.
 //
 // A team is a billing unit that wraps multiple tenants. The team owner pays;
 // members get read/write access to team-scoped concepts, recipes, artifacts,
 // tunnels, and BYOC deployments via membership.
 //
 // Roles (low → high): viewer, member, admin, owner.
-//   viewer  — read team resources
-//   member  — read + create team resources
-//   admin   — read + write + invite + remove members
-//   owner   — admin + transfer ownership + delete team
+//   viewer - read team resources
+//   member - read + create team resources
+//   admin - read + write + invite + remove members
+//   owner - admin + transfer ownership + delete team
 //
 // Team identity: stable `id` (team_<rand>) + URL slug. Slug uniqueness is
 // enforced at create time so /teams/<slug> is durable. Renaming changes the
@@ -242,7 +242,7 @@ export function revokeInvite(inviteId, byTenantId) {
   return true;
 }
 
-// Resource sharing helpers — called by registry / compile / tunnel to decide
+// Resource sharing helpers - called by registry / compile / tunnel to decide
 // whether a resource is readable/writable in a team context.
 export function teamScopedReadable(resource, tenantId, tenantName) {
   if (!resource) return false;

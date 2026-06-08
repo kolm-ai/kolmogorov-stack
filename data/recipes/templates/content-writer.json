@@ -1,0 +1,17 @@
+{
+  "name": "content-writer",
+  "title": "Content Writer",
+  "icon": "pencil",
+  "description": "Brand-voice copy generation across web, email, social. Distills a writer that respects tone-of-voice rules and never invents claims about the product.",
+  "default_describe": "Write copy in the brand voice. Stay within the word count. Never invent product features, pricing, or stats not present in the brief. Reuse phrasing from the brief when it conveys the right meaning.",
+  "sample_csv_url": "/samples/content-writer.csv",
+  "recommended_student": "qwen2.5-7b-instruct",
+  "recommended_target": "gguf-q4km",
+  "recommended_gate": 0.82,
+  "expected_kscore": 0.85,
+  "eval_criteria": ["tone_match", "word_count_within_range", "no_inventions", "brief_coverage"],
+  "input_col": "brief",
+  "output_col": "copy",
+  "use_cases": ["product email", "landing page hero", "social post", "blog intro"],
+  "minimum_rows": 50
+}

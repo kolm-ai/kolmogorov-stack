@@ -1,16 +1,16 @@
-// W717-1 — curriculum-distillation sort.
+// W717-1 - curriculum-distillation sort.
 //
 // Sister to W711 (importance scorer) and W712 (progressive 3-pass curriculum).
 // W711 rank by training VALUE. W712 splits into capability stages. W717 orders
 // the rows WITHIN a stage from simple to complex so the student's early epochs
-// see the easy distribution before the hard tail — the classical curriculum
+// see the easy distribution before the hard tail - the classical curriculum
 // learning recipe (Bengio et al, 2009).
 //
 // The complexity proxy is intentionally LIGHT (no LLM call, no tokenizer pull):
 //
 //   length_norm   = response_chars / 4096, clamped to [0, 1].
 //                   Long responses are usually harder than short ones in a
-//                   chat-style corpus — they pack more structure, more
+//                   chat-style corpus - they pack more structure, more
 //                   conditional branches, and more places the student can
 //                   diverge from the teacher.
 //
@@ -91,7 +91,7 @@ function _captureId(capture, fallback_idx) {
 }
 
 // -------------------------------------------------------------------------
-// Token-frequency table + Shannon perplexity. Both use whitespace tokens —
+// Token-frequency table + Shannon perplexity. Both use whitespace tokens - 
 // same trade-off as W711: BPE multiplier (~1.3x) cancels in the per-corpus
 // frequency ratio.
 // -------------------------------------------------------------------------
@@ -180,7 +180,7 @@ function _normalizeLength(responseText) {
  * `opts.unigramTable` + `opts.totalTokens` thread a pre-built corpus table
  * through (used by sortCapturesByCurriculum so each capture is scored
  * against the same reference). When omitted, the function builds a
- * trivial table from the single capture — useful for ad-hoc one-shot
+ * trivial table from the single capture - useful for ad-hoc one-shot
  * scoring but the perplexity number is then degenerate (every token is
  * "expected" against itself).
  *
@@ -258,8 +258,8 @@ export function sortCapturesByCurriculum(captures, mode = 'ascending') {
  *   {
  *     capture_id: string,
  *     complexity_proxy: number in [0, 1],
- *     prompt: string,                  (optional — passed through when present)
- *     response: string,                (optional — passed through when present)
+ *     prompt: string,                  (optional - passed through when present)
+ *     response: string,                (optional - passed through when present)
  *     reasoning_trace?: object,        (passed through when present so W713
  *                                      stays compatible)
  *   }

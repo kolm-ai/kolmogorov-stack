@@ -1,6 +1,6 @@
-// W759 — Calculator tool (recursive-descent + - * / parentheses ONLY).
+// W759 - Calculator tool (recursive-descent + - * / parentheses ONLY).
 //
-// SECURITY CONTRACT — read before editing.
+// SECURITY CONTRACT - read before editing.
 //
 //   This module is the ONLY arithmetic evaluator in the W759 path. It is also
 //   the source of truth for src/eval-numeric.js (verifyArithmetic re-exports
@@ -19,12 +19,12 @@
 //   Anything else (identifiers, function calls, `**`, `%`, bitwise ops,
 //   property access, template strings, backticks, semicolons, commas, square
 //   brackets, regex literals, comments) is rejected at the tokeniser. The
-//   parser never consults a symbol table — there are no symbols.
+//   parser never consults a symbol table - there are no symbols.
 //
 //   Honesty contract on errors: every failure path returns
 //   {ok:false, error:'syntax_error'|'divide_by_zero'|'unsupported_operator',
 //    detail}. We NEVER throw out of the public surface and we NEVER silently
-//   succeed on partial input — `2 + ` returns syntax_error, not 2.
+//   succeed on partial input - `2 + ` returns syntax_error, not 2.
 //
 // W735 TOOL-USE COMPATIBILITY.
 //
@@ -94,8 +94,8 @@ function tokenize(src) {
       tokens.push({ kind: 'num', value, span: [start, i] });
       continue;
     }
-    // Anything else — including `**`, `%`, `<`, `>`, `=`, identifiers,
-    // brackets, semicolons, backticks — gets rejected with the specific
+    // Anything else - including `**`, `%`, `<`, `>`, `=`, identifiers,
+    // brackets, semicolons, backticks - gets rejected with the specific
     // `unsupported_operator` error so callers can tell apart "your expression
     // is malformed" from "your operator isn't supported".
     return {
@@ -228,12 +228,12 @@ export function evalSafeArithmetic(expr) {
 // ─── public: extract arithmetic expressions from text ────────────────────────
 // Finds candidate `<digits/ops/parens>` substrings and tries each through the
 // safe evaluator. Returns the list that successfully parse. We do NOT extract
-// expressions that contain `=` here — that is handled by extractEquations in
+// expressions that contain `=` here - that is handled by extractEquations in
 // eval-numeric.js so the responsibilities stay separate.
 function _extractArithmeticCandidates(text) {
   if (typeof text !== 'string' || !text) return [];
   // Match runs of digits, operators, parens, dots, spaces, e/E. We bound by
-  // a non-arithmetic boundary on either side. The regex is liberal — we lean
+  // a non-arithmetic boundary on either side. The regex is liberal - we lean
   // on evalSafeArithmetic to reject anything that doesn't actually parse.
   const re = /(?:^|[^A-Za-z0-9_])((?:\d+(?:\.\d+)?(?:[eE][-+]?\d+)?|\(|\))(?:\s*[+\-*/]\s*(?:\d+(?:\.\d+)?(?:[eE][-+]?\d+)?|\(|\)))+)/g;
   const out = [];
@@ -241,7 +241,7 @@ function _extractArithmeticCandidates(text) {
   while ((m = re.exec(text)) !== null) {
     const raw = m[1];
     const start = m.index + (m[0].length - raw.length);
-    // Skip trivial single-number matches (no operator) — those are caught by
+    // Skip trivial single-number matches (no operator) - those are caught by
     // extractNumbers, not by the calculator.
     if (!/[+\-*/]/.test(raw)) continue;
     out.push({ raw: raw.trim(), span: [start, start + raw.length] });
@@ -254,9 +254,9 @@ function _extractArithmeticCandidates(text) {
 // emits the augmented text (with corrections appended) or returns the raw
 // expression+computed list. Two modes:
 //
-//   auto_eval:true   — append `[calc: <claimed> -> <computed> (correction)]`
+//   auto_eval:true - append `[calc: <claimed> -> <computed> (correction)]`
 //                       to the response text where the model got it wrong.
-//   auto_eval:false  — return expressions + computed values; caller decides.
+//   auto_eval:false - return expressions + computed values; caller decides.
 //
 // Returns {ok:true, augmented_text, corrections:[{expr, claimed, computed,
 // correction}]} on success. corrections is the list of mismatches (claimed
@@ -293,7 +293,7 @@ export function runtimeCalculatorMiddleware({ response_text, auto_eval = true } 
     }
   }
   // Also surface bare arithmetic expressions (no `=` rhs) the caller asked us
-  // to evaluate — we just attach them to expressions without comparing.
+  // to evaluate - we just attach them to expressions without comparing.
   const candidates = _extractArithmeticCandidates(response_text);
   for (const c of candidates) {
     // Skip if this candidate already appears as an equation LHS (avoid double
@@ -321,7 +321,7 @@ export function runtimeCalculatorMiddleware({ response_text, auto_eval = true } 
 
 // ─── public: CALCULATOR_TOOL_SPEC ────────────────────────────────────────────
 // Frozen tool-use spec compatible with the W735 contract. Distillation runs
-// register us by reference — no adapter shim needed.
+// register us by reference - no adapter shim needed.
 export const CALCULATOR_TOOL_SPEC = Object.freeze({
   name: 'calculator',
   description: 'Pure arithmetic only: + - * / parentheses. Returns numeric value.',

@@ -9,13 +9,13 @@
 //                       real weights at first launch.
 //   lora.bin          - artifact-bound binary slot. v0.1 carries an optional
 //                       behaviour pack here (KOLMPACK\x01 magic + length-
-//                       prefixed UTF-8 JSON body — patterns, lookup tables,
+//                       prefixed UTF-8 JSON body - patterns, lookup tables,
 //                       rule packs that recipes call into via `lib.pack`).
 //                       The LoRA tier (v0.2+) will swap this for a real
 //                       weight delta. Empty buffer when no pack is supplied.
 //   index.sqlite-vec  - artifact-bound lookup slot. v0.1 carries an optional
 //                       JSON lookup index (KOLMIDX\x01 magic + length-prefixed
-//                       UTF-8 JSON body — keyword→recipe maps, embedded
+//                       UTF-8 JSON body - keyword→recipe maps, embedded
 //                       lookup tables that recipes call via `lib.index`).
 //                       The retrieval tier (v0.3+) will swap this for a real
 //                       sqlite-vec database. Empty buffer when no index supplied.
@@ -24,7 +24,7 @@
 //
 // Tenant-runtime customisation: callers of runArtifact can supply a `params`
 // object that recipes read via `lib.params`. The artifact does NOT embed
-// tenant data — params are passed at run time, never re-signed, never
+// tenant data - params are passed at run time, never re-signed, never
 // persisted by the runtime. This lets any buyer customise an artifact for
 // their use case (extra patterns, vertical-specific rules, allowlists) while
 // the signed artifact stays the same byte-exact bundle the issuer published.
@@ -39,7 +39,7 @@ import { cidFromManifestHashes } from './cid.js';
 import { buildArtifactCredential } from './provenance.js';
 import { validateCapability, validateLineage } from './artifact-lineage.js';
 import { validateExportBlock, EXPORT_SPEC_VERSION } from './export-provenance.js';
-// R-1 — Runtime passport. Per (runtime, target_id) capability fingerprint
+// R-1 - Runtime passport. Per (runtime, target_id) capability fingerprint
 // rides inside the manifest as `runtime_passports: []`. Empty array when no
 // export targets were probed; otherwise one row per format that ExportForge
 // produced (status='tested' if a real probe ran, 'estimated' if the row was
@@ -47,11 +47,11 @@ import { validateExportBlock, EXPORT_SPEC_VERSION } from './export-provenance.js
 // validatePassports throws on schema violations so a hand-rolled bad row is
 // caught at build time, not at first /v1/inspect call.
 import { validatePassports as validateRuntimePassports, RUNTIME_PASSPORT_SCHEMA_VERSION } from './runtime-passport.js';
-// R-5 — Evidence DAG. The provenance graph that explains where the artifact's
+// R-5 - Evidence DAG. The provenance graph that explains where the artifact's
 // inputs (captures, evals, teacher rollouts, signature events, policy gates,
 // rights checks) came from. Validated at build time so a malformed or cyclic
 // graph is caught before the receipt is signed. NOT bound into
-// artifact_hash_input — same operational-fingerprint pattern as
+// artifact_hash_input - same operational-fingerprint pattern as
 // runtime_passports (R-1): a tenant can legitimately re-walk the graph and
 // emit a new derived_from edge after an eval re-run without invalidating the
 // receipt chain. The artifact's actual bytes (recipes, weights, evals) are
@@ -71,7 +71,7 @@ import { verifyAttestation, manifestBlock as ccManifestBlock, STATES as CC_STATE
 import { loadSignerKeyFromEnv as loadEd25519SignerFromEnv, loadOrCreateDefaultSigner as loadEd25519DefaultSigner, buildSignatureBlock as buildEd25519Block } from './ed25519.js';
 import { buildSigstoreBundle, isDisabled as isSigstoreDisabled, attestArtifactWithRekor, rekorUrl as sigstoreRekorUrl } from './sigstore.js';
 import { canonicalizeOutputSchemaSpec, validateOutputSchemaSpec, OUTPUT_SCHEMA_VERSION } from './output-schema.js';
-// W736 — Guardrail Compilation. Hard-constraint rules ride INSIDE the .kolm
+// W736 - Guardrail Compilation. Hard-constraint rules ride INSIDE the .kolm
 // manifest (NOT as training signal) so brand-safety policy survives every
 // runtime invocation + every re-distill. hashGuardrails feeds the
 // conditional `guardrails_hash` slot inside artifact_hash_input so any
@@ -80,11 +80,11 @@ import { canonicalizeOutputSchemaSpec, validateOutputSchemaSpec, OUTPUT_SCHEMA_V
 // preserved so pre-W736 artifacts rebuilt without a guardrails block
 // remain byte-identical to their old artifact_hash.
 import { hashGuardrails as hashGuardrailsW736, validateGuardrailRules as validateGuardrailRulesW736 } from './guardrails.js';
-// W786 — Carbon footprint / sustainability badge. badgeFor produces a small
+// W786 - Carbon footprint / sustainability badge. badgeFor produces a small
 // stable structure for the manifest's `sustainability_badge` field. Stamped
 // POST artifact_hash via the W460 conditional-spread pattern (badge absent
 // → key not present → pre-W786 artifacts remain byte-identical when
-// rebuilt). The badge is hygiene metadata, NOT provenance — a tamperer
+// rebuilt). The badge is hygiene metadata, NOT provenance - a tamperer
 // flipping it does NOT break receipt.json (badge is not bound into
 // artifact_hash_input).
 import { badgeFor as badgeForW786, CARBON_VERSION as CARBON_VERSION_W786 } from './carbon-estimator.js';
@@ -93,17 +93,17 @@ const ARTIFACT_SPEC = 'kolm-1';
 const PACK_MAGIC = 'KOLMPACK\x01';
 const INDEX_MAGIC = 'KOLMIDX\x01';
 
-// Artifact classes — see Wave 144 user redirect.
-//   'rule'           — deterministic JS/rule artifact. No model.gguf / lora.bin
+// Artifact classes - see Wave 144 user redirect.
+//   'rule' - deterministic JS/rule artifact. No model.gguf / lora.bin
 //                      / index.sqlite-vec padding when no real pack/index is
 //                      supplied. This is the only class that ships today.
-//   'compiled_rule'  — generated C/Rust/WASM artifact from a constrained rule
+//   'compiled_rule' - generated C/Rust/WASM artifact from a constrained rule
 //                      AST (Wave F). Adds target/target_source_hash/target_binary_hash
 //                      manifest fields.
 //   'distilled_model'- real teacher->student model artifact with LoRA/quantization
 //                      metadata + real weights (Wave J/K). Re-introduces
 //                      model.gguf / lora.bin slots with real bytes.
-// Wave 151 — RECIPE_CLASSES is the new canonical list (adds 'synthesized_rule').
+// Wave 151 - RECIPE_CLASSES is the new canonical list (adds 'synthesized_rule').
 // ARTIFACT_CLASSES stays as the historical export for backward compat; it now
 // re-exports the full RECIPE_CLASSES list. Validators import RECIPE_CLASSES.
 export const ARTIFACT_CLASSES = RECIPE_CLASSES;
@@ -148,7 +148,7 @@ function decodeContainer(buf, magic) {
 }
 // IMPORTANT: keep this in lock-step with router.js's RECEIPT_SECRET. The
 // receipt the artifact builder seals here is verified by /v1/receipts/verify
-// using that same secret — a mismatch produces "signature mismatch" + "chain
+// using that same secret - a mismatch produces "signature mismatch" + "chain
 // hmac mismatch" failures even though both sides are byte-identical canonical
 // JSON. The legacy KOLM_ARTIFACT_SECRET env name is still honoured for
 // back-compat, but the default must match router.js's default.
@@ -195,12 +195,12 @@ function sha256File(absPath) {
   }
 }
 
-// W367 — recipe.bundle.mjs builder. Wraps each rule recipe's source body
+// W367 - recipe.bundle.mjs builder. Wraps each rule recipe's source body
 // (already a pure `function generate(input, lib){...}` per the sandbox guard)
 // in an isolating IIFE so multiple recipes can coexist in one file without
 // shadowing each other's `generate` declaration. Exports a single default
 // dispatcher that walks the recipes in order and returns the first output that
-// does not throw — matching runJsTarget's semantics in artifact-runner.js.
+// does not throw - matching runJsTarget's semantics in artifact-runner.js.
 //
 // Heavy-deps rule: this builder uses ONLY string concatenation. No esbuild,
 // no rollup, no parser. The rule-class recipe shape (single top-level
@@ -209,13 +209,13 @@ function sha256File(absPath) {
 //
 // Output shape: a regular ESM module. Default export is
 //   async function run(input, opts) -> { output, recipe_id, recipe_name, latency_us }
-// The opts shape is { params, pack, index } — matching the lib slots that
+// The opts shape is { params, pack, index } - matching the lib slots that
 // artifact-runner.js exposes via the sandbox `lib` global. Callers that load
 // this file directly (host runtime, edge worker, mobile runtime) get the same
 // contract as the in-process JS runner without needing the .kolm machinery.
 export function buildRecipeBundleMjs(recipes, { spec, job_id } = {}) {
   const headerLines = [
-    '// recipe.bundle.mjs — self-contained ESM bundle generated by src/artifact.js',
+    '// recipe.bundle.mjs - self-contained ESM bundle generated by src/artifact.js',
     `// spec: ${spec || ARTIFACT_SPEC}`,
     `// job_id: ${job_id || 'unknown'}`,
     `// generated_at: ${new Date().toISOString()}`,
@@ -223,7 +223,7 @@ export function buildRecipeBundleMjs(recipes, { spec, job_id } = {}) {
     '// Default export is an async dispatcher: run(input, { params, pack, index })',
     '// that walks the bundled recipes in declaration order and returns the first',
     '// one that does not throw. Same semantics as src/artifact-runner.js',
-    '// runJsTarget — the artifact runs without needing the kolm runtime.',
+    '// runJsTarget - the artifact runs without needing the kolm runtime.',
     '',
   ];
   const recipeLoaders = recipes.map((r, idx) => {
@@ -292,7 +292,7 @@ function canonicalJson(v) {
   return '{' + k.map(x => JSON.stringify(x) + ':' + canonicalJson(v[x])).join(',') + '}';
 }
 
-// Compute the K-score — the visible scoreboard for "smallest artifact that
+// Compute the K-score - the visible scoreboard for "smallest artifact that
 // still passes the tests wins." Implements the documented formula at
 // /k-score: K = 0.40·A + 0.15·S + 0.15·L + 0.15·C + 0.15·V, on [0..1].
 // Ship gate is 0.85; below that, kolm compile fails closed.
@@ -315,7 +315,7 @@ function canonicalJson(v) {
 //   L = 1 / (1 + p50_us / 100000)                // 100us->1.0, 100ms->0.50
 //   C = 1 / (1 + cost_per_call * 1000)           // $0->1.0, $0.001->0.50
 // A and V are already on [0..1].
-// Wave 145 — delegates to src/kscore.js so V2 axes (R/F/E/Z/T) are available
+// Wave 145 - delegates to src/kscore.js so V2 axes (R/F/E/Z/T) are available
 // to any caller that supplies them. V1-only callers continue to receive a v1
 // envelope (auto-detected by kscore.js when no V2 inputs are present). The
 // gate (0.85) and v1 weights (0.40/0.15/0.15/0.15/0.15) are unchanged, so
@@ -357,7 +357,7 @@ function normalizeLicense(license) {
 
 export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region, runtime_passports, evidence_dag, speculative_decoding, prompt_cache, continuous_batching }) {
   const secret = requireSignSecret();
-  // W252 — K-score ship gate is load-bearing. If a K-score is supplied AND
+  // W252 - K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
   // passes allow_below_gate=true (which gets stamped on the manifest so the
   // verifier and downstream procurement gates can flag it). Without this
@@ -368,7 +368,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     throw new Error(`k_score below ship gate: composite=${composite}, gate=${gate}. ` +
       `Pass allow_below_gate=true to override; the manifest will record ship_gate_overridden=true.`);
   }
-  // Default class is 'rule' — the floor. Wave 151 adds 'synthesized_rule' and
+  // Default class is 'rule' - the floor. Wave 151 adds 'synthesized_rule' and
   // keeps 'compiled_rule' / 'distilled_model'. The class is load-bearing: the
   // verifier rejects any artifact whose class doesn't match what's in the zip.
   // Callers can pass artifact_class explicitly OR let the builder roll up from
@@ -378,7 +378,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     throw new Error('compiled_rule artifact requires compiled_targets (call spec-compile with artifact_class=compiled_rule)');
   }
 
-  // Wave V — capability contract, lineage, workflow IR, and attestation report
+  // Wave V - capability contract, lineage, workflow IR, and attestation report
   // are optional manifest blocks. Validation runs at build time so a malformed
   // block is caught here instead of at verify time. workflow_ir and
   // attestation_report ride along inside the zip as separate files so the
@@ -391,7 +391,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (lineage) {
     lineage_block = validateLineage(lineage);
   }
-  // Wave 146 — export block. The src/export-provenance.js bridge builds and
+  // Wave 146 - export block. The src/export-provenance.js bridge builds and
   // validates this; we re-validate here (cheap) so a caller that constructed
   // an export block by hand still gets schema-checked. The block's own short
   // hash is folded into artifact_hash_input below so any post-build mutation
@@ -400,13 +400,13 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (exportInput) {
     export_block = validateExportBlock(exportInput);
   }
-  // R-1 — runtime_passports. Always an array; empty when no targets were
+  // R-1 - runtime_passports. Always an array; empty when no targets were
   // exported. Each entry is one (runtime, target_id) capability fingerprint
   // produced by ExportForge after every format export. Validation runs at
   // build time so a malformed row (unknown runtime, missing measurement on a
   // status='tested' row) is caught here, before the receipt is signed. NOT
   // bound into artifact_hash_input below: the passport is an OPERATIONAL
-  // fingerprint, not provenance — a tenant who re-probes the same artifact
+  // fingerprint, not provenance - a tenant who re-probes the same artifact
   // on a different host can update the array without breaking the receipt
   // chain. The export_block already binds the bytes of every target file
   // into artifact_hash, so the passport never has authority over the bytes.
@@ -421,13 +421,13 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
     _runtime_passports_canon = runtime_passports.slice();
   }
-  // R-5 — evidence_dag. The provenance graph that explains where the
+  // R-5 - evidence_dag. The provenance graph that explains where the
   // artifact's upstream inputs (captures, evals, teacher rollouts,
   // signature events, policy gates, rights checks) came from. Validated
   // here so a hand-rolled malformed graph (unknown kind, cycle, missing
   // endpoint) is caught at build time, not at first /v1/evidence/* call.
   // NOT bound into artifact_hash_input below: the DAG is OPERATIONAL
-  // fingerprint, not provenance over bytes — a tenant who re-walks the
+  // fingerprint, not provenance over bytes - a tenant who re-walks the
   // graph (e.g. to add a new validated_by edge after an eval re-run) can
   // update the field without breaking the receipt chain. The artifact's
   // actual bytes (recipes, weights, evals) are anchored in artifact_hash;
@@ -443,7 +443,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
     _evidence_dag_canon = evidenceDagToJSON(buildEvidenceDag(evidence_dag));
   }
-  // Wave 147 — moe block. Same pattern as export: src/moe-provenance.js
+  // Wave 147 - moe block. Same pattern as export: src/moe-provenance.js
   // bridge builds + validates; we re-validate here so a hand-rolled block
   // still gets schema-checked. The block's short hash folds into
   // artifact_hash_input below.
@@ -451,10 +451,10 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (moeInput) {
     moe_block = validateMoeBlock(moeInput);
   }
-  // W809 — output_schema spec. Validate up front so a bad spec is caught at
+  // W809 - output_schema spec. Validate up front so a bad spec is caught at
   // build time (not first runtime invocation). Absence / null / {} all collapse
   // to canon === null via canonicalizeOutputSchemaSpec, and the chain slot
-  // below is keyed only when canon != null — pre-W809 artifacts remain
+  // below is keyed only when canon != null - pre-W809 artifacts remain
   // byte-identical when rebuilt. Validation throws on a bad spec, mirroring
   // the export/moe pattern above.
   let _output_schema_canon = null;
@@ -465,7 +465,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
     _output_schema_canon = canonicalizeOutputSchemaSpec(output_schema);
   }
-  // W736 — guardrails are validated at build time so a bad rule is caught
+  // W736 - guardrails are validated at build time so a bad rule is caught
   // here instead of at the first runtime hit. Absent / null / [] all
   // collapse to null via _guardrails_canon, mirroring the output_schema
   // collapse rule one block above. The byte-stability contract: pre-W736
@@ -480,7 +480,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
     _guardrails_canon = guardrails;
   }
-  // W739 — Model lineage tracking. parent_cid is OPTIONAL. Validated up
+  // W739 - Model lineage tracking. parent_cid is OPTIONAL. Validated up
   // front so a malformed pointer is caught at build time instead of at the
   // first `kolm lineage <cid>` walk on a deployed artifact. The W460
   // byte-stability law applies: absent / null / empty-string all collapse
@@ -513,7 +513,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
     _parent_cid_canon = parent_cid; // preserve verbatim form (bare hex or cidv1:sha256:<hex>)
   }
-  // W769 — Data residency region pin. region is OPTIONAL. The W460
+  // W769 - Data residency region pin. region is OPTIONAL. The W460
   // byte-stability law applies VERBATIM: absent / null / '' all collapse
   // to null (the conditional manifest spread + conditional hash slot
   // below are skipped) so pre-W769 artifacts rebuilt without a region
@@ -538,7 +538,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
     _region_canon = region;
   }
-  // W786 — Sustainability badge. Computed from training_stats {gpu, gpu_hours,
+  // W786 - Sustainability badge. Computed from training_stats {gpu, gpu_hours,
   // region, utilization} via badgeFor (a pure function in src/carbon-estimator.js).
   // The badge is POST-HASH metadata: it's NOT bound into artifact_hash_input
   // so legacy artifacts (pre-W786) rebuilt without gpu_hours remain byte-
@@ -547,7 +547,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // null and the matching manifest field collapses to an empty spread (the
   // `sustainability_badge` key is OMITTED from the manifest entirely so
   // JSON.stringify produces byte-identical output to pre-W786 builds).
-  // The badge is hygiene/audit signal only — a tamperer flipping
+  // The badge is hygiene/audit signal only - a tamperer flipping
   // co2_kg_estimate after build does NOT break receipt.json because the
   // field is not in artifact_hash_input. This is intentional: the
   // estimator is MODELED (methodology='public-research-estimate'), not
@@ -583,7 +583,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       };
     }
   }
-  // Wave 148 — pretokenize block. Same shape as moe: bridge builds + validates;
+  // Wave 148 - pretokenize block. Same shape as moe: bridge builds + validates;
   // we re-validate so a hand-rolled block still gets schema-checked. Drift in
   // either tokens.idx or tokens.pack changes idx_file.sha256/pack_file.sha256
   // → block.hash → artifact_hash. The bundled binary files also fold into
@@ -592,7 +592,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (pretokenizeInput) {
     pretokenize_block = validatePretokenizeBlock(pretokenizeInput);
   }
-  // Wave 164 — external + adversarial holdout block. Bridge built + validated;
+  // Wave 164 - external + adversarial holdout block. Bridge built + validated;
   // we re-validate here so hand-rolled blocks still get schema-checked. Drift
   // in any holdout's file_sha256 or recorded accuracy changes block.hash →
   // artifact_hash → every signature.
@@ -600,20 +600,20 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (externalHoldoutInput) {
     external_holdout_block = validateExternalHoldoutBlock(externalHoldoutInput);
   }
-  // Wave 165 (N+5) — tenant shadow corpus provenance. Unlike external_holdout
+  // Wave 165 (N+5) - tenant shadow corpus provenance. Unlike external_holdout
   // (one block per recipe, holding many holdouts), tenant_shadow is one block
   // per tenant-corpus pair, and the caller may name multiple. Stored as an
   // array of validated blocks so the verifier can re-anchor each independently.
   // The corpus bytes themselves are NEVER bundled into the .kolm (HIPAA
-  // data-never-leaves-tenant) — only the {tenant_id, corpus_id, corpus_sha256,
+  // data-never-leaves-tenant) - only the {tenant_id, corpus_id, corpus_sha256,
   // accuracy, ...} fingerprint rides in the manifest.
   let tenant_shadow_blocks = null;
   if (tenantShadowInput) {
     const arr = Array.isArray(tenantShadowInput) ? tenantShadowInput : [tenantShadowInput];
     tenant_shadow_blocks = arr.map(b => validateTenantShadowBlock(b));
   }
-  // Wave 166 (N+7) — third-party auditor attestation blocks. Same array shape
-  // as tenant_shadow (an artifact may carry multiple auditor signatures —
+  // Wave 166 (N+7) - third-party auditor attestation blocks. Same array shape
+  // as tenant_shadow (an artifact may carry multiple auditor signatures - 
   // e.g., Deloitte signed at issue time, AICPA member re-signed at procurement
   // gate). Each block is validated standalone here (schema + Ed25519 signature
   // self-consistency); cross-checking the signed claims against this artifact's
@@ -624,15 +624,15 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     const arr = Array.isArray(auditorAttestationInput) ? auditorAttestationInput : [auditorAttestationInput];
     auditor_attestation_blocks = arr.map(b => validateAuditorAttestationBlock(b));
   }
-  // Wave 167 (M+4) — supersession block. Exactly one predecessor per artifact
+  // Wave 167 (M+4) - supersession block. Exactly one predecessor per artifact
   // (chains form by walking predecessor_artifact_hash recursively). Validated
   // here so a hand-rolled block still gets schema-checked; the block's short
   // hash folds into artifact_hash_input below so any post-build mutation
   // breaks the receipt chain.
   let supersession_block = null;
   if (supersessionInput) {
-    // Accept either a raw input (no spec/hash — CLI passes this shape) or a
-    // pre-built block (spec/hash present — programmatic callers). buildSupersessionBlock
+    // Accept either a raw input (no spec/hash - CLI passes this shape) or a
+    // pre-built block (spec/hash present - programmatic callers). buildSupersessionBlock
     // is idempotent on a raw input and validates required fields; validateSupersessionBlock
     // then re-checks schema + hash so the resulting object is canonical.
     const block = supersessionInput.spec === SUPERSESSION_SPEC_VERSION
@@ -640,7 +640,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       : buildSupersessionBlock(supersessionInput);
     supersession_block = validateSupersessionBlock(block);
   }
-  // Wave 167 (M+3) — optional embedded drift report. When present the verifier
+  // Wave 167 (M+3) - optional embedded drift report. When present the verifier
   // re-checks its schema + hash and surfaces the verdict (within / drift /
   // breach). Embedding is opt-in: most tenants will ship drift reports as
   // sibling files rather than baking them into the manifest, but compliance-
@@ -678,7 +678,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       throw new Error(`workflow_ir hash mismatch: lineage claims ${lineage_block.workflow_ir_hash}, supplied IR hashes to ${recomputed}`);
     }
   }
-  // Wave 151 — validate each recipe's declared class (or infer if omitted).
+  // Wave 151 - validate each recipe's declared class (or infer if omitted).
   // The per-recipe class lives inside recipes.json so a verifier can re-check
   // it without trusting the manifest. The artifact-level class is the
   // most-permissive of the per-recipe classes (see rollupArtifactClass).
@@ -689,7 +689,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       throw new Error(`recipe ${JSON.stringify(r.id)} failed class validation: ${err.message}`);
     }
   });
-  // Wave 285 — every recipe carries an honest source_type declaring HOW the
+  // Wave 285 - every recipe carries an honest source_type declaring HOW the
   // source was produced (hand_written / pattern_generated / llm_emitted /
   // distilled / compiled_from_dsl). The verifier rejects any class/source_type
   // mismatch at build time so a `rule` artifact can never silently ship LLM-
@@ -715,22 +715,22 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       version_id: r.version_id,
       tags: r.tags || [],
       schema: r.schema || null,
-      // Wave 151 — honest per-recipe class. One of rule / synthesized_rule /
+      // Wave 151 - honest per-recipe class. One of rule / synthesized_rule /
       // compiled_rule / distilled_model. The artifact-level artifact_class
       // is the max of these. See src/recipe-class.js for definitions.
       class: per_recipe_classes[i],
-      // Wave 285 — honest per-recipe source_type. One of hand_written /
+      // Wave 285 - honest per-recipe source_type. One of hand_written /
       // pattern_generated / llm_emitted / distilled / compiled_from_dsl.
       // Verifiers reject any class/source_type mismatch (rule + llm_emitted
       // is rejected; synthesized_rule + pattern_generated is rejected; etc.).
       source_type: per_recipe_source_types[i],
-      // Wave F — when the recipe was authored as a DSL, ship the DSL block
+      // Wave F - when the recipe was authored as a DSL, ship the DSL block
       // inside recipes.json so an external verifier can recompute the JS
       // source (via emitJs) AND the native.c / native.rs source (via
       // emitCompiledTargets) and confirm every hash in manifest.compiled_targets
       // matches. Recipes that arrived as raw JS get null here.
       dsl: r.dsl || null,
-      // Wave 151 — teacher attribution for synthesized_rule and distilled_model.
+      // Wave 151 - teacher attribution for synthesized_rule and distilled_model.
       // null when not applicable. Verifiers cross-check against artifact_class.
       teacher_vendor: r.teacher_vendor || null,
       teacher_model: r.teacher_model || null,
@@ -738,7 +738,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     })),
   }, null, 2);
 
-  // W367 — recipe.bundle.mjs: self-contained ESM bundle so the .kolm runs on
+  // W367 - recipe.bundle.mjs: self-contained ESM bundle so the .kolm runs on
   // any Node 18+ / Bun 1+ / Deno 1.40+ host without re-reading recipes.json.
   // The recipe source is already a pure function on (input, lib) thanks to the
   // sandbox guard in src/verifier.js (no require/import/process/etc.). We
@@ -776,17 +776,17 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // fixtures, when base_model is set to a non-'none' value we still emit
   // the pointer record so existing artifacts that pin a base_model keep
   // their model.gguf entry on disk.
-  // Wave 151 — roll up per-recipe classes into the artifact-level class.
+  // Wave 151 - roll up per-recipe classes into the artifact-level class.
   // The artifact_class is the MAX of recipes' classes under CLASS_RANK. An
   // explicit artifact_class arg from the caller takes precedence (allows
   // callers to pin a higher class for cross-compatibility) but must not be
   // LOWER than the rolled-up class.
   const _rolledUpClass = rollupArtifactClass(per_recipe_classes);
   const _finalClass = _class || _rolledUpClass;
-  // (We don't reject downgrades here — buildPayload still produces the
+  // (We don't reject downgrades here - buildPayload still produces the
   // artifact, but validateArtifactClass below would reject a misdeclared one
   // before the receipt is signed.)
-  // W457 — runtime_target is the single source of truth (resolved early so
+  // W457 - runtime_target is the single source of truth (resolved early so
   // model_pointer + manifest both reference the same value, never the
   // legacy hardcoded 'cloud' that diverged from receipt.runtime_target).
   // Values: js | wasm | native | gguf | onnx | cloud. Default 'js' for the
@@ -822,9 +822,9 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       bytes: model_weights.content.length,
     };
   }
-  // W457 — model_pointer is the legacy pointer-only document (no real
+  // W457 - model_pointer is the legacy pointer-only document (no real
   // weights). Suppressed entirely when a real model_weights bundle was
-  // supplied — the bundled weights are the source of truth, the pointer
+  // supplied - the bundled weights are the source of truth, the pointer
   // would just be dead bytes that the verifier would have to skip. The
   // pointer's `runtime` field used to be a hardcoded 'cloud' lie; now it
   // mirrors `runtime_target` so a reader cannot get a divergent answer.
@@ -836,7 +836,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     note: 'pointer-only artifact; weights resolved on `kolm run` first launch.',
   }, null, 2) : null;
 
-  // evals.json — the "no eval, no compile" gate. Synthesized from the
+  // evals.json - the "no eval, no compile" gate. Synthesized from the
   // user's positives at compile time; surfaced in the artifact so anyone
   // can recompute K-score by re-running them.
   const evals_obj = evals && evals.cases ? evals : {
@@ -857,19 +857,19 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // CID parts always include the five canonical slots so existing verifiers
   // and the cid schema keep working. When a file is physically absent from
   // the zip (rule-class with no pack/index/model), the slot hash is the
-  // sha256 of an empty buffer — an explicit "this slot intentionally has no
+  // sha256 of an empty buffer - an explicit "this slot intentionally has no
   // content" sentinel rather than a fake byte payload.
-  // W739 — fold parent_cid into the model_pointer hash WHEN PRESENT so the
+  // W739 - fold parent_cid into the model_pointer hash WHEN PRESENT so the
   // CID itself (not just the receipt chain) is sensitive to lineage. Absent
   // parent_cid (null/undefined/'' all canonicalise to null in
-  // _parent_cid_canon above) leaves model_pointer hashing untouched — pre-
+  // _parent_cid_canon above) leaves model_pointer hashing untouched - pre-
   // W739 artifacts rebuilt without a parent_cid remain CID-byte-identical
   // (W460 byte-stability law). The suffix is `\x00parent_cid:<cid>` (NUL
   // separator + ASCII tag) so it cannot collide with any valid model_pointer
   // payload, which is plain bytes by contract upstream. The matching
   // artifact_hash_input.parent_cid slot below is preserved so a tamperer
   // who rewrites manifest.parent_cid AND the model_pointer hash still has
-  // to break the receipt chain too — defense in depth, not redundancy.
+  // to break the receipt chain too - defense in depth, not redundancy.
   let _modelPointerHash;
   if (model_pointer) {
     if (_parent_cid_canon) {
@@ -896,19 +896,19 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     index_bin: has_index ? sha256(index_bin) : EMPTY_SHA,
     evals_json: eval_set_hash,
   };
-  // Wave V — optional per-file hashes for new bundled blocks. We add them only
+  // Wave V - optional per-file hashes for new bundled blocks. We add them only
   // when the block is present so legacy CIDs stay byte-stable.
   if (workflow_ir_json) hashes.workflow_ir = sha256(Buffer.from(workflow_ir_json));
   if (attestation_report_json) hashes.attestation_report = sha256(Buffer.from(attestation_report_json));
-  // W367 — bundle hash. Only present for rule/synthesized_rule/compiled_rule
+  // W367 - bundle hash. Only present for rule/synthesized_rule/compiled_rule
   // artifacts; absent for distilled_model so legacy CIDs stay byte-stable.
   if (recipe_bundle_mjs) hashes.recipe_bundle_mjs = sha256(Buffer.from(recipe_bundle_mjs));
-  // W457 — model_weights hash. Present whenever the caller bundled real
+  // W457 - model_weights hash. Present whenever the caller bundled real
   // weights (gguf/onnx/wasm/native). The verifier (binder.js rtCheck) reads
   // manifest.runtime_target + runtime_target_config[<target>_path] to locate
   // the entry, hashes the bytes, and refuses to pass when sha256 drifts.
   if (_modelWeightsRecord) hashes.model_weights = _modelWeightsRecord.sha256;
-  // Wave 144 — extra files (e.g. tokenizer.json) ride inside the .kolm zip.
+  // Wave 144 - extra files (e.g. tokenizer.json) ride inside the .kolm zip.
   // Each gets a hash in manifest.hashes.extra_files keyed by filename, and the
   // canonical hash-of-extra-files folds into artifact_hash_input so tampering
   // breaks the receipt chain. Filenames sort for determinism.
@@ -932,7 +932,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
     hashes.extra_files = map;
   }
-  // Deterministic content-id over the per-file hashes — independent of the
+  // Deterministic content-id over the per-file hashes - independent of the
   // K-score, signature, or receipt. Same content always produces the same
   // CID, even across signing key rotations.
   const cid = cidFromManifestHashes(hashes);
@@ -941,7 +941,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // verifier can branch on shape. When the compile path did NOT split seeds
   // (legacy/hardcoded-evals path) `eval_source` is 'self_generated' and the
   // verifier downgrades the artifact to 'sample_check' regardless of the
-  // K-score — see verifier.js (Wave D).
+  // K-score - see verifier.js (Wave D).
   const seed_provenance_block = seed_provenance ? {
     seeds_hash: seed_provenance.seeds_hash,
     split_seed: seed_provenance.split_seed,
@@ -962,16 +962,16 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     output_overlap_count: typeof seed_provenance.output_overlap_count === 'number' ? seed_provenance.output_overlap_count : null,
     near_duplicate_count: typeof seed_provenance.near_duplicate_count === 'number' ? seed_provenance.near_duplicate_count : null,
     grouped_overlap_count: typeof seed_provenance.grouped_overlap_count === 'number' ? seed_provenance.grouped_overlap_count : null,
-    // Wave 283 — hash of the rows the teacher actually received. When the
+    // Wave 283 - hash of the rows the teacher actually received. When the
     // policy held (train-only synthesis) this equals train_hash; the
     // verifier (and an external auditor) reads this to confirm no holdout
     // leaked into recipe construction.
     synthesis_input_hash: typeof seed_provenance.synthesis_input_hash === 'string' ? seed_provenance.synthesis_input_hash : null,
-    // Wave 284 — when group-aware splitting was requested, this records
+    // Wave 284 - when group-aware splitting was requested, this records
     // which row-metadata key was used to define a "group" so two rows
     // about the same member / claim / case never straddle the split.
     group_key: typeof seed_provenance.group_key === 'string' ? seed_provenance.group_key : null,
-    // Wave 409c — auditor mandate. Honest counts of where seeds came from,
+    // Wave 409c - auditor mandate. Honest counts of where seeds came from,
     // and an explicit "eval_provenance" flag distinguishing a real eval-run
     // verifier output from a placeholder (synthetic / hard-coded number).
     //   eval_provenance ∈ { 'real_eval' | 'placeholder' | 'unknown' }
@@ -1006,7 +1006,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     grouped_overlap_count: null,
     synthesis_input_hash: null,
     group_key: null,
-    // Wave 409c — see above.
+    // Wave 409c - see above.
     source_seed_count: null,
     approved_count: null,
     synthetic_count: null,
@@ -1019,11 +1019,11 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // verifier can recompute them from recipes_json.dsl + emitCompiledTargets
   // and confirm every byte matches.
   //
-  // Wave G — when the caller also supplies `compiled_targets.native`
+  // Wave G - when the caller also supplies `compiled_targets.native`
   // (produced by src/native-compile.js when a toolchain is present), each
   // recipe entry gains a `c.bin` / `rust.bin` sub-block recording compiler
   // version, flags, and bin_hash; the binary files are appended to the zip.
-  // Absence of `.native` is the JS-rule fallback — manifest stays
+  // Absence of `.native` is the JS-rule fallback - manifest stays
   // source-only and verification works without any toolchain.
   let compiled_targets_block = null;
   let compiled_target_files = [];
@@ -1038,7 +1038,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     if (native) {
       out.native_spec = native.bundle.spec;
       out.host_triple = native.bundle.host_triple;
-      // Wave 153 — bundle-level toolchain pin record. One pin per kind (c,
+      // Wave 153 - bundle-level toolchain pin record. One pin per kind (c,
       // rust) capturing compiler + version + shim hash + source_date_epoch.
       // The receipt chain absorbs this via compiled_targets_hash; product
       // surfaces (binder PDF, /spec/rs-1, /how-it-works) read it to display
@@ -1062,7 +1062,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
         else if (nr.c_error) recipeBlock.c.bin_error = nr.c_error;
         if (nr.rust) recipeBlock.rust.bin = nr.rust;
         else if (nr.rust_error) recipeBlock.rust.bin_error = nr.rust_error;
-        // Wave 155 §P+3 — WASM lands as its own sub-block. Unlike c/rust the
+        // Wave 155 §P+3 - WASM lands as its own sub-block. Unlike c/rust the
         // wasm block does not carry its own source file (it reuses whichever
         // c/rust source was used); the bin is the only new artifact.
         if (nr.wasm) recipeBlock.wasm = { bin: nr.wasm };
@@ -1083,7 +1083,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     job_id,
     task,
     created_at: new Date().toISOString(),
-    // W457 — alias of runtime_target so the two fields can never diverge.
+    // W457 - alias of runtime_target so the two fields can never diverge.
     // Legacy readers (binder HTML, intent ranking, marketplace fingerprint)
     // consume manifest.runtime; the verifier + dispatchRuntime + receipt
     // consume manifest.runtime_target. Both now report the same string.
@@ -1092,13 +1092,13 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     runtime_target_config: _runtimeTargetConfig,
     entrypoint: _entrypoint,
     artifact_class: _finalClass,
-    // Wave 151 — per-class recipe count surfaces "we have 6 rule recipes and
+    // Wave 151 - per-class recipe count surfaces "we have 6 rule recipes and
     // 1 distilled-model recipe" without forcing readers to parse recipes.json.
     artifact_class_breakdown: per_recipe_classes.reduce((acc, c) => { acc[c] = (acc[c] || 0) + 1; return acc; }, {}),
     base_model: base_model || 'Qwen/Qwen2.5-3B-Instruct',
     target_device: target_device || null,
     train_device: train_device || null,
-    // W409s — device-fit hints carried at the top level. memory_requirement_mb
+    // W409s - device-fit hints carried at the top level. memory_requirement_mb
     // is the artifact's working-set; offline_capable says "this artifact can
     // run without network egress". Both are read by devices.recommendForProfile()
     // to gate target/quant picks. Default to honest minimums (5 MB / true) when
@@ -1116,7 +1116,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     },
     lora: lora_pointer || null,
     recall: recall_namespace ? { namespace: recall_namespace } : null,
-    // Wave 151 — when the rolled-up class is synthesized_rule or distilled_model,
+    // Wave 151 - when the rolled-up class is synthesized_rule or distilled_model,
     // teacher attribution from the per-recipe shape must be promoted into the
     // manifest.training block so validateArtifactClass passes. The verifier
     // reads training.teacher_vendor / teacher_model / synthesized_by; a tenant
@@ -1140,27 +1140,27 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     })(),
     evals: { n: evals_obj.n || (evals_obj.cases?.length || 0), spec: evals_obj.spec, hash: eval_set_hash },
     seed_provenance: seed_provenance_block,
-    // Wave 409q — honest top-level binaries[] manifest. Always present (empty
+    // Wave 409q - honest top-level binaries[] manifest. Always present (empty
     // array when no target was requested). Each entry pins a target
     // ('native' | 'wasm'), kind (c | rust), filename, sha256, size, and
     // compiler identity for an ACTUALLY produced binary. The verifier
     // (binder check #binaries-integrity) re-opens the zip, finds each
-    // entry's filename, re-hashes the bytes, and confirms the match —
+    // entry's filename, re-hashes the bytes, and confirms the match - 
     // surfacing `native_binary_missing` when the file is absent and
     // `native_binary_hash_mismatch` (or wasm_*) when the sha256 drifts.
     //
     // The honest auditor signal: when a tenant asked for target=c/rust/wasm
     // but no toolchain was present, this array is [] AND compiled_binary
-    // is false AND production_ready is false — the manifest never claims a
+    // is false AND production_ready is false - the manifest never claims a
     // compile happened that did not.
     binaries: Array.isArray(binaries) ? binaries : [],
-    // Wave 409q — top-level compiled_binary verdict. null = no native/wasm
+    // Wave 409q - top-level compiled_binary verdict. null = no native/wasm
     // target was requested (the rule-only path); true = at least one binary
     // was produced; false = a target was requested but toolchain or compile
     // failed and the artifact ships source-only. The matching CLI/UI copy
     // says "source generated" not "compiled" when this is false.
     compiled_binary: typeof compiled_binary === 'boolean' ? compiled_binary : null,
-    // Wave 409q — top-level production_ready. ANDs the seed_provenance.
+    // Wave 409q - top-level production_ready. ANDs the seed_provenance.
     // production_ready signal (already computed earlier) with the
     // compiled_binary signal: if the tenant asked for native/wasm and the
     // build did NOT produce a binary, production_ready is false even when
@@ -1170,7 +1170,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       if (compiled_binary === false) return false;
       return seedReady;
     })(),
-    // Wave 409q — surface toolchain skip reasons at the top level so a
+    // Wave 409q - surface toolchain skip reasons at the top level so a
     // tenant reading the manifest sees "no clang on host: source-only" with
     // no need to walk compiled_targets.native_skipped. Empty/null when no
     // skips occurred OR no target was requested.
@@ -1179,7 +1179,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     capability: capability_block,
     lineage: lineage_block,
     export: export_block,
-    // R-1 — runtime passports. Conditional spread per the W460 byte-
+    // R-1 - runtime passports. Conditional spread per the W460 byte-
     // stability law: when the caller did not pass a runtime_passports
     // argument the key is OMITTED from the manifest entirely so pre-R-1
     // artifacts rebuilt without the field remain byte-identical to their
@@ -1191,11 +1191,11 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       runtime_passports: _runtime_passports_canon,
       runtime_passports_spec_version: RUNTIME_PASSPORT_SCHEMA_VERSION,
     } : {}),
-    // W916-I1 — speculative decoding. Conditional spread per the W460
+    // W916-I1 - speculative decoding. Conditional spread per the W460
     // byte-stability law: when the caller did not pass a speculative_decoding
     // block the key is OMITTED entirely so pre-W916 artifacts rebuilt without
     // the field remain byte-identical to their original manifest_hash + cid.
-    // NOT bound into artifact_hash_input below — speculative_decoding is an
+    // NOT bound into artifact_hash_input below - speculative_decoding is an
     // OPERATIONAL fingerprint (target/draft pair + measured acceptance_rate),
     // not a property of the artifact bytes. A verifier on a different host
     // can legitimately re-probe with the same draft model and surface a
@@ -1207,21 +1207,21 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     ...(speculative_decoding && typeof speculative_decoding === 'object'
         && Object.keys(speculative_decoding).length > 0
       ? { speculative_decoding } : {}),
-    // W916-I3 — prompt cache (vLLM enable_prefix_caching / llama.cpp
+    // W916-I3 - prompt cache (vLLM enable_prefix_caching / llama.cpp
     // --prompt-cache-all). Conditional spread; operational fingerprint
-    // only — not bound into artifact_hash. Read at serve-time by
+    // only - not bound into artifact_hash. Read at serve-time by
     // apps/runtime/serve.py via KOLM_PROMPT_CACHE env override → manifest.
     ...(prompt_cache && typeof prompt_cache === 'object'
         && Object.keys(prompt_cache).length > 0
       ? { prompt_cache } : {}),
-    // W916-I4 — continuous batching (vLLM max_num_seqs / llama.cpp
-    // --parallel N). Conditional spread; operational fingerprint only —
+    // W916-I4 - continuous batching (vLLM max_num_seqs / llama.cpp
+    // --parallel N). Conditional spread; operational fingerprint only - 
     // not bound into artifact_hash. Read at serve-time by
     // apps/runtime/serve.py via KOLM_MAX_NUM_SEQS env override → manifest.
     ...(continuous_batching && typeof continuous_batching === 'object'
         && Object.keys(continuous_batching).length > 0
       ? { continuous_batching } : {}),
-    // R-5 — evidence DAG. Conditional spread per the W460 byte-stability
+    // R-5 - evidence DAG. Conditional spread per the W460 byte-stability
     // law: when the caller did not pass an evidence_dag argument the key
     // is OMITTED from the manifest entirely so pre-R-5 artifacts rebuilt
     // without the field remain byte-identical to their original
@@ -1240,7 +1240,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     supersession_provenance: supersession_block,
     drift_report: drift_report_block,
     confidential_compute: confidential_compute_block,
-    // W719 — Distillation-Aware Quantization (DAQ) per-layer bit budget.
+    // W719 - Distillation-Aware Quantization (DAQ) per-layer bit budget.
     // When the build was driven by a DAQ profile (kolm distill / kolm
     // quantize --mixed-precision), the resolved per-layer profile array
     // rides here so a verifier replaying the quantize step can re-apply
@@ -1249,7 +1249,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // any post-build profile mutation breaks the receipt chain.
     mixed_precision_profile: Array.isArray(daq_profile) && daq_profile.length > 0
       ? daq_profile : null,
-    // W721 — Task-Specific Attention Compiler (TSAC) per-(layer,head)
+    // W721 - Task-Specific Attention Compiler (TSAC) per-(layer,head)
     // sparsity profile. When the build was driven by `kolm distill
     // sparse-attention compile`, the resolved profile rides here so a
     // verifier (or a serve-time kernel selector) can re-derive the same
@@ -1261,7 +1261,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
         && Object.keys(sparsity_profile).length > 0
       ? sparsity_profile
       : null,
-    // W722 — Importance-Tiered KV Cache (ITKV) per-artifact profile. When
+    // W722 - Importance-Tiered KV Cache (ITKV) per-artifact profile. When
     // the build was driven by `kolm distill itkv build`, the resolved
     // token-class + precision-tier profile rides here so a runtime KV
     // scheduler (PagedAttention / radix cache) can apply the same per-class
@@ -1272,7 +1272,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
         && Object.keys(kv_profile).length > 0
       ? kv_profile
       : null,
-    // W809 — output_schema spec (canonicalized). Surface the spec a runtime
+    // W809 - output_schema spec (canonicalized). Surface the spec a runtime
     // wrapper or constrained decoder uses to enforce structured output. Schema
     // lives in src/output-schema.js (canonicalizer + validator + parser).
     // Bound into artifact_hash below via output_schema_hash with the W460
@@ -1281,7 +1281,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // rebuilt. Schema version stamp lets verifiers detect spec migrations.
     output_schema: _output_schema_canon,
     output_schema_spec_version: _output_schema_canon ? OUTPUT_SCHEMA_VERSION : undefined,
-    // W736 — Guardrail Compilation. Brand-safety rules bake into the manifest
+    // W736 - Guardrail Compilation. Brand-safety rules bake into the manifest
     // as HARD constraints (NOT training signal). Each entry is
     // { name, pattern, action }; pattern accepts keyword:/glob:/raw regex,
     // action is one of block|warn|rewrite. Runtime enforcement lives in
@@ -1293,7 +1293,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // artifact_hash. _guardrails_canon is null in that path; the conditional
     // slot in artifact_hash_input below is skipped to match.
     guardrails: _guardrails_canon,
-    // W739 — Model lineage tracking. Each .kolm references its parent artifact
+    // W739 - Model lineage tracking. Each .kolm references its parent artifact
     // via this field. The W460 byte-stability law: when parent_cid is absent
     // the manifest MUST not carry the key at all (so manifest_hash + cid stay
     // byte-identical to pre-W739 artifacts). We use a conditional spread
@@ -1304,11 +1304,11 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // diffArtifacts in src/kolm-diff.js. Tested by W739 #9 byte-stability
     // lock-in.
     ...(_parent_cid_canon ? { parent_cid: _parent_cid_canon } : {}),
-    // W769 — Data residency region. The W460 byte-stability law: when region
+    // W769 - Data residency region. The W460 byte-stability law: when region
     // is absent the manifest MUST NOT carry the key at all (so manifest_hash
     // + cid + artifact_hash stay byte-identical to pre-W769 artifacts).
     // Conditional spread (...(value ? {key:value} : {})) mirrors the W739
-    // parent_cid pattern verbatim — absent / null / '' all collapse to the
+    // parent_cid pattern verbatim - absent / null / '' all collapse to the
     // empty spread, and the matching artifact_hash_input slot below is
     // skipped in lockstep. Schema lives in src/data-residency.js (REGIONS
     // taxonomy + DEFAULT_REGION). Bound into artifact_hash below via
@@ -1316,7 +1316,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // residency tamper (swap from EU_WEST → US_EAST after sign-time) breaks
     // the receipt chain.
     ...(_region_canon ? { region: _region_canon } : {}),
-    // W786 — Sustainability badge. Conditional-spread per the W460 byte-
+    // W786 - Sustainability badge. Conditional-spread per the W460 byte-
     // stability law: absent (training_stats.gpu_hours not supplied) →
     // _w786_badge is null → key is OMITTED from the manifest entirely so
     // pre-W786 artifacts rebuilt without gpu_hours remain byte-identical
@@ -1327,24 +1327,24 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
     ship_gate_overridden: allow_below_gate === true ? true : undefined,
     license: normalizeLicense(license),
-    // Wave 161 (Q+8) — signature policy. Every modern artifact ships with
+    // Wave 161 (Q+8) - signature policy. Every modern artifact ships with
     // Ed25519 by default (Wave 149); the policy field records this stance so
     // a verifier (or a downstream tenant procurement gate) can REJECT an
     // HMAC-only re-issuance of the same task. Default true unless Ed25519 is
     // explicitly disabled at build time (KOLM_ED25519_DISABLE=1) or the
     // tenant has explicitly opted out of policy enforcement
     // (KOLM_POLICY_OPT_OUT=1). The matching binder check #17 reads this
-    // field PLUS the verifier-side env KOLM_REQUIRE_ED25519=1 — either side
+    // field PLUS the verifier-side env KOLM_REQUIRE_ED25519=1 - either side
     // can demand Ed25519; both sides false means HMAC-only is acceptable.
     //
-    // Wave 162 (Q+9) — Rekor transparency policy. Sigstore is dry-run by
+    // Wave 162 (Q+9) - Rekor transparency policy. Sigstore is dry-run by
     // default (Wave 150 emits a structurally-valid bundle that verifies
     // offline, but is not pinned to a public transparency log). Setting
-    // KOLM_REKOR_REQUIRE=1 at build time flips this to a CONTRACT — the
+    // KOLM_REKOR_REQUIRE=1 at build time flips this to a CONTRACT - the
     // build will fail unless KOLM_SIGSTORE_REKOR_URL is set AND the Rekor
     // submission succeeds. Default false because Rekor pinning needs
     // network egress; most builds are offline by design. The matching
-    // binder check #18 reads this field PLUS env KOLM_REQUIRE_REKOR=1 —
+    // binder check #18 reads this field PLUS env KOLM_REQUIRE_REKOR=1 - 
     // either side can demand a pinned bundle; both sides false means a
     // dry-run sigstore block is acceptable.
     policy: {
@@ -1355,7 +1355,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     },
     cid,
     hashes,
-    // W367 — entry block. Names the executable file inside the zip plus its
+    // W367 - entry block. Names the executable file inside the zip plus its
     // sha256 + the host runtimes it targets. Verifiers reject any rule-class
     // artifact whose entry file is missing or whose entry_sha256 drifts
     // (artifact.no_executable_bundle). Absent (null) for distilled_model
@@ -1368,7 +1368,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       export: 'default',
     } : null,
   };
-  // Wave 151 — validate the rolled-up artifact_class against the manifest
+  // Wave 151 - validate the rolled-up artifact_class against the manifest
   // contents. A `distilled_model` claim with no weights, a `compiled_rule`
   // claim with no compiled_targets, or a `synthesized_rule` claim with no
   // teacher attribution all throw here, before the receipt is signed.
@@ -1385,7 +1385,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // *before* the zip is finalised, while the manifest_hash anchors the
   // legacy signature.sig.
   //
-  // Wave F — compiled_rule artifacts add a `compiled_targets_hash` field over
+  // Wave F - compiled_rule artifacts add a `compiled_targets_hash` field over
   // the canonical compiled_targets manifest block (per-recipe filename +
   // source_hash + bytes). The field is omitted for non-compiled artifacts so
   // existing CIDs and artifact_hashes stay byte-stable.
@@ -1400,7 +1400,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (compiled_targets_block) {
     artifact_hash_input.compiled_targets_hash = sha256(canonicalJson(compiled_targets_block));
   }
-  // Wave 409q — bind honest binaries[] into artifact_hash. Empty array hashes
+  // Wave 409q - bind honest binaries[] into artifact_hash. Empty array hashes
   // to a stable canonical "[]" so the chain is byte-stable for non-compiled
   // artifacts; any post-build mutation (added entry, dropped one, swapped
   // sha256, swapped filename) breaks the receipt chain.
@@ -1412,7 +1412,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       }))
     ));
   }
-  // Wave V — bind capability/lineage/IR/attestation into the artifact hash so
+  // Wave V - bind capability/lineage/IR/attestation into the artifact hash so
   // tampering with any of them after seal-time breaks the receipt chain.
   if (capability_block) {
     artifact_hash_input.capability_hash = capability_block.hash;
@@ -1420,14 +1420,14 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (lineage_block) {
     artifact_hash_input.lineage_hash = lineage_block.hash;
   }
-  // Wave 146 — bind export block into artifact_hash. The block's hash is the
+  // Wave 146 - bind export block into artifact_hash. The block's hash is the
   // short hash over its own canonical contents (see export-provenance.js
   // buildExportBlock); tamper with any target sha256, the block hash drifts,
   // the artifact hash drifts, the receipt chain breaks.
   if (export_block) {
     artifact_hash_input.export_hash = export_block.hash;
   }
-  // Wave 147 — bind moe block into artifact_hash. Same drift-propagation as
+  // Wave 147 - bind moe block into artifact_hash. Same drift-propagation as
   // export: tamper any expert sha256, the moe block hash drifts, the
   // artifact hash drifts, the receipt chain breaks. The bundled expert
   // files themselves also folded into extra_files_hash below for double
@@ -1435,13 +1435,13 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (moe_block) {
     artifact_hash_input.moe_hash = moe_block.hash;
   }
-  // Wave 148 — bind pretokenize block into artifact_hash. Same drift-
+  // Wave 148 - bind pretokenize block into artifact_hash. Same drift-
   // propagation as moe/export: tamper either binary, the file's sha256 drifts,
   // the block hash drifts, the artifact hash drifts, the receipt chain breaks.
   if (pretokenize_block) {
     artifact_hash_input.pretokenize_hash = pretokenize_block.hash;
   }
-  // Wave 164 — bind external/adversarial holdout block into artifact_hash.
+  // Wave 164 - bind external/adversarial holdout block into artifact_hash.
   // Tamper with any holdout's file_sha256, normalized_hash, or recorded
   // accuracy: the block hash drifts, the artifact hash drifts, every
   // signature breaks. The holdout JSONLs themselves live under repo root
@@ -1451,17 +1451,17 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (external_holdout_block) {
     artifact_hash_input.external_holdout_hash = external_holdout_block.hash;
   }
-  // Wave 165 — bind tenant shadow corpus blocks into artifact_hash. Hash
+  // Wave 165 - bind tenant shadow corpus blocks into artifact_hash. Hash
   // over the canonical ordered array of per-corpus block hashes so any
   // post-build mutation (added corpus, dropped corpus, swapped corpus_sha256,
   // edited accuracy) breaks the receipt chain. The hash binds only the
-  // fingerprint, never the corpus bytes — those stay on tenant storage.
+  // fingerprint, never the corpus bytes - those stay on tenant storage.
   if (tenant_shadow_blocks && tenant_shadow_blocks.length > 0) {
     artifact_hash_input.tenant_shadow_corpus_hash = sha256(canonicalJson(
       tenant_shadow_blocks.map(b => ({ tenant_id: b.tenant_id, corpus_id: b.corpus_id, hash: b.hash }))
     ));
   }
-  // Wave 166 (N+7) — bind auditor attestation blocks into artifact_hash. Hash
+  // Wave 166 (N+7) - bind auditor attestation blocks into artifact_hash. Hash
   // over the canonical ordered array of per-block {auditor_id, key_fingerprint,
   // hash} tuples so any post-build mutation (added attestation, dropped one,
   // swapped signature, edited claimed eval_score) breaks the receipt chain.
@@ -1473,7 +1473,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       auditor_attestation_blocks.map(b => ({ auditor_id: b.auditor_id, key_fingerprint: b.key_fingerprint, hash: b.hash }))
     ));
   }
-  // Wave 167 (M+4) — bind supersession block into artifact_hash via the
+  // Wave 167 (M+4) - bind supersession block into artifact_hash via the
   // block's own short hash. Tamper with predecessor_artifact_hash, reason,
   // supersession_date, drift_signals, etc.: the block hash drifts → artifact
   // hash drifts → every downstream signature breaks. This is what makes the
@@ -1483,7 +1483,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (supersession_block) {
     artifact_hash_input.supersession_hash = supersession_block.hash;
   }
-  // Wave 167 (M+3) — bind drift report into artifact_hash. Same pattern as
+  // Wave 167 (M+3) - bind drift report into artifact_hash. Same pattern as
   // supersession: tamper the verdict, the breach_count, any signal value, and
   // the block hash drifts → artifact hash drifts → all signatures break.
   if (drift_report_block) {
@@ -1498,29 +1498,29 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (confidential_compute_block) {
     artifact_hash_input.confidential_compute_hash = sha256(canonicalJson(confidential_compute_block));
   }
-  // W719 — bind the DAQ mixed-precision profile into artifact_hash so any
+  // W719 - bind the DAQ mixed-precision profile into artifact_hash so any
   // post-build tamper of the per-layer schedule (added layer, dropped one,
   // changed weight_bits, swapped scale_mode, etc.) breaks the receipt
-  // chain. Same pattern as confidential_compute_hash (W460) — keyed only
+  // chain. Same pattern as confidential_compute_hash (W460) - keyed only
   // when the field is actually present so existing artifacts that did not
   // ship a DAQ profile remain byte-stable.
   if (Array.isArray(daq_profile) && daq_profile.length > 0) {
     artifact_hash_input.mixed_precision_profile_hash = sha256(canonicalJson(daq_profile));
   }
-  // W721 — bind the TSAC sparsity_profile into artifact_hash so any
+  // W721 - bind the TSAC sparsity_profile into artifact_hash so any
   // post-build tamper of the per-(layer,head) kernel selection (added
   // entry, dropped one, swapped prefill_pattern, swapped decode_policy,
   // tweaked page_topk/sink_keep/dense_fallback_threshold, etc.) breaks
   // the receipt chain. Mirrors the W460 confidential_compute_hash slot:
   // keyed ONLY when the field is non-null AND non-empty so existing
   // artifacts (which never carried a sparsity_profile) remain
-  // byte-stable. CRITICAL — never unconditionally add to the hash chain;
+  // byte-stable. CRITICAL - never unconditionally add to the hash chain;
   // that would re-hash every legacy .kolm at the next verify pass.
   if (sparsity_profile && typeof sparsity_profile === 'object'
       && Object.keys(sparsity_profile).length > 0) {
     artifact_hash_input.sparsity_profile_hash = sha256(canonicalJson(sparsity_profile));
   }
-  // W722 — bind the ITKV kv_profile into artifact_hash so any post-build
+  // W722 - bind the ITKV kv_profile into artifact_hash so any post-build
   // mutation of the per-token-class precision schedule breaks the receipt
   // chain. Mirrors the W460 confidential_compute_hash + W721
   // sparsity_profile_hash conditional-slot pattern: keyed only when a
@@ -1530,7 +1530,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       && Object.keys(kv_profile).length > 0) {
     artifact_hash_input.kv_profile_hash = sha256(canonicalJson(kv_profile));
   }
-  // W809 — bind the structured-output schema spec into artifact_hash so any
+  // W809 - bind the structured-output schema spec into artifact_hash so any
   // post-build swap of the canonical output_schema breaks the receipt chain.
   // Mirrors the W460 confidential_compute_hash + W721 sparsity_profile_hash +
   // W722 kv_profile_hash conditional-slot pattern: keyed only when canonical
@@ -1540,7 +1540,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (_output_schema_canon !== null) {
     artifact_hash_input.output_schema_hash = sha256(canonicalJson(_output_schema_canon));
   }
-  // W736 — bind the guardrails block into artifact_hash so any post-build
+  // W736 - bind the guardrails block into artifact_hash so any post-build
   // mutation of a rule (added entry, dropped one, swapped action/pattern,
   // edited name, replacement-string drift) breaks the receipt chain. Mirrors
   // the W460 confidential_compute_hash + W721 sparsity_profile_hash + W722
@@ -1548,14 +1548,14 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // slot is keyed ONLY when the canonical block is non-null + non-empty,
   // so pre-W736 artifacts (which never carried guardrails) rebuilt without
   // a guardrails block remain byte-identical to their original artifact_hash.
-  // hashGuardrailsW736 returns null on empty input — we re-check Array.isArray
+  // hashGuardrailsW736 returns null on empty input - we re-check Array.isArray
   // + length here as defense-in-depth so a future caller passing {} or 0
   // does not silently key the slot.
   if (Array.isArray(_guardrails_canon) && _guardrails_canon.length > 0) {
     const gh = hashGuardrailsW736(_guardrails_canon);
     if (gh) artifact_hash_input.guardrails_hash = gh;
   }
-  // W739 — bind parent_cid into artifact_hash so a tamperer cannot rewrite
+  // W739 - bind parent_cid into artifact_hash so a tamperer cannot rewrite
   // lineage history without invalidating every descendant's receipt chain.
   // Mirrors the W460 confidential_compute_hash + W721 sparsity_profile_hash
   // + W722 kv_profile_hash + W736 guardrails_hash conditional-slot pattern:
@@ -1567,7 +1567,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (_parent_cid_canon) {
     artifact_hash_input.parent_cid = _parent_cid_canon;
   }
-  // W769 — bind the residency region into artifact_hash so a tamperer
+  // W769 - bind the residency region into artifact_hash so a tamperer
   // cannot rewrite the residency claim on a signed artifact without
   // invalidating the receipt chain. Mirrors the W460 confidential_compute_hash
   // + W721 sparsity_profile_hash + W722 kv_profile_hash + W736 guardrails_hash
@@ -1583,12 +1583,12 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (hashes.extra_files) {
     artifact_hash_input.extra_files_hash = sha256(canonicalJson(hashes.extra_files));
   }
-  // W367 — bind recipe.bundle.mjs into artifact_hash so a tamperer can't swap
+  // W367 - bind recipe.bundle.mjs into artifact_hash so a tamperer can't swap
   // the executable bundle without breaking every signature down the chain.
   if (recipe_bundle_mjs) {
     artifact_hash_input.recipe_bundle_mjs_hash = hashes.recipe_bundle_mjs;
   }
-  // W457 — bind model_weights into artifact_hash so swapping weight bytes
+  // W457 - bind model_weights into artifact_hash so swapping weight bytes
   // (e.g. replacing a vetted Qwen 0.5B GGUF with a tampered build) breaks
   // every signature down the chain. The matching verifier check rehashes the
   // declared file and refuses on mismatch.
@@ -1624,17 +1624,17 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     stepSeal('package', evalsHash,   artifact_hash),
   ];
 
-  // Receipt body — bound by the HMAC over (artifact_hash, eval_set_hash,
+  // Receipt body - bound by the HMAC over (artifact_hash, eval_set_hash,
   // eval_score, judge_id, chain). The signed_by field identifies the current
   // HMAC key namespace; future asymmetric signatures should use a new
   // signature_alg value. Verifiers re-check both the chain and the body HMAC.
   const issued_at = new Date().toISOString();
   const receipt_id = crypto.randomUUID();
 
-  // Wave 409aa — auditor mandate: receipts MUST surface the dataset/holdout
+  // Wave 409aa - auditor mandate: receipts MUST surface the dataset/holdout
   // hashes + split seed + the source-event hashes the dataset rolled up from
   // + a build-toolchain block. These fields ride INSIDE the receipt body so
-  // the HMAC + Ed25519 + Sigstore signatures all cover them — tampering with
+  // the HMAC + Ed25519 + Sigstore signatures all cover them - tampering with
   // any one breaks every signature down the chain.
   //
   //   event_source_hashes[] : per-source-event sha256 the seed split rolled up
@@ -1712,7 +1712,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     build_toolchain,
   };
 
-  // Wave 149 — Ed25519 is now the DEFAULT signature alg.
+  // Wave 149 - Ed25519 is now the DEFAULT signature alg.
   //
   // Prior to Wave 149 the Ed25519 block only appeared when
   // `KOLM_ED25519_PRIVATE_KEY` was explicitly set. Per the Wave 144 plan
@@ -1735,7 +1735,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   } catch (e) {
     console.error(`[artifact] WARNING: ed25519 signer load skipped: ${e.message}`);
   }
-  // Wave 150 — sigstore (cosign-compatible) bundle is layered on top of
+  // Wave 150 - sigstore (cosign-compatible) bundle is layered on top of
   // Ed25519 when both the Ed25519 signer is present AND sigstore is not
   // explicitly disabled. signature_alg upgrades to reflect every active
   // signature scheme so verifiers can quickly decide which checks apply.
@@ -1773,7 +1773,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
   }
 
-  // Wave 150 — sigstore layer. Always dry-run-by-default at build time
+  // Wave 150 - sigstore layer. Always dry-run-by-default at build time
   // (KOLM_SIGSTORE_REKOR_URL not consulted here because that's an async
   // network call; `kolm sigstore-attest` upgrades to a Rekor-pinned bundle
   // post-build). The bundle still verifies offline against the embedded
@@ -1795,7 +1795,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
 
   const receipt_json = JSON.stringify(receiptBody, null, 2);
 
-  // Legacy signature.sig — kept for back-compat with v0 verifiers. The new
+  // Legacy signature.sig - kept for back-compat with v0 verifiers. The new
   // receipt.json supersedes it.
   const sig_payload = canonicalJson({
     spec: ARTIFACT_SPEC,
@@ -1822,7 +1822,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
 
   // Build an artifact-scoped provenance credential. Signed with the same
   // secret as the receipt chain. Shipped as a sidecar `credential.json` in
-  // the zip (not embedded in receipt.json — receipt.json is already signed,
+  // the zip (not embedded in receipt.json - receipt.json is already signed,
   // and we don't want to invalidate that signature).
   const credential = buildArtifactCredential({
     secret,
@@ -1854,16 +1854,16 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (model_pointer != null) files.push({ filename: 'model.gguf', content: Buffer.from(model_pointer) });
   if (has_pack) files.push({ filename: 'lora.bin', content: lora_bin });
   if (has_index) files.push({ filename: 'index.sqlite-vec', content: index_bin });
-  // W367 — emit the executable bundle. Without this, the artifact is metadata
+  // W367 - emit the executable bundle. Without this, the artifact is metadata
   // only and the homepage hero claim "same file runs on a laptop, a phone, or
   // an air-gapped server" is a lie. The bundle is a self-contained ESM module
   // any Node 18+ / Bun 1+ / Deno 1.40+ host can `import` directly.
   if (recipe_bundle_mjs) files.push({ filename: bundle_filename, content: Buffer.from(recipe_bundle_mjs) });
-  // W457 — emit bundled model weights (gguf/onnx/wasm/native). The verifier
+  // W457 - emit bundled model weights (gguf/onnx/wasm/native). The verifier
   // refuses any manifest whose runtime_target is a weight class but whose
   // declared *_path entry is absent from the zip, so PATH B (rule-class) and
   // PATH A (weight-class) cannot be mixed up. The runtime_target_config path
-  // must match the bundled filename — we don't blindly trust the caller; the
+  // must match the bundled filename - we don't blindly trust the caller; the
   // check below errors at build time if they drift.
   if (_modelWeightsRecord) {
     const _isWeightClass = ['gguf', 'onnx', 'wasm', 'native'].includes(_runtimeTargetDeclared);
@@ -1882,27 +1882,27 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     }
     files.push({ filename: _modelWeightsRecord.filename, content: _modelWeightsRecord.content });
   } else if (['gguf', 'onnx', 'wasm', 'native'].includes(_runtimeTargetDeclared)) {
-    // W457 — runtime_target declared a weight class but no model_weights was
+    // W457 - runtime_target declared a weight class but no model_weights was
     // supplied. This is the honest-failure path: the verifier would refuse the
     // bundle (rtCheck would see a missing entry), so refuse at build time
     // instead of shipping a known-broken artifact. Callers can pass
     // runtime_target='js' (the default) to ship a rule-class artifact.
     throw new Error(`runtime_target=${_runtimeTargetDeclared} requires model_weights={filename,content:Buffer} to bundle the matching weights; got none`);
   }
-  // Wave F — emit the C and Rust sources for compiled_rule artifacts. They
+  // Wave F - emit the C and Rust sources for compiled_rule artifacts. They
   // are the source-of-truth the verifier rebuilds against. Wave G adds the
   // compiled binary alongside (target binary hash also enters the manifest).
   for (const f of compiled_target_files) files.push(f);
-  // Wave V — emit workflow_ir.json and attestation_report.json so the verifier
+  // Wave V - emit workflow_ir.json and attestation_report.json so the verifier
   // can replay hashIr() / verifyAttestation() instead of trusting the manifest
   // claim. A claim without bundled evidence is treated as fail by binder.js.
   if (workflow_ir_json) files.push({ filename: 'workflow_ir.json', content: Buffer.from(workflow_ir_json) });
   if (attestation_report_json) files.push({ filename: 'attestation_report.json', content: Buffer.from(attestation_report_json) });
-  // Wave 144 — append extra files (e.g. tokenizer.json) last so they don't
+  // Wave 144 - append extra files (e.g. tokenizer.json) last so they don't
   // shift offsets of the load-bearing files above. Filename collisions with
   // the reserved set would silently shadow; we guard here.
   const RESERVED_FILENAMES = new Set(['manifest.json', 'recipes.json', 'signature.sig', 'evals.json', 'receipt.json', 'credential.json', 'model.gguf', 'lora.bin', 'index.sqlite-vec', 'workflow_ir.json', 'attestation_report.json', 'recipe.bundle.mjs']);
-  // W457 — also reserve the bundled model_weights filename so an extra_files
+  // W457 - also reserve the bundled model_weights filename so an extra_files
   // entry can't silently shadow real weights with a tampered payload.
   if (_modelWeightsRecord) RESERVED_FILENAMES.add(_modelWeightsRecord.filename);
   for (const f of extra_files_list) {
@@ -1960,11 +1960,11 @@ export function packageArtifact({ job_id, payload, outPath }) {
 //
 // We zip twice when k_score is requested: once to measure size, then again
 // with the size-aware K-score patched into the manifest. The double-zip is
-// cheap (≤10ms for 5KB artifacts) and keeps the K-score honest — the size
+// cheap (≤10ms for 5KB artifacts) and keeps the K-score honest - the size
 // axis includes the K-score bytes themselves.
 export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports, speculative_decoding, prompt_cache, continuous_batching }) {
   requireSignSecret();
-  // W457b (build-honors-out) — when an explicit outPath is supplied, write
+  // W457b (build-honors-out) - when an explicit outPath is supplied, write
   // the .kolm directly at the user-requested filename. Otherwise fall back
   // to the legacy `outDir/${job_id}.kolm` path. The override removes the
   // copy-rename step in spec-compile.js that (a) leaked `<job_id>.kolm` into
@@ -1975,7 +1975,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
 
   // Derive eval_score from the synthesis result. Pattern-mode synthesis
   // returns pass_rate_positive in [0..1]; the artifact tier defaults to
-  // "recipe" (the only tier the Sprint-1 toolchain produces today —
+  // "recipe" (the only tier the Sprint-1 toolchain produces today - 
   // adapter/specialist/bundle land in later sprints).
   const accuracy = training_stats?.pass_rate_positive ?? (training_stats?.verifier_accepted ? 1.0 : 0.0);
   const coverage = evals && evals.coverage != null ? evals.coverage : accuracy;
@@ -1983,7 +1983,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
   const _tier = tier || 'recipe';
   const _judgeId = judge_id || process.env.KOLM_JUDGE_ID || 'kolm-pattern-synth-1';
 
-  // Wave V — when an attestation_report is supplied, run the verifier here
+  // Wave V - when an attestation_report is supplied, run the verifier here
   // (async) and pass the resulting state into the sync buildPayload as
   // confidential_compute. The kind comes from the capability block when the
   // contract demands TEE; otherwise the caller must pre-supply a kind via
@@ -1999,17 +1999,17 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
 
   const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports, speculative_decoding, prompt_cache, continuous_batching };
 
-  // W350 — temp-file cleanup registry. The two-pass build writes a probe zip
+  // W350 - temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe
   // is overwritten in place by the final zip (same outPath). On FAILURE
   // (ship-gate throw, Rekor pinning failure, anything else between Pass 1 and
-  // the return) the probe zip used to leak — a half-baked .kolm with no
+  // the return) the probe zip used to leak - a half-baked .kolm with no
   // K-score in its manifest would sit in ~/.kolm/artifacts/. Track every
   // temp file we create and unlink them in the finally if `success` never
   // flips true.
   const cleanupOnFail = [];
   let success = false;
-  // W457b — honor explicit outPath override so the on-disk artifact is named
+  // W457b - honor explicit outPath override so the on-disk artifact is named
   // exactly what the user asked for (no `<job_id>.kolm` intermediate). Wrap
   // the pre-flight write probe so a locked/permission-denied target produces
   // a clean, actionable error instead of an unhandled EPERM/EBUSY crash with
@@ -2037,7 +2037,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     }
   }
   try {
-  // Pass 1 — zip to measure size.
+  // Pass 1 - zip to measure size.
   const probePayload = buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, judge_id: _judgeId, eval_score, tier: _tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, ...sharedBlocks });
   cleanupOnFail.push(outPath);
   await packageArtifact({ job_id, payload: probePayload, outPath });
@@ -2049,7 +2049,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
   // accuracy = synthesizer pass-rate. Coverage starts at the eval count
   // ratio; if no evals supplied, it equals accuracy (best-effort).
   //
-  // Wave 145 — also passes optional V2 axes when training_stats carries them.
+  // Wave 145 - also passes optional V2 axes when training_stats carries them.
   // The distill-provenance bridge surfaces teacher_holdout_accuracy +
   // holdout_accuracy from the worker manifest, which makes the K-score
   // emit a v2 envelope with R + T axes (student-on-holdout / teacher-on-
@@ -2067,22 +2067,22 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     eval_set_drift: training_stats?.eval_set_drift ?? null,
   });
 
-  // Pass 2 — repackage with the K-score in the manifest. The K-score size
+  // Pass 2 - repackage with the K-score in the manifest. The K-score size
   // axis reflects the probe zip size (Pass 1); the final zip is typically
   // 64-100 bytes larger because the manifest now embeds the K-score JSON.
-  // We do NOT mutate the manifest after writing — the returned manifest is
+  // We do NOT mutate the manifest after writing - the returned manifest is
   // exactly what's inside the on-disk artifact, so a verifier recomputing
   // K-score from the artifact bytes will reproduce manifest.k_score
   // deterministically (size_bytes axis matches the embedded value).
   const finalPayload = buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id: _judgeId, eval_score, tier: _tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, ...sharedBlocks });
   await packageArtifact({ job_id, payload: finalPayload, outPath });
 
-  // Wave 162 (Q+9) — opportunistic Rekor pinning. The build is sync; the
+  // Wave 162 (Q+9) - opportunistic Rekor pinning. The build is sync; the
   // sigstore block emitted inside buildPayload is dry-run by design. When
   // KOLM_SIGSTORE_REKOR_URL is set, post the bundle's digest+sig+pubkey to
   // that Rekor instance now (async, post-zip) and rewrite the artifact in
   // place with the pinned bundle. If manifest.policy.require_rekor=true and
-  // the submission fails, the build fails — that's the contract. Otherwise
+  // the submission fails, the build fails - that's the contract. Otherwise
   // log a warning and proceed with the dry-run artifact (the artifact is
   // still structurally valid + locally verifiable; the user can rerun
   // `kolm sigstore-attest <artifact>` later).
@@ -2092,7 +2092,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
   const sigstorePresent = !!finalPayload.receipt.signature_sigstore;
   if (sigstorePresent && (hasRekorUrl || requiresRekor)) {
     if (!hasRekorUrl && requiresRekor) {
-      throw new Error('policy.require_rekor=true but KOLM_SIGSTORE_REKOR_URL is unset — cannot pin sigstore bundle to a transparency log');
+      throw new Error('policy.require_rekor=true but KOLM_SIGSTORE_REKOR_URL is unset - cannot pin sigstore bundle to a transparency log');
     }
     try {
       rekorAttestation = await attestArtifactWithRekor(outPath);
@@ -2130,7 +2130,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     rekor_attestation: rekorAttestation,
   };
   } finally {
-    // W350 — only clean up on failure. On success the same outPath is the
+    // W350 - only clean up on failure. On success the same outPath is the
     // canonical artifact and must remain on disk; tracking it in cleanupOnFail
     // is harmless because `success === true` short-circuits the unlink loop.
     if (!success) {
@@ -2142,12 +2142,12 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
 }
 
 export function verifyManifestSignature(manifest_json, signature) {
-  // W481 — try every candidate verification secret in order so in-repo
+  // W481 - try every candidate verification secret in order so in-repo
   // marketplace seed artifacts verify on a fresh checkout AND user-compiled
   // artifacts verify on the user's own machine. The candidate list is built
   // by verificationSecrets() in env.js: env RECIPE_RECEIPT_SECRET first
   // (legacy KOLM_ARTIFACT_SECRET if requested), then MARKETPLACE_FIXTURE_SECRET,
-  // then DEV_RECEIPT_SECRET (in dev mode only — never in production-like).
+  // then DEV_RECEIPT_SECRET (in dev mode only - never in production-like).
   const candidates = verificationSecrets({ includeLegacyArtifactSecret: true });
   if (candidates.length === 0) return { valid: false, reason: 'sign secret unavailable on server' };
   try {
@@ -2242,7 +2242,7 @@ export async function verifyDeviceFit(manifest, hostDeviceId) {
   };
 }
 
-// W829-2 — Heterogeneous weights extension.
+// W829-2 - Heterogeneous weights extension.
 //
 // VLM-class artifacts ship three weight families inside one .kolm zip:
 //   weights/text/                -> the language-model backbone
@@ -2253,7 +2253,7 @@ export async function verifyDeviceFit(manifest, hostDeviceId) {
 // pipeline (PATH A in buildAndZip). It augments a `builder` envelope shaped
 // as { files:[{filename,content}], manifest:{...} } so a downstream wave can
 // fold heterogeneous weights into a builder envelope BEFORE the zip is
-// finalised — or onto a freshly-decoded artifact for re-emission.
+// finalised - or onto a freshly-decoded artifact for re-emission.
 //
 // Returns the SAME builder envelope, mutated in place AND returned, so the
 // helper composes nicely with chained transformations.
@@ -2267,7 +2267,7 @@ export async function verifyDeviceFit(manifest, hostDeviceId) {
 //   - filename collisions with the W457 reserved set throw at build time
 //     (we add the new files into the same files[] the buildAndZip writer
 //     iterates, so the same RESERVED_FILENAMES guard would catch a
-//     collision — but the helper checks up front for a sharper error).
+//     collision - but the helper checks up front for a sharper error).
 export const HETEROGENEOUS_WEIGHTS_VERSION = 'w829-v1';
 
 const VISION_ENCODER_KINDS = new Set([
@@ -2320,7 +2320,7 @@ export function addHeterogeneousWeights(builder, { text_weights, vision_encoder,
     tool_use_head_present: false,
   };
 
-  // weights/text/ — the language-model backbone. Accepts a single buffer
+  // weights/text/ - the language-model backbone. Accepts a single buffer
   // OR { filename, content } record OR an array of records for a sharded
   // backbone.
   if (text_weights != null) {
@@ -2331,7 +2331,7 @@ export function addHeterogeneousWeights(builder, { text_weights, vision_encoder,
     block.text_weights_files = records.map((r) => r.filename);
   }
 
-  // weights/vision-encoder/ — the image encoder weights + its kind tag.
+  // weights/vision-encoder/ - the image encoder weights + its kind tag.
   if (vision_encoder != null) {
     if (!vision_encoder || typeof vision_encoder !== 'object') {
       throw new Error('addHeterogeneousWeights: vision_encoder must be { kind, content | files }');
@@ -2354,7 +2354,7 @@ export function addHeterogeneousWeights(builder, { text_weights, vision_encoder,
     block.vision_encoder_files = records.map((r) => r.filename);
   }
 
-  // weights/tool-use-head/ — the tool-call head.
+  // weights/tool-use-head/ - the tool-call head.
   if (tool_use_head != null) {
     if (!tool_use_head || typeof tool_use_head !== 'object') {
       throw new Error('addHeterogeneousWeights: tool_use_head must be { kind, content | files }');

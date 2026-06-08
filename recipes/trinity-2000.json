@@ -1,0 +1,63 @@
+{
+  "$schema": "https://kolm.ai/schemas/distill-recipe/v1.json",
+  "name": "trinity-2000-v2",
+  "description": "Trinity 2000 v2 — multi-teacher customer-support distillation. 2000 pairs across 8 buckets (refunds/shipping/warranty/billing/technical/account/loyalty/escalation). Teachers: Claude-Sonnet-4-6 (800), GPT-4o (600), local DeepSeek-R1-Distill-Qwen-32B (600). Student: Qwen2.5-7B QLoRA r=32. Runs end-to-end via `kolm distill --recipe trinity-2000` and re-entrant via --resume.",
+  "version": "1.0.0",
+
+  "seeds": {
+    "target": 2000,
+    "generator": "scripts/trinity-2000-v2-seed-gen.mjs",
+    "buckets": {
+      "refunds_returns": 250,
+      "shipping_delivery": 250,
+      "warranty_repair": 200,
+      "billing_payment": 250,
+      "technical_issues": 300,
+      "account_access": 200,
+      "loyalty_discount": 200,
+      "escalation_complex": 350
+    },
+    "dedupe": { "method": "3gram", "threshold": 0.85 }
+  },
+
+  "teachers": [
+    { "slug": "anthropic:claude-sonnet-4-6", "weight": 0.40, "rows": 800, "source": "kolm-proxy" },
+    { "slug": "openai:gpt-4o",                "weight": 0.30, "rows": 600, "source": "kolm-proxy" },
+    { "slug": "kolm:deepseek-r1-distill-qwen-32b", "weight": 0.30, "rows": 600, "source": "local:8765" }
+  ],
+
+  "scrub": {
+    "cot": {
+      "markers_path": "workers/distill/scripts/cot_markers.json",
+      "strategy": "rsplit_close_tag",
+      "drop_if_no_close_tag": true
+    }
+  },
+
+  "train": {
+    "method": "qlora",
+    "student_base": "Qwen/Qwen2.5-7B-Instruct",
+    "lora": { "r": 32, "alpha": 64, "dropout": 0.05 },
+    "max_seq_len": 1024,
+    "epochs": 2,
+    "batch_size": 2,
+    "gradient_accumulation_steps": 8,
+    "effective_batch_size": 16,
+    "val_fraction": 0.10,
+    "eval_steps": 50,
+    "save_steps": 50,
+    "save_total_limit": 4,
+    "lr": 1.5e-4,
+    "warmup_ratio": 0.05,
+    "max_grad_norm": 1.0
+  },
+
+  "eval": {
+    "strict_cot": true,
+    "holdout_n": 20,
+    "bench": "none",
+    "out_path": "student/eval-strict-20.jsonl"
+  },
+
+  "system_prompt": "You are a careful customer-support agent. When a user asks for help, think through the steps, explain your reasoning briefly, and call the right tool with structured arguments. If information is missing, ask exactly one clarifying question. Never invent order IDs, prices, or policy text — say you don't know and route to a human."
+}

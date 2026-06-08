@@ -1,6 +1,6 @@
 // src/k8s-routes.js
 //
-// W824-2 + W824-3 — Kubernetes-native deep-readiness + extended-metrics
+// W824-2 + W824-3 - Kubernetes-native deep-readiness + extended-metrics
 // routes. Lives in a one-call mount module so W824 ships without touching
 // router.js beyond a single `__registerK8sRoutes_w824(r)` line. Concurrent
 // agents (WC07, WC14, W822) are editing router.js in parallel and the
@@ -8,16 +8,16 @@
 //
 // Routes registered:
 //
-//   GET /ready/deep      — 200 only when the .kolm artifact is loaded
+//   GET /ready/deep - 200 only when the .kolm artifact is loaded
 //                          (W824-2). 503 + structured envelope otherwise.
 //                          Distinct from /ready (W730, runtime-readiness)
 //                          which only checks env/config presence.
 //
-//   GET /metrics/extended — Prometheus exposition (W824-3) aggregated from
+//   GET /metrics/extended - Prometheus exposition (W824-3) aggregated from
 //                          the event-store: kolm_inferences_total (counter),
 //                          kolm_latency_seconds (histogram),
 //                          kolm_fallback_rate (gauge),
-//                          kolm_inference_queue_depth (gauge — HPA input).
+//                          kolm_inference_queue_depth (gauge - HPA input).
 //                          Distinct from /metrics (W730) which exposes the
 //                          generic prometheus-exporter registry.
 //
@@ -25,7 +25,7 @@
 //
 //   /ready/deep emits {ok:false, error:'artifact_not_loaded', hint, source}
 //   with HTTP 503 when the artifact is cold. Never 200 with a fake-ready
-//   body — k8s would let traffic land on an empty pod.
+//   body - k8s would let traffic land on an empty pod.
 //
 //   /metrics/extended always returns 200 with a Prometheus text body so
 //   scrapers stay green even when the store is empty. Empty store -> all
@@ -37,7 +37,7 @@ import * as eventStore from './event-store.js';
 export const K8S_ROUTES_VERSION = 'w824-v1';
 
 // ---------------------------------------------------------------------------
-// Prometheus text helpers (no external SDK — kept local so this module stays
+// Prometheus text helpers (no external SDK - kept local so this module stays
 // independently testable and we don't take on a heavy dependency for four
 // metrics).
 // ---------------------------------------------------------------------------
@@ -71,7 +71,7 @@ function _renderLabels(labels) {
 }
 
 // ---------------------------------------------------------------------------
-// Inference queue depth — exported so other modules (load-queue) can update
+// Inference queue depth - exported so other modules (load-queue) can update
 // the gauge. The gauge is read by /metrics/extended; the HPA uses the value
 // via a prometheus-adapter to keep replicas matched to demand.
 // ---------------------------------------------------------------------------
@@ -108,7 +108,7 @@ export async function renderExtendedMetrics() {
     rows = [];
   }
 
-  // kolm_inferences_total — counter labelled by status
+  // kolm_inferences_total - counter labelled by status
   const statusCounts = new Map();
   let fallbackCount = 0;
   let total = 0;
@@ -168,7 +168,7 @@ export async function renderExtendedMetrics() {
 }
 
 // ---------------------------------------------------------------------------
-// Route registration — single export so router.js gets a one-line diff.
+// Route registration - single export so router.js gets a one-line diff.
 // ---------------------------------------------------------------------------
 
 export function registerK8sRoutes(r) {
@@ -176,7 +176,7 @@ export function registerK8sRoutes(r) {
     throw new Error('registerK8sRoutes: requires an express router-like with .get()');
   }
 
-  // W824-2 — /ready/deep
+  // W824-2 - /ready/deep
   r.get('/ready/deep', (_req, res) => {
     const snap = readinessSnapshot();
     if (isArtifactLoaded()) {
@@ -201,7 +201,7 @@ export function registerK8sRoutes(r) {
     });
   });
 
-  // W824-3 — /metrics/extended
+  // W824-3 - /metrics/extended
   r.get('/metrics/extended', async (_req, res) => {
     try {
       const body = await renderExtendedMetrics();

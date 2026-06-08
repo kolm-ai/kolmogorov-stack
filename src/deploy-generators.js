@@ -1,4 +1,4 @@
-// R-4 — deployment config generators.
+// R-4 - deployment config generators.
 //
 // Four generators for taking a compiled .kolm artifact and emitting the
 // platform configs an operator actually needs:
@@ -165,7 +165,7 @@ export function generateDockerCompose({
   ].join('\n');
 
   return [
-    '# kolm deploy — docker-compose (' + runtime + ')',
+    '# kolm deploy - docker-compose (' + runtime + ')',
     '# artifact: ' + artifact,
     '# generator: ' + DEPLOY_GENERATORS_VERSION,
     '#',
@@ -184,7 +184,7 @@ export function generateDockerCompose({
 //
 // Multi-document YAML containing: ConfigMap, PersistentVolumeClaim, Job
 // (init download), Deployment, Service, HorizontalPodAutoscaler. The order
-// is intentional — `kubectl apply -f` processes top-down and we want the
+// is intentional - `kubectl apply -f` processes top-down and we want the
 // PVC + ConfigMap + Job ready before the Deployment + Service spin up.
 
 export function generateKubernetesManifests({
@@ -207,7 +207,7 @@ export function generateKubernetesManifests({
     : '["--model", "/models/' + artifact + '", "--port", "8000", "--host", "0.0.0.0", "--alias", "' + artifact + '"]';
 
   // Note: the Job downloads from `KOLM_REGISTRY_URL` which the operator
-  // sets to their internal artifact registry. The Job is a one-shot —
+  // sets to their internal artifact registry. The Job is a one-shot - 
   // re-runs are idempotent (it skips if the file already exists).
   const configMap = [
     '---',
@@ -407,7 +407,7 @@ export function generateKubernetesManifests({
   ].join('\n');
 
   return [
-    '# kolm deploy — kubernetes manifests (' + runtime + ', ' + gpus + ' gpu)',
+    '# kolm deploy - kubernetes manifests (' + runtime + ', ' + gpus + ' gpu)',
     '# artifact:  ' + artifact,
     '# namespace: ' + ns,
     '# generator: ' + DEPLOY_GENERATORS_VERSION,
@@ -494,7 +494,7 @@ export function generateVllmConfig({
 // every recoverable failure returns ok:false + error + hint.
 
 const VERIFIER_BODY = `#!/usr/bin/env node
-// Minimal kolm-audit-1 offline receipt verifier — bundled with air-gap exports.
+// Minimal kolm-audit-1 offline receipt verifier - bundled with air-gap exports.
 //
 // Verifies a kolm-audit-1 receipt JSON file using only the local secret
 // (HMAC) and the bundled trust roots. Never makes a network call. Exits 0
@@ -588,7 +588,7 @@ function _installScript(runtime) {
   if (runtime === 'vllm') {
     return [
       '#!/usr/bin/env bash',
-      '# kolm air-gap runtime installer — vLLM',
+      '# kolm air-gap runtime installer - vLLM',
       'set -euo pipefail',
       '',
       'echo "[kolm-airgap] installing vLLM from local wheelhouse"',
@@ -610,7 +610,7 @@ function _installScript(runtime) {
   // llama.cpp
   return [
     '#!/usr/bin/env bash',
-    '# kolm air-gap runtime installer — llama.cpp',
+    '# kolm air-gap runtime installer - llama.cpp',
     'set -euo pipefail',
     '',
     'echo "[kolm-airgap] installing llama.cpp"',
@@ -642,14 +642,14 @@ function _readme({ artifact_id, runtime, created_at, manifest_sha256 }) {
     '## Layout',
     '',
     '```',
-    '/artifact.kolm           — compiled artifact (copy of input)',
-    '/runtime/install.sh      — installs the chosen runtime from local wheelhouse',
-    '/runtime/wheels/         — drop offline pip wheels here before bundling (vllm only)',
-    '/runtime/bin/            — drop llama-server binary here before bundling (llama.cpp only)',
-    '/config/                 — runtime config files (vllm.json or llama-cpp.cmd)',
-    '/verify.cjs              — offline kolm-audit-1 receipt verifier',
-    '/MANIFEST.sha256         — sha256 of every file in this bundle',
-    '/README.md               — this file',
+    '/artifact.kolm - compiled artifact (copy of input)',
+    '/runtime/install.sh - installs the chosen runtime from local wheelhouse',
+    '/runtime/wheels/ - drop offline pip wheels here before bundling (vllm only)',
+    '/runtime/bin/ - drop llama-server binary here before bundling (llama.cpp only)',
+    '/config/ - runtime config files (vllm.json or llama-cpp.cmd)',
+    '/verify.cjs - offline kolm-audit-1 receipt verifier',
+    '/MANIFEST.sha256 - sha256 of every file in this bundle',
+    '/README.md - this file',
     '```',
     '',
     '## Install on the air-gapped host',
@@ -663,7 +663,7 @@ function _readme({ artifact_id, runtime, created_at, manifest_sha256 }) {
     '## Verify the bundle is intact',
     '',
     '```bash',
-    '# Per-file sha256 check (no receipt verification — checks transport integrity)',
+    '# Per-file sha256 check (no receipt verification - checks transport integrity)',
     'sha256sum -c MANIFEST.sha256',
     '',
     '# Or via the bundled verifier (also verifies a receipt against the local secret):',
@@ -672,9 +672,9 @@ function _readme({ artifact_id, runtime, created_at, manifest_sha256 }) {
     '',
     '## What is NOT in this bundle',
     '',
-    '- TLS certificates — supply via your reverse proxy.',
-    '- Secrets (`KOLM_ARTIFACT_SECRET`, registry tokens) — inject via your secrets manager.',
-    '- The base model weights — point your runtime config at your local model cache.',
+    '- TLS certificates - supply via your reverse proxy.',
+    '- Secrets (`KOLM_ARTIFACT_SECRET`, registry tokens) - inject via your secrets manager.',
+    '- The base model weights - point your runtime config at your local model cache.',
     '',
     'See `docs/self-hosted-deploy-complete.md` (in the main kolm repo) for the full',
     'env-var matrix, SSO setup, systemd unit, and operational runbook.',
@@ -685,7 +685,7 @@ function _readme({ artifact_id, runtime, created_at, manifest_sha256 }) {
 // USTAR-style tar header (512 bytes). We hand-roll this instead of pulling
 // in tar-stream's async-stream API because we want fully synchronous,
 // deterministic output (so the same inputs always produce byte-identical
-// tarballs — useful for repro builds + supply-chain attestation).
+// tarballs - useful for repro builds + supply-chain attestation).
 function _tarHeader(name, size, mode, mtime, typeflag) {
   const header = Buffer.alloc(512);
   // name (100 bytes, NUL-padded)
@@ -710,7 +710,7 @@ function _tarHeader(name, size, mode, mtime, typeflag) {
   }
   // mode (8 bytes, octal, NUL-terminated)
   header.write((mode & 0o7777).toString(8).padStart(7, '0') + '\0', 100, 8, 'ascii');
-  // uid + gid (8 bytes each, octal) — fixed 0 for repro
+  // uid + gid (8 bytes each, octal) - fixed 0 for repro
   header.write('0000000\0', 108, 8, 'ascii');
   header.write('0000000\0', 116, 8, 'ascii');
   // size (12 bytes, octal, NUL-terminated)

@@ -1,7 +1,7 @@
-// W809-4 — Runtime auto-retry on parse failure.
+// W809-4 - Runtime auto-retry on parse failure.
 //
 // Standalone retry harness used by the runtime-wrap loop. We DO NOT edit
-// src/runtime-wrap.js here — the orchestrator wires this function into the
+// src/runtime-wrap.js here - the orchestrator wires this function into the
 // shared runtime-wrap path (shared with W807 teacher splice). This module
 // owns:
 //
@@ -21,11 +21,11 @@
 //   schema_spec     : the W809-1 spec block; if null/empty we no-op and
 //                     return the first call's output unchanged.
 //   options:
-//     maxRetries:   integer ≥ 0 — defaults to 3. The 4th attempt is the
+//     maxRetries:   integer ≥ 0 - defaults to 3. The 4th attempt is the
 //                   teacher splice fallback (caller-injected).
 //     temperatures: optional array overriding the [0.7, 0.3, 0.1] decay.
 //                   Tests inject [1, 2, 3] to assert wiring.
-//     onTeacherSplice: optional async () → string | {output} — called when
+//     onTeacherSplice: optional async () → string | {output} - called when
 //                   maxRetries+1 attempts have been exhausted. Returns its
 //                   output through unchanged. The W807 hook lives here.
 //     spec_validator: optional (output, spec) → {ok, parsed, error} override
@@ -91,7 +91,7 @@ export async function runWithSchemaRetry(call, schema_spec, options = {}) {
 
   // 1 initial attempt + maxRetries retries = (maxRetries+1) call attempts
   // BEFORE the teacher splice escalation. Each retry uses temps[i-1] (i is
-  // 1-based for the retry count) — temps[0] is the first retry's temperature
+  // 1-based for the retry count) - temps[0] is the first retry's temperature
   // because attempt 0 uses the caller-supplied temperature (or undefined).
   for (let i = 0; i <= maxRetries; i += 1) {
     const temperature = i === 0

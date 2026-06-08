@@ -1,4 +1,4 @@
-// W888-C — deviceCaps(device, sshConnFactory): unified hardware probe.
+// W888-C - deviceCaps(device, sshConnFactory): unified hardware probe.
 //
 // Given a device record (DeviceRegistry shape) this opens an SSH connection
 // (type=ssh) or shells out locally (type=local) and probes the host for:
@@ -98,7 +98,7 @@ function _parseCpuinfo(out) {
   return { cpu_model: model.trim() || null, cpu_cores: cores > 0 ? cores : null };
 }
 
-// SSH path — runs 5 probes via the connection's .exec().
+// SSH path - runs 5 probes via the connection's .exec().
 async function _probeSsh(device, conn) {
   const raw = { nvidia_smi: '', cpu_raw: '', mem_raw: '', disk_raw: '', uname_raw: '' };
   const run = async (cmd, timeoutMs = 8000) => {
@@ -147,7 +147,7 @@ async function _probeSsh(device, conn) {
   };
 }
 
-// Local path — runs the same probes via child_process. Branches on platform
+// Local path - runs the same probes via child_process. Branches on platform
 // so macOS / Windows / Linux all return the same shape.
 async function _probeLocal() {
   const raw = { nvidia_smi: '', cpu_raw: '', mem_raw: '', disk_raw: '', uname_raw: '' };
@@ -160,7 +160,7 @@ async function _probeLocal() {
   } catch { /* no nvidia-smi → leave empty */ }
   const gpu = _parseNvidiaSmi(raw.nvidia_smi);
 
-  // CPU + RAM + disk_free + OS — platform-specific.
+  // CPU + RAM + disk_free + OS - platform-specific.
   let cpuParts = { cpu_model: null, cpu_cores: os.cpus().length || null };
   let ramGb = Math.round(os.totalmem() / 1024 / 1024 / 1024) || null;
   let diskFree = null;

@@ -1,6 +1,6 @@
 // src/auditor-attestation.js
 //
-// Wave 166 (N+7) — third-party auditor attestation. The eval-credibility
+// Wave 166 (N+7) - third-party auditor attestation. The eval-credibility
 // ladder Wave 144 Doc 2 §7 named five tiers; N+7 is the top tier above
 // tenant shadow (W165):
 //
@@ -16,7 +16,7 @@
 // "the build pipeline ran on a machine holding this key." The auditor's
 // signature proves "an independent party with their own Ed25519 key observed
 // this artifact's verification outputs and stands behind them." The two keys
-// MUST be different — that's the entire point. The verifier check #22
+// MUST be different - that's the entire point. The verifier check #22
 // records both key fingerprints so a downstream party can audit the chain
 // of trust end-to-end.
 //
@@ -66,7 +66,7 @@
 //     etc.) differs from current manifest → fail (attestation drift).
 //   - Auditor key fingerprint matches builder key fingerprint → fail (the
 //     attestation is structurally an auditor block but signed by the builder;
-//     this defeats the entire point — third-party attestation requires a
+//     this defeats the entire point - third-party attestation requires a
 //     distinct party).
 
 import fs from 'node:fs';
@@ -100,7 +100,7 @@ function sha256Hex(s) {
 
 // ---------------------------------------------------------------------------
 // Auditor key loader. Mirrors src/ed25519.js loadSignerKeyFromEnv shape but
-// reads a DIFFERENT pair of env vars — the auditor's key namespace is
+// reads a DIFFERENT pair of env vars - the auditor's key namespace is
 // deliberately separate from the builder's so a CI runner that signs
 // artifacts cannot accidentally also sign attestations.
 //
@@ -121,8 +121,12 @@ export function loadAuditorKeyFromEnv() {
   let publicKey;
   try {
     const keyObj = crypto.createPrivateKey(pem);
+    if (keyObj.asymmetricKeyType !== 'ed25519') {
+      throw new Error(`auditor-attestation.loadAuditorKeyFromEnv: ed25519 key required, got ${keyObj.asymmetricKeyType}`);
+    }
     publicKey = crypto.createPublicKey(keyObj).export({ type: 'spki', format: 'pem' });
   } catch (e) {
+    if (/ed25519 key required/.test(e.message)) throw e;
     throw new Error(`auditor-attestation.loadAuditorKeyFromEnv: invalid PEM private key: ${e.message}`);
   }
   return {
@@ -148,8 +152,12 @@ export function loadAuditorKeyFromFile(filePath) {
   let publicKey;
   try {
     const keyObj = crypto.createPrivateKey(pem);
+    if (keyObj.asymmetricKeyType !== 'ed25519') {
+      throw new Error(`auditor-attestation.loadAuditorKeyFromFile: ed25519 key required at ${filePath}, got ${keyObj.asymmetricKeyType}`);
+    }
     publicKey = crypto.createPublicKey(keyObj).export({ type: 'spki', format: 'pem' });
   } catch (e) {
+    if (/ed25519 key required/.test(e.message)) throw e;
     throw new Error(`auditor-attestation.loadAuditorKeyFromFile: invalid PEM private key at ${filePath}: ${e.message}`);
   }
   return {
@@ -208,7 +216,7 @@ export function buildAuditorAttestationBlock({ signerKey, observation, identity,
     throw new Error('buildAuditorAttestationBlock: signerKey.key_fingerprint must be hex32');
   }
   // Build the unsigned body first, then canonical-hash + sign it. The
-  // signed payload is everything EXCEPT the `signature` field — same pattern
+  // signed payload is everything EXCEPT the `signature` field - same pattern
   // src/ed25519.js#buildSignatureBlock uses.
   const checksPassed = Array.isArray(identity.checks_passed)
     ? identity.checks_passed.filter(s => typeof s === 'string' && s.length > 0).map(String)
@@ -238,7 +246,7 @@ export function buildAuditorAttestationBlock({ signerKey, observation, identity,
   const payloadCanonical = canonicalJson(block);
   const signature = ed25519Sign(signerKey.privateKey, payloadCanonical);
   block.signature = signature;
-  // Bind a short block hash for the artifact_hash_input chain — this is
+  // Bind a short block hash for the artifact_hash_input chain - this is
   // sha256(canonicalJson(block)) including the signature field, so any
   // tamper with the block AFTER it's embedded breaks the artifact hash.
   block.hash = sha256Hex(canonicalJson(block));
@@ -246,7 +254,7 @@ export function buildAuditorAttestationBlock({ signerKey, observation, identity,
 }
 
 // Validate an auditor attestation block standalone: schema + signature.
-// Does NOT check that the signed claims match a particular manifest — that
+// Does NOT check that the signed claims match a particular manifest - that
 // cross-check is the verifier's job (binder check #22). This function is
 // safe to call at build time (to reject malformed attestation files) and
 // at verify time (as the first gate before the cross-check).
@@ -285,7 +293,7 @@ export function validateAuditorAttestationBlock(block) {
     throw new Error(`auditor-attestation: key_fingerprint claim (${block.key_fingerprint.slice(0, 12)}…) does not match public_key bytes (${actualFingerprint.slice(0, 12)}…)`);
   }
   // Verify the Ed25519 signature against the canonical payload (block minus
-  // `signature` and `hash` fields — `hash` is computed AFTER signing so it
+  // `signature` and `hash` fields - `hash` is computed AFTER signing so it
   // is not part of the signed payload).
   const { signature, hash, ...payload } = block;
   void hash;
@@ -301,7 +309,7 @@ export function validateAuditorAttestationBlock(block) {
   if (block.hash != null) {
     const recomputed = sha256Hex(canonicalJson({ ...payload, signature }));
     if (block.hash !== recomputed) {
-      throw new Error(`auditor-attestation: block.hash drift — declared ${block.hash.slice(0, 12)}…, recomputed ${recomputed.slice(0, 12)}…`);
+      throw new Error(`auditor-attestation: block.hash drift - declared ${block.hash.slice(0, 12)}…, recomputed ${recomputed.slice(0, 12)}…`);
     }
   }
   return block;
@@ -320,7 +328,7 @@ export function crossCheckAttestation(block, manifest) {
   if (!block || !manifest) {
     return { ok: false, reason: 'crossCheckAttestation requires block + manifest' };
   }
-  // artifact_hash binding — the attestation claims to describe a specific
+  // artifact_hash binding - the attestation claims to describe a specific
   // artifact. The manifest's artifact-hash anchor lives in hashes.artifact
   // (when set) but the canonical source is the receipt's artifact_hash.
   // The verifier passes manifest.__artifact_hash explicitly so this module
@@ -372,7 +380,7 @@ export function crossCheckAttestation(block, manifest) {
       }
     }
   }
-  // External holdout / tenant shadow hashes — when the auditor's attestation
+  // External holdout / tenant shadow hashes - when the auditor's attestation
   // claims they re-verified those layers, the manifest's `artifact_hash_input`
   // analogs MUST match. We do not have direct access to artifact_hash_input
   // here (it's not in manifest), so the verifier passes hints via

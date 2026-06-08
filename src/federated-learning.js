@@ -1,6 +1,6 @@
 // Federated learning foundations.
 //
-// HONEST SCOPE — what this module is and is not:
+// HONEST SCOPE - what this module is and is not:
 //
 //   IS:
 //   - The protocol *contract* and *data shapes* a kolm federated round runs
@@ -47,19 +47,19 @@ import crypto from 'node:crypto';
 
 export const FL_SPEC_VERSION = 'fl-v1';
 
-// W409u — Honest "foundation" labeling. The federated module is a working
+// W409u - Honest "foundation" labeling. The federated module is a working
 // data + protocol contract; it is NOT a production secure-aggregation /
 // Byzantine-robust implementation. Every produced object carries this
 // feature_state so downstream consumers (verifier, dashboards, product copy)
 // cannot mistake it for a production federated learning claim.
 export const FEATURE_STATE = 'foundation';
-// Stable copy strings — product surfaces must use these, never substitute
+// Stable copy strings - product surfaces must use these, never substitute
 // "production federated learning" without registering a real plugin first.
 export const FEATURE_STATE_LABEL = 'Federated learning (foundation)';
 export const FEATURE_STATE_DESCRIPTION =
   'Foundation: protocol contract + aggregator + DP helpers. No secure-aggregation, no network transport, no production Byzantine robustness by default. Configure robust aggregation per round and wire a registered SecAgg plugin to upgrade proof scope.';
 
-// Pluggable SecAgg plugin registry. Defaults to empty — every artifact that
+// Pluggable SecAgg plugin registry. Defaults to empty - every artifact that
 // claims secure_aggregation_verified:true MUST come from a registered plugin
 // returning ok:true. (W409u)
 const _secagg_plugins = new Map();
@@ -113,7 +113,7 @@ export function newRound({ round_id, model_hash, base_artifact_version, target_s
     min_participants,
     deadline: deadline || null,
     issued_at: new Date().toISOString(),
-    // W409u — honest transport + SecAgg placeholders. The default transport
+    // W409u - honest transport + SecAgg placeholders. The default transport
     // is the in-memory dev harness used by tests; production deployments
     // must override via a registered transport plugin (separate wave).
     transport: transport || 'in_memory_dev_only',
@@ -141,11 +141,11 @@ export function roundHash(round) {
 // PARTICIPANT SIDE -------------------------------------------------------
 //
 // The participant (each kolm tenant) is given a Round and produces a
-// Contribution. The local training step is opaque to this module — you hand
+// Contribution. The local training step is opaque to this module - you hand
 // us the delta tensor (in our compact representation), the sample_count, and
 // optionally a mu (for FedProx). We add the signature + receipt fields.
 
-// Build a contribution. `delta` is a plain object — keys are tensor names,
+// Build a contribution. `delta` is a plain object - keys are tensor names,
 // values are 1-D numeric arrays of update values. Shape and key names must
 // match what the round's base model expects; the aggregator checks this.
 //
@@ -153,7 +153,7 @@ export function roundHash(round) {
 // aggregator + downstream auditor can confirm provenance.
 export function buildContribution({ round, participant_id, client_id, delta, sample_count, mu, private_key, dp_applied, dataset_hash, reviewed }) {
   if (!round || round.spec !== FL_SPEC_VERSION) throw new Error('invalid round');
-  // W409u — keep the original `participant_id` field, but also expose
+  // W409u - keep the original `participant_id` field, but also expose
   // `client_id` so the new client_update schema works alongside it.
   const cid = client_id || participant_id;
   if (!cid || typeof cid !== 'string') throw new Error('participant_id (or client_id) required');
@@ -190,12 +190,12 @@ export function buildContribution({ round, participant_id, client_id, delta, sam
     gradient_summary_hash: d_hash,
     delta_shapes: _shapesOf(delta),
     dp_applied: dp,
-    // Lineage — dataset_hash optional but recommended; ties the contribution
+    // Lineage - dataset_hash optional but recommended; ties the contribution
     // back through team_learning to a specific reviewed-and-approved
     // dataset (see src/team-events.js buildTeamDataset).
     dataset_hash: dataset_hash || null,
     // Reviewer state. W409u: any client_update that lands at the aggregator
-    // with reviewed.state !== 'approved' is rejected — federated rounds do
+    // with reviewed.state !== 'approved' is rejected - federated rounds do
     // not silently train on unreviewed local captures.
     reviewed: reviewed && reviewed.state ? { state: reviewed.state, reviewer: reviewed.reviewer || null } : { state: 'pending', reviewer: null },
     submitted_at: new Date().toISOString(),
@@ -221,7 +221,7 @@ export function verifyContribution({ contribution, round, public_key, require_re
   if (recomputed_delta !== r.delta_hash) return { ok: false, reason: 'delta_hash_mismatch' };
   const shapes = _shapesOf(contribution.delta);
   if (_canonicalize(shapes) !== _canonicalize(r.delta_shapes)) return { ok: false, reason: 'shape_mismatch' };
-  // W409u — reject any contribution whose reviewed.state is not 'approved'
+  // W409u - reject any contribution whose reviewed.state is not 'approved'
   // when require_reviewed:true. Default is back-compat (false) so existing
   // round flows keep working until the caller opts into the gate. Aggregator
   // code that wants the W409u gate should set require_reviewed:true.
@@ -249,7 +249,7 @@ export function aggregate({ round, contributions, started_at }) {
   if (contributions.length < round.min_participants) {
     throw new Error(`too few participants: ${contributions.length} < min ${round.min_participants}`);
   }
-  // Reject duplicate participant_ids — basic sybil guard, NOT a real
+  // Reject duplicate participant_ids - basic sybil guard, NOT a real
   // Byzantine defense.
   const seen = new Set();
   for (const c of contributions) {
@@ -500,7 +500,7 @@ function _composePrivacyBudget(round, contributions) {
 // Gaussian and Laplace noise injection. The CALLER is responsible for the
 // privacy budget (epsilon, delta) bookkeeping. These helpers add the noise
 // and emit the dp_applied record that the participant attaches to their
-// receipt — they DO NOT track cumulative budget across rounds.
+// receipt - they DO NOT track cumulative budget across rounds.
 
 // Gaussian mechanism: noise ~ N(0, (sensitivity * sigma)^2). Returns the
 // noised array and the dp_applied record.
@@ -606,7 +606,7 @@ function _verify(payload, sigB64, pubKeyPem) {
   } catch { return false; }
 }
 
-// Tiny helper for tests — generate an ephemeral Ed25519 keypair.
+// Tiny helper for tests - generate an ephemeral Ed25519 keypair.
 // Returns snake_case keys to match the rest of the FL module's API
 // (buildContribution takes `private_key`; verifyContribution takes `public_key`).
 export function generateKeypair() {
@@ -614,19 +614,19 @@ export function generateKeypair() {
   return { public_key: publicKey, private_key: privateKey };
 }
 
-// W409u — Foundation-state verifier. Given an artifact that claims to have
+// W409u - Foundation-state verifier. Given an artifact that claims to have
 // run through a federated aggregation round, surface the verifier state
 // that downstream auditors / product copy should respect:
 //
-//   federated_foundation: true        — every federated artifact starts here
-//   secure_aggregation_verified: false — only flips true when a registered
+//   federated_foundation: true - every federated artifact starts here
+//   secure_aggregation_verified: false - only flips true when a registered
 //                                        plugin returns ok:true
-//   byzantine_robust: false           — not implemented; lock to false
+//   byzantine_robust: false - not implemented; lock to false
 //
 // The verifier ALSO rejects artifacts whose embedded aggregation claims
 // `secure_aggregation_verified: true` without a registered plugin
 // returning ok:true. This is the gate that the product can lean on when
-// rendering "confidential federated learning verified" badges — without it,
+// rendering "confidential federated learning verified" badges - without it,
 // the badge cannot legitimately appear.
 export async function verifyFederatedArtifact(artifact, opts = {}) {
   if (!artifact || typeof artifact !== 'object') {
@@ -688,12 +688,12 @@ export async function verifyFederatedArtifact(artifact, opts = {}) {
       return { ...state, ok: false, reason: `secure_aggregation_plugin_threw:${e.message}`, plugin: provider };
     }
   }
-  // Foundation path — artifact does not claim verified SecAgg; OK because
+  // Foundation path - artifact does not claim verified SecAgg; OK because
   // the foundation label is honest.
   return { ...state, ok: true, reason: 'foundation_no_claim' };
 }
 
-// Lineage walker — given an aggregation_round receipt, return the chain
+// Lineage walker - given an aggregation_round receipt, return the chain
 // {artifact → aggregation_round → client_updates → dataset_hash[]} so a
 // downstream verifier can prove the data path. Each step carries the
 // fields tests assert on. (W409u)

@@ -1,7 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 
 import {
   kernelCatalog,
@@ -130,20 +128,9 @@ test('readiness and job envelopes produce product-surface proof shapes', () => {
   assert.deepEqual(job.evidence.proof_refs, [{ kind: 'job_id', id: 'job_1' }]);
 });
 
-test('CLI and TUI expose the generated product graph and readiness closeout ledger', () => {
-  const cli = fileURLToPath(new URL('../cli/kolm.js', import.meta.url));
-  const surfaces = spawnSync(process.execPath, [cli, 'surfaces', '--json'], { encoding: 'utf8' });
-  assert.equal(surfaces.status, 0, surfaces.stderr);
-  const surfaceJson = JSON.parse(surfaces.stdout);
-  assert.equal(surfaceJson.graph_available, true);
-  assert.equal(surfaceJson.closeout_available, true);
-  assert.equal(surfaceJson.contract.counts.surfaces, 12);
-  assert.ok(surfaceJson.readiness_counts.shipped >= 1);
-  assert.ok(surfaceJson.closeout_counts.open_requirements >= 0);
-
-  const tui = spawnSync(process.execPath, [cli, 'tui', '--views', '--json'], { encoding: 'utf8' });
-  assert.equal(tui.status, 0, tui.stderr);
-  const tuiJson = JSON.parse(tui.stdout);
-  assert.equal(tuiJson.product_graph_counts.tui_views, tuiJson.views.length);
-  assert.deepEqual(tuiJson.readiness_counts, surfaceJson.readiness_counts);
-});
+// NOTE: the former `CLI and TUI expose the generated product graph ...` block was
+// removed in the 2026 site teardown. It asserted `kolm surfaces --json` reported
+// graph_available/closeout_available, which read public/product-graph.json +
+// public/product-readiness-closeout.json — the old multi-surface compiler
+// product's self-description, retired with that surface. The pure-backend kernel
+// + envelope contracts above are unaffected and remain covered.

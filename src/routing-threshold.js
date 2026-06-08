@@ -1,24 +1,24 @@
-// W709-3 — runtime routing threshold knob.
+// W709-3 - runtime routing threshold knob.
 //
 // The runtime confidence router (src/runtime-confidence-router.js, W709-1)
 // compares per-token Shannon entropy from the student against a numeric
 // threshold to decide whether to escalate to the teacher API. This module
 // owns where that threshold comes from:
 //
-//   1. defaultThreshold() — process-wide default. Reads
+//   1. defaultThreshold() - process-wide default. Reads
 //      KOLM_ROUTE_ENTROPY_THRESHOLD (parseFloat) or falls back to 1.5.
-//      1.5 nats is a reasonable "ambiguous next token" line — Shannon entropy
+//      1.5 nats is a reasonable "ambiguous next token" line - Shannon entropy
 //      of a uniform distribution over k tokens is ln(k); at H≈1.5 nats the
 //      effective branching factor exp(H) ≈ 4.5 candidates, which is a
 //      common cutoff used by speculative-decoding and confidence-routing
 //      papers (eg. Big Little Decoder, FrugalGPT, MoE routing).
 //
-//   2. getNamespaceThreshold(namespace, tenantId) — per-namespace override,
+//   2. getNamespaceThreshold(namespace, tenantId) - per-namespace override,
 //      durable across restarts via the event-store (kind == 'routing_threshold_override').
 //      Most-recent wins so an admin can tighten or loosen routing for a
 //      single workload without touching the env var.
 //
-//   3. setNamespaceThreshold(namespace, tenantId, threshold) — writes the
+//   3. setNamespaceThreshold(namespace, tenantId, threshold) - writes the
 //      override row. Validates threshold ∈ [0, 10]. 10 nats is the Shannon
 //      entropy of a uniform 1024-vocab distribution (ln(1024) ≈ 6.93,
 //      rounded up so callers can still set "essentially never escalate").
@@ -46,14 +46,14 @@ export const OVERRIDE_PROVIDER_TAG = 'kolm_routing_threshold';
 
 // defaultThreshold(): process-wide default. Honors
 // KOLM_ROUTE_ENTROPY_THRESHOLD; falls back to DEFAULT_THRESHOLD. Never
-// throws — bad env values collapse to the default rather than crashing the
+// throws - bad env values collapse to the default rather than crashing the
 // router on startup.
 export function defaultThreshold() {
   const raw = process.env.KOLM_ROUTE_ENTROPY_THRESHOLD;
   if (raw == null || raw === '') return DEFAULT_THRESHOLD;
   const n = parseFloat(raw);
   if (!Number.isFinite(n)) return DEFAULT_THRESHOLD;
-  // Clamp to the legal range — out-of-range env vars collapse to the
+  // Clamp to the legal range - out-of-range env vars collapse to the
   // default so an operator typo can never produce a negative threshold
   // (which would route every token to teacher).
   if (n < MIN_THRESHOLD || n > MAX_THRESHOLD) return DEFAULT_THRESHOLD;
@@ -80,7 +80,7 @@ function _validateThreshold(t) {
 }
 
 // getNamespaceThreshold(namespace, tenantId): returns the per-namespace
-// override if any, else defaultThreshold(). Defensive — any read/parse
+// override if any, else defaultThreshold(). Defensive - any read/parse
 // failure falls back to the default so the router stays serving traffic.
 export async function getNamespaceThreshold(namespace, tenantId) {
   if (!namespace || !tenantId) return defaultThreshold();
@@ -106,7 +106,7 @@ export async function getNamespaceThreshold(namespace, tenantId) {
       return n;
     }
   } catch (_) { // deliberate: cleanup
-    // Fall through to default on any error — never let the threshold
+    // Fall through to default on any error - never let the threshold
     // lookup break the routing path.
   }
   return defaultThreshold();

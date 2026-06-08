@@ -1,6 +1,6 @@
 // src/pubkey-directory.js
 //
-// Wave 149 — Public-key directory for Ed25519 receipt signing keys.
+// Wave 149 - Public-key directory for Ed25519 receipt signing keys.
 //
 // The Wave 144 plan §Q+8 demanded a third-party-verifiable signature scheme.
 // `src/ed25519.js` (Wave H) provides the asymmetric primitive; this module is
@@ -14,7 +14,7 @@
 //   {
 //     "<fingerprint-32-hex>": {
 //       fingerprint:      "<full 64-hex sha256 of DER>",
-//       short_fingerprint:"<first 32 hex chars — what receipts carry>",
+//       short_fingerprint:"<first 32 hex chars - what receipts carry>",
 //       alg:              "ed25519",
 //       public_key:       "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----\n",
 //       label:            "tenant-friendly name",
@@ -35,7 +35,7 @@
 // The directory is intentionally additive: existing HMAC-only artifacts work
 // without any key registered, and Ed25519 verification falls back to the
 // embedded public key in `signature_ed25519` if the directory lookup is
-// absent. The directory is the long-term authority — embedded keys can be
+// absent. The directory is the long-term authority - embedded keys can be
 // trusted on first use but a tenant who rotates their key publishes the new
 // fingerprint here, and the verifier prefers the directory's answer.
 
@@ -64,7 +64,7 @@ function loadStore() {
     if (!parsed.challenges || typeof parsed.challenges !== 'object') parsed.challenges = {};
     return parsed;
   } catch (e) {
-    // Corrupt file — start fresh rather than locking out registration. The
+    // Corrupt file - start fresh rather than locking out registration. The
     // old file is renamed with .corrupt suffix so the operator can recover.
     try { fs.renameSync(p, p + '.corrupt.' + Date.now()); } catch { /* swallow */ }
     return { keys: {}, challenges: {} };
@@ -89,7 +89,7 @@ function pruneChallenges(store) {
 }
 
 // ---------------------------------------------------------------------------
-// listKeys — return all registered public keys. Suitable for GET
+// listKeys - return all registered public keys. Suitable for GET
 // /v1/keys/public. Strips sensitive fields (challenge_id) for the public
 // listing.
 // ---------------------------------------------------------------------------
@@ -107,7 +107,7 @@ export function listKeys() {
 }
 
 // ---------------------------------------------------------------------------
-// getKey — fetch a single key by its short fingerprint (the 32-hex prefix
+// getKey - fetch a single key by its short fingerprint (the 32-hex prefix
 // receipts carry). Returns null when not found.
 // ---------------------------------------------------------------------------
 export function getKey(shortFingerprint) {
@@ -130,9 +130,9 @@ export function getKey(shortFingerprint) {
 }
 
 // ---------------------------------------------------------------------------
-// issueChallenge — create a server-side nonce the caller must sign with the
+// issueChallenge - create a server-side nonce the caller must sign with the
 // private key matching the public key they want to register. Returns
-// { challenge_id, nonce, expires_at } — the caller signs `nonce` (utf8
+// { challenge_id, nonce, expires_at } - the caller signs `nonce` (utf8
 // bytes) with Ed25519 and submits { challenge_id, public_key, signature }
 // to registerKey().
 // ---------------------------------------------------------------------------
@@ -151,9 +151,9 @@ export function issueChallenge({ tenant_id = null, label = null } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// registerKey — validate the signed challenge and persist the public key.
+// registerKey - validate the signed challenge and persist the public key.
 // On success returns the stored entry; on failure throws with a clear
-// reason. The verifier never has to trust this directory blindly — every
+// reason. The verifier never has to trust this directory blindly - every
 // stored entry was proved by a signature over a server-issued nonce.
 // ---------------------------------------------------------------------------
 export function registerKey({ challenge_id, public_key, signature, label = null, tenant_id = null }) {
@@ -202,7 +202,7 @@ export function registerKey({ challenge_id, public_key, signature, label = null,
 }
 
 // ---------------------------------------------------------------------------
-// deleteKey — admin-only removal. Returns true when something was removed,
+// deleteKey - admin-only removal. Returns true when something was removed,
 // false when the fingerprint wasn't present.
 // ---------------------------------------------------------------------------
 export function deleteKey(shortFingerprint) {
@@ -219,7 +219,7 @@ export function deleteKey(shortFingerprint) {
 }
 
 // ---------------------------------------------------------------------------
-// stats — quick health probe used by /v1/keys/public diagnostics.
+// stats - quick health probe used by /v1/keys/public diagnostics.
 // ---------------------------------------------------------------------------
 export function stats() {
   const store = loadStore();

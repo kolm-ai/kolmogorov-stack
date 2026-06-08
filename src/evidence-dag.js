@@ -1,20 +1,20 @@
 // src/evidence-dag.js
 //
-// R-5 — Evidence DAG. Every .kolm artifact carries an `evidence_dag: {nodes, edges}`
+// R-5 - Evidence DAG. Every .kolm artifact carries an `evidence_dag: {nodes, edges}`
 // block that records the upstream provenance graph behind it: which captures
 // fed which evals, which evals seeded the teacher, which teacher seeded the
 // student, which runtime probe produced the bound passport, which signature
 // chain sealed the bytes, which policy + rights gates passed.
 //
 // The DAG is a labelled directed acyclic graph:
-//   nodes : { id, kind, ...attrs }     — every piece of evidence is a node
-//   edges : { from, to, relationship } — directed link with a typed verb
+//   nodes : { id, kind, ...attrs } - every piece of evidence is a node
+//   edges : { from, to, relationship } - directed link with a typed verb
 //
 // Relationships:
-//   derived_from   — `from` was produced from `to` (parent->child = inverse)
-//   validated_by   — `from` was checked against `to` (eval->capture)
-//   invalidates    — `from` revoked the truth-value of `to` (revoke fan-out)
-//   supersedes     — `from` replaced `to` in the canonical position
+//   derived_from - `from` was produced from `to` (parent->child = inverse)
+//   validated_by - `from` was checked against `to` (eval->capture)
+//   invalidates - `from` revoked the truth-value of `to` (revoke fan-out)
+//   supersedes - `from` replaced `to` in the canonical position
 //
 // Two design constraints from the R-5 brief:
 //
@@ -39,14 +39,14 @@
 export const EVIDENCE_DAG_SCHEMA_VERSION = 'kolm-evidence-dag-1';
 
 // Canonical evidence kinds. New kinds append here.
-//   capture   — a captured input/output pair from the gateway
-//   eval      — an evaluation case + its judge verdict
-//   teacher   — a teacher model rollout that produced training signal
-//   student   — a student model snapshot (an artifact's predecessor)
-//   runtime   — a runtime probe (passport row) on a target host
-//   signature — a signature event (HMAC chain, Ed25519, Sigstore)
-//   policy    — a policy gate verdict (Ed25519-required, Rekor-required)
-//   rights    — a rights/license check (copyright filter, license grant)
+//   capture - a captured input/output pair from the gateway
+//   eval - an evaluation case + its judge verdict
+//   teacher - a teacher model rollout that produced training signal
+//   student - a student model snapshot (an artifact's predecessor)
+//   runtime - a runtime probe (passport row) on a target host
+//   signature - a signature event (HMAC chain, Ed25519, Sigstore)
+//   policy - a policy gate verdict (Ed25519-required, Rekor-required)
+//   rights - a rights/license check (copyright filter, license grant)
 export const EVIDENCE_KINDS = Object.freeze([
   'capture',
   'eval',
@@ -70,7 +70,7 @@ export const EVIDENCE_RELATIONSHIPS = Object.freeze([
   'supersedes',
 ]);
 
-// Node id grammar — a stable identifier. We accept any non-empty string up to
+// Node id grammar - a stable identifier. We accept any non-empty string up to
 // 256 chars with the same charset as the lifecycle artifact_id regex so a DAG
 // can reference an artifact directly. Empty / null ids are rejected.
 const _NODE_ID_RE = /^[a-zA-Z0-9_:.@-]{1,256}$/;
@@ -108,13 +108,13 @@ function _deepFreeze(o) {
  *   3. node ids are unique.
  *   4. every edge has from/to ids that exist in nodes + a known relationship.
  *   5. no self-loops (from === to).
- *   6. NO CYCLES — Kahn-style topological reachability check. The traversal
+ *   6. NO CYCLES - Kahn-style topological reachability check. The traversal
  *      helpers (trace, descendants, revoke) all assume acyclicity.
  *
  * Returns a frozen graph object: { nodes, edges, _byId, _outAdj, _inAdj }.
  * The adjacency indexes are pre-computed so trace/descendants are O(n+e) per
  * call without an extra walk. Throws on any validation failure with a
- * specific reason — never silently coerces a malformed input into a
+ * specific reason - never silently coerces a malformed input into a
  * partially-valid DAG.
  */
 export function buildDag(input) {
@@ -192,7 +192,7 @@ export function buildDag(input) {
     inAdj.get(e.to).push(copy);
   }
 
-  // Cycle detection — Kahn's algorithm. Start from every node with in-degree
+  // Cycle detection - Kahn's algorithm. Start from every node with in-degree
   // zero, peel off, decrement neighbour in-degrees; if any node is left
   // un-peeled the graph has a cycle.
   //
@@ -241,7 +241,7 @@ export function buildDag(input) {
 }
 
 /**
- * Serialize a DAG to a JSON-safe object — strips the `_byId`/`_outAdj`/`_inAdj`
+ * Serialize a DAG to a JSON-safe object - strips the `_byId`/`_outAdj`/`_inAdj`
  * indexes so the DAG can ride inside a manifest without leaking Map references.
  * The shape matches the buildDag input contract, so a round-trip
  * buildDag(toJSON(buildDag(x))) reconstructs the same graph.
@@ -266,7 +266,7 @@ export function showNode(dag, nodeId) {
 }
 
 /**
- * Walk the ANCESTORS of a node — every transitive `to` reachable by following
+ * Walk the ANCESTORS of a node - every transitive `to` reachable by following
  * `from->to` edges in reverse. Returns the full provenance chain rooted at
  * nodeId.
  *
@@ -308,7 +308,7 @@ export function trace(dag, nodeId) {
 }
 
 /**
- * Walk the DESCENDANTS of a node — every transitive `from` that points AT this
+ * Walk the DESCENDANTS of a node - every transitive `from` that points AT this
  * node via the reverse adjacency. Used by revoke() to compute the
  * needs_review fan-out: when a capture is revoked, every eval that was
  * `validated_by` it and every student/artifact `derived_from` those evals is
@@ -360,13 +360,13 @@ export function descendants(dag, nodeId) {
  * Output shape:
  *   {
  *     revoked:      [<node_id>]              (always exactly the requested id)
- *     needs_review: [<node_id>, ...]         (transitive descendants — the
+ *     needs_review: [<node_id>, ...]         (transitive descendants - the
  *                                             revoked node itself is NOT in
  *                                             this list)
  *   }
  *
  * Returns { revoked: [], needs_review: [], error } when the node id is not in
- * the graph — letting callers branch on a missing target rather than blowing
+ * the graph - letting callers branch on a missing target rather than blowing
  * up a longer revocation workflow.
  */
 export function revoke(dag, nodeId) {
@@ -384,7 +384,7 @@ export function revoke(dag, nodeId) {
 }
 
 /**
- * Conservative validator used by buildPayload — same checks as buildDag, but
+ * Conservative validator used by buildPayload - same checks as buildDag, but
  * surfaces them as a result object instead of throwing so the artifact
  * builder can attach a precise error message. Returns { ok:true } or
  * { ok:false, reason }.

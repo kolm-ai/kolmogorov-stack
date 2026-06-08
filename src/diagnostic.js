@@ -1,4 +1,4 @@
-// W741 — Diagnostic envelope: structured per-category K-Score breakdown +
+// W741 - Diagnostic envelope: structured per-category K-Score breakdown +
 // linked actionable next-step recommendations.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 434-438):
@@ -12,7 +12,7 @@
 //   - PURE HEURISTIC. No LLM calls in this module. categorizeCaptures()
 //     buckets by inferred category using existing fields (namespace,
 //     tool_calls presence, media_kind, turn_count>1 multi-turn detection).
-//   - Wilson 95% CI when n>=30; null when n<30 (honesty — no shaky bands).
+//   - Wilson 95% CI when n>=30; null when n<30 (honesty - no shaky bands).
 //   - Recommendation rules are deterministic + lock-in tested.
 //
 // Public surface:
@@ -33,7 +33,7 @@ const K_SCORE_PROMOTE_THRESHOLD = 0.95;
 const VARIANCE_THRESHOLD = 0.15;
 // Wilson CI is only meaningful at n>=30. Below this we return null bands.
 const MIN_N_FOR_CI = 30;
-// Recommendation priority order — high > medium > info (used by stable
+// Recommendation priority order - high > medium > info (used by stable
 // sort). Lower number = higher priority.
 const PRIORITY_RANK = { high: 0, medium: 1, info: 2 };
 
@@ -105,14 +105,14 @@ function _inferCategory(cap) {
 // Join per-row bakeoff results to capture categories and roll up per category.
 //
 // captures: [{cid|capture_cid|event_id, ...categorization fields}]
-// bakeoffResults: [{cid|capture_cid|event_id, k_score, pass}] — one per
+// bakeoffResults: [{cid|capture_cid|event_id, k_score, pass}] - one per
 //   capture that participated in the bakeoff
 //
 // Returns {categories:[{name, n, k_score, k_score_ci_lo, k_score_ci_hi,
 //                       worst_sample_cids:[]}]}.
 //
 // Wilson 95% CI: only computed when n>=30 (MIN_N_FOR_CI). Otherwise both
-// ci_lo and ci_hi are null (honest — don't claim CI on a tiny n).
+// ci_lo and ci_hi are null (honest - don't claim CI on a tiny n).
 // worst_sample_cids: lowest-k_score rows in the bucket (up to 3) so the
 // caller has spot-check targets.
 // =============================================================================
@@ -148,7 +148,7 @@ export function perCategoryKScore(captures, bakeoffResults) {
     const n = b.rows.length;
     const mean = b.rows.reduce((s, r) => s + r.k_score, 0) / Math.max(1, n);
     // Wilson 95% CI on the mean (treat k_score as a 0..1 proportion). Skip
-    // when n<MIN_N_FOR_CI — honesty floor.
+    // when n<MIN_N_FOR_CI - honesty floor.
     let ciLo = null;
     let ciHi = null;
     if (n >= MIN_N_FOR_CI) {
@@ -159,7 +159,7 @@ export function perCategoryKScore(captures, bakeoffResults) {
     // Worst-sample cids: bottom 3 by k_score.
     const sorted = b.rows.slice().sort((a, b2) => a.k_score - b2.k_score);
     const worst_sample_cids = sorted.slice(0, 3).map((r) => r.cid);
-    // Per-category stddev — used by `generateDiagnostic` for the
+    // Per-category stddev - used by `generateDiagnostic` for the
     // adjust_temperature rule. We surface it here so callers can chart
     // variance without re-iterating the rows array.
     const variance = b.rows.reduce((s, r) => s + Math.pow(r.k_score - mean, 2), 0) / Math.max(1, n);
@@ -202,19 +202,19 @@ export function perCategoryKScore(captures, bakeoffResults) {
 //     generated_at,
 //   }
 //
-// Recommendation rules (deterministic — lock-in tested):
+// Recommendation rules (deterministic - lock-in tested):
 //   - Category k_score < 0.85 AND n < 200 →
 //       {action:'capture_more', category, target_count: max(100, 200-n),
 //        priority:'high', reason:'k_score 0.xx < threshold 0.85'}
 //   - Overall k_score < 0.85 AND ALL categories above 0.85 →
 //       {action:'inspect_captures', priority:'medium',
-//        reason:'data quality issue — overall < 0.85 with no per-cat below'}
+//        reason:'data quality issue - overall < 0.85 with no per-cat below'}
 //   - Category k_score stddev > 0.15 AND n >= 30 →
 //       {action:'adjust_temperature', category, from:0.7, to:0.4,
 //        priority:'medium', reason:'high variance in <cat> category'}
 //   - All categories >= 0.95 → single
 //       {action:'promote_to_production', priority:'info',
-//        reason:'all categories above 0.95'} — NOT combined with others.
+//        reason:'all categories above 0.95'} - NOT combined with others.
 // =============================================================================
 
 export function generateDiagnostic(artifact_cid, bakeoffRows, captures) {
@@ -280,14 +280,14 @@ function _buildRecommendations({ overall_k_score, perCategory }) {
         action: 'inspect_captures',
         priority: 'medium',
         reason: 'overall k_score ' + overall_k_score + ' < ' + K_SCORE_THRESHOLD
-          + ' but no per-category buckets — likely empty/unbucketed captures',
+          + ' but no per-category buckets - likely empty/unbucketed captures',
       });
     }
     return recs;
   }
 
   // Rule 4 (special-case, single-issue): all categories >= 0.95 →
-  // promote_to_production. Emit ALONE — no other recs.
+  // promote_to_production. Emit ALONE - no other recs.
   const allHigh = perCategory.every((c) => c.k_score >= K_SCORE_PROMOTE_THRESHOLD);
   if (allHigh) {
     return [{
@@ -312,7 +312,7 @@ function _buildRecommendations({ overall_k_score, perCategory }) {
   }
 
   // Rule 2: inspect_captures when overall < 0.85 AND ALL categories above 0.85.
-  // Data-quality signal — every per-category bucket is healthy but the
+  // Data-quality signal - every per-category bucket is healthy but the
   // unweighted mean isn't, so the row-level distribution must be skewed in
   // a way the category labels don't capture.
   if (overall_k_score < K_SCORE_THRESHOLD

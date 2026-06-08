@@ -107,7 +107,7 @@ function _assertSafeRemotePath(p) {
   return s;
 }
 
-// WC14 — generic leading-`-` guard for any value that flows into a CLI argv
+// WC14 - generic leading-`-` guard for any value that flows into a CLI argv
 // position. Empty input passes (callers gate on the truthiness check before
 // passing to argv). Used for identity_file and any future device-profile
 // fields that get spawned as ssh/scp args. Mirrors the host/remote-path

@@ -1,13 +1,13 @@
 // src/negative-variant-gen.js
 //
-// W714-1 — Contrastive distillation: negative-variant generator.
+// W714-1 - Contrastive distillation: negative-variant generator.
 //
 // For each capture, ask a configurable "cheap" teacher to rewrite the original
 // response into a measurably WORSE variant. The student is then trained with
 // a contrastive loss (W714-2) that rewards matching the positive (real
 // teacher) and penalizes matching the negative. This is the safety valve
 // that stops the student from drifting toward whatever the cheap model
-// already does — the classic "model collapse to floor" failure mode.
+// already does - the classic "model collapse to floor" failure mode.
 //
 // Public surface:
 //   generateNegativeVariants(capture, opts) -> Promise<{positives, negatives, ...}>
@@ -33,7 +33,7 @@ import crypto from 'node:crypto';
 export const NEGATIVE_VARIANT_VERSION = 'w714-v1';
 
 // Default teacher chosen for "cheap + on-policy at a different optimum than
-// the strong teacher" — Haiku 4.5 was the smallest published Anthropic SKU
+// the strong teacher" - Haiku 4.5 was the smallest published Anthropic SKU
 // at W714. Override via $KOLM_NEGATIVE_TEACHER ('vendor:model').
 export const DEFAULT_NEGATIVE_TEACHER = 'anthropic:claude-haiku-4-5-20251001';
 
@@ -95,7 +95,7 @@ function writeCache(key, payload) {
       JSON.stringify({ ...payload, cache_key: key, version: NEGATIVE_VARIANT_VERSION }, null, 2),
     );
   } catch (_) { // deliberate: cleanup
-    // Cache write failure is not fatal — the receipt the caller gets still
+    // Cache write failure is not fatal - the receipt the caller gets still
     // carries the negatives; we just lose idempotency for the next call.
   }
 }
@@ -138,7 +138,7 @@ function extractResponseModel(capture) {
 
 // Call the negative teacher. We intentionally do NOT import
 // workers/distill/teacher-bridge.mjs here because that bridge wraps every
-// call in the PHI redactor — appropriate for distillation but heavy for a
+// call in the PHI redactor - appropriate for distillation but heavy for a
 // rewrite-worse step. Instead we hit the bare vendor endpoint with the
 // tenant header in the envelope. Test seam: opts.transportOverride.
 async function callNegativeTeacher({ vendor, model, prompt, response, maxTokens, tenant_id, transportOverride }) {
@@ -321,7 +321,7 @@ export async function generateNegativeVariants(capture, opts = {}) {
         capture_id: captureId,
         tenant_id: tenant_id != null ? tenant_id : null,
         error: 'negative_teacher_returned_empty',
-        hint: 'negative teacher returned an empty rewrite — check rate-limits or input length',
+        hint: 'negative teacher returned an empty rewrite - check rate-limits or input length',
       };
     }
     negatives.push({
@@ -352,7 +352,7 @@ export async function generateNegativeVariantsBatch(captures, opts = {}) {
   if (!Array.isArray(captures)) throw new Error('captures array required');
   const out = [];
   for (const c of captures) {
-    // Sequential — we don't want to slam the teacher API in parallel for a
+    // Sequential - we don't want to slam the teacher API in parallel for a
     // single distill job. Use Promise.allSettled if the caller wants
     // concurrency and accepts the rate-limit risk.
      

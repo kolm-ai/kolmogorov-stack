@@ -1,4 +1,4 @@
-// KOLM Data Engine — embedding k-means clustering + topic auto-labeling (W921).
+// KOLM Data Engine - embedding k-means clustering + topic auto-labeling (W921).
 //
 // Turns the CURATE "cluster" stage from a lexical 3-gram-prefix hash bucket into
 // real, semantic, human-named topics. Canonical embed -> cluster -> label
@@ -7,17 +7,17 @@
 // default path needs no python, no sklearn, and no model download.
 //
 // PIPELINE (per namespace, deterministic):
-//   1. EMBED  — cluster text t = input (+ a slice of output), encoded with the
+//   1. EMBED - cluster text t = input (+ a slice of output), encoded with the
 //               deterministic 256-d hash-bag embedder (src/embedding.js), unit-
 //               normalized (Euclidean k-means == cosine k-means for unit vectors).
-//   2. CLUSTER — k-means++ seeding (seeded LCG, deterministic) + Lloyd
+//   2. CLUSTER - k-means++ seeding (seeded LCG, deterministic) + Lloyd
 //               iterations. AUTO-k: grid around round(sqrt(n/2)) clamped to
 //               [2, min(maxK, n//2)], pick argmax silhouette over a sample.
 //               opts.n_clusters overrides.
-//   3. LABEL  — c-TF-IDF (BERTopic representation): cluster pseudo-doc = concat
+//   3. LABEL - c-TF-IDF (BERTopic representation): cluster pseudo-doc = concat
 //               of member inputs; tf = L1-normalized cluster term freq; idf =
 //               log(1 + A/f_t); top-n terms -> slug 'refund_return_policy'.
-//   4. EMIT   — per-pair cluster_id (stable slug) + cluster_idx (int); topics
+//   4. EMIT - per-pair cluster_id (stable slug) + cluster_idx (int); topics
 //               report with size/top_terms/representative_inputs/silhouette.
 //
 // The optional teacher-naming tier (TnT-LLM/BERTopic-LLM style) is INJECTABLE
@@ -98,7 +98,7 @@ function _unitMean(vectors, dim) {
 // ── k-means++ + Lloyd ─────────────────────────────────────────────────────────
 
 /**
- * kmeans(embeddings, k, opts) — deterministic k-means++ seeding + Lloyd.
+ * kmeans(embeddings, k, opts) - deterministic k-means++ seeding + Lloyd.
  * @param {number[][]} embeddings  N x d (unit-normalized)
  * @param {number} k
  * @param {object} [opts] {maxIter, seed}
@@ -164,7 +164,7 @@ export function kmeans(embeddings, k, opts = {}) {
 // ── silhouette (sampled) ──────────────────────────────────────────────────────
 
 /**
- * silhouetteScore(embeddings, labels, sampleCap) — mean silhouette over a
+ * silhouetteScore(embeddings, labels, sampleCap) - mean silhouette over a
  * deterministic sample. Returns NaN if <2 clusters.
  */
 export function silhouetteScore(embeddings, labels, sampleCap = 400) {
@@ -203,7 +203,7 @@ export function silhouetteScore(embeddings, labels, sampleCap = 400) {
 }
 
 /**
- * chooseK(embeddings, kOverride, kMin, kMax) — auto-k via silhouette over a grid
+ * chooseK(embeddings, kOverride, kMin, kMax) - auto-k via silhouette over a grid
  * around round(sqrt(n/2)).
  * @returns {{k:number, method:'override'|'silhouette'|'sqrt', silhouette:number|null}}
  */
@@ -234,7 +234,7 @@ export function chooseK(embeddings, kOverride = null, kMin = 2, kMax = 50) {
 // ── c-TF-IDF labeling ─────────────────────────────────────────────────────────
 
 /**
- * labelClustersCtfidf(texts, labels, k, topN) — BERTopic c-TF-IDF top terms per
+ * labelClustersCtfidf(texts, labels, k, topN) - BERTopic c-TF-IDF top terms per
  * cluster. tf = L1-normalized cluster term freq; idf = log(1 + A/f_t) where A is
  * total token mass and f_t is term mass across the corpus.
  * @returns {Array<{idx:number, slug:string, top_terms:string[]}>}
@@ -296,7 +296,7 @@ function _representativeInputs(embs, centroids, labels, texts, c, perCluster = 3
 // ── headline orchestrator ─────────────────────────────────────────────────────
 
 /**
- * clusterAndLabel — embed -> k-means -> c-TF-IDF (or injected teacher labeler).
+ * clusterAndLabel - embed -> k-means -> c-TF-IDF (or injected teacher labeler).
  * @param {object} args
  * @param {object[]} args.pairs
  * @param {number|null} [args.n_clusters]  override auto-k

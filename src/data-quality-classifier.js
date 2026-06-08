@@ -1,4 +1,4 @@
-// KOLM Data Engine — per-pair quality CLASSIFIER (W921).
+// KOLM Data Engine - per-pair quality CLASSIFIER (W921).
 //
 // Replaces a single hand-tuned output-only heuristic with a LEARNED per-pair
 // quality scorer whose threshold can be tuned (percentile, DCLM-style, or
@@ -24,7 +24,7 @@
 //     Absent a fit, a SHIPPED default weight vector (cold-start) scores any
 //     corpus; the heuristic floor is the universal fallback.
 //   - THRESHOLD: 'percentile' (keep top keep_fraction by score, DCLM-style,
-//     dataset-relative — the proven default) or 'absolute' (score >= minQuality).
+//     dataset-relative - the proven default) or 'absolute' (score >= minQuality).
 //
 // Envelope contract: scoreQuality / fitQualityModel return {ok, version:
 // 'quality-v1', ...} and NEVER throw across the public API. Determinism:
@@ -83,7 +83,7 @@ function _relevance(input, output) {
 }
 
 /**
- * extractFeatures(pair) — the deterministic feature vector the logistic head
+ * extractFeatures(pair) - the deterministic feature vector the logistic head
  * scores. Each component is bounded so the head trains stably.
  * @returns {number[]} feature vector (FEATURE_NAMES order)
  */
@@ -139,7 +139,7 @@ function _scoreWithWeights(features, weights) {
 // ── heuristic floor (universal fallback) ──────────────────────────────────────
 
 /**
- * heuristicQualityScore(pair) — self-contained [0,1] floor. Mirrors the curate
+ * heuristicQualityScore(pair) - self-contained [0,1] floor. Mirrors the curate
  * scoreCandidateLocal ordering (clean > CoT-leaked > refusal > empty) but also
  * uses the INPUT for relevance.
  */
@@ -159,7 +159,7 @@ export function heuristicQualityScore(pair) {
 // ── scoreQuality ──────────────────────────────────────────────────────────────
 
 /**
- * scoreQuality({rows, backend, model, key}) — score each row in [0,1].
+ * scoreQuality({rows, backend, model, key}) - score each row in [0,1].
  * backend 'learned' uses the model weights (fitted or default); 'heuristic' uses
  * the floor; 'auto' uses learned when a model is given, else default-learned.
  * @returns {{ok, version, backend, scores:number[], error?}}
@@ -183,7 +183,7 @@ export function scoreQuality({ rows, backend = 'auto', model = null } = {}) {
 // ── fitQualityModel (deterministic logistic regression) ───────────────────────
 
 /**
- * fitQualityModel({posRows, negRows, epochs, lr, l2, seed}) — train the logistic
+ * fitQualityModel({posRows, negRows, epochs, lr, l2, seed}) - train the logistic
  * head on a labeled good/bad split via deterministic full-batch gradient descent.
  * @returns {{ok, version, backend:'learned', model, n_pos, n_neg, epochs, train_loss}}
  */
@@ -248,7 +248,7 @@ export function fitQualityModel({ posRows, negRows, epochs = 200, lr = 0.5, l2 =
 // ── thresholding ──────────────────────────────────────────────────────────────
 
 /**
- * applyThreshold(scores, {mode, keep_fraction, minQuality}) — return the kept
+ * applyThreshold(scores, {mode, keep_fraction, minQuality}) - return the kept
  * index set + the threshold actually used.
  *   'percentile' (default): keep top keep_fraction by score (DCLM-style).
  *   'absolute'            : keep score >= minQuality (back-compat).

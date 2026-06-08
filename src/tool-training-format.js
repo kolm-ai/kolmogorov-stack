@@ -1,4 +1,4 @@
-// W735 — Agent / Tool-Use distillation: training-data formatter.
+// W735 - Agent / Tool-Use distillation: training-data formatter.
 //
 // Closes W735-2 from KOLM_W707_SYSTEM_UPGRADE_PLAN.md line 393:
 //
@@ -17,7 +17,7 @@
 // Design contract:
 //
 //   * PURE module. No I/O, no timers, no persistence.
-//   * Mirrors src/rag-capture.js formatter convention — same defensive
+//   * Mirrors src/rag-capture.js formatter convention - same defensive
 //     fallthrough on missing fields, same shape for the legacy row, same
 //     line-anchored tag namespace (USER:, ASSISTANT:, ASSISTANT_TOOL_CALL:,
 //     TOOL_RESULT:). The student model can be fine-tuned on captures that
@@ -26,7 +26,7 @@
 //   * Multi-call: when a capture has multiple sequential tool calls, the
 //     formatter emits one ASSISTANT_TOOL_CALL+TOOL_RESULT pair per call,
 //     in order, before the final ASSISTANT response.
-//   * validateToolSchema() is shape-only — we never load JSON Schema's
+//   * validateToolSchema() is shape-only - we never load JSON Schema's
 //     full draft validation (heavy dep, not warranted at this layer).
 //     Tenant-supplied tool definitions are checked for the load-bearing
 //     fields: {name, description, parameters:{type:"object",properties:{...}}}.
@@ -53,14 +53,14 @@
  *
  * When `tool_calls` is absent or empty, falls through to the legacy
  * USER/ASSISTANT format (identical to pre-W735 behaviour). This is the
- * additive, non-breaking contract — captures with no tool calls keep
+ * additive, non-breaking contract - captures with no tool calls keep
  * looking exactly like W734 / pre-W735 rows.
  *
  * The capture row may carry `tool_results` (array of `{tool_call_id?,
  * output}`) and/or `tool_call_results` to pair with each tool_call by
  * `id` (preferred) or by positional order (fallback). Missing results
  * surface as `TOOL_RESULT: {}` so the student still sees the structural
- * shape — better than silently dropping the line.
+ * shape - better than silently dropping the line.
  *
  * Returns a string. Never throws.
  */
@@ -73,14 +73,14 @@ export function formatToolUseCapture(capture) {
 
   const toolCalls = Array.isArray(capture.tool_calls) ? capture.tool_calls : [];
   if (toolCalls.length === 0) {
-    // Legacy fallthrough — identical to pre-W735 behaviour. Stays in lock-
+    // Legacy fallthrough - identical to pre-W735 behaviour. Stays in lock-
     // step with src/rag-capture.js so a plain-text capture renders the
     // same regardless of which formatter handled it.
     return `USER: ${prompt}\nASSISTANT: ${response}`;
   }
 
   // Tool results may be supplied under either field name. Both are
-  // optional — missing results surface as {} placeholders.
+  // optional - missing results surface as {} placeholders.
   const rawResults = Array.isArray(capture.tool_results) ? capture.tool_results
     : (Array.isArray(capture.tool_call_results) ? capture.tool_call_results : []);
 
@@ -129,13 +129,13 @@ export function formatToolUseCapture(capture) {
   return lines.join('\n');
 }
 
-// Defensive JSON.stringify wrapper — never throws on circular refs or
+// Defensive JSON.stringify wrapper - never throws on circular refs or
 // BigInts (returns '{}'). The student model only needs to see a
 // deterministic shape; pathological inputs become empty objects.
 function _safeStringify(obj) {
   if (obj == null) return '{}';
   if (typeof obj !== 'object') {
-    // Numbers/strings/booleans — wrap in {output:...} so the line is
+    // Numbers/strings/booleans - wrap in {output:...} so the line is
     // always a valid JSON object for the student to parse.
     try { return JSON.stringify({ output: obj }); }
     catch (_e) { return '{}'; }
@@ -158,7 +158,7 @@ function _safeStringify(obj) {
  * Shape-only validation of a tenant-supplied tool definition.
  *
  * We intentionally do NOT pull in a full JSON Schema validator (Ajv etc.)
- * — that's a heavy dep for the scaffold layer, and the runtime adapter
+ * - that's a heavy dep for the scaffold layer, and the runtime adapter
  * (src/tool-runtime.js) is where actual argument validation belongs.
  * This function only checks the load-bearing shape so we can fail-loud
  * on registration time when a tool def is obviously misformed.

@@ -1,0 +1,17 @@
+{
+  "name": "code-reviewer",
+  "title": "Code Reviewer",
+  "icon": "code",
+  "description": "PR-style review comments grounded in the diff. Distills a reviewer that flags real issues (security, perf, style) and skips bikeshed nits.",
+  "default_describe": "Review the diff. Emit only review comments that point at a specific line and a specific issue category (bug, security, performance, style, doc). Never invent code that is not in the diff. Tone: senior-engineer, direct, no praise filler.",
+  "sample_csv_url": "/samples/code-reviewer.csv",
+  "recommended_student": "qwen2.5-7b-instruct",
+  "recommended_target": "gguf-q5km",
+  "recommended_gate": 0.87,
+  "expected_kscore": 0.89,
+  "eval_criteria": ["issue_validity", "line_anchored", "category_correct", "no_inventions"],
+  "input_col": "diff",
+  "output_col": "review_json",
+  "use_cases": ["GitHub PR bot", "pre-commit lint", "security triage", "perf hotspot scan"],
+  "minimum_rows": 50
+}

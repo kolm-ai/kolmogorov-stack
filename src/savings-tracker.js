@@ -1,6 +1,6 @@
 // src/savings-tracker.js
 //
-// W835 — savings-based pricing tracker.
+// W835 - savings-based pricing tracker.
 //
 // Records teacher API spend during a baseline window + after a kolm
 // deployment, then computes the dollar savings and the 10-15% fee that
@@ -17,7 +17,7 @@
 //     We never reach into a separate file; reusing the event-store keeps
 //     /v1/lake/export and audit-export honest (the marker rows show up too).
 //
-//  2. The PROVIDER_RATE_CARD here is FROZEN at module load — quarterly
+//  2. The PROVIDER_RATE_CARD here is FROZEN at module load - quarterly
 //     refresh is the explicit cadence. We do NOT pull from
 //     src/provider-registry.js because that table is tuned for the daemon-
 //     connector live-passthrough cost (which can swing intra-quarter when
@@ -31,7 +31,7 @@
 //     warning instead of a number. NEVER fabricate savings on thin data.
 //     When post-kolm spend exceeds baseline (a regression) we still return
 //     the (negative) saved_usd but annotate `regression: true` and set
-//     fee_usd to 0 — kolm.ai does not bill against negative savings.
+//     fee_usd to 0 - kolm.ai does not bill against negative savings.
 //
 //  4. Defense-in-depth tenant fence: every event-store read filters by
 //     tenant_id at the source AND inside the per-row loop. The route layer
@@ -44,13 +44,13 @@ import { appendEvent, listEvents } from './event-store.js';
 
 export const BASELINE_PERIOD_DAYS_DEFAULT = 30;
 export const MIN_BASELINE_DAYS = 7;
-export const SAVINGS_FEE_RATE_DEFAULT = 0.125; // 12.5% — within 10-15% band
+export const SAVINGS_FEE_RATE_DEFAULT = 0.125; // 12.5% - within 10-15% band
 
 // Rate-card snapshot 2025-Q4; refresh quarterly.
 //
 // USD per 1,000,000 tokens (NOT per 1k). Public-published list prices only;
 // volume discounts, batch-API discounts, and cached-input discounts are
-// explicitly NOT modelled here — those are negotiated, and baking them in
+// explicitly NOT modelled here - those are negotiated, and baking them in
 // would let kolm.ai overstate per-call savings against a list-price baseline.
 export const PROVIDER_RATE_CARD = Object.freeze({
   anthropic: Object.freeze({
@@ -86,7 +86,7 @@ export const PROVIDER_RATE_CARD = Object.freeze({
   }),
 });
 
-// Internal markers — we identify the baseline-start row by the
+// Internal markers - we identify the baseline-start row by the
 // (provider, model) tuple ('kolm', 'savings-tracker') + cost_micro_usd=0.
 // We cannot use a custom `status` value because the event-schema enum
 // (ok|error|timeout|rate_limited|blocked) collapses unknown values to 'ok'
@@ -381,8 +381,8 @@ export async function computeSavings({
       methodology, regression: false,
     };
   }
-  // Use whichever is smaller — requested period_days or what we've observed
-  // — so we never project past the observed window.
+  // Use whichever is smaller - requested period_days or what we've observed
+  // - so we never project past the observed window.
   const effectiveDays = Math.min(days, elapsedDays);
   const baseline = await getBaselineSpend({ tenant_id, namespace: ns, period_days: effectiveDays });
   const post = await getPostKolmSpend({ tenant_id, namespace: ns, period_days: effectiveDays });

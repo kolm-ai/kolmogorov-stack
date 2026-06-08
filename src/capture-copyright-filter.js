@@ -1,4 +1,4 @@
-// W708-4 — Copyright risk flagger for capture rows.
+// W708-4 - Copyright risk flagger for capture rows.
 //
 // kolm.ai captures user inputs/outputs as training data. External reviewer
 // flagged the risk that captures could contain copyrighted material (book
@@ -68,7 +68,7 @@ const COPYRIGHT_YEAR_RE = /(©|copyright\s*\(c\)|copyright\s+©|\(c\)\s*\d{4})\s
 
 // Heuristic threshold for the "single line of prose" detector: a line is
 // suspected prose if it's >200 chars AND has high comma density (>= 1 comma
-// per 80 chars). This is low confidence — it catches book paragraphs but
+// per 80 chars). This is low confidence - it catches book paragraphs but
 // also catches anyone explaining something in long sentences.
 const PROSE_LINE_MIN_LEN = 200;
 const PROSE_LINE_COMMA_DENSITY = 1 / 80;
@@ -89,7 +89,7 @@ function toFlaggableText(input) {
 //
 // `reasons` are short tags (e.g. 'paywall-boilerplate', 'copyright-header',
 // 'possibly-copyrighted-prose'). `matched_phrases` is the subset of
-// FLAGGED_PHRASES literally found in the text — useful for human review.
+// FLAGGED_PHRASES literally found in the text - useful for human review.
 //
 // opts:
 //   - max_scan_chars: cap how much of the text to scan (default 32K)
@@ -142,7 +142,7 @@ export function flagCopyrightRisk(captureText, opts = {}) {
 }
 
 // Attach copyright_flagged + copyright_reasons to a capture/event row in
-// place. Scans both the prompt and response sides. Pure mutation — returns
+// place. Scans both the prompt and response sides. Pure mutation - returns
 // the same row so it can be chained. Never throws (silently no-ops on
 // malformed input so it can be wrapped in try/catch by the wiring site).
 //
@@ -177,7 +177,7 @@ export function attachCopyrightFlag(eventRow) {
       eventRow.copyright_flagged = false;
       eventRow.copyright_reasons = ['scan-error'];
       eventRow.copyright_matched_phrases = [];
-    } catch (_) { /* row is frozen or otherwise unwritable — give up */ }
+    } catch (_) { /* row is frozen or otherwise unwritable - give up */ }
   }
   return eventRow;
 }

@@ -1,4 +1,4 @@
-// W709 — runtime confidence-aware router. Token-level entropy of a student
+// W709 - runtime confidence-aware router. Token-level entropy of a student
 // model's logprobs decides whether to (a) emit the student response as-is or
 // (b) escalate a high-entropy span to the teacher API. The "moat" feature:
 // distilled student models stay effectively as-good-as-teacher at student
@@ -9,7 +9,7 @@
 //     not expose per-token distributions; OpenAI without `logprobs:true`
 //     returns none either) the router emits route:'student' with
 //     reason:'no_entropy_signal_available'. It NEVER silently switches to
-//     "always teacher" — that would defeat the cost-saving point and lie
+//     "always teacher" - that would defeat the cost-saving point and lie
 //     about why the teacher was called.
 //   - Entropy is Shannon entropy in NATs (natural log), computed over the
 //     top_logprobs distribution per token. Top-K is necessarily truncated so
@@ -89,7 +89,7 @@ export function tokenEntropy(logprobs) {
     } else {
       // Row carries only the chosen token's logprob. We CANNOT compute a real
       // entropy without the alternative-candidate distribution; the honest
-      // floor is "0 known mass, infinite unknown" — but a non-disturbing
+      // floor is "0 known mass, infinite unknown" - but a non-disturbing
       // numeric is needed for the summary so we mark it as 0 and signal the
       // shape via reason='no_top_logprobs' upstream.
       per.push(0);
@@ -176,7 +176,7 @@ export function decideRouting({ tokens, threshold, hasLogprobs } = {}) {
     };
   }
   if (summary.reason === 'no_top_logprobs') {
-    // Adapter returned chosen-token logprob but no alternatives — we cannot
+    // Adapter returned chosen-token logprob but no alternatives - we cannot
     // measure uncertainty, so behave like hasLogprobs===false but tag it
     // distinctly so callers can debug which arm fired.
     return {

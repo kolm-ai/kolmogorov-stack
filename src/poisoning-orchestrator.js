@@ -1,4 +1,4 @@
-// W761 — Model Poisoning Anomaly Orchestrator.
+// W761 - Model Poisoning Anomaly Orchestrator.
 //
 // W761 ships an ADDITIVE LAYER on top of three existing primitives:
 //   - W808 statistical capture anomaly detector (src/capture-anomaly.js)
@@ -18,7 +18,7 @@
 //   - HMAC verification failure ALWAYS escalates to rotate_teacher_key.
 //     We NEVER return 'safe' when the HMAC check fails. A bound row whose
 //     binding cannot be verified is by definition not from the configured
-//     teacher — it is the strongest evidence of poisoning we have.
+//     teacher - it is the strongest evidence of poisoning we have.
 //   - Anomaly + copyright signals contribute risk levels but never override
 //     an HMAC failure. The four-level ladder is monotone: any signal can
 //     ONLY raise the risk level, never lower it.
@@ -45,7 +45,7 @@ import {
 
 export const POISONING_VERSION = 'w761-v1';
 
-// Risk level ladder. Monotone — higher index strictly dominates lower
+// Risk level ladder. Monotone - higher index strictly dominates lower
 // indices. Helpers escalate by taking the max of all detected signals.
 // Frozen so a downstream tweak cannot accidentally insert / reorder levels.
 export const POISON_RISK_LEVELS = Object.freeze([
@@ -60,7 +60,7 @@ const RISK_INDEX = Object.freeze(
   POISON_RISK_LEVELS.reduce((acc, lvl, i) => { acc[lvl] = i; return acc; }, {})
 );
 
-// Sample cap on namespace risk sweep — keeps the assessNamespacePoisoningRisk
+// Sample cap on namespace risk sweep - keeps the assessNamespacePoisoningRisk
 // hot path bounded even for tenants with millions of captures.
 const MAX_NAMESPACE_SAMPLE = 1000;
 
@@ -94,7 +94,7 @@ async function _runAnomaly(capture) {
     const tenant_id = capture.tenant_id || capture.tenant || null;
     const namespace = capture.namespace || capture.corpus_namespace || 'default';
     if (!tenant_id) {
-      return { ok: false, available: true, error: 'missing_tenant_id', detail: 'capture row has no tenant_id — cannot run W808 tenant-fenced detector' };
+      return { ok: false, available: true, error: 'missing_tenant_id', detail: 'capture row has no tenant_id - cannot run W808 tenant-fenced detector' };
     }
     const res = mod.detectAnomaly({ row: capture, tenant_id, namespace });
     return { ok: true, available: true, result: res };
@@ -126,11 +126,11 @@ async function _runCopyright(capture) {
 }
 
 // HMAC signal. Returns one of:
-//   { ok:true, status:'verified'       }   — binding present + signature OK
+//   { ok:true, status:'verified'       } - binding present + signature OK
 //   { ok:true, status:'invalid_signature' }
 //   { ok:true, status:'key_rotated'    }
-//   { ok:true, status:'no_binding'     }   — row has no teacher_binding
-//   { ok:true, status:'no_key_configured' } — env not set; row can't be verified
+//   { ok:true, status:'no_binding'     } - row has no teacher_binding
+//   { ok:true, status:'no_key_configured' } - env not set; row can't be verified
 function _runHmac(capture) {
   try {
     const result = verifyCaptureBinding(capture);
@@ -151,7 +151,7 @@ function _runHmac(capture) {
   }
 }
 
-// assessPoisoningRisk — combines all three detectors. Returns an envelope:
+// assessPoisoningRisk - combines all three detectors. Returns an envelope:
 //   {
 //     ok: true,
 //     version,
@@ -182,19 +182,19 @@ export async function assessPoisoningRisk(capture) {
   let risk = 'safe';
   const evidence = [];
 
-  // ----- HMAC signal first (W761 INVARIANT — escalates hardest) -----
+  // ----- HMAC signal first (W761 INVARIANT - escalates hardest) -----
   if (hmacEnv.status === 'invalid_signature') {
     risk = _escalate(risk, 'rotate_teacher_key');
     evidence.push('hmac:invalid_signature');
   } else if (hmacEnv.status === 'key_rotated') {
     // A binding signed under a previous key cannot be re-derived. This is
-    // not necessarily poisoning — but it IS the "we cannot verify" state,
+    // not necessarily poisoning - but it IS the "we cannot verify" state,
     // which under our threat model is equivalent to "treat as potentially
     // poisoned" until the row is re-bound under the active key.
     risk = _escalate(risk, 'rotate_teacher_key');
     evidence.push('hmac:key_rotated');
   } else if (hmacEnv.status === 'no_binding') {
-    // Honest signal — most legacy rows have no binding. Surface as review
+    // Honest signal - most legacy rows have no binding. Surface as review
     // (the analyst should know which rows are unbound) but not block.
     risk = _escalate(risk, 'review');
     evidence.push('hmac:no_binding');
@@ -231,7 +231,7 @@ export async function assessPoisoningRisk(capture) {
     evidence.push('anomaly:module_unavailable');
   }
   // anomalyEnv.ok=false with available=true (e.g. no_baseline_captures or
-  // missing_tenant_id) is NOT escalated — it just means there is not enough
+  // missing_tenant_id) is NOT escalated - it just means there is not enough
   // information to flag. The orchestrator records it for the audit trail.
 
   // ----- W750 copyright signal -----
@@ -247,7 +247,7 @@ export async function assessPoisoningRisk(capture) {
     evidence.push('copyright:module_unavailable');
   }
 
-  // Recommendation text — maps the final risk level to an action sentence.
+  // Recommendation text - maps the final risk level to an action sentence.
   const recommendation = _recommendation(risk, {
     anomaly_flagged: anomalyFlagged,
     copyright_hit: copyrightHit,
@@ -275,7 +275,7 @@ export async function assessPoisoningRisk(capture) {
 function _recommendation(risk, { anomaly_flagged, copyright_hit, hmac_status }) {
   if (risk === 'rotate_teacher_key') {
     if (hmac_status === 'invalid_signature') {
-      return 'Rotate KOLM_TEACHER_HMAC_KEY immediately. The capture row carries an invalid HMAC — its response body was mutated post-binding or was injected from a non-teacher source.';
+      return 'Rotate KOLM_TEACHER_HMAC_KEY immediately. The capture row carries an invalid HMAC - its response body was mutated post-binding or was injected from a non-teacher source.';
     }
     if (hmac_status === 'key_rotated') {
       return 'The active HMAC key does not match the key this row was bound under. If the key rotation was intentional, this row pre-dates the rotation. If it was not intentional, treat as a potential key compromise.';
@@ -286,7 +286,7 @@ function _recommendation(risk, { anomaly_flagged, copyright_hit, hmac_status }) 
     const reasons = [];
     if (anomaly_flagged) reasons.push('statistical anomaly');
     if (copyright_hit) reasons.push('copyright heuristic hit');
-    return 'Quarantine this capture (' + reasons.join(' + ') + '). Audit-trailed, reversible — release after analyst review.';
+    return 'Quarantine this capture (' + reasons.join(' + ') + '). Audit-trailed, reversible - release after analyst review.';
   }
   if (risk === 'review') {
     return 'Surface this capture for analyst review. No single signal is conclusive but the combined evidence warrants a look before promoting into the distill corpus.';
@@ -307,7 +307,7 @@ async function _loadEventStore() {
   }
 }
 
-// assessNamespacePoisoningRisk — runs assessPoisoningRisk on the N most-recent
+// assessNamespacePoisoningRisk - runs assessPoisoningRisk on the N most-recent
 // captures in (tenant_id, namespace). Returns aggregate counts + top
 // evidence so the operator can see the breakdown without iterating every row.
 export async function assessNamespacePoisoningRisk({ tenant_id, namespace, sample_n = DEFAULT_NAMESPACE_SAMPLE_N } = {}) {
@@ -327,7 +327,7 @@ export async function assessNamespacePoisoningRisk({ tenant_id, namespace, sampl
     return {
       ok: false,
       error: 'event_store_unavailable',
-      hint: 'src/event-store.js could not be imported — orchestrator cannot sweep namespace risk',
+      hint: 'src/event-store.js could not be imported - orchestrator cannot sweep namespace risk',
       version: POISONING_VERSION,
     };
   }
@@ -351,7 +351,7 @@ export async function assessNamespacePoisoningRisk({ tenant_id, namespace, sampl
     return {
       ok: false,
       error: 'empty_namespace',
-      hint: `no captures in (tenant=${tenant_id}, namespace=${ns}) — poisoning sweep needs at least one row to assess`,
+      hint: `no captures in (tenant=${tenant_id}, namespace=${ns}) - poisoning sweep needs at least one row to assess`,
       namespace: ns,
       sample_n: cap,
       version: POISONING_VERSION,
@@ -395,7 +395,7 @@ export async function assessNamespacePoisoningRisk({ tenant_id, namespace, sampl
 
 function _namespaceHint(highest, by_risk) {
   if (highest === 'rotate_teacher_key') {
-    return `${by_risk.rotate_teacher_key || 0} capture(s) failed HMAC verification — rotate KOLM_TEACHER_HMAC_KEY and investigate the source of the unsigned/mismatched rows.`;
+    return `${by_risk.rotate_teacher_key || 0} capture(s) failed HMAC verification - rotate KOLM_TEACHER_HMAC_KEY and investigate the source of the unsigned/mismatched rows.`;
   }
   if (highest === 'quarantine') {
     return `${by_risk.quarantine || 0} capture(s) flagged for quarantine. Use kolm poison quarantine --capture-id <id> --reason <r> to act.`;
@@ -418,7 +418,7 @@ async function _loadStore() {
   try { return await import('./store.js'); } catch (_) { return null; }
 }
 
-// quarantineCapture — audit-trailed, idempotent. The orchestrator records a
+// quarantineCapture - audit-trailed, idempotent. The orchestrator records a
 // poisoning-quarantine event in the per-tenant audit chain. Reads the same
 // chain the kolm audit verify command walks, so the action is verifiable.
 //
@@ -458,7 +458,7 @@ export async function quarantineCapture({ tenant_id, capture_id, reason, evidenc
   // + same reason. If found we return the existing event without re-appending.
   // We use `all('audit_events')` + manual tenant_id filter because
   // findByTenant() keys on a `tenant` field, but audit.js writes rows with a
-  // `tenant_id` field — so findByTenant would always return []. The manual
+  // `tenant_id` field - so findByTenant would always return []. The manual
   // filter below preserves the W411 tenant fence (defense-in-depth) and
   // matches the actual on-disk row shape.
   const storeMod = await _loadStore();
@@ -495,7 +495,7 @@ export async function quarantineCapture({ tenant_id, capture_id, reason, evidenc
     return {
       ok: false,
       error: 'audit_append_failed',
-      hint: 'tryAppendAudit returned null — likely no receipt secret configured',
+      hint: 'tryAppendAudit returned null - likely no receipt secret configured',
       version: POISONING_VERSION,
     };
   }
@@ -509,7 +509,7 @@ export async function quarantineCapture({ tenant_id, capture_id, reason, evidenc
   };
 }
 
-// releaseFromQuarantine — audit-trailed release. Owner/admin gating is
+// releaseFromQuarantine - audit-trailed release. Owner/admin gating is
 // enforced at the route layer; this function just records the release in
 // the audit chain. Returns the new audit row.
 export async function releaseFromQuarantine({ tenant_id, capture_id, release_reason, released_by } = {}) {

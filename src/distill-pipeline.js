@@ -1,11 +1,11 @@
-// Wave 381 — distillation pipeline orchestrator.
+// Wave 381 - distillation pipeline orchestrator.
 //
 // Wraps the existing src/distill-bridge.js spawn-detached worker with a
 // pipeline-shaped async-iterator API. The pipeline:
 //
 //   1. prepareDistillCorpus({namespace, split}) reads from src/event-store.js
 //      via listEvents({namespace}), pairs prompt→response on status='success'
-//      (and 'ok' — the canonical event-schema status — both accepted), and
+//      (and 'ok' - the canonical event-schema status - both accepted), and
 //      returns {pairs:[{prompt,response,event_id}], stats}
 //   2. selectStudentBackbone({task_type, hw_tier}) consults the registry
 //      already shipped in src/training-planner.js (BACKBONE_BY_PATH)
@@ -15,18 +15,18 @@
 //      {done:true, artifact_path, student_path, distill_log_path}
 //
 // Heavy ML stays in workers/distill/distill.mjs per repo policy. This module
-// is the orchestrator — it does NOT itself call torch / transformers. When
+// is the orchestrator - it does NOT itself call torch / transformers. When
 // KOLM_DISTILL_FULL is set AND python+torch are detected, the underlying
 // worker degrades to 'full' mode (real LoRA fine-tune); otherwise it runs
 // 'collect' mode (teacher → pair collection) or 'stub' (no teacher key).
 //
 // Modes:
-//   'kd_softmax'         — teacher softmax distillation. Default. The
+//   'kd_softmax' - teacher softmax distillation. Default. The
 //                          worker collects teacher responses then trains
 //                          the student to imitate full distributions.
-//   'kd_top_k'           — top-k logit distillation. Faster than softmax
+//   'kd_top_k' - top-k logit distillation. Faster than softmax
 //                          but loses tail-distribution information.
-//   'rejection_sampling' — teacher generates N candidates, judge keeps
+//   'rejection_sampling' - teacher generates N candidates, judge keeps
 //                          the best one, student is fine-tuned on the
 //                          accepted set only. Useful when teacher has
 //                          high variance.
@@ -43,7 +43,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { listEvents } from './event-store.js';
-// W787 — compute-efficiency knobs (precision mode, grad checkpointing, early stop).
+// W787 - compute-efficiency knobs (precision mode, grad checkpointing, early stop).
 import { normalizeEfficiencyOptions, buildEfficiencyEnv } from './distill-efficiency.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -52,7 +52,7 @@ const DEFAULT_WORKER = path.join(ROOT, 'workers', 'distill', 'distill.mjs');
 
 export const MODES = ['kd_softmax', 'kd_top_k', 'rejection_sampling'];
 
-// W708-2 — Teacher-source policy enum. Every known teacher slug is classified
+// W708-2 - Teacher-source policy enum. Every known teacher slug is classified
 // as either 'open-weights' (the weights are downloadable + the license permits
 // distillation) or 'proprietary' (closed weights served only via vendor API,
 // distillation may violate the vendor's TOS). The classification is stamped
@@ -60,16 +60,16 @@ export const MODES = ['kd_softmax', 'kd_top_k', 'rejection_sampling'];
 // answer "did this artifact's teacher carry TOS risk?" without rebuilding the
 // run.
 //
-// Classification rules — keep this table short and explicit; the fallback
+// Classification rules - keep this table short and explicit; the fallback
 // (unknown slug → 'proprietary') is safe-deny so an unrecognised slug never
 // silently qualifies as open-weights. Operators who run a fork should add the
 // slug here OR prefix it with `local:` / `hf:` so the prefix-fallback catches.
 export const TEACHER_SOURCE_CLASSIFICATION = Object.freeze({
-  // Proprietary — closed weights, vendor API only.
+  // Proprietary - closed weights, vendor API only.
   'claude': 'proprietary',
   'gpt': 'proprietary',
   'gemini': 'proprietary',
-  // Open-weights — downloadable weights, distillation permitted by license.
+  // Open-weights - downloadable weights, distillation permitted by license.
   'qwen': 'open-weights',
   'qwen2.5': 'open-weights',
   'qwen3': 'open-weights',
@@ -79,10 +79,10 @@ export const TEACHER_SOURCE_CLASSIFICATION = Object.freeze({
   'deepseek': 'open-weights', // distill-r1 + qwen-distill variants are MIT-licensed
 });
 
-// W708-2 — classifyTeacher(slug): returns 'open-weights' | 'proprietary' | 'unknown'.
+// W708-2 - classifyTeacher(slug): returns 'open-weights' | 'proprietary' | 'unknown'.
 // Order of resolution:
 //   1. provider prefix `local:` or `hf:` → 'open-weights' (operator opted into
-//      self-hosted weights — by definition they hold the weights themselves)
+//      self-hosted weights - by definition they hold the weights themselves)
 //   2. provider prefix `anthropic:` / `openai:` / `google:` → 'proprietary'
 //      (vendor-routed slugs that the prefix-stripped model name would also
 //      flag, but the prefix is the more reliable signal)
@@ -142,7 +142,7 @@ const STUDENT_BY_TIER = {
 export function selectStudentBackbone({ task_type, hw_tier } = {}) {
   // tier wins when present.
   if (hw_tier && STUDENT_BY_TIER[hw_tier]) return STUDENT_BY_TIER[hw_tier];
-  // task → planner recommended_path is hidden — we map common task names
+  // task → planner recommended_path is hidden - we map common task names
   // directly. Planner's pickPath() owns this mapping in the
   // training-planner module; we keep a coarse mirror so the pipeline can
   // suggest a backbone before planner runs.
@@ -158,11 +158,11 @@ export function selectStudentBackbone({ task_type, hw_tier } = {}) {
 // (canonical event-schema value), so events from both legacy connectors and
 // the W369 daemon-connector flow through. Drops rows missing either side.
 //
-// W411 — `tenant` / `tenant_id` scope: when supplied, the corpus is filtered
+// W411 - `tenant` / `tenant_id` scope: when supplied, the corpus is filtered
 // to the caller's tenant before any cross-tenant rows can leak. Route handlers
 // in router.js and compile-pipeline.js pass req.tenant_record.id down here;
 // admin / local-only daemon bypass by leaving the field unset (null).
-// W439 — `since` parameter: when supplied (ISO string, Date, or epoch ms),
+// W439 - `since` parameter: when supplied (ISO string, Date, or epoch ms),
 // only events with created_at strictly greater than `since` are returned.
 // Used by --since-last-compile to retrain on the delta of new approvals
 // since the previous artifact's created_at.
@@ -176,7 +176,7 @@ export async function prepareDistillCorpus({ namespace, split = 'train', limit =
     if (Number.isFinite(d)) sinceMs = d;
   }
   const events = await listEvents({ namespace, tenant_id: tenantScope, limit, order: 'asc' });
-  // W409n/W409o — approved-only mode: build the approval lookup once and
+  // W409n/W409o - approved-only mode: build the approval lookup once and
   // gate every event on having a non-reject decision (or being an edit row
   // with fixed_output, which counts as approved with a correction).
   let approvalsLookup = null;
@@ -233,11 +233,11 @@ export async function prepareDistillCorpus({ namespace, split = 'train', limit =
     }
     if (!prompt) { dropped_no_prompt += 1; continue; }
     if (!response) { dropped_no_response += 1; continue; }
-    // W411 P0 #2 — preserve metadata downstream consumers need: source_type
+    // W411 P0 #2 - preserve metadata downstream consumers need: source_type
     // (compile-pipeline.js:685 synthetic-vs-real seed counter), tenant_id
     // (cross-tenant training gate), approved/fixed_output/redaction_policy
     // (audit chain), holdout_only (forbids row from train split).
-    // W411 P0 #8 — fold approval-row holdout_only into the pair flag so a
+    // W411 P0 #8 - fold approval-row holdout_only into the pair flag so a
     // reviewer-set holdout flag (the workbench `holdoutOnly:true` on
     // approveEvent) propagates through corpus → split → distill. Either the
     // event flag OR the approval flag triggers holdout-only handling.
@@ -255,14 +255,14 @@ export async function prepareDistillCorpus({ namespace, split = 'train', limit =
       holdout_only: holdoutOnly,
     });
   }
-  // Optional split filter — when split='holdout', pull every nth row.
+  // Optional split filter - when split='holdout', pull every nth row.
   let filtered = pairs;
   if (split === 'holdout') {
     filtered = pairs.filter((_, i) => i % 5 === 0);
   } else if (split === 'train') {
     filtered = pairs.filter((_, i) => i % 5 !== 0);
   }
-  // W411 P0 #8 — fail-closed holdout enforcement. A pair flagged
+  // W411 P0 #8 - fail-closed holdout enforcement. A pair flagged
   // `holdout_only=true` (either by event metadata or approval row) MUST NEVER
   // enter the train split. The workbench split assigner already routes such
   // rows to the holdout bucket, but a stale event flag on a re-imported event
@@ -309,7 +309,7 @@ function _pickTeacher() {
   return list.length ? list[0] : null;
 }
 
-// W459 — return an ordered teacher list so distill() can fall back when the
+// W459 - return an ordered teacher list so distill() can fall back when the
 // first teacher's worker errors (rate-limit, transient API, key revoked).
 // The audit P1 distillation cluster (2026-05-19) flagged the missing
 // fallback: a single API outage on the highest-priority teacher would kill
@@ -337,7 +337,7 @@ export function _pickTeachers() {
   }
   if (process.env.ANTHROPIC_API_KEY) add('anthropic:claude-opus-4-7');
   if (process.env.OPENAI_API_KEY) add('openai:gpt-4o-mini');
-  // W708-2 — open-weights policy filter. When the operator sets
+  // W708-2 - open-weights policy filter. When the operator sets
   // KOLM_TEACHER_SOURCE=open-weights, we strip every teacher whose
   // classifyTeacher() result is NOT 'open-weights'. If the filtered list is
   // empty we throw a clear, actionable error rather than silently falling back
@@ -357,7 +357,7 @@ export function _pickTeachers() {
   return out;
 }
 
-// W718 — Teacher Council per-task selector. Wraps _pickTeachers() with the
+// W718 - Teacher Council per-task selector. Wraps _pickTeachers() with the
 // Teacher Council weighting formula from src/teacher-council.js, returning a
 // teacher list re-ranked per capture so the highest-weight teacher leads.
 //
@@ -451,11 +451,11 @@ function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId }) {
 // final {done:true, ...} envelope. For stub/collect modes the iterator
 // synthesizes a handful of progress events from the worker manifest;
 // for full mode it tails the worker's stdout log.
-// W422 P0-4 — pure-helper that resolves the tenant scope for distill().
+// W422 P0-4 - pure-helper that resolves the tenant scope for distill().
 // Accepts `tenant_id` (canonical) or `tenant` (shorthand alias used by route
 // handlers that pass req.tenant_record.id directly). When neither is supplied
 // we default to `'local'` so the existing local CLI / dev-loop callers keep
-// working without invasive call-site changes — this matches the rest of the
+// working without invasive call-site changes - this matches the rest of the
 // codebase's local-default convention (auth.js anon tenant, store.js DEFAULT
 // _TENANT, intent.js classifyIntent). Hosted route handlers are expected to
 // pass req.tenant_record.id explicitly; if they forget, the local default
@@ -480,11 +480,11 @@ export async function* distill({
   pairs_override = null,           // tests can inject pairs directly
   worker_cmd = null,
   emit_progress_every = 100,
-  tenant_id = null,                // W422 P0-4 — canonical tenant scope
-  tenant = null,                   // W422 P0-4 — shorthand alias for tenant_id
-  teacher_fallback = true,         // W459 — auto-retry with next teacher on worker_error
-  resume_from = null,              // W459 — resume a prior run_<id>: replay seeds + skip completed steps
-  // W787 — compute-efficiency knobs (default "off"). See normalizeEfficiencyOptions.
+  tenant_id = null,                // W422 P0-4 - canonical tenant scope
+  tenant = null,                   // W422 P0-4 - shorthand alias for tenant_id
+  teacher_fallback = true,         // W459 - auto-retry with next teacher on worker_error
+  resume_from = null,              // W459 - resume a prior run_<id>: replay seeds + skip completed steps
+  // W787 - compute-efficiency knobs (default "off"). See normalizeEfficiencyOptions.
   precision_mode = null,
   gradient_checkpointing = null,
   early_stop_config = null,
@@ -493,9 +493,9 @@ export async function* distill({
     throw new Error(`pipeline_mode must be one of [${MODES.join(', ')}]`);
   }
   if (!student_base) throw new Error('distill requires {student_base}');
-  // W787 — normalise the compute-efficiency block ONCE up front. Throws on a
+  // W787 - normalise the compute-efficiency block ONCE up front. Throws on a
   // bogus precision_mode (caller bug) BEFORE any worker spawn. Safe to call
-  // with all-nulls — defaults to bf16 + no grad-checkpoint + no early-stop.
+  // with all-nulls - defaults to bf16 + no grad-checkpoint + no early-stop.
   const _efficiencyRequested = (precision_mode != null) || (gradient_checkpointing != null) || (early_stop_config != null);
   const _efficiency = _efficiencyRequested
     ? normalizeEfficiencyOptions({
@@ -506,7 +506,7 @@ export async function* distill({
     : null;
   const _efficiencyEnv = _efficiency ? buildEfficiencyEnv(_efficiency) : {};
   const jobId = 'distill_' + Date.now().toString(36) + '_' + crypto.randomBytes(3).toString('hex');
-  // W422 P0-4 — resolve the tenant scope BEFORE any corpus read. The audit
+  // W422 P0-4 - resolve the tenant scope BEFORE any corpus read. The audit
   // (2026-05-19) flagged that direct distill({teacher_namespace, ...}) calls
   // hit prepareDistillCorpus with no tenant filter, which lets a multi-tenant
   // event-store leak cross-tenant rows into the seeds.jsonl. Default to the
@@ -523,7 +523,7 @@ export async function* distill({
   } else {
     pairs = [];
   }
-  // W411 P0 #8 — fail-closed holdout enforcement at the distill() boundary.
+  // W411 P0 #8 - fail-closed holdout enforcement at the distill() boundary.
   // Even if the caller hand-built pairs_override and slipped a holdout_only
   // row in (test fixture mistake, recipe-gen include, re-augmentation), we
   // refuse to feed it to the worker. This is the LAST chokepoint before the
@@ -531,7 +531,7 @@ export async function* distill({
   const _holdoutBefore = pairs.length;
   pairs = pairs.filter((p) => !(p && p.holdout_only));
   const holdout_excluded_count = _holdoutBefore - pairs.length;
-  // 2. Resolve mode + teacher list (W459 — fallback-aware).
+  // 2. Resolve mode + teacher list (W459 - fallback-aware).
   const { mode: workerMode } = _resolveWorkerMode();
   const teacherList = teacher_fallback ? _pickTeachers() : (() => {
     const one = _pickTeacher();
@@ -542,10 +542,10 @@ export async function* distill({
   // to single-shot (operator opted out of retry).
   const attemptList = teacherList.length ? teacherList : [null];
   // 3. Stage worker inputs.
-  // W459 — when resume_from is set, reuse the prior run_<id> directory
+  // W459 - when resume_from is set, reuse the prior run_<id> directory
   // verbatim (same seeds.jsonl, same spec.json), append new progress to the
   // existing progress.jsonl, and skip forward in the synthetic step counter
-  // to where the prior run left off. Resume is by-design tenant-local —
+  // to where the prior run left off. Resume is by-design tenant-local - 
   // the caller is responsible for matching tenant_id; mismatches yield an
   // error rather than silently rebinding.
   let runDir;
@@ -579,25 +579,25 @@ export async function* distill({
   } else {
     runDir = _distillRunDir();
   }
-  // W459 — make sure runDir exists before any in-runDir writes (run-meta,
+  // W459 - make sure runDir exists before any in-runDir writes (run-meta,
   // progress.jsonl, log). _distillRunDir() only creates the parent base dir;
   // without this mkdir the first writes below silently fail under try/catch.
   fs.mkdirSync(runDir, { recursive: true });
-  // W455 — persist a run-meta file so /v1/distill/runs can list the run
+  // W455 - persist a run-meta file so /v1/distill/runs can list the run
   // without re-deriving everything from the worker manifest. Tenant + ns
   // + base + ts so the list view tells the user what they were training.
-  // W459 — record the planned teacher attempt list so the run is auditable
+  // W459 - record the planned teacher attempt list so the run is auditable
   // even before any worker has reported back which teacher won.
-  // W708-2 — teacher-source policy stamps. teacher_source is the chosen
+  // W708-2 - teacher-source policy stamps. teacher_source is the chosen
   // teacher's classification (open-weights | proprietary | unknown); when no
   // teacher is wired (stub mode) it is null so downstream readers can
   // distinguish "no teacher" from "teacher classification unknown".
   // policy_enforced records whether KOLM_TEACHER_SOURCE=open-weights was set
-  // at the time of the run — useful for after-the-fact auditing.
+  // at the time of the run - useful for after-the-fact auditing.
   const _firstTeacher = attemptList[0] || null;
   const teacher_source = _firstTeacher ? classifyTeacher(_firstTeacher) : null;
   const policy_enforced = process.env.KOLM_TEACHER_SOURCE === 'open-weights';
-  // W718 — stamp Teacher Council choice when the council was invoked. We
+  // W718 - stamp Teacher Council choice when the council was invoked. We
   // detect activation either by env (KOLM_TEACHER_COUNCIL=1) or by a non-null
   // selection result passed via opts. Stamping is best-effort: a stamp failure
   // never blocks the distill run.
@@ -633,7 +633,7 @@ export async function* distill({
       teacher_council_choice,
       teacher_council_weights,
       resume_from: resume_from || null,
-      // W787 — record the normalised efficiency block so a downstream auditor
+      // W787 - record the normalised efficiency block so a downstream auditor
       // (or `kolm distill runs <id>`) can answer "was bf16 + grad_checkpoint
       // used on this run?" without reading the worker log. Null when no
       // efficiency knobs were passed (existing-caller compat).
@@ -641,13 +641,13 @@ export async function* distill({
       created_at: new Date().toISOString(),
     }, null, 2));
   } catch (_) {} // deliberate: cleanup
-  // W455 — open progress.jsonl for per-step loss telemetry. Each yielded
+  // W455 - open progress.jsonl for per-step loss telemetry. Each yielded
   // event is also appended here so /v1/distill/runs/:id can reconstruct
   // the loss curve. Best-effort: a failed write does not block the run.
   let progressFd = null;
   const progressPath = path.join(runDir, 'progress.jsonl');
   try { progressFd = fs.openSync(progressPath, 'a'); } catch (_) {} // deliberate: cleanup
-  // W459 — when resume_from is set, reuse the existing seeds.jsonl + spec.json
+  // W459 - when resume_from is set, reuse the existing seeds.jsonl + spec.json
   // verbatim (the prior run already paid the IO cost). Otherwise stage fresh
   // worker inputs from this run's pairs.
   let specPath, seedsPath, outDir;
@@ -671,7 +671,7 @@ export async function* distill({
   const start = Date.now();
   let step = resumePriorSteps;
   let kAccum = 0.5;
-  // W459 — try each teacher in attemptList until one succeeds. A "success"
+  // W459 - try each teacher in attemptList until one succeeds. A "success"
   // means: worker exit code === 0 AND a manifest.json was written without a
   // `teacher_error` field. On failure (rate-limit, transient API error,
   // revoked key, worker crash) we record the attempt and roll to the next
@@ -707,7 +707,7 @@ export async function* distill({
     const child = spawn(process.execPath, args, {
       detached: true,
       stdio: ['ignore', logFd, logFd],
-      // W787 — efficiencyEnv adds KOLM_PRECISION + KOLM_GRAD_CHECKPOINT +
+      // W787 - efficiencyEnv adds KOLM_PRECISION + KOLM_GRAD_CHECKPOINT +
       // KOLM_EARLY_STOP_* so the worker (and the Python trainer it spawns)
       // pick up the caller's compute-efficiency choice. Empty object when
       // no efficiency knobs were passed, so the spread is a no-op.
@@ -717,7 +717,7 @@ export async function* distill({
     if (typeof child.unref === 'function') child.unref();
     // Synthetic progress: yield a few k/loss events so the iterator surface
     // is uniform across stub/collect/full modes (stub mode finishes in ~50ms).
-    // On a retry we keep the synthetic step counter monotonic — the previous
+    // On a retry we keep the synthetic step counter monotonic - the previous
     // attempt's events already shipped to consumers + progress.jsonl.
     const stepCap = Math.min(max_steps, 10);
     for (let i = 0; i < stepCap; i++) {
@@ -775,18 +775,18 @@ export async function* distill({
       exitInfo = attemptExit;
       break;
     }
-    // Failed — try the next teacher (if any remain).
+    // Failed - try the next teacher (if any remain).
     workerManifest = attemptManifest;
     exitInfo = attemptExit;
   }
-  // W455 — close progress.jsonl after the attempt loop finishes (success or
+  // W455 - close progress.jsonl after the attempt loop finishes (success or
   // exhaustion). All synthetic events from every attempt have been appended.
   if (progressFd !== null) { try { fs.closeSync(progressFd); } catch (_) {} } // deliberate: cleanup
-  // W708-2 — stamp the WINNING teacher's source classification onto the worker
+  // W708-2 - stamp the WINNING teacher's source classification onto the worker
   // manifest so the .kolm artifact carries the policy enum end-to-end. The
   // manifest may already exist on disk (worker wrote it); we re-write it with
   // the added fields so a verifier reading the .kolm receipt chain sees
-  // teacher_source + policy_enforced inline. Best-effort — a stamp failure
+  // teacher_source + policy_enforced inline. Best-effort - a stamp failure
   // must not invalidate an otherwise successful distill run.
   const _winningTeacher = teacher_used || (attemptList[0] || null);
   const teacher_source_final = _winningTeacher ? classifyTeacher(_winningTeacher) : null;
@@ -799,17 +799,17 @@ export async function* distill({
     } catch (_) {} // deliberate: cleanup
   }
   // The artifact_path is the worker's out dir (the .kolm itself is built by
-  // src/compile-pipeline.js in the bundle phase — distill yields the path to
+  // src/compile-pipeline.js in the bundle phase - distill yields the path to
   // the training pairs / student weights, not a sealed .kolm).
   const studentPath = path.join(outDir, 'student');
-  // W808-5 — Post-distillation regression gate. Final pipeline step. Compares
+  // W808-5 - Post-distillation regression gate. Final pipeline step. Compares
   // the just-finished run against the prior artifact (if one exists for the
   // same namespace) and produces a verdict block on the done envelope. The
   // gate is non-fatal: it ANNOUNCES a regression but the caller decides
   // whether to roll back (the compile-pipeline + ship-pipeline read the
   // regression_gate.verdict to make the rollback decision).
   //
-  // Wired here at the END of distill() — does NOT touch the W459 teacher-
+  // Wired here at the END of distill() - does NOT touch the W459 teacher-
   // attempt logic, the W711 importance weighting, the W713 curriculum hook,
   // or the W714 holdout-exclusion chokepoint. Safe to remove the W808 block
   // by deleting these four lines + the function definition below.
@@ -824,7 +824,7 @@ export async function* distill({
   } catch (e) {
     _w808_gate = { ok: false, error: 'w808_gate_threw', detail: String(e && e.message || e), version: 'w808-v1' };
   }
-  // W832 — append one meta-training row per successful distill. Best-effort:
+  // W832 - append one meta-training row per successful distill. Best-effort:
   // any failure here MUST NOT break the distill run (the meta-model is a
   // hint, not a critical path). Features are derived from what we already
   // have on the worker manifest + the resolved tenant; observed.kscore is
@@ -873,13 +873,13 @@ export async function* distill({
     distill_log_path: logPath,
     worker_mode: workerMode,
     pipeline_mode,
-    // W459 — `teacher` is the winning teacher (first one whose worker exited
+    // W459 - `teacher` is the winning teacher (first one whose worker exited
     // clean). `teacher_used` is the same value, exposed under both names so
     // callers reading `done.teacher` (pre-W459) and `done.teacher_used`
     // (W459+) both see the right value.
     teacher: teacher_used,
     teacher_used,
-    // W708-2 — stamp open-weights vs proprietary classification on the done
+    // W708-2 - stamp open-weights vs proprietary classification on the done
     // envelope so callers reading the iterator output (without re-reading the
     // worker manifest from disk) see the policy verdict inline.
     teacher_source: teacher_source_final,
@@ -889,7 +889,7 @@ export async function* distill({
     pair_count: pairs.length,
     resumed_from: resume_from || null,
     resume_prior_steps: resumePriorSteps,
-    // W411 P0 #8 — how many pairs the distill() boundary refused as
+    // W411 P0 #8 - how many pairs the distill() boundary refused as
     // holdout_only. Compile-pipeline forwards this into the seed_provenance
     // block of the .kolm receipt so a verifier can confirm the chokepoint
     // fired.
@@ -897,19 +897,19 @@ export async function* distill({
     exit: exitInfo,
     manifest: workerManifest,
     duration_ms: Date.now() - start,
-    // W808-5 — regression-gate verdict block (see _w808RegressionGate below).
+    // W808-5 - regression-gate verdict block (see _w808RegressionGate below).
     w808_regression_gate: _w808_gate,
   };
 }
 
-// W455 — distill-runs read surface for /v1/distill/runs + the
+// W455 - distill-runs read surface for /v1/distill/runs + the
 // /account/distill-runs page. Each run is a directory under
 // ~/.kolm/distill-runs/run_<...>/ written by distill() above; the
 // run-meta.json + progress.jsonl + manifest.json files give the list view
 // everything it needs (tenant scope, namespace, base, ts, exit, loss curve).
 //
 // Tenant scoping: listDistillRuns({tenant_id}) ALWAYS filters by tenant_id
-// — never returns a cross-tenant view. The audit-2026-05-19 tenant-leak
+// - never returns a cross-tenant view. The audit-2026-05-19 tenant-leak
 // rule applies (canonical key is `tenant_id`).
 export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = null } = {}) {
   const base = path.join(_kolmDir(), 'distill-runs');
@@ -924,7 +924,7 @@ export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = 
     let meta = null;
     try { meta = JSON.parse(fs.readFileSync(metaPath, 'utf8')); } catch (_) { continue; }
     if (!meta) continue;
-    // Tenant scope — fail closed if the run-meta has no tenant_id field
+    // Tenant scope - fail closed if the run-meta has no tenant_id field
     // (older runs pre-W455 carry no tenant tag, so we treat them as local).
     const runTenant = meta.tenant_id || 'local';
     if (String(runTenant) !== String(tenant_id)) continue;
@@ -1009,7 +1009,7 @@ function _safeTail(p, bytes) {
 }
 
 // =============================================================================
-// W808-5 — Post-distillation regression gate.
+// W808-5 - Post-distillation regression gate.
 //
 // After the worker exits + the run-meta is finalized, compare the just-shipped
 // run's K-Score + critical_fail_rate against the prior run in the SAME
@@ -1024,12 +1024,12 @@ function _safeTail(p, bytes) {
 //   - Otherwise → 'promote'
 //
 // Honest envelope: if no prior run exists for this namespace, returns
-// { ok:true, verdict:'first_run', ... } — the first ship of a namespace is
+// { ok:true, verdict:'first_run', ... } - the first ship of a namespace is
 // always allowed (no baseline to regress against). If the candidate's
 // K-Score is missing, returns { ok:false, error:'no_candidate_kscore' } and
 // the caller treats that as 'needs_human'.
 //
-// Intentionally DOES NOT touch the W459/W711/W713/W714 hooks above — this
+// Intentionally DOES NOT touch the W459/W711/W713/W714 hooks above - this
 // is a pure read-only verdict computation off the run-meta + prior run.
 // Wired into distill() above by the four-line _w808_gate block before the
 // final yield.
@@ -1042,7 +1042,7 @@ export const W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD = 0.01;
 export function _w808RegressionGate({ run_dir, namespace, tenant_id = 'local', manifest = null } = {}) {
   const candidate_kscore = _w808ExtractKscoreFromRunDir(run_dir, manifest);
   const candidate_cfr = _w808ExtractCriticalFailRate(run_dir, manifest);
-  // Find the prior run in the same namespace + tenant — newest BEFORE the
+  // Find the prior run in the same namespace + tenant - newest BEFORE the
   // run we just finished.
   const allRuns = listDistillRuns({ tenant_id, limit: 200, namespace });
   // Drop the current run from the list (it appears as the newest entry).
@@ -1067,7 +1067,7 @@ export function _w808RegressionGate({ run_dir, namespace, tenant_id = 'local', m
       candidate_critical_fail_rate: candidate_cfr,
       prior_kscore: null,
       prior_run_id: null,
-      hint: 'no prior artifact in this namespace — first run always allowed',
+      hint: 'no prior artifact in this namespace - first run always allowed',
       kscore_drop_threshold: W808_KSCORE_DROP_THRESHOLD,
       critical_fail_rate_increase_threshold: W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD,
       version: W808_REGRESSION_GATE_VERSION,
@@ -1077,7 +1077,7 @@ export function _w808RegressionGate({ run_dir, namespace, tenant_id = 'local', m
   if (prior_kscore == null) {
     return {
       ok: true,
-      verdict: 'first_run', // no comparable prior — treat as first comparable run
+      verdict: 'first_run', // no comparable prior - treat as first comparable run
       candidate_kscore,
       candidate_critical_fail_rate: candidate_cfr,
       prior_kscore: null,
@@ -1121,7 +1121,7 @@ export function _w808RegressionGate({ run_dir, namespace, tenant_id = 'local', m
   };
 }
 
-// Internal — best-effort K-Score extractor. Tries manifest.k_score_final
+// Internal - best-effort K-Score extractor. Tries manifest.k_score_final
 // first, then the last row of progress.jsonl. Returns null when absent.
 function _w808ExtractKscoreFromRunDir(run_dir, manifest) {
   if (manifest && Number.isFinite(Number(manifest.k_score_final))) return Number(manifest.k_score_final);
@@ -1138,7 +1138,7 @@ function _w808ExtractKscoreFromRunDir(run_dir, manifest) {
   return null;
 }
 
-// Internal — best-effort critical_fail_rate extractor. Returns 0 when absent
+// Internal - best-effort critical_fail_rate extractor. Returns 0 when absent
 // (a missing CFR is treated as "no critical failures observed").
 function _w808ExtractCriticalFailRate(run_dir, manifest) {
   if (manifest && Number.isFinite(Number(manifest.critical_fail_rate))) return Number(manifest.critical_fail_rate);

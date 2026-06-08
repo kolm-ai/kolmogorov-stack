@@ -1,4 +1,4 @@
-// W774 — Multi-language artifact bake-off.
+// W774 - Multi-language artifact bake-off.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 643-648):
 //   [W774-4] Bakeoff multi-lang pairs
@@ -7,9 +7,9 @@
 // pooled scoring). src/multimodal-bakeoff.js (W466) compares ARTIFACTS
 // across CAPTURES by media_kind. W774 runXlangBakeoff() compares TWO
 // COMPILED ARTIFACTS head-to-head on captures partitioned BY DETECTED
-// LANGUAGE — the missing axis for cross-lingual distillation.
+// LANGUAGE - the missing axis for cross-lingual distillation.
 //
-// Use case: you distill an English teacher into two student variants —
+// Use case: you distill an English teacher into two student variants - 
 // one with language-balanced sampling (W774-1), one without. runXlang-
 // Bakeoff() tells you which variant wins on Spanish, which on Chinese,
 // and emits a "multilingual_consistency_score" reflecting how uniform
@@ -18,11 +18,11 @@
 // Design contract:
 //   - DI seams (runOnArtifact, judge, lang_detect, storeMod) mirror
 //     src/cross-lingual-eval.js so a single test fixture exercises both.
-//   - W411 defense-in-depth tenant fence — read tenant_id from arg AND
+//   - W411 defense-in-depth tenant fence - read tenant_id from arg AND
 //     re-filter every listEvents row by tenant_id.
 //   - HONESTY FLOOR: no captures, or no MULTILINGUAL captures (only one
 //     language detected), or missing DI seams all surface as honest
-//     envelopes — never silent-pass to a bogus winner.
+//     envelopes - never silent-pass to a bogus winner.
 //
 // Public surface:
 //   - XLANG_BAKEOFF_VERSION
@@ -82,12 +82,12 @@ export async function runXlangBakeoff(args) {
   const artifact_b = a.artifact_b;
   const opts = a.opts || {};
 
-  // W411 defense-in-depth — tenant_id mandatory.
+  // W411 defense-in-depth - tenant_id mandatory.
   if (!tenant_id || typeof tenant_id !== 'string') {
     return {
       ok: false,
       error: 'tenant_id_required',
-      hint: 'pass {tenant_id:"<canonical tenant id>"} — W411 tenant-fence is mandatory',
+      hint: 'pass {tenant_id:"<canonical tenant id>"} - W411 tenant-fence is mandatory',
       version: XLANG_BAKEOFF_VERSION,
     };
   }
@@ -110,7 +110,7 @@ export async function runXlangBakeoff(args) {
     return {
       ok: false,
       error: 'no_runner_or_judge_configured',
-      hint: 'pass opts.runOnArtifact + opts.judge — hosted route has no runner ' +
+      hint: 'pass opts.runOnArtifact + opts.judge - hosted route has no runner ' +
             'DI by default; production wires both via req.app.locals',
       version: XLANG_BAKEOFF_VERSION,
     };
@@ -125,7 +125,7 @@ export async function runXlangBakeoff(args) {
       order: 'desc',
     });
   } catch (_) { captures = []; }
-  // W411 defense-in-depth — re-filter.
+  // W411 defense-in-depth - re-filter.
   captures = (captures || []).filter((rr) => rr && rr.tenant_id === tenant_id);
 
   if (captures.length === 0) {
@@ -150,7 +150,7 @@ export async function runXlangBakeoff(args) {
     byLangCaps.get(lang).push(cap);
   }
 
-  // HONESTY: require at least 2 distinct detected languages — otherwise
+  // HONESTY: require at least 2 distinct detected languages - otherwise
   // this isn't a multilingual bakeoff.
   if (byLangCaps.size < MIN_DISTINCT_LANGS) {
     return {

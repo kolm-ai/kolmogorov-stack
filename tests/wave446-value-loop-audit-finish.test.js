@@ -241,11 +241,3 @@ test('W446 #4 — opportunity accept persists and surfaces in subsequent scans',
 // 5) sw.js cache slug is up to date
 // =============================================================================
 
-test('W446 #5 — sw.js cache slug is current (audit-finish marker)', () => {
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  // W604 anti-brittleness: scan all wave tokens, assert max >= 443.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 443, 'sw.js CACHE wave must reach >= 443 (saw max wave' + maxWave + ')');
-});

@@ -28,7 +28,7 @@
 //
 // W411 defense-in-depth note: tenant fencing happens at the alert/store boundary
 // (see src/drift-alert-w813.js + src/drift-config.js). This module accepts already-
-// scoped embedding arrays — it has no concept of tenant_id, so it cannot leak
+// scoped embedding arrays - it has no concept of tenant_id, so it cannot leak
 // across tenants by construction.
 
 export const DRIFT_DETECT_VERSION = 'w813-v1';
@@ -45,7 +45,7 @@ export const DEFAULT_KL_THRESHOLD = 0.10;
 export const DEFAULT_FALLBACK_RATE_LIFT = 0.20;
 
 // Minimum histogram bins. Below 8 the KL signal is dominated by binning noise
-// rather than distribution shift. This is a HARD floor — requests for fewer
+// rather than distribution shift. This is a HARD floor - requests for fewer
 // bins are clamped up so callers cannot silently degrade signal quality.
 export const MIN_HISTOGRAM_BINS = 8;
 
@@ -117,7 +117,7 @@ function _isEmbeddingArray(x) {
 //
 // Honest envelope on empty input or non-array input.
 //
-// NOTE on `normalized:true` — bin_counts hold raw counts (integers); the
+// NOTE on `normalized:true` - bin_counts hold raw counts (integers); the
 // `normalized:true` flag advertises that bin EDGES were computed on the
 // observed scalar range so total counts always equal total_samples. Callers
 // that want a PMF can divide bin_counts[i] / total_samples.

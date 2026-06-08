@@ -1,7 +1,7 @@
 // Capture-row durable store router.
 //
 // W212 fix for the Pablo receipt: previously router.js:3959 was
-// `try { insert('observations', obs); } catch (_) {}` — a silent swallow.
+// `try { insert('observations', obs); } catch (_) {}` - a silent swallow.
 // If the DB write failed (or /tmp was already recycled on Vercel) the
 // customer still received 200 + x-kolm-capture-id for a row that was
 // never stored. This module replaces that path with:
@@ -15,10 +15,10 @@
 // Driver selection (precedence high → low):
 //   1. KOLM_CAPTURE_DRIVER explicit override
 //   2. KOLM_STORE_DRIVER if set to vercel_postgres / vercel_kv
-//   3. Legacy synchronous store (./store.js) — durable when KOLM_DATA_DIR
+//   3. Legacy synchronous store (./store.js) - durable when KOLM_DATA_DIR
 //      points outside /tmp, ephemeral otherwise (e.g. default Vercel /tmp).
 //
-// W409a — the canonical telemetry plane is src/event-store.js (queryable by
+// W409a - the canonical telemetry plane is src/event-store.js (queryable by
 // the lake, opportunity engine, dataset workbench, label queue, and training
 // planner). For every observation we accept here we ALSO bridge the row into
 // the event-store via observationToCanonicalEvent() so the optimization /
@@ -81,7 +81,7 @@ export function driverName() {
 }
 
 // `true` when the next insertCapture call will persist beyond a single
-// lambda invocation. Honest answer — used by both the response header
+// lambda invocation. Honest answer - used by both the response header
 // and the /captures dashboard hero copy.
 export function isDurable() {
   const name = pickDriverName();
@@ -95,7 +95,7 @@ export function isDurable() {
   return true;
 }
 
-// W409a — translate a capture-store observation row into the canonical
+// W409a - translate a capture-store observation row into the canonical
 // event-store shape. Pure function; safe to call without side effects. The
 // `provenance` arg (default 'capture-store') stamps the source on every
 // canonical event for auditability of the bridge. Used by both the live
@@ -135,7 +135,7 @@ export function observationToCanonicalEvent(row, opts = {}) {
   return {
     event_id,
     tenant_id,
-    // W936 — carry team attribution through to the canonical event so the team
+    // W936 - carry team attribution through to the canonical event so the team
     // dashboard ("who asked what across the org") can query by team_id/actor_id.
     team_id: row.team_id || null,
     actor_id: row.actor_id || row.user_id || null,
@@ -161,7 +161,7 @@ export function observationToCanonicalEvent(row, opts = {}) {
     sensitive_classes: sensitiveClasses,
     redaction_count: Number(row.redaction_count) || 0,
     redaction_policy: row.redaction_policy || 'redact',
-    // W409b — propagate privacy provenance through the bridge so the canonical
+    // W409b - propagate privacy provenance through the bridge so the canonical
     // event row carries the same raw_available / hash / noncompliant_identifiers
     // tags the capture row recorded. Fail-closed: missing → false / null / [].
     raw_available: row.raw_available === true,
@@ -169,7 +169,7 @@ export function observationToCanonicalEvent(row, opts = {}) {
     raw_response_hash: row.raw_response_hash || null,
     noncompliant_identifiers: Array.isArray(row.noncompliant_identifiers) ? row.noncompliant_identifiers : [],
     source_type: row.source_type || 'real',
-    // W411 — vendor normalization + parity field names. The canonical event
+    // W411 - vendor normalization + parity field names. The canonical event
     // lake must report `vendor` (closed enum) so OpenAI / Anthropic /
     // OpenRouter / Ollama / vLLM / llama.cpp all collapse into one switch
     // target downstream. tokens_in/out + cost_micro_usd + latency_us mirror
@@ -188,14 +188,14 @@ export function observationToCanonicalEvent(row, opts = {}) {
     files: Array.isArray(row.files) ? row.files : [],
     tool_calls: Array.isArray(row.tool_calls) ? row.tool_calls : [],
     error: row.error == null ? null : String(row.error),
-    // W409a — provenance tag so audit can trace each canonical event back to
+    // W409a - provenance tag so audit can trace each canonical event back to
     // its bridge origin. Stored in feedback for now to avoid widening the
     // schema; opportunity engine + dataset workbench ignore unknown fields.
     feedback: provenance ? ('migrated_from:' + provenance) : null,
   };
 }
 
-// W409a — best-effort bridge into the canonical event-store. Never throws.
+// W409a - best-effort bridge into the canonical event-store. Never throws.
 // Idempotent: appendEvent uses INSERT OR REPLACE keyed on event_id so a
 // double-bridge of the same row (e.g. router proxy + migration backfill)
 // collapses into one canonical row. Failure to bridge does NOT block the
@@ -216,13 +216,13 @@ export async function insertCapture(row) {
   if (!row || typeof row !== 'object') {
     throw new Error('insertCapture: row must be an object');
   }
-  // W708-4 — defensive copyright-risk flag before persistence. Pure
+  // W708-4 - defensive copyright-risk flag before persistence. Pure
   // observability: stamps copyright_flagged + copyright_reasons[] on the
   // row so downstream (distill-time / dataset workbench / label queue) can
-  // filter. Failure NEVER blocks the capture write — the caller already got
+  // filter. Failure NEVER blocks the capture write - the caller already got
   // its upstream answer; losing the flag is better than losing the row.
   try { attachCopyrightFlag(row); } catch (_) { /* never block insert */ }
-  // W750-followup — Heuristic copyright detector (regex pack for Disney
+  // W750-followup - Heuristic copyright detector (regex pack for Disney
   // names, song-title n-grams, code copyright headers). This runs AFTER
   // the W708 paywall-shape detector and serves as the W808 staged_captures
   // post-quarantine classifier: when it fires, we stamp a structured
@@ -257,7 +257,7 @@ export async function insertCapture(row) {
   const driver = await loadDriver();
   if (driver) {
     await driver.insert('observations', row);
-    // W409a — mirror into the canonical event-store so the lake + optimizer
+    // W409a - mirror into the canonical event-store so the lake + optimizer
     // see it. Best-effort, post-insert.
     await bridgeToEventStore(row);
     return row;
@@ -273,10 +273,10 @@ export async function insertCapture(row) {
     err.code = 'CAPTURE_STORE_EPHEMERAL';
     throw err;
   }
-  // Synchronous insert may throw (disk full, permission, JSON parse) —
+  // Synchronous insert may throw (disk full, permission, JSON parse) - 
   // we propagate instead of swallowing.
   store.insert('observations', row);
-  // W409a — same bridge for the legacy synchronous path.
+  // W409a - same bridge for the legacy synchronous path.
   await bridgeToEventStore(row);
   return row;
 }

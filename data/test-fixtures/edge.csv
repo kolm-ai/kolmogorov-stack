@@ -1,0 +1,13 @@
+input,output
+"good question","short answer"
+"","missing input — should drop"
+"missing output",""
+"good question","short answer"
+"duplicate input — same key","this duplicate should be dropped by sha1 dedupe"
+"unique question","unique answer with a comma, and ""quoted"" content"
+"multi-line
+input across two lines","multi-line
+output across two lines"
+"trailing whitespace   ","   leading whitespace"
+"question 9","answer 9"
+"question 10","answer 10"

@@ -92,7 +92,7 @@ function _catalog() {
 // Resolve a catalog row by id. Catalog ids are global (not tenant-scoped);
 // tenant fencing applies to ENTITLEMENTS, not to which base models exist. A
 // tenant may also grant access to a tenant-private model id absent from the
-// static catalog (e.g. a compiled artifact id) — see opts.requireKnownModel.
+// static catalog (e.g. a compiled artifact id) - see opts.requireKnownModel.
 export function getCatalogModel(modelId) {
   if (!modelId) return null;
   const want = String(modelId);
@@ -149,7 +149,7 @@ function _findLive(tenant, subjectId, modelId) {
  * Grant a team or user access to a model at a given access role.
  *
  * @param {string} tenant        OWNING org tenant id (required; fences storage)
- * @param {string} groupOrUser   subject id — a `team_` group id or a user/member tenant id
+ * @param {string} groupOrUser   subject id - a `team_` group id or a user/member tenant id
  * @param {string} modelId       model id from the registry (or a tenant-private id)
  * @param {string} [role]        access role: viewer|user|admin (default 'user')
  * @param {object} [opts]
@@ -394,7 +394,7 @@ export async function attributeUsage(tenant, user, modelId, usage = {}) {
   // the attribution into the namespace as `model-access/<group>/<user>` (the
   // chargeback project/department mappers split on the first segment, so this
   // still rolls up cleanly under "model-access"). We ALSO stamp metadata for
-  // richer stores. We do not read the returned event back for these fields —
+  // richer stores. We do not read the returned event back for these fields - 
   // the caller gets whatever the store returns.
   const baseNs = usage.namespace || 'model-access';
   const attributionNs = `${baseNs}/${group_id || 'no-team'}/${uid}`;

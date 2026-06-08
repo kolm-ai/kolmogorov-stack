@@ -1,6 +1,6 @@
 // src/failure-analyst.js
 //
-// KOLM autopilot data engine — FAILURE ANALYST.
+// KOLM autopilot data engine - FAILURE ANALYST.
 //
 // Pipeline position: after EVALUATE produces a ship/no-ship verdict, the
 // autopilot needs to know WHERE the student fails and emit exactly the
@@ -17,7 +17,7 @@
 //
 // We do NOT re-run the evaluator (we read the artifacts it left behind) and we
 // do NOT re-implement clustering (we reuse active-learning's _bucketKey). We do
-// NOT write augment-pairs.jsonl directly — every fix pair flows through
+// NOT write augment-pairs.jsonl directly - every fix pair flows through
 // data-augment's appendFixPairs so provenance + id minting stay centralized.
 //
 // A failing item = verdict score below the pass threshold. We mirror
@@ -29,7 +29,7 @@
 // that known-good answer. When it does not, we emit a clearly-templated
 // corrective scaffold that names the failure so a later COLLECT step (or a
 // reviewer) can fill the canonical answer. A teacher_base, when supplied, is
-// recorded in the rationale as the intended synthesis source — we never call it
+// recorded in the rationale as the intended synthesis source - we never call it
 // here.
 //
 // Envelope: every exported function returns {ok:true, version:'fa-v1', ...} or
@@ -61,7 +61,7 @@ const FAIL_THRESHOLD = 0.5;
 const MAX_FIX_PAIRS = 50;
 
 // Pull the cluster-id helper from active-learning's published internals. We
-// fail loudly at import time only if the contract moved — but defend at call
+// fail loudly at import time only if the contract moved - but defend at call
 // time too so a missing helper degrades to a per-item bucket rather than a
 // throw across the public API.
 const _bucketKey =
@@ -70,7 +70,7 @@ const _bucketKey =
     : null;
 
 // ---------------------------------------------------------------------------
-// Persistence — EXACT mandated pattern (copied from data-feedback.js).
+// Persistence - EXACT mandated pattern (copied from data-feedback.js).
 // Best-effort; never throws across the public API.
 // ---------------------------------------------------------------------------
 
@@ -163,7 +163,7 @@ function _clusterOf(item) {
 
 // Flatten every eval artifact's results[] into one item list, tagging each with
 // the bench it came from (so the rationale can name it). Items missing a
-// finite score are dropped — they are neither a pass nor a fail.
+// finite score are dropped - they are neither a pass nor a fail.
 function _collectItems(evalMap) {
   const items = [];
   for (const [bench, obj] of Object.entries(evalMap || {})) {
@@ -251,7 +251,7 @@ function _fixPairForItem(entry, { cluster_id, teacher_base }) {
 }
 
 // ---------------------------------------------------------------------------
-// analyzeFailures — the public entry point.
+// analyzeFailures - the public entry point.
 // ---------------------------------------------------------------------------
 
 /**

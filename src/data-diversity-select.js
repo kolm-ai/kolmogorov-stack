@@ -1,4 +1,4 @@
-// KOLM Data Engine — diversity-aware active selection (BADGE / k-center-greedy /
+// KOLM Data Engine - diversity-aware active selection (BADGE / k-center-greedy /
 // facility-location), pure-JS, embedding-native (W921).
 //
 // CURATE today only FILTERS. Pure-pointwise (top-N by score) selection produces
@@ -15,7 +15,7 @@
 //
 //   (2) FACILITY-LOCATION (monotone submodular; apricot/SMART). maximize
 //       f(S)=Σ_i max_{j in S} sim(x_i,x_j). Lazy greedy gives (1-1/e)≈0.63.
-//       Result: REPRESENTATIVENESS — picks cluster medoids, prefers dense regions
+//       Result: REPRESENTATIVENESS - picks cluster medoids, prefers dense regions
 //       (the complement of k-center).
 //
 //   (3) BADGE (Ash et al. ICLR'20). Combines uncertainty + diversity via
@@ -101,7 +101,7 @@ function _resolveBudget(B, n) {
 // ── (1) k-center-greedy ───────────────────────────────────────────────────────
 
 /**
- * kCenterGreedy(embeddings, B, seedIndices) — incremental min-distance core-set.
+ * kCenterGreedy(embeddings, B, seedIndices) - incremental min-distance core-set.
  * @param {number[][]} embeddings  N x d
  * @param {number} B  budget (count)
  * @param {number[]} [seedIndices]  pre-selected indices to extend from
@@ -143,7 +143,7 @@ export function kCenterGreedy(embeddings, B, seedIndices = []) {
 // ── (2) facility-location (lazy greedy submodular max) ────────────────────────
 
 /**
- * facilityLocationSelect(embeddings, B) — lazy-greedy maximization of
+ * facilityLocationSelect(embeddings, B) - lazy-greedy maximization of
  * f(S)=Σ_i max_{j in S} sim(i,j). Uses cosine similarity. Lazy (Minoux)
  * evaluation: keep a max-heap-by-stale-gain and only recompute the top.
  * @param {number[][]} embeddings  N x d
@@ -201,10 +201,10 @@ export function facilityLocationSelect(embeddings, B) {
   return { selected_indices: selected.slice().sort((a, b) => a - b), gains, objective: Number(objective.toFixed(6)) };
 }
 
-// ── (3) BADGE — weighted k-means++ seeding ────────────────────────────────────
+// ── (3) BADGE - weighted k-means++ seeding ────────────────────────────────────
 
 /**
- * badgeSelect(embeddings, weights, B, seed) — distance²-weighted k-means++
+ * badgeSelect(embeddings, weights, B, seed) - distance²-weighted k-means++
  * seeding. Each pick is chosen with probability ∝ weight * (sq distance to the
  * nearest already-picked). High-weight (informative) + well-separated (diverse)
  * points are favored, reproducing BADGE without class gradients. Deterministic
@@ -264,7 +264,7 @@ export function badgeSelect(embeddings, weights, B, seed = 0x6b6f6c6d) {
 // ── orchestrator ──────────────────────────────────────────────────────────────
 
 /**
- * selectDiverse — embed pairs/strings and dispatch to a diversity algorithm.
+ * selectDiverse - embed pairs/strings and dispatch to a diversity algorithm.
  * @param {object} args
  * @param {object[]|string[]} args.items
  * @param {number} args.target_size  >1 = count, 0<x<=1 = fraction

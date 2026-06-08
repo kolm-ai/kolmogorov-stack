@@ -1,19 +1,19 @@
 // src/website-status-routes.js
 //
-// W921 — public, read-only trust/status routes for the marketing surface.
+// W921 - public, read-only trust/status routes for the marketing surface.
 //
 // Mounted by the orchestrator with a single registerWebsiteStatusRoutes(r, deps)
 // call so src/router.js is not edited here. These routes are intended to be
-// PUBLIC (no auth) — list the path prefix /v1/status/ in the public allowlist
+// PUBLIC (no auth) - list the path prefix /v1/status/ in the public allowlist
 // when wiring. Every route degrades to a non-fabricated answer; it never emits
 // a green status or a large count it cannot back.
 //
-//   GET /v1/status/summary   — Atlassian Statuspage v2 summary.json shape
-//   GET /v1/status/receipts  — privacy-safe global receipt aggregate (zero PII)
+//   GET /v1/status/summary - Atlassian Statuspage v2 summary.json shape
+//   GET /v1/status/receipts - privacy-safe global receipt aggregate (zero PII)
 //
 // deps (all optional; each route degrades if a primitive is missing):
-//   deps.store      — { all(table), backendInfo(), stats() }
-//   deps.loadSigner — () => signer | throws  (auth/signing liveness probe)
+//   deps.store - { all(table), backendInfo(), stats() }
+//   deps.loadSigner - () => signer | throws  (auth/signing liveness probe)
 //
 // ESM module (repo is "type":"module").
 
@@ -123,7 +123,7 @@ export function publicReceiptStats(opts = {}, deps = {}) {
       }
     }
   } catch (_) {
-    // degrade to zeros — never fabricate a count.
+    // degrade to zeros - never fabricate a count.
   }
 
   const value = {

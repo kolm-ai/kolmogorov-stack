@@ -1,6 +1,6 @@
 // src/export-provenance.js
 //
-// Wave 146 — bridge between the isolated apps/export Python toolchain and the
+// Wave 146 - bridge between the isolated apps/export Python toolchain and the
 // in-process artifact builder. Reads an export-output dir, recomputes every
 // per-file sha256 from disk, verifies declared hashes when present, and emits
 // a normalized `export` block that buildAndZip will bind into the artifact
@@ -8,7 +8,7 @@
 //
 // Two input shapes are accepted:
 //
-//  1. Manifest-driven (preferred) — out_dir contains `manifest.json` written
+//  1. Manifest-driven (preferred) - out_dir contains `manifest.json` written
 //     by apps/export/run.py (or by hand). Shape:
 //       {
 //         "kolm_export": true,
@@ -25,14 +25,14 @@
 //       }
 //     The bridge recomputes every sha256 from disk; drift throws.
 //
-//  2. Scan-driven (fallback) — out_dir has no manifest.json. Bridge walks the
+//  2. Scan-driven (fallback) - out_dir has no manifest.json. Bridge walks the
 //     dir, infers a format from each known extension, computes sha256+size,
 //     and synthesizes a manifest with backend='unknown' + exported_at=now.
 //     This path makes the bridge usable for hand-rolled exporter runs where
 //     someone just dropped a .gguf next to a recipe.
 //
 // In both cases the returned block is the canonical input for
-// buildAndZip({ export: <block> }) — see src/artifact.js#buildPayload.
+// buildAndZip({ export: <block> }) - see src/artifact.js#buildPayload.
 //
 // Honest scope: this module BUILDS and VALIDATES the export block. It does
 // NOT run the exporter (that's Python, see apps/export/). It does NOT decide
@@ -231,7 +231,7 @@ export function loadExportProvenance(dirPath, opts = {}) {
       throw new Error(`export manifest.json could not be parsed: ${e.message}`);
     }
     if (workerManifest.kolm_export !== true) {
-      // Not our manifest — fall through to scan-driven path. Don't trust a
+      // Not our manifest - fall through to scan-driven path. Don't trust a
       // manifest that doesn't claim to be ours.
       workerManifest = null;
     }
@@ -269,7 +269,7 @@ export function loadExportProvenance(dirPath, opts = {}) {
   }
 
   // For every declared target, locate the file/dir, recompute hash, and
-  // verify against the declared hash when present. Drift is fatal — the
+  // verify against the declared hash when present. Drift is fatal - the
   // bridge cannot let a manifest claim a hash that doesn't match the bytes.
   const resolvedTargets = [];
   const filesToBundle = [];

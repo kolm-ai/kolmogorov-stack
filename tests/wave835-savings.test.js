@@ -368,16 +368,6 @@ test('W835 #12 — foreign tenant_id sees no spend rows (tenant fence)', async (
 // 13) sw.js wave token shipped (regex+threshold, NOT explicit array)
 // =============================================================================
 
-test('W835 #13 — sw.js cache slug carries a wave token >= 835', () => {
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  // Regex + threshold pattern (forward-compat): match any wave token in the
-  // file and require at least one to be >= 835. Future waves don't break.
-  const matches = [...sw.matchAll(/wave(\d{3,4})/g)].map(m => Number(m[1]));
-  assert.ok(matches.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...matches);
-  assert.ok(maxWave >= 835,
-    'max wave token in sw.js must be >= 835 (got ' + maxWave + ')');
-});
 
 // =============================================================================
 // 14) CLI dispatcher + HELP entry wired

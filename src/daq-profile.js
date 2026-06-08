@@ -1,4 +1,4 @@
-// W719 — Distillation-Aware Quantization (DAQ) per-layer bit budget profile.
+// W719 - Distillation-Aware Quantization (DAQ) per-layer bit budget profile.
 //
 // Atomic items pinned:
 //   1) Layer-importance analysis (Hessian/Fisher proxy via kl_sensitivity)
@@ -42,7 +42,7 @@ const ALLOWED_FALLBACK_DTYPES = new Set(['bf16', 'fp16', 'fp32', 'int8']);
 
 // Threshold for the bit-decision rule. > HIGH_THRESHOLD → 8 bits (preserve
 // quality on the layers that move student KL the most). < LOW_THRESHOLD →
-// 4 bits flat (no protected channels — the layer is near-lossless to
+// 4 bits flat (no protected channels - the layer is near-lossless to
 // aggressive quant). Otherwise 4 bits with a small protected-channel list.
 const KL_HIGH_THRESHOLD = 0.05;
 const KL_LOW_THRESHOLD = 0.01;
@@ -65,7 +65,7 @@ export const DEFAULT_PROFILE = Object.freeze({
 /**
  * Decide a bit-width profile for ONE layer based on its telemetry.
  *
- * Rule (Hessian/Fisher proxy — see research doc Invention 1):
+ * Rule (Hessian/Fisher proxy - see research doc Invention 1):
  *   - kl_sensitivity > 0.05  → 8-bit weights, 8-bit activations, no protected channels
  *     (the layer is too sensitive to push under 8 bits; preserve quality outright)
  *   - kl_sensitivity < 0.01  → 4-bit weights, 4-bit activations, no protected channels
@@ -73,7 +73,7 @@ export const DEFAULT_PROFILE = Object.freeze({
  *   - otherwise              → 4-bit weights, 8-bit activations, top-k protected
  *     channels surfaced from telemetry.outlier_channels if present, else []
  *
- * @param {object} layer_telemetry — { layer_id, kl_sensitivity?, outlier_channels?,
+ * @param {object} layer_telemetry - { layer_id, kl_sensitivity?, outlier_channels?,
  *   group_size?, scale_mode?, fallback_dtype?, clip_percentile? }
  * @returns {object} a per-layer DAQ profile (frozen schema-valid object)
  */
@@ -143,7 +143,7 @@ export function decideBitsForLayer(layer_telemetry) {
 /**
  * Build a full DAQ profile (one entry per layer) from a layer-telemetry array.
  *
- * @param {Array<object>} layer_telemetry — array of per-layer telemetry rows
+ * @param {Array<object>} layer_telemetry - array of per-layer telemetry rows
  * @param {object} opts
  *   - default_group_size: override the per-layer group_size when telemetry omits
  *   - default_scale_mode: override the per-layer scale_mode when telemetry omits
@@ -177,7 +177,7 @@ export function buildDaqProfile(layer_telemetry, opts = {}) {
  * VRAM consumption); activations/kv are runtime axes the inference engine
  * scales separately and are not part of the saved-weights footprint.
  *
- * @param {Array<object>} profile_array — output of buildDaqProfile
+ * @param {Array<object>} profile_array - output of buildDaqProfile
  * @returns {{
  *   total_layers: number,
  *   weighted_avg_bits: number,
@@ -220,7 +220,7 @@ export function summarizeBitBudget(profile_array) {
 /**
  * Validate a per-layer profile object against the DAQ schema.
  *
- * @param {object} profile — a single per-layer profile object
+ * @param {object} profile - a single per-layer profile object
  * @returns {{ok: boolean, errors: Array<string>}}
  */
 export function validateProfile(profile) {

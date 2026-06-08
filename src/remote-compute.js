@@ -1,4 +1,4 @@
-// W250 — remote-compute rental catalog + launch primitives.
+// W250 - remote-compute rental catalog + launch primitives.
 //
 // When the user's hardware is too weak (no GPU, low RAM, mobile), they can
 // rent compute from a remote provider. This module:
@@ -17,21 +17,21 @@
 // any provider's runtime behavior (which would be brittle + cost money).
 //
 // Provider fields:
-//   id           — short slug (fireworks / together / modal / runpod / ...)
-//   name         — display name
-//   kind         — 'inference' | 'training' | 'both'
-//   homepage     — public URL for billing + signup
-//   docs         — public URL for the API docs
-//   auth_env     — env var name carrying the API key (e.g. FIREWORKS_API_KEY)
-//   base_url     — API root for inference (null for training-only providers)
-//   models       — array of model ids known to be available
-//   billing      — { unit: 'token'|'gpu_hr'|'job', currency: 'USD',
+//   id - short slug (fireworks / together / modal / runpod / ...)
+//   name - display name
+//   kind - 'inference' | 'training' | 'both'
+//   homepage - public URL for billing + signup
+//   docs - public URL for the API docs
+//   auth_env - env var name carrying the API key (e.g. FIREWORKS_API_KEY)
+//   base_url - API root for inference (null for training-only providers)
+//   models - array of model ids known to be available
+//   billing - { unit: 'token'|'gpu_hr'|'job', currency: 'USD',
 //                    rate_in?: <USD per 1M input tokens>,
 //                    rate_out?: <USD per 1M output tokens>,
 //                    gpu?: { kind: 'A100'|'H100'|..., usd_hr: <num> } }
-//   region       — array of regions where it has capacity
-//   verified_at  — ISO date of last manual verification
-//   notes        — short string about pitfalls / quotas
+//   region - array of regions where it has capacity
+//   verified_at - ISO date of last manual verification
+//   notes - short string about pitfalls / quotas
 
 const _UNVERIFIED = '2026-05-18';
 const ANTHROPIC_VERSION = '2023-06-01';
@@ -224,7 +224,7 @@ export function rankByTrainingCost({ gpu = 'A100' } = {}) {
     .sort((a, b) => a.usd_hr - b.usd_hr);
 }
 
-// Build a launch plan for an inference call. Pure function — returns an
+// Build a launch plan for an inference call. Pure function - returns an
 // object the CLI can either render as a curl command or hand to a runtime
 // HTTP client. Does NOT make a network call.
 function _anthropicMessagesPayload({ model, messages, max_tokens, temperature }) {

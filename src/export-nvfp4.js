@@ -1,6 +1,6 @@
 // src/export-nvfp4.js
 //
-// S-6 — NVFP4 (NVIDIA Blackwell 4-bit float) export chain for ANY artifact.
+// S-6 - NVFP4 (NVIDIA Blackwell 4-bit float) export chain for ANY artifact.
 //
 // NVFP4 is NVIDIA's hardware-native 4-bit floating point format introduced
 // with Blackwell (sm_100 / B100 / B200 / GB200). Unlike INT4 quantization,
@@ -31,9 +31,9 @@ import path from 'node:path';
 
 export const NVFP4_EXPORT_VERSION = 'export-nvfp4-v1';
 
-// w4a4 — weights + activations both NVFP4 (max savings, max risk)
-// w4a8 — weights NVFP4, activations FP8 (balanced default)
-// w8a8 — weights + activations both FP8 (lighter quant; falls through to fp8)
+// w4a4 - weights + activations both NVFP4 (max savings, max risk)
+// w4a8 - weights NVFP4, activations FP8 (balanced default)
+// w8a8 - weights + activations both FP8 (lighter quant; falls through to fp8)
 export const QUANT_LEVELS = Object.freeze([
   'w4a4',
   'w4a8',
@@ -79,7 +79,7 @@ export function probeNvfp4Toolchain() {
   };
 }
 
-// W916-I2 — Blackwell-native gate. NVFP4 only delivers its 2-3x throughput
+// W916-I2 - Blackwell-native gate. NVFP4 only delivers its 2-3x throughput
 // win on Blackwell (sm_100+). On Hopper/Ada it loads via emulation and is
 // SLOWER than FP8. This probe returns a structured object so callers can
 // surface a banner and let users override with `force: true`. Returning a
@@ -115,8 +115,8 @@ export function probeBlackwellNative() {
       device_name: deviceName,
       compute_capability: cc || null,
       reason: isBlackwell
-        ? `Blackwell native (cc ${cc}) — NVFP4 will run at full speed.`
-        : `Detected ${deviceName || 'NVIDIA GPU'} (cc ${cc}). NVFP4 calibration will succeed but inference will emulate FP4 — slower than FP8 on this device.`,
+        ? `Blackwell native (cc ${cc}) - NVFP4 will run at full speed.`
+        : `Detected ${deviceName || 'NVIDIA GPU'} (cc ${cc}). NVFP4 calibration will succeed but inference will emulate FP4 - slower than FP8 on this device.`,
     };
   } catch (e) {
     return {
@@ -186,8 +186,8 @@ export async function runExport({ artifact, quant, target_dir, force = false }) 
       hint: `accepted: ${QUANT_LEVELS.join(', ')}`,
     };
   }
-  // W916-I2 — Blackwell gate. Block by default on non-Blackwell silicon
-  // (emulation runs slower than FP8 — no point quantizing). Bypass with
+  // W916-I2 - Blackwell gate. Block by default on non-Blackwell silicon
+  // (emulation runs slower than FP8 - no point quantizing). Bypass with
   // `force: true` for benchmark sweeps that intentionally measure the
   // emulation path.
   const blackwell = probeBlackwellNative();

@@ -1,8 +1,8 @@
-// W918 — Temporal coverage analyzer.
+// W918 - Temporal coverage analyzer.
 //
 // Compares the time-of-occurrence distribution of PRODUCTION captures against
 // an expected (uniform) baseline and surfaces under-represented temporal
-// buckets — e.g. "weekends are 2% of training data but 28% of the week".
+// buckets - e.g. "weekends are 2% of training data but 28% of the week".
 //
 // The training corpus is rarely uniform across time. Production traffic that
 // spikes on weekends, after hours, or in winter shows up under-sampled in a
@@ -14,7 +14,7 @@
 // What it does:
 //
 //   1. analyzeTemporalCoverage({tenant, namespace, window_days, captures})
-//      — bucket every capture's time-of-occurrence three ways:
+// - bucket every capture's time-of-occurrence three ways:
 //        * by_weekday  : 7 counts, Sunday(0)..Saturday(6)
 //        * by_hour     : 24 counts, 0..23 local-to-UTC hour
 //        * by_season   : {winter, spring, summer, fall} keyed off month
@@ -22,23 +22,23 @@
 //      bucket, and flag buckets whose share falls below half the expected
 //      uniform share as under-represented gaps.
 //
-//   2. summarizeGaps(result) — pure one-liner naming the worst gap, e.g.
+//   2. summarizeGaps(result) - pure one-liner naming the worst gap, e.g.
 //      "weekend under-represented (3% vs 29% expected)".
 //
 // Persistence: best-effort via src/event-store.js. A failed write NEVER
-// fails the analysis call — the returned envelope still carries the buckets.
+// fails the analysis call - the returned envelope still carries the buckets.
 //
 // Caveats / constraints:
 //
 //   - Time-of-occurrence is read from each capture's created_at (canonical
 //     event-store column) or ts (capture-row shorthand). A row with neither a
 //     parseable created_at nor ts is skipped from the histogram but still
-//     counted toward n_captures via the parse-failure path? No — only rows
+//     counted toward n_captures via the parse-failure path? No - only rows
 //     that yield a valid Date contribute to buckets AND to the denominator,
 //     so shares always sum to ~1 over the parseable set. n_captures reports
 //     the parseable count so a caller can see how many rows were usable.
 //   - Weekday/hour/season are computed in UTC. We do NOT attempt per-tenant
-//     timezone localization here — that is a downstream concern. The gap
+//     timezone localization here - that is a downstream concern. The gap
 //     signal (weekends/after-hours under-represented) is robust to a few
 //     hours of UTC offset because the buckets are coarse.
 //   - The expected baseline is uniform. A tenant whose REAL traffic is itself
@@ -96,7 +96,7 @@ function _isoNow() {
 // Extract a valid Date (ms since epoch) from a capture row. Accepts the
 // canonical event-store created_at (ISO string) and the capture-row ts
 // shorthand (epoch ms number or ISO string). Returns null on anything
-// unparseable — the caller skips null rows from the histogram.
+// unparseable - the caller skips null rows from the histogram.
 function _extractDateMs(row) {
   if (!row || typeof row !== 'object') return null;
   // created_at: canonical event-store column, usually an ISO string.
@@ -281,7 +281,7 @@ export async function analyzeTemporalCoverage(args = {}) {
       gaps.push(_gap('season:' + s, share, SEASON_EXPECTED));
     }
   }
-  // per-hour gaps — group of 24, expected 1/24 each.
+  // per-hour gaps - group of 24, expected 1/24 each.
   for (let h = 0; h < 24; h++) {
     const share = shareOf(byHour[h]);
     if (share < HOUR_EXPECTED * GAP_THRESHOLD) {
@@ -336,7 +336,7 @@ function _gap(bucket, share, expected) {
  *   "weekend under-represented (3% vs 29% expected)".
  *
  * When the result carries no gaps, returns a clear all-clear string. Never
- * throws — a malformed result yields a safe fallback string.
+ * throws - a malformed result yields a safe fallback string.
  *
  * @param {object} result  the value returned by analyzeTemporalCoverage.
  * @returns {string}

@@ -1,16 +1,16 @@
-// W724 — Memory-aware scheduling: tier detection + placement estimator.
+// W724 - Memory-aware scheduling: tier detection + placement estimator.
 //
 // Closes W724-1 / W724-2 / W724-3 from KOLM_W707_SYSTEM_UPGRADE_PLAN.md
 // (lines 317-322). The four memory tiers are:
 //
-//   1) VRAM           — GPU device memory. Fastest. Detected via nvidia-smi.
-//   2) RAM            — host system memory. Detected via os.freemem().
-//   3) NVMe (disk)    — local SSD. Detected via fs.statfsSync(data_dir).
-//   4) network        — remote weight pull. KOLM_NETWORK_GBPS env var (opt).
+//   1) VRAM - GPU device memory. Fastest. Detected via nvidia-smi.
+//   2) RAM - host system memory. Detected via os.freemem().
+//   3) NVMe (disk) - local SSD. Detected via fs.statfsSync(data_dir).
+//   4) network - remote weight pull. KOLM_NETWORK_GBPS env var (opt).
 //
 // Honesty contract:
 //   * Every probe is wrapped in try/catch. A failing probe yields `0` (RAM,
-//     NVMe, VRAM) or `null` (network) — never a throw, never a negative
+//     NVMe, VRAM) or `null` (network) - never a throw, never a negative
 //     number, never undefined. A host without nvidia-smi reports vram_gb=0
 //     and the placement estimator routes around it accordingly.
 //   * The placement decision is a FIRST-PASS estimator. The tok/s numbers
@@ -32,14 +32,14 @@
 //
 // Public surface:
 //
-//   MEMORY_TIER_VERSION                       — schema stamp ('w724-v1')
-//   detectMemoryTiers(opts)                   — {vram_gb, ram_gb, nvme_gb, network_gbps}
+//   MEMORY_TIER_VERSION - schema stamp ('w724-v1')
+//   detectMemoryTiers(opts) - {vram_gb, ram_gb, nvme_gb, network_gbps}
 //   estimatePlacement({artifact_size_gb, tiers})
-//                                              — {placement, expected_tok_per_s,
+// - {placement, expected_tok_per_s,
 //                                                  fits_in_vram, fits_in_ram,
 //                                                  mixed_breakdown}
 //   applyAutoPlaceDecision(artifact_size_gb, opts)
-//                                              — composes detect + estimate,
+// - composes detect + estimate,
 //                                                returns {decision, reasoning_line, ...}
 
 import fs from 'node:fs';
@@ -61,7 +61,7 @@ export const MEMORY_TIER_VERSION = 'w724-v1';
 // =============================================================================
 //
 // These numbers come from the W724 atomic spec (lines 317-322 of the W707
-// plan). They are intentionally rough — the goal is to give the user a
+// plan). They are intentionally rough - the goal is to give the user a
 // realistic *order of magnitude* before the model loads, not a tight
 // guarantee. When W721-3 lands the real bench data, replace these literals
 // with bench-driven numbers and bump MEMORY_TIER_VERSION.
@@ -110,7 +110,7 @@ function _detectVramGb() {
   // one free-MB integer per visible GPU. We sum across all visible GPUs so
   // a multi-GPU host gets honest total free VRAM. If nvidia-smi is missing
   // (CPU-only host, AMD/Apple Silicon host) the spawn throws or returns
-  // status != 0 — both branches yield 0, never a throw or NaN.
+  // status != 0 - both branches yield 0, never a throw or NaN.
   try {
     const r = spawnSync('nvidia-smi', [
       '--query-gpu=memory.free',
@@ -149,7 +149,7 @@ function _detectRamGb() {
 function _detectNvmeGb(dataDirOverride) {
   // Probe the path the runtime would actually spill to. KOLM_DATA_DIR wins
   // (the artifact store lives there), then explicit override, then home.
-  // statfsSync needs a path that EXISTS — fall back to the parent if the
+  // statfsSync needs a path that EXISTS - fall back to the parent if the
   // first choice does not yet exist (fresh install).
   try {
     let target = dataDirOverride
@@ -170,7 +170,7 @@ function _detectNvmeGb(dataDirOverride) {
     const s = fs.statfsSync(probe);
     if (!s) return 0;
     // Linux/POSIX/Windows: free bytes = bavail * bsize. bavail (free for
-    // unprivileged users) is the honest figure — bfree may include reserved
+    // unprivileged users) is the honest figure - bfree may include reserved
     // root-only blocks the kolm CLI cannot actually use.
     const freeBytes = Number(s.bavail || 0) * Number(s.bsize || 0);
     if (!Number.isFinite(freeBytes) || freeBytes <= 0) return 0;
@@ -202,7 +202,7 @@ function _detectNetworkGbps() {
 
 /**
  * Decide which memory tier the artifact should live in and estimate the
- * resulting decode throughput. This is a pre-load DRY-RUN — it does not
+ * resulting decode throughput. This is a pre-load DRY-RUN - it does not
  * touch the artifact file. It picks the highest tier with enough free
  * capacity, falling back to a mixed VRAM+RAM split when the artifact
  * spills VRAM, and to mostly-nvme when even RAM cannot hold it.
@@ -272,7 +272,7 @@ export function estimatePlacement(input) {
     mixedBreakdown.ram_layers = 100;
   } else if (fitsInNvme) {
     // Mostly-NVMe: model is mmap'd from disk; each forward pass pays
-    // page-cache cost. Very slow but FUNCTIONAL — the user gets a real
+    // page-cache cost. Very slow but FUNCTIONAL - the user gets a real
     // tok/s number, not a fail.
     placement = 'nvme';
     expectedTokPerS = _scaledTokPerS(
@@ -354,31 +354,31 @@ export function applyAutoPlaceDecision(artifact_size_gb, opts) {
 }
 
 // One-line, human-readable explanation. The W724 atomic spec pins the
-// canonical phrasing: "fits in 24GB VRAM with 6.1GB headroom — expected
+// canonical phrasing: "fits in 24GB VRAM with 6.1GB headroom - expected
 // ~95 tok/s". Real output replaces the literals with the actual numbers.
 function _reasoningLine(sizeGb, tiers, decision) {
   const tok = decision.expected_tok_per_s;
   const tokStr = `~${tok} tok/s`;
   if (decision.placement === 'vram') {
     const headroom = Math.max(0, (tiers.vram_gb || 0) - sizeGb);
-    return `fits in ${_fmtGb(tiers.vram_gb)} VRAM with ${_fmtGb(headroom)} headroom — expected ${tokStr}`;
+    return `fits in ${_fmtGb(tiers.vram_gb)} VRAM with ${_fmtGb(headroom)} headroom - expected ${tokStr}`;
   }
   if (decision.placement === 'mixed') {
     const v = decision.mixed_breakdown.vram_layers;
     const r = decision.mixed_breakdown.ram_layers;
-    return `spills VRAM (${_fmtGb(tiers.vram_gb)} avail, artifact ${_fmtGb(sizeGb)}): ${v}% layers in VRAM, ${r}% in RAM — expected ${tokStr}`;
+    return `spills VRAM (${_fmtGb(tiers.vram_gb)} avail, artifact ${_fmtGb(sizeGb)}): ${v}% layers in VRAM, ${r}% in RAM - expected ${tokStr}`;
   }
   if (decision.placement === 'ram') {
-    return `no VRAM available; serving from ${_fmtGb(tiers.ram_gb)} RAM — expected ${tokStr}`;
+    return `no VRAM available; serving from ${_fmtGb(tiers.ram_gb)} RAM - expected ${tokStr}`;
   }
   if (decision.placement === 'nvme') {
-    return `RAM too small for ${_fmtGb(sizeGb)} artifact; mmap from ${_fmtGb(tiers.nvme_gb)} NVMe — expected ${tokStr}`;
+    return `RAM too small for ${_fmtGb(sizeGb)} artifact; mmap from ${_fmtGb(tiers.nvme_gb)} NVMe - expected ${tokStr}`;
   }
   // network or no-local-fit
   const link = (tiers.network_gbps !== null && tiers.network_gbps !== undefined)
     ? `${tiers.network_gbps} Gbps network`
     : 'remote weight pull';
-  return `no local tier fits ${_fmtGb(sizeGb)} artifact; falling back to ${link} — expected ${tokStr}`;
+  return `no local tier fits ${_fmtGb(sizeGb)} artifact; falling back to ${link} - expected ${tokStr}`;
 }
 
 function _fmtGb(n) {

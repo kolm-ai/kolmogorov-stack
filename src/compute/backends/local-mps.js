@@ -1,4 +1,4 @@
-// local-mps — Apple Silicon (M1+) via torch.backends.mps.
+// local-mps - Apple Silicon (M1+) via torch.backends.mps.
 // No API. run() spawns the command with PYTORCH_ENABLE_MPS_FALLBACK=1.
 // Env: any caller-set env wins over the default fallback.
 
@@ -35,7 +35,7 @@ export async function test() {
   return { ok: d.available, latency_ms: Date.now() - t0, ...d };
 }
 
-// run({ image, command, env, timeoutMs }) — spawns command with MPS fallback wired.
+// run({ image, command, env, timeoutMs }) - spawns command with MPS fallback wired.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {
   const t0 = Date.now();
   const det = await detect();

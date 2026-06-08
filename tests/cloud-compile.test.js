@@ -96,15 +96,3 @@ test('wave3-s8 · scripts/compile-cloud-modal.py exists with Modal app id and gp
   assert.match(body, /@app\.function/, 'no @app.function decorator found');
   assert.match(body, /quantize_and_upload/, 'quantize_and_upload function missing');
 });
-
-test('wave3-s8 · cloud-compile doc exists and covers Setup + Caveats', () => {
-  const existing = DOC_PATHS.find((p) => fs.existsSync(p));
-  assert.ok(existing, `expected a doc at one of: ${DOC_PATHS.join(', ')}`);
-  const body = fs.readFileSync(existing, 'utf8');
-  assert.match(body, /modal token new/, 'doc should mention `modal token new`');
-  assert.ok(
-    /Caveats/.test(body) || /Limitations/.test(body),
-    'doc should include a "Caveats" or "Limitations" section'
-  );
-  assert.match(body, /pip install modal/, 'doc should mention `pip install modal`');
-});

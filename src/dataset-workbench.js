@@ -1,18 +1,18 @@
-// W369 — dataset workbench.
+// W369 - dataset workbench.
 //
 // Turns accepted opportunities + approved events into named datasets with
 // deterministic train/holdout splits. Hard rule: train_ids and holdout_ids
 // MUST be disjoint. splitDataset() asserts this; createDataset() runs through
 // it on the way in.
 //
-// W409n — extension: canonical row shape + seeds.jsonl import/export, plus
+// W409n - extension: canonical row shape + seeds.jsonl import/export, plus
 // synthetic-tagged bucket and `approved_only` mode for compile-pipeline.
 // Multimodal + agent/workflow trace fields are preserved (workflow_id,
 // trace_id, tool_calls, media_*).
 //
 // State on disk:
-//   ~/.kolm/labels/approvals.jsonl     — per-event approve/reject decisions
-//   ~/.kolm/datasets/<dataset_id>.json — full dataset record
+//   ~/.kolm/labels/approvals.jsonl - per-event approve/reject decisions
+//   ~/.kolm/datasets/<dataset_id>.json - full dataset record
 //
 // All paths honor KOLM_DATA_DIR override so tests can isolate.
 
@@ -57,7 +57,7 @@ function _loadApprovals() {
 // duplicating the parser.
 export function _loadApprovalsForRead() { return _loadApprovals(); }
 
-// W409n — load the full audit trail for an event (every approval/reject/edit
+// W409n - load the full audit trail for an event (every approval/reject/edit
 // the reviewer touched, oldest-first). Returns [] for events with no history.
 // The single-row last-write-wins approvals map collapses history; for
 // audit purposes we want every entry.
@@ -76,7 +76,7 @@ export function loadAuditTrail(eventId) {
   return trail;
 }
 
-// W409n — canonical row shape. Every dataset consumer (training, eval,
+// W409n - canonical row shape. Every dataset consumer (training, eval,
 // bakeoff, distill) reads the same envelope so we never have to special-case
 // "is this prompt under .prompt or .input" branching at the read site.
 //
@@ -97,7 +97,7 @@ export function normalizeRow(ev, opts = {}) {
   return {
     event_id: ev.event_id || null,
     namespace: ev.namespace || null,
-    // Canonical (kolm-native) — every consumer SHOULD read these.
+    // Canonical (kolm-native) - every consumer SHOULD read these.
     input: String(input),
     output: String(output),
     // Mirror under prompt/completion so HuggingFace-style consumers can use
@@ -160,7 +160,7 @@ export async function listCandidates(opts = {}) {
 // approveEvent: append a positive-decision row to approvals.jsonl. The
 // optional fixedOutput is the "label" used to train future models.
 //
-// W409o — captures before/after audit trail: the row records the prior
+// W409o - captures before/after audit trail: the row records the prior
 // reviewer + decision (if any) so a multi-reviewer mode can rebuild who
 // said what when. The approvals file is append-only (jsonl) so the trail is
 // preserved even after the last-write-wins map collapses it for split.
@@ -168,7 +168,7 @@ export async function approveEvent(eventId, opts = {}) {
   if (!eventId) throw new Error('approveEvent requires an event_id');
   const ev = await getEvent(eventId);
   if (!ev) throw new Error('event not found: ' + eventId);
-  // W411 — tenant_id of the approval is pinned to the event's tenant_id.
+  // W411 - tenant_id of the approval is pinned to the event's tenant_id.
   // Routes that supply an explicit `tenant`/`tenant_id` MUST match the event's
   // owner; otherwise the call fail-closes with cross_tenant_approval. This
   // prevents tenantA from approving tenantB's rows.
@@ -207,7 +207,7 @@ export async function approveEvent(eventId, opts = {}) {
 
 export async function rejectEvent(eventId, opts = {}) {
   if (!eventId) throw new Error('rejectEvent requires an event_id');
-  // W411 — same cross-tenant gate as approveEvent.
+  // W411 - same cross-tenant gate as approveEvent.
   const ev = await getEvent(eventId);
   const callerTenant = opts.tenant_id || opts.tenant || null;
   if (callerTenant && ev && ev.tenant_id && callerTenant !== ev.tenant_id) {
@@ -236,7 +236,7 @@ export async function rejectEvent(eventId, opts = {}) {
   return entry;
 }
 
-// editEvent: alias for approve with fixedOutput — captures the "edit" verdict
+// editEvent: alias for approve with fixedOutput - captures the "edit" verdict
 // used by label-queue submitLabel.
 export async function editEvent(eventId, fixedOutput, opts = {}) {
   return approveEvent(eventId, { ...opts, fixedOutput });
@@ -251,7 +251,7 @@ function _dsId(seed) {
 // (seed:event_id) mod 100. Asserts disjointness. Returns {train_ids,
 // holdout_ids, train_count, holdout_count, split_signature, seed}.
 //
-// W409n — the seed argument is mixed into the hash so two calls with the same
+// W409n - the seed argument is mixed into the hash so two calls with the same
 // seed produce identical splits across machines / processes. Default seed is
 // the dataset_id itself (legacy behavior) so existing splits are unchanged.
 export async function splitDataset(datasetId, train_ratio = 0.8, opts = {}) {
@@ -345,12 +345,12 @@ export async function splitDataset(datasetId, train_ratio = 0.8, opts = {}) {
 // Returns {dataset_id, train_count, holdout_count, source_event_ids, version,
 //   split_signature, buckets: {approved, rejected, synthetic, unlabeled}}.
 //
-// W409n — flags:
+// W409n - flags:
 //   - approvedOnly:true   -> only events with an approve decision enter the
 //                            dataset. Rejected + unlabeled are dropped. Used
 //                            by compile-pipeline guard (W409c).
 //   - fromNamespace       -> alias for the namespace argument (the CLI
-//                            surfaces both — `kolm dataset create --from-namespace foo`
+//                            surfaces both - `kolm dataset create --from-namespace foo`
 //                            and `kolm dataset create foo` work identically).
 //   - fromOpportunity     -> restrict to events referenced by that
 //                            opportunity's sample_event_ids when present.
@@ -366,7 +366,7 @@ export async function createDataset(namespace, opts = {}) {
   const includeApproved = opts.includeApproved !== false;
   const approvedOnly = opts.approvedOnly === true;
   const train_ratio = opts.train_ratio != null ? opts.train_ratio : 0.8;
-  // W411 — tenant scope. Routes pass req.tenant_record.id (or req.tenant) here
+  // W411 - tenant scope. Routes pass req.tenant_record.id (or req.tenant) here
   // so the underlying listEvents() only returns the caller's rows. The
   // resulting dataset record stamps `tenant_id` so listDatasets() / split / etc.
   // can fence reads to the same tenant.
@@ -413,7 +413,7 @@ export async function createDataset(namespace, opts = {}) {
       } else buckets.unlabeled += 1;
     }
   }
-  // Synthetic bucket — any event with source_type='synthetic' counts toward
+  // Synthetic bucket - any event with source_type='synthetic' counts toward
   // the synthetic tally regardless of approval state.
   for (const e of source) {
     if ((e.source_type || 'real') === 'synthetic') buckets.synthetic += 1;
@@ -428,7 +428,7 @@ export async function createDataset(namespace, opts = {}) {
       source = source.filter(e => allow.has(e.event_id));
     }
   }
-  // W426 — explicit event-id whitelist. The seeds-importer uses this to pin
+  // W426 - explicit event-id whitelist. The seeds-importer uses this to pin
   // the dataset to the exact set of rows it just appended, avoiding a
   // namespace-wide rescan that could pick up legacy rows the caller doesn't
   // own (or didn't intend to bake into this dataset). The tenant filter on
@@ -441,13 +441,13 @@ export async function createDataset(namespace, opts = {}) {
   if (!source.length) {
     throw new Error('no events available for dataset (namespace=' + ns + ')');
   }
-  // W411 P0 #10 — content-based dedupe by row hash BEFORE the split. The
+  // W411 P0 #10 - content-based dedupe by row hash BEFORE the split. The
   // identity-based split contract (train_ids ∩ holdout_ids = ∅) only catches
   // event-id duplication; two distinct event_ids carrying the same
   // (prompt, response) pair (a re-emit, a replay through a different proxy,
   // a hand-curated synthetic copy) would still pass that probe and then both
   // copies could be distributed 80/20 across train+holdout. We canonicalise
-  // each (input, output) and keep the first occurrence — the rest are
+  // each (input, output) and keep the first occurrence - the rest are
   // collapsed and tallied so the dataset record can carry an honest
   // `row_hash_dedupe_count`.
   const seenRowHashes = new Set();
@@ -471,7 +471,7 @@ export async function createDataset(namespace, opts = {}) {
     dataset_id: datasetId,
     namespace: ns,
     version: 1,
-    // W411 — `tenant_id` stamped on the record so listDatasets() can filter
+    // W411 - `tenant_id` stamped on the record so listDatasets() can filter
     // and a downstream split / export / compile can re-verify that the
     // caller still owns the dataset before reading rows. Falls back to the
     // first event's tenant_id when the route omits an explicit tenant, so
@@ -489,7 +489,7 @@ export async function createDataset(namespace, opts = {}) {
     approved_only: approvedOnly,
     seed: opts.seed != null ? Number(opts.seed) : null,
     buckets,
-    // W411 P0 #10 — durable audit field. A verifier can compare
+    // W411 P0 #10 - durable audit field. A verifier can compare
     // source_event_ids.length against (buckets sum + row_hash_dedupe_count)
     // to confirm the dedupe step ran.
     row_hash_dedupe_count,
@@ -505,7 +505,7 @@ export async function createDataset(namespace, opts = {}) {
   });
   return {
     dataset_id: datasetId,
-    // W411 — surface the stamped tenant_id in the return envelope so the
+    // W411 - surface the stamped tenant_id in the return envelope so the
     // HTTP /v1/datasets POST response (and direct callers) can verify the
     // dataset belongs to the calling tenant without a follow-up inspect.
     tenant_id: record.tenant_id,
@@ -582,7 +582,7 @@ export async function inspectDataset(datasetId) {
   };
 }
 
-// W411 — `tenant` / `tenant_id` filter restricts the listing to datasets that
+// W411 - `tenant` / `tenant_id` filter restricts the listing to datasets that
 // belong to the caller. Legacy datasets without a stamped tenant_id are
 // included only when the caller does NOT pass a filter (admin / local-only).
 export async function listDatasets(opts = {}) {
@@ -595,7 +595,7 @@ export async function listDatasets(opts = {}) {
       const ds = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
       if (tenantFilter && ds.tenant_id && ds.tenant_id !== tenantFilter) continue;
       // If a tenant filter is set, also drop legacy records that have no
-      // tenant_id stamped — fail-closed so a cross-tenant lookup never sees
+      // tenant_id stamped - fail-closed so a cross-tenant lookup never sees
       // somebody else's dataset.
       if (tenantFilter && !ds.tenant_id) continue;
       out.push({
@@ -615,7 +615,7 @@ export async function listDatasets(opts = {}) {
 // exportDataset(datasetId, format, opts): write jsonl (default) or csv to
 // opts.out (defaults to ~/.kolm/datasets/<id>.<format>). Returns the path.
 //
-// W409n — exports use the canonical row shape from normalizeRow() so every
+// W409n - exports use the canonical row shape from normalizeRow() so every
 // dataset surface (export, bakeoff, distill, eval) reads the same envelope.
 // Multimodal media + agent traces (tool_calls) are preserved when present.
 // The optional opts.split controls which slice to export: 'train', 'holdout',
@@ -670,7 +670,7 @@ export async function exportDataset(datasetId, format = 'jsonl', opts = {}) {
   return out;
 }
 
-// W409n — importSeedsJsonl(filePath, {namespace, sourceType, autoApprove}):
+// W409n - importSeedsJsonl(filePath, {namespace, sourceType, autoApprove}):
 // Reads a seeds.jsonl (or any jsonl with {input, output} / {prompt, completion}
 // rows), writes each row as a fresh event into the event-store, optionally
 // auto-approves it, and returns {imported, skipped, errors, dataset_id?}.
@@ -706,7 +706,7 @@ export async function importSeedsJsonl(filePath, opts = {}) {
     const output = r.output || r.completion || r.response || r.response_redacted || (r.expected || '');
     if (!input || !output) { skipped += 1; continue; }
     const eventId = r.event_id || ('evt_seed_' + crypto.createHash('sha256').update(filePath + ':' + i + ':' + input).digest('hex').slice(0, 16));
-    // W426 — preserve per-row metadata from the JSONL row where present.
+    // W426 - preserve per-row metadata from the JSONL row where present.
     // Per the 2026-05-19 audit (P1-2): an imported row that carries its own
     // source_type / holdout_only / redaction_policy / approved should NOT be
     // silently overwritten by the importer's default sourceType. The
@@ -741,7 +741,7 @@ export async function importSeedsJsonl(filePath, opts = {}) {
     try {
       await appendEvent(ev);
       importedEventIds.push(eventId);
-      // W426 — honour an explicit per-row `approved: true` flag in addition to
+      // W426 - honour an explicit per-row `approved: true` flag in addition to
       // the importer-level autoApprove. The JSONL author may pre-mark some
       // rows as approved (the typical "I curated these by hand" flow). The
       // approveEvent stamp carries reviewer + workflow for audit.
@@ -756,7 +756,7 @@ export async function importSeedsJsonl(filePath, opts = {}) {
   }
   let createdDatasetId = null;
   if (opts.createDataset && importedEventIds.length) {
-    // W426 — pass tenant_id so the underlying listEvents() filter fences the
+    // W426 - pass tenant_id so the underlying listEvents() filter fences the
     // dataset to ONLY the calling tenant's rows in this namespace. Without
     // this, tenant A's `importSeedsJsonl({createDataset:true})` against a
     // shared namespace would pull tenant B's rows in too. Additionally, we

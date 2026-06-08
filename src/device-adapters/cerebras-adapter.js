@@ -1,4 +1,4 @@
-// W916-I9 — Cerebras device adapter.
+// W916-I9 - Cerebras device adapter.
 //
 // Wraps src/cloud-providers/cerebras.js into the device-adapter contract so
 // `kolm deploy artifact.kolm --device <cerebras-device>` and the fleet
@@ -7,10 +7,10 @@
 // "Deploy" on Cerebras is binding the artifact's namespace to a pre-loaded
 // Cerebras model id (see cloud-providers/cerebras.js for the full contract).
 // device.config can carry:
-//   cerebras_model   (required) — e.g. "llama3.1-8b"
-//   namespace        (required) — kolm namespace this artifact serves
-//   max_tokens       (optional) — default 2048
-//   temperature      (optional) — default 0.7
+//   cerebras_model   (required) - e.g. "llama3.1-8b"
+//   namespace        (required) - kolm namespace this artifact serves
+//   max_tokens       (optional) - default 2048
+//   temperature      (optional) - default 0.7
 //
 // Returns the same envelope shape as runpod-adapter / modal-adapter so the
 // fleet UI can render bound deployments without per-adapter branches.

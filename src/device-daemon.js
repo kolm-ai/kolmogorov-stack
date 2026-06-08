@@ -1,9 +1,9 @@
-// device-daemon.js — Kolm on-device model update daemon (P2)
+// device-daemon.js - Kolm on-device model update daemon (P2)
 //
 // Pure Node (no third-party deps). Polls a Kolm gateway for new signed model
 // versions, downloads the artifact, and applies it ONLY after an OFFLINE
 // ed25519 + sha256 verification passes. An artifact that cannot be verified is
-// never written into place — applyUpdate refuses.
+// never written into place - applyUpdate refuses.
 //
 // Companion to src/model-update-channel.js (publisher side). This module is the
 // consumer/edge side and is intentionally self-contained so it can run on a box
@@ -24,7 +24,7 @@
 // Network surface is small and explicit: runDaemon does GET
 //   {base}/v1/models/:id/updates
 // and applyUpdate does a single GET of the signed artifact URL. verifyLocal
-// touches the filesystem and crypto only — never the network.
+// touches the filesystem and crypto only - never the network.
 
 import { createHash, createPublicKey, verify as edVerify } from 'node:crypto';
 import {
@@ -169,7 +169,7 @@ function decodeSignature(signature) {
 }
 
 // --------------------------------------------------------------------------
-// OFFLINE verification — the security boundary
+// OFFLINE verification - the security boundary
 // --------------------------------------------------------------------------
 
 // Envelope/transport fields that are NEVER part of the signed bytes: a
@@ -238,7 +238,7 @@ export function canonicalJSON(obj) {
  *   2. its sha256 matches the expected digest (if one was provided);
  *   3. the ed25519 signature over the signing payload verifies against pubkey.
  *
- * Returns { ok:true } or { ok:false, reason } — never throws on a verification
+ * Returns { ok:true } or { ok:false, reason } - never throws on a verification
  * failure (only on programmer error / bad inputs).
  */
 export async function verifyLocal({ artifact_path, sha256, signature, pubkey, manifest } = {}) {
@@ -311,7 +311,7 @@ function authHeaders(apiKey, extra) {
 
 /**
  * Download a signed artifact, verify it OFFLINE, and only then move it into
- * place atomically. Refuses to apply (throws) if verification fails — the
+ * place atomically. Refuses to apply (throws) if verification fails - the
  * unverified temp file is removed.
  *
  * The ONLY network call here is the GET of signed_url. Verification is offline.
@@ -552,7 +552,7 @@ function parseArgs(argv) {
   return a;
 }
 
-const USAGE = `kolm device-daemon — poll for + verify on-device model updates
+const USAGE = `kolm device-daemon - poll for + verify on-device model updates
 
 Usage:
   kolm device-daemon --base <url> --model <id> --version <semver> [options]

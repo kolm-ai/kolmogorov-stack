@@ -1,4 +1,4 @@
-// W709-5 — routing-decision event recorder + summary reader.
+// W709-5 - routing-decision event recorder + summary reader.
 //
 // Wave 709 ships a runtime confidence router that, per request, picks
 // {student, teacher, mixed} based on the student's first-token entropy.
@@ -8,7 +8,7 @@
 // Why dual-write to event-store + store('routing_decisions'):
 //
 //  - The canonical event-store (src/event-store.js) is the lake's cost
-//    ledger. Its schema (event-schema.js) is closed — any field outside
+//    ledger. Its schema (event-schema.js) is closed - any field outside
 //    EVENT_FIELDS is silently dropped by canonicalize(). We still want a
 //    canonical lake row so /v1/billing/breakdown can roll routing cost
 //    into the same accounting as direct provider calls. The lake row uses
@@ -23,7 +23,7 @@
 //
 // The single helper recordRoutingDecision() owns both writes so callers
 // can never write one without the other. summarizeRouting() reads from
-// the 'routing_decisions' table (full-fidelity) — it does NOT need to
+// the 'routing_decisions' table (full-fidelity) - it does NOT need to
 // look at the lake.
 
 import crypto from 'node:crypto';
@@ -50,7 +50,7 @@ function _validRoute(r) {
 }
 
 // recordRoutingDecision({tenant_id, namespace, decision, student_tokens,
-//   teacher_tokens, costs, threshold}) — write one routing-decision row.
+//   teacher_tokens, costs, threshold}) - write one routing-decision row.
 //
 //   decision = {route: 'student'|'teacher'|'mixed', reason: string,
 //               entropy_summary?: {max, mean, p95}}
@@ -98,7 +98,7 @@ export async function recordRoutingDecision({
   }
 
   // W747 tie-in: consume any pending drift-warning for this (tenant, ns) and
-  // stamp drift_warning:true on the row. The drift-alert-store is opt-in —
+  // stamp drift_warning:true on the row. The drift-alert-store is opt-in - 
   // if its consume helper is missing or throws, we silently skip (honest
   // fallback per the W747 spec). When a warning IS pending, it's CLEARED by
   // consumeDriftWarning so the next routing decision is back to clean unless
@@ -117,7 +117,7 @@ export async function recordRoutingDecision({
       }
     }
   } catch (_) { // deliberate: cleanup
-    // Honest fallback — drift-alert-store missing or refactored. Do not
+    // Honest fallback - drift-alert-store missing or refactored. Do not
     // crash the routing decision path; the warning is best-effort metadata.
   }
 
@@ -148,7 +148,7 @@ export async function recordRoutingDecision({
     // below is the secondary record.
   }
 
-  // 2. Canonical lake row — uses the event-store schema fields so
+  // 2. Canonical lake row - uses the event-store schema fields so
   //    billing-breakdown + the lake export keep their existing shape.
   //    All routing-specific fields land in `feedback` as JSON (the only
   //    free-form 4096-char field on the schema).
@@ -179,16 +179,16 @@ export async function recordRoutingDecision({
       }),
     });
   } catch (_) { // deliberate: cleanup
-    // Lake row is non-critical — the durable routing_decisions row above
+    // Lake row is non-critical - the durable routing_decisions row above
     // is the source of truth for the dashboard.
   }
 
-  // 3. W710-1 — auto-ingest non-'student' rows into the active-learning
+  // 3. W710-1 - auto-ingest non-'student' rows into the active-learning
   //    queue so the next `kolm distill --resume-from-active-queue` run can
   //    consume them. Lazy import to avoid a circular dependency at module
   //    load time (active-learning-queue.js does NOT import routing-events,
   //    but a future cross-import would deadlock the module graph). Wrapped
-  //    in its own try/catch — enqueue failure NEVER throws into the routing
+  //    in its own try/catch - enqueue failure NEVER throws into the routing
   //    decision path; the routing_decisions row above is the source of truth
   //    and the queue can be backfilled from it.
   if (route !== 'student') {
@@ -198,14 +198,14 @@ export async function recordRoutingDecision({
         mod.enqueueFromRoutingDecision(tenant_id, ns, row);
       }
     } catch (_) { // deliberate: cleanup
-      // Never propagate — active-learning is opportunistic.
+      // Never propagate - active-learning is opportunistic.
     }
   }
 
   return row;
 }
 
-// summarizeRouting(tenant_id, namespace, sinceTimestamp) — read the
+// summarizeRouting(tenant_id, namespace, sinceTimestamp) - read the
 // routing_decisions table, filter by tenant + namespace + ts, return:
 //
 //   { total, by_route: {student, teacher, mixed},
@@ -232,7 +232,7 @@ export function summarizeRouting(tenant_id, namespace = null, sinceTimestamp = n
   try { rows = findByTenant(ROUTING_DECISIONS_TABLE, tenant_id) || []; } catch (_) { rows = []; }
   if (!Array.isArray(rows) || rows.length === 0) return empty;
 
-  // Defense in depth — the table is keyed by 'tenant' but we re-check
+  // Defense in depth - the table is keyed by 'tenant' but we re-check
   // both 'tenant' and 'tenant_id' in case a future writer drops one.
   rows = rows.filter(r => r && (r.tenant === tenant_id || r.tenant_id === tenant_id));
   if (namespace) rows = rows.filter(r => r.namespace === namespace);
@@ -274,7 +274,7 @@ export function summarizeRouting(tenant_id, namespace = null, sinceTimestamp = n
   };
 }
 
-// recentRoutingDecisions(tenant_id, namespace, limit) — read the last
+// recentRoutingDecisions(tenant_id, namespace, limit) - read the last
 // `limit` rows newest-first. Used by the dashboard's chart + table.
 export function recentRoutingDecisions(tenant_id, namespace = null, limit = 30) {
   if (!tenant_id) return [];
@@ -291,7 +291,7 @@ export function recentRoutingDecisions(tenant_id, namespace = null, limit = 30) 
   return rows.slice(0, cap);
 }
 
-// _resetForTests(tenant_id) — drop rows from the routing_decisions table for
+// _resetForTests(tenant_id) - drop rows from the routing_decisions table for
 // one tenant. Tests use this to isolate counts across cases because src/store.js
 // captures DATA_DIR at module-load time and tests that run in the same process
 // share the underlying JSON file. Production callers should never call this.

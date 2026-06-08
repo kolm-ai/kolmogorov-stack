@@ -1,4 +1,4 @@
-// W-D / wrapper-completion — gateway receipt builder.
+// W-D / wrapper-completion - gateway receipt builder.
 //
 // Builds full 19-field kolm-audit-1 receipts (see src/receipt-schema.js)
 // from the gateway's pipeline outputs (provider id, model name, route
@@ -10,7 +10,7 @@
 //     where `receipt` has signature_ed25519 attached at the tail.
 //   - newReceiptId() -> "rcpt_<22-char base32-friendly ULID>"
 //   - hashInput(s) / hashOutput(s) -> "sha256:<32-hex>" (first 32 hex chars
-//     of the full sha256 digest — short enough to grep, long enough that
+//     of the full sha256 digest - short enough to grep, long enough that
 //     a deliberate collision is still expensive)
 //   - verifyReceipt(receipt) -> { ok, key_fingerprint, reason? }
 //
@@ -37,7 +37,7 @@ import {
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 /**
- * newReceiptId — generate a fresh receipt id like rcpt_01HXYZ...
+ * newReceiptId - generate a fresh receipt id like rcpt_01HXYZ...
  *
  * Uses crypto.randomBytes to produce a 22-char Crockford-style base32 body
  * (no I, L, O, U). Sortable when stored as text because the leading bytes
@@ -73,34 +73,34 @@ function _verifyUrl(receiptId, baseUrl) {
 }
 
 /**
- * buildAndSignReceipt — assemble a kolm-audit-1 receipt and sign it.
+ * buildAndSignReceipt - assemble a kolm-audit-1 receipt and sign it.
  *
  * Inputs (all optional unless noted):
- *   - namespace_id       (string, REQUIRED) — namespace this call ran under
+ *   - namespace_id       (string, REQUIRED) - namespace this call ran under
  *   - route_decision     ('local' | 'frontier', default 'frontier')
- *   - provider           (string, REQUIRED) — e.g. 'anthropic', 'local-kolm'
- *   - model              (string, REQUIRED) — e.g. 'claude-opus-4-7'
- *   - artifact_id        (string | null)    — set when route_decision='local'
+ *   - provider           (string, REQUIRED) - e.g. 'anthropic', 'local-kolm'
+ *   - model              (string, REQUIRED) - e.g. 'claude-opus-4-7'
+ *   - artifact_id        (string | null) - set when route_decision='local'
  *   - confidence         (number 0..1 | null)
- *   - fallback_reason    (string | null)    — set when local→frontier fallback
- *   - input_text         (string)            — raw input, used to derive hash
- *   - output_text        (string)            — raw output, used to derive hash
- *   - input_hash         (string)            — override (else derived from input_text)
- *   - output_hash        (string)            — override (else derived from output_text)
+ *   - fallback_reason    (string | null) - set when local→frontier fallback
+ *   - input_text         (string) - raw input, used to derive hash
+ *   - output_text        (string) - raw output, used to derive hash
+ *   - input_hash         (string) - override (else derived from input_text)
+ *   - output_hash        (string) - override (else derived from output_text)
  *   - capture_eligible   (bool, default false)
  *   - capture_id         (string | null)
- *   - redaction_applied  (string[]) — e.g. ['email','phone']
+ *   - redaction_applied  (string[]) - e.g. ['email','phone']
  *   - input_tokens       (number, default 0)
  *   - output_tokens      (number, default 0)
  *   - cost_usd           (number, default 0)
- *   - signer             (signer object from loadOrCreateDefaultSigner) — optional
- *   - signing_key_id     (string)            — defaults to env or signer fingerprint
- *   - verify_url_base    (string)            — defaults to env or https://kolm.ai
- *   - timestamp          (string ISO-8601)   — defaults to now
+ *   - signer             (signer object from loadOrCreateDefaultSigner) - optional
+ *   - signing_key_id     (string) - defaults to env or signer fingerprint
+ *   - verify_url_base    (string) - defaults to env or https://kolm.ai
+ *   - timestamp          (string ISO-8601) - defaults to now
  *
  * Returns { receipt, signed_at, key_fingerprint }. The receipt has a
  * `signature_ed25519` block appended at the tail. Throws if the assembled
- * receipt fails validateReceipt — that means the caller passed bad inputs
+ * receipt fails validateReceipt - that means the caller passed bad inputs
  * and a corrupt signature is the worst possible recovery.
  */
 export function buildAndSignReceipt(opts = {}) {
@@ -163,9 +163,9 @@ export function buildAndSignReceipt(opts = {}) {
 }
 
 /**
- * verifyReceipt — recompute canonical, verify the attached signature.
+ * verifyReceipt - recompute canonical, verify the attached signature.
  *
- * Returns {ok, reason?, key_fingerprint?}. Pure (no network — does NOT
+ * Returns {ok, reason?, key_fingerprint?}. Pure (no network - does NOT
  * call verify_url). The `kolm receipts verify --offline` mode exercises
  * exactly this path; the online path additionally fetches the receipt
  * from /v1/verify/<id> and compares hash + signature blocks.

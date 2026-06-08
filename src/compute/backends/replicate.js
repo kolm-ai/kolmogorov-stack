@@ -1,4 +1,4 @@
-// replicate — Replicate Cog containers via predictions API.
+// replicate - Replicate Cog containers via predictions API.
 // API: https://replicate.com/docs/reference/http#predictions.create
 // Env: KOLM_REPLICATE_TOKEN (or REPLICATE_API_TOKEN). run() POSTs prediction, polls until terminal.
 
@@ -39,7 +39,7 @@ function _req(method, pathname, headers, body) {
   });
 }
 
-// run({ image, command, env, timeoutMs }) — `image` is the Replicate model
+// run({ image, command, env, timeoutMs }) - `image` is the Replicate model
 // version hash (e.g. "stability-ai/sdxl:7762fd07..."). `command` becomes the
 // JSON `input` payload via env.REPLICATE_INPUT_JSON or {prompt: command.join(' ')}.
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {

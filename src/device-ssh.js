@@ -1,4 +1,4 @@
-// W888-C — Real SSH transport for device fleet operations.
+// W888-C - Real SSH transport for device fleet operations.
 //
 // This module is the ssh2-backed SSHConnection class used by the Run surface's
 // deploy pipeline (src/deploy-pipeline.js) + on-device testers (src/test-device.js,
@@ -11,7 +11,7 @@
 //   - Hardware detection runs ~7 commands per session; opening one TCP +
 //     reusing it is materially faster than fork/exec'ing ssh 7 times.
 //   - We need structured exec results ({stdout, stderr, code}) without piping
-//     through a shell — the system-ssh path concatenates env-prefix + command
+//     through a shell - the system-ssh path concatenates env-prefix + command
 //     into one shell string, which makes error attribution lossy.
 //
 // ssh2 is loaded LAZILY (inside .connect()) so `kolm doctor` / `kolm devices
@@ -33,7 +33,7 @@
 //   - Private keys are read from device.connection.key_path (file path), NEVER
 //     passed inline as content. The path is read on connect; the key bytes
 //     are NOT persisted by this module.
-//   - Hosts that look like flags (starts with `-`) are rejected — mirrors
+//   - Hosts that look like flags (starts with `-`) are rejected - mirrors
 //     the guard in src/device-install.js#_assertSafeSshHost.
 //   - Default StrictHostKeyChecking is OFF for hostHash callback ("accept-new"
 //     semantics); callers that need stricter pinning pass `hostFingerprint`
@@ -68,7 +68,7 @@ function _isSafeHost(host) {
   return /^[A-Za-z0-9][A-Za-z0-9_.@:-]*$/.test(s);
 }
 
-// W888-C — Take a device record from device-capabilities and normalize the
+// W888-C - Take a device record from device-capabilities and normalize the
 // connection block. We accept three shapes for compat:
 //   - device.connection = { host, user, port, key_path, fingerprint, ...} (W888-C canonical)
 //   - device.ssh        = { host, user, port, identity_file, ... }       (W372 legacy)
@@ -132,7 +132,7 @@ export class SSHConnection {
     }
   }
 
-  // Open the ssh2 client and authenticate. Idempotent — repeat calls return
+  // Open the ssh2 client and authenticate. Idempotent - repeat calls return
   // the existing client without re-auth.
   async connect() {
     if (this._connected) return this;
@@ -195,7 +195,7 @@ export class SSHConnection {
 
   // Run a single command. Returns { stdout, stderr, code }. Throws on
   // transport-level failure (broken pipe, ssh dead); a nonzero exit code is
-  // RETURNED in `code`, never thrown — callers branch on code !== 0.
+  // RETURNED in `code`, never thrown - callers branch on code !== 0.
   async exec(command, { timeoutMs = 30_000 } = {}) {
     if (!this._connected) await this.connect();
     return await new Promise((resolve, reject) => {

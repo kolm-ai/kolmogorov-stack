@@ -1,0 +1,17 @@
+{
+  "name": "document-extractor",
+  "title": "Document Extractor",
+  "icon": "document",
+  "description": "Pull structured JSON fields from unstructured documents (invoices, receipts, contracts). Distills a deterministic extractor with a strict schema and never-invent guardrail.",
+  "default_describe": "Extract structured fields as JSON. Only emit fields present in the document; use null for missing values. Never infer values that are not written. Preserve original capitalization for proper nouns.",
+  "sample_csv_url": "/samples/document-extractor.csv",
+  "recommended_student": "qwen2.5-7b-instruct",
+  "recommended_target": "gguf-q4km",
+  "recommended_gate": 0.90,
+  "expected_kscore": 0.91,
+  "eval_criteria": ["schema_match", "no_inventions", "field_accuracy", "null_when_missing"],
+  "input_col": "document_text",
+  "output_col": "extracted_json",
+  "use_cases": ["invoice parsing", "receipt OCR cleanup", "contract field extraction", "form digitization"],
+  "minimum_rows": 50
+}

@@ -167,16 +167,6 @@ test('13. COMPLETION_VERBS has at least 70 entries (post-W202 baseline; was 65 p
   assert.ok(cv.size >= 70, 'COMPLETION_VERBS should have >= 70 entries; saw ' + cv.size);
 });
 
-test('14. sw.js CACHE wave-floor regex matches >= 202 (parent orchestrator bumps this)', () => {
-  const sw = fs.readFileSync(SW, 'utf-8');
-  // W604 anti-brittleness: scan all wave tokens, assert max >= 202.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 202,
-    'sw.js CACHE wave segment must reach >= 202 (saw max wave' + maxWave + '); coordinator needs to bump');
-});
-
 test('15. no em-dashes in NEW W202 prose (HELP.repl + EXIT alias comments)', () => {
   // We pin the W202 additions; the historic budget elsewhere is locked by W191.
   const helpReplMatch = SRC.match(/repl:\s*`([\s\S]*?)`,/);

@@ -1,6 +1,6 @@
 // src/vision-capture.js
 //
-// W771 — Vision-language capture detector + normalizer.
+// W771 - Vision-language capture detector + normalizer.
 //
 // The capture chokepoint that recognizes (and properly normalizes) vision
 // content blocks across the three large-vendor schemas we see in the wild:
@@ -13,10 +13,10 @@
 // Why a NEW module instead of grafting onto src/capture.js: src/capture.js
 // is the text-side capture chokepoint (`extractPromptForCapture`,
 // `extractCompletionText`, `extractReasoningTrace`). Vision is a different
-// privacy domain — raw image bytes can carry EXIF, biometric features, and
+// privacy domain - raw image bytes can carry EXIF, biometric features, and
 // other persona data that the text-side redactor never touches. Keeping the
 // vision-detect path in its own module means the W771 honesty contract
-// ("NEVER persist raw image bytes — only URL or hash") is enforced at the
+// ("NEVER persist raw image bytes - only URL or hash") is enforced at the
 // chokepoint, not buried in a switch inside the text path.
 //
 // HONESTY INVARIANTS (NEVER violate):
@@ -27,7 +27,7 @@
 //     verified by tests/wave771-vlm-distill.test.js #10.
 //
 //   * detectVisionCapture MUST NEVER throw on malformed input. A
-//     half-typed content block is honest data — we report
+//     half-typed content block is honest data - we report
 //     `{is_vision:false}` so the caller can treat it as a normal text
 //     message rather than crashing the request.
 //
@@ -38,7 +38,7 @@
 //   * W411 defense-in-depth: the per-tenant fence is applied at the
 //     persistence boundary by captureVisionMessage's caller (src/router.js
 //     /v1/vision/captures), not inside this module. detectVisionCapture
-//     is pure — it does not read or write state.
+//     is pure - it does not read or write state.
 //
 // W411 defense-in-depth law (cross-reference):
 //   Per-row tenant_id filter on any tenant-scoped read of the
@@ -47,7 +47,7 @@
 //
 // Distinct from src/capture.js (text) and src/multimodal-bakeoff.js (image
 // PII redaction is workers/multimodal-redact-image/, W462). The vision-
-// capture chokepoint sits BEFORE the redact step — it is the
+// capture chokepoint sits BEFORE the redact step - it is the
 // "did the request even carry an image" detector.
 
 import crypto from 'node:crypto';
@@ -115,7 +115,7 @@ function _hashUrl(url) {
 }
 
 // Classify the image MIME into a coarse "kind" bucket used by the bakeoff
-// rollup. Photo vs screenshot vs diagram is impossible from MIME alone —
+// rollup. Photo vs screenshot vs diagram is impossible from MIME alone - 
 // the bakeoff caller can refine via classifier later. Default 'other'.
 function _kindFromMime(mime) {
   if (typeof mime !== 'string' || mime.length === 0) return 'other';
@@ -130,7 +130,7 @@ function _kindFromMime(mime) {
 }
 
 // =============================================================================
-// detectVisionCapture — pure detector. Handles OpenAI, Anthropic, Google
+// detectVisionCapture - pure detector. Handles OpenAI, Anthropic, Google
 // content blocks; returns honest envelope on unknown shapes.
 // =============================================================================
 //
@@ -224,7 +224,7 @@ export function detectVisionCapture(message) {
 }
 
 // =============================================================================
-// normalizeImageBlock — canonicalize a single image block into a stable
+// normalizeImageBlock - canonicalize a single image block into a stable
 // shape regardless of vendor.
 // =============================================================================
 //
@@ -390,7 +390,7 @@ export function normalizeImageBlock(block, opts = {}) {
 }
 
 // =============================================================================
-// captureVisionMessage — chokepoint for vision capture rows.
+// captureVisionMessage - chokepoint for vision capture rows.
 //
 // HONESTY INVARIANT: never persists raw image bytes. Only the URL, a
 // sha256 of the URL (so deduplication is possible across runs), and a
@@ -424,7 +424,7 @@ export async function captureVisionMessage({
   }
   // Walk every message; aggregate the vision blocks across the whole turn.
   // The last assistant turn may carry its own image-output too (rare today,
-  // but Anthropic's vision-out roadmap supports it) — we treat assistant
+  // but Anthropic's vision-out roadmap supports it) - we treat assistant
   // turns the same as user turns for the detect path.
   let totalImages = 0;
   const allUrls = [];
@@ -456,7 +456,7 @@ export async function captureVisionMessage({
     ));
   }
 
-  // Build the canonical capture row. NEVER include raw image bytes —
+  // Build the canonical capture row. NEVER include raw image bytes - 
   // only the URL strings (if URL-sourced) and the hash digests. The
   // tests verify the persisted row to confirm this invariant holds.
   const captureRow = {

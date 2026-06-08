@@ -1,9 +1,9 @@
-// W-D / wrapper-completion — kolm-audit-1 receipt schema definition.
+// W-D / wrapper-completion - kolm-audit-1 receipt schema definition.
 //
 // Receipts are the Wrapper's signed proof-of-call. Every gateway call,
 // every captured response, every routing decision emits exactly one
 // Ed25519-signed receipt under the kolm-audit-1 schema. Receipts are
-// what makes the gateway auditable — a third party can `kolm receipts
+// what makes the gateway auditable - a third party can `kolm receipts
 // verify <id>` and replay the signature without needing access to the
 // underlying call history.
 //
@@ -19,7 +19,7 @@
 //   - REQUIRED_FIELDS, OPTIONAL_FIELDS, ALL_FIELDS (frozen arrays)
 //   - validateReceipt(obj) -> { ok, errors[] }
 //   - canonicalForSigning(receipt) -> string (sorted keys + signature_ed25519
-//     stripped — the EXACT input to ed25519.sign)
+//     stripped - the EXACT input to ed25519.sign)
 //   - emptyReceipt() -> a fresh receipt scaffold with required keys present
 
 export const RECEIPT_SCHEMA = 'kolm-audit-1';
@@ -116,7 +116,7 @@ const BOUNDS = {
 };
 
 /**
- * validateReceipt — verify the SHAPE and TYPES of a receipt envelope.
+ * validateReceipt - verify the SHAPE and TYPES of a receipt envelope.
  *
  * Does NOT verify the signature (that's verifySignatureBlock in ed25519.js).
  * Does NOT call the verify URL (that's `kolm receipts verify`). This is
@@ -187,7 +187,7 @@ export function validateReceipt(obj) {
 }
 
 /**
- * canonicalForSigning — produce the EXACT string the Ed25519 signer signs.
+ * canonicalForSigning - produce the EXACT string the Ed25519 signer signs.
  *
  * Strips signature_ed25519 (the signature MUST NOT cover itself) and emits
  * keys in ALL_FIELDS order. Uses JSON.stringify with no spaces so the bytes
@@ -205,7 +205,7 @@ export function canonicalForSigning(receipt) {
 }
 
 /**
- * emptyReceipt — return a fresh receipt scaffold with all required keys
+ * emptyReceipt - return a fresh receipt scaffold with all required keys
  * present and the optional ones explicitly null. Useful for builders that
  * fill in fields one at a time.
  */

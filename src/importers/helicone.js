@@ -1,9 +1,9 @@
-// W918 P3.2 — Helicone request log export importer.
+// W918 P3.2 - Helicone request log export importer.
 //
 // Ingests a Helicone request-log export and emits kolm capture rows ready
 // to feed into the distill / eval pipelines.
 //
-// Helicone has multiple export shapes in the wild — this importer handles
+// Helicone has multiple export shapes in the wild - this importer handles
 // three of them defensively, picking whichever shape matches each row:
 //
 //   1. Request-log JSONL (the documented export shape):
@@ -48,7 +48,7 @@
 // ts   = row.created_at if present, otherwise ISO 8601 ingest timestamp
 // namespace defaults to "helicone"; the caller can override.
 //
-// Malformed rows do NOT throw — they are skipped and recorded in the
+// Malformed rows do NOT throw - they are skipped and recorded in the
 // `errors` array as { line, reason } so the caller can surface them.
 
 import fs from 'node:fs';
@@ -158,7 +158,7 @@ function outputFromResponseBody(body) {
   return '';
 }
 
-// Shape #1: request-log JSONL — top-level `request` and `response` objects
+// Shape #1: request-log JSONL - top-level `request` and `response` objects
 // (already parsed, not strings).
 function fromRequestLogRow(obj) {
   const req = obj.request && typeof obj.request === 'object' ? obj.request : null;
@@ -171,7 +171,7 @@ function fromRequestLogRow(obj) {
   return { input, output };
 }
 
-// Shape #2: raw OpenAI-proxy — request_body / response_body fields, which
+// Shape #2: raw OpenAI-proxy - request_body / response_body fields, which
 // may be either strings (JSON-encoded) or already-parsed objects.
 function fromRawProxyRow(obj) {
   const reqBody = coerceBody(obj.request_body);
@@ -184,7 +184,7 @@ function fromRawProxyRow(obj) {
   return { input, output };
 }
 
-// Shape #3: flat CSV-via-JSONL — prompt_text + completion_text columns
+// Shape #3: flat CSV-via-JSONL - prompt_text + completion_text columns
 // straight on the row object.
 function fromFlatRow(obj) {
   const prompt = typeof obj.prompt_text === 'string' ? obj.prompt_text : null;

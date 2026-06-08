@@ -1,6 +1,6 @@
 // src/intoto-receipt.js
 //
-// W921 BET-3 — emit a kolm gateway/inference RECEIPT as an in-toto ITE-6 /
+// W921 BET-3 - emit a kolm gateway/inference RECEIPT as an in-toto ITE-6 /
 // SLSA-aligned ATTESTATION and an OpenSSF Model-Signing-compatible bundle, so a
 // buyer's existing supply-chain tooling (cosign verify-attestation, in-toto
 // verify, GUAC, Tekton Chains, the OpenSSF model-signing verifier) can ingest a
@@ -9,29 +9,29 @@
 // WHY THIS IS SEPARATE FROM intoto-slsa.js / govern-provenance.js:
 //   Those modules attest a *.kolm ARTIFACT* (the compiled, sealed model file:
 //   subject = the artifact bytes, predicate = SLSA Provenance v1 describing the
-//   BUILD — teacher/student/corpus). This module attests a single *INFERENCE
+//   BUILD - teacher/student/corpus). This module attests a single *INFERENCE
 //   EVENT* (subject = the receipt + the model output it covers, predicate =
-//   what the kolm-audit-1 receipt records about that call — provider, model,
+//   what the kolm-audit-1 receipt records about that call - provider, model,
 //   route decision, tokens, cost, redactions). Build-time vs. run-time. We
 //   REUSE the DSSE PAE + envelope machinery from intoto-slsa.js so there is one
 //   wire-format implementation, and the Ed25519 primitives from ed25519.js so
 //   there is one crypto implementation. No new PAE, no new crypto.
 //
 // SCOPE / Constraints (mirrors intoto-slsa.js discipline): an Ed25519 signature
-// proves KEY CUSTODY over the receipt's claims — it is "authenticated," not a
+// proves KEY CUSTODY over the receipt's claims - it is "authenticated," not a
 // proof-of-correct-compute. We never assert that a particular GPU ran a
 // particular model; the predicate only restates what the receipt itself
 // records. The conformance string says exactly that.
 //
 // STANDARDS (web-confirmed 2026-05-29):
-//   * in-toto Statement v1 — _type "https://in-toto.io/Statement/v1", a
+//   * in-toto Statement v1 - _type "https://in-toto.io/Statement/v1", a
 //     non-empty `subject` array of ResourceDescriptors each with a non-empty
 //     `digest` (sha256 hex), a `predicateType` URI, and a `predicate` object.
 //     (in-toto/attestation spec/v1/statement.md)
-//   * SLSA / ITE-6 — the in-toto attestation framework; a custom predicateType
+//   * SLSA / ITE-6 - the in-toto attestation framework; a custom predicateType
 //     is permitted alongside the standard SLSA ones. We mint a kolm inference
 //     predicateType and also accept the SLSA provenance type for cross-tooling.
-//   * OpenSSF Model Signing (OMS) — a DETACHED Sigstore-bundle-shaped file whose
+//   * OpenSSF Model Signing (OMS) - a DETACHED Sigstore-bundle-shaped file whose
 //     DSSE envelope wraps an in-toto Statement; subjects are (path/name, digest)
 //     pairs; predicateType "https://model_signing/signature/v1.0". We emit a
 //     bundle of that shape so the OMS verifier can read a kolm inference proof.
@@ -66,7 +66,7 @@ export const OMS_SIGNATURE_PREDICATE_TYPE = 'https://model_signing/signature/v1.
 // depend on a single constant.
 export { INTOTO_STATEMENT_TYPE };
 
-// Constraints string — Ed25519 over the receipt's own claims. Never upgrade to
+// Constraints string - Ed25519 over the receipt's own claims. Never upgrade to
 // a compute-proof or hardware-attestation claim here.
 export const KOLM_INFERENCE_CONFORMANCE =
   'in-toto Statement v1 + ITE-6 inference predicate (Ed25519 key-custody attestation; not proof-of-compute)';
@@ -74,7 +74,7 @@ export const KOLM_INFERENCE_CONFORMANCE =
 const HEX_RE = /^[0-9a-f]+$/i;
 
 // ---------------------------------------------------------------------------
-// _sha256Hex(s) — full 64-hex sha256 of a UTF-8 string. Used to give the
+// _sha256Hex(s) - full 64-hex sha256 of a UTF-8 string. Used to give the
 // Statement a robust, FULL-length subject digest (the receipt's own
 // input_hash/output_hash are deliberately truncated `sha256:<16..64hex>` for
 // grep-ability, which is too short to be a canonical in-toto subject digest).
@@ -94,7 +94,7 @@ function _hexFromShortHash(v) {
 }
 
 // ---------------------------------------------------------------------------
-// canonicalReceiptForDigest(receipt) — a stable byte image of the receipt for
+// canonicalReceiptForDigest(receipt) - a stable byte image of the receipt for
 // use as a subject digest. Excludes the signature blocks (a seal must not cover
 // itself, and re-signing identical claims must not change the subject). Sorted
 // keys via canonicalJson so the digest is reproducible across re-serialization.
@@ -108,7 +108,7 @@ export function canonicalReceiptForDigest(receipt) {
 }
 
 // ---------------------------------------------------------------------------
-// receiptSubjects(receipt) — the in-toto subject array for an inference receipt.
+// receiptSubjects(receipt) - the in-toto subject array for an inference receipt.
 //
 // Two subjects when an output hash is present:
 //   1. the receipt itself        name "receipt:<receipt_id>"  digest = sha256(canonical receipt)
@@ -144,7 +144,7 @@ export function receiptSubjects(receipt) {
 }
 
 // ---------------------------------------------------------------------------
-// buildInferencePredicate(receipt) — the ITE-6 custom predicate restating the
+// buildInferencePredicate(receipt) - the ITE-6 custom predicate restating the
 // receipt's verifiable claims. Only emits a field when the receipt carries it
 // (degrades, never fabricates). The `input_hash`/`output_hash` are carried as
 // the receipt records them (truncated short hashes) so a verifier can correlate
@@ -162,7 +162,7 @@ export function buildInferencePredicate(receipt) {
   for (const k of copy) {
     if (r[k] !== undefined) inference[k] = r[k];
   }
-  // signature_ed25519 metadata (NOT the signature bytes themselves — those live
+  // signature_ed25519 metadata (NOT the signature bytes themselves - those live
   // in the DSSE envelope). Carries the key fingerprint so a verifier can match
   // the signing key to the envelope.
   const sig = r.signature_ed25519;
@@ -196,7 +196,7 @@ export function buildInferencePredicate(receipt) {
 // opts.predicateType overrides the default kolm inference predicateType (e.g.
 // pass the OMS predicateType for an OMS-shaped statement). opts.predicate
 // overrides the auto-built inference predicate. Throws (via buildInTotoStatement)
-// if no valid subject can be formed — but receiptSubjects always yields at least
+// if no valid subject can be formed - but receiptSubjects always yields at least
 // the receipt subject with a full sha256 digest, so a well-formed receipt always
 // produces a valid Statement.
 // ---------------------------------------------------------------------------
@@ -248,7 +248,7 @@ export function signInTotoBundle(receipt, signer, opts = {}) {
 
   // Sigstore-bundle-shaped detached bundle (OMS-compatible). The mediaType is
   // the Sigstore bundle v0.3 media type; verificationMaterial carries a bare
-  // public key (kolm self-managed Ed25519, not keyless Fulcio — stated plainly).
+  // public key (kolm self-managed Ed25519, not keyless Fulcio - stated plainly).
   const bundle = {
     mediaType: 'application/vnd.dev.sigstore.bundle.v0.3+json',
     verificationMaterial: {
@@ -280,7 +280,7 @@ export function signInTotoBundle(receipt, signer, opts = {}) {
 // toOmsBundle(receipt, signer, opts) -> bundle (OpenSSF Model Signing shape).
 //
 // Convenience: an OMS-shaped bundle whose Statement uses the OMS signature
-// predicateType and whose subjects are the receipt's (name, digest) pairs —
+// predicateType and whose subjects are the receipt's (name, digest) pairs - 
 // exactly the (file path, digest) pair list the OMS manifest expects. Reuses
 // signInTotoBundle so there is one signing path.
 // ---------------------------------------------------------------------------
@@ -321,7 +321,7 @@ export function toOmsBundle(receipt, signer, opts = {}) {
 // so callers know the key was not externally pinned (trust-on-first-use).
 //
 // When opts.subjectDigestMap is supplied (subject name -> sha256 hex of the
-// real bytes), also confirm every subject digest matches — full content
+// real bytes), also confirm every subject digest matches - full content
 // verification, not just signature.
 // ---------------------------------------------------------------------------
 export function verifyInTotoBundle(bundleOrEnvelope, opts = {}) {

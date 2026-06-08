@@ -1,7 +1,7 @@
-// W916-I9 — High-level Cerebras Cloud Inference provider.
+// W916-I9 - High-level Cerebras Cloud Inference provider.
 //
 // Cerebras is an inference-only target. You do NOT train or compile weights
-// on Cerebras CS-3 — you point an existing artifact at a pre-loaded Cerebras
+// on Cerebras CS-3 - you point an existing artifact at a pre-loaded Cerebras
 // model id and route traffic to api.cerebras.ai via the OpenAI-compatible
 // /v1/chat/completions endpoint.
 //
@@ -16,9 +16,9 @@
 //     base model for this artifact's namespace at inference time" record.
 //
 // Surface:
-//   * detect(env)            — env probe + key check (never throws).
-//   * CerebrasProvider class — listModels / bindArtifact / unbindArtifact /
-//     getBinding / chatCompletion / getUsage — same shape as RunPodProvider.
+//   * detect(env) - env probe + key check (never throws).
+//   * CerebrasProvider class - listModels / bindArtifact / unbindArtifact /
+//     getBinding / chatCompletion / getUsage - same shape as RunPodProvider.
 //
 // Docs:
 //   https://inference-docs.cerebras.ai/
@@ -34,7 +34,7 @@
 //      ship a hardcoded list as the source of truth (CEREBRAS_MODELS below
 //      is a fallback for offline / dry-run only).
 //   3. Streaming is supported by the underlying API (stream: true) but is
-//      not exposed by this provider — callers use the chatCompletion()
+//      not exposed by this provider - callers use the chatCompletion()
 //      method which returns the full response. The gateway-router.js path
 //      handles streaming separately via the OpenAI-compatible backend.
 
@@ -151,7 +151,7 @@ export class CerebrasProvider {
     return { json, raw: text };
   }
 
-  // listModels — live probe of /v1/models. Falls back to CEREBRAS_MODELS if
+  // listModels - live probe of /v1/models. Falls back to CEREBRAS_MODELS if
   // the request fails (offline / outage); the response includes a `source`
   // field so callers can tell which list they're seeing.
   async listModels() {
@@ -190,7 +190,7 @@ export class CerebrasProvider {
     return path.join(this.bindingsDir, `${safe}.json`);
   }
 
-  // bindArtifact — record that the given namespace's artifact should route
+  // bindArtifact - record that the given namespace's artifact should route
   // through Cerebras using the supplied model id at inference time. Persists
   // to ~/.kolm/cerebras-bindings/<namespace>.json so subsequent kolm serve
   // / kolm gateway dispatch calls pick it up without re-asking.
@@ -263,7 +263,7 @@ export class CerebrasProvider {
     return { ok: true, provider: 'cerebras', bindings, bindings_dir: this.bindingsDir };
   }
 
-  // chatCompletion — direct OpenAI-compatible call, returns the parsed JSON
+  // chatCompletion - direct OpenAI-compatible call, returns the parsed JSON
   // response plus latency telemetry. For namespace-bound calls the caller
   // resolves the model id via getBinding() and passes it explicitly.
   async chatCompletion({ model, messages, maxTokens = 2048, temperature = 0.7, stream = false, timeoutMs = 60_000 } = {}) {
@@ -330,7 +330,7 @@ export class CerebrasProvider {
     }
   }
 
-  // getUsage — Cerebras doesn't expose a public usage endpoint as of 2026-05,
+  // getUsage - Cerebras doesn't expose a public usage endpoint as of 2026-05,
   // so we surface a clear "not_available" envelope instead of fabricating a
   // number. Callers should fall back to the cost-tracking layer's local
   // accounting (src/cost-tracking.js) which records per-call token counts.
@@ -345,7 +345,7 @@ export class CerebrasProvider {
   }
 }
 
-// estimateCost — Cerebras Cloud Inference (2026-05 list pricing).
+// estimateCost - Cerebras Cloud Inference (2026-05 list pricing).
 // Per Cerebras docs: pricing scales per 1M tokens, model-dependent.
 // We surface a conservative quote; the actual invoice comes from
 // https://cloud.cerebras.ai/platform/usage.

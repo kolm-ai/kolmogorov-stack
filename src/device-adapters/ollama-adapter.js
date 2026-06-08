@@ -1,8 +1,8 @@
-// W888-C — Ollama adapter: deploy(device, artifactPath, opts).
+// W888-C - Ollama adapter: deploy(device, artifactPath, opts).
 //
 // POSTs the artifact's GGUF blob (or a remote URL) to the device's Ollama
 // daemon at http://<device.host>:<port>/api/create, then polls until status:
-// 'success'. Uses Node's built-in fetch — no external HTTP client dep.
+// 'success'. Uses Node's built-in fetch - no external HTTP client dep.
 //
 // Adapter contract (uniform across src/device-adapters/*):
 //   async deploy(device, artifactPath, opts) → { ok, deployment_id, message, raw }

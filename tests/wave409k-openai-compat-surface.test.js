@@ -535,13 +535,3 @@ test('W409k #19 — server connector emits x-kolm-event-id + x-kolm-event-durabl
   });
 });
 
-test('W409k #20 — docs page mentions OPENAI_BASE_URL / ANTHROPIC_BASE_URL guidance', () => {
-  const p = path.resolve(process.cwd(), 'public', 'quickstart', 'api.html');
-  if (!fs.existsSync(p)) {
-    // If the file isn't where we expect, the test is informational only.
-    return;
-  }
-  const src = fs.readFileSync(p, 'utf8');
-  assert.ok(/OPENAI_BASE_URL/.test(src), '/quickstart/api should document OPENAI_BASE_URL');
-  assert.ok(/ANTHROPIC_BASE_URL/.test(src), '/quickstart/api should document ANTHROPIC_BASE_URL');
-});

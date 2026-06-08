@@ -169,7 +169,7 @@ test('S-4 #6: buildMarkdownReport renders header + rows + caveats', async () => 
   ];
   const md = buildMarkdownReport({ rows, suite, n: 10, ts: '2026-05-26T00:00:00.000Z' });
   // Title
-  assert.ok(md.startsWith('# unit-suite comparison —'), 'title must start with suite id');
+  assert.ok(md.startsWith('# unit-suite comparison -'), 'title must start with suite id');
   // Header
   assert.ok(md.includes('| model | mean_ms (ms) | p95_ms (ms) | cost_per_1k_usd (usd) |'), 'header must include all metric columns');
   // Row data

@@ -1,4 +1,4 @@
-// W810-2 — Bradley-Terry latent-skill fitter (pure JS).
+// W810-2 - Bradley-Terry latent-skill fitter (pure JS).
 //
 // Mission: estimate per-item latent "skill" parameters theta_i from pairwise
 // human preferences such that
@@ -39,7 +39,7 @@
 //   converged: boolean                 true iff grad_inf < grad_tol
 //
 // The mapping back to a "human preference rate" calibration curve lives in
-// `src/kscore-calibration.js` — this module deliberately does NOT know
+// `src/kscore-calibration.js` - this module deliberately does NOT know
 // anything about K-Score axes. It just fits BT.
 
 export const BRADLEY_TERRY_SPEC = 'kolm-bradley-terry-1';
@@ -212,7 +212,7 @@ export function fitBradleyTerry(pairs, opts = {}) {
       const candidate = new Array(theta.length);
       for (let i = 0; i < theta.length; i++) candidate[i] = theta[i] + step * dir[i];
       // Re-center after each step so the mean stays at 0 (BT identifiability
-      // — overall level is unidentifiable without an anchor).
+      // - overall level is unidentifiable without an anchor).
       let mean = 0;
       for (let i = 0; i < candidate.length; i++) mean += candidate[i];
       mean /= candidate.length;

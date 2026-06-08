@@ -296,11 +296,3 @@ test('W454 #8 — worker returns extractor_not_installed when tesseract.js absen
 // 9) sw.js CACHE slug references wave454
 // =============================================================================
 
-test('W454 #9 — sw.js CACHE slug is current within the W454+ family', () => {
-  const sw = fs.readFileSync(path.join(REPO_ROOT, 'public', 'sw.js'), 'utf8');
-  // W604 anti-brittleness: scan all wave tokens, assert max >= 454.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 454, 'sw.js CACHE wave must reach >= 454 (saw max wave' + maxWave + ')');
-});

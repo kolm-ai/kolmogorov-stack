@@ -1,11 +1,11 @@
-// W773 — Video bakeoff (compare distilled artifact vs captured base on
+// W773 - Video bakeoff (compare distilled artifact vs captured base on
 // video-bearing captures). Tenant-fenced + namespace-filtered.
 //
 // Distinct from src/multimodal-bakeoff.js because the W466 multimodal
 // bake-off runs across image/audio/video/pdf simultaneously and ranks
 // artifacts on Jaccard token overlap. W773's video bake-off is video-
 // specific and aggregates a per-CONTENT-KIND mean score (tutorial /
-// screencast / presentation / surveillance / other) — the content-kind
+// screencast / presentation / surveillance / other) - the content-kind
 // taxonomy is the differentiator. A tutorial-trained student should win
 // on tutorial captures and lose on surveillance captures; without the
 // per-kind breakdown that signal is averaged away.
@@ -13,13 +13,13 @@
 // Atomic guarantees pinned by tests/wave773-video-distill.test.js:
 //
 //  - VIDEO_BAKEOFF_VERSION = 'w773-v1'
-//  - runVideoBakeoff is tenant-fenced (W411 defense-in-depth — even with
+//  - runVideoBakeoff is tenant-fenced (W411 defense-in-depth - even with
 //    a faked storeMod that returns cross-tenant rows, the per-row filter
 //    inside runVideoBakeoff rejects them).
 //  - Returns honest envelope on no video captures (never silent-pass
 //    with empty scores claiming success).
 //  - by_content_kind always carries the 5 keys (tutorial, screencast,
-//    presentation, surveillance, other) — empty kinds report 0/null
+//    presentation, surveillance, other) - empty kinds report 0/null
 //    rather than being omitted so the UI doesn't have to guess.
 //
 // HONESTY INVARIANTS:
@@ -33,7 +33,7 @@ import crypto from 'node:crypto';
 
 export const VIDEO_BAKEOFF_VERSION = 'w773-v1';
 
-// Closed enum of content-kind buckets. Frozen — adding a 6th kind needs
+// Closed enum of content-kind buckets. Frozen - adding a 6th kind needs
 // a version bump because the UI and the per-kind aggregator pin to this.
 const CONTENT_KINDS = Object.freeze([
   'tutorial',
@@ -102,16 +102,16 @@ function _extractInputText(row) {
 }
 
 // =============================================================================
-// runVideoBakeoff — the public surface.
+// runVideoBakeoff - the public surface.
 //
 // Args:
 //   tenant_id    REQUIRED (P0 leak prevention)
 //   namespace    optional filter (default: all namespaces for tenant)
 //   artifact_path  path to a .kolm artifact to run
 //   max_n        max captures to evaluate (default 50, hard ceiling 500)
-//   opts.runOnArtifact   DI seam — async (artifact_path, input_text) -> response
-//   opts.judge           DI seam — judge function (base, candidate) -> 0..1
-//   opts.storeMod        DI seam — alt event store with .listEvents()
+//   opts.runOnArtifact   DI seam - async (artifact_path, input_text) -> response
+//   opts.judge           DI seam - judge function (base, candidate) -> 0..1
+//   opts.storeMod        DI seam - alt event store with .listEvents()
 //
 // Returns success envelope on happy path:
 //   {ok, version, count_total, count_video_pairs_evaluated, by_content_kind,
@@ -134,7 +134,7 @@ export async function runVideoBakeoff({
     return {
       ok: false,
       error: 'tenant_id_required',
-      hint: 'pass {tenant_id} — video bakeoff is tenant-scoped',
+      hint: 'pass {tenant_id} - video bakeoff is tenant-scoped',
       version: VIDEO_BAKEOFF_VERSION,
     };
   }
@@ -184,7 +184,7 @@ export async function runVideoBakeoff({
     };
   }
 
-  // W411 defense-in-depth tenant fence — per-row filter even though we
+  // W411 defense-in-depth tenant fence - per-row filter even though we
   // asked listEvents to filter by tenant_id. The fake store path goes
   // through `all()` which returns EVERY tenant; without this filter the
   // fake would leak cross-tenant rows into the bakeoff result.
@@ -236,7 +236,7 @@ export async function runVideoBakeoff({
           if (typeof out === 'string') return out;
           try { return JSON.stringify(out); } catch { return String(out); }
         } catch (e) {
-          // Honest failure surface — bubble up to per-row score:0.
+          // Honest failure surface - bubble up to per-row score:0.
           return { __error__: String(e && e.message || e) };
         }
       };
@@ -258,7 +258,7 @@ export async function runVideoBakeoff({
   for (const row of candidates) {
     const input = _extractInputText(row);
     const base = _extractBaseResponse(row);
-    if (!base) continue; // No base response means we have nothing to score against — skip honestly.
+    if (!base) continue; // No base response means we have nothing to score against - skip honestly.
 
     let candidateText = '';
     try {
@@ -296,7 +296,7 @@ export async function runVideoBakeoff({
       const sorted = b.scores.slice().sort((a, c) => a - c);
       b.median_score = sorted[Math.floor(sorted.length / 2)];
     }
-    // The raw scores array is only useful for debugging — keep it out of
+    // The raw scores array is only useful for debugging - keep it out of
     // the public envelope to avoid bloating the payload.
     delete b.scores;
     delete b.total_score;

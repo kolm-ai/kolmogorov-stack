@@ -41,22 +41,36 @@ async function run() {
   }
   const sizeMb = (buf.byteLength / 1024 / 1024).toFixed(2);
   line(`bytes:      ${sizeMb} MB`);
-  const topHash = await sha256(buf);
-  line(`sha256:     ${topHash.slice(0, 32)}..${topHash.slice(-8)}`);
-  line("");
 
-  // Same 6-check shape as /verify-prod for cross-surface parity.
-  line('<span class="ok">[1/6] OK manifest parsed (RS-1 v0.2)</span>');
-  line(`<span class="ok">[2/6] OK CID recomputed: cidv1:sha256:${topHash.slice(0, 24)}..</span>`);
-  line('<span class="ok">[3/6] OK HMAC chain intact (receipts walked)</span>');
-  line('<span class="ok">[4/6] OK K-score passes gate</span>');
-  line('<span class="ok">[5/6] OK provenance present</span>');
-  line('<span class="ok">[6/6] OK signature valid (kolm issuer key)</span>');
+  // REAL structural checks only. We do NOT print signature/chain/K-score as
+  // "OK" unless we actually verified them — faking a green check would launder
+  // exactly the trust kolm exists to make verifiable.
+  const bytes = new Uint8Array(buf);
+  const isZip = bytes[0] === 0x50 && bytes[1] === 0x4b; // "PK"
+  if (!isZip) {
+    line('<span class="bad">not a zip archive — a .kolm artifact must be a zip.</span>');
+    return;
+  }
+  line('<span class="ok">[1/3] OK zip container (PK header)</span>');
+
+  let topHash;
+  try {
+    topHash = await sha256(buf);
+    line(`<span class="ok">[2/3] OK sha-256: ${topHash.slice(0, 24)}..${topHash.slice(-8)}</span>`);
+  } catch (e) {
+    line(`<span class="bad">[2/3] sha-256 unavailable: ${e.message}</span>`);
+    return;
+  }
+
+  // Full crypto (HMAC receipt chain + Ed25519 issuer signature + K-score replay)
+  // requires unzipping the manifest/receipts and is done by the CLI, which has
+  // the issuer key directory. Be candid rather than fake it.
+  line('<span class="warn">[3/3] manifest + Ed25519 chain + K-score: run `kolm verify ' + (src.split("/").pop() || "artifact.kolm") + '` for full crypto.</span>');
   line("");
-  line('<span class="ok">verified.</span>');
+  line('<span class="ok">structural check passed.</span> <span class="warn">full cryptographic verification: kolm CLI.</span>');
 
   try {
-    await chrome.storage.local.set({ "kolm-last-verify": { ok: true, ts: Date.now(), src } });
+    await chrome.storage.local.set({ "kolm-last-verify": { ok: true, structural_only: true, sha256: topHash, ts: Date.now(), src } });
   } catch (_) { /* not running inside extension context */ }
 }
 

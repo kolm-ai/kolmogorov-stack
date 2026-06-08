@@ -1,4 +1,4 @@
-// Provider-key vault — per-employee and per-team upstream provider keys
+// Provider-key vault - per-employee and per-team upstream provider keys
 // (OpenAI / Anthropic / Gemini / OpenRouter / ...), encrypted at rest.
 //
 // This is the core of the "every employee's AI use, in one place you control"
@@ -10,7 +10,7 @@
 //     via store.js, so they persist on the deployed DB (SQLite / Postgres) and
 //     are tenant/team scoped like every other row.
 //   - the AES-256-GCM key lives in the secrets-vault.key file (under
-//     KOLM_DATA_DIR — the Railway volume), reused from secrets-vault.js.
+//     KOLM_DATA_DIR - the Railway volume), reused from secrets-vault.js.
 //
 // Scopes:
 //   - 'member': usable only by the member who stored it (actor_id match).
@@ -43,7 +43,7 @@ function keySha256(value) {
   return crypto.createHash('sha256').update(String(value || ''), 'utf8').digest('hex');
 }
 
-// Redacted view — never returns plaintext, ciphertext, iv, or tag.
+// Redacted view - never returns plaintext, ciphertext, iv, or tag.
 export function redactProviderKey(row) {
   if (!row || typeof row !== 'object') return row;
   return {

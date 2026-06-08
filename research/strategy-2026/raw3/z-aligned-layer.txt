@@ -1,0 +1,95 @@
+**Aligned Layer (Aligned, alignedlayer.com) is a ZK (zero-knowledge) proof verification layer and broader Ethereum infrastructure provider, primarily functioning as an EigenLayer Actively Validated Service (AVS) for fast, low-cost verification and aggregation of ZK/validity proofs on Ethereum.**[[1]](https://blog.alignedlayer.com/announcing-the-aligned-eigenlayer-testnet/)[[2]](https://www.coindesk.com/business/2024/04/25/eigenlayer-powered-aligned-layer-raises-20m-to-make-zk-proofs-faster-cheaper-on-ethereum)
+
+As of mid-2026 (based on docs, blogs, and explorer activity), its core offering is a **universal verification layer** that addresses Ethereum’s limitations in ZK proof verification—high gas costs, low throughput (~10 proofs/sec on L1), and restrictions on proof systems. It operates in two main modes:
+
+- **Proof Verification Layer (fast mode)**: An EigenLayer AVS using restaked Ethereum validators/operators for optimistic, high-throughput verification (often >1,000 proofs/sec, with claims of 2,500+ in some reports). Operators verify proofs off-chain (in Rust or other languages for optimization) and attest via BLS signatures; a 2/3 majority posts results on-chain with cryptoeconomic security from restaking. This provides fast finality at low cost (significant reductions vs. direct L1 verification, e.g., ~90%+ for systems like Groth16).[[3]](https://docs.alignedlayer.com/)[[4]](https://fuzzinglabs.com/aligned-layer-security-assessment-completed/)
+- **Proof Aggregation Service (slower/more secure mode)**: Uses recursive proof aggregation (similar to rollups) for batched settlement directly on Ethereum L1, providing stronger guarantees at the cost of some latency.[[5]](https://docs.alignedlayer.com/introduction/3_faq)
+
+It supports a wide range of proof systems (Groth16, STARKs, and others like Kimchi or Binius that are impractical on raw Ethereum) and is stateless for simplicity. The project has evolved into a vertically integrated stack including Rollup-as-a-Service (RaaS), Wallet-as-a-Service, interoperability, and meta-proving services, with a focus on enabling “provable execution” for finance and other sectors.[[3]](https://docs.alignedlayer.com/) Mainnet beta for the verification layer was live by late 2024/early 2025, with aggregation features advancing into 2025–2026.[[6]](https://blog.alignedlayer.com/aligned-align-tokenomics-and-roadmap/)
+
+It is explicitly positioned for **verifiable AI applications**, including zkML (zero-knowledge machine learning) and verifiable inference. Use cases include proving that AI model inference (or pipeline stages) ran correctly, met policy constraints, or produced specific outputs—then settling results on-chain for auditability, automation, or compliance. High-volume inference (e.g., agent marketplaces or micro-payments) suits the fast Verification Layer, while compliance-oriented or high-stakes events can use aggregated L1 proofs.[[7]](https://blog.alignedlayer.com/proof-verification-layer-vs-aggregation-service/)[[8]](https://docs.alignedlayer.com/introduction/2_use_cases)
+
+It also supports **TEE (Trusted Execution Environment) attestation verification** (e.g., via partnerships or integrations like with Automata Network), allowing decentralized, on-chain verification of hardware attestations for verifiable compute. This extends beyond pure ZK to hybrid setups combining TEEs with cryptographic proofs.[[9]](https://blog.ata.network/on-verifying-tee-attestations-with-aligned-layer-867822e33380)[[9]](https://blog.ata.network/on-verifying-tee-attestations-with-aligned-layer-867822e33380)
+
+**For a startup selling AI-agent security audit reports to enterprise security/compliance teams, anchoring attestations via an on-chain/ZK layer like Aligned would generally add *credibility* in specific high-trust scenarios but *add friction* compared to traditional Ed25519 signatures + Sigstore/Rekor transparency logs.** 
+
+**Credibility benefits**:
+- **Decentralized economic security**: Ethereum restaking (via EigenLayer AVS) provides cryptoeconomic guarantees and slashing potential, making tampering or false attestations costly. On-chain settlement offers public verifiability, immutability, and composability (e.g., triggering smart contracts or cross-chain actions).
+- **ZK/TEE properties**: Stronger guarantees than signatures alone—proofs of correct computation/inference (not just “someone signed this”) or hardware-rooted attestations. Useful for verifiable AI outputs, audit trails resistant to key compromise, or scenarios needing public auditability without revealing sensitive details.
+- **Enterprise appeal in regulated or blockchain-adjacent contexts**: Demonstrates cutting-edge verifiable compute, which can differentiate reports for forward-looking compliance teams (e.g., those dealing with AI governance, supply-chain security, or on-chain finance). TEE + Aligned verification has been explored for machine attestation in AI/decentralized systems.[[9]](https://blog.ata.network/on-verifying-tee-attestations-with-aligned-layer-867822e33380)
+
+**Friction drawbacks**:
+- **Complexity and adoption barriers**: Enterprises are often wary of blockchain/crypto integrations due to regulatory uncertainty, custody concerns, gas/token costs, latency, and the need for new tooling/expertise. Sigstore/Rekor is a mature, open standard widely adopted in software supply chains (e.g., Kubernetes, many OSS projects) with simple Ed25519 signing + append-only Merkle-tree transparency logs for tamper-evidence and key transparency.
+- **Overkill for many use cases**: Traditional signatures + logs already provide strong, auditable evidence of signing events and integrity. They are lighter, faster, cheaper, and sufficient for most internal compliance reviews or non-on-chain workflows.
+- **Operational overhead**: Integrating with Aligned (SDKs, batching, modes, potential fees) vs. standard signing libraries increases development and maintenance burden. Explorer data shows real usage for proof batches, but enterprise uptake of AVS-based systems remains niche compared to Sigstore.
+
+**Candid recommendation**: Start with (or stick primarily to) **traditional Ed25519 signatures + Sigstore/Rekor** for core audit report signing and transparency—it delivers excellent credibility with minimal friction and broad enterprise familiarity. Layer in Aligned (or similar) selectively for premium offerings where on-chain/ZK verifiability adds clear value, such as:
+- Reports tied to verifiable AI inference or TEE-protected execution.
+- Customers in crypto, DeFi, or those wanting public on-chain audit trails/automation.
+- Hybrid setups (sign traditionally, then optionally anchor key attestations or proofs on Aligned for extra assurance).
+
+Test integration costs/latency in a pilot, and position the on-chain option as an “enhanced verifiable” tier rather than a replacement. This balances credibility gains against adoption friction. Monitor Aligned’s enterprise traction and any regulatory clarity around restaking/AVSs. Sources include Aligned’s official docs/site, EigenLayer-related announcements, technical blogs on TEE integration, and use-case discussions from 2024–2026.
+
+--- CITATIONS ---
+[1] https://blog.alignedlayer.com/announcing-the-aligned-eigenlayer-testnet/
+[2] https://www.coindesk.com/business/2024/04/25/eigenlayer-powered-aligned-layer-raises-20m-to-make-zk-proofs-faster-cheaper-on-ethereum
+[3] https://docs.alignedlayer.com/
+[4] https://fuzzinglabs.com/aligned-layer-security-assessment-completed/
+[5] https://docs.alignedlayer.com/introduction/3_faq
+[6] https://blog.alignedlayer.com/aligned-align-tokenomics-and-roadmap/
+[7] https://blog.alignedlayer.com/proof-verification-layer-vs-aggregation-service/
+[8] https://docs.alignedlayer.com/introduction/2_use_cases
+[9] https://blog.ata.network/on-verifying-tee-attestations-with-aligned-layer-867822e33380
+
+--- SEARCHED ---
+[1] https://alignedlayer.com/
+[2] https://blog.alignedlayer.com/announcing-the-aligned-eigenlayer-testnet/
+[3] https://docs.alignedlayer.com/introduction/3_faq
+[4] https://www.coindesk.com/business/2024/04/25/eigenlayer-powered-aligned-layer-raises-20m-to-make-zk-proofs-faster-cheaper-on-ethereum
+[5] https://finance.yahoo.com/news/eigenlayer-powered-aligned-layer-raises-104906164.html
+[6] https://github.com/yetanotherco/aligned_layer
+[7] https://whitepaper.alignedlayer.com/
+[8] https://www.l2iterative.com/portfolio/aligned-layer
+[9] https://coinlist.co/aligned
+[10] https://leastauthority.com/blog/audit-of-aligned-layer-layer-operator-avs-smart-contracts-2nd-review/
+[11] https://icoanalytics.org/projects/aligned-layer/
+[12] https://www.lbank.com/price/aligned/what-is
+[13] https://blog.alignedlayer.com/aligned-align-tokenomics-and-roadmap/
+[14] https://www.linkedin.com/pulse/aligned-layer-partnership-union-labs-nv44f
+[15] https://cryptototem.com/aligned-layer/
+[16] https://docs.alignedlayer.com/
+[17] https://blog.coinlist.co/a-deep-dive-into-aligned-the-zk-verification-layer-for-ethereum/
+[18] https://x.com/alignedlayer/status/1988819491288174912
+[19] https://l2ivresearch.substack.com/p/aligned-layer
+[20] https://fuzzinglabs.com/aligned-layer-security-assessment-completed/
+[21] https://www.youtube.com/watch?v=DoVaJsJDxTg
+[22] https://blog.hack.vc/announcing-our-investment-in-and-alignment-with-aligned-layer/
+[23] https://app.dealroom.co/companies/aligned_layer
+[24] https://medium.com/@fmusicmc/aligned-zkquiz-guide-b131bf829a25
+[25] https://finance.yahoo.com/news/eqty-lab-pioneers-verifiable-compute-130000888.html
+[26] https://www.nvidia.com/en-us/on-demand/session/gtc26-s81489/
+[27] https://blog.ata.network/on-verifying-tee-attestations-with-aligned-layer-867822e33380
+[28] https://infohub.delltechnologies.com/static/media/client/7phukh/DAM_623643d4-f90a-4d3f-9884-f370d829d260.pdf
+[29] https://blog.alignedlayer.com/proof-verification-layer-vs-aggregation-service/
+[30] https://arxiv.org/html/2604.04712v1
+[31] https://www.linkedin.com/pulse/ai-computes-trust-problem-from-shadow-apis-verifiable-settlement-xj5fc
+[32] https://www.w3.org/TR/vc-data-model-2.0/
+[33] https://confidentialcomputing.io/category/newsletter/
+[34] https://startupintros.com/orgs/aligned-layer
+[35] https://campaign.alignedlayer.com/
+[36] https://blog.alignedlayer.com/
+[37] https://alignedlayer.com/about
+[38] https://explorer.alignedlayer.com/
+[39] https://explorer.alignedlayer.com/batches/0x8c9f475a05f13e5227bc2e55d5952cb5e7e76357cda48683e30af380b6ab472a
+[40] https://explorer.alignedlayer.com/batches/0xd5379a11ab6454e362b0d231c706fb309a4534f7b1d3076154c44df001bd9235
+[41] https://explorer.alignedlayer.com/batches/0x5928ed2d27c9762a1f2df69c3bb33f393b623c44aa6017c189c76c07bc16b20c
+[42] https://explorer.alignedlayer.com/batches/0x513a6c4ee1acc4ba427ea32ac1ccb0f035fc9b061da4092f140bdb202d802494
+[43] https://explorer.alignedlayer.com/batches/0x38b8bee876a8364a8c057781d987d4ff2fb1ac6c7db6b8e8637edd230d58d594
+[44] https://www.facebook.com/groups/371205290980633/posts/1217150323052788/
+[45] https://docs.alignedlayer.com/introduction/2_use_cases
+[46] https://atomicwallet.io/academy/articles/what-is-aligned-layer
+[47] https://www.reddit.com/r/cybersecurity/comments/1no2evi/teebased_ai_inference_is_being_overlooked_as_a/
+[48] https://arxiv.org/html/2603.19025v1
+[49] https://chain.link/article/verifiable-ai-stack
+[50] https://blog.eigencloud.xyz/ai-beyond-the-black-box-inference-labs-is-making-verifiable-decentralized-ai-a-reality-with-eigenlayer/
+[51] https://phala.com/posts/Phala-GPU-TEE-Deep-Dive

@@ -1,6 +1,6 @@
 // src/ed25519.js
 //
-// Wave H — Ed25519 signing for public receipt verification.
+// Wave H - Ed25519 signing for public receipt verification.
 //
 // HMAC-SHA256 (the original signature path) is a symmetric MAC: anyone who can
 // verify can also forge. That's fine for internal integrity inside a trusted
@@ -19,7 +19,7 @@
 //     payload (receipt minus this block AND minus the HMAC `signature`) and
 //     ask Node's built-in `crypto.verify` to check the Ed25519 signature
 //     against the embedded public key. This requires no secret on the
-//     verifier side — that's the whole point.
+//     verifier side - that's the whole point.
 //   * The HMAC `signature` field continues to verify as before, but the
 //     binder strips BOTH `signature` and `signature_ed25519` when forming
 //     the HMAC payload (Wave H signed material order: HMAC inside, Ed25519
@@ -110,15 +110,15 @@ export function keyFingerprint(publicKeyPem) {
 }
 
 // ---------------------------------------------------------------------------
-// Loader — read a signer key from env, falling back to null when absent.
+// Loader - read a signer key from env, falling back to null when absent.
 //
 // The build pipeline calls this once per artifact build. When null, the
 // receipt ships HMAC-only (existing Wave 0 behavior preserved). When
 // non-null, the receipt grows a signature_ed25519 block.
 //
 // Env vars (first non-empty wins):
-//   KOLM_ED25519_PRIVATE_KEY  — PEM-encoded private key (production path)
-//   KOLM_ED25519_PRIVATE_KEY_PATH — path to a PEM file on disk (CI path)
+//   KOLM_ED25519_PRIVATE_KEY - PEM-encoded private key (production path)
+//   KOLM_ED25519_PRIVATE_KEY_PATH - path to a PEM file on disk (CI path)
 //
 // Returns { privateKey, publicKey, key_fingerprint } or null.
 // ---------------------------------------------------------------------------
@@ -132,11 +132,21 @@ export function loadSignerKeyFromEnv() {
     }
   }
   if (!pem) return null;
+  // Env vars frequently cannot carry real newlines (dashboards, CI secrets, shell
+  // exports), so a PEM is commonly stored with its line breaks escaped as the
+  // two-character sequence backslash-n. Restore them before parsing. PEM base64
+  // bodies never contain a literal backslash, so this is a safe no-op for a PEM
+  // that already has real newlines.
+  if (pem.includes('\\n')) pem = pem.replace(/\\r\\n|\\n/g, '\n');
   let publicKey;
   try {
     const keyObj = crypto.createPrivateKey(pem);
+    if (keyObj.asymmetricKeyType !== 'ed25519') {
+      throw new Error(`ed25519.loadSignerKeyFromEnv: ed25519 key required, got ${keyObj.asymmetricKeyType}`);
+    }
     publicKey = crypto.createPublicKey(keyObj).export({ type: 'spki', format: 'pem' });
   } catch (e) {
+    if (/ed25519 key required/.test(e.message)) throw e;
     throw new Error(`ed25519.loadSignerKeyFromEnv: invalid PEM private key: ${e.message}`);
   }
   return {
@@ -147,7 +157,7 @@ export function loadSignerKeyFromEnv() {
 }
 
 // ---------------------------------------------------------------------------
-// Default signer — Wave 149.
+// Default signer - Wave 149.
 //
 // Before Wave 149 Ed25519 was opt-in: a build only got an `signature_ed25519`
 // block when `KOLM_ED25519_PRIVATE_KEY` (or _PATH) was set. The HMAC remained
@@ -200,8 +210,12 @@ export function loadOrCreateDefaultSigner(opts = {}) {
     let publicKey;
     try {
       const keyObj = crypto.createPrivateKey(pem);
+      if (keyObj.asymmetricKeyType !== 'ed25519') {
+        throw new Error(`ed25519.loadOrCreateDefaultSigner: ed25519 key required at ${keyPath}, got ${keyObj.asymmetricKeyType}`);
+      }
       publicKey = crypto.createPublicKey(keyObj).export({ type: 'spki', format: 'pem' });
     } catch (e) {
+      if (/ed25519 key required/.test(e.message)) throw e;
       throw new Error(`ed25519.loadOrCreateDefaultSigner: corrupt key at ${keyPath}: ${e.message}`);
     }
     return {
@@ -233,7 +247,7 @@ export function loadOrCreateDefaultSigner(opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// W921 NOW-3 — export the Ed25519 public key as an RFC 8037 OKP JWK so a
+// W921 NOW-3 - export the Ed25519 public key as an RFC 8037 OKP JWK so a
 // standards-conformant JWKS endpoint (/.well-known/jwks.json) lets any third-
 // party verifier fetch the key and check an X-Inference-Signature header without
 // trusting kolm (IETF draft-sharif-ai-model-lifecycle-attestation).
@@ -254,7 +268,7 @@ export function publicKeyJwk(publicKeyPem, kid) {
 // Helper: build a signature_ed25519 block for embedding in a receipt or any
 // other manifest-like structure.
 //
-// `payloadCanonical` is the EXACT canonical string the signature covers — the
+// `payloadCanonical` is the EXACT canonical string the signature covers - the
 // caller is responsible for stripping `signature_ed25519` (and whichever
 // other fields its scheme excludes) before passing it in. Doing canonicaliz-
 // ation in the caller keeps this module unaware of receipt schemas.
@@ -280,7 +294,7 @@ export function buildSignatureBlock({ privateKey, publicKey, key_fingerprint, pa
 // ---------------------------------------------------------------------------
 // Helper: verify a signature_ed25519 block against a payload.
 //
-// Mirrors buildSignatureBlock — caller passes the canonical payload string,
+// Mirrors buildSignatureBlock - caller passes the canonical payload string,
 // this module just checks the block shape and runs verify().
 // ---------------------------------------------------------------------------
 export function verifySignatureBlock(block, payloadCanonical) {
@@ -303,10 +317,14 @@ export function verifySignatureBlock(block, payloadCanonical) {
   let actualFingerprint;
   try { actualFingerprint = keyFingerprint(block.public_key); }
   catch (e) { return { ok: false, reason: `cannot derive fingerprint from public_key: ${e.message}` }; }
-  if (block.key_fingerprint && block.key_fingerprint !== actualFingerprint) {
+  // Coerce the claimed fingerprint to a string before comparing/slicing: a
+  // hostile report can carry a number / boolean / object here, and this module
+  // must never throw across the verify boundary.
+  const claimedFingerprint = block.key_fingerprint == null ? null : String(block.key_fingerprint);
+  if (claimedFingerprint && claimedFingerprint !== actualFingerprint) {
     return {
       ok: false,
-      reason: `key_fingerprint claim (${block.key_fingerprint.slice(0, 12)}…) does not match public_key bytes (${actualFingerprint.slice(0, 12)}…)`,
+      reason: `key_fingerprint claim (${claimedFingerprint.slice(0, 12)}…) does not match public_key bytes (${actualFingerprint.slice(0, 12)}…)`,
     };
   }
   const ok = verify(block.public_key, payloadCanonical, block.signature);

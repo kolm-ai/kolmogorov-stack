@@ -1,0 +1,75 @@
+{
+  "id": "b2-reviewer-gate-vertical",
+  "track": "launch",
+  "prompt": "On the BUYER side (the enterprise whose security team gates the deal), which industries' vendor-security reviewers are now explicitly demanding AI-AGENT-specific evidence (not just SOC2) from their AI vendors in 2026 - finance, healthcare, government, insurance, big-tech? Quote reviewers/CISOs/security engineers verbatim (@handle + date) or cite named enterprise security questionnaires/standards that added AI-agent questions. What exact artifacts does a reviewer say would let them mark an AI vendor 'cleared' (standards mapping, signed evidence, scope statement, named human sign-off)? This defines product requirements - be concrete, list the artifacts, and cite each.",
+  "content": "**Primarily finance (with emerging signals in healthcare/insurance/government); big-tech is buyer-side but less explicitly documented in public sources as of mid-2026. No widely publicized named enterprise questionnaires or standards have added explicit “AI-agent” sections beyond SOC 2 mappings or general AI/LLM controls, and verbatim CISO/reviewer quotes demanding agent-specific artifacts (e.g., agent behavior logs, model cards, human-in-the-loop proofs, signed scope statements) are not publicly prominent in searchable sources.**[[1]](https://www.okta.com/newsroom/articles/enterprise-buyer-survey-ai-agent-security/)[[2]](https://www.armosec.io/blog/financial-services-ai-agent-security/)\n\nKey patterns from 2025–mid-2026 sources:\n\n- **Finance** is the clearest sector where buyer security teams treat AI agents as requiring dedicated evidence/risk frameworks beyond baseline SOC 2. The U.S. Treasury’s Financial Services AI Risk Management Framework (FS AI RMF, released ~Feb 2026) includes a maturity assessment questionnaire and control matrix that maps AI-specific risks (including agentic/autonomous behaviors) to security controls. Financial institutions are expected to demonstrate evidence against it for deployments; failure to map controls creates audit exposure. Related regulatory overlays (FFIEC, NYDFS Part 500, SEC Reg S-P, PCI-DSS) increasingly require auditable trails for agent actions.[[2]](https://www.armosec.io/blog/financial-services-ai-agent-security/)\n\n- **Healthcare, insurance, and government** appear in discussions of strict compliance environments where AI-agent security is now a priority for vendor assessments (alongside finance and SaaS). However, evidence remains at the level of general SOC 2 + HIPAA/ISO expectations plus emerging identity/governance concerns rather than documented “AI-agent only” questionnaire additions.[[3]](https://www.fwdslash.ai/blog/ai-agents-for-security-questionnaires)[[4]](https://techiehub.blog/best-ai-agents-security-questionnaires/)\n\n- **Big-tech** buyers are referenced in enterprise surveys as viewing agent workflows as mission-critical while flagging gaps in governing non-human/agent identities at scale (e.g., Okta-commissioned survey of 150 IT/security leaders, Jan 2026: 86% see agents as very important/mission-critical, but only 27% feel current identity systems are equipped). Specific reviewer quotes or questionnaire examples are not surfaced.[[1]](https://www.okta.com/newsroom/articles/enterprise-buyer-survey-ai-agent-security/)\n\n- Broader context: SOC 2 (Type II) remains the baseline “must-have” for almost all enterprise AI/agent vendors. Discussions of “SOC 2 for AI agents” or agent-specific extensions (e.g., addressing autonomous code execution, RCE risks, data poisoning, agent identity/authorization, human oversight) are emerging as procurement hurdles, but they are framed as extensions/mappings within or alongside existing SOC 2 rather than wholly new standalone questionnaires. OWASP Agentic Security Initiative and similar efforts are referenced as guidance buyers may reference.[[5]](https://blaxel.ai/blog/soc-2-compliance-ai-guide)[[6]](https://www.reddit.com/r/AI_Agents/comments/1tpu0hd/calling_it_soc_2_for_ai_agents_becomes_a/)\n\n**Exact artifacts that would allow a reviewer to mark an AI vendor “cleared”** (drawn from buyer-oriented compliance and governance guidance in the sources; these are the types of evidence repeatedly highlighted as needed for defensibility):\n\n- **Standards/framework mapping** — Explicit mapping of the vendor’s controls to relevant AI/agent risks (e.g., FS AI RMF maturity questionnaire/matrix for finance; SOC 2 Trust Services Criteria with AI/agent scope notes; NIST AI RMF or EU AI Act elements where applicable). Include which agent components/systems are in/out of scope.[[2]](https://www.armosec.io/blog/financial-services-ai-agent-security/)\n\n- **Signed evidence / audit artifacts** — Current SOC 2 Type II report (with audit period, covered criteria, and explicit statement on AI/agent systems in scope); agent activity/decision logs or cryptographic audit trails proving actions, tool use, approvals, and outcomes (verifiable, tamper-evident where possible); evidence of human-in-the-loop/approval gates for high-risk actions.[[7]](https://www.voiceflow.com/blog/ai-agent-builder-security-compliance-enterprise-guide)[[8]](https://www.arthur.ai/column/ai-agent-security-best-practices-enterprise)\n\n- **Scope statement** — Written documentation of what is covered (models, agent workflows, subprocessors, data flows) and any exclusions; subprocessor coverage under the vendor’s SOC 2 or separate attestations.[[7]](https://www.voiceflow.com/blog/ai-agent-builder-security-compliance-enterprise-guide)\n\n- **Named human sign-off** — Attestation or sign-off from named individuals (e.g., CISO, compliance lead, or designated reviewer) on the evidence package, policies, and mappings; documented human review/approval workflows for agent behaviors or changes.[[8]](https://www.arthur.ai/column/ai-agent-security-best-practices-enterprise)\n\nAdditional frequently cited needs include: agent identity/authorization controls with least-privilege enforcement; short-lived credentials + approval gates; customizable governance per agent/use case; and source-attributed or confidence-scored evidence in questionnaire responses.[[8]](https://www.arthur.ai/column/ai-agent-security-best-practices-enterprise)\n\nThese requirements are still crystallizing in 2026. Finance leads due to the explicit FS AI RMF; other regulated sectors are aligning via expanded SOC 2 reviews and identity/governance scrutiny. Product teams should prioritize producing the mapping + scoped SOC 2 evidence + auditable agent logs/oversight proofs to clear reviews in these industries. Public verbatim reviewer quotes remain scarce, likely because many assessments occur privately via portals or NDAs.",
+  "citations": [
+    "https://www.okta.com/newsroom/articles/enterprise-buyer-survey-ai-agent-security/",
+    "https://www.armosec.io/blog/financial-services-ai-agent-security/",
+    "https://www.fwdslash.ai/blog/ai-agents-for-security-questionnaires",
+    "https://techiehub.blog/best-ai-agents-security-questionnaires/",
+    "https://blaxel.ai/blog/soc-2-compliance-ai-guide",
+    "https://www.reddit.com/r/AI_Agents/comments/1tpu0hd/calling_it_soc_2_for_ai_agents_becomes_a/",
+    "https://www.voiceflow.com/blog/ai-agent-builder-security-compliance-enterprise-guide",
+    "https://www.arthur.ai/column/ai-agent-security-best-practices-enterprise"
+  ],
+  "searched": [
+    "https://pokee.ai/blog/enterprise-ai-agent-platform-guide",
+    "https://www.fwdslash.ai/blog/ai-agents-for-security-questionnaires",
+    "https://blaxel.ai/blog/soc-2-compliance-ai-guide",
+    "https://agatsoftware.com/blog/ai-agent-security-enterprise-2026/",
+    "https://www.reddit.com/r/AI_Agents/comments/1tpu0hd/calling_it_soc_2_for_ai_agents_becomes_a/",
+    "https://www.okta.com/newsroom/articles/enterprise-buyer-survey-ai-agent-security/",
+    "https://www.arphie.ai/blog/best-ai-tools-security-questionnaire-automation",
+    "https://tribble.ai/security-questionnaires/",
+    "https://www.voiceflow.com/blog/ai-agent-builder-security-compliance-enterprise-guide",
+    "https://techiehub.blog/best-ai-agents-security-questionnaires/",
+    "https://www.sailpoint.com/identity-library/ai-agent-security",
+    "https://www.cyberbase.ai/blog/ai-security-agents-for-compliance",
+    "https://www.mindstudio.ai/blog/ai-agent-compliance/",
+    "https://www.securitypalhq.com/blog/best-ai-security-questionnaire-providers",
+    "https://osto.one/feeds/blog/ai-tools-auto-filling-vendor-security-questionnaire",
+    "https://safe.security/ai-agent/questionnaire-analyzer/",
+    "https://www.linkedin.com/posts/zenitysec_the-ciso-checklist-for-securing-ai-agents-activity-7410416840298102784-2r40",
+    "https://www.inventive.ai/blog-posts/ai-agents-security-questionnaire-automation",
+    "https://zenity.io/blog/security/ai-agent-governance",
+    "https://www.armosec.io/blog/financial-services-ai-agent-security/",
+    "https://www.uipath.com/blog/ai/ciso-guide-securing-agentic-ai",
+    "https://heyiris.ai/blog/best-ai-for-security-questionnaires",
+    "https://securityscorecard.com/blog/introducing-securityscorecard-ai-agents/",
+    "https://www.arthur.ai/column/ai-agent-security-best-practices-enterprise",
+    "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-agent-governance-framework-gap-20260403/",
+    "https://tribble.ai/blog/security-questionnaire-automation/",
+    "https://www.flowforma.com/blog/best-ai-agent-for-security-questionnaires",
+    "https://vegavid.com/blog/ai-agents-for-security-questionnaire-automation",
+    "https://trust.intercom.com/resources",
+    "https://cloudsecurityalliance.org/artifacts/enterprise-ai-security-starts-with-ai-agents"
+  ],
+  "usage": {
+    "input_tokens": 26189,
+    "input_tokens_details": {
+      "cached_tokens": 12160
+    },
+    "output_tokens": 2029,
+    "output_tokens_details": {
+      "reasoning_tokens": 935
+    },
+    "total_tokens": 28218,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 6,
+    "cost_in_usd_ticks": 550407500,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 3,
+      "x_search_calls": 3,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 15061,
+      "output_tokens": 1308
+    }
+  },
+  "attempts": 1
+}

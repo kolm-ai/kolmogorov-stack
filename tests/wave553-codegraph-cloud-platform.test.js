@@ -1,69 +1,31 @@
-// Wave 553 - close the "7.5 -> 10/10" backend readiness gap:
-// broader model/framework coverage, enterprise controls, production
-// observability/debugging, cloud GPU/storage readiness, and local codegraph
-// indexing for future surgical audits.
+// Wave 553 - backend readiness: cloud GPU/storage detection + production
+// observability wiring.
+//
+// NOTE: this wave originally had five checks. The 2026 site teardown retired the
+// multi-surface compiler product that two of them described:
+//   - "#1 platform matrix ... evidence" asserted every capability row pointed at
+//     a live page (public/sdk.js, compute.html, account/*.html, ...) — all
+//     deleted with that surface.
+//   - "#3 repo codegraph" asserted page-routes (/account/overview, /compute,
+//     /models, /captures, /distill, /train, /spec) + a >=300 route / 50-evidence
+//     count that only held for the old surface.
+// Both were removed. The live-backend checks that survive the teardown intact —
+// cloud-provider env detection (#2), the OTEL module (#4), and the machine-
+// readable `kolm cloud readiness` CLI surface (#5) — are kept below.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
 import path from 'node:path';
 
 import {
   cloudReadinessSummary,
   deploymentProfiles,
   detectCloudReadiness,
-  listPlatformCapabilities,
-  validatePlatformCapabilities,
 } from '../src/platform-capabilities.js';
-import { auditCodeGraph, buildCodeGraph } from '../src/repo-codegraph.js';
 import * as otel from '../src/otel.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-
-test('W553 #1 - platform matrix covers major model frameworks, enterprise, observability, and scale controls', () => {
-  const matrix = validatePlatformCapabilities();
-  assert.equal(matrix.ok, true, matrix.missing.join(', '));
-  assert.ok(matrix.counts.frameworks >= 16, 'runtime/model target coverage should include edge, browser, local, and serving engines');
-  assert.ok(matrix.counts.model_families >= 18, 'model family coverage should include teachers, students, media, RAG, agents, and structured models');
-  assert.ok(matrix.counts.device_targets >= 16, 'device target coverage should include local, mobile, browser, cloud, edge, and airgap targets');
-  assert.ok(matrix.counts.methods >= 22, 'method coverage should include capture, privacy, train/distill, eval, runtime, compression, and observability');
-  assert.ok(matrix.counts.enterprise_controls >= 8, 'enterprise security/privacy controls must be explicit');
-  assert.ok(matrix.counts.observability_controls >= 5, 'production monitoring/debugging controls must be explicit');
-  assert.ok(matrix.counts.scale_controls >= 7, 'scale/perf controls must be explicit');
-
-  const caps = listPlatformCapabilities();
-  const frameworkIds = new Set(caps.model_framework_targets.map((r) => r.id));
-  for (const id of ['openai-compatible', 'anthropic-messages', 'gguf-llama-cpp', 'onnx-runtime', 'coreml-ane', 'mlx-apple-silicon', 'tensorrt-llm', 'openvino', 'qnn-hexagon']) {
-    assert.ok(frameworkIds.has(id), `missing ${id}`);
-  }
-  const modelIds = new Set(caps.model_family_targets.map((r) => r.id));
-  for (const id of ['frontier-teacher-gpt', 'frontier-teacher-claude', 'frontier-teacher-gemini', 'open-weight-moe-llm', 'vision-language-model', 'speech-asr-model', 'rag-pipeline-artifact', 'agent-tool-policy-model']) {
-    assert.ok(modelIds.has(id), `missing model family ${id}`);
-  }
-  const deviceIds = new Set(caps.device_targets.map((r) => r.id));
-  for (const id of ['nvidia-cuda-workstation', 'amd-rocm-workstation', 'apple-silicon-mac', 'intel-npu-openvino', 'qualcomm-hexagon-qnn', 'ios-coreml-ane', 'android-litert-qnn', 'browser-webgpu', 'cloudflare-workers', 'airgapped-server']) {
-    assert.ok(deviceIds.has(id), `missing device ${id}`);
-  }
-  const methodIds = new Set(caps.method_targets.map((r) => r.id));
-  for (const id of ['capture-proxy', 'zero-retention-capture', 'teacher-student-distill', 'preference-optimization', 'lora-qlora-train', 'multimodal-tokenization', 'quantize-awq-gptq-gguf-mlx', 'otel-export']) {
-    assert.ok(methodIds.has(id), `missing method ${id}`);
-  }
-  const allRows = [
-    ...caps.model_framework_targets,
-    ...caps.model_family_targets,
-    ...caps.device_targets,
-    ...caps.method_targets,
-    ...caps.enterprise_controls,
-    ...caps.observability_controls,
-    ...caps.scale_controls,
-  ];
-  for (const row of allRows) {
-    for (const evidencePath of row.evidence || []) {
-      assert.equal(fs.existsSync(path.join(ROOT, evidencePath)), true, `${row.id} references missing evidence path ${evidencePath}`);
-    }
-  }
-});
 
 test('W553 #2 - cloud readiness detects storage, hosted GPU, teacher, and observability wiring without printing secrets', () => {
   const env = {
@@ -96,18 +58,6 @@ test('W553 #2 - cloud readiness detects storage, hosted GPU, teacher, and observ
   assert.ok(empty.blockers.includes('no_artifact_storage_configured'));
   assert.ok(empty.blockers.includes('no_hosted_gpu_or_managed_train_configured'));
   assert.ok(empty.blockers.includes('no_cloud_or_remote_compute_configured'));
-});
-
-test('W553 #3 - repo codegraph indexes routes, symbols, scripts, and readiness evidence', () => {
-  const graph = buildCodeGraph({ root: ROOT });
-  const audit = auditCodeGraph(graph);
-  assert.equal(audit.ok, true, audit.missing.join(', '));
-  assert.ok(graph.counts.routes >= 300, 'route graph should include hosted API + public surfaces');
-  assert.ok(graph.counts.symbols >= 500, 'symbol graph should be useful for impact analysis');
-  assert.ok(graph.counts.readiness_requirements >= 50, 'SOTA readiness requirements should be indexed');
-  assert.equal(graph.counts.readiness_missing_evidence, 0);
-  assert.ok(graph.routes.some((r) => r.path === '/v1/chat/completions'));
-  assert.ok(graph.routes.some((r) => r.path === '/account/overview'));
 });
 
 test('W553 #4 - OTEL module is importable ESM and server can mount middleware only when enabled', async () => {

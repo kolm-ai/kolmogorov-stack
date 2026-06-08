@@ -1,4 +1,4 @@
-// W722 — Importance-Tiered KV Cache (ITKV) profile schema + token-class scorer.
+// W722 - Importance-Tiered KV Cache (ITKV) profile schema + token-class scorer.
 //
 // Closes Invention 4 from docs/research/kolm-billion-dollar-distillation-lab-
 // 2026-05-24.md (lines 1434-1466). Agent and RAG workloads repeat system
@@ -7,13 +7,13 @@
 //
 // Token classes (research doc lines 1444-1454):
 //
-//   sink                 — high precision, never evict during session
-//   policy               — high precision, long TTL
-//   schema               — high precision or int8, reusable
-//   retrieved_evidence   — precision by citation confidence
-//   conversation_recent  — high precision, recency window
-//   boilerplate          — low precision or prefix cache
-//   irrelevant_span      — compress or evict
+//   sink - high precision, never evict during session
+//   policy - high precision, long TTL
+//   schema - high precision or int8, reusable
+//   retrieved_evidence - precision by citation confidence
+//   conversation_recent - high precision, recency window
+//   boilerplate - low precision or prefix cache
+//   irrelevant_span - compress or evict
 //
 // Default precision policy (research doc lines 1458-1460):
 //
@@ -26,7 +26,7 @@
 //   - Clear route/event telemetry for cache hits, compression tier, fallback
 //
 // Honesty contract: this module ships the PROFILE SCHEMA + TOKEN-CLASS SCORER.
-// Runtime KV cache tier dispatch is a future wave — the real implementation
+// Runtime KV cache tier dispatch is a future wave - the real implementation
 // plugs into vLLM PagedAttention / SGLang radix cache and is out of scope
 // here. The worker stub in workers/itkv/ ships the same classifier so the
 // upstream runtime can call it as a sidecar.
@@ -43,7 +43,7 @@ import crypto from 'node:crypto';
 export const ITKV_VERSION = 'w722-v1';
 
 // The seven token classes from the research doc (lines 1444-1454). Ordering
-// matters for the deterministic fallthrough in classifyToken — sink (position)
+// matters for the deterministic fallthrough in classifyToken - sink (position)
 // comes first, irrelevant_span (fallthrough) comes last.
 export const TOKEN_CLASSES = Object.freeze([
   'sink',
@@ -68,7 +68,7 @@ export const PRECISION_TIERS = Object.freeze([
 
 // Bytes-per-token-per-layer for each tier. BF16 = 2 bytes (the runtime
 // baseline). FP8 = 1 byte. INT8 = 1 byte. INT4 = 0.5 bytes. offload = 0
-// (the token is paged out of GPU memory entirely — accounted as zero
+// (the token is paged out of GPU memory entirely - accounted as zero
 // GPU-resident bytes; the cost shows up as latency at the call site, not
 // memory). estimateMemoryReduction reports GPU-resident savings.
 const BYTES_PER_TOKEN_BY_TIER = Object.freeze({
@@ -136,7 +136,7 @@ const RETRIEVED_TIER_MID = 0.5;
  * when the class itself overrides the default precision (currently only
  * retrieved_evidence, whose tier depends on citation_confidence).
  *
- * @param {object} token — {
+ * @param {object} token - {
  *     position,                   // integer index in the sequence
  *     role,                       // optional role hint (e.g. 'boilerplate')
  *     recent_window_start,        // sequence index where recent window begins
@@ -221,13 +221,13 @@ export function precisionTierFor(classResult, precision_by_class) {
  * stub, CLI, future artifact slot) consume.
  *
  * @param {object} opts
- *   - artifact_id              — string identifier the profile is scoped to
- *   - token_classes_override   — optional partial overrides of TOKEN_CLASSES
+ *   - artifact_id - string identifier the profile is scoped to
+ *   - token_classes_override - optional partial overrides of TOKEN_CLASSES
  *                                (subset only; you cannot ADD new classes)
- *   - precision_override       — optional {class -> tier} overrides
- *   - sink_anchor              — default 4
- *   - recent_window_size       — default 512
- *   - prefix_cache_enabled     — default true (research doc line 1465)
+ *   - precision_override - optional {class -> tier} overrides
+ *   - sink_anchor - default 4
+ *   - recent_window_size - default 512
+ *   - prefix_cache_enabled - default true (research doc line 1465)
  * @returns {{ok:true, profile} | {ok:false, error, hint}}
  */
 export function buildItkvProfile(opts = {}) {
@@ -286,7 +286,7 @@ export function buildItkvProfile(opts = {}) {
  * profile against a token-class distribution.
  *
  * Baseline assumption: BF16 across all tokens = 2 bytes/token (per layer per
- * head, but we report relative — the multipliers cancel for a percentage).
+ * head, but we report relative - the multipliers cancel for a percentage).
  *
  * Inputs:
  *   - profile.precision_by_class      → class -> tier
@@ -383,7 +383,7 @@ export function estimateMemoryReduction(profile, opts = {}) {
  * orchestrator wave will use this to bind the profile into artifact_hash via
  * a kv_profile_hash slot in src/artifact.js (analogous to the W460 /
  * W409q / W719 mixed_precision_profile_hash binding). This wave only ships
- * the hash function — the artifact-side wiring is the orchestrator's job
+ * the hash function - the artifact-side wiring is the orchestrator's job
  * (do NOT touch src/artifact.js this wave).
  */
 export function hashItkvProfile(profile) {

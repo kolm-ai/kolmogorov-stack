@@ -1,4 +1,4 @@
-// W369 — lake: pure-function analytics over the event-store.
+// W369 - lake: pure-function analytics over the event-store.
 //
 // Reads events via src/event-store.js, returns deterministic aggregates.
 // No HTTP / no fetch / no I/O beyond what event-store does. Pure JS so it
@@ -44,7 +44,7 @@ function _diskUsed(filePath) {
 // lakeStats({since, namespace, tenant_id|tenant}): structured snapshot of
 // everything in the lake right now. Honest counts; never makes up numbers.
 //
-// W411 — when `tenant_id`/`tenant` is supplied, the snapshot is scoped to that
+// W411 - when `tenant_id`/`tenant` is supplied, the snapshot is scoped to that
 // tenant only. Route handlers in router.js read req.tenant_record.id and pass
 // it down so /v1/lake/stats only ever surfaces the caller's spend/latency/
 // repeated clusters. Admin / local-only daemon callers leave the field unset.

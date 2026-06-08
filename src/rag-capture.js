@@ -1,13 +1,13 @@
-// W734 — RAG-aware distillation primitives.
+// W734 - RAG-aware distillation primitives.
 //
 // Closes W734-1/2/5 from KOLM_W707_SYSTEM_UPGRADE_PLAN.md (lines 382-388):
 //
 //   W734-1: "Capture not just prompt + response, but retrieved context"
 //           via the kolm-retrieved-context request header.
 //   W734-2: "Student learns to generate correct responses given specific
-//           context patterns" — training-data formatter that prefixes
+//           context patterns" - training-data formatter that prefixes
 //           retrieved chunks as <RETRIEVED> blocks.
-//   W734-5: "Bakeoff axis: context-faithfulness" — TF-presence heuristic
+//   W734-5: "Bakeoff axis: context-faithfulness" - TF-presence heuristic
 //           used by src/bakeoff.js to score how much of the response is
 //           grounded in the retrieved corpus.
 //
@@ -21,12 +21,12 @@
 //     hop-to-hop without escaping nightmares. The decoded shape is an
 //     array of {source, text, score?} items.
 //   * Honest absence: a non-RAG request (no header) returns
-//     {ok:true, retrieved:[]} — pure no-op, not an error. A malformed
+//     {ok:true, retrieved:[]} - pure no-op, not an error. A malformed
 //     header returns {ok:false, error:'invalid_header', hint:'...'} so
 //     misconfigured callers fail loud.
 //   * Privacy: we NEVER log raw retrieved text. Callers log
 //     `retrieved.length` + per-item `source` URLs only. The raw `text`
-//     fields stay in the persisted capture row (where they belong — they
+//     fields stay in the persisted capture row (where they belong - they
 //     are training data) and never appear in console / audit-log output.
 //   * Additive: when a capture has no retrieved_context field, the
 //     formatter falls through to the legacy USER/ASSISTANT format. Nothing
@@ -58,7 +58,7 @@ const MAX_RETRIEVED_ITEMS = 500;
  * Parse the `kolm-retrieved-context` request header.
  *
  * The header is base64-encoded JSON containing an array of
- * `{source, text, score?}` items — one per retrieved chunk that the
+ * `{source, text, score?}` items - one per retrieved chunk that the
  * calling RAG pipeline placed into the LLM's context window.
  *
  * Returns `{ok:true, retrieved:[...]}` on success, with each item
@@ -66,7 +66,7 @@ const MAX_RETRIEVED_ITEMS = 500;
  *
  *   { source: string, text: string, score: number | null }
  *
- * Returns `{ok:true, retrieved:[]}` when the header is absent — non-RAG
+ * Returns `{ok:true, retrieved:[]}` when the header is absent - non-RAG
  * requests are the common case, so absence is NOT an error.
  *
  * Returns `{ok:false, error:'invalid_header', hint:'...'}` on malformed
@@ -145,7 +145,7 @@ export function parseRetrievedContextHeader(req) {
     };
   }
   // Normalise each item. We tolerate missing `score` (returns null) but
-  // require `source` (string) and `text` (string) — without those the
+  // require `source` (string) and `text` (string) - without those the
   // training-data formatter has nothing to anchor on.
   const retrieved = [];
   for (let i = 0; i < parsed.length; i++) {
@@ -204,7 +204,7 @@ export function parseRetrievedContextHeader(req) {
  *
  * When the capture has no `retrieved_context` (or an empty array), the
  * formatter falls through to the legacy USER/ASSISTANT format. This is
- * the additive, non-breaking contract — existing distill flows keep
+ * the additive, non-breaking contract - existing distill flows keep
  * working untouched.
  *
  * Returns a string. Never throws (a defensive fallback handles even
@@ -255,12 +255,12 @@ export function formatCaptureForTraining(capture) {
  *
  * Some upstream APIs (Anthropic citations, OpenAI Assistants with
  * file_search, Perplexity, etc.) return retrieved chunks IN the
- * response body — either as a `<sources>` XML block, an
+ * response body - either as a `<sources>` XML block, an
  * `attachments.citations[]` array on the response_meta, or as
  * `[1] https://...` style footnote markers.
  *
  * This extractor tries each shape and returns the first match. When
- * nothing matches it returns an empty array — never throws.
+ * nothing matches it returns an empty array - never throws.
  *
  * The returned shape matches parseRetrievedContextHeader's output so
  * callers can compose: prefer header-supplied retrieved context, fall
@@ -317,7 +317,7 @@ export function extractRetrievedFromResponse(response_text, response_meta) {
 }
 
 // =============================================================================
-// computeContextFaithfulness — W734-5 bakeoff axis
+// computeContextFaithfulness - W734-5 bakeoff axis
 // =============================================================================
 
 /**
@@ -332,7 +332,7 @@ export function extractRetrievedFromResponse(response_text, response_meta) {
  * noise dominating the score).
  *
  * Returns a number in [0, 1]. Returns `null` when retrieved_context is
- * absent or empty — honest absence, NOT 0. The bakeoff column treats
+ * absent or empty - honest absence, NOT 0. The bakeoff column treats
  * `null` distinctly from 0 in display + recommendation logic.
  *
  * This is intentionally a token-presence heuristic, not a semantic
@@ -344,7 +344,7 @@ export function computeContextFaithfulness(response_text, retrieved_context) {
     return null;
   }
   if (typeof response_text !== 'string' || !response_text.trim()) {
-    // Empty response can't be faithful or unfaithful — honest absence.
+    // Empty response can't be faithful or unfaithful - honest absence.
     return null;
   }
   const responseTokens = _tokenize(response_text);

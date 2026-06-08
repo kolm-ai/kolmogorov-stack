@@ -1,11 +1,11 @@
-// W345 — single shared case-scoring path.
+// W345 - single shared case-scoring path.
 //
 // Background: `kolm eval <art>` and `kolm bench <art>` historically used two
 // different matchers on the same input. eval used a subset-equal walker (an
 // expected object was a pass when actual was a superset; numeric tolerance
 // 1e-6; array length must match). bench used a strict deep-equal (key sets
 // must match both ways; numeric tolerance 1e-9). On the same .kolm with the
-// same cases the two verbs disagreed — user trial reported eval=5/7 pass,
+// same cases the two verbs disagreed - user trial reported eval=5/7 pass,
 // bench=2/7 pass. That is a bug; users expect the pass count to be a property
 // of the artifact + the case set, not of the verb that read them.
 //
@@ -16,7 +16,7 @@
 // Comparator selection follows the artifact's manifest-declared comparator
 // when supplied (eval matcher when 'exact' or omitted; comparators.js when
 // 'json_subset', 'normalized_string', 'label'). Default keeps the historical
-// eval semantics (subset-equal) so existing artifacts score identically — the
+// eval semantics (subset-equal) so existing artifacts score identically - the
 // user said eval was the more correct verb in their trial, so eval is the
 // canonical source.
 
@@ -64,7 +64,7 @@ export function scoreCase(testCase, output, opts = {}) {
   let comparatorUsed = comparator;
   if (comparator === 'subset_equal' || comparator === 'exact' || !comparator) {
     // Default and most-common path: the eval matcher. 'exact' is treated as
-    // subset-equal historically (see artifact-runner::matches) — strict deep
+    // subset-equal historically (see artifact-runner::matches) - strict deep
     // equality is intentionally NOT the default because it would re-introduce
     // the bench-vs-eval drift this module exists to remove.
     pass = subsetEqualMatch(output, expected);

@@ -1,4 +1,4 @@
-// W918 P5.1 — Multi-user organisations with RBAC.
+// W918 P5.1 - Multi-user organisations with RBAC.
 //
 // Storage shape (single JSON document at data/orgs.json):
 //   { orgs: { [org_id]: Org },
@@ -8,7 +8,7 @@
 // Append-only audit ledger at data/orgs-audit.jsonl. One JSON object per line.
 //
 // File writes are sync read-modify-write. Atomicity is guaranteed by writing
-// the new document to a sibling tmp file then renaming over the target — the
+// the new document to a sibling tmp file then renaming over the target - the
 // rename is atomic on POSIX and best-effort-retried on Windows.
 
 import fs from 'node:fs';
@@ -72,7 +72,7 @@ function renameWithRetry(tmp, file) {
       if (!['EPERM', 'EACCES', 'EBUSY'].includes(err && err.code)) throw err;
       const wait = 5 * (2 ** attempt);
       const until = Date.now() + wait;
-      while (Date.now() < until) { /* short busy-wait — file lock contention */ }
+      while (Date.now() < until) { /* short busy-wait - file lock contention */ }
     }
   }
   try {
@@ -216,7 +216,7 @@ export function addMember(orgId, { user_id, email, role, acting_user_id } = {}) 
   if (!user_id) throw new Error('addMember: user_id is required');
   if (!email) throw new Error('addMember: email is required');
   if (!isValidRole(role)) throw new Error(`addMember: invalid role ${JSON.stringify(role)}`);
-  if (role === ROLES.OWNER) throw new Error('addMember: cannot add owner directly — use transferOwnership');
+  if (role === ROLES.OWNER) throw new Error('addMember: cannot add owner directly - use transferOwnership');
   if (!acting_user_id) throw new Error('addMember: acting_user_id is required');
 
   const doc = loadDoc();
@@ -257,7 +257,7 @@ export function removeMember(orgId, userIdOrEmail, actingUserId) {
   if (!target) return false;
 
   if (target.user_id === org.owner_user_id) {
-    throw new Error('removeMember: cannot remove the owner — transfer ownership first');
+    throw new Error('removeMember: cannot remove the owner - transfer ownership first');
   }
 
   const actorRole = actingRole(doc, orgId, actingUserId);
@@ -296,11 +296,11 @@ export function setRole(orgId, userId, role, actingUserId) {
 
   // Promotion to owner is reserved for transferOwnership.
   if (role === ROLES.OWNER) {
-    throw new Error('setRole: cannot promote to owner — use transferOwnership');
+    throw new Error('setRole: cannot promote to owner - use transferOwnership');
   }
   // Admins cannot change the owner's role at all.
   if (target.user_id === org.owner_user_id) {
-    throw new Error('setRole: cannot change the owner\'s role — transfer ownership first');
+    throw new Error('setRole: cannot change the owner\'s role - transfer ownership first');
   }
   // Admins cannot change another admin's role (only owner can demote admins).
   if (actorRole === ROLES.ADMIN && target.role === ROLES.ADMIN && actingUserId !== userId) {
@@ -359,7 +359,7 @@ export function transferOwnership(orgId, newOwnerUserId, actingUserId) {
 export function inviteMember(orgId, { email, role, actingUserId } = {}) {
   if (!email) throw new Error('inviteMember: email is required');
   if (!isValidRole(role)) throw new Error(`inviteMember: invalid role ${JSON.stringify(role)}`);
-  if (role === ROLES.OWNER) throw new Error('inviteMember: cannot invite as owner — use transferOwnership');
+  if (role === ROLES.OWNER) throw new Error('inviteMember: cannot invite as owner - use transferOwnership');
   if (!actingUserId) throw new Error('inviteMember: actingUserId is required');
 
   const doc = loadDoc();

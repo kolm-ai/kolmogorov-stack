@@ -1,6 +1,6 @@
 // src/data-provenance.js
 //
-// KOLM Data Engine — per-pair provenance for the INGEST stage.
+// KOLM Data Engine - per-pair provenance for the INGEST stage.
 //
 // Every raw training pair that lands in <ROOT>/.kolm/data/<ns>/raw-pairs.jsonl
 // carries a provenance block recording WHERE it came from, WHEN it was

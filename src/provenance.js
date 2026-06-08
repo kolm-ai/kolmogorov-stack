@@ -1,6 +1,6 @@
 // Provenance credentials for kolm artifacts and inferences.
 //
-// This is kolm's own credential schema — NOT a real C2PA assertion library.
+// This is kolm's own credential schema - NOT a real C2PA assertion library.
 // The schema borrows the shape (claim_generator, ingredients, assertions,
 // signature) so that a future C2PA conformance pass can ship by swapping the
 // signer for a real Content Authenticity Initiative library. Until then we
@@ -8,16 +8,16 @@
 // we haven't earned.
 //
 // Two callsites:
-//   1) Artifact build (src/artifact.js) — embeds an artifact-scoped credential
+//   1) Artifact build (src/artifact.js) - embeds an artifact-scoped credential
 //      in the receipt and in a sidecar `credential.json` inside the .kolm zip.
-//   2) Runtime emission (src/runtime.js + src/router.js /v1/run) — emits an
+//   2) Runtime emission (src/runtime.js + src/router.js /v1/run) - emits an
 //      output-scoped credential per invocation, signed with the artifact's
 //      credential as a parent ingredient. Chain is auditable offline.
 //
 // Why this is honest:
 // - We sign with HMAC-SHA256 (the same secret that already chains receipts).
-// - We do NOT claim "tamper-proof" — we say "tamper-evident".
-// - We do NOT claim public verification — verification requires the secret
+// - We do NOT claim "tamper-proof" - we say "tamper-evident".
+// - We do NOT claim public verification - verification requires the secret
 //   (or a future Ed25519 swap). Documented in the manifest.
 
 import crypto from 'node:crypto';
@@ -34,12 +34,12 @@ function hmac(secret, value) {
 // embeds in the receipt and as `credential.json` in the .kolm zip.
 //
 // Required:
-//   secret         — HMAC secret (same as receipt signer)
-//   artifact_hash  — sha256 of the manifest JSON
-//   cid            — content identifier (kolm CID, sha256-based)
-//   k_score        — final K-score
-//   base_model     — pointer to teacher model
-//   signed_at      — ISO timestamp
+//   secret - HMAC secret (same as receipt signer)
+//   artifact_hash - sha256 of the manifest JSON
+//   cid - content identifier (kolm CID, sha256-based)
+//   k_score - final K-score
+//   base_model - pointer to teacher model
+//   signed_at - ISO timestamp
 //
 // Optional:
 //   judge_id, tier, ingredients[]
@@ -73,10 +73,10 @@ export function buildArtifactCredential({
 // referenced as an ingredient so verifiers can walk the chain offline.
 //
 // Required:
-//   secret              — HMAC secret
-//   artifact_credential — the credential JSON for the .kolm that produced this
-//   output_hash         — sha256 of the canonical output JSON
-//   request_id          — server-generated request id (audit join key)
+//   secret - HMAC secret
+//   artifact_credential - the credential JSON for the .kolm that produced this
+//   output_hash - sha256 of the canonical output JSON
+//   request_id - server-generated request id (audit join key)
 export function buildOutputCredential({
   secret, artifact_credential, output_hash, request_id, model_pointer,
   k_floor, signed_at,

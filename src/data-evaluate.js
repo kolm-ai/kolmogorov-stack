@@ -1,12 +1,12 @@
 // src/data-evaluate.js
 //
-// KOLM Data Engine — EVALUATE stage (aggregation / analysis layer).
+// KOLM Data Engine - EVALUATE stage (aggregation / analysis layer).
 //
 // This module is the read-side companion to the GPU/python evaluator at
 // workers/distill/scripts/eval_adapter.py. That script runs a trained adapter
 // against one or more benches (mixeval-hard, adversarial, ...) and writes a
 // per-bench summary JSON to <run_dir>/student/eval-<bench>.json. We NEVER
-// invoke that evaluator — we READ the artifacts it leaves behind and turn the
+// invoke that evaluator - we READ the artifacts it leaves behind and turn the
 // raw bench scores into a ship/no-ship verdict:
 //
 //   - per-bench mean_score + CoT-contamination roll-up
@@ -51,7 +51,7 @@ const FAIL_THRESHOLD = 0.5;
 const SHIP_FLOOR = 0.5;
 
 // Templated refusal / unsafe markers. Matched case-insensitively against the
-// per-item student output. Kept coarse on purpose — this is a smoke-grade
+// per-item student output. Kept coarse on purpose - this is a smoke-grade
 // signal that surfaces a refusal spike, not a safety classifier.
 const REFUSAL_MARKERS = [
   "i can't",
@@ -134,13 +134,13 @@ function _benchNameFromFile(file, obj) {
 }
 
 // ---------------------------------------------------------------------------
-// loadEvalJsons — pure-ish reader. Returns {bench: parsedObj}.
+// loadEvalJsons - pure-ish reader. Returns {bench: parsedObj}.
 // ---------------------------------------------------------------------------
 
 // Reads <run_dir>/student/eval-*.json (one or many benches). When run_dir
 // itself contains the eval-*.json files (no student/ subdir) we read those
 // too, so a flat artifact dir works as well. Unreadable / malformed files are
-// skipped rather than throwing — the caller decides what an empty map means.
+// skipped rather than throwing - the caller decides what an empty map means.
 export function loadEvalJsons(run_dir) {
   const out = {};
   if (!run_dir) return out;
@@ -154,7 +154,7 @@ export function loadEvalJsons(run_dir) {
       if (!e.isFile()) continue;
       if (/^eval-.+\.json$/i.test(e.name)) candidates.push(path.join(dir, e.name));
     }
-    // If the student/ subdir produced files, prefer it and stop — the run_dir
+    // If the student/ subdir produced files, prefer it and stop - the run_dir
     // root scan is only a fallback for flat artifact layouts.
     if (candidates.length > 0) break;
   }
@@ -170,7 +170,7 @@ export function loadEvalJsons(run_dir) {
 }
 
 // ---------------------------------------------------------------------------
-// classifyFailure — pure helper. Buckets one failed item by a coarse key.
+// classifyFailure - pure helper. Buckets one failed item by a coarse key.
 // ---------------------------------------------------------------------------
 
 // Prefers an explicit `category` field; otherwise uses the first few
@@ -322,7 +322,7 @@ function _worstBench(benches) {
 }
 
 // ---------------------------------------------------------------------------
-// _persist — best-effort event-store write (exact mandated pattern).
+// _persist - best-effort event-store write (exact mandated pattern).
 // ---------------------------------------------------------------------------
 
 async function _persist({ tenant, namespace, workflow, payload }) {
@@ -346,7 +346,7 @@ async function _persist({ tenant, namespace, workflow, payload }) {
 }
 
 // ---------------------------------------------------------------------------
-// evaluateRun — the public entry point.
+// evaluateRun - the public entry point.
 // ---------------------------------------------------------------------------
 
 export async function evaluateRun({ tenant, namespace, run_dir, baseline_dir } = {}) {

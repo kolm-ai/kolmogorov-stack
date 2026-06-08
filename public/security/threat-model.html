@@ -3,315 +3,386 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t;}}catch(e){}})();</script>
-<title>Threat model &middot; Open-source AI workbench &middot; kolm.ai</title>
-<meta name="description" content="Threat model for the kolm.ai Open-source AI workbench. Asset inventory, adversary model, threats by asset, mitigation per cell, out-of-scope assumptions, and open questions. Plain about what we defend, what we trust,">
-<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta property="og:title" content="Threat model · Open-source AI workbench">
-<meta property="og:description" content="Threat model: assets, adversaries, threats per asset with mitigations, out-of-scope assumptions, and open questions.">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Threat model · kolm.ai</title>
+<meta name="description" content="The threat model for kolm's signed evidence. What the buyer must trust and what they do not, the scope boundary, the attacker capabilities (tamper, rogue key, replay) the two verification tiers answer, and the limits stated plainly for security reviewers.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Threat model · what the signature defends against">
+<meta property="og:description" content="Who can attack a signed report, what the Ed25519 signature and Merkle log prove, how the two verification tiers answer tamper, rogue key and replay, and the limits we state plainly.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security/threat-model">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Threat model · Open-source AI workbench">
-<meta name="twitter:description" content="Asset inventory, adversaries, threats, mitigations, out-of-scope, and open questions.">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Threat model · kolm">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security/threat-model">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Threat model","description":"Threat model for the kolm.ai Open-source AI workbench. Asset inventory, adversary model, threats by asset with mitigations, out-of-scope assumptions, and open questions.","url":"https://kolm.ai/security/threat-model","datePublished":"2026-05-24","dateModified":"2026-05-24","author":{"@type":"Organization","name":"kolm.ai"},"publisher":{"@type":"Organization","name":"kolm.ai"}}</script>
-<link rel="stylesheet" href="/design-tokens.css">
-<style>
-:root{--ink:#e6e9ee;--ink-mute:#aab0b8;--ink-faint:#6a727c;--line:var(--line-2);--bg:#0b0d10;--bg-elev:#101316;--accent:#e6e9ee;--accent-soft:var(--line-2);--warn:#a8b3c2;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#6a727c;--line:var(--line-2);--bg:#f3f5f7;--bg-elev:#ffffff;--accent:#2563eb;--accent-soft:rgba(5,150,105,0.10);--warn:#a06b1a}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
-.skip-link{position:absolute;left:-9999px}
-.skip-link:focus{position:static;background:var(--accent);color:#fff;padding:8px 14px}
-.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-header.site{padding:18px 0;border-bottom:1px solid var(--line)}
-header.site .wrap{display:flex;justify-content:space-between;align-items:center}
-main{padding:48px 0 96px}
-.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
-.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-.brand-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
-h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
-.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
-h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
-h3{font-size:16px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:780px}
-p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
-pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:14px 0 18px}
-pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
-code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
-ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
-li{margin:4px 0}
-table{border-collapse:collapse;width:100%;max-width:920px;margin:14px 0;font-size:13.5px}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--ink);font-weight:500;background:var(--bg-elev)}
-td code{font-size:12px}
-.warn{border:1px solid var(--warn);border-left:4px solid var(--warn);background:rgba(82, 90, 100,0.07);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
-.truthfulness{border:1px solid var(--accent);border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 18px;margin:18px 0;color:var(--ink);font-size:14.5px;line-height:1.55;max-width:780px}
-.asset-list{list-style:none;padding:0;margin:14px 0 18px;max-width:920px}
-.asset-list li{padding:14px 18px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:var(--bg-elev);margin:8px 0;color:var(--ink-mute);font-size:14.5px;line-height:1.6}
-.asset-list li b{display:block;color:var(--ink);font-family:var(--mono);font-size:11.5px;letter-spacing:0.10em;text-transform:uppercase;margin-bottom:6px}
-.asset-list li b.kind{color:var(--accent)}
-.asset-list li.public{border-left-color:var(--ink-faint)}
-.asset-list li.public b.kind{color:var(--ink-faint)}
-.threat-tbl th:nth-child(1),.threat-tbl th:nth-child(2){white-space:nowrap}
-.threat-tbl td:nth-child(1){font-family:var(--mono);font-size:11.5px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink)}
-.threat-tbl td:nth-child(2){font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)}
-.threat-tbl td:nth-child(3){color:var(--ink-mute);font-size:13.5px}
-.threat-tbl td:nth-child(4){font-family:var(--mono);font-size:11.5px;color:var(--accent)}
-.related{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px;max-width:920px}
-@media(max-width:820px){.related{grid-template-columns:1fr}}
-.related a{padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
-.related a:hover{border-color:var(--accent-soft)}
-.related b{font-size:14px;color:var(--ink);font-weight:500}
-.related span{font-size:12.5px;color:var(--ink-mute);line-height:1.5}
-footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
-footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-</style>
-
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/docs-shell.css">
-    <link rel="stylesheet" href="/warm-paper.css">
-<script defer src="/docs-shell.js"></script>
-
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "kolm threat model",
+  "description": "What a kolm signed evidence report defends against and what it does not: the trust model, scope boundary, attacker capabilities, and stated limits.",
+  "author": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "mainEntityOfPage": "https://kolm.ai/security/threat-model"
+}
+</script>
 </head>
-<body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<div role="heading" aria-level="2" class="brand-anchor" style="position:absolute;left:-9999px" aria-hidden="true">Frontier AI on your own infrastructure.</div>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/solutions/teams">For teams</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs">Docs</a></li>
-      <li><a href="/enterprise">Enterprise</a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg></button>
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
     </div>
-  </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a><a href="/solutions/teams">For teams</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub</a><a href="/signup?intent=login">Sign in</a><a href="/signup">Get started &rarr;</a>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
   </div>
-</div>
+</header>
 
-<main id="main" tabindex="-1"><div class="wrap">
+<main>
 
-<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/security">security</a> / threat model</div>
-<p class="brand-eyebrow">Open-source AI workbench</p>
-<h1>Threat model.</h1>
-<p class="lede">The plain version of a threat model. We name every asset, every adversary, every threat, and every mitigation &mdash; and we name the parts we have not yet proven. The point of this page is to make it cheap for a security reviewer to find the gaps and challenge them, not to assert a defended boundary we have not built. See <a href="/security/posture">/security/posture</a> for the controls inventory and <a href="/security">/security</a> for the overview.</p>
-
-<h2 id="assets">Asset inventory</h2>
-<p>The things worth protecting on the kolm.ai stack. Anything not on this list is either out of scope or downstream of one of these.</p>
-
-<ul class="asset-list">
-  <li>
-    <b class="kind">Captures &middot; tenant-private</b>
-    Raw prompts, completions, tool outputs, retrieval contexts, and run metadata logged by the tenant's calls. The lake holds them per tenant per namespace; they never cross the tenant boundary except by explicit publish. Leak of a tenant's captures is the highest-severity data event we plan for.
-  </li>
-
-  <li>
-    <b class="kind">Distilled artifacts &middot; tenant-private</b>
-    <code>.kolm</code> artifacts produced by the compiler against a tenant's captures and chosen teacher. The artifact contains quantized weights, the signed receipt, the eval pack reference, and the K-score axes. Tenant-private by default; only the receipt CID becomes public if the tenant publishes.
-  </li>
-
-  <li>
-    <b class="kind">API keys &middot; auth credentials</b>
-    Per-tenant API keys minted at signup and rotation. We store only the SHA-256 hash in the control plane; the plaintext exists only on the client. A leaked key authenticates the holder until rotated; an audit log entry on every issued request makes the leak detectable.
-  </li>
-
-  <li>
-    <b class="kind">Event-store rows &middot; audit trail</b>
-    Append-only event rows covering auth, key issuance, namespace mutation, plan change, artifact publish, takedown, and admin action. Used by SOC-2 evidence collection and tenant-side audit pulls. Tampering with this trail is the high-severity integrity event we plan for.
-  </li>
-
-  <li class="public">
-    <b class="kind">Source code &middot; public</b>
-    The kolm stack at <a href="https://github.com/kolm-ai/kolm" rel="noopener">github.com/kolm-ai/kolm</a>. Apache-2.0. Source disclosure is by design &mdash; the same code an auditor reviews is the code that runs. The risk to manage here is supply-chain on the build pipeline, not source-reading.
-  </li>
-</ul>
-
-<h2 id="adversaries">Adversary model</h2>
-<p>The actors we plan against. Each adversary has a capability boundary; the threats below pair an asset with the adversary that could reach it.</p>
-
-<ul>
-  <li><b>External attacker (no credentials).</b> Network-reachable internet adversary with no kolm account. Capability: probe public endpoints, attempt auth bypass, run vulnerability scanners, attempt CDN/edge attacks. Cannot present a valid API key.</li>
-  <li><b>Low-privilege tenant user.</b> Holds a valid API key for tenant A. Capability: legitimate API calls within tenant A's plan + quota; may attempt cross-tenant reads by spoofing tenant ID, namespace, or row ID. Cannot reach the control-plane admin surface.</li>
-  <li><b>Compromised dependency (npm / pypi / cargo / actions).</b> A transitive package or GitHub Action used in the build pipeline ships a backdoor. Capability: execute arbitrary code on a build runner; influence the bytes of a released artifact; insert a backdoor that lies dormant until activated.</li>
-  <li><b>Insider with op access.</b> A Kolm operator with legitimate access to a subset of production systems (e.g. on-call SRE). Capability: read storage volumes, mutate config, deploy code. The intent is malicious or coerced; the control framework treats them as a separate adversary even though their access is legitimate.</li>
-  <li><b>Regulator (audit).</b> Not an attacker in the adversarial sense; an actor who requires evidence that the controls we claim are in fact in place. Capability: subpoena, audit, request reproducible evidence, demand data-residency proofs. We model them as an adversary because they generate the same evidence requirements an attacker discovers under incident response.</li>
-</ul>
-
-<h2 id="threats">Threats by asset</h2>
-<p>Each row pairs an asset with an adversary and names the mitigation that defends the cell. If the mitigation is "out of scope" we say so explicitly in the <a href="#oos">Out of scope</a> section below.</p>
-
-<table class="threat-tbl">
-  <thead><tr><th>Asset</th><th>Adversary</th><th>Threat</th><th>Mitigation</th></tr></thead>
-  <tbody>
-    <tr>
-      <td>Captures</td>
-      <td>External attacker</td>
-      <td>Unauthenticated read of capture rows via probe of public endpoints; brute-force of the API surface.</td>
-      <td>API key auth + TLS 1.3 + rate limit</td>
-    </tr>
-    <tr>
-      <td>Captures</td>
-      <td>Low-priv tenant user (cross-tenant)</td>
-      <td>Tenant A user crafts a request with tenant B's tenant ID, namespace, or row ID and attempts to read captures owned by tenant B.</td>
-      <td>tenant fence + per-row defense in depth</td>
-    </tr>
-    <tr>
-      <td>Distilled artifacts</td>
-      <td>External attacker / insider</td>
-      <td>Tamper with the bytes of a deployed <code>.kolm</code> artifact (swap weights, rewrite K-score, swap eval pack) and ship the same signed receipt.</td>
-      <td>artifact_hash binding in receipt</td>
-    </tr>
-    <tr>
-      <td>Distilled artifacts</td>
-      <td>Low-priv tenant user (cross-tenant)</td>
-      <td>Tenant A user fetches tenant B's <code>.kolm</code> artifact by CID guess or registry probe.</td>
-      <td>tenant fence on registry reads + per-row tenant check</td>
-    </tr>
-    <tr>
-      <td>API keys</td>
-      <td>External attacker</td>
-      <td>Database snapshot leak yields usable credentials.</td>
-      <td>SHA-256 hash only; plaintext never persisted</td>
-    </tr>
-    <tr>
-      <td>API keys</td>
-      <td>External attacker</td>
-      <td>Stolen key used to call hosted teacher or publish to registry.</td>
-      <td><code>kolm keys rotate</code> + per-tenant rate limits + audit log</td>
-    </tr>
-    <tr>
-      <td>Event-store rows</td>
-      <td>Insider with op access</td>
-      <td>Insider edits, deletes, or backdates rows in the audit trail to cover an action.</td>
-      <td>Append-only event-store; periodic offsite hash chain</td>
-    </tr>
-    <tr>
-      <td>Event-store rows</td>
-      <td>Regulator</td>
-      <td>Cannot produce evidence that an action happened at the claimed time.</td>
-      <td>append-only sink + SBOM + signed-receipt chain</td>
-    </tr>
-    <tr>
-      <td>Source code &middot; build pipeline</td>
-      <td>Compromised dependency</td>
-      <td>Transitive npm / pypi / cargo / actions dep ships a backdoor that taints the released binary.</td>
-      <td>SBOM + lockfile pinning + <code>--ignore-scripts</code> + Dependabot</td>
-    </tr>
-    <tr>
-      <td>Captures &middot; data residency</td>
-      <td>Regulator (GDPR / EU-AI)</td>
-      <td>Cannot prove a tenant's captures stayed in the contracted region.</td>
-      <td>region-pinned data plane + DPA + SCC</td>
-    </tr>
-    <tr>
-      <td>Captures &middot; PHI</td>
-      <td>Regulator (HIPAA-shaped)</td>
-      <td>PHI in captures leaves the tenant boundary by accident.</td>
-      <td>On-premise data plane + storage-layer encryption</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2 id="oos">Out of scope</h2>
-<p>Threats we do not defend against on this stack. We list them frankly so a downstream operator can decide whether their environment closes the gap.</p>
-
-<ul>
-  <li><b>Physical-server compromise.</b> An attacker with physical access to the host running the hosted control plane is out of scope &mdash; we depend on the hosting infrastructure (data-center physical controls, hardware tamper-evidence, on-premise customer controls) for that boundary. The same applies to on-premise deployments: the operator owns physical security of their hardware.</li>
-  <li><b>Attacks via the configured teacher API.</b> The kolm distill path calls a teacher endpoint the tenant chose (Anthropic, OpenAI, a self-hosted vLLM/SGLang/TGI). We trust the configured teacher to behave as specified. A malicious teacher could return distillation data designed to poison the student; we do not defend against that. Tenants that need to defend against a malicious teacher should pin to a known-good teacher and treat distillation output as untrusted.</li>
-  <li><b>User-device compromise.</b> The user's laptop, browser, terminal, or CI runner is out of scope. If the API key on the user's laptop is exfiltrated by malware on that laptop, no server-side control can prevent it. Rotation, audit-log review, and per-tenant rate limits are the recovery path.</li>
-  <li><b>Side-channel attacks on the inference runtime.</b> Timing, power, and cache side channels against a deployed <code>.kolm</code> running on the tenant's hardware are out of scope. Operators in regulated settings should run the inference path on hardware with the relevant side-channel mitigations enabled.</li>
-  <li><b>Social engineering of operators or tenants.</b> Phishing, pretexting, and pressure on a person to grant access are out of scope of the kolm stack. We document the runbook (rotation, audit-log review, account lock); we do not promise to prevent the social-engineering attempt itself.</li>
-</ul>
-
-<h2 id="open">Open questions</h2>
-<p>Things we are still figuring out. Each item is a real engineering question we have not yet resolved to a signed proof; we list them on the public site so a security reviewer can challenge our current reasoning.</p>
-
-<ul>
-  <li><b>Cross-tenant model-leak via fine-tune.</b> If tenant A's captures train a distilled artifact, and tenant B later runs a fine-tune that includes membership-inference probes against the same artifact, can tenant B recover capture content from tenant A? We believe the tenant fence + per-row defense-in-depth holds because tenant A's artifacts are not reachable by tenant B in the first place &mdash; but the formal proof against membership-inference under a shared base-model assumption is still in progress. See <a href="/security/membership-inference">/security/membership-inference</a> for the in-progress write-up.</li>
-  <li><b>Receipt forgery under a quantum-capable adversary.</b> Ed25519 receipts are signed today. A quantum-capable adversary in the future could break Ed25519 retroactively. The forward path is post-quantum signing (Dilithium / SPHINCS+); we have not yet shipped a PQC migration. Open question: at what point do we migrate, and how do we keep historical receipts verifiable through the migration?</li>
-  <li><b>Eval-pack poisoning.</b> If a tenant publishes an eval pack that the wider ecosystem references, can a malicious tenant craft an eval pack that grades unsafe outputs as high-K-score? The K-score gate is a tenant-chosen contract; a malicious tenant can grade their own artifact however they like. The open question is whether public-registry eval packs need a separate trust signal beyond the CID hash.</li>
-  <li><b>Compromised teacher detection.</b> Today we trust the configured teacher (see <a href="#oos">Out of scope</a>). Open question: should the distill worker run a sanity check on teacher output (e.g. canary-prompt detection) and refuse to compile if the teacher fails it? We have not yet shipped this and have not yet decided on the policy.</li>
-  <li><b>Audit-log offsite hash chain.</b> The event store is append-only at the application layer. A sufficiently privileged insider with database access could in principle rewrite history. The mitigation is a periodic offsite hash chain that an external observer can verify; we have not yet shipped that publication step. Open question: cadence (per-hour? per-day?) and where to publish.</li>
-</ul>
-
-<div class="caveat">If you find an item here that you think we have answered (or one we should add), email <code>security@kolm.ai</code> with a writeup. We acknowledge within 24 hours and aim to triage within 72.</div>
-
-<div class="related">
-  <a href="/security"><b>Security overview &rarr;</b><span>The full kolm security overview &mdash; signing, retention, BAA, SOC 2, HIPAA, GDPR, key management.</span></a>
-  <a href="/security/posture"><b>Security posture &rarr;</b><span>What we do, what we don't yet do, what we promise. Architecture diagram and compliance status.</span></a>
-  <a href="/security/sbom"><b>SBOM &rarr;</b><span>Software Bill of Materials for every release and every .kolm artifact.</span></a>
-</div>
-
-</div></main>
-
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:70ch">
+      <h1>Threat model</h1>
+      <p class="lede">
+        Someone has handed you a signed evidence report and asked you to rely on it
+        before you clear a vendor's agent. Before you do, you should know exactly what
+        the signature defends against, and where it stops. This is that boundary, drawn
+        precisely: who can attack the report, what the cryptography proves, and (stated
+        plainly) what it does not.
+      </p>
+      <div class="trustline" aria-label="What this page commits to">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Signed with Ed25519</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline by you</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Scope and limits stated plainly</span>
       </div>
-      <div class="ks-foot__col">
-        <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
+      <p class="card__map" style="margin-top:var(--s4)">Last reviewed 8 June 2026</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. TRUST MODEL -->
+<section class="section reveal" id="trust-model">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / Trust model</span>
+      <h2>Trust the math, not the vendor and not us.</h2>
+      <p class="lede">
+        The point of a signed report is to move the burden of proof off your desk. So the
+        trust base is kept small and inspectable. Every report is signed with Ed25519
+        (RFC 8037) over a canonical serialization of its fields. The public key travels
+        inside the report, and you verify the signature in your own browser using WebCrypto
+        at <a href="/verify" style="color:var(--ok)">/verify</a>, offline, with no account
+        and no call to us. Any change to a single byte of a signed field invalidates the
+        signature. To pin our identity out of band, the current public key is published at
+        <a href="/keys/kolm-2026-04.pub" style="color:var(--ok)">/keys/kolm-2026-04.pub</a>.
+      </p>
+      <p class="card__map">Ed25519 (RFC 8037) · canonical field serialization · in-browser WebCrypto · append-only Merkle log</p>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">The trust base</p>
+        <h3>What you rely on</h3>
+        <ul>
+          <li>The Ed25519 primitive (RFC 8037) being sound.</li>
+          <li>Your own verification environment: your browser and its WebCrypto.</li>
+          <li>A kolm public key, pinned out of band at <span class="mono">/keys/kolm-2026-04.pub</span>.</li>
+        </ul>
+        <p class="card__map">Three things, all inspectable. Nothing else is load-bearing.</p>
       </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
-        <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/compare">Compare</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/status">Status</a>
-        <a href="/subprocessors">Subprocessors</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
-        <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/about">About</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/press">Press</a>
-        <a href="/contact">Contact</a>
-        <a href="https://github.com/kolm-ai/kolm" rel="noopener">GitHub <span aria-hidden="true">&rarr;</span></a>
+      <div class="card">
+        <p class="card__k">Outside the trust base</p>
+        <h3>What you do not have to trust</h3>
+        <ul>
+          <li>kolm's servers or uptime. Verification runs offline, with no kolm server in the path.</li>
+          <li>The network path between vendor and buyer. Tampering in transit breaks the seal.</li>
+          <li>The vendor's account of their own results. The signed bytes are the result.</li>
+          <li>Any login. There is no account to create and none to verify.</li>
+        </ul>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai - Apache-2.0 - Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+
+    <h3 style="margin-top:var(--s7)">What the signature and the log protect</h3>
+    <ul class="ledger" style="margin-top:var(--s3)">
+      <li><strong>Integrity.</strong> The contents are exactly what kolm signed, byte for byte.</li>
+      <li><strong>Provenance.</strong> The report was issued by the holder of kolm's signing key, not forged.</li>
+      <li><strong>Auditability.</strong> A report's existence and time can be checked against an append-only Merkle transparency log (Ed25519 and SHA-256, RFC 6962 style), so issuance and ordering are independently verifiable.</li>
+      <li><strong>Confidentiality of your inputs.</strong> The agent logs and configuration given for an engagement are handled as customer data, not published.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ 3. SCOPE -->
+<section class="section reveal" id="scope">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / In scope and out of scope</span>
+      <h2>Scope is the boundary of every claim.</h2>
+      <p class="lede">
+        A report is precise about what it covers, and silent about what it does not. The
+        scope statement is part of the signed object, so a reviewer reads the boundary in
+        the same bytes as the findings.
+      </p>
+      <p class="hero__claim">
+        Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+      </p>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">In scope · assessed</p>
+        <h3>What a report covers</h3>
+        <ul>
+          <li>Least-privilege permission posture: scopes held versus scopes used.</li>
+          <li>Audit-trail integrity and retention: append-only, reviewable activity.</li>
+          <li>Data egress and redaction: destinations, sub-processors, what is masked.</li>
+          <li>Prompt-injection resistance, tested and reported with reproductions.</li>
+          <li>Model and dependency provenance.</li>
+          <li>The signed evidence object itself: logged and offline-verifiable.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="card__k">Out of scope · not claimed</p>
+        <h3>What a report does not cover</h3>
+        <ul>
+          <li>Any warranty that the agent is invincible or cannot be made to misbehave.</li>
+          <li>Systems outside the agreed scope. A report never implies coverage it does not state.</li>
+          <li>Runtime defense or live monitoring of the agent in production.</li>
+          <li>A guarantee that no injection path exists, only the results of the tests run.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4. ATTACKER CAPABILITIES (the ledger) -->
+<section class="section section--ink reveal" id="attackers">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / Attacker capabilities</span>
+      <h2>Three ways to attack a report. Two tiers that answer them.</h2>
+      <p class="lede">
+        We model a vendor who would alter their own report, a forger who would fabricate
+        one, and a tamperer on the wire between vendor and buyer. The skeptical buyer is
+        modeled too, as a first-class participant rather than an adversary: they should be
+        able to confirm everything themselves.
+      </p>
+    </div>
+
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Tamper</p>
+        <h3>Edit the report, break the seal</h3>
+        <p>A vendor upgrades a finding, changes a date or widens the tested scope, or a tamperer alters the report in transit. The Ed25519 signature covers the canonical bytes, so any single-byte change fails verification in front of the reviewer.</p>
+        <p class="card__map">Tier 1 · signature integrity</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Rogue key</p>
+        <h3>Sign with a fresh key, fail the keyring</h3>
+        <p>A forger fabricates a kolm-styled report for an agent we never assessed and signs it with their own key. Tier 1 clears for that key, but Tier 2 checks the issuer against the buyer's keyring, where the key is not a kolm issuer.</p>
+        <p class="card__map">Tier 2 · issuer provenance</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Replay</p>
+        <h3>Present a stale report as current</h3>
+        <p>An old or superseded report is shown as today's, or a finding is back-dated. The append-only Merkle log fixes existence and ordering, re-attestation supersedes a stale report with a signed delta, and each report names its point in time.</p>
+        <p class="card__map">Append-only Merkle log</p>
+      </div>
+    </div>
+
+    <p class="hero__claim" style="margin-top:var(--s7)">
+      Every check above runs in the buyer's own browser, against the key inside the report,
+      with no kolm server in the path. There is nothing for us to fake after the fact.
+    </p>
+    <div class="hero__cta" style="margin-top:var(--s5)">
+      <a class="btn btn--ghost" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/transparency-log">See the transparency log</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 5. ASSUMPTIONS AND LIMITATIONS -->
+<section class="section reveal" id="limits">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / Assumptions and limitations</span>
+      <h2>Where the guarantee ends.</h2>
+      <p class="lede">
+        A signature is a narrow instrument, and it is more useful when its edges are clear.
+        These are the limits we design to, and the assumptions the whole model rests on.
+      </p>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">Integrity, not security</p>
+        <h3>A signature proves origin, not invincibility</h3>
+        <p>It confirms the report is genuine and unaltered, and that a kolm key signed it. It does not assert that the audited agent cannot be attacked.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Tested, not warranted</p>
+        <h3>Injection results reflect the tests we ran</h3>
+        <p>Prompt-injection and jailbreak resistance are tested and reported, not warranted. A passing result reflects the adversarial tests run within scope, not a proof that no attack exists.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Point in time</p>
+        <h3>Findings describe a moment and a fixed scope</h3>
+        <p>A later code change can alter the posture. A permission granted in January can still fire in August. Re-attestation captures the change as a signed delta.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Stated scope only</p>
+        <h3>No coverage a report does not state</h3>
+        <p>We do not assess systems outside the agreed scope, and a report never implies coverage beyond what its scope statement names.</p>
+      </div>
+    </div>
+
+    <div class="split" style="margin-top:var(--s7)">
+      <div class="plate">
+        <p class="card__k">Assumptions the model rests on</p>
+        <h3 style="margin-top:var(--s2)">What has to hold</h3>
+        <p style="color:var(--ink-2);margin-top:var(--s3)">
+          The model holds if the Ed25519 primitive is sound, our signing key remains under
+          our control in its key-management service, and the buyer's verification environment
+          is itself untampered. We rotate signing keys on a published schedule and record
+          rotations, so a report always names the key that signed it. If a key is ever
+          suspected compromised, we revoke it, publish the revocation, and re-attest affected
+          reports under a fresh key.
+        </p>
+      </div>
+      <div>
+        <h3>Reporting an issue</h3>
+        <p style="color:var(--ink-2);margin:var(--s3) 0 var(--s4)">
+          Found a gap in the verification path or in this model? Tell us at
+          <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a> before
+          disclosing publicly, per our
+          <a href="/acceptable-use" style="color:var(--ok)">Acceptable Use Policy</a>. The
+          signing core and the verifier are open source, so the verification path can be
+          reviewed line by line.
+        </p>
+        <p class="hero__claim">
+          See also: <a href="/security" style="color:var(--ok)">Security</a> ·
+          <a href="/verify" style="color:var(--ok)">Verify a report</a> ·
+          <a href="/transparency-log" style="color:var(--ok)">Transparency log</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Rely on the signature, exactly as far as this page says.</h2>
+    <p class="lede">Verify a report yourself in your own browser, or read the controls behind each finding.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/checks">What we test</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>

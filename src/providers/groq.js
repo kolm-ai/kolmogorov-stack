@@ -1,4 +1,4 @@
-// W-B / wrapper-completion — Groq provider adapter.
+// W-B / wrapper-completion - Groq provider adapter.
 //
 // Groq is an OpenAI-compatible inference service (https://api.groq.com).
 // Uses bearer auth, /openai/v1/chat/completions endpoint, models include
@@ -13,8 +13,8 @@
 //
 // Contract mirrors src/capture.js forwardOpenAI: returns
 //   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
-// Never throws on non-2xx — upstream errors flow through as-is so the
-// gateway can sign + capture them. Never throws on transport failure —
+// Never throws on non-2xx - upstream errors flow through as-is so the
+// gateway can sign + capture them. Never throws on transport failure - 
 // the hardenedFetch envelope replaces transport throws with synthetic
 // status:0 envelopes.
 

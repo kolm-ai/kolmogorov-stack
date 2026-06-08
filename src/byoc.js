@@ -1,7 +1,7 @@
 // Bring-Your-Own-Cloud (BYOC) deployment scaffolding.
 //
 // A BYOC deployment runs a .kolm artifact on infrastructure the customer
-// controls — Fly Machines, AWS Nitro Enclaves, GCP Confidential VMs, Azure
+// controls - Fly Machines, AWS Nitro Enclaves, GCP Confidential VMs, Azure
 // Confidential Compute, or a generic Docker host they own. kolm.ai never
 // touches the runtime; we issue a signed deploy manifest + a deploy script,
 // and the customer's CI runs `fly deploy` (or equivalent) themselves.
@@ -110,7 +110,7 @@ export function recordAttestation(enrollToken, { public_url, attestation, measur
       }
     }
   } catch { // deliberate: cleanup
-    // Parser failures should never block the record — we still capture the
+    // Parser failures should never block the record - we still capture the
     // raw blob so an operator can debug downstream.
   }
   const att = {
@@ -156,7 +156,7 @@ function deployScriptFor(target, manifest) {
 
 function flyDeployScript(m) {
   return `#!/usr/bin/env bash
-# kolm BYOC deploy — Fly Machines
+# kolm BYOC deploy - Fly Machines
 # deploy_id: ${m.deploy_id}
 # artifact: ${m.artifact_id}
 # region:   ${m.region}
@@ -231,7 +231,7 @@ echo "Public URL: https://$APP.fly.dev"
 
 function nitroDeployScript(m) {
   return `#!/usr/bin/env bash
-# kolm BYOC deploy — AWS Nitro Enclave
+# kolm BYOC deploy - AWS Nitro Enclave
 # deploy_id: ${m.deploy_id}
 # artifact: ${m.artifact_id}
 set -euo pipefail
@@ -282,7 +282,7 @@ echo "Enclave running. Use socat to forward 8080 ↔ vsock://16:8080 for incomin
 
 function gcpCvmDeployScript(m) {
   return `#!/usr/bin/env bash
-# kolm BYOC deploy — GCP Confidential VM
+# kolm BYOC deploy - GCP Confidential VM
 # deploy_id: ${m.deploy_id}
 # artifact: ${m.artifact_id}
 set -euo pipefail
@@ -325,7 +325,7 @@ echo "Confidential VM \\\"$NAME\\\" created in $ZONE. Boot will POST attestation
 
 function azureCvmDeployScript(m) {
   return `#!/usr/bin/env bash
-# kolm BYOC deploy — Azure Confidential VM
+# kolm BYOC deploy - Azure Confidential VM
 # deploy_id: ${m.deploy_id}
 # artifact: ${m.artifact_id}
 set -euo pipefail
@@ -373,7 +373,7 @@ echo "Confidential VM \\\"$NAME\\\" created in $RG/$LOC. Boot will POST attestat
 
 function dockerDeployScript(m) {
   return `#!/usr/bin/env bash
-# kolm BYOC deploy — generic Docker host
+# kolm BYOC deploy - generic Docker host
 # deploy_id: ${m.deploy_id}
 # artifact: ${m.artifact_id}
 set -euo pipefail

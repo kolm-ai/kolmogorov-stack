@@ -1,4 +1,4 @@
-// MODEL-EXPORT — push a trained model/artifact to a destination.
+// MODEL-EXPORT - push a trained model/artifact to a destination.
 //
 // One generic entry point (startExport) + status reads (listExports /
 // getExport). State is recorded as event-store rows (namespace 'export.job',
@@ -7,13 +7,13 @@
 // before calling anything here; every read additionally re-checks tenant_id.
 //
 // Destinations:
-//   kolm        — R2 storage. NO user token (server uses its own CLOUDFLARE
+//   kolm - R2 storage. NO user token (server uses its own CLOUDFLARE
 //                 creds via src/r2.js). Default + always-available.
-//   github      — user PAT (repo scope). Pushed via the GitHub contents API.
-//   huggingface — HF write token (or server HF_TOKEN). HF Hub upload API.
-//   ollama      — (a) return a Modelfile, NO token (default); (b) push to
+//   github - user PAT (repo scope). Pushed via the GitHub contents API.
+//   huggingface - HF write token (or server HF_TOKEN). HF Hub upload API.
+//   ollama - (a) return a Modelfile, NO token (default); (b) push to
 //                 ollama.com registry, requires the user's ollama key.
-//   custom      — user-supplied https URL (SSRF-guarded) + optional headers.
+//   custom - user-supplied https URL (SSRF-guarded) + optional headers.
 //
 // SECURITY: tokens arrive only in the POST body over TLS, are held in the
 // worker closure, and are never written to the event-store. Only non-secret
@@ -47,7 +47,7 @@ function newExportId() {
 
 // Persist a job-state row. Idempotent on export_id (INSERT OR REPLACE) so the
 // queued → running → succeeded/failed transitions overwrite one row instead of
-// piling up. NEVER carries a token — only outcome metadata.
+// piling up. NEVER carries a token - only outcome metadata.
 //
 // The event schema drops unknown keys in canonicalize(), so the job payload is
 // JSON-serialized into media_extracted_text (preserved up to 1 MiB) with
@@ -167,7 +167,7 @@ async function exportToKolm(tenantId, job) {
   const uploaded = [];
   let lastKey = null;
   if (files.length === 0) {
-    // No packaged bytes yet — still publish the manifest so the export is a
+    // No packaged bytes yet - still publish the manifest so the export is a
     // real, fetchable artifact rather than an empty success.
     const key = `t/${tenantId}/${artifactId}/manifest.json`;
     await r2.putObject(key, JSON.stringify(manifestOf(job), null, 2), {
@@ -245,7 +245,7 @@ async function exportToHuggingFace(job, options, token) {
     throw new ExportError(400, 'invalid_options', "huggingface export requires options.repo='user/model'");
   }
   const isPrivate = options.private === true;
-  // Create the repo if missing (idempotent — HF returns 409 if it exists).
+  // Create the repo if missing (idempotent - HF returns 409 if it exists).
   const create = await fetch('https://huggingface.co/api/repos/create', {
     method: 'POST',
     headers: { Authorization: `Bearer ${hfToken}`, 'Content-Type': 'application/json' },
@@ -278,7 +278,7 @@ async function exportToHuggingFace(job, options, token) {
   return { target_url, meta: { repo, revision } };
 }
 
-// Ollama: default mode (a) returns a Modelfile the user runs locally — NO
+// Ollama: default mode (a) returns a Modelfile the user runs locally - NO
 // token, NO network. Mode (b) (push to ollama.com) requires the user's ollama
 // key AND a pre-published public GGUF URL; without both we return token_required
 // rather than pretending to push.
@@ -350,7 +350,7 @@ async function runDestination(tenantId, job, destination, options, token) {
   }
 }
 
-// startExport — validate, enqueue, return 202 payload. The actual push runs on
+// startExport - validate, enqueue, return 202 payload. The actual push runs on
 // a background fiber so the route returns immediately.
 //
 // `resolveArtifact(artifact_id)` is injected by the router (it passes getJob

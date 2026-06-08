@@ -1,6 +1,6 @@
 // src/runtime-passport.js
 //
-// R-1 — Runtime passport schema. Every .kolm artifact manifest carries a
+// R-1 - Runtime passport schema. Every .kolm artifact manifest carries a
 // `runtime_passports: []` array. Each entry pins one (runtime, target_id)
 // combination with a measured-or-estimated capability fingerprint:
 //
@@ -43,14 +43,14 @@ export const RUNTIME_PASSPORT_SCHEMA_VERSION = 'kolm-runtime-passport-1';
 
 // v2 schema (R-1 enrichment, wave4-r-enrich). v1 stays the canonical pin for
 // already-shipped artifacts. v2 is opt-in for new exports and adds:
-//   * file_size_bytes / file_hash   — bytes-on-disk fingerprint
-//   * time_to_first_token_ms        — cold-prompt TTFT
-//   * max_context_tested            — largest context length the probe ran at
-//   * perplexity_delta              — additional quality signal beyond quality_delta
-//   * kv_cache                      — Shard sub-object (see src/kv-cache-shard.js)
-//   * fallback                      — already present in v1
-//   * unsupported_features          — feature flags the runtime does not honor
-//   * notes                         — free-text caveats for the procurement reviewer
+//   * file_size_bytes / file_hash - bytes-on-disk fingerprint
+//   * time_to_first_token_ms - cold-prompt TTFT
+//   * max_context_tested - largest context length the probe ran at
+//   * perplexity_delta - additional quality signal beyond quality_delta
+//   * kv_cache - Shard sub-object (see src/kv-cache-shard.js)
+//   * fallback - already present in v1
+//   * unsupported_features - feature flags the runtime does not honor
+//   * notes - free-text caveats for the procurement reviewer
 //
 // v2 entries are validated by validatePassportV2 (looser superset of v1: it
 // accepts unknown v1 fields, requires v2-only fields when they are populated).
@@ -76,18 +76,18 @@ export const RUNTIME_PASSPORT_FIELDS_V2 = Object.freeze([
   'max_context_tested',
   'perplexity_delta',
   'kv_cache',
-  // W916-I1 — speculative decoding sub-object built by
+  // W916-I1 - speculative decoding sub-object built by
   // src/speculative-decoding.js speculativePassportEntry({measured}).
   // Always paired with the same artifact's `runtime` field; never
   // back-fillable to a v1 passport without re-measurement.
   'speculative_decoding',
-  // W916-I3 — prompt-cache state (boolean) + first-vs-second-call TTFT
+  // W916-I3 - prompt-cache state (boolean) + first-vs-second-call TTFT
   // sub-object so a procurement reviewer can see the cache win.
   'prompt_cache',
-  // W916-I4 — measured continuous-batching width and the throughput
-  // delta vs single-stream — empty when not measured.
+  // W916-I4 - measured continuous-batching width and the throughput
+  // delta vs single-stream - empty when not measured.
   'continuous_batching',
-  // W921 — quantized-GEMM serving kernel sub-object built by
+  // W921 - quantized-GEMM serving kernel sub-object built by
   // src/serve-config.js servingKernelPassportEntry({resolved, measured}).
   // Records the resolved Marlin/Machete/MoE-Marlin/FP8/NVFP4 kernel + the
   // est-or-measured speedup so the receipt can quote "served via awq_marlin
@@ -206,7 +206,7 @@ export function validatePassport(p) {
       }
     }
   } else {
-    // status === 'unsupported' — numeric fields MUST be null so a UI never
+    // status === 'unsupported' - numeric fields MUST be null so a UI never
     // accidentally renders a 0 ms latency for a runtime that doesn't run it.
     for (const f of TESTED_REQUIRED_NUMERIC.concat(['quality_delta'])) {
       if (p[f] !== null) {
@@ -231,7 +231,7 @@ export function validatePassports(arr) {
 }
 
 // Rough memory estimator. Given a parameter count (billions) + a precision tag,
-// return the working-set memory in MB. Numbers are conservative — the exporter
+// return the working-set memory in MB. Numbers are conservative - the exporter
 // adds KV-cache + activations on top of this, but for the passport-table
 // preview the user wants "how big is this on disk vs in RAM" within ~10%.
 //
@@ -331,7 +331,7 @@ export function estimatePassport(spec) {
  * Build a passport row from REAL measurements. Used by the post-export probe
  * step in ExportForge after it has loaded the bytes into the target runtime
  * and pulled actual numbers. Throws if the caller tries to ship a 'tested'
- * row with missing numbers — exactly the failure mode the schema is here to
+ * row with missing numbers - exactly the failure mode the schema is here to
  * prevent.
  *
  * Required measurements: target_id, runtime, runtime_version, precision,
@@ -339,7 +339,7 @@ export function estimatePassport(spec) {
  * Optional: fallback.
  */
 // ---------------------------------------------------------------------------
-// v2 enrichment helpers — bytes-on-disk fingerprint, runtime/precision
+// v2 enrichment helpers - bytes-on-disk fingerprint, runtime/precision
 // inference, performance estimation, and a Shard kv-cache attach point.
 // All helpers are additive; existing v1 callers see no change.
 // ---------------------------------------------------------------------------
@@ -436,7 +436,7 @@ async function _hashAndSize(absPath) {
  * and sha256 from disk, infers (runtime, precision) from the path + caller
  * hint, and seeds the performance fields from ESTIMATED_PERFORMANCE.
  *
- * The resulting passport has status='estimated' by default — the caller's
+ * The resulting passport has status='estimated' by default - the caller's
  * post-export probe step is expected to upgrade it to 'tested' by calling
  * recordTestedPassport with measured numbers (then merging in file_size /
  * file_hash from this helper). Numeric performance fields the caller does
@@ -540,7 +540,7 @@ export function addSpeculativeDecodingToPassport(passport, measured) {
 /**
  * addPromptCacheToPassport(passport, measured) -> passport (copy)
  *
- * W916-I3 — attach a prompt-cache measurement. `measured` carries:
+ * W916-I3 - attach a prompt-cache measurement. `measured` carries:
  *   {
  *     enabled:           boolean        // is prompt caching on?
  *     backend:           string         // 'vllm-prefix' | 'llama-cpp-prompt-cache' | 'none'
@@ -566,7 +566,7 @@ export function addPromptCacheToPassport(passport, measured) {
 /**
  * addContinuousBatchingToPassport(passport, measured) -> passport (copy)
  *
- * W916-I4 — attach a continuous-batching measurement. `measured` carries:
+ * W916-I4 - attach a continuous-batching measurement. `measured` carries:
  *   {
  *     enabled:                boolean
  *     max_num_seqs:           number    // configured width

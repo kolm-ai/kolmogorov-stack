@@ -1,6 +1,6 @@
 // src/quality-predictor.js
 //
-// KOLM AUTOPILOT — QUALITY PREDICTOR.
+// KOLM AUTOPILOT - QUALITY PREDICTOR.
 //
 // The autopilot daemon watches a deployed model and must DECIDE whether a new
 // batch of training data is worth acquiring before it spends GPU on a compile.
@@ -25,7 +25,7 @@
 // MIN_ROWS_FOR_META (W832's own threshold) so the two surfaces agree on when
 // the GBM is trustworthy.
 //
-// CONTRACT (qp-v1) — other autopilot components (Compile Simulator, Cost
+// CONTRACT (qp-v1) - other autopilot components (Compile Simulator, Cost
 // Optimizer) import predictKScore against this EXACT shape:
 //   predictKScore({tenant, namespace, features}) -> {
 //     ok, version, kscore_predicted, ci:[lo,hi], confidence,
@@ -59,7 +59,7 @@ import {
   n_rows as metaNRows,
   MIN_ROWS_FOR_META,
 } from './kolm-meta-trainer.js';
-// W921 — split-conformal calibrated interval, attached as an ADDITIVE field
+// W921 - split-conformal calibrated interval, attached as an ADDITIVE field
 // (predicted_interval) alongside the existing point-estimate `ci` band. The
 // legacy `ci` is left untouched; this is a strict superset of the qp-v1
 // envelope and activates only when a calibration pool clears MIN_CONFORMAL_CAL.
@@ -81,7 +81,7 @@ const K_MIN = 0;
 const K_MAX = 1;
 
 // ---------------------------------------------------------------------------
-// Persistence — EXACT mandated pattern (copied from src/data-feedback.js).
+// Persistence - EXACT mandated pattern (copied from src/data-feedback.js).
 // Best-effort; never throws across the public API.
 // ---------------------------------------------------------------------------
 
@@ -117,7 +117,7 @@ function _clamp01(x) {
 function _round4(x) { return Number(Number(x).toFixed(4)); }
 
 // ---------------------------------------------------------------------------
-// Feature normalization — turn an arbitrary data-feature object into a set of
+// Feature normalization - turn an arbitrary data-feature object into a set of
 // [0,1] sub-scores where 1 is always "better for K". This is the monotonicity
 // backbone of the heuristic: every sub-score is non-decreasing in goodness.
 //
@@ -142,7 +142,7 @@ function _pairsSubScore(nPairs) {
 }
 
 // Returns a map of named sub-scores, each in [0,1], higher = better for K.
-// `defined` counts how many of the recognized features the caller supplied —
+// `defined` counts how many of the recognized features the caller supplied - 
 // used to gauge how complete the feature vector is (feeds confidence).
 function _subScores(features) {
   const f = (features && typeof features === 'object') ? features : {};
@@ -155,7 +155,7 @@ function _subScores(features) {
   }
 
   // Neutral defaults chosen so an empty/partial vector lands mid-range rather
-  // than at an extreme — keeps the heuristic stable under sparse input.
+  // than at an extreme - keeps the heuristic stable under sparse input.
   const pairs = _pairsSubScore(has('n_pairs') ? f.n_pairs : 0);
   const dupGood = 1 - _clamp01(has('dup_fraction') ? f.dup_fraction : 0.1);
   const coverage = _clamp01(has('coverage_score') ? f.coverage_score : 0.6);
@@ -187,7 +187,7 @@ function _subScores(features) {
 //
 // The proxy-slot choices are arbitrary-but-fixed: the GBM splits ordinally so
 // it only needs each feature to land on a stable, monotone-meaningful column.
-// (Caveat: these are not the slots' literal semantics — they are stable
+// (Caveat: these are not the slots' literal semantics - they are stable
 // carriers so the stump splitter can learn on our signal. The contract that
 // matters is consistency between persist and infer, which this guarantees.)
 function _toMetaFeatures(features) {
@@ -240,14 +240,14 @@ function _heuristicK(sub) {
 }
 
 // ---------------------------------------------------------------------------
-// W921 — split-conformal calibrated interval (additive).
+// W921 - split-conformal calibrated interval (additive).
 //
 // Builds calibration residuals e_i = | observed_K_i - f_hat(x_i) | over the
 // accumulated meta-training rows, where f_hat is the SAME heuristic point
 // estimator used for the cold path (over each row's preserved _qp_features).
 // Then conformalInterval gives a distribution-free, finite-sample [lo,hi] around
 // the CURRENT point prediction. Returns null when the pool is below
-// MIN_CONFORMAL_CAL (caller simply omits the additive field — zero regression).
+// MIN_CONFORMAL_CAL (caller simply omits the additive field - zero regression).
 //
 // This is intentionally a SEPARATE, additive signal: it never replaces the
 // existing `ci` band, so every existing caller of predictKScore is unaffected.
@@ -276,7 +276,7 @@ function _conformalIntervalForPoint({ tenant, point }) {
         yhat = _heuristicK(_subScores(f));
       } else {
         // No source vector preserved: fall back to the pool mean as f_hat so the
-        // residual still reflects spread (conservative — widens the interval).
+        // residual still reflects spread (conservative - widens the interval).
         yhat = null;
       }
       if (Number.isFinite(yhat)) calRows.push({ y, yhat });
@@ -310,7 +310,7 @@ function _conformalIntervalForPoint({ tenant, point }) {
 }
 
 // ---------------------------------------------------------------------------
-// predictKScore — the public predictor. Heuristic below MIN_ROWS_FOR_META,
+// predictKScore - the public predictor. Heuristic below MIN_ROWS_FOR_META,
 // learned at or above it.
 // ---------------------------------------------------------------------------
 
@@ -336,7 +336,7 @@ export async function predictKScore({ tenant, namespace, features } = {}) {
     try { nTrain = metaNRows({ tenant_id: t }); } catch { nTrain = 0; }
 
     const sub = _subScores(features);
-    // Require at least one recognized, finite feature — an object of only junk
+    // Require at least one recognized, finite feature - an object of only junk
     // keys is a malformed call, not a sparse-but-valid vector.
     if (sub.defined === 0) {
       return { ok: false, error: 'no_recognized_features', version: QUALITY_PREDICTOR_VERSION };
@@ -352,10 +352,10 @@ export async function predictKScore({ tenant, namespace, features } = {}) {
       result = _predictHeuristic({ sub, nTrain });
     }
 
-    // W921 — additive split-conformal interval around the point estimate. When
+    // W921 - additive split-conformal interval around the point estimate. When
     // the learned path already produced a meta conformal interval, prefer it;
     // otherwise compute one from the accumulated calibration pool. null when the
-    // pool is below the floor (field simply absent — no regression).
+    // pool is below the floor (field simply absent - no regression).
     const predicted_interval = (result.conformal_interval && result.conformal_interval.lo != null)
       ? result.conformal_interval
       : _conformalIntervalForPoint({ tenant: t, point: result.kscore_predicted });
@@ -403,7 +403,7 @@ function _predictHeuristic({ sub, nTrain }) {
     : 0;
   // Feature completeness in [0,1] over the 6 recognized features.
   const completeness = sub.defined / 6;
-  // Heuristic confidence: floor 0.10, ceiling 0.45. Always LOW — the cold path
+  // Heuristic confidence: floor 0.10, ceiling 0.45. Always LOW - the cold path
   // is calibrated to one run and must not be over-trusted.
   const confidence = _round4(
     0.10 + 0.25 * supportFrac + 0.10 * completeness
@@ -440,7 +440,7 @@ async function _predictLearned({ tenant, features, sub, nTrain }) {
     const trained = trainKolmMeta({ rows });
     if (!trained || trained.ok !== true) return null;
 
-    // Infer in the meta-trainer's own feature space — the same projection used
+    // Infer in the meta-trainer's own feature space - the same projection used
     // when the rows were persisted, so train and infer agree on vocabulary.
     const inf = inferKolmMeta({ features: _toMetaFeatures(features) });
     if (!inf || inf.ok !== true || !Number.isFinite(Number(inf.kscore_predicted))) {
@@ -455,7 +455,7 @@ async function _predictLearned({ tenant, features, sub, nTrain }) {
     const confidence = _round4(Math.max(0.5, Math.min(0.95, 0.5 + 0.45 * gbmConf)));
 
     // Tighter band than the cold path: ~0.12 at min learned confidence, ~0.05
-    // at high confidence. (Legacy point-estimate band — UNCHANGED.)
+    // at high confidence. (Legacy point-estimate band - UNCHANGED.)
     const half = 0.155 - 0.11 * confidence;
     const lo = _round4(_clampK(k - half));
     const hi = _round4(_clampK(k + half));
@@ -490,7 +490,7 @@ async function _predictLearned({ tenant, features, sub, nTrain }) {
 }
 
 // ---------------------------------------------------------------------------
-// backfillFromRuns — derive (features -> observed K) training rows from
+// backfillFromRuns - derive (features -> observed K) training rows from
 // historical distill runs so the predictor can flip heuristic -> learned.
 // Idempotent: a run already present in the meta row store (matched by run_id)
 // is skipped, so re-running never double-counts.
@@ -518,7 +518,7 @@ export async function backfillFromRuns({ tenant, namespace, runs_dir } = {}) {
       ? runs_dir
       : path.join(os.homedir(), '.kolm', 'distill-runs');
 
-    // Existing run_ids in the meta row store — for idempotent skipping.
+    // Existing run_ids in the meta row store - for idempotent skipping.
     const existing = readTrainingRows({ tenant_id: t });
     const seen = new Set(
       (Array.isArray(existing) ? existing : [])
@@ -672,7 +672,7 @@ function _deriveObservedK(evalLike) {
 }
 
 // Exposed for tests + downstream introspection. Not part of the stable
-// contract — do not rely on these from other modules.
+// contract - do not rely on these from other modules.
 export const __internals = Object.freeze({
   _subScores,
   _heuristicK,

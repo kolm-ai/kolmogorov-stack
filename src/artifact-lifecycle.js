@@ -1,16 +1,16 @@
-// R-2 — Artifact lifecycle state machine.
+// R-2 - Artifact lifecycle state machine.
 //
 // An artifact moves through a small set of states that mirror the real-world
 // publish workflow of a signed .kolm:
 //
-//   created   — bytes exist; not yet signed (e.g. mid-build)
-//   signed    — receipt + signature attached; eligible to deploy
-//   deployed  — bound to a namespace and serving traffic
-//   monitored — deployed AND drift/health monitoring is on
-//   superseded— another artifact took its serving slot (successor_id set)
-//   revoked   — withdrawn (compromised key, license violation, etc.). Pulls
+//   created - bytes exist; not yet signed (e.g. mid-build)
+//   signed - receipt + signature attached; eligible to deploy
+//   deployed - bound to a namespace and serving traffic
+//   monitored - deployed AND drift/health monitoring is on
+//   superseded - another artifact took its serving slot (successor_id set)
+//   revoked - withdrawn (compromised key, license violation, etc.). Pulls
 //               return 410 Gone and can never deploy again.
-//   archived  — terminal cold storage (not serving, not eligible)
+//   archived - terminal cold storage (not serving, not eligible)
 //
 // Transitions are append-only. Every transition records a {timestamp, from,
 // to, actor, reason, evidence_id, successor_id?} entry on the artifact's
@@ -68,11 +68,11 @@ export const LIFECYCLE_STATES = [
 
 // Allowed forward transitions. Anything not listed is rejected. `revoked`
 // is reachable from any non-terminal state via the dedicated revoke() helper
-// below — it is intentionally NOT inside this table so callers cannot route
+// below - it is intentionally NOT inside this table so callers cannot route
 // to it accidentally on a typo (revoke is destructive: pulls 410 forever).
 //
 // `undeployed` is included as a transient state that lives ONLY in the
-// transition graph (it is not in LIFECYCLE_STATES — the canonical
+// transition graph (it is not in LIFECYCLE_STATES - the canonical
 // monitorable states are the seven above). When a namespace clears its
 // artifact, we mark the binding deployed→undeployed→(deployed|archived).
 // History rows still record both ends so the audit trail is complete.
@@ -126,7 +126,7 @@ function _writeLifecycle(artifact_id, obj) {
 }
 
 // Materialise a lifecycle handle for an artifact_id. If no on-disk record
-// exists, returns a fresh `{current_state:'created', history:[]}` shell —
+// exists, returns a fresh `{current_state:'created', history:[]}` shell - 
 // callers can pass that straight into transition().
 export function loadOrInit(artifact_id) {
   const existing = readLifecycle(artifact_id);
@@ -153,7 +153,7 @@ export function getHistory(artifact) {
 }
 
 // True when the artifact is eligible for pull/download. The only state that
-// blocks a pull is `revoked` — archived artifacts can still be pulled for
+// blocks a pull is `revoked` - archived artifacts can still be pulled for
 // reproducibility (audit, retro-eval) even though they are not serving.
 export function canPull(artifact) {
   const state = getCurrentState(artifact);
@@ -180,7 +180,7 @@ export function transition(artifact, toState, opts = {}) {
   if (!allowed.includes(toState)) {
     throw new Error(
       `invalid transition: ${from} -> ${toState} not permitted. ` +
-      `Allowed from "${from}": [${allowed.join(', ') || '(none — terminal state)'}]`,
+      `Allowed from "${from}": [${allowed.join(', ') || '(none - terminal state)'}]`,
     );
   }
   if (toState === 'revoked' && (!reason || String(reason).trim() === '')) {
@@ -225,7 +225,7 @@ export function listArtifactIds() {
   }
 }
 
-// Test helper — wipe a single artifact's lifecycle record. Production
+// Test helper - wipe a single artifact's lifecycle record. Production
 // callers should use transition(..., 'archived'); this exists so unit tests
 // can run hermetically without touching real lake state.
 export function _resetForTests(artifact_id) {
@@ -252,7 +252,7 @@ export function getSideEffectLog() {
 }
 
 /**
- * blockPulls(artifactId) — invoked on revoke. The default implementation
+ * blockPulls(artifactId) - invoked on revoke. The default implementation
  * appends a structured record to an in-memory log so tests can observe the
  * side effect fired. Production wiring is expected to replace this with a
  * call into store.js / the router's pull guard.
@@ -270,7 +270,7 @@ export function blockPulls(artifactId) {
 }
 
 /**
- * alertDeployments(artifactId) — invoked on revoke. Notifies any deployment
+ * alertDeployments(artifactId) - invoked on revoke. Notifies any deployment
  * that bound to the artifact_id. Default implementation is the structured
  * log; production wiring routes to the alert ladder.
  */
@@ -287,7 +287,7 @@ export function alertDeployments(artifactId) {
 }
 
 /**
- * linkSuccessor(artifactId, successorId) — invoked on supersede. The default
+ * linkSuccessor(artifactId, successorId) - invoked on supersede. The default
  * implementation appends a structured log row; production wiring stores the
  * link on the lifecycle record.
  */
@@ -308,7 +308,7 @@ export function linkSuccessor(artifactId, successorId) {
 }
 
 /**
- * ArtifactLifecycle — class-shaped wrapper around the v1 transition functions
+ * ArtifactLifecycle - class-shaped wrapper around the v1 transition functions
  * that enforces the FULL R-2 ladder (created -> signed -> deployed ->
  * monitored -> drift_detected -> re_evaluated -> superseded/archived/revoked).
  *
@@ -342,7 +342,7 @@ export class ArtifactLifecycle {
   }
 
   /**
-   * transition(event, actor, reason, evidence) — validate the move against
+   * transition(event, actor, reason, evidence) - validate the move against
    * TRANSITIONS, append a history row, fire side effects, persist.
    *
    * @param {string} event  - target state
@@ -358,7 +358,7 @@ export class ArtifactLifecycle {
     if (!Array.isArray(allowed) || !allowed.includes(event)) {
       throw new Error(
         `ArtifactLifecycle: invalid transition ${this._state} -> ${event}. ` +
-        `Allowed from "${this._state}": [${(allowed || []).join(', ') || '(none — terminal state)'}]`,
+        `Allowed from "${this._state}": [${(allowed || []).join(', ') || '(none - terminal state)'}]`,
       );
     }
     if (event === 'revoked' && (!reason || String(reason).trim() === '')) {

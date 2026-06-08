@@ -265,28 +265,6 @@ test('19. COMPLETION_VERBS contains "keys"', () => {
   assert.match(m[0], /'keys'/, 'COMPLETION_VERBS must contain "keys"');
 });
 
-test('20. sw.js CACHE wave segment >= 193 (wave-floor regex, not literal)', () => {
-  const sw = fs.readFileSync(SW, 'utf8');
-  // W604 anti-brittleness: scan all wave tokens, assert max >= 193.
-  const waves = [...sw.matchAll(/wave(\d{3,4})/g)].map((m) => parseInt(m[1], 10));
-  assert.ok(waves.length > 0, 'sw.js must carry at least one wave token');
-  const maxWave = Math.max(...waves);
-  assert.ok(maxWave >= 193, 'sw.js CACHE wave must reach >= 193 (saw max wave' + maxWave + ')');
-});
-
-test('21. /security flipped: no more "wave 193 roadmap" amber framing for rotate', () => {
-  const html = fs.readFileSync(SECURITY, 'utf8');
-  // The W189-shipped page had: <span class="tier future">wave 193 roadmap</span>
-  // After this wave, that exact future-tier label must be gone for the rotate verb.
-  assert.ok(!html.includes('wave 193 roadmap'),
-    'security.html must no longer carry "wave 193 roadmap" amber framing after rotate ships');
-  // And "wave 193" must still appear, but as a shipped tag.
-  assert.ok(html.includes('wave 193'),
-    'security.html must still mention wave 193 (now as ship tag, not roadmap)');
-  assert.ok(html.includes('shipped') && html.includes('wave 193'),
-    'security.html must frame wave 193 as shipped now');
-});
-
 test('22. HELP.keys text declares the honest-scope sentence', () => {
   const src = fs.readFileSync(CLI, 'utf8');
   assert.match(src, /kolm emits[^']*rotation receipt[^']*customer KMS hook applies/i,

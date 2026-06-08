@@ -1,10 +1,10 @@
-// Federated approval-row sharing — W461.
+// Federated approval-row sharing - W461.
 //
 // Closes audit 2026-05-19 P1 Federated Foundations cluster open item:
 //   "approval-row sharing (decisions, not data); cross-org demo with 2+ tenants;
 //   opt-in policy + audit chain."
 //
-// HONEST SCOPE — distinct from src/federated-learning.js (gradient-aggregation
+// HONEST SCOPE - distinct from src/federated-learning.js (gradient-aggregation
 // foundation). This module ships a DIFFERENT primitive: decision-aggregation,
 // where the only thing that crosses a tenant boundary is sha256(namespace +
 // ':' + input_hash + ':' + decision_kind). The receiver sees counts of
@@ -12,7 +12,7 @@
 // reviewer, or any raw label content.
 //
 // What an opted-in peer learns:
-//   - "I have N approvals whose approval_hash matches yours" — and N is
+//   - "I have N approvals whose approval_hash matches yours" - and N is
 //     Laplace-noised before crossing the wire (ε=1.0, sensitivity=1, scale=1.0).
 //
 // What an opted-in peer does NOT learn:
@@ -40,7 +40,7 @@ export const FEATURE_STATE_LABEL = 'Federated approval-row sharing (foundation)'
 export const FEATURE_STATE_DESCRIPTION =
   'Foundation: hash-only approval-row sharing with Laplace-DP-noised aggregates. ' +
   'Network transport, peer-identity authentication, and Byzantine robustness are ' +
-  'the caller responsibility — this module guarantees only that raw input/output ' +
+  'the caller responsibility - this module guarantees only that raw input/output ' +
   'text never crosses the tenant boundary.';
 
 export const DEFAULT_DP_EPSILON = 1.0;
@@ -319,7 +319,7 @@ export function auditTrail({ tenant_id, limit = 50 } = {}) {
   };
 }
 
-// Test/util — wipes the local federated state (opt-in registry + share
+// Test/util - wipes the local federated state (opt-in registry + share
 // ledger). Production callers MUST NOT use this; tests rely on it to keep
 // fixtures isolated.
 export function _wipeLocalState() {

@@ -1,4 +1,4 @@
-// W263 — kolm.ai marketplace catalog.
+// W263 - kolm.ai marketplace catalog.
 //
 // Single source of truth for the public marketplace surface at /marketplace.
 // Every artifact entry MUST point to a real .kolm file on disk under
@@ -26,7 +26,7 @@ import {
 } from './ed25519.js';
 
 // adm-zip is CommonJS; pull it through createRequire so hydrate() can stay
-// synchronous (W342 callers — getCatalogManifest, listArtifacts, getArtifact —
+// synchronous (W342 callers - getCatalogManifest, listArtifacts, getArtifact - 
 // are all sync and feed the marketplace UI/CLI in a tight loop).
 const __require = createRequire(import.meta.url);
 let __AdmZip = null;
@@ -69,7 +69,7 @@ export const MARKETPLACE_BADGES = Object.freeze([
   'Verified',
 ]);
 
-// SEED CATALOG — every slug here MUST resolve to a real file on disk via
+// SEED CATALOG - every slug here MUST resolve to a real file on disk via
 // ARTIFACT_ROOTS. The five entries below back the five .kolm files in
 // public/registry-pack/ (built by scripts/build-registry-pack.js, sha256
 // recorded in public/registry-pack/manifest.json). The sixth slot is the
@@ -153,7 +153,7 @@ const SEED_CATALOG = [
     vertical: 'support',
     tags: ['classification', 'support', 'intent', 'predibase-style'],
   },
-  // W343 — claims-redactor: HIPAA Safe Harbor PHI redactor backed by
+  // W343 - claims-redactor: HIPAA Safe Harbor PHI redactor backed by
   // examples/claims-redactor/recipe.js (single-source mirror of
   // src/phi-redactor.js DETECTORS). 60 real seed rows, K-score ~0.985,
   // productionReady() true.
@@ -169,7 +169,7 @@ const SEED_CATALOG = [
     vertical: 'healthcare',
     tags: ['redaction', 'healthcare', 'phi', 'hipaa', 'safe-harbor', 'claims'],
   },
-  // W475 — qwen-distill-classifier: first model-class seed (artifact_class
+  // W475 - qwen-distill-classifier: first model-class seed (artifact_class
   // distilled_model, base=Qwen/Qwen2.5-0.5B-Instruct). Bundled model_weights
   // bytes + real_eval seed provenance + production_ready=true. Recipe is a
   // TF-IDF intent classifier so the artifact runs cleanly in JS today;
@@ -189,7 +189,7 @@ const SEED_CATALOG = [
   },
 ];
 
-// Manifest from public/registry-pack/ — populated at startup. Used to pull
+// Manifest from public/registry-pack/ - populated at startup. Used to pull
 // real K-scores. If the file is missing or malformed we keep `null` so the
 // UI shows "unverified" rather than a fake number.
 let REGISTRY_PACK_MANIFEST = null;
@@ -274,7 +274,7 @@ function hydrate(seed) {
   // not a derivation of `k_score != null && badges.includes('Verified')`.
   // Read the manifest synchronously via adm-zip (already a root dep) and feed
   // it through productionReadySync(). If the .kolm has no manifest or fails to
-  // parse, treat as unverified — same outcome as a failed gate.
+  // parse, treat as unverified - same outcome as a failed gate.
   let verdict = { ok: false, gates: {}, reasons: ['manifest_unreadable'] };
   const AdmZip = loadAdmZip();
   if (!AdmZip) {
@@ -294,7 +294,7 @@ function hydrate(seed) {
     }
   }
   // W428 P0 audit lock-in: the value derived from productionReadySync() above
-  // is PROVISIONAL — the durability, executable_bundle, and eval_parity gates
+  // is PROVISIONAL - the durability, executable_bundle, and eval_parity gates
   // were skipped (productionReadySync() tags its envelope with
   // `_provisional: true`). Exposing it as a public `verified: true` lets a
   // direct module consumer (CLI, third-party, future route) treat the sync
@@ -318,7 +318,7 @@ function hydrate(seed) {
   // direct listArtifacts() consumer cannot read a `Verified` pill that was
   // never gated by the bundle + eval_parity + durability checks.
   const finalBadges = badges.filter((b) => b !== 'Verified');
-  // W409x — full metadata block for the listing. Sourced from the on-disk
+  // W409x - full metadata block for the listing. Sourced from the on-disk
   // manifest where possible (license/runtime/policy/lineage) and from the
   // seed catalog where the manifest stays silent (privacy_class/device_compat).
   // The block is stable across the seed entry and the on-disk manifest so a
@@ -356,7 +356,7 @@ function hydrate(seed) {
     source_path: seed.source_path,
     download_url: seed.download_url,
     detail_url: `/marketplace/${seed.slug}`,
-    // W409x — metadata block (author, license, runtime_target, schemas,
+    // W409x - metadata block (author, license, runtime_target, schemas,
     // privacy_class, production_readiness_state, verified_receipt_hash,
     // device_compatibility). Listed here AND mirrored as flat fields below so
     // a `?filter=...&` API endpoint can filter without un-nesting.
@@ -373,33 +373,33 @@ function hydrate(seed) {
 }
 
 // =====================================================================
-// W409x — metadata builder + production-gate install helpers.
+// W409x - metadata builder + production-gate install helpers.
 //
 // PUBLIC SHAPE (each field MUST round-trip through the manifest -> listing ->
 // install path):
-//   author                       — anonymized hash (sha256 of an `author_email`
+//   author - anonymized hash (sha256 of an `author_email`
 //                                   or `submitter` field) OR a display string
-//   license                      — license id pulled from manifest.license.id
+//   license - license id pulled from manifest.license.id
 //                                   (fallback: seed.license)
-//   runtime_target               — manifest.runtime || fallback "cloud"
-//   input_schema, output_schema  — JSON schema fragments OR a string description
+//   runtime_target - manifest.runtime || fallback "cloud"
+//   input_schema, output_schema - JSON schema fragments OR a string description
 //                                   (compile-time recipe block may set these;
 //                                   default null if the artifact doesn't declare)
-//   privacy_class                — public-data-only | redacted-pii |
+//   privacy_class - public-data-only | redacted-pii |
 //                                   raw-pii-internal-only
 //                                   (mapped from manifest.policy + tags)
-//   production_readiness_state   — production_ready_verified |
+//   production_readiness_state - production_ready_verified |
 //                                   source_generated | foundation
 //                                   (production_ready_verified iff the unified
 //                                   productionReady gate ok; source_generated
 //                                   if the artifact ships a recipe.bundle.mjs
 //                                   but has no seed_provenance; foundation
 //                                   otherwise)
-//   verified_receipt_hash        — manifest.signature.signature_ed25519 base64
+//   verified_receipt_hash - manifest.signature.signature_ed25519 base64
 //                                   (or the receipt.signature_ed25519 carried
 //                                   in the receipt.json block; either way it
 //                                   is the Ed25519 receipt hash)
-//   device_compatibility         — list of profile_class strings
+//   device_compatibility - list of profile_class strings
 //                                   (manifest.compiled_targets[*].profile_class
 //                                   when present; falls back to ["cloud"])
 // =====================================================================
@@ -443,7 +443,7 @@ function _resolvePrivacyClass(manifest, seed) {
 }
 
 function _resolveProductionReadinessState(verdict, manifest) {
-  // W428 — only the LIVE async productionReady() verdict may flip the state
+  // W428 - only the LIVE async productionReady() verdict may flip the state
   // to 'production_ready_verified'. The sync verdict from productionReadySync()
   // carries `_provisional: true`; treating it as fully verified here would let
   // a direct listArtifacts() consumer claim production-readiness without the
@@ -539,7 +539,7 @@ export function buildArtifactMetadata({ seed, manifest, verdict, sha256, bytes }
   };
 }
 
-// W409x — extract a metadata block from a downloaded artifact's manifest.
+// W409x - extract a metadata block from a downloaded artifact's manifest.
 // Mirrors `buildArtifactMetadata` so an `install` caller can compute the same
 // block the listing surfaced. Returns null on read failure.
 export function extractManifestMetadataFromBytes(buffer, seed = null) {
@@ -560,7 +560,7 @@ export function extractManifestMetadataFromBytes(buffer, seed = null) {
   } catch (_e) { return null; }
 }
 
-// W409x — install path. Pass downloaded bytes + the marketplace listing
+// W409x - install path. Pass downloaded bytes + the marketplace listing
 // row; we re-run productionReady() against the bytes (NOT the row's claim)
 // and accept or reject the install accordingly. Returns
 // `{ ok, reason?, written_path?, recheck:{ ok, reasons } }`.
@@ -582,7 +582,7 @@ export async function installArtifactFromBytes({
   if (typeof destPath !== 'string' || !destPath) {
     throw new Error('installArtifactFromBytes: destPath required');
   }
-  // sha256 honesty check first — protects against compromised mirrors.
+  // sha256 honesty check first - protects against compromised mirrors.
   const got = crypto.createHash('sha256').update(buffer).digest('hex');
   if (expectedSha256 && got !== expectedSha256) {
     return { ok: false, reason: 'sha256_mismatch', expected: expectedSha256, got, recheck: { ok: false, reasons: ['sha256_mismatch'] } };
@@ -597,7 +597,7 @@ export async function installArtifactFromBytes({
   } catch (e) {
     recheck = { ok: false, gates: {}, reasons: [`recheck_threw: ${e.message}`] };
   }
-  // The marketplace listing MAY claim production_ready_verified — we never
+  // The marketplace listing MAY claim production_ready_verified - we never
   // trust it. The re-check verdict is authoritative; the listing claim only
   // surfaces in the rejection reason so a buyer can see the contradiction.
   const listingClaimedReady = !!(listingRow && (
@@ -615,7 +615,7 @@ export async function installArtifactFromBytes({
       recheck,
     };
   }
-  // Accept — move temp -> dest and surface the (possibly forced) verdict.
+  // Accept - move temp -> dest and surface the (possibly forced) verdict.
   try { fs.renameSync(tmpPath, destPath); }
   catch (e) {
     // EXDEV / Windows: fallback to copy+unlink
@@ -658,18 +658,18 @@ export const MARKETPLACE_ARTIFACTS = new Proxy([], {
   },
 });
 
-// listArtifacts({filter}) — return the hydrated, filtered catalog.
+// listArtifacts({filter}) - return the hydrated, filtered catalog.
 // Filter keys (all optional, all AND-ed together):
-//   category               — exact match against artifact.category
-//   license                — exact match (W409x: also matches metadata.license)
-//   min_k_score            — drops artifacts whose k_score is null or below the floor
-//   verified               — true => only entries with verified:true
-//   badge                  — string => only entries whose badges include the value
-//   q                      — free-text search across slug/name/description/tags
-//   runtime_target         — (W409x) exact match against artifact.runtime_target
-//   privacy_class          — (W409x) exact match against artifact.privacy_class
-//   device                 — (W409x) substring match against device_compatibility
-//   production_readiness_state — (W409x) exact match
+//   category - exact match against artifact.category
+//   license - exact match (W409x: also matches metadata.license)
+//   min_k_score - drops artifacts whose k_score is null or below the floor
+//   verified - true => only entries with verified:true
+//   badge - string => only entries whose badges include the value
+//   q - free-text search across slug/name/description/tags
+//   runtime_target - (W409x) exact match against artifact.runtime_target
+//   privacy_class - (W409x) exact match against artifact.privacy_class
+//   device - (W409x) substring match against device_compatibility
+//   production_readiness_state - (W409x) exact match
 export function listArtifacts({ filter = {} } = {}) {
   const all = hydrateAll();
   return all.filter((a) => {
@@ -727,7 +727,7 @@ function canonicalJson(v) {
 const CATALOG_SPEC_VERSION = 'kolm-marketplace-1';
 const SIGNATURE_ALGO = 'sha256-anchor';
 
-// getCatalogManifest() — returns the full signed catalog. Signature is a
+// getCatalogManifest() - returns the full signed catalog. Signature is a
 // deterministic sha256 over the canonical JSON of the manifest body. The
 // Ed25519 sidecar signs the anchored envelope for public provenance.
 export function getCatalogManifest() {
@@ -762,7 +762,7 @@ export function getCatalogManifest() {
   return signatureEd25519 ? { ...anchored, signature_ed25519: signatureEd25519 } : anchored;
 }
 
-// Helper for the download endpoint — returns an absolute path to the
+// Helper for the download endpoint - returns an absolute path to the
 // backing file if it exists, null otherwise.
 export function resolveArtifactPath(slug) {
   const a = getArtifact(slug);
@@ -772,7 +772,7 @@ export function resolveArtifactPath(slug) {
   return abs;
 }
 
-// Verify a catalog manifest — recompute the signature over the body and
+// Verify a catalog manifest - recompute the signature over the body and
 // compare. Returns { ok, expected, got } so the caller can surface the
 // mismatch.
 export function verifyCatalogManifest(manifest) {
@@ -802,13 +802,13 @@ export const SPEC = Object.freeze({
 });
 
 // ============================================================================
-// W737 — Artifact Marketplace Expansion
+// W737 - Artifact Marketplace Expansion
 // ============================================================================
 //
 // W737-1 ("Browse by vertical, task type, K-Score, hardware target") + W737-2
 // ("Rate and review") + W737-3 ("Publishers earn revenue (70/30 split)").
 // W737-4 ("Fine-tune on their own captures (transfer learning)") rides on the
-// W715 namespace-fingerprint primitive (already shipped) — the docs page at
+// W715 namespace-fingerprint primitive (already shipped) - the docs page at
 // /docs/marketplace/publish links it.
 //
 // Design decisions vs the W342/W263 seed catalog above:
@@ -818,7 +818,7 @@ export const SPEC = Object.freeze({
 //     both kolm.ai's seed entries AND third-party listings.
 //   - 70/30 split is HARD-CODED here (not a runtime config) so the contract
 //     cannot drift between deploys. Payout integration is honestly NOT YET
-//     WIRED — the docs page says so explicitly and computeRoyalty() is a pure
+//     WIRED - the docs page says so explicitly and computeRoyalty() is a pure
 //     accounting function with no side effects (no Stripe write, no balance
 //     ledger). When payouts ship (post-W737), they will read computeRoyalty()
 //     as the source of truth and not invent their own math.
@@ -833,12 +833,12 @@ export const SPEC = Object.freeze({
 //     aggregation. getReviews() reads ALL reviews for a cid because reviews
 //     are a public artifact attribute; that's the W737-2 design. Aggregate
 //     counts (ratings_avg, ratings_count) are computed on-read and not stored
-//     as a denormalised field — keeping the event-store the single source of
+//     as a denormalised field - keeping the event-store the single source of
 //     truth.
 
 export const MARKETPLACE_VERSION = 'w737-v1';
 
-// W737-3 revenue split — HARD-CODED constants. Never read from runtime config.
+// W737-3 revenue split - HARD-CODED constants. Never read from runtime config.
 // Changing these requires a code change + a new W7xx wave; the docs page TOS
 // pins this contract for publishers.
 export const W737_PUBLISHER_SHARE = 0.70;
@@ -864,7 +864,7 @@ import { appendEvent as _appendEvent, listEvents as _listEvents } from './event-
 // searchArtifacts({vertical, task_type, min_kscore, hardware_target, limit, offset})
 //
 // Returns {ok:true, results, total, facets:{...counts}}. Empty results are
-// represented as a normal envelope with results=[] and total=0 — NOT an error.
+// represented as a normal envelope with results=[] and total=0 - NOT an error.
 // The route handler maps an empty result set to the honest envelope
 // {ok:false, error:'marketplace_empty', hint:'no artifacts registered yet'}.
 //
@@ -953,7 +953,7 @@ export async function submitReview(opts = {}) {
 //
 // Returns {ratings_avg, ratings_count, reviews:[]}. Read is public (reviews
 // are a public artifact attribute by W737-2 design) so we pull all rows for
-// the cid across tenants — but aggregation is on-the-fly here; the underlying
+// the cid across tenants - but aggregation is on-the-fly here; the underlying
 // event-store rows still carry their tenant_id for any per-tenant audit.
 export async function getReviews(artifact_cid) {
   if (!artifact_cid) {

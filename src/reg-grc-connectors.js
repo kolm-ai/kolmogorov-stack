@@ -1,10 +1,10 @@
-// W834-6 — GRC export connectors (OneTrust, ServiceNow, IBM OpenPages).
+// W834-6 - GRC export connectors (OneTrust, ServiceNow, IBM OpenPages).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md):
 //   [W834-6] GRC export connectors: OneTrust, ServiceNow, IBM OpenPages.
 //
 // W768 ships the field-name MAPPING (src/model-card-schema.js holds
-// GOVERNANCE_PLATFORM_MAPPINGS); W834-6 ships the EXPORT ACTION — given a
+// GOVERNANCE_PLATFORM_MAPPINGS); W834-6 ships the EXPORT ACTION - given a
 // model-card / governance-report blob and a vendor, return the vendor-
 // shaped JSON payload PLUS the honest creds-check.
 //
@@ -14,7 +14,7 @@
 //     We STILL compute and return export_payload so the operator can
 //     manually upload via the vendor UI. NEVER drop the payload silently.
 //   * When creds ARE present we DO NOT actually call the vendor API in
-//     this module — that's a downstream job (the deploy pipeline owns
+//     this module - that's a downstream job (the deploy pipeline owns
 //     credential rotation). We just emit {ok:true, ready_to_post:true,
 //     export_payload}. The caller decides whether to post or to log.
 //   * NEVER fabricates field values. Missing fields in the report land in
@@ -39,7 +39,7 @@
 
 export const REG_GRC_CONNECTORS_VERSION = 'w834-v1';
 
-// Vendor enumeration. Frozen — adding a vendor requires bumping the version
+// Vendor enumeration. Frozen - adding a vendor requires bumping the version
 // stamp + adding env-var + shape table entries below.
 export const SUPPORTED_VENDORS = Object.freeze([
   'onetrust',
@@ -276,7 +276,7 @@ function _exportVendor(vendor, report) {
 }
 
 // =============================================================================
-// PUBLIC: exportByVendor(report, vendor) — generic dispatch.
+// PUBLIC: exportByVendor(report, vendor) - generic dispatch.
 //
 // Lets callers pass the vendor as a string instead of picking one of the
 // three exported functions above. Mirrors the W768-3

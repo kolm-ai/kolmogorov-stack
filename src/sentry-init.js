@@ -9,7 +9,7 @@
 // Why dynamic import: @sentry/node is intentionally NOT in package.json so
 // the default install footprint stays small. Sites that need it opt in.
 //
-// Caveats: tracesSampleRate is held at 0.1 — adjust per traffic. Release
+// Caveats: tracesSampleRate is held at 0.1 - adjust per traffic. Release
 // tagging requires KOLM_RELEASE (commit SHA / semver) to be set at boot;
 // without it Sentry groups crashes under "unknown".
 

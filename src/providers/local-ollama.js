@@ -1,16 +1,16 @@
-// W-B / wrapper-completion — local-Ollama provider adapter.
+// W-B / wrapper-completion - local-Ollama provider adapter.
 //
 // Ollama exposes an OpenAI-compatible chat surface at
 // http://127.0.0.1:11434/v1/chat/completions. No auth in default
 // install; the gateway treats Ollama as a trusted local upstream.
 //
-// W-N hardening: shared hardenedFetch — 429+backoff (max 3 retries),
+// W-N hardening: shared hardenedFetch - 429+backoff (max 3 retries),
 // AbortController timeoutMs (default 60s, clamped 1-300s), malformed-JSON
 // envelope, OpenAI-compat body normalizer.
 //
 // Contract mirrors src/capture.js forwardOpenAI: returns
 //   { status: <http status int>, json: <parsed body or {_raw}>, elapsed_us }
-// Never throws on non-2xx — upstream errors flow through as-is so the
+// Never throws on non-2xx - upstream errors flow through as-is so the
 // gateway can sign + capture them. Never throws on transport failure.
 
 import { hardenedFetch, buildOpenAICompatBody, DEFAULT_TIMEOUT_MS } from './_shared.js';

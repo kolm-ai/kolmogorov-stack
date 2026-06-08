@@ -244,7 +244,7 @@ function tracesPayload(spans) {
           parentSpanId: s.parentSpanId,
           name: s.name,
           // SpanKind: 1=INTERNAL (default, back-compat with the kolm.* path),
-          // 3=CLIENT (GenAI inference spans — the gateway is a client of the
+          // 3=CLIENT (GenAI inference spans - the gateway is a client of the
           // upstream provider per OTel SemConv gen-ai-spans).
           kind: Number.isInteger(s.kind) ? s.kind : 1,
           startTimeUnixNano: s.startTimeUnixNano,
@@ -339,18 +339,18 @@ function routePattern(req) {
 }
 
 // =============================================================================
-// W733 — OpenTelemetry Semantic Conventions
+// W733 - OpenTelemetry Semantic Conventions
 //
 // Atomic additions (W707 plan W733-1/-2/-3):
-//   * KOLM_OTEL_ATTRS    — the kolm.* attribute namespace (token confidence,
+//   * KOLM_OTEL_ATTRS - the kolm.* attribute namespace (token confidence,
 //                          routing decision, K-Score, K-Score 24h drift,
 //                          artifact CID, tenant id_hash, namespace).
-//   * KOLM_OTEL_SPAN_NAMES — sub-span structure for the inference timeline
+//   * KOLM_OTEL_SPAN_NAMES - sub-span structure for the inference timeline
 //                          (queue → load → prefill → decode).
-//   * createInferenceSpans(parent, timings) — emits 4 child spans with
+//   * createInferenceSpans(parent, timings) - emits 4 child spans with
 //                          relative start-time offsets so they render as a
 //                          stacked timeline in any OTel UI.
-//   * setRoutingAttributes(span, w709Block) — pure attacher; safely no-ops
+//   * setRoutingAttributes(span, w709Block) - pure attacher; safely no-ops
 //                          when span or @opentelemetry/api are absent.
 //
 // Privacy contract (W733 #6): tenant_id NEVER appears as a raw attribute.
@@ -362,7 +362,7 @@ function routePattern(req) {
 // package.json. At runtime we try-import it lazily; if absent we fall
 // through to the existing STATE.enabled-driven kolm-native exporter above
 // and remain honest no-ops if neither path is wired. The "honest no-op"
-// promise is critical — we never throw on a missing tracer because that
+// promise is critical - we never throw on a missing tracer because that
 // would put OTel in the request hot-path on uninstrumented hosts.
 // =============================================================================
 
@@ -375,7 +375,7 @@ const KOLM_OTEL_ATTRS = Object.freeze({
   // W709 routing decision: 'student' | 'teacher' | 'mixed'.
   ROUTING_DECISION: 'kolm.routing.decision',
   // W709 routing-threshold entropy. Unit: nats. The threshold that fired,
-  // not the per-token entropy — that lives on per-token sub-spans.
+  // not the per-token entropy - that lives on per-token sub-spans.
   ROUTING_ENTROPY_NATS: 'kolm.routing.entropy_nats',
   // W733 K-Score at the time the inference ran.
   KSCORE_VALUE: 'kolm.kscore.value',
@@ -383,27 +383,27 @@ const KOLM_OTEL_ATTRS = Object.freeze({
   KSCORE_DRIFT_24H: 'kolm.kscore.drift_24h',
   // W144 artifact content-id (immutable).
   ARTIFACT_CID: 'kolm.artifact.cid',
-  // W733 tenant id_hash — sha256 prefix, NEVER raw tenant_id (see privacy
+  // W733 tenant id_hash - sha256 prefix, NEVER raw tenant_id (see privacy
   // contract above). 12 hex chars = 48 bits = collision-safe for the use
   // case (linking spans across a single tenant inside one tenant's trace
   // budget).
   TENANT_ID_HASH: 'kolm.tenant.id_hash',
-  // W245 namespace (already public — appears in routes, capture rows,
+  // W245 namespace (already public - appears in routes, capture rows,
   // metrics). Safe to emit raw.
   NAMESPACE: 'kolm.namespace',
-  // W823-1 — extends W733 attrs.
+  // W823-1 - extends W733 attrs.
   //
   // ARTIFACT_ID is a stable per-deployment identifier (the W144 artifact
   // pointer the runtime is currently serving). This is different from
-  // ARTIFACT_CID (the immutable content-id of the on-disk .kolm) — buyers
+  // ARTIFACT_CID (the immutable content-id of the on-disk .kolm) - buyers
   // dashboard by deployment, not by content-hash, so both must travel.
   ARTIFACT_ID: 'kolm.artifact.id',
-  // W823 p50/p95 token confidence — distribution stats over a span. We
+  // W823 p50/p95 token confidence - distribution stats over a span. We
   // already expose TOKEN_CONFIDENCE (mean entropy); these add the
   // percentile pair for histogram-class panels.
   TOKEN_CONFIDENCE_P50: 'kolm.token.confidence_p50',
   TOKEN_CONFIDENCE_P95: 'kolm.token.confidence_p95',
-  // W823 kscore_drift — caller-supplied drift window (default 24h above
+  // W823 kscore_drift - caller-supplied drift window (default 24h above
   // via KSCORE_DRIFT_24H; KSCORE_DRIFT is the open-window variant so the
   // buyer can pick the comparison baseline). Unit: K-Score points.
   KSCORE_DRIFT: 'kolm.kscore.drift',
@@ -421,7 +421,7 @@ const KOLM_OTEL_SPAN_NAMES = Object.freeze({
 });
 
 // Lazy @opentelemetry/api detection. Caches the module if present so we
-// only pay the try-import cost once per process. We DO NOT add the dep —
+// only pay the try-import cost once per process. We DO NOT add the dep - 
 // only honor it if the host installed it for their own instrumentation.
 let _otelApi = null;
 let _otelApiDetected = false;
@@ -457,7 +457,7 @@ function _hashTenant(rawTenantId) {
   return crypto.createHash('sha256').update(String(rawTenantId)).digest('hex').slice(0, 12);
 }
 
-// Pure helper — attaches W709 routing block attributes to a span. Safe to
+// Pure helper - attaches W709 routing block attributes to a span. Safe to
 // call with span=null (no-op); safe to call with a kolm-native span object
 // from startSpan() above OR an @opentelemetry/api Span (both honor
 // setAttribute(key, value) and our native path appends to span.attributes).
@@ -479,16 +479,16 @@ function setRoutingAttributes(span, block) {
   if (Number.isFinite(Number(block.token_confidence_p95))) out[KOLM_OTEL_ATTRS.TOKEN_CONFIDENCE_P95] = Number(block.token_confidence_p95);
   if (typeof block.namespace === 'string') out[KOLM_OTEL_ATTRS.NAMESPACE] = block.namespace;
   if (block.tenant_id) {
-    // Privacy — only the sha256 prefix ever crosses the OTel boundary.
+    // Privacy - only the sha256 prefix ever crosses the OTel boundary.
     const hashed = _hashTenant(block.tenant_id);
     if (hashed) out[KOLM_OTEL_ATTRS.TENANT_ID_HASH] = hashed;
   }
-  // Native kolm-otel span shape from startSpan() — attributes is a kv array.
+  // Native kolm-otel span shape from startSpan() - attributes is a kv array.
   if (Array.isArray(span.attributes)) {
     for (const k of Object.keys(out)) span.attributes.push(kv(k, out[k]));
     return true;
   }
-  // @opentelemetry/api Span shape — setAttribute(key, value).
+  // @opentelemetry/api Span shape - setAttribute(key, value).
   if (typeof span.setAttribute === 'function') {
     for (const k of Object.keys(out)) {
       try { span.setAttribute(k, out[k]); } catch (_e) { /* ignore one bad attr */ }
@@ -502,7 +502,7 @@ function setRoutingAttributes(span, block) {
 // monotonically-advancing start times so the buyer's OTel UI renders them
 // as a stacked timeline below the parent kolm.inference span. Tolerates
 // (a) missing parent, (b) missing tracer, (c) missing @opentelemetry/api
-// — all of which collapse to an honest no-op + return false. Never throws.
+// - all of which collapse to an honest no-op + return false. Never throws.
 function createInferenceSpans(parentSpan, timings) {
   timings = timings || {};
   const queueMs = Number(timings.queue_ms) || 0;
@@ -555,7 +555,7 @@ function createInferenceSpans(parentSpan, timings) {
   }
   if (STATE.enabled) trimQueue();
   // If @opentelemetry/api tracer is also registered, mirror via tracer
-  // hook — but tolerate any tracer impl that doesn't honor our minimal
+  // hook - but tolerate any tracer impl that doesn't honor our minimal
   // contract by catching+continuing.
   if (tracer && typeof tracer.startSpan === 'function') {
     try {
@@ -588,13 +588,13 @@ function listW733SpanNames() {
 }
 
 // =============================================================================
-// W921 — OpenTelemetry GenAI semantic conventions (gen_ai.*)
+// W921 - OpenTelemetry GenAI semantic conventions (gen_ai.*)
 //
 // Standard OTel GenAI inference span + the three GenAI client metrics emitted
 // from the /v1/gateway/dispatch path so a buyer's existing Datadog / Grafana
 // Tempo / Honeycomb / Phoenix / OpenLLMetry pipeline lights up kolm gateway
 // traffic with ZERO custom mapping. kolm.* (W733/W823) stays additive
-// enrichment on the SAME span via setRoutingAttributes — one span carries
+// enrichment on the SAME span via setRoutingAttributes - one span carries
 // both dialects.
 //
 // Spec verified against OTel SemConv v1.37 (2026-05-29):
@@ -612,7 +612,7 @@ function listW733SpanNames() {
 //
 // Gating: every GenAI emitter is a hard no-op unless isEnabled() (native
 // exporter wired via KOLM_OTEL=1) OR a host @opentelemetry/api tracer is
-// registered — identical to the existing kolm.inference wrapper. Never throws
+// registered - identical to the existing kolm.inference wrapper. Never throws
 // on the request hot-path.
 // =============================================================================
 
@@ -623,7 +623,7 @@ const OTEL_GENAI_VERSION = 'w921-genai-v1';
 const GEN_AI_ATTRS = Object.freeze({
   OPERATION_NAME: 'gen_ai.operation.name',
   PROVIDER_NAME: 'gen_ai.provider.name',
-  // DEPRECATED — emitted only under KOLM_OTEL_SEMCONV_COMPAT=1.
+  // DEPRECATED - emitted only under KOLM_OTEL_SEMCONV_COMPAT=1.
   SYSTEM: 'gen_ai.system',
   REQUEST_MODEL: 'gen_ai.request.model',
   RESPONSE_MODEL: 'gen_ai.response.model',
@@ -644,7 +644,7 @@ const GEN_AI_ATTRS = Object.freeze({
   SERVER_ADDRESS: 'server.address',
   SERVER_PORT: 'server.port',
   ERROR_TYPE: 'error.type',
-  // kolm extension namespace — raw provider when no clean enum member exists.
+  // kolm extension namespace - raw provider when no clean enum member exists.
   PROVIDER_RAW: 'kolm.provider.raw',
 });
 
@@ -654,7 +654,7 @@ const GEN_AI_METRICS = Object.freeze({
   TIME_TO_FIRST_TOKEN: 'gen_ai.server.time_to_first_token',
 });
 
-// Exact bucket boundaries from OTel SemConv v1.37 — byte-match required so a
+// Exact bucket boundaries from OTel SemConv v1.37 - byte-match required so a
 // buyer's pre-aggregated GenAI dashboards line up without a custom view.
 const GENAI_TOKEN_BUCKETS = Object.freeze([1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864]);
 const GENAI_DURATION_BUCKETS = Object.freeze([0.01, 0.02, 0.04, 0.08, 0.16, 0.32, 0.64, 1.28, 2.56, 5.12, 10.24, 20.48, 40.96, 81.92]);
@@ -711,7 +711,7 @@ function mapProviderToGenAi(kolmProvider) {
   for (const key of Object.keys(_PROVIDER_ENUM)) {
     if (raw.includes(key)) return _PROVIDER_ENUM[key];
   }
-  // Lowercased fallback — keep it OTel-attribute-safe.
+  // Lowercased fallback - keep it OTel-attribute-safe.
   return raw.replace(/[^a-z0-9._-]+/g, '_');
 }
 
@@ -746,7 +746,7 @@ function mapFinishReason(provider, raw) {
 
 // Extract an array of normalized finish reasons from a raw upstream response
 // body (OpenAI-shape choices[].finish_reason OR Anthropic stop_reason). Always
-// returns string[] (possibly empty), never null — safe for the array attr.
+// returns string[] (possibly empty), never null - safe for the array attr.
 function extractFinishReasons(provider, responseJson) {
   if (!responseJson || typeof responseJson !== 'object') return [];
   const out = [];
@@ -815,7 +815,7 @@ function startGenAiSpan({ operation = 'chat', provider, requestModel, maxTokens,
       span = tracer.startSpan(name, { kind: 3 });
     } else {
       span = startSpan(name, {}, parent);
-      span.kind = 3; // CLIENT — honored by tracesPayload.
+      span.kind = 3; // CLIENT - honored by tracesPayload.
     }
     _setSpanAttr(span, GEN_AI_ATTRS.OPERATION_NAME, operation);
     _setSpanAttr(span, GEN_AI_ATTRS.PROVIDER_NAME, providerName);
@@ -824,13 +824,13 @@ function startGenAiSpan({ operation = 'chat', provider, requestModel, maxTokens,
       _setSpanAttr(span, GEN_AI_ATTRS.PROVIDER_RAW, String(provider));
     }
     if (process.env.KOLM_OTEL_SEMCONV_COMPAT === '1') {
-      // Deprecated dual-emit — same value as provider.name.
+      // Deprecated dual-emit - same value as provider.name.
       _setSpanAttr(span, GEN_AI_ATTRS.SYSTEM, providerName);
     }
     if (requestModel) _setSpanAttr(span, GEN_AI_ATTRS.REQUEST_MODEL, String(requestModel));
     if (Number.isFinite(Number(maxTokens))) _setSpanAttr(span, GEN_AI_ATTRS.REQUEST_MAX_TOKENS, Math.trunc(Number(maxTokens)));
     if (Number.isFinite(Number(temperature))) _setSpanAttr(span, GEN_AI_ATTRS.REQUEST_TEMPERATURE, Number(temperature));
-    // kolm enrichment — namespace is public-safe; tenant goes through the
+    // kolm enrichment - namespace is public-safe; tenant goes through the
     // W733 hash path so the raw id never crosses the OTel boundary.
     if (typeof namespace === 'string' && namespace) _setSpanAttr(span, KOLM_OTEL_ATTRS.NAMESPACE, namespace);
     if (tenant_id) {
@@ -857,7 +857,7 @@ function finishGenAiSpan(span, {
   outputContent, inputContent,
 } = {}) {
   // Even with a null span (telemetry inactive at start) we keep the metric
-  // emit gated below — metrics are also a hard no-op when inactive.
+  // emit gated below - metrics are also a hard no-op when inactive.
   const meta = (span && span.__genai) || {};
   const provider = meta.provider;
   const providerName = meta.providerName || mapProviderToGenAi(provider);
@@ -882,7 +882,7 @@ function finishGenAiSpan(span, {
         _setSpanAttr(span, GEN_AI_ATTRS.ERROR_TYPE, String(errorType));
       }
       // Opt-in content (post-redaction text ONLY). Caller is responsible for
-      // passing already-redacted strings — this is the privacy chokepoint.
+      // passing already-redacted strings - this is the privacy chokepoint.
       if (process.env.KOLM_OTEL_CAPTURE_CONTENT === '1') {
         if (typeof inputContent === 'string' && inputContent) _setSpanAttr(span, GEN_AI_ATTRS.INPUT_MESSAGES, inputContent);
         if (typeof outputContent === 'string' && outputContent) _setSpanAttr(span, GEN_AI_ATTRS.OUTPUT_MESSAGES, outputContent);
@@ -949,7 +949,7 @@ function histogram(name, value, { unit = '', bounds = [], attrs = {}, descriptio
   trimQueue();
 }
 
-// gen_ai.client.token.usage — Histogram, unit {token}. Emitted TWICE per call
+// gen_ai.client.token.usage - Histogram, unit {token}. Emitted TWICE per call
 // (gen_ai.token.type=input value=input_tokens; type=output value=output_tokens).
 function genAiTokenUsage({ provider, requestModel, responseModel, operation = 'chat', inputTokens, outputTokens, serverAddress, serverPort } = {}) {
   if (!STATE.enabled) return;
@@ -964,7 +964,7 @@ function genAiTokenUsage({ provider, requestModel, responseModel, operation = 'c
   }
 }
 
-// gen_ai.client.operation.duration — Histogram, unit s (SECONDS not ms).
+// gen_ai.client.operation.duration - Histogram, unit s (SECONDS not ms).
 // value = upstream call seconds (durationMs/1000), error.type when failed.
 function genAiOperationDuration({ provider, requestModel, responseModel, operation = 'chat', durationMs, errorType, serverAddress, serverPort } = {}) {
   if (!STATE.enabled) return;
@@ -974,7 +974,7 @@ function genAiOperationDuration({ provider, requestModel, responseModel, operati
   histogram(GEN_AI_METRICS.OPERATION_DURATION, Number(durationMs) / 1000, { unit: 's', bounds: GENAI_DURATION_BUCKETS, attrs: a, description: 'GenAI operation duration' });
 }
 
-// gen_ai.server.time_to_first_token — Histogram, unit s. SSE first-chunk delta
+// gen_ai.server.time_to_first_token - Histogram, unit s. SSE first-chunk delta
 // (synthetic until true upstream streaming lands).
 function genAiTimeToFirstToken({ provider, requestModel, responseModel, operation = 'chat', ttftMs, serverAddress, serverPort } = {}) {
   if (!STATE.enabled) return;
@@ -1020,7 +1020,7 @@ export {
   shutdown,
   isEnabled,
   expressMiddleware,
-  // W733 — semantic conventions surface.
+  // W733 - semantic conventions surface.
   OTEL_W733_VERSION,
   KOLM_OTEL_ATTRS,
   KOLM_OTEL_SPAN_NAMES,
@@ -1030,7 +1030,7 @@ export {
   listW733Attrs,
   listW733SpanNames,
   _probeOtelApi,
-  // W921 — OTel GenAI semantic conventions (gen_ai.*) surface.
+  // W921 - OTel GenAI semantic conventions (gen_ai.*) surface.
   OTEL_GENAI_VERSION,
   GEN_AI_ATTRS,
   GEN_AI_METRICS,

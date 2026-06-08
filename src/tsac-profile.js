@@ -1,7 +1,7 @@
-// W721 — Task-Specific Attention Compiler (TSAC) per-layer-per-head sparsity profile schema.
+// W721 - Task-Specific Attention Compiler (TSAC) per-layer-per-head sparsity profile schema.
 //
 // Background (per docs/research/kolm-billion-dollar-distillation-lab-2026-05-24.md
-// Invention 2 — Task-Specific Attention Compiler, lines 1321-1378):
+// Invention 2 - Task-Specific Attention Compiler, lines 1321-1378):
 //
 //   Problem: long-context serving pays for dense attention even when
 //   task-specific distilled models use stable sparse patterns. Per-head
@@ -26,12 +26,12 @@
 // shape.
 //
 // Honesty contract:
-//   * dense_fallback_threshold is load-bearing — a serve-time kernel that
+//   * dense_fallback_threshold is load-bearing - a serve-time kernel that
 //     ignores it can quietly degrade quality. A compiler that omits it
 //     fails validation here.
 //   * quality_guard names the specific guard (logit_delta_and_kscore by
 //     default). A serve-time kernel that does not implement the named
-//     guard MUST refuse to dispatch — the profile is the contract.
+//     guard MUST refuse to dispatch - the profile is the contract.
 //   * Safety-tagged heads (is_safety_critical:true) get a dense prefill
 //     and dense decode regardless of sparsity affinity. The compiler is
 //     responsible for setting that flag; the validator enforces the
@@ -46,14 +46,14 @@ import crypto from 'node:crypto';
 export const TSAC_VERSION = 'w721-v1';
 
 // Prefill patterns: how the prefill kernel walks the attention matrix.
-//   dense              — full O(n^2) matrix (safety / fallback default).
-//   vertical_slash     — keep columns matching task-specific token IDs +
+//   dense - full O(n^2) matrix (safety / fallback default).
+//   vertical_slash - keep columns matching task-specific token IDs +
 //                        a vertical slash window around the diagonal.
-//   blocked_local      — block-sparse local window (M=128 typical).
-//   sink_plus_local    — keep sink_keep tokens at the front + a
+//   blocked_local - block-sparse local window (M=128 typical).
+//   sink_plus_local - keep sink_keep tokens at the front + a
 //                        local_window slice at the back.
-//   head_pruned        — skip this head entirely (output = zero contribution
-//                        — only valid if compile-time KL test shows the
+//   head_pruned - skip this head entirely (output = zero contribution
+// - only valid if compile-time KL test shows the
 //                        head contributes < 0.001 to final logits).
 export const DEFAULT_PREFILL_PATTERNS = Object.freeze([
   'dense',
@@ -64,12 +64,12 @@ export const DEFAULT_PREFILL_PATTERNS = Object.freeze([
 ]);
 
 // Decode policies: how the decode kernel selects K/V pages.
-//   dense                — full attention (safety / fallback default).
-//   query_page_topk      — score every K/V page against the new query,
+//   dense - full attention (safety / fallback default).
+//   query_page_topk - score every K/V page against the new query,
 //                          attend to the top page_topk pages.
-//   sink_plus_window     — keep sink_keep at the front + local_window
+//   sink_plus_window - keep sink_keep at the front + local_window
 //                          at the tail, drop the middle (Streaming-LLM).
-//   head_pruned_decode   — skip the head at decode too (paired with
+//   head_pruned_decode - skip the head at decode too (paired with
 //                          head_pruned prefill).
 export const DEFAULT_DECODE_POLICIES = Object.freeze([
   'dense',
@@ -80,11 +80,11 @@ export const DEFAULT_DECODE_POLICIES = Object.freeze([
 
 // Quality guards. The serve-time kernel must implement the named guard;
 // the compiler picks it based on what telemetry is available.
-//   logit_delta_and_kscore — sample-level logit delta vs dense + K-score
+//   logit_delta_and_kscore - sample-level logit delta vs dense + K-score
 //                            shadow on every Nth request.
-//   logit_delta_only       — sample-level logit delta vs dense (cheaper).
-//   kscore_only            — K-score shadow every Nth request, no per-sample.
-//   none                   — no guard (only valid for explicitly safe heads
+//   logit_delta_only - sample-level logit delta vs dense (cheaper).
+//   kscore_only - K-score shadow every Nth request, no per-sample.
+//   none - no guard (only valid for explicitly safe heads
 //                            that are also marked is_safety_critical:false).
 export const DEFAULT_QUALITY_GUARDS = Object.freeze([
   'logit_delta_and_kscore',
@@ -93,7 +93,7 @@ export const DEFAULT_QUALITY_GUARDS = Object.freeze([
   'none',
 ]);
 
-// Numeric bounds (load-bearing — validators below reject out-of-range).
+// Numeric bounds (load-bearing - validators below reject out-of-range).
 const PAGE_TOPK_MIN = 1;
 const PAGE_TOPK_MAX = 4096;
 const SINK_KEEP_MIN = 0;
@@ -148,7 +148,7 @@ const DEFAULT_DECODE_POLICY = 'query_page_topk';
 // entries OR object {task, entries:[...]}). Returns {ok:true} on success,
 // {ok:false, errors:[...]} on any schema violation.
 //
-// This is the load-bearing contract — every consumer (compileTsacProfile,
+// This is the load-bearing contract - every consumer (compileTsacProfile,
 // worker tsac.mjs, artifact.js hash chain) calls validateProfile before
 // trusting a profile.
 
@@ -158,7 +158,7 @@ export function validateProfile(profile) {
     return { ok: false, errors: ['profile is null or undefined'] };
   }
   if (Array.isArray(profile)) {
-    // Array of entries — validate each one independently.
+    // Array of entries - validate each one independently.
     if (profile.length === 0) {
       return { ok: false, errors: ['profile array is empty'] };
     }

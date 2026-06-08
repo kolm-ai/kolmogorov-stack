@@ -1,6 +1,6 @@
 // src/export-awq.js
 //
-// S-6 — AWQ (autoawq) export chain for ANY artifact.
+// S-6 - AWQ (autoawq) export chain for ANY artifact.
 //
 // AWQ (Activation-aware Weight Quantization) from Lin et al. (2023). The key
 // idea: identify the 1% of weight channels that matter most based on

@@ -1,6 +1,6 @@
 // src/govern-routes.js
 //
-// W921 Govern / Receipts & Compliance — HTTP route module.
+// W921 Govern / Receipts & Compliance - HTTP route module.
 //
 // Exports register(r, deps) so the orchestrator can mount the whole Govern
 // surface with ONE call (import + register) and NOT edit src/router.js itself.
@@ -12,7 +12,7 @@
 // `deps` is an injectable seam so the routes unit-test without a live store and
 // so the orchestrator can supply the real store/audit/drift/signer:
 //   deps = {
-//     store,                 // src/store.js (find/insert) — observation rows
+//     store,                 // src/store.js (find/insert) - observation rows
 //     verifyAuditChain,      // src/audit.js verifyAuditChain(tenant_id)
 //     listAuditEvents,       // src/audit.js listAuditEvents(tenant_id, opts)
 //     computeDriftSignals,   // a drift computation returning standard_signals
@@ -21,21 +21,21 @@
 //     retentionDays,         // configured retention, or null
 //   }
 //
-//   POST /v1/govern/anchor/batch       — Merkle-batch + anchor a set of receipts
-//   GET  /v1/govern/anchor/status      — batcher / anchoring status
-//   POST /v1/govern/anchor/verify      — two-level offline verify of an anchor
-//   POST /v1/govern/transparency/append— append an entry to the tlog
-//   GET  /v1/govern/transparency/head  — signed Tree Head + chain verify
-//   GET  /v1/govern/transparency/proof/:seq — inclusion proof for an entry
-//   POST /v1/govern/provenance/build   — in-toto/SLSA attestation for an artifact
-//   POST /v1/govern/provenance/verify  — verify a DSSE attestation
-//   POST /v1/govern/c2pa/sign          — C2PA content-credential for an output
-//   POST /v1/govern/c2pa/verify        — verify a C2PA manifest
-//   GET  /v1/govern/drift/standard     — PSI/MMD/ADWIN standard drift signals
-//   GET  /v1/govern/compliance/export  — framework evidence bundle
-//   GET  /v1/govern/compliance/ai-act/art12 — Art. 12 logging conformance
-//   GET  /v1/govern/compliance/ai-act/art72 — Art. 72 post-market report
-//   GET  /v1/govern/compliance/ai-act/art12-export — signed Art. 12 log stream
+//   POST /v1/govern/anchor/batch - Merkle-batch + anchor a set of receipts
+//   GET  /v1/govern/anchor/status - batcher / anchoring status
+//   POST /v1/govern/anchor/verify - two-level offline verify of an anchor
+//   POST /v1/govern/transparency/append - append an entry to the tlog
+//   GET  /v1/govern/transparency/head - signed Tree Head + chain verify
+//   GET  /v1/govern/transparency/proof/:seq - inclusion proof for an entry
+//   POST /v1/govern/provenance/build - in-toto/SLSA attestation for an artifact
+//   POST /v1/govern/provenance/verify - verify a DSSE attestation
+//   POST /v1/govern/c2pa/sign - C2PA content-credential for an output
+//   POST /v1/govern/c2pa/verify - verify a C2PA manifest
+//   GET  /v1/govern/drift/standard - PSI/MMD/ADWIN standard drift signals
+//   GET  /v1/govern/compliance/export - framework evidence bundle
+//   GET  /v1/govern/compliance/ai-act/art12 - Art. 12 logging conformance
+//   GET  /v1/govern/compliance/ai-act/art72 - Art. 72 post-market report
+//   GET  /v1/govern/compliance/ai-act/art12-export - signed Art. 12 log stream
 
 import {
   TransparencyLog,
@@ -116,7 +116,7 @@ export function register(r, deps = {}) {
   const getSigner = typeof deps.getSigner === 'function' ? deps.getSigner : () => (deps.signer || null);
 
   // -------------------------------------------------------------------------
-  // ANCHOR — Merkle batch anchoring of receipts.
+  // ANCHOR - Merkle batch anchoring of receipts.
   // -------------------------------------------------------------------------
   r.post('/v1/govern/anchor/batch', async (req, res) => {
     const trec = _authOrReject(req, res);
@@ -168,7 +168,7 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
-  // TRANSPARENCY LOG — append-only verifiable log.
+  // TRANSPARENCY LOG - append-only verifiable log.
   // -------------------------------------------------------------------------
   function _tlog(trec) {
     return getTransparencyLog({ tenant_id: trec.id, store: deps.store || null, origin: deps.tlogOrigin });
@@ -226,7 +226,7 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
-  // PROVENANCE — in-toto / SLSA build provenance.
+  // PROVENANCE - in-toto / SLSA build provenance.
   // -------------------------------------------------------------------------
   r.post('/v1/govern/provenance/build', (req, res) => {
     const trec = _authOrReject(req, res);
@@ -262,7 +262,7 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
-  // C2PA — content credentials for model outputs.
+  // C2PA - content credentials for model outputs.
   // -------------------------------------------------------------------------
   r.post('/v1/govern/c2pa/sign', (req, res) => {
     const trec = _authOrReject(req, res);
@@ -311,7 +311,7 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
-  // DRIFT — standard signals.
+  // DRIFT - standard signals.
   // -------------------------------------------------------------------------
   r.get('/v1/govern/drift/standard', (req, res) => {
     const trec = _authOrReject(req, res);
@@ -328,7 +328,7 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
-  // COMPLIANCE — framework evidence + EU AI Act live reports.
+  // COMPLIANCE - framework evidence + EU AI Act live reports.
   // -------------------------------------------------------------------------
   r.get('/v1/govern/compliance/frameworks', (req, res) => {
     const trec = _authOrReject(req, res);

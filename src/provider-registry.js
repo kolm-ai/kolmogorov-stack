@@ -1,4 +1,4 @@
-// W368 provider registry — per-provider upstream / auth / path / cost table.
+// W368 provider registry - per-provider upstream / auth / path / cost table.
 //
 // The daemon-connector reads this to resolve:
 //   - upstream base URL (override via KOLM_UPSTREAM_<PROVIDER>_BASE env)
@@ -93,7 +93,7 @@ export const PROVIDERS = {
       'gemini-2.0-flash':   { input: 0.00010,  output: 0.0004 },
     },
   },
-  // W-B wrapper-completion — Gemini native via OpenAI-compat alias. Same
+  // W-B wrapper-completion - Gemini native via OpenAI-compat alias. Same
   // upstream as 'gemini' above but uses bearer auth on the /openai path
   // so a single provider id ('google') works with the OpenAI client SDKs.
   google: {
@@ -108,7 +108,7 @@ export const PROVIDERS = {
       'gemini-2.0-flash':      { input: 0.00010,  output: 0.0004 },
     },
   },
-  // W-B wrapper-completion — DeepSeek native platform (api.deepseek.com).
+  // W-B wrapper-completion - DeepSeek native platform (api.deepseek.com).
   // OpenAI-compatible. Models: deepseek-chat (V4 Pro), deepseek-reasoner
   // (R1 lineage). Cheapest frontier reasoner on the market in 2026.
   deepseek: {
@@ -123,7 +123,7 @@ export const PROVIDERS = {
       'deepseek-v4-pro':       { input: 0.00027, output: 0.0011 },
     },
   },
-  // W-B wrapper-completion — Groq LPU. OpenAI-compatible. Ultra-low-latency
+  // W-B wrapper-completion - Groq LPU. OpenAI-compatible. Ultra-low-latency
   // hosting of open-weight models (Llama-3.3 70B at >500 tok/s, etc.).
   groq: {
     upstream: env('KOLM_UPSTREAM_GROQ_BASE', 'https://api.groq.com'),
@@ -138,7 +138,7 @@ export const PROVIDERS = {
       'deepseek-r1-distill-llama-70b': { input: 0.00075, output: 0.00099 },
     },
   },
-  // W-B wrapper-completion — Together AI. OpenAI-compatible. Wide
+  // W-B wrapper-completion - Together AI. OpenAI-compatible. Wide
   // open-weight catalog including Llama, Qwen, Mistral, DeepSeek.
   together: {
     upstream: env('KOLM_UPSTREAM_TOGETHER_BASE', 'https://api.together.xyz'),
@@ -154,7 +154,7 @@ export const PROVIDERS = {
       'mistralai/Mixtral-8x7B-Instruct-v0.1':    { input: 0.0006, output: 0.0006 },
     },
   },
-  // W-B wrapper-completion — Fireworks AI. OpenAI-compatible. Serves
+  // W-B wrapper-completion - Fireworks AI. OpenAI-compatible. Serves
   // Llama, Mixtral, DeepSeek R1, and many community models.
   fireworks: {
     upstream: env('KOLM_UPSTREAM_FIREWORKS_BASE', 'https://api.fireworks.ai'),
@@ -169,8 +169,8 @@ export const PROVIDERS = {
       'accounts/fireworks/models/qwen2p5-72b-instruct':    { input: 0.0009, output: 0.0009 },
     },
   },
-  // W-B wrapper-completion — local vLLM server (operator-run, OpenAI-compat).
-  // Bearer auth optional (vLLM uses --api-key). Cost is 0/0 — operator
+  // W-B wrapper-completion - local vLLM server (operator-run, OpenAI-compat).
+  // Bearer auth optional (vLLM uses --api-key). Cost is 0/0 - operator
   // owns the hardware, kolm gateway does not invent a cost number.
   'local-vllm': {
     upstream: env('KOLM_UPSTREAM_LOCAL_VLLM_BASE', 'http://127.0.0.1:8000'),
@@ -179,7 +179,7 @@ export const PROVIDERS = {
     paths: ['/v1/chat/completions', '/v1/completions', '/v1/embeddings'],
     cost_per_1k: {},
   },
-  // W-B wrapper-completion — local Ollama. No auth by default. Cost 0/0.
+  // W-B wrapper-completion - local Ollama. No auth by default. Cost 0/0.
   'local-ollama': {
     upstream: env('KOLM_UPSTREAM_LOCAL_OLLAMA_BASE', 'http://127.0.0.1:11434'),
     auth: 'none',
@@ -187,7 +187,7 @@ export const PROVIDERS = {
     paths: ['/v1/chat/completions', '/v1/embeddings', '/api/generate', '/api/chat', '/api/embeddings'],
     cost_per_1k: {},
   },
-  // W-B wrapper-completion — local .kolm artifact served by `kolm serve`.
+  // W-B wrapper-completion - local .kolm artifact served by `kolm serve`.
   // No auth (gateway treats the local kolm worker as trusted). Cost 0/0.
   'local-kolm': {
     upstream: env('KOLM_UPSTREAM_LOCAL_KOLM_BASE', 'http://127.0.0.1:8765'),

@@ -1,0 +1,91 @@
+{
+  "id": "e1-euaiact-art12-budget",
+  "track": "launch",
+  "prompt": "Is EU AI Act Article 12 (record-keeping / automatic logging for high-risk AI) specifically driving BUDGET ALLOCATION NOW (mid-2026) ahead of the Aug 2 2026 milestone, or is it still theoretical to buyers? Distinguish Art.12 logging obligations from the GPAI obligations and the high-risk timeline. Find 2026 evidence of companies line-iteming spend or RFPs citing Art.12/logging specifically (quote @handle+date or cite procurement docs/vendor pages). Clarify: do Series-A AI-native startups selling to enterprises actually fall in scope (as providers of high-risk systems or via enterprise customers' obligations), or is the urgency mostly customer-driven pressure? Give a NOW-vs-theoretical verdict with confidence and cite everything.",
+  "content": "**Art. 12 (record-keeping/automatic logging) for high-risk AI systems is primarily preparatory/theoretical for most buyers in mid-2026, with emerging but limited RFP language and vendor questionnaires citing it specifically; it is not yet broadly driving allocated budgets or line-items.**[[1]](https://www.kognitos.com/blog/agentic-ai-rfp-template-2026-vendor-questions/)[[2]](https://www.cequence.ai/eu-ai-act.html)\n\nHigh-risk obligations (including Art. 12) were originally scheduled for full application on **2 August 2026** (24 months after the AI Act’s entry into force on 1 Aug 2024). GPAI model obligations (transparency, systemic risk rules, etc.) applied earlier, from **2 August 2025**. A proposed “Digital Omnibus” delay would push Annex III high-risk obligations (stand-alone systems) to 2 Dec 2027 and Annex I (embedded in regulated products) to 2 Aug 2028, but as of early June 2026 this remains a political agreement only—not yet finalized law—so the original 2026 date is still the enforceable baseline that many organizations are advised to plan against.[[3]](https://www.traverssmith.com/knowledge/knowledge-container/eu-agrees-to-delay-key-ai-act-compliance-deadlines/)[[4]](https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/)[[5]](https://www.helpnetsecurity.com/2026/04/16/eu-ai-act-logging-requirements/)\n\n**Art. 12 specifically** requires high-risk AI systems to “technically allow for the automatic recording of events (logs) over the lifetime of the system,” covering risk situations, post-market monitoring, and operational data (with deployers required to retain logs for at least six months under Art. 26(6)). This is a provider design obligation (technical capability built in) distinct from GPAI rules and from other high-risk requirements such as risk management (Art. 9), data governance (Art. 10), transparency (Art. 13), or human oversight (Art. 14).[[6]](https://artificialintelligenceact.eu/article/12/)[[7]](https://truescreen.io/insights/ai-act-record-keeping-requirements/)\n\n### Evidence of 2026 Activity (RFPs, Procurement, Budgets)\nDirect evidence of companies line-iteming specific spend for Art. 12/logging remains sparse in public sources. There are, however, concrete examples of procurement and vendor-evaluation documents explicitly referencing it ahead of the August 2026 date:\n\n- A May 26, 2026, “Agentic AI RFP Template” (Kognitos) includes dedicated questions on EU AI Act compliance, explicitly calling out “EU AI Act, Article 12 — Record-keeping (logs)” and noting that full high-risk enforcement begins 2 Aug 2026 under current law. It frames these as vendor obligations buyers inherit if not contractually addressed.[[1]](https://www.kognitos.com/blog/agentic-ai-rfp-template-2026-vendor-questions/)\n- Cequence.ai’s “CISO’s Guide to EU AI Act Compliance” (updated/referenced into 2026) provides a vendor questionnaire template that directly asks: “Does your system technically allow automatic recording of events over its lifetime as required by Article 12 of the EU AI Act?” It maps this to provider obligations alongside Arts. 9, 10, and 13.[[2]](https://www.cequence.ai/eu-ai-act.html)\n- Broader 2026 procurement guidance (e.g., public-sector and enterprise AI procurement resources) recommends embedding AI Act classification, logging/traceability, and compliance into tender specs and contracts, though without granular public line-item examples.[[8]](https://planbe.eco/en/blog/eu-ai-act-for-the-public-administration-industry/)\n\nOn X (as of June 2026), vendors and practitioners reference building Art. 12-compliant logging into products now (e.g., tamper-evident audit logs shipped with models) or note that the Act “is going to force the conversation” on logging for agentic/high-risk use cases, but these are awareness/prep signals rather than confirmed budget allocations.[[9]](https://x.com/AISGateway/status/2061489020094284144)\n\nNo public 2026 procurement documents or earnings disclosures were identified with explicit “Art. 12 logging” line-items or quantified spend. Activity is concentrated in vendor questionnaires, RFP templates, and readiness assessments rather than executed budgets.\n\n### Scope for Series-A AI-Native Startups\nSeries-A AI-native startups fall into scope primarily **as providers** only if their systems are classified as high-risk under Annex III (e.g., employment screening, credit scoring, biometric identification, certain public services, etc.). In those cases, they bear direct obligations, including designing for Art. 12 automatic logging capability. Most general-purpose or non-Annex-III tools do not trigger provider obligations directly.[[10]](https://artificialintelligenceact.eu/high-level-summary/)\n\nFor the majority of startups, urgency is **customer-driven**: enterprise deployers must meet their own Art. 26 obligations (e.g., retaining logs, ensuring human oversight) and will increasingly demand contractual/vendor assurances on logging capability, documentation, and classification during procurement. This creates indirect pressure even for non-high-risk tools.[[2]](https://www.cequence.ai/eu-ai-act.html)\n\n### Overall Verdict (Mid-2026)\n**Still largely theoretical/preparatory for buyers**, with targeted RFP language and vendor due-diligence emerging but no widespread evidence of ring-fenced budgets or line-items specifically for Art. 12/logging. The combination of the looming (or potentially delayed) 2026 deadline, fines up to €15M or 3% global turnover, and enterprise risk aversion is driving awareness and documentation requests now, but concrete spend allocation appears customer-led and concentrated among larger organizations or those in clearly high-risk sectors.[[11]](https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-high-risk-compliance-deadline-20/)\n\nStartups should treat customer RFPs and questionnaires citing Art. 12 as the leading indicator of commercial pressure rather than a signal of immediate broad budget releases. Monitor finalization of any Omnibus delay for clarity on the exact timeline. All citations above are from 2026 sources reflecting the state as of early June 2026.",
+  "citations": [
+    "https://www.kognitos.com/blog/agentic-ai-rfp-template-2026-vendor-questions/",
+    "https://www.cequence.ai/eu-ai-act.html",
+    "https://www.traverssmith.com/knowledge/knowledge-container/eu-agrees-to-delay-key-ai-act-compliance-deadlines/",
+    "https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/",
+    "https://www.helpnetsecurity.com/2026/04/16/eu-ai-act-logging-requirements/",
+    "https://artificialintelligenceact.eu/article/12/",
+    "https://truescreen.io/insights/ai-act-record-keeping-requirements/",
+    "https://planbe.eco/en/blog/eu-ai-act-for-the-public-administration-industry/",
+    "https://x.com/AISGateway/status/2061489020094284144",
+    "https://artificialintelligenceact.eu/high-level-summary/",
+    "https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-high-risk-compliance-deadline-20/"
+  ],
+  "searched": [
+    "https://artificialintelligenceact.eu/article/12/",
+    "https://truescreen.io/insights/ai-act-record-keeping-requirements/",
+    "https://www.cequence.ai/eu-ai-act.html",
+    "https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-high-risk-compliance-deadline-20/",
+    "https://www.linkedin.com/posts/hayatamin_august-2026-is-the-eu-ai-acts-high-risk-activity-7462207171842433024-i0fJ",
+    "https://www.hklaw.com/en/insights/publications/2026/04/us-companies-face-eu-ai-acts-possible-august-2026-compliance-deadline",
+    "https://alicelabs.ai/en/insights/eu-ai-act-timeline-2026",
+    "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+    "https://www.helpnetsecurity.com/2026/04/16/eu-ai-act-logging-requirements/",
+    "https://www.mckennaconsultants.com/eu-ai-act-high-risk-compliance-a-technical-readiness-guide-for-august-2026/",
+    "https://euaiactguide.com/eu-ai-act-summary-2026/",
+    "https://fontvera.eu/intelligence/eu-ai-act-august-2026-deadline-requirements",
+    "https://www.traverssmith.com/knowledge/knowledge-container/eu-agrees-to-delay-key-ai-act-compliance-deadlines/",
+    "https://www.bakerbotts.com/thought-leadership/publications/2026/march/the-eu-ai-act",
+    "https://lucairn.eu/en/blog/ai-act-article-12-logging-in-practice",
+    "https://artificialintelligenceact.eu/high-level-summary/",
+    "https://octagonpeople.com/eu-ai-act-hr-recruitment/",
+    "https://agent-works.ai/glossary/eu-ai-act-article-12",
+    "https://planbe.eco/en/blog/eu-ai-act-for-the-public-administration-industry/",
+    "https://www.linkedin.com/pulse/eu-ai-act-5-months-until-biggest-deadline-history-anadea-wdphc",
+    "https://www.truefoundry.com/blog/eu-ai-data-act",
+    "https://data.consilium.europa.eu/doc/document/ST-9247-2026-INIT/en/pdf",
+    "https://tianpan.co/forum/t/eu-ai-act-high-risk-rules-hit-august-2-2026-most-engineering-orgs-cant-even-inventory-their-ai-systems/646",
+    "https://arxiv.org/html/2605.01091v1",
+    "https://medium.com/@wasowski.jarek/dont-wait-for-a-delay-august-2026-is-real-eu-ai-act-3801bd967b0f",
+    "https://www.augmentcode.com/guides/eu-ai-act-2026",
+    "https://www.linkedin.com/pulse/eu-ai-act-now-treats-multi-agent-systems-one-system-van-schalkwyk-ondmc",
+    "https://d3security.com/compliance/eu-ai-act/",
+    "https://www.kognitos.com/blog/agentic-ai-rfp-template-2026-vendor-questions/",
+    "https://predictionguard.com/blog/best-eu-ai-act-compliance-tools-for-enterprise-ai-programs-in-2026",
+    "https://www.deepinspect.ai/blog/ai-security-vendor-evaluation-criteria",
+    "https://pipelab.org/learn/eu-ai-act-compliance/",
+    "https://kla.digital/blog/best-eu-ai-act-compliance-software-2026",
+    "https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/",
+    "https://www.dataguard.com/eu-ai-act/timeline",
+    "https://marketdojo.com/resource/procurement-regulations-2026-eu-uk-supply-chains/",
+    "https://www.whitehouse.gov/wp-content/uploads/2026/04/budget_fy2027.pdf",
+    "https://publicprocurementinternational.com/symposium-turin-march-2026/",
+    "https://hillsboroughnh.org/wp-content/uploads/2026/03/2026-Budget-Highlights-Final.pdf",
+    "https://alicelabs.ai/reports/public-sector-ai-procurement-sweden-2026",
+    "https://papers.ssrn.com/sol3/Delivery.cfm/6368338.pdf?abstractid=6368338&mirid=1",
+    "https://worqlo.com/blog/enterprise-ai-vendor-rfp-questions/",
+    "https://www.linkedin.com/posts/escartinjavier_best-ai-rfp-software-in-2026-chatgpt-vs-activity-7465374087880687616-xobi"
+  ],
+  "usage": {
+    "input_tokens": 35287,
+    "input_tokens_details": {
+      "cached_tokens": 17792
+    },
+    "output_tokens": 2463,
+    "output_tokens_details": {
+      "reasoning_tokens": 1251
+    },
+    "total_tokens": 37750,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 7,
+    "cost_in_usd_ticks": 665846500,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 5,
+      "x_search_calls": 2,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 19341,
+      "output_tokens": 1617
+    }
+  },
+  "attempts": 1
+}

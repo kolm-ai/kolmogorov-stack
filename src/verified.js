@@ -1,4 +1,4 @@
-// Verified Inference — the breakthrough primitive.
+// Verified Inference - the breakthrough primitive.
 //
 // Mathematical claim: for a stochastic generator G with single-shot accuracy p
 // on a verifiable task, drawing k independent samples and accepting any that
@@ -20,7 +20,7 @@ import { synthesize } from './synthesis.js';
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 
 // Call any Anthropic model k times in parallel. Returns array of completions.
-// We sample with temperature > 0 deliberately — the whole point is independent draws.
+// We sample with temperature > 0 deliberately - the whole point is independent draws.
 //
 // Prompt cache: the system prelude is wrapped as a cache-controlled block so a
 // tenant replaying the same artifact within Anthropic's 5-min ephemeral window
@@ -96,7 +96,7 @@ function deepEqual(a, b) {
     if (ka.length !== kb.length) return false;
     return ka.every(k => deepEqual(a[k], b[k]));
   }
-  // Numerical tolerance — frontier models occasionally produce float noise.
+  // Numerical tolerance - frontier models occasionally produce float noise.
   if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) < 1e-9;
   return false;
 }
@@ -137,7 +137,7 @@ export async function verifiedInference({ prompt, system, signature, test_cases,
   const elapsed_ms = Math.round(Number(process.hrtime.bigint() - t0) / 1e6);
   const verified = best.passes === test_cases.length;
 
-  // Cost accounting — Opus 4.7 input $15/Mtok, output $75/Mtok.
+  // Cost accounting - Opus 4.7 input $15/Mtok, output $75/Mtok.
   // Prompt cache: writes $18.75/Mtok (1.25x input), reads $1.50/Mtok (0.1x input).
   const total_input_tokens = samples.reduce((s, x) => s + (x.usage.input_tokens || 0), 0);
   const total_output_tokens = samples.reduce((s, x) => s + (x.usage.output_tokens || 0), 0);
@@ -217,7 +217,7 @@ export async function recipeAsJudge({ prompt, system, verifier_concept_id, verif
   };
 }
 
-// Synthesize a program directly from input/output examples — the HumanEval mode.
+// Synthesize a program directly from input/output examples - the HumanEval mode.
 // This is a thin wrapper over the existing synthesizer that re-shapes the call
 // for "I have test cases, give me code that passes them all."
 export async function programSynthesize({ signature, docstring, test_cases, k = 8 }) {

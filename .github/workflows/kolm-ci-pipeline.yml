@@ -33,8 +33,9 @@ jobs:
   compile-test-publish:
     name: kolm pipeline (template)
     runs-on: ubuntu-latest
-    # TEMPLATE GUARD: keep `if: false` until the secret is configured.
-    if: false
+    # Self-guarding: runs only when the KOLM_KEY secret is configured,
+    # skips cleanly on forks / unconfigured repos.
+    if: ${{ secrets.KOLM_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

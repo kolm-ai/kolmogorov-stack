@@ -1,13 +1,13 @@
 // src/benchmark-compare.js
 //
-// Wave W — Head-to-head benchmark: compiled kolm artifact vs. LLM (remote API
+// Wave W - Head-to-head benchmark: compiled kolm artifact vs. LLM (remote API
 // or local inference).
 //
 // The product thesis the user named: "we know for a fact that we have
 // something that is faster and provides a better system than simply calling
 // an LLM or running it locally." This module is the measurement that
-// answers that — honestly. If a path can't be measured (no API key, no
-// local inference server), it reports "skipped — <reason>", not a faked
+// answers that - honestly. If a path can't be measured (no API key, no
+// local inference server), it reports "skipped - <reason>", not a faked
 // number.
 //
 // The three paths measured for each task input:
@@ -27,7 +27,7 @@
 //
 // For each path we record per-call latency_us, then summarize n, min, p50,
 // p95, p99, max. We also record correctness when the case carries an
-// `expected` field — for LLM paths we use a loose-equality comparator
+// `expected` field - for LLM paths we use a loose-equality comparator
 // because models add chatter; for kolm paths we use exact match.
 
 import fs from 'node:fs';
@@ -50,7 +50,7 @@ export async function compareArtifact(artifactPath, opts = {}) {
     throw new Error('compareArtifact: artifact has no eval cases and no opts.input/cases was provided');
   }
 
-  // LLM paths are cost-bounded — running 1000 cases × 5 runs against
+  // LLM paths are cost-bounded - running 1000 cases × 5 runs against
   // claude-haiku is $$. Default to first 20 cases for the API path so the
   // head-to-head latency comparison still has signal but we don't burn the
   // user's credits. Override with opts.llmSampleN (or --llm-sample on the CLI).
@@ -103,7 +103,7 @@ export async function compareArtifact(artifactPath, opts = {}) {
 // {input, output} (the Wave J / seeds.jsonl shape) or legacy
 // {prompt, completion}. Normalizes to {id, input, expected, params}.
 // Skips malformed lines silently so a one-line typo doesn't kill a 1000-row
-// run — but logs the count on stderr so the operator notices.
+// run - but logs the count on stderr so the operator notices.
 export function readCorpusJsonl(corpusPath) {
   const raw = fs.readFileSync(corpusPath, 'utf8');
   const lines = raw.split(/\r?\n/).filter(Boolean);
@@ -131,7 +131,7 @@ export function readCorpusJsonl(corpusPath) {
 }
 
 // ---------------------------------------------------------------------------
-// Path 1 — kolm-js (the current artifact runtime).
+// Path 1 - kolm-js (the current artifact runtime).
 // ---------------------------------------------------------------------------
 async function measureKolmJs(artifactPath, cases, runs) {
   const latencies = [];
@@ -175,7 +175,7 @@ async function measureKolmJs(artifactPath, cases, runs) {
 }
 
 // ---------------------------------------------------------------------------
-// Path 2 — kolm-native (Wave G bundled native binary).
+// Path 2 - kolm-native (Wave G bundled native binary).
 // ---------------------------------------------------------------------------
 async function measureKolmNative(artifactPath, bundle, probe, cases, runs) {
   const { binPath, recipe_id, kind } = probe;
@@ -220,10 +220,10 @@ async function measureKolmNative(artifactPath, bundle, probe, cases, runs) {
 }
 
 // ---------------------------------------------------------------------------
-// Path 3 — llm-api (Anthropic by default).
+// Path 3 - llm-api (Anthropic by default).
 //
 // Honest measurement: we make REAL API calls. If ANTHROPIC_API_KEY is
-// missing, the path is skipped — never simulated. Token cost is reported
+// missing, the path is skipped - never simulated. Token cost is reported
 // using the response's `usage` block multiplied by the public per-token
 // rate for the model in question.
 // ---------------------------------------------------------------------------
@@ -295,7 +295,7 @@ async function measureLlmApi(probe, bundle, cases, runs, opts) {
 }
 
 // ---------------------------------------------------------------------------
-// Path 4 — local-llm (ollama by default).
+// Path 4 - local-llm (ollama by default).
 //
 // Real call to the local inference server. Probed at start so we don't
 // flood logs on a host without it.
@@ -365,7 +365,7 @@ async function measureLocalLlm(probe, bundle, cases, runs, opts) {
 }
 
 // ---------------------------------------------------------------------------
-// Availability probes — done once, up front, so we know which paths to run.
+// Availability probes - done once, up front, so we know which paths to run.
 // ---------------------------------------------------------------------------
 async function probeAvailability({ llmApi, localLlm, nativeBin, bundle }) {
   const probe = {
@@ -416,7 +416,7 @@ async function probeLlmApi() {
     return { available: false, reason: `@anthropic-ai/sdk not installable: ${e.message}` };
   }
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  // Default to Haiku (cheap, fast) for fairness — kolm's pitch is that it
+  // Default to Haiku (cheap, fast) for fairness - kolm's pitch is that it
   // beats even the cheapest LLM on simple narrow tasks. Override with
   // KOLM_BENCH_LLM_MODEL.
   const model = process.env.KOLM_BENCH_LLM_MODEL || 'claude-haiku-4-5';
@@ -463,7 +463,7 @@ async function probeLocalLlm() {
 }
 
 // ---------------------------------------------------------------------------
-// Head-to-head — comparative speedup + cost ratios over kolm-js as baseline.
+// Head-to-head - comparative speedup + cost ratios over kolm-js as baseline.
 // ---------------------------------------------------------------------------
 function headToHead(results) {
   const base = results['kolm-js'];
@@ -523,7 +523,7 @@ function buildSystemPromptFromBundle(bundle) {
   }).join('\n\n');
   return [
     `Task: ${task}`,
-    'Reply with the output only — no commentary, no markdown fences, no explanation.',
+    'Reply with the output only - no commentary, no markdown fences, no explanation.',
     'If the output is structured, reply with exact JSON. Do not add fields the schema does not specify.',
     shots ? `Examples:\n${shots}` : '',
   ].filter(Boolean).join('\n\n');

@@ -113,7 +113,7 @@ ${body}
 
 <footer class="ks-foot">
   <div class="ks-wrap">
-    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:rodneyyesep@gmail.com">rodneyyesep@gmail.com</a></p>
+    <p>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></p>
   </div>
 </footer>
 
@@ -169,7 +169,7 @@ const GATEWAY_PAGES = [
   {
     slug: 'overview',
     title: 'Gateway overview',
-    description: 'The kolm Wrapper is a signing, redacting, capturing reverse-proxy that sits in front of any LLM API. Eleven providers, one auditable receipt per call.',
+    description: 'The kolm gateway is a signing, redacting, capturing reverse-proxy that sits in front of any LLM API. Eleven providers, one auditable receipt per call.',
     eyebrow: 'Gateway',
     h1: 'A signing gateway in front of every LLM call.',
     lede: 'The gateway is a thin reverse-proxy that turns every chat-completion request into a signed, captured, metered event. Eleven providers behind one OpenAI-compatible interface. No vendor lock, no SDK rewrite.',
@@ -236,9 +236,9 @@ const GATEWAY_PAGES = [
 
   {
     slug: 'quickstart',
-    title: 'Wrapper quickstart',
+    title: 'Gateway quickstart',
     description: 'Install the kolm CLI, point your OpenAI SDK at the wrap endpoint, and capture your first signed call in 60 seconds.',
-    eyebrow: 'Wrapper quickstart',
+    eyebrow: 'Gateway quickstart',
     h1: 'From zero to a signed capture in 60 seconds.',
     lede: 'Install the CLI, set one environment variable, fire a normal OpenAI call. The response is identical; a signed receipt lands in your capture lake.',
     sections: [
@@ -302,7 +302,7 @@ const GATEWAY_PAGES = [
     slug: 'configuration',
     title: 'gateway.toml reference',
     description: 'Full reference for the gateway.toml configuration file: server, signing, redaction, capture, telemetry, provider, and namespace sections.',
-    eyebrow: 'Wrapper configuration',
+    eyebrow: 'Gateway configuration',
     h1: 'gateway.toml &mdash; the single source of truth.',
     lede: 'One file declares the gateway’s bind address, signing key path, PII mode, capture backend, telemetry exporter, every upstream provider, and per-namespace routing rules. Loaded once at boot; SIGHUP reloads it without dropping connections.',
     sections: [
@@ -403,7 +403,7 @@ const GATEWAY_PAGES = [
     slug: 'providers',
     title: 'Supported providers',
     description: 'Eleven providers behind one wrap endpoint: OpenAI, Anthropic, Google Gemini, DeepSeek, Groq, Together, Fireworks, OpenRouter, local-vLLM, local-Ollama, local-.kolm.',
-    eyebrow: 'Wrapper providers',
+    eyebrow: 'Gateway providers',
     h1: 'Eleven providers, one wrap endpoint.',
     lede: 'Every provider accepts its native request shape on the wrap URL. The gateway translates only what the provider requires; nothing else is rewritten. Your existing SDK keeps working.',
     sections: [
@@ -468,7 +468,7 @@ const GATEWAY_PAGES = [
     slug: 'routing-rules',
     title: 'Per-namespace routing rules',
     description: 'Declare primary model, fallback chain, and confidence threshold per namespace. Same config covers cost-aware and latency-aware routing.',
-    eyebrow: 'Wrapper routing rules',
+    eyebrow: 'Gateway routing rules',
     h1: 'Per-namespace routing in one TOML block.',
     lede: 'A namespace declares a primary model and an ordered fallback chain. Optionally enable confidence routing so cheap local handles the easy queries and the expensive teacher only gets the hard ones.',
     sections: [
@@ -544,7 +544,7 @@ const GATEWAY_PAGES = [
     slug: 'streaming',
     title: 'SSE streaming',
     description: 'Server-Sent Events streaming end-to-end through the gateway. Chunk shape normalized across all 11 providers.',
-    eyebrow: 'Wrapper streaming',
+    eyebrow: 'Gateway streaming',
     h1: 'SSE streaming, normalized across providers.',
     lede: 'Set <code>stream: true</code> in the request body and the gateway forwards chunks as they arrive. Receipt and capture are written when the final chunk lands; latency to first token is identical to direct upstream.',
     sections: [
@@ -608,7 +608,7 @@ const GATEWAY_PAGES = [
     slug: 'self-host',
     title: 'Self-host the gateway',
     description: 'Docker Compose walkthrough for production self-hosting. Kubernetes Helm chart pointer for HA deployments.',
-    eyebrow: 'Wrapper self-host',
+    eyebrow: 'Gateway self-host',
     h1: 'Self-host in 10 minutes with Docker Compose.',
     lede: 'Three containers: gateway, Postgres, MinIO. One <code>docker compose up -d</code>. The same image runs in Kubernetes via the published Helm chart.',
     sections: [
@@ -674,9 +674,9 @@ const GATEWAY_PAGES = [
 
   {
     slug: 'troubleshooting',
-    title: 'Wrapper troubleshooting',
+    title: 'Gateway troubleshooting',
     description: 'Common gateway errors: 401 unauthorized, 429 rate limit, 502 upstream timeout, 503 capture write failure. Diagnose, fix, re-verify.',
-    eyebrow: 'Wrapper troubleshooting',
+    eyebrow: 'Gateway troubleshooting',
     h1: 'Diagnose, fix, re-verify.',
     lede: 'Every error from the gateway carries a stable error code and a remediation pointer. The most common four are listed below with the exact command to surface the root cause.',
     sections: [
@@ -689,7 +689,7 @@ const GATEWAY_PAGES = [
         list: [
           '<code>kolm_auth_failed</code> &mdash; your kolm key is wrong. Run <code>kolm whoami</code>; if it says <code>logged_in: false</code>, re-run <code>kolm login</code> or paste a fresh key.',
           '<code>upstream_auth_failed</code> &mdash; your provider key (OpenAI / Anthropic / Gemini) is wrong. The body includes <code>upstream_status</code> and <code>upstream_body</code> verbatim.',
-          '<code>tenant_disabled</code> &mdash; the tenant is suspended (billing or abuse). Contact <a href="mailto:rodneyyesep@gmail.com">support</a>.',
+          '<code>tenant_disabled</code> &mdash; the tenant is suspended (billing or abuse). Contact <a href="mailto:dev@kolm.ai">support</a>.',
         ],
       },
       {

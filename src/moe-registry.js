@@ -1,4 +1,4 @@
-// S-7 — Known Mixture-of-Experts model families + their topology defaults.
+// S-7 - Known Mixture-of-Experts model families + their topology defaults.
 //
 // The registry encodes the canonical sparse-MoE topology numbers that ship in
 // each family's published config.json so callers (detectMoE in moe-support.js,
@@ -134,7 +134,7 @@ export const MOE_FAMILIES = Object.freeze({
 //
 // Multiple families can share an architecture string (Mixtral 8x7B and
 // Mixtral 8x22B both report `MixtralForCausalLM`). The mapping prefers the
-// SMALLER / more-common variant as the fallback — callers who care about
+// SMALLER / more-common variant as the fallback - callers who care about
 // the exact size will read `num_experts` / `hidden_size` from config.json
 // and pin the precise family themselves. This default behavior matches
 // what most users mean by "I have a Mixtral".

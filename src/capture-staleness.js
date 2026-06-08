@@ -1,4 +1,4 @@
-// W746 — Capture staleness: recency weighting, freshness distribution, TTL eviction.
+// W746 - Capture staleness: recency weighting, freshness distribution, TTL eviction.
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 473-478):
 //   [W746-1] Capture expiry / decay weighting (recent > older)
@@ -15,7 +15,7 @@
 //     "tune the curve" PR cannot silently drift sampler weights.
 //   - Honest envelopes. evictExpired() returns {kept,evicted} so callers can
 //     audit what disappeared; never silently drops rows.
-//   - TTL = null means NO TTL. We never invent a default retention period —
+//   - TTL = null means NO TTL. We never invent a default retention period - 
 //     a user who never opted in must never have rows auto-evicted. The W746
 //     dashboard surfaces the per-namespace policy explicitly.
 //
@@ -44,7 +44,7 @@ function _toMs(captured_at) {
 }
 
 // =============================================================================
-// recencyWeight — exponential decay weight in (0, 1].
+// recencyWeight - exponential decay weight in (0, 1].
 //
 // Same-day capture returns 1.0 (no decay yet).
 // After `half_life_days` of age, weight = 0.5.
@@ -69,7 +69,7 @@ export function recencyWeight(captured_at, opts = {}) {
 }
 
 // =============================================================================
-// weightCapturesByRecency — annotate each capture with a recency_weight field.
+// weightCapturesByRecency - annotate each capture with a recency_weight field.
 //
 // Pure transform: returns a NEW array of NEW row objects (no mutation of input).
 // Each output row carries every original field PLUS `recency_weight` in (0, 1].
@@ -86,7 +86,7 @@ export function weightCapturesByRecency(captures, opts = {}) {
 }
 
 // =============================================================================
-// freshnessDistribution — bucket captures by age band for the W746-3 timeline viz.
+// freshnessDistribution - bucket captures by age band for the W746-3 timeline viz.
 //
 // Default buckets = [1, 7, 30, 90, 365] days. Plus an overflow bucket
 // `>max(buckets)d` (e.g. ">365d") that catches everything older.
@@ -152,14 +152,14 @@ export function freshnessDistribution(captures, opts = {}) {
 }
 
 // =============================================================================
-// evictExpired — partition captures into kept/evicted using a TTL in days.
+// evictExpired - partition captures into kept/evicted using a TTL in days.
 //
 // ttl_days = null  → no TTL configured → returns ALL kept, evicted is empty.
 //                     (This is the W746-2 honesty contract: no policy = no
 //                     eviction. We do NOT impose a default retention.)
 // ttl_days = N (>0) → captures older than N days move to evicted[].
 //
-// Returns: {kept: [...], evicted: [...]} — both are NEW arrays of references
+// Returns: {kept: [...], evicted: [...]} - both are NEW arrays of references
 // to the original rows (we never mutate input).
 //
 // Garbage captured_at → row falls into `evicted` (we cannot honestly keep a
@@ -170,7 +170,7 @@ export function evictExpired(captures, opts = {}) {
   const list = Array.isArray(captures) ? captures : [];
   const ttl_days = opts.ttl_days;
   const now = opts.now != null ? opts.now : Date.now();
-  // Null/undefined TTL — no eviction. Empty string + 0 also count as "no TTL"
+  // Null/undefined TTL - no eviction. Empty string + 0 also count as "no TTL"
   // so an accidental `?ttl=` query param doesn't wipe a user's corpus.
   if (ttl_days == null || ttl_days === '' || ttl_days === 0) {
     return { kept: list.slice(), evicted: [] };
@@ -198,7 +198,7 @@ export function evictExpired(captures, opts = {}) {
 }
 
 // =============================================================================
-// applyNamespaceTtl — group captures by namespace and evict per-namespace.
+// applyNamespaceTtl - group captures by namespace and evict per-namespace.
 //
 // namespaceSettings shape: { [namespace_name]: { capture_ttl_days: N|null } }
 //

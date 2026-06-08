@@ -3,13 +3,13 @@ import fs from 'node:fs';
 // W217 (origin) + W295 (split). The frontier-model catalog kolm targets for
 // `kolm compile --tier=<hw>` (W218) and the /models page.
 //
-// W295 — TWO registries, one orthogonal axis. Audit C5 found the original
+// W295 - TWO registries, one orthogonal axis. Audit C5 found the original
 // W217 catalog was a hallucination risk: speculative model rows used broad
 // Hugging Face ORG URLs as source_url, but the online verifier only HEADed
 // that URL, so a customer reading /models could be misled into thinking we
 // had verified a model-id that may not exist. The compliance fix is to split:
 //
-//   FRONTIER_MODELS  — VERIFIED rows used by `kolm compile` defaults.
+//   FRONTIER_MODELS - VERIFIED rows used by `kolm compile` defaults.
 //                      A row is verified ONLY if:
 //                        - source_url matches the exact model-card regex
 //                          ^https://huggingface\.co/[^/]+/[^/]+/?$ (one org
@@ -21,7 +21,7 @@ import fs from 'node:fs';
 //                          explicitly null with revision_pinned:false (the
 //                          honest warn-band -- listed but unpinned).
 //
-//   CANDIDATE_MODELS — RESEARCH WATCHLIST, never used by compile defaults.
+//   CANDIDATE_MODELS - RESEARCH WATCHLIST, never used by compile defaults.
 //                      Same row shape but no verification requirement. A user
 //                      can opt-in with `kolm models add --unverified` or by
 //                      passing the id explicitly. The /models page shows these
@@ -29,7 +29,7 @@ import fs from 'node:fs';
 //
 // `resolveTier()` reads ONLY FRONTIER_MODELS. If a tier has no verified pick
 // it returns null with reason:'no_verified_model_for_tier' so the CLI can
-// surface "I can't pick a verified model for this tier — choose a candidate
+// surface "I can't pick a verified model for this tier - choose a candidate
 // explicitly with --unverified".
 //
 // This catalog sits ALONGSIDE the older `src/models.js` baseline registry
@@ -78,7 +78,7 @@ export const HW_TIERS = [
   { slug: 'm3-ultra-512',  name: 'Apple M3 Ultra (512GB unified)', vram_gb: 512,   class: 'workstation',  backends: ['metal'] },
   { slug: 'm4-max-128',    name: 'Apple M4 Max (128GB unified)',   vram_gb: 128,   class: 'workstation',  backends: ['metal'] },
   { slug: 'cpu-server',    name: 'CPU server (256GB+ DDR5)',       vram_gb: 0,     class: 'cpu',          backends: ['cpu'] },
-  // W235 — AMD ROCm / Vulkan first-class. Datacenter MI300 + consumer RX 7000/9000.
+  // W235 - AMD ROCm / Vulkan first-class. Datacenter MI300 + consumer RX 7000/9000.
   { slug: 'mi300x',        name: 'AMD Instinct MI300X (192GB HBM3)', vram_gb: 192, class: 'datacenter',   backends: ['rocm'] },
   { slug: 'mi300a',        name: 'AMD Instinct MI300A (128GB unified)', vram_gb: 128, class: 'datacenter', backends: ['rocm'] },
   { slug: 'rx7900xtx',     name: 'AMD Radeon RX 7900 XTX (24GB)',  vram_gb: 24,    class: 'consumer-gpu', backends: ['rocm', 'vulkan'] },
@@ -88,25 +88,25 @@ export const HW_TIERS = [
 export const QUANTS = ['fp16', 'bf16', 'q8', 'q6', 'q5', 'q4', 'q3', 'q2'];
 export const ARCHS = ['dense', 'moe', 'reap-moe', 'omni'];
 export const MODALITIES = ['text', 'vision', 'video', 'audio'];
-// W235 — runtime backends. Every frontier-model row declares which backends it
+// W235 - runtime backends. Every frontier-model row declares which backends it
 // is verified on so the doctor + tier resolver can advise honestly. ROCm and
 // Vulkan are first-class alongside CUDA -- no second-tier "best-effort" framing.
 export const RUNTIME_BACKENDS = ['cuda', 'rocm', 'vulkan', 'metal', 'cpu'];
 
-// W295 — exact HF model-card URL regex. Exactly two path segments after the
+// W295 - exact HF model-card URL regex. Exactly two path segments after the
 // huggingface.co host (org/repo). Trailing slash optional. Anything else
 // (org-only, model-with-tree-or-blob suffix, vendor docs page) is rejected.
 const EXACT_HF_MODEL_URL = /^https:\/\/huggingface\.co\/[^/]+\/[^/]+\/?$/;
 
-// W295 — verifyExactSourceUrl is the single source of truth for what counts
+// W295 - verifyExactSourceUrl is the single source of truth for what counts
 // as a properly cited model-card URL. Used by verifyEntry (offline shape),
 // verifyEntryOnline (returned as source_url_specific), and the test suite.
 //
 // Returns:
-//   { ok: true }                                — exact model-card URL.
-//   { ok: false, reason: 'too_broad' }          — HF org page (one segment).
-//   { ok: false, reason: 'not_huggingface' }    — anywhere else.
-//   { ok: false, reason: 'missing' }            — empty/null/non-string.
+//   { ok: true } - exact model-card URL.
+//   { ok: false, reason: 'too_broad' } - HF org page (one segment).
+//   { ok: false, reason: 'not_huggingface' } - anywhere else.
+//   { ok: false, reason: 'missing' } - empty/null/non-string.
 export function verifyExactSourceUrl(url) {
   if (!url || typeof url !== 'string') return { ok: false, reason: 'missing' };
   if (EXACT_HF_MODEL_URL.test(url)) return { ok: true };
@@ -123,7 +123,7 @@ export function verifyExactSourceUrl(url) {
 // Source note shorthand for cite-strings.
 const SRC_W295_AUDIT = 'codebase audit 2026-05-18 (W295 split)';
 
-// W295 — verification_evidence shape helper. Only the verifier_note is
+// W295 - verification_evidence shape helper. Only the verifier_note is
 // populated by hand; HTTP status fields stay null until a network probe
 // fills them. revision_hash mirrors the row-level field when pinned.
 function evidence(note) {
@@ -137,7 +137,7 @@ function evidence(note) {
 }
 
 // ---------------------------------------------------------------------------
-// FRONTIER_MODELS — VERIFIED catalog. Used by `resolveTier()` and compile
+// FRONTIER_MODELS - VERIFIED catalog. Used by `resolveTier()` and compile
 // defaults. Every row has an exact HF model-card URL, exact license URL, and
 // verified_at within the last 90 days. revision_hash is null + revision_pinned
 // is false because we cannot fabricate SHAs without network access; rows are
@@ -389,7 +389,7 @@ export const FRONTIER_MODELS = [
 ];
 
 // ---------------------------------------------------------------------------
-// CANDIDATE_MODELS — RESEARCH WATCHLIST. Never used by `resolveTier()` or
+// CANDIDATE_MODELS - RESEARCH WATCHLIST. Never used by `resolveTier()` or
 // compile defaults. These rows survive the W295 split as the original W217
 // + W235 catalog; their source_url points to HF organization pages, not
 // exact model-card URLs, so they fail the verification gate and cannot be
@@ -671,7 +671,7 @@ export const CANDIDATE_MODELS = [
     verified_at: '2026-05-17',
     recipe_classes: ['rules', 'extraction', 'classification', 'agent'],
   },
-  // W235 — AMD-targeted candidates. Same model files, AMD hw_tier so the
+  // W235 - AMD-targeted candidates. Same model files, AMD hw_tier so the
   // resolver can answer "I have an MI300X / RX 7900 XTX / RX 9070 XT --
   // what's the biggest thing I can compile against?" once promoted.
   {
@@ -741,7 +741,7 @@ export const CANDIDATE_MODELS = [
 ];
 
 // ---------------------------------------------------------------------------
-// W409r — BACKBONES. Cross-orthogonal model-backbones registry.
+// W409r - BACKBONES. Cross-orthogonal model-backbones registry.
 //
 // FRONTIER_MODELS/CANDIDATE_MODELS above are the W217/W295 axis: which model
 // to pick FOR A GIVEN hw_tier. BACKBONES is the W409r axis: every base model
@@ -809,7 +809,7 @@ export const BACKBONES = [
     local_path: null,
     recommended_for_target: [],
     verified_at: null,
-    notes: 'Gemma 3n E2B — phone-class mobile target. LM Studio iOS + MediaPipe sideload demo.',
+    notes: 'Gemma 3n E2B - phone-class mobile target. LM Studio iOS + MediaPipe sideload demo.',
   },
   {
     id: 'google/gemma-3n-E4B-it',
@@ -825,7 +825,7 @@ export const BACKBONES = [
     local_path: null,
     recommended_for_target: [],
     verified_at: null,
-    notes: 'Gemma 3n E4B — larger phone-class target. Galaxy S24 Ultra / Pixel 9 Pro / iPhone 16 Pro.',
+    notes: 'Gemma 3n E4B - larger phone-class target. Galaxy S24 Ultra / Pixel 9 Pro / iPhone 16 Pro.',
   },
 
   // ===== Qwen family =====
@@ -1086,7 +1086,7 @@ export const BACKBONES = [
   },
 ];
 
-// --------- W409r — BACKBONES API ---------
+// --------- W409r - BACKBONES API ---------
 
 const BACKBONE_LICENSES = ['Apache-2.0', 'MIT', 'Llama-3-Community', 'Llama-4-Community', 'Gemma-TOU', 'Qwen-License', 'Mistral-Research'];
 const BACKBONE_RUNTIMES = ['js', 'wasm', 'gguf', 'onnx', 'native'];
@@ -1122,7 +1122,7 @@ export async function pullBackbone(id, opts = {}) {
   if (!row) {
     return { ok: false, id, reason: 'unknown_id' };
   }
-  // Lazy imports — avoid heavy fs/os at module load.
+  // Lazy imports - avoid heavy fs/os at module load.
   const path = await import('node:path');
   const os = await import('node:os');
 
@@ -1137,12 +1137,12 @@ export async function pullBackbone(id, opts = {}) {
   let bytes = 0;
   let filePath;
   if (opts.fixtureBytes) {
-    // Test/offline path — write the fixture verbatim.
+    // Test/offline path - write the fixture verbatim.
     filePath = path.join(outDir, 'fixture.bin');
     fs.writeFileSync(filePath, opts.fixtureBytes);
     bytes = opts.fixtureBytes.length;
   } else if (opts.useRealPuller) {
-    // Production path — delegate to W386 puller via model-weights-manifest.
+    // Production path - delegate to W386 puller via model-weights-manifest.
     try {
       const W = await import('./model-weights-manifest.js');
       const P = await import('./model-weights-puller.js');
@@ -1167,7 +1167,7 @@ export async function pullBackbone(id, opts = {}) {
           bytes = result.total_bytes || 0;
         }
       } else {
-        // No manifest row — write a manifest stub so the registry reflects
+        // No manifest row - write a manifest stub so the registry reflects
         // the operator's intent without lying about a pulled binary.
         filePath = path.join(outDir, 'backbone.json');
         const stub = { id, family: row.family, cached_at: new Date().toISOString(), source: 'registry-metadata-only' };
@@ -1178,7 +1178,7 @@ export async function pullBackbone(id, opts = {}) {
       return { ok: false, id, reason: 'puller_error', detail: String(e.message || e) };
     }
   } else {
-    // Default offline path — write a stub manifest. The runtime can later
+    // Default offline path - write a stub manifest. The runtime can later
     // replace this with a real weights file.
     filePath = path.join(outDir, 'backbone.json');
     const stub = { id, family: row.family, cached_at: new Date().toISOString(), source: 'registry-metadata-only' };
@@ -1210,7 +1210,7 @@ export async function pullBackbone(id, opts = {}) {
   };
 }
 
-// Shape check — every backbone row has the W409r contract.
+// Shape check - every backbone row has the W409r contract.
 export function verifyBackbone(id) {
   const row = BACKBONES.find(b => b.id === id);
   if (!row) return { ok: false, id, reason: 'unknown_id' };
@@ -1250,7 +1250,7 @@ export function verifyAllBackbones() {
 
 // --------- API ---------
 
-// W295 — verified-only accessors. listVerified/listCandidates return shallow
+// W295 - verified-only accessors. listVerified/listCandidates return shallow
 // copies so callers cannot mutate the in-module registries.
 export function listVerified() { return FRONTIER_MODELS.slice(); }
 export function listCandidates() { return CANDIDATE_MODELS.slice(); }
@@ -1270,7 +1270,7 @@ export function showFrontier(id) {
   return FRONTIER_MODELS.find(m => m.id === id) || null;
 }
 
-// W295 — show across BOTH registries so `kolm models show <id>` works for
+// W295 - show across BOTH registries so `kolm models show <id>` works for
 // candidates too; returns {row, registry:'verified'|'candidate'} or null.
 export function showAny(id) {
   const v = FRONTIER_MODELS.find(m => m.id === id);
@@ -1342,7 +1342,7 @@ export function buildEntry(input) {
 // source_url is the second-tier check that `kolm models verify --online`
 // performs.
 //
-// W295 — verifyEntry now reads from BOTH registries (verified+candidate) so
+// W295 - verifyEntry now reads from BOTH registries (verified+candidate) so
 // `kolm models verify <id>` works even when the id is unverified. Candidate
 // rows skip the source_url-specificity check because the whole point of the
 // candidate registry is that those URLs are not yet promoted. Verified rows
@@ -1361,14 +1361,14 @@ export function verifyEntry(id) {
   if (m.active_params_b != null && m.active_params_b > m.params_b) problems.push('active_exceeds_total');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(m.verified_at))       problems.push('bad_verified_at');
   if (!m.source_url && !m.source_note)                  problems.push('missing_source');
-  // W235 — verified_backends optional but if present must be from the catalog.
+  // W235 - verified_backends optional but if present must be from the catalog.
   if (m.verified_backends != null) {
     if (!Array.isArray(m.verified_backends)) problems.push('bad_verified_backends');
     else for (const b of m.verified_backends) {
       if (!RUNTIME_BACKENDS.includes(b)) problems.push('bad_backend_value:' + b);
     }
   }
-  // W295 — verified rows must pass the strict source-URL specificity gate.
+  // W295 - verified rows must pass the strict source-URL specificity gate.
   // Candidate rows are exempt by design.
   if (registry === 'verified') {
     const spec = verifyExactSourceUrl(m.source_url);
@@ -1396,7 +1396,7 @@ export async function verifyEntryOnline(id, opts = {}) {
   const base = verifyEntry(id);
   const found = showAny(id);
   const m = found ? found.row : null;
-  // W295 — surface the specificity check in the returned object regardless
+  // W295 - surface the specificity check in the returned object regardless
   // of network result, so callers can detect "broad URL responded 200".
   const specCheck = m ? verifyExactSourceUrl(m.source_url) : { ok: false, reason: 'missing' };
   if (!m || !m.source_url) {
@@ -1449,12 +1449,12 @@ export async function verifyAllOnline(opts = {}) {
   return { total: results.length, failed: failed.length, results };
 }
 
-// W218 — given a hardware tier slug, return the recommended frontier model
+// W218 - given a hardware tier slug, return the recommended frontier model
 // pick (lowest-VRAM model that targets this tier -- favors models that fit
 // with KV-cache + context headroom). Returns null if no model targets the
 // tier. Caller can override by passing --base-model explicitly.
 //
-// W295 — resolveTier reads ONLY FRONTIER_MODELS (the verified registry).
+// W295 - resolveTier reads ONLY FRONTIER_MODELS (the verified registry).
 // Candidate models are NEVER selected automatically. If no verified model
 // targets the tier the result is null + a reason string so CLI surfaces can
 // say "no verified model for tier X -- pass --base-model <id> from
@@ -1464,7 +1464,7 @@ export function resolveTier(slug, opts = {}) {
   if (!tier) return null;
   const matches = FRONTIER_MODELS.filter(m => m.hw_tier === slug);
   if (matches.length === 0) {
-    // W295 — non-null reason payload so callers can amber-pill the user.
+    // W295 - non-null reason payload so callers can amber-pill the user.
     return {
       tier,
       base_model: null,
@@ -1499,7 +1499,7 @@ export function resolveTier(slug, opts = {}) {
   };
 }
 
-// W218 — given a free-text GPU name (from nvidia-smi or system_profiler),
+// W218 - given a free-text GPU name (from nvidia-smi or system_profiler),
 // return the best-match HW tier slug. Conservative -- returns null if no
 // confident match. The doctor surface uses this to suggest a tier; the user
 // confirms by re-running compile with `--tier <slug>`.
@@ -1516,7 +1516,7 @@ export function detectTierFromGpuName(gpuName) {
   if (/dgx[ -]?spark|gb10|grace[ -]?blackwell/.test(s)) return 'dgx-spark';
   if (/m3[ -]?ultra|apple[ -]?m3[ -]?ultra/.test(s)) return 'm3-ultra-512';
   if (/m4[ -]?max|apple[ -]?m4[ -]?max/.test(s)) return 'm4-max-128';
-  // W235 — AMD detection. ROCm + Vulkan first-class.
+  // W235 - AMD detection. ROCm + Vulkan first-class.
   if (/mi300x|instinct[ -]?mi300x/.test(s)) return 'mi300x';
   if (/mi300a|instinct[ -]?mi300a/.test(s)) return 'mi300a';
   if (/rx[ -]?7900[ -]?xtx|radeon[ -]?rx[ -]?7900[ -]?xtx/.test(s)) return 'rx7900xtx';
@@ -1524,7 +1524,7 @@ export function detectTierFromGpuName(gpuName) {
   return null;
 }
 
-// W235 — given a free-text GPU name, return the best-match runtime backend.
+// W235 - given a free-text GPU name, return the best-match runtime backend.
 // Conservative -- defaults to 'cuda' for NVIDIA, 'rocm' for AMD, 'metal' for
 // Apple, 'cpu' otherwise. Returns null only when the name is missing.
 export function detectBackendFromGpuName(gpuName) {

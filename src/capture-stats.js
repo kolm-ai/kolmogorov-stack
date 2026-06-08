@@ -1,4 +1,4 @@
-// W716 — capture-distribution stats for task-adaptive architecture search (TAAS).
+// W716 - capture-distribution stats for task-adaptive architecture search (TAAS).
 //
 // Pure analytic module. Given an array of capture rows (the same shape
 // listCaptures returns) it produces a distribution profile the
@@ -16,7 +16,7 @@
 //                         normalized composite [0..1] over the three signals
 //                         above, used by the recommender's branch logic
 //
-// Honest empty contract: empty input returns n=0 with zero stats — the
+// Honest empty contract: empty input returns n=0 with zero stats - the
 // CLI surfaces this as `no_captures` and exits 3. NO synthesis of fake
 // stats; no NaN; no silent zero-pad.
 
@@ -28,7 +28,7 @@ export const CAPTURE_STATS_VERSION = 'w716-v1';
 const VOCAB_TOP_K = 5000;
 
 // =============================================================================
-// Internal helpers (not exported — keep the public surface tight).
+// Internal helpers (not exported - keep the public surface tight).
 // =============================================================================
 
 function toText(v) {
@@ -67,9 +67,9 @@ function mean(arr) {
 }
 
 // Shannon entropy of a unigram distribution over the top-K tokens (cap is
-// for perf — without it a tenant with millions of unique tokens explodes the
+// for perf - without it a tenant with millions of unique tokens explodes the
 // counter). The cap biases entropy LOW (we throw away the long tail's
-// contribution), which is the safe direction for the recommender — under-
+// contribution), which is the safe direction for the recommender - under-
 // rather than over-estimating complexity.
 function unigramEntropyBits(captures) {
   const counts = new Map();
@@ -121,7 +121,7 @@ function reasoningChainDepth(text) {
   // Step markers: "Step 1", "Step 2", ... or line-leading "1." "2." ...
   const stepMatches = text.match(/Step\s+\d+|^\s*\d+\.\s/gm) || [];
   const stepDepth = stepMatches.length;
-  // MAX of the signals — never 0 for non-empty text.
+  // MAX of the signals - never 0 for non-empty text.
   return Math.max(thinkBlocks, paragraphDepth, stepDepth);
 }
 
@@ -163,7 +163,7 @@ function softNorm(x, anchor) {
 /**
  * Compute the distribution profile of a capture set.
  *
- * @param {Array<object>} captures - capture rows (any source — listCaptures, raw JSONL, etc.)
+ * @param {Array<object>} captures - capture rows (any source - listCaptures, raw JSONL, etc.)
  * @returns {{
  *   version: string,
  *   n: number,

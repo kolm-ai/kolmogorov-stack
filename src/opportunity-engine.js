@@ -1,21 +1,21 @@
-// W369 — opportunity engine.
+// W369 - opportunity engine.
 //
 // Reads events via src/event-store.js, finds 11 categories of opportunity,
 // persists accept/ignore state at ~/.kolm/opportunities.jsonl. All
-// detectors are pure functions of the events array — easy to seed in tests.
+// detectors are pure functions of the events array - easy to seed in tests.
 //
 // Opportunity types:
-//   1.  cache_candidate            — identical request_hash repeated N+ times
-//   2.  cheaper_model_candidate    — strong model used where weak would suffice
-//   3.  local_replacement_candidate — template signature repeated 100+ times
-//   4.  privacy_leak               — sensitive_data_detected with allow policy
-//   5.  prompt_compression         — long prompts with consistent prefix
-//   6.  repeated_extraction        — JSON output with consistent schema
-//   7.  repeated_classification    — output in small enumerated set
-//   8.  log_triage                 — prompts about logs/errors with categorical out
-//   9.  routing_policy             — same prompt type to multiple providers
-//   10. dataset_ready              — 1000+ events with template clustering
-//   11. training_ready             — dataset_ready + holdout-disjoint candidate
+//   1.  cache_candidate - identical request_hash repeated N+ times
+//   2.  cheaper_model_candidate - strong model used where weak would suffice
+//   3.  local_replacement_candidate - template signature repeated 100+ times
+//   4.  privacy_leak - sensitive_data_detected with allow policy
+//   5.  prompt_compression - long prompts with consistent prefix
+//   6.  repeated_extraction - JSON output with consistent schema
+//   7.  repeated_classification - output in small enumerated set
+//   8.  log_triage - prompts about logs/errors with categorical out
+//   9.  routing_policy - same prompt type to multiple providers
+//   10. dataset_ready - 1000+ events with template clustering
+//   11. training_ready - dataset_ready + holdout-disjoint candidate
 
 import fs from 'node:fs';
 import os from 'node:os';
@@ -45,7 +45,7 @@ function _oppId(type, seed) {
 
 function _round(n, p = 2) { const m = Math.pow(10, p); return Math.round(n * m) / m; }
 
-// Strong/weak model heuristics — the costliest premium models are obvious
+// Strong/weak model heuristics - the costliest premium models are obvious
 // candidates to demote when responses are short and structured. Names are
 // matched substring-insensitive so we catch variant tags (gpt-4o-2024-...).
 const STRONG_MODELS = ['gpt-4', 'claude-opus', 'claude-sonnet', 'gpt-5', 'o1', 'o3', 'gemini-1.5-pro', 'gemini-2.0', 'kolm-flagship'];
@@ -60,7 +60,7 @@ function _looksLikeJson(s) { return typeof s === 'string' && JSON_OPENER.test(s)
 
 // findOpportunities({since, namespace, minCallCount, minMonthlySpend, tenant_id})
 //
-// W419 — `tenant_id` (or `tenant` alias) restricts the opportunity scan to the
+// W419 - `tenant_id` (or `tenant` alias) restricts the opportunity scan to the
 // caller's events. Without this guard the engine would surface another
 // tenant's optimization opportunities through `/v1/opportunities/*` and via
 // `/v1/intent/next` snapshot_summary. Local-only daemon callers leave the
@@ -140,7 +140,7 @@ export async function findOpportunities(opts = {}) {
       expected_replacement_rate: 1.0,
       estimated_savings_usd: _round(spend * 30 * 0.95, 2),
       risk: 'low',
-      reason: count + ' identical requests in window — same answer every time',
+      reason: count + ' identical requests in window - same answer every time',
       sample_event_ids: sample.slice(0, 5).map(e => e.event_id),
     }, state));
   }
@@ -169,7 +169,7 @@ export async function findOpportunities(opts = {}) {
         expected_replacement_rate: 0.85,
         estimated_savings_usd: _round(spend * 30 * 0.80, 2),
         risk: 'low',
-        reason: strongShort.length + ' calls return <200 tokens with no code/tools — gpt-4o-mini or claude-haiku would suffice',
+        reason: strongShort.length + ' calls return <200 tokens with no code/tools - gpt-4o-mini or claude-haiku would suffice',
         sample_event_ids: strongShort.slice(0, 5).map(e => e.event_id),
       }, state));
     }
@@ -194,7 +194,7 @@ export async function findOpportunities(opts = {}) {
       expected_replacement_rate: 0.78,
       estimated_savings_usd: _round(monthlySpend * 0.85, 2),
       risk: 'medium',
-      reason: c.count + ' calls share the same template — local model can replace 78%+',
+      reason: c.count + ' calls share the same template - local model can replace 78%+',
       sample_event_ids: c.sample_event_ids,
       template_signature: c.signature,
     }, state));
@@ -245,7 +245,7 @@ export async function findOpportunities(opts = {}) {
         expected_replacement_rate: 0.6,
         estimated_savings_usd: _round(spend * 30 * 0.3, 2),
         risk: 'low',
-        reason: top[1] + ' prompts >4000 tokens share an identical 200-char prefix — cache it',
+        reason: top[1] + ' prompts >4000 tokens share an identical 200-char prefix - cache it',
         sample_event_ids: sample.map(e => e.event_id),
       }, state));
     }
@@ -278,7 +278,7 @@ export async function findOpportunities(opts = {}) {
         expected_replacement_rate: 0.9,
         estimated_savings_usd: _round(spend * 30 * 0.7, 2),
         risk: 'medium',
-        reason: top[1] + ' outputs have identical JSON schema — extractor can replace LLM',
+        reason: top[1] + ' outputs have identical JSON schema - extractor can replace LLM',
         sample_event_ids: sample,
       }, state));
     }
@@ -308,7 +308,7 @@ export async function findOpportunities(opts = {}) {
         expected_replacement_rate: 0.92,
         estimated_savings_usd: _round(spend * 30 * 0.85, 2),
         risk: 'low',
-        reason: shortOuts.length + ' outputs use a vocab of ' + labels.size + ' labels — distilbert-tier model will match',
+        reason: shortOuts.length + ' outputs use a vocab of ' + labels.size + ' labels - distilbert-tier model will match',
         sample_event_ids: shortOuts.slice(0, 5).map(e => e.event_id),
       }, state));
     }
@@ -343,7 +343,7 @@ export async function findOpportunities(opts = {}) {
   }
 
   // --- 9) routing_policy ----------------------------------------------------
-  // Same template sig hitting multiple providers — pick the cheapest reliable one.
+  // Same template sig hitting multiple providers - pick the cheapest reliable one.
   for (const c of clusters) {
     if (c.providers.length < 2) continue;
     if (c.count < Math.floor(minCallCount / 5)) continue;
@@ -358,7 +358,7 @@ export async function findOpportunities(opts = {}) {
       expected_replacement_rate: 1.0,
       estimated_savings_usd: _round((c.avg_cost || 0) * c.count * 30 * 0.2, 2),
       risk: 'low',
-      reason: c.count + ' calls of the same template went to ' + c.providers.join(' / ') + ' — pin to cheapest',
+      reason: c.count + ' calls of the same template went to ' + c.providers.join(' / ') + ' - pin to cheapest',
       sample_event_ids: c.sample_event_ids,
       providers: c.providers,
     }, state));
@@ -378,7 +378,7 @@ export async function findOpportunities(opts = {}) {
       expected_replacement_rate: 0.7,
       estimated_savings_usd: 0,
       risk: 'low',
-      reason: events.length + ' events with ' + clusters.length + ' clusters — ready to curate into a dataset',
+      reason: events.length + ' events with ' + clusters.length + ' clusters - ready to curate into a dataset',
       sample_event_ids: topCluster.sample_event_ids,
     }, state));
   }
@@ -426,20 +426,20 @@ function _finalize(opp, state) {
   } else {
     opp.status = 'open';
   }
-  // W409m — universal score envelope. Every opportunity carries the same
+  // W409m - universal score envelope. Every opportunity carries the same
   // four signals so the UI / CLI / promote endpoint can sort/group without
   // having to special-case by type:
   //   - estimated_savings: USD/month savings the suggestion would unlock
   //   - volume:            call count in the lookback window
   //   - risk:              {low,medium,high} string + numeric weight
-  //   - trainability:      0..1 — how viable a local-replacement adapter is.
+  //   - trainability:      0..1 - how viable a local-replacement adapter is.
   // The aggregate `score` is the product of normalized savings * volume *
   // (1-risk_weight) * trainability, scaled to a 0..100 readable range. It's
   // a relative ranker, not a cost forecast.
   const savings = Number(opp.estimated_savings_usd) || 0;
   const volume = Number(opp.call_count) || 0;
   const replacement = Number(opp.expected_replacement_rate) || 0;
-  // Per-type baseline trainability — privacy_leak and dataset_ready are not
+  // Per-type baseline trainability - privacy_leak and dataset_ready are not
   // "trainable" in the local-replacement sense; they're routing / policy
   // hints. The remaining types map directly to their replacement rate.
   const baseTrainability = {
@@ -460,7 +460,7 @@ function _finalize(opp, state) {
   opp.estimated_savings = savings;
   // Risk numeric weight: 0=low, 0.5=medium, 1=high.
   const riskWeight = opp.risk === 'high' ? 1 : opp.risk === 'medium' ? 0.5 : 0;
-  // privacy_leak is treated as INFINITE business risk to ignore — we want it
+  // privacy_leak is treated as INFINITE business risk to ignore - we want it
   // to surface first, so we score it 100 outright. Other types get the
   // product of normalized signals scaled to 0..100.
   if (opp.type === 'privacy_leak') {
@@ -490,7 +490,7 @@ export async function explainOpportunity(id, opts = {}) {
   };
 }
 
-// W419 — accept/ignore must verify the opportunity id belongs to the calling
+// W419 - accept/ignore must verify the opportunity id belongs to the calling
 // tenant before mutating shared state. Otherwise tenant B could accept/ignore
 // tenant A's opportunities by guessing the id (the ids are deterministic per
 // request_hash / model). When tenant_id is unset (local-only daemon mode) the
@@ -515,7 +515,7 @@ export async function ignoreOpportunity(id, opts = {}) {
   return _writeState(id, 'ignored', opts.reason || null);
 }
 
-// W409m — promoteOpportunity: turn an opportunity into a dataset.
+// W409m - promoteOpportunity: turn an opportunity into a dataset.
 //
 // Looks up the live opportunity by id, resolves its namespace, and invokes
 // the dataset-workbench createDataset() with from_opportunity provenance.
@@ -528,7 +528,7 @@ export async function ignoreOpportunity(id, opts = {}) {
 // keeps `kolm opportunities` / `kolm optimize list` snappy).
 export async function promoteOpportunity(id, opts = {}) {
   if (!id) throw new Error('promoteOpportunity requires an opportunity id');
-  // W419 — tenant_id (or alias) restricts the live lookup so a tenant cannot
+  // W419 - tenant_id (or alias) restricts the live lookup so a tenant cannot
   // promote another tenant's opportunity into their own dataset namespace.
   const tenant_id = opts.tenant_id || opts.tenant || null;
   // Find the live opportunity so we know its namespace + sample event ids.
@@ -542,7 +542,7 @@ export async function promoteOpportunity(id, opts = {}) {
   if (!opp) {
     // The id might be a synthetic/persisted-only opportunity that no longer
     // shows up in the live recompute (events purged, window moved). We still
-    // need a namespace to promote — fall back to a caller-supplied one.
+    // need a namespace to promote - fall back to a caller-supplied one.
     if (!opts.namespace) {
       const err = new Error('opportunity_not_found_and_no_namespace: ' + id);
       err.code = 'OPPORTUNITY_NOT_FOUND';
@@ -596,7 +596,7 @@ function _writeState(id, status, reason) {
   return entry;
 }
 
-// W409m — _writeStateExtra: append a state row that carries additional
+// W409m - _writeStateExtra: append a state row that carries additional
 // fields (e.g. sample_event_ids) without setting status. The last-write-wins
 // reducer in _loadState() will merge the extra keys into byId[id].
 function _writeStateExtra(id, extra) {

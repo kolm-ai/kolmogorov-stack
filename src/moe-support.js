@@ -1,4 +1,4 @@
-// S-7 — Mixture-of-Experts model support.
+// S-7 - Mixture-of-Experts model support.
 //
 // Five primary APIs, each callable independently:
 //
@@ -120,15 +120,15 @@ function _emptyDetection(reason) {
  * known family).
  *
  * Lookup order:
- *   1) config.json — primary source (HF transformers convention).
- *   2) model.safetensors.index.json — surfaces tensor-name fragments like
+ *   1) config.json - primary source (HF transformers convention).
+ *   2) model.safetensors.index.json - surfaces tensor-name fragments like
  *      `model.layers.0.block_sparse_moe.experts.0.w1.weight` so we can count
  *      experts even when config.json is incomplete.
- *   3) *.gguf metadata table — read the leading 4KB header for keys named
+ *   3) *.gguf metadata table - read the leading 4KB header for keys named
  *      `*.expert_count` and `*.expert_used_count`.
  *
  * Returns a frozen record. is_moe=false means "no MoE evidence" rather than
- * "definitely dense" — caller should treat 0-experts as inconclusive when
+ * "definitely dense" - caller should treat 0-experts as inconclusive when
  * dealing with novel architectures.
  *
  * @param {string} modelDir local dir, single config.json path, or .gguf path
@@ -155,12 +155,12 @@ export function detectMoE(modelDir) {
     return _emptyDetection('unsupported_path_kind');
   }
 
-  // Case 3: directory — try config.json first, then safetensors index, then gguf.
+  // Case 3: directory - try config.json first, then safetensors index, then gguf.
   //
   // We only return early from config.json when it gives us positive evidence
   // either way: a recognized dense architecture (so we trust it as truly
   // dense) or any MoE signal. An unrecognized architecture string with no
-  // expert fields is INCONCLUSIVE — fall through to safetensors / gguf so a
+  // expert fields is INCONCLUSIVE - fall through to safetensors / gguf so a
   // custom model that wires its experts in unusual config keys still lights
   // up via tensor-name scanning.
   const cfgPath = path.join(modelDir, 'config.json');
@@ -300,7 +300,7 @@ function _detectFromSafetensorsIndex(idx) {
 
 // GGUF metadata: read only the first 64 KB and look for key strings
 // `*.expert_count` and `*.expert_used_count`. We don't fully parse the GGUF
-// header (avoids a binary dependency) — we just match the key+little-endian
+// header (avoids a binary dependency) - we just match the key+little-endian
 // uint32 next to it. This works for llama.cpp 0.5+ MoE quants of Mixtral,
 // Qwen-MoE, DeepSeek-V2 family.
 function _detectFromGguf(ggufPath) {
@@ -502,9 +502,9 @@ export function pinExperts({ artifact, expert_ids, runtime } = {}) {
  * Aggregate inference traces into a per-expert hit-count table.
  *
  * Each trace is one of:
- *   { experts_activated: [3, 17, 41, 88] }     — single decision
- *   { activations: [[3,17],[3,41],[17,88]] }   — batch of decisions
- *   { experts: [3, 17, 41] }                   — alias
+ *   { experts_activated: [3, 17, 41, 88] } - single decision
+ *   { activations: [[3,17],[3,41],[17,88]] } - batch of decisions
+ *   { experts: [3, 17, 41] } - alias
  *
  * Returns an object map of expert_id -> hit_count. Caller passes this back
  * to pinExperts({ expert_ids: top_n(hotness) }).
@@ -548,9 +548,9 @@ export function expertHotness({ traces } = {}) {
  * Recommend a mixed-precision quant policy for an MoE.
  *
  * Returns a per-tensor-class policy:
- *   router  — top-k logit head. ALWAYS fp16 (rounding here breaks routing).
- *   shared  — always-active layers (attention, embedding, shared expert).
- *   experts — sparse-routed MLPs. Most of the parameter count; aggressive
+ *   router - top-k logit head. ALWAYS fp16 (rounding here breaks routing).
+ *   shared - always-active layers (attention, embedding, shared expert).
+ *   experts - sparse-routed MLPs. Most of the parameter count; aggressive
  *             quant here pays the highest VRAM dividend.
  *
  * Aggressiveness scales with how tight target_vram_gb is relative to the
@@ -628,7 +628,7 @@ export function recommendQuantPolicy({ moe_info, target_vram_gb } = {}) {
   }
 
   // Recompute footprint at the recommended mix (using experts quant as the
-  // dominant term — shared is small by comparison).
+  // dominant term - shared is small by comparison).
   const projected = estimateMoEMemory({
     params: totalParamsB,
     num_experts: numExperts,

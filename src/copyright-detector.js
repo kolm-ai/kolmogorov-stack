@@ -1,9 +1,9 @@
-// W750-followup — Heuristic copyright detector for staged captures.
+// W750-followup - Heuristic copyright detector for staged captures.
 //
 // W750 (copyright filter + capture quarantine) was MERGED into W808 in the
 // 2026-05-24 dup-cleanup. The quarantine half (staged_captures table +
 // /account/captures/review.html + cmdCapturesReview) shipped under W808.
-// Only the copyright-classifier slice remained — promoted to this single
+// Only the copyright-classifier slice remained - promoted to this single
 // W808-followup item: a regex pack for common copyrighted-content
 // fingerprints that hooks into the W808 staged_captures pipeline as a
 // post-quarantine classifier.
@@ -11,7 +11,7 @@
 // SCOPE / HONESTY CONTRACT:
 //   - This is a HEURISTIC. The arrays below are pattern packs, not legal
 //     truth. A non-zero risk_score means "this looks like it MAY contain
-//     copyrighted content" — not "this is a confirmed copyright violation."
+//     copyrighted content" - not "this is a confirmed copyright violation."
 //   - We never call out to any external service. Scans are 100% local.
 //   - Lyric fingerprints are the TITLES (or short n-grams from titles) of
 //     well-known copyrighted songs. We do NOT bundle the actual lyrics; the
@@ -42,14 +42,14 @@
 //   - The wiring lives in src/proxy.js next to the existing W808 staged-row
 //     insert + anomaly call. The gate
 //     `process.env.KOLM_W750_COPYRIGHT_DETECTOR !== 'off'` is a byte-stability
-//     hatch — when set to 'off' the W808 happy path is unchanged.
+//     hatch - when set to 'off' the W808 happy path is unchanged.
 //
 // ANTI-BRITTLENESS (W604):
 //   - COPYRIGHT_VERSION is `w750-followup-vN.M` and consumers MUST match
 //     with a regex (/^w750-followup-/) NOT literal equality.
 //   - DISNEY_NAMES + LYRIC_FINGERPRINTS are frozen so callers cannot
 //     accidentally mutate the pattern pack.
-//   - risk_score is min(1, hits.length * 0.25) — additive + capped so a
+//   - risk_score is min(1, hits.length * 0.25) - additive + capped so a
 //     pathological input cannot drive the score out of [0, 1].
 
 export const COPYRIGHT_VERSION = 'w750-followup-v1';
@@ -93,7 +93,7 @@ export const DISNEY_NAMES = Object.freeze([
 ]);
 
 // ~30 recognizable song titles / Top-100 n-grams. NOT the lyrics themselves
-// — the presence of "Hey Jude" in a capture is the heuristic. Frozen.
+// - the presence of "Hey Jude" in a capture is the heuristic. Frozen.
 //
 // Origin: the LIST is curated heuristic content (titles + artist-name pairs
 // in common use). We do not bundle protected works.
@@ -141,7 +141,7 @@ export const LYRIC_FINGERPRINTS = Object.freeze([
 export const CODE_COPYRIGHT_REGEX = /\bcopyright\s*(?:\([cC]\)|©|&copy;)?\s*\d{4}(?:-\d{4})?\s*[a-zA-Z]/i;
 
 // SPDX license identifier comment. The convention is from
-// spdx.org/licenses/ — `SPDX-License-Identifier: MIT` style lines. High
+// spdx.org/licenses/ - `SPDX-License-Identifier: MIT` style lines. High
 // signal: code with an SPDX line almost always has a real license attached.
 export const SPDX_REGEX = /SPDX-License-Identifier:\s*[A-Za-z0-9.+-]+/;
 
@@ -156,7 +156,7 @@ const PER_HIT_RISK = 0.25;
 const MAX_SCAN_CHARS = 65536;
 
 // -----------------------------------------------------------------------------
-// Pure scanner — no I/O, deterministic given text.
+// Pure scanner - no I/O, deterministic given text.
 // -----------------------------------------------------------------------------
 
 function _coerceToString(input) {
@@ -227,7 +227,7 @@ export function scanText(text, opts = {}) {
     hits.push({ kind: 'lyric_fingerprint', matched: fp, index: idx });
   }
 
-  // Code copyright header — exec against the original-case scan so the
+  // Code copyright header - exec against the original-case scan so the
   // match position is honest (case-sensitive offsets in lowered text would
   // be misleading for downstream highlighting).
   const codeMatch = CODE_COPYRIGHT_REGEX.exec(scan);
@@ -240,7 +240,7 @@ export function scanText(text, opts = {}) {
     }
   }
 
-  // SPDX license identifier. Same — run against the original-case scan.
+  // SPDX license identifier. Same - run against the original-case scan.
   const spdxMatch = SPDX_REGEX.exec(scan);
   if (spdxMatch) {
     const matched = spdxMatch[0];
@@ -263,7 +263,7 @@ export function scanText(text, opts = {}) {
   };
 }
 
-// Scan a capture row — runs scanText on input + output sides, combines hits,
+// Scan a capture row - runs scanText on input + output sides, combines hits,
 // and preserves the capture_id for traceability. Accepts both
 // {prompt, response} (capture-store shape) and {prompt_redacted,
 // response_redacted} (event-store shape) so the helper works at either
@@ -287,7 +287,7 @@ export function scanCapture(captureRow) {
   const inScan = scanText(inputText);
   const outScan = scanText(outputText);
 
-  // Combine — tag each hit with which side it came from so the UI can
+  // Combine - tag each hit with which side it came from so the UI can
   // highlight prompt-vs-response without re-scanning.
   const hits = [];
   for (const h of inScan.hits) hits.push({ ...h, side: 'input' });
@@ -313,7 +313,7 @@ export function scanCapture(captureRow) {
   };
 }
 
-// W808 integration hook — caller decides "should this staged_captures row
+// W808 integration hook - caller decides "should this staged_captures row
 // be flagged for quarantine by the copyright heuristic?"
 //
 // Returns:
@@ -324,7 +324,7 @@ export function scanCapture(captureRow) {
 // is a comma-sorted list of the kinds that contributed (e.g.
 // "disney_character,spdx"). null when not quarantined.
 //
-// threshold default 0.5 — requires at least 2 hits. The W808 caller can
+// threshold default 0.5 - requires at least 2 hits. The W808 caller can
 // lower the threshold to 0.25 (single-hit sensitivity) via opts.
 export function classifyForQuarantine(captureRow, opts = {}) {
   const threshold = Number.isFinite(opts.threshold) && opts.threshold >= 0 && opts.threshold <= 1
@@ -364,7 +364,7 @@ export function classifyForQuarantine(captureRow, opts = {}) {
 }
 
 // Convenience wrapper for the W808 staged_captures post-quarantine
-// classifier call site. Returns a bool + reason — drops the heavy hits
+// classifier call site. Returns a bool + reason - drops the heavy hits
 // payload for the hot-path use case where the caller only wants the
 // decision. The full scan envelope is still available via classifyForQuarantine.
 export function shouldQuarantineForCopyright(captureRow, opts = {}) {

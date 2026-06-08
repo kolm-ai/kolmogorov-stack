@@ -90,7 +90,7 @@ export function normalizeRow(raw, opts = {}) {
   // Canonical kolm format: {input, output|expected, tags?, id?, params?, metadata?}.
   // Input must be a non-null primitive or object; expected must be defined.
   //
-  // Wave 284 — when raw.metadata is present, its custom keys (e.g.,
+  // Wave 284 - when raw.metadata is present, its custom keys (e.g.,
   // member_id / claim_id / case_id) are preserved so the group-aware split
   // can resolve them at split time. Known fields (id, tags, params,
   // source_format) take precedence at the top-level shape.
@@ -191,7 +191,7 @@ function canonicalInput(v) {
 // Deterministic 80/20 split by sha256(canonicalInput(row.input) + split_seed).
 // Stable across machines, reproducible by verifier. Returns { train, holdout,
 // split_seed, holdout_ratio }.
-// Wave 284 — extract the group value for a row given a group_key like
+// Wave 284 - extract the group value for a row given a group_key like
 // 'member_id' or 'claim_id' or 'case_id'. Two sources are honored:
 //   1. row.metadata[group_key] (canonical seed-author shape)
 //   2. row.metadata.tags entries that look like 'group_key:value'
@@ -223,11 +223,11 @@ export function splitSeeds(rows, opts = {}) {
   const buckets = 1000;
   const cutoff = Math.floor(holdout_ratio * buckets);
 
-  // Wave 284 — when group_key is set, route every row whose metadata
+  // Wave 284 - when group_key is set, route every row whose metadata
   // resolves a group value through a per-group bucket assignment so all
   // rows sharing the value land in the same partition. Rows that don't
   // resolve a group value (no member_id / claim_id / case_id) fall back to
-  // per-row hashing — this is the correct behavior for mixed corpora.
+  // per-row hashing - this is the correct behavior for mixed corpora.
   const groupAssignment = new Map(); // group_value -> 'train' | 'holdout'
   function assignGroup(groupValue) {
     if (groupAssignment.has(groupValue)) return groupAssignment.get(groupValue);
@@ -309,7 +309,7 @@ export function detectDuplicateInputs(rows) {
 // when the input hash differs.
 function jaccardBigrams(a, b) {
   // Object inputs (e.g., {text: 'foo'}) stringify to '[object Object]' under
-  // String() — every row would tokenize identically and the detector would
+  // String() - every row would tokenize identically and the detector would
   // falsely flag every pair as near-duplicate. Canonicalize via JSON for
   // objects, then tokenize on non-word boundaries so JSON punctuation
   // ({},:,") doesn't dominate the bigram space.
@@ -339,7 +339,7 @@ function jaccardBigrams(a, b) {
 // referring to the same underlying entity can be flagged even with different
 // surface text. Returns null if no grouping signal found.
 //
-// Wave 284 — when an explicit `group_key` is supplied (e.g., 'member_id'),
+// Wave 284 - when an explicit `group_key` is supplied (e.g., 'member_id'),
 // the function returns just that group's value so the leakage check matches
 // what splitSeeds enforces. Without an explicit key the function falls back
 // to picking the first tag that looks like an id, which is the pre-W284

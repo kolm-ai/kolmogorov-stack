@@ -1,4 +1,4 @@
-// W808-3 — Capture proxy: cryptographic origin binding.
+// W808-3 - Capture proxy: cryptographic origin binding.
 //
 // Every captured upstream response gets a `teacher_response_signature`
 // stamped onto the capture row before persistence. The signature is a
@@ -6,17 +6,17 @@
 // the teacher fingerprint that was supposed to answer this request).
 // If KOLM_W808_STRICT_SIGNATURE=1, an unrecognised teacher fingerprint
 // rejects the capture (returns null + a reason); otherwise the row is
-// passed through with a soft-flag (observability-only default — the
+// passed through with a soft-flag (observability-only default - the
 // proxy is in soft mode at launch so a teacher fingerprint roll-out
 // does not block legitimate traffic).
 //
-// This module is intentionally TINY — it does not own routing, only the
+// This module is intentionally TINY - it does not own routing, only the
 // signature-on-capture verb. The HTTP wiring lives in src/router.js
 // (intentionally untouched this wave per the W808 owned/forbidden split).
 //
 // Anti-brittleness (W604):
 //   - PROXY_VERSION is `w808-vN.M` and consumers must match with regex
-//     /^w808-/ — never literal equality.
+//     /^w808-/ - never literal equality.
 //   - Teacher-fingerprint registry is in-memory + appendable so an
 //     operator can add a new fingerprint without redeploying.
 
@@ -27,12 +27,12 @@ export const SIGNATURE_BODY_BYTES = 256;
 export const STRICT_SIGNATURE = (process.env.KOLM_W808_STRICT_SIGNATURE === '1'
   || process.env.KOLM_W808_STRICT_SIGNATURE === 'true');
 
-// W808-3 — known teacher fingerprints. Seeded with the public TLS-cert SPKI
+// W808-3 - known teacher fingerprints. Seeded with the public TLS-cert SPKI
 // SHA256 prefixes of the three vendor APIs we currently distill from. The
 // `registerTeacherFingerprint` verb lets an operator add a self-hosted
 // teacher (vLLM / llama.cpp / TGI) at runtime.
 //
-// IMPORTANT: these fingerprint VALUES are placeholders — at first wire-up
+// IMPORTANT: these fingerprint VALUES are placeholders - at first wire-up
 // the registry is observability-only (STRICT_SIGNATURE=false by default),
 // so the actual cert SPKI does not need to match anything in production
 // until an operator rotates KOLM_W808_STRICT_SIGNATURE=1. The shape of the
@@ -67,7 +67,7 @@ export function isKnownTeacherFingerprint(vendor, fingerprint) {
   return set.has(String(fingerprint));
 }
 
-// Reset hook for tests — empties + re-seeds the placeholder registry.
+// Reset hook for tests - empties + re-seeds the placeholder registry.
 export function _resetTeacherFingerprintsForTests() {
   _teacherFingerprints.clear();
   _teacherFingerprints.set('anthropic', new Set(['anthropic-public-spki-placeholder']));
@@ -76,13 +76,13 @@ export function _resetTeacherFingerprintsForTests() {
 }
 
 // Compute the W808-3 teacher_response_signature. Inputs:
-//   headers     — plain object or Headers-like { get(name): string }
-//   body        — string OR Buffer OR Uint8Array; only first 256 bytes used
-//   vendor      — short slug used to bind the signature to a teacher
-//   fingerprint — operator-supplied teacher fingerprint (may be undefined)
+//   headers - plain object or Headers-like { get(name): string }
+//   body - string OR Buffer OR Uint8Array; only first 256 bytes used
+//   vendor - short slug used to bind the signature to a teacher
+//   fingerprint - operator-supplied teacher fingerprint (may be undefined)
 //
 // Returns a hex sha256 digest. Deterministic given the same inputs. The
-// signature does NOT include a timestamp — that would make replay
+// signature does NOT include a timestamp - that would make replay
 // detection meaningless. The signature DOES include vendor + fingerprint
 // so two different teachers returning the same bytes produce different
 // signatures (which is the whole point of origin binding).
@@ -91,7 +91,7 @@ export function computeTeacherResponseSignature({ headers = {}, body = '', vendo
   // Canonicalize headers: lowercase keys, sort, join "k:v\n".
   let headerObj = {};
   if (headers && typeof headers.get === 'function') {
-    // Headers-like (web Fetch API) — we can only iterate if `entries()` exists.
+    // Headers-like (web Fetch API) - we can only iterate if `entries()` exists.
     if (typeof headers.entries === 'function') {
       for (const [k, v] of headers.entries()) headerObj[String(k).toLowerCase()] = String(v);
     } else {
@@ -123,7 +123,7 @@ export function computeTeacherResponseSignature({ headers = {}, body = '', vendo
 }
 
 // =============================================================================
-// W808-3 main verb — stamp + (optionally) reject a capture.
+// W808-3 main verb - stamp + (optionally) reject a capture.
 //
 // Threads the teacher_response_signature into the capture row in place,
 // then returns a verdict envelope. The proxy is wired to insert into the

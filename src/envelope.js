@@ -87,11 +87,11 @@ export function errorEnvelope({
     readiness: normalizedReadiness,
     tenant: normalizeTenant(tenant),
     evidence: normalizeEvidence(evidence),
-    // FLAT shape — matches the ~478 legacy call sites that read `error` as a string
+    // FLAT shape - matches the ~478 legacy call sites that read `error` as a string
     // and `detail` as a human message. Do not change this without a coordinated migration.
     error: code,
     detail: resolvedMessage,
-    // RICH nested shape — W707 standardizer contract; preserved for new clients that
+    // RICH nested shape - W707 standardizer contract; preserved for new clients that
     // need severity/retryable/status/details without re-deriving them.
     error_detail: {
       code,

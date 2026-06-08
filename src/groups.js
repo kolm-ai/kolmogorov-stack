@@ -1,4 +1,4 @@
-// W910-E2 — Compile groups.
+// W910-E2 - Compile groups.
 //
 // A compile group is a named bundle of namespaces that should compile as one
 // model. Examples:

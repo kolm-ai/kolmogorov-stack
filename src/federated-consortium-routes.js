@@ -1,23 +1,23 @@
 // src/federated-consortium-routes.js
 //
-// W830 — Federated consortium management routes.
+// W830 - Federated consortium management routes.
 //
 // Lives as a one-call mount to keep src/router.js diff small (parallel
-// WC07/WC14 fix + W825/W829 agents are editing router.js — every extra
+// WC07/WC14 fix + W825/W829 agents are editing router.js - every extra
 // touched line is a merge-conflict risk per W604 trap).
 //
 // Six routes, all auth-required + tenant-scoped via req.tenant_record.id:
 //
-//   POST /v1/federated/consortium/opt-in        — opt this tenant into a consortium
-//   POST /v1/federated/consortium/opt-out       — opt out + record reason
-//   GET  /v1/federated/consortium/members       — list opted-in members (per-tenant view)
-//   GET  /v1/federated/consortium/budget        — privacy budget (epsilon spent vs allocated)
-//   GET  /v1/federated/consortium/aggregations  — recent aggregation runs (status)
-//   POST /v1/federated/consortium/verify-mia    — verify artifact MIA-resistance (W830-2)
+//   POST /v1/federated/consortium/opt-in - opt this tenant into a consortium
+//   POST /v1/federated/consortium/opt-out - opt out + record reason
+//   GET  /v1/federated/consortium/members - list opted-in members (per-tenant view)
+//   GET  /v1/federated/consortium/budget - privacy budget (epsilon spent vs allocated)
+//   GET  /v1/federated/consortium/aggregations - recent aggregation runs (status)
+//   POST /v1/federated/consortium/verify-mia - verify artifact MIA-resistance (W830-2)
 //
 // Persistence:
-//   ~/.kolm/federated-consortium/<consortium_id>.json — single-tenant view
-//   ~/.kolm/federated-consortium/_aggregations.jsonl — system-wide aggregation log
+//   ~/.kolm/federated-consortium/<consortium_id>.json - single-tenant view
+//   ~/.kolm/federated-consortium/_aggregations.jsonl - system-wide aggregation log
 //
 // Honesty contract:
 //   - Foreign tenants reading the same consortium_id see ONLY their own
@@ -332,11 +332,11 @@ function _readAggregations({ consortium_id } = {}) {
         if (!consortium_id || row.consortium_id === consortium_id) out.push(row);
       } catch { /* skip malformed */ }
     }
-  } catch { /* file gone or unreadable — treat as empty */ }
+  } catch { /* file gone or unreadable - treat as empty */ }
   return out;
 }
 
-// Test/util — record an aggregation run. Production callers go through the
+// Test/util - record an aggregation run. Production callers go through the
 // federated-learning round flow; this helper is exported so tests + the
 // CLI can seed aggregations without spinning up a full round.
 export function _recordAggregationForTests(row) {
@@ -344,7 +344,7 @@ export function _recordAggregationForTests(row) {
   fs.appendFileSync(f, JSON.stringify(row) + '\n', 'utf8');
 }
 
-// Test/util — wipe local consortium state (per-consortium files + the
+// Test/util - wipe local consortium state (per-consortium files + the
 // system-wide aggregation log). Production callers MUST NOT use this.
 export function _wipeLocalConsortiumState() {
   try {

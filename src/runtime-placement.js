@@ -1,4 +1,4 @@
-// W826 — [T3] memory-aware runtime placement.
+// W826 - [T3] memory-aware runtime placement.
 //
 // Closes KOLM_W707_SYSTEM_UPGRADE_PLAN.md W826 (lines 1121-1127): "VRAM → RAM
 // → NVMe → network" tier detection + placement-decision tree that auto-routes
@@ -37,7 +37,7 @@
 //
 // TODO(future-wave-runtime): `kolm run` and `kolm serve` should call
 //   detectMemoryHierarchy() once at boot and placementDecision() per loaded
-//   artifact. Wire-up point: src/runtime.js getCompiled() — pass the
+//   artifact. Wire-up point: src/runtime.js getCompiled() - pass the
 //   placement decision to compileWasm/compileJs so the runtime layer can
 //   honour split_ratio / nvme_mmap when the worker stack supports it.
 
@@ -54,7 +54,7 @@ export const PLACEMENT_VERSION = 'w826-v1';
 // schema-incompatible decision label.
 export const PLACEMENTS = Object.freeze(['full_gpu', 'hybrid', 'nvme_mmap', 'cpu_only']);
 
-// VRAM headroom factor. We do NOT pack 100% — kernels, activations, KV cache
+// VRAM headroom factor. We do NOT pack 100% - kernels, activations, KV cache
 // all consume real memory at inference time. 0.9 matches the headroom budget
 // the W722 ITKV profile uses and the W721 TSAC compiler assumes.
 export const GPU_VRAM_USABLE_FRACTION = 0.9;
@@ -103,7 +103,7 @@ export async function detectMemoryHierarchy() {
       }];
       deviceSource = local.source || 'devices';
     } else if (local && deviceInfo(local.id) && deviceInfo(local.id).vram_gb > 0) {
-      // sysctl / hint path — use the registry's vram_gb for the profile.
+      // sysctl / hint path - use the registry's vram_gb for the profile.
       const reg = deviceInfo(local.id);
       gpu = [{
         idx: 0,
@@ -125,7 +125,7 @@ export async function detectMemoryHierarchy() {
 
   // NVMe probe. 100MB tmp write+read; report MB/s on the smaller of the two
   // (write-bound is the realistic floor). Skip if KOLM_NO_DISK_PROBE=1 or if
-  // the temp dir is in-memory (tmpfs on linux) — we cannot tell from JS so
+  // the temp dir is in-memory (tmpfs on linux) - we cannot tell from JS so
   // we honor the env override as the only opt-out.
   let nvme_bandwidth_mbps_estimate = null;
   let probeSource = 'skipped';
@@ -153,7 +153,7 @@ export async function detectMemoryHierarchy() {
 
 // _probeNvmeBandwidth: write a 100MB buffer to tmp, fsync, read it back,
 // return the smaller of (write_mbps, read_mbps). Returns null on any I/O
-// failure — never throws.
+// failure - never throws.
 function _probeNvmeBandwidth() {
   const sizeBytes = 100 * 1024 * 1024;
   const buf = Buffer.alloc(sizeBytes);

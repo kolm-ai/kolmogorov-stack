@@ -1,4 +1,4 @@
-// WC06 — minimal structured-logging wrapper.
+// WC06 - minimal structured-logging wrapper.
 //
 // Goal: a one-import drop-in replacement for console.{log,warn,error} that
 //   (a) preserves the existing `[tag] msg` console style so tail-the-logs
@@ -9,7 +9,7 @@
 //   (c) sanitises fields before they hit either sink, so a careless caller
 //       cannot leak an email / API key / JWT through the structured payload.
 //
-// This module deliberately does not depend on src/audit.js — audit rows are
+// This module deliberately does not depend on src/audit.js - audit rows are
 // HMAC-chained and load-bearing for tenant attestation, whereas log rows are
 // operational telemetry. Loggers that need an audit row should call appendAudit
 // directly; logger calls are best-effort and never throw.
@@ -27,7 +27,7 @@
 
 const LEVELS = Object.freeze(['info', 'warn', 'error']);
 
-// Lightweight sentinels — exposed for tests + callers that need to assert.
+// Lightweight sentinels - exposed for tests + callers that need to assert.
 const REDACTED = '[REDACTED]';
 
 // Regexes for the three high-risk leak shapes that show up in field values.
@@ -37,13 +37,13 @@ const REDACTED = '[REDACTED]';
 const EMAIL_RE = /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i;
 // API-key shape: `ks_<hex>`, `sk_<hex>`, plus generic long base64/hex tokens
 // >= 32 chars composed of safe alphabet. We intentionally don't try to detect
-// arbitrary opaque tokens — that's privacy-membrane's job.
+// arbitrary opaque tokens - that's privacy-membrane's job.
 const APIKEY_RE = /\b(?:ks|sk|pk|rk)_[A-Za-z0-9_-]{16,}\b/;
 // JWT shape: three base64url segments separated by dots. The middle segment
 // must be a JSON-object base64 so we require length >= 8 to avoid matching
 // arbitrary triples.
 const JWT_RE = /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/;
-// Bearer prefix — strip the token, leave the label.
+// Bearer prefix - strip the token, leave the label.
 const BEARER_RE = /Bearer\s+[A-Za-z0-9._\-+/=]{8,}/i;
 
 function looksSensitive(s) {
@@ -54,7 +54,7 @@ function looksSensitive(s) {
 
 // sanitizeFields(fields, opts?): walks the object, replaces string values that
 // look like emails / api-keys / JWTs with '[REDACTED]'. Non-string values are
-// passed through (with depth/cycle guards). Returns a fresh object — the
+// passed through (with depth/cycle guards). Returns a fresh object - the
 // caller's input is never mutated.
 export function sanitizeFields(fields, _opts = {}) {
   if (fields == null) return {};
@@ -96,7 +96,7 @@ export function sanitizeFields(fields, _opts = {}) {
     if (result && typeof result === 'object' && !Array.isArray(result)) return result;
     return { value: result };
   } catch (e) {
-    // Last-ditch guard — never let a logging call throw.
+    // Last-ditch guard - never let a logging call throw.
     return { _sanitize_error: e && e.message ? String(e.message).slice(0, 200) : 'unknown' };
   }
 }
@@ -147,7 +147,7 @@ async function emitStructured(level, tag, msg, fields) {
       provider: tag,
       status: level === 'error' ? 'error' : 'ok',
       feedback,
-      source_type: 'simulated', // honest provenance — these aren't real LLM rows
+      source_type: 'simulated', // honest provenance - these aren't real LLM rows
     });
   } catch { // deliberate: cleanup
     // Best-effort: swallow.
@@ -173,7 +173,7 @@ function _emit(level, tag, msg, fields) {
   _writeConsole(level, _format(safeTag, safeMsg));
   // sanitize once + reuse for the structured sink
   const cleanFields = sanitizeFields(fields);
-  // Don't await — best-effort fire-and-forget. Tests that need the row to
+  // Don't await - best-effort fire-and-forget. Tests that need the row to
   // exist before they assert can await getLogger(...).<level>.flush() if we
   // ever add one; current scope keeps emission async to avoid blocking hot
   // paths.

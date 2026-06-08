@@ -1,15 +1,15 @@
-// W808-1 — Capture poisoning detection: statistical anomaly detector.
+// W808-1 - Capture poisoning detection: statistical anomaly detector.
 //
 // Per-tenant per-namespace running mean / stddev on four axes of capture
 // telemetry. Flags a capture row as anomalous if ANY axis exceeds 3σ.
 //
 // The four axes (per master plan W808-1):
-//   1. output_length            — number of characters in the response
-//   2. vocab_entropy            — Shannon entropy of the response token
+//   1. output_length - number of characters in the response
+//   2. vocab_entropy - Shannon entropy of the response token
 //                                 frequency distribution (proxy for "is this
 //                                 a low-entropy spam / poisoning payload?")
-//   3. response_time            — latency_ms of the upstream call
-//   4. token_overlap_to_teacher — Jaccard overlap of response tokens against
+//   3. response_time - latency_ms of the upstream call
+//   4. token_overlap_to_teacher - Jaccard overlap of response tokens against
 //                                 the running mode of the teacher response
 //                                 set for the same namespace (proxy for
 //                                 "is this a unique payload that doesn't
@@ -17,8 +17,8 @@
 //
 // Baseline is computed from the LAST N (default 200) non-anomalous captures
 // for the same (tenant_id, namespace) tuple. If fewer than MIN_BASELINE (8)
-// captures are available we emit an honest envelope —
-// { ok:false, error:'no_baseline_captures', ... } — and refuse to flag
+// captures are available we emit an honest envelope - 
+// { ok:false, error:'no_baseline_captures', ... } - and refuse to flag
 // anything (cold-start protection so the first eight captures of a new
 // namespace aren't reflexively quarantined).
 //
@@ -39,7 +39,7 @@ export const SIGMA_THRESHOLD = 3.0;
 export const MIN_BASELINE = 8;
 export const DEFAULT_BASELINE_WINDOW = 200;
 
-// W808-1 — the four axes. Exported so the manual-review UI + tests can
+// W808-1 - the four axes. Exported so the manual-review UI + tests can
 // reference the canonical axis names without re-string-ing them.
 export const ANOMALY_AXES = Object.freeze([
   'output_length',
@@ -49,11 +49,11 @@ export const ANOMALY_AXES = Object.freeze([
 ]);
 
 // =============================================================================
-// Pure-math helpers — no I/O, no tenant scope, deterministic.
+// Pure-math helpers - no I/O, no tenant scope, deterministic.
 // =============================================================================
 
 // Shannon entropy of the byte-pair frequency in `text`. We deliberately do not
-// require a tokenizer here — the goal is to spot abrupt drops in lexical
+// require a tokenizer here - the goal is to spot abrupt drops in lexical
 // variance (e.g. response collapses to "aaaaaa...") which a character-level
 // entropy already catches. Returns bits per character; 0 for empty input.
 export function vocabEntropy(text) {
@@ -127,7 +127,7 @@ export function runningStats(values) {
 // observationToCanonicalEvent). Missing fields default to 0 so a sparse row
 // from a legacy ingester still produces a feature vector.
 //
-// teacher_typical_response is an optional string — the mode of recent
+// teacher_typical_response is an optional string - the mode of recent
 // teacher responses for the same namespace; if omitted, token_overlap is
 // computed against an empty string (yielding 0). The detect() driver
 // computes teacher_typical itself from the baseline window.
@@ -162,19 +162,19 @@ export function extractFeatures(row, opts = {}) {
 }
 
 // =============================================================================
-// Baseline reader — tenant-fenced lookup of recent NON-anomalous captures.
+// Baseline reader - tenant-fenced lookup of recent NON-anomalous captures.
 // =============================================================================
 
 // W411 pattern: findByTenant + inner-loop defense-in-depth tenant_id check.
 // We read from the `observations` table (the canonical post-promotion
 // capture store; the anomaly detector intentionally trains on rows that
-// HAVE cleared quarantine — they are the trusted baseline). Returns an
+// HAVE cleared quarantine - they are the trusted baseline). Returns an
 // array of capture rows in newest-first order, capped at `windowSize`.
 export function readBaseline({ tenant_id, namespace, windowSize = DEFAULT_BASELINE_WINDOW } = {}) {
   if (!tenant_id) return [];
   // findByTenant queries on the `tenant` column (see store.js:415). The
   // capture rows use either `tenant` or `tenant_id` depending on the
-  // ingester. We try both columns and merge — defense in depth.
+  // ingester. We try both columns and merge - defense in depth.
   let rowsT = [];
   let rowsTId = [];
   try { rowsT = store.findByField('observations', 'tenant', tenant_id); } catch (_) { rowsT = []; }
@@ -183,7 +183,7 @@ export function readBaseline({ tenant_id, namespace, windowSize = DEFAULT_BASELI
   const merged = [];
   for (const r of [...rowsT, ...rowsTId]) {
     if (!r) continue;
-    // Inner-loop tenant fence — never trust the index alone (W411).
+    // Inner-loop tenant fence - never trust the index alone (W411).
     const rt = r.tenant_id || r.tenant;
     if (String(rt) !== String(tenant_id)) continue;
     if (namespace) {
@@ -193,7 +193,7 @@ export function readBaseline({ tenant_id, namespace, windowSize = DEFAULT_BASELI
     const key = r.event_id || r.id;
     if (key && seen.has(key)) continue;
     if (key) seen.add(key);
-    // Skip rows that were themselves flagged as anomalous — we are training
+    // Skip rows that were themselves flagged as anomalous - we are training
     // the baseline, not contaminating it.
     if (r.anomaly_flagged === true) continue;
     if (r.quarantine === true) continue;
@@ -207,7 +207,7 @@ export function readBaseline({ tenant_id, namespace, windowSize = DEFAULT_BASELI
 // Compute the per-axis baseline stats from a set of capture rows. Returns
 // { axis_name: {mean, stddev, n}, teacher_typical_response: <string> }.
 // teacher_typical_response is the LONGEST response in the baseline (a
-// cheap proxy for "the typical teacher answer" — good enough to seed a
+// cheap proxy for "the typical teacher answer" - good enough to seed a
 // Jaccard comparison; not a true mode-of-tokens computation).
 export function computeBaseline(rows) {
   const out = {};
@@ -232,14 +232,14 @@ export function computeBaseline(rows) {
 }
 
 // =============================================================================
-// Per-row anomaly verdict — pure function given a row + a baseline.
+// Per-row anomaly verdict - pure function given a row + a baseline.
 // =============================================================================
 
 // Returns { anomaly_flagged, flagged_axes:[{axis, value, mean, stddev,
 // sigma}], reasons:[], version }.
 //
 // An axis is flagged when |value - mean| / stddev > SIGMA_THRESHOLD AND
-// stddev > 0 (a zero-variance baseline cannot flag — we treat that as
+// stddev > 0 (a zero-variance baseline cannot flag - we treat that as
 // "no signal, do not block"). The version stamp lets the manual-review UI
 // distinguish v1 verdicts from future v2 verdicts in the same row.
 export function scoreCapture(row, baseline) {
@@ -273,7 +273,7 @@ export function scoreCapture(row, baseline) {
 }
 
 // =============================================================================
-// Driver — full detect() flow: load baseline, score row, return envelope.
+// Driver - full detect() flow: load baseline, score row, return envelope.
 // =============================================================================
 
 // Returns either:

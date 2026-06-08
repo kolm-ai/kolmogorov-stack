@@ -1,4 +1,4 @@
-// compile-eval-gate.js — eval + regression gate bound to the receipt (P1).
+// compile-eval-gate.js - eval + regression gate bound to the receipt (P1).
 //
 // The promotion decision for a freshly-compiled candidate artifact must be
 //   (a) computed from a REAL eval run (K-Score + regression classes), and
@@ -14,7 +14,7 @@
 //   - src/gateway-receipt.js buildAndSignReceipt / verifyReceipt for the
 //     Ed25519-signed binding.
 //
-// Public surface (ES module — the codebase is type:module):
+// Public surface (ES module - the codebase is type:module):
 //   evaluateAndGate({ candidate_artifact, baseline, thresholds })
 //       -> { promote:bool, reason, eval_summary }
 //   embedEvalSummaryReceipt({ eval_summary, namespace_id, candidate_artifact_id,
@@ -76,7 +76,7 @@ function resolveKScore(ref) {
     (isObject(ref.eval) && ref.eval) ||
     null;
 
-  // 1 — explicit composite
+  // 1 - explicit composite
   const explicit =
     num(ref.k_score) ?? num(manifest.k_score) ?? num(ref.kscore) ?? num(manifest.kscore) ??
     (evalResults ? (num(evalResults.kscore) ?? num(evalResults.k_score) ?? num(evalResults.composite)) : null) ??
@@ -85,7 +85,7 @@ function resolveKScore(ref) {
     return { score: explicit, source: 'explicit_k_score', kscore_envelope: null };
   }
 
-  // 2 — compute from per-axis fields if accuracy is present
+  // 2 - compute from per-axis fields if accuracy is present
   const axisSource = evalResults || ref.kscore_input || manifest.kscore_input || ref;
   const accuracy = num(axisSource.accuracy);
   if (accuracy != null) {
@@ -95,7 +95,7 @@ function resolveKScore(ref) {
       size_bytes: num(axisSource.size_bytes) ?? num(manifest.size_bytes) ?? 0,
       p50_latency_us: num(axisSource.p50_latency_us),
       cost_usd_per_call: num(axisSource.cost_usd_per_call) ?? 0,
-      // optional v2 axes — pass through when present so the gate honors them
+      // optional v2 axes - pass through when present so the gate honors them
       holdout_accuracy: num(axisSource.holdout_accuracy),
       subgroup_min_accuracy: num(axisSource.subgroup_min_accuracy),
       joules_per_call: num(axisSource.joules_per_call),
@@ -144,7 +144,7 @@ export function hashEvalSummary(eval_summary) {
 }
 
 // ---------------------------------------------------------------------------
-// evaluateAndGate — the gate.
+// evaluateAndGate - the gate.
 // ---------------------------------------------------------------------------
 //
 // candidate_artifact / baseline may each be:
@@ -152,7 +152,7 @@ export function hashEvalSummary(eval_summary) {
 //   - a manifest object
 //   - an eval_results object ({ accuracy, coverage, kscore, regressions:[...] })
 //   - or carry an explicit composite ({ k_score } / { composite })
-// baseline may be null (first compile — no incumbent). With no baseline, delta
+// baseline may be null (first compile - no incumbent). With no baseline, delta
 // is computed against 0 and the decision falls back to the absolute floor.
 //
 // Returns { promote, reason, eval_summary }. Pure + synchronous: the caller is
@@ -231,13 +231,13 @@ export function evaluateAndGate({ candidate_artifact, baseline, thresholds } = {
 }
 
 // ---------------------------------------------------------------------------
-// embedEvalSummaryReceipt — bind the eval_summary into a signed receipt.
+// embedEvalSummaryReceipt - bind the eval_summary into a signed receipt.
 // ---------------------------------------------------------------------------
 //
 // The gateway receipt is a fixed-field kolm-audit-1 schema, so we bind the
 // summary by hashing its canonical form into the receipt's `output_hash` and
 // carrying the candidate artifact id in `artifact_id`. The Ed25519 signature
-// then covers both — tampering with the summary OR the receipt fails
+// then covers both - tampering with the summary OR the receipt fails
 // verifyEvalSummaryReceipt(). This is the "embed the eval_summary INTO the
 // signed receipt" step the integrator calls right after evaluateAndGate().
 //
@@ -281,7 +281,7 @@ export function embedEvalSummaryReceipt({
   };
 }
 
-// verifyEvalSummaryReceipt — confirm the signature AND that the receipt's
+// verifyEvalSummaryReceipt - confirm the signature AND that the receipt's
 // output_hash still matches the canonical hash of the supplied eval_summary.
 // Returns { ok, reason? }.
 export function verifyEvalSummaryReceipt(receipt, eval_summary) {
@@ -294,7 +294,7 @@ export function verifyEvalSummaryReceipt(receipt, eval_summary) {
   return { ok: true, key_fingerprint: sig.key_fingerprint };
 }
 
-// assertPromotable — fail-closed control flow for callers that prefer throwing
+// assertPromotable - fail-closed control flow for callers that prefer throwing
 // over inspecting .promote. Throws an error tagged EVAL_GATE_BLOCKED carrying
 // the eval_summary so the caller can surface / persist the refusal.
 export function assertPromotable(gateResult) {

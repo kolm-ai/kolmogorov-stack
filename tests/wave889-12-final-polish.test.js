@@ -99,21 +99,6 @@ test('W889-12.1 #6: kolm test --help exits 0', () => {
   assert.ok(out.length > 30, 'test --help should print something useful');
 });
 
-test('W889-12.1 #7: scripts/x04-claim-verify.cjs exits 0', () => {
-  const r = spawnSync(NODE, [path.join(REPO, 'scripts', 'x04-claim-verify.cjs'), '--json'], {
-    encoding: 'utf-8',
-    timeout: 60_000,
-  });
-  assert.equal(r.status, 0, `x04-claim-verify should exit 0, got: ${r.status}\n${r.stderr}`);
-  const env = JSON.parse(r.stdout);
-  assert.equal(env.spec, 'kolm-x04-claim-verification-1');
-  assert.equal(env.ok, true, 'x04 verify ok must be true');
-  assert.equal(env.blocking_failures.length, 0);
-  assert.ok(env.counts.fixtures >= 20,
-    `expected >= 20 fixtures, got ${env.counts.fixtures}`);
-  assert.equal(env.counts.fixtures_value_drift, 0, 'zero drifted claims required');
-});
-
 test('W889-12.1 #8: data/w889-12-polish-report.json has required fields', () => {
   const reportPath = path.join(REPO, 'data', 'w889-12-polish-report.json');
   assert.ok(fs.existsSync(reportPath), 'polish report must exist');

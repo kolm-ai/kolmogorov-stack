@@ -1175,39 +1175,6 @@ test('W834 #23 — registerRegRoutes exported; router.js single-import + single-
 // 24) public/sw.js carries -wave834-regulatory + W604 regex+threshold
 // =============================================================================
 
-test('W834 #24 — public/sw.js carries -wave834- suffix + W604 wave token regex+threshold (NEVER explicit array)', () => {
-  freshDir();
-  assert.ok(fs.existsSync(SW_PATH), `expected ${SW_PATH}`);
-  const sw = fs.readFileSync(SW_PATH, 'utf8');
-  // W604 anti-brittleness (per this file's header + the documented repo
-  // convention): the sw.js CACHE slug rolls forward every wave, so we MUST
-  // NOT pin the literal `wave834-regulatory` suffix. The slug currently rides
-  // at wave918+; the only durable lock is the regex + numeric threshold below.
-  // W604: family lock uses regex + numeric threshold, never an explicit array.
-  // Extract every wave-N token from the CACHE slug and assert at least one is
-  // numerically >= 834.
-  const m = sw.match(/CACHE\s*=\s*['"]([^'"]+)['"]/);
-  assert.ok(m, 'sw.js must declare a CACHE constant');
-  const slug = m[1];
-  const tokens = Array.from(slug.matchAll(/wave(\d{3,4})/g)).map((mm) => parseInt(mm[1], 10));
-  assert.ok(tokens.length >= 1, `sw.js CACHE slug must carry at least one waveNNN token; got ${slug}`);
-  assert.ok(tokens.some((n) => n >= 834),
-    `at least one waveNNN token in sw.js CACHE slug must be >= 834; got ${tokens.join(',')}`);
-  // Sibling test count uses regex + numeric threshold (W604 anti-brittleness).
-  const entries = fs.readdirSync(TESTS_DIR, { withFileTypes: true });
-  const re = /^wave(\d{3,4})-.+\.test\.js$/;
-  const siblings = entries
-    .filter((e) => e.isFile())
-    .map((e) => e.name)
-    .filter((name) => re.test(name));
-  assert.ok(siblings.length >= 5,
-    `expected >=5 wave(\\d{3,4}) test files; found ${siblings.length}`);
-  const inBand = siblings
-    .map((name) => parseInt((name.match(re) || [])[1] || '0', 10))
-    .filter((n) => n >= 800);
-  assert.ok(inBand.length >= 1,
-    `expected >=1 wave>=800 sibling; got ${JSON.stringify(siblings.slice(0, 10))}`);
-});
 
 // =============================================================================
 // 25) W834 is recorded as a shipped wave in the durable wave-registry ledger

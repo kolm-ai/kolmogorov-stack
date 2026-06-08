@@ -1,34 +1,34 @@
 // src/sla-rollup.js
 //
-// W788 — SLA persistent dashboard.
+// W788 - SLA persistent dashboard.
 //
 // Always-on latency (p50/p95/p99) and uptime samplers per surface, with a
 // tenant-fenced rollup readable from /v1/sla/rollup, /v1/sla/dashboard, and
-// `kolm sla rollup`. Complements src/bench-report-md.js — bench-report has
+// `kolm sla rollup`. Complements src/bench-report-md.js - bench-report has
 // p50/p95/p99 only for the bench run (point-in-time); this module persists
 // samples to ~/.kolm/sla-samples.jsonl and rolls them over real time windows.
 //
 // Honest-by-design:
 //   - Empty windows return { count: 0, p50: null, p95: null, p99: null,
-//     status: 'no_samples_in_window' } — NEVER zeros that look like real
+//     status: 'no_samples_in_window' } - NEVER zeros that look like real
 //     measurements. The dashboard renders the honest "no samples" pill
 //     instead of pretending 0ms latency means anything.
 //   - Tenant fence is defense-in-depth: the route layer pins tenant_id from
 //     the auth middleware, and the loop pins it again per row.
 //   - Storage is append-only JSONL via direct fs.appendFile to a dedicated
-//     file (separate from event-store) — wave-cluster isolation matches
+//     file (separate from event-store) - wave-cluster isolation matches
 //     W461/W465 patterns. No raw request bodies are ever sampled; only
 //     latency_ms + ok-boolean + surface label cross the wire.
 //
 // Honors:
-//   - KOLM_DATA_DIR (overrides ~/.kolm — tests use a temp dir)
+//   - KOLM_DATA_DIR (overrides ~/.kolm - tests use a temp dir)
 //   - HOME (Linux/macOS), USERPROFILE (Windows)
 
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-// Frozen surface list — adding a new surface is an explicit code change.
+// Frozen surface list - adding a new surface is an explicit code change.
 // Routes that try to sample for a non-listed surface get rejected loudly
 // so the dashboard never silently grows a "ghost" column.
 export const SLA_SURFACES = Object.freeze([
@@ -87,7 +87,7 @@ function _readAllRows() {
     try {
       const row = JSON.parse(line);
       if (row && typeof row === 'object') out.push(row);
-    } catch { /* skip malformed lines — JSONL allows partial-write tolerance */ }
+    } catch { /* skip malformed lines - JSONL allows partial-write tolerance */ }
   }
   return out;
 }
@@ -107,7 +107,7 @@ function _windowBounds(windowHours) {
 }
 
 // Linear interpolation percentile so two adjacent samples don't both
-// collapse onto the same value — keeps the dashboard readable when N is
+// collapse onto the same value - keeps the dashboard readable when N is
 // small. p must be 0..1.
 function _percentile(sortedAsc, p) {
   if (!sortedAsc.length) return null;
@@ -151,7 +151,7 @@ export function sampleLatency({ surface, latency_ms, tenant_id, ts = null } = {}
   return row;
 }
 
-// sampleUptime({surface, ok, tenant_id, ts?}) — one boolean availability
+// sampleUptime({surface, ok, tenant_id, ts?}) - one boolean availability
 // sample. Used by the route wrapper to log "this surface returned a 2xx /
 // did NOT return a 5xx" alongside the latency row.
 export function sampleUptime({ surface, ok, tenant_id, ts = null } = {}) {
@@ -176,7 +176,7 @@ export function sampleUptime({ surface, ok, tenant_id, ts = null } = {}) {
   return row;
 }
 
-// rollupLatency({surface, window_hours, tenant_id}) — pure read. Returns:
+// rollupLatency({surface, window_hours, tenant_id}) - pure read. Returns:
 //   {
 //     surface, window_hours, window_start, window_end, tenant_id,
 //     count, p50, p95, p99, min, max,
@@ -201,7 +201,7 @@ export function rollupLatency({ surface, window_hours = DEFAULT_WINDOW_HOURS, te
   const samples = [];
   for (const r of rows) {
     if (!r || r.kind !== 'latency') continue;
-    // Defense in depth — pin tenant_id per row even though the caller
+    // Defense in depth - pin tenant_id per row even though the caller
     // pinned it at the read level. Same pattern as billing-breakdown.js.
     if (r.tenant_id !== tenant_id) continue;
     if (r.surface !== surface) continue;
@@ -245,7 +245,7 @@ export function rollupLatency({ surface, window_hours = DEFAULT_WINDOW_HOURS, te
   };
 }
 
-// rollupUptime({surface, window_hours, tenant_id}) — pure read. Returns:
+// rollupUptime({surface, window_hours, tenant_id}) - pure read. Returns:
 //   {
 //     surface, window_hours, window_start, window_end, tenant_id,
 //     total_samples, ok_samples, failed_samples, uptime_pct,
@@ -270,7 +270,7 @@ export function rollupUptime({ surface, window_hours = DEFAULT_WINDOW_HOURS, ten
   let okCount = 0;
   for (const r of rows) {
     if (!r || r.kind !== 'uptime') continue;
-    // Defense in depth — pin tenant per row.
+    // Defense in depth - pin tenant per row.
     if (r.tenant_id !== tenant_id) continue;
     if (r.surface !== surface) continue;
     const t = new Date(r.ts).getTime();
@@ -336,14 +336,14 @@ export function dashboardData({ tenant_id, surfaces = null, window_hours = DEFAU
   };
 }
 
-// Test/util — wipes the local SLA sample file. Production callers MUST NOT
+// Test/util - wipes the local SLA sample file. Production callers MUST NOT
 // use this; tests rely on it to keep fixtures isolated. Mirrors the
 // _wipeLocalState pattern in federated-approvals.js.
 export function _wipeLocalState() {
   try { fs.unlinkSync(_samplesFile()); } catch { /* idempotent */ }
 }
 
-// Inspector for tests — surfaces the absolute path of the JSONL backing
+// Inspector for tests - surfaces the absolute path of the JSONL backing
 // store. Not part of the public contract.
 export function _samplesFilePath() { return _samplesFile(); }
 

@@ -1,4 +1,4 @@
-// W866 — memory fit calculator (will_it_fit).
+// W866 - memory fit calculator (will_it_fit).
 //
 // "Will this model at this quant fit in my VRAM at this context length?"
 //
@@ -87,10 +87,10 @@ export function estimateMemoryFit({ model_params_b, quant, vram_gb, context = 81
       .sort((a, b) => b[1] - a[1])
       .map(([k]) => k);
     recommendation = smaller.length
-      ? `try ${smaller[0]} or smaller — current quant exceeds VRAM by ${Math.round((est_total_gb - vram_gb) * 10) / 10} GB`
-      : `model too large for ${vram_gb} GB VRAM — needs sharding or CPU offload`;
+      ? `try ${smaller[0]} or smaller - current quant exceeds VRAM by ${Math.round((est_total_gb - vram_gb) * 10) / 10} GB`
+      : `model too large for ${vram_gb} GB VRAM - needs sharding or CPU offload`;
   } else if (tight) {
-    recommendation = `fits but headroom <10% — long contexts may OOM. Consider quant tier down or shorter ctx`;
+    recommendation = `fits but headroom <10% - long contexts may OOM. Consider quant tier down or shorter ctx`;
   } else {
     recommendation = `comfortable fit (${headroom_gb} GB free)`;
   }
@@ -130,12 +130,12 @@ export function pickBestFitTarget({ model_params_b, vram_gb, context = 8192, sup
     if (!supported_methods.includes(q)) continue;
     const fit = estimateMemoryFit({ model_params_b, quant: q, vram_gb, context });
     if (fit.fits) {
-      return { picked: q, fit, rationale: `tight fit — last viable target` };
+      return { picked: q, fit, rationale: `tight fit - last viable target` };
     }
   }
   return {
     picked: null,
     fit: null,
-    rationale: `nothing fits — model ${model_params_b}B too large for ${vram_gb} GB VRAM. Needs sharding or CPU.`,
+    rationale: `nothing fits - model ${model_params_b}B too large for ${vram_gb} GB VRAM. Needs sharding or CPU.`,
   };
 }

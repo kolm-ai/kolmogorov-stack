@@ -1,8 +1,8 @@
-// W809-2 — Constrained decoding engine integration.
+// W809-2 - Constrained decoding engine integration.
 //
 // Wraps the workers/constrained/ Python shell that calls outlines (or
 // lm-format-enforcer) for JSON-Schema-guided sampling. The heavy ML deps
-// stay OUTSIDE Node — the root kolm install pulls ZERO constrained-decoder
+// stay OUTSIDE Node - the root kolm install pulls ZERO constrained-decoder
 // deps. Tenants who want grammar-guided generation install outlines or
 // lm-format-enforcer themselves; we surface an honest envelope when neither
 // is present rather than silently falling back to unconstrained sampling.
@@ -41,7 +41,7 @@ const ROOT       = path.resolve(__dirname, '..');
 const WORKER_SHELL = path.join(ROOT, 'workers', 'constrained', 'constrained.mjs');
 
 // ---------------------------------------------------------------------------
-// resolveWorkerCommand — same pattern as src/constrained side of workers/tsac
+// resolveWorkerCommand - same pattern as src/constrained side of workers/tsac
 // + workers/itkv. Tests inject a Node stub via $CONSTRAINED_DECODE_CMD
 // (string or JSON array). Default: invoke the workers/constrained/ shell
 // which itself wraps the Python script. No silent fallback.

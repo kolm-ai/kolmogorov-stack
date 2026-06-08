@@ -26,7 +26,7 @@
 // the manifest makes the cost/quality tradeoff legible. 0.9 means student is
 // at 90% of teacher accuracy on the same holdout. Required by Doc 7 §4.7 for
 // cross-vendor distillation. Missing T (no teacher_holdout_accuracy supplied)
-// degrades gracefully — the v2 redistribution rule reshuffles weight to the
+// degrades gracefully - the v2 redistribution rule reshuffles weight to the
 // supplied axes.
 //
 // Both versions are normalized to [0..1] and gated at 0.85.
@@ -35,7 +35,7 @@
 // `human_preference_rate` block when a fitted calibration mapping is
 // available at ~/.kolm/kscore-calibration.json. The mapping is built by
 // `src/kscore-calibration.js` from a Bradley-Terry fit (W810-1/2/3). The
-// surfacing here is ADDITIVE — it preserves every existing weight + axis
+// surfacing here is ADDITIVE - it preserves every existing weight + axis
 // (A/S/L/C/V/R/T/F/E/Z + W714 k_contrastive_score). See the W810 anchor
 // section near the bottom of this file.
 
@@ -58,7 +58,7 @@ const GATE = 0.85;
 // informational axis the verifier surfaces alongside the composite. Callers
 // who want to gate ship-eligibility on contrastive separation can read
 // `k_contrastive_score` independently. This preserves backward compat with
-// every K-Score consumer shipped before W714 — none of them know about the
+// every K-Score consumer shipped before W714 - none of them know about the
 // axis, none of them are surprised by a shifted composite.
 //
 // Populates only if `input.contrastive_eval_present === true`. Otherwise
@@ -144,7 +144,7 @@ export function computeKScoreV1({ size_bytes, accuracy, coverage, p50_latency_us
   };
 }
 
-// v2 — accepts the same inputs as v1 plus optional R/F/E/Z/T. When an optional
+// v2 - accepts the same inputs as v1 plus optional R/F/E/Z/T. When an optional
 // input is missing, its weight is redistributed proportionally over the
 // supplied axes so the composite stays comparable. Spec emitted is 'k-score-2'
 // when any v2 axis is supplied; otherwise we return a v1 envelope.
@@ -300,7 +300,7 @@ export function computeKScore(input) {
 }
 
 // ===========================================================================
-// W810 ANCHOR — K-Score external calibration envelope surfacing.
+// W810 ANCHOR - K-Score external calibration envelope surfacing.
 // ===========================================================================
 //
 // Adds a `human_preference_rate` block (and the calibration_pack_id +
@@ -324,10 +324,10 @@ export function computeKScore(input) {
 //
 // Inputs the caller can pass through `input` to drive this:
 //   - calibration_category   (string, one of coding/writing/analysis/support)
-//   - calibration_mapping    (object override — used by tests to inject a
+//   - calibration_mapping    (object override - used by tests to inject a
 //                             mapping without writing to disk; takes
 //                             precedence over the on-disk loadMapping())
-//   - calibration_disabled   (boolean — if true, surfacing is a no-op and the
+//   - calibration_disabled   (boolean - if true, surfacing is a no-op and the
 //                             envelope is returned unchanged. Useful for
 //                             callers who can prove they don't need it.)
 //
@@ -348,7 +348,7 @@ function _attachW810Calibration(envelope, input) {
 
   // Defaults: every new field starts null. Callers that don't have a
   // calibration mapping installed get an envelope where the calibration
-  // block is uniformly null — never a noisy default.
+  // block is uniformly null - never a noisy default.
   envelope.human_preference_rate = null;
   envelope.calibration_pack_id = null;
   envelope.calibration_version = CALIBRATION_VERSION;

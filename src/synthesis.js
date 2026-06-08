@@ -1,7 +1,7 @@
 // Synthesis layer.
 // Two paths:
-//   1. Claude path — when ANTHROPIC_API_KEY is set, ask Claude for a JS generator.
-//   2. Pattern path — deterministic rule-based synthesis from positive/negative examples.
+//   1. Claude path - when ANTHROPIC_API_KEY is set, ask Claude for a JS generator.
+//   2. Pattern path - deterministic rule-based synthesis from positive/negative examples.
 // Both produce JS source. Both pass through the same verifier and quality gate.
 
 import 'dotenv/config';
@@ -27,7 +27,7 @@ CONTRACT
 - Output a SINGLE JS source string.
 - Define exactly: function generate(input, lib) { ... return output; }
 - No imports. No I/O. No global state. No randomness. Pure function only.
-- Use the subroutine library \`lib\` when helpful — it dramatically shrinks generators.
+- Use the subroutine library \`lib\` when helpful - it dramatically shrinks generators.
 - Keep generators under 2 KB. Smaller is better.
 - Be exact about the output_spec.
 
@@ -251,7 +251,7 @@ function synthRegexExtract(_positives, spec) {
 }
 
 function synthClassifier(positives) {
-  // W443 — TF-IDF-style class-specific token weighting. Previously every token
+  // W443 - TF-IDF-style class-specific token weighting. Previously every token
   // (shared + class-unique) got weight 1 and substring-matched, which meant on
   // prompts like "support ticket N regarding our <cls> workflow needs attention"
   // (a) shared boilerplate dominated, (b) numeric sample-IDs (e.g. token "1"
@@ -347,10 +347,10 @@ export { QUALITY_GATE };
 // ---------- seedsNewFromBrief (Wave 199) ----------
 //
 // Natural-language brief -> candidate training rows. Two paths:
-//   1. Air-gap mode (airGap:true) — deterministic; pulls from a per-class
+//   1. Air-gap mode (airGap:true) - deterministic; pulls from a per-class
 //      library of domain-keyed starter rows (CARC denial codes 50/197/204/16,
 //      EDI 837 fragments, HEDIS measure stubs, etc.). No network, no telemetry.
-//   2. Networked mode (default) — when KOLM_LLM_* env vars are configured,
+//   2. Networked mode (default) - when KOLM_LLM_* env vars are configured,
 //      calls a real LLM endpoint via src/llm-call.js to fan the air-gap
 //      seed library into N synthesized variations. Concurrency 4, retry 2.
 //      When the LLM is unconfigured the path degrades to a deterministic
@@ -586,7 +586,7 @@ export async function seedsNewFromBrief(opts) {
         note: 'candidates are CANDIDATES, not labels. Run `kolm seeds split` + `kolm eval` before promoting any row to ground truth.',
       };
     }
-    // Configured LLM responded with nothing usable — fall back deterministically.
+    // Configured LLM responded with nothing usable - fall back deterministically.
   }
 
   // Deterministic networked fallback: template+synonym augmentation over
@@ -604,7 +604,7 @@ export async function seedsNewFromBrief(opts) {
     llm: llmDescribe(),
     class_inference_basis: inferred.basis,
     teacher_vendor: teacherVendor,
-    note: 'LLM not configured (set KOLM_LLM_*) — emitted deterministic template+synonym variations. candidates are CANDIDATES; gate before promotion.',
+    note: 'LLM not configured (set KOLM_LLM_*) - emitted deterministic template+synonym variations. candidates are CANDIDATES; gate before promotion.',
   };
 }
 
@@ -646,7 +646,7 @@ const SYNONYM_TEMPLATES = [
   (s) => `${s} (case B)`,
   (s) => s.replace(/^([A-Z])/, (m) => m.toLowerCase()),
   (s) => `urgent: ${s}`,
-  (s) => `${s} — production`,
+  (s) => `${s} - production`,
   (s) => `[priority] ${s}`,
 ];
 

@@ -1,0 +1,93 @@
+{
+  "id": "t5-picks-shovels",
+  "track": "whitespace",
+  "prompt": "What 'picks and shovels' for the AI and agent economy are underbuilt in 2026 - infrastructure that nearly every AI company needs but that is missing, immature, or fragmented? Cite sources.",
+  "content": "**Key underbuilt or immature \"picks and shovels\" infrastructure for the AI and agent economy in 2026 centers on software, standards, and coordination layers for autonomous agents rather than raw physical compute or data centers (which face constraints like power but see heavy investment).** Nearly every AI company deploying agents in production needs reliable mechanisms for identity, payments/transactions, coordination, observability, evaluation, security/governance, and interoperability—these remain fragmented, nascent, or absent at scale, creating binding constraints on autonomy and enterprise adoption.[[1]](https://medium.com/@tobias_pfuetze/the-agent-economys-missing-infrastructure-939a33382dce)[[2]](https://www.truefoundry.com/blog/the-infrastructure-for-an-agent-to-agent-economy)[[3]](https://a16zcrypto.com/posts/article/5-ways-blockchains-help-ai-agents/)\n\n### 1. Agent Payment and Economic Transaction Infrastructure\nAgents can reason and act but struggle to autonomously initiate payments, access paid APIs/data, or transact without human intervention, shared keys, or pre-funded wallets (which create security, capital inefficiency, and scalability issues). Traditional rails were designed for human-present transactions and lack bounded, verifiable, programmable authority for agents.[[1]](https://medium.com/@tobias_pfuetze/the-agent-economys-missing-infrastructure-939a33382dce)\n\nEmerging protocols (e.g., x402 for HTTP-native payments with stablecoins, Google’s AP2 for cryptographically signed mandates/authorization with audit trails, and ACP for agent-compatible merchant checkouts) are composable but still early-stage, with limited adoption, fragmentation risks, and production implementations only beginning to appear (e.g., Delegare combining layers). This is described as a \"binding constraint\" on agentic workflows in financial services and beyond.[[1]](https://medium.com/@tobias_pfuetze/the-agent-economys-missing-infrastructure-939a33382dce)[[3]](https://a16zcrypto.com/posts/article/5-ways-blockchains-help-ai-agents/)\n\nBlockchains/stablecoins help fill gaps for AI-native/headless merchants via programmable rails, but standardized, interoperable solutions lag.[[3]](https://a16zcrypto.com/posts/article/5-ways-blockchains-help-ai-agents/)\n\n### 2. Non-Human/Agent Identity, Authorization, and \"Know Your Agent\" (KYA) Systems\nAgents lack portable, verifiable, standardized identities that prove who they represent, their permissions/constraints, and reputation across platforms. This leads to \"unbanked\" agents, firewall blocks by merchants, and attribution issues (e.g., shared API keys or unauditable chains in multi-agent setups).[[3]](https://a16zcrypto.com/posts/article/5-ways-blockchains-help-ai-agents/)[[4]](https://agatsoftware.com/blog/ai-agent-security-enterprise-2026/)\n\nSolutions remain fragmented (proprietary stacks vs. crypto-native standards like onchain registries or wallet-native agents). Cryptographic mandates, attestations, and verifiable credentials are needed but immature, with surveys showing most organizations lack full visibility into agent identities or the ability to contain compromised ones.[[5]](https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-agent-governance-framework-gap-20260403/)\n\n### 3. Agent-to-Agent Coordination, Control Planes, Gateways, and Interoperability Standards\nMulti-agent systems (where agents delegate, call others, or operate across environments) behave like distributed systems but lack explicit infrastructure for coordination, context propagation, policy enforcement, and discovery. Ad-hoc calls or simple routers create opacity, inconsistent policies, tracing failures, and governance gaps.[[2]](https://www.truefoundry.com/blog/the-infrastructure-for-an-agent-to-agent-economy)[[2]](https://www.truefoundry.com/blog/the-infrastructure-for-an-agent-to-agent-economy)\n\nProduction failures often stem from missing control planes, Agent APIs, or standardized interfaces (e.g., for registered, discoverable agents with explicit execution boundaries) rather than model intelligence. Interoperability is \"broken at the edges,\" with proprietary/fragmented ecosystems and thin security for cross-organization use.[[6]](https://www.linkedin.com/pulse/ai-infrastructure-2026-looks-like-internet-1990-projectnanda-h4g2f)[[7]](https://www.tgvp.vc/releases/tgvp-report-ai-agent-infrastructure-in-2026)\n\n### 4. Observability, Tracing, Evaluation, and Monitoring Tailored to Agents (Especially Multi-Agent)\nTraditional APM/monitoring falls short for non-deterministic, multi-step agent behavior (tool calls, branching workflows, long-running or delegated actions). Gaps include multi-agent system observability, real-time/online evaluation (vs. offline test sets), production trace scoring, cost attribution, and linking observability directly to evaluation/governance.[[8]](https://guptadeepak.com/ai-agent-observability-evaluation-governance-the-2026-market-reality-check/)[[9]](https://www.braintrust.dev/articles/agent-observability-complete-guide-2026)\n\nSurveys indicate observability is often the lowest-rated part of the AI stack despite rising production deployments; composite stacks (LLM tracers + integration layers) are emerging but not standardized or enterprise-complete.[[8]](https://guptadeepak.com/ai-agent-observability-evaluation-governance-the-2026-market-reality-check/)\n\n### 5. Governance, Security, Policy Enforcement, and Compliance Frameworks\nEnterprises lack mature tools for sandboxing, runtime policy checks, audit trails, identity-based authorization, and incident response specific to autonomous agents. Issues include default trust in tool invocations, poor visibility into agent-to-agent communication, and frameworks (e.g., NIST AI RMF) not fully adapted to agentic systems— with agent-specific standards delayed.[[5]](https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-agent-governance-framework-gap-20260403/)[[4]](https://agatsoftware.com/blog/ai-agent-security-enterprise-2026/)\n\nHigh concern (e.g., 92% of organizations) coexists with significant gaps; only a minority treat agents as first-class security principals with scoped identities and logs.[[4]](https://agatsoftware.com/blog/ai-agent-security-enterprise-2026/)\n\nThese layers are interdependent and frequently cited as the shift from \"intelligence\" bottlenecks to \"infrastructure\" ones in 2026 analyses. While physical AI infrastructure (power, cooling, data centers) faces well-documented constraints and complexity, the agent-specific software primitives remain more fragmented and underbuilt relative to demand.[[10]](https://www.ddn.com/2026-state-of-ai-infrastructure-report/)[[11]](https://www.flexential.com/resources/report/2026-state-ai-infrastructure) Early protocol work (often blockchain-adjacent or standards efforts) shows promise but requires broader adoption and maturation for the agent economy to scale safely.",
+  "citations": [
+    "https://medium.com/@tobias_pfuetze/the-agent-economys-missing-infrastructure-939a33382dce",
+    "https://www.truefoundry.com/blog/the-infrastructure-for-an-agent-to-agent-economy",
+    "https://a16zcrypto.com/posts/article/5-ways-blockchains-help-ai-agents/",
+    "https://agatsoftware.com/blog/ai-agent-security-enterprise-2026/",
+    "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-agent-governance-framework-gap-20260403/",
+    "https://www.linkedin.com/pulse/ai-infrastructure-2026-looks-like-internet-1990-projectnanda-h4g2f",
+    "https://www.tgvp.vc/releases/tgvp-report-ai-agent-infrastructure-in-2026",
+    "https://guptadeepak.com/ai-agent-observability-evaluation-governance-the-2026-market-reality-check/",
+    "https://www.braintrust.dev/articles/agent-observability-complete-guide-2026",
+    "https://www.ddn.com/2026-state-of-ai-infrastructure-report/",
+    "https://www.flexential.com/resources/report/2026-state-ai-infrastructure"
+  ],
+  "searched": [
+    "https://ai-infra-summit.com/",
+    "https://www.ddn.com/2026-state-of-ai-infrastructure-report/",
+    "https://www.cockroachlabs.com/guides/state-of-ai/",
+    "https://www.infrastructuresummit.io/",
+    "https://www.flexential.com/resources/report/2026-state-ai-infrastructure",
+    "https://www.jdsupra.com/legalnews/ai-trends-for-2026-power-not-compute-7025410/",
+    "https://www.youtube.com/watch?v=qHbgWP8ynSM",
+    "https://nibs.org/event/the-intersection-of-ai-and-building-sciences-a-new-era-of-intelligent-infrastructure/",
+    "https://greenlining.org/2026/who-builds-the-ai-future-and-who-pays-for-it/",
+    "https://www.crusoe.ai/resources/learn/2026-ai-infrastructure-trends-report",
+    "https://www.maviklabs.com/blog/build-vs-buy-ai-team-2026",
+    "https://semiwiki.com/event/ai-infra-summit-2026/",
+    "https://go.clear.ml/state-of-ai-infrastructure-report-25-26",
+    "https://www.structureresearch.net/events/",
+    "https://www.datacenterknowledge.com/ai-data-centers/the-ai-infrastructure-revolution-lessons-from-2025-predictions-for-2026",
+    "https://tesseris.org/insights/google-io-2026-agent-economy-trust",
+    "https://medium.com/@tobias_pfuetze/the-agent-economys-missing-infrastructure-939a33382dce",
+    "https://restofworld.org/2026/ai-agent-inequality/",
+    "https://www.truefoundry.com/blog/the-infrastructure-for-an-agent-to-agent-economy",
+    "https://a16zcrypto.com/posts/article/5-ways-blockchains-help-ai-agents/",
+    "https://mitsloan.mit.edu/ideas-made-to-matter/ai-agents-tech-circularity-whats-ahead-platforms-2026",
+    "https://www.youtube.com/watch?v=JUi3CrfdcHA",
+    "https://meditations.metavert.io/p/the-state-of-ai-agents-in-2026",
+    "https://www.tgvp.vc/releases/tgvp-report-ai-agent-infrastructure-in-2026",
+    "https://www.linkedin.com/pulse/ai-infrastructure-2026-looks-like-internet-1990-projectnanda-h4g2f",
+    "https://eodhd.com/financial-academy/financial-faq/ai-infrastructure-the-picks-and-shovels-of-the-gold-rush",
+    "https://finance.yahoo.com/markets/stocks/articles/best-picks-shovels-artificial-intelligence-093600671.html",
+    "https://www.facebook.com/marketbeatcom/videos/the-1-trillion-ai-infrastructure-shift-happening-right-now/1935407137331696/",
+    "https://www.reddit.com/r/wallstreetbets/comments/1g6o8og/selling_the_shovels_for_ai_what_are_more_stocks/",
+    "https://xplainerr.substack.com/p/the-ai-gold-rush-why-building-shovels",
+    "https://sinewave.vc/investing-ai-picks-and-shovels/",
+    "https://www.facebook.com/bloombergbusiness/posts/investment-experts-see-intriguing-opportunities-in-ai-picks-and-shovels-emerging/1399150468737709/",
+    "https://www.tradingtips.com/blog/forget-the-ai-hype-buy-the-picks-and-shovels-instead-2/",
+    "https://ort.org/52d6b0c9/113239a9IGReG09k9LM",
+    "https://www.linkedin.com/posts/jonmcneill1_fed-rate-cut-outlook-for-october-why-options-activity-7382422677711376384-JZor",
+    "https://guptadeepak.com/ai-agent-observability-evaluation-governance-the-2026-market-reality-check/",
+    "https://www.braintrust.dev/articles/agent-observability-complete-guide-2026",
+    "https://blog.jetbrains.com/pycharm/2026/05/llm-evaluation-and-ai-observability-for-agent-monitoring/",
+    "https://mlflow.org/articles/building-production-ready-ai-agents-in-2026/",
+    "https://www.getmaxim.ai/articles/top-5-platforms-for-ai-agent-evaluation-in-2026/",
+    "https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-agent-governance-framework-gap-20260403/",
+    "https://agatsoftware.com/blog/ai-agent-security-enterprise-2026/",
+    "https://www.youtube.com/watch?v=-YgOWID1dHU&vl=en",
+    "https://www.voiceflow.com/blog/what-is-ai-agent-observability",
+    "https://truto.one/blog/article-targeting-the-prompt-what-is-the-best-solution-for-ai-agent-observability-source-competitor-gap-mergedev-stackone-arcadedev-workato-trayio-paragon/"
+  ],
+  "usage": {
+    "input_tokens": 40897,
+    "input_tokens_details": {
+      "cached_tokens": 17920
+    },
+    "output_tokens": 2468,
+    "output_tokens_details": {
+      "reasoning_tokens": 1309
+    },
+    "total_tokens": 43365,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 7,
+    "cost_in_usd_ticks": 734752500,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 7,
+      "x_search_calls": 0,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 24794,
+      "output_tokens": 1454
+    }
+  },
+  "attempts": 1
+}

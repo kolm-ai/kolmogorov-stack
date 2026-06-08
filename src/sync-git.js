@@ -1,18 +1,18 @@
-// W229 — `kolm sync` helper. Pushes a .kolm artifact + manifest + receipt-chain
+// W229 - `kolm sync` helper. Pushes a .kolm artifact + manifest + receipt-chain
 // to a private git repo so a fleet of agents can share the same compiled
 // memory. Wraps the system `git` CLI; we do not bundle a git library.
 //
 // Layout written into the repo:
 //   <subdir>/
-//     manifest.json       — full artifact manifest (signature trailer included)
-//     receipt-chain.json  — Merkle leaves, in declared order
-//     artifact.kolm       — copy of the .kolm blob (LFS-friendly path)
-//     synced_at.txt       — ISO timestamp of the sync that landed this rev
+//     manifest.json - full artifact manifest (signature trailer included)
+//     receipt-chain.json - Merkle leaves, in declared order
+//     artifact.kolm - copy of the .kolm blob (LFS-friendly path)
+//     synced_at.txt - ISO timestamp of the sync that landed this rev
 //
 // Commands:
-//   push(artifactPath, gitUrl, opts)  — clone-or-pull, write, commit, push
-//   pull(gitUrl, opts)                — clone-or-pull, return list of artifacts
-//   status(gitUrl, opts)              — clone-or-pull, summarize latest commit
+//   push(artifactPath, gitUrl, opts) - clone-or-pull, write, commit, push
+//   pull(gitUrl, opts) - clone-or-pull, return list of artifacts
+//   status(gitUrl, opts) - clone-or-pull, summarize latest commit
 //
 // Authentication is whatever the user's git already does (ssh-agent / netrc /
 // GH_TOKEN env). We never read or store credentials.

@@ -1,23 +1,23 @@
-// W775 — Continuous Background Distill (THE KILLER FEATURE).
+// W775 - Continuous Background Distill (THE KILLER FEATURE).
 //
 // This is the marquee feature that turns kolm from a tool into invisible
 // infrastructure. Once enabled, the daemon:
 //
-//   1. Records every API call (W144 + capture.js do the actual recording —
+//   1. Records every API call (W144 + capture.js do the actual recording - 
 //      the daemon does NOT re-implement capture; it polls the existing
 //      event-store + active-learning surfaces).
 //   2. Continuously evaluates whether enough data has landed to distill.
 //      Uses W815 getCoverageGapsForNamespace() as the readiness signal.
 //   3. When critical mass + drift gate is green, calls W720
 //      orchestrateImprovement() to kick off the actual distill.
-//   4. Routes silently — that part is the W807 confidence router, not us.
+//   4. Routes silently - that part is the W807 confidence router, not us.
 //      We just make sure the distilled artifact is ready when W807 needs it.
 //
 // Dependencies (all satisfied as of 2026-05-24):
-//   W720 (self-improvement) — src/improvement-orchestrator.js
-//   W807 (confidence routing) — src/confidence-router.js
-//   W813 (drift detection) — src/drift-alert-w813.js
-//   W815 (active learning) — src/active-learning.js
+//   W720 (self-improvement) - src/improvement-orchestrator.js
+//   W807 (confidence routing) - src/confidence-router.js
+//   W813 (drift detection) - src/drift-alert-w813.js
+//   W815 (active learning) - src/active-learning.js
 //
 // Honesty contract (NEVER violate):
 //   - Daemon NEVER silently distills bad data. When W815 returns
@@ -28,12 +28,12 @@
 //   - opt-in is explicit (POST /v1/autopilot/enable). NEVER auto-enable.
 //   - Every read is tenant-fenced (W411 invariant). Per-row defense-in-depth.
 //
-// DI testing seam — set $KOLM_W775_ORCHESTRATE_CMD to a Node script path; the
+// DI testing seam - set $KOLM_W775_ORCHESTRATE_CMD to a Node script path; the
 // daemon will require() that script and call it instead of
 // orchestrateImprovement(). Tests use this to avoid spinning up the real
 // distill pipeline.
 //
-// W604 anti-brittleness: AUTOPILOT_VERSION matches /^w775-/ — consumers must
+// W604 anti-brittleness: AUTOPILOT_VERSION matches /^w775-/ - consumers must
 // regex the prefix, never compare exact string.
 
 import crypto from 'node:crypto';
@@ -87,7 +87,7 @@ function _validateTenant(tenant) {
 }
 
 // Lazy import the event-store. Wrapped in try/catch so the daemon NEVER
-// crashes the call when the store is unavailable — surfaces an honest
+// crashes the call when the store is unavailable - surfaces an honest
 // envelope instead.
 async function _eventStore() {
   try {
@@ -97,7 +97,7 @@ async function _eventStore() {
   }
 }
 
-// Internal helper: write an autopilot ledger row. Best-effort — never throws
+// Internal helper: write an autopilot ledger row. Best-effort - never throws
 // into the caller. Returns {persisted, event_id, error}.
 async function _writeAutopilotEvent({ tenant, namespace, workflow, feedback }) {
   const es = await _eventStore();
@@ -139,7 +139,7 @@ async function _readLatestAutopilotEvent({ tenant, namespace, workflow }) {
       order: 'desc',
     });
     if (!Array.isArray(rows)) return null;
-    // W411 — per-row tenant fence re-check.
+    // W411 - per-row tenant fence re-check.
     for (const r of rows) {
       if (r && r.tenant_id === tenant && r.namespace === _ns(namespace)) return r;
     }
@@ -170,7 +170,7 @@ async function _isDriftRed({ tenant, namespace }) {
     }
     return { red: false, latest_alert: latest, reason: 'drift_' + sev };
   } catch (_) {
-    // Fail-open on drift read failure — we already write a holding-pattern
+    // Fail-open on drift read failure - we already write a holding-pattern
     // ledger row when we choose to hold, so a missing drift alert table is
     // not silent. The caller still observes ok:true,no_op.
     return { red: false, latest_alert: null, reason: 'drift_read_failed' };
@@ -207,7 +207,7 @@ async function _maybeStubOrchestrate(opts) {
 }
 
 // ---------------------------------------------------------------------------
-// enableAutopilot({tenant, namespace}) — opt-in.
+// enableAutopilot({tenant, namespace}) - opt-in.
 // ---------------------------------------------------------------------------
 //
 // Writes a workflow:'autopilot:enabled' event-store row carrying:
@@ -233,7 +233,7 @@ export async function enableAutopilot({ tenant, namespace, host = null } = {}) {
     try {
       const fb = JSON.parse(existing.feedback);
       if (fb && fb.autopilot_id) autopilotId = String(fb.autopilot_id);
-    } catch (_) { /* ignore — fall through to mint */ }
+    } catch (_) { /* ignore - fall through to mint */ }
   }
   if (!autopilotId) {
     autopilotId = 'ap_' + crypto.randomBytes(6).toString('hex');
@@ -265,7 +265,7 @@ export async function enableAutopilot({ tenant, namespace, host = null } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// disableAutopilot({tenant, namespace}) — opt-out.
+// disableAutopilot({tenant, namespace}) - opt-out.
 // ---------------------------------------------------------------------------
 //
 // Writes a workflow:'autopilot:disabled' event-store row. Subsequent ticks
@@ -298,7 +298,7 @@ export async function disableAutopilot({ tenant, namespace } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// getAutopilotStatus({tenant, namespace}) — current daemon state.
+// getAutopilotStatus({tenant, namespace}) - current daemon state.
 // ---------------------------------------------------------------------------
 //
 // Returns:
@@ -340,7 +340,7 @@ export async function getAutopilotStatus({ tenant, namespace } = {}) {
     enabled = Number.isFinite(enT) && Number.isFinite(disT) ? enT > disT : !!enabledRow;
   }
 
-  // Most-recent tick — search for holding, no_op, or redistilled.
+  // Most-recent tick - search for holding, no_op, or redistilled.
   let lastTickAt = null;
   let lastTickAction = null;
   let holdingReason = null;
@@ -382,7 +382,7 @@ export async function getAutopilotStatus({ tenant, namespace } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// tickAutopilot({tenant, namespace, opts?}) — main loop body.
+// tickAutopilot({tenant, namespace, opts?}) - main loop body.
 // ---------------------------------------------------------------------------
 //
 // The daemon "tick" is the heartbeat. In production this is invoked by a
@@ -392,7 +392,7 @@ export async function getAutopilotStatus({ tenant, namespace } = {}) {
 // have to keep alive.
 //
 // Sequence:
-//   1. Status check — if disabled, return action:'disabled' (no event).
+//   1. Status check - if disabled, return action:'disabled' (no event).
 //   2. W815 coverage gap read. If insufficient_captures or no_capture data,
 //      return action:'holding' + write a workflow:autopilot:holding event.
 //   3. W813 drift gate read. If red (moderate / severe), return
@@ -580,7 +580,7 @@ export async function tickAutopilot({ tenant, namespace, opts } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// Internal test seam helpers — exported under `_` so external callers cannot
+// Internal test seam helpers - exported under `_` so external callers cannot
 // rely on them.
 // ---------------------------------------------------------------------------
 

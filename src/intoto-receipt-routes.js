@@ -1,6 +1,6 @@
 // src/intoto-receipt-routes.js
 //
-// W921 BET-3 — HTTP route module exposing the in-toto / SLSA / OpenSSF
+// W921 BET-3 - HTTP route module exposing the in-toto / SLSA / OpenSSF
 // Model-Signing-compatible attestation form of a kolm inference receipt.
 //
 // Exports register(r, deps) so the orchestrator mounts the surface with ONE
@@ -11,11 +11,11 @@
 // boundary.
 //
 // Routes:
-//   GET  /v1/govern/intoto/:receipt_id  — resolve a receipt by id and return
+//   GET  /v1/govern/intoto/:receipt_id - resolve a receipt by id and return
 //        its in-toto attestation (signed DSSE bundle when a signer is present,
 //        else the unsigned Statement). Optional ?format=oms for the OpenSSF
 //        Model-Signing-shaped bundle.
-//   POST /v1/govern/intoto/verify       — verify a posted DSSE bundle/envelope
+//   POST /v1/govern/intoto/verify - verify a posted DSSE bundle/envelope
 //        (signature + Statement shape; optional subject-digest content check).
 //
 // `deps` is an injectable seam so the routes unit-test without a live store and

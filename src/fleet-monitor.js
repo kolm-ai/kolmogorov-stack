@@ -1,9 +1,9 @@
-// W888-E — Fleet monitor loop with pluggable alert sinks.
+// W888-E - Fleet monitor loop with pluggable alert sinks.
 //
 // FleetMonitor.tick({ tag, namespace }) -> { ts, devices: [{...health}], alerts: [...] }
 // FleetMonitor.run({ tag, intervalMs, alertSinks, until }) -> long-running loop.
 //
-// Alert detection rules (intentionally simple — fancier heuristics belong in
+// Alert detection rules (intentionally simple - fancier heuristics belong in
 // the W888-H e2e layer):
 //   - kind: 'offline'   when a device's healthCheck returns reachable:false
 //                       and the prior tick saw it online (state transition).
@@ -14,7 +14,7 @@
 //   - kind: 'vram_high' when hw.gpu_vram_mb is reported and we have a
 //                       passport min_vram_mb baseline; alert when the
 //                       reported free VRAM falls under 10% of capacity.
-//                       Heuristic only — a real probe needs nvidia-smi MEM_USED.
+//                       Heuristic only - a real probe needs nvidia-smi MEM_USED.
 //   - kind: 'drift'     when the most recent deploy's sha256 does NOT match
 //                       the manifest sha256 for the same artifact_id (i.e.
 //                       someone hand-patched the bytes on the device).

@@ -1,4 +1,4 @@
-// W747 — Distribution-shift live alerter (production vs training).
+// W747 - Distribution-shift live alerter (production vs training).
 //
 // What this module ships (per KOLM_W707_SYSTEM_UPGRADE_PLAN.md W747-1..3):
 //
@@ -15,11 +15,11 @@
 //
 //   - drift-detector.js compares baseline-vs-current EVENT WINDOWS within a
 //     single capture stream and emits one alert envelope. Its baseline floats
-//     with the stream — there's no separate "training distribution".
+//     with the stream - there's no separate "training distribution".
 //   - W747 compares two NAMED distributions held side by side: a TRAINING
 //     sketch snapshotted at distill time, and a LIVE PRODUCTION sketch
 //     snapshotted on demand. The buyer story is "did the workload my student
-//     was trained on still look like the workload it's serving today?" —
+//     was trained on still look like the workload it's serving today?" - 
 //     which requires a long-lived training sketch the W813 detector does not
 //     maintain.
 //   - The two modules use the same divergence math (KL + JSD) but operate
@@ -30,9 +30,9 @@
 // Honest-by-default contract:
 //   - klDivergence(p, q) uses ADDITIVE smoothing so zero-count terms can
 //     never produce -Infinity or NaN. JSD is always in [0, 1].
-//   - shouldAlert() returns boolean only — callers decide what to do.
+//   - shouldAlert() returns boolean only - callers decide what to do.
 //   - generateShiftSuggestion() interpolates real ratios from the
-//     production sketch — no fabricated numbers.
+//     production sketch - no fabricated numbers.
 //   - Tenant-fencing happens in src/drift-alert-store.js, not here. This
 //     module is pure-JS math on plain Maps/objects.
 
@@ -51,11 +51,11 @@ export const DEFAULTS = Object.freeze({
 });
 
 // ---------------------------------------------------------------------------
-// W747-1 — Tokenize input into a deterministic n-gram bag (mono + tri).
+// W747-1 - Tokenize input into a deterministic n-gram bag (mono + tri).
 //
 // We mix mono-grams (single tokens) and tri-grams to keep both lexical signal
 // ("billing") and phrase signal ("how do i") in the same sketch. The plan
-// calls for "lowercase + word-split + take top-3 n-grams" — we read that as
+// calls for "lowercase + word-split + take top-3 n-grams" - we read that as
 // "include monograms through tri-grams, then top-K the sketch" so a billing
 // query like "how do i upgrade my plan" contributes both "billing"-adjacent
 // monograms and the diagnostic tri-gram "how do i".
@@ -63,7 +63,7 @@ export const DEFAULTS = Object.freeze({
 
 /**
  * Tokenize a string into a sequence of lowercase mono-, bi-, and tri-grams.
- * Deterministic — same input always yields the same array.
+ * Deterministic - same input always yields the same array.
  *
  * @param {string} text
  * @returns {string[]}
@@ -93,7 +93,7 @@ export function tokenizeForDistribution(text) {
 }
 
 // ---------------------------------------------------------------------------
-// W747-1 — Build a top-K count-min-style sketch from a corpus of samples.
+// W747-1 - Build a top-K count-min-style sketch from a corpus of samples.
 //
 // We tokenize each sample, sum counts across the corpus, then keep the top-K
 // tokens by count and dump everything else into an "_other" bucket. The
@@ -103,7 +103,7 @@ export function tokenizeForDistribution(text) {
 // Sketch shape:
 //   { [token]: count, ..., _other: count, _total: N, _top_k: K }
 //
-// _total is the sum of ALL counts (including _other) — i.e. the total token
+// _total is the sum of ALL counts (including _other) - i.e. the total token
 // observations, not the number of samples. Callers that need per-sample
 // counts pass samples.length separately.
 // ---------------------------------------------------------------------------
@@ -149,7 +149,7 @@ export function buildDistributionSketch(samples, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// W747-1 — KL divergence on two sketches.
+// W747-1 - KL divergence on two sketches.
 //
 // We project both sketches onto the UNION of their keys (excluding meta keys
 // _total/_top_k), apply additive (Laplace) smoothing so zero-count terms
@@ -213,7 +213,7 @@ export function klDivergence(p, q, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// W747-1 — Symmetric KL (Jensen-Shannon) + top diverging tokens.
+// W747-1 - Symmetric KL (Jensen-Shannon) + top diverging tokens.
 //
 // JSD(P, Q) = 0.5 * KL(P || M) + 0.5 * KL(Q || M) where M = 0.5*(P + Q).
 // Bounded in [0, ln(2)] in nats; we clip to [0, 1] for dashboard scaling
@@ -306,21 +306,21 @@ function _klFromProbs(countSketch, probSketch, keys, smoothing, totalDenom) {
 }
 
 // ---------------------------------------------------------------------------
-// W747-3 — Plain-English shift suggestion list.
+// W747-3 - Plain-English shift suggestion list.
 //
 // Reads the top diverging tokens from compareSketches() and turns each one
 // into an actionable string. We only emit suggestions for tokens where the
 // production share is GREATER than the training share (a shift we can fix
 // by capturing more examples). Shifts in the opposite direction (training
 // has more of a token than production sees today) are still surfaced in the
-// dashboard table but not in the suggestion list — there's no "capture
+// dashboard table but not in the suggestion list - there's no "capture
 // fewer" action a user can take.
 // ---------------------------------------------------------------------------
 
 /**
  * Build human-readable suggestions from a compare result.
  *
- * @param {object} compareResult — from compareSketches()
+ * @param {object} compareResult - from compareSketches()
  * @param {{top_n?: number}} [opts]
  * @returns {string[]} suggestions in priority order; empty when no shifts detected
  */
@@ -358,11 +358,11 @@ export function generateShiftSuggestion(compareResult, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// W747-2 — should-we-alert decision.
+// W747-2 - should-we-alert decision.
 // ---------------------------------------------------------------------------
 
 /**
- * @param {object} compareResult — from compareSketches()
+ * @param {object} compareResult - from compareSketches()
  * @param {{jsd_threshold?: number}} [opts]
  * @returns {boolean}
  */

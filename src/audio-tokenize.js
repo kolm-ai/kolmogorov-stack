@@ -135,7 +135,7 @@ export async function tokenizeAudio(opts) {
   }
 
   // If audio_base64 is provided, materialize it on disk so the worker
-  // can read it. We do NOT keep the bytes in memory beyond this — once
+  // can read it. We do NOT keep the bytes in memory beyond this - once
   // the worker has run we delete the temp file.
   let tmpPath = null;
   let workerArgs = ['--json'];

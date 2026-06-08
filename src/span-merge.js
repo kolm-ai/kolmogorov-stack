@@ -1,6 +1,6 @@
 // src/span-merge.js
 //
-// W921 Phase-1 — pure-JS, zero-dependency span merger that fuses the
+// W921 Phase-1 - pure-JS, zero-dependency span merger that fuses the
 // deterministic regex tier (src/phi-redactor.js findings) with the ML/NER tier
 // (src/ner-recognizer.js spans) into ONE non-overlapping redaction plan, using
 // Microsoft Presidio's decision process:
@@ -93,7 +93,7 @@ function _findingRange(f) {
 }
 
 /**
- * applyContextBoost — LemmaContextAwareEnhancer-style score lift. Scans a
+ * applyContextBoost - LemmaContextAwareEnhancer-style score lift. Scans a
  * window of `windowChars` (default 40) on each side of the span for any of the
  * `contextLemmas`; if found, returns score + delta (capped at 1.0), else the
  * original score. Word-boundary matched + case-insensitive.
@@ -126,7 +126,7 @@ export function applyContextBoost(span, text, contextLemmas, delta = DEFAULT_DEL
 }
 
 /**
- * resolveOverlaps — Presidio overlap resolution. Given normalized spans
+ * resolveOverlaps - Presidio overlap resolution. Given normalized spans
  * { start, end, score, source, class }, returns the maximal non-overlapping
  * subset chosen by: longest-span-wins, then highest-score, then
  * regex-source-wins. Deterministic.
@@ -160,7 +160,7 @@ export function resolveOverlaps(spans) {
 }
 
 /**
- * mergeFindings — the public merge entry point.
+ * mergeFindings - the public merge entry point.
  *
  * @param {Array} regexFindings  phi-redactor findings (have {type,span:[s,e],...})
  * @param {Array<{start,end,label,score,raw_label?}>} nerSpans  ner-recognizer spans (label is a phi CLASS)
@@ -276,7 +276,7 @@ export function mergeFindings(regexFindings, nerSpans, opts = {}) {
 }
 
 /**
- * applyPlan — apply a non-overlapping plan to source text. Mirrors
+ * applyPlan - apply a non-overlapping plan to source text. Mirrors
  * phi-redactor's internal applyPlan so callers (and tests) can build the
  * redacted text + a token->original map directly from mergeFindings output.
  *

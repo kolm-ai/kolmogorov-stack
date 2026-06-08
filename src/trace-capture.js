@@ -2,19 +2,19 @@
 //
 // Records the structured trace that an agent or multi-step workflow emits as
 // it runs. The trace is what src/workflow-ir.js compiles into the workflow
-// IR — and ultimately into a frozen .kolm artifact that replays the same
+// IR - and ultimately into a frozen .kolm artifact that replays the same
 // logic deterministically without round-tripping to a frontier API for every
 // step.
 //
 // Span kinds we capture:
-//   LLM_CALL    — request to a model (vendor, model, prompt, response,
+//   LLM_CALL - request to a model (vendor, model, prompt, response,
 //                  latency, tokens, cost)
-//   TOOL_CALL   — function/tool invocation (name, args, return, latency)
-//   BRANCH      — control-flow decision (condition value, taken edge)
-//   IO          — external I/O (HTTP, DB, filesystem) with redacted payloads
-//   STATE       — workflow-state mutation (scratchpad / memory write)
-//   USER_INPUT  — user message arriving into the workflow
-//   ARTIFACT    — sub-artifact invocation (existing kolm artifact called as
+//   TOOL_CALL - function/tool invocation (name, args, return, latency)
+//   BRANCH - control-flow decision (condition value, taken edge)
+//   IO - external I/O (HTTP, DB, filesystem) with redacted payloads
+//   STATE - workflow-state mutation (scratchpad / memory write)
+//   USER_INPUT - user message arriving into the workflow
+//   ARTIFACT - sub-artifact invocation (existing kolm artifact called as
 //                  a step; lets us nest workflows)
 //
 // Trace identity follows W3C Trace Context: trace_id (16 bytes, 32 hex),
@@ -96,9 +96,9 @@ function _traceFile(trace_id) {
 
 // Append a span to the trace's log. Chain hash links to prior span.
 //
-// W425 — tenant ownership: every span stamps `tenant_id` from the caller
+// W425 - tenant ownership: every span stamps `tenant_id` from the caller
 // (span.tenant_id) so downstream readers can filter cross-tenant access.
-// If a prior span exists with a different tenant_id the append refuses —
+// If a prior span exists with a different tenant_id the append refuses - 
 // trace ownership is established by the first span and cannot be hijacked.
 export async function appendSpan(span) {
   _validateSpan(span);
@@ -159,7 +159,7 @@ export async function appendSpan(span) {
 // Read all spans for a trace, ordered by seq. Returns [] if the file does
 // not exist.
 //
-// W425 — tenant ownership: when `tenant_id` is passed (non-null), the read
+// W425 - tenant ownership: when `tenant_id` is passed (non-null), the read
 // returns [] unless every span in the trace either matches or carries a
 // null tenant_id (legacy, pre-W425). Cross-tenant access returns [] so the
 // caller cannot distinguish "doesn't exist" from "not yours".
@@ -183,7 +183,7 @@ export async function readTrace(trace_id, tenant_id = null) {
 // Walk the chain. Returns ok=true if every span's prev_hash + recomputed
 // hash matches; otherwise reports the first break.
 //
-// W425 — tenant ownership: `tenant_id`, when supplied, scopes the read; a
+// W425 - tenant ownership: `tenant_id`, when supplied, scopes the read; a
 // foreign-tenant trace returns ok=false with reason='tenant_mismatch'.
 export async function chain(trace_id, tenant_id = null) {
   const spans = await readTrace(trace_id, tenant_id);
@@ -274,7 +274,7 @@ export function artifactSpan({ trace_id, span_id, parent_span_id, artifact_hash,
 
 // Redact ALL payload fields per the caller's redactor before exporting.
 // The redactor function receives (payload) and returns { redacted, map }.
-// The chain hash IS NOT recomputed after redaction — the resulting spans
+// The chain hash IS NOT recomputed after redaction - the resulting spans
 // are explicitly marked `redacted: true` and the original chain integrity
 // is preserved by leaving `hash` and `prev_hash` intact for cross-checks
 // against the original trace file.
@@ -294,9 +294,9 @@ export function redactForExport(spans, redactor) {
   });
 }
 
-// Summary statistics — used by the CLI `kolm trace stats` command.
+// Summary statistics - used by the CLI `kolm trace stats` command.
 //
-// W425 — tenant ownership: when `tenant_id` is supplied, the stats return
+// W425 - tenant ownership: when `tenant_id` is supplied, the stats return
 // a zeroed envelope (with reason: 'tenant_mismatch') for foreign-tenant
 // traces. Local stats on the caller's own traces are unchanged.
 export async function stats(trace_id, tenant_id = null) {

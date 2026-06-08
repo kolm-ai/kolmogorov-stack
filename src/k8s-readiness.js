@@ -1,6 +1,6 @@
 // src/k8s-readiness.js
 //
-// W824-2 — In-memory "artifact-loaded" flag consumed by /ready/deep.
+// W824-2 - In-memory "artifact-loaded" flag consumed by /ready/deep.
 //
 // Tiny module by design: holds a single boolean (plus the timestamp at which
 // it flipped to true) so the k8s readinessProbe can wait for the .kolm
@@ -8,7 +8,7 @@
 //
 // Set the flag from anywhere in the runtime once the artifact finishes
 // loading (typically the bundle-runner / artifact loader). Tests + the
-// runtime boot path both call setArtifactLoaded(true) — this module never
+// runtime boot path both call setArtifactLoaded(true) - this module never
 // reaches into the artifact loader itself, keeping the dependency graph
 // one-way.
 //
@@ -35,11 +35,11 @@ function _envFlag() {
 }
 
 /**
- * Flip the artifact-loaded flag. Idempotent — calling twice with true does
+ * Flip the artifact-loaded flag. Idempotent - calling twice with true does
  * not move loaded_at_ms. Calling with false resets the flag (used by the
  * artifact loader on a graceful unload + by tests).
  *
- *   reason — optional short label for diagnostics ("warm_complete",
+ *   reason - optional short label for diagnostics ("warm_complete",
  *            "hot_swap", "manual"). Surfaced in the /ready/deep envelope.
  */
 export function setArtifactLoaded(value, opts = {}) {
@@ -65,7 +65,7 @@ export function isArtifactLoaded() {
 }
 
 /**
- * Return the structured snapshot used by /ready/deep — includes the source
+ * Return the structured snapshot used by /ready/deep - includes the source
  * (memory|env|none) so operators can debug why a probe is hot/cold.
  */
 export function readinessSnapshot() {
@@ -82,7 +82,7 @@ export function readinessSnapshot() {
 }
 
 /**
- * Reset to first-boot state. Tests only — production callers should not
+ * Reset to first-boot state. Tests only - production callers should not
  * use this. Mirrors the convention used by event-store / store / etc.
  */
 export function _resetForTests() {

@@ -1,4 +1,4 @@
-// W832 — HTTP routes for kolm-meta meta-distillation model.
+// W832 - HTTP routes for kolm-meta meta-distillation model.
 //
 // Three auth-gated routes wired by router.js via mountMetaRoutes(r):
 //
@@ -6,12 +6,12 @@
 //   POST /v1/meta/retrain    -> rebuild ~/.kolm/meta-model.json
 //   GET  /v1/meta/predict?features=<json> -> infer prediction for features
 //
-// All routes return honest envelopes — meta_insufficient_data, no_model,
+// All routes return honest envelopes - meta_insufficient_data, no_model,
 // feature_order_mismatch surface as ok:false with status, never silent.
 
 import * as meta from './kolm-meta-trainer.js';
 
-// Both names exported — mountMetaRoutes is the historical name, registerMetaRoutes
+// Both names exported - mountMetaRoutes is the historical name, registerMetaRoutes
 // matches the sibling pattern (registerSavingsRoutes_w835, registerPipelineRoutes_w821).
 export function registerMetaRoutes(r) {
   return mountMetaRoutes(r);

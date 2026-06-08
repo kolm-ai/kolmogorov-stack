@@ -158,7 +158,7 @@ export function mountOAuth(router) {
       let email = p.extractEmail(userJson);
       const displayName = p.extractName(userJson);
 
-      // GitHub may not expose primary email on /user — fall back to /user/emails.
+      // GitHub may not expose primary email on /user - fall back to /user/emails.
       if (!email && p.emailUrl) {
         const emailRes = await fetch(p.emailUrl, {
           headers: { authorization: `Bearer ${accessToken}`, accept: 'application/json', 'user-agent': 'kolm-oauth' },

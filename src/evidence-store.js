@@ -1,6 +1,6 @@
 // src/evidence-store.js
 //
-// R-5 — Per-artifact evidence DAG persistence.
+// R-5 - Per-artifact evidence DAG persistence.
 //
 // The DAG itself rides inside the .kolm manifest, but the router endpoints
 // (/v1/evidence/:id, /v1/artifacts/:id/evidence-trace) need a stable
@@ -130,7 +130,7 @@ export function readNode(node_id) {
 }
 
 /**
- * Test helper — wipe a single artifact's evidence record. Production callers
+ * Test helper - wipe a single artifact's evidence record. Production callers
  * should rely on the artifact-lifecycle archive path; this exists so unit
  * tests can run hermetically without touching real lake state.
  */

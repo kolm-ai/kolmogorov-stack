@@ -1,9 +1,9 @@
 // src/marketplace-payouts.js
 //
-// W825-6 — Revenue share for the W825 Artifact Marketplace MVP.
+// W825-6 - Revenue share for the W825 Artifact Marketplace MVP.
 //
 // W737 already shipped computeRoyalty() in src/marketplace.js with the same
-// 70/30 split — this module is the W825 MVP cron-stub variant that aggregates
+// 70/30 split - this module is the W825 MVP cron-stub variant that aggregates
 // ledger rows out of the event-store and emits an audit row per publisher
 // payout cycle. The math is identical (publisher 70 / platform 30) so the
 // public contract pinned in /docs/marketplace/publish.html stays consistent.
@@ -12,7 +12,7 @@
 // FORECAST surface (W825 brief: "surface as forecast"). The audit row
 // includes `dispatched: false` so a CI gate can confirm no real money moved.
 //
-// Hard-coded split — never read from runtime config.
+// Hard-coded split - never read from runtime config.
 export const PUBLISHER_SHARE = 0.70;
 export const PLATFORM_SHARE  = 0.30;
 export const MARKETPLACE_PAYOUTS_VERSION = 'w825-payouts-v1';
@@ -20,7 +20,7 @@ export const MARKETPLACE_PAYOUTS_VERSION = 'w825-payouts-v1';
 import { listEvents, appendEvent } from './event-store.js';
 import { AUDIT_OPS as _AUDIT_OPS, tryAppendAudit } from './audit.js';
 
-// W825-6 — extend AUDIT_OPS in-place. audit.js declares AUDIT_OPS as a
+// W825-6 - extend AUDIT_OPS in-place. audit.js declares AUDIT_OPS as a
 // Object.freeze() but we cannot mutate it; the audit.js layer accepts ANY
 // string op via tryAppendAudit so we just thread a stable string. Exporting
 // a constant here keeps the op grep-able alongside the W825 module set.
@@ -59,7 +59,7 @@ export function calcPayout(listing, total_revenue_micro_usd) {
 // onto every cycle for compliance.
 export async function payoutCycle(period) {
   const periodStr = String(period || _currentPeriod());
-  // listEvents is async-safe — call site awaits.
+  // listEvents is async-safe - call site awaits.
   const rows = await listEvents({ provider: 'kolm_marketplace_revenue', limit: 0 });
   // Aggregate revenue per listing_id. The event-schema canonicalizer only
   // preserves named columns, so we encoded {listing_id, micro_usd} into the
@@ -114,7 +114,7 @@ export async function payoutCycle(period) {
     dispatched: false,
     rows: payouts,
     listing_count: payouts.length,
-    forecast_note: 'NO STRIPE PAYOUT WIRED — this is a forecast surface (W825 MVP)',
+    forecast_note: 'NO STRIPE PAYOUT WIRED - this is a forecast surface (W825 MVP)',
     version: MARKETPLACE_PAYOUTS_VERSION,
   };
 }

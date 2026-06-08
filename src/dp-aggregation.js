@@ -1,4 +1,4 @@
-// W757 — Differential-privacy aggregation primitive.
+// W757 - Differential-privacy aggregation primitive.
 //
 // Pure-JS Laplace mechanism for count queries over the W757 pattern lake.
 // Separate module from src/pattern-lake.js so the math can be unit-tested
@@ -7,23 +7,23 @@
 // without importing the entire lake.
 //
 // HONESTY CONTRACT:
-//   - Epsilon floor of 0.1 — never publish an aggregate with weaker noise.
+//   - Epsilon floor of 0.1 - never publish an aggregate with weaker noise.
 //     The validateEpsilon() helper throws `epsilon_below_floor` on violation.
 //   - Mechanism stamp `'laplace_v1'` accompanies every aggregate so the
 //     consumer can branch on the exact algorithm (a future Gaussian / RAPPOR
 //     mechanism would carry a different stamp and a different contract).
-//   - The noise is pseudo-random JS Math.random — NOT cryptographic. The
+//   - The noise is pseudo-random JS Math.random - NOT cryptographic. The
 //     auditor SHOULD treat this as a research-quality DP guarantee, not a
 //     load-bearing privacy claim. The lake's primary privacy guarantee is
 //     the hash-only contribution surface in src/pattern-lake.js; DP is the
 //     belt over the suspenders.
 //
-// W411 invariant — this module is data-only (no tenant context); the caller
+// W411 invariant - this module is data-only (no tenant context); the caller
 // is responsible for fencing tenant boundaries before passing counts in.
 
 export const DP_VERSION = 'w757-v1';
 
-// dpEpsilonFloor — minimum allowed epsilon. Tighter epsilon (smaller number)
+// dpEpsilonFloor - minimum allowed epsilon. Tighter epsilon (smaller number)
 // = stronger privacy = more noise. The 0.1 floor is chosen so the W757
 // vertical fingerprint surface always carries SOMETHING the DP literature
 // would call "weak but meaningful" privacy.
@@ -31,7 +31,7 @@ export function dpEpsilonFloor() {
   return 0.1;
 }
 
-// validateEpsilon(eps) — throws `epsilon_below_floor` if below the floor.
+// validateEpsilon(eps) - throws `epsilon_below_floor` if below the floor.
 // Returns the validated number on success. Tests pin both branches.
 export function validateEpsilon(eps) {
   const n = Number(eps);
@@ -50,7 +50,7 @@ export function validateEpsilon(eps) {
   return n;
 }
 
-// laplaceNoise(scale) — pure-JS Laplace(0, scale) sampler.
+// laplaceNoise(scale) - pure-JS Laplace(0, scale) sampler.
 //
 // pdf(x) = 1/(2 scale) exp(-|x|/scale)
 // inverse CDF for u in (-0.5, 0.5):
@@ -72,7 +72,7 @@ export function laplaceNoise(scale) {
   return -s * Math.sign(u) * Math.log(1 - 2 * Math.abs(u));
 }
 
-// aggregateWithDP({counts, epsilon, sensitivity}) — adds Laplace(scale)
+// aggregateWithDP({counts, epsilon, sensitivity}) - adds Laplace(scale)
 // noise to each value in `counts` (a plain object mapping key→count) and
 // returns the noised dict plus the mechanism stamp.
 //
@@ -98,7 +98,7 @@ export function aggregateWithDP({
     const raw = Number(v) || 0;
     const noised = raw + laplaceNoise(scale);
     // Round to nearest integer, clamp at zero. Negative counts are a DP
-    // artifact only — they leak more than they reveal so we clip-at-zero.
+    // artifact only - they leak more than they reveal so we clip-at-zero.
     noised_counts[k] = Math.max(0, Math.round(noised));
   }
   return {

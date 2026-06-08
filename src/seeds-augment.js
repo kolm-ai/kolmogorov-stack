@@ -1,14 +1,14 @@
 // src/seeds-augment.js
 //
-// Wave 355 — Seed augmentation.
+// Wave 355 - Seed augmentation.
 //
 // Generates variations of existing seed rows that preserve label semantics.
 // Three strategies are layered:
-//   1. Template substitution — names, dates, MRNs, emails, addresses, phones.
+//   1. Template substitution - names, dates, MRNs, emails, addresses, phones.
 //      For redactor-style rows (output contains [PHI_*] tokens), we swap the
 //      raw value AND mirror the swap into the output map so the redacted
 //      target still matches. For other rows the swap is purely on the input.
-//   2. Synonym swap — built-in 500-word dictionary; replaces 10-20% of words.
+//   2. Synonym swap - built-in 500-word dictionary; replaces 10-20% of words.
 //   3. LLM call IF KOLM_LLM_PROVIDER is set. Falls back to (1)+(2) otherwise.
 //
 // --target-coverage mode generates rows hitting MISSING PHI classes (and
@@ -192,7 +192,7 @@ function templateSwap(input, output, rnd) {
   inp = inp.replace(/\b\d{3}-\d{3}-\d{4}\b/g, () => randPhone(rnd));
   // Emails
   inp = inp.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, () => randEmail(rnd));
-  // Names — match capitalized 2-word sequences (best-effort).
+  // Names - match capitalized 2-word sequences (best-effort).
   inp = inp.replace(/\b[A-Z][a-z]{2,}\s+[A-Z][a-z]{2,}\b/g, () => {
     return NAMES[Math.floor(rnd() * NAMES.length)];
   });
@@ -202,7 +202,7 @@ function templateSwap(input, output, rnd) {
   return { input: inp, output: out };
 }
 
-// Optional LLM augmentation — uses KOLM_LLM_PROVIDER env var. If unset or
+// Optional LLM augmentation - uses KOLM_LLM_PROVIDER env var. If unset or
 // network call fails we silently fall back to template + synonym. Never throws.
 async function llmAugment(row, opts) {
   const provider = (process.env.KOLM_LLM_PROVIDER || '').toLowerCase();
@@ -367,7 +367,7 @@ export async function augment(rows, opts = {}) {
   if (opts.targetCoverage) {
     const missing = resolveMissing(opts.targetCoverage);
     if (missing.length === 0 && !opts.synthetic) {
-      // Nothing to fill — return empty so caller can detect & report.
+      // Nothing to fill - return empty so caller can detect & report.
       return [];
     }
     // Round-robin through missing classes until N rows produced.
@@ -388,7 +388,7 @@ export async function augment(rows, opts = {}) {
   while (out.length < n) {
     const base = src[i % src.length];
     const r = await makeSynthetic(base, rnd, opts);
-    // Skip if exact dupe of source — try once more then accept.
+    // Skip if exact dupe of source - try once more then accept.
     if (r.input === base.input && opts.allowDupes !== true) {
       const r2 = await makeSynthetic(base, rnd, opts);
       out.push(r2);

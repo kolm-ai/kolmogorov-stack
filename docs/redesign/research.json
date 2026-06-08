@@ -1,0 +1,844 @@
+[
+  {
+    "topic": "SOTA landing-page aesthetics (2025–2026) translated into directives for a LIGHT, all-monospace, signal-green security-evidence site (kolm \"Agent Security-Review Readiness\")",
+    "keyFindings": [
+      "The all-mono risk is the 'README/terminal' look. The fix is to stop treating mono as code and frame the whole page as a SIGNED INSTRUMENT — a lab report / financial statement / passport data-page rendered in light. Exploit mono's monospaced grid: ledger key/value rows, right-aligned tabular numerals, registration crosshairs, sequential section register numbers. A terminal is undifferentiated text; an instrument has structured rows. That structural discipline is what separates premium mono from a code listing.",
+      "Mono letter-spacing inversion is the single biggest premium lever and the easiest amateur tell. Spline Sans Mono runs wide, so display sizes MUST get negative tracking (-0.04 to -0.05em) and small uppercase labels MUST get positive tracking (+0.12 to +0.18em). A 56px mono headline at default (0) spacing instantly reads template/default; the same headline at -0.05em reads expensive and intentional.",
+      "Weight discipline with only 3 weights, strictly role-assigned, is the spine of restraint: 400 = body + data + legal; 500 = labels, nav, ghost buttons, sub-heads; 600 = headings + key numbers + the primary green button ONLY. Never set body at 600. This is what reads 'designed by someone with taste' in a one-family system.",
+      "Light-mode depth WITHOUT heavy shadows: set paper to #F7F8F6 and plates/cards to pure #FFFFFF. That ~5-point lightness delta plus a 1px #E2E5E0 hairline makes a card lift off the page cleanly. Big diffuse drop-shadows are the #1 thing that makes a light site look like a template; reserve a tight shadow for hover only.",
+      "Make the color logic BE the verification semantic: green (#11875A) appears only where something is verified/pass and on the single primary CTA. A failed/tampered/void state simply LOSES the green and goes flat ink-grey plus the word VOID (there is no red in this palette). 'Green present vs green absent' tells the entire product story. Keep green under ~5–8% of on-screen pixels.",
+      "The 2026 'engineering-serious' backdrop is a subliminal 1px grid at ~3–4% opacity, masked so it fades out behind the central text column. The rule from the Vercel/Blueprint-grid lineage: 'if you notice the grid first, it is too strong.' This must REPLACE the rejected dark site's blue/violet radial glows, which would turn muddy and cheap on a light paper.",
+      "Hero = ONE focal artifact, never a collage. The cryptographically-signed evidence-report plate is the icon of the whole brand — render it once, beautifully, on pure white. Asymmetric ~52/48 split (text left, artifact right). Per security-landing research, the trust proof (Ed25519-signed, offline-verifiable) must be visible above the fold next to the CTA, not scrolled to.",
+      "Section rhythm: 6–7 sections MAX, each opening with a sequential register marker (§01 … §07), divided by full-bleed 1px hairlines, alternating #F7F8F6 paper and #FFFFFF plate bands to create boundaries (Clerk's light/dark alternation translated to light-only). The numbered spine is iconic and is the structural antidote to mono monotony. The founder's 'too wordy / not simplified' verdict is solved here: ruthlessly cut to these sections.",
+      "Motion restraint beats motion quantity (Anthropic frontend-design skill + 2026 trend reports agree): one orchestrated staggered page-load (12–16px fade-up, 500–600ms, 60–80ms stagger, cubic-bezier(0.2,0.7,0.2,1), fail-open + reduced-motion gated) plus ONE 'seal stamp' moment, beats scattered hover micro-interactions. The existing fail-open .js-reveal pattern is good and should be kept.",
+      "Conversion: one repeated primary action (green 'Start a readiness audit') in nav + hero + post-how-it-works + pricing + final CTA, and one secondary for the skeptical buyer persona ('Verify a report', ghost). Lead from the founder's SITUATION (a $100–500k deal stuck 4–8 weeks in security review) not the mechanism. Specificity converts (Linear's lesson). Collapse pricing from the current 4-tier grid to ONE fixed-fee plate.",
+      "Mono tables are a superpower, not a fallback. The control-to-framework crosswalk (your controls → SOC 2 / ISO 27001 / the buyer's questionnaire) rendered as a hairline monospace table is more convincing AND more iconic than another 3-card grid. Vary section formats (statement → 3 steps → table → single artifact → price) so the page never feels like repeated card grids.",
+      "Crisp geometry signals precision: 1px borders only (no 2px except a deliberate green pass-bar), small radii (4/6/10px, not pill-y), content max-width ~1100px, body text columns 60–66ch, and hero headline lines capped at ~16–18 mono characters because monospace wraps far wider than a proportional face at the same point size."
+    ],
+    "patterns": [
+      {
+        "name": "Signed-Instrument framing (not a terminal)",
+        "whatItIs": "Premium mono sites (and physical security artifacts: passports, certificates, lab reports, stock certificates) earn trust through STRUCTURE — labelled key/value rows, register numbers, registration ticks, microprint legends, signature blocks — rather than prose. The grid of monospace becomes a ledger, not a console.",
+        "howToApply": "Build a reusable .register block: two-column key/value rows (grid-template-columns: max-content 1fr; 11px UPPERCASE tracked +0.14em keys in ink-3; 12px values in ink with word-break:break-all for the Ed25519 fingerprint). Put registration crosshairs (.regmark, currentColor 1px, ~13px) at the four corners of the hero evidence plate. Add one faint microprint line (6px, +0.34em, ink-3 ~50% alpha) along a panel edge. These 'security furniture' devices say evidence, not code-snippet."
+      },
+      {
+        "name": "Mono tracking inversion",
+        "whatItIs": "Monospace has uniform wide advance widths, so it needs the OPPOSITE tracking treatment to a proportional face: pull display sizes tight, push small labels open.",
+        "howToApply": "h1 letter-spacing:-0.045em (≥48px go -0.05em), line-height 1.02–1.05; h2 -0.035em; h3 -0.02em; body -0.005em to 0, line-height 1.6; all small UPPERCASE labels/eyebrows/running-heads/table-headers letter-spacing +0.12 to +0.18em. Numerals: font-variant-numeric: tabular-nums and tracking 0."
+      },
+      {
+        "name": "Plate-lift depth (the light-mode shadow substitute)",
+        "whatItIs": "On light backgrounds, depth comes from a small lightness delta + a hairline, not from shadow. The page is faintly off-white; the content plates are pure white and sit visibly 'on top'.",
+        "howToApply": "--paper:#F7F8F6; --plate:#FFFFFF; a secondary 'sunken' surface --plate-sunken:#F2F3F1 for inset/code-ish rows. Cards: background var(--plate); border:1px solid #E2E5E0; radius 8px. Rest shadow none or 0 1px 2px rgba(15,20,17,0.04). Hover only: border→#D2D6D0 + translateY(-1px) + 0 12px 32px -16px rgba(15,20,17,0.10)."
+      },
+      {
+        "name": "Green-as-verification-only",
+        "whatItIs": "The accent is not decoration; it is a semantic. Green = pass/verified/primary-action. Its scarcity is what gives it meaning and makes the page feel disciplined.",
+        "howToApply": "Allow #11875A ONLY on: primary button fill, the verified status pill/seal, pass-state check ticks, the active framework-crosswalk 'mapped' cell, and a 1px green underline that slides in on verify-links hover. Everywhere else is monochrome ink. The void/fail state uses ink-3 grey + the literal word VOID/FAIL and a hairline-fracture, never a second hue. Verified plate tint = rgba(17,135,90,0.06) bg + rgba(17,135,90,0.24) border."
+      },
+      {
+        "name": "Subliminal masked grid backdrop",
+        "whatItIs": "The 2026 'we are serious about engineering' texture: a near-invisible technical-drawing grid behind content that you sense before you see.",
+        "howToApply": "Fixed full-page layer: repeating-linear-gradient 1px lines at rgba(15,20,17,0.03) every 64px both axes; mask-image: radial-gradient(120% 90% at 50% 0%, transparent 38%, #000 100%) so the grid only shows toward the page edges/top and fades behind the reading column. Optionally one monochrome engraved seal/guilloché at ~3% opacity behind the hero plate's outer corner. No color glows, no gradient identity."
+      },
+      {
+        "name": "Register-numbered section spine",
+        "whatItIs": "Sequential section markers (§01 … §07) plus full-bleed hairline dividers turn a scroll into a document index — the signature device that makes an all-mono page feel authored and iconic.",
+        "howToApply": "Each .section gets border-top:1px solid #E2E5E0 and opens with: <span class=idx>§01 / HOW IT WORKS</span> (12px, +0.04em, ink-3, the § glyph in ink-faint). Number them in order down the page. Alternate section backgrounds paper ↔ #FFFFFF to reinforce boundaries. Replace generic 'eyebrow' kickers with this register marker (consistent with the brand's zero-eyebrow rule)."
+      },
+      {
+        "name": "Single-artifact hero",
+        "whatItIs": "Top dev-infra sites show ONE real product object as the hero focal (Linear's app frame, Stripe's code block, Clerk's live widget). For kolm the object is the signed evidence report.",
+        "howToApply": "Right column = one .vw evidence plate on #FFFFFF: header row (buyer/subject org + big tabular readiness score) → green VERIFIED pill → 3–4 streamed check rows with green ticks → signature/key-fingerprint register row (break-all) → 'verify offline' foot link + 4 corner regmarks. It must be legible at a glance and re-render the entire value prop without copy."
+      },
+      {
+        "name": "One-orchestrated-load + one stamp",
+        "whatItIs": "Delight comes from a single well-timed entrance, not many twitchy hovers. A security brand earns one hero 'moment': the seal stamping/verifying.",
+        "howToApply": "Keep .js-reveal fail-open. Stagger sections/cards: opacity 0→1 + translateY(14px→0), 560ms, cubic-bezier(0.2,0.7,0.2,1), 70ms stagger via nth-child delays. The hero seal does ONE press-in (scale 1.06→1, 0.6s) and the green pass-tick draws via stroke-dashoffset, once on load/scroll-in. Everything gated on prefers-reduced-motion."
+      }
+    ],
+    "references": [
+      {
+        "name": "Linear (linear.app)",
+        "url": "https://linear.app",
+        "whyItMatters": "The gold standard for dev-tool landing craft: unapologetic specificity in copy (tribe-signalling headlines), one real product surface as hero, restrained type, ruthless section count. Lesson for kolm: be specific to the Series-A founder with one stuck deal and let everyone else self-select out — do not hedge to appeal to all."
+      },
+      {
+        "name": "Stripe (stripe.com)",
+        "url": "https://stripe.com",
+        "whyItMatters": "Every product page is a self-contained essay with custom, consistent illustration and REAL technical depth (live code on the homepage). Lesson: show the actual signed report and the actual offline-verify, not stock 'security' imagery; technical authenticity is the trust signal for an audience of security researchers."
+      },
+      {
+        "name": "Vercel (vercel.com) + Blueprint-Grid guide",
+        "url": "https://www.setproduct.com/blog/complete-guide-to-blueprint-grid-design",
+        "whyItMatters": "Source of the 2026 'engineering-serious' subliminal grid backdrop with concrete numbers: 1px lines, ~5% (rgba(0,0,0,0.05)) opacity, 16–24px or larger increments, 'if you notice the grid first it is too strong.' Directly informs kolm's light masked-grid backdrop that replaces the rejected dark glows."
+      },
+      {
+        "name": "Clerk (clerk.com) — Fountn breakdown",
+        "url": "https://fountn.design/website/clerk/",
+        "whyItMatters": "Demonstrates alternating light/section rhythm that creates natural content boundaries, plus live UI 'specimens' floating with subtle depth. kolm adapts this as paper↔pure-white alternating bands (since it is light-only) and the evidence plate as the floating specimen."
+      },
+      {
+        "name": "Resend (resend.com)",
+        "url": "https://resend.com",
+        "whyItMatters": "Reference for restraint and hairline craft in a developer brand: generous whitespace, tiny tasteful motion, monochrome-plus-one-accent discipline. Models the 'quiet but premium' tone kolm needs to avoid both the cold-compliance look and the loud-startup look."
+      },
+      {
+        "name": "Vanta (vanta.com)",
+        "url": "https://www.vanta.com",
+        "whyItMatters": "The category-adjacent benchmark to consciously DIFFERENTIATE from — it reads as a broad compliance-automation platform. kolm's positioning is the opposite (single deal-unblocker, one signed report), so the design should feel sharper, narrower, and more instrument-like, not platform-like."
+      },
+      {
+        "name": "Anthropic frontend-design skill (SKILL.md)",
+        "url": "https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md",
+        "whyItMatters": "Codifies the premium-vs-AI-template line: distinctive type over generic fonts, dominant+sharp-accent color over timid even palettes, ONE orchestrated staggered load over scattered micro-interactions, atmosphere/depth over flat fills, avoid cookie-cutter layouts. Validates kolm's one-family + one-accent + one-load-moment plan."
+      },
+      {
+        "name": "Fontfabric — 2026 typography trends ('Technical Mono')",
+        "url": "https://www.fontfabric.com/blog/10-design-trends-shaping-the-visual-typographic-landscape-in-2026/",
+        "whyItMatters": "Confirms monospace ('Technical Mono' / code-brutalism) is a live 2026 premium trend for dev-tool and cybersecurity brands conveying credibility — so kolm's locked all-mono direction is on-trend, provided it is executed with the tracking/weight discipline above rather than left as raw terminal text."
+      },
+      {
+        "name": "SaaSHero — B2B landing trust signals",
+        "url": "https://www.saashero.net/design/landing-page-design-trust-signals/",
+        "whyItMatters": "Security/compliance landing research: lead with trust above the fold (certifications, audit badges, verifiable proof next to the CTA), one page = one goal, fewer distractions. Drives kolm's above-the-fold 'Ed25519-signed · offline-verifiable' proof line and single-action funnel."
+      }
+    ],
+    "pitfalls": [
+      "Setting body copy inside a tinted 'code block' panel. Body text is plain mono on #F7F8F6 paper with NO background fill — the moment paragraphs sit on a grey/tinted box, the whole site collapses into 'a README'. Reserve --plate-sunken backgrounds for actual data/code rows only.",
+      "Spraying green everywhere (links, icons, hovers, headings). That destroys the verification semantic. If green is on more than ~8% of the viewport it stops meaning 'verified'. Keep links monochrome (ink, with a hairline underline); reserve green for CTA + pass states.",
+      "Leaving large mono headlines at default (0) letter-spacing. This is the instant amateur tell for monospace. Every heading ≥24px must carry negative tracking.",
+      "Carrying over ANY of the rejected dark system: the holographic/foil gradient (--foil), the blue/violet ambient radials (body::before), color-scheme:dark, obsidian surfaces. On light these read muddy and cheap and violate the locked 'no gradient/foil identity' rule. Strip them entirely.",
+      "Heavy diffuse drop-shadows on cards (e.g. 0 22px 50px rgba(0,0,0,0.8) from the dark file). On light that looks like a 2014 template. Use hairline + lightness delta at rest; a single tight shadow only on hover.",
+      "Too many type sizes or weights. Cap at ~6 sizes (11 / 13.5 / 15.5 / 19 / h2 / h1) and exactly 3 weights with fixed roles. Every extra size/weight is visual noise that mono punishes harder than a proportional face.",
+      "Keeping the 4-tier pricing grid (.tiers grid-4) for a single fixed-fee product. It implies a platform and creates choice-paralysis. Show ONE fixed-fee plate (big tabular price + 'one report · N-day turnaround') and at most one quiet 'multi-deal/enterprise' line.",
+      "Over-long hero headline lines. Monospace wraps ~30–40% wider than a proportional face at the same px, so an 8-word hero line will sprawl. Cap hero lines at ~16–18 characters and let it break into 2–3 short, punchy lines.",
+      "Body line-height outside 1.55–1.65. Above ~1.7 mono floats apart and looks sparse; below ~1.5 it reads dense and code-like. Lock body at 1.6.",
+      "Introducing red for the fail/void state. There is NO red in the Verified palette. A failed verification loses its green and goes flat ink-grey + the word VOID + a hairline fracture. The absence of green IS the alarm.",
+      "Wordy section copy and generic eyebrows. The founder flagged 'too wordy, drifted off SOTA'. Replace eyebrow kickers with §-register markers, cut every section headline to ≤7 words and ledes to ≤30, and avoid em-dashes in copy (brand rule).",
+      "Decorating instead of structuring. Resist adding ornament to make mono 'interesting'. The interest comes from real alignment (tabular columns, ledger rows, the crosswalk table), not from extra graphics. One characterful display headline + one hero artifact is the whole show."
+    ],
+    "directives": [
+      "Palette tokens (replace the obsidian set): --paper:#F7F8F6; --plate:#FFFFFF; --plate-sunken:#F2F3F1; --ink:#0F1411; --ink-2:#545B55 (≈6.3:1 on paper, AA body); --ink-3:#818881 (≈3.4:1, labels/≥18px only); --ink-faint:#A7ADA7; --hair:#E2E5E0; --hair-faint:#ECEEEA; --pass:#11875A; --pass-strong:#0E7350; --pass-tint:rgba(17,135,90,0.06); --pass-edge:rgba(17,135,90,0.24); --grid:rgba(15,20,17,0.03). Set html{color-scheme:light}.",
+      "Delete --foil, --foil-edge, --foil-soft, the holographic mechanics, and the blue/violet body::before radials. Replace body::before with the masked grid; remove the dark guilloche or recolor it to ink at 3% opacity.",
+      "Type scale (6 steps only): h1 clamp(34px,4.6vw,56px)/600/-0.045em/lh1.03; h2 clamp(24px,3vw,34px)/600/-0.035em/lh1.12; h3 19px/500/-0.02em/lh1.25; .lede 16px/400/lh1.6/max-width 60ch; body 15.5px/400/lh1.6/-0.005em; .label & table-th 11px/500/UPPERCASE/+0.16em.",
+      "Weight roles (enforce): 400 = body, lede, legal, data values; 500 = nav links, labels, sub-heads, ghost buttons, h3; 600 = h1/h2, key numerals, primary button. No 600 body anywhere.",
+      "Spacing scale (8px base): 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 / 128. Section padding: 120px top+bottom desktop, 72px mobile. Label→headline gap 16px; headline→lede 20px; lede→CTA 32px. --maxw:1100px; text columns 60–66ch.",
+      "Hairline craft: ALL borders 1px. Section dividers border-top:1px solid var(--hair) full-bleed. Two line tiers only — #E2E5E0 structural, rgba(15,20,17,0.05) faint (key/value row underlines). The only 2px element allowed is a green pass-bar on a verified card's left edge.",
+      "Backdrop layer (fixed, z-index:-2): background: repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 64px), repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 64px), var(--paper); mask-image: radial-gradient(125% 90% at 50% 0%, transparent 36%, #000 100%). The grid must be invisible at first glance behind the reading column.",
+      "Cards/.plate: background var(--plate); 1px solid var(--hair); border-radius 8px; padding 24–28px; shadow:none at rest. Hover: border-color #D2D6D0; transform:translateY(-1px); box-shadow:0 12px 32px -16px rgba(15,20,17,0.10); transition 160ms cubic-bezier(0.2,0.7,0.2,1). Radii system: --r-sm:4 --r-md:6 --r-lg:10 (drop pill from CTAs).",
+      "Primary button (the ONLY filled-green element): background var(--pass); color:#F7F8F6; font-weight:600; font-size:14px; padding:13px 22px; radius:6px; letter-spacing:0. Hover: background var(--pass-strong) + box-shadow 0 8px 24px -12px rgba(17,135,90,0.40). Active: translateY(1px). Min text size 14px to hold AA (white on #11875A ≈4.9:1).",
+      "Ghost/secondary button: transparent; 1px solid var(--hair); color var(--ink); weight 500. Hover: border-color var(--ink-3); background rgba(15,20,17,0.03). Use for the buyer-skeptic action 'Verify a report'.",
+      "Nav: height 60px; sticky; background color-mix(in srgb, var(--paper) 80%, transparent); backdrop-filter: saturate(140%) blur(11px); border-bottom 1px solid var(--hair). Brand wordmark mono 600 17px -0.02em with a small green pass-tick glyph (the only nav green other than the CTA). Links mono 13.5px/500 ink-2→ink. One green CTA at right.",
+      "Hero: asymmetric grid-template-columns:1.04fr 0.96fr; gap 56px; collapse to 1col <940px. Left: §00 register marker → h1 (≤18ch lines, 2–3 lines) → lede (≤30 words) → CTA row (green primary + ghost) → trust micro-line. Right: ONE evidence plate, 4 corner regmarks.",
+      "Above-the-fold trust line (mono 12px ink-3, green tick glyphs): 'Ed25519-signed · Verifiable offline · Maps to SOC 2 / ISO 27001 / your buyer's questionnaire'. Place directly under the CTA row, not in a later section.",
+      "Hero H1 copy (lead from situation, simplified, no em-dash): line1 'Your $100k–500k deal is' / line2 'stuck in security review.' Lede: 'kolm turns the 6-week security questionnaire into a signed evidence report your buyer can verify in minutes.' CTA: 'Start a readiness audit' (green) + 'Verify a report' (ghost).",
+      "Section count = 7, in order, each with a §register marker and 1px top divider: §01 Hero · §02 Proof band (framework chips) · §03 The stall (the founder's pain, quantified) · §04 How it works (3 steps) · §05 What's in the report (anatomy + crosswalk table) · §06 Verify it yourself (offline) · §07 Pricing (one fixed fee) → Final CTA. Cut everything else.",
+      "Register/index marker component: <span class=idx>§01 / HOW IT WORKS</span> — 12px, +0.04em, color ink-3, § glyph in ink-faint, b-segment (the title) in ink-2/500. Numbered sequentially down the page.",
+      "Alternate section surfaces for boundaries: odd sections background var(--paper), even sections background var(--plate) (full-bleed white band), keeping the 1px dividers. This replaces dark-mode contrast as the rhythm device.",
+      "Evidence plate (.vw) anatomy: header row = subject org (15px/600) left + readiness score right (clamp(30px,4vw,40px)/600 tabular-nums); a VERIFIED pill (pass-tint bg, pass-edge border, green dot, 10.5px +0.08em UPPERCASE); 3–4 .check rows (15px ick green stroke + 12px mono label); a .register fingerprint row (Ed25519 key, word-break:break-all); foot link 'Verify offline →'. Corner regmarks on the plate.",
+      "Void/fail variant: the same plate with status pill text 'VOID' in ink-3, score underlined with a 1px ink-3 hairline-fracture, ALL green removed (ticks become ink-3 minus-glyphs). No red, ever. The disappearance of green is the signal.",
+      "Framework crosswalk table (§05): hairline mono table, min-width 640px, th 11px UPPERCASE +0.12em ink-3 on plate-sunken, td 13.5px, 14px row padding, 1px hair row borders, hover row bg plate-sunken. The 'mapped' cells (your control → SOC 2 CC6.x / ISO A.x / Q#) render in green mono 12px. This single table is a centerpiece, not filler.",
+      "Pricing (§07): ONE fixed-fee plate, not a tier grid. Big price tabular-nums clamp(28px,3.4vw,40px)/600; sub '$ fixed · one signed report · N-day turnaround'; 5–6 feature rows with green ticks; one green CTA. Optional single muted line 'Multiple deals or BAA? → Enterprise'. Remove .tiers grid-4.",
+      "Motion: keep fail-open .js-reveal. Reveal = opacity 0→1 + translateY(14px→0), 560ms cubic-bezier(0.2,0.7,0.2,1), stagger 70ms (nth-child delays up to ~5). Hero seal: one press-in scale(1.06→1) 600ms + pass-tick stroke-dashoffset draw, once. All gated behind @media (prefers-reduced-motion:reduce).",
+      "Hover/link micro-interaction (the one place green is allowed subtly): verify-links get a 1px green underline drawn via background-image linear-gradient(var(--pass),var(--pass)) / background-size 0% 1px → 100% 1px on hover, 150ms, background-position bottom left. Body links stay ink with a static faint underline.",
+      "Numerals everywhere data appears: font-variant-numeric: tabular-nums; letter-spacing 0. Readiness score, price, turnaround days, control counts all use this so columns and digits align like a financial statement.",
+      "Eyebrow/label rule: do not use generic accent eyebrows; the §-register marker replaces them (consistent with the brand's zero-eyebrow, zero-em-dash convention). Any remaining .label is UPPERCASE mono 11px/500 +0.16em ink-3.",
+      "Selection + focus: ::selection background var(--pass-tint), color var(--ink). Focus-visible: 2px solid var(--pass) outline, 2px offset (the one accessibility place green is mandatory).",
+      "Scrollbar + details: thin scrollbar thumb var(--hair) on paper track; corner regmarks (.regmark, currentColor 1px, 13px) only on the hero plate and at most one other framed panel — 1–2 per page, never the dark-mode density.",
+      "Copy discipline pass: every section headline ≤7 words, every lede ≤30 words, no em-dashes (use periods or ' · '), no 'honesty/honest' wording, never the word 'compliance vendor' (positioning = deal-unblocker). Repeat the single primary CTA label verbatim at all 5 placements."
+    ]
+  },
+  {
+    "topic": "Making an all-monospace (Spline Sans Mono), light \"Verified\" site feel expensive, editorial, and iconic — type scale, tracking, measure, weight discipline, and faux-hierarchy for kolm's Agent Security-Review Readiness deal-unblocker",
+    "keyFindings": [
+      "The editorial-mono recipe is a contrast of extremes, not a uniform grey: very large display set with TIGHT negative tracking against a SHORT measure, plus very small UPPERCASE labels set with WIDE positive tracking. Everything between those poles stays calm. This single move (US Graphics / Berkeley Mono) is what separates 'expensive instrument' from 'code editor'.",
+      "Mono's fixed advance (~0.60em per glyph in Spline Sans Mono, so 1ch ~= 0.60em) means big type develops ugly gaps and small type develops authority. Therefore tracking must be size-scoped, not global: negative above ~22px, ~0 at body, strongly positive only on <=12px caps labels. A single global letter-spacing is the #1 amateur tell.",
+      "On near-white (#F7F8F6), mono at weight 400 goes spindly if you force -webkit-font-smoothing:antialiased (that flag is a DARK-mode trick). Drop it / set to auto for the light theme so 400 keeps its stroke. This one line is the difference between crisp and frail.",
+      "Hierarchy must come from SIZE + WEIGHT(400/500/600) + COLOR(ink ramp) + CASE + TRACKING — never family (there is only one). Build a 4-step ink ramp on light: #0F1411 / #434B46 / #6E766F / #9BA29B and reserve weight 600 for >=18px only.",
+      "Mono strains in long prose because uniform width mutes word-shape cues and slows recognition; mitigate with a SHORT measure (target 64ch, hard cap 68ch), generous leading (1.65), ragged-right left alignment (NEVER justify — mono justification = rivers), and paragraphs capped at 3-4 lines. Better: convert prose into key-value registers and short blocks, which is what mono is FOR.",
+      "Mono shines exactly where this product lives: hashes, Ed25519 signatures, key IDs, timestamps, readiness scores, control IDs ([SOC2 CC6.1]), prices, version strings, seals/stamps, and tabular crosswalks. Lean the whole page on these instrument blocks; let prose be connective tissue.",
+      "Keep tabular figures on for ALL numerics anyway (font-variant-numeric: tabular-nums) — not because the woff2 isn't monospaced, but so the SF Mono / Consolas fallback chain stays column-aligned during font-swap and on machines that miss the webfont.",
+      "Green (#11875A) earns its power by scarcity: it must appear ONLY as primary-CTA fill (white text on green) and the verified/pass state. Because green = pass, the fail/void state must stay MONOCHROME (ink-3 grey + the word VOID + a strike), never red — that constraint is itself the brand's most iconic typographic decision.",
+      "The 'signed instrument' identity already in the codebase (banknote/passport/microprint/registration-mark furniture) survives the light flip and is the differentiator. Carry it as hairline-only (#E2E5E0) on paper — graph-grid, registration ticks, microprint legends — at 3-5% presence. Furniture made of hairlines + whitespace reads editorial; furniture made of color reads cheap.",
+      "Display headlines should be measure-constrained (hero h1 max-width ~16ch) so they wrap into a tight 2-3 line stack. A tightly-set, tightly-wrapped mono headline looks 'typeset'; a full-width single line of tracked mono looks 'typed'.",
+      "Spline Sans Mono has a tall x-height and low contrast, so it carries small UI sizes well but looks generous — you can run body one step smaller (15-16px) than a proportional sans and still feel substantial; spend the saved space on leading and margin.",
+      "Reserve a true optical jump between body (16px) and the next size up (lede 18-20px). In a one-family system, adjacent sizes <=2px apart read as a rendering accident, not hierarchy — make every step on the scale a clear ratio (~1.2-1.25)."
+    ],
+    "patterns": [
+      {
+        "name": "Instrument legend (the tracked micro-label)",
+        "whatItIs": "Tiny uppercase mono set 11px / weight 500 / letter-spacing +0.18-0.24em — reads as an engraved gauge legend or certificate annotation, not a web 'eyebrow'.",
+        "howToApply": "Re-cut .eyebrow, .running-head, .card__k, .register__k, .tier__name, .foot__col h4, .tbl thead th to 11px, weight 500, +0.2em tracking, uppercase, color --ink-3 (#6E766F). Lead .eyebrow with an 18px hairline tick (already present). This is the ONLY place positive tracking is allowed. Use it for section markers and field keys, never for sentences."
+      },
+      {
+        "name": "Tight-set display (negative-tracking headline on a short measure)",
+        "whatItIs": "Large mono pulled together with -0.035 to -0.045em tracking and tight leading (1.02-1.08), wrapped to a narrow column so it stacks.",
+        "howToApply": "h1: clamp(40px,6vw,72px), ls -0.045em, lh 1.02, weight 600, max-width 16ch. h2: clamp(28px,4vw,44px), ls -0.035em, lh 1.08, weight 600, max-width 28ch. Never let a hero headline run as one wide tracked line."
+      },
+      {
+        "name": "Tabular register (the certificate metadata block)",
+        "whatItIs": "A key-value grid where mono's column alignment becomes the aesthetic — subject, issued, kid, fingerprint, score, expiry — bordered by hairlines.",
+        "howToApply": "Keep .register / .vw__row / .report as 2-col grids (max-content 1fr). Keys: 10-11px caps, +0.14em, --ink-3. Values: 12-13px, 400, --ink-2, word-break:break-all for hashes, tabular-nums slashed-zero. This block, not prose, should anchor the hero and the report sections."
+      },
+      {
+        "name": "Faux-hierarchy ink ramp (color does the work family can't)",
+        "whatItIs": "A 4-stop near-monochrome ramp on paper that encodes importance through value, since you can't switch typeface.",
+        "howToApply": "Set --ink #0F1411 (headlines, primary), --ink-2 #434B46 (body, lede, card copy), --ink-3 #6E766F (labels, meta), --ink-faint #9BA29B (microprint/disabled only). Promote/demote elements by moving them one stop, not by adding weight or color."
+      },
+      {
+        "name": "Short-measure prose (mono made readable)",
+        "whatItIs": "Body paragraphs constrained tighter than a sans would be, with extra leading and hard left alignment.",
+        "howToApply": "Body: 16px (15px <768px), lh 1.65, ls -0.006em, --ink, max-width 64ch (cap 68ch). .lede: clamp(17px,1.4vw,20px), lh 1.5, --ink-2, max-width 56ch. text-align:left always. Paragraph spacing 1em. Cap paragraphs at 3-4 lines; if longer, break into a register or list."
+      },
+      {
+        "name": "Light-mode weight preservation",
+        "whatItIs": "Stopping near-white from thinning the mono strokes.",
+        "howToApply": "On the light theme remove -webkit-font-smoothing:antialiased (or set auto/subpixel). Keep body weight 400 with full-contrast ink #0F1411 on #F7F8F6 (~15:1). Use weight 500 (not 600) for in-body emphasis; 600 only at >=18px."
+      },
+      {
+        "name": "Hairline + whitespace furniture",
+        "whatItIs": "Editorial structure built from 1px rules, registration marks, microprint and air — zero decorative color.",
+        "howToApply": "Section dividers, card borders, table rules all #E2E5E0 (flat hex, not opacity, so 1px stays crisp). Backdrop = #F7F8F6 paper + an optional 1px graph grid / guilloche / registration ticks in #E2E5E0 at 3-5% opacity. Cards lift on pure #FFFFFF; recessed wells on #F1F3EF. No drop-shadow heavier than 0 18px 40px -30px rgba(15,20,17,.10)."
+      },
+      {
+        "name": "Monochrome fail-state",
+        "whatItIs": "Because green is the pass semantic, failure is rendered without hue.",
+        "howToApply": "VOID/FAIL: color --ink-3, 1px --ink-3 border, the literal word VOID, and a strike/fracture mark — never red, never green. Verified/PASS: green seal + 'VERIFIED' + --ok-soft rgba(17,135,90,.08) row tint + --ok-edge rgba(17,135,90,.32) border. Green text only where it passes AA (>=14px) else use --ok-ink #0B6344."
+      }
+    ],
+    "references": [
+      {
+        "name": "US Graphics Company (usgraphics.com)",
+        "url": "https://usgraphics.com/",
+        "whyItMatters": "The canonical 'expensive, iconic, all-mono' site: instrument/aerospace aesthetic, hairline rules, tracked caps legends, tabular data blocks on a light field. The single closest aesthetic precedent for what kolm wants."
+      },
+      {
+        "name": "Berkeley Mono specimen (US Graphics)",
+        "url": "https://berkeleygraphics.com/typefaces/berkeley-mono/",
+        "whyItMatters": "Shows the exact contrast move — huge tight-tracked display vs tiny wide-tracked labels — that makes a single mono read as editorial rather than as code. Study its tracking-by-size and whitespace discipline."
+      },
+      {
+        "name": "Spline Sans Mono specimen (Google Fonts / Sorkin Type)",
+        "url": "https://fonts.google.com/specimen/Spline+Sans+Mono",
+        "whyItMatters": "The actual face in use: confirm the 400/500/600 cuts, the tall x-height/low-contrast that lets you run small, and test whether the woff2 ships the 'zero'/slashed-zero feature before relying on it."
+      },
+      {
+        "name": "Vercel Geist Mono",
+        "url": "https://vercel.com/font",
+        "whyItMatters": "Reference for mono used as a premium product brand for metrics, IDs and labels on light surfaces — disciplined tabular numerals and restrained weight use."
+      },
+      {
+        "name": "Stripe Docs",
+        "url": "https://docs.stripe.com",
+        "whyItMatters": "Gold standard for mono reserved to its strengths (keys, hashes, code, amounts) inside an otherwise readable layout — a model for where to let mono carry data vs. where to keep blocks short."
+      },
+      {
+        "name": "Linear",
+        "url": "https://linear.app",
+        "whyItMatters": "Mono used as editorial accent for labels, IDs and version strings with tight tracking and generous whitespace — proof that mono labels signal precision/engineering without feeling like a terminal."
+      },
+      {
+        "name": "Klim Type Foundry — Soehne Mono",
+        "url": "https://klim.co.nz/retail-fonts/soehne-mono/",
+        "whyItMatters": "Specimen pages demonstrate negative tracking on large mono and the line-length/leading needed to keep mono prose readable — directly informs the measure and tracking ladder."
+      },
+      {
+        "name": "IBM Plex Mono in the IBM design system",
+        "url": "https://www.ibm.com/plex/",
+        "whyItMatters": "Enterprise-grade example of mono as a trust/engineering signal at small sizes and labels, paired with a strict value ramp — relevant to selling to enterprise security reviewers."
+      },
+      {
+        "name": "Teenage Engineering",
+        "url": "https://teenage.engineering/",
+        "whyItMatters": "Instrument-panel typography: tiny tracked mono legends, registration marks, hairlines — the same 'physical signed instrument' furniture kolm already has, executed to a premium bar."
+      }
+    ],
+    "pitfalls": [
+      "Applying one global letter-spacing. Tracking MUST be size-scoped: negative on display, ~0 on body, strongly positive only on <=12px caps. A uniform value either blows out body legibility or makes display look loose.",
+      "Forcing -webkit-font-smoothing:antialiased on the light theme — it thins 400-weight mono into something frail on near-white. That flag was for the old obsidian theme; remove it.",
+      "Justifying or centering mono prose. Justification creates rivers (fixed advance can't absorb spacing); centered mono loses its left grid. Always left-aligned, ragged right.",
+      "Wall-of-code prose: long multi-line paragraphs at full width. Mono recognition drops fast past ~68ch and past ~4 lines. Shorten measure, raise leading, or convert to a register/list.",
+      "Flat single-weight pages. Using only 400 (or only 500) yields no hierarchy in a one-family system; you must ladder size + weight + ink + case deliberately.",
+      "Weight 600 at body size. In mono, 600 below ~18px reads blocky and crowds the fixed cells. Use 500 or an ink-step for in-text emphasis; keep 600 for headlines, metrics, price, wordmark.",
+      "Letting green leak into decoration, links, borders, or backdrop. Every non-CTA, non-verified green dilutes the pass semantic. Links = ink with hairline underline; hover may go green, fills/states stay reserved.",
+      "Using red for the fail state. Green=pass means fail must be monochrome (ink-3 + VOID + strike). A red would import a second color and break the 'one-signal' system.",
+      "Pure #000 on pure #FFF. The locked #0F1411 on #F7F8F6 is correct — don't 'fix' it to black/white; the off-tones stop the harsh vibration that makes mono feel like a console.",
+      "Adjacent sizes <=2px apart (e.g. 15px body next to 16px lede). They read as an accident, not hierarchy. Keep each scale step a clear ~1.2-1.25 ratio.",
+      "Tracked uppercase on anything longer than a label. Caps + wide tracking on a sentence shouts and tanks readability; restrict to <=4-word legends and field keys.",
+      "Hairlines built from rgba/opacity instead of a flat hex — they go fuzzy and inconsistent at 1px. Use #E2E5E0 directly. Same for backdrop grid: keep it >=3% but flat and crisp.",
+      "Forgetting tabular-nums on the fallback path. The webfont is monospaced, but during swap the SF Mono/Consolas fallback can misalign columns — set font-variant-numeric: tabular-nums on all data.",
+      "Over-decorated backdrop. Guilloche/grid above ~5% opacity, or any colored ambient wash, drags the light field toward 'theme template'. Keep it subliminal and hairline-only.",
+      "Icon/illustration stroke weight heavier than the mono. Iconography must be hairline (~1.25-1.5px) to sit in the same optical weight class as 400/500 mono, or it reads bolted-on."
+    ],
+    "directives": [
+      "Color tokens (light 'Verified'): --paper #F7F8F6; --paper-raise #FFFFFF (cards); --well #F1F3EF (recessed); --ink #0F1411; --ink-2 #434B46; --ink-3 #6E766F; --ink-faint #9BA29B; --hair #E2E5E0; --line-2 #D2D6CF; --ok #11875A; --ok-ink #0B6344; --ok-soft rgba(17,135,90,.08); --ok-edge rgba(17,135,90,.32).",
+      "body: font-size 16px (15px @ <768px); line-height 1.65; letter-spacing -0.006em; color var(--ink); background var(--paper); font-family var(--mono); REMOVE -webkit-font-smoothing:antialiased (let it default).",
+      "Type scale (px / line-height / tracking / weight / measure): hero-h1 clamp(40,6vw,72)/1.02/-0.045em/600/max16ch | h2 clamp(28,4vw,44)/1.08/-0.035em/600/max28ch | h3 21/1.25/-0.018em/500/max40ch | lede clamp(17,1.4vw,20)/1.5/-0.01em/400/max56ch (color --ink-2) | body 16/1.65/-0.006em/400/max64ch | small 13/1.55/0/400 | label-caps 11/1/+0.20em/500/UPPER | micro 8/1/+0.30em/500/UPPER.",
+      "Tracking ladder by size (apply, do not globalize): >=56px -0.045em; 40-55px -0.04em; 28-39px -0.035em; 22-27px -0.022em; 18-21px -0.014em; 16-17px -0.008em; 14-15px -0.003em; 13px 0; 11-12px caps +0.18 to +0.24em; <=9px caps +0.28 to +0.34em.",
+      "Measure: body max-width 64ch (hard cap 68ch); lede 56ch; hero h1 16ch; h2 28ch; h3 40ch. (1ch ~= 0.60em in Spline Sans Mono, so 64ch @16px ~= 614px.) text-align:left everywhere; never justify.",
+      "Weight map — 400: all body, lede, captions, table cells, key-values, code, hashes, nav links. 500: eyebrow/legends, h3, table headers, nav active, button text, in-body emphasis, field keys. 600: h1/h2, metric numerals, price, brand wordmark ONLY. Hard rule: no 600 below 18px.",
+      "Numerals: every metric/price/score/hash/date/version gets font-variant-numeric: tabular-nums slashed-zero; (use slashed-zero only if the Spline Sans Mono woff2 ships the 'zero' feature — otherwise tabular-nums alone). .metric__n clamp(36,5vw,56)/lh1/-0.03em/600/tabular-nums.",
+      "Paragraph rhythm: paragraph margin-bottom 1em (~24px @16px); space-before for a heading = 2 line-heights (~48px); cap any prose paragraph at 3-4 lines (~ 64ch x 4) before converting to a register or list.",
+      "Eyebrow/legend (.eyebrow, .running-head, .card__k, .tier__name, .foot__col h4, .tbl thead th): 11px, weight 500, letter-spacing +0.20em, text-transform uppercase, color var(--ink-3). Keep the 18px hairline tick before .eyebrow.",
+      "Register/report rows (.register, .vw__row, .report): keys 10-11px caps +0.14em var(--ink-3); values 12-13px/400/var(--ink-2)/tabular-nums; rows separated by 1px var(--hair); word-break:break-all on hash/fingerprint values.",
+      "Primary CTA (.btn--primary): background var(--ok) #11875A, color #FFFFFF, weight 600, 14px, letter-spacing +0.005em, padding 13px 22px, radius 5px; hover background #0F7A50. This is the ONLY filled-green element on the page.",
+      "Secondary CTA (.btn--ghost): transparent, color var(--ink), 1px var(--line-2) border; hover border var(--ink), background transparent. Links in prose: color var(--ink) with 1px var(--hair) underline, underline-offset 3px; hover underline var(--ok).",
+      "Verified state: green seal + the word 'VERIFIED' (11px caps +0.2em, --ok-ink), row tint var(--ok-soft), 1px var(--ok-edge) border. Fail/void state: MONOCHROME — color var(--ink-3), 1px var(--ink-3) border, the word 'VOID' + strike (text-decoration: line-through), never red.",
+      "Nav: height 64px, 1px var(--hair) bottom border, background color-mix(in srgb, var(--paper) 82%, transparent) + backdrop-filter blur(12px). Brand wordmark 17px/600/-0.02em; the '.ai' or accent letter in --ink (NOT green). Nav links 13.5px/400/var(--ink-2), hover var(--ink).",
+      "Tables (.tbl): font-size 13.5px, header 11px caps +0.10em var(--ink-3) weight 500 on var(--well) background; cells 1px var(--hair) bottom rule, vertical-align top; numeric cells tabular-nums right-aligned; row hover background var(--well).",
+      "Cards (.card): background var(--paper-raise) #FFFFFF, 1px var(--hair) border, radius 9px, padding 28px; hover border var(--line-2) + box-shadow 0 18px 40px -30px rgba(15,20,17,.10) + translateY(-1px). Replace the foil top-edge accent with a 36px x 2px var(--ok) tick that fades in on hover only if the card represents a verified/pass item.",
+      "Backdrop: var(--paper) base + an optional 1px graph grid OR guilloche OR registration ticks in var(--hair) at opacity 0.035-0.05, fixed, pointer-events none, z-index -1. No colored radial washes; no gradient. Keep the existing registration-mark / microprint furniture, recolored to var(--ink-faint)/var(--hair).",
+      "Microprint legend (.microprint): 8px, line-height 1, letter-spacing +0.30em, uppercase, color var(--ink-faint), opacity 0.6 — use along section edges and the footer as anti-forgery texture.",
+      "Hairlines: all rules/borders flat var(--hair) #E2E5E0 at 1px (never rgba-opacity). Section divider: border-top 1px var(--hair). Dashed receipt rows: 1px dashed var(--hair).",
+      "Spacing grid stays s1..s9 (6/10/14/20/28/40/56/80/112). Section vertical padding 112px desktop / 80px <=720px. Hero padding clamp(48px,8vw,92px) top.",
+      "Icon/seal stroke weight 1.25-1.5px to match 400/500 mono optical weight; seal type label 5px caps +0.2em var(--ink-3); verified seal fill var(--ok), pending var(--ink-faint), void var(--ink-3).",
+      "Reduced-motion + fail-open preserved: keep .reveal visible-by-default pattern; gate all entrance transitions behind .js-reveal and @media (prefers-reduced-motion: reduce).",
+      "Selection + focus: ::selection background var(--ok-soft), color var(--ink); :focus-visible outline 2px var(--ok), offset 2px (the one green that's allowed beyond CTA/verified, for accessibility).",
+      "Copy directive for the mono medium: write in short instrument-style lines — verb-led, <=64ch, key:value where possible. No em-dashes, no eyebrows-as-sentences. Lead the hero with the founder's situation ('one $100-500k deal stuck in security review'), then the signed-evidence outcome, then a tabular register/seal — not a prose paragraph."
+    ]
+  },
+  {
+    "topic": "High-conversion homepage + secondary-page architecture for kolm.ai — a fixed-fee \"Agent Security-Review Readiness\" audit positioned as a DEAL-UNBLOCKER for Series-A AI founders/CTOs, rendered entirely in Spline Sans Mono on a light \"Verified\" (signal-green) palette.",
+    "keyFindings": [
+      "The product's single strongest conversion asset is the LIVE offline Ed25519 verifier. Research on dev-tool pages is explicit that a real, embedded interactive demo is a 'power move' for narrow-scope technical tools. For this buyer (a skeptical technical founder), the proof above the fold should not be a screenshot or a logo wall — it should be a working verifier they can press: it passes green, they tamper a field, it reads VOID. That interaction IS the pitch and it pre-empts the 'is this security theater' objection in one gesture.",
+      "This buyer has ZERO recognizable customer logos to show and shouldn't fake them. The correct substitute for B2B logo proof here is a 'proof stack': (1) verifiable math (the live demo), (2) a named, accredited security researcher who co-signs, (3) a public append-only transparency log, (4) an open/inspectable verifier + published method, (5) framework-crosswalk fluency (you speak the CISO's exact vocabulary), (6) one specific anonymized outcome. Relevance beats volume: one proof point matched to the buyer's core fear converts better than ten generic logos.",
+      "Trust-signal PLACEMENT drives the lift, not just presence. Putting verification proof and credibility markers directly adjacent to CTAs and the price (not in a far-off 'trust' section) is what moves the needle — proof immediately below a CTA has been measured to lift conversion materially. So the framework chips, 'verified offline / 0 servers in trust path', and the co-signer line belong as a strip right under the hero and beside the pricing tiers, not buried.",
+      "Two CTAs in the hero is optimal — never one, never four. One bold primary (a specific verb) plus one zero-commitment secondary that gives immediate value. For kolm the pairing is forced and perfect: primary 'Start an audit' (the conversion) + secondary 'Verify a report / See a signed report' (the developer-value, no-friction action that doubles as proof).",
+      "Use ONE primary verb site-wide and reserve green for it. Because the locked palette allows signal green ONLY on primary CTAs and the pass/verified state, there should be exactly one green button style on the whole site and it always means go/pass. Green therefore becomes magnetic — the eye is trained that green = the action. Every secondary action is a hairline ghost button. This is a conversion advantage the palette lock hands you for free.",
+      "CISOs (the buyer's gatekeeper) distrust marketing and have no interest in feature demos, but extreme interest in their own risk posture and in peer-grade rigor. The page must therefore lead with the buyer's SITUATION ('week 6, $240k deal, stuck behind a security questionnaire') and reduce-risk language, not feature lists — problem-oriented storytelling is the highest-converting feature-block style for early-stage products.",
+      "Scope honesty is a conversion ASSET, not a liability, for a security-researcher audience. Explicitly stating 'we do not warrant your agent is secure; we test and report, scoped to exactly what we examined' and 'a finding's absence is not proof of safety' reads as maturity to a reviewer. Omitting limitations reads as immaturity. The liability/scope statement should be a confident on-page card, not fine print.",
+      "Pricing opacity is friction. The current /pricing intentionally hides every dollar figure behind 'get a quote'. For a self-qualifying Series-A founder, show the SHAPE of cost — a representative 'from $X' or a typical range per turnaround tier — to let them qualify themselves. Transparent pricing reduces hesitation; the contingency-on-close and re-attestation retainer options are themselves trust signals (you win when they do).",
+      "The contact page currently uses mailto: links, which leak the lead and add friction. Replace with a real 3–4 field form (3-field forms convert ~25% vs ~12% for 7-field) plus an embedded scheduling widget — calendar embeds in CTAs measurably lift conversion for early-stage teams. Fields: work email, one-line agent description, deal/target-date context. Nothing else.",
+      "Making an all-mono site feel premium (not a code listing) hinges on EXTREME type-scale contrast within the one family: very tight negative tracking on large display weights (mono at 48px/-0.02em reads as architecture) versus wide positive tracking on tiny uppercase micro-labels (+0.14em). That tension, plus hairline grids, generous whitespace, and framing data as a certificate/register rather than a terminal, is what separates 'iconic instrument' from 'README'.",
+      "The fail/VOID state must stay monochrome. Because green is locked to pass-only and 'no other colour' is allowed, a tampered report must NOT go red — it goes ink/ash + a visible fracture + the literal word VOID. This is also better security semantics (alarm-red is theatrical; a broken seal is evidentiary) and keeps the single-accent discipline that makes the green pass-state pop.",
+      "Cybersecurity buyers spend longer in evaluation and pull in multiple stakeholders (security, compliance, procurement). The site needs a clean self-serve trust path so those stakeholders can answer their own questions without a sales call: a verifier they can run, a /security page answering 'what does kolm itself touch', BYOC/air-gap on /enterprise, and framework mappings. Trust-center self-service is shown to close deals roughly 2x faster."
+    ],
+    "patterns": [
+      {
+        "name": "Proof-in-the-hero (live verifier as the hero visual)",
+        "whatItIs": "Instead of a static product screenshot or logo bar, the hero's primary visual is a working, in-browser instance of the core product — here, the offline Ed25519 verifier in its PASS (green seal) state with one tamper control.",
+        "howToApply": "Center the hero: H1, one-sentence sub, two CTAs, then directly below, a compact live verify card (max-width 560px) preloaded with the sample report showing a green PASS seal, a 4-row mono register, a single 'Inflate the score' / 'Tamper a field' toggle, and a verdict line. Pressing it fractures the seal to VOID using real WebCrypto. Caption beneath in 12px ink-3: 'Real Ed25519 check, in your browser. No account, no upload.' Keep the whole hero under ~900px tall so the PASS seal is above the fold on a 1080px laptop."
+      },
+      {
+        "name": "Property-based trust strip (logo-wall substitute)",
+        "whatItIs": "A post-hero credibility band built from verifiable PROPERTIES and framework fluency rather than customer logos, since there are none to show.",
+        "howToApply": "Full-width hairline-bordered strip immediately under the hero, 56–64px tall, containing: a green 'Ed25519-signed' pass-badge, then mono chips 'Verified offline · 0 servers in trust path', 'SOC 2 · ISO 42001 · NIST AI RMF · EU AI Act · OWASP · MITRE ATLAS', and a link 'Append-only transparency log →'. Chips separated by hairline dividers, 12px uppercase +0.06em labels with values in ink. No carousels, no greyed logo placeholders."
+      },
+      {
+        "name": "Situation-first problem framing (PAS for the stalled deal)",
+        "whatItIs": "Lead from the buyer's exact lived situation and emotional state — a specific deal stuck in review — before any mechanism. Problem-oriented storytelling, the highest-converting feature style for early-stage technical products.",
+        "howToApply": "Section 3 H2: 'A CISO won't take your word for it.' Open the lede by naming the scene in the buyer's language: a six-figure deal, week six, a questionnaire that no longer clears the bar. Then 3 hairline cards (Over-permissioned / No tamper-evidence / Say-so doesn't scale), each ≤45 words, each tagged with its ASR control id in ink-3 mono. Do not describe kolm yet — only the pain."
+      },
+      {
+        "name": "Two-tier verifiable demo as the anti-theater objection handler",
+        "whatItIs": "A deeper interactive block (beyond the hero taste) that lets the visitor actively try to BREAK the system — tamper a field, forge with a rogue key — and watch it fail every time, proving it isn't theater.",
+        "howToApply": "Mid-page 'Evidence vault' section with the full widget: buttons Load sample report / Load sample receipt / Tamper a field / Forge with a rogue key / Clear, plus a 'Verify your own report' upload (offline). Show the two-tier verdict explicitly: tier-1 signature integrity, tier-2 issuer provenance. Link 'Read the browser verifier →' to the actual JS. Copy: 'Press anything. A forged report fails. That is the whole point.'"
+      },
+      {
+        "name": "Single-accent green discipline",
+        "whatItIs": "Exactly one accent colour (signal green #11875A) appears on the page, used only for the primary CTA and the pass/verified state — turning green into a trained 'go/proven' signal.",
+        "howToApply": "Only .btn--primary and verified seals/pass rows get green. Everything else (secondary buttons, links, badges, dividers) is ink or hairline. Fail/VOID is monochrome ink+fracture, never red. This means there is one green button shape site-wide; place it as the rightmost nav action, the hero primary, the post-mechanism CTA, and the final-band CTA."
+      },
+      {
+        "name": "Certificate/register rendering of data (not terminal chrome)",
+        "whatItIs": "All cryptographic and report data is laid out like a printed instrument — a banknote/passport/stock-certificate register of hairline-separated key→value rows — rather than a code window with traffic-light dots.",
+        "howToApply": "Render the report object as a .register: left key in ink-3 uppercase +0.08em 12px, right value in ink 14px tabular-nums, 1px hairline between rows, right-aligned values, registration-mark crosshairs at the 4 corners of the framed card. Never use a fake macOS title bar, blinking cursor, or syntax-highlight colours."
+      },
+      {
+        "name": "Recurring dual-CTA footer-of-section + dark final band",
+        "whatItIs": "Every major section and the page end resolve to the same two actions, with a single full-width dark band as the bottom 'safety-net' CTA.",
+        "howToApply": "Primary 'Start an audit' (green) + secondary 'See a signed report' (ghost) repeat after the mechanism and report sections. The final section is a full-width band on ink #0F1411 with paper text, one green primary button + one ghost, optional embedded scheduling link. This is the only dark surface on the site, which makes the green button detonate."
+      },
+      {
+        "name": "Self-serve trust path for the buyer's gatekeepers",
+        "whatItIs": "A coherent set of pages that lets the CISO/security/procurement stakeholders answer their own questions without a sales call, shortening the very review kolm sells against.",
+        "howToApply": "Wire /verify (run it yourself), /security (what kolm itself touches, key custody, subprocessors, retention), /enterprise (BYOC, air-gap, named co-signer, DPA/BAA), /how-it-works (the canonical-bytes mechanism), and /research (published method) as a navigable trust center. Every one ends with the same dual CTA."
+      }
+    ],
+    "references": [
+      {
+        "name": "Evil Martians — We studied 100 devtool landing pages: what actually works in 2025",
+        "url": "https://evilmartians.com/chronicles/we-studied-100-devtool-landing-pages-here-is-what-actually-works-in-2025",
+        "whyItMatters": "The single most authoritative, data-backed source for this exact audience. Establishes: centered hero with the visual directly below dominates; two CTAs in the hero (specific-verb primary + value secondary); avoid generic 'Get started'; trust block immediately post-hero; problem-oriented feature storytelling is highest-converting for early-stage; final full-width CTA as safety net; live product embeds are a power move; 'no salesy BS, clever-and-simple wins'."
+      },
+      {
+        "name": "SaaSHero — CRO Landing Pages for Cybersecurity",
+        "url": "https://www.saashero.net/strategy/cro-cybersecurity-landing-pages/",
+        "whyItMatters": "Security buyers spend longer in evaluation with multi-stakeholder review (security/compliance/procurement); they value risk-reduction over feature depth; a free credible assessment that delivers genuine value builds trust where demos don't. Directly validates kolm's audit-as-wedge and the situation-first framing."
+      },
+      {
+        "name": "SaaSHero — Landing Page Trust Signals: 10 Proven B2B SaaS Tactics",
+        "url": "https://www.saashero.net/design/landing-page-design-trust-signals/",
+        "whyItMatters": "'Trust is built through relevance, not volume — ten generic logos are less persuasive than one proof point matched to the buyer's core concern.' The justification for kolm's property-based proof stack in place of a logo wall, and for placing proof next to CTAs/pricing."
+      },
+      {
+        "name": "Flint — Landing Page Trust Signal Conversion Statistics",
+        "url": "https://www.flint.com/blog/landing-page-trust-signal-conversion-statistics",
+        "whyItMatters": "Quantifies placement: social proof positioned directly below CTA buttons produced ~68% conversion improvement; 3-field forms convert ~25% vs ~12% for 7-field. Drives the contact-form spec and the proof-adjacent-to-CTA placement rule."
+      },
+      {
+        "name": "Autobound — CISO Buyer Persona Guide",
+        "url": "https://www.autobound.ai/blog/ciso-buyer-persona-guide",
+        "whyItMatters": "CISOs trust other CISOs over marketing, have zero interest in demos but extreme interest in their own risk posture relative to peers, and respond to risk-reduction + peer references. Justifies the named accredited co-signer as the top non-logo trust signal and the scope-honesty stance."
+      },
+      {
+        "name": "SecureSlate — How Top SaaS Use Trust Centers to Close Deals 2× Faster",
+        "url": "https://getsecureslate.com/blog/how-top-saas-use-trust-centers-to-close-deals-2-faster",
+        "whyItMatters": "Self-serve trust centers (downloadable reports, self-answered questions) pre-empt objections that previously required a security call and close deals ~2x faster — the conversion thesis behind the /verify, /security, /enterprise self-serve path."
+      },
+      {
+        "name": "Smart-Team — High-Trust B2B Landing Pages: A Proof Stack Framework",
+        "url": "https://smart-team.io/en/high-trust-b2b-landing-pages/",
+        "whyItMatters": "Formalizes the 'proof stack' layering used here to substitute for missing logos (verifiable math > named expert > public ledger > open method > framework fluency > specific outcome)."
+      },
+      {
+        "name": "The Monospace Web (Oskar Wickström)",
+        "url": "https://owickstrom.github.io/the-monospace-web/",
+        "whyItMatters": "Reference implementation proving an all-monospace site can read as a deliberate, premium design system via a character-cell grid, hairline rules, and responsive step-sizing — the aesthetic precedent for making kolm's Spline Sans Mono feel iconic, not like a code listing."
+      }
+    ],
+    "pitfalls": [
+      "Do NOT carry over any of the rejected 'Obsidian Foil' identity: no dark #0C0D10 canvas, no holographic/spectral foil strip, no animated rainbow gradient seal, no guilloché-on-black. The brief explicitly killed this. Re-skin to the light Verified palette and replace foil with a monochrome hairline/engraving backdrop.",
+      "Do not make the fail state red. The palette allows green only (pass/CTA) and no other colour. A tampered report must read VOID in ink/ash with a fractured seal. A red error would both break the palette lock and cheapen the evidentiary tone.",
+      "Do not use more than 2 CTAs in the hero or sprinkle a primary green button into every section — that dilutes the trained 'green = the action' signal. Keep ~4 primary instances total on the homepage (nav, hero, post-mechanism, final band).",
+      "Do not fake social proof: no greyed-out 'logo' placeholders, no invented customer counts, no 'trusted by 500+ teams'. For a security-researcher audience this is instantly disqualifying. Use only verifiable/falsifiable proof (live demo, transparency log, named co-signer, one anonymized-but-specific outcome).",
+      "Do not let the mono site default into 'code listing' tropes: no fake terminal window chrome (traffic-light dots), no blinking cursor, no syntax-highlight colours, no green-on-black. Frame data as a certificate/register with hairlines and tabular numerals instead.",
+      "Do not bury scope/liability or the price logic in fine print. State 'we don't warrant your agent is secure' confidently on-page and show the cost shape. Omission reads as immaturity to this buyer and creates the exact 'is this theater?' doubt you're trying to kill.",
+      "Do not keep the contact page as mailto: links. That leaks leads, adds friction, and breaks on shared machines. Ship a real 3–4 field form + scheduler.",
+      "Do not over-pack the nav. Cap at ~5 links + 2 actions; push Platform/Research-style pages to the footer. A founder in a hurry needs How it works / What we test / Pricing / Verify, not a sitemap.",
+      "Do not center long body paragraphs or let line length run wide — monospace is ~1.6x the width of proportional text, so an un-capped measure becomes unreadable fast. Cap text columns at ~62ch (~600px).",
+      "Do not animate the backdrop or the seal in a way that ignores prefers-reduced-motion; a security/researcher audience is allergic to gratuitous motion ('no salesy BS'). Gate every animation and keep the backdrop under ~3% opacity so it's felt, not seen.",
+      "Do not let the hero verifier be a non-functional mockup. If a visitor presses 'tamper' and nothing cryptographically real happens, you've manufactured the theater you claim to oppose. It must run real in-browser WebCrypto.",
+      "Do not write a 3-sentence, ~45-word lede (the current one). The founder flagged the site as 'too wordy'. Hero sub = one sentence, ≤28 words; section ledes ≤ 2 lines."
+    ],
+    "directives": [
+      "PALETTE TOKENS (replace :root): --paper:#F7F8F6; --paper-2:#FFFFFF; --ink:#0F1411; --ink-2:#565E57; --ink-3:#878E87; --ink-faint:#A8AEA8; --pass:#11875A; --pass-deep:#0E7350 (hover); --pass-tint:rgba(17,135,90,.07); --pass-edge:rgba(17,135,90,.24); --hair:#E2E5E0; --hair-2:#D3D7D1; --void:#6B726B (fail ink). Set body{background:var(--paper);color:var(--ink);} and html{color-scheme:light;}. Green appears ONLY on .btn--primary and .seal.is-pass / .register__row.is-pass.",
+      "TYPE SCALE (one family, weights 400/500/600): h1 clamp(38px,5vw,56px)/lh1.05/ -0.022em/600; h2 clamp(26px,3.2vw,36px)/lh1.12/ -0.015em/600; h3 18px/lh1.3/ -0.01em/500; lede clamp(17px,1.6vw,19px)/lh1.55/ -0.008em/400/color ink-2; body 16px/lh1.6/ -0.006em/400; micro-label 12px/lh1/ +0.14em/uppercase/500/ink-3. The tight-negative-display vs wide-positive-microcap contrast is the whole mono aesthetic — enforce it.",
+      "MEASURE + RHYTHM: keep spacing scale (--s5:28 … --s9:112). Section vertical padding 120px desktop, 72px ≤720px. Content max-width 1120px; any prose column max 62ch (~600px). Card padding 24–28px. Hairline (1px var(--hair)) is the primary structural divider site-wide — top-border every .section.",
+      "BACKDROP (monochrome, no foil, no green): position:fixed;inset:0;z-index:-1;pointer-events:none. Layer 1, a 1px hairline grid: background-image:linear-gradient(rgba(15,20,17,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(15,20,17,.022) 1px,transparent 1px); background-size:32px 32px. Layer 2, paper warmth: radial-gradient(1200px 700px at 82% -12%, rgba(15,20,17,.025), transparent 60%). Keep all backdrop ink ≤3% opacity. No animation.",
+      "HERO LAYOUT (centered, proof-in-hero): max-width 760px text block, centered. H1 (2 lines): 'The deal isn't lost.<br>It's in security review.' Sub (one sentence, ≤26 words): 'kolm audits your agent and signs an evidence report your buyer verifies offline. A four-to-eight-week review becomes days.' Two CTAs centered (primary + ghost). Directly below, centered, the live verify card (max-width 560px) in PASS state.",
+      "HERO VERIFY CARD: framed white (var(--paper-2)) card, 1px hairline, corner registration marks, 24px padding. Contains: a green PASS seal (.seal.is-pass), 4 register rows (subject / issuer / key fp / signature), a verdict line 'SIGNATURE VALID · ISSUER MATCHES' in pass-green, ONE control button 'Inflate the score', and a 12px ink-3 caption 'Real Ed25519 check, in your browser. No account, no upload.' Pressing the button runs real WebCrypto, fractures the seal, sets verdict 'VOID — bytes no longer match' in --void ink. Total hero height ≤ ~900px so PASS is above the fold on a 1080px laptop.",
+      "CTA SYSTEM: ONE primary verb site-wide = 'Start an audit'. .btn--primary{background:var(--pass);color:#fff;font-weight:500;padding:12px 20px;border-radius:6px;letter-spacing:0;min-height:44px} hover background:var(--pass-deep). .btn--ghost{background:transparent;border:1px solid var(--hair-2);color:var(--ink)} hover border-color:var(--ink). Secondary CTA label = 'See a signed report' or 'Verify it live'. Exactly 2 CTAs in hero; ~4 primary instances on the homepage total.",
+      "NAV: sticky, 64px, background var(--paper), border-bottom:1px solid var(--hair) on scroll. Links (≤5): How it works / What we test / Pricing / Verify / Trust. Actions (2): ghost 'Verify a report' + green 'Start an audit'. Move Platform + Research to the footer. Brand mark: the 3 descending bars in ink (drop the foil .ai — render .ai in ink-3, not green).",
+      "PROOF STRIP (section 2, directly under hero): full-bleed, 56–64px tall, 1px hairline top+bottom, flex row with hairline dividers: [green badge 'Ed25519-signed'] · [shield icon 'Verified offline · 0 servers in trust path'] · [chips 'SOC 2 · ISO 42001 · NIST AI RMF · EU AI Act · OWASP · MITRE ATLAS'] · [link 'Append-only transparency log →']. Labels 12px uppercase +0.06em ink-3, values ink.",
+      "SECTION SEQUENCE (homepage, in order): 1 Hero (with live proof) → 2 Property proof strip → 3 Problem ('A CISO won't take your word for it', 3 cards) → 4 Mechanism ('Audit. Sign. Verify.', 3 steps) → 5 Evidence vault (full interactive tamper/forge demo) → 6 What we test (6 ASR controls, framework crosswalk) → 7 Trust / proof-stack (co-signer + transparency log + inspectable verifier + scope honesty) → 8 Objection 'Before you ask' (3 cards) → 9 Pricing teaser (fixed fee + turnaround tiers, link to /pricing) → 10 Final dark CTA band. This refines the requested hero→proof→mechanism→framework→social-proof→pricing→CTA by injecting the live demo at both #1 and #5.",
+      "OBJECTION CARDS (section 8, three explicit): Card A 'Do you warrant our agent is secure?' → 'No — and distrust anyone who does. We test and report with reproductions, scoped to exactly what we examined. The scope statement is part of the signed object.' Card B 'Why should a CISO trust kolm?' → 'They don't have to. They verify your report offline against your public key. Trust moves from our word to the signature — and a named accredited researcher co-signs.' Card C 'Is this just security theater?' → 'Press Tamper above. A forged report fails, every time, in real WebCrypto. The verifier is open — read it.'",
+      "FINAL CTA BAND (section 10): full-width, background var(--ink) #0F1411, paper text, 120px vertical padding (the ONLY dark surface on the site). H2 'Clear the review. Close the deal.' One green primary 'Start an audit' + one ghost (border rgba(255,255,255,.2)) 'See a signed report'. Optional inline scheduling link 'or book a 20-min scoping call'.",
+      "TRUST SIGNALS WITHOUT LOGOS (section 7): four hairline cards in priority order — (1) 'Verify it yourself' (offline, 0 servers, link to /verify), (2) 'Signed by a named researcher' (accredited co-signer, reputation on the line), (3) 'Append-only transparency log' (every issued report logged, link), (4) 'We state what we did not test' (scope honesty). Optionally one specific anonymized outcome line: 'Series-A infra vendor · $240k deal · cleared review in 9 days' — only if truthful.",
+      "/pricing CONVERSION: keep 4 turnaround tiers but add cost shape — a representative 'from $X' or typical range per tier so a founder self-qualifies; do not leave every tier as 'get a quote'. Visually elevate the middle (~2-week) tier with a 1px pass-green border + 'Most common' green micro-label; its CTA is the green primary, the other three are ghost 'Get a quote'. Keep the contingency-on-close and re-attestation-retainer cards as de-risk trust. End with the dual CTA + 'See a sample report'.",
+      "/how-it-works CONVERSION: expand Audit→Sign→Verify with the real onramp ('log import: LiteLLM / Helicone / Portkey, or a sidecar proxy'), the canonical-bytes→Ed25519 mechanism (so a technical reviewer trusts it), and a downloadable sample-report.json. Embed a compact verify widget mid-page. End with dual CTA.",
+      "/verify CONVERSION (the credibility engine): make the interactive widget the page hero. Buttons: Load sample report / Load sample receipt / Tamper a field / Forge with a rogue key / Clear + a 'Drop your own report (offline)' upload. Show the two-tier verdict labels explicitly (signature integrity + issuer provenance). Add 'Read the browser verifier →' linking the actual JS. Bottom CTA 'Start an audit'.",
+      "/security CONVERSION (kolm's own posture — the CISO's questions about YOU): cover what data kolm touches, signing-key custody + rotation, hosted vs BYOC vs air-gapped, subprocessors, retention window, and link to the threat model. This is the page the buyer's security team reads about kolm itself. CTA 'Talk to us'.",
+      "/enterprise CONVERSION (for the $300–500k deals): lead with BYOC + air-gapped runs (agent data never leaves their boundary), named accredited co-signer, DPA/BAA, SSO/SAML if applicable, custom scope, and contingency pricing. Single CTA 'Talk to sales' + ghost 'See a sample report'.",
+      "/contact CONVERSION: replace mailto with a real form — exactly 4 fields (work email · one-line agent description · deal/target-date context · optional 'systems it can reach'). Single green submit 'Request a scoping call'. Reassurance line under the button: '20-minute call · fixed quote upfront · we'll sign your NDA · no obligation.' Embed a cal.com/Calendly scheduler as the alternative path. Keep ghost 'Verify a sample report'.",
+      "DATA/REGISTER COMPONENT: .register rows = grid key→value, key ink-3 12px uppercase +0.08em, value ink 14px font-variant-numeric:tabular-nums, 1px hairline divider, value right-aligned; verified rows get .is-pass (left 2px pass-green rule + pass-tint background). Wrap report/seal cards in .framed with 4 corner registration-mark crosshairs (ink-3, 13px). Never add terminal chrome.",
+      "MOTION + A11Y: gate every transition behind @media (prefers-reduced-motion: reduce). Scroll-reveal must fail-open (strip the hidden class if the observer never arms — preserve the existing pattern). All interactive verifier controls are real <button>s with aria-labels; the verdict updates an aria-live region. Touch targets ≥44px. Contrast: ink on paper = ~15:1, pass-green #11875A on white = ~4.0:1 so only use green on text ≥16px/500 or on white-text buttons (button passes at ≥4.5:1 with #fff)."
+    ]
+  },
+  {
+    "topic": "kolm.ai copy system: terse, instrument-grade voice for a mono-forward, Verified-palette security-evidence site (cut to the bone, every claim intact)",
+    "keyFindings": [
+      "The site ALREADY obeys every hard rule: a grep across all HTML returns 0 em/en dashes, 0 occurrences of 'honest', and exactly one contact (dev@kolm.ai, 160 hits). So this is not a rewrite problem, it is a SUBTRACTION problem. The system is a set of cut-rules, not new prose.",
+      "Current ledes run 39 to 62 words across 1 to 3 long sentences (hero lede 42w, problem lede 39w, vault lede 62w, ai-vendors lede one 39-word sentence). Target: lede <=28 words and <=2 sentences. Expect a median 35 to 45 percent word cut with zero loss of fact.",
+      "The flagship line 'The deal isn't lost. It's in security review.' is the voice DNA: a 7-word correction couplet (negation, then relocation). Codify its SHAPE as headline pattern A and reuse the form, not the words.",
+      "Monospace is a concision ASSET, not a liability: every glyph is exactly 1ch wide, so hashes, numerals and verdict tokens self-align into columns. Leading each line with the noun or number turns the left edge into a scannable index. Set all text measures in ch (exact in mono), not px.",
+      "The single biggest wordiness source is the dependent SETUP clause: 'the moment a CISO has to vet...', 'Instead of promising,', 'which is why it scores 0%', 'To the right is...'. Cut the setup, state the result. This one move does most of the work.",
+      "Two kinds of hedging must be separated. KILL marketing hedges (helps you, designed to, aims to, robust, seamless). PROTECT epistemic scope qualifiers verbatim: 'tested and reported, not warranted', 'assessed', 'is not proof', 'target', 'design property'. These are load-bearing claim-scope language, not filler.",
+      "Color cannot carry emphasis on this site: green #11875A is reserved for pass-state and primary CTA only. Emphasis therefore comes from FONT WEIGHT (400/500/600) and word order, never from highlighting. This forces shorter, harder sentences because you cannot lean on a color to rescue a buried point.",
+      "Several one-sentence paragraphs are lists in disguise: parenthetical enumerations like '(permissions, audit trail, data egress, injection)' and comma series joined by 'and'. Converting these to a vertical ledger both shortens the line and improves scan, and mono makes each row's leading token align for free.",
+      "Web-reading research is unambiguous: users read ~20 to 28 percent of the words on a page and scan in an F-pattern (NN/g). Front-loading the noun or number beats any adjective. An adjective the reader skips is dead weight.",
+      "The copy currently avoids em dashes by overloading commas, which lengthens sentences into comma-splices ('verifies offline, against your public key, with no account'). Replacing those commas with periods both shortens the sentence AND keeps the no-dash rule, so the constraint and the goal point the same way.",
+      "Numbers already in the copy are the strongest assets and are under-exploited: 4-8 weeks, days, 0 servers, 0%, 10x, Ed25519, six controls. Hoist one quantified fact to the top of every section; never let prose bury a figure."
+    ],
+    "patterns": [
+      {
+        "name": "Correction Couplet (flagship headline pattern A)",
+        "whatItIs": "Two short sentences: sentence 1 negates a wrong belief, sentence 2 relocates it to the true state. 'The deal isn't lost. It's in security review.' Max 8 words total, second sentence shorter than the first.",
+        "howToApply": "Use as the hero H1 and as any reframe of a fear. Templates for this site: 'A questionnaire isn't proof. A signature is.' / 'The risk isn't the agent. It's the review.' Set H1 at font-weight 600, line-height 1.04, max-width 16ch, break the two sentences onto two lines with <br>."
+      },
+      {
+        "name": "Imperative Triad / Pair (section heads + CTA)",
+        "whatItIs": "Two or three bare verbs as a sentence each. 'Audit. Sign. Verify.' 'Clear the review. Close the deal.' Period after each verb for staccato weight.",
+        "howToApply": "Use for the how-it-works head, the final CTA head, and step labels (01 Audit / 02 Sign / 03 Verify). Cap at 3 beats. Never pad a verb with an object the reader can infer."
+      },
+      {
+        "name": "Subject-Collapse Declarative (feature heads)",
+        "whatItIs": "Collapse a feature to a 4 to 6 word 'The N is the proof' assertion. 'The artifact is the proof.' 'Altered evidence cannot pass.' 'Say-so doesn't scale.'",
+        "howToApply": "Replace any explanatory feature heading with one of these. Each H2 is one clause, present tense, no 'that/which'. Follow it with exactly one lede line under 28 words."
+      },
+      {
+        "name": "Number-Lead Line (metrics, cards, stats)",
+        "whatItIs": "Start the line with the figure, then the meaning. 'Days, not weeks.' '0 servers in the trust path.' '10x the privileges they use.' The numeral occupies the leftmost ch column.",
+        "howToApply": "Rewrite metric blocks and stat cards so the numeral is the first token. In mono this aligns the figures into a column down the left edge. Wrap each token in white-space:nowrap, font-weight 500 so 'ed25519:7HHx...' and '410302c9...' never wrap."
+      },
+      {
+        "name": "Cut-the-Setup (the core paragraph-shrinking move)",
+        "whatItIs": "Delete the leading dependent/scene-setting clause and the trailing wave-away clause; keep only the main clause and its fact. Removes 'the moment a CISO has to...', 'Instead of promising,', 'which is why...', 'and the hardest to wave away'.",
+        "howToApply": "For every paragraph: (1) put the noun or number first, (2) delete any clause before the first verb, (3) split on each 'and'/'which'/'that' into separate sentences, (4) cut adjectives that do not change the claim (biggest, deliberately, entirely, roughly), (5) keep scope qualifiers verbatim, (6) read aloud, if you breathe twice it is two lines."
+      },
+      {
+        "name": "Ledger-over-Prose (list beats sentence)",
+        "whatItIs": "When a sentence joins 3+ coordinate items with commas, or carries a parenthetical enumeration, it is a list pretending to be prose. Break it into a vertical ledger, one item per row.",
+        "howToApply": "Trigger on any '(a, b, c, d)' or 'x, y, z and w'. Convert to <ul class=\"ledger\"> with a 1ch green tick marker, 8px row gap, each row a noun phrase under 6 words. Example: turn '(permissions, audit trail, data egress, injection)' into four ledger rows or the existing framework-chip row, not inline prose."
+      },
+      {
+        "name": "Weight-not-Color Emphasis",
+        "whatItIs": "Emphasis is carried by font weight, because green is reserved for pass-state and CTA. 400 = body, 500 = the key noun or inline fact, 600 = headlines and crypto facts.",
+        "howToApply": "Bold (500/600) only the single load-bearing token per sentence: the number, the verb 'verify', the standard name, the hash. Never color running text green. If a sentence needs two bolds to make sense, it is two sentences."
+      },
+      {
+        "name": "Scope-Qualifier Lock",
+        "whatItIs": "A protected-phrase list that passes through every edit verbatim and is never softened to sell: 'tested and reported, not warranted', 'assessed', 'is not proof', 'target', 'design property', 'covers the canonical bytes'.",
+        "howToApply": "Treat these as immutable strings during any concision pass. They satisfy the claim-scope hard rule. A CI grep should confirm 'tested and reported, not warranted' still appears on /checks, /how-it-works and the homepage after edits."
+      }
+    ],
+    "references": [
+      {
+        "name": "Strunk & White, The Elements of Style: 'Omit needless words.'",
+        "whyItMatters": "The single operating principle of this system. Rule 17 is the entire brief: vigorous writing is concise, a sentence should contain no unnecessary words for the same reason a drawing should have no unnecessary lines. Every directive here is an operationalization of it."
+      },
+      {
+        "name": "GOV.UK Content Design / plain-English style guide",
+        "url": "https://www.gov.uk/guidance/content-design/writing-for-gov-uk",
+        "whyItMatters": "The most rigorous public word-banlist and 'one idea per sentence' standard in production. Bans 'leverage', 'robust', 'in order to', 'we believe', and mandates front-loading. Directly portable into a copy banlist + CI grep for this site."
+      },
+      {
+        "name": "Nielsen Norman Group: 'Concise, SCANnable, Objective' (Morkes & Nielsen) + 'How Little Do Users Read?'",
+        "url": "https://www.nngroup.com/articles/how-users-read-on-the-web/",
+        "whyItMatters": "Empirical proof that users read ~20 to 28 percent of words and scan in an F-pattern. Justifies lead-with-noun/number and the ledger-over-prose pattern with data, not taste. The concise+scannable+objective rewrite raised measured usability 124 percent."
+      },
+      {
+        "name": "Stripe marketing and docs voice",
+        "url": "https://stripe.com",
+        "whyItMatters": "Closest commercial analog: precise, declarative, technical noun first, zero hype, sentences that read like spec lines. The instrument-grade register the founder is asking for, proven at scale on a developer-and-buyer audience."
+      },
+      {
+        "name": "Linear brand and marketing copy",
+        "url": "https://linear.app",
+        "whyItMatters": "Reference for rhythm: terse, confident, short lines, lowercase product nouns, headlines that assert rather than explain. Shows a light, typographic, near-monochrome site can feel iconic on copy alone."
+      },
+      {
+        "name": "BLUF (Bottom Line Up Front), US Army writing standard",
+        "whyItMatters": "Front-load the conclusion in the first sentence; supporting detail after. Maps exactly to lead-with-the-result and cut-the-setup. A security-researcher audience already reads this way."
+      },
+      {
+        "name": "Flesch-Kincaid / Hemingway Editor readability targets",
+        "url": "https://hemingwayapp.com",
+        "whyItMatters": "Lets the sentence-length and grade-level targets be measured, not asserted: aim average sentence < 16 words, grade level 7 to 9, flag any sentence over 24 words. Turns 'too wordy' into a number a build step can check."
+      }
+    ],
+    "pitfalls": [
+      "Stripping scope qualifiers while cutting words. Deleting 'not warranted', 'assessed', 'is not proof', or 'target' to save a few words changes the legal claim. These are protected strings; cut around them, never through them.",
+      "Over-fragmenting into staccato everywhere. Three-word sentences are an emphasis BEAT, not a default. A whole page of them reads like a ransom note. Reserve fragments for the couplet, the imperative triad, and one or two punch lines per section; keep body sentences at 12 to 16 words.",
+      "Letting an em or en dash sneak back in via smart-punctuation autoreplace when you split a comma-splice. Split with a period or semicolon only. Add a CI grep for U+2014 and U+2013 and fail the build on any hit.",
+      "Using green for emphasis text to make a cut line pop. Green #11875A means pass/verified and primary CTA only. Green on a noun breaks the one semantic the whole palette is built on. Emphasize with weight (500/600).",
+      "Going abstract when you cut the human noun. Removing 'CISO', 'buyer', 'reviewer', 'founder' and replacing with 'stakeholders' or 'security posture' is shorter but kills the deal-unblocker positioning. Keep the named human; cut the verbs around them.",
+      "Headline cleverness that hides the claim. A pun or a clever fragment that makes the reader work to find the fact fails an elite-researcher audience. The couplet works because the second sentence DELIVERS the fact ('It's in security review'), it does not just sound good.",
+      "Mono walls of ALLCAPS. In a single-family monospace site, a long all-caps run reads as a code dump. Keep readable ALLCAPS tokens <= 24 chars (VOID, VERIFIED, ED25519); decorative microprint is the only exception and is aria-hidden.",
+      "Replacing a specific cryptographic fact with a vague trust word during 'simplification'. 'Verified offline against the embedded public key' must not collapse to 'secure and trusted'. Concision removes filler, never the load-bearing noun.",
+      "Adding a marketing eyebrow kicker above a headline to 'frame' it. The card category tag (.card__k, 1 to 3 words) is a label and is fine; an ALLCAPS marketing eyebrow over an H1/H2 is banned. Section heads are a bare H2 plus one lede line.",
+      "Introducing a second contact or a soft CTA. Any 'Contact us', 'Get in touch', 'Learn more', or sales@/hello@ address violates the rules. Contact is dev@kolm.ai only; CTAs are 'Start an audit' and 'Verify a report'.",
+      "Quantifying with an unmeasured superlative. 'Fastest', 'best-in-class', 'world-class' are both hype AND an unbacked claim. If there is no measured number, use the design-property framing the site already uses ('the target review window'), not a superlative."
+    ],
+    "directives": [
+      "BODY MEASURE: set all readable text columns in ch, not px (exact in mono). Body p { max-width: 60ch }. Lede { max-width: 46ch }. H1 { max-width: 16ch }. Card p { max-width: 42ch }. This caps line length at the readability sweet spot for monospace.",
+      "HERO H1: <= 8 words, <= 2 lines. CSS: font-weight:600; font-size:clamp(34px,5vw,60px); line-height:1.04; letter-spacing:-0.02em (slight negative tracking tightens wide mono glyphs at display size).",
+      "LEDE: <= 2 sentences and <= 28 words total. CSS: font-size:18px; line-height:1.5; font-weight:400; max-width:46ch; margin-top:14px.",
+      "SENTENCE LENGTH: average 12 to 16 words; hard cap 24 words. Max one subordinate clause ('and'/'which'/'that') per sentence; beyond that, split on a period. CI: flag any sentence > 24 words via a build-time check.",
+      "PARAGRAPH CAP: <= 3 sentences and <= 45 words anywhere in body. CARD BODY: 1 to 2 sentences, <= 24 words, <= 3 lines at the card measure.",
+      "LEAD TOKEN: the first 1 to 3 words of every line carry the noun or number. Hoist figures to the front: '10x', '0%', '4-8 weeks', 'Ed25519', 'Days'. In mono this aligns the left edge into a scan index.",
+      "EMPHASIS BY WEIGHT: 400 body / 500 inline key noun or fact / 600 headlines and crypto facts. Green #11875A restricted to .btn--primary and .badge--ok / pass-state only. Never font-weight-bold a green word in running text.",
+      "TOKEN NO-WRAP: every hash, key fingerprint, signature and count gets white-space:nowrap; font-weight:500 so 'ed25519:7HHxmVcZ...', '410302c9...', '0 servers', '6 findings' never break mid-token.",
+      "LIST TRIGGER: any sentence with 3+ comma-joined coordinate items or a parenthetical enumeration becomes <ul class=\"ledger\"> { list-style:none; display:grid; gap:8px } with a 1ch green tick marker; each row a noun phrase <= 6 words.",
+      "DELETE-ON-SIGHT BANLIST: very, really, simply, just, actually, basically, essentially, leverage, robust, seamless, powerful, cutting-edge, world-class, best-in-class, enterprise-grade, next-generation, revolutionary, frictionless, delightful, holistic. Rewrites: 'in order to'->'to'; 'is able to'/'has the ability to'->'can'; 'allows you to'/'enables you to'/'helps you'->use the verb directly; drop 'we believe'/'we're excited'/'designed to'/'aims to'.",
+      "PROTECTED STRINGS (pass verbatim, never soften): 'tested and reported, not warranted'; 'assessed'; 'is not proof'; 'target'; 'design property'; 'covers the canonical bytes'. CI grep must confirm 'tested and reported, not warranted' still present after any edit.",
+      "PUNCTUATION: no em (U+2014) or en (U+2013) dash anywhere. Split clauses with a period or semicolon. Hyphen only inside compound modifiers ('four-to-eight-week', 'append-only'). Add a CI grep that fails on U+2014, U+2013, and the substring 'honest'.",
+      "CONTACT + CTA LOCK: contact is dev@kolm.ai only (no sales@/hello@/support@). Allowed CTA verbs: 'Start an audit', 'Verify a report', 'See a signed report', 'Download the JSON'. Banned: 'Contact us', 'Get in touch', 'Learn more', 'Request a demo'.",
+      "NO EYEBROW KICKER: section heads are a bare H2 plus one lede line, no ALLCAPS marketing label above them. The .card__k category tag (1 to 3 words) is permitted as a label only.",
+      "HEADLINE FORM: pick one per heading, max 8 words: (A) correction couplet 'X isn't Y. It's Z.'; (B) imperative pair/triad 'Verb. Verb.'; (C) subject-collapse 'The N is the proof.'; (D) number-lead 'Six controls, mapped to the frameworks reviewers cite.'",
+      "ALLCAPS RUN CAP: readable copy ALLCAPS tokens <= 24 chars (VOID, VERIFIED, ED25519, PASS). Longer = sentence case. Decorative microprint is the sole exception and stays aria-hidden.",
+      "READABILITY GATE: target Flesch-Kincaid grade 7 to 9, average sentence < 16 words. Run Hemingway/FK on hero + each section head + each lede before ship; any 'hard to read' sentence is split.",
+      "BEFORE/AFTER 1 (hero lede, 42w -> 25w, 2 sentences): BEFORE 'Your biggest enterprise contract stalls the moment a CISO has to vet an autonomous agent. kolm audits the agent and issues a cryptographically signed evidence report your buyer verifies offline, against your public key. A four-to-eight-week review goes back to days.' AFTER 'One CISO review can stall your biggest deal for two months. kolm signs evidence your buyer verifies offline against your key, so weeks become days.'",
+      "BEFORE/AFTER 2 (problem lede, 39w -> 26w): BEFORE 'Nobody turns an autonomous agent loose on their customers' data because the vendor says it's safe. The review that used to take a week now runs four to eight, and a filled-in questionnaire no longer clears the bar.' AFTER 'No CISO trusts an autonomous agent on customer data on your say-so. The week-long review now runs four to eight, and a questionnaire no longer clears it.'",
+      "BEFORE/AFTER 3 (card body, 35w -> 19w, number-lead): BEFORE 'Most agents carry roughly ten times the privileges they actually use, and many share one API key across tools. It is the first thing a reviewer flags, and the hardest to wave away.' AFTER '10x the privileges they actually use, often on one shared key. It is the first thing a reviewer flags.'",
+      "BEFORE/AFTER 4 (vault lede, 62w -> 33w, fragment for rhythm): BEFORE 'To the right is a real, signed audit of a deliberately over-permissioned demo agent, which is why it scores 0%. The check runs entirely in this browser. Press Inflate the score to raise the readiness number, the way a vendor under pressure might. The seal fractures and the report reads VOID, every time. That is the whole point.' AFTER 'This is a real signed audit of an over-permissioned demo agent. It scores 0%. The check runs in your browser. Press Inflate the score. The seal fractures and the report reads VOID. Every time.'",
+      "BEFORE/AFTER 5 (ai-vendors lede, one 39-word sentence -> lede + ledger): BEFORE 'Instead of promising, you arrive with a signed report mapped to the exact frameworks the buyer's group cites (permissions, audit trail, data egress, injection), each finding in their vocabulary, each fact checkable offline against your public key.' AFTER lede: 'You arrive with a signed report in the buyer's own framework language.' + ledger rows: 'Mapped to the controls their group cites' / 'Each finding in their vocabulary' / 'Each fact checkable offline against your key'.",
+      "BEFORE/AFTER 6 (how-it-works verify lede, 48w -> 26w + micro-line): BEFORE 'Your buyer opens the report and the signature is checked in their browser, against the public key inside it. Because kolm is never in the path, there is no back end that could fake a green check. Pin the issuer key to also prove it's the key you expected.' AFTER 'Your buyer checks the signature in their browser, against the key inside the report. kolm is never in the path, so no server can fake a pass.' + micro-line: 'Pin the issuer key to confirm it is yours.'"
+    ]
+  },
+  {
+    "topic": "Premium light-paper backdrop + rationed signal-green accent system for kolm's mono-forward \"signed instrument / cryptographic ledger\" audit site (#F7F8F6 paper, #0F1411 ink, #11875A green)",
+    "keyFindings": [
+      "GREEN IS NOT A TEXT COLOR. #11875A on #F7F8F6 measures 4.25:1 — below the 4.5:1 AA threshold for body text and links, but above the 3:1 threshold for large text, fills, seals, borders and focus rings. Verified by computation. This single fact dictates that green may only ever appear as a FILL or a LARGE/UI element, never as running type.",
+      "White-on-green (#FFFFFF on #11875A) is 4.53:1 — it clears AA normal-text by 0.03, so primary-button labels are legal but only at >=16px/600 weight. Do not set button text smaller or lighter, and deepen to #0F7A50 (5.36:1) on hover so the press state is comfortably above threshold.",
+      "The backdrop should be exactly TWO layers and never more: ONE geometric texture (a masked dot-matrix that reads as ledger/graph paper) plus ONE colorless tonal wash. Stacking two textures (e.g. grain + grid) is the single fastest way to look amateur on near-white.",
+      "For a 'ledger' brand the instinct is ruled horizontal lines — resist it. Repeating full-width horizontal rules make an all-mono page read as a code listing, the exact failure the founder called out. A dot-matrix carries the same ledger/instrument semantics while staying quiet.",
+      "The premium signal is the MASK, not the texture. SOTA light sites (Linear, Vercel) concentrate the grid behind the hero/fold and fade it to pure paper within ~600px. 'Wallpaper to all four edges' is what cheap sites do; a fade is what expensive sites do.",
+      "Backdrop must cost zero scroll repaint and zero network: render it as one fixed/absolute pseudo-element (z-index:-1, pointer-events:none) using a CSS radial-gradient for the dots — no image request, painted once, GPU-cheap.",
+      "Green only reads as 'PASS/VERIFIED' if it is scarce. Budget: at most ONE green fill and ONE green seal per viewport. Two competing greens on screen destroys the semantic — it stops meaning 'verified' and becomes mere decoration.",
+      "Disabled states must DRAIN the green to neutral (#E6EBE7 / #9AA39E). A greyed-but-still-green button reads as 'verified-but-dead,' which is semantically incoherent for an evidence/audit product.",
+      "A single focus token works site-wide: #11875A passes 3:1 against paper (4.25) AND against the soft green pill fill (3.96). One outline rule covers every interactive element — no per-context overrides needed.",
+      "Hairline #E2E5E0 is 1.19:1 vs paper — perfect for decorative ledger rules and section seams, but invisible as a functional control border. Anything that must be perceived as a boundary (input borders, the report card edge) needs ink-at-alpha, not the hairline.",
+      "Mono feels premium through restraint of the type grid, so the backdrop must never fight it: dot pitch (24px) should be visually unrelated to the baseline grid, and texture opacity capped at 0.05 so glyph edges always win the contrast battle.",
+      "State must not be encoded in green alone (WCAG 1.4.1). Every 'verified/pass' element pairs fill + a checkmark/seal glyph + a text label, so colorblind reviewers and the buyer's security team read PASS without relying on hue."
+    ],
+    "patterns": [
+      {
+        "name": "Hero-scoped masked dot-matrix (ledger grain)",
+        "whatItIs": "An ultra-faint dot grid evoking graph/ledger paper, rendered as a single CSS radial-gradient and softly masked so it lives only behind the hero and fades to pure paper before the first content section.",
+        "howToApply": "On the hero section only: .hero{position:relative} .hero::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(circle at 1px 1px, rgba(15,20,17,0.045) 1px, transparent 1.6px);background-size:24px 24px;-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 45%,transparent 80%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 45%,transparent 80%)}. Cap dot alpha at 0.05. Reuse the identical layer on the final CTA band so the page opens and closes on the same ledger texture and the middle stays clean paper."
+      },
+      {
+        "name": "Colorless tonal lift wash",
+        "whatItIs": "A barely-there radial of near-white over paper that lifts the top of the page so it never looks like a flat fill — depth without any second color, preserving green's scarcity.",
+        "howToApply": "On body, global: body{background:radial-gradient(110% 70% at 50% -8%, #FFFFFF 0%, rgba(255,255,255,0) 55%), #F7F8F6}. This is white-on-paper only — do NOT tint it green; a green wash would dilute the pass/verified semantic. It is the one treatment that is allowed everywhere."
+      },
+      {
+        "name": "Instrument frame (ledger margin rules)",
+        "whatItIs": "Two full-height 1px hairlines bounding the content column, echoing the ruled margin of a printed financial instrument or signed certificate — structural, not decorative.",
+        "howToApply": "Wrap content in a centered column max-width 76ch (~840px) with border-left/right:1px solid #E2E5E0 running the full document height. Pair with a 1px #E2E5E0 top border on each <section> as a horizontal 'rule line.' Drop the side rules below 640px. This is what makes the page read as a signed instrument rather than a web page."
+      },
+      {
+        "name": "Green rationing ladder",
+        "whatItIs": "A fixed semantic spend of the single accent: primary CTA fill, the verified seal/state, the focus ring, and at most one hairline accent — and nothing else.",
+        "howToApply": "Allowed green surfaces, in priority order: (1) primary button fill #11875A, (2) verified seal + soft pill #E8F2EC, (3) focus ring #11875A, (4) exactly ONE 2px green left-border on the live evidence/report card. Forbidden: green body text, green links, green icons in nav, green section headers, green dividers. Audit every page against this 4-item list."
+      },
+      {
+        "name": "Verified seal token",
+        "whatItIs": "The hero asset of the brand: a compact 'VERIFIED / Ed25519' chip that is the ONLY place green and ink combine into a badge, mirroring the signed-report payoff.",
+        "howToApply": "Pill: background #E8F2EC, border 1px #CFE3D8, radius 6px, padding 4px 10px; a checkmark or seal glyph in #0C6B45 + label in #0F1411 set in Spline Sans Mono 12px/600 with +0.04em tracking, uppercase. Never set the seal label in green (it would be <4.5:1); keep label ink, glyph green."
+      },
+      {
+        "name": "Single focus-ring token",
+        "whatItIs": "One outline definition that satisfies 3:1 against every background it can land on, removing per-component focus styling.",
+        "howToApply": ":focus-visible{outline:2px solid #11875A;outline-offset:2px;border-radius:inherit}. Verified 4.25:1 on paper and 3.96:1 on the green pill — both >=3:1. Remove default browser outlines only with :focus-visible (never :focus) so keyboard users keep it."
+      },
+      {
+        "name": "SVG grain (alternative texture, not additive)",
+        "whatItIs": "An organic fractal-noise grain as a SUBSTITUTE for the dot-matrix when a softer, paper-fibre feel is wanted — chosen instead of, never alongside, the dots.",
+        "howToApply": "Inline data-URI: feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2', layer opacity 0.022, on the same fixed z-index:-1 pseudo-element, masked identically to the hero. ~1.2KB, cacheable. Decision rule: ship the dot-matrix (geometric, on-brand for a cryptographic ledger); reserve grain only if the founder finds dots too 'techy.' Never run both."
+      }
+    ],
+    "references": [
+      {
+        "name": "Linear — masked dot/grid on near-white",
+        "url": "https://linear.app",
+        "whyItMatters": "The canonical reference for a faint top-weighted matrix that fades out; demonstrates the 'mask, don't tile' principle and the exact restraint level (~0.04 alpha dots) this brief should target."
+      },
+      {
+        "name": "Vercel / Geist design system",
+        "url": "https://vercel.com/geist",
+        "whyItMatters": "Proves a near-white, mono-adjacent, hairline-framed aesthetic can feel premium with almost no color; their 1px border discipline is the template for the instrument-frame pattern."
+      },
+      {
+        "name": "Stripe — radial wash + color restraint",
+        "url": "https://stripe.com",
+        "whyItMatters": "Benchmark for using a single soft tonal wash for depth and rationing one accent so it reads as meaningful; validates spending the brand color only on primary action, never on chrome."
+      },
+      {
+        "name": "Radix Colors / Tailwind green scale methodology",
+        "url": "https://www.radix-ui.com/colors",
+        "whyItMatters": "Shows how to derive a perceptually-even hover/press/fill/border/text ramp from one hue with guaranteed contrast steps — the method behind the #11875A -> #0F7A50 -> #0C6B45 -> #E8F2EC ladder."
+      },
+      {
+        "name": "WCAG 2.2 SC 1.4.3 (text) + 1.4.11 (non-text) + 1.4.1 (use of color)",
+        "url": "https://www.w3.org/WAI/WCAG22/Understanding/",
+        "whyItMatters": "The compliance floor for an elite-security-researcher audience: 1.4.3 forbids green body text at 4.25:1, 1.4.11 permits green fills/rings at 3:1, 1.4.1 requires the seal to carry an icon+label not hue alone."
+      },
+      {
+        "name": "Resend / Mintlify docs aesthetic",
+        "url": "https://resend.com",
+        "whyItMatters": "Real-world proof that a mono-forward, light, hairline-ruled layout reads as 'precision instrument' rather than 'code listing' when texture is subtractive and type measure is disciplined."
+      }
+    ],
+    "pitfalls": [
+      "Setting any green text or green links on paper — at 4.25:1 it fails AA and looks washed; the whole site's credibility with security reviewers dies on a contrast checker. Green is fill-only.",
+      "Tiling the dot-matrix across the entire page with no mask. Full-bleed texture on near-white looks like a default Bootstrap background; the fade is the entire point.",
+      "Using repeating horizontal ruled lines to evoke a 'ledger' — it instantly reads as a monospace code listing, the precise drift the founder rejected.",
+      "Animating the backdrop (parallax dots, drifting gradient, shimmer). On a 'signed instrument' brand any motion in the paper undermines the stillness/permanence the product sells, and it forces a prefers-reduced-motion branch for zero upside.",
+      "Letting two green elements share a viewport (e.g. green CTA + green nav highlight + green icon). Scarcity is what makes green mean PASS; abundance makes it mean nothing.",
+      "Tinting the tonal wash green for 'brand cohesion.' A green haze spends the accent on nothing and weakens the seal — keep the wash colorless (#FFFFFF over #F7F8F6).",
+      "Greying out disabled buttons while keeping them green-ish. A dead-but-verified-colored control is semantically broken for an evidence product; disabled must go fully neutral.",
+      "Relying on the #E2E5E0 hairline (1.19:1) for functional borders like form inputs or the report-card edge — it's invisible as a control boundary; use rgba(15,20,17,0.14) or darker for anything that must read as an edge.",
+      "Pushing dot opacity above ~0.06 or pitch below 20px to 'make it visible' — it then competes with mono glyph edges and the page reads busy/noisy instead of crisp.",
+      "Encoding the verified state in color alone. Without a checkmark glyph + 'VERIFIED' label, colorblind reviewers (and a skeptical security team) can't read the single most important state in the product."
+    ],
+    "directives": [
+      "Token set (CSS custom properties): --paper:#F7F8F6; --ink:#0F1411; --ink-muted:#5B6661 (5.6:1, secondary text/captions); --hairline:#E2E5E0; --green:#11875A; --green-hover:#0F7A50; --green-press:#0C6B45; --green-text:#0D6E48; --green-fill:#E8F2EC; --green-border:#CFE3D8; --disabled-bg:#E6EBE7; --disabled-text:#9AA39E.",
+      "Backdrop is exactly two layers: (A) global colorless wash on body — background:radial-gradient(110% 70% at 50% -8%, #FFFFFF 0%, rgba(255,255,255,0) 55%), #F7F8F6; (B) hero-scoped masked dot-matrix only. Nothing else.",
+      "Dot-matrix CSS (hero ::before, position:absolute; inset:0; z-index:-1; pointer-events:none): background-image:radial-gradient(circle at 1px 1px, rgba(15,20,17,0.045) 1px, transparent 1.6px); background-size:24px 24px.",
+      "Mask the dot-matrix so it dies before content: -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,0.5) 45%,transparent 80%); mask-image: same. Repeat the identical layer on the final CTA band; leave all mid-page sections as pure paper + wash.",
+      "Hi-DPI: in @media (min-resolution:2dppx) raise dot radius to 1.25px and keep alpha <=0.05. Never exceed 0.06 alpha or go below 20px pitch.",
+      "prefers-reduced-motion: backdrop is fully static by default. Permit at most ONE 320ms ease-out opacity fade-in of the hero ::before, gated inside @media (prefers-reduced-motion: no-preference); under reduce, render the final opacity immediately. No parallax, no animated gradients, ever.",
+      "Instrument frame: center content in a column max-width:76ch (~840px) with border-left:1px solid #E2E5E0 and border-right:1px solid #E2E5E0 full document height; each <section> gets border-top:1px solid #E2E5E0. Remove the side rules under 640px.",
+      "Primary button: background:#11875A; color:#FFFFFF; font:600 16px 'Spline Sans Mono'; letter-spacing:0.01em; padding:12px 20px; radius:8px. Hover background:#0F7A50; active/pressed background:#0C6B45. (White-on-green = 4.53:1 AA at base, 5.36:1 hover, 6.55:1 pressed.)",
+      "Button focus and all interactive focus: outline:2px solid #11875A; outline-offset:2px; via :focus-visible only. One rule site-wide (4.25:1 on paper, 3.96:1 on pill — both >=3:1).",
+      "Disabled primary button: background:#E6EBE7; color:#9AA39E; cursor:not-allowed; no green, no shadow.",
+      "Secondary/ghost button: background:transparent; color:#0F1411; border:1px solid rgba(15,20,17,0.16); hover background:rgba(15,20,17,0.04). No green on secondary actions.",
+      "Links: color:#0F1411; text-decoration:underline; text-decoration-color:rgba(15,20,17,0.30); text-underline-offset:3px; hover decoration-color:#0F1411. Links are NEVER green.",
+      "Any place a green word is unavoidable (e.g. inline 'Verified'), use --green-text #0D6E48 (5.9:1 on paper, 5.49:1 on pill) — never #11875A, which fails as text.",
+      "Verified seal/pill: background:#E8F2EC; border:1px solid #CFE3D8; radius:6px; padding:4px 10px; checkmark glyph in #0C6B45; label in #0F1411, Spline Sans Mono 12px/600, letter-spacing:0.04em, text-transform:uppercase. Must include both glyph AND label (do not encode state in color alone).",
+      "The single permitted green hairline accent: a 2px solid #11875A left border on the live evidence/report card only. No other green borders anywhere.",
+      "Green budget enforcement: max ONE green fill + ONE green seal per viewport. Build a checklist gate and fail any page that shows two competing greens above the fold.",
+      "Functional borders (inputs, the report card, data rows) use border:1px solid rgba(15,20,17,0.14) — NOT the 1.19:1 #E2E5E0 hairline, which is reserved for decorative ledger rules and section seams.",
+      "Body text: #0F1411 on #F7F8F6 (17.5:1); secondary/meta text: #5B6661 (5.6:1). Keep body measure at 66–72ch and line-height 1.6 so the mono column never reads as code.",
+      "Implement the whole backdrop as pseudo-elements with pointer-events:none and z-index:-1; do not add real DOM nodes, do not use background-attachment:fixed (mobile repaint cost), and request zero image assets for the dot grid.",
+      "If grain is chosen instead of dots: inline SVG data-URI, feTurbulence baseFrequency=0.9 numOctaves=2, layer opacity 0.022, same fixed pseudo-element + same mask. It REPLACES the dot-matrix; the two textures are mutually exclusive.",
+      "Section rhythm to keep mono premium: section vertical padding 96px desktop / 56px mobile; max ONE accent element (button or seal) per section; headings in Spline Sans Mono 600 with -0.01em tracking to tighten the mono cadence.",
+      "Pre-launch QA gates: (1) automated contrast scan must show zero green text under 4.5:1; (2) every 'pass/verified' element must contain a non-color cue; (3) grep the codebase for green hex used as a 'color' on text/links and remove; (4) confirm no animation on the backdrop layers."
+    ]
+  },
+  {
+    "topic": "Accessibility + Information Architecture spec for kolm.ai \"Verified\" light theme (mono-forward, 28-page agent-security-evidence site, deal-unblocker positioning)",
+    "keyFindings": [
+      "Measured against paper #F7F8F6 (relative luminance 0.9354), a clean 4-step ink ramp covers every use: #0F1411 = 17.5:1 (AAA, body+headings), #3A413D = 9.8:1 (AAA, secondary), #565B57 = 6.5:1 (AA-safe down to 12px meta), #8B918C = 3.0:1 (NON-text only: disabled, decorative, large numerals, min interactive border). Only the last fails text contrast and must never carry copy.",
+      "The brand green #11875A is 4.25:1 on paper, so it FAILS AA (4.5:1) for normal-size text by a hair. Split green into two tokens: --accent #11875A for fills/icons/large(>=24px) text + UI borders, and --accent-text #0B6B45 (6.15:1) for ANY green text <=18px (inline links, 'Verified' labels, small badges). This keeps green scarce and on-palette while staying legible.",
+      "White (#FFFFFF) on the #11875A button = 4.53:1: passes AA but with thin margin, so lock the label to weight 500 at >=15px and never use 400/light or a tint. Disabled button = #8B918C text on #EDEFEC, no green.",
+      "Hairline #E2E5E0 is only 1.19:1 against paper: correct for decorative dividers and card outlines, but it CANNOT be the sole border of an interactive control. Form-field, toggle and segmented-control borders must step up to #8B918C (3.0:1) to satisfy WCAG 1.4.11 Non-text Contrast.",
+      "Mono at display size reads like a code listing unless it is typeset: apply negative tracking (-0.02em on headings, -0.01em on body), drive hierarchy with SIZE + WHITESPACE + one weight step (not color), cap measure at ~66ch, and restrict to weights 400/500/600. This is how an all-Spline-Sans-Mono site reads premium instead of terminal.",
+      "Reveal/scroll animations must DEFAULT to visible (opacity:1) and only animate when motion + JS are present. The prior build shipped sections stuck at opacity:0 when the reveal class was not applied (the W921 'bleed'); progressive enhancement plus a hard prefers-reduced-motion reset prevents content from vanishing.",
+      "Conversion spine for a deal-unblocker (not a compliance vendor): problem -> how-it-works -> the signed report -> verify-it-yourself -> founder/buyer split -> trust -> single CTA. One primary green CTA per viewport, flagship capped at ~9 sections; everything else (research, changelog, status, enterprise) lives in footer + contextual links.",
+      "44x44px target floor (AAA 2.5.5) is the right bar for a security-researcher audience and trivial in mono: nav rows reach 44px via vertical padding even when the label is 14px, and adjacent targets get an 8px minimum gap.",
+      "Backdrop is FLAT #F7F8F6: premium comes from a strict vertical rhythm (80px desktop / 40px mobile between sections) and 1px #E2E5E0 hairlines, not gradients or foil. Cards = #FFFFFF fill + #E2E5E0 1px border + barely-there shadow (0 1px 2px rgba(15,20,17,.04)).",
+      "Legal pages read thin AND wordy at the same time when dumped as a wall of clauses. A single shared shell (last-updated stamp + plain-language TL;DR box + sticky ToC + collapsible sections) makes /privacy /terms /dpa /baa /sla scannable and credible to a reviewer.",
+      "Heading order is structural, not stylistic: exactly one h1 (the page promise), no skipped levels, size controlled by class. Unlabeled regions (Proof bar, FAQ) get a visually-hidden h2 so the screen-reader outline stays complete.",
+      "Mobile reflow at 390px is the make-or-break: 16px minimum body (prevents iOS auto-zoom), single column <=640px, and data tables convert to stacked key:value cards rather than silently overflowing."
+    ],
+    "patterns": [
+      {
+        "name": "Two-tier signal green",
+        "whatItIs": "Green carries two jobs (primary CTA + verified/pass semantics) at two contrast levels, so one token cannot serve both legibly.",
+        "howToApply": "Define --accent:#11875A (fills, icons, >=24px text, UI borders; 4.25:1) and --accent-text:#0B6B45 (any green text <=18px; 6.15:1). Pass-state pills: #0B6B45 glyph + label on a #E9F3EE tint. CTA: #FFFFFF/500 on #11875A. Never recolor body links green at body size with #11875A."
+      },
+      {
+        "name": "Ink ramp by role, not by shade",
+        "whatItIs": "A 4-step grey scale where each step is pinned to a contrast budget and an allowed use, removing guesswork.",
+        "howToApply": "--ink:#0F1411 (17.5:1) headings+body; --ink-2:#3A413D (9.8:1) secondary/sublabels/captions used as paragraphs; --ink-3:#565B57 (6.5:1) meta/timestamps/eyebrow-labels >=12px; --ink-faint:#8B918C (3.0:1) disabled text, >=24px decorative numerals, AND the minimum border of any interactive control."
+      },
+      {
+        "name": "Anatomy block (the report as hero artifact)",
+        "whatItIs": "A reusable annotated-artifact module that shows the signed evidence report with leader-line callouts to header, checks table, verdicts, and Ed25519 signature block.",
+        "howToApply": "Use on /, /report, /verify and /how-it-works. Monospace artifact in a #FFFFFF card, hairline-divided rows, tabular-nums for IDs/hashes, a green #0B6B45 'Verified' stamp, and 3-5 numbered callouts in --ink-3. This is the single most persuasive object on the site; do not bury it below the fold."
+      },
+      {
+        "name": "Table-to-card reflow",
+        "whatItIs": "Responsive transform that converts wide data tables (checks, subprocessors, SLA credits, status components) into readable stacks on narrow screens.",
+        "howToApply": "<=640px: each <tr> becomes a card; cell label (from <th>) in --ink-3 11px uppercase +0.06em, value in --ink. If the table is genuinely 2D (status grid), instead wrap in role='region' aria-label tabindex=0 with overflow-x:auto, sticky first column, and a right-edge fade. Never set table font <13px."
+      },
+      {
+        "name": "Section rhythm + min-content rule",
+        "whatItIs": "A fixed vertical cadence plus a floor on what a section may contain, so nothing reads thin and nothing reads padded.",
+        "howToApply": "Vertical gap between sections: --s8 (80px) desktop / --s6 (40px) <=640px. Minimum viable section = a heading + 2-4 sentences OR a 3-tile row. If a planned section cannot meet that floor, merge it upward. Max ~9 sections on the flagship, 5-8 on sub-pages."
+      },
+      {
+        "name": "Legal/reference shell",
+        "whatItIs": "One template that makes clause-heavy pages scannable and trustworthy rather than a wall.",
+        "howToApply": "Header: H1 + 'Last updated YYYY-MM-DD' (--ink-3) + plain-language TL;DR box (#FFFFFF card, 3-5 bullets). Body: sticky left ToC (>=961px) over collapsible <section> blocks, each h2 + short prose. Footer of page: contact + related legal links. Reuse verbatim across /privacy /terms /dpa /baa /sla /acceptable-use /subprocessors /transparency-log."
+      }
+    ],
+    "references": [
+      {
+        "name": "WCAG 2.2 SC 1.4.3 Contrast (Minimum) + 1.4.6 (Enhanced)",
+        "url": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html",
+        "whyItMatters": "Defines the 4.5:1 normal / 3:1 large thresholds every ink and green token here is measured against; the #11875A 4.25:1 text fail and the #0B6B45 fix come straight from this."
+      },
+      {
+        "name": "WCAG 2.2 SC 1.4.11 Non-text Contrast",
+        "url": "https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html",
+        "whyItMatters": "Requires 3:1 for control boundaries and UI components, which is why interactive borders must use #8B918C, not the 1.19:1 hairline #E2E5E0."
+      },
+      {
+        "name": "WCAG 2.2 SC 2.4.13 Focus Appearance + 2.4.11 Focus Not Obscured",
+        "url": "https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html",
+        "whyItMatters": "Sets the size/contrast bar for the focus ring and forbids removing focus without a compliant replacement; drives the 2px ring + double-ring-on-green spec."
+      },
+      {
+        "name": "WCAG 2.2 SC 2.5.5 Target Size (AAA) / 2.5.8 (AA, 24px)",
+        "url": "https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html",
+        "whyItMatters": "Justifies the 44x44px floor and 8px gap for mono buttons and nav rows aimed at a high-standards security audience."
+      },
+      {
+        "name": "WCAG 2.2 SC 1.4.10 Reflow",
+        "url": "https://www.w3.org/WAI/WCAG22/Understanding/reflow.html",
+        "whyItMatters": "No loss of content/function at 320px without 2D scroll; underpins the single-column + table-to-card reflow rules at 390px."
+      },
+      {
+        "name": "MDN prefers-reduced-motion",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion",
+        "whyItMatters": "Canonical guidance for the global motion reset and the progressive-enhancement reveal pattern that prevents opacity:0 content bleed."
+      },
+      {
+        "name": "WebAIM Contrast Checker",
+        "url": "https://webaim.org/resources/contrastchecker/",
+        "whyItMatters": "Independent verifier for the exact hex/ratio pairs in this spec so the brief's numbers can be reproduced before shipping."
+      },
+      {
+        "name": "Vercel Geist Mono and Linear as mono/minimal exemplars",
+        "url": "https://vercel.com/font",
+        "whyItMatters": "Reference for making an all-monospace, near-monochrome interface read as premium and iconic via spacing, negative tracking, and restraint rather than color or ornament."
+      }
+    ],
+    "pitfalls": [
+      "Using #11875A for small links, labels or badge text: it is 4.25:1 and silently fails AA on the most-used semantic color. Switch to #0B6B45 for any green text <=18px.",
+      "Leaving scroll-reveal sections at opacity:0 by default: when JS fails or prefers-reduced-motion is set, the content disappears (the exact W921 bleed). Default to visible; animate only as enhancement.",
+      "Bordering inputs, toggles or segmented controls with only the #E2E5E0 hairline (1.19:1): fails 1.4.11. Interactive borders need #8B918C (3:1).",
+      "Stripping focus outlines for looks, or signaling focus with color change alone: breaks keyboard users and 2.4.13. Always render the 2px ring (double-ring on green/dark).",
+      "Mixing 4-5 weights or bolding everything: mono goes muddy. Hold to 400/500/600 and create hierarchy with size + space.",
+      "Tables that overflow horizontally at 390px with no affordance, or that shrink below 13px to fit: reflow to key:value cards or give an explicit scroll region with edge fade.",
+      "Choosing heading levels by visual size (h2 -> h4 skips): corrupts the screen-reader outline. Size via class, keep levels sequential, one h1 per page.",
+      "Dumping legal pages as undivided clause walls: reads thin and wordy simultaneously and bounces reviewers. Use the TL;DR + ToC + collapsible shell.",
+      "Stacking multiple competing CTAs per screen: dilutes the single 'Book the audit' action. One primary green button per viewport.",
+      "Introducing any second hue, gradient or foil: breaks the iconic single-accent system. Green must stay scarce (CTA + pass-state only); everything else is ink on paper.",
+      "Inputs below 16px (triggers iOS auto-zoom), targets below 44px, or adjacent targets with <8px gap: degrades mobile trust.",
+      "Em-dashes, eyebrow clutter, and the word 'honest/honesty' in copy: violates house style. Use colons/periods, restrained labels, and 'limits/constraints/stated plainly'.",
+      "Captioning at #565B57 below 12px or using #8B918C for any real copy: the first loses its 6.5:1 safety margin, the second (3.0:1) is non-text only."
+    ],
+    "directives": [
+      "[TOKENS] :root light set -> --paper:#F7F8F6; --paper-raised:#FFFFFF; --paper-sink:#F1F2EF; --ink:#0F1411; --ink-2:#3A413D; --ink-3:#565B57; --ink-faint:#8B918C; --accent:#11875A; --accent-text:#0B6B45; --accent-tint:#E9F3EE; --hairline:#E2E5E0; --border-strong:#8B918C; --on-accent:#FFFFFF.",
+      "[A11Y-CONTRAST] Verified ratios on #F7F8F6: #0F1411=17.5:1, #3A413D=9.8:1, #565B57=6.5:1, #8B918C=3.0:1, #11875A=4.25:1, #0B6B45=6.15:1, #FFFFFF-on-#11875A=4.53:1, #E2E5E0=1.19:1. Body/headings #0F1411; secondary paragraphs #3A413D; meta/timestamps/labels >=12px #565B57; disabled/decorative/borders #8B918C only.",
+      "[A11Y-GREEN] Green text <=18px must be #0B6B45; #11875A allowed only for fills, icons, UI borders and text >=24px. Verified pill = #0B6B45 glyph+label on #E9F3EE. Pass/fail must also carry a glyph (check / dot), never color alone.",
+      "[A11Y-BUTTON] Primary: background #11875A, label #FFFFFF weight 500 >=15px, min-height 44px, padding 12px 20px, radius 8px. Hover darken to #0F7A50; active #0C6A45. Disabled: #EDEFEC bg, #8B918C label, no green. Secondary/ghost: transparent bg, 1px #8B918C border, #0F1411 label.",
+      "[A11Y-FOCUS] :focus-visible{outline:2px solid #11875A;outline-offset:2px} On green/dark surfaces use box-shadow:0 0 0 2px #F7F8F6,0 0 0 4px #0F1411;outline:none. Never outline:none without a replacement; suppress mouse :focus, keep :focus-visible.",
+      "[A11Y-TARGETS] All buttons/nav/icon-controls >=44x44px (AAA 2.5.5); icon-only 44x44 with 24px glyph; >=8px gap between adjacent targets. Inline prose links exempt but mobile nav rows reach 44px via vertical padding.",
+      "[A11Y-MOTION] Global reset: @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}. Reveal classes apply opacity:1 by default and transition only when motion is allowed and JS loaded.",
+      "[A11Y-HEADINGS] Exactly one h1 = page promise. Sequential levels, no skips, size via class not tag. Sections=h2, sub-points=h3. Visually-hidden h2 for Proof bar and FAQ. Nav/footer use <nav aria-label>, not headings.",
+      "[A11Y-TYPE] Body 16px/1.65, letter-spacing -0.01em, measure max 66ch. Headings weight 600, line-height 1.08-1.12, letter-spacing -0.02em via clamp() (h1 clamp(34px,6vw,60px), h2 clamp(24px,3.5vw,34px), h3 20px). Eyebrow/label 12px, +0.08em, uppercase, #565B57. Numerals/IDs/hashes font-feature-settings:'tnum'. Weights restricted to 400/500/600.",
+      "[A11Y-BORDERS] Dividers and card outlines #E2E5E0 (decorative). Inputs/toggles/segmented controls border 1px #8B918C (3:1); focus adds #11875A ring. Cards: #FFFFFF fill, 1px #E2E5E0, shadow 0 1px 2px rgba(15,20,17,.04), radius 12px.",
+      "[A11Y-BACKDROP] Flat #F7F8F6, no gradient/foil. Optional hero-only 1px grid at #0F1411 @0.04 or a single hairline rule under the nav. Separate sections with whitespace (s8/s6) + occasional #E2E5E0 hairline, not boxes.",
+      "[A11Y-REFLOW-390] <=640px single column; container padding 20px; body >=16px; no horizontal scroll except opt-in tables; grids 1-col <=640, 2-col 641-960, full >=961; grid gap 20px mobile / 28px desktop; card padding 20px.",
+      "[A11Y-TABLES] <=640px convert rows to key:value cards (label #565B57 11px uppercase +0.06em, value #0F1411). For true 2D grids use role='region' aria-label tabindex=0 + overflow-x:auto + sticky first col + right-edge fade. Never <13px.",
+      "[A11Y-NAV] Desktop inline >=961px (6 items max). <=960px collapse to 44px hamburger -> full-height drawer: 44px stacked rows, focus-trap, Esc closes, body scroll-lock, primary CTA pinned at drawer bottom.",
+      "[IA-NAV] Primary nav (<=6): How it works | Pricing | Verify | Security | Docs | [Book the audit]. Footer 4 cols: Product (How it works, Platform, Checks, Report, Pricing) / Trust (Verify, Security, Trust, Status, Transparency log) / Legal (Privacy, Terms, DPA, BAA, SLA, Subprocessors, Acceptable use) / Company (Research, Changelog, Careers, Contact).",
+      "[IA-/] Hero(problem h1 + signed-report artifact + 'Book the audit' primary / 'View a sample report' ghost) -> Proof bar(Ed25519 signed | fixed fee | days not weeks) -> Problem(the stalled $100-500k deal) -> How it works(3 steps) -> What we check(6-tile preview -> /checks) -> The report(anatomy block + 'Verify a report' -> /verify) -> For founders / For buyers(2 cards -> /solutions) -> Outcome(1 metric + 1 quote) -> Security & trust strip(-> /security /trust) -> FAQ(5 objections) -> Final CTA. Cap ~9 sections.",
+      "[IA-/how-it-works] Intro(1 line + timeline visual) -> Step 1 Scope(inputs, day 0) -> Step 2 Audit(what runs, 2-3 days) -> Step 3 Signed report(deliverable) -> What's inside the report -> Timeline/SLA -> What it is not(scope limits) -> CTA.",
+      "[IA-/verify] H1 'Verify a kolm report' -> client-side drop/paste verifier -> result states(valid / signed-by / tampered) -> how verification works(Ed25519, offline, public key) -> public key + fingerprint(kid -> /keys) -> issuer trust chain -> verify via CLI/API snippet -> CTA.",
+      "[IA-/security] H1 -> posture summary(at a glance) -> data handling(access, retention, deletion) -> infrastructure(hosting, isolation, encryption in transit/at rest) -> access control(least privilege, key mgmt) -> vulnerability mgmt + disclosure -> subprocessors(-> /subprocessors) -> compliance status(state plainly what is and isn't in place) -> threat model(-> /security/threat-model) -> contact security.",
+      "[IA-/security/threat-model] H1 -> scope & assets -> trust boundaries(diagram) -> adversaries & assumptions -> threats table(threat -> mitigation, STRIDE-style) -> key/signing custody(Ed25519) -> out of scope -> residual risk -> report an issue.",
+      "[IA-/trust] H1 'Trust center' -> live status(-> /status) -> report verification(-> /verify) -> security overview(-> /security) -> subprocessors -> legal & DPAs(-> /dpa /baa) -> transparency log(-> /transparency-log) -> public key + fingerprint -> contact.",
+      "[IA-/enterprise] H1 'Hand security review a report it can verify' -> how review groups use it -> what the report proves(mapped to their checklist) -> verification(offline, no portal login) -> procurement docs(DPA/BAA/SLA links) -> pilot/onboarding -> CTA 'Talk to us'.",
+      "[IA-/pricing] H1 + one-line model(single fixed fee) -> the plan(one card: price, included, turnaround SLA) -> what's checked(-> /checks) -> add-ons(re-audit, BAA, SAML) -> compare(DIY vs kolm vs consultancy: time/cost/output) -> billing FAQ -> CTA.",
+      "[IA-/report] H1 'The evidence report' -> sample artifact(full) -> anatomy(annotated: header, checks, verdicts, signature block) -> verdict semantics(pass/flag/n-a) -> verification(-> /verify) -> how buyers read it -> download sample(PDF/JSON) -> CTA.",
+      "[IA-/checks] H1 'What we check' -> coverage statement -> category groups(Identity & secrets, Data handling, Model/agent safety, Infra, Logging) each a collapsible list of checks(id + one line) -> mapping(SOC2/ISO/OWASP where relevant) -> what we don't check(scope limits) -> CTA.",
+      "[IA-/research] H1 -> thesis(why agent security review is broken) -> notes list(date + title + 1 line, grouped into 2-3 pillars to avoid thinness) -> method/benchmark callout -> subscribe -> CTA.",
+      "[IA-/contact] H1 -> primary path('Book the audit' -> calendar/form) -> form(name, company, deal size, deadline, message) -> other channels(sales, security@, support) -> response-time expectation -> legal entity/address.",
+      "[IA-/platform] H1(what the engine is) -> overview(pipeline diagram scope->run->sign->verify) -> capabilities(checks engine, signing, verifier) -> inputs/integrations -> platform security(-> /security) -> for builders(API/CLI -> /docs) -> CTA.",
+      "[IA-/docs] H1 + search -> quickstart(verify a report in 60s) -> concepts(report, verdict, signature, key) -> verify(CLI/API/offline) -> report schema(JSON) -> checks reference(-> /checks) -> keys & rotation -> changelog(-> /changelog) -> support.",
+      "[IA-/changelog] H1 -> filter(product/checks/security) -> reverse-chron entries(date, version tag, grouped Added/Changed/Fixed/Security, one line each) -> RSS/subscribe.",
+      "[IA-/status] H1 + overall badge(operational) -> component table(API, verifier, signing, site) -> 90-day uptime -> incident history -> subscribe.",
+      "[IA-/privacy] Shell: H1 + last-updated + TL;DR box -> sticky ToC -> sections(data collected, use, sharing/subprocessors, retention, rights, transfers, security, children, changes, contact/DPO) -> related-legal footer.",
+      "[IA-/terms] Shell -> sections(acceptance, service, fees, IP, warranties/disclaimer, liability cap, indemnity, term/termination, governing law, changes, contact).",
+      "[IA-/dpa] Shell + 'Download/sign DPA' CTA -> sections(roles, scope/duration, processing details, subprocessors link, security-measures annex, transfers/SCCs, audit rights, sub-breach, return/deletion).",
+      "[IA-/baa] Shell + 'Request BAA' CTA -> sections(HIPAA definitions, permitted uses, safeguards, breach notification, subcontractors, term/termination, return/destruction).",
+      "[IA-/sla] Shell -> summary(uptime % + turnaround commitment) -> definitions -> availability target & measurement -> credits table -> support response targets -> exclusions -> claim process.",
+      "[IA-/acceptable-use] Shell -> prohibited uses list -> security/abuse -> enforcement -> reporting -> changes.",
+      "[IA-/subprocessors] Shell + 'Subscribe to changes' -> table(name, purpose, data, region) -> vetting -> notification policy -> contact.",
+      "[IA-/transparency-log] H1 + what this log is -> append-only entries(date, event: key rotation, issuance counts, incidents, gov requests) -> verify log integrity -> subscribe.",
+      "[IA-/careers] H1 + 1-line mission -> why kolm(2-3 points) -> open roles(list, or 'no roles open, reach us here') -> how we work -> apply/contact.",
+      "[IA-/404] One screen: H1 'Page not found' + 1 line + search -> top destinations(Verify, How it works, Pricing, Docs, Status) -> contact. On-brand, never a dead end.",
+      "[IA-/solutions/ai-vendors] H1 'Unblock the deal stuck in security review' -> the stall(founder pain) -> how kolm fixes it -> what you hand the buyer -> timeline/price -> proof/quote -> CTA 'Book the audit'.",
+      "[IA-/solutions/enterprise-buyers] H1 'Verify a vendor in minutes, not weeks' -> the review backlog -> how to verify a kolm report -> coverage vs your checklist -> trust/verification -> CTA 'Request a vendor report / Talk to us'.",
+      "[IA-GLOBAL] One primary green CTA per viewport; every page ends in a single CTA band. Min section floor = heading + 2-4 sentences or a 3-tile row, else merge. Flagship <=9 sections, sub-pages 5-8, legal via summary+ToC+collapsible shell. No em-dashes, no eyebrow clutter, avoid 'honest/honesty' (use 'limits/constraints/stated plainly')."
+    ]
+  }
+]

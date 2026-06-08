@@ -7,9 +7,9 @@ const require = createRequire(import.meta.url);
 
 export const DEV_RECEIPT_SECRET = 'ks_receipt_dev_secret_change_in_prod';
 
-// W481 — known-public HMAC secret used by in-repo marketplace seed artifacts
+// W481 - known-public HMAC secret used by in-repo marketplace seed artifacts
 // (e.g. public/registry-pack/qwen-distill-classifier.kolm). This is NOT a
-// trust gate — Ed25519 (signed over the canonical receipt body) and Sigstore
+// trust gate - Ed25519 (signed over the canonical receipt body) and Sigstore
 // (transparency log) are the trust gates. The fixture secret only seals the
 // HMAC integrity layer so verifiers on any host can re-derive the same hex
 // without requiring env setup. Tampering with artifact bytes still breaks
@@ -17,7 +17,7 @@ export const DEV_RECEIPT_SECRET = 'ks_receipt_dev_secret_change_in_prod';
 // every signature down the chain regardless of HMAC secret publicity.
 export const MARKETPLACE_FIXTURE_SECRET = 'kolm-public-fixture-v0-1-0';
 
-// W481 — list of secrets a verifier may try in order. The runtime-effective
+// W481 - list of secrets a verifier may try in order. The runtime-effective
 // secret comes first (the user's local_receipt_secret, RECIPE_RECEIPT_SECRET
 // env, or DEV_RECEIPT_SECRET dev fallback); the marketplace fixture secret is
 // appended so in-repo seed artifacts verify on any fresh checkout. Callers
@@ -33,7 +33,7 @@ export function verificationSecrets({ includeLegacyArtifactSecret = false } = {}
     out.push(MARKETPLACE_FIXTURE_SECRET);
   }
   // In dev mode, the explicit DEV_RECEIPT_SECRET path is already returned by
-  // effectiveReceiptSecret when no env is set — but if the user has set a
+  // effectiveReceiptSecret when no env is set - but if the user has set a
   // RECIPE_RECEIPT_SECRET env, DEV_RECEIPT_SECRET is no longer primary. Append
   // it so historic in-tree dev-secret artifacts still verify regardless of
   // current env. In production-like hosts, DEV_RECEIPT_SECRET is intentionally
@@ -110,7 +110,7 @@ export function effectiveReceiptSecretForTenant(tenant, { includeLegacyArtifactS
   return { secret: globalSecret, key_id: 'global' };
 }
 
-// All known verification keys for a tenant — current + previous (for rotation).
+// All known verification keys for a tenant - current + previous (for rotation).
 // Verifiers walk this list and accept the first match.
 export function tenantReceiptVerificationKeys(tenant) {
   const out = [];
@@ -251,7 +251,7 @@ function receiptSecretLooksProductionSafe(secret) {
     !/^ks_receipt_(live|test|dev|change)/i.test(secret);
 }
 
-// WC07 — type-safe env readers. Audit found 10 sites where bare
+// WC07 - type-safe env readers. Audit found 10 sites where bare
 // `process.env.FOO` reads silently corrupt:
 //   * `!!process.env.KOLM_LOCAL_DAEMON` returns TRUE for `KOLM_LOCAL_DAEMON=false`
 //     because non-empty strings are truthy. So `=false` does the OPPOSITE of
@@ -263,7 +263,7 @@ function receiptSecretLooksProductionSafe(secret) {
 // True iff env var is set to a truthy string. Treats '0', 'false', 'no', 'off'
 // (case-insensitive) as FALSE. Treats unset/empty as the provided fallback
 // (default: false). Unrecognized non-empty strings (e.g. 'maybe') return the
-// fallback rather than silently coercing — this prevents 'KOLM_FOO=disabled'
+// fallback rather than silently coercing - this prevents 'KOLM_FOO=disabled'
 // from being read as `true` just because the string is non-empty.
 export function envBool(name, fallback = false) {
   const v = process.env[name];
@@ -276,7 +276,7 @@ export function envBool(name, fallback = false) {
 
 // Returns env var value iff it's non-empty after trim, else null. NEVER
 // returns ''. Caller MUST handle null (e.g. throw / disable feature / log).
-// Use this for SECRETS and other "must be present and meaningful" reads —
+// Use this for SECRETS and other "must be present and meaningful" reads - 
 // the bare `process.env.FOO || ''` pattern lets `FOO=""` flow through as a
 // "configured" value, which then collides with omitted-header empty-string
 // comparisons in constant-time auth paths.

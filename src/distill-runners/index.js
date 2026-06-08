@@ -1,6 +1,6 @@
 // src/distill-runners/index.js
 //
-// W921 Run / Serve & Deploy — remote distill-job RUNNERS (Modal + RunPod).
+// W921 Run / Serve & Deploy - remote distill-job RUNNERS (Modal + RunPod).
 //
 // Additive, deterministic LAUNCH-SPEC builders for running a kolm distill job on
 // a rented GPU. These are PURE spec generators (no network, no API calls): they
@@ -45,7 +45,7 @@ export const GPU_CATALOG = Object.freeze([
 ]);
 
 // LoRA distill VRAM model (deterministic): base weights at bf16 + LoRA optimizer
-// + activations. Rough but conservative — used to pick the smallest GPU that
+// + activations. Rough but conservative - used to pick the smallest GPU that
 // fits. Full-finetune is much larger; we expose a `full_finetune` multiplier.
 export function estimateDistillVramGb({ params_b, full_finetune = false, batch_size = 1, seq_len = 2048, teacher_resident = false, teacher_params_b = 0 } = {}) {
   if (!_isFiniteNumber(params_b) || params_b <= 0) return null;

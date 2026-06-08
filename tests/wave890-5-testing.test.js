@@ -240,20 +240,28 @@ test('lock-in 12: no banned vocabulary in any W890-5 deliverable', () => {
 test('lock-in 13: prior W890 lock-in test files still structurally intact', () => {
   // Same pattern as W890-3 #10: we cannot recursively invoke `node --test`,
   // but we CAN assert the prior W890 sub-wave test files exist, parse, and
-  // declare >= 12 lock-in blocks each. Their own CI coverage runs them.
-  for (const fp of [
-    path.join(ROOT, 'tests/wave890-1-organization.test.js'),
-    path.join(ROOT, 'tests/wave890-2-code-quality.test.js'),
-    path.join(ROOT, 'tests/wave890-3-error-handling.test.js'),
-    path.join(ROOT, 'tests/wave890-4-logging.test.js'),
-    path.join(ROOT, 'tests/wave890-7-configuration.test.js'),
-    path.join(ROOT, 'tests/wave890-8-storage.test.js'),
-  ]) {
+  // declare at least their documented floor of lock-in blocks each. Their own
+  // CI coverage runs them.
+  //
+  // NOTE (2026 teardown): wave890-8-storage's ship-gate lock-in block pinned a
+  // snapshot of the retired multi-surface compiler product, so it was removed
+  // with that product (12 -> 11). The remaining 11 storage lock-ins are intact;
+  // the floor below records the new, accurate minimum for that one file.
+  const FLOORS = {
+    'tests/wave890-1-organization.test.js': 12,
+    'tests/wave890-2-code-quality.test.js': 12,
+    'tests/wave890-3-error-handling.test.js': 12,
+    'tests/wave890-4-logging.test.js': 12,
+    'tests/wave890-7-configuration.test.js': 12,
+    'tests/wave890-8-storage.test.js': 11,
+  };
+  for (const [rel, floor] of Object.entries(FLOORS)) {
+    const fp = path.join(ROOT, rel);
     assert.ok(fs.existsSync(fp), `prior W890 test file missing: ${fp}`);
     const txt = fs.readFileSync(fp, 'utf8');
     const blocks = txt.match(/\btest\(\s*['"`]lock-in\s+\d+/g) || [];
-    assert.ok(blocks.length >= 12,
-      `${path.basename(fp)} must declare >= 12 lock-in test blocks; found ${blocks.length}`);
+    assert.ok(blocks.length >= floor,
+      `${path.basename(fp)} must declare >= ${floor} lock-in test blocks; found ${blocks.length}`);
   }
   // Sample of prior-wave data artifacts must still exist.
   for (const f of [

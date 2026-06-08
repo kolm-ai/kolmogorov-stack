@@ -21,6 +21,21 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// --- Hermetic capture store (test-isolation only; no product change) --------
+// listCaptures() (#4) reads src/store.js, whose DATA_DIR is frozen to
+// KOLM_DATA_DIR (else ./data) at first import. On a developer machine ./data
+// accumulates tens of thousands of rows, so the freshly-written row is lost
+// among them. Freeze the store to a fresh, empty file-scoped temp dir BEFORE
+// the first dynamic import of the daemon/store (the static imports above never
+// touch store.js). resolveKolmDir() ranks KOLM_HOME above KOLM_DATA_DIR, so the
+// config.json opt-in subtest (#2) sets KOLM_HOME to its own HOME/.kolm below.
+const _STORE_DIR = path.join(
+  os.tmpdir(),
+  'kolm-w407b-store-' + process.pid + '-' + Math.random().toString(36).slice(2),
+);
+try { fs.mkdirSync(_STORE_DIR, { recursive: true }); } catch (_) {} // deliberate: cleanup
+process.env.KOLM_DATA_DIR = _STORE_DIR;
+
 function isolatedHome() {
   const dir = path.join(os.tmpdir(), 'kolm-w407b-' + process.pid + '-' + Math.random().toString(36).slice(2));
   try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} // deliberate: cleanup
@@ -133,8 +148,11 @@ test('W407b #1 - default privacy policy is "redact" when no config + no env var'
 
 test('W407b #2 - explicit privacy_policy=allow in config.json is still honored (opt-in path)', async () => {
   const HOME = isolatedHome();
-  const prev = { HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE, POLICY: process.env.KOLM_PRIVACY_POLICY };
+  const prev = { HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE, POLICY: process.env.KOLM_PRIVACY_POLICY, KOLM_HOME: process.env.KOLM_HOME };
   process.env.HOME = HOME; process.env.USERPROFILE = HOME;
+  // resolveKolmDir() ranks KOLM_HOME above the file-scoped KOLM_DATA_DIR, so the
+  // daemon reads the opt-in config.json we write below from THIS test's HOME.
+  process.env.KOLM_HOME = path.join(HOME, '.kolm');
   delete process.env.KOLM_PRIVACY_POLICY;
   fs.mkdirSync(path.join(HOME, '.kolm'), { recursive: true });
   fs.writeFileSync(path.join(HOME, '.kolm', 'config.json'), JSON.stringify({ privacy_policy: 'allow' }));
@@ -151,6 +169,7 @@ test('W407b #2 - explicit privacy_policy=allow in config.json is still honored (
   } finally {
     process.env.HOME = prev.HOME || ''; process.env.USERPROFILE = prev.USERPROFILE || '';
     if (prev.POLICY != null) process.env.KOLM_PRIVACY_POLICY = prev.POLICY;
+    if (prev.KOLM_HOME != null) process.env.KOLM_HOME = prev.KOLM_HOME; else delete process.env.KOLM_HOME;
     try { fs.rmSync(HOME, { recursive: true, force: true }); } catch (_) {} // deliberate: cleanup
   }
 });

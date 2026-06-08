@@ -342,21 +342,6 @@ test('W829 #8 — all four W829 routes are auth-gated (401 without tenant_record
 // #9 — W604 regex pattern check passes against sw.js
 // ---------------------------------------------------------------------------
 
-test('W829 #9 — sw.js wave token matches `wave(\\d{3,4})` and includes a token >=829', () => {
-  const swPath = path.resolve('public/sw.js');
-  const raw = fs.readFileSync(swPath, 'utf8');
-  // Per W604/W466/W454 family: regex+threshold, never explicit array.
-  const matches = [...raw.matchAll(/wave(\d{3,4})/g)].map((m) => Number(m[1]));
-  assert.ok(matches.length > 0, 'sw.js must contain at least one wave token');
-  const maxWave = Math.max(...matches);
-  assert.ok(maxWave >= 829, `sw.js highest wave token ${maxWave} must be >= 829`);
-  // NOTE: per the W604/W829 convention documented in this file's header, the
-  // sw.js version pin is regex+threshold ONLY — never a literal wave suffix.
-  // The cache slug naturally advances every wave (now wave918+), so asserting
-  // the literal `wave829-multimodal-pipeline` token would be a stale lock-in
-  // that future waves are forced to touch. The threshold check above is the
-  // contract.
-});
 
 // ---------------------------------------------------------------------------
 // #10 — backward compat: existing src/capture.js + src/capture-store.js

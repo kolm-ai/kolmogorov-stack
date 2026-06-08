@@ -1,4 +1,4 @@
-// W834-3 — Human-in-the-loop config (confidence-threshold gate).
+// W834-3 - Human-in-the-loop config (confidence-threshold gate).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md):
 //   [W834-3] Human-in-the-loop config: per-namespace
@@ -11,7 +11,7 @@
 //   * W834-3 persists the threshold as a CONFIDENCE PROBABILITY in [0.0, 1.0]
 //     because the regulator-facing surface speaks "confidence below X
 //     triggers human review", NOT "entropy above Y". A compliance team
-//     writes policies in probability units, not nats — forcing them to
+//     writes policies in probability units, not nats - forcing them to
 //     translate is a footgun.
 //   * Both subsystems can coexist; downstream callers pick the unit
 //     vocabulary that matches their audience.
@@ -19,12 +19,12 @@
 // HONESTY CONTRACT (matches W766, W782 approval-queue):
 //   * threshold validated ∈ [0.0, 1.0] (probability). Out-of-range →
 //     honest {ok:false, error:'invalid_threshold'} envelope. NEVER persists.
-//   * Per-row tenant fence (W411 defense-in-depth) — every event-store read
+//   * Per-row tenant fence (W411 defense-in-depth) - every event-store read
 //     re-checks row.tenant_id even after the query filter.
-//   * shouldEscalate(opts) is a pure function — no I/O, no side effects.
+//   * shouldEscalate(opts) is a pure function - no I/O, no side effects.
 //     Returns BOOL. NEVER throws.
 //   * When the manifest field is missing, shouldEscalate returns FALSE
-//     (no escalation when no threshold configured) — but the caller must
+//     (no escalation when no threshold configured) - but the caller must
 //     pass threshold explicitly. We do NOT auto-default to 0.5; an unset
 //     threshold is treated as "no HIL configured".
 //
@@ -43,7 +43,7 @@ export const REG_HIL_VERSION = 'w834-v1';
 const THRESHOLD_MIN = 0.0;
 const THRESHOLD_MAX = 1.0;
 
-// Event-store provider tag — distinct from W766's
+// Event-store provider tag - distinct from W766's
 // 'kolm_human_review_threshold' (which is in nats) so the two subsystems
 // don't shadow each other.
 const PROVIDER_TAG = 'kolm_reg_hil_confidence_threshold';
@@ -59,10 +59,10 @@ function _now() {
 // triggers human review.
 //
 // Inputs:
-//   tenant      — REQUIRED tenant_id (route layer sources from req.tenant_record.id)
-//   namespace   — REQUIRED string
-//   threshold   — REQUIRED number in [0.0, 1.0]
-//   eventStore  — DI seam for tests
+//   tenant - REQUIRED tenant_id (route layer sources from req.tenant_record.id)
+//   namespace - REQUIRED string
+//   threshold - REQUIRED number in [0.0, 1.0]
+//   eventStore - DI seam for tests
 //
 // Returns:
 //   { ok:true, tenant, namespace, threshold, persisted_event_id, persisted_at, version }
@@ -79,7 +79,7 @@ export async function setMandatoryHumanReviewThreshold(opts = {}) {
     return {
       ok: false,
       error: 'tenant_required',
-      hint: 'pass {tenant: <tenant_id>} — required so the threshold is tenant-fenced',
+      hint: 'pass {tenant: <tenant_id>} - required so the threshold is tenant-fenced',
       version: REG_HIL_VERSION,
     };
   }
@@ -87,7 +87,7 @@ export async function setMandatoryHumanReviewThreshold(opts = {}) {
     return {
       ok: false,
       error: 'namespace_required',
-      hint: 'pass {namespace: "<namespace>"} — thresholds are per-namespace',
+      hint: 'pass {namespace: "<namespace>"} - thresholds are per-namespace',
       version: REG_HIL_VERSION,
     };
   }
@@ -113,7 +113,7 @@ export async function setMandatoryHumanReviewThreshold(opts = {}) {
     };
   }
 
-  // DI seam — accept opts.eventStore for tests.
+  // DI seam - accept opts.eventStore for tests.
   let eventStore = o.eventStore;
   if (!eventStore) {
     try {
@@ -173,7 +173,7 @@ export async function setMandatoryHumanReviewThreshold(opts = {}) {
 //   { ok:true, tenant, namespace, threshold, configured:true|false, version }
 //
 // configured:false means no threshold has ever been set for this
-// (tenant, namespace) pair — caller must NOT treat threshold:null as 0.0
+// (tenant, namespace) pair - caller must NOT treat threshold:null as 0.0
 // (that would mean "never escalate"). Default behavior when unconfigured:
 // shouldEscalate returns false (no escalation), but the caller MAY want to
 // fall back to a tenant-wide default; that's policy-layer business.
@@ -225,7 +225,7 @@ export async function getHilConfig(opts = {}) {
   }
   if (!Array.isArray(rows)) rows = [];
 
-  // W411 defense-in-depth — per-row tenant + namespace + provider re-check.
+  // W411 defense-in-depth - per-row tenant + namespace + provider re-check.
   for (const row of rows) {
     if (!row || row.tenant_id !== String(tenant)) continue;
     if (row.namespace !== String(namespace)) continue;

@@ -1,4 +1,4 @@
-// W760 — Language detection (pure JS, no ML deps).
+// W760 - Language detection (pure JS, no ML deps).
 //
 // Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 549-553):
 //   [W760-1] Per-language K-Score reporting → language detect + axis split
@@ -9,15 +9,15 @@
 //     in every install; we trade absolute accuracy for zero dependencies
 //     and sub-millisecond latency.
 //   - HONESTY FLOOR: when the heuristics can't agree, we return
-//     {lang:null, confidence, fallback:true} — never silently pick a
+//     {lang:null, confidence, fallback:true} - never silently pick a
 //     wrong language. Callers (W760-3 confidence thresholds) treat
 //     fallback rows as "route to teacher".
 //   - SCRIPT-CLASS first: a single CJK / Cyrillic / Arabic / Devanagari
 //     character is more diagnostic than a dozen Latin stopwords. We
 //     compute character-class scores BEFORE stopwords.
 //   - STOPWORD frequency for Latin-script disambiguation (en/es/fr/de/it/
-//     pt/nl/pl/sv/no/da/fi/tr/vi/id). The lists are tiny — 5-8 words per
-//     language — to keep the module small.
+//     pt/nl/pl/sv/no/da/fi/tr/vi/id). The lists are tiny - 5-8 words per
+//     language - to keep the module small.
 //   - Code-mixed content: detectLangSegments() splits by script-class
 //     boundary so a "Hello / 你好 / Hola" string returns three segments.
 //
@@ -30,7 +30,7 @@
 
 export const LANG_DETECT_VERSION = 'w760-v1';
 
-// 22 most-common languages for compiled-model use. Keep tight — every
+// 22 most-common languages for compiled-model use. Keep tight - every
 // language we add slows the detector and grows the install. ISO 639-1.
 export const SUPPORTED_LANGS = Object.freeze([
   'en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'ru', 'zh', 'ja',
@@ -44,7 +44,7 @@ export const SUPPORTED_LANGS = Object.freeze([
 // Each test counts how many characters in the text fall inside the named
 // Unicode block. The detector with the highest hit-ratio wins the
 // "script" stage. The thresholds below were tuned so a single non-Latin
-// character in an otherwise Latin string is NOT misclassified — we only
+// character in an otherwise Latin string is NOT misclassified - we only
 // trust script-class when >=20% of code points hit the target block.
 // =============================================================================
 
@@ -55,7 +55,7 @@ const SCRIPT_RANGES = {
   ja_chars: /[぀-ゟ゠-ヿｦ-ﾟ]/g,
   // Hangul (Korean).
   ko_chars: /[가-힯ᄀ-ᇿ㄰-㆏]/g,
-  // Cyrillic (Russian / Bulgarian / etc — we tag as ru).
+  // Cyrillic (Russian / Bulgarian / etc - we tag as ru).
   ru_chars: /[Ѐ-ӿ]/g,
   // Arabic (incl. Arabic Supplement, Extended-A).
   ar_chars: /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿]/g,
@@ -119,7 +119,7 @@ export function detectLang(text, opts) {
   if (typeof text !== 'string' || text.length === 0) {
     return { lang: null, confidence: 0, kind: 'mixed', fallback: true };
   }
-  // Trim — leading/trailing whitespace shouldn't count toward total chars.
+  // Trim - leading/trailing whitespace shouldn't count toward total chars.
   const trimmed = text.trim();
   if (trimmed.length === 0) {
     return { lang: null, confidence: 0, kind: 'mixed', fallback: true };
@@ -145,7 +145,7 @@ export function detectLang(text, opts) {
   const arHits = scriptHits.ar_chars;
   const hiHits = scriptHits.hi_chars;
   const thHits = scriptHits.th_chars;
-  // Japanese commonly mixes kanji + kana — if BOTH kana and kanji are
+  // Japanese commonly mixes kanji + kana - if BOTH kana and kanji are
   // present, treat the whole CJK chunk as Japanese.
   let zhScore = zhHitsRaw / totalNonWs;
   let jaScore = jaHits / totalNonWs;
@@ -203,7 +203,7 @@ export function detectLang(text, opts) {
       return { lang: topSw.lang, confidence: _round4(conf), kind: 'stopword', fallback: false };
     }
   }
-  // Single stopword hit — too weak.
+  // Single stopword hit - too weak.
   return { lang: null, confidence: _round4(topSw.hits / 4), kind: 'mixed', fallback: true };
 }
 

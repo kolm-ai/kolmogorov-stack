@@ -1,4 +1,4 @@
-// K-Score-over-time persistence — the time-series layer for K-Score points.
+// K-Score-over-time persistence - the time-series layer for K-Score points.
 //
 // The rest of the distillation autopilot depends on a durable record of how a
 // tenant's K-Score moves over successive runs: trend detection, regression
@@ -9,7 +9,7 @@
 //   - Every exported async function returns an envelope:
 //       success: { ok:true,  version:'kts-v1', ... }
 //       failure: { ok:false, error:'<reason>', version:'kts-v1' }
-//     The public API NEVER throws — internal errors are caught and surfaced as
+//     The public API NEVER throws - internal errors are caught and surfaced as
 //     ok:false.
 //   - Persistence is best-effort. If the event store is unavailable, a record
 //     call still returns ok:true with persisted:false rather than failing the
@@ -71,7 +71,7 @@ function _parsePayload(row) {
 // --------------------------------------------------------------------------
 
 // Persist one K-Score measurement. `ts` defaults to now (ISO 8601).
-// kscore must be a finite number — anything else returns ok:false.
+// kscore must be a finite number - anything else returns ok:false.
 export async function recordKScore({ tenant, namespace, kscore, artifact_id, run_id, ts } = {}) {
   try {
     const t = tenant || DEFAULT_TENANT;
@@ -204,7 +204,7 @@ export async function backfillKScoreSeries({ tenant, namespace, runs_dir } = {})
     let recorded = 0;
     let skipped = 0;
 
-    // Existing run_ids in the series — used for idempotent skipping.
+    // Existing run_ids in the series - used for idempotent skipping.
     const existing = await getKScoreSeries({ tenant: t, namespace });
     const seen = new Set(
       (existing.ok && Array.isArray(existing.points) ? existing.points : [])

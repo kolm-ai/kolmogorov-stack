@@ -1,6 +1,6 @@
 // src/export-format-registry.js
 //
-// S-6 — Central registry of every export format the SOTA quantization ladder
+// S-6 - Central registry of every export format the SOTA quantization ladder
 // supports. The registry exists so callers (CLI, account UI, runtime passport
 // builder, /docs/compile/formats) all agree on:
 //   * which quant levels each format accepts

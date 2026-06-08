@@ -1,10 +1,10 @@
-// R-6 — Assurance case export.
+// R-6 - Assurance case export.
 //
 // A "trust packet" is the procurement-ready bundle a buyer's security and risk
 // team can attach to a third-line-of-defense review. It folds three signals
 // the platform already produces into one structured envelope:
 //
-//   1. CLAIMS — outcome-shaped statements about the artifact / workspace
+//   1. CLAIMS - outcome-shaped statements about the artifact / workspace
 //      (data provenance, model integrity, deployment integrity, drift
 //      monitoring). Each claim carries:
 //        - claim:        free-text outcome
@@ -15,7 +15,7 @@
 //        - limitations:  what the claim does NOT cover (so the reviewer
 //                        cannot misread silence as scope)
 //
-//   2. CONTROLS — explicit framework mapping (SOC 2, HIPAA, EU AI Act,
+//   2. CONTROLS - explicit framework mapping (SOC 2, HIPAA, EU AI Act,
 //      ISO 27001). Each row carries:
 //        - framework:             'SOC2' | 'HIPAA' | 'EU-AI-Act' | 'ISO-27001'
 //        - control_id:            'CC6.1' | '164.308' | 'Art-13' | 'A.5.1' …
@@ -23,19 +23,19 @@
 //                                 'certification-gated' | 'external-proof-needed'
 //        - evidence_id:           pointer to the supporting artifact / vault row
 //
-//   3. META — generated_at, artifact pointer, workspace pointer, spec version,
+//   3. META - generated_at, artifact pointer, workspace pointer, spec version,
 //      signature hash if the source artifact is signed.
 //
 // Status taxonomy:
-//   * implemented            — the control IS in production now. Evidence
+//   * implemented - the control IS in production now. Evidence
 //                              points at a receipt or vault row that proves it.
-//   * package-gated          — the technical control ships but the buyer must
+//   * package-gated - the technical control ships but the buyer must
 //                              run a specific install / config to enable it
 //                              (e.g. on-prem self-hosted air-gap mode).
-//   * certification-gated    — control exists, third-party certification is in
+//   * certification-gated - control exists, third-party certification is in
 //                              progress (e.g. SOC 2 Type II window not closed).
 //                              No fabrication: vault row tags the gating cert.
-//   * external-proof-needed  — control depends on a signal the platform cannot
+//   * external-proof-needed - control depends on a signal the platform cannot
 //                              attest to itself (e.g. drift monitoring requires
 //                              a separately-enabled namespace drift detector).
 //                              The reviewer must verify externally.
@@ -53,7 +53,7 @@
 
 export const ASSURANCE_CASE_SPEC = 'kolm-assurance-case-1';
 
-// v1 status taxonomy — used by buildAssuranceCase() and the procurement-vault
+// v1 status taxonomy - used by buildAssuranceCase() and the procurement-vault
 // PDF render path. Pinned by tests/r6-assurance-case.test.js and the v1
 // wrapper-r1-r8 symbol-presence test; do NOT renumber.
 export const CLAIM_STATUSES = [
@@ -100,14 +100,14 @@ export const FRAMEWORK_LABELS = {
 // evidence pointer; build* fills the actual id at runtime.
 //
 // Rationale per control:
-//   SOC 2 CC6.1   — Logical access (auth + RBAC).
-//   SOC 2 CC7.2   — Detection of anomalies (drift detection + audit log).
-//   SOC 2 A1.2    — Capacity & resilience (queue + load shed).
-//   HIPAA 164.308 — Administrative safeguards (workforce auth + BAA).
-//   HIPAA 164.312 — Technical safeguards (encryption + integrity controls).
-//   EU AI Act Art 13 — Transparency / instructions for use (model card).
-//   EU AI Act Art 14 — Human oversight (HIL queue + review surface).
-//   ISO 27001 A.5.1 — Information security policies.
+//   SOC 2 CC6.1 - Logical access (auth + RBAC).
+//   SOC 2 CC7.2 - Detection of anomalies (drift detection + audit log).
+//   SOC 2 A1.2 - Capacity & resilience (queue + load shed).
+//   HIPAA 164.308 - Administrative safeguards (workforce auth + BAA).
+//   HIPAA 164.312 - Technical safeguards (encryption + integrity controls).
+//   EU AI Act Art 13 - Transparency / instructions for use (model card).
+//   EU AI Act Art 14 - Human oversight (HIL queue + review surface).
+//   ISO 27001 A.5.1 - Information security policies.
 export const REQUIRED_CONTROL_ROWS = Object.freeze([
   { framework: 'SOC2',      control_id: 'CC6.1',    label: 'Logical and physical access controls' },
   { framework: 'SOC2',      control_id: 'CC7.2',    label: 'System monitoring of anomalies and events' },
@@ -120,7 +120,7 @@ export const REQUIRED_CONTROL_ROWS = Object.freeze([
 ]);
 
 // ---------------------------------------------------------------------------
-// Internal helpers — pure shape probes. NEVER throw on shape mismatch; the
+// Internal helpers - pure shape probes. NEVER throw on shape mismatch; the
 // auto-generator must degrade to 'package-gated' or 'external-proof-needed'
 // when a signal is missing rather than blowing up the report.
 // ---------------------------------------------------------------------------
@@ -220,7 +220,7 @@ function _indexVault(workspace) {
 }
 
 // ---------------------------------------------------------------------------
-// CLAIMS — outcome-shaped statements with evidence_ids
+// CLAIMS - outcome-shaped statements with evidence_ids
 // ---------------------------------------------------------------------------
 
 function _claimDataProvenance(artifact) {
@@ -365,7 +365,7 @@ function _claimJurisdiction(workspace, vaultIdx) {
 }
 
 // ---------------------------------------------------------------------------
-// CONTROLS — explicit framework mapping
+// CONTROLS - explicit framework mapping
 // ---------------------------------------------------------------------------
 
 function _controlEvidence(row, artifact, vaultIdx) {
@@ -374,24 +374,24 @@ function _controlEvidence(row, artifact, vaultIdx) {
   // when nothing maps.
   const { framework, control_id } = row;
 
-  // SOC 2 CC6.1 — auth + RBAC. Anchor in CAIQ IAM-01.1 if present.
+  // SOC 2 CC6.1 - auth + RBAC. Anchor in CAIQ IAM-01.1 if present.
   if (framework === 'SOC2' && control_id === 'CC6.1') {
     const e = vaultIdx['CAIQ:IAM-01.1'];
     if (e) return { evidence_id: e.evidence_id, implementation_status: 'implemented' };
   }
-  // SOC 2 CC7.2 — detection of anomalies. Anchor in drift monitoring claim
+  // SOC 2 CC7.2 - detection of anomalies. Anchor in drift monitoring claim
   // (R-7) if a drift namespace is wired; else certification-gated.
   if (framework === 'SOC2' && control_id === 'CC7.2') {
     const driftCfgs = (artifact && artifact._derived_drift_present) ? true : false;
     if (driftCfgs) return { evidence_id: 'control:r7:drift-monitoring', implementation_status: 'implemented' };
     return { evidence_id: null, implementation_status: 'external-proof-needed' };
   }
-  // SOC 2 A1.2 — capacity. Anchor in CAIQ BCR-01.1 if present.
+  // SOC 2 A1.2 - capacity. Anchor in CAIQ BCR-01.1 if present.
   if (framework === 'SOC2' && control_id === 'A1.2') {
     const e = vaultIdx['CAIQ:BCR-01.1'];
     if (e) return { evidence_id: e.evidence_id, implementation_status: 'implemented' };
   }
-  // HIPAA 164.308 / 164.312 — anchor in CAIQ CEK-01.1 (encryption) and
+  // HIPAA 164.308 / 164.312 - anchor in CAIQ CEK-01.1 (encryption) and
   // IAM-08.1 (workforce auth) when present.
   if (framework === 'HIPAA' && control_id === '164.308') {
     const e = vaultIdx['CAIQ:IAM-08.1'] || vaultIdx['CAIQ:HRS-04.1'];
@@ -401,17 +401,17 @@ function _controlEvidence(row, artifact, vaultIdx) {
     const e = vaultIdx['CAIQ:CEK-01.1'] || vaultIdx['CAIQ:AIS-04.1'];
     if (e) return { evidence_id: e.evidence_id, implementation_status: 'implemented' };
   }
-  // EU AI Act Art 13 — transparency. The model card / passport satisfies this.
+  // EU AI Act Art 13 - transparency. The model card / passport satisfies this.
   if (framework === 'EU-AI-Act' && control_id === 'Art-13') {
     const present = _receiptSummary(artifact) || _runtimePassports(artifact).length > 0;
     if (present) return { evidence_id: 'control:model-card:hf-v0.3', implementation_status: 'implemented' };
   }
-  // EU AI Act Art 14 — human oversight. Anchor in CAIQ GRC-04.1 (governance).
+  // EU AI Act Art 14 - human oversight. Anchor in CAIQ GRC-04.1 (governance).
   if (framework === 'EU-AI-Act' && control_id === 'Art-14') {
     const e = vaultIdx['CAIQ:GRC-04.1'];
     if (e) return { evidence_id: e.evidence_id, implementation_status: 'implemented' };
   }
-  // ISO 27001 A.5.1 — security policies. Anchor in CAIQ AIS-01.1 if present.
+  // ISO 27001 A.5.1 - security policies. Anchor in CAIQ AIS-01.1 if present.
   if (framework === 'ISO-27001' && control_id === 'A.5.1') {
     const e = vaultIdx['CAIQ:AIS-01.1'];
     if (e) return { evidence_id: e.evidence_id, implementation_status: 'implemented' };
@@ -431,7 +431,7 @@ function _controlEvidence(row, artifact, vaultIdx) {
 //
 // workspace (optional): { id, drift_namespaces:{}, procurement_vault:{sig_lite, caiq} }.
 //
-// Returns a structured envelope. NEVER throws — missing inputs downgrade
+// Returns a structured envelope. NEVER throws - missing inputs downgrade
 // individual claims/controls to a 'package-gated' or 'external-proof-needed'
 // row with a descriptive `limitations` string.
 export function buildAssuranceCase({ artifact = null, workspace = null } = {}) {
@@ -517,7 +517,7 @@ export function validateAssuranceCase(envelope) {
 // 4 default claims (reproducibility / provenance / signatures / PII redaction)
 // + V2_DEFAULT_CONTROL_ROWS controls.
 //
-// This module does no I/O — callers pass artifact context inline. By default
+// This module does no I/O - callers pass artifact context inline. By default
 // the four claims map to: status='unknown' when no artifact context, status
 // based on artifact attributes when present.
 // ---------------------------------------------------------------------------
@@ -529,7 +529,7 @@ function _resolveDefaultClaims(artifactContext) {
   const ctx = artifactContext || {};
   const claims = [];
 
-  // Reproducibility — driven by manifest.reproducibility / receipt presence.
+  // Reproducibility - driven by manifest.reproducibility / receipt presence.
   const hasReceipt = !!(ctx.receipt || (ctx.manifest && ctx.manifest.receipt));
   const reproSeed = ctx.manifest && (ctx.manifest.seed != null || ctx.manifest.reproducibility);
   claims.push({
@@ -543,7 +543,7 @@ function _resolveDefaultClaims(artifactContext) {
       : ['No recorded seed/reproducibility hash on the manifest; bit-for-bit reproduction is not attested.'],
   });
 
-  // Provenance — driven by evidence_dag capture+rights nodes.
+  // Provenance - driven by evidence_dag capture+rights nodes.
   const dag = (ctx.evidence_dag || (ctx.manifest && ctx.manifest.evidence_dag) || {});
   const dagNodes = Array.isArray(dag.nodes) ? dag.nodes : (Array.isArray(dag) ? dag : []);
   const captureNodes = dagNodes.filter((n) => n && n.kind === 'capture');
@@ -577,7 +577,7 @@ function _resolveDefaultClaims(artifactContext) {
     limitations: provenanceLimits,
   });
 
-  // Signatures — driven by receipt.signature_* presence.
+  // Signatures - driven by receipt.signature_* presence.
   const r = (ctx.receipt || (ctx.manifest && ctx.manifest.receipt) || {});
   const hasSig = !!(r.signature_ed25519
                     || r.signature_mode === 'ed25519'
@@ -589,7 +589,7 @@ function _resolveDefaultClaims(artifactContext) {
     limitations: hasSig ? [] : ['Artifact is unsigned. Run `kolm sign <artifact.kolm>` before procurement review.'],
   });
 
-  // PII redaction — driven by manifest.pii_redaction or capture-step config.
+  // PII redaction - driven by manifest.pii_redaction or capture-step config.
   const piiConfig = (ctx.manifest && ctx.manifest.pii_redaction)
                   || ctx.pii_redaction
                   || null;
@@ -622,7 +622,7 @@ function _resolveDefaultControls(artifactContext, claims) {
   //   - if a claim with framework-relevant content is 'supported', the
   //     control is 'supported' too.
   //   - otherwise 'partial' if there is partial evidence, else 'unknown'.
-  // The mapping is intentionally coarse — the v1 buildAssuranceCase path
+  // The mapping is intentionally coarse - the v1 buildAssuranceCase path
   // remains the source of truth for the procurement-vault PDF; this v2
   // generator is for the lightweight machine-readable envelope.
   const supportsAccess  = claims.some((c) => c.status === 'supported' && /signature|signed|cryptograph/i.test(c.claim));
@@ -680,7 +680,7 @@ function _resolveDefaultControls(artifactContext, claims) {
  *
  * Async v2 generator. Emits the schema-v2 shape with claims + controls.
  * `artifactId` is the canonical artifact identifier the envelope will key on.
- * `artifactContext` is OPTIONAL — when omitted, the four default claims emit
+ * `artifactContext` is OPTIONAL - when omitted, the four default claims emit
  * status='unknown' (we never invent attestation).
  *
  * Every returned claim's `status` is in CLAIM_STATUSES_V2. Every returned

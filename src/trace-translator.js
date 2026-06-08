@@ -1,9 +1,9 @@
 // src/trace-translator.js
 //
-// W467 — cross-provider trace IR translator.
+// W467 - cross-provider trace IR translator.
 //
 // Closes audit P1 Agent Trace cluster open item ("cross-provider IR
-// translator — Anthropic ↔ OpenAI ↔ vendor function-call differences").
+// translator - Anthropic ↔ OpenAI ↔ vendor function-call differences").
 //
 // What this is:
 //
@@ -20,7 +20,7 @@
 //   - A re-execution layer. The translator produces a new IR; replay
 //     still happens via workflow-ir.interpret() with caller-supplied
 //     executors.
-//   - A semantic re-prompter. We do not edit prompt_template text —
+//   - A semantic re-prompter. We do not edit prompt_template text - 
 //     same prompt goes to the new vendor. If the vendors disagree on
 //     system-prompt placement that is the executor's problem.
 //   - A pricing oracle. Cost re-estimation lives in src/usage.js; this
@@ -41,8 +41,8 @@ export const KNOWN_PROVIDERS = Object.freeze(['anthropic', 'openai', 'generic'])
 
 // Default model map keyed by canonical capability tier.
 //
-// We mirror the W217 frontier catalog's tiering — Opus-class, Sonnet-
-// class, Haiku-class — so an Anthropic Opus call translates to a
+// We mirror the W217 frontier catalog's tiering - Opus-class, Sonnet-
+// class, Haiku-class - so an Anthropic Opus call translates to a
 // comparable OpenAI flagship. Callers can override this entirely by
 // passing opts.model_map.
 //
@@ -122,14 +122,14 @@ function _validateProviders({ from, to }) {
   }
 }
 
-// Public API — translate an IR in place by returning a deep-copied
+// Public API - translate an IR in place by returning a deep-copied
 // version with rewritten LLM-node vendor + model fields. Tool nodes
 // pass through unchanged (the compile-ir pass already normalises
 // vendor-specific tool_use/tool_calls shape into a single TOOL kind).
 //
 // Returns { ir, mappings, dropped, ir_hash, from, to }.
 //
-//   mappings[]: one entry per LLM node — { node_id, from_model,
+//   mappings[]: one entry per LLM node - { node_id, from_model,
 //               from_vendor, to_model, to_vendor, tier, mapped, reason }.
 //   dropped[]:  LLM nodes that had no model lookup AND opts.strict=true.
 //
@@ -142,7 +142,7 @@ export function translateIr(ir, { from, to, model_map, strict = false } = {}) {
     err.code = 'ir_required';
     throw err;
   }
-  // validateIr throws if the shape is wrong — let it through unchanged.
+  // validateIr throws if the shape is wrong - let it through unchanged.
   workflowIr.validateIr(ir);
 
   // Lowercase the override map keys once for stable matching.
@@ -187,7 +187,7 @@ export function translateIr(ir, { from, to, model_map, strict = false } = {}) {
   const newIr = {
     ...ir,
     nodes: newNodes,
-    // edges + seeds are vendor-agnostic — pass through.
+    // edges + seeds are vendor-agnostic - pass through.
     edges: ir.edges.map(e => ({ ...e })),
     seeds: ir.seeds.map(s => ({ ...s })),
   };
@@ -207,7 +207,7 @@ export function translateIr(ir, { from, to, model_map, strict = false } = {}) {
 
 // Helper: translate by trace_id. Pulls the trace tenant-fenced via
 // trace-capture, compiles to IR via compile-ir, then translates.
-// Useful for the route + CLI surface — they don't need to import
+// Useful for the route + CLI surface - they don't need to import
 // three modules.
 export async function translateTrace({ trace_id, tenant_id, from, to, model_map, strict }) {
   if (!trace_id) {
@@ -236,7 +236,7 @@ export async function translateTrace({ trace_id, tenant_id, from, to, model_map,
   };
 }
 
-// Sniff a trace's predominant vendor — useful when the caller didn't
+// Sniff a trace's predominant vendor - useful when the caller didn't
 // supply a from-provider. Looks at LLM_CALL spans' payload.vendor and
 // returns the most common one (defaults to 'generic' if there are no
 // LLM spans).

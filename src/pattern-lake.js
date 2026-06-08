@@ -1,4 +1,4 @@
-// W757 — Cross-namespace anonymized pattern lake.
+// W757 - Cross-namespace anonymized pattern lake.
 //
 // Closes the W751-W755 vertical fingerprint blocker. The five vertical
 // foundation students need fingerprint data to learn shared structure across
@@ -6,7 +6,7 @@
 // module is the privacy-preserving aggregation primitive that the W751
 // fingerprint surface now consumes.
 //
-// HONESTY CONTRACT — the privacy claim is binding:
+// HONESTY CONTRACT - the privacy claim is binding:
 //   - Every contribution stored is a sha256 bigram hash. Raw input text NEVER
 //     enters the lake (tokenizePattern destructures into hashes before any
 //     write path).
@@ -17,26 +17,26 @@
 //   - The lake is disabled by default. The KOLM_W757_LAKE_ENABLED env hatch
 //     is read at WRITE time so a pre-W757 install behaves identically.
 //   - Aggregation enforces a privacy floor of min_contributors=5. Below the
-//     floor the response is an honest `insufficient_contributors` envelope —
+//     floor the response is an honest `insufficient_contributors` envelope - 
 //     NEVER a partial leak.
 //   - Cross-tenant aggregation is the ONLY surface that crosses tenant
 //     boundaries; even then the projection is sha256(bigram) + counts, never
 //     a back-pointer to the contributing tenant_id.
 //
-// W411 tenant fence — every read path filters by tenant_id from the opt-in
+// W411 tenant fence - every read path filters by tenant_id from the opt-in
 // registry AND inside the contribution loop (defense-in-depth). A bug in the
 // outer filter cannot leak rows.
 
 import crypto from 'node:crypto';
 
 import { appendEvent, listEvents } from './event-store.js';
-// Read-only catalog import — never mutated, never re-exported. We thread
+// Read-only catalog import - never mutated, never re-exported. We thread
 // through getVertical for unknown-id rejection in extractVerticalFingerprint.
 import { getVertical, VERTICALS_VERSION } from './verticals.js';
 
 export const PATTERN_LAKE_VERSION = 'w757-v1';
 
-// W757 byte-stability hatch — reading defaults to 'off' so a pre-W757 install
+// W757 byte-stability hatch - reading defaults to 'off' so a pre-W757 install
 // keeps its prior behavior end-to-end. Operators flip the env to opt their
 // installation in to lake writes; opt-in by individual namespace is a
 // separate, finer-grained gate enforced by isOptedIn() below.
@@ -48,11 +48,11 @@ export const LAKE_ENABLED_ENV = 'KOLM_W757_LAKE_ENABLED';
 const PROVIDER_OPTIN = 'kolm_pattern_lake_optin';
 const PROVIDER_CONTRIBUTION = 'kolm_pattern_lake_contribution';
 
-// Privacy floor — never return aggregated data with fewer than 5 distinct
+// Privacy floor - never return aggregated data with fewer than 5 distinct
 // contributors. Tests pin this number; auditors can reference it.
 const MIN_CONTRIBUTORS_DEFAULT = 5;
 
-// Token regex — Unicode letter/number/underscore runs, dropping punctuation
+// Token regex - Unicode letter/number/underscore runs, dropping punctuation
 // and whitespace. The lake is text-only; binary captures (images, audio)
 // flow through the separate W462/W464 multimodal-redact pipelines.
 const TOKEN_RE = /[\p{L}\p{N}_]+/gu;
@@ -61,21 +61,21 @@ function _sha256Hex(s) {
   return crypto.createHash('sha256').update(String(s)).digest('hex');
 }
 
-// _isLakeEnabled() — reads the env hatch at call time so tests can flip it
+// _isLakeEnabled() - reads the env hatch at call time so tests can flip it
 // per-case via process.env without restarting the module.
 function _isLakeEnabled() {
   const v = String(process.env[LAKE_ENABLED_ENV] || '').toLowerCase();
   return v === '1' || v === 'true' || v === 'yes' || v === 'on';
 }
 
-// tokenizePattern(input) — bigram fingerprint extraction.
+// tokenizePattern(input) - bigram fingerprint extraction.
 //
 // Returns an array of sha256-hex strings, one per adjacent bigram in the
 // input. RAW TEXT IS NEVER RETURNED. Tests pin that every element matches
 // the 64-char hex regex.
 //
 // Empty / null / non-string inputs return []. Single-token inputs also
-// return [] (no bigram pairs to form), which is intentional — single-word
+// return [] (no bigram pairs to form), which is intentional - single-word
 // fragments leak too much surface to be useful for cross-tenant aggregation.
 export function tokenizePattern(input) {
   if (input === null || input === undefined) return [];
@@ -92,7 +92,7 @@ export function tokenizePattern(input) {
   return out;
 }
 
-// isOptedIn(tenant_id, namespace) — synchronous-shape read over the lake's
+// isOptedIn(tenant_id, namespace) - synchronous-shape read over the lake's
 // opt-in registry. Returns true ONLY if a row with provider=optin exists
 // for the (tenant_id, namespace) pair AND no later opt-out row supersedes
 // it. The registry is append-only inside the event-store; opt-in / opt-out
@@ -109,7 +109,7 @@ export async function isOptedIn(tenant_id, namespace) {
     limit: 0,
     order: 'asc',
   });
-  // W411 defense-in-depth — tenant_id may have been spoofed by a caller that
+  // W411 defense-in-depth - tenant_id may have been spoofed by a caller that
   // forgot the listEvents tenant filter; re-fence inside the loop.
   let opted = false;
   for (const r of rows) {
@@ -123,7 +123,7 @@ export async function isOptedIn(tenant_id, namespace) {
   return opted;
 }
 
-// optIn(tenant_id, namespace) — durably opt the (tenant, namespace) pair in.
+// optIn(tenant_id, namespace) - durably opt the (tenant, namespace) pair in.
 // Idempotent: a second call updates the timestamp but does not error.
 export async function optIn(tenant_id, namespace) {
   if (!tenant_id) throw new Error('optIn requires tenant_id');
@@ -143,7 +143,7 @@ export async function optIn(tenant_id, namespace) {
   return { ok: true, tenant_id, namespace, action: 'opt_in', version: PATTERN_LAKE_VERSION };
 }
 
-// optOut(tenant_id, namespace) — durably opt out. Append-only; future
+// optOut(tenant_id, namespace) - durably opt out. Append-only; future
 // isOptedIn() reads observe the latest-wins state machine.
 export async function optOut(tenant_id, namespace) {
   if (!tenant_id) throw new Error('optOut requires tenant_id');
@@ -163,7 +163,7 @@ export async function optOut(tenant_id, namespace) {
   return { ok: true, tenant_id, namespace, action: 'opt_out', version: PATTERN_LAKE_VERSION };
 }
 
-// contributePattern({tenant_id, namespace, capture, consent}) — record a
+// contributePattern({tenant_id, namespace, capture, consent}) - record a
 // hash-only contribution for the given capture into the lake.
 //
 // Throws on missing consent (consent !== true). Returns {ok:true, skipped}
@@ -171,7 +171,7 @@ export async function optOut(tenant_id, namespace) {
 // (idempotency); the no-op skip preserves the privacy claim because we
 // never re-hash on duplicates.
 //
-// The capture object is duck-typed — `capture.id` is required; `capture.input`
+// The capture object is duck-typed - `capture.id` is required; `capture.input`
 // and `capture.text` are both checked (in that order) for the source text.
 // Anything else inside `capture` is ignored.
 export async function contributePattern({
@@ -196,7 +196,7 @@ export async function contributePattern({
     : (capture.text != null ? String(capture.text)
       : (capture.prompt != null ? String(capture.prompt) : ''));
 
-  // Honest no-op when the env hatch is off — never silently DROPS the call,
+  // Honest no-op when the env hatch is off - never silently DROPS the call,
   // but also never writes to disk. The envelope tells the caller exactly why.
   if (!_isLakeEnabled()) {
     return {
@@ -207,7 +207,7 @@ export async function contributePattern({
     };
   }
 
-  // Idempotency — defense-in-depth check before tokenization to avoid
+  // Idempotency - defense-in-depth check before tokenization to avoid
   // re-hashing on duplicate writes. Tenant fence both at listEvents query
   // AND inside the loop (W411 invariant).
   const prior = await listEvents({
@@ -233,7 +233,7 @@ export async function contributePattern({
   }
 
   const bigram_hashes = tokenizePattern(source_text);
-  // The contribution row carries ONLY the hash list + metadata — never the
+  // The contribution row carries ONLY the hash list + metadata - never the
   // raw text. tests/wave757 pins that no raw substring survives.
   await appendEvent({
     tenant_id,
@@ -260,10 +260,10 @@ export async function contributePattern({
   };
 }
 
-// _readAllContributions() — internal helper. Reads every contribution row in
+// _readAllContributions() - internal helper. Reads every contribution row in
 // the lake, JSON-decodes the payload, returns the flat list. NO tenant
 // filter here; aggregation callers filter explicitly. The privacy guarantee
-// is that the rows themselves carry only hashes — the tenant identity stays
+// is that the rows themselves carry only hashes - the tenant identity stays
 // on the outer event row, never reaches the aggregated output.
 async function _readAllContributions() {
   const rows = await listEvents({
@@ -288,14 +288,14 @@ async function _readAllContributions() {
   return out;
 }
 
-// aggregatePatterns({min_contributors, vertical, k_top}) — top-K bigram
+// aggregatePatterns({min_contributors, vertical, k_top}) - top-K bigram
 // hashes across opted-in contributors. Returns honest insufficient
 // envelope below the privacy floor.
 //
 // `vertical` parameter is a string id used to filter contributions to those
 // whose source namespace is annotated as belonging to that vertical via the
 // (future) namespace→vertical mapping. For W757-v1 the parameter is a
-// best-effort substring match against namespace — the W715 namespace
+// best-effort substring match against namespace - the W715 namespace
 // fingerprint pipeline will replace this with a learned mapping.
 export async function aggregatePatterns({
   min_contributors = MIN_CONTRIBUTORS_DEFAULT,
@@ -310,7 +310,7 @@ export async function aggregatePatterns({
   const eligible = [];
   for (const row of all_rows) {
     if (!row.tenant_id || !row.namespace) continue;
-    // W411 defense-in-depth — confirm the opt-in is still active for this
+    // W411 defense-in-depth - confirm the opt-in is still active for this
     // (tenant, namespace) pair. Inside the loop so a registry bug cannot
     // surface a row whose opt-in was revoked.
      
@@ -318,7 +318,7 @@ export async function aggregatePatterns({
      
     if (!stillOpted) continue;
     if (vertical) {
-      // Best-effort vertical filter — match if the source namespace contains
+      // Best-effort vertical filter - match if the source namespace contains
       // the vertical id as a substring. Conservative: a tenant labeling
       // their namespace 'support-team-a' lands under vertical='support'.
       if (!String(row.namespace).toLowerCase().includes(String(vertical).toLowerCase())) {
@@ -371,7 +371,7 @@ export async function aggregatePatterns({
   };
 }
 
-// extractVerticalFingerprint(vertical_id) — the fingerprint surface the
+// extractVerticalFingerprint(vertical_id) - the fingerprint surface the
 // W751 vertical catalog consumes. Returns either:
 //   { ok:true, vertical_id, version, n_contributing_namespaces,
 //     top_bigram_hashes, generated_at, dp_epsilon }
@@ -389,7 +389,7 @@ export async function extractVerticalFingerprint(vertical_id) {
       version: PATTERN_LAKE_VERSION,
     };
   }
-  // Lake disabled — surface honest insufficient_lake_data envelope (the
+  // Lake disabled - surface honest insufficient_lake_data envelope (the
   // caller is the vertical fingerprint route; it is OK with the lake being
   // off for this install).
   if (!_isLakeEnabled()) {
@@ -438,11 +438,11 @@ export async function extractVerticalFingerprint(vertical_id) {
   };
 }
 
-// _wipeForTests — destructive helper for the test suite only. The event-
+// _wipeForTests - destructive helper for the test suite only. The event-
 // store's own _resetForTests handles the bulk of the wipe; this helper
 // surfaces a no-op for callers that want a symmetric shape.
 export function _wipeForTests() {
-  // No module-local state to drop — the event-store owns persistence and
+  // No module-local state to drop - the event-store owns persistence and
   // tests already call eventStore._resetForTests() in their freshEventStore
   // helper. This export exists so test code can name it without a runtime
   // failure if it is called.

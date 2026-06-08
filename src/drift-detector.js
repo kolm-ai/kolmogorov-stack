@@ -1,4 +1,4 @@
-// R-7 — Namespace-scoped drift detection over the capture lake + receipts.
+// R-7 - Namespace-scoped drift detection over the capture lake + receipts.
 //
 // Where this fits in the drift family:
 //
@@ -22,7 +22,7 @@
 //      In the lookback window, what fraction of routed calls hit
 //      `frontier_fallback`? Compare against the baseline window. The
 //      ConfidenceRouter only emits `frontier_fallback` when the local
-//      artifact lacked confidence — a rising rate is the canonical
+//      artifact lacked confidence - a rising rate is the canonical
 //      "your traffic shifted away from the artifact" signal.
 //      Receipts without route_decision (older rows) are excluded so we
 //      never under-count or over-count the rate by treating missing as 0.
@@ -46,11 +46,11 @@
 //   declare drift when ANY of the three signals exceeds 2σ ('warn') or
 //   3σ ('alert') of its in-window variance. The 2σ/3σ convention is the
 //   standard SPC (Statistical Process Control) ladder and keeps thresholds
-//   self-calibrating across tenants — a steady namespace with low variance
+//   self-calibrating across tenants - a steady namespace with low variance
 //   trips on smaller absolute deltas than a noisy one.
 //
 //   When the baseline window is too thin (< MIN_BASELINE_SAMPLES) we
-//   return status='ok' and `recommendation:null` — refusing to fabricate
+//   return status='ok' and `recommendation:null` - refusing to fabricate
 //   a drift call from insufficient data.
 //
 // Recommendation generator:
@@ -59,7 +59,7 @@
 //
 //     kolm distill --namespace <ns> --priority-captures fallback_eligible --limit 200
 //
-//   We do NOT auto-run anything from this module — the operator stays in
+//   We do NOT auto-run anything from this module - the operator stays in
 //   the loop. The W813 auto-remediate path (src/drift-alert-w813.js +
 //   /v1/drift/auto-remediate) is the opt-in self-driving counterpart.
 //
@@ -71,7 +71,7 @@
 //   primary index on the observations table and we never fall back to
 //   `all()` if findByTenant returns nothing.
 //
-// Pure JS — no model imports, no embedding API. Safe to call from the
+// Pure JS - no model imports, no embedding API. Safe to call from the
 // router hot path; the heaviest op is one sha256 per capture sentence.
 
 import crypto from 'node:crypto';
@@ -94,7 +94,7 @@ export const MIN_BASELINE_SAMPLES = 8;
 export const MIN_BASELINE_RECEIPTS = 5;
 
 // Standard SPC ladder: warn at 2σ, alert at 3σ. The "1σ floor" is the
-// minimum baseline standard deviation we accept — a perfectly steady
+// minimum baseline standard deviation we accept - a perfectly steady
 // baseline (σ ≈ 0) would otherwise trip on the tiniest absolute delta;
 // the floor turns those into "ok" instead of "alert".
 export const SIGMA_WARN = 2.0;
@@ -217,7 +217,7 @@ function _isInWindow(rowTs, windowStartMs, windowEndMs) {
 
 // Tenant-scoped reads. Optional injection so tests can stub the lake
 // without touching disk. The default reader reads observations + captures
-// from src/store.js — same shape the router writes via the gateway path.
+// from src/store.js - same shape the router writes via the gateway path.
 function _defaultReadReceipts(tenant_id) {
   try {
     return store.findByTenant('observations', tenant_id) || [];
@@ -268,7 +268,7 @@ function _promptText(row) {
 // =============================================================================
 
 function _fallbackRate(receipts) {
-  // Older rows lack route_decision — exclude them so we never mis-count.
+  // Older rows lack route_decision - exclude them so we never mis-count.
   let known = 0;
   let fb = 0;
   for (const r of receipts) {
@@ -324,7 +324,7 @@ function _volumeRatio(baselineCount, baselineDays, lookbackCount, lookbackDays) 
 }
 
 // =============================================================================
-// SPC ladder — compute baseline standard deviation by chunking the baseline
+// SPC ladder - compute baseline standard deviation by chunking the baseline
 // window into N sub-windows and treating each chunk's signal as one sample.
 // =============================================================================
 
@@ -357,7 +357,7 @@ function _baselineFallbackStats(baselineReceipts, baselineStartMs, baselineEndMs
 // Same idea, but for the distribution-distance signal. Each chunk gets its
 // own centroid; we compute distance against the overall baseline centroid
 // and treat the per-chunk distances as the variance sample. This is a
-// self-baseline noise floor — if the baseline is internally chunky we let
+// self-baseline noise floor - if the baseline is internally chunky we let
 // lookback drift more before flagging.
 function _baselineDistributionStats(baselineCaps, baselineStartMs, baselineEndMs) {
   const K = 6;
@@ -440,7 +440,7 @@ function _baselineVolumeStats(baselineRows, baselineStartMs, baselineEndMs, base
  *     volume_ratio: number|null,
  *     status: 'ok' | 'warn' | 'alert',
  *     recommendation: string|null,
- *     // Diagnostic breakdown — surfaced so the dashboard can show "why".
+ *     // Diagnostic breakdown - surfaced so the dashboard can show "why".
  *     details: {
  *       lookback: { receipts_count, captures_count, fallback_rate, fallback_sample_size },
  *       baseline: { receipts_count, captures_count, fallback_rate, fallback_sample_size,
@@ -570,7 +570,7 @@ export function computeDriftSignals(opts = {}) {
   // ---- Recommendation generator ----
   let recommendation = null;
   if (status === 'warn' || status === 'alert') {
-    // Always recommend the same starting command — the operator can refine
+    // Always recommend the same starting command - the operator can refine
     // limits. The `fallback_eligible` cohort lifts the captures that landed
     // on `frontier_fallback` so the next distill round focuses on the
     // weakness the router already surfaced.
@@ -642,7 +642,7 @@ export const SEVERITY_THRESHOLDS = Object.freeze({
   // medium if either > half the high thresholds
   medium_fallback_rate_delta: 0.025,
   medium_topic_kl:            0.15,
-  // length / language are tertiary signals — same shape, smaller cutoffs
+  // length / language are tertiary signals - same shape, smaller cutoffs
   medium_length_shift: 0.20,
   high_length_shift:   0.40,
   medium_language_shift: 0.10,
@@ -735,7 +735,7 @@ export function scoreSeverity(drift) {
 }
 
 /**
- * DriftDetector — class wrapper around the lake-read drift signals path.
+ * DriftDetector - class wrapper around the lake-read drift signals path.
  *
  * Distinct from computeDriftSignals above:
  *   - returns the (topic_kl_divergence, length_shift, fallback_rate,
@@ -823,7 +823,7 @@ export class DriftDetector {
     const mlB = meanLen(baselineCaptures);
     const length_shift = mlB > 0 ? (mlL - mlB) / mlB : 0;
 
-    // Language shift — coarse: fraction of captures with non-ASCII characters.
+    // Language shift - coarse: fraction of captures with non-ASCII characters.
     // Magnitude of |frac_lookback - frac_baseline|.
     const nonAsciiFrac = (rows) => {
       if (rows.length === 0) return 0;

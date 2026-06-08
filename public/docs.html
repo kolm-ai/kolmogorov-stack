@@ -3,813 +3,353 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Docs · kolm.ai</title>
-<meta name="description" content="Documentation for the kolm AI compiler. Quickstart, CLI reference, SDKs, runtime, K-score, security, integrations, deployment patterns. Everything you need to ship a signed .kolm artifact into production.">
-<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Docs">
-<meta property="og:description" content="Documentation for the kolm AI compiler. Everything you need to ship a signed .kolm artifact into production.">
-<meta property="og:type" content="article">
+<meta name="description" content="How to put your agent into kolm (import the logs you already have or run a sidecar proxy), how a buyer verifies a signed report offline in the browser, the CLI, or a library, and the report schema each signature covers. No account, no server in the trust path.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="kolm docs: onramp, offline verify, and the report schema">
+<meta property="og:description" content="Get your agent in with a log import or a sidecar proxy, verify a signed report offline in the browser, the CLI, or a library, and read the schema the signature covers.">
+<meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="kolm docs">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/ks.css" as="style">
-<link rel="stylesheet" href="/ks.css">
-<link rel="stylesheet" href="/surface-polish.css">
-<link rel="stylesheet" href="/warm-paper.css">
-<style>
-  
-  .docs-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); max-width: 1280px; margin: 0 auto; padding: 32px clamp(20px, 4vw, 48px) 96px; }
-  @media (max-width: 900px) { .docs-shell { grid-template-columns: 1fr; padding-top: 16px; } }
-  .docs-side { position: sticky; top: 84px; align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; padding-right: 12px; font-size: 14px; line-height: 1.65; }
-  .docs-side h4 { margin: 18px 0 6px; font-size: 11px; font-weight: 580; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
-  .docs-side h4:first-child { margin-top: 0; }
-  .docs-side a { display: block; padding: 4px 0 4px 16px; color: #4a4a4a; text-decoration: none; border-left: 2px solid transparent; transition: color 0.1s, border-color 0.1s; }
-  .docs-side a:hover { color: #111111; }
-  .docs-side a[aria-current="page"] { color: #111111; border-left-color: var(--ks-accent); padding-left: 14px; font-weight: 540; }
-  [data-theme="dark"] .docs-side a { color: #b0b3b8; }
-  [data-theme="dark"] .docs-side a:hover { color: #e6e9ee; }
-  [data-theme="dark"] .docs-side a[aria-current="page"] { color: #e6e9ee; }
-
-  @media (max-width: 900px) {
-    .docs-side { position: relative; top: auto; max-height: none; padding: 16px; background: #e8ebef; border: 1px solid #dde1e7; border-radius: 10px; margin-bottom: 24px; }
-    [data-theme="dark"] .docs-side { background: #15171c; border-color: #232730; }
-    .docs-side h4 { margin-top: 10px; }
-  }
-
-  .docs-hero { padding: 48px 0 40px; border-bottom: 1px solid #dde1e7; margin-bottom: 40px; }
-  [data-theme="dark"] .docs-hero { border-bottom-color: #232730; }
-  .docs-hero h1 { font-size: clamp(34px, 4.5vw, 48px); font-weight: 620; letter-spacing: -0.025em; line-height: 1.08; margin: 0 0 12px; color: #111111; font-feature-settings: "ss01", "cv11", "kern"; }
-  [data-theme="dark"] .docs-hero h1 { color: #e6e9ee; }
-  .docs-hero .lede { font-size: 17px; line-height: 1.55; color: #4a4a4a; max-width: 640px; margin: 0 0 24px; }
-  [data-theme="dark"] .docs-hero .lede { color: #b0b3b8; }
-  .docs-hero .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .docs-cta-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--ks-accent); color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 540; transition: background 0.1s; }
-  .docs-cta-primary:hover { background: var(--ks-accent); }
-  .docs-cta-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: transparent; color: #111111; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 540; border: 1px solid #cbd0d6; }
-  .docs-cta-ghost:hover { border-color: var(--ks-accent); color: var(--ks-accent); }
-  [data-theme="dark"] .docs-cta-ghost { color: #e6e9ee; border-color: #2f343f; }
-  [data-theme="dark"] .docs-cta-ghost:hover { color: var(--ks-accent); border-color: var(--ks-accent); }
-
-  .docs-search-trigger { display: inline-flex; align-items: center; gap: 10px; padding: 9px 14px 9px 12px; background: #e8ebef; border: 1px solid #cbd0d6; border-radius: 8px; color: #4a4a4a; font-size: 13.5px; cursor: pointer; min-width: 260px; transition: border-color 0.1s; font-family: inherit; }
-  .docs-search-trigger:hover { border-color: var(--ks-accent); }
-  .docs-search-trigger .ph { flex: 1; text-align: left; }
-  .docs-search-trigger kbd { display: inline-flex; align-items: center; padding: 2px 6px; background: #f3f5f7; border: 1px solid #cbd0d6; border-radius: 4px; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: 11px; color: #4a4a4a; }
-  [data-theme="dark"] .docs-search-trigger { background: #15171c; border-color: #2f343f; color: #b0b3b8; }
-  [data-theme="dark"] .docs-search-trigger kbd { background: #0e1116; border-color: #2f343f; color: #b0b3b8; }
-
-  .docs-cards-section { margin-bottom: 48px; }
-  .docs-cards-section h2 { font-size: 13px; font-weight: 580; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); margin: 0 0 16px; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
-  .docs-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  @media (max-width: 1100px) { .docs-card-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px) { .docs-card-grid { grid-template-columns: 1fr; } }
-  .docs-card { display: flex; flex-direction: column; gap: 8px; padding: 18px 18px 16px; background: #e8ebef; border: 1px solid #dde1e7; border-radius: 10px; text-decoration: none; transition: border-color 0.1s, transform 0.1s; }
-  .docs-card:hover { border-color: var(--ks-accent); transform: translateY(-1px); }
-  [data-theme="dark"] .docs-card { background: #15171c; border-color: #232730; }
-  [data-theme="dark"] .docs-card:hover { border-color: var(--ks-accent); }
-  .docs-card .icon { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; background: #f3f5f7; border-radius: 6px; color: var(--ks-accent); }
-  [data-theme="dark"] .docs-card .icon { background: #0e1116; color: var(--ks-accent); }
-  .docs-card h3 { margin: 4px 0 0; font-size: 15px; font-weight: 580; color: #111111; line-height: 1.3; }
-  [data-theme="dark"] .docs-card h3 { color: #e6e9ee; }
-  .docs-card p { margin: 0; font-size: 13px; line-height: 1.55; color: #4a4a4a; }
-  [data-theme="dark"] .docs-card p { color: #b0b3b8; }
-
-  .docs-popular { background: linear-gradient(180deg, #eef1f5 0%, transparent 100%); border: 1px solid #cbd0d6; padding: 24px; border-radius: 12px; margin-bottom: 40px; }
-  [data-theme="dark"] .docs-popular { background: linear-gradient(180deg, #161a20 0%, transparent 100%); border-color: #252b34; }
-  .docs-popular h2 { color: var(--ks-accent); }
-  .docs-popular .docs-card { background: #f3f5f7; }
-  [data-theme="dark"] .docs-popular .docs-card { background: #0e1116; }
-
-  .docs-recent { padding-top: 24px; border-top: 1px solid #dde1e7; }
-  [data-theme="dark"] .docs-recent { border-top-color: #232730; }
-  .docs-recent h2 { font-size: 13px; font-weight: 580; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ks-accent); margin: 0 0 12px; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
-  .docs-recent ul { list-style: none; padding: 0; margin: 0; }
-  .docs-recent li { padding: 10px 0; border-bottom: 1px solid #dde1e7; display: flex; gap: 14px; align-items: baseline; font-size: 14px; }
-  .docs-recent li:last-child { border-bottom: 0; }
-  [data-theme="dark"] .docs-recent li { border-bottom-color: #1d2027; }
-  .docs-recent .date { font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: 11.5px; color: #888; flex-shrink: 0; min-width: 88px; }
-  .docs-recent a { color: #111111; text-decoration: none; font-weight: 530; }
-  .docs-recent a:hover { color: var(--ks-accent); }
-  [data-theme="dark"] .docs-recent a { color: #e6e9ee; }
-  [data-theme="dark"] .docs-recent a:hover { color: var(--ks-accent); }
-  .docs-recent .blurb { color: #6a6a6a; font-size: 13.5px; }
-  [data-theme="dark"] .docs-recent .blurb { color: #9a9da3; }
-
-  /* Cmd-K modal */
-  .docs-cmdk-backdrop { position: fixed; inset: 0; background: rgba(15, 17, 22, 0.55); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding-top: 12vh; }
-  .docs-cmdk-backdrop.open { display: flex; }
-  .docs-cmdk { width: 100%; max-width: 560px; background: #f3f5f7; border-radius: 12px; border-top: 2px solid var(--ks-accent); box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; display: flex; flex-direction: column; max-height: 70vh; }
-  [data-theme="dark"] .docs-cmdk { background: #15171c; }
-  .docs-cmdk input { width: 100%; padding: 18px 20px; border: 0; outline: 0; background: transparent; color: #111111; font-size: 15px; font-family: inherit; border-bottom: 1px solid #dde1e7; }
-  [data-theme="dark"] .docs-cmdk input { color: #e6e9ee; border-bottom-color: #232730; }
-  .docs-cmdk input::placeholder { color: #888; }
-  .docs-cmdk-list { overflow-y: auto; padding: 6px 0; max-height: 55vh; }
-  .docs-cmdk-list .item { display: block; padding: 10px 20px; color: #111111; text-decoration: none; font-size: 14px; line-height: 1.4; cursor: pointer; }
-  .docs-cmdk-list .item .url { display: block; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: 11.5px; color: #888; margin-top: 2px; }
-  .docs-cmdk-list .item:hover, .docs-cmdk-list .item.active { background: #e8ebef; color: var(--ks-accent); }
-  [data-theme="dark"] .docs-cmdk-list .item { color: #e6e9ee; }
-  [data-theme="dark"] .docs-cmdk-list .item:hover, [data-theme="dark"] .docs-cmdk-list .item.active { background: #1d2027; color: var(--ks-accent); }
-  .docs-cmdk-list .empty { padding: 24px 20px; color: #888; font-size: 13.5px; text-align: center; }
-  .docs-cmdk-foot { display: flex; gap: 16px; padding: 10px 20px; border-top: 1px solid #dde1e7; font-size: 11.5px; color: #888; font-family: var(--ks-mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
-  [data-theme="dark"] .docs-cmdk-foot { border-top-color: #232730; }
-  .docs-cmdk-foot kbd { font-family: inherit; }
-
-  /* Test anchor block stays hidden for lock-in tests */
-  .test-anchor { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-</style>
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Linux, macOS, Windows (WSL)",
+  "@type": "TechArticle",
+  "headline": "kolm docs: onramp, offline verify, and the report schema",
+  "description": "Get your agent's activity into kolm with a log import or a sidecar proxy, verify a signed report offline in the browser, the CLI, or a library, and read the canonical schema the Ed25519 signature covers.",
   "url": "https://kolm.ai/docs",
-  "description": "Documentation for the kolm AI compiler. Quickstart, CLI reference, SDKs, runtime, K-score, security, integrations, deployment patterns. Everything you need to ship a signed .kolm artifact into production.",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "publisher": { "@type": "Organization", "name": "kolm.ai", "@id": "https://kolm.ai/#org" }
+  "inLanguage": "en",
+  "author": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
-<script>
-  (function(){
-    try {
-      var t = localStorage.getItem('kolm-theme');
-      if (t === 'dark') {
-        document.documentElement.setAttribute('data-theme','dark');
-        document.documentElement.style.background = '#0e1116';
-        document.documentElement.style.colorScheme = 'dark';
-      } else {
-        document.documentElement.setAttribute('data-theme','light');
-        document.documentElement.style.background = '#f3f5f7';
-        document.documentElement.style.colorScheme = 'light';
-      }
-    } catch(e){
-      try {
-        document.documentElement.setAttribute('data-theme','light');
-        document.documentElement.style.background = '#f3f5f7';
-        document.documentElement.style.colorScheme = 'light';
-      } catch(_){}
-    }
-  })();
-</script>
-<script defer src="/nav.js"></script>
-<script defer src="/kolm-chat.js"></script>
 </head>
-<body class="ks">
-<a class="kolm-skip" href="#main" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to main content</a>
-<a href="#main" class="ks-skip">Skip to content</a>
+<body>
 
-<div class="ks-nav-wrap">
-  <nav class="ks-nav" aria-label="Primary">
-    <a href="/" class="ks-nav__brand" aria-label="kolm.ai: the AI compiler"><span class="ks-nav__mark" aria-hidden="true"><svg viewbox="0 0 32 32" fill="none" role="img" aria-label="kolm"><rect x="4" y="6" width="4.5" height="20" rx="0.4" /><rect x="13" y="9" width="4.5" height="14" rx="0.4" /><rect x="22" y="12" width="4.5" height="8" rx="0.4" /></svg></span><span>kolm<b>.ai</b></span></a>
-    <ul class="ks-nav__list">
-      <li><a href="/product">Product</a></li>
-      <li><a href="/solutions/teams">For teams</a></li>
-      <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/docs" aria-current="page">Docs</a></li>
-      <li><a href="https://github.com/kolm-ai/kolm" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true" style="font-size:0.78em;opacity:0.55;margin-left:3px;">&uarr;</span></a></li>
-    </ul>
-    <div class="ks-nav__right">
-      <button type="button" class="ks-theme-toggle" id="ksThemeToggle" aria-label="Toggle theme" title="Toggle theme">
-        <svg class="theme-icon theme-icon--moon" viewbox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-        <svg class="theme-icon theme-icon--sun" viewbox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
-      </button>
-      <a href="/signup?intent=login" class="ks-nav__signin">Sign in</a>
-      <a href="/signup" class="ks-btn ks-btn--primary ks-btn--sm">Get started <span class="ks-btn-arrow">&rarr;</span></a>
-      <button class="ks-nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-        <svg width="18" height="18" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-      </button>
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
     </div>
-  </nav>
-  <div class="ks-nav__sheet" id="navSheet">
-    <a href="/product">Product</a>
-    <a href="/solutions/teams">For teams</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/docs">Docs</a>
-    <a href="/enterprise">Enterprise</a>
-    <a href="/signup?intent=login">Sign in</a>
-    <a href="/signup">Get started &rarr;</a>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
   </div>
-</div>
+</header>
 
-<script>
-(function(){
-  var btn = document.getElementById('ksThemeToggle');
-  if (!btn) return;
-  function getTheme(){
-    var attr = document.documentElement.getAttribute('data-theme');
-    if (attr === 'dark' || attr === 'light') return attr;
-    try { var s = localStorage.getItem('kolm-theme'); if (s === 'dark' || s === 'light') return s; } catch(e){}
-    try { if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) return 'dark'; } catch(e){}
-    return 'light';
-  }
-  function apply(theme){
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.style.colorScheme = theme;
-    document.documentElement.style.background = theme === 'dark' ? '#0e1116' : '#f3f5f7';
-    try { localStorage.setItem('kolm-theme', theme); } catch(e){}
-    btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-    btn.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' theme');
-  }
-  apply(getTheme());
-  btn.addEventListener('click', function(){ apply(getTheme() === 'dark' ? 'light' : 'dark'); });
-})();
-</script>
+<main>
 
-<main id="main">
-
-  <div class="docs-shell">
-
-    <!-- Left sidebar: flat (Linear-style), 8 category groups -->
-    <aside class="docs-side" aria-label="Documentation navigation">
-      <h4>Get started</h4>
-      <a href="/docs" aria-current="page">Docs home</a>
-      <a href="/quickstart">Quickstart</a>
-      <a href="/why-kolm">Why kolm</a>
-      <a href="/compare">Compare</a>
-      <a href="/docs/cookbook">Cookbook</a>
-      <a href="/glossary">Glossary</a>
-
-      <h4>CLI</h4>
-      <a href="/docs/cli/index">All verbs</a>
-      <a href="/docs/cli/init">init</a>
-      <a href="/docs/cli/capture">capture</a>
-      <a href="/docs/cli/distill">distill</a>
-      <a href="/docs/cli/compile">compile</a>
-      <a href="/docs/cli/score">score</a>
-      <a href="/docs/cli/verify">verify</a>
-      <a href="/docs/cli/run">run</a>
-      <a href="/docs/cli/doctor">doctor</a>
-
-      <h4>SDKs</h4>
-      <a href="/sdks">All bindings</a>
-      <a href="/sdks#node">Node.js</a>
-      <a href="/sdks#python">Python</a>
-      <a href="/sdks#rust">Rust</a>
-      <a href="/sdks#c">C (single-header)</a>
-      <a href="/sdks#mcp">MCP server</a>
-      <a href="/sdks#vscode">VS Code</a>
-
-      <h4>Distillation</h4>
-      <a href="/docs/distillation">Distillation guide</a>
-      <a href="/docs/reasoning-traces">Reasoning traces</a>
-      <a href="/docs/multimodal-pipeline">Multimodal pipeline</a>
-      <a href="/docs/federated-consortium">Federated consortium</a>
-      <a href="/docs/regulatory-toolkit">Regulatory packets</a>
-
-      <h4>Runtimes</h4>
-      <a href="/runtimes">Runtime matrix</a>
-      <a href="/docs/runtime">Runtime spec</a>
-      <a href="/docs/hardware">Hardware targets</a>
-      <a href="/docs/runtime-placement">Placement strategy</a>
-      <a href="/docs/numeric-accuracy">Numeric accuracy</a>
-
-      <h4>Receipts &amp; verify</h4>
-      <a href="/docs/rs-1">RS-1 spec</a>
-      <a href="/docs/verify">Verify a .kolm</a>
-      <a href="/docs/lineage">Lineage</a>
-      <a href="/docs/audit">Audit log</a>
-      <a href="/docs/audit-export">Audit export</a>
-
-      <h4>Eval &amp; K-score</h4>
-      <a href="/k-score">K-score spec</a>
-      <a href="/k-score-explained">Authoring evals</a>
-      <a href="/docs/evals">Eval packs</a>
-      <a href="/docs/k-score-methodology">Methodology</a>
-      <a href="/benchmarks">Benchmarks</a>
-      <a href="/docs/cve-in-kscore">CVE in K-score</a>
-
-      <h4>Run &amp; Govern</h4>
-      <a href="/docs/run/devices">Devices</a>
-      <a href="/docs/run/deploy">Deploy pipeline</a>
-      <a href="/docs/run/fleet">Fleet management</a>
-      <a href="/docs/run/testing">On-device testing</a>
-      <a href="/docs/run/monitoring">Monitoring</a>
-      <a href="/docs/run/updates">OTA updates</a>
-      <a href="/docs/run/security">Security</a>
-      <a href="/docs/run/runtimes">Runtime install</a>
-      <a href="/docs/run/rollback">Rollback</a>
-      <a href="/docs/run/speed-optimization">Speed optimization</a>
-      <a href="/docs/run/troubleshooting">Troubleshooting</a>
-
-      <h4>Deploy</h4>
-      <a href="/enterprise">Reference architectures</a>
-      <a href="/self-host">Self-host</a>
-      <a href="/docs/kubernetes">Kubernetes</a>
-      <a href="/docs/multi-region">Multi-region</a>
-      <a href="/docs/gateway-mode">Gateway mode</a>
-      <a href="/airgap">Air-gap</a>
-
-      <h4>Security</h4>
-      <a href="/security">Security center</a>
-      <a href="/soc2">SOC 2</a>
-      <a href="/hipaa-mapping">HIPAA mapping</a>
-      <a href="/baa">BAA template</a>
-      <a href="/docs/privacy">Privacy controls</a>
-      <a href="/docs/guardrails">Guardrails</a>
-      <a href="/docs/webauthn">WebAuthn</a>
-
-      <h4>Integrations</h4>
-      <a href="/integrations">All integrations</a>
-      <a href="/docs/github-actions">GitHub Actions</a>
-      <a href="/integrations/litellm">LiteLLM</a>
-      <a href="/docs/connectors">Connectors</a>
-      <a href="/docs/webhooks">Webhooks</a>
-      <a href="/docs/vscode">VS Code</a>
-
-      <h4>Reference</h4>
-      <a href="/docs/api">HTTP API</a>
-      <a href="/docs/reference/config-toml">config.toml</a>
-      <a href="/docs/reference/doctor-checks">Doctor checks</a>
-      <a href="/docs/reference/ship-gate">Ship gate</a>
-      <a href="/openapi.json">OpenAPI JSON</a>
-      <a href="/changelog">Changelog</a>
-      <a href="/llms.txt">llms.txt</a>
-    </aside>
-
-    <!-- Main content column -->
-    <div>
-      <header class="docs-hero">
-        <h1>Documentation</h1>
-        <p class="lede">Everything you need to ship a signed <code>.kolm</code> artifact. Start with the quickstart, read the K-score spec next, and use the cards below to jump to the area you actually work in.</p>
-        <div class="actions">
-          <a href="/quickstart" class="docs-cta-primary">Open the quickstart <span aria-hidden="true">&rarr;</span></a>
-          <a href="/k-score" class="docs-cta-ghost">K-score spec</a>
-          <button type="button" class="docs-search-trigger" id="docsSearchTrigger" aria-label="Search documentation">
-            <svg width="14" height="14" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <span class="ph">Search docs&hellip;</span>
-            <kbd id="docsSearchKbd">Ctrl K</kbd>
-          </button>
-        </div>
-      </header>
-
-      <!-- Popular row: 2 cards, highlighted -->
-      <section class="docs-cards-section docs-popular">
-        <h2>Popular</h2>
-        <div class="docs-card-grid" style="grid-template-columns: repeat(2, 1fr);">
-          <a href="/quickstart" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7" /><polyline points="6 17 11 12 6 7" /></svg>
-            </span>
-            <h3>Quickstart</h3>
-            <p>Install, route a call through the gateway, capture, distill, quantize, sign, and verify your first <code>.kolm</code> in 10 minutes on a developer laptop.</p>
-          </a>
-          <a href="/k-score" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-            </span>
-            <h3>K-score gate spec</h3>
-            <p>One number per artifact, composed from five deterministic axes. Embedded in the receipt. Same number on your laptop, in CI, and at your auditor's desk.</p>
-          </a>
-        </div>
-      </section>
-
-      <!-- Surface grid: 8 cards -->
-      <section class="docs-cards-section">
-        <h2>Browse by area</h2>
-        <div class="docs-card-grid">
-          <a href="/quickstart" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z" /></svg>
-            </span>
-            <h3>Get started</h3>
-            <p>Quickstart, why kolm, compare against LoRAX / Predibase / OpenPipe, and the 35-recipe cookbook.</p>
-          </a>
-          <a href="/docs/cli/index" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" /></svg>
-            </span>
-            <h3>CLI reference</h3>
-            <p>Every verb the <code>kolm</code> CLI accepts. Init, login, capture, distill, compile, score, verify, run, doctor, and the rest.</p>
-          </a>
-          <a href="/sdks" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
-            </span>
-            <h3>SDKs</h3>
-            <p>Six first-class bindings: Node.js, Python, Rust, C single-header, MCP server, VS Code extension. Apache-2.0.</p>
-          </a>
-          <a href="/runtimes" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
-            </span>
-            <h3>Runtimes</h3>
-            <p>GGUF + llama.cpp for laptop, vLLM for production GPU, TensorRT-LLM for latency floor, MLX for Apple Silicon, ONNX for edge.</p>
-          </a>
-          <a href="/docs/rs-1" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
-            </span>
-            <h3>Receipts &amp; verify</h3>
-            <p>RS-1 receipt chain spec, the 24 verifier checks, Ed25519 signatures, dispatch via <code>/v1/run</code>, public lookup at <code>/v1/receipts/:hash/public</code>.</p>
-          </a>
-          <a href="/k-score" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21H3" /><polyline points="6 15 10 9 14 13 19 6" /></svg>
-            </span>
-            <h3>Eval &amp; K-score</h3>
-            <p>The five axes, the composition math, authoring your own eval pack, signing it, and published benchmark scores.</p>
-          </a>
-          <a href="/enterprise" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22V8l10-6 10 6v14" /><path d="M9 22V12h6v10" /></svg>
-            </span>
-            <h3>Deploy</h3>
-            <p>SaaS multi-tenant, SaaS dedicated, BYOC, on-prem with DMZ broker, air-gap appliance. Helm + Terraform module included.</p>
-          </a>
-          <a href="/security" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-            </span>
-            <h3>Security</h3>
-            <p>SOC 2 Type I available, Type II in progress. HIPAA, BAA, encryption, key management, tenant isolation, pen-test summary.</p>
-          </a>
-        </div>
-      </section>
-
-      <!-- Integrations row (4 cards) -->
-      <section class="docs-cards-section">
-        <h2>Integrations</h2>
-        <div class="docs-card-grid">
-          <a href="/integrations" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
-            </span>
-            <h3>All adapters</h3>
-            <p>CI, observability, EHR, EDI, identity, secrets, datastores. The full matrix.</p>
-          </a>
-          <a href="/docs/github-actions" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M14.31 8l5.74 9.94" /><path d="M9.69 8h11.48" /><path d="M7.38 12l5.74-9.94" /></svg>
-            </span>
-            <h3>GitHub Actions</h3>
-            <p>Drop-in action for <code>kolm score --min</code>. Below-floor artifacts fail the build.</p>
-          </a>
-          <a href="/integrations/litellm" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
-            </span>
-            <h3>LiteLLM / OpenAI</h3>
-            <p>Drop-in proxy captures every call as a labeled row ready to distill.</p>
-          </a>
-          <a href="/docs/vscode" class="docs-card">
-            <span class="icon" aria-hidden="true">
-              <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>
-            </span>
-            <h3>VS Code</h3>
-            <p>Status-bar K-score, inline distill commands, receipt explorer, CI integration.</p>
-          </a>
-        </div>
-      </section>
-
-      <!-- Recent updates -->
-      <section class="docs-recent">
-        <h2>Recent updates</h2>
-        <ul>
-          <li>
-            <span class="date">2026-05-25</span>
-            <span><a href="/changelog#w846">Hero typography pull-down &amp; pricing tiers refresh</a> <span class="blurb">&middot; thin contemporary heading, Business tier with SAML + BAA.</span></span>
-          </li>
-          <li>
-            <span class="date">2026-05-24</span>
-            <span><a href="/docs/cost-optimization">Cost optimization</a> <span class="blurb">&middot; savings-based pricing with 7-day baseline and plain insufficient-baseline envelope.</span></span>
-          </li>
-          <li>
-            <span class="date">2026-05-24</span>
-            <span><a href="/docs/regulatory-toolkit">Regulatory toolkit</a> <span class="blurb">&middot; EU AI Act Annex IV generator, risk classifier, GRC export.</span></span>
-          </li>
-        </ul>
-      </section>
-
-      
-      <div data-kolm-chat data-kolm-chat-heading="Ask the docs" data-kolm-chat-subtitle="plain English in. the CLI command, the why, and a deep-link out." style="margin-top: 48px;"></div>
-
-      
-      <div class="test-anchor">
-        <span data-test="w220-claim">kolm.ai</span>
-        <span data-test="w260-trust">SOC 2 Type I</span>
-        <span data-test="w271-frontier">Frontier methods</span>
-        <span data-test="w335-claim">Open-source AI compiler</span>
-        <span data-test="w373-receipts">Ed25519 receipts</span>
+<!-- ============================================================ 1. START HERE -->
+<section class="section section--flush">
+  <div class="wrap">
+    <div class="section__head" style="max-width:70ch">
+      <span class="idx">01 / Start here</span>
+      <h1>Hand your reviewer a report they can check themselves.</h1>
+      <p class="lede">
+        These docs cover the three things you do with kolm: get your agent's activity in,
+        hand your buyer a signed report, and let them verify it offline against your key,
+        with no account and no kolm server in the trust path. Read in order, or jump to the part
+        your review is stuck on.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/verify">Open the verifier</a>
+        <a class="btn btn--ghost" href="/report">Anatomy of a report</a>
       </div>
+      <div class="trustline" aria-label="What the docs assume">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline, no account</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>One canonicalization, everywhere</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Apache-2.0 verifier</span>
+      </div>
+    </div>
 
+    <div class="steps" style="margin-top:var(--s7)">
+      <div class="step">
+        <span class="step__n">Step 01</span>
+        <h3>Onramp your agent</h3>
+        <p>Import the logs you already produce, or run a sidecar proxy for a live capture. No rewrite. <a href="#onramp" class="card__map" style="margin-top:10px;display:inline-block"><span style="border-bottom:1px solid var(--line-2)">Go to onramp</span></a></p>
+      </div>
+      <div class="step">
+        <span class="step__n">Step 02</span>
+        <h3>Verify the report</h3>
+        <p>Your buyer checks the Ed25519 signature offline in the browser, the CLI, or a library. <a href="#verify" class="card__map" style="margin-top:10px;display:inline-block"><span style="border-bottom:1px solid var(--line-2)">Go to verify</span></a></p>
+      </div>
+      <div class="step">
+        <span class="step__n">Step 03</span>
+        <h3>Read the schema</h3>
+        <p>See the exact bytes a signature commits to, so any edit is self-evident. <a href="#report-schema" class="card__map" style="margin-top:10px;display:inline-block"><span style="border-bottom:1px solid var(--line-2)">Go to the schema</span></a></p>
+      </div>
     </div>
   </div>
+</section>
+
+<!-- ============================================================ 2. ONRAMP -->
+<section class="section reveal" id="onramp">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / Onramp</span>
+      <h2>Get your agent's activity in.</h2>
+      <p class="lede">
+        Two onramps, one outcome. Import the logs you already have, or run a sidecar proxy for a
+        live capture. Either way there is no change to the agent, and you upload redacted logs:
+        the scope is what you send, and the report states it.
+      </p>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">Import logs</p>
+        <h3>LiteLLM · Helicone · Portkey</h3>
+        <p>Bring the observability exports you already produce. kolm normalizes tool calls, scopes, and traffic. No code change, and it is the fastest path to a first read.</p>
+        <p class="card__map">fastest path to a first read</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Sidecar proxy</p>
+        <h3>MCP or proxy capture</h3>
+        <p>Route the agent through a sidecar for a live, append-only capture of exactly what it does, with tamper-evident hashing. Use it when you want the record built as the agent runs.</p>
+        <p class="card__map">live, append-only capture</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s5)">
+      Once the activity is in, the audit and signing run as compute. See <a href="/how-it-works" style="border-bottom:1px solid var(--line-2)">how it works</a> for the full lifecycle.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 3. VERIFY (the ledger) -->
+<section class="section section--ink reveal" id="verify">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / Verify a report</span>
+      <h2>Your buyer verifies it offline.</h2>
+      <p class="lede">
+        The same Ed25519 check runs three ways, with the identical canonicalization. No account,
+        no upload, no kolm server in the trust path. The report carries the public key it was
+        signed with, so the check needs nothing from us.
+      </p>
+    </div>
+
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Browser</p>
+        <h3>Nothing to install</h3>
+        <p>Open the verifier and drop the report. The Ed25519 check runs in the page with WebCrypto, in front of the reviewer.</p>
+        <p class="card__map"><a href="/verify">Open the verifier</a></p>
+      </div>
+      <div class="card">
+        <p class="card__k">CLI</p>
+        <h3>In your pipeline</h3>
+        <p>Verify in CI or a terminal with one command. It exits non-zero on a bad signature, so a forged or edited report gates the build.</p>
+        <p class="card__map">apache-2.0</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Library</p>
+        <h3>In your app</h3>
+        <p>Import the verifier and check reports inside your own tooling. It is the same function the browser widget calls.</p>
+        <p class="card__map">node 20+ · WebCrypto</p>
+      </div>
+    </div>
+
+    <div class="split" style="align-items:flex-start;margin-top:var(--s7)">
+      <div>
+        <h3>Verify in a few lines.</h3>
+        <p class="lede" style="margin-bottom:16px">
+          The verifier returns a structured result (it never throws) and tells you exactly which
+          checks passed. Pass the issuer's key to also assert the report came from the key you
+          expected: a rogue key clears the signature check but fails the issuer check.
+        </p>
+        <p class="card__map">verifyReceipt(report, &#123; pinnedPublicKeyPem &#125;) returns &#123; ok, reason?, key_fingerprint, checks[] &#125;</p>
+      </div>
+      <div class="report">
+        <div><span class="lbl">import</span> &nbsp; <span class="h">{ verifyReceipt }</span> from '/kolm-verify.js'</div>
+        <div>&nbsp;</div>
+        <div><span class="lbl">const</span> &nbsp; report = <span class="h">await</span> fetch(url).then(r =&gt; r.json())</div>
+        <div><span class="lbl">const</span> &nbsp; res = <span class="h">await</span> verifyReceipt(report, &#123; pinnedPublicKeyPem &#125;)</div>
+        <div>&nbsp;</div>
+        <div><span class="lbl">if</span> &nbsp; (res.ok) <span class="ann">signature valid, key matches</span></div>
+        <div><span class="lbl">else</span> &nbsp; res.reason <span class="ann">why it failed</span></div>
+      </div>
+    </div>
+
+    <div class="hero__cta" style="margin-top:var(--s7)">
+      <a class="btn btn--primary" href="/verify">Open the verifier</a>
+      <a class="btn btn--ghost" href="/sample-audit-report.json" download>Download the sample</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4. THE REPORT SCHEMA -->
+<section class="section reveal" id="report-schema">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / The report schema</span>
+      <h2>What the signature covers.</h2>
+      <p class="lede">
+        A report is one canonical object. These rules define the exact bytes the signature commits
+        to, so two semantically equal reports are byte-equal and any edit is self-evident. The
+        browser, the CLI, and the library all apply them the same way.
+      </p>
+    </div>
+
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th scope="col">Rule</th><th scope="col">Definition</th></tr></thead>
+      <tbody>
+        <tr><td><b>Field order</b></td><td>A fixed, documented order of the signed fields, not source order, not alphabetical-by-accident.</td></tr>
+        <tr><td><b>Present-only</b></td><td>Absent fields are omitted, not nulled. The byte string contains exactly the fields that exist.</td></tr>
+        <tr><td><b>No whitespace</b></td><td>Compact JSON (no spaces, no newlines) so two semantically equal reports are byte-equal.</td></tr>
+        <tr><td><b>Self-exclusion</b></td><td>The signature field is excluded from the bytes it signs.</td></tr>
+        <tr><td><b>Algorithm</b></td><td>Ed25519 (RFC 8037) over the canonical bytes, with SHA-256 content hashes.</td></tr>
+        <tr><td><b>Key fingerprint</b></td><td>SHA-256 of the SPKI DER public key, truncated to 128 bits. Documented, deterministic, pinnable.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="split" style="margin-top:var(--s7)">
+      <div class="report register">
+        <div class="register__row"><span class="register__k">schema</span><span class="register__v">kolm-audit-report-1</span></div>
+        <div class="register__row"><span class="register__k">report_id</span><span class="register__v">asrr_sample</span></div>
+        <div class="register__row"><span class="register__k">subject</span><span class="register__v">what was assessed <span class="ann">scoped</span></span></div>
+        <div class="register__row"><span class="register__k">readiness_pct</span><span class="register__v"><b>assessed controls only</b></span></div>
+        <div class="register__row"><span class="register__k">findings</span><span class="register__v">count by severity</span></div>
+        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
+        <div class="register__row"><span class="register__k">key_fingerprint</span><span class="register__v"><b>410302c93becdcc3...</b></span></div>
+        <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:0XCoqRkb...</b> <span class="ann">covers the canonical bytes</span></span></div>
+      </div>
+      <div>
+        <h3>One object, every fact in mono.</h3>
+        <p style="color:var(--ink-2);margin:var(--s3) 0 var(--s4)">
+          Top-level fields name what was assessed, the findings, and the signing key, all in a single
+          canonical artifact. The cryptographic values (the key fingerprint, the signature) are facts,
+          so they are set in mono. Field-by-field, the page at <a href="/report" style="border-bottom:1px solid var(--line-2)">Anatomy of a report</a> walks the whole schema.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--ghost btn--sm" href="/report">Anatomy of a report</a>
+          <a class="btn btn--ghost btn--sm" href="/sample-audit-report.json" download>See a sample report</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="hero__claim" style="margin-top:var(--s5)">
+      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 5. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Verify the sample, then bring your own.</h2>
+    <p class="lede">Open the verifier on a signed sample, then onramp your agent and hand your buyer a report they can check in their own browser.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/verify">Open the verifier</a>
+      <a class="btn btn--ghost" href="/report">Anatomy of a report</a>
+    </div>
+  </div>
+</section>
 
 </main>
 
-
-<div class="docs-cmdk-backdrop" id="docsCmdkBackdrop" role="dialog" aria-modal="true" aria-label="Search documentation">
-  <div class="docs-cmdk">
-    <input type="text" id="docsCmdkInput" placeholder="Search docs by title or URL…" autocomplete="off" spellcheck="false">
-    <div class="docs-cmdk-list" id="docsCmdkList"></div>
-    <div class="docs-cmdk-foot">
-      <span><kbd>&uarr;&darr;</kbd> Navigate</span>
-      <span><kbd>&crarr;</kbd> Open</span>
-      <span><kbd>Esc</kbd> Close</span>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  // Build the doc index. Each entry: { t: title, u: url }.
-  // Slugs come from the public/docs/*.html and public/docs/cli/*.html scan.
-  function titleize(slug){
-    return slug.split('-').map(function(w){
-      if (w.length <= 3 && w === w.toUpperCase()) return w; // preserve acronyms in slug already
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }).join(' ');
-  }
-  var docs = ('ab-testing,agent-guide,agents,airgap,api,approvals,audit,audit-export,capture-anomaly,chargeback,cloud-sync,connectors,cookbook,copyright-scan,cost-optimization,cross-lingual,cve-in-kscore,data-network-effects,datasets,dev-agents,devices,diagnose,distill,distillation,drift-alert,drift-detector,efficiency,enterprise,evals,failure-modes,federated-consortium,gateway-mode,github-actions,glossary,guardrails,hardware,import,k-score-methodology,kubernetes,lake,lineage,lm-studio-import,marketplace,marketplace-import,migrate,model-card,multi-region,multilingual,multimodal-pipeline,namespace-fingerprint,numeric-accuracy,observability,optimizer,pipelines,plugins,privacy,quickstart,rag,reasoning-traces,regulatory-toolkit,releasing,rs-1,runtime,runtime-placement,sandbox,sdk,seasonal,staleness,state,storage,synthetic,team,tickets,token-dpo,training,troubleshooting,verify,verticals,vscode,webauthn,webhooks').split(',');
-  var cli = ('agent,airgap,anonymize,artifacts,ask,auditor,bench,build,capture,cc,chat,cloud,compile,completion,compute,config,demo,deploy,device,devices,diff,distill,do,doctor,eval,evidence,explain,export,federated,fix,fl,gpu,health,hub,improve,index,init,init-agent,inspect,inspection,install,install-device,instant,ir,jobs,keys,labels,list,login,logout,logs,loop,mesh,meta,models,new,next,nl,packages,pipeline,profile,publish,pull,quantize,rag,registry,replay,rescue,resume,run,runtime,score,seeds,serve,sessions,signup,sigstore-attest,status,surfaces,sync,tail,team,trace,train,tui,tune,tunnel,update,upgrade,verify,version,watch,what,whoami').split(',');
-  var index = [];
-  // Top-level brand pages
-  [
-    {t:'Quickstart', u:'/quickstart'},
-    {t:'Why kolm', u:'/why-kolm'},
-    {t:'Compare', u:'/compare'},
-    {t:'K-score spec', u:'/k-score'},
-    {t:'K-score explained', u:'/k-score-explained'},
-    {t:'Runtimes', u:'/runtimes'},
-    {t:'SDKs', u:'/sdks'},
-    {t:'Enterprise', u:'/enterprise'},
-    {t:'Self-host', u:'/self-host'},
-    {t:'Security center', u:'/security'},
-    {t:'SOC 2', u:'/soc2'},
-    {t:'HIPAA mapping', u:'/hipaa-mapping'},
-    {t:'BAA', u:'/baa'},
-    {t:'Air-gap', u:'/airgap'},
-    {t:'Integrations', u:'/integrations'},
-    {t:'Pricing', u:'/pricing'},
-    {t:'Changelog', u:'/changelog'},
-    {t:'Glossary', u:'/glossary'},
-    {t:'FAQ', u:'/faq'},
-    {t:'Benchmarks', u:'/benchmarks'},
-    {t:'llms.txt', u:'/llms.txt'},
-    {t:'OpenAPI JSON', u:'/openapi.json'}
-  ].forEach(function(e){ index.push(e); });
-  docs.forEach(function(s){
-    index.push({ t: titleize(s), u: '/docs/' + s });
-  });
-  cli.forEach(function(s){
-    index.push({ t: 'CLI: ' + s, u: '/docs/cli/' + s });
-  });
-  var run = ('overview,devices,deploy,fleet,testing,monitoring,updates,security,runtimes,rollback,speed-optimization,troubleshooting').split(',');
-  run.forEach(function(s){
-    index.push({ t: 'Run: ' + titleize(s), u: '/docs/run/' + s });
-  });
-  var reference = [
-    { t: 'Reference: config.toml', u: '/docs/reference/config-toml' },
-    { t: 'Reference: Doctor checks', u: '/docs/reference/doctor-checks' },
-    { t: 'Reference: Ship gate', u: '/docs/reference/ship-gate' }
-  ];
-  reference.forEach(function(e){ index.push(e); });
-
-  var backdrop = document.getElementById('docsCmdkBackdrop');
-  var input = document.getElementById('docsCmdkInput');
-  var list = document.getElementById('docsCmdkList');
-  var trigger = document.getElementById('docsSearchTrigger');
-  var kbd = document.getElementById('docsSearchKbd');
-  if (!backdrop || !input || !list) return;
-
-  // Display platform-appropriate key hint
-  if (kbd) {
-    var isMac = /Mac|iPhone|iPad/.test(navigator.platform);
-    kbd.textContent = isMac ? 'Cmd K' : 'Ctrl K';
-  }
-
-  var active = 0;
-  var current = [];
-
-  function render(q){
-    q = (q || '').toLowerCase().trim();
-    var hits;
-    if (!q) {
-      hits = index.slice(0, 40);
-    } else {
-      hits = index.filter(function(e){
-        return e.t.toLowerCase().indexOf(q) !== -1 || e.u.toLowerCase().indexOf(q) !== -1;
-      }).slice(0, 60);
-    }
-    current = hits;
-    active = 0;
-    if (!hits.length) {
-      list.innerHTML = '<div class="empty">No matches for "' + q.replace(/[<>]/g, '') + '".</div>';
-      return;
-    }
-    var html = '';
-    for (var i = 0; i < hits.length; i++){
-      html += '<a class="item' + (i === 0 ? ' active' : '') + '" href="' + hits[i].u + '" data-idx="' + i + '">' +
-              '<span>' + hits[i].t + '</span>' +
-              '<span class="url">' + hits[i].u + '</span>' +
-              '</a>';
-    }
-    list.innerHTML = html;
-  }
-
-  function open(){
-    backdrop.classList.add('open');
-    input.value = '';
-    render('');
-    setTimeout(function(){ input.focus(); }, 30);
-  }
-  function close(){
-    backdrop.classList.remove('open');
-  }
-  function setActive(n){
-    var items = list.querySelectorAll('.item');
-    if (!items.length) return;
-    if (n < 0) n = items.length - 1;
-    if (n >= items.length) n = 0;
-    items[active] && items[active].classList.remove('active');
-    items[n].classList.add('active');
-    active = n;
-    items[n].scrollIntoView({ block: 'nearest' });
-  }
-
-  if (trigger) trigger.addEventListener('click', open);
-
-  document.addEventListener('keydown', function(e){
-    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
-      e.preventDefault();
-      backdrop.classList.contains('open') ? close() : open();
-      return;
-    }
-    if (e.key === 'Escape' && backdrop.classList.contains('open')) {
-      e.preventDefault();
-      close();
-      return;
-    }
-    if (!backdrop.classList.contains('open')) return;
-    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
-    else if (e.key === 'Enter') {
-      if (current[active]) { e.preventDefault(); window.location.href = current[active].u; }
-    }
-  });
-
-  input.addEventListener('input', function(){ render(input.value); });
-
-  backdrop.addEventListener('click', function(e){
-    if (e.target === backdrop) close();
-  });
-})();
-</script>
-
-
-<script src="/assets/docs-search-assistant.js" defer></script>
-
-<footer class="ks-foot">
-  <div class="ks-wrap">
-    <div class="ks-foot__grid">
-      <div class="ks-foot__col">
-        <div class="ks-foot__brand">kolm<b style="color:var(--ks-accent)">.ai</b></div>
-        <p class="ks-foot__tag">The AI control plane for teams. Capture, own, and govern your company’s AI in one place.</p>
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
-      <div class="ks-foot__col">
+      <div class="foot__col">
         <h4>Product</h4>
-        <a href="/gateway">Gateway</a>
-        <a href="/capture">Capture</a>
-        <a href="/distill">Distill</a>
-        <a href="/compile">Compile</a>
-        <a href="/runtimes">Runtime</a>
-        <a href="/registry">Registry</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Build</h4>
-        <a href="/quickstart">Quickstart</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
         <a href="/docs">Docs</a>
-        <a href="/sdks">SDKs</a>
-        <a href="/models">Models</a>
-        <a href="/benchmarks">Benchmarks</a>
-        <a href="/blog">Blog</a>
-        <a href="/faq">FAQ</a>
-        <a href="/changelog">Changelog</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Trust</h4>
-        <a href="/security">Security</a>
-        <a href="/soc2">SOC 2</a>
-        <a href="/hipaa-mapping">HIPAA</a>
-        <a href="/baa">BAA</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/verify-prod">Verify a .kolm</a>
-      </div>
-      <div class="ks-foot__col">
-        <h4>Company</h4>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/why-kolm">Why kolm</a>
-        <a href="/about">About</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
-        <a href="/enterprise">Enterprise</a>
       </div>
     </div>
-    <div class="ks-foot__base">
-      <span>&copy; 2026 kolm.ai &middot; Apache-2.0 &middot; Made with .kolm</span>
-      <span>Receipts signed in CI. Verify any artifact at <a href="/verify-prod" class="ks-accent">/verify-prod</a>.</span>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
 
-<script>
-  (function(){
-    var btn = document.getElementById('navToggle');
-    var sheet = document.getElementById('navSheet');
-    if (!btn || !sheet) return;
-    btn.addEventListener('click', function(){
-      var open = sheet.style.display === 'block';
-      sheet.style.display = open ? 'none' : 'block';
-      btn.setAttribute('aria-expanded', String(!open));
-    });
-  })();
-</script>
-
-
-<div hidden data-w806-anchors="wave206-docs-sidebar" aria-hidden="true">
-<a href="/docs/cli/nl">nl</a>
-<a href="/docs/cli/seeds">seeds</a>
-<a href="/docs/cli/keys">keys</a>
-<a href="/docs/cli/quantize">quantize</a>
-<a href="/docs/cli/init">init</a>
-<a href="/docs/cli/login">login</a>
-<a href="/docs/cli/compile">compile</a>
-<a href="/docs/cli/run">run</a>
-<a href="/docs/cli/inspect">inspect</a>
-<a href="/docs/cli/verify">verify</a>
-<a href="/docs/cli/serve">serve</a>
-<a href="/docs/cli/install">install</a>
-<a href="/docs/cli/doctor">doctor</a>
-<a href="/docs/cli/tune">tune</a>
-<a href="/docs/cli/rag">rag</a>
-<a href="/docs/cli/improve">improve</a>
-<a href="/quickstart">quickstart</a>
-<a href="/quickstart/nl">quickstart in natural language</a>
-<a href="/k-score">K-score</a>
-<a href="/k-score-explained">K-score explained</a>
-<a href="/spec/rs-1">RS-1 spec</a>
-<a href="/format/v2">format v2</a>
-<a href="/frozen-eval">frozen eval</a>
-<a href="/drift">drift detection</a>
-<a href="/verify-prod">verify in production</a>
-<a href="/training">training transparency</a>
-<a href="/training/data-sources">training data sources</a>
-<a href="/research/methods-2026-q2">research methods Q2 2026</a>
-<a href="/security">security</a>
-<a href="/compliance-packs">compliance packs</a>
-<a href="/baa">BAA</a>
-<a href="/dpa">DPA</a>
-<a href="/acceptable-use">acceptable use</a>
-<a href="/airgap">airgap</a>
-<a href="/byoc">BYOC</a>
-<a href="/enterprise">enterprise</a>
-<a href="/healthcare">healthcare</a>
-<a href="/health-insurance">health insurance</a>
-<a href="/finance">finance</a>
-<a href="/fintech">fintech</a>
-<a href="/defense">defense</a>
-<a href="/gov">government</a>
-<a href="/eu">EU</a>
-<a href="/education">education</a>
-<a href="/compute">compute</a>
-<a href="/cloud">cloud</a>
-<a href="/foundations">foundations</a>
-<a href="/frontier-stack">frontier stack</a>
-<a href="/migrate">migrate</a>
-<a href="/migrate/diy">migrate from DIY</a>
-<a href="/migrate/hyperscaler">migrate from hyperscaler</a>
-<a href="/migrate/lorax">migrate from LoRAX</a>
-<a href="/migrate/openpipe">migrate from OpenPipe</a>
-<a href="/migrate/predibase">migrate from Predibase</a>
-<a href="/compare">compare</a>
-<a href="/why-kolm">why kolm</a>
-<a href="/manifesto">manifesto</a>
-<a href="/changelog">changelog</a>
-<a href="/community">community</a>
-<a href="/glossary">glossary</a>
-<a href="/faq">FAQ</a>
-<a href="/forge">forge</a>
-<a href="/builder">builder</a>
-<a href="/wrapper">wrapper</a>
-<a href="/integrations">integrations</a>
-<a href="/captures">captures</a>
-<a href="/account">account</a>
-<a href="/dashboard">dashboard</a>
-<a href="/teams">teams</a>
-<a href="/account/billing">billing</a>
-<a href="/pricing">pricing</a>
-<a href="/signup">signup</a>
-<a href="/signin">signin</a>
-<span>kolm sdk - the JavaScript/Python SDK surface lives under sdk/ and is documented inline. kolm spec-decode - speculative decoding research path under /docs/inference/speculative-decoding. kolm package - alias for `kolm packages release-readiness`. kolm ns - alias for `kolm namespace`. kolm kolmbench - the canonical benchmark runner (alias for `kolm bench`). kolm kb - knowledge-base index alias for `kolm rag`. kolm vscode - VS Code installer (`kolm vscode install` writes the workspace MCP config). kolm savings - savings-opportunity report (alias for `kolm opportunities`).</span>
-<p>docs floor recovery payload. The kolm docs are organized into the following content groups, each of which is locked by a per-group test in this wave family. Quickstart: the developer first-run path; from install to a signed artifact in under 60 seconds on a clean machine. CLI reference: every documented verb with a per-verb stub under /docs/cli/, including init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve. SDK reference: the JavaScript SDK at sdk/js/, the Python SDK at sdk/python/, the C SDK at sdk/c/, the Rust SDK at sdk/rust/. Runtime adapters: the runtime adapters at src/runtime/ for vLLM, SGLang, TGI, Anthropic, OpenAI, kolm-native. K-score: the artifact gate, composed from five axes (faith, cover, calibration, truthfulness, cost). Receipts: the receipt chain spec (RS-1), the verifier checks #1 through #24, the binder roster. Security: the air-gap mode (KOLM_AIRGAP), the BYOC pattern, the BAA + DPA + acceptable-use policy, the SOC 2 Type I report. Integrations: the gateway for Claude Code, Cursor, Continue, Cline, VS Code. Deployment patterns: the multi-region pattern, the horizontal-scaling pattern, the gateway-mode pattern, the airgap-mode pattern, the BYOC pattern. Compliance: the compliance packs for HIPAA, FedRAMP, SOC 2 Type I, EU AI Act, GDPR, FERPA, PCI-DSS, GLBA. Migration: five one-page guides from LoRAX, Predibase, OpenPipe, the DIY LoRA stack, and hyperscaler fine-tuning to kolm. Cookbook: end-to-end recipes for common workflows (letter generation, classification, summarization, extraction, code generation, translation, multilingual, multimodal). Drift: the supersession ladder, the drift detection report, the lifecycle tiers. Numerical accuracy: the FP32 vs FP16 vs BF16 vs INT8 vs INT4 vs FP8 tradeoff matrix. Synthetic data: the seeds pipeline, the synth pipeline, the bakeoff pipeline. Verticals: the vertical packs for healthcare, health insurance, finance, fintech, defense, government, education.</p>
-<p>docs floor recovery payload continued. The CLI verb taxonomy: the developer-facing verbs (init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve, ask, chat, repl, ls, list, eject, whoami, logs); the platform-module verbs (sigstore-attest, attest, test, drift, trace, ir, device, cc, fl); the persona-aliased verbs (key for keys, kb for rag, kolmbench for bench, ns for namespace, package for packages, savings for opportunities, spec-decode for the speculative decoding research path, sdk for the SDK surface, vscode for the VS Code installer); the post-auth verbs (account, dashboard, captures, teams, billing); the integration verbs (claude-code, cursor, continue, cline, vscode); the deployment verbs (cloud, airgap, tunnel, compute, hub); the workflow verbs (replay, runtime, sync, profile, services, checkpoint, import-chat, merge, bootstrap, proxy, remote, wrap, migrate, marketplace, loop, synth, sim, bakeoff, pipeline, make, ship, do, what, next, explain, fix); the device + data verbs (devices, install-device, dataset, label); the audit + settings verbs (audit, settings); the multimodal verbs (media); and the changelog verb (changelog).</p>
-<p>docs floor recovery payload tail. Every CLI verb is documented through one of three substrates: a dedicated /docs/cli/<verb> stub under public/docs/cli/, a HELP.<verb> entry in cli/kolm.js (which is the source-of-truth for `kolm <verb> --help`), or an inbound reference from a /docs/ page that uses the verb in its prose. The lock-in test asserts every verb in COMPLETION_VERBS has at least one inbound reference somewhere in /docs/* OR /docs.html (so meta verbs like help and version need not have their own page but should be mentioned at least once). The ALLOWED_GAPS set in the test enumerates the verbs that are intentionally without a /docs/ page (because they are aliases, sub-routes of existing pages, or have a dedicated public surface outside /docs/). The required-documented set is the load-bearing list: init, login, compile, run, inspect, verify, serve, install, doctor, tune, rag, nl, seeds, keys, quantize, improve.</p>
-<p>docs floor recovery payload extension. The /docs/cli/nl.md stub documents the natural-language quickstart verb that scaffolds a recipe from a plain-English description. The /docs/cli/seeds.md stub documents the seed-corpus management verb (new, generate, list, bootstrap, validate). The /docs/cli/keys.md stub documents the Ed25519 signing-key management verb. The /docs/cli/quantize.md stub documents the quantization verb that emits an INT4 artifact from a BF16 base. Each stub carries a Usage section, an Examples or Flags section, a reference to `kolm verify`, and a cross-link to /spec/rs-1 (locked by #19). The docs.html sidebar exposes these new stubs through the per-verb anchor list above; the #20 test asserts at least the nl link plus three of the new CLI verb pages appear in the sidebar so the new pages are reachable from the docs index. The #16 em-dash baseline is 0 across all audited docs; new prose must not regress, so any introduced em-dash gets scrubbed in the close-out. The #15 emoji baseline is also 0; the docs surface is intentionally text-only per the standing brand voice. The #14 forbidden marketing-fluff phrase list (see tests/wave206-docs-audit.test.js FLUFF constant for the canonical set) has zero hits across all audited docs by design.</p>
-<p>docs floor recovery payload final. The kolm docs surface reflects the kolm voice: every claim is grounded, every flag is verifiable against the installed CLI through `kolm <verb> --help`, every receipt can be replayed against `kolm verify`, every artifact carries a tenant-scoped binder roster row that the user can inspect through `kolm inspect`. The receipt chain is the integrity mechanism; the K-score gate is the verification mechanism; the binder roster is the lookup mechanism; the drift detection ladder is the supersession mechanism. The standing constraint is plain scope: every page distinguishes what kolm ships today from what its competitors ship from what is still in the planning wave. The plain-scope statement on every page is the brand contract.</p>
-<p>docs extension. The receipt envelope (RS-1) defines the load-bearing fields that every captured prompt/response pair carries through the kolm gateway: receipt_id, tenant_id, namespace, recipe_version, corpus_hash, input_hash, output_hash, teacher_id, student_id, captured_at, captured_by, redaction_applied, redaction_profile, k_score, k_score_floor, supersession_block, drift_report, attestation_report, attestation_kind, confidential_compute_hash. The artifact bundle (.kolm) is a ZIP archive that carries the manifest, the receipt chain, the K-score floor, the quantization profile, the corpus hash, the recipe hash, the seed, and the signed model weights (or a model pointer when the artifact references a hosted weights store). The verifier checks #1 through #24 are documented at /spec/rs-1 and enforced by the `kolm verify` CLI verb; check #23 verifies the supersession block when present and check #24 verifies the drift report when present. The drift detection ladder M+1 through M+4 enumerates the four lifecycle tiers; the six SUPERSESSION_REASONS (corpus_drift, recipe_drift, K-score_floor_violation, evaluation_drift, hardware_target_drift, manual_override) and the seven default tolerances are documented at /drift. The kolm wrapper supports the OpenAI chat completion API, the Anthropic messages API, the Anthropic completions API, and the kolm-native invocation API; the gateway writes every request/response pair through the gateway so the receipt chain is the source-of-truth for what shipped. The `kolm install` command provides one-shot installers for the four primary IDE assistants (Claude Code, Cursor, Continue, Cline), each of which adds a workspace MCP config that routes the assistant's model calls through the local kolm gateway. The `kolm serve` command starts the gateway in either MCP mode (for local assistants) or HTTP mode (for production workloads), with optional `--airgap` flag that refuses any upstream request and forces use of a locally-compiled artifact.</p>
-</div>
 </body>
 </html>

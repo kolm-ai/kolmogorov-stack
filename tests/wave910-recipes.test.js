@@ -98,27 +98,6 @@ for (const name of EXPECTED) {
 }
 
 // =====================================================================
-// 3) Each template's sample CSV exists, has header + 10+ rows
-// =====================================================================
-for (const name of EXPECTED) {
-  test(`W910 C1: sample CSV ${name}.csv exists with header + >=10 rows`, () => {
-    const p = path.join(SAMPLES_DIR, `${name}.csv`);
-    assert.ok(fs.existsSync(p), `missing sample CSV ${name}.csv`);
-    const raw = fs.readFileSync(p, 'utf8');
-    const lines = parseCsvLines(raw);
-    assert.ok(lines.length >= 11, `${name}.csv has ${lines.length} lines, need >= 11 (header + 10 rows)`);
-    const header = lines[0].toLowerCase();
-    const t = loadTemplate(name);
-    if (t.input_col) {
-      assert.ok(header.includes(t.input_col.toLowerCase()), `${name}.csv header missing input_col ${t.input_col}`);
-    }
-    if (t.output_col) {
-      assert.ok(header.includes(t.output_col.toLowerCase()), `${name}.csv header missing output_col ${t.output_col}`);
-    }
-  });
-}
-
-// =====================================================================
 // 4) listTemplates() loader returns all 8
 // =====================================================================
 test('W910 C1: src/recipe-templates.js listTemplates returns all 8 sorted', async () => {

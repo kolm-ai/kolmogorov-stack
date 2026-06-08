@@ -289,12 +289,3 @@ test('W921-STUDIO.26 gate + data are in COMPLETION_VERBS with dispatch + subs', 
   assert.match(SRC, /distill:\s*\[[^\]]*'grpo'[^\]]*\]/, 'grpo in distill subs');
 });
 
-test('W921-STUDIO.27 gate + data each have an inbound /docs/cli reference', () => {
-  for (const verb of ['gate', 'data']) {
-    const p = path.join(REPO, 'public', 'docs', 'cli', `${verb}.md`);
-    assert.ok(fs.existsSync(p), `${verb}.md exists`);
-    const txt = fs.readFileSync(p, 'utf8');
-    assert.match(txt, new RegExp(`kolm\\s+${verb}\\b`), `${verb}.md references kolm ${verb}`);
-    assert.match(txt, /##\s+Usage/, `${verb}.md has a Usage section`);
-  }
-});

@@ -1,6 +1,6 @@
 // src/phi-redactor.js
 //
-// Wave Q+3a — PHI/PII redactor + reinjector.
+// Wave Q+3a - PHI/PII redactor + reinjector.
 //
 // Pure-JS regex-based detector for the 18 HIPAA Safe Harbor identifiers
 // (45 CFR 164.514(b)(2)) plus three kolm extensions for healthcare-provider
@@ -15,7 +15,7 @@
 //   reinject(text, map)  -> string
 //   For any string x:    reinject(redact(x).redacted, redact(x).map) === x
 //   For any string x:    redact(redact(x).redacted).redacted === redact(x).redacted
-//   (idempotency — re-redacting an already-redacted string is a no-op on tokens)
+//   (idempotency - re-redacting an already-redacted string is a no-op on tokens)
 //
 // TOKEN FORMAT
 //   [PHI_<CLASS>_<INDEX>] where CLASS is one of the constants in CLASSES.
@@ -53,15 +53,15 @@ const DETECTORS = [
   { class: 'IP',    re: /\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/g },
 
   // Labeled provider IDs (run before the generic 10-digit phone path).
-  // 19. NPI — 10 digits; labeled "NPI" or "NPI #" to avoid false positives on phones.
+  // 19. NPI - 10 digits; labeled "NPI" or "NPI #" to avoid false positives on phones.
   { class: 'NPI', re: /\b(?:NPI|National Provider Identifier)\s*[#:]?\s*(\d{10})\b/gi, capture: 1 },
-  // 20. DEA — letter, letter, 7 digits.
+  // 20. DEA - letter, letter, 7 digits.
   { class: 'DEA', re: /\b(?:DEA)\s*[#:]?\s*([A-Z]{2}\d{7})\b/g,  capture: 1 },
-  // 21. Medicaid — provider IDs vary by state; labeled "Medicaid ID:".
+  // 21. Medicaid - provider IDs vary by state; labeled "Medicaid ID:".
   { class: 'MEDICAID', re: /\b(?:Medicaid(?:\s+(?:ID|#))?)\s*[#:]?\s*([A-Z0-9-]{6,15})\b/gi, capture: 1 },
 
   // Labeled identifiers (always require a label to avoid generic-number false hits).
-  // 8. MRN — medical record number.
+  // 8. MRN - medical record number.
   { class: 'MRN',  re: /\b(?:MRN|Medical Record(?:\s+#)?|Patient ID)\s*[#:]?\s*([A-Z0-9-]{4,20})\b/gi, capture: 1 },
   // 9. Health plan ID.
   { class: 'HPID', re: /\b(?:Member ID|Subscriber ID|Health Plan ID|Policy(?:\s+#)?)\s*[#:]?\s*([A-Z0-9-]{4,20})\b/gi, capture: 1 },
@@ -76,27 +76,27 @@ const DETECTORS = [
   // 5. Fax (labeled).
   { class: 'FAX',  re: /\b(?:Fax(?:\s+#)?)\s*[#:]?\s*([+()\d][\d().\s-]{8,20}\d)\b/gi, capture: 1 },
 
-  // 7. SSN — 3-2-4 with separators OR 9 digits with a label.
+  // 7. SSN - 3-2-4 with separators OR 9 digits with a label.
   { class: 'SSN',  re: /\b\d{3}-\d{2}-\d{4}\b/g },
   { class: 'SSN',  re: /\b(?:SSN|Social Security(?:\s+#)?)\s*[#:]?\s*(\d{9}|\d{3}-?\d{2}-?\d{4})\b/gi, capture: 1 },
 
-  // 4. Phone — labeled or US/international shapes.
+  // 4. Phone - labeled or US/international shapes.
   { class: 'PHONE', re: /\b(?:Phone|Tel|Cell|Mobile)\s*[#:]?\s*([+()\d][\d().\s-]{8,20}\d)\b/gi, capture: 1 },
   { class: 'PHONE', re: /\b\+?1?[\s.-]?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}\b/g },
 
-  // 3. Dates — strip year-precision identifiers (DOB, admission, etc.). Match
+  // 3. Dates - strip year-precision identifiers (DOB, admission, etc.). Match
   // common US/ISO/long forms. (Year-only is technically Safe Harbor-OK, but
-  // we still redact when it's clearly a DOB context — see opts.preserveYears.)
+  // we still redact when it's clearly a DOB context - see opts.preserveYears.)
   { class: 'DATE', re: /\b(?:DOB|Date of Birth|Birthdate|Admission|Discharge|Death|Visit Date)\s*[#:]?\s*([A-Za-z0-9,./-]{4,30})\b/gi, capture: 1 },
   { class: 'DATE', re: /\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/g },
   { class: 'DATE', re: /\b\d{4}-\d{2}-\d{2}\b/g },
   { class: 'DATE', re: /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/gi },
 
-  // 2. Geographic — ZIP+4 / ZIP / labeled address.
+  // 2. Geographic - ZIP+4 / ZIP / labeled address.
   { class: 'GEO',  re: /\b\d{5}(?:-\d{4})?\b/g },
   { class: 'GEO',  re: /\b(?:Address|Street|Addr)\s*[#:]?\s*([\d]+\s+[A-Za-z][A-Za-z\s.]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Place|Pl|Way))\b/gi, capture: 1 },
 
-  // 1. Names — labeled (Name:, Patient:, etc.) or honorific prefix.
+  // 1. Names - labeled (Name:, Patient:, etc.) or honorific prefix.
   { class: 'NAME', re: /\b(?:Patient(?:\s+Name)?|Name|Member|Insured|Provider|Physician|Dr|Doctor)\s*[#:]?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z'-]+){0,3})\b/g, capture: 1 },
   { class: 'NAME', re: /\b(?:Mr|Mrs|Ms|Miss|Dr|Prof)\.?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z'-]+){0,3})\b/g, capture: 1 },
 ];
@@ -122,7 +122,7 @@ export function findTokens(s) {
 
 // Public: redact the input. Returns { redacted, map }.
 //   redacted: input with every detected identifier replaced by a token.
-//   map:      { '[PHI_FOO_1]': 'original value', ... } — every reverse lookup
+//   map:      { '[PHI_FOO_1]': 'original value', ... } - every reverse lookup
 //             the caller needs to reinject after the teacher call.
 //
 // Options:
@@ -247,7 +247,7 @@ function escapeRegExp(s) {
 }
 
 // ---------------------------------------------------------------------------
-// Wave 291 — Structured validation findings.
+// Wave 291 - Structured validation findings.
 //
 // The legacy redact()/reinject() pair above is a placement transform: it
 // rewrites the input so a downstream teacher API never sees raw PHI. Callers
@@ -400,7 +400,7 @@ function scanFindings(text, opts = {}) {
     plan.push({ start, end, replacement });
   }
 
-  // ----- (a) SSN — separated 3-2-4 (well-formed) -----
+  // ----- (a) SSN - separated 3-2-4 (well-formed) -----
   {
     const re = /\b(\d{3})-(\d{2})-(\d{4})\b/g;
     let m;
@@ -429,7 +429,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (a) SSN — space-separated 3 2 4 -----
+  // ----- (a) SSN - space-separated 3 2 4 -----
   {
     const re = /\b(\d{3}) (\d{2}) (\d{4})\b/g;
     let m;
@@ -450,7 +450,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (a) SSN — dot-separated 3.2.4 -----
+  // ----- (a) SSN - dot-separated 3.2.4 -----
   {
     const re = /\b(\d{3})\.(\d{2})\.(\d{4})\b/g;
     let m;
@@ -471,7 +471,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (b) NPI — 10 digit runs validated against Luhn -----
+  // ----- (b) NPI - 10 digit runs validated against Luhn -----
   // Walk every standalone 10-digit run (not adjacent to letters/digits) and
   // classify Luhn-valid vs Luhn-invalid. Done BEFORE the unseparated SSN
   // scan so a 10-digit run is not also reported as a 9-digit SSN.
@@ -510,7 +510,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (a) SSN — unseparated 9-digit run -----
+  // ----- (a) SSN - unseparated 9-digit run -----
   {
     const re = /(?<![A-Za-z0-9])(\d{9})(?![A-Za-z0-9])/g;
     let m;
@@ -545,7 +545,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (c) DOB — ISO -----
+  // ----- (c) DOB - ISO -----
   {
     const re = /\b(\d{4}-\d{2}-\d{2})\b/g;
     let m;
@@ -571,7 +571,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (c) DOB — US M/D/YY or M/D/YYYY -----
+  // ----- (c) DOB - US M/D/YY or M/D/YYYY -----
   {
     const re = /\b(\d{1,2}\/\d{1,2}\/\d{2,4})\b/g;
     let m;
@@ -597,7 +597,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (d) MRN — context-labeled alphanumeric token -----
+  // ----- (d) MRN - context-labeled alphanumeric token -----
   {
     const re = /\b(MRN|MR#|MedRec)\s*[:#]?\s*([A-Z0-9-]{4,20})\b/gi;
     let m;
@@ -615,7 +615,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (e) Address fragments — ZIP+4 -----
+  // ----- (e) Address fragments - ZIP+4 -----
   {
     const re = /\b(\d{5})-(\d{4})\b/g;
     let m;
@@ -632,7 +632,7 @@ function scanFindings(text, opts = {}) {
     }
   }
 
-  // ----- (f) Account numbers — context-labeled 8-16 digit run -----
+  // ----- (f) Account numbers - context-labeled 8-16 digit run -----
   {
     const re = /\b(Acct|Account|Member)\s*[:#]?\s*(\d{8,16})\b/gi;
     let m;

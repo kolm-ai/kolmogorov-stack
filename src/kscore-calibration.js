@@ -1,4 +1,4 @@
-// W810-1 / W810-3 — K-Score external calibration pack loader + mapping exporter.
+// W810-1 / W810-3 - K-Score external calibration pack loader + mapping exporter.
 //
 // Spec recap (verbatim from master plan §W810):
 //   - Calibration pack file: ~/.kolm/calibration-pack-YYYY-MM.jsonl
@@ -12,7 +12,7 @@
 //     otherwise that slot reports 'insufficient_data' verbatim (never silently
 //     falls back to the pooled estimate).
 //
-// The actual envelope surfacing lives in src/kscore.js (W810-4) — this module
+// The actual envelope surfacing lives in src/kscore.js (W810-4) - this module
 // is the data layer only.
 //
 // Test seam: KOLM_DATA_DIR overrides ~/.kolm (same pattern as event-store).
@@ -30,13 +30,13 @@ export const CALIBRATION_VERSION = 'w810-v1';
 // 'insufficient_data' and the K-Score envelope reports the same code.
 export const MIN_PAIRS_PER_CATEGORY = 500;
 
-// Allowlist of canonical category names — surfaces of the methodology page
+// Allowlist of canonical category names - surfaces of the methodology page
 // pin these four explicitly so that an unrelated 'random' label in a pack
 // can't quietly create a new public curve.
 export const CALIBRATION_CATEGORIES = Object.freeze(['coding', 'writing', 'analysis', 'support']);
 
 // ---------------------------------------------------------------------------
-// Path helpers (KOLM_DATA_DIR aware — never touches the real ~/.kolm in tests)
+// Path helpers (KOLM_DATA_DIR aware - never touches the real ~/.kolm in tests)
 // ---------------------------------------------------------------------------
 
 function _home() {
@@ -157,7 +157,7 @@ export function loadPack(period) {
 //   2) For each category with n >= MIN_PAIRS_PER_CATEGORY:
 //        - Map every row to a BT pair where 'a' = response_a's model id and
 //          'b' = response_b's model id. When a row doesn't carry an explicit
-//          model id (most calibration packs in the wild don't — they treat
+//          model id (most calibration packs in the wild don't - they treat
 //          response_a / response_b as anonymous candidates), we synthesize
 //          stable ids from pair_id + 'a' / 'b'. The BT fit then gives us a
 //          per-response skill estimate.
@@ -398,7 +398,7 @@ export function loadMapping() {
 
 // Apply a fitted calibration curve to a raw K-Score (or BT predicted prob)
 // and produce {point, ci95_low, ci95_high}. Returns null when the per-category
-// slot is insufficient_data — callers MUST surface 'insufficient_data' rather
+// slot is insufficient_data - callers MUST surface 'insufficient_data' rather
 // than silently fall back to the pooled estimate (honest contract).
 export function applyCalibration(mapping, category, kscore) {
   if (mapping == null) return null;

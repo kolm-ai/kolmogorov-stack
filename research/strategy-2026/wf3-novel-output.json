@@ -1,0 +1,579 @@
+{
+  "summary": "Harder greenfield round (web-only): TAM x pain x profile matrix -> invention-grade ideation at best-fit cells -> LIVE incumbent-existence check per idea -> novelty+fit gate -> shortlist",
+  "agentCount": 89,
+  "logs": [
+    "Matrix: 13 cells, 6 openings -> 14 ideation targets",
+    "Ideated 70 unique candidates",
+    "NoveltyCheck: 23/70 survive as uncontested/novel",
+    "Gate: 7 kept; shortlist 7"
+  ],
+  "result": {
+    "matrix_cells": [
+      {
+        "profile": "AI Security and Governance Officers (CISOs, Compliance Leaders)",
+        "pain": "Shadow AI data leakage (34% cite internal misuse; 43% experienced IP leakage; 20% of breaches tied to shadow AI); EU AI Act enforcement ramps August 2026 with €35M fines; 90% of agents over-permissioned with prompt injection as #1 vulnerability",
+        "tam": "$500B+ (global cybersecurity + compliance budgets; 70% of orgs allocating >10% of security budget to AI controls)",
+        "pain_intensity": 5,
+        "buying_speed": "30-90 days (regulatory deadline creates urgency; boards demanding visibility by August 2026)",
+        "founder_fit": 5,
+        "why_open": "Fragmented landscape with no unified solution. EU AI Act compliance tooling exists but is not integrated with agent security (permissions, identity, least-privilege). Shadow AI detection is band-aid monitoring. No turnkey 'policy enforcement + agent identity + audit trail' platform that startups can deploy."
+      },
+      {
+        "profile": "Enterprise Engineering Leaders (CTOs/VPs of Engineering)",
+        "pain": "AI code quality/technical debt explosion: 41% of code is AI-generated with 1.7x higher defect rates; review process becomes theater; mounting production bugs and rework eating 82% of engineering spend",
+        "tam": "$750B+ (engineering spend across Fortune 5000; Gartner forecasts 1-3% carved for AI tooling)",
+        "pain_intensity": 5,
+        "buying_speed": "90-180 days (pilot to POC phase; approval required but budgets approved)",
+        "founder_fit": 4,
+        "why_open": "Cursor/Copilot solve speed, not reliability. No one has nailed code verification, eval frameworks, or governance gates that catch slop pre-deploy. LLM-as-judge fails; human + automated verification still manual. Deterministic testing/replay on LLM outputs is nascent."
+      },
+      {
+        "profile": "CFOs and Finance Operations Teams",
+        "pain": "AI rollout mandate stuck 1 inch before production; approved budgets (60% plan 10%+ increases) but 82% of AI projects stall before live deployment due to legacy system brittleness underneath",
+        "tam": "$180B+ (finance function budgets globally; nearly 60% of CFOs have fresh allocation for AI in 2026)",
+        "pain_intensity": 5,
+        "buying_speed": "60-120 days (CFOs push for ROI visibility; governance requirements accelerate purchasing)",
+        "founder_fit": 4,
+        "why_open": "The problem isn't the AI model. It's the integration layer: legacy ERP/accounting systems are broken underneath, and automation can't fix garbage data. No one has a fast, low-friction bridge for retrofit AI on legacy finance stacks without a full system rebuild."
+      },
+      {
+        "profile": "Indie Hackers and Solo Founders (AI Micro-SaaS)",
+        "pain": "Can't ship fast enough or with defensibility: 70% earn under $1K MRR; commoditized AI wrappers face price wars; need niche vertical moats (data integrations, workflows) but integration/self-serve scaling is manual overhead eating into margins",
+        "tam": "$25B+ (estimated micro-SaaS market; 99.9% growth for AI-tagged verticals; thousands of indie makers seeking $5-50K MRR)",
+        "pain_intensity": 4,
+        "buying_speed": "1-4 weeks (product-led, self-serve; no procurement; need quick validation channels)",
+        "founder_fit": 5,
+        "why_open": "They have the builder mindset but lack: (1) no-code/low-code vertical-building frameworks (Lovable is full-stack, not niche), (2) plug-and-play data integrations for vertical workflows (Slack, Shopify, Notion at API level, not abstracted), (3) quick monetization + distribution loops. AI coding tools solve speed but not defensibility or market fit for solopreneurs."
+      },
+      {
+        "profile": "AI Agent Operators and Platform Engineers",
+        "pain": "Reliability and observability crisis: 68% execute <10 steps before needing human intervention; 3-5x longer debugging due to non-determinism; tool calling fails 3-15% of the time; no tracing/visibility; MCP token overhead is enormous; graph memory costs explode",
+        "tam": "$200B+ (AI infrastructure/agent platform spend; Gartner ~$1.37T AI infra by 2026; agents a growing subset)",
+        "pain_intensity": 5,
+        "buying_speed": "60-120 days (engineering-led; internal champion can push POC; tool adoption is bottleneck)",
+        "founder_fit": 4,
+        "why_open": "LangChain, State of Agent Engineering resources exist but observability/tracing is not production-ready for agents. OpenTelemetry fragmented. No unified 'agent nervous system' with real-time decision visibility, compiled tool-calling verification, and replay debugging. Most teams roll bespoke logging."
+      },
+      {
+        "profile": "Product Teams and Non-Technical Founders (Building AI-First Products)",
+        "pain": "Can't verify AI product quality without heavy manual testing: shipping features relying on LLM reasoning with no regression detection; users hit edge cases; no fast feedback loop; cost of bad outputs (toxic suggestions, hallucinations) risks brand/user trust",
+        "tam": "$50B+ (AI product development tools; vertical AI SaaS building; Indie Hackers + early-stage startups)",
+        "pain_intensity": 4,
+        "buying_speed": "14-45 days (scrappy validation loop; product-led adoption; low commitment needed)",
+        "founder_fit": 5,
+        "why_open": "Cursor/Claude Code help you build fast but not validate reliably. No lightweight 'test automation for AI outputs' tool for non-engineers (e.g., 'did this product recommendation meet brand guidelines?'). Existing eval tools (Weights & Biases, Vellum) are too heavy and ML-focused. Need lightweight A/B testing + regression detection tailored for product teams."
+      },
+      {
+        "profile": "ML/Data Engineers and Model Ops Teams",
+        "pain": "Model evaluation/testing is unreliable: 75% evaluate without formal benchmarks, relying on A/B testing; LLM-as-judge always paired with human verification (expensive); no CI/CD integration due to non-determinism; retraining/drift monitoring is manual; edge-case handling is post-hoc",
+        "tam": "$110B+ (ML infrastructure + MLOps tools; 2026 forecasts rising spend on model governance)",
+        "pain_intensity": 4,
+        "buying_speed": "90-180 days (infrastructure purchase; competitive evaluation; integration with existing MLOps stack)",
+        "founder_fit": 4,
+        "why_open": "Weights & Biases, Hugging Face, and others have pieces but no unified verification layer. Deterministic replay testing for LLMs is nascent. No standardized 'eval as code' framework that catches regressions before deploy. Custom benchmarks take 6+ months per team. Industry needs a fast, verifiable eval infra with human-in-the-loop gates."
+      },
+      {
+        "profile": "Enterprise IT/Infrastructure Operators (System Admins, IT Managers)",
+        "pain": "Shadow AI sprawl creating unmanaged risk: no visibility into employee AI tool usage; data leakage via personal ChatGPT/Claude accounts; no enterprise controls (DLP, identity, approvals); managing both sanctioned cloud AI and private on-prem models is fragmented",
+        "tam": "$45B+ (enterprise IT security tooling + cloud management; higher allocation for governance in 2026)",
+        "pain_intensity": 4,
+        "buying_speed": "30-60 days (security-driven urgency; IT procurement can move fast)",
+        "founder_fit": 4,
+        "why_open": "Governance platforms emerging (Splunk, others) but lightweight and fragmented. No integrated solution for: (1) shadow AI detection at network/app level, (2) delegated enterprise AI (managed endpoints serving internal models to teams), (3) automated policy enforcement (e.g., 'block prompts containing SSID'), (4) seamless user experience (users don't switch tools)."
+      },
+      {
+        "profile": "Prompt Engineers and Applied AI Practitioners",
+        "pain": "Prompt tuning/iteration dominance with no conviction in system improvement: spending 60%+ time on edge-case patching and prompt complexity; no feedback loops proving systems actually improve; architectural ownership is lost when outsourcing logic to models; ambition/synthesis limited by prompt-centric mindset",
+        "tam": "$20B+ (applied AI services + internal AI CoEs; estimated 100K+ practitioners globally)",
+        "pain_intensity": 3,
+        "buying_speed": "7-30 days (community-driven; peer validation; GitHub adoption model)",
+        "founder_fit": 5,
+        "why_open": "Prompt engineering is the bottleneck, not model capability. No tools exist for 'structured evaluation-as-you-iterate' that show practitioners when a prompt change actually improves system behavior (vs. lucky samples). No frameworks for building mental models of AI system behavior (vs. black-box prompting). Academic research exists; no viable product for practitioners."
+      },
+      {
+        "profile": "Sales and Revenue Operations Leaders (Sales Execs, RevOps)",
+        "pain": "Demand for AI SDRs/agents high but execution immature: outbound agents need to maintain brand voice, handle objections contextually, and avoid over-promising. Manual lead qualification eating 40%+ of BDR time; pipeline tools don't integrate AI natively",
+        "tam": "$90B+ (sales tooling + outsourced BDR; ~40% of enterprises investing in AI SDR agents per 2026 surveys)",
+        "pain_intensity": 4,
+        "buying_speed": "60-90 days (tied to hiring cycles and quota pressure; quick pilot adoption if proven)",
+        "founder_fit": 3,
+        "why_open": "Generic agent platforms (Replit, Cognition) don't understand sales workflows. No vertical AI agent for B2B outbound that handles: (1) multi-touch sequences with brand guardrails, (2) CRM integration for lead context, (3) A/B testing at agent prompt level, (4) fallback to humans with full context. Existing tools are either too generic or too rigid."
+      },
+      {
+        "profile": "Healthcare/Legal Compliance Specialists",
+        "pain": "Document processing and compliance review bottleneck: contracts/medical records need extraction + classification + compliance check; 90% of deployed agents over-permissioned; prompt injection risks high with sensitive data; manual review still required; HIPAA/GDPR audit trails missing",
+        "tam": "$35B+ (specialized compliance/document services; high-touch verticals with regulatory lock-in)",
+        "pain_intensity": 4,
+        "buying_speed": "120-180 days (heavily regulated; compliance review required; procurement long cycles)",
+        "founder_fit": 3,
+        "why_open": "Generic document AI tools (filings, OCR) exist but don't integrate compliance logic + least-privilege identity + audit trails for regulated workflows. No 'agent + guardrails' product for legal/medical doc review that ships with HIPAA/GDPR compliance baked in and deterministic safeguards."
+      },
+      {
+        "profile": "Legacy Enterprise Modernization Teams (Digital Transformation Leads)",
+        "pain": "AI sits 1 inch short of production because legacy systems are too broken underneath: can't automate garbage data; ETL/data quality gaps prevent agent autonomy; rebuilding from scratch is expensive; no fast retrofit path for legacy ERP/databases with AI layer on top",
+        "tam": "$200B+ (enterprise modernization + consulting services; estimated 40%+ of large enterprises attempting AI retrofit on legacy)",
+        "pain_intensity": 5,
+        "buying_speed": "120-240 days (long procurement cycles; multiple stakeholders; requires executive sponsorship)",
+        "founder_fit": 2,
+        "why_open": "McKinsey, Accenture sell consulting but no product. Internal teams write custom ETL + data quality filters. No off-the-shelf 'legacy to AI-ready' platform that: (1) profiles legacy system data quality, (2) generates fast data fixes/normalization, (3) maps AI workflows to legacy APIs, (4) handles async handoffs and rollback. Consultancy is the moat, not a product."
+      },
+      {
+        "profile": "Marketing Heads and Demand Gen Leaders (CMOs, Marketing Ops)",
+        "pain": "Budget shifting to AI (content, ABM agents, SEO/AEO optimization) but tools fragmented: no unified agent for end-to-end campaign orchestration + personalization + attribution; content quality/brand consistency hard to maintain; attribution breaks with agentic decisions",
+        "tam": "$60B+ (marketing tech + content creation tools; strong budget reallocation toward AI agents for 2026)",
+        "pain_intensity": 3,
+        "buying_speed": "45-90 days (marketing-led purchase; quick ROI visible in pipeline metrics)",
+        "founder_fit": 2,
+        "why_open": "HubSpot, Salesforce add AI capabilities but are not agent-native. Smaller tools like Gamma do content but not orchestration. No vertical AI agent for demand gen that chains: content generation -> email sequencing -> landing page optimization -> lead scoring -> handoff to sales with full context, all with compliance/brand guardrails."
+      }
+    ],
+    "openings": [
+      {
+        "opening": "AI Compliance-as-a-Service for Small Businesses (Sub-500 Employees)",
+        "why_uncontested": "Searched 'AI compliance regulatory 2026 small business' - no venture-backed competitor dominates. 82% of sub-5-person firms think AI doesn't apply to them. States like NY, Colorado, Illinois now require bias audits ($5k-$50k annually). Compliance costs ~$16k/year in CA alone. No funded startup has built affordable, accessible compliance tooling for SMBs despite regulatory explosion. Startups focus on enterprise/Fortune 500.",
+        "why_now": "2026 marks the year state-level AI regulations went live with enforcement. Prior authorization, hiring algorithms, lending decisions now require documented audits. SMBs using AI tools without knowing they're regulated. Gap widens monthly. Regulatory fines imminent.",
+        "why_lab_cant": "Frontier labs optimize for headline-grabbing inference performance, not compliance/governance. Labs (OpenAI, Anthropic) don't build SMB tax/compliance software. Zero incentive to address sub-$1M ARR market. Hyperscalers focus on enterprise IAM, not regulatory coaching. Pure software play, not compute-dependent."
+      },
+      {
+        "opening": "Healthcare Prior Authorization Automation for Regional Health Systems (Not Optum/UnitedHealth)",
+        "why_uncontested": "Searched 'AI healthcare operations prior authorization 2026' - market is $35B annual waste, 92% care delays. Optum entered Q1 2026 with first-mover, but only serves large national insurers. Regional health systems, smaller hospital networks, and MGAs (Managing General Agents) have zero specialized solutions. R1 RCM focused on large enterprises. No startup built 'white-label prior auth engine for mid-market health systems.'",
+        "why_now": "CMS issued guardrails Jan 2026 requiring medical-history-based determinations + explainability. Prior auth is collapsing under volume (healthcare AI priority #1 per searches). Regional systems scrambling to avoid fines. Optum/competitors won't serve $50-100M revenue health systems (unprofitable at their scale).",
+        "why_lab_cant": "Frontier labs have no healthcare revenue contracts, no HIPAA baggage, no incentive to handle compliance + explainability overhead. Labs optimize for benchmark performance, not regulatory audits. Hyperscalers don't build domain-specific healthcare workflows. Requires domain expertise + sales into highly regulated buyers = not a lab priority."
+      },
+      {
+        "opening": "Local-First AI Infrastructure for Privacy-Conscious SMBs (Ollama + Domain-Specific Optimization)",
+        "why_uncontested": "Searched 'local AI edge deployment 2026 small business' - 50%+ enterprise inference shifting on-prem by 2026. But no startup has built 'plug-and-play local AI appliance + industry playbooks.' Ollama is open-source, basic. No funded company targets SMB on-prem market (too low TAM for VC model). Hardware companies (Dell, NVIDIA) don't do SMB software.\nMarket gap: SMBs spend $300-500/mo on OpenAI APIs; $10-20k local box breaks even in 4 months. Proven CAC + LTV economics but unsexy.",
+        "why_now": "2026 = on-premise LLM market hit $3.81B (23.8% CAGR). Privacy regulations (GDPR, CCPA enforcement) make cloud APIs legally risky for healthcare/finance SMBs. Data residency now table-stakes. Consumer GPUs (RTX 4090) cheap enough. But zero 'turnkey for SMBs' solution exists.",
+        "why_lab_cant": "Labs generate revenue from API tokens consumed. Selling local inference cannibalizes their core business model. Labs won't build on-prem product or support local model deployment (kills margins). Hardware play requires supply chain expertise labs lack. Not a research/capability gap, a business-incentive mismatch."
+      },
+      {
+        "opening": "Multi-Agent Observability + Coordination Platform (Not LangSmith, Not Generic APM)",
+        "why_uncontested": "Searched 'enterprise AI agent observability multi-agent coordination 2026' - only 2% of enterprises deployed agents at scale. Infrastructure needs: real-time tracing of 1000s of agent calls/min, cost attribution per agent, conflict resolution across agents, policy enforcement. LangSmith (LangChain) handles single agents. No venture-backed startup built 'observability for multi-agent systems operating at scale.' Cloud providers (AWS, GCP) have fragmented solutions.",
+        "why_now": "By end 2026, 40% of enterprise apps will embed task-specific AI agents (Gartner). Current infrastructure designed for static processes, not dynamic autonomous systems. Organizations deploying agents now hit 'blind orchestration' problem: agents loop, conflict, consume 10x expected resources. 2026 = first wave of production agent failures due to lack of visibility.",
+        "why_lab_cant": "Labs don't operate enterprise infrastructure or production SaaS platforms at multi-tenant scale. Observability is operations/SRE heavy, not research-driven. Requires deep cloud engineering + enterprise sales motions labs don't have. Multi-agent coordination is not a model-capability problem, it's orchestration infrastructure (not a lab bet)."
+      },
+      {
+        "opening": "Precision Agriculture AI for Specialty Crops / Smallholder Farmers (Not Monsanto, Not John Deere)",
+        "why_uncontested": "Searched 'AI agriculture farming precision agriculture 2026' - $12B data economy by 2026, 25% CAGR through 2030. But dominated by incumbents (Deere AI integrations, Monsanto/Bayer data plays). Gap: smallholder farmers (<500 acres), specialty crops (berries, wine grapes, nuts), and direct-to-farm solutions. No startup has built 'affordable AI for crop-specific yield prediction + irrigation optimization' for non-industrial farms.",
+        "why_now": "2026 Farm Bill provides 90% subsidy for precision ag tech adoption. Labor costs surging. Specialty crops (higher margin) demand precision. AI drone costs dropping. But farmer tech adoption is slow; existing solutions require enterprise IT infrastructure farmers lack. First-mover in accessible, crop-specific AI wins state subsidy budgets.",
+        "why_lab_cant": "Labs optimize for GPU throughput, not agronomic domain knowledge. Agriculture requires hyper-local data (soil pH, microclimate, crop phenology) labs don't collect. No lab has crop-science expertise or farmer distribution. Unsexy vertical with tiny ML budgets = not a lab priority. Requires domain partnership (university ag departments, equipment dealers) labs don't have."
+      },
+      {
+        "opening": "Real Estate Operations Automation (Title Abstraction + Deed Generation + Closing Checklists)",
+        "why_uncontested": "Searched 'AI real estate contracts deeds automation 2026' - 76% of CRE firms exploring AI, only 5% achieved goals (per Deloitte). 47% of title companies use AI for title review; 38% for lease abstraction. But 'turnkey closing automation' doesn't exist at startup level. Legal incumbents (Thomson Reuters) focus on solo practitioners, not brokerages. No venture-backed 'closing checklist + deed + final walkthrough AI agent' for regional real estate offices.",
+        "why_now": "Deal-closing time fell from 45-60 days to 30 when AI handles documents (2026 ABA survey). Regulatory complexity (title insurance, state-specific deeds) makes AI valuable. Regional brokerages losing deals to inefficiency but can't afford custom builds. 2026 = critical mass of title companies and brokers demanding automation without hiring 3 more paralegals.",
+        "why_lab_cant": "Real estate law is state-specific and document-template heavy. Labs can't compete without hyper-local legal knowledge + state bar relationships. No lab is building 'closing software' (not their business model). Requires legal liability insurance + state bar approval labs don't want. Hardware/infrastructure play = not aligned with lab research."
+      }
+    ],
+    "idea_count": 70,
+    "survivor_count": 23,
+    "shortlist": [
+      {
+        "name": "Title Exception Cure Agent (TECA)",
+        "one_liner": "AI agent that autonomously generates state-specific title defect remediation strategies and automated lien release/exception clearing workflows for title companies.",
+        "buyer": "Title insurance carriers (Stewart, Fidelity National, First American underwriting desks) + regional title companies clearing 50-200 transactions/month.",
+        "tam": "USD 1.28B title insurance market (2026) x 15-20% of transactions hitting title defects/exceptions x average USD 800-1200/remediation service = USD 150-250M SOM.",
+        "pain": "Title exceptions (missing heirs, old liens, boundary disputes, survey exceptions) block 12-18% of closings. Manual curing takes 7-14 days, requires legal review, state-specific statutes knowledge. Title companies hemorrhage revenue on 'free' exception clearing as competitive necessity. No software exists that predicts cure paths or auto-drafts affidavits/quiet title strategies.",
+        "wedge": "Build exception-to-cure reasoning agent: ingest exception type + property history + state law database => recommend cure path (affidavit, lien release, quiet title, insurance endorsement) + auto-draft legal documents. Integrate with Qualia/ResWare APIs for title flow.",
+        "why_uncontested": "Propy ($100M Series) focused on end-to-end closing, not exception curing. RecordsOnline's 2026 AI Suite handles detection, not remediation. Legal incumbents (Thomson Reuters, LexisNexis) target solo practitioners, not title company operations. Cure curation requires domain knowledge of all 50 state statutes, title insurance policy language, and quiet title procedures labs can't justify. No YC/venture startup targets this because margins appear thin until you realize it prevents deal collapse (USD 5-10K revenue per cure, 10-15 cures/title agent/month = defensive play worth USD 60-180K/agent).",
+        "invention": "State-law-aware exception reasoning engine trained on title company case data + state statute embeddings + quiet title precedents. Agent auto-populates affidavits/legal templates keyed to jurisdiction. Signed receipt/audit trail for liability defense. Real innovation: predictive cure-path ranking (e.g., 'this missing heir lien will cost USD 2000 to cure via affidavit but only USD 500 in endorsement cost if you wait 2 days for title insurance market shift').",
+        "bulldozer_distance": "18+ months safe. Labs have no incentive to build title-specific legal reasoning (not general AI). Funded closing platforms (Propy, RealPact) don't sell to title companies; they own/consolidate them. No AWS/Azure/Cloudflare equivalent because curing is domain-expert work, not infrastructure.",
+        "fast_cash_8wk": "Services path: contract with 2-3 regional title companies (50-100 transactions/month each). Your AI agent drafts cures; partner's underwriters review/approve (human-in-loop). Charge USD 200-400/exception cleared (margin: USD 100-200). 50-100 cures/month = USD 5-20K/month in 8 weeks. Scale to SaaS once 6-month track record of accuracy/compliance proven.",
+        "needs_model": "finetune. Base model (Claude/Llama) fine-tuned on: (1) title company case database (affiliate/early partner), (2) all 50 state real property law summaries + quiet title statute texts, (3) title policy language + exceptions codebook. Distill to 3B params for on-prem inference (regional title companies want local data sovereignty).",
+        "rough_25k_path": "Month 1-2: Affiliate 2-3 title companies; collect 200-300 anonymized exception/cure pairs. Fine-tune 7B model on exception->cure mappings + state law. Month 3: Deploy as API + human review dashboard. Month 4-6: Scale to 10-15 title partners. Achieve USD 15-25K/month via per-cure fees + intro SaaS pricing (USD 2-5K/month per title office). Moat: title-insurance-specific legal reasoning + relationships with underwriters (they validate cures; competitors can't replicate without data access).",
+        "contested": "some",
+        "incumbents": [
+          "Stewart Information Services (Virtual Underwriter AI, March 2026)",
+          "First American (Virtual Underwriter AI)",
+          "Neoreasoning (AI claims automation, not exception clearing)",
+          "Alanna.ai (communication & order entry automation)",
+          "AtClose (workflow & compliance automation)"
+        ],
+        "composite": 22,
+        "score": {
+          "name": "Title Exception Cure Agent (TECA)",
+          "tam": 3,
+          "pain": 4,
+          "novelty": 4,
+          "founder_fit": 3,
+          "fast_cash": 4,
+          "bulldozer": 4,
+          "verdict": "keep",
+          "reason": "Acute deal-collapse pain with $5-10k per-cure pricing is a natural contingency services-to-product wedge, signed-receipt liability trails fit the founder's specialty, and 50-state statute depth keeps labs out 18mo+."
+        }
+      },
+      {
+        "name": "TokenRecap: Autonomous MCP Cost Optimizer",
+        "one_liner": "Automated MCP auditor that profiles agent calls, applies dynamic compression (search-first, mode switching, mapping), and reduces token overhead by 60-80% without code changes.",
+        "buyer": "MLOps/DevOps engineers managing multi-MCP-server deployments for cost-sensitive agent fleets (scaleups, open-source projects, edge deployments)",
+        "tam": "$2.5B (cost optimization attach-on to $5B+ agent infrastructure/DevOps platform spend; 40%+ of MCP deployments have bloat)",
+        "pain": "MCP schema overhead is 71–771 tokens per turn per agent; teams know Maxim reduced costs by 92% but require custom code changes (mode switching, search-first tool discovery, mapping compression); no turnkey service connects diagnosis → multi-technique optimization → validation → cost attribution; re-optimization is manual and risky.",
+        "wedge": "Automated MCP auditor runs alongside agents, profiles tool calls (which tools actually used, call frequency, schema overhead per tool), recommends and applies compression (mode switching, dynamic tool discovery, mapping), auto-generates patches for MCP configs, measures savings, and reports ROI—zero code changes required, rollback via config flip.",
+        "why_uncontested": "Maxim AI's Bifrost achieves 92% cost reduction but is a gateway (requires deployment + architecture change); individual compression techniques are documented (Atlassian mcp-compressor, StackOne tool-search-first) but no unified, turnkey service automates end-to-end optimization + monitoring. Langchain/LangGraph do not bundle MCP cost optimization. No vendor targets cost as primary pain for MCP operators.",
+        "invention": "Continuous MCP cost fingerprinting: model which tools are actually invoked vs. injected, cluster by latency/value/usage, auto-detect compression opportunities (search-first for low-use tool sets, mode switching for heavy compute), generate diff-based MCP patches, A/B test new config against baseline on shadow traffic, auto-approve on cost savings + accuracy parity.",
+        "bulldozer_distance": "18+ months safe. Cloud providers (AWS/Azure Bedrock) are moving toward per-token metering but won't optimize MCP specifically (out of scope for infra). Observability vendors (Datadog, Splunk) don't optimize cost at tool level. MCP is nascent (early 2024 launch), adoption curve is still steep; major re-optimization happens when teams hit 5+ servers, which is 2026–2027 inflection point.",
+        "fast_cash_8wk": "SaaS wedge: Free audit tier (profiles MCP servers, generates report, estimates savings). Fast-cash: hand-sell to 10 scaleups running $500+/mo MCP spend → $50–100k in audit fees by week 6. Position as \"MCP bill reduction guarantee.\" Week 7–8: charge 30% of 6-month savings as implementation fee; 3 customers at $5k each = $15k → $25k/mo projected post-pilot.",
+        "needs_model": "none (pure profiling and config synthesis; could distill a small cost-prediction model later)",
+        "rough_25k_path": "Weeks 1–2: MCP server profiler (read schema, log calls, measure tokens). Weeks 3–4: compression recommendation engine (search-first, mode switching, mapping scoring). Weeks 5–6: config patcher + rollback mechanism. Weeks 7–8: shadow traffic A/B testing + cost attribution dashboard. Revenue: 10 audits at $5k + 3 implementations at $5k each = $35k by week 8.",
+        "contested": "some",
+        "incumbents": [
+          "Cloudflare Code Mode MCP",
+          "mcp-compressor (Atlassian Labs)",
+          "Token Optimizer MCP (ooples)",
+          "Headroom (output compression)",
+          "LeanOps (consulting)",
+          "Anthropic Tool Search Tool",
+          "MCP Observability platforms (Braintrust, Helicone, LangSmith)"
+        ],
+        "composite": 20,
+        "score": {
+          "name": "TokenRecap: Autonomous MCP Cost Optimizer",
+          "tam": 3,
+          "pain": 3,
+          "novelty": 3,
+          "founder_fit": 4,
+          "fast_cash": 4,
+          "bulldozer": 3,
+          "verdict": "keep",
+          "reason": "Token-savings is the cleanest contingency model (take a cut of measured reduction) and it lands squarely on the founder's gateway-capture + signed-receipts skills with a reachable AI-native buyer."
+        }
+      },
+      {
+        "name": "CacheForensics",
+        "one_liner": "Deterministic AI model cache state replay: capture and reconstruct every cached prompt, system state, and decision at the moment an agent behaved, enabling post-breach forensic timeline reconstruction (MITRE ATT&CK mapping)",
+        "buyer": "Enterprise Incident Response & DFIR Teams (CISO, IR Manager, Head of Forensics)",
+        "tam": "$3.8B (DFIR market $8.2B; forensics spend is 10–15% of compliance; Asymmetric Security $4.2M pre-seed signals demand; enterprises allocate $100k–$1M/year to forensics retainers)",
+        "pain": "When AI agents cause breaches (e.g., Mercor April 2026), DFIR teams cannot reconstruct 'what did the model see in cache when it exfiltrated data?' They have prompt logs + outputs but zero model state. Traditional DFIR (Magnet, Cellebrite) doesn't handle model state. Unit 42's 2026 sim showed data theft in 25 minutes; if undetected for days, replaying model state is impossible — investigators only see API logs, not intermediate reasoning. Post-breach, proving an agent didn't leak requires full cache replay.",
+        "wedge": "Deterministic cache snapshot sidecar: inject process into every LLM request capturing (1) full prompt + cached prefix state, (2) system state (env vars, file access, tokens), (3) HMAC signature of both; store in immutable log (Merkle tree + S3 or blockchain). Forensic query: 'show me model state when output X was generated' — replay full decision tree. LLM-driven timeline: map cache + output to MITRE ATT&CK phases for analyst review",
+        "why_uncontested": "DFIR incumbents (CrowdStrike, Mandiant, Asymmetric Security) don't handle model state as first-class artifact; LLM providers (OpenAI, Anthropic) don't export detailed cache forensics; requires distributed tracing (OpenTelemetry) + model-aware snapshots + forensic timeline language (novel combo); patent-eligible forensics process",
+        "invention": "Model state time-series forensics: extend traditional digital evidence (disk, memory, network) to include LLM cache as first-class artifact. Forensic timeline reconstruction uses LLM itself (human-in-loop: analyst reviews AI summary, AI maps to MITRE ATT&CK). Patent: 'Method for deterministic replay of LLM model state in post-incident investigation'",
+        "bulldozer_distance": "Safe 24+ months. DFIR incumbents need new licensing, data model, UI; Splunk needs forensics module; Cloud providers must publish model cache state (proprietary to LLM vendors, conflict of interest). Ecosystem buy-in required; slow incumbent motion.",
+        "fast_cash_8wk": "Service partnership wedge: partner with 1 regional DFIR firm ('we'll add AI forensics to your IR practice'). Target post-breach companies via CISO networks; offer 'free forensic audit' of recent incident ('if we find $Y risk, you pay X% of cost'). By week 8: 2 deals at $10k–$15k/mo each (SaaS + retainer)",
+        "needs_model": "Light distillation for timeline classification (optional; heuristics work for MVP)",
+        "rough_25k_path": "Month 1: Hire 2 (1 ex-DFIR expert, 1 infra engineer). Weeks 1–4: MVP (snapshot capture sidecar + immutable log + replay UI). Weeks 5–8: Pitch DFIR partners + 2–3 post-breach enterprises. Land 2 deals = $15k–$20k/mo. Month 2: Add vertical specialization (healthcare/fintech breaches). Month 3–4: Partner with forensic consulting firms for distribution; expand to 4+ customers = $40k/mo",
+        "contested": "some",
+        "incumbents": [
+          "Langfuse ($4M seed, Y Combinator W23)",
+          "Arize AI ($131M Series C Feb 2025)",
+          "Cydelphi (seed-funded DFIR)",
+          "Helicone (acquired by Mintlify March 2026)"
+        ],
+        "composite": 20,
+        "score": {
+          "name": "CacheForensics",
+          "tam": 3,
+          "pain": 3,
+          "novelty": 4,
+          "founder_fit": 4,
+          "fast_cash": 2,
+          "bulldozer": 4,
+          "verdict": "keep",
+          "reason": "Maps perfectly to the founder's signed-receipt/replay/gateway-capture stack, is patent-eligible and bulldozer-resistant via forensic chain-of-custody, though enterprise DFIR sales make fast cash hard."
+        }
+      },
+      {
+        "name": "BenchAudit",
+        "one_liner": "Benchmark contamination detection and model evaluation audit platform that identifies data leakage, annotation errors, and gaming signatures in public benchmarks and proprietary eval datasets.",
+        "buyer": "Model evaluation teams at frontier labs; LLMOps teams at enterprises; researchers publishing benchmarks; evaluation infrastructure platforms (Hugging Face, Scale Labs)",
+        "tam": "$280M (evaluation infrastructure + benchmarking tools + research credibility assurance; compliance/audit premium in regulated AI)",
+        "pain": "2026 reality: major benchmarks have 50%+ annotation error, data contamination, and leaderboard gaming. Teams cannot trust public evals to validate models. Contamination detection is manual and unreliable. No tool audits your proprietary evals for gaming signatures. Leaderboards rank models within noise margins but look authoritative. Enterprises need verifiable evals for compliance.",
+        "wedge": "First tool to systematically audit evaluation datasets: Detect memorization (query examples in training corpus) via n-gram overlap + embedding similarity. Identify annotation errors (inconsistent labeling, low inter-rater agreement). Catch gaming signatures (suspiciously easy inputs, temporally clustered model improvements). Audit reports suitable for regulatory review. Integrates with eval platforms (DeepEval, Confident AI).",
+        "why_uncontested": "Benchmark contamination is a 2026 crisis (METR, AI Safety Report documented frontier models detecting eval contexts) but no product addresses it. DeepEval/Confident AI focus on metric reliability, not data integrity. Hugging Face has dataset browser, not auditor. This is boring (auditing, compliance) but high-TAM (every LLM lab needs this soon).",
+        "invention": "Causal contamination analysis: Given a benchmark and a model's training data, compute probability that model 'saw' specific test examples. Anomaly detector for eval gaming (detect suspicious model behavior patterns: accuracy drop on hard variants, sudden jumps on new evals). Reproducibility checker: can results be replicated by independent annotators? Audit report generation suitable for regulatory submission (EU AI Act, etc.).",
+        "bulldozer_distance": "Benchmark auditing is a governance primitive, not horizontal infra. Cloud platforms gain nothing. Evaluation vendors have no margin to build this deeply. 20+ months safe.",
+        "fast_cash_8wk": "Services-first: Hire eval experts. Offer 'benchmark audit' consulting to frontier labs + enterprises ($50-200k per audit). Simultaneously build lightweight open-source contamination detector. Month 1-2: Auditing service (manual + tools). Month 3: Sell to 2 labs at $60k each. Month 4-6: Build SaaS audit platform. Month 7-8: Self-serve report generation. Path: Service revenue to seed product.",
+        "needs_model": "distill (train classifier on contamination patterns, annotation error signatures from public benchmark analysis)",
+        "rough_25k_path": "Weeks 1-4: Build contamination detector + annotation error analyzer. Months 1-2: Auditing services (2 customers @ $40-80k each). Month 3-4: SaaS dashboard + compliance report templates. Month 5-7: Integration with eval platforms. Month 7-8: Self-serve model. Target: 2-3 SaaS customers @ $8-15k/mo by month 8 = $16-45k MRR.",
+        "contested": "some",
+        "incumbents": [
+          "Braintrust ($121M, Feb 2026)",
+          "Arize AI ($131M, Feb 2025)",
+          "Confident AI (Seed)",
+          "Kili Technology (commercial)",
+          "BenchGuard (academic, UW/Phylo/Genentech, Apr 2026)",
+          "LastingBench/AntiLeak-Bench (academic frameworks)"
+        ],
+        "composite": 19,
+        "score": {
+          "name": "BenchAudit",
+          "tam": 3,
+          "pain": 3,
+          "novelty": 3,
+          "founder_fit": 4,
+          "fast_cash": 3,
+          "bulldozer": 3,
+          "verdict": "keep",
+          "reason": "Independent eval-integrity/contamination auditing is the founder's exact eval/replay/receipts wheelhouse, and third-party credibility is structurally hard for labs to self-provide, though the willing-payer pool is thin."
+        }
+      },
+      {
+        "name": "AgentAudit",
+        "one_liner": "Real-time OAuth forensics for AI agents: continuous cryptographically-signed audit replay of every token grant and permission delegation, emitting semantic audit receipts proving least-privilege compliance",
+        "buyer": "Enterprise Security & Compliance Officers (CISO, CAO, Legal/Compliance Directors)",
+        "tam": "$5.2B (IAM audit $1.8B + compliance audit $2.1B + AI governance $1.3B; enterprises pay $50k–$500k/year for privileged audit alone)",
+        "pain": "OAuth multi-hop delegation for AI agents is forensically opaque: 93% of agents still use unscoped API keys (Scalekit 2026); audit logs show token exchanges but not semantic 'why did this agent inherit Finance API access?' When Mercor had its April 2026 breach, agents had 4x more permissions than needed — audit trails existed but couldn't explain delegation chains. Compliance cannot prove least-privilege to regulators.",
+        "wedge": "OAuth replay sidecar that intercepts every token grant, PKCE flow, and scope reduction at gateway; semantic replay with LLM-guided policy verification ('agent capabilities vs. minimum needed'); signed immutable audit records (HMAC-SHA256 on append-only log or blockchain); export as cryptographic attestation (signed JSON-LD linked-data proofs) for regulators",
+        "why_uncontested": "Incumbents (Okta, Auth0, Splunk, CrowdStrike) log OAuth but don't offer semantic replay; their audit is user-centric, not agent-centric; real-time + cryptographic provenance is novel; Okta would need 18+ months (compliance expertise + agent-aware policy DSL + forensic replay); conflict of interest (they sell IAM, not forensics)",
+        "invention": "Semantic token provenance graph: real-time multi-hop delegation graph queryable by policy predicate ('was agent X allowed to call endpoint Y?'); cryptographically signed audit receipts on immutable log. Patent-eligible: 'Method and apparatus for real-time OAuth semantic auditability in agentic systems'",
+        "bulldozer_distance": "Safe 18+ months. OAuth standardization (RFC 8693, SPIFFE/SVID) is in draft phase (12–24 months to RFC). Okta/Auth0 lack forensics expertise; Splunk would need new data model + query language. Least likely incumbent pivot.",
+        "fast_cash_8wk": "Contingency + service wedge: partner with 2–3 enterprises (target Mercor competitors, fintech agentic ATM workflows) on free 30-day audit; if $X risk found, charge $10k + 2-month $8k/mo SaaS contract. By week 8: 2–3 customers at $8k–$12k/mo = $20k–$30k/mo showback + minor tooling",
+        "needs_model": "None. OAuth is deterministic; audit is rule-based policy DSL + cryptographic signature verification",
+        "rough_25k_path": "Month 1: Hire 3 (1 OAuth expert ex-Auth0/Okta, 1 policy DSL engineer, 1 infra). Weeks 1–4: MVP (FastAPI OAuth gateway + Postgres audit log + HMAC signing). Weeks 5–8: Direct outreach to CISO networks; land 2–3 pilots on $5k–$8k/mo each via webinar/email. Month 2: Refine compliance messaging; pitch vertical (healthcare/banking). Month 3–6: Expand to 5+ customers = $50k/mo",
+        "contested": "some",
+        "incumbents": [
+          "Vorlon (AI Agent Flight Recorder, ~$? Series A 2026)",
+          "Anthropic (Claude Compliance API, May 2025)",
+          "Cequence (Agent Personas least-privilege)",
+          "Okta/Auth0 (MCP authorization workgroup)"
+        ],
+        "composite": 19,
+        "score": {
+          "name": "AgentAudit",
+          "tam": 4,
+          "pain": 3,
+          "novelty": 3,
+          "founder_fit": 4,
+          "fast_cash": 2,
+          "bulldozer": 3,
+          "verdict": "keep",
+          "reason": "Signed-receipt OAuth replay uses all three core skills (capture, replay verification, signed receipts) and is the invention-grade durable bet, though enterprise compliance GTM is the slow speed not the fast-cash wedge."
+        }
+      },
+      {
+        "name": "ModelMix: Compliance Layer for Open-Weight + Proprietary Model Blending",
+        "one_liner": "SaaS that manages licensing, audit trails, and cost allocation when SMBs blend open-weight, proprietary, and fine-tuned models in production.",
+        "buyer": "CTOs/compliance teams at regulated SMBs (healthcare, fintech, legal) running hybrid local + cloud inference stacks.",
+        "tam": "$600M (regulated SMB segment x $10-50k annual spend on model governance + audit trail infrastructure)",
+        "pain": "SMBs want to: (1) use free DeepSeek locally to cut API spend, (2) keep OpenAI for hard tasks, (3) deploy proprietary fine-tuned models. But licensing thresholds (e.g., Llama 2 community license kicks in at $1M revenue; Qwen has restrictions), export controls, and compliance audits create legal risk. No tool exists to track which model handles which request and prove compliance.",
+        "wedge": "Policy-as-code platform: define model selection rules (e.g., 'use DeepSeek unless output precision >99.5%, then use Claude'), auto-tag each inference with model + license metadata, generate quarterly compliance reports for auditors. Integrates with model router to enforce license thresholds and data residency rules.",
+        "why_uncontested": "Compliance automation is huge, but startups focus on data governance (Immuta, Alation) or model monitoring (Arthur AI, Fiddler). No one owns the 'which model can I legally use for this request' problem. Open-weights exploded but licensing is chaotic (Grok, Llama, DeepSeek, Qwen all different). Labs and cloud providers can't build this (conflicts with their licensing model).",
+        "invention": "Fine-grained model permissioning engine: link model weights to license terms, monitor live request streams against thresholds, generate audit-proof logs of compliance decisions. Integrate export control databases (BIS, OFAC) for geofencing. Proof-of-work: show SMBs they can save 40-60% on API spend by blending models without legal risk.",
+        "bulldozer_distance": "Regulation enforces this gap. EU AI Act (effective Aug 2026) requires documented model selection rationale. Labs will never audit their own licensing compliance. This is anti-bulldozer: the more regulation tightens, the more defensible.",
+        "fast_cash_8wk": "Service: audit customer's model stack, create policy document, monthly compliance checks ($2k/month). Land 5 customers at $2k each = $10k/mo. Repeatable: every regulated SMB deploying local AI needs this.",
+        "needs_model": "none (policy engine + compliance analytics).",
+        "rough_25k_path": "Build policy engine on top of Postgres + Anthropic for logic reasoning. Start with healthcare verticals (strict HIPAA + FDA audit requirements). Land 8-12 healthcare SMBs at $2-3k/mo each = $16-36k/mo by month 8. Expand to finance/legal.",
+        "contested": "some",
+        "incumbents": [
+          "OpenRouter ($1.3B, $113M Series B 2026)",
+          "Vellum AI (SOC 2/HIPAA compliance)",
+          "LiteLLM (OSS policy-as-code router)",
+          "AWS Bedrock + Azure OpenAI (hyperscaler multi-model + audit)",
+          "CloudZero/Flexprice/Harness (FinOps tools)"
+        ],
+        "composite": 19,
+        "score": {
+          "name": "ModelMix: Compliance Layer for Open-Weight + Proprietary Model Blending",
+          "tam": 3,
+          "pain": 3,
+          "novelty": 3,
+          "founder_fit": 4,
+          "fast_cash": 3,
+          "bulldozer": 3,
+          "verdict": "keep",
+          "reason": "Cross-vendor model licensing/audit-trail compliance maps almost one-to-one onto the founder's gateway-capture + signed-receipts stack, regulated buyers carry compliance budget, and labs can't build a neutral layer without licensing conflict."
+        }
+      },
+      {
+        "name": "Anesthesia Real-Time Concurrency & Modifier Compliance Enforcer",
+        "one_liner": "AI-powered live concurrency tracking and modifier validation system that prevents $500K-$3M annual coding exposure per anesthesia group by enforcing CMS time-documentation and medical-direction rules in real-time.",
+        "buyer": "Independent anesthesia practices and anesthesia surgical centers (100+ providers); large hospital anesthesia departments desperate to avoid audit liability; anesthesia billing services targeting compliance-first revenue.",
+        "tam": "~8,000 anesthesia practices in US; average exposure $500K-$3M per practice from modifier/time errors = $4B-$24B annual TAM. SaaS serviceable = ~$500M (targeting practices with audit risk or recent CMS action).",
+        "pain": "Anesthesia groups face exponential audit risk from CMS targeting overlapping time claims, incorrect medical-direction modifiers, and base+time unit bundling errors. A single case miscoding = $500-$2K in exposure. With 1,500 cases/year, exposure scales to $750K-$3M. Current solutions (manual chart review, post-hoc auditing) catch errors after billing. No live enforcement tool exists.",
+        "wedge": "Real-time concurrency enforcement during OR schedule planning and post-op documentation: AI ingests OR schedule data, provider credentials, case duration, and documention as it's entered. Live alerts trigger if: (1) two providers claim overlapping medical direction, (2) time units exceed allowable based on ASA physical status, (3) modifier combination is CMS-disallowed. Generates pre-submission validation report. Integrates into anesthesia EHR/billing workflows.",
+        "why_uncontested": "Nexus io exists but is a billing services vendor, not a SaaS product for self-serve practices. No funded startup builds real-time concurrency + modifier validation. Anesthesia billing vendors are legacy, lack AI. Hospital anesthesia departments use generic RCM tools that don't enforce specialty rules. Barrier: requires deep anesthesia billing domain knowledge + CMS regulatory expertise.",
+        "invention": "Anesthesia-specific LLM trained on CMS anesthesia rules, CPT/modifier guidelines, ASA physical-status coding standards, and historical audit findings. Multi-agent system: (1) concurrency conflict detector, (2) modifier pair validator, (3) time-unit calculator, (4) CMS medical-direction rule enforcer. Proprietary evaluation framework on known audit cases.",
+        "bulldozer_distance": "Athena, Epic, Cerner don't build anesthesia-specific billing enforcement. Hospitals use these; building specialty module expensive for them. Private equity roll-up targets but legacy systems stay siloed. Regulatory tail-wind (increasing CMS audits) raises switching costs. 18mo+ safe.",
+        "fast_cash_8wk": "Month 1-2: Cold outreach to anesthesia billing services and 10-15 mid-size anesthesia practices. Months 2-4: Deploy MVP (real-time modifier + concurrency alerts) at 1-2 pilot practices on contingency (20% of avoided audit costs). Month 4-8: Expand to 5-10 practices at $500-1K/month SaaS + contingency. Target $20K-$25K/mo from 5-8 customers by week 8.",
+        "needs_model": "Finetune: Mixtral or Llama 2 70B fine-tuned on CMS anesthesia billing rules, CPT/modifier documentation, ASA guidelines, and 50+ historical audit findings. Distill to smaller model (Mistral 7B) for edge deployment in OR systems.",
+        "rough_25k_path": "Months 1-2: Cold outreach to 20-30 independent anesthesia practices + 5 billing service firms. Months 2-4: MVP with modifier validator + concurrency detector; deploy at 1-2 practices on contingency. Month 4-6: Add ASA/time-unit enforcement; expand to 5 practices at $750/mo SaaS. Month 6-8: Recruit 3-5 more customers at $1K-1.5K/mo. Path to $25K/mo: 15-20 practices at $1-1.5K/mo + 2-3 contingency recoveries.",
+        "contested": "some",
+        "incumbents": [
+          "Nexus io",
+          "Medaptus (acquired Volaris 2020)",
+          "Sedate AI/Artigen",
+          "Provation Medical iPro (Fortive $1.425B 2021)",
+          "CombineHealth",
+          "3Gen Consulting RevGen-i",
+          "PGM Billing",
+          "NAPA",
+          "F1RSTAnesthesia"
+        ],
+        "composite": 18,
+        "score": {
+          "name": "Anesthesia Real-Time Concurrency & Modifier Compliance Enforcer",
+          "tam": 3,
+          "pain": 4,
+          "novelty": 3,
+          "founder_fit": 2,
+          "fast_cash": 2,
+          "bulldozer": 4,
+          "verdict": "keep",
+          "reason": "Acute, well-budgeted billing-exposure pain and a lab-proof vertical, but it demands deep anesthesia/CMS domain expertise and a healthcare network the founder lacks."
+        }
+      }
+    ],
+    "all_scored": [
+      {
+        "name": "ShadowHunt: Real-time Shadow AI Risk Scoring & Contingency Automation",
+        "composite": 16,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Continuous inventory + behavioral risk classification of shadow AI tools with automated approval workflows and instant contingency breach response (auto-revoke, alert escalation, data retrieval)."
+      },
+      {
+        "name": "Agentic Debt Quantifier",
+        "composite": 16,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Real-time stochastic tax measurement and prediction for agentic workflows—quantify operational overhead of probabilistic code systems before they compound."
+      },
+      {
+        "name": "EnergyAware: Power Optimization Engine for Embedded AI Code",
+        "composite": 12,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Measure, optimize, and verify energy efficiency of AI-generated code for embedded systems—reduce battery drain and carbon footprint before shipping."
+      },
+      {
+        "name": "InvariantGuard: Performance Regression Oracle for AI Code",
+        "composite": 15,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Detect performance regressions and invariant violations in AI-generated code before merge—without requiring benchmarks to exist."
+      },
+      {
+        "name": "AgentSLO: Per-Tool SLO Enforcement Engine",
+        "composite": 16,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Automated SLO authorship, enforcement, and escalation for multi-tool agents—making per-tool latency and reliability accountable in production."
+      },
+      {
+        "name": "TokenRecap: Autonomous MCP Cost Optimizer",
+        "composite": 20,
+        "verdict": "keep",
+        "contested": "some",
+        "one_liner": "Automated MCP auditor that profiles agent calls, applies dynamic compression (search-first, mode switching, mapping), and reduces token overhead by 60-80% without code changes."
+      },
+      {
+        "name": "BenchAudit",
+        "composite": 19,
+        "verdict": "keep",
+        "contested": "some",
+        "one_liner": "Benchmark contamination detection and model evaluation audit platform that identifies data leakage, annotation errors, and gaming signatures in public benchmarks and proprietary eval datasets."
+      },
+      {
+        "name": "AgentAudit",
+        "composite": 19,
+        "verdict": "keep",
+        "contested": "some",
+        "one_liner": "Real-time OAuth forensics for AI agents: continuous cryptographically-signed audit replay of every token grant and permission delegation, emitting semantic audit receipts proving least-privilege compliance"
+      },
+      {
+        "name": "CacheForensics",
+        "composite": 20,
+        "verdict": "keep",
+        "contested": "some",
+        "one_liner": "Deterministic AI model cache state replay: capture and reconstruct every cached prompt, system state, and decision at the moment an agent behaved, enabling post-breach forensic timeline reconstruction (MITRE ATT&CK mapping)"
+      },
+      {
+        "name": "CacheIntel",
+        "composite": 15,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Real-time prompt cache behavior optimizer: ML-driven analysis that recommends cache layout changes and attributes actual cost savings per team, converting '90% cache savings' promise into real money for enterprises running 100+ agents"
+      },
+      {
+        "name": "ComplianceCardinator",
+        "composite": 13,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Auto-generated compliance model cards + bias test suite for small businesses using open-weights LLMs, continuously updated as models change."
+      },
+      {
+        "name": "BiasShield: Synthetic Data-Driven Fairness Testing for SMBs",
+        "composite": 15,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Generate synthetic diverse populations on-demand to test hiring/lending/hiring AI models for bias; score fairness and auto-generate audit reports for $299-500/mo."
+      },
+      {
+        "name": "Anesthesia Real-Time Concurrency & Modifier Compliance Enforcer",
+        "composite": 18,
+        "verdict": "keep",
+        "contested": "some",
+        "one_liner": "AI-powered live concurrency tracking and modifier validation system that prevents $500K-$3M annual coding exposure per anesthesia group by enforcing CMS time-documentation and medical-direction rules in real-time."
+      },
+      {
+        "name": "Pharmacy Technician Shortage Solver: AI Dispensing Triage & Verification",
+        "composite": 14,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Hybrid AI + robotics integration layer that automates 70-80% of pharmacy technician workflow (triage, verification, alert handling) to offset 40K-technician shortage and reduce prescription error rates below 0.1%."
+      },
+      {
+        "name": "Medical Equipment Rental Demand Forecasting & Predictive Maintenance Network",
+        "composite": 13,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "AI-powered demand forecasting and predictive maintenance orchestration platform for medical equipment rental companies to optimize inventory levels, reduce downtime, and capture market share in the $62B-$95B equipment rental market."
+      },
+      {
+        "name": "ModelOps FinOps: AI Cost Attribution for Local Inference",
+        "composite": 13,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "SaaS that brings Heroku-style cost transparency and automated model routing to SMBs running on-premise LLM fleets."
+      },
+      {
+        "name": "ModelMix: Compliance Layer for Open-Weight + Proprietary Model Blending",
+        "composite": 19,
+        "verdict": "keep",
+        "contested": "some",
+        "one_liner": "SaaS that manages licensing, audit trails, and cost allocation when SMBs blend open-weight, proprietary, and fine-tuned models in production."
+      },
+      {
+        "name": "IdentityLayer: Cross-Device Agent Memory & User Consolidation",
+        "composite": 16,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Identity resolution and persistent memory sync for AI agents across devices and sessions—solves the 'unsolved identity problem' explicitly flagged in memory research."
+      },
+      {
+        "name": "WorkflowVault: Production-Tested Agent Workflow Marketplace",
+        "composite": 16,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Marketplace for battle-tested, cost-instrumented agent workflows with resilience patterns, runbook templates, and one-click deployment—compounding infrastructure for the $47.1B agentic market."
+      },
+      {
+        "name": "Microbial Terroir Prediction for Premium Wine",
+        "composite": 15,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Real-time soil microbiome sequencing + ML to predict grape flavor, tannin profile, and optimal harvest timing for estate wines ($500-$2k/acre premium pricing)"
+      },
+      {
+        "name": "Individual Berry Ripeness & Harvest Timing AI for Specialty Crops",
+        "composite": 14,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Handheld RGB+thermal phone-camera vision system + edge AI predicting per-berry ripeness (Brix, acid, color maturity) within 48 hours, cutting harvest labor by 30% and waste by 25% for blueberries, wine grapes, specialty berries"
+      },
+      {
+        "name": "Federated Edge AI for Crop Disease Detection (Privacy-First Farm Co-op Model)",
+        "composite": 15,
+        "verdict": "kill",
+        "contested": "some",
+        "one_liner": "Lightweight, on-device disease detection (powdery mildew, Botrytis, early blight) via mobile app + encrypted federated learning that improves accuracy per farm without sharing images, enabling cooperatives of 50-200 small farms to collectively train a regional disease model"
+      },
+      {
+        "name": "Title Exception Cure Agent (TECA)",
+        "composite": 22,
+        "verdict": "keep",
+        "contested": "some",
+        "one_liner": "AI agent that autonomously generates state-specific title defect remediation strategies and automated lien release/exception clearing workflows for title companies."
+      }
+    ]
+  }
+}

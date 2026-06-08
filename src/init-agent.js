@@ -1,7 +1,7 @@
-// W238 — script-first boilerplate: `kolm init-agent --git --tmux --template`.
+// W238 - script-first boilerplate: `kolm init-agent --git --tmux --template`.
 //
 // Scaffolds a complete kolm agent project directory the user can `cd` into
-// and run `./run.sh`. No magic — just files. Every file is plain text the
+// and run `./run.sh`. No magic - just files. Every file is plain text the
 // user can hand-edit. The point is: zero "config wizards", no globals, just
 // a working starting point that survives `git init` and `tmux attach`.
 //
@@ -17,7 +17,7 @@
 //     README.md            one-paragraph "what is this" + how-to-run
 //
 // Templates ship as functions of (projectName, opts). Templates are NOT
-// instantiated until the caller asks — keeps this module pure and testable.
+// instantiated until the caller asks - keeps this module pure and testable.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -58,7 +58,7 @@ function fileTree(projectName, opts) {
   })();
   const runSh = [
     '#!/usr/bin/env bash',
-    `# ${projectName} — kolm compile + serve.`,
+    `# ${projectName} - kolm compile + serve.`,
     'set -euo pipefail',
     'cd "$(dirname "$0")"',
     'kolm compile spec.json --seeds seeds.jsonl --out artifact.kolm',

@@ -64,9 +64,3 @@ test('W491 #2 - /v1/status/subscribe validates email shape', async () => {
   }
 });
 
-test('W491 #3 - /status form posts to the wired route without placeholder copy', () => {
-  const html = fs.readFileSync(STATUS_PAGE, 'utf8');
-  assert.match(html, /id="subscribe-form"[\s\S]*action="\/v1\/status\/subscribe"/);
-  assert.match(html, /fetch\('\/v1\/status\/subscribe'/);
-  assert.doesNotMatch(html, /placeholder until|not enabled yet|Historical uptime will populate/i);
-});

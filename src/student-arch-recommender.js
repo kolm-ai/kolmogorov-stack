@@ -1,4 +1,4 @@
-// W716 — student-architecture recommender for task-adaptive arch search (TAAS).
+// W716 - student-architecture recommender for task-adaptive arch search (TAAS).
 //
 // Rule-based v1 (no meta-model). Consumes a capture-stats profile
 // (src/capture-stats.js#computeCaptureStats) and produces an arch spec
@@ -6,7 +6,7 @@
 //
 // The recommender's contract: GIVEN distribution stats, RETURN a single
 // `recommended` arch plus a smaller `fallback` (so the caller can show
-// a "cheaper but plausible" option in the report). Plus `reasoning` — a
+// a "cheaper but plausible" option in the report). Plus `reasoning` - a
 // short human-readable string explaining which rule fired.
 //
 // Honest contract: the recommender NEVER fabricates training. It outputs
@@ -27,7 +27,7 @@ export const RECOMMENDER_VERSION = 'w716-v1';
 
 // =============================================================================
 // Architecture catalog. Sizes are honest defaults; hidden_dim / depth / heads
-// are the "class-typical" geometry for each tier — a v2 meta-model would
+// are the "class-typical" geometry for each tier - a v2 meta-model would
 // learn the exact numbers per-task but v1 picks from a fixed catalog.
 // =============================================================================
 
@@ -81,7 +81,7 @@ const ARCH_MOE_8x3 = Object.freeze({
   },
 });
 
-// Stable catalog accessor — exposed for tests that need to enumerate.
+// Stable catalog accessor - exposed for tests that need to enumerate.
 export const ARCH_CATALOG = Object.freeze({
   ARCH_1B, ARCH_3B, ARCH_7B, ARCH_MOE_8x3,
 });
@@ -126,7 +126,7 @@ export function recommendArch(stats) {
     recommended = { ...ARCH_1B };
     fallback = { ...ARCH_1B };
     reasoning =
-      `Only ${n} captures — distill into a 1B-class student (small + fast). ` +
+      `Only ${n} captures - distill into a 1B-class student (small + fast). ` +
       `Recommend capturing >=500 before considering larger classes.`;
   }
   // Rule 2: complex + tool-heavy + MoE explicitly enabled.
@@ -135,35 +135,35 @@ export function recommendArch(stats) {
     fallback = { ...ARCH_7B };
     reasoning =
       `complexity ${complexity.toFixed(2)} > 0.6 AND tool_use_rate ` +
-      `${toolRate.toFixed(2)} > 0.3 — MoE recipe (8 experts, top-3 routing, ` +
+      `${toolRate.toFixed(2)} > 0.3 - MoE recipe (8 experts, top-3 routing, ` +
       `expert specialization: tool_call/reasoning/general). ` +
-      `Note: MoE recipe is a scaffold — production training requires the full ` +
+      `Note: MoE recipe is a scaffold - production training requires the full ` +
       `mixture trainer.`;
   }
-  // Rule 3: complex OR deeply-reasoning tasks — 7B-class.
+  // Rule 3: complex OR deeply-reasoning tasks - 7B-class.
   else if (complexity > 0.6 || depth > 3) {
     recommended = { ...ARCH_7B };
     fallback = { ...ARCH_3B };
     reasoning =
       `complexity ${complexity.toFixed(2)} > 0.6 OR reasoning_chain_depth ` +
-      `${depth.toFixed(2)} > 3 — recommend 7B-class student to preserve ` +
+      `${depth.toFixed(2)} > 3 - recommend 7B-class student to preserve ` +
       `reasoning capacity. Fallback: 3B-class if memory-constrained.`;
   }
-  // Rule 4: moderate complexity — 3B-class.
+  // Rule 4: moderate complexity - 3B-class.
   else if (complexity >= 0.3 && complexity <= 0.6) {
     recommended = { ...ARCH_3B };
     fallback = { ...ARCH_1B };
     reasoning =
-      `complexity ${complexity.toFixed(2)} in [0.3, 0.6] — 3B-class is the ` +
+      `complexity ${complexity.toFixed(2)} in [0.3, 0.6] - 3B-class is the ` +
       `sweet spot for moderate-difficulty tasks. Fallback: 1B-class for edge.`;
   }
-  // Rule 5: low complexity + short outputs — 1B-class.
+  // Rule 5: low complexity + short outputs - 1B-class.
   else if (complexity < 0.3 && p95 < 200) {
     recommended = { ...ARCH_1B };
     fallback = { ...ARCH_1B };
     reasoning =
       `complexity ${complexity.toFixed(2)} < 0.3 AND output_length p95 ` +
-      `${p95.toFixed(0)} < 200 tokens — 1B-class is sufficient and ships ` +
+      `${p95.toFixed(0)} < 200 tokens - 1B-class is sufficient and ships ` +
       `fastest to edge devices.`;
   }
   // Rule 6 (default): 3B-class safe pick.
@@ -199,12 +199,12 @@ export function recommendArch(stats) {
 }
 
 // =============================================================================
-// W832 — Meta-augmented recommender.
+// W832 - Meta-augmented recommender.
 //
 // If the kolm-meta trainer has accumulated >= MIN_ROWS_FOR_META training rows
 // AND a trained model exists on disk, we consult the meta-model and surface
 // its prediction alongside the rule-based pick. The rule pick stays the
-// authority on architecture SELECTION — meta predictions ride on the envelope
+// authority on architecture SELECTION - meta predictions ride on the envelope
 // as a hint (predicted kscore, compile_time, failure mode) so the operator
 // can decide whether to push past the rule's safe pick.
 //
@@ -213,7 +213,7 @@ export function recommendArch(stats) {
 //
 // `features` is the same shape kolm-meta-trainer expects (META_FEATURES keys).
 // `stats` is the same capture-stats profile the rule-based recommendArch eats.
-// Callers can pass both — the rule path uses stats, the meta path uses features.
+// Callers can pass both - the rule path uses stats, the meta path uses features.
 // =============================================================================
 
 export async function recommendArchWithMeta({ stats = null, features = null } = {}) {
@@ -240,7 +240,7 @@ export async function recommendArchWithMeta({ stats = null, features = null } = 
       min_rows_for_meta: metaMod.MIN_ROWS_FOR_META,
     };
   }
-  // n >= threshold — try the meta model.
+  // n >= threshold - try the meta model.
   let metaEnv = null;
   try { metaEnv = metaMod.inferKolmMeta({ features: features || {} }); }
   catch (e) { metaEnv = { ok: false, status: 'infer_threw', detail: String(e && e.message || e) }; }

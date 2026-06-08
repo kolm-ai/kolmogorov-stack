@@ -1,4 +1,4 @@
-// W888-C — DeviceRegistry: single-file JSON registry for the device fleet.
+// W888-C - DeviceRegistry: single-file JSON registry for the device fleet.
 //
 // Complements (does NOT replace) the existing src/device-capabilities.js
 // per-file profile store (~/.kolm/devices/<id>.json). The W888-C registry
@@ -45,7 +45,7 @@ const VALID_STATUSES = new Set(['unknown', 'online', 'offline', 'error']);
 
 function _defaultDataDir() {
   if (process.env.KOLM_DATA_DIR) return path.resolve(process.env.KOLM_DATA_DIR);
-  // Repo-local default: <cwd>/data — matches what src/store.js does in dev.
+  // Repo-local default: <cwd>/data - matches what src/store.js does in dev.
   return path.resolve('data');
 }
 
@@ -107,11 +107,11 @@ function _validateType(type) {
 
 export class DeviceRegistry {
   // opts:
-  //   - store    (optional)  — capture-store hook (unused by default; reserved
+  //   - store    (optional) - capture-store hook (unused by default; reserved
   //                            so future callers can mirror device events into
   //                            the capture lake without breaking the API).
-  //   - dataDir  (optional)  — override the on-disk root (test isolation).
-  //   - filePath (optional)  — override the entire path, NOT just dataDir.
+  //   - dataDir  (optional) - override the on-disk root (test isolation).
+  //   - filePath (optional) - override the entire path, NOT just dataDir.
   constructor({ store = null, dataDir = null, filePath = null } = {}) {
     this._store = store;
     this._dataDir = dataDir ? path.resolve(dataDir) : _defaultDataDir();
@@ -235,7 +235,7 @@ export class DeviceRegistry {
     return { ok: true, mode: 'soft', id };
   }
 
-  // update(id, patch) — shallow merge a patch into the record. Ignores
+  // update(id, patch) - shallow merge a patch into the record. Ignores
   // attempts to overwrite id / created_at; allows nulling out fields by
   // passing null explicitly.
   async update(id, patch = {}) {
@@ -259,7 +259,7 @@ export class DeviceRegistry {
     return merged;
   }
 
-  // heartbeat(id, {status, last_seen, observed_hardware}) — update fields
+  // heartbeat(id, {status, last_seen, observed_hardware}) - update fields
   // from a poll cycle. Used by the HTTP /v1/devices/:id/heartbeat handler
   // and by the local probe path.
   async heartbeat(id, { status = null, last_seen = null, observed_hardware = null } = {}) {

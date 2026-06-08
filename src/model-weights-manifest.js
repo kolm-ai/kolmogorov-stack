@@ -1,4 +1,4 @@
-// W386 — model-weights manifest.
+// W386 - model-weights manifest.
 //
 // Authoritative download registry for the frontier model catalog in
 // src/model-registry.js. Maps each model_id (verified or candidate) +
@@ -13,7 +13,7 @@
 //   2. We prefer single-file GGUFs from well-known re-quant repos
 //      (unsloth, bartowski, lmstudio-community) so a download is one
 //      HTTP stream, not a 12-shard juggling act.
-//   3. We do NOT hardcode SHA256 — that requires touching the network.
+//   3. We do NOT hardcode SHA256 - that requires touching the network.
 //      Caller verifies via the .sha256 file on HF (download alongside
 //      the GGUF) or skips verification with --no-verify. If a manifest
 //      row includes `sha256`, the puller will verify; otherwise it
@@ -30,13 +30,13 @@
 //      flips it if reality disagrees.
 //
 // Public API:
-//   ALL_VARIANTS         — flat array of every (model_id, variant) row.
-//   variantsFor(modelId) — all variants for one model.
-//   tierTotalBytes(tier) — sum of bytes needed to pull a whole tier.
-//   getVariant(id, v)    — one row by composite key.
-//   listTiers()          — distinct tier labels in display order.
+//   ALL_VARIANTS - flat array of every (model_id, variant) row.
+//   variantsFor(modelId) - all variants for one model.
+//   tierTotalBytes(tier) - sum of bytes needed to pull a whole tier.
+//   getVariant(id, v) - one row by composite key.
+//   listTiers() - distinct tier labels in display order.
 //
-// W386 — heavy-ML-dep rule: this file is PURE METADATA. No imports of
+// W386 - heavy-ML-dep rule: this file is PURE METADATA. No imports of
 // torch, transformers, llama.cpp bindings, etc. The puller is a
 // node:https stream + crypto.createHash. Stays in default install.
 
@@ -61,7 +61,7 @@ export function hfResolveUrl(hf_repo, revision, file_path) {
 }
 
 // ---------------------------------------------------------------------------
-// ALL_VARIANTS — the manifest.
+// ALL_VARIANTS - the manifest.
 //
 // Byte counts below come from public HuggingFace size metadata as of
 // 2026-05-18. They are not network-verified by this module; the puller
@@ -325,7 +325,7 @@ export const ALL_VARIANTS = [
     notes: 'Gemma 2 27B Q4; runs on RTX 4090/5090.',
     unavailable: false,
   },
-  // Carnice / Hermes 4.3 / etc. — fall back to the closest current.
+  // Carnice / Hermes 4.3 / etc. - fall back to the closest current.
   {
     model_id: 'cerebras/Carnice-35B-A3B-Instruct',
     variant: 'q4_k_m',
@@ -375,7 +375,7 @@ export const ALL_VARIANTS = [
     notes: 'Llama 3.1 70B Q4; H100 80GB at Q4 or DGX Spark at Q6.',
     unavailable: false,
   },
-  // Step / DeepSeek v4 PRO/Flash / GLM 4.7/4.5 / Qwen3-VL / Kimi K2.5 — all
+  // Step / DeepSeek v4 PRO/Flash / GLM 4.7/4.5 / Qwen3-VL / Kimi K2.5 - all
   // 2026-future. We do NOT ship fake URLs; the row references the closest
   // current shipping model and the notes call out the gap.
   {
@@ -466,7 +466,7 @@ export const ALL_VARIANTS = [
     notes: 'Fallback: Qwen 2.5 32B Q4 (Nemotron 3 Nano Omni 30B-A3B not yet shipped).',
     unavailable: false,
   },
-  // Bonus: meta-llama/Llama-3.1-405B-Instruct at Q4 is 230GB+ — listed but
+  // Bonus: meta-llama/Llama-3.1-405B-Instruct at Q4 is 230GB+ - listed but
   // exceeds disk budget for most users.
   {
     model_id: 'meta-llama/Llama-3.1-405B-Instruct',

@@ -1,19 +1,19 @@
 // src/compliance-c2pa.js
 //
-// W921 Govern / Receipts & Compliance — C2PA 2.x Content Credentials with a
+// W921 Govern / Receipts & Compliance - C2PA 2.x Content Credentials with a
 // hard-binding manifest for model outputs (text), emitted as a DETACHED/SIDECAR
 // manifest store.
 //
 // C2PA (Coalition for Content Provenance and Authenticity, ISO/IEC 22144) is
 // the standard the EU AI Act Art. 50(2) points to for machine-readable marking
 // of AI-generated content. A manifest has three required parts:
-//   (1) ASSERTION STORE (c2pa.assertions) — CBOR assertions, including AT LEAST
+//   (1) ASSERTION STORE (c2pa.assertions) - CBOR assertions, including AT LEAST
 //       ONE hard-binding (c2pa.hash.data over the asset bytes + exclusions) and
 //       a c2pa.actions.v2 assertion whose c2pa.created action carries a
 //       digitalSourceType marking AI involvement.
-//   (2) CLAIM (c2pa.claim.v2) — lists created_assertions as hashed-uri maps
+//   (2) CLAIM (c2pa.claim.v2) - lists created_assertions as hashed-uri maps
 //       {url, hash:b64, alg} + claim_generator_info + instanceID + signature URI.
-//   (3) CLAIM SIGNATURE — a COSE_Sign1_Tagged structure over the claim, signed
+//   (3) CLAIM SIGNATURE - a COSE_Sign1_Tagged structure over the claim, signed
 //       with an X.509 cert chain (alg may be Ed25519/EdDSA).
 //
 // CONSTRAINTS / SCOPE (important): the reference C2PA SDKs (@contentauth/
@@ -21,14 +21,14 @@
 // adding them (and this agent must not edit package.json). So this module
 // builds a STRUCTURALLY-CORRECT C2PA 2.x manifest with a REAL cryptographic
 // hard binding (c2pa.hash.data) and a REAL COSE_Sign1 Ed25519 signature, using
-// a vanilla-Node CBOR encoder — but cross-validation against the c2patool /
+// a vanilla-Node CBOR encoder - but cross-validation against the c2patool /
 // c2pa-rs Reader is a separate, dependency-gated step (see verifyC2paManifest:
 // it validates the COSE signature + every assertion hash + the hard binding
 // offline, which is the load-bearing tamper-evidence property; full Reader
 // trust-list conformance is reported as a limitation, never asserted).
 //
-// The hard-binding property — altering ANY output byte breaks c2pa.hash.data
-// and fails verification — is cryptographically real and fully tested here.
+// The hard-binding property - altering ANY output byte breaks c2pa.hash.data
+// and fails verification - is cryptographically real and fully tested here.
 //
 // REUSE: node:crypto (via src/ed25519.js sign/verify pattern) + src/ed25519.js
 // keyFingerprint. Zero new package.json dependencies.
@@ -41,7 +41,7 @@ export const C2PA_CLAIM_VERSION = 'c2pa.claim.v2';
 export const C2PA_ACTIONS_VERSION = 'c2pa.actions.v2';
 export const C2PA_HASH_DATA_LABEL = 'c2pa.hash.data';
 export const C2PA_KOLM_RECEIPT_LABEL = 'kolm.receipt';
-// IPTC digitalSourceType for content produced by a trained algorithm — the
+// IPTC digitalSourceType for content produced by a trained algorithm - the
 // exact value EU AI Act Art. 50(2) marking expects for AI-generated media.
 export const DIGITAL_SOURCE_TYPE_TRAINED_ALGORITHMIC =
   'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia';
@@ -115,7 +115,7 @@ function encodeMapEntries(entries) {
 // Assertions
 // ===========================================================================
 
-// c2pa.hash.data — the HARD BINDING. Hash over the asset (output) bytes with an
+// c2pa.hash.data - the HARD BINDING. Hash over the asset (output) bytes with an
 // optional exclusions list. Any single-byte change breaks this hash.
 export function c2paHashDataAssertion(assetBytes, exclusions = []) {
   const buf = Buffer.isBuffer(assetBytes) ? assetBytes : Buffer.from(String(assetBytes), 'utf8');
@@ -131,7 +131,7 @@ export function c2paHashDataAssertion(assetBytes, exclusions = []) {
   };
 }
 
-// c2pa.actions.v2 — marks the c2pa.created action with digitalSourceType.
+// c2pa.actions.v2 - marks the c2pa.created action with digitalSourceType.
 export function c2paActionsAssertion(opts = {}) {
   return {
     label: C2PA_ACTIONS_VERSION,
@@ -147,7 +147,7 @@ export function c2paActionsAssertion(opts = {}) {
   };
 }
 
-// kolm.receipt — custom assertion embedding selected kolm-audit receipt fields.
+// kolm.receipt - custom assertion embedding selected kolm-audit receipt fields.
 function kolmReceiptAssertion(receipt = {}) {
   return {
     label: C2PA_KOLM_RECEIPT_LABEL,
@@ -310,7 +310,7 @@ export function signC2paOutput(opts = {}) {
 // Offline validation: (1) recompute each assertion hash vs the claim's
 // created_assertions hashed-uris; (2) recompute c2pa.hash.data over the asset
 // bytes and compare; (3) verify the COSE_Sign1 Ed25519 signature over the claim
-// CBOR. NEVER throws — garbage -> {ok:false}.
+// CBOR. NEVER throws - garbage -> {ok:false}.
 // ===========================================================================
 export function verifyC2paManifest(manifestStoreBytes, assetBytes, opts = {}) {
   const errors = [];
@@ -439,7 +439,7 @@ function decodeItem(b, pos) {
     }
     return { value: obj, pos: p };
   }
-  if (major === 6) { // tag — skip the tag, decode the tagged item
+  if (major === 6) { // tag - skip the tag, decode the tagged item
     const r = readLen(b, pos, info); return decodeItem(b, r.pos);
   }
   if (major === 7) {
@@ -453,7 +453,7 @@ function decodeItem(b, pos) {
 }
 
 // ===========================================================================
-// ensureC2paSigningCert — provision an X.509 cert wrapping the Ed25519 key.
+// ensureC2paSigningCert - provision an X.509 cert wrapping the Ed25519 key.
 //
 // Prod: a CA / CAI-trust-list cert via env (KOLM_C2PA_CERT_CHAIN_PEM). Dev/CI:
 // a self-signed Ed25519 X.509 cert minted with node:crypto X509Certificate

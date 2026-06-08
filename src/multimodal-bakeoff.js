@@ -1,9 +1,9 @@
 // src/multimodal-bakeoff.js
 //
-// W466 — multimodal bake-off harness.
+// W466 - multimodal bake-off harness.
 //
 // Closes audit P1 Multimodal cluster open item ("multimodal bake-off harness
-// — compare base vs compiled across image/audio/video tasks").
+// - compare base vs compiled across image/audio/video tasks").
 //
 // Shape: takes a list of compiled .kolm artifact paths and a media_kind
 // filter. Pulls the tenant's captured events with that media_kind, replays
@@ -19,7 +19,7 @@
 // Keeping them split makes the tenant-fence + media_kind filter obvious in
 // the source instead of buried in another module's branches.
 //
-// Heavy ML stays OUT of this module per the standing constraint — scoring
+// Heavy ML stays OUT of this module per the standing constraint - scoring
 // is pure string/token comparison. If the user wants embedding-similarity
 // scoring (CLIP for images, etc.) that lives in workers/multimodal-bakeoff/
 // and is invoked via env override (KOLM_MULTIMODAL_SCORE_CMD).
@@ -63,7 +63,7 @@ function _extractInput(ev) {
 }
 
 // Pull the captured base-model response. Used as the comparison anchor
-// — the artifact whose output most closely matches this string wins.
+// - the artifact whose output most closely matches this string wins.
 function _extractBase(ev) {
   if (!ev) return '';
   return String(
@@ -205,7 +205,7 @@ export async function runMultimodalBakeoff({
     limit: limit > 0 ? limit : 100,
   });
 
-  // Defense in depth — listEvents already filtered, but verify each row.
+  // Defense in depth - listEvents already filtered, but verify each row.
   const rows = events.filter(ev =>
     ev
     && ev.tenant_id === tenant_id

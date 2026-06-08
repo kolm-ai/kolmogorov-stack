@@ -1,9 +1,9 @@
-// KOLM Data Engine — MinHash + LSH near-duplicate deduper (W921).
+// KOLM Data Engine - MinHash + LSH near-duplicate deduper (W921).
 //
 // A dependency-free Broder MinHash + LSH banding deduper that collapses exact
 // and near-exact {input,output} training pairs in near-LINEAR time, so the
 // expensive O(n^2) semantic (embedding-cosine) dedup only ever sees a small
-// set of survivors — and so the JS curate path scales past a few thousand rows
+// set of survivors - and so the JS curate path scales past a few thousand rows
 // without invoking python.
 //
 // Pipeline placement: a NEW curate stage "b0. minhash-predup" runs in Node
@@ -13,18 +13,18 @@
 //
 // Four classic stages (Broder MinHash + LSH banding, Leskovec/Rajaraman/Ullman
 // MMDS ch.3; Lee 2021 NEARDUP; HuggingFace DataTrove; NVIDIA NeMo Curator):
-//   1. SHINGLE   — word 5-grams (matches capture-importance._shingles), each
+//   1. SHINGLE - word 5-grams (matches capture-importance._shingles), each
 //                  shingle hashed to a 32-bit int via dependency-free FNV-1a.
-//   2. SIGNATURE — N = bands*rows MinHash slots from a FIXED seeded universal
+//   2. SIGNATURE - N = bands*rows MinHash slots from a FIXED seeded universal
 //                  hash family h_i(x)=(a_i*x+b_i) mod (2^31-1).
-//   3. LSH       — split signature into bands; band-tuple hashed to a
+//   3. LSH - split signature into bands; band-tuple hashed to a
 //                  band-index-namespaced bucket; >=1 collision => candidate.
-//   4. CLUSTER   — union-find over candidate edges => connected components;
+//   4. CLUSTER - union-find over candidate edges => connected components;
 //                  keep ONE survivor per component (confidence>teacher>quality);
 //                  optional true-Jaccard VERIFY (default on) kills LSH FPs.
 //
 // Envelope contract: minhashPredup never throws on malformed rows (empty /
-// non-string => returned as singletons). ZERO new npm deps — node:crypto for
+// non-string => returned as singletons). ZERO new npm deps - node:crypto for
 // the dedup_signature sha256, hand-rolled FNV-1a + a seeded LCG for the
 // permutation family. JS is the source of truth; the python mirror
 // (workers/data/scripts/minhash_dedup.py) shares the same seed + FNV + 5-shingle
@@ -37,12 +37,12 @@ export const MINHASH_VERSION = 'minhash-v1';
 // Mersenne prime modulus for the universal hash family. 2^31 - 1.
 const MERSENNE_P = 0x7fffffff; // 2147483647
 const DEFAULT_SEED = 0x6b6f6c6d; // 'kolm'
-const NGRAM_K = 5; // word 5-grams — LLM-dedup standard (Lee 2021), matches capture-importance.
+const NGRAM_K = 5; // word 5-grams - LLM-dedup standard (Lee 2021), matches capture-importance.
 
 // ── 1. SHINGLE ───────────────────────────────────────────────────────────────
 
 /**
- * fnv1a32(s) — 32-bit FNV-1a hash of a string's UTF-16 code units (low byte).
+ * fnv1a32(s) - 32-bit FNV-1a hash of a string's UTF-16 code units (low byte).
  * Mirrors src/ab-router.js fnv1a so JS callers agree; the python mirror hashes
  * the same low-byte stream for cross-language parity.
  * @param {string} s
@@ -67,7 +67,7 @@ function _normalizeText(text) {
 }
 
 /**
- * shingleSet(text, k=5) — set of FNV-1a-hashed word k-grams (normalized).
+ * shingleSet(text, k=5) - set of FNV-1a-hashed word k-grams (normalized).
  * Short text (< k tokens) collapses to a single whole-sequence shingle so two
  * equally short identical texts collide cleanly and short different texts don't
  * over-merge (matches capture-importance._shingles short-text fallback).
@@ -94,7 +94,7 @@ export function shingleSet(text, k = NGRAM_K) {
 
 // ── 2. SIGNATURE ─────────────────────────────────────────────────────────────
 
-// Seeded LCG (Numerical Recipes constants) — reproducible across processes and
+// Seeded LCG (Numerical Recipes constants) - reproducible across processes and
 // mirrored in python. Returns a function yielding 32-bit unsigned ints.
 function _lcg(seed) {
   let state = (seed >>> 0) || 1;
@@ -106,7 +106,7 @@ function _lcg(seed) {
 }
 
 /**
- * makePermutations(numHashes=128, seed) — FIXED seeded universal-hash family.
+ * makePermutations(numHashes=128, seed) - FIXED seeded universal-hash family.
  * a_i drawn in [1, P-1] (non-degenerate), b_i in [0, P-1], P = 2^31-1.
  * Shared with the python mirror via the identical seed + LCG.
  * @param {number} [numHashes=128]
@@ -126,7 +126,7 @@ export function makePermutations(numHashes = 128, seed = DEFAULT_SEED) {
   return { a, b };
 }
 
-// (a*x + b) mod P with 53-bit-safe multiplication. a,x < 2^31 so a*x < 2^62 —
+// (a*x + b) mod P with 53-bit-safe multiplication. a,x < 2^31 so a*x < 2^62 - 
 // too large for exact JS integer math, so split a into high/low 16-bit halves.
 function _affineModP(a, x, b) {
   const ax = a >>> 0;
@@ -142,7 +142,7 @@ function _affineModP(a, x, b) {
 }
 
 /**
- * minhashSignature(shingles, perms) — MinHash signature (length numHashes).
+ * minhashSignature(shingles, perms) - MinHash signature (length numHashes).
  * signature[i] = min over shingles of (a_i*x + b_i) mod (2^31-1).
  * Empty shingle set => all-zero signature (a deterministic sentinel; such rows
  * collide with each other but real text never produces an all-zero signature
@@ -175,7 +175,7 @@ export function minhashSignature(shingles, perms) {
 // ── 3. LSH BANDING ───────────────────────────────────────────────────────────
 
 /**
- * lshBuckets(signature, bands=16, rows=8, idx) — band-hashed, band-index-
+ * lshBuckets(signature, bands=16, rows=8, idx) - band-hashed, band-index-
  * namespaced bucket keys. Two pairs are CANDIDATES iff they collide in >=1 band.
  * The band index is folded into the bucket key so an identical row-tuple in two
  * different bands cannot cross-collide.
@@ -191,7 +191,7 @@ export function lshBuckets(signature, bands = 16, rows = 8) {
   const out = [];
   const usableBands = Math.min(b, Math.floor(sig.length / r) || (sig.length >= 1 ? 1 : 0));
   for (let band = 0; band < usableBands; band++) {
-    // FNV-1a over the band index then each slot's 4 bytes — order-sensitive.
+    // FNV-1a over the band index then each slot's 4 bytes - order-sensitive.
     let h = 0x811c9dc5;
     // mix the band index first
     let bi = band >>> 0;
@@ -216,7 +216,7 @@ export function lshBuckets(signature, bands = 16, rows = 8) {
 // ── 4. JACCARD ESTIMATE ──────────────────────────────────────────────────────
 
 /**
- * estimateJaccard(sigA, sigB) — fraction of agreeing signature slots. Unbiased
+ * estimateJaccard(sigA, sigB) - fraction of agreeing signature slots. Unbiased
  * estimator of Jaccard(A,B); std err ~ sqrt(J(1-J)/N).
  * @param {Int32Array} sigA
  * @param {Int32Array} sigB
@@ -247,7 +247,7 @@ function _trueJaccard(setA, setB) {
 // ── UNION-FIND ───────────────────────────────────────────────────────────────
 
 /**
- * UnionFind — disjoint-set with path compression + union by rank.
+ * UnionFind - disjoint-set with path compression + union by rank.
  * components() returns Map<root, member-index[]> (mirrors NeMo
  * BucketsToEdges -> ConnectedComponents / text-dedup).
  */
@@ -316,7 +316,7 @@ function _integrate(f, lo, hi, steps = 200) {
 }
 
 /**
- * optimalBands(threshold, numHashes, fpWeight, fnWeight) — datasketch-style
+ * optimalBands(threshold, numHashes, fpWeight, fnWeight) - datasketch-style
  * (b,r) selection minimizing the weighted FP+FN integral of the S-curve for a
  * target Jaccard threshold. FP integrated over [0, threshold] (pairs below the
  * bar that still collide); FN over [threshold, 1] (pairs above the bar that
@@ -447,7 +447,7 @@ function _cmpKey(ka, kb) {
 // ── minhashPredup (headline export) ──────────────────────────────────────────
 
 /**
- * minhashPredup(pairs, opts) — corpus near-dup pre-pass.
+ * minhashPredup(pairs, opts) - corpus near-dup pre-pass.
  * @param {object[]} pairs  {input|prompt, output|teacher_output|response}[]
  * @param {object} [opts]
  * @param {number} [opts.numHashes=128]
@@ -531,7 +531,7 @@ export function minhashPredup(pairs, opts = {}) {
         const est = estimateJaccard(signatures[i], signatures[j]);
         if (verify) {
           const tj = _trueJaccard(shingleSets[i], shingleSets[j]);
-          if (tj < jaccardThreshold) continue; // LSH false positive — skip
+          if (tj < jaccardThreshold) continue; // LSH false positive - skip
         }
         uf.union(i, j);
         const ek = i < j ? i + ',' + j : j + ',' + i;
@@ -563,7 +563,7 @@ export function minhashPredup(pairs, opts = {}) {
       const ek = dropped < survivor ? dropped + ',' + survivor : survivor + ',' + dropped;
       let est = edgeJaccard.get(ek);
       if (est === undefined) {
-        // dropped & survivor weren't a direct edge (transitive cluster) — use
+        // dropped & survivor weren't a direct edge (transitive cluster) - use
         // the signature estimate against the survivor directly.
         est = estimateJaccard(signatures[dropped], signatures[survivor]);
       }
@@ -597,7 +597,7 @@ export function minhashPredup(pairs, opts = {}) {
 // ── dedup_signature (receipt) ────────────────────────────────────────────────
 
 /**
- * dedupSignature(removals, params) — sha256 over the sorted drop set + params.
+ * dedupSignature(removals, params) - sha256 over the sorted drop set + params.
  * Deterministic + receipt-able: same seed + input => same signature, and the
  * python mirror produces the same value.
  * @param {object[]} removals

@@ -1,4 +1,4 @@
-// local-mlx — Apple Silicon native via mlx-lm. Detected by mlx import probe.
+// local-mlx - Apple Silicon native via mlx-lm. Detected by mlx import probe.
 // No API. run() spawns the command (mlx is process-local, no daemon).
 // Env: standard PATH inherits; mlx-lm tools must be on PATH.
 
@@ -34,7 +34,7 @@ export async function test() {
   return { ok: d.available, latency_ms: Date.now() - t0, ...d };
 }
 
-// run({ image, command, env, timeoutMs }) — spawns command (typically a
+// run({ image, command, env, timeoutMs }) - spawns command (typically a
 // mlx_lm tool like `mlx_lm.lora` or `python -m mlx_lm.generate`).
 export async function run({ image, command = [], env = {}, timeoutMs = 30 * 60 * 1000 } = {}) {
   const t0 = Date.now();

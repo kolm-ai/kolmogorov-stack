@@ -13,16 +13,16 @@ const buckets = new Map();
 const DEFAULT_RATE = parseInt(process.env.RATE_LIMIT_PER_SEC || '20'); // req/s sustained
 const DEFAULT_BURST = parseInt(process.env.RATE_LIMIT_BURST || '60');
 
-// W708-5 — Export-control geo-fence. ISO 3166-1 alpha-2 country codes
+// W708-5 - Export-control geo-fence. ISO 3166-1 alpha-2 country codes
 // corresponding to US OFAC comprehensive-sanctions jurisdictions
 // (Cuba, Iran, North Korea, Syria, Russia, Belarus). This is a baseline list
-// and admins MUST adjust per their own legal counsel — sanctions programs
+// and admins MUST adjust per their own legal counsel - sanctions programs
 // change, and your obligations depend on the products/services you ship.
 export const EXPORT_CONTROL_DENYLIST = ['CU', 'IR', 'KP', 'SY', 'RU', 'BY'];
 
 // True if the given ISO 3166-1 alpha-2 country code is on the export-control
 // denylist. Comparison is case-insensitive; null/undefined/empty returns false
-// (an unknown country never blocks — see signup handler for the "stamp
+// (an unknown country never blocks - see signup handler for the "stamp
 // geo_check:unknown" branch).
 export function isGeoFenced(countryCode) {
   if (!countryCode) return false;
@@ -62,7 +62,7 @@ function tenantKeyMatches(tenant, key) {
   // migrated to hashed form by migrateAllPlainKeysOnce() at module-load time;
   // any row that still has a non-empty api_key column at lookup time is a
   // pre-migration leftover that can no longer authenticate (the equivalent of
-  // a lost password — owner must rotate via /v1/account/rotate-key after a
+  // a lost password - owner must rotate via /v1/account/rotate-key after a
   // separate identity-verified recovery flow).
   if (!tenant.api_key_hash) return false;
   return constantTimeEqual(tenant.api_key_hash, hashApiKey(key));
@@ -91,7 +91,7 @@ export function findTenantByApiKey(key) {
 // One-shot migration: any tenant minted before api_key_hash was a column has
 // a plain api_key string. This walks the tenant table once at module load
 // and computes api_key_hash + api_key_prefix for those rows, then clears the
-// plain api_key column. Idempotent — subsequent boots are no-ops because the
+// plain api_key column. Idempotent - subsequent boots are no-ops because the
 // filter (api_key && !api_key_hash) matches zero rows.
 export function migrateAllPlainKeysOnce() {
   let migrated = 0;
@@ -106,13 +106,13 @@ export function migrateAllPlainKeysOnce() {
         });
         migrated++;
       } else if (typeof t.api_key === 'string' && t.api_key.length > 0 && t.api_key_hash) {
-        // Stale plain column on an already-hashed row — clear it.
+        // Stale plain column on an already-hashed row - clear it.
         update('tenants', x => x.id === t.id, { api_key: undefined });
         migrated++;
       }
     }
   } catch (e) {
-    // Never block startup on migration failure — surface but continue.
+    // Never block startup on migration failure - surface but continue.
     console.warn('[auth] plain-key migration error:', e && e.message);
   }
   if (migrated > 0) console.log('[auth] migrated', migrated, 'tenant plain-key column(s) to hash');
@@ -135,10 +135,10 @@ export function provisionTenant(name, { quota = 10000, plan = 'free', kind = 'us
     used: 0,
     rate_per_sec: DEFAULT_RATE,
     burst: DEFAULT_BURST,
-    // W708-5 — export-control attribution. country_code is the ISO 3166-1
+    // W708-5 - export-control attribution. country_code is the ISO 3166-1
     // alpha-2 code provided at signup (header or body), null if unknown.
     // geo_check is one of: 'allowed' | 'unknown' | 'denied' (denied tenants
-    // never reach provisionTenant — they're rejected upstream with HTTP 451).
+    // never reach provisionTenant - they're rejected upstream with HTTP 451).
     country_code: country_code || null,
     geo_check: geo_check || (country_code ? 'allowed' : 'unknown'),
     created_at: new Date().toISOString(),
@@ -209,7 +209,7 @@ export function claimAnonTenant(anonToken, { email, name }) {
 // Note: api_key is only returned on first creation (the OAuth path replaces
 // "remember an API key" with "remember to log in via Google/GitHub"). For
 // existing tenants we mint a fresh session token by rotating the key, so the
-// browser cookie is the new key — old keys still work for CLI/server callers.
+// browser cookie is the new key - old keys still work for CLI/server callers.
 export function findOrCreateTenantByEmail({ email, name, provider, provider_id }) {
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     throw new Error('valid email required');
@@ -218,7 +218,7 @@ export function findOrCreateTenantByEmail({ email, name, provider, provider_id }
   if (existing) {
     // Existing tenant signs in via OAuth: rotate the key so the session
     // cookie has a usable credential (we only store the hash, never the raw
-    // key after signup). Old API keys are invalidated — that's the cost of
+    // key after signup). Old API keys are invalidated - that's the cost of
     // mixing OAuth signin with API-key auth. CLI users keeping a stored
     // ks_*** key should sign in with that key, not OAuth.
     const newKey = mintApiKey('user');
@@ -264,7 +264,7 @@ export function findOrCreateTenantByEmail({ email, name, provider, provider_id }
   };
 }
 
-// Look up a tenant by email — used by webhook fallback when client_reference_id
+// Look up a tenant by email - used by webhook fallback when client_reference_id
 // is missing but customer email is present.
 export function findTenantByEmail(email) {
   if (!email) return null;
@@ -284,7 +284,7 @@ export function rotateTenantKey(tenant_id) {
 // Rotate a tenant's receipt-signing secret. The previous secret is preserved
 // in tenant.previous_receipt_secrets[] so existing artifacts and audit-chain
 // rows signed with the old key continue to verify. Verifiers walk the list
-// and accept the first match — see env.tenantReceiptVerificationKeys.
+// and accept the first match - see env.tenantReceiptVerificationKeys.
 export function rotateTenantReceiptSecret(tenant_id) {
   const tenant = findOne('tenants', x => x.id === tenant_id);
   if (!tenant) throw new Error('tenant not found');
@@ -334,7 +334,7 @@ export function listTenantReceiptSecrets(tenant_id) {
 
 // Drop a specific previous key from the verification ring. Once pruned,
 // receipts signed with that key will no longer verify against this tenant.
-// Refuses to prune the current key — rotate first if you want to retire it.
+// Refuses to prune the current key - rotate first if you want to retire it.
 export function pruneTenantReceiptSecret(tenant_id, key_id) {
   const tenant = findOne('tenants', x => x.id === tenant_id);
   if (!tenant) throw new Error('tenant not found');
@@ -392,7 +392,7 @@ const PUBLIC_API = (p) =>
   /^\/v1\/target-profiles\/[A-Za-z0-9_\-]+$/.test(p) ||                 // single profile lookup
   /^\/v1\/teams\/invites\/[A-Za-z0-9_\-]+$/.test(p) ||                  // preview is public; /accept is its own path
   /^\/v1\/oauth\/(google|github)\/(start|callback)$/.test(p) ||
-  // W889-8.4 — short OAuth aliases. /v1/auth/github + /v1/auth/github/callback
+  // W889-8.4 - short OAuth aliases. /v1/auth/github + /v1/auth/github/callback
   // are 302 redirects to the canonical /v1/oauth/github/* routes above. They
   // must be public so the redirect itself does not need an API key.
   p === '/v1/auth/github' ||
@@ -412,79 +412,79 @@ const PUBLIC_API = (p) =>
   // artifacts). All routes are read-only metadata + download; the download
   // path enforces a productionReady() gate (409 unless ?force=true).
   // publish-request remains queue-write-only (audit ledger), so we keep it
-  // bound here too — it doesn't touch tenant rows.
+  // bound here too - it doesn't touch tenant rows.
   p === '/v1/marketplace' ||
   p === '/v1/marketplace/list' ||
   p === '/v1/marketplace/catalog.json' ||
   p === '/v1/marketplace/publish-request' ||
-  // W889-10.1 — public email-capture for the v2 premium marketplace
+  // W889-10.1 - public email-capture for the v2 premium marketplace
   // teaser on /marketplace. Same policy as /v1/specialists/waitlist:
   // public POST, IP-rate-limited inside the route handler, no tenant
   // scoping (the email IS the dedupe key).
   p === '/v1/marketplace/interest' ||
-  // W737 — faceted search + public review-read are public; listing-register +
+  // W737 - faceted search + public review-read are public; listing-register +
   // review-submit stay auth-gated above. The reviews/:cid path uses a
   // dedicated regex so /v1/marketplace/:slug/download (existing route below)
-  // is unambiguous — reviews/:cid only matches when the second segment is
+  // is unambiguous - reviews/:cid only matches when the second segment is
   // literal 'reviews'.
   p === '/v1/marketplace/search' ||
   /^\/v1\/marketplace\/reviews\/[A-Za-z0-9._:-]{1,128}$/.test(p) ||
   /^\/v1\/marketplace\/[A-Za-z0-9._-]+(?:\/download)?$/.test(p) ||
-  // W751-W755 — vertical foundation-student catalog. Listing + per-id detail
+  // W751-W755 - vertical foundation-student catalog. Listing + per-id detail
   // are public (marketing/discovery; mirrors /v1/marketplace policy). The
   // register-stubs POST and the per-id fingerprint GET stay auth-gated above.
   p === '/v1/verticals' ||
   /^\/v1\/verticals\/[A-Za-z0-9_-]+$/.test(p) ||
-  // W436 — public artifact verification. /v1/verify/:cid surfaces the
+  // W436 - public artifact verification. /v1/verify/:cid surfaces the
   // recompute-cid-from-manifest-hashes verdict so an auditor can verify
   // provenance without an account; /v1/artifact/verify-manifest is the
   // stateless POST variant for callers that already have the hashes block.
   /^\/v1\/verify\/[A-Za-z0-9:_-]+$/.test(p) ||
   p === '/v1/artifact/verify-manifest' ||
-  // W409g/W409k — GET /v1/models is OpenAI-compatible model discovery. Public
+  // W409g/W409k - GET /v1/models is OpenAI-compatible model discovery. Public
   // so SDKs that call client.models.list() before authenticating get a usable
   // envelope; the soft-auth block above will still populate req.tenant when a
   // valid key is present, so the handler can decide whether to surface
   // tenant-specific compiled .kolm artifacts (private rows).
   p === '/v1/models' ||
-  // W384 — sync inbox accepts pushes from peer daemons; the sender supplies
+  // W384 - sync inbox accepts pushes from peer daemons; the sender supplies
   // an Authorization: Bearer <key> via the body/headers and validates it itself
   // (the body's source_device_id + state envelope acts as the auth contract).
   p === '/v1/sync/inbox' ||
-  // W456 — /v1/changelog is the public marketing surface backing /changelog
+  // W456 - /v1/changelog is the public marketing surface backing /changelog
   // and the `kolm changelog` CLI verb. Mirrors /v1/spec / /v1/registry/public:
   // identical response for every caller, no tenant scoping, no auth.
   p === '/v1/changelog' ||
-  // W384 — accept-invite is invite-token-authenticated (the URL token IS the
+  // W384 - accept-invite is invite-token-authenticated (the URL token IS the
   // credential); the workspace lookup happens inside team.js with explicit
   // expiry + consumed checks. Public so a new member with no api_key can join.
   p === '/v1/team/accept-invite' ||
-  // W560 — SAML SP metadata + SCIM SP config are spec-mandated public
+  // W560 - SAML SP metadata + SCIM SP config are spec-mandated public
   // documents (RFC 7644 §4 + SAML 2.0 §5.2). IdPs MUST be able to fetch them
   // without an API key during federation setup. The tenant-scoped SSO
   // configure + SCIM Users endpoints stay auth-gated.
   p === '/v1/account/saml/metadata' ||
   p === '/v1/scim/v2/ServiceProviderConfig' ||
-  // W756 — KolmBench v1 spec + leaderboard are public marketing/discovery
+  // W756 - KolmBench v1 spec + leaderboard are public marketing/discovery
   // surfaces (same policy as /v1/verticals + /v1/changelog). validate +
   // submit stay auth-gated above; submit additionally requires confirm:true.
   p === '/v1/kolmbench/spec' ||
   p === '/v1/kolmbench/leaderboard' ||
-  // W844 — public chat for the homepage free-tier and the post-auth console.
+  // W844 - public chat for the homepage free-tier and the post-auth console.
   // Same pipe; rate limiter inside the route enforces the 20/IP/day cap when
   // no key is attached. With a valid key the soft-auth above promotes the
   // call to the full snapshotContext path (same as /v1/intent/ask).
   p === '/v1/free/chat' ||
-  // W888-R — public docs-search assistant. Rate-limited inside the route
+  // W888-R - public docs-search assistant. Rate-limited inside the route
   // via docsAssistantLimiter at 60/IP/24h. Per-turn budget capped at $0.005.
   // Capture namespace is 'public/docs-search' so we can audit public usage.
   p === '/v1/assistant/chat-docs' ||
-  // W854 — public CLI runner for the homepage chat. Strict allowlist of
+  // W854 - public CLI runner for the homepage chat. Strict allowlist of
   // read-only verbs is enforced inside the route handler; the same rate
   // limiter pool as /v1/free/chat caps anonymous calls at 20/IP/day.
   p === '/v1/free/cli' ||
   p === '/v1/free/cli/allowlist' ||
-  // W866 — Forge read-only compute routes (hardware/inspect/fit/experts).
+  // W866 - Forge read-only compute routes (hardware/inspect/fit/experts).
   // These are pure compute over caller-supplied or server-side data, with no
   // tenant scoping. Rate-limited inside the routes via forgeLimiter. Same
   // policy as /v1/device/* and /v1/cc/* (stateless validators).
@@ -492,17 +492,17 @@ const PUBLIC_API = (p) =>
   p === '/v1/inspect' ||
   p === '/v1/fit' ||
   p === '/v1/experts' ||
-  // W869 — teacher-chat health probe publishes only booleans (which vendors
+  // W869 - teacher-chat health probe publishes only booleans (which vendors
   // have a server-side key configured). Used by local distill workers to
   // decide whether to route through the proxy before burning a real call.
   // The actual POST /v1/teacher/chat remains auth-gated.
   p === '/v1/teacher/chat/health' ||
-  // W891 — gateway health probe surfaces upstream model-provider booleans for
+  // W891 - gateway health probe surfaces upstream model-provider booleans for
   // the same reason as teacher-chat/health: SDKs and the homepage status panel
   // need to render a live readiness pill without burning an authed budget call.
-  // Body is provider-bool only — no per-tenant quota or pricing leak.
+  // Body is provider-bool only - no per-tenant quota or pricing leak.
   p === '/v1/gateway/health' ||
-  // W910 Track B — public routes powering the no-code /account/create-model
+  // W910 Track B - public routes powering the no-code /account/create-model
   // wizard. Each is rate-limited inside the route handler. Templates is a
   // pure catalog; estimate/preview/start are stateless heuristics; the SSE
   // stream returns deterministic stub events; connector-notify appends to a
@@ -518,7 +518,26 @@ const PUBLIC_API = (p) =>
   p === '/v1/connectors/notify' ||
   p === '/v1/draft/save' ||
   p === '/v1/capture/snippet' ||
-  /^\/v1\/playground\/proxy\/[A-Za-z0-9._-]{1,64}$/.test(p);
+  /^\/v1\/playground\/proxy\/[A-Za-z0-9._-]{1,64}$/.test(p) ||
+  // Agent Security-Review audit - offline verification of a signed evidence
+  // report. Public so a buyer's review group can verify the Ed25519 signature
+  // with no kolm account. Pure compute over the posted envelope; touches no
+  // tenant data (mirrors /v1/verify/:cid + /v1/artifact/verify-manifest).
+  p === '/v1/audit/report/verify' ||
+  // The live issuer PUBLIC key this server signs reports with. Public so a
+  // buyer / the /verify keyring can pin against the authoritative source.
+  // Returns only the public half; no tenant data.
+  p === '/v1/audit/issuer-key' ||
+  // The public shareable Trust link a buyer hands their review group: renders
+  // the paid signed report (html / json / pdf) and verifies offline. The slug
+  // is an unguessable capability token (crypto.randomBytes), so possession of
+  // the link is the grant - no account needed. Audit + subscription slugs both
+  // resolve here.
+  /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}$/.test(p) ||
+  // The continuous re-attestation tick is gated by KOLM_CRON_SECRET (a request
+  // header), not tenant auth, so it must bypass the API-key gate; the route
+  // handler itself rejects any call without the correct secret.
+  p === '/v1/audit/continuous/tick';
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;
@@ -579,7 +598,7 @@ export function authMiddleware(req, res, next) {
   // keys. CLI / server-to-server callers already use Authorization or
   // X-API-Key; the browser dashboard uses the httpOnly cookie. Anonymous
   // ?anon=<token> bootstrap (short-lived, scoped) still uses its own
-  // dedicated route — it never hits this fallback.
+  // dedicated route - it never hits this fallback.
   if (PUBLIC_API(p)) {
     // Soft-auth: never reject, but if the caller sent a valid key, populate
     // req.tenant_record so the route can differentiate anon vs owner reads
@@ -624,7 +643,7 @@ export function authMiddleware(req, res, next) {
   const t = findTenantByApiKey(key);
   if (!t) return res.status(401).json({ error: 'invalid api key' });
 
-  // Anon tokens expire — deny + nudge to claim
+  // Anon tokens expire - deny + nudge to claim
   if (t.kind === 'anon' && t.expires_at && new Date(t.expires_at) < new Date()) {
     return res.status(401).json({
       error: 'anonymous workspace expired',
@@ -660,7 +679,7 @@ export function authMiddleware(req, res, next) {
   // mirroring api_key into a sliding-session cookie). Tenants store only
   // api_key_hash post-migration, so without this the raw key is unrecoverable.
   req.api_key = key;
-  // W936 — scoped keys: null for the tenant-primary key (full access), an array
+  // W936 - scoped keys: null for the tenant-primary key (full access), an array
   // of scopes for keys minted via mintScopedKey. Routes gate with keyHasScope /
   // authorizeCaptureAction({ keyScopes: req.key_scopes || ['*'] }).
   req.key_scopes = scopesForKey(key);
@@ -671,7 +690,7 @@ export function authMiddleware(req, res, next) {
 // W258-BE-4: previously did a read-modify-write off the stale tenant_record
 // snapshot the middleware captured at request entry. Two concurrent billable
 // requests on the same tenant would both read `used=N`, both write `N+units`,
-// and the second increment was lost — paying-plan tenants drifted past quota
+// and the second increment was lost - paying-plan tenants drifted past quota
 // and we under-billed. Wrap the read-modify-write in withTransaction so
 // SQLite's BEGIN IMMEDIATE serializes the increment. Re-read the row inside
 // the transaction so we increment from the latest committed value, not the
@@ -710,7 +729,7 @@ export function requirePlan(allowedPlans, feature = 'this feature') {
     }
     const plan = String(t.plan || 'free').toLowerCase();
     if (allowed.has(plan)) return next();
-    // Pending upgrade — show as "payment pending" rather than "upgrade".
+    // Pending upgrade - show as "payment pending" rather than "upgrade".
     if (t.pending_plan && allowed.has(String(t.pending_plan).toLowerCase())) {
       return res.status(402).json({
         error: 'plan upgrade pending payment',

@@ -1,10 +1,10 @@
-// W832 — kolm-meta meta-distillation model.
+// W832 - kolm-meta meta-distillation model.
 //
 // HONEST: this is a TOY gradient-boosting regressor. Each tree is a single
 // best-split decision stump over a numeric feature; the ensemble is the sum
 // of stump predictions scaled by learning_rate. There is NO column subsampling,
 // NO multi-depth splits, NO row subsampling, NO regularization. It is a
-// faithful but small GBM — production-scale meta-distillation should move to
+// faithful but small GBM - production-scale meta-distillation should move to
 // apps/trainer/meta_xgb.py via a worker shell (same W786-style honesty contract
 // the other heavy-ML primitives use; see workers/multimodal-redact-audio for
 // the worker-shell template).
@@ -12,9 +12,9 @@
 // Bounds we DO NOT pretend to:
 //   - We are not XGBoost / LightGBM. Performance on big training sets will
 //     trail real GBMs because we use stumps (depth=1), not depth-3 trees.
-//   - We do not handle categorical features natively — strings are hashed to
+//   - We do not handle categorical features natively - strings are hashed to
 //     stable integers and treated as ordinals (lossy but deterministic).
-//   - We do not output calibrated confidence — `confidence` is a heuristic
+//   - We do not output calibrated confidence - `confidence` is a heuristic
 //     based on training-set support, NOT a posterior.
 //
 // What we DO promise:
@@ -33,7 +33,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-// W921 — real depth-D gradient-boosted regressor (src/gbm-regressor.js), wired
+// W921 - real depth-D gradient-boosted regressor (src/gbm-regressor.js), wired
 // in BEHIND this module's existing train/predict API as an OPT-IN engine. The
 // default path remains the W832 toy stump GBM, so every existing caller + test
 // behaves identically by default. The GBM engine activates only when explicitly
@@ -43,7 +43,7 @@ import * as gbm from './gbm-regressor.js';
 
 export const META_VERSION = 'w832-v1';
 
-// W921 — opt-in engine selection. 'stump' (W832 default, unchanged) or 'gbm'
+// W921 - opt-in engine selection. 'stump' (W832 default, unchanged) or 'gbm'
 // (the real depth-D regressor). Env override lets an operator flip the engine
 // without a code change; an explicit opts.engine wins over the env.
 export const META_ENGINE_STUMP = 'stump';
@@ -60,7 +60,7 @@ function _resolveEngine(optEngine) {
   return want === META_ENGINE_GBM ? META_ENGINE_GBM : META_ENGINE_STUMP;
 }
 
-// Frozen so a test can pin the exact feature contract — a re-ordering or rename
+// Frozen so a test can pin the exact feature contract - a re-ordering or rename
 // would invalidate any persisted model and the test catches it.
 export const META_FEATURES = Object.freeze([
   'capture_count',
@@ -85,10 +85,10 @@ export const META_TARGETS = Object.freeze([
 // Spec pin: W832-4. Keep configurable via env for emergency override.
 export const MIN_ROWS_FOR_META = Number(process.env.KOLM_META_MIN_ROWS || 1000);
 
-// GBM hyperparameters — small + honest. NOT XGBoost-tuned.
+// GBM hyperparameters - small + honest. NOT XGBoost-tuned.
 const N_TREES = 50;
 const LEARNING_RATE = 0.1;
-// Tree depth is fixed at 1 (stumps) — see honesty note at top of file.
+// Tree depth is fixed at 1 (stumps) - see honesty note at top of file.
 
 // =============================================================================
 // Paths
@@ -130,7 +130,7 @@ export function resetForTests() {
 
 // Categorical / string features get a stable hash → integer so the GBM splitter
 // can treat them ordinally. Lossy by design (collisions possible) but
-// deterministic — same string always lands on the same bucket.
+// deterministic - same string always lands on the same bucket.
 function _hashStr(s) {
   const h = crypto.createHash('sha256').update(String(s || '')).digest();
   // 32-bit unsigned int, then map to [0, 1000) so the splitter has reasonable
@@ -148,7 +148,7 @@ function _toNumber(v) {
 
 function _coerceFeatures(featuresObj) {
   // Returns a [number, number, ...] vector ALIGNED to META_FEATURES order.
-  // Missing keys coerce to 0 (NOT NaN — never leak NaN downstream).
+  // Missing keys coerce to 0 (NOT NaN - never leak NaN downstream).
   const out = new Array(META_FEATURES.length);
   for (let i = 0; i < META_FEATURES.length; i++) {
     const key = META_FEATURES[i];
@@ -163,7 +163,7 @@ function _validateFeatures(featuresObj) {
       code: 'features_required',
     });
   }
-  // We require at least ONE of the required keys to be present — that is a
+  // We require at least ONE of the required keys to be present - that is a
   // weak contract but it catches the "caller passed {} by mistake" case.
   const present = META_FEATURES.filter((k) => featuresObj[k] != null);
   if (present.length === 0) {
@@ -224,7 +224,7 @@ export function readTrainingRows({ tenant_id = null, limit = null } = {}) {
     let row;
     try { row = JSON.parse(ln); } catch (_) { continue; }
     if (!row || typeof row !== 'object') continue;
-    // Defense-in-depth tenant fence — caller-provided filter MUST match.
+    // Defense-in-depth tenant fence - caller-provided filter MUST match.
     if (tenant_id != null && String(row.tenant_id) !== String(tenant_id)) continue;
     out.push(row);
     if (limit != null && out.length >= limit) break;
@@ -242,7 +242,7 @@ export function n_rows({ tenant_id = null } = {}) {
 
 // Find the best single-split stump for (xs, residuals) on a given column.
 // Returns {split_value, left_pred, right_pred, sse} for the column.
-// Honest: this is a brute-force O(N) scan over candidate splits — fine at
+// Honest: this is a brute-force O(N) scan over candidate splits - fine at
 // N <= ~50000 which is well above MIN_ROWS_FOR_META, and well below the size
 // where you'd want to move to apps/trainer/meta_xgb.py anyway.
 function _bestStump(xs, residuals, colIdx) {
@@ -267,7 +267,7 @@ function _bestStump(xs, residuals, colIdx) {
     if (pairs[i][0] === pairs[i + 1][0]) continue;
     const leftMean = leftSum / leftN;
     const rightMean = rightSum / rightN;
-    // SSE = sum (y - mean)^2 — but we only care about RELATIVE SSE across
+    // SSE = sum (y - mean)^2 - but we only care about RELATIVE SSE across
     // candidate splits, so we can compute the negative-of-variance shortcut:
     // SSE_total = sum_y2 - (leftSum^2/leftN + rightSum^2/rightN)
     // Lower is better → maximize (leftSum^2/leftN + rightSum^2/rightN).
@@ -349,7 +349,7 @@ function _trainFailureClassifier(xs, failureModeRows) {
 }
 
 // =============================================================================
-// W921 — real GBM engine (behind the same API).
+// W921 - real GBM engine (behind the same API).
 //
 // These helpers wrap src/gbm-regressor.js. The feature matrix + targets are the
 // SAME ones the stump path builds (_coerceFeatures over META_FEATURES), so the
@@ -362,7 +362,7 @@ function _trainFailureClassifier(xs, failureModeRows) {
 
 // GBM hyperparameters for the meta-task. Conservative depth-3 with subsampling
 // + L2 + early stopping (the gbm-regressor defaults already encode this, but we
-// pin a seed so retrains are byte-deterministic — the W832 promise).
+// pin a seed so retrains are byte-deterministic - the W832 promise).
 const GBM_META_OPTS = Object.freeze({
   max_depth: 3,
   n_trees: 200,
@@ -456,7 +456,7 @@ function _trainKolmMetaGBM({ xs, ysKscore, ysCompile, failureModeRows, nRows, al
   const compileGBM = _trainOneTargetRealGBM(xsFit, ysCFit);
   const failureClf = _trainFailureClassifierGBM(xsFit, failFit);
 
-  // Conformal Q on the held-out calibration slice (kscore target only — the
+  // Conformal Q on the held-out calibration slice (kscore target only - the
   // interval the autopilot consumes is the K-Score interval).
   let conformal = { Q: null, n_cal: nCal, alpha: a, coverage_target: 1 - a, undercalibrated: true };
   if (nCal >= 2) {
@@ -496,7 +496,7 @@ export function trainKolmMeta({ rows, model_path = null, engine = null, alpha = 
     ysCompile[i] = Number.isFinite(Number(obs.compile_time_s)) ? Number(obs.compile_time_s) : 0;
     failureModeRows[i] = Array.isArray(obs.failure_modes) ? obs.failure_modes : [];
   }
-  // W921 — engine selection. Default 'stump' (W832, unchanged byte-for-byte).
+  // W921 - engine selection. Default 'stump' (W832, unchanged byte-for-byte).
   // 'gbm' activates the real depth-D regressor BUT silently downgrades back to
   // the stump when there are too few rows to fit it, so a thin pool never trains
   // a deep tree (and the default behavior + existing tests are untouched).
@@ -618,7 +618,7 @@ export function inferKolmMeta({ features, model_path = null } = {}) {
       version: META_VERSION,
     };
   }
-  // Schema fence — if the on-disk model was trained under a different feature
+  // Schema fence - if the on-disk model was trained under a different feature
   // order, refuse to predict (silent re-ordering would silently corrupt).
   if (!Array.isArray(model.feature_order)
       || model.feature_order.length !== META_FEATURES.length
@@ -678,7 +678,7 @@ export function inferKolmMeta({ features, model_path = null } = {}) {
     out.coverage_target = Number(model.conformal.coverage_target);
     out.conformal_basis = 'split_conformal';
   } else if (model.engine === META_ENGINE_GBM) {
-    // GBM but calibration pool too thin to certify coverage — honest signal.
+    // GBM but calibration pool too thin to certify coverage - honest signal.
     out.ci = null;
     out.conformal_Q = null;
     out.coverage_target = model.conformal ? Number(model.conformal.coverage_target) : null;

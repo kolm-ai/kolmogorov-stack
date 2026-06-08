@@ -1,4 +1,4 @@
-// W240 — service registry + lifecycle for the 3-process split.
+// W240 - service registry + lifecycle for the 3-process split.
 //
 // kolm previously ran every concern (redactor, compiler, proxy) as one
 // monolithic Express app inside the api server. This let small footguns
@@ -8,11 +8,11 @@
 //
 // Three services ship today:
 //
-//   redactor — HTTP wrapper around src/phi-redactor.js. Pure CPU. Default
+//   redactor - HTTP wrapper around src/phi-redactor.js. Pure CPU. Default
 //              port 7401. Stateless.
-//   compiler — HTTP wrapper around src/compile.js + workers/*. Default
+//   compiler - HTTP wrapper around src/compile.js + workers/*. Default
 //              port 7402. Stateful (jobs + artifacts).
-//   proxy    — capture-and-forward HTTP proxy in front of an upstream
+//   proxy - capture-and-forward HTTP proxy in front of an upstream
 //              teacher API (OpenAI / Anthropic / vLLM). Default port
 //              7403. Persists captures via src/capture-store.js.
 //
@@ -191,7 +191,7 @@ export function stop(name, { signal = 'SIGTERM' } = {}) {
   return next;
 }
 
-// Convenience for the test suite — synchronously kill + delete.
+// Convenience for the test suite - synchronously kill + delete.
 export function purge(name) {
   const rec = readRecord(name);
   if (rec && pidAlive(rec.pid)) {

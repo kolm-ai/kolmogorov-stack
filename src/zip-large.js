@@ -22,7 +22,7 @@ import zlib from 'node:zlib';
 //
 // NOTE: this reads the entry's decompressed bytes into a Buffer. For entries
 // whose decompressed size exceeds 2 GiB (Trinity-500 model.gguf at 4.68 GB
-// is the canonical case), use extractEntryToFile() instead — it streams the
+// is the canonical case), use extractEntryToFile() instead - it streams the
 // entry to disk and never holds the full payload in memory.
 export function readEntryFromLargeZip(artifactPath, wantName) {
   const fd = fs.openSync(artifactPath, 'r');
@@ -45,7 +45,7 @@ export function readEntryFromLargeZip(artifactPath, wantName) {
 // Stream-extract a single named entry to disk. Returns
 // { ok, bytes_written, sha256? } on success or { ok:false, reason } when the
 // entry is missing. Never holds more than 1 MiB in memory regardless of entry
-// size — the canonical use is the 4.68 GB Trinity GGUF.
+// size - the canonical use is the 4.68 GB Trinity GGUF.
 export async function extractEntryToFile(artifactPath, wantName, destPath, opts = {}) {
   const wantSha = opts && opts.computeSha256 === true;
   const crypto = wantSha ? await import('node:crypto') : null;
@@ -116,7 +116,7 @@ export async function extractEntryToFile(artifactPath, wantName, destPath, opts 
 }
 
 // List all entry names + sizes from a (potentially >4 GiB) zip without
-// loading any payload bytes. Cheap — walks the central directory only.
+// loading any payload bytes. Cheap - walks the central directory only.
 export function listEntriesFromLargeZip(artifactPath) {
   const fd = fs.openSync(artifactPath, 'r');
   try {
