@@ -27,6 +27,12 @@ import crypto from 'node:crypto';
 import { id as storeId, insert, update, find, findOne, findByField, withTransaction } from './store.js';
 import { runAudit } from './audit-orchestrator.js';
 import { buildAndSignReport, resignAsTier } from './attestation-report-builder.js';
+// M14 - audit trail. Package fulfillment + subscription activation are
+// money-bearing state transitions, so each writes one chained audit row.
+// tryAppendAudit never throws, so the fulfillment path is never blocked by an
+// audit-store hiccup (it is safe inside the surrounding withTransaction - the
+// chain append uses a re-entrant SAVEPOINT).
+import { tryAppendAudit, AUDIT_OPS } from './audit.js';
 
 const AUDITS = 'agent_audits';
 export const SUBSCRIPTIONS = 'asr_subscriptions';
@@ -149,6 +155,12 @@ export function fulfillPackagePurchase({ tenant_id, product, stripe_session_id }
     if (!fresh || fresh.status !== 'active') {
       return { ok: false, reason: 'write_unconfirmed', retryable: true };
     }
+    tryAppendAudit({
+      tenant_id,
+      actor: 'system',
+      op: AUDIT_OPS.STRIPE_EVENT,
+      payload: { kind: 'asr_package_fulfilled', product, package_id: fresh.id, stripe_session_id: stripe_session_id || null },
+    });
     return { ok: true, pkg: fresh };
   });
 }
@@ -177,6 +189,12 @@ export function activateSubscription({ product, tenant_id, stripe_subscription_i
         stripe_customer_id: stripe_customer_id || sub.stripe_customer_id || null,
         updated_at: ts,
       });
+      tryAppendAudit({
+        tenant_id,
+        actor: 'system',
+        op: AUDIT_OPS.STRIPE_EVENT,
+        payload: { kind: 'asr_subscription_reactivated', product, subscription_id: sub.id, stripe_subscription_id: stripe_subscription_id || sub.stripe_subscription_id || null },
+      });
       return { ok: true, already: true, sub: findOne(SUBSCRIPTIONS, (s) => s.id === sub.id) };
     }
     const audits = find(AUDITS, (r) => r.tenant_id === tenant_id && r.report)
@@ -200,6 +218,12 @@ export function activateSubscription({ product, tenant_id, stripe_subscription_i
       updated_at: ts,
     };
     insert(SUBSCRIPTIONS, row);
+    tryAppendAudit({
+      tenant_id,
+      actor: 'system',
+      op: AUDIT_OPS.STRIPE_EVENT,
+      payload: { kind: 'asr_subscription_activated', product, subscription_id: row.id, stripe_subscription_id: stripe_subscription_id || null, public_slug: row.public_slug },
+    });
     return { ok: true, sub: row };
   });
 }

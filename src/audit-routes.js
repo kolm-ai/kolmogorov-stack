@@ -41,7 +41,9 @@ import {
   AUDIT_REPORT_VERSION,
 } from './attestation-report-builder.js';
 import { EXPORTERS as FRAMEWORK_EXPORTERS, EXPORT_FORMATS } from './framework-export.js';
-import { loadOrCreateDefaultSigner } from './ed25519.js';
+import { loadOrCreateDefaultSigner, keyFingerprint } from './ed25519.js';
+import { register as registerTransparencyLogRoutes } from './transparency-log-routes.js';
+import { revoke as revokeIssuerKey, status as issuerKeyStatus, KEY_REVOCATION_VERSION } from './key-revocation.js';
 import { tryAppendAudit } from './audit.js';
 import { createAsrCheckout, asrBillingReady } from './asr-billing.js';
 import { resolveTrust, runDueReattestations, forceReattest } from './asr-fulfillment.js';
@@ -259,6 +261,29 @@ function _safeEq(a, b) {
   try { return crypto.timingSafeEqual(ab, bb); } catch { return false; }
 }
 
+// Admin gate for the key-revocation route. Two accepted paths:
+//   (1) the request reached here via authMiddleware with Bearer ADMIN_KEY,
+//       which sets req.is_admin (the established convention), OR
+//   (2) an x-admin-key header equal to ADMIN_KEY (constant-time compared).
+// With no ADMIN_KEY configured the route is closed (returns false).
+function _adminOk(req) {
+  if (req && req.is_admin === true) return true;
+  const adminKey = process.env.ADMIN_KEY;
+  if (!adminKey) return false;
+  const supplied = (req && req.headers && (req.headers['x-admin-key'] || req.headers['x-kolm-admin-key'])) || '';
+  return _safeEq(supplied, adminKey);
+}
+
+// The fingerprint of the key a report is signed by, recomputed from the embedded
+// public key (never trusting the claimed key_fingerprint). null when absent.
+function _embeddedKeyFingerprint(envelope) {
+  try {
+    const block = envelope && typeof envelope === 'object' ? envelope.signature_ed25519 : null;
+    const pem = block && typeof block.public_key === 'string' ? block.public_key : null;
+    return pem ? keyFingerprint(pem) : null;
+  } catch { return null; }
+}
+
 // Run the orchestrator + (optionally) build+sign the report. Returns
 // { audit?, report?, signError?, auditError? }. Never throws across the
 // boundary: runAudit is designed not to throw, but we still guard it (a
@@ -310,6 +335,13 @@ export function register(r, deps = {}) {
   if (!r || typeof r.get !== 'function' || typeof r.post !== 'function') {
     throw new Error('audit-routes.register: router with get/post required');
   }
+
+  // TRACK CRYPTO-SERVICES / M4 - mount the PUBLIC transparency-log read surface
+  // (size / entries / proof / checkpoints) onto the same router. Kept as its own
+  // module + register so router.js does not grow; the paths are allow-listed in
+  // PUBLIC_API (see the track caveats for the exact paths to add to auth.js).
+  try { registerTransparencyLogRoutes(r); }
+  catch (e) { /* a transparency-log wiring failure must not break audit routes */ if (process.env.NODE_ENV !== 'production') console.error('[audit-routes] transparency-log mount failed:', e && e.message); }
 
   // -------------------------------------------------------------------------
   // POST /v1/audit/sessions - open a session.
@@ -621,8 +653,25 @@ export function register(r, deps = {}) {
     }
     const verify = verifyReport(envelope);
     const issuer = _issuerProvenance(envelope);
-    const trusted = verify.ok === true && issuer.recognized === true;
-    return res.json({ ok: true, trusted, verify, issuer });
+    // Tier-3: key lifecycle. A signature can verify (tier 1) by a RECOGNIZED
+    // issuer (tier 2) and STILL be untrustworthy if that key has since been
+    // revoked (compromised / withdrawn). Recompute the embedded fingerprint and
+    // consult the persisted revocation store; a revoked key forces trusted:false
+    // with a clear reason, exactly like the offline browser verifier.
+    const fp = _embeddedKeyFingerprint(envelope);
+    let revoked = false;
+    let revocation = null;
+    if (fp) {
+      try {
+        const st = issuerKeyStatus(fp);
+        revoked = st.status === 'revoked';
+        revocation = { fingerprint: fp, status: st.status, valid: st.valid, revoked_at: st.revoked_at, reason: st.reason };
+      } catch { /* never throw across the verify boundary */ }
+    }
+    const trusted = verify.ok === true && issuer.recognized === true && revoked === false;
+    const out = { ok: true, trusted, verify, issuer, revocation };
+    if (revoked) out.reason = 'issuer_key_revoked';
+    return res.json(out);
   });
 
   // -------------------------------------------------------------------------
@@ -646,6 +695,62 @@ export function register(r, deps = {}) {
       public_key: signer.publicKey,
       key_fingerprint: signer.key_fingerprint,
       source: signer.source || null,
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // GET /v1/audit/issuer-key/:fp/status  (PUBLIC) - the lifecycle status of an
+  // issuer key fingerprint: 'live' | 'rotated' | 'revoked' + valid flag, so a
+  // buyer's verifier can confirm the key that signed a report is still trusted
+  // RIGHT NOW (a signature that verifies against a REVOKED key must be refused).
+  // Pure read over the persisted key-revocation store; never throws.
+  // -------------------------------------------------------------------------
+  r.get('/v1/audit/issuer-key/:fp/status', (req, res) => {
+    const fp = req.params && req.params.fp;
+    let st;
+    try { st = issuerKeyStatus(fp); }
+    catch (e) { return _err(res, 500, 'status_failed', e && e.message); }
+    res.setHeader('Cache-Control', 'public, max-age=30');
+    return res.json({
+      ok: true,
+      fingerprint: st.fingerprint,
+      valid: st.valid,
+      status: st.status,
+      revoked_at: st.revoked_at,
+      reason: st.reason,
+      next_rotation_at: st.next_rotation_at,
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // POST /v1/audit/issuer-key/:fp/revoke  (ADMIN-gated) - mark an issuer key
+  // revoked. After this, POST /v1/audit/report/verify returns trusted:false +
+  // reason:'issuer_key_revoked' for any report signed by that key, and the
+  // public status endpoint reports valid:false. Gated by ADMIN_KEY (Bearer
+  // ADMIN_KEY via authMiddleware -> req.is_admin, or an x-admin-key header).
+  // body: { reason? }
+  // -------------------------------------------------------------------------
+  r.post('/v1/audit/issuer-key/:fp/revoke', (req, res) => {
+    if (!_adminOk(req)) {
+      return res.status(403).json({ ok: false, error: 'admin_required', detail: 'set ADMIN_KEY and authenticate as admin (Bearer ADMIN_KEY or x-admin-key header)' });
+    }
+    const fp = req.params && req.params.fp;
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    let st;
+    try { st = revokeIssuerKey(fp, body.reason || 'admin_revocation'); }
+    catch (e) { return _err(res, 400, 'revoke_failed', e && e.message); }
+    tryAppendAudit({
+      tenant_id: req.tenant_record ? req.tenant_record.id : 'admin',
+      actor: 'admin', op: 'agent_audit.issuer_key_revoked',
+      payload: { fingerprint: st.fingerprint, reason: st.reason, store: KEY_REVOCATION_VERSION },
+    });
+    return res.json({
+      ok: true,
+      fingerprint: st.fingerprint,
+      valid: st.valid,
+      status: st.status,
+      revoked_at: st.revoked_at,
+      reason: st.reason,
     });
   });
 
@@ -995,6 +1100,14 @@ export const AUDIT_ROUTES_SPEC = {
     'POST /v1/audit/continuous/deploy-hook',
     'POST /v1/audit/report/verify (public)',
     'GET /v1/audit/issuer-key (public)',
+    'GET /v1/audit/issuer-key/:fp/status (public)',
+    'POST /v1/audit/issuer-key/:fp/revoke (admin)',
+    'GET /v1/transparency-log/size (public)',
+    'GET /v1/transparency-log/entries (public)',
+    'GET /v1/transparency-log/entries/:seq (public)',
+    'GET /v1/transparency-log/proof/:seq (public)',
+    'GET /v1/transparency-log/checkpoints/latest (public)',
+    'GET /v1/transparency-log/checkpoints (public)',
     'GET /v1/trust/:slug (public)',
     'GET /v1/trust/:slug/export (public)',
   ],

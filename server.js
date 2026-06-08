@@ -13,9 +13,11 @@ import { init as initOtel, expressMiddleware as otelMiddleware } from './src/ote
 import { initSentry } from './src/sentry-init.js';
 import { synthesize } from './src/synthesis.js';
 import { createConcept, publishVersion } from './src/registry.js';
-import { all } from './src/store.js';
+import { all, findOne } from './src/store.js';
 import { backupNow, pruneBackups, backupDir } from './src/store-backup.js';
 import { runDueReattestations, resignPendingReports } from './src/asr-fulfillment.js';
+import { runDueDunning, tEmailDunning } from './src/dunning.js';
+import { sendEmail } from './src/email.js';
 
 // W922 — normalize provider-key env-var names at startup. Operators keep keys in
 // Vercel/Railway under varied casings (runpod_api_key, cerebras_api,
@@ -380,6 +382,30 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
         const p = resignPendingReports({});
         if (p && p.fixed) console.log(`[reattest] re-signed ${p.fixed}/${p.pending} pending reports`);
       } catch (e) { console.error('[reattest] resign-pending error:', e && e.message); }
+      // M12 dunning: advance the failed-payment retry ladder, emailing each
+      // reminder / suspension notice. Best-effort - one bad email never stalls
+      // the sweep. Tenant email is resolved from the store at send time.
+      try {
+        const d = runDueDunning({
+          sendFn: ({ dunning, final }) => {
+            try {
+              const t = dunning && dunning.tenant_id ? findOne('tenants', (x) => x.id === dunning.tenant_id) : null;
+              const to = (t && (t.email || t.owner_email || t.billing_email)) || null;
+              if (!to) return;
+              const mail = tEmailDunning({
+                email: to,
+                attempt: dunning.attempt,
+                final,
+                amount_cents: dunning.amount_cents,
+                currency: dunning.currency,
+                next_retry_at: dunning.next_retry_at,
+              });
+              return sendEmail({ to, subject: mail.subject, html: mail.html, text: mail.text, tag: 'dunning' });
+            } catch { /* per-send best-effort */ }
+          },
+        });
+        if (d && d.processed) console.log(`[reattest] dunning advanced ${d.processed}/${d.due} due schedule(s)`);
+      } catch (e) { console.error('[reattest] dunning error:', e && e.message); }
     };
     const everyMs = everyMin * 60 * 1000;
     const t = setInterval(sweep, everyMs);

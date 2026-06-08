@@ -6,6 +6,44 @@ import { SiteFooter } from "@/components/site-footer";
 
 const SITE_URL = "https://kolm.ai";
 
+// Sitewide structured data: a single @graph with the publishing Organization
+// and the WebSite that references it. Emitted once from the root layout so it
+// is present on every route, powering knowledge-panel and sitelink eligibility.
+const organizationLd = {
+  "@type": "Organization",
+  "@id": `${SITE_URL}/#organization`,
+  name: "kolm.ai",
+  url: `${SITE_URL}/`,
+  logo: `${SITE_URL}/favicon.svg`,
+  image: `${SITE_URL}/brand-hero.png`,
+  description:
+    "Signed, offline-verifiable security evidence for AI agents entering the enterprise. The SOC 2 for AI agents.",
+  email: "dev@kolm.ai",
+  sameAs: ["https://github.com/kolm-ai/kolm"],
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "sales",
+    email: "dev@kolm.ai",
+    availableLanguage: "en",
+  },
+};
+
+const websiteLd = {
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  url: `${SITE_URL}/`,
+  name: "kolm.ai",
+  description:
+    "The evidence layer for AI agents entering the enterprise. Signed, offline-verifiable security audit reports a buyer's review team can check for themselves.",
+  publisher: { "@id": `${SITE_URL}/#organization` },
+  inLanguage: "en-US",
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [organizationLd, websiteLd],
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -59,6 +97,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-paper-2 focus:px-4 focus:py-2 focus:text-ink focus:shadow-lg"

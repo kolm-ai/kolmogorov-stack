@@ -77,7 +77,7 @@ export function findTenantByApiKey(key) {
   // tenant row itself carries no api_key_hash, walk the api_keys table.
   try {
     const rawHex = crypto.createHash('sha256').update(String(key || '')).digest('hex');
-    const row = findOne('api_keys', x => x && !x._deleted && !x.revoked_at && (
+    const row = findOne('api_keys', x => x && !x._deleted && !x.revoked_at && !_scopedKeyExpired(x) && (
       x.hash === rawHex || x.hash === ('sha256:' + rawHex) || x.api_key_hash === rawHex || x.api_key_hash === ('sha256:' + rawHex)
     ));
     if (row && row.tenant_id) {
@@ -544,6 +544,17 @@ const PUBLIC_API = (p) =>
   // buyer / the /verify keyring can pin against the authoritative source.
   // Returns only the public half; no tenant data.
   p === '/v1/audit/issuer-key' ||
+  // The per-key status (live / rotated / revoked) for the issuer keyring. Public
+  // so an offline verifier can refuse a report signed by a revoked key without a
+  // kolm account. The :fp segment is a hex fingerprint. The /revoke counterpart
+  // stays admin-gated (ADMIN_KEY Bearer) above, never here.
+  /^\/v1\/audit\/issuer-key\/[A-Za-z0-9:_-]{1,128}\/status$/.test(p) ||
+  // The public, append-only transparency log (RFC 9162 style): tree size, the
+  // entry list / single entry, an inclusion proof, and signed checkpoints. All
+  // read-only, no tenant data - a buyer (or a witness) can audit the log and
+  // verify any report's inclusion proof offline. The witness-cosign and append
+  // paths are not exposed here (append is server-internal at sign time).
+  /^\/v1\/transparency-log\/(size|entries|proof|checkpoints)(\/[A-Za-z0-9_-]{1,64})?$/.test(p) ||
   // The public shareable Trust link a buyer hands their review group: renders
   // the paid signed report (html / json / pdf) and verifies offline. The slug
   // is an unguessable capability token (crypto.randomBytes), so possession of
@@ -568,34 +579,85 @@ export function adminApiKey() {
 // 'lake:export', 'namespace:<slug>', or '*'. A request authenticated by one of
 // these keys carries req.key_scopes (an array); the tenant-primary key carries
 // req.key_scopes = null, meaning full access.
-export function mintScopedKey(tenant_id, { scopes = [], label = '' } = {}) {
+// M15 - credential TTL. Resolve an optional expiry from either an explicit ISO
+// `expires_at` or a `ttl_days` number. Returns null (never expires) when neither
+// is supplied, so existing keyless-expiry rows are unaffected.
+function _resolveExpiry({ expires_at = null, ttl_days = null } = {}) {
+  if (expires_at) {
+    const t = new Date(expires_at);
+    if (!Number.isNaN(t.getTime())) return t.toISOString();
+  }
+  if (ttl_days != null) {
+    const days = Number(ttl_days);
+    if (Number.isFinite(days) && days > 0) return new Date(Date.now() + days * 24 * 3600 * 1000).toISOString();
+  }
+  return null;
+}
+
+// M15 - true iff a scoped-key row has a non-null expires_at in the past. A null/
+// absent expires_at means "never expires" (the pre-M15 behavior), so legacy rows
+// keep authenticating forever.
+export function _scopedKeyExpired(row, atMs = Date.now()) {
+  if (!row || !row.expires_at) return false;
+  const t = new Date(row.expires_at).getTime();
+  return Number.isFinite(t) && t < atMs;
+}
+
+export function mintScopedKey(tenant_id, { scopes = [], label = '', ttl_days = null, expires_at = null } = {}) {
   if (!tenant_id) throw Object.assign(new Error('tenant required'), { code: 'no_tenant' });
   const key = 'ks_' + crypto.randomBytes(24).toString('hex');
   const rawHex = crypto.createHash('sha256').update(key).digest('hex');
+  const exp = _resolveExpiry({ expires_at, ttl_days });
   insert('api_keys', {
     id: 'key_' + crypto.randomBytes(8).toString('hex'),
     tenant_id, hash: rawHex, key_prefix: key.slice(0, 12),
     scopes: Array.isArray(scopes) ? scopes.map(String).filter(Boolean) : [],
     label: String(label || '').slice(0, 80),
     created_at: new Date().toISOString(), last_used_at: null, revoked_at: null,
+    expires_at: exp,            // M15: null = never expires
   });
-  return { key, key_prefix: key.slice(0, 12) };
+  return { key, key_prefix: key.slice(0, 12), expires_at: exp };
 }
 export function listScopedKeys(tenant_id) {
+  const now = Date.now();
   return all('api_keys')
     .filter((k) => k && !k._deleted && k.tenant_id === tenant_id)
-    .map((k) => ({ id: k.id, key_prefix: k.key_prefix, scopes: k.scopes || [], label: k.label || '', created_at: k.created_at, last_used_at: k.last_used_at || null, revoked: !!k.revoked_at }));
+    .map((k) => {
+      const expired = _scopedKeyExpired(k, now);
+      const expiresInDays = k.expires_at
+        ? Math.max(0, Math.ceil((new Date(k.expires_at).getTime() - now) / (24 * 3600 * 1000)))
+        : null;
+      return {
+        id: k.id, key_prefix: k.key_prefix, scopes: k.scopes || [], label: k.label || '',
+        created_at: k.created_at, last_used_at: k.last_used_at || null, revoked: !!k.revoked_at,
+        expires_at: k.expires_at || null,                 // null = never
+        expires_in_days: k.expires_at ? expiresInDays : null,
+        expired,
+        active: !k.revoked_at && !expired,
+      };
+    });
 }
 export function revokeScopedKey(tenant_id, id) {
   const n = update('api_keys', (k) => k && k.tenant_id === tenant_id && k.id === id && !k.revoked_at, { revoked_at: new Date().toISOString() });
   return { ok: true, revoked: n > 0 };
+}
+// M15 - renew (extend) a scoped key's TTL. Tenant-fenced; refuses a revoked key.
+// Pass ttl_days (extend from now) or an explicit expires_at; omit both to clear
+// the expiry (make it never-expire). Returns the new expires_at.
+export function renewScopedKey(tenant_id, id, { ttl_days = null, expires_at = null } = {}) {
+  const row = findOne('api_keys', (k) => k && !k._deleted && k.tenant_id === tenant_id && k.id === id);
+  if (!row) return { ok: false, reason: 'not_found' };
+  if (row.revoked_at) return { ok: false, reason: 'revoked' };
+  const exp = (ttl_days == null && expires_at == null) ? null : _resolveExpiry({ expires_at, ttl_days });
+  update('api_keys', (k) => k && k.tenant_id === tenant_id && k.id === id, { expires_at: exp, renewed_at: new Date().toISOString() });
+  return { ok: true, expires_at: exp };
 }
 // Returns the scope array for a raw key authenticated via the api_keys table,
 // or null when the key is the tenant-primary key (full access).
 export function scopesForKey(key) {
   try {
     const rawHex = crypto.createHash('sha256').update(String(key || '')).digest('hex');
-    const row = findOne('api_keys', (x) => x && !x._deleted && !x.revoked_at && (x.hash === rawHex || x.hash === 'sha256:' + rawHex || x.api_key_hash === rawHex));
+    const row = findOne('api_keys', (x) => x && !x._deleted && !x.revoked_at && !_scopedKeyExpired(x) && (x.hash === rawHex || x.hash === 'sha256:' + rawHex || x.api_key_hash === rawHex));
     return row ? (Array.isArray(row.scopes) ? row.scopes : []) : null;
   } catch (_) { return null; }
 }

@@ -1,0 +1,75 @@
+{
+  "id": "u3-crypto-evidence-sota",
+  "track": "ultimate",
+  "prompt": "2026 state of the art for VERIFIABLE cryptographic evidence that a sophisticated security auditor would demand of a signed attestation product: RFC 3161 / RFC 5816 trusted timestamping, a PUBLIC append-only transparency log with Merkle inclusion proofs + signed tree heads (Sigstore Rekor / Trillian / RFC 6962 + 9162 + the C2SC/witness cosigning model), key rotation + revocation + a documented trust root, post-quantum signatures (ML-DSA/SLH-DSA migration), reproducible/deterministic builds, COSE/JWS envelope standards, and in-toto/SLSA provenance. kolm currently: Ed25519 signature, two-tier issuer-keyring provenance, an internal Merkle transparency log (not yet public/witnessed), offline browser verify. Identify precisely which of these SOTA properties kolm lacks and the order to add them to be cryptographically best-in-class. Cite standards/projects.",
+  "content": "**Kolm (kolm.ai) currently provides Ed25519 signatures on canonicalized reports, a two-tier issuer-keyring provenance mechanism, an internal (non-public/non-witnessed) Merkle-structured append-only log styled after RFC 6962, and offline browser-based signature verification with no server in the trust path.**[[1]](https://kolm.ai/product)[[2]](https://kolm.ai/about)\n\nIt lacks the majority of the listed 2026 state-of-the-art (SOTA) properties demanded by a sophisticated security auditor for high-assurance signed attestations. Below is a precise gap analysis followed by a recommended addition order.\n\n### Precise Gaps vs. SOTA\n- **RFC 3161 / RFC 5816 trusted timestamping**: Lacks entirely. No evidence of RFC 3161 Time Stamp Tokens (TSTs) or RFC 5816 updates for binding signatures to trusted time sources (e.g., via TSA or integrated with a transparency log).\n- **PUBLIC append-only transparency log with Merkle inclusion proofs + signed tree heads (Sigstore Rekor / Trillian / RFC 6962 + RFC 9162 + C2SC/witness cosigning model)**: Has an internal RFC 6962-style Merkle log for append-only guarantees and root recomputation, but it is not yet public, does not expose inclusion proofs for arbitrary verifiers, lacks signed tree heads (STHs) for efficient auditing, and has no witness/cosigning (C2SC model) for distributed trust.[[3]](https://kolm.ai/security)\n- **Key rotation + revocation + a documented trust root**: Partial coverage via the two-tier issuer-keyring provenance, but lacks explicit mechanisms or documentation for rotation policies, revocation (e.g., CRLs, OCSP, or transparency-integrated revocation), and a fully documented, auditable trust root (e.g., root CA or keyring specification with provenance).\n- **Post-quantum signatures (ML-DSA/SLH-DSA migration)**: Uses classical Ed25519; no current support or migration path for NIST post-quantum standards (FIPS 204 ML-DSA / Dilithium or FIPS 205 SLH-DSA / SPHINCS+).\n- **Reproducible/deterministic builds**: Not mentioned or evidenced (no references to deterministic compilation, build provenance, or tools like Bazel/Reproducible Builds project).\n- **COSE/JWS envelope standards**: Uses custom canonicalization + Ed25519; no adoption of IETF COSE (RFC 8152/9052) or JWS (RFC 7515) envelopes for standardized, interoperable signing with protected headers, claims, and algorithms.\n- **In-toto/SLSA provenance**: Has a two-tier issuer-keyring provenance model, but lacks full in-toto attestations (in-toto.io) or SLSA (slsa.dev) levels (e.g., SLSA v1 provenance predicates, build definitions, or verified supply-chain metadata).\n\n**Strengths to build on**: Ed25519 (solid classical signature), offline verification model, and the existing internal Merkle log foundation.\n\n### Recommended Order to Add Properties for Cryptographically Best-in-Class Status\nPrioritize based on impact for verifiability, tamper-evidence, interoperability, and forward security in a 2026 auditor context. Focus first on transparency and time-binding (core to preventing equivocation/backdating), then standardization and provenance, then operations and future-proofing.\n\n1. **Public transparency log + inclusion proofs + signed tree heads + witnessing (highest immediate priority)**: Publish the existing Merkle log (RFC 6962), expose inclusion proofs and STHs for public verification, and adopt a witness/cosigning model (e.g., C2SC or Sigstore-style). Reference: Sigstore Rekor/Trillian, RFC 6962 (Certificate Transparency), RFC 9162 (CT v2). This turns the internal log into a verifiable public append-only structure, enabling third-party auditing without trusting kolm.[[3]](https://kolm.ai/security)\n\n2. **Trusted timestamping (RFC 3161/5816)**: Integrate RFC 3161 TSTs (or embed timestamps into the transparency log entries). This binds issuance time cryptographically and prevents retroactive changes. Can be combined with the public log for efficiency.\n\n3. **COSE/JWS envelope standards**: Migrate signatures to COSE (preferred for binary/attestation use) or JWS for JSON claims. This provides standardized protected headers, algorithm agility, and interoperability with tools like Sigstore/cosign or in-toto.\n\n4. **In-toto/SLSA provenance (full adoption)**: Extend the two-tier keyring model to produce in-toto attestations and/or SLSA-compliant provenance (e.g., SLSA Provenance v1 predicates linking materials, build process, and outputs). Reference: in-toto.io, slsa.dev.\n\n5. **Key rotation + revocation + documented trust root**: Formalize and document the trust root (e.g., root keyring spec), implement rotation policies, and add revocation (e.g., via transparency log entries or CRLs). This strengthens the existing two-tier provenance.\n\n6. **Reproducible/deterministic builds**: Implement and attest to reproducible builds (e.g., via deterministic tooling and build provenance in SLSA/in-toto). This ensures the attested artifact can be independently rebuilt and verified.\n\n7. **Post-quantum signatures (ML-DSA/SLH-DSA migration path)**: Add hybrid or pure PQ signatures (NIST FIPS 204/205) alongside Ed25519 for a transition period, with algorithm agility in envelopes. This is forward-looking but lower urgency than core transparency/time-binding for current auditors.\n\nFollowing this sequence would make kolm cryptographically best-in-class by aligning with Sigstore, Certificate Transparency, in-toto/SLSA, and RFC standards while preserving its offline-verification strengths. Many elements (e.g., public log + timestamping) can be implemented together for synergistic security.",
+  "citations": [
+    "https://kolm.ai/product",
+    "https://kolm.ai/about",
+    "https://kolm.ai/security"
+  ],
+  "searched": [
+    "https://www.linkedin.com/posts/kolm-shield_introducing-a-cybersecurity-companykolm-activity-7434470000889085953-7Sku",
+    "https://kolmshield.com/our-solution",
+    "https://kolm.ai/compare",
+    "https://muckrack.com/josh-kolm/articles",
+    "https://za.linkedin.com/company/kolm-shield",
+    "https://www.instagram.com/cozybookcorner_kolm416/",
+    "https://auditors.nebraska.gov/APA_Reports/2010/SA12-06162010-March_1_2009_through_February_28_2010_Attestation_Review.pdf",
+    "https://www.cs.umd.edu/~gasarch/open/kolm.pdf",
+    "https://kolmshield.com/",
+    "https://www.researchgate.net/publication/341954955_A_Blockchain-Driven_Approach_to_Fulfill_the_GDPR_Recording_Requirements",
+    "https://github.com/sigstore/sigstore/issues/122",
+    "https://www.brandonchecketts.com/archives/ssh-ed25519-key-best-practices-for-2025",
+    "https://kolm.ai/blog/2026-05-26-receipts-as-compliance",
+    "https://ssl.engineering.nyu.edu/blog/2020-02-03-transparent-logs",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC11585852/",
+    "https://kolm.ai/docs",
+    "https://kolm.ai/quickstart",
+    "https://kolm.ai/faq",
+    "https://kolm.ai/about",
+    "https://kolm.ai/",
+    "https://arxiv.org/html/2601.20727v1",
+    "https://medium.com/@wasowski.jarek/your-logs-are-claims-not-evidence-llm-audit-trails-eu-ai-act-9e4dc6d55d46",
+    "https://latitude.so/blog/frameworks-ai-audit-trails-comparative-guide",
+    "https://kolm.ai/product",
+    "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/msc/documents/presentations/CSR/Responsible-AI-Transparency-Report-2024.pdf",
+    "https://github.com/Kolm-ai/kolm/blob/main/AGENT_GUIDE.md",
+    "https://kolm.ai/security",
+    "https://www.facebook.com/cedarrapidsfiredepartment/posts/fire-engine-5-crew-captain-matt-hilliard-firefighter-landon-merkle-and-firefight/2299449016767359/",
+    "https://www.flightaware.com/live/airport/KOLM/history/buy",
+    "https://mesonet.agron.iastate.edu/p.php?pid=202603260121-KSEW-CDUS46-CLIOLM",
+    "https://royalsocietypublishing.org/doi/abs/10.1098/rsbl.2020.0366",
+    "https://www.weather.gov/wrh/timeseries?site=KOLM&hourly=true",
+    "https://www.merriam-webster.com/rhymes/sim/cose",
+    "https://www.reddit.com/r/ToolBand/comments/1pdm5c9/the_reach_single_by_kolm/?tl=it",
+    "https://www.behance.net/kolmdesign"
+  ],
+  "usage": {
+    "input_tokens": 16090,
+    "input_tokens_details": {
+      "cached_tokens": 8640
+    },
+    "output_tokens": 2532,
+    "output_tokens_details": {
+      "reasoning_tokens": 1295
+    },
+    "total_tokens": 18622,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 4,
+    "cost_in_usd_ticks": 373705000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 4,
+      "x_search_calls": 0,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 9331,
+      "output_tokens": 1582
+    }
+  },
+  "attempts": 1
+}

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Billing &amp; receipts · kolm.ai</title>
+<meta name="description" content="Manage your kolm subscription, payment method, invoices, VAT details, and Full Readiness package.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/kolm-2026.css">
+<style>
+  :root{ --d-ink:#0b0e14; --d-muted:#5b6472; --d-rule:#e3e7ee; --d-paper:#f6f7f4; --d-panel:#ffffff; --d-accent:#b3431f; --d-ok:#166534; --d-warn:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--d-paper);color:var(--d-ink);font-family:'Switzer',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5}
+  .mono{font-family:'Spline Sans Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 22px 80px}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--d-rule);padding:16px 22px;background:var(--d-panel)}
+  header.top a.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--d-ink);font-weight:700;font-family:'Cabinet Grotesk',sans-serif;font-size:18px;letter-spacing:-.01em}
+  header.top .bars{display:inline-flex;gap:3px;align-items:flex-end;height:18px}
+  header.top .bars i{width:4px;background:var(--d-ink);border-radius:1px;display:block}
+  header.top .bars i:nth-child(1){height:8px}header.top .bars i:nth-child(2){height:13px}header.top .bars i:nth-child(3){height:18px}
+  header.top nav a{color:var(--d-muted);text-decoration:none;margin-left:18px;font-size:14px}
+  header.top nav a:hover{color:var(--d-ink)}
+  h1{font-family:'Cabinet Grotesk',sans-serif;font-size:30px;letter-spacing:-.02em;margin:26px 0 4px}
+  .lede{color:var(--d-muted);margin:0 0 26px;max-width:62ch}
+  .idx{font-family:'Spline Sans Mono',monospace;font-size:12px;color:var(--d-accent);letter-spacing:.08em;text-transform:uppercase}
+  h2{font-family:'Cabinet Grotesk',sans-serif;font-size:20px;margin:34px 0 12px}
+  .card{background:var(--d-panel);border:1px solid var(--d-rule);border-radius:12px;padding:18px 20px;margin:0 0 16px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--d-rule);vertical-align:middle}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--d-muted);font-weight:600}
+  .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+  .pill.ok{background:#ecfdf3;color:var(--d-ok)}
+  .pill.warn{background:#fff4ed;color:#92400e}
+  .pill.muted{background:#eef1f6;color:var(--d-muted)}
+  .num{font-variant-numeric:tabular-nums}
+  .btn{display:inline-block;border:0;border-radius:8px;padding:9px 15px;font:600 14px 'Switzer',sans-serif;cursor:pointer;text-decoration:none;text-align:center}
+  .btn.primary{background:var(--d-ink);color:#fff}.btn.primary:hover{background:#1b2331}
+  .btn.ghost{background:transparent;color:var(--d-ink);border:1px solid var(--d-rule)}.btn.ghost:hover{border-color:var(--d-ink)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn.sm{padding:6px 11px;font-size:13px}
+  .banner{border-radius:10px;padding:12px 16px;margin:0 0 20px;font-size:14px}
+  .banner.ok{background:#ecfdf3;border:1px solid #abe0c0;color:#0f5132}
+  .banner.info{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3}
+  .banner.warn{background:#fff4ed;border:1px solid #f3c4a8;color:#92400e}
+  .muted{color:var(--d-muted)}
+  .empty{padding:24px;text-align:center;color:var(--d-muted)}
+  .kv{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid var(--d-rule)}
+  .kv:last-child{border-bottom:0}
+  .kv b{font-weight:600}
+  label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--d-muted);margin:12px 0 5px}
+  input.fld{width:100%;padding:9px 11px;border:1px solid var(--d-rule);border-radius:8px;font-family:'Spline Sans Mono',monospace;font-size:14px}
+  ul.feat{margin:8px 0 0;padding-left:18px}ul.feat li{margin:5px 0;color:var(--d-ink)}
+  .auth-box{max-width:460px;margin:40px auto;text-align:center}
+  .auth-box input{width:100%;padding:10px 12px;border:1px solid var(--d-rule);border-radius:8px;font-family:'Spline Sans Mono',monospace;margin:12px 0}
+  .row-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  footer{border-top:1px solid var(--d-rule);margin-top:60px;padding:20px 0;color:var(--d-muted);font-size:13px;text-align:center}
+  footer a{color:var(--d-muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><span class="bars"><i></i><i></i><i></i></span> kolm</a>
+  <nav>
+    <a href="/dashboard">Reports</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/verify">Verify</a>
+    <a href="/contact">Contact</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="idx">Account</div>
+  <h1>Billing &amp; receipts</h1>
+  <p class="lede">Your subscription, payment method, invoices, tax details, and the Full Readiness package. Update your card or cancel any time from the Stripe billing portal.</p>
+
+  <div id="banner"></div>
+  <div id="content"><div class="empty">Loading your billing details...</div></div>
+
+  <div id="auth" class="auth-box" style="display:none">
+    <h2>View your billing</h2>
+    <p class="muted">Paste your API key (starts with <span class="mono">ks_</span>) to manage billing.</p>
+    <input id="keyInput" class="mono" placeholder="ks_..." autocomplete="off" spellcheck="false">
+    <button class="btn primary" id="keyBtn" style="width:100%">View billing</button>
+  </div>
+</div>
+
+<footer>
+  kolm.ai &middot; Agent Security Evidence &middot; <a href="/dashboard">Your reports</a> &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>
+</footer>
+
+<script>
+(function(){
+  var KEY = null;
+  try { KEY = sessionStorage.getItem('kolm_dash_key') || null; } catch(e){}
+
+  function authHeaders(extra){ var h = extra||{}; if (KEY) h['Authorization']='Bearer '+KEY; return h; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+  function fmtDate(s){ try { return s? new Date(s).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : '-'; } catch(e){ return s||'-'; } }
+  function money(cents,cur){ if(typeof cents!=='number') return '-'; try { return (cents/100).toLocaleString(undefined,{style:'currency',currency:(cur||'usd').toUpperCase()}); } catch(e){ return '$'+(cents/100).toFixed(2); } }
+
+  function showBanner(){
+    var q = new URLSearchParams(location.search);
+    var el = document.getElementById('banner');
+    if (q.get('portal')==='return'){ el.innerHTML = '<div class="banner info">Welcome back. Any change you made in the Stripe portal is reflected below.</div>'; }
+    else if (q.get('asr')==='full'){ el.innerHTML = '<div class="banner ok">Full Readiness is active. Our review team will reach out to scope your engagement.</div>'; }
+  }
+
+  function statusPill(s){
+    if (s==='active') return '<span class="pill ok">Active</span>';
+    if (s==='past_due') return '<span class="pill warn">Past due</span>';
+    if (s==='cancelled') return '<span class="pill muted">Cancelled</span>';
+    if (s==='free') return '<span class="pill muted">Free</span>';
+    return '<span class="pill muted">'+esc(s||'-')+'</span>';
+  }
+
+  function render(d){
+    var content = document.getElementById('content');
+    var tax = d.tax || {};
+    var parts = [];
+
+    // Plan + status
+    parts.push('<h2>Subscription</h2><div class="card"><div class="grid2">'
+      + '<div>'
+        + '<div class="kv"><span class="muted">Plan</span><b>'+esc(d.plan&&d.plan.label||'Free')+' <span class="muted num">'+esc(d.plan&&d.plan.price_label||'')+'</span></b></div>'
+        + '<div class="kv"><span class="muted">Status</span><b>'+statusPill(d.billing_status)+'</b></div>'
+        + (d.pending_plan?('<div class="kv"><span class="muted">Pending</span><b>'+esc(d.pending_plan)+'</b></div>'):'')
+        + '<div class="kv"><span class="muted">Renews / ends</span><b>'+esc(fmtDate(d.current_period_end))+(d.cancel_at_period_end?' <span class="pill warn">cancels</span>':'')+'</b></div>'
+        + (d.credit_balance_cents>0?('<div class="kv"><span class="muted">Account credit</span><b class="num">'+money(d.credit_balance_cents,'usd')+'</b></div>'):'')
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:10px;justify-content:flex-start">'
+        + (d.portal_available
+            ? '<button class="btn primary" id="portalBtn">Open billing portal</button><span class="muted" style="font-size:13px">Update your card, download receipts, or cancel.</span>'
+            : '<a class="btn ghost" href="/pricing">Change plan</a><span class="muted" style="font-size:13px">The self-serve portal activates once you have a paid plan.</span>')
+        + '<a class="btn ghost" href="/dashboard">Your reports</a>'
+      + '</div>'
+    + '</div></div>');
+
+    // Dunning warning
+    if (d.dunning && d.dunning.length){
+      var nx = d.dunning[0];
+      parts.push('<div class="banner warn">A recent payment failed. We will retry automatically'+(nx.next_retry_at?(' on '+esc(fmtDate(nx.next_retry_at))):'')+'. Update your payment method in the billing portal to avoid interruption.</div>');
+    }
+
+    // Continuous subscriptions
+    if (d.subscriptions && d.subscriptions.length){
+      parts.push('<h2>Continuous re-attestation</h2><div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Product</th><th>Status</th><th>Cadence</th><th>Last run</th><th></th></tr></thead><tbody>'
+        + d.subscriptions.map(function(s){
+            return '<tr><td><strong>'+esc(s.product)+'</strong></td><td>'+statusPill(s.status)+'</td><td class="muted">'+esc(s.cadence||'-')+'</td><td class="muted">'+esc(fmtDate(s.last_run_at))+'</td>'
+              + '<td class="row-actions">'+(s.public_slug?('<a class="btn ghost sm" target="_blank" rel="noopener" href="/v1/trust/'+esc(s.public_slug)+'">Trust link</a>'):'')+'</td></tr>';
+          }).join('')
+        + '</tbody></table></div>');
+    }
+
+    // Full Readiness package / entitlement
+    var fr = d.full_readiness;
+    var owns = (d.packages||[]).some(function(p){ return p.product==='full'; });
+    if (fr){
+      parts.push('<h2>Full Readiness package</h2><div class="card">'
+        + '<div class="kv"><span class="muted">Status</span><b>'+(owns?'<span class="pill ok">Active</span>':'<span class="pill muted">Not purchased</span>')+'</b></div>'
+        + '<p style="margin:12px 0 4px"><b>What\'s included</b> <span class="muted num">$'+esc(fr.price_usd.toLocaleString())+' one-time</span></p>'
+        + '<ul class="feat">'+(fr.includes||[]).map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>'
+        + '<p style="margin:14px 0 0" class="muted">'+esc(fr.schedule_review&&fr.schedule_review.how||'')+' '
+          + '<a href="mailto:'+esc(fr.schedule_review&&fr.schedule_review.contact||'dev@kolm.ai')+'">'+esc(fr.schedule_review&&fr.schedule_review.contact||'dev@kolm.ai')+'</a></p>'
+      + '</div>');
+    }
+
+    // Invoices
+    parts.push('<h2>Invoices &amp; receipts</h2>');
+    if (d.invoices && d.invoices.length){
+      parts.push('<div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody>'
+        + d.invoices.map(function(iv){
+            var link = iv.hosted_invoice_url? ('<a class="btn ghost sm" target="_blank" rel="noopener" href="'+esc(iv.hosted_invoice_url)+'">View</a>') : '';
+            var pdf = iv.invoice_pdf? ('<a class="btn ghost sm" target="_blank" rel="noopener" href="'+esc(iv.invoice_pdf)+'">PDF</a>') : '';
+            return '<tr><td class="muted">'+esc(fmtDate(iv.created_at))+'</td><td>'+esc(iv.description||iv.number||(iv.kind==='refund'?'Refund':'Invoice'))+'</td>'
+              + '<td class="num">'+money(iv.amount_paid_cents,iv.currency)+'</td><td>'+(iv.status==='refunded'?'<span class="pill muted">Refunded</span>':'<span class="pill ok">Paid</span>')+'</td>'
+              + '<td class="row-actions">'+link+pdf+'</td></tr>';
+          }).join('')
+        + '</tbody></table></div>');
+    } else {
+      parts.push('<div class="card"><div class="empty">No invoices yet. Receipts appear here automatically after each payment.</div></div>');
+    }
+
+    // Tax / VAT
+    parts.push('<h2>Tax details</h2><div class="card">'
+      + '<p class="muted" style="margin:0 0 6px">For your invoice header. '+esc((d.tax&&d.tax.reverse_charge_note)||'')+'</p>'
+      + '<div class="grid2">'
+        + '<div><label for="vat">VAT number</label><input class="fld" id="vat" placeholder="e.g. DE123456789" value="'+esc(tax.vat_number||'')+'"></div>'
+        + '<div><label for="taxid">Tax ID</label><input class="fld" id="taxid" placeholder="e.g. EIN / company number" value="'+esc(tax.tax_id||'')+'"></div>'
+        + '<div><label for="company">Company name</label><input class="fld" id="company" placeholder="Legal entity" value="'+esc(tax.company_name||'')+'"></div>'
+        + '<div><label for="cc">Country code</label><input class="fld" id="cc" placeholder="2-letter, e.g. DE" maxlength="2" value="'+esc(tax.country_code||'')+'"></div>'
+      + '</div>'
+      + '<div style="margin-top:14px"><button class="btn primary" id="saveTax">Save tax details</button> <span id="taxMsg" class="muted"></span></div>'
+    + '</div>');
+
+    content.innerHTML = parts.join('');
+
+    var pb = document.getElementById('portalBtn');
+    if (pb) pb.onclick = openPortal;
+    document.getElementById('saveTax').onclick = saveTax;
+  }
+
+  function openPortal(){
+    var b = document.getElementById('portalBtn'); var prev=b.textContent; b.disabled=true; b.textContent='Opening...';
+    fetch('/v1/account/billing/portal', { method:'POST', credentials:'same-origin', headers: authHeaders({'Content-Type':'application/json'}), body:'{}' })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+      .then(function(o){ if(o.ok && o.j && o.j.portal_url){ location.href=o.j.portal_url; return; } b.disabled=false; b.textContent=prev; alert((o.j&&o.j.message)||'Could not open the billing portal. Email dev@kolm.ai.'); })
+      .catch(function(){ b.disabled=false; b.textContent=prev; alert('Network error. Try again or email dev@kolm.ai.'); });
+  }
+
+  function saveTax(){
+    var msg = document.getElementById('taxMsg'); msg.textContent='Saving...';
+    var body = { vat_number: val('vat'), tax_id: val('taxid'), company_name: val('company'), country_code: val('cc') };
+    fetch('/v1/account/billing', { method:'PATCH', credentials:'same-origin', headers: authHeaders({'Content-Type':'application/json'}), body: JSON.stringify(body) })
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+      .then(function(o){ msg.textContent = o.ok? 'Saved.' : ((o.j&&o.j.message)||'Could not save.'); setTimeout(function(){ msg.textContent=''; },2500); })
+      .catch(function(){ msg.textContent='Network error.'; });
+  }
+  function val(id){ var e=document.getElementById(id); return e? e.value.trim() : ''; }
+
+  function load(){
+    fetch('/v1/account/billing', { credentials:'same-origin', headers: authHeaders() })
+      .then(function(res){
+        if (res.status===401){ document.getElementById('content').style.display='none'; document.getElementById('auth').style.display='block'; return null; }
+        return res.json();
+      })
+      .then(function(d){ if (d && d.ok){ render(d); } })
+      .catch(function(){ document.getElementById('content').innerHTML='<div class="banner warn">Could not load your billing details. Refresh, or email dev@kolm.ai.</div>'; });
+  }
+
+  document.getElementById('keyBtn').onclick = function(){
+    var v=(document.getElementById('keyInput').value||'').trim(); if(!v){ return; }
+    KEY=v; try { sessionStorage.setItem('kolm_dash_key', v); } catch(e){}
+    document.getElementById('auth').style.display='none';
+    document.getElementById('content').style.display='block';
+    document.getElementById('content').innerHTML='<div class="empty">Loading your billing details...</div>';
+    load();
+  };
+
+  showBanner();
+  load();
+})();
+</script>
+</body>
+</html>

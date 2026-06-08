@@ -98,6 +98,53 @@ export function issuerProvenance(report, keyring) {
   return out;
 }
 
+// isFingerprintRevoked - tier-3 key lifecycle. A signature can be cryptograph-
+// ically valid yet untrustworthy if its key was later REVOKED. An offline
+// browser cannot know revocation on its own, so the caller supplies a revocation
+// source (fetched once from the public status feed / keyring):
+//   opts.revokedFingerprints: array/Set/object of 32-hex fingerprints, OR
+//   opts.issuerKeyring: { issuers:[{public_key,status,revoked}], revocations:[] }
+// Pure, synchronous, never throws.
+export function normalizeFpSet(src) {
+  const set = new Set();
+  if (!src) return set;
+  let list = [];
+  if (Array.isArray(src)) list = src;
+  else if (src instanceof Set) list = [...src];
+  else if (typeof src === 'object') list = Object.keys(src);
+  else list = [src];
+  for (const x of list) {
+    const s = String(x == null ? '' : x).trim().toLowerCase().replace(/[^0-9a-f]/g, '');
+    if (s) set.add(s);
+  }
+  return set;
+}
+
+export function isFingerprintRevoked(fp, pem, opts = {}) {
+  try {
+    const f = String(fp || '').trim().toLowerCase();
+    if (f && normalizeFpSet(opts.revokedFingerprints).has(f)) return true;
+    const kr = opts.issuerKeyring;
+    if (kr && typeof kr === 'object') {
+      if (typeof pem === 'string' && Array.isArray(kr.issuers)) {
+        const target = normalizePem(pem);
+        for (const iss of kr.issuers) {
+          if (iss && typeof iss.public_key === 'string' && normalizePem(iss.public_key) === target) {
+            if (iss.revoked === true || String(iss.status || '').toLowerCase() === 'revoked') return true;
+          }
+        }
+      }
+      if (Array.isArray(kr.revocations)) {
+        for (const rv of kr.revocations) {
+          const rfp = String((rv && (rv.fingerprint || rv)) || '').trim().toLowerCase();
+          if (rfp && rfp === f) return true;
+        }
+      }
+    }
+  } catch (_) { /* never throw */ }
+  return false;
+}
+
 // ---------------------------------------------------------------------------
 // byte / key helpers (shared shape with public/kolm-verify.js).
 // ---------------------------------------------------------------------------
@@ -173,6 +220,24 @@ export async function verifyAuditReport(report, opts = {}) {
   if (typeof block.public_key !== 'string' || !block.public_key) return fail('signature block missing public_key');
   if (typeof block.signature !== 'string' || !block.signature) return fail('signature block missing signature');
 
+  // Tier-3 (optional): refuse a REVOKED issuer key BEFORE reporting any clean
+  // pass. Runs only when the caller supplies a revocation source, and runs
+  // before the WebCrypto-Ed25519 availability gate so a revoked key is rejected
+  // even in a browser that cannot run the signature check. Computing the
+  // fingerprint needs only SHA-256, which is universally available.
+  if (opts.revokedFingerprints || opts.issuerKeyring) {
+    let revFp = null;
+    try {
+      const der0 = pemToDer(block.public_key);
+      revFp = bytesToHex(new Uint8Array(await crypto.subtle.digest('SHA-256', der0))).slice(0, 32);
+    } catch (_) { revFp = null; }
+    if (revFp && isFingerprintRevoked(revFp, block.public_key, opts)) {
+      checks.push({ name: 'issuer key not revoked', ok: false, detail: `key ${revFp.slice(0, 12)}… is revoked` });
+      return { ok: false, reason: 'issuer_key_revoked', key_fingerprint: revFp, checks };
+    }
+    checks.push({ name: 'issuer key not revoked', ok: true, detail: revFp || '(fingerprint unavailable)' });
+  }
+
   if (!ed25519Available()) {
     checks.push({ name: 'native Ed25519', ok: false, detail: 'this browser lacks WebCrypto Ed25519' });
     return { ok: false, reason: 'native Ed25519 unavailable in this browser (need Chrome 137+ / Safari 17+ / Firefox 129+); signature was NOT checked', checks };
@@ -234,10 +299,35 @@ export async function verifyAuditReport(report, opts = {}) {
   }
   checks.push({ name: 'signed_at matches signed generated_at', ok: true, detail: String(report.generated_at || '(none)') });
 
+  // Optional additive evidence (gracefully optional - never flips the verdict).
+  // Both fields live in the SIGNED payload, so any tampering already broke the
+  // Ed25519 check above; here we just surface their presence + shape.
+  //   timestamp_evidence: an RFC 3161 trusted timestamp (independent of kolm's
+  //     clock). Full token verification is a Node-side / SDK concern; the
+  //     browser confirms it binds the same digest family and is well-formed.
+  //   log_checkpoint: a transparency-log signed tree head the report anchors to.
+  if (report.timestamp_evidence && typeof report.timestamp_evidence === 'object') {
+    const te = report.timestamp_evidence;
+    const st = String(te.status || '');
+    const imprintOk = typeof te.message_imprint === 'string' && /^[0-9a-f]{64}$/i.test(te.message_imprint);
+    if (st === 'timestamped' && te.token_b64 && imprintOk) {
+      checks.push({ name: 'trusted timestamp present', ok: true, detail: `TSA ${te.tsa_url || '?'} @ ${te.timestamp || '?'}` });
+    } else if (st === 'offline') {
+      checks.push({ name: 'trusted timestamp', ok: true, detail: 'not timestamped (status offline) - additive evidence absent' });
+    } else {
+      checks.push({ name: 'trusted timestamp', ok: false, detail: 'timestamp_evidence present but malformed (informational; verdict unaffected)' });
+    }
+  }
+  if (report.log_checkpoint && typeof report.log_checkpoint === 'object') {
+    const lc = report.log_checkpoint;
+    const ok = typeof lc.root_hash === 'string' && /^[0-9a-f]{64}$/i.test(lc.root_hash) && Number.isFinite(Number(lc.tree_size));
+    checks.push({ name: 'transparency-log checkpoint present', ok, detail: ok ? `tree_size=${lc.tree_size} root=${String(lc.root_hash).slice(0, 12)}…` : 'log_checkpoint present but malformed (informational; verdict unaffected)' });
+  }
+
   return { ok: true, key_fingerprint: fp, checks };
 }
 
 // UMD-ish global for plain <script src> pages.
 if (typeof window !== 'undefined') {
-  window.kolmAuditVerify = { verifyAuditReport, canonicalize, canonicalizeReport, keyFingerprintFromPem, pemToDer, normalizePem, issuerProvenance, AUDIT_REPORT_SCHEMA };
+  window.kolmAuditVerify = { verifyAuditReport, canonicalize, canonicalizeReport, keyFingerprintFromPem, pemToDer, normalizePem, issuerProvenance, isFingerprintRevoked, normalizeFpSet, AUDIT_REPORT_SCHEMA };
 }

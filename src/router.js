@@ -33,9 +33,11 @@ import { verifiedInference } from './verified.js';
 import { createJob, getJob, listJobs, runJob } from './compile.js';
 import { cidFromManifestHashes, verifyCidAgainstManifestHashes, canonicalJson as cidCanonicalJson } from './cid.js';
 import * as recall from './recall.js';
-import { verifyStripeSignature, planFromAmount, appendCheckoutParams } from './stripe.js';
+import { verifyStripeSignature, planFromAmount, appendCheckoutParams, createBillingPortalSession, prorataCreditFromEvent, applyStripeCustomerCredit, retrieveStripeInvoice, createStripeRefund, stripeSecretKeyFromEnv } from './stripe.js';
 import { parseAsrRef } from './asr-billing.js';
-import { fulfillReportPurchase, fulfillPackagePurchase, activateSubscription, setSubscriptionStatus } from './asr-fulfillment.js';
+import { fulfillReportPurchase, fulfillPackagePurchase, activateSubscription, setSubscriptionStatus, SUBSCRIPTIONS as ASR_SUBSCRIPTIONS, PACKAGES as ASR_PACKAGES } from './asr-fulfillment.js';
+import { recordInvoiceFromStripe, recordRefund as recordTenantRefund, listInvoices as listTenantInvoices, publicInvoice } from './invoices.js';
+import { scheduleDunning, resolveDunning, listDunning } from './dunning.js';
 import {
   pickAnthropicUpstream,
   pickOpenAIUpstream,
@@ -12341,6 +12343,198 @@ export function buildRouter() {
     });
   });
 
+  // ---------- Billing self-serve surface (procurement-grade) ----------
+  // M9/M11/M13: the customer-facing billing console. The Stripe Billing Portal
+  // (self-serve payment-method / cancel / receipts), the local invoice/receipt
+  // ledger, VAT/tax-id capture, and the Full Readiness ($15k) entitlement view.
+  // Every route is tenant-fenced via req.tenant_record.
+
+  // What the $15k Full Readiness package includes + how to schedule the review.
+  // Static catalog so the account page + API render one source of truth.
+  const FULL_READINESS_ENTITLEMENT = Object.freeze({
+    product: 'full',
+    label: 'Full Readiness',
+    price_usd: 15000,
+    includes: Object.freeze([
+      'Hands-on Agent Security-Review of your production agent fleet by the kolm review team',
+      'Signed Readiness Report (Ed25519, offline-verifiable) your buyer keeps',
+      'Control-by-control mapping to the assessed framework with remediation guidance',
+      'A 30-minute architecture review to scope evidence sources and log access',
+      'Procurement export bundle (CSV / Drata / Vanta / exec summary / crosswalk)',
+      'Priority email support at dev@kolm.ai for the duration of the engagement',
+    ]),
+    schedule_review: Object.freeze({
+      how: 'Email dev@kolm.ai with your tenant id to book the 30-minute scoping review.',
+      contact: 'dev@kolm.ai',
+    }),
+  });
+
+  // M9 - open a Stripe Billing Portal session so the customer can self-serve
+  // payment-method updates, cancellation/downgrade, and receipt downloads. 503
+  // when no Stripe secret key is configured; 409 when the tenant has no Stripe
+  // customer yet (no paid subscription has ever been created for them).
+  r.post('/v1/account/billing/portal', async (req, res) => {
+    if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot open the billing portal' });
+    const t = req.tenant_record;
+    if (!stripeSecretKeyFromEnv()) {
+      return res.status(503).json({ error: 'billing_not_configured', message: 'The Stripe Billing Portal needs STRIPE_SECRET_KEY set. Contact dev@kolm.ai.' });
+    }
+    if (!t.stripe_customer_id) {
+      return res.status(409).json({ error: 'no_stripe_customer', message: 'No Stripe customer is on file for this tenant yet. Start a paid plan first, or email dev@kolm.ai.' });
+    }
+    const base = (process.env.PUBLIC_BASE || process.env.KOLM_VERIFY_URL_BASE || 'https://kolm.ai').replace(/\/+$/, '');
+    try {
+      const out = await createBillingPortalSession({ customer: t.stripe_customer_id, returnUrl: `${base}/account-billing?portal=return` });
+      if (!out || !out.url) return res.status(502).json({ error: 'stripe_no_url', message: 'Stripe did not return a portal URL.' });
+      tryAppendAudit({ tenant_id: t.id, tenant_name: t.name || null, actor: 'tenant', op: AUDIT_OPS.STRIPE_EVENT, payload: { kind: 'billing_portal_opened' } });
+      return res.json({ ok: true, portal_url: out.url });
+    } catch (e) {
+      const code = e && e.statusCode && Number.isInteger(e.statusCode) ? e.statusCode : 502;
+      return res.status(code).json({ error: e && e.code || 'stripe_error', message: String((e && e.message) || e) });
+    }
+  });
+
+  // M11 - list the tenant's invoices / receipts (newest first). Reads the local
+  // ledger populated by the invoice.payment_succeeded webhook.
+  r.get('/v1/account/invoices', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    const rows = listTenantInvoices(req.tenant_record.id).map(publicInvoice);
+    res.json({ ok: true, invoices: rows, total: rows.length });
+  });
+
+  // Billing summary the account-billing page reads: plan, status, period, credit
+  // balance, tax fields, Full Readiness entitlements, continuous subscription,
+  // recent invoices, dunning state, and whether the portal can be opened.
+  r.get('/v1/account/billing', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    const t = req.tenant_record;
+    const meta = PLAN_CATALOG[t.plan] || PLAN_CATALOG.free;
+    const packages = findByField(ASR_PACKAGES, 'tenant_id', t.id)
+      .filter((p) => p && p.status === 'active')
+      .map((p) => ({
+        id: p.id,
+        product: p.product,
+        label: p.product === 'full' ? 'Full Readiness' : String(p.product || 'package'),
+        status: p.status,
+        purchased_at: p.purchased_at || p.created_at || null,
+        entitlement: p.product === 'full' ? FULL_READINESS_ENTITLEMENT : null,
+      }));
+    const subs = findByField(ASR_SUBSCRIPTIONS, 'tenant_id', t.id).map((s) => ({
+      id: s.id, product: s.product_key, status: s.status, cadence: s.cadence,
+      public_slug: s.public_slug || null, next_run_at: s.next_run_at || null, last_run_at: s.last_run_at || null,
+    }));
+    const invoices = listTenantInvoices(t.id, { limit: 50 }).map(publicInvoice);
+    const dunning = listDunning(t.id).filter((d) => d.status === 'scheduled')
+      .map((d) => ({ attempt: d.attempt, status: d.status, next_retry_at: d.next_retry_at, stripe_subscription_id: d.stripe_subscription_id || null }));
+    res.json({
+      ok: true,
+      tenant_id: t.id,
+      email: t.email || null,
+      plan: { id: meta.id, label: meta.label, price_label: meta.price_label, quota: meta.quota, seats: meta.seats },
+      billing_status: t.billing_status || (t.plan === 'free' ? 'free' : 'active'),
+      pending_plan: t.pending_plan || null,
+      current_period_end: t.current_period_end || null,
+      cancel_at_period_end: !!t.cancel_at_period_end,
+      credit_balance_cents: Number(t.credit_balance_cents || 0),
+      tax: {
+        vat_number: t.vat_number || null,
+        tax_id: t.tax_id || null,
+        country_code: t.tax_country || t.country_code || null,
+        company_name: t.company_name || null,
+        // Stripe automatic_tax computes VAT/GST at checkout; for EU B2B with a
+        // valid VAT number the reverse-charge mechanism applies (tax accounted
+        // for by the customer). Surfaced as guidance only - never tax advice.
+        reverse_charge_note: 'If you supply a valid EU VAT number, EU B2B reverse-charge applies and VAT is accounted for by you. Stripe automatic_tax computes any applicable tax at checkout.',
+      },
+      portal_available: !!stripeSecretKeyFromEnv() && !!t.stripe_customer_id,
+      packages,
+      full_readiness: FULL_READINESS_ENTITLEMENT,
+      subscriptions: subs,
+      invoices,
+      dunning,
+    });
+  });
+
+  // M13 - capture VAT number / tax id (+ optional company + country) for the
+  // invoice header and Stripe automatic_tax. Tenant-fenced + audited.
+  r.patch('/v1/account/billing', (req, res) => {
+    if (!req.tenant_record) return res.status(403).json({ error: 'admin tokens cannot edit billing' });
+    const t = req.tenant_record;
+    const b = req.body || {};
+    const clean = (v, max = 64) => (v == null ? undefined : String(v).trim().slice(0, max) || null);
+    const patch = {};
+    if ('vat_number' in b) patch.vat_number = clean(b.vat_number, 32);
+    if ('tax_id' in b) patch.tax_id = clean(b.tax_id, 64);
+    if ('company_name' in b) patch.company_name = clean(b.company_name, 120);
+    if ('country_code' in b || 'tax_country' in b) {
+      const cc = clean(b.country_code != null ? b.country_code : b.tax_country, 2);
+      patch.tax_country = cc ? cc.toUpperCase() : null;
+    }
+    if (Object.keys(patch).length === 0) {
+      return res.status(400).json({ error: 'no_fields', message: 'Provide at least one of: vat_number, tax_id, company_name, country_code.' });
+    }
+    update('tenants', x => x.id === t.id, patch);
+    tryAppendAudit({
+      tenant_id: t.id, tenant_name: t.name || null, actor: 'tenant', op: AUDIT_OPS.SETTINGS_UPDATED,
+      payload: { kind: 'billing_tax_updated', fields: Object.keys(patch) },
+    });
+    const fresh = findOne('tenants', x => x.id === t.id) || t;
+    res.json({
+      ok: true,
+      tax: {
+        vat_number: fresh.vat_number || null,
+        tax_id: fresh.tax_id || null,
+        company_name: fresh.company_name || null,
+        country_code: fresh.tax_country || null,
+      },
+      note: 'Stripe automatic_tax computes VAT/GST at checkout; a valid EU VAT number triggers B2B reverse-charge.',
+    });
+  });
+
+  // M13 - admin-issued refund. Owner/admin only (req.is_admin). Issues a Stripe
+  // refund against a charge, records a credit-memo in the tenant ledger, audits
+  // the action, and notifies the tenant. 503 when Stripe is not configured.
+  r.post('/v1/admin/refund', async (req, res) => {
+    if (!req.is_admin) return res.status(403).json({ error: 'admin only', hint: 'refunds require the owner/admin key' });
+    const b = req.body || {};
+    const charge = String(b.stripe_charge_id || b.charge || '').trim();
+    const paymentIntent = String(b.payment_intent || '').trim();
+    if (!charge && !paymentIntent) return res.status(400).json({ error: 'missing_charge', message: 'stripe_charge_id (or payment_intent) is required.' });
+    const amountCents = (typeof b.amount_cents === 'number' && b.amount_cents > 0) ? Math.round(b.amount_cents) : undefined;
+    const reason = b.reason ? String(b.reason) : undefined;
+    const tenantId = b.tenant_id ? String(b.tenant_id) : null;
+    if (!stripeSecretKeyFromEnv()) {
+      return res.status(503).json({ error: 'billing_not_configured', message: 'Refunds need STRIPE_SECRET_KEY set in the environment.' });
+    }
+    let refund;
+    try {
+      refund = await createStripeRefund({ charge: charge || undefined, paymentIntent: paymentIntent || undefined, amountCents, reason });
+    } catch (e) {
+      const code = e && e.statusCode && Number.isInteger(e.statusCode) ? e.statusCode : 502;
+      return res.status(code).json({ error: e && e.code || 'stripe_error', message: String((e && e.message) || e) });
+    }
+    // Record the credit-memo + audit + notify under the named tenant (best-effort).
+    if (tenantId) {
+      try {
+        recordTenantRefund({ tenant_id: tenantId, stripe_refund_id: refund.id, stripe_charge_id: refund.charge || charge || null, amount_cents: (typeof refund.amount === 'number' ? refund.amount : amountCents) ?? null, reason });
+      } catch (_) {} // ledger write is best-effort
+      const tgt = findOne('tenants', x => x.id === tenantId);
+      tryAppendAudit({
+        tenant_id: tenantId, tenant_name: tgt && tgt.name || null, actor: 'admin', op: AUDIT_OPS.ADMIN_ACTION,
+        payload: { kind: 'refund_issued', stripe_refund_id: refund.id, stripe_charge_id: refund.charge || charge || null, amount_cents: refund.amount ?? amountCents ?? null, reason: reason || null },
+      });
+      if (tgt && tgt.email && emailConfigured()) {
+        const amt = (typeof refund.amount === 'number' ? refund.amount : amountCents);
+        const amtLabel = (typeof amt === 'number') ? (amt / 100).toLocaleString(undefined, { style: 'currency', currency: 'USD' }) : 'the charge';
+        const text = [`We have issued a refund of ${amtLabel} to your original payment method.`, '', refund.id ? `Refund id: ${refund.id}` : null, '', 'It can take 5-10 business days to appear, depending on your bank.', '', 'Questions: dev@kolm.ai', '', ' - kolm'].filter(Boolean).join('\n');
+        sendEmail({ to: tgt.email, subject: 'Your kolm refund has been issued', text, html: `<p>We have issued a refund of <strong>${amtLabel}</strong> to your original payment method.</p>${refund.id ? `<p style="font:12px ui-monospace,Menlo,monospace;color:#555">Refund id: ${refund.id}</p>` : ''}<p>It can take 5-10 business days to appear. Questions: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></p>`, tag: 'refund' }).catch(() => {});
+      }
+    } else {
+      tryAppendAudit({ tenant_id: 'system', actor: 'admin', op: AUDIT_OPS.ADMIN_ACTION, payload: { kind: 'refund_issued', stripe_refund_id: refund.id, stripe_charge_id: refund.charge || charge || null, amount_cents: refund.amount ?? amountCents ?? null, reason: reason || null } });
+    }
+    res.json({ ok: true, refund });
+  });
+
   // ---------- Admin console endpoints ----------
   // Read-only admin surface for the founder console at /admin. Gated by
   // req.is_admin (ADMIN_KEY in env). Returns scrubbed views - no raw api_keys,
@@ -12465,6 +12659,28 @@ export function buildRouter() {
     });
   });
 
+  // Resolve the owning tenant id for a Stripe invoice. Checks the gateway
+  // tenants table (stripe_subscription_id / stripe_customer_id columns) first,
+  // then the ASR continuous subscriptions table (which carries its own
+  // stripe_subscription_id / stripe_customer_id + tenant_id). Returns null when
+  // nothing matches. Used by the invoice (M11) + dunning (M12) webhook branches.
+  function resolveTenantIdForInvoice(inv) {
+    if (!inv || typeof inv !== 'object') return null;
+    const subId = inv.subscription || null;
+    const custId = inv.customer || null;
+    if (subId || custId) {
+      const t = findOne('tenants', (x) => x && !x._deleted && (
+        (subId && x.stripe_subscription_id === subId) || (custId && x.stripe_customer_id === custId)
+      ));
+      if (t) return t.id;
+      const asr = findOne(ASR_SUBSCRIPTIONS, (s) => s && (
+        (subId && s.stripe_subscription_id === subId) || (custId && s.stripe_customer_id === custId)
+      ));
+      if (asr && asr.tenant_id) return asr.tenant_id;
+    }
+    return null;
+  }
+
   // ---------- Stripe webhook ----------
   // Receives Stripe webhook events. Verifies signature with
   // STRIPE_WEBHOOK_SECRET, decodes the event, and flips tenant plans on
@@ -12582,6 +12798,7 @@ export function buildRouter() {
             return { kind: 'ok', body: { received: true, warning: 'no plan match', amount_total: s.amount_total, id: event.id } };
           }
           const meta = PLAN_CATALOG[resolvedPlan];
+          const priorPlan = tenant.plan || 'free';
           update('tenants', x => x.id === tenantId, {
             plan: resolvedPlan,
             quota: meta.quota,
@@ -12592,6 +12809,14 @@ export function buildRouter() {
             paid_at: new Date().toISOString(),
             cancelled_at: null,
             billing_status: 'active',
+          });
+          // M14 - audit the plan change outcome (chained, tenant-fenced).
+          tryAppendAudit({
+            tenant_id: tenantId,
+            tenant_name: tenant.name || null,
+            actor: 'system',
+            op: AUDIT_OPS.PLAN_CHANGED,
+            payload: { from: priorPlan, to: resolvedPlan, source: 'stripe.checkout.session.completed', stripe_event: event.id },
           });
           return { kind: 'ok', body: { received: true, plan: resolvedPlan, tenant: tenantId, id: event.id }, sideEffect: { kind: 'activated', tenant } };
         }
@@ -12615,12 +12840,40 @@ export function buildRouter() {
             : stripeStatus === 'unpaid' ? 'past_due'
             : stripeStatus === 'canceled' ? 'cancelled'
             : 'active';
+          // M10 - pro-rata downgrade credit. When the new recurring amount is
+          // below the old one, the unused portion of the current period is
+          // credited to the tenant's balance (and pushed to Stripe as a customer
+          // balance adjustment in a post-transaction side effect so a Stripe
+          // outage never rolls back the webhook). Math is pure + tested.
+          let creditCents = 0;
+          try {
+            const pc = prorataCreditFromEvent(event);
+            creditCents = pc && pc.credit_cents > 0 ? pc.credit_cents : 0;
+          } catch (_) { creditCents = 0; } // deliberate: credit is best-effort
+          const priorCredit = Number(tenant.credit_balance_cents || 0);
           update('tenants', x => x.id === tenant.id, {
             billing_status: billingStatus,
             current_period_end: periodEnd,
             cancel_at_period_end: !!sub.cancel_at_period_end,
+            ...(creditCents > 0 ? { credit_balance_cents: priorCredit + creditCents } : {}),
           });
-          return { kind: 'ok', body: { received: true, billing_status: billingStatus, tenant: tenant.id, id: event.id } };
+          // M14 - audit billing-status changes + any credit granted.
+          tryAppendAudit({
+            tenant_id: tenant.id,
+            tenant_name: tenant.name || null,
+            actor: 'system',
+            op: AUDIT_OPS.STRIPE_EVENT,
+            payload: { kind: 'subscription_updated', billing_status: billingStatus, prorata_credit_cents: creditCents, stripe_event: event.id },
+          });
+          // Recovery clears any open dunning schedule.
+          if (billingStatus === 'active') { try { resolveDunning({ tenant_id: tenant.id, stripe_subscription_id: sub.id }); } catch (_) {} }
+          return {
+            kind: 'ok',
+            body: { received: true, billing_status: billingStatus, prorata_credit_cents: creditCents, tenant: tenant.id, id: event.id },
+            sideEffect: creditCents > 0 && tenant.stripe_customer_id
+              ? { kind: 'prorata_credit', customer: tenant.stripe_customer_id, amount_cents: creditCents, tenant_id: tenant.id }
+              : null,
+          };
         }
 
         if (event.type === 'customer.subscription.deleted') {
@@ -12644,12 +12897,48 @@ export function buildRouter() {
           return { kind: 'ok', body: { received: true, plan: 'free', tenant: tenant.id, id: event.id } };
         }
 
+        // M11 - record a paid invoice as a durable, tenant-fenced receipt so a
+        // buyer's finance team can pull every receipt from their account surface
+        // and recovery clears any open dunning schedule. The Stripe event carries
+        // hosted_invoice_url + invoice_pdf directly. invoice.paid is the modern
+        // alias; we handle both.
+        if (event.type === 'invoice.payment_succeeded' || event.type === 'invoice.paid') {
+          const inv = event.data && event.data.object || {};
+          const tenantId = resolveTenantIdForInvoice(inv);
+          if (!tenantId) return { kind: 'ok', body: { received: true, invoice: 'recorded', tenant: null, warning: 'tenant not found', id: event.id } };
+          const rec = recordInvoiceFromStripe({ tenant_id: tenantId, invoice: inv, source: 'webhook' });
+          if (rec && rec.retryable) throw new Error(`invoice record unconfirmed for ${tenantId}; requesting Stripe redelivery`);
+          // A successful payment recovers any open dunning schedule.
+          try { resolveDunning({ tenant_id: tenantId, stripe_subscription_id: inv.subscription || null }); } catch (_) {} // best-effort
+          tryAppendAudit({
+            tenant_id: tenantId,
+            actor: 'system',
+            op: AUDIT_OPS.STRIPE_EVENT,
+            payload: { kind: 'invoice_paid', stripe_invoice_id: inv.id || null, amount_paid: typeof inv.amount_paid === 'number' ? inv.amount_paid : null, stripe_event: event.id },
+          });
+          return {
+            kind: 'ok',
+            body: { received: true, invoice: rec && rec.ok ? (rec.already ? 'already' : 'recorded') : 'failed', tenant: tenantId, id: event.id },
+            sideEffect: (rec && rec.ok && !rec.already && rec.invoice) ? { kind: 'invoice_recorded', invoice: rec.invoice, tenant_id: tenantId } : null,
+          };
+        }
+
         if (event.type === 'invoice.payment_failed') {
           const inv = event.data && event.data.object || {};
+          // M12 - open/refresh a dunning schedule for whichever tenant owns the
+          // failed invoice (gateway plan OR ASR continuous). Tenant-fenced; the
+          // 3/7/14-day ladder + suspension is driven by runDueDunning() on the
+          // server sweep, not here.
+          const dunningTenantId = resolveTenantIdForInvoice(inv);
+          if (dunningTenantId) {
+            try { scheduleDunning({ tenant_id: dunningTenantId, stripe_customer_id: inv.customer || null, stripe_subscription_id: inv.subscription || null, stripe_invoice_id: inv.id || null }); }
+            catch (_) {} // dunning is best-effort; never block the webhook
+          }
           if (inv.subscription) {
             const asr = setSubscriptionStatus({ stripe_subscription_id: inv.subscription, status: 'past_due' });
             if (asr && asr.updated > 0) {
-              return { kind: 'ok', body: { received: true, asr: 'continuous', action: 'past_due_marked', id: event.id } };
+              tryAppendAudit({ tenant_id: dunningTenantId || 'unknown', actor: 'system', op: AUDIT_OPS.STRIPE_EVENT, payload: { kind: 'invoice_payment_failed', surface: 'asr_continuous', stripe_event: event.id } });
+              return { kind: 'ok', body: { received: true, asr: 'continuous', action: 'past_due_marked', dunning_scheduled: !!dunningTenantId, id: event.id } };
             }
           }
           const tenant = findOne('tenants', t =>
@@ -12658,9 +12947,10 @@ export function buildRouter() {
           );
           if (tenant) {
             update('tenants', x => x.id === tenant.id, { billing_status: 'past_due' });
-            return { kind: 'ok', body: { received: true, action: 'past_due_marked', tenant: tenant.id, id: event.id }, sideEffect: { kind: 'past_due', tenant } };
+            tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'system', op: AUDIT_OPS.STRIPE_EVENT, payload: { kind: 'invoice_payment_failed', surface: 'gateway_plan', stripe_event: event.id } });
+            return { kind: 'ok', body: { received: true, action: 'past_due_marked', dunning_scheduled: !!dunningTenantId, tenant: tenant.id, id: event.id }, sideEffect: { kind: 'past_due', tenant } };
           }
-          return { kind: 'ok', body: { received: true, action: 'noted', id: event.id } };
+          return { kind: 'ok', body: { received: true, action: 'noted', dunning_scheduled: !!dunningTenantId, id: event.id } };
         }
 
         return { kind: 'ok', body: { received: true, type: event.type, action: 'ignored' } };
@@ -12682,6 +12972,64 @@ export function buildRouter() {
       }
       if (kind === 'past_due' && tenant.email && emailConfigured()) {
         sendBillingFailed({ email: tenant.email, plan: tenant.plan }).catch(() => {});
+      }
+    }
+    // M10 - push the pro-rata credit to Stripe as a customer balance adjustment.
+    // Strictly a post-transaction, best-effort side effect: the tenant-side
+    // credit_balance_cents is already committed, so a Stripe outage here never
+    // loses the credit (an operator can replay). Only fires when a secret key is
+    // configured (the Payment-Link-only deployment has none).
+    if (outcome && outcome.sideEffect && outcome.sideEffect.kind === 'prorata_credit' && stripeSecretKeyFromEnv()) {
+      const se = outcome.sideEffect;
+      applyStripeCustomerCredit({ customer: se.customer, amountCents: se.amount_cents, description: `kolm pro-rata downgrade credit (${se.tenant_id})` })
+        .catch((e) => { wclog.error('webhook', 'prorata credit apply failed', { tenant: se.tenant_id, code: e && (e.code || e.name) || null }); });
+    }
+    // M11 - email the buyer their receipt with the hosted invoice + PDF links.
+    // Best-effort; the invoice row is already committed. When the event lacked
+    // the URLs and a secret key is present, retrieve them from Stripe first.
+    if (outcome && outcome.sideEffect && outcome.sideEffect.kind === 'invoice_recorded' && outcome.sideEffect.invoice) {
+      const inv = outcome.sideEffect.invoice;
+      const t = findOne('tenants', x => x.id === outcome.sideEffect.tenant_id);
+      if (t && t.email) {
+        const base = (process.env.PUBLIC_BASE || process.env.KOLM_VERIFY_URL_BASE || 'https://kolm.ai').replace(/\/+$/, '');
+        (async () => {
+          let hosted = inv.hosted_invoice_url, pdf = inv.invoice_pdf;
+          if ((!hosted || !pdf) && inv.stripe_invoice_id && stripeSecretKeyFromEnv()) {
+            try {
+              const full = await retrieveStripeInvoice({ invoiceId: inv.stripe_invoice_id });
+              hosted = hosted || full.hosted_invoice_url; pdf = pdf || full.invoice_pdf;
+              if (hosted || pdf) recordInvoiceFromStripe({ tenant_id: t.id, invoice: { ...full, id: inv.stripe_invoice_id }, source: 'retrieve' });
+            } catch (_) {} // best-effort backfill
+          }
+          const amount = (typeof inv.amount_paid_cents === 'number' && inv.amount_paid_cents >= 0)
+            ? (inv.amount_paid_cents / 100).toLocaleString(undefined, { style: 'currency', currency: String(inv.currency || 'usd').toUpperCase() })
+            : null;
+          const manageUrl = `${base}/account-billing`;
+          const link = hosted || manageUrl;
+          const subject = `Your kolm receipt${inv.number ? ' ' + inv.number : ''}`;
+          const text = [
+            `Thanks - your payment was received.`,
+            '',
+            amount ? `Amount: ${amount}` : null,
+            inv.number ? `Invoice: ${inv.number}` : null,
+            '',
+            `View or download your receipt:`,
+            `  ${link}`,
+            pdf ? `PDF: ${pdf}` : null,
+            '',
+            `All receipts: ${manageUrl}`,
+            '',
+            `Questions: dev@kolm.ai`,
+            '',
+            ` - kolm`,
+          ].filter((l) => l != null).join('\n');
+          const html = `<p>Thanks - your payment was received.</p>`
+            + (amount ? `<p style="font:12px/1.55 ui-monospace,Menlo,monospace;background:#f6f5f2;padding:12px;border-radius:6px">Amount: ${amount}${inv.number ? `<br>Invoice: ${inv.number}` : ''}</p>` : '')
+            + `<p><a href="${link}" style="display:inline-block;padding:10px 18px;background:#0b0b0d;color:#fff;text-decoration:none;border-radius:6px;font-weight:600">View receipt</a></p>`
+            + (pdf ? `<p style="font-size:12px;color:#555">Or download the <a href="${pdf}">PDF</a>.</p>` : '')
+            + `<p style="font-size:12px;color:#555">All receipts: <a href="${manageUrl}">${manageUrl}</a> &nbsp;·&nbsp; Questions: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></p>`;
+          sendEmail({ to: t.email, subject, html, text, tag: 'invoice_receipt' }).catch(() => {});
+        })().catch(() => {});
       }
     }
     // ASR Signed Readiness Report ready - email the buyer the shareable Trust

@@ -446,6 +446,167 @@ export function verifyInclusionProof(proof, opts = {}) {
   return { ok: true, root: inc.root, leaf_index, tree_size, checkpoint };
 }
 
+// ===========================================================================
+// TRACK CRYPTO-SERVICES / M4 - witness co-signing HOOK (optional) + persisted
+// signed checkpoints. Purely additive over the primitives above.
+//
+// WITNESS CO-SIGNING (the Certificate-Transparency / Sigstore "witness" model)
+//   A single operator signing its own log is a closed system: the operator can
+//   still present DIFFERENT histories to different viewers (a "split view")
+//   because nobody else attests the tree head. A WITNESS is an independent party
+//   that counter-signs the SAME checkpoint note. A viewer who trusts the witness
+//   (not just kolm) can detect a split view: two checkpoints at the same
+//   tree_size with different roots cannot both carry a valid witness signature.
+//
+//   This is a HOOK, not a mandate. By default there is no witness (the field is
+//   simply absent). An operator wires one by either:
+//     (a) setTransparencyWitness(signer)  - an in-process Ed25519 signer, OR
+//     (b) env KOLM_TLOG_WITNESS_KEY=<PEM>  - loaded lazily by loadWitnessFromEnv().
+//   cosignTreeHead() appends witness signatures over the checkpoint note; the
+//   verifier verifies them alongside the log's own signature.
+// ===========================================================================
+
+export const TLOG_CHECKPOINT_COLLECTION = 'transparency_checkpoints';
+
+let _witnessSigner = null; // { privateKey, publicKey, key_fingerprint? } | null
+
+// Register an in-process witness signer (or clear with null). The witness signs
+// the SAME C2SP note bytes as the log, with its OWN Ed25519 key.
+export function setTransparencyWitness(signer) {
+  _witnessSigner = signer && signer.privateKey && signer.publicKey ? signer : null;
+  return _witnessSigner;
+}
+
+export function getTransparencyWitness() {
+  if (_witnessSigner) return _witnessSigner;
+  return loadWitnessFromEnv();
+}
+
+// Lazily load a witness signer from KOLM_TLOG_WITNESS_KEY (PEM, with the common
+// escaped-newline form supported). Returns null when unset/invalid - the witness
+// is always optional and never breaks checkpoint issuance.
+export function loadWitnessFromEnv() {
+  let pem = process.env.KOLM_TLOG_WITNESS_KEY || null;
+  if (!pem) return null;
+  if (pem.includes('\\n')) pem = pem.replace(/\\r\\n|\\n/g, '\n');
+  try {
+    const keyObj = crypto.createPrivateKey(pem);
+    if (keyObj.asymmetricKeyType !== 'ed25519') return null;
+    const publicKey = crypto.createPublicKey(keyObj).export({ type: 'spki', format: 'pem' });
+    let key_fingerprint; try { key_fingerprint = keyFingerprint(publicKey); } catch { key_fingerprint = undefined; }
+    return { privateKey: pem, publicKey, key_fingerprint };
+  } catch {
+    return null;
+  }
+}
+
+// cosignTreeHead(signedHead, witnessSigner?) -> signedHead with a `witnesses`
+// array (one entry per witness). Each witness signs the SAME note bytes. When no
+// witness is supplied AND none is configured, the head is returned unchanged.
+export function cosignTreeHead(signedHead, witnessSigner = null) {
+  if (!signedHead || typeof signedHead !== 'object' || !signedHead.note) return signedHead;
+  const w = witnessSigner && witnessSigner.privateKey ? witnessSigner : getTransparencyWitness();
+  if (!w || !w.privateKey) return signedHead;
+  const sigB64Url = ed25519Sign(w.privateKey, Buffer.from(signedHead.note, 'utf8'));
+  let key_id = w.key_fingerprint;
+  if (!key_id && w.publicKey) { try { key_id = keyFingerprint(w.publicKey); } catch { key_id = undefined; } }
+  const entry = {
+    role: 'witness',
+    alg: 'ed25519',
+    signature: Buffer.from(sigB64Url, 'base64url').toString('base64'),
+    public_key: w.publicKey,
+    key_id,
+    witnessed_at: new Date().toISOString(),
+  };
+  const witnesses = Array.isArray(signedHead.witnesses) ? signedHead.witnesses.slice() : [];
+  witnesses.push(entry);
+  return { ...signedHead, witnesses };
+}
+
+// verifyCosignedTreeHead(signed, { logKey?, witnessKeys? }) -> verify the log's
+// own checkpoint signature AND every embedded witness signature. `witnessKeys`
+// (optional) pins which witness public keys are trusted; when omitted, each
+// witness signature is verified against its embedded key (proves the witness
+// attested THIS note, leaving the trust decision to the caller). NEVER throws.
+export function verifyCosignedTreeHead(signed, opts = {}) {
+  const out = { ok: false, log: null, witnesses: [] };
+  if (!signed || typeof signed !== 'object') return { ...out, reason: 'no_signed_tree_head' };
+  const log = verifyTreeHeadSignature(signed, opts.logKey || null);
+  out.log = log;
+  if (!log.ok) return { ...out, reason: `log_signature:${log.reason}` };
+  const pinned = Array.isArray(opts.witnessKeys)
+    ? opts.witnessKeys.map((k) => String(k).replace(/\s+/g, ''))
+    : null;
+  let witnessOk = true;
+  for (const w of (Array.isArray(signed.witnesses) ? signed.witnesses : [])) {
+    let res = { ok: false };
+    try {
+      if (pinned && !pinned.includes(String(w.public_key || '').replace(/\s+/g, ''))) {
+        res = { ok: false, reason: 'witness_key_not_pinned', key_id: w.key_id };
+      } else {
+        const sigB64Url = Buffer.from(String(w.signature || ''), 'base64').toString('base64url');
+        const ok = ed25519Verify(w.public_key, Buffer.from(signed.note, 'utf8'), sigB64Url);
+        res = ok ? { ok: true, key_id: w.key_id } : { ok: false, reason: 'witness_signature_invalid', key_id: w.key_id };
+      }
+    } catch (e) { res = { ok: false, reason: 'witness_error:' + (e && e.message), key_id: w && w.key_id }; }
+    if (!res.ok) witnessOk = false;
+    out.witnesses.push(res);
+  }
+  // A pinned-witness policy REQUIRES at least one valid witness signature.
+  if (pinned && pinned.length && !out.witnesses.some((w) => w.ok)) {
+    return { ...out, ok: false, reason: 'no_trusted_witness_signature' };
+  }
+  out.ok = log.ok && witnessOk;
+  if (!out.ok) out.reason = 'witness_verification_failed';
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Persisted signed checkpoints (history). A checkpoint is a signed (and
+// optionally witness-cosigned) Tree Head captured at a point in time. Persisting
+// them lets /v1/transparency-log/checkpoints serve a verifiable HISTORY of tree
+// heads (so a monitor can detect a non-append-only rewrite between two heads).
+// Backed by any store with insert/find (src/store.js shape); collection
+// TLOG_CHECKPOINT_COLLECTION. Keyed by origin + tree_size.
+// ---------------------------------------------------------------------------
+export function persistCheckpoint(store, signedHead, opts = {}) {
+  if (!store || typeof store.insert !== 'function' || typeof store.find !== 'function') return signedHead;
+  if (!signedHead || typeof signedHead !== 'object') return signedHead;
+  const origin = String(signedHead.origin || opts.origin || TLOG_DEFAULT_ORIGIN);
+  const tree_size = Number(signedHead.tree_size) | 0;
+  // Idempotent: do not double-store a checkpoint for the same origin+size+root.
+  const existing = store.find(TLOG_CHECKPOINT_COLLECTION, (r) =>
+    r && r.origin === origin && Number(r.tree_size) === tree_size && r.root_hash === signedHead.root_hash);
+  if (existing && existing.length) return existing[0].checkpoint || signedHead;
+  const row = {
+    id: 'ckpt_' + origin.replace(/[^a-z0-9]+/gi, '_').slice(0, 24) + '_' + tree_size + '_' + Date.now().toString(36),
+    origin,
+    tree_size,
+    root_hash: signedHead.root_hash || null,
+    signed_at: signedHead.signed_at || new Date().toISOString(),
+    checkpoint: signedHead,
+    version: TRANSPARENCY_LOG_VERSION,
+  };
+  store.insert(TLOG_CHECKPOINT_COLLECTION, row);
+  return signedHead;
+}
+
+export function loadCheckpoints(store, { origin = TLOG_DEFAULT_ORIGIN, from = null, to = null } = {}) {
+  if (!store || typeof store.find !== 'function') return [];
+  const rows = store.find(TLOG_CHECKPOINT_COLLECTION, (r) => r && r.origin === origin);
+  const lo = Number.isFinite(Number(from)) && from !== null ? Number(from) : null;
+  const hi = Number.isFinite(Number(to)) && to !== null ? Number(to) : null;
+  return rows
+    .filter((r) => (lo === null || Number(r.tree_size) >= lo) && (hi === null || Number(r.tree_size) <= hi))
+    .sort((a, b) => Number(a.tree_size) - Number(b.tree_size))
+    .map((r) => r.checkpoint);
+}
+
+export function latestPersistedCheckpoint(store, origin = TLOG_DEFAULT_ORIGIN) {
+  const all = loadCheckpoints(store, { origin });
+  return all.length ? all[all.length - 1] : null;
+}
+
 // ---------------------------------------------------------------------------
 // Module-level convenience: a process-wide default log (used by routes when no
 // explicit log is injected). Keyed by `${tenant}:${origin}` so callers reusing
