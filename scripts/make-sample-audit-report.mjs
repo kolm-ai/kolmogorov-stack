@@ -92,7 +92,7 @@ const logs = fs.readFileSync(fixture, 'utf8');
 
 const audit = runAudit(logs, { source: 'litellm' });
 const { envelope, report_id, key_fingerprint } = buildAndSignReport(audit, {
-  subject: 'Helpwise · support & billing agents (demo)',
+  subject: 'Helpwise support and billing agents (demo)',
   report_seed: 'sample',
   generated_at: '2026-06-08T00:00:00.000Z',
   signer,

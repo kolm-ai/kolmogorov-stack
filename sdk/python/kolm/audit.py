@@ -455,7 +455,11 @@ def verify_report(
         from kolm.audit import verify_report
         import json
 
-        report = json.load(open("agent-security-report.json"))
+        # Always read the report as UTF-8: the signed canonical may contain
+        # non-ASCII, and a platform-default encoding (e.g. cp1252 on Windows)
+        # would corrupt those bytes and fail tier-1 verification.
+        with open("agent-security-report.json", encoding="utf-8") as fp:
+            report = json.load(fp)
         result = verify_report(report)
         if result.ok:
             print("trusted kolm evidence:", result.issuer.status, result.key_fingerprint)

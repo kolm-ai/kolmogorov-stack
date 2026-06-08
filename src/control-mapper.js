@@ -57,7 +57,7 @@ const C = {
   llm06: c(FW.OWASP, 'LLM06', 'Sensitive disclosure / shared credential'),
   llm07: c(FW.OWASP, 'LLM07', 'System-prompt leakage'),
   llm08: c(FW.OWASP, 'LLM08', 'Excessive agency'),
-  asi: c(FW.OWASP, 'ASI', 'Agentic Security Initiative · agent threats'),
+  asi: c(FW.OWASP, 'ASI', 'Agentic Security Initiative: agent threats'),
   // MITRE ATLAS
   atlas_inj: c(FW.ATLAS, 'AML.T0051', 'LLM prompt injection'),
   atlas_inj_ind: c(FW.ATLAS, 'AML.T0051.001', 'Indirect prompt injection'),
