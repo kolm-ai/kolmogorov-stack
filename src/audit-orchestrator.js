@@ -20,26 +20,42 @@ import { analyzePermissions } from './permission-analyzer.js';
 import { analyzeAuditTrail } from './audit-trail-analyzer.js';
 import { mapControls } from './control-mapper.js';
 import { runRedTeam } from './red-team.js';
+import { analyzeModelProvenance } from './model-provenance-analyzer.js';
+import { analyzeAgentIdentity } from './agent-identity-analyzer.js';
+import { analyzeRagMemory } from './rag-memory-analyzer.js';
+import { analyzeDelegation } from './delegation-analyzer.js';
 
 // Versioned so a re-attestation is a cheap, comparable delta and so a signed
 // report records exactly which engine shape produced it.
 export const AUDIT_SPEC_VERSION = 'asr-audit/0.1';
 
-// The ASR controls the deterministic trinity actually assesses. ASR-4
-// (injection), ASR-5 (provenance) and ASR-6 (evidence) require modules that do
-// not exist in this leg; the rollup reports them as not-assessed with a reason
-// rather than silently scoring them as clean.
-const ASSESSED_CONTROLS = ['ASR-1', 'ASR-2', 'ASR-3'];
+// The ASR controls the deterministic engine assesses. The posture trinity
+// (ASR-1 least privilege, ASR-2 audit trail, ASR-3 egress) is joined by the
+// Wave-2 analyzers: ASR-5 (model & supply-chain provenance), ASR-7 (memory &
+// retrieval integrity), ASR-8 (multi-agent delegation). ASR-4 (injection) is
+// reported separately in the red_team block; ASR-6 (evidence) is established by
+// the report's own input-evidence digest + signing, not by log analysis.
+//
+// CORE controls always carry their graduated weight in the readiness rollup.
+// SUPPLEMENTAL controls (the Wave-2 additions) are assessed and reported in the
+// controls table, but they fold into the readiness SCORE only when they surface
+// a hard blocker (see the readiness rule below) - they can lower the headline
+// when a real deal-blocker is found, but a partial / clean / untested
+// supplemental result never inflates it. This is the documented non-inflation
+// choice: an untested supplemental is excluded from the denominator, never
+// scored as a clean pass.
+const CORE_CONTROLS = ['ASR-1', 'ASR-2', 'ASR-3'];
+const SUPPLEMENTAL_CONTROLS = ['ASR-5', 'ASR-7', 'ASR-8'];
+const ASSESSED_CONTROLS = [...CORE_CONTROLS, ...SUPPLEMENTAL_CONTROLS];
 const NOT_ASSESSED = {
   // ASR-4 is covered by the deterministic red-team battery (src/red-team.js),
   // reported as its own resistance score in the red_team block rather than
   // folded into the readiness rollup: the battery marks probes the logs never
   // exercised as untested, so scoring it as a pass/fail control would overstate
-  // coverage. The readiness rollup stays a clean graduated number over the three
-  // controls the trinity fully assesses.
+  // coverage. The readiness rollup stays a clean graduated number over the
+  // controls the analyzers fully assess.
   'ASR-4': 'Injection: assessed by the deterministic red-team battery and reported separately in the red_team block (graduated resistance score); not folded into the readiness rollup because untested probes are marked, not scored.',
-  'ASR-5': 'Provenance: requires model/dependency + MCP supply-chain enumeration (not run in this audit).',
-  'ASR-6': 'Evidence: established by signing + logging the report itself, not by log analysis.',
+  'ASR-6': 'Evidence: established by the input-evidence digest binding the report to the exact logs analyzed, plus Ed25519 signing, RFC 3161 trusted timestamping, and transparency-log inclusion of the signed report (the report attests itself; not a property of the log analysis).',
 };
 
 // A control's status from its severity rollup. Critical/high block a deal;
@@ -90,15 +106,34 @@ export function runAudit(logs, opts = {}) {
   const ing = ingestForAudit(logs, { source });
   const events = Array.isArray(ing.events) ? ing.events : [];
 
-  // 2. Two independent analyzers over the same events.
+  // 2. The deterministic analyzers over the SAME events. The posture trinity
+  // (permission + audit-trail) plus the Wave-2 analyzers: model-provenance
+  // (ASR-5), agent-identity (ASR-1), rag-memory (ASR-7), delegation (ASR-8).
+  // Each is wrapped never-throw (belt-and-braces; the analyzers already guard
+  // themselves) and yields an empty-but-valid result on any failure, so one
+  // analyzer can never sink the audit.
   const trailOpts = Number.isFinite(options.retentionDays)
     ? { retentionDays: options.retentionDays }
     : undefined;
+  const analyzerOpts = options.analyzerOpts && typeof options.analyzerOpts === 'object' ? options.analyzerOpts : {};
   const permission = analyzePermissions(events);
   const trail = analyzeAuditTrail(events, trailOpts);
+  const modelProvenance = _safeAnalyze(() => analyzeModelProvenance(events, analyzerOpts.modelProvenance), _emptyModelProvenance);
+  const agentIdentity = _safeAnalyze(() => analyzeAgentIdentity(events, analyzerOpts.agentIdentity), _emptyAgentIdentity);
+  const ragMemory = _safeAnalyze(() => analyzeRagMemory(events, analyzerOpts.ragMemory), _emptyRagMemory);
+  const delegation = _safeAnalyze(() => analyzeDelegation(events, analyzerOpts.delegation), _emptyDelegation);
 
-  // 3. Map every finding onto the ASR controls + the buyer's frameworks.
-  const allFindings = [...permission.findings, ...trail.findings];
+  // 3. Map every finding onto the ASR controls + the buyer's frameworks. The
+  // Wave-2 findings are merged in BEFORE mapControls so they are framework-mapped
+  // exactly like the trinity findings.
+  const allFindings = [
+    ...permission.findings,
+    ...trail.findings,
+    ...modelProvenance.findings,
+    ...agentIdentity.findings,
+    ...ragMemory.findings,
+    ...delegation.findings,
+  ];
   const controls = mapControls(allFindings);
 
   // 3.5 Deterministic red-team / injection battery (ASR-4) over the SAME events.
@@ -113,10 +148,21 @@ export function runAudit(logs, opts = {}) {
   }
 
   // 4. Readiness rollup - explicit about coverage, never inflated.
+  //
+  // A supplemental control whose analyzer reported the dimension UNTESTED (no
+  // model call / no retrieval-or-memory op / no delegation observed) is given an
+  // explicit 'untested' status rather than mislabeled 'pass'. The structured
+  // analyzer summaries are the authoritative untested signal (the *-untested info
+  // finding alone would roll up to a misleading 'pass' under controlStatus).
+  const untestedSupplemental = new Set();
+  if (modelProvenance.summary && modelProvenance.summary.untested === true) untestedSupplemental.add('ASR-5');
+  if (ragMemory.summary && (ragMemory.summary.retrieval_calls || 0) === 0 && (ragMemory.summary.memory_calls || 0) === 0) untestedSupplemental.add('ASR-7');
+  if (delegation.summary && delegation.summary.detected === false) untestedSupplemental.add('ASR-8');
+
   const asrById = new Map((controls.asr || []).map((a) => [a.id, a]));
   const controlRows = ASSESSED_CONTROLS.map((id) => {
     const a = asrById.get(id) || { id, name: id, findings: 0, by_severity: {} };
-    const status = controlStatus(a.by_severity);
+    const status = untestedSupplemental.has(id) ? 'untested' : controlStatus(a.by_severity);
     return {
       id,
       name: a.name,
@@ -126,13 +172,23 @@ export function runAudit(logs, opts = {}) {
     };
   });
 
+  // The graduated readiness denominator. CORE controls always contribute their
+  // weight (pass=1, attention=0.5, blocking=0). SUPPLEMENTAL controls contribute
+  // ONLY when they surface a hard blocker (weight 0) - so a real supply-chain /
+  // memory / delegation deal-blocker can pull the headline down, but a partial
+  // (attention), clean (pass), or untested supplemental result is reported in the
+  // table yet excluded from the score. This is the non-inflation rule: a control
+  // the logs never exercised is never counted as a clean pass, and a hygiene-level
+  // supplemental medium never dilutes the deal-readiness headline.
+  const scored = [];
+  for (const r of controlRows) {
+    if (CORE_CONTROLS.includes(r.id)) scored.push(STATUS_WEIGHT[r.status]);
+    else if (r.status === 'blocking') scored.push(0);
+  }
   const noEvents = events.length === 0;
-  const readinessPct = noEvents
+  const readinessPct = noEvents || scored.length === 0
     ? null
-    : Math.round(
-        (100 * controlRows.reduce((sum, r) => sum + STATUS_WEIGHT[r.status], 0)) /
-          controlRows.length,
-      );
+    : Math.round((100 * scored.reduce((sum, w) => sum + w, 0)) / scored.length);
 
   const bySeverity = tallySeverity(allFindings);
   const blocking = (controls.findings || [])
@@ -168,11 +224,41 @@ export function runAudit(logs, opts = {}) {
     events,
     permission,
     trail,
+    model_provenance: modelProvenance,
+    agent_identity: agentIdentity,
+    rag_memory: ragMemory,
+    delegation,
     controls,
     findings: allFindings,
     red_team: redTeam,
     summary,
   };
+}
+
+// Run one analyzer with a never-throw guard. The analyzers already guarantee
+// they never throw and return an empty-but-valid shape, so this is belt-and-
+// braces: a defect in any one analyzer degrades to its documented empty result
+// instead of sinking the whole audit.
+function _safeAnalyze(fn, emptyFactory) {
+  try {
+    const out = fn();
+    return out && typeof out === 'object' ? out : emptyFactory();
+  } catch (_e) {
+    return emptyFactory();
+  }
+}
+
+function _emptyModelProvenance() {
+  return { findings: [], models: [], mcp_servers: [], providers: [], summary: { analyzer: 'model-provenance', model_events: 0, untested: true, findings: 0, by_severity: emptySeverity() } };
+}
+function _emptyAgentIdentity() {
+  return { findings: [], identities: [], summary: { analyzer: 'agent-identity', identities: 0, findings: 0, by_severity: emptySeverity() } };
+}
+function _emptyRagMemory() {
+  return { findings: [], retrieval_sources: [], memory_ops: [], summary: { analyzer: 'rag-memory', retrieval_calls: 0, memory_calls: 0, findings: 0, by_severity: emptySeverity() } };
+}
+function _emptyDelegation() {
+  return { findings: [], delegations: [], agent_graph: { nodes: [], edges: [] }, summary: { analyzer: 'delegation', detected: false, delegations: 0, findings: 0, by_severity: emptySeverity() } };
 }
 
 export default runAudit;

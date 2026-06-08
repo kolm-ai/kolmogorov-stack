@@ -24,6 +24,7 @@
 // states the limits in plain terms. This report maps findings to the frameworks
 // a reviewer cites; it is not a certification.
 
+import crypto from 'node:crypto';
 import {
   loadOrCreateDefaultSigner,
   buildSignatureBlock,
@@ -31,6 +32,9 @@ import {
 } from './ed25519.js';
 import { ASR_CONTROLS } from './control-mapper.js';
 import { runRedTeam } from './red-team.js';
+import { buildAgentPassport } from './passport-builder.js';
+import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
+import { TransparencyLog, TRANSPARENCY_LOG_VERSION } from './transparency-log.js';
 
 // Versioned so a re-attestation is a comparable delta and a signed report
 // records exactly which builder shape produced it.
@@ -39,6 +43,72 @@ export const AUDIT_REPORT_VERSION = 'asr-report/0.1';
 
 // The single contact surface for the report. dev@kolm.ai is the only address.
 const CONTACT_EMAIL = 'dev@kolm.ai';
+
+// sha256 hex over a UTF-8 string. Used for the input-evidence digest (M2/ASR-6)
+// and the report digest the detached evidence (timestamp + transparency log)
+// binds to.
+function sha256hex(str) {
+  return crypto.createHash('sha256').update(String(str), 'utf8').digest('hex');
+}
+
+// ---------------------------------------------------------------------------
+// Input-evidence digest (M2 / ASR-6). A sha256 over the canonical form of the
+// exact AuditEvents the analyzers ran on, so the SIGNED report binds to the
+// precise evidence it was derived from. The events themselves are deliberately
+// NOT carried in the envelope (they can hold sensitive log bodies); the digest
+// proves which evidence was analyzed without disclosing it. event_count lets a
+// reader cross-check against subject.events. Pure, never throws.
+// ---------------------------------------------------------------------------
+export function computeEvidenceDigest(auditResultOrEvents) {
+  let events = [];
+  if (Array.isArray(auditResultOrEvents)) events = auditResultOrEvents;
+  else if (auditResultOrEvents && typeof auditResultOrEvents === 'object' && Array.isArray(auditResultOrEvents.events)) {
+    events = auditResultOrEvents.events;
+  }
+  let value;
+  try { value = sha256hex(canonicalize(events)); }
+  catch { value = sha256hex('[]'); }
+  return { alg: 'sha256', value, event_count: events.length };
+}
+
+// ---------------------------------------------------------------------------
+// Transparency-log inclusion of the SIGNED report digest (best-effort, M4).
+// A process-wide append-only, Ed25519/Merkle-witnessed log (src/transparency-
+// log.js). recordTransparencyEntry appends the report digest and returns a
+// compact checkpoint { origin, tree_size, root_hash, leaf_hash, seq } the
+// verifier can sanity-check. Best-effort: any failure yields null and the report
+// simply omits log_checkpoint (signing is never blocked).
+// ---------------------------------------------------------------------------
+const _REPORT_TLOG_ORIGIN = 'kolm.ai/audit-reports/v1';
+let _reportTlog = null;
+function _getReportTlog(opts) {
+  if (opts && opts.transparencyLog instanceof TransparencyLog) return opts.transparencyLog;
+  if (!_reportTlog) _reportTlog = new TransparencyLog({ origin: _REPORT_TLOG_ORIGIN });
+  return _reportTlog;
+}
+
+export function recordTransparencyEntry(reportDigest, opts = {}) {
+  try {
+    const digest = String(reportDigest || '').toLowerCase();
+    if (!/^[0-9a-f]{64}$/.test(digest)) return null;
+    const log = _getReportTlog(opts);
+    const row = log.append('audit-report', { alg: 'sha256', report_digest: digest, report_id: opts.report_id || null });
+    const head = log.treeHead();
+    return {
+      version: TRANSPARENCY_LOG_VERSION,
+      origin: head.origin,
+      tree_size: head.tree_size,
+      root_hash: head.root_hash,
+      root_b64: head.root_b64,
+      leaf_hash: row.leaf_hash,
+      seq: row.seq,
+      entry_hash: row.entry_hash,
+      report_digest: digest,
+    };
+  } catch (_e) {
+    return null;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Canonicalization - the exact bytes the Ed25519 signature covers.
@@ -70,7 +140,17 @@ export function canonicalizeReport(envelope) {
   if (!envelope || typeof envelope !== 'object') {
     throw new Error('canonicalizeReport: envelope must be an object');
   }
-  const { signature_ed25519, ...rest } = envelope;
+  // Excluded from the signed bytes:
+  //   - signature_ed25519: a signature cannot cover itself.
+  //   - timestamp_evidence + log_checkpoint: DETACHED evidence added AFTER
+  //     signing. Each references the signed report digest (sha256 of this exact
+  //     canonical payload), so it is bound to the report without being covered by
+  //     the signature - which is correct, since a third-party TSA / append-only
+  //     witness issues them after the report already exists. Excluding them keeps
+  //     the signature stable when they are attached. (Reports built before these
+  //     fields existed simply have nothing to exclude - a no-op.)
+  const { signature_ed25519, timestamp_evidence, log_checkpoint, ...rest } = envelope;
+  void signature_ed25519; void timestamp_evidence; void log_checkpoint;
   return canonicalize(rest);
 }
 
@@ -154,7 +234,7 @@ function buildCaveats(summary) {
   return [
     `This report assesses ${assessed || 'the deterministic controls'} from the supplied logs. The controls listed under "Not assessed" were not evaluated in this run. Each carries its reason.`,
     'Findings reflect only the activity present in the supplied export. The absence of a finding is not proof that the underlying risk is absent.',
-    'The readiness percentage is a graduated rollup over the assessed controls only (pass = 1, attention = 0.5, blocking = 0). It is not a certification or an attestation of compliance.',
+    'The readiness percentage is a graduated rollup over the assessed posture controls (ASR-1/2/3: pass = 1, attention = 0.5, blocking = 0). The supplemental controls (ASR-5 provenance, ASR-7 memory and retrieval, ASR-8 delegation) are assessed and listed, but fold into the percentage only when they surface a hard blocker; a partial, clean, or untested supplemental result is reported without inflating the score. It is not a certification or an attestation of compliance.',
     'Framework references map each finding to the control an enterprise reviewer cites; they do not assert certification against that framework.',
   ];
 }
@@ -293,6 +373,24 @@ export function buildReportEnvelope(auditResult, opts = {}) {
   };
   if (s.note) envelope.summary.note = s.note;
 
+  // Input-evidence digest (M2 / ASR-6). Binds the SIGNED report to the exact
+  // AuditEvents the analyzers ran on (sha256 over their canonical form), without
+  // carrying the potentially-sensitive event bodies. Added before signing, so it
+  // is signature-covered and tamper-evident.
+  envelope.evidence_digest = computeEvidenceDigest(auditResult);
+
+  // Agent identity passport (the wedge). A compact, signature-covered projection
+  // of WHO acted, on WHICH models + MCP/vendor surface, through WHAT delegation
+  // graph, over WHICH retrieval sources - assembled from the Wave-2 analyzer
+  // outputs the orchestrator produced over the same events. Pure / never-throws.
+  envelope.passport = buildAgentPassport({
+    agent_identity: auditResult.agent_identity,
+    model_provenance: auditResult.model_provenance,
+    delegation: auditResult.delegation,
+    rag_memory: auditResult.rag_memory,
+    audit_summary: s,
+  });
+
   // ASR-4 red-team resistance. A NEW top-level field: the canonicalizer is a
   // generic key-sort, so adding it is signature-safe and does not change how any
   // existing field is canonicalized. Gated by opts.includeRedTeam (default on)
@@ -340,6 +438,75 @@ export function buildAndSignReport(auditResult, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Detached evidence (added AFTER signing). The signature covers evidence_digest
+// + passport (they are part of the report). The two fields here are DETACHED:
+// they reference the signed report digest (sha256 of the canonical signed
+// payload) rather than being covered by the signature - because they are issued
+// by third parties / append-only witnesses AFTER the report exists:
+//
+//   - timestamp_evidence: an RFC 3161 trusted timestamp over the signed report
+//     digest (src/rfc3161-timestamp.js). Proves the report existed no later than
+//     the TSA's genTime, independent of kolm's clock. status:'offline' on any
+//     failure - timestamping is additive evidence, never blocks the report.
+//   - log_checkpoint: inclusion of the signed report digest in the append-only
+//     Ed25519/Merkle transparency log (src/transparency-log.js). Best-effort.
+//
+// Both reference the signed digest, so they cannot be re-pointed at a different
+// report without mismatching it. Never throws.
+// ---------------------------------------------------------------------------
+export async function attachDetachedEvidence(envelope, opts = {}) {
+  if (!envelope || typeof envelope !== 'object') return envelope;
+  const options = opts && typeof opts === 'object' ? opts : {};
+  let reportDigest;
+  try { reportDigest = sha256hex(canonicalizeReport(envelope)); }
+  catch { reportDigest = null; }
+  if (!reportDigest) return envelope;
+
+  // RFC 3161 trusted timestamp over the signed report digest.
+  if (options.timestamp !== false) {
+    try {
+      let te;
+      if (options.selfIssueTimestamp === true) {
+        // Fully-offline real RFC 3161 token (source:'self') - used by tests and
+        // as an opt-in fallback; no network call.
+        te = selfIssueTimestamp(reportDigest, { signer: options.timestampSigner });
+      } else {
+        te = await timestampDigest(reportDigest, {
+          tsaUrl: options.tsaUrl,
+          timeoutMs: options.tsaTimeoutMs,
+          fallbackSelfIssue: options.fallbackSelfIssue === true,
+        });
+      }
+      if (te && typeof te === 'object') envelope.timestamp_evidence = te;
+    } catch (_e) {
+      envelope.timestamp_evidence = {
+        alg: 'sha256', message_imprint: reportDigest, timestamp: null,
+        token_b64: null, tsa_url: null, status: 'offline', reason: 'timestamp_error',
+      };
+    }
+  }
+
+  // Transparency-log inclusion of the signed report digest (best-effort).
+  if (options.transparency !== false) {
+    try {
+      const cp = recordTransparencyEntry(reportDigest, { ...options, report_id: envelope.report_id });
+      if (cp) envelope.log_checkpoint = cp;
+    } catch (_e) { /* best-effort: omit log_checkpoint */ }
+  }
+  return envelope;
+}
+
+// Build + sign + attach detached evidence in one async call. Returns the same
+// shape as buildAndSignReport plus the envelope carrying timestamp_evidence +
+// log_checkpoint. The sync buildAndSignReport stays available for callers (the
+// HTTP route) that must not block on a network TSA call at request time.
+export async function buildAndSignReportWithEvidence(auditResult, opts = {}) {
+  const built = buildAndSignReport(auditResult, opts);
+  await attachDetachedEvidence(built.envelope, opts);
+  return built;
+}
+
+// ---------------------------------------------------------------------------
 // Re-sign an existing signed envelope at a different tier (the paid upgrade).
 //
 // The free Scan stores a watermarked tier:'scan' envelope. When the buyer pays
@@ -365,7 +532,7 @@ export function resignAsTier(envelope, tier, signer) {
 // Verify a signed report envelope. Pure, offline, never throws.
 // Returns { ok, reason?, key_fingerprint?, checks: [...] }.
 // ---------------------------------------------------------------------------
-export function verifyReport(envelope) {
+export function verifyReport(envelope, opts = {}) {
   const checks = [];
   let report = envelope;
   if (typeof report === 'string') {
@@ -407,6 +574,23 @@ export function verifyReport(envelope) {
   }
   checks.push({ name: 'signed_at matches signed generated_at', ok: true, detail: String(report.generated_at || '(none)') });
 
+  // Additive: input-evidence digest (M2 / ASR-6). It is signature-covered, so any
+  // tampering already failed the Ed25519 check above. Here we surface it, and when
+  // the caller supplies the original events we recompute and confirm the binding
+  // (proving the signed report is bound to the exact evidence analyzed).
+  const ed = report.evidence_digest;
+  if (ed && typeof ed === 'object') {
+    const wellFormed = ed.alg === 'sha256' && typeof ed.value === 'string' && /^[0-9a-f]{64}$/i.test(ed.value);
+    if (opts && Array.isArray(opts.events)) {
+      const recomputed = computeEvidenceDigest(opts.events).value;
+      const match = recomputed === String(ed.value);
+      checks.push({ name: 'evidence_digest matches supplied events', ok: match, detail: match ? String(ed.value) : `report=${String(ed.value).slice(0, 12)} recomputed=${recomputed.slice(0, 12)}` });
+      if (!match) return { ok: false, reason: 'evidence_digest does not match the supplied input events', key_fingerprint: v.key_fingerprint, checks };
+    } else {
+      checks.push({ name: 'evidence_digest present (signature-covered)', ok: wellFormed, detail: wellFormed ? `${ed.value} over ${ed.event_count} event(s)` : 'malformed evidence_digest (informational)' });
+    }
+  }
+
   return { ok: true, key_fingerprint: v.key_fingerprint, checks };
 }
 
@@ -420,8 +604,8 @@ function esc(s) {
     .replace(/"/g, '&quot;');
 }
 
-const STATUS_LABEL = { pass: 'PASS', attention: 'ATTENTION', blocking: 'BLOCKING' };
-const STATUS_COLOR = { pass: '#166534', attention: '#0e7490', blocking: '#991b1b' };
+const STATUS_LABEL = { pass: 'PASS', attention: 'ATTENTION', blocking: 'BLOCKING', untested: 'UNTESTED' };
+const STATUS_COLOR = { pass: '#166534', attention: '#0e7490', blocking: '#991b1b', untested: '#5b6472' };
 
 // renderReportHtml(envelope) -> string. Self-contained HTML document.
 export function renderReportHtml(envelope) {
@@ -484,6 +668,36 @@ export function renderReportHtml(envelope) {
   <table><thead><tr><th>Probe</th><th>Severity</th><th>Observed resistance</th><th>Mapped to</th></tr></thead>
   <tbody>${rtRows}</tbody></table>` : '';
 
+  // Agent identity passport (signature-covered). Rendered as a compact set of
+  // tables; absent on legacy reports built before this field existed.
+  const pp = e.passport && typeof e.passport === 'object' ? e.passport : null;
+  const ppAgents = pp ? (pp.agents || []).map((a) => `
+    <tr><td>${esc(a.agent || '(unnamed)')}</td><td class="mono small">${esc(a.key_id || ' - ')}</td><td>${esc((a.scopes || []).length)}</td><td>${a.attested ? 'Yes' : 'No'}</td></tr>`).join('') : '';
+  const ppModels = pp ? (pp.models || []).map((m) => `
+    <tr><td class="mono">${esc(m.slug)}</td><td>${m.pinned ? 'pinned' : 'floating'}</td><td>${esc(m.provider || 'unknown')}</td></tr>`).join('') : '';
+  const ppEdges = pp ? (pp.delegation_graph && Array.isArray(pp.delegation_graph.edges) ? pp.delegation_graph.edges : []).map((g) => `
+    <li><span class="mono">${esc(g.from || '?')} -&gt; ${esc(g.to || '?')}</span> (${esc(g.classification || 'n/a')}${g.via ? ', via ' + esc(g.via) : ''})</li>`).join('') : '';
+  const ppSources = pp ? (pp.retrieval_sources || []).map((srcRow) => `
+    <li><span class="mono">${esc(srcRow.source)}</span> - ${esc(srcRow.classification)}</li>`).join('') : '';
+  const ppMcp = pp ? (pp.mcp_surface || []).map((srv) => `<span class="mono">${esc(srv.name)}${srv.pinned ? ' (pinned)' : ''}</span>`).join(' · ') : '';
+  const passportSection = pp ? `
+  <h2>Agent identity passport</h2>
+  <p class="sub small">A signature-covered map of who acted, on which models and vendor surface, through what delegation graph, over which retrieval sources. Identity: ${esc(pp.identity_status || 'n/a')} &middot; Provenance: ${esc(pp.provenance_status || 'n/a')}.</p>
+  ${(pp.agents || []).length ? `<h3 class="small">Agents</h3><table><thead><tr><th>Agent</th><th>Credential</th><th>Scopes</th><th>Attested</th></tr></thead><tbody>${ppAgents}</tbody></table>` : ''}
+  ${(pp.models || []).length ? `<h3 class="small">Models</h3><table><thead><tr><th>Model</th><th>Pin</th><th>Provider</th></tr></thead><tbody>${ppModels}</tbody></table>` : ''}
+  ${ppMcp ? `<p class="small"><strong>MCP / vendor surface:</strong> ${ppMcp}</p>` : ''}
+  ${ppEdges ? `<h3 class="small">Delegation graph</h3><ul class="small">${ppEdges}</ul>` : ''}
+  ${ppSources ? `<h3 class="small">Retrieval sources</h3><ul class="small">${ppSources}</ul>` : ''}
+  <p class="small" style="color:var(--muted)">Standards mapped (descriptive cross-reference, not a certification): ${esc((pp.standards || []).join(' · '))}</p>` : '';
+
+  // Detached + bound evidence lines for the signature box.
+  const ed = e.evidence_digest && typeof e.evidence_digest === 'object' ? e.evidence_digest : null;
+  const te = e.timestamp_evidence && typeof e.timestamp_evidence === 'object' ? e.timestamp_evidence : null;
+  const cp = e.log_checkpoint && typeof e.log_checkpoint === 'object' ? e.log_checkpoint : null;
+  const edLine = ed ? `<div><span class="k">input-evidence digest:</span> <span class="mono">${esc(ed.alg)}:${esc(ed.value)}</span> <span class="small">(${esc(ed.event_count)} event(s), signature-covered)</span></div>` : '';
+  const teLine = te ? `<div><span class="k">trusted timestamp:</span> <span class="mono">${te.status === 'timestamped' ? esc(te.timestamp || '') + ' via ' + esc(te.tsa_url || te.source || '') : 'offline (additive evidence absent)'}</span></div>` : '';
+  const cpLine = cp ? `<div><span class="k">transparency log:</span> <span class="mono">seq ${esc(cp.seq)} of ${esc(cp.tree_size)}, root ${esc(String(cp.root_hash || '').slice(0, 16))}</span></div>` : '';
+
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -544,6 +758,7 @@ export function renderReportHtml(envelope) {
   <h2>Findings</h2>
   ${findingRows || '<p class="sub">No deal-blocking or attention findings in the assessed controls.</p>'}
   ${rtSection}
+  ${passportSection}
 
   <h2>Remediation roadmap</h2>
   ${remediation ? `<table><thead><tr><th>Priority</th><th>Finding</th><th>Action</th><th>Frameworks</th></tr></thead><tbody>${remediation}</tbody></table>` : '<p class="sub">No remediation items.</p>'}
@@ -556,6 +771,9 @@ export function renderReportHtml(envelope) {
     <div><span class="k">algorithm:</span> <span class="mono">${esc(sig.alg || ' - ')} (${esc(sig.spec || ' - ')})</span></div>
     <div><span class="k">key fingerprint:</span> <span class="mono">${esc(sig.key_fingerprint || ' - ')}</span></div>
     <div><span class="k">signed at:</span> <span class="mono">${esc(sig.signed_at || ' - ')}</span></div>
+    ${edLine}
+    ${teLine}
+    ${cpLine}
     <div style="margin-top:8px"><span class="k">Verify offline:</span> paste this report's JSON at <span class="mono">${esc(e.verify_url || '')}</span> - it checks the Ed25519 signature in your browser with no upload.</div>
   </div>
 
@@ -731,6 +949,37 @@ export async function renderReportPdf(envelope, outputStream) {
       rule();
     }
 
+    // --- Agent identity passport ---
+    const pp = e.passport && typeof e.passport === 'object' ? e.passport : null;
+    if (pp) {
+      heading('Agent identity passport');
+      doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted).text(
+        `Who acted, on which models and vendor surface, through what delegation graph, over which retrieval sources. Identity: ${pp.identity_status || 'n/a'}; provenance: ${pp.provenance_status || 'n/a'}.`,
+        { width: contentWidth },
+      );
+      doc.moveDown(0.3);
+      for (const a of (pp.agents || [])) {
+        if (doc.y > 700) doc.addPage();
+        doc.font('Helvetica-Bold').fontSize(9).fillColor(PDF_COLOR.ink).text(`${a.agent || '(unnamed)'}${a.key_id ? ' [' + a.key_id + ']' : ''}`, { continued: true });
+        doc.font('Helvetica').fillColor(a.attested ? PDF_COLOR.ok : PDF_COLOR.warn).text(`  ${a.attested ? 'attested' : 'partial'} (${(a.scopes || []).length} scope(s))`);
+      }
+      for (const m of (pp.models || [])) {
+        if (doc.y > 710) doc.addPage();
+        doc.font('Courier').fontSize(8).fillColor(PDF_COLOR.muted).text(`model ${m.slug} - ${m.pinned ? 'pinned' : 'floating'} (${m.provider || 'unknown'})`, { width: contentWidth });
+      }
+      for (const g of ((pp.delegation_graph && pp.delegation_graph.edges) || [])) {
+        if (doc.y > 710) doc.addPage();
+        doc.font('Courier').fontSize(8).fillColor(PDF_COLOR.muted).text(`delegation ${g.from || '?'} -> ${g.to || '?'} (${g.classification || 'n/a'})`, { width: contentWidth });
+      }
+      for (const srcRow of (pp.retrieval_sources || [])) {
+        if (doc.y > 710) doc.addPage();
+        doc.font('Courier').fontSize(8).fillColor(PDF_COLOR.muted).text(`retrieval ${srcRow.source} - ${srcRow.classification}`, { width: contentWidth });
+      }
+      doc.font('Helvetica').fontSize(8).fillColor(PDF_COLOR.muted).text(`Standards (descriptive cross-reference, not a certification): ${(pp.standards || []).join(', ')}`, { width: contentWidth });
+      doc.moveDown(0.2);
+      rule();
+    }
+
     // --- Remediation ---
     heading('Remediation roadmap');
     const rem = e.remediation || [];
@@ -764,6 +1013,12 @@ export async function renderReportPdf(envelope, outputStream) {
       .text(`algorithm: ${sig.alg || ' - '} (${sig.spec || ' - '})`)
       .text(`key fingerprint: ${sig.key_fingerprint || ' - '}`)
       .text(`signed at: ${sig.signed_at || ' - '}`);
+    const ed = e.evidence_digest && typeof e.evidence_digest === 'object' ? e.evidence_digest : null;
+    if (ed) doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.ink).text(`input-evidence digest: ${ed.alg}:${ed.value} (${ed.event_count} event(s), signature-covered)`, { width: contentWidth });
+    const te = e.timestamp_evidence && typeof e.timestamp_evidence === 'object' ? e.timestamp_evidence : null;
+    if (te) doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.ink).text(`trusted timestamp: ${te.status === 'timestamped' ? (te.timestamp || '') + ' via ' + (te.tsa_url || te.source || '') : 'offline (additive evidence absent)'}`, { width: contentWidth });
+    const cp = e.log_checkpoint && typeof e.log_checkpoint === 'object' ? e.log_checkpoint : null;
+    if (cp) doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.ink).text(`transparency log: seq ${cp.seq} of ${cp.tree_size}, root ${String(cp.root_hash || '').slice(0, 16)}`, { width: contentWidth });
     doc.moveDown(0.3);
     doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted)
       .text(`Verify offline by pasting this report's JSON at ${e.verify_url || ''} - the Ed25519 signature is checked in the browser with no upload. Questions: ${e.contact || CONTACT_EMAIL}.`, { width: contentWidth });

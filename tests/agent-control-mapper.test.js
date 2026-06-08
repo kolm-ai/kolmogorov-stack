@@ -13,9 +13,9 @@ function ctrlIds(controls, framework) {
   return controls.filter((c) => c.framework === framework).map((c) => c.id);
 }
 
-test('ASR_CONTROLS publishes exactly the six site controls', () => {
-  assert.equal(ASR_CONTROLS.length, 6);
-  assert.deepEqual(ASR_CONTROLS.map((a) => a.id), ['ASR-1', 'ASR-2', 'ASR-3', 'ASR-4', 'ASR-5', 'ASR-6']);
+test('ASR_CONTROLS publishes the full eight-control checklist', () => {
+  assert.equal(ASR_CONTROLS.length, 8);
+  assert.deepEqual(ASR_CONTROLS.map((a) => a.id), ['ASR-1', 'ASR-2', 'ASR-3', 'ASR-4', 'ASR-5', 'ASR-6', 'ASR-7', 'ASR-8']);
 });
 
 test('mapFinding maps a wildcard-grant to ASR-1 and buyer frameworks', () => {
@@ -64,7 +64,7 @@ test('mapControls rolls up findings per framework and per ASR control', () => {
   ];
   const out = mapControls(findings);
   assert.equal(out.findings.length, 4, 'all findings mapped');
-  assert.equal(out.asr.length, 6, 'all six ASR controls reported');
+  assert.equal(out.asr.length, 8, 'all eight ASR controls reported');
 
   const eu = out.frameworks.find((f) => f.framework === 'EU AI Act');
   assert.ok(eu, 'EU AI Act framework present in rollup');
@@ -81,6 +81,6 @@ test('mapControls never throws on bad input', () => {
   for (const bad of [undefined, null, 'x', 42, [null, 5]]) {
     const out = mapControls(bad);
     assert.ok(Array.isArray(out.findings));
-    assert.equal(out.asr.length, 6, 'ASR list always complete');
+    assert.equal(out.asr.length, 8, 'ASR list always complete');
   }
 });

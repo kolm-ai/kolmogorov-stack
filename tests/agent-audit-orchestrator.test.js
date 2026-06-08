@@ -104,9 +104,12 @@ test('runAudit on a stalled-deal agent surfaces every pillar, mapped to framewor
   assert.equal(byId['ASR-2'].status, 'blocking');
   assert.equal(byId['ASR-3'].status, 'blocking');
 
-  // What was NOT assessed is stated, never silently scored.
+  // What was NOT assessed is stated, never silently scored. ASR-4 (injection)
+  // is reported in the separate red_team block; ASR-6 (evidence) is established
+  // by the report's own signing + input-evidence digest. ASR-5/7/8 are now
+  // assessed by the Wave-2 analyzers.
   const naIds = r.summary.not_assessed.map((n) => n.id);
-  assert.deepEqual(naIds, ['ASR-4', 'ASR-5', 'ASR-6']);
+  assert.deepEqual(naIds, ['ASR-4', 'ASR-6']);
 
   // The deal-blockers a buyer cares about, each carrying an ASR + frameworks.
   const blockingIds = r.summary.blocking.map((b) => b.id);
@@ -129,10 +132,16 @@ test('runAudit on a stalled-deal agent surfaces every pillar, mapped to framewor
 
 test('runAudit on a clean agent reports full readiness and no blockers', () => {
   const r = runAudit(CLEAN_LOG, { source: 'litellm' });
-  assert.equal(r.summary.readiness_pct, 100, 'all assessed controls pass');
+  assert.equal(r.summary.readiness_pct, 100, 'core controls all pass -> full readiness');
   assert.equal(r.summary.blocking.length, 0, 'no deal-blockers');
   assert.equal(r.summary.tamper_evident, true, 'intact hash chain');
-  for (const c of r.summary.controls) assert.equal(c.status, 'pass', `${c.id} passes`);
+  const byId = Object.fromEntries(r.summary.controls.map((c) => [c.id, c]));
+  // The posture trinity (core) passes cleanly on a least-privilege, hash-chained
+  // agent. Supplemental controls are reported but, on a clean agent, are never a
+  // hard blocker (a clean agent on a floating model slug correctly surfaces an
+  // ASR-5 provenance attention; an untested supplemental is marked, not failed).
+  for (const id of ['ASR-1', 'ASR-2', 'ASR-3']) assert.equal(byId[id].status, 'pass', `${id} passes`);
+  for (const id of ['ASR-5', 'ASR-7', 'ASR-8']) assert.ok(byId[id].status !== 'blocking', `${id} non-blocking on a clean agent`);
 });
 
 test('runAudit on empty input reports null readiness with a note, not a fake score', () => {

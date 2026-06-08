@@ -38,6 +38,8 @@ export const ASR_CONTROLS = Object.freeze([
   { id: 'ASR-4', name: 'Injection', requires: 'Direct/indirect injection and jailbreaks tested and reported with reproductions.' },
   { id: 'ASR-5', name: 'Provenance', requires: 'Model and dependency provenance; MCP/vendor surface enumerated.' },
   { id: 'ASR-6', name: 'Evidence', requires: 'Findings signed, logged, and offline-verifiable.' },
+  { id: 'ASR-7', name: 'Memory and retrieval integrity', requires: 'Retrieval sources enumerated and trusted; memory writes carry an integrity link and a recorded author.' },
+  { id: 'ASR-8', name: 'Multi-agent delegation', requires: "Each handoff is attributable and attenuates the sub-agent to a subset of the delegating agent's authority." },
 ]);
 
 function c(framework, id, label) {
@@ -50,6 +52,7 @@ const C = {
   llm01: c(FW.OWASP, 'LLM01', 'Prompt injection'),
   llm02: c(FW.OWASP, 'LLM02', 'Sensitive information disclosure'),
   llm03: c(FW.OWASP, 'LLM03', 'Supply chain - MCP / vendor surface'),
+  llm04: c(FW.OWASP, 'LLM04', 'Data & model poisoning (retrieval / memory integrity)'),
   llm05: c(FW.OWASP, 'LLM05', 'Supply chain - model & dependency provenance'),
   llm06: c(FW.OWASP, 'LLM06', 'Sensitive disclosure / shared credential'),
   llm07: c(FW.OWASP, 'LLM07', 'System-prompt leakage'),
@@ -62,6 +65,7 @@ const C = {
   atlas_leak: c(FW.ATLAS, 'AML.T0057', 'Sensitive-data leakage'),
   atlas_accounts: c(FW.ATLAS, 'AML.T0012', 'Valid accounts / credential reuse'),
   atlas_supply: c(FW.ATLAS, 'AML.T0010', 'ML supply-chain compromise'),
+  atlas_rag: c(FW.ATLAS, 'AML.T0070', 'RAG poisoning'),
   // NIST AI RMF (tokens mirror the site)
   nist_govern3: c(FW.NIST, 'GOVERN-3', 'Roles, responsibilities & accountability'),
   nist_map2: c(FW.NIST, 'MAP-2', 'Tool-call authorization & system boundaries'),
@@ -106,6 +110,45 @@ const CONTROL_MAP = {
   'retention-unverifiable': { asr: 'ASR-2', controls: [C.eu_art12, C.nist_manage4] },
   'short-retention-window': { asr: 'ASR-2', controls: [C.eu_art12, C.nist_manage4] },
   'audit-trail-complete': { asr: 'ASR-2', controls: [C.eu_art12, C.soc2_cc7, C.nist_manage4] },
+
+  // --- model-provenance analyzer (ASR-5, supply-chain) ---
+  // model -> ASR-5: OWASP LLM05/LLM03 supply chain, MITRE ATLAS AML.T0010,
+  // NIST MAP-4 (third-party provenance), ISO A.6 lifecycle / A.10 third-party.
+  'unpinned-model-version': { asr: 'ASR-5', controls: [C.llm05, C.llm03, C.atlas_supply, C.nist_map4, C.iso_a6, C.iso_a10] },
+  'opaque-model-routing': { asr: 'ASR-5', controls: [C.llm05, C.llm03, C.atlas_supply, C.nist_map4, C.iso_a10] },
+  'unpinned-mcp-server': { asr: 'ASR-5', controls: [C.llm03, C.atlas_supply, C.nist_map4, C.iso_a10] },
+  'model-egress-third-party': { asr: 'ASR-5', controls: [C.llm02, C.llm05, C.nist_measure2, C.eu_art10, C.soc2_cc6, C.iso_a10] },
+  // The untested / clean sentinels route to ASR-5 but carry no framework
+  // controls (an untested or clean dimension implicates no specific control);
+  // model-provenance-clean falls through to the supply-chain PILLAR_MAP below.
+  'model-provenance-untested': { asr: 'ASR-5', controls: [] },
+
+  // --- agent-identity analyzer (ASR-1, identity / least privilege) ---
+  // identity attribution -> ASR-1: NIST GOVERN-3 (roles & accountability),
+  // MITRE ATLAS AML.T0012 (credential reuse), OWASP ASI, SOC 2 CC6, ISO A.9.
+  'unattributed-agent-action': { asr: 'ASR-1', controls: [C.nist_govern3, C.atlas_accounts, C.asi, C.eu_art12, C.soc2_cc6, C.iso_a9] },
+  'ambiguous-agent-identity': { asr: 'ASR-1', controls: [C.nist_govern3, C.atlas_accounts, C.asi, C.soc2_cc6, C.iso_a9] },
+  'unverifiable-agent-scope': { asr: 'ASR-1', controls: [C.asi, C.nist_manage1, C.soc2_cc6, C.iso_a9] },
+  'agent-identity-attested': { asr: 'ASR-1', controls: [C.asi, C.soc2_cc6] },
+
+  // --- rag-memory analyzer (ASR-7, memory & retrieval integrity) ---
+  // retrieval -> ASR-7: OWASP LLM01 (indirect injection) + LLM04 (poisoning),
+  // MITRE ATLAS AML.T0051.001 (indirect injection) + AML.T0070 (RAG poisoning),
+  // NIST MEASURE-2 (data-flow measurement), EU Art.10 / ISO A.7 (data governance).
+  'untrusted-retrieval-source': { asr: 'ASR-7', controls: [C.llm01, C.atlas_inj_ind, C.atlas_rag, C.nist_measure2, C.eu_art10, C.iso_a7] },
+  'unverified-memory-write': { asr: 'ASR-7', controls: [C.llm04, C.atlas_rag, C.nist_manage4, C.soc2_cc7, C.iso_a7] },
+  'retrieval-sources-enumerated': { asr: 'ASR-7', controls: [C.nist_measure2, C.iso_a7] },
+  'rag-memory-untested': { asr: 'ASR-7', controls: [] },
+
+  // --- delegation analyzer (ASR-8, multi-agent delegation) ---
+  // delegation -> ASR-8: OWASP LLM08 (excessive agency) + ASI, MITRE ATLAS
+  // AML.T0012 (credential reuse), NIST MAP-2 (tool-call authorization) /
+  // MANAGE-1 (least-privilege treatment), SOC 2 CC6/CC7, ISO A.9.
+  'delegation-privilege-escalation': { asr: 'ASR-8', controls: [C.llm08, C.asi, C.atlas_accounts, C.nist_map2, C.nist_manage1, C.soc2_cc6, C.iso_a9] },
+  'unattenuated-delegation': { asr: 'ASR-8', controls: [C.llm08, C.asi, C.nist_manage1, C.soc2_cc6, C.iso_a9] },
+  'opaque-delegation-hop': { asr: 'ASR-8', controls: [C.asi, C.nist_govern3, C.nist_manage4, C.soc2_cc7, C.iso_a9] },
+  'delegation-attenuated': { asr: 'ASR-8', controls: [C.asi, C.nist_manage1] },
+  'delegation-untested': { asr: 'ASR-8', controls: [] },
 };
 
 // pillar → fallback mapping when a finding id is not in CONTROL_MAP.
@@ -116,6 +159,10 @@ const PILLAR_MAP = {
   'audit-trail': { asr: 'ASR-2', controls: [C.eu_art12, C.soc2_cc7, C.nist_manage4] },
   'supply-chain': { asr: 'ASR-5', controls: [C.llm05, C.llm03, C.atlas_supply, C.nist_map4, C.iso_a10] },
   injection: { asr: 'ASR-4', controls: [C.llm01, C.atlas_inj] },
+  // Wave-2 analyzers: identity -> ASR-1, retrieval/memory -> ASR-7, delegation -> ASR-8.
+  'agent-identity': { asr: 'ASR-1', controls: [C.asi, C.nist_govern3, C.nist_manage1, C.soc2_cc6] },
+  'rag-memory': { asr: 'ASR-7', controls: [C.llm04, C.atlas_rag, C.nist_measure2, C.iso_a7] },
+  delegation: { asr: 'ASR-8', controls: [C.llm08, C.asi, C.nist_map2, C.nist_manage1] },
 };
 
 function asrFor(id) {

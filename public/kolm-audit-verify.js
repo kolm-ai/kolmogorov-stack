@@ -61,7 +61,15 @@ export function canonicalizeReport(envelope) {
   // assignment hits the Object.prototype __proto__ setter and silently drops the
   // key, whereas the Node spread copies it as an own data property. Using the
   // same construct on both sides keeps the signed bytes in lock-step.
-  const { signature_ed25519, ...rest } = envelope;
+  //
+  // Excluded (MUST match src/attestation-report-builder.js exactly):
+  //   - signature_ed25519: a signature cannot cover itself.
+  //   - timestamp_evidence + log_checkpoint: DETACHED evidence added after
+  //     signing (each references the signed report digest), so they are bound to
+  //     the report but not covered by its signature. Excluding them keeps the
+  //     canonical bytes identical whether or not they are attached.
+  const { signature_ed25519, timestamp_evidence, log_checkpoint, ...rest } = envelope;
+  void signature_ed25519; void timestamp_evidence; void log_checkpoint;
   return canonicalize(rest);
 }
 
@@ -321,7 +329,30 @@ export async function verifyAuditReport(report, opts = {}) {
   if (report.log_checkpoint && typeof report.log_checkpoint === 'object') {
     const lc = report.log_checkpoint;
     const ok = typeof lc.root_hash === 'string' && /^[0-9a-f]{64}$/i.test(lc.root_hash) && Number.isFinite(Number(lc.tree_size));
-    checks.push({ name: 'transparency-log checkpoint present', ok, detail: ok ? `tree_size=${lc.tree_size} root=${String(lc.root_hash).slice(0, 12)}…` : 'log_checkpoint present but malformed (informational; verdict unaffected)' });
+    checks.push({ name: 'transparency-log checkpoint present', ok, detail: ok ? `tree_size=${lc.tree_size} root=${String(lc.root_hash).slice(0, 12)}` : 'log_checkpoint present but malformed (informational; verdict unaffected)' });
+  }
+  // Input-evidence digest (M2 / ASR-6). It is signature-covered, so any tampering
+  // already failed the Ed25519 check above. The events themselves are not carried
+  // in the report (they can hold sensitive bodies), so the browser confirms the
+  // digest is well-formed and that its event_count matches the report's stated
+  // subject.events - a real cross-check over the signed content. Informational.
+  if (report.evidence_digest && typeof report.evidence_digest === 'object') {
+    const edv = report.evidence_digest;
+    const wf = edv.alg === 'sha256' && typeof edv.value === 'string' && /^[0-9a-f]{64}$/i.test(edv.value);
+    let ok = wf;
+    let detail = wf ? `${String(edv.value).slice(0, 16)} over ${edv.event_count} event(s)` : 'malformed evidence_digest';
+    const subjEvents = report.subject && typeof report.subject === 'object' ? report.subject.events : null;
+    if (wf && subjEvents != null && Number.isFinite(Number(edv.event_count)) && Number(edv.event_count) !== Number(subjEvents)) {
+      ok = false;
+      detail = `event_count ${edv.event_count} != subject.events ${subjEvents}`;
+    }
+    checks.push({ name: 'input-evidence digest present (signature-covered)', ok, detail });
+  }
+  // Agent identity passport - surfaced (it is signature-covered, not re-derived).
+  if (report.passport && typeof report.passport === 'object') {
+    const pp = report.passport;
+    const ok = pp.spec_version === 'asr-passport/0.1' || (Array.isArray(pp.agents) && Array.isArray(pp.models));
+    checks.push({ name: 'agent identity passport present', ok, detail: ok ? `${(pp.agents || []).length} agent(s), ${(pp.models || []).length} model(s); identity ${pp.identity_status || '?'}, provenance ${pp.provenance_status || '?'}` : 'passport present but malformed (informational; verdict unaffected)' });
   }
 
   return { ok: true, key_fingerprint: fp, checks };

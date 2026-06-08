@@ -169,9 +169,9 @@ test('envelope carries every section a reviewer needs', () => {
   assert.ok(Array.isArray(envelope.findings) && envelope.findings.length >= 1);
   assert.ok(Array.isArray(envelope.remediation) && envelope.remediation.length >= 1);
   assert.ok(Array.isArray(envelope.caveats) && envelope.caveats.length >= 1);
-  assert.equal(envelope.asr_checklist.length, 6, 'all six ASR controls listed');
+  assert.equal(envelope.asr_checklist.length, 8, 'the full eight-control checklist is listed');
   // The summary must be explicit about what was and was NOT assessed (no theater).
-  assert.deepEqual(envelope.summary.assessed_controls, ['ASR-1', 'ASR-2', 'ASR-3']);
+  assert.deepEqual(envelope.summary.assessed_controls, ['ASR-1', 'ASR-2', 'ASR-3', 'ASR-5', 'ASR-7', 'ASR-8']);
   assert.ok(envelope.summary.not_assessed.length >= 1, 'not_assessed controls are disclosed');
   for (const n of envelope.summary.not_assessed) assert.ok(n.id && n.reason, 'each not-assessed item has a reason');
 });
@@ -201,15 +201,17 @@ test('remediation is ordered worst-first and carries framework refs', () => {
 // clean-input behaviour + never-throw on bad input.
 // ---------------------------------------------------------------------------
 test('a clean permission posture passes ASR-1 and beats the dirty fixture', () => {
-  // A single benign chat turn — no over-permissioned tools, no shared key alias.
-  // (An imported log still flags ASR-2: a plain export carries no tamper-evident
-  // hash chain — that flag is correct, so this asserts the permission pillar +
-  // the readiness lift, not a fully-clean report.)
+  // A clean, least-privilege agent: one declared tool used exactly as granted, an
+  // attributable credential, and a version-pinned model (so identity + provenance
+  // are clean too). (An imported log still flags ASR-2: a plain export carries no
+  // tamper-evident hash chain — that flag is correct, so this asserts the
+  // permission pillar + the readiness lift, not a fully-clean report.)
   const clean = JSON.stringify({
-    request_id: 'ok1', timestamp: '2026-05-01T00:00:00Z', model: 'openai/gpt-4o',
-    user: 'agent-one',
+    request_id: 'ok1', timestamp: '2026-05-01T00:00:00Z', model: 'openai/gpt-4o-2024-08-06',
+    user: 'agent-one', metadata: { key_alias: 'k-one' },
+    tools: [{ type: 'function', function: { name: 'get_return_policy' } }],
     messages: [{ role: 'user', content: 'What is your return window?' },
-               { role: 'assistant', content: 'Thirty days.' }],
+               { role: 'assistant', tool_calls: [{ id: 't1', type: 'function', function: { name: 'get_return_policy', arguments: '{}' } }] }],
   });
   const audit = runAudit(clean, { source: 'litellm' });
   const dirty = dirtyAudit();
