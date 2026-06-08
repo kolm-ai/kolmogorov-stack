@@ -12352,6 +12352,11 @@ export function buildRouter() {
           if (asrKind === 'asr_report') {
             const auditId = (s.metadata && s.metadata.audit_id) || (asrRef && asrRef.audit_id) || null;
             const fr = fulfillReportPurchase({ audit_id: auditId, stripe_session_id: s.id });
+            // Write not confirmed (e.g. ephemeral-store failure): throw so the
+            // whole txn (incl. the stripe_events idempotency row) rolls back and
+            // Stripe re-delivers the event rather than losing the purchase.
+            if (fr && fr.retryable) throw new Error(`asr_report fulfillment unconfirmed for ${auditId}; requesting Stripe redelivery`);
+            if (!fr || !fr.ok) console.error('[webhook] asr_report fulfillment failed:', fr && fr.reason, 'audit:', auditId);
             return {
               kind: 'ok',
               body: { received: true, asr: 'report', audit_id: auditId, fulfilled: !!(fr && fr.ok), id: event.id },
@@ -12361,12 +12366,18 @@ export function buildRouter() {
           if (asrKind === 'asr_continuous') {
             const product = (s.metadata && s.metadata.product_key) || (asrRef && asrRef.product) || null;
             const asrTenant = (s.metadata && s.metadata.tenant_id) || (asrRef && asrRef.tenant_id) || null;
+            if (!asrTenant || !product) {
+              // Cannot bind the subscription to a tenant: do not silently swallow.
+              console.error('[webhook] asr_continuous missing tenant/product; cannot activate. metadata:', JSON.stringify(s.metadata || {}), 'ref:', s.client_reference_id);
+              return { kind: 'ok', body: { received: true, asr: 'continuous', warning: 'missing_tenant_or_product', activated: false, id: event.id } };
+            }
             const ac = activateSubscription({
               product, tenant_id: asrTenant,
               stripe_subscription_id: s.subscription || null,
               stripe_customer_id: s.customer || null,
               stripe_session_id: s.id,
             });
+            if (!ac || !ac.ok) console.error('[webhook] asr_continuous activation failed:', ac && ac.reason, 'tenant:', asrTenant);
             return { kind: 'ok', body: { received: true, asr: 'continuous', product, tenant: asrTenant, activated: !!(ac && ac.ok), id: event.id } };
           }
 

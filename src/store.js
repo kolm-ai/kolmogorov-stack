@@ -37,11 +37,22 @@ function probeWritable(dir) {
 }
 
 let DATA_DIR = PREFERRED_DATA_DIR;
+let STORE_EPHEMERAL = false;
 if (!probeWritable(DATA_DIR)) {
   const fallback = path.join(os.tmpdir(), 'kolm-data');
+  // A paid product must NEVER silently run on ephemeral /tmp (audit + billing
+  // state would vanish on the next restart with no error). In a production-like
+  // environment, fail boot LOUDLY instead of degrading invisibly, unless the
+  // operator explicitly opts in with KOLM_ALLOW_EPHEMERAL=1.
+  const productionLike = process.env.NODE_ENV === 'production'
+    || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+  if (productionLike && process.env.KOLM_ALLOW_EPHEMERAL !== '1') {
+    throw new Error(`[store] FATAL: KOLM_DATA_DIR ${DATA_DIR} is not writable in a production environment. Refusing to fall back to ephemeral /tmp because paid + audit state would be silently lost on restart. Fix the volume mount/permissions, or set KOLM_ALLOW_EPHEMERAL=1 to explicitly accept ephemeral storage.`);
+  }
   if (probeWritable(fallback)) {
     console.error(`[store] WARNING: KOLM_DATA_DIR ${DATA_DIR} is not writable (EACCES or similar). Falling back to ${fallback}. State written here will NOT survive container restarts - fix volume permissions to recover persistence.`);
     DATA_DIR = fallback;
+    STORE_EPHEMERAL = true;
   } else {
     console.error(`[store] FATAL: neither ${DATA_DIR} nor ${fallback} is writable. Persistent state operations will throw at write time.`);
   }
@@ -287,6 +298,18 @@ function getSqliteDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_kolm_store_rows_table_row_id
       ON kolm_store_rows(table_name, row_id);
+    -- Expression indexes on the hot findByField() lookups (tenant fences, slug
+    -- resolution, Stripe webhook + Continuous tick). findByField() filters on
+    -- json_extract(json, '$.<field>') = ?, which these indexes serve directly,
+    -- so webhook/tick/trust stay fast as agent_audits + asr_subscriptions grow.
+    CREATE INDEX IF NOT EXISTS idx_kolm_store_rows_tenant
+      ON kolm_store_rows(table_name, json_extract(json, '$.tenant_id'));
+    CREATE INDEX IF NOT EXISTS idx_kolm_store_rows_rowid_field
+      ON kolm_store_rows(table_name, json_extract(json, '$.id'));
+    CREATE INDEX IF NOT EXISTS idx_kolm_store_rows_public_slug
+      ON kolm_store_rows(table_name, json_extract(json, '$.public_slug'));
+    CREATE INDEX IF NOT EXISTS idx_kolm_store_rows_stripe_sub
+      ON kolm_store_rows(table_name, json_extract(json, '$.stripe_subscription_id'));
     CREATE TABLE IF NOT EXISTS kolm_store_meta (
       table_name TEXT PRIMARY KEY,
       imported_at TEXT NOT NULL
@@ -557,6 +580,13 @@ export function withTransaction(fn) {
 
 export function storeDriver() {
   return STORE_DRIVER;
+}
+
+// True when the store fell back to ephemeral /tmp (non-production only; in
+// production this condition throws at boot). Surfaced in /health so an operator
+// sees the degraded state.
+export function storeEphemeral() {
+  return STORE_EPHEMERAL;
 }
 
 // =============================================================================

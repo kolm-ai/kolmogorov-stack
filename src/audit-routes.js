@@ -241,6 +241,14 @@ function _trustUrlFor(slug) {
   return slug ? `${_publicBase()}/v1/trust/${slug}` : null;
 }
 
+// Rendered when a Continuous Trust link is valid but its first re-attestation
+// has not run yet (subscribed before any scan). Auto-refreshes.
+function _trustPendingHtml() {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="30"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Report generating - kolm.ai</title>
+<style>body{font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0b0e14;background:#f6f7f4;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center}.card{max-width:520px;text-align:center;padding:40px 28px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#b3431f;animation:p 1.2s infinite}@keyframes p{0%,100%{opacity:.3}50%{opacity:1}}h1{font-size:22px;margin:18px 0 8px}p{color:#5b6472}</style></head>
+<body><div class="card"><span class="dot"></span><h1>Your first signed report is generating</h1><p>This Continuous Trust link is live. The first re-attestation runs shortly and this page will refresh automatically. Questions: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p></div></body></html>`;
+}
+
 // Constant-time string compare for the cron secret (length-guarded).
 function _safeEq(a, b) {
   const ab = Buffer.from(String(a == null ? '' : a));
@@ -685,8 +693,9 @@ export function register(r, deps = {}) {
   r.post('/v1/audit/continuous/tick', (req, res) => {
     const secret = process.env.KOLM_CRON_SECRET;
     if (!secret) return _err(res, 503, 'cron_not_configured', 'set KOLM_CRON_SECRET to enable scheduled re-attestation');
-    const provided = (req.headers && (req.headers['x-kolm-cron-secret'] || req.headers['x-cron-secret']))
-      || (req.query && req.query.secret) || '';
+    // Header-only: never accept the secret via query string (it would leak into
+    // access logs / referrers). Matches the W258-SEC-1 no-secret-in-query policy.
+    const provided = (req.headers && (req.headers['x-kolm-cron-secret'] || req.headers['x-cron-secret'])) || '';
     if (!_safeEq(provided, secret)) {
       return res.status(403).json({ ok: false, error: 'forbidden', detail: 'missing or invalid x-kolm-cron-secret' });
     }
@@ -724,6 +733,15 @@ export function register(r, deps = {}) {
     const slug = req.params && req.params.slug;
     const hit = resolveTrust(slug);
     if (!hit) return _err(res, 404, 'not_found', 'no published report at this link');
+    // A Continuous subscription that has not produced its first report yet:
+    // render a "generating" page instead of a 404 (the link is valid).
+    if (hit.pending) {
+      const fmt = (req.query && String(req.query.format || 'html')).toLowerCase();
+      if (fmt === 'json') { res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); return res.json({ ok: true, status: 'pending', detail: 'first report is being generated' }); }
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store');
+      return res.send(_trustPendingHtml());
+    }
     const envelope = hit.envelope;
     const format = (req.query && String(req.query.format || 'html')).toLowerCase();
     const fname = hit.report_id || 'agent-security-report';
@@ -755,10 +773,17 @@ export function register(r, deps = {}) {
     let html;
     try { html = renderReportHtml(envelope); }
     catch (e) { return _err(res, 500, 'html_render_error', e && e.message); }
+    // Self-evidencing freshness for Continuous: lapsed > stale > current.
+    const bstyle = (bg) => `background:${bg};color:#fff;padding:11px 16px;border-radius:8px;margin:0 0 22px;font:600 13px/1.45 -apple-system,Segoe UI,Helvetica,Arial,sans-serif`;
+    let banner = '';
     if (hit.lapsed) {
-      const banner = '<div style="background:#92400e;color:#fff;padding:11px 16px;border-radius:8px;margin:0 0 22px;font:600 13px/1.45 -apple-system,Segoe UI,Helvetica,Arial,sans-serif">Subscription lapsed - this is the last signed report from an inactive Continuous plan. It remains verifiable, but is no longer refreshed on new deploys.</div>';
-      html = html.replace(/(<body[^>]*>)/, `$1${banner}`);
+      banner = `<div style="${bstyle('#92400e')}">Subscription lapsed - this is the last signed report from an inactive Continuous plan. It remains verifiable, but is no longer refreshed on new deploys.</div>`;
+    } else if (hit.kind === 'continuous' && hit.stale) {
+      banner = `<div style="${bstyle('#9a6700')}">This Continuous report has not refreshed in over 8 days${hit.age_hours != null ? ` (last re-attested ${hit.age_hours}h ago)` : ''}. Contact the vendor if their agents have shipped since.</div>`;
+    } else if (hit.kind === 'continuous' && hit.age_hours != null) {
+      banner = `<div style="${bstyle('#0f5132')}">Continuous - last re-attested ${hit.age_hours}h ago. This link refreshes automatically.</div>`;
     }
+    if (banner) html = html.replace(/(<body[^>]*>)/, `$1${banner}`);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
     return res.send(html);

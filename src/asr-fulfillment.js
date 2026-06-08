@@ -62,21 +62,48 @@ export function fulfillReportPurchase({ audit_id, stripe_session_id, signer } = 
       return { ok: true, already: true, row };
     }
     let upgraded = row.report;
+    let pendingResign = false;
     if (row.report) {
+      // Sign immediately with the supplied signer (the webhook loads it). If the
+      // signer is momentarily unavailable, mark paid + flag report_pending_resign
+      // so the scheduler sweep re-signs within one tick (no permanent watermark).
       try { upgraded = resignAsTier(row.report, 'report', signer); }
-      catch { upgraded = row.report; /* no signer: mark paid; report stays watermarked until a signer exists */ }
+      catch { upgraded = row.report; pendingResign = true; }
     }
     const slug = row.public_slug || mintSlug();
     const ts = nowIso();
     update(AUDITS, (r) => r.id === audit_id, {
       paid: true, paid_at: ts, tier: 'report', public: true, public_slug: slug,
-      report: upgraded,
+      report: upgraded, report_pending_resign: pendingResign,
       stripe_session_id: stripe_session_id || row.stripe_session_id || null,
       updated_at: ts,
     });
-    const fresh = findOne(AUDITS, (r) => r.id === audit_id) || { ...row, paid: true, public_slug: slug, report: upgraded };
-    return { ok: true, row: fresh };
+    // Post-write read-back: confirm the write actually landed (catches a silent
+    // ephemeral-store failure). If not, signal retryable so the caller can have
+    // Stripe re-deliver rather than silently lose the purchase.
+    const fresh = findOne(AUDITS, (r) => r.id === audit_id);
+    if (!fresh || fresh.paid !== true || !fresh.public_slug) {
+      return { ok: false, reason: 'write_unconfirmed', retryable: true };
+    }
+    return { ok: true, row: fresh, pending_resign: pendingResign };
   });
+}
+
+// Re-sign any paid reports that were marked paid while the signer was momentarily
+// unavailable (report_pending_resign). Called from the scheduler sweep so a $750
+// buyer's report self-heals to unwatermarked within one tick. Idempotent.
+export function resignPendingReports({ signer, limit = 50 } = {}) {
+  const pending = find(AUDITS, (r) => r && r.report_pending_resign === true && r.paid === true && r.report)
+    .slice(0, Math.max(1, limit));
+  let fixed = 0;
+  for (const row of pending) {
+    try {
+      const upgraded = resignAsTier(row.report, 'report', signer);
+      update(AUDITS, (r) => r.id === row.id, { report: upgraded, report_pending_resign: false, updated_at: nowIso() });
+      fixed++;
+    } catch { /* still no signer; retry next tick */ }
+  }
+  return { ok: true, pending: pending.length, fixed };
 }
 
 // ---------------------------------------------------------------------------
@@ -87,8 +114,12 @@ export function fulfillReportPurchase({ audit_id, stripe_session_id, signer } = 
 export function activateSubscription({ product, tenant_id, stripe_subscription_id, stripe_customer_id, stripe_session_id } = {}) {
   if (!product || !tenant_id) return { ok: false, reason: 'missing_fields' };
   return withTransaction(() => {
+    // Tenant-fenced lookup: a subscription is only ever matched within the
+    // owning tenant. The stripe_subscription_id cross-check (s.tenant_id ===
+    // tenant_id) guarantees a reused/forged id can never mutate another tenant's
+    // subscription row.
     let sub = stripe_subscription_id
-      ? findOne(SUBSCRIPTIONS, (s) => s.stripe_subscription_id === stripe_subscription_id)
+      ? findOne(SUBSCRIPTIONS, (s) => s.stripe_subscription_id === stripe_subscription_id && s.tenant_id === tenant_id)
       : null;
     if (!sub) sub = findOne(SUBSCRIPTIONS, (s) => s.tenant_id === tenant_id && s.product_key === product);
     const ts = nowIso();
@@ -222,6 +253,12 @@ export function resolveTrust(slug) {
   if (sub) {
     const latest = sub.latest_audit_id ? findOne(AUDITS, (r) => r.id === sub.latest_audit_id) : null;
     if (latest && latest.report) {
+      // Staleness: the "always-current" promise is self-evidencing. last_run_at
+      // is set on re-attestation; for the seed report it may be null, so fall
+      // back to the report's generated_at.
+      const lastIso = sub.last_run_at || (latest.report && latest.report.generated_at) || sub.created_at || null;
+      const ageMs = lastIso ? (Date.now() - new Date(lastIso).getTime()) : null;
+      const ageHours = (ageMs != null && ageMs >= 0) ? Math.floor(ageMs / 3600000) : null;
       return {
         envelope: latest.report,
         lapsed: sub.status !== 'active',
@@ -229,14 +266,21 @@ export function resolveTrust(slug) {
         subject: latest.subject,
         kind: 'continuous',
         status: sub.status,
+        last_run_at: lastIso,
+        age_hours: ageHours,
+        stale: ageHours != null && ageHours > 24 * 8, // >8 days without a refresh
       };
     }
+    // Subscription exists but has not produced its first report yet (subscribed
+    // before running a scan). Return a PENDING state so the Trust route renders
+    // a "your first report is generating" page instead of a 404.
+    return { pending: true, kind: 'continuous', status: sub.status, subject: null };
   }
   return null;
 }
 
 export default {
   SUBSCRIPTIONS, mintSlug,
-  fulfillReportPurchase, activateSubscription, setSubscriptionStatus,
+  fulfillReportPurchase, resignPendingReports, activateSubscription, setSubscriptionStatus,
   runDueReattestations, forceReattest, resolveTrust,
 };

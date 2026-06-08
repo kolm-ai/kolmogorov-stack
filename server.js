@@ -14,7 +14,7 @@ import { initSentry } from './src/sentry-init.js';
 import { synthesize } from './src/synthesis.js';
 import { createConcept, publishVersion } from './src/registry.js';
 import { all } from './src/store.js';
-import { runDueReattestations } from './src/asr-fulfillment.js';
+import { runDueReattestations, resignPendingReports } from './src/asr-fulfillment.js';
 
 // W922 — normalize provider-key env-var names at startup. Operators keep keys in
 // Vercel/Railway under varied casings (runpod_api_key, cerebras_api,
@@ -364,6 +364,10 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
         const r = runDueReattestations({});
         if (r && r.ran) console.log(`[reattest] ran ${r.ran}/${r.considered} due subscriptions`);
       } catch (e) { console.error('[reattest] sweep error:', e && e.message); }
+      try {
+        const p = resignPendingReports({});
+        if (p && p.fixed) console.log(`[reattest] re-signed ${p.fixed}/${p.pending} pending reports`);
+      } catch (e) { console.error('[reattest] resign-pending error:', e && e.message); }
     };
     const everyMs = everyMin * 60 * 1000;
     const t = setInterval(sweep, everyMs);
