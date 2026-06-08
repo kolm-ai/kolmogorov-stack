@@ -95,7 +95,9 @@ const REVIEWED: Tier[] = [
       "Model and MCP supply-chain enumeration",
       "Bounded by an SLA, days not weeks",
     ],
-    cta: { label: "Talk to us", href: "/contact", variant: "primary" },
+    // Self-serve: a new user signs up, then completes the $15,000 purchase via
+    // POST /v1/audit/package/checkout. The next= param carries the chosen package.
+    cta: { label: "Buy Full Readiness", href: "/signup?next=full", variant: "primary" },
   },
   {
     name: "Continuous-Plus",
@@ -108,7 +110,7 @@ const REVIEWED: Tier[] = [
       "Priority review queue",
       "Named technical contact",
     ],
-    cta: { label: "Talk to us", href: "/contact", variant: "ghost" },
+    cta: { label: "Start Continuous-Plus", href: "/signup?next=plus", variant: "ghost" },
   },
   {
     name: "Reviewed Attestation",

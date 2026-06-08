@@ -3,6 +3,10 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { BrandMark } from "@/components/icons";
 
+/**
+ * Full footer sitemap. Together with the header nav this links every route the
+ * site will have, grouped Product / Solutions / Trust / Company / Legal.
+ */
 const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] =
   [
     {
@@ -10,30 +14,37 @@ const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] =
       links: [
         { href: "/how-it-works", label: "How it works" },
         { href: "/platform", label: "Platform" },
-        { href: "/checks", label: "Checks" },
-        { href: "/sample", label: "Sample report" },
-        { href: "/docs", label: "Docs" },
+        { href: "/checks", label: "What we test" },
+        { href: "/verify", label: "Verify" },
+        { href: "/report-viewer", label: "Report viewer" },
+        { href: "/report", label: "Sample report" },
         { href: "/pricing", label: "Pricing" },
+        { href: "/docs", label: "Docs" },
+      ],
+    },
+    {
+      heading: "Solutions",
+      links: [
+        { href: "/solutions/ai-vendors", label: "AI vendors" },
+        { href: "/solutions/enterprise-buyers", label: "Enterprise buyers" },
+        { href: "/solutions/finance", label: "Finance" },
+        { href: "/solutions/healthcare", label: "Healthcare" },
+        {
+          href: "/solutions/critical-infrastructure",
+          label: "Critical infrastructure",
+        },
+        { href: "/enterprise", label: "For enterprise" },
+        { href: "/customers", label: "Customers" },
       ],
     },
     {
       heading: "Trust",
       links: [
-        { href: "/verify", label: "Verify" },
-        { href: "/security", label: "Security" },
         { href: "/trust", label: "Trust center" },
-        { href: "/status", label: "Status" },
+        { href: "/security", label: "Security" },
+        { href: "/security/threat-model", label: "Threat model" },
         { href: "/transparency-log", label: "Transparency log" },
-      ],
-    },
-    {
-      heading: "Legal",
-      links: [
-        { href: "/privacy", label: "Privacy" },
-        { href: "/terms", label: "Terms" },
-        { href: "/dpa", label: "DPA" },
-        { href: "/baa", label: "BAA" },
-        { href: "/subprocessors", label: "Subprocessors" },
+        { href: "/status", label: "Status" },
       ],
     },
     {
@@ -43,6 +54,19 @@ const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] =
         { href: "/changelog", label: "Changelog" },
         { href: "/careers", label: "Careers" },
         { href: "/contact", label: "Contact" },
+        { href: "/signup", label: "Start free" },
+      ],
+    },
+    {
+      heading: "Legal",
+      links: [
+        { href: "/privacy", label: "Privacy" },
+        { href: "/terms", label: "Terms" },
+        { href: "/dpa", label: "DPA" },
+        { href: "/baa", label: "BAA" },
+        { href: "/sla", label: "SLA" },
+        { href: "/acceptable-use", label: "Acceptable use" },
+        { href: "/subprocessors", label: "Subprocessors" },
       ],
     },
   ];
@@ -56,8 +80,8 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-line py-[64px]">
       <div className="mx-auto max-w-wrap px-6">
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-5">
-          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+        <div className="flex flex-col gap-12 lg:flex-row lg:justify-between lg:gap-16">
+          <div className="lg:max-w-[28ch]">
             <Link
               href="/"
               aria-label="kolm.ai home"
@@ -68,30 +92,36 @@ export function SiteFooter() {
                 kolm<b className="font-extrabold">.ai</b>
               </span>
             </Link>
-            <p className="max-w-[34ch] text-[13px] text-ink-3">
+            <p className="text-[13.5px] leading-relaxed text-ink-3">
               Signed security evidence for AI agents entering the enterprise.
             </p>
           </div>
-          {COLUMNS.map((col) => (
-            <div key={col.heading} className="flex flex-col gap-2">
-              <h4 className="font-sans text-[13px] font-semibold text-ink">
-                {col.heading}
-              </h4>
-              {col.links.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="text-[13.5px] text-ink-2 transition-colors hover:text-ink"
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </div>
-          ))}
+
+          <nav
+            aria-label="Footer"
+            className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-5"
+          >
+            {COLUMNS.map((col) => (
+              <div key={col.heading} className="flex flex-col gap-2.5">
+                <h4 className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-ink-3">
+                  {col.heading}
+                </h4>
+                {col.links.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    className="text-[13.5px] text-ink-2 transition-colors hover:text-ink"
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </nav>
         </div>
 
         <div
-          className="mt-8 select-none overflow-hidden whitespace-nowrap font-mono text-[8px] uppercase leading-none tracking-[0.30em] text-ink-faint"
+          className="mt-12 select-none overflow-hidden whitespace-nowrap font-mono text-[8px] uppercase leading-none tracking-[0.30em] text-ink-faint"
           aria-hidden="true"
         >
           {MICROPRINT}

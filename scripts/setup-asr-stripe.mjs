@@ -59,6 +59,12 @@ const PRODUCTS = [
   { env: 'STRIPE_PAYMENT_LINK_ASR_CONTINUOUS_GROWTH', tag: 'growth', lookup_key: 'kolm_asr_continuous_growth',
     name: 'kolm Continuous Growth', description: 'Re-attestation on every deploy plus injection regression, always-current Trust link (up to ~15 agents).',
     unit_amount: 99900, recurring: 'month', redirect: `${PUBLIC_BASE}/dashboard?asr=growth` },
+  { env: 'STRIPE_PAYMENT_LINK_ASR_FULL_READINESS', tag: 'full', lookup_key: 'kolm_asr_full_readiness', kolm_product: 'asr_package',
+    name: 'kolm Full Readiness', description: 'One-time Agent Security-Review across your whole agent fleet: the full evidence package, a scored red-team battery, and procurement exports for every framework.',
+    unit_amount: 1500000, recurring: null, redirect: `${PUBLIC_BASE}/dashboard?asr=full` },
+  { env: 'STRIPE_PAYMENT_LINK_ASR_CONTINUOUS_PLUS', tag: 'plus', lookup_key: 'kolm_asr_continuous_plus', kolm_product: 'asr_continuous',
+    name: 'kolm Continuous-Plus', description: 'Enterprise continuous re-attestation across the full control set, re-signed on every deploy with a red-team regression each release, no agent cap.',
+    unit_amount: 350000, recurring: 'month', redirect: `${PUBLIC_BASE}/dashboard?asr=plus` },
 ];
 
 async function ensurePrice(spec) {
@@ -67,15 +73,19 @@ async function ensurePrice(spec) {
     if (found.data[0].unit_amount !== spec.unit_amount) console.error(`WARN ${spec.lookup_key}: existing price ${found.data[0].id} is ${found.data[0].unit_amount}, expected ${spec.unit_amount}. Reusing.`);
     return found.data[0].id;
   }
+  // kolm_product defaults from the cadence (one-time -> asr_report, recurring ->
+  // asr_continuous) but a spec can override it: Full Readiness is a one-time
+  // charge that fulfills as a PACKAGE (asr_package), not a per-audit report.
+  const kolmProduct = spec.kolm_product || (spec.recurring ? 'asr_continuous' : 'asr_report');
   const product = await stripe('POST', '/v1/products', {
     name: spec.name, description: spec.description,
-    'metadata[kolm_product]': spec.recurring ? 'asr_continuous' : 'asr_report',
+    'metadata[kolm_product]': kolmProduct,
     'metadata[product_key]': spec.tag,
   });
   const priceParams = {
     product: product.id, unit_amount: String(spec.unit_amount), currency: 'usd',
     lookup_key: spec.lookup_key, transfer_lookup_key: 'true',
-    'metadata[kolm_product]': spec.recurring ? 'asr_continuous' : 'asr_report', 'metadata[product_key]': spec.tag,
+    'metadata[kolm_product]': kolmProduct, 'metadata[product_key]': spec.tag,
   };
   if (spec.recurring) priceParams['recurring[interval]'] = spec.recurring;
   const price = await stripe('POST', '/v1/prices', priceParams);

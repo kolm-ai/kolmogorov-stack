@@ -35,7 +35,7 @@ import { cidFromManifestHashes, verifyCidAgainstManifestHashes, canonicalJson as
 import * as recall from './recall.js';
 import { verifyStripeSignature, planFromAmount, appendCheckoutParams } from './stripe.js';
 import { parseAsrRef } from './asr-billing.js';
-import { fulfillReportPurchase, activateSubscription, setSubscriptionStatus } from './asr-fulfillment.js';
+import { fulfillReportPurchase, fulfillPackagePurchase, activateSubscription, setSubscriptionStatus } from './asr-fulfillment.js';
 import {
   pickAnthropicUpstream,
   pickOpenAIUpstream,
@@ -12518,7 +12518,28 @@ export function buildRouter() {
           // tenants.plan. Returns before the gateway plan logic below.
           const asrRef = parseAsrRef(s.client_reference_id);
           const asrKind = (s.metadata && s.metadata.kolm_product)
-            || (asrRef ? (asrRef.kind === 'one_time' ? 'asr_report' : 'asr_continuous') : null);
+            || (asrRef ? (asrRef.kind === 'one_time' ? 'asr_report' : asrRef.kind === 'package' ? 'asr_package' : 'asr_continuous') : null);
+          if (asrKind === 'asr_package') {
+            // $15k Full Readiness (or any tenant-bound package). Bind on
+            // metadata (Checkout-API path) or the asrpkg_ ref (Payment-Link
+            // path). Grant a durable entitlement; never touch tenants.plan.
+            const product = (s.metadata && s.metadata.product_key) || (asrRef && asrRef.product) || 'full';
+            const pkgTenant = (s.metadata && s.metadata.tenant_id) || (asrRef && asrRef.tenant_id) || null;
+            if (!pkgTenant) {
+              console.error('[webhook] asr_package missing tenant; cannot fulfill. metadata:', JSON.stringify(s.metadata || {}), 'ref:', s.client_reference_id);
+              return { kind: 'ok', body: { received: true, asr: 'package', warning: 'missing_tenant', fulfilled: false, id: event.id } };
+            }
+            const fp = fulfillPackagePurchase({ tenant_id: pkgTenant, product, stripe_session_id: s.id });
+            // Unconfirmed write: throw so the whole txn (incl. the idempotency
+            // row) rolls back and Stripe re-delivers rather than losing the sale.
+            if (fp && fp.retryable) throw new Error(`asr_package fulfillment unconfirmed for ${pkgTenant}; requesting Stripe redelivery`);
+            if (!fp || !fp.ok) console.error('[webhook] asr_package fulfillment failed:', fp && fp.reason, 'tenant:', pkgTenant);
+            return {
+              kind: 'ok',
+              body: { received: true, asr: 'package', product, tenant: pkgTenant, fulfilled: !!(fp && fp.ok), id: event.id },
+              sideEffect: (fp && fp.ok && !fp.already) ? { kind: 'asr_package_ready', row: fp.pkg } : null,
+            };
+          }
           if (asrKind === 'asr_report') {
             const auditId = (s.metadata && s.metadata.audit_id) || (asrRef && asrRef.audit_id) || null;
             const fr = fulfillReportPurchase({ audit_id: auditId, stripe_session_id: s.id });
@@ -12678,6 +12699,37 @@ export function buildRouter() {
           subject_name: row.subject,
         });
         sendEmail({ to: t.email, subject: tpl.subject, html: tpl.html, text: tpl.text, tag: 'asr_report_ready' }).catch(() => {});
+      }
+    }
+    // ASR enterprise PACKAGE (Full Readiness) purchased - confirm to the buyer
+    // and hand off to the review engagement. Best-effort; never rolls back the
+    // (already-committed) entitlement.
+    if (outcome && outcome.sideEffect && outcome.sideEffect.kind === 'asr_package_ready' && outcome.sideEffect.row) {
+      const pkg = outcome.sideEffect.row;
+      const t = findOne('tenants', x => x.id === pkg.tenant_id);
+      if (t && t.email && emailConfigured()) {
+        const base = (process.env.PUBLIC_BASE || process.env.KOLM_VERIFY_URL_BASE || 'https://kolm.ai').replace(/\/+$/, '');
+        const label = pkg.product === 'full' ? 'Full Readiness' : String(pkg.product || 'package');
+        const dashUrl = `${base}/dashboard`;
+        const subject = `Your kolm ${label} package is active`;
+        const text = [
+          `Your kolm ${label} package is active.`,
+          ``,
+          `Package: ${label}`,
+          `Tenant:  ${pkg.tenant_id}`,
+          ``,
+          `Our review team will reach out to scope the engagement. You can track`,
+          `progress and pull every signed report from your dashboard:`,
+          `  ${dashUrl}`,
+          ``,
+          `Questions: dev@kolm.ai`,
+          ``,
+          ` - kolm`,
+        ].join('\n');
+        const html = `<p>Your kolm <strong>${label}</strong> package is active.</p>`
+          + `<p>Our review team will reach out to scope the engagement. You can track progress and pull every signed report from your <a href="${dashUrl}">dashboard</a>.</p>`
+          + `<p style="color:#555;font-size:12px">Questions: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></p>`;
+        sendEmail({ to: t.email, subject, html, text, tag: 'asr_package_ready' }).catch(() => {});
       }
     }
     return res.json(outcome.body);

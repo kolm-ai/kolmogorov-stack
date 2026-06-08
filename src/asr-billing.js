@@ -49,7 +49,30 @@ export const ASR_PRODUCTS = Object.freeze({
     price_env: 'KOLM_STRIPE_PRICE_ASR_CONTINUOUS_GROWTH', link_env: 'STRIPE_PAYMENT_LINK_ASR_CONTINUOUS_GROWTH',
     kolm_product: 'asr_continuous',
   },
+  // Full Readiness is a one-time CHARGE (mode:'payment') but a tenant-bound
+  // PACKAGE entitlement, not an upgrade of one specific audit. The Stripe
+  // checkout mode keys off `kind` ('one_time' -> mode:'payment'); the FULFILLMENT
+  // routing keys off kolm_product:'asr_package' (-> an 'asrpkg_<tenant>' ref and
+  // fulfillPackagePurchase), so it never touches the per-audit report path.
+  full: {
+    kind: 'one_time', amount_cents: 1500000, label: 'Full Readiness',
+    price_env: 'KOLM_STRIPE_PRICE_ASR_FULL_READINESS', link_env: 'STRIPE_PAYMENT_LINK_ASR_FULL_READINESS',
+    kolm_product: 'asr_package',
+  },
+  // Continuous-Plus reuses the EXISTING subscription path end-to-end: it encodes
+  // an 'asrsub_plus_<tenant>' ref, flows through the asr_continuous webhook
+  // branch, and activates via activateSubscription with product_key 'plus'.
+  plus: {
+    kind: 'subscription', amount_cents: 350000, label: 'Continuous-Plus',
+    price_env: 'KOLM_STRIPE_PRICE_ASR_CONTINUOUS_PLUS', link_env: 'STRIPE_PAYMENT_LINK_ASR_CONTINUOUS_PLUS',
+    kolm_product: 'asr_continuous',
+  },
 });
+
+// Products whose fulfillment is a durable tenant PACKAGE entitlement (asr_packages)
+// rather than an audit upgrade or a subscription. Keyed by kolm_product so the
+// ref/checkout logic stays declarative as more packages are added.
+function _isPackage(def) { return !!def && def.kolm_product === 'asr_package'; }
 
 // Encode the binding into client_reference_id (alphanumeric + _ only - within
 // Stripe's allowed charset). audit_id is "audses_<hex>"; tenant_id is
@@ -58,6 +81,8 @@ export const ASR_PRODUCTS = Object.freeze({
 export function encodeAsrRef({ product, audit_id, tenant_id }) {
   const def = ASR_PRODUCTS[product];
   if (!def) return null;
+  // A tenant-bound package (Full Readiness): bind to the tenant, not an audit.
+  if (_isPackage(def)) return tenant_id ? `asrpkg_${tenant_id}` : null;
   if (def.kind === 'one_time') return audit_id ? `asrrep_${audit_id}` : null;
   return tenant_id ? `asrsub_${product}_${tenant_id}` : null;
 }
@@ -67,6 +92,14 @@ export function encodeAsrRef({ product, audit_id, tenant_id }) {
 // plan handling). Pure, never throws.
 export function parseAsrRef(ref) {
   if (!ref || typeof ref !== 'string') return null;
+  if (ref.startsWith('asrpkg_')) {
+    // 'asrpkg_<tenant_id>' - a tenant-bound package. There is one package
+    // product (Full Readiness); the Checkout-API path also carries product_key
+    // in metadata, but the ref alone resolves to 'full' so the Payment-Link path
+    // (no metadata) still binds correctly.
+    const tenant_id = ref.slice('asrpkg_'.length);
+    return tenant_id ? { product: 'full', kind: 'package', tenant_id } : null;
+  }
   if (ref.startsWith('asrrep_')) {
     const audit_id = ref.slice('asrrep_'.length);
     return audit_id ? { product: 'report', kind: 'one_time', audit_id } : null;
@@ -168,7 +201,9 @@ export async function createAsrCheckout(opts = {}) {
   }
   const tenantId = opts.tenant && typeof opts.tenant === 'object' ? (opts.tenant.id || opts.tenant.tenant) : opts.tenant;
   if (!tenantId) { const err = new Error('tenant is required'); err.code = 'tenant_required'; err.statusCode = 400; throw err; }
-  if (def.kind === 'one_time' && !opts.audit_id) {
+  // The audit-bound one-time report needs an audit to upgrade; a tenant-bound
+  // package (Full Readiness) does not (it is purchased ahead of any scan).
+  if (def.kind === 'one_time' && !_isPackage(def) && !opts.audit_id) {
     const err = new Error('audit_id is required for the one-time report'); err.code = 'audit_required'; err.statusCode = 400; throw err;
   }
 

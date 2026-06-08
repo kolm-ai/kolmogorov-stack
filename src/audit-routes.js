@@ -45,6 +45,7 @@ import { loadOrCreateDefaultSigner } from './ed25519.js';
 import { tryAppendAudit } from './audit.js';
 import { createAsrCheckout, asrBillingReady } from './asr-billing.js';
 import { resolveTrust, runDueReattestations, forceReattest } from './asr-fulfillment.js';
+import { importAgentLogs } from './log-importer.js';
 
 export const AUDIT_ROUTES_VERSION = 'asr-audit-routes/0.1';
 
@@ -726,6 +727,123 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
+  // POST /v1/audit/package/checkout - self-serve purchase of an enterprise
+  // PACKAGE. body: { product: "full" | "plus" }.
+  //   full -> $15,000 one-time Full Readiness (a durable tenant entitlement,
+  //           fulfilled by fulfillPackagePurchase in the webhook).
+  //   plus -> $3,500/mo Continuous-Plus (flows through the existing subscription
+  //           path; activated by activateSubscription with product_key 'plus').
+  // Env-gated 503 degrade: when the product is not wired, createAsrCheckout
+  // throws BillingNotConfiguredError (statusCode 503) listing the exact env vars.
+  // -------------------------------------------------------------------------
+  r.post('/v1/audit/package/checkout', async (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const product = String(body.product || '').toLowerCase();
+    if (product !== 'full' && product !== 'plus') {
+      return _err(res, 400, 'invalid_product', 'POST { "product": "full" | "plus" }');
+    }
+    try {
+      const out = await createAsrCheckout({ product, tenant: trec.id, email: trec.email || trec.owner_email });
+      tryAppendAudit({ tenant_id: trec.id, actor: trec.id, op: 'agent_audit.checkout_started', payload: { product, source: out.source } });
+      return res.json({ ok: true, url: out.url, source: out.source });
+    } catch (e) {
+      const code = e && e.statusCode ? e.statusCode : 500;
+      return res.status(code).json({ ok: false, error: (e && e.code) || 'checkout_failed', detail: e && e.message, ...(e && e.missing ? { missing: e.missing } : {}) });
+    }
+  });
+
+  // -------------------------------------------------------------------------
+  // POST /v1/audit/import - the Continuous ONRAMP. Pull logs the tenant already
+  // has (inline in the request, or fetched from a url they control) through the
+  // SAME scan -> sign path as /v1/audit/scan, yielding a signed report. Auth-
+  // gated + tenant-fenced (the row is forced onto req.tenant_record.id), size-
+  // capped (src/log-importer.js), and it never throws across the boundary.
+  // body: { source?: 'inline'|'url', logs?, url?, headers?, subject?, source_label?,
+  //         retention_days?, sign?, persist? }
+  // Designed to be hit on a schedule by a tiny sidecar (see docs/onramp.md).
+  // -------------------------------------------------------------------------
+  r.post('/v1/audit/import', async (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const source = String(body.source || (body.url ? 'url' : 'inline')).toLowerCase();
+
+    let imported;
+    try {
+      imported = await importAgentLogs({
+        source,
+        url: body.url,
+        headers: body.headers,
+        logs: body.logs != null ? body.logs : null,
+        maxBytes: MAX_BYTES_PER_SESSION,
+      });
+    } catch (e) {
+      // importAgentLogs is contracted never to throw; this is belt-and-suspenders.
+      return _err(res, 500, 'import_failed', e && e.message);
+    }
+    if (!imported || !imported.ok) {
+      const reason = (imported && imported.reason) || 'import_failed';
+      const code = reason === 'too_large' ? 413
+        : (reason === 'fetch_failed' || reason === 'fetch_status' || reason === 'fetch_timeout' || reason === 'read_failed' || reason === 'fetch_unavailable') ? 502
+        : 400; // no_logs / url_required / invalid_url / blocked_url / invalid_source / unserializable_logs
+      return _err(res, code, reason, imported && imported.detail);
+    }
+
+    const { text, count } = _toJsonl(imported.payload);
+    if (count === 0) return _err(res, 400, 'no_records', 'no parseable log records were supplied');
+    if (count > MAX_RECORDS_PER_SESSION) {
+      return _err(res, 413, 'too_many_records', `an import holds at most ${MAX_RECORDS_PER_SESSION} records; split the export`);
+    }
+
+    const sign = body.sign !== false;
+    const subject = String(body.subject || 'Agent fleet').slice(0, 200);
+    const srcLabel = body.source_label ? String(body.source_label).slice(0, 64) : (source === 'url' ? 'import:url' : 'import');
+    const retentionDays = _clampRetentionDays(body.retention_days);
+    const { audit, report, signError, auditError } = _runAndSign(text, { source: srcLabel, subject, retentionDays, sign });
+    if (auditError) {
+      return _err(res, 422, 'audit_failed', auditError.message || 'the supplied logs could not be analyzed');
+    }
+    if (sign && signError) {
+      return _err(res, 503, 'no_signer_configured', signError.message || 'no Ed25519 signer available');
+    }
+
+    let id = null;
+    if (body.persist !== false) {
+      const now = new Date().toISOString();
+      id = _newId();
+      try {
+        insert(TABLE, {
+          id, tenant_id: trec.id, subject, source: srcLabel,
+          retention_days: retentionDays,
+          status: 'complete', logs: text, record_count: count,
+          report: report ? report.envelope : null,
+          report_id: report ? report.report_id : null,
+          summary: audit.summary, created_at: now, updated_at: now,
+        });
+      } catch { id = null; /* persistence is best-effort; the report is still returned inline */ }
+    }
+    tryAppendAudit({
+      tenant_id: trec.id, actor: trec.id, op: 'agent_audit.import',
+      payload: { id, source, report_id: report ? report.report_id : null, records: count, bytes: imported.bytes, readiness_pct: audit.summary.readiness_pct, signed: !!report },
+    });
+    return res.json({
+      ok: true,
+      id,
+      source,
+      bytes: imported.bytes,
+      report_id: report ? report.report_id : null,
+      signed: !!report,
+      key_fingerprint: report ? report.key_fingerprint : null,
+      summary: audit.summary,
+      ingest: audit.ingest,
+      report: report ? report.envelope : null,
+      verify_url: _verifyUrlFor(),
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // POST /v1/audit/continuous/tick  (cron-secret gated, in PUBLIC_API) - run
   // every Continuous subscription whose re-attestation is due. Driven by an
   // EXTERNAL scheduler hitting this with x-kolm-cron-secret (containers restart,
@@ -868,9 +986,11 @@ export const AUDIT_ROUTES_SPEC = {
     'GET /v1/audit/sessions/:id/report',
     'GET /v1/audit/sessions/:id/export',
     'POST /v1/audit/scan',
+    'POST /v1/audit/import',
     'GET /v1/audit/reports',
     'POST /v1/audit/report/checkout',
     'POST /v1/audit/continuous/checkout',
+    'POST /v1/audit/package/checkout',
     'POST /v1/audit/continuous/tick (cron-secret)',
     'POST /v1/audit/continuous/deploy-hook',
     'POST /v1/audit/report/verify (public)',

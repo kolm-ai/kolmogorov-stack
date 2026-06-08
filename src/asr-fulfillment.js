@@ -30,6 +30,7 @@ import { buildAndSignReport, resignAsTier } from './attestation-report-builder.j
 
 const AUDITS = 'agent_audits';
 export const SUBSCRIPTIONS = 'asr_subscriptions';
+export const PACKAGES = 'asr_packages';
 
 // Weekly cadence as a fixed interval. The tick is external + idempotent, so an
 // interval-from-claim model is more robust here than wall-clock cron alignment
@@ -104,6 +105,52 @@ export function resignPendingReports({ signer, limit = 50 } = {}) {
     } catch { /* still no signer; retry next tick */ }
   }
   return { ok: true, pending: pending.length, fixed };
+}
+
+// ---------------------------------------------------------------------------
+// $15k Full Readiness (and any future tenant-bound package): grant a durable
+// entitlement row in asr_packages. Unlike fulfillReportPurchase this is NOT
+// bound to a single audit - it is a tenant-level grant the review engagement
+// runs against. Idempotent on (tenant, product) so a webhook retry (or a second
+// purchase before the first cleared) never double-grants. Tenant-fenced: the
+// row is only ever keyed to the purchasing tenant. Post-write read-back like
+// fulfillReportPurchase so a silent ephemeral-store failure surfaces as
+// retryable rather than a lost purchase.
+// ---------------------------------------------------------------------------
+export function fulfillPackagePurchase({ tenant_id, product, stripe_session_id } = {}) {
+  if (!tenant_id || !product) return { ok: false, reason: 'missing_fields' };
+  return withTransaction(() => {
+    // Tenant-fenced idempotency: an existing ACTIVE grant for this exact
+    // (tenant, product) means the purchase is already fulfilled. The tenant_id
+    // predicate guarantees a forged/reused session can never read or mutate
+    // another tenant's entitlement.
+    const existing = findOne(PACKAGES, (p) => p && p.tenant_id === tenant_id && p.product === product && p.status === 'active');
+    if (existing) {
+      // Backfill the session id if this is the first webhook to carry it, but
+      // still report `already` so no confirmation side-effect re-fires.
+      if (stripe_session_id && !existing.stripe_session_id) {
+        update(PACKAGES, (p) => p.id === existing.id, { stripe_session_id, updated_at: nowIso() });
+      }
+      return { ok: true, already: true, pkg: findOne(PACKAGES, (p) => p.id === existing.id) };
+    }
+    const ts = nowIso();
+    const row = {
+      id: storeId('asrpkg'),
+      tenant_id,
+      product,
+      status: 'active',
+      purchased_at: ts,
+      stripe_session_id: stripe_session_id || null,
+      created_at: ts,
+      updated_at: ts,
+    };
+    insert(PACKAGES, row);
+    const fresh = findOne(PACKAGES, (p) => p.id === row.id);
+    if (!fresh || fresh.status !== 'active') {
+      return { ok: false, reason: 'write_unconfirmed', retryable: true };
+    }
+    return { ok: true, pkg: fresh };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -280,7 +327,7 @@ export function resolveTrust(slug) {
 }
 
 export default {
-  SUBSCRIPTIONS, mintSlug,
-  fulfillReportPurchase, resignPendingReports, activateSubscription, setSubscriptionStatus,
+  SUBSCRIPTIONS, PACKAGES, mintSlug,
+  fulfillReportPurchase, fulfillPackagePurchase, resignPendingReports, activateSubscription, setSubscriptionStatus,
   runDueReattestations, forceReattest, resolveTrust,
 };

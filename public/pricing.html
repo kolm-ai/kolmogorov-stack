@@ -197,7 +197,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <li>An executive summary your buyer's leadership reads in a minute</li>
           <li>A dedicated transparency log, and a BAA where you need one</li>
         </ul>
-        <a class="btn btn--primary" href="/contact" style="width:100%">Book a readiness audit</a>
+        <button class="btn btn--primary" type="button" data-asr-package="full" style="width:100%">Buy Full Readiness</button>
       </div>
       <div class="plate">
         <p class="card__k">Continuous-Plus</p>
@@ -210,10 +210,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <li>SSO and SCIM provisioning for your team</li>
           <li>Priority support and a named contact</li>
         </ul>
-        <a class="btn btn--ghost" href="/contact" style="width:100%">Talk to us</a>
+        <button class="btn btn--ghost" type="button" data-asr-package="plus" style="width:100%">Start Continuous-Plus</button>
       </div>
     </div>
-    <p class="hero__claim" style="margin-top:var(--s4)">Need white-label reports or a custom scope? <a href="/enterprise">Enterprise terms</a> cover an MSA, BAA, and a named SLA.</p>
+    <p class="hero__claim" style="margin-top:var(--s4)">Need white-label reports or a custom scope? <a href="/enterprise">Enterprise terms</a> cover an MSA, BAA, and a named SLA, or <a href="/contact">talk to us</a>.</p>
   </div>
 </section>
 
@@ -400,6 +400,44 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </div>
 </footer>
+
+<script>
+/* Self-serve purchase for the enterprise packages (Full Readiness, Continuous-Plus).
+ * A logged-in user (dashboard key in sessionStorage) starts Stripe checkout via
+ * /v1/audit/package/checkout. A new user is routed to /signup?next=<product> so
+ * they create an account first, then complete the purchase. If purchasing is not
+ * wired on this deployment (503), or anything else goes wrong, fall back to
+ * /contact so the buyer is never stranded. Enterprise/custom scope stays on
+ * /contact by design. */
+(function () {
+  function keyFor() { try { return sessionStorage.getItem('kolm_dash_key') || null; } catch (e) { return null; } }
+  function buy(product, btn) {
+    var key = keyFor();
+    if (!key) { location.href = '/signup?next=' + encodeURIComponent(product); return; }
+    var prev = btn.textContent; btn.disabled = true; btn.textContent = 'Starting...';
+    fetch('/v1/audit/package/checkout', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({ product: product })
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (j) { return { status: res.status, j: j }; });
+    }).then(function (o) {
+      if (o.j && o.j.url) { location.href = o.j.url; return; }
+      if (o.status === 401) { location.href = '/signup?next=' + encodeURIComponent(product); return; }
+      // Not configured to charge, or another error: hand off to the sales path.
+      location.href = '/contact';
+    }).catch(function () {
+      btn.disabled = false; btn.textContent = prev;
+      location.href = '/contact';
+    });
+  }
+  var btns = document.querySelectorAll('[data-asr-package]');
+  for (var i = 0; i < btns.length; i++) {
+    (function (b) { b.addEventListener('click', function () { buy(b.getAttribute('data-asr-package'), b); }); })(btns[i]);
+  }
+})();
+</script>
 
 </body>
 </html>
