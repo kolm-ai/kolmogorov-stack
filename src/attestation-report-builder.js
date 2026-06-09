@@ -35,6 +35,7 @@ import { runRedTeam } from './red-team.js';
 import { buildAgentPassport } from './passport-builder.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
 import { TransparencyLog, TRANSPARENCY_LOG_VERSION } from './transparency-log.js';
+import { getPublicTransparencyLog } from './transparency-log-routes.js';
 
 // Versioned so a re-attestation is a comparable delta and a signed report
 // records exactly which builder shape produced it.
@@ -73,18 +74,21 @@ export function computeEvidenceDigest(auditResultOrEvents) {
 
 // ---------------------------------------------------------------------------
 // Transparency-log inclusion of the SIGNED report digest (best-effort, M4).
-// A process-wide append-only, Ed25519/Merkle-witnessed log (src/transparency-
-// log.js). recordTransparencyEntry appends the report digest and returns a
-// compact checkpoint { origin, tree_size, root_hash, leaf_hash, seq } the
-// verifier can sanity-check. Best-effort: any failure yields null and the report
-// simply omits log_checkpoint (signing is never blocked).
+// Appends the report digest to THE SAME global, store-backed, Ed25519/Merkle-
+// witnessed log the PUBLIC /v1/transparency-log/* endpoints serve (one origin,
+// persisted on the data volume) - so a buyer can fetch an inclusion proof for
+// their report's seq against the published signed tree head and verify it
+// WITHOUT trusting kolm. recordTransparencyEntry returns a compact checkpoint
+// { origin, tree_size, root_hash, leaf_hash, seq } the verifier sanity-checks.
+// Best-effort: any failure yields null and the report simply omits log_checkpoint
+// (signing is never blocked). Tests may pass opts.transparencyLog to isolate.
 // ---------------------------------------------------------------------------
-const _REPORT_TLOG_ORIGIN = 'kolm.ai/audit-reports/v1';
-let _reportTlog = null;
 function _getReportTlog(opts) {
   if (opts && opts.transparencyLog instanceof TransparencyLog) return opts.transparencyLog;
-  if (!_reportTlog) _reportTlog = new TransparencyLog({ origin: _REPORT_TLOG_ORIGIN });
-  return _reportTlog;
+  // The single global witness log, persisted via the kolm store - identical to
+  // the instance the public read endpoints expose (same origin + store), so the
+  // report's seq + root resolve against /v1/transparency-log/proof/:seq.
+  return getPublicTransparencyLog();
 }
 
 export function recordTransparencyEntry(reportDigest, opts = {}) {
@@ -92,7 +96,7 @@ export function recordTransparencyEntry(reportDigest, opts = {}) {
     const digest = String(reportDigest || '').toLowerCase();
     if (!/^[0-9a-f]{64}$/.test(digest)) return null;
     const log = _getReportTlog(opts);
-    const row = log.append('audit-report', { alg: 'sha256', report_digest: digest, report_id: opts.report_id || null });
+    const row = log.append('audit-report', { alg: 'sha256', report_digest: digest, report_id: opts.report_id || null }, { namespace: 'reports' });
     const head = log.treeHead();
     return {
       version: TRANSPARENCY_LOG_VERSION,
