@@ -15,7 +15,7 @@ import { CheckIcon, ShieldIcon, LogIcon } from "@/components/icons";
 export const metadata: Metadata = {
   title: "Enterprise",
   description:
-    "The six-figure deal stalled in review clears when the buyer's review group receives a signed, offline-verifiable report. Add a named co-signer with the Reviewed Attestation, keep a fleet current with continuous re-attestation, under an MSA and a defined scope.",
+    "A six-figure deal can wait weeks in security review. Give the buyer's review group a signed, offline-verifiable report they check themselves. Add a named co-signer with the Reviewed Attestation, keep a fleet current with continuous re-attestation, under an MSA and a defined scope.",
 };
 
 const FRAMEWORKS = [
@@ -72,7 +72,7 @@ const CLOCKS = [
   {
     kicker: "The human clock",
     title: "A name behind the result",
-    body: "An enterprise reviewer wants a person to stand behind the finding, not just a machine that approved a machine. The named co-signer reviews and signs alongside the math. That is days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.",
+    body: "An enterprise reviewer wants a person to stand behind the finding, not just a machine that approved a machine. The named co-signer reviews and signs alongside the automated audit. That is days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.",
   },
 ];
 
@@ -260,16 +260,16 @@ export default function EnterprisePage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(56px,7vw,96px)]">
           <div className="max-w-[68ch]">
             <h1 className="font-display text-[clamp(34px,5.4vw,56px)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
-              The six-figure deal is not lost.
+              Signed evidence for the agents
               <br />
-              It is in security review.
+              in your biggest deals.
             </h1>
             <p className="mt-5 max-w-[64ch] font-sans text-[clamp(17px,1.5vw,20px)] leading-[1.55] text-ink-2">
               A one-week review runs four to eight weeks the moment a CISO has to
               vet an autonomous agent. Enterprise is the version of the work
               built for that review: a signed report the buyer&rsquo;s review
-              group verifies offline, a named co-signer beside the math, and a
-              fleet kept current under an MSA.
+              group verifies offline, a named co-signer beside the automated
+              audit, and a fleet kept current under an MSA.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild>
@@ -337,8 +337,9 @@ export default function EnterprisePage() {
             </h2>
             <p className="mt-4 max-w-[54ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
               One contract, somewhere between a hundred thousand and half a
-              million in value, is paused on a single review group. The deal is
-              not dead. It waits on evidence the buyer can check for themselves.
+              million in value, is paused on a single review group. The deal
+              stalls in security review. It waits on evidence the buyer can
+              check for themselves.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -636,11 +637,11 @@ export default function EnterprisePage() {
       <section className="relative bg-ink-deep text-on-ink">
         <div className="mx-auto max-w-wrap px-6 py-[96px] text-center">
           <h2 className="mx-auto max-w-[24ch] font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-            Bring us the deal that has to close.
+            Bring us the deal stuck in security review.
           </h2>
           <p className="mx-auto mt-4 max-w-[56ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
             A signed report your buyer verifies in their own browser, a name
-            beside the math, and a review that moves at the speed of math.
+            beside the automated audit, and a review that takes days, not weeks.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>

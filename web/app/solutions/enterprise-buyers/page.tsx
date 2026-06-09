@@ -76,7 +76,7 @@ const CHECKS = [
   {
     kicker: "Tier 2 · issuer",
     title: "A rogue key clears Tier 1, fails Tier 2",
-    body: "Issuer provenance is checked against the keyring you expect. A fresh forged key can sign a clean report and pass the math, but it is not the issuer you pinned, so Tier 2 exposes it.",
+    body: "Issuer provenance is checked against the keyring you expect. A fresh forged key can sign a clean report and pass the signature check, but it is not the issuer you pinned, so Tier 2 exposes it.",
   },
   {
     kicker: "Offline · no server",
@@ -281,7 +281,7 @@ export default function EnterpriseBuyersPage() {
               A questionnaire is point-in-time, unverifiable, and impossible to
               compare across vendors. Require an artifact that carries its own
               proof, so the question stops being whether you believe the vendor
-              and becomes whether the math checks out.
+              and becomes whether the signature checks out.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">

@@ -87,7 +87,7 @@ const CLOCKS = [
   {
     kicker: "The human clock",
     title: "A name behind the result",
-    body: "For the deal where a CISO wants a person to stand behind the finding, a named co-signer reviews and signs alongside the math. That is days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.",
+    body: "For the deal where a CISO wants a person to stand behind the finding, a named co-signer reviews and signs alongside the automated findings. That is days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.",
   },
 ];
 
@@ -109,7 +109,7 @@ const MORE_WAYS = [
   },
   {
     lead: "Reviewed Attestation, $25,000 flat.",
-    rest: "A named co-signer reviews and signs beside the math. The deal-closer.",
+    rest: "A named co-signer reviews and signs beside the automated findings, for the review that needs a person to stand behind it.",
   },
 ];
 
@@ -229,9 +229,9 @@ export default function AiVendorsPage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(56px,7vw,96px)]">
           <div className="max-w-[60ch]">
             <h1 className="font-display text-[clamp(34px,5.4vw,56px)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
-              Your deal didn&rsquo;t die.
+              Your agent works.
               <br />
-              It stalled in security review.
+              The deal stalled in security review.
             </h1>
             <p className="mt-5 max-w-[60ch] font-sans text-[clamp(17px,1.5vw,20px)] leading-[1.55] text-ink-2">
               Your agent works. The contract is real. Then a CISO had to vet an
@@ -570,11 +570,11 @@ export default function AiVendorsPage() {
       <section className="relative bg-ink-deep text-on-ink">
         <div className="mx-auto max-w-wrap px-6 py-[96px] text-center">
           <h2 className="mx-auto max-w-[22ch] font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-            Clear the review. Close the deal.
+            Clear the security review in days.
           </h2>
           <p className="mx-auto mt-4 max-w-[56ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            A scoped audit, a signed evidence report, and a review that moves at
-            the speed of math instead of the speed of a questionnaire.
+            A scoped audit and a signed evidence report the buyer verifies for
+            themselves, instead of a questionnaire they take on faith.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>

@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "kolm.ai - signed security evidence for AI agents",
     short_name: "kolm.ai",
     description:
-      "Hand a buyer's security team a signed, offline-verifiable evidence report for your AI agent. The SOC 2 for AI agents.",
+      "Hand a buyer's security team a signed, offline-verifiable evidence report for your AI agent. A review that took weeks takes days.",
     start_url: "/",
     scope: "/",
     display: "standalone",

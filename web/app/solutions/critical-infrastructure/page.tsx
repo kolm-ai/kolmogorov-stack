@@ -347,12 +347,12 @@ export default function CriticalInfrastructurePage() {
       <section className="relative bg-ink-deep text-on-ink">
         <div className="mx-auto max-w-wrap px-6 py-[96px] text-center">
           <h2 className="mx-auto max-w-[24ch] font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-            Clear the high-risk review. Close the deal.
+            Clear the high-risk security review in days.
           </h2>
           <p className="mx-auto mt-4 max-w-[52ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            A scoped audit, a red-team battery with reproductions, a signed
-            evidence report, and an operator review that moves at the speed of
-            math instead of the speed of a questionnaire.
+            A scoped audit, a red-team battery with reproductions, and a signed
+            evidence report the operator verifies for themselves, instead of a
+            questionnaire they take on faith.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>

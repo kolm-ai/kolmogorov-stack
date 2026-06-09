@@ -17,7 +17,7 @@ const organizationLd = {
   logo: `${SITE_URL}/favicon.svg`,
   image: `${SITE_URL}/brand-hero.png`,
   description:
-    "Signed, offline-verifiable security evidence for AI agents entering the enterprise. The SOC 2 for AI agents.",
+    "Signed, offline-verifiable security evidence for AI agents entering the enterprise.",
   email: "dev@kolm.ai",
   sameAs: ["https://github.com/kolm-ai/kolm"],
   contactPoint: {
@@ -51,12 +51,11 @@ export const metadata: Metadata = {
     template: "%s · kolm.ai",
   },
   description:
-    "Your AI agent is ready for enterprise. Hand a buyer's security team a signed, offline-verifiable evidence report - mapped to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP and MITRE ATLAS. The SOC 2 for AI agents.",
+    "kolm audits your AI agent from its logs, maps each finding to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS, and signs the report your buyer verifies offline. A review that took weeks takes days.",
   applicationName: "kolm.ai",
   keywords: [
     "AI agent security",
     "Ed25519 signed report",
-    "SOC 2 for AI agents",
     "ISO 42001",
     "NIST AI RMF",
     "EU AI Act",
@@ -69,14 +68,14 @@ export const metadata: Metadata = {
     siteName: "kolm.ai",
     title: "Signed security evidence for AI agents · kolm.ai",
     description:
-      "The SOC 2 for AI agents - signed, verifiable, deal-closing evidence.",
+      "Signed, offline-verifiable security evidence for AI agents. A review that took weeks takes days.",
     images: [{ url: "/brand-hero.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Signed security evidence for AI agents · kolm.ai",
     description:
-      "The SOC 2 for AI agents - signed, verifiable, deal-closing evidence.",
+      "Signed, offline-verifiable security evidence for AI agents. A review that took weeks takes days.",
     images: ["/brand-hero.png"],
   },
   icons: { icon: "/favicon.svg" },

@@ -486,12 +486,12 @@ export default function PlatformPage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3 text-on-ink-3">05 / Proof</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-              They don&rsquo;t trust us. They check the math.
+              They don&rsquo;t trust us. They check it themselves.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-              Security theater can&rsquo;t be falsified. This can. Two checks run in
-              the buyer&rsquo;s own browser, against the key inside the report, with
-              no kolm server in the path.
+              You cannot check a questionnaire. You can check this. Two checks run
+              in the buyer&rsquo;s own browser, against the key inside the report,
+              with no kolm server in the path.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -533,8 +533,8 @@ export default function PlatformPage() {
             Put your agent through the pipeline.
           </h2>
           <p className="mx-auto mt-4 max-w-[52ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            One onramp, one signed object, and a review that moves at the speed of
-            math.
+            One onramp, one signed object, and a review that takes days, not
+            weeks.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>

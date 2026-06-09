@@ -140,8 +140,8 @@ export default function HealthcarePage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(48px,7vw,88px)]">
           <p className="eyebrow mb-4">For healthcare AI vendors</p>
           <h1 className="max-w-[20ch] font-display text-[clamp(36px,5.6vw,60px)] font-extrabold leading-[1.0] tracking-[-0.035em] text-ink">
-            Your agent is ready for the health system. Its security review is
-            not moving.
+            Your agent can read PHI. The health system&rsquo;s security review
+            stopped.
           </h1>
           <p className="mt-6 max-w-[58ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
             The moment an autonomous agent can read PHI, a hospital&rsquo;s
@@ -345,12 +345,12 @@ export default function HealthcarePage() {
       <section className="relative bg-ink-deep text-on-ink">
         <div className="mx-auto max-w-wrap px-6 py-[96px] text-center">
           <h2 className="mx-auto max-w-[22ch] font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-            Clear the review. Close the deal.
+            Clear the healthcare security review in days.
           </h2>
           <p className="mx-auto mt-4 max-w-[52ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
             A scoped audit, a signed evidence report, a Business Associate
-            Agreement, and a health-system review that moves at the speed of
-            math instead of the speed of a questionnaire.
+            Agreement, and evidence the health system verifies for themselves,
+            instead of a questionnaire they take on faith.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>

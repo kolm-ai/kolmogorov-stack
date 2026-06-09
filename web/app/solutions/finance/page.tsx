@@ -344,12 +344,11 @@ export default function FinancePage() {
       <section className="relative bg-ink-deep text-on-ink">
         <div className="mx-auto max-w-wrap px-6 py-[96px] text-center">
           <h2 className="mx-auto max-w-[22ch] font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-            Clear the review. Close the deal.
+            Clear the financial security review in days.
           </h2>
           <p className="mx-auto mt-4 max-w-[52ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            A scoped audit, a signed evidence report, and a financial security
-            review that moves at the speed of math instead of the speed of a
-            questionnaire.
+            A scoped audit and a signed evidence report the bank verifies for
+            themselves, instead of a questionnaire they take on faith.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>
