@@ -9,7 +9,7 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Signed security evidence for AI agents · kolm.ai</title>
+<title>On-demand security audits · kolm.ai</title>
 <meta name="description" content="Every enterprise deal needs a security audit of the AI you ship. kolm runs it on demand, from your own logs, in minutes, and signs the result so your buyer verifies it themselves. On demand, reproducible, no lead time. A review that took weeks takes days.">
 <meta name="keywords" content="AI agent security, security review, signed evidence report, Ed25519 attestation, least privilege audit, prompt injection testing, OWASP LLM Top 10, MITRE ATLAS, SOC 2 control mapping, ISO 42001, NIST AI RMF, EU AI Act, enterprise AI procurement">
 <meta name="theme-color" content="#F6F7F4">
@@ -17,8 +17,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="On-demand security audits for AI · kolm.ai">
-<meta property="og:description" content="kolm audits your AI agent from its logs and signs the security evidence a buyer's review needs. They verify it offline against your public key, with no account and no kolm server in the trust path. Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, and MITRE.">
+<meta property="og:title" content="On-demand security audits · kolm.ai">
+<meta property="og:description" content="Every enterprise deal needs a security audit of the AI you ship. kolm runs it on demand, from your own logs, in minutes, and signs the result so your buyer verifies it themselves offline. On demand, reproducible, no lead time. A review that took weeks runs in minutes.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -27,8 +27,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:alt" content="kolm.ai, signed security evidence for AI agents entering the enterprise.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="On-demand security audits for AI · kolm.ai">
-<meta name="twitter:description" content="kolm audits your AI agent from its logs and signs the security evidence a buyer's review needs. They verify it offline against your public key, with no account and no kolm server in the trust path. Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, and MITRE.">
+<meta name="twitter:title" content="On-demand security audits · kolm.ai">
+<meta name="twitter:description" content="Every enterprise deal needs a security audit of the AI you ship. kolm runs it on demand, from your own logs, in minutes, and signs the result so your buyer verifies it themselves offline. On demand, reproducible, no lead time. A review that took weeks runs in minutes.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -189,16 +189,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <section class="section reveal" id="passport">
   <div class="wrap">
     <div class="section__head">
-      <span class="idx">01 / Where your existing evidence stops</span>
-      <h2>The agent-specific facts a review actually needs.</h2>
+      <span class="idx">01 / The old way</span>
+      <h2>An outside firm, weeks of waiting, a PDF taken on faith.</h2>
       <p class="lede">
-        Your SOC 2 and your questionnaires speak for the platform: your controls, your processes, your people. They were not built to look inside an agent that acts on its own. kolm reads the agent's own logs and reports the rest, in a signature-covered block: who each agent is, the scopes it holds versus the scopes it actually used, every action it took, the models and tools and vendors it reached, how it delegates to other agents, and what data left the boundary. Each finding is mapped to the control your buyer cites, timestamped, and anchored in a public witnessed transparency log. Any seller can issue one, and any buyer can verify it offline against your key. No login, no vendor portal, no server in the trust path.
+        The deal is waiting on the review. The old way is to hire an outside firm, wait four to six weeks, pay tens of thousands of dollars, and hand the buyer a PDF they take on faith, one that is stale the moment the next PR merges. It speaks for the platform, not the agent that acts on its own. kolm runs the audit on demand from the agent's own logs and reports the rest, in a signature-covered block: who each agent is, the scopes it holds versus the scopes it actually used, every action it took, the models and tools and vendors it reached, how it delegates to other agents, and what data left the boundary. Each finding is mapped to the control your buyer cites, timestamped, and anchored in a public witnessed transparency log. Any seller can issue one in minutes, and any buyer can verify it offline against your key. No login, no vendor portal, no server in the trust path.
       </p>
     </div>
     <div class="grid">
       <div class="card">
-        <h3>Why it matters in 2026</h3>
-        <p>Agent reviews now fail on questions that human-era tooling never had to answer. Prompt injection still lands against production agents at rates measured in the double digits, multiple agents sharing one key make it impossible to say which one acted, and multi-agent delegation chains scatter authority across hops a reviewer cannot trace. At the same time, the EU AI Act record-keeping rules (Art. 12, effective Aug 2026), NIST AI RMF, and the NIST AI agent standards work are pushing buyers to ask for agent-specific records that questionnaires do not provide. kolm gives a reviewer those records as signed facts they can verify offline, instead of claims they have to take on faith. Injection is tested and reported, not warranted.</p>
+        <h3>Why on demand matters in 2026</h3>
+        <p>Your agent ships new behavior on every deploy, so a once-a-year review is stale before the ink dries. Agent reviews now fail on questions that human-era tooling never had to answer. Prompt injection still lands against production agents at rates measured in the double digits, multiple agents sharing one key make it impossible to say which one acted, and multi-agent delegation chains scatter authority across hops a reviewer cannot trace. At the same time, the EU AI Act record-keeping rules (Art. 12, effective Aug 2026), NIST AI RMF, and the NIST AI agent standards work are pushing buyers to ask for agent-specific records that questionnaires do not provide. Buyers want proof they can check, not claims they take on faith. kolm runs on demand and re-runs on every change, and gives a reviewer signed facts they verify offline themselves. Injection is tested and reported, not warranted.</p>
       </div>
     </div>
   </div>
@@ -208,11 +208,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <section class="section reveal" id="problem">
   <div class="wrap">
     <div class="section__head">
-      <span class="idx">02 / The stall</span>
-      <h2>A CISO won't take your word for it.</h2>
+      <span class="idx">02 / What a security review digs into</span>
+      <h2>What the audit surfaces.</h2>
       <p class="lede">
-        The moment an autonomous agent touches customer data, the week-long review
-        runs four to eight. A questionnaire no longer clears it.
+        These are the things a reviewer digs into, and the things a questionnaire
+        cannot answer. The audit surfaces each one on demand, from your own logs,
+        and signs the result so the buyer checks it themselves.
       </p>
     </div>
     <div class="grid grid--3">
@@ -244,7 +245,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head">
       <span class="idx">03 / How it works</span>
       <h2>Audit. Sign. Verify.</h2>
-      <p class="lede">One lifecycle. The report is reproducible, scoped to what was tested, and checkable by anyone you hand it to.</p>
+      <p class="lede">One lifecycle, on demand, in minutes. The run is reproducible, scoped to what was tested, and the buyer checks the signature themselves on anything you hand them.</p>
     </div>
 
     <!-- intuitive-first: the signing pipeline as a diagram, not a wall of steps -->
@@ -252,15 +253,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="flow__node">
         <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
         <span class="flow__n">01 · Audit</span>
-        <span class="flow__t">We examine the agent</span>
-        <p class="flow__d">Onramp through a log import or a sidecar proxy. Permissions, audit trail, data egress and injection resistance, each mapped to the standards your buyer cites.</p>
+        <span class="flow__t">Run it on demand, in minutes</span>
+        <p class="flow__d">Onramp through a log import or a sidecar proxy, then run the audit whenever you need it. Permissions, audit trail, data egress and injection resistance, each read from the logs in minutes and mapped to the standards your buyer cites.</p>
       </div>
       <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="flow__node">
         <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 11.5l2.4 2.4L15.5 9.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span class="flow__n">02 · Sign</span>
         <span class="flow__t">We seal the findings</span>
-        <p class="flow__d">The report is canonicalized and signed with Ed25519. The signature covers the exact bytes, so a downgraded finding or an inflated score breaks it. Each issuance enters an append-only log.</p>
+        <p class="flow__d">The report is canonicalized and signed with Ed25519. The signature covers the exact bytes, so a downgraded finding or an inflated score breaks it. The run is reproducible, same input same result, so you re-run it on every change. Each issuance enters an append-only log.</p>
       </div>
       <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="flow__node">
@@ -341,8 +342,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="idx">05 / Verification</span>
       <h2>They don't trust us. They check the signature.</h2>
       <p class="lede">
-        The buyer doesn't take our word. Two checks run in the buyer's
-        own browser, against the key inside the report, with no kolm server in the path.
+        Do not just trust the audit. Re-run it and check the signature yourself.
+        Two checks run in the buyer's own browser, against the key inside the
+        report, with no kolm server in the path. Same input, same result, every time.
       </p>
     </div>
     <div class="grid grid--3">
@@ -412,8 +414,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 8. FINAL CTA -->
 <section class="section reveal cta-final">
   <div class="wrap">
-    <h2>Clear the security review in days.</h2>
-    <p class="lede">A fixed-fee audit, a signed evidence report, and a review that takes days, not weeks.</p>
+    <h2>Clear the security review on demand.</h2>
+    <p class="lede">A fixed-fee audit you run on demand, a signed evidence report, and a review that runs in minutes, not weeks.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/contact">Start an audit</a>
       <a class="btn btn--ghost" href="/verify">Verify a report</a>

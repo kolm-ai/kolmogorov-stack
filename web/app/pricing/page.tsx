@@ -9,7 +9,7 @@ import { CheckIcon } from "@/components/icons";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Flat, public prices. Scan free, hand your buyer a signed readiness report for $750, keep your evidence current from $299 a month, a full readiness audit at $15,000, continuous-plus at $3,500 a month, or a named co-signed attestation at $25,000. No quote, no per-seat meter, no contingency.",
+    "On-demand, verifiable security audits, no lead time. Run a full audit free, hand your buyer a signed readiness report for $750, re-audit automatically from $299 a month, a guided deep audit at $15,000, continuous-plus at $3,500 a month, or a named co-signed audit at $25,000. No quote, no per-seat meter, no contingency.",
 };
 
 type CtaVariant = "primary" | "ghost";
@@ -57,7 +57,7 @@ const SELF_SERVE: Tier[] = [
     name: "Continuous Starter",
     price: "$299",
     unit: "/mo",
-    sub: "Keep the report current. Re-attested every week.",
+    sub: "Re-audit automatically every week. Evidence never goes stale.",
     features: [
       "Everything in the Signed Readiness Report.",
       "Re-attested weekly, so evidence does not go stale during a review.",
@@ -70,7 +70,7 @@ const SELF_SERVE: Tier[] = [
     name: "Continuous Growth",
     price: "$999",
     unit: "/mo",
-    sub: "Evidence as fresh as your last release.",
+    sub: "Re-audit on every deploy. Evidence as fresh as your last release.",
     features: [
       "Everything in Continuous Starter.",
       "Re-attested on every deploy, not on a weekly clock.",
@@ -86,7 +86,7 @@ const REVIEWED: Tier[] = [
     name: "Full Readiness",
     price: "$15,000",
     unit: "flat",
-    sub: "We run the audit with you and help close the gaps.",
+    sub: "A guided deep audit across your fleet. We help close the gaps.",
     features: [
       "A guided engagement across your full control set and agent fleet.",
       "Remediation guidance for every finding before you sign.",
@@ -114,7 +114,7 @@ const REVIEWED: Tier[] = [
     name: "Reviewed Attestation",
     price: "$25,000",
     unit: "flat",
-    sub: "A named human reviewer co-signs the report.",
+    sub: "A named human co-signs the audit.",
     features: [
       "Everything in Full Readiness.",
       "A named human reviewer co-signs the report alongside the cryptographic signature.",
@@ -188,13 +188,15 @@ export default function PricingPage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(56px,7vw,96px)]">
           <p className="eyebrow mb-4">Pricing</p>
           <h1 className="max-w-[20ch] font-display text-[clamp(38px,6vw,60px)] font-extrabold leading-[1.0] tracking-[-0.035em] text-ink">
-            Flat, public prices. No quote, no contingency.
+            On-demand security audits. No lead time, no quote.
           </h1>
           <p className="mt-6 max-w-[58ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-            Scan for free, hand your buyer a signed readiness report for $750,
-            or keep your evidence current from $299 a month. When an enterprise
-            reviewer wants a person to stand behind the report, add a named
-            co-signer. The only thing you pay for is evidence your buyer can verify.
+            Run a full audit free, hand your buyer a signed readiness report for
+            $750, or re-audit automatically from $299 a month so the evidence is
+            never stale. When an enterprise reviewer wants a person to stand
+            behind the audit, add a named co-signer. On-demand, verifiable
+            security audits, no lead time. The only thing you pay for is evidence
+            your buyer can verify.
           </p>
         </div>
       </section>
@@ -204,7 +206,7 @@ export default function PricingPage() {
         <div className="mx-auto max-w-wrap px-6 py-[72px]">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-2">
             <h2 className="font-display text-[28px] font-bold tracking-[-0.028em] text-ink">
-              Self-serve. No human in the loop.
+              Run the audit on demand. No human in the loop.
             </h2>
             <p className="text-[14px] text-ink-3">
               Flat fees. No call to book.
@@ -223,7 +225,7 @@ export default function PricingPage() {
         <div className="mx-auto max-w-wrap px-6 py-[72px]">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-2">
             <h2 className="font-display text-[28px] font-bold tracking-[-0.028em] text-on-ink">
-              Reviewer-backed. A person stands behind it.
+              A guided deep audit. A person stands behind it.
             </h2>
             <p className="text-[14px] text-on-ink-3">
               Your full control set. SLA-bounded. Days, not weeks.
@@ -300,12 +302,13 @@ export default function PricingPage() {
               </p>
             </Card>
             <Card>
-              <CardKicker>Why pay monthly?</CardKicker>
+              <CardKicker>Why re-audit?</CardKicker>
               <p className="mt-2 text-[15px] leading-relaxed text-ink-2">
                 A point-in-time report goes stale on your next deploy. A
                 permission you granted in January can still fire in August.
-                Continuous re-attests on a schedule, so the evidence your buyer
-                checks is never older than your last release. Questions?{" "}
+                Continuous re-audits on a schedule, weekly or on every deploy, so
+                the evidence your buyer checks is never older than your last
+                release. Questions?{" "}
                 <a
                   className="border-b border-line-2 text-ink hover:border-ink"
                   href="mailto:dev@kolm.ai"

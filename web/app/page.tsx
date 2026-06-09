@@ -29,18 +29,18 @@ const FRAMEWORKS = [
 const TRUST = [
   {
     icon: CheckIcon,
-    title: "Ed25519-signed",
-    body: "Every report is canonicalized and signed. The signature covers the exact bytes, so an inflated score or a deleted finding breaks the seal.",
+    title: "Ed25519-signed, so you verify it",
+    body: "Do not just trust the audit. The report is canonicalized and signed, so an inflated score or a deleted finding breaks the seal the moment you check it yourself.",
   },
   {
     icon: LogIcon,
-    title: "Append-only transparency log",
-    body: "Each issuance is written to a hash-chained log a reviewer can audit. Evidence that cannot be quietly revised after the fact.",
+    title: "Reproducible, append-only log",
+    body: "Same input, same result. Each issuance is written to a hash-chained log a reviewer can audit, so the evidence cannot be quietly revised after the fact.",
   },
   {
     icon: KeyIcon,
     title: "Public-key pinning",
-    body: "Your buyer verifies offline against your published key. No kolm server in the trust path, no account, no upload.",
+    body: "Your buyer verifies offline against your published key. No kolm server in the trust path, no account, no upload. Re-run the audit and check the signature on every change.",
   },
 ];
 
@@ -68,13 +68,13 @@ const STALL = [
 const FLOW = [
   {
     n: "01 · Audit and map",
-    t: "We examine the agent",
-    d: "Onramp through a log import or a sidecar proxy. We read permissions, audit trail, and data egress from the logs. Each finding maps to the framework a review asks about.",
+    t: "Run it on demand, in minutes",
+    d: "Onramp through a log import or a sidecar proxy, then run the audit whenever you need it. We read permissions, audit trail, and data egress from the logs in minutes. Each finding maps to the framework a review asks about.",
   },
   {
     n: "02 · Sign",
     t: "We seal the findings",
-    d: "The report is canonicalized and signed with Ed25519. A downgraded finding or an inflated score breaks it. Each issuance enters an append-only log.",
+    d: "The report is canonicalized and signed with Ed25519. A downgraded finding or an inflated score breaks it. The run is reproducible: same input, same result, so you re-run it on every change.",
   },
   {
     n: "03 · Verify",
@@ -156,19 +156,21 @@ export default function HomePage() {
       <section className="border-b border-line">
         <div className="mx-auto max-w-wrap px-6 py-[96px]">
           <div className="max-w-[66ch]">
-            <p className="eyebrow mb-3">Where your existing evidence stops</p>
+            <p className="eyebrow mb-3">The old way</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              The agent-specific facts a review actually needs.
+              An outside firm, weeks of waiting, a PDF taken on faith.
             </h2>
             <p className="mt-4 max-w-[64ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              Your SOC 2 and your questionnaires speak for the platform: your
-              controls, your processes, your people. They were not built to look
-              inside an agent that acts on its own. kolm reads the agent&rsquo;s
-              own logs and reports the rest: the scopes it holds versus the
-              scopes it uses, every action it took, the models and tools and
-              vendors it reached, how it hands work to other agents, and what
-              data left the boundary. Each finding is signed and mapped to the
-              control a reviewer cites, and any buyer can verify it offline
+              The deal is waiting on the review. The old way is to hire an
+              outside firm, wait four to six weeks, pay tens of thousands of
+              dollars, and hand the buyer a PDF they take on faith. It speaks for
+              the platform, not the agent that acts on its own, and it is stale
+              the moment the next PR merges. kolm runs the audit on demand from
+              the agent&rsquo;s own logs and reports the rest: the scopes it holds
+              versus the scopes it uses, every action it took, the models and
+              tools and vendors it reached, how it hands work to other agents,
+              and what data left the boundary. Each finding is signed and mapped
+              to the control a reviewer cites, and any buyer can verify it offline
               against your key.
             </p>
           </div>
@@ -179,22 +181,23 @@ export default function HomePage() {
       <section className="border-b border-line">
         <div className="mx-auto max-w-wrap px-6 py-[96px]">
           <div className="max-w-[66ch]">
-            <p className="eyebrow mb-3">Why it matters in 2026</p>
+            <p className="eyebrow mb-3">Why on demand matters in 2026</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              Agent reviews fail on questions human-era tooling never had to
-              answer.
+              Your agent changes every deploy. A once-a-year PDF cannot keep up.
             </h2>
             <p className="mt-4 max-w-[64ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              Prompt injection still lands against production agents at rates
-              measured in the double digits, multiple agents sharing one key
-              make it impossible to say which one acted, and multi-agent
-              delegation chains scatter authority across hops a reviewer cannot
-              trace. At the same time, the EU AI Act record-keeping rules (Art.
-              12, effective Aug 2026), NIST AI RMF, and the NIST AI agent
-              standards work are pushing buyers to ask for agent-specific
-              records that questionnaires do not provide. kolm gives a reviewer
-              those records as signed facts they can verify offline, instead of
-              claims they have to take on faith. Injection is tested and
+              An agent ships new behavior on every deploy, so a review that took
+              weeks is stale before the ink dries. Prompt injection still lands
+              against production agents at rates measured in the double digits,
+              multiple agents sharing one key make it impossible to say which one
+              acted, and multi-agent delegation chains scatter authority across
+              hops a reviewer cannot trace. At the same time, the EU AI Act
+              record-keeping rules (Art. 12, effective Aug 2026), NIST AI RMF, and
+              the NIST AI agent standards work are pushing buyers to ask for
+              agent-specific records that questionnaires do not provide. Buyers
+              want proof they can check, not claims they take on faith. kolm runs
+              on demand and re-runs on every change, and gives a reviewer signed
+              facts they verify offline themselves. Injection is tested and
               reported, not warranted.
             </p>
           </div>
@@ -232,15 +235,15 @@ export default function HomePage() {
       <section className="border-b border-line">
         <div className="mx-auto max-w-wrap px-6 py-[96px]">
           <div className="mb-12 max-w-[66ch]">
-            <p className="eyebrow mb-3">01 / The stall</p>
+            <p className="eyebrow mb-3">01 / What a security review digs into</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              Self-attested answers are not evidence.
+              What the audit surfaces.
             </h2>
             <p className="mt-4 max-w-[50ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              A security questionnaire puts the burden of proof on the buyer.
-              Self-attested answers are not something a reviewer can check, so
-              the review stalls. A signed report takes the burden off them. The
-              review moves in days, not weeks.
+              These are the things a reviewer digs into, and the things a
+              questionnaire cannot answer. The audit surfaces each one on demand,
+              from your own logs, and signs the result so the buyer checks it
+              themselves. The review moves in minutes, not weeks.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -265,8 +268,9 @@ export default function HomePage() {
               Audit, map, sign, verify.
             </h2>
             <p className="mt-4 max-w-[50ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-              One lifecycle. The report is reproducible, scoped to what was
-              tested, and checkable by anyone you hand it to.
+              One lifecycle, on demand, in minutes. The run is reproducible,
+              scoped to what was tested, and the buyer checks the signature
+              themselves on anything you hand them.
             </p>
           </div>
           <div className="grid items-stretch gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
@@ -301,7 +305,7 @@ export default function HomePage() {
       <section className="border-b border-line">
         <div className="mx-auto max-w-wrap px-6 py-[96px]">
           <div className="mb-12 max-w-[66ch]">
-            <p className="eyebrow mb-3">03 / What we test</p>
+            <p className="eyebrow mb-3">03 / What the audit covers</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
               Every finding traces to a control.
             </h2>
@@ -355,8 +359,8 @@ export default function HomePage() {
             Run the free scan.
           </h2>
           <p className="mx-auto mt-4 max-w-[52ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            Run the full audit from your logs and see every finding before you
-            pay. A review that took weeks takes days.
+            Run the full audit from your logs on demand and see every finding
+            before you pay. A review that took weeks runs in minutes.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>

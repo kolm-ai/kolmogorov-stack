@@ -47,7 +47,7 @@ const jsonLd = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "On-demand security audits for AI · kolm.ai",
+    default: "On-demand security audits · kolm.ai",
     template: "%s · kolm.ai",
   },
   description:
@@ -69,14 +69,14 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: "kolm.ai",
-    title: "On-demand security audits for AI · kolm.ai",
+    title: "On-demand security audits · kolm.ai",
     description:
       "Every enterprise deal needs a security audit of the AI you ship. kolm runs it on demand, from your logs, in minutes, and signs the result so your buyer verifies it themselves. On demand, reproducible, no lead time.",
     images: [{ url: "/brand-hero.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "On-demand security audits for AI · kolm.ai",
+    title: "On-demand security audits · kolm.ai",
     description:
       "Every enterprise deal needs a security audit of the AI you ship. kolm runs it on demand, from your logs, in minutes, and signs the result so your buyer verifies it themselves. On demand, reproducible, no lead time.",
     images: ["/brand-hero.png"],

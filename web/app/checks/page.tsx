@@ -12,9 +12,9 @@ import {
 import { CheckIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
-  title: "What we test",
+  title: "What the audit covers",
   description:
-    "kolm tests your AI agent across eight controls, from least privilege to multi-agent delegation. Each finding maps to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS, traces to the crosswalk, and ships in a signed report your buyer verifies offline.",
+    "What an on-demand security audit of the AI you ship covers: eight controls a security review digs into, from least privilege to multi-agent delegation. Each finding is signed and maps to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS, traces to the crosswalk, and ships in a report your buyer verifies offline.",
 };
 
 const FRAMEWORKS = [
@@ -140,14 +140,15 @@ export default function ChecksPage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(48px,7vw,88px)]">
           <div className="max-w-[70ch]">
             <h1 className="font-display text-[clamp(34px,5.2vw,56px)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
-              What a reviewer flags, tested and named to a control.
+              What the audit covers: eight controls a review digs into.
             </h1>
             <p className="mt-5 max-w-[62ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              A security reviewer works a checklist: what your agent can touch, what
-              it records, where data goes, and whether it can be talked out of its
-              instructions. kolm tests each one. It maps every finding to a control
-              and to the standard your buyer cites, then signs the report. The report
-              states what was tested and what was not.
+              When a buyer reviews the AI you ship, they work a checklist: what your
+              agent can touch, what it records, where data goes, and whether it can be
+              talked out of its instructions. The on-demand audit covers all eight
+              controls behind that checklist. Each finding is signed and mapped to a
+              control and to the standard your buyer cites. The report states what was
+              tested and what was not.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-2.5">
               {FRAMEWORKS.map((f) => (
@@ -169,10 +170,10 @@ export default function ChecksPage() {
               The findings a reviewer circles first.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              Once your agent can touch customer data and act on its own, a security
-              review can run four to eight weeks. The reviewer stops reading your
-              answers and asks for evidence. These are the findings they circle
-              first.
+              Once your agent can touch customer data and act on its own, the buyer
+              stops reading your answers and asks for evidence. The audit runs on
+              demand, in minutes, and surfaces these findings first, each one signed
+              and named to a control.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -197,10 +198,10 @@ export default function ChecksPage() {
               Four pillars. Every check has a control behind it.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              We test what a reviewer tests: what the agent can touch, what it
-              records, where data goes, and whether it can be turned against its
-              instructions. Each pillar carries a control id you can trace to the
-              crosswalk below.
+              The audit covers what a reviewer digs into: what the agent can touch,
+              what it records, where data goes, and whether it can be turned against
+              its instructions. Each pillar carries a control id you can trace to the
+              crosswalk below, and each finding ships signed.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -240,10 +241,10 @@ export default function ChecksPage() {
               Eight controls, mapped to the standard your buyer cites.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-              ASR-1 through ASR-8. Each row is one control, what it checks, and the
-              framework a review group already uses. Every finding in the signed
-              report points back to a row here, so a reviewer traces each result to
-              a standard, not to our word.
+              ASR-1 through ASR-8 are everything the audit covers. Each row is one
+              control, what it checks, and the framework a review group already uses.
+              Every finding in the signed report points back to a row here, so a
+              reviewer traces each result to a standard, not to our word.
             </p>
           </div>
           <div className="overflow-x-auto rounded-lg border border-[var(--line-ink)]">
@@ -301,13 +302,13 @@ export default function ChecksPage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3">04 / What we do not warrant</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              What we assess, and what we will not claim.
+              What the audit assesses, and what we will not claim.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              An accurate report names its edges. We are precise about what is
-              assessed, what is only tested and reported, and where the line sits.
-              The scope statement is part of the signed object, so a reviewer reads
-              it with the findings.
+              An accurate report names its edges. We are precise about what the audit
+              assesses, what is only tested and reported, and where the line sits. The
+              scope statement is part of the signed object, so a reviewer reads it with
+              the findings.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -354,11 +355,11 @@ export default function ChecksPage() {
       <section className="relative bg-ink-deep text-on-ink">
         <div className="mx-auto max-w-wrap px-6 py-[96px] text-center">
           <h2 className="mx-auto max-w-[22ch] font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-            Run these checks against your agent.
+            Run the audit against your agent.
           </h2>
           <p className="mx-auto mt-4 max-w-[56ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            Eight controls, each finding mapped to a framework your buyer cites,
-            ending in a signed report they verify offline.
+            Eight controls, on demand in minutes, each finding signed and mapped to a
+            framework your buyer cites, ending in a report they verify offline.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>

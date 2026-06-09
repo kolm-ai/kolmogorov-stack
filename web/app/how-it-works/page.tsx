@@ -13,7 +13,7 @@ import { CheckIcon, ArrowIcon } from "@/components/icons";
 export const metadata: Metadata = {
   title: "How it works",
   description:
-    "kolm audits your AI agent from its logs, maps each finding to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS, and signs the report with Ed25519. Your buyer verifies it offline against your public key, with no kolm server in the trust path. A review that took weeks takes days.",
+    "Run a security audit of the AI you ship on demand, end to end in minutes. kolm audits your agent from its own logs, maps each finding to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS, and signs the report with Ed25519. The audit is reproducible, so it re-runs on every change, and your buyer verifies the signature offline against your public key, with no kolm server in the trust path.",
 };
 
 /* page-local flow icons (the shared icon set covers check + arrow) */
@@ -59,29 +59,29 @@ function BigCheckIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 const HERO_TRUST = [
-  "Ed25519-signed",
+  "On demand, end to end in minutes",
+  "Reproducible, re-runs on every change",
   "Verified offline, no kolm server in the trust path",
-  "Re-attested on every deploy",
 ];
 
 const STALL = [
   {
-    kicker: "The clock",
-    title: "One week becomes eight",
-    body: "A reviewer who has to vet an autonomous agent reopens every assumption. A review scoped for one week stretches to four or eight. The agent ships late, or it does not ship.",
-    map: "weeks lost to review",
+    kicker: "The lead time",
+    title: "Four to six weeks of waiting",
+    body: "The old way is an outside firm and a scheduled engagement. The audit of the AI you ship waits in a queue. A deal that needed the report this quarter slips to next.",
+    map: "weeks of lead time",
   },
   {
-    kicker: "The burden",
-    title: "Say-so does not scale",
-    body: "Self-attested answers put the burden of proof on the buyer. They want evidence they can check, not a promise that the trail was never edited after the fact.",
-    map: "self-attestation is not evidence",
+    kicker: "The faith",
+    title: "A PDF taken on faith",
+    body: "What the firm hands over is a static PDF the buyer takes on your word. It is stale the moment a PR merges, and the buyer cannot re-check it themselves.",
+    map: "a stale PDF, taken on faith",
   },
   {
     kicker: "The fix",
-    title: "Make trust checkable",
-    body: "Hand the buyer one signed artifact they verify on their own machine. The question moves from whether they believe you to whether the signature holds.",
-    map: "one signed artifact",
+    title: "Run it on demand, signed",
+    body: "kolm runs the same audit on demand, from your own logs, in minutes, and signs the result. The buyer verifies the signature on their own machine. The question moves from whether they believe you to whether the signature holds.",
+    map: "on demand, signed, verifiable",
   },
 ];
 
@@ -89,14 +89,14 @@ const FLOW = [
   {
     icon: SearchIcon,
     n: "01 / Audit",
-    t: "We audit the agent",
-    d: "We read the agent from a log import or a sidecar proxy. We check least privilege, audit-trail integrity, data egress and redaction, and prompt-injection resistance. We map each finding to the standards your buyer cites.",
+    t: "We audit the agent on demand",
+    d: "Point us at the agent through a log import or a sidecar proxy, then run it whenever you want. We check least privilege, audit-trail integrity, data egress and redaction, and prompt-injection resistance, and map each finding to the standards your buyer cites. The scan is compute, so it finishes in minutes.",
   },
   {
     icon: ShieldCheckIcon,
     n: "02 / Sign",
     t: "We sign the findings",
-    d: "We canonicalize the report and sign it with Ed25519. The signature covers the exact bytes. A downgraded finding or an inflated score breaks it. Each issuance enters an append-only log.",
+    d: "We canonicalize the report and sign it with Ed25519. The signature covers the exact bytes. A downgraded finding or an inflated score breaks it. The run is deterministic, so the same input gives the same signed result.",
   },
   {
     icon: BigCheckIcon,
@@ -110,7 +110,7 @@ const ONRAMP = [
   {
     kicker: "Onramp A",
     title: "Import your logs",
-    body: "Bring observability exports from tools such as LiteLLM, Helicone, or Portkey. We normalize tool calls, scopes, and traffic. No code change, and the fastest path to a first read.",
+    body: "Bring observability exports from tools such as LiteLLM, Helicone, or Portkey. We normalize tool calls, scopes, and traffic. No code change, and the fastest path to a first signed read in minutes.",
   },
   {
     kicker: "Onramp B",
@@ -134,7 +134,7 @@ const CLOCKS = [
   {
     kicker: "Co-signed",
     title: "A named reviewer stands behind it",
-    body: "Some reviewers want a person behind the finding. On the Reviewed Attestation, a named co-signer reviews the report and signs it alongside the Ed25519 signature. That takes days, against the four to eight weeks a from-scratch review takes.",
+    body: "Some reviewers want a person behind the finding. On the Reviewed Attestation, a named co-signer reviews the report and signs it alongside the Ed25519 signature. That takes days, against the four to six weeks a from-scratch firm review takes.",
     map: "days, with a named co-signer",
   },
 ];
@@ -165,15 +165,18 @@ export default function HowItWorksPage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(48px,7vw,88px)]">
           <div className="max-w-[68ch]">
             <h1 className="font-display text-[clamp(34px,5.2vw,56px)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
-              From your logs to a report your buyer verifies offline.
+              Run the audit on demand. From your logs to a signed report in minutes.
             </h1>
             <p className="mt-5 max-w-[60ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              A security review stalls when a buyer has to vet an autonomous
-              agent. kolm audits your agent from its logs. It maps each finding to
-              SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and
-              MITRE ATLAS. It signs the report with Ed25519. Your buyer verifies it
-              offline against your public key, with no kolm server in the trust
-              path. A review that took weeks takes days.
+              Every enterprise deal puts the AI you ship through a security review,
+              and the AI is the part they dig into. The old way is an outside firm,
+              a four to six week wait, and a PDF the buyer takes on faith. kolm runs
+              the audit on demand, from your own logs, end to end in minutes. It maps
+              each finding to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM
+              Top 10, and MITRE ATLAS, and signs the report with Ed25519. The run is
+              reproducible, so it re-runs on every change, and your buyer verifies the
+              signature offline against your public key, with no kolm server in the
+              trust path.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild>
@@ -199,16 +202,16 @@ export default function HowItWorksPage() {
       <section className="border-b border-line">
         <div className="mx-auto max-w-wrap px-6 py-[96px]">
           <div className="mb-12 max-w-[66ch]">
-            <p className="eyebrow mb-3">01 / The stall</p>
+            <p className="eyebrow mb-3">01 / The old way</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              Self-attested answers are not evidence.
+              An outside firm, weeks of wait, a PDF taken on faith.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              A security questionnaire puts the burden of proof on your buyer.
-              They have to take your answers on faith. A review scoped for one
-              week runs four to eight once an autonomous agent touches customer
-              data. You need to show the agent is least-privileged, logged, and
-              injection-tested in a form the buyer can check.
+              The standard security audit of the AI you ship is an outside firm and
+              a scheduled engagement: a four to six week wait, and a PDF the buyer
+              takes on your word. It is stale the moment a PR merges, and the buyer
+              cannot re-check it. You need an audit you run on demand, in minutes,
+              that the buyer verifies for themselves.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -230,12 +233,13 @@ export default function HowItWorksPage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3 text-on-ink-3">02 / Audit, Sign, Verify</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-              One pipeline, three steps.
+              One pipeline, three steps, minutes end to end.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
               We audit the agent. We sign the findings. Your buyer verifies the
               report on their own machine. Each step is reproducible and scoped to
-              exactly what was tested.
+              exactly what was tested, so the same input gives the same signed result
+              every time you run it.
             </p>
           </div>
 
@@ -298,12 +302,12 @@ export default function HowItWorksPage() {
             <div>
               <p className="eyebrow mb-3">03 / Onramp</p>
               <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-                Two ways in, no rebuild.
+                Two ways in, no rebuild, self-serve.
               </h2>
               <p className="mt-4 max-w-[50ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
                 You do not change the agent to audit it. Point us at the evidence
-                and we go to work. Use a log import for the fastest first read, or
-                a sidecar proxy for a live capture.
+                once and run the audit whenever you want. Use a log import for the
+                fastest first signed read, or a sidecar proxy for a live capture.
               </p>
               <div className="mt-6">
                 <Button asChild variant="ghost" size="sm">
@@ -335,12 +339,14 @@ export default function HowItWorksPage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3 text-on-ink-3">04 / Timing</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-              The scan takes minutes. A named co-signer takes days.
+              No lead time. The scan takes minutes.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-              Most of the audit is automated and runs in minutes. One paid tier
-              adds a named human reviewer, and that part takes days. We are clear
-              about which is which.
+              There is no engagement to schedule and no queue to wait in. Most of
+              the audit is automated and runs in minutes, on demand. One paid tier
+              adds a named human reviewer, and that part takes days, against the four
+              to six weeks a from-scratch firm review takes. We are clear about which
+              is which.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -358,8 +364,8 @@ export default function HowItWorksPage() {
             ))}
           </div>
           <p className="mt-10 max-w-[64ch] text-[13px] leading-[1.6] text-on-ink-3">
-            Minutes for the automated scan. Days for a named co-signed
-            attestation. The automated tiers add no person. The Reviewed
+            Minutes for the automated scan, run on demand. Days for a named
+            co-signed attestation. The automated tiers add no person. The Reviewed
             Attestation adds one, on purpose.
           </p>
         </div>
@@ -371,13 +377,13 @@ export default function HowItWorksPage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3">05 / Continuous</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              A point-in-time report goes stale on the next deploy.
+              The firm&rsquo;s PDF goes stale on the next deploy. This re-runs.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              A permission granted in January can still fire in August. Continuous
-              re-attests weekly, or on every deploy. It exposes a live Trust link
-              you hand any buyer. The evidence they check is never older than your
-              last release.
+              A permission granted in January can still fire in August. Because the
+              audit is reproducible, Continuous re-runs and re-attests weekly, or on
+              every deploy. It exposes a live Trust link you hand any buyer. The
+              evidence they check is never older than your last release.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -415,8 +421,8 @@ export default function HowItWorksPage() {
             Run the free scan.
           </h2>
           <p className="mx-auto mt-4 max-w-[52ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            One audit. One signed evidence report. A review that took weeks takes
-            days.
+            One audit, on demand, end to end in minutes. One signed evidence report
+            your buyer verifies offline.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>
