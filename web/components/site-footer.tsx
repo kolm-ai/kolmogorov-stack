@@ -13,11 +13,11 @@ const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] =
       heading: "Product",
       links: [
         { href: "/how-it-works", label: "How it works" },
-        { href: "/platform", label: "Platform" },
         { href: "/checks", label: "What we test" },
         { href: "/verify", label: "Verify" },
-        { href: "/report-viewer", label: "Report viewer" },
-        { href: "/report", label: "Sample report" },
+        { href: "/sample", label: "Sample report" },
+        { href: "/compare", label: "Compare" },
+        { href: "/roi", label: "ROI calculator" },
         { href: "/pricing", label: "Pricing" },
         { href: "/docs", label: "Docs" },
       ],
@@ -51,6 +51,7 @@ const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] =
       heading: "Company",
       links: [
         { href: "/research", label: "Research" },
+        { href: "/glossary", label: "Glossary" },
         { href: "/changelog", label: "Changelog" },
         { href: "/careers", label: "Careers" },
         { href: "/contact", label: "Contact" },

@@ -1,6 +1,11 @@
 {
   "schema": "kolm-issuer-keyring-1",
-  "updated_at": "2026-06-08",
+  "updated_at": "2026-06-09",
+  "rotation": {
+    "policy_days": 365,
+    "note": "Issuer keys rotate on a routine cadence. A rotated key is NOT compromised: reports it signed before rotation remain valid. A REVOKED key (see revocations) is withdrawn and reports signed by it must be refused. Live status is authoritative at GET /v1/audit/issuer-key/:fp/status."
+  },
+  "revocations": [],
   "issuers": [
     {
       "kid": "kolm-demo-2026",
@@ -18,6 +23,9 @@
       "alg": "ed25519",
       "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAI1W4RkabFYhAOfk3DB+hE3CZWexFJE/7KFZ3X2G1+bk=\n-----END PUBLIC KEY-----\n",
       "fingerprint": "fa562154f99c95f48a45d04272943435",
+      "revoked": false,
+      "valid_from": "2026-06-08",
+      "next_rotation_at": "2027-06-08",
       "note": "Production evidence signer for kolm.ai. A report whose embedded key matches this entry is kolm-issued production evidence, signed by the live audit service."
     }
   ]

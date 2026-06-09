@@ -83,6 +83,7 @@ export function VerifyWidget({
   const [subject, setSubject] = React.useState<string>("");
   const [tampered, setTampered] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
+  const [showChecks, setShowChecks] = React.useState(false);
 
   const verifierRef = React.useRef<AuditVerifier | null>(null);
   const reportRef = React.useRef<Record<string, unknown> | null>(null);
@@ -213,25 +214,45 @@ export function VerifyWidget({
         )}
 
         {result && result.checks.length > 0 && (
-          <ul className="mt-3 grid gap-1.5">
-            {result.checks.map((c) => (
-              <li
-                key={c.name}
-                className="flex items-start gap-2 font-mono text-[12px] text-ink-2"
-              >
-                <CheckIcon
-                  className={cn(
-                    "mt-[3px] h-3.5 w-3.5 flex-none",
-                    c.ok ? "text-[var(--accent)]" : "text-void"
-                  )}
-                />
-                <span>
-                  <b className="font-semibold text-ink">{c.name}</b>
-                  {c.detail ? ` — ${c.detail}` : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <>
+            {/* A clean default: one summary line. The full per-step cryptographic
+                trail is one click away (and always shown when a check fails) so
+                the proof stays inspectable without being a wall of text. */}
+            <button
+              type="button"
+              onClick={() => setShowChecks((v) => !v)}
+              aria-expanded={showChecks || phase === "void"}
+              className="mt-3 inline-flex items-center gap-1.5 font-mono text-[12px] text-ink-3 transition-colors hover:text-ink-2"
+            >
+              <CheckIcon className="h-3.5 w-3.5 text-[var(--accent)]" />
+              {result.checks.filter((c) => c.ok).length}/{result.checks.length}{" "}
+              cryptographic checks passed
+              <span aria-hidden="true" className="ml-1 text-ink-faint">
+                {showChecks || phase === "void" ? "hide" : "show"}
+              </span>
+            </button>
+            {(showChecks || phase === "void") && (
+              <ul className="mt-2.5 grid gap-1.5 border-t border-line pt-2.5">
+                {result.checks.map((c) => (
+                  <li
+                    key={c.name}
+                    className="flex items-start gap-2 font-mono text-[12px] text-ink-2"
+                  >
+                    <CheckIcon
+                      className={cn(
+                        "mt-[3px] h-3.5 w-3.5 flex-none",
+                        c.ok ? "text-[var(--accent)]" : "text-void"
+                      )}
+                    />
+                    <span>
+                      <b className="font-semibold text-ink">{c.name}</b>
+                      {c.detail ? ` — ${c.detail}` : ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </div>
 

@@ -9,7 +9,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { VerifyWidget } from "@/components/verify-widget";
-import { HeroLoop } from "@/components/hero-loop";
 import {
   CheckIcon,
   ShieldIcon,
@@ -109,10 +108,7 @@ export default function HomePage() {
                   <Link href="/signup">Start free</Link>
                 </Button>
                 <Button asChild variant="ghost">
-                  <Link href="/sample">See sample report</Link>
-                </Button>
-                <Button asChild variant="ghost">
-                  <Link href="/contact">Book a demo</Link>
+                  <Link href="/sample">See a sample report</Link>
                 </Button>
               </div>
 
@@ -148,15 +144,6 @@ export default function HomePage() {
             <aside aria-label="Live offline verification of a signed evidence report">
               <VerifyWidget />
             </aside>
-          </div>
-
-          {/* the narrative: stall -> verify offline -> close, on a 15s loop */}
-          <div className="mt-[clamp(40px,5vw,64px)]">
-            <div className="mb-4 flex items-center gap-3">
-              <span className="eyebrow">The deal, end to end</span>
-              <span className="h-px flex-1 bg-line" aria-hidden="true" />
-            </div>
-            <HeroLoop />
           </div>
         </div>
       </section>
@@ -306,9 +293,6 @@ export default function HomePage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>
               <Link href="/signup">Start free</Link>
-            </Button>
-            <Button asChild variant="ghost">
-              <Link href="/sample">See sample report</Link>
             </Button>
             <Button asChild variant="ghost">
               <Link href="/contact">Book a demo</Link>

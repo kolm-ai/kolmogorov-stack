@@ -15,7 +15,6 @@ import { BrandMark, MenuIcon } from "@/components/icons";
  */
 const NAV_LINKS = [
   { href: "/how-it-works", label: "How it works" },
-  { href: "/platform", label: "Platform" },
   { href: "/checks", label: "What we test" },
   { href: "/pricing", label: "Pricing" },
   { href: "/trust", label: "Trust" },
