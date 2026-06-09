@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>ROI calculator: the cost of a stalled security review · kolm.ai</title>
+<meta name="description" content="Estimate what a stalled enterprise security review costs you, and what a signed evidence report saves. Enter your contract value, deals in review, review length, and engineering hours. The calculator runs live in your browser against the $750 report and the $15,000 Full Readiness tiers.">
+<meta name="keywords" content="security review ROI calculator, cost of delay AI agent, enterprise procurement delay cost, security questionnaire cost, AI vendor sales cycle, signed evidence report savings, time-value of a stalled deal">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="ROI calculator: the cost of a stalled security review">
+<meta property="og:description" content="Enter your numbers and see what a four-to-eight-week security review costs, and what a signed evidence report saves against the $750 and $15,000 tiers. Runs live in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/roi">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="kolm.ai ROI calculator for the cost of a stalled agent security review.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="ROI calculator: the cost of a stalled security review · kolm">
+<meta name="twitter:description" content="Estimate the cost of review friction and the savings from a signed evidence report. Conservative defaults, every assumption labeled, runs in your browser.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/roi">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "kolm Security-Review ROI Calculator",
+  "url": "https://kolm.ai/roi",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any modern web browser",
+  "browserRequirements": "Requires JavaScript. Runs entirely in the browser; no data leaves your device.",
+  "description": "An interactive estimator for the cost of a stalled enterprise security review and the savings from a signed, offline-verifiable evidence report. Inputs are annual contract value, deals per year in security review, review length, and engineering hours per review. Outputs are annual review-friction cost, projected cost with kolm, net savings, and payback against the $750 and $15,000 tiers.",
+  "isAccessibleForFree": true,
+  "inLanguage": "en-US",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/", "email": "dev@kolm.ai" },
+  "offers": [
+    { "@type": "Offer", "name": "Signed Readiness Report", "price": "750", "priceCurrency": "USD" },
+    { "@type": "Offer", "name": "Full Readiness", "price": "15000", "priceCurrency": "USD" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
+    { "@type": "ListItem", "position": 2, "name": "Pricing", "item": "https://kolm.ai/pricing" },
+    { "@type": "ListItem", "position": 3, "name": "ROI calculator", "item": "https://kolm.ai/roi" }
+  ]
+}
+</script>
+<style>
+  /* page-local: the ROI calculator. Built on the warm-paper system; it uses the
+     existing tokens only, so it inherits the three-voice type and the green =
+     verified / saved semantic. Inputs are MACHINE voice (a figure is a figure);
+     the big result numbers are DISPLAY voice. The whole tool degrades to readable
+     static defaults if scripting is off, and respects prefers-reduced-motion. */
+  .roi { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr); gap: var(--s7); align-items: start; }
+  @media (max-width: 940px) { .roi { grid-template-columns: 1fr; gap: var(--s6); } }
+
+  .roi-panel { background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 28px; box-shadow: 0 1px 2px rgba(14, 19, 16, 0.04); }
+  .roi-panel__k { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 var(--s5); }
+
+  /* a labeled input: caption, a number field, and a mirror slider */
+  .roi-field { margin-bottom: var(--s5); }
+  .roi-field:last-child { margin-bottom: 0; }
+  .roi-field > label { display: block; font-family: var(--sans); font-size: 14.5px; font-weight: 600; color: var(--ink); letter-spacing: -0.006em; margin-bottom: var(--s2); }
+  .roi-input { display: flex; align-items: center; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--paper-2); overflow: hidden; transition: border-color 140ms, box-shadow 140ms; }
+  .roi-input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+  .roi-input .roi-pre, .roi-input .roi-suf { color: var(--ink-3); font-family: var(--mono); font-size: 13.5px; white-space: nowrap; }
+  .roi-input .roi-pre { padding-left: 14px; }
+  .roi-input .roi-suf { padding-right: 14px; }
+  .roi-input input { flex: 1; min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; padding: 11px 12px; font-family: var(--mono); font-size: 16px; color: var(--ink); font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
+  .roi-input input::-webkit-outer-spin-button, .roi-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .roi-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; margin: 12px 0 0; background: var(--line); border-radius: 999px; cursor: pointer; }
+  .roi-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); border: 2px solid var(--paper-2); box-shadow: 0 1px 3px rgba(14, 19, 16, 0.22); cursor: pointer; }
+  .roi-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 2px solid var(--paper-2); box-shadow: 0 1px 3px rgba(14, 19, 16, 0.22); cursor: pointer; }
+  .roi-slider:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .roi-help { margin: 8px 0 0; font-family: var(--sans); font-size: 12.5px; color: var(--ink-3); line-height: 1.5; max-width: none; }
+
+  /* results: three stat blocks, the savings one wearing the verified green */
+  .roi-stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); }
+  @media (max-width: 460px) { .roi-stats { grid-template-columns: 1fr; } }
+  .roi-stat { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s4) var(--s5); background: var(--paper-sink); }
+  .roi-stat--save { grid-column: 1 / -1; background: var(--accent-soft); border-color: var(--accent-edge); }
+  .roi-stat__l { font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .roi-stat__n { font-family: var(--display); font-weight: 800; font-size: clamp(28px, 4vw, 40px); line-height: 1.04; letter-spacing: -0.035em; color: var(--ink); font-variant-numeric: tabular-nums; margin-top: 6px; }
+  .roi-stat--save .roi-stat__l { color: var(--accent-text); }
+  .roi-stat--save .roi-stat__n { color: var(--accent-text); }
+  .roi-stat__s { font-family: var(--sans); font-size: 12.5px; color: var(--ink-3); margin-top: 4px; }
+  .roi-stat--save .roi-stat__s { color: var(--accent-text); }
+
+  /* a two-bar comparison: today vs with kolm, scaled to the larger figure */
+  .roi-bars { margin-top: var(--s5); display: grid; gap: var(--s3); }
+  .roi-bar__top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.02em; }
+  .roi-bar__top b { font-family: var(--mono); color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .roi-bar__track { height: 12px; border-radius: 999px; background: var(--paper-sink); border: 1px solid var(--line); overflow: hidden; }
+  .roi-bar__fill { height: 100%; width: 0; border-radius: 999px; }
+  .roi-bar__fill--today { background: var(--void); }
+  .roi-bar__fill--kolm { background: var(--accent); }
+  @media (prefers-reduced-motion: no-preference) { .roi-bar__fill { transition: width 420ms var(--ease); } }
+
+  /* the math, laid out as a ledger so every figure is traceable */
+  .roi-break { margin-top: var(--s6); }
+  .roi-break .tbl td.num, .roi-break .tbl th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .roi-payback { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); margin-top: var(--s6); }
+  @media (max-width: 560px) { .roi-payback { grid-template-columns: 1fr; } }
+  .roi-pay { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s5); background: var(--paper-2); }
+  .roi-pay__k { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+  .roi-pay__n { font-family: var(--display); font-weight: 800; font-size: clamp(24px, 3vw, 32px); letter-spacing: -0.03em; color: var(--ink); margin: 6px 0 2px; font-variant-numeric: tabular-nums; }
+  .roi-pay__s { font-family: var(--sans); font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  .roi-pay__s b { color: var(--ink); font-weight: 600; }
+
+  /* the assumptions disclosure */
+  .roi-assume { margin-top: var(--s6); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper-2); }
+  .roi-assume > summary { cursor: pointer; list-style: none; padding: var(--s4) var(--s5); display: flex; align-items: center; gap: var(--s3); font-family: var(--sans); font-size: 14.5px; font-weight: 600; color: var(--ink); }
+  .roi-assume > summary::-webkit-details-marker { display: none; }
+  .roi-assume > summary .roi-chev { margin-left: auto; width: 16px; height: 16px; color: var(--ink-3); transition: transform 180ms var(--ease); flex: none; }
+  .roi-assume[open] > summary .roi-chev { transform: rotate(180deg); }
+  @media (prefers-reduced-motion: reduce) { .roi-assume > summary .roi-chev { transition: none; } }
+  .roi-assume__body { padding: 0 var(--s5) var(--s5); }
+  .roi-assume__intro { font-family: var(--sans); font-size: 13.5px; color: var(--ink-2); line-height: 1.55; margin: 0 0 var(--s5); }
+
+  .roi-actions { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: var(--s6); }
+  .roi-note { margin-top: var(--s5); font-family: var(--sans); font-size: 12.5px; color: var(--ink-3); line-height: 1.6; max-width: 64ch; }
+  .roi-note b { color: var(--ink-2); font-weight: 600; }
+
+  .noscript-note { margin-top: var(--s4); padding: var(--s4) var(--s5); border: 1px solid var(--void-edge); border-radius: var(--r-md); background: var(--void-soft); font-family: var(--sans); font-size: 13.5px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:64ch;margin-bottom:var(--s7)">
+      <span class="idx">ROI / Cost of delay</span>
+      <h1>What is the stalled review costing you?</h1>
+      <p class="lede">
+        A deal that sits in security review does not pause its cost. Each week
+        ties up pipeline and burns engineering time answering the same
+        questionnaire. Put in your numbers and see the annual figure, then see
+        what a signed evidence report changes.
+      </p>
+      <div class="trustline" aria-label="How this calculator works">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Runs in your browser</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Conservative defaults</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Every assumption labeled</span>
+      </div>
+    </div>
+
+    <!-- ===================== THE CALCULATOR ===================== -->
+    <div class="roi">
+      <!-- inputs -->
+      <form class="roi-panel" id="roiForm" aria-label="Your numbers" novalidate>
+        <p class="roi-panel__k">01 / Your numbers</p>
+
+        <div class="roi-field">
+          <label for="acv">Annual contract value</label>
+          <div class="roi-input">
+            <span class="roi-pre" aria-hidden="true">$</span>
+            <input type="number" id="acv" name="acv" inputmode="numeric" min="0" max="5000000" step="1000" value="120000" aria-describedby="acv-help">
+          </div>
+          <input type="range" class="roi-slider" id="acv_r" min="10000" max="600000" step="5000" value="120000" aria-label="Annual contract value, slider">
+          <p class="roi-help" id="acv-help">A typical deal you sell into the enterprise. Use your median, not your best.</p>
+        </div>
+
+        <div class="roi-field">
+          <label for="deals">Deals per year in security review</label>
+          <div class="roi-input">
+            <input type="number" id="deals" name="deals" inputmode="numeric" min="0" max="2000" step="1" value="12" aria-describedby="deals-help">
+            <span class="roi-suf" aria-hidden="true">deals / yr</span>
+          </div>
+          <input type="range" class="roi-slider" id="deals_r" min="1" max="100" step="1" value="12" aria-label="Deals per year in security review, slider">
+          <p class="roi-help" id="deals-help">How many deals a year actually reach a buyer security review.</p>
+        </div>
+
+        <div class="roi-field">
+          <label for="weeks">Current review length</label>
+          <div class="roi-input">
+            <input type="number" id="weeks" name="weeks" inputmode="decimal" min="0" max="52" step="0.5" value="6" aria-describedby="weeks-help">
+            <span class="roi-suf" aria-hidden="true">weeks</span>
+          </div>
+          <input type="range" class="roi-slider" id="weeks_r" min="1" max="16" step="0.5" value="6" aria-label="Current review length in weeks, slider">
+          <p class="roi-help" id="weeks-help">Calendar weeks from first questionnaire to a cleared review today.</p>
+        </div>
+
+        <div class="roi-field">
+          <label for="hours">Engineering hours per review</label>
+          <div class="roi-input">
+            <input type="number" id="hours" name="hours" inputmode="numeric" min="0" max="800" step="1" value="40" aria-describedby="hours-help">
+            <span class="roi-suf" aria-hidden="true">hours</span>
+          </div>
+          <input type="range" class="roi-slider" id="hours_r" min="0" max="160" step="1" value="40" aria-label="Engineering hours per review, slider">
+          <p class="roi-help" id="hours-help">Hours your team spends per deal on questionnaires, evidence, and review calls.</p>
+        </div>
+
+        <!-- assumptions, labeled and editable -->
+        <details class="roi-assume" id="roiAssume">
+          <summary>
+            Assumptions you can change
+            <svg class="roi-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <div class="roi-assume__body">
+            <p class="roi-assume__intro">These four defaults drive the math. They are deliberately conservative. Adjust any one to match your own business, and the results update with it.</p>
+
+            <div class="roi-field">
+              <label for="rate">Fully loaded engineering cost</label>
+              <div class="roi-input">
+                <span class="roi-pre" aria-hidden="true">$</span>
+                <input type="number" id="rate" name="rate" inputmode="numeric" min="0" max="500" step="5" value="120" aria-describedby="rate-help">
+                <span class="roi-suf" aria-hidden="true">/ hour</span>
+              </div>
+              <input type="range" class="roi-slider" id="rate_r" min="40" max="300" step="5" value="120" aria-label="Fully loaded engineering cost per hour, slider">
+              <p class="roi-help" id="rate-help">Salary plus overhead, per hour. Default 120, a common loaded rate for senior engineers.</p>
+            </div>
+
+            <div class="roi-field">
+              <label for="slip">Pipeline at risk per extra week in review</label>
+              <div class="roi-input">
+                <input type="number" id="slip" name="slip" inputmode="decimal" min="0" max="10" step="0.1" value="1.2" aria-describedby="slip-help">
+                <span class="roi-suf" aria-hidden="true">% / week</span>
+              </div>
+              <input type="range" class="roi-slider" id="slip_r" min="0" max="5" step="0.1" value="1.2" aria-label="Share of deal value at risk per extra week, slider">
+              <p class="roi-help" id="slip-help">Each extra week in limbo carries a chance the deal slips a quarter or is lost. Default 1.2 percent of the deal value per week, applied across the review length.</p>
+            </div>
+
+            <div class="roi-field">
+              <label for="kweeks">Review length with a signed report</label>
+              <div class="roi-input">
+                <input type="number" id="kweeks" name="kweeks" inputmode="decimal" min="0" max="20" step="0.1" value="0.6" aria-describedby="kweeks-help">
+                <span class="roi-suf" aria-hidden="true">weeks</span>
+              </div>
+              <input type="range" class="roi-slider" id="kweeks_r" min="0.2" max="4" step="0.1" value="0.6" aria-label="Review length with a signed report, in weeks, slider">
+              <p class="roi-help" id="kweeks-help">Default 0.6 weeks, about three business days, the time a buyer needs to verify a signed report and trace the findings.</p>
+            </div>
+
+            <div class="roi-field">
+              <label for="khours">Engineering hours per review with a signed report</label>
+              <div class="roi-input">
+                <input type="number" id="khours" name="khours" inputmode="numeric" min="0" max="200" step="1" value="6" aria-describedby="khours-help">
+                <span class="roi-suf" aria-hidden="true">hours</span>
+              </div>
+              <input type="range" class="roi-slider" id="khours_r" min="0" max="60" step="1" value="6" aria-label="Engineering hours per review with a signed report, slider">
+              <p class="roi-help" id="khours-help">The evidence is already gathered and signed. Default 6 hours to pull logs, run the audit, and hand off the report.</p>
+            </div>
+          </div>
+        </details>
+
+        <div class="roi-actions">
+          <button type="button" class="btn btn--ghost btn--sm" id="roiReset">Reset to defaults</button>
+        </div>
+        <noscript><div class="noscript-note">This calculator needs JavaScript to run the math live. With it off, the fields above show conservative example inputs. See <a href="/pricing">pricing</a> for the flat fees.</div></noscript>
+      </form>
+
+      <!-- results -->
+      <div class="roi-panel" aria-label="Your estimated result">
+        <p class="roi-panel__k">02 / What it costs, what it saves</p>
+
+        <div class="roi-stats" id="roiStats" aria-live="polite">
+          <div class="roi-stat">
+            <p class="roi-stat__l">Annual cost today</p>
+            <p class="roi-stat__n" id="outToday">$161,280</p>
+            <p class="roi-stat__s">Review friction, current process</p>
+          </div>
+          <div class="roi-stat">
+            <p class="roi-stat__l">Annual cost with kolm</p>
+            <p class="roi-stat__n" id="outKolm">$34,008</p>
+            <p class="roi-stat__s">Friction plus Full Readiness</p>
+          </div>
+          <div class="roi-stat roi-stat--save">
+            <p class="roi-stat__l">Estimated net savings per year</p>
+            <p class="roi-stat__n" id="outSave">$127,272</p>
+            <p class="roi-stat__s" id="outSaveSub">About 8.5x the $15,000 Full Readiness fee</p>
+          </div>
+        </div>
+
+        <div class="roi-bars" aria-hidden="true">
+          <div>
+            <div class="roi-bar__top"><span>Today</span><b id="barTodayN">$161,280</b></div>
+            <div class="roi-bar__track"><div class="roi-bar__fill roi-bar__fill--today" id="barToday" style="width:100%"></div></div>
+          </div>
+          <div>
+            <div class="roi-bar__top"><span>With kolm</span><b id="barKolmN">$34,008</b></div>
+            <div class="roi-bar__track"><div class="roi-bar__fill roi-bar__fill--kolm" id="barKolm" style="width:21%"></div></div>
+          </div>
+        </div>
+
+        <div class="roi-break">
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th scope="col">Where the cost sits</th><th scope="col" class="num">Today</th><th scope="col" class="num">With kolm</th></tr></thead>
+            <tbody>
+              <tr><td><b>Deal value at risk in review</b></td><td class="num" id="brDelayToday">$103,680</td><td class="num" id="brDelayKolm">$10,368</td></tr>
+              <tr><td><b>Engineering time on reviews</b></td><td class="num" id="brEngToday">$57,600</td><td class="num" id="brEngKolm">$8,640</td></tr>
+              <tr><td><b>kolm Full Readiness</b></td><td class="num" id="brProgToday">none</td><td class="num" id="brProgKolm">$15,000</td></tr>
+              <tr><td><b>Total per year</b></td><td class="num" id="brTotToday">$161,280</td><td class="num" id="brTotKolm">$34,008</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="roi-payback">
+          <div class="roi-pay">
+            <p class="roi-pay__k">Payback vs the $750 report</p>
+            <p class="roi-pay__n" id="payReportN">2 days</p>
+            <p class="roi-pay__s" id="payReportS">A single <b>Signed Readiness Report</b> at $750 is covered by the friction it removes in roughly <b id="payReportInline">2 days</b>.</p>
+          </div>
+          <div class="roi-pay">
+            <p class="roi-pay__k">Payback vs $15,000 Full Readiness</p>
+            <p class="roi-pay__n" id="payFullN">5 weeks</p>
+            <p class="roi-pay__s">The <b>$15,000 Full Readiness</b> package is covered in about <b id="payFullInline">5 weeks</b> of the savings it creates.</p>
+          </div>
+        </div>
+
+        <p class="roi-note">
+          <b>This is an estimate, not a quote or a guarantee.</b> It is built only
+          from the numbers you enter and the labeled assumptions above. Deal
+          slippage and review length vary by buyer, sector, and quarter. kolm does
+          not warrant any outcome, and the pricing on this page is the flat,
+          published fee. Use this to frame the conversation, then check the real
+          figures against your own pipeline.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. HOW THE MATH WORKS -->
+<section class="section reveal" id="method">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / The model</span>
+      <h2>Two clocks, one annual figure.</h2>
+      <p class="lede">A review stalls on two costs at once. The calculator adds them, applies them across your deals, then re-runs both with the review compressed to days.</p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Cost one</p>
+        <h3>Deal value at risk</h3>
+        <p>Each extra week a deal sits in review carries a small chance it slips a quarter or is lost. We multiply the contract value by a conservative weekly risk and by the number of weeks in review. Shorten the review and that exposure shrinks with it.</p>
+        <p class="card__map">contract value x weekly risk x weeks</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Cost two</p>
+        <h3>Engineering time</h3>
+        <p>Every review pulls engineers off the roadmap to answer questionnaires, assemble evidence, and join review calls. We price those hours at a fully loaded rate. A signed report that ships the evidence up front cuts the hours per deal.</p>
+        <p class="card__map">hours per review x loaded rate</p>
+      </div>
+      <div class="card">
+        <p class="card__k">The comparison</p>
+        <h3>Then add the fee</h3>
+        <p>The projected side keeps a short review and a few hours per deal, then adds the published kolm fee so nothing is hidden. Net savings is today minus that total. Payback is the published fee divided by the friction the report removes.</p>
+        <p class="card__map">today minus (friction + fee)</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s6)">
+      The same audit that drives this estimate ends in an Ed25519-signed report your buyer verifies offline. <a href="/how-it-works" style="border-bottom:1px solid var(--line-2)">See how it works</a>, or <a href="/sample-audit-report.json" download style="border-bottom:1px solid var(--line-2)">open a sample report</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 3. WHY THE NUMBER IS DEFENSIBLE (the ledger) -->
+<section class="section section--ink reveal" id="basis">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / Why it holds up</span>
+      <h2>Conservative on purpose.</h2>
+      <p class="lede">A calculator only helps if a buyer's finance team would sign off on it. Each default is set low, and each is yours to override.</p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">No inflated win-rate</p>
+        <h3>Risk, not certainty</h3>
+        <p>We never assume a stalled deal is lost. The model applies a small per-week probability to the deal value, so a long review only ever puts a fraction of pipeline at risk.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">No free lunch</p>
+        <h3>The fee is in the total</h3>
+        <p>The published kolm fee is added to the projected side before savings are shown. The number you see is after paying for the report, not before.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">No hidden hours</p>
+        <h3>kolm reviews still cost time</h3>
+        <p>The compressed path keeps real engineering hours and a real review window. We shorten the clock, we do not zero it out.</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s7)">
+      Want the figures behind the published prices instead? Every fee is flat and listed on the <a href="/pricing">pricing page</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 4. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Run the scan. Shorten the clock.</h2>
+    <p class="lede">Start with a free signed scan, then hand your buyer a report they verify in their own browser. The review moves at the speed of math.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/signup">Run a free scan</a>
+      <a class="btn btn--ghost" href="/pricing">See full pricing</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/compare">Compare</a>
+        <a href="/roi">ROI calculator</a>
+        <a href="/glossary">Glossary</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/badge">Verify badge</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ROI calculator. Vanilla, accessible, recalculates live. Each number field is
+ * mirrored by a range slider sharing the same base id (field "acv" pairs with
+ * slider "acv_r"); editing either updates the other and re-runs the model. All
+ * money is shown with Intl.NumberFormat. Everything runs in the browser; nothing
+ * is sent anywhere. The model and its defaults are documented in the visible
+ * "Assumptions" panel, so the math on screen always matches the math here. */
+(function () {
+  'use strict';
+
+  var REPORT_PRICE = 750;     // Signed Readiness Report, one-time
+  var FULL_PRICE = 15000;     // Full Readiness, flat
+
+  var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  var num1 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
+
+  // base ids of the eight inputs; each has an id (number) and id+"_r" (range)
+  var IDS = ['acv', 'deals', 'weeks', 'hours', 'rate', 'slip', 'kweeks', 'khours'];
+  var DEFAULTS = { acv: 120000, deals: 12, weeks: 6, hours: 40, rate: 120, slip: 1.2, kweeks: 0.6, khours: 6 };
+
+  function el(id) { return document.getElementById(id); }
+  function clamp(v, lo, hi) { if (isNaN(v)) v = 0; return Math.min(hi, Math.max(lo, v)); }
+
+  function readField(id) {
+    var input = el(id);
+    if (!input) return 0;
+    var v = parseFloat(input.value);
+    var lo = parseFloat(input.getAttribute('min'));
+    var hi = parseFloat(input.getAttribute('max'));
+    if (isNaN(lo)) lo = 0;
+    if (isNaN(hi)) hi = Number.MAX_SAFE_INTEGER;
+    return clamp(v, lo, hi);
+  }
+
+  function setText(id, text) { var n = el(id); if (n) n.textContent = text; }
+  function setWidth(id, pct) { var n = el(id); if (n) n.style.width = Math.max(0, Math.min(100, pct)) + '%'; }
+
+  function humanizeDuration(days) {
+    if (!isFinite(days) || days <= 0) return null;
+    if (days < 1) return 'under a day';
+    if (days <= 21) { var d = Math.round(days); return d + (d === 1 ? ' day' : ' days'); }
+    if (days <= 120) { var w = Math.round(days / 7); return w + (w === 1 ? ' week' : ' weeks'); }
+    var m = Math.round(days / 30); return m + (m === 1 ? ' month' : ' months');
+  }
+
+  function compute() {
+    var acv = readField('acv');
+    var deals = readField('deals');
+    var weeks = readField('weeks');
+    var hours = readField('hours');
+    var rate = readField('rate');
+    var slip = readField('slip') / 100;   // percent per week -> fraction
+    var kweeks = readField('kweeks');
+    var khours = readField('khours');
+
+    // per-deal, today
+    var delayToday = acv * slip * weeks;
+    var engToday = hours * rate;
+    var annualDelayToday = delayToday * deals;
+    var annualEngToday = engToday * deals;
+    var annualToday = annualDelayToday + annualEngToday;
+
+    // per-deal, with a signed report
+    var delayKolm = acv * slip * kweeks;
+    var engKolm = khours * rate;
+    var annualDelayKolm = delayKolm * deals;
+    var annualEngKolm = engKolm * deals;
+    var annualKolmFriction = annualDelayKolm + annualEngKolm;
+    var annualKolm = annualKolmFriction + FULL_PRICE;   // include the published fee
+
+    var netSavings = annualToday - annualKolm;
+    var grossReduction = annualToday - annualKolmFriction;   // savings before paying kolm
+    var dailySavings = grossReduction / 365;
+
+    // headline stats
+    setText('outToday', usd.format(Math.round(annualToday)));
+    setText('outKolm', usd.format(Math.round(annualKolm)));
+    setText('outSave', usd.format(Math.round(netSavings)));
+
+    if (netSavings > 0 && FULL_PRICE > 0) {
+      var mult = netSavings / FULL_PRICE;
+      setText('outSaveSub', 'About ' + num1.format(mult) + 'x the $15,000 Full Readiness fee');
+    } else {
+      setText('outSaveSub', 'Adjust the inputs above to model your own savings');
+    }
+
+    // comparison bars, scaled to the larger of the two totals
+    var maxT = Math.max(annualToday, annualKolm, 1);
+    setWidth('barToday', (annualToday / maxT) * 100);
+    setWidth('barKolm', (annualKolm / maxT) * 100);
+    setText('barTodayN', usd.format(Math.round(annualToday)));
+    setText('barKolmN', usd.format(Math.round(annualKolm)));
+
+    // breakdown ledger
+    setText('brDelayToday', usd.format(Math.round(annualDelayToday)));
+    setText('brDelayKolm', usd.format(Math.round(annualDelayKolm)));
+    setText('brEngToday', usd.format(Math.round(annualEngToday)));
+    setText('brEngKolm', usd.format(Math.round(annualEngKolm)));
+    setText('brProgToday', 'none');
+    setText('brProgKolm', usd.format(FULL_PRICE));
+    setText('brTotToday', usd.format(Math.round(annualToday)));
+    setText('brTotKolm', usd.format(Math.round(annualKolm)));
+
+    // payback, in human time, from the daily friction reduction
+    var payReport = dailySavings > 0 ? humanizeDuration(REPORT_PRICE / dailySavings) : null;
+    var payFull = dailySavings > 0 ? humanizeDuration(FULL_PRICE / dailySavings) : null;
+
+    if (payReport) {
+      setText('payReportN', payReport);
+      setText('payReportInline', payReport);
+    } else {
+      setText('payReportN', 'n/a');
+      setText('payReportInline', 'n/a at these inputs');
+    }
+    if (payFull) {
+      setText('payFullN', payFull);
+      setText('payFullInline', payFull);
+    } else {
+      setText('payFullN', 'n/a');
+      setText('payFullInline', 'n/a at these inputs');
+    }
+  }
+
+  // keep a number field and its mirror slider in sync, then recompute
+  function syncFromNumber(id) {
+    var input = el(id), slider = el(id + '_r');
+    if (slider && input) slider.value = input.value;
+    compute();
+  }
+  function syncFromSlider(id) {
+    var input = el(id), slider = el(id + '_r');
+    if (slider && input) input.value = slider.value;
+    compute();
+  }
+
+  function wire() {
+    IDS.forEach(function (id) {
+      var input = el(id), slider = el(id + '_r');
+      if (input) input.addEventListener('input', function () { syncFromNumber(id); });
+      if (input) input.addEventListener('change', function () { syncFromNumber(id); });
+      if (slider) slider.addEventListener('input', function () { syncFromSlider(id); });
+    });
+    var reset = el('roiReset');
+    if (reset) reset.addEventListener('click', function () {
+      IDS.forEach(function (id) {
+        var input = el(id), slider = el(id + '_r');
+        if (input) input.value = DEFAULTS[id];
+        if (slider) slider.value = DEFAULTS[id];
+      });
+      compute();
+    });
+    compute();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+  else wire();
+})();
+</script>
+
+</body>
+</html>
