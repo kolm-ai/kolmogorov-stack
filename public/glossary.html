@@ -10,15 +10,15 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Glossary: agent security review terms · kolm.ai</title>
-<meta name="description" content="Plain definitions of the vocabulary a security-review buyer or AI vendor searches: agent security review, signed evidence report, offline verification, Ed25519 attestation, the Agent Identity Passport, the ASR control catalog, transparency logs, RFC 3161 timestamps, and the frameworks each control maps to.">
-<meta name="keywords" content="agent security review, signed evidence report, offline verification, Ed25519 attestation, Agent Identity Passport, least privilege audit, audit trail integrity, data egress control, prompt injection testing, model provenance, memory retrieval integrity, multi-agent delegation, transparency log, inclusion proof, RFC 3161 timestamp, SOC 2 for AI agents, EU AI Act Article 12, NIST AI RMF, OWASP LLM Top 10, MITRE ATLAS">
+<meta name="description" content="Plain definitions of the vocabulary a security-review buyer or AI vendor searches: agent security review, signed evidence report, offline verification, Ed25519 attestation, the signed agent security record, the ASR control catalog, transparency logs, RFC 3161 timestamps, and the frameworks each control maps to.">
+<meta name="keywords" content="agent security review, signed evidence report, offline verification, Ed25519 attestation, signed agent security record, least privilege audit, audit trail integrity, data egress control, prompt injection testing, model provenance, memory retrieval integrity, multi-agent delegation, transparency log, inclusion proof, RFC 3161 timestamp, AI agent security evidence, EU AI Act Article 12, NIST AI RMF, OWASP LLM Top 10, MITRE ATLAS">
 <meta name="theme-color" content="#F6F7F4">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Glossary: the vocabulary of an agent security review">
-<meta property="og:description" content="Accurate, jargon-free definitions of the terms behind signed agent security evidence: the ASR control catalog, offline verification, the Agent Identity Passport, and the frameworks each finding maps to.">
+<meta property="og:description" content="Accurate, jargon-free definitions of the terms behind signed agent security evidence: the ASR control catalog, offline verification, the signed agent security record, and the frameworks each finding maps to.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/glossary">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -54,7 +54,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     { "@type": "DefinedTerm", "name": "Signed Evidence Report", "url": "https://kolm.ai/glossary#signed-evidence-report", "description": "A single canonical JSON artifact that records an agent's audit findings, each mapped to a named control, sealed with an Ed25519 signature over its exact bytes so any change to a finding or score breaks the seal." },
     { "@type": "DefinedTerm", "name": "Offline Verification", "url": "https://kolm.ai/glossary#offline-verification", "description": "Checking a signed report's authenticity entirely in the verifier's own browser using WebCrypto, with no account, no upload, and no kolm server in the trust path. The public key needed to verify travels inside the report." },
     { "@type": "DefinedTerm", "name": "Ed25519 Attestation", "url": "https://kolm.ai/glossary#ed25519-attestation", "description": "A statement of audit results signed with the Ed25519 elliptic-curve scheme (Curve25519, RFC 8032), computed over the report's canonical, key-sorted, whitespace-free bytes. Verification is fast, deterministic, and needs no contact with an issuer." },
-    { "@type": "DefinedTerm", "name": "Agent Identity Passport", "url": "https://kolm.ai/glossary#agent-identity-passport", "description": "A signed, timestamped, witnessed record that binds an agent's identity to its assessed security posture at a point in time, carrying the control findings, the issuer's public key, a transparency-log entry, and a trusted timestamp." },
+    { "@type": "DefinedTerm", "name": "Signed agent security record", "url": "https://kolm.ai/glossary#signed-agent-security-record", "description": "A signed, timestamped, witnessed record that binds an agent's identity and provenance to its assessed security posture at a point in time, carrying the control findings, the issuer's public key, a transparency-log entry, and a trusted timestamp." },
     { "@type": "DefinedTerm", "name": "Least-Privilege Audit (ASR-1)", "url": "https://kolm.ai/glossary#asr-1-least-privilege", "description": "Compares the scopes an agent holds against the scopes it actually uses, surfacing shared keys, standing grants, and high-impact actions reachable without a confirmation. Maps to SOC 2 CC6, OWASP ASI, and NIST MANAGE-1." },
     { "@type": "DefinedTerm", "name": "Audit-Trail Integrity (ASR-2)", "url": "https://kolm.ai/glossary#asr-2-audit-trail", "description": "Tests whether agent activity is logged append-only, hash-chained, and retained, so the record a reviewer reads is the record that happened. Maps to EU AI Act Article 12 and SOC 2 CC7." },
     { "@type": "DefinedTerm", "name": "Data Egress Control (ASR-3)", "url": "https://kolm.ai/glossary#asr-3-data-egress", "description": "Enumerates every destination the agent can reach, the approved sub-processors behind them, and proof that sensitive fields are redacted before they cross the boundary. Maps to OWASP LLM02 and EU AI Act Article 10." },
@@ -137,7 +137,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a class="ctrlid" href="#signed-evidence-report">Signed Evidence Report</a>
         <a class="ctrlid" href="#offline-verification">Offline Verification</a>
         <a class="ctrlid" href="#ed25519-attestation">Ed25519 Attestation</a>
-        <a class="ctrlid" href="#agent-identity-passport">Agent Identity Passport</a>
+        <a class="ctrlid" href="#signed-agent-security-record">Signed agent security record</a>
         <a class="ctrlid" href="#asr-1-least-privilege">ASR-1</a>
         <a class="ctrlid" href="#asr-2-audit-trail">ASR-2</a>
         <a class="ctrlid" href="#asr-3-data-egress">ASR-3</a>
@@ -190,10 +190,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p>A statement of audit results signed with the Ed25519 elliptic-curve signature scheme (Curve25519, defined in RFC 8032). The signature is computed over the report's canonical, key-sorted, whitespace-free bytes, so any change to the content invalidates it. Verification is fast, deterministic, and runs without contacting an issuer, which is what makes a report checkable offline.</p>
         <p class="card__map">Related: <a href="/how-it-works">How it works</a> · <a href="/security">Security</a></p>
       </div>
-      <div class="card" id="agent-identity-passport">
+      <div class="card" id="signed-agent-security-record">
         <p class="card__k">Term · Core wedge</p>
-        <h3>Agent Identity Passport</h3>
-        <p>A signed, timestamped, witnessed record that binds an agent's identity to its assessed security posture at a point in time. It carries the agent's control findings, the issuer's public key, an append-only log entry, and a trusted timestamp, so a buyer can confirm both what was attested and when. It is the durable credential an agent presents when its security has already been reviewed, rather than re-answering a questionnaire for every deal.</p>
+        <h3>Signed agent security record</h3>
+        <p>A signed, timestamped, witnessed record that binds an agent's identity and provenance to its assessed security posture at a point in time. It carries the agent's control findings, the issuer's public key, an append-only log entry, and a trusted timestamp, so a buyer can confirm both what was attested and when. It is the durable evidence an agent presents when its security has already been reviewed, rather than re-answering a questionnaire for every deal.</p>
         <p class="card__map">Related: <a href="/research">Research</a> · <a href="/trust">Trust center</a> · <a href="/transparency-log">Transparency log</a></p>
       </div>
     </div>

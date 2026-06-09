@@ -10,15 +10,15 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Signed security evidence for AI agents · kolm.ai</title>
-<meta name="description" content="Your enterprise deal stalls in security review the moment a CISO has to vet an autonomous agent. kolm signs an evidence report your buyer verifies offline against your key, with no account and no server in the trust path. A four-to-eight-week review becomes days.">
+<meta name="description" content="SOC 2 does not cover your AI agent: what it can access, what it did, whether it can be prompt-injected, or what data it sent out. kolm audits the agent from its logs and signs the evidence your buyer verifies offline against your key. A review that took weeks takes days.">
 <meta name="keywords" content="AI agent security, security review, signed evidence report, Ed25519 attestation, least privilege audit, prompt injection testing, OWASP LLM Top 10, MITRE ATLAS, SOC 2 control mapping, ISO 42001, NIST AI RMF, EU AI Act, enterprise AI procurement">
 <meta name="theme-color" content="#F6F7F4">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Signed security evidence for AI agents entering the enterprise">
-<meta property="og:description" content="kolm signs an evidence report your buyer verifies offline, against your public key, with no account and no server in the trust path. Clear the review in days, not months.">
+<meta property="og:title" content="SOC 2 doesn't cover your AI agent · kolm.ai">
+<meta property="og:description" content="kolm audits your AI agent from its logs and signs the security evidence a buyer's review needs. They verify it offline against your public key, with no account and no kolm server in the trust path. Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, and MITRE.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -27,8 +27,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:alt" content="kolm.ai, signed security evidence for AI agents entering the enterprise.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Signed security evidence for AI agents">
-<meta name="twitter:description" content="A signed evidence report your enterprise buyer's security team verifies offline, against your public key, with no account and no server in the trust path.">
+<meta name="twitter:title" content="SOC 2 doesn't cover your AI agent · kolm.ai">
+<meta name="twitter:description" content="kolm audits your AI agent from its logs and signs the security evidence a buyer's review needs. They verify it offline against your public key, with no account and no kolm server in the trust path. Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, and MITRE.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -74,7 +74,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       "@id": "https://kolm.ai/#website",
       "url": "https://kolm.ai/",
       "name": "kolm.ai",
-      "description": "The evidence layer for AI agents entering the enterprise. Signed, offline-verifiable security audit reports a buyer's review team can check for themselves.",
+      "description": "SOC 2 does not cover your AI agent. kolm audits the agent from its logs and signs the security evidence a buyer's review needs. They verify the report offline against your public key, with no account and no kolm server in the trust path.",
       "publisher": { "@id": "https://kolm.ai/#organization" },
       "inLanguage": "en-US"
     }
@@ -122,14 +122,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <div class="wrap">
     <div class="hero__grid">
       <div>
-        <h1 class="hero__h1">Security evidence for your AI agent,<br>signed and verifiable.</h1>
+        <p class="eyebrow">AI agent security</p>
+        <h1 class="hero__h1">SOC 2 doesn&rsquo;t cover<br>your AI agent.</h1>
         <p class="lede">
-          When a buyer's security team has to vet your autonomous agent, hand them a signed evidence report they verify offline, against your own key. The four-to-eight-week review becomes days.
+          It is table stakes for the enterprise, but it says nothing about the agent itself: what it can access, what it actually did, whether it can be prompt-injected, or what data it sent out. kolm audits the agent from its logs and signs the evidence. Your buyer verifies it offline against your public key, and a review that took weeks takes days.
         </p>
         <div class="hero__cta">
-          <a class="btn btn--primary" href="/signup">Start free</a>
-          <a class="btn btn--ghost" href="/how-it-works">See how it works</a>
+          <a class="btn btn--primary" href="/signup">Run the free scan</a>
+          <a class="btn btn--ghost" href="/verify">Verify a sample report offline</a>
         </div>
+        <p class="hero__claim" style="margin-top:12px">
+          Or <a href="/sample-audit-report.json" download style="border-bottom:1px solid var(--line-2)">download the sample report</a> and verify it yourself with our open tool. Real Ed25519, offline, no account, no kolm server in the trust path.
+        </p>
         <p class="hero__who" style="margin-top:14px;color:var(--ink-2);font-size:.95rem;max-width:54ch">For AI-native vendors whose deal is waiting on a security review. Financial-services buyers first, then any regulated reviewer now asking an agent-specific question that SOC 2 alone does not answer.</p>
         <div class="trustline" aria-label="What the report guarantees">
           <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed</span>
@@ -181,11 +185,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </section>
 
-<!-- ============================================================ 3. THE STALL -->
+<!-- ============================================================ 3. THE WEDGE (the passport) -->
+<section class="section reveal" id="passport">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / What your SOC 2 leaves out</span>
+      <h2>The agent-specific facts a review actually needs.</h2>
+      <p class="lede">
+        The signed report states, in a signature-covered block, who each agent is, the scopes it holds versus the scopes it actually used, every action it took, the models and tools and vendors it reached, how it delegates to other agents, and what data left the boundary. Each finding is mapped to the control your buyer cites, timestamped, and anchored in a public witnessed transparency log. It is vendor-neutral: any seller can issue one, and any buyer can verify it offline against your key. No login, no vendor portal, no server in the trust path. The buyer checks the math and your key, and nothing else.
+      </p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Why it matters in 2026</h3>
+        <p>Agent reviews now fail on questions that human-era tooling never had to answer. Prompt injection still lands against production agents at rates measured in the double digits, multiple agents sharing one key make it impossible to say which one acted, and multi-agent delegation chains scatter authority across hops a reviewer cannot trace. At the same time, the EU AI Act record-keeping rules (Art. 12, effective Aug 2026), NIST AI RMF, and the NIST AI agent standards work are pushing buyers to ask for agent-specific records that questionnaires do not provide. kolm gives a reviewer those records as signed facts they can verify offline, instead of claims they have to take on faith. Injection is tested and reported, not warranted.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4. THE STALL -->
 <section class="section reveal" id="problem">
   <div class="wrap">
     <div class="section__head">
-      <span class="idx">01 / The stall</span>
+      <span class="idx">02 / The stall</span>
       <h2>A CISO won't take your word for it.</h2>
       <p class="lede">
         The moment an autonomous agent touches customer data, the week-long review
@@ -219,7 +242,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <section class="section section--ink reveal" id="how">
   <div class="wrap">
     <div class="section__head">
-      <span class="idx">02 / How it works</span>
+      <span class="idx">03 / How it works</span>
       <h2>Audit. Sign. Verify.</h2>
       <p class="lede">One lifecycle. The report is reproducible, scoped to what was tested, and checkable by anyone you hand it to.</p>
     </div>
@@ -258,7 +281,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <section class="section reveal" id="report">
   <div class="wrap">
     <div class="section__head">
-      <span class="idx">03 / The report</span>
+      <span class="idx">04 / The report</span>
       <h2>The artifact is the proof.</h2>
       <p class="lede">A signed report is one canonical object. Every cryptographic fact is set in mono, because a fact should read like a fact.</p>
     </div>
@@ -315,7 +338,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <section class="section section--ink reveal" id="verify">
   <div class="wrap">
     <div class="section__head">
-      <span class="idx">04 / Verification</span>
+      <span class="idx">05 / Verification</span>
       <h2>They don't trust us. They check the signature.</h2>
       <p class="lede">
         The buyer doesn't take our word. Two checks run in the buyer's
@@ -350,7 +373,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <section class="section reveal" id="pricing">
   <div class="wrap">
     <div class="section__head">
-      <span class="idx">05 / Pricing</span>
+      <span class="idx">06 / Pricing</span>
       <h2>One fixed fee. One signed report.</h2>
       <p class="lede">No retainer to start, no per-seat meter. A scoped audit that ends in evidence your buyer can verify.</p>
     </div>

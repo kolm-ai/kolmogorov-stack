@@ -306,7 +306,7 @@ export function VerifyWidget({
       <p className="mt-3 text-center text-[12px] text-ink-3">
         Edit any field and the signature reports VOID.{" "}
         <b className="text-ink-2">Inflate the score</b> and the seal breaks. Real
-        Ed25519, no account, no upload.
+        Ed25519, offline, no account, no kolm server in the trust path.
       </p>
     </div>
   );

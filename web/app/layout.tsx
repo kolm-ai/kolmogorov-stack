@@ -17,7 +17,7 @@ const organizationLd = {
   logo: `${SITE_URL}/favicon.svg`,
   image: `${SITE_URL}/brand-hero.png`,
   description:
-    "Signed, offline-verifiable security evidence for AI agents entering the enterprise.",
+    "SOC 2 does not cover your AI agent. kolm audits the agent from its logs and signs the security evidence your buyer verifies offline against your public key.",
   email: "dev@kolm.ai",
   sameAs: ["https://github.com/kolm-ai/kolm"],
   contactPoint: {
@@ -34,7 +34,7 @@ const websiteLd = {
   url: `${SITE_URL}/`,
   name: "kolm.ai",
   description:
-    "The evidence layer for AI agents entering the enterprise. Signed, offline-verifiable security audit reports a buyer's review team can check for themselves.",
+    "SOC 2 does not cover the AI agent itself: what it can access, what it did, whether it can be prompt-injected, or what data it sent out. kolm audits the agent from its logs and signs the security evidence a buyer's review team verifies offline against your public key.",
   publisher: { "@id": `${SITE_URL}/#organization` },
   inLanguage: "en-US",
 };
@@ -51,14 +51,17 @@ export const metadata: Metadata = {
     template: "%s · kolm.ai",
   },
   description:
-    "kolm audits your AI agent from its logs, maps each finding to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS, and signs the report your buyer verifies offline. A review that took weeks takes days.",
+    "SOC 2 does not cover your AI agent: what it can access, what it did, whether it can be prompt-injected, or what data it sent out. kolm audits the agent from its logs and signs the evidence your buyer verifies offline against your key. A review that took weeks takes days.",
   applicationName: "kolm.ai",
   keywords: [
     "AI agent security",
+    "SOC 2 AI agent gap",
+    "offline-verifiable report",
     "Ed25519 signed report",
     "ISO 42001",
     "NIST AI RMF",
-    "EU AI Act",
+    "OWASP LLM Top 10",
+    "MITRE ATLAS",
     "agent audit",
   ],
   authors: [{ name: "kolm.ai", url: SITE_URL }],
@@ -66,16 +69,16 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: "kolm.ai",
-    title: "Signed security evidence for AI agents · kolm.ai",
+    title: "SOC 2 doesn't cover your AI agent · kolm.ai",
     description:
-      "Signed, offline-verifiable security evidence for AI agents. A review that took weeks takes days.",
+      "kolm audits your AI agent from its logs and signs the security evidence a buyer's review needs. They verify it offline against your public key, with no account and no kolm server in the trust path. Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, and MITRE.",
     images: [{ url: "/brand-hero.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Signed security evidence for AI agents · kolm.ai",
+    title: "SOC 2 doesn't cover your AI agent · kolm.ai",
     description:
-      "Signed, offline-verifiable security evidence for AI agents. A review that took weeks takes days.",
+      "kolm audits your AI agent from its logs and signs the security evidence a buyer's review needs. They verify it offline against your public key, with no account and no kolm server in the trust path. Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, and MITRE.",
     images: ["/brand-hero.png"],
   },
   icons: { icon: "/favicon.svg" },

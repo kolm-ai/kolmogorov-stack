@@ -1,0 +1,71 @@
+{
+  "id": "s2-soc2gap-language",
+  "track": "soc2gap",
+  "prompt": "2026: how do AI founders, CISOs, security engineers, and enterprise buyers actually TALK on X and the web about the gap between traditional security/compliance (SOC 2, ISO 27001, security questionnaires, pentests) and the NEW security questions raised by AUTONOMOUS AI AGENTS? Quote real recent posts/threads (@handle + date) and real articles/product copy (URLs) that express sentiments like 'SOC 2 doesn't cover AI', 'your compliance does not address agents', 'questionnaires are theater for AI', 'who is accountable when the agent acts'. What is the most RESONANT, credible way to express 'your existing security evidence does not cover your AI agent' without sounding like fear-mongering or hype? Give the 8-10 highest-signal phrases/words to use, and the cliches to avoid.",
+  "content": "**Key real discussions (as of mid-2026) highlight specific mismatches: traditional frameworks assume human-mediated, static, deterministic systems with attributable actions, while autonomous AI agents introduce runtime code generation/execution, non-human identities, dynamic behavior, and untraceable decision chains.**[[1]](https://goteleport.com/blog/ai-agents-soc-2/)[[2]](https://blaxel.ai/blog/soc-2-compliance-ai-guide)\n\n### Real Recent Posts/Threads on X\n- **@ChanniGreenwall** (Jun 5, 2026): “SOC 2 was designed for systems where humans approve sensitive actions. ISO 27001 was designed for systems with stable, auditable boundaries. AI agents violate both assumptions by design.”[[3]](https://x.com/ChanniGreenwall/status/2062973113508180238)\n- **@cloudsa** (Jun 8, 2026): “Ask your legal team who's liable when an autonomous agent triggers a compliance violation. Watch them reach for a framework that was written before agents existed. ... That's the gap agentic AI opens.” (Discusses accountability dissolving across vendors/teams.)[[4]](https://x.com/cloudsa/status/2063803369962303526)\n- **@sooyoon_eth** (Jun 2, 2026): “a lot of teams treat soc2 as a rubber stamp while their ai pipelines have zero runtime validation. compliance checks just do not prevent prompt injections.”[[5]](https://x.com/sooyoon_eth/status/2061919007478030515)\n- **@gateway_eth** (Feb 20, 2026): “For enterprises, the discussion around AI agents is framed as security, but the deeper issue is compliance. ... Security tries to prevent what an agent might do. Compliance requires proving what the agent actually did, under whose authority, and within which permissions. Without identity, every agent is a black box. Black boxes don't survive audits.”[[6]](https://x.com/gateway_eth/status/2024827308469846126)\n- **@haridigresses** (Mar 20, 2026): Extended thread calling much of SOC 2 “security theater” and a poor proxy for real security, noting it doesn’t address novel risks (in context of broader enterprise sales/compliance).[[7]](https://x.com/haridigresses/status/2035070060050493541)\n\nAdditional recent context appears in threads about non-human identity sprawl, audit trails for agent actions, and the need for “SOC 2 plus” approaches (e.g., integrating ISO 42001 for AI governance).[[8]](https://x.com/francescofaenzi/status/2062398021653213315)\n\n### Real Articles and Product/Thought Leadership Copy (URLs)\n- **GoTeleport blog** (Feb 25, 2026): “How AI Agents Impact SOC 2 Trust Services Criteria” — “Auditors will often treat ‘no human request’ as a major accountability gap, because SOC 2 expects privileged actions to be attributable to an accountable individual, not to an autonomous agent or generic system account.” Expands evidentiary requirements to cover models, training data, automated decision-making, and production execution.[[1]](https://goteleport.com/blog/ai-agents-soc-2/)\n- **Blaxel blog** (Feb 18, 2026): “SOC 2 Compliance for AI Agents in 2026” — “AI agents break the assumptions that SOC 2 was built on. Traditional compliance frameworks assume static controls, deterministic system behavior, and human-mediated access. ... This creates compliance gaps that existing controls can't address.” Specifically: traditional controls “can't protect against an agent that writes and runs its own code.”[[2]](https://blaxel.ai/blog/soc-2-compliance-ai-guide)\n- **IBM Think** (recent): “Building trustworthy AI agents for compliance” — Focuses on “the accountability gap,” “Can an AI agent be a control owner?”, and the “RACI problem for AI agents” (who is responsible/accountable when agents make autonomous decisions; default is human accountability, but scale of autonomy challenges this).[[9]](https://www.ibm.com/think/insights/building-trustworthy-ai-agents-compliance-auditability-explainability)\n- **Agility at Scale** (Mar 10, 2026): “Enterprise AI Agent Security and Compliance” — Table explicitly lists SOC 2 strengths vs. gaps: “No coverage of model behavior, Prompt Injection defenses, or autonomous decision-making risks.” ISO 27001 similarly limited on drift detection, adversarial inputs, and multi-agent coordination.[[10]](https://agility-at-scale.com/ai/agents/security-and-compliance-for-enterprise-ai-agents/)\n- **DSalta** (undated/recent in results): “Agentic AI Identity: The Gap SOC 2 and ISO 27001 Miss” — Highlights non-human identity governance gaps (e.g., 78% of enterprises lack policies for AI agents).[[11]](https://www.dsalta.com/resources/ai-compliance/agentic-ai-identity-governance-gap-soc2-iso27001)\n\nOther pieces echo “processing integrity” challenges for model outputs, the need for runtime/continuous validation beyond point-in-time pentests or questionnaires, and black-box audit failures.[[12]](https://fin.ai/learn/evaluate-ai-agent-security-compliance)\n\n### Most Resonant, Credible Framing (Without Hype or Fear-Mongering)\nThe strongest language stays factual and assumption-focused: it points to **mismatches in design assumptions** of the frameworks rather than claiming “traditional security is broken” or using alarmist terms. It emphasizes **auditability, attribution, and control boundaries** that enterprises and auditors actually care about (e.g., evidence an auditor can review, actions attributable to an accountable party, coverage of runtime behavior).\n\n**8–10 highest-signal phrases/words to use** (drawn directly from the sources above):\n- Accountability gap (or “major accountability gap”)\n- Attributable to an accountable individual / human-mediated access\n- Autonomous agent / agentic actions / autonomous decision-making\n- Static controls / deterministic system behavior / stable, auditable boundaries\n- Runtime validation / processing integrity (for model outputs)\n- Non-human identity / agent identity governance / identity policies for AI agents\n- Compliance gaps that existing controls can't address\n- Black box (in audit context: “black boxes don't survive audits”)\n- RACI problem / control owner\n- Assumptions the framework was built on (e.g., “violate both assumptions by design”)\n\n**Cliches to avoid**:\n- “Security theater,” “rubber stamp,” “scam,” or “checkbox compliance” (comes across as dismissive rather than precise).\n- Overly broad hype like “revolutionary risk,” “existential gap,” “zero trust in agents,” or “traditional security is dead.”\n- Vague fear language (“nightmare,” “uncontrollable,” “massive exposure”) without tying to specific auditor expectations or control mismatches.\n\n**Example credible phrasing**: “Traditional SOC 2 and ISO 27001 controls were designed around human approval of sensitive actions and static system boundaries; autonomous agents introduce non-attributable actions and dynamic behavior that create specific gaps in auditability and evidence requirements.” This mirrors language from auditors, vendors, and practitioners while remaining neutral and evidence-oriented.",
+  "citations": [
+    "https://goteleport.com/blog/ai-agents-soc-2/",
+    "https://blaxel.ai/blog/soc-2-compliance-ai-guide",
+    "https://x.com/ChanniGreenwall/status/2062973113508180238",
+    "https://x.com/cloudsa/status/2063803369962303526",
+    "https://x.com/sooyoon_eth/status/2061919007478030515",
+    "https://x.com/gateway_eth/status/2024827308469846126",
+    "https://x.com/haridigresses/status/2035070060050493541",
+    "https://x.com/francescofaenzi/status/2062398021653213315",
+    "https://www.ibm.com/think/insights/building-trustworthy-ai-agents-compliance-auditability-explainability",
+    "https://agility-at-scale.com/ai/agents/security-and-compliance-for-enterprise-ai-agents/",
+    "https://www.dsalta.com/resources/ai-compliance/agentic-ai-identity-governance-gap-soc2-iso27001",
+    "https://fin.ai/learn/evaluate-ai-agent-security-compliance"
+  ],
+  "searched": [
+    "https://goteleport.com/blog/ai-agents-soc-2/",
+    "https://www.linkedin.com/posts/js-patenaude-1677671bb_aisecurity-aigovernance-soc2-activity-7414308554482057216-uVm2",
+    "https://blaxel.ai/blog/soc-2-compliance-ai-guide",
+    "https://www.ibm.com/think/insights/building-trustworthy-ai-agents-compliance-auditability-explainability",
+    "https://www.reddit.com/r/cybersecurity/comments/1ssyfgm/is_ai_compliance_a_real_concern_or_just_soc_2/",
+    "https://www.kiteworks.com/regulatory-compliance/human-in-the-loop-ai-compliance/",
+    "https://www.surepath.ai/blog/soc-2-type-1-certified",
+    "https://www.mindstudio.ai/blog/ai-agent-compliance/",
+    "https://agility-at-scale.com/ai/agents/security-and-compliance-for-enterprise-ai-agents/",
+    "https://www.fieldguide.io/resource-articles/ai-continuous-soc-2-compliance",
+    "https://quickblox.com/answers/ai-agent-security-compliance/?srsltid=AfmBOorZyaXCgDifJY6k2shjKNKc45tPVI7fKVb4G9xzeA509CBLAD4B",
+    "https://www.dsalta.com/resources/ai-compliance/agentic-ai-identity-governance-gap-soc2-iso27001",
+    "https://innovationvista.com/governance/agentic-ai-within-soc2/",
+    "https://www.getmyai.ai/blog/ai-chatbot-soc-2-compliance/",
+    "https://continuumgrc.com/audit-compliance-solutions-soc/",
+    "https://novee.security/blog/ai-pentesting-for-compliance/",
+    "https://www.linkedin.com/posts/michellesandford_aigovernance-agenticai-enterpriseai-activity-7442732390638333953-1H1x",
+    "https://www.penligent.ai/hackinglabs/ai-soc-iso-27001-soc-2-and-the-security-stack-real-ai-teams-need-in-2026/",
+    "https://safe.security/resources/blog/ace-your-tprm-program-compliance-with-iso-27001-soc2-and-nist-csf-using-safes-agentic-ai/",
+    "https://pentera.io/glossary/ai-soc-agent/",
+    "https://www.token.security/use-cases/compliance-and-governance",
+    "https://fin.ai/learn/evaluate-ai-agent-security-compliance"
+  ],
+  "usage": {
+    "input_tokens": 14910,
+    "input_tokens_details": {
+      "cached_tokens": 4032
+    },
+    "output_tokens": 2744,
+    "output_tokens_details": {
+      "reasoning_tokens": 1346
+    },
+    "total_tokens": 17654,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 4,
+    "cost_in_usd_ticks": 412639000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 2,
+      "x_search_calls": 2,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 12782,
+      "output_tokens": 2211
+    }
+  },
+  "attempts": 1
+}

@@ -91,16 +91,17 @@ export default function HomePage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(48px,7vw,88px)]">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)]">
             <div>
-              <p className="eyebrow mb-4">Signed security evidence for AI agents</p>
-              <h1 className="max-w-[18ch] font-display text-[clamp(38px,6vw,64px)] font-extrabold leading-[1.0] tracking-[-0.035em] text-ink">
-                Security evidence for your AI agent, signed and verifiable.
+              <p className="eyebrow mb-4">AI agent security</p>
+              <h1 className="max-w-[16ch] font-display text-[clamp(38px,6vw,64px)] font-extrabold leading-[1.0] tracking-[-0.035em] text-ink">
+                SOC 2 doesn&rsquo;t cover your AI agent.
               </h1>
               <p className="mt-6 max-w-[52ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-                kolm audits your agent from its logs, maps each finding to SOC
-                2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and
-                MITRE ATLAS, and signs the report. Your buyer verifies it
-                offline against your public key. No account, no upload, no kolm
-                server in the trust path. A review that took weeks takes days.
+                It is table stakes for the enterprise, but it says nothing about
+                the agent itself: what it can access, what it actually did,
+                whether it can be prompt-injected, or what data it sent out.
+                kolm audits the agent from its logs and signs the evidence. Your
+                buyer verifies it offline against your public key, and a review
+                that took weeks takes days.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
@@ -108,7 +109,7 @@ export default function HomePage() {
                   <Link href="/signup">Run the free scan</Link>
                 </Button>
                 <Button asChild variant="ghost">
-                  <Link href="/sample">Verify a sample report</Link>
+                  <Link href="/sample">Verify a sample report offline</Link>
                 </Button>
               </div>
 
@@ -119,9 +120,10 @@ export default function HomePage() {
                   href="/sample-audit-report.json"
                   download
                 >
-                  download the sample report
+                  download the report
                 </a>{" "}
-                and verify it yourself. Real Ed25519, no account.
+                and verify it offline with our open tool. No login, no upload,
+                no vendor portal.
               </p>
 
               <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-ink-3">
@@ -135,7 +137,7 @@ export default function HomePage() {
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <CheckIcon className="h-3.5 w-3.5 text-[var(--accent)]" />
-                  Mapped to SOC 2, ISO 42001, NIST, EU AI Act, OWASP, MITRE
+                  Mapped to SOC 2, ISO 42001, EU AI Act Art. 12
                 </span>
               </div>
             </div>
@@ -144,6 +146,54 @@ export default function HomePage() {
             <aside aria-label="Live offline verification of a signed evidence report">
               <VerifyWidget />
             </aside>
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== WHAT SOC 2 LEAVES OUT ===================== */}
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-wrap px-6 py-[96px]">
+          <div className="max-w-[66ch]">
+            <p className="eyebrow mb-3">What your SOC 2 leaves out</p>
+            <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
+              The agent-specific facts a review actually needs.
+            </h2>
+            <p className="mt-4 max-w-[64ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
+              kolm reads the agent&rsquo;s own logs and reports what a SOC 2
+              never looks at: the scopes it holds versus the scopes it uses,
+              every action it took, the models and tools and vendors it reached,
+              how it hands work to other agents, and what data left the
+              boundary. Each finding is signed and mapped to the control a
+              reviewer cites. Any vendor can produce one, and any buyer can
+              verify it offline against your key, with no kolm account and no
+              kolm server in the trust path.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== WHY IT MATTERS IN 2026 ===================== */}
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-wrap px-6 py-[96px]">
+          <div className="max-w-[66ch]">
+            <p className="eyebrow mb-3">Why it matters in 2026</p>
+            <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
+              Agent reviews fail on questions human-era tooling never had to
+              answer.
+            </h2>
+            <p className="mt-4 max-w-[64ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
+              Prompt injection still lands against production agents at rates
+              measured in the double digits, multiple agents sharing one key
+              make it impossible to say which one acted, and multi-agent
+              delegation chains scatter authority across hops a reviewer cannot
+              trace. At the same time, the EU AI Act record-keeping rules (Art.
+              12, effective Aug 2026), NIST AI RMF, and the NIST AI agent
+              standards work are pushing buyers to ask for agent-specific
+              records that questionnaires do not provide. kolm gives a reviewer
+              those records as signed facts they can verify offline, instead of
+              claims they have to take on faith. Injection is tested and
+              reported, not warranted.
+            </p>
           </div>
         </div>
       </section>

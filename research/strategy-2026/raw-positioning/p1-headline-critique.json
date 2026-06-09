@@ -1,0 +1,80 @@
+{
+  "id": "p1-headline-critique",
+  "track": "positioning",
+  "prompt": "It is 2026. kolm.ai sells signed, offline-verifiable SECURITY EVIDENCE for AI AGENTS: an AI-agent vendor whose enterprise deal stalls in the buyer's security review uploads the agent's logs, and kolm runs a deterministic audit across 8 controls (least privilege, audit trail, data egress, prompt-injection/red-team, model provenance, evidence, memory/retrieval, multi-agent delegation), maps every finding to SOC 2 / ISO 42001 / NIST AI RMF / EU AI Act / OWASP LLM Top 10 / MITRE ATLAS, and produces an Ed25519-SIGNED report the buyer verifies OFFLINE against the vendor's public key with no kolm account and no kolm server in the trust path. Turns a 4-8 week review into days. The current homepage HEADLINE is: 'Security evidence for your AI agent, signed and verifiable.' Critique this headline hard for a technical B2B security buyer. Is it the clearest, most compelling framing, or generic? Propose 3-5 SHARPER alternative headlines (write the actual lines). Then pick the single best and explain why. Be specific and current; cite real 2026 examples of strong security/devtools positioning (@handle or URL + date) you are drawing from.",
+  "content": "**The current headline is generic and underpowered for a technical B2B security buyer.**\n\n\"Security evidence for your AI agent, signed and verifiable\" reads like boilerplate from any compliance or audit SaaS. It states the obvious without surfacing the core buyer pain (stalled enterprise deals in security review), the mechanism (deterministic 8-control audit + Ed25519 offline verification with zero trust-path dependency on kolm), or the outcome (4–8 weeks compressed to days, with explicit mapping to SOC 2 / ISO 42001 / NIST AI RMF / EU AI Act / OWASP LLM Top 10 / MITRE ATLAS). Technical buyers in 2026 are inundated with \"AI security\" and \"verifiable\" claims; they want specificity, cryptographic proof language, and direct tie-ins to deal velocity and regulatory frameworks.[[1]](https://securityboulevard.com/2025/11/introducing-juno-the-first-verifiable-ai-analyst-for-cybersecurity/)\n\nStrong 2025–2026 positioning in the space leans into **verifiability + runtime/agentic specificity** rather than generic descriptors:\n- Uptycs Juno (launched ~Nov 2025): \"The First Verifiable AI Analyst for Cybersecurity\" + emphasis on \"clear, verifiable answers... No hallucinations. No black boxes... every output must be verifiable\" backed by real queries/logs/reasoning.[[1]](https://securityboulevard.com/2025/11/introducing-juno-the-first-verifiable-ai-analyst-for-cybersecurity/)\n- Wiz (2026 homepage): \"AI Cybersecurity for All Your Cloud and AI Applications\" + \"agentic cybersecurity platform\" framing that ties directly to code/cloud/runtime and risk prevention.[[2]](https://www.wiz.io/)\n- AGAT/Pragatix (Mar 2026): \"AI Security and Enablement Platform that gives security teams full visibility and control over every AI agent\" with explicit enterprise governance language.[[3]](https://agatsoftware.com/blog/ai-agent-security-2026-google-forecast/)\n\nThese succeed because they are benefit- or mechanism-specific, not feature-descriptive.\n\n### Sharper Alternative Headlines\nHere are five tighter options written as actual headline copy:\n\n1. \"Close AI Agent Enterprise Deals in Days: Ed25519-Signed Audits Mapped to SOC 2, NIST AI RMF & EU AI Act\"\n2. \"Offline-Verifiable AI Agent Evidence—No Server in the Trust Path. 8 Controls, Instant Buyer Verification\"\n3. \"Stuck in Security Review? Upload Agent Logs → Get Deterministic, Standards-Mapped, Signed Reports\"\n4. \"The Only Ed25519-Signed, Offline-Verifiable Audit for AI Agents—SOC 2 / ISO 42001 / MITRE ATLAS Ready\"\n5. \"Turn 4–8 Week AI Agent Security Reviews into Days: Cryptographically Verifiable Evidence Buyers Trust\"\n\n### Best Headline and Why\n**Best: \"Close AI Agent Enterprise Deals in Days: Ed25519-Signed Audits Mapped to SOC 2, NIST AI RMF & EU AI Act\"**\n\nThis is the sharpest because it leads with the highest-value outcome for the buyer (deal velocity / unblocking revenue), immediately signals technical credibility (Ed25519 + explicit standards), and implies the offline/no-trust-path mechanic without burying it. It mirrors the precision of Uptycs’ “verifiable” + Wiz’s agentic framing while directly attacking the stated pain point (stalled reviews). The others are strong but either over-index on mechanism at the expense of benefit or feel slightly more feature-listy. This one reads like copy that would survive a CISO or procurement review in 2026.",
+  "citations": [
+    "https://securityboulevard.com/2025/11/introducing-juno-the-first-verifiable-ai-analyst-for-cybersecurity/",
+    "https://www.wiz.io/",
+    "https://agatsoftware.com/blog/ai-agent-security-2026-google-forecast/"
+  ],
+  "searched": [
+    "https://agatsoftware.com/blog/ai-agent-security-2026-google-forecast/",
+    "https://www.hiddenlayer.com/report-and-guide/threatreport2026",
+    "https://cloud.google.com/blog/products/identity-security/next26-redefining-security-for-the-ai-era-with-google-cloud-and-wiz",
+    "https://www.strata.io/blog/agentic-identity/the-ai-agent-identity-crisis-new-research-reveals-a-governance-gap/",
+    "https://www.youtube.com/watch?v=rMabCePagtk",
+    "https://www.obsidiansecurity.com/blog/ai-agent-market-landscape",
+    "https://www.denexus.io/resources/ai-agents-in-cybersecurity-and-cyber-risk-management-5-critical-trends-for-2026",
+    "https://jetruby.com/blog/enterprise-ai-agents/",
+    "https://blog.google/products-and-platforms/products/search/search-io-2026/",
+    "https://www.linkedin.com/pulse/2026-predictions-identity-ai-agents-new-guardrails-cksqe",
+    "https://agatsoftware.com/blog/ai-agent-security-enterprise-2026/",
+    "https://gradientflow.substack.com/p/security-for-ai-native-companies",
+    "https://www.firecrawl.dev/blog/agentic-ai-trends",
+    "https://www.rstreet.org/?post_type=research&p=87654",
+    "https://www.mintmcp.com/blog/ai-agent-security-risks",
+    "https://github.com/jamesmurdza/awesome-ai-devtools",
+    "https://medium.com/oak-security/ai-assisted-security-audits-0bd76608e3be",
+    "https://arxiv.org/html/2606.03190v1",
+    "https://www.domo.com/learn/article/ai-governance-tools",
+    "https://softwareanalyst.substack.com/p/runtime-security-for-ai-agents-an",
+    "https://www.knostic.ai/blog/shadow-ai-detection-tools",
+    "https://www.opsmx.com/blog/security-risks-of-ai-in-software-development-what-you-need-to-know/",
+    "https://gotopia.tech/articles/419/handling-ai-generated-code-challenges-and-best-practices",
+    "https://www.augmentcode.com/tools/open-source-ai-code-review-tools-worth-trying",
+    "https://www.federalregister.gov/documents/2023/11/01/2023-24283/safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence",
+    "https://www.uptycs.com/blog/the-dirty-secret-of-ai-in-security-it-doesnt-think-it-retrieves",
+    "https://www.threatngsecurity.com/glossary/verifiable-ai",
+    "https://securityboulevard.com/2025/11/introducing-juno-the-first-verifiable-ai-analyst-for-cybersecurity/",
+    "https://www.sciencedirect.com/science/article/pii/S0164121224001274",
+    "https://www.linkedin.com/posts/uptycs_ai-security-architecture-the-key-to-verifiable-activity-7459966870771834880-saTA",
+    "https://www.wiz.io/",
+    "https://live.paloaltonetworks.com/t5/community-blogs/prisma-cloud-new-feature-announcements-feb-2025/ba-p/1220487",
+    "https://docs.prismacloud.io/en/enterprise-edition/rn/prisma-cloud-release-info/features-introduced-in-2026/features-introduced-in-2026",
+    "https://cybersectools.com/compare/wiz-cloud-vs-palo-alto-networks-prisma-cloud",
+    "https://www.youtube.com/watch?v=1HzC5tG5_hY",
+    "https://softwareanalyst.substack.com/p/runtime-security-in-2025-how-wiz",
+    "https://reintech.io/blog/wiz-vs-orca-vs-prisma-cloud-comparison-2026",
+    "https://www.plexicus.ai/blog/review/wiz-alternatives-from-visibility-to-remediation/",
+    "https://www.reddit.com/r/devops/comments/1q1wd90/best_agentless_cloud_security_tool_for_multi/",
+    "https://getsecureslate.com/blog/10-best-cspm-solutions-for-multi-cloud-environments-ranked-reviewed"
+  ],
+  "usage": {
+    "input_tokens": 14108,
+    "input_tokens_details": {
+      "cached_tokens": 3520
+    },
+    "output_tokens": 1952,
+    "output_tokens_details": {
+      "reasoning_tokens": 1236
+    },
+    "total_tokens": 16060,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 4,
+    "cost_in_usd_ticks": 388190000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 4,
+      "x_search_calls": 0,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 11894,
+      "output_tokens": 1277
+    }
+  },
+  "attempts": 1
+}

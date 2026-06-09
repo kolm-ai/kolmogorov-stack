@@ -1,0 +1,92 @@
+{
+  "id": "p6-pricing-packaging",
+  "track": "positioning",
+  "prompt": "Evaluate kolm's pricing/packaging framing for an AI-agent vendor buyer in 2026. Tiers: free Scan (watermarked preview), $750 one-time Signed Readiness Report, Continuous $299/mo (re-attested weekly) and $999/mo (re-attested every deploy + injection regression), $15k Full Readiness (guided engagement), $25k Reviewed Attestation (named human co-signer). Is the free-scan -> one-time -> continuous -> high-touch ladder the right shape? Is differentiating the two Continuous tiers on CADENCE (weekly vs every-deploy) + DEPTH the right move (we just removed an 'up to 3 vs 15 agents' meter)? Compare to how 2026 security/devtools companies package self-serve + sales-assisted (cite real pricing pages/URLs). Recommend any changes to the FRAMING/labels/order (NOT the locked prices) that would convert better, and the one-line value statement to put atop the pricing page.",
+  "content": "**The proposed ladder (free scan → one-time signed report → continuous subscriptions → high-touch) is the right shape for an AI-agent security/readiness vendor targeting 2026 buyers.** It mirrors proven patterns in security/devtools SaaS: low-friction entry for evaluation/PLG, clear upgrade paths that expand usage/commitment, and a transition to sales-assisted for complex/enterprise needs.[[1]](https://snyk.io/plans/)\n\n### Comparison to 2026 Security/Devtools Packaging\nReal-world examples (as of mid-2026) show consistent structures:\n\n- **Snyk** (code/open-source/container security): Free tier (limited) → Team (~$25–$98 per contributing developer/month, self-serve) → Enterprise (custom quote, demo/booked). Strong self-serve ramp with usage-based elements; high-touch for scale/compliance.[[1]](https://snyk.io/plans/)\n\n- **SonarQube/SonarSource**: Free (limited LOC) → Team (starts ~$32/month, LOC-based) → Enterprise (custom pricing, advanced features/audit). Self-managed or cloud options with clear self-serve entry.[[2]](https://www.sonarsource.com/plans-and-pricing/)\n\n- **GitHub Advanced Security**: Free on public repos → Paid per-active-committer/month tiers (Secret Protection ~$19, Code Security ~$30) for private/enterprise. Metered/self-serve scaling.[[3]](https://github.com/security/plans)\n\n- **Lakera** (AI/GenAI security): Free Community (limited requests) → Enterprise (custom/sales contact for advanced features).[[4]](https://platform.lakera.ai/pricing)\n\n- **Mindgard** (AI red teaming/security testing): Free sandbox/labs → Premium/Enterprise (sales contact).[[5]](https://sourceforge.net/software/product/Mindgard/)\n\nThese emphasize **self-serve starters** (free or low-commitment to hook developers/teams) transitioning to **per-user/usage subscriptions**, with **enterprise/high-touch** (custom pricing, demos, named support, compliance features) gated behind sales. Kolm’s mix of one-time + recurring + high-touch engagements fits well, especially for AI-specific attestation/readiness where buyers range from indie devs/agents to regulated enterprises needing human sign-off. The cadence/depth differentiation (post-removal of the 3-vs-15 agents meter) is a **strong move**—it ties directly to buyer pain (how fresh/reliable is the signal?) rather than arbitrary caps, which often feel punitive in security tools.\n\n### Recommended Framing/Label/Order Changes (Prices Locked)\nThe core ladder is sound and converts well by reducing friction early while creating natural expansion. Minor tweaks improve clarity, perceived value progression, and psychological flow (self-serve first, then assisted):\n\n1. **Reorder/group slightly for better conversion**:\n   - Self-serve section first (Free Scan + One-time + the two Continuous tiers).\n   - Then “Enterprise & Attestation Services” for the $15k/$25k (positions high-touch as premium add-ons, not the main path).\n\n2. **Refine labels** (make benefits/outcomes clearer and more benefit-oriented; avoid overly technical jargon like “injection regression” if the audience is broad AI vendors):\n   - Free: “Free Preview Scan” (or keep “Scan” but add “(watermarked)”).\n   - One-time: “Signed Readiness Report – $750 one-time” (strong as-is; signals quick, professional output).\n   - Continuous tiers:\n     - Lower ($299/mo): “Continuous Monitoring – Weekly Re-attestation”.\n     - Higher ($999/mo): “Production Continuous – Deploy-time + Regression Re-attestation”.\n     - (Or “Starter Continuous” / “Pro Continuous” if you want simpler branding; cadence + depth is already the right axis.)\n   - $15k: “Full Readiness Engagement – Guided Implementation”.\n   - $25k: “Reviewed Attestation – Named Human Co-signer”.\n\n3. **Other framing notes**:\n   - Add subtle “Most Popular” or “Recommended for Production” badge on the $999/mo tier to guide choice.\n   - Use comparison table (or clear columns) highlighting cadence, depth, and what each unlocks (e.g., “Fresh weekly signal” vs. “Every-deploy gate + regression coverage”).\n   - Ensure the page supports self-serve checkout for the lower tiers (credit card) while routing $15k/$25k to a form/demo.\n\nThese changes keep the progression intuitive, emphasize outcomes (preview → validated report → always-on assurance → enterprise-grade attestation), and align with how buyers evaluate (start free, prove value one-time, then subscribe for ongoing).\n\n**One-line value statement for the top of the pricing page**:  \n“Instantly preview, validate, and continuously attest the security and readiness of your AI agents—from free scans to production-grade, human-co-signed reports.” \n\nThis is concise, benefit-focused, covers the full ladder, and speaks directly to AI-agent vendor buyers in 2026.",
+  "citations": [
+    "https://snyk.io/plans/",
+    "https://www.sonarsource.com/plans-and-pricing/",
+    "https://github.com/security/plans",
+    "https://platform.lakera.ai/pricing",
+    "https://sourceforge.net/software/product/Mindgard/"
+  ],
+  "searched": [
+    "https://snyk.io/plans/",
+    "https://www.reddit.com/r/devops/comments/1abjv58/what_is_snyk_pricing_is_snyk_expensive/",
+    "https://snyk.io/",
+    "https://www.trustradius.com/products/snyk/pricing",
+    "https://www.vendr.com/marketplace/snyk",
+    "https://www.spendhound.com/marketplace/snyk-pricing",
+    "https://docs.snyk.io/whats-snyk",
+    "https://www.spendflo.com/blog/snyk-pricing-plans-features",
+    "https://www.g2.com/products/snyk/pricing",
+    "https://help.probely.com/en/articles/6609798-pricing-plans-comparison",
+    "https://www.sonarsource.com/plans-and-pricing/",
+    "https://www.vendr.com/marketplace/sonarsource",
+    "https://www.capterra.com/p/210481/SonarQube/pricing/",
+    "https://www.sonarsource.com/products/sonarqube/whats-new/2026-1/",
+    "https://www.softwareadvice.com/continuous-integration/sonarqube-profile/",
+    "https://docs.github.com/en/billing/concepts/product-billing/github-advanced-security",
+    "https://github.com/security/plans",
+    "https://www.reddit.com/r/github/comments/ucpqk8/whats_the_pricing_of_advanced_security/",
+    "https://github.com/pricing",
+    "https://azure.microsoft.com/en-us/products/github/advanced-security",
+    "https://platform.lakera.ai/pricing",
+    "https://www.lakera.ai/",
+    "https://www.lakera.ai/ai-security-guides",
+    "https://www.eesel.ai/blog/lakera-pricing",
+    "https://www.futurepedia.io/tool/lakera",
+    "https://www.lakera.ai/lakera-gandalf",
+    "https://www.checkpoint.com/press-releases/check-point-acquires-lakera-to-deliver-end-to-end-ai-security-for-enterprises/",
+    "https://www.crunchbase.com/organization/lakera-ai",
+    "https://news.ycombinator.com/item?id=39602681",
+    "https://mindgard.ai/compare/mindgard-vs-lakera",
+    "https://www.paddle.com/blog/saas-pricing-models-strategies-fltr",
+    "https://www.linkedin.com/pulse/cracking-code-enterprise-saas-pricing-packaging-keith-laska-dmm1e",
+    "https://blog.alguna.com/saas-pricing-models/",
+    "https://www.fortunebusinessinsights.com/software-as-a-service-saas-market-102222",
+    "https://softwarepricing.com/blog/enterprise-saas-pricing/",
+    "https://blockchain-development-solutions.com/blog/saas-development-costs-2026",
+    "https://ssojet.com/blog/%20best-developer-tools-enterprise-authentication",
+    "https://dataintelo.com/report/software-as-a-service-saas-market",
+    "https://blog.tooljet.com/self-hosted-vs-saas-low-code-security/",
+    "https://www.revenera.com/blog/software-monetization/saas-pricing-models-guide/",
+    "https://mindgard.ai/",
+    "https://mindgard.ai/ai-security-platform",
+    "https://www.gartner.com/reviews/product/mindgard-platform",
+    "https://mindgard.ai/learn/blog",
+    "https://sourceforge.net/software/product/Mindgard/",
+    "https://www.crunchbase.com/organization/mindgard",
+    "https://www.globalsecuritymag.fr/mindgard-launched-mindguard-s-ai-security-lab.html",
+    "https://cybersectools.com/compare/ai-gateway-vs-mindgard-ai-security-testing-solution",
+    "https://www.youtube.com/watch?v=Te2x_Ohizr8",
+    "https://aitools.inc/tools/mindgard"
+  ],
+  "usage": {
+    "input_tokens": 27742,
+    "input_tokens_details": {
+      "cached_tokens": 16192
+    },
+    "output_tokens": 2001,
+    "output_tokens_details": {
+      "reasoning_tokens": 955
+    },
+    "total_tokens": 29743,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 9,
+    "cost_in_usd_ticks": 676784000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 9,
+      "x_search_calls": 0,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 13423,
+      "output_tokens": 1347
+    }
+  },
+  "attempts": 1
+}
