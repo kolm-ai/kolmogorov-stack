@@ -91,17 +91,20 @@ export default function HomePage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(48px,7vw,88px)]">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)]">
             <div>
-              <p className="eyebrow mb-4">AI agent security</p>
-              <h1 className="max-w-[16ch] font-display text-[clamp(38px,6vw,64px)] font-extrabold leading-[1.0] tracking-[-0.035em] text-ink">
-                SOC 2 doesn&rsquo;t cover your AI agent.
+              <p className="eyebrow mb-4">Agent security evidence</p>
+              <h1 className="max-w-[20ch] font-display text-[clamp(36px,5.4vw,58px)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
+                Your platform passed its security review. Your autonomous agent
+                is a new one.
               </h1>
-              <p className="mt-6 max-w-[52ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-                It is table stakes for the enterprise, but it says nothing about
-                the agent itself: what it can access, what it actually did,
-                whether it can be prompt-injected, or what data it sent out.
-                kolm audits the agent from its logs and signs the evidence. Your
-                buyer verifies it offline against your public key, and a review
-                that took weeks takes days.
+              <p className="mt-6 max-w-[54ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
+                Your SOC 2 speaks for your platform. An autonomous agent is a
+                new question: what it can access, what it actually did, whether
+                it can be prompt-injected, and what data it sent out. kolm
+                audits the agent from its own logs across eight controls, maps
+                each finding to the frameworks your buyer already trusts, and
+                signs the report. Your buyer verifies it offline against your
+                public key, with no account and no kolm server in the way. A
+                four to eight week review becomes days.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
@@ -154,19 +157,20 @@ export default function HomePage() {
       <section className="border-b border-line">
         <div className="mx-auto max-w-wrap px-6 py-[96px]">
           <div className="max-w-[66ch]">
-            <p className="eyebrow mb-3">What your SOC 2 leaves out</p>
+            <p className="eyebrow mb-3">Where your existing evidence stops</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
               The agent-specific facts a review actually needs.
             </h2>
             <p className="mt-4 max-w-[64ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              kolm reads the agent&rsquo;s own logs and reports what a SOC 2
-              never looks at: the scopes it holds versus the scopes it uses,
-              every action it took, the models and tools and vendors it reached,
-              how it hands work to other agents, and what data left the
-              boundary. Each finding is signed and mapped to the control a
-              reviewer cites. Any vendor can produce one, and any buyer can
-              verify it offline against your key, with no kolm account and no
-              kolm server in the trust path.
+              Your SOC 2 and your questionnaires speak for the platform: your
+              controls, your processes, your people. They were not built to look
+              inside an agent that acts on its own. kolm reads the agent&rsquo;s
+              own logs and reports the rest: the scopes it holds versus the
+              scopes it uses, every action it took, the models and tools and
+              vendors it reached, how it hands work to other agents, and what
+              data left the boundary. Each finding is signed and mapped to the
+              control a reviewer cites, and any buyer can verify it offline
+              against your key.
             </p>
           </div>
         </div>

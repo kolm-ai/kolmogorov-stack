@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "kolm.ai - signed security evidence for AI agents",
     short_name: "kolm.ai",
     description:
-      "SOC 2 does not cover your AI agent. kolm audits the agent from its logs and signs the security evidence your buyer verifies offline against your public key, with no account and no kolm server in the trust path. A review that took weeks takes days.",
+      "Signed, offline-verifiable security evidence for your AI agent. kolm audits the agent from its own logs and signs the report your buyer verifies offline against your public key, with no account and no kolm server in the trust path. A review that took weeks takes days.",
     start_url: "/",
     scope: "/",
     display: "standalone",
