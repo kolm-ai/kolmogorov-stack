@@ -91,20 +91,19 @@ export default function HomePage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(48px,7vw,88px)]">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)]">
             <div>
-              <p className="eyebrow mb-4">Agent security evidence</p>
+              <p className="eyebrow mb-4">On-demand security audits</p>
               <h1 className="max-w-[20ch] font-display text-[clamp(36px,5.4vw,58px)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
-                Your platform passed its security review. Your autonomous agent
-                is a new one.
+                Every enterprise deal needs a security audit. Run yours in
+                minutes.
               </h1>
               <p className="mt-6 max-w-[54ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-                Your SOC 2 speaks for your platform. An autonomous agent is a
-                new question: what it can access, what it actually did, whether
-                it can be prompt-injected, and what data it sent out. kolm
-                audits the agent from its own logs across eight controls, maps
-                each finding to the frameworks your buyer already trusts, and
-                signs the report. Your buyer verifies it offline against your
-                public key, with no account and no kolm server in the way. A
-                four to eight week review becomes days.
+                You shipped your product. Now every enterprise deal puts it
+                through a security review, and the AI you added is the part they
+                dig into. The old way is an outside firm, a six week wait, and a
+                PDF the buyer takes on faith. kolm audits the AI you ship from
+                its own logs in minutes, end to end, and signs the result so the
+                buyer verifies it themselves. On demand, reproducible, and no
+                lead time.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">

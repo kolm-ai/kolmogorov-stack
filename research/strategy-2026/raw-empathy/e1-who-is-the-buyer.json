@@ -1,0 +1,46 @@
+{
+  "id": "e1-who-is-the-buyer",
+  "track": "empathy",
+  "prompt": "USER EMPATHY RESEARCH, 2026. A company sells software to enterprises. They added AI to it (a copilot, an assistant, an agent, automation, AI features). Now their enterprise deals stall in the customer's SECURITY REVIEW because the customer's security team is worried about the AI: what it can access, whether it leaks data, whether it can be manipulated. WHO is the person inside the selling company who feels this pain and would go buy a tool to fix it? Give the realistic personas (role/title: founder, head of eng, CISO, security engineer, AE/sales eng, GTM lead?), what kind of company (AI-native startup vs SaaS-adding-AI vs enterprise platform), and CRUCIALLY how THEY describe what they built in their own words. Key question: do real people say 'our AI agent' or do they say 'our product', 'our platform', 'our app', 'our AI feature', 'the AI in our product'? Quote real 2026 posts/threads (@handle + date) and real language. Conclude: the single unit/noun the buyer most identifies with (product? platform? agent? feature?), and the persona most likely to self-serve buy.",
+  "content": "**CTOs, Founders (esp. in AI-native or early-stage SaaS), Head of Product/Engineering, and sometimes Sales Engineers or GTM leads at the vendor company feel this pain most acutely and are positioned to buy a fix.** Security engineers or the vendor’s own CISO may also drive or influence it, but the revenue-blocking nature makes it a GTM/product priority.[[1]](https://x.com/craigirwin/status/2063459858545094959)[[2]](https://x.com/v_shakthi/status/2063254335308578936)\n\n### Company Types\n- **AI-native startups**: Building agents, copilots, or autonomous systems from the ground up (e.g., infrastructure for agents, custom agents replacing SaaS). They use “AI agent” language heavily and face the sharpest security scrutiny because agents act autonomously.[[3]](https://x.com/assisterr/status/1893999957918560380)[[4]](https://x.com/AITECHio/status/1961383668984770601)\n- **SaaS companies adding AI**: Layering copilots, assistants, automation, or “AI features” onto existing platforms. They more often describe it as an integrated capability rather than a standalone agent.[[5]](https://x.com/Mr_crunchcoast/status/2063934688847159583)\n- **Larger enterprise platforms**: Less likely to self-serve buy (more process-heavy), but their product/security teams still feel the stall.\n\n### How They Describe What They Built (Real 2025–2026 Language)\nReal posts show a mix, with “AI agent(s)” dominant for autonomous/action-oriented offerings, while “platform,” “feature,” or “product” appears for integrated or broader capabilities. Examples (with handles/dates where available):\n\n- “we don’t just build AI agents - we use them... custom-built AI agents... The future isn’t SaaS. The future is agents.” (@assisterr, Feb 2025).[[3]](https://x.com/assisterr/status/1893999957918560380)\n- “We call it an AI Agent.” (@AITECHio, Aug 2025).[[4]](https://x.com/AITECHio/status/1961383668984770601)\n- “AI agents are not applications in the traditional sense. They are dynamic systems...” and “The agent was running in production for six weeks before anyone realized it was calling an external API... It was not in the security review.” (@v_shakthi, Jun 2026).[[2]](https://x.com/v_shakthi/status/2063254335308578936)\n- “Getting it through security review for production takes months. The trusted distribution layer in enterprise might end up being whoever owns the secure wrapper...” (@craigirwin, Jun 2026).[[1]](https://x.com/craigirwin/status/2063459858545094959)\n- “AI-powered platform to automate workflows”; “our AI platform works your leads...” (various 2026 posts).[[5]](https://x.com/Mr_crunchcoast/status/2063934688847159583)[[6]](https://x.com/Quativacom/status/2064018301412376995)\n- Broader references to “AI feature,” “the AI in our product/platform,” or “enterprise agents/copilots” appear alongside agent-specific talk.[[7]](https://x.com/_Reflectiz_/status/2063215110307434726)\n\nVendors rarely lead exclusively with pure “our AI agent” in every context; it’s contextual (“our AI agent” for autonomy-focused tools, “our platform with AI” or “AI feature” for integrated ones). Security discussions emphasize gaps in reviews, governance, and runtime behavior rather than the marketing noun.[[8]](https://x.com/Basemail_ai/status/2062709196433555590)[[9]](https://x.com/gilles/status/2062954291602890818)\n\n### Conclusion\nThe single unit/noun buyers (and vendors) most identify with is **“our platform” or “our product” (with AI/agent as a capability/feature)**. Pure “agent” is used when the core offering is autonomous action, but even then it often sits inside a platform story for enterprise credibility and security framing. “Feature” appears for incremental additions.[[5]](https://x.com/Mr_crunchcoast/status/2063934688847159583)\n\nThe persona most likely to **self-serve buy** a tool to unblock this (e.g., security wrappers, auditability, policy enforcement for AI components) is the **CTO or Founder (AI-native/SaaS-adding-AI startup)**—they own the build/sales outcome and move fastest on unblocking revenue. Security Engineer or vendor CISO is a close second for evaluation/implementation.[[1]](https://x.com/craigirwin/status/2063459858545094959)[[10]](https://x.com/sentierovc/status/2061831710229110797)\n\nThis is driven by direct revenue impact (stalled enterprise deals) rather than pure defensive security.",
+  "citations": [
+    "https://x.com/craigirwin/status/2063459858545094959",
+    "https://x.com/v_shakthi/status/2063254335308578936",
+    "https://x.com/assisterr/status/1893999957918560380",
+    "https://x.com/AITECHio/status/1961383668984770601",
+    "https://x.com/Mr_crunchcoast/status/2063934688847159583",
+    "https://x.com/Quativacom/status/2064018301412376995",
+    "https://x.com/_Reflectiz_/status/2063215110307434726",
+    "https://x.com/Basemail_ai/status/2062709196433555590",
+    "https://x.com/gilles/status/2062954291602890818",
+    "https://x.com/sentierovc/status/2061831710229110797"
+  ],
+  "searched": [],
+  "usage": {
+    "input_tokens": 27786,
+    "input_tokens_details": {
+      "cached_tokens": 15744
+    },
+    "output_tokens": 2606,
+    "output_tokens_details": {
+      "reasoning_tokens": 1684
+    },
+    "total_tokens": 30392,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 5,
+    "cost_in_usd_ticks": 497163000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 0,
+      "x_search_calls": 5,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 13882,
+      "output_tokens": 1283
+    }
+  },
+  "attempts": 1
+}

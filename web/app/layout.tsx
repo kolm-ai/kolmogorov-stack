@@ -34,7 +34,7 @@ const websiteLd = {
   url: `${SITE_URL}/`,
   name: "kolm.ai",
   description:
-    "Your platform passed its security review; an autonomous agent is a new question. kolm audits the agent from its own logs across eight controls and signs the security evidence a buyer's review team verifies offline against your public key.",
+    "On-demand security audits for the AI you ship. kolm audits the AI from its own logs across eight controls, in minutes, and signs the result a buyer's review team verifies offline against your public key. Reproducible, no lead time.",
   publisher: { "@id": `${SITE_URL}/#organization` },
   inLanguage: "en-US",
 };
@@ -47,38 +47,38 @@ const jsonLd = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Signed security evidence for AI agents · kolm.ai",
+    default: "On-demand security audits for AI · kolm.ai",
     template: "%s · kolm.ai",
   },
   description:
-    "Your platform passed its security review. Your autonomous agent is a new question: what it can access, what it did, whether it can be prompt-injected, or what data it sent out. kolm audits the agent from its own logs and signs the security evidence your buyer verifies offline against your key. A review that took weeks takes days.",
+    "Every enterprise deal needs a security audit of the AI you ship. kolm runs it on demand, from your own logs, in minutes, and signs the result so your buyer verifies it themselves. On demand, reproducible, no lead time. A review that took weeks takes days.",
   applicationName: "kolm.ai",
   keywords: [
-    "AI agent security",
-    "agent security review",
+    "AI security audit",
+    "on-demand security audit",
+    "AI security review",
     "offline-verifiable report",
     "Ed25519 signed report",
     "ISO 42001",
     "NIST AI RMF",
     "OWASP LLM Top 10",
     "MITRE ATLAS",
-    "agent audit",
   ],
   authors: [{ name: "kolm.ai", url: SITE_URL }],
   openGraph: {
     type: "website",
     url: SITE_URL,
     siteName: "kolm.ai",
-    title: "Security evidence for your AI agent · kolm.ai",
+    title: "On-demand security audits for AI · kolm.ai",
     description:
-      "kolm audits your AI agent from its logs and signs the security evidence a buyer's review needs. They verify it offline against your public key, with no account and no kolm server in the trust path. Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, and MITRE.",
+      "Every enterprise deal needs a security audit of the AI you ship. kolm runs it on demand, from your logs, in minutes, and signs the result so your buyer verifies it themselves. On demand, reproducible, no lead time.",
     images: [{ url: "/brand-hero.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Security evidence for your AI agent · kolm.ai",
+    title: "On-demand security audits for AI · kolm.ai",
     description:
-      "kolm audits your AI agent from its logs and signs the security evidence a buyer's review needs. They verify it offline against your public key, with no account and no kolm server in the trust path. Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, and MITRE.",
+      "Every enterprise deal needs a security audit of the AI you ship. kolm runs it on demand, from your logs, in minutes, and signs the result so your buyer verifies it themselves. On demand, reproducible, no lead time.",
     images: ["/brand-hero.png"],
   },
   icons: { icon: "/favicon.svg" },
