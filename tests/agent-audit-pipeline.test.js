@@ -114,7 +114,7 @@ test('pipeline: logs → events → analyzers → control map', () => {
   assert.equal(trail.summary.tamper_evident, false);
 
   const mapped = mapControls([...perm.findings, ...trail.findings]);
-  assert.equal(mapped.asr.length, 6, 'all ASR controls reported');
+  assert.equal(mapped.asr.length, 8, 'all eight ASR controls reported');
   const fwNames = mapped.frameworks.map((f) => f.framework);
   assert.ok(fwNames.includes('EU AI Act'), 'EU AI Act implicated by the trail gap');
   assert.ok(fwNames.includes('OWASP LLM & Agentic Top 10'), 'OWASP implicated by permission findings');

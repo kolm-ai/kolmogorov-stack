@@ -26,7 +26,8 @@
 import crypto from 'node:crypto';
 import { id as storeId, insert, update, find, findOne, findByField, withTransaction } from './store.js';
 import { runAudit } from './audit-orchestrator.js';
-import { buildAndSignReport, resignAsTier } from './attestation-report-builder.js';
+import { buildAndSignReport, resignAsTier, canonicalizeReport } from './attestation-report-builder.js';
+import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
 // M14 - audit trail. Package fulfillment + subscription activation are
 // money-bearing state transitions, so each writes one chained audit row.
 // tryAppendAudit never throws, so the fulfillment path is never blocked by an
@@ -57,12 +58,105 @@ function nowIso() { return new Date().toISOString(); }
 function plusWeekIso() { return new Date(Date.now() + WEEK_MS).toISOString(); }
 
 // ---------------------------------------------------------------------------
+// Trusted timestamping of the PAID deliverable (the $750 report / Trust Link).
+//
+// An Ed25519 signature proves WHO signed and that nothing changed since; it does
+// NOT prove WHEN. The paid report therefore additionally carries an RFC 3161
+// timestamp over its SIGNED report digest (sha256 of the canonical signed bytes,
+// the same value the signature covers). The timestamp is DETACHED evidence
+// (canonicalizeReport excludes timestamp_evidence), so attaching it never breaks
+// the signature.
+//
+// Two layers, both offline-safe and best-effort - they NEVER throw and NEVER
+// block fulfillment:
+//   * a SYNCHRONOUS self-issued token (selfIssueTimestamp) is attached the moment
+//     the report is sold, so the deliverable is always anchored in time without a
+//     network round-trip at request time (the free scan path stays un-timestamped);
+//   * an asynchronous upgrade to an INDEPENDENT public TSA (timestampDigest) runs
+//     post-commit when one is configured, replacing the self token with a stronger
+//     third-party countersignature (status:'offline' when no TSA is reachable).
+// ---------------------------------------------------------------------------
+function _reportDigest(env) {
+  try { return crypto.createHash('sha256').update(canonicalizeReport(env), 'utf8').digest('hex'); }
+  catch { return null; }
+}
+
+// Attach a synchronous, offline-safe self-issued RFC 3161 timestamp to a signed
+// paid report envelope IN PLACE. selfIssueTimestamp is pure crypto (no network)
+// and never throws. Returns the same envelope. Best-effort.
+function _attachReportTimestamp(env) {
+  try {
+    if (!env || typeof env !== 'object' || env.tier !== 'report') return env;
+    const digest = _reportDigest(env);
+    if (!digest) return env;
+    const te = selfIssueTimestamp(digest);
+    if (te && typeof te === 'object') env.timestamp_evidence = te;
+  } catch { /* best-effort: leave the report un-timestamped */ }
+  return env;
+}
+
+// Attach an RFC 3161 timestamp over a signed paid report's digest via
+// timestampDigest (the INDEPENDENT public TSA path). Offline-safe: timestampDigest
+// never throws and yields status:'offline' when no TSA is reachable. Mutates +
+// returns the envelope. opts.selfIssueTimestamp forces the offline self path
+// (used by tests for a deterministic token with no network). Best-effort.
+export async function attachPaidTimestamp(envelope, opts = {}) {
+  try {
+    if (!envelope || typeof envelope !== 'object') return envelope;
+    const digest = _reportDigest(envelope);
+    if (!digest) return envelope;
+    let te;
+    if (opts.selfIssueTimestamp === true) {
+      te = selfIssueTimestamp(digest, { signer: opts.timestampSigner });
+    } else {
+      te = await timestampDigest(digest, {
+        tsaUrl: opts.tsaUrl,
+        timeoutMs: opts.timeoutMs,
+        fallbackSelfIssue: opts.fallbackSelfIssue === true,
+      });
+    }
+    if (te && typeof te === 'object') envelope.timestamp_evidence = te;
+  } catch { /* best-effort */ }
+  return envelope;
+}
+
+// Upgrade a STORED paid report's timestamp to an independent-TSA token and
+// persist it. Async + post-commit so it never blocks the money-write. Idempotent:
+// a no-op when the row already carries an external (source!='self') timestamp for
+// the current digest, or when no external token can be obtained (the sync self
+// baseline stands). Keyed by audit_id (the money path that produced it was already
+// tenant-fenced). NEVER throws.
+export async function upgradeReportTimestamp(audit_id, opts = {}) {
+  try {
+    if (!audit_id) return { ok: false, reason: 'no_audit_id' };
+    const row = findOne(AUDITS, (r) => r && r.id === audit_id);
+    if (!row || !row.report || row.report.tier !== 'report') return { ok: false, reason: 'not_paid_report' };
+    const env = row.report;
+    const digest = _reportDigest(env);
+    if (!digest) return { ok: false, reason: 'no_digest' };
+    const cur = env.timestamp_evidence;
+    if (cur && typeof cur === 'object' && cur.status === 'timestamped' && cur.source && cur.source !== 'self' && cur.message_imprint === digest) {
+      return { ok: true, already: true, status: 'timestamped', source: cur.source };
+    }
+    const te = await timestampDigest(digest, { tsaUrl: opts.tsaUrl, timeoutMs: opts.timeoutMs, fallbackSelfIssue: opts.fallbackSelfIssue === true });
+    if (!te || te.status !== 'timestamped') {
+      return { ok: false, reason: (te && te.reason) || 'offline', status: te ? te.status : 'offline' };
+    }
+    const updated = { ...env, timestamp_evidence: te };
+    update(AUDITS, (r) => r.id === audit_id, { report: updated, updated_at: nowIso() });
+    return { ok: true, status: 'timestamped', source: te.source || 'tsa' };
+  } catch (e) {
+    return { ok: false, reason: e && e.message };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // $750 one-time: upgrade a paid audit row to an unwatermarked report + slug.
 // Idempotent: a webhook retry on an already-fulfilled row returns it unchanged.
 // ---------------------------------------------------------------------------
 export function fulfillReportPurchase({ audit_id, stripe_session_id, signer } = {}) {
   if (!audit_id) return { ok: false, reason: 'no_audit_id' };
-  return withTransaction(() => {
+  const result = withTransaction(() => {
     const row = findOne(AUDITS, (r) => r && r.id === audit_id);
     if (!row) return { ok: false, reason: 'audit_not_found' };
     if (row.paid === true && row.public_slug) {
@@ -74,8 +168,13 @@ export function fulfillReportPurchase({ audit_id, stripe_session_id, signer } = 
       // Sign immediately with the supplied signer (the webhook loads it). If the
       // signer is momentarily unavailable, mark paid + flag report_pending_resign
       // so the scheduler sweep re-signs within one tick (no permanent watermark).
-      try { upgraded = resignAsTier(row.report, 'report', signer); }
-      catch { upgraded = row.report; pendingResign = true; }
+      try {
+        upgraded = resignAsTier(row.report, 'report', signer);
+        // Anchor the paid deliverable in time the moment it is sold, synchronously
+        // and offline-safe (self-issued RFC 3161 token; no network at request
+        // time). Best-effort; never blocks fulfillment.
+        upgraded = _attachReportTimestamp(upgraded);
+      } catch { upgraded = row.report; pendingResign = true; }
     }
     const slug = row.public_slug || mintSlug();
     const ts = nowIso();
@@ -94,6 +193,16 @@ export function fulfillReportPurchase({ audit_id, stripe_session_id, signer } = 
     }
     return { ok: true, row: fresh, pending_resign: pendingResign };
   });
+  // Post-commit, best-effort upgrade to an INDEPENDENT public TSA token. The
+  // timestampDigest call is async, so it runs AFTER the sync money-write and never
+  // blocks the webhook's sync return; the sync self-issued baseline already stands.
+  // Gated on KOLM_TSA_URL so no network fires unless an operator opted into an
+  // external TSA. The in-flight promise is exposed as result.timestamp for an
+  // async-aware caller (or a test); the Stripe webhook ignores the extra field.
+  if (result && result.ok && !result.already && process.env.KOLM_TSA_URL) {
+    result.timestamp = upgradeReportTimestamp(audit_id, {}).catch(() => null);
+  }
+  return result;
 }
 
 // Re-sign any paid reports that were marked paid while the signer was momentarily
@@ -105,7 +214,8 @@ export function resignPendingReports({ signer, limit = 50 } = {}) {
   let fixed = 0;
   for (const row of pending) {
     try {
-      const upgraded = resignAsTier(row.report, 'report', signer);
+      let upgraded = resignAsTier(row.report, 'report', signer);
+      upgraded = _attachReportTimestamp(upgraded); // self-heal the trusted timestamp too
       update(AUDITS, (r) => r.id === row.id, { report: upgraded, report_pending_resign: false, updated_at: nowIso() });
       fixed++;
     } catch { /* still no signer; retry next tick */ }
@@ -258,6 +368,9 @@ function reattestSub(sub, { signer } = {}) {
   try {
     audit = runAudit(baseLogs, { source: source.source || 'reattest' });
     built = buildAndSignReport(audit, { subject: source.subject || sub.product_key, verify_url: verifyUrl(), tier: 'report', signer });
+    // The re-attested report is the live paid deliverable behind the stable Trust
+    // Link: anchor it in time too (sync, offline-safe, best-effort).
+    _attachReportTimestamp(built.envelope);
   } catch (e) {
     return { sub: sub.id, ok: false, reason: e && e.message };
   }
@@ -354,4 +467,5 @@ export default {
   SUBSCRIPTIONS, PACKAGES, mintSlug,
   fulfillReportPurchase, fulfillPackagePurchase, resignPendingReports, activateSubscription, setSubscriptionStatus,
   runDueReattestations, forceReattest, resolveTrust,
+  attachPaidTimestamp, upgradeReportTimestamp,
 };

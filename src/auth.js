@@ -563,6 +563,17 @@ const PUBLIC_API = (p) =>
   // procurement artifact (CSV / .xls / Drata / Vanta / exec / crosswalk) so a
   // buyer's GRC team can ingest it without a kolm account.
   /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}(?:\/export)?$/.test(p) ||
+  // S8: the buyer's reviewer pre-fills a security questionnaire straight from the
+  // SIGNED report behind the Trust Link. Possession of the unguessable slug is the
+  // grant - the same capability level as the report it derives from - so this
+  // matches the GET /v1/trust/:slug policy above. The seller-side counterpart
+  // (POST /v1/audit/sessions/:id/questionnaire) stays auth-gated, never here.
+  /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}\/questionnaire$/.test(p) ||
+  // S7: a viewer of a GATED Trust Link submits an email + accept-terms and gets an
+  // unlock token. PUBLIC because the buyer has no kolm account. The seller-only
+  // GET /v1/trust/:slug/views + GET /v1/trust-center analytics stay AUTH-gated
+  // (deliberately NOT matched here), so the global authMiddleware fences them.
+  /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}\/unlock$/.test(p) ||
   // The continuous re-attestation tick is gated by KOLM_CRON_SECRET (a request
   // header), not tenant auth, so it must bypass the API-key gate; the route
   // handler itself rejects any call without the correct secret.

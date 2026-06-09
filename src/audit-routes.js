@@ -43,10 +43,12 @@ import {
 import { EXPORTERS as FRAMEWORK_EXPORTERS, EXPORT_FORMATS } from './framework-export.js';
 import { loadOrCreateDefaultSigner, keyFingerprint } from './ed25519.js';
 import { register as registerTransparencyLogRoutes } from './transparency-log-routes.js';
+import { register as registerTrustCenter, recordTrustView } from './trust-center.js';
 import { revoke as revokeIssuerKey, status as issuerKeyStatus, KEY_REVOCATION_VERSION } from './key-revocation.js';
 import { tryAppendAudit } from './audit.js';
 import { createAsrCheckout, asrBillingReady } from './asr-billing.js';
 import { resolveTrust, runDueReattestations, forceReattest } from './asr-fulfillment.js';
+import { autofillQuestionnaire, toQuestionnaireCsv, QUESTIONNAIRE_TEMPLATES } from './questionnaire-autofill.js';
 import { importAgentLogs } from './log-importer.js';
 
 export const AUDIT_ROUTES_VERSION = 'asr-audit-routes/0.1';
@@ -342,6 +344,16 @@ export function register(r, deps = {}) {
   // PUBLIC_API (see the track caveats for the exact paths to add to auth.js).
   try { registerTransparencyLogRoutes(r); }
   catch (e) { /* a transparency-log wiring failure must not break audit routes */ if (process.env.NODE_ENV !== 'production') console.error('[audit-routes] transparency-log mount failed:', e && e.message); }
+
+  // S7 Trust Center - the seller-facing analytics on each shareable Trust Link
+  // (who opened it, how many distinct viewers) + the optional NDA share gate.
+  // GET /v1/trust/:slug/views and GET /v1/trust-center stay auth-gated (NOT in
+  // PUBLIC_API) so the global authMiddleware fences them to the owning tenant;
+  // POST /v1/trust/:slug/unlock is PUBLIC (allow-listed in src/auth.js). The
+  // authMiddleware is forwarded so the authenticated routes resolve the tenant
+  // even before the global gate populates req.tenant_record.
+  try { registerTrustCenter(r, { authMiddleware: deps && deps.authMiddleware }); }
+  catch (e) { /* a trust-center wiring failure must not break audit routes */ if (process.env.NODE_ENV !== 'production') console.error('[audit-routes] trust-center mount failed:', e && e.message); }
 
   // -------------------------------------------------------------------------
   // POST /v1/audit/sessions - open a session.
@@ -997,6 +1009,21 @@ export function register(r, deps = {}) {
     const slug = req.params && req.params.slug;
     const hit = resolveTrust(slug);
     if (!hit) return _err(res, 404, 'not_found', 'no published report at this link');
+    // S7: log this Trust Link view for the owning seller (counts + distinct,
+    // pseudonymous viewers). recordTrustView hashes the IP at the boundary and
+    // NEVER stores a raw IP; it resolves the owner tenant from the slug itself.
+    // Best-effort: view logging must never block or break serving the report.
+    try {
+      recordTrustView({
+        slug,
+        ip: (req.headers && String(req.headers['x-forwarded-for'] || '').split(',')[0].trim())
+          || req.ip
+          || (req.socket && req.socket.remoteAddress)
+          || '',
+        ua: req.headers && req.headers['user-agent'],
+        referer: req.headers && (req.headers.referer || req.headers.referrer),
+      });
+    } catch { /* view logging is best-effort */ }
     // A Continuous subscription that has not produced its first report yet:
     // render a "generating" page instead of a 404 (the link is valid).
     if (hit.pending) {
@@ -1072,7 +1099,77 @@ export function register(r, deps = {}) {
     return _sendExport(res, hit.envelope, req.query && req.query.format);
   });
 
+  // -------------------------------------------------------------------------
+  // GET /v1/trust/:slug/questionnaire?template=generic-ai-vendor[&format=csv]
+  //   (PUBLIC) - the buyer's reviewer pre-fills a standard security questionnaire
+  // straight from the SIGNED report behind the Trust Link, so they reuse the
+  // signed evidence instead of re-interviewing the vendor by email. Possession of
+  // the unguessable slug is the grant (same capability level as the report it
+  // derives from); allow-listed in PUBLIC_API alongside GET /v1/trust/:slug.
+  // Answers are DERIVED from the report - a control the run never assessed is
+  // 'n/a', never an unsupported 'yes'.
+  // -------------------------------------------------------------------------
+  r.get('/v1/trust/:slug/questionnaire', (req, res) => {
+    const slug = req.params && req.params.slug;
+    const hit = resolveTrust(slug);
+    if (!hit) return _err(res, 404, 'not_found', 'no published report at this link');
+    if (hit.pending || !hit.envelope) {
+      return _err(res, 409, 'report_not_ready', 'this Continuous link has not generated its first report yet');
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    return _sendQuestionnaire(res, hit.envelope, req.query, hit.report_id);
+  });
+
+  // -------------------------------------------------------------------------
+  // POST /v1/audit/sessions/:id/questionnaire?template=...[&format=csv]
+  //   (AUTH, tenant-fenced) - the SELLER pre-fills a questionnaire from their own
+  // session's signed report (e.g. to attach to an RFP response before sharing).
+  // Tenant-fenced exactly like the sibling /report + /export routes. body may
+  // carry { template, format } as an alternative to the query string.
+  // -------------------------------------------------------------------------
+  r.post('/v1/audit/sessions/:id/questionnaire', (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const id = req.params && req.params.id;
+    const sess = _getSession(trec.id, id);
+    if (!sess) return _err(res, 404, 'session_not_found', `no audit session ${id} for this tenant`);
+    if (!sess.report) return _err(res, 409, 'report_not_ready', 'run the session before generating a questionnaire');
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const query = {
+      template: (req.query && req.query.template) || body.template,
+      format: (req.query && req.query.format) || body.format,
+    };
+    tryAppendAudit({ tenant_id: trec.id, actor: trec.id, op: 'agent_audit.questionnaire', payload: { id, report_id: sess.report_id, template: String(query.template || 'generic-ai-vendor') } });
+    return _sendQuestionnaire(res, sess.report, query, sess.report_id);
+  });
+
   return r;
+}
+
+// ---------------------------------------------------------------------------
+// Render an autofilled questionnaire over a signed report envelope, as JSON
+// (default) or RFC-4180 CSV (?format=csv). Pure view over the SAME signed report
+// (src/questionnaire-autofill.js never re-signs and never throws). An unknown
+// template is a clean 400 listing the available templates.
+// ---------------------------------------------------------------------------
+function _sendQuestionnaire(res, envelope, query, reportId) {
+  const template = (query && query.template) ? String(query.template) : 'generic-ai-vendor';
+  let result;
+  try { result = autofillQuestionnaire(envelope, { template }); }
+  catch (e) { return _err(res, 500, 'questionnaire_failed', e && e.message); }
+  if (result && result.error) {
+    return res.status(400).json({ ok: false, error: result.error, available_templates: result.available_templates || QUESTIONNAIRE_TEMPLATES.map((t) => t.id) });
+  }
+  const fmt = String((query && query.format) || 'json').toLowerCase();
+  if (fmt === 'csv') {
+    let csv;
+    try { csv = toQuestionnaireCsv(result); }
+    catch (e) { return _err(res, 500, 'questionnaire_csv_failed', e && e.message); }
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${(reportId || 'agent-security-report')}-${result.template}-questionnaire.csv"`);
+    return res.send(csv);
+  }
+  return res.json({ ok: true, ...result, templates: QUESTIONNAIRE_TEMPLATES });
 }
 
 export default register;
@@ -1090,6 +1187,7 @@ export const AUDIT_ROUTES_SPEC = {
     'GET /v1/audit/sessions/:id',
     'GET /v1/audit/sessions/:id/report',
     'GET /v1/audit/sessions/:id/export',
+    'POST /v1/audit/sessions/:id/questionnaire',
     'POST /v1/audit/scan',
     'POST /v1/audit/import',
     'GET /v1/audit/reports',
@@ -1110,5 +1208,9 @@ export const AUDIT_ROUTES_SPEC = {
     'GET /v1/transparency-log/checkpoints (public)',
     'GET /v1/trust/:slug (public)',
     'GET /v1/trust/:slug/export (public)',
+    'GET /v1/trust/:slug/questionnaire (public)',
+    'GET /v1/trust/:slug/views (auth, tenant-fenced)',
+    'GET /v1/trust-center (auth, tenant-fenced)',
+    'POST /v1/trust/:slug/unlock (public)',
   ],
 };

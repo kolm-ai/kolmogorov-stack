@@ -244,8 +244,8 @@ test('toFrameworkCrosswalk renders the ASR-to-framework matrix + per-framework d
   for (const col of ['SOC 2 TSC', 'ISO/IEC 42001', 'NIST AI RMF', 'EU AI Act', 'OWASP LLM & Agentic', 'MITRE ATLAS']) {
     assert.ok(body.includes(col), `column ${col} present`);
   }
-  // All six ASR rows appear (assessed + not-assessed), and a concrete mapping.
-  for (const id of ['ASR-1', 'ASR-2', 'ASR-3', 'ASR-4', 'ASR-5', 'ASR-6']) assert.ok(body.includes(id), `${id} row present`);
+  // All eight ASR rows appear (assessed + not-assessed), and a concrete mapping.
+  for (const id of ['ASR-1', 'ASR-2', 'ASR-3', 'ASR-4', 'ASR-5', 'ASR-6', 'ASR-7', 'ASR-8']) assert.ok(body.includes(id), `${id} row present`);
   assert.ok(/ASR-1 Least privilege \| BLOCKING/.test(body), 'ASR-1 shows its blocking status');
   assert.ok(body.includes('CC6'), 'SOC 2 control id surfaced in the matrix');
 });

@@ -419,6 +419,19 @@ export function signReport(envelope, signer) {
     payloadCanonical: canonical,
     signed_at: envelope.generated_at,
   });
+  // Anchor the SIGNED report digest in the append-only transparency log, in line
+  // (recordTransparencyEntry is local + fast, never a network call), so EVERY
+  // delivered report - the free Scan AND the paid Signed Readiness Report - is
+  // witnessed the moment it is signed. log_checkpoint is DETACHED evidence
+  // (canonicalizeReport excludes it), so attaching it does NOT change the signed
+  // bytes; it references the same sha256(canonical) the signature covers. Best-
+  // effort: a log failure leaves the report unanchored rather than blocking the
+  // signature. attachDetachedEvidence reuses this checkpoint instead of appending
+  // a duplicate leaf for the same digest.
+  try {
+    const cp = recordTransparencyEntry(sha256hex(canonical), { report_id: envelope.report_id });
+    if (cp) envelope.log_checkpoint = cp;
+  } catch (_e) { /* best-effort: omit log_checkpoint */ }
   return envelope;
 }
 
@@ -486,11 +499,17 @@ export async function attachDetachedEvidence(envelope, opts = {}) {
     }
   }
 
-  // Transparency-log inclusion of the signed report digest (best-effort).
+  // Transparency-log inclusion of the signed report digest (best-effort). When
+  // signReport already anchored THIS exact digest, reuse that checkpoint rather
+  // than appending a second leaf for the same report.
   if (options.transparency !== false) {
     try {
-      const cp = recordTransparencyEntry(reportDigest, { ...options, report_id: envelope.report_id });
-      if (cp) envelope.log_checkpoint = cp;
+      const existing = envelope.log_checkpoint;
+      const alreadyAnchored = existing && typeof existing === 'object' && existing.report_digest === reportDigest;
+      if (!alreadyAnchored) {
+        const cp = recordTransparencyEntry(reportDigest, { ...options, report_id: envelope.report_id });
+        if (cp) envelope.log_checkpoint = cp;
+      }
     } catch (_e) { /* best-effort: omit log_checkpoint */ }
   }
   return envelope;
@@ -589,6 +608,30 @@ export function verifyReport(envelope, opts = {}) {
     } else {
       checks.push({ name: 'evidence_digest present (signature-covered)', ok: wellFormed, detail: wellFormed ? `${ed.value} over ${ed.event_count} event(s)` : 'malformed evidence_digest (informational)' });
     }
+  }
+
+  // Additive, informational: surface the DETACHED evidence. Both fields are
+  // excluded from the signed bytes (they are issued after signing and reference
+  // the signed digest), so they never flip the verdict; this just mirrors the
+  // browser verifier so a Node consumer sees the same "signed + timestamped +
+  // witnessed" story. A delivered report is always anchored in the transparency
+  // log; the paid report additionally carries an RFC 3161 trusted timestamp.
+  const te = report.timestamp_evidence;
+  if (te && typeof te === 'object') {
+    const st = String(te.status || '');
+    const imprintOk = typeof te.message_imprint === 'string' && /^[0-9a-f]{64}$/i.test(te.message_imprint);
+    if (st === 'timestamped' && te.token_b64 && imprintOk) {
+      checks.push({ name: 'trusted timestamp present', ok: true, detail: `${te.timestamp || '?'} via ${te.tsa_url || te.source || '?'}` });
+    } else if (st === 'offline') {
+      checks.push({ name: 'trusted timestamp', ok: true, detail: 'not timestamped (status offline); additive evidence absent' });
+    } else {
+      checks.push({ name: 'trusted timestamp', ok: false, detail: 'timestamp_evidence present but malformed (informational; verdict unaffected)' });
+    }
+  }
+  const cp = report.log_checkpoint;
+  if (cp && typeof cp === 'object') {
+    const wf = typeof cp.root_hash === 'string' && /^[0-9a-f]{64}$/i.test(cp.root_hash) && Number.isFinite(Number(cp.tree_size));
+    checks.push({ name: 'transparency-log checkpoint present', ok: wf, detail: wf ? `seq ${cp.seq} of ${cp.tree_size}, root ${String(cp.root_hash).slice(0, 16)}` : 'log_checkpoint present but malformed (informational; verdict unaffected)' });
   }
 
   return { ok: true, key_fingerprint: v.key_fingerprint, checks };
