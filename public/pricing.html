@@ -81,7 +81,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     {
       "@type": "Question",
       "name": "What does the named co-signer add over the crypto?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The signature proves the bytes are intact. The name proves a person reviewed them. Enterprise reviewers ask for both, so the Reviewed Attestation puts a named, accredited reviewer beside the math." }
+      "acceptedAnswer": { "@type": "Answer", "text": "The signature proves the bytes are intact. The name proves a person reviewed them. Enterprise reviewers ask for both, so the Reviewed Attestation puts a named, accredited reviewer beside the signature." }
     },
     {
       "@type": "Question",
@@ -148,9 +148,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head" style="max-width:66ch">
       <h1>Priced to clear the review, not to start a sales call.</h1>
       <p class="lede">
-        Every fee is flat and listed in full. Start free, hand your buyer a signed
-        report for $750, or keep your evidence current from $299 a month. The only
-        call you book is the one that closes the deal.
+        Every fee is flat and listed in full. Run the free scan, hand your buyer a
+        signed report for $750, or keep your evidence current from $299 a month. No
+        quote, no per-seat meter, no contingency.
       </p>
       <div class="trustline" aria-label="How pricing works">
         <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Flat and public</span>
@@ -167,55 +167,55 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="idx">01 / Plans</span>
     <div class="tiers">
       <div class="tier">
-        <p class="tier__name">Scan</p>
+        <p class="tier__name">Free Scan</p>
         <p class="tier__price">Free</p>
-        <p class="tier__sub">Self-serve. A signed snapshot in minutes, no call.</p>
+        <p class="tier__sub">Run the full audit. See every finding before you pay.</p>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Upload redacted logs, read in minutes</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Least-privilege and audit-trail read</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Signed, offline-verifiable snapshot (watermarked)</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>No account to run it, none to verify it</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Deterministic audit of your agent from its logs, across every control.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Each finding mapped to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Watermarked preview report (not signed).</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>No account needed to read your results.</li>
         </ul>
-        <a class="btn btn--ghost" href="/signup">Run a free scan</a>
+        <a class="btn btn--ghost" href="/signup">Run the free scan</a>
       </div>
 
       <div class="tier">
         <p class="tier__name">Signed Readiness Report</p>
-        <p class="tier__price">$750</p>
-        <p class="tier__sub">one-time. The full automated audit, signed.</p>
+        <p class="tier__price">$750<span style="font-size:.42em;font-weight:500;letter-spacing:0"> one-time</span></p>
+        <p class="tier__sub">The same audit, signed. Your buyer verifies it offline.</p>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Four pillars: permissions, audit trail, egress, injection</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, ATLAS</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed, offline-verifiable report</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Remediation checklist for every finding</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed evidence report tied to a stable report ID.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Your buyer verifies the signature against your public key, in the browser, with no kolm server in the path.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Full framework crosswalk included.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>A public Trust link you can send with the deal.</li>
         </ul>
-        <a class="btn btn--ghost" href="/signup">Get the report</a>
+        <a class="btn btn--ghost" href="/signup">Get the signed report</a>
       </div>
 
       <div class="tier tier--feat">
-        <p class="tier__name">Continuous Starter · most teams</p>
+        <p class="tier__name">Continuous Starter</p>
         <p class="tier__price">$299<span style="font-size:.42em;font-weight:500;letter-spacing:0"> /mo</span></p>
-        <p class="tier__sub">Re-attested weekly, so the evidence never goes stale.</p>
+        <p class="tier__sub">Keep the report current. Re-attested every week.</p>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in the Signed Readiness Report</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Up to 3 agents</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly re-attestation, re-signed automatically</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>A live Trust link your buyer can re-check any time</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in the Signed Readiness Report.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Re-attested weekly, so evidence does not go stale during a review.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>One agent, one public Trust link.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>A fresh signed report on every re-attestation.</li>
         </ul>
-        <a class="btn btn--primary" href="/signup">Start continuous</a>
+        <a class="btn btn--primary" href="/signup">Subscribe</a>
       </div>
 
       <div class="tier">
         <p class="tier__name">Continuous Growth</p>
         <p class="tier__price">$999<span style="font-size:.42em;font-weight:500;letter-spacing:0"> /mo</span></p>
-        <p class="tier__sub">For teams shipping every few days.</p>
+        <p class="tier__sub">Evidence as fresh as your last release.</p>
         <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Starter</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Up to 15 agents</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Re-attested on every deploy</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Prompt-injection regression on each release</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Continuous Starter.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Re-attested on every deploy, not on a weekly clock.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Prompt-injection regression on every release, so a new build cannot quietly reopen a closed finding.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Your full agent fleet under one buyer portal.</li>
         </ul>
-        <a class="btn btn--ghost" href="/signup">Start continuous</a>
+        <a class="btn btn--ghost" href="/signup">Subscribe</a>
       </div>
     </div>
     <p class="hero__claim" style="margin-top:18px">
@@ -237,13 +237,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="plate">
         <p class="card__k">Full Readiness</p>
         <div class="tier__price">$15,000</div>
-        <p class="tier__sub">flat · the whole evidence package · multi-agent</p>
+        <p class="tier__sub">We run the audit with you and help close the gaps.</p>
         <ul class="ledger" style="margin:var(--s5) 0">
-          <li>Everything in the Signed Readiness Report, across your whole agent fleet</li>
-          <li>A scored red-team campaign: prompt-injection and agent-abuse battery, mapped to OWASP and MITRE ATLAS</li>
-          <li>Exports for every framework: SOC 2, ISO 42001, NIST AI RMF, EU AI Act, plus Drata, Vanta, and Excel for procurement</li>
-          <li>An executive summary your buyer's leadership reads in a minute</li>
-          <li>A dedicated transparency log, and a BAA where you need one</li>
+          <li>A guided engagement across your full control set and agent fleet.</li>
+          <li>Remediation guidance for every finding before you sign.</li>
+          <li>Signed Readiness Report plus a buyer portal delivered at the end.</li>
+          <li>Continuous re-attestation for the duration of the engagement.</li>
         </ul>
         <button class="btn btn--primary" type="button" data-asr-package="full" style="width:100%">Buy Full Readiness</button>
       </div>
@@ -252,11 +251,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <div class="tier__price">$3,500<span style="font-size:.42em;font-weight:500;letter-spacing:0"> /mo</span></div>
         <p class="tier__sub">enterprise continuous · from</p>
         <ul class="ledger" style="margin:var(--s5) 0">
-          <li>Everything in Continuous Growth, with no agent cap</li>
-          <li>Re-attested on every deploy, with red-team regression each release</li>
-          <li>A dedicated transparency log and an always-current Trust link your buyers pin</li>
-          <li>SSO and SCIM provisioning for your team</li>
-          <li>Priority support and a named contact</li>
+          <li>Everything in Continuous Growth, across your full agent fleet.</li>
+          <li>Re-attested on every deploy, with prompt-injection regression each release.</li>
+          <li>A dedicated transparency log and an always-current Trust link your buyers pin.</li>
+          <li>SSO and SCIM provisioning for your team.</li>
+          <li>Priority support and a named contact.</li>
         </ul>
         <button class="btn btn--ghost" type="button" data-asr-package="plus" style="width:100%">Start Continuous-Plus</button>
       </div>
@@ -271,18 +270,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head">
       <span class="idx">03 / Speed</span>
       <h2>Minutes for the scan. Days for a signature with a name on it.</h2>
-      <p class="lede">A security review stalls on two different clocks. We compress both, and we are candid about which one needs a person.</p>
+      <p class="lede">A review waits on two things: automated checks, and a human signature. The checks run in minutes. A signature with a name on it takes days.</p>
     </div>
     <div class="grid grid--2">
       <div class="card">
-        <p class="card__k">The machine clock</p>
-        <h3>No human waits here</h3>
-        <p>Permission reads, audit-trail and egress checks, and the prompt-injection battery are compute. They run in minutes to hours and re-run on every deploy. The free scan, the $750 report, and both continuous plans need nobody in the loop.</p>
+        <p class="card__k">Automated checks</p>
+        <h3>No human in the loop</h3>
+        <p>Permission reads, audit-trail and egress checks, and the prompt-injection battery run automatically. They take minutes to hours and re-run on every deploy. The free scan, the $750 report, and both continuous plans need nobody in the loop.</p>
       </div>
       <div class="card">
-        <p class="card__k">The human clock</p>
+        <p class="card__k">A named co-signer</p>
         <h3>A name behind the result</h3>
-        <p>Enterprise reviewers still want a person to stand behind the finding, not just a machine that approved a machine. A named co-signer reviews and signs alongside the math. That is days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.</p>
+        <p>Enterprise reviewers still want a person to stand behind the finding. On the Reviewed Attestation, a named reviewer co-signs the report. That takes days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.</p>
       </div>
     </div>
     <p class="hero__claim" style="margin-top:var(--s6)">
@@ -296,30 +295,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <div class="wrap">
     <div class="section__head">
       <span class="idx">04 / The deal-closer</span>
-      <h2>When a CISO needs more than math.</h2>
+      <h2>When a reviewer needs more than a signature.</h2>
       <p class="lede">The automated report is verifiable on its own. For the deal where a reviewer wants a name beside it, add an accredited human who co-signs.</p>
     </div>
     <div class="split" style="align-items:center">
       <div class="plate">
         <p class="card__k">Reviewed Attestation</p>
         <div class="tier__price">$25,000</div>
-        <p class="tier__sub">flat · named co-signer · days, not weeks</p>
+        <p class="tier__sub">A named human reviewer co-signs the report.</p>
         <ul class="ledger" style="margin:var(--s5) 0">
-          <li>Everything in Continuous Growth</li>
-          <li>A named, accredited security reviewer co-signs the report</li>
-          <li>Remediation walkthrough with your team</li>
-          <li>The co-signer's reputation on the line beside ours</li>
+          <li>Everything in Full Readiness.</li>
+          <li>A named human reviewer co-signs the report alongside the cryptographic signature.</li>
+          <li>Two-tier verdict: the Ed25519 signature plus issuer provenance.</li>
+          <li>The strongest artifact kolm produces for a high-stakes review.</li>
         </ul>
-        <a class="btn btn--primary" href="/contact" style="width:100%">Book a reviewed attestation</a>
+        <a class="btn btn--primary" href="mailto:dev@kolm.ai" style="width:100%">Talk to us</a>
         <p class="hero__claim" style="text-align:center;margin-top:var(--s3)">Need a deeper adversarial pass? Add <b>Deep Red-Team</b> for <b>+$10,000</b>.</p>
       </div>
       <div>
         <h3>What the named signature buys you</h3>
         <p style="color:var(--ink-2);margin:var(--s3) 0 var(--s4)">
           Cryptography proves the bytes were not altered. A name proves a person
-          reviewed them. For the deal where a CISO needs more than an agent that
-          checked an agent, the co-signer is the difference between a passed review
-          and another round of questions.
+          reviewed them. For the deal where a CISO needs more than a signature, the
+          co-signer is the difference between a passed review and another round of
+          questions.
         </p>
         <p class="hero__claim">
           Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
@@ -366,7 +365,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="card"><h3>Why are the prices just listed?</h3><p>Because you should not sit through a call to find out whether you can afford us. Every fee is flat and final. You pick a plan and start.</p></div>
       <div class="card"><h3>Is the free scan really free?</h3><p>Yes. Upload redacted logs and get a signed snapshot in minutes. It is watermarked and scoped to what you sent, and it is yours to verify offline. Most teams use it to see a finding before they commit.</p></div>
       <div class="card"><h3>Why pay monthly when a report is one-time?</h3><p>A point-in-time report goes stale on your next deploy. A permission you granted in January can still fire in August. Continuous re-attests on a schedule, so the evidence your buyer checks is never older than your last release.</p></div>
-      <div class="card"><h3>What does the named co-signer add over the crypto?</h3><p>The signature proves the bytes are intact. The name proves a person reviewed them. Enterprise reviewers ask for both, so the Reviewed Attestation puts a named, accredited reviewer beside the math.</p></div>
+      <div class="card"><h3>What does the named co-signer add over the crypto?</h3><p>The signature proves the bytes are intact. The name proves a person reviewed them. Enterprise reviewers ask for both, so the Reviewed Attestation puts a named, accredited reviewer beside the signature.</p></div>
       <div class="card"><h3>Do you warrant our agent is secure?</h3><p>No, and distrust anyone who does. We test and report with reproductions, scoped to exactly what we examined. The scope statement is part of the signed report. <a href="/verify">Try the sample verifier.</a></p></div>
       <div class="card"><h3>Is there a contingency or success fee?</h3><p>No. Every price on this page is the whole price. No percentage of your deal, no surprise true-up. <a href="/enterprise">Enterprise terms</a> cover an MSA and custom scope.</p></div>
       <div class="card"><h3>How is this different from a cheap automated scan?</h3><p>Every report is generated from your agent's actual permission reads, audit-trail and egress checks, and a live prompt-injection battery, then Ed25519-signed and entered in an append-only transparency log. No two reports are alike, and your buyer verifies every byte offline against your key. This is evidence a reviewer can check, not a templated PDF.</p></div>
@@ -379,10 +378,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 7. FINAL CTA -->
 <section class="section reveal cta-final">
   <div class="wrap">
-    <h2>Start free. Sign when the deal needs it.</h2>
-    <p class="lede">A signed report your buyer verifies in their own browser, and a review that moves at the speed of math.</p>
+    <h2>Run the free scan. Sign when your buyer needs it.</h2>
+    <p class="lede">A signed report your buyer verifies in their own browser, in under a minute, against your public key.</p>
     <div class="hero__cta">
-      <a class="btn btn--primary" href="/signup">Run a free scan</a>
+      <a class="btn btn--primary" href="/signup">Run the free scan</a>
       <a class="btn btn--ghost" href="/verify">Verify a report</a>
     </div>
   </div>

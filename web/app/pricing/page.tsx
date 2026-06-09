@@ -27,30 +27,29 @@ interface Tier {
 
 const SELF_SERVE: Tier[] = [
   {
-    name: "Scan",
+    name: "Free Scan",
     price: "Free",
-    sub: "Self-serve. A signed snapshot in minutes, no call.",
+    sub: "Run the full audit. See every finding before you pay.",
     features: [
-      "Automated ASR-1, ASR-2, ASR-3 read",
-      "Ed25519-signed snapshot",
-      "Offline-verifiable in the browser",
-      "Framework crosswalk preview",
+      "Deterministic audit of your agent from its logs, across every control.",
+      "Each finding mapped to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS.",
+      "Watermarked preview report (not signed).",
+      "No account needed to read your results.",
     ],
-    cta: { label: "Start free", href: "/signup", variant: "ghost" },
+    cta: { label: "Run the free scan", href: "/signup", variant: "ghost" },
   },
   {
-    name: "Signed Report",
+    name: "Signed Readiness Report",
     price: "$750",
     unit: "one-time",
-    sub: "The full automated audit, signed and ready to hand over.",
+    sub: "The same audit, signed. Your buyer verifies it offline.",
     features: [
-      "Everything in Scan",
-      "Full findings with remediation",
-      "SOC 2 / ISO 42001 / NIST / EU AI Act / OWASP / MITRE crosswalk",
-      "Append-only transparency-log entry",
-      "Buyer-ready PDF and JSON",
+      "Ed25519-signed evidence report tied to a stable report ID.",
+      "Your buyer verifies the signature against your public key, in the browser, with no kolm server in the path.",
+      "Full framework crosswalk included.",
+      "A public Trust link you can send with the deal.",
     ],
-    cta: { label: "Start an audit", href: "/contact", variant: "primary" },
+    cta: { label: "Get the signed report", href: "/signup", variant: "primary" },
     featured: true,
     badge: "Most popular",
   },
@@ -58,27 +57,27 @@ const SELF_SERVE: Tier[] = [
     name: "Continuous Starter",
     price: "$299",
     unit: "/mo",
-    sub: "Re-attested weekly, so the evidence never goes stale.",
+    sub: "Keep the report current. Re-attested every week.",
     features: [
-      "Everything in Signed Report",
-      "Weekly re-attestation",
-      "Re-runs on every deploy",
-      "Drift alerts when a control regresses",
+      "Everything in the Signed Readiness Report.",
+      "Re-attested weekly, so evidence does not go stale during a review.",
+      "One agent, one public Trust link.",
+      "A fresh signed report on every re-attestation.",
     ],
-    cta: { label: "Start free", href: "/signup", variant: "ghost" },
+    cta: { label: "Subscribe", href: "/signup", variant: "ghost" },
   },
   {
     name: "Continuous Growth",
     price: "$999",
     unit: "/mo",
-    sub: "For teams shipping every few days.",
+    sub: "Evidence as fresh as your last release.",
     features: [
-      "Everything in Continuous Starter",
-      "Daily re-attestation",
-      "Multiple agents and environments",
-      "Shareable buyer portal link",
+      "Everything in Continuous Starter.",
+      "Re-attested on every deploy, not on a weekly clock.",
+      "Prompt-injection regression on every release, so a new build cannot quietly reopen a closed finding.",
+      "Your full agent fleet under one buyer portal.",
     ],
-    cta: { label: "Start free", href: "/signup", variant: "ghost" },
+    cta: { label: "Subscribe", href: "/signup", variant: "ghost" },
   },
 ];
 
@@ -87,13 +86,12 @@ const REVIEWED: Tier[] = [
     name: "Full Readiness",
     price: "$15,000",
     unit: "flat",
-    sub: "The complete audit across all six controls, delivered as a named report.",
+    sub: "We run the audit with you and help close the gaps.",
     features: [
-      "Everything in Continuous Growth",
-      "All six controls, including ASR-4 injection and ASR-5 provenance",
-      "Red-team / prompt-injection battery with reproductions",
-      "Model and MCP supply-chain enumeration",
-      "Bounded by an SLA, days not weeks",
+      "A guided engagement across your full control set and agent fleet.",
+      "Remediation guidance for every finding before you sign.",
+      "Signed Readiness Report plus a buyer portal delivered at the end.",
+      "Continuous re-attestation for the duration of the engagement.",
     ],
     // Self-serve: a new user signs up, then completes the $15,000 purchase via
     // POST /v1/audit/package/checkout. The next= param carries the chosen package.
@@ -105,10 +103,10 @@ const REVIEWED: Tier[] = [
     unit: "/mo",
     sub: "Continuous re-attestation across the full control set, with priority.",
     features: [
-      "Everything in Full Readiness, re-run continuously",
-      "All six controls re-attested on schedule",
-      "Priority review queue",
-      "Named technical contact",
+      "Everything in Full Readiness, re-run continuously.",
+      "Your full control set re-attested on schedule.",
+      "Priority review queue.",
+      "Named technical contact.",
     ],
     cta: { label: "Start Continuous-Plus", href: "/signup?next=plus", variant: "ghost" },
   },
@@ -116,14 +114,14 @@ const REVIEWED: Tier[] = [
     name: "Reviewed Attestation",
     price: "$25,000",
     unit: "flat",
-    sub: "A named co-signer reviews and signs alongside the math. Days, not weeks.",
+    sub: "A named human reviewer co-signs the report.",
     features: [
-      "Everything in Full Readiness",
-      "Named, accredited reviewer co-signs the report",
-      "Person-plus-crypto signature your buyer can cite",
-      "SLA-bounded turnaround",
+      "Everything in Full Readiness.",
+      "A named human reviewer co-signs the report alongside the cryptographic signature.",
+      "Two-tier verdict: the Ed25519 signature plus issuer provenance.",
+      "The strongest artifact kolm produces for a high-stakes review.",
     ],
-    cta: { label: "Talk to us", href: "/contact", variant: "primary" },
+    cta: { label: "Talk to us", href: "mailto:dev@kolm.ai", variant: "primary" },
     badge: "Reviewer-backed",
   },
   {
@@ -131,10 +129,10 @@ const REVIEWED: Tier[] = [
     price: "Contact",
     sub: "MSA, custom scope, SAML and BAA. For programs with their own paper.",
     features: [
-      "Everything in Reviewed Attestation",
-      "Master service agreement and custom scope",
-      "SAML SSO, SCIM, BAA on request",
-      "Dedicated reviewer and roadmap input",
+      "Everything in Reviewed Attestation.",
+      "Master service agreement and custom scope.",
+      "SAML SSO, SCIM, BAA on request.",
+      "Dedicated reviewer and roadmap input.",
     ],
     cta: { label: "Talk to us", href: "/contact", variant: "ghost" },
   },
@@ -195,8 +193,8 @@ export default function PricingPage() {
           <p className="mt-6 max-w-[58ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
             Scan for free, hand your buyer a signed readiness report for $750,
             or keep your evidence current from $299 a month. When an enterprise
-            reviewer wants a person beside the math, add a named co-signer. The
-            only thing you pay for is evidence your buyer can verify.
+            reviewer wants a person to stand behind the report, add a named
+            co-signer. The only thing you pay for is evidence your buyer can verify.
           </p>
         </div>
       </section>
@@ -209,7 +207,7 @@ export default function PricingPage() {
               Self-serve. No human in the loop.
             </h2>
             <p className="text-[14px] text-ink-3">
-              Compute-only tiers. Re-run on every deploy.
+              Flat fees. No call to book.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -228,7 +226,7 @@ export default function PricingPage() {
               Reviewer-backed. A person stands behind it.
             </h2>
             <p className="text-[14px] text-on-ink-3">
-              All six controls. SLA-bounded. Days, not weeks.
+              Your full control set. SLA-bounded. Days, not weeks.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

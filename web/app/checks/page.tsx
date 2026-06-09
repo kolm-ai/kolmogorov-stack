@@ -14,15 +14,15 @@ import { CheckIcon } from "@/components/icons";
 export const metadata: Metadata = {
   title: "What we test",
   description:
-    "Four pillars (permissions, audit trail, data egress, injection) and six ASR controls, each mapped to the standard your buyer's reviewers already cite: SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP, MITRE ATLAS. Every finding traces to the crosswalk and ships in a signed report.",
+    "kolm tests your AI agent across eight controls, from least privilege to multi-agent delegation. Each finding maps to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and MITRE ATLAS, traces to the crosswalk, and ships in a signed report your buyer verifies offline.",
 };
 
 const FRAMEWORKS = [
   "SOC 2",
   "ISO 42001",
   "NIST AI RMF",
-  "EU AI Act Art.12 / 14",
-  "OWASP LLM & Agentic",
+  "EU AI Act",
+  "OWASP LLM Top 10",
   "MITRE ATLAS",
 ];
 
@@ -30,47 +30,47 @@ const FLAGS = [
   {
     kicker: "Over-permissioned",
     title: "More access than the job needs",
-    body: "An agent holding ten times the scopes it uses, often on one shared key, is the first thing a reviewer circles.",
-    map: "ASR-1 · least privilege",
+    body: "An agent that holds far more scopes than it uses, often on one shared key, is the first thing a reviewer circles. We surface the gap with the calls that prove it.",
+    map: "ASR-1 / least privilege",
   },
   {
     kicker: "Editable trail",
     title: "A log nobody can trust",
-    body: "If the activity record can be changed after the fact, it is not evidence. Reviewers want it append-only and hash-chained.",
-    map: "ASR-2 · audit trail",
+    body: "If the activity record can be changed after the fact, it is not evidence. A reviewer wants it append-only and hash-chained.",
+    map: "ASR-2 / audit trail",
   },
   {
     kicker: "Unredacted egress",
     title: "Data that leaves in the clear",
-    body: "Where the agent sends data, and whether sensitive fields are masked before they go, decides whether a reviewer signs off.",
-    map: "ASR-3 · data egress",
+    body: "Where the agent sends data, and whether sensitive fields are masked before they leave, is what a reviewer checks before signing off.",
+    map: "ASR-3 / data egress",
   },
 ];
 
 const PILLARS = [
   {
-    kicker: "Pillar 01 · Permissions",
+    kicker: "Pillar 01 / Permissions",
     title: "Least privilege",
     body: "Scopes the agent holds versus the scopes it actually uses. Shared keys, standing grants, and high-impact actions reachable without a confirmation are surfaced with the calls that prove them.",
-    map: "ASR-1 · maps to SOC 2 CC6",
+    map: "ASR-1 maps to SOC 2 CC6",
   },
   {
-    kicker: "Pillar 02 · Audit trail",
+    kicker: "Pillar 02 / Audit trail",
     title: "A record that cannot be edited",
     body: "Whether agent activity is logged append-only, hash-chained, and retained, so the record a reviewer reads is the record that happened, not one rewritten after the fact.",
-    map: "ASR-2 · maps to EU AI Act Art.12",
+    map: "ASR-2 maps to EU AI Act Art.12",
   },
   {
-    kicker: "Pillar 03 · Data egress",
+    kicker: "Pillar 03 / Data egress",
     title: "Where data goes, and what is masked",
     body: "Every destination the agent can reach, the approved sub-processors behind them, and proof that sensitive fields are redacted before they leave the boundary.",
-    map: "ASR-3 · maps to OWASP LLM02",
+    map: "ASR-3 maps to OWASP LLM02",
   },
   {
-    kicker: "Pillar 04 · Injection",
+    kicker: "Pillar 04 / Injection",
     title: "Can it be talked out of its rules",
-    body: "Direct and indirect prompt injection, guardrail bypass, and system-prompt extraction, run as a battery with reproductions. Tested and reported, not warranted.",
-    map: "ASR-4 · maps to OWASP LLM01",
+    body: "Direct and indirect prompt injection, guardrail bypass, and system-prompt extraction, run as a battery with reproductions a reviewer can replay. Tested and reported, not warranted.",
+    map: "ASR-4 maps to OWASP LLM01",
   },
 ];
 
@@ -80,37 +80,49 @@ const CROSSWALK: { ctrl: string; name: string; checks: string; maps: string }[] 
       ctrl: "ASR-1",
       name: "Least privilege",
       checks: "Scopes the agent holds versus the scopes it uses",
-      maps: "SOC 2 CC6 · OWASP ASI · NIST MANAGE-1",
+      maps: "SOC 2 CC6, OWASP ASI, NIST MANAGE-1",
     },
     {
       ctrl: "ASR-2",
       name: "Audit trail",
       checks: "Append-only, hash-chained, retained activity log",
-      maps: "EU AI Act Art.12 · SOC 2 CC7",
+      maps: "EU AI Act Art.12, SOC 2 CC7",
     },
     {
       ctrl: "ASR-3",
       name: "Data egress",
       checks: "Destinations, approved sub-processors, redaction",
-      maps: "OWASP LLM02 · EU AI Act Art.10",
+      maps: "OWASP LLM02, EU AI Act Art.10",
     },
     {
       ctrl: "ASR-4",
       name: "Injection",
       checks: "Instruction hijack, indirect injection, guardrail bypass",
-      maps: "OWASP LLM01 · MITRE ATLAS",
+      maps: "OWASP LLM01, MITRE ATLAS",
     },
     {
       ctrl: "ASR-5",
       name: "Provenance",
-      checks: "Model and dependency provenance",
-      maps: "ISO 42001 · NIST MAP-1",
+      checks: "Model and dependency provenance, MCP and vendor surface",
+      maps: "ISO 42001, NIST MAP-4, OWASP LLM05",
     },
     {
       ctrl: "ASR-6",
       name: "Evidence",
       checks: "Signed, logged, offline-verifiable report",
-      maps: "SOC 2 CC7 · ISO 42001",
+      maps: "SOC 2 CC7, ISO 42001",
+    },
+    {
+      ctrl: "ASR-7",
+      name: "Memory and retrieval integrity",
+      checks: "Retrieval sources trusted, memory writes attributed",
+      maps: "OWASP LLM08, NIST MEASURE-2",
+    },
+    {
+      ctrl: "ASR-8",
+      name: "Multi-agent delegation",
+      checks: "Each handoff attributable and scope-attenuated",
+      maps: "OWASP ASI, NIST GOVERN-3",
     },
   ];
 
@@ -128,14 +140,14 @@ export default function ChecksPage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(48px,7vw,88px)]">
           <div className="max-w-[70ch]">
             <h1 className="font-display text-[clamp(34px,5.2vw,56px)] font-extrabold leading-[1.03] tracking-[-0.035em] text-ink">
-              What a reviewer flags, named and tested first.
+              What a reviewer flags, tested and named to a control.
             </h1>
             <p className="mt-5 max-w-[62ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              When a CISO sits down to vet your agent, they work a checklist: what
-              it can touch, what it records, where data goes, and whether it can be
-              talked out of its instructions. We test all four, map each result to
-              the standard they already cite, and sign it. The report says exactly
-              what was tested, and what was not.
+              A security reviewer works a checklist: what your agent can touch, what
+              it records, where data goes, and whether it can be talked out of its
+              instructions. kolm tests each one. It maps every finding to a control
+              and to the standard your buyer cites, then signs the report. The report
+              states what was tested and what was not.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-2.5">
               {FRAMEWORKS.map((f) => (
@@ -154,13 +166,13 @@ export default function ChecksPage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3">01 / What a reviewer flags</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              A questionnaire stopped clearing it.
+              The findings a reviewer circles first.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              The moment your agent can touch customer data and act on its own, the
-              week-long review runs four to eight. The reviewer stops reading your
-              answers and starts asking for evidence. Three findings draw the first
-              red marks.
+              Once your agent can touch customer data and act on its own, a security
+              review can run four to eight weeks. The reviewer stops reading your
+              answers and asks for evidence. These are the findings they circle
+              first.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -202,11 +214,19 @@ export default function ChecksPage() {
             ))}
           </div>
           <p className="mt-10 max-w-[64ch] text-[13px] leading-[1.6] text-ink-3">
-            Two more controls round out the catalog.{" "}
-            <b className="font-semibold text-ink-2">ASR-5 provenance</b> and{" "}
-            <b className="font-semibold text-ink-2">ASR-6 evidence</b> extend the
-            four pillars into the supply chain and the report itself. All six
-            appear in the crosswalk.
+            Four more controls round out the catalog.{" "}
+            <b className="font-semibold text-ink-2">ASR-5 provenance</b>,{" "}
+            <b className="font-semibold text-ink-2">ASR-6 evidence</b>,{" "}
+            <b className="font-semibold text-ink-2">
+              ASR-7 memory and retrieval integrity
+            </b>
+            , and{" "}
+            <b className="font-semibold text-ink-2">
+              ASR-8 multi-agent delegation
+            </b>{" "}
+            extend the four pillars into the supply chain, the report itself,
+            retrieval, and agent-to-agent handoffs. All eight appear in the
+            crosswalk.
           </p>
         </div>
       </section>
@@ -217,10 +237,10 @@ export default function ChecksPage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3 text-on-ink-3">03 / The crosswalk</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-              Six controls, mapped to the standard your buyer cites.
+              Eight controls, mapped to the standard your buyer cites.
             </h2>
             <p className="mt-4 text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-              ASR-1 through ASR-6. Each row is one control, what it checks, and the
+              ASR-1 through ASR-8. Each row is one control, what it checks, and the
               framework a review group already uses. Every finding in the signed
               report points back to a row here, so a reviewer traces each result to
               a standard, not to our word.
@@ -315,7 +335,7 @@ export default function ChecksPage() {
                 that the agent is secure, and you should distrust anyone who does.
               </CardDescription>
               <p className="mt-4 font-mono text-[12px] text-ink-3">
-                ASR-4 · OWASP LLM01 · MITRE ATLAS
+                ASR-4 / OWASP LLM01 / MITRE ATLAS
               </p>
             </Card>
           </div>
@@ -334,15 +354,15 @@ export default function ChecksPage() {
       <section className="relative bg-ink-deep text-on-ink">
         <div className="mx-auto max-w-wrap px-6 py-[96px] text-center">
           <h2 className="mx-auto max-w-[22ch] font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-            Run the catalog against your agent.
+            Run these checks against your agent.
           </h2>
           <p className="mx-auto mt-4 max-w-[56ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            All four pillars, six controls, each mapped to the framework your buyer
-            cites, ending in a signed report they verify offline.
+            Eight controls, each finding mapped to a framework your buyer cites,
+            ending in a signed report they verify offline.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>
-              <Link href="/contact">Start an audit</Link>
+              <Link href="/signup">Run the free scan</Link>
             </Button>
             <Button
               asChild

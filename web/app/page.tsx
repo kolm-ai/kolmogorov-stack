@@ -22,7 +22,7 @@ const FRAMEWORKS = [
   "ISO 42001",
   "NIST AI RMF",
   "EU AI Act",
-  "OWASP",
+  "OWASP LLM Top 10",
   "MITRE ATLAS",
 ];
 
@@ -61,15 +61,15 @@ const STALL = [
     kicker: "Say-so does not scale",
     title: "Questionnaires are not proof",
     body: "Self-attested answers shift the burden to the buyer. They want evidence they can verify themselves.",
-    map: "ASR-3 · data egress",
+    map: "ASR-6 · evidence",
   },
 ];
 
 const FLOW = [
   {
-    n: "01 · Audit",
+    n: "01 · Audit and map",
     t: "We examine the agent",
-    d: "Onramp through a log import or a sidecar proxy. Permissions, audit trail and data egress, each mapped to the standards your buyer cites.",
+    d: "Onramp through a log import or a sidecar proxy. We read permissions, audit trail, and data egress from the logs. Each finding maps to the framework a review asks about.",
   },
   {
     n: "02 · Sign",
@@ -91,24 +91,24 @@ export default function HomePage() {
         <div className="mx-auto max-w-wrap px-6 py-[clamp(48px,7vw,88px)]">
           <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)]">
             <div>
-              <p className="eyebrow mb-4">The SOC 2 for AI agents</p>
+              <p className="eyebrow mb-4">Signed security evidence for AI agents</p>
               <h1 className="max-w-[18ch] font-display text-[clamp(38px,6vw,64px)] font-extrabold leading-[1.0] tracking-[-0.035em] text-ink">
-                Your AI agent is ready for enterprise. Here&rsquo;s the signed
-                proof.
+                Security evidence for your AI agent, signed and verifiable.
               </h1>
               <p className="mt-6 max-w-[52ch] font-sans text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-                The deal is not lost. It is stalled in security review. When a
-                buyer&rsquo;s security team has to vet your autonomous agent,
-                hand them a signed evidence report they verify offline, against
-                your own key. The four-to-eight-week review becomes days.
+                kolm audits your agent from its logs, maps each finding to SOC
+                2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10, and
+                MITRE ATLAS, and signs the report. Your buyer verifies it
+                offline against your public key. No account, no upload, no kolm
+                server in the trust path. A review that took weeks takes days.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
                 <Button asChild>
-                  <Link href="/signup">Start free</Link>
+                  <Link href="/signup">Run the free scan</Link>
                 </Button>
                 <Button asChild variant="ghost">
-                  <Link href="/sample">See a sample report</Link>
+                  <Link href="/sample">Verify a sample report</Link>
                 </Button>
               </div>
 
@@ -135,7 +135,7 @@ export default function HomePage() {
                 </span>
                 <span className="inline-flex items-center gap-2">
                   <CheckIcon className="h-3.5 w-3.5 text-[var(--accent)]" />
-                  Mapped to SOC 2, ISO 42001, your buyer&rsquo;s questionnaire
+                  Mapped to SOC 2, ISO 42001, NIST, EU AI Act, OWASP, MITRE
                 </span>
               </div>
             </div>
@@ -152,7 +152,7 @@ export default function HomePage() {
       <section className="border-b border-line">
         <div className="mx-auto max-w-wrap px-6 py-12">
           <div className="flex flex-wrap items-center gap-3">
-            <Badge variant="verified">Verified by</Badge>
+            <Badge variant="verified">Mapped to</Badge>
             {FRAMEWORKS.map((f) => (
               <span key={f} className="ctrlid">
                 {f}
@@ -181,11 +181,13 @@ export default function HomePage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3">01 / The stall</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              A CISO will not take your word for it.
+              Self-attested answers are not evidence.
             </h2>
             <p className="mt-4 max-w-[50ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-ink-2">
-              The moment an autonomous agent touches customer data, the week-long
-              review runs four to eight. A questionnaire no longer clears it.
+              A security questionnaire puts the burden of proof on the buyer.
+              Self-attested answers are not something a reviewer can check, so
+              the review stalls. A signed report takes the burden off them. The
+              review moves in days, not weeks.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -207,7 +209,7 @@ export default function HomePage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3 text-on-ink-3">02 / How it works</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-              Audit. Sign. Verify.
+              Audit, map, sign, verify.
             </h2>
             <p className="mt-4 max-w-[50ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
               One lifecycle. The report is reproducible, scoped to what was
@@ -248,7 +250,7 @@ export default function HomePage() {
           <div className="mb-12 max-w-[66ch]">
             <p className="eyebrow mb-3">03 / What we test</p>
             <h2 className="font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-ink">
-              Three deterministic controls, mapped to the questionnaire.
+              Every finding traces to a control.
             </h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -277,6 +279,19 @@ export default function HomePage() {
               </CardDescription>
             </Card>
           </div>
+          <p className="mt-6 max-w-[72ch] text-[15px] leading-relaxed text-ink-2">
+            Plus a scored prompt-injection red-team battery, model and
+            dependency provenance, agent identity, memory and retrieval
+            integrity, and multi-agent delegation. Eight controls in all, each
+            mapped to the frameworks a review asks about.{" "}
+            <Link
+              href="/checks"
+              className="whitespace-nowrap border-b border-line-2 text-ink hover:border-ink"
+            >
+              See everything we test
+            </Link>
+            .
+          </p>
         </div>
       </section>
 
@@ -284,15 +299,15 @@ export default function HomePage() {
       <section className="relative bg-ink-deep text-on-ink">
         <div className="mx-auto max-w-wrap px-6 py-[96px] text-center">
           <h2 className="mx-auto max-w-[22ch] font-display text-[clamp(28px,3.8vw,42px)] font-bold leading-[1.08] tracking-[-0.028em] text-on-ink">
-            Turn the security review into a download.
+            Run the free scan.
           </h2>
           <p className="mx-auto mt-4 max-w-[52ch] text-[clamp(17.5px,1.55vw,20px)] leading-[1.55] text-on-ink-2">
-            A fixed-fee audit, a signed evidence report, and a review that moves
-            at the speed of math.
+            Run the full audit from your logs and see every finding before you
+            pay. A review that took weeks takes days.
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button asChild>
-              <Link href="/signup">Start free</Link>
+              <Link href="/signup">Run the free scan</Link>
             </Button>
             <Button asChild variant="ghost">
               <Link href="/contact">Book a demo</Link>

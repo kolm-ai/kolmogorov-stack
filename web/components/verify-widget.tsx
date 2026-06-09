@@ -181,7 +181,7 @@ export function VerifyWidget({
         </span>
         {phase === "verified" && <Badge variant="verified">Verified</Badge>}
         {phase === "void" && <Badge variant="void">Void</Badge>}
-        {phase === "loading" && <Badge>Verifying…</Badge>}
+        {phase === "loading" && <Badge>Verifying...</Badge>}
         {phase === "error" && <Badge variant="void">Unavailable</Badge>}
       </div>
 
@@ -194,7 +194,7 @@ export function VerifyWidget({
       <div className="mt-4 rounded-md border border-line bg-paper-sink p-4">
         {phase === "loading" && (
           <p className="font-mono text-[13px] text-ink-2">
-            Loading the verifier and the signed report…
+            Loading the verifier and the signed report...
           </p>
         )}
         {phase === "verified" && (
@@ -204,7 +204,7 @@ export function VerifyWidget({
         )}
         {phase === "void" && (
           <p className="font-mono text-[13px] text-void">
-            VOID — {result?.reason ?? "the signature does not verify."}
+            VOID: {result?.reason ?? "the signature does not verify."}
           </p>
         )}
         {phase === "error" && (
@@ -246,7 +246,7 @@ export function VerifyWidget({
                     />
                     <span>
                       <b className="font-semibold text-ink">{c.name}</b>
-                      {c.detail ? ` — ${c.detail}` : ""}
+                      {c.detail ? `: ${c.detail}` : ""}
                     </span>
                   </li>
                 ))}
@@ -304,8 +304,9 @@ export function VerifyWidget({
       </div>
 
       <p className="mt-3 text-center text-[12px] text-ink-3">
-        Try to break it. <b className="text-ink-2">Inflate the score</b> and the
-        seal reads VOID. Real Ed25519, no account, no upload.
+        Edit any field and the signature reports VOID.{" "}
+        <b className="text-ink-2">Inflate the score</b> and the seal breaks. Real
+        Ed25519, no account, no upload.
       </p>
     </div>
   );
