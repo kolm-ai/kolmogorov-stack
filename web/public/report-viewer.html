@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes, strip the class so nothing stays hidden. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Open a signed Agent Security-Review report, verify it offline, explore it · kolm.ai</title>
+<meta name="description" content="Load a kolm evidence report from a trust URL or paste it. The viewer verifies its Ed25519 signature in your browser, then renders the executive summary, an interactive control graph, the framework crosswalk, the red-team resistance battery, and a visual diff between two reports.">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Open a signed Agent Security-Review report and explore it offline">
+<meta property="og:description" content="Verify a kolm evidence report in your browser, then read it: summary, interactive control graph, framework crosswalk, red-team battery, and a visual diff between two audits.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/report-viewer">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Open a signed Agent Security-Review report offline">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/report-viewer">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<style>
+  /* page-local: the report viewer. Severity ramp is a restrained earth-tone
+     scale (no alarm red), so the control graph reads at a glance while staying
+     inside the warm-paper system: green = clear, deepening toward void. */
+  .rv { --sev-critical:#8C3A2E; --sev-high:#C2603A; --sev-medium:#B5852A; --sev-low:#565C57; --sev-info:var(--accent); --sev-none:#8A908B;
+        --st-resisted:var(--accent); --st-exposed:#8C3A2E; --st-untested:#8A908B; }
+
+  .rv__load { display:grid; grid-template-columns:1fr; gap:var(--s4); align-items:start; }
+  .rv__load.is-compare { grid-template-columns:1fr 1fr; }
+  @media (max-width:860px){ .rv__load.is-compare { grid-template-columns:1fr; } }
+  .rv__pane { background:var(--panel); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; }
+  .rv__panehead { display:flex; align-items:center; gap:10px; padding:12px var(--s4); border-bottom:1px solid var(--line); background:var(--bg-2); }
+  .rv__panehead h3 { font-size:14px; margin:0; }
+  .rv__panehead .rv__status { margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--ink-3); }
+  .rv__status.is-ok { color:var(--accent-text); } .rv__status.is-bad { color:var(--void); }
+  .rv textarea { width:100%; min-height:200px; resize:vertical; border:0; outline:0; display:block;
+    background:var(--bg-1); color:var(--ink); font-family:var(--mono); font-size:12.5px; line-height:1.6; padding:var(--s4); tab-size:2; }
+  .rv textarea::placeholder { color:var(--ink-faint); }
+  .rv__bar { display:flex; gap:var(--s2); padding:var(--s3) var(--s4); border-top:1px solid var(--line); flex-wrap:wrap; background:var(--bg-2); }
+  .rv__urlrow { display:flex; gap:var(--s2); padding:0 var(--s4) var(--s4); }
+  .rv__urlrow input { flex:1; border:1px solid var(--line-2); border-radius:var(--r-md); padding:8px 12px; font-family:var(--mono); font-size:12.5px; background:var(--bg-1); color:var(--ink); }
+  .rv.drag .rv__pane:first-child { border-color:var(--ok-edge); box-shadow:0 0 0 1px var(--ok-edge) inset; }
+
+  /* verdict / executive header */
+  .rv__verdict { border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper-2); }
+  .rv__vtop { display:flex; align-items:center; gap:var(--s3); flex-wrap:wrap; padding:var(--s4) var(--s5); border-bottom:1px solid var(--line); }
+  .rv__seal { font-family:var(--mono); font-weight:600; font-size:13px; letter-spacing:.06em; padding:6px 12px; border-radius:var(--r-pill); border:1px solid; }
+  .rv__seal.ok { color:var(--accent-text); background:var(--accent-soft); border-color:var(--accent-edge); }
+  .rv__seal.bad { color:var(--void); background:var(--void-soft); border-color:var(--void-edge); }
+  .rv__subject { font-family:var(--display); font-weight:600; font-size:clamp(20px,3vw,26px); margin:0; }
+  .rv__meta { margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--ink-3); text-align:right; }
+  .rv__stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); }
+  @media (max-width:680px){ .rv__stats { grid-template-columns:repeat(2,1fr); } }
+  .rv__stat { background:var(--paper-2); padding:var(--s4) var(--s5); }
+  .rv__stat .big { font-family:var(--display); font-weight:600; font-size:clamp(26px,4.4vw,40px); line-height:1.05; letter-spacing:-0.01em; font-feature-settings:"tnum" 1; }
+  .rv__stat .lab { font-size:12px; color:var(--ink-3); margin-top:2px; }
+  .rv__stat .big.ok { color:var(--accent-text); } .rv__stat .big.warn { color:var(--sev-medium); } .rv__stat .big.bad { color:var(--void); }
+  .rv__sig { padding:var(--s4) var(--s5); border-top:1px solid var(--line); font-family:var(--mono); font-size:12px; color:var(--ink-2); display:grid; gap:4px; }
+  .rv__sig .k { color:var(--ink-3); }
+
+  /* control graph */
+  .rv__panel { border:1px solid var(--line); border-radius:var(--r-lg); background:var(--paper-2); padding:var(--s5); }
+  .rv__panelhead { display:flex; align-items:baseline; gap:var(--s3); flex-wrap:wrap; margin-bottom:var(--s4); }
+  .rv__panelhead h2 { font-size:18px; margin:0; }
+  .rv__panelhead .hint { font-size:13px; color:var(--ink-3); }
+  .rv__graphwrap { display:grid; grid-template-columns:1.6fr 1fr; gap:var(--s4); align-items:start; }
+  @media (max-width:860px){ .rv__graphwrap { grid-template-columns:1fr; } }
+  .rv__graph { width:100%; height:auto; background:var(--paper-sink); border:1px solid var(--line); border-radius:var(--r-md); touch-action:none; }
+  .rv__graph .edge { stroke:var(--line-2); stroke-width:1; opacity:.5; }
+  .rv__graph .node { cursor:pointer; }
+  .rv__graph .node circle { stroke:var(--paper-2); stroke-width:1.5; transition:r .12s var(--ease); }
+  .rv__graph .node:hover circle, .rv__graph .node.sel circle { stroke:var(--ink); stroke-width:2; }
+  .rv__graph .node text { font-family:var(--mono); font-size:9px; fill:var(--ink-2); pointer-events:none; }
+  .rv__graph .node.hub text { font-size:10px; fill:var(--ink); font-weight:500; }
+  .rv__graph .center text { font-family:var(--display); font-size:12px; fill:var(--ink); font-weight:600; }
+  .rv__detail { background:var(--paper-sink); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); min-height:200px; }
+  .rv__detail h4 { margin:0 0 4px; font-size:15px; }
+  .rv__detail .cid { font-family:var(--mono); font-size:12px; color:var(--ink-3); }
+  .rv__detail .findlist { margin:var(--s3) 0 0; padding:0; list-style:none; display:grid; gap:8px; }
+  .rv__detail .findlist li { font-size:13px; border-left:3px solid var(--line-2); padding-left:10px; }
+  .rv__legend { display:flex; gap:var(--s3); flex-wrap:wrap; margin-top:var(--s3); font-size:12px; color:var(--ink-3); }
+  .rv__legend span { display:inline-flex; align-items:center; gap:6px; }
+  .rv__legend i { width:11px; height:11px; border-radius:50%; display:inline-block; }
+
+  /* crosswalk + tables */
+  .rv table { width:100%; border-collapse:collapse; }
+  .rv th,.rv td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; font-size:13.5px; }
+  .rv th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); }
+  .rv .mono { font-family:var(--mono); }
+  .chip { display:inline-block; color:#fff; border-radius:var(--r-pill); padding:1px 9px; font-family:var(--mono); font-size:11px; font-weight:500; }
+  .fwgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:var(--s3); }
+  .fwcard { border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); background:var(--paper-2); }
+  .fwcard h4 { margin:0 0 8px; font-size:14px; display:flex; align-items:center; gap:8px; }
+  .fwcard .ctrl { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13px; border-top:1px solid var(--line); }
+  .fwcard .ctrl:first-of-type { border-top:0; }
+  .fwcard .ctrl .id { font-family:var(--mono); font-size:12px; min-width:74px; }
+  .fwcard .ctrl .dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+
+  /* red-team probes */
+  .probe { border:1px solid var(--line); border-left-width:4px; border-radius:var(--r-md); padding:var(--s3) var(--s4); margin:10px 0; background:var(--paper-2); }
+  .probe.s-resisted { border-left-color:var(--st-resisted); } .probe.s-exposed { border-left-color:var(--st-exposed); } .probe.s-untested { border-left-color:var(--st-untested); }
+  .probe__head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .probe__title { font-weight:600; font-size:14px; }
+  .probe__cat { font-family:var(--mono); font-size:11px; color:var(--ink-3); }
+  .probe__st { margin-left:auto; font-family:var(--mono); font-size:11px; font-weight:600; padding:2px 9px; border-radius:var(--r-pill); }
+  .probe__st.s-resisted { color:var(--accent-text); background:var(--accent-soft); } .probe__st.s-exposed { color:var(--void); background:var(--void-soft); } .probe__st.s-untested { color:var(--ink-3); background:var(--paper-sink); }
+  .probe__detail { margin:6px 0 4px; font-size:13.5px; color:var(--ink-2); }
+  .probe__fw { font-family:var(--mono); font-size:11px; color:var(--ink-3); }
+
+  /* diff */
+  .rv__diffstats { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s3); margin-bottom:var(--s4); }
+  @media (max-width:680px){ .rv__diffstats { grid-template-columns:1fr; } }
+  .rv__delta { border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); background:var(--paper-2); }
+  .rv__delta .big { font-family:var(--display); font-weight:600; font-size:30px; font-feature-settings:"tnum" 1; }
+  .rv__delta .big.up { color:var(--accent-text); } .rv__delta .big.down { color:var(--void); }
+  .rv__delta .lab { font-size:12px; color:var(--ink-3); }
+  .rv__diffcols { display:grid; grid-template-columns:repeat(2,1fr); gap:var(--s4); }
+  @media (max-width:680px){ .rv__diffcols { grid-template-columns:1fr; } }
+  .rv__difflist { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+  .rv__difflist li { font-size:13px; padding:7px 10px; border-radius:var(--r-sm); border-left:3px solid var(--line-2); background:var(--paper-sink); }
+  .rv__difflist li.good { border-left-color:var(--accent); } .rv__difflist li.bad { border-left-color:var(--sev-critical); } .rv__difflist li.warn { border-left-color:var(--sev-medium); }
+  .stack { display:grid; gap:var(--s6); }
+  .muted { color:var(--ink-3); }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body class="rv">
+
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- LOADER -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="section__head" style="max-width:74ch">
+      <h1>Open a signed report. Read it like the reviewer will.</h1>
+      <p class="lede">
+        Load a kolm evidence report from a trust URL or paste it. The viewer verifies the Ed25519
+        signature in <em>this</em> browser, with no account and no kolm server in the path, then
+        renders the executive summary, an interactive control graph, the framework crosswalk, and the
+        red-team resistance battery. Switch on <span class="mono">Compare</span> to diff two audits
+        and see exactly what improved, regressed, resolved, or is new.
+      </p>
+    </div>
+
+    <div class="rv__load" id="rvLoad">
+      <div class="rv__pane">
+        <div class="rv__panehead">
+          <h3>Report A (JSON)</h3>
+          <span class="rv__status" id="statusA">paste · load · drop</span>
+        </div>
+        <label class="sr-only" for="srcA">Report A JSON</label>
+        <textarea id="srcA" spellcheck="false" placeholder='{
+  "schema": "kolm-audit-report-1",
+  "report_id": "asrr_...",
+  "summary": { "readiness_pct": 0, "blocking_count": 5, "tamper_evident": false },
+  "red_team": { "score": 13, "probes": [ ... ] },
+  "signature_ed25519": { "alg": "ed25519", "public_key": "-----BEGIN PUBLIC KEY-----...", "signature": "..." }
+}
+
+Paste a signed report here, press "Open report", or drop a .json file.'></textarea>
+        <div class="rv__bar">
+          <button class="btn btn--primary btn--sm" id="openBtn" type="button">Open report</button>
+          <button class="btn btn--ghost btn--sm" id="sampleBtn" type="button">Load sample</button>
+          <button class="btn btn--ghost btn--sm" id="cmpToggle" type="button" aria-pressed="false">Compare two reports</button>
+          <button class="btn btn--ghost btn--sm" id="printBtn" type="button">Print</button>
+          <button class="btn btn--ghost btn--sm" id="clearBtn" type="button">Clear</button>
+        </div>
+        <div class="rv__urlrow">
+          <label class="sr-only" for="urlA">Trust URL</label>
+          <input id="urlA" type="url" inputmode="url" placeholder="https://your-domain.example/evidence/report.json" />
+          <button class="btn btn--ghost btn--sm" id="urlBtn" type="button">Load URL</button>
+        </div>
+      </div>
+
+      <div class="rv__pane hidden" id="paneB">
+        <div class="rv__panehead">
+          <h3>Report B (compare)</h3>
+          <span class="rv__status" id="statusB">paste · load · drop</span>
+        </div>
+        <label class="sr-only" for="srcB">Report B JSON</label>
+        <textarea id="srcB" spellcheck="false" placeholder='Paste the second report to diff against Report A (for example a re-audit after remediation).'></textarea>
+        <div class="rv__bar">
+          <button class="btn btn--primary btn--sm" id="diffBtn" type="button">Diff A against B</button>
+          <button class="btn btn--ghost btn--sm" id="sampleBBtn" type="button">Load sample as B</button>
+          <button class="btn btn--ghost btn--sm" id="clearBBtn" type="button">Clear B</button>
+        </div>
+        <div class="rv__urlrow">
+          <label class="sr-only" for="urlB">Trust URL B</label>
+          <input id="urlB" type="url" inputmode="url" placeholder="https://your-domain.example/evidence/report-after.json" />
+          <button class="btn btn--ghost btn--sm" id="urlBBtn" type="button">Load URL</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="band" style="margin-top:var(--s5)">
+      <span class="band__item"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:14px;height:14px;color:var(--ok)"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> in-browser WebCrypto · Ed25519 (RFC 8037)</span>
+      <span class="band__item">Issuer matched against kolm's published keyring</span>
+      <span class="band__item">Open verifier: <a href="/kolm-audit-verify.js" style="color:var(--ink);border-bottom:1px solid var(--ok-edge)">kolm-audit-verify.js</a></span>
+    </div>
+  </div>
+</section>
+
+<!-- RENDERED REPORT -->
+<section class="section hidden" id="rvReport">
+  <div class="wrap stack">
+    <div class="rv__verdict" id="rvSummary"></div>
+
+    <div class="rv__panel">
+      <div class="rv__panelhead">
+        <h2>Control graph</h2>
+        <span class="hint">Each leaf is a framework control, coloured by its worst mapped finding. Click a node to read the controls and the findings behind it.</span>
+      </div>
+      <div class="rv__graphwrap">
+        <div>
+          <div id="rvGraph"></div>
+          <div class="rv__legend" id="rvLegend"></div>
+        </div>
+        <div class="rv__detail" id="rvDetail">
+          <h4>Select a node</h4>
+          <p class="muted" style="font-size:13px">Click any control in the graph to see its framework id, what it covers, its worst severity, and the findings that map to it.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rv__panel">
+      <div class="rv__panelhead"><h2>Framework crosswalk</h2><span class="hint">The control each finding maps to, in the frameworks an enterprise reviewer cites.</span></div>
+      <div class="fwgrid" id="rvCross"></div>
+    </div>
+
+    <div class="rv__panel" id="rvProbesPanel">
+      <div class="rv__panelhead"><h2 id="rvProbesTitle">Red-team resistance</h2><span class="hint">Deterministic injection / agent-abuse battery over the ingested events. Untested probes are marked, never scored as a pass.</span></div>
+      <div id="rvProbes"></div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFF -->
+<section class="section hidden" id="rvDiff">
+  <div class="wrap">
+    <div class="rv__panel">
+      <div class="rv__panelhead"><h2>Visual diff: A against B</h2><span class="hint" id="rvDiffSub"></span></div>
+      <div id="rvDiffBody"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/report-viewer">Report viewer</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="/report-viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trust Center &middot; kolm.ai</title>
+<meta name="description" content="See who opens the Trust Links you share. View counts and distinct viewers for every signed Agent Security-Review report.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/kolm-2026.css">
+<style>
+  :root{ --d-ink:#0b0e14; --d-muted:#5b6472; --d-rule:#e3e7ee; --d-paper:#f6f7f4; --d-panel:#ffffff; --d-accent:#b3431f; --d-ok:#166534; --d-warn:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--d-paper);color:var(--d-ink);
+    font-family:'Switzer',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;line-height:1.5}
+  .mono{font-family:'Spline Sans Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 22px 80px}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--d-rule);padding:16px 22px;background:var(--d-panel)}
+  header.top a.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--d-ink);font-weight:700;font-family:'Cabinet Grotesk',sans-serif;font-size:18px;letter-spacing:-.01em}
+  header.top .bars{display:inline-flex;gap:3px;align-items:flex-end;height:18px}
+  header.top .bars i{width:4px;background:var(--d-ink);border-radius:1px;display:block}
+  header.top .bars i:nth-child(1){height:8px}header.top .bars i:nth-child(2){height:13px}header.top .bars i:nth-child(3){height:18px}
+  header.top nav a{color:var(--d-muted);text-decoration:none;margin-left:18px;font-size:14px}
+  header.top nav a:hover{color:var(--d-ink)}
+  h1{font-family:'Cabinet Grotesk',sans-serif;font-size:30px;letter-spacing:-.02em;margin:26px 0 4px}
+  .lede{color:var(--d-muted);margin:0 0 26px;max-width:62ch}
+  .idx{font-family:'Spline Sans Mono',monospace;font-size:12px;color:var(--d-accent);letter-spacing:.08em;text-transform:uppercase}
+  h2{font-family:'Cabinet Grotesk',sans-serif;font-size:20px;margin:34px 0 12px}
+  .card{background:var(--d-panel);border:1px solid var(--d-rule);border-radius:12px;padding:18px 20px;margin:0 0 16px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:0 0 22px}
+  .stat{background:var(--d-panel);border:1px solid var(--d-rule);border-radius:12px;padding:16px 18px}
+  .stat .big{font-family:'Cabinet Grotesk',sans-serif;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat .lbl{color:var(--d-muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--d-rule);vertical-align:middle}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--d-muted);font-weight:600}
+  .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+  .pill.report{background:#ecfdf3;color:var(--d-ok)}
+  .pill.continuous{background:#eef2ff;color:#3730a3}
+  .pill.gated{background:#fff4ed;color:#92400e;margin-left:6px}
+  .num{font-variant-numeric:tabular-nums}
+  .btn{display:inline-block;border:0;border-radius:8px;padding:9px 15px;font:600 14px 'Switzer',sans-serif;cursor:pointer;text-decoration:none;text-align:center}
+  .btn.primary{background:var(--d-ink);color:#fff}
+  .btn.primary:hover{background:#1b2331}
+  .btn.ghost{background:transparent;color:var(--d-ink);border:1px solid var(--d-rule)}
+  .btn.ghost:hover{border-color:var(--d-ink)}
+  .btn.sm{padding:6px 11px;font-size:13px}
+  .muted{color:var(--d-muted)}
+  .empty{padding:30px;text-align:center;color:var(--d-muted)}
+  .auth-box{max-width:460px;margin:40px auto;text-align:center}
+  .auth-box input{width:100%;padding:10px 12px;border:1px solid var(--d-rule);border-radius:8px;font-family:'Spline Sans Mono',monospace;margin:12px 0}
+  .banner{border-radius:10px;padding:12px 16px;margin:0 0 20px;font-size:14px}
+  .banner.warn{background:#fff4ed;border:1px solid #f3c4a8;color:#92400e}
+  .row-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  footer{border-top:1px solid var(--d-rule);margin-top:60px;padding:20px 0;color:var(--d-muted);font-size:13px;text-align:center}
+  footer a{color:var(--d-muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><span class="bars"><i></i><i></i><i></i></span> kolm</a>
+  <nav>
+    <a href="/dashboard">Your reports</a>
+    <a href="/how-it-works">How it works</a>
+    <a href="/verify">Verify</a>
+    <a href="/contact">Contact</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="idx">Account</div>
+  <h1>Trust Center</h1>
+  <p class="lede">Every Trust Link you have shared is an unguessable capability token; possession is the grant. Here you can see who opened each one: total views and distinct viewers, so visible buyer engagement closes the deal. Viewer addresses are hashed at the boundary and never stored in the clear.</p>
+
+  <div id="banner"></div>
+  <div id="stats" class="stats" style="display:none"></div>
+  <div id="content"><div class="empty">Loading your Trust Links...</div></div>
+
+  <div id="auth" class="auth-box" style="display:none">
+    <h2>View your Trust Center</h2>
+    <p class="muted">Sign in, or paste your API key (starts with <span class="mono">ks_</span>) to see who opened your Trust Links. Do not have one yet? <a href="/contact">Start an audit</a>.</p>
+    <input id="keyInput" class="mono" placeholder="ks_..." autocomplete="off" spellcheck="false">
+    <button class="btn primary" id="keyBtn" style="width:100%">View my Trust Center</button>
+  </div>
+</div>
+
+<footer>
+  kolm.ai &middot; Agent Security Evidence &middot; <a href="/verify">Verify a report</a> &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>
+</footer>
+
+<script>
+(function(){
+  var KEY = null;
+  try { KEY = sessionStorage.getItem('kolm_dash_key') || null; } catch(e){}
+
+  function authHeaders(){
+    var h = {};
+    if (KEY) h['Authorization'] = 'Bearer ' + KEY;
+    return h;
+  }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+  function fmtDateTime(s){
+    if (!s) return 'never';
+    try { return new Date(s).toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+    catch(e){ return String(s); }
+  }
+
+  function showAuth(){
+    document.getElementById('content').style.display='none';
+    document.getElementById('stats').style.display='none';
+    document.getElementById('auth').style.display='block';
+  }
+
+  // Pull each paid report's view roll-up. The seller-only /v1/trust/:slug/views
+  // route is auth-gated + tenant-fenced, so a slug owned by another tenant 404s.
+  function loadViews(slug){
+    return fetch('/v1/trust/' + encodeURIComponent(slug) + '/views', { credentials:'same-origin', headers: authHeaders() })
+      .then(function(res){ return res.ok ? res.json() : null; })
+      .then(function(j){ return (j && j.ok) ? j : null; })
+      .catch(function(){ return null; });
+  }
+
+  function render(reports){
+    var content = document.getElementById('content');
+    var links = (reports || []).filter(function(r){ return r && r.public_slug && r.trust_url; });
+
+    if (!links.length){
+      document.getElementById('stats').style.display='none';
+      content.innerHTML = '<div class="card"><div class="empty">No published Trust Links yet. Purchase a Signed Readiness Report or start Continuous re-attestation to mint a shareable Trust Link, then track who opens it here.<br><br><a class="btn primary" href="/dashboard">Go to your reports</a></div></div>';
+      return;
+    }
+
+    content.innerHTML = '<div class="empty">Loading view counts...</div>';
+
+    Promise.all(links.map(function(r){ return loadViews(r.public_slug).then(function(v){ return { r: r, v: v }; }); }))
+      .then(function(items){
+        var totalViews = 0, totalUnique = 0;
+        var rows = items.map(function(it){
+          var r = it.r, v = it.v;
+          var summary = (v && v.summary) || { views:0, unique_viewers:0, last_view:null };
+          var views = Number(summary.views || 0);
+          var uniq = Number(summary.unique_viewers || 0);
+          totalViews += views; totalUnique += uniq;
+          var kind = (r.tier === 'report') ? '<span class="pill report">REPORT</span>' : (r.tier === 'continuous' ? '<span class="pill continuous">CONTINUOUS</span>' : '<span class="pill report">REPORT</span>');
+          var gated = (v && v.gated) ? '<span class="pill gated">GATED</span>' : '';
+          var actions = '<a class="btn ghost sm" href="'+esc(r.trust_url)+'" target="_blank" rel="noopener">Open</a>'
+                      + '<button class="btn primary sm" data-copy="'+esc(r.trust_url)+'">Copy link</button>';
+          return '<tr>'
+            + '<td><strong>'+esc(r.subject||'Agent security report')+'</strong>'+gated+'<br><span class="mono muted" style="font-size:12px">'+esc(r.report_id||'')+'</span></td>'
+            + '<td>'+kind+'</td>'
+            + '<td class="num">'+views+'</td>'
+            + '<td class="num">'+uniq+'</td>'
+            + '<td class="muted">'+esc(fmtDateTime(summary.last_view))+'</td>'
+            + '<td><div class="row-actions">'+actions+'</div></td>'
+            + '</tr>';
+        }).join('');
+
+        var stats = document.getElementById('stats');
+        stats.style.display='';
+        stats.innerHTML =
+            '<div class="stat"><div class="big">'+links.length+'</div><div class="lbl">Trust Links</div></div>'
+          + '<div class="stat"><div class="big">'+totalViews+'</div><div class="lbl">Total views</div></div>'
+          + '<div class="stat"><div class="big">'+totalUnique+'</div><div class="lbl">Distinct viewers</div></div>';
+
+        content.innerHTML = '<div class="card" style="padding:0;overflow:hidden">'
+          + '<table><thead><tr><th>Report</th><th>Type</th><th>Views</th><th>Distinct</th><th>Last view</th><th></th></tr></thead>'
+          + '<tbody>'+rows+'</tbody></table></div>';
+
+        content.querySelectorAll('[data-copy]').forEach(function(b){ b.onclick = function(){ navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function(){ b.textContent='Copied'; setTimeout(function(){ b.textContent='Copy link'; },1500); }); }; });
+      });
+  }
+
+  function load(){
+    fetch('/v1/audit/reports', { credentials:'same-origin', headers: authHeaders() })
+      .then(function(res){
+        if (res.status === 401){ showAuth(); return null; }
+        return res.json();
+      })
+      .then(function(data){
+        if (data && data.ok){
+          document.getElementById('auth').style.display='none';
+          document.getElementById('content').style.display='block';
+          render(data.reports || []);
+        }
+      })
+      .catch(function(){ document.getElementById('content').innerHTML = '<div class="banner warn">Could not load your Trust Center. Try refreshing, or email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</div>'; });
+  }
+
+  document.getElementById('keyBtn').onclick = function(){
+    var v = (document.getElementById('keyInput').value||'').trim();
+    if (!v){ return; }
+    KEY = v; try { sessionStorage.setItem('kolm_dash_key', v); } catch(e){}
+    document.getElementById('auth').style.display='none';
+    document.getElementById('content').style.display='block';
+    document.getElementById('content').innerHTML = '<div class="empty">Loading your Trust Links...</div>';
+    load();
+  };
+
+  load();
+})();
+</script>
+</body>
+</html>

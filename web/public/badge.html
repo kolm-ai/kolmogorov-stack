@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Embed the kolm verify badge: signed, offline-verifiable evidence · kolm.ai</title>
+<meta name="description" content="Put a verify badge on your site, docs, or README. It links to your public Trust Link, where anyone checks your signed evidence report against kolm's published issuer key, offline, with no account. Copy-paste HTML, Markdown, and a self-contained image snippet.">
+<meta name="keywords" content="verify badge, embeddable security badge, trust badge, signed evidence report, Ed25519 verification, offline verification, AI agent security, README badge, trust link, kolm.ai">
+<meta name="theme-color" content="#F6F7F4">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Embed the kolm verify badge">
+<meta property="og:description" content="A badge for your site, docs, or README that links to your public Trust Link, where anyone verifies your signed evidence report offline against kolm's published issuer key. No account.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/badge">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="kolm.ai verify badge, signed and offline-verifiable evidence for AI agents.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Embed the kolm verify badge · kolm">
+<meta name="twitter:description" content="A copy-paste badge that links to your Trust Link, where anyone verifies your signed evidence report offline against kolm's published key. No account.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/badge">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Embed the kolm verify badge",
+  "description": "Add an embeddable verify badge to your site, docs, or README. The badge links to your public Trust Link, where anyone checks your signed evidence report against kolm's published Ed25519 issuer key, offline, with no account and no server in the trust path.",
+  "url": "https://kolm.ai/badge",
+  "inLanguage": "en",
+  "author": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Embed the kolm verify badge on your site",
+  "description": "Copy a badge snippet, point it at your Trust Link, and publish. Visitors click through to verify your signed evidence report offline.",
+  "step": [
+    { "@type": "HowToStep", "name": "Copy a snippet", "text": "Pick the HTML, Markdown, or self-contained image snippet and copy it." },
+    { "@type": "HowToStep", "name": "Point it at your Trust Link", "text": "Replace your-slug with the slug from your Trust Link, for example https://kolm.ai/v1/trust/your-slug." },
+    { "@type": "HowToStep", "name": "Publish", "text": "Paste the snippet into your site, docs, or README. Clicking the badge opens your Trust Link, where the signed report is verified offline against kolm's published issuer key." }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does a visitor need an account to verify the report?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Clicking the badge opens your Trust Link, where the signed report is verified in the browser against kolm's published issuer key. No account, no upload, no kolm server in the trust path." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the badge actually prove?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The badge itself is a link. The proof lives at your Trust Link: an Ed25519-signed evidence report whose signature covers the exact bytes, so a reviewer can confirm the report was not altered and was signed by the key they expect." }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens to the badge when my report is re-attested?",
+      "acceptedAnswer": { "@type": "Answer", "text": "On a continuous plan your Trust Link stays current as the report is re-signed. The badge keeps pointing at the same link, so it always opens your latest signed evidence." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I change the badge color or wording?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Use any of the three snippets as published so the mark and the link stay intact. The badge must link to your own Trust Link and must not imply a result the signed report does not state." }
+    }
+  ]
+}
+</script>
+<style>
+/* page-scoped components: copy-paste snippet boxes + a live badge stage.
+   Names are namespaced so they never collide with the shared design system. */
+.snip { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper-2); overflow: hidden; box-shadow: 0 1px 2px rgba(14, 19, 16, 0.04); }
+.snip__bar { display: flex; align-items: center; gap: var(--s3); padding: 11px var(--s5); border-bottom: 1px solid var(--line); background: var(--paper-sink); }
+.snip__name { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.snip__copy { margin-left: auto; }
+.snip__pre { margin: 0; padding: var(--s5); font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--ink); white-space: pre; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.snip__note { padding: var(--s4) var(--s5); margin: 0; border-top: 1px solid var(--line); font-family: var(--sans); font-size: 13px; color: var(--ink-3); line-height: 1.6; }
+.snip__note b { color: var(--ink-2); font-weight: 600; }
+.copied { color: var(--accent-text) !important; border-color: var(--accent-edge) !important; background: var(--accent-soft) !important; }
+.badge-stage { display: flex; flex-direction: column; gap: var(--s4); align-items: center; justify-content: center; text-align: center; padding: var(--s8) var(--s5); border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper-2); }
+.badge-stage--dark { background: var(--ink-deep); border-color: var(--ink-deep); }
+.badge-stage__tag { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.badge-stage--dark .badge-stage__tag { color: var(--on-ink-3); }
+.badge-stage a { display: inline-flex; }
+.badge-stage img { display: block; width: 300px; height: 40px; max-width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush" style="padding-top:var(--s8)">
+  <div class="wrap">
+    <div class="hero__grid">
+      <div>
+        <span class="idx">Embeddable verify badge</span>
+        <h1>Put the proof where buyers already look.</h1>
+        <p class="lede">
+          You have a signed evidence report. Now make it findable. The kolm verify badge
+          sits on your site, docs, or README and links straight to your Trust Link, where
+          anyone checks your report offline against kolm's published key. No account, no
+          screenshot, no taking your word for it.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#snippets">Copy a snippet</a>
+          <a class="btn btn--ghost" href="/verify">See how verify works</a>
+        </div>
+        <div class="trustline" aria-label="What the badge links to">
+          <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Links to your Trust Link</span>
+          <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline, no account</span>
+          <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>ASCII-clean, self-contained SVG</span>
+        </div>
+      </div>
+
+      <!-- live exhibit: the actual badge, on light and on dark, clickable -->
+      <aside aria-label="Live preview of the kolm verify badge">
+        <span class="tryit">Live preview</span>
+        <div class="badge-stage" style="margin-bottom:var(--s4)">
+          <span class="badge-stage__tag">On a light surface</span>
+          <a href="https://kolm.ai/trust" target="_blank" rel="noopener" aria-label="kolm verifiable evidence: open the Trust center">
+            <img width="300" height="40" alt="kolm: verifiable evidence, signed and offline-verifiable" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0ia29sbTogdmVyaWZpYWJsZSBldmlkZW5jZSI+PHRpdGxlPmtvbG0gdmVyaWZpYWJsZSBldmlkZW5jZTogc2lnbmVkIGFuZCBvZmZsaW5lLXZlcmlmaWFibGU8L3RpdGxlPjxjbGlwUGF0aCBpZD0iciI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0MCIgcng9IjgiLz48L2NsaXBQYXRoPjxnIGNsaXAtcGF0aD0idXJsKCNyKSI+PHJlY3Qgd2lkdGg9IjExOCIgaGVpZ2h0PSI0MCIgZmlsbD0iIzBFMTMxMCIvPjxyZWN0IHg9IjExOCIgd2lkdGg9IjE4MiIgaGVpZ2h0PSI0MCIgZmlsbD0iIzExODc1QSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2IDEwKSBzY2FsZSgwLjYyKSIgZmlsbD0iIzQ1RDk4RSI+PHJlY3QgeD0iNCIgeT0iNiIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIyMCIgcng9IjAuNCIvPjxyZWN0IHg9IjEzIiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjE0IiByeD0iMC40Ii8+PHJlY3QgeD0iMjIiIHk9IjEyIiB3aWR0aD0iNC41IiBoZWlnaHQ9IjgiIHJ4PSIwLjQiLz48L2c+PHRleHQgeD0iNDIiIHk9IjI1LjUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI0VDRUZFQSI+a29sbTwvdGV4dD48cGF0aCBkPSJNMTM1IDIwLjVsNCA0IDgtOC41IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48dGV4dCB4PSIxNTQiIHk9IjI1LjUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjRkZGRkZGIj52ZXJpZmlhYmxlIGV2aWRlbmNlPC90ZXh0PjwvZz48L3N2Zz4="></a>
+        </div>
+        <div class="badge-stage badge-stage--dark">
+          <span class="badge-stage__tag">On a dark surface</span>
+          <a href="https://kolm.ai/trust" target="_blank" rel="noopener" aria-label="kolm verifiable evidence: open the Trust center">
+            <img width="300" height="40" alt="kolm: verifiable evidence, signed and offline-verifiable" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0ia29sbTogdmVyaWZpYWJsZSBldmlkZW5jZSI+PHRpdGxlPmtvbG0gdmVyaWZpYWJsZSBldmlkZW5jZTogc2lnbmVkIGFuZCBvZmZsaW5lLXZlcmlmaWFibGU8L3RpdGxlPjxjbGlwUGF0aCBpZD0iciI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0MCIgcng9IjgiLz48L2NsaXBQYXRoPjxnIGNsaXAtcGF0aD0idXJsKCNyKSI+PHJlY3Qgd2lkdGg9IjExOCIgaGVpZ2h0PSI0MCIgZmlsbD0iIzBFMTMxMCIvPjxyZWN0IHg9IjExOCIgd2lkdGg9IjE4MiIgaGVpZ2h0PSI0MCIgZmlsbD0iIzExODc1QSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2IDEwKSBzY2FsZSgwLjYyKSIgZmlsbD0iIzQ1RDk4RSI+PHJlY3QgeD0iNCIgeT0iNiIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIyMCIgcng9IjAuNCIvPjxyZWN0IHg9IjEzIiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjE0IiByeD0iMC40Ii8+PHJlY3QgeD0iMjIiIHk9IjEyIiB3aWR0aD0iNC41IiBoZWlnaHQ9IjgiIHJ4PSIwLjQiLz48L2c+PHRleHQgeD0iNDIiIHk9IjI1LjUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI0VDRUZFQSI+a29sbTwvdGV4dD48cGF0aCBkPSJNMTM1IDIwLjVsNCA0IDgtOC41IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48dGV4dCB4PSIxNTQiIHk9IjI1LjUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjRkZGRkZGIj52ZXJpZmlhYmxlIGV2aWRlbmNlPC90ZXh0PjwvZz48L3N2Zz4="></a>
+        </div>
+        <p class="hero__claim" style="text-align:center">
+          The preview links to the Trust center. Your real badge links to <b>your</b> Trust Link.
+        </p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. WHAT IT IS -->
+<section class="section reveal" id="what">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">01 / What it does</span>
+      <h2>A link, not a logo wall.</h2>
+      <p class="lede">
+        Most trust badges are decoration: an image that asserts something with nothing
+        behind it. This one is a doorway. It opens your Trust Link, and the report there
+        is checkable by the person looking at it.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Points to your evidence</p>
+        <h3>Straight to your Trust Link</h3>
+        <p>The badge links to kolm.ai/v1/trust/your-slug, the public page for your signed evidence report. One click, no search, no sign-in wall.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Verifiable at the click</p>
+        <h3>The math runs in their browser</h3>
+        <p>At your Trust Link the Ed25519 signature is checked against kolm's published issuer key, offline. Edit a finding or inflate a score and the seal reads VOID.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Nothing to trust on faith</p>
+        <h3>No account, no kolm server</h3>
+        <p>A reviewer needs no kolm login and uploads nothing. The report carries the key it was signed with, so the check needs nothing from us.</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s5)">
+      The badge is a signpost. The proof is the signed report it points to. <a href="/report" style="border-bottom:1px solid var(--line-2)">See the anatomy of a report.</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 3. SNIPPETS -->
+<section class="section reveal" id="snippets">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">02 / Copy and paste</span>
+      <h2>Three snippets. Pick the one your platform speaks.</h2>
+      <p class="lede">
+        Each one renders the same badge and links to your Trust Link. Replace
+        <b>your-slug</b> with the slug from your Trust Link, paste, and publish.
+      </p>
+    </div>
+
+    <div class="grid" style="gap:var(--s6)">
+
+      <!-- (a) HTML anchor + inline SVG -->
+      <div class="snip">
+        <div class="snip__bar">
+          <span class="snip__name">a / HTML, inline SVG</span>
+          <button class="btn btn--ghost btn--sm snip__copy" type="button" data-copy="#snipA" data-label="Copy" aria-label="Copy the HTML inline SVG snippet">Copy</button>
+        </div>
+        <pre class="snip__pre" id="snipA">&lt;a href="https://kolm.ai/v1/trust/your-slug" target="_blank" rel="noopener"
+   aria-label="kolm verifiable evidence: open the signed Trust Link"&gt;
+  &lt;svg xmlns="http://www.w3.org/2000/svg" width="300" height="40" role="img"
+       aria-label="kolm: verifiable evidence"&gt;
+    &lt;title&gt;kolm verifiable evidence: signed and offline-verifiable&lt;/title&gt;
+    &lt;clipPath id="kolm-badge-clip"&gt;&lt;rect width="300" height="40" rx="8"/&gt;&lt;/clipPath&gt;
+    &lt;g clip-path="url(#kolm-badge-clip)"&gt;
+      &lt;rect width="118" height="40" fill="#0E1310"/&gt;
+      &lt;rect x="118" width="182" height="40" fill="#11875A"/&gt;
+      &lt;g transform="translate(16 10) scale(0.62)" fill="#45D98E"&gt;
+        &lt;rect x="4" y="6" width="4.5" height="20" rx="0.4"/&gt;
+        &lt;rect x="13" y="9" width="4.5" height="14" rx="0.4"/&gt;
+        &lt;rect x="22" y="12" width="4.5" height="8" rx="0.4"/&gt;
+      &lt;/g&gt;
+      &lt;text x="42" y="25.5" font-family="Segoe UI,Helvetica,Arial,sans-serif"
+            font-size="15" font-weight="700" fill="#ECEFEA"&gt;kolm&lt;/text&gt;
+      &lt;path d="M135 20.5l4 4 8-8.5" fill="none" stroke="#FFFFFF" stroke-width="2.4"
+            stroke-linecap="round" stroke-linejoin="round"/&gt;
+      &lt;text x="154" y="25.5" font-family="Segoe UI,Helvetica,Arial,sans-serif"
+            font-size="13.5" font-weight="600" fill="#FFFFFF"&gt;verifiable evidence&lt;/text&gt;
+    &lt;/g&gt;
+  &lt;/svg&gt;
+&lt;/a&gt;</pre>
+        <p class="snip__note">Best for your own site or hosted docs. <b>Self-contained:</b> no external request, no third-party service, exact brand mark. The SVG is ASCII-only.</p>
+      </div>
+
+      <!-- (b) Markdown -->
+      <div class="snip">
+        <div class="snip__bar">
+          <span class="snip__name">b / Markdown, for READMEs</span>
+          <button class="btn btn--ghost btn--sm snip__copy" type="button" data-copy="#snipB" data-label="Copy" aria-label="Copy the Markdown snippet">Copy</button>
+        </div>
+        <pre class="snip__pre" id="snipB">[![kolm: verifiable evidence](https://img.shields.io/badge/kolm-verifiable_evidence-11875A?labelColor=0E1310)](https://kolm.ai/v1/trust/your-slug)</pre>
+        <p class="snip__note">Best for GitHub, GitLab, and other READMEs, which strip inline SVG. This renders a flat badge in kolm's colors through the third-party shields.io service. Prefer zero third-party calls? Host the SVG above yourself, or use snippet a on a platform that allows HTML.</p>
+      </div>
+
+      <!-- (c) self-contained image -->
+      <div class="snip">
+        <div class="snip__bar">
+          <span class="snip__name">c / Image, self-contained</span>
+          <button class="btn btn--ghost btn--sm snip__copy" type="button" data-copy="#snipC" data-label="Copy" aria-label="Copy the self-contained image snippet">Copy</button>
+        </div>
+        <pre class="snip__pre" id="snipC">&lt;a href="https://kolm.ai/v1/trust/your-slug" target="_blank" rel="noopener"&gt;
+  &lt;img width="300" height="40"
+       alt="kolm: verifiable evidence, signed and offline-verifiable"
+       src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0ia29sbTogdmVyaWZpYWJsZSBldmlkZW5jZSI+PHRpdGxlPmtvbG0gdmVyaWZpYWJsZSBldmlkZW5jZTogc2lnbmVkIGFuZCBvZmZsaW5lLXZlcmlmaWFibGU8L3RpdGxlPjxjbGlwUGF0aCBpZD0iciI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0MCIgcng9IjgiLz48L2NsaXBQYXRoPjxnIGNsaXAtcGF0aD0idXJsKCNyKSI+PHJlY3Qgd2lkdGg9IjExOCIgaGVpZ2h0PSI0MCIgZmlsbD0iIzBFMTMxMCIvPjxyZWN0IHg9IjExOCIgd2lkdGg9IjE4MiIgaGVpZ2h0PSI0MCIgZmlsbD0iIzExODc1QSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2IDEwKSBzY2FsZSgwLjYyKSIgZmlsbD0iIzQ1RDk4RSI+PHJlY3QgeD0iNCIgeT0iNiIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIyMCIgcng9IjAuNCIvPjxyZWN0IHg9IjEzIiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjE0IiByeD0iMC40Ii8+PHJlY3QgeD0iMjIiIHk9IjEyIiB3aWR0aD0iNC41IiBoZWlnaHQ9IjgiIHJ4PSIwLjQiLz48L2c+PHRleHQgeD0iNDIiIHk9IjI1LjUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI0VDRUZFQSI+a29sbTwvdGV4dD48cGF0aCBkPSJNMTM1IDIwLjVsNCA0IDgtOC41IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48dGV4dCB4PSIxNTQiIHk9IjI1LjUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjRkZGRkZGIj52ZXJpZmlhYmxlIGV2aWRlbmNlPC90ZXh0PjwvZz48L3N2Zz4="&gt;
+&lt;/a&gt;</pre>
+        <p class="snip__note">Best for places that allow an image tag but not raw SVG, such as a help center, a status page, or an email signature. <b>One tag, no external request:</b> the whole badge travels inside the data URI.</p>
+      </div>
+
+    </div>
+
+    <p class="hero__claim" style="margin-top:var(--s5)" id="copy-status" role="status" aria-live="polite">
+      Replace <b>your-slug</b> in every snippet with the slug from your Trust Link, for example
+      <span class="mono">kolm.ai/v1/trust/acme-support-agent</span>.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ 4. WHAT HAPPENS ON CLICK (the ledger) -->
+<section class="section section--ink reveal" id="onclick">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">03 / At the click</span>
+      <h2>Where the badge leads, the math takes over.</h2>
+      <p class="lede">
+        The badge is the easy part. What makes it worth embedding is what happens after the
+        click: the same offline verification that runs on this site, in the visitor's own browser.
+      </p>
+    </div>
+    <div class="flow" aria-label="From badge click to offline verification">
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">01 · Click</span>
+        <span class="flow__t">The badge opens your Trust Link</span>
+        <p class="flow__d">A visitor clicks the badge and lands on your public Trust Link, kolm.ai/v1/trust/your-slug, with your latest signed evidence report.</p>
+      </div>
+      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 11.5l2.4 2.4L15.5 9.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">02 · Check</span>
+        <span class="flow__t">Ed25519, in their browser</span>
+        <p class="flow__d">The signature is verified against kolm's published issuer key, offline. The signature covers the canonical bytes, so any edit breaks it in front of the reviewer.</p>
+      </div>
+      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="flow__node">
+        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l4.5 4.5L20 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="flow__n">03 · Read</span>
+        <span class="flow__t">A result they can stand behind</span>
+        <p class="flow__d">A green seal and the scoped findings, mapped to the frameworks a reviewer cites. No account asked, nothing uploaded, no kolm server in the trust path.</p>
+      </div>
+    </div>
+    <div class="hero__cta" style="margin-top:var(--s7)">
+      <a class="btn btn--ghost" href="/verify">Try the verifier</a>
+      <a class="btn btn--ghost" href="/trust">See a Trust center</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 5. GUIDELINES -->
+<section class="section reveal" id="guidelines">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">04 / Use it well</span>
+      <h2>A few rules so the badge keeps meaning something.</h2>
+      <p class="lede">The badge is only as good as the link behind it. Keep it pointing at your own evidence and it stays a real signal.</p>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <h3>Link to your own Trust Link</h3>
+        <p>The badge must point at the Trust Link for your account. Do not link it to the sample, to another vendor's slug, or to a page that is not your signed report.</p>
+        <p class="card__map">required</p>
+      </div>
+      <div class="card">
+        <h3>Do not assert a result the report does not</h3>
+        <p>The badge says the evidence is signed and verifiable, not that an agent is certified secure. Let the report state the findings and the scope. The signature is the claim.</p>
+        <p class="card__map">scoped, not a warranty</p>
+      </div>
+      <div class="card">
+        <h3>Keep it current</h3>
+        <p>On a continuous plan your Trust Link is re-signed on a schedule, so a pinned badge always opens your latest evidence. See <a href="/pricing" style="border-bottom:1px solid var(--line-2)">continuous plans</a>.</p>
+        <p class="card__map">re-attested</p>
+      </div>
+      <div class="card">
+        <h3>Use the mark as published</h3>
+        <p>Use any of the three snippets as given. Keep the three-bar mark and the link intact rather than rebuilding a look-alike, so a reviewer recognizes a real kolm badge.</p>
+        <p class="card__map">consistent</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6. FAQ -->
+<section class="section reveal" id="faq">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="idx">05 / Questions</span>
+      <h2>Before you embed.</h2>
+    </div>
+    <div class="grid grid--2">
+      <div class="card"><h3>Does a visitor need an account to verify?</h3><p>No. Clicking the badge opens your Trust Link, where the signed report is verified in the browser against kolm's published issuer key. No account, no upload, no kolm server in the trust path.</p></div>
+      <div class="card"><h3>What does the badge actually prove?</h3><p>The badge itself is a link. The proof lives at your Trust Link: an Ed25519-signed report whose signature covers the exact bytes, so a reviewer can confirm it was not altered and was signed by the key they expect. <a href="/verify">Try it on the sample.</a></p></div>
+      <div class="card"><h3>Where does my Trust Link come from?</h3><p>A live Trust Link ships with the continuous plans. Start a free scan, then move to a plan that keeps the evidence current. See <a href="/pricing">pricing</a>.</p></div>
+      <div class="card"><h3>What happens when my report is re-attested?</h3><p>On a continuous plan the Trust Link stays current as the report is re-signed. The badge keeps pointing at the same link, so it always opens your latest signed evidence.</p></div>
+      <div class="card"><h3>Will the Markdown badge work on GitHub?</h3><p>Yes. READMEs strip inline SVG, so snippet b renders a flat badge in kolm's colors through shields.io. For a zero-dependency badge, host the SVG yourself or use snippet a where HTML is allowed.</p></div>
+      <div class="card"><h3>Is the badge artwork really ASCII-only?</h3><p>Yes. The SVG uses plain ASCII characters and embeds the kolm three-bar mark, so it pastes cleanly into any editor and renders the same everywhere.</p></div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s4)">Already a customer? <a href="/dashboard">Find your Trust Link in your dashboard.</a></p>
+  </div>
+</section>
+
+<!-- ============================================================ 7. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="wrap">
+    <h2>Get a Trust Link. Wear the badge.</h2>
+    <p class="lede">A signed report your buyer verifies in their own browser, and a badge that takes them straight to it.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/signup">Start free</a>
+      <a class="btn btn--ghost" href="#snippets">Copy a snippet</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Product</h4>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/compare">Compare</a>
+        <a href="/roi">ROI calculator</a>
+        <a href="/glossary">Glossary</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h4>Trust</h4>
+        <a href="/verify">Verify</a>
+        <a href="/badge">Verify badge</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h4>Legal</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h4>Company</h4>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Copy-to-clipboard for the badge snippets. Reads the exact textContent of the
+ * referenced <pre> so what gets copied is byte-identical to what is shown
+ * (the &lt; &gt; &amp; entities decode back to literal characters). Uses the async
+ * Clipboard API where available, with a textarea + execCommand fallback for
+ * non-secure contexts. Fail visible: if copying is blocked, the button tells the
+ * reader to press the keyboard shortcut instead, so they are never stuck. */
+(function () {
+  function copyText(t) {
+    if (navigator.clipboard && window.isSecureContext) { return navigator.clipboard.writeText(t); }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('copy blocked'));
+    });
+  }
+  var status = document.getElementById('copy-status');
+  var btns = document.querySelectorAll('[data-copy]');
+  for (var i = 0; i < btns.length; i++) {
+    (function (btn) {
+      btn.addEventListener('click', function () {
+        var pre = document.querySelector(btn.getAttribute('data-copy'));
+        if (!pre) return;
+        var label = btn.getAttribute('data-label') || 'Copy';
+        copyText(pre.textContent).then(function () {
+          btn.classList.add('copied'); btn.textContent = 'Copied';
+          if (status) status.setAttribute('data-note', 'Snippet copied');
+          setTimeout(function () { btn.classList.remove('copied'); btn.textContent = label; }, 1600);
+        }).catch(function () {
+          btn.textContent = 'Press Ctrl C';
+          setTimeout(function () { btn.textContent = label; }, 2000);
+        });
+      });
+    })(btns[i]);
+  }
+})();
+</script>
+
+</body>
+</html>

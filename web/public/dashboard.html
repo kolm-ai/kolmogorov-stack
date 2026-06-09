@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your reports · kolm.ai</title>
+<meta name="description" content="Your signed Agent Security-Review reports, Trust links, and Continuous subscription.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/kolm-2026.css">
+<style>
+  :root{ --d-ink:#0b0e14; --d-muted:#5b6472; --d-rule:#e3e7ee; --d-paper:#f6f7f4; --d-panel:#ffffff; --d-accent:#b3431f; --d-ok:#166534; --d-warn:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--d-paper);color:var(--d-ink);
+    font-family:'Switzer',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;line-height:1.5}
+  .mono{font-family:'Spline Sans Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 22px 80px}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--d-rule);padding:16px 22px;background:var(--d-panel)}
+  header.top a.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--d-ink);font-weight:700;font-family:'Cabinet Grotesk',sans-serif;font-size:18px;letter-spacing:-.01em}
+  header.top .bars{display:inline-flex;gap:3px;align-items:flex-end;height:18px}
+  header.top .bars i{width:4px;background:var(--d-ink);border-radius:1px;display:block}
+  header.top .bars i:nth-child(1){height:8px}header.top .bars i:nth-child(2){height:13px}header.top .bars i:nth-child(3){height:18px}
+  header.top nav a{color:var(--d-muted);text-decoration:none;margin-left:18px;font-size:14px}
+  header.top nav a:hover{color:var(--d-ink)}
+  h1{font-family:'Cabinet Grotesk',sans-serif;font-size:30px;letter-spacing:-.02em;margin:26px 0 4px}
+  .lede{color:var(--d-muted);margin:0 0 26px;max-width:60ch}
+  .idx{font-family:'Spline Sans Mono',monospace;font-size:12px;color:var(--d-accent);letter-spacing:.08em;text-transform:uppercase}
+  h2{font-family:'Cabinet Grotesk',sans-serif;font-size:20px;margin:34px 0 12px}
+  .card{background:var(--d-panel);border:1px solid var(--d-rule);border-radius:12px;padding:18px 20px;margin:0 0 16px}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--d-rule);vertical-align:middle}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--d-muted);font-weight:600}
+  .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+  .pill.scan{background:#fff4ed;color:var(--d-accent)}
+  .pill.report{background:#ecfdf3;color:var(--d-ok)}
+  .num{font-variant-numeric:tabular-nums}
+  .btn{display:inline-block;border:0;border-radius:8px;padding:9px 15px;font:600 14px 'Switzer',sans-serif;cursor:pointer;text-decoration:none;text-align:center}
+  .btn.primary{background:var(--d-ink);color:#fff}
+  .btn.primary:hover{background:#1b2331}
+  .btn.ghost{background:transparent;color:var(--d-ink);border:1px solid var(--d-rule)}
+  .btn.ghost:hover{border-color:var(--d-ink)}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn.sm{padding:6px 11px;font-size:13px}
+  .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .tier{border:1px solid var(--d-rule);border-radius:12px;padding:18px;background:var(--d-panel)}
+  .tier .price{font-family:'Cabinet Grotesk',sans-serif;font-size:26px;letter-spacing:-.02em}
+  .tier .price small{font-size:13px;color:var(--d-muted);font-family:'Switzer',sans-serif;letter-spacing:0}
+  .tier p{color:var(--d-muted);font-size:13px;margin:6px 0 14px}
+  .banner{border-radius:10px;padding:12px 16px;margin:0 0 20px;font-size:14px}
+  .banner.ok{background:#ecfdf3;border:1px solid #abe0c0;color:#0f5132}
+  .banner.info{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3}
+  .banner.warn{background:#fff4ed;border:1px solid #f3c4a8;color:#92400e}
+  .muted{color:var(--d-muted)}
+  .empty{padding:30px;text-align:center;color:var(--d-muted)}
+  .auth-box{max-width:460px;margin:40px auto;text-align:center}
+  .auth-box input{width:100%;padding:10px 12px;border:1px solid var(--d-rule);border-radius:8px;font-family:'Spline Sans Mono',monospace;margin:12px 0}
+  .row-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  footer{border-top:1px solid var(--d-rule);margin-top:60px;padding:20px 0;color:var(--d-muted);font-size:13px;text-align:center}
+  footer a{color:var(--d-muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><span class="bars"><i></i><i></i><i></i></span> kolm</a>
+  <nav>
+    <a href="/how-it-works">How it works</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/verify">Verify</a>
+    <a href="/contact">Contact</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="idx">Account</div>
+  <h1>Your reports</h1>
+  <p class="lede">Every Agent Security-Review you have run, the shareable Trust link your buyer's review group verifies offline, and your Continuous subscription.</p>
+
+  <div id="banner"></div>
+  <div id="content"><div class="empty">Loading your reports...</div></div>
+
+  <div id="auth" class="auth-box" style="display:none">
+    <h2>View your reports</h2>
+    <p class="muted">Paste your API key (starts with <span class="mono">ks_</span>) to see your reports and Trust links. Do not have one yet? <a href="/contact">Start an audit</a>.</p>
+    <input id="keyInput" class="mono" placeholder="ks_..." autocomplete="off" spellcheck="false">
+    <button class="btn primary" id="keyBtn" style="width:100%">View my reports</button>
+  </div>
+
+  <h2 id="contTitle" style="display:none">Continuous re-attestation</h2>
+  <div id="continuous" class="tiers" style="display:none">
+    <div class="tier">
+      <div class="price">$299<small> /mo</small></div>
+      <strong>Starter</strong>
+      <p>Weekly re-attestation. An always-current Trust link that refreshes the signed report so a month-old audit never blocks a deal.</p>
+      <button class="btn primary sm" data-plan="starter">Subscribe to Starter</button>
+    </div>
+    <div class="tier">
+      <div class="price">$999<small> /mo</small></div>
+      <strong>Growth</strong>
+      <p>Re-attest on every deploy plus injection regression. Hand any buyer a link that is never stale.</p>
+      <button class="btn primary sm" data-plan="growth">Subscribe to Growth</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  kolm.ai &middot; Agent Security Evidence &middot; <a href="/verify">Verify a report</a> &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>
+</footer>
+
+<script>
+(function(){
+  var KEY = null;
+  try { KEY = sessionStorage.getItem('kolm_dash_key') || null; } catch(e){}
+
+  function authHeaders(){
+    var h = {};
+    if (KEY) h['Authorization'] = 'Bearer ' + KEY;
+    return h;
+  }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  function showBanner(){
+    var q = new URLSearchParams(location.search);
+    var asr = q.get('asr');
+    var el = document.getElementById('banner');
+    if (asr === 'report') { el.innerHTML = '<div class="banner ok">Payment received. Your Signed Readiness Report is ready below. The watermark is gone and the Trust link is live to share.</div>'; }
+    else if (asr === 'starter' || asr === 'growth') { el.innerHTML = '<div class="banner ok">Subscription active. Your Continuous Trust link refreshes automatically and is ready to share.</div>'; }
+    else if (asr === 'cancelled') { el.innerHTML = '<div class="banner info">Checkout cancelled. Nothing was charged.</div>'; }
+  }
+
+  function fmtDate(s){ try { return new Date(s).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); } catch(e){ return s||''; } }
+
+  function render(data){
+    var billing = data.billing || { ready:false, products:{} };
+    var reports = data.reports || [];
+    var content = document.getElementById('content');
+
+    document.getElementById('contTitle').style.display='';
+    document.getElementById('continuous').style.display='';
+
+    // Wire continuous + reflect configured state.
+    var contBtns = document.querySelectorAll('#continuous [data-plan]');
+    contBtns.forEach(function(b){
+      var p = b.getAttribute('data-plan');
+      var configured = billing.products && billing.products[p];
+      if (!configured) { b.textContent = 'Contact to enable'; b.classList.remove('primary'); b.classList.add('ghost'); b.onclick = function(){ location.href='/contact'; }; }
+      else { b.onclick = function(){ startCheckout('/v1/audit/continuous/checkout', { plan: p }, b); }; }
+    });
+
+    if (!reports.length){
+      content.innerHTML = '<div class="card"><div class="empty">No reports yet. Run a free Agent Exposure Scan to generate your first signed snapshot, then purchase the full report when a buyer asks for evidence.<br><br><a class="btn primary" href="/how-it-works">See how it works</a></div></div>';
+      return;
+    }
+
+    var reportConfigured = billing.products && billing.products.report;
+    var rows = reports.map(function(r){
+      var tierPill = r.paid ? '<span class="pill report">REPORT</span>' : '<span class="pill scan">SCAN</span>';
+      var readiness = (r.readiness_pct==null) ? '<span class="muted">n/a</span>' : ('<span class="num">'+esc(r.readiness_pct)+'%</span>');
+      var actions;
+      if (r.paid && r.trust_url){
+        actions = '<a class="btn ghost sm" href="'+esc(r.trust_url)+'" target="_blank" rel="noopener">Open Trust link</a>'
+                + '<button class="btn primary sm" data-copy="'+esc(r.trust_url)+'">Copy link</button>';
+      } else if (reportConfigured) {
+        actions = '<button class="btn primary sm" data-buy="'+esc(r.id)+'">Buy full report ($750)</button>';
+      } else {
+        actions = '<a class="btn ghost sm" href="/contact">Contact to purchase</a>';
+      }
+      return '<tr>'
+        + '<td><strong>'+esc(r.subject||'Agent fleet')+'</strong><br><span class="mono muted" style="font-size:12px">'+esc(r.report_id||'')+'</span></td>'
+        + '<td>'+tierPill+'</td>'
+        + '<td>'+readiness+'</td>'
+        + '<td class="muted num">'+esc(r.blocking_count==null?'-':r.blocking_count)+'</td>'
+        + '<td class="muted">'+esc(fmtDate(r.created_at))+'</td>'
+        + '<td><div class="row-actions">'+actions+'</div></td>'
+        + '</tr>';
+    }).join('');
+
+    content.innerHTML = '<div class="card" style="padding:0;overflow:hidden">'
+      + '<table><thead><tr><th>Subject</th><th>Tier</th><th>Readiness</th><th>Blocking</th><th>Generated</th><th></th></tr></thead>'
+      + '<tbody>'+rows+'</tbody></table></div>'
+      + (reportConfigured ? '' : '<div class="banner warn">Purchasing is not enabled on this deployment yet. Email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> to buy a report.</div>');
+
+    // Wire row actions.
+    content.querySelectorAll('[data-buy]').forEach(function(b){ b.onclick = function(){ startCheckout('/v1/audit/report/checkout', { audit_id: b.getAttribute('data-buy') }, b); }; });
+    content.querySelectorAll('[data-copy]').forEach(function(b){ b.onclick = function(){ navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function(){ b.textContent='Copied'; setTimeout(function(){ b.textContent='Copy link'; },1500); }); }; });
+  }
+
+  function startCheckout(url, body, btn){
+    var prev = btn.textContent; btn.disabled = true; btn.textContent = 'Starting...';
+    fetch(url, { method:'POST', credentials:'same-origin', headers: Object.assign({'Content-Type':'application/json'}, authHeaders()), body: JSON.stringify(body) })
+      .then(function(res){ return res.json().then(function(j){ return { ok: res.ok, j: j }; }); })
+      .then(function(o){
+        if (o.j && o.j.already_paid && o.j.trust_url){ location.href = o.j.trust_url; return; }
+        if (o.ok && o.j && o.j.url){ location.href = o.j.url; return; }
+        btn.disabled=false; btn.textContent=prev;
+        alert((o.j && (o.j.detail||o.j.error)) || 'Could not start checkout. Email dev@kolm.ai.');
+      })
+      .catch(function(){ btn.disabled=false; btn.textContent=prev; alert('Network error. Try again or email dev@kolm.ai.'); });
+  }
+
+  function load(){
+    fetch('/v1/audit/reports', { credentials:'same-origin', headers: authHeaders() })
+      .then(function(res){
+        if (res.status === 401){ document.getElementById('content').style.display='none'; document.getElementById('auth').style.display='block'; return null; }
+        return res.json();
+      })
+      .then(function(data){ if (data && data.ok){ render(data); } })
+      .catch(function(){ document.getElementById('content').innerHTML = '<div class="banner warn">Could not load your reports. Try refreshing, or email dev@kolm.ai.</div>'; });
+  }
+
+  document.getElementById('keyBtn').onclick = function(){
+    var v = (document.getElementById('keyInput').value||'').trim();
+    if (!v){ return; }
+    KEY = v; try { sessionStorage.setItem('kolm_dash_key', v); } catch(e){}
+    document.getElementById('auth').style.display='none';
+    document.getElementById('content').style.display='block';
+    document.getElementById('content').innerHTML = '<div class="empty">Loading your reports...</div>';
+    load();
+  };
+
+  showBanner();
+  load();
+})();
+</script>
+</body>
+</html>

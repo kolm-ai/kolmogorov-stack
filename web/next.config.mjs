@@ -27,7 +27,6 @@ const legacyRedirects = [
     { source: "/atlas", destination: "/research", permanent: true },
     { source: "/audit", destination: "/transparency-log", permanent: true },
     { source: "/audit-log", destination: "/transparency-log", permanent: true },
-    { source: "/badge", destination: "/verify", permanent: true },
     { source: "/bench", destination: "/research", permanent: true },
     { source: "/benchmarks", destination: "/research", permanent: true },
     { source: "/blog", destination: "/", permanent: true },
@@ -48,7 +47,6 @@ const legacyRedirects = [
     { source: "/code-gen", destination: "/how-it-works", permanent: true },
     { source: "/community", destination: "/", permanent: true },
     { source: "/community-github", destination: "https://github.com/kolm-ai/kolm", permanent: true },
-    { source: "/compare", destination: "/how-it-works", permanent: true },
     { source: "/compile", destination: "/how-it-works", permanent: true },
     { source: "/compliance", destination: "/trust", permanent: true },
     { source: "/compliance-packs", destination: "/trust", permanent: true },
@@ -90,7 +88,6 @@ const legacyRedirects = [
     { source: "/frozen-eval", destination: "/research", permanent: true },
     { source: "/gateway", destination: "/platform", permanent: true },
     { source: "/gateway-migration", destination: "/how-it-works", permanent: true },
-    { source: "/glossary", destination: "/docs", permanent: true },
     { source: "/gov", destination: "/enterprise", permanent: true },
     { source: "/government", destination: "/enterprise", permanent: true },
     { source: "/hall-of-fame", destination: "/security", permanent: true },
@@ -157,7 +154,6 @@ const legacyRedirects = [
     { source: "/registry", destination: "/docs", permanent: true },
     { source: "/retail", destination: "/enterprise", permanent: true },
     { source: "/roadmap", destination: "/changelog", permanent: true },
-    { source: "/roi", destination: "/pricing", permanent: true },
     { source: "/run", destination: "/how-it-works", permanent: true },
     { source: "/runtimes", destination: "/platform", permanent: true },
     { source: "/saas", destination: "/enterprise", permanent: true },
@@ -244,7 +240,6 @@ const legacyRedirects = [
     { source: "/brand/:path(.+)", destination: "/", permanent: true },
     { source: "/case-studies/:path(.+)", destination: "/enterprise", permanent: true },
     { source: "/community/:path(.+)", destination: "/", permanent: true },
-    { source: "/compare/:path(.+)", destination: "/how-it-works", permanent: true },
     { source: "/compile/:path(.+)", destination: "/how-it-works", permanent: true },
     { source: "/compliance/:path(.+)", destination: "/trust", permanent: true },
     { source: "/cookbook/:path(.+)", destination: "/docs", permanent: true },
@@ -303,6 +298,19 @@ const nextConfig = {
       { source: "/v1/:path*", destination: `${apiOrigin}/v1/:path*` },
       { source: "/health", destination: `${apiOrigin}/health` },
       { source: "/ready", destination: `${apiOrigin}/ready` },
+      // Static app + SEO pages bundled into web/public as plain HTML (the React
+      // port does not cover these). Clean-URL rewrites so /signup serves
+      // /signup.html etc. These pages carry their own kolm-2026.css and talk to
+      // the API through the /v1 proxy above.
+      { source: "/signup", destination: "/signup.html" },
+      { source: "/dashboard", destination: "/dashboard.html" },
+      { source: "/account-billing", destination: "/account-billing.html" },
+      { source: "/trust-center", destination: "/trust-center.html" },
+      { source: "/report-viewer", destination: "/report-viewer.html" },
+      { source: "/compare", destination: "/compare.html" },
+      { source: "/roi", destination: "/roi.html" },
+      { source: "/badge", destination: "/badge.html" },
+      { source: "/glossary", destination: "/glossary.html" },
     ];
   },
 
