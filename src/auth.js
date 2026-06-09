@@ -562,7 +562,7 @@ const PUBLIC_API = (p) =>
   // resolve here. The optional /export suffix serves the same paid report as a
   // procurement artifact (CSV / .xls / Drata / Vanta / exec / crosswalk) so a
   // buyer's GRC team can ingest it without a kolm account.
-  /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}(?:\/export)?$/.test(p) ||
+  /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}(?:\/export|\/delta)?$/.test(p) ||
   // S8: the buyer's reviewer pre-fills a security questionnaire straight from the
   // SIGNED report behind the Trust Link. Possession of the unguessable slug is the
   // grant - the same capability level as the report it derives from - so this

@@ -1,33 +1,186 @@
-# Continuous onramp: keep your signed evidence current from logs you already have
+# Onramp: get your agent logs into kolm from wherever they already run
 
 The Agent Security-Review scan turns a batch of agent logs into an Ed25519-signed,
-offline-verifiable readiness report. The onramp is how you keep that evidence
-current without a person re-uploading a file every week: point your existing logs
-at one endpoint on a schedule, and each run produces a fresh signed report.
+offline-verifiable readiness report. The onramp is how you feed it without
+re-plumbing your stack: point the logs you already have at kolm, on the cadence
+that suits you, and each run produces a fresh signed report.
 
-This document covers:
-
-1. `POST /v1/audit/import` - the single onramp endpoint.
-2. The sidecar pattern - a tiny proxy that tees your agent logs to the endpoint on
-   a schedule.
-3. How the onramp relates to the Continuous subscription tiers.
+You already emit agent traces somewhere - an OpenTelemetry collector, Datadog LLM
+Observability, LangSmith, a gateway like LiteLLM or Helicone, or a JSONL file.
+This document maps every one of those onto the same scan and signing path, with
+copy-paste snippets.
 
 All you need is a kolm API key (`ks_...`). Questions go to dev@kolm.ai.
 
 ---
 
-## 1. `POST /v1/audit/import`
+## Integration matrix
+
+| Where your logs live            | Use this onramp                       | Best for                                  |
+| ------------------------------- | ------------------------------------- | ----------------------------------------- |
+| A CI pipeline (every PR/deploy) | The `kolm-agent-audit` GitHub Action  | Gating a merge or a release on readiness  |
+| Datadog LLM Observability       | The `datadog` connector               | Teams already on Datadog LLM Observability |
+| LangSmith                       | The `langsmith` connector             | LangChain / LangGraph agents              |
+| OpenTelemetry (gen_ai + http)   | The `otel` connector                  | Any OTel-instrumented agent               |
+| LiteLLM / Helicone / Portkey / OpenRouter | `POST /v1/audit/scan` or `/v1/audit/import` (native) | Gateway users (kolm ingests these directly) |
+| A JSONL file or your own API    | The sidecar + `POST /v1/audit/import` | A scheduled refresh you drive yourself    |
+| A signed report in a reviewer's hands | The offline verifier at `/verify` (and language SDKs) | A buyer checking the signature, no account |
+
+Every path lands on the same deterministic scan, so the report is identical in
+shape and verifiable offline no matter how the logs arrived.
+
+---
+
+## 1. CI: the `kolm-agent-audit` GitHub Action
+
+Gate a merge or a deploy on your agent's security posture. The Action reads your
+logs, auto-detects the platform (Datadog / LangSmith / OpenTelemetry) or passes
+provider-native logs straight through, scans them, prints a readiness and
+blocking summary, and fails the job when the result is below your policy.
+
+```yaml
+# .github/workflows/agent-security.yml
+name: agent security
+on: [pull_request]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kolm-ai/kolm/.github/actions/kolm-agent-audit@main
+        with:
+          logs: ./agent-traces            # a file or a directory of log files
+          api-key: ${{ secrets.KOLM_API_KEY }}
+          min-readiness: "85"             # fail the job under 85 percent
+          fail-on-blocking: "true"        # fail on any blocking finding
+```
+
+### Inputs
+
+| Input              | Default              | Notes                                                             |
+| ------------------ | -------------------- | ----------------------------------------------------------------- |
+| `logs`             | (stdin)              | Path to a file or a directory of files. Empty reads stdin.        |
+| `api-key`          | (required)           | Your `ks_...` key, from a CI secret.                              |
+| `api-url`          | `https://kolm.ai`    | Base URL of the kolm API.                                         |
+| `source`           | `auto`               | `auto`, `datadog`, `langsmith`, `otel`, or `raw` (passthrough).  |
+| `subject`          | `Agent fleet`        | What the report is about.                                         |
+| `min-readiness`    | `80`                 | Fail under this readiness percent.                                |
+| `fail-on-blocking` | `true`               | Fail when any blocking finding is present.                        |
+| `sign`             | `true`               | Ask for a signed report; falls back to an unsigned gate scan.     |
+| `retention-days`   | (none)               | Optional declared retention window, mapped into the report.       |
+
+### Outputs
+
+`readiness`, `blocking-count`, `report-id`, `trust-url` (present only for a
+purchased or Continuous report), `verify-url`, and `passed`.
+
+### Running the same gate outside GitHub
+
+The Action is a thin wrapper over `scripts/kolm-audit-ci.mjs`, which reads the
+same configuration from the environment. Run it from any CI or a shell:
+
+```bash
+export KOLM_API_KEY=ks_xxx
+export KOLM_AUDIT_MIN_READINESS=85
+node scripts/kolm-audit-ci.mjs ./agent-traces
+# or pipe logs in:  cat traces.jsonl | node scripts/kolm-audit-ci.mjs
+```
+
+It prints the summary, sets the gate exit code (non-zero on a policy violation),
+and needs nothing beyond Node 18+ (it uses global `fetch`).
+
+---
+
+## 2. Connectors: Datadog, LangSmith, OpenTelemetry
+
+Each connector turns a platform's agent trace export into the canonical
+AuditEvents kolm analyzes - pulling the tool that was called, the model, the
+egress host, the credential and agent identity, and any sensitive or redacted
+hints the platform records. The connectors live in `src/connectors/` and are
+used automatically by the CI Action and the CLI script (`source: auto`), or
+programmatically:
+
+```js
+import { detectConnector, normalizeWith, normalizeAuto } from "kolm/src/connectors/index.js";
+
+const raw = /* your Datadog / LangSmith / OTel export, as a string or object */;
+const { source, events } = normalizeAuto(raw);   // source: 'datadog' | 'langsmith' | 'otel' | null
+// events are canonical AuditEvents; POST them to /v1/audit/scan as { logs: events }.
+```
+
+`detectConnector(raw)` sniffs the platform, `normalizeWith(source, raw)` forces a
+connector, and every entry point is defensive: an unknown or malformed shape
+returns `[]` rather than throwing.
+
+### Datadog LLM Observability
+
+Maps each LLM Observability span by kind: `llm` spans become model events (model
+and provider host from `meta.metadata`), `tool` spans become tool events (the
+destination host is read from the tool input), and any `tool_calls` the model
+emitted in an `llm` span output become their own tool events. Identity comes from
+`ml_app`, the `agent:` / `service:` tags, and an `api_key_id:` tag when present.
+
+```bash
+# Export your spans (Datadog LLM Observability), then gate on them:
+node scripts/kolm-audit-ci.mjs ./datadog-spans.json
+```
+
+### LangSmith
+
+Flattens the run tree (including `child_runs`). `llm` / `chat_model` runs become
+model events with the tool allow-list from `extra.invocation_params.tools` (so
+over-permission is measurable), and the tool calls inside `outputs.generations`
+become tool events. `tool` runs become tool events; `retriever` runs feed the
+retrieval-integrity checks. Identity comes from `extra.metadata.user_id` and the
+api key id when LangSmith records it.
+
+```bash
+node scripts/kolm-audit-ci.mjs ./langsmith-runs.json
+```
+
+### OpenTelemetry
+
+Reads OTLP/JSON (`resourceSpans` -> `scopeSpans` -> `spans`, attributes as
+`[{key,value}]`) and a flattened span list. GenAI spans (`gen_ai.*`) become model
+events (model from `gen_ai.request.model`, host from `gen_ai.system` or
+`server.address`), `execute_tool` spans become tool events, and HTTP spans
+(`http.*` / `url.*`) become api events with method, host, and path. Identity
+comes from `enduser.id` / `user.id` / `service.name`.
+
+```bash
+# Works with an OTLP/JSON file straight off your collector:
+cat otel-spans.json | node scripts/kolm-audit-ci.mjs
+```
+
+---
+
+## 3. `POST /v1/audit/scan` and `POST /v1/audit/import`
+
+Both endpoints run the SAME analysis and signing path. Use `scan` when you have
+the logs in hand; use `import` when you want kolm to pull them from a URL you
+control, or to keep a clean inline transport for a sidecar.
+
+`POST /v1/audit/scan` body: `{ logs, subject?, source?, retention_days?, sign?, persist? }`.
+`logs` is JSONL text, a JSON array of records, a wrapper with a
+`data`/`rows`/`events`/`generations` array, or the canonical AuditEvents a
+connector produced.
+
+```bash
+curl -sS https://kolm.ai/v1/audit/scan \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "subject": "Support agent fleet", "logs": [ { "request_id": "r1", "timestamp": "2026-06-09T00:00:00Z", "model": "openai/gpt-4o", "user": "support-1", "tools": [{"type":"function","function":{"name":"read_doc"}}], "messages": [{"role":"assistant","tool_calls":[{"function":{"name":"read_doc","arguments":"{}"}}]}] } ] }'
+```
+
+### `POST /v1/audit/import`
 
 Auth-gated (send `Authorization: Bearer ks_...`). Tenant-fenced: the report is
 always written to the calling key's tenant, never to a value from the body. Size
 capped. It never throws: every failure is a JSON `{ ok: false, error, detail }`
 with a clean HTTP status.
 
-It accepts logs two ways and runs them through the SAME analysis and signing path
-as `POST /v1/audit/scan`, so the report you get back is identical in shape and is
-verifiable offline.
-
-### Body
+#### Body
 
 | Field           | Type                    | Notes                                                                 |
 | --------------- | ----------------------- | --------------------------------------------------------------------- |
@@ -41,7 +194,7 @@ verifiable offline.
 | `sign`          | boolean                 | Optional, default `true`. When `false`, runs the analysis without signing. |
 | `persist`       | boolean                 | Optional, default `true`. When `false`, returns the report inline without storing a row. |
 
-### Inline example
+#### Inline example
 
 ```bash
 curl -sS https://kolm.ai/v1/audit/import \
@@ -56,7 +209,7 @@ curl -sS https://kolm.ai/v1/audit/import \
   }'
 ```
 
-### URL example
+#### URL example
 
 The URL source pulls logs from an endpoint you control. Useful when your logs
 already sit behind an internal API.
@@ -74,7 +227,7 @@ curl -sS https://kolm.ai/v1/audit/import \
   }'
 ```
 
-### Response
+#### Response
 
 ```json
 {
@@ -94,7 +247,7 @@ curl -sS https://kolm.ai/v1/audit/import \
 Hand `verify_url` and the `report` envelope to a reviewer; they verify the
 signature offline with no kolm account.
 
-### Limits and safety
+#### Limits and safety
 
 - Size cap: a single import holds at most 24 MiB of logs and 20000 records.
   Split larger exports across calls, or run a `POST /v1/audit/sessions` session
@@ -110,7 +263,7 @@ signature offline with no kolm account.
 
 ---
 
-## 2. The sidecar pattern
+## 4. The sidecar pattern
 
 You usually do not want to re-upload a file by hand every week. The sidecar is a
 tiny process that tees a copy of your recent agent logs to `/v1/audit/import` on a
@@ -184,7 +337,23 @@ const res = await fetch("https://kolm.ai/v1/audit/import", {
 
 ---
 
-## 3. Relationship to the Continuous tiers
+## 5. Verifying the report (the reviewer side)
+
+A signed report verifies offline, with no kolm account, two ways:
+
+- In a browser at `https://kolm.ai/verify` - paste the report envelope.
+- Programmatically against `POST /v1/audit/report/verify` (public), or with a
+  language SDK that checks the Ed25519 signature byte-for-byte.
+
+Verification is two-tier: tier 1 confirms the report was signed by the holder of
+the embedded key and is untampered; tier 2 confirms that key is one kolm
+publishes (the live signer or a key in `public/keys/kolm-issuers.json`). A
+consumer should require BOTH (the `trusted` flag), so a rogue-signed copy is
+refused. Ask dev@kolm.ai for the offline verify SDKs.
+
+---
+
+## 6. Relationship to the Continuous tiers
 
 The onramp is the manual or self-scheduled way to refresh evidence. The Continuous
 subscription tiers do the same refresh on kolm's schedule and keep a single stable
@@ -193,7 +362,9 @@ Trust link always-current:
 - Continuous Starter and Growth re-attest on a weekly or per-deploy cadence and
   expose one Trust link your buyer pins.
 - The deploy hook `POST /v1/audit/continuous/deploy-hook` (auth-gated by your key)
-  forces an immediate re-attestation, for example from CI after you ship.
+  forces an immediate re-attestation, for example from CI after you ship. The
+  `kolm-agent-audit` Action pairs naturally with it: gate on the scan in a PR,
+  then refresh the Trust link on the deploy.
 
 Use the import endpoint and a sidecar when you want to drive the cadence yourself,
 or to seed a first report before subscribing. Use a Continuous subscription when

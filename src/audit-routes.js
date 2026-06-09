@@ -47,7 +47,8 @@ import { register as registerTrustCenter, recordTrustView } from './trust-center
 import { revoke as revokeIssuerKey, status as issuerKeyStatus, KEY_REVOCATION_VERSION } from './key-revocation.js';
 import { tryAppendAudit } from './audit.js';
 import { createAsrCheckout, asrBillingReady } from './asr-billing.js';
-import { resolveTrust, runDueReattestations, forceReattest } from './asr-fulfillment.js';
+import { resolveTrust, resolvePriorReport, runDueReattestations, forceReattest } from './asr-fulfillment.js';
+import { computeAuditDelta } from './audit-delta.js';
 import { autofillQuestionnaire, toQuestionnaireCsv, QUESTIONNAIRE_TEMPLATES } from './questionnaire-autofill.js';
 import { importAgentLogs } from './log-importer.js';
 
@@ -1121,6 +1122,34 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
+  // GET /v1/trust/:slug/delta  (PUBLIC) - the signed drift between the report this
+  // Trust Link serves now and its immediately-prior signed report (S9). Possession
+  // of the unguessable slug is the grant (same capability level as the report it
+  // diffs); allow-list it in PUBLIC_API alongside GET /v1/trust/:slug. The prior is
+  // resolved from the audit / subscription history (resolvePriorReport); a link
+  // with no prior (a first-cycle Continuous report or a standalone $750 report)
+  // returns { ok:true, delta:null, note } rather than a 404. computeAuditDelta is
+  // pure + never-throws; this route never re-signs and touches no tenant data.
+  // -------------------------------------------------------------------------
+  r.get('/v1/trust/:slug/delta', (req, res) => {
+    const slug = req.params && req.params.slug;
+    const hit = resolveTrust(slug);
+    if (!hit) return _err(res, 404, 'not_found', 'no published report at this link');
+    res.setHeader('Cache-Control', 'no-store');
+    if (hit.pending || !hit.envelope) {
+      return res.json({ ok: true, delta: null, kind: hit.kind || null, note: 'this Continuous link has not generated its first report yet' });
+    }
+    let prior = null;
+    try { prior = resolvePriorReport(slug); } catch { prior = null; }
+    if (!prior) {
+      return res.json({ ok: true, delta: null, kind: hit.kind || null, report_id: hit.report_id || null, note: 'no prior signed report to compare against (this is the first attestation)' });
+    }
+    let delta = null;
+    try { delta = computeAuditDelta(prior, hit.envelope); } catch { delta = null; }
+    return res.json({ ok: true, delta, kind: hit.kind || null, report_id: hit.report_id || null });
+  });
+
+  // -------------------------------------------------------------------------
   // POST /v1/audit/sessions/:id/questionnaire?template=...[&format=csv]
   //   (AUTH, tenant-fenced) - the SELLER pre-fills a questionnaire from their own
   // session's signed report (e.g. to attach to an RFP response before sharing).
@@ -1142,6 +1171,38 @@ export function register(r, deps = {}) {
     tryAppendAudit({ tenant_id: trec.id, actor: trec.id, op: 'agent_audit.questionnaire', payload: { id, report_id: sess.report_id, template: String(query.template || 'generic-ai-vendor') } });
     return _sendQuestionnaire(res, sess.report, query, sess.report_id);
   });
+
+  // -------------------------------------------------------------------------
+  // GET /v1/audit/sessions/:id/questionnaire?template=...[&format=csv]
+  //   (AUTH, tenant-fenced) - the openable GET alias of the POST above, so a
+  // seller can pull their session's autofilled questionnaire from a browser / a
+  // simple link. Identical auth + tenant fence + pure-view semantics; query-only
+  // (no body). The POST form stays for callers that prefer to send { template }.
+  // -------------------------------------------------------------------------
+  r.get('/v1/audit/sessions/:id/questionnaire', (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const id = req.params && req.params.id;
+    const sess = _getSession(trec.id, id);
+    if (!sess) return _err(res, 404, 'session_not_found', `no audit session ${id} for this tenant`);
+    if (!sess.report) return _err(res, 409, 'report_not_ready', 'run the session before generating a questionnaire');
+    const query = { template: req.query && req.query.template, format: req.query && req.query.format };
+    tryAppendAudit({ tenant_id: trec.id, actor: trec.id, op: 'agent_audit.questionnaire', payload: { id, report_id: sess.report_id, template: String(query.template || 'generic-ai-vendor'), method: 'GET' } });
+    return _sendQuestionnaire(res, sess.report, query, sess.report_id);
+  });
+
+  // -------------------------------------------------------------------------
+  // JSON 404 fallback for the namespaces this surface owns. Registered LAST so
+  // every specific route above matches first; an unmatched GET sub-path under
+  // /v1/audit or /v1/trust then returns a clean {ok:false} JSON envelope instead
+  // of Express's default HTML "Cannot GET ..." page. Scoped to GET on exactly the
+  // two namespaces this module owns, so it never shadows another surface (all
+  // other /v1/audit + /v1/trust handlers are registered before this point).
+  // -------------------------------------------------------------------------
+  const _jsonNotFound = (req, res) =>
+    res.status(404).json({ ok: false, error: 'not_found', detail: `no such endpoint: ${req.method} ${req.path}`, contact: 'dev@kolm.ai' });
+  r.get('/v1/audit/*', _jsonNotFound);
+  r.get('/v1/trust/*', _jsonNotFound);
 
   return r;
 }
@@ -1188,6 +1249,7 @@ export const AUDIT_ROUTES_SPEC = {
     'GET /v1/audit/sessions/:id/report',
     'GET /v1/audit/sessions/:id/export',
     'POST /v1/audit/sessions/:id/questionnaire',
+    'GET /v1/audit/sessions/:id/questionnaire (auth, tenant-fenced)',
     'POST /v1/audit/scan',
     'POST /v1/audit/import',
     'GET /v1/audit/reports',
@@ -1209,6 +1271,7 @@ export const AUDIT_ROUTES_SPEC = {
     'GET /v1/trust/:slug (public)',
     'GET /v1/trust/:slug/export (public)',
     'GET /v1/trust/:slug/questionnaire (public)',
+    'GET /v1/trust/:slug/delta (public)',
     'GET /v1/trust/:slug/views (auth, tenant-fenced)',
     'GET /v1/trust-center (auth, tenant-fenced)',
     'POST /v1/trust/:slug/unlock (public)',

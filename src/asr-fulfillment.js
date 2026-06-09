@@ -27,6 +27,7 @@ import crypto from 'node:crypto';
 import { id as storeId, insert, update, find, findOne, findByField, withTransaction } from './store.js';
 import { runAudit } from './audit-orchestrator.js';
 import { buildAndSignReport, resignAsTier, canonicalizeReport } from './attestation-report-builder.js';
+import { computeAuditDelta } from './audit-delta.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
 // M14 - audit trail. Package fulfillment + subscription activation are
 // money-bearing state transitions, so each writes one chained audit row.
@@ -364,6 +365,11 @@ function reattestSub(sub, { signer } = {}) {
   const source = sub.source_audit_id ? findOne(AUDITS, (r) => r.id === sub.source_audit_id) : null;
   const baseLogs = source && source.logs ? source.logs : null;
   if (!baseLogs) return { sub: sub.id, ok: false, reason: 'no_source_logs' };
+  // The report this cycle replaces - the subscription's CURRENT latest report.
+  // S9: the new report carries a signed delta vs this one so a Continuous
+  // customer sees exactly what changed this cycle.
+  const prevRow = sub.latest_audit_id ? findOne(AUDITS, (r) => r.id === sub.latest_audit_id) : null;
+  const prevReport = prevRow && prevRow.report ? prevRow.report : null;
   let audit, built;
   try {
     audit = runAudit(baseLogs, { source: source.source || 'reattest' });
@@ -374,6 +380,11 @@ function reattestSub(sub, { signer } = {}) {
   } catch (e) {
     return { sub: sub.id, ok: false, reason: e && e.message };
   }
+  // computeAuditDelta is pure + never-throws; guard anyway so a delta hiccup can
+  // never block a re-attestation. null when there is no prior report (first run).
+  let drift = null;
+  try { drift = prevReport ? computeAuditDelta(prevReport, built.envelope) : null; }
+  catch { drift = null; }
   const ts = nowIso();
   const auditRow = {
     id: newAuditId(),
@@ -387,13 +398,14 @@ function reattestSub(sub, { signer } = {}) {
     report: built.envelope,
     report_id: built.report_id,
     summary: audit.summary,
+    drift,
     paid: true, tier: 'report', public: false, public_slug: null,
     subscription_id: sub.id,
     created_at: ts, updated_at: ts,
   };
   insert(AUDITS, auditRow);
   update(SUBSCRIPTIONS, (s) => s.id === sub.id, { latest_audit_id: auditRow.id, last_run_at: ts, updated_at: ts });
-  return { sub: sub.id, ok: true, audit_id: auditRow.id, readiness_pct: audit.summary ? audit.summary.readiness_pct : null };
+  return { sub: sub.id, ok: true, audit_id: auditRow.id, readiness_pct: audit.summary ? audit.summary.readiness_pct : null, regressed: drift ? drift.regressed === true : null };
 }
 
 // Run every active subscription whose next_run_at has passed. Claim-then-run so
@@ -463,9 +475,59 @@ export function resolveTrust(slug) {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// S9 - resolve the signed report immediately PRIOR to the one a Trust Link
+// currently serves, so the public delta route can diff "now vs last cycle".
+//
+//   * one-time paid audit slug: a standalone $750 report has no prior unless it
+//     is itself part of a subscription lineage -> null.
+//   * subscription slug: the lineage is the seed report (source_audit_id) plus
+//     every re-attestation row (subscription_id === sub.id), ordered by
+//     created_at. The prior is the report immediately before the current
+//     latest_audit_id in that ordering (null when the latest IS the first).
+//
+// Pure read over the store; never throws. Returns a signed envelope or null.
+// ---------------------------------------------------------------------------
+function _subscriptionLineage(sub) {
+  const rows = [];
+  if (sub.source_audit_id) {
+    const seed = findOne(AUDITS, (r) => r.id === sub.source_audit_id);
+    if (seed && seed.report) rows.push(seed);
+  }
+  for (const r of find(AUDITS, (x) => x && x.subscription_id === sub.id && x.report)) {
+    if (!rows.some((existing) => existing.id === r.id)) rows.push(r);
+  }
+  rows.sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
+  return rows;
+}
+
+export function resolvePriorReport(slug) {
+  try {
+    if (!slug || typeof slug !== 'string') return null;
+    // One-time paid audit slug.
+    const audits = findByField(AUDITS, 'public_slug', slug);
+    const audit = audits.find((r) => r && r.public === true && r.paid === true && r.report);
+    if (audit && !audit.subscription_id) return null;
+
+    // Subscription slug (or a paid audit that is part of a subscription lineage).
+    const subs = findByField(SUBSCRIPTIONS, 'public_slug', slug);
+    const sub = subs[0];
+    if (!sub) return null;
+    const lineage = _subscriptionLineage(sub);
+    if (lineage.length < 2) return null;
+    const currentId = sub.latest_audit_id || lineage[lineage.length - 1].id;
+    let idx = lineage.findIndex((r) => r.id === currentId);
+    if (idx < 0) idx = lineage.length - 1; // unknown latest -> treat last as current
+    const prior = idx > 0 ? lineage[idx - 1] : null;
+    return prior && prior.report ? prior.report : null;
+  } catch {
+    return null;
+  }
+}
+
 export default {
   SUBSCRIPTIONS, PACKAGES, mintSlug,
   fulfillReportPurchase, fulfillPackagePurchase, resignPendingReports, activateSubscription, setSubscriptionStatus,
-  runDueReattestations, forceReattest, resolveTrust,
+  runDueReattestations, forceReattest, resolveTrust, resolvePriorReport,
   attachPaidTimestamp, upgradeReportTimestamp,
 };

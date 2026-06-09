@@ -29,6 +29,7 @@ import {
   loadOrCreateDefaultSigner,
   buildSignatureBlock,
   verifySignatureBlock,
+  keyFingerprint,
 } from './ed25519.js';
 import { ASR_CONTROLS } from './control-mapper.js';
 import { runRedTeam } from './red-team.js';
@@ -153,8 +154,15 @@ export function canonicalizeReport(envelope) {
   //     witness issues them after the report already exists. Excluding them keeps
   //     the signature stable when they are attached. (Reports built before these
   //     fields existed simply have nothing to exclude - a no-op.)
-  const { signature_ed25519, timestamp_evidence, log_checkpoint, ...rest } = envelope;
-  void signature_ed25519; void timestamp_evidence; void log_checkpoint;
+  //   - co_signatures: the S11 named co-signer (the Reviewed Attestation tier)
+  //     attests the SAME signed payload AFTER the primary signature exists. Each
+  //     co-signature is itself an Ed25519 block over THIS canonical payload, so it
+  //     references the primary-signed bytes without being covered by them.
+  //     Excluding co_signatures keeps the primary signature (and every prior
+  //     co-signature) stable as more co-signers are appended - a co-signer can
+  //     never invalidate the issuer's signature.
+  const { signature_ed25519, timestamp_evidence, log_checkpoint, co_signatures, ...rest } = envelope;
+  void signature_ed25519; void timestamp_evidence; void log_checkpoint; void co_signatures;
   return canonicalize(rest);
 }
 
@@ -543,12 +551,94 @@ export function resignAsTier(envelope, tier, signer) {
   if (!envelope || typeof envelope !== 'object') {
     throw new Error('resignAsTier: a signed envelope object is required');
   }
-  const { signature_ed25519, ...rest } = envelope;
+  // Drop the old primary signature AND any co_signatures: re-signing changes the
+  // canonical payload (tier / watermark flip), which would invalidate a stale
+  // co-signature. A co-signer attests the FINAL signed report, so co_signatures
+  // are (re-)added by addCoSignature after this upgrade, never carried across it.
+  const { signature_ed25519, co_signatures, ...rest } = envelope;
+  void co_signatures;
   const next = { ...rest };
   next.tier = tier === 'report' ? 'report' : 'scan';
   next.watermark = next.tier !== 'report';
   signReport(next, signer);
   return next;
+}
+
+// ---------------------------------------------------------------------------
+// S11 - named co-signer (the Reviewed Attestation tier).
+//
+// A SECOND, independent Ed25519 attestation over the SAME signed payload. After
+// the issuer signs a report (signature_ed25519), a named reviewer co-signs the
+// IDENTICAL canonical bytes - canonicalizeReport(envelope), which excludes
+// signature_ed25519 / timestamp_evidence / log_checkpoint / co_signatures - so:
+//   * the co-signer attests exactly what the issuer signed (same bytes), and
+//   * appending a co-signature never disturbs the primary signature or any prior
+//     co-signature (co_signatures is excluded from the canonical payload).
+//
+// The block records WHO co-signed (name, role) alongside a full Ed25519
+// signature block { spec, alg, public_key, key_fingerprint, signature,
+// signed_at } so it verifies offline with no extra schema. The co-signer's key
+// is passed in (env KOLM_COSIGNER_PRIVATE_KEY in production; tests pass a
+// generated signer). Mutates + returns the envelope. Co-signing NEVER blocks the
+// primary deliverable: a missing / invalid signer throws NO_SIGNER and the caller
+// simply ships the issuer-signed report without a co-signature.
+//
+// signer: { privateKey, publicKey, key_fingerprint? } (same shape as signReport).
+// name/role: short ASCII labels for the named reviewer (kept in the block).
+// ---------------------------------------------------------------------------
+export function addCoSignature(envelope, { signer, name, role } = {}) {
+  if (!envelope || typeof envelope !== 'object') {
+    throw new Error('addCoSignature: a signed envelope object is required');
+  }
+  // The named co-signer key is DELIBERATELY independent of the issuer signer:
+  // pass it explicitly (tests), or set KOLM_COSIGNER_PRIVATE_KEY in production.
+  // It never falls back to the issuer's own key - a co-signature must be a second,
+  // distinct attestation, not the issuer signing twice.
+  const s = signer || loadCoSignerFromEnv();
+  if (!s || !s.privateKey || !s.publicKey) {
+    const err = new Error('addCoSignature: no Ed25519 co-signer available (set KOLM_COSIGNER_PRIVATE_KEY or pass a signer)');
+    err.code = 'NO_SIGNER';
+    throw err;
+  }
+  // The co-signer signs the SAME bytes the issuer signed: co_signatures is
+  // excluded from canonicalizeReport, so the canonical payload is identical
+  // whether zero or N co-signatures are already attached.
+  const canonical = canonicalizeReport(envelope);
+  const block = buildSignatureBlock({
+    privateKey: s.privateKey,
+    publicKey: s.publicKey,
+    key_fingerprint: s.key_fingerprint,
+    payloadCanonical: canonical,
+    signed_at: new Date().toISOString(),
+  });
+  const coSig = {
+    name: name == null ? null : String(name).slice(0, 200),
+    role: role == null ? null : String(role).slice(0, 200),
+    signed_at: block.signed_at,
+    spec: block.spec,
+    alg: block.alg,
+    public_key: block.public_key,
+    key_fingerprint: block.key_fingerprint,
+    signature: block.signature,
+  };
+  if (!Array.isArray(envelope.co_signatures)) envelope.co_signatures = [];
+  envelope.co_signatures.push(coSig);
+  return envelope;
+}
+
+// Load the dedicated co-signer key from the environment (production path). Kept
+// separate from the issuer signer so the named reviewer's key is independent of
+// the evidence-issuing key. Returns a signer or null; never throws.
+export function loadCoSignerFromEnv() {
+  try {
+    let pem = process.env.KOLM_COSIGNER_PRIVATE_KEY || null;
+    if (!pem) return null;
+    if (pem.includes('\\n')) pem = pem.replace(/\\r\\n|\\n/g, '\n');
+    const keyObj = crypto.createPrivateKey(pem);
+    if (keyObj.asymmetricKeyType !== 'ed25519') return null;
+    const publicKey = crypto.createPublicKey(keyObj).export({ type: 'spki', format: 'pem' });
+    return { privateKey: pem, publicKey, key_fingerprint: keyFingerprint(publicKey) };
+  } catch { return null; }
 }
 
 // ---------------------------------------------------------------------------
@@ -638,7 +728,33 @@ export function verifyReport(envelope, opts = {}) {
     checks.push({ name: 'transparency-log checkpoint present', ok: wf, detail: wf ? `seq ${cp.seq} of ${cp.tree_size}, root ${String(cp.root_hash).slice(0, 16)}` : 'log_checkpoint present but malformed (informational; verdict unaffected)' });
   }
 
-  return { ok: true, key_fingerprint: v.key_fingerprint, checks };
+  // S11 named co-signers (informational). Each co-signature is an Ed25519 block
+  // over the SAME canonical payload as the primary signature (co_signatures is
+  // excluded from canonicalizeReport). We verify each and surface who co-signed,
+  // but the PRIMARY signature remains the verdict: a missing / invalid co-sig
+  // never flips ok, and a report with no co_signatures is unchanged.
+  let co_signers;
+  if (Array.isArray(report.co_signatures) && report.co_signatures.length) {
+    co_signers = report.co_signatures.map((cs) => {
+      const cv = verifySignatureBlock(cs, canonical);
+      const ok = cv.ok === true;
+      checks.push({
+        name: 'co-signature' + (cs && cs.name ? ` (${String(cs.name)})` : ''),
+        ok,
+        detail: ok ? `co-signed by ${cs && cs.name ? String(cs.name) : '(unnamed)'}${cs && cs.role ? ', ' + String(cs.role) : ''}` : (cv.reason || 'co-signature does not verify') + ' (informational; verdict unaffected)',
+      });
+      return {
+        name: cs && cs.name != null ? String(cs.name) : null,
+        role: cs && cs.role != null ? String(cs.role) : null,
+        ok,
+        key_fingerprint: ok ? cv.key_fingerprint : (cs && cs.key_fingerprint != null ? String(cs.key_fingerprint) : null),
+      };
+    });
+  }
+
+  const out = { ok: true, key_fingerprint: v.key_fingerprint, checks };
+  if (co_signers) out.co_signers = co_signers;
+  return out;
 }
 
 // ===========================================================================

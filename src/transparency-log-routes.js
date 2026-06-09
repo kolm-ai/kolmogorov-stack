@@ -185,6 +185,12 @@ export function register(r) {
   });
 
   // GET /v1/transparency-log/proof/:seq  (RFC 9162 inclusion proof + signed head)
+  //
+  // The RFC 9162 / RFC 6962 inclusion-proof fields (leaf_index, tree_size,
+  // audit_path, root_hash, leaf_hash) are surfaced at the TOP LEVEL so a buyer
+  // can verify inclusion directly against verifyInclusionProof without reaching
+  // into a nested object. The original `proof` + `checkpoint` keys are kept for
+  // backward compatibility (older clients still read response.proof.*).
   r.get('/v1/transparency-log/proof/:seq', (req, res) => {
     try {
       const seq = _toInt(req.params && req.params.seq);
@@ -194,7 +200,19 @@ export function register(r) {
       if (!proof.ok) return res.status(404).json({ ok: false, error: 'not_found', detail: proof.reason });
       const checkpoint = captureCheckpoint();
       res.setHeader('Cache-Control', 'no-store');
-      return res.json({ ok: true, proof, checkpoint });
+      return res.json({
+        ok: true,
+        // RFC 9162 inclusion-proof fields, top-level and self-contained.
+        origin: proof.origin,
+        leaf_index: proof.leaf_index,
+        tree_size: proof.tree_size,
+        audit_path: proof.audit_path,
+        root_hash: proof.root_hash,
+        leaf_hash: proof.leaf_hash,
+        // Backward-compatible nested copies.
+        proof,
+        checkpoint,
+      });
     } catch (e) {
       return res.status(500).json({ ok: false, error: 'tlog_proof_failed', detail: e && e.message });
     }

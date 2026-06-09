@@ -1,0 +1,92 @@
+name: kolm agent security audit
+description: >
+  Run a kolm Agent Security-Review scan over your agent logs in CI. Auto-detects
+  Datadog LLM Observability, LangSmith, or OpenTelemetry exports, normalizes them,
+  scans for least-privilege / audit-trail / data-egress blockers, and fails the
+  job when readiness is below a threshold or a blocking finding is present.
+author: Kolm
+
+branding:
+  icon: shield
+  color: gray-dark
+
+inputs:
+  logs:
+    description: Path to a log file or a directory of log files. Leave empty to read logs from stdin.
+    required: false
+    default: ""
+  api-key:
+    description: kolm API key (ks_...). Store it as a CI secret and pass it here, for example ${{ secrets.KOLM_API_KEY }}.
+    required: true
+  api-url:
+    description: Base URL of the kolm API.
+    required: false
+    default: "https://kolm.ai"
+  source:
+    description: Connector to use - auto, datadog, langsmith, otel, or raw (pass provider-native logs straight through).
+    required: false
+    default: "auto"
+  subject:
+    description: What the report is about (shown on the signed report).
+    required: false
+    default: "Agent fleet"
+  min-readiness:
+    description: Fail the job when the scan readiness percent is below this value (0 - 100).
+    required: false
+    default: "80"
+  fail-on-blocking:
+    description: Fail the job when the scan returns one or more blocking findings.
+    required: false
+    default: "true"
+  sign:
+    description: Ask the deployment to sign the report. Falls back to an unsigned scan for the gate if no signer is configured.
+    required: false
+    default: "true"
+  retention-days:
+    description: Optional declared log retention window (days), mapped into the report.
+    required: false
+    default: ""
+
+outputs:
+  readiness:
+    description: Readiness percent reported by the scan (empty when no events were ingested).
+    value: ${{ steps.audit.outputs.readiness }}
+  blocking-count:
+    description: Number of blocking findings.
+    value: ${{ steps.audit.outputs.blocking-count }}
+  report-id:
+    description: The scan report id (rpt_...), when one was produced.
+    value: ${{ steps.audit.outputs.report-id }}
+  trust-url:
+    description: The public Trust link, present only when the report has been purchased or is on a Continuous subscription.
+    value: ${{ steps.audit.outputs.trust-url }}
+  verify-url:
+    description: Where a reviewer verifies the signed report offline.
+    value: ${{ steps.audit.outputs.verify-url }}
+  passed:
+    description: Whether the gate passed. Either true or false.
+    value: ${{ steps.audit.outputs.passed }}
+
+runs:
+  using: composite
+  steps:
+    - name: kolm agent security audit
+      id: audit
+      shell: bash
+      env:
+        KOLM_API_URL: ${{ inputs.api-url }}
+        KOLM_API_KEY: ${{ inputs.api-key }}
+        KOLM_AUDIT_LOGS: ${{ inputs.logs }}
+        KOLM_AUDIT_SOURCE: ${{ inputs.source }}
+        KOLM_AUDIT_SUBJECT: ${{ inputs.subject }}
+        KOLM_AUDIT_MIN_READINESS: ${{ inputs.min-readiness }}
+        KOLM_AUDIT_FAIL_ON_BLOCKING: ${{ inputs.fail-on-blocking }}
+        KOLM_AUDIT_SIGN: ${{ inputs.sign }}
+        KOLM_AUDIT_RETENTION_DAYS: ${{ inputs.retention-days }}
+      run: |
+        node_major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)"
+        if [ "$node_major" -lt 18 ]; then
+          echo "::error::kolm-agent-audit needs Node 18+ (global fetch). Add actions/setup-node before this step."
+          exit 1
+        fi
+        node "${{ github.action_path }}/../../../scripts/kolm-audit-ci.mjs"

@@ -68,8 +68,11 @@ export function canonicalizeReport(envelope) {
   //     signing (each references the signed report digest), so they are bound to
   //     the report but not covered by its signature. Excluding them keeps the
   //     canonical bytes identical whether or not they are attached.
-  const { signature_ed25519, timestamp_evidence, log_checkpoint, ...rest } = envelope;
-  void signature_ed25519; void timestamp_evidence; void log_checkpoint;
+  //   - co_signatures: additional named-reviewer Ed25519 signatures added AFTER
+  //     the primary signature, each over this same canonical payload. Excluding
+  //     them keeps the primary signature stable when a co-signature is attached.
+  const { signature_ed25519, timestamp_evidence, log_checkpoint, co_signatures, ...rest } = envelope;
+  void signature_ed25519; void timestamp_evidence; void log_checkpoint; void co_signatures;
   return canonicalize(rest);
 }
 
