@@ -39,6 +39,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<script defer src="/kolm-field.js"></script>
 <style>
 /* Page fix: sentence-length crosswalk cells in the 03 table must wrap, not clip,
    so the table fits its .tbl-wrap at desktop widths without a hidden horizontal scroll. */
@@ -126,6 +127,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <!-- ============================================================ 1. HERO -->
 <section class="section section--flush hero">
+  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
   <div class="wrap">
     <p class="eyebrow" data-enter="1">Compare</p>
     <h1 class="hero__h1" data-enter="2">Your stack already defends. <span class="go">The review wants evidence.</span></h1>

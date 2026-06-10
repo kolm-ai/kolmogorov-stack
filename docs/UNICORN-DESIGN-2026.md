@@ -386,7 +386,17 @@ driven `animation-timeline` as progressive enhancement. GSAP et al stay banned
 
 ## 8. PER-PAGE ART DIRECTION MAP (38 pages; homepage is the core agent's)
 
-The Evidence Field mounts on: index (core agent), verify, and 404. Nowhere else.
+The Evidence Field mounts on: index at full intensity (0.34 default), verify
+(0.20) and 404, AND - by user directive 2026-06-11, "it definitely stands out" -
+every product/marketing page hero at sub-page intensity `data-intensity="0.18"`
+(24 pages: pricing, report, how-it-works, trust, platform, security, enterprise,
+docs, compare, research, contact, changelog, trust-center, checks, badge, spec,
+regulatory-clock, roi, glossary, transparency-log, careers, both solutions
+pages, security/threat-model). It stays OFF legal pages (privacy, terms, dpa,
+baa, sla, acceptable-use, subprocessors), signup (entrance choreography is its
+only flourish), status, dashboard and the report-viewer app surface - ops and
+contract surfaces stay still. The index hero alone runs above 0.20; the field
+must read as atmosphere on subpages, never wallpaper.
 Every page keeps: exactly one `.eyebrow`, >= 1 `.section--ink` per major page,
 `.cta-final` close, the locked strings where they already live.
 

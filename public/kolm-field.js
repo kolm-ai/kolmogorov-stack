@@ -4,7 +4,9 @@
 // discrete verifiable units, the brand thesis as physics. Raw WebGL1, zero
 // dependencies, fail-open: with no JS / no WebGL the CSS grid + radial layers
 // underneath ARE the hero. Mount: <div class="field"><canvas></canvas></div>
-// on index, /verify (data-intensity="0.20") and /404 only. DPR cap 1.5.
+// on index (full 0.34), /verify (0.20), /404, and all product/marketing page
+// heroes at data-intensity="0.18" (see UNICORN-DESIGN-2026.md section 8).
+// Legal/ops surfaces stay still. DPR cap 1.5.
 (function () {
   'use strict';
   try {

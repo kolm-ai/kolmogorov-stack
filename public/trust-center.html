@@ -24,6 +24,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<script defer src="/kolm-field.js"></script>
 <style>
 /* page-scoped hooks for the script-rendered Trust Center app (v2 tokens only) */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:0 0 22px}
@@ -102,6 +103,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <!-- ============================================================ 1. HERO -->
 <section class="section section--flush hero">
+  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
   <div class="wrap">
     <p class="eyebrow">Account · Trust Links</p>
     <h1>Trust Center. <span class="go">See who opened what.</span></h1>
