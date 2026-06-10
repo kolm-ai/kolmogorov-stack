@@ -173,7 +173,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">02 / In scope and out of scope</span></div>
       <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true">02</span>
     <div class="section__head">
       <h2>Scope is the boundary of every claim.</h2>
       <p class="lede">
@@ -222,6 +221,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">03 / Attacker capabilities</span></div>
       <div class="sect-rail__body">
+    <span class="num-ghost num-ghost--deep" aria-hidden="true">03</span>
     <div class="section__head">
       <h2>Three ways to attack a report. Two tiers that answer them.</h2>
       <p class="lede">
@@ -234,18 +234,48 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
     <div class="grid grid--3">
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="16.5" y="26.5" width="152" height="16"/>
+          <path class="gy-s2" d="M24.5 30.5 V38.5 M32.5 30.5 V38.5 M40.5 30.5 V38.5 M48.5 30.5 V38.5 M56.5 30.5 V38.5 M64.5 30.5 V38.5 M72.5 30.5 V38.5 M80.5 30.5 V38.5 M96.5 30.5 V38.5 M104.5 30.5 V38.5 M112.5 30.5 V38.5 M120.5 30.5 V38.5 M128.5 30.5 V38.5 M136.5 30.5 V38.5 M144.5 30.5 V38.5 M152.5 30.5 V38.5 M160.5 30.5 V38.5"/>
+          <rect class="gy-r" x="86" y="29.5" width="5" height="10"/>
+          <path class="gy-s" d="M88.5 26.5 L92.5 18.5 L86.5 14.5 L90.5 6.5"/>
+          <path class="gy-s" d="M168.5 34.5 H176.5"/>
+          <rect class="gy-s" x="176.5" y="22.5" width="24" height="24"/>
+          <rect class="gy-p" x="184.5" y="30.5" width="8" height="8"/>
+        </svg></div>
         <p class="card__k">Tamper</p>
         <h3>Edit the report, break the seal</h3>
         <p>A vendor upgrades a finding, changes a date or widens the tested scope, or a tamperer alters the report in transit. The Ed25519 signature covers the canonical bytes, so any single-byte change fails verification in front of the reviewer.</p>
         <p class="card__map">Tier 1 · signature integrity</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="22.5" width="18" height="18"/>
+          <rect class="gy-p" x="20.5" y="28.5" width="6" height="6"/>
+          <path class="gy-s2" d="M32.5 31.5 H88.5 M60.5 28.5 V34.5"/>
+          <rect class="gy-s" x="88.5" y="25.5" width="12" height="12"/>
+          <path class="gy-s2" d="M100.5 31.5 H160.5 M130.5 28.5 V34.5"/>
+          <path class="gy-s" d="M160.5 14.5 H182.5 L190.5 22.5 V49.5 H160.5 Z M182.5 14.5 V22.5 H190.5"/>
+          <path class="gy-s2" d="M166.5 30.5 H184.5 M166.5 36.5 H180.5 M166.5 42.5 H184.5"/>
+        </svg></div>
         <p class="card__k">Rogue key</p>
         <h3>Sign with a fresh key, fail the keyring</h3>
         <p>A forger fabricates a kolm-styled report for an agent we never assessed and signs it with their own key. Tier 1 clears for that key, but Tier 2 checks the issuer against the buyer's keyring, where the key is not a kolm issuer.</p>
         <p class="card__map">Tier 2 · issuer provenance</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s" d="M14.5 16.5 H70.5 M14.5 26.5 H70.5 M14.5 36.5 H70.5 M14.5 46.5 H70.5"/>
+          <rect class="gy-f" x="8" y="15" width="3" height="3"/>
+          <rect class="gy-f" x="8" y="25" width="3" height="3"/>
+          <rect class="gy-f" x="8" y="35" width="3" height="3"/>
+          <rect class="gy-f" x="8" y="45" width="3" height="3"/>
+          <path class="gy-s2" d="M78.5 31.5 H110.5"/>
+          <rect class="gy-s" x="110.5" y="22.5" width="56" height="18"/>
+          <path class="gy-ps" d="M118.5 31.5 H148.5"/>
+          <path class="gy-s2" d="M174.5 31.5 H198.5" stroke-dasharray="2 3"/>
+          <path class="gy-s" d="M180 38 L192 24 M186 38 L198 24"/>
+        </svg></div>
         <p class="card__k">Replay</p>
         <h3>Present a stale report as current</h3>
         <p>An old or superseded report is shown as today's, or a finding is back-dated. The append-only Merkle log fixes existence and ordering, re-attestation supersedes a stale report with a signed delta, and each report names its point in time.</p>
@@ -274,7 +304,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="sect-rail__body">
     <span class="num-ghost" aria-hidden="true">04</span>
     <div class="section__head">
-      <h2>What forging the input evidence would actually take.</h2>
+      <h2>What forging the input evidence would take.</h2>
       <p class="lede">
         The signature proves the report was not altered after kolm signed it. A separate
         question is how strong the evidence was before kolm ever saw it. Every report
@@ -356,7 +386,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">06 / Assumptions and limitations</span></div>
       <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true">06</span>
     <div class="section__head">
       <h2>Where the guarantee ends.</h2>
       <p class="lede">

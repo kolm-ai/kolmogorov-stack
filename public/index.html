@@ -236,19 +236,49 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
     <div class="steps">
       <div class="step">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s2" d="M16.5 14.5 H76.5 M16.5 22.5 H62.5 M16.5 30.5 H72.5 M16.5 38.5 H56.5"/>
+          <rect class="gy-f" x="10" y="13" width="3" height="3"/>
+          <rect class="gy-f" x="10" y="21" width="3" height="3"/>
+          <rect class="gy-f" x="10" y="29" width="3" height="3"/>
+          <rect class="gy-f" x="10" y="37" width="3" height="3"/>
+          <path class="gy-s" d="M84.5 26.5 H166.5 V36.5"/>
+          <path class="gy-ps" d="M162.5 33.5 L166.5 37.5 L170.5 33.5"/>
+          <path class="gy-s" d="M130.5 28.5 V52.5 H202.5 V28.5"/>
+          <path class="gy-s2" d="M138.5 46.5 H194.5"/>
+        </svg></div>
         <span class="step__n">01 · audit</span>
         <h3>Run it on your logs</h3>
-        <p>Import a log or attach the sidecar proxy. Permissions, audit trail, egress and injection resistance are read from what the agent actually did.</p>
+        <p>Import a log or attach the sidecar proxy. Permissions, audit trail, egress and injection resistance are read from what the agent did.</p>
       </div>
       <div class="step">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s2" d="M14.5 24.5 H62.5 M14.5 32.5 H62.5 M14.5 40.5 H62.5"/>
+          <path class="gy-s2" d="M68.5 32.5 H84.5" stroke-dasharray="2 3"/>
+          <rect class="gy-s" x="96.5" y="8.5" width="28" height="12"/>
+          <path class="gy-s" d="M110.5 20.5 V30.5"/>
+          <rect class="gy-s" x="86.5" y="30.5" width="48" height="18"/>
+          <rect class="gy-p" x="106.5" y="36.5" width="8" height="6"/>
+          <path class="gy-s" d="M134.5 39.5 H146.5 L152.5 33.5 L158.5 45.5 L164.5 33.5 L170.5 45.5 L176.5 39.5 H204.5"/>
+        </svg></div>
         <span class="step__n">02 · sign</span>
         <h3>We seal the findings</h3>
         <p>The report is canonicalized and signed with Ed25519. The signature covers the exact bytes: inflate a score and the seal breaks. Every issuance enters an append-only log.</p>
       </div>
       <div class="step">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s2" x="14.5" y="26.5" width="11" height="11"/>
+          <path class="gy-s2" d="M25.5 32.5 H78.5 M62.5 32.5 V37.5 M68.5 32.5 V36.5"/>
+          <rect class="gy-s" x="78.5" y="10.5" width="76" height="46"/>
+          <path class="gy-s" d="M78.5 22.5 H154.5"/>
+          <rect class="gy-f" x="83.5" y="15.5" width="3" height="3"/>
+          <rect class="gy-f" x="89.5" y="15.5" width="3" height="3"/>
+          <path class="gy-ps" d="M100.5 38.5 L110.5 48.5 L132.5 26.5"/>
+          <path class="gy-s2" d="M154.5 33.5 H202.5 M202.5 29.5 V37.5"/>
+        </svg></div>
         <span class="step__n">03 · verify</span>
         <h3>Your buyer checks it</h3>
-        <p>Offline, in their browser, against the public key inside the report. No account, no upload, no kolm server in the trust path.</p>
+        <p>Offline, in their browser, against the public key inside the report. The check needs only the report file; kolm never sees it happen.</p>
       </div>
     </div>
     <p class="how__foot"><span class="spark" aria-hidden="true"><i class="on" style="--v:.5"></i><i class="on" style="--v:.8"></i><i class="on" style="--v:.65"></i><i class="on" style="--v:.95"></i><i class="on" style="--v:.7"></i><i class="on" style="--v:.85"></i><i class="on" style="--v:.6"></i><i class="on" style="--v:1"></i></span> <b>Eight controls</b> read from your own logs · <b>Six frameworks</b> in the crosswalk · mapped to the controls your buyer already cites · <a href="/how-it-works" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">the full lifecycle</a></p>
@@ -280,16 +310,45 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
       <div class="grid" style="gap:14px;align-content:start">
         <div class="card">
+          <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <rect class="gy-s" x="16.5" y="26.5" width="152" height="16"/>
+            <path class="gy-s2" d="M24.5 30.5 V38.5 M32.5 30.5 V38.5 M40.5 30.5 V38.5 M48.5 30.5 V38.5 M56.5 30.5 V38.5 M64.5 30.5 V38.5 M72.5 30.5 V38.5 M80.5 30.5 V38.5 M96.5 30.5 V38.5 M104.5 30.5 V38.5 M112.5 30.5 V38.5 M120.5 30.5 V38.5 M128.5 30.5 V38.5 M136.5 30.5 V38.5 M144.5 30.5 V38.5 M152.5 30.5 V38.5 M160.5 30.5 V38.5"/>
+            <rect class="gy-r" x="86" y="29.5" width="5" height="10"/>
+            <path class="gy-s" d="M88.5 26.5 L92.5 18.5 L86.5 14.5 L90.5 6.5"/>
+            <path class="gy-s" d="M168.5 34.5 H176.5"/>
+            <rect class="gy-s" x="176.5" y="22.5" width="24" height="24"/>
+            <rect class="gy-p" x="184.5" y="30.5" width="8" height="8"/>
+          </svg></div>
           <p class="card__k">Tier 1 · signature</p>
           <h3>Edit one field, the seal breaks</h3>
           <p>The signature covers the canonical bytes. Change a finding or inflate the score and the match fails, in front of the reviewer.</p>
         </div>
         <div class="card">
+          <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <rect class="gy-s" x="14.5" y="22.5" width="18" height="18"/>
+            <rect class="gy-p" x="20.5" y="28.5" width="6" height="6"/>
+            <path class="gy-s2" d="M32.5 31.5 H88.5 M60.5 28.5 V34.5"/>
+            <rect class="gy-s" x="88.5" y="25.5" width="12" height="12"/>
+            <path class="gy-s2" d="M100.5 31.5 H160.5 M130.5 28.5 V34.5"/>
+            <path class="gy-s" d="M160.5 14.5 H182.5 L190.5 22.5 V49.5 H160.5 Z M182.5 14.5 V22.5 H190.5"/>
+            <path class="gy-s2" d="M166.5 30.5 H184.5 M166.5 36.5 H180.5 M166.5 42.5 H184.5"/>
+          </svg></div>
           <p class="card__k">Tier 2 · issuer</p>
           <h3>A rogue key signs, but does not match</h3>
           <p>The signing key is pinned to the keyring your buyer expects. A forged key clears tier 1 and fails tier 2.</p>
         </div>
         <div class="card">
+          <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <rect class="gy-s" x="24.5" y="12.5" width="64" height="40"/>
+            <path class="gy-s" d="M24.5 23.5 H88.5"/>
+            <rect class="gy-f" x="29.5" y="16.5" width="3" height="3"/>
+            <rect class="gy-f" x="35.5" y="16.5" width="3" height="3"/>
+            <path class="gy-ps" d="M42.5 37.5 L50.5 45.5 L68.5 29.5"/>
+            <path class="gy-s2" d="M88.5 32.5 H134.5 M160.5 32.5 H170.5" stroke-dasharray="3 3"/>
+            <path class="gy-s" d="M139 39 L147 25 M145 39 L153 25"/>
+            <rect class="gy-s2" x="170.5" y="12.5" width="32" height="40"/>
+            <path class="gy-s2" d="M170.5 25.5 H202.5 M170.5 38.5 H202.5"/>
+          </svg></div>
           <p class="card__k">Offline · no server</p>
           <h3>Nothing for us to fake</h3>
           <p>Verification runs on WebCrypto in the buyer's browser. No account, no upload, no server of ours in the path.</p>
@@ -332,8 +391,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="sect-rail__body">
     <span class="num-ghost" aria-hidden="true">04</span>
     <div class="section__head">
-      <h2>Every price is public. No demo wall.</h2>
-      <p class="lede">Start free, buy the report when the deal needs it.</p>
+      <h2>Start free. $750 when the deal needs a signature.</h2>
+      <p class="lede">Flat fees, self-serve, from a free scan to a guided fleet audit.</p>
     </div>
     <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="plate plate--rows">

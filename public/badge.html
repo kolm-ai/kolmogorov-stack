@@ -77,7 +77,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     },
     {
       "@type": "Question",
-      "name": "What does the badge actually prove?",
+      "name": "What does the badge prove?",
       "acceptedAnswer": { "@type": "Answer", "text": "The badge itself is a link. The proof lives at your Trust Link: an Ed25519-signed evidence report whose signature covers the exact bytes, so a reviewer can confirm the report was not altered and was signed by the key they expect." }
     },
     {
@@ -166,8 +166,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">
           You have a signed evidence report. Now make it findable. The kolm verify badge
           sits on your site, docs, or README and links straight to your Trust Link, where
-          anyone checks your report offline against kolm's published key. No account, no
-          screenshot, no taking your word for it.
+          anyone checks your report offline against kolm's published key. The click lands
+          on proof, not a marketing page.
         </p>
         <div class="hero__cta">
           <a class="btn btn--primary" href="#snippets">Copy a snippet</a>
@@ -222,11 +222,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p>The badge links to kolm.ai/v1/trust/your-slug, the public page for your signed evidence report. One click, no search, no sign-in wall.</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s2" x="14.5" y="26.5" width="11" height="11"/>
+          <path class="gy-s2" d="M25.5 32.5 H78.5 M62.5 32.5 V37.5 M68.5 32.5 V36.5"/>
+          <rect class="gy-s" x="78.5" y="10.5" width="76" height="46"/>
+          <path class="gy-s" d="M78.5 22.5 H154.5"/>
+          <rect class="gy-f" x="83.5" y="15.5" width="3" height="3"/>
+          <rect class="gy-f" x="89.5" y="15.5" width="3" height="3"/>
+          <path class="gy-ps" d="M100.5 38.5 L110.5 48.5 L132.5 26.5"/>
+          <path class="gy-s2" d="M154.5 33.5 H202.5 M202.5 29.5 V37.5"/>
+        </svg></div>
         <p class="card__k">Verifiable at the click</p>
         <h3>The math runs in their browser</h3>
         <p>At your Trust Link the Ed25519 signature is checked against kolm's published issuer key, offline. Edit a finding or inflate a score and the seal reads VOID.</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="24.5" y="12.5" width="64" height="40"/>
+          <path class="gy-s" d="M24.5 23.5 H88.5"/>
+          <rect class="gy-f" x="29.5" y="16.5" width="3" height="3"/>
+          <rect class="gy-f" x="35.5" y="16.5" width="3" height="3"/>
+          <path class="gy-ps" d="M42.5 37.5 L50.5 45.5 L68.5 29.5"/>
+          <path class="gy-s2" d="M88.5 32.5 H134.5 M160.5 32.5 H170.5" stroke-dasharray="3 3"/>
+          <path class="gy-s" d="M139 39 L147 25 M145 39 L153 25"/>
+          <rect class="gy-s2" x="170.5" y="12.5" width="32" height="40"/>
+          <path class="gy-s2" d="M170.5 25.5 H202.5 M170.5 38.5 H202.5"/>
+        </svg></div>
         <p class="card__k">Nothing to trust on faith</p>
         <h3>No account, no kolm server</h3>
         <p>A reviewer needs no kolm login and uploads nothing. The report carries the key it was signed with, so the check needs nothing from us.</p>
@@ -361,7 +382,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="card">
         <p class="card__k">Older than 30 days</p>
         <h3>Grey: <span class="mono">stale (Month YYYY)</span></h3>
-        <p>Past 30 days the pill loses its color and names the month it was generated. The report stays verifiable; the badge simply stops vouching for its freshness. A continuous plan re-signs on a schedule, so the pill stays current instead of greying out.</p>
+        <p>Past 30 days the pill loses its color and names the month it was generated. The report stays verifiable; the badge stops vouching for its freshness. A continuous plan re-signs on a schedule, so the pill stays current instead of greying out.</p>
       </div>
       <div class="card">
         <p class="card__k">Issuer key revoked</p>
@@ -417,7 +438,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l4.5 4.5L20 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <span class="flow__n">03 · Read</span>
         <span class="flow__t">A result they can stand behind</span>
-        <p class="flow__d">A green seal and the scoped findings, mapped to the frameworks a reviewer cites. No account asked, nothing uploaded, no kolm server in the trust path.</p>
+        <p class="flow__d">A green seal and the scoped findings, mapped to the frameworks a reviewer cites. Their own browser ran the check against the published key; the report supplied everything else.</p>
       </div>
     </div>
     <div class="hero__cta" style="margin-top:var(--s7)">
@@ -474,16 +495,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="sect-rail__rail"><span class="idx">06 / Questions</span></div>
       <div class="sect-rail__body">
     <div class="section__head">
-      <h2>Before you embed.</h2>
+      <h2>Common questions</h2>
     </div>
     <div class="grid grid--2">
       <div class="card"><h3>Does a visitor need an account to verify?</h3><p>No. Clicking the badge opens your Trust Link, where the signed report is verified in the browser against kolm's published issuer key. No account, no upload, no kolm server in the trust path.</p></div>
-      <div class="card"><h3>What does the badge actually prove?</h3><p>The badge itself is a link. The proof lives at your Trust Link: an Ed25519-signed report whose signature covers the exact bytes, so a reviewer can confirm it was not altered and was signed by the key they expect. <a href="/verify">Try it on the sample.</a></p></div>
+      <div class="card"><h3>What does the badge prove?</h3><p>The badge itself is a link. The proof lives at your Trust Link: an Ed25519-signed report whose signature covers the exact bytes, so a reviewer can confirm it was not altered and was signed by the key they expect. <a href="/verify">Try it on the sample.</a></p></div>
       <div class="card"><h3>Where does my Trust Link come from?</h3><p>A live Trust Link ships with the continuous plans. Start a free scan, then move to a plan that keeps the evidence current. See <a href="/pricing">pricing</a>.</p></div>
       <div class="card"><h3>What happens when my report is re-attested?</h3><p>On a continuous plan the Trust Link stays current as the report is re-signed. The badge keeps pointing at the same link, so it always opens your latest signed evidence.</p></div>
       <div class="card"><h3>What if my report goes stale or its key is revoked?</h3><p>The static badge stays a link, so it always opens your Trust Link, where the state shows plainly. For a badge that changes on its own, embed the live status badge: it greys to <span class="mono">stale (Month YYYY)</span> after 30 days and to <span class="mono">report revoked</span> if kolm revokes the signing key. A continuous plan re-signs on a schedule, so it stays current.</p></div>
       <div class="card"><h3>Will the Markdown badge work on GitHub?</h3><p>Yes. READMEs strip inline SVG, so snippet b renders a flat badge in kolm's colors through shields.io. For a zero-dependency badge, host the SVG yourself or use snippet a where HTML is allowed.</p></div>
-      <div class="card"><h3>Is the badge artwork really ASCII-only?</h3><p>Yes. The SVG uses plain ASCII characters and embeds the kolm three-bar mark, so it pastes cleanly into any editor and renders the same everywhere.</p></div>
+      <div class="card"><h3>Is the badge artwork ASCII-only?</h3><p>Yes. The SVG uses plain ASCII characters and embeds the kolm three-bar mark, so it pastes cleanly into any editor and renders the same everywhere.</p></div>
     </div>
     <p class="hero__claim" style="margin-top:var(--s4)">Already a customer? <a href="/dashboard">Find your Trust Link in your dashboard.</a></p>
       </div>

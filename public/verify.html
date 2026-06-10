@@ -10,14 +10,14 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Verify a kolm evidence report offline, in your browser · kolm.ai</title>
-<meta name="description" content="Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. No account, no upload, no kolm server in the trust path. You verify against the public key, not against our word.">
+<meta name="description" content="Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. The whole check runs locally against the published issuer key; the report never leaves your machine and kolm's servers stay out of the trust path. You verify against the public key, not against our word.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Verify a kolm evidence report offline, in your browser">
-<meta property="og:description" content="Real Ed25519 verification running in your own browser. No account, no upload, no server in the trust path. Try to tamper with the report, the seal reads VOID.">
+<meta property="og:description" content="Real Ed25519 verification running in your own browser, locally, against the published issuer key. Try to tamper with the report, the seal reads VOID.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/verify">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -78,7 +78,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/verify",
-  "description": "Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. No account, no upload, no kolm server in the trust path. You verify against the public key, not against our word.",
+  "description": "Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. The whole check runs locally against the published issuer key; the report never leaves your machine and kolm's servers stay out of the trust path. You verify against the public key, not against our word.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -221,18 +221,47 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
     <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="grid grid--3">
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="24.5" y="12.5" width="64" height="40"/>
+          <path class="gy-s" d="M24.5 23.5 H88.5"/>
+          <rect class="gy-f" x="29.5" y="16.5" width="3" height="3"/>
+          <rect class="gy-f" x="35.5" y="16.5" width="3" height="3"/>
+          <path class="gy-ps" d="M42.5 37.5 L50.5 45.5 L68.5 29.5"/>
+          <path class="gy-s2" d="M88.5 32.5 H134.5 M160.5 32.5 H170.5" stroke-dasharray="3 3"/>
+          <path class="gy-s" d="M139 39 L147 25 M145 39 L153 25"/>
+          <rect class="gy-s2" x="170.5" y="12.5" width="32" height="40"/>
+          <path class="gy-s2" d="M170.5 25.5 H202.5 M170.5 38.5 H202.5"/>
+        </svg></div>
         <p class="card__k">Why offline</p>
         <h3>Nothing for us to fake</h3>
         <p>Asymmetric signatures need only the public key, and it travels inside the report. kolm is never in the verification path, so there is no back end to quietly return a green check.</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="16.5" y="26.5" width="152" height="16"/>
+          <path class="gy-s2" d="M24.5 30.5 V38.5 M32.5 30.5 V38.5 M40.5 30.5 V38.5 M48.5 30.5 V38.5 M56.5 30.5 V38.5 M64.5 30.5 V38.5 M72.5 30.5 V38.5 M80.5 30.5 V38.5 M96.5 30.5 V38.5 M104.5 30.5 V38.5 M112.5 30.5 V38.5 M120.5 30.5 V38.5 M128.5 30.5 V38.5 M136.5 30.5 V38.5 M144.5 30.5 V38.5 M152.5 30.5 V38.5 M160.5 30.5 V38.5"/>
+          <rect class="gy-r" x="86" y="29.5" width="5" height="10"/>
+          <path class="gy-s" d="M88.5 26.5 L92.5 18.5 L86.5 14.5 L90.5 6.5"/>
+          <path class="gy-s" d="M168.5 34.5 H176.5"/>
+          <rect class="gy-s" x="176.5" y="22.5" width="24" height="24"/>
+          <rect class="gy-p" x="184.5" y="30.5" width="8" height="8"/>
+        </svg></div>
         <p class="card__k">Tier 1 · signature</p>
         <h3>Untampered since signing</h3>
         <p>The report is signed by the holder of the embedded key and has not changed by a single byte since. Edit one field and the signature fails in red. Try <span class="mono">Tamper a field</span>.</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="22.5" width="18" height="18"/>
+          <rect class="gy-p" x="20.5" y="28.5" width="6" height="6"/>
+          <path class="gy-s2" d="M32.5 31.5 H88.5 M60.5 28.5 V34.5"/>
+          <rect class="gy-s" x="88.5" y="25.5" width="12" height="12"/>
+          <path class="gy-s2" d="M100.5 31.5 H160.5 M130.5 28.5 V34.5"/>
+          <path class="gy-s" d="M160.5 14.5 H182.5 L190.5 22.5 V49.5 H160.5 Z M182.5 14.5 V22.5 H190.5"/>
+          <path class="gy-s2" d="M166.5 30.5 H184.5 M166.5 36.5 H180.5 M166.5 42.5 H184.5"/>
+        </svg></div>
         <p class="card__k">Tier 2 · issuer</p>
-        <h3>And actually ours</h3>
+        <h3>And ours</h3>
         <p>The embedded key is matched against kolm's published keyring. Re-sign an edited report with an attacker's own key and tier 1 passes, but tier 2 exposes it. Try <span class="mono">Forge with a rogue key</span>.</p>
       </div>
     </div>

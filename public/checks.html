@@ -146,7 +146,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </section>
 
 <!-- ============================================================ 3. THE FOUR PILLARS -->
-<section class="section reveal" id="pillars">
+<section class="section sect--dense reveal" id="pillars">
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">02 / The four pillars</span></div>
@@ -184,24 +184,67 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </figure>
     <div class="grid grid--2">
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="24.5" width="14" height="15"/>
+          <rect class="gy-s" x="19.5" y="29.5" width="4" height="5"/>
+          <path class="gy-s" d="M28.5 32.5 H64.5 M52.5 32.5 V39.5 M59.5 32.5 V37.5"/>
+          <path class="gy-s2" d="M70.5 32.5 H86.5" stroke-dasharray="2 3"/>
+          <g class="gy-s2"><rect x="92.5" y="18.5" width="12" height="12"/><rect x="108.5" y="18.5" width="12" height="12"/><rect x="124.5" y="18.5" width="12" height="12"/><rect x="140.5" y="18.5" width="12" height="12"/><rect x="156.5" y="18.5" width="12" height="12"/><rect x="92.5" y="34.5" width="12" height="12"/><rect x="108.5" y="34.5" width="12" height="12"/><rect x="124.5" y="34.5" width="12" height="12"/><rect x="140.5" y="34.5" width="12" height="12"/><rect x="156.5" y="34.5" width="12" height="12"/></g>
+          <rect class="gy-p" x="95.5" y="21.5" width="6" height="6"/>
+          <rect class="gy-f" x="111.5" y="21.5" width="6" height="6"/>
+          <rect class="gy-f" x="95.5" y="37.5" width="6" height="6"/>
+          <rect class="gy-f" x="127.5" y="37.5" width="6" height="6"/>
+        </svg></div>
         <p class="card__k">Pillar 01 · Permissions</p>
         <h3>Least privilege</h3>
         <p>Scopes held versus scopes used. Shared keys, standing grants, and high-impact actions reachable without confirmation, surfaced with the calls that prove them.</p>
         <p class="card__map">ASR-1 · maps to SOC 2 CC6</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="16.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="64.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="112.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="160.5" y="22.5" width="28" height="18"/>
+          <path class="gy-s2" d="M21.5 28.5 H39.5 M21.5 34.5 H33.5 M69.5 28.5 H87.5 M69.5 34.5 H81.5 M117.5 28.5 H135.5 M117.5 34.5 H129.5 M165.5 28.5 H183.5 M165.5 34.5 H177.5"/>
+          <path class="gy-s" d="M44.5 31.5 H64.5 M92.5 31.5 H112.5 M140.5 31.5 H160.5 M188.5 31.5 H202.5"/>
+          <rect class="gy-s" x="52.5" y="29.5" width="4" height="4"/>
+          <rect class="gy-s" x="100.5" y="29.5" width="4" height="4"/>
+          <rect class="gy-s" x="148.5" y="29.5" width="4" height="4"/>
+          <path class="gy-s" d="M198.5 27.5 L202.5 31.5 L198.5 35.5"/>
+          <rect class="gy-p" x="204.5" y="29.5" width="4" height="4"/>
+        </svg></div>
         <p class="card__k">Pillar 02 · Audit trail</p>
         <h3>A record that cannot be edited</h3>
         <p>Append-only, hash-chained, retained, so the record a reviewer reads is the record that happened.</p>
         <p class="card__map">ASR-2 · maps to EU AI Act Art.12</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s2" d="M14.5 22.5 H203.5 M14.5 32.5 H203.5 M14.5 42.5 H203.5"/>
+          <rect class="gy-r" x="58" y="18" width="28" height="9"/>
+          <rect class="gy-r" x="42" y="38" width="34" height="9"/>
+          <path class="gy-s" d="M126.5 10.5 V53.5"/>
+          <path class="gy-s2" d="M130.5 14.5 V49.5"/>
+          <path class="gy-s" d="M203.5 18.5 V26.5 M203.5 28.5 V36.5 M203.5 38.5 V46.5"/>
+          <rect class="gy-p" x="124.5" y="30.5" width="4" height="4"/>
+        </svg></div>
         <p class="card__k">Pillar 03 · Data egress</p>
         <h3>Where data goes, and what is masked</h3>
         <p>Every destination the agent can reach, the sub-processors behind them, and proof that sensitive fields are redacted before they leave.</p>
         <p class="card__map">ASR-3 · maps to OWASP LLM02</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s" d="M132.5 8.5 V55.5"/>
+          <path class="gy-s2" d="M136.5 12.5 V51.5"/>
+          <path class="gy-s" d="M18 13 L128 30"/>
+          <path class="gy-s" d="M120.8 24.6 L128 30 L119.5 33"/>
+          <path class="gy-s2" d="M128 30 L86 9" stroke-dasharray="3 3"/>
+          <path class="gy-s2" d="M86 9 L94.5 10.3 M86 9 L88.6 17.2"/>
+          <path class="gy-s2" d="M150.5 22.5 H202.5 M150.5 32.5 H190.5 M150.5 42.5 H198.5"/>
+          <rect class="gy-p" x="126" y="27.5" width="4" height="4"/>
+        </svg></div>
         <p class="card__k">Pillar 04 · Injection</p>
         <h3>Can it be talked out of its rules</h3>
         <p>Direct and indirect injection, guardrail bypass, and system-prompt extraction, run as a battery with reproductions. Tested and reported, not warranted.</p>
@@ -253,7 +296,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </tbody>
       </table>
     </div>
-    <p class="how__foot"><span class="spark" aria-hidden="true"><i class="on" style="--v:.5"></i><i class="on" style="--v:.8"></i><i class="on" style="--v:.65"></i><i class="on" style="--v:.95"></i><i class="on" style="--v:.7"></i><i class="on" style="--v:.85"></i><i class="on" style="--v:.6"></i><i class="on" style="--v:1"></i></span> <b>Eight controls</b> · <b>Six frameworks</b> · the mapping travels inside the signed object: follow any finding to its control, and that control to the clause the reviewer reads from. kolm maps findings to standards, it never certifies compliance.</p>
+    <p class="how__foot"><b>Eight controls</b> · <b>Six frameworks</b> · the mapping travels inside the signed object: follow any finding to its control, and that control to the clause the reviewer reads from. kolm maps findings to standards, it never certifies compliance.</p>
       </div>
     </div>
   </div>
@@ -272,15 +315,37 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
     <div class="grid grid--2">
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <defs><pattern id="gyHatch" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0 6 L6 0" stroke="currentColor" stroke-width="0.75" opacity="0.35"/></pattern></defs>
+          <rect class="gy-s" x="56.5" y="8.5" width="44" height="44"/>
+          <path class="gy-s2" d="M64.5 18.5 H92.5 M64.5 25.5 H88.5 M64.5 32.5 H92.5 M64.5 39.5 H84.5"/>
+          <path class="gy-s" d="M56.5 59.5 H100.5 M56.5 56.5 V62.5 M100.5 56.5 V62.5"/>
+          <path class="gy-s" d="M124.5 6.5 V56.5" stroke-dasharray="3 3"/>
+          <rect class="gy-s2" x="132.5" y="8.5" width="56" height="44"/>
+          <rect x="132.5" y="8.5" width="56" height="44" fill="url(#gyHatch)"/>
+          <rect class="gy-p" x="122.5" y="29.5" width="4" height="4"/>
+        </svg></div>
         <p class="card__k">Assessed</p>
         <h3>Stated as a posture</h3>
         <ul class="ledger" style="margin-top:var(--s4)">
-          <li>Permission posture against what the agent actually uses</li>
+          <li>Permission posture against what the agent uses</li>
           <li>Redaction of sensitive fields before egress</li>
           <li>Audit-trail integrity, append-only and hash-chained</li>
         </ul>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s" d="M124.5 8.5 V55.5"/>
+          <path class="gy-s2" d="M18.5 14.5 H120.5 M18.5 26.5 H120.5 M18.5 38.5 H120.5 M18.5 50.5 H120.5"/>
+          <path class="gy-s2" d="M120.5 14.5 L108.5 6.5 M120.5 26.5 L108.5 18.5 M120.5 50.5 L108.5 42.5" stroke-dasharray="2 2"/>
+          <path class="gy-s" d="M124.5 38.5 H148.5"/>
+          <rect class="gy-s2" x="154.5" y="11.5" width="6" height="6"/>
+          <rect class="gy-s2" x="154.5" y="23.5" width="6" height="6"/>
+          <rect class="gy-p" x="154.5" y="35.5" width="6" height="6"/>
+          <rect class="gy-s2" x="154.5" y="47.5" width="6" height="6"/>
+          <path class="gy-s2" d="M172.5 10.5 H176.5 V52.5 H172.5 M176.5 31.5 H186.5"/>
+          <rect class="gy-s" x="186.5" y="25.5" width="18" height="12"/>
+        </svg></div>
         <p class="card__k">Tested and reported</p>
         <h3>Shown, not promised</h3>
         <p>Injection runs as a battery with reproductions a reviewer can replay. We report what held and what did not. We do not warrant that the agent is secure, and you should distrust anyone who does.</p>

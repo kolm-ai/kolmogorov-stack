@@ -1395,3 +1395,71 @@ html:not(.js-reveal) .sect-rail__rail .idx::after { transform: scaleY(1); }
 @supports (color: oklch(0% 0 0)) {
   :root { --accent: oklch(83% 0.155 163); --cool: oklch(72% 0.10 258); --paper: oklch(13% 0.01 200); }
 }
+
+/* ============================================================
+   GLYPH SYSTEM v3.2 - ENGRAVED CARD GLYPHS (2026-06-11).
+   Instrument-faceplate micro-schematics for the reserved
+   .card__art slot at the top of cards and steps. The full glyph
+   library + authoring laws live in docs/GRAPHICS-SPEC-2026.md
+   ("GLYPH SYSTEM v3.2" section). Laws: stroke-only engraving on
+   transparent ground; inks ride currentColor tiers so the drawing
+   sits IN the card material, not on it; exactly ONE phosphor
+   element per glyph (a lit cell, a tick, a pulse dot); squared
+   geometry snapped to a 2px grid with .5 offsets for crisp 1px
+   hairlines; no gradients; no text inside glyphs. The slot height
+   is fixed so layout never shifts (CLS 0). Hover: the inks
+   brighten and the phosphor element pulses or draws once -
+   fine-pointer gated, reduced-motion gated.
+   ============================================================ */
+
+/* the reserved art slot - always the FIRST child of its card/step. Corner
+   register ticks (the .diag crop-mark voice, miniaturized) bound the full
+   slot width so the centered schematic reads as a composed plate, not a
+   floating drawing. */
+.card__art { display: block; position: relative; height: 64px; margin: 2px 0 18px; color: rgba(229, 240, 234, 0.32); pointer-events: none; }
+.card__art svg { display: block; width: 100%; height: 64px; }
+.card__art::before, .card__art::after { content: ""; position: absolute; width: 7px; height: 7px; }
+.card__art::before { top: 0; left: 0; border-top: 1px solid var(--line-2); border-left: 1px solid var(--line-2); }
+.card__art::after { bottom: 0; right: 0; border-bottom: 1px solid var(--line-2); border-right: 1px solid var(--line-2); }
+
+/* engraving ink tiers (strokes are lines cut into the plate; the rare
+   fills are recessed panels and redaction blocks, never paint) */
+.gy-s  { fill: none; stroke: currentColor; stroke-width: 1; }
+.gy-s2 { fill: none; stroke: rgba(229, 240, 234, 0.17); stroke-width: 1; }
+.gy-f  { fill: rgba(229, 240, 234, 0.10); }
+.gy-r  { fill: rgba(229, 240, 234, 0.34); }
+.gy-dt { fill: currentColor; }
+/* THE one phosphor element per glyph */
+.gy-p  { fill: var(--accent); }
+.gy-ps { fill: none; stroke: var(--accent); stroke-width: 1.2; stroke-linecap: square; stroke-linejoin: miter; stroke-dasharray: 120; stroke-dashoffset: 0; }
+
+/* hover: strokes brighten; the phosphor pulses / draws ONCE (gated) */
+@media (hover: hover) and (pointer: fine) {
+  .card__art { transition: color var(--dur-2) var(--ease-exp); }
+  .card:hover > .card__art, .step:hover > .card__art { color: rgba(233, 243, 238, 0.52); }
+  @media (prefers-reduced-motion: no-preference) {
+    .card:hover > .card__art .gy-p, .step:hover > .card__art .gy-p { animation: gyPulse 680ms var(--ease-exp) 1; }
+    .card:hover > .card__art .gy-ps, .step:hover > .card__art .gy-ps { animation: gyDraw 680ms var(--ease-exp) 1; }
+  }
+}
+@keyframes gyPulse { 0% { opacity: 0.15; } 60% { opacity: 1; } 100% { opacity: 1; } }
+@keyframes gyDraw { from { stroke-dashoffset: 120; } to { stroke-dashoffset: 0; } }
+
+/* ============================================================
+   SYMPHONY v3.3 - COHESION HAND-OFFS (2026-06-11). Additive only.
+   The binding score is docs/SYMPHONY-SCORE-2026.md. These rules
+   standardize junctions pages were improvising inline; no new
+   visual language, no device restyling.
+   ============================================================ */
+
+/* Ghost ordinals: the ONE sanctioned offset, for chamber sections whose
+   head sits under a dither-edge + field band. Ghosts are never resized or
+   nudged inline; if an ordinal collides with content, drop the ghost. */
+.num-ghost--deep { top: -0.78em; }
+
+/* Chamber-to-coda hand-off: when the page's proof chamber sits directly
+   against the final doorway (roi, changelog, 404), the junction speaks
+   ONCE - the coda keeps its quantized strip, the chamber yields its
+   hairline and its own strip, so two lit volumes meet cleanly. */
+.section--ink + .cta-final, .section--lit + .cta-final { border-top: 0; }
+.section--ink:has(+ .cta-final) > .dither-edge { display: none; }

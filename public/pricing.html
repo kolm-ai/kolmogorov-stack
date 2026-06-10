@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Pricing: flat, public, no demo wall · kolm.ai</title>
-<meta name="description" content="Every price on one page. Run the scan free, buy the Ed25519-signed readiness report for $750 one-time, re-attest continuously at $299 or $999 per month, or go upmarket: Full Readiness $15,000, Continuous-Plus $3,500/mo, Reviewed Attestation $25,000. No quote, no per-seat meter, no contingency.">
+<title>Pricing · kolm.ai</title>
+<meta name="description" content="Run the scan free, buy the Ed25519-signed readiness report for $750 one-time, re-attest continuously at $299 or $999 per month, or go upmarket: Full Readiness $15,000, Continuous-Plus $3,500/mo, Reviewed Attestation $25,000. Every fee is flat and final.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Pricing: flat, public, no demo wall · kolm.ai">
-<meta property="og:description" content="Scan free. Signed report $750 one-time. Continuous $299/$999 per month. Reviewed Attestation $25,000. No quote, no per-seat meter, no contingency.">
+<meta property="og:title" content="Pricing · kolm.ai">
+<meta property="og:description" content="Scan free. Signed report $750 one-time. Continuous $299/$999 per month. Reviewed Attestation $25,000. Every fee is flat and final.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/pricing">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -27,7 +27,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
 <meta name="twitter:title" content="Pricing · kolm">
-<meta name="twitter:description" content="Flat, public pricing for on-demand, verifiable security audits. No quote, no per-seat meter, no contingency.">
+<meta name="twitter:description" content="Flat fees for on-demand, verifiable security audits. Scan free, signed report $750 one-time, Continuous from $299 per month.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -66,7 +66,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "name": "kolm Agent Security-Review Readiness",
   "serviceType": "AI agent security audit and signed evidence attestation",
   "provider": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
-  "description": "On-demand, verifiable security audits for AI agents. A free self-serve scan, a one-time signed readiness report, automatic re-attestation, and a named co-signed audit. Every fee flat and public.",
+  "description": "On-demand, verifiable security audits for AI agents. A free self-serve scan, a one-time signed readiness report, automatic re-attestation, and a named co-signed audit. Every fee is flat and final.",
   "areaServed": "Worldwide",
   "offers": [
     { "@type": "Offer", "name": "Scan", "price": "0", "priceCurrency": "USD" },
@@ -87,8 +87,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Why are the prices just listed?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Because you should not sit through a call to learn whether you can afford us. Every fee is flat and final. Pick a plan and start." }
+      "name": "Do prices change with team size or usage?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. Every fee is flat and final: $750 for the signed report, $299 or $999 per month for Continuous. There is no per-seat meter and no usage tier." }
     },
     {
       "@type": "Question",
@@ -162,11 +162,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="hero__grid">
       <div>
         <p class="eyebrow" data-enter="1">Pricing</p>
-        <h1 class="hero__h1" data-enter="2">Every price is public. <span class="go">No demo wall.</span></h1>
+        <h1 class="hero__h1" data-enter="2">Flat fees. Self-serve. <span class="go">Start free.</span></h1>
         <p class="lede" data-enter="3">
           Run the full scan free. Buy the signed report when the deal needs it:
           $750 one-time, or continuous from $299 a month so the evidence never
-          goes stale. Flat fees, no quote, no contingency.
+          goes stale. The fee listed is the whole fee.
         </p>
         <div class="hero__cta" data-enter="4">
           <a class="btn btn--primary" href="/signup">Run the free scan</a>
@@ -180,16 +180,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
 
       <!-- the artifact IS the hero image: the whole price list as one sealed receipt -->
-      <aside class="artifact" aria-label="Every self-serve price, as a receipt">
+      <aside class="artifact" aria-label="The self-serve price list, as a receipt">
         <div class="rep">
           <div class="rep__bar">
             <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="t">kolm · price receipt</span>
-            <span class="chip chip--ok">flat · public</span>
+            <span class="chip chip--ok">flat · final</span>
           </div>
           <div class="rep__sheet">
             <div class="rep__head">
-              <span class="rep__sub">Every price, on one page</span>
+              <span class="rep__sub">Self-serve price list</span>
               <span class="rep__id">pricing_v1</span>
             </div>
             <div style="font-family:var(--mono);font-size:12px;color:var(--sheet-ink-2);font-variant-numeric:tabular-nums" translate="no">
@@ -198,7 +198,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
               <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--sheet-line)"><span>Continuous Starter</span><b style="color:var(--sheet-ink);font-weight:600">$299/mo</b></div>
               <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0"><span>Continuous Growth</span><b style="color:var(--sheet-ink);font-weight:600">$999/mo</b></div>
             </div>
-            <div class="find__more">no quote · no per-seat meter · no contingency</div>
+            <div class="find__more">flat fees · self-serve checkout · the whole price</div>
           </div>
           <div class="rep__sig" translate="no">
             <div class="sig__row"><span class="sig__k">sealed</span><span>ed25519 over the canonical bytes</span><span class="sig__ok">✓ verifies offline</span></div>
@@ -289,8 +289,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </svg>
     <figcaption class="diag__cap"><b>Always current</b> what Continuous buys: one stable link, re-signed on schedule and on every deploy</figcaption>
     </figure>
-    <p class="hero__claim" style="margin-top:18px">
-      All prices flat and final. No per-seat meter, no usage surprise, no contingency.
+    <p class="hero__claim">
+      All prices flat and final. The figure on this page is the figure at checkout.
     </p>
       </div>
     </div>
@@ -303,7 +303,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">02 / Enterprise</span></div>
       <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true">02</span>
     <div class="section__head">
       <h2>A guided deep audit across the fleet.</h2>
       <p class="lede">For a fleet of agents or a regulated buyer. Both tiers can be bought on this page; a scoping call is available, not required.</p>
@@ -341,7 +340,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </section>
 
 <!-- ============================================================ 4. REVIEWED ATTESTATION (proof panel) -->
-<section class="section section--ink reveal" id="reviewed" style="padding-block:112px">
+<section class="section section--ink sect--air reveal" id="reviewed">
   <div class="dither-edge" aria-hidden="true"></div>
   <!-- band volume of the Evidence Field: the deal-closer chapter is lit, not flat -->
   <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
@@ -349,7 +348,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">03 / The deal-closer</span></div>
       <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true" style="top:-0.78em">03</span>
+    <span class="num-ghost num-ghost--deep" aria-hidden="true">03</span>
     <div class="section__head">
       <h2>When a reviewer needs more than a signature.</h2>
       <p class="lede">Cryptography proves the bytes were not altered. A name proves a person reviewed them. The Reviewed Attestation puts both in front of the CISO.</p>
@@ -371,12 +370,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <div class="card">
           <p class="card__k">Add-on · adversarial</p>
           <h3>Deep Red-Team · +$10,000</h3>
-          <p>A deeper adversarial pass on top of the standard prompt-injection battery, for the buyer who asks how hard you really pushed.</p>
+          <p>A deeper adversarial pass on top of the standard prompt-injection battery, for the buyer who asks how hard you pushed.</p>
         </div>
         <div class="card">
           <p class="card__k">Why a name</p>
           <h3>The signature is necessary, not always sufficient</h3>
-          <p>The automated tiers need no human, on purpose. For the deal where a reviewer wants a person to stand behind the finding, the co-signer is the difference between a passed review and another round of questions.</p>
+          <p>The automated tiers need no human. For the deal where a reviewer wants a person to stand behind the finding, the co-signer is the difference between a passed review and another round of questions.</p>
         </div>
       </div>
     </div>
@@ -392,7 +391,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">04 / Compare</span></div>
       <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true" style="top:-0.45em;font-size:clamp(80px,9.5vw,136px)">04</span>
+    <span class="num-ghost" aria-hidden="true">04</span>
     <div class="section__head">
       <h2>What is in each plan.</h2>
     </div>
@@ -425,17 +424,17 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="sect-rail__rail"><span class="idx">05 / Questions</span></div>
       <div class="sect-rail__body">
     <div class="section__head">
-      <h2>Before you ask.</h2>
+      <h2>Common questions.</h2>
     </div>
     <div class="grid grid--2">
-      <div class="card"><h3>Why are the prices just listed?</h3><p>Because you should not sit through a call to learn whether you can afford us. Every fee is flat and final. Pick a plan and start.</p></div>
+      <div class="card"><h3>Do prices change with team size or usage?</h3><p>No. Every fee is flat and final: $750 for the signed report, $299 or $999 per month for Continuous. There is no per-seat meter and no usage tier.</p></div>
       <div class="card"><h3>Is the free scan really free?</h3><p>Yes. Upload redacted logs, get watermarked findings in minutes, no card. Most teams use it to see a real finding before they commit.</p></div>
       <div class="card"><h3>Why pay monthly when a report is one-time?</h3><p>A point-in-time report goes stale on your next deploy. Continuous re-attests on a schedule, weekly on Starter and on every deploy on Growth, so the evidence your buyer checks is never older than your cadence.</p></div>
       <div class="card"><h3>What does the named co-signer add over the crypto?</h3><p>The signature proves the bytes are intact. The name proves a person reviewed them. Enterprise reviewers ask for both, so the Reviewed Attestation puts a named, accredited reviewer beside the signature.</p></div>
       <div class="card"><h3>Do you warrant our agent is secure?</h3><p>No, and distrust anyone who does. We test and report with reproductions, scoped to exactly what we examined. The scope statement is part of the signed report. <a href="/verify">Try the sample verifier.</a></p></div>
       <div class="card"><h3>We already use Vanta or have SOC 2. Why this?</h3><p>kolm does not replace your SOC 2 or your trust center. It is the fast, agent-specific evidence that clears the deal in front of you now, and every finding maps into the SOC 2, ISO 42001 and NIST AI RMF work you are already doing.</p></div>
     </div>
-    <p class="hero__claim" style="margin-top:var(--s4)">Already a customer? <a href="/dashboard">View your reports and Trust links</a>. No contingency, no success fee: every price on this page is the whole price.</p>
+    <p class="hero__claim">Already a customer? <a href="/dashboard">View your reports and Trust links</a>.</p>
       </div>
     </div>
   </div>

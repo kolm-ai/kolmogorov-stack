@@ -162,6 +162,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__map"><a href="/verify" style="color:var(--accent)">Verify a report</a></p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s2" d="M32.5 6.5 V58.5 M188.5 6.5 V58.5"/>
+          <path class="gy-s" d="M36.5 10.5 H48.5 M36.5 20.5 H48.5 M36.5 30.5 H48.5 M36.5 40.5 H48.5 M36.5 50.5 H48.5"/>
+          <path class="gy-s" d="M172.5 16.5 H184.5 M172.5 32.5 H184.5 M172.5 48.5 H184.5"/>
+          <path class="gy-s2" d="M48.5 10.5 L172.5 16.5 M48.5 20.5 L172.5 48.5 M48.5 40.5 L172.5 16.5 M48.5 50.5 L172.5 48.5"/>
+          <path class="gy-ps" d="M48.5 30.5 L172.5 32.5"/>
+        </svg></div>
         <p class="card__k">Framework mapping</p>
         <h3>Findings tie to standards you cite</h3>
         <p>Each finding maps to a control your review group already uses. kolm maps to these frameworks; it does not hold their certifications.</p>
@@ -171,7 +178,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__k">What we do not hold</p>
         <h3>Stated, not buried</h3>
         <p>kolm does not currently hold a SOC 2 report or a published third-party pentest of its own. We will not claim either until it is real and verifiable.</p>
-        <p class="card__map"><span class="badge">candid by default</span></p>
+        <p class="card__map"><span class="badge">status · not held</span></p>
       </div>
     </div>
 
@@ -250,7 +257,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="sect-rail__rail"><span class="idx">03 / Data handling</span></div>
       <div class="sect-rail__body">
     <div class="section__head">
-      <h2>We see less than you think, and keep it for less time.</h2>
+      <h2>We see less than a pentest does, and keep it for less time.</h2>
       <p class="lede">
         The audit reads redacted activity logs, not your production secrets. You redact
         before upload, the credentials we hold are scoped and revocable, and nothing is
@@ -292,6 +299,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">04 / Transparency log</span></div>
       <div class="sect-rail__body">
+    <span class="num-ghost num-ghost--deep" aria-hidden="true">04</span>
     <div class="section__head">
       <h2>Every report is logged where anyone can watch.</h2>
       <p class="lede">
@@ -313,6 +321,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
       <div class="grid" style="gap:14px;align-content:start">
         <div class="card">
+          <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <path class="gy-s" d="M14.5 16.5 H70.5 M14.5 26.5 H70.5 M14.5 36.5 H70.5 M14.5 46.5 H70.5"/>
+            <rect class="gy-f" x="8" y="15" width="3" height="3"/>
+            <rect class="gy-f" x="8" y="25" width="3" height="3"/>
+            <rect class="gy-f" x="8" y="35" width="3" height="3"/>
+            <rect class="gy-f" x="8" y="45" width="3" height="3"/>
+            <path class="gy-s2" d="M78.5 31.5 H110.5"/>
+            <rect class="gy-s" x="110.5" y="22.5" width="56" height="18"/>
+            <path class="gy-ps" d="M118.5 31.5 H148.5"/>
+            <path class="gy-s2" d="M174.5 31.5 H198.5" stroke-dasharray="2 3"/>
+            <path class="gy-s" d="M180 38 L192 24 M186 38 L198 24"/>
+          </svg></div>
           <h3>Append-only, by construction</h3>
           <p>New leaves are added, old ones are never changed. Altering a past entry changes the Merkle root, breaks the signed checkpoint, and is visible to anyone watching.</p>
         </div>
@@ -322,7 +342,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </div>
         <div class="card">
           <h3>A Merkle log, plainly</h3>
-          <p>Ed25519 and SHA-256 over an append-only tree. No tokens, no consensus network, no chain in the trust path.</p>
+          <p>Ed25519 and SHA-256 over an append-only tree, served over HTTPS. The trust path is the signature math and the published root, end of list.</p>
         </div>
       </div>
     </div>
@@ -342,7 +362,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">05 / Verify it yourself</span></div>
       <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true">05</span>
     <div class="section__head">
       <h2>Do not take our word. Run the check.</h2>
       <p class="lede">
@@ -387,12 +406,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__map"><a href="/sample-audit-report.json" download style="color:var(--accent)">Download the sample</a></p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="16.5" y="26.5" width="152" height="16"/>
+          <path class="gy-s2" d="M24.5 30.5 V38.5 M32.5 30.5 V38.5 M40.5 30.5 V38.5 M48.5 30.5 V38.5 M56.5 30.5 V38.5 M64.5 30.5 V38.5 M72.5 30.5 V38.5 M80.5 30.5 V38.5 M96.5 30.5 V38.5 M104.5 30.5 V38.5 M112.5 30.5 V38.5 M120.5 30.5 V38.5 M128.5 30.5 V38.5 M136.5 30.5 V38.5 M144.5 30.5 V38.5 M152.5 30.5 V38.5 M160.5 30.5 V38.5"/>
+          <rect class="gy-r" x="86" y="29.5" width="5" height="10"/>
+          <path class="gy-s" d="M88.5 26.5 L92.5 18.5 L86.5 14.5 L90.5 6.5"/>
+          <path class="gy-s" d="M168.5 34.5 H176.5"/>
+          <rect class="gy-s" x="176.5" y="22.5" width="24" height="24"/>
+          <rect class="gy-p" x="184.5" y="30.5" width="8" height="8"/>
+        </svg></div>
         <p class="card__k">02 · Tier 1, signature</p>
         <h3>Edit one field, the seal breaks</h3>
         <p>The Ed25519 signature covers the canonical bytes. Inflate the score or downgrade a finding and the match fails, on the spot.</p>
         <p class="card__map">VOID on any edit &middot; <a href="/spec">format spec</a></p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="22.5" width="18" height="18"/>
+          <rect class="gy-p" x="20.5" y="28.5" width="6" height="6"/>
+          <path class="gy-s2" d="M32.5 31.5 H88.5 M60.5 28.5 V34.5"/>
+          <rect class="gy-s" x="88.5" y="25.5" width="12" height="12"/>
+          <path class="gy-s2" d="M100.5 31.5 H160.5 M130.5 28.5 V34.5"/>
+          <path class="gy-s" d="M160.5 14.5 H182.5 L190.5 22.5 V49.5 H160.5 Z M182.5 14.5 V22.5 H190.5"/>
+          <path class="gy-s2" d="M166.5 30.5 H184.5 M166.5 36.5 H180.5 M166.5 42.5 H184.5"/>
+        </svg></div>
         <p class="card__k">03 · Tier 2, issuer</p>
         <h3>A rogue key clears one, fails the other</h3>
         <p>The signing key is pinned to the keyring your buyer expects. Forge a fresh key and Tier 1 clears, but Tier 2 exposes the mismatch.</p>

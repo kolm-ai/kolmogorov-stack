@@ -98,7 +98,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="eyebrow">How it works</p>
         <h1>Audit. Sign. <span class="go">They verify.</span></h1>
         <p class="lede">
-          kolm reads what your agent actually did from its own logs, seals the findings with Ed25519,
+          kolm reads what your agent did from its own logs, seals the findings with Ed25519,
           and your buyer checks the signature offline against your key. kolm is never in the trust path.
           A review that ran four to eight weeks closes in days.
         </p>
@@ -208,7 +208,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
         <span class="flow__n">01 · Audit</span>
         <span class="flow__t">We examine the agent</span>
-        <p class="flow__d">From a log import or a sidecar proxy. Permissions, audit trail, data egress and injection resistance, read from what the agent actually did.</p>
+        <p class="flow__d">From a log import or a sidecar proxy. Permissions, audit trail, data egress and injection resistance, read from what the agent did.</p>
       </div>
       <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="flow__node">
@@ -290,19 +290,67 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
     <div class="grid" style="gap:14px">
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s2" d="M16.5 14.5 H76.5 M16.5 22.5 H62.5 M16.5 30.5 H72.5 M16.5 38.5 H56.5"/>
+          <rect class="gy-f" x="10" y="13" width="3" height="3"/>
+          <rect class="gy-f" x="10" y="21" width="3" height="3"/>
+          <rect class="gy-f" x="10" y="29" width="3" height="3"/>
+          <rect class="gy-f" x="10" y="37" width="3" height="3"/>
+          <path class="gy-s" d="M84.5 26.5 H166.5 V36.5"/>
+          <path class="gy-ps" d="M162.5 33.5 L166.5 37.5 L170.5 33.5"/>
+          <path class="gy-s" d="M130.5 28.5 V52.5 H202.5 V28.5"/>
+          <path class="gy-s2" d="M138.5 46.5 H194.5"/>
+        </svg></div>
         <p class="card__k">Onramp A · fastest</p>
         <h3>Import your logs</h3>
         <p>Bring observability exports from LiteLLM, Helicone or Portkey. We normalize tool calls, scopes and traffic. No code change.</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="16.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="64.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="112.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="160.5" y="22.5" width="28" height="18"/>
+          <path class="gy-s2" d="M21.5 28.5 H39.5 M21.5 34.5 H33.5 M69.5 28.5 H87.5 M69.5 34.5 H81.5 M117.5 28.5 H135.5 M117.5 34.5 H129.5 M165.5 28.5 H183.5 M165.5 34.5 H177.5"/>
+          <path class="gy-s" d="M44.5 31.5 H64.5 M92.5 31.5 H112.5 M140.5 31.5 H160.5 M188.5 31.5 H202.5"/>
+          <rect class="gy-s" x="52.5" y="29.5" width="4" height="4"/>
+          <rect class="gy-s" x="100.5" y="29.5" width="4" height="4"/>
+          <rect class="gy-s" x="148.5" y="29.5" width="4" height="4"/>
+          <path class="gy-s" d="M198.5 27.5 L202.5 31.5 L198.5 35.5"/>
+          <rect class="gy-p" x="204.5" y="29.5" width="4" height="4"/>
+        </svg></div>
         <p class="card__k">Onramp B · live</p>
         <h3>Run a sidecar proxy</h3>
         <p>Route the agent through a sidecar or MCP proxy for an append-only capture of exactly what it does, with tamper-evident hashing.</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s" d="M14.5 32.5 H205.5"/>
+          <g class="gy-dt">
+            <rect x="16" y="22" width="2" height="2"/><rect x="16" y="28" width="2" height="2"/><rect x="16" y="36" width="2" height="2"/><rect x="16" y="42" width="2" height="2"/>
+            <rect x="22" y="24" width="2" height="2"/><rect x="22" y="30" width="2" height="2"/><rect x="22" y="38" width="2" height="2"/>
+            <rect x="28" y="22" width="2" height="2"/><rect x="28" y="28" width="2" height="2"/><rect x="28" y="34" width="2" height="2"/><rect x="28" y="42" width="2" height="2"/>
+            <rect x="34" y="26" width="2" height="2"/><rect x="34" y="36" width="2" height="2"/>
+            <rect x="40" y="22" width="2" height="2"/><rect x="40" y="30" width="2" height="2"/><rect x="40" y="40" width="2" height="2"/>
+            <rect x="46" y="28" width="2" height="2"/><rect x="46" y="36" width="2" height="2"/>
+            <rect x="52" y="22" width="2" height="2"/><rect x="52" y="34" width="2" height="2"/>
+            <rect x="58" y="26" width="2" height="2"/><rect x="58" y="40" width="2" height="2"/>
+            <rect x="64" y="30" width="2" height="2"/>
+            <rect x="70" y="24" width="2" height="2"/><rect x="70" y="36" width="2" height="2"/>
+            <rect x="78" y="30" width="2" height="2"/>
+            <rect x="86" y="22" width="2" height="2"/><rect x="86" y="38" width="2" height="2"/>
+            <rect x="96" y="28" width="2" height="2"/>
+            <rect x="106" y="34" width="2" height="2"/>
+            <rect x="118" y="24" width="2" height="2"/>
+            <rect x="132" y="36" width="2" height="2"/>
+            <rect x="148" y="28" width="2" height="2"/>
+            <rect x="166" y="38" width="2" height="2"/>
+            <rect x="186" y="26" width="2" height="2"/>
+          </g>
+        </svg></div>
         <p class="card__k">What we look at</p>
         <h3>Permissions · trail · egress · injection</h3>
-        <p>Every scope held versus the scopes actually used, audit-trail completeness, where data can leave, and a red-team pass for prompt injection.</p>
+        <p>Every scope held versus the scopes used, audit-trail completeness, where data can leave, and a red-team pass for prompt injection.</p>
       </div>
     </div>
     </div>
@@ -369,7 +417,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="card">
         <p class="card__k">Live Trust link</p>
         <h3>One link your buyer re-checks</h3>
-        <p>It always resolves to the current signed report. No new email, no waiting on you, no human in the loop.</p>
+        <p>It always resolves to the current signed report, so a buyer re-checks on their own schedule without asking you for a fresh copy.</p>
       </div>
     </div>
     <p class="hero__claim" style="margin-top:var(--s6)">

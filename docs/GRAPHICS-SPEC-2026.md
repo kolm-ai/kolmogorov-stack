@@ -208,3 +208,88 @@ disciplined, the ENVIRONMENT is visibly lit. Both halves are binding.
   e.g. `115` or `48h`): scroll-triggered count-up. NEVER on evidence-locked strings,
   never on non-numeric metrics.
 - Pointer-tracked card light and button sheen are automatic (no markup changes).
+
+## GLYPH SYSTEM v3.2 (binding, 2026-06-11) - engraved card glyphs
+
+Cards stopped being typography-only boxes. Every important .card/.step may open
+with ONE engraved micro-schematic in a reserved art slot. The register is
+"instrument faceplate engraving / patent drawing": hairline stroke geometry that
+EXPLAINS the card's concept abstractly. CSS lives in `public/kolm-2026.css`
+under "GLYPH SYSTEM v3.2" (do not edit; place markup only).
+
+### Slot markup (exact pattern, first child of the card)
+
+```html
+<div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <!-- glyph geometry -->
+</svg></div>
+```
+
+- The slot is a fixed 64px tall block (margin 2px 0 18px) so CLS = 0. The CSS
+  draws corner register ticks on ::before/::after - never add your own corners.
+- viewBox is ALWAYS "0 0 220 64", preserveAspectRatio ALWAYS "xMidYMid meet".
+- aria-hidden="true" on the wrapper; the card heading carries the meaning.
+
+### Ink tiers (class vocabulary)
+
+- `gy-s`  primary hairline stroke (currentColor, 1px) - the subject
+- `gy-s2` secondary hairline (etched fainter, 0.17) - context/ground
+- `gy-f`  faint fill block (0.10) - inert mass
+- `gy-r`  raised fill block (0.34) - emphasized mass (e.g. redaction bars)
+- `gy-dt` dot fill at currentColor - Bayer/dither dots
+- `gy-p`  THE phosphor element (var(--accent) fill) - at most ONE per glyph
+- `gy-ps` phosphor stroke path 1.2px (drawable; hover/draw is CSS-only,
+  reduced-motion + fine-pointer gated) - counts as the one phosphor element
+
+### Laws (binding)
+
+1. Stroke-only on transparent ground; geometry snaps to a 2px grid with .5
+   offsets so 1px hairlines render crisp.
+2. Exactly ONE phosphor element per glyph (one `gy-p` OR one `gy-ps`, never
+   both). The fallback texture G18 carries zero phosphor.
+3. NO text inside glyphs, ever. Numbers are expressed as tick/segment counts,
+   and counts must NOT mirror evidence-locked numerals (the x04 gate counts
+   exact string appearances in HTML including inline SVG; geometry is safe,
+   strings are not).
+4. No gradients, no filters, no external refs. `<pattern>` is allowed for
+   hatch/dither shading (see gyHatch in G06); keep pattern ids gy-prefixed
+   and unique per page.
+5. Squared geometry only - miter joins, square caps, no rounded rects.
+6. One glyph per card, first child, max ~6 glyph cards per viewport-region.
+   Legal pages get NO glyphs. Do not add glyphs to .pc severity cards.
+7. Glyphs must explain the concept (a reviewer should guess the card topic
+   from the engraving alone at 220px wide). If a card has no explainable
+   mechanism, use the G18 fallback texture or leave the slot out entirely.
+
+### Library (G01-G18) - geometry of record
+
+The PLACED glyph geometry of record lives verbatim in the reference pages:
+
+- public/checks.html - G01 least-privilege key/tool-grid (Pillar 01),
+  G02 hash chain (Pillar 02), G03 egress boundary + redaction (Pillar 03),
+  G04 deflected probe (Pillar 04), G06 scope contract w/ gyHatch (Assessed),
+  G07 probe battery + result column (Tested and reported).
+- public/index.html - G09 log import (step 01), G10 seal press (step 02),
+  G11 offline verify check (step 03, uses gy-ps), G13 tamper spike on ruler
+  scale (Tier 1), G05 issuer keyring/provenance chain (Tier 2),
+  G12 severed server / WebCrypto check (Offline, uses gy-ps).
+
+Library-only glyphs (authored, not yet placed - use when their concept
+appears on a page):
+
+- G08 retrieval integrity (ASR-7): three source sheets linked into a store,
+  one phosphor integrity link tick.
+- G14 delegation attenuation (ASR-8): root agent bus narrowing through a
+  gate into two sub-agent buses; phosphor on the attenuation gate.
+- G15 append-only ledger: fixed entry rows left, the newest entry being
+  struck at right (phosphor), no erase path back.
+- G16 crosswalk: left tick column fanning across hairlines to a right tick
+  column; one phosphor mapping line.
+- G17 flat line (pricing/constant): ruled plate with one unwavering
+  horizontal trace, phosphor endpoint.
+- G18 fallback texture: Bayer-dither dot band decaying left to right over a
+  single hairline; ZERO phosphor (safe anywhere).
+
+Copy geometry from the reference pages or from the glyph registry returned by
+the v3.2 build (StructuredOutput of the glyph agent). Never freehand new tiers
+or stroke widths; new glyphs reuse the gy-* vocabulary above.

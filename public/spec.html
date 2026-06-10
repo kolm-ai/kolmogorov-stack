@@ -280,21 +280,43 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <span class="mono">alg</span>, the PEM <span class="mono">public_key</span>, its
         <span class="mono">key_fingerprint</span>, the <span class="mono">signature</span>,
         and <span class="mono">signed_at</span>. Verification then answers three separate
-        questions, and the format keeps them separate on purpose.
+        questions, and the format keeps them separate.
       </p>
     </div>
     <div class="grid grid--3">
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="16.5" y="26.5" width="152" height="16"/>
+          <path class="gy-s2" d="M24.5 30.5 V38.5 M32.5 30.5 V38.5 M40.5 30.5 V38.5 M48.5 30.5 V38.5 M56.5 30.5 V38.5 M64.5 30.5 V38.5 M72.5 30.5 V38.5 M80.5 30.5 V38.5 M96.5 30.5 V38.5 M104.5 30.5 V38.5 M112.5 30.5 V38.5 M120.5 30.5 V38.5 M128.5 30.5 V38.5 M136.5 30.5 V38.5 M144.5 30.5 V38.5 M152.5 30.5 V38.5 M160.5 30.5 V38.5"/>
+          <rect class="gy-r" x="86" y="29.5" width="5" height="10"/>
+          <path class="gy-s" d="M88.5 26.5 L92.5 18.5 L86.5 14.5 L90.5 6.5"/>
+          <path class="gy-s" d="M168.5 34.5 H176.5"/>
+          <rect class="gy-s" x="176.5" y="22.5" width="24" height="24"/>
+          <rect class="gy-p" x="184.5" y="30.5" width="8" height="8"/>
+        </svg></div>
         <p class="card__k">Tier 1 &middot; integrity</p>
         <h3>Is this byte-for-byte what was signed?</h3>
         <p>Rebuild the canonical payload from the envelope itself, verify the Ed25519 signature with the embedded public key, and confirm <span class="mono">signed_at</span> equals the signed <span class="mono">generated_at</span>. Fully offline. A single altered byte fails it.</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="22.5" width="18" height="18"/>
+          <rect class="gy-p" x="20.5" y="28.5" width="6" height="6"/>
+          <path class="gy-s2" d="M32.5 31.5 H88.5 M60.5 28.5 V34.5"/>
+          <rect class="gy-s" x="88.5" y="25.5" width="12" height="12"/>
+          <path class="gy-s2" d="M100.5 31.5 H160.5 M130.5 28.5 V34.5"/>
+          <path class="gy-s" d="M160.5 14.5 H182.5 L190.5 22.5 V49.5 H160.5 Z M182.5 14.5 V22.5 H190.5"/>
+          <path class="gy-s2" d="M166.5 30.5 H184.5 M166.5 36.5 H180.5 M166.5 42.5 H184.5"/>
+        </svg></div>
         <p class="card__k">Tier 2 &middot; issuer provenance</p>
         <h3>Is the embedded key a kolm key?</h3>
         <p>Tier 1 alone would accept a forgery re-signed with the attacker's own key. Tier 2 checks the key against the published keyring (<a href="/keys/kolm-issuers.json" style="color:var(--ok)">kolm-issuers.json</a>) or the live <span class="mono">GET /v1/audit/issuer-key</span>. Key lifecycle is public: <span class="mono">live</span>, <span class="mono">rotated</span> (history stays verifiable), or <span class="mono">revoked</span>. A revoked key forces <span class="mono">trusted:false</span>.</p>
       </div>
       <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s2" d="M14.5 32.5 H206.5"/>
+          <path class="gy-dt" d="M16 21h2v2h-2z M24 21h2v2h-2z M32 21h2v2h-2z M40 21h2v2h-2z M48 21h2v2h-2z M56 21h2v2h-2z M64 21h2v2h-2z M72 21h2v2h-2z M80 21h2v2h-2z M88 21h2v2h-2z M96 21h2v2h-2z M112 21h2v2h-2z M128 21h2v2h-2z M144 21h2v2h-2z M160 21h2v2h-2z M176 21h2v2h-2z M16 27h2v2h-2z M24 27h2v2h-2z M32 27h2v2h-2z M40 27h2v2h-2z M48 27h2v2h-2z M56 27h2v2h-2z M72 27h2v2h-2z M88 27h2v2h-2z M104 27h2v2h-2z M120 27h2v2h-2z M152 27h2v2h-2z M16 33h2v2h-2z M24 33h2v2h-2z M32 33h2v2h-2z M40 33h2v2h-2z M48 33h2v2h-2z M56 33h2v2h-2z M64 33h2v2h-2z M72 33h2v2h-2z M80 33h2v2h-2z M96 33h2v2h-2z M112 33h2v2h-2z M128 33h2v2h-2z M144 33h2v2h-2z M160 33h2v2h-2z M192 33h2v2h-2z M16 39h2v2h-2z M24 39h2v2h-2z M32 39h2v2h-2z M40 39h2v2h-2z M56 39h2v2h-2z M72 39h2v2h-2z M88 39h2v2h-2z M104 39h2v2h-2z M120 39h2v2h-2z M136 39h2v2h-2z"/>
+        </svg></div>
         <p class="card__k">Evidence tiers &middot; A / B / C</p>
         <h3>How strong was the input evidence?</h3>
         <p>A separate axis from authenticity, graded inside the signed payload. <b>A</b>: events captured by the kolm gateway at runtime. <b>B</b>: vendor-supplied logs with a verified hash chain. <b>C</b>: vendor logs accepted as provided. A report built from as-provided logs cannot be upgraded to gateway-captured without breaking the signature.</p>
@@ -363,7 +385,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="card">
         <p class="card__k">timestamp_evidence</p>
         <h3>RFC 3161 trusted timestamp</h3>
-        <p>An RFC 3161 token over the signed report digest (the <span class="mono">message_imprint</span>), proving the report existed no later than the time authority's clock, independent of kolm's. Status <span class="mono">"timestamped"</span> carries <span class="mono">token_b64</span> and the TSA URL; status <span class="mono">"offline"</span> means this additive evidence is simply absent. Verifiers report it; the verdict stays with the signature.</p>
+        <p>An RFC 3161 token over the signed report digest (the <span class="mono">message_imprint</span>), proving the report existed no later than the time authority's clock, independent of kolm's. Status <span class="mono">"timestamped"</span> carries <span class="mono">token_b64</span> and the TSA URL; status <span class="mono">"offline"</span> means this additive evidence is absent. Verifiers report it; the verdict stays with the signature.</p>
       </div>
       <div class="card">
         <p class="card__k">co_signatures</p>
@@ -394,6 +416,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         Use whichever fits the environment; they agree by construction and by test.
       </p>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="grid grid--3">
       <div class="card">
         <p class="card__k">Browser</p>

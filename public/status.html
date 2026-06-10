@@ -10,14 +10,14 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>System Status · kolm.ai</title>
-<meta name="description" content="Current health of the kolm.ai audit infrastructure: public verifier, API, transparency log, audit pipeline, and website. Incidents posted here and to dev@kolm.ai.">
+<meta name="description" content="Current health of the kolm.ai audit infrastructure: public verifier, API, transparency log, audit pipeline, and website. Incidents are posted here with impact and resolution.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="System Status · kolm.ai">
-<meta property="og:description" content="Current health of the kolm.ai audit infrastructure. Incidents are posted here and notified to dev@kolm.ai.">
+<meta property="og:description" content="Current health of the kolm.ai audit infrastructure. Incidents are posted here with impact and resolution.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/status">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -45,7 +45,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/status",
-  "description": "Current health of the kolm.ai audit infrastructure: public verifier, API, transparency log, audit pipeline, and website. Incidents posted here and to dev@kolm.ai.",
+  "description": "Current health of the kolm.ai audit infrastructure: public verifier, API, transparency log, audit pipeline, and website. Incidents are posted here with impact and resolution.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -98,7 +98,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <div class="wrap">
     <p class="eyebrow">Infrastructure</p>
     <h1>Audit infrastructure status. <span class="go">Evidence stays verifiable.</span></h1>
-    <p class="lede">The live health of every public surface behind the kolm.ai evidence pipeline. Incidents are posted here and sent directly to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. Evidence reports already in your hands are not affected by infrastructure events; they are offline-verifiable against our public Ed25519 key with no dependency on our servers.</p>
+    <p class="lede">The live health of every public surface behind the kolm.ai evidence pipeline. Incidents are posted here as dated, plain-language entries; questions go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. Evidence reports already in your hands are not affected by infrastructure events; they verify offline against our public Ed25519 key with no dependency on our servers.</p>
     <div class="hero__proof" aria-label="Status at a glance">
       <span><i class="dot" aria-hidden="true"></i>All systems operational</span>
       <span><i class="dot" aria-hidden="true"></i>No incidents active</span>
@@ -127,14 +127,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </section>
 
 <!-- component table -->
-<section class="section sect--dense reveal">
+<section class="section reveal">
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">02 / Components</span></div>
       <div class="sect-rail__body">
     <div class="section__head">
       <h2>What we monitor.</h2>
-      <p style="max-width:60ch;color:var(--ink-3)">Each component is checked continuously. Status shown here is updated on a rolling basis. When a component degrades or goes down, an incident is opened and posted to this page; a notification is sent to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+      <p style="max-width:60ch;color:var(--ink-3)">Each component is checked continuously and the status here updates on a rolling basis. When a component degrades or goes down, an incident is opened and posted to this page; for anything urgent, write to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
     </div>
     <div class="tbl-wrap" tabindex="0" role="region" aria-label="Monitored components">
       <table class="tbl">
@@ -180,7 +180,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </section>
 
 <!-- incident history -->
-<section class="section reveal">
+<section class="section sect--dense reveal">
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">03 / Incidents</span></div>
@@ -188,7 +188,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head">
       <h2>No incidents on record.</h2>
     </div>
-    <p style="color:var(--ink-3)">When an incident occurs, a dated entry is posted here with a plain-language description of the affected component, the impact, and the resolution. Notifications go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. There are no incidents to report at this time.</p>
+    <p style="color:var(--ink-3)">When an incident occurs, a dated entry is posted here with a plain-language description of the affected component, the impact, and the resolution. Questions go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. There are no incidents to report at this time.</p>
       </div>
     </div>
   </div>
@@ -204,7 +204,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <div class="split" style="align-items:flex-start">
     <div>
       <h2>Evidence reports survive any outage.</h2>
-      <p class="lede" style="margin-bottom:16px">Every evidence report issued by kolm is signed with an Ed25519 key whose public counterpart is published and pinned. Verification uses in-browser WebCrypto: no network call to kolm servers, no account, no trust in our uptime. A buyer's security team can confirm the signature, the scope, and the timestamp of any report even when this status page is unreachable.</p>
+      <p class="lede" style="margin-bottom:16px">Every evidence report issued by kolm is signed with an Ed25519 key whose public counterpart is published and pinned. Verification runs on in-browser WebCrypto against that key, so our uptime is never in the trust path. A buyer's security team can confirm the signature, the scope, and the timestamp of any report even when this status page is unreachable.</p>
       <div class="hero__cta" style="margin-top:8px">
         <a class="btn btn--primary" href="/verify">Verify a report</a>
         <a class="btn btn--ghost" href="/trust">Trust center</a>
