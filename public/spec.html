@@ -162,30 +162,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         Field names below are the literal keys in the JSON.
       </p>
     </div>
-
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="tbl-wrap" tabindex="0" role="region" aria-label="Signed envelope fields"><table class="tbl">
       <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
       <tbody>
-        <tr><td class="mono">schema</td><td>Fixed type marker, <span class="mono">"kolm-audit-report-1"</span>. Verifiers reject any other value before checking anything else.</td></tr>
-        <tr><td class="mono">report_version</td><td>The envelope shape that produced the report. Currently <span class="mono">"asr-report/0.1"</span>.</td></tr>
-        <tr><td class="mono">spec_version</td><td>The audit spec the underlying run followed. Currently <span class="mono">"asr-audit/0.1"</span>; null on inputs that predate it.</td></tr>
-        <tr><td class="mono">report_id</td><td>Stable identifier with an <span class="mono">asrr_</span> prefix, time-prefixed so ids sort roughly by issue time.</td></tr>
-        <tr><td class="mono">generated_at</td><td>ISO 8601 time the audit ran. The signature block's <span class="mono">signed_at</span> must equal it; verifiers fail a mismatch as a post-signing timestamp edit.</td></tr>
-        <tr><td class="mono">tier</td><td><span class="mono">"scan"</span> (the free Scan) or <span class="mono">"report"</span> (the paid Signed Readiness Report). Inside the signed bytes.</td></tr>
-        <tr><td class="mono">watermark</td><td>Boolean, true on the free Scan. Signed, so the watermark cannot be stripped without breaking the signature.</td></tr>
-        <tr><td class="mono">evidence_tier</td><td>Evidence-quality grade <span class="mono">{ grade: "A"|"B"|"C", method, basis[] }</span>, signed alongside the findings. See section 04.</td></tr>
-        <tr><td class="mono">subject</td><td>What was assessed: <span class="mono">{ name, source, records, events }</span>.</td></tr>
-        <tr><td class="mono">summary</td><td>The graduated readiness rollup: <span class="mono">readiness_pct</span>, findings by severity, <span class="mono">tamper_evident</span>, assessed controls, not-assessed controls with reasons, blocking count.</td></tr>
-        <tr><td class="mono">findings</td><td>Framework-mapped findings: severity, pillar, title, detail, ASR control, framework references, opaque evidence ids (never raw log bodies).</td></tr>
-        <tr><td class="mono">frameworks</td><td>Per-framework coverage rollup: controls touched, finding counts, worst severity.</td></tr>
-        <tr><td class="mono">remediation</td><td>Prioritized fix roadmap derived from the findings, worst first, each item carrying its framework references.</td></tr>
-        <tr><td class="mono">caveats</td><td>What the report does and does not claim, stated in plain terms. Findings map to frameworks a reviewer cites; the report is not a certification.</td></tr>
-        <tr><td class="mono">asr_checklist</td><td>The ASR control catalog the run assessed against (id, name, required evidence).</td></tr>
-        <tr><td class="mono">evidence_digest</td><td><span class="mono">{ alg: "sha256", value, event_count }</span>: binds the report to the exact input events analyzed, without carrying their possibly sensitive bodies.</td></tr>
-        <tr><td class="mono">passport</td><td>The agent identity passport: who acted, on which models and vendor surface, through what delegation graph, over which retrieval sources.</td></tr>
-        <tr><td class="mono">red_team</td><td>The injection-resistance battery: score, per-status counts, and the probe table with opaque evidence ids.</td></tr>
-        <tr><td class="mono">contact</td><td>The single contact surface: <span class="mono">dev@kolm.ai</span>.</td></tr>
-        <tr><td class="mono">verify_url</td><td>Where any holder can verify the report; defaults to <span class="mono">https://kolm.ai/verify</span>.</td></tr>
+        <tr class="trow"><td class="mono">schema</td><td>Fixed type marker, <span class="mono">"kolm-audit-report-1"</span>. Verifiers reject any other value before checking anything else.</td></tr>
+        <tr class="trow"><td class="mono">report_version</td><td>The envelope shape that produced the report. Currently <span class="mono">"asr-report/0.1"</span>.</td></tr>
+        <tr class="trow"><td class="mono">spec_version</td><td>The audit spec the underlying run followed. Currently <span class="mono">"asr-audit/0.1"</span>; null on inputs that predate it.</td></tr>
+        <tr class="trow"><td class="mono">report_id</td><td>Stable identifier with an <span class="mono">asrr_</span> prefix, time-prefixed so ids sort roughly by issue time.</td></tr>
+        <tr class="trow"><td class="mono">generated_at</td><td>ISO 8601 time the audit ran. The signature block's <span class="mono">signed_at</span> must equal it; verifiers fail a mismatch as a post-signing timestamp edit.</td></tr>
+        <tr class="trow"><td class="mono">tier</td><td><span class="mono">"scan"</span> (the free Scan) or <span class="mono">"report"</span> (the paid Signed Readiness Report). Inside the signed bytes.</td></tr>
+        <tr class="trow"><td class="mono">watermark</td><td>Boolean, true on the free Scan. Signed, so the watermark cannot be stripped without breaking the signature.</td></tr>
+        <tr class="trow"><td class="mono">evidence_tier</td><td>Evidence-quality grade <span class="mono">{ grade: "A"|"B"|"C", method, basis[] }</span>, signed alongside the findings. See section 04.</td></tr>
+        <tr class="trow"><td class="mono">subject</td><td>What was assessed: <span class="mono">{ name, source, records, events }</span>.</td></tr>
+        <tr class="trow"><td class="mono">summary</td><td>The graduated readiness rollup: <span class="mono">readiness_pct</span>, findings by severity, <span class="mono">tamper_evident</span>, assessed controls, not-assessed controls with reasons, blocking count.</td></tr>
+        <tr class="trow"><td class="mono">findings</td><td>Framework-mapped findings: severity, pillar, title, detail, ASR control, framework references, opaque evidence ids (never raw log bodies).</td></tr>
+        <tr class="trow"><td class="mono">frameworks</td><td>Per-framework coverage rollup: controls touched, finding counts, worst severity.</td></tr>
+        <tr class="trow"><td class="mono">remediation</td><td>Prioritized fix roadmap derived from the findings, worst first, each item carrying its framework references.</td></tr>
+        <tr class="trow"><td class="mono">caveats</td><td>What the report does and does not claim, stated in plain terms. Findings map to frameworks a reviewer cites; the report is not a certification.</td></tr>
+        <tr class="trow"><td class="mono">asr_checklist</td><td>The ASR control catalog the run assessed against (id, name, required evidence).</td></tr>
+        <tr class="trow"><td class="mono">evidence_digest</td><td><span class="mono">{ alg: "sha256", value, event_count }</span>: binds the report to the exact input events analyzed, without carrying their possibly sensitive bodies.</td></tr>
+        <tr class="trow"><td class="mono">passport</td><td>The agent identity passport: who acted, on which models and vendor surface, through what delegation graph, over which retrieval sources.</td></tr>
+        <tr class="trow"><td class="mono">red_team</td><td>The injection-resistance battery: score, per-status counts, and the probe table with opaque evidence ids.</td></tr>
+        <tr class="trow"><td class="mono">contact</td><td>The single contact surface: <span class="mono">dev@kolm.ai</span>.</td></tr>
+        <tr class="trow"><td class="mono">verify_url</td><td>Where any holder can verify the report; defaults to <span class="mono">https://kolm.ai/verify</span>.</td></tr>
       </tbody>
     </table></div>
 
@@ -266,6 +266,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 5. SIGNATURE + TIERS (dark) -->
 <section class="section section--ink reveal" id="signature">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the signature chapter sits in quantized light -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">04 / Signature and tiers</span></div>
@@ -470,6 +472,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 9. FINAL CTA -->
 <section class="section reveal cta-final">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
   <div class="wrap">
     <h2>Read the bytes, not the brochure.</h2>
     <p class="lede">Verify a report in your own browser, or read what the format defends against and where it stops.</p>

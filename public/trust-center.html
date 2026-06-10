@@ -63,6 +63,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .auth-box input{width:100%;padding:11px 13px;border:1px solid var(--line-2);border-radius:var(--r-md);font-family:var(--mono);font-size:14px;margin:16px 0 12px;background:var(--paper-sink);color:var(--ink)}
 .auth-box input::placeholder{color:var(--ink-3)}
 .auth-box input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent-edge)}
+/* #mechanics hosts a .field--band; a non-ink host needs its own stacking
+   context or the z:-3 canvas paints behind the section background */
+#mechanics{isolation:isolate}
 </style>
 </head>
 <body class="tc">
@@ -143,6 +146,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <!-- ============================================================ 3. WHAT A TRUST LINK IS -->
 <section class="section section--band reveal" id="mechanics">
+  <!-- band volume of the Evidence Field: quantized light over the mechanics chapter -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">02 / Mechanics</span></div>
@@ -150,6 +155,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head">
       <h2>What a Trust Link is, and what we count.</h2>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <figure class="diag reveal" role="img" aria-label="Verification loop: the buyer's browser fetches the report and the public keyring, verifies with WebCrypto, and reaches VALID or VOID with no kolm server in the trust path">
     <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <rect class="dg-box" x="8" y="28" width="160" height="64" rx="9"/>

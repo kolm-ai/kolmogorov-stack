@@ -3,16 +3,18 @@
 // dot is either on or off, nothing in between - continuous claims broken into
 // discrete verifiable units, the brand thesis as physics. Raw WebGL1, zero
 // dependencies, fail-open: with no JS / no WebGL the CSS grid + radial layers
-// underneath ARE the hero. Mount: <div class="field"><canvas></canvas></div>
-// on index (full 0.34), /verify (0.20), /404, and all product/marketing page
-// heroes at data-intensity="0.18" (see UNICORN-DESIGN-2026.md section 8).
-// Legal/ops surfaces stay still. DPR cap 1.5.
+// underneath ARE the hero. Mounts: EVERY <div class="field"><canvas></canvas></div>
+// on the page - the hero ceiling volume plus .field--band section volumes -
+// capped at the first 3 (the per-page WebGL context budget). Each mount has
+// its own context, sizing, intersection pause and pointer tracking; a single
+// hero mount behaves exactly as before. data-intensity caps alpha (0.34 hero,
+// 0.10-0.14 bands). See UNICORN-DESIGN-2026.md section 8. DPR cap 1.5.
 (function () {
   'use strict';
-  try {
-    var host = document.querySelector('.field');
-    var canvas = host && host.querySelector('canvas');
-    if (!canvas || !window.WebGLRenderingContext) return;
+
+  function initField(host) {
+    var canvas = host.querySelector('canvas');
+    if (!canvas) return;
     var gl = canvas.getContext('webgl', { alpha: true, antialias: false, depth: false, stencil: false });
     if (!gl) return;
     var FS = [
@@ -86,6 +88,7 @@
     var fine = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
     var mx = 0.5, my = 0.3, tx = 0.5, ty = 0.3, ready = false;
     if (fine) document.addEventListener('pointermove', function (e) {
+      if (!inView) return; // no rect reads for paused offscreen mounts
       var r = canvas.getBoundingClientRect();
       if (r.width && r.height) { tx = (e.clientX - r.left) / r.width; ty = (e.clientY - r.top) / r.height; }
     }, { passive: true });
@@ -109,12 +112,12 @@
       raf = requestAnimationFrame(loop);
     }
     var reduceMq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
-    var inView = true, visible = !document.hidden;
+    var inView = true, visible = !document.hidden, lost = false;
     function settle() {
-      var run = inView && visible && !reduceMq.matches;
+      var run = !lost && inView && visible && !reduceMq.matches;
       if (run && !raf) raf = requestAnimationFrame(loop);
       if (!run && raf) { cancelAnimationFrame(raf); raf = 0; }
-      if (!run && reduceMq.matches && inView) draw(7.0); // exactly one static frame
+      if (!run && !lost && reduceMq.matches && inView) draw(7.0); // exactly one static frame
     }
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (es) { inView = es[0].isIntersecting; settle(); }).observe(host);
@@ -124,9 +127,19 @@
     window.addEventListener('resize', function () { if (reduceMq.matches && inView) draw(7.0); }, { passive: true });
     canvas.addEventListener('webglcontextlost', function (e) {
       e.preventDefault();
+      lost = true; // stays dormant: settle() may never restart a dead context
       if (raf) { cancelAnimationFrame(raf); raf = 0; }
       ready = false; host.classList.remove('ready'); // canvas fades back to 0
     });
     settle();
+  }
+
+  try {
+    if (!window.WebGLRenderingContext) return;
+    var hosts = document.querySelectorAll('.field');
+    var n = Math.min(hosts.length, 3); // WebGL budget: first 3 mounts only
+    for (var i = 0; i < n; i++) {
+      try { initField(hosts[i]); } catch (e) { /* fail open per mount */ }
+    }
   } catch (e) { /* fail open: the CSS layers underneath are the fallback */ }
 })();

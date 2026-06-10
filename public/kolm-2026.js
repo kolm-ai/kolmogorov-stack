@@ -19,7 +19,9 @@
     // off this to tell "observer ran" from "script never loaded" (so it can fail
     // open without falsely disabling the animation when reveals are below the fold).
     document.documentElement.setAttribute('data-reveal-armed', '1');
-    var els = document.querySelectorAll('.reveal');
+    // [data-art-reveal] joins the observed set (ART DEPTH v3.1 seam devices):
+    // purely additive - same .in class, same fail-open contract as .reveal.
+    var els = document.querySelectorAll('.reveal, [data-art-reveal]');
     if (!els.length) return;
     var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce || !('IntersectionObserver' in window)) {

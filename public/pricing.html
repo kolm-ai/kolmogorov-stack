@@ -219,6 +219,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Start free. Sign when the deal needs it.</h2>
       <p class="lede">Four plans you can buy without talking to anyone. The free scan needs&nbsp;no&nbsp;card.</p>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="tiers">
       <div class="tier">
         <p class="tier__name">Scan</p>
@@ -342,6 +343,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 4. REVIEWED ATTESTATION (proof panel) -->
 <section class="section section--ink reveal" id="reviewed" style="padding-block:112px">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the deal-closer chapter is lit, not flat -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">03 / The deal-closer</span></div>
@@ -393,19 +396,20 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head">
       <h2>What is in each plan.</h2>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="tbl-wrap" tabindex="0" role="region" aria-label="Plan comparison"><table class="tbl">
       <thead><tr><th scope="col">Capability</th><th scope="col">Scan</th><th scope="col">Report</th><th scope="col">Starter</th><th scope="col">Growth</th><th scope="col">Reviewed</th></tr></thead>
       <tbody>
-        <tr><th scope="row"><b>Least-privilege permission audit</b></th><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr><th scope="row"><b>Audit-trail &amp; retention review</b></th><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr><th scope="row"><b>Data-egress &amp; redaction audit</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr><th scope="row"><b>Prompt-injection battery</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr><th scope="row"><b>Framework control-mapping</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr><th scope="row"><b>Ed25519-signed, offline-verifiable</b></th><td class="mapped">watermarked</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr><th scope="row"><b>Re-attestation cadence</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">weekly</td><td class="mapped">per deploy</td><td class="mapped">per deploy</td></tr>
-        <tr><th scope="row"><b>Live Trust link</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr><th scope="row"><b>Named co-signer</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td></tr>
-        <tr><th scope="row"><b>Price</b></th><td class="mapped">Free</td><td class="mapped">$750</td><td class="mapped">$299/mo</td><td class="mapped">$999/mo</td><td class="mapped">$25,000</td></tr>
+        <tr class="trow"><th scope="row"><b>Least-privilege permission audit</b></th><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
+        <tr class="trow"><th scope="row"><b>Audit-trail &amp; retention review</b></th><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
+        <tr class="trow"><th scope="row"><b>Data-egress &amp; redaction audit</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
+        <tr class="trow"><th scope="row"><b>Prompt-injection battery</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
+        <tr class="trow"><th scope="row"><b>Framework control-mapping</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
+        <tr class="trow"><th scope="row"><b>Ed25519-signed, offline-verifiable</b></th><td class="mapped">watermarked</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
+        <tr class="trow"><th scope="row"><b>Re-attestation cadence</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">weekly</td><td class="mapped">per deploy</td><td class="mapped">per deploy</td></tr>
+        <tr class="trow"><th scope="row"><b>Live Trust link</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
+        <tr class="trow"><th scope="row"><b>Named co-signer</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td></tr>
+        <tr class="trow"><th scope="row"><b>Price</b></th><td class="mapped">Free</td><td class="mapped">$750</td><td class="mapped">$299/mo</td><td class="mapped">$999/mo</td><td class="mapped">$25,000</td></tr>
       </tbody>
     </table></div>
     <p class="hero__claim" style="margin-top:var(--s4)">The free scan is watermarked and scoped to what you upload. Every paid plan ships the full Ed25519-signed report your buyer verifies offline.</p>
@@ -440,6 +444,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 7. FINAL CTA -->
 <section class="section reveal cta-final">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
   <div class="wrap">
     <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Start at zero. Sign at $750.</h2>

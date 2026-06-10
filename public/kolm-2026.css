@@ -1245,6 +1245,151 @@ em { font-style: italic; font-weight: 400; }
 }
 @keyframes ghostdrift { from { transform: translateY(24px); } to { transform: none; } }
 
+/* ============================================================
+   ART DEPTH v3.1 - the sectional art-device vocabulary + THE
+   ARTIFACT CINEMA. One idea, propagated below the fold: light
+   stays quantized everywhere it enters a section. Devices are
+   markup-only for page agents; the JS drivers live in
+   kolm-cinema.js (cinema), kolm-field.js (multi-mount field)
+   and the reveal observer in kolm-2026.js ([data-art-reveal]).
+   Every motion is reduced-motion gated, fail-open without JS,
+   and CLS-safe: opacity / transform / clip-path / filter only.
+   ============================================================ */
+
+/* ---- D1. .field--band - a low band volume of the Evidence Field for
+   mid-page chapters (.section--ink, .section--lit) and .cta-final. The
+   light anchors to the TOP of the band, tighter than the hero ceiling.
+   Mount as a child of the band section, data-intensity 0.10-0.14. ---- */
+.field--band {
+  -webkit-mask-image: radial-gradient(120% 70% at 50% 0%, #000 24%, transparent 60%);
+          mask-image: radial-gradient(120% 70% at 50% 0%, #000 24%, transparent 60%);
+}
+/* band hosts must be stacking contexts or the z:-3 canvas paints behind the
+   section's own background; isolation does it with zero z-order side effects */
+.section--ink, .section--lit { isolation: isolate; }
+
+/* ---- D2. .seam - the quantized divider: a thin band of dithered dot rows,
+   density falling off downward. Silver room light (the phosphor version of
+   this voice stays .dither-edge; the seam is the QUIET one, so the two never
+   compete). Add data-art-reveal and it materializes once, left to right,
+   when scrolled into view. Fail-open: no JS = fully visible. ---- */
+.seam { position: relative; height: 11px; margin: 2px 0 30px; border: 0; pointer-events: none; }
+/* the dots and the wipe live on ::before: a clip-path on the HOST would zero
+   its intersection box and the reveal observer could never fire (deadlock) */
+.seam::before { content: ""; position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(229, 240, 234, 0.32) 0.8px, transparent 1.3px),
+    radial-gradient(circle at 1px 1px, rgba(229, 240, 234, 0.18) 0.8px, transparent 1.3px),
+    radial-gradient(circle at 1px 1px, rgba(229, 240, 234, 0.10) 0.8px, transparent 1.3px);
+  background-position: 0 0, 2px 4px, 1px 8px;
+  background-size: 4px 4px, 6px 4px, 10px 3px;
+  background-repeat: repeat-x; }
+.js-reveal .seam::before { clip-path: inset(0 100% 0 0); transition: clip-path 1100ms var(--ease-exp); }
+.js-reveal .seam.in::before { clip-path: inset(0 0 0 0); }
+@media (prefers-reduced-motion: reduce) { .js-reveal .seam::before { clip-path: none; transition: none; } }
+
+/* ---- D3. row scan-sweep - one specular pass across ledger / price / table
+   rows on hover: the .btn--primary sweep idiom at row scale. Fine pointers
+   only; one pass per hover, no return animation. Markup-free: any .lrow,
+   .prow or .trow gets it. ---- */
+@media (hover: hover) and (pointer: fine) {
+  .lrow, .prow, .trow { position: relative; overflow: hidden; }
+  .lrow::after, .prow::after, .trow::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 40%, rgba(238, 246, 242, 0.05) 50%, transparent 60%);
+    transform: translateX(-130%); }
+  .lrow:hover, .prow:hover, .trow:hover { background-color: rgba(255, 255, 255, 0.016); }
+  @media (prefers-reduced-motion: no-preference) {
+    .lrow:hover::after, .prow:hover::after, .trow:hover::after {
+      transform: translateX(130%); transition: transform 720ms var(--ease); }
+  }
+}
+
+/* ---- D4. idx rail tick - the dossier tab grows a small phosphor tick when
+   its section enters view: the exhibit goes on the record. Markup-free on
+   rails inside .reveal sections; without JS the tick is simply present. ---- */
+.sect-rail__rail .idx { position: relative; }
+.sect-rail__rail .idx::after { content: ""; position: absolute; left: -1px; top: 7px; bottom: 7px; width: 2px;
+  background: var(--accent); transform: scaleY(0); transform-origin: top; }
+html:not(.js-reveal) .sect-rail__rail .idx::after { transform: scaleY(1); }
+.js-reveal .reveal.in .sect-rail__rail .idx::after { transform: scaleY(1); transition: transform 520ms var(--ease-exp) 220ms; }
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal .sect-rail__rail .idx::after { transform: scaleY(1); transition: none; }
+}
+
+/* ---- D5. .spark - the stat sparkline: a hand-set row of dithered bar
+   columns beside a number. Static markup, no canvas. Heights via --v (0..1);
+   .on bars carry the verification accent for the COUNTED part of a stat.
+   Draws up once with its section's reveal; static under reduced motion. ---- */
+.spark { display: inline-flex; align-items: flex-end; gap: 2px; height: 13px; vertical-align: -1px; }
+.spark i { width: 3px; height: calc(var(--v, 0.6) * 100%);
+  background: repeating-linear-gradient(0deg, rgba(229, 240, 234, 0.30) 0 1px, transparent 1px 3px); }
+.spark i.on { background: repeating-linear-gradient(0deg, var(--accent) 0 1px, transparent 1px 3px); }
+@media (prefers-reduced-motion: no-preference) {
+  .js-reveal .reveal .spark i { transform: scaleY(0); transform-origin: bottom; transition: transform 460ms var(--ease-spring-soft); }
+  .js-reveal .reveal.in .spark i { transform: scaleY(1); }
+  .js-reveal .reveal.in .spark i:nth-child(2) { transition-delay: 40ms; }
+  .js-reveal .reveal.in .spark i:nth-child(3) { transition-delay: 80ms; }
+  .js-reveal .reveal.in .spark i:nth-child(4) { transition-delay: 120ms; }
+  .js-reveal .reveal.in .spark i:nth-child(5) { transition-delay: 160ms; }
+  .js-reveal .reveal.in .spark i:nth-child(6) { transition-delay: 200ms; }
+  .js-reveal .reveal.in .spark i:nth-child(7) { transition-delay: 240ms; }
+  .js-reveal .reveal.in .spark i:nth-child(8) { transition-delay: 280ms; }
+  .js-reveal .reveal.in .spark i:nth-child(9) { transition-delay: 320ms; }
+  .js-reveal .reveal.in .spark i:nth-child(10) { transition-delay: 360ms; }
+}
+
+/* ---- D6. the artifact as a precision object (material pass; anatomy and
+   every class untouched). Vertical lumen falls down the sheet the way the
+   stated overhead lamp would land on paper; rules are ENGRAVED (dark hairline
+   catching a light line beneath); the serial is punched; the machine strip
+   recesses under the perforation; the title bar is milled metal. ---- */
+.rep__sheet { background:
+    repeating-linear-gradient(0deg, rgba(17, 22, 19, 0.022) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #FAFBF8 0%, #F5F7F4 16%, var(--sheet) 58%, #ECEFE9 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(17, 22, 19, 0.05); }
+.rep__head, .rep__sheet .sev, .rep__sheet .find { box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65); }
+.rep__head { border-bottom-color: rgba(17, 22, 19, 0.30); }
+.rep__id { box-shadow: inset 0 1px 2px rgba(17, 22, 19, 0.10); }
+.rep__sig { box-shadow: inset 0 10px 14px -12px rgba(0, 0, 0, 0.65); }
+.rep__bar { box-shadow: inset 0 1px 0 var(--light-top), inset 0 -1px 0 rgba(0, 0, 0, 0.30); }
+
+/* ---- D7. THE ARTIFACT CINEMA (kolm-cinema.js). The card boots once on
+   first viewport entry, then rests. The pre-boot state exists ONLY under
+   html.cine-armed (set by the script itself) AND no-preference, so no JS,
+   a parse error, or reduced motion all land on the static final card.
+   Reveal is opacity / transform / clip-path / filter on existing containers;
+   text never leaves the DOM; geometry never changes. ---- */
+@media (prefers-reduced-motion: no-preference) {
+  html.cine-armed .rep.cine:not(.cine-play) { opacity: 0; }
+  .rep.cine-play { animation: cineCard 760ms var(--ease-exp) backwards; }
+  .rep.cine-play [data-cine] { animation: cineLine 520ms var(--ease-exp) backwards;
+    animation-delay: calc(500ms + var(--ci, 0) * 240ms); }
+  .rep.cine-play [data-cine="seg"] { animation-name: cineSeg; animation-duration: 620ms;
+    animation-timing-function: var(--ease-spring-soft); transform-origin: left center; }
+  .rep.cine-play [data-cine="sig"] { animation-name: cineWipe; animation-duration: 700ms; }
+  .rep.cine-play [data-cine="stamp"] { animation-name: cineStamp; animation-duration: 520ms;
+    animation-timing-function: var(--ease-spring); }
+  /* at rest: one whisper-slow pass of room light down the instrument */
+  .rep.cine-done::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 18%;
+    z-index: 3; pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(238, 246, 242, 0.045), transparent);
+    transform: translateY(-110%); opacity: 0; animation: cineScan 12s linear 1.6s infinite; }
+}
+@keyframes cineCard { from { opacity: 0; transform: translateY(10px) scale(0.988); } }
+@keyframes cineLine { from { opacity: 0; transform: translateY(7px); } }
+@keyframes cineSeg { from { transform: scaleX(0); } }
+@keyframes cineWipe { from { clip-path: inset(0 100% 0 0); } }
+@keyframes cineStamp {
+  0% { opacity: 0; transform: scale(1.65); filter: brightness(2.6); }
+  16% { opacity: 1; filter: brightness(2.6); }
+  42% { filter: brightness(1); }
+  100% { transform: scale(1); } }
+@keyframes cineScan {
+  0% { transform: translateY(-110%); opacity: 0; }
+  4% { opacity: 1; }
+  32% { transform: translateY(640%); opacity: 1; }
+  36%, 100% { transform: translateY(640%); opacity: 0; } }
+
 /* ---- P3 upgrade: visually identical on sRGB, deeper on wide gamut.
    Do not oklch-ify anything else. ---- */
 @supports (color: oklch(0% 0 0)) {

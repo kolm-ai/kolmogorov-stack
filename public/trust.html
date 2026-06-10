@@ -153,6 +153,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         progress is labeled, what we do not hold, we do not claim.
       </p>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="grid grid--3">
       <div class="card">
         <p class="card__k">Independent verification</p>
@@ -180,12 +181,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <tr><th scope="col">Area</th><th scope="col">Status</th><th scope="col">Detail</th></tr>
         </thead>
         <tbody>
-          <tr><td><b>Framework mapping</b></td><td class="mapped">Built in</td><td>Findings map to SOC 2 TSC, ISO 42001, NIST AI RMF, EU AI Act Art.12 and Art.14, OWASP and MITRE ATLAS. Mapped, not certified.</td></tr>
-          <tr><td><b>kolm's own SOC 2 / pentest</b></td><td>Not held</td><td>Not claimed until real and verifiable.</td></tr>
-          <tr><td><b>Data retention</b></td><td class="mapped">Engagement-only</td><td>Redacted logs are used for the engagement and not kept beyond it.</td></tr>
-          <tr><td><b>Attestation</b></td><td class="mapped">Ed25519 + tlog</td><td>Every report is signed and entered in an append-only Merkle transparency log.</td></tr>
-          <tr><td><b>Verification</b></td><td class="mapped">Offline</td><td>Open WebCrypto verifier; no kolm account or server in the trust path.</td></tr>
-          <tr><td><b>Tooling license</b></td><td class="mapped">Apache-2.0</td><td>The verifier, the canonicalization and the CLI are open and reproducible.</td></tr>
+          <tr class="trow"><td><b>Framework mapping</b></td><td class="mapped">Built in</td><td>Findings map to SOC 2 TSC, ISO 42001, NIST AI RMF, EU AI Act Art.12 and Art.14, OWASP and MITRE ATLAS. Mapped, not certified.</td></tr>
+          <tr class="trow"><td><b>kolm's own SOC 2 / pentest</b></td><td>Not held</td><td>Not claimed until real and verifiable.</td></tr>
+          <tr class="trow"><td><b>Data retention</b></td><td class="mapped">Engagement-only</td><td>Redacted logs are used for the engagement and not kept beyond it.</td></tr>
+          <tr class="trow"><td><b>Attestation</b></td><td class="mapped">Ed25519 + tlog</td><td>Every report is signed and entered in an append-only Merkle transparency log.</td></tr>
+          <tr class="trow"><td><b>Verification</b></td><td class="mapped">Offline</td><td>Open WebCrypto verifier; no kolm account or server in the trust path.</td></tr>
+          <tr class="trow"><td><b>Tooling license</b></td><td class="mapped">Apache-2.0</td><td>The verifier, the canonicalization and the CLI are open and reproducible.</td></tr>
         </tbody>
       </table>
     </div>
@@ -225,12 +226,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <tr><th scope="col">Framework</th><th scope="col">What it governs</th><th scope="col">kolm findings that map</th></tr>
         </thead>
         <tbody>
-          <tr><td><b>SOC 2</b> TSC</td><td>Security, availability and confidentiality controls</td><td class="mapped">Least-privilege scopes · audit-trail integrity · evidence</td></tr>
-          <tr><td><b>ISO 42001</b></td><td>AI management system</td><td class="mapped">Model and dependency provenance · evidence</td></tr>
-          <tr><td><b>NIST AI RMF</b></td><td>AI risk, mapped, measured and managed</td><td class="mapped">Permission posture · injection resistance</td></tr>
-          <tr><td><b>EU AI Act</b> Art.12 / Art.14</td><td>Activity logging and human oversight</td><td class="mapped">Append-only audit trail · oversight hooks</td></tr>
-          <tr><td><b>OWASP</b> LLM &amp; Agentic Top 10</td><td>LLM and agent attack classes</td><td class="mapped">Prompt-injection battery · data egress</td></tr>
-          <tr><td><b>MITRE ATLAS</b></td><td>Adversarial ML tactics and techniques</td><td class="mapped">Injection · model provenance</td></tr>
+          <tr class="trow"><td><b>SOC 2</b> TSC</td><td>Security, availability and confidentiality controls</td><td class="mapped">Least-privilege scopes · audit-trail integrity · evidence</td></tr>
+          <tr class="trow"><td><b>ISO 42001</b></td><td>AI management system</td><td class="mapped">Model and dependency provenance · evidence</td></tr>
+          <tr class="trow"><td><b>NIST AI RMF</b></td><td>AI risk, mapped, measured and managed</td><td class="mapped">Permission posture · injection resistance</td></tr>
+          <tr class="trow"><td><b>EU AI Act</b> Art.12 / Art.14</td><td>Activity logging and human oversight</td><td class="mapped">Append-only audit trail · oversight hooks</td></tr>
+          <tr class="trow"><td><b>OWASP</b> LLM &amp; Agentic Top 10</td><td>LLM and agent attack classes</td><td class="mapped">Prompt-injection battery · data egress</td></tr>
+          <tr class="trow"><td><b>MITRE ATLAS</b></td><td>Adversarial ML tactics and techniques</td><td class="mapped">Injection · model provenance</td></tr>
         </tbody>
       </table>
     </div>
@@ -285,6 +286,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 5. TRANSPARENCY LOG (the ledger, raised) -->
 <section class="section section--ink reveal" id="transparency">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the public ledger sits in quantized light -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">04 / Transparency log</span></div>
@@ -347,6 +350,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         and no kolm server in the trust path. Two checks, both falsifiable in front of a reviewer.
       </p>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <figure class="diag reveal" role="img" aria-label="Verification loop: the buyer's browser fetches the report and the public keyring, verifies with WebCrypto, and reaches VALID or VOID with no kolm server in the trust path">
     <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <rect class="dg-box" x="8" y="28" width="160" height="64" rx="9"/>
@@ -407,6 +411,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 7. FINAL CTA -->
 <section class="section reveal cta-final">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
   <div class="wrap">
     <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Hand your reviewers a page they can check.</h2>

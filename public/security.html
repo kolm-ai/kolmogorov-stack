@@ -125,6 +125,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Redacted in. A signed report out. Little kept in between.</h2>
       <p class="lede">You are evaluating a security vendor with your own logs. The surface we hold is deliberately small.</p>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="grid grid--3">
       <div class="card reveal">
         <p class="card__k">What you send</p>
@@ -153,6 +154,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 3. DATA HANDLING (proof panel) -->
 <section class="section section--ink reveal" id="handling">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the chamber where your data is handled stays lit -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.11"><canvas></canvas></div>
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">02 / Data handling</span></div>
@@ -278,6 +281,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Every signature lands in a Merkle log you can audit.</h2>
       <p class="lede">A signature you cannot situate in a record is a signature taken on faith. Each signed report is appended to a public log a reviewer audits independently.</p>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="split" style="align-items:flex-start">
       <div>
         <p style="color:var(--ink-2)">Entries are SHA-256 hashed into a Merkle tree structured after RFC 6962, so nothing can be edited or removed without changing the root. Every report ships with an inclusion proof.</p>
@@ -341,6 +345,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 7. FINAL CTA -->
 <section class="section reveal cta-final">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
   <div class="wrap">
     <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Checkable beats claimed.</h2>

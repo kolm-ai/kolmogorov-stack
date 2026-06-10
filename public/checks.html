@@ -156,6 +156,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Four pillars. Every check has a control behind it.</h2>
       <p class="lede">We test what the reviewer tests. Each pillar carries a control id that traces to the crosswalk below.</p>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <figure class="diag reveal" role="img" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
     <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path class="dg-flow" d="M158 68 H198 M380 68 H420 M602 68 H630"/>
@@ -207,7 +208,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__map">ASR-4 · maps to OWASP LLM01</p>
       </div>
     </div>
-    <p class="how__foot"><b>Four more controls</b> extend the pillars · ASR-5 provenance · ASR-6 evidence · ASR-7 memory and retrieval integrity · ASR-8 multi-agent delegation · all eight appear in the crosswalk</p>
+    <p class="how__foot"><span class="spark" aria-hidden="true"><i style="--v:.55"></i><i style="--v:.85"></i><i style="--v:.7"></i><i style="--v:1"></i><i class="on" style="--v:.6"></i><i class="on" style="--v:.9"></i><i class="on" style="--v:.75"></i><i class="on" style="--v:.5"></i></span> <b>Four more controls</b> extend the pillars · ASR-5 provenance · ASR-6 evidence · ASR-7 memory and retrieval integrity · ASR-8 multi-agent delegation · all eight appear in the crosswalk</p>
       </div>
     </div>
   </div>
@@ -216,6 +217,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 4. THE CROSSWALK -->
 <section class="section section--ink sect--dense reveal" id="crosswalk">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the crosswalk is the page's lit object -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
   <div class="wrap">
     <div class="sect-rail">
       <div class="sect-rail__rail"><span class="idx">03 / The crosswalk</span></div>
@@ -224,6 +227,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Eight controls, mapped to the standard your buyer cites.</h2>
       <p class="lede">One row per control. Every finding in the signed report points back to a row here, so a reviewer traces each result to a standard, not to our word.</p>
     </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="band" aria-label="Frameworks in the crosswalk">
       <span class="ctrlid">SOC 2</span>
       <span class="ctrlid">ISO 42001</span>
@@ -238,18 +242,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <tr><th scope="col">Control</th><th scope="col">What it checks</th><th scope="col">Maps to</th></tr>
         </thead>
         <tbody>
-          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI03 · NIST MANAGE-1</td></tr>
-          <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
-          <tr><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
-          <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS AML.T0051</td></tr>
-          <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance</td><td class="mapped">ISO 42001 A.10 · OWASP ASI04</td></tr>
-          <tr><td><b>ASR-6</b> Evidence</td><td>Signed, logged, offline-verifiable report</td><td class="mapped">SOC 2 CC7 · CSA AICM A&amp;A-02</td></tr>
-          <tr><td><b>ASR-7</b> Memory and retrieval integrity</td><td>Retrieval sources enumerated and trusted; memory writes integrity-linked</td><td class="mapped">OWASP ASI06 &middot; OWASP LLM08 &middot; MITRE ATLAS AML.T0070</td></tr>
-          <tr><td><b>ASR-8</b> Multi-agent delegation</td><td>Handoffs attributable; sub-agents attenuated to a subset of authority</td><td class="mapped">OWASP ASI03 &middot; OWASP ASI07 &middot; CSA AICM IAM-16</td></tr>
+          <tr class="trow"><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI03 · NIST MANAGE-1</td></tr>
+          <tr class="trow"><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
+          <tr class="trow"><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
+          <tr class="trow"><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS AML.T0051</td></tr>
+          <tr class="trow"><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance</td><td class="mapped">ISO 42001 A.10 · OWASP ASI04</td></tr>
+          <tr class="trow"><td><b>ASR-6</b> Evidence</td><td>Signed, logged, offline-verifiable report</td><td class="mapped">SOC 2 CC7 · CSA AICM A&amp;A-02</td></tr>
+          <tr class="trow"><td><b>ASR-7</b> Memory and retrieval integrity</td><td>Retrieval sources enumerated and trusted; memory writes integrity-linked</td><td class="mapped">OWASP ASI06 &middot; OWASP LLM08 &middot; MITRE ATLAS AML.T0070</td></tr>
+          <tr class="trow"><td><b>ASR-8</b> Multi-agent delegation</td><td>Handoffs attributable; sub-agents attenuated to a subset of authority</td><td class="mapped">OWASP ASI03 &middot; OWASP ASI07 &middot; CSA AICM IAM-16</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="how__foot"><b>Eight controls</b> · <b>Six frameworks</b> · the mapping travels inside the signed object: follow any finding to its control, and that control to the clause the reviewer reads from. kolm maps findings to standards, it never certifies compliance.</p>
+    <p class="how__foot"><span class="spark" aria-hidden="true"><i class="on" style="--v:.5"></i><i class="on" style="--v:.8"></i><i class="on" style="--v:.65"></i><i class="on" style="--v:.95"></i><i class="on" style="--v:.7"></i><i class="on" style="--v:.85"></i><i class="on" style="--v:.6"></i><i class="on" style="--v:1"></i></span> <b>Eight controls</b> · <b>Six frameworks</b> · the mapping travels inside the signed object: follow any finding to its control, and that control to the clause the reviewer reads from. kolm maps findings to standards, it never certifies compliance.</p>
       </div>
     </div>
   </div>
@@ -292,6 +296,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 6. FINAL CTA -->
 <section class="section reveal cta-final">
   <div class="dither-edge" aria-hidden="true"></div>
+  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
+  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
   <div class="wrap">
     <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Run the catalog against your agent.</h2>
