@@ -103,7 +103,7 @@ function assertWellFormedXml(xml) {
 
 test('every formatter returns { filename, contentType, body } with a real body', () => {
   const env = fixtureEnvelope();
-  assert.deepEqual(EXPORT_FORMATS, ['csv', 'xlsx', 'drata', 'vanta', 'exec', 'crosswalk']);
+  assert.deepEqual(EXPORT_FORMATS, ['csv', 'xlsx', 'drata', 'vanta', 'exec', 'crosswalk', 'sarif', 'oscal', 'aibom', 'scorecard', 'modelcard']);
   for (const fmt of EXPORT_FORMATS) {
     const a = EXPORTERS[fmt](env);
     assert.ok(a && typeof a === 'object', `${fmt}: returns an object`);
@@ -240,14 +240,63 @@ test('toFrameworkCrosswalk renders the ASR-to-framework matrix + per-framework d
   assert.match(filename, /-framework-crosswalk\.md$/);
   assert.ok(body.includes('## ASR control coverage'), 'matrix section present');
   assert.ok(body.includes('## Framework control detail'), 'detail section present');
-  // All six framework columns are headers.
-  for (const col of ['SOC 2 TSC', 'ISO/IEC 42001', 'NIST AI RMF', 'EU AI Act', 'OWASP LLM & Agentic', 'MITRE ATLAS']) {
+  // All eight framework columns are headers (AICM + COSAiS included).
+  for (const col of ['SOC 2 TSC', 'ISO/IEC 42001', 'NIST AI RMF', 'EU AI Act', 'OWASP LLM & Agentic', 'MITRE ATLAS', 'CSA AICM', 'NIST COSAiS']) {
     assert.ok(body.includes(col), `column ${col} present`);
   }
   // All eight ASR rows appear (assessed + not-assessed), and a concrete mapping.
   for (const id of ['ASR-1', 'ASR-2', 'ASR-3', 'ASR-4', 'ASR-5', 'ASR-6', 'ASR-7', 'ASR-8']) assert.ok(body.includes(id), `${id} row present`);
   assert.ok(/ASR-1 Least privilege \| BLOCKING/.test(body), 'ASR-1 shows its blocking status');
   assert.ok(body.includes('CC6'), 'SOC 2 control id surfaced in the matrix');
+});
+
+test('crosswalk: NO ASR row is blank - ASR-4/ASR-6 fall back to the catalog mapping', () => {
+  const env = fixtureEnvelope();
+  const { body } = toFrameworkCrosswalk(env);
+  const matrix = body.split('## Framework control detail')[0];
+  const rowOf = (id) => matrix.split('\n').find((l) => l.startsWith(`| ${id} `));
+  for (const id of ['ASR-1', 'ASR-2', 'ASR-3', 'ASR-4', 'ASR-5', 'ASR-6', 'ASR-7', 'ASR-8']) {
+    const row = rowOf(id);
+    assert.ok(row, `${id} matrix row present`);
+    // Cells: | label | status | findings | fw1 | ... | fw8 | -> at least one
+    // framework cell is non-empty for EVERY ASR control.
+    const cells = row.split('|').map((s) => s.trim()).slice(4, -1);
+    assert.ok(cells.some((c2) => c2.length > 0), `${id} has at least one non-blank framework cell`);
+  }
+  // ASR-4 (red-team) and ASR-6 (evidence) have no analyzer findings in the
+  // fixture; their cells come from the catalog and carry the named ids.
+  assert.ok(/\| ASR-4 [^\n]*ASI01/.test(matrix), 'ASR-4 row cites OWASP ASI01');
+  assert.ok(/\| ASR-4 [^\n]*MDS-06/.test(matrix), 'ASR-4 row cites CSA AICM MDS-06');
+  assert.ok(/\| ASR-4 [^\n]*GenAI-Overlay/.test(matrix), 'ASR-4 row cites the COSAiS GenAI overlay (draft mapping)');
+  assert.ok(/\| ASR-6 [^\n]*A&A-02/.test(matrix), 'ASR-6 row cites CSA AICM A&A-02');
+  assert.ok(body.includes('draft mapping'), 'COSAiS draft-mapping caveat is disclosed in the artifact');
+});
+
+test('crosswalk + CSV: every framework ref id segment is space-free', () => {
+  const env = fixtureEnvelope();
+  // Finding refs are "FRAMEWORK NAME CONTROLID" split on the LAST space; the
+  // id segment (last token) must never itself contain whitespace, which is
+  // guaranteed iff no ref ends in a doubled space and every mapper id is \S+.
+  for (const f of env.findings || []) {
+    for (const ref of f.frameworks || []) {
+      const i = ref.lastIndexOf(' ');
+      const id = ref.slice(i + 1);
+      assert.match(id, /^\S+$/, `ref "${ref}" id segment is space-free`);
+      assert.ok(id.length > 0, `ref "${ref}" carries an id`);
+    }
+  }
+  // And the rendered matrix cells never carry a space inside one control id
+  // (ids within a cell are comma-separated).
+  const matrix = toFrameworkCrosswalk(env).body.split('## Framework control detail')[0];
+  for (const line of matrix.split('\n').filter((l) => l.startsWith('| ASR-'))) {
+    const cells = line.split('|').map((s) => s.trim()).slice(4, -1);
+    for (const cell of cells) {
+      if (!cell) continue;
+      for (const id of cell.split(',').map((s) => s.trim())) {
+        assert.match(id, /^\S+$/, `matrix cell id "${id}" is space-free`);
+      }
+    }
+  }
 });
 
 test('no formatter throws on malformed / partial envelopes (returns a valid artifact)', () => {
@@ -395,6 +444,8 @@ test('session export returns the right Content-Type + Disposition for every form
   const expect = {
     csv: /text\/csv/, xlsx: /application\/vnd\.ms-excel/, drata: /application\/json/,
     vanta: /application\/json/, exec: /text\/markdown/, crosswalk: /text\/markdown/,
+    sarif: /application\/sarif\+json/, oscal: /application\/json/, aibom: /application\/json/,
+    scorecard: /text\/markdown/, modelcard: /text\/markdown/,
   };
   for (const fmt of EXPORT_FORMATS) {
     const r = await fetch(`${base}/v1/audit/sessions/${sessionA}/export?format=${fmt}`, { headers: { Authorization: `Bearer ${KEY_A}` } });
@@ -405,6 +456,7 @@ test('session export returns the right Content-Type + Disposition for every form
     assert.ok(text.length > 0, `${fmt} body non-empty`);
     if (fmt === 'csv') assert.ok(parseCsv(text)[0][0] === 'report_id', 'csv body parses');
     if (fmt === 'drata' || fmt === 'vanta') assert.doesNotThrow(() => JSON.parse(text), `${fmt} body is JSON`);
+    if (fmt === 'sarif' || fmt === 'oscal' || fmt === 'aibom') assert.doesNotThrow(() => JSON.parse(text), `${fmt} body is JSON`);
     if (fmt === 'xlsx') assertWellFormedXml(text);
   }
 });

@@ -4,30 +4,37 @@
 // It LOADS a signed report (from ?src=<trust-url>, a paste, a URL field, or a
 // dropped .json file), VERIFIES its Ed25519 signature offline by reusing the
 // published verifier (/kolm-audit-verify.js - no crypto is reimplemented here),
-// resolves the signing key against kolm's issuer keyring, and then RENDERS the
-// report the way the reviewer reads it:
+// resolves the signing key against kolm's issuer keyring INCLUDING revocation
+// (tier 3: a cryptographically valid signature from a revoked key is VOID),
+// and then RENDERS the signed document the way the reviewer reads it:
 //
-//   - an executive verdict header (readiness, red-team score, blocking count,
-//     tamper-evident, the cryptographic verdict, and the signing issuer),
-//   - an interactive control graph (inline SVG, no libraries: framework controls
-//     as leaves coloured by their worst mapped finding, click to drill in),
-//   - the framework crosswalk,
-//   - the red-team resistance battery, and
+//   - a verification masthead (VERIFIED / SIGNATURE INTACT / VOID / UNVERIFIED)
+//     with issuer, key fingerprint, transparency-log leaf, signed-at, as-of age,
+//     tier, and evidence tier,
+//   - the evidence-tier banner (A/B/C, or "not graded" for a legacy envelope),
+//   - subject, scope (boxed, verbatim, BEFORE findings), the eight-control
+//     posture grid (grey by default - color is earned by evidence),
+//   - findings grouped by control, the injection battery, what was not tested,
+//   - the signature block with offline-verify commands, and
 //   - a visual diff between two reports (improved / regressed / resolved / new).
 //
 // Everything runs in this browser. There is no kolm server in the trust path.
+// The page is a lens; the JSON is the source.
 
 import {
   verifyAuditReport,
   issuerProvenance,
+  isFingerprintRevoked,
   AUDIT_REPORT_SCHEMA,
 } from '/kolm-audit-verify.js';
 
 // kolm's published issuer keyring, INLINED as the offline anchor (view-source it).
-// We also merge /keys/kolm-issuers.json when the network is reachable, but the
-// inlined copy is what an offline reviewer resolves against. Mirrors verify.html.
+// We also merge /keys/kolm-issuers.json when the network is reachable (which is
+// also how an already-published revocation reaches this page), but the inlined
+// copy is what an offline reviewer resolves against. Mirrors verify.html.
 const KOLM_ISSUERS = {
   schema: 'kolm-issuer-keyring-1',
+  revocations: [],
   issuers: [
     { kid: 'kolm-demo-2026', label: 'kolm demo issuer', status: 'demo', public_key: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAcNW1vj5BUnzmEjH6iAdKM2p5of35Oe6znRifqpuLF7A=\n-----END PUBLIC KEY-----\n' },
     { kid: 'kolm-prod-2026', label: 'kolm production issuer', status: 'production', public_key: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAI1W4RkabFYhAOfk3DB+hE3CZWexFJE/7KFZ3X2G1+bk=\n-----END PUBLIC KEY-----\n' },
@@ -42,29 +49,38 @@ async function refreshKeyring() {
     const byKid = new Map(KOLM_ISSUERS.issuers.map((i) => [i.kid, i]));
     for (const i of fresh.issuers) { if (i && i.public_key) byKid.set(i.kid || i.fingerprint || i.public_key, i); }
     KOLM_ISSUERS.issuers = Array.from(byKid.values());
+    if (Array.isArray(fresh.revocations)) KOLM_ISSUERS.revocations = fresh.revocations;
   } catch (_) { /* offline: keep the inlined anchor */ }
 }
-refreshKeyring();
+const keyringReady = refreshKeyring();
+
+// Best-effort LIVE issuer-key status (revocation is the one fact an offline
+// page cannot know by itself). Unreachable is a calm condition, never an error:
+// the keyring anchor still decides recognition; only an explicit 'revoked'
+// answer changes the verdict.
+async function liveKeyStatus(fp) {
+  if (!fp) return { reachable: false };
+  try {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 2500);
+    const r = await fetch('/v1/audit/issuer-key/' + encodeURIComponent(fp) + '/status', { cache: 'no-store', signal: ctl.signal });
+    clearTimeout(t);
+    if (!r.ok) return { reachable: false };
+    const j = await r.json();
+    if (!j || typeof j !== 'object') return { reachable: false };
+    return { reachable: true, status: j.status || null, valid: j.valid !== false, revoked_at: j.revoked_at || null, reason: j.reason || null };
+  } catch (_) { return { reachable: false }; }
+}
 
 // --- small DOM + format helpers ---------------------------------------------
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const escA = (s) => esc(s).replace(/'/g, '&#39;');
+const nCount = (n, noun) => n + ' ' + noun + (n === 1 ? '' : 's');
 const isReport = (o) => !!(o && typeof o === 'object' && o.schema === AUDIT_REPORT_SCHEMA);
 
-const SEV_RANK = { info: 0, low: 1, medium: 2, high: 3, critical: 4 };
 const SEV_HEX = { critical: '#8C3A2E', high: '#C2603A', medium: '#B5852A', low: '#565C57', info: '#11875A', none: '#8A908B' };
-const STATUS_HEX = { pass: '#11875A', attention: '#B5852A', blocking: '#8C3A2E' };
-const FW_SHORT = {
-  'EU AI Act': 'EU AI Act',
-  'OWASP LLM & Agentic Top 10': 'OWASP',
-  'MITRE ATLAS': 'ATLAS',
-  'NIST AI RMF': 'NIST',
-  'SOC 2 TSC': 'SOC 2',
-  'ISO/IEC 42001': 'ISO 42001',
-  ASR: 'ASR',
-};
-const shortFw = (f) => FW_SHORT[f] || String(f || '').split(/\s+/).slice(0, 2).join(' ');
+const SEV_RANK = { info: 0, low: 1, medium: 2, high: 3, critical: 4 };
+const SEV_ORDER = ['critical', 'high', 'medium', 'low', 'info'];
 
 function setStatus(el, text, kind) {
   if (!el) return;
@@ -73,8 +89,16 @@ function setStatus(el, text, kind) {
   if (kind) el.classList.add(kind === 'ok' ? 'is-ok' : 'is-bad');
 }
 
+function shortHash(h, n) { const s = String(h == null ? '' : h); return s.length > (n || 16) ? s.slice(0, n || 16) : s; }
+
+function ageDays(iso) {
+  const t = Date.parse(iso || '');
+  if (!Number.isFinite(t)) return null;
+  return (Date.now() - t) / 86400000;
+}
+
 // Verification state for the currently loaded reports, so the diff can show it.
-const state = { A: null, B: null, model: null };
+const state = { A: null, B: null };
 
 // ============================================================================
 // VERIFY + RENDER report A.
@@ -85,237 +109,457 @@ async function openReport(report) {
     return;
   }
   setStatus($('statusA'), 'verifying...', null);
+  await keyringReady;
 
+  const sig = report.signature_ed25519 && typeof report.signature_ed25519 === 'object' ? report.signature_ed25519 : null;
+
+  // Tier 1+3 in one pass: signature integrity, and refuse a revoked issuer key.
   let verify;
-  try { verify = await verifyAuditReport(report); }
+  try { verify = await verifyAuditReport(report, { issuerKeyring: KOLM_ISSUERS }); }
   catch (e) { verify = { ok: false, reason: 'verifier error: ' + e.message, checks: [] }; }
-  const prov = issuerProvenance(report, KOLM_ISSUERS);
-  state.A = { report, verify, prov };
 
-  renderSummary(report, verify, prov);
-  renderGraph(report);
-  renderCrosswalk(report);
-  renderProbes(report);
+  // Tier 2: is the embedded key one of kolm's published issuer keys?
+  const prov = issuerProvenance(report, KOLM_ISSUERS);
+
+  // Tier 3, live half: ask the public status endpoint (calm when unreachable).
+  const fp = verify.key_fingerprint || (sig && sig.key_fingerprint) || null;
+  const live = await liveKeyStatus(fp);
+  const revokedLive = live.reachable && live.status === 'revoked';
+  const revokedOffline = verify.reason === 'issuer_key_revoked'
+    || (fp && sig && isFingerprintRevoked(fp, sig.public_key, { issuerKeyring: KOLM_ISSUERS }));
+
+  // The four masthead states.
+  //   UNVERIFIED        no signature block - there is nothing to check.
+  //   VOID              canonical bytes do not match the signature, OR the
+  //                     issuer key is revoked (valid math, withdrawn key).
+  //   VERIFIED          signature valid + issuer resolved in kolm's keyring
+  //                     (and not revoked).
+  //   SIGNATURE INTACT  signature valid, but the issuer cannot be resolved
+  //                     (unknown key, or status unavailable). Calm, not red.
+  let verdict;
+  if (!sig) verdict = 'unverified';
+  else if (revokedOffline || revokedLive) verdict = 'void-revoked';
+  else if (!verify.ok) verdict = 'void';
+  else if (prov.recognized) verdict = 'verified';
+  else verdict = 'intact';
+
+  state.A = { report, verify, prov, verdict, live };
+
+  renderDoc(report, { verify, prov, verdict, live, fp });
+  $('rvJson').textContent = JSON.stringify(report, null, 2);
 
   $('rvReport').classList.remove('hidden');
-  setStatus($('statusA'), verify.ok ? (prov.recognized ? 'verified · kolm issuer' : 'signature intact') : 'NOT verified', verify.ok ? 'ok' : 'bad');
-  $('rvReport').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const stText = verdict === 'verified' ? 'verified · kolm issuer'
+    : verdict === 'intact' ? 'signature intact'
+    : verdict === 'unverified' ? 'unverified (no signature)'
+    : 'VOID';
+  setStatus($('statusA'), stText, (verdict === 'verified' || verdict === 'intact') ? 'ok' : 'bad');
+  $('rvReport').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 }
 
-// --- executive verdict header -----------------------------------------------
-function band(n) { return n == null ? 'none' : (n >= 80 ? 'ok' : (n >= 40 ? 'warn' : 'bad')); }
+// ============================================================================
+// THE DOCUMENT. One renderer per register; absent fields collapse cleanly.
+// ============================================================================
+function renderDoc(report, v) {
+  const parts = [
+    renderMasthead(report, v),
+    renderSubject(report),
+    renderScope(report),
+    renderPosture(report),
+    renderFindings(report),
+    renderProbes(report),
+    renderNotTested(report),
+    renderSignature(report, v),
+  ];
+  $('rvDoc').innerHTML = parts.filter(Boolean).join('');
+  // findings start open for the worst severity group so the print artifact and
+  // the first read both lead with what matters.
+  const first = $('rvDoc').querySelector('details.finding');
+  if (first) first.open = true;
+}
 
-function renderSummary(report, verify, prov) {
-  const s = report.summary || {};
-  const rt = report.red_team && typeof report.red_team === 'object' ? report.red_team : null;
+// --- masthead ----------------------------------------------------------------
+function renderMasthead(report, v) {
   const sig = report.signature_ed25519 || {};
-  const readiness = s.readiness_pct == null ? 'n/a' : s.readiness_pct + '%';
-  const rtScore = rt ? (rt.score == null ? 'n/a' : rt.score + '/100') : 'n/a';
+  const lc = report.log_checkpoint && typeof report.log_checkpoint === 'object' ? report.log_checkpoint : null;
 
-  let sealClass = 'bad';
-  let sealText = 'VOID';
-  let note = '';
-  if (verify.ok && prov.recognized) {
-    sealClass = 'ok';
-    sealText = prov.status === 'production' ? 'VERIFIED · KOLM ISSUER' : 'VERIFIED · ' + String(prov.status || 'kolm').toUpperCase() + ' ISSUER';
-  } else if (verify.ok) {
-    sealClass = 'ok';
-    sealText = 'SIGNATURE INTACT';
-    note = 'The signature is intact, but the embedded key is not in kolm’s published keyring, so this is not resolved as a kolm-issued report.';
-  } else {
-    sealClass = 'bad';
-    sealText = 'VOID · ' + (verify.reason || 'signature did not verify');
+  let cls = 'is-unverified', word = 'UNVERIFIED', sub = 'no signature block to check';
+  if (v.verdict === 'verified') {
+    cls = 'is-verified'; word = 'VERIFIED';
+    sub = 'signature valid · ' + (v.prov.label || 'kolm issuer') + (v.live.reachable ? ' · key live' : '');
+  } else if (v.verdict === 'intact') {
+    cls = 'is-intact'; word = 'SIGNATURE INTACT';
+    sub = v.live.reachable ? 'signature valid · key not in kolm\'s published keyring' : 'signature valid · issuer status unavailable';
+  } else if (v.verdict === 'void-revoked') {
+    cls = 'is-void'; word = 'VOID';
+    sub = 'issuer key revoked' + (v.live.revoked_at ? ' ' + v.live.revoked_at.slice(0, 10) : '') + (v.live.reason ? ' (' + v.live.reason + ')' : '');
+  } else if (v.verdict === 'void') {
+    cls = 'is-void'; word = 'VOID';
+    sub = v.verify.reason || 'signed bytes do not match the signature';
   }
 
-  const issuerLine = prov.recognized
-    ? `${esc(prov.label || prov.kid || 'kolm')} (${esc(prov.status || 'issuer')})`
-    : 'not a recognized kolm issuer key';
-  const wm = report.watermark === true ? ' · <b style="color:var(--void)">UNPAID PREVIEW</b>' : '';
+  // as-of age: stale is a state, not a footnote.
+  const age = ageDays(report.generated_at);
+  let ageChip = '';
+  if (age != null) {
+    if (age > 90) ageChip = ' <span class="chipx stale">STALE</span>';
+    else if (age > 30) ageChip = ' <span class="chipx aging">AGING</span>';
+    else ageChip = ' <span class="chipx current">CURRENT</span>';
+  }
+  const ageNote = age == null ? '' : (age > 90
+    ? '<div class="v" style="font-size:11.5px;color:var(--void)">over 90 days old; treat as a historical record</div>'
+    : (age > 30 ? '<div class="v" style="font-size:11.5px;color:var(--ink-3)">30-90 days old; consider a re-audit</div>' : ''));
 
-  $('rvSummary').innerHTML = `
-    <div class="rv__vtop">
-      <span class="rv__seal ${sealClass}">${esc(sealText)}</span>
-      <div>
-        <p class="rv__subject">${esc(report.subject ? report.subject.name : 'Agent fleet')}</p>
-        <div class="muted mono" style="font-size:12px">generated ${esc(report.generated_at || '')}${wm}</div>
+  const tierCell = report.tier === 'scan'
+    ? 'Scan (free, watermarked preview)'
+    : report.tier === 'report' ? 'Signed Readiness Report' : (report.tier || 'not stated');
+
+  const et = report.evidence_tier && typeof report.evidence_tier === 'object' ? report.evidence_tier : null;
+  const etCell = et && et.grade ? 'Tier ' + esc(String(et.grade).toUpperCase()) : 'not graded';
+
+  const issuerCell = v.prov.recognized
+    ? esc(v.prov.label || v.prov.kid || 'kolm') + ' (' + esc(v.prov.status || 'issuer') + ')'
+    : (sig.public_key ? 'key not in kolm\'s published keyring' : 'none');
+
+  const tlogCell = lc
+    ? '<div class="v mono">leaf ' + esc(shortHash(lc.leaf_hash, 16)) + ' · seq ' + esc(lc.seq) + ' of ' + esc(lc.tree_size) + '</div>'
+    : '<div class="v">not logged</div>';
+
+  return `
+  <header class="mast">
+    <div class="mast__grid">
+      <div class="mast__stamp ${cls}">
+        <span class="state">${esc(word)}</span>
+        <span class="sub">${esc(sub)}</span>
       </div>
-      <div class="rv__meta">${esc(report.report_id || '')}<br>${esc(report.report_version || '')} · ${esc(report.spec_version || '')}</div>
+      <div class="mast__meta">
+        <div><div class="k">Issuer</div><div class="v">${issuerCell}</div><div class="v mono">${esc(sig.key_fingerprint || v.fp || 'n/a')}</div></div>
+        <div><div class="k">Transparency log</div>${tlogCell}</div>
+        <div><div class="k">Signed at</div><div class="v mono">${esc(sig.signed_at || 'n/a')}</div></div>
+        <div><div class="k">As of</div><div class="v mono">${esc((report.generated_at || 'n/a').slice(0, 10))}${ageChip}</div>${ageNote}</div>
+        <div><div class="k">Tier</div><div class="v">${esc(tierCell)}</div></div>
+        <div><div class="k">Evidence tier</div><div class="v">${etCell}</div></div>
+      </div>
     </div>
-    <div class="rv__stats">
-      <div class="rv__stat"><div class="big ${band(s.readiness_pct)}">${esc(readiness)}</div><div class="lab">Readiness (assessed controls)</div></div>
-      <div class="rv__stat"><div class="big ${band(rt ? rt.score : null)}">${esc(rtScore)}</div><div class="lab">Red-team resistance</div></div>
-      <div class="rv__stat"><div class="big ${(s.blocking_count || 0) > 0 ? 'bad' : 'ok'}">${esc(s.blocking_count ?? 0)}</div><div class="lab">Deal-blocking findings</div></div>
-      <div class="rv__stat"><div class="big ${s.tamper_evident ? 'ok' : 'bad'}">${s.tamper_evident ? 'Yes' : 'No'}</div><div class="lab">Tamper-evident trail</div></div>
-    </div>
-    <div class="rv__sig">
-      <div><span class="k">verdict:</span> ${verify.ok ? 'Ed25519 signature valid, untampered since signing' : esc(verify.reason || 'signature does not verify')}</div>
-      <div><span class="k">issuer:</span> ${issuerLine}</div>
-      <div><span class="k">key fingerprint:</span> ${esc(sig.key_fingerprint || 'n/a')}</div>
-      <div><span class="k">algorithm:</span> ${esc(sig.alg || '?')} (${esc(sig.spec || '?')}) · signed ${esc(sig.signed_at || 'n/a')}</div>
-      ${note ? `<div class="muted" style="margin-top:4px">${esc(note)}</div>` : ''}
-    </div>`;
+    ${renderEvidenceTierBanner(report)}
+    ${report.watermark === true || report.tier === 'scan' ? `
+    <div class="wmnote"><b>UNPAID PREVIEW</b> · This is the free Scan: the complete findings, with a watermark inside the signed bytes. The paid report is the same audit re-signed without the watermark. The paywall is the signature, never the findings.</div>` : ''}
+  </header>`;
 }
 
-// --- interactive control graph (inline SVG, no libraries) -------------------
-function buildGraph(report) {
-  const W = 920, H = 560, CX = 460, CY = 280;
-  const nodes = [], edges = [];
-  const subj = report.subject ? report.subject.name : 'Agent fleet';
-  nodes.push({ id: 'center', type: 'center', x: CX, y: CY, r: 34, color: '#0E1310', label: subj.length > 16 ? subj.slice(0, 15) + '…' : subj, data: { kind: 'subject', report } });
-
-  const fws = Array.isArray(report.frameworks) ? report.frameworks : [];
-  if (fws.length) {
-    const N = fws.length, R1 = 150, R2 = 268;
-    fws.forEach((fw, i) => {
-      const ang = (-90 + i * (360 / N)) * Math.PI / 180;
-      const hx = CX + R1 * Math.cos(ang), hy = CY + R1 * Math.sin(ang);
-      nodes.push({ id: 'fw' + i, type: 'hub', x: hx, y: hy, r: 14, color: SEV_HEX[fw.worst_severity] || SEV_HEX.none, label: shortFw(fw.framework), data: { kind: 'framework', fw } });
-      edges.push({ x1: CX, y1: CY, x2: hx, y2: hy });
-      const ctrls = fw.controls || [], k = ctrls.length;
-      const win = (2 * Math.PI / N) * 0.78;
-      ctrls.forEach((c, j) => {
-        const a2 = k > 1 ? ang + (j - (k - 1) / 2) * (win / (k - 1)) : ang;
-        const lx = CX + R2 * Math.cos(a2), ly = CY + R2 * Math.sin(a2);
-        const r = Math.max(6, Math.min(13, 6 + (c.findings || 0) * 2));
-        nodes.push({ id: 'fw' + i + 'c' + j, type: 'leaf', x: lx, y: ly, r, color: SEV_HEX[c.max_severity] || SEV_HEX.none, label: c.id, data: { kind: 'control', fw, c } });
-        edges.push({ x1: hx, y1: hy, x2: lx, y2: ly });
-      });
-    });
-  } else {
-    // Clean report: no framework controls were implicated. Show the ASR ring
-    // (status-coloured) so the graph still reads, rather than an empty canvas.
-    const ctrls = (report.summary && report.summary.controls) || [];
-    const N = Math.max(ctrls.length, 1), R1 = 190;
-    ctrls.forEach((c, i) => {
-      const ang = (-90 + i * (360 / N)) * Math.PI / 180;
-      const x = CX + R1 * Math.cos(ang), y = CY + R1 * Math.sin(ang);
-      nodes.push({ id: 'asr' + i, type: 'hub', x, y, r: 17, color: STATUS_HEX[c.status] || SEV_HEX.none, label: c.id, data: { kind: 'asr', c } });
-      edges.push({ x1: CX, y1: CY, x2: x, y2: y });
-    });
+function renderEvidenceTierBanner(report) {
+  const et = report.evidence_tier && typeof report.evidence_tier === 'object' ? report.evidence_tier : null;
+  if (!et || !et.grade) {
+    return '<div class="etier tNone">Evidence tier: <b>not graded</b> (issued before tiered evidence). The findings stand on the logs supplied; how those logs were captured was not graded in this envelope.</div>';
   }
-  return { W, H, nodes, edges };
-}
-
-function renderGraph(report) {
-  const model = buildGraph(report);
-  state.model = model;
-  const edges = model.edges.map((e) => `<line class="edge" x1="${e.x1.toFixed(1)}" y1="${e.y1.toFixed(1)}" x2="${e.x2.toFixed(1)}" y2="${e.y2.toFixed(1)}"/>`).join('');
-  const nodes = model.nodes.map((n) => {
-    const cls = 'node ' + n.type;
-    const labelY = n.type === 'center' ? n.y + 4 : n.y + n.r + 11;
-    const inside = n.type === 'center';
-    return `<g class="${cls}" data-id="${escA(n.id)}" tabindex="0" role="button" aria-label="${escA(n.label)}">
-      <circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${n.r}" style="fill:${n.color}"/>
-      <text x="${n.x.toFixed(1)}" y="${(inside ? labelY : labelY).toFixed(1)}" text-anchor="middle">${esc(n.label)}</text>
-    </g>`;
-  }).join('');
-  $('rvGraph').innerHTML = `<svg class="rv__graph" viewBox="0 0 ${model.W} ${model.H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Control graph">${edges}${nodes}</svg>`;
-
-  // legend
-  $('rvLegend').innerHTML = ['critical', 'high', 'medium', 'low', 'info'].map((sv) =>
-    `<span><i style="background:${SEV_HEX[sv]}"></i>${sv === 'info' ? 'clear' : sv}</span>`).join('');
-
-  // interactivity: click / keyboard selects a node and renders its detail.
-  const svg = $('rvGraph').querySelector('svg');
-  const select = (id) => {
-    svg.querySelectorAll('.node.sel').forEach((g) => g.classList.remove('sel'));
-    const g = svg.querySelector(`.node[data-id="${CSS.escape(id)}"]`);
-    if (g) g.classList.add('sel');
-    const node = model.nodes.find((n) => n.id === id);
-    if (node) renderDetail(node, report);
+  const g = String(et.grade).toUpperCase();
+  const lines = {
+    A: 'captured by the kolm gateway at runtime - kolm observed the traffic itself.',
+    B: 'vendor logs, hash chain verified - the supplied export carried an integrity chain that checks out.',
+    C: 'vendor logs as provided - the findings stand on the export as supplied, with no independent capture.',
   };
-  svg.querySelectorAll('.node').forEach((g) => {
-    g.addEventListener('click', () => select(g.dataset.id));
-    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(g.dataset.id); } });
-  });
-  // expose for crosswalk cross-selection
-  state.selectNode = select;
+  const cls = g === 'A' ? 'tA' : g === 'B' ? 'tB' : 'tC';
+  const basis = Array.isArray(et.basis) && et.basis.length
+    ? '<span class="basis">basis: ' + et.basis.map(esc).join(' · ') + '</span>' : '';
+  return `<div class="etier ${cls}"><b>TIER ${esc(g)}</b> evidence: ${esc(lines[g] || et.method || 'method not stated')}${basis}</div>`;
 }
 
-function findingsForControl(report, framework, id) {
-  const tag = `${framework} ${id}`;
-  return (report.findings || []).filter((f) => Array.isArray(f.frameworks) && f.frameworks.includes(tag));
-}
+// --- 01 subject ---------------------------------------------------------------
+function renderSubject(report) {
+  const s = report.subject && typeof report.subject === 'object' ? report.subject : {};
+  const p = report.passport && typeof report.passport === 'object' ? report.passport : {};
+  const ed = report.evidence_digest && typeof report.evidence_digest === 'object' ? report.evidence_digest : null;
 
-function renderDetail(node, report) {
-  const d = node.data || {};
-  const box = $('rvDetail');
-  if (d.kind === 'subject') {
-    const s = report.summary || {};
-    box.innerHTML = `<h4>${esc(report.subject ? report.subject.name : 'Agent fleet')}</h4>
-      <div class="cid">${esc(report.report_id || '')}</div>
-      <p style="font-size:13px;margin:var(--s3) 0 0">${esc(s.total_findings ?? 0)} findings across ${esc((report.frameworks || []).length)} frameworks. Readiness ${esc(s.readiness_pct == null ? 'n/a' : s.readiness_pct + '%')}, ${esc(s.blocking_count ?? 0)} deal-blocking. Click any leaf node to inspect a single control.</p>`;
-    return;
-  }
-  if (d.kind === 'framework') {
-    const fw = d.fw;
-    box.innerHTML = `<h4>${esc(fw.framework)}</h4>
-      <div class="cid">${esc(fw.controls_touched)} controls touched · ${esc(fw.findings)} findings · worst ${esc(fw.worst_severity)}</div>
-      <ul class="findlist">${(fw.controls || []).map((c) => `<li style="border-left-color:${SEV_HEX[c.max_severity] || SEV_HEX.none}"><b class="mono">${esc(c.id)}</b> ${esc(c.label)} <span class="muted">(${esc(c.findings)})</span></li>`).join('')}</ul>`;
-    return;
-  }
-  if (d.kind === 'asr') {
-    const c = d.c;
-    box.innerHTML = `<h4>${esc(c.id)} · ${esc(c.name)}</h4>
-      <div class="cid">status ${esc(c.status)} · ${esc(c.findings)} findings</div>
-      <p style="font-size:13px;margin:var(--s3) 0 0" class="muted">This control was assessed by the deterministic trinity. A pass means no over-permission, shared credential, or audit-trail gap was observed for it.</p>`;
-    return;
-  }
-  // control leaf
-  const fw = d.fw, c = d.c;
-  const finds = findingsForControl(report, fw.framework, c.id);
-  box.innerHTML = `<h4>${esc(c.id)}</h4>
-    <div class="cid">${esc(fw.framework)} · ${esc(c.label)}</div>
-    <div style="margin-top:6px;font-size:13px"><span class="chip" style="background:${SEV_HEX[c.max_severity] || SEV_HEX.none}">${esc((c.max_severity || 'info').toUpperCase())}</span> ${esc(c.findings)} finding(s) map here</div>
-    <ul class="findlist">${finds.length ? finds.map((f) => `<li style="border-left-color:${SEV_HEX[f.severity] || SEV_HEX.none}"><b>${esc(f.title)}</b>${f.asr ? ` <span class="muted mono">${esc(f.asr.id)}</span>` : ''}</li>`).join('') : '<li class="muted">No finding detail carried for this control in the envelope.</li>'}</ul>`;
-}
+  const cells = [];
+  cells.push(`<div><div class="k">Subject</div><div class="v">${esc(s.name || 'Agent fleet')}</div></div>`);
+  if (s.source) cells.push(`<div><div class="k">Log source</div><div class="v mono">${esc(s.source)}</div></div>`);
+  if (s.records != null || s.events != null) cells.push(`<div><div class="k">Observed</div><div class="v">${esc(s.records ?? '?')} records · ${esc(s.events ?? '?')} events</div></div>`);
+  if (s.retention) cells.push(`<div><div class="k">Retention</div><div class="v">${esc(s.retention)}</div></div>`);
+  if (ed && ed.value) cells.push(`<div><div class="k">Input evidence digest</div><div class="v mono">${esc(ed.alg || 'sha256')}:${esc(shortHash(ed.value, 24))}...</div><div class="v" style="font-size:11.5px;color:var(--ink-3)">binds this report to the exact logs analyzed</div></div>`);
+  if (report.report_id) cells.push(`<div><div class="k">Report</div><div class="v mono">${esc(report.report_id)} · ${esc(report.report_version || '')}</div></div>`);
 
-// --- framework crosswalk -----------------------------------------------------
-function renderCrosswalk(report) {
-  const fws = report.frameworks || [];
-  if (!fws.length) {
-    $('rvCross').innerHTML = '<p class="muted" style="font-size:13.5px">No framework controls were implicated. A clean report maps to no findings.</p>';
-    return;
-  }
-  $('rvCross').innerHTML = fws.map((fw, i) => `
-    <div class="fwcard">
-      <h4><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${SEV_HEX[fw.worst_severity] || SEV_HEX.none}"></span>${esc(fw.framework)}</h4>
-      ${(fw.controls || []).map((c, j) => `<div class="ctrl" data-fw="fw${i}c${j}" role="button" tabindex="0">
-        <span class="dot" style="background:${SEV_HEX[c.max_severity] || SEV_HEX.none}"></span>
-        <span class="id">${esc(c.id)}</span>
-        <span>${esc(c.label)}</span>
-        <span class="muted" style="margin-left:auto;font-family:var(--mono);font-size:12px">${esc(c.findings)}</span>
-      </div>`).join('')}
+  // per-agent tool scopes
+  const agents = Array.isArray(p.agents) ? p.agents : [];
+  const agentRows = agents.map((a) => `
+    <div style="margin-top:var(--s4)">
+      <div class="k">Agent · ${esc(a.agent || '?')} <span class="mono" style="text-transform:none;letter-spacing:0">(key ${esc(a.key_id || '?')})</span></div>
+      <div class="pillrow">${(Array.isArray(a.scopes) ? a.scopes : []).map((sc) => `<span class="pill">${esc(sc)}</span>`).join('')}</div>
     </div>`).join('');
-  // cross-select the graph node when a crosswalk control is clicked.
-  $('rvCross').querySelectorAll('.ctrl[data-fw]').forEach((el) => {
-    const go = () => { if (state.selectNode) { state.selectNode(el.dataset.fw); $('rvGraph').scrollIntoView({ behavior: 'smooth', block: 'center' }); } };
-    el.addEventListener('click', go);
-    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
-  });
+
+  // models + vendor surface
+  const models = Array.isArray(p.models) ? p.models : [];
+  const modelTable = models.length ? `
+    <div style="margin-top:var(--s5)">
+      <div class="k" style="margin-bottom:6px">Models and vendor egress surface</div>
+      <table>
+        <thead><tr><th>Model</th><th>Provider</th><th>Pinned snapshot</th></tr></thead>
+        <tbody>${models.map((m) => `<tr><td class="mono">${esc(m.slug || '?')}</td><td>${esc(m.provider || '?')}</td><td>${m.pinned ? 'yes' : '<span style="color:var(--attn-text)">no (floating alias)</span>'}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>` : '';
+  const mcp = Array.isArray(p.mcp_surface)
+    ? `<p class="v" style="margin:var(--s3) 0 0;color:var(--ink-3)">MCP surface: ${p.mcp_surface.length ? p.mcp_surface.map(esc).join(', ') : 'none declared in the observed window'}.</p>` : '';
+
+  // delegation edges
+  const dg = p.delegation_graph && typeof p.delegation_graph === 'object' ? p.delegation_graph : null;
+  const edges = dg && Array.isArray(dg.edges) && dg.edges.length ? `
+    <p class="v" style="margin:var(--s3) 0 0;color:var(--ink-3)">Delegation observed: ${dg.edges.map((e2) => esc(e2.from || '?') + ' -&gt; ' + esc(e2.to || '?') + ' (' + esc(e2.via || 'unknown') + ', ' + esc(e2.classification || 'unclassified') + ')').join('; ')}.</p>` : '';
+
+  return `
+  <section id="rvSubject">
+    <h2 class="reg"><span class="n">01</span>Subject under review</h2>
+    <div class="subj">${cells.join('')}</div>
+    ${agentRows}${modelTable}${mcp}${edges}
+  </section>`;
 }
 
-// --- red-team battery --------------------------------------------------------
+// --- 02 scope: boxed, verbatim, BEFORE findings -------------------------------
+const SCOPE_LINE = 'Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.';
+
+function renderScope(report) {
+  const caveats = Array.isArray(report.caveats) ? report.caveats
+    : Array.isArray(report.limitations) ? report.limitations : [];
+  const inData = caveats.find((c) => typeof c === 'string' && c.indexOf('Scope is contractual') === 0);
+  const rest = caveats.filter((c) => c !== inData);
+  return `
+  <section id="rvScope">
+    <h2 class="reg"><span class="n">02</span>Scope and limitations</h2>
+    <div class="scopebox">
+      <div class="k">Scope</div>
+      <p class="scopeline">${esc(inData || SCOPE_LINE)}</p>
+      ${rest.length ? `<ul>${rest.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
+    </div>
+  </section>`;
+}
+
+// --- 03 posture: eight controls, three states, grey by default ----------------
+const ASR_FALLBACK = [
+  ['ASR-1', 'Least privilege'], ['ASR-2', 'Audit trail'], ['ASR-3', 'Data egress'], ['ASR-4', 'Injection'],
+  ['ASR-5', 'Provenance'], ['ASR-6', 'Evidence'], ['ASR-7', 'Memory and retrieval integrity'], ['ASR-8', 'Multi-agent delegation'],
+];
+
+function renderPosture(report) {
+  const sum = report.summary && typeof report.summary === 'object' ? report.summary : {};
+  const byId = new Map((sum.controls || []).map((c) => [c.id, c]));
+  const naById = new Map((sum.not_assessed || []).map((n) => [n.id, n]));
+  const names = new Map(ASR_FALLBACK);
+  for (const c of (report.asr_checklist || [])) if (c && c.id) names.set(c.id, c.name || names.get(c.id));
+  for (const c of (sum.controls || [])) if (c && c.id) names.set(c.id, c.name || names.get(c.id));
+
+  const ids = ASR_FALLBACK.map(([id]) => id);
+  for (const c of (sum.controls || [])) if (c && c.id && !ids.includes(c.id)) ids.push(c.id);
+
+  const tiles = ids.map((id) => {
+    const c = byId.get(id);
+    const na = naById.get(id);
+    let cls = '', st = 'INSUFFICIENT EVIDENCE', why = '';
+    if (c && c.status === 'pass') {
+      cls = ' pass'; st = 'PASS';
+      why = 'evidence supports this control in the observed window.';
+    } else if (c && c.status === 'attention') {
+      cls = ' attn'; st = 'FINDINGS · ATTENTION';
+      why = nCount(c.findings || 0, 'finding') + ((c.findings || 0) === 1 ? ' maps' : ' map') + ' here; none is deal-blocking on its own.';
+    } else if (c && c.status === 'blocking') {
+      cls = ' block'; st = 'FINDINGS · BLOCKING';
+      why = (c.findings || 0) === 1 ? '1 finding maps here, and it is deal-blocking.' : nCount(c.findings || 0, 'finding') + ' map here, at least one deal-blocking.';
+    } else if (c && c.status === 'untested') {
+      st = 'INSUFFICIENT EVIDENCE';
+      why = 'untested in this run' + (c.findings ? '; ' + nCount(c.findings, 'informational note') + ' recorded' : '') + '. Grey is not a pass.';
+    } else if (na) {
+      st = 'NOT ASSESSED';
+      const r = String(na.reason || '');
+      why = r.length > 150 ? r.slice(0, 147) + '...' : (r || 'not assessed in this run.');
+    } else {
+      why = 'no signal either way in this envelope. Grey is not a pass.';
+    }
+    return `
+    <div class="tile${cls}">
+      <span class="tid">${esc(id)}</span>
+      <span class="tnm">${esc(names.get(id) || id)}</span>
+      <span class="twhy">${esc(why)}</span>
+      <span class="tst">${esc(st)}</span>
+    </div>`;
+  }).join('');
+
+  // severity strip
+  const bs = sum.by_severity && typeof sum.by_severity === 'object' ? sum.by_severity : {};
+  const strip = SEV_ORDER.filter((sv) => (bs[sv] || 0) > 0)
+    .map((sv) => `<span><i class="dot" style="background:${SEV_HEX[sv]}"></i>${esc(bs[sv])} ${esc(sv)}</span>`).join('');
+  const sevstrip = strip ? `<div class="sevstrip">${strip}<span style="margin-left:auto">${esc(sum.total_findings ?? 0)} findings total · ${esc(sum.blocking_count ?? 0)} deal-blocking</span></div>` : '';
+
+  // the rollups, demoted to one labeled line. A rollup, not a grade.
+  const rt = report.red_team && typeof report.red_team === 'object' ? report.red_team : null;
+  const bits = [];
+  if (sum.readiness_pct != null) bits.push('Readiness rollup: ' + sum.readiness_pct + '% of assessed controls pass - a rollup, not a grade.');
+  if (rt && rt.score != null) bits.push('Injection-resistance rollup: ' + rt.score + '/100 across ' + ((rt.summary && rt.summary.tested) ?? '?') + ' tested probes - a rollup, not a grade.');
+  const rollup = bits.length ? `<p class="rollup">${esc(bits.join(' '))}</p>` : '';
+
+  return `
+  <section id="rvPosture">
+    <h2 class="reg"><span class="n">03</span>Posture: the eight controls</h2>
+    <div class="grid8">${tiles}</div>
+    ${sevstrip}
+    ${rollup}
+    <p class="legend">Grey by default: a tile earns color only when evidence supports it. Green = evidence supports a pass. Earth tones = findings map to the control. Grey = insufficient evidence, never a pass.</p>
+  </section>`;
+}
+
+// --- 04 findings, grouped by control ------------------------------------------
+function remediationFor(report, f) {
+  const rems = Array.isArray(report.remediation) ? report.remediation : [];
+  return rems.find((r) => r && r.finding_id === f.id && r.title === f.title)
+    || rems.find((r) => r && r.finding_id === f.id) || null;
+}
+
+function renderFinding(report, f) {
+  const sev = String(f.severity || 'info').toLowerCase();
+  const ev = Array.isArray(f.evidence) && f.evidence.length
+    ? f.evidence.join('\n')
+    : 'no event hashes carried for this finding';
+  const chips = (Array.isArray(f.frameworks) ? f.frameworks : []).map((fw) => `<span class="chip">${esc(fw)}</span>`).join('');
+  const rem = remediationFor(report, f);
+  return `
+  <details class="finding">
+    <summary>
+      <span class="fsev" style="background:${SEV_HEX[sev] || SEV_HEX.none}">${esc(sev.toUpperCase())}</span>
+      <span class="ftitle">${esc(f.title || f.id || 'finding')}</span>
+      <span class="fid">${esc(f.id || '')}</span>
+    </summary>
+    <div class="fbody">
+      ${f.detail ? `<div><h3>Claim</h3><p>${esc(f.detail)}</p></div>` : ''}
+      <div><h3>Evidence (event hashes in the signed envelope)</h3><div class="evid">${esc(ev)}</div></div>
+      ${chips ? `<div><h3>Maps to (a map, not a certification)</h3><div class="chips">${chips}</div></div>` : ''}
+      ${rem ? `<div><h3>Remediation</h3><div class="remed"><div class="who">${esc(rem.priority || '')} · ${esc((rem.severity || '').toUpperCase())}</div>${esc(rem.action || '')}</div></div>` : ''}
+    </div>
+  </details>`;
+}
+
+function renderFindings(report) {
+  const findings = Array.isArray(report.findings) ? report.findings : [];
+  if (!findings.length) {
+    return `
+  <section id="rvFindings">
+    <h2 class="reg"><span class="n">04</span>Findings</h2>
+    <p class="v" style="color:var(--ink-3)">No findings in this envelope. Read that against the scope above: the absence of a finding is not proof the underlying risk is absent.</p>
+  </section>`;
+  }
+  // group by ASR control, worst severity first inside each group.
+  const groups = new Map();
+  for (const f of findings) {
+    const key = f.asr && f.asr.id ? f.asr.id : 'other';
+    if (!groups.has(key)) groups.set(key, { name: f.asr && f.asr.name ? f.asr.name : 'Other', items: [] });
+    groups.get(key).items.push(f);
+  }
+  const order = ASR_FALLBACK.map(([id]) => id).filter((id) => groups.has(id));
+  for (const k of groups.keys()) if (!order.includes(k)) order.push(k);
+
+  const html = order.map((k) => {
+    const g = groups.get(k);
+    g.items.sort((a, b) => (SEV_RANK[b.severity] ?? 0) - (SEV_RANK[a.severity] ?? 0));
+    return `<p class="fgroup">${esc(k)} · ${esc(g.name)} · ${nCount(g.items.length, 'finding')}</p>` + g.items.map((f) => renderFinding(report, f)).join('');
+  }).join('');
+
+  return `
+  <section id="rvFindings">
+    <h2 class="reg"><span class="n">04</span>Findings, grouped by control</h2>
+    ${html}
+  </section>`;
+}
+
+// --- 05 injection battery ------------------------------------------------------
 function renderProbes(report) {
   const rt = report.red_team && typeof report.red_team === 'object' ? report.red_team : null;
-  const panel = $('rvProbesPanel');
-  if (!rt) { panel.classList.add('hidden'); return; }
-  panel.classList.remove('hidden');
+  if (!rt || !Array.isArray(rt.probes) || !rt.probes.length) return '';
   const sum = rt.summary || {};
-  const score = rt.score == null ? 'n/a' : rt.score + '/100';
-  $('rvProbesTitle').textContent = `Red-team resistance: ${score}`;
-  const head = `<p class="muted" style="font-size:13.5px;margin:0 0 var(--s3)">${esc(rt.domain || 'generic')} suite · ${esc(sum.resisted ?? 0)} resisted, ${esc(sum.exposed ?? 0)} exposed, ${esc(sum.untested ?? 0)} untested of ${esc(sum.probes_total ?? 0)} probes.</p>`;
-  const probes = (rt.probes || []).map((p) => `
-    <div class="probe s-${esc(p.status)}">
-      <div class="probe__head">
-        <span class="probe__title">${esc(p.title || p.id)}</span>
-        <span class="probe__cat">${esc(p.category || '')} · ${esc((p.severity || '').toUpperCase())}</span>
-        <span class="probe__st s-${esc(p.status)}">${esc((p.status || '').toUpperCase())}</span>
-      </div>
-      ${p.detail ? `<p class="probe__detail">${esc(p.detail)}</p>` : ''}
-      <div class="probe__fw">${esc((p.frameworks || []).join(' · '))}</div>
-    </div>`).join('');
-  $('rvProbes').innerHTML = head + probes;
+  const head = `<p class="v" style="color:var(--ink-3);margin:0 0 var(--s4)">${esc(rt.domain || 'generic')} suite · ${esc(sum.resisted ?? 0)} resisted, ${esc(sum.exposed ?? 0)} exposed, ${esc(sum.untested ?? 0)} untested of ${esc(sum.probes_total ?? 0)} probes. Injection is tested and reported, not warranted; untested probes are marked, not scored.</p>`;
+  const probes = rt.probes.map((p) => `
+  <details class="probe">
+    <summary>
+      <span class="ftitle" style="min-width:200px">${esc(p.title || p.id)}</span>
+      <span class="fid">${esc(p.category || '')} · ${esc((p.severity || '').toUpperCase())}</span>
+      <span class="pst s-${esc(p.status)}">${esc((p.status || '').toUpperCase())}</span>
+    </summary>
+    <div class="pbody">
+      ${p.detail ? `<p style="margin:6px 0 0">${esc(p.detail)}</p>` : ''}
+      ${Array.isArray(p.evidence) && p.evidence.length ? `<div class="evid" style="margin-top:8px">${esc(p.evidence.join('\n'))}</div>` : ''}
+      ${Array.isArray(p.frameworks) && p.frameworks.length ? `<div class="chips" style="margin-top:8px">${p.frameworks.map((fw) => `<span class="chip">${esc(fw)}</span>`).join('')}</div>` : ''}
+    </div>
+  </details>`).join('');
+  return `
+  <section id="rvProbes">
+    <h2 class="reg"><span class="n">05</span>Injection battery - tested and reported, not warranted</h2>
+    ${head}${probes}
+  </section>`;
+}
+
+// --- 06 what was not tested ----------------------------------------------------
+function renderNotTested(report) {
+  const sum = report.summary && typeof report.summary === 'object' ? report.summary : {};
+  const items = [];
+  for (const n of (sum.not_assessed || [])) {
+    items.push(`<li><b class="mono">${esc(n.id)}</b> not assessed in this run. ${esc(n.reason || '')}</li>`);
+  }
+  for (const c of (sum.controls || [])) {
+    if (c && c.status === 'untested') items.push(`<li><b class="mono">${esc(c.id)}</b> ${esc(c.name || '')}: untested - the observed window carried no signal either way. Grey, not a pass.</li>`);
+  }
+  const rt = report.red_team && typeof report.red_team === 'object' ? report.red_team : null;
+  const untestedProbes = rt && Array.isArray(rt.probes) ? rt.probes.filter((p) => p.status === 'untested') : [];
+  if (untestedProbes.length) {
+    items.push(`<li><b class="mono">${nCount(untestedProbes.length, 'probe')}</b> in the injection battery reported untested: ${untestedProbes.map((p) => esc(p.title || p.id)).join('; ')}. Untested is marked, not scored.</li>`);
+  }
+  if (!items.length) return '';
+  return `
+  <section id="rvNotTested">
+    <h2 class="reg"><span class="n">06</span>What was not tested</h2>
+    <ul class="nottested">${items.join('')}</ul>
+  </section>`;
+}
+
+// --- 07 signature + offline verification ----------------------------------------
+function renderSignature(report, v) {
+  const sig = report.signature_ed25519 || {};
+  const lc = report.log_checkpoint && typeof report.log_checkpoint === 'object' ? report.log_checkpoint : null;
+  const issuer = v.prov.recognized
+    ? (v.prov.label || v.prov.kid || 'kolm') + ' (' + (v.prov.status || 'issuer') + ')'
+    : (sig.public_key ? 'key not in kolm\'s published keyring' : 'none');
+
+  const rows = [
+    ['verdict', v.verdict === 'verified' ? 'VERIFIED - signature valid, issuer resolved, key not revoked'
+      : v.verdict === 'intact' ? 'SIGNATURE INTACT - signature valid; issuer not resolved'
+      : v.verdict === 'unverified' ? 'UNVERIFIED - no signature block in this document'
+      : v.verdict === 'void-revoked' ? 'VOID - issuer key revoked'
+      : 'VOID - ' + (v.verify.reason || 'signature does not verify')],
+    ['issuer', issuer],
+    ['key fingerprint', sig.key_fingerprint || v.fp || 'n/a'],
+    ['algorithm', (sig.alg || '?') + ' (' + (sig.spec || '?') + ')'],
+    ['signed at', sig.signed_at || 'n/a'],
+  ];
+  if (lc) rows.push(['tlog leaf', shortHash(lc.leaf_hash, 24) + '... seq ' + (lc.seq ?? '?') + ' of tree ' + (lc.tree_size ?? '?')]);
+  const pad = (k) => (k + '              ').slice(0, 16);
+  const block = rows.map(([k, val]) => pad(k) + val).join('\n');
+
+  return `
+  <section class="sigfoot" id="rvSig">
+    <h2 class="reg"><span class="n">07</span>Signature and offline verification</h2>
+    <div class="sigblock">${esc(block)}</div>
+    <p class="v" style="margin:var(--s4) 0 0;color:var(--ink-2)">
+      The signature covers the canonical JSON of this document: keys sorted, no whitespace, with the
+      <span class="mono">signature_ed25519</span>, <span class="mono">timestamp_evidence</span>,
+      <span class="mono">log_checkpoint</span> and <span class="mono">co_signatures</span> fields detached
+      before signing. That is kolm's documented canonical form (see <a href="/spec">the spec</a>), not RFC 8785 JCS.
+      Change one byte anywhere else and the verdict above reads VOID.
+    </p>
+    <div class="vcmd">
+      <h3>Verify in a browser</h3>
+      <pre>Drop this JSON on https://kolm.ai/verify - or read the verifier first: https://kolm.ai/kolm-audit-verify.js</pre>
+      <h3>Verify in Node (20+, no dependencies)</h3>
+      <pre>const { verifyAuditReport } = await import('https://kolm.ai/kolm-audit-verify.js');
+const result = await verifyAuditReport(report);  // { ok, key_fingerprint, checks }</pre>
+      <h3>Verify in Python (kolm SDK)</h3>
+      <pre>from kolm import verify_report
+result = verify_report(report)  # result.ok, result.tier1_signature, result.tier2_issuer</pre>
+      <p>Every command runs offline against the same bytes. No kolm server is in the trust path: the page is a lens, the JSON is the source. Spec: <a href="/spec">kolm.ai/spec</a> · standalone verifier page: <a href="/verify">kolm.ai/verify</a>.</p>
+    </div>
+  </section>`;
 }
 
 // ============================================================================
@@ -361,14 +605,17 @@ function diffReports(a, b) {
 }
 
 function deltaCard(label, av, bv, betterIsHigher, suffix) {
-  const a = av == null ? null : av, b = bv == null ? null : bv;
+  // values come from untrusted pasted/fetched JSON and land in innerHTML:
+  // only finite numbers may render; anything else reads as n/a.
+  const num = (v) => (typeof v === 'number' && Number.isFinite(v)) ? v
+    : (typeof v === 'string' && v.trim() !== '' && Number.isFinite(+v)) ? +v : null;
+  const a = num(av), b = num(bv);
   const d = (a == null || b == null) ? null : b - a;
-  const arrow = d == null ? '' : (d > 0 ? '↑' : (d < 0 ? '↓' : ''));
   const good = d == null ? '' : ((d > 0) === !!betterIsHigher ? 'up' : (d === 0 ? '' : 'down'));
-  const show = (v) => v == null ? 'n/a' : v + (suffix || '');
+  const show = (val) => val == null ? 'n/a' : val + (suffix || '');
   return `<div class="rv__delta">
-    <div class="big ${good}">${show(b)} ${arrow}</div>
-    <div class="lab">${esc(label)} · was ${show(a)}${d != null ? ` (${d > 0 ? '+' : ''}${d}${suffix || ''})` : ''}</div>
+    <div class="big ${good}">${show(b)}${d != null && d !== 0 ? ' (' + (d > 0 ? '+' : '') + d + (suffix || '') + ')' : ''}</div>
+    <div class="lab">${esc(label)} · was ${show(a)} · a rollup, not a grade</div>
   </div>`;
 }
 
@@ -379,7 +626,12 @@ async function renderDiff() {
   if (!isReport(A) || !isReport(B)) { setStatus($('statusB'), 'need two kolm reports', 'bad'); return; }
 
   // verify both so the diff header can state each report's integrity.
-  const [va, vb] = await Promise.all([verifyAuditReport(A).catch((e) => ({ ok: false, reason: e.message })), verifyAuditReport(B).catch((e) => ({ ok: false, reason: e.message }))]);
+  await keyringReady;
+  const opts = { issuerKeyring: KOLM_ISSUERS };
+  const [va, vb] = await Promise.all([
+    verifyAuditReport(A, opts).catch((e) => ({ ok: false, reason: e.message })),
+    verifyAuditReport(B, opts).catch((e) => ({ ok: false, reason: e.message })),
+  ]);
   setStatus($('statusA'), va.ok ? 'verified' : 'not verified', va.ok ? 'ok' : 'bad');
   setStatus($('statusB'), vb.ok ? 'verified' : 'not verified', vb.ok ? 'ok' : 'bad');
 
@@ -387,8 +639,8 @@ async function renderDiff() {
   $('rvDiffSub').textContent = `${A.subject ? A.subject.name : 'A'} (${A.report_id || ''}) vs ${B.subject ? B.subject.name : 'B'} (${B.report_id || ''})`;
 
   const stats = `<div class="rv__diffstats">
-    ${deltaCard('Readiness', d.readiness.a, d.readiness.b, true, '%')}
-    ${deltaCard('Red-team resistance', d.redteam.a, d.redteam.b, true, '')}
+    ${deltaCard('Readiness rollup', d.readiness.a, d.readiness.b, true, '%')}
+    ${deltaCard('Injection-resistance rollup', d.redteam.a, d.redteam.b, true, '')}
     ${deltaCard('Deal-blocking findings', d.blocking.a, d.blocking.b, false, '')}
   </div>`;
 
@@ -396,47 +648,47 @@ async function renderDiff() {
   const sevTag = (f) => `<span class="muted mono">${esc((f.severity || '').toUpperCase())}</span>`;
   const goodCol = `
     <div>
-      <h4 style="margin:0 0 8px">Resolved &amp; improved <span class="muted">(${d.resolved.length + d.improved.length})</span></h4>
+      <h3 style="margin:0 0 8px;font-size:14px">Resolved &amp; improved <span class="muted">(${d.resolved.length + d.improved.length})</span></h3>
       <ul class="rv__difflist">
         ${d.resolved.map((f) => li('good', `Resolved: <b>${esc(f.title)}</b> ${sevTag(f)}`)).join('')}
-        ${d.improved.map((x) => li('good', `Improved: <b>${esc(x.to.title)}</b> ${esc((x.from.severity || '').toUpperCase())} → ${esc((x.to.severity || '').toUpperCase())}`)).join('')}
+        ${d.improved.map((x) => li('good', `Improved: <b>${esc(x.to.title)}</b> ${esc((x.from.severity || '').toUpperCase())} -&gt; ${esc((x.to.severity || '').toUpperCase())}`)).join('')}
         ${(d.resolved.length + d.improved.length) ? '' : '<li class="muted">No findings resolved or improved.</li>'}
       </ul>
     </div>`;
   const badCol = `
     <div>
-      <h4 style="margin:0 0 8px">New &amp; regressed <span class="muted">(${d.added.length + d.regressed.length})</span></h4>
+      <h3 style="margin:0 0 8px;font-size:14px">New &amp; regressed <span class="muted">(${d.added.length + d.regressed.length})</span></h3>
       <ul class="rv__difflist">
         ${d.added.map((f) => li('bad', `New: <b>${esc(f.title)}</b> ${sevTag(f)}`)).join('')}
-        ${d.regressed.map((x) => li('bad', `Regressed: <b>${esc(x.to.title)}</b> ${esc((x.from.severity || '').toUpperCase())} → ${esc((x.to.severity || '').toUpperCase())}`)).join('')}
+        ${d.regressed.map((x) => li('bad', `Regressed: <b>${esc(x.to.title)}</b> ${esc((x.from.severity || '').toUpperCase())} -&gt; ${esc((x.to.severity || '').toUpperCase())}`)).join('')}
         ${(d.added.length + d.regressed.length) ? '' : '<li class="muted">No new or regressed findings.</li>'}
       </ul>
     </div>`;
 
   const ctrl = d.ctrlChanges.length ? `
     <div style="margin-top:var(--s5)">
-      <h4 style="margin:0 0 8px">Control status changes</h4>
+      <h3 style="margin:0 0 8px;font-size:14px">Control status changes</h3>
       <ul class="rv__difflist">
-        ${d.ctrlChanges.map((c) => li(SEV_RANK_status(c.from, c.to), `<b class="mono">${esc(c.id)}</b> ${esc(c.name || '')}: ${esc(c.from)} → ${esc(c.to)}`)).join('')}
+        ${d.ctrlChanges.map((c) => li(statusDeltaClass(c.from, c.to), `<b class="mono">${esc(c.id)}</b> ${esc(c.name || '')}: ${esc(c.from)} -&gt; ${esc(c.to)}`)).join('')}
       </ul>
     </div>` : '';
 
   $('rvDiffBody').innerHTML = stats + `<div class="rv__diffcols">${goodCol}${badCol}</div>` + ctrl
-    + `<p class="muted" style="font-size:12.5px;margin-top:var(--s4)">${d.unchanged.length} finding(s) unchanged. Integrity: A ${va.ok ? 'verified' : 'NOT verified'}, B ${vb.ok ? 'verified' : 'NOT verified'}. Both reports are verified independently in this browser; the diff is over their signed contents.</p>`;
+    + `<p class="muted" style="font-size:12.5px;margin-top:var(--s4)">${nCount(d.unchanged.length, 'finding')} unchanged. Integrity: A ${va.ok ? 'verified' : 'NOT verified'}, B ${vb.ok ? 'verified' : 'NOT verified'}. Both reports are verified independently in this browser; the diff is over their signed contents.</p>`;
 
   $('rvDiff').classList.remove('hidden');
-  $('rvDiff').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('rvDiff').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 }
 
 // status change colour: pass<attention<blocking
 const STATUS_RANK = { pass: 0, attention: 1, blocking: 2 };
-function SEV_RANK_status(from, to) {
+function statusDeltaClass(from, to) {
   const a = STATUS_RANK[from] ?? 0, b = STATUS_RANK[to] ?? 0;
   return b > a ? 'bad' : (b < a ? 'good' : 'warn');
 }
 
 // ============================================================================
-// LOADERS + wiring.
+// LOADERS + wiring. Every entry point: paste, ?src=, URL field, file drop, sample.
 // ============================================================================
 async function loadText(text, which) {
   const ta = which === 'B' ? $('srcB') : $('srcA');
@@ -451,6 +703,11 @@ async function loadText(text, which) {
 async function loadUrl(url, which) {
   const st = which === 'B' ? $('statusB') : $('statusA');
   if (!url) { setStatus(st, 'enter a URL', 'bad'); return; }
+  // Busy state on the pane's load buttons: a slow fetch should not look idle,
+  // and a double click should not race two loads into the same textarea.
+  const busy = (which === 'B' ? ['sampleBBtn', 'urlBBtn'] : ['sampleBtn', 'urlBtn'])
+    .map((id) => $(id)).filter(Boolean);
+  busy.forEach((b) => { b.disabled = true; b.setAttribute('aria-busy', 'true'); });
   setStatus(st, 'fetching...', null);
   try {
     const r = await fetch(url, { cache: 'no-store' });
@@ -458,8 +715,14 @@ async function loadUrl(url, which) {
     const txt = await r.text();
     (which === 'B' ? $('srcB') : $('srcA')).value = txt;
     setStatus(st, 'loaded', 'ok');
+    // Make the loaded state shareable: reflect a successful pane-A URL load
+    // in ?src= so the address bar is a deep link to what is on screen.
+    if (which !== 'B' && /^https?:\/\//i.test(url)) {
+      try { const u = new URL(location.href); u.searchParams.set('src', url); history.replaceState(null, '', u); } catch (_) {}
+    }
     if (which !== 'B') { try { openReport(JSON.parse(txt)); } catch (e) { setStatus(st, 'invalid JSON', 'bad'); } }
-  } catch (e) { setStatus(st, 'load failed: ' + e.message, 'bad'); }
+  } catch (e) { setStatus(st, 'load failed: ' + e.message + '. Check the URL and that it allows cross-origin reads, then try again.', 'bad'); }
+  finally { busy.forEach((b) => { b.disabled = false; b.removeAttribute('aria-busy'); }); }
 }
 
 function wire() {
@@ -468,10 +731,42 @@ function wire() {
   $('sampleBBtn').addEventListener('click', () => loadUrl('/sample-audit-report.json', 'B'));
   $('urlBtn').addEventListener('click', () => loadUrl($('urlA').value.trim(), 'A'));
   $('urlBBtn').addEventListener('click', () => loadUrl($('urlB').value.trim(), 'B'));
+  // Enter in a URL field loads it; nobody should have to reach for the button.
+  $('urlA').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); loadUrl($('urlA').value.trim(), 'A'); } });
+  $('urlB').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); loadUrl($('urlB').value.trim(), 'B'); } });
   $('diffBtn').addEventListener('click', renderDiff);
   $('printBtn').addEventListener('click', () => window.print());
-  $('clearBtn').addEventListener('click', () => { $('srcA').value = ''; setStatus($('statusA'), 'paste · load · drop', null); $('rvReport').classList.add('hidden'); });
-  $('clearBBtn').addEventListener('click', () => { $('srcB').value = ''; setStatus($('statusB'), 'paste · load · drop', null); $('rvDiff').classList.add('hidden'); });
+
+  // Clear stashes what it wiped so one press of Restore brings it back
+  // (one-shot; a fresh Clear refreshes the stash).
+  const stash = { A: null, B: null };
+  function wireClear(which, clearId, restoreId, srcId, statusId, hideId) {
+    const restore = $(restoreId);
+    $(clearId).addEventListener('click', () => {
+      const cur = $(srcId).value;
+      if (cur.trim()) { stash[which] = cur; if (restore) restore.hidden = false; }
+      $(srcId).value = '';
+      setStatus($(statusId), 'paste · load · drop', null);
+      $(hideId).classList.add('hidden');
+    });
+    if (restore) restore.addEventListener('click', () => {
+      if (stash[which] == null) return;
+      $(srcId).value = stash[which];
+      stash[which] = null;
+      restore.hidden = true;
+      setStatus($(statusId), 'previous input restored', 'ok');
+    });
+  }
+  wireClear('A', 'clearBtn', 'restoreBtn', 'srcA', 'statusA', 'rvReport');
+  wireClear('B', 'clearBBtn', 'restoreBBtn', 'srcB', 'statusB', 'rvDiff');
+
+  // raw-JSON toggle: the page is a lens; this shows the source.
+  const jb = $('jsonBtn');
+  jb.addEventListener('click', () => {
+    const on = $('rvJson').classList.toggle('show');
+    jb.setAttribute('aria-pressed', String(on));
+    jb.textContent = on ? 'Hide JSON' : 'View as JSON';
+  });
 
   const cmp = $('cmpToggle');
   cmp.addEventListener('click', () => {

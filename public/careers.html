@@ -10,14 +10,14 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Careers: build the evidence layer for AI agents · kolm.ai</title>
-<meta name="description" content="Help build the evidence layer for AI agents entering the enterprise. We're assembling a network of elite AI-agent security researchers to co-review and co-sign audits, and a small founding team obsessed with verifiable, offline-checkable evidence.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="description" content="Help build the evidence layer for AI agents entering the enterprise: signed, scoped, offline-verifiable. We are assembling a network of elite agent-security researchers to co-review and co-sign audits, plus a small founding team.">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Careers at kolm">
-<meta property="og:description" content="Build the evidence layer for AI agents. We're recruiting elite agent-security researchers and a small founding team that cares about verifiable evidence.">
+<meta property="og:description" content="Build the evidence layer for AI agents. We are recruiting elite agent-security researchers and a small founding team that cares about what can be checked, not claimed.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/careers">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -39,9 +39,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <script defer src="/kolm-2026.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
 
+<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
@@ -61,7 +64,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -69,58 +72,150 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
-<section class="section section--flush" style="padding-top:var(--s8)">
+<main id="main">
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:64ch">
-      <span class="idx">01 / Careers</span>
-      <h1>Build the evidence layer for AI agents.</h1>
-      <p class="lede">Enterprises are about to let autonomous agents touch their most sensitive systems, and the way they decide whom to trust is broken. We build the proof layer that fixes it: signed, scoped, offline-verifiable evidence. If you care more about what can be checked than what can be claimed, we should talk.</p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="mailto:dev@kolm.ai">Get in touch</a>
-        <a class="btn btn--ghost" href="/research">Read our research</a>
+    <p class="eyebrow">Careers</p>
+    <h1 class="hero__h1">Build the evidence layer <span class="go">for AI agents.</span></h1>
+    <p class="lede">
+      Enterprises are about to hand autonomous agents their most sensitive systems, and they still decide whom to trust with questionnaires. We replace say-so with signed, scoped, offline-verifiable evidence. If you care more about what can be checked than what can be claimed, we should talk.
+    </p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="mailto:dev@kolm.ai">Write to dev@kolm.ai</a>
+      <a class="btn btn--ghost" href="/research">Read our research</a>
+    </div>
+    <div class="hero__proof" aria-label="What you would be building">
+      <span><i class="dot" aria-hidden="true"></i>Ed25519-signed evidence</span>
+      <span><i class="dot" aria-hidden="true"></i>verifies offline · no portal</span>
+      <span><i class="dot" aria-hidden="true"></i>small founding team</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. THE THESIS -->
+<section class="section sect--air reveal" id="thesis">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / The thesis</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Security review runs on say-so. We build what can be checked.</h2>
+      <p class="lede">Three convictions behind everything we ship. They are also a fair test of whether you would enjoy it here.</p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">The wedge</p>
+        <h3>Questionnaires are claims</h3>
+        <p>Enterprise review still runs on self-attested answers, which shifts the burden of proof to the buyer. Real evidence comes from what the agent actually did: its own logs.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">The product</p>
+        <h3>Evidence that breaks if edited</h3>
+        <p>Findings are canonicalized and signed with Ed25519. The signature covers the exact bytes; inflate a score and the seal breaks, in front of the reviewer.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">The discipline</p>
+        <h3>Never in the trust path</h3>
+        <p>Verification runs offline in the buyer's browser, against the key inside the report. No account, no upload, nothing of ours to take on faith.</p>
+      </div>
+    </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- researcher network -->
-<section class="section section--ink reveal">
-  <div class="wrap split" style="align-items:center">
+<!-- ============================================================ 3. RESEARCH NETWORK -->
+<section class="section section--ink reveal" id="network">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / Research network</span></div>
+      <div class="sect-rail__body">
+    <div class="split" style="align-items:center">
     <div>
-      <span class="idx">02 / Research network</span>
-      <h2>Elite agent-security researchers.</h2>
-      <p class="lede" style="margin-bottom:16px">The hardest audits deserve the best reviewers. We're assembling a network of top AI-agent security researchers to co-review and co-sign reports (their name and reputation on the evidence, alongside ours). Per-engagement, advisory, or deeper involvement; the work is real and the credit is yours.</p>
-      <p class="card__map">Co-review · co-sign · named · per-engagement or advisory</p>
+      <h2>Your name goes on the evidence.</h2>
+      <p class="lede" style="margin-bottom:16px">The hardest audits deserve the best reviewers. We are assembling a network of elite AI-agent security researchers to co-review and co-sign reports: your name and reputation on the artifact, alongside ours. Per-engagement, advisory, or deeper. The work is real and the credit is yours.</p>
+      <p class="card__map">co-review · co-sign · named on the report · per-engagement or advisory</p>
     </div>
     <div class="grid" style="gap:14px">
-      <div class="card"><p class="card__k">You've</p><h3>Broken real agents</h3><p>Prompt injection, tool abuse, exfiltration. You've found the failure modes, not just read about them.</p></div>
-      <div class="card"><p class="card__k">You value</p><h3>Proof over theater</h3><p>You'd rather sign something true and scoped than rubber-stamp a questionnaire.</p></div>
+      <div class="card">
+        <p class="card__k">You have</p>
+        <h3>Broken real agents</h3>
+        <p>Prompt injection, tool abuse, exfiltration. You have found the failure modes in the field, not just read about them.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">You want</p>
+        <h3>Proof over theater</h3>
+        <p>You would rather sign something true and scoped than rubber-stamp a questionnaire.</p>
+      </div>
+    </div>
+    </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- roles -->
-<section class="section reveal">
+<!-- ============================================================ 4. OPEN ROLES -->
+<section class="section sect--dense reveal" id="roles">
   <div class="wrap">
-    <div class="section__head"><span class="idx">03 / Open roles</span><h2>Open conversations.</h2></div>
-    <div class="grid grid--3">
-      <div class="card"><p class="card__k">Research network</p><h3>AI-agent security researcher</h3><p>Co-review and co-sign audits; help shape the ASR checklist and the red-team methodology.</p></div>
-      <div class="card"><p class="card__k">Engineering</p><h3>Founding security engineer</h3><p>Build the audit modules and the attestation core: permissions, egress, injection, signing, the verifier.</p></div>
-      <div class="card"><p class="card__k">Go-to-market</p><h3>Founding GTM</h3><p>Take the deal-unblocker to AI-native startups stuck in security review, and turn first wins into a referral engine.</p></div>
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / Open conversations</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>No listings. No funnel. Three doors.</h2>
+      <p class="lede">We hire the way we audit: from what you have actually done. Pick the door, then show us the logs.</p>
     </div>
-    <p class="hero__claim" style="margin-top:18px">No formal listings yet. If any of this is you, write to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a> and tell us what you've built or broken.</p>
+    <div class="plate plate--rows">
+      <div class="prow prow--hot">
+        <div class="prow__name">AI-agent security researcher<span class="chip chip--ok">network</span></div>
+        <div class="prow__d">Co-review and co-sign audits. Help shape the ASR checklist and the red-team methodology.</div>
+        <div class="prow__p">R-01<small>research</small></div>
+      </div>
+      <div class="prow">
+        <div class="prow__name">Founding security engineer</div>
+        <div class="prow__d">Build the audit modules and the attestation core: permissions, egress, injection, signing, the verifier.</div>
+        <div class="prow__p">E-01<small>engineering</small></div>
+      </div>
+      <div class="prow">
+        <div class="prow__name">Founding GTM</div>
+        <div class="prow__d">Take the deal-unblocker to AI-native teams stuck in security review. Turn first wins into a referral engine.</div>
+        <div class="prow__p">G-01<small>go-to-market</small></div>
+      </div>
+      <div class="plate__foot">
+        <span>One email, no form · tell us what you have built or broken</span>
+        <span style="margin-left:auto"><a class="go" href="mailto:dev@kolm.ai">dev@kolm.ai →</a></span>
+      </div>
+    </div>
+      </div>
+    </div>
   </div>
 </section>
 
+<!-- ============================================================ 5. FINAL CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
-    <h2>Put your name on evidence worth trusting.</h2>
-    <div class="hero__cta"><a class="btn btn--primary" href="mailto:dev@kolm.ai">Get in touch</a><a class="btn btn--ghost" href="/verify">See what we build</a></div>
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <h2>Put your name on evidence worth checking.</h2>
+    <p class="lede">Write to us tonight. Tell us what you have built or broken.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="mailto:dev@kolm.ai">Get in touch</a>
+      <a class="btn btn--ghost" href="/verify">See what we build</a>
+    </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
+
 </main>
 
+<!-- ============================================================ FOOTER -->
 <hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
@@ -137,24 +232,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -162,7 +260,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>
@@ -178,5 +276,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </div>
 </footer>
+
 </body>
 </html>

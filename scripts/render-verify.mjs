@@ -21,6 +21,19 @@ function resolveFile(urlPath) {
   return null;
 }
 const server = http.createServer((req, res) => {
+  // The verifier makes two best-effort backend calls - live issuer-key status
+  // and transparency-log size - that are DESIGNED to degrade gracefully when the
+  // backend is absent. Under this static harness there is no backend, so answer
+  // /v1/* with a benign empty 200 (no 'revoked' status, no tree info) instead of
+  // a 404: the page behaves identically (those paths only change the verdict on
+  // an explicit 'revoked' answer), and the browser stops logging resource-404
+  // console errors that would otherwise trip the strict no-console-errors gate.
+  if (req.url && req.url.startsWith('/v1/')) {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.end('{}');
+    return;
+  }
   const file = resolveFile(req.url === '/' ? '/index.html' : req.url);
   if (!file) { res.statusCode = 404; res.end('not found: ' + req.url); return; }
   res.setHeader('Content-Type', MIME[path.extname(file).toLowerCase()] || 'application/octet-stream');

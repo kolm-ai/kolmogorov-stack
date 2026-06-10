@@ -252,6 +252,47 @@ function buildCaveats(summary) {
 }
 
 // ---------------------------------------------------------------------------
+// Evidence tier - the A/B/C evidence-quality grade bound INSIDE the signed
+// envelope. The orchestrator computes it where every input is visible
+// (computeEvidenceTier in src/audit-orchestrator.js); this coercion accepts
+// that value, validates its shape, and - for legacy/synthetic audit results
+// that never carried one - derives a conservative grade from the same signals,
+// so EVERY envelope built from now on carries the field.
+// ---------------------------------------------------------------------------
+export const EVIDENCE_TIER_METHOD_BY_GRADE = Object.freeze({
+  A: 'kolm-gateway-capture',
+  B: 'vendor-logs-hash-verified',
+  C: 'vendor-logs-asserted',
+});
+
+export function coerceEvidenceTier(raw, auditResult) {
+  const r = raw && typeof raw === 'object' ? raw : null;
+  const grade = r && typeof r.grade === 'string' ? r.grade.trim().toUpperCase() : null;
+  if (r && (grade === 'A' || grade === 'B' || grade === 'C')) {
+    const basis = Array.isArray(r.basis)
+      ? r.basis
+          .filter((b) => typeof b === 'string' && b.trim() !== '')
+          .map((b) => String(b).slice(0, 300))
+          .slice(0, 12)
+      : [];
+    const method = typeof r.method === 'string' && r.method.trim() !== ''
+      ? String(r.method).slice(0, 80)
+      : EVIDENCE_TIER_METHOD_BY_GRADE[grade];
+    return { grade, method, basis };
+  }
+  // Fallback for audit results without a precomputed tier.
+  const source = auditResult && typeof auditResult.source === 'string' ? auditResult.source : '';
+  const s = (auditResult && auditResult.summary) || {};
+  if (source === 'kolm-capture') {
+    return { grade: 'A', method: EVIDENCE_TIER_METHOD_BY_GRADE.A, basis: ['events captured by the kolm gateway at runtime'] };
+  }
+  if (s.tamper_evident === true) {
+    return { grade: 'B', method: EVIDENCE_TIER_METHOD_BY_GRADE.B, basis: ['vendor-supplied logs with a verified hash chain'] };
+  }
+  return { grade: 'C', method: EVIDENCE_TIER_METHOD_BY_GRADE.C, basis: ['vendor-supplied logs accepted as provided (no cryptographic continuity)'] };
+}
+
+// ---------------------------------------------------------------------------
 // Red-team block - the ASR-4 injection-resistance evidence for the signed
 // envelope. Reads the orchestrator's red_team result (src/red-team.js); if a
 // caller built the audit without one, it is derived deterministically from the
@@ -316,6 +357,15 @@ export function buildReportEnvelope(auditResult, opts = {}) {
   const tier = options.tier === 'report' ? 'report' : 'scan';
   const watermark = options.watermark != null ? !!options.watermark : (tier !== 'report');
 
+  // Evidence tier (A/B/C). Bound INSIDE the signed payload, so the evidence-
+  // quality grade is as tamper-evident as the findings themselves: a report
+  // built from vendor-asserted logs cannot be upgraded to "captured by the
+  // kolm gateway" without breaking the Ed25519 signature.
+  const evidenceTier = coerceEvidenceTier(
+    options.evidence_tier != null ? options.evidence_tier : auditResult.evidence_tier,
+    auditResult,
+  );
+
   // Curated, framework-mapped findings (drop the all-clear "info" sentinels so
   // a clean report reads as clean, not as a list of non-findings).
   const mapped = (auditResult.controls && Array.isArray(auditResult.controls.findings))
@@ -357,6 +407,7 @@ export function buildReportEnvelope(auditResult, opts = {}) {
     generated_at: generatedAt,
     tier,
     watermark,
+    evidence_tier: evidenceTier,
     subject: {
       name: subjectName,
       source: auditResult.source || null,
@@ -781,6 +832,21 @@ export function renderReportHtml(envelope) {
     ? `<div class="wm-banner">UNPAID PREVIEW &middot; not for distribution. This free Scan snapshot is watermarked. Purchase the Signed Readiness Report to receive an unwatermarked, distributable copy plus a shareable verify link your reviewer can check. <span class="mono">${esc(e.contact || CONTACT_EMAIL)}</span></div>`
     : '';
 
+  // Evidence-tier banner. Signed envelopes built from now on always carry
+  // evidence_tier; a legacy envelope (issued before tiered evidence) renders a
+  // plain "not graded" line - it never crashes and never invents a grade.
+  const ET_LABEL = {
+    A: 'EVIDENCE TIER A - captured by kolm gateway at runtime',
+    B: 'EVIDENCE TIER B - vendor logs, hash chain verified',
+    C: 'EVIDENCE TIER C - vendor logs as provided',
+  };
+  const ET_COLOR = { A: '#166534', B: '#0e7490', C: '#5b6472' };
+  const et = e.evidence_tier && typeof e.evidence_tier === 'object' ? e.evidence_tier : null;
+  const etGrade = et && typeof et.grade === 'string' ? et.grade.toUpperCase() : null;
+  const etBanner = et && ET_LABEL[etGrade]
+    ? `<div class="et-banner" style="border-left-color:${ET_COLOR[etGrade]}">${esc(ET_LABEL[etGrade])}${(Array.isArray(et.basis) ? et.basis : []).map((b) => `<span class="et-basis">${esc(b)}</span>`).join('')}</div>`
+    : `<div class="et-banner et-none">Evidence tier: not graded (issued before tiered evidence)</div>`;
+
   const controlRows = (s.controls || []).map((c) => `
     <tr>
       <td class="mono">${esc(c.id)}</td>
@@ -899,11 +965,22 @@ export function renderReportHtml(envelope) {
   .wm-banner .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;opacity:.9}
   body.wm::before{content:"PREVIEW";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:165px;font-weight:800;color:rgba(153,27,27,.05);transform:rotate(-30deg);pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:.06em}
   body.wm>*{position:relative;z-index:1}
+  .et-banner{background:var(--panel);border:1px solid var(--rule);border-left-width:4px;border-radius:8px;padding:10px 14px;margin:0 0 18px;font-weight:600;font-size:13px}
+  .et-banner .et-basis{display:block;margin-top:4px;color:var(--muted);font-weight:400;font-size:12px}
+  .et-banner.et-none{font-weight:400;color:var(--muted)}
+  @media print{
+    body{padding:0;max-width:none}
+    h2,table,.finding,.headline,.sigbox,.et-banner,.wm-banner,footer{break-inside:avoid;page-break-inside:avoid}
+    h1{position:static}
+    body.wm::before{position:absolute}
+    a[href]:after{content:" (" attr(href) ")"}
+  }
 </style></head>
 <body class="${isWm ? 'wm' : ''}">
   <h1>Agent Security-Review Readiness Report</h1>
   <p class="sub">${esc(e.subject ? e.subject.name : '')} · generated ${esc(e.generated_at)} · <span class="mono">${esc(e.report_id)}</span></p>
   ${wmBanner}
+  ${etBanner}
 
   <div class="headline">
     <div><div class="big">${esc(readiness)}</div><div class="small">readiness (assessed controls)</div></div>
@@ -911,6 +988,9 @@ export function renderReportHtml(envelope) {
     <div><div class="big">${esc(rtScore)}</div><div class="small">red-team resistance</div></div>
     <div><div class="big">${s.tamper_evident ? 'Yes' : 'No'}</div><div class="small">tamper-evident trail</div></div>
   </div>
+
+  <h2>Scope &amp; limitations</h2>
+  <ul>${caveats}</ul>
 
   <h2>Control status</h2>
   <table><thead><tr><th>Control</th><th>Name</th><th>Status</th><th>Findings</th></tr></thead>
@@ -925,9 +1005,6 @@ export function renderReportHtml(envelope) {
 
   <h2>Remediation roadmap</h2>
   ${remediation ? `<table><thead><tr><th>Priority</th><th>Finding</th><th>Action</th><th>Frameworks</th></tr></thead><tbody>${remediation}</tbody></table>` : '<p class="sub">No remediation items.</p>'}
-
-  <h2>Scope &amp; limitations</h2>
-  <ul>${caveats}</ul>
 
   <h2>Signature</h2>
   <div class="sigbox">
@@ -1032,6 +1109,32 @@ export async function renderReportPdf(envelope, outputStream) {
       doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted)
         .text('This free Scan snapshot is watermarked. Purchase the Signed Readiness Report for an unwatermarked, distributable copy and a shareable verify link your reviewer can check.', { width: contentWidth });
     }
+
+    // Evidence-tier banner (signature-covered grade of the evidence quality).
+    // A legacy envelope without the field renders a plain "not graded" line.
+    {
+      const ET_PDF_LABEL = {
+        A: 'EVIDENCE TIER A - captured by kolm gateway at runtime',
+        B: 'EVIDENCE TIER B - vendor logs, hash chain verified',
+        C: 'EVIDENCE TIER C - vendor logs as provided',
+      };
+      const ET_PDF_COLOR = { A: PDF_COLOR.ok, B: PDF_COLOR.warn, C: PDF_COLOR.muted };
+      const et = e.evidence_tier && typeof e.evidence_tier === 'object' ? e.evidence_tier : null;
+      const etGrade = et && typeof et.grade === 'string' ? et.grade.toUpperCase() : null;
+      doc.moveDown(0.6);
+      if (et && ET_PDF_LABEL[etGrade]) {
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(ET_PDF_COLOR[etGrade])
+          .text(ET_PDF_LABEL[etGrade], { width: contentWidth });
+        for (const b of (Array.isArray(et.basis) ? et.basis : [])) {
+          if (typeof b !== 'string' || b === '') continue;
+          doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted)
+            .text('- ' + b, { width: contentWidth });
+        }
+      } else {
+        doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted)
+          .text('Evidence tier: not graded (issued before tiered evidence)', { width: contentWidth });
+      }
+    }
     doc.moveDown(1);
 
     // Headline numbers.
@@ -1045,6 +1148,16 @@ export async function renderReportPdf(envelope, outputStream) {
       .text(`Tamper-evident trail: ${s.tamper_evident ? 'yes' : 'no'}`)
       .text(`Total findings: ${s.total_findings ?? 0}`);
     doc.moveDown(0.8);
+    rule();
+
+    // --- Scope & limitations (scope-first: stated BEFORE any findings) ---
+    heading('Scope & limitations');
+    for (const c of (e.caveats || [])) {
+      if (doc.y > 710) doc.addPage();
+      doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted).text('• ' + c, { width: contentWidth });
+      doc.moveDown(0.3);
+    }
+    doc.moveDown(0.2);
     rule();
 
     // --- Control status ---
@@ -1155,16 +1268,6 @@ export async function renderReportPdf(envelope, outputStream) {
         doc.font('Courier').fontSize(8).fillColor(PDF_COLOR.muted).text((r.frameworks || []).join(', '), { width: contentWidth });
       }
       doc.moveDown(0.4);
-    }
-    doc.moveDown(0.2);
-    rule();
-
-    // --- Scope & limitations ---
-    heading('Scope & limitations');
-    for (const c of (e.caveats || [])) {
-      if (doc.y > 710) doc.addPage();
-      doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted).text('• ' + c, { width: contentWidth });
-      doc.moveDown(0.3);
     }
     doc.moveDown(0.2);
     rule();

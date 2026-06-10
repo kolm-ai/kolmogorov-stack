@@ -138,7 +138,7 @@
         "name": "Least privilege"
       },
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM08",
+        "OWASP LLM & Agentic Top 10 LLM06",
         "OWASP LLM & Agentic Top 10 ASI",
         "NIST AI RMF MAP-2",
         "EU AI Act Art.14",
@@ -188,7 +188,7 @@
         "name": "Least privilege"
       },
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM06",
+        "OWASP LLM & Agentic Top 10 LLM02",
         "MITRE ATLAS AML.T0012",
         "NIST AI RMF MANAGE-1",
         "SOC 2 TSC CC6",
@@ -232,7 +232,7 @@
       },
       "frameworks": [
         "OWASP LLM & Agentic Top 10 LLM02",
-        "OWASP LLM & Agentic Top 10 LLM05",
+        "OWASP LLM & Agentic Top 10 LLM03",
         "NIST AI RMF MEASURE-2",
         "EU AI Act Art.10",
         "SOC 2 TSC CC6",
@@ -254,7 +254,7 @@
       },
       "frameworks": [
         "OWASP LLM & Agentic Top 10 LLM02",
-        "OWASP LLM & Agentic Top 10 LLM05",
+        "OWASP LLM & Agentic Top 10 LLM03",
         "NIST AI RMF MEASURE-2",
         "EU AI Act Art.10",
         "SOC 2 TSC CC6",
@@ -276,7 +276,6 @@
         "name": "Provenance"
       },
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM05",
         "OWASP LLM & Agentic Top 10 LLM03",
         "MITRE ATLAS AML.T0010",
         "NIST AI RMF MAP-4",
@@ -298,7 +297,6 @@
         "name": "Provenance"
       },
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM05",
         "OWASP LLM & Agentic Top 10 LLM03",
         "MITRE ATLAS AML.T0010",
         "NIST AI RMF MAP-4",
@@ -342,7 +340,7 @@
         "name": "Multi-agent delegation"
       },
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM08",
+        "OWASP LLM & Agentic Top 10 LLM06",
         "OWASP LLM & Agentic Top 10 ASI",
         "NIST AI RMF MANAGE-1",
         "SOC 2 TSC CC6",
@@ -499,8 +497,8 @@
     },
     {
       "framework": "OWASP LLM & Agentic Top 10",
-      "controls_touched": 6,
-      "findings": 16,
+      "controls_touched": 4,
+      "findings": 14,
       "worst_severity": "high",
       "controls": [
         {
@@ -512,29 +510,17 @@
         {
           "id": "LLM02",
           "label": "Sensitive information disclosure",
-          "findings": 3,
+          "findings": 4,
           "max_severity": "high"
         },
         {
           "id": "LLM03",
-          "label": "Supply chain - MCP / vendor surface",
-          "findings": 2,
-          "max_severity": "medium"
-        },
-        {
-          "id": "LLM05",
-          "label": "Supply chain - model & dependency provenance",
+          "label": "Supply chain - model, MCP and dependency provenance",
           "findings": 4,
           "max_severity": "high"
         },
         {
           "id": "LLM06",
-          "label": "Sensitive disclosure / shared credential",
-          "findings": 1,
-          "max_severity": "high"
-        },
-        {
-          "id": "LLM08",
           "label": "Excessive agency",
           "findings": 2,
           "max_severity": "high"
@@ -585,7 +571,7 @@
       "action": "Gate destructive / financial tool calls behind human approval or a separate narrowly-scoped credential.",
       "asr": "ASR-1",
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM08",
+        "OWASP LLM & Agentic Top 10 LLM06",
         "OWASP LLM & Agentic Top 10 ASI",
         "NIST AI RMF MAP-2",
         "EU AI Act Art.14",
@@ -615,7 +601,7 @@
       "action": "Issue a distinct, scoped key per agent; stop sharing one key across isolation boundaries.",
       "asr": "ASR-1",
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM06",
+        "OWASP LLM & Agentic Top 10 LLM02",
         "MITRE ATLAS AML.T0012",
         "NIST AI RMF MANAGE-1",
         "SOC 2 TSC CC6",
@@ -645,7 +631,7 @@
       "asr": "ASR-5",
       "frameworks": [
         "OWASP LLM & Agentic Top 10 LLM02",
-        "OWASP LLM & Agentic Top 10 LLM05",
+        "OWASP LLM & Agentic Top 10 LLM03",
         "NIST AI RMF MEASURE-2",
         "EU AI Act Art.10",
         "SOC 2 TSC CC6",
@@ -661,7 +647,7 @@
       "asr": "ASR-5",
       "frameworks": [
         "OWASP LLM & Agentic Top 10 LLM02",
-        "OWASP LLM & Agentic Top 10 LLM05",
+        "OWASP LLM & Agentic Top 10 LLM03",
         "NIST AI RMF MEASURE-2",
         "EU AI Act Art.10",
         "SOC 2 TSC CC6",
@@ -676,7 +662,6 @@
       "action": "Remediate: Unpinned model version: anthropic/claude-sonnet-4.",
       "asr": "ASR-5",
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM05",
         "OWASP LLM & Agentic Top 10 LLM03",
         "MITRE ATLAS AML.T0010",
         "NIST AI RMF MAP-4",
@@ -692,7 +677,6 @@
       "action": "Remediate: Unpinned model version: openai/gpt-4o.",
       "asr": "ASR-5",
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM05",
         "OWASP LLM & Agentic Top 10 LLM03",
         "MITRE ATLAS AML.T0010",
         "NIST AI RMF MAP-4",
@@ -723,7 +707,7 @@
       "action": "Remediate: Unattenuated delegation: support-agent -> billing-agent.",
       "asr": "ASR-8",
       "frameworks": [
-        "OWASP LLM & Agentic Top 10 LLM08",
+        "OWASP LLM & Agentic Top 10 LLM06",
         "OWASP LLM & Agentic Top 10 ASI",
         "NIST AI RMF MANAGE-1",
         "SOC 2 TSC CC6",
@@ -911,7 +895,7 @@
         "title": "Tool confused-deputy / privilege escalation",
         "detail": "Grants are declared and non-wildcard, and every exercised tool fell within the declared allow-list; no out-of-grant escalation was observed.",
         "frameworks": [
-          "OWASP LLM08 (Excessive agency)",
+          "OWASP LLM06 (Excessive agency)",
           "OWASP ASI (Agentic threats)",
           "MITRE ATLAS AML.T0051.001 (Indirect prompt injection)",
           "MITRE ATLAS AML.T0053 (Plugin / tool compromise)"
@@ -927,7 +911,6 @@
         "detail": "4 call(s) carrying detected sensitive content reached an external destination without redaction. An injected instruction can route data out through that same path.",
         "frameworks": [
           "OWASP LLM02 (Sensitive information disclosure)",
-          "OWASP LLM06 (Sensitive disclosure / credential)",
           "MITRE ATLAS AML.T0057 (LLM data leakage)",
           "MITRE ATLAS AML.T0051.001 (Indirect prompt injection)"
         ],
@@ -960,7 +943,7 @@
         "detail": "A credential that ingested external data (via a read tool) also performed a destructive or unredacted-sensitive-egress action in the same window. That is the realised indirect-injection blast path: poisoned content read, dangerous action taken.",
         "frameworks": [
           "OWASP LLM01 (Prompt injection)",
-          "OWASP LLM08 (Excessive agency)",
+          "OWASP LLM06 (Excessive agency)",
           "MITRE ATLAS AML.T0051.001 (Indirect prompt injection)"
         ],
         "evidence": [
@@ -995,7 +978,7 @@
         "title": "Tool-argument escalation (action smuggled past the tool name)",
         "detail": "Tool calls that carried argument destinations were ones whose name already implies that capability (a send / write / transfer); no read-tier tool smuggled an egress destination through its arguments.",
         "frameworks": [
-          "OWASP LLM08 (Excessive agency)",
+          "OWASP LLM06 (Excessive agency)",
           "OWASP LLM01 (Prompt injection)",
           "MITRE ATLAS AML.T0051 (LLM prompt injection)"
         ],
@@ -1022,7 +1005,7 @@
         "title": "High-privilege action with no preceding runtime guardrail",
         "detail": "3 high-privilege action(s) (send_email, delete_customer, charge_card) ran with no validation, approval, or guardrail event preceding them in the chain. An injected instruction reaches an irreversible action with no runtime control in its path.",
         "frameworks": [
-          "OWASP LLM08 (Excessive agency)",
+          "OWASP LLM06 (Excessive agency)",
           "OWASP ASI (Agentic threats)",
           "MITRE ATLAS AML.T0053 (Plugin / tool compromise)"
         ],
@@ -1055,7 +1038,6 @@
         "detail": "No credential-shaped token was found in the logged fields and no sensitive content was observed being redacted, so the logging pipeline was never observed handling a secret either way. Absence of a marker is not proof that secrets are scrubbed.",
         "frameworks": [
           "OWASP LLM02 (Sensitive information disclosure)",
-          "OWASP LLM06 (Sensitive disclosure / credential)",
           "MITRE ATLAS AML.T0057 (Sensitive-data leakage)"
         ],
         "evidence": []
@@ -1084,7 +1066,7 @@
         "title": "Injected unauthorized money-moving action (finance)",
         "detail": "A money-moving action ran (charge_card) with no recorded approval or step-up control. An injected instruction reaches that same irreversible action.",
         "frameworks": [
-          "OWASP LLM08 (Excessive agency)",
+          "OWASP LLM06 (Excessive agency)",
           "OWASP ASI (Agentic threats)",
           "MITRE ATLAS AML.T0051 (LLM prompt injection)",
           "MITRE ATLAS AML.T0057 (LLM data leakage)"
@@ -1100,7 +1082,18 @@
     "alg": "ed25519",
     "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAcNW1vj5BUnzmEjH6iAdKM2p5of35Oe6znRifqpuLF7A=\n-----END PUBLIC KEY-----\n",
     "key_fingerprint": "410302c93becdcc3a8091ef0c33c24ed",
-    "signature": "cu8r_UKxzgCBIPAZPnFtL15hGCoZ_BRF9Q3os6jEFip5CUgFoXEWP_40_B-2Hcrkgcjq66uNb1aBVVX-R8xNDw",
+    "signature": "9kWQBu5kLlJ8qSaPgyu39K335ewB8hS8-ckKlcB9i9IDhxmYf0ojWdqJfvECIIYh89ljitxhSq4MIV1gaG9aDw",
     "signed_at": "2026-06-08T00:00:00.000Z"
+  },
+  "log_checkpoint": {
+    "version": "w921-tlog-v1",
+    "origin": "kolm.ai/transparency/v1",
+    "tree_size": 171,
+    "root_hash": "e7520b614b8edc8af0615e19941bf8aa877583121c108b256efa2d4bcdef88a2",
+    "root_b64": "51ILYUuO3IrwYV4ZlBv4qod1gxIcEIslbvotS83viKI=",
+    "leaf_hash": "73b1f70ab22d5e44e88cab4d77f3beaca81cda57752f20bf86696daa4bd82240",
+    "seq": 170,
+    "entry_hash": "4d4da545b655fbd4969fadfd47d53b6bad8a771a4b2fe955c45e3242acc01f53",
+    "report_digest": "f271b35ffef66f14545f4f46e49ca1e0dcbb5f8d2e823b9496a24ec5cd87aad6"
   }
 }

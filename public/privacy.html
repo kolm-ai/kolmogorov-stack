@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Privacy · kolm.ai</title>
 <meta name="description" content="How kolm.ai handles data collected during agent security audits: what we collect, how long we keep it, your GDPR and CCPA rights, and how to reach us.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -51,8 +51,36 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   }
 }
 </script>
+<style>
+/* Legal typesetting layer (page-scoped, identical across the legal group).
+   Typeset, not designed: one measured column, mono article numbers,
+   hairlines between articles. Candidate for kolm-2026.css as .legal-doc. */
+.legal-doc { max-width: 64ch; }
+.legal-doc h2 { font-size: clamp(21px, 2.1vw, 25px); letter-spacing: -0.016em; line-height: 1.18; max-width: none; margin: var(--s7) 0 var(--s4); padding-top: var(--s6); border-top: 1px solid var(--line); }
+.legal-doc > h2:first-of-type, .legal-doc .idx + h2, .legal-doc .section__head h2 { border-top: 0; padding-top: 0; }
+.legal-doc > h2:first-of-type { margin-top: var(--s5); }
+.legal-doc .idx + h2, .legal-doc .section__head h2 { margin-top: 0; }
+.legal-doc h3 { margin: var(--s6) 0 10px; }
+.legal-doc .n, .section--ink h2 .n { display: block; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
+.legal-doc h3 .n { margin-bottom: 5px; }
+.legal-doc p, .legal-doc li { font-size: 15px; line-height: 1.75; color: var(--ink-2); }
+.legal-doc li { margin-bottom: 8px; }
+.legal-doc li::marker { color: var(--ink-3); }
+.legal-doc .art-rule { border: 0; border-top: 1px solid var(--line); margin: var(--s7) 0; }
+.legal-doc--wide { max-width: none; }
+.legal-meta { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-3); margin-top: var(--s4); font-variant-numeric: tabular-nums; }
+.legal-meta b, .legal-meta strong { color: var(--ink-2); font-weight: 500; }
+.legal-toc { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 2px 20px; margin: var(--s5) 0 var(--s3); }
+.legal-toc .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.legal-toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 36px; font-size: 13.5px; line-height: 2.05; color: var(--ink-3); }
+.legal-toc a { color: var(--ink-2); }
+.legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.legal-card b, .legal-card strong { color: var(--ink); }
+@media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+</style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <hr class="foil-strip" aria-hidden="true">
 
@@ -75,7 +103,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -83,29 +111,29 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- Hero -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:72ch">
-      <span class="idx">01 / Privacy</span>
+    <div style="max-width:72ch">
+      <p class="eyebrow">Legal · Privacy</p>
       <h1>Privacy Policy</h1>
       <p class="lede">kolm.ai issues cryptographically signed, offline-verifiable evidence reports for AI agent security reviews. This policy explains, in plain terms, what personal and organisational data we collect to deliver that service, why we collect it, how long we keep it, who we share it with, and how you exercise your rights under GDPR, CCPA, and equivalent laws.</p>
-      <p style="font-size:14px;color:var(--ink-3);margin-top:0">Last updated: <strong>2026-06-07</strong> (supersedes 2026-05-22)</p>
+      <p class="legal-meta">Last updated: <strong>2026-06-07</strong> (supersedes 2026-05-22)</p>
     </div>
   </div>
 </section>
 
 <!-- Long-form legal prose -->
 <section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">02 / Policy</span>
+  <div class="wrap legal-doc">
+    <span class="idx">01 / Policy</span>
 
-    <h2>1. Who we are</h2>
-    <p>kolm.ai ("kolm", "we", "us") is the controller of personal data collected through the kolm.ai website and hosted services. We are incorporated under the laws of the United States. Contact: <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    <h2><span class="n">1.</span> Who we are</h2>
+    <p>kolm.ai ("kolm", "we", "us") is the controller of personal data collected through the kolm.ai website and hosted services. We are incorporated under the laws of the United States. Contact: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
 
-    <h2>2. Definitions</h2>
+    <h2><span class="n">2.</span> Definitions</h2>
     <ul>
       <li><strong>Audit Customer</strong>: an organisation that engages kolm to audit an AI agent.</li>
       <li><strong>Audit Subject</strong>: the AI agent system under review (not a natural person).</li>
@@ -114,48 +142,48 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <li><strong>Personal Data</strong>: any information relating to an identified or identifiable natural person, as defined in GDPR Article 4(1) and equivalent legislation.</li>
     </ul>
 
-    <h2>3. Data we collect</h2>
+    <h2><span class="n">3.</span> Data we collect</h2>
     <p>The data categories below represent a complete list of the personal and organisational data we collect. If something is not in this list, we do not collect it.</p>
 
-    <h3>3.1 Account and contact data</h3>
+    <h3><span class="n">3.1</span> Account and contact data</h3>
     <p>When an Audit Customer registers, we collect: the account email address, organisation name, billing contact name, and any other contact details provided in the order form. Legal basis: performance of a contract (GDPR Art. 6(1)(b)) and our legitimate interest in communicating with customers (Art. 6(1)(f)).</p>
 
-    <h3>3.2 Billing data</h3>
+    <h3><span class="n">3.2</span> Billing data</h3>
     <p>We collect a Stripe-generated card token (never the primary account number), billing address, invoice line items, plan tier, and payment history. Prompt and completion content is never logged in billing records. Legal basis: performance of a contract and compliance with legal obligations (GDPR Art. 6(1)(b) and (c)).</p>
 
-    <h3>3.3 Customer Content submitted for audit</h3>
+    <h3><span class="n">3.3</span> Customer Content submitted for audit</h3>
     <p>Audit Customers submit redacted agent logs, tool-call traces, configuration files, and related artefacts necessary to run the security check suite. We process this data solely to deliver the audit and produce the Evidence Report. We do not use Customer Content to train any model, share it with third parties beyond the sub-processors listed in Section 7, or retain it beyond the retention periods in Section 6. Legal basis: performance of a contract (GDPR Art. 6(1)(b)).</p>
 
-    <h3>3.4 Evidence Report registry data</h3>
+    <h3><span class="n">3.4</span> Evidence Report registry data</h3>
     <p>When a signed Evidence Report is issued, we store the report ID, the SHA-256 content hash, the Ed25519 signature, the audit scope summary, and a timestamp in the verifier registry so that downstream parties can resolve and verify the report at <span class="mono">/verify/&lt;report-id&gt;</span> without an account or connection to kolm servers. The registry entry never includes raw logs, weights, or personal data beyond the Audit Customer's organisation name and the scope description they approved.</p>
 
-    <h3>3.5 Gateway and API request metadata</h3>
+    <h3><span class="n">3.5</span> Gateway and API request metadata</h3>
     <p>When you use the kolm API or hosted control plane, we log: timestamp, route, HTTP status, latency, token counts (where applicable), and an API key fingerprint. Request and response bodies for audit-data endpoints are not retained after processing. Legal basis: legitimate interests in operating a reliable, secure service (GDPR Art. 6(1)(f)).</p>
 
-    <h3>3.6 Authentication audit log</h3>
+    <h3><span class="n">3.6</span> Authentication audit log</h3>
     <p>Sign-in events, API key rotations, permission changes, and administrator actions on the hosted control plane are logged for the purpose of security incident investigation. Legal basis: legitimate interests (GDPR Art. 6(1)(f)) and, where applicable, legal obligation (Art. 6(1)(c)).</p>
 
-    <h3>3.7 Support and correspondence</h3>
-    <p>When you contact us by email at <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>, we retain the thread so that follow-up enquiries can be handled in context. Threads are deleted on request. Legal basis: legitimate interests (GDPR Art. 6(1)(f)).</p>
+    <h3><span class="n">3.7</span> Support and correspondence</h3>
+    <p>When you contact us by email at <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>, we retain the thread so that follow-up enquiries can be handled in context. Threads are deleted on request. Legal basis: legitimate interests (GDPR Art. 6(1)(f)).</p>
 
-    <h3>3.8 Website analytics</h3>
+    <h3><span class="n">3.8</span> Website analytics</h3>
     <p>Marketing and informational pages on kolm.ai carry a first-party analytics cookie. No third-party ad pixels or cross-site trackers are used. Product and API pages set no analytics cookies; a session cookie holds your authentication token only while you are signed in. You may opt out of the analytics cookie by setting <span class="mono">kolm-no-track=1</span> in your browser. CLI tooling does not phone home unless you explicitly set <span class="mono">KOLM_TELEMETRY=1</span>; the opt-in telemetry records command name and exit code only, never content or filenames.</p>
 
-    <h2>4. Purposes and legal bases</h2>
+    <h2><span class="n">4.</span> Purposes and legal bases</h2>
     <ul>
       <li><strong>Delivering audit services</strong>: processing Customer Content and producing the signed Evidence Report. Basis: contract.</li>
       <li><strong>Account management and billing</strong>: provisioning access, issuing invoices, handling renewals. Basis: contract; legal obligation for tax records.</li>
       <li><strong>Security and fraud prevention</strong>: maintaining the authentication audit log, detecting abuse of the API. Basis: legitimate interests.</li>
       <li><strong>Service improvement</strong>: aggregate, anonymised usage metrics (not linked to individuals). Basis: legitimate interests.</li>
       <li><strong>Legal compliance</strong>: responding to lawful requests from competent authorities. Basis: legal obligation.</li>
-      <li><strong>Marketing communications</strong>: product updates and announcements sent to account contacts who have not unsubscribed. Basis: legitimate interests; you may opt out at any time via the unsubscribe link in any message or by emailing <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</li>
+      <li><strong>Marketing communications</strong>: product updates and announcements sent to account contacts who have not unsubscribed. Basis: legitimate interests; you may opt out at any time via the unsubscribe link in any message or by emailing <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</li>
     </ul>
 
-    <h2>5. What we do not collect or retain</h2>
+    <h2><span class="n">5.</span> What we do not collect or retain</h2>
     <p>We do not retain raw agent inference outputs, model weights, or un-redacted prompt bodies after the audit processing window. We do not sell, rent, or license personal data to third parties. We do not enrich account data with broker-sourced data. Customer Content is never used to train any model, including our own. We do not target or knowingly collect data from consumers; the service is designed for organisations and developers.</p>
-    <p>When an engagement involves imported agent logs, redaction is applied before that content is stored, and the redacted material is held only for the processing window described in Section 6 before deletion. Questions about how an engagement handles Customer Content go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    <p>When an engagement involves imported agent logs, redaction is applied before that content is stored, and the redacted material is held only for the processing window described in Section 6 before deletion. Questions about how an engagement handles Customer Content go to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
 
-    <h2>6. Retention</h2>
+    <h2><span class="n">6.</span> Retention</h2>
     <ul>
       <li><strong>Account and contact data</strong>: held for the duration of the customer relationship and for a further three years to handle post-termination enquiries and legal claims, then deleted.</li>
       <li><strong>Billing records</strong>: retained for seven years from the invoice date to satisfy statutory accounting obligations; the cardholder name and card token are deleted at account closure.</li>
@@ -166,7 +194,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <li><strong>Website analytics</strong>: aggregated at 30 days; individual-level records deleted at 90 days.</li>
     </ul>
 
-    <h2>7. Sharing with third parties and sub-processors</h2>
+    <h2><span class="n">7.</span> Sharing with third parties and sub-processors</h2>
     <p>We share data only as necessary to operate the service. The categories and roles of sub-processors are as follows. We do not share data with ad networks or data brokers under any circumstances.</p>
     <ul>
       <li><strong>Cloud infrastructure (compute, storage, CDN)</strong>: provides the hosting environment for the kolm platform. Data is encrypted at rest (KMS-backed keys) and in transit (TLS 1.3). Default region: US-East (AWS us-east-1). EU residency is available on the enterprise plan (AWS eu-west-1 or eu-central-1); Standard Contractual Clauses are included in the DPA.</li>
@@ -176,10 +204,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </ul>
     <p>When you supply your own API key to an upstream AI model provider (such as Anthropic, OpenAI, or Google) via the kolm platform settings, kolm routes your request directly to that provider; kolm is not the contracting party with the provider for those calls. If you use the free <span class="mono">/v1/free/chat</span> surface without supplying your own key, kolm acts as the contracting party with the upstream provider for those requests, and the gateway metadata logging described in Section 3.5 applies.</p>
 
-    <h2>8. International data transfers</h2>
-    <p>The hosted platform operates primarily in the United States. Personal data transferred from the European Economic Area to the United States is protected under the EU Standard Contractual Clauses (2021 SCCs, Module 2 controller-to-processor) incorporated into our Data Processing Agreement. Customers may request the DPA by contacting <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. EU data residency (hosting within AWS eu-west-1 or eu-central-1) is available as an addendum on the enterprise plan.</p>
+    <h2><span class="n">8.</span> International data transfers</h2>
+    <p>The hosted platform operates primarily in the United States. Personal data transferred from the European Economic Area to the United States is protected under the EU Standard Contractual Clauses (2021 SCCs, Module 2 controller-to-processor) incorporated into our Data Processing Agreement. Customers may request the DPA by contacting <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>. EU data residency (hosting within AWS eu-west-1 or eu-central-1) is available as an addendum on the enterprise plan.</p>
 
-    <h2>9. Security measures</h2>
+    <h2><span class="n">9.</span> Security measures</h2>
     <p>kolm applies the following technical and organisational measures to protect personal data:</p>
     <ul>
       <li>Encryption at rest using KMS-managed keys; encryption in transit using TLS 1.3.</li>
@@ -190,9 +218,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </ul>
     <p>kolm does not currently hold a SOC 2 report, and there is no published third-party penetration test of kolm's own infrastructure. We will state either one here only once it is real and independently verifiable. This is distinct from the kolm product, which maps your agent's findings to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, and the OWASP LLM &amp; Agentic Top 10.</p>
 
-    <h2>10. Your rights under GDPR and CCPA</h2>
+    <h2><span class="n">10.</span> Your rights under GDPR and CCPA</h2>
 
-    <h3>10.1 GDPR rights (EEA and UK data subjects)</h3>
+    <h3><span class="n">10.1</span> GDPR rights (EEA and UK data subjects)</h3>
     <ul>
       <li><strong>Access (Art. 15)</strong>: you may request a copy of the personal data we hold about you.</li>
       <li><strong>Rectification (Art. 16)</strong>: you may ask us to correct inaccurate data.</li>
@@ -203,41 +231,48 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <li><strong>Automated decision-making (Art. 22)</strong>: kolm does not make decisions with legal or similarly significant effects on individuals solely by automated means.</li>
       <li><strong>Lodge a complaint</strong>: you have the right to lodge a complaint with the supervisory authority in your country of residence.</li>
     </ul>
-    <p>To exercise any of these rights, contact <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. We will acknowledge within 2 business days and provide a substantive response within 30 days (extendable by a further two months for complex requests, with notice).</p>
+    <p>To exercise any of these rights, contact <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>. We will acknowledge within 2 business days and provide a substantive response within 30 days (extendable by a further two months for complex requests, with notice).</p>
 
-    <h3>10.2 CCPA rights (California residents)</h3>
-    <p>California residents have the right to know what personal information we collect and how it is used; the right to delete personal information we have collected; the right to opt out of any sale of personal information (we do not sell personal information); and the right not to receive discriminatory treatment for exercising these rights. To submit a CCPA request, contact <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    <h3><span class="n">10.2</span> CCPA rights (California residents)</h3>
+    <p>California residents have the right to know what personal information we collect and how it is used; the right to delete personal information we have collected; the right to opt out of any sale of personal information (we do not sell personal information); and the right not to receive discriminatory treatment for exercising these rights. To submit a CCPA request, contact <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
 
-    <h2>11. Cookies</h2>
-    <p>We use cookies as described in Section 3.8. In summary: product and API pages use a session cookie only when you are authenticated; marketing and informational pages carry a first-party analytics cookie you can opt out of. We do not use third-party advertising cookies. A full cookie table is available on request from <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    <h2><span class="n">11.</span> Cookies</h2>
+    <p>We use cookies as described in Section 3.8. In summary: product and API pages use a session cookie only when you are authenticated; marketing and informational pages carry a first-party analytics cookie you can opt out of. We do not use third-party advertising cookies. A full cookie table is available on request from <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
 
-    <h2>12. Children</h2>
-    <p>The kolm platform is designed for enterprise and developer use and is not directed at consumers or children. We do not knowingly collect personal information from individuals under the age of 13 (or the applicable minimum age in the relevant jurisdiction, which may be higher for EEA member states). If we become aware that such data has been collected, we will delete it promptly. To report a concern, contact <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    <h2><span class="n">12.</span> Children</h2>
+    <p>The kolm platform is designed for enterprise and developer use and is not directed at consumers or children. We do not knowingly collect personal information from individuals under the age of 13 (or the applicable minimum age in the relevant jurisdiction, which may be higher for EEA member states). If we become aware that such data has been collected, we will delete it promptly. To report a concern, contact <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
 
-    <h2>13. Changes to this policy</h2>
+    <h2><span class="n">13.</span> Changes to this policy</h2>
     <p>Material changes to this Privacy Policy will be announced by email to the account contact at least 30 days before they take effect. A dated summary of changes will be posted to the kolm.ai changelog. Non-material changes (clarifications, vendor address updates, typographic corrections) will be posted to the changelog without a mandatory advance notice period. Every version of this policy corresponds to a dated entry in the public changelog; previous versions are accessible through the changelog archive.</p>
 
-    <h2>14. Governing law</h2>
+    <h2><span class="n">14.</span> Governing law</h2>
     <p>This Privacy Policy is governed by the laws of the State of Delaware, United States, without regard to conflict-of-law provisions, except where applicable data-protection law (including GDPR) requires otherwise. Disputes arising under this policy are subject to the dispute-resolution provisions in the kolm Terms of Service.</p>
 
-    <h2>15. Contact</h2>
+    <h2><span class="n">15.</span> Contact</h2>
     <p>For all privacy enquiries, subject-rights requests, data-processing agreements, residency addenda, and incident reports:</p>
     <ul>
-      <li>Email: <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a></li>
+      <li>Email: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></li>
       <li>Response commitment: acknowledged within 2 business days; substantive response within 30 days for subject-rights requests.</li>
     </ul>
-    <p>There is no separate privacy desk address or DPO address. All privacy matters are routed through <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    <p>There is no separate privacy desk address or DPO address. All privacy matters are routed through <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
 
   </div>
 </section>
 
-<section class="section section--ink reveal cta-final">
+<section class="section reveal cta-final">
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>We will respond within 2 business days.</h2>
     <div class="hero__cta">
       <a class="btn btn--primary" href="mailto:dev@kolm.ai">Contact dev@kolm.ai</a>
       <a class="btn btn--ghost" href="/trust">Trust center</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -259,24 +294,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -284,7 +322,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

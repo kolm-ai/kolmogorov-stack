@@ -1,0 +1,56 @@
+{
+  "id": "d1-customer-segments",
+  "track": "demand",
+  "prompt": "2026: kolm.ai's CUSTOMER is the company that SHIPS an AI agent/LLM feature and must clear an enterprise buyer's SECURITY REVIEW to close the deal. Segment these customers precisely and for EACH give (cite real posts/data 2025-2026): (1) segment name + size signal; (2) the JOB TO BE DONE; (3) the TRIGGER event that makes them buy NOW (first enterprise prospect, a security questionnaire lands in the inbox, a SOC 2 demand, an EU AI Act/Art-12 deadline, a failed deal); (4) what they do TODAY to handle the AI portion (ignore it, fill the questionnaire by hand, buy a pentest, point at SOC 2, use Vanta); (5) who is the buyer + budget authority (founder, CTO, head of security, GRC lead); (6) willingness to pay for a signed AI audit artifact and price sensitivity; (7) urgency 1-5. Segments to consider: seed/pre-A AI startup selling to enterprise; Series A-B AI-native SaaS; incumbent SaaS bolting on an AI agent; AI agent platform/infra vendor; regulated-vertical AI (fintech/healthtech/legal). Be concrete, quote founders/buyers.",
+  "content": "**Segment 1: Seed/pre-A AI startup selling to enterprise** (size signal: common YC/early-stage cohort; many 5-15 person teams shipping agents/workflows by mid-2026).[[1]](https://x.com/sojimathewj/status/2054930746402652574)[[2]](https://x.com/BillLi_AI/status/2042165935747023216)\n\n- **Job to be done**: Ship an AI agent/LLM feature and pass the first enterprise security review/security questionnaire to close the initial $50K+ ACV deal without derailing the round or runway.\n- **Trigger event**: First enterprise prospect lands a 200-600+ question SIG/CAIQ-style questionnaire in the inbox (or demands SOC 2 + AI-specific controls); or a failed/lost deal explicitly blamed on \"no audit artifact.\"[[2]](https://x.com/BillLi_AI/status/2042165935747023216)[[3]](https://secureflo.net/ai-security-questionnaires-why-most-startups-fail/)\n- **What they do today**: Fill the questionnaire by hand (founder or one engineer loses a weekend or more); ignore AI-specific questions or answer generically; refuse paid tools like Vanta/Drata due to cost.[[2]](https://x.com/BillLi_AI/status/2042165935747023216)\n- **Buyer + budget authority**: Founder/CTO (often the same person) with full budget authority; extremely price-sensitive but will pay for anything that unblocks revenue.\n- **Willingness to pay for signed AI audit artifact**: High (willing to pay $99 one-time or low monthly for automation); views it as deal-saver vs. existential blocker.[[2]](https://x.com/BillLi_AI/status/2042165935747023216)\n- **Urgency**: 5 (direct revenue impact; stalls or kills early enterprise deals).\n\n**Segment 2: Series A-B AI-native SaaS** (size signal: post-seed teams with product-market fit, raising Series A/B; focused on agentic workflows).[[1]](https://x.com/sojimathewj/status/2054930746402652574)\n\n- **Job to be done**: Standardize repeatable responses to enterprise security reviews and AI governance questions so sales cycles shorten from months to weeks.\n- **Trigger event**: Repeated security questionnaires across multiple prospects (or first SOC 2 demand from a larger buyer); or explicit buyer feedback that \"process is the moat\" for incumbents.[[1]](https://x.com/sojimathewj/status/2054930746402652574)\n- **What they do today**: Manual filling by security analyst or founder (2-6 weeks per questionnaire); start exploring or buying Vanta/Drata/Sprinto-style tools; begin SOC 2 journey (first-year Type 2 costs often $40K–$120K).[[4]](https://soc2auditors.org/insights/soc-2-for-ai-companies/)[[3]](https://secureflo.net/ai-security-questionnaires-why-most-startups-fail/)\n- **Buyer + budget authority**: Head of Security/GRC lead or CTO; budget approved once it ties to pipeline velocity.\n- **Willingness to pay for signed AI audit artifact**: Moderate-to-high ($1.5K–$8K/month for automation tools or equivalent audit support); ROI tied to closing multiple deals.[[5]](https://x.com/chatdomain/status/2051377108262547925)\n- **Urgency**: 4 (recurring pain across deals; automation or artifacts become competitive necessity).\n\n**Segment 3: Incumbent SaaS bolting on an AI agent** (size signal: established SaaS companies adding AI features/agents to existing products).\n\n- **Job to be done**: Extend existing security/compliance posture (SOC 2, etc.) to cover new AI agent capabilities without restarting full enterprise buyer reviews.\n- **Trigger event**: Enterprise buyers demand AI-specific controls or updates to existing questionnaires post-AI feature launch; or internal push to ship agents while maintaining deal velocity.\n- **What they do today**: Point at existing SOC 2/ISO reports and fill AI addendum questions by hand or with existing GRC tools; run targeted pentests or red-teaming on the AI layer.[[6]](https://x.com/stormrae_ai/status/2046281126814343458)\n- **Buyer + budget authority**: Head of Security or GRC lead (with CTO input); budget from existing compliance line items.\n- **Willingness to pay for signed AI audit artifact**: Moderate (incremental spend on AI-specific attestation or red-team report); price sensitivity lower than pure startups but tied to avoiding sales friction.\n- **Urgency**: 3 (bolting-on creates new review surface area, but baseline compliance already exists).\n\n**Segment 4: AI agent platform/infra vendor** (size signal: companies providing agent runtimes, sandboxes, or infra; selling to both startups and enterprises).\n\n- **Job to be done**: Provide artifacts proving the platform itself meets enterprise security standards so downstream customers (who ship agents on it) can clear reviews faster.\n- **Trigger event**: Customer (or prospect) feedback that platform security review is blocking their enterprise deals; or own sales cycle lengthening due to buyer scrutiny of underlying infra.\n- **What they do today**: Maintain SOC 2 or equivalent; offer pen-test reports or basic governance docs; customers still often fill additional questionnaires manually.[[6]](https://x.com/stormrae_ai/status/2046281126814343458)\n- **Buyer + budget authority**: CTO or Head of Security at the platform vendor; budget for platform-level attestations.\n- **Willingness to pay for signed AI audit artifact**: High (platform differentiation via certified AI security posture); can command premium pricing as enabler for customer deals.\n- **Urgency**: 4 (ecosystem effect—unblocks many downstream customers).\n\n**Segment 5: Regulated-vertical AI (fintech/healthtech/legal)** (size signal: vertical-specific AI tools facing heightened scrutiny).\n\n- **Job to be done**: Achieve AI-specific compliance (e.g., EU AI Act high-risk obligations, sector regs) alongside general security reviews to sell into regulated buyers.\n- **Trigger event**: EU AI Act deadlines (e.g., Aug 2026 obligations) or first regulated enterprise prospect demanding AI Act conformity assessment + security questionnaire; or failed deal due to compliance gap.[[7]](https://x.com/firstcompute/status/2063895185428222271)[[8]](https://x.com/LestatSv/status/2063548516031676890)\n- **What they do today**: Heavy manual effort on questionnaires + sector-specific compliance (often point to SOC 2 as baseline); higher spend on audits/red-teaming due to risk; incumbents sometimes advantaged by carve-outs.[[9]](https://x.com/bart/status/2063175813714120830)\n- **Buyer + budget authority**: GRC lead, Head of Security, or compliance officer (often with legal/founder oversight); budget authority higher due to regulatory risk.\n- **Willingness to pay for signed AI audit artifact**: Very high (existential for regulated sales); less price-sensitive if it enables market access.\n- **Urgency**: 5 (regulatory deadlines + buyer demands create hard external clocks).[[7]](https://x.com/firstcompute/status/2063895185428222271)\n\nThese segments are derived from 2025-2026 public discussions on X and industry reports showing SOC 2/AI questionnaires as deal blockers (especially for early-stage teams), manual filling pain points, automation tool demand, governance gaps in agent deployments, and EU AI Act compliance burdens. Real posts highlight founders manually handling questionnaires, the \"process moat\" of enterprises, and automation opportunities.",
+  "citations": [
+    "https://x.com/sojimathewj/status/2054930746402652574",
+    "https://x.com/BillLi_AI/status/2042165935747023216",
+    "https://secureflo.net/ai-security-questionnaires-why-most-startups-fail/",
+    "https://soc2auditors.org/insights/soc-2-for-ai-companies/",
+    "https://x.com/chatdomain/status/2051377108262547925",
+    "https://x.com/stormrae_ai/status/2046281126814343458",
+    "https://x.com/firstcompute/status/2063895185428222271",
+    "https://x.com/LestatSv/status/2063548516031676890",
+    "https://x.com/bart/status/2063175813714120830"
+  ],
+  "searched": [
+    "https://soc2auditors.org/insights/soc-2-for-ai-companies/",
+    "https://trusteraai.com/best-soc-2-compliance-tools-for-ai-startups/",
+    "https://fridrickcybertech.com/soc-2-for-startups-in-2026",
+    "https://www.cybercrestcompliance.com/blog/how-to-get-soc-2-for-startups",
+    "https://www.trycomp.ai/hub/soc-2-for-ai-companies",
+    "https://www.youtube.com/watch?v=uYEHln0x9GA",
+    "https://sprinto.com/blog/soc-2-updates/",
+    "https://secureflo.net/ai-security-questionnaires-why-most-startups-fail/",
+    "https://underdefense.com/blog/best-ai-soc-providers/",
+    "https://cloudsecurityalliance.org/blog/2024/05/30/the-path-to-soc-2-compliance-for-startups"
+  ],
+  "usage": {
+    "input_tokens": 26821,
+    "input_tokens_details": {
+      "cached_tokens": 13440
+    },
+    "output_tokens": 2607,
+    "output_tokens_details": {
+      "reasoning_tokens": 1129
+    },
+    "total_tokens": 29428,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 6,
+    "cost_in_usd_ticks": 559317500,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 1,
+      "x_search_calls": 5,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 15216,
+      "output_tokens": 1719
+    }
+  },
+  "attempts": 1
+}

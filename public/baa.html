@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Business Associate Agreement · kolm.ai</title>
 <meta name="description" content="kolm's Business Associate Agreement for regulated engagements involving Protected Health Information (PHI). Scope, permitted uses, safeguards, subcontractor flow-down, and how to execute.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -51,8 +51,52 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   }
 }
 </script>
+<style>
+/* page-local: long-form legal prose on the dark paper, v2 tokens only */
+.legal { max-width: 72ch; }
+.legal h2 { margin-top: var(--s7); }
+.legal > h2:first-of-type { margin-top: var(--s5); }
+.legal h3 { margin-top: var(--s5); margin-bottom: var(--s3); }
+.legal p { margin: 0 0 var(--s3); color: var(--ink-2); max-width: 72ch; }
+.legal ul { margin: var(--s3) 0 var(--s4); padding-left: 1.25em; display: grid; gap: 10px; }
+.legal li { color: var(--ink-2); }
+.legal li::marker { color: var(--accent); }
+.legal strong { color: var(--ink); font-weight: 600; }
+.legal a:not([class]) { color: var(--ink); border-bottom: 1px solid var(--line-2); transition: border-color 140ms; }
+.legal a:not([class]):hover { border-color: var(--accent); }
+.legal-updated { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-3); margin-top: var(--s4); }
+.legal-updated strong { color: var(--ink-2); font-weight: 500; }
+</style>
+<style>
+/* Legal typesetting layer (page-scoped, identical across the legal group).
+   Typeset, not designed: one measured column, mono article numbers,
+   hairlines between articles. Candidate for kolm-2026.css as .legal-doc. */
+.legal-doc { max-width: 64ch; }
+.legal-doc h2 { font-size: clamp(21px, 2.1vw, 25px); letter-spacing: -0.016em; line-height: 1.18; max-width: none; margin: var(--s7) 0 var(--s4); padding-top: var(--s6); border-top: 1px solid var(--line); }
+.legal-doc > h2:first-of-type, .legal-doc .idx + h2, .legal-doc .section__head h2 { border-top: 0; padding-top: 0; }
+.legal-doc > h2:first-of-type { margin-top: var(--s5); }
+.legal-doc .idx + h2, .legal-doc .section__head h2 { margin-top: 0; }
+.legal-doc h3 { margin: var(--s6) 0 10px; }
+.legal-doc .n, .section--ink h2 .n { display: block; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
+.legal-doc h3 .n { margin-bottom: 5px; }
+.legal-doc p, .legal-doc li { font-size: 15px; line-height: 1.75; color: var(--ink-2); }
+.legal-doc li { margin-bottom: 8px; }
+.legal-doc li::marker { color: var(--ink-3); }
+.legal-doc .art-rule { border: 0; border-top: 1px solid var(--line); margin: var(--s7) 0; }
+.legal-doc--wide { max-width: none; }
+.legal-meta { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-3); margin-top: var(--s4); font-variant-numeric: tabular-nums; }
+.legal-meta b, .legal-meta strong { color: var(--ink-2); font-weight: 500; }
+.legal-toc { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 2px 20px; margin: var(--s5) 0 var(--s3); }
+.legal-toc .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.legal-toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 36px; font-size: 13.5px; line-height: 2.05; color: var(--ink-3); }
+.legal-toc a { color: var(--ink-2); }
+.legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.legal-card b, .legal-card strong { color: var(--ink); }
+@media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+</style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <hr class="foil-strip" aria-hidden="true">
 
@@ -75,7 +119,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -83,44 +127,43 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
-<!-- Hero -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<!-- ============================================================ HERO -->
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:64ch">
-      <span class="idx">01 / Business Associate</span>
-      <h1>Business Associate Agreement</h1>
-      <p class="lede">When an audit engagement touches a Covered Entity's Protected Health Information (PHI), kolm may act as a Business Associate under 45 CFR Parts 160 and 164. This agreement sets the permitted uses and disclosures of PHI, the safeguards we apply, and each party's obligations for the life of the engagement.</p>
-      <p style="font-size:14px;color:var(--ink-3);margin-top:0">Last updated: <strong>2026-06-07</strong></p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="mailto:dev@kolm.ai">Request the BAA</a>
-        <a class="btn btn--ghost" href="/trust">Trust center</a>
-      </div>
+    <p class="eyebrow">Legal · Regulated engagements</p>
+    <h1>Business Associate <span class="go">Agreement</span></h1>
+    <p class="lede">When an audit engagement touches a Covered Entity's Protected Health Information (PHI), kolm may act as a Business Associate under 45 CFR Parts 160 and 164. This agreement sets the permitted uses and disclosures of PHI, the safeguards we apply, and each party's obligations for the life of the engagement.</p>
+    <p class="legal-meta">Last updated: <strong>2026-06-07</strong></p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="mailto:dev@kolm.ai">Request the BAA</a>
+      <a class="btn btn--ghost" href="/trust">Trust center</a>
     </div>
   </div>
 </section>
 
-<!-- Long-form legal prose -->
+<!-- ============================================================ 01. THE AGREEMENT -->
 <section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">02 / Agreement</span>
+  <div class="wrap">
+    <span class="idx">01 / The agreement</span>
+    <div class="legal legal-doc">
 
-    <h2>1. Definitions</h2>
+    <h2><span class="n">1.</span> Definitions</h2>
     <p>The following definitions apply throughout this Business Associate Agreement and are drawn from 45 CFR Part 160 and Subparts A and E of 45 CFR Part 164 unless a more specific definition is given below.</p>
     <ul>
       <li><strong>Business Associate.</strong> kolm.ai ("kolm"), which provides AI-agent audit, attestation, and evidence services to Covered Entities and their downstream Business Associates. kolm is not itself a Covered Entity.</li>
       <li><strong>Covered Entity.</strong> The healthcare provider, health plan, or healthcare clearinghouse that executes this Agreement and whose audit engagement may involve Protected Health Information (PHI).</li>
       <li><strong>Protected Health Information (PHI).</strong> Individually identifiable health information, as defined at 45 CFR 160.103, created, received, maintained, or transmitted by kolm on behalf of the Covered Entity in the course of an audit engagement.</li>
       <li><strong>Security Incident.</strong> The attempted or successful unauthorized access, use, disclosure, modification, or destruction of information or interference with system operations in an information system that processes PHI, as defined at 45 CFR 164.304.</li>
-      <li><strong>Subcontractor.</strong> A person or entity that creates, receives, maintains, or transmits PHI on behalf of kolm in support of an audit engagement. Subcontractors are listed at <a href="/trust" style="color:var(--ok)">/trust</a>.</li>
+      <li><strong>Subcontractor.</strong> A person or entity that creates, receives, maintains, or transmits PHI on behalf of kolm in support of an audit engagement. Subcontractors are listed at <a href="/trust">/trust</a>.</li>
     </ul>
 
-    <h2>2. Scope and applicability</h2>
+    <h2><span class="n">2.</span> Scope and applicability</h2>
     <p>This Business Associate Agreement applies when, and only when, a kolm audit engagement involves PHI belonging to the Covered Entity. kolm's standard agent-security audit process does not require access to PHI; this agreement covers regulated engagements where the Covered Entity chooses to include PHI-bearing data as part of the evidence scope. If no PHI is in scope, this agreement has no operative effect.</p>
     <p>Engagements where PHI may be in scope include: AI-agent audits for healthcare providers or payors where the agent under review processes patient records; red-team assessments of systems that handle clinical notes or claims data; and audit-report generation where the evidence set includes PHI-derived inputs provided by the Covered Entity.</p>
 
-    <h2>3. Permitted uses and disclosures of PHI</h2>
+    <h2><span class="n">3.</span> Permitted uses and disclosures of PHI</h2>
     <p>kolm may use or disclose PHI received from, or created on behalf of, the Covered Entity only as follows:</p>
     <ul>
       <li>As necessary to perform the audit services described in the master engagement agreement, including generating the cryptographically signed evidence report delivered to the Covered Entity.</li>
@@ -130,7 +173,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </ul>
     <p>PHI is processed only as permitted under this agreement and the applicable Security Rule safeguards. kolm will not use or disclose PHI for marketing purposes, for training shared or general-purpose models, or for any purpose not expressly permitted by this agreement or required by law.</p>
 
-    <h2>4. Safeguards</h2>
+    <h2><span class="n">4.</span> Safeguards</h2>
     <p>kolm will implement and maintain administrative, physical, and technical safeguards that reasonably and appropriately protect the confidentiality, integrity, and availability of any PHI that kolm creates, receives, maintains, or transmits on behalf of the Covered Entity, in accordance with 45 CFR Part 164 Subpart C (the Security Rule).</p>
     <ul>
       <li><strong>Administrative safeguards (45 CFR 164.308).</strong> Risk analysis conducted prior to any engagement that is in scope; workforce training on PHI handling; designated security responsibility; and documented policies for PHI access control and incident response.</li>
@@ -139,11 +182,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <li><strong>Organizational requirements (45 CFR 164.314).</strong> Subcontractor agreements substantially equivalent to this agreement; policies and procedures maintained in written form; documentation retained for six years from creation or last effective date, whichever is later.</li>
     </ul>
 
-    <h2>5. Subcontractor flow-down</h2>
+    <h2><span class="n">5.</span> Subcontractor flow-down</h2>
     <p>To the extent that kolm uses a Subcontractor to create, receive, maintain, or transmit PHI on kolm's behalf in the course of an audit engagement, kolm will execute a written agreement with that Subcontractor requiring the Subcontractor to comply with the same restrictions, conditions, and requirements that apply to kolm under this Business Associate Agreement, consistent with 45 CFR 164.308(b)(3) and 164.314(a).</p>
-    <p>Subcontractors that may receive PHI in the course of an audit engagement are listed on the trust page at <a href="/trust" style="color:var(--ok)">/trust</a>. The Covered Entity will receive prior written notice before any new Subcontractor with potential PHI exposure is added to the engagement. If the Covered Entity objects to the addition of a Subcontractor within fourteen days of notice, the parties will work in good faith to resolve the objection; if the objection cannot be resolved, the Covered Entity may terminate the engagement without penalty with respect to the Subcontractor change.</p>
+    <p>Subcontractors that may receive PHI in the course of an audit engagement are listed on the trust page at <a href="/trust">/trust</a>. The Covered Entity will receive prior written notice before any new Subcontractor with potential PHI exposure is added to the engagement. If the Covered Entity objects to the addition of a Subcontractor within fourteen days of notice, the parties will work in good faith to resolve the objection; if the objection cannot be resolved, the Covered Entity may terminate the engagement without penalty with respect to the Subcontractor change.</p>
 
-    <h2>6. Reporting of impermissible use or disclosure; Security Incidents</h2>
+    <h2><span class="n">6.</span> Reporting of impermissible use or disclosure; Security Incidents</h2>
     <p>kolm will report to the Covered Entity any use or disclosure of PHI not provided for by this agreement of which kolm becomes aware. Reporting obligations are as follows:</p>
     <ul>
       <li><strong>Breach of unsecured PHI.</strong> Written notice to the Covered Entity within thirty (30) calendar days of discovery by kolm, as required by 45 CFR 164.410. The notice will include the identification of each individual whose unsecured PHI has been, or is reasonably believed to have been, accessed, acquired, used, or disclosed; a brief description of what happened; the types of PHI involved; the steps individuals should take to protect themselves; a brief description of what kolm is doing to investigate, mitigate, and prevent further occurrences; and contact information for the Covered Entity's questions.</li>
@@ -151,68 +194,79 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <li><strong>Impermissible use or disclosure.</strong> Any other use or disclosure of PHI not permitted by this agreement will be reported to the Covered Entity within thirty (30) calendar days of discovery. Notification under this subsection does not itself constitute a determination that a breach requiring individual notification has occurred; that determination remains with the Covered Entity.</li>
     </ul>
 
-    <h2>7. Access, amendment, and accounting of disclosures</h2>
-    <h3>7.1 Access by the Covered Entity</h3>
+    <h2><span class="n">7.</span> Access, amendment, and accounting of disclosures</h2>
+    <h3><span class="n">7.1</span> Access by the Covered Entity</h3>
     <p>To the extent kolm maintains PHI in a designated record set on behalf of the Covered Entity, kolm will make such PHI available to the Covered Entity or, at the Covered Entity's direction, to the applicable individual within ten (10) business days of a written request, so as to enable the Covered Entity to meet its obligations under 45 CFR 164.524. PHI held by kolm in the course of an audit engagement is not ordinarily part of a designated record set; if the Covered Entity instructs kolm that certain PHI is part of such a set, kolm will treat it accordingly.</p>
 
-    <h3>7.2 Amendment</h3>
+    <h3><span class="n">7.2</span> Amendment</h3>
     <p>To the extent kolm maintains PHI in a designated record set on behalf of the Covered Entity, kolm will make such PHI available for amendment and will incorporate any amendments directed by the Covered Entity within ten (10) business days of a written request, so as to enable the Covered Entity to meet its obligations under 45 CFR 164.526. Amendments are recorded with a tombstone entry in the audit trail; the original signed evidence report is not altered.</p>
 
-    <h3>7.3 Accounting of disclosures</h3>
+    <h3><span class="n">7.3</span> Accounting of disclosures</h3>
     <p>kolm will maintain and make available, within thirty (30) business days of a written request, the information required to provide an accounting of disclosures of PHI as necessary to enable the Covered Entity to respond to a request by an individual for an accounting under 45 CFR 164.528. kolm will retain records of PHI disclosures for six (6) years from the date of the disclosure or the last effective date of this agreement, whichever is later.</p>
 
-    <h2>8. Return or destruction of PHI at termination</h2>
+    <h2><span class="n">8.</span> Return or destruction of PHI at termination</h2>
     <p>Upon termination of this agreement, kolm will, at the Covered Entity's election, either return to the Covered Entity all PHI received from or created on behalf of the Covered Entity, or destroy all such PHI and provide the Covered Entity with written certification of destruction. Return will be in a verifiable, machine-readable format; destruction will be via methods that render the PHI unreadable, indecipherable, and otherwise cannot be reconstructed. kolm will sign a destruction certificate for the Covered Entity's records.</p>
     <p>The return or destruction will be completed within thirty (30) calendar days of the termination effective date. If return or destruction is not feasible, kolm will extend the protections of this agreement to the PHI and limit further uses and disclosures to those purposes that make the return or destruction infeasible, for as long as kolm retains the PHI.</p>
 
-    <h2>9. Term and termination</h2>
-    <h3>9.1 Term</h3>
+    <h2><span class="n">9.</span> Term and termination</h2>
+    <h3><span class="n">9.1</span> Term</h3>
     <p>This agreement is effective as of the date both parties execute the master engagement agreement and remains in effect until that agreement terminates or expires, unless terminated earlier under this section.</p>
 
-    <h3>9.2 Termination for cause</h3>
+    <h3><span class="n">9.2</span> Termination for cause</h3>
     <p>Either party may terminate this agreement if the other party materially breaches a material provision of this agreement and fails to cure the breach within thirty (30) calendar days of receiving written notice specifying the breach. The Covered Entity may terminate immediately upon written notice to kolm if the Covered Entity determines that a cure is not possible.</p>
 
-    <h3>9.3 Effect of termination</h3>
+    <h3><span class="n">9.3</span> Effect of termination</h3>
     <p>Sections 3 (Permitted uses and disclosures), 4 (Safeguards), 7.3 (Accounting of disclosures), and 8 (Return or destruction) survive termination. Upon termination, the obligations in Section 8 apply immediately.</p>
 
-    <h2>10. Miscellaneous</h2>
-    <h3>10.1 Governing law</h3>
+    <h2><span class="n">10.</span> Miscellaneous</h2>
+    <h3><span class="n">10.1</span> Governing law</h3>
     <p>This agreement is governed by the laws of the State of Delaware, without regard to conflict-of-laws principles, except to the extent federal law (including HIPAA, 45 CFR Parts 160 and 164) preempts or supersedes state law. For federal agency customers, state government customers, and customers in jurisdictions where local rules require a different governing law, the parties will negotiate an appropriate modification.</p>
 
-    <h3>10.2 Indemnification</h3>
+    <h3><span class="n">10.2</span> Indemnification</h3>
     <p>Each party will indemnify, defend, and hold harmless the other party from and against claims, losses, liabilities, costs, and expenses (including reasonable legal fees) arising out of or relating to the indemnifying party's breach of this agreement or negligent or willful acts or omissions in connection with its obligations under this agreement. Liability caps and carve-outs are negotiated in the master engagement agreement; this agreement does not impose or waive any caps on its own.</p>
 
-    <h3>10.3 Regulatory compliance</h3>
+    <h3><span class="n">10.3</span> Regulatory compliance</h3>
     <p>This agreement is intended to comply with HIPAA and the HITECH Act as implemented in 45 CFR Parts 160 and 164. To the extent any provision of this agreement conflicts with an applicable requirement of those regulations, the regulations control. The parties will amend this agreement as necessary to comply with changes in applicable law.</p>
 
-    <h3>10.4 No third-party beneficiaries</h3>
+    <h3><span class="n">10.4</span> No third-party beneficiaries</h3>
     <p>This agreement is for the sole benefit of the Covered Entity and kolm and does not create any rights in any third party, except as required by applicable law.</p>
 
-    <h3>10.5 Entire agreement</h3>
+    <h3><span class="n">10.5</span> Entire agreement</h3>
     <p>This Business Associate Agreement, together with the master engagement agreement into which it is incorporated, constitutes the entire agreement of the parties with respect to the subject matter hereof and supersedes all prior negotiations, representations, or agreements relating to the same subject matter.</p>
 
-    <h2>11. How to execute this agreement</h2>
+    <h2><span class="n">11.</span> How to execute this agreement</h2>
     <p>Regulated engagements involving PHI require a countersigned copy of this agreement before any PHI-bearing data is included in the audit scope. The process is as follows:</p>
     <ul>
-      <li>Email <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a> with your legal entity name, whether you are a Covered Entity or a downstream Business Associate, and whether you would like the kolm template or prefer to provide your own for redline. The contact form at <a href="/contact" style="color:var(--ok)">/contact</a> may also be used.</li>
+      <li>Email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> with your legal entity name, whether you are a Covered Entity or a downstream Business Associate, and whether you would like the kolm template or prefer to provide your own for redline. The contact form at <a href="/contact">/contact</a> may also be used.</li>
       <li>kolm will deliver the template the same business day. Material redlines are returned within five business days of receipt.</li>
       <li>A countersigned PDF is returned within two business days of agreed final text. A sales call is not required to execute the agreement.</li>
       <li>Once the agreement is in place, you are added to the Subcontractor notice list so that any future subprocessor change with PHI exposure reaches you with the prior notice this agreement requires.</li>
       <li>For OCR audits, IRB reviews, or downstream Covered Entity evidence requests, kolm responds to written evidence requests within five business days. The signed evidence report is verifiable offline; many audit questions resolve at that layer without further correspondence.</li>
     </ul>
-    <p>All BAA inquiries and breach reports go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. Acknowledged within one business day.</p>
+    <p>All BAA inquiries and breach reports go to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>. Acknowledged within one business day.</p>
 
+    </div>
   </div>
 </section>
 
-<section class="section section--ink reveal cta-final">
+<!-- ============================================================ 02. EXECUTE -->
+<section class="section section--ink reveal">
   <div class="wrap">
-    <h2>Start a regulated engagement.</h2>
-    <p class="lede" style="text-align:center;max-width:60ch;margin:0 auto 24px">For audit engagements that involve Protected Health Information, email us to initiate the BAA process. No sales call required to countersign.</p>
-    <div class="hero__cta">
+    <div class="section__head">
+      <span class="idx">02 / Execute</span>
+      <h2>Start a regulated engagement.</h2>
+      <p class="lede">For audit engagements that involve Protected Health Information, email us to initiate the BAA process. No sales call required to countersign.</p>
+    </div>
+    <div class="hero__cta" style="margin-top:0">
       <a class="btn btn--primary" href="mailto:dev@kolm.ai">Email dev@kolm.ai</a>
       <a class="btn btn--ghost" href="/trust">Trust center</a>
     </div>
+    <div class="band" style="padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -234,24 +288,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -259,7 +316,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

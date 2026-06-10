@@ -147,8 +147,8 @@ function realFindingIds(auditResult) {
 
 /* ----------------------------------- tests ------------------------------------ */
 
-test('registry exposes the three connectors', () => {
-  assert.deepEqual([...SOURCES].sort(), ['datadog', 'langsmith', 'otel']);
+test('registry exposes the five connectors', () => {
+  assert.deepEqual([...SOURCES].sort(), ['datadog', 'langfuse', 'langsmith', 'openinference', 'otel']);
   for (const s of SOURCES) assert.equal(typeof connectors[s].normalize, 'function');
 });
 

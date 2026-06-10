@@ -9,23 +9,25 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>For enterprise buyers · kolm.ai</title>
-<meta name="description" content="You are vetting a vendor's autonomous agent. Do not take their word for it. Open their signed kolm report, verify it offline against their public key, and read every finding in the frameworks you already enforce. No account, no kolm server in the trust path.">
-<meta name="theme-color" content="#F6F7F4">
+<title>For enterprise buyers: run the check yourself · kolm.ai</title>
+<meta name="description" content="You are vetting a vendor's AI agent. Do not weigh how convincing they sound. Open their signed kolm report, verify it offline against their public key, and read every finding in the frameworks you already enforce. No account, no kolm server in the trust path.">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="For enterprise buyers: run the check yourself">
+<meta property="og:title" content="For enterprise buyers: run the check yourself · kolm.ai">
 <meta property="og:description" content="Verify a vendor's signed evidence report offline, against their public key, with no kolm server in the trust path. Two checks, your browser, the frameworks you enforce.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/solutions/enterprise-buyers">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="kolm.ai, signed security evidence for AI agents entering the enterprise.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="For enterprise buyers · kolm">
+<meta name="twitter:title" content="For enterprise buyers: run the check yourself · kolm.ai">
+<meta name="twitter:description" content="Verify a vendor's signed evidence report offline, against their public key, with no kolm server in the trust path.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/solutions/enterprise-buyers">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -37,9 +39,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://kolm.ai/solutions/enterprise-buyers",
+  "url": "https://kolm.ai/solutions/enterprise-buyers",
+  "name": "For enterprise buyers: run the check yourself",
+  "description": "How a security review team verifies a vendor's signed kolm evidence report offline, against the issuer's public key, and reads every finding in the frameworks it already enforces.",
+  "inLanguage": "en-US",
+  "isPartOf": { "@type": "WebSite", "@id": "https://kolm.ai/#website", "url": "https://kolm.ai/", "name": "kolm.ai" },
+  "audience": { "@type": "Audience", "audienceType": "Enterprise security review teams vetting AI agents" }
+}
+</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
 
 <!-- ============================================================ NAV -->
@@ -62,7 +79,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -70,206 +87,237 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- ============================================================ 1. HERO -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:70ch">
-      <h1>Don't take the vendor's word. Run the check yourself.</h1>
-      <p class="lede">
-        An autonomous agent is asking for access to your environment. A questionnaire moves
-        the risk onto your desk. A signed evidence report does not. Open the vendor's kolm
-        report, verify it offline against their public key, and read every finding in the
-        frameworks you already enforce. No account, and no kolm server in the trust path.
-      </p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="/verify">Verify a report</a>
-        <a class="btn btn--ghost" href="/checks">See what we test</a>
+    <div class="hero__grid">
+      <div>
+        <p class="eyebrow">For security reviewers</p>
+        <h1 class="hero__h1">Don't take the vendor's word. <span class="go">Run the check yourself.</span></h1>
+        <p class="lede">
+          A vendor's agent wants access to your environment. Their questionnaire moves the risk onto your desk; a signed report does not. Open it, verify it offline against their public key, read the findings in your frameworks.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="/verify">Verify a report</a>
+          <a class="btn btn--ghost" href="/sample-audit-report.json" download>Download the sample</a>
+        </div>
+        <div class="hero__proof" aria-label="Proof at a glance">
+          <span><i class="dot" aria-hidden="true"></i>Ed25519 signed · verifies offline</span>
+          <span><i class="dot" aria-hidden="true"></i>Eight controls · Six frameworks</span>
+          <span><i class="dot" aria-hidden="true"></i>No account · no kolm server in the path</span>
+        </div>
       </div>
-      <div class="trustline" aria-label="What the check gives you">
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline, in your browser</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Pinned to the issuer's key</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act</span>
-      </div>
+
+      <!-- the artifact IS the hero image: what lands on the reviewer's desk -->
+      <aside class="artifact" aria-label="The signed report a vendor hands you">
+        <div class="rep">
+          <div class="rep__bar">
+            <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="t">kolm · readiness report</span>
+            <span class="chip chip--ok">signed · ed25519</span>
+          </div>
+          <div class="rep__sheet">
+            <div class="rep__head">
+              <span class="rep__sub">Helpwise support &amp; billing agents</span>
+              <span class="rep__id">asrr_sample</span>
+            </div>
+            <div class="sev">
+              <div class="sev__bar" aria-hidden="true"><i class="s-h"></i><i class="s-m"></i><i class="s-l"></i><i class="s-i"></i></div>
+              <div class="sev__row"><span class="lbl">findings</span><span>13 · <b>7 high</b> · 4 medium · 1 low · 1 info</span></div>
+            </div>
+            <div class="find">
+              <span class="pill">high</span>
+              <div>
+                <div class="find__t">Over-permission on a shared key</div>
+                <div class="find__e">support-agent on shared-prod-key grants 10 tools, uses 4</div>
+                <div class="find__m">ASR-1 least privilege → SOC 2 CC6</div>
+              </div>
+            </div>
+            <div class="find__more">+ 12 more findings, each inside the signed object</div>
+          </div>
+          <div class="rep__sig" translate="no">
+            <div class="sig__row"><span class="sig__k">signature</span><span class="sig__v">ed25519:9kWQBu5kLlJ8qSaPgyu39K335ewB8hS8-ckKlcB9i9IDhxmYf0ojWdqJfvECIIYh89ljitxhSq4MIV1gaG9aDw</span></div>
+            <div class="sig__row"><span class="sig__k">key</span><span>410302c93becdcc3...</span><span class="sig__ok">✓ verifies offline</span></div>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 2. PROOF STRIP -->
-<section class="section" style="padding-top:0;border-top:0" aria-label="Frameworks">
-  <div class="wrap">
-    <h2 class="sr-only">Mapped to the standards you cite</h2>
-    <hr class="rule">
-    <div class="band">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="band__item">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        Verified offline. Zero servers in the trust path
-      </span>
-      <span class="band__item">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <a href="/transparency-log">Append-only transparency log</a>
-      </span>
-    </div>
-    <div class="band" style="padding-top:0">
-      <span class="ctrlid">SOC 2 TSC</span>
-      <span class="ctrlid">ISO 42001</span>
-      <span class="ctrlid">NIST AI RMF</span>
-      <span class="ctrlid">EU AI Act Art.12 · Art.14</span>
-      <span class="ctrlid">OWASP Agentic / LLM Top 10</span>
-      <span class="ctrlid">MITRE ATLAS</span>
-    </div>
-    <hr class="rule">
-  </div>
-</section>
-
-<!-- ============================================================ 3. THE SITUATION -->
+<!-- ============================================================ 2. THE SITUATION -->
 <section class="section reveal" id="situation">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / What you are reviewing</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">01 / You are vetting an autonomous agent</span>
-      <h2>A new kind of thing is asking for access.</h2>
-      <p class="lede">
-        This is not another SaaS integration. An agent holds credentials and acts on its own,
-        calling tools and reading customer data without a human at each step. Three things change
-        what your review has to confirm before it touches anything.
-      </p>
+      <h2>An agent is not another SaaS integration.</h2>
+      <p class="lede">It holds credentials and acts on its own, with no human at each step. Three things change what your review has to confirm.</p>
     </div>
     <div class="grid grid--3">
       <div class="card">
         <p class="card__k">It acts, it doesn't just answer</p>
         <h3>The blast radius is everything it can reach</h3>
-        <p>An agent runs on the scopes you grant it. If it holds more access than the job needs, often on one shared key, every one of those scopes is exposed the moment it is compromised or redirected.</p>
+        <p>If the agent holds more access than the job needs, often on one shared key, every scope is exposed the moment it is compromised or redirected.</p>
         <p class="card__map">ASR-1 · least privilege</p>
       </div>
       <div class="card">
         <p class="card__k">A log you can edit is not evidence</p>
         <h3>The trail has to survive an investigation</h3>
-        <p>When something goes wrong, you reconstruct it from the activity log. If that log can be changed after the fact, it cannot anchor an incident. You need it append-only and tamper-evident.</p>
+        <p>When something goes wrong, you reconstruct it from the activity log. A log that can be changed after the fact cannot anchor an incident.</p>
         <p class="card__map">ASR-2 · audit trail</p>
       </div>
       <div class="card">
         <p class="card__k">Confidence is not a control</p>
-        <h3>A polished answer is the vendor grading itself</h3>
-        <p>A questionnaire tells you what the vendor believes. It does not let you test a single claim. You are left to weigh how convincing the seller is, which is exactly the burden you want off your desk.</p>
+        <h3>A questionnaire is the vendor grading itself</h3>
+        <p>Self-attested answers tell you what the vendor believes. You cannot test a single line, so the burden of proof lands on your team.</p>
         <p class="card__map">ASR-6 · evidence</p>
+      </div>
+    </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 4. DEMAND EVIDENCE -->
-<section class="section reveal" id="evidence">
+<!-- ============================================================ 3. WHAT TO REQUIRE -->
+<section class="section sect--air reveal" id="evidence">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / What to require</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">02</span>
     <div class="section__head">
-      <span class="idx">02 / Demand evidence you can verify</span>
-      <h2>Ask for proof you can check, not answers you have to trust.</h2>
-      <p class="lede">
-        A questionnaire is point-in-time, unverifiable, and impossible to compare across vendors.
-        Require an artifact that carries its own proof, so the question stops being whether you
-        believe the vendor and becomes whether the signature checks out.
-      </p>
+      <h2>Proof you can check, not answers you have to trust.</h2>
+      <p class="lede">Require an artifact that carries its own proof. The question stops being whether you believe the vendor and becomes whether the signature checks out.</p>
     </div>
     <div class="grid grid--2">
       <div class="card">
         <p class="card__k">What you get today</p>
         <h3>A questionnaire</h3>
-        <p>Self-attested answers in a spreadsheet. Already stale the moment it is signed, with no way to test a single line. The burden of proof lands on your team, every vendor, every renewal.</p>
+        <p>Self-attested answers in a spreadsheet, stale the moment it is signed, impossible to compare across vendors. Untestable by design.</p>
       </div>
       <div class="card">
         <p class="card__k">What to require instead</p>
         <h3>A signed evidence report</h3>
-        <p>One canonical object, signed with Ed25519, with the issuer's public key inside it. You open it, check the signature yourself, and trace each finding to a control. The proof travels with the document.</p>
+        <p>One canonical object, signed with Ed25519, the issuer's public key inside it. You check the signature yourself and trace each finding to a control.</p>
       </div>
     </div>
     <ul class="ledger" style="margin-top:var(--s6)">
-      <li>A signed report, not a slide or a spreadsheet</li>
-      <li>The issuer's public key, so you can verify provenance, not just integrity</li>
-      <li>Findings mapped to the frameworks you already enforce</li>
-      <li>The scope statement carried inside the signed object, so you read exactly what was tested</li>
+      <li><b>A signed report</b>, not a slide or a spreadsheet</li>
+      <li><b>The issuer's public key</b> inside it, so you verify provenance, not just integrity</li>
+      <li><b>Findings mapped</b> to the frameworks you already enforce</li>
+      <li><b>The scope statement</b> carried inside the signed object, so you read exactly what was tested</li>
     </ul>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 5. HOW TO CHECK A REPORT (the ledger) -->
+<!-- ============================================================ 4. RUN THE CHECK -->
 <section class="section section--ink reveal" id="check">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / Run the check</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">03 / How to check a kolm report</span>
       <h2>Two checks. Your browser. No server.</h2>
-      <p class="lede">
-        Verification is two tiers, and both run on WebCrypto in your own browser. One confirms
-        the bytes are intact. The other confirms who signed them. kolm is never in the path,
-        so there is nothing for anyone to fake.
-      </p>
+      <p class="lede">Both run on WebCrypto in your own browser. One confirms the bytes are intact, the other confirms who signed them. kolm is never in the path.</p>
     </div>
-    <div class="grid grid--3">
+    <div class="grid grid--2" style="align-items:start">
       <div class="card">
-        <p class="card__k">Tier 1 · signature</p>
-        <h3>Edit one field, the seal breaks</h3>
-        <p>The Ed25519 signature covers the canonical bytes of the report. Change a finding or inflate a score, and the signature no longer matches, in front of you. This is integrity.</p>
+        <div class="flow__t-k">What runs in your browser</div>
+        <div class="fnode"><span class="fk">input</span><span>report.json · the signed object the vendor handed you</span></div>
+        <div class="fjoin" aria-hidden="true"></div>
+        <div class="fnode"><span class="fk">canonical</span><span>key-sorted, whitespace-free bytes</span></div>
+        <div class="fjoin" aria-hidden="true"></div>
+        <div class="fnode"><span class="fk">check</span><span>ed25519.verify(signature, public_key)</span></div>
+        <div class="fjoin" aria-hidden="true"></div>
+        <div class="fnode fnode--ok"><span class="fk">result</span><span>VALID · key 410302c93becdcc3... · pinned issuer</span></div>
       </div>
-      <div class="card">
-        <p class="card__k">Tier 2 · issuer</p>
-        <h3>A rogue key clears Tier 1, fails Tier 2</h3>
-        <p>Issuer provenance is checked against the keyring you expect. A fresh forged key can sign a clean report and pass the signature check, but it is not the issuer you pinned, so Tier 2 exposes it.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Offline · no server</p>
-        <h3>Nothing for anyone to fake</h3>
-        <p>Both checks run in-browser with WebCrypto. No account, no upload, no kolm server in the trust path. An asymmetric signature needs only the public key, and that key travels inside the report.</p>
+      <div class="grid" style="gap:14px;align-content:start">
+        <div class="card">
+          <p class="card__k">Tier 1 · signature</p>
+          <h3>Edit one field, the seal breaks</h3>
+          <p>The signature covers the canonical bytes. Change a finding or inflate a score and the match fails, in front of you. This is integrity.</p>
+        </div>
+        <div class="card">
+          <p class="card__k">Tier 2 · issuer</p>
+          <h3>A rogue key clears Tier 1, fails Tier 2</h3>
+          <p>The signing key is checked against the keyring you pinned. A forged key can sign a clean report; it is still not the issuer you expect.</p>
+        </div>
+        <div class="card">
+          <p class="card__k">Offline · no account</p>
+          <h3>Nothing for anyone to fake</h3>
+          <p>No upload, no portal, no kolm server in the trust path. The public key travels inside the report, so the check needs nothing else.</p>
+        </div>
       </div>
     </div>
-    <div class="hero__cta" style="margin-top:var(--s7)">
-      <a class="btn btn--ghost" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost" href="/sample-audit-report.json" download>Download a sample</a>
+    <div class="hero__cta" style="margin-top:var(--s6)">
+      <a class="btn btn--ghost" href="/verify">Try it live: verify a report</a>
+      <a class="btn btn--ghost" href="/sample-audit-report.json" download>Download the sample</a>
+    </div>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+    <p class="how__foot" style="margin-top:14px">Issuer key <a href="/keys/kolm-issuers.json" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">fa562154f99c95f4...</a> · <a href="/transparency-log" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">append-only transparency log</a> · <a href="/kolm-audit-verify.js" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">inspect the verifier source</a></p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 6. THE CROSSWALK -->
-<section class="section reveal" id="crosswalk">
+<!-- ============================================================ 5. THE CROSSWALK -->
+<section class="section sect--dense reveal" id="crosswalk">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">04 / The crosswalk</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">04</span>
     <div class="section__head">
-      <span class="idx">04 / What the crosswalk tells you</span>
       <h2>Every finding lands in a control you already enforce.</h2>
-      <p class="lede">
-        You should not have to translate a vendor's terms into yours. Six agent-security controls
-        map directly to the frameworks your review group already cites, so a reviewer traces each
-        result to a standard without leaving the report.
-      </p>
+      <p class="lede">Eight agent-security controls, mapped to the six frameworks your review group already cites. No translating the vendor's terms into yours.</p>
     </div>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Controls and framework mapping">
       <table class="tbl">
         <thead>
           <tr><th scope="col">Control</th><th scope="col">What it checks</th><th scope="col">Maps to</th></tr>
         </thead>
         <tbody>
-          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI · NIST MANAGE-1</td></tr>
+          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI03 · NIST MANAGE-1</td></tr>
           <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
           <tr><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
-          <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS</td></tr>
-          <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance</td><td class="mapped">ISO 42001 · NIST MAP-1</td></tr>
-          <tr><td><b>ASR-6</b> Evidence</td><td>Signed, logged, offline-verifiable report</td><td class="mapped">SOC 2 CC7 · ISO 42001</td></tr>
+          <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS AML.T0051</td></tr>
+          <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance</td><td class="mapped">ISO 42001 A.10 · OWASP ASI04</td></tr>
+          <tr><td><b>ASR-6</b> Evidence</td><td>Signed, logged, offline-verifiable report</td><td class="mapped">SOC 2 CC7 · CSA AICM A&amp;A-02</td></tr>
+          <tr><td><b>ASR-7</b> Memory and retrieval integrity</td><td>Retrieval sources enumerated and trusted; memory writes integrity-linked</td><td class="mapped">OWASP ASI06 · OWASP LLM08 · MITRE ATLAS AML.T0070</td></tr>
+          <tr><td><b>ASR-8</b> Multi-agent delegation</td><td>Handoffs attributable; sub-agents attenuated to a subset of authority</td><td class="mapped">OWASP ASI03 · OWASP ASI07 · CSA AICM IAM-16</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="hero__claim" style="margin-top:var(--s4)">
-      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
-    </p>
+    <p class="how__foot" style="margin-top:var(--s4)">The mapping travels inside the signed object. kolm maps findings to standards; it never certifies compliance. <a href="/checks" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">The full control catalog</a></p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 7. FINAL CTA -->
+<!-- ============================================================ 6. FINAL CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Require evidence, not assurances.</h2>
-    <p class="lede">Make "show me, don't tell me" the default for every agent entering your environment. Open a signed report and check it yourself, in your own browser.</p>
+    <p class="lede">Make "show me, don't tell me" the default for every agent entering your environment. Open a signed report and check it yourself.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/verify">Verify a report</a>
       <a class="btn btn--ghost" href="/contact">Talk to us</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -292,24 +340,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -317,7 +368,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

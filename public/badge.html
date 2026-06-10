@@ -11,8 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Embed the kolm verify badge: signed, offline-verifiable evidence · kolm.ai</title>
 <meta name="description" content="Put a verify badge on your site, docs, or README. It links to your public Trust Link, where anyone checks your signed evidence report against kolm's published issuer key, offline, with no account. Copy-paste HTML, Markdown, and a self-contained image snippet.">
-<meta name="keywords" content="verify badge, embeddable security badge, trust badge, signed evidence report, Ed25519 verification, offline verification, AI agent security, README badge, trust link, kolm.ai">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -89,14 +88,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       "@type": "Question",
       "name": "Can I change the badge color or wording?",
       "acceptedAnswer": { "@type": "Answer", "text": "Use any of the three snippets as published so the mark and the link stay intact. The badge must link to your own Trust Link and must not imply a result the signed report does not state." }
+    },
+    {
+      "@type": "Question",
+      "name": "What if my report goes stale or its signing key is revoked?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The static badge is a link and always opens your Trust Link, where the state shows in full. For a badge that updates on its own, embed the live status badge from your Trust Link: it greys to 'stale (Month YYYY)' after 30 days and to 'report revoked' if kolm revokes the signing key. A continuous plan re-signs on a schedule so it stays current." }
     }
   ]
 }
 </script>
 <style>
 /* page-scoped components: copy-paste snippet boxes + a live badge stage.
-   Names are namespaced so they never collide with the shared design system. */
-.snip { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper-2); overflow: hidden; box-shadow: 0 1px 2px rgba(14, 19, 16, 0.04); }
+   Names are namespaced so they never collide with the shared design system.
+   Dark evidence-room surfaces; the "light surface" stage borrows the sheet
+   tokens so the badge artwork is shown on real paper, like the report. */
+.snip { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper-2); overflow: hidden; }
 .snip__bar { display: flex; align-items: center; gap: var(--s3); padding: 11px var(--s5); border-bottom: 1px solid var(--line); background: var(--paper-sink); }
 .snip__name { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
 .snip__copy { margin-left: auto; }
@@ -104,15 +110,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .snip__note { padding: var(--s4) var(--s5); margin: 0; border-top: 1px solid var(--line); font-family: var(--sans); font-size: 13px; color: var(--ink-3); line-height: 1.6; }
 .snip__note b { color: var(--ink-2); font-weight: 600; }
 .copied { color: var(--accent-text) !important; border-color: var(--accent-edge) !important; background: var(--accent-soft) !important; }
-.badge-stage { display: flex; flex-direction: column; gap: var(--s4); align-items: center; justify-content: center; text-align: center; padding: var(--s8) var(--s5); border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper-2); }
-.badge-stage--dark { background: var(--ink-deep); border-color: var(--ink-deep); }
-.badge-stage__tag { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.badge-stage { display: flex; flex-direction: column; gap: var(--s4); align-items: center; justify-content: center; text-align: center; padding: var(--s8) var(--s5); border: 1px solid var(--sheet-line); border-radius: var(--r-lg); background: var(--sheet); }
+.badge-stage--dark { background: var(--ink-deep); border-color: var(--line); }
+.badge-stage__tag { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sheet-ink-3); }
 .badge-stage--dark .badge-stage__tag { color: var(--on-ink-3); }
 .badge-stage a { display: inline-flex; }
 .badge-stage img { display: block; width: 300px; height: 40px; max-width: 100%; }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
@@ -137,7 +144,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -145,15 +152,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- ============================================================ 1. HERO -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
   <div class="wrap">
     <div class="hero__grid">
       <div>
-        <span class="idx">Embeddable verify badge</span>
-        <h1>Put the proof where buyers already look.</h1>
+        <p class="eyebrow">Embeddable verify badge</p>
+        <h1 class="hero__h1">Put the proof <span class="go">where buyers already look.</span></h1>
         <p class="lede">
           You have a signed evidence report. Now make it findable. The kolm verify badge
           sits on your site, docs, or README and links straight to your Trust Link, where
@@ -172,7 +179,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
 
       <!-- live exhibit: the actual badge, on light and on dark, clickable -->
-      <aside aria-label="Live preview of the kolm verify badge">
+      <aside class="artifact" aria-label="Live preview of the kolm verify badge">
         <span class="tryit">Live preview</span>
         <div class="badge-stage" style="margin-bottom:var(--s4)">
           <span class="badge-stage__tag">On a light surface</span>
@@ -195,8 +202,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <!-- ============================================================ 2. WHAT IT IS -->
 <section class="section reveal" id="what">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / What it does</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">01 / What it does</span>
       <h2>A link, not a logo wall.</h2>
       <p class="lede">
         Most trust badges are decoration: an image that asserts something with nothing
@@ -224,14 +233,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p class="hero__claim" style="margin-top:var(--s5)">
       The badge is a signpost. The proof is the signed report it points to. <a href="/report" style="border-bottom:1px solid var(--line-2)">See the anatomy of a report.</a>
     </p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 3. SNIPPETS -->
-<section class="section reveal" id="snippets">
+<section class="section sect--dense reveal" id="snippets">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / Copy and paste</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">02</span>
     <div class="section__head">
-      <span class="idx">02 / Copy and paste</span>
       <h2>Three snippets. Pick the one your platform speaks.</h2>
       <p class="lede">
         Each one renders the same badge and links to your Trust Link. Replace
@@ -247,7 +261,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="snip__name">a / HTML, inline SVG</span>
           <button class="btn btn--ghost btn--sm snip__copy" type="button" data-copy="#snipA" data-label="Copy" aria-label="Copy the HTML inline SVG snippet">Copy</button>
         </div>
-        <pre class="snip__pre" id="snipA">&lt;a href="https://kolm.ai/v1/trust/your-slug" target="_blank" rel="noopener"
+        <pre class="snip__pre" translate="no" id="snipA">&lt;a href="https://kolm.ai/v1/trust/your-slug" target="_blank" rel="noopener"
    aria-label="kolm verifiable evidence: open the signed Trust Link"&gt;
   &lt;svg xmlns="http://www.w3.org/2000/svg" width="300" height="40" role="img"
        aria-label="kolm: verifiable evidence"&gt;
@@ -279,7 +293,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="snip__name">b / Markdown, for READMEs</span>
           <button class="btn btn--ghost btn--sm snip__copy" type="button" data-copy="#snipB" data-label="Copy" aria-label="Copy the Markdown snippet">Copy</button>
         </div>
-        <pre class="snip__pre" id="snipB">[![kolm: verifiable evidence](https://img.shields.io/badge/kolm-verifiable_evidence-11875A?labelColor=0E1310)](https://kolm.ai/v1/trust/your-slug)</pre>
+        <pre class="snip__pre" translate="no" id="snipB">[![kolm: verifiable evidence](https://img.shields.io/badge/kolm-verifiable_evidence-11875A?labelColor=0E1310)](https://kolm.ai/v1/trust/your-slug)</pre>
         <p class="snip__note">Best for GitHub, GitLab, and other READMEs, which strip inline SVG. This renders a flat badge in kolm's colors through the third-party shields.io service. Prefer zero third-party calls? Host the SVG above yourself, or use snippet a on a platform that allows HTML.</p>
       </div>
 
@@ -289,7 +303,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="snip__name">c / Image, self-contained</span>
           <button class="btn btn--ghost btn--sm snip__copy" type="button" data-copy="#snipC" data-label="Copy" aria-label="Copy the self-contained image snippet">Copy</button>
         </div>
-        <pre class="snip__pre" id="snipC">&lt;a href="https://kolm.ai/v1/trust/your-slug" target="_blank" rel="noopener"&gt;
+        <pre class="snip__pre" translate="no" id="snipC">&lt;a href="https://kolm.ai/v1/trust/your-slug" target="_blank" rel="noopener"&gt;
   &lt;img width="300" height="40"
        alt="kolm: verifiable evidence, signed and offline-verifiable"
        src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iNDAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0ia29sbTogdmVyaWZpYWJsZSBldmlkZW5jZSI+PHRpdGxlPmtvbG0gdmVyaWZpYWJsZSBldmlkZW5jZTogc2lnbmVkIGFuZCBvZmZsaW5lLXZlcmlmaWFibGU8L3RpdGxlPjxjbGlwUGF0aCBpZD0iciI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0MCIgcng9IjgiLz48L2NsaXBQYXRoPjxnIGNsaXAtcGF0aD0idXJsKCNyKSI+PHJlY3Qgd2lkdGg9IjExOCIgaGVpZ2h0PSI0MCIgZmlsbD0iIzBFMTMxMCIvPjxyZWN0IHg9IjExOCIgd2lkdGg9IjE4MiIgaGVpZ2h0PSI0MCIgZmlsbD0iIzExODc1QSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2IDEwKSBzY2FsZSgwLjYyKSIgZmlsbD0iIzQ1RDk4RSI+PHJlY3QgeD0iNCIgeT0iNiIgd2lkdGg9IjQuNSIgaGVpZ2h0PSIyMCIgcng9IjAuNCIvPjxyZWN0IHg9IjEzIiB5PSI5IiB3aWR0aD0iNC41IiBoZWlnaHQ9IjE0IiByeD0iMC40Ii8+PHJlY3QgeD0iMjIiIHk9IjEyIiB3aWR0aD0iNC41IiBoZWlnaHQ9IjgiIHJ4PSIwLjQiLz48L2c+PHRleHQgeD0iNDIiIHk9IjI1LjUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNSIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI0VDRUZFQSI+a29sbTwvdGV4dD48cGF0aCBkPSJNMTM1IDIwLjVsNCA0IDgtOC41IiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48dGV4dCB4PSIxNTQiIHk9IjI1LjUiIGZvbnQtZmFtaWx5PSJTZWdvZSBVSSxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMy41IiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjRkZGRkZGIj52ZXJpZmlhYmxlIGV2aWRlbmNlPC90ZXh0PjwvZz48L3N2Zz4="&gt;
@@ -299,18 +313,79 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
     </div>
 
-    <p class="hero__claim" style="margin-top:var(--s5)" id="copy-status" role="status" aria-live="polite">
+    <p class="hero__claim" style="margin-top:var(--s5)" id="copy-status">
       Replace <b>your-slug</b> in every snippet with the slug from your Trust Link, for example
       <span class="mono">kolm.ai/v1/trust/acme-support-agent</span>.
     </p>
+    <span class="sr-only" role="status" id="copyNote"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3b. LIVE BADGE (truth states) -->
+<section class="section reveal" id="live">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / A badge that can go stale</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Want the badge itself to tell the truth? Point it at the live route.</h2>
+      <p class="lede">
+        The three snippets above are fixed artwork: a permanent link to your Trust Link, where
+        the report's real state always shows. If you would rather the badge image change on its
+        own as the evidence ages, embed the live status badge instead. It reads the same signals
+        the verifier reads, rendered as a small pill.
+      </p>
+    </div>
+
+    <div class="snip" style="margin-bottom:var(--s6)">
+      <div class="snip__bar">
+        <span class="snip__name">d / Live status badge</span>
+        <button class="btn btn--ghost btn--sm snip__copy" type="button" data-copy="#snipD" data-label="Copy" aria-label="Copy the live status badge snippet">Copy</button>
+      </div>
+      <pre class="snip__pre" translate="no" id="snipD">[![kolm agent security](https://kolm.ai/v1/trust/your-slug/badge.svg)](https://kolm.ai/v1/trust/your-slug)</pre>
+      <p class="snip__note">Best when you want the pill to reflect the current report without re-embedding. The image is served from your Trust Link, so it stays a pure link on your side and changes only as your evidence does. <b>Cached about five minutes.</b></p>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">Fresh, signed, in date</p>
+        <h3>Green: <span class="mono">N% ready</span></h3>
+        <p>A report generated within the last 30 days shows its readiness rollup, colored by band: green at 80 and up, amber from 50, red below 50.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Older than 30 days</p>
+        <h3>Grey: <span class="mono">stale (Month YYYY)</span></h3>
+        <p>Past 30 days the pill loses its color and names the month it was generated. The report stays verifiable; the badge simply stops vouching for its freshness. A continuous plan re-signs on a schedule, so the pill stays current instead of greying out.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Issuer key revoked</p>
+        <h3>Grey: <span class="mono">report revoked</span></h3>
+        <p>If kolm revokes the key a report was signed with, revocation outranks everything: the pill reads revoked and never shows a readiness number, because the signature can no longer be trusted.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Slug not found</p>
+        <h3>Grey: <span class="mono">unknown</span></h3>
+        <p>A slug that fits the link format but matches no report degrades to a neutral grey unknown pill rather than a false green, so a mistyped link never vouches for a report that is not there.</p>
+      </div>
+    </div>
+    <p class="hero__claim" style="margin-top:var(--s5)">
+      At the Trust Link the same evidence reads in full words: a report is <b>CURRENT</b> up to 30 days, <b>AGING</b> from 30 to 90, <b>STALE</b> past 90, and <b>VOID</b> if the key is revoked. The live badge collapses that into one conservative pill that greys out at 30 days.
+    </p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 4. WHAT HAPPENS ON CLICK (the ledger) -->
 <section class="section section--ink reveal" id="onclick">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">04 / At the click</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">03 / At the click</span>
       <h2>Where the badge leads, the math takes over.</h2>
       <p class="lede">
         The badge is the easy part. What makes it worth embedding is what happens after the
@@ -343,14 +418,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <a class="btn btn--ghost" href="/verify">Try the verifier</a>
       <a class="btn btn--ghost" href="/trust">See a Trust center</a>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 5. GUIDELINES -->
-<section class="section reveal" id="guidelines">
+<section class="section sect--air reveal" id="guidelines">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">05 / Use it well</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">05</span>
     <div class="section__head">
-      <span class="idx">04 / Use it well</span>
       <h2>A few rules so the badge keeps meaning something.</h2>
       <p class="lede">The badge is only as good as the link behind it. Keep it pointing at your own evidence and it stays a real signal.</p>
     </div>
@@ -376,14 +456,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__map">consistent</p>
       </div>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 6. FAQ -->
-<section class="section reveal" id="faq">
+<section class="section sect--dense reveal" id="faq">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">06 / Questions</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">05 / Questions</span>
       <h2>Before you embed.</h2>
     </div>
     <div class="grid grid--2">
@@ -391,22 +475,33 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="card"><h3>What does the badge actually prove?</h3><p>The badge itself is a link. The proof lives at your Trust Link: an Ed25519-signed report whose signature covers the exact bytes, so a reviewer can confirm it was not altered and was signed by the key they expect. <a href="/verify">Try it on the sample.</a></p></div>
       <div class="card"><h3>Where does my Trust Link come from?</h3><p>A live Trust Link ships with the continuous plans. Start a free scan, then move to a plan that keeps the evidence current. See <a href="/pricing">pricing</a>.</p></div>
       <div class="card"><h3>What happens when my report is re-attested?</h3><p>On a continuous plan the Trust Link stays current as the report is re-signed. The badge keeps pointing at the same link, so it always opens your latest signed evidence.</p></div>
+      <div class="card"><h3>What if my report goes stale or its key is revoked?</h3><p>The static badge stays a link, so it always opens your Trust Link, where the state shows plainly. For a badge that changes on its own, embed the live status badge: it greys to <span class="mono">stale (Month YYYY)</span> after 30 days and to <span class="mono">report revoked</span> if kolm revokes the signing key. A continuous plan re-signs on a schedule, so it stays current.</p></div>
       <div class="card"><h3>Will the Markdown badge work on GitHub?</h3><p>Yes. READMEs strip inline SVG, so snippet b renders a flat badge in kolm's colors through shields.io. For a zero-dependency badge, host the SVG yourself or use snippet a where HTML is allowed.</p></div>
       <div class="card"><h3>Is the badge artwork really ASCII-only?</h3><p>Yes. The SVG uses plain ASCII characters and embeds the kolm three-bar mark, so it pastes cleanly into any editor and renders the same everywhere.</p></div>
     </div>
     <p class="hero__claim" style="margin-top:var(--s4)">Already a customer? <a href="/dashboard">Find your Trust Link in your dashboard.</a></p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 7. FINAL CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Get a Trust Link. Wear the badge.</h2>
     <p class="lede">A signed report your buyer verifies in their own browser, and a badge that takes them straight to it.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/signup">Start free</a>
       <a class="btn btn--ghost" href="#snippets">Copy a snippet</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -429,28 +524,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
-        <a href="/compare">Compare</a>
-        <a href="/roi">ROI calculator</a>
-        <a href="/glossary">Glossary</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
-        <a href="/badge">Verify badge</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -458,7 +552,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>
@@ -495,21 +589,39 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       ok ? resolve() : reject(new Error('copy blocked'));
     });
   }
-  var status = document.getElementById('copy-status');
+  var note = document.getElementById('copyNote');
   var btns = document.querySelectorAll('[data-copy]');
   for (var i = 0; i < btns.length; i++) {
     (function (btn) {
+      var fullLabel = btn.getAttribute('aria-label');
       btn.addEventListener('click', function () {
         var pre = document.querySelector(btn.getAttribute('data-copy'));
         if (!pre) return;
         var label = btn.getAttribute('data-label') || 'Copy';
         copyText(pre.textContent).then(function () {
           btn.classList.add('copied'); btn.textContent = 'Copied';
-          if (status) status.setAttribute('data-note', 'Snippet copied');
-          setTimeout(function () { btn.classList.remove('copied'); btn.textContent = label; }, 1600);
+          if (fullLabel) btn.setAttribute('aria-label', 'Copied');
+          if (note) note.textContent = 'Snippet copied';
+          setTimeout(function () {
+            btn.classList.remove('copied'); btn.textContent = label;
+            if (fullLabel) btn.setAttribute('aria-label', fullLabel);
+            if (note) note.textContent = '';
+          }, 1600);
         }).catch(function () {
-          btn.textContent = 'Press Ctrl C';
-          setTimeout(function () { btn.textContent = label; }, 2000);
+          // select the snippet so the keyboard shortcut actually has something to copy
+          try {
+            var range = document.createRange(); range.selectNodeContents(pre);
+            var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+          } catch (e) {}
+          btn.textContent = 'Press Ctrl/Cmd C';
+          var msg = 'Copy blocked. The snippet is selected. Press Control C, or Command C on a Mac.';
+          if (fullLabel) btn.setAttribute('aria-label', msg);
+          if (note) note.textContent = msg;
+          setTimeout(function () {
+            btn.textContent = label;
+            if (fullLabel) btn.setAttribute('aria-label', fullLabel);
+            if (note) note.textContent = '';
+          }, 2600);
         });
       });
     })(btns[i]);

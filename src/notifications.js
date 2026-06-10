@@ -274,6 +274,12 @@ export const NOTIFICATION_EVENT_TYPES = [
   'compile_failed',
   'quota_warning',
   'recompile_suggested',
+  // Agent Security-Review (ASR) Continuous re-attestation events.
+  //   audit_report_ready   - a fresh signed report was published for a subject.
+  //   reattestation_drift  - a re-attestation produced a delta (new / resolved
+  //                          findings, or a readiness change) vs the prior cycle.
+  'audit_report_ready',
+  'reattestation_drift',
 ];
 
 const SETTINGS_TABLE = 'webhook_notification_settings';
@@ -315,6 +321,8 @@ export function getWebhookSettings(tenant) {
       compile_failed: true,
       quota_warning: true,
       recompile_suggested: true,
+      audit_report_ready: true,
+      reattestation_drift: true,
     },
     updated_at: null,
   };
@@ -353,14 +361,40 @@ export function setWebhookSettings(tenant, patch) {
   return next;
 }
 
+// A scalar field, hyphen-safe and length-capped, for a Slack section block.
+// ASCII only (a Slack payload may be persisted into a delivery log alongside
+// signed-report rows, so it stays locale-proof like the rest of this surface).
+function _slackField(label, value) {
+  return { type: 'mrkdwn', text: `*${label}*\n${String(value == null ? '-' : value).slice(0, 200)}` };
+}
+
 function buildSlackBlocks(eventType, payload) {
   const title = eventType.replace(/_/g, ' ');
-  const fields = [];
-  for (const [k, v] of Object.entries(payload || {})) {
-    if (typeof v === 'object') continue;
-    fields.push({ type: 'mrkdwn', text: `*${k}*\n${String(v).slice(0, 200)}` });
-    if (fields.length >= 10) break;
+  const p = payload && typeof payload === 'object' ? payload : {};
+  let fields = [];
+
+  // ASR Continuous events get a purpose-built field layout: a buyer-facing
+  // subject + the one number that matters + the shareable Trust link.
+  if (eventType === 'audit_report_ready') {
+    if (p.subject != null) fields.push(_slackField('subject', p.subject));
+    if (p.readiness_pct != null) fields.push(_slackField('readiness', `${p.readiness_pct}%`));
+    if (p.trust_url != null) fields.push(_slackField('trust link', p.trust_url));
+  } else if (eventType === 'reattestation_drift') {
+    if (p.subject != null) fields.push(_slackField('subject', p.subject));
+    if (p.summary != null) fields.push(_slackField('drift', p.summary));
+    if (p.readiness_change != null) {
+      const sign = Number(p.readiness_change) > 0 ? '+' : '';
+      fields.push(_slackField('readiness change', `${sign}${p.readiness_change}`));
+    }
+    if (p.trust_url != null) fields.push(_slackField('trust link', p.trust_url));
+  } else {
+    for (const [k, v] of Object.entries(p)) {
+      if (typeof v === 'object') continue;
+      fields.push({ type: 'mrkdwn', text: `*${k}*\n${String(v).slice(0, 200)}` });
+      if (fields.length >= 10) break;
+    }
   }
+  if (fields.length > 10) fields = fields.slice(0, 10);
   return {
     blocks: [
       { type: 'header', text: { type: 'plain_text', text: `kolm: ${title}` } },

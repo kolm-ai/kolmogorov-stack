@@ -10,14 +10,14 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Page not found · kolm.ai</title>
-<meta name="description" content="The page you requested has moved or never existed. Head back to kolm.ai to explore the evidence layer for AI agents entering the enterprise.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="description" content="No artifact is filed at this address. The rest of kolm.ai is intact: signed, offline-verifiable security evidence for AI agents entering the enterprise.">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="noindex">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Page not found · kolm.ai">
-<meta property="og:description" content="The page you requested has moved or never existed. Head back to kolm.ai to explore the evidence layer for AI agents entering the enterprise.">
+<meta property="og:description" content="No artifact is filed at this address. The rest of kolm.ai is intact: signed, offline-verifiable security evidence for AI agents entering the enterprise.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/404">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -37,11 +37,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<script defer src="/kolm-field.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
 
+<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
@@ -61,7 +65,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -69,18 +73,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
-<!-- ============================================================ 1. NOT FOUND -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<!-- ============================================================ 1. HERO: the lost page is the most atmospheric page.
+     THE EVIDENCE FIELD at full intensity over a near-empty spread.
+     Fail-open: with no JS/WebGL the grid + radial layers beneath remain. -->
+<section class="section section--flush hero">
+  <div class="field" aria-hidden="true"><canvas></canvas></div>
   <div class="wrap">
-    <div class="section__head" style="max-width:56ch;text-align:center;margin-inline:auto">
-      <span class="idx">01 / Not found</span>
-      <h1>This page moved or never existed.</h1>
-      <p class="lede">The URL you followed does not match any current path on kolm.ai. Use the links below, or head straight back home.</p>
-      <div class="hero__cta">
+    <div class="section__head" style="max-width:58ch;margin-bottom:0;padding-block:clamp(28px,5vw,72px)">
+      <p class="eyebrow" data-enter="1">HTTP 404 · no artifact on file</p>
+      <h1 class="hero__h1" data-enter="2">Exhibit not found. <span class="go">The record is intact.</span></h1>
+      <p class="lede" data-enter="3">
+        We checked the path against every published route and found no match. Everything signed still verifies; only this URL is empty.
+      </p>
+      <div class="hero__cta" data-enter="4">
         <a class="btn btn--primary" href="/">Back to home</a>
-        <a class="btn btn--ghost" href="/verify">Verify a report</a>
+      </div>
+      <div class="hero__proof" aria-label="Status at a glance" data-enter="5">
+        <span><i class="dot" aria-hidden="true"></i>status 404</span>
+        <span><i class="dot" aria-hidden="true"></i>route unmatched</span>
+        <span><i class="dot" aria-hidden="true"></i>evidence room intact</span>
       </div>
     </div>
   </div>
@@ -88,69 +101,74 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <!-- ============================================================ 2. FIND YOUR WAY -->
 <section class="section section--ink reveal">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
-    <div class="section__head"><span class="idx">02 / Find your way</span><h2>Where would you like to go?</h2></div>
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / Find your way</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Six doors, all open.</h2>
+    </div>
     <div class="grid grid--3">
       <div class="card">
         <p class="card__k">Product</p>
-        <h3><a href="/platform" style="color:inherit;text-decoration:none">Platform</a></h3>
-        <p>The full audit and signing platform for AI agents entering enterprise review.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Product</p>
         <h3><a href="/how-it-works" style="color:inherit;text-decoration:none">How it works</a></h3>
-        <p>End-to-end walkthrough of the audit, evidence generation, and offline verification flow.</p>
+        <p>Audit, sign, verify: the whole lifecycle, end to end.</p>
       </div>
       <div class="card">
         <p class="card__k">Product</p>
         <h3><a href="/checks" style="color:inherit;text-decoration:none">What we test</a></h3>
-        <p>The full ASR checklist: permissions, egress, injection, tool scope, and more.</p>
+        <p>Permissions, audit trail, egress and injection resistance, read from your own logs.</p>
       </div>
       <div class="card">
         <p class="card__k">Verification</p>
         <h3><a href="/verify" style="color:inherit;text-decoration:none">Verify a report</a></h3>
-        <p>Confirm a signed evidence report offline using WebCrypto. No account, no kolm servers.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Verification</p>
-        <h3><a href="/report" style="color:inherit;text-decoration:none">Sample report</a></h3>
-        <p>See a real signed evidence report: Ed25519 signature, scoped findings, and the public key.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Trust</p>
-        <h3><a href="/trust" style="color:inherit;text-decoration:none">Trust center</a></h3>
-        <p>Security posture, sub-processor details, and our evidence model.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Research</p>
-        <h3><a href="/research" style="color:inherit;text-decoration:none">Research</a></h3>
-        <p>Published findings on AI-agent attack surfaces, policy mapping, and methodology.</p>
+        <p>Check a signed report in your browser, offline. No account, no kolm server in the path.</p>
       </div>
       <div class="card">
         <p class="card__k">Pricing</p>
         <h3><a href="/pricing" style="color:inherit;text-decoration:none">Pricing</a></h3>
-        <p>Per-audit and enterprise pricing: start with a single report or engage at scale.</p>
+        <p>Every price is public and the scan is free. No demo wall.</p>
       </div>
       <div class="card">
-        <p class="card__k">Contact</p>
-        <h3><a href="/contact" style="color:inherit;text-decoration:none">Contact</a></h3>
-        <p>Talk to the team about an audit, a partnership, or anything else. <span class="mono" style="color:var(--accent-on-ink)">dev@kolm.ai</span></p>
+        <p class="card__k">Trust</p>
+        <h3><a href="/trust" style="color:inherit;text-decoration:none">Trust center</a></h3>
+        <p>Security posture, subprocessors and the evidence model.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Docs</p>
+        <h3><a href="/docs" style="color:inherit;text-decoration:none">Docs</a></h3>
+        <p>Integration, the report format and the verifier source. Stuck? <a href="mailto:dev@kolm.ai" style="color:var(--accent-on-ink)">dev@kolm.ai</a></p>
+      </div>
+    </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ FINAL CTA -->
+<!-- ============================================================ 3. FINAL CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
-    <h2>Reach us directly.</h2>
-    <p class="lede" style="text-align:center;max-width:52ch;margin-inline:auto">If the page you needed is genuinely missing, write to <a href="mailto:dev@kolm.ai" style="color:var(--accent-on-ink)">dev@kolm.ai</a> and we will point you in the right direction.</p>
-    <div class="hero__cta"><a class="btn btn--primary" href="/">Back to home</a><a class="btn btn--ghost" href="/contact">Contact us</a></div>
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <h2>Get back on the record.</h2>
+    <p class="lede">The free scan reads your agent's own logs and returns findings in minutes.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost" href="/">Back to home</a>
+    </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
 </main>
 
+<!-- ============================================================ FOOTER -->
 <hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
@@ -167,24 +185,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -192,7 +213,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>
@@ -208,5 +229,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </div>
 </footer>
+
 </body>
 </html>

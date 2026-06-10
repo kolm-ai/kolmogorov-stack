@@ -16,11 +16,15 @@
 import { normalize as datadogNormalize } from './datadog.js';
 import { normalize as langsmithNormalize } from './langsmith.js';
 import { normalize as otelNormalize } from './otel.js';
+import { normalize as openinferenceNormalize } from './openinference.js';
+import { normalize as langfuseNormalize } from './langfuse.js';
 
 export const connectors = Object.freeze({
   datadog: { source: 'datadog', normalize: datadogNormalize },
   langsmith: { source: 'langsmith', normalize: langsmithNormalize },
   otel: { source: 'otel', normalize: otelNormalize },
+  openinference: { source: 'openinference', normalize: openinferenceNormalize },
+  langfuse: { source: 'langfuse', normalize: langfuseNormalize },
 });
 
 export const SOURCES = Object.freeze(Object.keys(connectors));
@@ -113,18 +117,86 @@ function looksOtel(root, recs) {
   return false;
 }
 
+// Pull spans out of an OTLP wrapper (or a flat span list) so OpenInference's
+// dot-namespaced attribute markers are reachable from the same root/recs sniff.
+function otelSpanAttrKeys(root, recs) {
+  const out = [];
+  const fromSpan = (sp) => { const k = attrKeys(obj(sp) || {}); if (k.length) out.push(...k); };
+  const fromRs = (rsList) => {
+    for (const rs of rsList || []) {
+      const rso = obj(rs); if (!rso) continue;
+      const scopeSpans = arr(rso.scopeSpans) || arr(rso.instrumentationLibrarySpans) || [];
+      for (const ss of scopeSpans) { const sso = obj(ss); if (sso) for (const sp of arr(sso.spans) || []) fromSpan(sp); }
+    }
+  };
+  if (root && arr(root.resourceSpans)) fromRs(root.resourceSpans);
+  if (root && arr(root.spans)) for (const sp of root.spans) fromSpan(sp);
+  for (const r of recs) {
+    if (arr(r.resourceSpans)) fromRs(r.resourceSpans);
+    if (arr(r.spans)) for (const sp of r.spans) fromSpan(sp);
+    fromSpan(r);
+  }
+  return out;
+}
+
+// OpenInference rides OTLP, but its spans carry the OpenInference semantic
+// convention markers (openinference.span.kind, llm.model_name, tool.parameters,
+// retrieval.documents) instead of gen_ai.*. Checked BEFORE looksOtel.
+function looksOpenInference(root, recs) {
+  const keys = otelSpanAttrKeys(root, recs);
+  if (!keys.length) return false;
+  return keys.some((k) =>
+    k === 'openinference.span.kind' || k === 'openinference.kind' ||
+    k.startsWith('openinference.') ||
+    k === 'llm.model_name' || k.startsWith('llm.input_messages') || k.startsWith('llm.output_messages') ||
+    k.startsWith('llm.token_count') || k === 'tool.parameters' || k.startsWith('retrieval.documents'));
+}
+
+// A Langfuse trace carries observations[] of type GENERATION/SPAN/EVENT (or the
+// list-page shape under data[]). Checked BEFORE looksLangsmith because a bare
+// generation looks like a loose run otherwise.
+function looksLangfuse(root, recs) {
+  const obsLooksLangfuse = (list) => {
+    if (!arr(list)) return false;
+    for (const o of list) {
+      const oo = obj(o); if (!oo) continue;
+      const t = typeof oo.type === 'string' ? oo.type.toUpperCase() : '';
+      if (['GENERATION', 'SPAN', 'EVENT'].includes(t)) return true;
+    }
+    return false;
+  };
+  if (root && obsLooksLangfuse(root.observations)) return true;
+  if (root && obj(root.trace) && (obsLooksLangfuse(root.observations) || obsLooksLangfuse(root.data))) return true;
+  for (const r of recs) {
+    if (obsLooksLangfuse(r.observations)) return true;
+    if (obj(r.trace) && (obsLooksLangfuse(r.observations) || obsLooksLangfuse(r.data))) return true;
+    // A bare observation record: a Langfuse GENERATION/SPAN/EVENT with the
+    // Langfuse-distinctive fields (not a LangSmith run_type).
+    const t = typeof r.type === 'string' ? r.type.toUpperCase() : '';
+    if (['GENERATION', 'SPAN', 'EVENT'].includes(t) && r.run_type == null &&
+        (r.observationId != null || r.traceId != null || r.modelParameters != null || r.startTime != null || r.usage != null)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * detectConnector - sniff which connector a raw export belongs to.
- * Order matters: OTLP and Datadog carry the most specific markers, LangSmith's
- * run_type is checked before the looser fallbacks. Returns the source string or
- * null when nothing matches. Never throws.
+ * Order matters, most-specific markers first: OpenInference rides OTLP so its
+ * openinference.span.kind / llm.* / tool.* markers are checked BEFORE the
+ * generic OTLP sniff; Langfuse's observations[] (GENERATION/SPAN/EVENT) is
+ * checked BEFORE LangSmith's looser run_type. Returns the source string or null
+ * when nothing matches. Never throws.
  * @param {string|object|object[]} raw
- * @returns {'datadog'|'langsmith'|'otel'|null}
+ * @returns {'datadog'|'langsmith'|'otel'|'openinference'|'langfuse'|null}
  */
 export function detectConnector(raw) {
   try {
     const { root, recs } = sample(raw);
+    if (looksOpenInference(root, recs)) return 'openinference';
     if (looksOtel(root, recs)) return 'otel';
+    if (looksLangfuse(root, recs)) return 'langfuse';
     if (looksLangsmith(recs)) return 'langsmith';
     if (looksDatadog(recs)) return 'datadog';
     return null;

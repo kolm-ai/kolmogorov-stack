@@ -108,6 +108,41 @@ for (const file of files) {
   const badVar = html.match(/var\(--surface-1\)/);
   if (badVar) hard.push('undefined CSS var(--surface-1)');
 
+  // 11. structured data: every ld+json block must parse, and its DECODED string
+  //     values must pass the same content constraints as the raw HTML (a "—"
+  //     escape decodes to an em dash the raw-text scan in #2 cannot see).
+  const ldBlocks = [...html.matchAll(/<script\b[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  // Reconciliation: every textual mention of the ld+json MIME type in a script
+  // tag must have been captured above, or a quote/attribute variant slipped the
+  // scan and its decoded strings went unchecked.
+  const ldMentions = (html.match(/application\/ld\+json/gi) || []).length;
+  if (ldMentions !== ldBlocks.length) {
+    hard.push(`ld+json reconciliation: ${ldMentions} mention(s) of the MIME type but ${ldBlocks.length} parsed block(s)`);
+  }
+  ldBlocks.forEach((m, i) => {
+    let doc;
+    try { doc = JSON.parse(m[1]); } catch (e) {
+      hard.push(`ld+json block #${i + 1} is invalid JSON (${String(e.message).slice(0, 60)})`);
+      return;
+    }
+    const strings = [];
+    (function collect(node) {
+      if (typeof node === 'string') strings.push(node);
+      else if (Array.isArray(node)) node.forEach(collect);
+      else if (node && typeof node === 'object') Object.values(node).forEach(collect);
+    })(doc);
+    for (const s of strings) {
+      for (const f of FORBIDDEN) if (s.includes(f)) hard.push(`ld+json block #${i + 1}: forbidden substring "${f}" (decoded)`);
+      if (/[‒–—―]/.test(s)) hard.push(`ld+json block #${i + 1}: decoded em/en dash in "${s.slice(0, 50)}"`);
+      const h = s.match(/honest(y|ly)?/i);
+      if (h) hard.push(`ld+json block #${i + 1}: banned word "${h[0]}" (decoded)`);
+      if (/rodneyyesep/i.test(s)) hard.push(`ld+json block #${i + 1}: personal-identity leak (decoded)`);
+      for (const mt of s.matchAll(/mailto:([^"'\s>?]+)/g)) {
+        if (mt[1].toLowerCase() !== 'dev@kolm.ai') hard.push(`ld+json block #${i + 1}: non-canonical contact email "${mt[1]}"`);
+      }
+    }
+  });
+
   // --- advisory (design-hand completeness; legal/secondary pages may skip) ---
   if (!/section--ink/.test(html)) adv.push('no dark ledger beat (.section--ink)');
   if (!/cta-final/.test(html)) adv.push('no final CTA (.cta-final)');

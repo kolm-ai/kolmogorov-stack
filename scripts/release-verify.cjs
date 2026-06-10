@@ -513,6 +513,16 @@ async function gateClaimVerify() {
   if (!shouldRun('claim-verify')) return recordResult('claim-verify', true, { skipped: true });
   progress('claim-verify (X04) checking');
   const t = Date.now();
+  // Evidence freshness first: site-claims.json must match the ground-truth
+  // artifacts it is derived from, or every fixture comparison below is moot.
+  const fresh = runSync(nodeBin, [path.join('scripts', 'generate-claim-evidence.cjs'), '--check'], { silent: true, timeoutMs: 30_000 });
+  if (fresh.status !== 0) {
+    recordResult('claim-verify', false, {
+      detail: 'evidence stale vs ground truth: ' + ((fresh.stderr || fresh.stdout || '').trim().slice(0, 300)) + ' (rerun: node scripts/generate-claim-evidence.cjs)',
+      duration_ms: Date.now() - t,
+    });
+    return false;
+  }
   const r = runSync(nodeBin, [path.join('scripts', 'x04-claim-verify.cjs'), '--json'], { silent: true, timeoutMs: 60_000 });
   let parsed = null;
   try { parsed = JSON.parse((r.stdout || '').trim()); } catch (_) {} // deliberate: cleanup

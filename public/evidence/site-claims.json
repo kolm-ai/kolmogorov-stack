@@ -1,0 +1,83 @@
+{
+  "schema": "kolm-site-claims-evidence-1",
+  "generated_at": "2026-06-10T09:26:03.521Z",
+  "generator": "scripts/generate-claim-evidence.cjs",
+  "note": "Derived from checked-in ground-truth artifacts. Regenerate with the generator; do not hand-edit. Consumed by scripts/x04-claim-verify.cjs via data/x04-claim-fixtures.json.",
+  "rows": [
+    {
+      "id": "asr-controls",
+      "source": "public/sample-audit-report.json#asr_checklist",
+      "controls_count": 8,
+      "controls_word": "eight",
+      "controls_word_cap": "Eight",
+      "control_ids": [
+        "ASR-1",
+        "ASR-2",
+        "ASR-3",
+        "ASR-4",
+        "ASR-5",
+        "ASR-6",
+        "ASR-7",
+        "ASR-8"
+      ]
+    },
+    {
+      "id": "report-frameworks",
+      "source": "public/sample-audit-report.json#frameworks",
+      "frameworks_count": 6,
+      "frameworks_word": "six",
+      "frameworks_word_cap": "Six",
+      "framework_names": [
+        "EU AI Act",
+        "ISO/IEC 42001",
+        "MITRE ATLAS",
+        "NIST AI RMF",
+        "OWASP LLM & Agentic Top 10",
+        "SOC 2 TSC"
+      ]
+    },
+    {
+      "id": "verification-tiers",
+      "source": "public/verify-widget.js (distinct \"tier N\" markers)",
+      "tiers_count": 2,
+      "tiers_word": "two",
+      "tiers_word_cap": "Two"
+    },
+    {
+      "id": "issuer-prod-key",
+      "source": "public/keys/kolm-issuers.json kid=kolm-prod-2026",
+      "kid": "kolm-prod-2026",
+      "fingerprint": "fa562154f99c95f48a45d04272943435",
+      "fingerprint_prefix16": "fa562154f99c95f4"
+    },
+    {
+      "id": "sample-over-permission",
+      "source": "public/sample-audit-report.json findings[id=over-permission].title",
+      "grant_use_phrase": "grants 10 tools, uses 4",
+      "severity": "high",
+      "asr_control": "ASR-1"
+    },
+    {
+      "id": "sample-report-summary",
+      "source": "public/sample-audit-report.json#summary",
+      "total_findings": 13,
+      "by_severity": {
+        "critical": 0,
+        "high": 7,
+        "medium": 4,
+        "low": 1,
+        "info": 1
+      },
+      "blocking_count": 7,
+      "findings_register": "13 · <b>7 high</b> · 4 medium · 1 low · 1 info"
+    },
+    {
+      "id": "sample-signature",
+      "source": "public/sample-audit-report.json#signature_ed25519",
+      "sig_head10": "9kWQBu5kLl",
+      "sig_tail6": "aG9aDw",
+      "key_fingerprint": "410302c93becdcc3a8091ef0c33c24ed",
+      "key_fingerprint_prefix16": "410302c93becdcc3"
+    }
+  ]
+}

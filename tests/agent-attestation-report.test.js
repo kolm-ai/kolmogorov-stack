@@ -162,7 +162,7 @@ test('envelope carries every section a reviewer needs', () => {
   for (const k of [
     'schema', 'report_version', 'spec_version', 'report_id', 'generated_at',
     'subject', 'summary', 'findings', 'frameworks', 'remediation', 'caveats',
-    'asr_checklist', 'contact', 'verify_url', 'signature_ed25519',
+    'asr_checklist', 'contact', 'verify_url', 'signature_ed25519', 'evidence_tier',
   ]) {
     assert.ok(k in envelope, `envelope.${k} present`);
   }

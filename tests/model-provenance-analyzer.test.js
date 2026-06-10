@@ -282,8 +282,9 @@ test('findings map onto ASR-5 + OWASP supply-chain controls via the control-mapp
   const unpinned = mapped.findings.find((f) => f.id === 'unpinned-model-version');
   assert.ok(unpinned.asr && unpinned.asr.id === 'ASR-5', 'supply-chain pillar -> ASR-5');
   const ids = unpinned.controls.map((c) => c.id);
-  assert.ok(ids.includes('LLM05'), 'maps OWASP LLM05 (model & dependency provenance)');
-  assert.ok(ids.includes('LLM03'), 'maps OWASP LLM03 (MCP / vendor supply chain)');
+  assert.ok(ids.includes('AML.T0010'), 'maps MITRE ATLAS supply-chain compromise');
+  assert.ok(ids.includes('LLM03'), 'maps OWASP LLM03 (supply chain - model, MCP and dependency provenance)');
+  assert.ok(!ids.includes('LLM05'), 'no stale LLM05 (2025: LLM05 is improper output handling, out of scope)');
   // ASR-5 shows up in the rollup with at least one finding.
   const asr5 = mapped.asr.find((a) => a.id === 'ASR-5');
   assert.ok(asr5 && asr5.findings >= 1, 'ASR-5 rollup reflects the finding');

@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Transparency log: append-only, per-report inclusion proofs · kolm.ai</title>
 <meta name="description" content="Every kolm evidence report is entered into an append-only, hash-chained transparency log that returns a per-report Merkle inclusion proof, so a reviewer can confirm a report was logged when it claims and was never quietly replaced.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -60,6 +60,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <hr class="foil-strip" aria-hidden="true">
 
@@ -82,7 +83,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -90,34 +91,52 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
-<section class="section section--flush" style="padding-top:var(--s8)">
+<main id="main">
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:66ch">
-      <span class="idx">01 / Transparency log</span>
-      <h1>A report can't be quietly replaced.</h1>
-      <p class="lede">A signature proves a report wasn't altered. The transparency log proves something else: that this exact report existed when it claims, and that a different one wasn't slipped in later. Every report becomes a leaf in an append-only, hash-chained Merkle log, each shipping with its own inclusion proof.</p>
+    <p class="eyebrow">Trust · Transparency log</p>
+    <h1>A report cannot be quietly replaced. <span class="go">The log proves it.</span></h1>
+    <p class="lede">A signature proves a report was not altered. The transparency log proves something else: that this exact report existed when it claims, and that a different one was not slipped in later. Every report becomes a leaf in an append-only, hash-chained Merkle log, each shipping with its own inclusion proof.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/report">Anatomy of a report</a>
+    </div>
+    <div class="hero__proof" aria-label="Log facts at a glance">
+      <span><i class="dot" aria-hidden="true"></i>RFC 6962-style Merkle log</span>
+      <span><i class="dot" aria-hidden="true"></i>SHA-256 leaves · chained roots</span>
+      <span><i class="dot" aria-hidden="true"></i>Per-report inclusion proof · verifies offline</span>
     </div>
   </div>
 </section>
 
 <!-- what it adds -->
-<section class="section reveal" style="border-top:0;padding-top:0">
+<section class="section sect--dense reveal">
   <div class="wrap">
-    <div class="section__head"><span class="idx">02 / What the log adds</span></div>
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / What the log adds</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Three properties a signature alone cannot give you.</h2>
+    </div>
     <div class="grid grid--3">
       <div class="card"><p class="card__k">Append-only</p><h3>You can add, never edit</h3><p>Entries are chained by hash. Rewriting any past entry changes every hash after it, so tampering is self-evident.</p></div>
       <div class="card"><p class="card__k">Inclusion proof</p><h3>Proof per report</h3><p>Each report carries a Merkle proof binding it to the log's root, checkable without trusting the log operator.</p></div>
       <div class="card"><p class="card__k">No replacement</p><h3>History you can rely on</h3><p>A reviewer can confirm the report they hold is the one that was logged, not a quietly swapped re-issue.</p></div>
+    </div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- how it works -->
 <section class="section section--ink reveal">
-  <div class="wrap split" style="align-items:center">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / How it works</span></div>
+      <div class="sect-rail__body">
+  <div class="split" style="align-items:center">
     <div>
-      <span class="idx">03 / How it works</span>
       <h2>Hash the report, append the leaf, return the path.</h2>
       <p class="lede" style="margin-bottom:16px">When a report is signed, its hash is appended as a leaf to the Merkle tree. The log returns the audit path from that leaf to the root. Anyone can recompute the path and confirm the leaf is included. The chained roots make removing or reordering history detectable.</p>
       <p class="card__map">RFC 6962-style Merkle log · SHA-256 leaves · per-report audit path</p>
@@ -130,13 +149,20 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div><span class="lbl">verify</span> &nbsp; <span class="h">recompute &rarr; root</span> <span class="ann">offline</span></div>
     </div>
   </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- what it is not -->
-<section class="section reveal">
-  <div class="wrap split" style="align-items:center">
+<section class="section sect--dense reveal">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / What it is not</span></div>
+      <div class="sect-rail__body">
+  <span class="num-ghost" aria-hidden="true">03</span>
+  <div class="split" style="align-items:center">
     <div>
-      <span class="idx">04 / What it is not</span>
       <h2>Math reviewers already accept.</h2>
       <p class="lede" style="margin-bottom:16px">Enterprise security teams are wary of crypto custody and public-chain exposure, so we keep none of that in the path. The transparency log is the same well-understood, Sigstore-style construction reviewers know from software supply-chain security. It's offline-verifiable, with zero tokens, wallets, or chains to trust.</p>
       <div class="hero__cta">
@@ -150,12 +176,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="card"><p class="card__k">No custody</p><h3>Nothing to hold</h3><p>No tokens, no wallets, no chain in the enterprise trust path.</p></div>
     </div>
   </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Signed, logged, and checkable by anyone.</h2>
+    <p class="lede">Every report carries its own inclusion proof. Your buyer checks it offline.</p>
     <div class="hero__cta"><a class="btn btn--primary" href="/verify">Verify a report</a><a class="btn btn--ghost" href="/platform">See the platform</a></div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 </main>
@@ -176,24 +214,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -201,7 +242,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

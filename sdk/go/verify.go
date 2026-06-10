@@ -258,13 +258,32 @@ func Canonicalize(value any) []byte {
 	return appendCanonical(make([]byte, 0, 256), value)
 }
 
-// CanonicalizeReport strips the signature_ed25519 block (a signature cannot cover
-// itself) and canonicalizes the remainder, mirroring canonicalizeReport() in the
-// Node and browser code. The input map is not modified.
+// detachedReportFields are the four envelope keys the Ed25519 signature does
+// NOT cover, excluded byte-for-byte in lockstep with canonicalizeReport() in
+// src/attestation-report-builder.js and public/kolm-audit-verify.js:
+//   - signature_ed25519: a signature cannot cover itself.
+//   - timestamp_evidence + log_checkpoint: detached evidence (RFC 3161 TSA /
+//     append-only witness) attached AFTER signing; each references the signed
+//     digest, so it binds to the report without being covered by the signature.
+//   - co_signatures: named-reviewer Ed25519 blocks added AFTER the primary
+//     signature, each over THIS same canonical payload.
+// Stripping only signature_ed25519 made every real report (the builder always
+// attaches log_checkpoint) fail Go verification while Node/browser passed.
+var detachedReportFields = map[string]struct{}{
+	"signature_ed25519": {},
+	"timestamp_evidence": {},
+	"log_checkpoint":     {},
+	"co_signatures":      {},
+}
+
+// CanonicalizeReport strips the four detached fields (the signature cannot cover
+// itself, and the TSA / witness / co-signer blocks are attached after signing)
+// and canonicalizes the remainder, mirroring canonicalizeReport() in the Node
+// and browser code. The input map is not modified.
 func CanonicalizeReport(report map[string]any) []byte {
 	rest := make(map[string]any, len(report))
 	for k, v := range report {
-		if k == "signature_ed25519" {
+		if _, detached := detachedReportFields[k]; detached {
 			continue
 		}
 		rest[k] = v

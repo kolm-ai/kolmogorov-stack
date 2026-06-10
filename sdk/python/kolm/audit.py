@@ -224,16 +224,37 @@ def canonicalize(value: Any) -> str:
     return "null"
 
 
+# The four envelope keys the Ed25519 signature does NOT cover, excluded byte-for-
+# byte in lockstep with canonicalizeReport() in src/attestation-report-builder.js
+# and public/kolm-audit-verify.js:
+#   - signature_ed25519: a signature cannot sign itself.
+#   - timestamp_evidence + log_checkpoint: detached evidence (RFC 3161 TSA /
+#     append-only witness) attached AFTER signing; each references the signed
+#     digest, so it binds to the report without being covered by the signature.
+#   - co_signatures: named-reviewer Ed25519 blocks added AFTER the primary
+#     signature, each over THIS same canonical payload.
+# Excluding only signature_ed25519 made every real report (the builder always
+# attaches log_checkpoint) fail Python verification while Node/browser passed.
+_DETACHED_REPORT_FIELDS = (
+    "signature_ed25519",
+    "timestamp_evidence",
+    "log_checkpoint",
+    "co_signatures",
+)
+
+
 def canonicalize_report(envelope: Mapping[str, Any]) -> str:
     """Canonical bytes-as-string the Ed25519 signature covers.
 
-    The ``signature_ed25519`` block is excluded (a signature cannot sign itself),
-    matching ``const { signature_ed25519, ...rest } = envelope`` on the Node and
-    browser sides.
+    The four detached fields (``signature_ed25519`` plus the post-signing
+    ``timestamp_evidence``, ``log_checkpoint``, and ``co_signatures`` blocks) are
+    excluded, matching
+    ``const { signature_ed25519, timestamp_evidence, log_checkpoint, co_signatures, ...rest } = envelope``
+    on the Node and browser sides.
     """
     if not isinstance(envelope, Mapping):
         raise TypeError("canonicalize_report: envelope must be a mapping/object")
-    rest = {k: v for k, v in envelope.items() if k != "signature_ed25519"}
+    rest = {k: v for k, v in envelope.items() if k not in _DETACHED_REPORT_FIELDS}
     return canonicalize(rest)
 
 

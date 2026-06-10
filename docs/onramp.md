@@ -36,7 +36,8 @@ shape and verifiable offline no matter how the logs arrived.
 Gate a merge or a deploy on your agent's security posture. The Action reads your
 logs, auto-detects the platform (Datadog / LangSmith / OpenTelemetry) or passes
 provider-native logs straight through, scans them, prints a readiness and
-blocking summary, and fails the job when the result is below your policy.
+blocking summary, and applies the gate mode you chose to decide whether the job
+fails.
 
 ```yaml
 # .github/workflows/agent-security.yml
@@ -52,9 +53,33 @@ jobs:
         with:
           logs: ./agent-traces            # a file or a directory of log files
           api-key: ${{ secrets.KOLM_API_KEY }}
-          min-readiness: "85"             # fail the job under 85 percent
-          fail-on-blocking: "true"        # fail on any blocking finding
+          gate-mode: fail-on-new-high     # default is report-only (never fails on findings)
 ```
+
+### Gate modes
+
+`gate-mode` is the primary gate. It compares each scan against the prior signed
+report for the same subject, so the job fails on what CHANGED, not on a static
+threshold:
+
+| Mode                 | When the build fails                                                       |
+| -------------------- | --------------------------------------------------------------------------- |
+| `report-only`        | Never on findings. Scan, summary, and outputs still run. The default.       |
+| `fail-on-new-high`   | The delta vs the prior signed report adds a high or critical finding, or a control newly enters `blocking`. |
+| `fail-on-regression` | Any control status worsened, or a new high or critical finding appeared.    |
+
+The first run on a subject establishes the baseline and passes in every mode.
+If the kolm API is unreachable mid-gate, the two failing modes fail CLOSED (an
+unverifiable gate is not a passed gate); set `KOLM_FAIL_OPEN: "true"` in the
+step `env` to let builds proceed instead. Full semantics, including the control
+status vocabulary and PR-comment behavior, are in
+[docs/continuous-ci.md](./continuous-ci.md).
+
+`min-readiness` and `fail-on-blocking` are the legacy absolute layer: they are
+authoritative under `gate-mode: legacy` (and when you run the bare script with
+no gate mode set), opt-in as an extra layer under the delta modes via
+`KOLM_AUDIT_ABSOLUTE_GATE: "true"` in the step `env`, and never fail the build
+under `report-only`.
 
 ### Inputs
 
@@ -65,15 +90,17 @@ jobs:
 | `api-url`          | `https://kolm.ai`    | Base URL of the kolm API.                                         |
 | `source`           | `auto`               | `auto`, `datadog`, `langsmith`, `otel`, or `raw` (passthrough).  |
 | `subject`          | `Agent fleet`        | What the report is about.                                         |
-| `min-readiness`    | `80`                 | Fail under this readiness percent.                                |
-| `fail-on-blocking` | `true`               | Fail when any blocking finding is present.                        |
+| `gate-mode`        | `report-only`        | `report-only`, `fail-on-new-high`, `fail-on-regression`, or `legacy`. |
+| `min-readiness`    | `80`                 | Legacy absolute layer: fail under this readiness percent.         |
+| `fail-on-blocking` | `true`               | Legacy absolute layer: fail when any blocking finding is present. |
 | `sign`             | `true`               | Ask for a signed report; falls back to an unsigned gate scan.     |
 | `retention-days`   | (none)               | Optional declared retention window, mapped into the report.       |
 
 ### Outputs
 
 `readiness`, `blocking-count`, `report-id`, `trust-url` (present only for a
-purchased or Continuous report), `verify-url`, and `passed`.
+purchased or Continuous report), `verify-url`, `passed`, `baseline`, and
+`gate-mode`.
 
 ### Running the same gate outside GitHub
 
@@ -82,10 +109,15 @@ same configuration from the environment. Run it from any CI or a shell:
 
 ```bash
 export KOLM_API_KEY=ks_xxx
-export KOLM_AUDIT_MIN_READINESS=85
+export KOLM_GATE_MODE=fail-on-new-high
 node scripts/kolm-audit-ci.mjs ./agent-traces
 # or pipe logs in:  cat traces.jsonl | node scripts/kolm-audit-ci.mjs
 ```
+
+Note the bare script defaults to `gate-mode: legacy` (the absolute
+`min-readiness` / `fail-on-blocking` thresholds) when no gate mode is set; the
+Action defaults to `report-only`. Set `KOLM_GATE_MODE` (or pass
+`--gate-mode=...`) to pick the mode explicitly.
 
 It prints the summary, sets the gate exit code (non-zero on a policy violation),
 and needs nothing beyond Node 18+ (it uses global `fetch`).

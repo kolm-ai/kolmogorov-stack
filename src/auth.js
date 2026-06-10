@@ -563,6 +563,13 @@ const PUBLIC_API = (p) =>
   // procurement artifact (CSV / .xls / Drata / Vanta / exec / crosswalk) so a
   // buyer's GRC team can ingest it without a kolm account.
   /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}(?:\/export|\/delta)?$/.test(p) ||
+  // G-routes: an embeddable status badge (SVG) for the shareable Trust link, so a
+  // vendor can drop the live "Agent Security: NN% ready" pill into a README /
+  // status page with no kolm account. Same capability level as GET /v1/trust/:slug
+  // (possession of the unguessable slug is the grant); an unresolved slug serves a
+  // grey "unknown" badge, never tenant data. The POST .../sessions/:id/delta route
+  // is its sibling but stays AUTH-gated (deliberately NOT matched here).
+  /^\/v1\/trust\/[A-Za-z0-9_-]{1,64}\/badge\.svg$/.test(p) ||
   // S8: the buyer's reviewer pre-fills a security questionnaire straight from the
   // SIGNED report behind the Trust Link. Possession of the unguessable slug is the
   // grant - the same capability level as the report it derives from - so this

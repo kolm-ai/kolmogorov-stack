@@ -5,7 +5,8 @@
 // The signed report envelope (src/attestation-report-builder.js) already maps
 // every finding to the frameworks an enterprise buyer's review group cites
 // (SOC 2 TSC / ISO/IEC 42001 / NIST AI RMF / EU AI Act / OWASP LLM & Agentic /
-// MITRE ATLAS, plus kolm's ASR spine). This module turns that ONE signed
+// MITRE ATLAS / CSA AICM / NIST COSAiS, plus kolm's ASR spine). This module
+// turns that ONE signed
 // artifact into the file formats a procurement / GRC team actually ingests:
 //
 //   toCSV(envelope)                      findings x controls, RFC 4180
@@ -25,6 +26,10 @@
 // carried into every export so an importer can always trace an artifact back to
 // the signed source.
 
+import crypto from 'node:crypto';
+import { buildExtendedModelCard } from './reg-model-card-extended.js';
+import { asrCrosswalk } from './control-mapper.js';
+
 // ---------------------------------------------------------------------------
 // Defensive accessors - a formatter must survive a partial / hostile envelope.
 // ---------------------------------------------------------------------------
@@ -32,9 +37,10 @@ function obj(x) { return x && typeof x === 'object' && !Array.isArray(x) ? x : {
 function arr(x) { return Array.isArray(x) ? x : []; }
 function str(x) { return x == null ? '' : String(x); }
 
-// The six buyer frameworks (full names exactly as control-mapper.js emits them)
-// plus a short column label for the crosswalk matrix. ASR is the row spine, not
-// a column here.
+// The eight buyer frameworks (full names exactly as control-mapper.js emits
+// them) plus a short column label for the crosswalk matrix. ASR is the row
+// spine, not a column here. NIST COSAiS rows are draft mappings (the SP 800-53
+// AI overlays publish no final control ids yet).
 const FRAMEWORK_COLUMNS = [
   { name: 'SOC 2 TSC', short: 'SOC 2 TSC' },
   { name: 'ISO/IEC 42001', short: 'ISO/IEC 42001' },
@@ -42,6 +48,8 @@ const FRAMEWORK_COLUMNS = [
   { name: 'EU AI Act', short: 'EU AI Act' },
   { name: 'OWASP LLM & Agentic Top 10', short: 'OWASP LLM & Agentic' },
   { name: 'MITRE ATLAS', short: 'MITRE ATLAS' },
+  { name: 'CSA AICM', short: 'CSA AICM' },
+  { name: 'NIST COSAiS', short: 'NIST COSAiS' },
 ];
 
 const CONTACT_EMAIL = 'dev@kolm.ai';
@@ -668,18 +676,34 @@ export function toFrameworkCrosswalk(envelope) {
     }
   }
 
-  // The full ASR spine (all six) from the checklist, so clean + not-assessed
+  // The full ASR spine (all eight) from the checklist, so clean + not-assessed
   // controls still appear as rows.
   const asrRows = arr(e.asr_checklist).length
     ? arr(e.asr_checklist).map((a) => ({ id: str(obj(a).id), name: str(obj(a).name) }))
     : [...asrStatus.keys()].map((id) => ({ id, name: '' }));
+
+  // Catalog fallback: an ASR control whose findings produced no framework refs
+  // in this run (ASR-4 injection is exercised by the red-team battery; ASR-6
+  // evidence is established by the signed report itself) still renders its
+  // catalog mapping, so no ASR row is blank. asrId -> Map(framework -> Set(id)).
+  const baseline = new Map();
+  try {
+    for (const row of asrCrosswalk()) {
+      const m = new Map();
+      for (const ctrl of row.controls) {
+        if (!m.has(ctrl.framework)) m.set(ctrl.framework, new Set());
+        m.get(ctrl.framework).add(ctrl.id);
+      }
+      baseline.set(row.id, m);
+    }
+  } catch { /* deliberate: the catalog fallback must never break the export */ }
 
   const lines = [];
   lines.push(`# Framework Crosswalk - ${mdCell(subject)}`);
   lines.push('');
   lines.push(`\`${str(e.report_id)}\` · generated ${str(e.generated_at)} · kolm.ai Agent Security-Review`);
   lines.push('');
-  lines.push('Maps each kolm ASR control to the framework controls an enterprise reviewer cites, then lists every framework control implicated by this audit\'s findings. Cells show the controls implicated **by findings in this run**; a blank cell means no finding touched that framework for that control.');
+  lines.push('Maps each kolm ASR control to the framework controls an enterprise reviewer cites, then lists every framework control implicated by this audit\'s findings. Cells show the controls implicated **by findings in this run**; an ASR control with no findings in this run (ASR-4 injection is exercised by the red-team battery, ASR-6 evidence is established by the signed report itself) shows kolm\'s catalog mapping for that control instead, so no ASR row is blank. NIST COSAiS references are draft mappings: the SP 800-53 AI overlays publish no final control ids yet, so cells cite the overlay use case by name.');
   lines.push('');
 
   // --- Part 1: ASR -> framework matrix ---
@@ -689,7 +713,10 @@ export function toFrameworkCrosswalk(envelope) {
   for (const a of asrRows) {
     const status = asrStatus.get(a.id) || 'not assessed';
     const findings = asrFindings.get(a.id);
-    const fwMap = asrMatrix.get(a.id) || new Map();
+    let fwMap = asrMatrix.get(a.id);
+    if (!fwMap || ![...fwMap.values()].some((set) => set && set.size)) {
+      fwMap = baseline.get(a.id) || new Map();
+    }
     const cells = FRAMEWORK_COLUMNS.map((col) => {
       const set = fwMap.get(col.name);
       return set && set.size ? mdCell([...set].sort().join(', ')) : '';
@@ -724,6 +751,509 @@ export function toFrameworkCrosswalk(envelope) {
   };
 }
 
+// ===========================================================================
+// 6) SARIF 2.1.0 - static-analysis log a code-scanning UI (GitHub, Azure
+//    DevOps, DefectDojo) ingests directly. One rule per distinct finding-type
+//    / probe, one result per finding AND per exposed/untested red-team probe.
+// ===========================================================================
+
+// severity word -> SARIF result level.
+function sarifLevel(sev) {
+  const s = str(sev).toLowerCase();
+  if (s === 'critical' || s === 'high') return 'error';
+  if (s === 'medium') return 'warning';
+  return 'note'; // low / info / unknown
+}
+
+// security-severity is SARIF's 0.0-10.0 numeric band (GitHub code-scanning uses
+// it to bucket results). Mapped coarsely from the severity word.
+function securitySeverity(sev) {
+  const s = str(sev).toLowerCase();
+  if (s === 'critical') return '9.5';
+  if (s === 'high') return '8.0';
+  if (s === 'medium') return '5.5';
+  if (s === 'low') return '3.0';
+  return '1.0';
+}
+
+export function toSarif(envelope) {
+  const e = obj(envelope);
+  const rt = obj(e.red_team);
+  const reportId = str(e.report_id);
+  const verifyUrl = str(e.verify_url);
+
+  const rules = [];
+  const ruleSeen = new Set();
+  const results = [];
+
+  // One result per finding; one rule per distinct finding id.
+  for (const f0 of arr(e.findings)) {
+    const f = obj(f0);
+    const id = str(f.id);
+    if (!id) continue;
+    if (!ruleSeen.has(id)) {
+      ruleSeen.add(id);
+      rules.push({
+        id,
+        shortDescription: { text: str(f.title) || id },
+        properties: { 'security-severity': securitySeverity(f.severity) },
+      });
+    }
+    results.push({
+      ruleId: id,
+      level: sarifLevel(f.severity),
+      message: { text: str(f.title) || id },
+      properties: {
+        asr: str(obj(f.asr).id),
+        frameworks: arr(f.frameworks).map(str),
+      },
+    });
+  }
+
+  // One result per exposed / untested red-team probe (a resisted probe is not a
+  // finding). One rule per distinct probe id.
+  for (const p0 of arr(rt.probes)) {
+    const p = obj(p0);
+    const outcome = str(p.status || p.outcome).toLowerCase();
+    if (outcome !== 'exposed' && outcome !== 'untested') continue;
+    const id = str(p.id);
+    if (!id) continue;
+    if (!ruleSeen.has(id)) {
+      ruleSeen.add(id);
+      rules.push({
+        id,
+        shortDescription: { text: str(p.title) || id },
+        properties: { 'security-severity': securitySeverity(p.severity) },
+      });
+    }
+    // An untested probe is unproven (no evidence), so it is a note regardless of
+    // its nominal severity; an exposed probe carries its severity.
+    const level = outcome === 'untested' ? 'note' : sarifLevel(p.severity);
+    results.push({
+      ruleId: id,
+      level,
+      message: { text: `${str(p.title) || id} (${outcome})` },
+      properties: {
+        category: str(p.category),
+        outcome,
+        frameworks: arr(p.frameworks).map(str),
+      },
+    });
+  }
+
+  const log = {
+    $schema: 'https://json.schemastore.org/sarif-2.1.0.json',
+    version: '2.1.0',
+    runs: [{
+      tool: {
+        driver: {
+          name: 'kolm Agent Security-Review',
+          informationUri: 'https://kolm.ai',
+          version: str(e.spec_version) || 'asr-audit/0.1',
+          rules,
+        },
+      },
+      results,
+      properties: { report_id: reportId, verify_url: verifyUrl, signed: true },
+    }],
+  };
+
+  return {
+    filename: `${baseName(e)}.sarif`,
+    contentType: 'application/sarif+json; charset=utf-8',
+    body: JSON.stringify(log, null, 2),
+  };
+}
+
+// ===========================================================================
+// 7) OSCAL assessment-results 1.1.x - the NIST OSCAL JSON a FedRAMP / GRC tool
+//    (or a NIST OSCAL pipeline) ingests. UUIDs are derived deterministically
+//    from the report id so the same signed report always yields the same OSCAL.
+// ===========================================================================
+
+// Deterministic RFC-4122-shaped UUID from a seed (report_id + tag). Not a real
+// v5 UUID (no namespace ceremony) but stable + correctly formatted 8-4-4-4-12,
+// which is all an OSCAL consumer requires.
+function deterministicUuid(seed) {
+  const h = crypto.createHash('sha256').update(str(seed)).digest('hex');
+  return [
+    h.slice(0, 8),
+    h.slice(8, 12),
+    h.slice(12, 16),
+    h.slice(16, 20),
+    h.slice(20, 32),
+  ].join('-');
+}
+
+// A framework + controlId pair flattened into an OSCAL-safe control-id slug.
+function controlSlug(framework, controlId) {
+  return `${str(framework)} ${str(controlId)}`.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'control';
+}
+
+export function toOscal(envelope) {
+  const e = obj(envelope);
+  const reportId = str(e.report_id) || 'agent-security-report';
+  const generated = str(e.generated_at);
+  const records = controlEvidenceRecords(e);
+
+  const includeControls = records.map((rec) => ({
+    'control-id': controlSlug(rec.framework, rec.controlId),
+  }));
+
+  const observations = [];
+  let oi = 0;
+  for (const f0 of arr(e.findings)) {
+    const f = obj(f0);
+    observations.push({
+      uuid: deterministicUuid(`${reportId}:obs:${oi}:${str(f.id)}`),
+      description: str(f.title) || str(f.id),
+      methods: ['EXAMINE'],
+      collected: generated,
+    });
+    oi += 1;
+  }
+
+  // A finding per blocking/attention control (a not-satisfied objective). Clean
+  // and not-assessed controls do not raise an OSCAL finding.
+  const oscalFindings = [];
+  let fi = 0;
+  for (const rec of records) {
+    if (rec.status !== 'fail' && rec.status !== 'attention') continue;
+    oscalFindings.push({
+      uuid: deterministicUuid(`${reportId}:find:${fi}:${rec.framework}:${rec.controlId}`),
+      title: `${str(rec.controlName) || str(rec.controlId)} (${str(rec.framework)})`,
+      target: {
+        type: 'objective-id',
+        'target-id': str(rec.controlId),
+        status: { state: rec.status === 'pass' ? 'satisfied' : 'not-satisfied' },
+      },
+    });
+    fi += 1;
+  }
+
+  const doc = {
+    'assessment-results': {
+      uuid: deterministicUuid(`${reportId}:assessment-results`),
+      metadata: {
+        title: 'kolm Agent Security-Review assessment results',
+        'last-modified': generated,
+        version: str(e.report_version) || 'asr-report/0.1',
+        'oscal-version': '1.1.2',
+      },
+      'import-ap': { href: '#' },
+      results: [{
+        uuid: deterministicUuid(`${reportId}:result:0`),
+        title: 'kolm Agent Security-Review',
+        start: generated,
+        'reviewed-controls': {
+          'control-selections': [{ 'include-controls': includeControls }],
+        },
+        observations,
+        findings: oscalFindings,
+      }],
+    },
+  };
+
+  return {
+    filename: `${baseName(e)}-oscal.json`,
+    contentType: 'application/json; charset=utf-8',
+    body: JSON.stringify(doc, null, 2),
+  };
+}
+
+// ===========================================================================
+// 8) AI-BOM - CycloneDX 1.6 ML-BOM. Enumerates the models, retrieval sources,
+//    and MCP servers the passport declared so a supply-chain tool can ingest
+//    the agent's AI bill-of-materials. Empty components[] when no passport.
+// ===========================================================================
+export function toAibom(envelope) {
+  const e = obj(envelope);
+  const passport = obj(e.passport);
+  const reportId = str(e.report_id) || 'agent-security-report';
+  const verifyUrl = str(e.verify_url);
+  const subjectName = str(obj(e.subject).name) || reportId;
+
+  const components = [];
+
+  // Models - prefer the passport models[]; each entry is a machine-learning-model.
+  for (const m0 of arr(passport.models)) {
+    const m = obj(m0);
+    const name = str(m.slug || m.name || m.model);
+    if (!name) continue;
+    const comp = {
+      type: 'machine-learning-model',
+      name,
+      version: str(m.version || m.snapshot) || (m.pinned === true ? 'pinned' : 'floating'),
+      'bom-ref': `model:${name}`,
+    };
+    const provider = str(m.provider);
+    if (provider) comp.group = provider;
+    components.push(comp);
+  }
+
+  // Retrieval sources - each is a data component.
+  for (const r0 of arr(passport.retrieval_sources)) {
+    const r = obj(r0);
+    const name = typeof r0 === 'string' ? str(r0) : str(r.name || r.source || r.id);
+    if (!name) continue;
+    components.push({ type: 'data', name, 'bom-ref': `data:${name}` });
+  }
+
+  // MCP servers - each is a library grouped under "mcp".
+  for (const s0 of arr(passport.mcp_surface || passport.mcp_servers)) {
+    const s = obj(s0);
+    const name = typeof s0 === 'string' ? str(s0) : str(s.name || s.server || s.id);
+    if (!name) continue;
+    components.push({ type: 'library', name, group: 'mcp', 'bom-ref': `mcp:${name}` });
+  }
+
+  const bom = {
+    bomFormat: 'CycloneDX',
+    specVersion: '1.6',
+    version: 1,
+    metadata: {
+      timestamp: str(e.generated_at),
+      component: {
+        type: 'application',
+        name: subjectName,
+        'bom-ref': reportId,
+      },
+      properties: [{ name: 'kolm:verify_url', value: verifyUrl }],
+    },
+    components,
+  };
+
+  return {
+    filename: `${baseName(e)}-aibom.json`,
+    contentType: 'application/json; charset=utf-8',
+    body: JSON.stringify(bom, null, 2),
+  };
+}
+
+// ===========================================================================
+// 9) Scorecard - a compact Markdown scorecard (one screenful). Reuses the
+//    executive-summary structure but trimmed to the headline posture facts.
+// ===========================================================================
+export function toScorecard(envelope) {
+  const e = obj(envelope);
+  const s = obj(e.summary);
+  const subject = str(obj(e.subject).name) || 'Agent fleet';
+  const readiness = s.readiness_pct == null ? 'n/a' : `${s.readiness_pct}%`;
+  const blocking = s.blocking_count ?? 0;
+  const total = s.total_findings ?? arr(e.findings).length;
+  const tamper = s.tamper_evident ? 'Yes' : 'No';
+  const sig = obj(e.signature_ed25519);
+
+  const lines = [];
+  lines.push(`# Agent Security-Review Scorecard - ${mdCell(subject)} - readiness ${mdCell(readiness)}`);
+  lines.push('');
+  lines.push(`\`${str(e.report_id)}\` - generated ${str(e.generated_at)} - kolm.ai`);
+  lines.push('');
+
+  lines.push('## ASR controls');
+  lines.push('| Control | Name | Status |');
+  lines.push('| --- | --- | --- |');
+  for (const c0 of arr(s.controls)) {
+    const c = obj(c0);
+    lines.push(`| ${mdCell(c.id)} | ${mdCell(c.name)} | ${mdCell(str(c.status).toUpperCase())} |`);
+  }
+  for (const n0 of arr(s.not_assessed)) {
+    const n = obj(n0);
+    lines.push(`| ${mdCell(n.id)} | ${mdCell(n.reason)} | NOT ASSESSED |`);
+  }
+  lines.push('');
+
+  lines.push('## At a glance');
+  lines.push('| Metric | Value |');
+  lines.push('| --- | --- |');
+  lines.push(`| Readiness (assessed controls) | ${mdCell(readiness)} |`);
+  lines.push(`| Deal-blocking findings | ${mdCell(blocking)} |`);
+  lines.push(`| Total findings | ${mdCell(total)} |`);
+  lines.push(`| Tamper-evident trail | ${mdCell(tamper)} |`);
+  lines.push('');
+
+  lines.push(`Signed Ed25519 (\`${str(sig.key_fingerprint) || '-'}\`). Verify offline at ${str(e.verify_url) || '-'} - no upload, no account. A trusted verdict requires both a valid signature and a recognized issuer key.`);
+  lines.push('');
+  lines.push(`_kolm.ai - Agent Security Evidence - ${str(e.contact) || CONTACT_EMAIL}_`);
+  lines.push('');
+
+  return {
+    filename: `${baseName(e)}-scorecard.md`,
+    contentType: 'text/markdown; charset=utf-8',
+    body: lines.join('\n'),
+  };
+}
+
+// ===========================================================================
+// 10) Model card - maps the envelope to a minimal manifest and emits an HF
+//     model card via reg-model-card-extended.js. If the builder cannot produce
+//     a card, falls back to a minimal valid model-card Markdown from the
+//     envelope fields directly (never fails).
+// ===========================================================================
+
+// Build a minimal model-card manifest from the envelope. The subject is the
+// "model" being described; the declared passport models become the base models;
+// the findings/caveats become limitations.
+function manifestFromEnvelope(e) {
+  const passport = obj(e.passport);
+  const subject = str(obj(e.subject).name) || str(e.report_id) || 'AI agent';
+  const models = arr(passport.models).map((m) => str(obj(m).slug || obj(m).name)).filter(Boolean);
+  const outOfScope = arr(e.caveats).map(str).filter(Boolean);
+  return {
+    name: subject,
+    version: str(e.report_version) || str(e.report_id),
+    developed_by: subject,
+    model_type: 'agent (security-reviewed)',
+    base_model: models.length ? models.join(', ') : null,
+    intended_use: {
+      primary_uses: 'Operated AI agent assessed by a kolm Agent Security-Review.',
+      out_of_scope_uses: outOfScope.length ? outOfScope : null,
+    },
+    caveats: outOfScope.length ? outOfScope : null,
+  };
+}
+
+// Minimal, never-throw model-card Markdown directly from the envelope - the
+// fallback when the extended builder cannot produce a card.
+function minimalModelCardMd(e) {
+  const subject = str(obj(e.subject).name) || str(e.report_id) || 'AI agent';
+  const s = obj(e.summary);
+  const lines = [];
+  lines.push(`# Model Card - ${mdCell(subject)}`);
+  lines.push('');
+  lines.push('## Model Details');
+  lines.push(`- **Name**: ${mdCell(subject)}`);
+  lines.push(`- **Report**: \`${str(e.report_id) || '-'}\``);
+  lines.push(`- **Generated**: ${str(e.generated_at) || '-'}`);
+  const models = arr(obj(e.passport).models).map((m) => str(obj(m).slug || obj(m).name)).filter(Boolean);
+  lines.push(`- **Base models**: ${models.length ? mdCell(models.join(', ')) : 'not_yet_disclosed'}`);
+  lines.push('');
+  lines.push('## Intended Use');
+  lines.push('Operated AI agent assessed by a kolm Agent Security-Review.');
+  lines.push('');
+  lines.push('## Caveats and Recommendations');
+  const caveats = arr(e.caveats).map(str).filter(Boolean);
+  if (caveats.length === 0) lines.push('- not_yet_disclosed');
+  else for (const c of caveats) lines.push(`- ${mdCell(c)}`);
+  lines.push('');
+  lines.push(`Readiness ${s.readiness_pct == null ? 'n/a' : s.readiness_pct + '%'} across the assessed controls. Verify the signed source report offline at ${str(e.verify_url) || '-'}.`);
+  lines.push('');
+  return lines.join('\n');
+}
+
+// The reg-model-card-extended / model-card-emit builders carry labels that
+// include a word kolm's copy contract bans in any emitted string. Scrub it from
+// the builder's output (case-insensitive, word + the "ly" adverb) before we
+// emit the card, replacing it with a contract-safe synonym. This never touches
+// signing or canonicalization - the model card is a read-only view artifact.
+function scrubBannedWord(s) {
+  return str(s)
+    .replace(/Honesty/g, 'Candor')
+    .replace(/honesty/g, 'candor')
+    .replace(/Honestly/g, 'Candidly')
+    .replace(/honestly/g, 'candidly')
+    .replace(/Honest/g, 'Candid')
+    .replace(/honest/g, 'candid');
+}
+
+export function toModelCard(envelope) {
+  const e = obj(envelope);
+  let body = '';
+  let contentType = 'text/markdown; charset=utf-8';
+  let ext = 'md';
+  try {
+    const built = buildExtendedModelCard(manifestFromEnvelope(e), { format: 'huggingface' });
+    if (built && built.ok && typeof built.huggingface === 'string' && built.huggingface.length) {
+      body = scrubBannedWord(built.huggingface);
+    } else if (built && built.ok && built.card) {
+      body = scrubBannedWord(JSON.stringify({ ok: true, card: built.card }, null, 2));
+      contentType = 'application/json; charset=utf-8';
+      ext = 'json';
+    }
+  } catch {
+    body = ''; // fall through to the minimal markdown below
+  }
+  if (!body) {
+    body = minimalModelCardMd(e);
+    contentType = 'text/markdown; charset=utf-8';
+    ext = 'md';
+  }
+  return {
+    filename: `${baseName(e)}-model-card.${ext}`,
+    contentType,
+    body,
+  };
+}
+
+// ===========================================================================
+// 11) Readiness badge - a dependency-free shields.io-flat SVG. Served by a
+//     route (renderBadgeSvg returns the raw SVG string); toBadge wraps it in
+//     the standard { filename, contentType, body } shape for completeness.
+// ===========================================================================
+
+// shields.io-flat color buckets keyed on the readiness percentage.
+function badgeColor(pct) {
+  if (pct == null || !Number.isFinite(Number(pct))) return '#9f9f9f'; // grey
+  const n = Number(pct);
+  if (n >= 80) return '#4c1'; // green
+  if (n >= 50) return '#dfb317'; // yellow
+  return '#e05d44'; // red
+}
+
+// Minimal XML/SVG attribute escape (the only dynamic text is the message).
+function svgEsc(v) {
+  return str(v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+    .replace(XML_BAD_CHARS, ' ');
+}
+
+export function renderBadgeSvg(envelope) {
+  const e = obj(envelope);
+  const pct = obj(e.summary).readiness_pct;
+  const message = (pct == null || !Number.isFinite(Number(pct))) ? 'n/a' : `${Number(pct)}%`;
+  const label = 'kolm readiness';
+  const color = badgeColor(pct);
+
+  // Fixed geometry (no text-measurement dependency): a 6px-per-char estimate at
+  // the shields.io 11px font. Width is generous so the text never clips.
+  const labelW = 6 * label.length + 20;
+  const msgW = 6 * message.length + 20;
+  const totalW = labelW + msgW;
+  const labelX = (labelW / 2) * 10;
+  const msgX = (labelW + msgW / 2) * 10;
+  const labelLen = (labelW - 10) * 10;
+  const msgLen = (msgW - 10) * 10;
+  const eLabel = svgEsc(label);
+  const eMsg = svgEsc(message);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${totalW}" height="20" role="img" aria-label="${eLabel}: ${eMsg}">
+  <title>${eLabel}: ${eMsg}</title>
+  <linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
+  <clipPath id="r"><rect width="${totalW}" height="20" rx="3" fill="#fff"/></clipPath>
+  <g clip-path="url(#r)">
+    <rect width="${labelW}" height="20" fill="#555"/>
+    <rect x="${labelW}" width="${msgW}" height="20" fill="${color}"/>
+    <rect width="${totalW}" height="20" fill="url(#s)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="110">
+    <text aria-hidden="true" x="${labelX}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="${labelLen}">${eLabel}</text>
+    <text x="${labelX}" y="140" transform="scale(.1)" textLength="${labelLen}">${eLabel}</text>
+    <text aria-hidden="true" x="${msgX}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="${msgLen}">${eMsg}</text>
+    <text x="${msgX}" y="140" transform="scale(.1)" textLength="${msgLen}">${eMsg}</text>
+  </g>
+</svg>`;
+}
+
+export function toBadge(envelope) {
+  const e = obj(envelope);
+  return {
+    filename: `${baseName(e)}-badge.svg`,
+    contentType: 'image/svg+xml; charset=utf-8',
+    body: renderBadgeSvg(e),
+  };
+}
+
 // A registry the route layer can dispatch over (format string -> formatter).
 export const EXPORTERS = Object.freeze({
   csv: toCSV,
@@ -732,6 +1262,11 @@ export const EXPORTERS = Object.freeze({
   vanta: toVanta,
   exec: toExecutiveSummaryMarkdown,
   crosswalk: toFrameworkCrosswalk,
+  sarif: toSarif,
+  oscal: toOscal,
+  aibom: toAibom,
+  scorecard: toScorecard,
+  modelcard: toModelCard,
 });
 
 export const EXPORT_FORMATS = Object.freeze(Object.keys(EXPORTERS));

@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>System Status · kolm.ai</title>
 <meta name="description" content="Current health of the kolm.ai audit infrastructure: public verifier, API, transparency log, audit pipeline, and website. Incidents posted here and to dev@kolm.ai.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -60,6 +60,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <hr class="foil-strip" aria-hidden="true">
 
@@ -82,7 +83,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -90,24 +91,28 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- hero -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:64ch">
-      <h1>Audit infrastructure status.</h1>
-      <p class="lede">The live health of every public surface behind the kolm.ai evidence pipeline. Incidents are posted here and sent directly to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. Evidence reports already in your hands are not affected by infrastructure events; they are offline-verifiable against our public Ed25519 key with no dependency on our servers.</p>
+    <p class="eyebrow">Infrastructure</p>
+    <h1>Audit infrastructure status. <span class="go">Evidence stays verifiable.</span></h1>
+    <p class="lede">The live health of every public surface behind the kolm.ai evidence pipeline. Incidents are posted here and sent directly to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. Evidence reports already in your hands are not affected by infrastructure events; they are offline-verifiable against our public Ed25519 key with no dependency on our servers.</p>
+    <div class="hero__proof" aria-label="Status at a glance">
+      <span><i class="dot" aria-hidden="true"></i>All systems operational</span>
+      <span><i class="dot" aria-hidden="true"></i>No incidents active</span>
+      <span><i class="dot" aria-hidden="true"></i>Reports verify offline · Ed25519</span>
     </div>
   </div>
 </section>
 
 <!-- overall banner -->
-<section class="section reveal" style="border-top:0;padding-top:0">
+<section class="section sect--dense reveal" style="border-top:0;padding-top:0">
   <div class="wrap">
-    <div class="section__head" style="margin-bottom:var(--s4)">
-      <span class="idx">01 / Current status</span>
-    </div>
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / Current status</span></div>
+      <div class="sect-rail__body">
     <div class="band" style="margin-bottom:0" role="status" aria-live="polite">
       <div class="band__item">
         <span class="badge badge--ok">All systems operational</span>
@@ -116,18 +121,22 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         Per-component detail below. No incidents active.
       </div>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- component table -->
-<section class="section reveal">
+<section class="section sect--dense reveal">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / Components</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">02 / Components</span>
       <h2>What we monitor.</h2>
       <p style="max-width:60ch;color:var(--ink-3)">Each component is checked continuously. Status shown here is updated on a rolling basis. When a component degrades or goes down, an incident is opened and posted to this page; a notification is sent to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
     </div>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Monitored components">
       <table class="tbl">
         <thead>
           <tr>
@@ -165,25 +174,35 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </tbody>
       </table>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- incident history -->
 <section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / Incidents</span></div>
+      <div class="sect-rail__body" style="max-width:78ch">
     <div class="section__head">
-      <span class="idx">03 / Incidents</span>
       <h2>No incidents on record.</h2>
     </div>
     <p style="color:var(--ink-3)">When an incident occurs, a dated entry is posted here with a plain-language description of the affected component, the impact, and the resolution. Notifications go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. There are no incidents to report at this time.</p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- what is verified, and the offline guarantee -->
 <section class="section section--ink reveal">
-  <div class="wrap split" style="align-items:flex-start">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">04 / Offline verification</span></div>
+      <div class="sect-rail__body">
+  <div class="split" style="align-items:flex-start">
     <div>
-      <span class="idx">04 / Offline verification</span>
       <h2>Evidence reports survive any outage.</h2>
       <p class="lede" style="margin-bottom:16px">Every evidence report issued by kolm is signed with an Ed25519 key whose public counterpart is published and pinned. Verification uses in-browser WebCrypto: no network call to kolm servers, no account, no trust in our uptime. A buyer's security team can confirm the signature, the scope, and the timestamp of any report even when this status page is unreachable.</p>
       <div class="hero__cta" style="margin-top:8px">
@@ -214,13 +233,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
     </div>
   </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- cross-links -->
-<section class="section reveal">
+<section class="section sect--dense reveal">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">05 / Related</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">05 / Related</span>
       <h2>More on infrastructure and trust.</h2>
     </div>
     <div class="grid grid--3">
@@ -240,18 +264,28 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p>Upload any kolm evidence report and confirm its Ed25519 signature, scope, and log inclusion in-browser. No account needed.</p>
       </div>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- final CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Reach us directly.</h2>
     <p style="max-width:52ch;margin:0 auto 24px;color:var(--ink-3);text-align:center">For incident reports, infrastructure questions, or anything related to the audit pipeline, write to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. We aim to respond within one business day.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="mailto:dev@kolm.ai">dev@kolm.ai</a>
       <a class="btn btn--ghost" href="/contact">Start an audit</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -273,24 +307,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -298,7 +335,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

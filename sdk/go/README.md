@@ -186,4 +186,4 @@ offline `VerifyReport`, which needs no trust in the server.
 
 ## License
 
-Dual-licensed under MIT OR Apache-2.0, matching the other kolm SDKs.
+Licensed under Apache-2.0, governed by the LICENSE at the kolm repository root (the same license as the Python SDK).

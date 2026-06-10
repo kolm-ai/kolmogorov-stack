@@ -1,31 +1,16 @@
 // kolm-2026.js - shared page behavior for the rebuild. Load with `defer`.
-// The pre-paint theme bootstrap stays inline in each <head> (it must run before
-// first paint to avoid a flash); everything non-critical lives here so the 2026
-// pages don't each re-declare it.
-//
-//   <script>(function(){try{if(localStorage.getItem('kolm-2026-theme')==='light')
-//     document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+// Dark is the only theme (2026: the theme-toggle path was dead weight, removed).
 //   <script defer src="/kolm-2026.js"></script>
 
 (function () {
   'use strict';
 
-  // ---- theme toggle (dark canonical; light is the opt-in) ----
-  function wireToggle() {
-    var btn = document.getElementById('themeToggle') || document.querySelector('[data-theme-toggle]');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      var light = document.documentElement.getAttribute('data-theme') === 'light';
-      try {
-        if (light) {
-          document.documentElement.removeAttribute('data-theme');
-          localStorage.setItem('kolm-2026-theme', 'dark');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('kolm-2026-theme', 'light');
-        }
-      } catch (e) {}
-    });
+  // ---- browser chrome color tracks the live --paper token (one theme, dark) ----
+  function syncThemeColor() {
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) return;
+    var paper = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+    if (paper && paper.charAt(0) === '#') meta.setAttribute('content', paper);
   }
 
   // ---- reveal-on-scroll (gated by prefers-reduced-motion via the CSS rule) ----
@@ -64,6 +49,19 @@
         toggle.setAttribute('aria-expanded', 'false');
       });
     });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('is-open')) {
+        nav.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.focus();
+      }
+    });
+    document.addEventListener('click', function (e) {
+      if (nav.classList.contains('is-open') && !nav.contains(e.target)) {
+        nav.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
   }
 
   // ---- nav CTA fill: ghost while the hero is in view, solid green once it scrolls
@@ -82,7 +80,61 @@
     io.observe(hero);
   }
 
-  function init() { wireToggle(); wireReveal(); wireNav(); wireNavCta(); }
+  // ---- pointer-tracked card light (CSS renders it; we only feed --mx/--my).
+  // Desktop fine-pointer only; rAF-coalesced so pointermove never floods layout. ----
+  function wirePointerLight() {
+    if (!window.matchMedia || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    var sel = '.card, .step, .tier, .flow__node';
+    var pending = null;
+    document.addEventListener('pointermove', function (e) {
+      var t = e.target && e.target.closest ? e.target.closest(sel) : null;
+      if (!t) return;
+      if (pending) { pending.t = t; pending.x = e.clientX; pending.y = e.clientY; return; }
+      pending = { t: t, x: e.clientX, y: e.clientY };
+      requestAnimationFrame(function () {
+        var p = pending; pending = null;
+        var r = p.t.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        p.t.style.setProperty('--mx', (((p.x - r.left) / r.width) * 100).toFixed(1) + '%');
+        p.t.style.setProperty('--my', (((p.y - r.top) / r.height) * 100).toFixed(1) + '%');
+      });
+    }, { passive: true });
+  }
+
+  // ---- metric count-up: opt-in via data-count on a pure-number node.
+  // Fail-open: the real value is already in the markup; we only animate toward it. ----
+  function wireCount() {
+    var els = document.querySelectorAll('[data-count]');
+    if (!els.length) return;
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        io.unobserve(en.target);
+        var el = en.target;
+        var m = (el.textContent || '').trim().match(/^(\d[\d,]*)(.*)$/);
+        if (!m) return;
+        var target = parseInt(m[1].replace(/,/g, ''), 10);
+        var suffix = m[2] || '';
+        var hasComma = m[1].indexOf(',') !== -1;
+        if (!isFinite(target) || target <= 0) return;
+        var t0 = null, DUR = 900;
+        function frame(ts) {
+          if (t0 === null) t0 = ts;
+          var p = Math.min(1, (ts - t0) / DUR);
+          var eased = 1 - Math.pow(1 - p, 3);
+          var v = Math.round(target * eased);
+          el.textContent = (hasComma ? v.toLocaleString('en-US') : String(v)) + suffix;
+          if (p < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      });
+    }, { threshold: 0.4 });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  function init() { syncThemeColor(); wireReveal(); wireNav(); wireNavCta(); wirePointerLight(); wireCount(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

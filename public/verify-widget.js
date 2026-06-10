@@ -142,6 +142,9 @@ class VerifyWidget {
   _build() {
     this.root.innerHTML = '';
     this.root.classList.add('vw');
+    // 'is-live' arms the check-row entrance animation; without the script the
+    // CSS keeps rows fully visible (fail-open).
+    this.root.classList.add('is-live');
 
     const bar = el('div', 'vw__bar');
     bar.append(
@@ -149,6 +152,7 @@ class VerifyWidget {
       el('span', 'vw__title', 'kolm verify · offline'),
     );
     this.status = el('span', 'vw__status', 'loading…');
+    this.status.setAttribute('role', 'status');
     bar.append(this.status);
     this.root.append(bar);
 
@@ -161,7 +165,7 @@ class VerifyWidget {
     this.fwEl = el('div', 'vw__fw');
     this.actions = el('div', 'vw__actions');
 
-    this.tamperBtn = el('button', 'btn btn--ghost btn--sm', this.mode === 'report' ? 'Inflate the score' : 'Tamper a field');
+    this.tamperBtn = el('button', 'btn btn--ghost btn--sm vw__attack', this.mode === 'report' ? 'Inflate the score' : 'Tamper a field');
     this.tamperBtn.type = 'button';
     this.tamperBtn.addEventListener('click', () => this._toggleTamper());
 
@@ -170,7 +174,7 @@ class VerifyWidget {
     // (verify-page) variant, and only where the browser can actually keygen+sign.
     this.forgeBtn = null;
     if (this.mode === 'report' && this.variant === 'full' && this._forgeSupported()) {
-      this.forgeBtn = el('button', 'btn btn--ghost btn--sm', 'Forge with a rogue key');
+      this.forgeBtn = el('button', 'btn btn--ghost btn--sm vw__attack', 'Forge with a rogue key');
       this.forgeBtn.type = 'button';
       this.forgeBtn.addEventListener('click', () => this._toggleForge());
     }
@@ -182,7 +186,10 @@ class VerifyWidget {
     this.actions.append(this.tamperBtn);
     if (this.forgeBtn) this.actions.append(this.forgeBtn);
     this.actions.append(this.reverifyBtn);
-    body.append(this.headEl, this.sevEl, this.fieldsEl, this.checksEl, this.provEl, this.fwEl, this.actions);
+    // The attack drills ARE the demo; name the row so nobody mistakes the
+    // buttons for chrome. Every attack is reversible (Restore labels).
+    this.actionsK = el('p', 'vw__actions-k', 'Try to break it');
+    body.append(this.headEl, this.sevEl, this.fieldsEl, this.checksEl, this.provEl, this.fwEl, this.actionsK, this.actions);
     this.root.append(body);
   }
 
@@ -250,7 +257,10 @@ class VerifyWidget {
       el('div', 'vw__sub', `${esc(rep.report_id || 'asrr')} · ${esc(subj.source || 'source')} · ${esc(String(subj.records ?? '?'))} records`),
     );
     const score = el('div', 'vw__score');
-    this.scoreB = el('b', this.tampered ? 'is-changed' : null, esc(String(pct)) + '%');
+    // The readiness number lands WITH the verdict (_runReport), never before it:
+    // a number over a "verifying" chip reads as a result preceding its proof.
+    this.scoreB = el('b', this.tampered ? 'is-changed' : null, '·%');
+    this.scorePct = esc(String(pct)) + '%';
     score.append(this.scoreB, el('span', null, 'readiness'));
 
     this.headEl.append(sealWrap, idBlock, score);
@@ -352,6 +362,8 @@ class VerifyWidget {
     this.fwEl.innerHTML = '';
     this._setStatus('verifying…', null);
     this._setSeal('is-pending');
+    // while verifying, the number is withheld (re-verify path skips _render).
+    if (this.mode === 'report' && this.scoreB) this.scoreB.textContent = '·%';
 
     if (this.mode === 'report') await this._runReport();
     else await this._runReceipt();
@@ -428,11 +440,16 @@ class VerifyWidget {
     try { result = await verifyAuditReport(this.current); }
     catch (e) { result = { ok: false, reason: 'verifier error: ' + e.message, checks: [] }; }
 
-    for (const c of result.checks) { this._addCheck(c); await sleep(190); }
+    // sleep BETWEEN checks only - after the last check lands, the seal and the
+    // status chip must flip in the same frame, never linger on "verifying".
+    for (let i = 0; i < result.checks.length; i++) { if (i) await sleep(190); this._addCheck(result.checks[i]); }
     if (result.reason && !result.ok) this._addCheck({ name: result.reason, ok: false, detail: '' });
 
     // tier 2: is the embedded key one kolm publishes?
     const prov = issuerProvenance(this.current, this.keyring || { issuers: [] });
+
+    // the readiness number and the verdict land in the same frame as the last check.
+    if (this.scoreB) this.scoreB.textContent = this.scorePct;
 
     if (result.ok) {
       this._setSeal('is-sealed');
@@ -480,7 +497,8 @@ class VerifyWidget {
     try { result = await verifyReceipt(this.current); }
     catch (e) { result = { ok: false, reason: 'verifier error: ' + e.message, checks: [] }; }
 
-    for (const c of result.checks) { this._addCheck(c); await sleep(220); }
+    // sleep between checks only (see _runReport) so the verdict lands with the last row.
+    for (let i = 0; i < result.checks.length; i++) { if (i) await sleep(220); this._addCheck(result.checks[i]); }
     if (result.reason && !result.ok) this._addCheck({ name: result.reason, ok: false, detail: '' });
 
     if (result.ok) this._setStatus('Verified offline', 'ok');

@@ -29,6 +29,10 @@ import { runAudit } from './audit-orchestrator.js';
 import { buildAndSignReport, resignAsTier, canonicalizeReport } from './attestation-report-builder.js';
 import { computeAuditDelta } from './audit-delta.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
+// G-routes: fire Continuous re-attestation notifications. notify() is async and
+// can throw (unknown event / store hiccup); the _notify wrapper below makes every
+// call fire-and-forget so a notification failure can NEVER fail fulfillment.
+import { notify } from './notifications.js';
 // M14 - audit trail. Package fulfillment + subscription activation are
 // money-bearing state transitions, so each writes one chained audit row.
 // tryAppendAudit never throws, so the fulfillment path is never blocked by an
@@ -57,6 +61,27 @@ function verifyUrl() {
 }
 function nowIso() { return new Date().toISOString(); }
 function plusWeekIso() { return new Date(Date.now() + WEEK_MS).toISOString(); }
+
+// The public Trust link for a subscription's stable slug (mirrors the
+// _trustUrlFor / _publicBase helpers in audit-routes.js). null when no slug.
+function _publicBase() {
+  return (process.env.PUBLIC_BASE || process.env.KOLM_VERIFY_URL_BASE || 'https://kolm.ai').replace(/\/+$/, '');
+}
+function trustUrlFor(slug) {
+  return slug ? `${_publicBase()}/v1/trust/${slug}` : null;
+}
+
+// Fire-and-forget notification. notify() is async and may reject (an unknown
+// event type, a transient store error, a webhook timeout); fulfillment must
+// NEVER fail because a notification did. We swallow both the synchronous throw
+// and the rejected promise, and never await the result.
+function _notify(tenant, eventType, payload) {
+  try {
+    if (!tenant) return;
+    const p = notify(tenant, eventType, payload || {});
+    if (p && typeof p.then === 'function') p.then(() => {}, () => {});
+  } catch { /* best-effort: a notify failure never blocks fulfillment */ }
+}
 
 // ---------------------------------------------------------------------------
 // Trusted timestamping of the PAID deliverable (the $750 report / Trust Link).
@@ -405,6 +430,35 @@ function reattestSub(sub, { signer } = {}) {
   };
   insert(AUDITS, auditRow);
   update(SUBSCRIPTIONS, (s) => s.id === sub.id, { latest_audit_id: auditRow.id, last_run_at: ts, updated_at: ts });
+
+  // G-routes: notify the tenant about this re-attestation. Both calls are
+  // fire-and-forget (see _notify) so a webhook / email failure never fails the
+  // re-attestation. The Trust link is the subscription's stable, always-current
+  // public slug.
+  const trustUrl = trustUrlFor(sub.public_slug);
+  const subject = source.subject || sub.product_key || 'Agent fleet';
+  const readinessPct = audit.summary ? audit.summary.readiness_pct : null;
+  // audit_report_ready - a fresh signed report was published this cycle.
+  _notify(sub.tenant_id, 'audit_report_ready', { trust_url: trustUrl, readiness_pct: readinessPct, subject });
+  // reattestation_drift - only when the delta shows real movement vs the prior
+  // cycle (a new or resolved finding, or a readiness change). A no-change cycle
+  // stays quiet so a Continuous customer is only pinged when something moved.
+  if (drift && (
+    (Array.isArray(drift.findings_added) && drift.findings_added.length > 0) ||
+    (Array.isArray(drift.findings_resolved) && drift.findings_resolved.length > 0) ||
+    (drift.readiness_change != null && drift.readiness_change !== 0)
+  )) {
+    _notify(sub.tenant_id, 'reattestation_drift', {
+      trust_url: trustUrl,
+      subject,
+      summary: drift.summary || null,
+      readiness_change: drift.readiness_change,
+      findings_added: Array.isArray(drift.findings_added) ? drift.findings_added.length : 0,
+      findings_resolved: Array.isArray(drift.findings_resolved) ? drift.findings_resolved.length : 0,
+      regressed: drift.regressed === true,
+    });
+  }
+
   return { sub: sub.id, ok: true, audit_id: auditRow.id, readiness_pct: audit.summary ? audit.summary.readiness_pct : null, regressed: drift ? drift.regressed === true : null };
 }
 

@@ -28,7 +28,7 @@
 // src/red-team.js marks probes the logs never exercised. An absent pin, an
 // absent gateway, an absent egress are treated as untested/unknown, not as a
 // pass. Findings carry pillar 'supply-chain' so the control-mapper's
-// PILLAR_MAP -> ASR-5 fallback (and OWASP LLM05 / LLM03, MITRE ATLAS AML.T0010,
+// PILLAR_MAP -> ASR-5 fallback (and OWASP LLM03 supply chain, MITRE ATLAS AML.T0010,
 // NIST MAP-4, ISO A.10) applies.
 //
 // Never throws: malformed events are tolerated; an empty event set yields an

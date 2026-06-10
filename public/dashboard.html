@@ -3,111 +3,203 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Your reports · kolm.ai</title>
 <meta name="description" content="Your signed Agent Security-Review reports, Trust links, and Continuous subscription.">
+<meta name="theme-color" content="#090C0D">
 <meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://kolm.ai/dashboard">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <style>
-  :root{ --d-ink:#0b0e14; --d-muted:#5b6472; --d-rule:#e3e7ee; --d-paper:#f6f7f4; --d-panel:#ffffff; --d-accent:#b3431f; --d-ok:#166534; --d-warn:#0e7490; }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--d-paper);color:var(--d-ink);
-    font-family:'Switzer',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    font-size:15px;line-height:1.5}
-  .mono{font-family:'Spline Sans Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  .wrap{max-width:1000px;margin:0 auto;padding:28px 22px 80px}
-  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--d-rule);padding:16px 22px;background:var(--d-panel)}
-  header.top a.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--d-ink);font-weight:700;font-family:'Cabinet Grotesk',sans-serif;font-size:18px;letter-spacing:-.01em}
-  header.top .bars{display:inline-flex;gap:3px;align-items:flex-end;height:18px}
-  header.top .bars i{width:4px;background:var(--d-ink);border-radius:1px;display:block}
-  header.top .bars i:nth-child(1){height:8px}header.top .bars i:nth-child(2){height:13px}header.top .bars i:nth-child(3){height:18px}
-  header.top nav a{color:var(--d-muted);text-decoration:none;margin-left:18px;font-size:14px}
-  header.top nav a:hover{color:var(--d-ink)}
-  h1{font-family:'Cabinet Grotesk',sans-serif;font-size:30px;letter-spacing:-.02em;margin:26px 0 4px}
-  .lede{color:var(--d-muted);margin:0 0 26px;max-width:60ch}
-  .idx{font-family:'Spline Sans Mono',monospace;font-size:12px;color:var(--d-accent);letter-spacing:.08em;text-transform:uppercase}
-  h2{font-family:'Cabinet Grotesk',sans-serif;font-size:20px;margin:34px 0 12px}
-  .card{background:var(--d-panel);border:1px solid var(--d-rule);border-radius:12px;padding:18px 20px;margin:0 0 16px}
-  table{width:100%;border-collapse:collapse}
-  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--d-rule);vertical-align:middle}
-  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--d-muted);font-weight:600}
-  .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
-  .pill.scan{background:#fff4ed;color:var(--d-accent)}
-  .pill.report{background:#ecfdf3;color:var(--d-ok)}
-  .num{font-variant-numeric:tabular-nums}
-  .btn{display:inline-block;border:0;border-radius:8px;padding:9px 15px;font:600 14px 'Switzer',sans-serif;cursor:pointer;text-decoration:none;text-align:center}
-  .btn.primary{background:var(--d-ink);color:#fff}
-  .btn.primary:hover{background:#1b2331}
-  .btn.ghost{background:transparent;color:var(--d-ink);border:1px solid var(--d-rule)}
-  .btn.ghost:hover{border-color:var(--d-ink)}
-  .btn[disabled]{opacity:.45;cursor:not-allowed}
-  .btn.sm{padding:6px 11px;font-size:13px}
-  .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-  .tier{border:1px solid var(--d-rule);border-radius:12px;padding:18px;background:var(--d-panel)}
-  .tier .price{font-family:'Cabinet Grotesk',sans-serif;font-size:26px;letter-spacing:-.02em}
-  .tier .price small{font-size:13px;color:var(--d-muted);font-family:'Switzer',sans-serif;letter-spacing:0}
-  .tier p{color:var(--d-muted);font-size:13px;margin:6px 0 14px}
-  .banner{border-radius:10px;padding:12px 16px;margin:0 0 20px;font-size:14px}
-  .banner.ok{background:#ecfdf3;border:1px solid #abe0c0;color:#0f5132}
-  .banner.info{background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3}
-  .banner.warn{background:#fff4ed;border:1px solid #f3c4a8;color:#92400e}
-  .muted{color:var(--d-muted)}
-  .empty{padding:30px;text-align:center;color:var(--d-muted)}
-  .auth-box{max-width:460px;margin:40px auto;text-align:center}
-  .auth-box input{width:100%;padding:10px 12px;border:1px solid var(--d-rule);border-radius:8px;font-family:'Spline Sans Mono',monospace;margin:12px 0}
+  /* Page-scoped chrome for the reports console. Dark Evidence Room tokens only.
+   * Class names below are load-bearing: the inline script generates markup with
+   * .card .pill(.scan/.report) .banner(.ok/.info/.warn) .num .muted .mono
+   * .btn.primary/.ghost/.sm .row-actions .empty - do not rename. */
+  .mono{font-family:var(--mono)}
+  .app-wrap{max-width:1020px;margin:0 auto;padding:clamp(44px,6vw,72px) max(24px,env(safe-area-inset-right)) 96px max(24px,env(safe-area-inset-left))}
+  .app-wrap h1{font-size:clamp(30px,3.6vw,42px);margin:14px 0 0;max-width:none}
+  .app-wrap>.lede{margin:14px 0 32px;max-width:62ch}
+  .app-wrap h2{font-size:20px;margin:40px 0 14px;max-width:none}
+  .app-wrap .card{margin:0 0 16px}
+  .app-wrap .card:hover{transform:none;box-shadow:none;border-color:var(--line)}
+  .app-wrap table{width:100%;border-collapse:collapse;font-size:14px}
+  .app-wrap th,.app-wrap td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .app-wrap thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;background:var(--paper-sink)}
+  .app-wrap tbody tr:last-child td{border-bottom:0}
+  .app-wrap td{color:var(--ink-2)}
+  .app-wrap td strong{color:var(--ink);font-weight:600}
+  .num{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:.95em}
+  .app-wrap .pill{display:inline-flex;align-items:center;margin:0;padding:3px 10px;border-radius:3px;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-2)}
+  .app-wrap .pill.scan{background:rgba(227,195,104,.10);color:var(--sev-med);border-color:rgba(227,195,104,.38)}
+  .app-wrap .pill.report{background:var(--accent-soft);color:var(--accent);border-color:var(--accent-edge)}
+  .banner{border:1px solid var(--line-2);border-radius:var(--r-md);padding:13px 16px;margin:0 0 20px;font-size:14px;line-height:1.55;background:var(--paper-2);color:var(--ink-2)}
+  .banner.ok{background:var(--accent-soft);border-color:var(--accent-edge);color:var(--ink)}
+  .banner.info{background:var(--paper-2);border-color:var(--line-2);color:var(--ink-2)}
+  .banner.warn{background:rgba(227,195,104,.08);border-color:rgba(227,195,104,.38);color:var(--ink)}
+  .app-wrap .btn{font-size:14px;padding:11px 18px;min-height:42px;border-radius:var(--r-md);text-decoration:none}
+  .app-wrap .btn.primary{background:linear-gradient(180deg,#FBFCFA,var(--sheet) 70%);color:#0C100E;border-color:rgba(243,245,242,.92);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 10px 28px var(--shadow-tint)}
+  .app-wrap .btn.primary:hover{background:#FFFFFF;border-color:#FFFFFF}
+  .app-wrap .btn.ghost{background:rgba(255,255,255,.015);color:var(--ink);border-color:var(--line-2);font-weight:500}
+  .app-wrap .btn.ghost:hover{border-color:rgba(229,240,234,.34);background:rgba(255,255,255,.04)}
+  .app-wrap .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .app-wrap .btn.sm{padding:7px 13px;min-height:33px;font-size:13px}
+  .empty{padding:28px 18px;text-align:center;color:var(--ink-3);font-size:14px}
+  .auth-box{max-width:440px;margin:28px auto 40px;text-align:center;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:30px 26px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.005))}
+  .auth-box h2{margin:0 0 8px;font-size:20px}
+  .auth-box .muted{font-size:14px}
+  .auth-box input{width:100%;padding:11px 12px;border:1px solid var(--line-2);border-radius:var(--r-md);font-family:var(--mono);font-size:14px;margin:16px 0;background:var(--paper-sink);color:var(--ink)}
+  .auth-box input::placeholder{color:var(--ink-faint)}
+  .auth-box input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .row-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-  footer{border-top:1px solid var(--d-rule);margin-top:60px;padding:20px 0;color:var(--d-muted);font-size:13px;text-align:center}
-  footer a{color:var(--d-muted)}
+  .app-wrap .tiers{grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));max-width:760px}
+  .app-wrap .tier__price{font-size:clamp(26px,2.6vw,32px)}
+  .app-wrap .tier__price small{font-size:13px;color:var(--ink-3);font-family:var(--sans);font-weight:400;letter-spacing:0}
+  .app-wrap .tier__sub{min-height:0;font-size:13.5px;color:var(--ink-2);margin:6px 0 16px}
 </style>
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="/"><span class="bars"><i></i><i></i><i></i></span> kolm</a>
-  <nav>
-    <a href="/how-it-works">How it works</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/verify">Verify</a>
-    <a href="/contact">Contact</a>
-  </nav>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
 </header>
 
-<div class="wrap">
-  <div class="idx">Account</div>
+<main id="main">
+
+<div class="app-wrap">
+  <span class="idx">Account / Reports</span>
   <h1>Your reports</h1>
-  <p class="lede">Every Agent Security-Review you have run, the shareable Trust link your buyer's review group verifies offline, and your Continuous subscription.</p>
+  <p class="lede">Every Agent Security-Review you have run, the shareable Trust link your buyer's review group verifies offline, and your Continuous subscription. To see who opened each link, visit your <a href="/trust-center">Trust Center</a>.</p>
 
   <div id="banner"></div>
   <div id="content"><div class="empty">Loading your reports...</div></div>
 
   <div id="auth" class="auth-box" style="display:none">
     <h2>View your reports</h2>
-    <p class="muted">Paste your API key (starts with <span class="mono">ks_</span>) to see your reports and Trust links. Do not have one yet? <a href="/contact">Start an audit</a>.</p>
-    <input id="keyInput" class="mono" placeholder="ks_..." autocomplete="off" spellcheck="false">
+    <p class="muted">Sign in, or paste your API key (starts with <span class="mono">ks_</span>) to see your reports and Trust links. Do not have one yet? <a href="/signup">Run the free scan</a>.</p>
+    <input id="keyInput" class="mono" aria-label="API key" placeholder="ks_..." autocomplete="off" spellcheck="false">
     <button class="btn primary" id="keyBtn" style="width:100%">View my reports</button>
   </div>
 
   <h2 id="contTitle" style="display:none">Continuous re-attestation</h2>
   <div id="continuous" class="tiers" style="display:none">
     <div class="tier">
-      <div class="price">$299<small> /mo</small></div>
-      <strong>Starter</strong>
-      <p>Weekly re-attestation. An always-current Trust link that refreshes the signed report so a month-old audit never blocks a deal.</p>
+      <span class="tier__name">Starter</span>
+      <div class="tier__price">$299<small> /mo</small></div>
+      <p class="tier__sub">Weekly re-attestation. An always-current Trust link that refreshes the signed report so a month-old audit never blocks a deal.</p>
       <button class="btn primary sm" data-plan="starter">Subscribe to Starter</button>
     </div>
     <div class="tier">
-      <div class="price">$999<small> /mo</small></div>
-      <strong>Growth</strong>
-      <p>Re-attest on every deploy plus injection regression. Hand any buyer a link that is never stale.</p>
+      <span class="tier__name">Growth</span>
+      <div class="tier__price">$999<small> /mo</small></div>
+      <p class="tier__sub">Re-attest on every deploy plus injection regression. Hand any buyer a link that is never stale.</p>
       <button class="btn primary sm" data-plan="growth">Subscribe to Growth</button>
     </div>
   </div>
 </div>
 
-<footer>
-  kolm.ai &middot; Agent Security Evidence &middot; <a href="/verify">Verify a report</a> &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Product</h3>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+      </div>
+      <div class="foot__col">
+        <h3>Trust</h3>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h3>Legal</h3>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h3>Company</h3>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
 </footer>
 
 <script>

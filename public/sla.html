@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Service Level Agreement · kolm.ai</title>
 <meta name="description" content="kolm's service commitments: audit turnaround targets, verification-endpoint availability, support response times, and the remedies that apply when we miss them.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -37,8 +37,36 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+/* Legal typesetting layer (page-scoped, identical across the legal group).
+   Typeset, not designed: one measured column, mono article numbers,
+   hairlines between articles. Candidate for kolm-2026.css as .legal-doc. */
+.legal-doc { max-width: 64ch; }
+.legal-doc h2 { font-size: clamp(21px, 2.1vw, 25px); letter-spacing: -0.016em; line-height: 1.18; max-width: none; margin: var(--s7) 0 var(--s4); padding-top: var(--s6); border-top: 1px solid var(--line); }
+.legal-doc > h2:first-of-type, .legal-doc .idx + h2, .legal-doc .section__head h2 { border-top: 0; padding-top: 0; }
+.legal-doc > h2:first-of-type { margin-top: var(--s5); }
+.legal-doc .idx + h2, .legal-doc .section__head h2 { margin-top: 0; }
+.legal-doc h3 { margin: var(--s6) 0 10px; }
+.legal-doc .n, .section--ink h2 .n { display: block; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
+.legal-doc h3 .n { margin-bottom: 5px; }
+.legal-doc p, .legal-doc li { font-size: 15px; line-height: 1.75; color: var(--ink-2); }
+.legal-doc li { margin-bottom: 8px; }
+.legal-doc li::marker { color: var(--ink-3); }
+.legal-doc .art-rule { border: 0; border-top: 1px solid var(--line); margin: var(--s7) 0; }
+.legal-doc--wide { max-width: none; }
+.legal-meta { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-3); margin-top: var(--s4); font-variant-numeric: tabular-nums; }
+.legal-meta b, .legal-meta strong { color: var(--ink-2); font-weight: 500; }
+.legal-toc { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 2px 20px; margin: var(--s5) 0 var(--s3); }
+.legal-toc .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.legal-toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 36px; font-size: 13.5px; line-height: 2.05; color: var(--ink-3); }
+.legal-toc a { color: var(--ink-2); }
+.legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.legal-card b, .legal-card strong { color: var(--ink); }
+@media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+</style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <hr class="foil-strip" aria-hidden="true">
 
@@ -61,7 +89,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -69,92 +97,112 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
-<section class="section section--flush" style="padding-top:var(--s8)">
+<main id="main">
+
+<!-- ============================================================ HERO -->
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:64ch">
-      <span class="idx">01 / Service levels</span>
-      <h1>Service Level Agreement</h1>
-      <p class="lede">What you can count on from kolm: how fast we deliver an audit, the availability of the verification path your buyers rely on, and how quickly we respond when something needs attention. These commitments apply to paid engagements as set out in your order form.</p>
-      <p class="card__map">Last updated 1 June 2026 · supersedes prior versions</p>
-    </div>
+    <p class="eyebrow">Legal · Service levels</p>
+    <h1>Service Level Agreement</h1>
+    <p class="lede" style="max-width:72ch">What you can count on from kolm: how fast we deliver an audit, the availability of the verification path your buyers rely on, and how quickly we respond when something needs attention. These commitments apply to paid engagements as set out in your order form.</p>
+    <p class="legal-meta">Last updated <strong>1 June 2026</strong> · supersedes prior versions</p>
   </div>
 </section>
 
-<section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">02 / Audit turnaround</span>
-    <h2>1. Audit turnaround</h2>
+<!-- ============================================================ 1. TURNAROUND -->
+<section class="section sect--dense reveal">
+  <div class="wrap legal-doc">
+    <span class="idx">01 / Audit turnaround</span>
+    <h2><span class="n">1.</span> Audit turnaround</h2>
     <p>Turnaround is the commitment we price on. It is a clock, not a dollar figure. From the moment we have the inputs we need (agreed scope, access or log import, and a named technical contact), we target delivery of the signed evidence report within the window stated on your order form for the tier you selected. Express engagements target the shortest window; Standard and Advanced add depth and adjust the window accordingly. If we are tracking behind, we tell you before the deadline, not after.</p>
   </div>
 </section>
 
-<section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">03 / Verification availability</span>
-    <h2>2. Verification availability</h2>
+<!-- ============================================================ 2. VERIFICATION -->
+<section class="section sect--dense reveal">
+  <div class="wrap legal-doc">
+    <span class="idx">02 / Verification availability</span>
+    <h2><span class="n">2.</span> Verification availability</h2>
     <p>A report is only useful if a buyer can check it. Verification has two independent paths, and the durable one does not depend on us:</p>
     <ul>
-      <li><strong>Offline, in-browser verification</strong> at <a href="/verify" style="color:var(--ok)">/verify</a> runs entirely in the buyer's browser against the signature embedded in the report. It works with no kolm account and no call to our servers, so it is available whenever the buyer's own device is.</li>
+      <li><strong>Offline, in-browser verification</strong> at <a href="/verify">/verify</a> runs entirely in the buyer's browser against the signature embedded in the report. It works with no kolm account and no call to our servers, so it is available whenever the buyer's own device is.</li>
       <li><strong>The hosted verification endpoint and transparency log</strong> carry a target monthly availability of 99.9%, measured as successful responses over total valid requests in a calendar month, excluding scheduled maintenance announced at least 48 hours in advance.</li>
     </ul>
     <p>Because verification can be performed offline, a hosted-endpoint outage never invalidates a report you already hold.</p>
   </div>
 </section>
 
+<!-- ============================================================ 3. SUPPORT -->
 <section class="section section--ink reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">04 / Support response targets</span>
-    <h2>3. Support response targets</h2>
-    <div class="tbl-wrap">
+  <div class="wrap" style="max-width:72ch">
+    <span class="idx">03 / Support response targets</span>
+    <h2><span class="n">3.</span> Support response targets</h2>
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Support response targets" style="margin-top:var(--s5)">
       <table class="tbl">
         <thead><tr><th>Severity</th><th>Definition</th><th>Target first response</th></tr></thead>
         <tbody>
-          <tr><td>Critical</td><td>Verification path down, or a signed report cannot be validated</td><td>4 business hours</td></tr>
-          <tr><td>High</td><td>Active engagement blocked; delivery at risk</td><td>1 business day</td></tr>
-          <tr><td>Normal</td><td>Questions, scoping, report clarifications</td><td>2 business days</td></tr>
+          <tr><td><b>Critical</b></td><td>Verification path down, or a signed report cannot be validated</td><td>4 business hours</td></tr>
+          <tr><td><b>High</b></td><td>Active engagement blocked; delivery at risk</td><td>1 business day</td></tr>
+          <tr><td><b>Normal</b></td><td>Questions, scoping, report clarifications</td><td>2 business days</td></tr>
         </tbody>
       </table>
     </div>
-    <p>Business hours are 09:00 to 18:00 US Eastern, Monday to Friday, excluding US public holidays. The contact for all severities is <a href="mailto:dev@kolm.ai" style="color:var(--accent-on-ink)">dev@kolm.ai</a>.</p>
+    <p style="margin-top:var(--s5)">Business hours are 09:00 to 18:00 US Eastern, Monday to Friday, excluding US public holidays. The contact for all severities is <a href="mailto:dev@kolm.ai" style="color:var(--accent-on-ink)">dev@kolm.ai</a>.</p>
   </div>
 </section>
 
+<!-- ============================================================ 4. REMEDIES -->
 <section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">05 / Remedies</span>
-    <h2>4. Remedies</h2>
-    <p>If we miss the verification-availability target in a calendar month, you may request a service credit against the next invoice, proportional to the shortfall, up to one month of the applicable recurring fee. If we miss a committed audit-turnaround window for reasons within our control, the remedy is set out in your order form, typically a fee adjustment on that engagement. Service credits are the sole and exclusive remedy for missed targets, and are requested in writing to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a> within 30 days of the affected period.</p>
+  <div class="wrap legal-doc">
+    <span class="idx">04 / Remedies</span>
+    <h2><span class="n">4.</span> Remedies</h2>
+    <p>If we miss the verification-availability target in a calendar month, you may request a service credit against the next invoice, proportional to the shortfall, up to one month of the applicable recurring fee. If we miss a committed audit-turnaround window for reasons within our control, the remedy is set out in your order form, typically a fee adjustment on that engagement. Service credits are the sole and exclusive remedy for missed targets, and are requested in writing to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> within 30 days of the affected period.</p>
   </div>
 </section>
 
-<section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">06 / Exclusions</span>
-    <h2>5. Exclusions</h2>
-    <p>These targets do not apply to delays caused by incomplete or late inputs from the customer, scope changes mid-engagement, factors outside our reasonable control (including upstream provider or network outages), or use of the services outside the <a href="/acceptable-use" style="color:var(--ok)">Acceptable Use Policy</a>. Findings in a report describe the posture we observed within the agreed scope; this SLA covers service delivery, not the security outcome of any tested system.</p>
+<!-- ============================================================ 5. EXCLUSIONS -->
+<section class="section sect--dense reveal">
+  <div class="wrap legal-doc">
+    <span class="idx">05 / Exclusions</span>
+    <h2><span class="n">5.</span> Exclusions</h2>
+    <p>These targets do not apply to delays caused by incomplete or late inputs from the customer, scope changes mid-engagement, factors outside our reasonable control (including upstream provider or network outages), or use of the services outside the <a href="/acceptable-use">Acceptable Use Policy</a>. Findings in a report describe the posture we observed within the agreed scope; this SLA covers service delivery, not the security outcome of any tested system.</p>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
-<section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">07 / Changes and contact</span>
-    <h2>6. Changes &amp; contact</h2>
-    <p>We may revise these commitments; material changes appear in the "last updated" date and apply to engagements ordered after that date. Questions go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
-    <p class="hero__claim" style="margin-top:28px">See also: <a href="/terms" style="color:var(--ok)">Terms</a> · <a href="/status" style="color:var(--ok)">Status</a> · <a href="/pricing" style="color:var(--ok)">Pricing</a></p>
+<!-- ============================================================ 6. CHANGES & CONTACT -->
+<section class="section sect--dense reveal">
+  <div class="wrap legal-doc">
+    <span class="idx">06 / Changes and contact</span>
+    <h2><span class="n">6.</span> Changes &amp; contact</h2>
+    <p>We may revise these commitments; material changes appear in the "last updated" date and apply to engagements ordered after that date. Questions go to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
+    <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px">
+      <a class="btn btn--ghost btn--sm" href="/terms">Terms</a>
+      <a class="btn btn--ghost btn--sm" href="/status">Status</a>
+      <a class="btn btn--ghost btn--sm" href="/pricing">Pricing</a>
+      <a class="btn btn--ghost btn--sm" href="/trust">Trust center</a>
+    </div>
   </div>
 </section>
 
-<section class="section section--ink reveal cta-final">
+<!-- ============================================================ FINAL CTA -->
+<section class="section reveal cta-final">
   <div class="wrap">
     <h2>Commitments you can hold us to.</h2>
-    <p class="lede" style="max-width:52ch;margin:0 auto 28px">These targets apply the moment an engagement starts. Begin one, or read the terms behind them.</p>
+    <p class="lede">These targets apply the moment an engagement starts. Begin one, or read the terms behind them.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/contact">Start an audit</a>
       <a class="btn btn--ghost" href="/terms">Read the terms</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
+
 </main>
 
 <hr class="foil-line" aria-hidden="true">
@@ -173,24 +221,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -198,7 +249,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

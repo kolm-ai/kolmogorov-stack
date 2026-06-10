@@ -1,0 +1,73 @@
+{
+  "id": "d7",
+  "track": "design",
+  "prompt": "Document the typography systems of unicorn-tier AI startup sites in 2025-2026 with EXACT specifics: which typefaces (and foundries — Commercial Type, Klim, ABC Dinamo, Grilli, OH no, General Type), display vs text pairings, hero sizes in px/rem, line-height and letter-spacing values (e.g., -0.02em tracking on large display), weight usage, and use of monospace as a brand voice. Cover the 2026 serif-vs-grotesk trend: which AI brands moved to editorial serifs (who, which face) and which doubled down on neo-grotesks. Cite Fonts In Use pages, brand-launch posts, and verbatim designer commentary on X (@handle + date). Conclude with 3 concrete, named type-stack recipes (display face + text face + mono) that currently read as frontier-2026, with sizing/tracking values.",
+  "content": "**OpenAI (Klim Type Foundry, stable since its 2023 refresh and still current as of 2026):** Signifier (serif, Kris Sowersby’s “Brutalist response to 17th-century typefaces,” 7 weights + italics) paired with Söhne (neo-grotesk sans). Research papers and some display use Signifier; blog/posts lean on Söhne. This is a classic editorial-serif + neo-grotesk pairing from Klim.[[1]](https://fontsinuse.com/uses/52248/openai-website)[[1]](https://fontsinuse.com/uses/52248/openai-website)\n\nNo public verbatim CSS (hero px/rem, exact tracking, line-heights) appears in Fonts In Use or brand posts, but the system emphasizes contrast between the serif’s authority and the sans’s clarity. Monospace usage is minimal on the main site (Söhne Mono appears in some DevDay materials).\n\n**Anthropic/Claude and peers (serif shift, 2025–2026 “serif renaissance”):** Multiple sources document a deliberate move toward serifs for warmth, humanity, trust, and print-like reading (brown-tinted “book page” backgrounds on Claude). Brands explicitly named: Anthropic’s Claude, Perplexity, Runway, and Manus. Designer Keya Vadgama (@keyavadgama) coined/ popularised the term “serif renaissance” for AI-native brands pivoting from slick sans to serifs to signal “real humans built/ use this.”[[2]](https://www.wired.com/story/ai-has-come-for-serif-fonts/)[[3]](https://www.aichatdaily.com/ai-analysis/ai-companies-pivot-serif-fonts-look-more-human)[[2]](https://www.wired.com/story/ai-has-come-for-serif-fonts/)\n\nPerplexity’s CCO Jesse Dwyer framed it as “Why wouldn’t we have human design? Perplexity is for people.” Critics have labelled the trend “tasteslop.” Specific foundry/face names beyond the general serif direction are not widely published; the emphasis is on editorial/ transitional or old-style serifs for literary seriousness rather than neo-grotesks. Monospace appears in code/terminal contexts but is not the primary brand voice.\n\n**Other unicorn-tier AI sites (limited public detail):** No comprehensive 2025–2026 Fonts In Use archives surfaced for xAI/Grok, Cursor, Midjourney, or Stability with exact pairings or metrics. General 2026 web-design trend roundups mention neo-grotesks (e.g., Satoshi, Aeonik, Work Sans, Manrope, Inter) and wide geometric sans for tech/startups, but AI-specific sites are increasingly diverging toward serifs.[[4]](https://www.digidop.com/blog/the-20-best-fonts-for-modern-and-impactful-website-in-2025)\n\n**2026 serif-vs-grotesk trend summary:**  \n- **Moved to editorial serifs** — Anthropic (Claude), Perplexity, Runway, Manus (and similar AI-native tools). Goal: project humanity, authority, and print familiarity over “computerised” slickness. Vadgama and WIRED coverage (June 2026) are the primary sources.[[2]](https://www.wired.com/story/ai-has-come-for-serif-fonts/)[[5]](https://www.creativebloq.com/design/fonts-typography/why-ai-brands-are-obsessed-with-serif-fonts)  \n- **Doubled down on (or retained) neo-grotesks** — OpenAI (Signifier + Söhne) remains the clearest high-profile example of a mixed but grotesk-leaning system from Klim. Many non-AI tech/startup sites continue with pure neo-grotesks or geometric sans.\n\nExact hero sizes, tracking (e.g., -0.02em), line-heights, and weight hierarchies are rarely published publicly for these brands; they live in internal Figma/design systems. No verbatim X posts from the queried foundries or designers provided pixel-perfect specs in the results.\n\n**3 concrete, named type-stack recipes that read as frontier-2026** (synthesised from the above trends, Klim/OpenAI precedent, and the serif renaissance; sizing/tracking are representative “frontier” values drawn from common high-end web practice and the described aesthetic):\n\n1. **OpenAI-style mixed editorial (Klim)**: Display = Signifier (Klim, ~72–120 px / 4.5–7.5 rem hero, 1.05–1.1 line-height, -0.015 to -0.025em tracking on large display); Text = Söhne (Klim, 18–21 px / 1.125–1.3125 rem, 1.5–1.65 line-height, 0 or slight positive tracking); Mono = Söhne Mono or similar (code/terminal accents, 14–16 px, 1.4–1.5 line-height). Weights: Display 600–700, Text 400–500, strong contrast.\n\n2. **Serif-renaissance editorial (Anthropic/Perplexity vibe)**: Display = Contemporary editorial serif (e.g., a Klim/Commercial Type or similar transitional/old-style face, ~64–96 px hero, tight 1.0–1.1 line-height, -0.02em tracking); Text = Matching or lighter serif/text face (or subtle sans hybrid), 17–20 px, 1.55–1.7 line-height for book-like reading; Mono = Clean monospaced (e.g., a General Type or ABC Dinamo-adjacent voice for code/UI). Warm off-white or brown-tinted backgrounds; weights 500–700 display, 400 text.\n\n3. **Neo-grotesk forward (tech-doubledown, e.g., retained OpenAI-adjacent or pure-grotesk AI tools)**: Display = Söhne or equivalent neo-grotesk (Klim/Commercial Type style, 80–140 px hero, 1.0–1.05 line-height, -0.02 to -0.03em tracking); Text = Same family or close grotesque (Inter/Satoshi/Manrope equivalents), 16–19 px, 1.5–1.6 line-height; Mono = Purposeful monospace brand voice (e.g., a foundry mono for terminal/developer sections, 13–15 px, 1.45 line-height). Heavy 700–900 display weights, 400–500 text.\n\nThese stacks balance the documented 2026 tension between “human/serif” warmth and the precision of neo-grotesks while remaining practical for high-traffic AI sites. Public documentation remains sparse on micro-typographic values; the dominant signals are the foundry choices (especially Klim) and the serif pivot for humanity.",
+  "citations": [
+    "https://fontsinuse.com/uses/52248/openai-website",
+    "https://www.wired.com/story/ai-has-come-for-serif-fonts/",
+    "https://www.aichatdaily.com/ai-analysis/ai-companies-pivot-serif-fonts-look-more-human",
+    "https://www.digidop.com/blog/the-20-best-fonts-for-modern-and-impactful-website-in-2025",
+    "https://www.creativebloq.com/design/fonts-typography/why-ai-brands-are-obsessed-with-serif-fonts"
+  ],
+  "searched": [
+    "https://www.figma.com/resource-library/best-fonts-for-websites/",
+    "https://www.fontfabric.com/blog/10-design-trends-shaping-the-visual-typographic-landscape-in-2026/?srsltid=AfmBOopRHLlawRhrGhDQ-P7BI7KiR29Gf6jl9jrKWHcLCv0nWI7f0Wpu",
+    "https://www.vistaprint.com/hub/font-trends?srsltid=AfmBOopD6bHPjHzZuIC_5c-UAWKYQlJz6quct0pOPwJgkLgiuF_Av09_",
+    "https://www.untitledui.com/blog/best-free-fonts",
+    "https://madebyshape.co.uk/web-design-blog/50-best-free-fonts-for-designers-in-2026/",
+    "https://fonts.mojomox.com/blogs/on-type/fonts-for-startups?srsltid=AfmBOor-prBqI3geCxVLe-G2ICy2iXNUCW-4sQRSgKsjtSTjxLzCbWxo",
+    "https://stylokit.com/blog/top-20-fonts-for-modern-web-design-2025",
+    "https://simplified.com/blog/ai-design/font-generator-to-create-custom-typography",
+    "https://artcoastdesign.com/blog/typography-branding-trends-2026",
+    "https://www.digidop.com/blog/the-20-best-fonts-for-modern-and-impactful-website-in-2025",
+    "https://www.wired.com/story/ai-has-come-for-serif-fonts/",
+    "https://www.youtube.com/watch?v=JGM2TIJYQD0",
+    "https://www.anthropic.com/",
+    "https://www.aichatdaily.com/ai-analysis/ai-companies-pivot-serif-fonts-look-more-human",
+    "https://www.wheresyoured.at/wheres-the-money/",
+    "https://keyavadgama.substack.com/p/the-serif-renaissance-in-ai-branding",
+    "https://www.instagram.com/reel/DNGBbLGIFk1/",
+    "https://www.creativebloq.com/design/fonts-typography/why-ai-brands-are-obsessed-with-serif-fonts",
+    "https://www.facebook.com/groups/bedesigner/posts/29550397187940165/",
+    "https://medium.com/ai-art-creators/midjourney-method-2-a-beginners-guide-to-fonts-a39c6ba363dd",
+    "https://www.reddit.com/r/perplexity_ai/comments/1gu95b4/what_font_style_perplexity_use/",
+    "https://fontsinuse.com/uses/52248/openai-website",
+    "https://www.youtube.com/watch?v=6f1Dba2X37I",
+    "https://community.openai.com/t/gpt-suggesting-fonts-for-webdesign/94057",
+    "https://www.facebook.com/groups/midjourneyaii/posts/663261855808275/",
+    "https://www.youtube.com/watch?v=KB7CoQ0YXlw",
+    "https://www.linkedin.com/posts/carlosmpr_chatgpt-aidesign-promptengineering-activity-7339320712593104897-Bfv4",
+    "https://klim.co.nz/in-use/openai-devday/?srsltid=AfmBOorTULIh_7rvwgAxkA4X_zd8EiXmbdb67EGsEbHAQ7Zlt8cAgHXw",
+    "https://maxibestof.one/typefaces/signifier",
+    "https://www.typewolf.com/signifier",
+    "https://isaacdaniels.design/projects/openai?filter=6"
+  ],
+  "usage": {
+    "input_tokens": 27944,
+    "input_tokens_details": {
+      "cached_tokens": 5632
+    },
+    "output_tokens": 2473,
+    "output_tokens_details": {
+      "reasoning_tokens": 1116
+    },
+    "total_tokens": 30417,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 7,
+    "cost_in_usd_ticks": 701989000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 5,
+      "x_search_calls": 2,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 15445,
+      "output_tokens": 1642
+    }
+  },
+  "attempts": 1
+}

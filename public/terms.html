@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Terms of Service · kolm.ai</title>
 <meta name="description" content="Terms governing kolm.ai agent-security audits, signed evidence reports, acceptable use, fees, liability, and data handling. Contact: dev@kolm.ai.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -51,8 +51,36 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   }
 }
 </script>
+<style>
+/* Legal typesetting layer (page-scoped, identical across the legal group).
+   Typeset, not designed: one measured column, mono article numbers,
+   hairlines between articles. Candidate for kolm-2026.css as .legal-doc. */
+.legal-doc { max-width: 64ch; }
+.legal-doc h2 { font-size: clamp(21px, 2.1vw, 25px); letter-spacing: -0.016em; line-height: 1.18; max-width: none; margin: var(--s7) 0 var(--s4); padding-top: var(--s6); border-top: 1px solid var(--line); }
+.legal-doc > h2:first-of-type, .legal-doc .idx + h2, .legal-doc .section__head h2 { border-top: 0; padding-top: 0; }
+.legal-doc > h2:first-of-type { margin-top: var(--s5); }
+.legal-doc .idx + h2, .legal-doc .section__head h2 { margin-top: 0; }
+.legal-doc h3 { margin: var(--s6) 0 10px; }
+.legal-doc .n, .section--ink h2 .n { display: block; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
+.legal-doc h3 .n { margin-bottom: 5px; }
+.legal-doc p, .legal-doc li { font-size: 15px; line-height: 1.75; color: var(--ink-2); }
+.legal-doc li { margin-bottom: 8px; }
+.legal-doc li::marker { color: var(--ink-3); }
+.legal-doc .art-rule { border: 0; border-top: 1px solid var(--line); margin: var(--s7) 0; }
+.legal-doc--wide { max-width: none; }
+.legal-meta { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-3); margin-top: var(--s4); font-variant-numeric: tabular-nums; }
+.legal-meta b, .legal-meta strong { color: var(--ink-2); font-weight: 500; }
+.legal-toc { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 2px 20px; margin: var(--s5) 0 var(--s3); }
+.legal-toc .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.legal-toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 36px; font-size: 13.5px; line-height: 2.05; color: var(--ink-3); }
+.legal-toc a { color: var(--ink-2); }
+.legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.legal-card b, .legal-card strong { color: var(--ink); }
+@media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+</style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <hr class="foil-strip" aria-hidden="true">
 
@@ -75,7 +103,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -83,57 +111,55 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- Hero -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:72ch">
-      <span class="idx">01 / Terms</span>
-      <h1>Terms of Service</h1>
-      <p class="lede">These terms govern your use of kolm.ai for agent-security audits and signed evidence reports. They are the agreement between you and Kolmogorov Stack, Inc., written so a developer, a procurement reviewer, or legal counsel can read it once. The evidence report at the center of the service is a cryptographically signed (Ed25519), offline-verifiable document your security team checks against kolm's public key, with no account and no trust in kolm's servers.</p>
-      <p style="font-size:14px;color:var(--ink-3);margin-top:0">Last updated: <strong>2026-06-07</strong> (supersedes 2026-05-22)</p>
-    </div>
+    <p class="eyebrow">Legal · Terms of Service</p>
+    <h1>Terms of Service</h1>
+    <p class="lede" style="max-width:72ch">These terms govern your use of kolm.ai for agent-security audits and signed evidence reports. They are the agreement between you and Kolmogorov Stack, Inc., written so a developer, a procurement reviewer, or legal counsel can read it once. The evidence report at the center of the service is a cryptographically signed (Ed25519), offline-verifiable document your security team checks against kolm's public key, with no account and no trust in kolm's servers.</p>
+    <p class="legal-meta">Last updated: <strong>2026-06-07</strong> (supersedes 2026-05-22)</p>
   </div>
 </section>
 
 <!-- Long-form legal prose -->
 <section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">02 / Agreement</span>
+  <div class="wrap legal-doc">
+    <span class="idx">01 / The agreement</span>
 
     <!-- TOC -->
-    <nav aria-label="Table of contents" style="background:var(--ink-deep);border:1px solid var(--line-ink);border-radius:8px;padding:24px 28px;margin-bottom:40px">
-      <p style="font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--on-ink-3);margin:0 0 14px">Contents</p>
-      <ol style="margin:0;padding-left:22px;columns:2;column-gap:32px;font-size:14px;line-height:1.8;color:var(--on-ink-2)">
-        <li><a href="#s1" style="color:var(--on-ink)">Parties and acceptance</a></li>
-        <li><a href="#s2" style="color:var(--on-ink)">Service description</a></li>
-        <li><a href="#s3" style="color:var(--on-ink)">Accounts and access</a></li>
-        <li><a href="#s4" style="color:var(--on-ink)">Scope of the audit engagement</a></li>
-        <li><a href="#s5" style="color:var(--on-ink)">Acceptable use</a></li>
-        <li><a href="#s6" style="color:var(--on-ink)">Fees, payment, and refunds</a></li>
-        <li><a href="#s7" style="color:var(--on-ink)">Intellectual property and license</a></li>
-        <li><a href="#s8" style="color:var(--on-ink)">Confidentiality</a></li>
-        <li><a href="#s9" style="color:var(--on-ink)">Data handling</a></li>
-        <li><a href="#s10" style="color:var(--on-ink)">Warranties and disclaimer</a></li>
-        <li><a href="#s11" style="color:var(--on-ink)">Limitation of liability</a></li>
-        <li><a href="#s12" style="color:var(--on-ink)">Indemnification</a></li>
-        <li><a href="#s13" style="color:var(--on-ink)">Term, suspension, and termination</a></li>
-        <li><a href="#s14" style="color:var(--on-ink)">Changes to these terms</a></li>
-        <li><a href="#s15" style="color:var(--on-ink)">Governing law and dispute resolution</a></li>
-        <li><a href="#s16" style="color:var(--on-ink)">Contact</a></li>
+    <nav class="legal-toc" aria-label="Table of contents">
+      <p class="k">Contents</p>
+      <ol>
+        <li><a href="#s1">Parties and acceptance</a></li>
+        <li><a href="#s2">Service description</a></li>
+        <li><a href="#s3">Accounts and access</a></li>
+        <li><a href="#s4">Scope of the audit engagement</a></li>
+        <li><a href="#s5">Acceptable use</a></li>
+        <li><a href="#s6">Fees, payment, and refunds</a></li>
+        <li><a href="#s7">Intellectual property and license</a></li>
+        <li><a href="#s8">Confidentiality</a></li>
+        <li><a href="#s9">Data handling</a></li>
+        <li><a href="#s10">Warranties and disclaimer</a></li>
+        <li><a href="#s11">Limitation of liability</a></li>
+        <li><a href="#s12">Indemnification</a></li>
+        <li><a href="#s13">Term, suspension, and termination</a></li>
+        <li><a href="#s14">Changes to these terms</a></li>
+        <li><a href="#s15">Governing law and dispute resolution</a></li>
+        <li><a href="#s16">Contact</a></li>
       </ol>
     </nav>
 
     <!-- 1 -->
-    <h2 id="s1">1. Parties and Acceptance</h2>
+    <h2 id="s1"><span class="n">1.</span> Parties and Acceptance</h2>
     <p><strong>Provider.</strong> Kolmogorov Stack, Inc., a Delaware corporation ("kolm," "we," or "us").</p>
     <p><strong>Customer.</strong> The individual or legal entity that submits an audit request, signs an order form, or uses the verification service ("you" or "Customer"). Where you accept on behalf of a company, you represent that you are authorized to bind that company to these terms.</p>
-    <p><strong>Acceptance.</strong> You accept these terms by: (a) submitting an audit request at <a href="/contact" style="color:var(--ok)">/contact</a>; (b) signing an enterprise order form; (c) creating a kolm account and using any hosted feature; or (d) clicking through a checkout flow. Using the open-source verifier tool under its Apache-2.0 license does not require acceptance of these terms.</p>
-    <p><strong>Notices.</strong> The email address on your account or order form is the canonical address for legal notices from us to you. Notices from you to us must be sent to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    <p><strong>Acceptance.</strong> You accept these terms by: (a) submitting an audit request at <a href="/contact">/contact</a>; (b) signing an enterprise order form; (c) creating a kolm account and using any hosted feature; or (d) clicking through a checkout flow. Using the open-source verifier tool under its Apache-2.0 license does not require acceptance of these terms.</p>
+    <p><strong>Notices.</strong> The email address on your account or order form is the canonical address for legal notices from us to you. Notices from you to us must be sent to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
 
     <!-- 2 -->
-    <h2 id="s2">2. Service Description</h2>
+    <h2 id="s2"><span class="n">2.</span> Service Description</h2>
     <p>kolm.ai provides agent-security audit services and signed evidence reports for AI agents. The primary deliverable is a cryptographically signed (Ed25519) evidence report ("Evidence Report") that an enterprise security team can verify offline against kolm's published public key. The Evidence Report covers the scope agreed in the order form or audit request. Current audit modules include:</p>
     <ul>
       <li><strong>API and permission posture.</strong> Static and dynamic review of the API surface, OAuth scopes, tool-call boundaries, and least-privilege adherence.</li>
@@ -145,30 +171,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p>Additional modules and engagement types (retainer, re-audit, continuous monitoring) may be described in a separate order form. That order form, together with these terms, constitutes the complete agreement for the engagement.</p>
 
     <!-- 3 -->
-    <h2 id="s3">3. Accounts and Access</h2>
+    <h2 id="s3"><span class="n">3.</span> Accounts and Access</h2>
     <p><strong>Account creation.</strong> You create an account with an email address. We issue a verification link. Free and professional accounts authenticate with an API key. Enterprise accounts add SSO via SAML 2.0 and directory sync via SCIM 2.0.</p>
     <p><strong>Key security.</strong> Your API key is your credential. Treat it as a password. Rotate it immediately if you suspect compromise. kolm will not be liable for unauthorized access that results from your failure to protect your key.</p>
     <p><strong>Audit portal access.</strong> The audit portal at <code class="mono">https://kolm.ai</code> allows you to submit agent metadata, track audit status, download signed Evidence Reports, and run the in-browser WebCrypto verifier. The portal requires a valid account or a one-time verification token issued at the time of report delivery.</p>
     <p><strong>Enterprise SSO.</strong> Enterprise order forms may include SSO and SCIM provisioning. The order form is the controlling document for enterprise seat counts and access controls.</p>
 
     <!-- 4 -->
-    <h2 id="s4">4. Scope of the Audit Engagement</h2>
+    <h2 id="s4"><span class="n">4.</span> Scope of the Audit Engagement</h2>
     <p>The Evidence Report attests to findings within the agreed audit scope. The following scope limitations apply to all engagements unless explicitly expanded in a signed order form:</p>
 
-    <h3>4.1 What the Evidence Report covers</h3>
+    <h3><span class="n">4.1</span> What the Evidence Report covers</h3>
     <p>The Evidence Report attests to the findings produced by kolm's audit methodology applied to the agent artifact, API, and configuration provided by you. It covers: (a) the API and permission posture as observed during the audit window; (b) redaction and data-handling behavior as exercised by the audit test suite; (c) audit-trail structure and cryptographic integrity; and (d) injection probe findings as described in Section 4.2.</p>
 
-    <h3>4.2 Injection testing: reported, not warranted</h3>
+    <h3><span class="n">4.2</span> Injection testing: reported, not warranted</h3>
     <p>Prompt-injection and tool-abuse probes are performed and the findings are reported in the Evidence Report. <strong>kolm does not warrant that the agent is free from prompt-injection vulnerabilities, that the tested scenarios are exhaustive, or that the agent will resist injection attempts not covered by the audit scope.</strong> The injection module produces a findings report, not a certification of resistance. Customers are responsible for remediation and for independent re-testing following remediation.</p>
 
-    <h3>4.3 Point-in-time nature</h3>
+    <h3><span class="n">4.3</span> Point-in-time nature</h3>
     <p>The Evidence Report reflects the agent as audited at the date shown on the report. Subsequent code changes, configuration changes, model updates, or dependency updates are not covered by the original report. A re-audit engagement is required to cover a materially changed agent.</p>
 
-    <h3>4.4 Reliance scope</h3>
+    <h3><span class="n">4.4</span> Reliance scope</h3>
     <p>The Evidence Report is addressed to the Customer. Third parties (including the Customer's enterprise buyers and security reviewers) may verify the cryptographic signature and read the report but do so on their own assessment. kolm makes no warranty to any third party regarding the agent's security posture beyond what is stated in the signed report and these terms.</p>
 
     <!-- 5 -->
-    <h2 id="s5">5. Acceptable Use</h2>
+    <h2 id="s5"><span class="n">5.</span> Acceptable Use</h2>
     <p>The following uses are prohibited. kolm will suspend or terminate accounts that engage in them:</p>
     <ul>
       <li><strong>Harm.</strong> Do not submit agent configurations intended to generate content targeting real people for harassment, sexual content involving minors, or operational instructions for weapons capable of mass casualties.</li>
@@ -180,15 +206,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </ul>
 
     <!-- 6 -->
-    <h2 id="s6">6. Fees, Payment, and Refunds</h2>
-    <p><strong>Fees.</strong> Audit fees are set out in the order form or on the pricing page at <a href="/pricing" style="color:var(--ok)">/pricing</a>. All fees are in United States dollars unless the order form specifies otherwise.</p>
+    <h2 id="s6"><span class="n">6.</span> Fees, Payment, and Refunds</h2>
+    <p><strong>Fees.</strong> Audit fees are set out in the order form or on the pricing page at <a href="/pricing">/pricing</a>. All fees are in United States dollars unless the order form specifies otherwise.</p>
     <p><strong>Payment timing.</strong> Fixed-scope engagements are invoiced at signing (50%) and at report delivery (50%) unless the order form specifies a different schedule. Subscription and retainer plans are invoiced monthly or annually on the anniversary of the start date. Invoices are issued via Stripe and sent to the billing email on the order form.</p>
     <p><strong>Taxes.</strong> Fees exclude VAT, GST, and applicable sales tax. Where we are required to collect, taxes are added at checkout and shown on the invoice. Reverse-charge VAT applies in EU jurisdictions for business customers with a valid VAT ID.</p>
     <p><strong>Refunds.</strong> If you cancel a fixed-scope engagement before the audit kickoff call, we refund the deposit in full. After the kickoff call, work-in-progress fees are non-refundable but any unearned portion of the delivery payment is refunded pro-rata based on the audit modules not yet completed. For subscription plans, cancellation inside the first 14 days of the initial term earns a full refund; thereafter, the plan terminates at the end of the current billing cycle with no partial refund.</p>
-    <p><strong>Disputed charges.</strong> Disputes about any charge must be raised in writing to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a> within 30 days of the invoice date. Disputed amounts are placed in hold while we review; undisputed amounts remain due.</p>
+    <p><strong>Disputed charges.</strong> Disputes about any charge must be raised in writing to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> within 30 days of the invoice date. Disputed amounts are placed in hold while we review; undisputed amounts remain due.</p>
 
     <!-- 7 -->
-    <h2 id="s7">7. Intellectual Property and License</h2>
+    <h2 id="s7"><span class="n">7.</span> Intellectual Property and License</h2>
     <p><strong>kolm IP.</strong> The audit methodology, the Evidence Report template, the signing infrastructure, the open-source verifier, and all related tooling are owned by or licensed to kolm. These terms do not transfer any ownership of kolm IP to you.</p>
     <p><strong>Evidence Report license.</strong> Upon payment of all fees for an engagement, kolm grants you a worldwide, non-exclusive, royalty-free, sublicensable license to reproduce and distribute the Evidence Report for your legitimate business purposes, including sharing it with your enterprise buyers and security reviewers. You may not alter the cryptographic signature, the findings narrative, or the scope statement of the Evidence Report. An altered or truncated report will fail the open-source verifier's signature check.</p>
     <p><strong>Open-source verifier.</strong> The verifier tool is licensed under Apache-2.0. Anyone may use, modify, and redistribute it under those terms. No account is required to run the verifier against a signed report.</p>
@@ -197,59 +223,66 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p><strong>Trademarks.</strong> The kolm name, logo, and "verified by kolm" badge are trademarks of Kolmogorov Stack, Inc. Use of the badge is permitted only in connection with an unaltered Evidence Report issued by kolm for the specific agent version shown in the report. Use in any other context requires written permission from kolm.</p>
 
     <!-- 8 -->
-    <h2 id="s8">8. Confidentiality</h2>
+    <h2 id="s8"><span class="n">8.</span> Confidentiality</h2>
     <p><strong>Definition.</strong> "Confidential Information" means non-public information disclosed by one party to the other in connection with these terms that is designated as confidential or that a reasonable person would understand to be confidential given the circumstances of disclosure. Your agent architecture, code, credentials, and security findings are Confidential Information. kolm's pricing, methodology documentation, and internal tooling are Confidential Information.</p>
     <p><strong>Obligations.</strong> Each party agrees to: (a) use the other party's Confidential Information only for the purposes of performing or receiving the services under these terms; (b) protect Confidential Information with at least the same care it uses for its own confidential information of similar sensitivity, and in no case less than reasonable care; and (c) not disclose Confidential Information to any third party other than employees, contractors, or advisors who need to know it and are bound by obligations at least as protective as these.</p>
     <p><strong>Evidence Report publication.</strong> You control whether and to whom you share the Evidence Report. kolm does not publish report contents without your written authorization. kolm may reference the existence of the engagement in aggregate statistics or marketing (e.g., "N agent audits completed") without identifying you unless you have given written consent for a named case study.</p>
     <p><strong>Exceptions.</strong> The confidentiality obligation does not apply to information that: (a) is or becomes publicly available through no breach of these terms; (b) was already known to the receiving party without restriction; (c) is independently developed by the receiving party; or (d) is required to be disclosed by law, regulation, or court order, provided the disclosing party gives prompt written notice to the other party to the extent legally permitted.</p>
     <p><strong>Survival.</strong> Confidentiality obligations survive termination of these terms for three (3) years, except for trade secrets, which remain protected for as long as they qualify as trade secrets under applicable law.</p>
 
+  </div>
+</section>
+
+<section class="section reveal">
+  <div class="wrap legal-doc">
+    <span class="idx">02 / Sections 9 to 16</span>
+
     <!-- 9 -->
-    <h2 id="s9">9. Data Handling</h2>
+    <h2 id="s9"><span class="n">9.</span> Data Handling</h2>
     <p><strong>Agent data you submit.</strong> Agent code, configuration files, trace samples, and API credentials you submit for audit are used solely to perform the agreed audit modules. kolm does not retain your agent's submitted materials beyond the engagement window (90 days post-report delivery by default; shorter on request).</p>
     <p><strong>Audit portal metadata.</strong> The hosted portal records timestamp, request type, token count where applicable, response status, and key fingerprint. Request bodies containing agent configuration are not stored in audit logs longer than the engagement retention period.</p>
     <p><strong>Evidence Report data.</strong> The signed Evidence Report is stored by kolm for the duration of the agreement and for a reasonable period after to support verification requests. The report contains only the findings, scope summary, and cryptographic attestation fields. It includes no raw agent code or credentials.</p>
-    <p><strong>Sub-processors.</strong> kolm uses a limited set of sub-processors for infrastructure (compute, storage, signing key management) and business operations (billing, email). Sub-processors are listed at <a href="/subprocessors" style="color:var(--ok)">/subprocessors</a> and are bound by data-processing agreements at least as protective as this section. kolm notifies customers of material sub-processor changes with at least 30 days advance notice.</p>
-    <p><strong>Data minimization.</strong> Imported agent logs are redacted before storage, used solely to perform the agreed audit, and deleted at the end of the engagement window. Customer Content is never used to train any model, including kolm's own. Contact <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a> with data-handling questions before submitting an audit request.</p>
+    <p><strong>Sub-processors.</strong> kolm uses a limited set of sub-processors for infrastructure (compute, storage, signing key management) and business operations (billing, email). Sub-processors are listed at <a href="/subprocessors">/subprocessors</a> and are bound by data-processing agreements at least as protective as this section. kolm notifies customers of material sub-processor changes with at least 30 days advance notice.</p>
+    <p><strong>Data minimization.</strong> Imported agent logs are redacted before storage, used solely to perform the agreed audit, and deleted at the end of the engagement window. Customer Content is never used to train any model, including kolm's own. Contact <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> with data-handling questions before submitting an audit request.</p>
     <p><strong>Deletion.</strong> Upon termination or at your written request, kolm deletes your agent materials from active systems within 30 days and from backups within 90 days. Account email is retained only for legal and tax record retention as required by applicable law.</p>
-    <p><strong>Privacy policy.</strong> The full privacy policy at <a href="/privacy" style="color:var(--ok)">/privacy</a> governs personal data kolm processes about your team members in connection with account management. The privacy policy and these terms are complementary; in the event of conflict, these terms govern the audit engagement data and the privacy policy governs personal data.</p>
+    <p><strong>Privacy policy.</strong> The full privacy policy at <a href="/privacy">/privacy</a> governs personal data kolm processes about your team members in connection with account management. The privacy policy and these terms are complementary; in the event of conflict, these terms govern the audit engagement data and the privacy policy governs personal data.</p>
 
     <!-- 10 -->
-    <h2 id="s10">10. Warranties and Disclaimer</h2>
+    <h2 id="s10"><span class="n">10.</span> Warranties and Disclaimer</h2>
     <p><strong>kolm's warranty.</strong> For paid audit engagements, kolm warrants that: (a) the audit will be performed in a professional and workmanlike manner consistent with the agreed scope; (b) the Evidence Report will accurately reflect the findings of the audit as performed; and (c) the Ed25519 signature on the Evidence Report is valid and verifiable against kolm's published public key.</p>
     <p><strong>Scope limitations are not warranty failures.</strong> The following are expressly outside the scope of kolm's warranty and do not constitute a breach: (a) injection vulnerabilities not covered by the agreed audit modules (see Section 4.2); (b) vulnerabilities introduced after the audit date (see Section 4.3); (c) the agent's fitness for any particular production use; (d) the completeness of the audit relative to any specific compliance framework beyond the modules tested.</p>
     <p><strong>Open-source verifier.</strong> The open-source verifier is provided as-is under Apache-2.0. kolm does not warrant its fitness for any particular verification use case beyond checking Ed25519 signatures on Evidence Reports issued by kolm.</p>
     <p><strong>Disclaimer.</strong> To the maximum extent permitted by applicable law, kolm disclaims all other warranties, express or implied, including warranties of merchantability, fitness for a particular purpose, and non-infringement, except as expressly stated in this Section 10.</p>
 
     <!-- 11 -->
-    <h2 id="s11">11. Limitation of Liability</h2>
+    <h2 id="s11"><span class="n">11.</span> Limitation of Liability</h2>
     <p><strong>Liability cap.</strong> Each party's aggregate liability to the other arising out of or related to these terms, whether based on contract, tort, or any other theory, is limited to the greater of: (a) <strong>USD 1,000</strong>; or (b) the total fees paid or payable by you to kolm in the twelve (12) months immediately preceding the event giving rise to the claim.</p>
     <p><strong>Excluded damages.</strong> Neither party is liable for indirect, incidental, special, consequential, or punitive damages, including lost profits, lost revenue, lost data, reputational harm, or business interruption, even if advised of the possibility of such damages.</p>
     <p><strong>Carve-outs.</strong> The liability cap does not apply to: (a) your obligation to pay fees that are due; (b) either party's indemnification obligations under Section 12; (c) a party's fraud or willful misconduct; or (d) liability that cannot be excluded or limited under applicable law.</p>
     <p><strong>Allocation of risk.</strong> The fees for audit engagements reflect, in part, this allocation of risk. The parties acknowledge that kolm would not provide the services at the agreed price without these limitations.</p>
 
     <!-- 12 -->
-    <h2 id="s12">12. Indemnification</h2>
+    <h2 id="s12"><span class="n">12.</span> Indemnification</h2>
     <p><strong>kolm indemnifies you for:</strong> Third-party claims alleging that the Evidence Report format or the open-source verifier, as provided by kolm and used in accordance with these terms, infringes a valid United States patent, copyright, or registered trademark. Subject to the cap in Section 11.</p>
     <p><strong>You indemnify kolm for:</strong> Third-party claims arising from: (a) your agent's design, operation, or outputs; (b) your use of the services in violation of Section 5; (c) your sharing or misrepresentation of the Evidence Report beyond its stated scope; (d) claims by an upstream model provider arising from your use of model outputs in connection with the audited agent; or (e) your breach of applicable law. Subject to the cap in Section 11.</p>
     <p><strong>Process.</strong> The indemnified party must: (a) give the indemnifying party prompt written notice of the claim; (b) give the indemnifying party sole control of the defense and settlement; and (c) reasonably cooperate at the indemnifying party's expense. Any settlement that admits liability on behalf of the indemnified party requires the indemnified party's prior written consent, not to be unreasonably withheld.</p>
 
     <!-- 13 -->
-    <h2 id="s13">13. Term, Suspension, and Termination</h2>
+    <h2 id="s13"><span class="n">13.</span> Term, Suspension, and Termination</h2>
     <p><strong>Term.</strong> These terms apply from the date of acceptance until the expiration or termination of all active engagements and subscriptions.</p>
-    <p><strong>Termination for convenience.</strong> You may cancel any subscription plan at any time through the account dashboard or by written notice to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>; cancellation takes effect at the end of the current billing cycle. Fixed-scope engagements may not be cancelled for convenience after the kickoff call except on terms agreed in writing. kolm may terminate a subscription plan with 30 days written notice without cause.</p>
+    <p><strong>Termination for convenience.</strong> You may cancel any subscription plan at any time through the account dashboard or by written notice to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>; cancellation takes effect at the end of the current billing cycle. Fixed-scope engagements may not be cancelled for convenience after the kickoff call except on terms agreed in writing. kolm may terminate a subscription plan with 30 days written notice without cause.</p>
     <p><strong>Termination for cause.</strong> Either party may terminate immediately upon written notice if: (a) the other party materially breaches these terms and fails to cure within 30 days of written notice specifying the breach; (b) the other party becomes insolvent, makes a general assignment for the benefit of creditors, or has an insolvency proceeding filed against it that is not dismissed within 60 days; or (c) the other party engages in fraud or willful misconduct. Section 5 violations and non-payment may be terminated without a cure period.</p>
     <p><strong>Suspension.</strong> kolm may suspend account access for: (a) a security incident requiring immediate containment; (b) a suspected Section 5 violation; or (c) a payment that is more than 15 days past due. kolm will provide reasonable notice before suspension except where immediate action is required for security reasons.</p>
     <p><strong>Effect of termination.</strong> On termination: (a) all licenses granted under these terms terminate except the license to the Evidence Reports already delivered; (b) each party returns or destroys the other party's Confidential Information; and (c) all accrued payment obligations remain due.</p>
     <p><strong>Survival.</strong> Sections 7 (IP, for reports already delivered), 8 (Confidentiality), 9 (Data handling, for the retention and deletion obligations), 10 through 12 (Warranty, Liability, Indemnification), and 15 (Governing law) survive termination.</p>
 
     <!-- 14 -->
-    <h2 id="s14">14. Changes to These Terms</h2>
+    <h2 id="s14"><span class="n">14.</span> Changes to These Terms</h2>
     <p>kolm may update these terms from time to time. The effective date at the top of this page reflects the most recent revision. For changes that materially reduce your rights or materially increase your obligations, kolm will send notice to the account email at least 30 days before the change takes effect. Continued use of any kolm service after the effective date of a change constitutes acceptance of the revised terms.</p>
-    <p>Every effective date corresponds to a tagged commit in the public site repository. Prior versions of this document can be retrieved from the repository history. The canonical version is the one at <a href="https://kolm.ai/terms" style="color:var(--ok)">https://kolm.ai/terms</a>.</p>
+    <p>Every effective date corresponds to a tagged commit in the public site repository. Prior versions of this document can be retrieved from the repository history. The canonical version is the one at <a href="https://kolm.ai/terms">https://kolm.ai/terms</a>.</p>
 
     <!-- 15 -->
-    <h2 id="s15">15. Governing Law and Dispute Resolution</h2>
+    <h2 id="s15"><span class="n">15.</span> Governing Law and Dispute Resolution</h2>
     <p><strong>Governing law.</strong> These terms are governed by the laws of the State of Delaware, without regard to its conflict-of-laws principles.</p>
     <p><strong>Negotiation first.</strong> Before filing any formal claim, the parties agree to a 30-day period of good-faith negotiation. Either party initiates this period by written notice to the other party's contact address specifying the nature and amount of the claim. A genuine attempt to resolve is required, not a procedural checkbox.</p>
     <p><strong>Venue.</strong> Any dispute not resolved by negotiation is subject to the exclusive jurisdiction of the state and federal courts located in the State of Delaware. Each party irrevocably waives any objection to venue in those courts and waives any right to a jury trial.</p>
@@ -257,13 +290,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p><strong>Equitable relief.</strong> Either party may seek injunctive or other equitable relief in any court of competent jurisdiction to prevent actual or threatened misappropriation of intellectual property or Confidential Information, without first completing the negotiation period.</p>
 
     <!-- 16 -->
-    <h2 id="s16">16. Contact</h2>
+    <h2 id="s16"><span class="n">16.</span> Contact</h2>
     <p>For all questions about these terms, audit engagements, payment disputes, data requests, and legal notices, contact:</p>
-    <p style="background:var(--ink-deep);border:1px solid var(--line-ink);border-radius:8px;padding:18px 22px;font-size:15px;color:var(--on-ink-2)">
-      <strong style="color:var(--on-ink)">Kolmogorov Stack, Inc.</strong><br>
-      <a href="mailto:dev@kolm.ai" style="color:var(--on-ink)">dev@kolm.ai</a>
+    <p class="legal-card">
+      <strong>Kolmogorov Stack, Inc.</strong><br>
+      <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>
     </p>
-    <p>For verification of a signed Evidence Report, use the open-source verifier at <a href="/verify" style="color:var(--ok)">/verify</a> or run the verifier tool locally against kolm's published public key. Verification requires no account and no connection to kolm's servers.</p>
+    <p>For verification of a signed Evidence Report, use the open-source verifier at <a href="/verify">/verify</a> or run the verifier tool locally against kolm's published public key. Verification requires no account and no connection to kolm's servers.</p>
 
     <!-- Related legal pages -->
     <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px">
@@ -277,7 +310,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </section>
 
-<section class="section section--ink reveal cta-final">
+<section class="section reveal cta-final">
   <div class="wrap">
     <h2>Questions about these terms?</h2>
     <p class="lede">Reach the team for engagement, billing, or legal questions. Or verify a signed report against kolm's public key, with no account.</p>
@@ -285,6 +318,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <a class="btn btn--primary" href="/contact">Start an audit</a>
       <a class="btn btn--ghost" href="/verify">Verify a report</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -306,24 +345,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -331,7 +373,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

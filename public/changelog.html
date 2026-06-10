@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Changelog: what shipped, with dates · kolm.ai</title>
 <meta name="description" content="A running log of what kolm has shipped: the open offline verifier, the published Agent Security Readiness checklist, framework mappings, and the append-only transparency log.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -60,6 +60,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
@@ -84,7 +85,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -92,45 +93,58 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- ============================================================ HERO -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:62ch">
-      <h1>What shipped, with dates.</h1>
+    <div style="max-width:62ch">
+      <p class="eyebrow">Changelog</p>
+      <h1>What shipped, <span class="go">with dates.</span></h1>
       <p class="lede">A short, plain record of what's live: we list what's shipped, not what's promised.</p>
+      <div class="hero__proof" aria-label="Changelog at a glance">
+        <span><i class="dot" aria-hidden="true"></i>Shipped only · no roadmap theater</span>
+        <span><i class="dot" aria-hidden="true"></i>Verifier · checklist · transparency log</span>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ============================================================ 01. SHIPPED -->
-<section class="section reveal">
+<section class="section sect--dense reveal">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / Shipped</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">01 / Shipped</span>
       <h2>What's live now.</h2>
     </div>
-    <div class="grid grid--2">
-      <div class="card">
-        <p class="card__k">2026 · June</p>
-        <h3>Site rebuilt around verifiable evidence</h3>
-        <p>A ground-up redesign around verifiable evidence: a live in-browser verifier on the homepage, the report anatomy, and the four-pillar check catalog. Everything centers on a signed artifact you can check yourself.</p>
+    <div class="ledger-index" aria-label="Shipped entries">
+      <div>
+        <span class="li-date">2026 · June</span><span class="ctrlid">site</span>
+        <span class="li-title">Site rebuilt around verifiable evidence
+          <span style="display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:4px;max-width:74ch">A ground-up redesign around verifiable evidence: a live in-browser verifier on the homepage, the report anatomy, and the four-pillar check catalog. Everything centers on a signed artifact you can check yourself.</span>
+        </span>
       </div>
-      <div class="card">
-        <p class="card__k">2026 · June</p>
-        <h3>Open offline verifier</h3>
-        <p>A dependency-free WebCrypto Ed25519 verifier, shipped open. The browser widget, CLI, and library share one canonicalization. Paste a report and the check runs in-page, with a tamper demo to prove altered evidence can't pass.</p>
+      <div>
+        <span class="li-date">2026 · June</span><span class="ctrlid">verifier</span>
+        <span class="li-title">Open offline verifier
+          <span style="display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:4px;max-width:74ch">A dependency-free WebCrypto Ed25519 verifier, shipped open. The browser widget, CLI, and library share one canonicalization. Paste a report and the check runs in-page, with a tamper demo to prove altered evidence can't pass.</span>
+        </span>
       </div>
-      <div class="card">
-        <p class="card__k">2026 · June</p>
-        <h3>Agent Security Readiness (ASR) checklist</h3>
-        <p>Published openly under CC0: the six-control readiness checklist for agentic products, each control mapped into SOC 2, NIST AI RMF, EU AI Act, and the OWASP LLM &amp; Agentic Top 10.</p>
+      <div>
+        <span class="li-date">2026 · June</span><span class="ctrlid">framework</span>
+        <span class="li-title">Agent Security Readiness (ASR) checklist
+          <span style="display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:4px;max-width:74ch">Published openly under CC0: the six-control readiness checklist for agentic products, each control mapped into SOC 2, NIST AI RMF, EU AI Act, and the OWASP LLM &amp; Agentic Top 10.</span>
+        </span>
       </div>
-      <div class="card">
-        <p class="card__k">2026 · Q1</p>
-        <h3>Transparency log + inclusion proofs</h3>
-        <p>Every report enters an append-only, hash-chained Merkle log and ships with a per-report inclusion proof, so a report can be shown to have been logged and never quietly replaced.</p>
+      <div>
+        <span class="li-date">2026 · Q1</span><span class="ctrlid">log</span>
+        <span class="li-title">Transparency log + inclusion proofs
+          <span style="display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:4px;max-width:74ch">Every report enters an append-only, hash-chained Merkle log and ships with a per-report inclusion proof, so a report can be shown to have been logged and never quietly replaced.</span>
+        </span>
+      </div>
+    </div>
       </div>
     </div>
   </div>
@@ -138,20 +152,33 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <!-- ============================================================ 02. NOT YET LISTED -->
 <section class="section section--ink reveal">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / Not yet listed</span></div>
+      <div class="sect-rail__body">
     <div class="section__head" style="max-width:62ch">
-      <span class="idx">02 / Not yet listed</span>
       <h2>What we won't claim yet.</h2>
       <p class="lede">kolm does not yet hold a SOC 2 report or a published third-party pentest of its own. We'll list either here only once it is real and verifiable.</p>
+    </div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- ============================================================ CLOSE -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>See the latest, verify it yourself.</h2>
     <div class="hero__cta"><a class="btn btn--primary" href="/verify">Verify a report</a><a class="btn btn--ghost" href="/research">Read the research</a></div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 </main>
@@ -172,24 +199,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -197,7 +227,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

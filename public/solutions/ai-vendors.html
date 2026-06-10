@@ -10,8 +10,8 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>For AI vendors: clear the security review · kolm.ai</title>
-<meta name="description" content="Your six-figure enterprise deal stalled the moment a CISO had to vet an autonomous agent. kolm hands you a signed evidence report your buyer verifies offline, against your own key, with no account and no server in the trust path. The four to eight week review compresses back to days.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="description" content="Your enterprise deal stalled the moment a CISO had to vet an autonomous agent. kolm hands you a signed evidence report your buyer verifies offline, against your own key. The four to eight week review compresses back to days.">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -51,6 +51,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
@@ -75,7 +76,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -83,172 +84,171 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- ============================================================ 1. HERO -->
 <section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:60ch">
-      <h1 class="hero__h1">Your agent works.<br>The deal stalled in security review.</h1>
+    <div class="section__head" style="max-width:62ch">
+      <p class="eyebrow">For AI vendors</p>
+      <h1 class="hero__h1">Your agent works. The deal stalled in security review. <span class="go">Unstall it.</span></h1>
       <p class="lede">
-        Your agent works. The contract is real. Then a CISO had to vet an autonomous
-        agent, and a one-week review ran four, six, eight weeks. kolm hands you a signed
-        evidence report your buyer verifies offline, against your own key. The review
-        compresses back to days.
+        The day a CISO had to vet an autonomous agent, a one-week review ran eight.
+        kolm hands you a signed evidence report your buyer verifies offline, against
+        your own key. The review compresses back to days.
       </p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="/contact">Start an audit</a>
+        <a class="btn btn--primary" href="/signup">Run the free scan</a>
         <a class="btn btn--ghost" href="/report">See a sample report</a>
       </div>
-      <div class="trustline" aria-label="What the report gives you">
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline against your key</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Mapped to SOC 2, ISO 42001, your buyer's questionnaire</span>
+      <div class="hero__proof" aria-label="What the report gives you">
+        <span><i class="dot" aria-hidden="true"></i>Ed25519 signed · verifies offline</span>
+        <span><i class="dot" aria-hidden="true"></i>No kolm server in the trust path</span>
+        <span><i class="dot" aria-hidden="true"></i>SOC 2 · ISO 42001 · NIST AI RMF</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 2. PROOF STRIP -->
-<section class="section" style="padding-top:0;border-top:0" aria-label="Proof">
+<!-- ============================================================ 2. THE STALL -->
+<section class="section sect--air reveal" id="stall">
   <div class="wrap">
-    <h2 class="sr-only">Proof at a glance</h2>
-    <hr class="rule">
-    <div class="band">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="band__item">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        Verified offline. No kolm server in the trust path
-      </span>
-      <span class="band__item">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <a href="/transparency-log">Append-only transparency log</a>
-      </span>
-    </div>
-    <div class="band" style="padding-top:0">
-      <span class="ctrlid">SOC 2</span>
-      <span class="ctrlid">ISO 42001</span>
-      <span class="ctrlid">NIST AI RMF</span>
-      <span class="ctrlid">EU AI Act</span>
-      <span class="ctrlid">OWASP</span>
-      <span class="ctrlid">MITRE ATLAS</span>
-    </div>
-    <hr class="rule">
-  </div>
-</section>
-
-<!-- ============================================================ 3. THE STALL (situation) -->
-<section class="section reveal" id="stall">
-  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / The stall</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">01 / The stall</span>
       <h2>A CISO will not take your word for it.</h2>
       <p class="lede">
-        The day your agent touches customer data, the week-long review runs four to
-        eight. The contract sits in legal. The champion goes quiet. Nothing is wrong
-        with your product. There is just no way to prove the agent is safe except your
-        say-so, and a security team does not sign off on say-so.
+        The contract sits in legal. The champion goes quiet. Nothing is wrong with your
+        product. There is just no way to prove the agent is safe except your say-so,
+        and a security team does not sign off on say-so.
       </p>
     </div>
     <div class="metrics">
       <div class="metric">
         <span class="metric__n">4 to 8 wks</span>
-        <span class="metric__l">how long a from-scratch agent review runs once a CISO is in the loop</span>
+        <span class="metric__l">a from-scratch agent review, once a CISO is in the loop</span>
       </div>
       <div class="metric">
         <span class="metric__n">1 deal</span>
-        <span class="metric__l">six figures, signed by the buyer in principle, parked in review</span>
+        <span class="metric__l">six figures, agreed in principle, parked in review</span>
       </div>
       <div class="metric">
         <span class="metric__n">Days</span>
         <span class="metric__l">the same review when you walk in with signed, verifiable evidence</span>
       </div>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 4. WHY THE FORM FAILS (the ledger) -->
-<section class="section section--ink reveal" id="why">
+<!-- ============================================================ 3. WHY THE FORM FAILS -->
+<section class="section reveal" id="why">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / Why the form fails</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">02</span>
     <div class="section__head">
-      <span class="idx">02 / Why the form fails</span>
       <h2>A questionnaire no longer clears it.</h2>
-      <p class="lede">
-        A filled-in form was enough when software was deterministic. An agent decides at
-        runtime, so the reviewer wants something they can check, not read. Three things
-        are now table stakes, and a questionnaire proves none of them.
-      </p>
+      <p class="lede">A form was enough when software was deterministic. An agent decides at runtime, so the reviewer wants something they can check, not read.</p>
     </div>
     <div class="grid grid--3">
-      <div class="card">
-        <p class="card__k">Over-permissioned</p>
+      <div class="card pc" style="--sevc:var(--sev-high)">
+        <div class="pc__tag"><span class="sev-d">high</span><span>ASR-1 · least privilege</span></div>
         <h3>More access than the job needs</h3>
-        <p>Most agents hold ten times the privileges they use, often on one shared key. It is the first thing a reviewer flags, and a form cannot un-flag it.</p>
-        <p class="card__map">ASR-1 · least privilege</p>
+        <p>The first thing a reviewer flags, and a form cannot un-flag it.</p>
+        <span class="ev">In the signed sample, the support agent <em>grants 10 tools, uses 4</em>, on one shared key.</span>
       </div>
-      <div class="card">
-        <p class="card__k">No tamper-evidence</p>
+      <div class="card pc" style="--sevc:var(--sev-high)">
+        <div class="pc__tag"><span class="sev-d">high</span><span>ASR-2 · audit trail</span></div>
         <h3>A trail nobody can trust</h3>
-        <p>If the record of what your agent did can be edited after the fact, it is not evidence. Reviewers want it append-only and hash-chained, not asserted.</p>
-        <p class="card__map">ASR-2 · audit trail</p>
+        <p>If the record of what your agent did can be edited after the fact, it is not evidence.</p>
+        <span class="ev">Reviewers want it <em>append-only and hash-chained</em>, not asserted.</span>
       </div>
-      <div class="card">
-        <p class="card__k">Say-so doesn't scale</p>
-        <h3>Self-attestation shifts the burden</h3>
-        <p>Every answer you write by hand becomes work the buyer's team has to take on faith or re-verify. They want proof they can run themselves.</p>
-        <p class="card__map">ASR-6 · evidence</p>
+      <div class="card pc" style="--sevc:var(--sev-med)">
+        <div class="pc__tag"><span class="sev-d">medium</span><span>ASR-6 · evidence</span></div>
+        <h3>Say-so does not scale</h3>
+        <p>Every hand-written answer is work the buyer's team must take on faith or redo.</p>
+        <span class="ev">They want proof they can <em>run themselves</em>, against a key, with no portal.</span>
+      </div>
+    </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 5. THE SIGNED REPORT -->
-<section class="section reveal" id="report">
+<!-- ============================================================ 4. THE SIGNED REPORT (proof) -->
+<section class="section section--ink reveal" id="report">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / The report</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">03 / The report</span>
       <h2>What you hand the buyer.</h2>
-      <p class="lede">
-        Not a promise. One canonical object, signed with Ed25519, mapped to the controls
-        the review group already cites. They open it, verify the signature offline against
-        your public key, and trace every finding to a standard they enforce.
-      </p>
+      <p class="lede">One canonical object, signed with Ed25519, mapped to the controls the review group already cites. They verify it offline against your public key and trace every finding to a standard they enforce.</p>
     </div>
-    <div class="split">
-      <div class="report register">
-        <div class="register__row"><span class="register__k">schema</span><span class="register__v">kolm-audit-report-1</span></div>
-        <div class="register__row"><span class="register__k">report_id</span><span class="register__v">asrr_sample</span></div>
-        <div class="register__row"><span class="register__k">subject</span><span class="register__v">Support &amp; billing agents <span class="ann">what was assessed</span></span></div>
-        <div class="register__row"><span class="register__k">readiness_pct</span><span class="register__v"><b>0</b> <span class="ann">assessed controls only</span></span></div>
-        <div class="register__row"><span class="register__k">findings</span><span class="register__v">6 · <b>5 high</b> · 1 low</span></div>
-        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
-        <div class="register__row"><span class="register__k">key_fingerprint</span><span class="register__v"><b>410302c93becdcc3&hellip;</b></span></div>
-        <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:0XCoqRkbLg&hellip;sEjBDw</b> <span class="ann">covers the canonical bytes</span></span></div>
-        <div class="register__row"><span class="register__k">verify_url</span><span class="register__v"><b>kolm.ai/verify</b></span></div>
+    <div class="grid grid--2" style="align-items:start">
+      <div class="artifact" aria-label="The signed readiness report">
+        <div class="rep">
+          <div class="rep__bar">
+            <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="t">kolm · readiness report</span>
+            <span class="chip chip--ok">signed · ed25519</span>
+          </div>
+          <div class="rep__sheet">
+            <div class="rep__head">
+              <span class="rep__sub">Support &amp; billing agents</span>
+              <span class="rep__id">asrr_sample</span>
+            </div>
+            <div class="sev">
+              <div class="sev__bar" aria-hidden="true"><i class="s-h"></i><i class="s-m"></i><i class="s-l"></i><i class="s-i"></i></div>
+              <div class="sev__row"><span class="lbl">findings</span><span>13 · <b>7 high</b> · 4 medium · 1 low · 1 info</span></div>
+            </div>
+            <div class="find">
+              <span class="pill">high</span>
+              <div>
+                <div class="find__t">Over-permission on a shared key</div>
+                <div class="find__e">support-agent on shared-prod-key grants 10 tools, uses 4</div>
+                <div class="find__m">ASR-1 least privilege → SOC 2 CC6</div>
+              </div>
+            </div>
+            <div class="find__more">+ 12 more findings, each inside the signed object</div>
+          </div>
+          <div class="rep__sig" translate="no">
+            <div class="sig__row"><span class="sig__k">signature</span><span class="sig__v">ed25519:9kWQBu5kLlJ8qSaPgyu39K335ewB8hS8-ckKlcB9i9IDhxmYf0ojWdqJfvECIIYh89ljitxhSq4MIV1gaG9aDw</span></div>
+            <div class="sig__row"><span class="sig__k">key</span><span>410302c93becdcc3...</span><span class="sig__ok">✓ verifies offline</span></div>
+          </div>
+        </div>
       </div>
       <div class="grid" style="gap:14px;align-content:start">
         <div class="card">
-          <h3>Canonical payload</h3>
-          <p>Key-sorted, whitespace-free JSON. The signature covers these exact bytes, so a downgraded finding or an inflated score is self-evident the instant the buyer checks it.</p>
+          <p class="card__k">Canonical payload</p>
+          <h3>Edit one field, the seal breaks</h3>
+          <p>Key-sorted, whitespace-free JSON. The signature covers the exact bytes, so a downgraded finding or an inflated score is self-evident the instant the buyer checks.</p>
         </div>
         <div class="card">
+          <p class="card__k">Self-contained</p>
           <h3>Your key travels in the report</h3>
-          <p>The signature and the public key it was made with ship together. Your buyer needs nothing from us: the verifier runs offline against the key inside the report, no account, no upload.</p>
+          <p>Signature and public key ship together. The verifier runs offline in the buyer's browser: no account, no upload, nothing needed from us.</p>
         </div>
         <div class="card">
-          <h3>Framework crosswalk</h3>
-          <p>Every finding maps to the control your buyer names. The reviewer reads results in the vocabulary they already enforce, not yours.</p>
+          <p class="card__k">Crosswalk</p>
+          <h3>Their vocabulary, not yours</h3>
+          <p>Every finding maps to the control your buyer names: SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP, MITRE ATLAS.</p>
         </div>
       </div>
     </div>
 
-    <div class="tbl-wrap" style="margin-top:var(--s7)">
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Framework crosswalk" style="margin-top:var(--s7)">
       <table class="tbl">
         <thead>
           <tr><th scope="col">Control</th><th scope="col">What it checks</th><th scope="col">Maps to</th></tr>
         </thead>
         <tbody>
-          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI · NIST MANAGE-1</td></tr>
+          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI03 · NIST MANAGE-1</td></tr>
           <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
           <tr><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
           <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS</td></tr>
@@ -257,94 +257,124 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </tbody>
       </table>
     </div>
-    <p class="hero__claim" style="margin-top:var(--s4)">
-      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
-    </p>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 6. HOW FAST (the ledger) -->
-<section class="section section--ink reveal" id="speed">
+<!-- ============================================================ 5. TWO CLOCKS -->
+<section class="section sect--dense reveal" id="speed">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">04 / Two clocks</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">04</span>
     <div class="section__head">
-      <span class="idx">04 / Two clocks</span>
       <h2>Minutes for the scan. Days for a signature with a name on it.</h2>
-      <p class="lede">
-        A stalled review runs on two clocks, and we are candid about which one needs a
-        person. State it the way you would to the buyer: minutes for the automated scan,
-        days for a named-reviewed attestation.
-      </p>
+      <p class="lede">We are candid about which clock needs a person.</p>
     </div>
     <div class="grid grid--2">
       <div class="card">
-        <p class="card__k">The machine clock</p>
+        <p class="card__k">The machine clock · minutes</p>
         <h3>No human waits here</h3>
-        <p>Permission reads, audit-trail and egress checks, the prompt-injection battery, control-mapping and signing are compute. They run in minutes to hours, with nobody in the loop, and re-run on every deploy.</p>
+        <p>Permission reads, audit-trail and egress checks, the prompt-injection battery, control-mapping and signing are compute. Nobody in the loop, re-run on every deploy.</p>
       </div>
       <div class="card">
-        <p class="card__k">The human clock</p>
+        <p class="card__k">The human clock · days</p>
         <h3>A name behind the result</h3>
-        <p>For the deal where a CISO wants a person to stand behind the finding, a named co-signer reviews and signs alongside the math. That is days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.</p>
+        <p>When a CISO wants a person to stand behind the finding, a named co-signer reviews and signs alongside the math. Days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.</p>
       </div>
     </div>
-    <p class="hero__claim" style="margin-top:var(--s6)">
-      The crypto proves the bytes were not altered. The name proves a person reviewed them. Most deals clear on the automated report alone.
-    </p>
+    <figure class="diag reveal" role="img" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
+    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path class="dg-flow" d="M158 68 H198 M380 68 H420 M602 68 H630"/>
+      <rect class="dg-box" x="8" y="36" width="150" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="22" y="56">Input</text>
+      <text class="dg-t" x="22" y="76">Agent logs</text>
+      <text class="dg-mono" x="22" y="92">import or sidecar</text>
+      <polygon class="dg-ok" points="198,68 190,63.5 190,72.5"/>
+      <rect class="dg-box" x="200" y="36" width="180" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="214" y="56">Engine</text>
+      <text class="dg-t" x="214" y="76">Audit run</text>
+      <text class="dg-mono" x="214" y="92">ASR-01 .. ASR-08</text>
+      <polygon class="dg-ok" points="420,68 412,63.5 412,72.5"/>
+      <rect class="dg-box--ok" x="422" y="36" width="180" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="436" y="56">Output</text>
+      <text class="dg-t" x="436" y="76">Signed report</text>
+      <text class="dg-mono" x="436" y="92">Ed25519 envelope</text>
+      <polygon class="dg-ok" points="630,68 622,63.5 622,72.5"/>
+      <circle class="dg-dot" cx="646" cy="68" r="4"/>
+      <text class="dg-label" x="658" y="72">verify</text>
+      <path class="dg-line" d="M290 100 V128"/>
+      <text class="dg-mono" x="208" y="146">permissions &#183; audit trail &#183; egress &#183; injection</text>
+    </svg>
+    <figcaption class="diag__cap"><b>Pipeline</b> same logs in, same signature out: the machine clock is reproducible end to end</figcaption>
+    </figure>
+    <p class="how__foot">The crypto proves the bytes were not altered. The name proves a person reviewed them. Most deals clear on the automated report alone.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 7. PRICING POINTER -->
+<!-- ============================================================ 6. PRICING -->
 <section class="section reveal" id="pricing">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">05 / Pricing</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">05 / Pricing</span>
       <h2>Start free. Sign when the deal needs it.</h2>
-      <p class="lede">Every fee is flat and listed in full. No quote, no per-seat meter, no contingency. The report you hand the buyer is $750.</p>
+      <p class="lede">Every fee is flat and listed in full. No quote, no per-seat meter, no contingency.</p>
     </div>
-    <div class="split" style="align-items:center">
-      <div class="plate">
-        <p class="card__k">Signed Readiness Report</p>
-        <div class="tier__price">$750</div>
-        <p class="tier__sub">one-time · the full automated audit, signed and offline-verifiable</p>
-        <ul class="ledger" style="margin:var(--s5) 0">
-          <li>Permissions, audit trail, egress and injection, all four pillars</li>
-          <li>Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, MITRE ATLAS</li>
-          <li>Ed25519-signed report your buyer verifies offline, no account</li>
-          <li>Remediation checklist for every finding</li>
-        </ul>
-        <a class="btn btn--primary" href="/contact" style="width:100%">Start an audit</a>
-        <p class="hero__claim" style="text-align:center;margin-top:var(--s3)">Start with a <a href="/pricing" style="border-bottom:1px solid var(--line-2)">free scan</a> first, no card.</p>
+    <div class="plate plate--rows">
+      <div class="prow">
+        <div class="prow__name">Scan<span class="chip chip--ok">start here</span></div>
+        <div class="prow__d">Self-serve. Watermarked findings from your own logs, in minutes. No human, no call, no card.</div>
+        <div class="prow__p">Free</div>
       </div>
-      <div>
-        <h3>Three more ways in</h3>
-        <ul class="ledger" style="margin:var(--s3) 0 var(--s4)">
-          <li><b>Scan, Free.</b> Self-serve. A signed, watermarked snapshot in minutes, no human, no call.</li>
-          <li><b>Continuous, from $299/mo.</b> Weekly or on-every-deploy re-attestation, plus a live Trust link any buyer can re-check.</li>
-          <li><b>Reviewed Attestation, $25,000 flat.</b> A named co-signer reviews and signs beside the math. The deal-closer.</li>
-        </ul>
-        <p style="color:var(--ink-2);margin:0 0 var(--s4)">
-          A point-in-time report goes stale on your next deploy: a permission granted in
-          January can still fire in August. Continuous keeps the evidence current, and the
-          EU AI Act Article 12 logging obligation has an enforcement date of August 2, 2026.
-        </p>
-        <div class="hero__cta">
-          <a class="btn btn--ghost btn--sm" href="/pricing">See full pricing</a>
-          <a class="btn btn--ghost btn--sm" href="/report">See a sample report</a>
-        </div>
+      <div class="prow prow--hot">
+        <div class="prow__name">Signed Readiness Report</div>
+        <div class="prow__d">The full audit across permissions, audit trail, egress and injection, Ed25519-signed, with a remediation checklist for every finding. Yours to hand over.</div>
+        <div class="prow__p">$750<small>one-time</small></div>
+      </div>
+      <div class="prow">
+        <div class="prow__name">Continuous</div>
+        <div class="prow__d">Re-attested weekly or on every deploy, behind a stable trust link any buyer can re-check. A point-in-time report goes stale on your next deploy.</div>
+        <div class="prow__p">$299/$999<small>per month</small></div>
+      </div>
+      <div class="prow">
+        <div class="prow__name">Reviewed Attestation</div>
+        <div class="prow__d">A named co-signer reviews and signs beside the math. The deal-closer.</div>
+        <div class="prow__p">$25,000<small>flat</small></div>
+      </div>
+      <div class="plate__foot">
+        <span>Design partners this quarter: the Full Readiness audit at its listed $15,000 fixed fee · <a href="/pricing">full pricing</a> · <a href="/contact">talk to us</a></span>
+        <span style="margin-left:auto"><a class="go" href="/signup">Run the free scan →</a></span>
+      </div>
+    </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 8. FINAL CTA -->
+<!-- ============================================================ 7. FINAL CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
-    <h2>Clear the security review in days.</h2>
-    <p class="lede">A scoped audit, a signed evidence report, and a review your buyer clears in days instead of weeks.</p>
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <h2>Clear the review in days.</h2>
+    <p class="lede">Run the scan tonight. Hand the reviewer signed evidence tomorrow.</p>
     <div class="hero__cta">
-      <a class="btn btn--primary" href="/contact">Start an audit</a>
-      <a class="btn btn--ghost" href="/pricing">See pricing</a>
+      <a class="btn btn--primary" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost" href="/contact">Talk to us</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -367,24 +397,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -392,7 +425,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

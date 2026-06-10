@@ -1,0 +1,89 @@
+{
+  "id": "d13",
+  "track": "design",
+  "prompt": "Document the layout GEOMETRY of premium marketing sites in 2025-2026 with concrete patterns: asymmetric grid usage (e.g., 12-col with content offset to cols 2-7, rail labels in col 1), full-bleed bands alternating with contained sections, editorial rhythm (how award-tier sites vary section height and density instead of uniform py-24 blocks), oversized numerals and index numbering (01/02/03 section markers, giant stat numerals — at what sizes), hairline rule systems and bordered table layouts, sticky side rails, and max-width conventions (1200? 1440? full + inner grid?). Cite specific sites doing each pattern, designer breakdowns verbatim (@handle + date), and articles. Output: a catalog of named layout patterns with their structural recipe (columns, spans, spacing values).",
+  "content": "**Catalog of Premium Marketing Site Layout Patterns (2025-2026)**\n\nPremium marketing sites (luxury brands, award-winning agency/corporate sites, and high-end SaaS/brand experiences) in 2025-2026 emphasize editorial, print-inspired, and \"humanist tech\" aesthetics. They move away from rigid, uniform grids toward fluid, asymmetric, and organic compositions that evoke high-end magazines while maintaining structure. Key sources include AWWWARDS winners and nominees (e.g., Hubtown, Pacôme Pertant Portfolio, SOHub, Apechain, Steven.com, Imperiale Bolgheri), trend reports citing Linear, Vercel, and Arc as influences, and analyses of asymmetric/organic flows.[[1]](https://cubitrek.com/blog/top-10-website-design-trends-for-2026-the-ultimate-guide)[[2]](https://www.awwwards.com/)\n\nCommon max-width conventions: Content containers are typically capped at **1140–1280px** (often exactly 1200px) for balance on 1920px+ screens, with some using **1440px** for wider experiences or full-bleed + inner grids. Full-width elements (e.g., heroes, bands) sit outside this, with inner content constrained.[[3]](https://webhelpagency.com/blog/website-dimensions/)\n\n**Named Layout Patterns and Structural Recipes** (with columns/spans/spacing where specified in sources or inferred from common 12-column systems):\n\n**1. Asymmetric Offset Grid (Editorial Rail + Content Focus)**  \n- **Description**: 12-column grid with intentional offsets; main content shifted right or left for visual tension and hierarchy. Rail labels or secondary elements occupy edge columns. Common in portfolios and storytelling marketing sites.  \n- **Structural Recipe**: 12-col grid. Content spans cols 2–7 or 3–8 (offset left by 1–2 cols); left rail (labels/index) in col 1 (narrow, ~1-col width); right whitespace or secondary elements in cols 9–12. Use Tailwind-like classes: `grid grid-cols-12 gap-x-6`; content `col-start-2 col-span-6`. Asymmetric variants break symmetry with varying column widths (e.g., one wide, one narrow).  \n- **Examples/Sites**: Debut Art agency site (asymmetric project showcase); general magazine-style blogs; AWWWARDS corporate winners like those using \"spatial silence\" or high-contrast layouts. Trend reports highlight this in Linear/Vercel-influenced humanist tech sites.[[4]](https://www.mockplus.com/blog/post/grid-layout-website)[[1]](https://cubitrek.com/blog/top-10-website-design-trends-for-2026-the-ultimate-guide)  \n- **Citations/Verbatim**: \"Bento grids and rigid 12-column layouts are giving way to organic, asymmetric flows with soft gradients and generous white space. The aesthetic borrows from print editorial...\" (Cubitrek, Jan 2026). Asymmetry for \"visual interest without confusing users\" (Kontra.agency, Dec 2025).[[5]](https://kontra.agency/top-web-design-trends-for-2026/)\n\n**2. Alternating Full-Bleed Bands + Contained Sections**  \n- **Description**: Full-bleed (edge-to-edge) hero/impact bands alternate with narrower, padded contained sections for rhythm and breathing room. Creates cinematic flow.  \n- **Structural Recipe**: Full-bleed elements use `w-full` or `max-w-none`; contained sections use inner `max-w-[1200px] mx-auto px-6` (or 1440px). Spacing varies: generous vertical padding on contained (e.g., py-16 to py-32), minimal or zero on bleed bands. Alternate 2–3 full-bleed per page.  \n- **Examples/Sites**: AWWWARDS SOTD entries (e.g., full-bleed photography in corporate sites like Imperiale Bolgheri); Linear.app homepage influences; luxury brand campaigns.[[6]](https://www.spinxdigital.com/blog/best-website-design/)  \n- **Citations/Verbatim**: Full-bleed photography and clean layout systems in award winners; fluid asymmetric layouts emphasized in 2026 trends.[[1]](https://cubitrek.com/blog/top-10-website-design-trends-for-2026-the-ultimate-guide)\n\n**3. Editorial Rhythm with Variable Section Density/Height**  \n- **Description**: Sections vary in height, density, and padding (not uniform `py-24` blocks) to mimic print editorial pacing—dense clusters alternate with airy, tall whitespace zones. Avoids repetitive rhythm.  \n- **Structural Recipe**: Use dynamic padding (e.g., `py-12`, `py-24`, `py-40` or aspect-ratio constrained blocks). Vary row heights in grid/flex; incorporate negative space intentionally. Modular blocks with subtle variations in bg color/alignment.  \n- **Examples/Sites**: WIRED-inspired magazine layouts; AWWWARDS \"Spatial Silence\" portfolios; organic flows in Vercel/Linear aesthetic sites.[[7]](https://getdesign.md/wired/design-md)[[1]](https://cubitrek.com/blog/top-10-website-design-trends-for-2026-the-ultimate-guide)  \n- **Citations/Verbatim**: \"Designers are introducing subtle variations in spacing, background color, and alignment to avoid repetitive patterns. Asymmetry is used carefully...\" (Kontra.agency). \"Fluid, organic, asymmetric flows with generous white space\" (Cubitrek).[[5]](https://kontra.agency/top-web-design-trends-for-2026/)\n\n**4. Oversized Numerals & Index Numbering (Section Markers/Stats)**  \n- **Description**: Giant numerals (01/02/03 or large stats like \"47%\") as focal typographic elements for sections or data highlights.  \n- **Structural Recipe**: Numerals often 80–200px+ font-size (e.g., text-[120px] or clamp(4rem, 10vw, 12rem)); paired with smaller supporting text. Placed in left rails, as standalone section starters, or overlapping content. Use monospaced or bold display fonts.  \n- **Examples/Sites**: Common in AWWWARDS SOTD stats-heavy marketing sites and editorial portfolios; fashion/luxury campaign sites.  \n- **Citations/Verbatim**: X discussions on \"oversized headlines, ultra-small metadata... strong size contrast\" and \"editorial rhythm\" in luxury magazine aesthetics (e.g., @CaliraVal prompt examples, May 2026).[[8]](https://x.com/CaliraVal/status/2052716058822504832)\n\n**5. Hairline Rule Systems & Bordered Table/Layouts**  \n- **Description**: Thin (1px or hairline) horizontal/vertical rules for subtle division; bordered tables or card systems for structured data.  \n- **Structural Recipe**: `border` or `border-b border-gray-200` (hairline weight); tables with `border` classes or subtle outlines. Integrate into grids for separation without heaviness.  \n- **Examples/Sites**: WIRED design system (magazine cards + hairline rules); bordered elements in corporate AWWWARDS winners.[[7]](https://getdesign.md/wired/design-md)  \n- **Citations/Verbatim**: \"Magazine cards, hairline rules. A printed-magazine grid...\" (WIRED analysis).\n\n**6. Sticky Side Rails/Navigation**  \n- **Description**: Persistent left/right rails for navigation, labels, or secondary content that stick on scroll.  \n- **Structural Recipe**: `sticky top-0` or `position: sticky` on rail elements (narrow width, e.g., 60–120px); main content flows beside. Often paired with asymmetric grids. Desktop-focused (min 1200px+ viewport).  \n- **Examples/Sites**: Side rail patterns in wide desktop marketing sites; ad-adjacent but adapted for nav in premium experiences.  \n- **Citations/Verbatim**: Side rail best practices noted for wide screens (1200×650+); integrated into asymmetric premium layouts.[[9]](https://optidigital.com/resources/blog/top-ad-formats-for-publishers-in-2025/)\n\n**Additional Context from Designer/Trend Sources**  \n- **Vercel/Linear Aesthetic Influence**: Subtle blueprint grids, monospaced typography, systematic spacing on top of asymmetric bases.[[10]](https://www.setproduct.com/blog/complete-guide-to-blueprint-grid-design)  \n- **AWWWARDS Focus**: Recent SOTD (Jun 2026) emphasize layout impact, editorial composition, and visual hierarchy.[[2]](https://www.awwwards.com/)  \n- **X/Designer Notes**: Emphasis on \"asymmetric composition, intentional imbalance, editorial rhythm, and luxury fashion magazine aesthetics\" with \"broken grid layouts\" and \"controlled chaos\" (e.g., prompts and posts from 2026).[[8]](https://x.com/CaliraVal/status/2052716058822504832)\n\nThese patterns prioritize intentional whitespace, visual tension, and print-to-digital translation for premium feel. Implement with CSS Grid/Flexbox + Tailwind or similar; test for CLS with aspect-ratios. For latest examples, check AWWWARDS recent winners directly.",
+  "citations": [
+    "https://cubitrek.com/blog/top-10-website-design-trends-for-2026-the-ultimate-guide",
+    "https://www.awwwards.com/",
+    "https://webhelpagency.com/blog/website-dimensions/",
+    "https://www.mockplus.com/blog/post/grid-layout-website",
+    "https://kontra.agency/top-web-design-trends-for-2026/",
+    "https://www.spinxdigital.com/blog/best-website-design/",
+    "https://getdesign.md/wired/design-md",
+    "https://x.com/CaliraVal/status/2052716058822504832",
+    "https://optidigital.com/resources/blog/top-ad-formats-for-publishers-in-2025/",
+    "https://www.setproduct.com/blog/complete-guide-to-blueprint-grid-design"
+  ],
+  "searched": [
+    "https://www.youtube.com/watch?v=rFyOIWMwRdg",
+    "https://www.vistaprint.com/hub/web-design-trends?srsltid=AfmBOopKJHwHhMhNDDGkt3sSm3BSOLxzCK9_47HoFttgLOHzp4LYv4H4",
+    "https://cubitrek.com/blog/top-10-website-design-trends-for-2026-the-ultimate-guide",
+    "https://saltechsystems.com/10-powerful-2026-web-design-trends/",
+    "https://www.spinxdigital.com/blog/best-website-design/",
+    "https://www.growthroom.co/en/blog-posts/top-10-web-design-agencies-in-2026",
+    "https://www.vistaprint.ca/hub/web-design-trends?srsltid=AfmBOoqn_LUq9Q9l80zO60vnItAY9-h_uNzMiSsEuRft2AVzmjfoMv1x",
+    "https://www.youtube.com/watch?v=P4vRKsMMSUs",
+    "https://www.1stopdesign.com/2025s-best-worst-design-trends-plus-whats-coming-in-2026/",
+    "https://kontra.agency/top-web-design-trends-for-2026/",
+    "https://www.awwwards.com/",
+    "https://www.awwwards.com/websites/",
+    "https://www.awwwards.com/websites/business-corporate/",
+    "https://www.youtube.com/watch?v=9TUzpQujYHA",
+    "https://www.mockplus.com/blog/post/grid-layout-website",
+    "https://visme.co/blog/layout-design/",
+    "https://www.onething.design/post/grid-layout-design-guide-history-tips-examples",
+    "https://www.fisherdesignandadvertising.com/grid-layout/",
+    "https://elementor.com/blog/grid-design/",
+    "https://www.amazon.com/Putco-Black-Locker-Hyundai-2022-2024/dp/B0C5B4ZT4X",
+    "https://softopper.com/2025-recap/?srsltid=AfmBOorMn3Mlhgo1crY0Sm8tNo1gPxDT4_MX6zDAZSmP7TLj_iwwv7zn",
+    "https://optidigital.com/resources/blog/top-ad-formats-for-publishers-in-2025/",
+    "https://www.shopsar.com/chevrolet-silverado-bed-rail-chrome-letters-p/sgr60184.htm",
+    "https://fypon.com/pages/rail-systems?srsltid=AfmBOoo5l2Q8ovjYahTmwjLRKt1F_u-fBVvyihIVh0GpjBE28fEdVdy-",
+    "https://www.youtube.com/watch?v=KhSDaVDF3YA",
+    "https://www.awwwards.com/awwwards/collections/layout/",
+    "https://www.awwwards.com/awwwards/collections/inspiring-blog-design/",
+    "https://webhelpagency.com/blog/website-dimensions/",
+    "https://www.youtube.com/watch?v=qdq3O18tZsE",
+    "https://www.hobo-web.co.uk/best-screen-size/",
+    "https://www.tiktok.com/@jessicatatedesign/video/7535965877506690359",
+    "https://www.facebook.com/groups/greenshiftwp/posts/1511941143578486/",
+    "https://www.reddit.com/r/webdev/comments/1hkao6m/are_layout_grids_actually_still_relevant/",
+    "https://www.youtube.com/watch?v=qaR4jRrc1Iw",
+    "https://linear.app/",
+    "https://www.setproduct.com/blog/complete-guide-to-blueprint-grid-design",
+    "https://www.instagram.com/reel/DLqQstyqZB4/",
+    "https://www.geeksforgeeks.org/bootstrap/bootstrap-5-bordered-tables/",
+    "https://stackoverflow.com/questions/66888317/why-does-border-separate-collapse-break-bordered-tables-in-bootstrap",
+    "https://whitespacedesignbook.com/portfolio/chapter-4-layout-sins/",
+    "https://getdesign.md/wired/design-md",
+    "https://podcasts.apple.com/ru/podcast/rich-text-styles-css-new-web-design-game-changer/id1849238341?i=1000747735567&l=en-GB"
+  ],
+  "usage": {
+    "input_tokens": 39001,
+    "input_tokens_details": {
+      "cached_tokens": 25472
+    },
+    "output_tokens": 2836,
+    "output_tokens_details": {
+      "reasoning_tokens": 1029
+    },
+    "total_tokens": 41837,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 10,
+    "cost_in_usd_ticks": 790956500,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 9,
+      "x_search_calls": 1,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 15329,
+      "output_tokens": 1870
+    }
+  },
+  "attempts": 1
+}

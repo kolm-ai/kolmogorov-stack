@@ -4,18 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes, strip the class so nothing stays hidden. */
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Open a signed Agent Security-Review report, verify it offline, explore it · kolm.ai</title>
-<meta name="description" content="Load a kolm evidence report from a trust URL or paste it. The viewer verifies its Ed25519 signature in your browser, then renders the executive summary, an interactive control graph, the framework crosswalk, the red-team resistance battery, and a visual diff between two reports.">
-<meta name="theme-color" content="#F6F7F4">
+<title>Open a signed Agent Security-Review report, verify it offline, read it like the reviewer will - kolm.ai</title>
+<meta name="description" content="Load a kolm evidence report from a trust URL or paste it. The viewer verifies its Ed25519 signature in your browser, then renders the signed document: verification masthead, evidence tier, scope before findings, the eight-control posture grid, findings with evidence, and a diff between two reports. The page is a lens; the JSON is the source.">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Open a signed Agent Security-Review report and explore it offline">
-<meta property="og:description" content="Verify a kolm evidence report in your browser, then read it: summary, interactive control graph, framework crosswalk, red-team battery, and a visual diff between two audits.">
+<meta property="og:title" content="Open a signed Agent Security-Review report and read it like the reviewer will">
+<meta property="og:description" content="Verify a kolm evidence report in your browser, then read the signed document: masthead, evidence tier, scope, posture grid, findings, signature block. The page is a lens; the JSON is the source.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/report-viewer">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -36,116 +38,242 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
 <style>
-  /* page-local: the report viewer. Severity ramp is a restrained earth-tone
-     scale (no alarm red), so the control graph reads at a glance while staying
-     inside the warm-paper system: green = clear, deepening toward void. */
-  .rv { --sev-critical:#8C3A2E; --sev-high:#C2603A; --sev-medium:#B5852A; --sev-low:#565C57; --sev-info:var(--accent); --sev-none:#8A908B;
-        --st-resisted:var(--accent); --st-exposed:#8C3A2E; --st-untested:#8A908B; }
+  /* page-local: the report viewer. The loader, viewer chrome and diff live on
+     the dark evidence-room paper; the rendered document (#rvDoc) is the ONE lit
+     object on the page - the signed-report sheet. Everything the renderer
+     (report-viewer.js) injects into .doc colors itself with var() tokens, so
+     the .doc scope below re-resolves those tokens to sheet values and the same
+     markup flips from room-chrome to lit paper without touching the script.
+     Severity ramp inside the sheet is a restrained earth-tone scale (no alarm
+     red): green = supported by evidence, deepening earth toward blocking,
+     grey = no evidence either way. */
 
-  .rv__load { display:grid; grid-template-columns:1fr; gap:var(--s4); align-items:start; }
-  .rv__load.is-compare { grid-template-columns:1fr 1fr; }
-  @media (max-width:860px){ .rv__load.is-compare { grid-template-columns:1fr; } }
-  .rv__pane { background:var(--panel); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; }
-  .rv__panehead { display:flex; align-items:center; gap:10px; padding:12px var(--s4); border-bottom:1px solid var(--line); background:var(--bg-2); }
-  .rv__panehead h3 { font-size:14px; margin:0; }
-  .rv__panehead .rv__status { margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--ink-3); }
+  /* ---- loader panes (entry points: paste / URL / drop / ?src= / sample) ---- */
+  .rv__load { display:grid; grid-template-columns:minmax(0,1fr); gap:var(--s4); align-items:start; margin-top:var(--s6); }
+  .rv__load.is-compare { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+  @media (max-width:860px){ .rv__load.is-compare { grid-template-columns:minmax(0,1fr); } }
+  .rv__pane { background:var(--paper-2); border:1px solid var(--line); border-top-color:var(--line-top); border-radius:var(--r-lg); overflow:hidden; }
+  .rv__panehead { display:flex; align-items:center; gap:10px; padding:12px var(--s4); border-bottom:1px solid var(--line); background:var(--paper-sink); }
+  .rv__panehead h2 { font-size:13px; margin:0; font-family:var(--mono); font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); max-width:none; }
+  .rv__panehead .rv__status { margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--ink-3); text-align:right; }
   .rv__status.is-ok { color:var(--accent-text); } .rv__status.is-bad { color:var(--void); }
   .rv textarea { width:100%; min-height:200px; resize:vertical; border:0; outline:0; display:block;
-    background:var(--bg-1); color:var(--ink); font-family:var(--mono); font-size:12.5px; line-height:1.6; padding:var(--s4); tab-size:2; }
-  .rv textarea::placeholder { color:var(--ink-faint); }
-  .rv__bar { display:flex; gap:var(--s2); padding:var(--s3) var(--s4); border-top:1px solid var(--line); flex-wrap:wrap; background:var(--bg-2); }
-  .rv__urlrow { display:flex; gap:var(--s2); padding:0 var(--s4) var(--s4); }
-  .rv__urlrow input { flex:1; border:1px solid var(--line-2); border-radius:var(--r-md); padding:8px 12px; font-family:var(--mono); font-size:12.5px; background:var(--bg-1); color:var(--ink); }
-  .rv.drag .rv__pane:first-child { border-color:var(--ok-edge); box-shadow:0 0 0 1px var(--ok-edge) inset; }
+    background:var(--paper); color:var(--ink); font-family:var(--mono); font-size:12.5px; line-height:1.6; padding:var(--s4); tab-size:2; }
+  .rv textarea:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+  .rv textarea::placeholder { color:var(--ink-3); opacity:.7; }
+  .rv__bar { display:flex; gap:var(--s2); padding:var(--s3) var(--s4); border-top:1px solid var(--line); flex-wrap:wrap; background:var(--paper-sink); }
+  .rv__urlrow { display:flex; gap:var(--s2); padding:var(--s3) var(--s4) var(--s4); flex-wrap:wrap; background:var(--paper-sink); }
+  .rv__urlrow input { flex:1; min-width:0; border:1px solid var(--line-2); border-radius:var(--r-md); padding:8px 12px; font-family:var(--mono); font-size:12.5px; background:var(--paper); color:var(--ink); }
+  .rv__urlrow input:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+  .rv__urlrow input::placeholder { color:var(--ink-3); opacity:.7; }
+  .rv.drag .rv__pane:first-child { border-color:var(--accent-edge); box-shadow:0 0 0 1px var(--accent-edge) inset, 0 0 24px var(--accent-soft); }
 
-  /* verdict / executive header */
-  .rv__verdict { border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper-2); }
-  .rv__vtop { display:flex; align-items:center; gap:var(--s3); flex-wrap:wrap; padding:var(--s4) var(--s5); border-bottom:1px solid var(--line); }
-  .rv__seal { font-family:var(--mono); font-weight:600; font-size:13px; letter-spacing:.06em; padding:6px 12px; border-radius:var(--r-pill); border:1px solid; }
-  .rv__seal.ok { color:var(--accent-text); background:var(--accent-soft); border-color:var(--accent-edge); }
-  .rv__seal.bad { color:var(--void); background:var(--void-soft); border-color:var(--void-edge); }
-  .rv__subject { font-family:var(--display); font-weight:600; font-size:clamp(20px,3vw,26px); margin:0; }
-  .rv__meta { margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--ink-3); text-align:right; }
-  .rv__stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); }
-  @media (max-width:680px){ .rv__stats { grid-template-columns:repeat(2,1fr); } }
-  .rv__stat { background:var(--paper-2); padding:var(--s4) var(--s5); }
-  .rv__stat .big { font-family:var(--display); font-weight:600; font-size:clamp(26px,4.4vw,40px); line-height:1.05; letter-spacing:-0.01em; font-feature-settings:"tnum" 1; }
-  .rv__stat .lab { font-size:12px; color:var(--ink-3); margin-top:2px; }
-  .rv__stat .big.ok { color:var(--accent-text); } .rv__stat .big.warn { color:var(--sev-medium); } .rv__stat .big.bad { color:var(--void); }
-  .rv__sig { padding:var(--s4) var(--s5); border-top:1px solid var(--line); font-family:var(--mono); font-size:12px; color:var(--ink-2); display:grid; gap:4px; }
-  .rv__sig .k { color:var(--ink-3); }
+  /* ---- viewer chrome above the document: the lens, not the source ---- */
+  .rv__chrome { display:flex; gap:var(--s4); align-items:center; justify-content:space-between; flex-wrap:wrap;
+    padding:10px 2px; font-size:12.5px; color:var(--ink-3); }
+  .rv__chrome .lens { font-family:var(--mono); font-size:11.5px; letter-spacing:.02em; }
+  .rv__chrome .acts { display:flex; gap:var(--s3); align-items:center; flex-wrap:wrap; }
+  .rv__chrome .acts a { color:var(--ink-2); border-bottom:1px solid var(--line-2); }
+  .rv__chrome .acts a:hover { border-color:var(--accent); }
+  .rv__chrome button { font:inherit; font-family:var(--mono); font-size:12px; background:var(--paper-2); border:1px solid var(--line-2);
+    border-radius:var(--r-sm); padding:4px 10px; cursor:pointer; color:var(--ink); transition:border-color 140ms, background 140ms; }
+  .rv__chrome button:hover { border-color:var(--ink-3); background:rgba(255,255,255,0.04); }
+  .rv__chrome button[aria-pressed="true"] { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+  .rv__chrome button[aria-pressed="true"]:hover { background:var(--accent-deep); border-color:var(--accent-deep); }
+  .rv__json { display:none; background:var(--ink-deep-sink); color:var(--on-ink-2); border:1px solid var(--line); border-radius:var(--r-md);
+    padding:var(--s4) var(--s5); font-family:var(--mono); font-size:12px; line-height:1.6; overflow-x:auto; margin:0 0 var(--s4); max-height:60vh; overflow-y:auto; }
+  .rv__json.show { display:block; }
 
-  /* control graph */
-  .rv__panel { border:1px solid var(--line); border-radius:var(--r-lg); background:var(--paper-2); padding:var(--s5); }
+  /* ---- the document: the lit sheet. Re-scope the room tokens to sheet values
+     so every rule below AND every inline var() the renderer emits flips to
+     paper-legible ink. This is the page's one intentional light object. ---- */
+  .doc {
+    --ink:var(--sheet-ink); --ink-2:var(--sheet-ink-2); --ink-3:var(--sheet-ink-3);
+    --ink-faint:rgba(17,22,19,0.34);
+    --line:var(--sheet-line); --line-2:var(--sheet-line-2);
+    --paper:var(--sheet-2); --paper-2:var(--sheet); --paper-sink:var(--sheet-2);
+    --accent:var(--sheet-accent); --accent-text:var(--sheet-accent); --accent-deep:var(--sheet-accent);
+    --accent-soft:var(--sheet-accent-soft); --accent-edge:rgba(14,138,87,0.35);
+    --void:var(--sheet-high); --void-soft:var(--sheet-high-soft); --void-edge:var(--sheet-high-edge);
+    --attn-text:#8A6D1F;
+    --sev-critical:#8C3A2E; --sev-medium:#B5852A;
+    background:var(--sheet); color:var(--sheet-ink);
+    border:1px solid rgba(229,240,234,0.16); border-radius:var(--r-md); overflow:clip;
+    box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 34px 90px rgba(0,0,0,0.55);
+  }
+  .doc section { padding:var(--s6) var(--s5); border-top:1px solid var(--line); }
+  .doc section:first-of-type { border-top:0; }
+  .doc h2.reg { font-family:var(--mono); font-size:11.5px; font-weight:500; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); margin:0 0 var(--s4); max-width:none; }
+  .doc h2.reg .n { color:var(--ink); margin-right:8px; }
+  .doc .k { font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px; }
+  .doc .v { font-size:13.5px; }
+  .doc .v.mono { font-family:var(--mono); font-size:12px; word-break:break-word; }
+  .doc a { color:var(--ink); border-bottom:1px solid var(--line-2); }
+  .doc a:hover { border-color:var(--accent); }
+  .doc :focus-visible { outline-color:var(--sheet-accent); }
+
+  /* masthead: the signature element. Sticky under the site nav. */
+  .mast { position:sticky; top:62px; z-index:5; background:var(--paper-2); border-bottom:1px solid var(--line); }
+  /* this page stacks TWO sticky bars (nav 62px + masthead), so anchor targets
+     inside the document need more clearance than the site-wide 80px */
+  .doc [id], #rvSig { scroll-margin-top: 190px; }
+  .mast__grid { display:grid; grid-template-columns:auto minmax(0,1fr); }
+  .mast__stamp { display:flex; flex-direction:column; justify-content:center; gap:3px; padding:18px var(--s5); min-width:212px; border-right:1px solid var(--line); }
+  .mast__stamp .state { font-family:var(--mono); font-weight:600; font-size:14px; letter-spacing:.07em; display:inline-flex; align-items:center; gap:8px; }
+  .mast__stamp .sub { font-size:11.5px; }
+  .mast__stamp.is-verified { background:var(--accent-soft); } .mast__stamp.is-verified .state, .mast__stamp.is-verified .sub { color:var(--accent-text); }
+  .mast__stamp.is-intact { background:var(--paper-sink); } .mast__stamp.is-intact .state { color:var(--ink); } .mast__stamp.is-intact .sub { color:var(--ink-3); }
+  .mast__stamp.is-void { background:var(--void-soft); } .mast__stamp.is-void .state, .mast__stamp.is-void .sub { color:var(--void); }
+  .mast__stamp.is-unverified { background:var(--paper-sink); } .mast__stamp.is-unverified .state { color:var(--ink-3); } .mast__stamp.is-unverified .sub { color:var(--ink-3); }
+  .mast__meta { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-content:center; }
+  .mast__meta > div { padding:11px 16px; border-left:1px solid var(--line); min-width:0; }
+  .mast__meta > div:nth-child(3n+1) { border-left:0; }
+  .mast__meta > div:nth-child(n+4) { border-top:1px solid var(--line); }
+  .chipx { display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:600; letter-spacing:.05em; border-radius:var(--r-sm); padding:1px 7px; vertical-align:1px; }
+  .chipx.stale { background:var(--void-soft); color:var(--void); border:1px solid var(--void-edge); }
+  .chipx.aging { background:var(--paper-sink); color:var(--attn-text); border:1px solid var(--line-2); }
+  .chipx.current { background:var(--accent-soft); color:var(--accent-text); border:1px solid var(--accent-edge); }
+  @media (max-width:760px){
+    .mast { position:static; }
+    .mast__grid { grid-template-columns:minmax(0,1fr); }
+    .mast__stamp { border-right:0; border-bottom:1px solid var(--line); }
+    .mast__meta { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+    .mast__meta > div:nth-child(3n+1) { border-left:1px solid var(--line); }
+    .mast__meta > div:nth-child(2n+1) { border-left:0; }
+    .mast__meta > div:nth-child(n+3) { border-top:1px solid var(--line); }
+  }
+
+  /* evidence-tier banner directly under the masthead */
+  .etier { padding:10px var(--s5); border-top:1px solid var(--line); font-size:12.5px; background:var(--paper-sink); border-left:4px solid var(--ink-faint); }
+  .etier b { font-family:var(--mono); letter-spacing:.05em; }
+  .etier .basis { display:block; font-family:var(--mono); font-size:11.5px; color:var(--ink-3); margin-top:2px; }
+  .etier.tA { border-left-color:var(--accent); } .etier.tA b { color:var(--accent-text); }
+  .etier.tB { border-left-color:#B5852A; } .etier.tB b { color:var(--attn-text); }
+  .etier.tC { border-left-color:var(--ink-faint); } .etier.tC b { color:var(--ink-2); }
+  .etier.tNone { color:var(--ink-3); }
+  .wmnote { padding:10px var(--s5); border-top:1px solid var(--line); font-size:12.5px; background:var(--void-soft); color:var(--void); }
+  .wmnote b { font-family:var(--mono); letter-spacing:.05em; }
+
+  /* subject grid */
+  .subj { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--s4) var(--s5); }
+  @media (max-width:760px){ .subj { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+  @media (max-width:480px){ .subj { grid-template-columns:minmax(0,1fr); } }
+  .pillrow { display:flex; flex-wrap:wrap; gap:6px; margin-top:3px; }
+  .doc .pill { font-family:var(--mono); font-size:11px; border:1px solid var(--line); border-radius:var(--r-sm); padding:2px 7px; background:var(--paper); color:var(--ink-2); }
+
+  /* scope box: verbatim, boxed, BEFORE findings */
+  .scopebox { border:1px solid var(--ink); border-radius:var(--r-sm); padding:var(--s4) var(--s5); background:var(--paper); }
+  .scopebox .scopeline { font-size:14px; font-weight:500; margin:4px 0 0; }
+  .scopebox ul { margin:var(--s3) 0 0; padding-left:18px; }
+  .scopebox li { font-size:13px; color:var(--ink-2); margin:6px 0; }
+
+  /* posture grid: eight controls, three states, grey by default */
+  .grid8 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+  @media (max-width:860px){ .grid8 { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+  @media (max-width:480px){ .grid8 { grid-template-columns:minmax(0,1fr); } }
+  .tile { border:1px solid var(--line); border-left:3px solid var(--ink-faint); border-radius:var(--r-sm); padding:12px 13px;
+    background:var(--paper-sink); display:flex; flex-direction:column; gap:7px; min-height:108px; }
+  .tile .tid { font-family:var(--mono); font-size:11px; color:var(--ink-3); }
+  .tile .tnm { font-size:13px; font-weight:500; line-height:1.3; }
+  .tile .tst { margin-top:auto; font-family:var(--mono); font-size:11.5px; color:var(--ink-3); }
+  .tile .twhy { font-size:11.5px; color:var(--ink-3); line-height:1.45; }
+  .tile.pass { border-left-color:var(--accent); background:var(--paper-2); } .tile.pass .tst { color:var(--accent-text); }
+  .tile.attn { border-left-color:var(--sev-medium); background:var(--paper-2); } .tile.attn .tst { color:var(--attn-text); }
+  .tile.block { border-left-color:var(--sev-critical); background:var(--paper-2); } .tile.block .tst { color:var(--sev-critical); }
+  .sevstrip { display:flex; gap:var(--s4); flex-wrap:wrap; margin-top:var(--s4); padding-top:var(--s3); border-top:1px dashed var(--line-2); font-size:12.5px; color:var(--ink-2); }
+  .sevstrip .dot { width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:6px; vertical-align:-1px; }
+  .rollup { font-size:12.5px; color:var(--ink-3); margin:var(--s3) 0 0; }
+  .legend { font-size:12px; color:var(--ink-3); margin:var(--s2) 0 0; }
+
+  /* findings as expandable details */
+  .fgroup { font-family:var(--mono); font-size:12px; color:var(--ink-2); margin:var(--s4) 0 var(--s2); }
+  .fgroup:first-of-type { margin-top:0; }
+  .finding { border:1px solid var(--line); border-radius:var(--r-sm); margin:0 0 10px; overflow:clip; background:var(--paper-2); }
+  .finding summary { list-style:none; cursor:pointer; display:flex; gap:10px; align-items:baseline; padding:11px 14px; flex-wrap:wrap; }
+  .finding summary::-webkit-details-marker { display:none; }
+  .finding summary:hover { background:var(--paper); }
+  .fsev { font-family:var(--mono); font-size:10.5px; font-weight:600; letter-spacing:.06em; padding:2px 8px; border-radius:var(--r-sm); color:#fff; }
+  .ftitle { font-weight:500; font-size:13.5px; flex:1; min-width:240px; }
+  .fid { font-family:var(--mono); font-size:11.5px; color:var(--ink-3); }
+  .fbody { padding:2px 14px 16px; border-top:1px solid var(--line); display:grid; gap:var(--s3); }
+  .fbody h3 { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:10px 0 4px; font-weight:600; font-family:var(--sans); }
+  .fbody p { font-size:13px; margin:0; color:var(--ink-2); }
+  .evid { font-family:var(--mono); font-size:11.5px; background:var(--paper-sink); border:1px solid var(--line); border-radius:var(--r-sm); padding:10px 12px; overflow-x:auto; white-space:pre; color:var(--ink-2); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .doc .chip { font-family:var(--mono); font-size:11px; border:1px solid var(--line); border-radius:var(--r-sm); padding:2px 8px; background:var(--paper); color:var(--ink-2); }
+  .remed { border-left:3px solid var(--accent-edge); padding:8px 12px; background:var(--paper); font-size:13px; }
+  .remed .who { font-family:var(--mono); font-size:11px; color:var(--ink-3); margin-bottom:3px; }
+
+  /* probes (injection battery, reported not warranted) */
+  .probe { border:1px solid var(--line); border-radius:var(--r-sm); margin:0 0 8px; background:var(--paper-2); }
+  .probe summary { list-style:none; cursor:pointer; display:flex; gap:10px; align-items:baseline; padding:9px 14px; flex-wrap:wrap; }
+  .probe summary::-webkit-details-marker { display:none; }
+  .probe .pst { margin-left:auto; font-family:var(--mono); font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:var(--r-sm); }
+  .pst.s-resisted { color:var(--accent-text); background:var(--accent-soft); }
+  .pst.s-exposed { color:var(--sev-critical); background:var(--void-soft); }
+  .pst.s-untested { color:var(--ink-3); background:var(--paper-sink); }
+  .probe .pbody { padding:0 14px 12px; font-size:13px; color:var(--ink-2); }
+
+  /* tables (egress) */
+  .doc table { width:100%; border-collapse:collapse; font-size:13px; }
+  .doc th { font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); text-align:left; padding:8px 10px; border-bottom:1px solid var(--ink); }
+  .doc td { padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  .doc td.mono { font-family:var(--mono); font-size:12px; }
+
+  /* not tested */
+  .nottested { margin:0; padding-left:18px; }
+  .nottested li { font-size:13px; color:var(--ink-2); margin:8px 0; }
+
+  /* signature footer */
+  .sigfoot { background:var(--paper); }
+  .sigblock { font-family:var(--mono); font-size:11.5px; line-height:1.7; background:var(--paper-2); border:1px solid var(--line); border-radius:var(--r-sm); padding:12px 14px; overflow-x:auto; white-space:pre; color:var(--ink-2); }
+  .vcmd { margin-top:var(--s4); }
+  .vcmd h3 { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin:12px 0 4px; font-weight:600; font-family:var(--sans); }
+  .vcmd pre { font-family:var(--mono); font-size:11.5px; background:var(--paper-sink); border:1px solid var(--line); border-radius:var(--r-sm); padding:10px 12px; overflow-x:auto; margin:0; color:var(--ink-2); }
+  .vcmd p { font-size:12.5px; color:var(--ink-3); margin:8px 0 0; }
+
+  /* diff (compare two reports): room chrome, dark */
+  .rv__panel { border:1px solid var(--line); border-top-color:var(--line-top); border-radius:var(--r-lg); background:var(--paper-2); padding:var(--s5); }
   .rv__panelhead { display:flex; align-items:baseline; gap:var(--s3); flex-wrap:wrap; margin-bottom:var(--s4); }
-  .rv__panelhead h2 { font-size:18px; margin:0; }
+  .rv__panelhead h2 { font-size:18px; margin:0; max-width:none; }
   .rv__panelhead .hint { font-size:13px; color:var(--ink-3); }
-  .rv__graphwrap { display:grid; grid-template-columns:1.6fr 1fr; gap:var(--s4); align-items:start; }
-  @media (max-width:860px){ .rv__graphwrap { grid-template-columns:1fr; } }
-  .rv__graph { width:100%; height:auto; background:var(--paper-sink); border:1px solid var(--line); border-radius:var(--r-md); touch-action:none; }
-  .rv__graph .edge { stroke:var(--line-2); stroke-width:1; opacity:.5; }
-  .rv__graph .node { cursor:pointer; }
-  .rv__graph .node circle { stroke:var(--paper-2); stroke-width:1.5; transition:r .12s var(--ease); }
-  .rv__graph .node:hover circle, .rv__graph .node.sel circle { stroke:var(--ink); stroke-width:2; }
-  .rv__graph .node text { font-family:var(--mono); font-size:9px; fill:var(--ink-2); pointer-events:none; }
-  .rv__graph .node.hub text { font-size:10px; fill:var(--ink); font-weight:500; }
-  .rv__graph .center text { font-family:var(--display); font-size:12px; fill:var(--ink); font-weight:600; }
-  .rv__detail { background:var(--paper-sink); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); min-height:200px; }
-  .rv__detail h4 { margin:0 0 4px; font-size:15px; }
-  .rv__detail .cid { font-family:var(--mono); font-size:12px; color:var(--ink-3); }
-  .rv__detail .findlist { margin:var(--s3) 0 0; padding:0; list-style:none; display:grid; gap:8px; }
-  .rv__detail .findlist li { font-size:13px; border-left:3px solid var(--line-2); padding-left:10px; }
-  .rv__legend { display:flex; gap:var(--s3); flex-wrap:wrap; margin-top:var(--s3); font-size:12px; color:var(--ink-3); }
-  .rv__legend span { display:inline-flex; align-items:center; gap:6px; }
-  .rv__legend i { width:11px; height:11px; border-radius:50%; display:inline-block; }
-
-  /* crosswalk + tables */
-  .rv table { width:100%; border-collapse:collapse; }
-  .rv th,.rv td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; font-size:13.5px; }
-  .rv th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); }
-  .rv .mono { font-family:var(--mono); }
-  .chip { display:inline-block; color:#fff; border-radius:var(--r-pill); padding:1px 9px; font-family:var(--mono); font-size:11px; font-weight:500; }
-  .fwgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:var(--s3); }
-  .fwcard { border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); background:var(--paper-2); }
-  .fwcard h4 { margin:0 0 8px; font-size:14px; display:flex; align-items:center; gap:8px; }
-  .fwcard .ctrl { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13px; border-top:1px solid var(--line); }
-  .fwcard .ctrl:first-of-type { border-top:0; }
-  .fwcard .ctrl .id { font-family:var(--mono); font-size:12px; min-width:74px; }
-  .fwcard .ctrl .dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
-
-  /* red-team probes */
-  .probe { border:1px solid var(--line); border-left-width:4px; border-radius:var(--r-md); padding:var(--s3) var(--s4); margin:10px 0; background:var(--paper-2); }
-  .probe.s-resisted { border-left-color:var(--st-resisted); } .probe.s-exposed { border-left-color:var(--st-exposed); } .probe.s-untested { border-left-color:var(--st-untested); }
-  .probe__head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .probe__title { font-weight:600; font-size:14px; }
-  .probe__cat { font-family:var(--mono); font-size:11px; color:var(--ink-3); }
-  .probe__st { margin-left:auto; font-family:var(--mono); font-size:11px; font-weight:600; padding:2px 9px; border-radius:var(--r-pill); }
-  .probe__st.s-resisted { color:var(--accent-text); background:var(--accent-soft); } .probe__st.s-exposed { color:var(--void); background:var(--void-soft); } .probe__st.s-untested { color:var(--ink-3); background:var(--paper-sink); }
-  .probe__detail { margin:6px 0 4px; font-size:13.5px; color:var(--ink-2); }
-  .probe__fw { font-family:var(--mono); font-size:11px; color:var(--ink-3); }
-
-  /* diff */
-  .rv__diffstats { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s3); margin-bottom:var(--s4); }
-  @media (max-width:680px){ .rv__diffstats { grid-template-columns:1fr; } }
-  .rv__delta { border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); background:var(--paper-2); }
-  .rv__delta .big { font-family:var(--display); font-weight:600; font-size:30px; font-feature-settings:"tnum" 1; }
+  .rv__diffstats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--s3); margin-bottom:var(--s4); }
+  @media (max-width:680px){ .rv__diffstats { grid-template-columns:minmax(0,1fr); } }
+  .rv__delta { border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); background:var(--paper-sink); }
+  .rv__delta .big { font-family:var(--mono); font-weight:600; font-size:20px; font-feature-settings:"tnum" 1; }
   .rv__delta .big.up { color:var(--accent-text); } .rv__delta .big.down { color:var(--void); }
   .rv__delta .lab { font-size:12px; color:var(--ink-3); }
-  .rv__diffcols { display:grid; grid-template-columns:repeat(2,1fr); gap:var(--s4); }
-  @media (max-width:680px){ .rv__diffcols { grid-template-columns:1fr; } }
+  .rv__diffcols { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--s4); }
+  @media (max-width:680px){ .rv__diffcols { grid-template-columns:minmax(0,1fr); } }
   .rv__difflist { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
-  .rv__difflist li { font-size:13px; padding:7px 10px; border-radius:var(--r-sm); border-left:3px solid var(--line-2); background:var(--paper-sink); }
-  .rv__difflist li.good { border-left-color:var(--accent); } .rv__difflist li.bad { border-left-color:var(--sev-critical); } .rv__difflist li.warn { border-left-color:var(--sev-medium); }
-  .stack { display:grid; gap:var(--s6); }
+  .rv__difflist li { font-size:13px; padding:7px 10px; border-radius:var(--r-sm); border-left:3px solid var(--line-2); background:var(--paper-sink); color:var(--ink-2); }
+  .rv__difflist li b { color:var(--ink); }
+  .rv__difflist li.good { border-left-color:var(--accent); } .rv__difflist li.bad { border-left-color:var(--sev-high); } .rv__difflist li.warn { border-left-color:var(--sev-med); }
+
+  .mono { font-family:var(--mono); }
   .muted { color:var(--ink-3); }
   .hidden { display:none !important; }
+
+  /* ---- print: the document prints as the artifact ---- */
+  @media print {
+    .nav, .foot, .foil-strip, .foil-line, .rv__chrome, .rv__json, #rvLoaderSec, .section--ink, .cta-final { display:none !important; }
+    body { background:#fff; }
+    .doc { border:0; box-shadow:none; }
+    .mast { position:static; }
+    details, details > * { display:block !important; }
+    .finding, .probe, .tile, .doc section { break-inside:avoid; }
+    .grid8, .subj, .mast__meta { grid-template-columns:1fr !important; }
+    a[href^="http"]::after { content:" (" attr(href) ")"; font-size:10px; color:#555; }
+  }
 </style>
 </head>
 <body class="rv">
+<a class="skip-link" href="#main">Skip to content</a>
 
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
 
-<!-- NAV -->
+<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
@@ -165,7 +293,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -173,27 +301,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
-<!-- LOADER -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<!-- ============================================================ LOADER -->
+<section class="section section--flush hero" id="rvLoaderSec">
   <div class="wrap">
-    <div class="section__head" style="max-width:74ch">
-      <h1>Open a signed report. Read it like the reviewer will.</h1>
-      <p class="lede">
-        Load a kolm evidence report from a trust URL or paste it. The viewer verifies the Ed25519
-        signature in <em>this</em> browser, with no account and no kolm server in the path, then
-        renders the executive summary, an interactive control graph, the framework crosswalk, and the
-        red-team resistance battery. Switch on <span class="mono">Compare</span> to diff two audits
-        and see exactly what improved, regressed, resolved, or is new.
-      </p>
-    </div>
+    <p class="eyebrow">Report viewer</p>
+    <h1>Open a signed report. <span class="go">Read it like the reviewer will.</span></h1>
+    <p class="lede" style="max-width:74ch">
+      Load a kolm evidence report from a trust URL or paste it. The viewer verifies the Ed25519
+      signature in <em>this</em> browser, with no account and no kolm server in the trust path,
+      then renders the signed document: verification masthead, evidence tier, scope before
+      findings, the eight-control posture grid, and the signature block. The page is a lens;
+      the JSON is the source. Switch on <span class="mono">Compare</span> to diff two reports
+      and see exactly what improved, regressed, resolved, or is new.
+    </p>
 
-    <div class="rv__load" id="rvLoad">
+    <div class="rv__load artifact" id="rvLoad">
       <div class="rv__pane">
         <div class="rv__panehead">
-          <h3>Report A (JSON)</h3>
-          <span class="rv__status" id="statusA">paste · load · drop</span>
+          <h2>Report A (JSON)</h2>
+          <span class="rv__status" id="statusA" role="status">paste · load · drop</span>
         </div>
         <label class="sr-only" for="srcA">Report A JSON</label>
         <textarea id="srcA" spellcheck="false" placeholder='{
@@ -211,18 +339,19 @@ Paste a signed report here, press "Open report", or drop a .json file.'></textar
           <button class="btn btn--ghost btn--sm" id="cmpToggle" type="button" aria-pressed="false">Compare two reports</button>
           <button class="btn btn--ghost btn--sm" id="printBtn" type="button">Print</button>
           <button class="btn btn--ghost btn--sm" id="clearBtn" type="button">Clear</button>
+          <button class="btn btn--ghost btn--sm" id="restoreBtn" type="button" hidden>Restore previous</button>
         </div>
         <div class="rv__urlrow">
           <label class="sr-only" for="urlA">Trust URL</label>
-          <input id="urlA" type="url" inputmode="url" placeholder="https://your-domain.example/evidence/report.json" />
-          <button class="btn btn--ghost btn--sm" id="urlBtn" type="button">Load URL</button>
+          <input id="urlA" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://your-domain.example/evidence/report.json" />
+          <button class="btn btn--ghost btn--sm" id="urlBtn" type="button" aria-label="Load URL as report A">Load URL</button>
         </div>
       </div>
 
       <div class="rv__pane hidden" id="paneB">
         <div class="rv__panehead">
-          <h3>Report B (compare)</h3>
-          <span class="rv__status" id="statusB">paste · load · drop</span>
+          <h2>Report B (compare)</h2>
+          <span class="rv__status" id="statusB" role="status">paste · load · drop</span>
         </div>
         <label class="sr-only" for="srcB">Report B JSON</label>
         <textarea id="srcB" spellcheck="false" placeholder='Paste the second report to diff against Report A (for example a re-audit after remediation).'></textarea>
@@ -230,58 +359,40 @@ Paste a signed report here, press "Open report", or drop a .json file.'></textar
           <button class="btn btn--primary btn--sm" id="diffBtn" type="button">Diff A against B</button>
           <button class="btn btn--ghost btn--sm" id="sampleBBtn" type="button">Load sample as B</button>
           <button class="btn btn--ghost btn--sm" id="clearBBtn" type="button">Clear B</button>
+          <button class="btn btn--ghost btn--sm" id="restoreBBtn" type="button" hidden>Restore previous</button>
         </div>
         <div class="rv__urlrow">
           <label class="sr-only" for="urlB">Trust URL B</label>
-          <input id="urlB" type="url" inputmode="url" placeholder="https://your-domain.example/evidence/report-after.json" />
-          <button class="btn btn--ghost btn--sm" id="urlBBtn" type="button">Load URL</button>
+          <input id="urlB" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://your-domain.example/evidence/report-after.json" />
+          <button class="btn btn--ghost btn--sm" id="urlBBtn" type="button" aria-label="Load URL as report B">Load URL</button>
         </div>
       </div>
     </div>
 
-    <div class="band" style="margin-top:var(--s5)">
-      <span class="band__item"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:14px;height:14px;color:var(--ok)"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> in-browser WebCrypto · Ed25519 (RFC 8037)</span>
-      <span class="band__item">Issuer matched against kolm's published keyring</span>
-      <span class="band__item">Open verifier: <a href="/kolm-audit-verify.js" style="color:var(--ink);border-bottom:1px solid var(--ok-edge)">kolm-audit-verify.js</a></span>
+    <div class="hero__proof" aria-label="Verification facts">
+      <span><i class="dot" aria-hidden="true"></i>in-browser WebCrypto · Ed25519 (RFC 8037)</span>
+      <span><i class="dot" aria-hidden="true"></i>Issuer matched against kolm's published keyring</span>
+      <span><i class="dot" aria-hidden="true"></i>Open verifier: <a href="/kolm-audit-verify.js" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">kolm-audit-verify.js</a></span>
     </div>
   </div>
 </section>
 
-<!-- RENDERED REPORT -->
+<!-- ============================================================ THE RENDERED DOCUMENT -->
 <section class="section hidden" id="rvReport">
-  <div class="wrap stack">
-    <div class="rv__verdict" id="rvSummary"></div>
-
-    <div class="rv__panel">
-      <div class="rv__panelhead">
-        <h2>Control graph</h2>
-        <span class="hint">Each leaf is a framework control, coloured by its worst mapped finding. Click a node to read the controls and the findings behind it.</span>
-      </div>
-      <div class="rv__graphwrap">
-        <div>
-          <div id="rvGraph"></div>
-          <div class="rv__legend" id="rvLegend"></div>
-        </div>
-        <div class="rv__detail" id="rvDetail">
-          <h4>Select a node</h4>
-          <p class="muted" style="font-size:13px">Click any control in the graph to see its framework id, what it covers, its worst severity, and the findings that map to it.</p>
-        </div>
-      </div>
+  <div class="wrap">
+    <div class="rv__chrome">
+      <span class="lens">kolm viewer: this page renders the signed JSON. The page is a lens; the JSON is the source.</span>
+      <span class="acts">
+        <button id="jsonBtn" type="button" aria-pressed="false" aria-controls="rvJson">View as JSON</button>
+        <a href="#rvSig">Verify offline</a>
+      </span>
     </div>
-
-    <div class="rv__panel">
-      <div class="rv__panelhead"><h2>Framework crosswalk</h2><span class="hint">The control each finding maps to, in the frameworks an enterprise reviewer cites.</span></div>
-      <div class="fwgrid" id="rvCross"></div>
-    </div>
-
-    <div class="rv__panel" id="rvProbesPanel">
-      <div class="rv__panelhead"><h2 id="rvProbesTitle">Red-team resistance</h2><span class="hint">Deterministic injection / agent-abuse battery over the ingested events. Untested probes are marked, never scored as a pass.</span></div>
-      <div id="rvProbes"></div>
-    </div>
+    <pre id="rvJson" class="rv__json" aria-label="Signed report JSON (the source)"></pre>
+    <div class="artifact"><article class="doc" id="rvDoc" aria-label="Signed report"></article></div>
   </div>
 </section>
 
-<!-- DIFF -->
+<!-- ============================================================ DIFF -->
 <section class="section hidden" id="rvDiff">
   <div class="wrap">
     <div class="rv__panel">
@@ -291,9 +402,64 @@ Paste a signed report here, press "Open report", or drop a .json file.'></textar
   </div>
 </section>
 
+<!-- ============================================================ THE LENS, EXPLAINED -->
+<section class="section section--ink reveal" id="lens-explainer">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / How to read this page</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>The page is a lens. The JSON is the source.</h2>
+      <p class="lede">Nothing on this page is the evidence. The signed JSON is. The viewer verifies it in your browser, then renders it without editing it. The rendered sheet is the brightest thing in the room on purpose.</p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Grey by default</p>
+        <h3>Color is earned</h3>
+        <p>A control tile only earns color when evidence supports it: green when it passes, earth tones when findings map to it. No evidence either way reads grey as insufficient evidence, never as a pass.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">No composite score</p>
+        <h3>Rollups stay rollups</h3>
+        <p>The readiness percentage is one labeled line, not a hero number. A single percentage cannot carry a permission posture, an egress map, and an injection battery without flattening them.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">The paywall is the signature</p>
+        <h3>Findings are never blurred</h3>
+        <p>A free Scan renders complete, with a watermark inside the signed bytes. The paid report is the same audit re-signed without the watermark. No locked sections, no hidden findings.</p>
+      </div>
+    </div>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <h2>Hand your buyer a report they can check.</h2>
+    <p class="lede">A signed evidence report your buyer opens right here, verifies against your key, and reads without an account or a server in the trust path.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/contact">Talk to us</a>
+    </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+  </div>
+</section>
+
 </main>
 
-<!-- FOOTER -->
+<!-- ============================================================ FOOTER -->
 <hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
@@ -310,24 +476,27 @@ Paste a signed report here, press "Open report", or drop a .json file.'></textar
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
-        <a href="/report-viewer">Report viewer</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -335,7 +504,7 @@ Paste a signed report here, press "Open report", or drop a .json file.'></textar
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

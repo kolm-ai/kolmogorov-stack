@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Sub-processors · kolm.ai</title>
 <meta name="description" content="The categories of sub-processors kolm engages to deliver its audit and verification services, the role each plays, and how we notify customers of changes.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -37,6 +37,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+/* Legal page measure: readable column on the evidence-room paper, v2 tokens only. */
+.legal .wrap{max-width:72ch}
+.legal .idx{display:block;margin:clamp(40px,5vw,56px) 0 12px}
+.legal .idx:first-child{margin-top:0}
+.legal h2{margin:0 0 14px}
+.legal p{color:var(--ink-2);line-height:1.7;text-wrap:pretty}
+.legal .tbl-wrap{margin:18px 0 6px;width:min(880px,calc(100vw - 48px));margin-left:50%;transform:translateX(-50%)}
+.updated{margin-top:var(--s5);padding-top:14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);max-width:72ch}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -51,8 +61,36 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   }
 }
 </script>
+<style>
+/* Legal typesetting layer (page-scoped, identical across the legal group).
+   Typeset, not designed: one measured column, mono article numbers,
+   hairlines between articles. Candidate for kolm-2026.css as .legal-doc. */
+.legal-doc { max-width: 64ch; }
+.legal-doc h2 { font-size: clamp(21px, 2.1vw, 25px); letter-spacing: -0.016em; line-height: 1.18; max-width: none; margin: var(--s7) 0 var(--s4); padding-top: var(--s6); border-top: 1px solid var(--line); }
+.legal-doc > h2:first-of-type, .legal-doc .idx + h2, .legal-doc .section__head h2 { border-top: 0; padding-top: 0; }
+.legal-doc > h2:first-of-type { margin-top: var(--s5); }
+.legal-doc .idx + h2, .legal-doc .section__head h2 { margin-top: 0; }
+.legal-doc h3 { margin: var(--s6) 0 10px; }
+.legal-doc .n, .section--ink h2 .n { display: block; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
+.legal-doc h3 .n { margin-bottom: 5px; }
+.legal-doc p, .legal-doc li { font-size: 15px; line-height: 1.75; color: var(--ink-2); }
+.legal-doc li { margin-bottom: 8px; }
+.legal-doc li::marker { color: var(--ink-3); }
+.legal-doc .art-rule { border: 0; border-top: 1px solid var(--line); margin: var(--s7) 0; }
+.legal-doc--wide { max-width: none; }
+.legal-meta { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-3); margin-top: var(--s4); font-variant-numeric: tabular-nums; }
+.legal-meta b, .legal-meta strong { color: var(--ink-2); font-weight: 500; }
+.legal-toc { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 2px 20px; margin: var(--s5) 0 var(--s3); }
+.legal-toc .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.legal-toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 36px; font-size: 13.5px; line-height: 2.05; color: var(--ink-3); }
+.legal-toc a { color: var(--ink-2); }
+.legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.legal-card b, .legal-card strong { color: var(--ink); }
+@media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+</style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <hr class="foil-strip" aria-hidden="true">
 
@@ -75,7 +113,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -83,28 +121,25 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
-<!-- Hero -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<!-- ============================================================ HERO -->
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:64ch">
-      <span class="idx">01 / Sub-processors</span>
-      <h1>Sub-processors</h1>
-      <p class="lede">A deliberately small footprint. kolm's audits run on a tight set of infrastructure providers, and we keep customer data out of any system that does not need it. This page lists sub-processors by the role they play. It is referenced by our <a href="/dpa" style="color:var(--ok)">Data Processing Addendum</a> and kept current as the list changes.</p>
-      <p class="card__map">Last updated 1 June 2026</p>
-    </div>
+    <p class="eyebrow">Legal · Sub-processors</p>
+    <h1>Sub-processors</h1>
+    <p class="lede" style="max-width:62ch">A deliberately small footprint. kolm's audits run on a tight set of infrastructure providers, and we keep customer data out of any system that does not need it. This page lists sub-processors by the role they play. It is referenced by our <a href="/dpa">Data Processing Addendum</a> and kept current as the list changes.</p>
+    <p class="legal-meta">Last updated 1 June 2026</p>
   </div>
 </section>
 
-<!-- Disclosure -->
-<section class="section reveal">
-  <div class="wrap" style="max-width:78ch">
-    <span class="idx">02 / By role</span>
-
+<!-- ============================================================ DISCLOSURE -->
+<section class="section sect--dense reveal">
+  <div class="wrap legal-doc legal-doc--wide">
+    <span class="idx">01 / By role</span>
     <h2>By role</h2>
     <p>We name sub-processors by function rather than overstating relationships we don't have. Each handles only the data category required for its role, under a data-processing agreement with terms no less protective than our own commitments to you.</p>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Sub-processors by role">
       <table class="tbl">
         <thead><tr><th>Role</th><th>Purpose</th><th>Data category</th><th>Region</th></tr></thead>
         <tbody>
@@ -117,27 +152,41 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </table>
     </div>
 
+    <hr class="art-rule" aria-hidden="true">
+    <span class="idx">02 / Data boundaries</span>
     <h2>What does not leave</h2>
     <p>We don't retain your agent's underlying data beyond what an engagement requires. When we analyze imported logs, redaction is applied before storage, and the redacted material is deleted at the end of the retention window. The signing keys that make a report verifiable are held in a key-management service and never travel to a sub-processor outside that role.</p>
 
+    <hr class="art-rule" aria-hidden="true">
+    <span class="idx">03 / Change notification</span>
     <h2>Change notification</h2>
-    <p>Before adding or replacing a sub-processor that handles customer data, we update this page and, for customers under a <a href="/dpa" style="color:var(--ok)">DPA</a>, provide advance notice through the channel named there. If you object to a new sub-processor on reasonable data-protection grounds, contact us and we will work with you on alternatives.</p>
+    <p>Before adding or replacing a sub-processor that handles customer data, we update this page and, for customers under a <a href="/dpa">DPA</a>, provide advance notice through the channel named there. If you object to a new sub-processor on reasonable data-protection grounds, contact us and we will work with you on alternatives.</p>
 
+    <hr class="art-rule" aria-hidden="true">
+    <span class="idx">04 / Contact</span>
     <h2>Contact</h2>
-    <p>Questions about sub-processors, data residency, or data handling go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
+    <p>Questions about sub-processors, data residency, or data handling go to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p>
 
-    <p class="hero__claim" style="margin-top:28px">See also: <a href="/dpa" style="color:var(--ok)">DPA</a> · <a href="/privacy" style="color:var(--ok)">Privacy</a> · <a href="/security" style="color:var(--ok)">Security</a></p>
+    <p class="hero__claim" style="margin-top:28px">See also: <a href="/dpa">DPA</a> · <a href="/privacy">Privacy</a> · <a href="/security">Security</a></p>
   </div>
 </section>
 
-<section class="section section--ink reveal cta-final">
+<!-- ============================================================ FINAL CTA -->
+<section class="section reveal cta-final">
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Questions about a sub-processor?</h2>
-    <p class="lede" style="max-width:52ch;margin:0 auto 28px">Data residency, change objections, and data-handling questions all route to one inbox.</p>
+    <p class="lede">Data residency, change objections, and data-handling questions all route to one inbox.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="mailto:dev@kolm.ai">Contact dev@kolm.ai</a>
       <a class="btn btn--ghost" href="/dpa">Read the DPA</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -159,24 +208,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -184,7 +236,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

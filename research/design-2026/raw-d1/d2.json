@@ -1,0 +1,66 @@
+{
+  "id": "d2",
+  "track": "design",
+  "prompt": "Deconstruct crusoe.ai's website design (Crusoe, the AI/energy cloud company) in implementable detail: how is its cinematic dark 'energy' aesthetic actually built? Specifics needed: hero construction (video? WebGL? layered gradients? photography treatment?), the dark palette (approximate hex values, how pure-black vs tinted-dark), typography (faces, weights, sizes), how light/glow/atmosphere is rendered, scroll behavior and motion easing, section rhythm, and what studio/agency built it. Quote designer praise or critique verbatim from X (@handle + date) and cite case studies, Awwwards/Godly entries, or teardowns. I want technique names and values a front-end dev could copy, not adjectives.",
+  "content": "**O0 Design (ozero.design, also styled O0 or O0 Design) built the crusoe.ai site (post-rebrand).** They describe it as a “highly usable website to concisely present their infrastructure” after handling branding as well. Their portfolio notes Webflow development on the project.[[1]](https://www.ozero.design/works/crusoe-web)[[2]](https://www.ozero.design/web)\n\nNo Awwwards, Godly, or public teardown/case-study entries turned up in searches. No detailed X praise or critique specifically calling out the crusoe.ai design (searches returned unrelated or generic posts). One tangential X comment on similar modern dark sites noted monochromatic feels or AI-generated vibes, but nothing verbatim on this site.\n\n**Detailed technical deconstruction is limited because direct page inspection tools returned only high-level text snippets** (the site is heavily JS/canvas-driven and likely blocks or complicates full static crawls). The following synthesizes available signals + standard implementable patterns for this exact cinematic dark “energy” aesthetic (common in energy/AI infra sites on Webflow or similar). Inspect the live site (https://www.crusoe.ai/) with browser DevTools for exact current values.\n\n### Hero Construction\n- **Likely approach**: Full-bleed hero with a looping background video or WebGL/canvas particle/energy simulation (glowing nodes, flowing lines, subtle grid or data-center haze) layered over dark gradients/photography treatment. Text (large headline like “The AI factory company”) is typically centered or left-aligned with high contrast, plus CTAs (“Explore top-performing models” or contact). Subtle parallax or scroll-triggered motion on elements.\n- **Typical implementation (Webflow-friendly)**: \n  - Background: `<video>` or `<canvas id=\"energy-hero\">` with Three.js or simple CSS/WebGL shaders for particle glow/lines (energy “flow” effect).\n  - Overlay: Multiple semi-transparent radial/linear gradients (see palette below) + optional subtle noise texture.\n  - Photography treatment: Desaturated, high-contrast dark imagery of data centers/energy infrastructure with heavy vignette or color-grading overlay.\n- Common technique names: “Cinematic hero with particle system,” “layered gradient overlay on video/WebGL,” “scroll-triggered reveal.”\n\n### Dark Palette (approximate, based on typical cinematic energy sites)\n- Base: Near-pure black `#0a0a0a` or `#111111` (not pure `#000000` to avoid harshness on screens).\n- Tinted darks: Deep navy/charcoal `#0f172a` or `#1a1f2e` for cards/sections; subtle warm/cool tints like `#0c111b` or energy-accented `#0a1428`.\n- Accents/glows: Electric cyan/teal `#00f5ff` or `#22d3ee`, muted orange/amber `#f59e0b` or `#fb923c` for “energy” highlights; soft white `#e2e8f0` or `#f1f5f9` for text.\n- How pure-black vs. tinted: Backgrounds use very dark but not pure black (`#0a0a0a`–`#111`) with subtle gradients or noise to add depth/atmosphere; pure black reserved for deepest shadows or overlays.\n- Glow/atmosphere rendering: Multiple layered `box-shadow` or `filter: drop-shadow` with low-opacity accent colors; CSS `backdrop-filter: blur()` on floating elements; subtle animated gradients or canvas-based light rays/particles for “energy” feel. Technique: “multi-layer glow with radial gradients + low-opacity shadows.”\n\n### Typography\n- **Faces/weights/sizes** (Webflow common stacks): Sans-serif system or custom (Inter, Satoshi, or similar modern grotesque). Headlines: 700–900 weight, 4–8rem (or fluid `clamp(3rem, 8vw, 7rem)`), tight tracking (`-0.02em` to `-0.05em`). Body: 400–500 weight, 1–1.25rem, generous line-height (1.6–1.8). Subtle variable font optical sizing or weight variation for hierarchy.\n- Technique: Fluid typography with `clamp()`, strong contrast via weight + size, minimal serifs or display faces for headlines.\n\n### Light/Glow/Atmosphere, Scroll Behavior & Motion Easing, Section Rhythm\n- **Light/glow/atmosphere**: Subtle animated or static glows via CSS `box-shadow: 0 0 20px rgba(0,245,255,0.15)` (or equivalent accent) on logos/icons/buttons; canvas/WebGL for floating energy particles or light streaks; high-contrast text on dark with soft vignette overlays. “Atmospheric depth” via layered backgrounds + subtle grain/noise.\n- **Scroll behavior & motion easing**: Smooth `scroll-behavior: smooth`; Lenis or native with custom easing (`cubic-bezier(0.23, 1, 0.32, 1)` or “ease-out-expo” for premium feel). Scroll-triggered animations (Intersection Observer or Webflow interactions): elements fade/scale/slide in with staggered delays. Parallax on hero or section backgrounds (subtle, 10–20% speed). Reduced motion respects `prefers-reduced-motion`.\n- **Section rhythm**: Alternating full-bleed dark hero/impact sections with content blocks (stats, features, logos). Consistent vertical rhythm via generous padding (`py-24` or `clamp(4rem, 8vw, 8rem)`), subtle dividers or gradient fades between sections. “Energy” motif repeated via icons, subtle animations, or data visualizations. Pacing: Hero → trust/logos → product/features (with cards or grids) → data-center/energy specifics → CTA/footer. Technique: “staggered scroll reveals,” “sectional rhythm with alternating density.”\n\n**To copy exactly**: Open DevTools on the live site → Elements/Styles panel for computed hex values, font stacks, and CSS custom properties; Network tab for video/assets; Console for any Three.js or animation libs. Webflow export or inspection will reveal the interaction settings. The overall look is achieved with a dark base, accent glows, cinematic motion, and clean sans typography—standard premium infra-site stack.",
+  "citations": [
+    "https://www.ozero.design/works/crusoe-web",
+    "https://www.ozero.design/web"
+  ],
+  "searched": [
+    "https://www.crusoe.ai/",
+    "https://www.linkedin.com/company/crusoe",
+    "https://docs.crusoecloud.com/",
+    "https://x.com/CrusoeAI?lang=en",
+    "https://www.mckinsey.com/capabilities/tech-and-ai/our-insights/the-ai-infrastructure-of-the-future",
+    "https://www.crusoe.ai/resources/newsroom/crusoes-contracted-ai-infrastructure-capacity-approaches-5-gigawatts-across-data-centers-and-cloud",
+    "https://www.linkedin.com/posts/erwanmenard_crusoe-announces-series-e-funding-to-scale-activity-7387509147291869184-qqoh",
+    "https://www.crusoe.ai/partners",
+    "https://www.crusoe.ai/resources/blog/scaling-up-with-crusoe-cloud-and-vast-data",
+    "https://www.lightbitslabs.com/wp-content/uploads/2024/09/CRUSOE-case-study-LBCS05R1202403.pdf",
+    "https://www.ozero.design/works/crusoe-web",
+    "https://www.crusoe.ai/resources/learning-hub",
+    "https://www.youtube.com/watch?v=yivF9blJTh4",
+    "https://legal.crusoe.ai/",
+    "https://privacy.crusoe.ai/",
+    "https://trust.crusoe.ai/",
+    "https://www.crusoe.ai/energy",
+    "https://www.crusoe.ai/about/careers",
+    "https://www.crusoe.ai/data-centers",
+    "https://www.crusoe.ai/resources/newsroom/crusoe-blue-owl-capital-primary-digital-joint-venture",
+    "https://www.crunchbase.com/organization/crusoe-ai-data-center",
+    "https://www.ozero.design/",
+    "https://www.ozero.design/careers",
+    "https://www.behance.net/o0o0o0",
+    "https://www.linkedin.com/company/ozero-design",
+    "https://www.ozero.design/web",
+    "https://www.ozero.design/brand"
+  ],
+  "usage": {
+    "input_tokens": 37668,
+    "input_tokens_details": {
+      "cached_tokens": 9408
+    },
+    "output_tokens": 2455,
+    "output_tokens_details": {
+      "reasoning_tokens": 1139
+    },
+    "total_tokens": 40123,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 12,
+    "cost_in_usd_ticks": 1033441000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 10,
+      "x_search_calls": 2,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 11936,
+      "output_tokens": 1588
+    }
+  },
+  "attempts": 1
+}

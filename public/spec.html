@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>The kolm signed report format &middot; kolm.ai</title>
+<meta name="description" content="The open specification for the kolm signed evidence report: the exact signed field inventory, the canonical JSON the Ed25519 signature covers, the detached counter-signals (timestamp, transparency log, co-signatures), the two verification tiers, the A/B/C evidence tiers, and the versioned changelog.">
+<meta name="theme-color" content="#090C0D">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="The kolm signed report format">
+<meta property="og:description" content="An open, offline-verifiable evidence format. The signed field inventory, the canonicalization the signature covers, the detached counter-signals, and how to verify a report in the browser, in Python, or in Go.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/spec">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="The kolm signed report format">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/spec">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "The kolm signed report format",
+  "description": "The open specification for the kolm signed evidence report: signed field inventory, canonical JSON, Ed25519 signature, detached counter-signals, verification tiers, evidence tiers, and the versioned changelog.",
+  "author": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "mainEntityOfPage": "https://kolm.ai/spec"
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush hero">
+  <div class="wrap">
+    <div class="section__head" style="max-width:72ch">
+      <p class="eyebrow">Reference · report format</p>
+      <h1>The kolm <span class="go">signed report</span> format</h1>
+      <p class="lede">
+        Every kolm evidence report is one JSON envelope, signed with Ed25519 over a
+        canonical serialization of its fields. This page is the specification of that
+        envelope: the exact field inventory the signature covers, the canonicalization
+        rules, the detached counter-signals, and how anyone verifies a report with no
+        kolm server in the path. It is written so that an independent implementation
+        can be built from this page and the published verifiers alone.
+      </p>
+      <div class="trustline" aria-label="What this format commits to">
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Open format, Apache-2.0</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verifies offline, forever</span>
+        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Changes versioned and logged below</span>
+      </div>
+      <p class="card__map" style="margin-top:var(--s4)">Last reviewed 10 June 2026 &middot; current shape: <span class="mono">kolm-audit-report-1</span> / <span class="mono">asr-report/0.1</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2. INTENT -->
+<section class="section reveal" id="intent">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / Intent and governance</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Designed to outlive its issuer.</h2>
+      <p class="lede">
+        A piece of evidence is only durable if it can be checked without the issuer's
+        help. So the format is built around one rule: verification must never require
+        kolm to be reachable, or in business. The public key travels inside the report,
+        the verifiers are published and inspectable, and the canonicalization is simple
+        enough to reimplement from this page.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Open</p>
+        <h3>Apache-2.0, published, reimplementable</h3>
+        <p>The reference verifiers ship open source under Apache-2.0: the repository governs the whole tree, including the Python and Go SDKs. kolm publishes this spec and welcomes independent implementations; nothing in the format depends on kolm-only knowledge.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Offline</p>
+        <h3>No server in the verification path</h3>
+        <p>Tier-1 verification needs only the report itself: the envelope embeds the public key and the verifier rebuilds the signed bytes from the envelope's own fields. It runs in a browser, on an isolated box, or in CI, with no account and no network call.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Governed in the open</p>
+        <h3>Versioned, logged, never silent</h3>
+        <p>Every change to the envelope shape is versioned and recorded in the changelog at the bottom of this page. Additive fields are minor revisions; a breaking change would bump the major version and the schema string itself, so old verifiers fail loudly, never wrongly.</p>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3. ENVELOPE -->
+<section class="section sect--dense reveal" id="envelope">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / The envelope</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Every signed field, and what it means.</h2>
+      <p class="lede">
+        The envelope is a single JSON object. The Ed25519 signature covers every
+        top-level field except the four detached blocks listed after this table.
+        Field names below are the literal keys in the JSON.
+      </p>
+    </div>
+
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Signed envelope fields"><table class="tbl">
+      <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">schema</td><td>Fixed type marker, <span class="mono">"kolm-audit-report-1"</span>. Verifiers reject any other value before checking anything else.</td></tr>
+        <tr><td class="mono">report_version</td><td>The envelope shape that produced the report. Currently <span class="mono">"asr-report/0.1"</span>.</td></tr>
+        <tr><td class="mono">spec_version</td><td>The audit spec the underlying run followed. Currently <span class="mono">"asr-audit/0.1"</span>; null on inputs that predate it.</td></tr>
+        <tr><td class="mono">report_id</td><td>Stable identifier with an <span class="mono">asrr_</span> prefix, time-prefixed so ids sort roughly by issue time.</td></tr>
+        <tr><td class="mono">generated_at</td><td>ISO 8601 time the audit ran. The signature block's <span class="mono">signed_at</span> must equal it; verifiers fail a mismatch as a post-signing timestamp edit.</td></tr>
+        <tr><td class="mono">tier</td><td><span class="mono">"scan"</span> (the free Scan) or <span class="mono">"report"</span> (the paid Signed Readiness Report). Inside the signed bytes.</td></tr>
+        <tr><td class="mono">watermark</td><td>Boolean, true on the free Scan. Signed, so the watermark cannot be stripped without breaking the signature.</td></tr>
+        <tr><td class="mono">evidence_tier</td><td>Evidence-quality grade <span class="mono">{ grade: "A"|"B"|"C", method, basis[] }</span>, signed alongside the findings. See section 04.</td></tr>
+        <tr><td class="mono">subject</td><td>What was assessed: <span class="mono">{ name, source, records, events }</span>.</td></tr>
+        <tr><td class="mono">summary</td><td>The graduated readiness rollup: <span class="mono">readiness_pct</span>, findings by severity, <span class="mono">tamper_evident</span>, assessed controls, not-assessed controls with reasons, blocking count.</td></tr>
+        <tr><td class="mono">findings</td><td>Framework-mapped findings: severity, pillar, title, detail, ASR control, framework references, opaque evidence ids (never raw log bodies).</td></tr>
+        <tr><td class="mono">frameworks</td><td>Per-framework coverage rollup: controls touched, finding counts, worst severity.</td></tr>
+        <tr><td class="mono">remediation</td><td>Prioritized fix roadmap derived from the findings, worst first, each item carrying its framework references.</td></tr>
+        <tr><td class="mono">caveats</td><td>What the report does and does not claim, stated in plain terms. Findings map to frameworks a reviewer cites; the report is not a certification.</td></tr>
+        <tr><td class="mono">asr_checklist</td><td>The ASR control catalog the run assessed against (id, name, required evidence).</td></tr>
+        <tr><td class="mono">evidence_digest</td><td><span class="mono">{ alg: "sha256", value, event_count }</span>: binds the report to the exact input events analyzed, without carrying their possibly sensitive bodies.</td></tr>
+        <tr><td class="mono">passport</td><td>The agent identity passport: who acted, on which models and vendor surface, through what delegation graph, over which retrieval sources.</td></tr>
+        <tr><td class="mono">red_team</td><td>The injection-resistance battery: score, per-status counts, and the probe table with opaque evidence ids.</td></tr>
+        <tr><td class="mono">contact</td><td>The single contact surface: <span class="mono">dev@kolm.ai</span>.</td></tr>
+        <tr><td class="mono">verify_url</td><td>Where any holder can verify the report; defaults to <span class="mono">https://kolm.ai/verify</span>.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 style="margin-top:var(--s7)">The four detached fields</h3>
+    <p style="color:var(--ink-2);max-width:72ch;margin-top:var(--s3)">
+      Exactly four top-level fields are excluded from the signed bytes:
+      <span class="mono">signature_ed25519</span>, <span class="mono">timestamp_evidence</span>,
+      <span class="mono">log_checkpoint</span>, and <span class="mono">co_signatures</span>.
+      The reason is structural, not a loophole: each one attests the envelope, so it
+      cannot sit inside the bytes it attests. A signature cannot cover itself; a
+      timestamp and a transparency-log entry are issued after signing and reference the
+      sha256 of the signed canonical payload; each co-signature is itself an Ed25519
+      signature over that same payload. Because they bind to the signed digest, none of
+      them can be re-pointed at a different report, and attaching or appending them
+      never disturbs the primary signature.
+    </p>
+    <div class="report register" style="margin-top:var(--s5);max-width:760px">
+      <div class="register__row"><span class="register__k">signature_ed25519</span><span class="register__v">the primary signature block <span class="ann">a signature cannot cover itself</span></span></div>
+      <div class="register__row"><span class="register__k">timestamp_evidence</span><span class="register__v">RFC 3161 token over the signed digest <span class="ann">issued after signing</span></span></div>
+      <div class="register__row"><span class="register__k">log_checkpoint</span><span class="register__v">transparency-log inclusion of the signed digest <span class="ann">issued at signing time</span></span></div>
+      <div class="register__row"><span class="register__k">co_signatures</span><span class="register__v">independent attestations over the same canonical bytes <span class="ann">appended later</span></span></div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 4. CANONICALIZATION -->
+<section class="section reveal" id="canonicalization">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / Canonicalization</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>The exact bytes the signature covers.</h2>
+      <p class="lede">
+        kolm canonical JSON is recursive key-sorted JSON with no insignificant
+        whitespace, signed over its UTF-8 bytes. It is deliberately not RFC 8785 (JCS).
+        The difference is simplicity: the entire algorithm is one short recursive
+        function a reviewer can read in a single sitting and reimplement without a
+        dependency, and the awkward edges below are pinned by cross-implementation
+        fixtures rather than by a long standard.
+      </p>
+    </div>
+    <div class="split" style="align-items:flex-start">
+      <div>
+        <ul class="ledger">
+          <li><b>Key order.</b> Object keys sort by UTF-16 code unit, JavaScript's default sort. For supplementary-plane characters this differs from raw UTF-8 byte order, and every implementation reproduces it.</li>
+          <li><b>Whitespace.</b> None. <span class="mono">{"a":1,"b":[2,3]}</span>, never pretty-printed.</li>
+          <li><b>Numbers.</b> ECMAScript number-to-string: shortest round-trip digits, exponent notation only at the JSON.stringify thresholds. Non-finite values serialize to <span class="mono">null</span>.</li>
+          <li><b>Strings.</b> ECMAScript JSON quoting (JSON.stringify): the quote, the backslash, C0 control characters, and unpaired surrogates are escaped; every other code point passes through unescaped.</li>
+          <li><b>Dropped values.</b> <span class="mono">undefined</span> members are dropped, matching JSON.stringify. <span class="mono">null</span> is preserved: it is a value, not an absent key.</li>
+          <li><b>Exclusions.</b> The four detached fields above are removed before serialization. Everything else, present or future, is covered.</li>
+        </ul>
+        <p style="color:var(--ink-2);margin-top:var(--s4)">
+          Four implementations are locked byte-for-byte: the Node signer
+          (<span class="mono">src/attestation-report-builder.js</span>), the browser verifier
+          (<a href="/kolm-audit-verify.js" style="color:var(--ok)">kolm-audit-verify.js</a>),
+          the Python SDK, and the Go SDK. Each SDK's test suite asserts byte-exact equality
+          against the reference output, including the number-formatting and key-order edges.
+        </p>
+      </div>
+      <div class="report register">
+        <div class="register__row"><span class="register__k">algorithm</span><span class="register__v"><b>recursive key-sorted JSON</b></span></div>
+        <div class="register__row"><span class="register__k">whitespace</span><span class="register__v">none</span></div>
+        <div class="register__row"><span class="register__k">encoding</span><span class="register__v">UTF-8 bytes</span></div>
+        <div class="register__row"><span class="register__k">key_sort</span><span class="register__v">UTF-16 code unit</span></div>
+        <div class="register__row"><span class="register__k">rfc_8785_jcs</span><span class="register__v"><b>not used</b> <span class="ann">deliberate</span></span></div>
+        <div class="register__row"><span class="register__k">excluded</span><span class="register__v">signature_ed25519, timestamp_evidence, log_checkpoint, co_signatures</span></div>
+        <div class="register__row"><span class="register__k">implementations</span><span class="register__v">Node &middot; browser &middot; Python &middot; Go <span class="ann">byte-exact fixtures</span></span></div>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 5. SIGNATURE + TIERS (dark) -->
+<section class="section section--ink reveal" id="signature">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">04 / Signature and tiers</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>One signature, two trust tiers, three evidence grades.</h2>
+      <p class="lede">
+        The signature is Ed25519 (RFC 8032) over the canonical bytes. The block that
+        carries it records <span class="mono">spec: "kolm-ed25519-v1"</span>,
+        <span class="mono">alg</span>, the PEM <span class="mono">public_key</span>, its
+        <span class="mono">key_fingerprint</span>, the <span class="mono">signature</span>,
+        and <span class="mono">signed_at</span>. Verification then answers three separate
+        questions, and the format keeps them separate on purpose.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Tier 1 &middot; integrity</p>
+        <h3>Is this byte-for-byte what was signed?</h3>
+        <p>Rebuild the canonical payload from the envelope itself, verify the Ed25519 signature with the embedded public key, and confirm <span class="mono">signed_at</span> equals the signed <span class="mono">generated_at</span>. Fully offline. A single altered byte fails it.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Tier 2 &middot; issuer provenance</p>
+        <h3>Is the embedded key a kolm key?</h3>
+        <p>Tier 1 alone would accept a forgery re-signed with the attacker's own key. Tier 2 checks the key against the published keyring (<a href="/keys/kolm-issuers.json" style="color:var(--ok)">kolm-issuers.json</a>) or the live <span class="mono">GET /v1/audit/issuer-key</span>. Key lifecycle is public: <span class="mono">live</span>, <span class="mono">rotated</span> (history stays verifiable), or <span class="mono">revoked</span>. A revoked key forces <span class="mono">trusted:false</span>.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Evidence tiers &middot; A / B / C</p>
+        <h3>How strong was the input evidence?</h3>
+        <p>A separate axis from authenticity, graded inside the signed payload. <b>A</b>: events captured by the kolm gateway at runtime. <b>B</b>: vendor-supplied logs with a verified hash chain. <b>C</b>: vendor logs accepted as provided. A report built from as-provided logs cannot be upgraded to gateway-captured without breaking the signature.</p>
+      </div>
+    </div>
+    <figure class="diag reveal" role="img" aria-label="Signature chain: canonical report bytes are hashed with SHA-256 and signed with Ed25519; altering any byte voids the seal">
+    <svg viewBox="0 0 720 176" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path class="dg-flow" d="M150 60 H186 M330 60 H366 M548 60 H584"/>
+      <rect class="dg-box" x="8" y="28" width="142" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="22" y="48">Bytes</text>
+      <text class="dg-t" x="22" y="68">Report JSON</text>
+      <text class="dg-mono" x="22" y="84">canonicalized</text>
+      <polygon class="dg-ok" points="186,60 178,55.5 178,64.5"/>
+      <rect class="dg-box" x="188" y="28" width="142" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="202" y="48">Digest</text>
+      <text class="dg-t" x="202" y="68">SHA-256</text>
+      <text class="dg-mono" x="202" y="84">32-byte hash</text>
+      <polygon class="dg-ok" points="366,60 358,55.5 358,64.5"/>
+      <rect class="dg-box" x="368" y="28" width="180" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="382" y="48">Signature</text>
+      <text class="dg-t" x="382" y="68">Ed25519 sign</text>
+      <text class="dg-mono" x="382" y="84">kolm-ed25519-v1</text>
+      <polygon class="dg-ok" points="584,60 576,55.5 576,64.5"/>
+      <rect class="dg-box--ok" x="586" y="28" width="126" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="600" y="48">Seal</text>
+      <text class="dg-t" x="600" y="68">SEALED</text>
+      <path class="dg-ok" d="M600 78 l3.5 3.5 L611 74" fill="none" stroke="#3FE5A0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="dg-line" d="M79 92 V140 H520" stroke-dasharray="3 5"/>
+      <polygon points="520,140 512,135.5 512,144.5" fill="#E0A89F"/>
+      <rect class="dg-box--void" x="522" y="120" width="190" height="40" rx="9"/>
+      <text class="dg-void-t dg-k" x="536" y="138">VOID</text>
+      <text class="dg-mono" x="536" y="152">one changed byte breaks it</text>
+    </svg>
+    <figcaption class="diag__cap"><b>Why it holds</b> the signature covers the exact bytes, so the report cannot be quietly edited</figcaption>
+    </figure>
+    <p class="hero__claim" style="margin-top:var(--s7)">
+      Envelopes issued before tiered evidence carry no <span class="mono">evidence_tier</span> field.
+      They verify unchanged, and renderers show them as
+      "Evidence tier: not graded (issued before tiered evidence)". No grade is ever invented.
+    </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6. COUNTER-SIGNALS -->
+<section class="section sect--dense reveal" id="counter-signals">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">05 / Counter-signals</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Independent evidence that the signature is not alone.</h2>
+      <p class="lede">
+        Beyond the primary signature, the format carries four counter-signals. Each is
+        optional, each binds to the signed report digest, and none of them can flip a
+        failing verification to passing: they add confidence, never substitute for it.
+      </p>
+    </div>
+    <div class="grid grid--2">
+      <div class="card">
+        <p class="card__k">log_checkpoint</p>
+        <h3>Transparency-log inclusion</h3>
+        <p>At signing time, the sha256 of the signed canonical payload is appended to kolm's public, append-only Ed25519/Merkle transparency log. The checkpoint records <span class="mono">origin</span>, <span class="mono">tree_size</span>, <span class="mono">root_hash</span>, <span class="mono">leaf_hash</span>, and <span class="mono">seq</span>, and a holder fetches an inclusion proof from <span class="mono">GET /v1/transparency-log/proof/&lt;seq&gt;</span> against the published signed tree head. Anchoring is best-effort: a log failure omits the field rather than blocking the report.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">timestamp_evidence</p>
+        <h3>RFC 3161 trusted timestamp</h3>
+        <p>An RFC 3161 token over the signed report digest (the <span class="mono">message_imprint</span>), proving the report existed no later than the time authority's clock, independent of kolm's. Status <span class="mono">"timestamped"</span> carries <span class="mono">token_b64</span> and the TSA URL; status <span class="mono">"offline"</span> means this additive evidence is simply absent. Verifiers report it; the verdict stays with the signature.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">co_signatures</p>
+        <h3>Named co-signers (Reviewed Attestation)</h3>
+        <p>A named reviewer attests the same canonical bytes the issuer signed: <span class="mono">co_signatures</span> is excluded from the canonical payload, so the bytes are identical whether zero or N co-signatures are attached, and a co-signer can never invalidate the issuer's signature. Each entry records <span class="mono">name</span>, <span class="mono">role</span>, and a full Ed25519 block, so it verifies offline with no extra schema. The co-signer key is deliberately independent of the issuer key.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">key revocation</p>
+        <h3>Public key lifecycle</h3>
+        <p>Every issuer key has a public status: <span class="mono">live</span>, <span class="mono">rotated</span>, or <span class="mono">revoked</span>, served by <span class="mono">GET /v1/audit/issuer-key/&lt;fingerprint&gt;/status</span>. Rotated keys remain valid for the reports they signed; a revoked key forces <span class="mono">trusted:false</span> with reason <span class="mono">issuer_key_revoked</span> across the verify endpoint, the browser verifier, and the SDK keyrings.</p>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 7. VERIFYING -->
+<section class="section reveal" id="verifying">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">06 / Verifying a report</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Three offline verifiers, one shared byte stream.</h2>
+      <p class="lede">
+        Each path below rebuilds the same canonical bytes and checks the same signature.
+        Use whichever fits the environment; they agree by construction and by test.
+      </p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Browser</p>
+        <h3>kolm.ai/verify</h3>
+        <p>Paste or drop the report JSON at <a href="/verify" style="color:var(--ok)">/verify</a>. The check runs locally in your browser's WebCrypto; the page works with the network disconnected. The verifier source is one inspectable file: <a href="/kolm-audit-verify.js" style="color:var(--ok)">kolm-audit-verify.js</a>.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Python SDK</p>
+        <h3>kolm.verify_report</h3>
+        <p class="mono" style="font-size:13px;line-height:1.7">from kolm import verify_report<br>result = verify_report(report)<br>result.ok&nbsp;&nbsp;# tier1 AND tier2</p>
+        <p style="margin-top:var(--s3)">Zero network. <span class="mono">result.tier1_signature</span> and <span class="mono">result.tier2_issuer</span> expose the two tiers; act on <span class="mono">result.ok</span>, never on tier 1 alone.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Go SDK</p>
+        <h3>kolm.VerifyReport</h3>
+        <p class="mono" style="font-size:13px;line-height:1.7">v, err := kolm.VerifyReport(<br>&nbsp;&nbsp;reportJSON, kolm.DefaultKeyring())<br>// act only when v.Trusted()</p>
+        <p style="margin-top:var(--s3)">Standard library only, zero third-party dependencies. <span class="mono">v.Trusted()</span> is tier 1 and tier 2 together.</p>
+      </div>
+    </div>
+    <p style="color:var(--ink-2);max-width:72ch;margin-top:var(--s6)">
+      Fetching the artifact: a shareable Trust link serves the bare signed envelope at
+      <span class="mono">GET /v1/trust/&lt;slug&gt;?format=json</span>, ready to feed any of the
+      verifiers above. A server-side convenience, <span class="mono">POST /v1/audit/report/verify</span>,
+      returns the same two-tier verdict plus the revocation check; prefer the offline paths,
+      which require no trust in the server.
+    </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 8. VERSIONING + CHANGELOG -->
+<section class="section sect--dense reveal" id="changelog">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">07 / Versioning and changelog</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Additive by default, loud when breaking.</h2>
+      <p class="lede">
+        Three identifiers version the format. <span class="mono">schema</span> is the hard
+        gate: <span class="mono">"kolm-audit-report-1"</span> today, and a breaking change
+        would mint a new value so old verifiers reject it explicitly. Within a schema,
+        <span class="mono">report_version</span> (currently <span class="mono">"asr-report/0.1"</span>)
+        and <span class="mono">spec_version</span> (currently <span class="mono">"asr-audit/0.1"</span>)
+        move with semver discipline: additive fields are minor revisions.
+      </p>
+      <p style="color:var(--ink-2);max-width:72ch">
+        Additive fields never break old verifiers, because canonicalization is generic:
+        the signed bytes are rebuilt by key-sorting whatever fields the envelope carries,
+        never from a fixed field list. A verifier written against envelope v1 verifies an
+        envelope carrying fields it has never heard of, byte for byte.
+      </p>
+    </div>
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Specification version history"><table class="tbl">
+      <thead><tr><th>Date</th><th>Version</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="mono">2026-06-10</td>
+          <td class="mono">asr-report/0.1</td>
+          <td>Added <span class="mono">evidence_tier</span> (grade A/B/C, method, basis) inside the signed payload. Additive: earlier envelopes verify unchanged and render as "Evidence tier: not graded (issued before tiered evidence)".</td>
+        </tr>
+        <tr>
+          <td class="mono">2026-06</td>
+          <td class="mono">asr-report/0.1</td>
+          <td>Envelope v1 under schema <span class="mono">kolm-audit-report-1</span>: the signed field inventory above, tier and watermark inside the signed bytes, evidence_digest, passport and red_team blocks, and the four detached fields (signature, RFC 3161 timestamp, transparency-log checkpoint, co-signatures).</td>
+        </tr>
+      </tbody>
+    </table></div>
+    <p class="card__map" style="margin-top:var(--s4)">Questions about the format, or building an independent implementation? <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 9. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="wrap">
+    <h2>Read the bytes, not the brochure.</h2>
+    <p class="lede">Verify a report in your own browser, or read what the format defends against and where it stops.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/security/threat-model">Read the threat model</a>
+    </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Product</h3>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+      </div>
+      <div class="foot__col">
+        <h3>Trust</h3>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h3>Legal</h3>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h3>Company</h3>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

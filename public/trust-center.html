@@ -3,93 +3,263 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Trust Center &middot; kolm.ai</title>
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Trust Center · kolm.ai</title>
 <meta name="description" content="See who opens the Trust Links you share. View counts and distinct viewers for every signed Agent Security-Review report.">
+<meta name="theme-color" content="#090C0D">
+<meta name="author" content="kolm.ai">
 <meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://kolm.ai/trust-center">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <style>
-  :root{ --d-ink:#0b0e14; --d-muted:#5b6472; --d-rule:#e3e7ee; --d-paper:#f6f7f4; --d-panel:#ffffff; --d-accent:#b3431f; --d-ok:#166534; --d-warn:#0e7490; }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--d-paper);color:var(--d-ink);
-    font-family:'Switzer',-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    font-size:15px;line-height:1.5}
-  .mono{font-family:'Spline Sans Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  .wrap{max-width:1000px;margin:0 auto;padding:28px 22px 80px}
-  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--d-rule);padding:16px 22px;background:var(--d-panel)}
-  header.top a.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--d-ink);font-weight:700;font-family:'Cabinet Grotesk',sans-serif;font-size:18px;letter-spacing:-.01em}
-  header.top .bars{display:inline-flex;gap:3px;align-items:flex-end;height:18px}
-  header.top .bars i{width:4px;background:var(--d-ink);border-radius:1px;display:block}
-  header.top .bars i:nth-child(1){height:8px}header.top .bars i:nth-child(2){height:13px}header.top .bars i:nth-child(3){height:18px}
-  header.top nav a{color:var(--d-muted);text-decoration:none;margin-left:18px;font-size:14px}
-  header.top nav a:hover{color:var(--d-ink)}
-  h1{font-family:'Cabinet Grotesk',sans-serif;font-size:30px;letter-spacing:-.02em;margin:26px 0 4px}
-  .lede{color:var(--d-muted);margin:0 0 26px;max-width:62ch}
-  .idx{font-family:'Spline Sans Mono',monospace;font-size:12px;color:var(--d-accent);letter-spacing:.08em;text-transform:uppercase}
-  h2{font-family:'Cabinet Grotesk',sans-serif;font-size:20px;margin:34px 0 12px}
-  .card{background:var(--d-panel);border:1px solid var(--d-rule);border-radius:12px;padding:18px 20px;margin:0 0 16px}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:0 0 22px}
-  .stat{background:var(--d-panel);border:1px solid var(--d-rule);border-radius:12px;padding:16px 18px}
-  .stat .big{font-family:'Cabinet Grotesk',sans-serif;font-size:30px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .stat .lbl{color:var(--d-muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
-  table{width:100%;border-collapse:collapse}
-  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--d-rule);vertical-align:middle}
-  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--d-muted);font-weight:600}
-  .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
-  .pill.report{background:#ecfdf3;color:var(--d-ok)}
-  .pill.continuous{background:#eef2ff;color:#3730a3}
-  .pill.gated{background:#fff4ed;color:#92400e;margin-left:6px}
-  .num{font-variant-numeric:tabular-nums}
-  .btn{display:inline-block;border:0;border-radius:8px;padding:9px 15px;font:600 14px 'Switzer',sans-serif;cursor:pointer;text-decoration:none;text-align:center}
-  .btn.primary{background:var(--d-ink);color:#fff}
-  .btn.primary:hover{background:#1b2331}
-  .btn.ghost{background:transparent;color:var(--d-ink);border:1px solid var(--d-rule)}
-  .btn.ghost:hover{border-color:var(--d-ink)}
-  .btn.sm{padding:6px 11px;font-size:13px}
-  .muted{color:var(--d-muted)}
-  .empty{padding:30px;text-align:center;color:var(--d-muted)}
-  .auth-box{max-width:460px;margin:40px auto;text-align:center}
-  .auth-box input{width:100%;padding:10px 12px;border:1px solid var(--d-rule);border-radius:8px;font-family:'Spline Sans Mono',monospace;margin:12px 0}
-  .banner{border-radius:10px;padding:12px 16px;margin:0 0 20px;font-size:14px}
-  .banner.warn{background:#fff4ed;border:1px solid #f3c4a8;color:#92400e}
-  .row-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-  footer{border-top:1px solid var(--d-rule);margin-top:60px;padding:20px 0;color:var(--d-muted);font-size:13px;text-align:center}
-  footer a{color:var(--d-muted)}
+/* page-scoped hooks for the script-rendered Trust Center app (v2 tokens only) */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:0 0 22px}
+.stat{background:var(--paper-2);border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:16px 18px}
+.stat .big{font-family:var(--display);font-weight:620;font-size:var(--fs-metric);letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink);line-height:1.1}
+.stat .lbl{font-family:var(--mono);color:var(--ink-3);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-top:6px}
+#content .card{overflow-x:auto !important}
+#content table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+#content th,#content td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+#content th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);font-weight:600;background:var(--paper-sink)}
+#content tbody tr:last-child td{border-bottom:0}
+#content td{color:var(--ink-2)}
+#content td strong{color:var(--ink);font-weight:600}
+.tc .pill{display:inline-flex;align-items:center;margin-top:0;border-radius:var(--r-pill);padding:2px 9px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.tc .pill.report{background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--accent-edge)}
+.tc .pill.continuous{background:var(--paper-sink);color:var(--sev-low);border:1px solid var(--line-2)}
+.tc .pill.gated{background:var(--paper-sink);color:var(--sev-med);border:1px solid var(--line-2);margin-left:6px}
+.tc .btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.tc .btn.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
+.tc .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-2);font-weight:500}
+.tc .btn.ghost:hover{border-color:var(--accent-edge)}
+.tc .btn.sm{padding:7px 13px;min-height:34px;font-size:13px}
+.tc .mono{font-family:var(--mono)}
+.tc .muted{color:var(--ink-3)}
+.tc .num{font-variant-numeric:tabular-nums}
+.tc .empty{padding:34px 20px;text-align:center;color:var(--ink-3);font-size:14px;line-height:1.7}
+.tc .empty a.btn{margin-top:6px}
+.banner{border-radius:var(--r-md);padding:12px 16px;margin:0 0 20px;font-size:14px}
+.banner.warn{background:var(--void-soft);border:1px solid var(--void-edge);color:var(--void)}
+.banner.warn a{color:var(--ink);border-bottom:1px solid var(--line-2)}
+.row-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.auth-box{max-width:460px;margin:8px auto 0;text-align:center;padding:30px 26px;background:var(--paper-2);border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg)}
+.auth-box h3{margin:0 0 var(--s2)}
+.auth-box p{color:var(--ink-3);font-size:14px;line-height:1.6;margin:0}
+.auth-box p a{color:var(--ink);border-bottom:1px solid var(--line-2)}
+.auth-box input{width:100%;padding:11px 13px;border:1px solid var(--line-2);border-radius:var(--r-md);font-family:var(--mono);font-size:14px;margin:16px 0 12px;background:var(--paper-sink);color:var(--ink)}
+.auth-box input::placeholder{color:var(--ink-3)}
+.auth-box input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent-edge)}
 </style>
 </head>
-<body>
-<header class="top">
-  <a class="brand" href="/"><span class="bars"><i></i><i></i><i></i></span> kolm</a>
-  <nav>
-    <a href="/dashboard">Your reports</a>
-    <a href="/how-it-works">How it works</a>
-    <a href="/verify">Verify</a>
-    <a href="/contact">Contact</a>
-  </nav>
+<body class="tc">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
 </header>
 
-<div class="wrap">
-  <div class="idx">Account</div>
-  <h1>Trust Center</h1>
-  <p class="lede">Every Trust Link you have shared is an unguessable capability token; possession is the grant. Here you can see who opened each one: total views and distinct viewers, so visible buyer engagement closes the deal. Viewer addresses are hashed at the boundary and never stored in the clear.</p>
+<main id="main">
 
-  <div id="banner"></div>
-  <div id="stats" class="stats" style="display:none"></div>
-  <div id="content"><div class="empty">Loading your Trust Links...</div></div>
-
-  <div id="auth" class="auth-box" style="display:none">
-    <h2>View your Trust Center</h2>
-    <p class="muted">Sign in, or paste your API key (starts with <span class="mono">ks_</span>) to see who opened your Trust Links. Do not have one yet? <a href="/contact">Start an audit</a>.</p>
-    <input id="keyInput" class="mono" placeholder="ks_..." autocomplete="off" spellcheck="false">
-    <button class="btn primary" id="keyBtn" style="width:100%">View my Trust Center</button>
+<!-- ============================================================ 1. HERO -->
+<section class="section section--flush hero">
+  <div class="wrap">
+    <p class="eyebrow">Account · Trust Links</p>
+    <h1>Trust Center. <span class="go">See who opened what.</span></h1>
+    <p class="lede">Every Trust Link you have shared is an unguessable capability token; possession is the grant. Here you can see who opened each one: total views and distinct viewers, so visible buyer engagement closes the deal. Viewer addresses are hashed at the boundary and never stored in the clear.</p>
+    <div class="hero__proof" aria-label="How Trust Links behave">
+      <span><i class="dot" aria-hidden="true"></i>capability token · possession is the grant</span>
+      <span><i class="dot" aria-hidden="true"></i>views + distinct viewers per link</span>
+      <span><i class="dot" aria-hidden="true"></i>viewer addresses hashed at the boundary</span>
+    </div>
   </div>
-</div>
+</section>
 
-<footer>
-  kolm.ai &middot; Agent Security Evidence &middot; <a href="/verify">Verify a report</a> &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>
+<!-- ============================================================ 2. THE LEDGER (script-rendered) -->
+<section class="section sect--dense" id="ledger">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / Engagement</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Your Trust Links, and the eyes on them.</h2>
+    </div>
+
+    <div id="banner"></div>
+    <div id="stats" class="stats" style="display:none"></div>
+    <div id="content"><div class="empty">Loading your Trust Links...</div></div>
+
+    <div id="auth" class="auth-box" style="display:none">
+      <h3>View your Trust Center</h3>
+      <p class="muted">Sign in, or paste your API key (starts with <span class="mono">ks_</span>) to see who opened your Trust Links. Do not have one yet? <a href="/signup">Run the free scan</a>.</p>
+      <input id="keyInput" class="mono" aria-label="API key" placeholder="ks_..." autocomplete="off" spellcheck="false">
+      <button class="btn primary" id="keyBtn" style="width:100%">View my Trust Center</button>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 3. WHAT A TRUST LINK IS -->
+<section class="section section--band reveal" id="mechanics">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / Mechanics</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>What a Trust Link is, and what we count.</h2>
+    </div>
+    <figure class="diag reveal" role="img" aria-label="Verification loop: the buyer's browser fetches the report and the public keyring, verifies with WebCrypto, and reaches VALID or VOID with no kolm server in the trust path">
+    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect class="dg-box" x="8" y="28" width="160" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="22" y="48">Artifact</text>
+      <text class="dg-t" x="22" y="68">report.json</text>
+      <text class="dg-mono" x="22" y="84">signed envelope</text>
+      <rect class="dg-box" x="8" y="104" width="160" height="40" rx="9"/>
+      <text class="dg-t" x="22" y="122">issuer keyring</text>
+      <text class="dg-mono" x="22" y="137">public keys only</text>
+      <path class="dg-flow" d="M168 60 H276 M168 124 H236 V78"/>
+      <polygon class="dg-ok" points="276,60 268,55.5 268,64.5"/>
+      <rect class="dg-box" x="278" y="28" width="190" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="292" y="48">Buyer's browser</text>
+      <text class="dg-t" x="292" y="68">WebCrypto verify</text>
+      <text class="dg-mono" x="292" y="84">offline &#183; no upload</text>
+      <path class="dg-line" d="M468 48 H516 M468 76 H516"/>
+      <polygon class="dg-ok" points="516,48 508,43.5 508,52.5"/>
+      <polygon points="516,76 508,71.5 508,80.5" fill="#E0A89F"/>
+      <rect class="dg-box--ok" x="518" y="30" width="194" height="34" rx="9"/>
+      <text class="dg-t" x="532" y="51">VALID</text>
+      <text class="dg-mono" x="590" y="51">seal intact</text>
+      <rect class="dg-box--void" x="518" y="72" width="194" height="34" rx="9"/>
+      <text class="dg-void-t dg-k" x="532" y="93">VOID</text>
+      <text class="dg-mono" x="590" y="93">tampered bytes</text>
+      <text class="dg-mono" x="292" y="140">no account &#183; no kolm server in the trust path</text>
+    </svg>
+    <figcaption class="diag__cap"><b>Trust path</b> what the viewer opens: verification runs in the buyer's own browser against pinned public keys</figcaption>
+    </figure>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">Capability token</p>
+        <h3>Possession is the grant</h3>
+        <p>Each link carries an unguessable slug. Anyone holding it can open the signed report; nobody can enumerate it. Revoke the link and the grant is gone.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Engagement</p>
+        <h3>Views and distinct viewers</h3>
+        <p>Every open is counted, and repeat opens by the same viewer collapse into one distinct viewer. A reviewer who keeps coming back is a deal that is moving.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Privacy</p>
+        <h3>Hashed at the boundary</h3>
+        <p>Viewer addresses are hashed before they are stored, so engagement is visible to you while the viewer's identity is never kept in the clear.</p>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Product</h3>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+      </div>
+      <div class="foot__col">
+        <h3>Trust</h3>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h3>Legal</h3>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h3>Company</h3>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
 </footer>
 
 <script>

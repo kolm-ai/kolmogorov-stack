@@ -15,7 +15,7 @@
 // explicit about what was assessed and what was NOT (no theater - the trinity
 // covers ASR-1/2/3 only; injection/provenance/evidence need their own modules).
 
-import { ingestForAudit } from './audit-ingest.js';
+import { ingestForAudit, KOLM_CAPTURE_SOURCE } from './audit-ingest.js';
 import { analyzePermissions } from './permission-analyzer.js';
 import { analyzeAuditTrail } from './audit-trail-analyzer.js';
 import { mapControls } from './control-mapper.js';
@@ -75,6 +75,70 @@ const STATUS_WEIGHT = { pass: 1, attention: 0.5, blocking: 0 };
 
 function emptySeverity() {
   return { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
+}
+
+/* --------------------------------------------------------------------- */
+/* evidence tier - grading the QUALITY of the evidence inside the result  */
+/* --------------------------------------------------------------------- */
+//
+// The independence question ("who says these logs are real?") is answered by
+// grading the evidence INSIDE the signed object, so a verifier sees not just
+// what was found but how trustworthy the inputs were:
+//
+//   A  events captured by kolm's own gateway at runtime (first-party capture;
+//      the strongest grade - kolm observed the traffic itself)
+//   B  vendor-supplied logs whose hash chain verified end to end (tamper
+//      evident; continuity is cryptographic, provenance is still the vendor's)
+//   C  vendor-supplied logs without cryptographic continuity (accepted as
+//      provided; the weakest grade and the default for a raw export)
+//
+// The grade is computed here, where every input is visible (source tag, trail
+// coverage, summary), and the builder binds it into the signed envelope.
+
+export const EVIDENCE_TIER_METHODS = Object.freeze({
+  A: 'kolm-gateway-capture',
+  B: 'vendor-logs-hash-verified',
+  C: 'vendor-logs-asserted',
+});
+
+/**
+ * Grade the evidence quality of a finished audit result. Never throws.
+ *
+ * @param {object} auditResult  The (possibly partial) result of runAudit.
+ * @returns {{grade:'A'|'B'|'C', method:string, basis:string[]}}
+ */
+export function computeEvidenceTier(auditResult) {
+  const r = auditResult && typeof auditResult === 'object' ? auditResult : {};
+  const source = typeof r.source === 'string' ? r.source.trim() : '';
+  const summary = r.summary && typeof r.summary === 'object' ? r.summary : {};
+  const cov = r.trail && r.trail.coverage && typeof r.trail.coverage === 'object' ? r.trail.coverage : {};
+  const events = Array.isArray(r.events) ? r.events : [];
+  const chained = Number.isFinite(cov.hash_chained) ? cov.hash_chained : 0;
+  const broken = Number.isFinite(cov.chain_links_broken) ? cov.chain_links_broken : 0;
+  const basis = [];
+
+  if (source === KOLM_CAPTURE_SOURCE) {
+    const records = r.ingest && Number.isFinite(r.ingest.records) ? r.ingest.records : null;
+    let receipts = 0;
+    for (const e of events) {
+      if (e && e.meta && e.meta.receipt_signed === true && e.meta.kind === 'model_call') receipts++;
+    }
+    basis.push(`gateway captures: ${records == null ? events.length : records} recorded by the kolm gateway at runtime`);
+    if (receipts > 0) basis.push(`gateway receipts: ${receipts} signed at capture`);
+    if (chained > 0) basis.push(`hash chain: ${chained} chained, ${broken} broken`);
+    return { grade: 'A', method: EVIDENCE_TIER_METHODS.A, basis };
+  }
+
+  if (summary.tamper_evident === true) {
+    basis.push(`hash chain: ${chained} chained, ${broken} broken`);
+    return { grade: 'B', method: EVIDENCE_TIER_METHODS.B, basis };
+  }
+
+  basis.push(chained > 0
+    ? `hash chain incomplete: ${chained} of ${events.length} events chained, ${broken} broken`
+    : 'no hash chain present in the supplied logs');
+  basis.push('vendor-supplied logs accepted as provided');
+  return { grade: 'C', method: EVIDENCE_TIER_METHODS.C, basis };
 }
 
 function tallySeverity(findings) {
@@ -216,7 +280,7 @@ export function runAudit(logs, opts = {}) {
     note: noEvents ? 'No events were ingested from the supplied logs.' : undefined,
   };
 
-  return {
+  const result = {
     spec_version: AUDIT_SPEC_VERSION,
     source,
     ingest: { ...ing.stats },
@@ -233,6 +297,12 @@ export function runAudit(logs, opts = {}) {
     red_team: redTeam,
     summary,
   };
+
+  // Grade the evidence QUALITY of this audit (A/B/C) now that every input is
+  // visible; the report builder binds it into the signed envelope.
+  result.evidence_tier = computeEvidenceTier(result);
+
+  return result;
 }
 
 // Run one analyzer with a never-throw guard. The analyzers already guarantee

@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Verify a kolm evidence report offline, in your browser · kolm.ai</title>
 <meta name="description" content="Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. No account, no upload, no kolm server in the trust path. You verify against the public key, not against our word.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -37,27 +37,38 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<script defer src="/kolm-field.js"></script>
 <style>
-  /* page-local: the paste verifier */
-  .vrf { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); align-items: start; }
-  @media (max-width: 900px) { .vrf { grid-template-columns: 1fr; } }
-  .vrf__pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
-  .vrf__panehead { display: flex; align-items: center; gap: 10px; padding: 12px var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-2); }
-  .vrf__panehead h3 { font-size: 14px; }
-  .vrf__panehead .vw__status { margin-left: auto; }
+  /* page-local: the paste verifier. Dark input chrome; the verdict pane is the
+     lit sheet (.vw), so the evidence is the brightest thing on the page. */
+  .vrf { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: var(--s5); align-items: stretch; margin-top: var(--s6); }
+  @media (max-width: 980px) { .vrf { grid-template-columns: minmax(0,1fr); } }
+  .vrf__pane { display: flex; flex-direction: column; min-width: 0; background: var(--paper-2); border: 1px solid var(--line); border-top-color: var(--line-top); border-radius: 15px; overflow: hidden; }
+  .vrf__panehead { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+  .vrf__panek { margin: 0; font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .vrf__status { margin-left: auto; font-family: var(--mono); font-size: 10.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; text-align: right; }
+  .vrf__status.is-ok { color: var(--accent); border-color: var(--accent-edge); background: var(--accent-soft); }
+  .vrf__status.is-bad { color: var(--sev-high); border-color: var(--sev-high); }
   .vrf textarea {
-    width: 100%; min-height: 340px; resize: vertical; border: 0; outline: 0; display: block;
-    background: var(--bg-1); color: var(--ink); font-family: var(--mono); font-size: 12.5px;
-    line-height: 1.6; padding: var(--s4); tab-size: 2;
+    width: 100%; min-height: 340px; flex: 1; resize: vertical; border: 0; outline: 0; display: block;
+    background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 12.5px;
+    line-height: 1.6; padding: var(--s4) 18px; tab-size: 2;
   }
-  .vrf textarea::placeholder { color: var(--ink-faint); }
-  .vrf__bar { display: flex; gap: var(--s2); padding: var(--s3) var(--s4); border-top: 1px solid var(--line); flex-wrap: wrap; background: var(--bg-2); }
-  .vrf__out { padding: var(--s4); min-height: 340px; }
-  .vrf__empty { color: var(--ink-3); font-family: var(--mono); font-size: 12.5px; }
-  .vrf.drag .vrf__pane:first-child { border-color: var(--ok-edge); box-shadow: 0 0 0 1px var(--ok-edge) inset; }
-  .vw__fields { margin-bottom: var(--s4); }
-  .pin { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); margin-top: var(--s3); }
-  .pin input { accent-color: var(--ok); }
+  .vrf textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .vrf textarea::placeholder { color: var(--ink-3); opacity: 0.75; }
+  .vrf__bar { display: flex; gap: var(--s2); padding: var(--s3) 18px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+  .vrf__bar [hidden] { display: none !important; } /* .btn's display beats the UA [hidden] rule */
+  .pin { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; line-height: 1.5; color: var(--ink-2); padding: 0 18px 16px; }
+  .pin input { accent-color: var(--accent); margin-top: 2px; flex: none; }
+  .vrf.drag .vrf__pane { border-color: var(--accent-edge); box-shadow: 0 0 0 1px var(--accent-edge) inset; }
+  .vrf .artifact { display: flex; flex-direction: column; min-width: 0; }
+  .vrf .artifact .vw { flex: 1; display: flex; flex-direction: column; }
+  .vrf .vw__body { flex: 1; min-height: 340px; }
+  .vrf .vw__fields { margin-bottom: var(--s4); }
+  .vrf__empty { color: var(--sheet-ink-3); font-family: var(--mono); font-size: 12.5px; margin: 0; }
+  .vrf .ok-text { color: var(--sheet-accent); }
+  .vrf .vw__check a { color: var(--sheet-ink); border-bottom: 1px solid var(--sheet-line-2); }
+  .vrf .vw__check a:hover { border-color: var(--sheet-accent); }
 </style>
 <script type="application/ld+json">
 {
@@ -82,6 +93,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
@@ -106,7 +118,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -114,34 +126,42 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- ============================================================ 1. THE VERIFIER (the workspace) -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
+  <!-- THE EVIDENCE FIELD at half intensity: the one page where the brand
+       physics and the product physics meet. Fail-open: no JS = CSS hero. -->
+  <div class="field" aria-hidden="true" data-intensity="0.20"><canvas></canvas></div>
   <div class="wrap">
     <div class="section__head" style="max-width:72ch">
-      <h1>Verify a report, in your own browser.</h1>
-      <p class="lede">
-        Paste a report, load the sample, or drop a <span class="mono">.json</span> file.
-        Every check runs in <em>this</em> browser, with no account, no upload, and no
-        kolm server in the path. Two things are checked: the Ed25519 signature proves
-        the bytes are untampered, and the signing key is matched against kolm's published
-        issuer keyring, so a report re-signed with someone else's key cannot pass as ours.
+      <p class="eyebrow" data-enter="1">Offline verification</p>
+      <h1 data-enter="2">Verify a report, <span class="go">in your own browser.</span></h1>
+      <p class="lede" data-enter="3">
+        Paste a kolm report. Verification runs in your browser. Nothing uploads.
+        Load the sample or drop a <span class="mono">.json</span> file. Two things
+        are checked: the Ed25519 signature proves the bytes are untampered, and the
+        signing key is matched against kolm's published issuer keyring, so a report
+        re-signed with someone else's key cannot pass as ours. No account, no kolm
+        server in the path.
+      </p>
+      <p style="color:var(--ink-2);margin-top:var(--s3)" data-enter="4">
+        Reviewing a vendor's agent? <a href="/solutions/enterprise-buyers">Read the buyer's guide</a>: what to ask for and how to check it.
       </p>
     </div>
 
     <div class="vrf" id="vrf">
-      <!-- input -->
+      <!-- input: dark chrome -->
       <div class="vrf__pane">
         <div class="vrf__panehead">
-          <h3>Evidence report (JSON)</h3>
-          <span class="vw__status" id="inStatus">paste · load · drop</span>
+          <p class="vrf__panek">Evidence report (JSON)</p>
+          <span class="vrf__status" id="inStatus" role="status">paste · load · drop</span>
         </div>
         <label class="sr-only" for="src">Evidence report JSON</label>
         <textarea id="src" spellcheck="false" placeholder='{
   "schema": "kolm-audit-report-1",
   "report_id": "asrr_...",
-  "summary": { "readiness_pct": 0, "blocking_count": 5, "tamper_evident": false, ... },
+  "summary": { "readiness_pct": 0, "blocking_count": 7, "tamper_evident": false, ... },
   ...
   "signature_ed25519": { "alg": "ed25519", "public_key": "-----BEGIN PUBLIC KEY-----...", "signature": "..." }
 }
@@ -154,38 +174,45 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
           <button class="btn btn--ghost btn--sm" id="tamperBtn" type="button">Tamper a field</button>
           <button class="btn btn--ghost btn--sm" id="forgeBtn" type="button">Forge with a rogue key</button>
           <button class="btn btn--ghost btn--sm" id="clearBtn" type="button">Clear</button>
+          <button class="btn btn--ghost btn--sm" id="restoreBtn" type="button" hidden>Restore previous</button>
         </div>
-        <label class="pin" style="padding:0 var(--s4) var(--s4)">
+        <label class="pin">
           <input type="checkbox" id="pinChk" checked>
           Require a recognized kolm issuer key (recommended). Proves the report was signed by kolm, not just by a valid key.
         </label>
       </div>
 
-      <!-- output -->
-      <div class="vrf__pane">
-        <div class="vrf__panehead">
-          <h3>Verification</h3>
-          <span class="vw__status" id="outStatus">idle</span>
-        </div>
-        <div class="vrf__out" id="out">
-          <p class="vrf__empty">Load the sample or paste a report, then press <b class="ok-text">Verify</b>. Nothing is pre-filled; every check runs in your browser.</p>
+      <!-- output: the lit sheet. The verdict is the brightest object on the page. -->
+      <div class="artifact" aria-label="Verification result">
+        <div class="vw is-live">
+          <div class="vw__bar">
+            <span class="vw__title">Verification</span>
+            <span class="vw__status" id="outStatus" role="status">idle</span>
+          </div>
+          <div class="vw__body" id="out" aria-live="polite">
+            <p class="vrf__empty">Load the sample or paste a report, then press <b class="ok-text">Verify</b>. Nothing is pre-filled; every check runs in your browser.</p>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="band" style="margin-top:var(--s5)">
-      <span class="band__item"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:14px;height:14px;color:var(--ok)"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> in-browser WebCrypto · Ed25519 (RFC 8037)</span>
+      <span class="band__item"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true" style="color:var(--accent)"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> in-browser WebCrypto · Ed25519 (RFC 8037)</span>
       <span class="band__item">SHA-256 key fingerprint, recomputed locally</span>
-      <span class="band__item">Open verifier: <a href="/kolm-audit-verify.js" style="color:var(--ink);border-bottom:1px solid var(--ok-edge)">kolm-audit-verify.js</a></span>
+      <span class="band__item">Open verifier: <a href="/kolm-audit-verify.js">kolm-audit-verify.js</a></span>
+      <span class="band__item">Issuer keyring: <a href="/keys/kolm-issuers.json">kolm-issuers.json</a></span>
     </div>
   </div>
 </section>
 
 <!-- ============================================================ 2. THE TWO CHECKS (the ledger) -->
 <section class="section section--ink reveal" id="checks-explainer">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / The two checks</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">01 / The two checks</span>
       <h2>They don't trust us. They check the math.</h2>
       <p class="lede">A valid signature alone is not enough. A forger can sign their own edited report with their own key. Both tiers have to hold.</p>
     </div>
@@ -206,21 +233,58 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
         <p>The embedded key is matched against kolm's published keyring. Re-sign an edited report with an attacker's own key and tier 1 passes, but tier 2 exposes it. Try <span class="mono">Forge with a rogue key</span>.</p>
       </div>
     </div>
-    <p class="hero__claim" style="margin-top:var(--s6)">
-      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
-    </p>
+    <figure class="diag reveal" role="img" aria-label="Verification loop: the buyer's browser fetches the report and the public keyring, verifies with WebCrypto, and reaches VALID or VOID with no kolm server in the trust path">
+    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect class="dg-box" x="8" y="28" width="160" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="22" y="48">Artifact</text>
+      <text class="dg-t" x="22" y="68">report.json</text>
+      <text class="dg-mono" x="22" y="84">signed envelope</text>
+      <rect class="dg-box" x="8" y="104" width="160" height="40" rx="9"/>
+      <text class="dg-t" x="22" y="122">issuer keyring</text>
+      <text class="dg-mono" x="22" y="137">public keys only</text>
+      <path class="dg-flow" d="M168 60 H276 M168 124 H236 V78"/>
+      <polygon class="dg-ok" points="276,60 268,55.5 268,64.5"/>
+      <rect class="dg-box" x="278" y="28" width="190" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="292" y="48">Buyer's browser</text>
+      <text class="dg-t" x="292" y="68">WebCrypto verify</text>
+      <text class="dg-mono" x="292" y="84">offline &#183; no upload</text>
+      <path class="dg-line" d="M468 48 H516 M468 76 H516"/>
+      <polygon class="dg-ok" points="516,48 508,43.5 508,52.5"/>
+      <polygon points="516,76 508,71.5 508,80.5" fill="#E0A89F"/>
+      <rect class="dg-box--ok" x="518" y="30" width="194" height="34" rx="9"/>
+      <text class="dg-t" x="532" y="51">VALID</text>
+      <text class="dg-mono" x="590" y="51">seal intact</text>
+      <rect class="dg-box--void" x="518" y="72" width="194" height="34" rx="9"/>
+      <text class="dg-void-t dg-k" x="532" y="93">VOID</text>
+      <text class="dg-mono" x="590" y="93">tampered bytes</text>
+      <text class="dg-mono" x="292" y="140">no account &#183; no kolm server in the trust path</text>
+    </svg>
+    <figcaption class="diag__cap"><b>Trust path</b> verification runs in the buyer's own browser against pinned public keys</figcaption>
+    </figure>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 3. FINAL CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Hand your buyer a report they can check.</h2>
     <p class="lede">A signed evidence report your buyer verifies right here, against your key, with no account and no server in the trust path.</p>
     <div class="hero__cta">
-      <a class="btn btn--primary" href="/contact">Start an audit</a>
+      <a class="btn btn--primary" href="/signup">Run the free scan</a>
       <a class="btn btn--ghost" href="/report">See the report</a>
+      <a class="btn btn--ghost" href="/contact">Talk to us</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -243,24 +307,27 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -268,7 +335,7 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>
@@ -312,6 +379,7 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
   // "untampered since someone signed it", not a kolm-issued report.
   const KOLM_ISSUERS = {
     schema: 'kolm-issuer-keyring-1',
+    revocations: [],
     issuers: [
       {
         kid: 'kolm-demo-2026',
@@ -339,9 +407,30 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
       const byKid = new Map(KOLM_ISSUERS.issuers.map((i) => [i.kid, i]));
       for (const i of fresh.issuers) { if (i && i.public_key) byKid.set(i.kid || i.fingerprint || i.public_key, i); }
       KOLM_ISSUERS.issuers = Array.from(byKid.values());
+      // Published revocations ride the same keyring file: this is how an
+      // already-withdrawn key reaches the offline check below.
+      if (Array.isArray(fresh.revocations)) KOLM_ISSUERS.revocations = fresh.revocations;
     } catch (_) { /* offline: keep the inlined anchor */ }
   }
-  refreshKeyring();
+  const keyringReady = refreshKeyring();
+
+  // Best-effort LIVE issuer-key status. Revocation is the one fact an offline
+  // page cannot learn by itself, so we ask the public status endpoint - and
+  // treat "unreachable" as a calm condition, never an error: the keyring
+  // anchor already ran, and only an explicit 'revoked' answer changes anything.
+  async function liveKeyStatus(fp) {
+    if (!fp) return { reachable: false };
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 2500);
+      const r = await fetch('/v1/audit/issuer-key/' + encodeURIComponent(fp) + '/status', { cache: 'no-store', signal: ctl.signal });
+      clearTimeout(t);
+      if (!r.ok) return { reachable: false };
+      const j = await r.json();
+      if (!j || typeof j !== 'object') return { reachable: false };
+      return { reachable: true, status: j.status || null, revoked_at: j.revoked_at || null, reason: j.reason || null };
+    } catch (_) { return { reachable: false }; }
+  }
 
   const CHECK = '<svg class="mk" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:15px;height:15px"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const CROSS = '<svg class="mk" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="width:15px;height:15px"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -354,7 +443,7 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
 
   function row(k, v) {
     let s = String(v);
-    if (s.length > 44) s = s.slice(0, 32) + '…' + s.slice(-8);
+    if (s.length > 44) s = s.slice(0, 32) + '...' + s.slice(-8);
     return `<div class="vw__row"><span class="vw__key">${esc(k)}</span><span class="vw__val">${esc(s)}</span></div>`;
   }
 
@@ -393,7 +482,21 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
     return rowEl;
   }
 
+  // Re-entrancy guard: the check rows animate in (~200ms each), so a double
+  // click mid-run would interleave two verification passes into one output
+  // pane. One run at a time; the Verify button reports busy while it works.
+  let running = false;
   async function run() {
+    if (running) return;
+    running = true;
+    const vb = $('verifyBtn');
+    vb.disabled = true;
+    vb.setAttribute('aria-busy', 'true');
+    try { await runChecks(); }
+    finally { running = false; vb.disabled = false; vb.removeAttribute('aria-busy'); }
+  }
+
+  async function runChecks() {
     let text = src.value.trim();
     if (!text) { setStatus(outStatus, 'no input', 'bad'); out.innerHTML = '<p class="vrf__empty">Paste a report or load the sample first.</p>'; return; }
     let doc;
@@ -405,14 +508,17 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
     }
 
     const auditMode = isAuditReport(doc);
-    setStatus(outStatus, 'verifying…', null);
+    setStatus(outStatus, 'verifying...', null);
     out.innerHTML = (auditMode ? renderAuditFields(doc) : renderFields(doc)) + '<div class="vw__checks" id="checks"></div>';
     const checksEl = $('checks');
 
     // Tier 1, cryptographic integrity: signed by the holder of the embedded
     // key, untampered since. (No pin opt here; issuer provenance is tier 2.)
+    // The keyring rides along for tier 3: a key on the published revocation
+    // list is refused BEFORE any clean pass, even with the network unplugged.
+    await keyringReady;
     let result;
-    try { result = auditMode ? await verifyAuditReport(doc) : await verifyReceipt(doc); }
+    try { result = auditMode ? await verifyAuditReport(doc, { issuerKeyring: KOLM_ISSUERS }) : await verifyReceipt(doc); }
     catch (e) { result = { ok: false, reason: 'verifier error: ' + e.message, checks: [] }; }
 
     for (const c of result.checks) await appendCheck(checksEl, c.ok, c.name, c.detail, true);
@@ -438,9 +544,56 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
         'the embedded key is not one kolm publishes', true);
     }
 
-    // Compose the headline verdict from both tiers.
+    // Tier 3, key lifecycle: a signature can be mathematically valid and still
+    // void, because the key that made it was later withdrawn. Two sources:
+    // the published keyring's revocation list (offline, already folded into
+    // tier 1 above) and the live status endpoint (best effort, calm if away).
+    let revoked = result.reason === 'issuer_key_revoked';
+    const sigBlock = (doc && doc.signature_ed25519) || {};
+    const keyFp = result.key_fingerprint || sigBlock.key_fingerprint || null;
+    let liveRev = null;
+    if (!revoked && result.ok && keyFp) {
+      const live = await liveKeyStatus(keyFp);
+      if (live.reachable && live.status === 'revoked') {
+        revoked = true; liveRev = live;
+        await appendCheck(checksEl, false, 'issuer key revoked',
+          (live.revoked_at ? 'revoked ' + String(live.revoked_at).slice(0, 10) : keyFp) + (live.reason ? ' (' + live.reason + ')' : ''), true);
+      } else if (live.reachable) {
+        await appendCheck(checksEl, true, 'issuer key status: ' + (live.status || 'live'), keyFp, true);
+      } else {
+        await appendCheck(checksEl, null, 'live issuer-key status unreachable from this network; the published keyring anchor was used instead', '', false);
+      }
+    }
+    if (revoked) {
+      const note = document.createElement('div');
+      note.className = 'vw__check show';
+      note.innerHTML = '<span>A revoked key is withdrawn, not broken: the signature math still verifies, but a report signed by it must be refused. The revocation record is public in the <a href="/transparency-log">transparency log</a> and at the issuer-key status endpoint.</span>';
+      checksEl.appendChild(note);
+    }
+
+    // Transparency log, best effort: when the report carries a log checkpoint,
+    // confirm the public log answers. Unreachable is informational, never red -
+    // inclusion is a separate, optional check and the signature stands alone.
+    if (doc && doc.log_checkpoint && typeof doc.log_checkpoint === 'object') {
+      try {
+        const ctl = new AbortController();
+        const t = setTimeout(() => ctl.abort(), 2500);
+        const r = await fetch('/v1/transparency-log/size', { cache: 'no-store', signal: ctl.signal });
+        clearTimeout(t);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        await appendCheck(checksEl, null, 'transparency log reachable',
+          'tree size ' + (j && j.tree_size != null ? j.tree_size : '?') + '; this report cites seq ' + (doc.log_checkpoint.seq != null ? doc.log_checkpoint.seq : '?')
+          + '. Inclusion proof: GET /v1/transparency-log/proof/' + (doc.log_checkpoint.seq != null ? doc.log_checkpoint.seq : ':seq'), false);
+      } catch (_) {
+        await appendCheck(checksEl, null, 'transparency log unreachable from this network; signature verification is unaffected', '', false);
+      }
+    }
+
+    // Compose the headline verdict from all three tiers.
     let level, label;
-    if (!result.ok) { level = 'bad'; label = 'Not verified: altered or invalid signature'; }
+    if (revoked) { level = 'bad'; label = 'VOID: issuer key revoked' + (liveRev && liveRev.revoked_at ? ' ' + String(liveRev.revoked_at).slice(0, 10) : ''); }
+    else if (!result.ok) { level = 'bad'; label = 'Not verified: altered or invalid signature'; }
     else if (prov.recognized) {
       level = 'ok';
       label = prov.status === 'demo' ? 'Verified: kolm demo issuer, untampered' : 'Verified: kolm-issued, untampered';
@@ -455,26 +608,47 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
     if (result.ok && !prov.recognized) {
       await appendCheck(checksEl, null,
         require
-          ? 'A valid signature alone does not make a report kolm-issued. Anyone can sign their own edited report with their own key. Pinning to kolm’s published issuer key is what proves it came from us.'
-          : 'Signature is intact, but the issuer was not checked against kolm’s keyring. Tick the box above to require a recognized kolm issuer key.',
+          ? 'A valid signature alone does not make a report kolm-issued. Anyone can sign their own edited report with their own key. Pinning to kolm\'s published issuer key is what proves it came from us.'
+          : 'Signature is intact, but the issuer was not checked against kolm\'s keyring. Tick the box above to require a recognized kolm issuer key.',
         '', false);
     }
     setStatus(outStatus, label, level === 'ok' ? 'ok' : 'bad');
   }
 
   async function loadSample(url, label) {
-    setStatus(inStatus, 'loading…', null);
+    setStatus(inStatus, 'loading...', null);
     try {
       const r = await fetch(url, { cache: 'no-store' });
       src.value = JSON.stringify(await r.json(), null, 2);
       setStatus(inStatus, label + ' loaded', 'ok');
       run();
-    } catch (e) { setStatus(inStatus, 'load failed', 'bad'); }
+    } catch (e) { setStatus(inStatus, 'sample failed to load. Check your connection and press the button again.', 'bad'); }
   }
+
+  // Tamper, Forge and Clear all overwrite the textarea. Stash what was there
+  // so one press of Restore brings it back (one-shot; each new mutation
+  // refreshes the stash).
+  const restoreBtn = $('restoreBtn');
+  let stashed = null;
+  function stashSrc() {
+    const cur = src.value;
+    if (!cur.trim()) return;
+    stashed = cur;
+    restoreBtn.hidden = false;
+  }
+  restoreBtn.addEventListener('click', () => {
+    if (stashed == null) return;
+    src.value = stashed;
+    stashed = null;
+    restoreBtn.hidden = true;
+    setStatus(inStatus, 'previous input restored', 'ok');
+    run();
+  });
 
   function tamper() {
     let doc;
     try { doc = JSON.parse(src.value); } catch (e) { setStatus(inStatus, 'load a report first', 'bad'); return; }
+    stashSrc();
     if (isAuditReport(doc)) {
       // Downgrade the headline a buyer reads: bump readiness to 100%. The
       // signature must reject the altered bytes.
@@ -514,11 +688,12 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
     try { doc = JSON.parse(src.value); } catch (e) { setStatus(inStatus, 'load a report first', 'bad'); return; }
     if (!isAuditReport(doc)) { setStatus(inStatus, 'load an evidence report first', 'bad'); return; }
     if (!(window.crypto && crypto.subtle && crypto.subtle.generateKey)) { setStatus(inStatus, 'WebCrypto Ed25519 unavailable', 'bad'); return; }
+    stashSrc();
     try {
-      // Attacker edits the headline a buyer reads…
+      // Attacker edits the headline a buyer reads...
       if (doc.summary && typeof doc.summary === 'object') { doc.summary.readiness_pct = 100; doc.summary.blocking_count = 0; }
       doc.findings = [];
-      // …then re-signs the edited bytes with their OWN freshly-minted key.
+      // ...then re-signs the edited bytes with their OWN freshly-minted key.
       const kp = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
       const pubPem = _spkiDerToPem(await crypto.subtle.exportKey('spki', kp.publicKey));
       const fp = await keyFingerprintFromPem(pubPem);
@@ -546,7 +721,7 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
   $('forgeBtn').addEventListener('click', forge);
   // Re-run when the issuer requirement is toggled so the verdict updates live.
   pinChk.addEventListener('change', () => { if (src.value.trim()) run(); });
-  $('clearBtn').addEventListener('click', () => { src.value = ''; setStatus(inStatus, 'paste · load · drop', null); setStatus(outStatus, 'idle', null); out.innerHTML = '<p class="vrf__empty">Cleared. Load the sample or paste a report, then press Verify.</p>'; });
+  $('clearBtn').addEventListener('click', () => { stashSrc(); src.value = ''; setStatus(inStatus, 'paste · load · drop', null); setStatus(outStatus, 'idle', null); out.innerHTML = '<p class="vrf__empty">Cleared. Load the sample or paste a report, then press Verify.</p>'; });
 
   // drag-and-drop a .json file
   const vrf = $('vrf');

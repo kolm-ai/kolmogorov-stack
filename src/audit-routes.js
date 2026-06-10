@@ -51,6 +51,12 @@ import { resolveTrust, resolvePriorReport, runDueReattestations, forceReattest }
 import { computeAuditDelta } from './audit-delta.js';
 import { autofillQuestionnaire, toQuestionnaireCsv, QUESTIONNAIRE_TEMPLATES } from './questionnaire-autofill.js';
 import { importAgentLogs } from './log-importer.js';
+import { allCapturesForTenant } from './capture-store.js';
+import { KOLM_CAPTURE_SOURCE } from './audit-ingest.js';
+// One-off run notifications: notify() is async and can throw (unknown event /
+// store hiccup); see _notifyReportReady below for the fire-and-forget wrapper
+// that keeps it out of the response path.
+import { notify } from './notifications.js';
 
 export const AUDIT_ROUTES_VERSION = 'asr-audit-routes/0.1';
 
@@ -78,6 +84,23 @@ function _clampRetentionDays(v) {
   if (n < 0) return 0;
   if (n > 36500) return 36500; // 100 years - an obvious upper sanity bound
   return n;
+}
+
+// Normalize a caller-supplied source/source_label EXACTLY as the grading path
+// will see it. The routes stamp String(raw).slice(0,64); runAudit then trims,
+// and computeEvidenceTier trims again before comparing to KOLM_CAPTURE_SOURCE.
+// So the effective graded value is trim(slice(raw,0,64)). The reserved-source
+// guard MUST test this same form - testing String(raw).trim() instead let a
+// value like "kolm-capture"+52_spaces+"X" (65 chars) slip the guard yet slice
+// back to "kolm-capture" downstream and forge a grade-A capture attestation
+// over vendor logs. One normalizer, used by both the guard and the stamp,
+// closes that gap permanently.
+function _normalizeSource(raw) {
+  if (raw == null) return null;
+  return String(raw).slice(0, 64).trim();
+}
+function _claimsCaptureSource(raw) {
+  return _normalizeSource(raw) === KOLM_CAPTURE_SOURCE;
 }
 
 // Lightweight per-IP fixed-window limiter for the PUBLIC verify route. Pure
@@ -235,6 +258,21 @@ function _getSession(tenant_id, id) {
   return rows.find((r) => r && r.tenant_id === tenant_id) || null;
 }
 
+// Resolve an id (a session id audses_* OR a report id asrr_*) to the tenant's
+// own agent_audits row. Tenant-fenced: only ever returns a row whose tenant_id
+// matches, so a foreign / unknown id is indistinguishable from absent (null) and
+// the delta route can never read across the tenant boundary. Tries the row id
+// first (the common case), then falls back to report_id. Pure read; never throws.
+function _resolveOwnedReportRow(tenant_id, id) {
+  if (!tenant_id || !id) return null;
+  try {
+    const byId = findByField(TABLE, 'id', id).find((r) => r && r.tenant_id === tenant_id);
+    if (byId) return byId;
+    const byReport = findByField(TABLE, 'report_id', id).find((r) => r && r.tenant_id === tenant_id);
+    return byReport || null;
+  } catch { return null; }
+}
+
 function _verifyUrlFor() {
   const base = (process.env.KOLM_VERIFY_URL_BASE || 'https://kolm.ai').replace(/\/+$/, '');
   return `${base}/verify`;
@@ -287,6 +325,25 @@ function _embeddedKeyFingerprint(envelope) {
   } catch { return null; }
 }
 
+// ---------------------------------------------------------------------------
+// _notifyReportReady - fire-and-forget 'audit_report_ready' for one-off AUTHED
+// runs (scan / import / session run), so the event is not exclusive to the
+// Continuous re-attestation path. Mirrors the _notify wrapper in
+// src/asr-fulfillment.js: notify() is async and can throw; both the synchronous
+// throw and the rejected promise are swallowed and the result is NEVER awaited,
+// so a webhook / email failure can never fail or slow the scan response.
+// Every caller passes trec.id from req.tenant_record (set by _authOrReject), so
+// an unauthenticated request can never reach this - and the tenantId guard
+// keeps it that way even if a future caller forgets the auth fence.
+// ---------------------------------------------------------------------------
+function _notifyReportReady(tenantId, payload) {
+  try {
+    if (!tenantId) return;
+    const p = notify(tenantId, 'audit_report_ready', payload || {});
+    if (p && typeof p.then === 'function') p.then(() => {}, () => {});
+  } catch { /* best-effort: a notify failure never blocks the run */ }
+}
+
 // Run the orchestrator + (optionally) build+sign the report. Returns
 // { audit?, report?, signError?, auditError? }. Never throws across the
 // boundary: runAudit is designed not to throw, but we still guard it (a
@@ -314,6 +371,48 @@ function _runAndSign(logsText, { source, subject, retentionDays, sign, tier }) {
 }
 
 // ---------------------------------------------------------------------------
+// Tier-A capture bridge - load the CALLING tenant's own gateway observations.
+//
+// The store's allCapturesForTenant(x) matches rows where o.tenant === x OR
+// o.tenant_id === x (capture rows carry both; gateway-receipt rows carry only
+// the tenant NAME). That OR is too loose to trust on its own for a grade-A
+// evidence path: an attacker who NAMES their tenant equal to a victim's tenant
+// id would match the victim's pinned rows. So every returned row is re-checked
+// here: a row carrying tenant_id MUST equal the canonical trec.id (the pin
+// wins); only rows WITHOUT a tenant_id (receipt rows) fall back to the name
+// fence. Never throws; a store failure reads as zero rows for the caller to
+// surface.
+// ---------------------------------------------------------------------------
+function _ownsCaptureRow(row, trec) {
+  if (!row || typeof row !== 'object') return false;
+  if (row.tenant_id != null) return row.tenant_id === trec.id;
+  const t = row.tenant;
+  if (t == null) return false;
+  return t === trec.id || (trec.name != null && t === trec.name);
+}
+
+async function _loadTenantCaptures(trec) {
+  const idents = [trec.id];
+  if (trec.name && trec.name !== trec.id) idents.push(trec.name);
+  const seen = new Set();
+  const out = [];
+  for (const ident of idents) {
+    let rows = [];
+    try { rows = await allCapturesForTenant(ident, MAX_RECORDS_PER_SESSION); } catch { rows = []; }
+    if (!Array.isArray(rows)) rows = [];
+    for (const row of rows) {
+      if (!_ownsCaptureRow(row, trec)) continue;
+      const key = String((row.id != null ? row.id : row.receipt_id) || '');
+      if (key && seen.has(key)) continue;
+      if (key) seen.add(key);
+      out.push(row);
+      if (out.length >= MAX_RECORDS_PER_SESSION) return out;
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
 // Procurement exports (src/framework-export.js). Turns a signed report envelope
 // into the artifact a buyer's GRC / procurement team ingests: CSV (findings x
 // controls), a SpreadsheetML .xls workbook, Drata / Vanta control-evidence JSON,
@@ -332,6 +431,122 @@ function _sendExport(res, envelope, formatRaw) {
   res.setHeader('Content-Type', art.contentType);
   res.setHeader('Content-Disposition', `attachment; filename="${art.filename}"`);
   return res.send(art.body);
+}
+
+// ---------------------------------------------------------------------------
+// renderBadgeSvg(envelope) - a small shields.io-style status badge for the
+// shareable Trust link (an embeddable "Agent Security: NN% ready" pill).
+//
+// Kept LOCAL to this module (not in framework-export.js) on purpose: the badge
+// is a view over the SAME signed envelope, but it is part of the HTTP serving
+// surface this file owns, so it shares this module's lifecycle. Pure +
+// NEVER-throws (mirrors the framework-export.js obj()/str() idiom): a malformed
+// or absent envelope degrades to the grey "unknown" badge rather than throwing,
+// so the public badge route can never 500. ASCII-only output.
+// ---------------------------------------------------------------------------
+function _bObj(x) { return x && typeof x === 'object' && !Array.isArray(x) ? x : {}; }
+function _bStr(x) { return x == null ? '' : String(x); }
+
+// Minimal XML-escape so a subject / label can never break the SVG markup.
+function _svgEsc(s) {
+  return _bStr(s).replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+}
+
+// Rough monospace-ish width so the two pill halves size to their text. 7px/char
+// is a stable approximation for the 11px label font used below.
+function _textW(s) { return Math.max(0, _bStr(s).length) * 7 + 10; }
+
+// How long a published report stays "fresh" on the badge. Past this window the
+// pill goes grey + 'stale (Month YYYY)' regardless of readiness, so an
+// abandoned report can never keep serving a green pill.
+const BADGE_STALE_DAYS = 30;
+const BADGE_STALE_MS = BADGE_STALE_DAYS * 24 * 60 * 60 * 1000;
+
+// Month names for the stale badge's "(May 2026)" suffix. ASCII only.
+const _BADGE_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
+// _badgeStateFor(envelope) -> { revoked, stale, stale_month_year } for the
+// route-side badge. Reads the SAME signals the public verify route trusts:
+//   revoked - the embedded signing key's fingerprint (recomputed from the
+//             embedded public key, never the claimed key_fingerprint) is
+//             'revoked' in the persisted key-revocation store. Revocation
+//             outranks both staleness and readiness.
+//   stale   - generated_at is older than BADGE_STALE_DAYS days. Readiness
+//             bucket colours only apply to fresh reports.
+// Deliberately ALLOWED to throw: the badge route wraps the state check + the
+// render in one try/catch that degrades to the grey "unknown" badge, so an
+// internal error in these checks reads as unknown - never a 500, and never a
+// wrongly-green pill.
+function _badgeStateFor(envelope) {
+  const out = { revoked: false, stale: false, stale_month_year: null };
+  if (!envelope || typeof envelope !== 'object') return out;
+  const fp = _embeddedKeyFingerprint(envelope);
+  if (fp && issuerKeyStatus(fp).status === 'revoked') {
+    out.revoked = true;
+    return out;
+  }
+  const gen = typeof envelope.generated_at === 'string' ? Date.parse(envelope.generated_at) : NaN;
+  if (Number.isFinite(gen) && Date.now() - gen > BADGE_STALE_MS) {
+    out.stale = true;
+    const d = new Date(gen);
+    out.stale_month_year = _BADGE_MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+  }
+  return out;
+}
+
+function renderBadgeSvg(envelope, state) {
+  // The right-hand value + its colour. Default = the grey "unknown" badge a
+  // caller gets when the slug does not resolve (or the envelope is malformed).
+  let label = 'agent security';
+  let value = 'unknown';
+  let color = '#9f9f9f'; // grey
+  try {
+    const st = _bObj(state);
+    if (st.revoked === true) {
+      // The issuer key behind this report is revoked: the signature can no
+      // longer be trusted, so the pill must never show a readiness number.
+      // Neutral grey (the existing unknown palette) - no alarm red.
+      value = 'report revoked';
+    } else if (st.stale === true) {
+      // Older than BADGE_STALE_DAYS: the report stays verifiable but the badge
+      // loses its colour and names the month it was generated.
+      value = st.stale_month_year ? ('stale (' + st.stale_month_year + ')') : 'stale';
+    } else {
+      const env = _bObj(envelope);
+      const summary = _bObj(env.summary);
+      const pct = summary.readiness_pct;
+      if (typeof pct === 'number' && Number.isFinite(pct)) {
+        const n = Math.max(0, Math.min(100, Math.round(pct)));
+        value = n + '% ready';
+        // Traffic-light by readiness: red < 50 <= amber < 80 <= green.
+        // Only reachable for a FRESH, non-revoked report (see above).
+        color = n >= 80 ? '#2e7d32' : (n >= 50 ? '#b58900' : '#c0392b');
+      }
+    }
+  } catch { /* fall through to the grey unknown badge - never throw */ }
+
+  const lw = Math.round(_textW(label));
+  const vw = Math.round(_textW(value));
+  const w = lw + vw;
+  const lblEsc = _svgEsc(label);
+  const valEsc = _svgEsc(value);
+  // Standard two-segment shields-style badge: a dark label half + a coloured
+  // value half. Self-contained (no external fonts / images). ASCII only.
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="20" role="img" '
+    + 'aria-label="' + lblEsc + ': ' + valEsc + '">'
+    + '<title>' + lblEsc + ': ' + valEsc + '</title>'
+    + '<linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/>'
+    + '<stop offset="1" stop-opacity=".1"/></linearGradient>'
+    + '<clipPath id="r"><rect width="' + w + '" height="20" rx="3" fill="#fff"/></clipPath>'
+    + '<g clip-path="url(#r)">'
+    + '<rect width="' + lw + '" height="20" fill="#444"/>'
+    + '<rect x="' + lw + '" width="' + vw + '" height="20" fill="' + color + '"/>'
+    + '<rect width="' + w + '" height="20" fill="url(#s)"/></g>'
+    + '<g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">'
+    + '<text x="' + (lw / 2) + '" y="14">' + lblEsc + '</text>'
+    + '<text x="' + (lw + vw / 2) + '" y="14">' + valEsc + '</text>'
+    + '</g></svg>';
 }
 
 export function register(r, deps = {}) {
@@ -364,12 +579,18 @@ export function register(r, deps = {}) {
     const trec = _authOrReject(req, res);
     if (!trec) return;
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    // 'kolm-capture' is the RESERVED grade-A source: only the scan/import
+    // bridge (which loads the tenant's own stored gateway captures) may stamp
+    // it. A caller-supplied source must never claim first-party capture.
+    if (_claimsCaptureSource(body.source)) {
+      return _err(res, 400, 'source_reserved', `source "${KOLM_CAPTURE_SOURCE}" is reserved for the gateway-capture bridge; POST /v1/audit/scan with {"source":"${KOLM_CAPTURE_SOURCE}"} and no logs instead`);
+    }
     const now = new Date().toISOString();
     const row = {
       id: _newId(),
       tenant_id: trec.id,
       subject: String(body.subject || 'Agent fleet').slice(0, 200),
-      source: body.source ? String(body.source).slice(0, 64) : null,
+      source: _normalizeSource(body.source) || null,
       retention_days: Number.isFinite(body.retention_days) ? body.retention_days : null,
       status: 'open',
       logs: '',
@@ -446,9 +667,12 @@ export function register(r, deps = {}) {
     if (!sess.record_count) return _err(res, 400, 'no_records', 'ingest at least one log record before running');
 
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    if (_claimsCaptureSource(body.source)) {
+      return _err(res, 400, 'source_reserved', `source "${KOLM_CAPTURE_SOURCE}" is reserved for the gateway-capture bridge; POST /v1/audit/scan with {"source":"${KOLM_CAPTURE_SOURCE}"} and no logs instead`);
+    }
     const sign = body.sign !== false;
     const { audit, report, signError, auditError } = _runAndSign(sess.logs, {
-      source: body.source || sess.source,
+      source: _normalizeSource(body.source) || sess.source,
       subject: body.subject || sess.subject,
       retentionDays: _clampRetentionDays(Number.isFinite(body.retention_days) ? body.retention_days : sess.retention_days),
       sign,
@@ -471,6 +695,17 @@ export function register(r, deps = {}) {
       tenant_id: trec.id, actor: trec.id, op: 'agent_audit.report_signed',
       payload: { id, report_id: report ? report.report_id : null, readiness_pct: audit.summary.readiness_pct, blocking: audit.summary.blocking_count, signed: !!report },
     });
+    // Fire-and-forget (never awaited): a signed report from a one-off session
+    // run announces itself the same way a Continuous re-attestation does.
+    if (report) {
+      _notifyReportReady(trec.id, {
+        id,
+        report_id: report.report_id,
+        subject: body.subject || sess.subject,
+        readiness_pct: audit.summary ? audit.summary.readiness_pct : null,
+        evidence_tier_grade: audit.evidence_tier ? (audit.evidence_tier.grade || null) : null,
+      });
+    }
     return res.json({
       ok: true,
       id,
@@ -576,26 +811,100 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
+  // POST /v1/audit/sessions/:id/delta?against=<other_session_or_report_id>
+  //   (AUTH, tenant-fenced) - the signed delta between two reports the CALLER
+  // already owns. Unlike GET /v1/trust/:slug/delta (PUBLIC, prior-vs-current off
+  // a slug's lineage), this diffs any two of the tenant's own reports addressed
+  // by session id (audses_*) OR report id (asrr_*). BOTH ids must resolve to a
+  // report owned by this tenant - a foreign / unknown id is {ok:false} (404/403),
+  // never another tenant's data. No re-sign; computeAuditDelta is pure + never
+  // throws. The :id is "current"; ?against=<id> is the prior baseline.
+  // -------------------------------------------------------------------------
+  r.post('/v1/audit/sessions/:id/delta', (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const id = req.params && req.params.id;
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const against = (req.query && req.query.against) || body.against;
+    if (!against) {
+      return _err(res, 400, 'against_required', 'pass ?against=<other_session_or_report_id> (a report you own)');
+    }
+    // Resolve the CURRENT side (the path id). A missing report is its own status
+    // so the caller can tell "you do not own this" from "it has no report yet".
+    const curRow = _resolveOwnedReportRow(trec.id, id);
+    if (!curRow) return _err(res, 404, 'not_found', `no audit ${id} for this tenant`);
+    if (!curRow.report) return _err(res, 409, 'report_not_ready', `audit ${id} has no signed report yet`);
+    // Resolve the AGAINST side (the prior baseline). A foreign / unknown id must
+    // be indistinguishable from "absent" so the route never leaks the existence
+    // of another tenant's report -> 404, not 403-with-detail.
+    const priorRow = _resolveOwnedReportRow(trec.id, String(against));
+    if (!priorRow) return _err(res, 404, 'against_not_found', `no audit ${against} for this tenant`);
+    if (!priorRow.report) return _err(res, 409, 'against_report_not_ready', `audit ${against} has no signed report yet`);
+
+    let delta = null;
+    try { delta = computeAuditDelta(priorRow.report, curRow.report); }
+    catch { delta = null; }
+    tryAppendAudit({ tenant_id: trec.id, actor: trec.id, op: 'agent_audit.delta', payload: { id, against: String(against), report_id: curRow.report_id || null, against_report_id: priorRow.report_id || null } });
+    return res.json({
+      ok: true,
+      id,
+      against: String(against),
+      report_id: curRow.report_id || null,
+      against_report_id: priorRow.report_id || null,
+      delta,
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // POST /v1/audit/scan - one-shot: logs → signed report in a single call.
   // The fast path behind the "Agent Exposure Scan" + the full report. Persists
   // a completed session by default so the report is fetchable + re-verifiable.
   // body: { logs, subject?, source?, retention_days?, sign?, persist? }
+  //
+  // Tier-A bridge: { "source": "kolm-capture" } with NO logs audits the CALLING
+  // tenant's own stored gateway captures/receipts instead of a vendor export.
+  // The resulting report carries evidence grade A (first-party capture). The
+  // source value is reserved: supplying it WITH logs is a clean 400, so vendor
+  // logs can never masquerade as gateway captures.
   // -------------------------------------------------------------------------
-  r.post('/v1/audit/scan', (req, res) => {
+  r.post('/v1/audit/scan', async (req, res) => {
     const trec = _authOrReject(req, res);
     if (!trec) return;
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
-    const logsInput = body.logs != null ? body.logs : null;
-    if (logsInput == null) return _err(res, 400, 'logs_required', 'POST { "logs": <JSONL text | array of records> }');
-    const { text, count } = _toJsonl(logsInput);
-    if (count === 0) return _err(res, 400, 'no_records', 'no parseable log records were supplied');
+    const isCaptureBridge = _claimsCaptureSource(body.source);
+
+    let text;
+    let count;
+    if (isCaptureBridge) {
+      if (body.logs != null) {
+        return _err(res, 400, 'logs_not_allowed', `source "${KOLM_CAPTURE_SOURCE}" audits this tenant's stored gateway captures; do not supply logs (use a vendor source tag for vendor logs)`);
+      }
+      let rows;
+      try { rows = await _loadTenantCaptures(trec); }
+      catch (e) { return _err(res, 500, 'capture_load_failed', e && e.message); }
+      if (!rows.length) {
+        return _err(res, 409, 'no_captures', 'this tenant has no stored gateway captures to audit; route agent traffic through the kolm gateway first, or scan a vendor log export');
+      }
+      ({ text, count } = _toJsonl(rows));
+      if (count === 0) {
+        return _err(res, 409, 'no_captures', 'this tenant has no auditable gateway captures');
+      }
+      if (Buffer.byteLength(text, 'utf8') > MAX_BYTES_PER_SESSION) {
+        return _err(res, 413, 'captures_too_large', `the stored captures exceed ${Math.floor(MAX_BYTES_PER_SESSION / (1024 * 1024))} MiB; contact dev@kolm.ai for a staged audit`);
+      }
+    } else {
+      const logsInput = body.logs != null ? body.logs : null;
+      if (logsInput == null) return _err(res, 400, 'logs_required', 'POST { "logs": <JSONL text | array of records> }');
+      ({ text, count } = _toJsonl(logsInput));
+      if (count === 0) return _err(res, 400, 'no_records', 'no parseable log records were supplied');
+    }
     if (count > MAX_RECORDS_PER_SESSION) {
       return _err(res, 413, 'too_many_records', `a scan holds at most ${MAX_RECORDS_PER_SESSION} records; split the export`);
     }
 
     const sign = body.sign !== false;
     const subject = String(body.subject || 'Agent fleet').slice(0, 200);
-    const source = body.source ? String(body.source).slice(0, 64) : 'import';
+    const source = isCaptureBridge ? KOLM_CAPTURE_SOURCE : (_normalizeSource(body.source) || 'import');
     const retentionDays = _clampRetentionDays(body.retention_days);
     const { audit, report, signError, auditError } = _runAndSign(text, {
       source, subject,
@@ -628,6 +937,17 @@ export function register(r, deps = {}) {
       tenant_id: trec.id, actor: trec.id, op: 'agent_audit.scan',
       payload: { id, report_id: report ? report.report_id : null, records: count, readiness_pct: audit.summary.readiness_pct, blocking: audit.summary.blocking_count, signed: !!report },
     });
+    // Fire-and-forget (never awaited): an authed one-shot scan that produced a
+    // signed report announces 'audit_report_ready' like the Continuous path.
+    if (report) {
+      _notifyReportReady(trec.id, {
+        id,
+        report_id: report.report_id,
+        subject,
+        readiness_pct: audit.summary ? audit.summary.readiness_pct : null,
+        evidence_tier_grade: audit.evidence_tier ? (audit.evidence_tier.grade || null) : null,
+      });
+    }
     return res.json({
       ok: true,
       id,
@@ -636,6 +956,7 @@ export function register(r, deps = {}) {
       key_fingerprint: report ? report.key_fingerprint : null,
       summary: audit.summary,
       ingest: audit.ingest,
+      evidence_tier: audit.evidence_tier || null,
       report: report ? report.envelope : null,
       verify_url: _verifyUrlFor(),
     });
@@ -878,46 +1199,79 @@ export function register(r, deps = {}) {
   // SAME scan -> sign path as /v1/audit/scan, yielding a signed report. Auth-
   // gated + tenant-fenced (the row is forced onto req.tenant_record.id), size-
   // capped (src/log-importer.js), and it never throws across the boundary.
-  // body: { source?: 'inline'|'url', logs?, url?, headers?, subject?, source_label?,
-  //         retention_days?, sign?, persist? }
+  // body: { source?: 'inline'|'url'|'kolm-capture', logs?, url?, headers?,
+  //         subject?, source_label?, retention_days?, sign?, persist? }
   // Designed to be hit on a schedule by a tiny sidecar (see docs/onramp.md).
+  //
+  // Tier-A bridge: source 'kolm-capture' skips the inline/url transport and
+  // audits the CALLING tenant's own stored gateway captures (grade A). The
+  // label is reserved - source_label may never claim it for vendor logs.
   // -------------------------------------------------------------------------
   r.post('/v1/audit/import', async (req, res) => {
     const trec = _authOrReject(req, res);
     if (!trec) return;
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
     const source = String(body.source || (body.url ? 'url' : 'inline')).toLowerCase();
-
-    let imported;
-    try {
-      imported = await importAgentLogs({
-        source,
-        url: body.url,
-        headers: body.headers,
-        logs: body.logs != null ? body.logs : null,
-        maxBytes: MAX_BYTES_PER_SESSION,
-      });
-    } catch (e) {
-      // importAgentLogs is contracted never to throw; this is belt-and-suspenders.
-      return _err(res, 500, 'import_failed', e && e.message);
-    }
-    if (!imported || !imported.ok) {
-      const reason = (imported && imported.reason) || 'import_failed';
-      const code = reason === 'too_large' ? 413
-        : (reason === 'fetch_failed' || reason === 'fetch_status' || reason === 'fetch_timeout' || reason === 'read_failed' || reason === 'fetch_unavailable') ? 502
-        : 400; // no_logs / url_required / invalid_url / blocked_url / invalid_source / unserializable_logs
-      return _err(res, code, reason, imported && imported.detail);
+    const isCaptureBridge = source === KOLM_CAPTURE_SOURCE;
+    if (!isCaptureBridge && _claimsCaptureSource(body.source_label)) {
+      return _err(res, 400, 'source_label_reserved', `source_label "${KOLM_CAPTURE_SOURCE}" is reserved for the gateway-capture bridge; use {"source":"${KOLM_CAPTURE_SOURCE}"} (no logs/url) to audit this tenant's stored gateway captures`);
     }
 
-    const { text, count } = _toJsonl(imported.payload);
-    if (count === 0) return _err(res, 400, 'no_records', 'no parseable log records were supplied');
+    let text;
+    let count;
+    let bytes;
+    if (isCaptureBridge) {
+      if (body.logs != null || body.url != null) {
+        return _err(res, 400, 'logs_not_allowed', `source "${KOLM_CAPTURE_SOURCE}" audits this tenant's stored gateway captures; do not supply logs or a url`);
+      }
+      let rows;
+      try { rows = await _loadTenantCaptures(trec); }
+      catch (e) { return _err(res, 500, 'capture_load_failed', e && e.message); }
+      if (!rows.length) {
+        return _err(res, 409, 'no_captures', 'this tenant has no stored gateway captures to audit; route agent traffic through the kolm gateway first, or import a vendor log export');
+      }
+      ({ text, count } = _toJsonl(rows));
+      if (count === 0) {
+        return _err(res, 409, 'no_captures', 'this tenant has no auditable gateway captures');
+      }
+      bytes = Buffer.byteLength(text, 'utf8');
+      if (bytes > MAX_BYTES_PER_SESSION) {
+        return _err(res, 413, 'captures_too_large', `the stored captures exceed ${Math.floor(MAX_BYTES_PER_SESSION / (1024 * 1024))} MiB; contact dev@kolm.ai for a staged audit`);
+      }
+    } else {
+      let imported;
+      try {
+        imported = await importAgentLogs({
+          source,
+          url: body.url,
+          headers: body.headers,
+          logs: body.logs != null ? body.logs : null,
+          maxBytes: MAX_BYTES_PER_SESSION,
+        });
+      } catch (e) {
+        // importAgentLogs is contracted never to throw; this is belt-and-suspenders.
+        return _err(res, 500, 'import_failed', e && e.message);
+      }
+      if (!imported || !imported.ok) {
+        const reason = (imported && imported.reason) || 'import_failed';
+        const code = reason === 'too_large' ? 413
+          : (reason === 'fetch_failed' || reason === 'fetch_status' || reason === 'fetch_timeout' || reason === 'read_failed' || reason === 'fetch_unavailable') ? 502
+          : 400; // no_logs / url_required / invalid_url / blocked_url / invalid_source / unserializable_logs
+        return _err(res, code, reason, imported && imported.detail);
+      }
+      ({ text, count } = _toJsonl(imported.payload));
+      if (count === 0) return _err(res, 400, 'no_records', 'no parseable log records were supplied');
+      bytes = imported.bytes;
+    }
     if (count > MAX_RECORDS_PER_SESSION) {
       return _err(res, 413, 'too_many_records', `an import holds at most ${MAX_RECORDS_PER_SESSION} records; split the export`);
     }
 
     const sign = body.sign !== false;
     const subject = String(body.subject || 'Agent fleet').slice(0, 200);
-    const srcLabel = body.source_label ? String(body.source_label).slice(0, 64) : (source === 'url' ? 'import:url' : 'import');
+    const srcLabel = isCaptureBridge
+      ? KOLM_CAPTURE_SOURCE
+      : (_normalizeSource(body.source_label) || (source === 'url' ? 'import:url' : 'import'));
     const retentionDays = _clampRetentionDays(body.retention_days);
     const { audit, report, signError, auditError } = _runAndSign(text, { source: srcLabel, subject, retentionDays, sign });
     if (auditError) {
@@ -944,18 +1298,30 @@ export function register(r, deps = {}) {
     }
     tryAppendAudit({
       tenant_id: trec.id, actor: trec.id, op: 'agent_audit.import',
-      payload: { id, source, report_id: report ? report.report_id : null, records: count, bytes: imported.bytes, readiness_pct: audit.summary.readiness_pct, signed: !!report },
+      payload: { id, source, report_id: report ? report.report_id : null, records: count, bytes, readiness_pct: audit.summary.readiness_pct, signed: !!report },
     });
+    // Fire-and-forget (never awaited): an authed import that produced a signed
+    // report announces 'audit_report_ready' like the Continuous path.
+    if (report) {
+      _notifyReportReady(trec.id, {
+        id,
+        report_id: report.report_id,
+        subject,
+        readiness_pct: audit.summary ? audit.summary.readiness_pct : null,
+        evidence_tier_grade: audit.evidence_tier ? (audit.evidence_tier.grade || null) : null,
+      });
+    }
     return res.json({
       ok: true,
       id,
       source,
-      bytes: imported.bytes,
+      bytes,
       report_id: report ? report.report_id : null,
       signed: !!report,
       key_fingerprint: report ? report.key_fingerprint : null,
       summary: audit.summary,
       ingest: audit.ingest,
+      evidence_tier: audit.evidence_tier || null,
       report: report ? report.envelope : null,
       verify_url: _verifyUrlFor(),
     });
@@ -1098,6 +1464,42 @@ export function register(r, deps = {}) {
     }
     res.setHeader('Cache-Control', 'no-store');
     return _sendExport(res, hit.envelope, req.query && req.query.format);
+  });
+
+  // -------------------------------------------------------------------------
+  // GET /v1/trust/:slug/badge.svg  (PUBLIC) - a small embeddable status badge
+  // ("Agent Security: NN% ready") for the shareable Trust link, so a vendor can
+  // drop the live readiness pill into a README / status page. Resolves the slug
+  // via the SAME resolveTrust path as GET /v1/trust/:slug/export. If the slug
+  // does not resolve (or has not generated its first report yet), it serves the
+  // grey "unknown" badge - it NEVER 500s. The badge is STATE-BEARING (a report
+  // older than BADGE_STALE_DAYS goes grey 'stale (Month YYYY)'; a report whose
+  // issuer key is revoked goes grey 'report revoked', outranking staleness and
+  // readiness), so it is cached for only 5 minutes - short enough that a
+  // revocation or freshness change propagates promptly. Allow-listed in
+  // src/auth.js PUBLIC_API alongside the other /v1/trust regexes.
+  // -------------------------------------------------------------------------
+  r.get('/v1/trust/:slug/badge.svg', (req, res) => {
+    const slug = req.params && req.params.slug;
+    let envelope = null;
+    try {
+      const hit = resolveTrust(slug);
+      // A resolved-but-pending Continuous link (no first report yet) has no
+      // envelope: fall through to the grey "unknown" badge, never an error.
+      if (hit && !hit.pending && hit.envelope) envelope = hit.envelope;
+    } catch { envelope = null; }
+    // State check (revocation + staleness) and render share ONE guard: any
+    // internal error in either degrades to the grey "unknown" badge via
+    // renderBadgeSvg(null) (itself never-throws), explicitly preserving the
+    // route's NEVER-500 property.
+    let svg;
+    try { svg = renderBadgeSvg(envelope, envelope ? _badgeStateFor(envelope) : null); }
+    catch { svg = renderBadgeSvg(null); }
+    res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+    // Short max-age: a state-bearing image must not be pinned in caches long
+    // after the underlying report goes stale or its issuer key is revoked.
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    return res.send(svg);
   });
 
   // -------------------------------------------------------------------------
@@ -1248,6 +1650,7 @@ export const AUDIT_ROUTES_SPEC = {
     'GET /v1/audit/sessions/:id',
     'GET /v1/audit/sessions/:id/report',
     'GET /v1/audit/sessions/:id/export',
+    'POST /v1/audit/sessions/:id/delta (auth, tenant-fenced)',
     'POST /v1/audit/sessions/:id/questionnaire',
     'GET /v1/audit/sessions/:id/questionnaire (auth, tenant-fenced)',
     'POST /v1/audit/scan',
@@ -1270,6 +1673,7 @@ export const AUDIT_ROUTES_SPEC = {
     'GET /v1/transparency-log/checkpoints (public)',
     'GET /v1/trust/:slug (public)',
     'GET /v1/trust/:slug/export (public)',
+    'GET /v1/trust/:slug/badge.svg (public)',
     'GET /v1/trust/:slug/questionnaire (public)',
     'GET /v1/trust/:slug/delta (public)',
     'GET /v1/trust/:slug/views (auth, tenant-fenced)',

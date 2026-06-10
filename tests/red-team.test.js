@@ -83,6 +83,50 @@ test('every probe is well-formed and maps to OWASP LLM Top 10 + MITRE ATLAS', ()
   }
 });
 
+test('probe framework refs carry named ids that split cleanly on the last space', () => {
+  const r = runRedTeam(fixtureEvents());
+  for (const p of r.probes) {
+    for (const ref of p.frameworks) {
+      // Shape: "FRAMEWORK ID (Label)". Mirrors framework-export.js splitFwRef:
+      // once the parenthetical label is stripped, the ref splits on its LAST
+      // space and the id segment must be one space-free token.
+      const m = ref.match(/^(.+) \(([^)]+)\)$/);
+      assert.ok(m, `${p.id} ref "${ref}" is "FRAMEWORK ID (Label)" shaped`);
+      const core = m[1];
+      const i = core.lastIndexOf(' ');
+      assert.ok(i > 0, `${p.id} ref "${ref}" carries a framework name + control id`);
+      const id = core.slice(i + 1);
+      assert.match(id, /^\S+$/, `${p.id} ref id "${id}" is space-free`);
+      assert.match(id, /\d/, `${p.id} ref id "${id}" is a named (numbered) control, not a bare family`);
+    }
+  }
+});
+
+test('agentic probes cite named OWASP ASI threats, never the bare ASI family', () => {
+  const r = runRedTeam(fixtureEvents());
+  for (const p of r.probes) {
+    for (const ref of (p.frameworks || []).filter((f) => f.startsWith('OWASP ASI'))) {
+      assert.match(ref, /^OWASP ASI(0[1-9]|10) \(/, `${p.id} ASI ref "${ref}" is a named ASI01-ASI10 id`);
+    }
+  }
+  // Per-probe precision: each agentic probe maps to the SPECIFIC threat it
+  // exercises (always-present core probes asserted directly).
+  const expect = {
+    'tool-confused-deputy': ['OWASP ASI02 (Tool misuse)', 'OWASP ASI03 (Identity & privilege abuse)'],
+    'jailbreak-relay': ['OWASP ASI03 (Identity & privilege abuse)', 'OWASP ASI08 (Cascading failures)'],
+    'runtime-guardrails-absent': ['OWASP ASI02 (Tool misuse)'],
+    'unbounded-tool-calls': ['OWASP ASI08 (Cascading failures)', 'OWASP ASI10 (Rogue agents)'],
+  };
+  for (const [pid, refs] of Object.entries(expect)) {
+    const got = probe(r, pid);
+    assert.ok(got, `core probe ${pid} present`);
+    for (const ref of refs) assert.ok(got.frameworks.includes(ref), `${pid} carries "${ref}"`);
+  }
+  // The finance domain probe is domain-gated; when present it cites ASI01.
+  const fin = probe(r, 'financial-transaction-injection');
+  if (fin) assert.ok(fin.frameworks.includes('OWASP ASI01 (Agent goal hijack)'), 'finance probe cites ASI01 (goal hijack)');
+});
+
 // ---------------------------------------------------------------------------
 // constrained scoring - never resisted without evidence; untested is not a pass.
 // ---------------------------------------------------------------------------

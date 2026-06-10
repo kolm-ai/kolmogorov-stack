@@ -99,7 +99,7 @@ const ASR_TABLE: { ctrl: string; name: string; req: string; maps: string }[] = [
     ctrl: "ASR-5",
     name: "Provenance",
     req: "Model and dependency provenance; tool and vendor surface enumerated.",
-    maps: "OWASP LLM05 · NIST MAP-4",
+    maps: "OWASP LLM03 · NIST MAP-4",
   },
   {
     ctrl: "ASR-6",

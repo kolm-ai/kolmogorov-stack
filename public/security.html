@@ -10,14 +10,14 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Security · kolm.ai</title>
-<meta name="description" content="To run a scan you upload redacted logs. Here is how kolm holds that data: redaction before processing, scoped per-tenant access, minimal retention, Ed25519 key management, a Merkle transparency log, and disclosure at dev@kolm.ai.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="description" content="You upload redacted logs; here is how kolm holds them. Redaction before upload, scoped per-tenant processing, minimal retention, Ed25519 key management, a Merkle transparency log, and disclosure at dev@kolm.ai.">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="How kolm holds the data you upload">
-<meta property="og:description" content="Redaction before processing, scoped per-tenant access, minimal retention, Ed25519 key management, and a Merkle transparency log. What we do, and what we do not retain.">
+<meta property="og:description" content="Redaction before upload, scoped per-tenant processing, minimal retention, Ed25519 key management, and a Merkle transparency log. What we do, and what we do not retain.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -43,12 +43,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "@type": "WebPage",
   "name": "Security at kolm.ai",
   "url": "https://kolm.ai/security",
-  "description": "How kolm holds the redacted logs you upload: redaction before processing, scoped per-tenant access, minimal retention, Ed25519 key management, a Merkle transparency log, and responsible disclosure.",
+  "description": "How kolm holds the redacted logs you upload: redaction before upload, scoped per-tenant processing, minimal retention, Ed25519 key management, a Merkle transparency log, and responsible disclosure.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
@@ -73,7 +74,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -81,268 +82,277 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- ============================================================ 1. HERO -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:68ch">
-      <h1>You are handing us logs. Here is what we do with them.</h1>
-      <p class="lede">
-        To run a scan you upload redacted logs. This page is the operational record of
-        how we hold that data: what we process, what we keep, and what we discard. Concrete,
-        not reassuring. The signing facts below are the same ones your buyer checks offline.
-      </p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="/verify">Verify a report</a>
-        <a class="btn btn--ghost" href="/contact">Start an audit</a>
-      </div>
-      <div class="trustline" aria-label="How kolm holds your data">
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Redacted before it reaches us</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Processed in scope, then discarded</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed, verifiable offline</span>
-      </div>
+    <p class="eyebrow">Security at kolm</p>
+    <h1>You hand us logs. <span class="go">Here is exactly what we do with them.</span></h1>
+    <p class="lede">
+      A scan runs on logs you redact before upload. This page is the operational record:
+      what we process, what we keep, and what we discard. The signing facts below are the
+      same ones your buyer checks offline.
+    </p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost" href="/contact">Start an audit</a>
     </div>
-  </div>
-</section>
-
-<!-- ============================================================ 2. POSTURE STRIP -->
-<section class="section" style="padding-top:0;border-top:0" aria-label="Posture at a glance">
-  <div class="wrap">
-    <h2 class="sr-only">Posture at a glance</h2>
-    <hr class="rule">
-    <div class="band">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="band__item">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        AES-256 at rest, TLS 1.3 in transit
-      </span>
-      <span class="band__item">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <a href="/transparency-log">Merkle transparency log (RFC 6962 style)</a>
-      </span>
+    <div class="hero__proof" aria-label="Posture at a glance">
+      <span><i class="dot" aria-hidden="true"></i>Redacted before upload</span>
+      <span><i class="dot" aria-hidden="true"></i>AES-256 at rest · TLS 1.3 in transit</span>
+      <span><i class="dot" aria-hidden="true"></i>Ed25519 · Merkle transparency log</span>
     </div>
-    <div class="band" style="padding-top:0">
+    <div class="band" style="padding-bottom:0">
       <span class="ctrlid">SSO + MFA</span>
       <span class="ctrlid">Quarterly access review</span>
       <span class="ctrlid">Per-tenant isolation</span>
       <span class="ctrlid">Minimal retention</span>
       <span class="ctrlid">SBOM per release</span>
     </div>
-    <hr class="rule">
   </div>
 </section>
 
-<!-- ============================================================ 3. HOW WE HOLD YOUR DATA -->
+<!-- ============================================================ 2. HOW WE HOLD YOUR DATA -->
 <section class="section reveal" id="data">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / How we hold your data</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">01 / How we hold your data</span>
-      <h2>The data you send is redacted, scoped, and short-lived.</h2>
-      <p class="lede">
-        You are evaluating a vendor with your own logs. Reasonable people want to know exactly
-        what leaves their side and how long it lives on ours. The answer is small: redacted input
-        in, a signed report out, and very little kept in between.
-      </p>
+      <h2>Redacted in. A signed report out. Little kept in between.</h2>
+      <p class="lede">You are evaluating a security vendor with your own logs. The surface we hold is deliberately small.</p>
     </div>
     <div class="grid grid--3">
       <div class="card reveal">
         <p class="card__k">What you send</p>
         <h3>Redacted logs, not raw traffic</h3>
-        <p>A scan runs on logs you redact before upload. Secrets, customer identifiers, and payloads you strip stay on your side. We work from exactly what you choose to send.</p>
+        <p>You strip secrets, customer identifiers and payloads before upload. We work from exactly what you choose to send.</p>
         <p class="card__map">ASR-3 · data egress</p>
       </div>
       <div class="card reveal">
         <p class="card__k">What we touch</p>
         <h3>Only what the engagement scopes</h3>
-        <p>Processing is bounded by the scope in your engagement. Access is scoped per tenant with per-row fences, so one tenant's data is never in another's query path.</p>
+        <p>Processing is bounded by your engagement scope. Access is fenced per tenant, per row: one tenant's data is never in another's query path.</p>
         <p class="card__map">ASR-1 · least privilege</p>
       </div>
       <div class="card reveal">
         <p class="card__k">What we keep</p>
-        <h3>The signed artifact, not your raw data</h3>
-        <p>The output is one signed evidence report and its log entry. Raw uploaded logs are not retained past the run that produced it. The report is the record; the inputs are not.</p>
+        <h3>The signed artifact, not your uploads</h3>
+        <p>What persists is one signed report and its log entry. Raw logs are not retained past the run that produced it.</p>
         <p class="card__map">ASR-6 · evidence</p>
+      </div>
+    </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 4. DATA HANDLING (the ledger / dark beat) -->
+<!-- ============================================================ 3. DATA HANDLING (proof panel) -->
 <section class="section section--ink reveal" id="handling">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / Data handling</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">02 / Data handling</span>
       <h2>Redact. Process in scope. Retain only the artifact.</h2>
-      <p class="lede">
-        One short lifecycle. Redaction happens on your side first, processing stays inside the
-        assessed scope, and what persists afterward is the signed report, not your uploads.
-      </p>
+      <p class="lede">One short lifecycle, and the controls that hold each stage.</p>
     </div>
-
-    <div class="flow" aria-label="The redact, process and retain lifecycle">
-      <div class="flow__node">
-        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h9M4 18h13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M15.5 10.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-        <span class="flow__n">01 · Redact</span>
-        <span class="flow__t">You strip it first</span>
-        <p class="flow__d">Logs are redacted on your side before upload. Field-level redaction removes secrets and customer identifiers before anything reaches our processing.</p>
+    <div class="steps">
+      <div class="step">
+        <span class="step__n">01 · redact</span>
+        <h3>You strip it first</h3>
+        <p>Field-level redaction removes secrets and customer identifiers on your side, before anything reaches our processing.</p>
       </div>
-      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="flow__node">
-        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 11.5l2.4 2.4L15.5 9.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <span class="flow__n">02 · Process</span>
-        <span class="flow__t">We work in scope</span>
-        <p class="flow__d">Processing runs against the redacted input inside the assessed scope. Data is encrypted in transit (TLS 1.3) and at rest (AES-256), isolated per tenant.</p>
+      <div class="step">
+        <span class="step__n">02 · process</span>
+        <h3>We work in scope</h3>
+        <p>The redacted input is processed inside the assessed scope: TLS 1.3 in transit, AES-256 at rest, isolated per tenant.</p>
       </div>
-      <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="flow__node">
-        <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h8l4 4v14H7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 14.5l2 2 3.5-3.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <span class="flow__n">03 · Retain</span>
-        <span class="flow__t">We keep the report</span>
-        <p class="flow__d">What persists is the signed report and its log entry. Raw uploads are not retained beyond the run. Minimal retention by default, not by request.</p>
+      <div class="step">
+        <span class="step__n">03 · retain</span>
+        <h3>We keep the report</h3>
+        <p>The signed report and its log entry persist. Raw uploads do not outlive the run. Minimal retention by default, not by request.</p>
       </div>
     </div>
-
-    <div class="grid grid--3" style="margin-top:var(--s7)">
+    <div class="grid grid--3" style="margin-top:var(--s6)">
       <div class="card">
         <p class="card__k">Encryption</p>
         <h3>AES-256 at rest, TLS 1.3 in transit</h3>
-        <p>Data in the hosted control plane is encrypted at rest with AES-256 (AWS KMS, per-tenant data keys). Client traffic uses TLS 1.3 with HSTS.</p>
+        <p>Hosted control plane data is encrypted with AES-256 (AWS KMS, per-tenant data keys). Client traffic uses TLS 1.3 with HSTS.</p>
       </div>
       <div class="card">
         <p class="card__k">Isolation</p>
         <h3>Per-tenant, per-namespace, per-row</h3>
-        <p>Data is isolated at the tenant and namespace level, with per-row tenant fences inside every query handler. Defense in depth, not a single boundary.</p>
+        <p>Tenant and namespace isolation, plus per-row tenant fences inside every query handler. Defense in depth, not a single boundary.</p>
       </div>
       <div class="card">
         <p class="card__k">Access</p>
         <h3>SSO-gated, MFA-enforced, reviewed quarterly</h3>
-        <p>Engineering access to the control plane is SSO-gated and MFA-enforced, reviewed quarterly. Production access is written to an immutable audit store.</p>
+        <p>Engineering access to the control plane is SSO-gated and MFA-enforced. Production access is written to an immutable audit store.</p>
       </div>
     </div>
-
-    <p class="hero__claim" style="margin-top:var(--s7)">
-      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
-    </p>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 5. SIGNING KEY MANAGEMENT -->
-<section class="section reveal" id="signing">
+<!-- ============================================================ 4. SIGNING KEY MANAGEMENT -->
+<section class="section sect--air reveal" id="signing">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / Signing keys</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">03</span>
     <div class="section__head">
-      <span class="idx">03 / Signing key management</span>
       <h2>One Ed25519 key signs every report. The private half stays put.</h2>
-      <p class="lede">
-        The signature your buyer checks is only as good as the key behind it. We keep that key
-        small, single-purpose, and rotated, and we publish the fingerprint so verification needs
-        nothing from us at check time.
-      </p>
+      <p class="lede">The signature your buyer checks is only as good as the key behind it. We keep that key small, single-purpose and rotated, and publish the fingerprint.</p>
     </div>
+    <figure class="diag reveal" role="img" aria-label="Signature chain: canonical report bytes are hashed with SHA-256 and signed with Ed25519; altering any byte voids the seal">
+    <svg viewBox="0 0 720 176" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path class="dg-flow" d="M150 60 H186 M330 60 H366 M548 60 H584"/>
+      <rect class="dg-box" x="8" y="28" width="142" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="22" y="48">Bytes</text>
+      <text class="dg-t" x="22" y="68">Report JSON</text>
+      <text class="dg-mono" x="22" y="84">canonicalized</text>
+      <polygon class="dg-ok" points="186,60 178,55.5 178,64.5"/>
+      <rect class="dg-box" x="188" y="28" width="142" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="202" y="48">Digest</text>
+      <text class="dg-t" x="202" y="68">SHA-256</text>
+      <text class="dg-mono" x="202" y="84">32-byte hash</text>
+      <polygon class="dg-ok" points="366,60 358,55.5 358,64.5"/>
+      <rect class="dg-box" x="368" y="28" width="180" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="382" y="48">Signature</text>
+      <text class="dg-t" x="382" y="68">Ed25519 sign</text>
+      <text class="dg-mono" x="382" y="84">kid kolm-prod-2026</text>
+      <polygon class="dg-ok" points="584,60 576,55.5 576,64.5"/>
+      <rect class="dg-box--ok" x="586" y="28" width="126" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="600" y="48">Seal</text>
+      <text class="dg-t" x="600" y="68">SEALED</text>
+      <path class="dg-ok" d="M600 78 l3.5 3.5 L611 74" fill="none" stroke="#3FE5A0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="dg-line" d="M79 92 V140 H520" stroke-dasharray="3 5"/>
+      <polygon points="520,140 512,135.5 512,144.5" fill="#E0A89F"/>
+      <rect class="dg-box--void" x="522" y="120" width="190" height="40" rx="9"/>
+      <text class="dg-void-t dg-k" x="536" y="138">VOID</text>
+      <text class="dg-mono" x="536" y="152">one changed byte breaks it</text>
+    </svg>
+    <figcaption class="diag__cap"><b>Why it holds</b> the signature covers the exact bytes, so the report cannot be quietly edited</figcaption>
+    </figure>
     <div class="split" style="align-items:flex-start">
       <div>
-        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px">
-          <li><span class="ok-text">+</span> Reports are canonicalized to JCS, hashed with SHA-256, then signed with Ed25519</li>
-          <li><span class="ok-text">+</span> The private key stays in the signing service; only the public key fingerprint travels in the report</li>
-          <li><span class="ok-text">+</span> Editing any field after signing invalidates the signature, in front of the reviewer</li>
-          <li><span class="ok-text">+</span> Rotation runs via <span class="mono">kolm keys rotate</span> on a defined cadence</li>
-          <li><span class="ok-text">+</span> Prior reports stay verifiable because each carries the fingerprint it was signed with</li>
+        <ul class="ledger" style="margin-top:0">
+          <li>Reports are canonicalized to kolm canonical JSON (keys sorted, no whitespace; <a href="/spec">format spec</a>), then signed with Ed25519</li>
+          <li>The private key stays in the signing service; only the public key fingerprint travels in the report</li>
+          <li>Editing any field after signing breaks the signature, in front of the reviewer</li>
+          <li>Rotation runs via <span class="mono">kolm keys rotate</span> on a defined cadence; prior reports stay verifiable under the fingerprint they carry</li>
         </ul>
+        <p style="color:var(--ink-2);margin-top:20px;font-size:14px">What an attacker would have to beat, tier by tier, and what we do not defend, is written down in one place.</p>
+        <a class="btn btn--ghost" href="/security/threat-model" style="margin-top:14px;display:inline-flex">Read the threat model</a>
       </div>
-      <div class="report register">
+      <div class="report register register--keys">
         <div class="register__row"><span class="register__k">key_id</span><span class="register__v"><b>kolm-prod-2026</b></span></div>
         <div class="register__row"><span class="register__k">algorithm</span><span class="register__v">ed25519</span></div>
-        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
-        <div class="register__row"><span class="register__k">fingerprint</span><span class="register__v"><b>fa562154...c0a4</b></span></div>
-        <div class="register__row"><span class="register__k">private_key</span><span class="register__v">stays in the signer <span class="ann">not in any report</span></span></div>
+        <div class="register__row"><span class="register__k">public_key</span><span class="register__v">embedded PEM <span class="ann">in every report</span></span></div>
+        <div class="register__row"><span class="register__k">fingerprint</span><span class="register__v"><b>fa562154f99c95f4...</b></span></div>
+        <div class="register__row"><span class="register__k">private_key</span><span class="register__v">stays in the signer <span class="ann">never in a report</span></span></div>
         <div class="register__row"><span class="register__k">rotation</span><span class="register__v">defined cadence <span class="ann">kolm keys rotate</span></span></div>
         <div class="register__row"><span class="register__k">prior_reports</span><span class="register__v"><b>remain verifiable</b></span></div>
       </div>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 6. TRANSPARENCY LOG -->
-<section class="section reveal" id="transparency">
+<!-- ============================================================ 5. TRANSPARENCY LOG -->
+<section class="section sect--dense reveal" id="transparency">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">04 / Transparency log</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">04 / Transparency log</span>
       <h2>Every signature lands in a Merkle log you can audit.</h2>
-      <p class="lede">
-        A signature you cannot situate in a record is a signature you have to take on faith. Each
-        signed report is appended to a public log, so a reviewer can confirm it was issued and
-        never quietly altered.
-      </p>
+      <p class="lede">A signature you cannot situate in a record is a signature taken on faith. Each signed report is appended to a public log a reviewer audits independently.</p>
     </div>
     <div class="split" style="align-items:flex-start">
       <div>
-        <p>Each signed report is appended to a transparency log structured after RFC 6962. Entries are SHA-256 hashed into a Merkle tree, so no entry can be edited or removed without changing the root. Every report ships with an inclusion proof a reviewer checks independently.</p>
-        <p style="margin-top:16px">This is a Merkle log, not a blockchain. An Ed25519 and SHA-256 append-only structure, with no tokens, no wallets, and no distributed ledger. The log is public and anyone can recompute the root.</p>
-        <a class="btn btn--ghost" href="/transparency-log" style="margin-top:24px;display:inline-flex">View the transparency log</a>
+        <p style="color:var(--ink-2)">Entries are SHA-256 hashed into a Merkle tree structured after RFC 6962, so nothing can be edited or removed without changing the root. Every report ships with an inclusion proof.</p>
+        <p style="color:var(--ink-2);margin-top:14px">This is a Merkle log, not a blockchain: an append-only structure with no tokens, no wallets, no distributed ledger. The log is public and anyone can recompute the root.</p>
+        <a class="btn btn--ghost" href="/transparency-log" style="margin-top:20px;display:inline-flex">View the transparency log</a>
       </div>
       <div class="report register">
         <div class="register__row"><span class="register__k">structure</span><span class="register__v">rfc6962-merkle</span></div>
         <div class="register__row"><span class="register__k">hash</span><span class="register__v">sha-256</span></div>
         <div class="register__row"><span class="register__k">append_only</span><span class="register__v"><b>true</b> <span class="ann">no edits, no deletes</span></span></div>
-        <div class="register__row"><span class="register__k">tree_size</span><span class="register__v">1428 <span class="ann">illustrative</span></span></div>
-        <div class="register__row"><span class="register__k">root</span><span class="register__v"><b>sha256:7b91...c0a4</b></span></div>
         <div class="register__row"><span class="register__k">inclusion</span><span class="register__v">per-report proof</span></div>
         <div class="register__row"><span class="register__k">live_root</span><span class="register__v">kolm.ai/transparency-log</span></div>
+      </div>
+    </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 7. RESPONSIBLE DISCLOSURE -->
+<!-- ============================================================ 6. RESPONSIBLE DISCLOSURE -->
 <section class="section reveal" id="disclosure">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">05 / Responsible disclosure</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">05</span>
     <div class="section__head">
-      <span class="idx">05 / Responsible disclosure</span>
       <h2>Found something? Tell us, and you are covered.</h2>
-      <p class="lede">
-        If you find a security issue in our hosted services, signing pipeline, CLI, or evidence
-        format, report it to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> with a writeup,
-        reproduction steps, and the impact you assessed.
-      </p>
+      <p class="lede">Report issues in our hosted services, signing pipeline, CLI or evidence format to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> with a writeup, reproduction steps and assessed impact.</p>
     </div>
     <ul class="ledger" style="margin:0 0 var(--s6)">
-      <li>We acknowledge within 24 hours and triage within 72 hours</li>
-      <li>Coordinated disclosure window of 90 days from a verified report</li>
-      <li>We aim to remediate well before the window closes, and we say so proactively if a fix needs longer</li>
-      <li>We do not pursue legal action against researchers acting in good faith under this policy</li>
+      <li><b>24 hours</b> to acknowledge, <b>72 hours</b> to triage</li>
+      <li><b>90-day</b> coordinated disclosure window from a verified report, with proactive notice if a fix needs longer</li>
+      <li>No legal action against researchers acting in good faith under this policy</li>
     </ul>
     <div class="grid grid--3">
       <div class="card reveal">
         <p class="card__k">Dependency hygiene</p>
         <h3>Critical CVEs in 7 days</h3>
-        <p>Critical CVEs in dependencies are patched within 7 days, high severity within 30. A CycloneDX SBOM ships with every CLI release, signed and verifiable against the release tag.</p>
+        <p>Critical CVEs patched within 7 days, high severity within 30. A CycloneDX SBOM ships with every CLI release, signed against the release tag.</p>
       </div>
       <div class="card reveal">
         <p class="card__k">Supply chain</p>
         <h3>Signed, reproducible releases</h3>
-        <p>CLI releases are signed and built from a reproducible script in the public repository, so a downstream consumer can audit the dependency tree and confirm the bytes.</p>
+        <p>CLI releases are signed and built from a reproducible script in the public repository, so consumers can audit the tree and confirm the bytes.</p>
       </div>
       <div class="card reveal">
         <p class="card__k">Incident response</p>
         <h3>On-call, with a written follow-up</h3>
-        <p>An on-call rotation covers the hosted gateway and signing pipeline. Post-incident reviews are shared with affected enterprise customers within 14 days of closure.</p>
+        <p>An on-call rotation covers the hosted gateway and signing pipeline. Post-incident reviews reach affected enterprise customers within 14 days of closure.</p>
       </div>
     </div>
-    <p class="hero__claim" style="margin-top:var(--s4)">
+    <p class="hero__claim" style="margin-top:var(--s5);max-width:74ch">
       To be exact about kolm itself: we do not currently hold a SOC 2 report, and there is no published third-party penetration test of our own infrastructure. We will not list either until it exists and can be verified. What we offer today is evidence you can check yourself: the signing facts above, the Merkle log, and the open verifier. Questions? Email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.
     </p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 8. FINAL CTA -->
+<!-- ============================================================ 7. FINAL CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Checkable beats claimed.</h2>
-    <p class="lede">Pull a report, edit a byte, watch the seal break. The same Ed25519 key signs everything we issue, and every signature lands in the log.</p>
+    <p class="lede">Pull a report, edit a byte, watch the seal break. One Ed25519 key signs everything we issue, and every signature lands in the log.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/verify">Verify a report</a>
       <a class="btn btn--ghost" href="/transparency-log">View the transparency log</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -365,24 +375,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -390,7 +403,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

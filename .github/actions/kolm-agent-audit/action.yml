@@ -2,8 +2,11 @@ name: kolm agent security audit
 description: >
   Run a kolm Agent Security-Review scan over your agent logs in CI. Auto-detects
   Datadog LLM Observability, LangSmith, or OpenTelemetry exports, normalizes them,
-  scans for least-privilege / audit-trail / data-egress blockers, and fails the
-  job when readiness is below a threshold or a blocking finding is present.
+  scans for least-privilege / audit-trail / data-egress blockers, computes the
+  signed delta against the prior report for the same subject, upserts one PR
+  comment showing that delta (control transitions and counts only, never raw
+  finding detail), and gates the job per gate-mode: report-only (default),
+  fail-on-new-high, fail-on-regression, or the legacy absolute thresholds.
 author: Kolm
 
 branding:
@@ -30,12 +33,44 @@ inputs:
     description: What the report is about (shown on the signed report).
     required: false
     default: "Agent fleet"
+  gate-mode:
+    description: >-
+      How the job is gated. report-only never fails the build on findings (it still
+      scans, comments, and summarizes). fail-on-new-high fails only when the delta
+      against the prior signed report adds a high or critical finding, or a control
+      newly enters blocking. fail-on-regression also fails when readiness drops or
+      any control status worsens. legacy restores the absolute min-readiness /
+      fail-on-blocking gate from earlier versions. The first run on a subject
+      establishes a baseline and passes in every mode.
+    required: false
+    default: "report-only"
+  github-token:
+    description: >-
+      Token used to upsert the single kolm comment on the pull request (for example
+      the workflow's github.token, with pull-requests write permission). Leave empty
+      to skip the comment. The same content is always written to the job summary.
+    required: false
+    default: ""
+  comment:
+    description: Post or update the one kolm PR comment when a token and a pull request context are present.
+    required: false
+    default: "true"
+  trust-slug:
+    description: Optional public Trust link slug, included in the PR comment when set.
+    required: false
+    default: ""
   min-readiness:
-    description: Fail the job when the scan readiness percent is below this value (0 - 100).
+    description: >-
+      Legacy absolute gate. Fail the job when the scan readiness percent is below this
+      value (0 - 100). Authoritative when gate-mode is legacy; under the delta gate
+      modes it is enforced only when the step env sets KOLM_AUDIT_ABSOLUTE_GATE=true,
+      and never under report-only.
     required: false
     default: "80"
   fail-on-blocking:
-    description: Fail the job when the scan returns one or more blocking findings.
+    description: >-
+      Legacy absolute gate. Fail the job when the scan returns one or more blocking
+      findings. Same applicability rules as min-readiness.
     required: false
     default: "true"
   sign:
@@ -66,6 +101,12 @@ outputs:
   passed:
     description: Whether the gate passed. Either true or false.
     value: ${{ steps.audit.outputs.passed }}
+  baseline:
+    description: true when this run had no prior signed report for the subject and established the baseline.
+    value: ${{ steps.audit.outputs.baseline }}
+  gate-mode:
+    description: The gate mode the run resolved to.
+    value: ${{ steps.audit.outputs.gate-mode }}
 
 runs:
   using: composite
@@ -79,6 +120,10 @@ runs:
         KOLM_AUDIT_LOGS: ${{ inputs.logs }}
         KOLM_AUDIT_SOURCE: ${{ inputs.source }}
         KOLM_AUDIT_SUBJECT: ${{ inputs.subject }}
+        KOLM_GATE_MODE: ${{ inputs.gate-mode }}
+        KOLM_GITHUB_TOKEN: ${{ inputs.github-token }}
+        KOLM_AUDIT_COMMENT: ${{ inputs.comment }}
+        KOLM_TRUST_SLUG: ${{ inputs.trust-slug }}
         KOLM_AUDIT_MIN_READINESS: ${{ inputs.min-readiness }}
         KOLM_AUDIT_FAIL_ON_BLOCKING: ${{ inputs.fail-on-blocking }}
         KOLM_AUDIT_SIGN: ${{ inputs.sign }}

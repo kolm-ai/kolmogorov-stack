@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Docs · kolm.ai</title>
 <meta name="description" content="How to put your agent into kolm (import the logs you already have or run a sidecar proxy), how a buyer verifies a signed report offline in the browser, the CLI, or a library, and the report schema each signature covers. No account, no server in the trust path.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -51,6 +51,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
 <hr class="foil-strip" aria-hidden="true">
@@ -75,7 +76,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -83,14 +84,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
-<!-- ============================================================ 1. START HERE -->
-<section class="section section--flush">
+<!-- ============================================================ 1. HERO / START HERE -->
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:70ch">
-      <span class="idx">01 / Start here</span>
-      <h1>Hand your reviewer a report they can check themselves.</h1>
+    <div style="max-width:70ch">
+      <p class="eyebrow">Documentation</p>
+      <h1>Hand your reviewer a report <span class="go">they can check themselves.</span></h1>
       <p class="lede">
         These docs cover the three things you do with kolm: get your agent's activity in,
         hand your buyer a signed report, and let them verify it offline against your key,
@@ -101,10 +102,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a class="btn btn--primary" href="/verify">Open the verifier</a>
         <a class="btn btn--ghost" href="/report">Anatomy of a report</a>
       </div>
-      <div class="trustline" aria-label="What the docs assume">
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline, no account</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>One canonicalization, everywhere</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Apache-2.0 verifier</span>
+      <div class="hero__proof" aria-label="What the docs assume">
+        <span><i class="dot" aria-hidden="true"></i>Verified offline, no account</span>
+        <span><i class="dot" aria-hidden="true"></i>One canonicalization, everywhere</span>
+        <span><i class="dot" aria-hidden="true"></i>Apache-2.0 verifier</span>
       </div>
     </div>
 
@@ -112,27 +113,64 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="step">
         <span class="step__n">Step 01</span>
         <h3>Onramp your agent</h3>
-        <p>Import the logs you already produce, or run a sidecar proxy for a live capture. No rewrite. <a href="#onramp" class="card__map" style="margin-top:10px;display:inline-block"><span style="border-bottom:1px solid var(--line-2)">Go to onramp</span></a></p>
+        <p>Import the logs you already produce, or run a sidecar proxy for a live capture. No rewrite. <a href="#onramp" class="card__map" style="margin-top:10px;display:block"><span style="border-bottom:1px solid var(--line-2)">Go to onramp</span></a></p>
       </div>
       <div class="step">
         <span class="step__n">Step 02</span>
         <h3>Verify the report</h3>
-        <p>Your buyer checks the Ed25519 signature offline in the browser, the CLI, or a library. <a href="#verify" class="card__map" style="margin-top:10px;display:inline-block"><span style="border-bottom:1px solid var(--line-2)">Go to verify</span></a></p>
+        <p>Your buyer checks the Ed25519 signature offline in the browser, the CLI, or a library. <a href="#verify" class="card__map" style="margin-top:10px;display:block"><span style="border-bottom:1px solid var(--line-2)">Go to verify</span></a></p>
       </div>
       <div class="step">
         <span class="step__n">Step 03</span>
         <h3>Read the schema</h3>
-        <p>See the exact bytes a signature commits to, so any edit is self-evident. <a href="#report-schema" class="card__map" style="margin-top:10px;display:inline-block"><span style="border-bottom:1px solid var(--line-2)">Go to the schema</span></a></p>
+        <p>See the exact bytes a signature commits to, so any edit is self-evident. <a href="#report-schema" class="card__map" style="margin-top:10px;display:block"><span style="border-bottom:1px solid var(--line-2)">Go to the schema</span></a></p>
       </div>
     </div>
+
+    <figure class="diag reveal" role="img" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
+    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path class="dg-flow" d="M158 68 H198 M380 68 H420 M602 68 H630"/>
+      <rect class="dg-box" x="8" y="36" width="150" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="22" y="56">Input</text>
+      <text class="dg-t" x="22" y="76">Agent logs</text>
+      <text class="dg-mono" x="22" y="92">import or sidecar</text>
+      <polygon class="dg-ok" points="198,68 190,63.5 190,72.5"/>
+      <rect class="dg-box" x="200" y="36" width="180" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="214" y="56">Engine</text>
+      <text class="dg-t" x="214" y="76">Audit run</text>
+      <text class="dg-mono" x="214" y="92">ASR-01 .. ASR-08</text>
+      <polygon class="dg-ok" points="420,68 412,63.5 412,72.5"/>
+      <rect class="dg-box--ok" x="422" y="36" width="180" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="436" y="56">Output</text>
+      <text class="dg-t" x="436" y="76">Signed report</text>
+      <text class="dg-mono" x="436" y="92">Ed25519 envelope</text>
+      <polygon class="dg-ok" points="630,68 622,63.5 622,72.5"/>
+      <circle class="dg-dot" cx="646" cy="68" r="4"/>
+      <text class="dg-label" x="658" y="72">verify</text>
+      <path class="dg-line" d="M290 100 V128"/>
+      <text class="dg-mono" x="208" y="146">permissions &#183; audit trail &#183; egress &#183; injection</text>
+    </svg>
+    <figcaption class="diag__cap"><b>Pipeline</b> same logs in, same signature out: the run is reproducible end to end</figcaption>
+    </figure>
   </div>
 </section>
 
 <!-- ============================================================ 2. ONRAMP -->
-<section class="section reveal" id="onramp">
+<style>@media (max-width:720px){ .toc-rail{display:none} }</style>
+<section class="section sect--dense reveal" id="onramp">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail">
+        <nav class="toc-rail" aria-label="On this page">
+          <a href="#onramp" class="is-here">01 onramp</a>
+          <a href="#verify">02 verify</a>
+          <a href="#report-schema">03 schema</a>
+          <a href="#ci">04 ci</a>
+        </nav>
+      </div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">02 / Onramp</span>
+      <span class="idx">01 / Onramp</span>
       <h2>Get your agent's activity in.</h2>
       <p class="lede">
         Two onramps, one outcome. Import the logs you already have, or run a sidecar proxy for a
@@ -157,19 +195,33 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p class="hero__claim" style="margin-top:var(--s5)">
       Once the activity is in, the audit and signing run as compute. See <a href="/how-it-works" style="border-bottom:1px solid var(--line-2)">how it works</a> for the full lifecycle.
     </p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 3. VERIFY (the ledger) -->
 <section class="section section--ink reveal" id="verify">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail">
+        <nav class="toc-rail" aria-label="On this page">
+          <a href="#onramp">01 onramp</a>
+          <a href="#verify" class="is-here">02 verify</a>
+          <a href="#report-schema">03 schema</a>
+          <a href="#ci">04 ci</a>
+        </nav>
+      </div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">03 / Verify a report</span>
+      <span class="idx">02 / Verify a report</span>
       <h2>Your buyer verifies it offline.</h2>
       <p class="lede">
         The same Ed25519 check runs three ways, with the identical canonicalization. No account,
         no upload, no kolm server in the trust path. The report carries the public key it was
-        signed with, so the check needs nothing from us.
+        signed with, so the check needs nothing from us. The envelope is an open format:
+        <a href="/spec">read the spec</a>.
       </p>
     </div>
 
@@ -219,14 +271,26 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <a class="btn btn--primary" href="/verify">Open the verifier</a>
       <a class="btn btn--ghost" href="/sample-audit-report.json" download>Download the sample</a>
     </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 4. THE REPORT SCHEMA -->
 <section class="section reveal" id="report-schema">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail">
+        <nav class="toc-rail" aria-label="On this page">
+          <a href="#onramp">01 onramp</a>
+          <a href="#verify">02 verify</a>
+          <a href="#report-schema" class="is-here">03 schema</a>
+          <a href="#ci">04 ci</a>
+        </nav>
+      </div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">04 / The report schema</span>
+      <span class="idx">03 / The report schema</span>
       <h2>What the signature covers.</h2>
       <p class="lede">
         A report is one canonical object. These rules define the exact bytes the signature commits
@@ -235,7 +299,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </p>
     </div>
 
-    <div class="tbl-wrap"><table class="tbl">
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Signature coverage rules"><table class="tbl">
       <thead><tr><th scope="col">Rule</th><th scope="col">Definition</th></tr></thead>
       <tbody>
         <tr><td><b>Field order</b></td><td>A fixed, documented order of the signed fields, not source order, not alphabetical-by-accident.</td></tr>
@@ -275,18 +339,73 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p class="hero__claim" style="margin-top:var(--s5)">
       Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
     </p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 5. FINAL CTA -->
-<section class="section reveal cta-final">
+<!-- ============================================================ 5. CONTINUOUS CI -->
+<section class="section sect--dense reveal" id="ci">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail">
+        <nav class="toc-rail" aria-label="On this page">
+          <a href="#onramp">01 onramp</a>
+          <a href="#verify">02 verify</a>
+          <a href="#report-schema">03 schema</a>
+          <a href="#ci" class="is-here">04 ci</a>
+        </nav>
+      </div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <span class="idx">04 / Continuous CI</span>
+      <h2>Gate pull requests on the delta.</h2>
+      <p class="lede">
+        The kolm-agent-audit GitHub Action scans your agent logs on every pull request,
+        diffs the result against your prior signed report, and upserts one PR comment
+        showing what changed: readiness movement, control transitions, and finding counts.
+        Raw finding detail never leaves the private report. A repo adopts it in about
+        ten minutes.
+      </p>
+    </div>
+
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Gate modes"><table class="tbl">
+      <thead><tr><th scope="col">Gate mode</th><th scope="col">When the build fails</th></tr></thead>
+      <tbody>
+        <tr><td><b>report-only</b></td><td>Never on findings. The scan, the PR comment, and the job summary still run. The default, and the right first week.</td></tr>
+        <tr><td><b>fail-on-new-high</b></td><td>Only when the delta against the prior signed report adds a high or critical finding, or a control newly enters blocking.</td></tr>
+        <tr><td><b>fail-on-regression</b></td><td>Also when readiness drops or any control status worsens versus the prior signed report.</td></tr>
+      </tbody>
+    </table></div>
+
+    <p class="hero__claim" style="margin-top:var(--s5)">
+      The first run on a subject establishes the baseline and passes in every mode. If the kolm API is
+      unreachable mid-gate, report-only never fails the build and the two failing modes fail closed unless
+      you opt into fail-open. The copy-paste onramp, the PR comment anatomy, and the full reference live in
+      <a href="https://github.com/kolm-ai/kolm/blob/main/docs/continuous-ci.md" style="border-bottom:1px solid var(--line-2)">docs/continuous-ci.md</a>.
+    </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 6. FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Verify the sample, then bring your own.</h2>
     <p class="lede">Open the verifier on a signed sample, then onramp your agent and hand your buyer a report they can check in their own browser.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/verify">Open the verifier</a>
       <a class="btn btn--ghost" href="/report">Anatomy of a report</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -309,24 +428,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -334,7 +456,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

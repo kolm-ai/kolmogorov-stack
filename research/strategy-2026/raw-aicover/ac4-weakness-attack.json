@@ -1,0 +1,91 @@
+{
+  "id": "ac4-weakness-attack",
+  "track": "aicover",
+  "prompt": "2026 ADVERSARIAL: Steelman the case AGAINST a product like kolm.ai (on-demand, automated, signed, offline-verifiable AI security audit generated from the vendor's OWN logs, no human firm, $750 signed report). What are the strongest objections a skeptical enterprise CISO, a Big-4 auditor, and a competitor (Vanta/Cobalt/HiddenLayer) would raise? Specifically: (a) 'audit from the vendor's own logs' = garbage-in/self-reported, not independent; (b) automated = misses what a human pentester finds; (c) a cryptographic signature proves integrity but not VALIDITY/authority (who is kolm to attest?); (d) no named human/firm liability; (e) coverage gaps vs a real pentest; (f) regulatory/auditor acceptance. For each objection, note whether it is fatal, mitigable, or already handled, and what the strongest counter or product change would be. Cite real CISO/auditor sentiment where possible.",
+  "content": "**Steelmanning objections to Kolm.ai-style products (on-demand automated AI security \"audit\" from vendor logs, cryptographically signed, $750, no human firm involvement).** These draw from enterprise security realities, auditor practices, and competitive dynamics as of 2026. Real CISO/auditor sentiment (from discussions, reports, and forums) consistently emphasizes independence, human judgment, accountability, and regulatory defensibility.[[1]](https://www.linkedin.com/posts/tomer-roizman-1bb96b88_is-delve-a-symptom-of-a-larger-problem-activity-7449454762879569921-34mi)[[2]](https://www.reddit.com/r/cybersecurity/comments/1qn3lof/do_automated_pentesting_tools_actually_replace/)[[3]](https://www.codeant.ai/blogs/ai-pentesting-compliance)\n\n**(a) \"Audit from the vendor's own logs\" = garbage-in/self-reported, not independent.**  \nThis is a core, often **fatal or near-fatal objection** for high-stakes use cases (e.g., customer due diligence, regulatory filings, or board reporting). CISOs and auditors repeatedly stress that self-reported data or vendor-controlled logs lack credibility without outside-in validation; questionnaires and internal artifacts are \"a starting point, not a conclusion.\"[[1]](https://www.linkedin.com/posts/tomer-roizman-1bb96b88_is-delve-a-symptom-of-a-larger-problem-activity-7449454762879569921-34mi) Sentiment: \"What a vendor says about themselves requires outside-in validation.\" Automated ingestion of logs the vendor controls introduces tampering risks (even if signed post-ingestion) and selection bias—what logs are provided or omitted?  \n\n**Mitigable?** Partially, via mandatory customer-side log export, tamper-evident collection agents, or hybrid models requiring third-party log verification. Strongest counter/product change: Shift to (or prominently offer) customer-initiated, read-only log pulls with cryptographic commitments at source, plus optional \"witness\" mode where Kolm processes live customer feeds rather than vendor-submitted dumps. This still won't satisfy pure independence demands.\n\n**(b) Automated = misses what a human pentester finds.**  \n**Strong objection, largely mitigable but persistent in practice.** Multiple analyses highlight AI/automated limitations: higher false-positive rates, inability to handle GUI-based or business-logic exploits, difficulty adapting to unexpected scenarios, weak coverage of zero-days or novel chained attacks, and lack of contextual/creativity judgment.[[4]](https://versprite.com/resources/blog/ai-vs-human-penetration-testing/)[[5]](https://blog.vidocsecurity.com/blog/ai-penetration-testing-vs-automated-penetration-testing)[[6]](https://centricconsulting.com/blog/ai-pen-testing-is-automated-penetration-testing-right-for-you_cyber/)[[7]](https://outpost24.com/blog/will-ai-replace-human-pen-testers/) Human pentesters excel at improvisation, social engineering analogs (where relevant), and prioritizing real risk. Reddit/auditor discussions note that while automated tools are accepted for some scanning, full pentests often require explicit manual components.[[2]](https://www.reddit.com/r/cybersecurity/comments/1qn3lof/do_automated_pentesting_tools_actually_replace/)  \n\n**Mitigable?** Yes—position as continuous/automated *scanning + validation layer*, not a full pentest replacement. Strongest counter/product change: Explicit \"AI + optional human escalation\" tiers, or clear disclaimers + benchmarks showing parity on specific control classes (e.g., config drift, known CVEs). Add coverage metrics vs. frameworks like OWASP or MITRE ATT&CK.\n\n**(c) Cryptographic signature proves integrity but not VALIDITY/authority (who is Kolm to attest?).**  \n**Core, difficult objection—mitigable only with reputation-building.** A signature (e.g., via hardware-backed keys or timestamping) attests to *unchanged content since signing*, but says nothing about whether the analysis is correct, complete, or authoritative. \"Who is Kolm?\"—a startup AI tool lacks the professional standing, peer review, or track record of Big-4 firms, CREST-certified pentesters, or established vendors. Auditors and CISOs care about *who stands behind the opinion*.  \n\n**Mitigable?** Via transparent methodology whitepapers, third-party validation of the AI engine (e.g., SOC 2 on Kolm itself, red-team audits of the model), or partnerships with reputable firms for co-signing. Strongest counter/product change: Pursue formal attestations (e.g., ISO 27001, SOC 2 Type II for the service) and publish independent evaluations of Kolm's detection efficacy. Without this, it remains a \"vendor self-attestation tool.\"\n\n**(d) No named human/firm liability.**  \n**Fatal for many enterprise/risk-averse buyers.** Big-4 or established pentest firms carry professional liability insurance (E&O), follow standards (e.g., IIA, ISACA), and have named partners/firms with reputational skin in the game. A pure AI product or anonymous startup offers no deep pockets or professional accountability if the report misses a critical issue leading to a breach. Sentiment from compliance contexts: Auditors and CISOs prefer entities with real recourse.[[3]](https://www.codeant.ai/blogs/ai-pentesting-compliance)  \n\n**Mitigable?** Limited—offer substantial cyber insurance backing the reports, or partner with a Big-4/insurer for co-branded liability coverage. Strongest counter/product change: Secure named professional liability coverage explicitly tied to reports, or evolve into a hybrid where Kolm generates and a licensed firm reviews/signs. Pure no-human model struggles here.\n\n**(e) Coverage gaps vs. a real pentest.**  \n**Well-supported objection, mitigable as a complementary tool.** Real pentests include dynamic testing, exploitation attempts, business-context analysis, and manual creativity that pure log-based AI automation inherently misses (e.g., runtime behavior, unlogged attack surfaces, social vectors). Sources note automated tools are strong for volume/known issues but weak on novel or contextual ones.[[4]](https://versprite.com/resources/blog/ai-vs-human-penetration-testing/)[[8]](https://www.emazzanti.net/benefits-and-limitations-of-automated-tools-in-penetration-testing/)[[6]](https://centricconsulting.com/blog/ai-pen-testing-is-automated-penetration-testing-right-for-you_cyber/)  \n\n**Mitigable?** Yes—market explicitly as \"continuous compliance/evidence automation\" or \"log-driven control validation,\" not a pentest substitute. Strongest counter/product change: Provide side-by-side coverage matrices (e.g., vs. NIST/ISO controls or common pentest scopes), integrate with external scanners, and offer \"gap-to-pentest\" recommendations. Competitors like Vanta succeed here by focusing on continuous monitoring rather than claiming full audit equivalence.\n\n**(f) Regulatory/auditor acceptance.**  \n**Often fatal or highly restrictive without precedent.** Big-4 auditors and regulators (SOC 2, ISO, PCI, etc.) typically require human-led or human-reviewed assessments for attestation opinions. There are cases of AI-generated pentest reports being rejected outright by auditors.[[3]](https://www.codeant.ai/blogs/ai-pentesting-compliance) Self-attested or purely automated artifacts have limited weight compared to independent third-party reports. Continuous monitoring tools are welcomed for evidence collection, but the final \"audit\" opinion usually needs a qualified human/firm.[[9]](https://www.fortinet.com/resources/cyberglossary/security-audit)  \n\n**Mitigable?** Through engagement with standards bodies, pilot programs with friendly auditors, or positioning as *supporting evidence* rather than the audit itself. Strongest counter/product change: Seek explicit auditor endorsements or mappings to frameworks that allow automated evidence; pursue formal recognition (e.g., via AICPA or similar for automated attestations). Start with internal-use or low-stakes compliance before enterprise sales.\n\n**Overall:** The strongest objections center on **independence, authority, and human accountability**—areas where automation excels at scale/cost but collides with entrenched trust models in enterprise security and auditing. Kolm-like tools are best positioned as efficient evidence generators or continuous monitors (mitigating b, e) rather than standalone \"audits.\" Product evolution toward transparency, partnerships, insurance, and hybrid human oversight would address the most damaging critiques. Real sentiment favors tools that *augment* rather than replace established processes.",
+  "citations": [
+    "https://www.linkedin.com/posts/tomer-roizman-1bb96b88_is-delve-a-symptom-of-a-larger-problem-activity-7449454762879569921-34mi",
+    "https://www.reddit.com/r/cybersecurity/comments/1qn3lof/do_automated_pentesting_tools_actually_replace/",
+    "https://www.codeant.ai/blogs/ai-pentesting-compliance",
+    "https://versprite.com/resources/blog/ai-vs-human-penetration-testing/",
+    "https://blog.vidocsecurity.com/blog/ai-penetration-testing-vs-automated-penetration-testing",
+    "https://centricconsulting.com/blog/ai-pen-testing-is-automated-penetration-testing-right-for-you_cyber/",
+    "https://outpost24.com/blog/will-ai-replace-human-pen-testers/",
+    "https://www.emazzanti.net/benefits-and-limitations-of-automated-tools-in-penetration-testing/",
+    "https://www.fortinet.com/resources/cyberglossary/security-audit"
+  ],
+  "searched": [
+    "https://onspring.com/resources/guide/what-is-an-it-security-audit/",
+    "https://www.cyberproof.com/blog/how-automated-security-control-assessment-drive-faster-and-smarter-compliance-audits/",
+    "https://www.reddit.com/r/cybersecurity/comments/1iah488/im_a_ciso_who_has_built_a_successful_security/",
+    "https://www.sentinelone.com/cybersecurity-101/cybersecurity/information-security-audit-tools/",
+    "https://www.fortinet.com/resources/cyberglossary/security-audit",
+    "https://19january2021snapshot.epa.gov/sites/static/files/2015-10/documents/cio-2150-p-03.2.pdf",
+    "https://www.youtube.com/watch?v=KPY6bq3xj0M",
+    "https://www.sciencedirect.com/science/article/pii/S1467089521000506",
+    "https://www.algosec.com/blog/cloud-security-audit",
+    "https://www.cyberark.com/cisoview/",
+    "https://graylog.org/post/a-cisos-guide-to-log-managment-for-cybersecurity/",
+    "https://www.cisco.com/c/en/us/td/docs/security/secure-firewall/management-center/admin/740/management-center-admin-74/health-audit.html",
+    "https://www.firefly.ai/academy/cloud-security-compliance-automation",
+    "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+    "https://www.sciencedirect.com/science/article/pii/S0167404825002056",
+    "https://www.reddit.com/r/cybersecurity/comments/1qn3lof/do_automated_pentesting_tools_actually_replace/",
+    "https://www.codeant.ai/blogs/ai-pentesting-compliance",
+    "https://www.synack.com/platform/ai-pentesting/",
+    "https://medium.com/oak-security/ai-assisted-security-audits-0bd76608e3be",
+    "https://www.youtube.com/watch?v=C_orWHTGTbo",
+    "https://www.jenova.ai/en/resources/ai-security-audit-202605",
+    "https://dev.to/bridgeace/automated-security-audits-with-ai-agent-teams-5cp4",
+    "https://hacken.io/services/ai-system-security-audit/",
+    "https://www.devopsschool.com/blog/top-10-ai-security-audit-tools-in-2025-features-pros-cons-comparison/",
+    "https://arxiv.org/pdf/2505.10732",
+    "https://www.linkedin.com/posts/tomer-roizman-1bb96b88_is-delve-a-symptom-of-a-larger-problem-activity-7449454762879569921-34mi",
+    "https://publications.aaahq.org/ajpt/article/35/1/139/6009/The-Validity-of-Auditor-Industry-Specialization",
+    "https://dallascityhall.com/departments/auditor/DCH%20Documents/Audit%20and%20Attestation%20Reports%20FY%202017%20(10-01-2016%20to%2009-30-2017)/A17-005%20-%20FY%202015%20Audit%20Follow-Up%20of%20Prior%20Audit%20Recommendations%20with%20Attachments%2003-03-2017.pdf",
+    "https://www.bindbee.dev/feeds/blog/soc2-auditors",
+    "https://archive.legmt.gov/content/Committees/Administration/audit/2021-22/Meetings/April-2022/Committee%20Ed%20-%20Fieldwork.pdf",
+    "https://www.ijmae.com/article_194951_beb1d12197cc8bfc8f3e8b34d2ec4159.pdf",
+    "https://www.enterprise-development.org/measuring-results-the-dced-standard/auditing-the-monitoring-system/",
+    "https://www.facebook.com/AuditorMA/posts/our-office-just-released-an-audit-of-21-state-agencies-identifying-violations-of/1300684105202354/",
+    "https://www.farmers.com/business/premium-audit/",
+    "https://www.linkedin.com/posts/cherihotman_vendorrisk-thirdpartyrisk-supplychainsecurity-activity-7377401539985932288-PgC0",
+    "https://versprite.com/resources/blog/ai-vs-human-penetration-testing/",
+    "https://equixly.com/blog/2025/09/14/equixly-vs-human-pentesters/",
+    "https://blog.vidocsecurity.com/blog/ai-penetration-testing-vs-automated-penetration-testing",
+    "https://xbow.com/blog/traditional-pentesting-vs-ai-pentesting",
+    "https://www.reddit.com/r/Pentesting/comments/1ozjpm8/are_autonomous_pentesting_ai_agents_actually/",
+    "https://www.emazzanti.net/benefits-and-limitations-of-automated-tools-in-penetration-testing/",
+    "https://centricconsulting.com/blog/ai-pen-testing-is-automated-penetration-testing-right-for-you_cyber/",
+    "https://www.thoropass.com/blog/can-ai-replace-pentesters",
+    "https://outpost24.com/blog/will-ai-replace-human-pen-testers/",
+    "https://www.aikido.dev/blog/manual-vs-automated-pentesting"
+  ],
+  "usage": {
+    "input_tokens": 14741,
+    "input_tokens_details": {
+      "cached_tokens": 4032
+    },
+    "output_tokens": 2208,
+    "output_tokens_details": {
+      "reasoning_tokens": 662
+    },
+    "total_tokens": 16949,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 5,
+    "cost_in_usd_ticks": 447126500,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 4,
+      "x_search_calls": 1,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 12577,
+      "output_tokens": 1760
+    }
+  },
+  "attempts": 1
+}

@@ -196,16 +196,18 @@ test('W910 C3: notify() dispatches to a live HTTP webhook server and logs a deli
 });
 
 // =====================================================================
-// 6) NOTIFICATION_EVENT_TYPES is the documented 7-element list
+// 6) NOTIFICATION_EVENT_TYPES is the documented set (7 base + 2 audit events)
 // =====================================================================
-test('W910 C3: NOTIFICATION_EVENT_TYPES is the documented 7-item set', () => {
+test('W910 C3: NOTIFICATION_EVENT_TYPES is the documented 9-item set', () => {
   assert.deepEqual([...NOTIFICATION_EVENT_TYPES].sort(), [
     'artifact_compiled',
+    'audit_report_ready',
     'compile_failed',
     'device_offline',
     'drift_detected',
     'kscore_drop',
     'quota_warning',
+    'reattestation_drift',
     'recompile_suggested',
   ]);
 });

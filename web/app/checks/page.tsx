@@ -104,7 +104,7 @@ const CROSSWALK: { ctrl: string; name: string; checks: string; maps: string }[] 
       ctrl: "ASR-5",
       name: "Provenance",
       checks: "Model and dependency provenance, MCP and vendor surface",
-      maps: "ISO 42001, NIST MAP-4, OWASP LLM05",
+      maps: "ISO 42001, NIST MAP-4, OWASP LLM03",
     },
     {
       ctrl: "ASR-6",

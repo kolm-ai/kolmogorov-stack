@@ -19,7 +19,7 @@ import {
 import { runAudit } from '../src/audit-orchestrator.js';
 import { buildAndSignReport } from '../src/attestation-report-builder.js';
 
-const TEMPLATE_IDS = ['sig-lite', 'caiq', 'eu-ai-act', 'generic-ai-vendor'];
+const TEMPLATE_IDS = ['sig-lite', 'caiq', 'eu-ai-act', 'generic-ai-vendor', 'ai-caiq', 'sig-core', 'vsaq', 'eu-ai-act-fria'];
 
 // A synthetic CLEAN signed-report shape: every assessed control passes, the
 // red-team battery resisted, and the report is signed. (Only the fields the
@@ -74,7 +74,7 @@ function dirtyReport() {
       ],
     },
     findings: [
-      { id: 'wildcard-grant', severity: 'high', title: 'Agent holds a wildcard tool grant', asr: { id: 'ASR-1', name: 'Least privilege' }, frameworks: ['OWASP LLM & Agentic Top 10 LLM08', 'SOC 2 TSC CC6'] },
+      { id: 'wildcard-grant', severity: 'high', title: 'Agent holds a wildcard tool grant', asr: { id: 'ASR-1', name: 'Least privilege' }, frameworks: ['OWASP LLM & Agentic Top 10 LLM06', 'SOC 2 TSC CC6'] },
       { id: 'no-tamper-evidence', severity: 'high', title: 'Activity log is not tamper-evident', asr: { id: 'ASR-2', name: 'Audit trail' }, frameworks: ['EU AI Act Art.12'] },
       { id: 'sensitive-egress', severity: 'medium', title: 'Sensitive field left the boundary unredacted', asr: { id: 'ASR-3', name: 'Data egress' }, frameworks: ['EU AI Act Art.10'] },
     ],
@@ -97,7 +97,7 @@ function byId(answers) {
   return m;
 }
 
-test('QUESTIONNAIRE_TEMPLATES lists the four built-in templates with counts', () => {
+test('QUESTIONNAIRE_TEMPLATES lists the eight built-in templates with counts', () => {
   assert.ok(Array.isArray(QUESTIONNAIRE_TEMPLATES));
   const ids = QUESTIONNAIRE_TEMPLATES.map((t) => t.id).sort();
   assert.deepEqual(ids, [...TEMPLATE_IDS].sort());
@@ -260,7 +260,7 @@ test('unknown template returns a well-formed error result, not a throw', () => {
   const res = autofillQuestionnaire(cleanReport(), { template: 'does-not-exist' });
   assert.equal(res.error, 'unknown_template');
   assert.deepEqual(res.answers, []);
-  assert.ok(Array.isArray(res.available_templates) && res.available_templates.length === 4);
+  assert.ok(Array.isArray(res.available_templates) && res.available_templates.length === 8);
   // generated_from is still populated from the report.
   assert.equal(res.generated_from.report_id, 'asrr_clean');
 });

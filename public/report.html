@@ -11,7 +11,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>The report · kolm.ai</title>
 <meta name="description" content="A kolm evidence report is one canonical object: scope, content hashes, an Ed25519 signature over the exact bytes, and a transparency-log inclusion proof. Read it field by field, then verify a real sample live in your browser.">
-<meta name="theme-color" content="#F6F7F4">
+<meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -40,6 +40,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <script type="module" src="/verify-widget.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <hr class="foil-strip" aria-hidden="true">
 
@@ -62,7 +63,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </nav>
     <div class="nav__actions">
       <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/contact">Start an audit</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -70,87 +71,138 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </header>
 
-<main>
+<main id="main">
 
 <!-- ============================================================ 1. HERO -->
-<section class="section section--flush" style="padding-top:var(--s8)">
+<section class="section section--flush hero">
   <div class="wrap">
-    <div class="section__head" style="max-width:66ch">
-      <span class="idx">01 / The artifact is the proof</span>
-      <h1>One object your buyer can check, not a PDF they have to trust.</h1>
-      <p class="lede">
-        When a deal stalls in security review, the buyer's group will not take your word, or a slide.
-        A kolm report is a single canonical object: a scope, content hashes, an Ed25519 signature over
-        the exact bytes, and an append-only inclusion proof. Every cryptographic fact is set in mono,
-        because a fact should read like a fact. Here is the object, line by line, then a real one you can
-        verify in this browser.
-      </p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="#live">Verify the sample</a>
-        <a class="btn btn--ghost" href="/how-it-works">How it works</a>
+    <div class="hero__grid">
+      <div>
+        <p class="eyebrow">The signed report</p>
+        <h1 class="hero__h1">One object your buyer can check, <span class="go">not a PDF</span> they have to trust.</h1>
+        <p class="lede">
+          When a deal stalls in security review, the buyer's group will not take your word, or a slide.
+          A kolm report is a single canonical object: a scope, content hashes, an Ed25519 signature over
+          the exact bytes, and an append-only inclusion proof. Here is the object, line by line, then a
+          real one you can verify in this browser.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#live">Verify the sample</a>
+          <a class="btn btn--ghost" href="/how-it-works">How it works</a>
+        </div>
+        <div class="hero__proof" aria-label="What the report is">
+          <span><i class="dot" aria-hidden="true"></i>One signed object</span>
+          <span><i class="dot" aria-hidden="true"></i>Ed25519 over the exact bytes</span>
+          <span><i class="dot" aria-hidden="true"></i>Verified offline · against your key</span>
+        </div>
       </div>
-      <div class="trustline" aria-label="What the report is">
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>One signed object</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519 over the exact bytes</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline, against your key</span>
-      </div>
+
+      <!-- the artifact IS the hero image: the signed object itself, field by field -->
+      <aside class="artifact" aria-label="The signed object, field by field">
+        <div class="rep">
+          <div class="rep__bar">
+            <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="t">kolm · signed object</span>
+            <span class="chip chip--ok">signed · ed25519</span>
+          </div>
+          <div style="padding:20px 18px 18px">
+            <div class="report register" style="background:transparent;border:0;border-radius:0;padding:0">
+              <div class="register__row"><span class="register__k">schema</span><span class="register__v">kolm-audit-report-1</span></div>
+              <div class="register__row"><span class="register__k">report_id</span><span class="register__v">asrr_sample</span></div>
+              <div class="register__row"><span class="register__k">subject</span><span class="register__v">Helpwise support &amp; billing agents <span class="ann">what was assessed</span></span></div>
+              <div class="register__row"><span class="register__k">readiness_pct</span><span class="register__v"><b>0</b> <span class="ann">assessed controls only</span></span></div>
+              <div class="register__row"><span class="register__k">findings</span><span class="register__v">13 · <b>7 high</b> · 4 medium · 1 low · 1 info</span></div>
+              <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
+              <div class="register__row"><span class="register__k">key_fingerprint</span><span class="register__v"><b>410302c93becdcc3...</b></span></div>
+              <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:9kWQBu5kLl...aG9aDw</b> <span class="ann">covers the canonical bytes</span></span></div>
+              <div class="register__row"><span class="register__k">inclusion</span><span class="register__v"><b>tlog · per-report Merkle proof</b> <span class="ann">append-only</span></span></div>
+              <div class="register__row"><span class="register__k">verify_url</span><span class="register__v"><b>kolm.ai/verify</b></span></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:13px 18px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--ink-2)" translate="no"><span style="color:var(--ink-3)">object</span><span>one file · self-describing</span><span style="margin-left:auto;color:var(--accent);display:inline-flex;gap:6px;align-items:center">✓ verifies offline</span></div>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
 
 <!-- ============================================================ 2. THE REGISTER (the ledger) -->
 <section class="section section--ink reveal" id="register">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / The register</span></div>
+      <div class="sect-rail__body">
     <div class="section__head">
-      <span class="idx">02 / The register</span>
       <h2>One object, fully self-describing.</h2>
       <p class="lede">
         The report carries its own scope, its own content hashes, its own signature, and the public key
         needed to check it. Nothing about verifying it depends on kolm being online, or even existing.
       </p>
     </div>
-    <div class="split">
-      <div class="report register">
-        <div class="register__row"><span class="register__k">schema</span><span class="register__v">kolm-audit-report-1</span></div>
-        <div class="register__row"><span class="register__k">report_id</span><span class="register__v">asrr_sample</span></div>
-        <div class="register__row"><span class="register__k">subject</span><span class="register__v">Helpwise support &amp; billing agents <span class="ann">what was assessed</span></span></div>
-        <div class="register__row"><span class="register__k">readiness_pct</span><span class="register__v"><b>0</b> <span class="ann">assessed controls only</span></span></div>
-        <div class="register__row"><span class="register__k">findings</span><span class="register__v">6 · <b>5 high</b> · 1 low</span></div>
-        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
-        <div class="register__row"><span class="register__k">key_fingerprint</span><span class="register__v"><b>410302c93becdcc3...</b></span></div>
-        <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:0XCoqRkbLg...sEjBDw</b> <span class="ann">covers the canonical bytes</span></span></div>
-        <div class="register__row"><span class="register__k">inclusion</span><span class="register__v"><b>tlog · per-report Merkle proof</b> <span class="ann">append-only</span></span></div>
-        <div class="register__row"><span class="register__k">verify_url</span><span class="register__v"><b>kolm.ai/verify</b></span></div>
+    <div class="grid grid--3">
+      <div class="card">
+        <p class="card__k">01 · payload</p>
+        <h3>Canonical payload</h3>
+        <p>Key-sorted, whitespace-free JSON in a fixed field order. The signature covers these exact bytes, so a downgraded finding or an inflated score is self-evident the moment a reviewer re-checks.</p>
       </div>
-      <div class="grid" style="gap:14px;align-content:start">
-        <div class="card">
-          <p class="card__k">01 · payload</p>
-          <h3>Canonical payload</h3>
-          <p>Key-sorted, whitespace-free JSON in a fixed field order. The signature covers these exact bytes, so a downgraded finding or an inflated score is self-evident the moment a reviewer re-checks.</p>
-        </div>
-        <div class="card">
-          <p class="card__k">02 · signature</p>
-          <h3>Ed25519 signature, embedded key</h3>
-          <p>The signature and the public key it was made with travel together. Your buyer needs nothing from us: the verifier runs offline against the key inside the report.</p>
-        </div>
-        <div class="card">
-          <p class="card__k">03 · inclusion</p>
-          <h3>Append-only inclusion proof</h3>
-          <p>A Merkle inclusion proof from an RFC 6962 style log confirms the report was recorded when it claims and was never quietly replaced. Not a chain, an append-only transparency log.</p>
-        </div>
+      <div class="card">
+        <p class="card__k">02 · signature</p>
+        <h3>Ed25519 signature, embedded key</h3>
+        <p>The signature and the public key it was made with travel together. Your buyer needs nothing from us: the verifier runs offline against the key inside the report.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">03 · inclusion</p>
+        <h3>Append-only inclusion proof</h3>
+        <p>A Merkle inclusion proof from an RFC 6962 style log confirms the report was recorded when it claims and was never quietly replaced. Not a chain, an append-only transparency log.</p>
       </div>
     </div>
+    <figure class="diag reveal" role="img" aria-label="Signature chain: canonical report bytes are hashed with SHA-256 and signed with Ed25519; altering any byte voids the seal">
+    <svg viewBox="0 0 720 176" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path class="dg-flow" d="M150 60 H186 M330 60 H366 M548 60 H584"/>
+      <rect class="dg-box" x="8" y="28" width="142" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="22" y="48">Bytes</text>
+      <text class="dg-t" x="22" y="68">Report JSON</text>
+      <text class="dg-mono" x="22" y="84">canonicalized</text>
+      <polygon class="dg-ok" points="186,60 178,55.5 178,64.5"/>
+      <rect class="dg-box" x="188" y="28" width="142" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="202" y="48">Digest</text>
+      <text class="dg-t" x="202" y="68">SHA-256</text>
+      <text class="dg-mono" x="202" y="84">32-byte hash</text>
+      <polygon class="dg-ok" points="366,60 358,55.5 358,64.5"/>
+      <rect class="dg-box" x="368" y="28" width="180" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="382" y="48">Signature</text>
+      <text class="dg-t" x="382" y="68">Ed25519 sign</text>
+      <text class="dg-mono" x="382" y="84">kid kolm-prod-2026</text>
+      <polygon class="dg-ok" points="584,60 576,55.5 576,64.5"/>
+      <rect class="dg-box--ok" x="586" y="28" width="126" height="64" rx="9"/>
+      <text class="dg-label dg-label--up" x="600" y="48">Seal</text>
+      <text class="dg-t" x="600" y="68">SEALED</text>
+      <path class="dg-ok" d="M600 78 l3.5 3.5 L611 74" fill="none" stroke="#3FE5A0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="dg-line" d="M79 92 V140 H520" stroke-dasharray="3 5"/>
+      <polygon points="520,140 512,135.5 512,144.5" fill="#E0A89F"/>
+      <rect class="dg-box--void" x="522" y="120" width="190" height="40" rx="9"/>
+      <text class="dg-void-t dg-k" x="536" y="138">VOID</text>
+      <text class="dg-mono" x="536" y="152">one changed byte breaks it</text>
+    </svg>
+    <figcaption class="diag__cap"><b>Why it holds</b> the signature covers the exact bytes, so the report cannot be quietly edited</figcaption>
+    </figure>
     <p class="hero__claim" style="margin-top:var(--s6)">
       Every line above is part of the signed bytes. Edit one character and the signature, and the seal, stop matching.
     </p>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ============================================================ 3. THE CROSSWALK -->
-<section class="section reveal" id="crosswalk">
+<section class="section sect--dense reveal" id="crosswalk">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / The crosswalk</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">02</span>
     <div class="section__head">
-      <span class="idx">03 / The crosswalk</span>
       <h2>Every finding maps to a control they already cite.</h2>
       <p class="lede">
         A reviewer should not have to learn our vocabulary. Each control on the report points to the
@@ -158,13 +210,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         in one step.
       </p>
     </div>
-    <div class="tbl-wrap">
+    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Controls and framework mapping">
       <table class="tbl">
         <thead>
           <tr><th scope="col">Control</th><th scope="col">What it checks</th><th scope="col">Maps to</th></tr>
         </thead>
         <tbody>
-          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI · NIST MANAGE-1</td></tr>
+          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI03 · NIST MANAGE-1</td></tr>
           <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
           <tr><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
           <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS</td></tr>
@@ -173,41 +225,45 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </tbody>
       </table>
     </div>
-    <p class="hero__claim" style="margin-top:var(--s4)">
-      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
-    </p>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 4. VERIFY THIS SAMPLE -->
-<section class="section reveal" id="live">
+<!-- ============================================================ 4. VERIFY THIS SAMPLE (the artifact, staged) -->
+<section class="section sect--air reveal" id="live">
   <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / Verify this sample</span></div>
+      <div class="sect-rail__body">
     <div class="section__head" style="max-width:64ch">
-      <span class="idx">04 / Verify this sample</span>
       <h2>Do not take the diagram's word for it.</h2>
       <p class="lede">
-        Below is a real, signed artifact produced by the same signing core, verified entirely in this
-        browser. Tamper a field and the signature breaks, in red, every time. No account, no upload,
-        no kolm server in the path.
+        Below is a real, signed report produced by the same signing core, verified entirely in this
+        browser. Inflate the score or forge a rogue key, and the seal reads VOID, every time.
+        No account, no upload, no kolm server in the path.
       </p>
     </div>
     <div class="split">
-      <div>
+      <div class="artifact">
         <span class="tryit">Live · runs in your browser</span>
-        <div class="vw" data-verify-widget data-src="/sample-receipt.json" data-fields="receipt_id,model,output_hash,signing_key_id" aria-label="Live verification of a sample report"></div>
+        <div class="vw" data-verify-widget data-src="/sample-audit-report.json" data-mode="report" data-keyring="/keys/kolm-issuers.json" data-variant="full" aria-label="Live verification of the sample signed report"></div>
       </div>
-      <div class="card" style="height:100%">
+      <div class="card" style="align-self:start">
         <p class="card__k">What you are seeing</p>
-        <h3>The same crypto core that signs a full audit</h3>
+        <h3>The full signed report, sealed by the signing core</h3>
         <p style="margin-bottom:14px">
-          This sample is a per-call receipt minted by kolm's attestation core: the identical
-          canonicalization, signing, and verification path a full audit report uses. Verify it here,
-          or open the dedicated verifier to paste your own.
+          This is the complete sample report: canonicalized, signed with Ed25519, and verified
+          against the pinned issuer keyring right here. Verify it in place, or open the dedicated
+          verifier to paste your own.
         </p>
         <div class="hero__cta">
           <a class="btn btn--primary btn--sm" href="/verify">Open the verifier</a>
-          <a class="btn btn--ghost btn--sm" href="/sample-receipt.json" download>Download the sample</a>
+          <a class="btn btn--ghost btn--sm" href="/sample-audit-report.json" download>Download the sample</a>
         </div>
+      </div>
+    </div>
       </div>
     </div>
   </div>
@@ -215,13 +271,22 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <!-- ============================================================ 5. FINAL CTA -->
 <section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Get a report like this for your agent.</h2>
     <p class="lede">A scoped audit that ends in one signed object your buyer verifies in their own browser. The four to eight week review compresses to days.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/contact">Start an audit</a>
       <a class="btn btn--ghost" href="/verify">Verify a report</a>
     </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p style="margin-top:var(--s4)"><code class="ctrlid" translate="no">kolm.ai/verify · drop report.json · seal: VALID</code></p>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
@@ -244,24 +309,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
       </div>
       <div class="foot__col">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
         <a href="/checks">Checks</a>
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h4>Trust</h4>
+        <h3>Trust</h3>
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
         <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h4>Legal</h4>
+        <h3>Legal</h3>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/dpa">DPA</a>
@@ -269,7 +337,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
-        <h4>Company</h4>
+        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="/careers">Careers</a>

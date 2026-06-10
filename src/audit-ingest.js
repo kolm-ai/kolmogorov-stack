@@ -21,6 +21,12 @@
 import { normalizeEvent, eventId } from './audit-event.js';
 import { scanPii } from './pii-redactor.js';
 
+// Reserved source tag for first-party gateway captures (the Tier-A bridge).
+// Only the authenticated /v1/audit scan/import bridge may use it - it drives
+// evidence grade A, so a caller-supplied source must never be allowed to
+// claim it (the routes layer enforces the reservation).
+export const KOLM_CAPTURE_SOURCE = 'kolm-capture';
+
 // Provider prefixes LiteLLM/OpenRouter stamp onto model names, mapped to the
 // host the inference call actually reached. Used to derive an egress host when
 // no explicit api_base is logged.
@@ -171,6 +177,133 @@ function sensitivity(text) {
 }
 
 /* --------------------------------------------------------------------- */
+/* OpenAI Responses + Assistants API shape recognition                    */
+/* --------------------------------------------------------------------- */
+//
+// The chat path above keys on `choices[].message`. Two newer OpenAI surfaces
+// log a different envelope and would otherwise lose their tool calls:
+//   - Responses API: { object:'response', model, output:[ ... ], usage }
+//     where output[] is a typed array mixing { type:'message', content:[{
+//     type:'output_text', text }] } with { type:'function_call'|'tool_call',
+//     name, arguments }.
+//   - Assistants API: { object:'thread.run' | 'thread.run.step', assistant_id,
+//     thread_id, model, step_details:{ tool_calls:[ ... ] } } and standalone
+//     { object:'thread.message', role, content:[{ type:'text', text:{ value }}]}.
+// These helpers stay never-throw and additive; the chat/Anthropic branches are
+// untouched.
+
+function objectTag(rec, res) {
+  // The `object` discriminator can sit on the row OR on a nested response body.
+  return firstString(rec && rec.object, res && res.object);
+}
+
+function isResponsesShape(rec, res) {
+  if (objectTag(rec, res) === 'response') return true;
+  // Tolerate a bare Responses body with no `object` tag: an `output` array of
+  // typed items (output_text / function_call / message) is the tell.
+  const out = asArray(rec && rec.output) || asArray(res && res.output);
+  if (!out) return false;
+  for (const it of out) {
+    if (it && typeof it === 'object') {
+      const t = it.type;
+      if (t === 'output_text' || t === 'function_call' || t === 'tool_call' ||
+          (t === 'message' && Array.isArray(it.content))) return true;
+    }
+  }
+  return false;
+}
+
+function isAssistantsShape(rec, res) {
+  const tag = objectTag(rec, res);
+  return typeof tag === 'string' && tag.indexOf('thread.') === 0;
+}
+
+// The Responses `output[]` array, found on the row, a nested response body, or
+// (rarely) the request echo. Returns [] when absent.
+function responsesOutput(rec, req, res) {
+  return (
+    asArray(rec && rec.output) ||
+    asArray(res && res.output) ||
+    asArray(req && req.output) ||
+    []
+  );
+}
+
+// Assistant text from a Responses output[] - the output_text parts of any
+// { type:'message', role:'assistant' } items (or top-level output_text items).
+function responsesOutputText(output) {
+  const parts = [];
+  for (const it of asArray(output) || []) {
+    if (!it || typeof it !== 'object') continue;
+    if (it.type === 'output_text') { const t = str(it.text); if (t) parts.push(t); continue; }
+    if (it.type === 'message' || Array.isArray(it.content)) {
+      for (const c of asArray(it.content) || []) {
+        if (c && typeof c === 'object' && c.type === 'output_text') {
+          const t = str(c.text);
+          if (t) parts.push(t);
+        }
+      }
+    }
+  }
+  return parts.join('\n');
+}
+
+// Tool/function calls from a Responses output[] - the { type:'function_call' |
+// 'tool_call', name, arguments } items. Returns [{ name, args, id }].
+function responsesToolCalls(output) {
+  const calls = [];
+  for (const it of asArray(output) || []) {
+    if (!it || typeof it !== 'object') continue;
+    if (it.type === 'function_call' || it.type === 'tool_call') {
+      const fn = it.function && typeof it.function === 'object' ? it.function : it;
+      const name = firstString(it.name, fn.name);
+      if (name) {
+        const args = it.arguments != null ? it.arguments : (fn.arguments != null ? fn.arguments : it.args);
+        calls.push({ name, args, id: firstString(it.id, it.call_id, fn.id) });
+      }
+    }
+  }
+  return calls;
+}
+
+// Text from an Assistants { object:'thread.message' } record, whose content is
+// [{ type:'text', text:{ value } }] (text is an OBJECT with .value, unlike the
+// chat string content). Returns '' for any other shape.
+function assistantsMessageText(rec, res) {
+  if (!isAssistantsShape(rec, res)) return '';
+  const tag = objectTag(rec, res);
+  if (tag !== 'thread.message') return '';
+  const parts = [];
+  for (const c of asArray(rec.content) || asArray(res && res.content) || []) {
+    if (c && typeof c === 'object' && c.type === 'text') {
+      const t = c.text && typeof c.text === 'object' ? str(c.text.value) : str(c.text);
+      if (t) parts.push(t);
+    }
+  }
+  return parts.join('\n');
+}
+
+// Assistants tool calls from a run-step's step_details.tool_calls[], where each
+// entry is { id, type:'function', function:{ name, arguments } } (or already a
+// flat { name, arguments }). Returns [{ name, args, id }].
+function assistantsStepToolCalls(rec, res) {
+  const calls = [];
+  const details =
+    asObject(rec && rec.step_details) ||
+    asObject(res && res.step_details) ||
+    null;
+  const tcs = details ? asArray(details.tool_calls) : null;
+  if (!tcs) return calls;
+  for (const tc of tcs) {
+    if (!tc || typeof tc !== 'object') continue;
+    const fn = tc.function && typeof tc.function === 'object' ? tc.function : tc;
+    const name = firstString(fn.name, tc.name);
+    if (name) calls.push({ name, args: fn.arguments != null ? fn.arguments : (fn.args != null ? fn.args : tc.arguments), id: firstString(tc.id, fn.id) });
+  }
+  return calls;
+}
+
+/* --------------------------------------------------------------------- */
 /* exchange coercion - one provider row → a uniform request/response view */
 /* --------------------------------------------------------------------- */
 
@@ -190,12 +323,21 @@ function coerceExchange(rec, source) {
     (asObject(rec.output) && !Array.isArray(rec.output) ? asObject(rec.output) : null) ||
     null;
 
+  // OpenAI Responses / Assistants recognition (additive - the chat path keys on
+  // choices[].message and is unaffected). When present these expose the model,
+  // the assistant output text, and tool calls from their own envelope shapes.
+  const responsesShape = isResponsesShape(rec, res);
+  const assistantsShape = isAssistantsShape(rec, res);
+  const respOutput = responsesShape ? responsesOutput(rec, req, res) : [];
+
   // Messages: prefer request.messages; tolerate top-level / JSON-string forms
-  // and OpenRouter's input.messages / input array.
+  // and OpenRouter's input.messages / input array. Guard: a Responses request
+  // can carry `input` as an array of typed items (not chat messages), so only
+  // treat rec.input as messages when it is NOT the Responses envelope.
   let messages =
     asArray(req && req.messages) ||
     asArray(rec.messages) ||
-    (Array.isArray(rec.input) ? rec.input : null) ||
+    (!responsesShape && Array.isArray(rec.input) ? rec.input : null) ||
     [];
 
   // Tool/function grants declared on the request - what the agent MAY call.
@@ -221,7 +363,11 @@ function coerceExchange(rec, source) {
   );
 
   // Identity: a credential id and/or an agent/service name, wherever logged.
+  // For the Assistants API the agent IS the assistant_id (the configured
+  // assistant that ran the step); thread_id is carried on meta for correlation.
   const md = asObject(rec.metadata) || asObject(req && req.metadata) || {};
+  const assistantId = firstString(rec.assistant_id, rec.assistantId, res && res.assistant_id, md.assistant_id);
+  const threadId = firstString(rec.thread_id, rec.threadId, res && res.thread_id, md.thread_id);
   const keyId = firstString(
     rec.key_id, rec.keyId, rec.api_key_id, md.key_id, md.api_key_id, md.key,
     rec.key_alias, md.key_alias, rec.virtual_key, md.virtual_key,
@@ -229,6 +375,7 @@ function coerceExchange(rec, source) {
   const agent = firstString(
     rec.user, req && req.user, rec.user_id, md.user, md.user_id, md.agent,
     md.agent_name, md.agent_id, md.app, rec.app, rec.end_user_id,
+    assistantId,
   );
 
   // Egress host for the inference call itself. An explicit api_base wins; then
@@ -246,7 +393,24 @@ function coerceExchange(rec, source) {
   const hash = firstString(rec.hash, rec.entry_hash, rec.chain_hash, md.hash);
   const prevHash = firstString(rec.prev_hash, rec.prevHash, rec.previous_hash, md.prev_hash);
 
-  return { rec, req, res, messages, tools, model, ts, requestId, keyId, agent, host, routedProvider, hash, prevHash };
+  // Tool calls and assistant text drawn from the OpenAI Responses output[] and
+  // the Assistants run-step step_details.tool_calls[]. Empty for every other
+  // shape, so the chat/Anthropic tool-call path is unaffected.
+  const extraToolCalls = [
+    ...(responsesShape ? responsesToolCalls(respOutput) : []),
+    ...(assistantsShape ? assistantsStepToolCalls(rec, res) : []),
+  ];
+  const responsesText = [
+    responsesShape ? responsesOutputText(respOutput) : '',
+    assistantsShape ? assistantsMessageText(rec, res) : '',
+  ].filter(Boolean).join('\n');
+
+  return {
+    rec, req, res, messages, tools, model, ts, requestId, keyId, agent,
+    host, routedProvider, hash, prevHash,
+    responsesShape, assistantsShape, assistantId, threadId,
+    extraToolCalls, responsesText,
+  };
 }
 
 /* --------------------------------------------------------------------- */
@@ -350,12 +514,18 @@ function eventsFromRecord(rec, source, index, seenCallKeys) {
     }
     return str(x.res.content || x.res.output_text || x.res.text);
   })();
-  const exchangeText = (inputText + '\n' + outputText).trim();
+  // Responses output_text (and Assistants thread.message text, surfaced via the
+  // messages walk above) feed the same shared sensitivity scan.
+  const exchangeText = [inputText, outputText, x.responsesText].filter(Boolean).join('\n').trim();
   const sens = sensitivity(exchangeText);
   const redacted = looksRedacted(exchangeText);
 
   const baseActor = { key_id: x.keyId, agent: x.agent };
   const baseMeta = { source, model: x.model, request_id: x.requestId };
+  // Correlation handles for the Assistants API (the agent IS the assistant_id,
+  // already folded into actor.agent; thread_id/assistant_id stay on meta).
+  if (x.assistantId) baseMeta.assistant_id = x.assistantId;
+  if (x.threadId) baseMeta.thread_id = x.threadId;
 
   const events = [];
 
@@ -382,9 +552,19 @@ function eventsFromRecord(rec, source, index, seenCallKeys) {
       toolCallSites.push(x.res); // Anthropic-shaped response message
     }
   }
-  let callIndex = 0;
+  // Flatten the message-derived calls (chat tool_calls / function_call /
+  // Anthropic tool_use) and append the calls extracted from the OpenAI
+  // Responses output[] and the Assistants run-step step_details. The dedup +
+  // PII-scan + emit body below is identical for all of them.
+  const allCalls = [];
   for (const m of toolCallSites) {
-    for (const call of toolCallsFromMessage(m)) {
+    for (const call of toolCallsFromMessage(m)) allCalls.push(call);
+  }
+  for (const call of x.extraToolCalls) allCalls.push(call);
+
+  let callIndex = 0;
+  {
+    for (const call of allCalls) {
       const toolName = call.name.toLowerCase();
       const argStr = safeStringify(call.args);
       const dest = argHost(call.args);
@@ -430,7 +610,10 @@ function eventsFromRecord(rec, source, index, seenCallKeys) {
   //    analyzer sees every call even when no tool fired. Only emitted when the
   //    record carried something auditable; a contentless record is reported as
   //    an error rather than a phantom event.
-  const hasSignal = !!(x.model || x.host || (x.messages && x.messages.length) || x.res || events.length);
+  const hasSignal = !!(
+    x.model || x.host || (x.messages && x.messages.length) || x.res || events.length ||
+    x.responsesShape || x.assistantsShape || (x.responsesText && x.responsesText.length)
+  );
   if (hasSignal) {
     // Discriminate distinct exchanges that share {ts, actor, host}: the source
     // request_id when present, else a content hash. Without this, two calls by
@@ -450,6 +633,146 @@ function eventsFromRecord(rec, source, index, seenCallKeys) {
       meta: { ...baseMeta, kind: 'model_call', api_base: x.host, routed_provider: x.routedProvider, pii_classes: sens.classes },
     }));
   }
+
+  return { events, error: null };
+}
+
+/* --------------------------------------------------------------------- */
+/* first-party gateway capture rows (the Tier-A bridge)                   */
+/* --------------------------------------------------------------------- */
+//
+// The kolm gateway stores two observation-row shapes:
+//   - capture rows ('cap_...'): { id, tenant, tenant_id, model, prompt,
+//     response, tool_calls[], corpus_namespace, created_at, ... }
+//   - receipt rows ('rcpt_...'): { id, tenant, receipt_id, ts, model,
+//     input_hash, output_hash, receipt:{ ..., signature_ed25519 } }
+// Both were recorded by kolm's own gateway at runtime, which is exactly what
+// evidence grade A means. This parser mirrors eventsFromRecord's contract
+// ({ events, error }, shared seenCallKeys dedup) so the rest of the audit
+// pipeline is unchanged.
+
+export function eventsFromCaptureRow(row, index, seenCallKeys) {
+  if (!row || typeof row !== 'object' || Array.isArray(row)) {
+    return { events: [], error: 'capture row is not a JSON object' };
+  }
+  const seen = seenCallKeys instanceof Set ? seenCallKeys : new Set();
+  const receipt = asObject(row.receipt);
+  const receiptId = firstString(row.receipt_id, receipt && receipt.receipt_id);
+  const captureId = firstString(row.id, receiptId);
+  const ts = firstTimestamp(
+    row.created_at, receipt && receipt.timestamp, row.ts, row.createdAt, row.timestamp,
+  );
+  const model = firstString(row.model, receipt && receipt.model);
+
+  // Egress host: explicit api_base wins; then a known provider tag; then the
+  // model slug. Gateway captures often log only the model, so the slug
+  // fallback matters here.
+  const provider = firstString(row.provider, row.vendor);
+  const apiBase = firstString(row.api_base, row.apiBase);
+  const host =
+    hostFromUrl(apiBase) ||
+    (apiBase ? apiBase.toLowerCase() : null) ||
+    (provider ? (PROVIDER_HOSTS[provider.toLowerCase()] || provider.toLowerCase()) : null) ||
+    hostFromModel(model);
+
+  const keyId = firstString(row.key_id, row.api_key_id, receipt && receipt.signing_key_id);
+  const agent = firstString(row.actor_id, row.user_id, row.agent, row.team_id, row.tenant);
+
+  const promptText = str(row.prompt != null ? row.prompt : row.input);
+  const responseText = str(row.response != null ? row.response : row.output);
+  const exchangeText = [promptText, responseText].filter(Boolean).join('\n').trim();
+  const sens = sensitivity(exchangeText);
+  const redacted =
+    (Array.isArray(row.redaction_applied) && row.redaction_applied.length > 0) ||
+    Number(row.redaction_count) > 0 ||
+    looksRedacted(exchangeText);
+  const receiptSigned = !!(receipt && receipt.signature_ed25519);
+
+  // Tamper-evidence chain links, where the capture path recorded them.
+  const hash = firstString(row.hash, row.entry_hash, row.chain_hash);
+  const prevHash = firstString(row.prev_hash, row.prevHash, row.previous_hash);
+
+  const baseActor = { key_id: keyId, agent };
+  const baseMeta = {
+    source: KOLM_CAPTURE_SOURCE,
+    model,
+    request_id: captureId,
+  };
+  const rowId = firstString(row.id);
+  if (rowId) baseMeta.capture_id = rowId;
+  const ns = firstString(row.corpus_namespace, row.namespace);
+  if (ns) baseMeta.corpus_namespace = ns;
+  if (receiptId) baseMeta.receipt_id = receiptId;
+  if (receipt) {
+    baseMeta.receipt_signed = receiptSigned;
+    const inHash = firstString(row.input_hash, receipt.input_hash);
+    const outHash = firstString(row.output_hash, receipt.output_hash);
+    if (inHash) baseMeta.input_hash = inHash;
+    if (outHash) baseMeta.output_hash = outHash;
+  }
+
+  const events = [];
+
+  // 1) Tool-call events from the capture's tool_calls[] (flat { name,
+  //    arguments } / OpenAI { function:{ name, arguments } } / Anthropic-ish
+  //    { name, input }). Same dedup + args-PII discipline as eventsFromRecord.
+  let callIndex = 0;
+  for (const tc of asArray(row.tool_calls) || []) {
+    if (!tc || typeof tc !== 'object') continue;
+    const fn = tc.function && typeof tc.function === 'object' ? tc.function : tc;
+    const name = firstString(fn.name, tc.name);
+    if (!name) continue;
+    const rawArgs = fn.arguments != null ? fn.arguments : (fn.args != null ? fn.args : (tc.input != null ? tc.input : tc.arguments));
+    const toolName = name.toLowerCase();
+    const argStr = safeStringify(rawArgs);
+    const dest = argHost(rawArgs);
+
+    const callId = firstString(tc.id, fn.id);
+    const dedupKey = callId
+      ? 'id:' + callId
+      : 'c:' + [keyId || '', toolName, argStr, dest || ''].join('|');
+    if (seen.has(dedupKey)) continue;
+    seen.add(dedupKey);
+
+    const argSens = sensitivity(argStr);
+    const hasSensitive = sens.has_sensitive || argSens.has_sensitive;
+    const piiClasses = uniqStrings([...sens.classes, ...argSens.classes]);
+    const disc = callId || [captureId || '', toolName, argStr, dest || '', String(callIndex)].join('|');
+
+    events.push(normalizeEvent({
+      ts,
+      namespace: KOLM_CAPTURE_SOURCE,
+      actor: baseActor,
+      action: { type: 'tool', tool: toolName, host: dest, method: null, endpoint: null },
+      scopes: { granted: null, used: ['tool:' + toolName] },
+      data: { has_sensitive: hasSensitive, redacted, egress: !!dest },
+      hash,
+      prev_hash: prevHash,
+      disc,
+      meta: { ...baseMeta, kind: 'tool_call', args_host: dest, pii_classes: piiClasses },
+    }));
+    callIndex++;
+  }
+
+  // 2) The captured inference call itself. A contentless row is an error, not
+  //    a phantom event - mirrors eventsFromRecord's hasSignal guard.
+  const hasSignal = !!(model || host || promptText || responseText || receipt || events.length);
+  if (!hasSignal) {
+    return { events: [], error: 'no auditable action found in capture row' };
+  }
+  const disc = captureId || (exchangeText ? eventId({ c: exchangeText }) : null);
+  events.push(normalizeEvent({
+    ts,
+    namespace: KOLM_CAPTURE_SOURCE,
+    actor: baseActor,
+    action: { type: 'model', host, method: 'post', endpoint: '/chat/completions' },
+    scopes: { granted: null, used: host ? [host.toLowerCase() + ':post'] : [] },
+    data: { has_sensitive: sens.has_sensitive, redacted, egress: !!host },
+    hash,
+    prev_hash: prevHash,
+    disc,
+    meta: { ...baseMeta, kind: 'model_call', api_base: host, provider: provider || null, pii_classes: sens.classes },
+  }));
 
   return { events, error: null };
 }
@@ -509,6 +832,7 @@ const BAD_LINE = Symbol.for('kolm.audit.badline');
  */
 export function ingestForAudit(input, opts = {}) {
   const source = (opts.source && String(opts.source).trim()) || 'import';
+  const isCapture = source === KOLM_CAPTURE_SOURCE;
   const records = recordsFromInput(input);
   const events = [];
   const errors = [];
@@ -521,7 +845,9 @@ export function ingestForAudit(input, opts = {}) {
       errors.push({ index: i, reason: 'invalid JSON' });
       continue;
     }
-    const { events: evs, error } = eventsFromRecord(rec, source, i, seenCallKeys);
+    const { events: evs, error } = isCapture
+      ? eventsFromCaptureRow(rec, i, seenCallKeys)
+      : eventsFromRecord(rec, source, i, seenCallKeys);
     if (error) {
       errors.push({ index: i, reason: error });
       continue;

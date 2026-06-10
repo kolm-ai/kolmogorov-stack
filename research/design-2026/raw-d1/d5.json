@@ -1,0 +1,66 @@
+{
+  "id": "d5",
+  "track": "design",
+  "prompt": "What concretely separates a TEMPLATE-LOOKING dark SaaS marketing site from an AWARD-TIER dark site in 2025-2026? I want the specific tells designers list when they critique: e.g., pure #000 vs tinted near-blacks, default border-radius and shadow values, generic purple-gradient glows, stock Tailwind/shadcn component look, uniform section padding, centered-everything layouts, fake bento grids — versus what award-tier sites do instead (custom type, real lighting models, asymmetric grids, bespoke iconography, intentional grain/texture, motion with crafted easing). Quote design-Twitter critiques and teardowns verbatim (@handle + date) and cite articles/videos. For every 'template tell' give the concrete fix with values (hex, px, easing curves, structure). This should read as an actionable checklist.",
+  "content": "**Template-looking dark SaaS sites (2025-2026) typically rely on default Tailwind/shadcn patterns, uniform symmetry, and off-the-shelf effects that scream \"indie hacker stack.\"** Award-tier sites (Awwwards, FWA, or high-converting enterprise examples like certain Linear/Resend-inspired or custom Webflow builds) feel hand-crafted through deliberate deviations in color, spacing, typography, layout, iconography, texture, and motion.[[1]](https://x.com/Deconinck_co/status/1891792332262981705)[[2]](https://x.com/nezbuilds/status/2062252576503218343)\n\nDesigners on X frequently call out the sameness. Here is an actionable checklist of the most-cited \"tells,\" paired with verbatim quotes where available and concrete fixes (with hex values, px, easing curves, and structural alternatives drawn from premium practices highlighted in critiques and trend roundups).\n\n### 1. Background Color & Depth\n**Template tell**: Pure `#000000` (or Tailwind `bg-black`/`bg-zinc-950`) with flat, screen-like emptiness. No subtle variation or perceived material.[[3]](https://www.stan.vision/journal/saas-website-design)\n\n**Award-tier instead**: Tinted near-blacks with slight warmth/coolness for depth and \"real lighting\" feel (avoids dead black on modern displays).\n\n**Fix**: Use `#0a0a0b` or `#111113` (or `#0f0f11` with a very subtle radial gradient overlay from `#1a1a1d` at center). Add micro-texture via CSS `background-image` with low-opacity noise/grain PNG (or SVG) at 2-5% opacity. Pair with soft inner shadows or multiple layered `box-shadow`s (e.g., one for subtle bevel).\n\n### 2. Border Radius & Component \"Feel\"\n**Template tell**: Default or oversized Tailwind `rounded-xl`/`rounded-2xl` (12-16px+) everywhere, plus huge radii on cards/buttons.[[2]](https://x.com/nezbuilds/status/2062252576503218343)\n\n**Award-tier instead**: Purposeful, varied radii—often tighter for precision or fully custom per element. Sharp or asymmetric edges where appropriate.\n\n**Fix**: Primary cards/buttons at `border-radius: 8px` or `10px`; smaller elements (badges, inputs) at `4px` or `6px`. Hero or large feature cards can go asymmetric (e.g., `border-radius: 12px 24px 12px 24px`). Avoid uniform large radii across the site.\n\n### 3. Shadows, Glows & Elevation\n**Template tell**: Generic purple/neon gradient glows (`shadow-purple-500/50` style) or default `shadow-md`/`shadow-lg` that look identical across sites.[[2]](https://x.com/nezbuilds/status/2062252576503218343)\n\n**Award-tier instead**: Realistic, context-aware lighting (directional shadows, subtle ambient occlusion, or physically inspired highlights).\n\n**Fix**: Replace glowing gradients with layered shadows, e.g.:\n- `box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.05)`\n- Or a subtle directional one: `0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2)`.\nUse `ring` utilities sparingly and only for focus states (e.g., `ring-1 ring-white/10`).\n\n### 4. Layout Symmetry & Section Structure\n**Template tell**: Centered-everything hero + uniform vertical padding (e.g., `py-16` or `py-24` on every section), symmetric grids, and repetitive bento/feature card layouts.[[1]](https://x.com/Deconinck_co/status/1891792332262981705)\n\n**Award-tier instead**: Asymmetric or editorial grids, varied padding, intentional negative space, and non-centered compositions.\n\n**Fix**: Vary section padding (e.g., `py-12`, `py-20`, `py-32` selectively). Use CSS Grid with irregular spans or masonry-like asymmetry. Break centering in hero (e.g., left-aligned text with offset imagery or split layouts). Replace uniform bento with custom overlapping or staggered cards.\n\n### 5. Typography & Letter Spacing\n**Template tell**: Excessive or default letter-spacing (`tracking-wide`/`tracking-wider`), system or generic sans fonts, and uniform weights/sizes.\n\n**Award-tier instead**: Custom or carefully paired typefaces with intentional (often tighter) spacing and hierarchy.\n\n**Fix**: Use tighter tracking on headings (e.g., `letter-spacing: -0.02em` or `-0.04em`). Pair a variable font (e.g., Inter or custom) with a display face. Vary weights dramatically (400/500 body vs. 600-700 headings).\n\n### 6. Gradients, Accents & \"Vibe\" Elements\n**Template tell**: Random glowing purple/blue gradients, generic \"Live\" badges, and stock micro-interactions.[[2]](https://x.com/nezbuilds/status/2062252576503218343)\n\n**Award-tier instead**: Bespoke iconography (often hand-drawn or heavily customized SVGs), subtle grain/texture, and purposeful color accents.\n\n**Fix**: Limit gradients to very subtle linear ones (e.g., from `#1a1a1d` to `#111113`). Build or commission custom icons instead of heroicons/lucide defaults. Add fine grain/noise overlay globally. Use one strong accent color with high contrast (e.g., a specific green or orange rather than generic neon).\n\n### 7. Motion & Interactions\n**Template tell**: Default Tailwind transitions or basic `ease-in-out` / `duration-300` on everything; floaty or bouncy defaults.\n\n**Award-tier instead**: Crafted easing curves, deliberate timing, and motion that feels physical or brand-specific.\n\n**Fix**: Use custom cubic-bezier easing such as `cubic-bezier(0.23, 1, 0.32, 1)` (smooth, premium feel) or `cubic-bezier(0.32, 0.72, 0, 1)` for entrances. Stagger animations with `transition-delay`. Keep durations purposeful (150-400ms). Add micro-details like transform origins or spring-like physics via Framer Motion/GSAP.\n\n### 8. Overall \"Stack\" Signature\n**Template tell**: shadcn/ui + Tailwind dark mode SaaS aesthetic that instantly reads as generated or templated (especially with AI prompts).[[4]](https://x.com/devbyharshit/status/2064200167226806636)\n\n**Award-tier instead**: Artisanal/hand-coded deviations, custom design systems, or heavily modified foundations that feel unique to the brand.[[5]](https://x.com/levelsio/status/1957529180330955260)\n\n**Fix**: Audit every component—override or rebuild defaults. Introduce at least 3-5 bespoke elements per page (custom illustrations, unique section dividers, or non-standard nav). Test against competitors: if it could be swapped with another SaaS site by changing only the logo/copy, iterate.\n\nThese distinctions are repeatedly surfaced in designer discussions as the gap between \"vibe-coded\" or template-derived sites and those that feel premium, intentional, and brand-specific. Implementing even 3-4 of the fixes above (starting with color, radius/shadows, and asymmetry) moves a site noticeably toward award-tier territory while improving perceived quality and conversion.",
+  "citations": [
+    "https://x.com/Deconinck_co/status/1891792332262981705",
+    "https://x.com/nezbuilds/status/2062252576503218343",
+    "https://www.stan.vision/journal/saas-website-design",
+    "https://x.com/devbyharshit/status/2064200167226806636",
+    "https://x.com/levelsio/status/1957529180330955260"
+  ],
+  "searched": [
+    "https://www.eloqwnt.com/blog/saas-website-design-trends",
+    "https://webflow.com/blog/saas-website-design-examples",
+    "https://www.stan.vision/journal/saas-website-design",
+    "https://cozythemes.com/blog/saas-website-templates/",
+    "https://www.figma.com/resource-library/web-design-trends/",
+    "https://kontra.agency/top-web-design-trends-for-2026/",
+    "https://azurodigital.com/saas-website-examples/",
+    "https://www.saasframe.io/blog/10-saas-landing-page-trends-for-2026-with-real-examples",
+    "https://framerbite.com/blog/saas-website-design-inspiration",
+    "https://www.youtube.com/watch?v=8ahnUt_A5eA",
+    "https://javascript.plainenglish.io/shadcn-landing-page-templates-every-front-end-developer-should-try-a942c010c54a",
+    "https://tailkits.com/templates/categories/startup/",
+    "https://www.pinterest.com/ideas/dark-landing-page-design/905171157575/",
+    "https://www.etsy.com/no-en/listing/4446157899/saas-dark-mode-landing-page-template",
+    "https://www.reddit.com/r/SaaS/comments/1tpceg0/what_are_your_favorite_saas_landing_page_designs/",
+    "https://www.pixeto.co/blog/15-best-designed-saas-websites",
+    "https://www.reddit.com/r/web_design/comments/xxnxej/best_dark_mode_website_designs/",
+    "https://www.marketermilk.com/blog/best-saas-websites",
+    "https://www.wavespace.agency/blog/best-website-design-examples",
+    "https://webflow.com/templates/search/gradient-themed-saas-template-for-ai-design-platform",
+    "https://brixtemplates.com/templates/dark-saas-webflow-template",
+    "https://www.youtube.com/watch?v=XjL9jhlztEs",
+    "https://www.gola.supply/blog/best-dark-saas-website-templates",
+    "https://www.reddit.com/r/EnterpriseArchitect/comments/zrtt0e/saas_design_document_template/"
+  ],
+  "usage": {
+    "input_tokens": 29504,
+    "input_tokens_details": {
+      "cached_tokens": 15040
+    },
+    "output_tokens": 2839,
+    "output_tokens_details": {
+      "reasoning_tokens": 1253
+    },
+    "total_tokens": 32343,
+    "num_sources_used": 0,
+    "num_server_side_tools_used": 7,
+    "cost_in_usd_ticks": 631855000,
+    "server_side_tool_usage_details": {
+      "web_search_calls": 4,
+      "x_search_calls": 3,
+      "code_interpreter_calls": 0,
+      "file_search_calls": 0,
+      "mcp_calls": 0,
+      "document_search_calls": 0
+    },
+    "context_details": {
+      "input_tokens": 16348,
+      "output_tokens": 1907
+    }
+  },
+  "attempts": 1
+}
