@@ -32,7 +32,7 @@ try {
   await page.goto(TARGET, { waitUntil: 'networkidle', timeout: 45000 });
 
   const title = await page.title();
-  check('title is the agent-security site', /on-demand security audits/i.test(title) && /kolm.ai/i.test(title));
+  check('title is the agent-security site', /security audit/i.test(title) && /kolm\.ai/i.test(title));
 
   check('hero accent phrase renders (h1 .go)', (await page.locator('h1 .go').count()) >= 1);
   check('signed-report artifact renders (.artifact .rep__sheet)', (await page.locator('.artifact .rep__sheet').count()) >= 1);
