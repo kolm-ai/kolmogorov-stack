@@ -256,9 +256,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         actions = '<a class="btn ghost sm" href="'+esc(r.trust_url)+'" target="_blank" rel="noopener">Open Trust link</a>'
                 + '<button class="btn primary sm" data-copy="'+esc(r.trust_url)+'">Copy link</button>';
       } else if (reportConfigured) {
-        actions = '<button class="btn primary sm" data-buy="'+esc(r.id)+'">Buy full report ($750)</button>';
+        actions = '<button class="btn ghost sm" data-preview="'+esc(r.id)+'">View preview report</button>'
+                + '<button class="btn primary sm" data-buy="'+esc(r.id)+'">Buy full report ($750)</button>';
       } else {
-        actions = '<a class="btn ghost sm" href="/contact">Contact to purchase</a>';
+        actions = '<button class="btn ghost sm" data-preview="'+esc(r.id)+'">View preview report</button>'
+                + '<a class="btn ghost sm" href="/contact">Contact to purchase</a>';
       }
       return '<tr>'
         + '<td><strong>'+esc(r.subject||'Agent fleet')+'</strong><br><span class="mono muted" style="font-size:12px">'+esc(r.report_id||'')+'</span></td>'
@@ -273,22 +275,63 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     content.innerHTML = '<div class="card" style="padding:0;overflow:hidden">'
       + '<table><thead><tr><th>Subject</th><th>Tier</th><th>Readiness</th><th>Blocking</th><th>Generated</th><th></th></tr></thead>'
       + '<tbody>'+rows+'</tbody></table></div>'
+      + '<p class="muted" style="font-size:13.5px;margin:-4px 0 20px">The free scan is the full analysis, watermarked. The Signed Readiness Report ($750) removes the watermark, adds a trusted timestamp, and mints the shareable Trust link your buyer verifies.</p>'
       + (reportConfigured ? '' : '<div class="banner warn">Purchasing is not enabled on this deployment yet. Email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> to buy a report.</div>');
 
     // Wire row actions.
+    content.querySelectorAll('[data-preview]').forEach(function(b){ b.onclick = function(){ openPreview(b.getAttribute('data-preview'), b); }; });
     content.querySelectorAll('[data-buy]').forEach(function(b){ b.onclick = function(){ startCheckout('/v1/audit/report/checkout', { audit_id: b.getAttribute('data-buy') }, b); }; });
     content.querySelectorAll('[data-copy]').forEach(function(b){ b.onclick = function(){ navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function(){ b.textContent='Copied'; setTimeout(function(){ b.textContent='Copy link'; },1500); }); }; });
+  }
+
+  // Open the stored watermarked scan-tier report in a new tab. Works for both
+  // auth modes: the kolm_session cookie rides on credentials:'same-origin' and
+  // a pasted ks_ key rides on authHeaders(). Blob URL keeps the page's own
+  // route untouched and is revoked once the new tab has had time to load.
+  function openPreview(id, btn){
+    var prev = btn.textContent; btn.disabled = true; btn.textContent = 'Loading...';
+    fetch('/v1/audit/sessions/' + encodeURIComponent(id) + '/report?format=html', { credentials:'same-origin', headers: authHeaders() })
+      .then(function(res){
+        if (!res.ok){
+          btn.disabled = false;
+          btn.textContent = (res.status === 401 || res.status === 404) ? 'Sign in again to view' : 'Preview unavailable';
+          setTimeout(function(){ btn.textContent = prev; }, 4000);
+          return null;
+        }
+        return res.text();
+      })
+      .then(function(html){
+        if (html == null) return;
+        btn.disabled = false; btn.textContent = prev;
+        var objUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+        window.open(objUrl, '_blank');
+        setTimeout(function(){ URL.revokeObjectURL(objUrl); }, 60000);
+      })
+      .catch(function(){
+        btn.disabled = false; btn.textContent = 'Preview unavailable';
+        setTimeout(function(){ btn.textContent = prev; }, 4000);
+      });
   }
 
   function startCheckout(url, body, btn){
     var prev = btn.textContent; btn.disabled = true; btn.textContent = 'Starting...';
     fetch(url, { method:'POST', credentials:'same-origin', headers: Object.assign({'Content-Type':'application/json'}, authHeaders()), body: JSON.stringify(body) })
-      .then(function(res){ return res.json().then(function(j){ return { ok: res.ok, j: j }; }); })
+      .then(function(res){ return res.json().then(function(j){ return { ok: res.ok, status: res.status, j: j }; }).catch(function(){ return { ok: res.ok, status: res.status, j: null }; }); })
       .then(function(o){
         if (o.j && o.j.already_paid && o.j.trust_url){ location.href = o.j.trust_url; return; }
         if (o.ok && o.j && o.j.url){ location.href = o.j.url; return; }
         btn.disabled=false; btn.textContent=prev;
-        alert((o.j && (o.j.detail||o.j.error)) || 'Could not start checkout. Email dev@kolm.ai.');
+        // Surface the failure with real detail instead of a dead end. Env NAMES
+        // in o.j.missing are operator-facing only: console, never the banner.
+        if (o.j && Array.isArray(o.j.missing)) { console.warn('Checkout not configured. Missing server env names:', o.j.missing); }
+        var banner = document.getElementById('banner');
+        if ((o.j && o.j.error === 'billing_not_configured') || o.status === 503){
+          banner.innerHTML = '<div class="banner warn">Purchasing is temporarily unavailable on this deployment. Email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> and we will invoice you directly.</div>';
+        } else {
+          var detail = o.j && (o.j.detail || o.j.error);
+          banner.innerHTML = '<div class="banner warn">' + esc(detail || 'Could not start checkout. Email dev@kolm.ai.') + '</div>';
+        }
+        banner.scrollIntoView({ block: 'nearest' });
       })
       .catch(function(){ btn.disabled=false; btn.textContent=prev; alert('Network error. Try again or email dev@kolm.ai.'); });
   }

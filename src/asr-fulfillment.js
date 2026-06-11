@@ -219,6 +219,23 @@ export function fulfillReportPurchase({ audit_id, stripe_session_id, signer } = 
     }
     return { ok: true, row: fresh, pending_resign: pendingResign };
   });
+  // Economics telemetry (die-risk #1): one 'agent_audit.checkout_completed' op
+  // per ACTUAL state transition, so started-vs-paid conversion is countable by
+  // joining the existing agent_audit.checkout_started ops. The already-fulfilled
+  // retry path (result.already) appends NOTHING, so a redelivered webhook never
+  // double-counts. tryAppendAudit never throws, and the extra try/catch
+  // guarantees telemetry can never push the webhook onto its retry path.
+  if (result && result.ok && !result.already) {
+    try {
+      const tid = result.row ? result.row.tenant_id : null;
+      tryAppendAudit({
+        tenant_id: tid,
+        actor: 'system',
+        op: 'agent_audit.checkout_completed',
+        payload: { product: 'report', tenant_id: tid, audit_id },
+      });
+    } catch { /* telemetry is best-effort, never the webhook's problem */ }
+  }
   // Post-commit, best-effort upgrade to an INDEPENDENT public TSA token. The
   // timestampDigest call is async, so it runs AFTER the sync money-write and never
   // blocks the webhook's sync return; the sync self-issued baseline already stands.
@@ -261,7 +278,7 @@ export function resignPendingReports({ signer, limit = 50 } = {}) {
 // ---------------------------------------------------------------------------
 export function fulfillPackagePurchase({ tenant_id, product, stripe_session_id } = {}) {
   if (!tenant_id || !product) return { ok: false, reason: 'missing_fields' };
-  return withTransaction(() => {
+  const result = withTransaction(() => {
     // Tenant-fenced idempotency: an existing ACTIVE grant for this exact
     // (tenant, product) means the purchase is already fulfilled. The tenant_id
     // predicate guarantees a forged/reused session can never read or mutate
@@ -299,6 +316,19 @@ export function fulfillPackagePurchase({ tenant_id, product, stripe_session_id }
     });
     return { ok: true, pkg: fresh };
   });
+  // Economics telemetry (die-risk #1): see fulfillReportPurchase. Appends only
+  // on a real transition (never on the idempotent already path); can never throw.
+  if (result && result.ok && !result.already) {
+    try {
+      tryAppendAudit({
+        tenant_id,
+        actor: 'system',
+        op: 'agent_audit.checkout_completed',
+        payload: { product, tenant_id, package_id: result.pkg ? result.pkg.id : null },
+      });
+    } catch { /* telemetry is best-effort, never the webhook's problem */ }
+  }
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -308,7 +338,7 @@ export function fulfillPackagePurchase({ tenant_id, product, stripe_session_id }
 // ---------------------------------------------------------------------------
 export function activateSubscription({ product, tenant_id, stripe_subscription_id, stripe_customer_id, stripe_session_id } = {}) {
   if (!product || !tenant_id) return { ok: false, reason: 'missing_fields' };
-  return withTransaction(() => {
+  const result = withTransaction(() => {
     // Tenant-fenced lookup: a subscription is only ever matched within the
     // owning tenant. The stripe_subscription_id cross-check (s.tenant_id ===
     // tenant_id) guarantees a reused/forged id can never mutate another tenant's
@@ -348,7 +378,13 @@ export function activateSubscription({ product, tenant_id, stripe_subscription_i
       public_slug: mintSlug(),
       latest_audit_id: seed ? seed.id : null,
       source_audit_id: seed ? seed.id : null,
-      next_run_at: plusWeekIso(),
+      // Die-risk #7: the FIRST attestation must not wait a week. next_run_at
+      // starts at NOW so the in-process 30-minute sweep (runDueReattestations)
+      // picks the subscription up on its next tick when seed logs exist
+      // (reattestSub already handles a subscription with no stored source
+      // gracefully). Every SUBSEQUENT cycle still re-schedules +1 week via
+      // claimDue, so the weekly cadence is unchanged after the first run.
+      next_run_at: nowIso(),
       last_run_at: null,
       created_at: ts,
       updated_at: ts,
@@ -362,6 +398,20 @@ export function activateSubscription({ product, tenant_id, stripe_subscription_i
     });
     return { ok: true, sub: row };
   });
+  // Economics telemetry (die-risk #1): see fulfillReportPurchase. Appends only
+  // on a real activation (never on the idempotent re-activation path); can
+  // never throw, so it can never trigger the webhook retry path.
+  if (result && result.ok && !result.already) {
+    try {
+      tryAppendAudit({
+        tenant_id,
+        actor: 'system',
+        op: 'agent_audit.checkout_completed',
+        payload: { product, tenant_id, subscription_id: result.sub ? result.sub.id : null },
+      });
+    } catch { /* telemetry is best-effort, never the webhook's problem */ }
+  }
+  return result;
 }
 
 export function setSubscriptionStatus({ stripe_subscription_id, status } = {}) {

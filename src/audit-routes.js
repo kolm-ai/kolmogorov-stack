@@ -326,7 +326,7 @@ function _trustUrlFor(slug) {
 function _trustPendingHtml() {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="30"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Report generating - kolm.ai</title>
 <style>body{font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0b0e14;background:#f6f7f4;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center}.card{max-width:520px;text-align:center;padding:40px 28px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#b3431f;animation:p 1.2s infinite}@keyframes p{0%,100%{opacity:.3}50%{opacity:1}}h1{font-size:22px;margin:18px 0 8px}p{color:#5b6472}</style></head>
-<body><div class="card"><span class="dot"></span><h1>Your first signed report is generating</h1><p>This Continuous Trust link is live. The first re-attestation runs shortly and this page will refresh automatically. Questions: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p></div></body></html>`;
+<body><div class="card"><span class="dot"></span><h1>This Trust link is live - the first signed report is not generated yet</h1><p>The first signed report generates on the subscription's first attestation cycle. The vendor can trigger it immediately by running one Agent Exposure Scan from their account, or by calling the deploy-hook endpoint (POST /v1/audit/continuous/deploy-hook) after a deploy. This page refreshes automatically. Questions: <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</p></div></body></html>`;
 }
 
 // Constant-time string compare for the cron secret (length-guarded).
@@ -1643,8 +1643,20 @@ export function register(r, deps = {}) {
       }
     }
     // html (default) - render in the browser, no upload, offline-verifiable.
+    // S9 into the artifact: the drift vs the immediately-prior signed report is
+    // rendered INSIDE the report (renderReportHtml's opts.delta - the same
+    // 'What changed since the last attestation' block the builder owns). Same
+    // helpers as the sibling /v1/trust/:slug/delta route. The whole computation
+    // is best-effort: it can NEVER block or fail serving the report (a first
+    // attestation or a delta hiccup just renders the report with no drift block).
+    let prior = null;
+    try { prior = resolvePriorReport(slug); } catch { prior = null; }
+    let delta = null;
+    if (prior) {
+      try { delta = computeAuditDelta(prior, hit.envelope); } catch { delta = null; }
+    }
     let html;
-    try { html = renderReportHtml(envelope); }
+    try { html = renderReportHtml(envelope, { delta, trustSlug: slug }); }
     catch (e) { return _err(res, 500, 'html_render_error', e && e.message); }
     // Self-evidencing freshness for Continuous: lapsed > stale > current.
     const bstyle = (bg) => `background:${bg};color:#fff;padding:11px 16px;border-radius:8px;margin:0 0 22px;font:600 13px/1.45 -apple-system,Segoe UI,Helvetica,Arial,sans-serif`;
@@ -1657,6 +1669,24 @@ export function register(r, deps = {}) {
       banner = `<div style="${bstyle('#0f5132')}">Continuous - last re-attested ${hit.age_hours}h ago. This link refreshes automatically.</div>`;
     }
     if (banner) html = html.replace(/(<body[^>]*>)/, `$1${banner}`);
+    // Reviewer toolbar (upgrade #2): the public Trust link is the reviewer's
+    // WORKING surface, so the already-mounted procurement endpoints get a
+    // sticky strip of working links at the top of the artifact. HTML-wrapper
+    // only (the signed envelope underneath is untouched), applied ONLY on this
+    // route - never on the watermarked authed session render. Cool slate,
+    // squared corners, no glows, no warm colors.
+    const eslug = encodeURIComponent(slug);
+    const tbA = 'color:#fff;text-decoration:none;border:1px solid #2a3140;background:#141925;padding:4px 10px;border-radius:0;white-space:nowrap';
+    const toolbar = `<div style="position:sticky;top:0;z-index:9999;background:#0b0e14;color:#fff;font:500 13px/1.4 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">`
+      + `<span style="font-weight:700;letter-spacing:.04em;margin-right:6px">Reviewer tools</span>`
+      + `<a style="${tbA}" href="/v1/trust/${eslug}/export?format=drata">Export Drata</a>`
+      + `<a style="${tbA}" href="/v1/trust/${eslug}/export?format=vanta">Export Vanta</a>`
+      + `<a style="${tbA}" href="/v1/trust/${eslug}/questionnaire?format=csv">Questionnaire CSV</a>`
+      + `<a style="${tbA}" href="/v1/trust/${eslug}/badge.svg">Badge</a>`
+      + `<a style="${tbA}" href="/v1/trust/${eslug}/delta">Drift JSON</a>`
+      + `<a style="${tbA}" href="/verify?trust=${eslug}">Verify this report</a>`
+      + `</div>`;
+    html = html.replace(/(<body[^>]*>)/, `$1${toolbar}`);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
     return res.send(html);

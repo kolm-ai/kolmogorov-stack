@@ -133,7 +133,7 @@ export function recordTransparencyEntry(reportDigest, opts = {}) {
       }
     } catch { /* best-effort: a checkpoint without an embedded path is still valid */ }
     return checkpoint;
-  } catch (_e) {
+  } catch {
     return null;
   }
 }
@@ -226,7 +226,34 @@ const REMEDIATION_HINTS = {
   'retention-unverifiable': 'Set and document a retention window that meets the buyer requirement (e.g. EU AI Act Art.12).',
   'short-retention-window': 'Extend and document the retention window to meet the buyer requirement (e.g. EU AI Act Art.12).',
   'trail-volume-inconsistent': 'Export the full continuous window, or attach a coverage declaration (window, systems, expected daily call volume) so the report binds the export scope.',
+  // Egress analyzer (ASR-3).
+  'secret-egress': 'Rotate the exposed credential class(es) immediately, then add shape-based redaction at the egress boundary so credential-shaped tokens never leave it.',
+  'unapproved-egress-destination': 'Route the off-allowlist destinations through an approved proxy, add the vetted ones to the sub-processor allowlist, and remove the tools\' ability to reach the rest.',
+  'undeclared-egress-surface': 'Declare an explicit egress allowlist of approved destination hosts so every observed host can be evaluated as approved or unapproved on the next run.',
+  // Agent identity analyzer (ASR-5 identity / passport).
+  'unattributed-agent-action': 'Stamp every agent action with a credential id and an agent name at the gateway, and reject events that arrive with neither.',
+  'ambiguous-agent-identity': 'Issue one credential per agent identity; stop presenting a single key under multiple agent names so each action attests to a single subject.',
+  'unverifiable-agent-scope': 'Declare an explicit scope grant per credential so the authority each agent exercised can be bounded and attested as least privilege.',
+  'agent-identity-partial': 'Complete each partial identity: bind every credential id to an agent name and every agent name to a credential id, so the passport asserts both.',
+  // Model provenance analyzer (ASR-5 provenance / supply chain).
+  'unpinned-model-version': 'Pin each production agent to an explicit model version; floating aliases change behavior without a deploy.',
+  'opaque-model-routing': 'Record the resolved upstream provider per gateway call, or call the upstream vendor directly, so the model supply chain is verifiable.',
+  'unpinned-mcp-server': 'Pin each MCP / vendor server to a version or image digest and record it in a declared allow-list.',
+  'model-egress-third-party': 'Confirm the third-party destination is a contractually approved sub-processor with a data-processing agreement in place, and apply redaction before sensitive content egresses to it.',
+  // RAG / memory analyzer (ASR-7).
+  'untrusted-retrieval-source': 'Route retrieval through an approved, integrity-checked first-party index, or sanitize and declare the external source; retrieved text is an indirect prompt-injection vector.',
+  'unverified-memory-write': 'Attach a hash-chain integrity link and a credential/agent attribution to every durable memory write so a forged or poisoned entry is detectable before it steers later turns.',
+  // Delegation analyzer (ASR-8).
+  'delegation-privilege-escalation': 'Bound each sub-agent to a scoped, short-lived credential at or below the delegating agent\'s privilege tier; require a recorded step-up control for any elevation.',
+  'opaque-delegation-hop': 'Record the sub-agent identity on every handoff and log the sub-agent\'s actions under its own attributable identity so each hop is reviewable.',
+  'unattenuated-delegation': 'Issue each sub-agent a narrowed credential scoped to only the tools the handoff requires; every delegation hop must attenuate, never inherit the full grant.',
 };
+
+// The fallback action when a finding id has no standard remediation pattern.
+// Exported so the renderer (and tests) can recognize that the fallback fired
+// and surface the finding's own detail next to it instead of filler text.
+export const REMEDIATION_FALLBACK_ACTION =
+  'Address the evidence cited in this finding with your platform team; no standard remediation pattern applies.';
 
 const SEV_ORDER = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
 
@@ -253,7 +280,7 @@ export function deriveRemediation(auditResult) {
       severity: f.severity,
       finding_id: f.id,
       title: f.title || f.id,
-      action: REMEDIATION_HINTS[f.id] || `Remediate: ${f.title || f.id}.`,
+      action: REMEDIATION_HINTS[f.id] || REMEDIATION_FALLBACK_ACTION,
       asr: f.asr ? f.asr.id : null,
       frameworks: frameworksOf(f),
     }));
@@ -588,7 +615,7 @@ export function signReport(envelope, signer, opts = {}) {
       transparencyLog: opts && opts.transparencyLog,
     });
     if (cp) envelope.log_checkpoint = cp;
-  } catch (_e) { /* best-effort: omit log_checkpoint */ }
+  } catch { /* best-effort: omit log_checkpoint */ }
   return envelope;
 }
 
@@ -648,7 +675,7 @@ export async function attachDetachedEvidence(envelope, opts = {}) {
         });
       }
       if (te && typeof te === 'object') envelope.timestamp_evidence = te;
-    } catch (_e) {
+    } catch {
       envelope.timestamp_evidence = {
         alg: 'sha256', message_imprint: reportDigest, timestamp: null,
         token_b64: null, tsa_url: null, status: 'offline', reason: 'timestamp_error',
@@ -667,7 +694,7 @@ export async function attachDetachedEvidence(envelope, opts = {}) {
         const cp = recordTransparencyEntry(reportDigest, { ...options, report_id: envelope.report_id });
         if (cp) envelope.log_checkpoint = cp;
       }
-    } catch (_e) { /* best-effort: omit log_checkpoint */ }
+    } catch { /* best-effort: omit log_checkpoint */ }
   }
   return envelope;
 }
@@ -701,7 +728,7 @@ export function resignAsTier(envelope, tier, signer) {
   // co-signature. A co-signer attests the FINAL signed report, so co_signatures
   // are (re-)added by addCoSignature after this upgrade, never carried across it.
   const { signature_ed25519, co_signatures, ...rest } = envelope;
-  void co_signatures;
+  void signature_ed25519; void co_signatures;
   const next = { ...rest };
   next.tier = tier === 'report' ? 'report' : 'scan';
   next.watermark = next.tier !== 'report';
@@ -915,9 +942,19 @@ function esc(s) {
 const STATUS_LABEL = { pass: 'PASS', attention: 'ATTENTION', blocking: 'BLOCKING', untested: 'UNTESTED' };
 const STATUS_COLOR = { pass: '#166534', attention: '#0e7490', blocking: '#991b1b', untested: '#5b6472' };
 
-// renderReportHtml(envelope) -> string. Self-contained HTML document.
-export function renderReportHtml(envelope) {
+// renderReportHtml(envelope, opts) -> string. Self-contained HTML document.
+//
+// opts (optional, render-only - NEVER signature-affecting):
+//   delta:     a computeAuditDelta result (src/audit-delta.js) or null. When
+//              present, a "What changed since the last attestation" section is
+//              rendered above Findings.
+//   trustSlug: the Trust-link slug or null. When present (paid tier), the
+//              headline strip carries a one-click /verify?trust=<slug> button.
+// Calling with a single argument behaves exactly as before plus the new
+// verdict-first sections derived from the SAME signed fields.
+export function renderReportHtml(envelope, opts = {}) {
   const e = envelope || {};
+  const o = opts && typeof opts === 'object' ? opts : {};
   const s = e.summary || {};
   const readiness = s.readiness_pct == null ? 'n/a' : `${s.readiness_pct}%`;
   const sig = e.signature_ed25519 || {};
@@ -925,6 +962,65 @@ export function renderReportHtml(envelope) {
   const wmBanner = isWm
     ? `<div class="wm-banner">UNPAID PREVIEW &middot; not for distribution. This free Scan snapshot is watermarked. Purchase the Signed Readiness Report to receive an unwatermarked, distributable copy plus a shareable verify link your reviewer can check. <span class="mono">${esc(e.contact || CONTACT_EMAIL)}</span></div>`
     : '';
+
+  // Scan tier (or any watermarked preview) keeps the live verdict band, the
+  // one-click verify button, and the Trust-link affordances LOCKED - rendered
+  // as a neutral slate panel naming exactly what the paid report includes.
+  const isScanLocked = e.tier === 'scan' || e.watermark === true;
+
+  // ---- Verdict band (derived ONLY from signed fields; never invented). ----
+  // Legacy envelopes without summary.blocking_count omit the band entirely.
+  const rtForVerdict = e.red_team && typeof e.red_team === 'object' ? e.red_team : null;
+  const exposedCount = rtForVerdict && rtForVerdict.summary && rtForVerdict.summary.exposed != null
+    ? Number(rtForVerdict.summary.exposed)
+    : null;
+  const hasVerdictBasis = e.summary && typeof e.summary === 'object' && s.blocking_count != null;
+  const blockingCount = hasVerdictBasis ? Number(s.blocking_count) : null;
+  const attentionCount = Array.isArray(e.findings) ? e.findings.length : (s.total_findings ?? 0);
+  const VERDICT_QUALIFIER = 'Assessed scope only; see Scope and limitations.';
+  let verdictColor = '#5b6472';
+  let verdictText = '';
+  if (hasVerdictBasis) {
+    if (blockingCount > 0 || (exposedCount != null && exposedCount > 0)) {
+      verdictColor = '#991b1b';
+      verdictText = `${blockingCount} deal-blocking finding(s) open`
+        + (exposedCount > 0 ? ` and ${exposedCount} red-team probe(s) exposed` : '')
+        + '. Not procurement-ready on the assessed controls.';
+    } else if (attentionCount > 0) {
+      verdictColor = '#0e7490';
+      verdictText = `No deal-blocking findings in the assessed controls. ${attentionCount} finding(s) need attention before review.`;
+    } else {
+      verdictColor = '#166534';
+      verdictText = 'No deal-blocking findings in the assessed controls.';
+    }
+  }
+  const verdictBand = hasVerdictBasis && !isScanLocked
+    ? `<div class="verdict" style="background:${verdictColor}">${esc(verdictText)} ${esc(VERDICT_QUALIFIER)}</div>`
+    : '';
+  // Same position on the scan tier: the locked-affordances panel ($750 upgrade).
+  const lockedPanel = isScanLocked
+    ? `<div class="locked-panel">Verdict band, one-click cryptographic verification, the reviewer toolbar and the shareable Trust link are included in the Signed Readiness Report ($750).</div>`
+    : '';
+
+  // Headline-tile coloring by the same thresholds: red when blocking, green
+  // when fully clean, slate otherwise; legacy envelopes keep the plain ink.
+  const tileColor = hasVerdictBasis
+    ? (blockingCount > 0 ? '#991b1b'
+      : ((exposedCount == null || exposedCount === 0) && attentionCount === 0 ? '#166534' : '#5b6472'))
+    : null;
+  const tileStyle = tileColor ? ` style="color:${tileColor}"` : '';
+
+  // ---- One-click verify button (paid tier only). URL contract: the query
+  // param named `trust` on /verify (public/verify.html via Vercel cleanUrls).
+  let verifyButton = '';
+  if (!isScanLocked) {
+    const trustSlug = typeof o.trustSlug === 'string' && o.trustSlug.trim() !== '' ? o.trustSlug : null;
+    if (trustSlug) {
+      verifyButton = `<div class="verify-cta"><a class="btn-verify" href="/verify?trust=${encodeURIComponent(trustSlug)}">Verify this report cryptographically</a></div>`;
+    } else if (e.verify_url && e.tier !== 'scan') {
+      verifyButton = `<div class="verify-cta"><a class="btn-verify" href="${esc(e.verify_url)}">Verify this report cryptographically</a></div>`;
+    }
+  }
 
   // Evidence-tier banner. Signed envelopes built from now on always carry
   // evidence_tier; a legacy envelope (issued before tiered evidence) renders a
@@ -940,6 +1036,53 @@ export function renderReportHtml(envelope) {
   const etBanner = et && ET_LABEL[etGrade]
     ? `<div class="et-banner" style="border-left-color:${ET_COLOR[etGrade]}">${esc(ET_LABEL[etGrade])}${(Array.isArray(et.basis) ? et.basis : []).map((b) => `<span class="et-basis">${esc(b)}</span>`).join('')}</div>`
     : `<div class="et-banner et-none">Evidence tier: not graded (issued before tiered evidence)</div>`;
+
+  // Evidence-grade chip (fifth headline tile). Legacy envelopes render n/a -
+  // never an invented grade. Grade C carries the one-line capture nudge.
+  const gradeKnown = !!(et && ET_LABEL[etGrade]);
+  const gradeLetter = gradeKnown ? etGrade : 'n/a';
+  const gradeColor = gradeKnown ? ET_COLOR[etGrade] : '#5b6472';
+  const gradeNudge = gradeKnown && etGrade === 'C'
+    ? `<div class="small grade-nudge">Grade C: vendor logs as provided. Grade A is available via kolm-gateway capture.</div>`
+    : '';
+  const gradeTile = `<div><div class="big" style="color:${gradeColor}">${esc(gradeLetter)}</div><div class="small">evidence grade</div>${gradeNudge}</div>`;
+
+  // ---- For reviewers (no invented numbers, no certification claims). ----
+  const forReviewers = `
+  <h2>For reviewers</h2>
+  <p class="small">This report supports vendor security review: every finding is mapped to the framework controls a reviewer cites. The Trust link version of this page carries a Drata/Vanta export, a questionnaire CSV and a drift view. Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>`;
+
+  // ---- Delta section (render half of the re-attestation drift view). ----
+  // Rendered only when the caller supplies a computeAuditDelta result; the
+  // section is a pure projection of that object - nothing is invented here.
+  let deltaSection = '';
+  if (o.delta && typeof o.delta === 'object') {
+    const d = o.delta;
+    const added = Array.isArray(d.findings_added) ? d.findings_added : [];
+    const resolved = Array.isArray(d.findings_resolved) ? d.findings_resolved : [];
+    const changed = Array.isArray(d.controls_changed) ? d.controls_changed : [];
+    const deltaColor = d.regressed === true
+      ? '#991b1b'
+      : ((typeof d.readiness_change === 'number' && d.readiness_change > 0)
+          || (resolved.length > 0 && added.length === 0))
+        ? '#166534'
+        : '#5b6472';
+    const rc = typeof d.readiness_change === 'number'
+      ? `${d.readiness_change > 0 ? '+' : ''}${d.readiness_change} percentage point(s)`
+      : 'n/a';
+    const fromRef = d.from && typeof d.from === 'object' ? d.from : {};
+    const addedList = added.map((f) => `<li><span class="sev" style="color:${_sevColor(f && f.severity)}">${esc(((f && f.severity) || '').toUpperCase())}</span> ${esc((f && (f.title || f.id)) || '')}</li>`).join('');
+    const resolvedList = resolved.map((f) => `<li>${esc((f && (f.title || f.id)) || '')}</li>`).join('');
+    const changedList = changed.map((c) => `<li><span class="mono">${esc((c && c.id) || '?')}: ${esc((c && c.from_status) || '?')} -&gt; ${esc((c && c.to_status) || '?')}</span></li>`).join('');
+    deltaSection = `
+  <h2>What changed since the last attestation</h2>
+  <div class="delta-head" style="background:${deltaColor}">${esc(d.summary || `Compared against ${fromRef.report_id || 'the prior attestation'}.`)}</div>
+  <p class="small">Readiness movement: <strong>${esc(rc)}</strong>${fromRef.report_id ? ` &middot; prior report <span class="mono">${esc(fromRef.report_id)}</span>${fromRef.generated_at ? ` (${esc(fromRef.generated_at)})` : ''}` : ''}</p>
+  <p class="small">${esc(changed.length)} control transition(s) &middot; ${esc(added.length)} finding(s) added &middot; ${esc(resolved.length)} resolved</p>
+  ${changedList ? `<h3 class="small">Control transitions</h3><ul class="small">${changedList}</ul>` : ''}
+  ${addedList ? `<h3 class="small">Findings added</h3><ul class="small">${addedList}</ul>` : ''}
+  ${resolvedList ? `<h3 class="small">Findings resolved</h3><ul class="small">${resolvedList}</ul>` : ''}`;
+  }
 
   const controlRows = (s.controls || []).map((c) => `
     <tr>
@@ -962,13 +1105,23 @@ export function renderReportHtml(envelope) {
       <p class="finding-fw">${esc(f.asr ? f.asr.id + ' · ' : '')}${esc((f.frameworks || []).join(' · ') || 'no framework mapping')}</p>
     </div>`).join('');
 
-  const remediation = (e.remediation || []).map((r) => `
+  const remediation = (e.remediation || []).map((r) => {
+    // When the generic fallback fired (no standard remediation pattern for this
+    // finding id), surface the finding's own detail excerpt in the row so the
+    // engineer still gets the specific evidence to act on - never filler.
+    let actionCell = esc(r.action);
+    if (r.action === REMEDIATION_FALLBACK_ACTION) {
+      const src = (e.findings || []).find((f) => f && f.id === r.finding_id && f.detail);
+      if (src) actionCell += `<div class="small rem-detail">${esc(String(src.detail).slice(0, 320))}</div>`;
+    }
+    return `
     <tr>
       <td class="mono">${esc(r.priority)}</td>
       <td>${esc(r.title)}</td>
-      <td>${esc(r.action)}</td>
+      <td>${actionCell}</td>
       <td class="mono small">${esc((r.frameworks || []).join(', '))}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   const caveats = (e.caveats || []).map((c) => `<li>${esc(c)}</li>`).join('');
 
@@ -1062,43 +1215,52 @@ export function renderReportHtml(envelope) {
 <style>
   :root{--ink:#0b0e14;--muted:#5b6472;--rule:#e3e7ee;--paper:#ffffff;--panel:#f7f9fc;}
   *{box-sizing:border-box}
-  body{font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper);margin:0;padding:40px;max-width:920px;margin-inline:auto}
-  h1{font-size:26px;margin:0 0 4px}
-  h2{font-size:18px;margin:32px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+  body{font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#f4f7fb 0%,#ffffff 420px) no-repeat,var(--paper);margin:0;padding:40px;max-width:920px;margin-inline:auto}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink);margin:36px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+  h3.small{text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:14px 0 4px}
   .sub{color:var(--muted);margin:0 0 24px}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   .small{font-size:12px}
-  .headline{display:flex;gap:28px;align-items:baseline;background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:20px 24px;margin:0 0 8px}
-  .headline .big{font-size:40px;font-weight:700}
+  .verdict{color:#fff;border-radius:2px;padding:14px 18px;margin:0 0 14px;font-weight:600;font-size:15px;line-height:1.45}
+  .locked-panel{background:var(--panel);border:1px solid var(--rule);border-left:3px solid #5b6472;border-radius:2px;color:#2a2f3a;padding:13px 16px;margin:0 0 14px;font-size:13px;line-height:1.5}
+  .headline{display:flex;gap:28px;align-items:baseline;flex-wrap:wrap;background:var(--panel);border:1px solid var(--rule);border-radius:2px;border-top:2px solid var(--ink);padding:20px 24px;margin:0 0 8px}
+  .headline .big{font-size:40px;font-weight:700;letter-spacing:-.02em}
+  .headline .small{text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .grade-nudge{text-transform:none;letter-spacing:0;max-width:230px;margin-top:4px;color:var(--muted)}
+  .verify-cta{align-self:center;margin-left:auto}
+  .btn-verify{display:inline-block;background:var(--ink);color:#fff;text-decoration:none;font-weight:600;font-size:13px;letter-spacing:.02em;padding:10px 18px;border-radius:2px;border:1px solid var(--ink)}
   table{width:100%;border-collapse:collapse;margin:6px 0}
   th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
-  th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
   .pill{color:#fff;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
-  .finding{border:1px solid var(--rule);border-left-width:4px;border-radius:8px;padding:12px 14px;margin:10px 0}
+  .finding{border:1px solid var(--rule);border-left-width:3px;border-radius:2px;background:var(--paper);padding:12px 14px;margin:10px 0}
   .finding.sev-critical,.finding.sev-high{border-left-color:#991b1b}
   .finding.sev-medium{border-left-color:#0e7490}
   .finding.sev-low{border-left-color:#5b6472}
   .finding-head{display:flex;gap:10px;align-items:baseline}
-  .finding .sev{font-size:11px;font-weight:700;color:#991b1b}
+  .finding .sev{font-size:11px;font-weight:700;letter-spacing:.06em;color:#991b1b}
   .finding.sev-medium .sev{color:#0e7490}
   .finding.sev-low .sev{color:#5b6472}
   .finding-title{font-weight:600}
   .finding-detail{margin:6px 0;color:#2a2f3a}
-  .finding-fw{margin:4px 0 0;color:var(--muted);font-size:12px}
-  .sigbox{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;font-size:13px}
+  .finding-fw{margin:4px 0 0;color:var(--muted);font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .delta-head{color:#fff;border-radius:2px;padding:11px 16px;margin:0 0 10px;font-weight:600;font-size:13px;line-height:1.45}
+  .rem-detail{color:var(--muted);margin-top:4px}
+  .sigbox{background:var(--panel);border:1px solid var(--rule);border-radius:2px;padding:16px 18px;font-size:13px}
   .sigbox .k{color:var(--muted)}
   ul{margin:6px 0;padding-left:20px}
   footer{margin-top:40px;color:var(--muted);font-size:12px;border-top:1px solid var(--rule);padding-top:14px}
-  .wm-banner{background:#991b1b;color:#fff;border-radius:8px;padding:11px 16px;margin:0 0 22px;font-weight:600;font-size:13px;line-height:1.45}
+  .wm-banner{background:#991b1b;color:#fff;border-radius:2px;padding:11px 16px;margin:0 0 22px;font-weight:600;font-size:13px;line-height:1.45}
   .wm-banner .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;opacity:.9}
   body.wm::before{content:"PREVIEW";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:165px;font-weight:800;color:rgba(153,27,27,.05);transform:rotate(-30deg);pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:.06em}
   body.wm>*{position:relative;z-index:1}
-  .et-banner{background:var(--panel);border:1px solid var(--rule);border-left-width:4px;border-radius:8px;padding:10px 14px;margin:0 0 18px;font-weight:600;font-size:13px}
+  .et-banner{background:var(--panel);border:1px solid var(--rule);border-left-width:3px;border-radius:2px;padding:10px 14px;margin:0 0 18px;font-weight:600;font-size:13px}
   .et-banner .et-basis{display:block;margin-top:4px;color:var(--muted);font-weight:400;font-size:12px}
   .et-banner.et-none{font-weight:400;color:var(--muted)}
   @media print{
-    body{padding:0;max-width:none}
-    h2,table,.finding,.headline,.sigbox,.et-banner,.wm-banner,footer{break-inside:avoid;page-break-inside:avoid}
+    body{padding:0;max-width:none;background:var(--paper)}
+    h2,table,.finding,.headline,.sigbox,.et-banner,.wm-banner,.verdict,.locked-panel,.delta-head,footer{break-inside:avoid;page-break-inside:avoid}
     h1{position:static}
     body.wm::before{position:absolute}
     a[href]:after{content:" (" attr(href) ")"}
@@ -1107,24 +1269,29 @@ export function renderReportHtml(envelope) {
 <body class="${isWm ? 'wm' : ''}">
   <h1>Agent Security-Review Readiness Report</h1>
   <p class="sub">${esc(e.subject ? e.subject.name : '')} · generated ${esc(e.generated_at)} · <span class="mono">${esc(e.report_id)}</span></p>
+  ${verdictBand}${lockedPanel}
   ${wmBanner}
   ${etBanner}
 
   <div class="headline">
-    <div><div class="big">${esc(readiness)}</div><div class="small">readiness (assessed controls)</div></div>
-    <div><div class="big">${esc(s.blocking_count ?? 0)}</div><div class="small">deal-blocking findings</div></div>
+    <div><div class="big"${tileStyle}>${esc(readiness)}</div><div class="small">readiness (assessed controls)</div></div>
+    <div><div class="big"${tileStyle}>${esc(s.blocking_count ?? 0)}</div><div class="small">deal-blocking findings</div></div>
     <div><div class="big">${esc(rtScore)}</div><div class="small">red-team resistance</div></div>
     <div><div class="big">${s.tamper_evident ? 'Yes' : 'No'}</div><div class="small">tamper-evident trail</div></div>
+    ${gradeTile}
+    ${verifyButton}
   </div>
-
-  <h2>Scope &amp; limitations</h2>
-  <ul>${caveats}</ul>
+  ${forReviewers}
 
   <h2>Control status</h2>
   <table><thead><tr><th>Control</th><th>Name</th><th>Status</th><th>Findings</th></tr></thead>
   <tbody>${controlRows}</tbody></table>
   <p class="small" style="color:var(--muted)">Not assessed in this run:</p>
   <ul class="small">${notAssessed}</ul>
+
+  <h2>Scope &amp; limitations</h2>
+  <ul>${caveats}</ul>
+  ${deltaSection}
 
   <h2>Findings</h2>
   ${findingRows || '<p class="sub">No deal-blocking or attention findings in the assessed controls.</p>'}

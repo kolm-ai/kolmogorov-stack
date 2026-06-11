@@ -784,6 +784,63 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
     setStatus(inStatus, 'dropped: ' + file.name, 'ok');
     run();
   });
+
+  // --- One-click Trust-link verification: /verify?trust=<slug>. ---
+  // The rendered report and the Trust toolbar link here with the slug in the
+  // query string; the page fetches the signed envelope from the public Trust
+  // route and auto-runs the same three-tier check above, so a skeptical
+  // reviewer lands on a verdict with nothing to download or paste. Without
+  // the param, the page behaves exactly as before. Note: this uses the bare
+  // /v1/trust/:slug?format=json envelope, NOT the /export sibling (that one
+  // returns reshaped CSV/GRC artifacts, not the signed envelope).
+  async function loadTrust(slug) {
+    setStatus(inStatus, 'loading report from Trust link...', null);
+    let res;
+    try {
+      res = await fetch('/v1/trust/' + encodeURIComponent(slug) + '?format=json', { cache: 'no-store' });
+    } catch (_) {
+      setStatus(inStatus, 'Could not reach the Trust link. Check your connection and retry.', 'bad');
+      return;
+    }
+    if (res.status === 404) { setStatus(inStatus, 'No published report at this link.', 'bad'); return; }
+    let doc;
+    try {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      doc = await res.json();
+    } catch (_) {
+      setStatus(inStatus, 'Could not reach the Trust link. Check your connection and retry.', 'bad');
+      return;
+    }
+    // A valid Continuous link whose first report is still being generated.
+    if (doc && typeof doc === 'object' && doc.status === 'pending' && !doc.schema) {
+      setStatus(inStatus, 'This Trust link has not generated its first report yet.', 'bad');
+      return;
+    }
+    src.value = JSON.stringify(doc, null, 2);
+    setStatus(inStatus, 'Trust link report loaded', 'ok');
+    // One calm line of provenance for the reviewer who just clicked a link.
+    if (!document.getElementById('trustNote')) {
+      const note = document.createElement('p');
+      note.id = 'trustNote';
+      note.setAttribute('style', 'margin:0;padding:0 18px 14px;font-size:12.5px;line-height:1.5;color:var(--ink-3)');
+      note.textContent = 'Loaded from a shared Trust link. The checks below run entirely in your browser; nothing is uploaded.';
+      const pane = inStatus.closest('.vrf__pane');
+      if (pane) pane.appendChild(note); else vrf.appendChild(note);
+    }
+    run();
+  }
+
+  const trustSlug = new URLSearchParams(location.search).get('trust');
+  if (trustSlug != null) {
+    if (!/^[A-Za-z0-9_-]{6,80}$/.test(trustSlug)) {
+      setStatus(inStatus, 'invalid trust link parameter', 'bad');
+    } else {
+      // A buyer following a vendor's link gets the strict check: a green
+      // verdict REQUIRES a recognized kolm issuer key, not just a valid key.
+      pinChk.checked = true;
+      loadTrust(trustSlug);
+    }
+  }
 </script>
 </body>
 </html>
