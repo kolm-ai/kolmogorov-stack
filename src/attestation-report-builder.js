@@ -34,6 +34,7 @@ import {
 import { ASR_CONTROLS } from './control-mapper.js';
 import { runRedTeam } from './red-team.js';
 import { buildAgentPassport } from './passport-builder.js';
+import { buildSubprocessorInventory } from './subprocessor-inventory.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
 import { TransparencyLog, TRANSPARENCY_LOG_VERSION } from './transparency-log.js';
 import { getPublicTransparencyLog } from './transparency-log-routes.js';
@@ -535,6 +536,13 @@ export function buildReportEnvelope(auditResult, opts = {}) {
     audit_summary: s,
   });
 
+  // Sub-processor inventory (OFFER #8). The enumerated models / providers /
+  // MCP-or-vendor servers / egress hosts observed in the supplied window, deduped
+  // and sorted deterministically. A NEW top-level field added BEFORE signing, so
+  // it is signature-covered. Pure / never-throws; re-ingests nothing.
+  envelope.subprocessor_inventory =
+    auditResult.subprocessor_inventory || buildSubprocessorInventory(auditResult);
+
   // ASR-4 red-team resistance. A NEW top-level field: the canonicalizer is a
   // generic key-sort, so adding it is signature-safe and does not change how any
   // existing field is canonicalized. Gated by opts.includeRedTeam (default on)
@@ -1005,6 +1013,40 @@ export function renderReportHtml(envelope) {
   ${ppSources ? `<h3 class="small">Retrieval sources</h3><ul class="small">${ppSources}</ul>` : ''}
   <p class="small" style="color:var(--muted)">Standards mapped (descriptive cross-reference, not a certification): ${esc((pp.standards || []).join(' · '))}</p>` : '';
 
+  // Sub-processors observed (OFFER #8). The signature-covered enumeration of the
+  // models / providers / MCP-or-vendor servers / egress hosts the audited agents
+  // actually touched in the supplied window. Guard a legacy envelope (built before
+  // this field existed) by deriving from the result; pure / never-throws. When
+  // every count is 0 we render the untested-style line, never a clean empty list.
+  const inv = e.subprocessor_inventory && typeof e.subprocessor_inventory === 'object'
+    ? e.subprocessor_inventory
+    : buildSubprocessorInventory(e);
+  const invCounts = inv && inv.counts ? inv.counts : { models: 0, providers: 0, mcp_servers: 0, hosts: 0, sensitive_hosts: 0 };
+  const invTotal = (invCounts.models || 0) + (invCounts.providers || 0) + (invCounts.mcp_servers || 0) + (invCounts.hosts || 0);
+  const invCaveats = (inv && Array.isArray(inv.caveats) ? inv.caveats : []).map((c) => `<li>${esc(c)}</li>`).join('');
+  const invModelRows = (inv && Array.isArray(inv.models) ? inv.models : []).map((m) => `
+    <tr><td class="mono">${esc(m.slug)}</td><td>${esc(m.provider || 'unknown')}</td><td>${m.pinned ? 'pinned' : 'unpinned'}</td><td>${esc(m.calls)}</td></tr>`).join('');
+  const invProviderRows = (inv && Array.isArray(inv.providers) ? inv.providers : []).map((p) => `
+    <tr><td>${esc(p.name)}${p.gateway ? ' <span class="small" style="color:var(--muted)">(routed via gateway)</span>' : ''}</td><td>${esc(p.calls)}</td><td>${esc(p.models)}</td></tr>`).join('');
+  const invMcpRows = (inv && Array.isArray(inv.mcp_servers) ? inv.mcp_servers : []).map((srv) => `
+    <tr><td class="mono">${esc(srv.name)}</td><td>${srv.pinned ? 'pinned' : 'unpinned'}</td><td>${esc(srv.calls)}</td></tr>`).join('');
+  const invHostRows = (inv && Array.isArray(inv.hosts) ? inv.hosts : []).map((h) => `
+    <tr><td class="mono">${esc(h.host)}</td><td>${esc(h.call_count)}</td><td>${h.sensitivity_flag ? 'sensitive content observed' : ' - '}</td></tr>`).join('');
+  const invSummaryLine = `${esc(invCounts.models || 0)} models, ${esc(invCounts.providers || 0)} providers, ${esc(invCounts.mcp_servers || 0)} MCP servers, ${esc(invCounts.hosts || 0)} hosts (${esc(invCounts.sensitive_hosts || 0)} carried sensitive content)`;
+  const subprocessorSection = invTotal === 0
+    ? `
+  <h2>Sub-processors observed</h2>
+  <p class="sub small">Sub-processor surface: not observed in the supplied window.</p>
+  <ul class="small">${invCaveats}</ul>`
+    : `
+  <h2>Sub-processors observed</h2>
+  <p class="sub small">${invSummaryLine}. Enumerated from the supplied window; kolm maps the surface the logs evidenced, it does not certify the list is complete.</p>
+  ${invModelRows ? `<h3 class="small">Models</h3><table><thead><tr><th>Model</th><th>Provider</th><th>Pin</th><th>Calls</th></tr></thead><tbody>${invModelRows}</tbody></table>` : ''}
+  ${invProviderRows ? `<h3 class="small">Providers</h3><table><thead><tr><th>Provider</th><th>Calls</th><th>Models</th></tr></thead><tbody>${invProviderRows}</tbody></table>` : ''}
+  ${invMcpRows ? `<h3 class="small">MCP / vendor servers</h3><table><thead><tr><th>Server</th><th>Pin</th><th>Calls</th></tr></thead><tbody>${invMcpRows}</tbody></table>` : ''}
+  ${invHostRows ? `<h3 class="small">Egress hosts</h3><table><thead><tr><th>Host</th><th>Calls</th><th>Sensitivity</th></tr></thead><tbody>${invHostRows}</tbody></table>` : ''}
+  <ul class="small">${invCaveats}</ul>`;
+
   // Detached + bound evidence lines for the signature box.
   const ed = e.evidence_digest && typeof e.evidence_digest === 'object' ? e.evidence_digest : null;
   const te = e.timestamp_evidence && typeof e.timestamp_evidence === 'object' ? e.timestamp_evidence : null;
@@ -1088,6 +1130,7 @@ export function renderReportHtml(envelope) {
   ${findingRows || '<p class="sub">No deal-blocking or attention findings in the assessed controls.</p>'}
   ${rtSection}
   ${passportSection}
+  ${subprocessorSection}
 
   <h2>Remediation roadmap</h2>
   ${remediation ? `<table><thead><tr><th>Priority</th><th>Finding</th><th>Action</th><th>Frameworks</th></tr></thead><tbody>${remediation}</tbody></table>` : '<p class="sub">No remediation items.</p>'}

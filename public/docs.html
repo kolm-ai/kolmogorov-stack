@@ -264,6 +264,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
 
     <p class="hero__claim" style="margin-top:var(--s5)">
+      <b>No hash chain in your logs yet?</b> Drop in the evidence-grade logging shim, a zero-dependency logger
+      for <a href="/shims/kolm-logger.js" download style="border-bottom:1px solid var(--line-2)">Node</a> or
+      <a href="/shims/kolm_logger.py" download style="border-bottom:1px solid var(--line-2)">Python</a> that emits the
+      canonical event shape with per-agent keys, declared grants and a SHA-256 <span style="font-family:var(--mono);font-size:0.92em">hash</span> /
+      <span style="font-family:var(--mono);font-size:0.92em">prev_hash</span> chain. Feed its
+      <span style="font-family:var(--mono);font-size:0.92em">toJSONL()</span> /
+      <span style="font-family:var(--mono);font-size:0.92em">to_jsonl()</span> output to the scan and the run grades the
+      evidence tier B (hash-verified). No network call leaves your runtime; see the
+      <a href="/shims/README.md" style="border-bottom:1px solid var(--line-2)">shim readme</a>.
+    </p>
+
+    <p class="hero__claim" style="margin-top:var(--s5)">
       Optional body fields: <span style="font-family:var(--mono);font-size:0.92em">subject</span> (what the report names, 200 chars),
       <span style="font-family:var(--mono);font-size:0.92em">source</span> (a label for where the logs came from, 64 chars),
       <span style="font-family:var(--mono);font-size:0.92em">retention_days</span> (your declared log-retention window),

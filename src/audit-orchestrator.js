@@ -26,6 +26,8 @@ import { analyzeRagMemory } from './rag-memory-analyzer.js';
 import { analyzeDelegation } from './delegation-analyzer.js';
 import { analyzeEgress } from './egress-analyzer.js';
 import { detectorCoverage } from './sensitive-data.js';
+import { analyzeMemoryIntegrity } from './memory-integrity-ledger.js';
+import { buildSubprocessorInventory } from './subprocessor-inventory.js';
 
 // Versioned so a re-attestation is a cheap, comparable delta and so a signed
 // report records exactly which engine shape produced it.
@@ -196,6 +198,14 @@ export function runAudit(logs, opts = {}) {
   // ({ allowedHosts: [...] }) from the API/report layer.
   const egress = _safeAnalyze(() => analyzeEgress(events, analyzerOpts.egress), _emptyEgress);
 
+  // Memory Integrity Ledger (ASR-7, OFFER #10): hash-chain over observed
+  // memory WRITE ops. Derives from ragMemory; never re-ingests. Guarded
+  // belt-and-braces like the other analyzers.
+  const memoryIntegrity = _safeAnalyze(
+    () => analyzeMemoryIntegrity(ragMemory),
+    () => ({ spec_version: 'asr-memory-ledger/0.1', ledger: [], chain_intact: null, findings: [], summary: { writes: 0, untested: true, by_severity: { critical: 0, high: 0, medium: 0, low: 0, info: 0 } } })
+  );
+
   // 3. Map every finding onto the ASR controls + the buyer's frameworks. The
   // Wave-2 findings are merged in BEFORE mapControls so they are framework-mapped
   // exactly like the trinity findings.
@@ -207,6 +217,7 @@ export function runAudit(logs, opts = {}) {
     ...ragMemory.findings,
     ...delegation.findings,
     ...egress.findings,
+    ...memoryIntegrity.findings,
   ];
   const controls = mapControls(allFindings);
 
@@ -307,6 +318,7 @@ export function runAudit(logs, opts = {}) {
     model_provenance: modelProvenance,
     agent_identity: agentIdentity,
     rag_memory: ragMemory,
+    memory_integrity: memoryIntegrity,
     delegation,
     egress,
     // The bounded detector claim (GAP-2): exactly which PII classes and secret
@@ -322,6 +334,7 @@ export function runAudit(logs, opts = {}) {
   // Grade the evidence QUALITY of this audit (A/B/C) now that every input is
   // visible; the report builder binds it into the signed envelope.
   result.evidence_tier = computeEvidenceTier(result);
+  result.subprocessor_inventory = buildSubprocessorInventory(result);
 
   return result;
 }

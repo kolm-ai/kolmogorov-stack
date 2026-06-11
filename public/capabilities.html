@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
+<title>Capabilities: Ten Audit Surfaces, One Signed Engine · kolm.ai</title>
+<meta name="description" content="The ten audit surfaces kolm ships: MCP audit, egress allowlist, active injection, coverage declaration, logging shim, OSCAL pack, buyer portfolio, sub-processor inventory, fix re-test and memory integrity ledger.">
+<meta name="theme-color" content="#090C0D">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Capabilities: Ten Audit Surfaces, One Signed Engine">
+<meta property="og:description" content="The ten audit surfaces kolm ships, each wired to an existing tier and claiming only what the engine runs.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/capabilities">
+<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@kolm_ai">
+<meta name="twitter:title" content="Capabilities: Ten Audit Surfaces, One Signed Engine">
+<meta name="twitter:description" content="The ten audit surfaces kolm ships, each wired to an existing tier and claiming only what the engine runs.">
+<link rel="canonical" href="https://kolm.ai/capabilities">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script defer src="/kolm-field.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "kolm audit capabilities",
+  "url": "https://kolm.ai/capabilities",
+  "description": "The ten audit surfaces kolm ships, each wired to an existing tier and claiming only what the engine runs.",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "MCP Server Audit" },
+    { "@type": "ListItem", "position": 2, "name": "Egress Allowlist Attestation" },
+    { "@type": "ListItem", "position": 3, "name": "Active Injection Battery" },
+    { "@type": "ListItem", "position": 4, "name": "Coverage Declaration" },
+    { "@type": "ListItem", "position": 5, "name": "Evidence-Grade Logging Shim" },
+    { "@type": "ListItem", "position": 6, "name": "GRC and OSCAL Evidence Pack" },
+    { "@type": "ListItem", "position": 7, "name": "Buyer Portfolio Dashboard" },
+    { "@type": "ListItem", "position": 8, "name": "Sub-Processor Inventory Report" },
+    { "@type": "ListItem", "position": 9, "name": "Fix Verification Re-Test" },
+    { "@type": "ListItem", "position": 10, "name": "Memory Integrity Ledger" }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
+    { "@type": "ListItem", "position": 2, "name": "Capabilities", "item": "https://kolm.ai/capabilities" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
+<hr class="foil-strip" aria-hidden="true">
+
+<!-- ============================================================ NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm<b>.ai</b></span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============================================================ HERO -->
+<section class="section section--flush hero">
+  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
+  <div class="wrap">
+    <div class="hero__grid">
+      <div>
+        <p class="eyebrow" data-enter="1">Capabilities</p>
+        <h1 class="hero__h1" data-enter="2">Ten audit surfaces. <span class="go">One signed engine.</span></h1>
+        <p class="lede" data-enter="3" style="max-width:64ch">
+          Every surface below runs on the same deterministic spine that turns your logs into one
+          Ed25519-signed report your buyer <a href="/verify" style="border-bottom:1px solid var(--line-2)">verifies offline</a>.
+          Each one wires to a tier already in the <a href="/pricing" style="border-bottom:1px solid var(--line-2)">catalog</a>,
+          and each claims only what the code runs: a control the logs never exercised is marked untested,
+          never a silent pass.
+        </p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="/signup">Run the free scan</a>
+          <a class="btn btn--ghost" href="/pricing">See pricing</a>
+        </div>
+        <div class="hero__proof" aria-label="What every surface shares" data-enter="5">
+          <span><i class="dot" aria-hidden="true"></i>One signed envelope, every surface</span>
+          <span><i class="dot" aria-hidden="true"></i>Wired to an existing tier</span>
+          <span><i class="dot" aria-hidden="true"></i>Untested is never a pass</span>
+        </div>
+      </div>
+
+      <!-- the artifact IS the hero image: the ten surfaces filed as one registry card -->
+      <aside class="artifact" aria-label="The ten audit surfaces, filed as one registry">
+        <div class="rep">
+          <div class="rep__bar">
+            <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="t">kolm · surface registry</span>
+            <span class="chip chip--ok">ten · one engine</span>
+          </div>
+          <div class="rep__sheet">
+            <div class="rep__head">
+              <span class="rep__sub">Audit surface index</span>
+              <span class="rep__id">surfaces_v1</span>
+            </div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--sheet-ink-2);font-variant-numeric:tabular-nums" translate="no">
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>01 · MCP server audit</span><b style="color:var(--sheet-ink);font-weight:600">free scan</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>02 · Egress allowlist</span><b style="color:var(--sheet-ink);font-weight:600">$750 + drift</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>03 · Active injection</span><b style="color:var(--sheet-ink);font-weight:600">+$10,000</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>04 · Coverage declaration</span><b style="color:var(--sheet-ink);font-weight:600">$750 report</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>05 · Logging shim</span><b style="color:var(--sheet-ink);font-weight:600">free</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>06 · GRC / OSCAL pack</span><b style="color:var(--sheet-ink);font-weight:600">$15,000</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>07 · Buyer portfolio</span><b style="color:var(--sheet-ink);font-weight:600">$999 / mo</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>08 · Sub-processor inventory</span><b style="color:var(--sheet-ink);font-weight:600">$750 report</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--sheet-line)"><span>09 · Fix re-test</span><b style="color:var(--sheet-ink);font-weight:600">$299 / $999</b></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0"><span>10 · Memory ledger</span><b style="color:var(--sheet-ink);font-weight:600">$15,000</b></div>
+            </div>
+            <div class="find__more">every surface wired to a tier already in the catalog</div>
+          </div>
+          <div class="rep__sig" translate="no">
+            <div class="sig__row"><span class="sig__k">sealed</span><span>ed25519 over the canonical bytes</span><span class="sig__ok">✓ verifies offline</span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 01. FREE FUNNEL -->
+<section class="section sect--dense reveal" id="funnel">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01 / Free, to start</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">01</span>
+    <div class="section__head">
+      <h2>Start where it costs nothing.</h2>
+      <p class="lede">The scan is the funnel. Point it at the logs you already have, or lift those logs to a higher evidence grade first with the drop-in shim. Findings land in the Signed Readiness Report when a buyer asks.</p>
+    </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
+    <div class="grid grid--3">
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="24.5" width="14" height="15"/>
+          <rect class="gy-s" x="19.5" y="29.5" width="4" height="5"/>
+          <path class="gy-s" d="M28.5 32.5 H64.5 M52.5 32.5 V39.5 M59.5 32.5 V37.5"/>
+          <path class="gy-s2" d="M70.5 32.5 H86.5" stroke-dasharray="2 3"/>
+          <g class="gy-s2"><rect x="92.5" y="18.5" width="12" height="12"/><rect x="108.5" y="18.5" width="12" height="12"/><rect x="124.5" y="18.5" width="12" height="12"/><rect x="92.5" y="34.5" width="12" height="12"/><rect x="108.5" y="34.5" width="12" height="12"/><rect x="124.5" y="34.5" width="12" height="12"/></g>
+          <rect class="gy-p" x="95.5" y="21.5" width="6" height="6"/>
+          <rect class="gy-f" x="111.5" y="21.5" width="6" height="6"/>
+        </svg></div>
+        <p class="card__k">01 · MCP Server Audit</p>
+        <h3>Audit the tool surface itself</h3>
+        <p>Point kolm at your MCP server logs and get the same signed posture for the tool surface: undeclared servers, discovery probes and unpinned versions, read from JSON-RPC <span style="font-family:var(--mono);font-size:0.9em">tools/call</span> and <span style="font-family:var(--mono);font-size:0.9em">tools/list</span> rows.</p>
+        <p class="card__map">Free scan funnel · findings in the $750 report · <a href="/docs#formats">connect MCP logs</a></p>
+      </div>
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="22.5" width="18" height="18"/>
+          <rect class="gy-p" x="20.5" y="28.5" width="6" height="6"/>
+          <path class="gy-s2" d="M32.5 31.5 H88.5 M60.5 28.5 V34.5"/>
+          <rect class="gy-s" x="88.5" y="25.5" width="12" height="12"/>
+          <path class="gy-s2" d="M100.5 31.5 H160.5 M130.5 28.5 V34.5"/>
+          <path class="gy-s" d="M160.5 14.5 H182.5 L190.5 22.5 V49.5 H160.5 Z M182.5 14.5 V22.5 H190.5"/>
+          <path class="gy-s2" d="M166.5 30.5 H184.5 M166.5 36.5 H180.5 M166.5 42.5 H184.5"/>
+        </svg></div>
+        <p class="card__k">05 · Evidence-Grade Logging Shim</p>
+        <h3>Lift tier C to tier B in an afternoon</h3>
+        <p>A zero-dependency logger for Node and Python that emits the canonical event shape with per-agent keys, declared grants and a SHA-256 hash chain. No network call leaves your runtime; tier B is earned, not asserted.</p>
+        <p class="card__map">Free download · <a href="/shims/kolm-logger.js" download>Node</a> · <a href="/shims/kolm_logger.py" download>Python</a> · <a href="/docs#quickstart">quickstart</a></p>
+      </div>
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s2" d="M14.5 24.5 H62.5 M14.5 32.5 H62.5 M14.5 40.5 H62.5"/>
+          <path class="gy-s2" d="M68.5 32.5 H84.5" stroke-dasharray="2 3"/>
+          <rect class="gy-s" x="96.5" y="8.5" width="28" height="12"/>
+          <path class="gy-s" d="M110.5 20.5 V30.5"/>
+          <rect class="gy-s" x="86.5" y="30.5" width="48" height="18"/>
+          <rect class="gy-p" x="106.5" y="36.5" width="8" height="6"/>
+          <path class="gy-s" d="M134.5 39.5 H146.5 L152.5 33.5 L158.5 45.5 L164.5 33.5 L170.5 45.5 L176.5 39.5 H204.5"/>
+        </svg></div>
+        <p class="card__k">04 · Coverage Declaration</p>
+        <h3>Sign what the export covers</h3>
+        <p>The vendor signs the window and systems an export covers; the statement binds into the envelope next to the evidence tier. A curated slice becomes a detectable misrepresentation, not a silent gap, and a window mismatch shows up in the signed caveats.</p>
+        <p class="card__map">In the $750 report and above · <a href="/docs#envelope">the envelope</a></p>
+      </div>
+    </div>
+    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 02. THE SIGNED REPORT -->
+<section class="section reveal" id="report-surfaces">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / In the signed report</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">02</span>
+    <div class="section__head">
+      <h2>What ships inside the $750 report.</h2>
+      <p class="lede">The Signed Readiness Report is $750 one-time. These surfaces are sections of that one signed object, each derived from the same audit run, never re-asserted.</p>
+    </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
+    <div class="grid grid--2">
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s" d="M14.5 12.5 H36.5 L44.5 20.5 V51.5 H14.5 Z M36.5 12.5 V20.5 H44.5"/>
+          <path class="gy-s2" d="M20.5 28.5 H38.5 M20.5 35.5 H34.5 M20.5 42.5 H38.5"/>
+          <path class="gy-s2" d="M50.5 32.5 H64.5" stroke-dasharray="2 3"/>
+          <rect class="gy-s" x="70.5" y="25.5" width="14" height="14"/>
+          <rect class="gy-s" x="106.5" y="25.5" width="14" height="14"/>
+          <rect class="gy-s" x="142.5" y="25.5" width="14" height="14"/>
+          <rect class="gy-s" x="178.5" y="25.5" width="14" height="14"/>
+          <path class="gy-s2" d="M70.5 48.5 H192.5"/>
+          <path class="gy-s2" d="M77.5 39.5 V48.5 M113.5 39.5 V48.5 M149.5 39.5 V48.5 M185.5 39.5 V48.5"/>
+          <rect class="gy-f" x="109.5" y="28.5" width="8" height="8"/>
+          <rect class="gy-p" x="181.5" y="28.5" width="8" height="8"/>
+        </svg></div>
+        <p class="card__k">08 · Sub-Processor Inventory Report</p>
+        <h3>Every model, provider, gateway and host your agents touched</h3>
+        <p>A signed enumeration of every model, provider, gateway, host and MCP server the run observed, built into the envelope and signature-covered, rendered as a "Sub-processors observed" section. It is the artifact vendor-risk teams currently rebuild by hand from questionnaires.</p>
+        <p class="card__map">Section of the $750 report · signature-covered</p>
+      </div>
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="25.5" width="16" height="14"/>
+          <rect class="gy-f" x="19.5" y="30.5" width="6" height="4"/>
+          <path class="gy-s" d="M30.5 32.5 H72.5"/>
+          <path class="gy-s" d="M80.5 16.5 V48.5 M88.5 16.5 V48.5"/>
+          <path class="gy-s2" d="M88.5 32.5 H112.5 M112.5 32.5 L132.5 16.5 M112.5 32.5 H132.5 M112.5 32.5 L132.5 48.5"/>
+          <rect class="gy-s" x="138.5" y="10.5" width="12" height="12"/>
+          <rect class="gy-s" x="138.5" y="26.5" width="12" height="12"/>
+          <rect class="gy-s" x="138.5" y="42.5" width="12" height="12"/>
+          <path class="gy-s2" d="M158.5 8.5 H166.5 V40.5 H158.5" stroke-dasharray="2 3"/>
+          <path class="gy-s2" d="M172.5 47.5 H188.5"/>
+          <rect class="gy-p" x="141.5" y="45.5" width="6" height="6"/>
+        </svg></div>
+        <p class="card__k">02 · Egress Allowlist Attestation</p>
+        <h3>Declare your destinations once, verify them every run</h3>
+        <p>Declare your approved sub-processor destinations; every re-attestation confirms observed egress stayed inside the declared set and flags any new host the day it appears. A window with no observed egress marks the control untested, never a silent pass.</p>
+        <p class="card__map">Declaration ships in the $750 report · drift watched on Continuous ($299 / $999 per month) · <a href="/docs#controls">ASR-3</a></p>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 03. CONTINUOUS / BUYER SIDE -->
+<section class="section sect--dense reveal" id="recurring">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03 / Recurring and buyer-side</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost" aria-hidden="true">03</span>
+    <div class="section__head">
+      <h2>Keep it current, and watch it from the other side.</h2>
+      <p class="lede">Continuous is $299 / $999 per month. It keeps the evidence fresh on every deploy, gives the re-test its on-demand tick, and opens a buyer-side seat for the security team tracking your readiness.</p>
+    </div>
+    <div class="seam" data-art-reveal aria-hidden="true"></div>
+    <div class="grid grid--3">
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="12.5" width="44" height="40"/>
+          <path class="gy-s2" d="M22.5 22.5 H50.5 M22.5 40.5 H46.5"/>
+          <rect class="gy-f" x="22.5" y="28.5" width="22" height="6"/>
+          <path class="gy-s" d="M66.5 32.5 H98.5 M92.5 26.5 L98.5 32.5 L92.5 38.5"/>
+          <rect class="gy-s" x="106.5" y="12.5" width="44" height="40"/>
+          <path class="gy-s2" d="M114.5 22.5 H142.5 M114.5 40.5 H138.5"/>
+          <rect class="gy-p" x="114.5" y="28.5" width="22" height="6"/>
+          <path class="gy-s2" d="M158.5 32.5 H176.5"/>
+          <rect class="gy-s" x="182.5" y="25.5" width="14" height="14"/>
+          <path class="gy-s2" d="M36.5 58.5 H128.5" stroke-dasharray="2 3"/>
+        </svg></div>
+        <p class="card__k">09 · Fix Verification Re-Test</p>
+        <h3>Sign the resolution, link both reports</h3>
+        <p>After a blocking finding, a focused re-run over a fresh window returns resolved, still-open and regressed findings with the full delta linking both report ids. kolm ranks an untested control worse than a pass, so a fix that genuinely closed is shown closing.</p>
+        <p class="card__map">On Continuous ($299 / $999 per month), or a follow-on $750 report with the delta</p>
+      </div>
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="14.5" y="10.5" width="192" height="44"/>
+          <path class="gy-s2" d="M14.5 20.5 H206.5"/>
+          <path class="gy-s2" d="M22.5 29.5 H40.5 M22.5 38.5 H36.5 M22.5 47.5 H40.5"/>
+          <rect class="gy-s" x="48.5" y="26.5" width="84" height="6"/>
+          <rect class="gy-s" x="48.5" y="35.5" width="56" height="6"/>
+          <rect class="gy-s" x="48.5" y="44.5" width="104" height="6"/>
+          <rect class="gy-f" x="188.5" y="26.5" width="6" height="6"/>
+          <rect class="gy-p" x="188.5" y="35.5" width="6" height="6"/>
+          <rect class="gy-f" x="188.5" y="44.5" width="6" height="6"/>
+        </svg></div>
+        <p class="card__k">07 · Buyer Portfolio Dashboard</p>
+        <h3>One pane for every AI vendor you review</h3>
+        <p>The other side of the trust link: a security team tracks every vendor's readiness, evidence grade, freshness and delta in one pane, with the lapsed and stale banners the trust link already carries. Pure read surface, no new engine work.</p>
+        <p class="card__map">Buyer-side seat under Continuous ($999 / mo shape) · <a href="/buyer">open the portfolio</a></p>
+      </div>
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="16.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="64.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="112.5" y="22.5" width="28" height="18"/>
+          <rect class="gy-s" x="160.5" y="22.5" width="28" height="18"/>
+          <path class="gy-s" d="M44.5 31.5 H64.5 M92.5 31.5 H112.5 M140.5 31.5 H160.5 M188.5 31.5 H202.5"/>
+          <rect class="gy-s" x="52.5" y="29.5" width="4" height="4"/>
+          <rect class="gy-s" x="100.5" y="29.5" width="4" height="4"/>
+          <rect class="gy-s" x="148.5" y="29.5" width="4" height="4"/>
+          <rect class="gy-p" x="204.5" y="29.5" width="4" height="4"/>
+        </svg></div>
+        <p class="card__k">Continuous keeps it fresh</p>
+        <h3>A report is a photograph; your app is a film</h3>
+        <p>Re-attestation runs weekly or on every release and updates one live Trust link in place. The signature, scope and freshness date are part of the signed object, so a buyer who re-opens the link sees current evidence.</p>
+        <p class="card__map"><a href="/trust">See a live Trust link</a> · <a href="/pricing">Continuous pricing</a></p>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 04. THE DEEP TIERS -->
+<section class="section section--ink reveal" id="deep">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">04 / The deep tiers</span></div>
+      <div class="sect-rail__body">
+    <span class="num-ghost num-ghost--deep" aria-hidden="true">04</span>
+    <div class="section__head">
+      <h2>The most thorough deliverables.</h2>
+      <p class="lede">Full Readiness is $15,000 and Continuous-Plus is $3,500 per month. The Deep Red-Team add-on is +$10,000 and finally gives the most expensive line item a live code path. Each one is grounded in the same signed envelope.</p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s" d="M132.5 8.5 V55.5"/>
+          <path class="gy-s2" d="M136.5 12.5 V51.5"/>
+          <path class="gy-s" d="M18 13 L128 30"/>
+          <path class="gy-s" d="M120.8 24.6 L128 30 L119.5 33"/>
+          <path class="gy-s2" d="M128 30 L86 9" stroke-dasharray="3 3"/>
+          <path class="gy-s2" d="M150.5 22.5 H202.5 M150.5 32.5 H190.5 M150.5 42.5 H198.5"/>
+          <rect class="gy-p" x="126" y="27.5" width="4" height="4"/>
+        </svg></div>
+        <p class="card__k">03 · Active Injection Battery</p>
+        <h3>The probes, exercised for real</h3>
+        <p>The same probe corpus, sent for real against a staging endpoint you name in a written consent record, through the kolm gateway, and merged into the signed red-team block as grade-A evidence. Worst outcome wins on merge: an exposed result is never erased.</p>
+        <p class="card__map">This is the Deep Red-Team add-on (+$10,000) · <a href="/docs#controls">ASR-4</a></p>
+      </div>
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <path class="gy-s2" d="M14.5 24.5 H62.5 M14.5 32.5 H62.5 M14.5 40.5 H62.5"/>
+          <path class="gy-s2" d="M68.5 32.5 H84.5" stroke-dasharray="2 3"/>
+          <rect class="gy-s" x="96.5" y="8.5" width="28" height="12"/>
+          <path class="gy-s" d="M110.5 20.5 V30.5"/>
+          <rect class="gy-s" x="86.5" y="30.5" width="48" height="18"/>
+          <rect class="gy-p" x="106.5" y="36.5" width="8" height="6"/>
+          <path class="gy-s" d="M134.5 39.5 H146.5 L152.5 33.5 L158.5 45.5 L164.5 33.5 L170.5 45.5 L176.5 39.5 H204.5"/>
+        </svg></div>
+        <p class="card__k">06 · GRC and OSCAL Evidence Pack</p>
+        <h3>One export the GRC team files without rework</h3>
+        <p>OSCAL assessment-results JSON over the signed report, plus a POA&amp;M remediation table with severities and re-test status, derived from the signed envelope. kolm cross-references control frameworks; it does not certify against them.</p>
+        <p class="card__map">Full Readiness ($15,000) and Continuous-Plus ($3,500 / mo) · <a href="/docs#sessions">export formats</a></p>
+      </div>
+      <div class="card">
+        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <rect class="gy-s" x="16.5" y="22.5" width="26" height="18"/>
+          <rect class="gy-s" x="60.5" y="22.5" width="26" height="18"/>
+          <rect class="gy-s" x="104.5" y="22.5" width="26" height="18"/>
+          <rect class="gy-s" x="148.5" y="22.5" width="26" height="18"/>
+          <path class="gy-s" d="M42.5 31.5 H60.5 M86.5 31.5 H104.5 M130.5 31.5 H148.5"/>
+          <rect class="gy-p" x="24.5" y="28.5" width="4" height="4"/>
+          <rect class="gy-p" x="68.5" y="28.5" width="4" height="4"/>
+          <rect class="gy-p" x="112.5" y="28.5" width="4" height="4"/>
+          <path class="gy-s" d="M174.5 31.5 H200.5"/>
+          <path class="gy-s" d="M196.5 27.5 L200.5 31.5 L196.5 35.5"/>
+        </svg></div>
+        <p class="card__k">10 · Memory Integrity Ledger</p>
+        <h3>Prove no stored memory was altered</h3>
+        <p>A SHA-256 hash chain over every memory write the agent makes. A tampered chain raises a high-severity memory-integrity-broken finding mapped to ASR-7, and the signed result carries the ledger and the chain-intact verdict. It is the poisoning evidence ASR-7 otherwise has to mark untested.</p>
+        <p class="card__map">Full Readiness ($15,000) add-on · Continuous keeps it fresh · <a href="/docs#controls">ASR-7</a></p>
+      </div>
+    </div>
+    <p class="how__foot"><b>Ten surfaces</b> · <b>one engine</b> · every one wires to a tier already in the <a href="/pricing" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">catalog</a> and claims only what the run exercised. A control the logs never touched is reported untested, never counted clean.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ FINAL CTA -->
+<section class="section reveal cta-final">
+  <div class="dither-edge" aria-hidden="true"></div>
+  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
+  <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <h2>Pick the surface your buyer asked for.</h2>
+    <p class="lede">Start with the free scan, then turn on the surface the review in front of you needs. One signed object, one verification anyone can run.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost" href="/contact">Talk to us</a>
+    </div>
+    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+    </div>
+    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================================================ FOOTER -->
+<hr class="foil-line" aria-hidden="true">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Product</h3>
+        <a href="/how-it-works">How it works</a>
+        <a href="/platform">Platform</a>
+        <a href="/capabilities">Capabilities</a>
+        <a href="/checks">Checks</a>
+        <a href="/report">Report</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+      </div>
+      <div class="foot__col">
+        <h3>Trust</h3>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/regulatory-clock">Regulatory clock</a>
+        <a href="/status">Status</a>
+        <a href="/transparency-log">Transparency log</a>
+      </div>
+      <div class="foot__col">
+        <h3>Legal</h3>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/dpa">DPA</a>
+        <a href="/baa">BAA</a>
+        <a href="/subprocessors">Subprocessors</a>
+      </div>
+      <div class="foot__col">
+        <h3>Company</h3>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="/careers">Careers</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Ed25519-signed</span>
+      <span class="badge">Offline-verifiable</span>
+      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

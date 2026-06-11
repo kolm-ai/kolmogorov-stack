@@ -26,7 +26,7 @@
 //   POST /v1/audit/scan                       one-shot scan → signed report
 //   POST /v1/audit/report/verify  (PUBLIC)    verify a posted signed report
 
-import { insert, update, findByField, withTransaction } from './store.js';
+import { insert, update, findByField, withTransaction, id as storeId } from './store.js';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -41,6 +41,7 @@ import {
   AUDIT_REPORT_VERSION,
 } from './attestation-report-builder.js';
 import { EXPORTERS as FRAMEWORK_EXPORTERS, EXPORT_FORMATS } from './framework-export.js';
+import { buildOscalAssessmentResults, buildRemediationTable } from './oscal-export.js';
 import { loadOrCreateDefaultSigner, keyFingerprint } from './ed25519.js';
 import { register as registerTransparencyLogRoutes } from './transparency-log-routes.js';
 import { register as registerTrustCenter, recordTrustView } from './trust-center.js';
@@ -49,11 +50,13 @@ import { tryAppendAudit } from './audit.js';
 import { createAsrCheckout, asrBillingReady } from './asr-billing.js';
 import { resolveTrust, resolvePriorReport, runDueReattestations, forceReattest } from './asr-fulfillment.js';
 import { computeAuditDelta } from './audit-delta.js';
+import { runFixRetest } from './fix-retest.js';
 import { autofillQuestionnaire, toQuestionnaireCsv, QUESTIONNAIRE_TEMPLATES } from './questionnaire-autofill.js';
 import { importAgentLogs } from './log-importer.js';
 import { normalizeCoverageDeclaration } from './coverage-declaration.js';
 import { allCapturesForTenant } from './capture-store.js';
 import { KOLM_CAPTURE_SOURCE } from './audit-ingest.js';
+import { addWatch, buildPortfolioView } from './buyer-portfolio.js';
 // One-off run notifications: notify() is async and can throw (unknown event /
 // store hiccup); see _notifyReportReady below for the fire-and-forget wrapper
 // that keeps it out of the response path.
@@ -595,6 +598,15 @@ export function register(r, deps = {}) {
     throw new Error('audit-routes.register: router with get/post required');
   }
 
+  // OFFER #7 Buyer Portfolio: adapt the spine store primitives to the injected
+  // `store` shape buyer-portfolio.js expects (dependency-injected, so no spine
+  // schema change). resolveTrust is the same lineage resolver the Trust routes use.
+  const _buyerStore = {
+    insert, update, findByField,
+    id: (prefix) => storeId(prefix),
+    resolveTrust,
+  };
+
   // TRACK CRYPTO-SERVICES / M4 - mount the PUBLIC transparency-log read surface
   // (size / entries / proof / checkpoints) onto the same router. Kept as its own
   // module + register so router.js does not grow; the paths are allow-listed in
@@ -862,6 +874,51 @@ export function register(r, deps = {}) {
   });
 
   // -------------------------------------------------------------------------
+  // GET /v1/audit/:id/oscal  - GRC Evidence Pack (OFFER #6). Auth-gated +
+  // tenant-fenced exactly like the sibling /export route. Default returns the
+  // OSCAL assessment-results JSON; ?format=poam returns the POA&M-style
+  // remediation table. kolm MAPS to standards; this is an assessment-results
+  // export, never a certification. Read-only view over the SAME signed report.
+  // Tiers: Full Readiness ($15,000) and Continuous-Plus ($3,500/mo).
+  // -------------------------------------------------------------------------
+  r.get('/v1/audit/:id/oscal', (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const id = req.params && req.params.id;
+    const sess = _getSession(trec.id, id);
+    if (!sess) return _err(res, 404, 'audit_not_found', `no audit ${id} for this tenant`);
+    if (!sess.report) return _err(res, 409, 'report_not_ready', 'run or scan the audit before exporting its GRC pack');
+    const envelope = sess.report;
+    // The signed envelope carries findings[] (asr + controls mapped), summary,
+    // and evidence_tier - exactly the fields oscal-export derives from.
+    const resultLike = {
+      spec_version: envelope.report_version || envelope.schema || null,
+      summary: envelope.summary || {},
+      controls: { findings: Array.isArray(envelope.findings) ? envelope.findings : [] },
+      findings: Array.isArray(envelope.findings) ? envelope.findings : [],
+      evidence_tier: envelope.evidence_tier || null,
+      subject: envelope.subject || { name: sess.subject },
+    };
+    const meta = {
+      subject: (envelope.subject && envelope.subject.name) || sess.subject,
+      report_id: sess.report_id || envelope.report_id || null,
+      generated: envelope.generated_at || null,
+      verify_url: envelope.verify_url || _verifyUrlFor(),
+      key_fingerprint: (envelope.signature_ed25519 && envelope.signature_ed25519.key_fingerprint) || null,
+    };
+    const format = (req.query && String(req.query.format || 'oscal')).toLowerCase();
+    tryAppendAudit({ tenant_id: trec.id, actor: trec.id, op: 'agent_audit.oscal_export', payload: { id, report_id: sess.report_id, format } });
+    let artifact;
+    try {
+      artifact = format === 'poam' ? buildRemediationTable(resultLike) : buildOscalAssessmentResults(resultLike, meta);
+    } catch (e) { return _err(res, 500, 'oscal_export_failed', e && e.message); }
+    const fname = (sess.report_id || 'agent-security-report') + (format === 'poam' ? '-poam' : '-oscal');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${fname}.json"`);
+    return res.send(JSON.stringify(artifact, null, 2));
+  });
+
+  // -------------------------------------------------------------------------
   // POST /v1/audit/sessions/:id/delta?against=<other_session_or_report_id>
   //   (AUTH, tenant-fenced) - the signed delta between two reports the CALLER
   // already owns. Unlike GET /v1/trust/:slug/delta (PUBLIC, prior-vs-current off
@@ -904,6 +961,91 @@ export function register(r, deps = {}) {
       against_report_id: priorRow.report_id || null,
       delta,
     });
+  });
+
+  // -------------------------------------------------------------------------
+  // POST /v1/audit/:id/retest  (AUTH, tenant-fenced) - OFFER #9 Fix Verification
+  // Re-Test. Re-runs the audit over a FRESH log window (body.logs) and produces a
+  // focused delta that classifies the prior report's finding(s) as resolved /
+  // still_open / regressed, linking both report ids. The :id (a session id
+  // audses_* OR a report id asrr_*) MUST resolve to a report this tenant owns - a
+  // foreign / unknown id is 404, never another tenant's data. No re-sign here;
+  // runFixRetest is pure + never throws (the diff is computeAuditDelta).
+  // Tier: a Continuous ($299/$999 per month) on-demand tick, or a follow-on $750
+  // Signed Readiness Report that embeds result.delta.
+  // -------------------------------------------------------------------------
+  r.post('/v1/audit/:id/retest', (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const id = req.params && req.params.id;
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    // Resolve + tenant-fence the PRIOR audit. Ownership is forced from
+    // req.tenant_record.id (via _resolveOwnedReportRow), never read from the body.
+    const priorRow = _resolveOwnedReportRow(trec.id, id);
+    if (!priorRow) return _err(res, 404, 'not_found', `no audit ${id} for this tenant`);
+    if (!priorRow.report) return _err(res, 409, 'report_not_ready', `audit ${id} has no signed report yet`);
+    // Parse the fresh window from the body (same accepted shapes as /ingest).
+    const logsInput = body.logs != null ? body.logs : null;
+    if (logsInput == null) return _err(res, 400, 'logs_required', 'POST { "logs": <JSONL text | array of records>, "focus_finding_ids"?: [..] }');
+    const { text, count } = _toJsonl(logsInput);
+    if (count === 0) return _err(res, 400, 'no_records', 'no parseable log records were supplied for the re-test window');
+    if (count > MAX_RECORDS_PER_SESSION) {
+      return _err(res, 413, 'too_many_records', `a re-test window holds at most ${MAX_RECORDS_PER_SESSION} records; split the export`);
+    }
+    let result;
+    try {
+      result = runFixRetest({
+        priorAudit: priorRow.report,
+        newLogs: text,
+        focusFindingIds: Array.isArray(body.focus_finding_ids) ? body.focus_finding_ids : (body.focus_finding_ids != null ? [body.focus_finding_ids] : null),
+      });
+    } catch (e) {
+      return _err(res, 500, 'retest_failed', e && e.message);
+    }
+    tryAppendAudit({
+      tenant_id: trec.id, actor: trec.id, op: 'agent_audit.retest',
+      payload: { id, prior_report_id: result.prior_id, new_report_id: result.new_id, resolved: result.resolved.length, still_open: result.still_open.length, regressed: result.regressed.length },
+    });
+    return res.json({
+      ok: true,
+      id,
+      prior_id: result.prior_id,
+      new_id: result.new_id,
+      resolved: result.resolved,
+      still_open: result.still_open,
+      regressed: result.regressed,
+      delta: result.delta,
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // OFFER #7 Buyer Portfolio Dashboard - the buyer side of the trust link.
+  // Both routes are AUTH-gated; the global authMiddleware fences them to the
+  // owning tenant via req.tenant_record.id. A buyer seat lives under the EXISTING
+  // Continuous $999/mo shape - no new price or tier.
+  // -------------------------------------------------------------------------
+  // POST /v1/buyer/watchlist - add a vendor Trust slug to the buyer's watchlist.
+  // body: { slug, label? }
+  r.post('/v1/buyer/watchlist', (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const result = addWatch(trec.id, _buyerStore, { slug: body.slug, label: body.label });
+    if (!result.ok) {
+      const map = { no_tenant: 401, store_unavailable: 503, invalid_slug: 400, watchlist_full: 409, insert_failed: 500 };
+      return _err(res, map[result.error] || 400, result.error, result.detail);
+    }
+    return res.status(result.already ? 200 : 201).json({ ok: true, already: !!result.already, watch: result.watch });
+  });
+
+  // GET /v1/buyer/portfolio - the buyer's vendor portfolio pane (read surface).
+  r.get('/v1/buyer/portfolio', (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    let view;
+    try { view = buildPortfolioView(trec.id, _buyerStore); }
+    catch (e) { return _err(res, 500, 'portfolio_failed', e && e.message); }
+    return res.json({ ok: true, vendors: view.vendors });
   });
 
   // -------------------------------------------------------------------------
@@ -1724,6 +1866,10 @@ export const AUDIT_ROUTES_SPEC = {
     'GET /v1/audit/sessions/:id/report',
     'GET /v1/audit/sessions/:id/export',
     'POST /v1/audit/sessions/:id/delta (auth, tenant-fenced)',
+    'GET /v1/audit/:id/oscal (auth, tenant-fenced)',
+    'POST /v1/audit/:id/retest (auth, tenant-fenced)',
+    'POST /v1/buyer/watchlist (auth, tenant-fenced)',
+    'GET /v1/buyer/portfolio (auth, tenant-fenced)',
     'POST /v1/audit/sessions/:id/questionnaire',
     'GET /v1/audit/sessions/:id/questionnaire (auth, tenant-fenced)',
     'POST /v1/audit/scan',
