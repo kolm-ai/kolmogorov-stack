@@ -174,6 +174,19 @@ const CONTROL_MAP = {
   // 164.312(e)(1) (transmission security), NIST SP 800-53 SC-7 / SC-8 and
   // CSA AICM DSP-05 (data flow documentation: egress destinations enumerated).
   'sensitive-egress': { asr: 'ASR-3', controls: [C.llm02, C.nist_measure2, C.eu_art10, C.soc2_cc6, C.iso_a7, C.iso27001_a8_16, C.hipaa_transmission, C.nist80053_sc7, C.nist80053_sc8, C.aicm_dsp05] },
+
+  // --- egress analyzer (ASR-3, data egress) ---
+  // Explicit rows (not pillar-fallback dependent): destinations enumerated and
+  // vetted maps to NIST SP 800-53 SC-7 (boundary protection) + SC-8
+  // (transmission), OWASP LLM02 (sensitive information disclosure), CSA AICM
+  // DSP-05 (data flow documentation), ISO 27001 A.8.16 (monitoring), HIPAA
+  // 164.312(e)(1) (transmission security). The untested sentinel routes to
+  // ASR-3 with no framework controls, mirroring delegation-untested.
+  'unapproved-egress-destination': { asr: 'ASR-3', controls: [C.llm02, C.nist_measure2, C.eu_art10, C.iso_a7, C.iso27001_a8_16, C.hipaa_transmission, C.nist80053_sc7, C.nist80053_sc8, C.aicm_dsp05] },
+  'secret-egress': { asr: 'ASR-3', controls: [C.llm02, C.atlas_leak, C.nist_measure2, C.eu_art10, C.iso_a7, C.iso27001_a8_16, C.hipaa_transmission, C.nist80053_sc7, C.nist80053_sc8, C.aicm_dsp05] },
+  'undeclared-egress-surface': { asr: 'ASR-3', controls: [C.llm02, C.nist_measure2, C.eu_art10, C.iso27001_a8_16, C.hipaa_transmission, C.nist80053_sc7, C.aicm_dsp05] },
+  'egress-allowlisted-clean': { asr: 'ASR-3', controls: [C.nist_measure2, C.nist80053_sc7, C.aicm_dsp05] },
+  'egress-untested': { asr: 'ASR-3', controls: [] },
   'shared-credential': { asr: 'ASR-1', controls: [C.llm02, C.asi03, C.atlas_accounts, C.nist_manage1, C.soc2_cc6, C.iso_a9, C.iso27001_a8_2, C.hipaa_access, C.nist80053_ac6, C.aicm_iam05] },
   'least-privilege-clean': { asr: 'ASR-1', controls: [C.asi03, C.nist_manage1, C.soc2_cc6, C.iso27001_a8_2, C.hipaa_access, C.nist80053_ac6, C.aicm_iam05] },
 

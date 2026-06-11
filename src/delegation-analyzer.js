@@ -14,6 +14,17 @@
 //       credential (key_id) or namespace inside one session. The first agent to
 //       act is treated as the delegating root; every later distinct agent is a
 //       sub-agent of that root.
+//   (c) CROSS-CREDENTIAL (GAP-4, docs/AUDIT-SURFACE-REVIEW-2026.md) - the
+//       remediation every delegation finding recommends (issue each sub-agent
+//       its own scoped key) must not make the delegation invisible to the next
+//       audit. Two correlators see across the credential boundary:
+//         - an explicit spawn / delegate target that names an agent observed
+//           under ANOTHER credential is classified against that agent's
+//           profile (cross_credential: true), not recorded as an opaque hop;
+//         - events sharing one correlation handle (meta.thread_id, then
+//           meta.assistant_id) under DIFFERENT key_ids create implicit edges
+//           (via 'thread-correlation', session 'thread::<id>'), deduped
+//           against the explicit / same-session edges.
 //
 // For each delegation it compares the sub-agent's exercised privilege against
 // the delegating agent's, using classifyScopeTier (src/audit-event.js) - the
@@ -144,6 +155,9 @@ export function analyzeDelegation(events, opts = {}) {
   // mirrors permission-analyzer's actorKey: the credential is the real isolation
   // boundary, so two agent names under one key are a delegation surface.
   const sessions = new Map();
+  // Cross-credential correlation groups (GAP-4): events sharing one
+  // meta.thread_id (else meta.assistant_id) regardless of key_id.
+  const threads = new Map();
   let order = 0;
 
   for (const e of list) {
@@ -171,6 +185,28 @@ export function analyzeDelegation(events, opts = {}) {
       if (p.eventIds.length < 6 && e.id) p.eventIds.push(e.id);
       if (keyId) p.keyIds.add(keyId);
       p.namespaces.add(namespace);
+
+      // Same profile accumulation per correlation thread (GAP-4): the handles
+      // ingest already carries (meta.thread_id, then meta.assistant_id) group
+      // agents across credential boundaries.
+      const meta = (e.meta && typeof e.meta === 'object') ? e.meta : {};
+      const threadKey = (typeof meta.thread_id === 'string' && meta.thread_id.trim())
+        ? `thread::${meta.thread_id.trim()}`
+        : ((typeof meta.assistant_id === 'string' && meta.assistant_id.trim())
+          ? `assistant::${meta.assistant_id.trim()}`
+          : null);
+      if (threadKey) {
+        let th = threads.get(threadKey);
+        if (!th) { th = { key: threadKey, agents: new Map() }; threads.set(threadKey, th); }
+        let tp = th.agents.get(agentName);
+        if (!tp) {
+          tp = { name: agentName, scopes: new Set(), eventIds: [], firstOrder: order, keyIds: new Set() };
+          th.agents.set(agentName, tp);
+        }
+        for (const u of used) { const t = lc(u); if (t) tp.scopes.add(t); }
+        if (tp.eventIds.length < 6 && e.id) tp.eventIds.push(e.id);
+        if (keyId) tp.keyIds.add(keyId);
+      }
     }
 
     // Explicit spawn / delegate detection.
@@ -185,6 +221,40 @@ export function analyzeDelegation(events, opts = {}) {
   // Finalize per-agent privilege tier.
   for (const session of sessions.values()) {
     for (const p of session.agents.values()) p.maxTier = tierOfScopes(p.scopes);
+  }
+  for (const th of threads.values()) {
+    for (const p of th.agents.values()) p.maxTier = tierOfScopes(p.scopes);
+  }
+
+  // Global agent index across sessions (GAP-4): an explicit spawn target that
+  // names an agent observed under ANOTHER credential must stay evaluable.
+  const globalAgents = new Map(); // lowercased name -> [{ sessionKey, profile }]
+  for (const session of sessions.values()) {
+    for (const p of session.agents.values()) {
+      const k = p.name.toLowerCase();
+      let arr = globalAgents.get(k);
+      if (!arr) { arr = []; globalAgents.set(k, arr); }
+      arr.push({ sessionKey: session.key, profile: p });
+    }
+  }
+
+  // Merged profile of an agent name as observed OUTSIDE the given session, or
+  // null when it only exists inside it (or not at all). Deterministic: sessions
+  // iterate in insertion order.
+  function findAgentRemote(name, session) {
+    if (!name) return null;
+    const arr = globalAgents.get(name.toLowerCase());
+    if (!arr) return null;
+    const remotes = arr.filter((x) => x.sessionKey !== session.key);
+    if (remotes.length === 0) return null;
+    const merged = { name: remotes[0].profile.name, scopes: new Set(), eventIds: [], maxTier: 0, sessions: [] };
+    for (const r of remotes) {
+      for (const s of r.profile.scopes) merged.scopes.add(s);
+      sample(r.profile.eventIds, merged.eventIds);
+      if (r.profile.maxTier > merged.maxTier) merged.maxTier = r.profile.maxTier;
+      merged.sessions.push(r.sessionKey);
+    }
+    return merged;
   }
 
   // --- Pass 2: build delegation edges per session. ----------------------------
@@ -214,10 +284,15 @@ export function analyzeDelegation(events, opts = {}) {
     const seen = new Set(); // `${parent} ${child}` to dedupe explicit+implicit
     const explicitChildren = new Set(); // lowercased child names already linked explicitly
 
-    // 2a. Explicit edges from spawn / delegate calls.
+    // 2a. Explicit edges from spawn / delegate calls. A named target observed
+    // only under ANOTHER credential resolves through the global agent index
+    // (GAP-4): per-agent scoped keys must not turn an evaluable handoff into
+    // an opaque hop.
     for (const sp of session.spawns) {
       const parentProfile = sp.parent ? session.agents.get(sp.parent) : null;
-      const childProfile = sp.target ? findAgent(session, sp.target) : null;
+      const localChild = sp.target ? findAgent(session, sp.target) : null;
+      const remoteChild = (!localChild && sp.target) ? findAgentRemote(sp.target, session) : null;
+      const childProfile = localChild || remoteChild;
       const parentName = sp.parent || UNKNOWN;
       const childName = childProfile ? childProfile.name : (sp.target || UNKNOWN);
 
@@ -246,12 +321,17 @@ export function analyzeDelegation(events, opts = {}) {
 
       explicitChildren.add(childProfile.name.toLowerCase());
       const classification = classify(parentProfile, childProfile);
-      record(session, {
+      const edge = {
         session: session.key, type: 'explicit', via: sp.via, parent: parentName, child: childProfile.name,
         parent_tier: parentProfile.maxTier, child_tier: childProfile.maxTier,
         parent_scopes: [...parentProfile.scopes].sort(), child_scopes: [...childProfile.scopes].sort(),
         classification, observed_child: true, evidence,
-      });
+      };
+      if (remoteChild) {
+        edge.cross_credential = true;
+        edge.child_sessions = [...remoteChild.sessions].sort();
+      }
+      record(session, edge);
     }
 
     // 2b. Implicit edges: >= 2 distinct named agents under one session.
@@ -275,6 +355,40 @@ export function analyzeDelegation(events, opts = {}) {
     }
   }
 
+  // --- Pass 2c: cross-credential implicit edges via thread correlation. -------
+  // (GAP-4) Two or more distinct named agents sharing one correlation handle
+  // (meta.thread_id / meta.assistant_id) under DIFFERENT key_ids are one
+  // delegation surface even though the credential boundary splits them into
+  // separate sessions. The first agent on the thread is the delegating root.
+  // Edges already built (explicit, same-session implicit, cross-credential
+  // explicit) are deduped by parent->child pair.
+  const pairSeen = new Set(delegations.map((d) => `${lc(d.parent)}->${lc(d.child)}`));
+  for (const th of threads.values()) {
+    const agents = [...th.agents.values()].sort((a, b) => a.firstOrder - b.firstOrder);
+    if (agents.length < 2) continue;
+    const root = agents[0];
+    if (root.keyIds.size === 0) continue; // no credential on the root: not attributable as cross-credential
+    for (let i = 1; i < agents.length; i++) {
+      const child = agents[i];
+      if (child.keyIds.size === 0) continue;
+      // Same-credential pairs are pass-2b territory (and already recorded).
+      let sharesKey = false;
+      for (const k of child.keyIds) { if (root.keyIds.has(k)) { sharesKey = true; break; } }
+      if (sharesKey) continue;
+      const pk = `${lc(root.name)}->${lc(child.name)}`;
+      if (pairSeen.has(pk)) continue;
+      pairSeen.add(pk);
+      sessionsWithDelegation.add(th.key);
+      delegations.push({
+        session: th.key, type: 'implicit', via: 'thread-correlation', parent: root.name, child: child.name,
+        parent_tier: root.maxTier, child_tier: child.maxTier,
+        parent_scopes: [...root.scopes].sort(), child_scopes: [...child.scopes].sort(),
+        classification: classify(root, child), observed_child: true, cross_credential: true,
+        evidence: sample([...root.eventIds, ...child.eventIds], []),
+      });
+    }
+  }
+
   // --- Findings from the edges. ----------------------------------------------
   const findings = [];
   const counts = { 'privilege-escalation': 0, unattenuated: 0, opaque: 0, attenuated: 0 };
@@ -290,7 +404,7 @@ export function analyzeDelegation(events, opts = {}) {
         detail: `Sub-agent ${d.child} exercised ${tierLabel(d.child_tier)} scope(s) (${escalating.slice(0, 8).join(', ') || d.child_scopes.slice(0, 8).join(', ')}) that exceed the delegating agent ${d.parent}'s observed ${tierLabel(d.parent_tier)}. A lower-privilege agent handed off to a higher-privilege one (confused-deputy / privilege escalation via delegation): an attacker who drives the parent reaches the sub-agent's elevated authority with no step-up control recorded. Bound the sub-agent to a scoped, short-lived credential at or below the delegating agent's tier.`,
         metric: {
           parent: d.parent, child: d.child, parent_tier: d.parent_tier, child_tier: d.child_tier,
-          escalating_scopes: escalating, via: d.via, type: d.type, session: d.session,
+          escalating_scopes: escalating, via: d.via, type: d.type, session: d.session, cross_credential: d.cross_credential === true,
         },
         evidence: d.evidence,
       }));
@@ -303,7 +417,7 @@ export function analyzeDelegation(events, opts = {}) {
         detail: `Sub-agent ${d.child} inherited the delegating agent ${d.parent}'s authority with no narrowing (${tierLabel(d.child_tier)} vs ${tierLabel(d.parent_tier)}; ${extra.length ? `scopes not held by the parent: ${extra.slice(0, 8).join(', ')}` : 'identical scope set'}). Least privilege means each hop attenuates: the sub-agent should receive a strict subset of the parent's scopes, not the full grant. Issue the sub-agent a narrowed credential scoped to only the tools the handoff requires.`,
         metric: {
           parent: d.parent, child: d.child, parent_tier: d.parent_tier, child_tier: d.child_tier,
-          child_scopes: d.child_scopes, parent_scopes: d.parent_scopes, scopes_not_in_parent: extra, via: d.via, type: d.type, session: d.session,
+          child_scopes: d.child_scopes, parent_scopes: d.parent_scopes, scopes_not_in_parent: extra, via: d.via, type: d.type, session: d.session, cross_credential: d.cross_credential === true,
         },
         evidence: d.evidence,
       }));
@@ -369,7 +483,7 @@ export function analyzeDelegation(events, opts = {}) {
   const graphEdges = [];
   for (const d of delegations) {
     node(d.parent); node(d.child);
-    graphEdges.push({ from: d.parent, to: d.child, via: d.via, type: d.type, classification: d.classification });
+    graphEdges.push({ from: d.parent, to: d.child, via: d.via, type: d.type, classification: d.classification, cross_credential: d.cross_credential === true });
   }
   const nodes = [...nodeMap.values()]
     .map((n) => ({ id: n.id, unknown: n.unknown, scopes_used: n.scopes_used, max_tier: n.max_tier, event_count: n.event_count, key_ids: [...n.key_ids].sort(), namespaces: [...n.namespaces].sort() }))
@@ -392,6 +506,7 @@ export function analyzeDelegation(events, opts = {}) {
     sessions_with_delegation: sessionsWithDelegation.size,
     explicit: delegations.filter((d) => d.type === 'explicit').length,
     implicit: delegations.filter((d) => d.type === 'implicit').length,
+    cross_credential: delegations.filter((d) => d.cross_credential === true).length,
     escalations: counts['privilege-escalation'],
     unattenuated: counts.unattenuated,
     opaque: counts.opaque,

@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Transparency log: append-only, per-report inclusion proofs · kolm.ai</title>
-<meta name="description" content="Every kolm evidence report is entered into an append-only, hash-chained transparency log that returns a per-report Merkle inclusion proof, so a reviewer can confirm a report was logged when it claims and was never quietly replaced.">
+<title>Transparency Log: Append-Only Inclusion Proofs · kolm.ai</title>
+<meta name="description" content="Every kolm report enters an append-only transparency log with a per-report Merkle inclusion proof, so a reviewer can confirm it was never quietly replaced.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Transparency log: per-report inclusion proofs">
-<meta property="og:description" content="An append-only, hash-chained log with per-report Merkle inclusion proofs. Confirm a report was logged when it claims and never replaced.">
+<meta property="og:title" content="Transparency Log: Append-Only Inclusion Proofs">
+<meta property="og:description" content="Every kolm report enters an append-only transparency log with a per-report Merkle inclusion proof, so a reviewer can confirm it was never quietly replaced.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/transparency-log">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -25,7 +25,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm transparency log">
+<meta name="twitter:title" content="Transparency Log: Append-Only Inclusion Proofs">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/transparency-log">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -46,7 +46,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/transparency-log",
-  "description": "Every kolm evidence report is entered into an append-only, hash-chained transparency log that returns a per-report Merkle inclusion proof, so a reviewer can confirm a report was logged when it claims and was never quietly replaced.",
+  "description": "Every kolm report enters an append-only transparency log with a per-report Merkle inclusion proof, so a reviewer can confirm it was never quietly replaced.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -57,6 +57,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     "name": "kolm.ai",
     "@id": "https://kolm.ai/#org"
   }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
+    { "@type": "ListItem", "position": 2, "name": "Transparency log", "item": "https://kolm.ai/transparency-log" }
+  ]
 }
 </script>
 </head>
@@ -207,7 +217,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <div class="split" style="align-items:center">
     <div>
       <h2>Math reviewers already accept.</h2>
-      <p class="lede" style="margin-bottom:16px">Enterprise security teams are wary of crypto custody and public-chain exposure, so we keep none of that in the path. The transparency log is the same well-understood, Sigstore-style construction reviewers know from software supply-chain security, and it verifies offline.</p>
+      <p class="lede" style="margin-bottom:16px">Enterprise security teams are wary of crypto custody and public-chain exposure, so we keep none of that in the path. The transparency log is the same well-understood, Sigstore-style construction reviewers know from software supply-chain security, and it verifies offline. The signed envelope it anchors is specified in the <a href="/spec" style="border-bottom:1px solid var(--line-2)">report spec</a>.</p>
       <div class="hero__cta">
         <a class="btn btn--ghost btn--sm" href="/report">Anatomy of a report</a>
         <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
@@ -256,7 +266,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
       </div>
       <div class="foot__col">
         <h3>Product</h3>

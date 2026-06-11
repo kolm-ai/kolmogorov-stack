@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Verify a kolm evidence report offline, in your browser · kolm.ai</title>
-<meta name="description" content="Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. The whole check runs locally against the published issuer key; the report never leaves your machine and kolm's servers stay out of the trust path. You verify against the public key, not against our word.">
+<title>Verify a Signed Security Report Offline · kolm.ai</title>
+<meta name="description" content="Paste a kolm evidence report and verify its Ed25519 signature in your browser against the published issuer key. No account, no kolm server in the trust path.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Verify a kolm evidence report offline, in your browser">
-<meta property="og:description" content="Real Ed25519 verification running in your own browser, locally, against the published issuer key. Try to tamper with the report, the seal reads VOID.">
+<meta property="og:title" content="Verify a Signed Security Report Offline">
+<meta property="og:description" content="Paste a kolm evidence report and verify its Ed25519 signature in your browser against the published issuer key. No account, no kolm server in the trust path.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/verify">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -25,7 +25,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Verify a kolm evidence report offline">
+<meta name="twitter:title" content="Verify a Signed Security Report Offline">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/verify">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -78,7 +78,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (WSL)",
   "url": "https://kolm.ai/verify",
-  "description": "Paste a kolm evidence report or load the sample and verify its Ed25519 signature entirely in your own browser. The whole check runs locally against the published issuer key; the report never leaves your machine and kolm's servers stay out of the trust path. You verify against the public key, not against our word.",
+  "description": "Paste a kolm evidence report and verify its Ed25519 signature in your browser against the published issuer key. No account, no kolm server in the trust path.",
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -146,7 +146,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         server in the path.
       </p>
       <p style="color:var(--ink-2);margin-top:var(--s3)" data-enter="4">
-        Reviewing a vendor's agent? <a href="/solutions/enterprise-buyers">Read the buyer's guide</a>: what to ask for and how to check it.
+        Reviewing a vendor's AI application? <a href="/solutions/enterprise-buyers">Read the buyer's guide</a>: what to ask for and how to check it.
       </p>
     </div>
 
@@ -201,6 +201,8 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
       <span class="band__item">SHA-256 key fingerprint, recomputed locally</span>
       <span class="band__item">Open verifier: <a href="/kolm-audit-verify.js">kolm-audit-verify.js</a></span>
       <span class="band__item">Issuer keyring: <a href="/keys/kolm-issuers.json">kolm-issuers.json</a></span>
+      <span class="band__item">Format: <a href="/spec">signed report spec</a></span>
+      <span class="band__item"><a href="/badge">Embed a verify badge</a></span>
     </div>
   </div>
 </section>
@@ -338,7 +340,7 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
@@ -388,7 +390,7 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
 
 <script type="module">
   import { verifyReceipt } from '/kolm-verify.js';
-  import { verifyAuditReport, issuerProvenance, canonicalizeReport, keyFingerprintFromPem, normalizePem, AUDIT_REPORT_SCHEMA } from '/kolm-audit-verify.js';
+  import { verifyAuditReport, verifyInclusionOffline, issuerProvenance, canonicalizeReport, keyFingerprintFromPem, normalizePem, AUDIT_REPORT_SCHEMA } from '/kolm-audit-verify.js';
 
   // The page verifies BOTH artifacts kolm signs: an Agent Security-Review
   // evidence *report* (schema kolm-audit-report-1, the deal-unblocking
@@ -605,10 +607,24 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
       checksEl.appendChild(note);
     }
 
-    // Transparency log, best effort: when the report carries a log checkpoint,
-    // confirm the public log answers. Unreachable is informational, never red -
-    // inclusion is a separate, optional check and the signature stands alone.
+    // Transparency log. First the OFFLINE inclusion check: a 2026+ report
+    // embeds the Merkle audit path in its checkpoint, so inclusion verifies
+    // right here with no network call. Then the best-effort live reachability
+    // note. Both informational - the signature stands alone.
     if (doc && doc.log_checkpoint && typeof doc.log_checkpoint === 'object') {
+      const lc = doc.log_checkpoint;
+      try {
+        const inc = await verifyInclusionOffline(lc);
+        if (inc.ok) {
+          await appendCheck(checksEl, true, 'transparency-log inclusion verified offline',
+            'leaf ' + inc.leaf_index + ' of tree_size=' + inc.tree_size + ' recomputes the checkpoint root; no network call was needed', true);
+        } else if (inc.reason === 'no_embedded_proof') {
+          await appendCheck(checksEl, null, 'checkpoint present, no embedded inclusion path (older report)',
+            'fetch GET /v1/transparency-log/proof/' + (lc.seq != null ? lc.seq : ':seq') + ' to verify inclusion against the published tree head', false);
+        } else {
+          await appendCheck(checksEl, false, 'embedded inclusion proof does NOT verify', inc.reason + ' (informational; the Ed25519 verdict above is unaffected)', true);
+        }
+      } catch (_) { /* informational only */ }
       try {
         const ctl = new AbortController();
         const t = setTimeout(() => ctl.abort(), 2500);

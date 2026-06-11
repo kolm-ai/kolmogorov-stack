@@ -199,6 +199,105 @@ function ed25519Available() {
 }
 
 // ---------------------------------------------------------------------------
+// verifyInclusionOffline - GAP-7: verify the transparency-log inclusion proof
+// EMBEDDED in report.log_checkpoint.inclusion, fully offline (WebCrypto
+// SHA-256, no /v1/transparency-log/proof fetch in the trust path).
+//
+// Algorithm: RFC 9162 section 2.1.3.2 verify_inclusion, byte-identical to
+// src/merkle.js verifyInclusion (0x00 leaf / 0x01 node domain separation,
+// fn/sn/LSB walk). Keep the two in lock-step.
+//
+// Input: the report's log_checkpoint object:
+//   { leaf_hash, root_hash, tree_size, inclusion?: { leaf_index, tree_size,
+//     audit_path: [hex], root_hash } }
+// Returns { ok, reason?, tree_size?, leaf_index?, root? }. ok:false with
+// reason 'no_embedded_proof' when the checkpoint predates embedded proofs
+// (pre-2026 reports) - the caller may then fall back to the live
+// /v1/transparency-log/proof/:seq endpoint. NEVER throws.
+// ---------------------------------------------------------------------------
+function hexToBytes(hex) {
+  const s = String(hex || '');
+  if (!/^[0-9a-fA-F]+$/.test(s) || s.length % 2 !== 0) return null;
+  const out = new Uint8Array(s.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(s.slice(i * 2, i * 2 + 2), 16);
+  return out;
+}
+
+async function _sha256Node(left, right) {
+  const buf = new Uint8Array(1 + left.length + right.length);
+  buf[0] = 0x01; // RFC 6962 interior-node prefix
+  buf.set(left, 1);
+  buf.set(right, 1 + left.length);
+  return new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+}
+
+export async function verifyInclusionOffline(checkpoint) {
+  try {
+    if (!checkpoint || typeof checkpoint !== 'object') {
+      return { ok: false, reason: 'no log_checkpoint supplied' };
+    }
+    const inc = checkpoint.inclusion;
+    if (!inc || typeof inc !== 'object') {
+      return { ok: false, reason: 'no_embedded_proof' };
+    }
+    const leaf = hexToBytes(checkpoint.leaf_hash);
+    if (!leaf || leaf.length !== 32) return { ok: false, reason: 'checkpoint leaf_hash is not a 64-hex sha256' };
+    const root = hexToBytes(inc.root_hash != null ? inc.root_hash : checkpoint.root_hash);
+    if (!root || root.length !== 32) return { ok: false, reason: 'inclusion root_hash is not a 64-hex sha256' };
+    // The embedded proof must speak about the SAME tree head the checkpoint
+    // claims - otherwise a forger could pair a real proof from one tree with a
+    // checkpoint from another.
+    if (inc.root_hash != null && checkpoint.root_hash != null
+        && String(inc.root_hash).toLowerCase() !== String(checkpoint.root_hash).toLowerCase()) {
+      return { ok: false, reason: 'inclusion.root_hash differs from checkpoint.root_hash' };
+    }
+    if (inc.tree_size != null && checkpoint.tree_size != null
+        && Number(inc.tree_size) !== Number(checkpoint.tree_size)) {
+      return { ok: false, reason: 'inclusion.tree_size differs from checkpoint.tree_size' };
+    }
+    const m = Number(inc.leaf_index);
+    const n = Number(inc.tree_size != null ? inc.tree_size : checkpoint.tree_size);
+    if (!Number.isInteger(m) || m < 0) return { ok: false, reason: 'leaf_index must be a non-negative integer' };
+    if (!Number.isInteger(n) || n <= 0) return { ok: false, reason: 'tree_size must be a positive integer' };
+    if (m >= n) return { ok: false, reason: `leaf_index ${m} >= tree_size ${n}` };
+    if (!Array.isArray(inc.audit_path)) return { ok: false, reason: 'audit_path must be an array' };
+    const path = [];
+    for (const p of inc.audit_path) {
+      const b = hexToBytes(p);
+      if (!b || b.length !== 32) return { ok: false, reason: 'audit_path entries must be 64-hex sha256 digests' };
+      path.push(b);
+    }
+
+    // RFC 9162 section 2.1.3.2 walk - identical to src/merkle.js.
+    let fn = m;
+    let sn = n - 1;
+    let r = leaf;
+    for (const p of path) {
+      if (sn === 0) return { ok: false, reason: 'inclusion path longer than tree depth' };
+      if ((fn & 1) === 1 || fn === sn) {
+        r = await _sha256Node(p, r);
+        if ((fn & 1) === 0) {
+          do { fn >>>= 1; sn >>>= 1; } while ((fn & 1) === 0 && fn !== 0);
+        }
+      } else {
+        r = await _sha256Node(r, p);
+      }
+      fn >>>= 1;
+      sn >>>= 1;
+    }
+    if (sn !== 0) return { ok: false, reason: 'inclusion path shorter than tree depth' };
+    const rHex = bytesToHex(r);
+    const rootHex = bytesToHex(root);
+    if (rHex !== rootHex) {
+      return { ok: false, reason: `recomputed root ${rHex.slice(0, 12)} != claimed ${rootHex.slice(0, 12)}` };
+    }
+    return { ok: true, tree_size: n, leaf_index: m, root: rHex };
+  } catch (e) {
+    return { ok: false, reason: 'inclusion verification raised: ' + (e && e.message) };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // verifyAuditReport - the real check. Returns { ok, reason?, key_fingerprint?,
 // checks[] }. Every entry in `checks` is the outcome of a genuine operation;
 // none are pre-filled. NEVER throws - bad input yields ok:false with a reason.
@@ -333,6 +432,21 @@ export async function verifyAuditReport(report, opts = {}) {
     const lc = report.log_checkpoint;
     const ok = typeof lc.root_hash === 'string' && /^[0-9a-f]{64}$/i.test(lc.root_hash) && Number.isFinite(Number(lc.tree_size));
     checks.push({ name: 'transparency-log checkpoint present', ok, detail: ok ? `tree_size=${lc.tree_size} root=${String(lc.root_hash).slice(0, 12)}` : 'log_checkpoint present but malformed (informational; verdict unaffected)' });
+    // GAP-7: when the checkpoint carries an EMBEDDED Merkle audit path, verify
+    // inclusion fully offline. A checkpoint without one (pre-2026 report) is
+    // not a failure - the live /v1/transparency-log/proof/:seq endpoint still
+    // serves a proof for its seq. Informational; never flips the verdict (the
+    // checkpoint is detached evidence, outside the signed bytes).
+    if (ok) {
+      const inc = await verifyInclusionOffline(lc);
+      if (inc.ok) {
+        checks.push({ name: 'transparency-log inclusion verified offline', ok: true, detail: `leaf ${inc.leaf_index} of tree_size=${inc.tree_size} recomputes the checkpoint root` });
+      } else if (inc.reason === 'no_embedded_proof') {
+        checks.push({ name: 'transparency-log inclusion', ok: true, detail: `checkpoint present, no embedded path (older report); fetch /v1/transparency-log/proof/${lc.seq != null ? lc.seq : ':seq'} to verify inclusion` });
+      } else {
+        checks.push({ name: 'transparency-log inclusion verified offline', ok: false, detail: `embedded inclusion proof does NOT verify: ${inc.reason} (informational; verdict unaffected)` });
+      }
+    }
   }
   // Input-evidence digest (M2 / ASR-6). It is signature-covered, so any tampering
   // already failed the Ed25519 check above. The events themselves are not carried
@@ -363,5 +477,5 @@ export async function verifyAuditReport(report, opts = {}) {
 
 // UMD-ish global for plain <script src> pages.
 if (typeof window !== 'undefined') {
-  window.kolmAuditVerify = { verifyAuditReport, canonicalize, canonicalizeReport, keyFingerprintFromPem, pemToDer, normalizePem, issuerProvenance, isFingerprintRevoked, normalizeFpSet, AUDIT_REPORT_SCHEMA };
+  window.kolmAuditVerify = { verifyAuditReport, verifyInclusionOffline, canonicalize, canonicalizeReport, keyFingerprintFromPem, pemToDer, normalizePem, issuerProvenance, isFingerprintRevoked, normalizeFpSet, AUDIT_REPORT_SCHEMA };
 }

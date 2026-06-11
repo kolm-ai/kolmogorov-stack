@@ -1,0 +1,31 @@
+# kolm.ai
+
+> kolm audits your AI application - the agent and every tool, endpoint, identity and data flow around it - from the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference, and gateway logs from LiteLLM, Helicone, Portkey or OpenRouter). The result is an Ed25519-signed evidence report that an enterprise buyer verifies offline against a published public key, with no kolm server in the trust path. Findings map to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS; kolm maps to standards, it does not certify. The scan is free; the Signed Readiness Report is $750 one-time. Contact: dev@kolm.ai.
+
+## Product
+
+- [How it works](https://kolm.ai/how-it-works): Audit, sign, verify. Logs in, analyzers run, the report is signed, the buyer checks the signature offline.
+- [Platform](https://kolm.ai/platform): The evidence pipeline: telemetry connectors, analyzers for permissions, audit trail, identity, delegation, provenance and data flows, plus injection testing, signing and a transparency log.
+- [What we test](https://kolm.ai/checks): The control catalog, each control mapped to the framework clause a security reviewer cites.
+- [The report](https://kolm.ai/report): The signed evidence object: scope, content hashes, Ed25519 signature, transparency-log inclusion proof.
+- [Verify a report](https://kolm.ai/verify): Paste a report and verify its signature in the browser against the published issuer key. No account.
+- [Report spec](https://kolm.ai/spec): The open specification for the signed report format and its canonical JSON.
+- [Transparency log](https://kolm.ai/transparency-log): Append-only, hash-chained log with per-report Merkle inclusion proofs.
+- [Pricing](https://kolm.ai/pricing): Scan free. Signed Readiness Report $750 one-time. Continuous $299/$999 per month. Full Readiness $15,000. Continuous-Plus $3,500/mo. Reviewed Attestation $25,000 flat.
+
+## Solutions
+
+- [For AI vendors](https://kolm.ai/solutions/ai-vendors): Clear the enterprise security review with a signed report instead of a questionnaire stalemate.
+- [For enterprise buyers](https://kolm.ai/solutions/enterprise-buyers): Verify a vendor's evidence yourself, offline, against their public key.
+- [Enterprise](https://kolm.ai/enterprise): Co-signed audits by a named accredited reviewer under an MSA.
+
+## Reference
+
+- [Research](https://kolm.ai/research): The published audit method: the ASR control framework and the adversarial prompt-injection battery. Injection is tested and reported, not warranted.
+- [Threat model](https://kolm.ai/security/threat-model): What a buyer must trust, what they do not, and the stated limits of signed evidence.
+- [Regulatory clock](https://kolm.ai/regulatory-clock): A dated tracker of the AI security frameworks buyers cite in procurement.
+- [Glossary](https://kolm.ai/glossary): Definitions for agent security review, signed evidence, offline verification and related terms.
+
+## Contact
+
+- [Start an audit](https://kolm.ai/contact): No sales call. One channel: dev@kolm.ai.

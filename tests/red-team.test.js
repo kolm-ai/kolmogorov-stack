@@ -18,7 +18,7 @@ import path from 'node:path';
 import { ingestForAudit } from '../src/audit-ingest.js';
 import { normalizeEvent } from '../src/audit-event.js';
 import { runAudit } from '../src/audit-orchestrator.js';
-import { runRedTeam, RED_TEAM_SPEC_VERSION } from '../src/red-team.js';
+import { runRedTeam, mergeActiveResults, RED_TEAM_SPEC_VERSION } from '../src/red-team.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const FIXTURE = path.join(ROOT, 'examples', 'agent-audit', 'litellm-export.jsonl');
@@ -391,7 +391,7 @@ test('the twelve-probe battery still computes a bounded score with reconciling c
   // that is on no provider allowlist, and runs unguarded destructive tools.
   assert.equal(probe(r, 'exfil-to-untrusted-host').status, 'exposed', 'SSN emailed to an off-allowlist host');
   assert.equal(probe(r, 'runtime-guardrails-absent').status, 'exposed', 'destructive tools ran with no guardrail');
-  assert.equal(r.spec_version, 'asr-redteam/0.2', 'the battery version is bumped for the new probes');
+  assert.equal(r.spec_version, 'asr-redteam/0.3', 'the battery version is bumped for the active-merge capability');
 });
 
 // ---------------------------------------------------------------------------
@@ -404,6 +404,102 @@ test('runRedTeam never throws on malformed input', () => {
     assert.ok(r && Array.isArray(r.probes), 'returns a valid result shape');
     assert.ok(r.red_team_score === null || typeof r.red_team_score === 'number');
   }
+});
+
+// ---------------------------------------------------------------------------
+// mergeActiveResults - the Deep Red-Team active-evidence merge (GAP-5).
+// Passive-only behaviour must be unchanged when the merge is never called;
+// merged probes carry evidence_source and the score recomputes worst-wins.
+// ---------------------------------------------------------------------------
+function activeRunWith(probes) {
+  return {
+    spec_version: 'asr-active-redteam/0.1',
+    endpoint_digest: 'd'.repeat(64),
+    consent: { token: 't', attestor: 'op', asserted_at: '2026-06-11T00:00:00Z' },
+    started_at: '2026-06-11T00:00:00Z',
+    finished_at: '2026-06-11T00:00:01Z',
+    probes,
+  };
+}
+
+test('mergeActiveResults is exported and the passive battery output is unchanged when it is never called (regression)', () => {
+  assert.equal(typeof mergeActiveResults, 'function', 'mergeActiveResults is exported');
+  const r = runRedTeam(fixtureEvents());
+  // The passive result carries NO active artifacts: no evidence_source on any
+  // probe, no summary.active - byte-identical to the pre-merge battery.
+  for (const p of r.probes) {
+    assert.ok(!('evidence_source' in p), `passive probe ${p.id} carries no evidence_source`);
+    assert.ok(!('transcript_digest' in p), `passive probe ${p.id} carries no transcript_digest`);
+  }
+  assert.ok(!('active' in r.summary), 'passive summary has no active block');
+  // And merging a null / empty active run returns the passive result untouched.
+  assert.equal(mergeActiveResults(r, null), r, 'null active run -> same passive object');
+  assert.equal(mergeActiveResults(r, { probes: [] }), r, 'empty active run -> same passive object');
+});
+
+test('mergeActiveResults: untested + active resisted -> resisted with evidence_source active, and the score recomputes', () => {
+  const passive = runRedTeam([]); // every probe untested, null score
+  const snapshot = JSON.parse(JSON.stringify(passive));
+  assert.equal(passive.red_team_score, null);
+
+  const merged = mergeActiveResults(passive, activeRunWith([
+    { id: 'unicode-homoglyph-smuggling', status: 'resisted', detail: 'Active probe: held.', transcript_digest: 'a'.repeat(64), evidence: [] },
+  ]));
+
+  const up = probe(merged, 'unicode-homoglyph-smuggling');
+  assert.equal(up.status, 'resisted', 'an active outcome replaces untested - the homoglyph probe can now reach resisted');
+  assert.equal(up.evidence_source, 'active');
+  assert.equal(up.transcript_digest, 'a'.repeat(64));
+  // Untouched probes stay untested and are labeled passive.
+  assert.equal(probe(merged, 'system-prompt-override').status, 'untested');
+  assert.equal(probe(merged, 'system-prompt-override').evidence_source, 'passive');
+  // The score is recomputed over the now-exercised probe (one resisted -> 100).
+  assert.equal(merged.red_team_score, 100);
+  assert.equal(merged.summary.resisted, 1);
+  assert.equal(merged.spec_version, 'asr-redteam/0.3');
+  assert.equal(merged.summary.active.probes_merged, 1);
+  assert.equal(merged.summary.active.consent_recorded, true);
+  assert.match(merged.summary.note, /ACTIVE/, 'the summary names the active evidence');
+  // Pure: the passive input was not mutated.
+  assert.deepEqual(passive, snapshot, 'mergeActiveResults does not mutate its input');
+});
+
+test('mergeActiveResults precedence: active exposed overrides passive resisted; passive exposed is never erased; active untested changes nothing', () => {
+  // A benign tool call makes system-prompt-override passively resisted.
+  const resistedPassive = runRedTeam([normalizeEvent({
+    ts: '2026-01-01T00:00:00Z', namespace: 'litellm', actor: { key_id: 'k1', agent: 'a' },
+    action: { type: 'tool', tool: 'get_order' }, scopes: { used: ['tool:get_order'] },
+    data: { has_sensitive: false, redacted: false, egress: false }, meta: { kind: 'tool_call' },
+  })]);
+  assert.equal(probe(resistedPassive, 'system-prompt-override').status, 'resisted');
+
+  // worst wins: an active exposed overrides the passive resisted.
+  const worse = mergeActiveResults(resistedPassive, activeRunWith([
+    { id: 'system-prompt-override', status: 'exposed', detail: 'Active probe landed.', transcript_digest: 'b'.repeat(64), evidence: [] },
+  ]));
+  assert.equal(probe(worse, 'system-prompt-override').status, 'exposed');
+  assert.equal(probe(worse, 'system-prompt-override').evidence_source, 'active');
+  assert.ok(worse.red_team_score < resistedPassive.red_team_score, 'the exposure costs score');
+
+  // active untested never replaces an exercised passive outcome.
+  const noop = mergeActiveResults(resistedPassive, activeRunWith([
+    { id: 'system-prompt-override', status: 'untested', detail: 'transport error', transcript_digest: 'c'.repeat(64), evidence: [] },
+  ]));
+  assert.equal(probe(noop, 'system-prompt-override').status, 'resisted', 'active untested leaves the passive outcome');
+  assert.equal(probe(noop, 'system-prompt-override').evidence_source, 'passive');
+
+  // a passive exposed is never erased by an active resisted.
+  const exposedPassive = runRedTeam([normalizeEvent({
+    ts: '2026-01-01T00:00:00Z', namespace: 'litellm', actor: { key_id: 'k1', agent: 'a' },
+    action: { type: 'tool', tool: 'delete_customer' }, scopes: { used: ['tool:delete_customer'] },
+    data: { has_sensitive: false, redacted: false, egress: false }, meta: { kind: 'tool_call' },
+  })]);
+  assert.equal(probe(exposedPassive, 'system-prompt-override').status, 'exposed');
+  const kept = mergeActiveResults(exposedPassive, activeRunWith([
+    { id: 'system-prompt-override', status: 'resisted', detail: 'Active probe held.', transcript_digest: 'e'.repeat(64), evidence: [] },
+  ]));
+  assert.equal(probe(kept, 'system-prompt-override').status, 'exposed', 'log-evidenced exposure survives an active resisted');
+  assert.equal(probe(kept, 'system-prompt-override').evidence_source, 'passive', 'the surviving evidence is the passive log evidence');
 });
 
 // ---------------------------------------------------------------------------

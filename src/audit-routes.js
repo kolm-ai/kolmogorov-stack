@@ -51,6 +51,7 @@ import { resolveTrust, resolvePriorReport, runDueReattestations, forceReattest }
 import { computeAuditDelta } from './audit-delta.js';
 import { autofillQuestionnaire, toQuestionnaireCsv, QUESTIONNAIRE_TEMPLATES } from './questionnaire-autofill.js';
 import { importAgentLogs } from './log-importer.js';
+import { normalizeCoverageDeclaration } from './coverage-declaration.js';
 import { allCapturesForTenant } from './capture-store.js';
 import { KOLM_CAPTURE_SOURCE } from './audit-ingest.js';
 // One-off run notifications: notify() is async and can throw (unknown event /
@@ -84,6 +85,37 @@ function _clampRetentionDays(v) {
   if (n < 0) return 0;
   if (n > 36500) return 36500; // 100 years - an obvious upper sanity bound
   return n;
+}
+
+// Operator egress allowlist (GAP-1 plumbing half): the request body may carry
+// allowed_hosts, the set of egress destinations the operator sanctions. It is
+// threaded into runAudit's analyzerOpts.egress.allowedHosts so the egress
+// analyzer grades observed destinations against the operator's intent. Caps
+// keep a hostile body from inflating the audit: <=200 entries, each a hostname
+// string <=253 chars (RFC 1035 name length).
+const MAX_ALLOWED_HOSTS = 200;
+const MAX_HOST_LEN = 253;
+function _normalizeAllowedHosts(raw) {
+  if (raw == null) return { ok: true, hosts: null };
+  if (!Array.isArray(raw) || raw.length > MAX_ALLOWED_HOSTS) return { ok: false };
+  const hosts = [];
+  for (const h of raw) {
+    if (typeof h !== 'string') return { ok: false };
+    const s = h.trim().toLowerCase();
+    if (!s || s.length > MAX_HOST_LEN) return { ok: false };
+    hosts.push(s);
+  }
+  return { ok: true, hosts: hosts.length ? hosts : null };
+}
+
+// Coverage declaration (GAP-3): validate the body's coverage_declaration via
+// src/coverage-declaration.js. Returns { ok:true, declaration|null } or
+// { ok:false, error } for the route to map onto a 400.
+function _coverageFromBody(body) {
+  if (!body || body.coverage_declaration == null) return { ok: true, declaration: null };
+  const norm = normalizeCoverageDeclaration(body.coverage_declaration);
+  if (!norm.ok) return { ok: false, error: norm.error };
+  return { ok: true, declaration: norm.declaration };
 }
 
 // Normalize a caller-supplied source/source_label EXACTLY as the grading path
@@ -349,9 +381,14 @@ function _notifyReportReady(tenantId, payload) {
 // boundary: runAudit is designed not to throw, but we still guard it (a
 // pathological export must not surface as a raw Express 500); a signer failure
 // is surfaced as signError so the caller maps a clean 503.
-function _runAndSign(logsText, { source, subject, retentionDays, sign, tier }) {
+function _runAndSign(logsText, { source, subject, retentionDays, sign, tier, allowedHosts, coverageDeclaration }) {
   const opts = { source: source || 'import' };
   if (Number.isFinite(retentionDays)) opts.retentionDays = retentionDays;
+  // GAP-1 plumbing: the operator's sanctioned egress destinations reach the
+  // egress analyzer via runAudit's analyzerOpts passthrough.
+  if (Array.isArray(allowedHosts) && allowedHosts.length) {
+    opts.analyzerOpts = { egress: { allowedHosts } };
+  }
   let audit;
   try {
     audit = runAudit(logsText, opts);
@@ -363,7 +400,11 @@ function _runAndSign(logsText, { source, subject, retentionDays, sign, tier }) {
     // tier defaults to 'scan' -> the envelope is watermarked ("UNPAID PREVIEW").
     // The free scan + session-run paths leave tier unset and so deliver a
     // watermarked preview; only the paid path re-signs as tier:'report'.
-    const built = buildAndSignReport(audit, { subject, verify_url: _verifyUrlFor(), tier: tier || 'scan' });
+    const signOpts = { subject, verify_url: _verifyUrlFor(), tier: tier || 'scan' };
+    // GAP-3: a route-validated coverage declaration is bound INSIDE the signed
+    // envelope by the builder (signature-covered, like evidence_tier).
+    if (coverageDeclaration) signOpts.coverage_declaration = coverageDeclaration;
+    const built = buildAndSignReport(audit, signOpts);
     return { audit, report: built };
   } catch (e) {
     return { audit, report: null, signError: e };
@@ -671,11 +712,21 @@ export function register(r, deps = {}) {
       return _err(res, 400, 'source_reserved', `source "${KOLM_CAPTURE_SOURCE}" is reserved for the gateway-capture bridge; POST /v1/audit/scan with {"source":"${KOLM_CAPTURE_SOURCE}"} and no logs instead`);
     }
     const sign = body.sign !== false;
+    const hostsNorm = _normalizeAllowedHosts(body.allowed_hosts);
+    if (!hostsNorm.ok) {
+      return _err(res, 400, 'invalid_allowed_hosts', `allowed_hosts must be an array of at most ${MAX_ALLOWED_HOSTS} hostname strings (each <=${MAX_HOST_LEN} chars)`);
+    }
+    const covNorm = _coverageFromBody(body);
+    if (!covNorm.ok) {
+      return _err(res, 400, 'invalid_coverage_declaration', covNorm.error);
+    }
     const { audit, report, signError, auditError } = _runAndSign(sess.logs, {
       source: _normalizeSource(body.source) || sess.source,
       subject: body.subject || sess.subject,
       retentionDays: _clampRetentionDays(Number.isFinite(body.retention_days) ? body.retention_days : sess.retention_days),
       sign,
+      allowedHosts: hostsNorm.hosts,
+      coverageDeclaration: covNorm.declaration,
     });
     if (auditError) {
       return _err(res, 422, 'audit_failed', auditError.message || 'the supplied logs could not be analyzed');
@@ -906,10 +957,20 @@ export function register(r, deps = {}) {
     const subject = String(body.subject || 'Agent fleet').slice(0, 200);
     const source = isCaptureBridge ? KOLM_CAPTURE_SOURCE : (_normalizeSource(body.source) || 'import');
     const retentionDays = _clampRetentionDays(body.retention_days);
+    const hostsNorm = _normalizeAllowedHosts(body.allowed_hosts);
+    if (!hostsNorm.ok) {
+      return _err(res, 400, 'invalid_allowed_hosts', `allowed_hosts must be an array of at most ${MAX_ALLOWED_HOSTS} hostname strings (each <=${MAX_HOST_LEN} chars)`);
+    }
+    const covNorm = _coverageFromBody(body);
+    if (!covNorm.ok) {
+      return _err(res, 400, 'invalid_coverage_declaration', covNorm.error);
+    }
     const { audit, report, signError, auditError } = _runAndSign(text, {
       source, subject,
       retentionDays,
       sign,
+      allowedHosts: hostsNorm.hosts,
+      coverageDeclaration: covNorm.declaration,
     });
     if (auditError) {
       return _err(res, 422, 'audit_failed', auditError.message || 'the supplied logs could not be analyzed');
@@ -1273,7 +1334,19 @@ export function register(r, deps = {}) {
       ? KOLM_CAPTURE_SOURCE
       : (_normalizeSource(body.source_label) || (source === 'url' ? 'import:url' : 'import'));
     const retentionDays = _clampRetentionDays(body.retention_days);
-    const { audit, report, signError, auditError } = _runAndSign(text, { source: srcLabel, subject, retentionDays, sign });
+    const hostsNorm = _normalizeAllowedHosts(body.allowed_hosts);
+    if (!hostsNorm.ok) {
+      return _err(res, 400, 'invalid_allowed_hosts', `allowed_hosts must be an array of at most ${MAX_ALLOWED_HOSTS} hostname strings (each <=${MAX_HOST_LEN} chars)`);
+    }
+    const covNorm = _coverageFromBody(body);
+    if (!covNorm.ok) {
+      return _err(res, 400, 'invalid_coverage_declaration', covNorm.error);
+    }
+    const { audit, report, signError, auditError } = _runAndSign(text, {
+      source: srcLabel, subject, retentionDays, sign,
+      allowedHosts: hostsNorm.hosts,
+      coverageDeclaration: covNorm.declaration,
+    });
     if (auditError) {
       return _err(res, 422, 'audit_failed', auditError.message || 'the supplied logs could not be analyzed');
     }

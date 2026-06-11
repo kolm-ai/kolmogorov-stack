@@ -37,6 +37,10 @@ import { buildAgentPassport } from './passport-builder.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
 import { TransparencyLog, TRANSPARENCY_LOG_VERSION } from './transparency-log.js';
 import { getPublicTransparencyLog } from './transparency-log-routes.js';
+// GAP-3: the one-line caveat rendered next to a bound coverage declaration.
+// (coverage-declaration.js imports this module's canonicalize; both sides only
+// reference each other inside function bodies, so the cycle is benign.)
+import { declarationCaveat } from './coverage-declaration.js';
 
 // Versioned so a re-attestation is a comparable delta and a signed report
 // records exactly which builder shape produced it.
@@ -99,7 +103,7 @@ export function recordTransparencyEntry(reportDigest, opts = {}) {
     const log = _getReportTlog(opts);
     const row = log.append('audit-report', { alg: 'sha256', report_digest: digest, report_id: opts.report_id || null }, { namespace: 'reports' });
     const head = log.treeHead();
-    return {
+    const checkpoint = {
       version: TRANSPARENCY_LOG_VERSION,
       origin: head.origin,
       tree_size: head.tree_size,
@@ -110,6 +114,24 @@ export function recordTransparencyEntry(reportDigest, opts = {}) {
       entry_hash: row.entry_hash,
       report_digest: digest,
     };
+    // GAP-7: embed the RFC 9162 Merkle audit path for THIS report's leaf at
+    // signing time, so the delivered artifact verifies inclusion fully OFFLINE
+    // (verifyInclusionProof in src/transparency-log.js; verifyInclusionOffline
+    // in public/kolm-audit-verify.js) - no live /proof/:seq fetch in the trust
+    // path. log_checkpoint is detached evidence (canonicalizeReport excludes
+    // it), so embedding the path never disturbs the Ed25519 signature.
+    try {
+      const proof = log.inclusionProof(row.seq);
+      if (proof && proof.ok) {
+        checkpoint.inclusion = {
+          leaf_index: proof.leaf_index,
+          tree_size: proof.tree_size,
+          audit_path: proof.audit_path,
+          root_hash: proof.root_hash,
+        };
+      }
+    } catch { /* best-effort: a checkpoint without an embedded path is still valid */ }
+    return checkpoint;
   } catch (_e) {
     return null;
   }
@@ -202,6 +224,7 @@ const REMEDIATION_HINTS = {
   'duplicate-event-ids': 'Make event ids unique so the trail is unambiguous.',
   'retention-unverifiable': 'Set and document a retention window that meets the buyer requirement (e.g. EU AI Act Art.12).',
   'short-retention-window': 'Extend and document the retention window to meet the buyer requirement (e.g. EU AI Act Art.12).',
+  'trail-volume-inconsistent': 'Export the full continuous window, or attach a coverage declaration (window, systems, expected daily call volume) so the report binds the export scope.',
 };
 
 const SEV_ORDER = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
@@ -241,14 +264,27 @@ export function deriveRemediation(auditResult) {
 // The caveats - what the report does and does NOT claim. Stated plainly so a
 // reviewer is never misled. (No theater; this is the anti-theater section.)
 // ---------------------------------------------------------------------------
-function buildCaveats(summary) {
+function buildCaveats(summary, auditResult) {
   const assessed = (summary.assessed_controls || []).join(', ');
-  return [
+  const caveats = [
     `This report assesses ${assessed || 'the deterministic controls'} from the supplied logs. The controls listed under "Not assessed" were not evaluated in this run. Each carries its reason.`,
     'Findings reflect only the activity present in the supplied export. The absence of a finding is not proof that the underlying risk is absent.',
     'The readiness percentage is a graduated rollup over the assessed posture controls (ASR-1/2/3: pass = 1, attention = 0.5, blocking = 0). The supplemental controls (ASR-5 provenance, ASR-7 memory and retrieval, ASR-8 delegation) are assessed and listed, but fold into the percentage only when they surface a hard blocker; a partial, clean, or untested supplemental result is reported without inflating the score. It is not a certification or an attestation of compliance.',
     'Framework references map each finding to the control an enterprise reviewer cites; they do not assert certification against that framework.',
   ];
+  // GAP-2 (claim-bounding half): name the EXACT detector vocabulary the
+  // sensitive-data scan covered, so "no sensitive egress was found" can never be
+  // read wider than what the detectors actually see. Tolerant of audit results
+  // built before the orchestrator carried detector_coverage.
+  const dc = auditResult && typeof auditResult === 'object' ? auditResult.detector_coverage : null;
+  if (dc && typeof dc === 'object' && Array.isArray(dc.pii_classes) && Array.isArray(dc.secret_shapes)) {
+    const pii = dc.pii_classes.filter((c) => typeof c === 'string' && c).slice(0, 64).join(', ');
+    const shapes = dc.secret_shapes.filter((c) => typeof c === 'string' && c).slice(0, 64).join(', ');
+    caveats.push(
+      `Sensitive-data detection covered PII classes [${pii}] and secret shapes [${shapes}]; content outside these detectors is not assessed.`,
+    );
+  }
+  return caveats;
 }
 
 // ---------------------------------------------------------------------------
@@ -327,6 +363,10 @@ export function buildRedTeamBlock(auditResult) {
       detail: p.detail || null,
       frameworks: Array.isArray(p.frameworks) ? p.frameworks.slice(0, 8) : [],
       evidence: Array.isArray(p.evidence) ? p.evidence.slice(0, 6) : [],
+      // P3 interface: how the probe's verdict was evidenced. 'passive' is the
+      // historical default (observed-traffic analysis); active harness probes
+      // stamp their own value, which passes through unchanged.
+      evidence_source: p.evidence_source || 'passive',
     })),
   };
 }
@@ -429,12 +469,53 @@ export function buildReportEnvelope(auditResult, opts = {}) {
     findings,
     frameworks,
     remediation: deriveRemediation(auditResult),
-    caveats: buildCaveats(s),
+    caveats: buildCaveats(s, auditResult),
     asr_checklist: ASR_CONTROLS.map((a) => ({ id: a.id, name: a.name, requires: a.requires })),
     contact: CONTACT_EMAIL,
     verify_url: verifyUrl,
   };
   if (s.note) envelope.summary.note = s.note;
+
+  // GAP-3: vendor coverage declaration, bound INSIDE the signed payload next to
+  // evidence_tier (canonicalizeReport covers every key but the detached
+  // evidence), so the vendor's "this export covers window W of systems S" is as
+  // tamper-evident as the findings. The route layer normalizes + validates
+  // (src/coverage-declaration.js); a defensive shape check here keeps a raw
+  // caller from binding garbage.
+  const coverageDecl = options.coverage_declaration && typeof options.coverage_declaration === 'object'
+    && !Array.isArray(options.coverage_declaration)
+    ? options.coverage_declaration
+    : null;
+  if (coverageDecl) {
+    envelope.coverage_declaration = coverageDecl;
+    envelope.caveats.push(declarationCaveat(coverageDecl));
+    // Declared-window cross-check: when the trail's observed event span and the
+    // declared window disagree, say so in the signed caveats (a caveat, not a
+    // finding - the volume-sanity finding lives in the analyzer, which sees only
+    // events). Tolerant of audits without a trail coverage block.
+    const cov = auditResult.trail && auditResult.trail.coverage ? auditResult.trail.coverage : null;
+    const declStart = Date.parse(coverageDecl.window_start || '');
+    const declEnd = Date.parse(coverageDecl.window_end || '');
+    if (cov && Number.isFinite(declStart) && Number.isFinite(declEnd)
+        && Number.isFinite(cov.earliest_ms) && Number.isFinite(cov.latest_ms)) {
+      const DAY = 86400000;
+      const outside = cov.earliest_ms < declStart - DAY || cov.latest_ms > declEnd + DAY;
+      const declaredDays = (declEnd - declStart) / DAY;
+      const observedDays = (cov.latest_ms - cov.earliest_ms) / DAY;
+      const underCovered = declaredDays >= 2 && observedDays < declaredDays * 0.5;
+      if (outside || underCovered) {
+        envelope.caveats.push(
+          `The declared coverage window (${String(coverageDecl.window_start).slice(0, 10)} to ${String(coverageDecl.window_end).slice(0, 10)}) does not match the observed event span (${new Date(cov.earliest_ms).toISOString().slice(0, 10)} to ${new Date(cov.latest_ms).toISOString().slice(0, 10)}); treat the export's window selection as unverified.`,
+        );
+      }
+    }
+  } else if (evidenceTier.grade === 'B' || evidenceTier.grade === 'C') {
+    // Vendor-supplied evidence with NO declaration: the analyzed window is the
+    // vendor's selection, and the signed report says so.
+    envelope.caveats.push(
+      "No coverage declaration was supplied; the analyzed window is the vendor's selection.",
+    );
+  }
 
   // Input-evidence digest (M2 / ASR-6). Binds the SIGNED report to the exact
   // AuditEvents the analyzers ran on (sha256 over their canonical form), without
@@ -467,7 +548,7 @@ export function buildReportEnvelope(auditResult, opts = {}) {
 // ---------------------------------------------------------------------------
 // Sign an envelope in place (returns the same object with signature_ed25519).
 // ---------------------------------------------------------------------------
-export function signReport(envelope, signer) {
+export function signReport(envelope, signer, opts = {}) {
   const s = signer || loadOrCreateDefaultSigner();
   if (!s || !s.privateKey || !s.publicKey) {
     const err = new Error('signReport: no Ed25519 signer available (set KOLM_ED25519_PRIVATE_KEY or allow a cached key)');
@@ -492,7 +573,12 @@ export function signReport(envelope, signer) {
   // signature. attachDetachedEvidence reuses this checkpoint instead of appending
   // a duplicate leaf for the same digest.
   try {
-    const cp = recordTransparencyEntry(sha256hex(canonical), { report_id: envelope.report_id });
+    const cp = recordTransparencyEntry(sha256hex(canonical), {
+      report_id: envelope.report_id,
+      // Test isolation: callers may anchor into their own TransparencyLog
+      // instead of the global store-backed witness (see _getReportTlog).
+      transparencyLog: opts && opts.transparencyLog,
+    });
     if (cp) envelope.log_checkpoint = cp;
   } catch (_e) { /* best-effort: omit log_checkpoint */ }
   return envelope;
@@ -504,7 +590,7 @@ export function signReport(envelope, signer) {
 // ---------------------------------------------------------------------------
 export function buildAndSignReport(auditResult, opts = {}) {
   const envelope = buildReportEnvelope(auditResult, opts);
-  signReport(envelope, opts.signer);
+  signReport(envelope, opts.signer, { transparencyLog: opts.transparencyLog });
   return {
     envelope,
     report_id: envelope.report_id,

@@ -7,7 +7,8 @@
 //   - which TOOLS it actually invoked (assistant tool_calls / function_call)
 //   - which HOST the call reached (api_base / provider) - the egress signal
 //   - which IDENTITY made the call (user / metadata / key)
-//   - whether the content carried SENSITIVE data (PII scan)
+//   - whether the content carried SENSITIVE data (PII scan + secret-shaped
+//     token scan over message AND argument bodies; src/sensitive-data.js)
 //
 // This module re-reads the same provider shapes but keeps that security
 // dimension, emitting one normalized AuditEvent (src/audit-event.js) per
@@ -19,7 +20,7 @@
 // row can yield multiple events (one model/API egress + one per tool call).
 
 import { normalizeEvent, eventId } from './audit-event.js';
-import { scanPii } from './pii-redactor.js';
+import { scanSensitive } from './sensitive-data.js';
 
 // Reserved source tag for first-party gateway captures (the Tier-A bridge).
 // Only the authenticated /v1/audit scan/import bridge may use it - it drives
@@ -165,15 +166,18 @@ function looksRedacted(text) {
 }
 
 function sensitivity(text) {
-  // Returns { has_sensitive, classes } using the shared PII detector, with a
-  // never-throw guard so a detector edge case can't sink an audit ingest.
-  if (typeof text !== 'string' || text === '') return { has_sensitive: false, classes: [] };
-  try {
-    const { classes_hit } = scanPii({ text });
-    return { has_sensitive: classes_hit.length > 0, classes: classes_hit };
-  } catch {
-    return { has_sensitive: false, classes: [] };
+  // Returns { has_sensitive, classes, secret_classes } using the shared
+  // sensitive-data detector (PII regexes + secret-shaped tokens; GAP-2:
+  // a customer API key in a message or argument body must flip
+  // has_sensitive, not just regex PII). scanSensitive never throws, so a
+  // detector edge case can't sink an audit ingest. `classes` stays PII-only
+  // (meta.pii_classes is consumed downstream as PII); secret shapes ride in
+  // the separate secret_classes so findings can distinguish the two.
+  if (typeof text !== 'string' || text === '') {
+    return { has_sensitive: false, classes: [], secret_classes: [] };
   }
+  const s = scanSensitive(text);
+  return { has_sensitive: s.has_sensitive, classes: s.pii_classes, secret_classes: s.secret_classes };
 }
 
 /* --------------------------------------------------------------------- */
@@ -578,18 +582,22 @@ function eventsFromRecord(rec, source, index, seenCallKeys) {
       if (seen.has(dedupKey)) continue;
       seen.add(dedupKey);
 
-      // PII can live in the call ARGUMENTS (send_email body, db write, http POST
-      // body) - the primary exfil channel - so scan them too, not just the
-      // message/response text, or a signed report can claim "no sensitive data
-      // left the boundary" while an SSN was emailed out.
+      // PII or a secret-shaped token can live in the call ARGUMENTS
+      // (send_email body, db write, http POST body) - the primary exfil
+      // channel - so scan them too, not just the message/response text, or a
+      // signed report can claim "no sensitive data left the boundary" while
+      // an SSN or an API key was emailed out.
       const argSens = sensitivity(argStr);
       const hasSensitive = sens.has_sensitive || argSens.has_sensitive;
       const piiClasses = uniqStrings([...sens.classes, ...argSens.classes]);
+      const secretClasses = uniqStrings([...sens.secret_classes, ...argSens.secret_classes]);
 
       // Discriminator so genuinely-distinct parallel calls (different args) get
       // distinct event ids instead of colliding into a false duplicate finding.
       const disc = call.id || [x.requestId || '', toolName, argStr, dest || '', String(callIndex)].join('|');
 
+      const meta = { ...baseMeta, kind: 'tool_call', args_host: dest, pii_classes: piiClasses };
+      if (secretClasses.length > 0) meta.secret_classes = secretClasses;
       events.push(normalizeEvent({
         ts: x.ts,
         namespace: source,
@@ -600,7 +608,7 @@ function eventsFromRecord(rec, source, index, seenCallKeys) {
         hash: x.hash,
         prev_hash: x.prevHash,
         disc,
-        meta: { ...baseMeta, kind: 'tool_call', args_host: dest, pii_classes: piiClasses },
+        meta,
       }));
       callIndex++;
     }
@@ -620,6 +628,8 @@ function eventsFromRecord(rec, source, index, seenCallKeys) {
     // the same actor in the same one-second bucket collapse to one id and the
     // trail is falsely flagged for duplicate ids / loses its positive finding.
     const disc = x.requestId || (exchangeText ? eventId({ c: exchangeText }) : null);
+    const meta = { ...baseMeta, kind: 'model_call', api_base: x.host, routed_provider: x.routedProvider, pii_classes: sens.classes };
+    if (sens.secret_classes.length > 0) meta.secret_classes = uniqStrings(sens.secret_classes);
     events.push(normalizeEvent({
       ts: x.ts,
       namespace: source,
@@ -630,7 +640,7 @@ function eventsFromRecord(rec, source, index, seenCallKeys) {
       hash: x.hash,
       prev_hash: x.prevHash,
       disc,
-      meta: { ...baseMeta, kind: 'model_call', api_base: x.host, routed_provider: x.routedProvider, pii_classes: sens.classes },
+      meta,
     }));
   }
 
@@ -737,8 +747,11 @@ export function eventsFromCaptureRow(row, index, seenCallKeys) {
     const argSens = sensitivity(argStr);
     const hasSensitive = sens.has_sensitive || argSens.has_sensitive;
     const piiClasses = uniqStrings([...sens.classes, ...argSens.classes]);
+    const secretClasses = uniqStrings([...sens.secret_classes, ...argSens.secret_classes]);
     const disc = callId || [captureId || '', toolName, argStr, dest || '', String(callIndex)].join('|');
 
+    const meta = { ...baseMeta, kind: 'tool_call', args_host: dest, pii_classes: piiClasses };
+    if (secretClasses.length > 0) meta.secret_classes = secretClasses;
     events.push(normalizeEvent({
       ts,
       namespace: KOLM_CAPTURE_SOURCE,
@@ -749,7 +762,7 @@ export function eventsFromCaptureRow(row, index, seenCallKeys) {
       hash,
       prev_hash: prevHash,
       disc,
-      meta: { ...baseMeta, kind: 'tool_call', args_host: dest, pii_classes: piiClasses },
+      meta,
     }));
     callIndex++;
   }
@@ -761,6 +774,8 @@ export function eventsFromCaptureRow(row, index, seenCallKeys) {
     return { events: [], error: 'no auditable action found in capture row' };
   }
   const disc = captureId || (exchangeText ? eventId({ c: exchangeText }) : null);
+  const modelMeta = { ...baseMeta, kind: 'model_call', api_base: host, provider: provider || null, pii_classes: sens.classes };
+  if (sens.secret_classes.length > 0) modelMeta.secret_classes = uniqStrings(sens.secret_classes);
   events.push(normalizeEvent({
     ts,
     namespace: KOLM_CAPTURE_SOURCE,
@@ -771,7 +786,7 @@ export function eventsFromCaptureRow(row, index, seenCallKeys) {
     hash,
     prev_hash: prevHash,
     disc,
-    meta: { ...baseMeta, kind: 'model_call', api_base: host, provider: provider || null, pii_classes: sens.classes },
+    meta: modelMeta,
   }));
 
   return { events, error: null };
@@ -870,6 +885,7 @@ function summarize(events, recordCount, errorCount) {
   let toolCalls = 0;
   let modelCalls = 0;
   let sensitive = 0;
+  let secret = 0;
   let egress = 0;
   for (const e of events) {
     if (e.actor.agent) actors.add(e.actor.agent);
@@ -879,6 +895,7 @@ function summarize(events, recordCount, errorCount) {
     if (e.meta && e.meta.kind === 'tool_call') toolCalls++;
     if (e.meta && e.meta.kind === 'model_call') modelCalls++;
     if (e.data.has_sensitive) sensitive++;
+    if (e.meta && Array.isArray(e.meta.secret_classes) && e.meta.secret_classes.length > 0) secret++;
     if (e.data.egress) egress++;
   }
   return {
@@ -892,6 +909,7 @@ function summarize(events, recordCount, errorCount) {
     distinct_tools: tools.size,
     distinct_hosts: hosts.size,
     sensitive_events: sensitive,
+    secret_events: secret,
     egress_events: egress,
   };
 }

@@ -147,8 +147,8 @@ function realFindingIds(auditResult) {
 
 /* ----------------------------------- tests ------------------------------------ */
 
-test('registry exposes the five connectors', () => {
-  assert.deepEqual([...SOURCES].sort(), ['datadog', 'langfuse', 'langsmith', 'openinference', 'otel']);
+test('registry exposes the seven connectors', () => {
+  assert.deepEqual([...SOURCES].sort(), ['datadog', 'langfuse', 'langsmith', 'mcp', 'openai-agents', 'openinference', 'otel']);
   for (const s of SOURCES) assert.equal(typeof connectors[s].normalize, 'function');
 });
 
@@ -242,6 +242,36 @@ test('detectConnector identifies each platform and rejects noise', () => {
   for (const noise of [undefined, null, 42, '', 'not json', '{bad', [], {}, [{ foo: 1 }]]) {
     assert.equal(detectConnector(noise), null, `no false-positive detect on ${JSON.stringify(noise)}`);
   }
+});
+
+test('detection matrix: mcp + openai-agents samples are not claimed by otel/langsmith', () => {
+  // An MCP JSON-RPC log: id-bearing rows that would otherwise read as loose
+  // spans to the OTLP sniff must land on the mcp connector.
+  const mcpLog = [
+    { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} },
+    { jsonrpc: '2.0', id: 1, result: { tools: [{ name: 'read_file' }] } },
+    { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'read_file', arguments: { path: 'a.txt' } } },
+    { jsonrpc: '2.0', id: 2, result: { content: [{ type: 'text', text: 'hello' }] } },
+  ];
+  assert.equal(detectConnector(mcpLog), 'mcp');
+  assert.equal(detectConnector([{ schema: 'mcp-tool-call-1', tool: 'send_email', call_id: 'mtc_1' }]), 'mcp');
+
+  // OpenAI Agents SDK rows have no run_type / dotted_order; they must be
+  // claimed by openai-agents BEFORE langsmith's looser sniff gets a look.
+  const agentsTrace = [
+    { object: 'trace', id: 'trace_1', workflow_name: 'support', group_id: 'grp_1' },
+    { object: 'trace.span', id: 'span_1', trace_id: 'trace_1', span_data: { type: 'generation', model: 'gpt-4o', input: [], output: [] } },
+    { object: 'trace.span', id: 'span_2', trace_id: 'trace_1', span_data: { type: 'function', name: 'send_email', input: '{}' } },
+  ];
+  assert.equal(detectConnector(agentsTrace), 'openai-agents');
+  assert.equal(detectConnector(agentsTrace.map((r) => JSON.stringify(r)).join('\n')), 'openai-agents');
+  // A bare span_data row (no object field) still detects.
+  assert.equal(detectConnector([{ span_data: { type: 'handoff', from_agent: 'a', to_agent: 'b' }, trace_id: 't' }]), 'openai-agents');
+
+  // And every existing sample still detects identically alongside the new pair.
+  assert.equal(detectConnector(DATADOG), 'datadog');
+  assert.equal(detectConnector(LANGSMITH), 'langsmith');
+  assert.equal(detectConnector(OTEL), 'otel');
 });
 
 test('normalizeWith + normalizeAuto route correctly', () => {

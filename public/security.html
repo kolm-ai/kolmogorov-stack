@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Security · kolm.ai</title>
-<meta name="description" content="You upload redacted logs; here is how kolm holds them. Redaction before upload, scoped per-tenant processing, minimal retention, Ed25519 key management, a Merkle transparency log, and disclosure at dev@kolm.ai.">
+<title>Security: How kolm Handles Your Logs · kolm.ai</title>
+<meta name="description" content="How kolm holds your uploaded logs: redaction before upload, per-tenant processing, minimal retention, Ed25519 key management and disclosure at dev@kolm.ai.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="How kolm holds the data you upload">
-<meta property="og:description" content="Redaction before upload, scoped per-tenant processing, minimal retention, Ed25519 key management, and a Merkle transparency log. What we do, and what we do not retain.">
+<meta property="og:title" content="Security: How kolm Handles Your Logs">
+<meta property="og:description" content="How kolm holds your uploaded logs: redaction before upload, per-tenant processing, minimal retention, Ed25519 key management and disclosure at dev@kolm.ai.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -25,7 +25,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Security · kolm">
+<meta name="twitter:title" content="Security: How kolm Handles Your Logs">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -44,7 +44,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "@type": "WebPage",
   "name": "Security at kolm.ai",
   "url": "https://kolm.ai/security",
-  "description": "How kolm holds the redacted logs you upload: redaction before upload, scoped per-tenant processing, minimal retention, Ed25519 key management, a Merkle transparency log, and responsible disclosure.",
+  "description": "How kolm holds your uploaded logs: redaction before upload, per-tenant processing, minimal retention, Ed25519 key management and disclosure at dev@kolm.ai.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
@@ -170,7 +170,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </svg></div>
         <p class="card__k">What we keep</p>
         <h3>The signed artifact, not your uploads</h3>
-        <p>What persists is one signed report and its log entry. Raw logs are not retained past the run that produced it.</p>
+        <p>What persists is one signed report and its log entry. Raw logs are not retained past the run that produced it, and every sub-processor in the path is <a href="/subprocessors" style="color:var(--accent)">listed in full</a>.</p>
         <p class="card__map">ASR-6 · evidence</p>
       </div>
     </div>
@@ -408,7 +408,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
       </div>
       <div class="foot__col">
         <h3>Product</h3>

@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Threat model · kolm.ai</title>
-<meta name="description" content="The threat model for kolm's signed evidence. What the buyer must trust and what they do not, the scope boundary, the attacker capabilities (tamper, rogue key, replay) the two verification tiers answer, and the limits stated plainly for security reviewers.">
+<title>Threat Model for Signed AI Audit Evidence · kolm.ai</title>
+<meta name="description" content="What a buyer must trust and what they do not: the scope boundary, the attacker capabilities the two verification tiers answer, and the limits stated plainly.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="Threat model · what the signature defends against">
-<meta property="og:description" content="Who can attack a signed report, what the Ed25519 signature and Merkle log prove, how the two verification tiers answer tamper, rogue key and replay, and the limits we state plainly.">
+<meta property="og:title" content="Threat Model for Signed AI Audit Evidence">
+<meta property="og:description" content="What a buyer must trust and what they do not: the scope boundary, the attacker capabilities the two verification tiers answer, and the limits stated plainly.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/security/threat-model">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -25,7 +25,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Threat model · kolm">
+<meta name="twitter:title" content="Threat Model for Signed AI Audit Evidence">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/security/threat-model">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -43,10 +43,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "@context": "https://schema.org",
   "@type": "TechArticle",
   "headline": "kolm threat model",
-  "description": "What a kolm signed evidence report defends against and what it does not: the trust model, scope boundary, attacker capabilities, and stated limits.",
+  "description": "What a buyer must trust and what they do not: the scope boundary, the attacker capabilities each verification tier answers, and the limits stated plainly.",
   "author": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
   "mainEntityOfPage": "https://kolm.ai/security/threat-model"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
+    { "@type": "ListItem", "position": 2, "name": "Security", "item": "https://kolm.ai/security" },
+    { "@type": "ListItem", "position": 3, "name": "Threat model", "item": "https://kolm.ai/security/threat-model" }
+  ]
 }
 </script>
 </head>
@@ -94,7 +105,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h1>Threat model. <span class="go">Drawn to the byte.</span></h1>
       <p class="lede">
         You have been handed a signed evidence report and asked to rely on it before
-        you clear a vendor's agent. This page draws the boundary precisely: who can
+        you clear a vendor's AI application. This page draws the boundary precisely: who can
         attack the report, what the cryptography proves, what an attacker would have
         to do to fake evidence at each of the A/B/C evidence tiers, and (stated
         plainly) what it does not cover. The envelope itself is specified at
@@ -160,7 +171,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <li><b>Integrity.</b> The contents are exactly what kolm signed, byte for byte.</li>
       <li><b>Provenance.</b> The report was issued by the holder of kolm's signing key, not forged.</li>
       <li><b>Auditability.</b> A report's existence and time can be checked against an append-only Merkle transparency log (Ed25519 and SHA-256, RFC 6962 style), so issuance and ordering are independently verifiable.</li>
-      <li><b>Confidentiality of your inputs.</b> The agent logs and configuration given for an engagement are handled as customer data, not published.</li>
+      <li><b>Confidentiality of your inputs.</b> The application logs and configuration given for an engagement are handled as customer data, not published.</li>
     </ul>
       </div>
     </div>
@@ -200,9 +211,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__k">Out of scope · not claimed</p>
         <h3>What a report does not cover</h3>
         <ul>
-          <li>Any warranty that the agent is invincible or cannot be made to misbehave.</li>
+          <li>Any warranty that the application is invincible or cannot be made to misbehave.</li>
           <li>Systems outside the agreed scope. A report never implies coverage it does not state.</li>
-          <li>Runtime defense or live monitoring of the agent in production.</li>
+          <li>Runtime defense or live monitoring of the application in production.</li>
           <li>A guarantee that no injection path exists, only the results of the tests run.</li>
         </ul>
       </div>
@@ -398,7 +409,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="card">
         <p class="card__k">Integrity, not security</p>
         <h3>A signature proves origin, not invincibility</h3>
-        <p>It confirms the report is genuine and unaltered, and that a kolm key signed it. It does not assert that the audited agent cannot be attacked.</p>
+        <p>It confirms the report is genuine and unaltered, and that a kolm key signed it. It does not assert that the audited application cannot be attacked.</p>
       </div>
       <div class="card">
         <p class="card__k">Tested, not warranted</p>
@@ -498,7 +509,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
       </div>
       <div class="foot__col">
         <h3>Product</h3>

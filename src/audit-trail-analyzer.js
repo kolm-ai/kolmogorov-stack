@@ -24,6 +24,25 @@ const ANALYZER = 'audit-trail';
 const DEFAULT_RETENTION_DAYS = 182;
 const DAY_MS = 86400000;
 
+// --- volume-consistency thresholds (GAP-3 detection half) ----------------
+// A vendor-curated "quiet week" export passes every per-event check while the
+// busy weeks never reach the evidence. These thresholds flag the statistical
+// signature of curation while staying DELIBERATELY generous, so ordinary bursty
+// agent traffic does not trip them:
+//   - need at least this many active (non-zero) UTC days before any volume
+//     judgement is made at all (one or two days is just a small sample);
+const VOLUME_MIN_ACTIVE_DAYS = 3;
+//   - the busiest day exceeding 25x the MEDIAN active day is far beyond normal
+//     burstiness (weekday/weekend swings are single-digit multiples);
+const VOLUME_BUSIEST_TO_MEDIAN_MAX = 25;
+//   - >=40% of the days inside the observed span carrying ZERO events suggests
+//     the export was sliced around the activity, not exported continuously.
+//     This arm needs a real sample: tiny demo exports (a handful of events
+//     across months) are sparse by nature, not curated, so it only applies
+//     from this many parseable-timestamp events upward.
+const VOLUME_ZERO_DAY_FRACTION = 0.4;
+const VOLUME_ZERO_DAY_MIN_EVENTS = 50;
+
 function parseTs(ts) {
   if (ts == null) return null;
   // Numeric epoch - either a raw number, or the bare numeric string that
@@ -145,6 +164,15 @@ export function analyzeAuditTrail(events, opts = {}) {
     spanDays = Number(((latest - earliest) / DAY_MS).toFixed(2));
   }
 
+  // --- per-UTC-day event histogram (volume consistency, GAP-3) ---
+  const perDay = new Map(); // 'YYYY-MM-DD' -> count
+  for (const t of tsValues) {
+    const day = new Date(t).toISOString().slice(0, 10);
+    perDay.set(day, (perDay.get(day) || 0) + 1);
+  }
+  const eventsPerDay = {};
+  for (const day of [...perDay.keys()].sort()) eventsPerDay[day] = perDay.get(day);
+
   const coverage = {
     events: total,
     with_timestamp: total - missingTs - unparseableTs,
@@ -162,6 +190,7 @@ export function analyzeAuditTrail(events, opts = {}) {
     span_days: spanDays,
     earliest_ms: earliest,
     latest_ms: latest,
+    events_per_day: eventsPerDay,
     required_retention_days: requiredDays,
     completeness_pct: total > 0
       ? Number((((total - missingTs - unparseableTs) + (total - missingActor) + (total - missingAction)) / (3 * total) * 100).toFixed(1))
@@ -271,6 +300,38 @@ export function analyzeAuditTrail(events, opts = {}) {
       metric: { span_days: spanDays, required_retention_days: requiredDays },
       evidence: [],
     }));
+  }
+
+  // --- volume consistency (GAP-3 detection half) ---
+  // The statistical signature of a curated export: activity wildly concentrated
+  // in a few days, or most of the observed span silent. Thresholds + rationale
+  // at the VOLUME_* constants above. Generous on purpose - a finding here says
+  // "this looks sliced; ask for a coverage declaration", never "fraud".
+  const activeDayCounts = [...perDay.values()].sort((a, b) => a - b);
+  if (activeDayCounts.length >= VOLUME_MIN_ACTIVE_DAYS) {
+    const busiest = activeDayCounts[activeDayCounts.length - 1];
+    const median = activeDayCounts[Math.floor(activeDayCounts.length / 2)];
+    const daysInSpan = Math.floor((latest - earliest) / DAY_MS) + 1;
+    const zeroDays = Math.max(0, daysInSpan - activeDayCounts.length);
+    const zeroFraction = daysInSpan > 0 ? zeroDays / daysInSpan : 0;
+    const ratioTripped = median > 0 && busiest > VOLUME_BUSIEST_TO_MEDIAN_MAX * median;
+    const zeroTripped = tsValues.length >= VOLUME_ZERO_DAY_MIN_EVENTS && zeroFraction >= VOLUME_ZERO_DAY_FRACTION;
+    if (ratioTripped || zeroTripped) {
+      findings.push(finding({
+        id: 'trail-volume-inconsistent',
+        severity: 'medium',
+        title: 'Event volume is inconsistent across the observed window',
+        detail: `Daily event volume across the observed ${daysInSpan}-day window is uneven: the busiest day carries ${busiest} event(s) against a median active day of ${median}, and ${zeroDays} day(s) in the span have no events at all. A deliberately quiet or sliced export (a "quiet week") looks exactly like this while the busy periods never reach the evidence. Ask the exporting vendor for a coverage declaration stating the export window, the systems included, and the expected daily call volume, and bind it to the report.`,
+        metric: {
+          days_in_span: daysInSpan,
+          active_days: activeDayCounts.length,
+          zero_days: zeroDays,
+          busiest_day_events: busiest,
+          median_active_day_events: median,
+        },
+        evidence: [],
+      }));
+    }
   }
 
   // --- positive finding ---

@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>How it works · kolm.ai</title>
-<meta name="description" content="Audit, sign, verify. kolm reads your AI agent's own logs, seals the findings with Ed25519, and your buyer checks the signature offline against your key, with no kolm server in the trust path. The four-to-eight-week security review compresses back to days.">
+<title>How an AI Application Security Audit Works · kolm.ai</title>
+<meta name="description" content="Audit, sign, verify. kolm reads your application telemetry, seals findings with Ed25519, and your buyer checks the signature offline against your key.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="How it works: Audit, Sign, Verify">
-<meta property="og:description" content="One lifecycle that turns your word into evidence. kolm audits your agent from its own logs, signs the findings with Ed25519, and your buyer verifies the report offline against your key. No kolm server in the trust path.">
+<meta property="og:title" content="How an AI Application Security Audit Works · kolm.ai">
+<meta property="og:description" content="Audit, sign, verify. kolm reads your application telemetry, seals findings with Ed25519, and your buyer checks the signature offline against your key.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/how-it-works">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -25,7 +25,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="How it works: Audit, Sign, Verify">
+<meta name="twitter:title" content="How an AI Application Security Audit Works · kolm.ai">
+<meta name="twitter:description" content="Audit, sign, verify. kolm reads your application telemetry, seals findings with Ed25519, and your buyer checks the signature offline against your key.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/how-it-works">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -43,12 +44,22 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "@context": "https://schema.org",
   "@type": "HowTo",
   "name": "How kolm works: Audit, Sign, Verify",
-  "description": "kolm audits an AI agent from its own logs, signs the findings with Ed25519, and the enterprise buyer verifies the report offline against the issuer's public key, with no kolm server in the trust path.",
+  "description": "kolm audits an AI application - the agent and every tool, identity and data flow around it - from the telemetry it already produces, signs the findings with Ed25519, and the enterprise buyer verifies the report offline against the issuer's public key.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
   "step": [
-    { "@type": "HowToStep", "name": "Audit", "text": "Onramp through a log import or a sidecar proxy. kolm examines permissions, audit trail, data egress and injection resistance, each mapped to the standards the buyer cites." },
+    { "@type": "HowToStep", "name": "Audit", "text": "Onramp through a log import or a sidecar proxy. kolm examines permissions, audit trail, data egress and injection resistance across the application, each mapped to the standards the buyer cites." },
     { "@type": "HowToStep", "name": "Sign", "text": "The report is canonicalized and signed with Ed25519. The signature covers the exact bytes, so a downgraded finding or an inflated score breaks it. Each issuance enters an append-only log." },
     { "@type": "HowToStep", "name": "Verify", "text": "The buyer verifies the signature offline, in their own browser, against the issuer's public key. No account, no upload, no kolm server in the trust path." }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
+    { "@type": "ListItem", "position": 2, "name": "How it works", "item": "https://kolm.ai/how-it-works" }
   ]
 }
 </script>
@@ -98,7 +109,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="eyebrow">How it works</p>
         <h1>Audit. Sign. <span class="go">They verify.</span></h1>
         <p class="lede">
-          kolm reads what your agent did from its own logs, seals the findings with Ed25519,
+          kolm reads what your AI application did - the agent and every tool, identity and data flow
+          around it - from the logs you already have, seals the findings with Ed25519,
           and your buyer checks the signature offline against your key. kolm is never in the trust path.
           A review that ran four to eight weeks closes in days.
         </p>
@@ -127,7 +139,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
               <span class="rep__id">trace_sample</span>
             </div>
             <div style="font-family:var(--mono);font-size:11.5px;color:var(--sheet-ink-2);font-variant-numeric:tabular-nums" translate="no">
-              <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--sheet-line)"><span style="flex:none;color:var(--sheet-ink-3)">01</span><span style="flex:none;color:var(--sheet-ink);font-weight:500;letter-spacing:.04em">AUDIT</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">read from the agent's own logs</span><span style="flex:none;color:var(--sheet-ink-3)">minutes</span></div>
+              <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--sheet-line)"><span style="flex:none;color:var(--sheet-ink-3)">01</span><span style="flex:none;color:var(--sheet-ink);font-weight:500;letter-spacing:.04em">AUDIT</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">read from the application's own logs</span><span style="flex:none;color:var(--sheet-ink-3)">minutes</span></div>
               <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--sheet-line)"><span style="flex:none;color:var(--sheet-ink-3)">02</span><span style="flex:none;color:var(--sheet-ink);font-weight:500;letter-spacing:.04em">SIGN</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ed25519 over the canonical bytes</span><span style="flex:none;color:var(--sheet-ink-3)">sealed</span></div>
               <div style="display:flex;align-items:center;gap:12px;padding:12px 0"><span style="flex:none;color:var(--sheet-ink-3)">03</span><span style="flex:none;color:var(--sheet-ink);font-weight:500;letter-spacing:.04em">VERIFY</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">your buyer's browser · their machine</span><span class="pill pill--ok" style="margin-top:0">offline</span></div>
             </div>
@@ -207,7 +219,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="flow__node">
         <span class="flow__ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
         <span class="flow__n">01 · Audit</span>
-        <span class="flow__t">We examine the agent</span>
+        <span class="flow__t">We examine the application</span>
         <p class="flow__d">From a log import or a sidecar proxy. Permissions, audit trail, data egress and injection resistance, read from what the agent did.</p>
       </div>
       <div class="flow__link" aria-hidden="true"><svg viewBox="0 0 26 14" fill="none"><path d="M0 7h22m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -277,7 +289,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div>
       <h2>Two ways in. No rebuild.</h2>
       <p class="lede" style="margin-bottom:20px">
-        You do not change the agent to audit it. Point us at the evidence it already produces.
+        You do not change the application to audit it. Point us at the telemetry it already produces.
       </p>
       <div style="margin:6px 0 26px;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;color:var(--ink-2)" translate="no" aria-label="What the onramp never requires">
         <div style="display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line)"><span style="color:var(--ink-3)">code change</span><span style="margin-left:auto">none</span></div>
@@ -303,7 +315,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </svg></div>
         <p class="card__k">Onramp A · fastest</p>
         <h3>Import your logs</h3>
-        <p>Bring observability exports from LiteLLM, Helicone or Portkey. We normalize tool calls, scopes and traffic. No code change.</p>
+        <p>Bring OpenTelemetry, Datadog, Langfuse or LangSmith traces, or gateway logs from LiteLLM, Helicone, Portkey and OpenRouter. We normalize tool calls, scopes and traffic. No code change. <a href="/platform">Every connector, on the platform page</a>.</p>
       </div>
       <div class="card">
         <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
@@ -399,7 +411,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head">
       <h2>Evidence that goes stale is not evidence.</h2>
       <p class="lede">
-        A permission granted in January can still fire in August. Continuous re-attests weekly or on
+        A permission granted in January can still fire in August. Continuous <a href="/glossary">re-attestation</a> runs weekly or on
         every deploy behind one live Trust link, so what your buyer checks is never older than your last release.
       </p>
     </div>

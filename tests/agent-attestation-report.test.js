@@ -340,3 +340,56 @@ test('the word "honest"/"honesty" appears nowhere in the deliverable', () => {
   const blob = (JSON.stringify(envelope) + renderReportHtml(envelope)).toLowerCase();
   assert.ok(!blob.includes('honest'), 'no "honest"/"honesty" in the report (use Scope/Limitations)');
 });
+
+// ---------------------------------------------------------------------------
+// GAP-2 (claim-bounding half) - the detector-coverage caveat.
+// ---------------------------------------------------------------------------
+test('detector_coverage on the audit result becomes a signed caveat naming the exact vocabulary', () => {
+  const audit = dirtyAudit();
+  audit.detector_coverage = {
+    pii_classes: ['email', 'phone', 'ssn'],
+    secret_shapes: ['openai-style-key', 'jwt', 'pem-private-key'],
+  };
+  const { envelope } = buildAndSignReport(audit, { subject: 'X' });
+  const caveat = envelope.caveats.find((c) => c.startsWith('Sensitive-data detection covered'));
+  assert.ok(caveat, 'detector-coverage caveat present');
+  for (const term of ['email', 'ssn', 'openai-style-key', 'jwt']) {
+    assert.ok(caveat.includes(term), `caveat names ${term}`);
+  }
+  assert.ok(caveat.includes('content outside these detectors is not assessed'), 'the claim is bounded');
+  assert.equal(verifyReport(envelope).ok, true, 'caveat is inside the signed payload');
+});
+
+test('the orchestrator-supplied detector_coverage flows into the caveat by default', () => {
+  // runAudit carries detector_coverage natively; the standard report must
+  // therefore bound the sensitive-data claim without any caller plumbing.
+  const { envelope } = buildAndSignReport(dirtyAudit(), { subject: 'X' });
+  assert.ok(envelope.caveats.some((c) => c.startsWith('Sensitive-data detection covered')), 'caveat present out of the box');
+});
+
+test('an audit result WITHOUT detector_coverage builds cleanly (backward compatible)', () => {
+  // Stored/legacy audit results (pre-detector_coverage) must still build and
+  // sign - the caveat is simply absent rather than fabricated.
+  const audit = dirtyAudit();
+  delete audit.detector_coverage;
+  const { envelope } = buildAndSignReport(audit, { subject: 'X' });
+  assert.ok(!envelope.caveats.some((c) => c.startsWith('Sensitive-data detection covered')), 'no fabricated coverage claim');
+  assert.equal(verifyReport(envelope).ok, true);
+});
+
+// ---------------------------------------------------------------------------
+// P3 interface - red_team probes carry evidence_source (default 'passive').
+// ---------------------------------------------------------------------------
+test('red_team probes pass evidence_source through, defaulting to passive', () => {
+  const audit = dirtyAudit();
+  const { envelope } = buildAndSignReport(audit, { subject: 'X' });
+  assert.ok(envelope.red_team && Array.isArray(envelope.red_team.probes), 'red_team block present');
+  assert.ok(envelope.red_team.probes.length >= 1);
+  assert.ok(envelope.red_team.probes.every((p) => p.evidence_source === 'passive'), 'historical probes read as passive');
+  // An active-harness probe stamps its own value, which must pass through.
+  if (audit.red_team && Array.isArray(audit.red_team.probes) && audit.red_team.probes.length) {
+    audit.red_team.probes[0].evidence_source = 'active-harness';
+    const again = buildAndSignReport(audit, { subject: 'X' }).envelope;
+    assert.equal(again.red_team.probes[0].evidence_source, 'active-harness');
+  }
+});

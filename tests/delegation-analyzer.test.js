@@ -199,6 +199,93 @@ test('analyzeDelegation is deterministic: same events -> identical result', () =
   assert.deepEqual(a, b);
 });
 
+// ---------------------------------------------------------------------------
+// cross-credential delegation (GAP-4): per-agent scoped keys must not make the
+// delegation invisible to the next audit.
+// ---------------------------------------------------------------------------
+test('explicit spawn naming an agent observed under ANOTHER key -> evaluable cross-credential edge', () => {
+  // Parent (key kA) spawns 'worker'; worker acts under its own scoped key kB -
+  // exactly the remediation every delegation finding recommends. Before GAP-4
+  // this was an opaque hop (or vanished entirely); now it is classified.
+  const events = [
+    ev({ key_id: 'kA', agent: 'parent', tool: 'read_doc' }),
+    ev({ key_id: 'kA', agent: 'parent', tool: 'spawn_agent', meta: { target_agent: 'worker' } }),
+    ev({ key_id: 'kB', agent: 'worker', tool: 'delete_record' }),
+  ];
+  const { findings, delegations, summary } = analyzeDelegation(events);
+  assert.equal(delegations.length, 1, 'one edge across the credential boundary');
+  const d = delegations[0];
+  assert.equal(d.type, 'explicit');
+  assert.equal(d.cross_credential, true, 'edge marked cross-credential');
+  assert.equal(d.parent, 'parent');
+  assert.equal(d.child, 'worker');
+  assert.equal(d.observed_child, true, 'NOT an opaque hop - the child profile is resolved');
+  assert.equal(d.classification, 'privilege-escalation');
+  assert.deepEqual(d.child_sessions, ['key::kB'], 'records where the child was observed');
+  const f = get(findings, 'delegation-privilege-escalation');
+  assert.ok(f, 'escalation still surfaced across keys');
+  assert.equal(f.metric.cross_credential, true);
+  assert.equal(summary.cross_credential, 1);
+  assert.ok(!has(findings, 'opaque-delegation-hop'), 'no longer degraded to opaque');
+  assert.ok(!has(findings, 'delegation-untested'), 'and certainly not untested');
+});
+
+test('shared thread_id across two keys -> implicit cross-credential edge via thread-correlation', () => {
+  const events = [
+    ev({ key_id: 'kc1', agent: 'router', tool: 'read_doc', meta: { thread_id: 'th-9' } }),
+    ev({ key_id: 'kc2', agent: 'executor', tool: 'delete_record', meta: { thread_id: 'th-9' } }),
+  ];
+  const { findings, delegations, summary } = analyzeDelegation(events);
+  assert.equal(delegations.length, 1, 'thread correlation builds the edge the key boundary hid');
+  const d = delegations[0];
+  assert.equal(d.type, 'implicit');
+  assert.equal(d.via, 'thread-correlation');
+  assert.equal(d.session, 'thread::th-9');
+  assert.equal(d.cross_credential, true);
+  assert.equal(d.classification, 'privilege-escalation');
+  assert.equal(summary.cross_credential, 1);
+  assert.equal(summary.detected, true);
+  assert.ok(has(findings, 'delegation-privilege-escalation'));
+});
+
+test('per-agent-key remediation no longer collapses to untested (the GAP-4 regression)', () => {
+  // The exact post-remediation fleet: each agent on its own scoped key, work
+  // correlated only by thread. The old analyzer reported delegation-untested.
+  const events = [
+    ev({ key_id: 'key-planner', agent: 'planner', tool: 'read_doc', meta: { thread_id: 'job-1' } }),
+    ev({ key_id: 'key-planner', agent: 'planner', tool: 'list_files', meta: { thread_id: 'job-1' } }),
+    ev({ key_id: 'key-worker', agent: 'worker', tool: 'read_doc', meta: { thread_id: 'job-1' } }),
+  ];
+  const { findings, summary } = analyzeDelegation(events);
+  assert.equal(summary.detected, true, 'delegation still detected after the recommended key split');
+  assert.ok(!has(findings, 'delegation-untested'));
+  // And a properly attenuated child stays the positive finding.
+  assert.ok(has(findings, 'delegation-attenuated'), 'strict-subset child across keys reads as attenuated');
+});
+
+test('thread correlation dedupes against an explicit cross-credential edge', () => {
+  const events = [
+    ev({ key_id: 'kA', agent: 'parent', tool: 'read_doc', meta: { thread_id: 'th-x' } }),
+    ev({ key_id: 'kA', agent: 'parent', tool: 'spawn_agent', meta: { target_agent: 'worker', thread_id: 'th-x' } }),
+    ev({ key_id: 'kB', agent: 'worker', tool: 'delete_record', meta: { thread_id: 'th-x' } }),
+  ];
+  const { delegations, summary } = analyzeDelegation(events);
+  assert.equal(delegations.length, 1, 'one edge, not an explicit + thread duplicate');
+  assert.equal(delegations[0].type, 'explicit', 'the explicit edge wins');
+  assert.equal(summary.cross_credential, 1);
+});
+
+test('agents sharing a thread under the SAME key do not double-count via thread correlation', () => {
+  const events = [
+    ev({ key_id: 'k1', agent: 'planner', tool: 'read_doc', meta: { thread_id: 'th-same' } }),
+    ev({ key_id: 'k1', agent: 'worker', tool: 'delete_record', meta: { thread_id: 'th-same' } }),
+  ];
+  const { delegations } = analyzeDelegation(events);
+  assert.equal(delegations.length, 1, 'pass-2b implicit edge only');
+  assert.equal(delegations[0].via, 'implicit');
+  assert.equal(delegations[0].cross_credential, undefined);
+});
+
 test('summary counts reconcile with the delegation classifications', () => {
   const events = [
     ev({ key_id: 'kb', agent: 'p1', tool: 'read_doc' }),

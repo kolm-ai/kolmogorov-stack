@@ -291,6 +291,54 @@ test('pathological-but-parseable logs still 200 (runAudit never-throw contract)'
   assert.ok(j.summary, 'an analysis summary is still produced');
 });
 
+test('malformed allowed_hosts is a clean 400 invalid_allowed_hosts (scan + session run)', async () => {
+  const logs = fs.readFileSync(FIXTURE, 'utf8');
+  const badValues = [
+    'api.example.com',                       // not an array
+    [123],                                   // non-string entry
+    ['ok.example.com', ''],                  // empty entry
+    ['x'.repeat(254)],                       // hostname over RFC length
+    Array.from({ length: 201 }, (_, i) => `h${i}.example.com`), // over the cap
+  ];
+  for (const allowed_hosts of badValues) {
+    const r = await fetch(`${A.base}/v1/audit/scan`, {
+      method: 'POST', headers: authA({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ logs, allowed_hosts, persist: false }),
+    });
+    assert.equal(r.status, 400, `allowed_hosts=${JSON.stringify(allowed_hosts).slice(0, 40)} → 400`);
+    assert.equal((await r.json()).error, 'invalid_allowed_hosts');
+  }
+  // The session-run path enforces the same contract.
+  const id = await newSessionA();
+  const rr = await fetch(`${A.base}/v1/audit/sessions/${id}/run`, {
+    method: 'POST', headers: authA({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ allowed_hosts: 'not-an-array' }),
+  });
+  assert.equal(rr.status, 400);
+  assert.equal((await rr.json()).error, 'invalid_allowed_hosts');
+});
+
+test('a malformed coverage_declaration is a clean 400 invalid_coverage_declaration', async () => {
+  const logs = fs.readFileSync(FIXTURE, 'utf8');
+  const badDecls = [
+    'a string',
+    { window_start: 'nope', window_end: '2026-01-01T00:00:00Z', systems: ['s'], attestor: { name: 'N' } },
+    { window_start: '2026-02-01T00:00:00Z', window_end: '2026-01-01T00:00:00Z', systems: ['s'], attestor: { name: 'N' } },
+    { window_start: '2026-01-01T00:00:00Z', window_end: '2026-02-01T00:00:00Z', systems: [], attestor: { name: 'N' } },
+    { window_start: '2026-01-01T00:00:00Z', window_end: '2026-02-01T00:00:00Z', systems: ['s'], attestor: {} },
+  ];
+  for (const coverage_declaration of badDecls) {
+    const r = await fetch(`${A.base}/v1/audit/scan`, {
+      method: 'POST', headers: authA({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ logs, coverage_declaration, persist: false }),
+    });
+    assert.equal(r.status, 400, 'malformed declaration → 400');
+    const j = await r.json();
+    assert.equal(j.error, 'invalid_coverage_declaration');
+    assert.ok(j.detail, 'a reason is returned so the vendor can fix the declaration');
+  }
+});
+
 test('teardown A', async () => {
   await killAndWait(A.proc);
   rmSyncBestEffort(A.scratchDir);

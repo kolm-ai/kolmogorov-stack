@@ -404,6 +404,102 @@ test('hostile retention_days values are clamped, never crash the scan', async ()
   }
 });
 
+test('scan accepts allowed_hosts and a coverage_declaration; both are bound into the signed report', async () => {
+  const logs = fs.readFileSync(FIXTURE, 'utf8');
+  const coverage_declaration = {
+    window_start: '2026-02-01T00:00:00Z',
+    window_end: '2026-04-30T00:00:00Z',
+    systems: ['litellm-gateway-prod'],
+    expected_calls_per_day: 500,
+    attestor: { name: 'A. Vendor', email: 'platform@example.com' },
+  };
+  const r = await fetch(`${base}/v1/audit/scan`, {
+    method: 'POST', headers: auth({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({
+      logs, subject: 'Declared scan', source: 'litellm', persist: false,
+      allowed_hosts: ['api.openai.com', 'Internal.example.COM '], // mixed case + padding normalize
+      coverage_declaration,
+    }),
+  });
+  assert.equal(r.status, 200);
+  const j = await r.json();
+  assert.equal(j.ok, true);
+  assert.equal(j.signed, true);
+  const decl = j.report.coverage_declaration;
+  assert.ok(decl, 'declaration bound inside the signed envelope');
+  assert.equal(decl.version, 'asr-coverage-declaration/0.1');
+  assert.equal(decl.attestor.name, 'A. Vendor');
+  assert.ok(
+    j.report.caveats.some((c) => c.includes('Coverage declared by A. Vendor')),
+    'declaration caveat is in the signed caveats',
+  );
+  assert.ok(
+    !j.report.caveats.some((c) => c.includes('No coverage declaration was supplied')),
+    'the no-declaration caveat is replaced by the declaration',
+  );
+
+  // The envelope (declaration included) verifies through the public route, and
+  // editing the declaration after the fact breaks the signature.
+  const v = await fetch(`${base}/v1/audit/report/verify`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ report: j.report }),
+  });
+  assert.equal((await v.json()).verify.ok, true, 'declared report verifies');
+  const tampered = JSON.parse(JSON.stringify(j.report));
+  tampered.coverage_declaration.window_end = '2027-12-31T00:00:00.000Z';
+  const tv = await fetch(`${base}/v1/audit/report/verify`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ report: tampered }),
+  });
+  assert.equal((await tv.json()).verify.ok, false, 'a widened declared window after signing fails verification');
+});
+
+test('a vendor-tier scan WITHOUT a declaration says so in the signed caveats', async () => {
+  const logs = fs.readFileSync(FIXTURE, 'utf8');
+  const r = await fetch(`${base}/v1/audit/scan`, {
+    method: 'POST', headers: auth({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ logs, subject: 'Undeclared scan', source: 'litellm', persist: false }),
+  });
+  assert.equal(r.status, 200);
+  const j = await r.json();
+  assert.ok(
+    j.report.caveats.some((c) => c.includes('No coverage declaration was supplied')),
+    'absence of a declaration is stated on the record',
+  );
+});
+
+test('session run accepts allowed_hosts + coverage_declaration through the same plumbing', async () => {
+  // Fresh session (the shared one is complete).
+  const cr = await fetch(base + '/v1/audit/sessions', {
+    method: 'POST', headers: auth({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ subject: 'Declared session', source: 'litellm' }),
+  });
+  assert.equal(cr.status, 201);
+  const id = (await cr.json()).audit.id;
+  const ir = await fetch(`${base}/v1/audit/sessions/${id}/ingest`, {
+    method: 'POST', headers: auth({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ logs: fs.readFileSync(FIXTURE, 'utf8') }),
+  });
+  assert.equal(ir.status, 200);
+  const r = await fetch(`${base}/v1/audit/sessions/${id}/run`, {
+    method: 'POST', headers: auth({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({
+      allowed_hosts: ['api.openai.com'],
+      coverage_declaration: {
+        window_start: '2026-02-01T00:00:00Z', window_end: '2026-04-30T00:00:00Z',
+        systems: ['litellm-gateway-prod'], attestor: { name: 'A. Vendor' },
+      },
+    }),
+  });
+  assert.equal(r.status, 200);
+  const j = await r.json();
+  assert.equal(j.signed, true);
+  const rep = await fetch(`${base}/v1/audit/sessions/${id}/report?format=json`, { headers: auth() });
+  const env = await rep.json();
+  assert.ok(env.coverage_declaration, 'stored session report carries the declaration');
+  assert.equal(env.coverage_declaration.attestor.name, 'A. Vendor');
+});
+
 test('teardown', async () => {
   await killAndWait(serverProc);
   rmSyncBestEffort(scratchDir);

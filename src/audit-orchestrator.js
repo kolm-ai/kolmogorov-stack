@@ -24,6 +24,8 @@ import { analyzeModelProvenance } from './model-provenance-analyzer.js';
 import { analyzeAgentIdentity } from './agent-identity-analyzer.js';
 import { analyzeRagMemory } from './rag-memory-analyzer.js';
 import { analyzeDelegation } from './delegation-analyzer.js';
+import { analyzeEgress } from './egress-analyzer.js';
+import { detectorCoverage } from './sensitive-data.js';
 
 // Versioned so a re-attestation is a cheap, comparable delta and so a signed
 // report records exactly which engine shape produced it.
@@ -36,14 +38,17 @@ export const AUDIT_SPEC_VERSION = 'asr-audit/0.1';
 // reported separately in the red_team block; ASR-6 (evidence) is established by
 // the report's own input-evidence digest + signing, not by log analysis.
 //
-// CORE controls always carry their graduated weight in the readiness rollup.
-// SUPPLEMENTAL controls (the Wave-2 additions) are assessed and reported in the
-// controls table, but they fold into the readiness SCORE only when they surface
-// a hard blocker (see the readiness rule below) - they can lower the headline
-// when a real deal-blocker is found, but a partial / clean / untested
-// supplemental result never inflates it. This is the documented non-inflation
-// choice: an untested supplemental is excluded from the denominator, never
-// scored as a clean pass.
+// CORE controls carry their graduated weight in the readiness rollup whenever
+// the logs exercised them; a CORE dimension the logs never exercised (e.g.
+// ASR-3 when no egress was observed) is marked 'untested' and EXCLUDED from
+// the denominator - the same non-inflation rule as supplementals, never a
+// silent pass. SUPPLEMENTAL controls (the Wave-2 additions) are assessed and
+// reported in the controls table, but they fold into the readiness SCORE only
+// when they surface a hard blocker (see the readiness rule below) - they can
+// lower the headline when a real deal-blocker is found, but a partial / clean
+// / untested supplemental result never inflates it. This is the documented
+// non-inflation choice: an untested control is excluded from the denominator,
+// never scored as a clean pass.
 const CORE_CONTROLS = ['ASR-1', 'ASR-2', 'ASR-3'];
 const SUPPLEMENTAL_CONTROLS = ['ASR-5', 'ASR-7', 'ASR-8'];
 const ASSESSED_CONTROLS = [...CORE_CONTROLS, ...SUPPLEMENTAL_CONTROLS];
@@ -186,6 +191,10 @@ export function runAudit(logs, opts = {}) {
   const agentIdentity = _safeAnalyze(() => analyzeAgentIdentity(events, analyzerOpts.agentIdentity), _emptyAgentIdentity);
   const ragMemory = _safeAnalyze(() => analyzeRagMemory(events, analyzerOpts.ragMemory), _emptyRagMemory);
   const delegation = _safeAnalyze(() => analyzeDelegation(events, analyzerOpts.delegation), _emptyDelegation);
+  // ASR-3's own analyzer (GAP-1): destination inventory + allowlist evaluation
+  // + secret egress. analyzerOpts.egress carries the operator allowlist
+  // ({ allowedHosts: [...] }) from the API/report layer.
+  const egress = _safeAnalyze(() => analyzeEgress(events, analyzerOpts.egress), _emptyEgress);
 
   // 3. Map every finding onto the ASR controls + the buyer's frameworks. The
   // Wave-2 findings are merged in BEFORE mapControls so they are framework-mapped
@@ -197,6 +206,7 @@ export function runAudit(logs, opts = {}) {
     ...agentIdentity.findings,
     ...ragMemory.findings,
     ...delegation.findings,
+    ...egress.findings,
   ];
   const controls = mapControls(allFindings);
 
@@ -222,11 +232,16 @@ export function runAudit(logs, opts = {}) {
   if (modelProvenance.summary && modelProvenance.summary.untested === true) untestedSupplemental.add('ASR-5');
   if (ragMemory.summary && (ragMemory.summary.retrieval_calls || 0) === 0 && (ragMemory.summary.memory_calls || 0) === 0) untestedSupplemental.add('ASR-7');
   if (delegation.summary && delegation.summary.detected === false) untestedSupplemental.add('ASR-8');
+  // A CORE control the logs never exercised gets the same untested discipline:
+  // ASR-3 with zero observed egress is marked 'untested' and excluded from the
+  // readiness denominator (below), never silently passed.
+  const untestedCore = new Set();
+  if (egress.summary && egress.summary.untested === true) untestedCore.add('ASR-3');
 
   const asrById = new Map((controls.asr || []).map((a) => [a.id, a]));
   const controlRows = ASSESSED_CONTROLS.map((id) => {
     const a = asrById.get(id) || { id, name: id, findings: 0, by_severity: {} };
-    const status = untestedSupplemental.has(id) ? 'untested' : controlStatus(a.by_severity);
+    const status = (untestedSupplemental.has(id) || untestedCore.has(id)) ? 'untested' : controlStatus(a.by_severity);
     return {
       id,
       name: a.name,
@@ -246,6 +261,7 @@ export function runAudit(logs, opts = {}) {
   // supplemental medium never dilutes the deal-readiness headline.
   const scored = [];
   for (const r of controlRows) {
+    if (r.status === 'untested') continue; // excluded from the denominator (CORE and supplemental alike) - never a silent pass
     if (CORE_CONTROLS.includes(r.id)) scored.push(STATUS_WEIGHT[r.status]);
     else if (r.status === 'blocking') scored.push(0);
   }
@@ -292,6 +308,11 @@ export function runAudit(logs, opts = {}) {
     agent_identity: agentIdentity,
     rag_memory: ragMemory,
     delegation,
+    egress,
+    // The bounded detector claim (GAP-2): exactly which PII classes and secret
+    // shapes the ingest-time sensitivity scan covers, so the signed report can
+    // carry a detector-coverage caveat instead of an unbounded no-exfil claim.
+    detector_coverage: detectorCoverage(),
     controls,
     findings: allFindings,
     red_team: redTeam,
@@ -329,6 +350,9 @@ function _emptyRagMemory() {
 }
 function _emptyDelegation() {
   return { findings: [], delegations: [], agent_graph: { nodes: [], edges: [] }, summary: { analyzer: 'delegation', detected: false, delegations: 0, findings: 0, by_severity: emptySeverity() } };
+}
+function _emptyEgress() {
+  return { findings: [], destinations: [], summary: { analyzer: 'egress', untested: true, egress_events: 0, destinations: 0, unapproved: 0, allowlist_declared: false, secret_egress: 0, findings: 0, by_severity: emptySeverity() } };
 }
 
 export default runAudit;

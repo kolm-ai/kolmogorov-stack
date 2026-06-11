@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>The report · kolm.ai</title>
-<meta name="description" content="A kolm evidence report is one canonical object: scope, content hashes, an Ed25519 signature over the exact bytes, and a transparency-log inclusion proof. Read it field by field, then verify a real sample live in your browser.">
+<title>The Signed Evidence Report, Field by Field · kolm.ai</title>
+<meta name="description" content="One canonical object: scope, content hashes, an Ed25519 signature over the exact bytes, and a transparency-log inclusion proof. Read it field by field.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="The report: one canonical, signed object">
-<meta property="og:description" content="Scope, content hashes, an Ed25519 signature over the exact bytes, and a Merkle inclusion proof. Field by field, then verified live offline against your key.">
+<meta property="og:title" content="The Signed Evidence Report, Field by Field · kolm.ai">
+<meta property="og:description" content="One canonical object: scope, content hashes, an Ed25519 signature over the exact bytes, and a transparency-log inclusion proof. Read it field by field.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/report">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -25,7 +25,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="The report · kolm">
+<meta name="twitter:title" content="The Signed Evidence Report, Field by Field · kolm.ai">
+<meta name="twitter:description" content="One canonical object: scope, content hashes, an Ed25519 signature over the exact bytes, and a transparency-log inclusion proof. Read it field by field.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/report">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -40,6 +41,38 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <script defer src="/kolm-field.js"></script>
 <script defer src="/kolm-cinema.js"></script>
 <script type="module" src="/verify-widget.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://kolm.ai/report#article",
+      "headline": "The Signed Evidence Report, Field by Field",
+      "description": "One canonical object: scope, content hashes, an Ed25519 signature over the exact bytes, and a transparency-log inclusion proof. Read it field by field.",
+      "url": "https://kolm.ai/report",
+      "inLanguage": "en-US",
+      "author": { "@id": "https://kolm.ai/#organization" },
+      "publisher": { "@id": "https://kolm.ai/#organization" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://kolm.ai/#organization",
+      "name": "kolm.ai",
+      "url": "https://kolm.ai/",
+      "logo": "https://kolm.ai/favicon.svg",
+      "email": "dev@kolm.ai"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
+        { "@type": "ListItem", "position": 2, "name": "The report", "item": "https://kolm.ai/report" }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -221,7 +254,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <figcaption class="diag__cap"><b>Why it holds</b> the signature covers the exact bytes, so the report cannot be quietly edited</figcaption>
     </figure>
     <p class="hero__claim" style="margin-top:var(--s6)">
-      Every line above is part of the signed bytes. Edit one character and the signature, and the seal, stop matching.
+      Every line above is part of the signed bytes. Edit one character and the signature, and the seal, stop matching. The byte-level format is public in the <a href="/spec">signed report spec</a>.
     </p>
       </div>
     </div>
@@ -310,7 +343,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
   <div class="wrap">
     <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>Get a report like this for your agent.</h2>
+    <h2>Get a report like this for your application.</h2>
     <p class="lede">A scoped audit that ends in one signed object your buyer verifies in their own browser. The four to eight week review compresses to days.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/contact">Start an audit</a>

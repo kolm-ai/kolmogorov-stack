@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>kolm vs Vanta, Drata and AI guardrails: signed agent evidence compared · kolm.ai</title>
-<meta name="description" content="Vanta and Drata automate your company SOC 2 and ISO evidence. Guardrails defend at runtime. Neither hands your buyer a signed, offline-verifiable report about the specific agent under review. The category-by-category comparison, with a fair read on what each tool does well.">
+<title>kolm vs Vanta, Drata and Runtime Guardrails · kolm.ai</title>
+<meta name="description" content="Vanta and Drata automate company compliance. Guardrails defend at runtime. Neither hands your buyer a signed, verifiable report on the application under review.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="kolm vs Vanta, Drata and AI guardrails, compared">
-<meta property="og:description" content="Compliance automation tracks your company controls. Guardrails defend at runtime. kolm signs an agent-specific evidence report your buyer verifies offline, against your key, with no account. The category-by-category comparison.">
+<meta property="og:title" content="kolm vs Vanta, Drata and Runtime Guardrails">
+<meta property="og:description" content="Vanta and Drata automate company compliance. Guardrails defend at runtime. Neither hands your buyer a signed, verifiable report on the application under review.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/compare">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -26,8 +26,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:alt" content="kolm.ai compared with GRC automation, runtime guardrails, and DIY security questionnaires.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm vs Vanta, Drata and AI guardrails">
-<meta name="twitter:description" content="A category-by-category comparison of signed agent evidence against compliance automation, runtime guardrails, and DIY questionnaires.">
+<meta name="twitter:title" content="kolm vs Vanta, Drata and Runtime Guardrails">
+<meta name="twitter:description" content="Vanta and Drata automate company compliance. Guardrails defend at runtime. Neither hands your buyer a signed, verifiable report on the application under review.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/compare">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -63,7 +63,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     {
       "@type": "Question",
       "name": "Is kolm a replacement for Vanta or Drata?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. GRC automation keeps your company SOC 2 and ISO evidence current, which you still need. kolm produces the agent-specific, buyer-verifiable evidence a reviewer asks for about the agent itself. Every finding maps back into the SOC 2, ISO 42001 and NIST AI RMF work those platforms track, so the two sit side by side." }
+      "acceptedAnswer": { "@type": "Answer", "text": "No. GRC automation keeps your company SOC 2 and ISO evidence current, which you still need. kolm produces the buyer-verifiable evidence a reviewer asks for about the AI application itself: the agent and every tool, identity and data flow around it. Every finding maps back into the SOC 2, ISO 42001 and NIST AI RMF work those platforms track, so the two sit side by side." }
     },
     {
       "@type": "Question",
@@ -73,7 +73,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     {
       "@type": "Question",
       "name": "Do runtime AI guardrails or firewalls give my buyer the evidence they need?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Guardrails defend at runtime, which matters in production, but runtime enforcement is not a procurement artifact. A security reviewer cannot hand a firewall configuration to their team as signed evidence about your agent. A guardrail and kolm address different jobs, and you can run both." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Guardrails defend at runtime, which matters in production, but runtime enforcement is not a procurement artifact. A security reviewer cannot hand a firewall configuration to their team as signed evidence about your AI application. A guardrail and kolm address different jobs, and you can run both." }
     },
     {
       "@type": "Question",
@@ -132,7 +132,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p class="eyebrow" data-enter="1">Compare</p>
     <h1 class="hero__h1" data-enter="2">Your stack already defends. <span class="go">The review wants evidence.</span></h1>
     <p class="lede" data-enter="3">
-      Compliance platforms track your company. Guardrails defend your runtime. A pentest PDF goes stale on the next deploy. None of them hands your buyer a signed, offline-verifiable report about the specific agent under review. That gap is what kolm fills.
+      Compliance platforms track your company. Guardrails defend your runtime. A pentest PDF goes stale on the next deploy. None of them hands your buyer a signed, offline-verifiable report about the AI application under review: the agent and every tool, identity and data flow around it. That gap is what kolm fills.
     </p>
     <div class="hero__cta" data-enter="4">
       <a class="btn btn--primary" href="/signup">Run the free scan</a>
@@ -154,7 +154,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="sect-rail__body">
     <div class="section__head">
       <h2>Three categories, each good at its own job.</h2>
-      <p class="lede">A fair read on what each tool is built for, and where it stops short of the evidence a procurement reviewer needs about your agent.</p>
+      <p class="lede">A fair read on what each tool is built for, and where it stops short of the evidence a procurement reviewer needs about your AI application.</p>
     </div>
     <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="grid grid--3">
@@ -374,7 +374,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </svg></div>
         <span class="step__n">01 · scan</span>
         <h3>Run it, sign it</h3>
-        <p>Point kolm at the agent logs you already keep. The audit runs in minutes and returns one signed report, scoped to that agent, mapped to the controls a reviewer cites.</p>
+        <p>Point kolm at the logs your application already keeps. The audit runs in minutes and returns one signed report, scoped to that application - the agent and the tools, identities and egress around it - mapped to the controls a reviewer cites.</p>
       </div>
       <div class="step">
         <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
@@ -512,7 +512,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <rect class="gy-p" x="122.5" y="29.5" width="4" height="4"/>
         </svg></div>
         <p class="card__k">In scope</p>
-        <h3>Assessed from the agent's own logs</h3>
+        <h3>Assessed from your application's own logs</h3>
         <p>Permission and least-privilege posture, audit-trail integrity, data egress and redaction, model and dependency provenance, agent identity, memory and retrieval integrity, and multi-agent delegation. Direct and indirect injection are tested by a red-team battery and reported with reproductions.</p>
       </div>
       <div class="card">
@@ -537,9 +537,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Common questions</h2>
     </div>
     <div class="grid grid--2">
-      <div class="card"><h3>Is kolm a replacement for Vanta or Drata?</h3><p>No. GRC automation keeps your company SOC 2 and ISO evidence current, which you still need. kolm produces the agent-specific, buyer-verifiable evidence a reviewer asks for about the agent itself. Every finding maps back into the frameworks those platforms track, so the two sit side by side.</p></div>
+      <div class="card"><h3>Is kolm a replacement for Vanta or Drata?</h3><p>No. GRC automation keeps your company SOC 2 and ISO evidence current, which you still need. kolm produces the buyer-verifiable evidence a reviewer asks for about the AI application itself: the agent and every tool, identity and data flow around it. Every finding maps back into the frameworks those platforms track, so the two sit side by side.</p></div>
       <div class="card"><h3>How is a signed report different from a SOC 2 or a trust portal?</h3><p>A SOC 2 attests company controls over a period and usually lives behind an NDA in a portal. A kolm report is a single canonical object about one agent that your buyer verifies offline, in their own browser, against your public key, with no account and no kolm server in the trust path. <a href="/verify">Try the sample verifier.</a></p></div>
-      <div class="card"><h3>Do runtime guardrails give my buyer what they need?</h3><p>Guardrails defend at runtime, which matters in production, but runtime enforcement is not a procurement artifact. A reviewer cannot hand a firewall configuration to their team as signed evidence about your agent. A guardrail and kolm address different jobs, and you can run both.</p></div>
+      <div class="card"><h3>Do runtime guardrails give my buyer what they need?</h3><p>Guardrails defend at runtime, which matters in production, but runtime enforcement is not a procurement artifact. A reviewer cannot hand a firewall configuration to their team as signed evidence about your AI application. A guardrail and kolm address different jobs, and you can run both.</p></div>
       <div class="card"><h3>What about a questionnaire or a pentest PDF?</h3><p>Familiar and sometimes required, but unsigned and impossible to verify independently. The document goes stale on your next deploy and shifts the burden of proof onto the buyer. kolm re-attests on a schedule and the buyer verifies every byte against your key.</p></div>
       <div class="card"><h3>What does kolm have that the others do not?</h3><p>A signed record of the agent's identity, provenance and delegation, an append-only transparency log, an agent-specific red-team battery, and an evidence report the buyer verifies with no account, all mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP LLM Top 10 and MITRE ATLAS.</p></div>
       <div class="card"><h3>How quickly can this clear a stalled review?</h3><p>The automated audit runs in minutes to hours, and the report is ready the same day. The buyer verifies it offline immediately. A review that was running four to eight weeks moves to days. See <a href="/pricing">pricing</a> for the plans and the named co-signer option.</p></div>
@@ -598,6 +598,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/report">Report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
+        <a href="/enterprise">Enterprise</a>
         <a href="/solutions/ai-vendors">For AI vendors</a>
         <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>

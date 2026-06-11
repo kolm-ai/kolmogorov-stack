@@ -1,8 +1,9 @@
 // S10 onramp connectors - the registry.
 //
 // One place to turn "wherever the seller already runs their agents" into the
-// canonical AuditEvents kolm audits. Each connector (datadog / langsmith / otel)
-// exports normalize(rawExport) -> AuditEvent[] (src/audit-event.js shape); the
+// canonical AuditEvents kolm audits. Each connector (datadog / langsmith / otel
+// / openinference / langfuse / mcp / openai-agents) exports
+// normalize(rawExport) -> AuditEvent[] (src/audit-event.js shape); the
 // events are self-ingesting (they carry a `request` projection) so the SAME
 // events drive both the analyzers directly AND kolm's server-side ingest at
 // POST /v1/audit/scan, with no change to the audit engine.
@@ -18,6 +19,8 @@ import { normalize as langsmithNormalize } from './langsmith.js';
 import { normalize as otelNormalize } from './otel.js';
 import { normalize as openinferenceNormalize } from './openinference.js';
 import { normalize as langfuseNormalize } from './langfuse.js';
+import { normalize as mcpNormalize } from './mcp.js';
+import { normalize as openaiAgentsNormalize } from './openai-agents.js';
 
 export const connectors = Object.freeze({
   datadog: { source: 'datadog', normalize: datadogNormalize },
@@ -25,6 +28,8 @@ export const connectors = Object.freeze({
   otel: { source: 'otel', normalize: otelNormalize },
   openinference: { source: 'openinference', normalize: openinferenceNormalize },
   langfuse: { source: 'langfuse', normalize: langfuseNormalize },
+  mcp: { source: 'mcp', normalize: mcpNormalize },
+  'openai-agents': { source: 'openai-agents', normalize: openaiAgentsNormalize },
 });
 
 export const SOURCES = Object.freeze(Object.keys(connectors));
@@ -55,7 +60,7 @@ function sample(raw, limit = 8) {
     const o = obj(root);
     if (o) {
       let pulled = false;
-      for (const k of ['runs', 'spans', 'data', 'results', 'events', 'rows']) {
+      for (const k of ['runs', 'spans', 'data', 'results', 'events', 'rows', 'entries']) {
         if (arr(o[k])) { for (const r of o[k]) { push(r); if (recs.length >= limit) break; } pulled = true; break; }
       }
       if (!pulled) push(o);
@@ -181,21 +186,61 @@ function looksLangfuse(root, recs) {
   return false;
 }
 
+// MCP server logs are JSON-RPC 2.0 rows whose method lives under tools/*
+// (or a result.content[] paired by id), plus kolm's own mcp-gateway receipts
+// (schema 'mcp-tool-call-1'). Checked BEFORE the generic OTLP sniff so a
+// JSON-RPC log is never mistaken for loose spans.
+function looksMcp(root, recs) {
+  const rowLooksMcp = (r) => {
+    const o = obj(r); if (!o) return false;
+    if (o.schema === 'mcp-tool-call-1' || o.receipt_version === 'mcp-tool-call-1') return true;
+    if (o.jsonrpc === '2.0') {
+      if (typeof o.method === 'string' && o.method.startsWith('tools/')) return true;
+      const res = obj(o.result);
+      if (o.id != null && res && (Array.isArray(res.content) || Array.isArray(res.tools) || obj(res.serverInfo))) return true;
+    }
+    return false;
+  };
+  if (root) {
+    if (rowLooksMcp(root)) return true;
+    // The generic MCP wrapper: { server, entries:[...] }.
+    if (Array.isArray(root.entries) && root.entries.slice(0, 8).some(rowLooksMcp)) return true;
+  }
+  return recs.some(rowLooksMcp);
+}
+
+// OpenAI Agents SDK exports are {object:'trace'|'trace.span'} rows; spans carry
+// span_data.type in the SDK's known set. They have no run_type / dotted_order,
+// so they read as loose objects to LangSmith - checked BEFORE looksLangsmith
+// (most-specific first).
+const AGENTS_SPAN_TYPES = new Set(['agent', 'generation', 'function', 'handoff', 'guardrail', 'response', 'custom']);
+function looksOpenAiAgents(recs) {
+  for (const r of recs) {
+    if (r.object === 'trace' || r.object === 'trace.span') return true;
+    const sd = obj(r.span_data);
+    if (sd && typeof sd.type === 'string' && AGENTS_SPAN_TYPES.has(sd.type)) return true;
+  }
+  return false;
+}
+
 /**
  * detectConnector - sniff which connector a raw export belongs to.
  * Order matters, most-specific markers first: OpenInference rides OTLP so its
  * openinference.span.kind / llm.* / tool.* markers are checked BEFORE the
- * generic OTLP sniff; Langfuse's observations[] (GENERATION/SPAN/EVENT) is
- * checked BEFORE LangSmith's looser run_type. Returns the source string or null
- * when nothing matches. Never throws.
+ * generic OTLP sniff; MCP's JSON-RPC rows are checked before OTel too; the
+ * OpenAI Agents SDK's object:'trace.span' rows and Langfuse's observations[]
+ * (GENERATION/SPAN/EVENT) are checked BEFORE LangSmith's looser run_type.
+ * Returns the source string or null when nothing matches. Never throws.
  * @param {string|object|object[]} raw
- * @returns {'datadog'|'langsmith'|'otel'|'openinference'|'langfuse'|null}
+ * @returns {'datadog'|'langsmith'|'otel'|'openinference'|'langfuse'|'mcp'|'openai-agents'|null}
  */
 export function detectConnector(raw) {
   try {
     const { root, recs } = sample(raw);
     if (looksOpenInference(root, recs)) return 'openinference';
+    if (looksMcp(root, recs)) return 'mcp';
     if (looksOtel(root, recs)) return 'otel';
+    if (looksOpenAiAgents(recs)) return 'openai-agents';
     if (looksLangfuse(root, recs)) return 'langfuse';
     if (looksLangsmith(recs)) return 'langsmith';
     if (looksDatadog(recs)) return 'datadog';

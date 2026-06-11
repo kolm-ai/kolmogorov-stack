@@ -130,3 +130,72 @@ test('configurable retention window is honoured', () => {
   assert.equal(has(findings, 'short-retention-window'), false, '2-day span clears a 1-day window');
   assert.ok(has(findings, 'audit-trail-complete'), 'clean trail under a 1-day window');
 });
+
+// ---------------------------------------------------------------------------
+// GAP-3 detection half - volume consistency (curated "quiet week" signature).
+// ---------------------------------------------------------------------------
+
+// n events on the given UTC day, ids unique across calls.
+function dayEvents(day, n, tag) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    out.push(evt({ id: `${tag}-${i}`, ts: `${day}T0${i % 10}:0${i % 6}:00Z`, actor: { key_id: 'k1' }, action: { tool: 'x' } }));
+  }
+  return out;
+}
+
+test('coverage exposes a per-day event histogram', () => {
+  const events = [...dayEvents('2026-05-01', 2, 'a'), ...dayEvents('2026-05-02', 3, 'b')];
+  const { coverage } = analyzeAuditTrail(events);
+  assert.deepEqual(coverage.events_per_day, { '2026-05-01': 2, '2026-05-02': 3 });
+});
+
+test('a single day carrying >25x the median active day flags trail-volume-inconsistent', () => {
+  const events = [
+    ...dayEvents('2026-05-01', 1, 'a'),
+    ...dayEvents('2026-05-02', 1, 'b'),
+    ...dayEvents('2026-05-03', 60, 'c'), // 60x the median active day
+  ];
+  const { findings } = analyzeAuditTrail(events);
+  const f = get(findings, 'trail-volume-inconsistent');
+  assert.ok(f, 'volume inconsistency flagged');
+  assert.equal(f.severity, 'medium');
+  assert.equal(f.metric.busiest_day_events, 60);
+  assert.equal(f.metric.median_active_day_events, 1);
+  assert.match(f.detail, /coverage declaration/, 'remediation points at the declaration');
+});
+
+test('a sliced export (most of the span silent, real sample size) is flagged', () => {
+  // 60 events on 3 days inside a 10-day span: 7/10 zero days >= 40%.
+  const events = [
+    ...dayEvents('2026-05-01', 20, 'a'),
+    ...dayEvents('2026-05-05', 20, 'b'),
+    ...dayEvents('2026-05-10', 20, 'c'),
+  ];
+  const { findings } = analyzeAuditTrail(events);
+  const f = get(findings, 'trail-volume-inconsistent');
+  assert.ok(f, 'zero-day arm trips on a sliced export');
+  assert.ok(f.metric.zero_days >= 4, 'silent days counted');
+});
+
+test('steady continuous traffic does NOT trip the volume check', () => {
+  const events = [];
+  for (let d = 1; d <= 6; d++) events.push(...dayEvents(`2026-05-0${d}`, 10, `d${d}`));
+  const { findings } = analyzeAuditTrail(events);
+  assert.equal(has(findings, 'trail-volume-inconsistent'), false, 'even traffic is clean');
+});
+
+test('tiny sparse demo exports are NOT misread as curated (sample-size gates)', () => {
+  // A handful of events across months: sparse by nature, below both gates
+  // (zero-day arm needs >=50 events; ratio arm needs a real spread).
+  const events = [
+    ...dayEvents('2026-02-03', 1, 'a'),
+    ...dayEvents('2026-03-11', 2, 'b'),
+    ...dayEvents('2026-04-02', 1, 'c'),
+  ];
+  const { findings } = analyzeAuditTrail(events);
+  assert.equal(has(findings, 'trail-volume-inconsistent'), false, 'no false curation flag on a demo-sized trail');
+  // And below three active days no volume judgement is made at all.
+  const twoDays = [...dayEvents('2026-05-01', 1, 'x'), ...dayEvents('2026-05-02', 90, 'y')];
+  assert.equal(has(analyzeAuditTrail(twoDays).findings, 'trail-volume-inconsistent'), false, 'two active days is too small a sample');
+});

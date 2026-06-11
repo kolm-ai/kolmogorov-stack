@@ -151,6 +151,94 @@ test('runAudit on empty input reports null readiness with a note, not a fake sco
   assert.equal(r.summary.blocking.length, 0);
 });
 
+// ---------------------------------------------------------------------------
+// ASR-3 egress analyzer wiring (GAP-1) + detector coverage (GAP-2).
+// ---------------------------------------------------------------------------
+
+// CLEAN_LOG plus one tool reaching an external destination: the egress surface
+// exists but carries no PII / secret. Hash-chained so ASR-2 stays green.
+const EGRESS_LOG = [
+  JSON.stringify({
+    request_id: 'e1', timestamp: '2026-01-01T00:00:00Z', model: 'openai/gpt-4o',
+    api_base: 'https://api.openai.com/v1', user: 'reader', metadata: { key_alias: 'k-egress' }, hash: 'h1',
+    tools: [{ type: 'function', function: { name: 'read_doc' } }, { type: 'function', function: { name: 'fetch_url' } }],
+    messages: [{ role: 'assistant', tool_calls: [{ id: 'c1', type: 'function', function: { name: 'read_doc', arguments: '{}' } }] }],
+  }),
+  JSON.stringify({
+    request_id: 'e2', timestamp: '2026-09-01T00:00:00Z', model: 'openai/gpt-4o',
+    api_base: 'https://api.openai.com/v1', user: 'reader', metadata: { key_alias: 'k-egress' }, hash: 'h2', prev_hash: 'h1',
+    tools: [{ type: 'function', function: { name: 'read_doc' } }, { type: 'function', function: { name: 'fetch_url' } }],
+    // NB: a bare host, not a full URL - the PII detector counts URLs as a PII
+    // class (HIPAA Safe Harbor), which would correctly fire sensitive-egress
+    // and turn this fixture into a blocking case instead of an attention one.
+    messages: [{ role: 'assistant', tool_calls: [{ id: 'c2', type: 'function', function: { name: 'fetch_url', arguments: '{"host":"partner.example.com"}' } }] }],
+  }),
+].join('\n');
+
+// No api_base, no provider-prefixed model, no tool destinations: nothing ever
+// leaves the boundary, so ASR-3 must be untested, not silently passed.
+const NO_EGRESS_LOG = [
+  JSON.stringify({
+    request_id: 'n1', timestamp: '2026-01-01T00:00:00Z', model: 'gpt-4o', user: 'reader', hash: 'h1',
+    tools: [{ type: 'function', function: { name: 'read_doc' } }],
+    messages: [{ role: 'assistant', tool_calls: [{ id: 'c1', type: 'function', function: { name: 'read_doc', arguments: '{}' } }] }],
+  }),
+  JSON.stringify({
+    request_id: 'n2', timestamp: '2026-09-01T00:00:00Z', model: 'gpt-4o', user: 'reader', hash: 'h2', prev_hash: 'h1',
+    tools: [{ type: 'function', function: { name: 'read_doc' } }],
+    messages: [{ role: 'assistant', tool_calls: [{ id: 'c2', type: 'function', function: { name: 'read_doc', arguments: '{}' } }] }],
+  }),
+].join('\n');
+
+test('runAudit carries result.egress and result.detector_coverage (the P2 interface)', () => {
+  const r = runAudit(BAD_LOG, { source: 'litellm' });
+  assert.ok(r.egress && typeof r.egress === 'object', 'result.egress present');
+  assert.equal(r.egress.summary.analyzer, 'egress');
+  assert.ok(Array.isArray(r.egress.destinations), 'destination inventory present');
+  assert.ok(r.egress.destinations.some((d) => d.host === 'api.openai.com'), 'model endpoint inventoried');
+  // The bounded detector claim for the signed report's caveat.
+  assert.ok(r.detector_coverage && typeof r.detector_coverage === 'object');
+  assert.ok(Array.isArray(r.detector_coverage.pii_classes) && r.detector_coverage.pii_classes.length > 0);
+  assert.ok(Array.isArray(r.detector_coverage.secret_shapes) && r.detector_coverage.secret_shapes.includes('openai-style-key'));
+});
+
+test('tool egress with no allowlist -> undeclared surface puts ASR-3 at attention', () => {
+  const r = runAudit(EGRESS_LOG, { source: 'litellm' });
+  const byId = Object.fromEntries(r.summary.controls.map((c) => [c.id, c]));
+  assert.equal(byId['ASR-3'].status, 'attention', 'enumerated-but-unvetted egress is no longer a silent pass');
+  assert.ok(r.findings.some((f) => f.id === 'undeclared-egress-surface'), 'undeclared-egress-surface merged into findings');
+  assert.equal(r.summary.readiness_pct, 83, 'pass + pass + attention over the core trinity');
+  // The egress findings are framework-mapped like every other finding.
+  const mapped = (r.controls.findings || []).find((f) => f.id === 'undeclared-egress-surface');
+  assert.ok(mapped && mapped.asr && mapped.asr.id === 'ASR-3', 'mapped to ASR-3');
+  assert.ok(Array.isArray(mapped.controls) && mapped.controls.length > 0, 'carries framework controls');
+});
+
+test('opts.analyzerOpts.egress.allowedHosts is plumbed through: clean allowlist -> ASR-3 pass', () => {
+  const r = runAudit(EGRESS_LOG, {
+    source: 'litellm',
+    analyzerOpts: { egress: { allowedHosts: ['partner.example.com'] } },
+  });
+  const byId = Object.fromEntries(r.summary.controls.map((c) => [c.id, c]));
+  assert.equal(byId['ASR-3'].status, 'pass', 'every destination vetted against the operator allowlist');
+  assert.equal(r.summary.readiness_pct, 100);
+  assert.equal(r.egress.summary.allowlist_declared, true);
+  assert.equal(r.egress.summary.unapproved, 0);
+  assert.ok(r.findings.some((f) => f.id === 'egress-allowlisted-clean'), 'positive posture finding present');
+});
+
+test('zero egress -> ASR-3 untested and EXCLUDED from the readiness denominator', () => {
+  const r = runAudit(NO_EGRESS_LOG, { source: 'litellm' });
+  const byId = Object.fromEntries(r.summary.controls.map((c) => [c.id, c]));
+  assert.equal(byId['ASR-3'].status, 'untested', 'never a silent pass');
+  assert.equal(r.egress.summary.untested, true);
+  // Non-inflation rule: the denominator is the EXERCISED core controls only.
+  const exercised = ['ASR-1', 'ASR-2'].map((id) => byId[id].status);
+  const weight = { pass: 1, attention: 0.5, blocking: 0 };
+  const expected = Math.round((100 * exercised.reduce((s, st) => s + weight[st], 0)) / exercised.length);
+  assert.equal(r.summary.readiness_pct, expected, 'readiness computed over ASR-1/ASR-2 only');
+});
+
 test('the committed dogfood fixture stays a meaningful end-to-end demo', () => {
   const fixture = path.join(ROOT, 'examples', 'agent-audit', 'litellm-export.jsonl');
   const logs = fs.readFileSync(fixture, 'utf8');

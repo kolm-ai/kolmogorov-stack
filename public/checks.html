@@ -9,15 +9,15 @@
  * marker, not on whether anything has scrolled into view yet. */
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>What we test · kolm.ai</title>
-<meta name="description" content="Four pillars (permissions, audit trail, data egress, injection) and eight ASR controls, each mapped to the standard your buyer's reviewers already cite: SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP, MITRE ATLAS. Every finding traces to the crosswalk and ships in a signed report.">
+<title>AI Agent Security Checks Mapped to Standards · kolm.ai</title>
+<meta name="description" content="Four pillars and eight ASR controls, each mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS. Every finding ships in a signed report.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="What we test: four pillars, eight controls, one crosswalk">
-<meta property="og:description" content="The checks a security reviewer runs, run first. Each control maps to a standard your buyer already cites, and every finding ships in a signed, offline-verifiable report.">
+<meta property="og:title" content="AI Agent Security Checks Mapped to Standards · kolm.ai">
+<meta property="og:description" content="Four pillars and eight ASR controls, each mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS. Every finding ships in a signed report.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/checks">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -25,7 +25,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="What we test · kolm.ai">
+<meta name="twitter:title" content="AI Agent Security Checks Mapped to Standards · kolm.ai">
+<meta name="twitter:description" content="Four pillars and eight ASR controls, each mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS. Every finding ships in a signed report.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/checks">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -45,9 +46,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "name": "kolm Agent Security-Review Readiness Audit",
   "serviceType": "AI agent security audit and signed evidence attestation",
   "provider": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
-  "description": "An audit of an AI agent across four pillars (permissions, audit trail, data egress, injection) and eight ASR controls, each mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS, ending in a cryptographically signed evidence report the buyer verifies offline.",
+  "description": "An audit of an AI application - the agent and every tool, identity and data flow around it - across four pillars (permissions, audit trail, data egress, injection) and eight ASR controls, each mapped to SOC 2, ISO 42001, NIST AI RMF, EU AI Act, OWASP and MITRE ATLAS, ending in a cryptographically signed evidence report the buyer verifies offline.",
   "areaServed": "Worldwide",
   "audience": { "@type": "Audience", "audienceType": "AI-native software vendors selling agents into the enterprise" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
+    { "@type": "ListItem", "position": 2, "name": "What we test", "item": "https://kolm.ai/checks" }
+  ]
 }
 </script>
 </head>
@@ -94,7 +105,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p class="eyebrow">The check catalog</p>
     <h1>The reviewer's checklist, <span class="go">run before the review.</span></h1>
     <p class="lede" style="max-width:62ch">
-      A CISO vets your agent on four things: what it can touch, what it records,
+      A CISO vets your AI application on four things: what the agent can touch, what it records,
       where data goes, and whether it can be talked out of its instructions.
       We test all four, map every result to the standard they already cite, and sign it.
     </p>
@@ -154,7 +165,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="num-ghost" aria-hidden="true">02</span>
     <div class="section__head">
       <h2>Four pillars. Every check has a control behind it.</h2>
-      <p class="lede">We test what the reviewer tests. Each pillar carries a control id that traces to the crosswalk below.</p>
+      <p class="lede">We test what the reviewer tests. Each pillar carries a control id that traces to the crosswalk below. The method behind the catalog is published on the <a href="/research">research page</a>.</p>
     </div>
     <div class="seam" data-art-reveal aria-hidden="true"></div>
     <figure class="diag reveal" role="img" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
@@ -268,7 +279,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="sect-rail__body">
     <div class="section__head">
       <h2>Eight controls, mapped to the standard your buyer cites.</h2>
-      <p class="lede">One row per control. Every finding in the signed report points back to a row here, so a reviewer traces each result to a standard, not to our word.</p>
+      <p class="lede">One row per control. Every finding in the signed report points back to a row here, so a reviewer traces each result to a standard, not to our word. Framework dates live on the <a href="/regulatory-clock">regulatory clock</a>.</p>
     </div>
     <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="band" aria-label="Frameworks in the crosswalk">
@@ -365,7 +376,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
   <div class="wrap">
     <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>Run the catalog against your agent.</h2>
+    <h2>Run the catalog against your application.</h2>
     <p class="lede">Four pillars, eight controls, each mapped to the framework your buyer cites, in a signed report they verify offline.</p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/signup">Run the free scan</a>
