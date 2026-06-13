@@ -35,10 +35,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
-<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
-<script defer src="/kolm-field.js"></script>
-<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -53,7 +50,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 }
 </script>
 </head>
-<body class="compiler-site compiler-site--paper compiler-site--paper-home" data-design-reference="image-2">
+<body class="home">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -67,8 +64,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span>kolm</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="#pipeline" aria-current="page">Solutions</a>
-      <a href="/docs">Developers</a>
+      <a href="#pipeline">Product</a>
+      <a href="/docs">Docs</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
@@ -83,411 +80,137 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-  <section class="section section--flush hero compiler-hero hero--reactor" data-design-reference="image-2" aria-label="The AI compiler">
-    <div class="reactor-core" aria-hidden="true"></div>
-    <div class="field" aria-hidden="true"><canvas></canvas></div>
-    <div class="hero-image-two kolm-hero-system" aria-label="Kolm API Control Center product artifact">
-      <img src="/compiler-brand-hero.png" alt="Kolm API Control Center visual showing capture, policy, compile, and export lanes." width="1200" height="630" loading="eager" decoding="async">
-      <span class="hero-image-two__caption">Capture -> govern -> compile -> prove. 17 channels. 8 readiness gated controls. Secret values stay out of receipts.</span>
-    </div>
-    <div class="wrap">
-      <div class="hero__grid">
-        <div class="hero__copy">
-          <p class="compiler-kicker" data-enter="1">The AI compiler</p>
-          <h1 class="hero__h1" data-enter="2">API behavior in. <span class="go">Device-fit models out.</span></h1>
-          <p class="lede" data-enter="3">Kolm is the collection wrapper and compiler for teams that already have model traffic. Capture production API behavior, compile a signed <code>.kolm</code> artifact, and run it on the smallest runtime that can carry the workload.</p>
-          <div class="hero__cta hero__cta--home" data-enter="4">
-            <a class="btn btn--primary" href="/signup">Get an API key</a>
-            <a class="btn btn--ghost" href="/docs">Read the docs</a>
-          </div>
-          <div class="hero-command-strip" data-enter="5" aria-label="Live product control summary">
-            <span><b>929</b> routes</span>
-            <span><b>214</b> groups</span>
-            <span><b>17</b> channels</span>
-            <span><b>8</b> open gates</span>
-          </div>
-        </div>
-        <figure class="hero-render" data-enter="4">
-          <img src="/img/kn-hero-reactor.png" alt="The kolm compiler rendered as a machined reactor instrument: phosphor-green capture, policy, compile, and export lanes in a dark hall." width="1536" height="864" loading="eager" decoding="async">
-          <figcaption><span class="hero-render__led"></span>capture · policy · compile · export — one signed instrument</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
 
-  <section class="section render-gallery reveal" aria-label="The kolm instrument family">
-    <div class="wrap">
-      <p class="eyebrow">The compiler, made tangible</p>
-      <h2 class="render-gallery__h">One API loop, <span class="go">three forms of proof.</span></h2>
-      <div class="render-gallery__grid">
-        <figure class="render-card">
-          <div class="render-card__frame"><img src="/img/kn-artifact.png" alt="A sealed matte-black .kolm artifact cube with a glowing green seam on an obsidian plinth." loading="lazy" decoding="async" width="1024" height="1024"></div>
-          <figcaption><b>The signed artifact</b><span>Your behavior compiled into one portable, signed <code>.kolm</code> — examples, recipes, evals and receipts, sealed.</span></figcaption>
-        </figure>
-        <figure class="render-card">
-          <div class="render-card__frame"><img src="/img/kn-runtime.png" alt="A large reactor slab connected by a green light thread to a small handheld device — a cloud model compiled down to fit." loading="lazy" decoding="async" width="1536" height="864"></div>
-          <figcaption><b>Device-fit deploy</b><span>The same artifact, shrunk to the smallest runtime that can carry it — hosted, server, laptop, edge, phone.</span></figcaption>
-        </figure>
-        <figure class="render-card">
-          <div class="render-card__frame"><img src="/img/kn-anatomy.png" alt="An exploded view of a .kolm artifact: machined plates threaded by a single green control rod." loading="lazy" decoding="async" width="864" height="1536"></div>
-          <figcaption><b>Inspectable inside</b><span>Capture, policy, compile, export — every layer is governed state you can open and verify.</span></figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section--lit reveal" id="proof-board">
-    <div class="wrap">
-      <div class="section__head proof-board__head">
-        <span class="idx">00 / Command Deck</span>
-        <h2>Control every API signal into proof.</h2>
-        <div class="proof-board__brief">
-          <p class="lede">Kolm is the control fabric for AI/API behavior: every gateway call, trace, workflow, data movement event, policy decision, and export becomes governed state that can compile into signed artifacts and buyer-ready proof.</p>
-          <div class="proof-board__operator" aria-label="Command deck invariant checks">
-            <span><b>ingest</b><em>opaque-safe until schema evidence</em></span>
-            <span><b>govern</b><em>policy before interpretation</em></span>
-            <span><b>compile</b><em>receipt-bound <code>.kolm</code> package</em></span>
-            <span><b>export</b><em>proof leaves the UI</em></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="infra-proof-strip" aria-label="Homepage proof points">
-        <span><b>17</b> channels</span>
-        <span><b>12</b> ingress modes</span>
-        <span><b>10</b> export modes</span>
-        <span><b>8</b> readiness gates</span>
-        <span>signed receipts</span>
-        <span>target matrix</span>
-      </div>
-
-      <div class="control-radar" aria-label="Kolm control fabric summary">
-        <div class="control-radar__header">
-          <span>control fabric</span>
-          <b>one command layer for AI/API behavior.</b>
-          <em>capture, govern, improve, compile, target, and export from the same operating surface</em>
-        </div>
-        <div class="control-radar__grid">
-          <span><b>Gateway traffic</b> requests, responses, streams, budgets, provider routes</span>
-          <span><b>Agent traces</b> tool calls, handoffs, prompts, eval rows, failure labels</span>
-          <span><b>Data movement</b> webhooks, queues, warehouses, files, CDC, catalogs</span>
-          <span><b>Policy gates</b> redaction, retention, access, egress, approval, review</span>
-          <span><b>Runtime targets</b> hosted, local, edge, mobile, restricted fleet paths</span>
-          <span><b>Proof exports</b> receipts, manifests, evidence bundles, tickets, logs</span>
-        </div>
-        <div class="control-radar__wedge">
-          <strong>Kolm command layer</strong>
-          <p>Capture any credible API/data signal, keep policy before interpretation, compile signed artifacts, and export proof to the systems enterprises already operate.</p>
-        </div>
-      </div>
-
-      <div class="category-control-matrix" aria-label="Kolm behavior to proof lifecycle matrix">
-        <div class="category-control-matrix__head">
-          <span>stage</span>
-          <span>input</span>
-          <span>operator job</span>
-          <span>Kolm output</span>
-        </div>
-        <div class="category-control-matrix__row">
-          <span><b>Capture</b></span>
-          <span>Raw API events</span>
-          <span>Bring traffic, traces, files, webhooks, queues, warehouse drops, and custom adapters into one governed intake path.</span>
-          <span>Canonical event envelope with source, tenant, retention, redaction, schema confidence, and receipt id.</span>
-        </div>
-        <div class="category-control-matrix__row">
-          <span><b>Govern</b></span>
-          <span>Unknown payloads</span>
-          <span>Apply policy, redaction, access scope, egress rules, and adapter evidence before the system claims semantic meaning.</span>
-          <span>Opaque-safe events promoted only when manifest, schema, or native connector evidence validates.</span>
-        </div>
-        <div class="category-control-matrix__row">
-          <span><b>Improve</b></span>
-          <span>Failures and labels</span>
-          <span>Move incidents, reviewer notes, weak slices, drift alerts, and eval deltas into replayable release gates.</span>
-          <span>Failure taxonomy, regression set, curriculum bundle, and promotion decision with protected-slice checks.</span>
-        </div>
-        <div class="category-control-matrix__row">
-          <span><b>Ship</b></span>
-          <span>Artifact and target</span>
-          <span>Compile the approved behavior into a portable package with runtime fit, hashes, rollback, and export policy attached.</span>
-          <span>Signed <code>.kolm</code> package, target recipe, verifier receipt, and governance packet.</span>
-        </div>
-      </div>
-
-      <div class="infra-map" aria-label="Kolm source to proof control map">
-        <div class="infra-map__label infra-map__label--source">source systems</div>
-        <div class="infra-map__label infra-map__label--kernel">kolm kernel</div>
-        <div class="infra-map__label infra-map__label--proof">proof outputs</div>
-        <div class="infra-map__stack" aria-label="Existing enterprise systems">
-          <article class="infra-map__card">
-            <span>gateway</span>
-            <div><b>Provider and route traffic</b><p>Requests, responses, streams, fallbacks, budgets, tool calls, and model routes become governed event envelopes.</p></div>
-          </article>
-          <article class="infra-map__card">
-            <span>trace</span>
-            <div><b>Behavior and eval signals</b><p>Prompts, traces, labels, reviewer decisions, weak slices, and regression rows become release-gated evidence.</p></div>
-          </article>
-          <article class="infra-map__card">
-            <span>data</span>
-            <div><b>Batch and stream context</b><p>Queues, files, webhooks, CDC, warehouses, object stores, catalogs, and lineage markers become controlled intake.</p></div>
-          </article>
-          <article class="infra-map__card">
-            <span>govern</span>
-            <div><b>Risk and proof workflow</b><p>Policy checks, approval events, incidents, audit events, evidence packets, and external reviews become exportable proof.</p></div>
-          </article>
-        </div>
-
-        <div class="control-kernel kolm-surface-media" aria-label="Kolm source to proof compiler kernel">
-          <div class="control-kernel__top">
-            <span>kolm control plane</span>
-            <b>source -> policy -> compile -> proof</b>
-          </div>
-          <div class="control-kernel__core">
-            <span>API Control Center</span>
-            <strong>sign the transition</strong>
-            <p>Semantic promotion only after adapter evidence, policy, redaction, and receipt gates pass.</p>
-          </div>
-          <div class="control-kernel__nodes">
-            <span>capture<br><b>17 channels</b></span>
-            <span>policy<br><b>8 stages</b></span>
-            <span>artifact<br><b>.kolm signed</b></span>
-            <span>export<br><b>10 modes</b></span>
-          </div>
-        </div>
-
-        <div class="proof-ledger" aria-label="Kolm outputs">
-          <div class="proof-ledger__line"><span>01</span><b>Canonical event envelope</b><p>Opaque-safe payload, source identity, redaction result, schema confidence, retention class, policy decision, and receipt id.</p></div>
-          <div class="proof-ledger__line"><span>02</span><b>Readiness-gated artifact</b><p>Manifests, examples, evaluators, target recipes, hashes, and signed verifier receipts travel with the package.</p></div>
-          <div class="proof-ledger__line"><span>03</span><b>Enterprise proof export</b><p>SIEM, warehouse, GRC, ticketing, webhook, docs, OpenAPI, and auditor packets leave with declared destination context.</p></div>
-        </div>
-      </div>
-
-      <div class="infra-board" data-home-proof>
-        <div class="infra-metrics" aria-label="Kolm product contract metrics">
-          <div class="infra-metric">
-            <span>owned routes</span>
-            <b data-home-count="routes">929</b>
-            <em>mapped across <strong data-home-count="surfaces">7</strong> route surfaces</em>
-          </div>
-          <div class="infra-metric">
-            <span>route groups</span>
-            <b data-home-count="route-groups">214</b>
-            <em>grouped by product owner and journey</em>
-          </div>
-          <div class="infra-metric">
-            <span>API reference</span>
-            <b data-home-count="api-routes">69</b>
-            <em>public API routes behind docs and SDKs</em>
-          </div>
-          <div class="infra-metric">
-            <span>open gates</span>
-            <b data-home-count="open-gates">8</b>
-            <em data-home-status="readiness">readiness-gated, not hidden</em>
-          </div>
-        </div>
-
-        <div class="infra-path" aria-label="Homepage source-to-proof path">
-          <div class="infra-path__row">
-            <span>source</span>
-            <p><b>Connect existing systems.</b> Gateways, traces, workflow tools, data movers, catalogs, SIEM and GRC platforms become governed sources or sinks.</p>
-            <a href="/integrations">/integrations</a>
-          </div>
-          <div class="infra-path__row">
-            <span>control</span>
-            <p><b>Operate the tenant loop.</b> The API Control Center exposes channel policy, egress rules, improvement workflow, compile state and proof exports.</p>
-            <a href="/account/api-control-center">/account/api-control-center</a>
-          </div>
-          <div class="infra-path__row">
-            <span>compile</span>
-            <p><b>Turn behavior into an artifact.</b> Compile manifests, examples, evaluators, hashes, target recipes and verifier receipts into a signed .kolm package.</p>
-            <a href="/compiler-product">/compiler-product</a>
-          </div>
-          <div class="infra-path__row">
-            <span>prove</span>
-            <p><b>Ship with buyer proof.</b> Public claims stay tied to current product evidence, verifiers, package state, and readiness records.</p>
-            <a href="/trust">/trust</a>
-          </div>
-        </div>
-
-        <aside class="infra-contract" aria-label="Live public product contract endpoints">
-          <div class="infra-contract__head">
-            <span>public contract</span>
-            <b data-home-contract-state>secret-safe</b>
-          </div>
-          <div class="infra-contract__line"><code>GET /v1/product/graph</code><span>route graph, journeys, readiness</span></div>
-          <div class="infra-contract__line"><code>GET /v1/product/capabilities</code><span>capture, compile, compose, deploy</span></div>
-          <div class="infra-contract__line"><code>GET /v1/evidence/readiness</code><span>open gates and proof requirements</span></div>
-          <div class="infra-contract__line"><code>GET /v1/account/api-control-center</code><span>tenant control center contract</span></div>
-          <p>All public envelopes must keep <code>secret_values_included: false</code>. Unknown payloads stay opaque until adapter evidence proves semantics.</p>
-          <a class="infra-contract__cta" href="/docs/api">Inspect API Contract</a>
-        </aside>
-      </div>
-
-      <div class="infra-board__note">Kolm connects the tools your team already runs and makes AI behavior governable from first event to signed artifact.</div>
-    </div>
-  </section>
-
-  <section class="section" id="pipeline">
-    <div class="wrap">
-      <div class="section__head">
-        <span class="idx">01 / Operating loop</span>
-        <h2>Control the loop. Export the proof.</h2>
-        <p class="lede">The control center treats AI/API traffic as governed state, not loose logs. Every useful call can become a trace, policy decision, eval row, compile input, signed artifact, receipt, target recommendation or export.</p>
-      </div>
-
-      <div class="pipeline-grid">
-        <article class="pipeline-card">
-          <span class="pipeline-card__n">01</span>
-          <h3>Collect every useful signal</h3>
-          <p>Provider routes, SDKs, gateway logs, traces, webhooks, batches, queues, warehouses and agent tools arrive with source, tenant and permission context.</p>
-          <ul>
-            <li>17 channel families with opaque-event fallback</li>
-            <li>12 ingress modes across API, files and data planes</li>
-            <li>Provider vault, source controls and capture policy</li>
-          </ul>
-        </article>
-        <article class="pipeline-card">
-          <span class="pipeline-card__n">02</span>
-          <h3>Gate changes before they ship</h3>
-          <p>Policy, redaction, retention, labels, eval suites, failure clusters and regression sets decide whether behavior is ready to compile.</p>
-          <ul>
-            <li>8 governance stages visible in the console</li>
-            <li>Closed-loop improvement with protected regression replay</li>
-            <li>Readiness-gated claims tied to product evidence</li>
-          </ul>
-        </article>
-        <article class="pipeline-card">
-          <span class="pipeline-card__n">03</span>
-          <h3>Compile artifacts and receipts</h3>
-          <p>A .kolm artifact packages manifests, executable recipes, evaluators, examples, hashes and receipts so proof survives outside the dashboard.</p>
-          <ul>
-            <li>Runtime target matrix for local, hosted and restricted fleets</li>
-            <li>10 export modes for governance, SIEM, catalogs and GRC</li>
-            <li>Verifier bundles for auditors and platform teams</li>
-          </ul>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section--ink reveal" id="contract">
-    <div class="dither-edge" aria-hidden="true"></div>
-    <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
-    <div class="wrap">
-      <div class="compiler-rail">
-        <div>
-          <span class="idx">02 / Backend contract</span>
-          <h2>The main API surface is the product contract.</h2>
-          <p class="lede">The public contract exposes the behavior-to-artifact stack as first-class product capabilities: capture, policy, evals, compile, targets, exports and audit events.</p>
-          <div class="compiler-proof" data-capability-proof>
-            <span>capability spec <b data-cap-version style="margin-left:6px">kolm-product-capabilities-1</b></span>
-            <span>updated <b data-cap-updated style="margin-left:6px">static</b></span>
-          </div>
-        </div>
-        <div class="surface-table" aria-label="Main API surfaces">
-          <div class="surface-row">
-            <div class="surface-row__key">capture <span data-cap-status="capture">mounted</span></div>
-            <div class="surface-row__body"><b>API collection wrapper.</b> Route model calls, capture learning traces, export or review the corpus.</div>
-            <div class="surface-row__route">/v1/route<br>/v1/capture</div>
-          </div>
-          <div class="surface-row">
-            <div class="surface-row__key">compile <span data-cap-status="compile">mounted</span></div>
-            <div class="surface-row__body"><b>Artifact builder.</b> Create compile jobs, preview fit, download signed .kolm files.</div>
-            <div class="surface-row__route">/v1/compile</div>
-          </div>
-          <div class="surface-row">
-            <div class="surface-row__key">compose <span data-cap-status="compose">mounted</span></div>
-            <div class="surface-row__body"><b>Specialist graph.</b> Combine experts, train specialist surfaces and run the composite path.</div>
-            <div class="surface-row__route">/v1/compose<br>/v1/specialists</div>
-          </div>
-          <div class="surface-row">
-            <div class="surface-row__key">deploy <span data-cap-status="deploy">mounted</span></div>
-            <div class="surface-row__body"><b>Device targeter.</b> Detect hardware, recommend runtime choices, install artifacts and serve pods.</div>
-            <div class="surface-row__route">/v1/devices<br>/v1/serve</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section reveal" id="runtime">
-    <div class="wrap">
-      <div class="section__head">
-        <span class="idx">03 / Runtime targets</span>
-        <h2>Shrink to the smallest place the workload can live.</h2>
-        <p class="lede">Kolm does not force every call back through the biggest frontier endpoint. It keeps the training and routing evidence with the artifact, then aims the resulting behavior at a concrete runtime target.</p>
-      </div>
-      <div class="device-grid" aria-label="Supported device targets">
-        <div class="device">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="2.5" width="8" height="19" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 18.5h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <b>Phone</b>
-          <span>Export path and fit checks for tiny local tasks.</span>
-        </div>
-        <div class="device">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="10" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 19h19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <b>Laptop</b>
-          <span>Local CPU, CUDA, DirectML, MLX and MPS adapters.</span>
-        </div>
-        <div class="device">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="16" height="5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="15" width="16" height="5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><path d="M7 6.5h.01M7 17.5h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <b>Server</b>
-          <span>vLLM, SGLang, TGI, TRT-LLM and SSH paths.</span>
-        </div>
-        <div class="device">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 17.5 12 4l7.5 13.5h-15Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <b>Edge</b>
-          <span>ONNX, WASM and constrained runtime probes.</span>
-        </div>
-        <div class="device">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12a7 7 0 0 1 14 0v5a2 2 0 0 1-2 2h-3v-6h5M5 12v5a2 2 0 0 0 2 2h3v-6H5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-          <b>Hosted</b>
-          <span>RunPod, Modal, Vast, Lambda and brokered compute.</span>
-        </div>
-      </div>
-      <p class="compiler-note">Scope note: current artifacts package executable recipes, examples, evaluators, tokenizer metadata and receipts. Full trained-weight bundling and mobile runtime parity remain gated work in the product roadmap.</p>
-    </div>
-  </section>
-
-  <section class="section section--lit reveal" id="audit">
-    <div class="wrap">
-      <div class="audit-aside">
-        <div>
-          <span class="idx">04 / Audit surface</span>
-          <h2>Audit evidence attaches to the control loop.</h2>
-          <p class="lede">Signed agent security-readiness evidence remains available for buyers who need a report. The larger product is the control loop that creates, verifies and exports evidence for real AI/API behavior.</p>
-          <div class="hero__cta">
-            <a class="btn btn--ghost" href="https://audit.kolm.ai">Open audit.kolm.ai</a>
-            <a class="btn btn--ghost" href="https://audit.kolm.ai/verify">Open audit verifier</a>
-          </div>
-        </div>
-        <div class="audit-ticket" aria-label="Audit surface summary">
-          <div class="audit-ticket__top"><span>surface</span><span>asr</span></div>
-          <div class="audit-ticket__main">Agent audit, signed evidence and report verification now attach to <b>runtime and governance receipts</b> on the compiler platform.</div>
-          <div class="audit-ticket__bottom"><span>/v1/audit</span><span>audit.kolm.ai</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section reveal cta-final">
-    <div class="dither-edge" aria-hidden="true"></div>
-    <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
-    <div class="wrap">
-      <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-      <h2>Start with one production AI/API loop.</h2>
-      <p class="lede">Route one namespace through Kolm, keep the traces, gate the failures, compile a signed artifact, then export the receipt to the systems your platform and audit teams already trust.</p>
+  <section class="hero section--flush">
+    <div class="wrap hero__in">
+      <p class="eyebrow">The AI compiler</p>
+      <h1 class="hero__h1">Compile your API behavior into a model that runs anywhere.</h1>
+      <p class="lede">Kolm captures the traffic your app already sends to model APIs, compiles it into a signed <code>.kolm</code> artifact, and runs it on the smallest runtime that fits &mdash; cloud, server, laptop, edge or phone.</p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="/account/api-control-center">Open API Control Center</a>
-        <a class="btn btn--ghost" href="mailto:dev@kolm.ai?subject=Kolm%20compiler%20access">Request access</a>
+        <a class="btn btn--primary" href="/signup">Get an API key</a>
+        <a class="btn btn--ghost" href="/docs">Read the docs</a>
       </div>
-      <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-        <span class="badge badge--ok">Gateway</span>
-        <span class="badge">Compiler</span>
-        <span class="badge">Device targeter</span>
-        <span class="badge">Audit module</span>
+      <div class="ui" aria-hidden="true">
+        <div class="ui__bar"><span class="ui__live"></span><span class="ui__name">kolm &middot; workspace / prod-ai-loop</span><span class="ui__meta">signed &middot; Ed25519</span></div>
+        <div class="ui__grid">
+          <aside class="ui__rail">
+            <span class="ui__step is-on">Capture</span>
+            <span class="ui__step">Compile</span>
+            <span class="ui__step">Compose</span>
+            <span class="ui__step">Deploy</span>
+          </aside>
+          <pre class="ui__code"><span class="m">$</span> kolm route --capture
+<span class="m"># 12,408 calls &middot; 17 channels &middot; redacted</span>
+
+<span class="a">&#10003;</span> compiled <span class="s">claims-redactor.kolm</span>
+<span class="m">  142 MB &middot; examples + recipes + evals + receipts</span>
+<span class="a">&#10003;</span> fit <span class="s">rtx-4090</span> &rarr; <span class="s">jetson</span> &rarr; <span class="s">edge</span>
+<span class="m">  5 runtime targets ranked by cost &amp; latency</span></pre>
+        </div>
       </div>
     </div>
   </section>
+
+  <section class="feat" id="pipeline">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">Capture</p>
+        <h2>Route your model traffic through one endpoint.</h2>
+        <p class="lede">Point your OpenAI- or Anthropic-compatible calls at Kolm. Every prompt, completion, tool call, cost and routing decision becomes governed, redacted, replayable state &mdash; with no SDK rewrite.</p>
+        <ul class="feat__list">
+          <li>Drop-in proxy &middot; keep your provider keys in one vault</li>
+          <li>Redaction before persistence &middot; secrets never stored</li>
+          <li>Export to JSONL, OTLP, or a signed receipt</li>
+        </ul>
+      </div>
+      <div class="feat__ui">
+        <div class="panel">
+          <div class="panel__head"><span>capture log</span><span class="m">live</span></div>
+          <div class="panel__rows">
+            <div class="prow"><span class="m">POST</span> /v1/route/chat &middot; gpt-4o <span class="prow__r m">412ms</span></div>
+            <div class="prow"><span class="m">POST</span> /v1/route/chat &middot; claude <span class="prow__r m">388ms</span></div>
+            <div class="prow"><span class="m">tool</span> redact() &middot; 3 spans <span class="prow__r a">redacted</span></div>
+            <div class="prow"><span class="m">POST</span> /v1/capture/export &middot; jsonl <span class="prow__r m">12,408</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feat feat--rev">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">Compile</p>
+        <h2>Turn captured behavior into a signed artifact.</h2>
+        <p class="lede">Kolm packages your examples, recipes, evaluators, tokenizer metadata and receipts into one portable <code>.kolm</code> &mdash; signed with Ed25519, reproducible, and inspectable layer by layer.</p>
+        <ul class="feat__list">
+          <li>Deterministic build &middot; content-addressed receipts</li>
+          <li>Evals and protected-slice gates before promotion</li>
+          <li>Open the artifact &mdash; every layer is governed state</li>
+        </ul>
+      </div>
+      <div class="feat__ui">
+        <div class="panel">
+          <div class="panel__head"><span>claims-redactor.kolm</span><span class="a">signed</span></div>
+          <div class="panel__rows">
+            <div class="prow">examples <span class="prow__r m">2,140</span></div>
+            <div class="prow">recipes &middot; evals <span class="prow__r m">18 / 6</span></div>
+            <div class="prow">tokenizer + receipts <span class="prow__r m">sha-256</span></div>
+            <div class="prow">readiness gate <span class="prow__r a">passed</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feat">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">Deploy</p>
+        <h2>Run it on the smallest runtime that fits.</h2>
+        <p class="lede">Kolm ranks every target &mdash; hosted, server, laptop, edge, phone &mdash; by cost, latency and fit, then installs and serves the same artifact wherever you choose. Your data never leaves your hardware.</p>
+        <ul class="feat__list">
+          <li>Device detection &middot; quantization oracle</li>
+          <li>One artifact, many targets &middot; hosted or self-managed</li>
+          <li>Rollback, receipts and governance exports included</li>
+        </ul>
+      </div>
+      <div class="feat__ui">
+        <div class="panel">
+          <div class="panel__head"><span>runtime targets</span><span class="m">ranked</span></div>
+          <div class="panel__rows">
+            <div class="prow">rtx-4090 &middot; 24GB <span class="prow__r a">best fit</span></div>
+            <div class="prow">jetson orin <span class="prow__r m">edge</span></div>
+            <div class="prow">macbook m3 <span class="prow__r m">local</span></div>
+            <div class="prow">hosted pod <span class="prow__r m">$0.04/hr</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="proof">
+    <div class="wrap">
+      <div class="proof__row">
+        <div class="proof__cell"><b>17</b><span>capture channels</span></div>
+        <div class="proof__cell"><b>5</b><span>runtime targets</span></div>
+        <div class="proof__cell"><b>Ed25519</b><span>signed artifacts</span></div>
+        <div class="proof__cell"><b>100%</b><span>your hardware</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta section--flush">
+    <div class="wrap cta__in">
+      <h2>Own the behavior you&rsquo;re renting.</h2>
+      <p class="lede">Route one namespace through Kolm and compile your first artifact in an afternoon.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/signup">Get an API key</a>
+        <a class="btn btn--ghost" href="/docs">Read the docs</a>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <hr class="foil-line" aria-hidden="true">

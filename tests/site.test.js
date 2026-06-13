@@ -192,7 +192,6 @@ const COMPILER_PRODUCT_ROUTES = [
 ];
 
 const IMAGE_TWO_PAPER_FILES = [
-  'index.html',
   'compiler-product.html',
   'how-it-works.html',
   'docs.html',
@@ -215,7 +214,6 @@ const IMAGE_TWO_PAPER_FILES = [
 ];
 
 const IMAGE_TWO_SOCIAL_CARD_FILES = new Set([
-  'index.html',
   'compiler-product.html',
   'how-it-works.html',
   'docs.html',
@@ -501,74 +499,25 @@ test('security page exposes control posture without overclaiming', () => {
 test('homepage exposes control-plane loop without overclaiming', () => {
   const home = fs.readFileSync(path.join('public', 'index.html'), 'utf8');
 
-  assert.match(home, /API behavior in\. Device-fit models out\./);
-  assert.match(home, /compiler-site--paper/);
-  assert.match(home, /compiler-site--paper-home/);
-  assert.match(home, /data-design-reference="image-2"/);
-  assert.match(home, /compiler-brand-hero\.png/);
-  assert.match(home, /class="hero-image-two kolm-hero-system"/);
-  assert.match(home, /kolm-hero-system/);
-  assert.match(home, /hero-image-two__caption/);
-  assert.match(home, /<img src="\/compiler-brand-hero\.png" alt="Kolm API Control Center visual showing capture, policy, compile, and export lanes\." width="1200" height="630"/);
-  assert.match(home, /behavior-to-artifact control plane/);
+  // clean linear-grade homepage: the compiler loop, told simply
+  assert.match(home, /Compile your API behavior into a model that runs anywhere/);
   assert.match(home, /The AI compiler/);
-  assert.match(home, /API Control Center/);
-  assert.match(home, /reactor-core/);
-  assert.match(home, /hero-render/);
-  assert.match(home, /img\/kn-hero-reactor\.png/);
-  assert.match(home, /Command Deck/);
-  assert.match(home, /Control every API signal into proof/);
-  assert.match(home, /hero-command-strip/);
-  assert.match(home, /Live product control summary/);
-  assert.match(home, /Kolm control fabric summary/);
-  assert.match(home, /control-radar/);
-  assert.match(home, /control fabric/);
-  assert.match(home, /one command layer for AI\/API behavior/);
-  assert.match(home, /capture, govern, improve, compile, target, and export/);
-  assert.match(home, /Gateway traffic<\/b> requests, responses, streams, budgets, provider routes/);
-  assert.match(home, /Agent traces<\/b> tool calls, handoffs, prompts, eval rows, failure labels/);
-  assert.match(home, /Policy gates<\/b> redaction, retention, access, egress, approval, review/);
-  assert.match(home, /Kolm command layer/);
-  assert.match(home, /Capture any credible API\/data signal/);
-  assert.match(home, /category-control-matrix/);
-  assert.match(home, /Kolm behavior to proof lifecycle matrix/);
-  assert.match(home, /operator job/);
-  assert.match(home, /Bring traffic, traces, files, webhooks, queues, warehouse drops, and custom adapters into one governed intake path/);
-  assert.match(home, /Opaque-safe events promoted only when manifest, schema, or native connector evidence validates/);
-  assert.match(home, /Signed <code>\.kolm<\/code> package, target recipe, verifier receipt, and governance packet/);
-  assert.match(home, /Kolm source to proof control map/);
-  assert.match(home, /source systems/);
-  assert.match(home, /kolm kernel/);
-  assert.match(home, /proof outputs/);
-  assert.match(home, /Provider and route traffic/);
-  assert.match(home, /Behavior and eval signals/);
-  assert.match(home, /Batch and stream context/);
-  assert.match(home, /Risk and proof workflow/);
-  assert.match(home, /source -> policy -> compile -> proof/);
-  assert.match(home, /sign the transition/);
-  assert.match(home, /Semantic promotion only after adapter evidence/);
-  assert.match(home, /Canonical event envelope/);
-  assert.match(home, /Readiness-gated artifact/);
-  assert.match(home, /Enterprise proof export/);
-  assert.match(home, /Inspect API Contract/);
-  assert.match(home, /data-home-proof/);
-  assert.match(home, /929<\/b>/);
-  assert.match(home, /214<\/b>/);
-  assert.match(home, /69<\/b>/);
-  assert.match(home, /17<\/b> channels/);
-  assert.match(home, /12<\/b> ingress modes/);
-  assert.match(home, /10<\/b> export modes/);
-  assert.match(home, /8<\/b> readiness gates/);
-  assert.match(home, /readiness gated/);
-  assert.match(home, /governance exports/);
-  assert.match(home, /Closed-loop improvement with protected regression replay/);
-  assert.match(home, /GET \/v1\/product\/graph/);
-  assert.match(home, /GET \/v1\/product\/capabilities/);
-  assert.match(home, /GET \/v1\/evidence\/readiness/);
-  assert.match(home, /GET \/v1\/account\/api-control-center/);
-  assert.match(home, /secret_values_included: false/);
-  assert.match(home, /Unknown payloads stay opaque/);
-  assert.match(home, /Kolm connects the tools your team already runs/);
+  assert.match(home, /Route your model traffic through one endpoint/);
+  assert.match(home, /Turn captured behavior into a signed artifact/);
+  assert.match(home, /Run it on the smallest runtime that fits/);
+  assert.match(home, /Capture/);
+  assert.match(home, /Compile/);
+  assert.match(home, /Compose/);
+  assert.match(home, /Deploy/);
+  assert.match(home, /.kolm/);
+  assert.match(home, /Ed25519/);
+  assert.match(home, /Get an API key/);
+  assert.match(home, /Read the docs/);
+  assert.match(home, /Own the behavior you/);
+  assert.match(home, /runtime targets/);
+  assert.match(home, /your hardware/);
+  // clean standalone homepage — no kolm-main.css, no heavy product renders inline
+  assert.doesNotMatch(home, /kolm-main.css/);
 
   assert.doesNotMatch(home, /better than every/i);
   assert.doesNotMatch(home, /objectively better/i);
