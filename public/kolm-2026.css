@@ -1361,3 +1361,174 @@ html:not(.js-reveal) .sect-rail__rail .idx::after { transform: scaleY(1); }
    hairline and its own strip, so two lit volumes meet cleanly. */
 .section--ink + .cta-final, .section--lit + .cta-final { border-top: 0; }
 .section--ink:has(+ .cta-final) > .dither-edge { display: none; }
+
+/* ============================================================
+   THE REACTOR v2 — retrofuturist · radioactive · luxury
+   ------------------------------------------------------------
+   An atomic-age control instrument that glows with contained
+   radiation. The wow is built in PURE CSS as real objects — a
+   glowing reactor core and a CRT readout — so it survives with
+   images off and no GPU. Phosphor RADIATES; chrome is material;
+   amber is the one warning light; the black is true obsidian.
+   ============================================================ */
+:root {
+  --reactor: #3FE5A0; --reactor-hi: #7DF7C0; --reactor-core-c: #C8FFEC;
+  --glow-1: rgba(63,229,160,0.55); --glow-2: rgba(63,229,160,0.26); --glow-3: rgba(63,229,160,0.10);
+  --amber: #FFC062; --amber-hot: #FFB400; --amber-glow: rgba(255,178,0,0.55);
+  --obsidian: #06080A;
+  --bezel: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 14%, rgba(0,0,0,0.30));
+  --bezel-ring: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.5);
+}
+
+/* the chamber: obsidian with a real phosphor halo overhead, an amber
+   counter-light, the reactor wash rising from the floor, deep vignette */
+body {
+  background:
+    radial-gradient(1200px 760px at 50% -10%, rgba(63,229,160,0.11), transparent 56%),
+    radial-gradient(900px 560px at 100% -4%, rgba(255,192,98,0.045), transparent 58%),
+    radial-gradient(1500px 950px at 50% 124%, rgba(63,229,160,0.07), transparent 60%),
+    var(--obsidian);
+  background-attachment: fixed;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(140% 130% at 50% 36%, transparent 50%, rgba(2,4,5,0.72) 100%);
+}
+/* scanlines EMIT phosphor light (screen), never subtract it — the live screen */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(125,247,192,0.022) 0 1px, transparent 1px 3px);
+  mix-blend-mode: screen; opacity: 0.6;
+}
+@media (prefers-reduced-motion: no-preference) { body::after { animation: scan 7s linear infinite; } }
+@keyframes scan { from { background-position: 0 0; } to { background-position: 0 600px; } }
+
+/* the one accent word RADIATES — 4-stop bloom that spills past its edges */
+h1 .go, h2 .go, h3 .go, .hero__h1 .go, .compiler-kicker .go {
+  color: var(--reactor-hi); -webkit-text-fill-color: var(--reactor-hi);
+  text-shadow: 0 0 2px var(--reactor-hi), 0 0 14px var(--glow-1), 0 0 40px var(--glow-1), 0 0 92px var(--glow-2);
+}
+@media (prefers-reduced-motion: no-preference) { h1 .go, .hero__h1 .go { animation: reactor-pulse 4.4s var(--ease) infinite; } }
+@keyframes reactor-pulse {
+  0%,100% { text-shadow: 0 0 2px var(--reactor-hi), 0 0 12px var(--glow-2), 0 0 34px var(--glow-3); }
+  50%     { text-shadow: 0 0 3px var(--reactor-core-c), 0 0 22px var(--glow-1), 0 0 60px var(--glow-1), 0 0 112px var(--glow-2); }
+}
+
+/* ---- THE REACTOR CORE: the page's glowing centerpiece (CSS-only DOM object) ---- */
+.reactor-core {
+  position: absolute; z-index: -1; pointer-events: none;
+  width: clamp(320px, 40vw, 560px); aspect-ratio: 1;
+  top: 40%; left: 66%; transform: translate(-50%,-50%);
+  background:
+    radial-gradient(circle, var(--reactor-core-c) 0%, rgba(200,255,236,0.9) 3.4%, transparent 6.4%),
+    radial-gradient(circle, transparent 56%, rgba(125,247,192,0.24) 58% 60.5%, transparent 62%),
+    radial-gradient(circle, transparent 69%, rgba(63,229,160,0.16) 71% 72.5%, transparent 75%),
+    radial-gradient(circle, rgba(125,247,192,0.30) 0%, rgba(63,229,160,0.12) 30%, rgba(63,229,160,0.03) 50%, transparent 66%);
+}
+.reactor-core::after {
+  content: ""; position: absolute; inset: -28%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(63,229,160,0.20), transparent 60%); filter: blur(64px);
+}
+@media (prefers-reduced-motion: no-preference) { .reactor-core { animation: breathe 8s ease-in-out infinite; } }
+@keyframes breathe { 0%,100% { transform: translate(-50%,-50%) scale(0.97); opacity: .9; } 50% { transform: translate(-50%,-50%) scale(1.03); opacity: 1; } }
+.hero--core .reactor-core { left: 84%; top: 28%; width: clamp(240px, 26vw, 400px); }
+/* boot-on: the core ignites once when the page powers up */
+@media (prefers-reduced-motion: no-preference) {
+  .js-reveal .hero .reactor-core { animation: breathe 8s ease-in-out infinite, core-ignite 1100ms var(--ease-enter) both; }
+}
+@keyframes core-ignite { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.35); } 55% { opacity: 1; } 100% { opacity: .9; transform: translate(-50%,-50%) scale(0.97); } }
+
+/* ---- THE REACTOR READOUT: a CRT control instrument (replaces flat slabs) ---- */
+.reactor-readout {
+  position: relative; border-radius: 14px; overflow: hidden; isolation: isolate;
+  background: radial-gradient(120% 120% at 50% 0%, rgba(63,229,160,0.07), transparent 60%), #0B0D0C;
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: var(--bezel-ring), 0 0 0 1px rgba(0,0,0,0.6), 0 40px 90px -34px #000, 0 0 70px -34px var(--glow-1);
+}
+.reactor-readout::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 4;
+  background:
+    repeating-linear-gradient(0deg, rgba(125,247,192,0.03) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 120% at 50% 50%, transparent 58%, rgba(0,0,0,0.5) 100%);
+  mix-blend-mode: screen;
+}
+.reactor-readout__bar {
+  display: flex; align-items: center; gap: 10px; padding: 13px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-3);
+}
+.reactor-readout__led { width: 8px; height: 8px; border-radius: 50%; background: var(--reactor-hi); box-shadow: 0 0 10px var(--glow-1), 0 0 22px var(--glow-2); }
+.reactor-readout__led--amber { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber-glow), 0 0 18px var(--amber-glow); margin-left: auto; }
+@media (prefers-reduced-motion: no-preference) { .reactor-readout__led { animation: pilot 2.4s ease-in-out infinite; } }
+.reactor-readout__row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 15px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.reactor-readout__row:last-child { border-bottom: 0; }
+.reactor-readout__row b { font-family: var(--mono); font-weight: var(--weight-ui); font-size: 12.5px; letter-spacing: 0.04em; color: var(--ink); }
+.reactor-readout__row em { display: block; margin-top: 3px; font-style: normal; font-size: 12px; color: var(--ink-3); letter-spacing: 0; }
+.reactor-readout__row > div { min-width: 0; }
+.reactor-readout__val { font-family: var(--mono); font-size: 13px; color: var(--reactor-hi); text-shadow: 0 0 16px var(--glow-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.reactor-readout__row--live .reactor-readout__val { color: var(--reactor-core-c); text-shadow: 0 0 4px var(--reactor-hi), 0 0 22px var(--glow-1); }
+
+/* ---- gauge cluster: the hero command strip becomes a graphite instrument bar ---- */
+.hero-command-strip {
+  display: inline-grid; grid-auto-flow: column; gap: 0; margin-top: var(--s6);
+  border-radius: 12px; overflow: hidden; width: fit-content;
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01)) padding-box, var(--bezel) border-box;
+  border: 1px solid transparent; box-shadow: var(--bezel-ring), 0 18px 50px -28px #000;
+}
+.hero-command-strip span {
+  display: flex; flex-direction: column-reverse; gap: 5px; padding: 13px 22px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ink-3);
+}
+.hero-command-strip span:last-child { border-right: 0; }
+.hero-command-strip b {
+  font-family: var(--mono); font-weight: var(--weight-ui); font-size: clamp(24px, 2.6vw, 34px); line-height: 1;
+  color: var(--reactor-hi); text-shadow: 0 0 18px var(--glow-2); font-variant-numeric: tabular-nums;
+}
+
+/* ---- chrome/graphite bezel as a real material on the instruments ---- */
+.card, .plate {
+  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)) padding-box, var(--bezel) border-box;
+  border: 1px solid transparent;
+  box-shadow: var(--bezel-ring), 0 1px 0 rgba(255,255,255,0.03);
+}
+.card:hover, .plate:hover {
+  border-color: transparent;
+  box-shadow: var(--bezel-ring), 0 0 0 1px var(--accent-edge), 0 22px 56px -20px #000, 0 0 46px -16px var(--glow-1);
+}
+
+/* ---- the primary action: the single hottest control on the page ---- */
+.btn--primary, .nav__cta, .nav__cta.is-solid {
+  background: linear-gradient(180deg, var(--reactor-hi), var(--reactor) 62%);
+  color: var(--on-accent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 0 0 1px var(--accent-edge), 0 8px 30px -8px var(--glow-1);
+}
+.btn--primary:hover, .nav__cta:hover, .nav__cta.is-solid:hover {
+  background: linear-gradient(180deg, #9DFAD0, var(--reactor-hi) 62%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 0 0 1px var(--accent), 0 0 0 5px var(--glow-3), 0 10px 46px -6px var(--glow-1);
+}
+
+/* the eyebrow's dot is a live reactor pilot-light */
+.eyebrow::before, .compiler-kicker::before { background: var(--reactor-hi); box-shadow: 0 0 10px var(--glow-1), 0 0 22px var(--glow-2); }
+@media (prefers-reduced-motion: no-preference) { .eyebrow::before { animation: pilot 2.6s ease-in-out infinite; } }
+@keyframes pilot { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+/* mono instrument readouts emit a crisp-cored phosphor */
+.card__k { color: var(--reactor-hi); }
+.metric__n { color: var(--reactor-hi); text-shadow: 0 0 2px var(--reactor-hi), 0 0 22px var(--glow-2); font-variant-numeric: tabular-nums; }
+
+/* an amber warning pill — the rare second light (interior heroes / armed states) */
+.armed-pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--amber);
+  border: 1px solid rgba(255,192,98,0.30); background: rgba(255,192,98,0.06);
+}
+.armed-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber-glow), 0 0 16px var(--amber-glow); }
+
+::selection { background: rgba(63,229,160,0.30); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  body::after, h1 .go, .hero__h1 .go, .eyebrow::before, .reactor-core, .reactor-readout__led { animation: none; }
+}
+/* ===================== /THE REACTOR v2 ===================== */

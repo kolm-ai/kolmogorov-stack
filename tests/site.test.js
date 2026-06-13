@@ -511,8 +511,10 @@ test('homepage exposes control-plane loop without overclaiming', () => {
   assert.match(home, /hero-image-two__caption/);
   assert.match(home, /<img src="\/compiler-brand-hero\.png" alt="Kolm API Control Center visual showing capture, policy, compile, and export lanes\." width="1200" height="630"/);
   assert.match(home, /behavior-to-artifact control plane/);
-  assert.match(home, /Enterprise AI\/API control plane/);
+  assert.match(home, /The AI compiler/);
   assert.match(home, /API Control Center/);
+  assert.match(home, /reactor-core/);
+  assert.match(home, /reactor-readout/);
   assert.match(home, /Command Deck/);
   assert.match(home, /Control every API signal into proof/);
   assert.match(home, /hero-command-strip/);
@@ -586,7 +588,7 @@ test('primary compiler pages use the image-2 paper design contract', () => {
     assert.match(html, /data-design-reference="image-2"/, `${file} should keep the image-2 design marker`);
 
     if (IMAGE_TWO_SOCIAL_CARD_FILES.has(file)) {
-      assert.match(html, /<meta name="theme-color" content="#E4ECE7">/, `${file} should use the reactor-glass browser theme`);
+      assert.match(html, /<meta name="theme-color" content="#06080A">/, `${file} should use the obsidian reactor browser theme`);
       assert.match(html, /compiler-brand-hero\.png/, `${file} should use the compiler social card`);
       assert.doesNotMatch(html, /https:\/\/kolm\.ai\/brand-hero\.png/, `${file} should not use the retired audit social card`);
     }
@@ -858,7 +860,7 @@ test('generated API reference is an operating surface, not a route dump', () => 
   const api = fs.readFileSync(path.join('public', 'docs', 'api.html'), 'utf8');
 
   assert.match(api, /<title>API reference - kolm\.ai<\/title>/);
-  assert.match(api, /<meta name="theme-color" content="#E4ECE7">/);
+  assert.match(api, /<meta name="theme-color" content="#06080A">/);
   assert.match(api, /compiler-brand-hero\.png/);
   assert.match(api, /kolm-2026\.css/);
   assert.match(api, /compiler-site--paper api-reference-page/);

@@ -9,7 +9,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 <title>kolm.ai - API behavior in. Device-fit models out.</title>
 <meta name="description" content="Kolm is the behavior-to-artifact control plane for enterprise AI/API systems: capture traffic, enforce policy, evaluate failures, compile signed .kolm artifacts, and export proof.">
-<meta name="theme-color" content="#E4ECE7">
+<meta name="theme-color" content="#06080A">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -83,7 +83,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-  <section class="section section--flush hero compiler-hero" data-design-reference="image-2" aria-label="Enterprise AI/API control plane">
+  <section class="section section--flush hero compiler-hero hero--reactor" data-design-reference="image-2" aria-label="The AI compiler">
+    <div class="reactor-core" aria-hidden="true"></div>
     <div class="field" aria-hidden="true"><canvas></canvas></div>
     <div class="hero-image-two kolm-hero-system" aria-label="Kolm API Control Center product artifact">
       <img src="/compiler-brand-hero.png" alt="Kolm API Control Center visual showing capture, policy, compile, and export lanes." width="1200" height="630" loading="eager" decoding="async">
@@ -106,6 +107,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <span><b>8</b> open gates</span>
           </div>
         </div>
+        <aside class="reactor-readout" data-enter="4" aria-label="Live control readout">
+          <div class="reactor-readout__bar"><span class="reactor-readout__led"></span>/// control readout<span class="reactor-readout__led--amber" title="readiness gated"></span></div>
+          <div class="reactor-readout__row reactor-readout__row--live"><div><b>Capture</b><em>every credible API + data channel</em></div><span class="reactor-readout__val">17 ch</span></div>
+          <div class="reactor-readout__row"><div><b>Govern</b><em>policy before interpretation</em></div><span class="reactor-readout__val">8 gates</span></div>
+          <div class="reactor-readout__row"><div><b>Compile</b><em>signed <code>.kolm</code> artifact</em></div><span class="reactor-readout__val">Ed25519</span></div>
+          <div class="reactor-readout__row"><div><b>Deploy</b><em>smallest runtime that fits</em></div><span class="reactor-readout__val">5 targets</span></div>
+        </aside>
       </div>
     </div>
   </section>

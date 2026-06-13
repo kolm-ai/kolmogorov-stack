@@ -1606,6 +1606,46 @@
         }
       }
     },
+    "/v1/account/api-control-center/adapter-manifests/validate": {
+      "post": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "postV1AccountApicontrolcenterAdaptermanifestsValidate",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericRequest"
+              },
+              "example": {
+                "ok": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/account/api-control-center/events": {
       "post": {
         "tags": [
@@ -1627,6 +1667,109 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/account/api-control-center/exports": {
+      "get": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "getV1AccountApicontrolcenterExports",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "postV1AccountApicontrolcenterExports",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericRequest"
+              },
+              "example": {
+                "ok": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/account/api-control-center/exports/{id}": {
+      "get": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "getV1AccountApicontrolcenterExportsId",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id path parameter"
+          }
+        ],
+        "x-kolm-source-indexed": true,
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"
