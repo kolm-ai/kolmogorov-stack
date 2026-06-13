@@ -1430,7 +1430,7 @@ p { color: var(--ink-2); }
 
 /* buttons — refined, small radius, one green primary, no glow */
 .btn { font-family: var(--sans); font-weight: var(--weight-ui); font-size: 14px; letter-spacing: -0.006em; border-radius: var(--r-md); padding: 9px 16px; min-height: 38px; gap: 7px; transition: background 140ms var(--ease), border-color 140ms, color 140ms; }
-.btn--primary, .nav__cta, .nav__cta.is-solid { background: var(--accent); color: var(--on-accent); border: 0; box-shadow: none; }
+.btn--primary { background: var(--accent); color: var(--on-accent); border: 0; box-shadow: none; }
 .btn--primary:hover, .nav__cta:hover, .nav__cta.is-solid:hover { background: var(--accent-hi); color: var(--on-accent); box-shadow: none; transform: none; border: 0; }
 .btn--primary::after { display: none; }
 .btn--ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-2); box-shadow: none; }
@@ -1512,7 +1512,7 @@ p a:not([class]):hover { border-bottom-color: var(--accent); }
 /* proof + cta */
 .proof__row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 44px 0; }
 .proof__cell b { display: block; font-family: var(--display); font-size: clamp(28px, 3vw, 42px); font-weight: 560; letter-spacing: -0.022em; color: var(--ink); }
-.proof__cell span { display: block; margin-top: 7px; font-size: 13.5px; color: var(--ink-3); }
+.proof__cell span { display: block; margin-top: 7px; font-size: 13.5px; color: var(--ink-2); }
 .cta { text-align: center; }
 .cta__in { max-width: 620px; margin: 0 auto; }
 .cta h2 { margin-bottom: 16px; }
@@ -1573,7 +1573,7 @@ p a:not([class]):hover { border-bottom-color: var(--accent); }
 .ui::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: linear-gradient(180deg, rgba(255,255,255,0.045), transparent 16%); }
 
 /* premium green CTA — refined gradient + soft glow */
-.btn--primary, .nav__cta, .nav__cta.is-solid {
+.btn--primary {
   background: linear-gradient(180deg, #54EAAC, var(--accent) 72%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.42), 0 2px 16px -5px rgba(63,229,160,0.42);
 }
@@ -1639,17 +1639,17 @@ p a:not([class]):hover { border-bottom-color: var(--accent); }
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
   pointer-events: none; z-index: 2;
 }
-.card:hover, .plate:hover, .panel:hover { transform: translateY(-3px); box-shadow: var(--glass-shadow), inset 1px 1px 0 0 var(--glass-rim-2), inset 0 1px 0 0 var(--glass-rim), inset 0 -1px 0 0 var(--glass-edge); }
+.card:hover, .plate:hover, .panel:hover { transform: translateY(-3px); box-shadow: var(--glass-shadow), inset 1px 1px 0 0 var(--glass-rim-2), inset 0 1px 0 0 rgba(255,255,255,.28), inset 0 -1px 0 0 var(--glass-edge); }
 /* nav — Regular glass, floating control layer */
 .nav { background: var(--glass-tint); backdrop-filter: blur(16px) saturate(var(--glass-sat)); -webkit-backdrop-filter: blur(16px) saturate(var(--glass-sat)); border-bottom: 1px solid var(--glass-hair); box-shadow: inset 0 1px 0 0 var(--glass-rim-2), 0 1px 0 0 rgba(0,0,0,.4); }
 /* primary CTA — pill, real press; exactly ONE solid green (nav demoted) */
-.btn--primary, .nav__cta.is-solid { border-radius: var(--r-pill); background: linear-gradient(180deg,#54EAAC,var(--accent) 72%); box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 6px 18px rgba(63,229,160,.28), 0 1px 2px rgba(0,0,0,.4); transition: transform var(--press), box-shadow var(--press), background var(--press); }
-.btn--primary:active, .nav__cta.is-solid:active { transform: translateY(1px) scale(.985); box-shadow: inset 0 1px 2px rgba(0,0,0,.25), 0 2px 8px rgba(63,229,160,.22); }
+.btn--primary { border-radius: var(--r-pill); background: linear-gradient(180deg,#54EAAC,var(--accent) 72%); box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 6px 18px rgba(63,229,160,.28), 0 1px 2px rgba(0,0,0,.4); transition: transform var(--press), box-shadow var(--press), background var(--press); }
+.btn--primary:active { transform: translateY(1px) scale(.985); box-shadow: inset 0 1px 2px rgba(0,0,0,.25), 0 2px 8px rgba(63,229,160,.22); }
 .btn--ghost { border-radius: var(--r-pill); }
-.nav .nav__cta.is-solid { background: transparent !important; color: var(--ink) !important; border: 1px solid var(--glass-hair) !important; box-shadow: none !important; background-image: none !important; }
+.nav__cta.is-solid { background: transparent; color: var(--ink); border: 1px solid var(--glass-hair); border-radius: var(--r-pill); box-shadow: none; }
 .nav__cta.is-solid:hover { background: var(--surface-4); border-color: var(--line-2); }
 /* hero secondary visibly lighter — eye lands on green */
-.hero__cta .btn--ghost { color: var(--ink-3); border-color: var(--line); background: transparent; }
+.hero__cta .btn--ghost { color: var(--ink-2); border-color: var(--line-2); background: transparent; }
 .hero__cta .btn--ghost:hover { color: var(--ink); border-color: var(--line-2); background: rgba(255,255,255,0.03); }
 /* .ui showpiece — Clear glass, real material, 3-part contact shadow */
 .ui { background: var(--glass-tint-clear); backdrop-filter: blur(20px) saturate(var(--glass-sat)) brightness(var(--glass-bright)); -webkit-backdrop-filter: blur(20px) saturate(var(--glass-sat)); border: 0; box-shadow: var(--glass-shadow), var(--halo-accent); margin-top: clamp(28px,4vw,56px); }
@@ -1681,3 +1681,5 @@ p a:not([class]):hover { border-bottom-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { .card, .plate, .panel, .ui { transition: none; } .ui__tick-from, .ui__tick-to { animation: none; } }
 @media (prefers-contrast: more) { :root { --glass-hair: rgba(255,255,255,.3); --glass-tint: rgba(12,13,14,.82); } }
 /* ===================== /LIQUID GLASS ===================== */
+
+.proof__cell b.is-mono { font-family: var(--mono); font-size: clamp(22px, 2.2vw, 30px); background: none; -webkit-text-fill-color: var(--ink); color: var(--ink); }

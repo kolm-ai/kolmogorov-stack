@@ -51,7 +51,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 </head>
 <body class="home">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="glass-refract" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="2" seed="42" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="s"/><feDisplacementMap in="SourceGraphic" in2="s" scale="32" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="glass-refract" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="42" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="s"/><feDisplacementMap in="SourceGraphic" in2="s" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -117,7 +117,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="feat__copy">
         <p class="eyebrow">Capture</p>
         <h2>Route your model traffic through one endpoint.</h2>
-        <p class="lede">Point your OpenAI- or Anthropic-compatible calls at Kolm. Every prompt, completion, tool call, cost and routing decision becomes governed, redacted, replayable state &mdash; with no SDK rewrite.</p>
+        <p class="lede">One endpoint governs every prompt, completion, tool call and routing decision &mdash; each one redacted, replayable, and exportable, with no SDK rewrite.</p>
         <ul class="feat__list">
           <li>Drop-in proxy &middot; keep your provider keys in one vault</li>
           <li>Redaction before persistence &middot; secrets never stored</li>
@@ -195,8 +195,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="proof__row">
         <div class="proof__cell"><b>17</b><span>capture channels</span></div>
         <div class="proof__cell"><b>5</b><span>runtime targets</span></div>
-        <div class="proof__cell"><b>Ed25519</b><span>signed artifacts</span></div>
-        <div class="proof__cell"><b>100%</b><span>your hardware</span></div>
+        <div class="proof__cell"><b class="is-mono">Ed25519</b><span>signed artifacts</span></div>
+        <div class="proof__cell"><b>142 MB</b><span>median signed artifact</span></div>
       </div>
     </div>
   </section>
@@ -206,8 +206,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Own the behavior you&rsquo;re renting.</h2>
       <p class="lede">Route one namespace through Kolm and compile your first artifact in an afternoon.</p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="/signup">Get an API key</a>
-        <a class="btn btn--ghost" href="/docs">Read the docs</a>
+        <a class="btn btn--primary" href="/signup">Start compiling</a>
+        <a class="btn btn--ghost" href="/contact">Talk to an engineer</a>
       </div>
     </div>
   </section>
