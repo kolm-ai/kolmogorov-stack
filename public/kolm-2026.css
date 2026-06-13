@@ -1495,3 +1495,16 @@ h1 .go, h2 .go, h3 .go, .hero__h1 .go, .compiler-kicker .go {
 ::selection { background: rgba(63,229,160,0.28); color: #fff; }
 @media (prefers-reduced-motion: reduce) { body::after, .hero__h1 .go, .eyebrow::before, .reactor-core, .reactor-readout__led { animation: none; } }
 /* ===================== /THE REACTOR v3 ===================== */
+
+/* ---- render gallery: the gpt-image-2 instrument family, in hairline frames ---- */
+.render-gallery__h { max-width: 24ch; margin-bottom: clamp(36px, 4vw, 56px); }
+.render-gallery__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 2.4vw, 34px); }
+.render-card { margin: 0; display: flex; flex-direction: column; gap: var(--s4); }
+.render-card__frame { position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 4 / 3;
+  border: 1px solid var(--edge); border-top-color: var(--edge-top); box-shadow: var(--lift), 0 30px 70px -38px #000; background: #090B0D; }
+.render-card__frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 600ms var(--ease); }
+.render-card:hover .render-card__frame { border-color: rgba(255,255,255,0.15); box-shadow: var(--lift), 0 34px 84px -34px #000, 0 0 54px -24px var(--glow-1); }
+.render-card:hover .render-card__frame img { transform: scale(1.035); }
+.render-card figcaption b { display: block; font-family: var(--sans); font-weight: var(--weight-ui); font-size: 16px; color: var(--ink); margin-bottom: 5px; letter-spacing: -0.01em; }
+.render-card figcaption span { display: block; font-size: 14px; line-height: 1.55; color: var(--ink-3); }
+@media (max-width: 860px) { .render-gallery__grid { grid-template-columns: 1fr; max-width: 460px; } }
