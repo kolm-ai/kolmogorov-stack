@@ -292,6 +292,15 @@ app.use((req, res, next) => {
 // avoid leaking stack-tail strings or internal paths and `error_id` is a
 // short opaque id the operator can grep for in logs and Sentry.
 app.use((err, req, res, _next) => {
+  // Client errors from body parsing/limits — return a clean, self-explanatory
+  // 400/413 instead of a scary 500. (First-touch DX: malformed JSON and
+  // oversized bodies are the most common early failures.)
+  if (err && (err.type === 'entity.parse.failed' || err.status === 400 || err.statusCode === 400)) {
+    return res.status(400).json({ ok: false, error: 'invalid_json', detail: 'Request body is not valid JSON.' });
+  }
+  if (err && (err.type === 'entity.too.large' || err.status === 413 || err.statusCode === 413)) {
+    return res.status(413).json({ ok: false, error: 'payload_too_large', detail: 'Request body exceeds the size limit.' });
+  }
   // Short error id — 12 hex chars from a timestamped random source. Stable
   // for the lifetime of the response; surfaced to the client AND logged so
   // an operator can correlate the user's report with the server log/Sentry.
