@@ -85,7 +85,7 @@
   /* spacing + grid */
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px; --s10:128px;
   --section-y:clamp(80px,10vw,128px); --rhy-1:clamp(40px,4.5vw,64px); --rhy-2:clamp(64px,7.5vw,104px); --rhy-3:var(--section-y);
-  --maxw:1200px; --maxw-prose:680px; --gutter:24px; --nav-h:62px;
+  --maxw:1200px; --maxw-prose:680px; --gutter:24px; --nav-h:56px;
   /* radius + elevation */
   --r-sm:2px; --r-md:6px; --r-lg:8px; --r-xl:12px; --r-pill:999px;
   --ring-inset:inset 0 1px 0 0 rgba(255,255,255,.06);
@@ -288,7 +288,7 @@ em { font-style: italic; font-weight: 400; }
   -webkit-backdrop-filter: saturate(140%) blur(12px);
   border-bottom: 1px solid var(--line);
 }
-.nav__in { display: flex; align-items: center; gap: var(--s5); height: 62px; }
+.nav__in { display: flex; align-items: center; gap: var(--s5); height: 56px; }
 .nav__brand { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; font-family: var(--display); font-weight: 640; font-size: 18.5px; letter-spacing: 0; color: var(--ink); }
 .nav__brand svg { width: 20px; height: 20px; }
 .nav__brand svg rect { fill: var(--accent); }
@@ -1384,19 +1384,22 @@ html:not(.js-reveal) .sect-rail__rail .idx::after { transform: scaleY(1); }
 /* a deeper, calmer chamber with more air */
 body {
   background:
-    radial-gradient(1300px 820px at 50% -12%, rgba(63,229,160,0.08), transparent 56%),
-    radial-gradient(1000px 600px at 100% -6%, rgba(255,192,98,0.028), transparent 58%),
-    radial-gradient(1600px 1000px at 50% 126%, rgba(63,229,160,0.05), transparent 60%),
+    radial-gradient(1300px 840px at 50% -12%, rgba(63,229,160,0.10), transparent 56%),
+    radial-gradient(1600px 1000px at 50% 128%, rgba(63,229,160,0.05), transparent 60%),
     var(--obsidian);
   background-attachment: fixed;
   font-size: 16px; line-height: 1.6; letter-spacing: -0.006em;
 }
+/* deep vignette: the chamber corners fall to near-pure black — luxe depth */
 body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(150% 140% at 50% 34%, transparent 54%, rgba(2,4,5,0.64) 100%); }
-/* the faintest static CRT phosphor scanlines — texture, not effect */
+  background: radial-gradient(145% 135% at 50% 32%, transparent 46%, rgba(1,2,3,0.82) 100%); }
+/* FELT CRT phosphor scanlines — present texture, not subliminal */
 body::after { content: ""; position: fixed; inset: 0; z-index: 9998; pointer-events: none;
-  background: repeating-linear-gradient(0deg, rgba(125,247,192,0.012) 0 1px, transparent 1px 5px);
-  mix-blend-mode: screen; opacity: 0.22; }
+  background: repeating-linear-gradient(0deg, rgba(125,247,192,0.05) 0 1px, transparent 1px 4px);
+  mix-blend-mode: screen; opacity: 0.6; }
+/* fine film grain — gives the black a tooth (luxe, not flat) */
+html::after { content: ""; position: fixed; inset: 0; z-index: 9997; pointer-events: none;
+  background-image: var(--grain); background-size: 150px 150px; opacity: 0.045; mix-blend-mode: overlay; }
 
 /* more breathing room between sections — air is the luxury */
 .section { padding-block: clamp(88px, 11vw, 150px); }
@@ -1405,22 +1408,23 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 9998; pointer-eve
 /* the one accent word radiates — refined, softer two-stop bloom */
 h1 .go, h2 .go, h3 .go, .hero__h1 .go, .compiler-kicker .go {
   color: var(--reactor-hi); -webkit-text-fill-color: var(--reactor-hi);
-  text-shadow: 0 0 8px var(--glow-1), 0 0 24px var(--glow-2);
+  text-shadow: 0 0 10px var(--glow-1), 0 0 30px var(--glow-1), 0 0 64px var(--glow-2);
 }
 
 /* ---- REACTOR CORE: an elegant glowing well + fine containment rings ---- */
 .reactor-core {
   position: absolute; z-index: -1; pointer-events: none;
-  width: clamp(340px, 40vw, 600px); aspect-ratio: 1; top: 42%; left: 66%; transform: translate(-50%,-50%);
+  width: clamp(440px, 44vw, 660px); aspect-ratio: 1; top: 40%; left: 72%; transform: translate(-50%,-50%);
   background:
-    radial-gradient(circle, transparent 51.5%, rgba(125,247,192,0.16) 53% 54%, transparent 56%),
-    radial-gradient(circle, transparent 65%, rgba(63,229,160,0.10) 66.5% 67.5%, transparent 70%),
-    radial-gradient(circle, rgba(125,247,192,0.22) 0%, rgba(63,229,160,0.09) 26%, rgba(63,229,160,0.025) 46%, transparent 62%);
+    radial-gradient(circle, transparent 47.5%, rgba(125,247,192,0.30) 49% 50.5%, transparent 53%),
+    radial-gradient(circle, transparent 60%, rgba(63,229,160,0.20) 61.5% 62.5%, transparent 65%),
+    radial-gradient(circle, transparent 72%, rgba(63,229,160,0.11) 73% 74%, transparent 77%),
+    radial-gradient(circle, rgba(207,255,238,0.18) 0%, rgba(125,247,192,0.32) 9%, rgba(63,229,160,0.16) 30%, rgba(63,229,160,0.05) 50%, transparent 66%);
 }
-.reactor-core::after { content: ""; position: absolute; inset: -22%; border-radius: 50%; background: radial-gradient(circle, rgba(63,229,160,0.08), transparent 60%); filter: blur(58px); }
+.reactor-core::after { content: ""; position: absolute; inset: -24%; border-radius: 50%; background: radial-gradient(circle, rgba(63,229,160,0.20), transparent 60%); filter: blur(64px); }
 @media (prefers-reduced-motion: no-preference) { .reactor-core { animation: breathe 9s ease-in-out infinite; } }
-@keyframes breathe { 0%,100% { transform: translate(-50%,-50%) scale(0.98); opacity: .9; } 50% { transform: translate(-50%,-50%) scale(1.02); opacity: 1; } }
-.hero--core .reactor-core { left: 86%; top: 26%; width: clamp(240px, 26vw, 400px); }
+@keyframes breathe { 0%,100% { transform: translate(-50%,-50%) scale(0.99); opacity: .92; } 50% { transform: translate(-50%,-50%) scale(1.03); opacity: 1; } }
+.hero--core .reactor-core { left: 84%; top: 28%; width: clamp(300px, 30vw, 480px); }
 @media (prefers-reduced-motion: no-preference) { .js-reveal .hero .reactor-core { animation: breathe 9s ease-in-out infinite, ignite 1200ms var(--ease-enter) both; } }
 @keyframes ignite { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); } 60% { opacity: 1; } 100% { opacity: .9; transform: translate(-50%,-50%) scale(0.98); } }
 

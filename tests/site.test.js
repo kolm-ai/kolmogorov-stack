@@ -514,7 +514,8 @@ test('homepage exposes control-plane loop without overclaiming', () => {
   assert.match(home, /The AI compiler/);
   assert.match(home, /API Control Center/);
   assert.match(home, /reactor-core/);
-  assert.match(home, /reactor-readout/);
+  assert.match(home, /hero-render/);
+  assert.match(home, /img\/kn-hero-reactor\.png/);
   assert.match(home, /Command Deck/);
   assert.match(home, /Control every API signal into proof/);
   assert.match(home, /hero-command-strip/);
