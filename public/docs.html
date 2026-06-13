@@ -3,91 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
+<script>
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Docs: Connect Logs, Verify Signed Reports · kolm.ai</title>
-<meta name="description" content="Connect the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference or gateway logs), run the audit, verify signed reports offline.">
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
+<title>Kolm Developer Docs</title>
+<meta name="description" content="Developer docs for Kolm: API routes, OpenAPI, API Control Center, data ingress, exports, eval gates, compile runs, artifacts, receipts, runtime targets, and readiness.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="Docs: Connect Logs, Verify Signed Reports">
-<meta property="og:description" content="Connect the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference or gateway logs), run the audit, verify signed reports offline.">
+<meta property="og:title" content="Kolm Developer Docs">
+<meta property="og:description" content="Build the behavior-to-artifact loop with route docs, OpenAPI, API Control Center contracts, data channels, artifacts, receipts, and readiness gates.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Docs: Connect Logs, Verify Signed Reports">
-<meta name="twitter:description" content="Connect the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference or gateway logs), run the audit, verify signed reports offline.">
+<meta name="twitter:title" content="Kolm Developer Docs">
+<meta name="twitter:description" content="Route behavior in, govern it, compile artifacts, target runtimes, and export evidence through documented APIs.">
+<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  "headline": "Docs: Connect Logs, Verify Signed Reports",
-  "description": "Connect the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference or gateway logs), run the audit, verify signed reports offline.",
+  "name": "Kolm Developer Docs",
   "url": "https://kolm.ai/docs",
-  "inLanguage": "en",
-  "author": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "description": "Developer docs for Kolm: API routes, OpenAPI, API Control Center, data ingress, exports, eval gates, compile runs, artifacts, receipts, runtime targets, and readiness.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
-    { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://kolm.ai/docs" }
-  ]
-}
-</script>
+<style>
+  .docs-hero .hero__h1{max-width:14ch;text-wrap:balance}
+  .docs-hero .lede{max-width:64ch}
+  .docs-panel{min-width:0;padding:clamp(18px,2.6vw,26px);border:1px solid var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.048),rgba(255,255,255,.014)),var(--paper-2);box-shadow:inset 0 1px 0 var(--light-top),0 30px 96px rgba(0,0,0,.36)}
+  .docs-panel__head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+  .docs-panel__head b{color:var(--ink)}
+  .docs-flow{display:grid;gap:10px;margin-top:14px}
+  .docs-flow__row{display:grid;grid-template-columns:120px minmax(0,1fr) max-content;gap:12px;align-items:center;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:rgba(9,12,13,.52);color:var(--ink-2);font:500 11.5px var(--mono)}
+  .docs-flow__row b{color:var(--ink)}
+  .docs-flow__row i{height:5px;border-radius:999px;background:linear-gradient(90deg,var(--accent) var(--fill,60%),rgba(229,240,234,.13) 0);box-shadow:0 0 18px rgba(63,229,160,.15)}
+  .docs-grid{min-width:0;display:grid;grid-template-columns:minmax(180px,.28fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:start}
+  .docs-grid > *{min-width:0}
+  .docs-nav{position:sticky;top:94px;min-width:0;max-width:100%;display:grid;gap:2px;font-family:var(--mono);font-size:12px}
+  .docs-nav a{min-width:0;min-height:38px;display:flex;align-items:center;padding:7px 10px;border-left:1px solid var(--line);color:var(--ink-3);touch-action:manipulation;overflow-wrap:anywhere}
+  .docs-nav a:hover{color:var(--ink);border-left-color:var(--accent);background:rgba(255,255,255,.024)}
+  .docs-nav a:focus-visible{color:var(--ink);border-left-color:var(--accent);background:rgba(255,255,255,.024);outline:2px solid var(--accent);outline-offset:2px}
+  .docs-block{scroll-margin-top:96px;padding:34px 0;border-top:1px solid var(--line)}
+  .docs-block:first-child{padding-top:0;border-top:0}
+  .docs-block h2{max-width:24ch;text-wrap:balance}
+  .docs-copy{max-width:72ch;color:var(--ink-2);font-size:15px;line-height:1.68}
+  .docs-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+  .docs-link{min-height:158px;display:grid;align-content:start;gap:10px;padding:18px;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.038),rgba(255,255,255,.012)),var(--paper-2);color:var(--ink-2)}
+  .docs-link:hover{border-color:var(--accent-edge);color:var(--ink)}
+  .docs-link:focus-visible{border-color:var(--accent-edge);color:var(--ink);outline:2px solid var(--accent);outline-offset:2px}
+  .docs-link b{color:var(--ink);font-family:var(--display);font-size:21px;line-height:1.15}
+  .docs-link span{font-size:13.5px;line-height:1.55}
+  .docs-list{display:grid;gap:10px;margin:22px 0 0;padding:0;list-style:none}
+  .docs-list li{padding:14px 16px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018);color:var(--ink-2);font-size:14px;line-height:1.62;overflow-wrap:anywhere}
+  .docs-list code,.docs-copy code{font-family:var(--mono);font-size:.92em;color:var(--accent-text);background:rgba(63,229,160,.08);border:1px solid rgba(63,229,160,.18);border-radius:4px;padding:1px 4px}
+  .docs-code{max-width:100%;margin:22px 0 0;padding:18px;border:1px solid var(--line-top);border-radius:8px;background:var(--paper-sink);box-shadow:inset 0 1px 0 var(--light-top);overflow-x:auto;color:var(--ink-2);font:500 12px/1.72 var(--mono);tab-size:2}
+  .docs-matrix{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:22px}
+  .docs-matrix .proof-card{min-height:196px}
+  .docs-matrix .card__k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+  .docs-table{display:grid;gap:8px;margin-top:22px}
+  .docs-table div{display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018);font-size:13px;color:var(--ink-2)}
+  .docs-table b{color:var(--ink);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+  @media (max-width:1080px){.docs-grid{grid-template-columns:1fr}.docs-nav{position:static;grid-template-columns:repeat(3,minmax(0,1fr))}.docs-links,.docs-matrix{grid-template-columns:repeat(2,minmax(0,1fr))}.docs-flow__row{grid-template-columns:104px minmax(0,1fr) max-content}}
+  @media (max-width:680px){.docs-nav,.docs-links,.docs-matrix{grid-template-columns:1fr}.docs-table div,.docs-flow__row{grid-template-columns:1fr}.docs-panel__head{display:grid}.docs-flow__row i{width:100%}}
+  @media (prefers-reduced-motion:reduce){.docs-link{transition:none}}
+</style>
 </head>
-<body>
+<body class="compiler-site">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
-<hr class="foil-strip" aria-hidden="true">
-
-<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
+      <a href="/#pipeline">Pipeline</a>
+      <a href="/account/api-control-center">Control</a>
+      <a href="/integrations">Integrations</a>
+      <a href="/runtimes">Runtimes</a>
+      <a href="/compare">Compare</a>
       <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost btn--sm" href="/docs/api">API Reference</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Create Workspace</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -96,807 +113,206 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-
-<!-- ============================================================ HERO / OVERTURE -->
-<section class="section section--flush hero">
-  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
-  <div class="wrap">
-    <div style="max-width:70ch">
-      <p class="eyebrow">Documentation</p>
-      <h1>Logs in. Signed evidence out. <span class="go">Every endpoint, documented.</span></h1>
-      <p class="lede">
-        kolm audits your AI application: the agent and every tool, endpoint, identity and
-        data flow around it, from the logs you already have. These docs cover the whole API
-        surface: send telemetry to <span style="font-family:var(--mono);font-size:0.92em">/v1/audit</span>,
-        read the signed envelope, and let your reviewer verify it offline against your key.
-      </p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="#quickstart">Run the first scan</a>
-        <a class="btn btn--ghost" href="/verify">Open the verifier</a>
-      </div>
-      <div class="hero__proof" aria-label="What the docs assume">
-        <span><i class="dot" aria-hidden="true"></i>Real endpoints, real field names</span>
-        <span><i class="dot" aria-hidden="true"></i>One canonicalization, everywhere</span>
-        <span><i class="dot" aria-hidden="true"></i>Apache-2.0 verifier</span>
-      </div>
-    </div>
-
-    <div class="steps" style="margin-top:var(--s7)">
-      <div class="step">
-        <span class="step__n">Step 01</span>
-        <h3>Send the logs</h3>
-        <p>One curl to <span style="font-family:var(--mono);font-size:0.92em">POST /v1/audit/scan</span> with the telemetry your application already emits. <a href="#quickstart" class="card__map" style="margin-top:10px;display:block"><span style="border-bottom:1px solid var(--line-2)">Go to quickstart</span></a></p>
-      </div>
-      <div class="step">
-        <span class="step__n">Step 02</span>
-        <h3>Read the envelope</h3>
-        <p>One canonical JSON object: findings, evidence digest, passport, and the Ed25519 signature over the exact bytes. <a href="#envelope" class="card__map" style="margin-top:10px;display:block"><span style="border-bottom:1px solid var(--line-2)">Go to the envelope</span></a></p>
-      </div>
-      <div class="step">
-        <span class="step__n">Step 03</span>
-        <h3>Verify it offline</h3>
-        <p>Your reviewer checks the signature in the browser, in a script, or against the API. <a href="#verify" class="card__map" style="margin-top:10px;display:block"><span style="border-bottom:1px solid var(--line-2)">Go to verify</span></a></p>
-      </div>
-    </div>
-
-    <figure class="diag reveal" role="img" aria-label="Audit pipeline: application logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
-    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="dg-flow" d="M158 68 H198 M380 68 H420 M602 68 H630"/>
-      <rect class="dg-box" x="8" y="36" width="150" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="56">Input</text>
-      <text class="dg-t" x="22" y="76">App telemetry</text>
-      <text class="dg-mono" x="22" y="92">import or capture</text>
-      <polygon class="dg-ok" points="198,68 190,63.5 190,72.5"/>
-      <rect class="dg-box" x="200" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="214" y="56">Engine</text>
-      <text class="dg-t" x="214" y="76">Audit run</text>
-      <text class="dg-mono" x="214" y="92">ASR-01 .. ASR-08</text>
-      <polygon class="dg-ok" points="420,68 412,63.5 412,72.5"/>
-      <rect class="dg-box--ok" x="422" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="436" y="56">Output</text>
-      <text class="dg-t" x="436" y="76">Signed report</text>
-      <text class="dg-mono" x="436" y="92">Ed25519 envelope</text>
-      <polygon class="dg-ok" points="630,68 622,63.5 622,72.5"/>
-      <circle class="dg-dot" cx="646" cy="68" r="4"/>
-      <text class="dg-label" x="658" y="72">verify</text>
-      <path class="dg-line" d="M290 100 V128"/>
-      <text class="dg-mono" x="208" y="146">permissions &#183; audit trail &#183; egress &#183; injection</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Pipeline</b> same logs in, same signature out: the run is reproducible end to end</figcaption>
-    </figure>
-  </div>
-</section>
-
-<style>
-@media (max-width:720px){ .toc-rail{display:none} }
-.report pre{margin:0;font:inherit;color:inherit;white-space:pre}
-</style>
-
-<!-- ============================================================ 01 QUICKSTART (STATEMENT) -->
-<section class="section reveal" id="quickstart">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail">
-        <nav class="toc-rail" aria-label="On this page">
-          <a href="#quickstart" class="is-here">01 quickstart</a>
-          <a href="#formats">02 formats</a>
-          <a href="#sessions">03 sessions</a>
-          <a href="#controls">04 controls</a>
-          <a href="#envelope">05 envelope</a>
-          <a href="#verify">06 verify</a>
-          <a href="#continuous">07 continuous</a>
-          <a href="#errors">08 errors</a>
-        </nav>
-      </div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <span class="idx">01 / Quickstart</span>
-      <h2>Run the free scan in three steps.</h2>
-      <p class="lede">
-        The scan reads your application's existing logs and returns a watermarked,
-        signed preview of the full report. It is the same engine and the same signature
-        as the paid deliverable; only the tier differs.
-      </p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-
-    <div class="grid grid--3">
-      <div class="card">
-        <p class="card__k">Step 1</p>
-        <h3>Get a key</h3>
-        <p>Create an account at <a href="/signup">/signup</a>. Every request authenticates with <span style="font-family:var(--mono);font-size:0.92em">Authorization: Bearer ks_...</span> The scan is free.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Step 2</p>
-        <h3>Post the logs</h3>
-        <p><span style="font-family:var(--mono);font-size:0.92em">POST /v1/audit/scan</span> accepts JSONL text, a JSON array, or an array of records in the <span style="font-family:var(--mono);font-size:0.92em">logs</span> field, up to 20,000 records.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Step 3</p>
-        <h3>Read the result</h3>
-        <p>The response carries a summary, the evidence grade, and the full signed envelope. Paste the envelope into <a href="/verify">/verify</a> to see the check pass.</p>
-      </div>
-    </div>
-
-    <div class="split" style="align-items:flex-start;margin-top:var(--s7)">
-      <div class="report"><pre>curl -s https://kolm.ai/v1/audit/scan \
-  -H "Authorization: Bearer ks_live_xxxxxxxx" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "subject": "checkout-assistant",
-    "logs": [
-      { "model": "openai/gpt-4o",
-        "user": "agent-checkout",
-        "timestamp": "2026-06-11T09:14:02Z",
-        "request": {
-          "messages": [{ "role": "user",
-            "content": "refund order 1042" }],
-          "tools": [{ "type": "function",
-            "function": { "name": "issue_refund" } }]
-        },
-        "response": { "choices": [{ "message": {
-          "role": "assistant",
-          "tool_calls": [{ "function": {
-            "name": "issue_refund",
-            "arguments": "{\"order\":1042}" } }]
-        } }] }
-      }
-    ]
-  }'</pre></div>
-      <div class="report"><pre>{
-  "ok": true,
-  "id": "audses_9c81b2f0e6a44d1c77aa",
-  "report_id": "asrr_mbqv3k",
-  "signed": true,
-  "key_fingerprint": "...",
-  "summary": {
-    "readiness_pct": 64,
-    "total_findings": 3,
-    "by_severity": { "high": 1, "medium": 1, "low": 1 },
-    "blocking_count": 1,
-    "tamper_evident": false
-  },
-  "ingest": { "records": 1, "events": 2 },
-  "evidence_tier": { "grade": "B" },
-  "report": { "schema": "kolm-audit-report-1", "...": "..." },
-  "verify_url": "https://kolm.ai/verify"
-}</pre></div>
-    </div>
-
-    <p class="hero__claim" style="margin-top:var(--s5)">
-      <b>No hash chain in your logs yet?</b> Drop in the evidence-grade logging shim, a zero-dependency logger
-      for <a href="/shims/kolm-logger.js" download style="border-bottom:1px solid var(--line-2)">Node</a> or
-      <a href="/shims/kolm_logger.py" download style="border-bottom:1px solid var(--line-2)">Python</a> that emits the
-      canonical event shape with per-agent keys, declared grants and a SHA-256 <span style="font-family:var(--mono);font-size:0.92em">hash</span> /
-      <span style="font-family:var(--mono);font-size:0.92em">prev_hash</span> chain. Feed its
-      <span style="font-family:var(--mono);font-size:0.92em">toJSONL()</span> /
-      <span style="font-family:var(--mono);font-size:0.92em">to_jsonl()</span> output to the scan and the run grades the
-      evidence tier B (hash-verified). No network call leaves your runtime; see the
-      <a href="/shims/README.md" style="border-bottom:1px solid var(--line-2)">shim readme</a>.
-    </p>
-
-    <p class="hero__claim" style="margin-top:var(--s5)">
-      Optional body fields: <span style="font-family:var(--mono);font-size:0.92em">subject</span> (what the report names, 200 chars),
-      <span style="font-family:var(--mono);font-size:0.92em">source</span> (a label for where the logs came from, 64 chars),
-      <span style="font-family:var(--mono);font-size:0.92em">retention_days</span> (your declared log-retention window),
-      <span style="font-family:var(--mono);font-size:0.92em">allowed_hosts</span> (your sanctioned egress destinations, up to 200 hostnames; see <a href="#controls" style="border-bottom:1px solid var(--line-2)">ASR-3</a>),
-      <span style="font-family:var(--mono);font-size:0.92em">coverage_declaration</span> (what window and systems the export covers; bound inside the signed envelope, see <a href="#envelope" style="border-bottom:1px solid var(--line-2)">the envelope</a>),
-      <span style="font-family:var(--mono);font-size:0.92em">sign</span> and <span style="font-family:var(--mono);font-size:0.92em">persist</span> (both default true).
-      The Signed Readiness Report is $750 one-time: <span style="font-family:var(--mono);font-size:0.92em">POST /v1/audit/report/checkout</span> with
-      <span style="font-family:var(--mono);font-size:0.92em">{"audit_id":"audses_..."}</span> re-signs the same audit without the watermark.
-    </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 02 LOG FORMATS AND CONNECTORS -->
-<section class="section sect--dense reveal" id="formats">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail">
-        <nav class="toc-rail" aria-label="On this page">
-          <a href="#quickstart">01 quickstart</a>
-          <a href="#formats" class="is-here">02 formats</a>
-          <a href="#sessions">03 sessions</a>
-          <a href="#controls">04 controls</a>
-          <a href="#envelope">05 envelope</a>
-          <a href="#verify">06 verify</a>
-          <a href="#continuous">07 continuous</a>
-          <a href="#errors">08 errors</a>
-        </nav>
-      </div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <span class="idx">02 / Log formats and connectors</span>
-      <h2>The telemetry kolm reads.</h2>
-      <p class="lede">
-        The engine ingests the observability your application already produces. Connector
-        detection sniffs the export shape, most-specific markers first; you can also tag the
-        source yourself. Unparseable lines are skipped at the boundary and reported, never fatal.
-      </p>
-    </div>
-
-    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Supported telemetry sources"><table class="tbl">
-      <thead><tr><th scope="col">Source</th><th scope="col">What the detector keys on</th></tr></thead>
-      <tbody>
-        <tr><td><b>OpenTelemetry</b></td><td>OTLP exports: <span style="font-family:var(--mono)">resourceSpans</span> / <span style="font-family:var(--mono)">scopeSpans</span>, span attributes under <span style="font-family:var(--mono)">gen_ai.*</span>, <span style="font-family:var(--mono)">http.*</span>, <span style="font-family:var(--mono)">url.*</span>.</td></tr>
-        <tr><td><b>OpenInference</b></td><td>OTLP spans carrying <span style="font-family:var(--mono)">openinference.span.kind</span>, <span style="font-family:var(--mono)">llm.model_name</span>, <span style="font-family:var(--mono)">tool.parameters</span>, <span style="font-family:var(--mono)">retrieval.documents</span>. Checked before plain OTel.</td></tr>
-        <tr><td><b>Datadog</b></td><td>LLM Observability spans: <span style="font-family:var(--mono)">meta.kind</span> of llm / tool / agent / workflow / task / embedding / retrieval, <span style="font-family:var(--mono)">ml_app</span>, <span style="font-family:var(--mono)">start_ns</span>.</td></tr>
-        <tr><td><b>Langfuse</b></td><td>Traces with <span style="font-family:var(--mono)">observations[]</span> of type GENERATION / SPAN / EVENT, or bare observations with <span style="font-family:var(--mono)">traceId</span> / <span style="font-family:var(--mono)">modelParameters</span> / <span style="font-family:var(--mono)">usage</span>.</td></tr>
-        <tr><td><b>LangSmith</b></td><td>Runs with <span style="font-family:var(--mono)">run_type</span>, <span style="font-family:var(--mono)">child_runs</span>, <span style="font-family:var(--mono)">dotted_order</span>, or <span style="font-family:var(--mono)">extra.metadata.ls_model_name</span>.</td></tr>
-        <tr><td><b>MCP server logs</b></td><td>JSON-RPC 2.0 rows: <span style="font-family:var(--mono)">tools/call</span> requests paired with results by id, <span style="font-family:var(--mono)">tools/list</span> declared tool surfaces, <span style="font-family:var(--mono)">initialize</span> <span style="font-family:var(--mono)">serverInfo</span>, and kolm mcp-gateway receipts (<span style="font-family:var(--mono)">mcp-tool-call-1</span>).</td></tr>
-        <tr><td><b>OpenAI Agents SDK</b></td><td>Trace exports: <span style="font-family:var(--mono)">object</span> of trace / trace.span with <span style="font-family:var(--mono)">span_data.type</span> of agent, generation, function, handoff or guardrail. Handoffs land as explicit delegation edges.</td></tr>
-        <tr><td><b>Gateway logs</b></td><td>LiteLLM, Helicone, Portkey and OpenRouter rows read natively: <span style="font-family:var(--mono)">request</span> / <span style="font-family:var(--mono)">request_body</span>, <span style="font-family:var(--mono)">response</span> / <span style="font-family:var(--mono)">response_body</span>, <span style="font-family:var(--mono)">api_base</span>, provider-prefixed model names.</td></tr>
-        <tr><td><b>Plain JSONL</b></td><td>One JSON object per line. Also accepted: a JSON array, a wrapper object (<span style="font-family:var(--mono)">data</span> / <span style="font-family:var(--mono)">rows</span> / <span style="font-family:var(--mono)">events</span> / <span style="font-family:var(--mono)">generations</span>), or a single record. OpenAI chat, Responses and Assistants envelopes and Anthropic tool_use blocks are all recognized.</td></tr>
-      </tbody>
-    </table></div>
-
-    <p style="color:var(--ink-2);margin-top:var(--s4)">
-      <b>Running LangGraph, CrewAI or the Vercel AI SDK?</b> Each ships an OpenTelemetry
-      exporter (LangGraph and CrewAI also via OpenInference instrumentation; the Vercel AI SDK
-      via its built-in <span style="font-family:var(--mono);font-size:0.92em">experimental_telemetry</span> OTel support).
-      Point the exporter at a file or collector and the export arrives through the
-      OpenTelemetry or OpenInference connector above. No kolm-specific code in your application.
-    </p>
-
-    <div class="split" style="align-items:flex-start;margin-top:var(--s7)">
+  <section class="section section--flush hero compiler-hero docs-hero">
+    <div class="field" aria-hidden="true"><canvas></canvas></div>
+    <div class="wrap compiler-hero__grid">
       <div>
-        <h3>The fields the analyzers use.</h3>
-        <p style="color:var(--ink-2);margin:var(--s3) 0 var(--s4)">
-          Seven analyzers (permission, audit trail, agent identity, delegation, model provenance,
-          retrieval and memory, data egress) plus the injection battery read the same normalized events.
-          The dimensions that matter, per record: tools granted
-          (<span style="font-family:var(--mono);font-size:0.92em">request.tools</span> / <span style="font-family:var(--mono);font-size:0.92em">functions</span>),
-          tools invoked (assistant <span style="font-family:var(--mono);font-size:0.92em">tool_calls</span> / <span style="font-family:var(--mono);font-size:0.92em">function_call</span>),
-          the egress host (<span style="font-family:var(--mono);font-size:0.92em">api_base</span>, the provider prefix on
-          <span style="font-family:var(--mono);font-size:0.92em">model</span>, URL-bearing tool arguments like
-          <span style="font-family:var(--mono);font-size:0.92em">url</span> / <span style="font-family:var(--mono);font-size:0.92em">webhook</span> / <span style="font-family:var(--mono);font-size:0.92em">to</span>),
-          the identity behind the call (<span style="font-family:var(--mono);font-size:0.92em">user</span>, <span style="font-family:var(--mono);font-size:0.92em">metadata</span>, key id),
-          timestamps (ISO or unix epoch), tamper evidence
-          (<span style="font-family:var(--mono);font-size:0.92em">hash</span> / <span style="font-family:var(--mono);font-size:0.92em">prev_hash</span> chains),
-          and message and tool-argument content for the sensitivity scan: PII classes plus
-          secret-shaped tokens, so an API key in a tool-call body flips
-          <span style="font-family:var(--mono);font-size:0.92em">has_sensitive</span> the same way an SSN does.
-          A record can be minimal; absent dimensions are
-          reported as not assessed, never guessed.
-        </p>
-        <p class="card__map">terms are defined in the <a href="/glossary">glossary</a></p>
-      </div>
-      <div class="report"><pre>{"model": "openai/gpt-4o",
- "user": "agent-checkout",
- "timestamp": 1781082842,
- "api_base": "https://api.openai.com/v1",
- "request": { "messages": [...],
-   "tools": [{ "type": "function",
-     "function": { "name": "send_email" } }] },
- "response": { "choices": [{ "message": {
-   "tool_calls": [{ "function": {
-     "name": "send_email",
-     "arguments": "{\"to\":\"ops@acme.com\"}"
-   } }] } }] },
- "hash": "f3ab...", "prev_hash": "09cd..."}</pre></div>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 03 SESSIONS API -->
-<section class="section reveal" id="sessions">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail">
-        <nav class="toc-rail" aria-label="On this page">
-          <a href="#quickstart">01 quickstart</a>
-          <a href="#formats">02 formats</a>
-          <a href="#sessions" class="is-here">03 sessions</a>
-          <a href="#controls">04 controls</a>
-          <a href="#envelope">05 envelope</a>
-          <a href="#verify">06 verify</a>
-          <a href="#continuous">07 continuous</a>
-          <a href="#errors">08 errors</a>
-        </nav>
-      </div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <span class="idx">03 / Sessions API</span>
-      <h2>Sessions, for exports bigger than one request.</h2>
-      <p class="lede">
-        A single request body caps at 4 MB. Sessions accumulate logs across calls,
-        up to 24 MiB and 20,000 records per session, then run the audit once over
-        the whole export. Each session belongs to your tenant and never crosses it.
-      </p>
-    </div>
-
-    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Session endpoints"><table class="tbl">
-      <thead><tr><th scope="col">Endpoint</th><th scope="col">What it does</th></tr></thead>
-      <tbody>
-        <tr><td><span style="font-family:var(--mono)">POST /v1/audit/sessions</span></td><td>Open a session. Body: <span style="font-family:var(--mono)">{ subject?, source?, retention_days? }</span>. Returns 201 with an <span style="font-family:var(--mono)">audses_*</span> id.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">POST /v1/audit/sessions/:id/ingest</span></td><td>Append logs. Body: <span style="font-family:var(--mono)">{ logs }</span>. Repeat per chunk; returns <span style="font-family:var(--mono)">accepted</span> and the running <span style="font-family:var(--mono)">record_count</span>.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">POST /v1/audit/sessions/:id/run</span></td><td>Run the audit and sign. Body: <span style="font-family:var(--mono)">{ subject?, source?, retention_days?, allowed_hosts?, coverage_declaration?, sign? }</span>. Closes the session.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/audit/sessions/:id</span></td><td>Status and summary. Raw logs are never echoed back.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/audit/sessions/:id/report</span></td><td>The deliverable: <span style="font-family:var(--mono)">?format=json|html|pdf</span>. JSON is the bare signed envelope, downloadable and offline-verifiable.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/audit/sessions/:id/export</span></td><td>Procurement artifacts over the same signed envelope: <span style="font-family:var(--mono)">?format=csv|xlsx|drata|vanta|exec|crosswalk|sarif|oscal|aibom|scorecard|modelcard</span>.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">POST /v1/audit/sessions/:id/delta</span></td><td>Diff two reports you own: <span style="font-family:var(--mono)">?against=&lt;audses_* or asrr_*&gt;</span>. Readiness movement, control transitions, finding counts.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/audit/sessions/:id/questionnaire</span></td><td>A standard security questionnaire pre-filled from the signed report: <span style="font-family:var(--mono)">?template=generic-ai-vendor&amp;format=csv</span>. Unassessed controls answer n/a, never an unsupported yes.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/audit/reports</span></td><td>Every audit and report your tenant owns; powers the dashboard.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">POST /v1/audit/import</span></td><td>Pull logs from a URL you control: <span style="font-family:var(--mono)">{ source:"url", url, headers? }</span>, same caps, same optional <span style="font-family:var(--mono)">allowed_hosts</span> and <span style="font-family:var(--mono)">coverage_declaration</span>, same signed result. Built for a scheduled sidecar.</td></tr>
-      </tbody>
-    </table></div>
-
-    <p class="hero__claim" style="margin-top:var(--s5)">
-      The source tag <span style="font-family:var(--mono);font-size:0.92em">kolm-capture</span> is reserved. Sending
-      <span style="font-family:var(--mono);font-size:0.92em">{"source":"kolm-capture"}</span> with no logs audits the gateway captures
-      stored for your tenant and grades the evidence A (first-party capture); supplying it with vendor logs is a clean 400,
-      so imported logs can never claim capture-grade evidence.
-    </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 04 THE CONTROLS -->
-<section class="section sect--dense reveal" id="controls">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail">
-        <nav class="toc-rail" aria-label="On this page">
-          <a href="#quickstart">01 quickstart</a>
-          <a href="#formats">02 formats</a>
-          <a href="#sessions">03 sessions</a>
-          <a href="#controls" class="is-here">04 controls</a>
-          <a href="#envelope">05 envelope</a>
-          <a href="#verify">06 verify</a>
-          <a href="#continuous">07 continuous</a>
-          <a href="#errors">08 errors</a>
-        </nav>
-      </div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <span class="idx">04 / The controls</span>
-      <h2>What the audit assesses, ASR-1 to ASR-8.</h2>
-      <p class="lede">
-        Every finding in a report traces to one of these controls, and each control maps to the
-        frameworks your reviewer cites: SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP and
-        MITRE ATLAS. kolm maps findings to those standards; it does not certify against them.
-      </p>
-    </div>
-
-    <div class="tbl-wrap" tabindex="0" role="region" aria-label="ASR control list"><table class="tbl">
-      <thead><tr><th scope="col">Control</th><th scope="col">What it requires</th></tr></thead>
-      <tbody>
-        <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes held match scopes used; no shared keys across isolation boundaries.</td></tr>
-        <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, tamper-evident activity log with a stated retention policy.</td></tr>
-        <tr><td><b>ASR-3</b> Data egress</td><td>Egress destinations enumerated; sensitive fields redacted before they leave.</td></tr>
-        <tr><td><b>ASR-4</b> Injection</td><td>Direct and indirect injection and jailbreaks tested and reported with reproductions.</td></tr>
-        <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance; MCP and vendor surface enumerated.</td></tr>
-        <tr><td><b>ASR-6</b> Evidence</td><td>Findings signed, logged, and offline-verifiable.</td></tr>
-        <tr><td><b>ASR-7</b> Memory and retrieval integrity</td><td>Retrieval sources enumerated and trusted; memory writes carry an integrity link and a recorded author.</td></tr>
-        <tr><td><b>ASR-8</b> Multi-agent delegation</td><td>Each handoff is attributable and attenuates the sub-agent to a subset of the delegating agent's authority.</td></tr>
-      </tbody>
-    </table></div>
-
-    <p style="color:var(--ink-2);margin-top:var(--s5)">
-      <b>ASR-3 has a dedicated egress analyzer.</b> Every destination host is inventoried with call
-      counts, tools and sensitivity flags, then graded against the
-      <span style="font-family:var(--mono);font-size:0.92em">allowed_hosts</span> you declare
-      (<span style="font-family:var(--mono);font-size:0.92em">acme.com</span> admits its subdomains).
-      A destination outside the allowlist is a high finding; a secret-shaped token leaving the
-      boundary is critical; with no allowlist declared, the enumerated-but-unvetted surface is a
-      medium finding. A window with no observed egress marks the control untested and drops it
-      from the readiness denominator, never a silent pass.
-    </p>
-    <p style="color:var(--ink-2);margin-top:var(--s4)">
-      <b>ASR-4 results carry an <span style="font-family:var(--mono);font-size:0.95em">evidence_source</span> per probe.</b>
-      Passive outcomes are scored from observed traffic. The consented active battery behind the
-      Deep Red-Team add-on (+$10,000) sends the same probe corpus, from a fixed seed, against a
-      staging endpoint you name in a written consent record, and merges live outcomes into the
-      same <span style="font-family:var(--mono);font-size:0.92em">red_team</span> block. Worst
-      outcome wins on merge: an exposed result is never erased.
-    </p>
-
-    <p class="hero__claim" style="margin-top:var(--s5)">
-      A control the run could not assess is listed under <span style="font-family:var(--mono);font-size:0.92em">summary.not_assessed</span>
-      with a reason, and the readiness number covers assessed controls only. The full crosswalk,
-      pillar by pillar, lives at <a href="/checks" style="border-bottom:1px solid var(--line-2)">what we test</a>.
-    </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 05 THE REPORT ENVELOPE -->
-<section class="section reveal" id="envelope">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail">
-        <nav class="toc-rail" aria-label="On this page">
-          <a href="#quickstart">01 quickstart</a>
-          <a href="#formats">02 formats</a>
-          <a href="#sessions">03 sessions</a>
-          <a href="#controls">04 controls</a>
-          <a href="#envelope" class="is-here">05 envelope</a>
-          <a href="#verify">06 verify</a>
-          <a href="#continuous">07 continuous</a>
-          <a href="#errors">08 errors</a>
-        </nav>
-      </div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <span class="idx">05 / The report envelope</span>
-      <h2>One object. The signature covers it.</h2>
-      <p class="lede">
-        A report is one canonical JSON object, schema
-        <span style="font-family:var(--mono);font-size:0.92em">kolm-audit-report-1</span>. The Ed25519 signature
-        covers the recursive, key-sorted, whitespace-free serialization of every field except four:
-        the signature block itself, and the detached evidence attached after signing.
-      </p>
-    </div>
-
-    <div class="split" style="align-items:flex-start">
-      <div class="report register">
-        <div class="register__row"><span class="register__k">schema</span><span class="register__v">kolm-audit-report-1</span></div>
-        <div class="register__row"><span class="register__k">report_id</span><span class="register__v">asrr_mbqv3k</span></div>
-        <div class="register__row"><span class="register__k">tier &#183; watermark</span><span class="register__v">scan &#183; true <span class="ann">free preview</span></span></div>
-        <div class="register__row"><span class="register__k">evidence_tier</span><span class="register__v">grade A / B / C <span class="ann">signed</span></span></div>
-        <div class="register__row"><span class="register__k">subject</span><span class="register__v">name &#183; source &#183; records &#183; events</span></div>
-        <div class="register__row"><span class="register__k">coverage_declaration</span><span class="register__v">window &#183; systems &#183; attestor <span class="ann">optional, signed</span></span></div>
-        <div class="register__row"><span class="register__k">summary</span><span class="register__v"><b>assessed controls only</b></span></div>
-        <div class="register__row"><span class="register__k">findings / frameworks</span><span class="register__v">severity-sorted, framework-mapped</span></div>
-        <div class="register__row"><span class="register__k">evidence_digest</span><span class="register__v">sha256 over the analyzed events</span></div>
-        <div class="register__row"><span class="register__k">passport &#183; red_team</span><span class="register__v">identity graph &#183; injection results</span></div>
-        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 &#183; embedded PEM</b></span></div>
-        <div class="register__row"><span class="register__k">key_fingerprint</span><span class="register__v"><b>410302c93becdcc3...</b></span></div>
-        <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:0XCoqRkb...</b> <span class="ann">covers the canonical bytes</span></span></div>
-        <div class="register__row"><span class="register__k">log_checkpoint</span><span class="register__v">Merkle inclusion path <span class="ann">embedded, detached</span></span></div>
-      </div>
-      <div>
-        <h3>Signed, or detached. Nothing in between.</h3>
-        <p style="color:var(--ink-2);margin:var(--s3) 0 var(--s4)">
-          Signed and tamper-evident: <span style="font-family:var(--mono);font-size:0.92em">tier</span>,
-          <span style="font-family:var(--mono);font-size:0.92em">watermark</span>,
-          <span style="font-family:var(--mono);font-size:0.92em">evidence_tier</span>, the subject, the summary,
-          every finding, the remediation roadmap, the caveats, the evidence digest and the passport.
-          The free scan signs <span style="font-family:var(--mono);font-size:0.92em">tier:"scan"</span> with the
-          watermark on; the $750 purchase re-signs the same audit as
-          <span style="font-family:var(--mono);font-size:0.92em">tier:"report"</span>. Because both fields sit inside
-          the signed payload, stripping the watermark breaks the signature.
-        </p>
-        <p style="color:var(--ink-2);margin:0 0 var(--s4)">
-          The caveats are bounded claims, signed with everything else. They name the exact PII
-          classes and secret shapes the sensitivity scan covered, so a clean egress posture is
-          never read wider than the detectors. A
-          <span style="font-family:var(--mono);font-size:0.92em">coverage_declaration</span>
-          (window, systems, attestor, optional vendor Ed25519 signature) binds the vendor's
-          statement of what the export covers next to
-          <span style="font-family:var(--mono);font-size:0.92em">evidence_tier</span>; when the
-          observed event span disagrees with the declared window, or vendor-supplied logs arrive
-          with no declaration at all, the signed caveats say so.
-        </p>
-        <p style="color:var(--ink-2);margin:0 0 var(--s4)">
-          Excluded from the signed bytes: <span style="font-family:var(--mono);font-size:0.92em">signature_ed25519</span>
-          (a signature cannot cover itself) and the detached evidence
-          (<span style="font-family:var(--mono);font-size:0.92em">log_checkpoint</span>,
-          <span style="font-family:var(--mono);font-size:0.92em">timestamp_evidence</span>,
-          <span style="font-family:var(--mono);font-size:0.92em">co_signatures</span>), each of which references the
-          sha256 of the signed canonical payload. The checkpoint embeds the report's RFC 9162 Merkle
-          audit path (<span style="font-family:var(--mono);font-size:0.92em">log_checkpoint.inclusion</span>:
-          leaf index, tree size, path hashes) at signing time, so transparency-log inclusion verifies
-          offline along with the signature. The key fingerprint is the SHA-256 of the SPKI DER public key,
-          truncated to 128 bits. The full byte-level rules are in
-          <a href="/spec" style="border-bottom:1px solid var(--line-2)">the spec</a>; the field-by-field walk is at
-          <a href="/report" style="border-bottom:1px solid var(--line-2)">anatomy of a report</a>.
-        </p>
-        <div class="hero__cta">
-          <a class="btn btn--ghost btn--sm" href="/sample-audit-report.json" download>Download the sample</a>
-          <a class="btn btn--ghost btn--sm" href="/report">Anatomy of a report</a>
+        <p class="compiler-kicker" data-enter="1">Docs / API Contract</p>
+        <h1 class="hero__h1" data-enter="2">Docs should show the product contract.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Use these docs to route production calls, capture behavior, govern sources, evaluate regressions, compile signed artifacts, target runtimes, issue receipts, and export evidence.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="#quickstart">Start Quickstart</a>
+          <a class="btn btn--ghost" href="/docs/api">Open API Reference</a>
+          <a class="btn btn--ghost" href="/openapi.json">OpenAPI JSON</a>
+        </div>
+        <div class="compiler-proof" data-enter="5">
+          <span><b>922</b> route inventory</span>
+          <span><b>214</b> route groups</span>
+          <span><b>17</b> data channel families</span>
+          <span><b>8</b> readiness groups</span>
         </div>
       </div>
+      <aside class="docs-panel kolm-surface-media" aria-label="Documentation route map">
+        <div class="docs-panel__head">
+          <span><b>docs map</b> / behavior to artifact</span>
+          <span>route first</span>
+        </div>
+        <div class="docs-flow">
+          <div class="docs-flow__row"><b>route</b><i style="--fill:92%"></i><span>/v1/route</span></div>
+          <div class="docs-flow__row"><b>capture</b><i style="--fill:84%"></i><span>/v1/capture</span></div>
+          <div class="docs-flow__row"><b>govern</b><i style="--fill:76%"></i><span>policies</span></div>
+          <div class="docs-flow__row"><b>evaluate</b><i style="--fill:68%"></i><span>eval gates</span></div>
+          <div class="docs-flow__row"><b>compile</b><i style="--fill:62%"></i><span>.kolm</span></div>
+          <div class="docs-flow__row"><b>export</b><i style="--fill:56%"></i><span>receipts</span></div>
+        </div>
+      </aside>
     </div>
+  </section>
 
-    <p class="hero__claim" style="margin-top:var(--s5)">
-      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
-    </p>
-      </div>
-    </div>
-  </div>
-</section>
+  <section class="section">
+    <div class="wrap docs-grid">
+      <nav class="docs-nav" aria-label="Docs Sections">
+        <a href="#quickstart">Quickstart</a>
+        <a href="#references">References</a>
+        <a href="#control-center">Control Center</a>
+        <a href="#data-movement">Data Movement</a>
+        <a href="#lifecycle">Lifecycle</a>
+        <a href="#errors">Errors</a>
+        <a href="#cli-sdk">CLI & SDK</a>
+      </nav>
 
-<!-- ============================================================ 06 VERIFY (CHAMBER) -->
-<section class="section section--ink reveal" id="verify">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: quantized light over the verification chapter -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.11"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail">
-        <nav class="toc-rail" aria-label="On this page">
-          <a href="#quickstart">01 quickstart</a>
-          <a href="#formats">02 formats</a>
-          <a href="#sessions">03 sessions</a>
-          <a href="#controls">04 controls</a>
-          <a href="#envelope">05 envelope</a>
-          <a href="#verify" class="is-here">06 verify</a>
-          <a href="#continuous">07 continuous</a>
-          <a href="#errors">08 errors</a>
-        </nav>
-      </div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <span class="idx">06 / Verify a report</span>
-      <h2>Three ways to check the same signature.</h2>
-      <p class="lede">
-        The first two run offline. No account, no upload, no kolm server in the trust path:
-        the report embeds the public key it was signed with, and the canonicalization is
-        byte-identical everywhere, so any edit is self-evident.
-      </p>
-    </div>
-
-    <div class="grid grid--3">
-      <div class="card">
-        <p class="card__k">Browser</p>
-        <h3>Paste it at /verify</h3>
-        <p>Drop the report JSON on the page. The Ed25519 check runs with WebCrypto, in front of the reviewer, against the published issuer keyring.</p>
-        <p class="card__map"><a href="/verify">Open the verifier</a></p>
-      </div>
-      <div class="card">
-        <p class="card__k">Script</p>
-        <h3>kolm-audit-verify.js</h3>
-        <p>A dependency-free module that runs in browsers and Node 20+. It returns a structured result and never throws; exit on a falsy <span style="font-family:var(--mono);font-size:0.92em">ok</span> to gate a pipeline.</p>
-        <p class="card__map"><a href="/kolm-audit-verify.js">read the source &#183; apache-2.0</a></p>
-      </div>
-      <div class="card">
-        <p class="card__k">API</p>
-        <h3>POST the envelope</h3>
-        <p><span style="font-family:var(--mono);font-size:0.92em">POST /v1/audit/report/verify</span> is public and adds the issuer and revocation checks. It consults a kolm server, so treat it as the convenience path, not the trust path.</p>
-        <p class="card__map">120 requests/min per address</p>
-      </div>
-    </div>
-
-    <div class="split" style="align-items:flex-start;margin-top:var(--s7)">
-      <div class="report"><pre>// node 20+ (global WebCrypto) or any modern browser
-import { verifyAuditReport }
-  from './kolm-audit-verify.js';
-
-const report = JSON.parse(
-  fs.readFileSync('asrr_mbqv3k.json', 'utf8'));
-const res = await verifyAuditReport(report);
-
-// res = { ok, reason?, key_fingerprint,
-//         checks: [{ name, ok, detail }] }</pre></div>
-      <div class="report"><pre>curl -s https://kolm.ai/v1/audit/report/verify \
+      <div>
+        <section class="docs-block" id="quickstart">
+          <span class="idx">01 / Quickstart</span>
+          <h2>Start by routing one namespace.</h2>
+          <p class="docs-copy">Keep the first integration small. Route one OpenAI-compatible namespace, export captured examples, then compile only after the behavior has enough eval and regression coverage.</p>
+          <pre class="docs-code"><span class="prompt">$</span> curl https://kolm.ai/v1/route/chat/completions \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
   -H "Content-Type: application/json" \
-  -d @asrr_mbqv3k.json
+  -d '{"namespace":"billing-agent","model":"openai:gpt-4.1-mini","messages":[{"role":"user","content":"classify this ticket"}]}'
 
-{ "ok": true,
-  "trusted": true,
-  "verify":     { "ok": true },
-  "issuer":     { "recognized": true, "kid": "live" },
-  "revocation": { "status": "live" } }</pre></div>
-    </div>
+<span class="prompt">$</span> curl https://kolm.ai/v1/capture/export \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -o billing-agent.jsonl
 
-    <p class="lede" style="margin-top:var(--s6)">
-      A consumer that checks only the signature would accept a forgery re-signed with a rogue key:
-      check <span style="font-family:var(--mono);font-size:0.92em">trusted</span>, which requires the signature to
-      verify, the embedded key to be a published kolm issuer, and that key to be unrevoked. To pin the issuer
-      yourself, fetch <span style="font-family:var(--mono);font-size:0.92em">GET /v1/audit/issuer-key</span> and
-      confirm a key's lifecycle at
-      <span style="font-family:var(--mono);font-size:0.92em">GET /v1/audit/issuer-key/:fp/status</span>
-      (live, rotated or revoked).
-    </p>
+<span class="prompt">$</span> curl https://kolm.ai/v1/compile \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"task":"billing-agent","examples_file":"billing-agent.jsonl","target":"local-cpu"}'</pre>
+        </section>
 
-    <p class="lede" style="margin-top:var(--s4)">
-      Inclusion verifies offline too: <span style="font-family:var(--mono);font-size:0.92em">verifyInclusionOffline</span>
-      in the same module walks the Merkle audit path embedded at
-      <span style="font-family:var(--mono);font-size:0.92em">log_checkpoint.inclusion</span> with WebCrypto SHA-256
-      and confirms the report's leaf sits under the checkpointed root. A checkpoint that predates embedded
-      proofs returns <span style="font-family:var(--mono);font-size:0.92em">no_embedded_proof</span>; fall back to
-      <span style="font-family:var(--mono);font-size:0.92em">GET /v1/transparency-log/proof/:seq</span>.
-    </p>
+        <section class="docs-block" id="references">
+          <span class="idx">02 / Reference Surfaces</span>
+          <h2>Use the generated contracts, not screenshot docs.</h2>
+          <p class="docs-copy">Kolm docs should behave like infrastructure docs: every page points to a machine-readable contract or a route that can be verified.</p>
+          <div class="docs-links">
+            <a class="docs-link" href="/docs/api"><b>API Reference</b><span>Generated route documentation for authenticated and public endpoints.</span></a>
+            <a class="docs-link" href="/openapi.json"><b>OpenAPI JSON</b><span>OpenAPI 3 contract for clients, gateway tests, SDK generation, and review.</span></a>
+            <a class="docs-link" href="/docs/api-routes.json"><b>Route Inventory</b><span>922 routes, 214 route groups, source files, methods, paths, and comments.</span></a>
+            <a class="docs-link" href="/product-graph.json"><b>Product Graph</b><span>Journey counts, route surfaces, readiness groups, runtime dimensions, and category spine.</span></a>
+            <a class="docs-link" href="/v1/product/capabilities"><b>Capability JSON</b><span>Live product capabilities for the current tenant-facing platform surface.</span></a>
+            <a class="docs-link" href="/product-readiness-closeout.json"><b>Readiness Ledger</b><span>Implemented and open readiness states kept explicit for claims discipline.</span></a>
+          </div>
+        </section>
 
-    <div class="hero__cta" style="margin-top:var(--s6)">
-      <a class="btn btn--primary" href="/verify">Open the verifier</a>
-      <a class="btn btn--ghost" href="/sample-audit-report.json" download>Download the sample</a>
-    </div>
+        <section class="docs-block" id="control-center">
+          <span class="idx">03 / API Control Center</span>
+          <h2>Every dashboard control needs an API contract.</h2>
+          <p class="docs-copy">The API Control Center is the enterprise surface for source registration, provider policy, credentials, retention, redaction, eval gates, compile state, runtime targets, exports, and readiness gates.</p>
+          <div class="docs-table">
+            <div><b>Console</b><span><a href="/account/api-control-center">/account/api-control-center</a></span></div>
+            <div><b>Contract</b><span><code>GET /v1/account/api-control-center</code></span></div>
+            <div><b>Principle</b><span>Every write should leave an event, every export should be replayable, and every claim-bearing object should reference evidence.</span></div>
+          </div>
+          <ul class="docs-list">
+            <li><code>workspace</code>, <code>project</code>, <code>environment</code>, <code>source</code>, <code>connector</code>, <code>credential</code>, and <code>provider</code> define the enterprise boundary.</li>
+            <li><code>capture policy</code>, <code>redaction policy</code>, <code>retention policy</code>, <code>eval suite</code>, <code>failure taxonomy</code>, and <code>regression set</code> define the governance boundary.</li>
+            <li><code>compile run</code>, <code>artifact</code>, <code>manifest</code>, <code>target runtime</code>, <code>receipt</code>, <code>export</code>, and <code>readiness gate</code> define the release boundary.</li>
+          </ul>
+        </section>
+
+        <section class="docs-block" id="data-movement">
+          <span class="idx">04 / Data Movement</span>
+          <h2>Every credible API data path in and out.</h2>
+          <p class="docs-copy">A docs page should make ingestion and export coverage legible before an enterprise buyer asks. Unknown schemas stay opaque until a connector declares ownership.</p>
+          <div class="docs-matrix">
+            <div class="proof-card"><p class="card__k">Ingress</p><h3>12+ ways in</h3><p>REST proxy, SDK capture, CLI upload, JSONL/CSV/parquet, webhooks, streams, OTEL, gateway logs, trace imports, warehouse import, browser traces, and human labels.</p></div>
+            <div class="proof-card"><p class="card__k">Interop</p><h3>Trace tools and agents</h3><p>LangSmith, Langfuse, Braintrust, Helicone-style traces, MCP/tool calls, agent handoffs, support tickets, CRM records, and red-team cases.</p></div>
+            <div class="proof-card"><p class="card__k">Egress</p><h3>10+ ways out</h3><p>Signed artifacts, manifests, receipts, eval reports, event streams, SIEM/log export, warehouse export, webhook callbacks, CLI/SDK pull, and runtime packages.</p></div>
+            <div class="proof-card"><p class="card__k">Controls</p><h3>Policy travels with data</h3><p>Source identity, scope, redaction, retention, provider policy, budget, rate limits, approvals, export permissions, and readiness state.</p></div>
+          </div>
+        </section>
+
+        <section class="docs-block" id="lifecycle">
+          <span class="idx">05 / Lifecycle Routes</span>
+          <h2>The loop is the API surface.</h2>
+          <ul class="docs-list">
+            <li><code>POST /v1/route/chat/completions</code> sends OpenAI-compatible traffic through a controlled route.</li>
+            <li><code>POST /v1/gateway/dispatch</code> dispatches to configured providers with capture, cache, fallback, and quality-router controls.</li>
+            <li><code>POST /v1/capture/log</code>, <code>GET /v1/captures/list</code>, <code>GET /v1/capture/export</code>, and <code>POST /v1/capture/bulk</code> move behavior into review and training workflows.</li>
+            <li><code>POST /v1/compile/estimate</code>, <code>POST /v1/compile/preview</code>, <code>POST /v1/compile</code>, and <code>GET /v1/compile/:id/.kolm</code> move from data to signed artifact.</li>
+            <li><code>GET /v1/devices/detect</code>, <code>POST /v1/devices/recommend</code>, <code>POST /v1/devices/:id/install</code>, and <code>POST /v1/serve</code> move artifact state into runtime targets.</li>
+          </ul>
+        </section>
+
+        <section class="docs-block" id="errors">
+          <span class="idx">06 / Errors And Readiness</span>
+          <h2>Docs should show failure paths.</h2>
+          <p class="docs-copy">A serious enterprise API documents the edges: authentication, rate limits, idempotency, readiness states, unsupported targets, connector ownership, and recovery hints.</p>
+          <div class="docs-table">
+            <div><b>Auth</b><span>Use <code>Authorization: Bearer $KOLM_API_KEY</code>. Create a key at <a href="/signup">/signup</a> or through the CLI.</span></div>
+            <div><b>Errors</b><span>Error responses should include stable error codes and a fix or next step.</span></div>
+            <div><b>Idempotency</b><span>Write routes that can create work should accept idempotency or provide status lookup.</span></div>
+            <div><b>Readiness</b><span>Open gates remain explicit for external partners, live certification, package release, and public benchmark data.</span></div>
+          </div>
+        </section>
+
+        <section class="docs-block" id="cli-sdk">
+          <span class="idx">07 / CLI And SDK</span>
+          <h2>Local tools should match hosted docs.</h2>
+          <p class="docs-copy">Developers should be able to move between API, CLI, SDK, account console, and static contracts without learning a second product language.</p>
+          <pre class="docs-code"><span class="prompt">$</span> kolm signup --email you@company.com
+<span class="prompt">$</span> kolm login --key ks_...
+<span class="prompt">$</span> kolm compile "billing-agent" --target local-cpu
+<span class="prompt">$</span> kolm verify artifact.kolm
+<span class="prompt">$</span> kolm serve artifact.kolm</pre>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="/signup">Create Workspace</a>
+            <a class="btn btn--ghost" href="/account/api-control-center">Open API Control Center</a>
+            <a class="btn btn--ghost" href="/compare">Compare Category</a>
+          </div>
+        </section>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ============================================================ 07 CONTINUOUS -->
-<section class="section sect--dense reveal" id="continuous">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail">
-        <nav class="toc-rail" aria-label="On this page">
-          <a href="#quickstart">01 quickstart</a>
-          <a href="#formats">02 formats</a>
-          <a href="#sessions">03 sessions</a>
-          <a href="#controls">04 controls</a>
-          <a href="#envelope">05 envelope</a>
-          <a href="#verify">06 verify</a>
-          <a href="#continuous" class="is-here">07 continuous</a>
-          <a href="#errors">08 errors</a>
-        </nav>
-      </div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <span class="idx">07 / Continuous re-attestation</span>
-      <h2>The Trust link that stays current.</h2>
-      <p class="lede">
-        Continuous is $299/$999 per month and re-signs your report on a schedule and on every
-        deploy, behind one stable, unguessable URL your buyer keeps. The link states its own
-        freshness: a current report shows when it last re-attested, a report older than 8 days
-        carries a stale banner, and a lapsed subscription says so while staying verifiable.
-      </p>
-    </div>
-
-    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Continuous and Trust link endpoints"><table class="tbl">
-      <thead><tr><th scope="col">Endpoint</th><th scope="col">What it does</th></tr></thead>
-      <tbody>
-        <tr><td><span style="font-family:var(--mono)">POST /v1/audit/continuous/checkout</span></td><td>Subscribe: <span style="font-family:var(--mono)">{ "plan": "starter" | "growth" }</span>.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">POST /v1/audit/continuous/deploy-hook</span></td><td>Force an immediate re-attestation; call it from CI after a deploy (your own API key authenticates it).</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/trust/:slug</span></td><td>The shareable report, public to whoever holds the slug: <span style="font-family:var(--mono)">?format=html|json|pdf</span>.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/trust/:slug/export</span></td><td>The same procurement formats as the session export, straight into a buyer's GRC tool, no account.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/trust/:slug/badge.svg</span></td><td>An embeddable readiness pill for a README or status page. It goes grey after 30 days without a refresh, and on issuer-key revocation. See <a href="/badge">the badge page</a>.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/trust/:slug/questionnaire</span></td><td>The pre-filled questionnaire, derived from the signed report behind the link.</td></tr>
-        <tr><td><span style="font-family:var(--mono)">GET /v1/trust/:slug/delta</span></td><td>The drift between the report the link serves now and the prior signed report. A first attestation returns <span style="font-family:var(--mono)">delta:null</span> with a note.</td></tr>
-      </tbody>
-    </table></div>
-
-    <p class="hero__claim" style="margin-top:var(--s5)">
-      To gate pull requests on the delta instead, the kolm-agent-audit GitHub Action scans on every PR,
-      diffs against your prior signed report, and upserts one PR comment; the reference lives in
-      <a href="https://github.com/kolm-ai/kolm/blob/main/docs/continuous-ci.md" style="border-bottom:1px solid var(--line-2)">docs/continuous-ci.md</a>.
-    </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 08 ERRORS AND LIMITS -->
-<section class="section reveal" id="errors">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail">
-        <nav class="toc-rail" aria-label="On this page">
-          <a href="#quickstart">01 quickstart</a>
-          <a href="#formats">02 formats</a>
-          <a href="#sessions">03 sessions</a>
-          <a href="#controls">04 controls</a>
-          <a href="#envelope">05 envelope</a>
-          <a href="#verify">06 verify</a>
-          <a href="#continuous">07 continuous</a>
-          <a href="#errors" class="is-here">08 errors</a>
-        </nav>
-      </div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <span class="idx">08 / Errors and limits</span>
-      <h2>Every failure is a JSON envelope.</h2>
-      <p class="lede">
-        Nothing on this surface throws an HTML error page. A failed call returns
-        <span style="font-family:var(--mono);font-size:0.92em">{ "ok": false, "error": "...", "detail": "..." }</span>
-        with the status codes below, and an unmatched path under
-        <span style="font-family:var(--mono);font-size:0.92em">/v1/audit</span> or
-        <span style="font-family:var(--mono);font-size:0.92em">/v1/trust</span> returns a JSON 404.
-      </p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-
-    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Error codes and limits"><table class="tbl">
-      <thead><tr><th scope="col">Status &#183; error</th><th scope="col">Meaning</th></tr></thead>
-      <tbody>
-        <tr><td><b>401</b> <span style="font-family:var(--mono)">auth_required</span></td><td>Missing or invalid key. Send <span style="font-family:var(--mono)">Authorization: Bearer ks_...</span></td></tr>
-        <tr><td><b>400</b> <span style="font-family:var(--mono)">logs_required &#183; no_records</span></td><td>The body had no <span style="font-family:var(--mono)">logs</span> field, or nothing in it parsed as a record.</td></tr>
-        <tr><td><b>400</b> <span style="font-family:var(--mono)">source_reserved</span></td><td>The <span style="font-family:var(--mono)">kolm-capture</span> source tag is reserved for the gateway-capture bridge.</td></tr>
-        <tr><td><b>400</b> <span style="font-family:var(--mono)">invalid_allowed_hosts &#183; invalid_coverage_declaration</span></td><td><span style="font-family:var(--mono)">allowed_hosts</span> takes at most 200 hostname strings, each 253 chars or fewer; a malformed coverage declaration is rejected with the failing field named in <span style="font-family:var(--mono)">detail</span>. A declaration carrying an invalid vendor signature is a hard reject.</td></tr>
-        <tr><td><b>404</b> <span style="font-family:var(--mono)">session_not_found &#183; not_found</span></td><td>No such session, report or Trust link for this tenant. A foreign id reads the same as an absent one.</td></tr>
-        <tr><td><b>409</b> <span style="font-family:var(--mono)">session_closed &#183; report_not_ready</span></td><td>A session that already produced its report stays closed; a report endpoint called before <span style="font-family:var(--mono)">run</span> says so.</td></tr>
-        <tr><td><b>413</b> <span style="font-family:var(--mono)">too_many_records &#183; session_too_large</span></td><td>Caps: 20,000 records and 24 MiB of JSONL per session or scan; 4 MB per request body. Split the export across <span style="font-family:var(--mono)">ingest</span> calls or sessions.</td></tr>
-        <tr><td><b>422</b> <span style="font-family:var(--mono)">audit_failed</span></td><td>The records parsed but could not be analyzed.</td></tr>
-        <tr><td><b>429</b> <span style="font-family:var(--mono)">rate_limited</span></td><td>The public verify endpoint caps at 120 requests per minute per address. Verify offline instead.</td></tr>
-        <tr><td><b>503</b> <span style="font-family:var(--mono)">no_signer_configured &#183; pdf_unavailable</span></td><td>The server cannot sign or render right now; the audit itself is unaffected. Retry or mail <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>.</td></tr>
-      </tbody>
-    </table></div>
-
-    <p class="hero__claim" style="margin-top:var(--s5)">
-      That is the whole surface: logs in at <span style="font-family:var(--mono);font-size:0.92em">/v1/audit</span>,
-      a signed envelope out, and a check your reviewer can run without us. The byte-level format lives in
-      <a href="/spec" style="border-bottom:1px solid var(--line-2)">the spec</a>; questions reach
-      <a href="mailto:dev@kolm.ai" style="border-bottom:1px solid var(--line-2)">dev@kolm.ai</a>.
-    </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ FINAL CTA -->
-<section class="section reveal cta-final">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
-  <div class="wrap">
-    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>Verify the sample, then send your own logs.</h2>
-    <p class="lede">Open the verifier on a signed sample, then run the free scan on your application's telemetry and hand your buyer a report they can check in their own browser.</p>
-    <div class="hero__cta">
-      <a class="btn btn--primary" href="/verify">Open the verifier</a>
-      <a class="btn btn--ghost" href="/signup">Run the free scan</a>
-    </div>
-    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
-    </div>
-    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-  </div>
-</section>
-
+  </section>
 </main>
 
-<!-- ============================================================ FOOTER -->
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Developer docs for the behavior-to-artifact control plane.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Docs</h3>
+        <a href="/docs/api">API Reference</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/docs/api-routes.json">Route Inventory</a>
+        <a href="/product-graph.json">Product Graph</a>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
-        <a href="/docs">Docs</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/runtimes">Runtimes</a>
+        <a href="/capabilities">Capabilities</a>
       </div>
       <div class="foot__col">
-        <h3>Trust</h3>
-        <a href="/verify">Verify</a>
+        <h3>Control</h3>
+        <a href="/account/api-control-center">API Control Center</a>
+        <a href="/account/overview">Account Overview</a>
+        <a href="/trust">Readiness Center</a>
         <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
-        <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
-      </div>
-      <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
       </div>
       <div class="foot__col">
         <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
+        <a href="/pricing">Pricing</a>
       </div>
     </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge badge--ok">Developer docs</span>
+      <span class="badge">OpenAPI ready</span>
+      <span class="badge">Route inventory</span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
-
 </body>
 </html>

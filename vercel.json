@@ -5,11 +5,6 @@
   "cleanUrls": true,
   "redirects": [
     {
-      "source": "/openapi.json",
-      "destination": "/docs",
-      "permanent": true
-    },
-    {
       "source": "/about",
       "destination": "/",
       "permanent": true
@@ -21,8 +16,23 @@
     },
     {
       "source": "/account",
-      "destination": "/",
-      "permanent": true
+      "destination": "/account/overview",
+      "permanent": false
+    },
+    {
+      "source": "/control-center",
+      "destination": "/account/api-control-center",
+      "permanent": false
+    },
+    {
+      "source": "/api-control-center",
+      "destination": "/account/api-control-center",
+      "permanent": false
+    },
+    {
+      "source": "/enterprise-control",
+      "destination": "/account/api-control-center",
+      "permanent": false
     },
     {
       "source": "/admin",
@@ -46,12 +56,12 @@
     },
     {
       "source": "/api",
-      "destination": "/docs",
+      "destination": "/docs/api",
       "permanent": true
     },
     {
       "source": "/api-routes.json",
-      "destination": "/docs",
+      "destination": "/docs/api-routes.json",
       "permanent": true
     },
     {
@@ -81,8 +91,118 @@
     },
     {
       "source": "/audit",
-      "destination": "/transparency-log",
+      "destination": "https://audit.kolm.ai/",
       "permanent": true
+    },
+    {
+      "source": "/audit.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "https://audit.kolm.ai/",
+      "permanent": false
+    },
+    {
+      "source": "/dashboard.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "/account/overview",
+      "permanent": false
+    },
+    {
+      "source": "/:compilerPath(how-it-works|platform|capabilities|enterprise|security|trust|contact|research|changelog).html",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "/:compilerPath",
+      "permanent": false
+    },
+    {
+      "source": "/terms.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "/terms",
+      "permanent": false
+    },
+    {
+      "source": "/:auditPath(verify|checks|report|report-viewer|badge|roi|regulatory-clock|transparency-log|trust-center|buyer|spec)",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "https://audit.kolm.ai/:auditPath",
+      "permanent": false
+    },
+    {
+      "source": "/:auditPath(verify|checks|report|report-viewer|badge|roi|regulatory-clock|transparency-log|trust-center|buyer|spec).html",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "https://audit.kolm.ai/:auditPath.html",
+      "permanent": false
+    },
+    {
+      "source": "/security/threat-model",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "https://audit.kolm.ai/security/threat-model",
+      "permanent": false
+    },
+    {
+      "source": "/security/threat-model.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "https://audit.kolm.ai/security/threat-model.html",
+      "permanent": false
+    },
+    {
+      "source": "/solutions/:auditSolution(ai-vendors|enterprise-buyers)",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "https://audit.kolm.ai/solutions/:auditSolution",
+      "permanent": false
+    },
+    {
+      "source": "/solutions/:auditSolution(ai-vendors|enterprise-buyers).html",
+      "has": [
+        {
+          "type": "host",
+          "value": "kolm.ai"
+        }
+      ],
+      "destination": "https://audit.kolm.ai/solutions/:auditSolution.html",
+      "permanent": false
     },
     {
       "source": "/audit-log",
@@ -505,11 +625,6 @@
       "permanent": true
     },
     {
-      "source": "/integrations",
-      "destination": "/docs",
-      "permanent": true
-    },
-    {
       "source": "/iso-27001",
       "destination": "/security",
       "permanent": true
@@ -676,7 +791,7 @@
     },
     {
       "source": "/product",
-      "destination": "/how-it-works",
+      "destination": "/compiler-product",
       "permanent": true
     },
     {
@@ -732,11 +847,6 @@
     {
       "source": "/run",
       "destination": "/how-it-works",
-      "permanent": true
-    },
-    {
-      "source": "/runtimes",
-      "destination": "/platform",
       "permanent": true
     },
     {
@@ -1110,11 +1220,6 @@
       "permanent": true
     },
     {
-      "source": "/account/:path(.+)",
-      "destination": "/",
-      "permanent": true
-    },
-    {
       "source": "/articles/:path(.+)",
       "destination": "/",
       "permanent": true
@@ -1185,11 +1290,6 @@
       "permanent": true
     },
     {
-      "source": "/docs/:path(.+)",
-      "destination": "/docs",
-      "permanent": true
-    },
-    {
       "source": "/enterprise/:path(.+)",
       "destination": "/enterprise",
       "permanent": true
@@ -1231,7 +1331,12 @@
     },
     {
       "source": "/integrations/:path(.+)",
-      "destination": "/docs",
+      "destination": "/integrations",
+      "permanent": true
+    },
+    {
+      "source": "/runtimes/:path(.+)",
+      "destination": "/runtimes",
       "permanent": true
     },
     {
@@ -1360,6 +1465,144 @@
     },
     {
       "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/audit.html"
+    },
+    {
+      "source": "/docs",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/audit-docs.html"
+    },
+    {
+      "source": "/pricing",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/audit-pricing.html"
+    },
+    {
+      "source": "/how-it-works",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/how-it-works.html"
+    },
+    {
+      "source": "/platform",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/platform.html"
+    },
+    {
+      "source": "/capabilities",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/capabilities.html"
+    },
+    {
+      "source": "/enterprise",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/enterprise.html"
+    },
+    {
+      "source": "/security",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/security.html"
+    },
+    {
+      "source": "/trust",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/trust.html"
+    },
+    {
+      "source": "/contact",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/research",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/research.html"
+    },
+    {
+      "source": "/changelog",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/changelog.html"
+    },
+    {
+      "source": "/terms",
+      "has": [
+        {
+          "type": "host",
+          "value": "audit.kolm.ai"
+        }
+      ],
+      "destination": "/terms.html"
+    },
+    {
+      "source": "/account/overview",
+      "destination": "/account/overview.html"
+    },
+    {
+      "source": "/account/overview/",
+      "destination": "/account/overview.html"
+    },
+    {
+      "source": "/",
       "destination": "/index.html"
     },
     {
@@ -1387,12 +1630,40 @@
       "destination": "/docs.html"
     },
     {
+      "source": "/how-it-works",
+      "destination": "/compiler-product.html"
+    },
+    {
+      "source": "/platform",
+      "destination": "/platform.html"
+    },
+    {
+      "source": "/capabilities",
+      "destination": "/capabilities.html"
+    },
+    {
+      "source": "/research",
+      "destination": "/research.html"
+    },
+    {
+      "source": "/changelog",
+      "destination": "/changelog.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/compiler-terms.html"
+    },
+    {
       "source": "/security",
       "destination": "/security.html"
     },
     {
       "source": "/enterprise",
       "destination": "/enterprise.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
     },
     {
       "source": "/baa",
@@ -1421,6 +1692,14 @@
     {
       "source": "/compare",
       "destination": "/compare.html"
+    },
+    {
+      "source": "/integrations",
+      "destination": "/integrations.html"
+    },
+    {
+      "source": "/runtimes",
+      "destination": "/runtimes.html"
     },
     {
       "source": "/roi",

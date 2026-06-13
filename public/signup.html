@@ -3,30 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
+<script>
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Create Your Account: Free Security Scan · kolm.ai</title>
-<meta name="description" content="Run a free scan from the logs you already have, then buy the signed report when your buyer asks for evidence. Create a kolm account in seconds.">
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
+<title>Kolm Workspace Setup</title>
+<meta name="description" content="Create a Kolm workspace, issue an API key, route one namespace, capture API behavior, and open the enterprise API Control Center.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="Create Your Account: Free Security Scan">
-<meta property="og:description" content="Run a free scan from the logs you already have, then buy the signed report when your buyer asks for evidence. Create a kolm account in seconds.">
+<meta property="og:title" content="Kolm Workspace Setup">
+<meta property="og:description" content="Create the workspace that controls one AI/API loop: key, route, capture, eval, compile, receipt, runtime target, and export.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/signup">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Create Your Account: Free Security Scan">
-<meta name="twitter:description" content="Run a free scan from the logs you already have, then buy the signed report when your buyer asks for evidence. Create a kolm account in seconds.">
+<meta name="twitter:title" content="Kolm Workspace Setup">
+<meta name="twitter:description" content="Create the workspace that controls one AI/API loop: key, route, capture, eval, compile, receipt, runtime target, and export.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/signup">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -34,63 +28,88 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
+<script defer src="/kolm-field.js"></script>
+<script defer src="/kolm-main.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Kolm Workspace Setup",
+  "url": "https://kolm.ai/signup",
+  "description": "Create a Kolm workspace, issue an API key, route one namespace, capture API behavior, and open the enterprise API Control Center.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
+}
+</script>
 <style>
-  /* page-specific app chrome, v2 tokens only */
-  .signup-wrap{max-width:560px;margin:0 auto}
-  .signup-wrap h1{font-size:clamp(30px,3.6vw,38px);margin:0 0 var(--s2)}
-  .signup-wrap .lede{margin:0 0 var(--s6)}
-  .signup-wrap .card{margin-top:var(--s4)}
-  .signup-wrap .card:hover{transform:none}
-  .signup-wrap label{display:block;font-weight:600;font-size:14px;color:var(--ink);margin:0 0 8px}
-  .signup-wrap input[type=email]{width:100%;padding:12px 14px;background:var(--paper-sink);border:1px solid var(--line-2);border-radius:var(--r-md);color:var(--ink);font-size:15px;font-family:var(--sans)}
-  .signup-wrap input[type=email]::placeholder{color:var(--ink-3)}
-  .signup-wrap input[type=email]:focus{outline:2px solid var(--accent);outline-offset:1px}
-  .btn--block{width:100%;margin-top:var(--s4)}
-  .signup-wrap .fine{font-size:13px;color:var(--ink-3);margin:14px 0 0;text-align:center;line-height:1.6}
-  .keybox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--paper-sink);border:1px solid var(--accent-edge);border-radius:var(--r-md);padding:14px 16px;font-size:13px;color:var(--accent-text);word-break:break-all}
-  .keybox button{flex:none;background:var(--accent-soft);color:var(--accent-text);border:1px solid var(--accent-edge);border-radius:var(--r-sm);padding:6px 11px;font:500 12px var(--sans);cursor:pointer}
+  .signup-hero .hero__h1{max-width:14ch}
+  .signup-hero .lede{max-width:62ch}
+  .signup-panel{min-width:0;padding:clamp(20px,3vw,28px);border:1px solid var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),var(--paper-2);box-shadow:inset 0 1px 0 var(--light-top),0 26px 84px rgba(0,0,0,.34)}
+  .signup-panel h2{font-size:clamp(26px,3vw,38px);margin-bottom:10px}
+  .signup-panel p{color:var(--ink-2)}
+  .signup-form{display:grid;gap:12px;margin-top:22px}
+  .signup-form label{display:block;color:var(--ink);font-size:13px;font-weight:650}
+  .signup-form input[type=email]{width:100%;min-height:48px;padding:13px 14px;border:1px solid var(--line-2);border-radius:6px;background:var(--paper-sink);color:var(--ink);font:500 16px var(--sans);touch-action:manipulation}
+  .signup-form input[type=email]::placeholder{color:var(--ink-3)}
+  .signup-form input[type=email]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .signup-helper{margin:0;color:var(--ink-3);font-size:13px;line-height:1.55}
+  .signup-fine{margin:2px 0 0;color:var(--ink-3);font-size:12.5px;line-height:1.65}
+  #banner:not(:empty){margin:0 0 14px}
+  .signup-plan{display:grid;gap:6px;margin:14px 0 16px;padding:12px 14px;border:1px solid var(--accent-edge);border-radius:6px;background:var(--accent-soft);color:var(--accent-text)}
+  .signup-plan b{font-size:13px}
+  .signup-plan span{color:var(--ink-2);font-size:12.5px;line-height:1.55}
+  .btn--block{width:100%;min-height:48px}
+  .signup-panel>.btn--block{margin-top:14px}
+  .signup-panel>.btn--block+.btn--block{margin-top:10px}
+  .signup-banner{border-radius:6px;padding:12px 14px;font-size:13px;line-height:1.55}
+  .signup-banner.ok{border:1px solid var(--accent-edge);background:var(--accent-soft);color:var(--accent-text)}
+  .signup-banner.warn{border:1px solid rgba(224,168,159,.36);background:rgba(224,168,159,.12);color:#f3c2bb}
+  .keybox{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:10px;align-items:center;margin-top:10px;padding:13px;border:1px solid var(--accent-edge);border-radius:6px;background:var(--paper-sink);color:var(--accent-text);font:500 12px var(--mono);word-break:break-all}
+  .keybox button{min-height:36px;border:1px solid var(--accent-edge);border-radius:5px;background:var(--accent-soft);color:var(--accent-text);font:650 12px var(--sans);cursor:pointer;touch-action:manipulation}
   .keybox button:hover{background:var(--accent-tint)}
-  .banner{border-radius:var(--r-md);padding:12px 16px;margin:0 0 18px;font-size:14px;line-height:1.55}
-  .banner.ok{background:var(--accent-soft);border:1px solid var(--accent-edge);color:var(--accent-text)}
-  .banner.warn{background:var(--void-soft);border:1px solid var(--void-edge);color:var(--void)}
-  .signup-steps{display:block;margin:18px 0 0;padding:0;list-style:none}
-  .signup-steps li{padding:8px 0;border-top:1px solid var(--line);color:var(--ink-2);font-size:14px}
-  .signup-steps li b{color:var(--ink)}
-  .signup-wrap pre{background:var(--paper-sink);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--ink-2);margin:10px 0 0}
+  .keybox button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .signup-code{margin:14px 0 0;padding:14px;border:1px solid var(--line);border-radius:6px;background:var(--paper-sink);color:var(--ink-2);font:500 12px/1.65 var(--mono);overflow-x:auto;white-space:pre}
+  .signup-steps{display:grid;gap:9px;margin:18px 0 0;padding:0;list-style:none}
+  .signup-steps li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018);color:var(--ink-2);font-size:14px;line-height:1.55}
+  .signup-steps b{display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--line-2);border-radius:4px;color:var(--ink);font:650 11px var(--mono)}
+  .signup-matrix{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  .signup-matrix .proof-card{min-height:190px}
+  .signup-matrix .card__k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+  .signup-contract{display:grid;grid-template-columns:minmax(0,.82fr) minmax(320px,1.18fr);gap:clamp(22px,4vw,52px);align-items:start}
+  .signup-contract pre{margin:0;padding:18px;border:1px solid var(--line-top);border-radius:8px;background:var(--paper-sink);box-shadow:inset 0 1px 0 var(--light-top);overflow-x:auto;color:var(--ink-2);font:500 12px/1.72 var(--mono)}
+  .signup-route-table{display:grid;gap:8px;margin-top:22px}
+  .signup-route-table div{display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018);font-size:13px;color:var(--ink-2)}
+  .signup-route-table b{color:var(--ink);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
   .mono{font-family:var(--mono)}
   [hidden]{display:none!important}
+  @media (max-width:1080px){.signup-matrix{grid-template-columns:repeat(2,minmax(0,1fr))}.signup-contract{grid-template-columns:1fr}}
+  @media (max-width:680px){.signup-matrix{grid-template-columns:1fr}.keybox{grid-template-columns:1fr}.signup-route-table div{grid-template-columns:1fr}.signup-steps li{grid-template-columns:24px minmax(0,1fr)}}
+  @media (prefers-reduced-motion:reduce){.signup-panel,.keybox button{transition:none}}
 </style>
 </head>
-<body>
+<body class="compiler-site">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
-<hr class="foil-strip" aria-hidden="true">
-
-<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
+      <a href="/#pipeline">Pipeline</a>
+      <a href="/account/api-control-center">Control</a>
+      <a href="/integrations">Integrations</a>
+      <a href="/runtimes">Runtimes</a>
+      <a href="/compare">Compare</a>
       <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost btn--sm" href="/docs/api">API Docs</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/account/api-control-center">Open Control</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -99,134 +118,274 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
+  <section class="section section--flush hero compiler-hero signup-hero">
+    <div class="field" aria-hidden="true"><canvas></canvas></div>
+    <div class="wrap compiler-hero__grid">
+      <div>
+        <p class="compiler-kicker" data-enter="1">Signup / Workspace</p>
+        <h1 class="hero__h1" data-enter="2">Create the workspace that controls one AI/API loop.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Use one work email to issue a key, route one namespace, capture real behavior, and open the control plane that tracks policy, evals, compile runs, artifacts, receipts, runtime targets, and exports.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="#create-workspace">Create Workspace</a>
+          <a class="btn btn--ghost" href="/docs/api">Read API Docs</a>
+        </div>
+        <div class="compiler-proof" data-enter="5">
+          <span><b>1</b> API key issued once</span>
+          <span><b>1</b> namespace first</span>
+          <span><b>17</b> data channel families</span>
+          <span><b>8</b> readiness gates visible</span>
+        </div>
+      </div>
+      <aside class="control-plane kolm-surface-media" aria-label="Workspace setup loop">
+        <div class="control-plane__head">
+          <span><b>workspace loop</b> / first 10 minutes</span>
+          <span>key to control</span>
+        </div>
+        <div class="control-plane__grid">
+          <div class="control-tile control-tile--wide"><b>01 Identity</b><span>Create a tenant with one work email. The server sets the session cookie and returns the key once.</span></div>
+          <div class="control-tile"><b>02 Key</b><span>Store the API key or let the browser session carry you into account controls.</span></div>
+          <div class="control-tile"><b>03 Route</b><span>Point one OpenAI-compatible namespace at Kolm before broad migration.</span></div>
+          <div class="control-tile"><b>04 Capture</b><span>Keep prompts, completions, tool calls, labels, and failure cases attached to source policy.</span></div>
+          <div class="control-tile"><b>05 Compile</b><span>Turn stable behavior into a signed artifact with target-fit metadata.</span></div>
+          <div class="control-tile"><b>06 Export</b><span>Move receipts, manifests, reports, logs, and runtime packages out through governed channels.</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
 
-<section class="section section--flush hero">
-  <div class="wrap">
-    <div class="signup-wrap">
-      <p class="eyebrow" data-enter="1">Get started</p>
-      <h1 data-enter="2">Create your account</h1>
-      <p class="lede" data-enter="3">No card. One email address gets you a key in seconds, plus a free signed Agent Exposure Scan and a dashboard. Your buyer never needs an account to verify.</p>
-
-      <div class="card" id="form-card" data-enter="4">
-        <div id="banner"></div>
-        <label for="email">Work email</label>
-        <input id="email" type="email" placeholder="you@company.com" autocomplete="email" spellcheck="false">
-        <button class="btn btn--primary btn--block" id="go">Create account</button>
-        <p class="fine">By creating an account you agree to the <a href="/terms">terms</a> and <a href="/privacy">privacy policy</a>. Already have a key? <a href="/dashboard">Open your dashboard</a>.</p>
+  <section class="section" id="create-workspace">
+    <div class="wrap signup-contract">
+      <div class="section__head">
+        <span class="idx">01 / Workspace</span>
+        <h2>Start with a key, not a sales maze.</h2>
+        <p class="lede">The self-serve flow is intentionally narrow: create the workspace, save the key, run one route, then inspect the same lifecycle in the API Control Center.</p>
+        <div class="signup-route-table" aria-label="Signup contract">
+          <div><b>Endpoint</b><span><span class="mono">POST /v1/signup</span></span></div>
+          <div><b>Returns</b><span><span class="mono">api_key</span>, tenant metadata, onboarding guidance, and billing state when relevant.</span></div>
+          <div><b>Session</b><span>The server sets <span class="mono">kolm_session</span> so the account console opens without pasting the key.</span></div>
+        </div>
       </div>
 
-      <div class="card" id="done-card" hidden>
-        <div class="banner ok">Account created. Save your API key now - it is shown once.</div>
-        <label>Your API key</label>
-        <div class="keybox"><span id="apikey" class="mono"></span><button id="copy">Copy</button></div>
-        <a class="btn btn--primary btn--block" href="/dashboard">Go to your dashboard</a>
+      <div class="signup-panel" id="form-card" data-enter="1">
+        <h2>Create Workspace</h2>
+        <p>Use a work email. You can move into provider policy, source capture, eval gates, compile runs, artifacts, receipts, and exports after the key is issued.</p>
+        <div id="banner" aria-live="polite"></div>
+        <div class="signup-plan" id="plan-note" hidden>
+          <b id="plan-name">Selected plan</b>
+          <span id="plan-detail">The workspace starts on Free while billing state stays explicit.</span>
+        </div>
+        <div class="signup-form">
+          <label for="email">Work Email</label>
+          <input id="email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" aria-describedby="email-help">
+          <p class="signup-helper" id="email-help">Example: you@company.com. Existing workspaces should use account recovery or OAuth sign-in.</p>
+          <button class="btn btn--primary btn--block" id="go" type="button">Create Workspace</button>
+          <p class="signup-fine">By creating a workspace you agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>. Already active? <a href="/account/api-control-center">Open API Control Center</a>.</p>
+        </div>
+      </div>
+
+      <div class="signup-panel" id="done-card" tabindex="-1" hidden>
+        <h2>Workspace Created</h2>
+        <div class="signup-banner ok">Save your API key now. It is shown once.</div>
+        <p class="signup-helper" id="workspace-status">Workspace active on Free.</p>
+        <label for="apikey">Your API Key</label>
+        <div class="keybox"><span id="apikey" class="mono"></span><button id="copy" type="button">Copy Key</button></div>
+        <a class="btn btn--primary btn--block" href="/account/api-control-center">Open API Control Center</a>
+        <a class="btn btn--ghost btn--block" id="billing-link" href="/pricing" hidden>Continue to Checkout</a>
         <ol class="signup-steps">
-          <li><b>1.</b> Run a free scan from the CLI or API with your key:</li>
+          <li><b>1</b><span>Route one namespace through the API wrapper with your key.</span></li>
+          <li><b>2</b><span>Capture enough real behavior to form eval and regression sets.</span></li>
+          <li><b>3</b><span>Compile captured examples into a signed <span class="mono">.kolm</span> artifact when the readiness gates pass.</span></li>
         </ol>
-        <pre id="snippet" class="mono"></pre>
-        <ol class="signup-steps" style="margin-top:0">
-          <li><b>2.</b> Review the findings, then <b>buy the $750 signed report</b> from your dashboard when a buyer asks for evidence.</li>
-          <li><b>3.</b> Hand them the Trust link. They verify the signature offline, no account needed.</li>
-        </ol>
-      </div>
-
-      <div class="hero__proof" aria-label="Proof at a glance" data-enter="5">
-        <span><i class="dot" aria-hidden="true"></i>Free scan · no card</span>
-        <span><i class="dot" aria-hidden="true"></i>Ed25519 signed · verifies offline</span>
-        <span><i class="dot" aria-hidden="true"></i>Buyer needs no account</span>
+        <pre id="snippet" class="signup-code mono"></pre>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">02 / First 10 Minutes</span>
+        <h2>The first run should prove the whole loop.</h2>
+        <p class="lede">The best onboarding path does not ask teams to migrate everything. It proves one controlled route end to end.</p>
+      </div>
+      <div class="compiler-card-grid">
+        <div class="proof-card"><p class="card__k">Key</p><h3>Issue a scoped credential</h3><p>Create the tenant, keep the key, and move credential handling into account controls instead of scattered environment notes.</p></div>
+        <div class="proof-card"><p class="card__k">Route</p><h3>Send one namespace</h3><p>Use an OpenAI-compatible route first, then expand to SDK, CLI, webhook, stream, trace, log, warehouse, and browser sources.</p></div>
+        <div class="proof-card"><p class="card__k">Capture</p><h3>Attach policy to behavior</h3><p>Prompts, completions, tool calls, labels, failures, redaction, retention, and source identity stay together.</p></div>
+        <div class="proof-card"><p class="card__k">Compile</p><h3>Ship an artifact, not a promise</h3><p>The output path is a signed artifact with manifest, eval evidence, runtime target metadata, receipt, and export bundle.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">03 / Enterprise Controls</span>
+        <h2>The control center is the product surface buyers inspect.</h2>
+        <p class="lede">Unicorn-grade enterprise software exposes the objects administrators need to govern, not just the model call that developers need to run.</p>
+      </div>
+      <div class="signup-matrix">
+        <div class="proof-card"><p class="card__k">Identity</p><h3>Roles and service accounts</h3><p>Workspace, project, environment, credential, key scope, user role, and account lifecycle state.</p></div>
+        <div class="proof-card"><p class="card__k">Sources</p><h3>Every credible data path</h3><p>API routes, SDKs, CLI uploads, webhooks, streams, logs, traces, browser events, warehouse imports, labels, and runtime receipts.</p></div>
+        <div class="proof-card"><p class="card__k">Policy</p><h3>Provider and data controls</h3><p>Model allowlists, connector state, redaction, retention, rate limits, cost controls, and risky-action approvals.</p></div>
+        <div class="proof-card"><p class="card__k">Evidence</p><h3>Portable exports</h3><p>Receipts, manifests, eval reports, event streams, warehouse exports, webhook callbacks, runtime packages, and readiness ledgers.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap signup-contract">
+      <div class="section__head">
+        <span class="idx">04 / Developer Contract</span>
+        <h2>One route should map to every later product object.</h2>
+        <p class="lede">The signup snippet starts with a single route, but the contract is bigger: every write should emit lifecycle state that an admin can inspect or export.</p>
+      </div>
+      <pre aria-label="Signup API example">curl -s https://kolm.ai/v1/signup \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@company.com"}'
+
+curl -s https://kolm.ai/v1/route/chat/completions \
+  -H "Authorization: Bearer $KOLM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "namespace":"default",
+    "model":"openai:gpt-4.1-mini",
+    "messages":[{"role":"user","content":"hello"}]
+  }'</pre>
+    </div>
+  </section>
+
+  <section class="section section--cta">
+    <div class="wrap cta-final">
+      <p class="compiler-kicker">Readiness-Gated Claims</p>
+      <h2>Create one controlled loop, then prove it before expanding.</h2>
+      <p class="lede">Kolm should win by making the real objects visible: source, route, policy, trace, eval, compile run, artifact, target, receipt, export, and open readiness gate.</p>
+      <div class="hero__cta" style="justify-content:center">
+        <a class="btn btn--primary" href="#create-workspace">Create Workspace</a>
+        <a class="btn btn--ghost" href="/account/api-control-center">Open Control Center</a>
+      </div>
+    </div>
+  </section>
 </main>
 
-<!-- ============================================================ FOOTER -->
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The behavior-to-artifact control plane for AI/API routes, policies, evals, artifacts, receipts, runtime targets, and exports.</p>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
+        <a href="/#pipeline">Pipeline</a>
         <a href="/platform">Platform</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
-        <a href="/docs">Docs</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/runtimes">Runtimes</a>
+        <a href="/compare">Compare</a>
         <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
       </div>
       <div class="foot__col">
-        <h3>Trust</h3>
-        <a href="/verify">Verify</a>
+        <h3>Control</h3>
+        <a href="/account/api-control-center">API Control Center</a>
+        <a href="/account/overview">Account Overview</a>
+        <a href="/docs/api">API Docs</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/capabilities">Capabilities</a>
+      </div>
+      <div class="foot__col">
+        <h3>Evidence</h3>
+        <a href="/trust">Readiness Center</a>
         <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
-      </div>
-      <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
       </div>
       <div class="foot__col">
         <h3>Company</h3>
-        <a href="/research">Research</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
         <a href="/contact">Contact</a>
+        <a href="/careers">Careers</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
       </div>
     </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge badge--ok">Workspace setup</span>
+      <span class="badge">API key issued once</span>
+      <span class="badge"><a href="/docs/api">API docs</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
 
 <script>
 (function(){
-  var go=document.getElementById('go'), email=document.getElementById('email'), banner=document.getElementById('banner');
-  function showErr(msg){ banner.innerHTML='<div class="banner warn">'+msg+'</div>'; }
+  var go=document.getElementById('go');
+  var email=document.getElementById('email');
+  var banner=document.getElementById('banner');
+  var planAliases={team:'teams'};
+  var planLabels={free:'Free',indie:'Indie',pro:'Pro',teams:'Team',business:'Business',enterprise:'Enterprise'};
+  var params=new URLSearchParams(window.location.search);
+  var rawPlan=(params.get('plan')||'').toLowerCase().replace(/[^a-z0-9_-]+/g,'');
+  var selectedPlan=planAliases[rawPlan]||rawPlan;
+  if(!Object.prototype.hasOwnProperty.call(planLabels,selectedPlan)) selectedPlan='';
+  var planNote=document.getElementById('plan-note');
+  if(selectedPlan&&planNote){
+    document.getElementById('plan-name').textContent=planLabels[selectedPlan]+' plan selected';
+    document.getElementById('plan-detail').textContent=selectedPlan==='free'
+      ? 'This workspace activates immediately on the Free tier.'
+      : (selectedPlan==='enterprise'
+        ? 'Enterprise access is sales-led; signup creates a Free workspace while architecture review is pending.'
+        : 'Signup creates a Free workspace first, then marks '+planLabels[selectedPlan]+' pending until checkout activates it.');
+    planNote.hidden=false;
+  }
+  function showErr(msg){ banner.innerHTML='<div class="signup-banner warn" role="alert">'+msg+'</div>'; }
+  function resetButton(){ go.disabled=false; go.textContent='Create Workspace'; }
   function submit(){
     var v=(email.value||'').trim();
-    if(!v || v.indexOf('@')<1){ showErr('Enter a valid email address.'); return; }
-    go.disabled=true; go.textContent='Creating...';
-    fetch('/v1/signup',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})})
+    if(!v || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ showErr('Enter a valid work email, for example you@company.com.'); email.focus(); return; }
+    go.disabled=true; go.textContent='Creating';
+    var payload={email:v};
+    if(selectedPlan) payload.plan=selectedPlan;
+    fetch('/v1/signup',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
       .then(function(res){ return res.json().then(function(j){ return {ok:res.ok,status:res.status,j:j}; }); })
       .then(function(o){
-        if(o.status===429){ go.disabled=false; go.textContent='Create account'; showErr('Too many signups from this network today. Try again later or email dev@kolm.ai.'); return; }
-        if(!o.ok || !o.j || !o.j.api_key){ go.disabled=false; go.textContent='Create account'; showErr((o.j&&(o.j.detail||o.j.error))||'Could not create the account. Email dev@kolm.ai.'); return; }
+        if(o.status===429){ resetButton(); showErr('Too many signups from this network today. Try again later or email dev@kolm.ai for a direct invite.'); return; }
+        if(o.status===409){ resetButton(); showErr('A workspace already exists for this email. Use account recovery or email dev@kolm.ai.'); return; }
+        if(!o.ok || !o.j || !o.j.api_key){ resetButton(); showErr((o.j&&(o.j.detail||o.j.error))||'Could not create the workspace. Email dev@kolm.ai and include the email you used.'); return; }
         var key=o.j.api_key;
+        var tenant=o.j.tenant||{};
+        var pending=tenant.pending_plan;
+        var activePlan=tenant.plan||'free';
+        var status=document.getElementById('workspace-status');
         document.getElementById('apikey').textContent=key;
-        document.getElementById('snippet').textContent='curl -s https://kolm.ai/v1/audit/scan \\\n  -H "Authorization: Bearer '+key+'" \\\n  -H "Content-Type: application/json" \\\n  -d \x27{"logs": <your agent logs as JSONL or array>, "subject": "My agents"}\x27';
+        document.getElementById('snippet').textContent='curl -s https://kolm.ai/v1/route/chat/completions \\\n  -H "Authorization: Bearer '+key+'" \\\n  -H "Content-Type: application/json" \\\n  -d \x27{"namespace":"default","model":"openai:gpt-4.1-mini","messages":[{"role":"user","content":"hello"}]}\x27';
+        if(status){
+          if(o.j.sales_required){
+            status.textContent=planLabels[pending]+' is pending architecture review. The workspace is active on '+(planLabels[activePlan]||'Free')+' until sales activation completes.';
+          }else if(pending){
+            status.textContent=planLabels[pending]+' is pending billing. The workspace is active on '+(planLabels[activePlan]||'Free')+' until checkout completes.';
+          }else{
+            status.textContent='Workspace active on '+(planLabels[activePlan]||'Free')+'.';
+          }
+        }
+        var billing=document.getElementById('billing-link');
+        if(billing&&o.j.billing_url){
+          billing.href=o.j.billing_url;
+          billing.hidden=false;
+        }
         document.getElementById('form-card').hidden=true;
         document.getElementById('done-card').hidden=false;
-        document.getElementById('copy').onclick=function(){ navigator.clipboard.writeText(key).then(function(){ document.getElementById('copy').textContent='Copied'; }); };
+        document.getElementById('copy').addEventListener('click',function(){
+          navigator.clipboard.writeText(key).then(function(){ document.getElementById('copy').textContent='Copied'; });
+        });
+        document.getElementById('done-card').focus && document.getElementById('done-card').focus();
       })
-      .catch(function(){ go.disabled=false; go.textContent='Create account'; showErr('Network error. Try again or email dev@kolm.ai.'); });
+      .catch(function(){ resetButton(); showErr('Network error. Try again or email dev@kolm.ai for setup help.'); });
   }
-  go.onclick=submit;
+  go.addEventListener('click',submit);
   email.addEventListener('keydown',function(e){ if(e.key==='Enter') submit(); });
 })();
 </script>

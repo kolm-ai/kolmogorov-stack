@@ -1,149 +1,162 @@
-# Product Surface Spec - 2026-05-20
+# Product Surface Spec
+
+Updated: 2026-06-13
 
 ## Verdict
 
-**NOT 100% FINAL.**
+**Locally coherent, not production-final.**
 
-Kolm now has an enforceable product-surface contract, but the product is not final because production authenticated coverage is blocked. The current truth is:
+Kolm now has an enforceable product-surface contract for the compiler-first product. The current truth is:
 
 - `docs/product-surfaces.json` is the canonical product surface registry.
-- `scripts/verify-product-surfaces.cjs` is the gate that verifies the registry against the generated API inventory.
-- `scripts/prod-surface-smoke.cjs` is the live production smoke runner for every declared surface.
-- `scripts/local-surface-smoke.cjs` boots an isolated local backend, provisions an enterprise tenant, and runs the same surface probes without using `~/.kolm/config.json`.
-- `npm run lint:refs` now includes the product-surface gate.
-- The catalog maps `356` API routes across `108` route groups to `7` product surfaces with `20` primary competitor/research references.
-- Local certification is green on this working tree: `npm.cmd test` passed `4382` tests with `0` failures, `local:surfaces` passed `49/49`, and `local:surfaces:deep` passed `58/58`.
-- `node scripts/release-verify.cjs --json` still fails final certification because the `whoami` gate returns `logged_in:false` with `allow_logged_out:false`; its local gates, isolated tests, and SDK smoke pass.
-- The catalog intentionally carries blockers. A blocked surface is a truthful surface, not a finished one.
+- `public/product-graph.json` is the generated public graph consumed by the site and account UI.
+- `public/product-readiness-closeout.json` is the generated open-blocker ledger.
+- `scripts/verify-product-surfaces.cjs` verifies route-group ownership against `public/docs/api-routes.json`.
+- `scripts/audit-product-kernel.cjs` verifies the product kernel and readiness graph.
+- `scripts/ui-surface-audit.cjs` verifies critical public UI surfaces.
+- The catalog maps `922` generated routes across `214` route groups to `7` product surfaces with `29` competitor/research references.
 
-No future claim of "100% final" is valid until production auth passes and every surface below has a passing production smoke path.
+No claim of "100% final", "fully certified", "best", or "state of the art" is valid unless the claim is tied to dated evidence and the relevant readiness item is closed.
+
+## Current Product Scope
+
+Kolm is the AI compiler and artifact contract layer: production model traffic becomes captured evidence, datasets, evals, signed `.kolm` artifacts, runtime targets, receipts, and governance exports.
+
+The old agent security-readiness audit site is preserved as a focused secondary product at `audit.kolm.ai`. It is not the main `kolm.ai` homepage or account workspace.
 
 ## Source Of Truth
 
 | Artifact | Role |
 | --- | --- |
-| `docs/product-surfaces.json` | Machine-readable owner, route-group, code-path, doc-path, competitor, optimal-spec, certification, and blocker registry. |
-| `scripts/verify-product-surfaces.cjs` | Contract gate. Fails when a route group is unowned, double-owned, points at missing code/docs, or references unknown research. |
-| `scripts/prod-surface-smoke.cjs` | Live smoke runner. Executes each surface's structured `production_smoke` probes against `https://kolm.ai` or `--base=<url>`. |
-| `scripts/local-surface-smoke.cjs` | Local end-to-end harness. Starts `server.js` on an isolated port/data directory, provisions a disposable enterprise tenant, and invokes the production smoke runner against localhost. |
-| `public/docs/api-routes.json` | Generated backend route inventory. The surface registry must map this inventory exactly. |
-| `FINAL_BACKEND_AUDIT_2026-05-20.md` | Backend evidence audit. Current verdict remains production-auth blocked. |
+| `docs/PRODUCT.md` | Human product spec and old-vs-current scope. |
+| `docs/product-surfaces.json` | Machine-readable owner, route-group, code-path, doc-path, research, certification, and probe registry. |
+| `public/product-graph.json` | Generated product graph for site/account/runtime reads. |
+| `public/product-readiness-closeout.json` | Generated non-final readiness ledger. |
+| `public/docs/api-routes.json` | Generated backend route inventory. |
+| `public/openapi.json` | Generated OpenAPI contract. |
+| `scripts/verify-product-surfaces.cjs` | Surface ownership gate. |
+| `scripts/audit-product-kernel.cjs` | Product kernel and readiness gate. |
+| `scripts/prod-surface-smoke.cjs` | Production smoke runner. |
+| `scripts/local-surface-smoke.cjs` | Hermetic local smoke runner. |
+
+## Surface Map
+
+| Surface | Routes | Groups | Local status | Product promise | Not-final gates |
+| --- | ---: | ---: | --- | --- | --- |
+| Identity, access, teams, billing | 148 | 26 | `certified` | Buyer can sign up, authenticate, manage teams/keys/plans, and prove entitlement state. | SSO/SCIM, package-backed billing portal, webhook entitlement proof, production auth smoke. |
+| Public site, docs, API reference, SDK | 72 | 21 | `certified` | Public pages, API reference, SDK assets, route contracts, and readiness ledgers are coherent. | Production fetch/hash smoke, package publication, public benchmark evidence. |
+| Compile, artifacts, registry, receipts, verification | 88 | 28 | `certified` | Tasks become signed portable artifacts with K-score, receipt chain, registry metadata, and verification. | Production compile/list/download/verify, durable artifact storage, release evidence. |
+| Runtime, inference, connectors, multimodal APIs | 131 | 41 | `certified` | Kolm can sit in the hot path as an OpenAI/Anthropic-compatible runtime and connector gateway. | Provider readiness, third-party runtime adoption, package/channel release. |
+| Capture, datasets, evals, labels, training, improvement loop | 205 | 47 | `certified` | Production traces become governed datasets, labels, evals, simulations, distill runs, and follow-up artifacts. | Public reproducible benchmarks, importer fixtures, remote loop production auth. |
+| Governance, compliance, admin, audit, privacy, trace, notifications | 171 | 31 | `certified` | Operators can prove actions, data movement, artifact execution, privacy decisions, and compliance exportability. | Live auditor/certification evidence, compliance package production export, trust-page dated evidence. |
+| Deployment, edge devices, BYOC, storage, sync, tunnel, federated learning | 107 | 20 | `certified` | Artifacts move across cloud, BYOC, devices, tunnels, sync, confidential-compute, and federated flows with tenant boundaries. | External partner/runtime acceptance, BYOC lifecycle smoke, mobile/browser package releases. |
+
+`certified` here means locally mapped and gateable. It does not mean externally certified, package-published, benchmark-proven, or production-auth complete.
 
 ## Research Baseline
 
-The registry uses primary docs and current competitor references, not vibes. Full URLs live in `docs/product-surfaces.json`; the high-signal baseline is:
+The registry uses primary competitor and platform references. The product implication is:
 
-| Market layer | State-of-art comparator | Product implication for Kolm |
+- Fine-tuning providers are mature; Kolm must not compete only on generic training UI.
+- AI gateways and prompt caching are table stakes; Kolm must preserve provider compatibility while proving avoided calls and local hot paths.
+- Observability/eval systems are table stakes; Kolm must bind traces and evals into signed artifacts and receipts.
+- Enterprise identity/billing is table stakes; Kolm must support orgs, keys, quotas, entitlements, audit logs, production smoke, and an account-side API control center.
+- API gateways alone are not enough; Kolm must show ingress, egress, retention, redaction, routing, eval, compile, deployment, and export policy in one tenant-scoped contract.
+- Runtime engines are the substrate; Kolm should package, govern, and verify artifacts for those runtimes rather than claiming to replace all execution engines.
+
+## Open Readiness Gates
+
+The current closeout ledger has eight open items:
+
+| Priority | Requirement | Blocking condition |
 | --- | --- | --- |
-| Provider customization | OpenAI supervised fine-tuning; Together AI LoRA/full fine-tuning; Predibase/OpenPipe; Amazon Bedrock custom models | Kolm should not compete on generic fine-tune UX alone. It must win on portable artifacts, receipts, runtime targets, eval gates, and governance. |
-| Runtime cost and routing | OpenAI and Anthropic prompt caching; OpenRouter-style routing | Kolm must preserve provider fallback and cache economics while proving avoided calls for stable repeated work. |
-| Observability and evals | LangSmith, Arize Phoenix, W&B Weave | Trace, dataset, experiment, and online eval loops are table stakes. Kolm must bind them into signed artifact evidence. |
-| Enterprise identity and billing | WorkOS, Auth0 Organizations, Stripe Billing and customer portal | SSO, SCIM, RBAC, audit logs, self-serve invoices, subscription portal, entitlements, quotas, and webhooks are required for enterprise-final. |
-| Edge runtime substrate | Apple Core ML, Apple Foundation Models, Google LiteRT, ONNX Runtime Mobile, PyTorch ExecuTorch | Kolm should wrap and govern existing runtimes. It should not pretend to replace platform-native execution engines. |
+| P0 | Benchmark harness public data | `public_leaderboard_data` |
+| P0 | Formal compliance/certification evidence | `live_auditor_certification` |
+| P1 | One-line installer release | `installer_channel_release` |
+| P1 | Ecosystem runtime adoption | `external_runtime_adoption` |
+| P1 | Neutral format governance | `external_partner_acceptance` |
+| P1 | SDK package release matrix | `sdk_package_release` |
+| P1 | iOS/Android/React Native package release | `mobile_package_release` |
+| P1 | Browser/runtime package channel | `package_channel_release` |
 
-## Product Surfaces
+Every public page and email must remain scoped to those gates. If a gate is open, copy may say "source exists", "local proof exists", or "readiness tracked"; it may not say "shipped", "certified", "published", or "adopted".
 
-| Surface | Routes | Status | State-of-art bar | Missing for 100% |
-| --- | ---: | --- | --- | --- |
-| Identity, access, teams, billing | 60 | `blocked-prod-auth` | WorkOS/Auth0-grade org identity, scoped keys, RBAC, SSO/SCIM, audit logs, Stripe portal-backed billing and entitlements. | Valid production key; auth/account/key/team/billing prod smoke; SSO/SCIM final certification; webhook-backed entitlement proof. |
-| Public site, docs, API reference, SDK | 27 | `needs-prod-smoke` | Generated docs from route inventory, OpenAPI with zero undocumented flags, content-addressed SDK assets, source-backed public claims. | Direct production fetch/hash smoke for docs, OpenAPI, SDK manifest, SDK asset, pricing, signup, and comparison pages. |
-| Compile, artifacts, registry, receipts, verification | 38 | `blocked-prod-auth` | Signed portable artifact with source, evals, K-score, runtime target, CID, signature, registry state, and optional transparency-log proof. | Authenticated production compile/artifact/list/download/verify smoke; durable cloud compile/object storage proof; marketplace publish dry run. |
-| Runtime, inference, connectors, multimodal APIs | 37 | `blocked-prod-auth` | OpenAI/Anthropic-compatible runtime, provider fallback, prompt-cache-aware routing, receipts, cost/latency metadata, and tenant-gated hot path. | Authenticated `/v1/models`, `/v1/chat/completions`, `/v1/responses`, `/v1/messages`, `/v1/verified-inference`; production model-provider readiness. |
-| Capture, datasets, evals, labels, training, improvement loop | 92 | `blocked-prod-auth` | LangSmith/Phoenix/Weave-class traces, datasets, labels, experiments, evals, distill runs, replay, drift, and governed training provenance. | Remote loop auth; dataset create/split; label next/submit; distill dry run; external trace importer fixtures; K-score update guardrails. |
-| Governance, compliance, admin, audit, privacy, trace, notifications | 53 | `blocked-prod-auth` | Append-only signed audit logs, privacy policy enforcement, tenant fences, compliance exports, trace lineage, DSR/retention evidence. | Production compliance package export; trace append/export; audit export; privacy scan/redact; SOC2/HIPAA evidence beyond code. |
-| Deployment, edge devices, BYOC, storage, sync, tunnel, federated learning | 49 | `blocked-prod-auth` | Runtime target matrix for Core ML/LiteRT/ONNX/ExecuTorch, graceful device probes, BYOC data-plane separation, sync/tunnel/federated evidence. | BYOC lifecycle dry run; storage/sync/tunnel prod smoke; federated contribution/aggregate prod smoke. |
+## URL Contract
 
-## Codebase Organization Rule
+Canonical compiler URLs:
 
-Every feature must land in one of the seven surfaces before it is considered product. The ownership rule is:
+- `/`
+- `/compiler-product`
+- `/platform`
+- `/docs`
+- `/docs/api`
+- `/pricing`
+- `/signup`
+- `/account/overview`
+- `/account/api-control-center`
+- `/enterprise`
+- `/security`
+- `/trust`
 
-1. Add or change the backend route.
-2. Regenerate `public/docs/api-routes.json` and OpenAPI through the existing docs pipeline.
-3. Assign the route group to exactly one surface in `docs/product-surfaces.json`.
-4. Add the code path and human doc path that prove the feature is not just a route name.
-5. Add competitor/research references when the public promise changes.
-6. Add local and production certification gates.
-7. Run `npm run verify:surfaces` or `npm run lint:refs`.
+Compatibility URLs that must keep working:
 
-If a route group cannot be assigned, it is not ready to ship. If a surface has no production gate, it cannot be called final.
+- `/product -> /compiler-product`
+- `/models -> /platform`
+- `/api -> /docs/api`
+- `/api-routes.json -> /docs/api-routes.json`
+- `/quickstart -> /docs#quickstart`
+- `/captures`, `/training`, `/distill -> /compiler-product#pipeline`
+- `/runtimes -> /platform`
+- `/tui -> /account/overview`
+- `/control-center`, `/api-control-center`, `/enterprise-control -> /account/api-control-center`
+- `/self-host`, `/airgap -> /security`
 
-## Upgrade Backlog
+Audit URLs on the main domain should redirect to `https://audit.kolm.ai/...` unless the request host is already `audit.kolm.ai`, where preserved audit pages are served.
 
-### P0 - Blocks "100% Final"
+## Maintenance Rule
 
-| Area | Required code/product work |
-| --- | --- |
-| Production auth | Provision a valid production tenant/admin key, make `doctor`, `whoami`, `health --require-auth`, and remote loop pass without `--allow-logged-out`. |
-| Surface smoke runner | Completed in code: production and local runners now execute declared safe/deep probes across every product surface. Production remains blocked by network/auth, not by missing runner code. |
-| Device detect | Completed in code: GET/POST `/v1/devices/detect` now degrade to structured partial profiles instead of profile-dependent 500s. |
-| Local hermeticity | Completed in code: `npm.cmd test` now avoids real-profile event-store/bootstrap leakage and passes with `0` failures. |
-| Binder reproducibility | Completed in code: tampered artifacts now produce verifier failure rows for signature and deterministic rebuild drift instead of aborting before check #13. |
-| Docs/SDK prod hash gate | Fetch `/docs/api`, `/openapi.json`, `/sdk-current.json`, and the current SDK asset from `https://kolm.ai`; verify status, parseability, bytes, hash, and SRI. |
-| Authenticated compile/artifact gate | Compile, list, download, and verify a production artifact with the same tenant key that runs `whoami`. |
-| Remote value loop | Make `doctor --loop --remote --json` pass against production capture, bridge, distill, replay, and lake routes. |
+When product scope changes:
 
-### P1 - Required For State-Of-Art Enterprise Launch
-
-| Area | Required code/product work |
-| --- | --- |
-| Enterprise identity | Add or certify SSO, SCIM, RBAC, service accounts, key scopes, key rotation, org/workspace/tenant separation, and admin audit export. |
-| Billing | Replace payment-link-only proof with customer portal session, webhook-backed entitlements, invoice state, usage quota, and plan-change audit rows. |
-| Trace/eval imports | Build import/export adapters for LangSmith, Phoenix/OpenTelemetry/OpenInference, Weave, and OpenPipe-style trace-to-finetune loops. |
-| Runtime receipts | Persist provider, model, prompt hash, cost, latency, cache metadata, privacy decision, and fallback path on every connector call. |
-| Registry trust | Add yanked/deprecated/manual-review states, optional Sigstore/Rekor anchoring, and artifact transparency evidence in the public verifier. |
-| Compliance package | Export receipts, manifests, audit rows, DSR state, subprocessors, retention policy, and admin actions as a tenant-scoped bundle. |
-
-### P2 - Differentiators
-
-| Area | Required code/product work |
-| --- | --- |
-| Runtime target matrix | Publish and enforce target manifests for Core ML, LiteRT, ONNX Runtime Mobile, ExecuTorch, llama.cpp, and browser/PWA execution. |
-| Gateway integrations | Add LiteLLM, Vercel AI SDK, OpenRouter, and Cloudflare AI Gateway middleware paths that route repeated tasks to `.kolm` first. |
-| Marketplace quality | Add verified/yanked/deprecated lifecycle, public receipt viewer, publisher trust, artifact signing tiers, and enterprise private registry. |
-| Drift and rollback | Automatically compare production traces to K-score gates and require rollback or review when drift exceeds surface-specific policy. |
+1. Update the backend route or static route.
+2. Regenerate `public/docs/api-routes.json`, `public/docs/api.html`, and `public/openapi.json`.
+3. Assign the route group exactly once in `docs/product-surfaces.json`.
+4. Regenerate `public/product-graph.json`.
+5. Regenerate readiness/control files if the graph or docs changed.
+6. Update public copy so claims match shipped evidence.
+7. Run the certification commands below.
 
 ## Certification Commands
 
-These commands are now the minimum local contract for product-surface integrity:
+Local contract:
 
 ```powershell
-node --check scripts/verify-product-surfaces.cjs
-node --check scripts/prod-surface-smoke.cjs
-node --check scripts/local-surface-smoke.cjs
-npm.cmd run verify:surfaces
-npm.cmd run local:surfaces
-npm.cmd run local:surfaces:deep
+node scripts\build-api-ref.cjs
+node scripts\build-openapi.cjs
+npm.cmd run build:product-graph
+npm.cmd run build:readiness-closeout
+npm.cmd run build:control-files
 npm.cmd run lint:refs
+npm.cmd run verify:kernel
+npm.cmd run verify:surfaces
+npm.cmd run verify:control-files
+npm.cmd run verify:claims-scope
+npm.cmd run ui:audit:critical
+node --check server.js
+node --check src\router.js
+node --test --test-concurrency=1 tests\site.test.js
+node --test --test-concurrency=1 tests\product-compiler-contract.test.js tests\wrapper-email.test.js
 ```
 
-These are the minimum production commands before any final claim:
+Production-final contract:
 
 ```powershell
-node cli/kolm.js health --json --require-ready --require-auth
-node cli/kolm.js doctor --json
-node cli/kolm.js whoami --json
-node cli/kolm.js doctor --loop --remote --json
-node cli/kolm.js verify examples/claims-redactor/claims-redactor.kolm --json
-node cli/kolm.js billing tiers --json
-node scripts/prod-surface-smoke.cjs --json --require-auth
-node scripts/prod-surface-smoke.cjs --json --deep --require-auth
-node scripts/release-verify.cjs --json
+node cli\kolm.js health --json --require-ready --require-auth
+node cli\kolm.js doctor --json
+node cli\kolm.js whoami --json
+node cli\kolm.js doctor --loop --remote --json
+node scripts\prod-surface-smoke.cjs --json --require-auth
+node scripts\prod-surface-smoke.cjs --json --deep --require-auth
+node scripts\release-verify.cjs --json
 ```
 
-The final command set must not use `--allow-logged-out`, skipped gates, or offline billing fallbacks.
-
-## Maintenance Policy
-
-This file is the human spec. `docs/product-surfaces.json` is the enforceable spec. When they disagree, update both and let `scripts/verify-product-surfaces.cjs` decide whether the repo is internally coherent.
-
-Any future product surface must include:
-
-- Product promise.
-- Route groups.
-- Primary public/API paths.
-- Code paths.
-- Human doc paths.
-- Competitor/research references.
-- Optimal technical spec.
-- Local and production certification gates.
-- Explicit blockers if it is not final.
+Production-final commands must not use `--allow-logged-out`, skipped gates, offline billing fallbacks, or unpublished package artifacts.

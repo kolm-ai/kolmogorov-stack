@@ -1,196 +1,171 @@
-# kolm — terminal product spec
+# Kolm Product Spec
 
-> The one-document answer to "what is this and why does it exist." Updated 2026-05-11.
+Updated: 2026-06-13
 
----
+## One Sentence
 
-## In one sentence
+Kolm is the AI compiler and API wrapper that turns repeated model traffic into signed `.kolm` artifacts with eval gates, receipts, runtime targets, and governance evidence.
 
-**`kolm` is a compiler cache for intelligence: turn a task spec into a signed, byte-reproducible `.kolm` artifact that runs locally with zero egress, and surface it to any frontier agent (Claude Code, Cursor, Cline, Continue) as an MCP tool.**
+## What Changed From The Old Product
 
----
+The old public surface was centered on agent security-readiness audit reports. That surface still exists and is preserved on `audit.kolm.ai` through `public/audit.html`, `public/audit-docs.html`, and `public/audit-pricing.html`.
 
-## The three frames
+The main `kolm.ai` product is now broader:
 
-Three audiences, one product. Each sees the same artifact through a different lens:
+1. Capture model calls through provider-compatible routes.
+2. Curate traces into datasets, labels, evals, and improvement loops.
+3. Compile stable behavior into signed `.kolm` artifacts.
+4. Compose smaller specialists where that is cheaper or safer.
+5. Deploy artifacts toward concrete runtimes and devices.
+6. Export receipts, audit logs, privacy evidence, and compliance packets.
+7. Give enterprise teams one API control center for ingress, egress, capture policy, redaction, routing, eval gates, compile state, deployment targets, and exports.
 
-| Frame                  | Audience                | What kolm IS, in their words                                                   |
-|------------------------|-------------------------|--------------------------------------------------------------------------------|
-| **Docker for AI**      | DevOps / platform       | A single-file deploy unit. Same input → same artifact → same output, forever. |
-| **Compiler cache**     | Engineers               | Compile once, run a million times locally. µs latency. No round-trip.         |
-| **MCP tool registry**  | Agent builders          | Every `.kolm` is automatically a callable tool with K-score, paths, schema.   |
+Audit is a secondary module on that stack, not the default homepage product.
 
-The three frames all reduce to the same thing: **a signed binary that an agent can run without phoning home**.
-
----
-
-## The terminal product loop
+## Product Spine
 
 ```
-   spec.json  ──►  kolm compile  ──►  *.kolm                  (build once)
-                       │
-                       ▼
-                  K-score gate                                (verify)
-                       │
-                       ▼
-          ┌────────────┴────────────┐
-          ▼                         ▼
-    kolm run                  kolm install <harness>           (use anywhere)
-      (CLI / SDK)               (Claude Code, Cursor,
-                                 Cline, Continue)
-                       │
-                       ▼
-                ~/.kolm/logs/runs.jsonl                       (observe)
-                       │
-                       ▼
-                  kolm bench                                  (re-prove)
+gateway traffic
+  -> capture ledger
+  -> dataset / labels / evals
+  -> compile preview
+  -> signed artifact
+  -> runtime target
+  -> receipt chain
+  -> governance export
 ```
 
-Every step is a verb-noun CLI command. Every step is fully offline after the initial compile. Every step writes a signed, auditable receipt.
+This spine is the scope boundary. A feature is product only when it lands on this path or directly proves one part of it.
 
----
+## Enterprise API Control Center
 
-## CLI surface (verb-noun grammar, terminal)
+The account-side control plane is `/account/api-control-center`, backed by `GET /v1/account/api-control-center`.
 
+The contract covers REST JSON, streaming/SSE, webhooks, batch JSONL/CSV-style exports, OpenTelemetry/GenAI spans, MCP tool traffic, A2A agent traffic, browser/client events, files/blobs, GraphQL/RPC envelopes, queues/topics, warehouse/lakehouse drops, database CDC, SIEM/log drains, collaboration/ticketing callbacks, package/registry releases, and custom adapter envelopes. Each channel declares direction, data styles, routes, and controls.
+
+The same endpoint now also exposes 12 ingress collection modes, 10 egress/export modes, and 8 governance stages: accept, classify, redact, route, evaluate, compile, target, and export. This is the enforceable control-center shape behind the public claim that Kolm can govern broad API/data collection in and out without pretending every unknown vendor schema is semantically understood on day one.
+
+The endpoint also exposes an operator workbench. Its job is to turn the broad coverage contract into a usable source-to-proof runbook: declare source and schema, set egress policy, diagnose the failure loop, compile target receipts, and export governance packets. Each workbench step must declare trigger, operator action, proof, and backend route.
+
+The control center must accept unknown vendor payloads as opaque governed events when tenant policy allows them, but it must not claim semantic understanding until an adapter manifest, schema hints, or a native connector proves that understanding.
+
+Default posture:
+
+- Capture mode: metadata plus redacted body.
+- Egress mode: deny until the provider or destination is declared.
+- Cache mode: tenant-isolated cache keys only.
+- Unknown payloads: accepted as opaque events only when size and tenant policy allow.
+- Public envelopes: no secret values.
+
+This is the practical answer to the market gap: gateways, observability tools, eval tools, and closed-loop SLM retraining systems usually cover only part of the lifecycle. Kolm's control center keeps the API data path, evidence path, compile path, and deployment path in one tenant-scoped contract.
+
+## Competitive Position
+
+The current category atlas is `docs/research/category-competitor-atlas-2026-06-13.md`. It maps 290+ competitors, standards, protocols, and adjacent players across gateways, API management, observability/evals, fine-tuning, serving, runtimes, agent frameworks, RAG substrate, AI security, GRC/trust, standards, and developer-platform design references.
+
+The product rule from that research is: Kolm should not claim to be a better version of every specialized tool. Gateways route, eval platforms score, fine-tuning platforms train, security tools defend, GRC platforms manage trust, and runtimes serve. Kolm should own the transition from captured API behavior into governed, signed, portable runtime artifacts.
+
+The current unicorn product benchmark is `docs/research/unicorn-product-research-2026-06-13.md`. It is an internal quality bar for product specificity, docs, control centers, proof, trust, integrations, and exportable artifacts, not a public valuation claim.
+
+The current API Control Center operator-workbench pass is `docs/research/api-control-center-operator-workbench-gap-2026-06-13.md`. It adds current-source pressure from Pioneer Agent, Portkey, Vercel AI Gateway, LiteLLM, Langfuse, Braintrust, LangSmith, Galileo, MCP, A2A, and OpenTelemetry. The product requirement from that pass is: broad coverage must be rendered as a usable source-to-proof workflow, not only a list of supported channels.
+
+The current integrations/data-plane pass is `docs/research/integrations-data-plane-gap-2026-06-13.md`. It adds current-source pressure from Workato, MuleSoft, Airbyte, Fivetran, Confluent, OpenLineage, Akto, Vanta, and Drata. The product requirement from that pass is: the public integration story must treat existing workflow, data movement, catalog, security, GRC, gateway, eval, and runtime platforms as source, control, evidence, or target nodes, then show how Kolm turns their signals into receipts, artifacts, lineage, and governance packets.
+
+The public category page is `/compare`. It should stay compiler/control-center-first and avoid audit-only positioning.
+
+The public integration map is `/integrations`. It should show the 17 API/data-channel families, source/sink clusters, source-to-proof operator path, market-pressure context, policy posture, and adapter caveats that make the account API control center credible.
+
+The public runtime target matrix is `/runtimes`. It should show serving engines, hosted GPU targets, local runners, portable inference, device edge, and enterprise fleet exports as readiness-gated target recipes, not unproven runtime ownership claims.
+
+## Current Enforced Scope
+
+The machine-readable source of truth is `docs/product-surfaces.json`; the generated public graph is `public/product-graph.json`.
+
+Current generated graph:
+
+| Area | Count |
+| --- | ---: |
+| Routes | 922 |
+| Route groups | 214 |
+| Route surfaces | 7 |
+| API reference routes | 69 |
+| Product journeys | 12 |
+| Readiness requirements | 57 |
+| Open readiness groups | 8 |
+| CLI commands | 64 |
+| Account links | 33 |
+| TUI views | 32 |
+
+The seven route surfaces are:
+
+1. Identity, access, teams, and billing.
+2. Public site, docs, API reference, and SDK distribution.
+3. Compile, artifact, registry, receipts, and verification.
+4. Runtime, inference, connectors, and multimodal APIs.
+5. Capture, datasets, evals, labels, training, and improvement loop.
+6. Governance, compliance, admin, audit, privacy, trace, and notifications.
+7. Deployment, edge devices, BYOC, storage, sync, tunnel, and federated learning.
+
+## Shipped Locally Vs Not Final
+
+The route ownership contract is locally certified: every generated route group is assigned to exactly one product surface and the static/API reference gates can verify that mapping.
+
+The product is not production-final. `public/product-readiness-closeout.json` currently lists eight open readiness requirements:
+
+- Public reproducible benchmark data.
+- Live auditor/certification evidence.
+- Signed installer channel release.
+- External runtime adoption proof.
+- External standards/foundation acceptance.
+- SDK package release matrix.
+- Mobile package release.
+- Browser/runtime package channel release.
+
+Marketing and UI must not describe those items as fully shipped until the closeout ledger promotes them.
+
+## Non-Negotiable Scope Rules
+
+- Do not claim formal SOC 2, ISO 27001, HIPAA, FedRAMP, SLSA, package-channel, standards-body, benchmark-leaderboard, or third-party runtime adoption evidence without a dated artifact in the readiness ledger.
+- Do not imply full trained-weight bundling or mobile/runtime parity. Current artifacts package executable recipes, examples, evaluators, tokenizer metadata, manifests, hashes, and receipts; trained-weight bundling remains gated.
+- Do not position Kolm as a generic fine-tuning UI. The product wins only when capture, eval, artifact, runtime, and governance evidence stay connected.
+- Do not bury the audit product. It remains available at `audit.kolm.ai`, but main-site navigation and onboarding should start with compiler workflows.
+
+## Backend Contract
+
+Minimum public routes that must remain coherent with the site:
+
+- `GET /v1/product/capabilities`
+- `GET /v1/product/graph`
+- `GET /v1/plans`
+- `GET /v1/billing/tiers`
+- `POST /v1/signup`
+- `GET /v1/account/compiler-overview`
+- `GET /v1/account/api-control-center`
+- `GET /docs/api`
+- `GET /openapi.json`
+- `GET /docs/api-routes.json`
+
+Compatibility URLs such as `/product`, `/models`, `/api`, `/quickstart`, `/captures`, `/training`, `/distill`, `/control-center`, `/api-control-center`, `/enterprise-control`, `/self-host`, and `/airgap` must redirect to the nearest canonical compiler surface. `/runtimes` is now a canonical product surface.
+
+## Verification Commands
+
+```powershell
+npm.cmd run lint:refs
+npm.cmd run verify:kernel
+npm.cmd run verify:surfaces
+npm.cmd run verify:control-files
+npm.cmd run verify:claims-scope
+npm.cmd run ui:audit:critical
+node --check server.js
+node --check src\router.js
+node --test --test-concurrency=1 tests\site.test.js
+node --test --test-concurrency=1 tests\product-compiler-contract.test.js tests\wrapper-email.test.js
 ```
-authoring          kolm init / new / login / config
-compile-and-prove  kolm compile / eval / score / inspect
-run-and-observe    kolm run / bench / logs / doctor
-serve-and-share    kolm serve --mcp / install <harness> / publish
-data-loop          kolm capture / labels / distill
+
+Production-final claims additionally require authenticated production smoke:
+
+```powershell
+node scripts\prod-surface-smoke.cjs --json --require-auth
+node scripts\prod-surface-smoke.cjs --json --deep --require-auth
+node scripts\release-verify.cjs --json
 ```
-
-Every verb is a single function in `cli/kolm.js`. Every flag is documented in `kolm help <verb>`. No subcommand trees deeper than two.
-
-**Deferred (v7.6+):** `kolm tune`, `kolm registry`, `kolm bridge`.
-
----
-
-## File formats (the persistence layer)
-
-| File              | Carries                                                                 | Spec       |
-|-------------------|-------------------------------------------------------------------------|------------|
-| `*.kolm`          | recipes + verifier + evals + manifest + HMAC chain                      | RS-1       |
-| `kolm.yaml`       | project root, artifact globs, k_min gate, MCP transport, hooks          | kolm-yaml-v0.1 |
-| `SKILL.md`        | Claude Code skill frontmatter (auto-emitted next to every `.kolm`)      | claude-code |
-| `~/.kolm/config.json` | local API key, receipt secret, base URL                             | local-config-v0.1 |
-| `~/.kolm/logs/runs.jsonl` | append-only run history (artifact, latency, k_score, recipe)    | jsonl |
-
-The `.kolm` file is to AI what a Docker image is to a service: a single deploy unit that carries the model, the adapter, the verifier, the eval suite, and a signed receipt of the gate that let it ship.
-
----
-
-## The K-score (ship gate)
-
-```
-K = 0.40·A + 0.15·S + 0.15·L + 0.15·C + 0.15·V
-    │       │       │       │       │
-    │       │       │       │       └─ coverage (eval pass fraction)
-    │       │       │       └───────── cost per call
-    │       │       └───────────────── p50 latency
-    │       └───────────────────────── size on disk
-    └───────────────────────────────── accuracy on evals
-
-ship gate: K ≥ 0.85
-```
-
-The K-score is a number between 0 and 1. Anything below 0.85 fails the ship gate. The gate runs at compile-time, at install-time (`k_min` in `kolm.yaml`), and at serve-time (MCP discovery refuses to expose low-K artifacts). Three layers, same number.
-
----
-
-## What we do NOT do (scope discipline)
-
-- **We do not host models.** kolm is the substrate; weights live in `.gguf` / `.safetensors` and are referenced by hash.
-- **We do not run inference for you.** `kolm run` is local. The cloud is for compile + registry, never for runtime.
-- **We do not phone home.** Zero egress at runtime is enforced by the bench monitor; wire-touching artifacts fail benchmark.
-- **We do not ship a chat UI.** kolm exposes tools, not chats. The agent — Claude Code, Cursor, etc. — owns the conversation.
-- **We do not gate the spec.** RS-1 is MIT-licensed. Anyone can read and write `.kolm` files without paying us a cent.
-- **We do not claim compliance.** kolm gives you the substrate (signed artifacts, zero egress, audit receipts). The HIPAA / SOC 2 / FedRAMP audit is yours.
-
----
-
-## Competitive positioning
-
-| Camp                      | Examples                          | Where kolm fits                                                    |
-|---------------------------|-----------------------------------|--------------------------------------------------------------------|
-| **Model weights formats** | `.gguf`, `.safetensors`, `.onnx`  | Complement. kolm references weights by hash; doesn't replace them. |
-| **Inference runtimes**    | Ollama, vLLM, llama.cpp           | Complement. `kolm run` calls them as a base layer.                 |
-| **Agent harnesses**       | Claude Code, Cursor, Cline        | Customer. kolm appears as MCP tools they call.                     |
-| **Memory layers**         | Mem0, Zep, MemPalace, Hindsight   | Different problem. kolm is task-shaped; memory is conversation-shaped. |
-| **Spec / contract layer** | (kolm is essentially alone here)  | **This is the moat.** RS-1 + K-score + signed receipts = the spec. |
-
-**The wedge:** every agent harness needs to call tools. Every regulated buyer needs the tool to be auditable. Every CFO needs the inference to be predictable in cost. kolm is the substrate that makes all three true at once.
-
----
-
-## Why now (the market window)
-
-1. **Frontier APIs hit a per-request liability ceiling.** Every `requests.post('api.openai.com')` in a regulated codebase is now a compliance question.
-2. **Open-weight models cleared the quality bar.** Qwen 3 / Llama 3.3 / DeepSeek V3 do 90% of the work most agent tools need.
-3. **MCP standardized the agent-tool boundary.** A `.kolm` becomes a tool with one config entry. Network effects compound.
-4. **K-score answers the AI-fragility complaint.** A signed receipt + reproducible eval is the only way to make AI behavior contractually defensible.
-
-We are the wedge **between the model and the agent**, owning the unit of deployment.
-
----
-
-## Architecture, top-down
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                  FRONTIER AGENT HARNESS                         │
-│        Claude Code · Cursor · Cline · Continue                  │
-│                  (kolm install <harness>)                       │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │  MCP (stdio | http)
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  kolm serve --mcp                               │
-│         tools/list · tools/call · k_min gate                    │
-│           reads kolm.yaml + ~/.kolm/artifacts                   │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │  load .kolm
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  artifact-runner.js                             │
-│        node:vm sandbox · 1 MiB cap · 1 000 ms timeout           │
-│        HMAC chain verify · per-recipe dispatch                  │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │  emit
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│        receipt → runs.jsonl    →    hooks (PostRun)             │
-│        K-score → score gate    →    metrics                     │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-No daemons. No dashboards. No telemetry leaving the box.
-
----
-
-## Pricing (positioning, not the truth source)
-
-| Tier         | Who                              | What unlocks                                       |
-|--------------|----------------------------------|----------------------------------------------------|
-| **Free**     | individual devs                  | local CLI, MCP serve, all OSS spec, public registry |
-| **Pro**      | startups / small teams           | shared registry, private receipts, K-score dashboards |
-| **Business** | regulated / multi-vertical teams | SSO, audit log API, K-score gate enforcement       |
-| **Enterprise** | design partners                | dedicated channel, custom k_min policies, escalation |
-
-Source of truth: `/pricing`. This table is for orientation only.
-
----
-
-## The product loop, in one paragraph
-
-A developer writes a JSON spec describing a task. They pipe it to `kolm compile`. The compiler synthesizes a verifier, fits a small adapter, runs the evals, and packages the lot into a `.kolm` file signed under their local secret. They run `kolm install claude-code` once. From that moment on, Claude Code (or Cursor, or Cline, or any MCP-aware agent) calls the artifact as a tool. Each call writes a row to `~/.kolm/logs/runs.jsonl` with the recipe, latency, K-score, and receipt. Nothing leaves the box. The same spec, run a year later, produces a byte-identical artifact. That is the loop. Everything else is plumbing.
-
----
-
-## Read next
-
-- **Spec:** [`docs/rs-1.md`](rs-1.md) — RS-1 wire format.
-- **Authoring:** [`docs/AUTHORING.md`](AUTHORING.md) — spec field reference.
-- **Hooks:** [`docs/HOOKS.md`](HOOKS.md) — event contract.
-- **kolm.yaml:** [`docs/kolm-yaml-v0.1.json`](kolm-yaml-v0.1.json) — JSON Schema.
-- **v7.4 amendments:** [`docs/SOTA-amendments-2026-05-11.md`](SOTA-amendments-2026-05-11.md) — what shipped this pass.

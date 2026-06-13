@@ -13,44 +13,21 @@ const PUBLIC_DIR = path.join(ROOT, 'public');
 
 const CRITICAL_ROUTES = [
   '/',
-  '/product',
-  '/models',
+  '/compiler-product',
+  '/platform',
+  '/integrations',
+  '/runtimes',
+  '/compare',
   '/docs',
   '/pricing',
   '/enterprise',
-  '/quickstart',
-  '/captures',
-  '/training',
-  '/distill',
-  '/runtimes',
-  '/api',
-  '/tui',
   '/signup',
   '/dashboard',
-  '/account',
   '/account/overview',
-  '/account/captured',
-  '/account/datasets',
-  '/account/labeling',
-  '/account/bakeoffs',
-  '/account/builds',
-  '/account/billing',
-  '/account/settings',
+  '/account/api-control-center',
   '/docs/api',
-  '/docs/cli',
-  '/docs/training',
-  '/docs/distill',
-  '/docs/enterprise',
-  '/compare/kolm-vs-openai',
-  '/compare/kolm-vs-ollama',
-  '/compare/kolm-vs-openpipe',
-  '/compare/kolm-vs-predibase',
-  '/compare/kolm-vs-together',
-  '/compare/kolm-vs-bedrock-distill',
   '/trust',
   '/security',
-  '/self-host',
-  '/airgap',
 ];
 
 const DEFAULT_VIEWPORTS = {
@@ -315,7 +292,7 @@ async function evaluateRoute(page, route, viewportName, themeName) {
     const body = document.body;
     const header = document.querySelector('header.site-header, header.site');
     const h1 = document.querySelector('h1');
-    const navLinks = Array.from(document.querySelectorAll('header.site-header .site-nav > .nav-item > a.nav-top, header.site-header .site-nav > a, header.site .left nav a, body > .site-nav a'))
+    const navLinks = Array.from(document.querySelectorAll('header .nav__links a, header.site-header nav a, header.site-header .site-nav > .nav-item > a.nav-top, header.site-header .site-nav > a, header.site .left nav a, body > .site-nav a'))
       .filter(visible)
       .map(a => (a.textContent || '').trim().replace(/\s+/g, ' '));
     function controlName(el) {
@@ -392,8 +369,11 @@ async function evaluateRoute(page, route, viewportName, themeName) {
       bodyTextLength: bodyText.length,
       hasHeader: !!header,
       headerClass: header ? header.className : '',
-      hasSurfacePolish: !!document.querySelector('link[href*="surface-polish.css"]'),
-      hasNavScript: !!document.querySelector('script[src*="nav.js"]'),
+      bodyClass: body.className || '',
+      hasSurfaceCss: !!document.querySelector('link[href*="surface-polish.css"], link[href*="kolm-2026.css"], link[href*="kolm-main.css"]'),
+      hasCompilerCss: !!document.querySelector('link[href*="kolm-main.css"]'),
+      hasNavWidget: !!document.querySelector('.nav__toggle, .nav__links'),
+      hasNavScript: !!document.querySelector('script[src*="nav.js"], script[src*="kolm-main.js"], script[src*="kolm-2026.js"]'),
       navLinks,
       h1Text: h1 ? (h1.textContent || '').trim().replace(/\s+/g, ' ') : '',
       h1FontSize: h1Style ? h1Style.fontSize : '',
@@ -429,8 +409,9 @@ async function evaluateRoute(page, route, viewportName, themeName) {
     findings.push({ severity: 'fail', rule: 'product-media-visible', message: `media weak or invisible (${metrics.mediaWidth}x${metrics.mediaHeight}, text ${metrics.mediaTextLength})` });
   }
   if (!metrics.h1Text && !route.startsWith('/account/')) findings.push({ severity: 'warn', rule: 'h1', message: 'missing visible h1' });
-  if (!metrics.hasSurfacePolish) findings.push({ severity: 'warn', rule: 'shared-css', message: 'surface-polish.css is not loaded' });
-  if (!metrics.hasNavScript) findings.push({ severity: 'warn', rule: 'nav-js', message: 'nav.js is not loaded' });
+  if (!metrics.hasSurfaceCss) findings.push({ severity: 'warn', rule: 'shared-css', message: 'shared surface CSS is not loaded' });
+  if (/\bcompiler-site\b/.test(metrics.bodyClass) && !metrics.hasCompilerCss) findings.push({ severity: 'warn', rule: 'compiler-css', message: 'kolm-main.css is not loaded on compiler surface' });
+  if (metrics.hasNavWidget && !metrics.hasNavScript) findings.push({ severity: 'warn', rule: 'nav-js', message: 'navigation script is not loaded' });
   if (metrics.h1LetterSpacing && /^-/.test(metrics.h1LetterSpacing)) findings.push({ severity: 'fail', rule: 'tracking', message: `negative h1 letter-spacing: ${metrics.h1LetterSpacing}` });
   if (metrics.namelessControls.length) findings.push({ severity: 'fail', rule: 'control-name', message: `visible controls without accessible names: ${metrics.namelessControls.map(t => `${t.tag}${t.href ? ` ${t.href}` : ''} ${t.width}x${t.height}`).join('; ')}` });
   if (metrics.invalidActionHrefs.length) findings.push({ severity: 'fail', rule: 'action-href', message: `visible action links with invalid hrefs: ${metrics.invalidActionHrefs.map(t => `${t.label || t.tag} -> ${t.href || '(empty)'}`).join('; ')}` });
@@ -438,8 +419,11 @@ async function evaluateRoute(page, route, viewportName, themeName) {
   if (metrics.unsafeBlankTargets.length) findings.push({ severity: 'warn', rule: 'blank-target-rel', message: `target=_blank links missing noopener: ${metrics.unsafeBlankTargets.map(t => `${t.label || t.tag} -> ${t.href}`).join('; ')}` });
   if (metrics.smallTargets.length) findings.push({ severity: 'warn', rule: 'target-size', message: `small action targets: ${metrics.smallTargets.map(t => `${t.label || 'control'} ${t.targetWidth || t.width}x${t.targetHeight || t.height}`).join('; ')}` });
   if (viewportName === 'desktop' && metrics.hasHeader) {
-    for (const label of ['Product', 'Models', 'Docs', 'Pricing', 'Enterprise']) {
+    for (const label of ['Docs', 'Pricing']) {
       if (!metrics.navLinks.includes(label)) findings.push({ severity: 'fail', rule: 'primary-nav', message: `missing desktop nav label: ${label}` });
+    }
+    if (!metrics.navLinks.some(label => ['Product', 'Pipeline', 'Platform'].includes(label))) {
+      findings.push({ severity: 'fail', rule: 'primary-nav', message: 'missing desktop product/platform nav label' });
     }
   }
   return { metrics, findings };

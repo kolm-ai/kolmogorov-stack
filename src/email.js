@@ -54,15 +54,15 @@ export async function sendMail({ to, subject, html, text, replyTo, tags }) {
 
 export async function sendWelcome({ email, apiKey, plan, billingUrl }) {
   const planLabel = (plan || 'free').toString();
-  const subject = `Your kolm API key${billingUrl ? ' (payment required)' : ''}`;
+  const subject = `Your kolm compiler API key${billingUrl ? ' (payment required)' : ''}`;
   const lines = [
     `Welcome to kolm.`,
     ``,
-    `Your API key:`,
+    `Your compiler API key:`,
     `  ${apiKey}`,
     ``,
     `Save it. We don't store the raw key - only a hash. You can rotate any time from`,
-    `  https://kolm.ai/account`,
+    `  https://kolm.ai/account/overview`,
     ``,
     `Plan: ${planLabel}`,
   ];
@@ -70,7 +70,14 @@ export async function sendWelcome({ email, apiKey, plan, billingUrl }) {
     lines.push('', `Complete payment to activate your paid tier:`, `  ${billingUrl}`);
     lines.push('', `Until payment is confirmed, your account is on the Free tier.`);
   }
-  lines.push('', `Docs: https://kolm.ai/docs`, `Quickstart: https://kolm.ai/quickstart`, '', ` - kolm`);
+  lines.push(
+    '',
+    `Compiler path: route a namespace through /v1/route, compile it with /v1/compile, then deploy the signed artifact.`,
+    `Docs: https://kolm.ai/docs`,
+    `Quickstart: https://kolm.ai/docs#quickstart`,
+    '',
+    ` - kolm`,
+  );
   return sendMail({
     to: email,
     subject,
@@ -333,20 +340,20 @@ export function tEmailSignup({ email, tenant_id, plan_tier } = {}) {
   const plan = String(plan_tier || 'free').toLowerCase();
   const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
   const acctUrl = 'https://kolm.ai/account/overview';
-  const subject = `Welcome to kolm - your ${planLabel} account is live`;
+  const subject = `Welcome to kolm - your ${planLabel} compiler workspace is live`;
   const textLines = [
     `Welcome to kolm.`,
     ``,
-    `Your tenant is provisioned on the ${planLabel} tier.`,
+    `Your compiler workspace is provisioned on the ${planLabel} tier.`,
     `Tenant: ${tenant_id || '(pending)'}`,
     `Email:  ${email || '(unknown)'}`,
     ``,
-    `Open your account overview to grab your API key, set spending caps,`,
-    `and wire kolm into your stack:`,
+    `Open your compiler overview to grab your API key, set spending caps,`,
+    `route one namespace through the API wrapper, and compile your first artifact:`,
     `  ${acctUrl}`,
     ``,
     `Docs:        https://kolm.ai/docs`,
-    `Quickstart:  https://kolm.ai/quickstart`,
+    `Quickstart:  https://kolm.ai/docs#quickstart`,
     ``,
     `Reply to this email if you hit any friction.`,
     ``,
@@ -354,11 +361,11 @@ export function tEmailSignup({ email, tenant_id, plan_tier } = {}) {
   ];
   const html = _wrapHtml([
     `Welcome to <strong>kolm</strong>.`,
-    `Your tenant is provisioned on the <strong>${_esc(planLabel)}</strong> tier.`,
+    `Your compiler workspace is provisioned on the <strong>${_esc(planLabel)}</strong> tier.`,
     `<div style="background:#f6f5f2;padding:12px;border-radius:6px;font:12px/1.55 ui-monospace,Menlo,monospace"><div>Tenant: ${_esc(tenant_id || '(pending)')}</div><div>Email: ${_esc(email || '(unknown)')}</div></div>`,
-    `Open your account overview to grab your API key, set spending caps, and wire kolm into your stack.`,
-    _ctaButton('Open account overview', acctUrl),
-    `<p style="margin:24px 0 0 0;font:12px/1.55 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#555">Docs: <a href="https://kolm.ai/docs">kolm.ai/docs</a> &nbsp;·&nbsp; Quickstart: <a href="https://kolm.ai/quickstart">kolm.ai/quickstart</a></p>`,
+    `Open your compiler overview to grab your API key, set spending caps, route one namespace through the API wrapper, and compile your first artifact.`,
+    _ctaButton('Open compiler overview', acctUrl),
+    `<p style="margin:24px 0 0 0;font:12px/1.55 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#555">Docs: <a href="https://kolm.ai/docs">kolm.ai/docs</a> &nbsp;/&nbsp; Quickstart: <a href="https://kolm.ai/docs#quickstart">kolm.ai/docs#quickstart</a></p>`,
   ]);
   return { subject, html, text: textLines.join('\n') };
 }

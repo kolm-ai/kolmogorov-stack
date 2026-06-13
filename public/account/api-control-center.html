@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>API Control Center - kolm.ai</title>
+<meta name="description" content="Enterprise API control center for Kolm gateway capture, egress policy, routing, evaluation, compile, deployment, and export coverage.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#090C0D">
+<link rel="canonical" href="https://kolm.ai/account/api-control-center">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/kolm-2026.css">
+<style>
+  .mono{font-family:var(--mono)}
+  .app{max-width:1180px;margin:0 auto;padding:clamp(32px,5vw,64px) max(22px,env(safe-area-inset-right)) 88px max(22px,env(safe-area-inset-left))}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}
+  .brandlink{display:inline-flex;align-items:center;gap:9px;min-height:44px;color:var(--ink);text-decoration:none;font-weight:700}
+  .brandlink svg{width:24px;height:24px;fill:var(--accent)}
+  .navrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .app h1{font-size:clamp(32px,4.2vw,56px);letter-spacing:0;max-width:980px;margin:10px 0 10px}
+  .app>.lede{max-width:78ch;margin:0 0 24px}
+  .hero-panel{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:16px;align-items:stretch;margin:22px 0}
+  .hero-stack{display:grid;gap:12px}
+  .control-statement{font-size:15px;line-height:1.65;color:var(--ink-2);margin:0}
+  .coverage-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .coverage-strip span{display:block;border:1px solid var(--line);border-radius:6px;background:var(--paper-2);padding:10px;color:var(--ink-3);font:11px/1.35 var(--mono)}
+  .coverage-strip b{display:block;color:var(--ink);font-size:18px;line-height:1;margin-bottom:5px}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
+  .grid--2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .panel{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-md);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.006));padding:18px;min-width:0}
+  .metric b{display:block;margin-top:8px;color:var(--ink);font:600 clamp(24px,3vw,34px)/1 var(--mono)}
+  .metric span,.muted{color:var(--ink-3);font-size:13px;line-height:1.55}
+  .posture-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+  .posture-item{min-width:0;border:1px solid var(--line);border-radius:6px;background:var(--paper-2);padding:12px}
+  .posture-item span{display:block;color:var(--ink-3);font-size:12px;margin-bottom:7px}
+  .posture-item code{display:block;color:var(--ink);font:12px/1.45 var(--mono);white-space:normal;overflow-wrap:anywhere}
+  .section-title{font-size:18px;margin:32px 0 12px;letter-spacing:0}
+  .policy h3,.channel h3,.control h3{font-size:15px;margin:0 0 8px;letter-spacing:0}
+  .policy p,.channel p,.control p{font-size:13.5px;line-height:1.55;color:var(--ink-2);margin:0}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .chip{display:inline-flex;align-items:center;min-height:26px;padding:4px 8px;border:1px solid var(--line-2);border-radius:4px;background:var(--paper-2);color:var(--ink-2);font:11px/1.25 var(--mono)}
+  .channel{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .flow span{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border-radius:4px;border:1px solid var(--line);color:var(--ink-2);font:11px/1.2 var(--mono)}
+  .flow .on{border-color:var(--accent-edge);color:var(--accent);background:var(--accent-soft)}
+  .mode-card{display:grid;gap:8px}
+  .mode-card__top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .mode-card__dir{color:var(--compile-blue,#6fa6e8);font:11px/1.25 var(--mono)}
+  .stage-card{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;align-items:start}
+  .stage-card b{color:var(--ink);font-size:14px}
+  .stage-card p{margin:0;color:var(--ink-2);font-size:13px;line-height:1.55}
+  .workbench{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:14px;margin:22px 0}
+  .workbench__lead{display:grid;align-content:start;gap:12px}
+  .workbench__lead p{margin:0;color:var(--ink-2);font-size:13.5px;line-height:1.62}
+  .workbench__rule{padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper-2);color:var(--ink);font:12px/1.55 var(--mono)}
+  .workbench-steps{display:grid;gap:10px}
+  .workbench-step{display:grid;grid-template-columns:minmax(170px,.48fr) minmax(0,1fr);gap:10px 12px;align-items:start}
+  .workbench-step b{display:block;color:var(--ink);font-size:14px;margin-bottom:6px}
+  .workbench-step span{display:block;color:var(--ink-3);font:11px/1.4 var(--mono)}
+  .workbench-step p{margin:0;color:var(--ink-2);font-size:13px;line-height:1.55}
+  .workbench-step code{grid-column:1/-1;display:block;color:var(--compile-blue,#6fa6e8);font:11px/1.45 var(--mono);white-space:normal;overflow-wrap:anywhere}
+  .summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .summary-grid .panel{min-height:100%}
+  .loop-head{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:12px;align-items:start}
+  .loop-head p{margin:0;color:var(--ink-2);font-size:13.5px;line-height:1.6}
+  .loop-rail{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:12px}
+  .loop-step{display:grid;gap:9px;padding:14px;min-width:0}
+  .loop-step__num{display:inline-grid;place-items:center;width:28px;height:28px;border:1px solid var(--line-2);border-radius:5px;color:var(--accent);font:700 11px/1 var(--mono)}
+  .loop-step h3{font-size:14px;margin:0;letter-spacing:0}
+  .loop-step p{margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.5}
+  .loop-step code{display:block;color:var(--ink-3);font:11px/1.45 var(--mono);white-space:normal;overflow-wrap:anywhere}
+  .integration-list{display:grid;gap:10px}
+  .integration-card{display:grid;grid-template-columns:minmax(190px,.75fr) minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start;border:1px solid var(--line);border-radius:var(--r-md);background:var(--paper-2);padding:14px;min-width:0}
+  .integration-card b{display:block;color:var(--ink);font-size:14px}
+  .integration-card span{display:block;color:var(--ink-3);font:11px/1.45 var(--mono);margin-top:5px}
+  .integration-card p{margin:0;color:var(--ink-2);font-size:13px;line-height:1.55}
+  .channel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:32px 0 12px}
+  .channel-head .section-title{margin:0}
+  .channel-toolbar{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}
+  .filter-button{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:5px;background:var(--paper-2);color:var(--ink-2);font:11px/1.25 var(--mono);cursor:pointer}
+  .filter-button:hover{border-color:var(--line-2);color:var(--ink)}
+  .filter-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .filter-button[aria-pressed="true"]{border-color:var(--accent-edge);background:var(--accent-soft);color:var(--accent)}
+  .scope-note{margin-top:12px;color:var(--ink-3);font-size:12.5px;line-height:1.55}
+  .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--r-md);background:var(--paper-2)}
+  table{width:100%;border-collapse:collapse;min-width:720px}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font:600 10.5px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);background:var(--paper-sink)}
+  td{font-size:13px;line-height:1.5;color:var(--ink-2)}
+  tr:last-child td{border-bottom:0}
+  .banner{border:1px solid var(--line-2);border-radius:var(--r-md);padding:13px 16px;margin:16px 0;font-size:14px;line-height:1.55;background:var(--paper-2);color:var(--ink-2)}
+  .banner.warn{border-color:rgba(227,195,104,.38);background:rgba(227,195,104,.08);color:var(--ink)}
+  .auth{max-width:520px;margin:26px 0;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:24px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.006))}
+  .auth input{width:100%;margin:14px 0 12px;padding:12px;border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--paper-sink);color:var(--ink);font:14px var(--mono)}
+  .auth input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  [hidden]{display:none!important}
+  @media (max-width:1120px){.loop-rail{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:920px){.hero-panel,.grid,.grid--2,.grid--3,.posture-grid,.summary-grid,.coverage-strip,.integration-card,.loop-head,.workbench,.workbench-step{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.channel-head{display:grid;align-items:start}.channel-toolbar{justify-content:flex-start}}
+  @media (max-width:680px){.loop-rail{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<main id="main" class="app">
+  <div class="topbar">
+    <a class="brandlink" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
+      <span>kolm.ai</span>
+    </a>
+    <div class="navrow">
+      <a class="btn btn--ghost btn--sm" href="/account/overview">Overview</a>
+      <a class="btn btn--ghost btn--sm" href="/docs/api">API docs</a>
+      <a class="btn btn--ghost btn--sm" href="/security">Security</a>
+    </div>
+  </div>
+
+  <p class="eyebrow">Enterprise / API Control</p>
+  <h1>API control center</h1>
+  <p class="lede">One tenant-scoped console for AI API ingress, egress, provider routing, capture retention, redaction, evaluation, compile artifacts, device targets, and exports.</p>
+
+  <div id="banner"></div>
+  <section id="auth" class="auth" hidden>
+    <h2 class="section-title" style="margin-top:0">Open control center</h2>
+    <p class="muted">Use your active session, or paste a Kolm API key that starts with <span class="mono">ks_</span>.</p>
+    <label class="muted" for="keyInput">API key</label>
+    <input id="keyInput" name="api_key" placeholder="ks_&hellip;" autocomplete="off" spellcheck="false">
+    <button class="btn btn--primary" id="keyBtn" type="button" style="width:100%">Open control center</button>
+  </section>
+
+  <div id="content" aria-live="polite"><div class="banner">Loading API control center&hellip;</div></div>
+</main>
+
+<script>
+(function(){
+  var KEY = null;
+  try {
+    KEY = sessionStorage.getItem('kolm_account_key')
+      || sessionStorage.getItem('kolm_dash_key')
+      || localStorage.getItem('ks_api_key')
+      || null;
+  } catch(e) {}
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g,function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+  function headers(){ var h = {}; if (KEY) h.Authorization = 'Bearer ' + KEY; return h; }
+  function chip(x){ return '<span class="chip">'+esc(x)+'</span>'; }
+  function metric(label, value){ return '<div class="panel metric"><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>'; }
+  function showAuth(){ document.getElementById('content').hidden = true; document.getElementById('auth').hidden = false; }
+  function channelFilterText(c){
+    return [c.id, c.label].concat(c.directions || [], c.styles || [], c.routes || [], c.controls || []).join(' ').toLowerCase();
+  }
+  function renderChannel(c){
+    var flow = ['ingress','egress'].map(function(d){ return '<span class="'+((c.directions || []).indexOf(d) >= 0 ? 'on' : '')+'">'+esc(d)+'</span>'; }).join('');
+    return '<div class="panel channel" data-channel-card data-channel-directions="'+esc((c.directions || []).join(' '))+'" data-channel-text="'+esc(channelFilterText(c))+'"><h3>'+esc(c.label)+'</h3><div class="flow">'+flow+'</div><p>'+esc((c.styles || []).join(', '))+'</p><div class="chips">'+(c.controls || []).map(chip).join('')+'</div></div>';
+  }
+  function renderMode(m){
+    return '<div class="panel mode-card"><div class="mode-card__top"><h3>'+esc(m.label)+'</h3><span class="mode-card__dir">'+esc(m.direction)+'</span></div><div class="chips">'+(m.examples || []).map(chip).join('')+'</div></div>';
+  }
+  function renderStage(s){
+    return '<div class="panel stage-card"><b>'+esc(s.label)+'</b><p>'+esc(s.proof)+'</p></div>';
+  }
+  function renderPolicy(p){
+    return '<div class="panel policy"><h3>'+esc(p.label)+'</h3><div class="chips">'+(p.controls || []).map(chip).join('')+'</div></div>';
+  }
+  function renderLoopStep(s, i){
+    return '<div class="panel loop-step"><span class="loop-step__num">'+esc(String(i + 1).padStart(2,'0'))+'</span><h3>'+esc(s.label)+'</h3><p>'+esc(s.trigger)+'</p><code>Evidence: '+esc(s.evidence)+'</code><code>Gate: '+esc(s.gate)+'</code><div class="chips">'+chip(s.output)+'</div></div>';
+  }
+  function renderWorkbenchStep(s){
+    return '<div class="panel workbench-step"><div><b>'+esc(s.label)+'</b><span>'+esc(s.trigger)+'</span></div><p>'+esc(s.action)+'</p><code>'+esc(s.route)+' -> '+esc(s.proof)+'</code></div>';
+  }
+  function renderWorkbench(workbench){
+    if (!workbench || !workbench.next_actions) return '';
+    return '<section class="workbench" aria-label="Operator workbench">'
+      + '<div class="panel workbench__lead"><p class="eyebrow">'+esc(workbench.label || 'Operator workbench')+'</p><p>'+esc(workbench.summary || '')+'</p><div class="workbench__rule">'+esc(workbench.source_to_proof_rule || '')+'</div><div><p class="muted">High-priority intake</p><div class="chips">'+(workbench.intake_priorities || []).map(chip).join('')+'</div></div><div><p class="muted">Proof exports</p><div class="chips">'+(workbench.export_priorities || []).map(chip).join('')+'</div></div></div>'
+      + '<div class="workbench-steps"><h2 class="section-title" style="margin:0">Source-to-proof runbook</h2>'+(workbench.next_actions || []).map(renderWorkbenchStep).join('')+'</div>'
+      + '</section>';
+  }
+  function renderSummary(label, rows){
+    return '<div class="panel"><h3 class="section-title" style="margin-top:0">'+esc(label)+'</h3><div class="chips">'+(rows || []).map(chip).join('')+'</div></div>';
+  }
+  function renderIntegration(x){
+    return '<div class="integration-card"><div><b>'+esc(x.cluster)+'</b><span>'+esc(x.role)+'</span></div><p>'+esc((x.systems || []).join(', '))+'</p><p>'+esc(x.coverage)+'</p></div>';
+  }
+  function renderControl(c){
+    return '<div class="panel control"><h3>'+esc(c.id)+'</h3><p>Status: <span class="mono">'+esc(c.status)+'</span></p><div class="chips">'+(c.routes || []).map(chip).join('')+'</div></div>';
+  }
+  function renderTable(rows){
+    return '<div class="table-wrap" tabindex="0" role="region" aria-label="API data channel matrix"><table><thead><tr><th>Channel</th><th>Directions</th><th>Styles</th><th>Routes</th></tr></thead><tbody>'
+      + rows.map(function(c){ return '<tr data-channel-row data-channel-directions="'+esc((c.directions || []).join(' '))+'" data-channel-text="'+esc(channelFilterText(c))+'"><td><strong>'+esc(c.label)+'</strong><br><span class="mono">'+esc(c.id)+'</span></td><td>'+esc((c.directions || []).join(', '))+'</td><td>'+esc((c.styles || []).join(', '))+'</td><td>'+esc((c.routes || []).join(', '))+'</td></tr>'; }).join('')
+      + '</tbody></table></div>';
+  }
+  function renderChannelFilters(){
+    var filters = [
+      ['all', 'All'],
+      ['ingress', 'Ingress'],
+      ['egress', 'Egress'],
+      ['protocol', 'Protocol'],
+      ['opaque', 'Opaque']
+    ];
+    return '<div class="channel-head"><h2 class="section-title">Data channels</h2><div class="channel-toolbar" role="group" aria-label="Filter API data channels">'
+      + filters.map(function(f){ return '<button class="filter-button" type="button" data-channel-filter="'+esc(f[0])+'" aria-pressed="'+(f[0] === 'all' ? 'true' : 'false')+'">'+esc(f[1])+'</button>'; }).join('')
+      + '</div></div>';
+  }
+  function matchesChannelFilter(node, filter){
+    var directions = ' ' + (node.getAttribute('data-channel-directions') || '') + ' ';
+    var text = node.getAttribute('data-channel-text') || '';
+    if (filter === 'all') return true;
+    if (filter === 'ingress' || filter === 'egress') return directions.indexOf(' ' + filter + ' ') >= 0;
+    if (filter === 'opaque') return text.indexOf('opaque') >= 0 || text.indexOf('custom') >= 0 || text.indexOf('adapter manifest') >= 0;
+    if (filter === 'protocol') return /mcp|a2a|opentelemetry|graphql|json-rpc|grpc|sse|webhook/.test(text);
+    return true;
+  }
+  function applyChannelFilter(root, filter){
+    Array.prototype.forEach.call(root.querySelectorAll('[data-channel-filter]'), function(btn){
+      btn.setAttribute('aria-pressed', btn.getAttribute('data-channel-filter') === filter ? 'true' : 'false');
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-channel-card],[data-channel-row]'), function(node){
+      node.hidden = !matchesChannelFilter(node, filter);
+    });
+  }
+  function setupChannelFilters(root){
+    Array.prototype.forEach.call(root.querySelectorAll('[data-channel-filter]'), function(btn){
+      btn.addEventListener('click', function(){
+        applyChannelFilter(root, btn.getAttribute('data-channel-filter') || 'all');
+      });
+    });
+  }
+  function render(data){
+    var coverage = data.coverage || {};
+    var counters = data.counters || {};
+    var posture = data.posture || {};
+    var contract = data.operational_contract || {};
+    var loop = data.closed_loop_improvement || {};
+    var channelCount = (coverage.data_channels || []).length;
+    var collectionModes = coverage.collection_modes || [];
+    var exportModes = coverage.export_modes || [];
+    var stages = coverage.governance_stages || [];
+    var protocolCount = (coverage.protocols || []).length;
+    var policyCount = (coverage.policy_layers || []).length;
+    var lifecycleCount = (coverage.lifecycle_states || []).length;
+    var html = '';
+    html += '<div class="hero-panel"><div class="panel hero-stack">'
+      + '<p class="eyebrow">Control promise</p>'
+      + '<p class="control-statement">Kolm treats API data collection as an enterprise data plane: every source enters as a governed event, every export leaves with policy, provenance, and receipt context, and unknown vendor payloads stay opaque until an adapter manifest declares their schema.</p>'
+      + '<div class="coverage-strip">'
+      + '<span><b>'+channelCount+'</b>data channel families</span>'
+      + '<span><b>'+collectionModes.length+'</b>collection modes</span>'
+      + '<span><b>'+exportModes.length+'</b>export modes</span>'
+      + '<span><b>'+stages.length+'</b>governance stages</span>'
+      + '</div>'
+      + '<p class="scope-note">'+esc(posture.production_claim || '')+'</p>'
+      + '</div><div class="panel"><p class="eyebrow">Secure default posture</p><div class="posture-grid">'
+      + '<div class="posture-item"><span>Capture</span><code>'+esc(posture.default_capture_mode)+'</code></div>'
+      + '<div class="posture-item"><span>Egress</span><code>'+esc(posture.default_egress_mode)+'</code></div>'
+      + '<div class="posture-item"><span>Cache</span><code>'+esc(posture.cache_policy)+'</code></div>'
+      + '<div class="posture-item"><span>Unknown payloads</span><code>'+esc(posture.unknown_payload_policy)+'</code></div>'
+      + '</div></div></div>';
+    html += '<div class="grid">'
+      + metric('Captured events', counters.observed_captures || 0)
+      + metric('Routing events', counters.routing_events || 0)
+      + metric('Compile jobs', counters.compile_jobs || 0)
+      + metric('Artifacts', counters.artifacts || 0)
+      + '</div>';
+    html += renderWorkbench(data.operator_workbench || {});
+    html += '<h2 class="section-title">Coverage summary</h2><div class="summary-grid">'
+      + renderSummary('Protocols', coverage.protocols || [])
+      + renderSummary('Modalities', coverage.modalities || [])
+      + renderSummary('Lifecycle', coverage.lifecycle_states || [])
+      + '</div>';
+    html += '<h2 class="section-title">Collection and export modes</h2><div class="grid grid--2">'
+      + '<div><h3 class="section-title" style="margin-top:0">Ingress collection</h3><div class="grid grid--2">'+collectionModes.map(renderMode).join('')+'</div></div>'
+      + '<div><h3 class="section-title" style="margin-top:0">Egress and exports</h3><div class="grid grid--2">'+exportModes.map(renderMode).join('')+'</div></div>'
+      + '</div>';
+    html += '<h2 class="section-title">Governance path</h2><div class="grid grid--2">'+stages.map(renderStage).join('')+'</div>';
+    html += '<h2 class="section-title">Operational contract</h2><div class="summary-grid">'
+      + renderSummary('Ingress rule', [contract.ingress_rule || ''])
+      + renderSummary('Egress rule', [contract.egress_rule || ''])
+      + renderSummary('Unknown schema rule', [contract.unknown_schema_rule || ''])
+      + '</div>';
+    html += '<h2 class="section-title">Closed-loop improvement</h2><div class="loop-head">'
+      + '<div class="panel"><p class="eyebrow">Failure to artifact</p><p>'+esc(loop.summary || '')+'</p><div class="chips">'+(loop.minimum_inputs || []).map(chip).join('')+'</div></div>'
+      + '<div class="panel"><p class="eyebrow">Promotion gates</p><div class="chips">'+(loop.promotion_gates || []).map(chip).join('')+'</div><p class="scope-note">Status: <span class="mono">'+esc(loop.status || 'readiness-gated')+'</span></p></div>'
+      + '</div><div class="loop-rail">'+(loop.stages || []).map(renderLoopStep).join('')+'</div>';
+    html += renderChannelFilters()+'<div class="grid grid--2">'+(coverage.data_channels || []).map(renderChannel).join('')+'</div>';
+    html += '<h2 class="section-title">Matrix</h2>'+renderTable(coverage.data_channels || []);
+    html += '<h2 class="section-title">Integration map</h2><div class="integration-list">'+(data.integration_map || []).map(renderIntegration).join('')+'</div>';
+    html += '<h2 class="section-title">Policy layers</h2><div class="grid grid--2">'+(coverage.policy_layers || []).map(renderPolicy).join('')+'</div>';
+    html += '<h2 class="section-title">Enterprise controls</h2><div class="grid grid--3">'+(data.enterprise_controls || []).map(renderControl).join('')+'</div>';
+    html += '<h2 class="section-title">Differentiators</h2><div class="panel"><div class="chips">'+(data.differentiators || []).map(chip).join('')+'</div></div>';
+    html += '<div class="grid grid--2"><a class="btn btn--primary" href="/docs#quickstart">Open quickstart</a><a class="btn btn--ghost" href="/account/overview">Compiler overview</a></div>';
+    document.getElementById('auth').hidden = true;
+    var content = document.getElementById('content');
+    content.hidden = false;
+    content.innerHTML = html;
+    setupChannelFilters(content);
+  }
+  function load(){
+    if (!KEY) { showAuth(); return; }
+    fetch('/v1/account/api-control-center', { credentials:'same-origin', headers: headers() })
+      .then(function(res){
+        if (res.status === 401) { showAuth(); return null; }
+        return res.json().then(function(j){ return { ok: res.ok, body: j }; });
+      })
+      .then(function(o){
+        if (!o) return;
+        if (!o.ok || !o.body || !o.body.ok) {
+          document.getElementById('banner').innerHTML = '<div class="banner warn">'+esc((o.body && (o.body.detail || o.body.error)) || 'Could not load the control center.')+'</div>';
+          return;
+        }
+        render(o.body);
+      })
+      .catch(function(){
+        document.getElementById('banner').innerHTML = '<div class="banner warn">Network error. Try refreshing, or email dev@kolm.ai.</div>';
+      });
+  }
+  document.getElementById('keyBtn').onclick = function(){
+    var v = (document.getElementById('keyInput').value || '').trim();
+    if (!v) return;
+    KEY = v;
+    try { sessionStorage.setItem('kolm_account_key', v); } catch(e) {}
+    document.getElementById('content').hidden = false;
+    document.getElementById('content').innerHTML = '<div class="banner">Loading API control center&hellip;</div>';
+    load();
+  };
+  document.getElementById('keyInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('keyBtn').click(); });
+  load();
+})();
+</script>
+</body>
+</html>

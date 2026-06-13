@@ -3,30 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
+<script>
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Start an AI Security Audit, No Sales Call · kolm.ai</title>
-<meta name="description" content="Start an AI application security audit with no sales call. Run a free scan, or get the $750 signed readiness report your buyer verifies offline: dev@kolm.ai.">
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
+<title>Kolm Implementation Intake</title>
+<meta name="description" content="Contact Kolm with a production AI/API workflow, source systems, runtime targets, security requirements, and evidence export needs. Start from API control, docs, trust, or enterprise review.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="Start an AI Security Audit, No Sales Call">
-<meta property="og:description" content="Start an AI application security audit with no sales call. Run a free scan, or get the $750 signed readiness report your buyer verifies offline: dev@kolm.ai.">
+<meta property="og:title" content="Kolm Implementation Intake">
+<meta property="og:description" content="Route an enterprise AI/API workflow into Kolm's API control center, compiler loop, runtime targets, and readiness-gated evidence packet.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/contact">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Start an AI Security Audit, No Sales Call">
-<meta name="twitter:description" content="Start an AI application security audit with no sales call. Run a free scan, or get the $750 signed readiness report your buyer verifies offline: dev@kolm.ai.">
+<meta name="twitter:title" content="Kolm Implementation Intake">
+<meta name="twitter:description" content="Send one production AI/API workflow and the evidence path you need.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/contact">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -34,52 +28,48 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "ContactPage",
-  "name": "Start an AI security audit, no sales call",
+  "name": "Kolm Implementation Intake",
   "url": "https://kolm.ai/contact",
-  "description": "Start an AI application security audit with no sales call. Run a free scan, or get the $750 signed readiness report your buyer verifies offline: dev@kolm.ai.",
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "url": "https://kolm.ai/",
+  "description": "Contact Kolm with a production AI/API workflow, source systems, runtime targets, security requirements, and evidence export needs.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "implementation intake",
     "email": "dev@kolm.ai"
   }
 }
 </script>
 </head>
-<body>
+<body class="compiler-site">
 <a class="skip-link" href="#main">Skip to content</a>
-
-<hr class="foil-strip" aria-hidden="true">
 
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
+      <a href="/#pipeline">Pipeline</a>
+      <a href="/account/api-control-center">Control</a>
+      <a href="/integrations">Integrations</a>
+      <a href="/runtimes">Runtimes</a>
+      <a href="/compare">Compare</a>
       <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost btn--sm" href="/docs/api">API docs</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/account/api-control-center">Open control</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -88,243 +78,196 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-
-<!-- ============================================================ 1. HERO: START AN AUDIT -->
-<section class="section section--flush hero">
-  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="section__head" style="max-width:66ch;margin-bottom:0">
-      <p class="eyebrow">Start an audit</p>
-      <h1>Your deal is stalled in security review. <span class="go">Start here.</span></h1>
-      <p class="lede">
-        A six-figure deal slows the moment a CISO has to vet your AI application, and a
-        one-week review stretches to four to eight weeks. The first move is not a meeting.
-        Run a free scan, or get the $750 signed readiness report your buyer verifies
-        offline, against our public key.
-      </p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="mailto:dev@kolm.ai?subject=Start%20an%20audit">Email dev@kolm.ai</a>
-        <a class="btn btn--ghost" href="/verify">Verify a sample report</a>
-      </div>
-      <div class="trustline" aria-label="How this works">
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Free scan, no card</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>No account for your buyer</span>
-        <span><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified offline against our key</span>
-      </div>
-    </div>
-
-    <!-- the two ways in: a free scan or the signed report -->
-    <div class="grid grid--2" style="margin-top:var(--s7)">
-      <div class="plate">
-        <p class="card__k">Start here · no card</p>
-        <div class="tier__price">Free</div>
-        <p class="tier__sub">A signed snapshot in minutes. Self-serve, no call.</p>
-        <ul class="ledger" style="margin:var(--s4) 0">
-          <li>Upload redacted logs, read findings in minutes</li>
-          <li>Least-privilege and audit-trail read</li>
-          <li>Signed, offline-verifiable snapshot (watermarked)</li>
-          <li>One email address gets you a key in seconds. Your buyer never needs an account to verify.</li>
-        </ul>
-        <a class="btn btn--ghost" href="/signup" style="width:100%">Run the free scan</a>
-      </div>
-      <div class="plate">
-        <p class="card__k">The buyer-ready artifact</p>
-        <div class="tier__price">$750</div>
-        <p class="tier__sub">one-time. The full automated audit, signed.</p>
-        <ul class="ledger" style="margin:var(--s4) 0">
-          <li>Permissions, audit trail, egress, injection</li>
-          <li>Mapped to SOC 2, ISO 42001, NIST AI RMF, OWASP, ATLAS</li>
-          <li>Ed25519-signed, offline-verifiable report</li>
-          <li>Remediation checklist for every finding</li>
-        </ul>
-        <a class="btn btn--primary" href="mailto:dev@kolm.ai?subject=Signed%20Readiness%20Report" style="width:100%">Get the signed report</a>
-      </div>
-    </div>
-    <p class="hero__claim" style="margin-top:var(--s4)">
-      Both are self-serve. Every fee is flat and listed on
-      <a href="/pricing" style="border-bottom:1px solid var(--line-2)">pricing</a>.
-    </p>
-  </div>
-</section>
-
-<!-- ============================================================ 2. WHAT HAPPENS NEXT (the ledger) -->
-<section class="section section--ink reveal">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: quantized light over the lifecycle chapter -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.11"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">01 / What happens next</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>Three steps. No call in any of them.</h2>
-      <p class="lede">
-        The automated audit is compute, minutes for the scan and the report. The only
-        human step is a named co-signer when a deal needs one, and that is days, not weeks.
-      </p>
-    </div>
-    <div class="steps">
-      <div class="step">
-        <span class="step__n">01 · Choose your entry</span>
-        <h3>Free scan or the $750 report</h3>
-        <p>Run the free scan self-serve: one email address gets you a key in seconds. For the $750 signed readiness report, email dev@kolm.ai with redacted logs. No sales call either way.</p>
-      </div>
-      <div class="step">
-        <span class="step__n">02 · We run the audit</span>
-        <h3>Automated, then signed</h3>
-        <p>Permission read, audit-trail and egress checks, and the prompt-injection battery run as compute. The findings are canonicalized and Ed25519-signed, mapped to the frameworks your buyer cites.</p>
-      </div>
-      <div class="step">
-        <span class="step__n">03 · Your buyer verifies</span>
-        <h3>Offline, against our key</h3>
-        <p>They open the report and verify the signature in their own browser with WebCrypto, against the public key inside the report. The four-to-eight-week review compresses to days.</p>
-      </div>
-    </div>
-    <p class="hero__claim" style="margin-top:var(--s6)">
-      Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.
-    </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 3. REACH US -->
-<section class="section sect--air reveal">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">02 / Reach us</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head" style="max-width:60ch">
-      <h2>One channel. Always the same address.</h2>
-      <p class="lede">
-        There is no phone line, no chat widget, and no ticket queue. Every engagement
-        starts with a written scope, and email keeps a clear record of what both sides agreed.
-      </p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="split" style="align-items:start">
-      <div class="plate">
-        <p class="card__k">Write to</p>
-        <p style="font-size:clamp(1.5rem,4vw,2rem);font-weight:600;line-height:1.1;margin:var(--s2) 0 var(--s3)">
-          <a href="mailto:dev@kolm.ai" style="color:var(--accent)">dev@kolm.ai</a>
-        </p>
-        <p class="tier__sub">We reply within one business day, with a scope draft or a clarifying question.</p>
-        <a class="btn btn--primary" href="mailto:dev@kolm.ai?subject=Start%20an%20audit&body=Agent%20description%3A%0A%0ASystems%20it%20can%20reach%3A%0A%0ADeal%20or%20evaluation%20context%3A%0A%0ATarget%20delivery%20date%3A" style="width:100%;margin-top:var(--s4)">Email dev@kolm.ai</a>
-        <p class="hero__claim" style="text-align:center;margin-top:var(--s3)">
-          dev@kolm.ai is the only contact address.
-        </p>
-      </div>
+  <section class="section section--flush hero compiler-hero">
+    <div class="field" aria-hidden="true"><canvas></canvas></div>
+    <div class="wrap compiler-hero__grid">
       <div>
-        <h3>Before you write</h3>
-        <p style="color:var(--ink-2);margin:var(--s3) 0 var(--s4)">
-          A few lines is enough to scope the audit. Tell us what the application does and
-          which deal is waiting, and we can size the work on the first reply.
-        </p>
-        <ul class="ledger" style="margin:0 0 var(--s5)">
-          <li>What your AI application does (one paragraph is plenty)</li>
-          <li>What systems or APIs the agent can reach</li>
-          <li>Which buyer or deal is blocked, and why</li>
-          <li>Your target delivery date</li>
-        </ul>
-        <div class="hero__cta">
-          <a class="btn btn--ghost btn--sm" href="/pricing">See full pricing</a>
-          <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
+        <p class="compiler-kicker" data-enter="1">Contact / Implementation Intake</p>
+        <h1 class="hero__h1" data-enter="2">Bring one production AI/API loop.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. The fastest path is not a generic sales call: send one real workflow, the source systems, the target runtime, and the evidence exports your buyer needs. Kolm routes it through capture, policy, eval gates, signed artifact, receipt, and readiness-gated proof.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="mailto:dev@kolm.ai?subject=Kolm%20implementation%20intake">Email Implementation Intake</a>
+          <a class="btn btn--ghost" href="/account/api-control-center">Open API control</a>
+        </div>
+        <div class="compiler-proof" data-enter="5">
+          <span><b>1</b> production namespace</span>
+          <span><b>5</b> owner questions</span>
+          <span><b>4</b> evidence outputs</span>
+          <span><b>8</b> open readiness gates</span>
+        </div>
+      </div>
+      <aside class="control-plane kolm-surface-media" aria-label="Kolm implementation intake packet">
+        <div class="control-plane__head">
+          <span><b>intake packet</b> / what to send</span>
+          <span>dev@kolm.ai</span>
+        </div>
+        <div class="control-plane__grid">
+          <div class="control-tile control-tile--wide"><b>Workflow</b><span>The API namespace, agent path, customer action, or model behavior you need to control.</span></div>
+          <div class="control-tile"><b>Sources</b><span>Provider, gateway, traces, warehouse, CI, support, GRC, files, or custom API events.</span></div>
+          <div class="control-tile"><b>Target</b><span>Hosted, local, browser, edge, BYOC, offline, or restricted runtime expectations.</span></div>
+          <div class="control-tile"><b>Evidence</b><span>Receipt, eval report, governance packet, SIEM/GRC export, warehouse export, or CI status.</span></div>
+          <div class="control-tile"><b>Gate</b><span>Any certification, package, benchmark, partner, or standards proof the buyer requires.</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="route">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">01 / Route The Request</span>
+        <h2>Choose the path that matches the work, then attach the proof you need.</h2>
+        <p class="lede">Kolm is not a broad AI assistant. It is a control plane for turning observed API behavior into signed, verifiable runtime artifacts.</p>
+      </div>
+      <div class="surface-table">
+        <div class="surface-row"><div class="surface-row__key">enterprise rollout</div><div class="surface-row__body"><b>Put a production namespace under control.</b> Send the source system, owner, data boundary, runtime target, and evidence destination.</div><div class="surface-row__route"><a href="mailto:dev@kolm.ai?subject=Enterprise%20rollout%20for%20Kolm">email</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">developer trial</div><div class="surface-row__body"><b>Run the loop with sample data.</b> Start with docs, OpenAPI, API route inventory, and the control center before using private traffic.</div><div class="surface-row__route"><a href="/docs/api">docs</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">security review</div><div class="surface-row__body"><b>Inspect the boundary.</b> Use the security posture page for hosted headers, unknown-schema policy, data boundary, disclosure path, and certification gates.</div><div class="surface-row__route"><a href="/security">security</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">buyer evidence</div><div class="surface-row__body"><b>Export proof without overstating scope.</b> Use the trust center and readiness JSON to separate shipped controls from open requirements.</div><div class="surface-row__route"><a href="/trust">trust</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">category comparison</div><div class="surface-row__body"><b>Explain where Kolm fits.</b> Use the competitor atlas and compare page when the buyer asks how Kolm differs from model gateways, eval tools, observability, and training loops.</div><div class="surface-row__route"><a href="/compare">compare</a></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" id="packet">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">02 / Intake Packet</span>
+        <h2>Send enough context to prove the loop without exposing unnecessary data.</h2>
+        <p class="lede">The best first contact is concrete: one workflow, one owner, one evidence destination, and the current risk that blocks production.</p>
+      </div>
+      <div class="compiler-card-grid">
+        <div class="proof-card"><p class="card__k">1. Source</p><h3>Where behavior starts</h3><p>Provider logs, gateway events, agent traces, product telemetry, support tickets, warehouse rows, CI events, repository context, or custom API events.</p></div>
+        <div class="proof-card"><p class="card__k">2. Risk</p><h3>What must not regress</h3><p>Customer action, data boundary, workflow failure, latency target, cost ceiling, policy violation, escalation path, or reviewer concern.</p></div>
+        <div class="proof-card"><p class="card__k">3. Gate</p><h3>How release is blocked</h3><p>Eval threshold, regression set, security review, procurement evidence, CI status, runtime compatibility, or buyer control mapping.</p></div>
+        <div class="proof-card"><p class="card__k">4. Target</p><h3>Where artifact runs</h3><p>Hosted GPU, local runner, browser worker, edge function, private cloud, restricted fleet, offline verifier, or deployment check.</p></div>
+        <div class="proof-card"><p class="card__k">5. Export</p><h3>Where proof must go</h3><p>Receipt, eval report, evidence bundle, JSON API, webhook, warehouse export, SIEM/GRC event, ticket, or CI deployment status.</p></div>
+        <div class="proof-card"><p class="card__k">6. Caveat</p><h3>What cannot be claimed yet</h3><p>Benchmark, certification, package-channel, partner-adoption, and standards-stewardship claims stay readiness-gated until external proof exists.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="owners">
+    <div class="wrap">
+      <div class="compiler-rail">
+        <div>
+          <span class="idx">03 / Owner Questions</span>
+          <h2>The first conversation should identify owners and control objects.</h2>
+          <p class="lede">If the workflow has no source owner, policy owner, runtime owner, evidence owner, or failure owner, it is too vague to control.</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="mailto:dev@kolm.ai?subject=Kolm%20owner%20map">Send Owner Map</a>
+            <a class="btn btn--ghost" href="/enterprise#buyer-workflow">Enterprise workflow</a>
+          </div>
+        </div>
+        <div class="unicorn-proof-grid">
+          <div class="proof-card"><h3>Platform Owner</h3><p>Which namespace, API key, service account, environment, provider, connector, or webhook owns the source?</p></div>
+          <div class="proof-card"><h3>AI Owner</h3><p>Which traces, labels, prompts, tools, schemas, evals, failure taxonomy, and regression set define acceptable behavior?</p></div>
+          <div class="proof-card"><h3>Security Owner</h3><p>Which retention, redaction, vault, routing, least-privilege, unknown-schema, and export policies apply before reuse?</p></div>
+          <div class="proof-card"><h3>Evidence Owner</h3><p>Who receives the receipt, governance packet, SIEM/GRC event, warehouse export, ticket, or deployment status?</p></div>
         </div>
       </div>
     </div>
+  </section>
+
+  <section class="section section--ink" id="readiness">
+    <div class="dither-edge" aria-hidden="true"></div>
+    <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">04 / Readiness Contract</span>
+        <h2>Do not ask for unsupported claims. Ask for the evidence path.</h2>
+        <p class="lede">Kolm's strongest buyer posture is strict: if a requirement lacks proof, it stays in the readiness ledger instead of becoming marketing copy.</p>
+      </div>
+      <div class="surface-table surface-table--dense">
+        <div class="surface-row"><div class="surface-row__key">claimable now</div><div class="surface-row__body">Current product controls with routes, tests, generated payloads, verifier receipts, static assets, screenshots, or source files that prove the behavior.</div><div class="surface-row__route">evidence</div></div>
+        <div class="surface-row"><div class="surface-row__key">open gates</div><div class="surface-row__body">8 open requirements remain in the readiness closeout: public benchmark data, live certification, package releases, external runtime adoption, and neutral stewardship.</div><div class="surface-row__route"><a href="/product-readiness-closeout.json">json</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">buyer packet</div><div class="surface-row__body">A useful packet names source hashes, policy versions, eval results, artifact checksums, runtime target, receipt ID, export destination, and open-gate caveats.</div><div class="surface-row__route">packet</div></div>
+        <div class="surface-row"><div class="surface-row__key">wrong ask</div><div class="surface-row__body">Do not request claims of certification, public package availability, external partner adoption, neutral standards status, or broad benchmark leadership unless you can provide proof.</div><div class="surface-row__route">blocked</div></div>
+      </div>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/trust#open-gates">Read readiness gates</a>
+        <a class="btn btn--ghost" href="/product-readiness-closeout.json">Open readiness JSON</a>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ 4. FINAL CTA -->
-<section class="section reveal cta-final">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
-  <div class="wrap">
-    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>Start with one email.</h2>
-    <p class="lede" style="max-width:52ch;margin-inline:auto">
-      A free scan or a $750 signed report. No sales call, and evidence your buyer
-      verifies without trusting us.
-    </p>
-    <div class="hero__cta">
-      <a class="btn btn--primary" href="mailto:dev@kolm.ai?subject=Start%20an%20audit">Email dev@kolm.ai</a>
-      <a class="btn btn--ghost" href="/verify">Verify a report</a>
+  <section class="section" id="direct-links">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">05 / Direct Paths</span>
+        <h2>Use the shortest path to the object you need.</h2>
+        <p class="lede">The contact page should reduce time to action. These routes are better than a vague inbox thread when the next step is already obvious.</p>
+      </div>
+      <div class="surface-table">
+        <div class="surface-row"><div class="surface-row__key">control center</div><div class="surface-row__body"><b>Inspect channel coverage, policy, governance, exports, and audit state.</b></div><div class="surface-row__route"><a href="/account/api-control-center">open</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">api docs</div><div class="surface-row__body"><b>Build against routes, OpenAPI, quickstarts, and generated API route inventory.</b></div><div class="surface-row__route"><a href="/docs/api">docs</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">enterprise</div><div class="surface-row__body"><b>Use the buyer workflow when platform, AI, security, and compliance owners all need the same proof path.</b></div><div class="surface-row__route"><a href="/enterprise">enterprise</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">runtime matrix</div><div class="surface-row__body"><b>Check deployment targets and caveats before assuming an artifact can run in a specific environment.</b></div><div class="surface-row__route"><a href="/runtimes">runtimes</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">email</div><div class="surface-row__body"><b>Send implementation context, reproduction notes, or security issues to <span translate="no">dev@kolm.ai</span>.</b></div><div class="surface-row__route"><a href="mailto:dev@kolm.ai">email</a></div></div>
+      </div>
     </div>
-    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
-    </div>
-    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-  </div>
-</section>
+  </section>
 
+  <section class="section section--cta">
+    <div class="wrap cta-band">
+      <div>
+        <h2>Send one controlled workflow, not a vague AI request.</h2>
+        <p class="lede">Name the source, risk, gate, target, and export. Kolm can only be useful if the behavior loop is concrete enough to prove.</p>
+      </div>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="mailto:dev@kolm.ai?subject=Kolm%20implementation%20intake">Email Implementation Intake</a>
+        <a class="btn btn--ghost" href="/docs">Read docs</a>
+      </div>
+    </div>
+  </section>
 </main>
 
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Implementation intake for API behavior capture, policy, signed artifacts, runtime targets, and evidence exports.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Contact</h3>
+        <a href="#route">Route request</a>
+        <a href="#packet">Intake packet</a>
+        <a href="#owners">Owner questions</a>
+        <a href="#direct-links">Direct paths</a>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
-        <a href="/platform">Platform</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
-        <a href="/docs">Docs</a>
-        <a href="/pricing">Pricing</a>
         <a href="/enterprise">Enterprise</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+        <a href="/account/api-control-center">API control</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/runtimes">Runtimes</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
-        <a href="/verify">Verify</a>
         <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
-        <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
+        <a href="/trust">Readiness center</a>
+        <a href="/product-readiness-closeout.json">Readiness JSON</a>
+        <a href="/compare">Compare</a>
       </div>
       <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
-      </div>
-      <div class="foot__col">
-        <h3>Company</h3>
-        <a href="/research">Research</a>
+        <h3>Developers</h3>
+        <a href="/docs">Docs</a>
+        <a href="/docs/api">API reference</a>
+        <a href="/openapi.json">OpenAPI JSON</a>
         <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
-        <a href="/contact">Contact</a>
       </div>
     </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge badge--ok">Implementation intake</span>
+      <span class="badge">Readiness-gated claims</span>
+      <span class="badge">Control-first routing</span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
-
 </body>
 </html>

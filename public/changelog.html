@@ -3,30 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
+<script>
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Changelog: What Shipped, With Dates · kolm.ai</title>
-<meta name="description" content="A running log of what kolm shipped: the open offline verifier, the published Agent Security Readiness checklist, framework mappings and the transparency log.">
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
+<title>Kolm Product Release Ledger</title>
+<meta name="description" content="Kolm product release ledger tracking rebuilt public surfaces, route cutovers, API control center scope, verification gates, and open readiness requirements.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="Changelog: What Shipped, With Dates">
-<meta property="og:description" content="A running log of what kolm shipped: the open offline verifier, the published Agent Security Readiness checklist, framework mappings and the transparency log.">
+<meta property="og:title" content="Kolm Product Release Ledger">
+<meta property="og:description" content="A product-facing release ledger for what changed, how it was verified, and which readiness gates remain open.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/changelog">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Changelog: What Shipped, With Dates">
-<meta name="twitter:description" content="A running log of what kolm shipped: the open offline verifier, the published Agent Security Readiness checklist, framework mappings and the transparency log.">
+<meta name="twitter:title" content="Kolm Product Release Ledger">
+<meta name="twitter:description" content="Current product cutover, route verification, API control center scope, and readiness-gated release state for Kolm.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/changelog">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -34,54 +28,43 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Changelog: What Shipped, With Dates",
+  "name": "Kolm Product Release Ledger",
   "url": "https://kolm.ai/changelog",
-  "description": "A running log of what kolm shipped: the open offline verifier, the published Agent Security Readiness checklist, framework mappings and the transparency log.",
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "url": "https://kolm.ai/",
-    "@id": "https://kolm.ai/#org"
-  }
+  "description": "Kolm product release ledger tracking rebuilt public surfaces, route cutovers, API control center scope, verification gates, and open readiness requirements.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
 </head>
-<body>
+<body class="compiler-site">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
-<hr class="foil-strip" aria-hidden="true">
-
-<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
+      <a href="/#pipeline">Pipeline</a>
+      <a href="/account/api-control-center">Control</a>
+      <a href="/integrations">Integrations</a>
+      <a href="/runtimes">Runtimes</a>
+      <a href="/compare">Compare</a>
       <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost btn--sm" href="/docs/api">API Docs</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/account/api-control-center">Open Control</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -90,158 +73,182 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-
-<!-- ============================================================ HERO -->
-<section class="section section--flush hero">
-  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
-  <div class="wrap">
-    <div style="max-width:62ch">
-      <p class="eyebrow">Changelog</p>
-      <h1>What shipped, <span class="go">with dates.</span></h1>
-      <p class="lede">A short, plain record of what's live: the verifier, the checklist, and the transparency log, each dated when it shipped.</p>
-      <div class="hero__proof" aria-label="Changelog at a glance">
-        <span><i class="dot" aria-hidden="true"></i>Shipped only · no roadmap theater</span>
-        <span><i class="dot" aria-hidden="true"></i>Verifier · checklist · transparency log</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 01. SHIPPED -->
-<section class="section sect--dense reveal">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">01 / Shipped</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>What's live now.</h2>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="ledger-index" aria-label="Shipped entries">
+  <section class="section section--flush hero compiler-hero">
+    <div class="field" aria-hidden="true"><canvas></canvas></div>
+    <div class="wrap compiler-hero__grid">
       <div>
-        <span class="li-date">2026 · June</span><span class="ctrlid">site</span>
-        <span class="li-title">Site rebuilt around verifiable evidence
-          <span style="display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:4px;max-width:74ch">A ground-up redesign around verifiable evidence: a live in-browser verifier on the homepage, the report anatomy, and the four-pillar check catalog. Everything centers on a signed artifact you can check yourself.</span>
-        </span>
+        <p class="compiler-kicker" data-enter="1">Release Ledger / Product Cutover</p>
+        <h1 class="hero__h1" data-enter="2">A changelog should show what changed and what is still gated.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. This ledger tracks public surface rebuilds, route cutovers, API control center scope, verification gates, and the readiness requirements that must remain visible until proof exists.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="/trust">Review Readiness</a>
+          <a class="btn btn--ghost" href="/account/api-control-center">Open API Control</a>
+        </div>
+        <div class="compiler-proof" data-enter="5">
+          <span><b>8</b> product surfaces tracked</span>
+          <span><b>13</b> route tests</span>
+          <span><b>8</b> open readiness gates</span>
+          <span><b>0</b> broken static refs</span>
+        </div>
       </div>
-      <div>
-        <span class="li-date">2026 · June</span><span class="ctrlid">verifier</span>
-        <span class="li-title">Open offline verifier
-          <span style="display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:4px;max-width:74ch">A dependency-free WebCrypto Ed25519 verifier, shipped open. The browser widget, CLI, and library share one canonicalization. Paste a report and the check runs in-page, with a tamper demo to prove altered evidence can't pass.</span>
-        </span>
-      </div>
-      <div>
-        <span class="li-date">2026 · June</span><span class="ctrlid">framework</span>
-        <span class="li-title">Agent Security Readiness (ASR) checklist
-          <span style="display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:4px;max-width:74ch">Published openly under CC0: the six-control readiness checklist for agentic products, each control mapped into SOC 2, NIST AI RMF, EU AI Act, and the OWASP LLM &amp; Agentic Top 10.</span>
-        </span>
-      </div>
-      <div>
-        <span class="li-date">2026 · Q1</span><span class="ctrlid">log</span>
-        <span class="li-title">Transparency log + inclusion proofs
-          <span style="display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:4px;max-width:74ch">Every report enters an append-only, hash-chained Merkle log and ships with a per-report inclusion proof, so a report can be shown to have been logged and never quietly replaced.</span>
-        </span>
-      </div>
+      <aside class="control-plane kolm-surface-media" aria-label="Current release ledger summary">
+        <div class="control-plane__head">
+          <span><b>release ledger</b> / current cutover</span>
+          <span>2026-06-13</span>
+        </div>
+        <div class="control-plane__grid">
+          <div class="control-tile control-tile--wide"><b>Pages</b><span>Trust, Security, Enterprise, Contact, Platform, Capabilities, Research, and Changelog now describe current product state.</span></div>
+          <div class="control-tile"><b>Routes</b><span>Public pages are being unmasked from compiler-product aliases and tested by direct route assertions.</span></div>
+          <div class="control-tile"><b>Tests</b><span>Route, rewrite, stale-copy, claims, refs, kernel, UI audit, and screenshots verify the cutover.</span></div>
+          <div class="control-tile"><b>Caveats</b><span>External partner, live certification, package release, and public benchmark data gates remain explicit.</span></div>
+          <div class="control-tile"><b>Rule</b><span>No release note counts as done until routes, copy, references, and readiness state agree.</span></div>
+        </div>
+      </aside>
     </div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ 02. NOT YET LISTED -->
-<section class="section section--ink reveal">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: quantized light over the unclaimed chapter -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">02 / Not yet listed</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head" style="max-width:62ch">
-      <h2>What we won't claim yet.</h2>
-      <p class="lede">kolm does not yet hold a SOC 2 report or a published third-party pentest of its own. We'll list either here only once it is real and verifiable.</p>
-    </div>
+  <section class="section" id="current-cutover">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">01 / Current Cutover</span>
+        <h2>The public product surface is moving from audit packaging to platform objects.</h2>
+        <p class="lede">Each entry records what changed, why it matters, and which buyer proof path it supports.</p>
+      </div>
+      <div class="surface-table">
+        <div class="surface-row"><div class="surface-row__key">2026-06-13 / surfaces</div><div class="surface-row__body"><b>Public product surfaces rebuilt.</b> Trust, Security, Enterprise, Contact, Platform, Capabilities, Research, and Changelog now point at the behavior-to-artifact platform and readiness-gated claims.</div><div class="surface-row__route">pages</div></div>
+        <div class="surface-row"><div class="surface-row__key">2026-06-13 / control</div><div class="surface-row__body"><b>API control center scope surfaced.</b> The public story now names 17 channel families, 12 ingress modes, 10 export modes, and 8 governance stages.</div><div class="surface-row__route"><a href="/account/api-control-center">control</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">2026-06-13 / routing</div><div class="surface-row__body"><b>Routes hardened.</b> Product pages should render their own HTML instead of falling through to a generic compiler-product alias.</div><div class="surface-row__route">routes</div></div>
+        <div class="surface-row"><div class="surface-row__key">2026-06-13 / claims</div><div class="surface-row__body"><b>Claim scope hardened.</b> Readiness-gated claims remain visible for external partner, live certification, package release, and public benchmark data requirements.</div><div class="surface-row__route"><a href="/trust">trust</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">2026-06-13 / research</div><div class="surface-row__body"><b>Category research became product scope.</b> Competitor and unicorn research now maps to API controls, object model, evidence exports, enterprise workflows, and website standards.</div><div class="surface-row__route"><a href="/research">research</a></div></div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ CLOSE -->
-<section class="section reveal cta-final">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
-  <div class="wrap">
-    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>See the latest, verify it yourself.</h2>
-    <div class="hero__cta"><a class="btn btn--primary" href="/verify">Verify a report</a><a class="btn btn--ghost" href="/research">Read the research</a></div>
-    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
+  <section class="section section--tint" id="verification-gates">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">02 / Verification Gates</span>
+        <h2>Release confidence comes from checks that target the actual failure modes.</h2>
+        <p class="lede">A green page load is not enough. The release path checks routing, stale copy, broken references, claim scope, kernel readiness, and real screenshots.</p>
+      </div>
+      <div class="compiler-card-grid">
+        <div class="proof-card"><p class="card__k">Site Tests</p><h3>Routes render the intended pages</h3><p>Direct route fetches assert titles and current product copy for trust, security, enterprise, contact, platform, capabilities, research, and changelog.</p></div>
+        <div class="proof-card"><p class="card__k">Rewrite Tests</p><h3>Aliases cannot hide stale pages</h3><p>Vercel rewrite assertions prevent product surfaces from resolving to the generic compiler-product page by accident.</p></div>
+        <div class="proof-card"><p class="card__k">Stale-Copy Tests</p><h3>Old packaging cannot return silently</h3><p>Forbidden copy searches block old scan, package, pricing, verifier, overclaiming, and mojibake fragments from rebuilt pages.</p></div>
+        <div class="proof-card"><p class="card__k">Reference Lint</p><h3>Static links and assets resolve</h3><p>The refs audit checks internal links, images, manifests, docs paths, public JSON, and route references across the static site.</p></div>
+        <div class="proof-card"><p class="card__k">Claim Scope</p><h3>Marketing cannot outrun proof</h3><p>Claim verification keeps certification, benchmark, package, partner, and adoption statements tied to explicit evidence or open gates.</p></div>
+        <div class="proof-card"><p class="card__k">UI Screenshots</p><h3>Desktop and mobile must be readable</h3><p>Full-page screenshots check spacing, stacking, footer integrity, hero density, and absence of smushing across desktop and mobile viewports.</p></div>
+      </div>
     </div>
-    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-  </div>
-</section>
+  </section>
+
+  <section class="section section--ink" id="still-gated">
+    <div class="dither-edge" aria-hidden="true"></div>
+    <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">03 / Still Gated</span>
+        <h2>The release ledger is useful only if unfinished proof stays visible.</h2>
+        <p class="lede">These gates should remain explicit in public trust and security surfaces until there is stronger evidence.</p>
+      </div>
+      <div class="surface-table surface-table--dense">
+        <div class="surface-row"><div class="surface-row__key">needs external partner</div><div class="surface-row__body">Partner-backed claims, marketplace claims, and external validation need named evidence before they become public certainty.</div><div class="surface-row__route">partner</div></div>
+        <div class="surface-row"><div class="surface-row__key">needs live certification</div><div class="surface-row__body">Certification language must remain gated until live, reviewable evidence exists and can be routed from the trust surface.</div><div class="surface-row__route">cert</div></div>
+        <div class="surface-row"><div class="surface-row__key">needs package release</div><div class="surface-row__body">Package, SDK, CLI, and distribution claims must match a released artifact, install path, version, and verification command.</div><div class="surface-row__route">package</div></div>
+        <div class="surface-row"><div class="surface-row__key">needs public benchmark data</div><div class="surface-row__body">Performance or superiority claims require public benchmark data, method, sample, limitations, and repeatable evidence.</div><div class="surface-row__route">benchmark</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="buyer-delta">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">04 / What Changed For Buyers</span>
+        <h2>The site now explains the system a buyer has to approve.</h2>
+        <p class="lede">The product narrative is stronger when it shows objects, owners, controls, and evidence instead of category adjectives.</p>
+      </div>
+      <div class="surface-table">
+        <div class="surface-row"><div class="surface-row__key">product owner</div><div class="surface-row__body"><b>Clear object model.</b> Source, trace, dataset, policy, eval, compile run, artifact, runtime target, receipt, export, audit event, and readiness gate.</div><div class="surface-row__route"><a href="/platform">objects</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">enterprise admin</div><div class="surface-row__body"><b>Control center path.</b> API keys, providers, connectors, quotas, retention, exports, audit events, usage, costs, and policy state.</div><div class="surface-row__route"><a href="/enterprise">control</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">security reviewer</div><div class="surface-row__body"><b>Boundary posture.</b> Unknown schemas, redaction, retention, provider policy, access scope, tenant isolation, audit trail, and open gates.</div><div class="surface-row__route"><a href="/security">security</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">developer</div><div class="surface-row__body"><b>Implementation path.</b> API docs, OpenAPI JSON, examples, route stability, verification, runtime targets, and error contracts.</div><div class="surface-row__route"><a href="/docs/api">api</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">procurement</div><div class="surface-row__body"><b>Proof discipline.</b> Evidence center, readiness JSON, support posture, policy boundaries, and no unsupported external claims.</div><div class="surface-row__route"><a href="/trust">trust</a></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" id="next-release-work">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">05 / Next Release Work</span>
+        <h2>The next release should keep moving from website clarity into working product control.</h2>
+        <p class="lede">The public surface is useful only if the backend, account UI, API docs, and tests keep converging on the same object model.</p>
+      </div>
+      <div class="compiler-card-grid">
+        <div class="proof-card"><p class="card__k">Control Center</p><h3>Make every control inspectable</h3><p>Expose source scopes, connector health, provider policy, retention, eval gates, exports, usage, cost, and audit event search as usable account surfaces.</p></div>
+        <div class="proof-card"><p class="card__k">Docs</p><h3>Show implementation paths</h3><p>Add examples for capture trace, classify schema, create eval, compile artifact, fetch receipt, export evidence, and verify runtime target.</p></div>
+        <div class="proof-card"><p class="card__k">Routing</p><h3>Finish unmasking stale surfaces</h3><p>Continue removing old aliases and copy across docs, pricing, signup, dashboard, compare, integrations, and runtimes where evidence shows drift.</p></div>
+        <div class="proof-card"><p class="card__k">Verification</p><h3>Broaden screenshot coverage</h3><p>Add research and changelog to the critical UI audit route list so spacing regressions fail automatically on desktop and mobile.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--cta">
+    <div class="wrap cta-band">
+      <div>
+        <h2>Read the ledger before trusting the claim.</h2>
+        <p class="lede">The product should be judged by route evidence, API objects, screenshots, generated artifacts, receipts, and open readiness gates.</p>
+      </div>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/trust">Review Readiness</a>
+        <a class="btn btn--ghost" href="/docs/api">Read API Docs</a>
+      </div>
+    </div>
+  </section>
 </main>
 
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Release ledger for product cutovers, route verification, readiness gates, and control-plane proof.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Ledger</h3>
+        <a href="#current-cutover">Current Cutover</a>
+        <a href="#verification-gates">Verification</a>
+        <a href="#still-gated">Still Gated</a>
+        <a href="#next-release-work">Next Work</a>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
-        <a href="/docs">Docs</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+        <a href="/capabilities">Capabilities</a>
+        <a href="/account/api-control-center">API Control</a>
+        <a href="/research">Research</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
-        <a href="/verify">Verify</a>
+        <a href="/trust">Readiness Center</a>
         <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
+        <a href="/product-readiness-closeout.json">Readiness JSON</a>
         <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
-      </div>
-      <div class="foot__col">
-        <h3>Company</h3>
-        <a href="/research">Research</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
-        <a href="/contact">Contact</a>
+        <h3>Developers</h3>
+        <a href="/docs">Docs</a>
+        <a href="/docs/api">API Reference</a>
+        <a href="/openapi.json">OpenAPI JSON</a>
+        <a href="/compare">Compare</a>
       </div>
     </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge badge--ok">Release notes tied to proof</span>
+      <span>Readiness-gated claims</span>
     </div>
   </div>
 </footer>

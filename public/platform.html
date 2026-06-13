@@ -3,29 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
+<script>
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>AI Audit Platform: Logs to Signed Evidence · kolm.ai</title>
-<meta name="description" content="Connect OpenTelemetry, Datadog, Langfuse, LangSmith, MCP or gateway logs, run seven analyzers plus injection testing, sign with Ed25519, and verify offline.">
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
+<title>Kolm Platform Architecture</title>
+<meta name="description" content="Kolm platform architecture: the behavior-to-artifact control plane for API behavior capture, policy, eval gates, signed artifacts, runtime targets, receipts, and enterprise evidence exports.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="AI Audit Platform: Logs to Signed Evidence">
-<meta property="og:description" content="Connect OpenTelemetry, Datadog, Langfuse, LangSmith, MCP or gateway logs, run seven analyzers plus injection testing, sign with Ed25519, and verify offline.">
+<meta property="og:title" content="Kolm Platform Architecture">
+<meta property="og:description" content="The control-plane architecture for turning real API behavior into governed, device-fit artifacts with policy, eval gates, receipts, and exports.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/platform">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="AI Audit Platform: Logs to Signed Evidence">
+<meta name="twitter:title" content="Kolm Platform Architecture">
+<meta name="twitter:description" content="API behavior in, signed runtime artifact out, with platform architecture around every source, policy, eval, target, and receipt.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/platform">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -33,62 +28,43 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "kolm",
-  "applicationCategory": "SecurityApplication",
-  "operatingSystem": "Web, Linux, macOS, Windows",
+  "@type": "WebPage",
+  "name": "Kolm Platform Architecture",
   "url": "https://kolm.ai/platform",
-  "description": "Connect OpenTelemetry, Datadog, Langfuse, LangSmith, MCP or gateway logs, run seven analyzers plus injection testing, sign with Ed25519, and verify offline.",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Kolm platform architecture: the behavior-to-artifact control plane for API behavior capture, policy, eval gates, signed artifacts, runtime targets, receipts, and enterprise evidence exports.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
-    { "@type": "ListItem", "position": 2, "name": "Platform", "item": "https://kolm.ai/platform" }
-  ]
-}
-</script>
 </head>
-<body>
+<body class="compiler-site">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
-<hr class="foil-strip" aria-hidden="true">
-
-<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
+      <a href="/#pipeline">Pipeline</a>
+      <a href="/account/api-control-center">Control</a>
+      <a href="/integrations">Integrations</a>
+      <a href="/runtimes">Runtimes</a>
+      <a href="/compare">Compare</a>
       <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost btn--sm" href="/docs/api">API Docs</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/account/api-control-center">Open Control</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -97,387 +73,215 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-
-<!-- ============================================================ 1. HERO -->
-<section class="section section--flush hero">
-  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
-  <div class="wrap">
-    <p class="eyebrow">The platform</p>
-    <h1 class="hero__h1">One pipeline. Logs in, <span class="go">signed evidence out.</span></h1>
-    <p class="lede" style="max-width:62ch">
-      kolm reads what your AI application did, the agent and every tool, identity and
-      data flow around it, from your existing logs or a sidecar proxy, and seals the
-      findings into one Ed25519-signed object your buyer <a href="/verify" style="border-bottom:1px solid var(--line-2)">verifies offline</a>,
-      against your key, with no kolm server in the trust path.
-    </p>
-    <div class="hero__cta">
-      <a class="btn btn--primary" href="/signup">Run the free scan</a>
-      <a class="btn btn--ghost" href="/how-it-works">See how it works</a>
-    </div>
-    <div class="hero__proof" aria-label="What the pipeline produces">
-      <span><i class="dot" aria-hidden="true"></i>Import logs or sidecar · no SDK</span>
-      <span><i class="dot" aria-hidden="true"></i>Ed25519 signed · Merkle logged</span>
-      <span><i class="dot" aria-hidden="true"></i>Verified offline by your buyer</span>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 01. THE PROBLEM -->
-<section class="section reveal" id="problem">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">01 / The problem</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>A questionnaire used to clear it. An autonomous agent does not.</h2>
-      <p class="lede">The one-week review runs four to eight when a reviewer has to vet an agent that acts on its own. Everything below exists to answer that review in evidence.</p>
-    </div>
-    <div class="grid grid--3">
-      <div class="card">
-        <p class="card__k">The clock</p>
-        <h3>One week becomes eight</h3>
-        <p>A self-attested answer no longer clears an autonomous agent. The review reopens, and a six-figure deal waits on it.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">The burden</p>
-        <h3>Proof lands on your buyer</h3>
-        <p>Say-so moves the work to the reviewer's desk. They want evidence they can check themselves, not a promise that an audit happened.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">The half-life</p>
-        <h3>It goes stale on deploy</h3>
-        <p>Even a clean point-in-time answer expires on your next release. A permission granted in January can still fire in August.</p>
-      </div>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 02. CAPABILITIES -->
-<section class="section sect--dense reveal" id="capabilities">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">02 / Capabilities</span></div>
-      <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true">02</span>
-    <div class="section__head">
-      <h2>Six controls. One per question a reviewer asks.</h2>
-      <p class="lede">Each module produces signed findings mapped to a standard your buyer already cites. None of it is a wrapper around a checklist.</p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="grid grid--3">
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <rect class="gy-s" x="14.5" y="24.5" width="14" height="15"/>
-          <rect class="gy-s" x="19.5" y="29.5" width="4" height="5"/>
-          <path class="gy-s" d="M28.5 32.5 H64.5 M52.5 32.5 V39.5 M59.5 32.5 V37.5"/>
-          <path class="gy-s2" d="M70.5 32.5 H86.5" stroke-dasharray="2 3"/>
-          <g class="gy-s2"><rect x="92.5" y="18.5" width="12" height="12"/><rect x="108.5" y="18.5" width="12" height="12"/><rect x="124.5" y="18.5" width="12" height="12"/><rect x="140.5" y="18.5" width="12" height="12"/><rect x="156.5" y="18.5" width="12" height="12"/><rect x="92.5" y="34.5" width="12" height="12"/><rect x="108.5" y="34.5" width="12" height="12"/><rect x="124.5" y="34.5" width="12" height="12"/><rect x="140.5" y="34.5" width="12" height="12"/><rect x="156.5" y="34.5" width="12" height="12"/></g>
-          <rect class="gy-p" x="95.5" y="21.5" width="6" height="6"/>
-          <rect class="gy-f" x="111.5" y="21.5" width="6" height="6"/>
-          <rect class="gy-f" x="95.5" y="37.5" width="6" height="6"/>
-          <rect class="gy-f" x="127.5" y="37.5" width="6" height="6"/>
-        </svg></div>
-        <p class="card__k">Permission analyzer</p>
-        <h3>Least privilege</h3>
-        <p>Normalizes every scope the agent holds, compares it to what it exercises, and flags over-permissioning and shared keys.</p>
-        <p class="card__map">ASR-1 · SOC 2 CC6 · OWASP ASI03</p>
-      </div>
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <rect class="gy-s" x="16.5" y="22.5" width="28" height="18"/>
-          <rect class="gy-s" x="64.5" y="22.5" width="28" height="18"/>
-          <rect class="gy-s" x="112.5" y="22.5" width="28" height="18"/>
-          <rect class="gy-s" x="160.5" y="22.5" width="28" height="18"/>
-          <path class="gy-s2" d="M21.5 28.5 H39.5 M21.5 34.5 H33.5 M69.5 28.5 H87.5 M69.5 34.5 H81.5 M117.5 28.5 H135.5 M117.5 34.5 H129.5 M165.5 28.5 H183.5 M165.5 34.5 H177.5"/>
-          <path class="gy-s" d="M44.5 31.5 H64.5 M92.5 31.5 H112.5 M140.5 31.5 H160.5 M188.5 31.5 H202.5"/>
-          <rect class="gy-s" x="52.5" y="29.5" width="4" height="4"/>
-          <rect class="gy-s" x="100.5" y="29.5" width="4" height="4"/>
-          <rect class="gy-s" x="148.5" y="29.5" width="4" height="4"/>
-          <path class="gy-s" d="M198.5 27.5 L202.5 31.5 L198.5 35.5"/>
-          <rect class="gy-p" x="204.5" y="29.5" width="4" height="4"/>
-        </svg></div>
-        <p class="card__k">Audit-trail analyzer</p>
-        <h3>Audit trail</h3>
-        <p>Scores completeness, tamper-evidence and retention of the activity log against what a reviewer expects to read back.</p>
-        <p class="card__map">ASR-2 · EU AI Act Art.12 · SOC 2 CC7</p>
-      </div>
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <path class="gy-s2" d="M14.5 22.5 H203.5 M14.5 32.5 H203.5 M14.5 42.5 H203.5"/>
-          <rect class="gy-r" x="58" y="18" width="28" height="9"/>
-          <rect class="gy-r" x="42" y="38" width="34" height="9"/>
-          <path class="gy-s" d="M126.5 10.5 V53.5"/>
-          <path class="gy-s2" d="M130.5 14.5 V49.5"/>
-          <path class="gy-s" d="M203.5 18.5 V26.5 M203.5 28.5 V36.5 M203.5 38.5 V46.5"/>
-          <rect class="gy-p" x="124.5" y="30.5" width="4" height="4"/>
-        </svg></div>
-        <p class="card__k">Egress auditor</p>
-        <h3>Data egress</h3>
-        <p>Maps where the agent's data can travel, names destinations and sub-processors, and confirms sensitive fields are redacted first.</p>
-        <p class="card__map">ASR-3 · OWASP LLM02 · EU AI Act Art.10</p>
-      </div>
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <path class="gy-s" d="M132.5 8.5 V55.5"/>
-          <path class="gy-s2" d="M136.5 12.5 V51.5"/>
-          <path class="gy-s" d="M18 13 L128 30"/>
-          <path class="gy-s" d="M120.8 24.6 L128 30 L119.5 33"/>
-          <path class="gy-s2" d="M128 30 L86 9" stroke-dasharray="3 3"/>
-          <path class="gy-s2" d="M86 9 L94.5 10.3 M86 9 L88.6 17.2"/>
-          <path class="gy-s2" d="M150.5 22.5 H202.5 M150.5 32.5 H190.5 M150.5 42.5 H198.5"/>
-          <rect class="gy-p" x="126" y="27.5" width="4" height="4"/>
-        </svg></div>
-        <p class="card__k">Injection tester</p>
-        <h3>Injection</h3>
-        <p>A red-team pass for prompt injection, indirect injection and guardrail bypass, with reproductions a reviewer can re-run.</p>
-        <p class="card__map">ASR-4 · OWASP LLM01 · MITRE ATLAS</p>
-      </div>
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <rect class="gy-s" x="14.5" y="22.5" width="18" height="18"/>
-          <rect class="gy-p" x="20.5" y="28.5" width="6" height="6"/>
-          <path class="gy-s2" d="M32.5 31.5 H88.5 M60.5 28.5 V34.5"/>
-          <rect class="gy-s" x="88.5" y="25.5" width="12" height="12"/>
-          <path class="gy-s2" d="M100.5 31.5 H160.5 M130.5 28.5 V34.5"/>
-          <path class="gy-s" d="M160.5 14.5 H182.5 L190.5 22.5 V49.5 H160.5 Z M182.5 14.5 V22.5 H190.5"/>
-          <path class="gy-s2" d="M166.5 30.5 H184.5 M166.5 36.5 H180.5 M166.5 42.5 H184.5"/>
-        </svg></div>
-        <p class="card__k">Provenance check</p>
-        <h3>Provenance</h3>
-        <p>Records model and dependency provenance so a reviewer can trace exactly what was running when the agent acted.</p>
-        <p class="card__map">ASR-5 · ISO 42001 · NIST MAP-1</p>
-      </div>
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <path class="gy-s2" d="M14.5 24.5 H62.5 M14.5 32.5 H62.5 M14.5 40.5 H62.5"/>
-          <path class="gy-s2" d="M68.5 32.5 H84.5" stroke-dasharray="2 3"/>
-          <rect class="gy-s" x="96.5" y="8.5" width="28" height="12"/>
-          <path class="gy-s" d="M110.5 20.5 V30.5"/>
-          <rect class="gy-s" x="86.5" y="30.5" width="48" height="18"/>
-          <rect class="gy-p" x="106.5" y="36.5" width="8" height="6"/>
-          <path class="gy-s" d="M134.5 39.5 H146.5 L152.5 33.5 L158.5 45.5 L164.5 33.5 L170.5 45.5 L176.5 39.5 H204.5"/>
-        </svg></div>
-        <p class="card__k">Report builder</p>
-        <h3>Evidence</h3>
-        <p>Canonicalizes the findings and seals them with Ed25519 into one report object plus a readable PDF. Signed, logged, offline-verifiable.</p>
-        <p class="card__map">ASR-6 · SOC 2 CC7 · ISO 42001</p>
-      </div>
-    </div>
-    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-    <p class="how__foot">Beyond the core controls, the engine ships ten audit surfaces, from MCP audit and egress allowlist to the memory integrity ledger, each wired to a tier already in the catalog · <a href="/capabilities" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">see all capabilities</a></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 03. ARCHITECTURE -->
-<section class="section section--ink reveal" id="architecture">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the machine room is lit, not flat -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">03 / Architecture</span></div>
-      <div class="sect-rail__body">
-    <span class="num-ghost num-ghost--deep" aria-hidden="true">03</span>
-    <div class="section__head">
-      <h2>Onramp, sign, log, verify.</h2>
-      <p class="lede">Two ways in, one way out. The same attestation core seals every finding into an object anyone you hand it to can check offline.</p>
-    </div>
-    <figure class="diag reveal" role="img" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
-    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="dg-flow" d="M158 68 H198 M380 68 H420 M602 68 H630"/>
-      <rect class="dg-box" x="8" y="36" width="150" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="56">Input</text>
-      <text class="dg-t" x="22" y="76">Agent logs</text>
-      <text class="dg-mono" x="22" y="92">import or sidecar</text>
-      <polygon class="dg-ok" points="198,68 190,63.5 190,72.5"/>
-      <rect class="dg-box" x="200" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="214" y="56">Engine</text>
-      <text class="dg-t" x="214" y="76">Audit run</text>
-      <text class="dg-mono" x="214" y="92">ASR-01 .. ASR-08</text>
-      <polygon class="dg-ok" points="420,68 412,63.5 412,72.5"/>
-      <rect class="dg-box--ok" x="422" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="436" y="56">Output</text>
-      <text class="dg-t" x="436" y="76">Signed report</text>
-      <text class="dg-mono" x="436" y="92">Ed25519 envelope</text>
-      <polygon class="dg-ok" points="630,68 622,63.5 622,72.5"/>
-      <circle class="dg-dot" cx="646" cy="68" r="4"/>
-      <text class="dg-label" x="658" y="72">verify</text>
-      <path class="dg-line" d="M290 100 V128"/>
-      <text class="dg-mono" x="208" y="146">permissions &#183; audit trail &#183; egress &#183; injection</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Pipeline</b> same logs in, same signature out: the run is reproducible end to end</figcaption>
-    </figure>
-    <div class="grid grid--2" style="align-items:start">
-      <div class="card">
-        <div class="flow__t-k">The pipeline, end to end</div>
-        <div class="fnode"><span class="fk">onramp</span><span>OpenTelemetry, Datadog, Langfuse, LangSmith, MCP server logs, OpenAI Agents SDK or gateway logs · or sidecar / MCP proxy</span></div>
-        <div class="fjoin" aria-hidden="true"></div>
-        <div class="fnode"><span class="fk">analyze</span><span>permissions · audit trail · egress · injection · provenance</span></div>
-        <div class="fjoin" aria-hidden="true"></div>
-        <div class="fnode"><span class="fk">sign</span><span>canonical key-sorted JSON · ed25519 over the exact bytes</span></div>
-        <div class="fjoin" aria-hidden="true"></div>
-        <div class="fnode"><span class="fk">log</span><span>append-only Merkle log · per-report inclusion proof</span></div>
-        <div class="fjoin" aria-hidden="true"></div>
-        <div class="fnode fnode--ok"><span class="fk">verify</span><span>offline · WebCrypto in the buyer's browser · no account</span></div>
-      </div>
-      <div class="grid" style="gap:14px;align-content:start">
-        <div class="card">
-          <p class="card__k">Onramp · no rebuild</p>
-          <h3>Bring the logs you already have</h3>
-          <p>Import <a href="/docs" style="color:var(--accent)">OpenTelemetry, Datadog, Langfuse or LangSmith</a> telemetry, MCP server logs, OpenAI Agents SDK traces, gateway logs from LiteLLM, Helicone or Portkey, or run a sidecar / MCP proxy for live capture. Your application ships unchanged.</p>
-        </div>
-        <div class="card">
-          <p class="card__k">Seal · exact bytes</p>
-          <h3>Edit one field, the seal breaks</h3>
-          <p>Findings are canonicalized and signed with Ed25519 over the exact bytes. A downgraded finding or an inflated score breaks the signature.</p>
-        </div>
-        <div class="card">
-          <p class="card__k">Log · append-only</p>
-          <h3>Issued once, on the record</h3>
-          <p>Every issuance enters an append-only Merkle transparency log (RFC 6962 style, Ed25519 and SHA-256, not a blockchain). The inclusion proof shows the report was logged and never replaced.</p>
-        </div>
-      </div>
-    </div>
-    <p class="how__foot">The verifier, the CLI and the library share one canonicalization, and the verifier is open source · <a href="/kolm-audit-verify.js" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">inspect the verifier</a> · <a href="/transparency-log" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">transparency log</a> · no black box in the trust path</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 04. ALWAYS CURRENT -->
-<section class="section sect--air reveal" id="continuous">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">04 / Always current</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>A report is a photograph. Your application is a film.</h2>
-      <p class="lede">Continuous re-attests weekly or on every release and exposes one live Trust link you hand any buyer. No human in the loop.</p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="split" style="align-items:center">
-      <div class="report register">
-        <div class="register__row"><span class="register__k">trust_url</span><span class="register__v"><b>kolm.ai/trust/acme-support</b> <span class="ann">hand this to the buyer</span></span></div>
-        <div class="register__row"><span class="register__k">status</span><span class="register__v"><b class="ok-text">current</b></span></div>
-        <div class="register__row"><span class="register__k">cadence</span><span class="register__v">on every deploy <span class="ann">re-signed automatically</span></span></div>
-        <div class="register__row"><span class="register__k">last_attested</span><span class="register__v">2026-06-08T09:14Z</span></div>
-        <div class="register__row"><span class="register__k">public_key</span><span class="register__v"><b>ed25519 · embedded PEM</b></span></div>
-        <div class="register__row"><span class="register__k">signature</span><span class="register__v"><b>ed25519:9fA2c1d4...b07e</b> <span class="ann">covers the canonical bytes</span></span></div>
-        <div class="register__row"><span class="register__k">log_proof</span><span class="register__v"><b>merkle · inclusion verified</b></span></div>
-      </div>
+  <section class="section section--flush hero compiler-hero">
+    <div class="field" aria-hidden="true"><canvas></canvas></div>
+    <div class="wrap compiler-hero__grid">
       <div>
-        <h3>Never older than your last release</h3>
-        <p style="color:var(--ink-2);margin:var(--s3) 0 var(--s4)">
-          Re-attestation runs on a schedule or on every deploy and updates the live Trust
-          link in place. Signature, scope and freshness date are part of the signed object,
-          so a buyer who re-opens the link sees current evidence, not a stale PDF.
-        </p>
-        <div class="hero__cta">
-          <a class="btn btn--ghost btn--sm" href="/trust">See a live Trust link</a>
-          <a class="btn btn--ghost btn--sm" href="/pricing">Continuous pricing</a>
+        <p class="compiler-kicker" data-enter="1">Platform / Architecture</p>
+        <h1 class="hero__h1" data-enter="2">The platform is the behavior-to-artifact control plane.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Kolm turns real traces, tool calls, policies, eval gates, and runtime requirements into signed artifacts, receipts, exports, and readiness-gated evidence that a buyer can inspect.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="/account/api-control-center">Open API Control</a>
+          <a class="btn btn--ghost" href="/docs/api">Read API Docs</a>
         </div>
-        <p class="hero__claim">
-          Buyer questionnaires already ask for the audit-trail record EU AI Act Art.12 describes
-          (<a href="/regulatory-clock" style="border-bottom:1px solid var(--line-2)">regulatory clock</a>).
-          Continuous keeps that evidence current for the review in front of you.
-        </p>
+        <div class="compiler-proof" data-enter="5">
+          <span><b>17</b> API data channel families</span>
+          <span><b>12</b> ingress modes</span>
+          <span><b>10</b> export modes</span>
+          <span><b>8</b> governance stages</span>
+        </div>
+      </div>
+      <aside class="control-plane kolm-surface-media" aria-label="Kolm platform stack summary">
+        <div class="control-plane__head">
+          <span><b>platform stack</b> / source to runtime</span>
+          <span>control plane</span>
+        </div>
+        <div class="control-plane__grid">
+          <div class="control-tile control-tile--wide"><b>Behavior Loop</b><span>Register a source, capture events, classify schemas, apply policy, create eval gates, compile an artifact, choose a runtime, and export proof.</span></div>
+          <div class="control-tile"><b>Sources</b><span>Providers, gateways, apps, agents, traces, warehouses, CI, support, and custom API events.</span></div>
+          <div class="control-tile"><b>Policy</b><span>Retention, redaction, unknown schemas, provider routing, eval thresholds, budgets, and export boundaries.</span></div>
+          <div class="control-tile"><b>Compile</b><span>Regression set, signed artifact, manifest, runtime target, verifier receipt, and release gate.</span></div>
+          <div class="control-tile"><b>Evidence</b><span>Audit events, checksums, readiness gates, export packets, webhooks, SIEM/GRC, warehouse, and CI status.</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="architecture-loop">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">01 / Architecture Loop</span>
+        <h2>The platform starts with observed behavior, not a blank model prompt.</h2>
+        <p class="lede">A production AI/API workflow becomes useful only after its source, policy, eval, artifact, runtime, and evidence state are explicit.</p>
+      </div>
+      <div class="surface-table">
+        <div class="surface-row"><div class="surface-row__key">1. source registered</div><div class="surface-row__body"><b>Bind one production boundary.</b> Organization, workspace, project, environment, API key, connector, source, and retention policy are created before data is reused.</div><div class="surface-row__route">source</div></div>
+        <div class="surface-row"><div class="surface-row__key">2. behavior captured</div><div class="surface-row__body"><b>Normalize the event stream.</b> Provider logs, app events, agent traces, observability spans, warehouse rows, and custom records become trace and capture objects.</div><div class="surface-row__route">capture</div></div>
+        <div class="surface-row"><div class="surface-row__key">3. policy applied</div><div class="surface-row__body"><b>Classify before reuse.</b> Unknown schemas stay opaque until mapped, redaction runs before export, and every policy version is attached to downstream objects.</div><div class="surface-row__route">policy</div></div>
+        <div class="surface-row"><div class="surface-row__key">4. eval gate built</div><div class="surface-row__body"><b>Failures become controls.</b> Human labels, failure taxonomy, drift checks, thresholds, and locked regression sets decide whether a compile can proceed.</div><div class="surface-row__route">eval</div></div>
+        <div class="surface-row"><div class="surface-row__key">5. artifact compiled</div><div class="surface-row__body"><b>Output becomes portable.</b> The compile run emits a signed artifact, manifest, target recipe, checksum, verifier receipt, and release-gate status.</div><div class="surface-row__route">artifact</div></div>
+        <div class="surface-row"><div class="surface-row__key">6. proof exported</div><div class="surface-row__body"><b>Evidence leaves the dashboard.</b> Receipts, eval reports, governance packets, webhooks, SIEM/GRC events, warehouse exports, and CI status carry the same object IDs.</div><div class="surface-row__route">export</div></div>
       </div>
     </div>
+  </section>
+
+  <section class="section section--tint" id="platform-layers">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">02 / Platform Layers</span>
+        <h2>Each layer has a job, a state boundary, and an exportable proof trail.</h2>
+        <p class="lede">This is how Kolm stays more useful than an agent demo, an eval dashboard, or a model gateway: the platform owns the lifecycle between behavior and runtime.</p>
+      </div>
+      <div class="compiler-card-grid">
+        <div class="proof-card"><p class="card__k">Data Plane</p><h3>Capture without assuming shape</h3><p>Accept structured, semi-structured, and opaque inputs. Store provenance, source hash, schema state, tenant, environment, and retention window with every capture.</p></div>
+        <div class="proof-card"><p class="card__k">Policy Plane</p><h3>Constrain before processing</h3><p>Apply redaction, provider routing, data boundary, export scope, budget, allowlist, and purge rules before a trace can become training or eval material.</p></div>
+        <div class="proof-card"><p class="card__k">Evaluation Plane</p><h3>Turn failures into gates</h3><p>Convert labels, edge cases, regressions, and policy violations into evals with thresholds, owners, versions, and release-blocking status.</p></div>
+        <div class="proof-card"><p class="card__k">Compiler Plane</p><h3>Produce a portable artifact</h3><p>Compile behavior and eval constraints into artifact, manifest, checksums, runtime target, verifier receipt, and approval state.</p></div>
+        <div class="proof-card"><p class="card__k">Runtime Plane</p><h3>Deploy without provider lock-in</h3><p>Target hosted, local, browser, edge, BYOC, offline, and restricted fleet paths with explicit compatibility and readiness caveats.</p></div>
+        <div class="proof-card"><p class="card__k">Evidence Plane</p><h3>Export what buyers inspect</h3><p>Emit audit events, evidence bundles, SIEM/GRC records, warehouse exports, webhooks, CI status, and readiness-gated claim state.</p></div>
+        <div class="proof-card"><p class="card__k">Admin Plane</p><h3>Give operators control</h3><p>Manage API keys, connector health, RBAC, environments, provider policy, cost limits, rate limits, retention, export destinations, and owner assignments.</p></div>
+        <div class="proof-card"><p class="card__k">Integration Plane</p><h3>Move data both ways</h3><p>Support inbound APIs, webhooks, streams, batches, queues, object storage, warehouses, CLI imports, and outbound evidence/export channels.</p></div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ FINAL CTA -->
-<section class="section reveal cta-final">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
-  <div class="wrap">
-    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>Put your application through the pipeline.</h2>
-    <p class="lede">One onramp, one signed object, and a review that takes days, not weeks.</p>
-    <div class="hero__cta">
-      <a class="btn btn--primary" href="/signup">Run the free scan</a>
-      <a class="btn btn--ghost" href="/contact">Talk to us</a>
+  <section class="section" id="object-model">
+    <div class="wrap">
+      <div class="compiler-rail">
+        <div>
+          <span class="idx">03 / Object Model</span>
+          <h2>Every serious product claim maps to a platform object.</h2>
+          <p class="lede">Unicorn-grade infrastructure wins by making the object obvious. Kolm should expose the objects behind capture, policy, eval, compile, runtime, export, and audit state.</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="/docs/api">Inspect API Reference</a>
+            <a class="btn btn--ghost" href="/openapi.json">OpenAPI JSON</a>
+          </div>
+        </div>
+        <div class="unicorn-proof-grid">
+          <div class="proof-card"><h3>Account Objects</h3><p>Organization, workspace, project, environment, API key, service account, connector, role, policy, and owner.</p></div>
+          <div class="proof-card"><h3>Behavior Objects</h3><p>Source, capture, trace, prompt version, tool version, schema version, dataset, label set, eval, failure, and regression set.</p></div>
+          <div class="proof-card"><h3>Compiler Objects</h3><p>Compile run, artifact, manifest, checksum, runtime target, target recipe, verifier receipt, approval, and release gate.</p></div>
+          <div class="proof-card"><h3>Evidence Objects</h3><p>Export, evidence bundle, audit event, readiness gate, exception record, policy version, source hash, and output hash.</p></div>
+        </div>
+      </div>
     </div>
-    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
-    </div>
-    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-  </div>
-</section>
+  </section>
 
+  <section class="section section--ink" id="integration-coverage">
+    <div class="dither-edge" aria-hidden="true"></div>
+    <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">04 / Integration Coverage</span>
+        <h2>The platform must support every credible way API behavior moves in and out.</h2>
+        <p class="lede">Enterprise control requires breadth with maturity states: supported, gated, adapter-ready, or not claimable.</p>
+      </div>
+      <div class="surface-table surface-table--dense">
+        <div class="surface-row"><div class="surface-row__key">17 API data channel families</div><div class="surface-row__body">Provider logs, application events, gateway records, agent tool calls, observability spans, eval data, human labels, product analytics, warehouses, CI/CD, repositories, support tools, GRC systems, files, runtime telemetry, cost events, and customer-system actions.</div><div class="surface-row__route"><a href="/integrations">integrations</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">12 ingress modes</div><div class="surface-row__body">REST, GraphQL, gRPC, webhooks, streaming, batch files, object storage, warehouse queries, queues, browser events, local CLI, and custom adapter manifests.</div><div class="surface-row__route"><a href="/account/api-control-center">control</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">10 export modes</div><div class="surface-row__body">Signed artifact, verifier receipt, eval report, evidence bundle, JSON API, warehouse export, webhook, CI status, SIEM/GRC event, and admin analytics.</div><div class="surface-row__route"><a href="/docs/api">api</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">8 governance stages</div><div class="surface-row__body">Register source, capture event, classify schema, apply redaction, build eval, lock regression set, compile artifact, and export evidence.</div><div class="surface-row__route">governed</div></div>
+      </div>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/integrations">Review Integrations</a>
+        <a class="btn btn--ghost" href="/runtimes">Review Runtimes</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="backend-invariants">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">05 / Backend Invariants</span>
+        <h2>The backend standard is stricter than the website copy.</h2>
+        <p class="lede">These invariants keep the platform credible when buyers compare it to better-funded unicorns, model gateways, observability stacks, and agent tools.</p>
+      </div>
+      <div class="compiler-card-grid">
+        <div class="proof-card"><p class="card__k">Auditability</p><h3>Every write emits an audit event</h3><p>Object ID, actor, tenant, environment, source, policy version, before/after state, and timestamp must be queryable and exportable.</p></div>
+        <div class="proof-card"><p class="card__k">Evidence</p><h3>Every claim-bearing object has proof</h3><p>Artifacts, receipts, reports, exports, readiness gates, and control mappings need source hashes, output hashes, versions, and owner state.</p></div>
+        <div class="proof-card"><p class="card__k">Exports</p><h3>Every export has destination and receipt</h3><p>Outbound packets should record destination, payload class, policy scope, delivery status, checksum, retry state, and recipient context.</p></div>
+        <div class="proof-card"><p class="card__k">Schemas</p><h3>Unknown schemas stay opaque</h3><p>Unmapped or sensitive payloads are stored with provenance and retention controls, but are not promoted into reusable datasets until classified.</p></div>
+        <div class="proof-card"><p class="card__k">Readiness</p><h3>Every open claim remains gated</h3><p>Benchmark, certification, package, partner, standards, and adoption claims are visible as open gates until proof exists.</p></div>
+        <div class="proof-card"><p class="card__k">Operations</p><h3>Every runtime target is explicit</h3><p>Hosted, local, browser, edge, BYOC, offline, and restricted fleet targets carry compatibility, limits, and verification status.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" id="category-standard">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">06 / Category Standard</span>
+        <h2>To beat the category, Kolm has to be clearer than every adjacent tool.</h2>
+        <p class="lede">The strongest position is not another agent, gateway, eval dashboard, or fine-tuning tool. It is the governed platform that connects them to runtime-ready artifacts and proof.</p>
+      </div>
+      <div class="surface-table">
+        <div class="surface-row"><div class="surface-row__key">agent tools</div><div class="surface-row__body"><b>Kolm should win after execution.</b> Capture what agents did, gate failures, produce artifacts, and export receipts instead of stopping at task automation.</div><div class="surface-row__route"><a href="/compare">compare</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">observability</div><div class="surface-row__body"><b>Kolm should convert logs into artifacts.</b> Dashboards explain behavior; Kolm needs to compile it into portable outputs with evaluation and evidence.</div><div class="surface-row__route">artifact</div></div>
+        <div class="surface-row"><div class="surface-row__key">model gateways</div><div class="surface-row__body"><b>Kolm should control the lifecycle around providers.</b> Routing matters, but policy, eval, runtime target, receipt, and export state are the durable objects.</div><div class="surface-row__route">lifecycle</div></div>
+        <div class="surface-row"><div class="surface-row__key">eval tools</div><div class="surface-row__body"><b>Kolm should make evals release gates.</b> Scores are useful only when they block regressions, create receipts, and move into deployment decisions.</div><div class="surface-row__route">gate</div></div>
+        <div class="surface-row"><div class="surface-row__key">fine-tuning</div><div class="surface-row__body"><b>Kolm should stay runtime-neutral.</b> The artifact, manifest, target, and receipt should survive provider and deployment changes.</div><div class="surface-row__route">portable</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--cta">
+    <div class="wrap cta-band">
+      <div>
+        <h2>Put one behavior loop through the platform.</h2>
+        <p class="lede">Start with one source, one policy, one eval gate, one artifact, one runtime target, and one evidence export. Expansion should follow proof.</p>
+      </div>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/account/api-control-center">Open Control Center</a>
+        <a class="btn btn--ghost" href="/docs/api">Read API Docs</a>
+      </div>
+    </div>
+  </section>
 </main>
 
-<!-- ============================================================ FOOTER -->
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Platform architecture for API behavior, policy, eval gates, signed artifacts, runtime targets, and evidence exports.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Platform</h3>
+        <a href="#architecture-loop">Architecture Loop</a>
+        <a href="#platform-layers">Platform Layers</a>
+        <a href="#object-model">Object Model</a>
+        <a href="#backend-invariants">Backend Invariants</a>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
-        <a href="/platform">Platform</a>
-        <a href="/capabilities">Capabilities</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
-        <a href="/docs">Docs</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+        <a href="/compiler-product">Compiler</a>
+        <a href="/account/api-control-center">API Control</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/runtimes">Runtimes</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
-        <a href="/verify">Verify</a>
         <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
+        <a href="/trust">Readiness Center</a>
+        <a href="/product-readiness-closeout.json">Readiness JSON</a>
         <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
-      </div>
-      <div class="foot__col">
-        <h3>Company</h3>
-        <a href="/research">Research</a>
+        <h3>Developers</h3>
+        <a href="/docs">Docs</a>
+        <a href="/docs/api">API Reference</a>
+        <a href="/openapi.json">OpenAPI JSON</a>
         <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
-        <a href="/contact">Contact</a>
       </div>
     </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge badge--ok">Behavior-to-artifact platform</span>
+      <span>Readiness-gated claims</span>
     </div>
   </div>
 </footer>
-
 </body>
 </html>

@@ -1283,15 +1283,15 @@ export function renderReportHtml(envelope, opts = {}) {
   </div>
   ${forReviewers}
 
+  <h2>Scope &amp; limitations</h2>
+  <ul>${caveats}</ul>
+  ${deltaSection}
+
   <h2>Control status</h2>
   <table><thead><tr><th>Control</th><th>Name</th><th>Status</th><th>Findings</th></tr></thead>
   <tbody>${controlRows}</tbody></table>
   <p class="small" style="color:var(--muted)">Not assessed in this run:</p>
   <ul class="small">${notAssessed}</ul>
-
-  <h2>Scope &amp; limitations</h2>
-  <ul>${caveats}</ul>
-  ${deltaSection}
 
   <h2>Findings</h2>
   ${findingRows || '<p class="sub">No deal-blocking or attention findings in the assessed controls.</p>'}

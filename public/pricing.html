@@ -3,31 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
+<script>
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>AI Security Audit Pricing: Free Scan to Flat Fees · kolm.ai</title>
-<meta name="description" content="Scan free. Signed Readiness Report $750 one-time. Continuous $299/$999 per month. Full Readiness $15,000, Reviewed Attestation $25,000 flat. Every fee is flat and final.">
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
+<title>Kolm Compiler Pricing</title>
+<meta name="description" content="Pricing for Kolm compiler plans: Free, Indie, Pro, Team, Business, and Enterprise tiers for gateway calls, compile credits, seats, API controls, artifacts, and runtime rollout.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="AI Security Audit Pricing: Free Scan to Flat Fees · kolm.ai">
-<meta property="og:description" content="Scan free. Signed Readiness Report $750 one-time. Continuous $299/$999 per month. Full Readiness $15,000, Reviewed Attestation $25,000 flat. Every fee is flat and final.">
+<meta property="og:title" content="Kolm Compiler Pricing">
+<meta property="og:description" content="Plan catalog for the behavior-to-artifact control plane: gateway calls, compile credits, seats, artifacts, receipts, runtime targets, and enterprise controls.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/pricing">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="kolm.ai pricing, flat fees for signed agent security evidence.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="AI Security Audit Pricing: Free Scan to Flat Fees · kolm.ai">
-<meta name="twitter:description" content="Scan free. Signed Readiness Report $750 one-time. Continuous $299/$999 per month. Full Readiness $15,000, Reviewed Attestation $25,000 flat. Every fee is flat and final.">
+<meta name="twitter:title" content="Kolm Compiler Pricing">
+<meta name="twitter:description" content="Choose the Kolm plan for API capture, compile credits, artifacts, receipts, runtime targets, and enterprise controls.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -35,127 +28,82 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
-<style>
-/* page-scoped: plan-card presence + the featured tier as the lit paper object */
-.tier{padding:28px}
-.tier .btn{white-space:nowrap}
-.tier__price{font-size:clamp(36px,3.2vw,46px)}
-.tier__price .tier__per{white-space:nowrap}
-.tier--feat{border-top:1px solid var(--accent-edge);border-color:rgba(229,240,234,.30);color:var(--sheet-ink);
-  background:linear-gradient(180deg,#F7F8F5,var(--sheet) 64%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 26px 70px rgba(0,0,0,.5)}
-.tier--feat::after{background:linear-gradient(90deg,transparent,rgba(14,138,87,.5),transparent)}
-.tier--feat .tier__name{color:var(--sheet-accent)}
-.tier--feat .tier__price{color:var(--sheet-ink)}
-.tier--feat .tier__sub{color:var(--sheet-ink-2)}
-.tier--feat li{color:var(--sheet-ink-2)}
-.tier--feat li svg{color:var(--sheet-accent)}
-.tier--feat .btn--primary{background:var(--sheet-ink);color:var(--sheet);border-color:var(--sheet-ink);box-shadow:none}
-.tier--feat .btn--primary:hover{background:#1C2420;border-color:#1C2420}
-.tier--feat .btn--primary::after{background:linear-gradient(105deg,transparent 38%,rgba(243,245,242,.10) 50%,transparent 62%)}
-</style>
+<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Service",
-  "name": "kolm Agent Security-Review Readiness",
-  "serviceType": "AI agent security audit and signed evidence attestation",
-  "provider": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
-  "description": "On-demand, verifiable security audits of AI applications - the agent and every tool, identity and data flow around it. A free self-serve scan, a one-time signed readiness report, automatic re-attestation, and a named co-signed audit. Every fee is flat and final.",
-  "areaServed": "Worldwide",
-  "offers": [
-    { "@type": "Offer", "name": "Scan", "price": "0", "priceCurrency": "USD" },
-    { "@type": "Offer", "name": "Signed Readiness Report", "price": "750", "priceCurrency": "USD" },
-    { "@type": "Offer", "name": "Continuous Starter", "price": "299", "priceCurrency": "USD", "priceSpecification": { "@type": "UnitPriceSpecification", "price": "299", "priceCurrency": "USD", "unitText": "MONTH" } },
-    { "@type": "Offer", "name": "Continuous Growth", "price": "999", "priceCurrency": "USD", "priceSpecification": { "@type": "UnitPriceSpecification", "price": "999", "priceCurrency": "USD", "unitText": "MONTH" } },
-    { "@type": "Offer", "name": "Full Readiness", "price": "15000", "priceCurrency": "USD" },
-    { "@type": "Offer", "name": "Continuous-Plus", "price": "3500", "priceCurrency": "USD", "priceSpecification": { "@type": "UnitPriceSpecification", "price": "3500", "priceCurrency": "USD", "unitText": "MONTH" } },
-    { "@type": "Offer", "name": "Reviewed Attestation", "price": "25000", "priceCurrency": "USD" },
-    { "@type": "Offer", "name": "Deep Red-Team add-on", "price": "10000", "priceCurrency": "USD" }
-  ]
+  "@type": "WebPage",
+  "name": "Kolm Compiler Pricing",
+  "url": "https://kolm.ai/pricing",
+  "description": "Pricing for Kolm compiler plans: Free, Indie, Pro, Team, Business, and Enterprise tiers for gateway calls, compile credits, seats, API controls, artifacts, and runtime rollout.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Do prices change with team size or usage?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. Every fee is flat and final: $750 for the signed report, $299 or $999 per month for Continuous. There is no per-seat meter and no usage tier." }
-    },
-    {
-      "@type": "Question",
-      "name": "Is the free scan really free?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Upload redacted logs, get watermarked findings in minutes, no card. Most teams use it to see a real finding before they commit." }
-    },
-    {
-      "@type": "Question",
-      "name": "Why pay monthly when a report is one-time?",
-      "acceptedAnswer": { "@type": "Answer", "text": "A point-in-time report goes stale on your next deploy. Continuous re-attests on a schedule, weekly on Starter and on every deploy on Growth, so the evidence your buyer checks is never older than your cadence." }
-    },
-    {
-      "@type": "Question",
-      "name": "What does the named co-signer add over the crypto?",
-      "acceptedAnswer": { "@type": "Answer", "text": "The signature proves the bytes are intact. The name proves a person reviewed them. Enterprise reviewers ask for both, so the Reviewed Attestation puts a named, accredited reviewer beside the signature." }
-    },
-    {
-      "@type": "Question",
-      "name": "Do you warrant our application is secure?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No, and distrust anyone who does. We test and report with reproductions, scoped to exactly what we examined. The scope statement is part of the signed report." }
-    },
-    {
-      "@type": "Question",
-      "name": "We already use Vanta or have SOC 2. Why this?",
-      "acceptedAnswer": { "@type": "Answer", "text": "kolm does not replace your SOC 2 or your trust center. It is the fast, agent-specific evidence that clears the deal in front of you now, and every finding maps into the SOC 2, ISO 42001 and NIST AI RMF work you are already doing. See the full comparison." }
-    }
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
-    { "@type": "ListItem", "position": 2, "name": "Pricing", "item": "https://kolm.ai/pricing" }
-  ]
-}
-</script>
+<style>
+  .pricing-hero .hero__h1{max-width:13ch;text-wrap:balance}
+  .pricing-hero .lede{max-width:66ch}
+  .pricing-ledger{min-width:0;padding:clamp(18px,2.6vw,26px);border:1px solid var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.048),rgba(255,255,255,.014)),var(--paper-2);box-shadow:inset 0 1px 0 var(--light-top),0 30px 96px rgba(0,0,0,.36)}
+  .pricing-ledger__head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+  .pricing-ledger__head b{color:var(--ink)}
+  .pricing-ledger__rows{display:grid;gap:10px;margin-top:14px}
+  .pricing-ledger__row{display:grid;grid-template-columns:100px minmax(0,1fr) max-content;gap:12px;align-items:center;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:rgba(9,12,13,.52);color:var(--ink-2);font:500 11.5px var(--mono)}
+  .pricing-ledger__row b{color:var(--ink)}
+  .pricing-ledger__row i{height:5px;border-radius:999px;background:linear-gradient(90deg,var(--accent) var(--fill,60%),rgba(229,240,234,.13) 0);box-shadow:0 0 18px rgba(63,229,160,.15)}
+  .pricing-plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch}
+  .pricing-card{min-width:0;display:grid;grid-template-rows:auto auto auto 1fr auto;gap:16px;min-height:466px;padding:20px;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.012)),var(--paper-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+  .pricing-card--hot{border-color:var(--accent-edge);box-shadow:inset 0 1px 0 var(--light-top),0 20px 70px rgba(63,229,160,.08)}
+  .pricing-card h3{margin:0;font-family:var(--display);font-size:25px;line-height:1.12;text-wrap:balance}
+  .pricing-card__price{font:700 30px/1 var(--mono);color:var(--ink);letter-spacing:0}
+  .pricing-card__price small{display:block;margin-top:8px;color:var(--ink-3);font-size:11.5px;font-weight:600;line-height:1.45}
+  .pricing-card__stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pricing-stat{min-width:0;padding:10px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018)}
+  .pricing-stat b{display:block;color:var(--ink);font:650 13px var(--mono)}
+  .pricing-stat span{display:block;margin-top:5px;color:var(--ink-3);font-size:11px;line-height:1.35}
+  .pricing-card ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+  .pricing-card li{color:var(--ink-2);font-size:14px;line-height:1.55;overflow-wrap:anywhere}
+  .pricing-card li::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;background:var(--accent);vertical-align:1px}
+  .pricing-card .btn{min-height:44px}
+  .pricing-contract{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:clamp(24px,5vw,70px);align-items:start}
+  .pricing-table{border-top:1px solid var(--line-2)}
+  .pricing-row{display:grid;grid-template-columns:170px minmax(0,1fr) 150px;gap:18px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--line);min-width:0}
+  .pricing-row__key{color:var(--ink-3);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+  .pricing-row__body{color:var(--ink-2);font-size:14.5px;line-height:1.6}
+  .pricing-row__body b{color:var(--ink)}
+  .pricing-row__route{color:var(--compile-blue);font-family:var(--mono);font-size:11.5px;line-height:1.5;overflow-wrap:anywhere}
+  .pricing-note{margin-top:20px;color:var(--ink-3);font-family:var(--mono);font-size:11.5px;line-height:1.7}
+  .pricing-compare{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  .pricing-compare .proof-card{min-height:190px}
+  .pricing-compare .card__k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+  @media (max-width:1080px){.pricing-plans{grid-template-columns:repeat(2,minmax(0,1fr))}.pricing-contract{grid-template-columns:1fr}.pricing-compare{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:680px){.pricing-plans,.pricing-compare{grid-template-columns:1fr}.pricing-ledger__head{display:grid}.pricing-ledger__row,.pricing-row{grid-template-columns:1fr}.pricing-ledger__row i{width:100%}.pricing-card{min-height:auto}.pricing-card__stats{grid-template-columns:1fr 1fr}}
+  @media (prefers-reduced-motion:reduce){.pricing-card{transition:none}}
+</style>
 </head>
-<body>
+<body class="compiler-site">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
-<hr class="foil-strip" aria-hidden="true">
-
-<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
+      <a href="/#pipeline">Pipeline</a>
+      <a href="/account/api-control-center">Control</a>
+      <a href="/integrations">Integrations</a>
+      <a href="/runtimes">Runtimes</a>
+      <a href="/compare">Compare</a>
       <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost btn--sm" href="/v1/plans">Plan JSON</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Create Workspace</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -164,416 +112,264 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-
-<!-- ============================================================ 1. HERO -->
-<section class="section section--flush hero">
-  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="hero__grid">
+  <section class="section section--flush hero compiler-hero pricing-hero">
+    <div class="field" aria-hidden="true"><canvas></canvas></div>
+    <div class="wrap compiler-hero__grid">
       <div>
-        <p class="eyebrow" data-enter="1">Pricing</p>
-        <h1 class="hero__h1" data-enter="2">Flat fees. Self-serve. <span class="go">Start free.</span></h1>
-        <p class="lede" data-enter="3">
-          Run the full scan free. Buy the signed report when the deal needs it:
-          $750 one-time, or continuous from $299 a month so the evidence never
-          goes stale. The fee listed is the whole fee.
-        </p>
+        <p class="compiler-kicker" data-enter="1">Pricing / Plan Catalog</p>
+        <h1 class="hero__h1" data-enter="2">Price the controlled loop, not generic AI seats.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Kolm plans meter the workflow buyers can inspect: gateway calls, compile credits, seats, policies, artifacts, receipts, runtime targets, and enterprise exports.</p>
         <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="/signup">Run the free scan</a>
-          <a class="btn btn--ghost" href="/verify">Verify the sample report</a>
+          <a class="btn btn--primary" href="#plans">Compare Plans</a>
+          <a class="btn btn--ghost" href="/v1/plans">Open Plan JSON</a>
+          <a class="btn btn--ghost" href="/account/api-control-center">Open Control Center</a>
         </div>
-        <div class="hero__proof" aria-label="Pricing at a glance" data-enter="5">
-          <span><i class="dot" aria-hidden="true"></i>Scan free · no card</span>
-          <span><i class="dot" aria-hidden="true"></i>Signed report $750 · one-time</span>
-          <span><i class="dot" aria-hidden="true"></i>No quote · no per-seat meter · no contingency</span>
+        <div class="compiler-proof" data-enter="5">
+          <span><b>6</b> catalog tiers</span>
+          <span><b>25M</b> Business gateway calls</span>
+          <span><b>200</b> Business compile credits</span>
+          <span><b>17%</b> annual savings on paid self-serve</span>
         </div>
       </div>
-
-      <!-- the artifact IS the hero image: the whole price list as one sealed receipt -->
-      <aside class="artifact" aria-label="The self-serve price list, as a receipt">
-        <div class="rep">
-          <div class="rep__bar">
-            <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="t">kolm · price receipt</span>
-            <span class="chip chip--ok">flat · final</span>
-          </div>
-          <div class="rep__sheet">
-            <div class="rep__head">
-              <span class="rep__sub">Self-serve price list</span>
-              <span class="rep__id">pricing_v1</span>
-            </div>
-            <div style="font-family:var(--mono);font-size:12px;color:var(--sheet-ink-2);font-variant-numeric:tabular-nums" translate="no">
-              <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--sheet-line)"><span>Scan</span><b style="color:var(--sheet-ink);font-weight:600">$0</b></div>
-              <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--sheet-line)"><span>Signed Readiness Report</span><b style="color:var(--sheet-ink);font-weight:600">$750 one-time</b></div>
-              <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--sheet-line)"><span>Continuous Starter</span><b style="color:var(--sheet-ink);font-weight:600">$299/mo</b></div>
-              <div style="display:flex;justify-content:space-between;gap:14px;padding:12px 0"><span>Continuous Growth</span><b style="color:var(--sheet-ink);font-weight:600">$999/mo</b></div>
-            </div>
-            <div class="find__more">flat fees · self-serve checkout · the whole price</div>
-          </div>
-          <div class="rep__sig" translate="no">
-            <div class="sig__row"><span class="sig__k">sealed</span><span>ed25519 over the canonical bytes</span><span class="sig__ok">✓ verifies offline</span></div>
-          </div>
+      <aside class="pricing-ledger kolm-surface-media" aria-label="Pricing work ledger">
+        <div class="pricing-ledger__head">
+          <span><b>meters</b> / compiler work</span>
+          <span>from /v1/plans</span>
+        </div>
+        <div class="pricing-ledger__rows">
+          <div class="pricing-ledger__row"><b>calls</b><i style="--fill:92%"></i><span>gateway caps</span></div>
+          <div class="pricing-ledger__row"><b>credits</b><i style="--fill:76%"></i><span>compile work</span></div>
+          <div class="pricing-ledger__row"><b>seats</b><i style="--fill:62%"></i><span>team access</span></div>
+          <div class="pricing-ledger__row"><b>policy</b><i style="--fill:70%"></i><span>control center</span></div>
+          <div class="pricing-ledger__row"><b>output</b><i style="--fill:64%"></i><span>artifacts</span></div>
+          <div class="pricing-ledger__row"><b>export</b><i style="--fill:58%"></i><span>evidence</span></div>
         </div>
       </aside>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ 2. SELF-SERVE PLANS -->
-<section class="section reveal" id="plans">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">01 / Self-serve</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>Start free. Sign when the deal needs it.</h2>
-      <p class="lede">Four plans you can buy without talking to anyone. The free scan needs&nbsp;no&nbsp;card.</p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="tiers">
-      <div class="tier">
-        <p class="tier__name">Scan</p>
-        <p class="tier__price">Free</p>
-        <p class="tier__sub">See real findings from your own logs before you pay.</p>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Watermarked findings from your logs, in minutes.</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Permission and audit-trail checks included.</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>One email address gets a key in seconds.</li>
-        </ul>
-        <a class="btn btn--ghost" href="/signup">Run the free scan</a>
+  <section class="section" id="plans">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">01 / Plans</span>
+        <h2>The public plan catalog mirrors the backend.</h2>
+        <p class="lede">These tiers match the `PLAN_CATALOG` behind <span class="mono">GET /v1/plans</span>. Billing links are operator-configured; if a checkout link is not present, the app still provisions the workspace and keeps billing state explicit.</p>
       </div>
+      <div class="pricing-plans">
+        <article class="pricing-card">
+          <h3>Free</h3>
+          <div class="pricing-card__price">$0/mo<small>Developer evaluation</small></div>
+          <div class="pricing-card__stats">
+            <div class="pricing-stat"><b>50K</b><span>gateway calls</span></div>
+            <div class="pricing-stat"><b>1</b><span>compile credit</span></div>
+            <div class="pricing-stat"><b>1</b><span>seat</span></div>
+            <div class="pricing-stat"><b>Self</b><span>serve</span></div>
+          </div>
+          <ul>
+            <li>Local CLI and public capability JSON.</li>
+            <li>Light gateway capture for first namespaces.</li>
+            <li>Small compile path for evaluating artifacts.</li>
+          </ul>
+          <a class="btn btn--ghost" href="/signup">Create Workspace</a>
+        </article>
 
-      <div class="tier">
-        <p class="tier__name">Signed Readiness Report</p>
-        <p class="tier__price">$750<span class="tier__per"> one-time</span></p>
-        <p class="tier__sub">The full audit, sealed. Your buyer verifies it offline.</p>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ed25519-signed report tied to a stable report ID.</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Findings mapped to SOC 2, ISO 42001, NIST AI RMF, the EU AI Act, OWASP LLM Top 10 and MITRE ATLAS.</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verified in the buyer's browser, no kolm server in the path.</li>
-        </ul>
-        <a class="btn btn--ghost" href="/signup">Get the report</a>
-      </div>
+        <article class="pricing-card">
+          <h3>Indie</h3>
+          <div class="pricing-card__price">$29/mo<small>Solo production namespace</small></div>
+          <div class="pricing-card__stats">
+            <div class="pricing-stat"><b>500K</b><span>gateway calls</span></div>
+            <div class="pricing-stat"><b>10</b><span>compile credits</span></div>
+            <div class="pricing-stat"><b>1</b><span>seat</span></div>
+            <div class="pricing-stat"><b>17%</b><span>annual savings</span></div>
+          </div>
+          <ul>
+            <li>Authenticated gateway capture and artifact previews.</li>
+            <li>Compile jobs and receipt export.</li>
+            <li>Recommended for single-user production workloads.</li>
+          </ul>
+          <a class="btn btn--ghost" href="/signup?plan=indie">Create Workspace</a>
+        </article>
 
-      <div class="tier tier--feat">
-        <p class="tier__name">Continuous Starter</p>
-        <p class="tier__price">$299<span class="tier__per"> /mo</span></p>
-        <p class="tier__sub">Re-attested weekly. Evidence never goes stale.</p>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in the Signed Readiness Report.</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>A fresh signed report every week, behind a stable Trust link.</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>One agent, one public Trust link.</li>
-        </ul>
-        <a class="btn btn--primary" href="/signup" aria-label="Subscribe to Continuous Starter">Subscribe</a>
-      </div>
+        <article class="pricing-card pricing-card--hot">
+          <h3>Pro</h3>
+          <div class="pricing-card__price">$49/mo<small>Production capture and device targeting</small></div>
+          <div class="pricing-card__stats">
+            <div class="pricing-stat"><b>500K</b><span>gateway calls</span></div>
+            <div class="pricing-stat"><b>50</b><span>compile credits</span></div>
+            <div class="pricing-stat"><b>1</b><span>seat</span></div>
+            <div class="pricing-stat"><b>17%</b><span>annual savings</span></div>
+          </div>
+          <ul>
+            <li>Provider routing, capture export, and artifact downloads.</li>
+            <li>Device fit recommendations before runtime rollout.</li>
+            <li>Recommended for teams moving repeated API work into owned artifacts.</li>
+          </ul>
+          <a class="btn btn--primary" href="/signup?plan=pro">Create Workspace</a>
+        </article>
 
-      <div class="tier">
-        <p class="tier__name">Continuous Growth</p>
-        <p class="tier__price">$999<span class="tier__per"> /mo</span></p>
-        <p class="tier__sub">Re-attested on every deploy, fleet-wide.</p>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Continuous Starter.</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Prompt-injection regression on every release.</li>
-          <li><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Your full agent fleet under one buyer portal.</li>
-        </ul>
-        <a class="btn btn--ghost" href="/signup" aria-label="Subscribe to Continuous Growth">Subscribe</a>
-      </div>
-    </div>
-    <figure class="diag reveal" role="img" aria-label="Continuous attestation timeline: scheduled re-audits re-sign the report each week and a deploy forces an immediate re-sign, so the trust link always serves current evidence">
-    <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="dg-line" d="M16 76 H704"/>
-      <path class="dg-flow" d="M16 76 H704"/>
-      <g>
-        <circle class="dg-ok" cx="80" cy="76" r="4"/><text class="dg-mono" x="62" y="102">week 1</text>
-        <circle class="dg-ok" cx="240" cy="76" r="4"/><text class="dg-mono" x="222" y="102">week 2</text>
-        <circle class="dg-ok" cx="400" cy="76" r="4"/><text class="dg-mono" x="382" y="102">week 3</text>
-        <circle class="dg-dot" cx="640" cy="76" r="5"/><text class="dg-mono" x="618" y="102">current</text>
-      </g>
-      <path class="dg-line" d="M512 36 V70" stroke-dasharray="3 5"/>
-      <polygon class="dg-ok" points="512,70 507.5,62 516.5,62"/>
-      <text class="dg-label dg-label--up" x="478" y="28">Deploy</text>
-      <text class="dg-mono" x="540" y="33">forces an immediate re-sign</text>
-      <text class="dg-label dg-label--up" x="16" y="28">Re-attestation</text>
-      <text class="dg-mono" x="16" y="44">each dot is a fresh signed report; the same trust link always serves the newest one</text>
-      <text class="dg-mono" x="16" y="132">evidence that goes stale stops being evidence</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Always current</b> what Continuous buys: one stable link, re-signed on schedule and on every deploy</figcaption>
-    </figure>
-    <p class="hero__claim">
-      All prices flat and final. The figure on this page is the figure at checkout. <a href="/roi">Estimate what a stalled review costs</a>.
-    </p>
-      </div>
-    </div>
-  </div>
-</section>
+        <article class="pricing-card">
+          <h3>Team</h3>
+          <div class="pricing-card__price">$99/mo<small>Shared namespaces and specialist composition</small></div>
+          <div class="pricing-card__stats">
+            <div class="pricing-stat"><b>5M</b><span>gateway calls</span></div>
+            <div class="pricing-stat"><b>50</b><span>compile credits</span></div>
+            <div class="pricing-stat"><b>5</b><span>seats</span></div>
+            <div class="pricing-stat"><b>17%</b><span>annual savings</span></div>
+          </div>
+          <ul>
+            <li>Team seats and namespace controls.</li>
+            <li>Specialist composition and shared artifact review.</li>
+            <li>Recommended for multi-person compiler workflows.</li>
+          </ul>
+          <a class="btn btn--ghost" href="/signup?plan=teams">Create Workspace</a>
+        </article>
 
-<!-- ============================================================ 3. ENTERPRISE -->
-<section class="section section--lit reveal" id="enterprise-tiers">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">02 / Enterprise</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>A guided deep audit across the fleet.</h2>
-      <p class="lede">For a fleet of agents or a regulated buyer. Both tiers can be bought on this page; a scoping call is available, not required.</p>
-    </div>
-    <div class="grid grid--2">
-      <div class="plate">
-        <p class="card__k">Full Readiness</p>
-        <div class="tier__price">$15,000<span class="tier__per"> fixed fee</span></div>
-        <p class="tier__sub">A guided deep audit across your fleet. We help close the gaps.</p>
-        <ul class="ledger" style="margin:var(--s5) 0">
-          <li>A guided engagement across your full control set and agent fleet.</li>
-          <li>Remediation guidance for every finding before you sign.</li>
-          <li>Signed Readiness Report plus a buyer portal at the end.</li>
-          <li>Continuous re-attestation for the duration of the engagement.</li>
-        </ul>
-        <button class="btn btn--primary" type="button" data-asr-package="full" style="width:100%">Buy Full Readiness</button>
-      </div>
-      <div class="plate">
-        <p class="card__k">Continuous-Plus</p>
-        <div class="tier__price">$3,500<span class="tier__per"> /mo</span></div>
-        <p class="tier__sub">Continuous Growth for the whole fleet, with a team behind it.</p>
-        <ul class="ledger" style="margin:var(--s5) 0">
-          <li>Everything in Continuous Growth, across your full agent fleet.</li>
-          <li>A dedicated transparency log and an always-current Trust link your buyers pin.</li>
-          <li>SSO and SCIM provisioning for your team.</li>
-          <li>Priority support and a named contact.</li>
-        </ul>
-        <button class="btn btn--ghost" type="button" data-asr-package="plus" style="width:100%">Start Continuous-Plus</button>
-      </div>
-    </div>
-    <p class="hero__claim" style="margin-top:var(--s4)">Need white-label reports or a custom scope? <a href="/enterprise">Enterprise terms</a> cover an MSA, BAA and a named SLA, or <a href="/contact">talk to us</a>.</p>
-      </div>
-    </div>
-  </div>
-</section>
+        <article class="pricing-card">
+          <h3>Business</h3>
+          <div class="pricing-card__price">$499/mo<small>Fleet deployment and governed capture</small></div>
+          <div class="pricing-card__stats">
+            <div class="pricing-stat"><b>25M</b><span>gateway calls</span></div>
+            <div class="pricing-stat"><b>200</b><span>compile credits</span></div>
+            <div class="pricing-stat"><b>20</b><span>seats</span></div>
+            <div class="pricing-stat"><b>17%</b><span>annual savings</span></div>
+          </div>
+          <ul>
+            <li>Higher gateway caps and capture RBAC.</li>
+            <li>Device fleet rollout and hosted serve paths.</li>
+            <li>Recommended for device and hosted runtime programs.</li>
+          </ul>
+          <a class="btn btn--ghost" href="/signup?plan=business">Create Workspace</a>
+        </article>
 
-<!-- ============================================================ 4. REVIEWED ATTESTATION (proof panel) -->
-<section class="section section--ink sect--air reveal" id="reviewed">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the deal-closer chapter is lit, not flat -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">03 / The deal-closer</span></div>
-      <div class="sect-rail__body">
-    <span class="num-ghost num-ghost--deep" aria-hidden="true">03</span>
-    <div class="section__head">
-      <h2>When a reviewer needs more than a signature.</h2>
-      <p class="lede">Cryptography proves the bytes were not altered. A name proves a person reviewed them. The Reviewed Attestation puts both in front of the CISO.</p>
-    </div>
-    <div class="grid grid--2" style="align-items:start">
-      <div class="plate">
-        <p class="card__k">Reviewed Attestation</p>
-        <div class="tier__price">$25,000<span class="tier__per"> flat</span></div>
-        <p class="tier__sub">A named, accredited human co-signs the audit.</p>
-        <ul class="ledger" style="margin:var(--s5) 0">
-          <li>Everything in Full Readiness.</li>
-          <li>A named reviewer co-signs beside the Ed25519 signature.</li>
-          <li>Days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.</li>
-          <li>The strongest artifact kolm produces for a high-stakes review.</li>
-        </ul>
-        <a class="btn btn--primary" href="mailto:dev@kolm.ai" style="width:100%">Talk to us</a>
+        <article class="pricing-card">
+          <h3>Enterprise</h3>
+          <div class="pricing-card__price">Custom<small>Private deployment and support</small></div>
+          <div class="pricing-card__stats">
+            <div class="pricing-stat"><b>250M</b><span>gateway calls</span></div>
+            <div class="pricing-stat"><b>Custom</b><span>compile credits</span></div>
+            <div class="pricing-stat"><b>25</b><span>seats base</span></div>
+            <div class="pricing-stat"><b>Sales</b><span>led</span></div>
+          </div>
+          <ul>
+            <li>Private deployment planning and custom compile credits.</li>
+            <li>Fleet rollout support and procurement packet export.</li>
+            <li>Recommended for private cloud, regulated, or high-volume programs.</li>
+          </ul>
+          <a class="btn btn--ghost" href="mailto:dev@kolm.ai?subject=Kolm%20Enterprise%20Compiler">Email Enterprise</a>
+        </article>
       </div>
-      <div class="grid" style="gap:14px;align-content:start">
-        <div class="card">
-          <p class="card__k">Add-on · adversarial</p>
-          <h3>Deep Red-Team · +$10,000</h3>
-          <p>A deeper adversarial pass on top of the standard prompt-injection battery, for the buyer who asks how hard you pushed.</p>
+      <p class="pricing-note">Plan data is also available at <a href="/v1/plans">/v1/plans</a> and <a href="/v1/billing/tiers">/v1/billing/tiers</a>. Paid checkout availability depends on configured billing links; the product keeps that state explicit instead of implying a payment path that is not wired.</p>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="wrap pricing-contract">
+      <div class="section__head">
+        <span class="idx">02 / Billing Contract</span>
+        <h2>The meter follows the lifecycle.</h2>
+        <p class="lede">Pricing should make the product object obvious. Kolm charges around controlled API traffic, compile work, target/runtime activity, and enterprise controls because those are the objects that create durable value.</p>
+      </div>
+      <div class="pricing-table" aria-label="Billing contract">
+        <div class="pricing-row">
+          <div class="pricing-row__key">Gateway</div>
+          <div class="pricing-row__body">Provider-compatible routing, capture modes, cache, fallback, and quality-router decisions.</div>
+          <div class="pricing-row__route">/v1/route</div>
         </div>
-        <div class="card">
-          <p class="card__k">Why a name</p>
-          <h3>The signature is necessary, not always sufficient</h3>
-          <p>The automated tiers need no human. For the deal where a reviewer wants a person to stand behind the finding, the co-signer is the difference between a passed review and another round of questions.</p>
+        <div class="pricing-row">
+          <div class="pricing-row__key">Compile</div>
+          <div class="pricing-row__body">Preview, estimate, build, K-score checks, artifact packaging, manifests, and receipts.</div>
+          <div class="pricing-row__route">/v1/compile</div>
+        </div>
+        <div class="pricing-row">
+          <div class="pricing-row__key">Control</div>
+          <div class="pricing-row__body">Source registration, provider policy, credentials, retention, redaction, exports, and readiness gates.</div>
+          <div class="pricing-row__route">/v1/account/api-control-center</div>
+        </div>
+        <div class="pricing-row">
+          <div class="pricing-row__key">Runtime</div>
+          <div class="pricing-row__body">Device detection, fit recommendation, install tracking, hosted serve, and runtime export paths.</div>
+          <div class="pricing-row__route">/v1/devices</div>
         </div>
       </div>
     </div>
-    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">03 / Why This Packaging</span>
+        <h2>The best category position replaces disconnected tools.</h2>
+        <p class="lede">The plan structure follows the research: one product should own the path from real API behavior to governed, portable runtime artifacts.</p>
+      </div>
+      <div class="pricing-compare">
+        <div class="proof-card"><p class="card__k">Capture</p><h3>Behavior before claims</h3><p>Plans start with routed API traffic, traces, source policy, and controlled capture instead of abstract model access.</p></div>
+        <div class="proof-card"><p class="card__k">Build</p><h3>Compile credits are explicit</h3><p>Compile work is visible by tier, so teams know when they are paying for artifact generation instead of hidden infrastructure.</p></div>
+        <div class="proof-card"><p class="card__k">Control</p><h3>Enterprise features map to objects</h3><p>Seats, RBAC, namespaces, provider policy, exports, and readiness gates are product controls, not generic add-ons.</p></div>
+        <div class="proof-card"><p class="card__k">Export</p><h3>Evidence leaves the UI</h3><p>Artifacts, manifests, receipts, reports, event streams, and procurement packets should stay useful outside the dashboard.</p></div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ 5. COMPARE -->
-<section class="section sect--dense reveal" id="compare">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">04 / Compare</span></div>
-      <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true">04</span>
-    <div class="section__head">
-      <h2>What is in each plan.</h2>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Plan comparison"><table class="tbl">
-      <thead><tr><th scope="col">Capability</th><th scope="col">Scan</th><th scope="col">Report</th><th scope="col">Starter</th><th scope="col">Growth</th><th scope="col">Reviewed</th></tr></thead>
-      <tbody>
-        <tr class="trow"><th scope="row"><b>Least-privilege permission audit</b></th><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr class="trow"><th scope="row"><b>Audit-trail &amp; retention review</b></th><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr class="trow"><th scope="row"><b>Data-egress &amp; redaction audit</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr class="trow"><th scope="row"><b>Prompt-injection battery</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr class="trow"><th scope="row"><b>Framework control-mapping</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr class="trow"><th scope="row"><b>Ed25519-signed, offline-verifiable</b></th><td class="mapped">watermarked</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr class="trow"><th scope="row"><b>Re-attestation cadence</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">weekly</td><td class="mapped">per deploy</td><td class="mapped">per deploy</td></tr>
-        <tr class="trow"><th scope="row"><b>Live Trust link</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td><td class="mapped">✓</td><td class="mapped">✓</td></tr>
-        <tr class="trow"><th scope="row"><b>Named co-signer</b></th><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="muted"><span class="sr-only">Not included</span></td><td class="mapped">✓</td></tr>
-        <tr class="trow"><th scope="row"><b>Price</b></th><td class="mapped">Free</td><td class="mapped">$750</td><td class="mapped">$299/mo</td><td class="mapped">$999/mo</td><td class="mapped">$25,000</td></tr>
-      </tbody>
-    </table></div>
-    <p class="hero__claim" style="margin-top:var(--s4)">The free scan is watermarked and scoped to what you upload. Every paid plan ships the full Ed25519-signed report your buyer verifies offline.</p>
+  <section class="section section--cta">
+    <div class="wrap cta-final">
+      <p class="compiler-kicker">Readiness-Gated Claims</p>
+      <h2>Choose a tier, then prove one controlled loop.</h2>
+      <p class="lede">Start with one namespace, capture the behavior, compile the artifact, inspect the receipt, and expand only when the readiness gates support it.</p>
+      <div class="hero__cta" style="justify-content:center">
+        <a class="btn btn--primary" href="/signup">Create Workspace</a>
+        <a class="btn btn--ghost" href="/docs">Read Docs</a>
+        <a class="btn btn--ghost" href="/account/api-control-center">Open Control Center</a>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ============================================================ 6. FAQ -->
-<section class="section sect--dense reveal" id="faq">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">05 / Questions</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>Common questions.</h2>
-    </div>
-    <div class="grid grid--2">
-      <div class="card"><h3>Do prices change with team size or usage?</h3><p>No. Every fee is flat and final: $750 for the signed report, $299 or $999 per month for Continuous. There is no per-seat meter and no usage tier.</p></div>
-      <div class="card"><h3>Is the free scan really free?</h3><p>Yes. Upload redacted logs, get watermarked findings in minutes, no card. Most teams use it to see a real finding before they commit.</p></div>
-      <div class="card"><h3>Why pay monthly when a report is one-time?</h3><p>A point-in-time report goes stale on your next deploy. Continuous re-attests on a schedule, weekly on Starter and on every deploy on Growth, so the evidence your buyer checks is never older than your cadence.</p></div>
-      <div class="card"><h3>What does the named co-signer add over the crypto?</h3><p>The signature proves the bytes are intact. The name proves a person reviewed them. Enterprise reviewers ask for both, so the Reviewed Attestation puts a named, accredited reviewer beside the signature.</p></div>
-      <div class="card"><h3>Do you warrant our application is secure?</h3><p>No, and distrust anyone who does. We test and report with reproductions, scoped to exactly what we examined. The scope statement is part of the signed report. <a href="/verify">Try the sample verifier.</a></p></div>
-      <div class="card"><h3>We already use Vanta or have SOC 2. Why this?</h3><p>kolm does not replace your SOC 2 or your trust center. It is the fast, agent-specific evidence that clears the deal in front of you now, and every finding maps into the SOC 2, ISO 42001 and NIST AI RMF work you are already doing. See the <a href="/compare">full comparison</a>.</p></div>
-    </div>
-    <p class="hero__claim">Already a customer? <a href="/dashboard">View your reports and Trust links</a>.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 7. FINAL CTA -->
-<section class="section reveal cta-final">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
-  <div class="wrap">
-    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>Start at zero. Sign at $750.</h2>
-    <p class="lede">Run the free scan tonight. Buy the signed report the day your buyer asks for proof.</p>
-    <div class="hero__cta">
-      <a class="btn btn--primary" href="/signup">Run the free scan</a>
-      <a class="btn btn--ghost" href="/verify">Verify a report</a>
-    </div>
-    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
-    </div>
-    <p style="margin-top:var(--s4);font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--ink-3)" translate="no">SCAN $0 · REPORT $750 ONE-TIME · CONTINUOUS $299/$999 PER MONTH · FULL READINESS $15,000 · REVIEWED ATTESTATION $25,000</p>
-    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-  </div>
-</section>
-
+  </section>
 </main>
 
-<!-- ============================================================ FOOTER -->
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Compiler pricing for the behavior-to-artifact control plane.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Plans</h3>
+        <a href="#plans">Compare Plans</a>
+        <a href="/v1/plans">Plan JSON</a>
+        <a href="/v1/billing/tiers">Billing Tiers</a>
+        <a href="/signup">Create Workspace</a>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
-        <a href="/docs">Docs</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/runtimes">Runtimes</a>
+        <a href="/capabilities">Capabilities</a>
       </div>
       <div class="foot__col">
-        <h3>Trust</h3>
-        <a href="/verify">Verify</a>
+        <h3>Docs</h3>
+        <a href="/docs">Developer Docs</a>
+        <a href="/docs/api">API Reference</a>
+        <a href="/openapi.json">OpenAPI</a>
+        <a href="/account/api-control-center">API Control Center</a>
+      </div>
+      <div class="foot__col">
+        <h3>Evidence</h3>
+        <a href="/trust">Readiness Center</a>
         <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
-        <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
-      </div>
-      <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
-      </div>
-      <div class="foot__col">
-        <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
-        <a href="/contact">Contact</a>
       </div>
     </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge badge--ok">Plan catalog aligned</span>
+      <span class="badge">Compiler-first pricing</span>
+      <span class="badge"><a href="/v1/plans">JSON contract</a></span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
-
-<script>
-/* Self-serve purchase for the enterprise packages (Full Readiness, Continuous-Plus).
- * A logged-in user (dashboard key in sessionStorage) starts Stripe checkout via
- * /v1/audit/package/checkout. A new user is routed to /signup?next=<product> so
- * they create an account first, then complete the purchase. If purchasing is not
- * wired on this deployment (503), or anything else goes wrong, fall back to
- * /contact so the buyer is never stranded. Enterprise/custom scope stays on
- * /contact by design. */
-(function () {
-  function keyFor() { try { return sessionStorage.getItem('kolm_dash_key') || null; } catch (e) { return null; } }
-  function buy(product, btn) {
-    var key = keyFor();
-    if (!key) { location.href = '/signup?next=' + encodeURIComponent(product); return; }
-    var prev = btn.textContent; btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = 'Starting...';
-    fetch('/v1/audit/package/checkout', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: JSON.stringify({ product: product })
-    }).then(function (res) {
-      return res.json().catch(function () { return {}; }).then(function (j) { return { status: res.status, j: j }; });
-    }).then(function (o) {
-      if (o.j && o.j.url) { location.href = o.j.url; return; }
-      if (o.status === 401) { location.href = '/signup?next=' + encodeURIComponent(product); return; }
-      // Not configured to charge, or another error: hand off to the sales path.
-      location.href = '/contact';
-    }).catch(function () {
-      btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = prev;
-      location.href = '/contact';
-    });
-  }
-  var btns = document.querySelectorAll('[data-asr-package]');
-  for (var i = 0; i < btns.length; i++) {
-    (function (b) { b.addEventListener('click', function () { buy(b.getAttribute('data-asr-package'), b); }); })(btns[i]);
-  }
-})();
-</script>
-
 </body>
 </html>

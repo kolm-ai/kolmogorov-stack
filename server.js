@@ -100,7 +100,123 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 if (initOtel()) app.use(otelMiddleware());
 
-// --- Static site (the Agent Security Evidence site) ---
+function isAuditHost(req) {
+  const host = String(req.headers.host || '').split(':')[0].toLowerCase();
+  return host === 'audit.kolm.ai' || host === 'www.audit.kolm.ai';
+}
+
+function sendPublicHtml(res, file) {
+  const f = path.join(__dirname, 'public', file);
+  if (!fs.existsSync(f)) return false;
+  res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+  res.sendFile(f);
+  return true;
+}
+
+const COMPILER_PRODUCT_ROUTES = [
+  '/how-it-works',
+];
+
+const AUDIT_HOST_ONLY_ROUTES = [
+  '/verify',
+  '/checks',
+  '/report',
+  '/report-viewer',
+  '/badge',
+  '/roi',
+  '/regulatory-clock',
+  '/transparency-log',
+  '/trust-center',
+  '/buyer',
+  '/spec',
+  '/security/threat-model',
+  '/solutions/ai-vendors',
+  '/solutions/enterprise-buyers',
+];
+const COMPILER_PRODUCT_ROUTE_PATTERNS = COMPILER_PRODUCT_ROUTES.concat(
+  COMPILER_PRODUCT_ROUTES.map(route => `${route}.html`),
+);
+const AUDIT_HOST_ONLY_ROUTE_PATTERNS = AUDIT_HOST_ONLY_ROUTES.concat(
+  AUDIT_HOST_ONLY_ROUTES.map(route => `${route}.html`),
+);
+
+const COMPILER_COMPAT_REDIRECTS = new Map([
+  ['/product', '/compiler-product'],
+  ['/models', '/platform'],
+  ['/api', '/docs/api'],
+  ['/api-routes.json', '/docs/api-routes.json'],
+  ['/quickstart', '/docs#quickstart'],
+  ['/captures', '/compiler-product#pipeline'],
+  ['/training', '/compiler-product#pipeline'],
+  ['/distill', '/compiler-product#pipeline'],
+  ['/tui', '/account/overview'],
+  ['/control-center', '/account/api-control-center'],
+  ['/api-control-center', '/account/api-control-center'],
+  ['/enterprise-control', '/account/api-control-center'],
+  ['/self-host', '/security'],
+  ['/airgap', '/security'],
+]);
+
+for (const [source, destination] of COMPILER_COMPAT_REDIRECTS) {
+  app.get([source, `${source}.html`], (req, res, next) => {
+    if (isAuditHost(req)) return next();
+    res.redirect(302, destination);
+  });
+}
+
+app.get('/', (req, res, next) => {
+  if (isAuditHost(req)) {
+    if (sendPublicHtml(res, 'audit.html')) return;
+  }
+  return next();
+});
+
+app.get(['/audit', '/audit.html'], (req, res, next) => {
+  if (isAuditHost(req)) {
+    if (sendPublicHtml(res, 'audit.html')) return;
+    return next();
+  }
+  res.redirect(302, 'https://audit.kolm.ai/');
+});
+
+app.get(['/docs', '/pricing'], (req, res, next) => {
+  if (!isAuditHost(req)) return next();
+  const file = req.path === '/docs' ? 'audit-docs.html' : 'audit-pricing.html';
+  if (sendPublicHtml(res, file)) return;
+  return next();
+});
+
+app.get('/account', (_req, res) => {
+  res.redirect(302, '/account/overview');
+});
+
+app.get(['/dashboard', '/dashboard.html'], (req, res, next) => {
+  if (isAuditHost(req)) {
+    if (sendPublicHtml(res, 'dashboard.html')) return;
+    return next();
+  }
+  res.redirect(302, '/account/overview');
+});
+
+app.get(['/terms', '/terms.html'], (req, res, next) => {
+  if (isAuditHost(req)) return next();
+  if (sendPublicHtml(res, 'compiler-terms.html')) return;
+  return next();
+});
+
+app.get(COMPILER_PRODUCT_ROUTE_PATTERNS, (req, res, next) => {
+  if (isAuditHost(req)) return next();
+  if (sendPublicHtml(res, 'compiler-product.html')) return;
+  return next();
+});
+
+app.get(AUDIT_HOST_ONLY_ROUTE_PATTERNS, (req, res, next) => {
+  if (isAuditHost(req)) return next();
+  const suffix = req.originalUrl || req.url || req.path;
+  res.redirect(302, `https://audit.kolm.ai${suffix}`);
+});
+
+// --- Static site (main compiler site plus audit subdomain) ---
 // The public surface is a small, flat set of pages plus the verification
 // assets. Two page names also exist as directories (public/docs/ holds the API
 // schema + reference; public/security/ holds the Halborn report + threat
@@ -110,11 +226,7 @@ if (initOtel()) app.use(otelMiddleware());
 // below — matching the Vercel deploy's rewrite behaviour.
 for (const [route, file] of [['/docs', 'docs.html'], ['/security', 'security.html']]) {
   app.get(route, (_req, res, next) => {
-    const f = path.join(__dirname, 'public', file);
-    if (fs.existsSync(f)) {
-      res.set('Cache-Control', 'public, max-age=60, must-revalidate');
-      return res.sendFile(f);
-    }
+    if (sendPublicHtml(res, file)) return;
     return next();
   });
 }
@@ -170,7 +282,7 @@ const _404Path = path.join(__dirname, 'public', '404.html');
 app.use((req, res, next) => {
   if (req.method === 'GET' && req.accepts('html') && !req.path.startsWith('/v1') && !req.path.startsWith('/health') && req.path !== '/ready' && req.path !== '/404') {
     if (fs.existsSync(_404Path)) return res.status(404).sendFile(_404Path);
-    return res.status(404).type('html').send(`<!DOCTYPE html><html><head><title>404 · kolm</title></head><body style="padding:48px;text-align:center;font-family:system-ui;color:#e8ecf3;background:#0B0E12;min-height:100vh;"><h1 style="font-size:48px;margin:0;letter-spacing:-0.02em;">404</h1><p style="color:#8b94a8;margin-top:8px">That page doesn't exist.</p><p style="margin-top:24px;"><a href="/" style="color:#34D399;">&larr; Home</a> &middot; <a href="/verify" style="color:#34D399;">Verify a report</a> &middot; <a href="/docs" style="color:#34D399;">Docs</a></p></body></html>`);
+    return res.status(404).type('html').send(`<!DOCTYPE html><html><head><title>404 - kolm</title></head><body style="padding:48px;text-align:center;font-family:system-ui;color:#131713;background:#F5F3EC;min-height:100vh;"><h1 style="font-size:48px;margin:0;letter-spacing:-0.02em;">404</h1><p style="color:#5f675f;margin-top:8px">That compiler route does not exist.</p><p style="margin-top:24px;"><a href="/" style="color:#176b4d;">Home</a> &middot; <a href="/docs" style="color:#176b4d;">Docs</a> &middot; <a href="https://audit.kolm.ai/" style="color:#176b4d;">Audit module</a></p></body></html>`);
   }
   next();
 });
@@ -355,7 +467,7 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   const httpServer = app.listen(PORT, () => {
     console.log('\nkolm server');
     console.log(`  home:       http://localhost:${PORT}`);
-    console.log(`  verify:     http://localhost:${PORT}/verify`);
+    console.log(`  workspace:  http://localhost:${PORT}/account/overview`);
     console.log(`  docs:       http://localhost:${PORT}/docs`);
     console.log(`  demo key:   ${!!demo.api_key ? 'configured' : 'missing'}`);
     console.log(`  admin key:  ${!!process.env.ADMIN_KEY ? 'configured' : 'not set'}`);

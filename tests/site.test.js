@@ -142,27 +142,53 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   '?',
 ];
 
-// Canonical surfaces of the Agent Security Evidence site. Sitemap must list
-// every primary route so search engines index the surfaces we sell from.
+// Canonical surfaces of the compiler-first main site. Audit/report-specific
+// pages live on audit.kolm.ai and must not be indexed as primary kolm.ai pages.
 const REQUIRED_SITEMAP_ROUTES = [
   '/',
-  '/verify',
   '/how-it-works',
   '/platform',
-  '/checks',
-  '/report',
-  '/transparency-log',
+  '/integrations',
+  '/runtimes',
+  '/capabilities',
   '/pricing',
-  '/trust',
-  '/research',
   '/docs',
-  '/changelog',
   '/enterprise',
   '/security',
+  '/trust',
+  '/contact',
+  '/research',
+  '/changelog',
+  '/status',
+  '/signup',
   '/privacy',
   '/terms',
+  '/dpa',
+  '/baa',
+  '/acceptable-use',
+  '/sla',
+  '/subprocessors',
+];
+
+const AUDIT_HOST_ONLY_ROUTES = [
+  '/verify',
+  '/checks',
+  '/report',
+  '/report-viewer',
+  '/badge',
+  '/roi',
+  '/regulatory-clock',
+  '/transparency-log',
+  '/trust-center',
+  '/buyer',
+  '/spec',
+  '/security/threat-model',
   '/solutions/ai-vendors',
   '/solutions/enterprise-buyers',
+];
+
+const COMPILER_PRODUCT_ROUTES = [
+  '/how-it-works',
 ];
 
 // W224 cut routes — these MUST NOT appear in sitemap. Negative assertion locks
@@ -175,6 +201,7 @@ const FORBIDDEN_SITEMAP_ROUTES = [
   // Cutover-retired: /soc2 now 308-redirects to /trust (no soc2.html). A
   // redirect source must never appear in the sitemap, so lock it out here.
   '/soc2',
+  ...AUDIT_HOST_ONLY_ROUTES,
 ];
 
 const STALE_SOURCE_PATTERNS = [
@@ -379,6 +406,440 @@ test('public inline scripts parse successfully', () => {
   assert.deepEqual(failures, []);
 });
 
+test('trust page exposes readiness gates without overclaiming', () => {
+  const trust = fs.readFileSync(path.join('public', 'trust.html'), 'utf8');
+  const readiness = JSON.parse(fs.readFileSync(path.join('public', 'product-readiness-closeout.json'), 'utf8'));
+  const statuses = new Set(readiness.open_requirements.map(item => item.status.replaceAll('_', ' ')));
+
+  assert.match(trust, /Product Readiness and Evidence Center/);
+  assert.match(trust, /<b>8<\/b> open readiness gates/);
+  assert.match(trust, /product-readiness-closeout\.json/);
+  assert.match(trust, /Marketing and product UI must not describe these as fully shipped/);
+
+  for (const status of statuses) {
+    assert.match(trust, new RegExp(status.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `trust page should expose ${status}`);
+  }
+
+  assert.doesNotMatch(trust, /Run the free scan/);
+  assert.doesNotMatch(trust, /SOC 2 Type II evidence/);
+  assert.doesNotMatch(trust, /HIPAA-ready/);
+  assert.doesNotMatch(trust, /Public append-only registry/);
+});
+
+test('security page exposes control posture without overclaiming', () => {
+  const security = fs.readFileSync(path.join('public', 'security.html'), 'utf8');
+
+  assert.match(security, /Kolm Security and Control Posture/);
+  assert.match(security, /Security starts at the API boundary/);
+  assert.match(security, /Unknown schemas stay opaque/);
+  assert.match(security, /Certification and Package Gates/);
+  assert.match(security, /needs live certification/);
+  assert.match(security, /needs package release/);
+  assert.match(security, /needs public benchmark data/);
+  assert.match(security, /needs external partner/);
+
+  assert.doesNotMatch(security, /Run the free scan/);
+  assert.doesNotMatch(security, /Start an audit/);
+  assert.doesNotMatch(security, /SOC 2 Type II evidence/);
+  assert.doesNotMatch(security, /HIPAA-ready/);
+  assert.doesNotMatch(security, /FedRAMP Moderate roadmap/);
+});
+
+test('homepage exposes control-plane loop without overclaiming', () => {
+  const home = fs.readFileSync(path.join('public', 'index.html'), 'utf8');
+
+  assert.match(home, /API behavior in\. Device-fit models out\./);
+  assert.match(home, /behavior-to-artifact control plane/);
+  assert.match(home, /Enterprise AI\/API control plane/);
+  assert.match(home, /API Control Center/);
+  assert.match(home, /17<\/b> channels/);
+  assert.match(home, /12<\/b> ingress modes/);
+  assert.match(home, /10<\/b> export modes/);
+  assert.match(home, /8<\/b> readiness gates/);
+  assert.match(home, /readiness gated/);
+  assert.match(home, /governance exports/);
+  assert.match(home, /Pioneer-style improvement loop without benchmark overclaiming/);
+
+  assert.doesNotMatch(home, /better than every/i);
+  assert.doesNotMatch(home, /objectively better/i);
+  assert.doesNotMatch(home, /100x/i);
+  assert.doesNotMatch(home, /Run the free scan/i);
+  assert.doesNotMatch(home, /Start an audit/i);
+  assert.doesNotMatch(home, /Reviewed Attestation/i);
+  assert.doesNotMatch(home, /SOC 2 Type II evidence/i);
+  assert.doesNotMatch(home, /HIPAA-ready/i);
+  assert.doesNotMatch(home, /FedRAMP Moderate/i);
+});
+
+test('enterprise page exposes API control workflow without overclaiming', () => {
+  const enterprise = fs.readFileSync(path.join('public', 'enterprise.html'), 'utf8');
+
+  assert.match(enterprise, /Kolm Enterprise Control Center/);
+  assert.match(enterprise, /Enterprise AI control starts before a model ships/);
+  assert.match(enterprise, /API behavior in\. Device-fit models out\./);
+  assert.match(enterprise, /17 API data channel families/);
+  assert.match(enterprise, /12 ingress modes/);
+  assert.match(enterprise, /10 export modes/);
+  assert.match(enterprise, /8 governance stages/);
+  assert.match(enterprise, /8 open readiness gates/);
+  assert.match(enterprise, /Readiness-gated claims/);
+  assert.match(enterprise, /Do not imply certification/);
+
+  assert.doesNotMatch(enterprise, /Run the free scan/);
+  assert.doesNotMatch(enterprise, /Start an audit/);
+  assert.doesNotMatch(enterprise, /Reviewed Attestation/);
+  assert.doesNotMatch(enterprise, /\$25,000/);
+  assert.doesNotMatch(enterprise, /co-signed/i);
+  assert.doesNotMatch(enterprise, /SOC 2 Type II evidence/);
+  assert.doesNotMatch(enterprise, /HIPAA-ready/);
+  assert.doesNotMatch(enterprise, /FedRAMP Moderate roadmap/);
+});
+
+test('platform page exposes architecture without stale audit packaging', () => {
+  const platform = fs.readFileSync(path.join('public', 'platform.html'), 'utf8');
+
+  assert.match(platform, /Kolm Platform Architecture/);
+  assert.match(platform, /behavior-to-artifact control plane/);
+  assert.match(platform, /API behavior in\. Device-fit models out\./);
+  assert.match(platform, /17 API data channel families/);
+  assert.match(platform, /12 ingress modes/);
+  assert.match(platform, /10 export modes/);
+  assert.match(platform, /8 governance stages/);
+  assert.match(platform, /Unknown schemas stay opaque/);
+  assert.match(platform, /Every write emits an audit event/);
+  assert.match(platform, /Readiness-gated claims/);
+
+  assert.doesNotMatch(platform, /Run the free scan/i);
+  assert.doesNotMatch(platform, /Start an audit/i);
+  assert.doesNotMatch(platform, /AI Audit Platform/i);
+  assert.doesNotMatch(platform, /Logs to Signed Evidence/i);
+  assert.doesNotMatch(platform, /Reviewed Attestation/);
+  assert.doesNotMatch(platform, /\$750|\$25,000/);
+  assert.doesNotMatch(platform, /co-signed/i);
+  assert.doesNotMatch(platform, /SOC 2 Type II evidence/);
+  assert.doesNotMatch(platform, /HIPAA-ready/);
+  assert.doesNotMatch(platform, /FedRAMP Moderate roadmap/);
+  assert.doesNotMatch(platform, /繚/);
+});
+
+test('capabilities page exposes lifecycle capabilities without stale audit SKUs', () => {
+  const capabilities = fs.readFileSync(path.join('public', 'capabilities.html'), 'utf8');
+
+  assert.match(capabilities, /Kolm Capabilities Matrix/);
+  assert.match(capabilities, /Capabilities are lifecycle controls, not audit SKUs/);
+  assert.match(capabilities, /API behavior in\. Device-fit models out\./);
+  assert.match(capabilities, /<b>8<\/b> capability domains/);
+  assert.match(capabilities, /<b>17<\/b> channel families/);
+  assert.match(capabilities, /<b>12<\/b> ingress modes/);
+  assert.match(capabilities, /<b>10<\/b> export modes/);
+  assert.match(capabilities, /Every capability has input, control, output, proof/);
+  assert.match(capabilities, /Readiness-gated claims/);
+
+  assert.doesNotMatch(capabilities, /Run the free scan/i);
+  assert.doesNotMatch(capabilities, /Ten audit surfaces/i);
+  assert.doesNotMatch(capabilities, /One signed engine/i);
+  assert.doesNotMatch(capabilities, /MCP Server Audit/i);
+  assert.doesNotMatch(capabilities, /OSCAL/i);
+  assert.doesNotMatch(capabilities, /\$750|\$10,000|\$15,000|\$999/);
+  assert.doesNotMatch(capabilities, /Reviewed Attestation/);
+  assert.doesNotMatch(capabilities, /co-signed/i);
+  assert.doesNotMatch(capabilities, /SOC 2 Type II evidence/);
+  assert.doesNotMatch(capabilities, /HIPAA-ready/);
+  assert.doesNotMatch(capabilities, /FedRAMP Moderate roadmap/);
+  assert.doesNotMatch(capabilities, /繚/);
+});
+
+test('compare page exposes source-backed operator scorecard without overclaiming competitors', () => {
+  const compare = fs.readFileSync(path.join('public', 'compare.html'), 'utf8');
+
+  assert.match(compare, /Kolm Compared With AI Gateways, Evals, Fine-Tuning, Security, and Runtime Platforms/);
+  assert.match(compare, /Kolm is not one more AI dashboard/);
+  assert.match(compare, /290\+<\/b> players mapped/);
+  assert.match(compare, /17<\/b> API data channels/);
+  assert.match(compare, /id="operator-scorecard"/);
+  assert.match(compare, /The buyer comparison should be an operating checklist/);
+  assert.match(compare, /Gateway and routing/);
+  assert.match(compare, /Observability and evals/);
+  assert.match(compare, /Pioneer-style improvement/);
+  assert.match(compare, /Fine-tuning and serving/);
+  assert.match(compare, /Security and GRC/);
+  assert.match(compare, /Data and ops plane/);
+  assert.match(compare, /closed_loop_improvement/);
+  assert.match(compare, /observe-failures/);
+  assert.match(compare, /compile-artifact/);
+  assert.match(compare, /12 ingress modes/);
+  assert.match(compare, /10 export modes/);
+  assert.match(compare, /product requirement, not a benchmark claim/i);
+  assert.match(compare, /https:\/\/arxiv\.org\/abs\/2604\.09791/);
+  assert.match(compare, /https:\/\/portkey\.ai\/docs\/product\/ai-gateway/);
+  assert.match(compare, /https:\/\/langfuse\.com\/docs/);
+  assert.match(compare, /https:\/\/www\.respan\.ai\/docs\/documentation\/getting-started\/overview/);
+
+  assert.doesNotMatch(compare, /better than every/i);
+  assert.doesNotMatch(compare, /objectively better/i);
+  assert.doesNotMatch(compare, /Run the free scan/i);
+  assert.doesNotMatch(compare, /Verify a report/i);
+  assert.doesNotMatch(compare, /SOC 2 Type II evidence/i);
+  assert.doesNotMatch(compare, /HIPAA-ready/i);
+  assert.doesNotMatch(compare, /FedRAMP Moderate/i);
+  assert.doesNotMatch(compare, /蝜/);
+});
+
+test('integrations page exposes source-to-proof integration fabric without overclaiming', () => {
+  const integrations = fs.readFileSync(path.join('public', 'integrations.html'), 'utf8');
+
+  assert.match(integrations, /Every API signal becomes governed proof/);
+  assert.match(integrations, /Source-to-proof map/);
+  assert.match(integrations, /operator workbench/);
+  assert.match(integrations, /GET \/v1\/account\/api-control-center/);
+  assert.match(integrations, /source-to-proof map/);
+  assert.match(integrations, /workflow\/api/);
+  assert.match(integrations, /catalog\/lineage/);
+  assert.match(integrations, /market pressure/i);
+  assert.match(integrations, /Workato/);
+  assert.match(integrations, /MuleSoft/);
+  assert.match(integrations, /Airbyte/);
+  assert.match(integrations, /Fivetran/);
+  assert.match(integrations, /Confluent/);
+  assert.match(integrations, /OpenLineage/);
+  assert.match(integrations, /Akto/);
+  assert.match(integrations, /Vanta/);
+  assert.match(integrations, /Drata/);
+  assert.match(integrations, /does not claim live certification/);
+  assert.match(integrations, /opaque until adapter-proven/);
+
+  assert.doesNotMatch(integrations, /Run the free scan/i);
+  assert.doesNotMatch(integrations, /Start an audit/i);
+  assert.doesNotMatch(integrations, /SOC 2 Type II evidence/i);
+  assert.doesNotMatch(integrations, /HIPAA-ready/i);
+  assert.doesNotMatch(integrations, /FedRAMP Moderate/i);
+  assert.doesNotMatch(integrations, /better than every/i);
+  assert.doesNotMatch(integrations, /100x/i);
+});
+
+test('docs page exposes API control contracts without stale audit module copy', () => {
+  const docs = fs.readFileSync(path.join('public', 'docs.html'), 'utf8');
+
+  assert.match(docs, /Kolm Developer Docs/);
+  assert.match(docs, /Docs should show the product contract/);
+  assert.match(docs, /API behavior in\. Device-fit models out\./);
+  assert.match(docs, /<b>922<\/b> route inventory/);
+  assert.match(docs, /<b>214<\/b> route groups/);
+  assert.match(docs, /<b>17<\/b> data channel families/);
+  assert.match(docs, /API Control Center/);
+  assert.match(docs, /Every credible API data path in and out/);
+  assert.match(docs, /Every dashboard control needs an API contract/);
+  assert.match(docs, /Every write should leave an event/);
+  assert.match(docs, /\/docs\/api/);
+  assert.match(docs, /\/openapi\.json/);
+  assert.match(docs, /\/docs\/api-routes\.json/);
+  assert.match(docs, /\/account\/api-control-center/);
+
+  assert.doesNotMatch(docs, /Audit module/i);
+  assert.doesNotMatch(docs, /audit API still exists/i);
+  assert.doesNotMatch(docs, /audit property/i);
+  assert.doesNotMatch(docs, /Security-readiness audit/i);
+  assert.doesNotMatch(docs, /Audit docs/i);
+  assert.doesNotMatch(docs, /Local audit docs/i);
+  assert.doesNotMatch(docs, /Run the free scan/i);
+  assert.doesNotMatch(docs, /Verify a report/i);
+  assert.doesNotMatch(docs, /SOC 2/i);
+  assert.doesNotMatch(docs, /HIPAA-ready/i);
+  assert.doesNotMatch(docs, /繚/);
+});
+
+test('research page exposes product research command center without stale audit method copy', () => {
+  const research = fs.readFileSync(path.join('public', 'research.html'), 'utf8');
+
+  assert.match(research, /Kolm Research Command Center/);
+  assert.match(research, /Research should decide product scope, not decorate it/);
+  assert.match(research, /API behavior in\. Device-fit models out\./);
+  assert.match(research, /<b>293<\/b> competitor\/category players mapped/);
+  assert.match(research, /<b>17<\/b> product clusters/);
+  assert.match(research, /<b>11<\/b> source-backed unicorn lessons/);
+  assert.match(research, /behavior-to-artifact product requirements/);
+  assert.match(research, /Every research claim needs a product object/);
+  assert.match(research, /Readiness-gated claims/);
+
+  assert.doesNotMatch(research, /Agent Security Research/i);
+  assert.doesNotMatch(research, /The Audit Method/i);
+  assert.doesNotMatch(research, /prompt-injection battery/i);
+  assert.doesNotMatch(research, /Audit verifier/i);
+  assert.doesNotMatch(research, /Verify a report/i);
+  assert.doesNotMatch(research, /Run the free scan/i);
+  assert.doesNotMatch(research, /SOC 2/i);
+  assert.doesNotMatch(research, /ISO 42001/i);
+  assert.doesNotMatch(research, /NIST AI RMF/i);
+  assert.doesNotMatch(research, /EU AI Act/i);
+  assert.doesNotMatch(research, /OWASP/i);
+  assert.doesNotMatch(research, /MITRE/i);
+  assert.doesNotMatch(research, /繚/);
+});
+
+test('changelog page exposes product release ledger without stale audit verifier copy', () => {
+  const changelog = fs.readFileSync(path.join('public', 'changelog.html'), 'utf8');
+
+  assert.match(changelog, /Kolm Product Release Ledger/);
+  assert.match(changelog, /A changelog should show what changed and what is still gated/);
+  assert.match(changelog, /API behavior in\. Device-fit models out\./);
+  assert.match(changelog, /<b>8<\/b> product surfaces tracked/);
+  assert.match(changelog, /<b>13<\/b> route tests/);
+  assert.match(changelog, /<b>8<\/b> open readiness gates/);
+  assert.match(changelog, /needs external partner/);
+  assert.match(changelog, /needs live certification/);
+  assert.match(changelog, /needs package release/);
+  assert.match(changelog, /needs public benchmark data/);
+  assert.match(changelog, /Readiness-gated claims/);
+
+  assert.doesNotMatch(changelog, /Audit verifier/i);
+  assert.doesNotMatch(changelog, /Verify a report/i);
+  assert.doesNotMatch(changelog, /Agent Security Readiness/i);
+  assert.doesNotMatch(changelog, /sample audit report/i);
+  assert.doesNotMatch(changelog, /third-party pentest/i);
+  assert.doesNotMatch(changelog, /SOC 2/i);
+  assert.doesNotMatch(changelog, /繚/);
+});
+
+test('contact page routes implementation intake without stale audit packaging', () => {
+  const contact = fs.readFileSync(path.join('public', 'contact.html'), 'utf8');
+
+  assert.match(contact, /Kolm Implementation Intake/);
+  assert.match(contact, /Bring one production AI\/API loop/);
+  assert.match(contact, /API behavior in\. Device-fit models out\./);
+  assert.match(contact, /Email Implementation Intake/);
+  assert.match(contact, /dev@kolm\.ai/);
+  assert.match(contact, /Readiness-gated claims/);
+  assert.match(contact, /<b>8<\/b> open readiness gates/);
+  assert.match(contact, /source, risk, gate, target, and export/);
+
+  assert.doesNotMatch(contact, /Run a free scan/i);
+  assert.doesNotMatch(contact, /Run the free scan/i);
+  assert.doesNotMatch(contact, /Start an AI Security Audit/i);
+  assert.doesNotMatch(contact, /Start an audit/i);
+  assert.doesNotMatch(contact, /\$750/);
+  assert.doesNotMatch(contact, /Reviewed Attestation/);
+  assert.doesNotMatch(contact, /co-signed/i);
+  assert.doesNotMatch(contact, /SOC 2 Type II evidence/);
+  assert.doesNotMatch(contact, /HIPAA-ready/);
+});
+
+test('api control center UI exposes enterprise data-plane and improvement-loop controls', () => {
+  const control = fs.readFileSync(path.join('public', 'account', 'api-control-center.html'), 'utf8');
+
+  assert.match(control, /API Control Center - kolm\.ai/);
+  assert.match(control, /One tenant-scoped console for AI API ingress, egress/);
+  assert.match(control, /API data channel matrix/);
+  assert.match(control, /Collection and export modes/);
+  assert.match(control, /Operational contract/);
+  assert.match(control, /Closed-loop improvement/);
+  assert.match(control, /Failure to artifact/);
+  assert.match(control, /Promotion gates/);
+  assert.match(control, /Operator workbench/);
+  assert.match(control, /Source-to-proof runbook/);
+  assert.match(control, /High-priority intake/);
+  assert.match(control, /Proof exports/);
+  assert.match(control, /renderLoopStep/);
+  assert.match(control, /renderWorkbench/);
+  assert.match(control, /Evidence:/);
+  assert.match(control, /Gate:/);
+  assert.match(control, /Data channels/);
+  assert.match(control, /Filter API data channels/);
+  assert.match(control, /\['ingress', 'Ingress'\]/);
+  assert.match(control, /applyChannelFilter/);
+  assert.match(control, /Integration map/);
+  assert.match(control, /Policy layers/);
+  assert.match(control, /Enterprise controls/);
+  assert.match(control, /Differentiators/);
+  assert.match(control, /fetch\('\/v1\/account\/api-control-center'/);
+
+  assert.doesNotMatch(control, /Run the free scan/i);
+  assert.doesNotMatch(control, /Verify a report/i);
+  assert.doesNotMatch(control, /SOC 2 Type II evidence/i);
+  assert.doesNotMatch(control, /HIPAA-ready/i);
+  assert.doesNotMatch(control, /FedRAMP Moderate/i);
+  assert.doesNotMatch(control, /蝜/);
+});
+
+test('pricing page mirrors compiler plan catalog without stale audit packaging', () => {
+  const pricing = fs.readFileSync(path.join('public', 'pricing.html'), 'utf8');
+
+  assert.match(pricing, /Kolm Compiler Pricing/);
+  assert.match(pricing, /Price the controlled loop, not generic AI seats/);
+  assert.match(pricing, /API behavior in\. Device-fit models out\./);
+  assert.match(pricing, /6<\/b> catalog tiers/);
+  assert.match(pricing, /25M<\/b> Business gateway calls/);
+  assert.match(pricing, /200<\/b> Business compile credits/);
+  assert.match(pricing, /17%<\/b> annual savings/);
+  assert.match(pricing, /\$0\/mo/);
+  assert.match(pricing, /\$29\/mo/);
+  assert.match(pricing, /\$49\/mo/);
+  assert.match(pricing, /\$99\/mo/);
+  assert.match(pricing, /\$499\/mo/);
+  assert.match(pricing, /Custom/);
+  assert.match(pricing, /50K/);
+  assert.match(pricing, /500K/);
+  assert.match(pricing, /5M/);
+  assert.match(pricing, /250M/);
+  assert.match(pricing, /\/signup\?plan=indie/);
+  assert.match(pricing, /\/signup\?plan=pro/);
+  assert.match(pricing, /\/signup\?plan=teams/);
+  assert.match(pricing, /\/signup\?plan=business/);
+  assert.match(pricing, /\/v1\/plans/);
+  assert.match(pricing, /\/v1\/billing\/tiers/);
+  assert.match(pricing, /\/v1\/account\/api-control-center/);
+
+  assert.doesNotMatch(pricing, /Audit module/i);
+  assert.doesNotMatch(pricing, /signed audit reports/i);
+  assert.doesNotMatch(pricing, /audit pricing/i);
+  assert.doesNotMatch(pricing, /Run the free scan/i);
+  assert.doesNotMatch(pricing, /Verify a report/i);
+  assert.doesNotMatch(pricing, /SOC 2/i);
+  assert.doesNotMatch(pricing, /HIPAA-ready/i);
+  assert.doesNotMatch(pricing, /FedRAMP/i);
+  assert.doesNotMatch(pricing, /Reviewed Attestation/i);
+  assert.doesNotMatch(pricing, /co-signed/i);
+  assert.doesNotMatch(pricing, /\$750|\$10,000|\$15,000|\$999/);
+  assert.doesNotMatch(pricing, /private beta/i);
+  assert.doesNotMatch(pricing, /Request access/i);
+  assert.doesNotMatch(pricing, /蝜/);
+});
+
+test('signup page exposes workspace onboarding without stale audit packaging', () => {
+  const signup = fs.readFileSync(path.join('public', 'signup.html'), 'utf8');
+
+  assert.match(signup, /Kolm Workspace Setup/);
+  assert.match(signup, /Create the workspace that controls one AI\/API loop/);
+  assert.match(signup, /API behavior in\. Device-fit models out\./);
+  assert.match(signup, /API Control Center/);
+  assert.match(signup, /17<\/b> data channel families/);
+  assert.match(signup, /8<\/b> readiness gates visible/);
+  assert.match(signup, /id="form-card"/);
+  assert.match(signup, /id="done-card"/);
+  assert.match(signup, /id="email"/);
+  assert.match(signup, /id="apikey"/);
+  assert.match(signup, /id="snippet"/);
+  assert.match(signup, /id="plan-note"/);
+  assert.match(signup, /id="workspace-status"/);
+  assert.match(signup, /id="billing-link"/);
+  assert.match(signup, /new URLSearchParams\(window\.location\.search\)/);
+  assert.match(signup, /payload\.plan=selectedPlan/);
+  assert.match(signup, /pending billing/);
+  assert.match(signup, /Continue to Checkout/);
+  assert.match(signup, /fetch\('\/v1\/signup'/);
+  assert.match(signup, /\/account\/api-control-center/);
+  assert.match(signup, /\/docs\/api/);
+
+  assert.doesNotMatch(signup, /Audit module/i);
+  assert.doesNotMatch(signup, /Run a free scan/i);
+  assert.doesNotMatch(signup, /Run the free scan/i);
+  assert.doesNotMatch(signup, /Verify artifacts/i);
+  assert.doesNotMatch(signup, /Trust center/i);
+  assert.doesNotMatch(signup, /SOC 2/i);
+  assert.doesNotMatch(signup, /HIPAA-ready/i);
+  assert.doesNotMatch(signup, /Create account/i);
+  assert.doesNotMatch(signup, /蝜/);
+});
+
 test('node SDK package presents the current kolm brand', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join('sdk', 'node', 'package.json'), 'utf8'));
   const readme = fs.readFileSync(path.join('sdk', 'node', 'README.md'), 'utf8');
@@ -421,9 +882,137 @@ test('public site routes, sitemap URLs, and referenced assets resolve', async (t
 
   const failures = [];
   for (const ref of [...collectInternalReferences(), '/ready']) {
-    const res = await fetch(base + ref, { redirect: 'follow' });
+    const res = await fetch(base + ref, { redirect: 'manual' });
+    if (AUDIT_HOST_ONLY_ROUTES.includes(ref) && res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location') || '';
+      if (!location.startsWith('https://audit.kolm.ai/')) failures.push(`${ref}: audit redirect location ${location || '(empty)'}`);
+      continue;
+    }
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location') || '';
+      if (location.startsWith('/')) {
+        const followed = await fetch(base + location, { redirect: 'manual' });
+        if (followed.status >= 400) failures.push(`${ref}: ${res.status} -> ${location}: ${followed.status}`);
+        continue;
+      }
+    }
     if (res.status >= 400) failures.push(`${ref}: ${res.status}`);
   }
+
+  for (const route of COMPILER_PRODUCT_ROUTES) {
+    const product = await fetch(base + route, { redirect: 'manual' });
+    assert.equal(product.status, 200, `${route} should render the main compiler product page`);
+    assert.match(await product.text(), /API behavior in\. Device-fit models out\./);
+  }
+
+  const trust = await fetch(base + '/trust', { redirect: 'manual' });
+  assert.equal(trust.status, 200, '/trust should render the product readiness center');
+  const trustHtml = await trust.text();
+  assert.match(trustHtml, /Product Readiness and Evidence Center/);
+  assert.match(trustHtml, /<b>8<\/b> open readiness gates/);
+
+  const security = await fetch(base + '/security', { redirect: 'manual' });
+  assert.equal(security.status, 200, '/security should render the security and control posture page');
+  const securityHtml = await security.text();
+  assert.match(securityHtml, /Kolm Security and Control Posture/);
+  assert.match(securityHtml, /Security starts at the API boundary/);
+  assert.match(securityHtml, /Certification and Package Gates/);
+
+  const enterprise = await fetch(base + '/enterprise', { redirect: 'manual' });
+  assert.equal(enterprise.status, 200, '/enterprise should render the enterprise control center');
+  const enterpriseHtml = await enterprise.text();
+  assert.match(enterpriseHtml, /Kolm Enterprise Control Center/);
+  assert.match(enterpriseHtml, /Enterprise AI control starts before a model ships/);
+  assert.match(enterpriseHtml, /17 API data channel families/);
+
+  const contact = await fetch(base + '/contact', { redirect: 'manual' });
+  assert.equal(contact.status, 200, '/contact should render the implementation intake page');
+  const contactHtml = await contact.text();
+  assert.match(contactHtml, /Kolm Implementation Intake/);
+  assert.match(contactHtml, /Bring one production AI\/API loop/);
+  assert.match(contactHtml, /Email Implementation Intake/);
+
+  const platform = await fetch(base + '/platform', { redirect: 'manual' });
+  assert.equal(platform.status, 200, '/platform should render the platform architecture page');
+  const platformHtml = await platform.text();
+  assert.match(platformHtml, /Kolm Platform Architecture/);
+  assert.match(platformHtml, /behavior-to-artifact control plane/);
+  assert.match(platformHtml, /Every write emits an audit event/);
+
+  const capabilities = await fetch(base + '/capabilities', { redirect: 'manual' });
+  assert.equal(capabilities.status, 200, '/capabilities should render the capabilities matrix page');
+  const capabilitiesHtml = await capabilities.text();
+  assert.match(capabilitiesHtml, /Kolm Capabilities Matrix/);
+  assert.match(capabilitiesHtml, /Capabilities are lifecycle controls, not audit SKUs/);
+  assert.match(capabilitiesHtml, /Every capability has input, control, output, proof/);
+
+  const pricing = await fetch(base + '/pricing', { redirect: 'manual' });
+  assert.equal(pricing.status, 200, '/pricing should render the compiler pricing plan catalog');
+  const pricingHtml = await pricing.text();
+  assert.match(pricingHtml, /Kolm Compiler Pricing/);
+  assert.match(pricingHtml, /Price the controlled loop, not generic AI seats/);
+  assert.match(pricingHtml, /\$499\/mo/);
+  assert.match(pricingHtml, /\/signup\?plan=pro/);
+  assert.match(pricingHtml, /\/v1\/plans/);
+
+  const docs = await fetch(base + '/docs', { redirect: 'manual' });
+  assert.equal(docs.status, 200, '/docs should render the developer docs page');
+  const docsHtml = await docs.text();
+  assert.match(docsHtml, /Kolm Developer Docs/);
+  assert.match(docsHtml, /Docs should show the product contract/);
+  assert.match(docsHtml, /Every credible API data path in and out/);
+  assert.match(docsHtml, /\/docs\/api/);
+
+  const research = await fetch(base + '/research', { redirect: 'manual' });
+  assert.equal(research.status, 200, '/research should render the research command center');
+  const researchHtml = await research.text();
+  assert.match(researchHtml, /Kolm Research Command Center/);
+  assert.match(researchHtml, /Research should decide product scope/);
+
+  const changelog = await fetch(base + '/changelog', { redirect: 'manual' });
+  assert.equal(changelog.status, 200, '/changelog should render the product release ledger');
+  const changelogHtml = await changelog.text();
+  assert.match(changelogHtml, /Kolm Product Release Ledger/);
+  assert.match(changelogHtml, /what changed and what is still gated/);
+
+  const signup = await fetch(base + '/signup', { redirect: 'manual' });
+  assert.equal(signup.status, 200, '/signup should render the workspace setup page');
+  const signupHtml = await signup.text();
+  assert.match(signupHtml, /Kolm Workspace Setup/);
+  assert.match(signupHtml, /Create the workspace that controls one AI\/API loop/);
+  assert.match(signupHtml, /Create Workspace/);
+  assert.match(signupHtml, /fetch\('\/v1\/signup'/);
+
+  const compatRedirects = new Map([
+    ['/product', '/compiler-product'],
+    ['/models', '/platform'],
+    ['/api', '/docs/api'],
+    ['/api-routes.json', '/docs/api-routes.json'],
+    ['/quickstart', '/docs#quickstart'],
+    ['/captures', '/compiler-product#pipeline'],
+    ['/training', '/compiler-product#pipeline'],
+    ['/distill', '/compiler-product#pipeline'],
+    ['/tui', '/account/overview'],
+    ['/control-center', '/account/api-control-center'],
+    ['/api-control-center', '/account/api-control-center'],
+    ['/enterprise-control', '/account/api-control-center'],
+    ['/self-host', '/security'],
+    ['/airgap', '/security'],
+  ]);
+  for (const [source, destination] of compatRedirects) {
+    const res = await fetch(base + source, { redirect: 'manual' });
+    assert.equal(res.status, 302, `${source} should redirect to the canonical compiler surface`);
+    assert.equal(res.headers.get('location'), destination);
+  }
+
+  const openapi = await fetch(base + '/openapi.json', { redirect: 'manual' });
+  assert.equal(openapi.status, 200, '/openapi.json should serve the generated OpenAPI JSON, not redirect to docs');
+  assert.match(openapi.headers.get('content-type') || '', /json/);
+  assert.match((await openapi.json()).openapi || '', /^3\./);
+
+  const auditOnly = await fetch(base + '/checks', { redirect: 'manual' });
+  assert.equal(auditOnly.status, 302, '/checks should move off the main compiler domain');
+  assert.equal(auditOnly.headers.get('location'), 'https://audit.kolm.ai/checks');
 
   assert.deepEqual(failures, []);
 });
@@ -451,4 +1040,78 @@ test('sitemap includes indexable product/docs/article routes only', () => {
   );
 
   assert.deepEqual(blockedInSitemap, []);
+});
+
+test('vercel routing keeps compiler pages primary and audit pages on audit host', () => {
+  const config = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+  const hasHost = (rule, host) => (rule.has || []).some(entry => entry.type === 'host' && entry.value === host);
+  const firstRewrite = source => config.rewrites.find(rule => rule.source === source && !rule.has);
+
+  assert.equal(firstRewrite('/platform')?.destination, '/platform.html');
+  assert.equal(firstRewrite('/capabilities')?.destination, '/capabilities.html');
+  assert.equal(firstRewrite('/research')?.destination, '/research.html');
+  assert.equal(firstRewrite('/changelog')?.destination, '/changelog.html');
+  assert.equal(firstRewrite('/integrations')?.destination, '/integrations.html');
+  assert.equal(firstRewrite('/runtimes')?.destination, '/runtimes.html');
+  assert.equal(firstRewrite('/security')?.destination, '/security.html');
+  assert.equal(firstRewrite('/trust')?.destination, '/trust.html');
+  assert.equal(firstRewrite('/enterprise')?.destination, '/enterprise.html');
+  assert.equal(firstRewrite('/contact')?.destination, '/contact.html');
+  assert.equal(firstRewrite('/terms')?.destination, '/compiler-terms.html');
+  assert.ok(!config.redirects.some(rule => rule.source === '/openapi.json'), '/openapi.json must be served as static JSON');
+  assert.ok(!config.redirects.some(rule => rule.source === '/integrations' && rule.destination === '/docs'), '/integrations must be a product page, not a docs redirect');
+  assert.ok(!config.redirects.some(rule => rule.source === '/runtimes' && rule.destination === '/platform'), '/runtimes must be a product page, not a platform redirect');
+  assert.ok(!config.rewrites.some(rule => rule.source === '/security' && rule.destination === '/compiler-product.html'), '/security must be a security posture page, not a compiler-product alias');
+  assert.ok(!config.rewrites.some(rule => rule.source === '/trust' && rule.destination === '/compiler-product.html'), '/trust must be a readiness center, not a compiler-product alias');
+  assert.ok(!config.rewrites.some(rule => rule.source === '/enterprise' && rule.destination === '/compiler-product.html'), '/enterprise must be an enterprise control center, not a compiler-product alias');
+  assert.ok(!config.rewrites.some(rule => rule.source === '/contact' && rule.destination === '/compiler-product.html'), '/contact must be an implementation intake page, not a compiler-product alias');
+  assert.ok(!config.rewrites.some(rule => rule.source === '/platform' && rule.destination === '/compiler-product.html'), '/platform must be a platform architecture page, not a compiler-product alias');
+  assert.ok(!config.rewrites.some(rule => rule.source === '/capabilities' && rule.destination === '/compiler-product.html'), '/capabilities must be a capabilities matrix page, not a compiler-product alias');
+  assert.ok(!config.rewrites.some(rule => rule.source === '/research' && rule.destination === '/compiler-product.html'), '/research must be a research command center, not a compiler-product alias');
+  assert.ok(!config.rewrites.some(rule => rule.source === '/changelog' && rule.destination === '/compiler-product.html'), '/changelog must be a product release ledger, not a compiler-product alias');
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/api' &&
+    rule.destination === '/docs/api'
+  ));
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/api-routes.json' &&
+    rule.destination === '/docs/api-routes.json'
+  ));
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/product' &&
+    rule.destination === '/compiler-product'
+  ));
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/control-center' &&
+    rule.destination === '/account/api-control-center'
+  ));
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/api-control-center' &&
+    rule.destination === '/account/api-control-center'
+  ));
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/enterprise-control' &&
+    rule.destination === '/account/api-control-center'
+  ));
+
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/:compilerPath(how-it-works|platform|capabilities|enterprise|security|trust|contact|research|changelog).html' &&
+    rule.destination === '/:compilerPath' &&
+    hasHost(rule, 'kolm.ai')
+  ));
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/terms.html' &&
+    rule.destination === '/terms' &&
+    hasHost(rule, 'kolm.ai')
+  ));
+  assert.ok(config.redirects.some(rule =>
+    rule.source === '/:auditPath(verify|checks|report|report-viewer|badge|roi|regulatory-clock|transparency-log|trust-center|buyer|spec).html' &&
+    rule.destination === 'https://audit.kolm.ai/:auditPath.html' &&
+    hasHost(rule, 'kolm.ai')
+  ));
+  assert.ok(config.rewrites.some(rule =>
+    rule.source === '/platform' &&
+    rule.destination === '/platform.html' &&
+    hasHost(rule, 'audit.kolm.ai')
+  ));
 });

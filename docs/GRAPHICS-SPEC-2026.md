@@ -1,4 +1,4 @@
-﻿# GRAPHICS SPEC 2026 - the kolm.ai diagram language (v2.1 cosmetics wave)
+# GRAPHICS SPEC 2026 - the kolm.ai diagram language (v2.1 cosmetics wave)
 
 One shared SVG vocabulary so every technical page shows its mechanism instead of
 describing it. All styles live in `public/kolm-2026.css` under "GRAPHICS LAYER v2.1"

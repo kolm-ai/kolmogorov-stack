@@ -102,14 +102,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
       <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
+      <a href="/platform">Platform</a>
       <a href="/pricing">Pricing</a>
       <a href="/trust">Trust</a>
       <a href="/docs">Docs</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost btn--sm" href="https://audit.kolm.ai/verify">Audit verifier</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Get an API key</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -175,7 +175,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__k">Term · Core</p>
         <h3>Agent Security Review</h3>
         <p>The process by which an enterprise buyer's security team evaluates an autonomous AI agent before approving it for production or signing a contract. It examines what the agent can access, what it records, where data flows, and how it resists manipulation, and it now asks agent-specific questions that a standard SOC 2 report or vendor questionnaire does not answer. kolm runs the same checks a reviewer runs and ships the results as signed evidence.</p>
-        <p class="card__map">Related: <a href="/checks">What we test</a> · <a href="/how-it-works">How it works</a></p>
+        <p class="card__map">Related: <a href="/platform">Platform</a> · <a href="/how-it-works">How it works</a></p>
       </div>
       <div class="card" id="signed-evidence-report">
         <p class="card__k">Term · Core</p>
@@ -199,7 +199,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__k">Term · Core wedge</p>
         <h3>Signed agent security record</h3>
         <p>A signed, timestamped, witnessed record that binds an agent's identity and provenance to its assessed security posture at a point in time. It carries the agent's control findings, the issuer's public key, an append-only log entry, and a trusted timestamp, so a buyer can confirm both what was attested and when. It is the durable evidence an agent presents when its security has already been reviewed, rather than re-answering a questionnaire for every deal.</p>
-        <p class="card__map">Related: <a href="/research">Research</a> · <a href="/trust">Trust center</a> · <a href="/transparency-log">Transparency log</a></p>
+        <p class="card__map">Related: <a href="/research">Research</a> · <a href="/trust">Trust center</a> · <a href="https://audit.kolm.ai/transparency-log">Transparency log</a></p>
       </div>
     </div>
     <figure class="diag reveal" role="img" aria-label="Verification loop: the buyer's browser fetches the report and the public keyring, verifies with WebCrypto, and reaches VALID or VOID with no kolm server in the trust path">
@@ -318,13 +318,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__k">Term · Provenance</p>
         <h3>Transparency Log and Inclusion Proof</h3>
         <p>A transparency log is an append-only, tamper-evident record of every report kolm issues. An inclusion proof is a compact cryptographic path showing that one specific report is recorded in the log without revealing the rest, the same idea behind certificate-transparency and Sigstore-style logs. Together they let a buyer confirm a report was issued and that the log it sits in cannot be silently rewritten.</p>
-        <p class="card__map">Related: <a href="/transparency-log">Transparency log</a> · <a href="/trust">Trust center</a></p>
+        <p class="card__map">Related: <a href="https://audit.kolm.ai/transparency-log">Transparency log</a> · <a href="/trust">Trust center</a></p>
       </div>
       <div class="card" id="rfc-3161-timestamp">
         <p class="card__k">Term · Provenance</p>
         <h3>RFC 3161 Timestamp</h3>
         <p>A trusted timestamp issued by a time-stamping authority under RFC 3161, which binds a hash of the report to a specific time so the attestation cannot be back-dated. Combined with the Ed25519 signature and the transparency-log entry, it answers not just who signed and what, but when. This matters when a buyer needs evidence that a posture was attested before a given deploy or deadline.</p>
-        <p class="card__map">Related: <a href="/how-it-works">How it works</a> · <a href="/transparency-log">Transparency log</a></p>
+        <p class="card__map">Related: <a href="/how-it-works">How it works</a> · <a href="https://audit.kolm.ai/transparency-log">Transparency log</a></p>
       </div>
     </div>
       </div>
@@ -348,19 +348,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__k">Standard · Attestation</p>
         <h3>SOC 2 for AI Agents</h3>
         <p>Shorthand for the agent-specific evidence buyers now ask for on top of a SOC 2 report. SOC 2 attests an organization's controls, but not an autonomous agent's permissions, egress, or injection resistance, so reviewers ask a separate set of questions. kolm fills that gap and maps each finding back into the SOC 2, ISO 42001, and NIST AI RMF work a team is already doing. It complements a SOC 2 audit; it does not replace one.</p>
-        <p class="card__map">Related: <a href="/checks">What we test</a> · <a href="/how-it-works">How it works</a></p>
+        <p class="card__map">Related: <a href="/platform">Platform</a> · <a href="/how-it-works">How it works</a></p>
       </div>
       <div class="card" id="eu-ai-act-article-12">
         <p class="card__k">Standard · Regulation</p>
         <h3>EU AI Act Article 12</h3>
         <p>The Article of Regulation (EU) 2024/1689 that requires high-risk AI systems to automatically record events (record-keeping, or logging) over their lifetime, so the operation of the system is traceable. It is the regulatory anchor for ASR-2 audit-trail integrity: append-only, retained, and reviewable. A reviewer working an EU mandate looks here first.</p>
-        <p class="card__map">Related: <a href="#asr-2-audit-trail">ASR-2 audit-trail</a> · <a href="/checks">What we test</a></p>
+        <p class="card__map">Related: <a href="#asr-2-audit-trail">ASR-2 audit-trail</a> · <a href="/platform">Platform</a></p>
       </div>
       <div class="card" id="nist-ai-rmf">
         <p class="card__k">Standard · Framework</p>
         <h3>NIST AI RMF</h3>
         <p>The U.S. National Institute of Standards and Technology AI Risk Management Framework (AI RMF 1.0), organized around four functions: Govern, Map, Measure, and Manage. kolm maps controls such as least privilege (Manage) and provenance (Map) to its subcategories, so a finding traces to a recognized risk function rather than to a vendor's own scheme.</p>
-        <p class="card__map">Related: <a href="#asr-1-least-privilege">ASR-1</a> · <a href="#asr-5-provenance">ASR-5</a> · <a href="/checks">What we test</a></p>
+        <p class="card__map">Related: <a href="#asr-1-least-privilege">ASR-1</a> · <a href="#asr-5-provenance">ASR-5</a> · <a href="/platform">Platform</a></p>
       </div>
       <div class="card" id="owasp-llm-top-10">
         <p class="card__k">Standard · Risk catalog</p>
@@ -394,8 +394,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <a class="btn btn--ghost" href="/verify">Verify a report</a>
     </div>
     <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
+      <span class="badge badge--ok">Compiler-ready</span>
+      <span class="badge">Signed artifacts</span>
       <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
     </div>
     <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
@@ -418,14 +418,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI applications entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The API wrapper and compiler for signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
         <a href="/how-it-works">How it works</a>
         <a href="/platform">Platform</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
+        <a href="https://audit.kolm.ai/checks">Audit checks</a>
+        <a href="https://audit.kolm.ai/report">Audit report</a>
         <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
         <a href="/solutions/ai-vendors">For AI vendors</a>
@@ -436,9 +436,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <a href="/verify">Verify</a>
         <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
+        <a href="https://audit.kolm.ai/regulatory-clock">Regulatory clock</a>
         <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
+        <a href="https://audit.kolm.ai/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
         <h3>Legal</h3>
@@ -458,9 +458,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
     <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
+      <span class="badge badge--ok">Compiler-ready</span>
+      <span class="badge">Signed artifacts</span>
+      <span class="badge"><a href="/docs">API docs</a></span>
       <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>

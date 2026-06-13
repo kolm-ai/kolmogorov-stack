@@ -89,14 +89,14 @@ test('renderReportHtml(env) single-arg works and contains no em/en dash characte
   assert.ok(!/certified|compliant/i.test(html), 'no certification claim');
 });
 
-test('caveats render AFTER the control-status section (placement only, strings intact)', () => {
+test('caveats render BEFORE the control-status section (scope-first placement, strings intact)', () => {
   const env = paidEnvelope();
   const html = renderReportHtml(env);
   const controls = html.indexOf('<h2>Control status</h2>');
   const scope = html.indexOf('<h2>Scope &amp; limitations</h2>');
   const findings = html.indexOf('<h2>Findings</h2>');
   assert.ok(controls >= 0 && scope >= 0 && findings >= 0, 'all three sections present');
-  assert.ok(controls < scope && scope < findings, 'order is Control status -> Scope & limitations -> Findings');
+  assert.ok(scope < controls && controls < findings, 'order is Scope & limitations -> Control status -> Findings');
   for (const c of env.caveats) {
     assert.ok(html.includes(c.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')), 'every caveat string survives byte-identical (escaped)');
   }

@@ -2438,11 +2438,14 @@ export function buildRouter() {
     res.json({ ok: true, normalized: normalizeStreamChunk(provider, chunk), secret_values_included: false });
   });
 
-  // ---------- Plan catalog ----------
-  // Single source of truth for self-serve signup + plan-change. Mirrors
-  // /pricing exactly. STRIPE_PAYMENT_LINK_<PLAN> env vars wire each paid
-  // plan to a Stripe Payment Link (operator-supplied; absent => billing_url
-  // is null and the tenant is provisioned with a 30-day trial banner).
+  // ---------- Compiler plan catalog ----------
+  // Single source of truth for self-serve signup + plan-change. The public
+  // product is the compiler/gateway stack: capture API traffic, compile signed
+  // .kolm artifacts, compose specialists, and deploy to devices. The audit
+  // report surface is still available, but serialized as a secondary module.
+  // STRIPE_PAYMENT_LINK_<PLAN> env vars wire each paid plan to a Stripe Payment
+  // Link (operator-supplied; absent => billing_url is null and the tenant is
+  // provisioned with a 30-day trial banner).
   // Wave4 stripe-fix: PLAN_CATALOG now mirrors /pricing + the homepage tier row
   // exactly. Indie ($29) + Business ($499) are first-class self-serve rows
   // (previously: indie dropped silently to free; business was aliased to the
@@ -2466,6 +2469,7 @@ export function buildRouter() {
   // self-serve buyers into the sales-led path. Business is now its own row.
   const PLAN_ALIASES = {
     developer: 'free',
+    compiler: 'pro',
     starter: 'pro',
     team: 'teams',
     teams: 'teams',
@@ -2475,12 +2479,108 @@ export function buildRouter() {
     const id = String(raw || 'free').toLowerCase().replace(/[^a-z0-9_-]+/g, '').trim();
     return PLAN_CATALOG[id] ? id : (PLAN_ALIASES[id] || null);
   }
+
+  const COMPILER_PLAN_FEATURES = {
+    free: {
+      tier_label: 'Developer',
+      workflow: 'local_cli_and_light_gateway_capture',
+      included: ['Local CLI', 'public capability JSON', 'light gateway capture', 'one compile credit'],
+      recommended_for: 'evaluating the wrapper and compiling small local examples',
+    },
+    indie: {
+      tier_label: 'Indie compiler',
+      workflow: 'solo_gateway_capture_and_artifact_builds',
+      included: ['authenticated gateway capture', 'artifact previews', 'compile jobs', 'receipt export'],
+      recommended_for: 'single-user production namespaces',
+    },
+    pro: {
+      tier_label: 'Compiler',
+      workflow: 'production_gateway_capture_and_device_targeting',
+      included: ['provider routing', 'capture export', 'compile jobs', 'device fit recommendations', 'artifact downloads'],
+      recommended_for: 'teams moving repeated API workloads into owned artifacts',
+    },
+    teams: {
+      tier_label: 'Team compiler',
+      workflow: 'shared_namespaces_and_specialist_composition',
+      included: ['team seats', 'namespace controls', 'specialist composition', 'shared artifact review'],
+      recommended_for: 'multi-person compiler workflows',
+    },
+    business: {
+      tier_label: 'Business compiler',
+      workflow: 'fleet_deployment_and_governed_capture',
+      included: ['higher gateway caps', 'capture RBAC', 'device fleet rollout', 'hosted serve paths'],
+      recommended_for: 'device and hosted runtime rollouts',
+    },
+    enterprise: {
+      tier_label: 'Enterprise compiler',
+      workflow: 'private_deployment_and_support',
+      included: ['private deployment planning', 'custom compile credits', 'fleet rollout support', 'procurement packet export'],
+      recommended_for: 'private cloud, regulated, or high-volume runtime programs',
+    },
+  };
+
+  function compilerOnboardingForPlan(planId, opts = {}) {
+    const id = canonicalPlanId(planId) || 'free';
+    return {
+      product: 'kolm AI compiler',
+      primary_surface: 'compiler',
+      plan: id,
+      requested_plan: opts.requestedPlan || id,
+      dashboard_url: '/account/overview',
+      next_url: '/docs#quickstart',
+      default_namespace: opts.namespace || 'default',
+      steps: [
+        {
+          id: 'capture',
+          label: 'Route one namespace',
+          route: 'POST /v1/route/chat/completions',
+          docs: '/docs#capture',
+          detail: 'Send OpenAI-compatible model calls through Kolm and capture the behavior you want to own.',
+        },
+        {
+          id: 'compile',
+          label: 'Compile a .kolm artifact',
+          route: 'POST /v1/compile',
+          docs: '/docs#compile',
+          detail: 'Package examples, recipes, evals, tokenizer metadata and receipts into a signed artifact.',
+        },
+        {
+          id: 'deploy',
+          label: 'Fit and serve on a target',
+          route: 'POST /v1/devices/recommend',
+          docs: '/docs#deploy',
+          detail: 'Rank local, hosted, edge and fleet targets before installation or serving.',
+        },
+      ],
+      routes: {
+        capture: ['/v1/route/chat/completions', '/v1/gateway/dispatch', '/v1/capture/log', '/v1/capture/export'],
+        compile: ['/v1/compile/estimate', '/v1/compile/preview', '/v1/compile', '/v1/compile/:id/.kolm'],
+        compose: ['/v1/compose', '/v1/specialists/train', '/v1/specialists/:id/run'],
+        deploy: ['/v1/devices/detect', '/v1/devices/recommend', '/v1/devices/:id/install', '/v1/serve'],
+      },
+      audit_module: {
+        secondary: true,
+        host: 'audit.kolm.ai',
+        docs_url: 'https://audit.kolm.ai/docs',
+        routes: ['/v1/audit/scan', '/v1/audit/sessions', '/v1/audit/report/verify'],
+      },
+    };
+  }
+
   function serializePlan(p) {
+    const compiler = COMPILER_PLAN_FEATURES[p.id] || COMPILER_PLAN_FEATURES.free;
     return {
       id: p.id,
       label: p.label,
+      product: 'compiler',
+      product_label: compiler.tier_label,
+      workflow: compiler.workflow,
+      included: compiler.included,
+      recommended_for: compiler.recommended_for,
+      billing_unit: 'gateway calls plus compile credits',
       price_usd_month: p.price_usd_month,                    // null when sales-led
       price_label: p.price_label,                            // 'Custom' when sales-led
+      gateway_calls_hard: p.gateway_calls_hard,
       quota: p.quota,
       seats: p.seats,
       self_serve: p.self_serve !== false,
@@ -2488,6 +2588,11 @@ export function buildRouter() {
       compile_credits_monthly: p.compile_credits_monthly,    // 'custom' for Enterprise
       annual_savings_pct: p.annual_savings_pct || 0,
       billing_link_configured: !!billingLinkFor(p.id),
+      audit_module: {
+        available: true,
+        primary: false,
+        pricing_url: 'https://audit.kolm.ai/pricing',
+      },
     };
   }
 
@@ -2501,13 +2606,19 @@ export function buildRouter() {
     return null;
   }
 
-  // Plans - public plan catalog (Free / Pro / Team / Enterprise). Historical
-  // aliases still canonicalize server-side, but the public contract stays on
-  // the current four-plan model. Enterprise is contact-sales unless a custom
+  // Plans - public compiler plan catalog. Historical aliases still
+  // canonicalize server-side. Enterprise is contact-sales unless a custom
   // checkout link is supplied by the operator.
   r.get('/v1/plans', (_req, res) => {
     const plans = Object.values(PLAN_CATALOG).map(serializePlan);
-    res.json({ plans });
+    res.json({
+      ok: true,
+      product: 'kolm AI compiler',
+      positioning: 'API wrapper, signed artifact compiler, specialist composer and device targeter.',
+      primary_surfaces: ['capture', 'compile', 'compose', 'deploy'],
+      secondary_surfaces: ['audit'],
+      plans,
+    });
   });
 
   // P0-3 closure: /v1/billing/tiers as a public alias of /v1/plans so the
@@ -2521,6 +2632,9 @@ export function buildRouter() {
     const paidTotal = plans.filter(p => p.self_serve && p.price_usd_month > 0).length;
     res.json({
       source: 'cloud',
+      product: 'kolm AI compiler',
+      primary_surfaces: ['capture', 'compile', 'compose', 'deploy'],
+      secondary_surfaces: ['audit'],
       plans,
       stripe: {
         configured_links: configured,
@@ -2728,6 +2842,8 @@ export function buildRouter() {
     } catch (_) { /* metrics outage must not break signup */ }
 
     res.status(201).json({
+      ok: true,
+      product: 'kolm AI compiler',
       tenant: {
         id: t.id,
         name: t.name,
@@ -2740,11 +2856,12 @@ export function buildRouter() {
       billing_url: billingUrl,
       billing_required: requiresBilling,
       sales_required: requestedMeta.self_serve === false && !billingUrl,
+      onboarding: compilerOnboardingForPlan(provisionedPlan, { requestedPlan }),
       message: !requiresBilling
-        ? 'Save this key. You can rotate it from /v1/account/rotate-key or upgrade with /v1/account/change-plan.'
+        ? 'Save this key. Route one namespace through /v1/route, compile it with /v1/compile, and open /account/overview for the compiler dashboard.'
         : (billingUrl
-            ? `Save this key. Complete payment at ${billingUrl} to activate your ${requestedMeta.label} tier. Until payment is confirmed your account is on the Free tier.`
-            : `Save this key. ${requestedMeta.label} requires an architecture review; your account is on the Free tier until sales activates it.`),
+            ? `Save this key. Complete payment at ${billingUrl} to activate your ${requestedMeta.label} compiler tier. Until payment is confirmed your account is on the Free tier.`
+            : `Save this key. ${requestedMeta.label} compiler access requires an architecture review; your account is on the Free tier until sales activates it.`),
     });
   });
 
@@ -3403,6 +3520,122 @@ export function buildRouter() {
     } catch (e) {
       return res.status(500).json({ error: 'changelog_failed', message: String(e.message || e) });
     }
+  });
+
+  // Public product capability contract for the compiler-first site. This is a
+  // descriptive map, not an auth bypass: operational routes below keep their
+  // own auth/rate-limit gates.
+  r.get('/v1/product/capabilities', (_req, res) => {
+    res.json({
+      ok: true,
+      version: 'kolm-product-capabilities-1',
+      product: 'kolm AI compiler',
+      positioning: 'API collection wrapper, signed artifact compiler, specialist composer, and device-shrinking deployment layer.',
+      generated_at: new Date().toISOString(),
+      competitive_research: {
+        source: 'docs/research/category-competitor-atlas-2026-06-13.md',
+        unique_mapped_players: 293,
+        public_copy_count: '290+',
+        clusters: 17,
+        public_route: '/compare',
+        rule: 'Kolm should own the governed transition from API behavior to signed runtime artifacts, not claim to replace every specialized tool.',
+      },
+      api_control_coverage: {
+        data_channel_families: 17,
+        policy_layers: 8,
+        route: '/account/api-control-center',
+        api: '/v1/account/api-control-center',
+        default_unknown_payload_posture: 'opaque governed event until adapter manifest, schema hints, or native connector proves semantic understanding',
+      },
+      account_surfaces: [
+        {
+          id: 'api-control-center',
+          name: 'Enterprise API control center',
+          status: 'mounted',
+          summary: 'Tenant-scoped control plane for API ingress, egress, capture, routing, retention, redaction, evals, compile, deployment and export coverage.',
+          route: '/account/api-control-center',
+          api: '/v1/account/api-control-center',
+        },
+      ],
+      primary_surfaces: [
+        {
+          id: 'capture',
+          name: 'API collection wrapper',
+          status: 'mounted',
+          summary: 'Provider-compatible gateway and capture routes for prompts, completions, tool calls, costs, routing decisions and review/export workflows.',
+          public_docs: '/docs#capture',
+          routes: [
+            'POST /v1/route/chat/completions',
+            'POST /v1/gateway/dispatch',
+            'POST /v1/capture/log',
+            'GET /v1/captures/list',
+            'GET /v1/capture/export',
+          ],
+        },
+        {
+          id: 'compile',
+          name: 'Signed artifact compiler',
+          status: 'mounted',
+          summary: 'Compile estimates, previews, jobs and downloadable .kolm artifacts with manifests, recipes, evals and receipts.',
+          public_docs: '/docs#compile',
+          routes: [
+            'POST /v1/compile/estimate',
+            'POST /v1/compile/preview',
+            'POST /v1/compile',
+            'GET /v1/compile/:id',
+            'GET /v1/compile/:id/.kolm',
+          ],
+        },
+        {
+          id: 'compose',
+          name: 'Specialist composition',
+          status: 'mounted',
+          summary: 'Composition and specialist surfaces for combining smaller task experts behind deterministic routing.',
+          public_docs: '/docs#compose',
+          routes: [
+            'POST /v1/compose',
+            'POST /v1/specialists/train',
+            'GET /v1/specialists',
+            'POST /v1/specialists/:id/run',
+          ],
+          cli: ['kolm moe compose', 'kolm moe inspect'],
+        },
+        {
+          id: 'deploy',
+          name: 'Device targeting and serve',
+          status: 'mounted',
+          summary: 'Detect hardware, recommend target runtimes, install artifacts, and serve through hosted or self-managed paths.',
+          public_docs: '/docs#deploy',
+          routes: [
+            'GET /v1/devices/detect',
+            'POST /v1/devices/detect',
+            'POST /v1/devices/recommend',
+            'POST /v1/devices/:id/install',
+            'GET /v1/serve/pods',
+            'POST /v1/serve',
+          ],
+        },
+      ],
+      secondary_surfaces: [
+        {
+          id: 'audit',
+          name: 'Agent security-readiness audit',
+          status: 'split_to_subdomain',
+          summary: 'Signed audit reports, report verification, buyer trust links and audit checkout live as a focused surface at audit.kolm.ai.',
+          host: 'audit.kolm.ai',
+          routes: [
+            'POST /v1/audit/scan',
+            'POST /v1/audit/sessions',
+            'GET /v1/audit/sessions/:id/report',
+            'POST /v1/audit/report/verify',
+          ],
+        },
+      ],
+      caveats: [
+        'Operational routes keep their existing authentication and rate-limit requirements.',
+        'Current .kolm artifacts package executable recipes, examples, evaluators, tokenizer metadata and receipts; full trained-weight bundling remains a product gate.',
+      ],
+    });
   });
 
   // Public RS-1 spec document - open standard, no auth required.
@@ -16069,6 +16302,550 @@ export function buildRouter() {
     } catch (e) {
       res.status(500).json({ ok: false, error: String(e.message || e) });
     }
+  });
+
+  function _tenantRowMatches(row, tenantName, tenantId) {
+    if (!row || typeof row !== 'object') return false;
+    return row.tenant === tenantName ||
+      row.tenant_id === tenantId ||
+      row.owner === tenantName ||
+      row.owner_tenant_id === tenantId ||
+      row.created_by === tenantName;
+  }
+
+  function _safeRows(table) {
+    try { return all(table).filter(r => r && !r._deleted && !r.deleted_at); }
+    catch (_) { return []; }
+  }
+
+  function _tableCount(table, tenantName, tenantId) {
+    return _safeRows(table).filter(row => _tenantRowMatches(row, tenantName, tenantId)).length;
+  }
+
+  const API_CONTROL_DATA_CHANNELS = Object.freeze([
+    {
+      id: 'rest-json',
+      label: 'REST JSON APIs',
+      directions: ['ingress', 'egress'],
+      styles: ['OpenAI-compatible chat', 'Anthropic messages', 'generic JSON request/response', 'tool-call payloads'],
+      routes: ['/v1/route/chat/completions', '/v1/gateway/dispatch', '/v1/responses'],
+      controls: ['tenant key', 'namespace', 'provider vault', 'redaction', 'capture policy', 'budget cap'],
+    },
+    {
+      id: 'streaming',
+      label: 'Streaming APIs',
+      directions: ['ingress', 'egress'],
+      styles: ['SSE chunks', 'token deltas', 'reasoning traces', 'tool-call deltas'],
+      routes: ['/v1/route/chat/completions', '/v1/streaming/capabilities'],
+      controls: ['chunk normalization', 'trace correlation', 'redaction before persistence', 'latency accounting'],
+    },
+    {
+      id: 'webhooks',
+      label: 'Webhook and event callbacks',
+      directions: ['ingress', 'egress'],
+      styles: ['signed webhooks', 'automation triggers', 'status callbacks', 'delivery receipts'],
+      routes: ['/v1/webhooks', '/v1/automations', '/v1/notifications'],
+      controls: ['signature verification', 'retry policy', 'event ledger', 'tenant fence'],
+    },
+    {
+      id: 'batch-jsonl',
+      label: 'Batch files and JSONL',
+      directions: ['ingress', 'egress'],
+      styles: ['JSONL corpora', 'CSV exports', 'capture exports', 'dataset snapshots'],
+      routes: ['/v1/capture/export', '/v1/corpora', '/v1/datasets'],
+      controls: ['retention policy', 'schema validation', 'redaction pass', 'receipt hash'],
+    },
+    {
+      id: 'otel',
+      label: 'OpenTelemetry and trace spans',
+      directions: ['ingress', 'egress'],
+      styles: ['OTLP traces', 'GenAI spans', 'metrics', 'distributed trace context'],
+      routes: ['/v1/otel', '/v1/gateway/dashboard', '/v1/product/experience'],
+      controls: ['span attributes', 'trace joins', 'metrics rollup', 'no secret values in public envelopes'],
+    },
+    {
+      id: 'mcp',
+      label: 'MCP tool traffic',
+      directions: ['ingress', 'egress'],
+      styles: ['tool discovery', 'tool calls', 'context resources', 'tool results'],
+      routes: ['/v1/mcp', '/v1/tools', '/v1/automations'],
+      controls: ['scoped keys', 'tool approval policy', 'audit trail', 'recoverable error metadata'],
+    },
+    {
+      id: 'a2a',
+      label: 'Agent-to-agent traffic',
+      directions: ['ingress', 'egress'],
+      styles: ['agent messages', 'handoffs', 'delegated tool calls', 'status events'],
+      routes: ['/v1/a2a', '/v1/agents', '/v1/automations'],
+      controls: ['agent identity', 'least privilege', 'handoff evidence', 'policy escalation'],
+    },
+    {
+      id: 'browser-events',
+      label: 'Browser and client events',
+      directions: ['ingress'],
+      styles: ['client errors', 'feedback events', 'session markers', 'user-visible state'],
+      routes: ['/v1/client-error', '/v1/feedback', '/v1/sessions'],
+      controls: ['PII minimization', 'origin-bound session', 'tenant fence', 'rate limit'],
+    },
+    {
+      id: 'file-blob',
+      label: 'Files and blobs',
+      directions: ['ingress', 'egress'],
+      styles: ['attachments', 'model artifacts', 'receipts', 'signed reports', 'bundle downloads'],
+      routes: ['/v1/artifacts', '/v1/receipts', '/v1/export'],
+      controls: ['content hash', 'signature verification', 'lifecycle state', 'download gate'],
+    },
+    {
+      id: 'custom-adapter',
+      label: 'Custom adapters',
+      directions: ['ingress', 'egress'],
+      styles: ['custom headers', 'opaque JSON envelopes', 'vendor-specific payloads', 'legacy API bridges'],
+      routes: ['/v1/bridges/observe', '/v1/connectors', '/v1/gateway/dispatch'],
+      controls: ['adapter manifest', 'schema hints', 'default deny egress', 'operator review'],
+    },
+    {
+      id: 'graphql-rpc',
+      label: 'GraphQL, RPC, and typed operations',
+      directions: ['ingress', 'egress'],
+      styles: ['GraphQL queries and mutations', 'GraphQL subscriptions', 'JSON-RPC envelopes', 'gRPC-over-JSON payloads'],
+      routes: ['/v1/bridges/observe', '/v1/connectors', '/v1/gateway/dispatch'],
+      controls: ['operation signature', 'schema hints', 'query/body redaction', 'adapter manifest'],
+    },
+    {
+      id: 'message-queues',
+      label: 'Queues, topics, and event streams',
+      directions: ['ingress', 'egress'],
+      styles: ['Kafka topics', 'Pub/Sub events', 'SQS/SNS messages', 'EventBridge events', 'RabbitMQ deliveries'],
+      routes: ['/v1/bridges/observe', '/v1/notifications/settings', '/v1/connectors'],
+      controls: ['topic allowlist', 'partition/window metadata', 'dead-letter receipt', 'tenant event fence'],
+    },
+    {
+      id: 'warehouse-lakehouse',
+      label: 'Warehouses, lakes, and object stores',
+      directions: ['ingress', 'egress'],
+      styles: ['Snowflake/BigQuery/Databricks extracts', 'S3/GCS/Azure Blob drops', 'Iceberg/Delta tables', 'Parquet snapshots'],
+      routes: ['/v1/capture/export', '/v1/exports', '/v1/evidence'],
+      controls: ['dataset manifest', 'retention clock', 'row/column redaction', 'receipt hash'],
+    },
+    {
+      id: 'database-cdc',
+      label: 'Database and CDC feeds',
+      directions: ['ingress'],
+      styles: ['SQL extracts', 'PostgreSQL/MySQL CDC', 'MongoDB/DynamoDB change events', 'Redis streams'],
+      routes: ['/v1/bridges/observe', '/v1/datasets', '/v1/corpora'],
+      controls: ['source cursor', 'schema drift flag', 'PII minimization', 'replay window'],
+    },
+    {
+      id: 'siem-log-drain',
+      label: 'SIEM, log drains, and telemetry sinks',
+      directions: ['ingress', 'egress'],
+      styles: ['Datadog/Splunk/Elastic events', 'Cloudflare Logpush', 'Filebeat/Fluent/Logstash drains', 'OTLP log records'],
+      routes: ['/v1/otel', '/v1/notifications/log', '/v1/capture/export'],
+      controls: ['secret scrub', 'severity mapping', 'trace correlation', 'export receipt'],
+    },
+    {
+      id: 'collab-ticketing',
+      label: 'Collaboration and ticketing systems',
+      directions: ['ingress', 'egress'],
+      styles: ['Slack/Teams alerts', 'Jira/Linear issues', 'GitHub events', 'ServiceNow incidents', 'approval callbacks'],
+      routes: ['/v1/notifications/settings', '/v1/webhooks', '/v1/connectors/notify'],
+      controls: ['approval gate', 'least-privilege webhook', 'delivery ledger', 'human review marker'],
+    },
+    {
+      id: 'registry-packages',
+      label: 'Registries, packages, and release channels',
+      directions: ['egress'],
+      styles: ['OCI artifacts', 'Sigstore/Rekor-style provenance', 'npm/PyPI packages', 'Hugging Face/Ollama/R2/GitHub exports'],
+      routes: ['/v1/exports', '/v1/artifacts', '/v1/receipts/verify'],
+      controls: ['package manifest', 'signing policy', 'release gate', 'external verifier path'],
+    },
+  ]);
+
+  const API_CONTROL_POLICY_LAYERS = Object.freeze([
+    { id: 'identity', label: 'Identity and tenant fence', controls: ['tenant API keys', 'scoped keys', 'RBAC', 'SSO/SAML/SCIM hooks'] },
+    { id: 'provider-vault', label: 'Provider vault', controls: ['central provider keys', 'BYOK/BYOC paths', 'model entitlements', 'secret-safe envelopes'] },
+    { id: 'capture', label: 'Capture policy', controls: ['sample rate', 'body retention mode', 'namespace capture windows', 'redaction before persistence'] },
+    { id: 'egress', label: 'Egress policy', controls: ['destination allowlist', 'subprocessor mapping', 'PII/secret block', 'response redaction'] },
+    { id: 'routing', label: 'Routing and cost', controls: ['provider fallback', 'budget caps', 'latency policy', 'cache isolation'] },
+    { id: 'evaluation', label: 'Evaluation and gates', controls: ['production evals', 'drift alerts', 'regression gates', 'human review queue'] },
+    { id: 'compile', label: 'Compile and artifact', controls: ['corpus selection', 'artifact receipt', 'evidence DAG', 'production-ready gate'] },
+    { id: 'export', label: 'Export and auditability', controls: ['OpenAPI', 'JSONL/CSV', 'OTLP metrics', 'signed receipts', 'assurance case'] },
+  ]);
+
+  const API_CONTROL_COLLECTION_MODES = Object.freeze([
+    { id: 'proxy', label: 'Provider-compatible proxy', direction: 'ingress', examples: ['OpenAI-compatible chat', 'Anthropic messages', 'generic JSON'] },
+    { id: 'sdk-log', label: 'SDK or direct log call', direction: 'ingress', examples: ['capture log', 'feedback event', 'manual trace marker'] },
+    { id: 'stream', label: 'Streaming capture', direction: 'ingress', examples: ['SSE chunks', 'token deltas', 'tool-call deltas'] },
+    { id: 'webhook-listener', label: 'Webhook listener', direction: 'ingress', examples: ['signed callback', 'status event', 'approval callback'] },
+    { id: 'batch-import', label: 'Batch import', direction: 'ingress', examples: ['JSONL', 'CSV', 'Parquet snapshot'] },
+    { id: 'trace-import', label: 'Trace import', direction: 'ingress', examples: ['OTLP trace', 'LangSmith/Langfuse-style export', 'GenAI span'] },
+    { id: 'file-upload', label: 'File or object upload', direction: 'ingress', examples: ['attachment', 'artifact bundle', 'receipt bundle'] },
+    { id: 'queue-consume', label: 'Queue or topic consume', direction: 'ingress', examples: ['Kafka topic', 'Pub/Sub event', 'SQS message'] },
+    { id: 'warehouse-drop', label: 'Warehouse or lake drop', direction: 'ingress', examples: ['Snowflake extract', 'BigQuery table', 'object-store snapshot'] },
+    { id: 'cdc-feed', label: 'Database CDC feed', direction: 'ingress', examples: ['PostgreSQL CDC', 'MongoDB change event', 'Redis stream'] },
+    { id: 'browser-beacon', label: 'Browser/client beacon', direction: 'ingress', examples: ['client error', 'session marker', 'feedback event'] },
+    { id: 'custom-observe', label: 'Custom adapter observe', direction: 'ingress', examples: ['opaque vendor envelope', 'legacy API bridge', 'adapter manifest'] },
+  ]);
+
+  const API_CONTROL_EXPORT_MODES = Object.freeze([
+    { id: 'provider-response', label: 'Provider-compatible response', direction: 'egress', examples: ['chat completion', 'tool result', 'fallback reason'] },
+    { id: 'stream-response', label: 'Streaming response', direction: 'egress', examples: ['SSE delta', 'normalized chunk', 'latency marker'] },
+    { id: 'webhook-delivery', label: 'Webhook delivery', direction: 'egress', examples: ['automation callback', 'status delivery', 'approval event'] },
+    { id: 'batch-export', label: 'Batch export', direction: 'egress', examples: ['JSONL', 'CSV', 'Parquet-style snapshot'] },
+    { id: 'otel-export', label: 'Telemetry export', direction: 'egress', examples: ['OTLP traces', 'metrics', 'log records'] },
+    { id: 'warehouse-export', label: 'Warehouse/object-store export', direction: 'egress', examples: ['S3/R2 drop', 'warehouse table', 'dataset manifest'] },
+    { id: 'ticketing-export', label: 'Ticketing and approval export', direction: 'egress', examples: ['Jira issue', 'Linear issue', 'ServiceNow incident'] },
+    { id: 'package-release', label: 'Package or registry release', direction: 'egress', examples: ['OCI artifact', 'npm/PyPI package', 'Hugging Face export'] },
+    { id: 'governance-packet', label: 'Governance packet', direction: 'egress', examples: ['assurance case', 'control evidence', 'buyer export'] },
+    { id: 'verifier-receipt', label: 'Verifier receipt', direction: 'egress', examples: ['manifest hash', 'signature', 'public verifier link'] },
+  ]);
+
+  const API_CONTROL_GOVERNANCE_STAGES = Object.freeze([
+    { id: 'accept', label: 'Accept', proof: 'tenant identity, source, namespace, size, and route are recorded before payload handling' },
+    { id: 'classify', label: 'Classify', proof: 'channel family, direction, schema hints, and adapter status are attached to the event' },
+    { id: 'redact', label: 'Redact', proof: 'secret and PII handling runs before persistence or outbound export' },
+    { id: 'route', label: 'Route', proof: 'provider, destination, fallback reason, cache boundary, and budget decision are recorded' },
+    { id: 'evaluate', label: 'Evaluate', proof: 'eval gates, regression checks, drift markers, and human review state can block promotion' },
+    { id: 'compile', label: 'Compile', proof: 'accepted examples and evaluator context can become signed artifact inputs' },
+    { id: 'target', label: 'Target', proof: 'runtime fit, incompatible features, package files, and promotion state are explicit' },
+    { id: 'export', label: 'Export', proof: 'receipts, manifests, hashes, governance packets, and delivery ledgers leave the UI' },
+  ]);
+
+  const API_CONTROL_IMPROVEMENT_LOOP = Object.freeze([
+    {
+      id: 'observe-failures',
+      label: 'Observe Failures',
+      trigger: 'production traces, user feedback, eval scores, incident tickets, and rejected routes',
+      evidence: 'capture id, route id, namespace, model, prompt version, failure label, severity, and reviewer',
+      output: 'failure queue',
+      gate: 'tenant fence and redaction policy',
+    },
+    {
+      id: 'taxonomize',
+      label: 'Taxonomize',
+      trigger: 'clustered failures, drift windows, regression slices, and weak namespaces',
+      evidence: 'failure family, affected capability, suspected data gap, labeling confidence, and adapter schema status',
+      output: 'failure taxonomy',
+      gate: 'human review on high-risk labels',
+    },
+    {
+      id: 'build-curriculum',
+      label: 'Build Curriculum',
+      trigger: 'confirmed weakness with enough safe examples or approved synthetic augmentation',
+      evidence: 'corrected examples, hard negatives, replay rows, holdout split, and provenance manifest',
+      output: 'training and eval bundle',
+      gate: 'data rights, retention, and PII rules',
+    },
+    {
+      id: 'replay-regression',
+      label: 'Replay Regression',
+      trigger: 'candidate improvement run or prompt/model change',
+      evidence: 'baseline result, candidate result, protected slices, delta thresholds, and reviewer verdict',
+      output: 'promotion decision',
+      gate: 'no protected-slice degradation',
+    },
+    {
+      id: 'compile-artifact',
+      label: 'Compile Artifact',
+      trigger: 'approved improvement with target runtime requirements',
+      evidence: 'compile run, K-score, manifest hash, runtime target, incompatible feature list, and receipt',
+      output: 'signed .kolm artifact',
+      gate: 'readiness and target-fit checks',
+    },
+    {
+      id: 'promote-export',
+      label: 'Promote & Export',
+      trigger: 'artifact approved for deployment or external review',
+      evidence: 'release channel, rollback pointer, export destination, governance packet, and delivery ledger',
+      output: 'deployment or evidence export',
+      gate: 'declared destination and egress policy',
+    },
+  ]);
+
+  const API_CONTROL_OPERATOR_WORKBENCH = Object.freeze({
+    label: 'Operator workbench',
+    summary: 'Run one production AI/API loop from source declaration to policy gates, failure replay, artifact compile, and proof export without switching consoles.',
+    source_to_proof_rule: 'every next action must name a source, policy gate, output object, and verifier path before it can promote',
+    next_actions: [
+      {
+        id: 'declare-source-schema',
+        label: 'Declare Source & Schema',
+        trigger: 'new gateway route, trace import, webhook, queue, warehouse drop, or custom adapter',
+        action: 'select a channel family, attach schema hints or adapter manifest, and set retention/redaction policy',
+        proof: 'source envelope, adapter status, tenant fence, and opaque-event marker',
+        route: '/v1/bridges/observe',
+      },
+      {
+        id: 'set-egress-policy',
+        label: 'Set Egress Policy',
+        trigger: 'provider response, webhook delivery, telemetry export, package release, or governance packet',
+        action: 'declare destination, processor, payload class, redaction mode, and retry window before export',
+        proof: 'destination allowlist, egress rule, processor mapping, and delivery ledger',
+        route: '/v1/redteam/sanitize',
+      },
+      {
+        id: 'diagnose-failure-loop',
+        label: 'Diagnose Failure Loop',
+        trigger: 'judged failure, incident ticket, drift alert, eval score drop, or rejected route',
+        action: 'assign taxonomy, reviewer, severity, protected slice, and candidate improvement bundle',
+        proof: 'failure family, reviewer marker, eval baseline, and regression replay set',
+        route: '/v1/drift-alert',
+      },
+      {
+        id: 'compile-target-receipt',
+        label: 'Compile Target Receipt',
+        trigger: 'approved examples and eval gates for a runtime target',
+        action: 'compile a signed .kolm package with manifest, examples, evaluators, target fit, hashes, and rollback pointer',
+        proof: 'artifact id, manifest hash, target matrix, K-score, and verifier receipt',
+        route: '/v1/compile',
+      },
+      {
+        id: 'export-governance-packet',
+        label: 'Export Governance Packet',
+        trigger: 'buyer review, audit request, release approval, or external runtime handoff',
+        action: 'send receipts, governance packet, lineage, and delivery record to the declared system of record',
+        proof: 'assurance case, JSONL/CSV/OTLP export, public verifier path, and ticket or catalog reference',
+        route: '/v1/assurance-case',
+      },
+    ],
+    intake_priorities: [
+      'gateway traffic',
+      'OpenTelemetry/GenAI spans',
+      'LangSmith/Langfuse/Braintrust exports',
+      'MCP tool calls',
+      'A2A task traffic',
+      'queues and CDC',
+      'warehouse/lakehouse drops',
+      'SIEM/log drains',
+      'custom opaque adapters',
+    ],
+    export_priorities: [
+      'governance packet',
+      'verifier receipt',
+      'ticketing approval',
+      'warehouse manifest',
+      'OTLP log export',
+      'package registry release',
+      'runtime target recipe',
+    ],
+    competitive_pressure: [
+      'gateways now normalize model access, routing, budgets, cache, and fallback controls',
+      'eval platforms now expose traces, prompts, datasets, experiments, annotation, and production monitoring',
+      'MCP, A2A, and OpenTelemetry make protocol-level trace and tool coverage buyer expectations',
+      'Kolm must win by making those sources produce signed artifacts and proof exports, not by replacing every specialized console',
+    ],
+  });
+
+  function _apiControlCenterPayload(req, counts) {
+    const plan = String((req.tenant_record && req.tenant_record.plan) || 'free').toLowerCase();
+    const tenantId = req.tenant_record && req.tenant_record.id;
+    const tenantName = req.tenant;
+    const captureEvents = Number(counts.capture_events || 0) + Number(counts.captures || 0);
+    const routeEvents = Number(counts.routing_events || 0);
+    return {
+      ok: true,
+      version: 'kolm-api-control-center-4',
+      product: 'kolm AI compiler',
+      category: 'enterprise API control center',
+      secret_values_included: false,
+      tenant: {
+        id: tenantId || null,
+        name: tenantName,
+        plan,
+      },
+      posture: {
+        default_capture_mode: 'metadata-and-redacted-body',
+        default_egress_mode: 'deny-until-provider-or-destination-is-declared',
+        cache_policy: 'tenant-isolated-cache-keys-only',
+        unknown_payload_policy: 'accept-as-opaque-event-when-size-and-tenant-policy-allow',
+        production_claim: 'coverage contract, not a guarantee that every possible vendor schema is semantically understood without an adapter',
+      },
+      counters: {
+        observed_captures: captureEvents,
+        routing_events: routeEvents,
+        compile_jobs: Number(counts.compile_jobs || 0),
+        artifacts: Number(counts.artifacts || 0),
+        devices: Number(counts.devices || 0),
+      },
+      coverage: {
+        data_channels: API_CONTROL_DATA_CHANNELS,
+        collection_modes: API_CONTROL_COLLECTION_MODES,
+        export_modes: API_CONTROL_EXPORT_MODES,
+        governance_stages: API_CONTROL_GOVERNANCE_STAGES,
+        policy_layers: API_CONTROL_POLICY_LAYERS,
+        modalities: ['text', 'tokens', 'tool calls', 'reasoning traces', 'embeddings metadata', 'images metadata', 'audio metadata', 'files', 'structured JSON', 'tabular rows', 'events', 'binary blobs', 'governance packets'],
+        protocols: ['REST', 'SSE', 'webhook', 'JSONL batch', 'OpenTelemetry', 'MCP', 'A2A', 'GraphQL', 'JSON-RPC', 'gRPC-over-JSON', 'Kafka/event stream', 'database CDC', 'warehouse/lakehouse', 'SIEM log drain', 'package registry', 'custom adapter'],
+        lifecycle_states: ['capture', 'redact', 'route', 'observe', 'evaluate', 'compile', 'deploy', 'monitor', 'export'],
+      },
+      operational_contract: {
+        ingress_rule: 'any source can be accepted only as a tenant-scoped governed event with size, retention, and redaction policy',
+        egress_rule: 'any destination must be declared or adapter-reviewed before payload export',
+        unknown_schema_rule: 'unknown vendor payloads can be stored as opaque events, but semantic fields are not claimed until adapter manifest or schema hints exist',
+        proof_rule: 'every promoted artifact or export should carry route, policy, manifest, hash, and receipt context',
+      },
+      closed_loop_improvement: {
+        status: 'readiness-gated',
+        summary: 'Captured API failures can move through taxonomy, curriculum, regression replay, compile, target, and export without leaving the tenant control plane.',
+        minimum_inputs: ['production traces', 'judged failures', 'human feedback', 'eval scores', 'runtime incidents', 'protected regression set'],
+        promotion_gates: ['tenant fence', 'redaction policy', 'human review for high-risk labels', 'no protected-slice degradation', 'target-fit check', 'declared egress destination'],
+        stages: API_CONTROL_IMPROVEMENT_LOOP,
+      },
+      operator_workbench: API_CONTROL_OPERATOR_WORKBENCH,
+      integration_map: [
+        {
+          cluster: 'Gateway and provider control',
+          systems: ['LiteLLM', 'Portkey', 'Cloudflare AI Gateway', 'Vercel AI Gateway', 'OpenRouter', 'Kong', 'OpenAI', 'Anthropic', 'Bedrock', 'Vertex'],
+          role: 'source-and-route-target',
+          coverage: 'provider access, routing, key policy, budgets, cache boundaries, fallback reasons',
+        },
+        {
+          cluster: 'Trace, eval, and observability',
+          systems: ['LangSmith', 'Langfuse', 'Braintrust', 'Helicone', 'Phoenix', 'Weave', 'Vellum', 'PromptLayer', 'OpenTelemetry'],
+          role: 'import-source-and-evidence-sink',
+          coverage: 'traces, prompt versions, eval sets, annotations, drift signals, release evidence',
+        },
+        {
+          cluster: 'Data movement and event streams',
+          systems: ['Airbyte', 'Fivetran', 'Confluent', 'Kafka', 'Pub/Sub', 'SQS/SNS', 'EventBridge', 'Snowflake', 'BigQuery', 'Databricks'],
+          role: 'batch-stream-and-warehouse-source',
+          coverage: 'connectors, topics, CDC, warehouse extracts, object-store drops, export manifests',
+        },
+        {
+          cluster: 'Security, SIEM, and governance',
+          systems: ['Vanta', 'Drata', 'Datadog', 'Splunk', 'Elastic', 'ServiceNow', 'Lakera', 'HiddenLayer', 'Protect AI', 'Giskard'],
+          role: 'control-verdict-and-governance-sink',
+          coverage: 'control evidence, log drains, incident/ticket events, guardrail verdicts, assurance packets',
+        },
+        {
+          cluster: 'Runtime and package targets',
+          systems: ['vLLM', 'SGLang', 'TensorRT-LLM', 'llama.cpp', 'Ollama', 'Core ML', 'LiteRT', 'ExecuTorch', 'ONNX', 'RunPod', 'Hugging Face'],
+          role: 'deployment-target-and-release-channel',
+          coverage: 'target instructions, artifact manifests, release gates, runtime receipts, external verifier links',
+        },
+      ],
+      enterprise_controls: [
+        { id: 'rbac-sso-scim', status: 'mounted', routes: ['/v1/scim', '/v1/saml/acs', '/v1/scoped-keys'] },
+        { id: 'provider-vault', status: 'mounted', routes: ['/v1/provider-vault', '/v1/model-entitlements'] },
+        { id: 'budget-and-rate', status: 'mounted', routes: ['/v1/spend-caps', '/v1/pricing', '/v1/gateway/dashboard'] },
+        { id: 'egress-policy', status: 'mounted', routes: ['/v1/redteam/sanitize', '/v1/capture/export', '/v1/assurance-case'] },
+        { id: 'retention-and-export', status: 'mounted', routes: ['/v1/capture/export', '/v1/corpora', '/v1/evidence'] },
+        { id: 'drift-and-regression', status: 'mounted', routes: ['/v1/drift-alert', '/v1/evals', '/v1/compile/evaluate'] },
+      ],
+      differentiators: [
+        'captures production API behavior and turns it into portable signed artifacts',
+        'keeps gateway control, evals, evidence, compile, and device targeting in one contract',
+        'treats audit as a module while the core system optimizes runtime cost and owned deployment',
+        'exports proof artifacts instead of only dashboards',
+      ],
+      recommended_ui: {
+        route: '/account/api-control-center',
+        primary_cta: '/docs#quickstart',
+        secondary_cta: '/account/overview',
+      },
+      generated_at: new Date().toISOString(),
+    };
+  }
+
+  // Compiler overview - a backend-owned application contract for the main
+  // product surface. The UI can render this instead of hard-coding an audit
+  // dashboard as the first-run experience.
+  r.get('/v1/account/compiler-overview', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const tenantId = req.tenant_record && req.tenant_record.id;
+    const tenantName = req.tenant;
+    const plan = String((req.tenant_record && req.tenant_record.plan) || 'free').toLowerCase();
+    const jobs = listJobs(req.is_admin ? null : tenantName, 500)
+      .filter(j => j && !j._deleted && !j._bootstrap);
+    const completedJobs = jobs.filter(j => j.status === 'completed');
+    const captureTables = {
+      captures: _tableCount('captures', tenantName, tenantId),
+      capture_events: _tableCount('capture_events', tenantName, tenantId),
+      routing_events: _tableCount('routing_events', tenantName, tenantId),
+      events: _tableCount('events', tenantName, tenantId),
+    };
+    const observedCaptures = Math.max(0, ...Object.values(captureTables));
+    const devices = _tableCount('devices', tenantName, tenantId) +
+      _tableCount('device_registry', tenantName, tenantId);
+    const specialists = _tableCount('specialists', tenantName, tenantId);
+    const namespaces = Array.from(new Set(
+      jobs.map(j => j.corpus_namespace || j.namespace || j.task)
+        .concat(_safeRows('namespaces')
+          .filter(row => _tenantRowMatches(row, tenantName, tenantId))
+          .map(row => row.namespace || row.name))
+        .filter(Boolean)
+        .map(String)
+    )).slice(0, 25);
+    let actions = [];
+    try { actions = computeNextActions(tenantName, { limit: 5 }); }
+    catch (_) { actions = []; }
+
+    res.json({
+      ok: true,
+      version: 'kolm-compiler-overview-1',
+      product: 'kolm AI compiler',
+      tenant: {
+        id: tenantId || null,
+        name: tenantName,
+        plan,
+        quota: req.tenant_record && req.tenant_record.quota,
+      },
+      onboarding: compilerOnboardingForPlan(plan),
+      counts: {
+        observed_captures: observedCaptures,
+        capture_tables: captureTables,
+        compile_jobs: jobs.length,
+        artifacts: completedJobs.length,
+        specialists,
+        devices,
+        namespaces: namespaces.length,
+      },
+      namespaces,
+      recent_compile_jobs: jobs.slice(0, 10).map(j => ({
+        id: j.id,
+        task: j.task || null,
+        namespace: j.corpus_namespace || j.namespace || null,
+        status: j.status,
+        artifact_ready: j.status === 'completed' && !!j.artifact_path,
+        created_at: j.created_at || null,
+      })),
+      next_actions: actions,
+      primary_surfaces: [
+        { id: 'capture', status: 'mounted', docs: '/docs#capture', routes: ['/v1/route/chat/completions', '/v1/gateway/dispatch', '/v1/capture/export'] },
+        { id: 'compile', status: 'mounted', docs: '/docs#compile', routes: ['/v1/compile/estimate', '/v1/compile/preview', '/v1/compile'] },
+        { id: 'compose', status: 'mounted', docs: '/docs#compose', routes: ['/v1/compose', '/v1/specialists/train'] },
+        { id: 'deploy', status: 'mounted', docs: '/docs#deploy', routes: ['/v1/devices/detect', '/v1/devices/recommend', '/v1/serve'] },
+      ],
+      secondary_surfaces: [
+        { id: 'audit', status: 'available_as_module', host: 'audit.kolm.ai', routes: ['/v1/audit/scan', '/v1/audit/sessions'] },
+      ],
+      empty_state: observedCaptures === 0 && jobs.length === 0 ? {
+        title: 'Route one namespace through Kolm',
+        cta_label: 'Open compiler quickstart',
+        cta_href: '/docs#quickstart',
+        curl: 'curl https://kolm.ai/v1/route/chat/completions -H "Authorization: Bearer $KOLM_API_KEY" -H "Content-Type: application/json" -d \'{"namespace":"default","model":"openai:gpt-4.1-mini","messages":[{"role":"user","content":"hello"}]}\'',
+      } : null,
+      generated_at: new Date().toISOString(),
+    });
+  });
+
+  r.get('/v1/account/api-control-center', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const tenantId = req.tenant_record && req.tenant_record.id;
+    const tenantName = req.tenant;
+    const jobs = listJobs(req.is_admin ? null : tenantName, 500)
+      .filter(j => j && !j._deleted && !j._bootstrap);
+    const completedJobs = jobs.filter(j => j.status === 'completed');
+    const counts = {
+      captures: _tableCount('captures', tenantName, tenantId),
+      capture_events: _tableCount('capture_events', tenantName, tenantId),
+      routing_events: _tableCount('routing_events', tenantName, tenantId),
+      events: _tableCount('events', tenantName, tenantId),
+      compile_jobs: jobs.length,
+      artifacts: completedJobs.length,
+      devices: _tableCount('devices', tenantName, tenantId) +
+        _tableCount('device_registry', tenantName, tenantId),
+    };
+    res.json(_apiControlCenterPayload(req, counts));
   });
   // Next-actions snooze - silences the matching dismiss_key for N days (default 14).
   r.post('/v1/account/next-actions/snooze', authMiddleware, (req, res) => {

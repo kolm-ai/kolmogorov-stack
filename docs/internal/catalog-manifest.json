@@ -3390,6 +3390,60 @@
     },
     {
       "capabilities": {
+        "auth": "bearer",
+        "env_key": "DEEPSEEK_API_KEY",
+        "model_count": 4,
+        "paths": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/embeddings"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:deepseek",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://api.deepseek.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "FIREWORKS_API_KEY",
+        "model_count": 5,
+        "paths": [
+          "/inference/v1/chat/completions",
+          "/inference/v1/completions",
+          "/inference/v1/embeddings"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:fireworks",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://api.fireworks.ai",
+      "status": "available"
+    },
+    {
+      "capabilities": {
         "auth": "key-param",
         "env_key": "GEMINI_API_KEY",
         "model_count": 4,
@@ -3412,6 +3466,144 @@
       "pricing": null,
       "runtime_fit": null,
       "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GEMINI_API_KEY",
+        "model_count": 4,
+        "paths": [
+          "/v1beta/openai/chat/completions",
+          "/v1beta/openai/completions",
+          "/v1beta/openai/embeddings"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:google",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GROQ_API_KEY",
+        "model_count": 5,
+        "paths": [
+          "/openai/v1/chat/completions",
+          "/openai/v1/embeddings",
+          "/openai/v1/audio/transcriptions"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:groq",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://api.groq.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "none",
+        "env_key": "KOLM_LOCAL_API_KEY",
+        "model_count": 0,
+        "paths": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/embeddings",
+          "/v1/artifacts"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:local-kolm",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "http://127.0.0.1:8765",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "none",
+        "env_key": "OLLAMA_API_KEY",
+        "model_count": 0,
+        "paths": [
+          "/v1/chat/completions",
+          "/v1/embeddings",
+          "/api/generate",
+          "/api/chat",
+          "/api/embeddings"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:local-ollama",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "http://127.0.0.1:11434",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer-optional",
+        "env_key": "VLLM_API_KEY",
+        "model_count": 0,
+        "paths": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/embeddings"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:local-vllm",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "http://127.0.0.1:8000",
       "status": "available"
     },
     {
@@ -3470,6 +3662,33 @@
       "pricing": null,
       "runtime_fit": null,
       "source_url": "https://openrouter.ai/api",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "TOGETHER_API_KEY",
+        "model_count": 6,
+        "paths": [
+          "/v1/chat/completions",
+          "/v1/completions",
+          "/v1/embeddings"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider:together",
+      "kind": "provider",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": null,
+      "source_url": "https://api.together.xyz",
       "status": "available"
     },
     {
@@ -3726,6 +3945,258 @@
     },
     {
       "capabilities": {
+        "auth": "bearer",
+        "env_key": "DEEPSEEK_API_KEY",
+        "model": "deepseek-chat",
+        "provider": "deepseek"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:deepseek/deepseek-chat",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00027,
+        "output": 0.0011,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.deepseek.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "DEEPSEEK_API_KEY",
+        "model": "deepseek-reasoner",
+        "provider": "deepseek"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:deepseek/deepseek-reasoner",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00055,
+        "output": 0.0022,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.deepseek.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "DEEPSEEK_API_KEY",
+        "model": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:deepseek/deepseek-v4-flash",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00014,
+        "output": 0.00028,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.deepseek.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "DEEPSEEK_API_KEY",
+        "model": "deepseek-v4-pro",
+        "provider": "deepseek"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:deepseek/deepseek-v4-pro",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00027,
+        "output": 0.0011,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.deepseek.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "FIREWORKS_API_KEY",
+        "model": "accounts/fireworks/models/deepseek-r1",
+        "provider": "fireworks"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:fireworks/accounts/fireworks/models/deepseek-r1",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.008,
+        "output": 0.008,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.fireworks.ai",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "FIREWORKS_API_KEY",
+        "model": "accounts/fireworks/models/llama-v3p1-8b-instruct",
+        "provider": "fireworks"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:fireworks/accounts/fireworks/models/llama-v3p1-8b-instruct",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0002,
+        "output": 0.0002,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.fireworks.ai",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "FIREWORKS_API_KEY",
+        "model": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+        "provider": "fireworks"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:fireworks/accounts/fireworks/models/llama-v3p3-70b-instruct",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0009,
+        "output": 0.0009,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.fireworks.ai",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "FIREWORKS_API_KEY",
+        "model": "accounts/fireworks/models/mixtral-8x22b-instruct",
+        "provider": "fireworks"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:fireworks/accounts/fireworks/models/mixtral-8x22b-instruct",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0012,
+        "output": 0.0012,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.fireworks.ai",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "FIREWORKS_API_KEY",
+        "model": "accounts/fireworks/models/qwen2p5-72b-instruct",
+        "provider": "fireworks"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:fireworks/accounts/fireworks/models/qwen2p5-72b-instruct",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0009,
+        "output": 0.0009,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.fireworks.ai",
+      "status": "available"
+    },
+    {
+      "capabilities": {
         "auth": "key-param",
         "env_key": "GEMINI_API_KEY",
         "model": "gemini-2.0-flash",
@@ -3834,6 +4305,258 @@
       },
       "runtime_fit": null,
       "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GEMINI_API_KEY",
+        "model": "gemini-2.0-flash",
+        "provider": "google"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:google/gemini-2.0-flash",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0001,
+        "output": 0.0004,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GEMINI_API_KEY",
+        "model": "gemini-2.5-flash",
+        "provider": "google"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:google/gemini-2.5-flash",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.000075,
+        "output": 0.0003,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GEMINI_API_KEY",
+        "model": "gemini-2.5-flash-lite",
+        "provider": "google"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:google/gemini-2.5-flash-lite",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00004,
+        "output": 0.00016,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GEMINI_API_KEY",
+        "model": "gemini-2.5-pro",
+        "provider": "google"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:google/gemini-2.5-pro",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00125,
+        "output": 0.005,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://generativelanguage.googleapis.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GROQ_API_KEY",
+        "model": "deepseek-r1-distill-llama-70b",
+        "provider": "groq"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:groq/deepseek-r1-distill-llama-70b",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00075,
+        "output": 0.00099,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.groq.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GROQ_API_KEY",
+        "model": "gemma2-9b-it",
+        "provider": "groq"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:groq/gemma2-9b-it",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0002,
+        "output": 0.0002,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.groq.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GROQ_API_KEY",
+        "model": "llama-3.1-8b-instant",
+        "provider": "groq"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:groq/llama-3.1-8b-instant",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00005,
+        "output": 0.00008,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.groq.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GROQ_API_KEY",
+        "model": "llama-3.3-70b-versatile",
+        "provider": "groq"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:groq/llama-3.3-70b-versatile",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00059,
+        "output": 0.00079,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.groq.com",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "GROQ_API_KEY",
+        "model": "mixtral-8x7b-32768",
+        "provider": "groq"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:groq/mixtral-8x7b-32768",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00024,
+        "output": 0.00024,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.groq.com",
       "status": "available"
     },
     {
@@ -4426,6 +5149,174 @@
     },
     {
       "capabilities": {
+        "auth": "bearer",
+        "env_key": "TOGETHER_API_KEY",
+        "model": "Qwen/Qwen2.5-72B-Instruct-Turbo",
+        "provider": "together"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:together/Qwen/Qwen2.5-72B-Instruct-Turbo",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0012,
+        "output": 0.0012,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.together.xyz",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "TOGETHER_API_KEY",
+        "model": "deepseek-ai/DeepSeek-R1",
+        "provider": "together"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:together/deepseek-ai/DeepSeek-R1",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.003,
+        "output": 0.007,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.together.xyz",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "TOGETHER_API_KEY",
+        "model": "deepseek-ai/DeepSeek-V3",
+        "provider": "together"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:together/deepseek-ai/DeepSeek-V3",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00125,
+        "output": 0.00125,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.together.xyz",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "TOGETHER_API_KEY",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "provider": "together"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:together/meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00088,
+        "output": 0.00088,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.together.xyz",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "TOGETHER_API_KEY",
+        "model": "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+        "provider": "together"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:together/meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.00018,
+        "output": 0.00018,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.together.xyz",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "auth": "bearer",
+        "env_key": "TOGETHER_API_KEY",
+        "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "provider": "together"
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/provider-registry.js",
+        "src/daemon-connector.js",
+        "src/router.js"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 30,
+      "id": "provider_model:together/mistralai/Mixtral-8x7B-Instruct-v0.1",
+      "kind": "provider_model",
+      "license_url": null,
+      "pricing": {
+        "currency": "USD",
+        "input": 0.0006,
+        "output": 0.0006,
+        "unit": "1k_tokens"
+      },
+      "runtime_fit": null,
+      "source_url": "https://api.together.xyz",
+      "status": "available"
+    },
+    {
+      "capabilities": {
         "is_default": false,
         "ladder": [
           "token_budget",
@@ -4534,38 +5425,38 @@
       "status": "available"
     }
   ],
-  "generated_at": "2026-05-25T05:51:40.745Z",
+  "generated_at": "2026-06-12T22:21:27.013Z",
   "schema": "kolm.catalog_manifest.v1",
   "source_evidence": [
     {
-      "bytes": 5460,
+      "bytes": 13095,
       "path": "src/provider-registry.js",
-      "sha1_short": "e419f955df31"
+      "sha1_short": "1e53e5290552"
     },
     {
-      "bytes": 65422,
+      "bytes": 65291,
       "path": "src/model-registry.js",
-      "sha1_short": "813e7a01cfd9"
+      "sha1_short": "872599acf0f5"
     },
     {
-      "bytes": 30462,
+      "bytes": 30444,
       "path": "src/models.js",
-      "sha1_short": "c6f0f40ba6f0"
+      "sha1_short": "8f25c518c9a2"
     },
     {
-      "bytes": 24854,
+      "bytes": 25107,
       "path": "src/runtime-policy.js",
-      "sha1_short": "3f3198dc6e97"
+      "sha1_short": "38702873bd1d"
     },
     {
-      "bytes": 32384,
+      "bytes": 32427,
       "path": "src/devices.js",
-      "sha1_short": "0358e722d38d"
+      "sha1_short": "ea860d316711"
     },
     {
-      "bytes": 2553,
+      "bytes": 5689,
       "path": "src/cost-estimator.js",
-      "sha1_short": "9a09803bdca0"
+      "sha1_short": "92afaadfc8cb"
     }
   ],
   "summary": {
@@ -4573,14 +5464,14 @@
       "device": 25,
       "hardware": 14,
       "local_model": 51,
-      "provider": 4,
-      "provider_model": 34,
+      "provider": 12,
+      "provider_model": 58,
       "runtime": 4
     },
     "by_status": {
-      "available": 115,
+      "available": 147,
       "candidate": 17
     },
-    "total": 132
+    "total": 164
   }
 }

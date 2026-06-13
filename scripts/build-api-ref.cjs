@@ -179,6 +179,9 @@ function isDecorativeComment(c) {
   if (!s) return false;
   if (/^=+$/.test(s)) return true;
   if (/^=+\s*[^=].*?=+$/.test(s)) return true;
+  const compact = s.replace(/[\s\-=+\u2500\u2501\u2550\uFFFD\u0080?]+/g, '');
+  if (/^(GET|POST|PUT|PATCH|DELETE|ALL)\/v?\d?\//i.test(compact)) return true;
+  if (/^(GET|POST|PUT|PATCH|DELETE|ALL)\/[a-z0-9]/i.test(compact)) return true;
   return false;
 }
 
@@ -534,11 +537,11 @@ function canonicalNavBlockForApi() {
   return [
     begin,
     '<nav class="site-nav" aria-label="Primary">',
-    '<a href="/product">Product</a>',
-    '<a href="/models">Models</a>',
+    '<a href="/compiler-product">Product</a>',
+    '<a href="/platform">Platform</a>',
     '<a href="/docs">Docs</a>',
     '<a href="/pricing">Pricing</a>',
-    '<a href="/enterprise">Enterprise</a>',
+    '<a href="https://audit.kolm.ai">Audit</a>',
     '</nav>',
     end,
   ].join('\n');
@@ -617,7 +620,7 @@ function renderPage(grouped, totalCount, unparseable) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script> // deliberate: cleanup
+<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
 <style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
 <title>${title}</title>
 <meta name="description" content="${escapeHtml(description)}">
@@ -634,8 +637,7 @@ function renderPage(grouped, totalCount, unparseable) {
 <meta name="twitter:image" content="https://kolm.ai/og/docs-api.svg">
 <link rel="canonical" href="https://kolm.ai/docs/api">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/brand-refresh.css">
+<link rel="stylesheet" href="/kolm-main.css">
 <script type="application/ld+json">${jsonLd}</script>
 <script type="application/ld+json">${breadcrumbLd}</script>
 <style>
@@ -643,25 +645,29 @@ function renderPage(grouped, totalCount, unparseable) {
 [data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#2563eb;--accent-soft:rgba(5,150,105,0.10)}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
+main,.wrap,.api-route,.api-group,pre,code{max-width:100%}
 .skip-link{position:absolute;left:12px;top:12px;z-index:9999;transform:translateY(-160%);border:1px solid var(--accent);border-radius:999px;background:var(--accent);color:#06120b;padding:10px 14px;font:700 13px/1 var(--mono);text-decoration:none}
 .skip-link:focus{transform:translateY(0)}
 .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
 header.site-header{padding:18px 0;border-bottom:1px solid var(--line)}
-header.site-header .wrap{display:flex;justify-content:space-between;align-items:center}
-header.site-header nav{display:flex;gap:18px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
-header.site-header nav a{color:inherit;text-decoration:none}
-header.site-header .logo{font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
+header.site-header .wrap{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center}
+header.site-header nav{display:flex;justify-content:flex-end;gap:8px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
+header.site-header nav a{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 10px;color:inherit;text-decoration:none;border-radius:6px}
+header.site-header nav a:hover{background:rgba(255,255,255,.04)}
+header.site-header .logo{min-height:44px;display:inline-flex;align-items:center;font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
 main{padding:48px 0 96px}
 .crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
 .crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:-0.02em;margin:0 0 18px;max-width:920px}
+h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:0;margin:0 0 18px;max-width:920px}
 .lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
-h2{font-size:24px;font-weight:500;letter-spacing:-0.018em;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
-h3{font-size:15px;font-weight:500;letter-spacing:-0.01em;margin:28px 0 8px;max-width:840px;font-family:var(--mono);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h2{font-size:24px;font-weight:500;letter-spacing:0;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
+h3{font-size:15px;font-weight:500;letter-spacing:0;margin:28px 0 8px;max-width:840px;font-family:var(--mono);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
-pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font:12.5px/1.55 var(--mono);margin:10px 0 14px}
-pre code{background:none;border:none;padding:0;color:inherit;font:inherit}
+pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:hidden;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font:12.5px/1.55 var(--mono);margin:10px 0 14px}
+pre code{background:none;border:none;padding:0;color:inherit;font:inherit;white-space:inherit;overflow-wrap:anywhere;word-break:break-word}
 code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+.api-route,.api-group{min-width:0;overflow:hidden}
+.api-route h3,.api-route code,.api-route p,.api-route li,.api-route summary,.route-desc,.route-detail,.group-intro p{min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
 li{margin:4px 0}
 .api-group{margin:48px 0 32px;padding-top:8px;border-top:1px solid var(--line)}
@@ -680,7 +686,12 @@ li{margin:4px 0}
 .route-stub{display:inline-block;padding:2px 8px;border-radius:4px;background:rgba(236,231,220,0.06);color:var(--ink-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase}
 .route-live{display:inline-block;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase}
 .partition-toolbar{display:flex;gap:14px;align-items:center;margin:10px 0 22px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)}
-.partition-toolbar label{cursor:pointer;display:flex;gap:6px;align-items:center}
+.partition-toolbar label{min-height:44px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.surface-media-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-height:132px;margin:22px 0 30px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
+.surface-media-panel div{min-width:0;padding:12px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.026)}
+.surface-media-panel b{display:block;color:var(--ink);font-family:var(--mono);font-size:11px;line-height:1.35}
+.surface-media-panel span{display:block;margin-top:7px;color:var(--ink-mute);font-size:12px;line-height:1.45}
+@media(max-width:820px){.surface-media-panel{grid-template-columns:1fr}}
 body[data-api-filter="live"] .api-route:has(.route-stub){display:none}
 body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
 .group-count,.toc-count{color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;font-weight:400;margin-left:6px}
@@ -689,14 +700,14 @@ body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
 .toc-grid li{margin:2px 0;break-inside:avoid}
 .toc-grid a{color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line)}
 .group-intro{margin:6px 0 14px;font-size:13.5px}
-.group-intro summary{cursor:pointer;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+.group-intro summary,.route-detail summary{min-height:38px;display:flex;align-items:center;cursor:pointer;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
 .totals{font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);margin:0 0 24px}
 .legacy{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);max-width:780px;line-height:1.65}
 .legacy code{font-size:11.5px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
+@media(max-width:640px){header.site-header .wrap{grid-template-columns:1fr;gap:8px}header.site-header nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:stretch}header.site-header nav a{border:1px solid var(--line);background:rgba(255,255,255,.018)}.wrap{padding:0 20px}main{padding:38px 0 80px}h1{font-size:38px}.lede{font-size:17px}}
 </style>
-<link rel="stylesheet" href="/surface-polish.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -704,24 +715,30 @@ footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)
   <a class="logo" href="/">kolm.ai</a>
 ${navBlock}
 </div></header>
-<script defer src="/nav.js"></script>
+<script defer src="/kolm-main.js"></script>
 
 <main id="main" tabindex="-1"><div class="wrap">
 
 <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / api</div>
 <h1>API reference</h1>
 <p class="lede">The kolm.ai REST surface. ${totalCount} wired routes across ${groupKeys.length} groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
+<div class="kolm-surface-media surface-media-panel" aria-label="API reference surface map">
+  <div><b>capture and route</b><span>Provider-compatible chat, messages, responses, gateway dispatch and capture ingestion endpoints.</span></div>
+  <div><b>compile and verify</b><span>Build jobs, artifacts, receipts, signatures, OpenAPI references and verifier routes.</span></div>
+  <div><b>train and evaluate</b><span>Datasets, labels, bakeoffs, quality prediction, K-score and distillation workflows.</span></div>
+  <div><b>deploy and govern</b><span>Devices, fleets, trust links, transparency logs, usage controls and enterprise governance routes.</span></div>
+</div>
 
 <p data-w704="api-landing-bridge" style="margin:-8px 0 14px;font-size:14px;color:var(--ink-faint,#737c73)">Looking for a high-level surface map, curl-friendly examples, and the auth-flow walkthrough? Start at <a href="/api">/api</a>. This page is the exhaustive endpoint catalog.</p>
 
 <p class="totals"><strong>${totalCount} wired routes</strong> &middot; <span class="route-live">${liveCount} reference-ready</span> &middot; <span class="route-stub">${previewCount} source-indexed</span> &middot; ${groupKeys.length} groups &middot; generated ${TODAY} &middot; source <code>src/router.js</code></p>
 
-<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Show reference-ready routes only</label></div>
+<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" aria-label="Show reference-ready routes only" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Show reference-ready routes only</label></div>
 
 ${unparseableNote}
 
 <h2 id="base">Base URL &amp; auth</h2>
-<p>Start with the guided setup at <a href="/docs/quickstart">/docs/quickstart</a>, then keep this API reference open for exact endpoints and payloads. Runtime behavior is covered in <a href="/docs/runtime">/docs/runtime</a> and acceptance gates are covered in <a href="/docs/evals">/docs/evals</a>.</p>
+<p>Start with the guided setup at <a href="/docs#quickstart">/docs#quickstart</a>, then keep this API reference open for exact endpoints and payloads. Runtime behavior and acceptance gates are covered from <a href="/docs">/docs</a> and <a href="/platform">/platform</a>.</p>
 <p>Local proxy: <code>http://localhost:8787</code>. Hosted: <code>https://kolm.ai</code>. Self-hosted enterprise: your domain.</p>
 <p>Public routes (such as <code>/health</code>, <code>/v1/loop/try</code>, <code>/v1/anon/bootstrap</code>) need no auth header. Every other <code>/v1/*</code> route accepts either:</p>
 <ul>
@@ -763,7 +780,7 @@ ${groupsHtml}
 </div></main>
 
 <footer><div class="wrap">
-  kolm.ai &middot; the AI compiler &middot; <a href="/articles/kolm-ai-vs-kolm-therapeutics">not the band, not the therapeutics company</a>
+  kolm.ai &middot; the AI compiler
 </div></footer>
 
 </body>
@@ -815,6 +832,8 @@ function main() {
 
   const html = renderPage(grouped, total, unparseable);
   const json = JSON.stringify(manifest, null, 2) + '\n';
+
+  fs.mkdirSync(path.dirname(OUT_HTML), { recursive: true });
 
   // Idempotent write — skip if content matches.
   let touched = 0;

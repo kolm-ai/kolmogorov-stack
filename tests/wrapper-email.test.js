@@ -159,6 +159,9 @@ test('LM-8 #5: tEmailSignup includes a CTA to /account/overview', () => {
   const s = tEmailSignup({ email: 'alice@example.com', tenant_id: 'tenant_lm8_s5', plan_tier: 'free' });
   assert.ok(s.text.includes('/account/overview'), 'signup text must include /account/overview');
   assert.ok(s.html.includes('/account/overview'), 'signup html must include /account/overview');
+  assert.ok(s.subject.includes('compiler workspace'), 'signup subject must frame the account as a compiler workspace');
+  assert.ok(s.text.includes('API wrapper'), 'signup text must point users at the compiler wrapper flow');
+  assert.ok(s.text.includes('/docs#quickstart'), 'signup text must link the compiler docs quickstart');
 });
 
 // ---------------------------------------------------------------------------

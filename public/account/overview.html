@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Compiler Overview - kolm.ai</title>
+<meta name="description" content="Your kolm compiler workspace: API wrapper capture, compile jobs, specialists, device targets, and next actions.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#090C0D">
+<link rel="canonical" href="https://kolm.ai/account/overview">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/kolm-2026.css">
+<style>
+  .mono{font-family:var(--mono)}
+  .app{max-width:1120px;margin:0 auto;padding:clamp(36px,6vw,70px) max(22px,env(safe-area-inset-right)) 90px max(22px,env(safe-area-inset-left))}
+  .app h1{font-size:clamp(32px,4vw,52px);letter-spacing:0;margin:10px 0 10px;max-width:900px}
+  .app>.lede{max-width:72ch;margin:0 0 26px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px}
+  .brandlink{display:inline-flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none;font-weight:700}
+  .brandlink svg{width:24px;height:24px;fill:currentColor}
+  .navrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
+  .panel{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-md);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.006));padding:18px}
+  .metric b{display:block;font:600 clamp(24px,3vw,36px)/1 var(--mono);color:var(--ink);margin-top:8px}
+  .metric span,.muted{color:var(--ink-3);font-size:13px;line-height:1.55}
+  .section-title{font-size:18px;margin:30px 0 12px}
+  .surfaces{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .surface h3,.job h3{font-size:15px;margin:0 0 6px}
+  .surface p,.job p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.55}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .chip{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border:1px solid var(--line-2);border-radius:4px;background:var(--paper-2);color:var(--ink-2);font:11px/1.2 var(--mono)}
+  .auth{max-width:520px;margin:26px 0;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:24px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.006))}
+  .auth input{width:100%;margin:14px 0 12px;padding:12px;border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--paper-sink);color:var(--ink);font:14px var(--mono)}
+  .auth input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .banner{border:1px solid var(--line-2);border-radius:var(--r-md);padding:12px 14px;margin:14px 0;font-size:14px;line-height:1.55;background:var(--paper-2);color:var(--ink-2)}
+  .banner.warn{border-color:rgba(227,195,104,.38);background:rgba(227,195,104,.08);color:var(--ink)}
+  pre{white-space:pre-wrap;word-break:break-word;overflow:auto;border:1px solid var(--line);border-radius:var(--r-md);background:var(--paper-sink);padding:14px;color:var(--ink-2);font:12px/1.65 var(--mono)}
+  .jobs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .empty{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  [hidden]{display:none!important}
+  @media (max-width:820px){
+    .topbar{align-items:flex-start;flex-direction:column}
+    .grid,.surfaces,.jobs{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<main id="main" class="app">
+  <div class="topbar">
+    <a class="brandlink" href="/" aria-label="kolm.ai home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
+      <span>kolm.ai</span>
+    </a>
+    <div class="navrow">
+      <a class="btn btn--ghost btn--sm" href="/account/api-control-center">API control</a>
+      <a class="btn btn--ghost btn--sm" href="/docs">Docs</a>
+      <a class="btn btn--ghost btn--sm" href="/pricing">Pricing</a>
+      <a class="btn btn--ghost btn--sm" href="https://audit.kolm.ai/">Audit module</a>
+    </div>
+  </div>
+
+  <p class="eyebrow">Account / Compiler</p>
+  <h1>Your compiler overview</h1>
+  <p class="lede">Capture traffic through the API wrapper, compile task-specific artifacts, compose specialist models, and choose deployment targets without making the audit product the default workspace.</p>
+  <section class="panel" data-product-readiness aria-label="Product readiness">
+    <p class="muted">Compiler readiness is tracked from <a href="/v1/product/graph">/v1/product/graph</a>, <a href="/product-readiness-closeout.json">/product-readiness-closeout.json</a>, and the local <span class="mono">readiness-counts</span> ledger. The <span class="mono">readiness-closeout</span> state names remaining package, benchmark, partner, and certification gates explicitly.</p>
+  </section>
+
+  <div id="banner"></div>
+  <div id="auth" class="auth" hidden>
+    <h2 class="section-title" style="margin-top:0">Open your workspace</h2>
+    <p class="muted">Use the session from signup, or paste a kolm API key that starts with <span class="mono">ks_</span>.</p>
+    <input id="keyInput" aria-label="API key" placeholder="ks_..." autocomplete="off" spellcheck="false">
+    <button class="btn btn--primary" id="keyBtn" style="width:100%">Open compiler overview</button>
+  </div>
+
+  <div id="content"><div class="banner">Loading compiler workspace...</div></div>
+</main>
+
+<script>
+(function(){
+  var KEY = null;
+  try { KEY = sessionStorage.getItem('kolm_account_key') || sessionStorage.getItem('kolm_dash_key') || null; } catch(e) {}
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g,function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; });
+  }
+  function headers(extra){
+    var h = extra ? Object.assign({}, extra) : {};
+    if (KEY) h.Authorization = 'Bearer ' + KEY;
+    return h;
+  }
+  function showAuth(){
+    document.getElementById('content').hidden = true;
+    document.getElementById('auth').hidden = false;
+  }
+  function metric(label, value){
+    return '<div class="panel metric"><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>';
+  }
+  function renderSurface(s){
+    var routes = (s.routes || []).slice(0,4).map(function(r){ return '<span class="chip">'+esc(r)+'</span>'; }).join('');
+    return '<div class="panel surface"><h3>'+esc(s.id)+'</h3><p>'+esc(s.status || 'mounted')+'</p><div class="chips">'+routes+'</div></div>';
+  }
+  function renderJob(j){
+    return '<div class="panel job"><h3>'+esc(j.task || j.id || 'compile job')+'</h3><p><span class="mono">'+esc(j.status || 'queued')+'</span>'
+      + (j.namespace ? ' in '+esc(j.namespace) : '')
+      + (j.artifact_ready ? ' - artifact ready' : '')
+      + '</p></div>';
+  }
+  function render(data){
+    var c = data.counts || {};
+    var onboarding = data.onboarding || {};
+    var surfaces = data.primary_surfaces || [];
+    var jobs = data.recent_compile_jobs || [];
+    var ns = data.namespaces || [];
+    var empty = data.empty_state;
+    var html = '';
+    html += '<div class="grid">'
+      + metric('Captured events', c.observed_captures || 0)
+      + metric('Compile jobs', c.compile_jobs || 0)
+      + metric('Artifacts', c.artifacts || 0)
+      + metric('Device targets', c.devices || 0)
+      + '</div>';
+      html += '<div class="panel empty"><div><p class="eyebrow">Workspace</p><h2 class="section-title" style="margin-top:4px">'+esc((data.tenant && data.tenant.name) || 'tenant')+'</h2>'
+        + '<p class="muted">Plan: <span class="mono">'+esc((data.tenant && data.tenant.plan) || 'free')+'</span>'
+        + (ns.length ? ' / Namespaces: '+esc(ns.join(', ')) : ' / Namespace: default') + '</p></div>'
+      + '<div class="btnrow"><a class="btn btn--primary" href="'+esc(onboarding.next_url || '/docs#quickstart')+'">Open quickstart</a><a class="btn btn--ghost" href="/account/api-control-center">API control</a><a class="btn btn--ghost" href="/pricing">Change plan</a></div></div>';
+    if (empty) {
+      html += '<h2 class="section-title">'+esc(empty.title || 'Route one namespace through Kolm')+'</h2>';
+      html += '<pre>'+esc(empty.curl || '')+'</pre>';
+    }
+    html += '<h2 class="section-title">Compiler surfaces</h2><div class="surfaces">'+surfaces.map(renderSurface).join('')+'</div>';
+    html += '<h2 class="section-title">Recent compile jobs</h2>';
+    html += jobs.length ? '<div class="jobs">'+jobs.map(renderJob).join('')+'</div>' : '<div class="panel"><p class="muted">No compile jobs yet. Capture traffic first, then run <span class="mono">POST /v1/compile</span>.</p></div>';
+    html += '<h2 class="section-title">Audit module</h2><div class="panel"><p class="muted">Signed review evidence remains available as a secondary module at <a href="https://audit.kolm.ai/">audit.kolm.ai</a>. It is not the default compiler workspace.</p></div>';
+    document.getElementById('auth').hidden = true;
+    var content = document.getElementById('content');
+    content.hidden = false;
+    content.innerHTML = html;
+  }
+  function load(){
+    if (!KEY) { showAuth(); return; }
+    fetch('/v1/account/compiler-overview', { credentials:'same-origin', headers: headers() })
+      .then(function(res){
+        if (res.status === 401) { showAuth(); return null; }
+        return res.json().then(function(j){ return { ok: res.ok, status: res.status, body: j }; });
+      })
+      .then(function(o){
+        if (!o) return;
+        if (!o.ok || !o.body || !o.body.ok) {
+          document.getElementById('banner').innerHTML = '<div class="banner warn">'+esc((o.body && (o.body.detail || o.body.error)) || 'Could not load compiler overview.')+'</div>';
+          return;
+        }
+        render(o.body);
+      })
+      .catch(function(){
+        document.getElementById('banner').innerHTML = '<div class="banner warn">Network error. Try refreshing, or email dev@kolm.ai.</div>';
+      });
+  }
+  document.getElementById('keyBtn').onclick = function(){
+    var v = (document.getElementById('keyInput').value || '').trim();
+    if (!v) return;
+    KEY = v;
+    try { sessionStorage.setItem('kolm_account_key', v); } catch(e) {}
+    document.getElementById('content').hidden = false;
+    document.getElementById('content').innerHTML = '<div class="banner">Loading compiler workspace...</div>';
+    load();
+  };
+  document.getElementById('keyInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('keyBtn').click(); });
+  load();
+})();
+</script>
+</body>
+</html>

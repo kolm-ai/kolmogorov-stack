@@ -3,30 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
+<script>
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Enterprise: Co-Signed AI Audit Under an MSA · kolm.ai</title>
-<meta name="description" content="For the six-figure deal in security review: a signed audit co-signed by a named accredited reviewer, under an MSA. Reviewed Attestation $25,000 flat.">
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
+<title>Kolm Enterprise Control Center</title>
+<meta name="description" content="Enterprise control plane for Kolm API behavior capture, policy, eval gates, signed artifacts, runtime targets, evidence exports, and readiness-gated buyer workflows.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="Enterprise: Co-Signed AI Audit Under an MSA">
-<meta property="og:description" content="For the six-figure deal in security review: a signed audit co-signed by a named accredited reviewer, under an MSA. Reviewed Attestation $25,000 flat.">
+<meta property="og:title" content="Kolm Enterprise Control Center">
+<meta property="og:description" content="API behavior in, signed runtime artifact out, with enterprise controls around every source, policy, eval, export, and readiness gate.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/enterprise">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="Enterprise: Co-Signed AI Audit Under an MSA">
-<meta name="twitter:description" content="For the six-figure deal in security review: a signed audit co-signed by a named accredited reviewer, under an MSA. Reviewed Attestation $25,000 flat.">
+<meta name="twitter:title" content="Kolm Enterprise Control Center">
+<meta name="twitter:description" content="Enterprise API control, evidence export, and buyer workflow for Kolm's AI compiler.">
 <meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/enterprise">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -34,65 +28,43 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Service",
-  "name": "kolm Enterprise Agent Security-Review Readiness",
-  "serviceType": "AI application security audit and signed evidence attestation for enterprise procurement",
-  "provider": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
-  "description": "For the six-figure deal in security review: a signed audit of your AI application co-signed by a named accredited reviewer, with continuous re-attestation for a fleet, delivered under an MSA and a defined scope. Reviewed Attestation $25,000 flat.",
-  "areaServed": "Worldwide",
-  "audience": { "@type": "Audience", "audienceType": "AI-native software vendors selling agents into the enterprise" },
-  "offers": [
-    { "@type": "Offer", "name": "Reviewed Attestation", "price": "25000", "priceCurrency": "USD", "url": "https://kolm.ai/pricing" },
-    { "@type": "Offer", "name": "Deep Red-Team add-on", "price": "10000", "priceCurrency": "USD", "url": "https://kolm.ai/pricing" }
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kolm.ai/" },
-    { "@type": "ListItem", "position": 2, "name": "Enterprise", "item": "https://kolm.ai/enterprise" }
-  ]
+  "@type": "WebPage",
+  "name": "Kolm Enterprise Control Center",
+  "url": "https://kolm.ai/enterprise",
+  "description": "Enterprise control plane for Kolm API behavior capture, policy, eval gates, signed artifacts, runtime targets, evidence exports, and readiness-gated buyer workflows.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
 </head>
-<body>
+<body class="compiler-site">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
-<hr class="foil-strip" aria-hidden="true">
-
-<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
+      <a href="/#pipeline">Pipeline</a>
+      <a href="/account/api-control-center">Control</a>
+      <a href="/integrations">Integrations</a>
+      <a href="/runtimes">Runtimes</a>
+      <a href="/compare">Compare</a>
       <a href="/docs">Docs</a>
+      <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
+      <a class="btn btn--ghost btn--sm" href="/docs/api">API docs</a>
+      <a class="btn btn--ghost btn--sm nav__cta" href="/account/api-control-center">Open control</a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -101,443 +73,196 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-
-<!-- ============================================================ 1. HERO -->
-<section class="section section--flush hero">
-  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="hero__grid">
+  <section class="section section--flush hero compiler-hero">
+    <div class="field" aria-hidden="true"><canvas></canvas></div>
+    <div class="wrap compiler-hero__grid">
       <div>
-        <p class="eyebrow" data-enter="1">Enterprise</p>
-        <h1 class="hero__h1" data-enter="2" style="max-width:19ch">Your biggest deal wants a person behind the proof. <span class="go">Add a name to the signature.</span></h1>
-        <p class="lede" data-enter="3">
-          Everything in the signed audit, plus a named accredited reviewer who co-signs the report, continuous re-attestation across a fleet, and an MSA with a defined scope. The buyer's review group verifies both signatures offline.
-        </p>
+        <p class="compiler-kicker" data-enter="1">Enterprise / API Control</p>
+        <h1 class="hero__h1" data-enter="2">Enterprise AI control starts before a model ships.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Kolm gives platform, AI, security, and compliance owners one control plane for sources, policy, eval gates, signed artifacts, runtime targets, exports, and the readiness gates that are not yet claimable.</p>
         <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="/contact">Start an audit</a>
-          <a class="btn btn--ghost" href="/pricing">See pricing</a>
+          <a class="btn btn--primary" href="/account/api-control-center">Open API control</a>
+          <a class="btn btn--ghost" href="/docs/api">Read API docs</a>
         </div>
-        <div class="hero__proof" aria-label="Enterprise at a glance" data-enter="5">
-          <span><i class="dot" aria-hidden="true"></i>Reviewed Attestation · $25,000 flat</span>
-          <span><i class="dot" aria-hidden="true"></i>Two signatures · independent keys</span>
-          <span><i class="dot" aria-hidden="true"></i>MSA · defined scope · DPA</span>
+        <div class="compiler-proof" data-enter="5">
+          <span><b>17</b> API data channel families</span>
+          <span><b>12</b> ingress modes</span>
+          <span><b>10</b> export modes</span>
+          <span><b>8</b> governance stages</span>
+          <span><b>8</b> open readiness gates</span>
         </div>
       </div>
-
-      <!-- the artifact IS the hero image: the co-signed attestation, rendered as a document -->
-      <aside class="artifact" aria-label="The co-signed reviewed attestation">
-        <div class="rep">
-          <div class="rep__bar">
-            <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="t">kolm · reviewed attestation</span>
-            <span class="chip chip--ok">co-signed · 2 keys</span>
-          </div>
-          <div class="rep__sheet">
-            <div class="rep__head">
-              <span class="rep__sub">Helpwise support &amp; billing agents</span>
-              <span class="rep__id">asrr_sample</span>
-            </div>
-            <div class="sev">
-              <div class="sev__bar" aria-hidden="true"><i class="s-h"></i><i class="s-m"></i><i class="s-l"></i><i class="s-i"></i></div>
-              <div class="sev__row"><span class="lbl">findings</span><span>13 · <b>7 high</b> · 4 medium · 1 low · 1 info</span></div>
-            </div>
-            <div class="find">
-              <span class="pill pill--ok">reviewed</span>
-              <div>
-                <div class="find__t">Named co-signer attached</div>
-                <div class="find__e">accredited security reviewer · independent key · same canonical bytes</div>
-                <div class="find__m">ASR-6 evidence → SOC 2 CC7 · ISO 42001</div>
-              </div>
-            </div>
-            <div class="find__more">13 findings, every one inside both signatures</div>
-          </div>
-          <div class="rep__sig" translate="no">
-            <div class="sig__row"><span class="sig__k">sig_1 · kolm</span><span class="sig__v">ed25519:9kWQBu5kLlJ8qSaPgyu39K335ewB8hS8-ckKlcB9i9IDhxmYf0ojWdqJfvECIIYh89ljitxhSq4MIV1gaG9aDw</span></div>
-            <div class="sig__row"><span class="sig__k">sig_2 · reviewer</span><span class="sig__v">ed25519(reviewer_sk, same canonical bytes)</span></div>
-            <div class="sig__row"><span class="sig__k">key</span><span>410302c93becdcc3...</span><span class="sig__ok">✓ both verify offline</span></div>
-          </div>
+      <aside class="control-plane kolm-surface-media" aria-label="Kolm enterprise control summary">
+        <div class="control-plane__head">
+          <span><b>enterprise control plane</b> / source to evidence</span>
+          <span>live scope</span>
+        </div>
+        <div class="control-plane__grid">
+          <div class="control-tile control-tile--wide"><b>Core loop</b><span>Capture real API behavior, apply policy, build eval gates, compile a signed artifact, choose a runtime target, and export the evidence.</span></div>
+          <div class="control-tile"><b>Inputs</b><span>Providers, gateways, agents, traces, warehouses, files, CI, support systems, and custom API events.</span></div>
+          <div class="control-tile"><b>Controls</b><span>Retention, redaction, provider vaulting, routing, eval, compile, runtime, and export policy.</span></div>
+          <div class="control-tile"><b>Outputs</b><span>Signed artifacts, receipts, manifests, governance packets, webhooks, SIEM, GRC, warehouse, and CI status.</span></div>
+          <div class="control-tile"><b>Gate</b><span>Benchmark, certification, package, partner, and standards claims stay visible as open gates until proven.</span></div>
         </div>
       </aside>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ 01. THE DEAL IN REVIEW -->
-<section class="section reveal" id="situation">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">01 / The deal in review</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>A CISO will not take your word for it.</h2>
-      <p class="lede">One six-figure contract, paused on a single review group, waiting on evidence the buyer can check for themselves.</p>
+  <section class="section" id="buyer-workflow">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">01 / Buyer Workflow</span>
+        <h2>Enterprise buyers do not buy an AI claim. They inspect a controlled workflow.</h2>
+        <p class="lede">The page, backend, and API center need to answer the same question for every stakeholder: what went in, what changed, what came out, who approved it, and what proof can leave the dashboard?</p>
+      </div>
+      <div class="surface-table">
+        <div class="surface-row"><div class="surface-row__key">platform owner</div><div class="surface-row__body"><b>Connect sources safely.</b> API keys, service accounts, webhooks, limits, quotas, provider allowlists, environments, integration health, and export paths.</div><div class="surface-row__route"><a href="/account/api-control-center">control</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">ai owner</div><div class="surface-row__body"><b>Manage model behavior.</b> Trace import, eval creation, failure taxonomy, version comparison, drift checks, prompt/tool/schema lineage, runtime compatibility, and human review.</div><div class="surface-row__route"><a href="/compiler-product#pipeline">pipeline</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">security owner</div><div class="surface-row__body"><b>Constrain the boundary.</b> Retention, redaction, unknown-schema handling, vault policy, least-privilege connectors, immutable audit events, and evidence exports.</div><div class="surface-row__route"><a href="/security">security</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">compliance owner</div><div class="surface-row__body"><b>Export proof without overclaiming.</b> Signed receipts, control mappings, readiness ledger, exception records, audit trail, data lineage, and change history.</div><div class="surface-row__route"><a href="/trust">trust</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">developer</div><div class="surface-row__body"><b>Run the loop quickly.</b> Quickstart, OpenAPI, examples, local test path, clear error objects, sample artifacts, verifier output, and CI gates.</div><div class="surface-row__route"><a href="/docs/api">docs</a></div></div>
+      </div>
     </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="ledger-rows">
-      <div class="lrow">
-        <div class="lrow__k">The clock</div>
-        <div class="lrow__t">
-          <h3>One week becomes eight</h3>
-          <p>The moment an autonomous agent touches customer data, a routine review stretches into its second month. Every unsigned week is a week the buyer can change their mind.</p>
+  </section>
+
+  <section class="section section--tint" id="control-coverage">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">02 / Control Coverage</span>
+        <h2>The API control center is the enterprise product, not a settings page.</h2>
+        <p class="lede">Kolm needs to support every major way AI behavior enters and leaves an enterprise system, with maturity states instead of logo padding.</p>
+      </div>
+      <div class="compiler-card-grid">
+        <div class="proof-card"><p class="card__k">Ingress families</p><h3>17 API data channel families</h3><p>Provider logs, app events, agent traces, observability spans, eval data, human labels, product analytics, warehouses, CI/CD, repositories, support tools, GRC, files, runtime telemetry, cost events, and customer-system actions.</p></div>
+        <div class="proof-card"><p class="card__k">Collection patterns</p><h3>12 ingress modes</h3><p>REST, GraphQL, gRPC, webhooks, streaming, batch files, object storage, warehouse queries, queues, browser events, local CLI, and custom adapter manifests.</p></div>
+        <div class="proof-card"><p class="card__k">Export patterns</p><h3>10 export modes</h3><p>Signed artifact, verifier receipt, eval report, evidence bundle, JSON API, warehouse export, webhook, CI status, SIEM/GRC event, and admin analytics.</p></div>
+        <div class="proof-card"><p class="card__k">Governance path</p><h3>8 governance stages</h3><p>Register source, capture event, classify schema, apply redaction, build eval, lock regression set, compile artifact, export evidence.</p></div>
+        <div class="proof-card"><p class="card__k">Policy layers</p><h3>Control before reuse</h3><p>Tenant isolation, environment separation, scoped keys, connector allowlists, retention windows, purge workflows, redaction, budgets, and audit events.</p></div>
+        <div class="proof-card"><p class="card__k">Readiness rule</p><h3>Truth beats reach</h3><p>Unsupported benchmark, certification, package-channel, partner, and standards claims stay in the readiness ledger until the proof exists.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="object-model">
+    <div class="wrap">
+      <div class="compiler-rail">
+        <div>
+          <span class="idx">03 / Object Model</span>
+          <h2>Enterprise quality means every claim has a backing object.</h2>
+          <p class="lede">Durable infrastructure unicorns win by exposing the real object. Kolm's object model should make capture, eval, artifact, receipt, target, export, and audit state impossible to miss.</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="/docs/api">Inspect API reference</a>
+            <a class="btn btn--ghost" href="/openapi.json">OpenAPI JSON</a>
+          </div>
         </div>
-        <div class="lrow__f">Buyer questionnaires · <a href="/regulatory-clock">EU AI Act Art.12 timeline</a></div>
-      </div>
-      <div class="lrow">
-        <div class="lrow__k">The reviewer</div>
-        <div class="lrow__t">
-          <h3>A questionnaire stops clearing it</h3>
-          <p>Self-attested answers shift the burden onto the buyer. A senior reviewer wants evidence they can verify, mapped to a control they already cite.</p>
+        <div class="unicorn-proof-grid">
+          <div class="proof-card"><h3>Account objects</h3><p>Organization, workspace, project, environment, API key, service account, connector, role, and policy.</p></div>
+          <div class="proof-card"><h3>Behavior objects</h3><p>Source, capture, trace, prompt version, tool version, schema version, dataset, label set, eval, failure, and regression set.</p></div>
+          <div class="proof-card"><h3>Compiler objects</h3><p>Compile run, artifact, manifest, runtime target, target recipe, verification receipt, and release gate.</p></div>
+          <div class="proof-card"><h3>Evidence objects</h3><p>Export, evidence bundle, audit event, readiness gate, exception record, source hash, output hash, and policy version.</p></div>
         </div>
-        <div class="lrow__f">ASR-6 · evidence</div>
-      </div>
-      <div class="lrow">
-        <div class="lrow__k">The stakes</div>
-        <div class="lrow__t">
-          <h3>Six figures, on hold</h3>
-          <p>The agent is built, the pricing is agreed. What is left is one sign-off, and the cost of getting it wrong is the whole deal slipping a quarter.</p>
-        </div>
-        <div class="lrow__f">ASR-1 · least privilege</div>
       </div>
     </div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ 02. WHAT THE REVIEW GROUP RECEIVES -->
-<section class="section section--lit sect--dense reveal" id="receives">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">02 / What the review group receives</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>One object they can open and check.</h2>
-      <p class="lede">Not a slide deck. One canonical report, sealed with Ed25519, mapped to the frameworks the buyer cites, verifiable offline in their own browser.</p>
-    </div>
-    <div class="grid grid--3">
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <path class="gy-s2" d="M14.5 24.5 H62.5 M14.5 32.5 H62.5 M14.5 40.5 H62.5"/>
-          <path class="gy-s2" d="M68.5 32.5 H84.5" stroke-dasharray="2 3"/>
-          <rect class="gy-s" x="96.5" y="8.5" width="28" height="12"/>
-          <path class="gy-s" d="M110.5 20.5 V30.5"/>
-          <rect class="gy-s" x="86.5" y="30.5" width="48" height="18"/>
-          <rect class="gy-p" x="106.5" y="36.5" width="8" height="6"/>
-          <path class="gy-s" d="M134.5 39.5 H146.5 L152.5 33.5 L158.5 45.5 L164.5 33.5 L170.5 45.5 L176.5 39.5 H204.5"/>
-        </svg></div>
-        <p class="card__k">The artifact</p>
-        <h3>The signed report</h3>
-        <p>Key-sorted, whitespace-free JSON, sealed with Ed25519. The signature covers the exact bytes, so a downgraded finding or an inflated score is self-evident in front of the reviewer.</p>
+  <section class="section section--ink" id="procurement-gates">
+    <div class="dither-edge" aria-hidden="true"></div>
+    <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">04 / Procurement Gates</span>
+        <h2>The enterprise packet should separate shipped controls from open gates.</h2>
+        <p class="lede">This is how Kolm stays credible against better-funded platforms: make every risk and missing proof visible before the buyer asks.</p>
       </div>
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <path class="gy-s" d="M36.5 8.5 V56.5 M184.5 8.5 V56.5"/>
-          <path class="gy-s" d="M30.5 10.5 H36.5 M30.5 20.5 H36.5 M30.5 30.5 H36.5 M30.5 40.5 H36.5 M30.5 50.5 H36.5"/>
-          <path class="gy-s" d="M184.5 16.5 H190.5 M184.5 30.5 H190.5 M184.5 44.5 H190.5"/>
-          <path class="gy-s2" d="M36.5 10.5 L184.5 30.5 M36.5 20.5 L184.5 16.5 M36.5 40.5 L184.5 16.5 M36.5 50.5 L184.5 44.5"/>
-          <path class="gy-ps" d="M36.5 30.5 L184.5 44.5"/>
-        </svg></div>
-        <p class="card__k">The crosswalk</p>
-        <h3>Mapped to their controls</h3>
-        <p>Every finding traces straight to SOC 2, ISO 42001, NIST AI RMF, OWASP or MITRE ATLAS. The reviewer files it under a control they already use.</p>
+      <div class="surface-table surface-table--dense">
+        <div class="surface-row"><div class="surface-row__key">shipped control evidence</div><div class="surface-row__body">Route, schema, test, static asset, API payload, screenshot, generated JSON, or verifier output that proves a feature exists in the current product.</div><div class="surface-row__route">inspectable</div></div>
+        <div class="surface-row"><div class="surface-row__key">readiness gates</div><div class="surface-row__body">The current closeout ledger has 8 open readiness gates covering public benchmark data, live certification, package releases, external runtime adoption, and neutral stewardship.</div><div class="surface-row__route"><a href="/product-readiness-closeout.json">json</a></div></div>
+        <div class="surface-row"><div class="surface-row__key">never imply</div><div class="surface-row__body">Do not imply certification, public package availability, external partner adoption, neutral standards stewardship, or broad benchmark superiority until the evidence exists.</div><div class="surface-row__route">claim gate</div></div>
+        <div class="surface-row"><div class="surface-row__key">buyer export</div><div class="surface-row__body">The enterprise packet should include source hashes, policy versions, eval results, artifact checksums, runtime targets, receipt IDs, and open-gate statuses.</div><div class="surface-row__route">evidence</div></div>
       </div>
-      <div class="card">
-        <div class="card__art" aria-hidden="true"><svg viewBox="0 0 220 64" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-          <rect class="gy-s" x="24.5" y="12.5" width="64" height="40"/>
-          <path class="gy-s" d="M24.5 23.5 H88.5"/>
-          <rect class="gy-f" x="29.5" y="16.5" width="3" height="3"/>
-          <rect class="gy-f" x="35.5" y="16.5" width="3" height="3"/>
-          <path class="gy-ps" d="M42.5 37.5 L50.5 45.5 L68.5 29.5"/>
-          <path class="gy-s2" d="M88.5 32.5 H134.5 M160.5 32.5 H170.5" stroke-dasharray="3 3"/>
-          <path class="gy-s" d="M139 39 L147 25 M145 39 L153 25"/>
-          <rect class="gy-s2" x="170.5" y="12.5" width="32" height="40"/>
-          <path class="gy-s2" d="M170.5 25.5 H202.5 M170.5 38.5 H202.5"/>
-        </svg></div>
-        <p class="card__k">The check</p>
-        <h3>Offline verification</h3>
-        <p>WebCrypto in their own browser, against the key inside the report. The check needs only the report file itself.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/trust#open-gates">Read readiness gates</a>
+        <a class="btn btn--ghost" href="/security">Security posture</a>
       </div>
     </div>
+  </section>
 
-    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Controls and framework mapping" style="margin-top:var(--s7)">
-      <table class="tbl">
-        <thead>
-          <tr><th scope="col">Control</th><th scope="col">What it checks</th><th scope="col">Maps to</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><b>ASR-1</b> Least privilege</td><td>Scopes the agent holds versus the scopes it uses</td><td class="mapped">SOC 2 CC6 · OWASP ASI03 · NIST MANAGE-1</td></tr>
-          <tr><td><b>ASR-2</b> Audit trail</td><td>Append-only, hash-chained, retained activity log</td><td class="mapped">EU AI Act Art.12 · SOC 2 CC7</td></tr>
-          <tr><td><b>ASR-3</b> Data egress</td><td>Destinations, approved sub-processors, redaction</td><td class="mapped">OWASP LLM02 · EU AI Act Art.10</td></tr>
-          <tr><td><b>ASR-4</b> Injection</td><td>Instruction hijack, indirect injection, guardrail bypass</td><td class="mapped">OWASP LLM01 · MITRE ATLAS</td></tr>
-          <tr><td><b>ASR-5</b> Provenance</td><td>Model and dependency provenance</td><td class="mapped">ISO 42001 · NIST MAP-1</td></tr>
-          <tr><td><b>ASR-6</b> Evidence</td><td>Signed, logged, offline-verifiable report</td><td class="mapped">SOC 2 CC7 · ISO 42001</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+  <section class="section" id="implementation-path">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">05 / Implementation Path</span>
+        <h2>A serious enterprise path should be narrow, fast, and fully evidenced.</h2>
+        <p class="lede">The first buyer workflow should prove the full loop with one namespace before expanding to every system.</p>
+      </div>
+      <div class="surface-table">
+        <div class="surface-row"><div class="surface-row__key">day 0</div><div class="surface-row__body"><b>Connect one source.</b> Register a project, create scoped API credentials, attach one namespace, set retention, and confirm source health.</div><div class="surface-row__route">source</div></div>
+        <div class="surface-row"><div class="surface-row__key">day 1</div><div class="surface-row__body"><b>Capture and label behavior.</b> Import traces, classify failures, attach human review where needed, and lock the first regression set.</div><div class="surface-row__route">capture</div></div>
+        <div class="surface-row"><div class="surface-row__key">day 2</div><div class="surface-row__body"><b>Compile with gates.</b> Run evals, block regressions, produce the signed artifact, and generate a verifier receipt.</div><div class="surface-row__route">compile</div></div>
+        <div class="surface-row"><div class="surface-row__key">day 3</div><div class="surface-row__body"><b>Export the buyer packet.</b> Send evidence to GRC, SIEM, warehouse, webhook, ticket, or CI status with receipt context and open-gate caveats.</div><div class="surface-row__route">export</div></div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ 03. THE NAMED CO-SIGNER -->
-<section class="section section--ink sect--air reveal" id="cosigner">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the chamber where the co-signer is staged -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">03 / The named co-signer</span></div>
-      <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true">03</span>
-    <div class="section__head">
-      <h2>A name a competitor cannot copy.</h2>
-      <p class="lede">Cryptography proves the bytes were not altered. A name proves a person reviewed them. For the deal where a CISO wants both, an accredited reviewer co-signs the report.</p>
-    </div>
-    <div class="grid grid--2" style="align-items:start">
-      <div class="plate">
-        <p class="card__k">Reviewed Attestation</p>
-        <div class="tier__price">$25,000</div>
-        <p class="tier__sub">flat · named co-signer · days, not weeks</p>
-        <ul class="ledger" style="margin:var(--s5) 0">
-          <li>The full automated audit, signed and offline-verifiable</li>
-          <li>A named, accredited security reviewer co-signs the report</li>
-          <li>Two signatures, independent keys, both verifiable offline</li>
-          <li>Remediation walkthrough with your team</li>
-        </ul>
-        <a class="btn btn--primary" href="/contact" style="width:100%">Start an audit</a>
-        <p class="hero__claim" style="text-align:center;margin-top:var(--s3)">Need a deeper adversarial pass? Add <b>Deep Red-Team</b> for <b>+$10,000</b>.</p>
+  <section class="section section--cta">
+    <div class="wrap cta-band">
+      <div>
+        <h2>Put one production AI/API loop under control.</h2>
+        <p class="lede">Start with one source, prove the capture-to-artifact path, and export the packet. Expansion should follow evidence, not ambition.</p>
       </div>
-      <div class="card">
-        <div class="flow__t-k">What the buyer's browser checks</div>
-        <div class="fnode"><span class="fk">input</span><span>report.json · one object, two signatures</span></div>
-        <div class="fjoin" aria-hidden="true"></div>
-        <div class="fnode"><span class="fk">check 1</span><span>ed25519.verify(sig_kolm, kolm_pk)</span></div>
-        <div class="fjoin" aria-hidden="true"></div>
-        <div class="fnode"><span class="fk">check 2</span><span>ed25519.verify(sig_reviewer, reviewer_pk)</span></div>
-        <div class="fjoin" aria-hidden="true"></div>
-        <div class="fnode fnode--ok"><span class="fk">result</span><span>VALID · both keys · offline</span></div>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/account/api-control-center">Open control center</a>
+        <a class="btn btn--ghost" href="/compare">Compare category</a>
       </div>
     </div>
-    <p class="how__foot">A forged report fails the kolm key. A pressured reviewer fails the second. Issuer key <a href="/keys/kolm-issuers.json" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">fa562154f99c95f4...</a> · <a href="/transparency-log" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">append-only transparency log</a></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 04. TWO CLOCKS -->
-<section class="section sect--dense reveal" id="clocks">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">04 / Two clocks</span></div>
-      <div class="sect-rail__body">
-    <span class="num-ghost" aria-hidden="true">04</span>
-    <div class="section__head">
-      <h2>Minutes for the scan. Days for a signature with a name on it.</h2>
-      <p class="lede">An enterprise review stalls on two different clocks. We compress both, and we are clear about which one needs a person.</p>
-    </div>
-    <div class="grid grid--2">
-      <div class="card">
-        <p class="card__k">The machine clock</p>
-        <h3>No human waits here</h3>
-        <p>Permission read, audit-trail and egress checks, the injection battery, control mapping and signing are compute. Minutes to hours, re-run on every deploy, nobody in the loop.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">The human clock</p>
-        <h3>A name behind the result</h3>
-        <p>A reviewer wants a person to stand behind the finding, not a machine that approved a machine. The co-signer reviews and signs in days, bounded by an SLA, not the open-ended wait of a from-scratch review.</p>
-      </div>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 05. CONTINUOUS FOR A FLEET -->
-<section class="section reveal" id="fleet">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">05 / Continuous for a fleet</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>A snapshot goes stale on the next deploy.</h2>
-      <p class="lede">A point-in-time report describes the agent you shipped last week. Continuous re-attests the whole fleet and hands the buyer one link that never goes out of date.</p>
-    </div>
-    <figure class="diag reveal" role="img" aria-label="Continuous attestation timeline: scheduled re-audits re-sign the report each week and a deploy forces an immediate re-sign, so the trust link always serves current evidence">
-    <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="dg-line" d="M16 76 H704"/>
-      <path class="dg-flow" d="M16 76 H704"/>
-      <g>
-        <circle class="dg-ok" cx="80" cy="76" r="4"/><text class="dg-mono" x="62" y="102">week 1</text>
-        <circle class="dg-ok" cx="240" cy="76" r="4"/><text class="dg-mono" x="222" y="102">week 2</text>
-        <circle class="dg-ok" cx="400" cy="76" r="4"/><text class="dg-mono" x="382" y="102">week 3</text>
-        <circle class="dg-dot" cx="640" cy="76" r="5"/><text class="dg-mono" x="618" y="102">current</text>
-      </g>
-      <path class="dg-line" d="M512 36 V70" stroke-dasharray="3 5"/>
-      <polygon class="dg-ok" points="512,70 507.5,62 516.5,62"/>
-      <text class="dg-label dg-label--up" x="478" y="28">Deploy</text>
-      <text class="dg-mono" x="540" y="33">forces an immediate re-sign</text>
-      <text class="dg-label dg-label--up" x="16" y="28">Re-attestation</text>
-      <text class="dg-mono" x="16" y="44">each dot is a fresh signed report; the same trust link always serves the newest one</text>
-      <text class="dg-mono" x="16" y="132">evidence that goes stale stops being evidence</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Always current</b> one stable link for the fleet, re-signed on schedule and on every deploy</figcaption>
-    </figure>
-    <div class="grid grid--2">
-      <div class="card">
-        <p class="card__k">Re-attested per deploy</p>
-        <h3>Evidence that moves with the code</h3>
-        <p>Affected checks re-run and re-sign on every release, with injection regression on each agent. The report the buyer holds is never older than your last deploy.</p>
-        <p class="card__map">ASR-2 · audit trail · per-deploy</p>
-      </div>
-      <div class="card">
-        <p class="card__k">A live trust link</p>
-        <h3>One URL the buyer re-checks</h3>
-        <p>The review group re-verifies the current attestation offline, any time, against the embedded key. When you ship, it updates itself, so a passed review stays passed.</p>
-        <p class="card__map">ASR-6 · evidence · live</p>
-      </div>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ 06. PRICING AND TERMS -->
-<section class="section sect--dense reveal" id="terms">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">06 / Pricing and terms</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>Flat fees, on paper your counsel has seen before.</h2>
-      <p class="lede">An MSA, a DPA and a named SLA, with scope defined in writing. Full Readiness $15,000; Reviewed Attestation $25,000.</p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="plate plate--rows">
-      <div class="prow">
-        <div class="prow__name">Full Readiness</div>
-        <div class="prow__d">A guided audit across your agent fleet, remediation guidance, buyer portal, re-attestation.</div>
-        <div class="prow__p">$15,000<small>fixed fee</small></div>
-      </div>
-      <div class="prow">
-        <div class="prow__name">Continuous-Plus</div>
-        <div class="prow__d">Fleet-wide re-attestation on every deploy behind a stable trust link, with priority support.</div>
-        <div class="prow__p">$3,500<small>per month</small></div>
-      </div>
-      <div class="prow prow--hot">
-        <div class="prow__name">Reviewed Attestation<span class="chip chip--ok">named co-signer</span></div>
-        <div class="prow__d">The full audit plus an accredited reviewer's second signature, in days under an SLA.</div>
-        <div class="prow__p">$25,000<small>flat</small></div>
-      </div>
-      <div class="prow">
-        <div class="prow__name">Deep Red-Team</div>
-        <div class="prow__d">A deeper adversarial pass on top of the Reviewed Attestation.</div>
-        <div class="prow__p">+$10,000<small>add-on</small></div>
-      </div>
-      <div class="plate__foot">
-        <span>No retainer · no per-seat meter · <a href="/pricing">full pricing</a></span>
-        <span style="margin-left:auto"><a class="go" href="/contact">Start an audit →</a></span>
-      </div>
-    </div>
-    <div class="grid grid--4" style="margin-top:var(--s6)">
-      <div class="card"><p class="card__k">Contract</p><h3>MSA &amp; custom scope</h3><p>A master services agreement, a scope defined in the order, liability terms your counsel can redline.</p></div>
-      <div class="card"><p class="card__k">Data</p><h3>DPA &amp; subprocessors</h3><p>The data-processing terms and the current <a href="/subprocessors">subprocessor list</a>, ready for diligence.</p></div>
-      <div class="card"><p class="card__k">Freshness</p><h3>Re-attestation in the order</h3><p>Checks re-run and re-sign across the fleet as the agent changes, under the cadence the order sets.</p></div>
-      <div class="card"><p class="card__k">Diligence</p><h3>Trust package</h3><p>Our security posture, the data terms and the open verifier, gathered for your <a href="/trust">review</a>.</p></div>
-    </div>
-    <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted. Liability is capped at fee.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ FINAL CTA -->
-<section class="section reveal cta-final">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
-  <div class="wrap">
-    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>Bring us the deal stuck in review.</h2>
-    <p class="lede">A signed report the buyer verifies in their own browser, a name beside the automated audit, days instead of weeks.</p>
-    <div class="hero__cta">
-      <a class="btn btn--primary" href="/contact">Start an audit</a>
-      <a class="btn btn--ghost" href="/pricing">See pricing</a>
-    </div>
-    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
-      <span class="badge">Reviewed Attestation · a named engineer co-signs</span>
-    </div>
-    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-  </div>
-</section>
-
+  </section>
 </main>
 
-<!-- ============================================================ FOOTER -->
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Enterprise control for API behavior, policy, signed artifacts, runtime targets, and evidence exports.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Enterprise</h3>
+        <a href="#buyer-workflow">Buyer workflow</a>
+        <a href="#control-coverage">Control coverage</a>
+        <a href="#object-model">Object model</a>
+        <a href="#procurement-gates">Procurement gates</a>
       </div>
       <div class="foot__col">
         <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
-        <a href="/platform">Platform</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
-        <a href="/docs">Docs</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/enterprise">Enterprise</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
+        <a href="/compiler-product">Compiler</a>
+        <a href="/account/api-control-center">API control</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/runtimes">Runtimes</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
-        <a href="/verify">Verify</a>
         <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
+        <a href="/trust">Readiness center</a>
+        <a href="/product-readiness-closeout.json">Readiness JSON</a>
         <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
       </div>
       <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
-      </div>
-      <div class="foot__col">
-        <h3>Company</h3>
-        <a href="/research">Research</a>
+        <h3>Developers</h3>
+        <a href="/docs">Docs</a>
+        <a href="/docs/api">API reference</a>
+        <a href="/openapi.json">OpenAPI JSON</a>
         <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
-        <a href="/contact">Contact</a>
       </div>
     </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge badge--ok">API control center</span>
+      <span class="badge">Readiness-gated claims</span>
+      <span class="badge">Enterprise evidence path</span>
+      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
-
 </body>
 </html>
