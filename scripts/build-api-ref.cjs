@@ -632,14 +632,14 @@ function renderPage(grouped, totalCount, unparseable) {
       : '';
 
   return `<!DOCTYPE html>
-<html lang="en" style="background:#e4ece7;color-scheme:light">
+<html lang="en" style="background:#06080A;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#e4ece7;color:#07100d}html{color-scheme:light}</style>
+<style>html,body{background:#06080A;color:#C3C8D0}html{color-scheme:dark}</style>
 <title>${title}</title>
 <meta name="description" content="${escapeHtml(description)}">
-<meta name="theme-color" content="#E4ECE7">
+<meta name="theme-color" content="#06080A">
 <meta property="og:title" content="${titleEntity}">
 <meta property="og:description" content="${escapeHtml(description)}">
 <meta property="og:type" content="article">
@@ -768,7 +768,7 @@ body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 @media(max-width:640px){header.site-header .wrap{grid-template-columns:1fr;gap:8px}header.site-header nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:stretch}header.site-header nav a{border:1px solid var(--line);background:rgba(255,255,255,.018)}.wrap{padding:0 20px}main{padding:38px 0 80px}h1{font-size:38px}.lede{font-size:17px}}
-:root{--ink:#07100d;--ink-mute:#26342e;--ink-faint:#5b6c62;--line:rgba(7,16,13,.14);--line-2:rgba(7,16,13,.24);--bg:#e4ece7;--bg-elev:#f3faf5;--paper-sink:#d8e5de;--accent:#087a52;--accent-soft:rgba(117,255,157,.1);--mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+:root{--ink:#F7F8F8;--ink-mute:#C3C8D0;--ink-faint:#868B94;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.13);--bg:#06080A;--bg-elev:#0E0F12;--paper-sink:#0B0C0E;--accent:#3FE5A0;--accent-soft:rgba(63,229,160,.12);--mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 body.api-reference-page{background:radial-gradient(920px 420px at 18% 12%,rgba(247,255,250,.78),transparent 74%),radial-gradient(760px 330px at 82% 0%,rgba(117,255,157,.13),transparent 72%),radial-gradient(700px 300px at 100% 25%,rgba(111,166,232,.07),transparent 72%),linear-gradient(rgba(7,16,13,.036) 1px,transparent 1px),linear-gradient(90deg,rgba(7,16,13,.03) 1px,transparent 1px),var(--bg);background-size:auto,auto,auto,72px 72px,72px 72px,auto;color:var(--ink);font-family:"Switzer",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .api-reference-page .wrap{max-width:1160px}
 .api-reference-page header.site-header{position:sticky;top:0;z-index:50;padding:0;background:rgba(216,229,222,.86);border-bottom:1px solid rgba(7,16,13,.1);backdrop-filter:saturate(140%) blur(12px);-webkit-backdrop-filter:saturate(140%) blur(12px);box-shadow:0 1px 0 rgba(247,255,250,.72)}
