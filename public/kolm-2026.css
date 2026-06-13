@@ -1527,3 +1527,82 @@ p a:not([class]):hover { border-bottom-color: var(--accent); }
   .ui__rail { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); }
   .proof__row { grid-template-columns: repeat(2, 1fr); gap: 30px 16px; }
 }
+
+/* ============================================================
+   PREMIUM ELEVATION — tasteful, luxurious, series-B aesthetic.
+   Soft gradient light, glassy depth, refined glow. Restrained, never loud.
+   ============================================================ */
+.home .hero { position: relative; isolation: isolate; }
+/* a beautiful, soft gradient-light backdrop behind the hero */
+.home .hero::before {
+  content: ""; position: absolute; inset: -16% -24% 24% -12%; z-index: -2; pointer-events: none; display: block;
+  background:
+    radial-gradient(46% 52% at 26% 16%, rgba(63,229,160,0.12), transparent 70%),
+    radial-gradient(42% 46% at 80% 6%, rgba(95,130,255,0.07), transparent 72%);
+  filter: blur(24px);
+  -webkit-mask-image: radial-gradient(130% 95% at 38% 8%, #000 26%, transparent 82%);
+          mask-image: radial-gradient(130% 95% at 38% 8%, #000 26%, transparent 82%);
+}
+/* a whisper-fine grid floor under the hero (premium, barely there) */
+.home .hero::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; display: block; opacity: 0.5;
+  background-image: linear-gradient(var(--line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(80% 60% at 50% 0%, #000 0%, transparent 72%);
+          mask-image: radial-gradient(80% 60% at 50% 0%, #000 0%, transparent 72%);
+}
+
+/* refined gradient headline — subtle depth, premium (safe fallback) */
+.hero__h1 { color: var(--ink); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero__h1 { background: linear-gradient(176deg, #FFFFFF 6%, #CDD2DA 96%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero__h1 .go { background: none; -webkit-text-fill-color: var(--accent-text); }
+}
+
+/* premium glassy product UI: gradient bezel, soft colored glow, top sheen */
+.ui {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04) 26%, rgba(255,255,255,0.02)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 60px 150px -60px rgba(0,0,0,0.96),
+    0 0 120px -55px rgba(63,229,160,0.20);
+}
+.ui::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: linear-gradient(180deg, rgba(255,255,255,0.045), transparent 16%); }
+
+/* premium green CTA — refined gradient + soft glow */
+.btn--primary, .nav__cta, .nav__cta.is-solid {
+  background: linear-gradient(180deg, #54EAAC, var(--accent) 72%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42), 0 2px 16px -5px rgba(63,229,160,0.42);
+}
+.btn--primary:hover, .nav__cta:hover, .nav__cta.is-solid:hover { background: linear-gradient(180deg, #6BF0BB, #4BE5A4 72%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 5px 24px -5px rgba(63,229,160,0.58); }
+
+/* premium glassy cards / panels — gradient bezel + inner top light */
+.card, .plate, .panel {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.028), rgba(255,255,255,0.008)) padding-box,
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04) 42%, rgba(255,255,255,0.025)) border-box;
+  border: 1px solid transparent; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.card:hover, .plate:hover { background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)) padding-box,
+    linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05) 42%) border-box;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 30px 70px -44px rgba(0,0,0,0.9); }
+
+/* refined accent details */
+.eyebrow::before, .compiler-kicker::before { box-shadow: 0 0 8px rgba(63,229,160,0.6); }
+.proof__cell b { background: linear-gradient(176deg, #FFFFFF, #CDD2DA); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* tasteful hero entrance */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__in > * { animation: rise 720ms cubic-bezier(0.16,0.84,0.44,1) both; }
+  .hero__in > .eyebrow { animation-delay: 20ms; }
+  .hero__in > .hero__h1 { animation-delay: 80ms; }
+  .hero__in > .lede { animation-delay: 150ms; }
+  .hero__in > .hero__cta { animation-delay: 220ms; }
+  .hero__in > .ui { animation-delay: 300ms; }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+/* ===================== /PREMIUM ELEVATION ===================== */
