@@ -25,45 +25,26 @@ html {
 }
 
 .compiler-site--paper {
-  --paper: #e4ece7;
-  --paper-2: #f3faf5;
-  --paper-sink: #d8e5de;
-  --ink: #07100d;
-  --ink-2: #26342e;
-  --ink-3: #5b6c62;
-  --ink-faint: #86978e;
-  --line: rgba(7, 16, 13, 0.14);
-  --line-2: rgba(7, 16, 13, 0.24);
-  --line-top: rgba(7, 16, 13, 0.18);
-  --light-top: rgba(255, 255, 255, 0.66);
-  --accent: #087a52;
-  --accent-deep: #055d3f;
-  --accent-press: #034831;
-  --accent-text: #086d4b;
-  --accent-soft: rgba(8, 122, 82, 0.12);
-  --accent-tint: rgba(117, 255, 157, 0.1);
-  --accent-edge: rgba(8, 122, 82, 0.3);
-  --compile-blue: #1f5fbf;
-  --compile-blue-soft: rgba(31, 95, 191, 0.1);
-  --compile-blue-edge: rgba(31, 95, 191, 0.26);
-  --compile-amber: #8a650c;
-  --compile-amber-soft: rgba(138, 101, 12, 0.1);
-  --compile-rose: #9d3c31;
-  --compile-violet: #6b5ac8;
-  --compile-violet-soft: rgba(107, 90, 200, 0.1);
-  --compile-panel: rgba(246, 255, 249, 0.58);
-  --compile-panel-strong: rgba(247, 255, 250, 0.82);
-  color-scheme: light;
+  /* UNIFIED TO DARK-CANONICAL (Design system 2026 §3.8): the light "paper" skin
+     is retired. These pages now inherit the dark room; the 230 component rules
+     scoped to this class sit on dark tokens. Compile hues kept (dark-tuned) so
+     rules consuming them don't break. */
+  --paper: #08090A; --paper-2: #0F1011; --paper-sink: #0C0D0E;
+  --ink: #F7F8F8; --ink-2: #D0D6E0; --ink-3: #8A8F98; --ink-faint: #3A3D42;
+  --line: rgba(255, 255, 255, 0.07); --line-2: rgba(255, 255, 255, 0.12); --line-top: rgba(255, 255, 255, 0.14);
+  --light-top: rgba(238, 246, 242, 0.30);
+  --accent: #3FE5A0; --accent-deep: #5FEDB1; --accent-press: #33CC8C; --accent-text: #5EE8AD;
+  --accent-soft: rgba(63, 229, 160, 0.12); --accent-tint: rgba(63, 229, 160, 0.06); --accent-edge: rgba(63, 229, 160, 0.30);
+  --compile-blue: #6FA6E8; --compile-blue-soft: rgba(111, 166, 232, 0.16); --compile-blue-edge: rgba(111, 166, 232, 0.34);
+  --compile-amber: #E3C368; --compile-amber-soft: rgba(227, 195, 104, 0.14);
+  --compile-rose: #E0A89F; --compile-violet: #B7A7FF; --compile-violet-soft: rgba(183, 167, 255, 0.12);
+  --compile-panel: rgba(16, 24, 27, 0.76); --compile-panel-strong: rgba(25, 36, 40, 0.86);
+  color-scheme: dark;
   background:
-    radial-gradient(820px 380px at 17% 7%, rgba(247, 255, 250, 0.78), transparent 70%),
-    radial-gradient(980px 430px at 76% 0%, rgba(117, 255, 157, 0.16), transparent 72%),
-    radial-gradient(700px 320px at 100% 26%, rgba(111, 166, 232, 0.08), transparent 72%),
-    linear-gradient(rgba(7, 16, 13, 0.032) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 16, 13, 0.026) 1px, transparent 1px),
+    radial-gradient(1100px 600px at 50% -12%, rgba(63, 229, 160, 0.045), transparent 60%),
     var(--paper);
-  background-size: auto, auto, auto, 72px 72px, 72px 72px, auto;
   overflow-x: clip;
-  scroll-padding-top: 86px;
+  scroll-padding-top: var(--nav-h);
 }
 
 .compiler-site--paper .section,
@@ -91,19 +72,15 @@ html {
 }
 
 .compiler-site--paper::before {
-  background:
-    linear-gradient(rgba(7, 16, 13, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 16, 13, 0.016) 1px, transparent 1px),
-    radial-gradient(700px 340px at 16% 4%, rgba(247, 255, 250, 0.58), transparent 72%),
-    radial-gradient(620px 270px at 82% 0%, rgba(117, 255, 157, 0.11), transparent 70%);
-  background-size: 28px 28px, 28px 28px, auto, auto;
-  opacity: 0.72;
+  /* retired light grid/paper texture (dark-canonical now) */
+  background: none;
+  opacity: 0;
   animation: none;
 }
 
 .compiler-site--paper::after {
-  opacity: 0.052;
-  mix-blend-mode: multiply;
+  opacity: 0;
+  mix-blend-mode: normal;
 }
 
 .compiler-site--paper .nav {

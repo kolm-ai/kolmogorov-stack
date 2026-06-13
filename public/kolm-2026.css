@@ -30,148 +30,71 @@
 @font-face { font-family: "Switzer"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/fonts/Switzer-Variable.woff2") format("woff2"); }
 @font-face { font-family: "Switzer"; font-style: italic; font-weight: 100 900; font-display: swap; src: url("/fonts/Switzer-VariableItalic.woff2") format("woff2"); }
 
-:root {
-  /* ---- the room (page surfaces) - 2026: half a step toward blue-cool ---- */
-  --paper: #090C0D;        /* page base - the chamber */
-  --paper-2: #121A1C;      /* plates, cards, raised chrome - lifted so raised plates catch the lamp */
-  --paper-sink: #0E1314;   /* recessed wells, table headers */
-
-  /* proof panels (slightly raised dark band; legacy name kept) */
-  --ink-deep: #0D1213;
-  --ink-deep-2: #131A1B;
-  --ink-deep-sink: #090C0D;
-
+:root{
+  /* ===== KOLM DESIGN SYSTEM 2026 — "The Instrument" (dark-canonical) ===== */
+  /* surfaces — Linear-grade cool near-black ladder */
+  --paper:#08090A; --paper-2:#0F1011; --paper-sink:#0C0D0E; --raised:#191A1B;
+  --ink-deep:#0D0E10; --ink-deep-2:#141517; --ink-deep-sink:#08090A;
   /* foreground ramp (light on dark) */
-  --ink: #EDF2EF;          /* primary text + headings - a hair brighter so the silver ink bites */
-  --ink-2: #A6B0A9;        /* secondary, lede */
-  --ink-3: #8B968F;        /* meta, labels (>=12px) */
-  --ink-faint: #49524F;    /* NON-TEXT decorative only */
-
-  /* on-ink == ink: the whole page is the ledger now */
-  --on-ink: #EDF2EF;
-  --on-ink-2: #A6B0A9;
-  --on-ink-3: #8B968F;
-  --on-ink-faint: #4A514B;
-
-  /* lines - hairlines lighter at the top edge of raised things */
-  --line: rgba(229, 240, 234, 0.10);
-  --line-2: rgba(229, 240, 234, 0.22);
-  --line-top: rgba(229, 240, 234, 0.22);  /* card top edge (catches the light) */
-  --line-ink: rgba(229, 240, 234, 0.10);
-  --line-ink-2: rgba(229, 240, 234, 0.22);
-
-  /* accent - one disciplined phosphor green (verification semantic) */
-  --accent: #3FE5A0;
-  --accent-deep: #5FEDB1;   /* hover (brighter, toward the light) */
-  --accent-press: #36CC8E;
-  --accent-text: #3FE5A0;   /* 9.9:1 on the page */
-  --accent-soft: rgba(63, 229, 160, 0.12);
-  --accent-tint: rgba(63, 229, 160, 0.07);
-  --accent-edge: rgba(63, 229, 160, 0.30);
-  --accent-on-ink: #3FE5A0;
-  --accent-on-ink-soft: rgba(63, 229, 160, 0.12);
-  --accent-on-ink-edge: rgba(63, 229, 160, 0.34);
-  --on-accent: #062A1D;     /* ink on a phosphor fill */
-
-  /* ---- UNICORN 2026 tokens ---- */
-  /* the second light - cool counterlight, now a first-class token */
-  --cool: #6FA6E8;
-  --cool-soft: rgba(111, 166, 232, 0.10);
-  --cool-edge: rgba(111, 166, 232, 0.30);
-
-  /* metallic ink stops (the silver-struck headline gradient, tokenized) */
-  --ink-hot: #FFFFFF;
-  --ink-silver: #EAF0ED;
-  --ink-shadowed: #A4B2AB;
-
-  /* graphite - the dark-metal mid surface for instrument chrome on the sheet */
-  --graphite: #1A2123;
-  --graphite-2: #232B2D;
-
-  /* one stated lighting model: cold overhead lamp + faint blue counterlight */
-  --light-top: rgba(238, 246, 242, 0.30);   /* top-edge specular */
-  --shadow-tint: rgba(4, 8, 9, 0.55);       /* tinted drop shadow base */
-
-  /* section rhythm - three densities, no uniform drum */
-  --rhy-1: clamp(40px, 4.5vw, 64px);
-  --rhy-2: clamp(64px, 7.5vw, 104px);
-  --rhy-3: clamp(96px, 11vw, 160px);
-
-  /* motion timing */
-  --dur-1: 160ms; --dur-2: 320ms; --dur-3: 560ms;
-  --ease-exp: cubic-bezier(0.23, 1, 0.32, 1);
-
-  /* void - tampered / not-verified. desaturated clay, NOT alarm-red */
-  --void: #E0A89F;
-  --void-soft: rgba(224, 168, 159, 0.12);
-  --void-edge: rgba(224, 168, 159, 0.34);
-  --void-on-ink: #E0A89F;
-  --void-on-ink-soft: rgba(224, 168, 159, 0.12);
-  --void-on-ink-edge: rgba(224, 168, 159, 0.34);
-
-  /* severity - surgical use only (the artifact, finding rows, chips) */
-  --sev-high: #FF8266;
-  --sev-med: #E3C368;
-  --sev-low: #8FB7E8;
-  --sev-info: #7C867F;
-  --sev-critical: #FF8266;
-  --sev-medium: #E3C368;
-  --attn-text: #E3C368;
-
-  /* ---- the SHEET (the lit paper artifact: .vw, .rep, signed exhibits) ---- */
-  --sheet: #F3F5F2;
-  --sheet-2: #EBEEE9;            /* sheet chrome / recessed sheet rows */
-  --sheet-ink: #111613;
-  --sheet-ink-2: #4C554F;
-  --sheet-ink-3: #6B746E;
-  --sheet-line: rgba(17, 22, 19, 0.10);
-  --sheet-line-2: rgba(17, 22, 19, 0.26);
-  --sheet-accent: #0E8A57;       /* green that reads on paper */
-  --sheet-accent-soft: rgba(14, 138, 87, 0.10);
-  --sheet-high: #B3401F;         /* high-severity text on paper */
-  --sheet-high-soft: rgba(255, 130, 102, 0.14);
-  --sheet-high-edge: rgba(255, 130, 102, 0.35);
-  --sheet-void: #8A5A52;
-
-  /* ---- back-compat aliases (legacy pages re-skin cleanly) ---- */
-  --plate: var(--paper-2); --plate-2: var(--paper-sink);
-  --bg: var(--paper); --bg-1: var(--paper-2); --bg-2: var(--paper); --panel: var(--paper-2);
-  --hair: var(--line);
-  --seal: var(--ink); --seal-strong: var(--ink); --seal-deep: var(--ink-3);
-  --seal-soft: rgba(234, 240, 236, 0.05); --seal-tint: var(--accent-tint); --seal-edge: var(--line-2);
-  --ok: var(--accent-text); --ok-strong: var(--accent); --ok-soft: var(--accent-soft); --ok-edge: var(--accent-edge);
-  --bad: var(--void); --bad-soft: var(--void-soft); --bad-edge: var(--void-edge);
-  --void-2: var(--void);
-  --foil: var(--accent); --foil-edge: var(--accent-edge); --foil-soft: var(--accent-tint);
-  /* d-* legacy dark-section tokens: the page IS dark now */
-  --d-ink: var(--ink); --d-muted: var(--ink-2); --d-rule: var(--line);
-  --d-panel: var(--paper-2); --d-paper: var(--paper); --d-accent: var(--accent); --d-ok: var(--accent);
-
-  /* ---- type ---- */
-  --display: "Cabinet Grotesk", "Switzer", system-ui, sans-serif;
-  --sans: "Switzer", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --mono: "Spline Sans Mono", ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-
-  /* grain - one tileable fractal-noise sheet for tooth (perf-first, no WebGL) */
+  --ink:#F7F8F8; --ink-2:#D0D6E0; --ink-3:#8A8F98; --ink-4:#62666D; --ink-faint:#3A3D42;
+  --on-ink:var(--ink); --on-ink-2:var(--ink-2); --on-ink-3:var(--ink-3); --on-ink-faint:var(--ink-faint);
+  /* the one accent (phosphor green — verification semantic) */
+  --accent:#3FE5A0; --accent-hi:#6BF0B8; --accent-press:#33CC8C; --accent-text:#5EE8AD;
+  --accent-soft:rgba(63,229,160,.12); --accent-tint:rgba(63,229,160,.06); --accent-edge:rgba(63,229,160,.30);
+  --on-accent:#062A1D; --accent-deep:#5FEDB1;
+  --accent-on-ink:var(--accent); --accent-on-ink-soft:var(--accent-soft); --accent-on-ink-edge:var(--accent-edge);
+  /* second light (cool counterlight — read by the field shader) */
+  --cool:#6FA6E8; --cool-soft:rgba(111,166,232,.10); --cool-edge:rgba(111,166,232,.28);
+  /* hairlines — translucent white (the biggest single upgrade) */
+  --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.12); --line-top:rgba(255,255,255,.14); --line-micro:rgba(255,255,255,.04);
+  --hair:var(--line); --line-ink:var(--line); --line-ink-2:var(--line-2);
+  /* status — minimal */
+  --void:#E0A89F; --void-soft:rgba(224,168,159,.12); --void-edge:rgba(224,168,159,.34); --void-2:var(--void);
+  --void-on-ink:var(--void); --void-on-ink-soft:var(--void-soft); --void-on-ink-edge:var(--void-edge);
+  /* severity — retained for audit/report finding rows only (shared marketing must not use these) */
+  --sev-high:#FF8266; --sev-med:#E3C368; --sev-low:#8FB7E8; --sev-info:#7C867F; --sev-critical:#FF8266; --sev-medium:#E3C368; --attn-text:#E3C368;
+  /* the lit SHEET (signed artifact — preserved signature; --sheet-accent AA-corrected) */
+  --sheet:#F3F5F2; --sheet-2:#EBEEE9;
+  --sheet-high:#B3401F; --sheet-high-soft:rgba(255,130,102,.14); --sheet-high-edge:rgba(255,130,102,.35);
+  --sheet-ink:#111613; --sheet-ink-2:#4C554F; --sheet-ink-3:#6B746E;
+  --sheet-line:rgba(17,22,19,.10); --sheet-line-2:rgba(17,22,19,.26);
+  --sheet-accent:#0B7A4C; --sheet-accent-soft:rgba(14,138,87,.10); --sheet-void:#8A5A52;
+  /* legacy metallic-heading trio — kept until the §4.4 clip block is removed */
+  --ink-hot:#FFFFFF; --ink-silver:#EAF0ED; --ink-shadowed:#A4B2AB;
+  /* legacy neutrals still referenced by component rules */
+  --graphite:#1A2123; --graphite-2:#232B2D; --light-top:rgba(238,246,242,.30); --shadow-tint:rgba(4,8,9,.55);
+  /* legacy surface aliases */
+  --plate:var(--paper-2); --plate-2:var(--paper-sink); --panel:var(--paper-2); --bg:var(--paper); --bg-1:var(--paper-2); --bg-2:var(--paper);
+  /* seal / ok / bad / foil / d-* legacy aliases (verifier + audit/legacy pages) */
+  --seal:var(--ink); --seal-strong:var(--ink); --seal-deep:var(--ink-3); --seal-soft:rgba(255,255,255,.05); --seal-tint:var(--accent-tint); --seal-edge:var(--line-2);
+  --ok:var(--accent-text); --ok-strong:var(--accent); --ok-soft:var(--accent-soft); --ok-edge:var(--accent-edge);
+  --bad:var(--void); --bad-soft:var(--void-soft); --bad-edge:var(--void-edge);
+  --foil:var(--accent); --foil-edge:var(--accent-edge); --foil-soft:var(--accent-tint);
+  --d-ink:var(--ink); --d-muted:var(--ink-2); --d-rule:var(--line); --d-panel:var(--paper-2); --d-paper:var(--paper); --d-accent:var(--accent); --d-ok:var(--accent);
+  /* type — TWO faces + mono (Cabinet Grotesk dropped) */
+  --display:"Switzer", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --sans:"Switzer", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono:"Spline Sans Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --weight-text:400; --weight-ui:510; --weight-display:590; --tracking-display:-0.022em;
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
-
-  /* spacing (8px base) + geometry */
-  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
-  --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 104px;
-  /* squared instrument geometry - precision, not pebbles */
-  --r-sm: 3px; --r-md: 6px; --r-lg: 9px; --r-xl: 12px; --r-pill: 999px;
-  --maxw: 1148px;
-  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-
-  /* fluid type - DISCIPLINED scale (no billboards; presence = art direction) */
-  --fs-hero: clamp(40px, 4.6vw, 66px);   /* computed cap 66px - under the 68px gate */
-  --fs-h1: clamp(34px, 4vw, 54px);
-  --fs-h2: clamp(28px, 3vw, 42px);
-  --fs-h3: clamp(17px, 1.4vw, 19px);
-  --fs-lede: clamp(16px, 1.4vw, 17.5px);
-  --fs-metric: clamp(30px, 3.2vw, 44px);
-  --fs-price: clamp(26px, 2.6vw, 34px);
-  --fs-ghost: clamp(96px, 14vw, 200px);  /* the outlined ghost ordinal */
+  /* type scale */
+  --fs-hero:clamp(40px,5vw,64px); --fs-h1:clamp(33px,4vw,52px); --fs-h2:clamp(27px,3vw,38px);
+  --fs-h3:clamp(19px,1.6vw,22px); --fs-h4:18px; --fs-lede:clamp(17px,1.5vw,19px);
+  --fs-body:16px; --fs-sm:14px; --fs-eyebrow:12px; --fs-metric:clamp(30px,3.2vw,44px); --fs-price:clamp(28px,2.6vw,36px);
+  --fs-ghost:0;
+  /* spacing + grid */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px; --s10:128px;
+  --section-y:clamp(80px,10vw,128px); --rhy-1:clamp(40px,4.5vw,64px); --rhy-2:clamp(64px,7.5vw,104px); --rhy-3:var(--section-y);
+  --maxw:1200px; --maxw-prose:680px; --gutter:24px; --nav-h:62px;
+  /* radius + elevation */
+  --r-sm:2px; --r-md:6px; --r-lg:8px; --r-xl:12px; --r-pill:999px;
+  --ring-inset:inset 0 1px 0 0 rgba(255,255,255,.06);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.40); --shadow-md:0 4px 16px -4px rgba(0,0,0,.50); --shadow-lg:0 16px 48px -12px rgba(0,0,0,.60);
+  --glow-accent:0 0 0 1px var(--accent-edge),0 8px 40px -12px rgba(63,229,160,.25);
+  /* motion */
+  --dur-instant:100ms; --dur-fast:150ms; --dur-base:200ms; --dur-mod:320ms; --dur-slow:500ms;
+  --dur-1:160ms; --dur-2:320ms; --dur-3:560ms;
+  --ease:cubic-bezier(0.25,0.46,0.45,0.94); --ease-enter:cubic-bezier(0.165,0.84,0.44,1); --ease-exp:cubic-bezier(0.23,1,0.32,1);
 }
 
 * { box-sizing: border-box; }
@@ -187,44 +110,22 @@ body { overflow-x: clip; }
 
 body {
   margin: 0;
-  /* atmosphere: the room is LIT - phosphor and cold-blue spotlights you can
-     actually see, plus a faint floor wash rising from below the fold */
+  /* atmosphere: ONE restrained overhead glow over near-black. No aurora loop,
+     no grain. The room is lit, not decorated. (Design system 2026 §6.4) */
   background:
-    radial-gradient(900px 520px at 16% -8%, rgba(63, 229, 160, 0.11), transparent 62%),
-    radial-gradient(1100px 640px at 88% -12%, rgba(111, 166, 232, 0.10), transparent 62%),
-    radial-gradient(1400px 760px at 50% 118%, rgba(111, 166, 232, 0.05), transparent 64%),
+    radial-gradient(1100px 600px at 50% -12%, rgba(63, 229, 160, 0.045), transparent 60%),
     var(--paper);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 15.5px;
-  line-height: 1.65;
-  letter-spacing: 0.002em;
-  font-feature-settings: "ss01" 1, "cv01" 1;
+  font-size: var(--fs-body);
+  font-weight: var(--weight-text);
+  line-height: 1.55;
+  letter-spacing: -0.006em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-@media (max-width: 767px) { body { font-size: 15px; } }
-
-/* aurora sheen - one fixed conic wash, far above the fold, barely-there.
-   Drifts on capable setups; perfectly still under reduced motion. */
-body::before {
-  content: ""; position: fixed; inset: -22% -12%; z-index: -1; pointer-events: none;
-  background: conic-gradient(from 210deg at 72% -6%,
-    transparent 0deg, rgba(63, 229, 160, 0.085) 28deg, transparent 64deg,
-    rgba(111, 166, 232, 0.07) 110deg, transparent 150deg);
-  filter: blur(32px);
-}
-@media (prefers-reduced-motion: no-preference) {
-  body::before { animation: aurora 36s var(--ease) infinite alternate; }
-}
-@keyframes aurora { from { transform: rotate(0deg) scale(1); } to { transform: rotate(5deg) scale(1.07); } }
-
-/* the grain sheet - fixed, whisper-low, gives the dark a film tooth */
-body::after {
-  content: ""; position: fixed; inset: 0; z-index: 9999; pointer-events: none;
-  background-image: var(--grain); background-size: 160px 160px; opacity: 0.05; mix-blend-mode: overlay;
-}
-@media (prefers-reduced-motion: reduce) { body::after { opacity: 0.04; } }
 
 a { color: inherit; text-decoration: none; }
 p a:not([class]), .lede a:not([class]) { text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; transition: text-decoration-color 140ms; }
@@ -309,10 +210,10 @@ a, button, input, select, textarea, summary, [role="button"] { touch-action: man
 .bars--ink i { background: var(--sheet-ink); }
 
 /* ---------- type ---------- */
-h1, h2 { font-family: var(--display); font-weight: 620; letter-spacing: 0; line-height: 1.06; margin: 0; color: var(--ink); text-wrap: balance; }
-h1 { font-size: var(--fs-h1); font-weight: 640; letter-spacing: 0; line-height: 1.03; max-width: 20ch; }
-h2 { font-size: var(--fs-h2); margin-bottom: var(--s4); max-width: 26ch; }
-h3 { font-family: var(--sans); font-size: var(--fs-h3); font-weight: 600; letter-spacing: -0.012em; line-height: 1.30; margin: 0; color: var(--ink); max-width: 40ch; text-wrap: balance; }
+h1, h2 { font-family: var(--display); font-weight: var(--weight-display); letter-spacing: var(--tracking-display); line-height: 1.1; margin: 0; color: var(--ink); text-wrap: balance; }
+h1 { font-size: var(--fs-h1); letter-spacing: -0.022em; line-height: 1.08; max-width: 20ch; }
+h2 { font-size: var(--fs-h2); letter-spacing: -0.018em; line-height: 1.12; margin-bottom: var(--s4); max-width: 26ch; }
+h3 { font-family: var(--sans); font-size: var(--fs-h3); font-weight: var(--weight-ui); letter-spacing: -0.012em; line-height: 1.30; margin: 0; color: var(--ink); max-width: 40ch; text-wrap: balance; }
 h4 { font-family: var(--sans); color: var(--ink); }
 .lede { font-family: var(--sans); font-weight: 400; font-size: var(--fs-lede); line-height: 1.6; color: var(--ink-2); max-width: 56ch; margin: var(--s4) 0 0; letter-spacing: 0; text-wrap: pretty; }
 p { max-width: 64ch; }
@@ -331,8 +232,8 @@ em { font-style: italic; font-weight: 400; }
    phosphor. The site itself files its claims as exhibits. */
 .idx { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 var(--s4); padding: 5px 11px; border: 1px solid var(--line-2); border-radius: 2px; background: rgba(255, 255, 255, 0.022); }
 .idx::before { content: "\00a7"; color: var(--accent); font-weight: 500; letter-spacing: 0; }
-.eyebrow { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 var(--s4); padding: 5px 11px; border: 1px solid var(--line-2); border-radius: 2px; background: rgba(255, 255, 255, 0.022); }
-.eyebrow::before { content: "\00a7"; color: var(--accent); font-weight: 500; letter-spacing: 0; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: var(--fs-eyebrow); font-weight: var(--weight-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 var(--s4); }
+.eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 8px var(--accent-edge); }
 .kicker { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 18px; padding: 5px 11px; border: 1px solid var(--line-2); border-radius: 2px; background: rgba(255, 255, 255, 0.022); }
 .kicker .n { color: var(--accent); }
 
@@ -352,33 +253,32 @@ em { font-style: italic; font-weight: 400; }
 
 /* ---------- buttons - TEXT voice ---------- */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 9px; cursor: pointer;
-  font-family: var(--sans); font-size: 15px; font-weight: 580; line-height: 1; letter-spacing: 0.004em;
-  padding: 13px 22px; border-radius: var(--r-md); border: 1px solid transparent; min-height: 46px;
-  transition: background 160ms var(--ease), border-color 160ms, color 160ms, box-shadow 160ms, transform 150ms var(--ease);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+  font-family: var(--sans); font-size: var(--fs-sm); font-weight: var(--weight-ui); line-height: 1; letter-spacing: -0.004em;
+  padding: 12px 18px; border-radius: var(--r-md); border: 1px solid transparent; min-height: 44px;
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
-/* primary = PAPER. The call to action is made of the same material as the
-   signed artifact - ivory on the dark room, no candy fill, no glow. Green
-   stays reserved for verification semantics. */
+/* primary = the ONE accent action (phosphor green on the dark room). One per
+   viewport. The accent now reads as both the brand and the call to act. */
 .btn--primary { position: relative; overflow: hidden;
-  background: linear-gradient(180deg, #FBFCFA, var(--sheet) 70%); color: #0C100E; border-color: rgba(243, 245, 242, 0.92);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 28px rgba(0, 0, 0, 0.38); }
-.btn--primary:hover { background: #FFFFFF; border-color: #FFFFFF; transform: translateY(-1px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 14px 34px rgba(0, 0, 0, 0.45); }
-/* specular sweep across the primary action - one pass per hover */
+  background: var(--accent); color: var(--on-accent); border-color: transparent;
+  box-shadow: var(--ring-inset); }
+.btn--primary:hover { background: var(--accent-hi); border-color: transparent; transform: translateY(-1px);
+  box-shadow: var(--ring-inset), 0 10px 30px -10px rgba(63, 229, 160, 0.45); }
+/* one restrained specular pass per hover */
 .btn--primary::after { content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(105deg, transparent 38%, rgba(17, 22, 19, 0.07) 50%, transparent 62%);
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.18) 50%, transparent 60%);
   transform: translateX(-130%); }
 @media (prefers-reduced-motion: no-preference) {
-  .btn--primary:hover::after { transform: translateX(130%); transition: transform 640ms var(--ease); }
+  .btn--primary:hover::after { transform: translateX(130%); transition: transform 620ms var(--ease); }
 }
 .btn svg { transition: transform 200ms var(--ease); }
 .btn:hover svg { transform: translateX(2px); }
-.btn--primary:active { background: var(--sheet-2); border-color: var(--sheet-2); transform: translateY(0); }
+.btn--primary:active { background: var(--accent-press); border-color: transparent; transform: translateY(0); }
 .btn--primary[disabled] { background: var(--paper-2); color: var(--ink-faint); border-color: var(--line); box-shadow: none; cursor: not-allowed; transform: none; }
-.btn--ghost { background: rgba(255, 255, 255, 0.015); color: var(--ink); border-color: var(--line-2); font-weight: 500; }
-.btn--ghost:hover { border-color: rgba(229, 240, 234, 0.34); background: rgba(255, 255, 255, 0.04); }
-.btn--sm { padding: 11px 16px; min-height: 44px; font-size: 13.5px; }
+.btn--ghost { background: rgba(255, 255, 255, 0.02); color: var(--ink); border-color: var(--line-2); font-weight: var(--weight-ui); }
+.btn--ghost:hover { border-color: var(--line-2); background: rgba(255, 255, 255, 0.05); }
+.btn--sm { padding: 9px 14px; min-height: 40px; font-size: 13.5px; }
 
 /* ---------- nav ---------- */
 .nav {
@@ -401,19 +301,19 @@ em { font-style: italic; font-weight: 400; }
 .nav__toggle { display: none; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: var(--s2); padding: 0; background: transparent; border: 1px solid var(--line-2); border-radius: var(--r-md); color: var(--ink); cursor: pointer; }
 .nav__toggle svg { width: 20px; height: 20px; }
 .nav__toggle:hover { border-color: var(--ink-2); }
-/* the primary nav action is SOLID PAPER (the hero paper-CTA rule, applied to
-   chrome): the secondary stays the ghost outline, so the nav has hierarchy */
-.nav__cta { background: var(--ink-silver); color: #0B0F10; border-color: transparent; font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 22px rgba(0, 0, 0, 0.35); }
-.nav__cta:hover { background: #FFFFFF; color: #0B0F10; border-color: transparent; }
-.nav__cta.is-solid { background: var(--sheet); color: #0C100E; border-color: rgba(243, 245, 242, 0.92); font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 22px rgba(0, 0, 0, 0.35); }
-.nav__cta.is-solid:hover { background: #FFFFFF; border-color: #FFFFFF; }
+/* the primary nav action is the one accent (phosphor green); ghost stays the
+   outline, so the nav keeps hierarchy with a single bright element */
+.nav__cta { background: var(--accent); color: var(--on-accent); border-color: transparent; font-weight: var(--weight-ui);
+  box-shadow: var(--ring-inset); }
+.nav__cta:hover { background: var(--accent-hi); color: var(--on-accent); border-color: transparent; }
+.nav__cta.is-solid { background: var(--accent); color: var(--on-accent); border-color: transparent; font-weight: var(--weight-ui);
+  box-shadow: var(--ring-inset); }
+.nav__cta.is-solid:hover { background: var(--accent-hi); border-color: transparent; }
 
 @media (max-width: 860px) {
   .nav__toggle { display: inline-flex; }
   .nav__actions .btn--ghost:not(.nav__cta) { display: none; }
-  .nav__cta { background: var(--sheet); color: #0C100E; border-color: rgba(243, 245, 242, 0.92); font-weight: 600; }
+  .nav__cta { background: var(--accent); color: var(--on-accent); border-color: transparent; font-weight: var(--weight-ui); }
   .nav__links {
     position: absolute; top: 62px; left: 0; right: 0; z-index: 49;
     flex-direction: column; gap: 0; margin: 0;
@@ -462,7 +362,7 @@ em { font-style: italic; font-weight: 400; }
 .field canvas { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity 600ms var(--ease); }
 .field.ready canvas { opacity: 1; }
 
-.hero__h1 { max-width: 16ch; font-size: var(--fs-hero); font-weight: 650; letter-spacing: 0; line-height: 1.02; margin: 0 0 var(--s5); text-wrap: balance; }
+.hero__h1 { max-width: 16ch; font-size: var(--fs-hero); font-weight: var(--weight-display); letter-spacing: -0.024em; line-height: 1.04; margin: 0 0 var(--s5); text-wrap: balance; }
 .hero__h1 .go, h1 .go { color: var(--accent); }
 /* offset spread, not mirrored slabs: copy leads 1.08fr, artifact drops 28px */
 .hero__grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: clamp(36px, 4.5vw, 72px); align-items: start; }
@@ -521,16 +421,16 @@ em { font-style: italic; font-weight: 400; }
 @media (max-width: 640px) { .grid { gap: var(--s4); } .grid--2, .grid--3, .grid--4 { grid-template-columns: 1fr; } }
 .card, .plate {
   position: relative;
-  /* a solid ink base UNDER the glass gradient: the plate visibly steps above
-     the page void instead of dissolving into it */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.01)), var(--paper-sink);
+  /* the base, very slightly lifted: a translucent-white film over the room,
+     a hairline, and a top-edge specular. Reads "lit from within", not boxed. */
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--line); border-top-color: var(--line-top);
   border-radius: var(--r-lg);
-  padding: 24px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 36px var(--shadow-tint);
-  transition: border-color var(--dur-1) var(--ease-exp), box-shadow var(--dur-1) var(--ease-exp), transform 420ms var(--ease-spring-soft, var(--ease));
+  padding: var(--s5);
+  box-shadow: var(--ring-inset);
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), transform var(--dur-base) var(--ease);
 }
-.card:hover, .plate:hover { border-color: var(--line-2); border-top-color: rgba(229, 240, 234, 0.26); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 18px 44px var(--shadow-tint); transform: translateY(-2px); }
+.card:hover, .plate:hover { border-color: var(--line-2); background: rgba(255, 255, 255, 0.06); box-shadow: var(--ring-inset), var(--shadow-md); transform: translateY(-2px); }
 /* spec-sheet header: the mono key runs out into a hairline rule */
 .card__k { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
 .card__k::after { content: ""; flex: 1; height: 1px; background: var(--line); min-width: 16px; }
@@ -1032,21 +932,18 @@ em { font-style: italic; font-weight: 400; }
    no green glows on chrome, paper CTAs, squared radii.
    ============================================================ */
 
-/* metallic ink: headlines are silver-struck, not flat. The gradient runs
-   white-hot at the cap height down to cool silver at the baseline. */
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  h1, h2, .metric__n {
-    background: linear-gradient(180deg, var(--ink-hot) 0%, var(--ink-silver) 52%, var(--ink-shadowed) 100%);
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  /* phosphor ink for the .go span: children of a clipped parent need their
-     own gradient + clip, otherwise they render the parent's silver */
-  h1 .go, h2 .go, .hero__h1 .go {
-    background: linear-gradient(180deg, #9CF7D0 0%, var(--accent) 55%, #2FBE83 100%);
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+/* Single heading render model (Design system 2026 §4.4): solid ink, no metallic
+   gradient-clip. The one accent word (<span class="go">) is a solid phosphor word,
+   legible at heading sizes on dark via the lifted --accent-text. */
+h1, h2, h3, .hero__h1, .metric__n {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--ink);
+}
+h1 .go, h2 .go, h3 .go, .hero__h1 .go, .plate__foot a.go {
+  background: none;
+  -webkit-text-fill-color: var(--accent-text);
+  color: var(--accent-text);
 }
 
 /* glass top-light: a centered highlight on every panel's top edge, the way
