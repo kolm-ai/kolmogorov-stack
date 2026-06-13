@@ -15790,15 +15790,15 @@ export function buildRouter() {
   // After ≥4 calls with the same template signature we surface a synthesis suggestion.
   // W258-BE-1: persists via insertCapture (durable contract). 503 on store
   // failure - same envelope as the capture proxy handlers.
-  r.post('/v1/bridges/observe', (req, res) => __handleControlObserve(req, res));
+  r.post('/v1/bridges/observe', (req, res, next) => __handleControlObserve(req, res).catch(next));
   // Static durability lock for W212: __handleControlObserve executes
   // await insertCapture(obs) and returns res.status(503) on store failure.
 
   // Enterprise control-center intake alias. This exposes the advertised
   // canonical event envelope directly from the account surface.
-  r.post('/v1/account/api-control-center/events', authMiddleware, (req, res) => {
+  r.post('/v1/account/api-control-center/events', authMiddleware, (req, res, next) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
-    return __handleControlObserve(req, res, { created: true });
+    return __handleControlObserve(req, res, { created: true }).catch(next);
   });
 
   r.post('/v1/account/api-control-center/adapter-manifests/validate', authMiddleware, (req, res) => {
@@ -15839,7 +15839,7 @@ export function buildRouter() {
     res.json({ ok: true, export: found, secret_values_included: false });
   });
 
-  r.post('/v1/account/api-control-center/exports', authMiddleware, (req, res) => __handleControlExportDeclaration(req, res));
+  r.post('/v1/account/api-control-center/exports', authMiddleware, (req, res, next) => __handleControlExportDeclaration(req, res).catch(next));
 
   // GET /v1/bridges/suggestions - recipe-synthesis suggestions clustered from observations.
   r.get('/v1/bridges/suggestions', (req, res) => {
