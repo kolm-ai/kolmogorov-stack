@@ -421,11 +421,10 @@ html {
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -34px -54px -36px -24px;
+  inset: -44px -90px -44px -44px;
+  border-radius: 24px;
   pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(5, 9, 10, 0.98) 0%, rgba(5, 9, 10, 0.94) 42%, rgba(5, 9, 10, 0.48) 70%, rgba(5, 9, 10, 0) 100%),
-    linear-gradient(180deg, rgba(117, 255, 157, 0.08), rgba(117, 255, 157, 0));
+  background: radial-gradient(120% 100% at 18% 42%, rgba(5, 9, 10, 0.60), rgba(5, 9, 10, 0) 78%);
 }
 
 .compiler-site--paper-home .hero__accent {
@@ -3790,33 +3789,33 @@ html {
   gap: clamp(28px, 5vw, 76px); align-items: center;
 }
 .compiler-site--paper-home .compiler-hero .hero__copy { max-width: 620px; }
-.compiler-site--paper-home .compiler-hero .hero__h1 { max-width: 13ch; font-size: clamp(40px, 5vw, 74px); line-height: 0.96; text-shadow: 0 18px 54px rgba(0,0,0,0.4); }
+.compiler-site--paper-home .compiler-hero .hero__h1 { max-width: 19ch; font-size: clamp(38px, 4.5vw, 66px); font-weight: 500; line-height: 1.08; letter-spacing: -0.015em; hyphens: none; text-shadow: 0 14px 40px rgba(0,0,0,0.4); }
 /* the CSS scene (core + readout) is the visual now — retire the baked-in raster */
 .compiler-site--paper-home .hero-image-two { display: none; }
-.compiler-site--paper-home .compiler-hero .reactor-core { left: 74%; top: 46%; width: clamp(360px, 42vw, 620px); }
+.compiler-site--paper-home .compiler-hero .reactor-core { left: 82%; top: 44%; width: clamp(320px, 34vw, 470px); }
 .compiler-site--paper-home .reactor-readout { position: relative; z-index: 2; width: 100%; max-width: 460px; justify-self: end; }
+/* refined fine instrument row — no box, hairline ticks, mono numerals in ink */
 .compiler-site--paper-home .hero-command-strip {
-  display: inline-grid; grid-auto-flow: column; gap: 0; margin-top: var(--s6);
-  border-radius: 12px; overflow: hidden; width: fit-content; padding: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01)) padding-box, var(--bezel) border-box;
-  border: 1px solid transparent; box-shadow: var(--bezel-ring), 0 18px 50px -28px #000;
+  display: flex; gap: 0; margin-top: var(--s7); width: fit-content; padding-top: var(--s4);
+  border: 0; border-top: 1px solid var(--edge-soft); border-radius: 0; background: none; box-shadow: none;
 }
 .compiler-site--paper-home .hero-command-strip span {
-  display: flex; flex-direction: column-reverse; gap: 5px; padding: 12px 20px; margin: 0;
-  border-right: 1px solid rgba(255,255,255,0.06); border-radius: 0; background: none;
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-3);
+  display: flex; flex-direction: column-reverse; gap: 7px; padding: 0 26px; margin: 0;
+  border-right: 1px solid rgba(255,255,255,0.05); background: none;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ink-4);
 }
-.compiler-site--paper-home .hero-command-strip span:last-child { border-right: 0; }
+.compiler-site--paper-home .hero-command-strip span:first-child { padding-left: 0; }
+.compiler-site--paper-home .hero-command-strip span:last-child { border-right: 0; padding-right: 0; }
 .compiler-site--paper-home .hero-command-strip b {
-  font-family: var(--mono); font-weight: 510; font-size: clamp(22px, 2.4vw, 32px); line-height: 1;
-  color: var(--reactor-hi); text-shadow: 0 0 18px var(--glow-2);
+  font-family: var(--mono); font-weight: 400; font-size: clamp(22px, 2.4vw, 30px); line-height: 1;
+  color: var(--ink); text-shadow: none; font-variant-numeric: tabular-nums;
 }
 .compiler-site--paper-home .compiler-hero .hero__cta--home .btn--primary {
-  background: linear-gradient(180deg, var(--reactor-hi), var(--reactor) 62%); color: var(--on-accent); border-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 0 0 1px var(--accent-edge), 0 8px 30px -8px var(--glow-1);
+  background: var(--reactor); color: var(--on-accent); border-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.40);
 }
 .compiler-site--paper-home .compiler-hero .hero__cta--home .btn--ghost {
-  background: rgba(255,255,255,0.02); color: var(--ink); border-color: var(--line-2); box-shadow: none;
+  background: rgba(255,255,255,0.02); color: var(--ink); border-color: var(--edge); box-shadow: none;
 }
 @media (max-width: 900px) {
   .compiler-site--paper-home .compiler-hero .hero__grid { grid-template-columns: 1fr; }

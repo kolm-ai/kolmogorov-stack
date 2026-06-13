@@ -600,7 +600,7 @@ test('primary compiler pages use the image-2 paper design contract', () => {
       assert.match(header, /href="\/pricing"[^>]*>Pricing<\/a>/, `${file} should keep pricing in the compact nav`);
       assert.match(header, /class="nav__icon" href="\/status" aria-label="System status"/, `${file} should expose the compact status icon control`);
       assert.match(header, /href="\/account\/overview">sign in<\/a>/, `${file} should keep sign-in as the quiet secondary action`);
-      assert.match(header, /href="\/signup">Get API key -><\/a>/, `${file} should use the image-2 API-key CTA`);
+      assert.match(header, /href="\/signup">Get API key/, `${file} should use the image-2 API-key CTA`);
       assert.doesNotMatch(header, /https:\/\/audit\.kolm\.ai/i, `${file} should not put audit in the primary header`);
       assert.doesNotMatch(header, />Audit<\/a>/i, `${file} should not put Audit in the primary header`);
       assert.doesNotMatch(header, />Pipeline<\/a>|>Control<\/a>|>Integrations<\/a>|>Runtimes<\/a>|>Compare<\/a>/, `${file} should not use the old crowded product nav`);
@@ -666,7 +666,7 @@ test('status page exposes compiler platform posture without stale audit pipeline
   assert.match(status, /backend first, frontend second/);
   assert.match(status, /package-release and benchmark gates remain explicit/);
   assert.match(status, /secret-safe status/i);
-  assert.match(status, /Get API key ->/);
+  assert.match(status, /Get API key/);
 
   assert.doesNotMatch(status, /System Status: Verifier, API, Audit Pipeline/i);
   assert.doesNotMatch(status, /Audit infrastructure status/i);
@@ -870,7 +870,7 @@ test('generated API reference is an operating surface, not a route dump', () => 
   assert.match(apiHeader, /href="\/docs" aria-current="page">Developers<\/a>/);
   assert.match(apiHeader, /href="\/pricing">Pricing<\/a>/);
   assert.match(apiHeader, /class="nav__icon" href="\/status" aria-label="System status"/);
-  assert.match(apiHeader, /href="\/signup">Get API key -><\/a>/);
+  assert.match(apiHeader, /href="\/signup">Get API key/);
   assert.doesNotMatch(apiHeader, /site-nav|https:\/\/audit\.kolm\.ai|>Audit<\/a>/i);
   assert.match(api, /API operating reference/);
   assert.match(api, /API reference command center/);

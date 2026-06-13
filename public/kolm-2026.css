@@ -1363,172 +1363,131 @@ html:not(.js-reveal) .sect-rail__rail .idx::after { transform: scaleY(1); }
 .section--ink:has(+ .cta-final) > .dither-edge { display: none; }
 
 /* ============================================================
-   THE REACTOR v2 — retrofuturist · radioactive · luxury
+   THE REACTOR v3 — refined precision instrument
    ------------------------------------------------------------
-   An atomic-age control instrument that glows with contained
-   radiation. The wow is built in PURE CSS as real objects — a
-   glowing reactor core and a CRT readout — so it survives with
-   images off and no GPU. Phosphor RADIATES; chrome is material;
-   amber is the one warning light; the black is true obsidian.
+   Premium = restraint + light + precision. Hairlines not bezels,
+   air not density, soft radiance not heavy boxes. The radioactive
+   core stays the signature; everything around it gets quieter,
+   finer, and more legible. Built CSS-only so it survives no-GPU.
    ============================================================ */
 :root {
-  --reactor: #3FE5A0; --reactor-hi: #7DF7C0; --reactor-core-c: #C8FFEC;
-  --glow-1: rgba(63,229,160,0.55); --glow-2: rgba(63,229,160,0.26); --glow-3: rgba(63,229,160,0.10);
-  --amber: #FFC062; --amber-hot: #FFB400; --amber-glow: rgba(255,178,0,0.55);
+  --reactor: #3FE5A0; --reactor-hi: #7DF7C0; --reactor-core-c: #CFFFEE;
+  --glow-1: rgba(63,229,160,0.50); --glow-2: rgba(63,229,160,0.22); --glow-3: rgba(63,229,160,0.08);
+  --amber: #FFC062; --amber-glow: rgba(255,178,0,0.50);
   --obsidian: #06080A;
-  --bezel: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 14%, rgba(0,0,0,0.30));
-  --bezel-ring: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.5);
+  /* refined elevation: a hairline, a whisper of top-light, one soft shadow */
+  --edge: rgba(255,255,255,0.08); --edge-soft: rgba(255,255,255,0.05); --edge-top: rgba(255,255,255,0.13);
+  --lift: inset 0 1px 0 0 rgba(255,255,255,0.06);
+  --shadow-soft: 0 24px 64px -34px rgba(0,0,0,0.72);
 }
 
-/* the chamber: obsidian with a real phosphor halo overhead, an amber
-   counter-light, the reactor wash rising from the floor, deep vignette */
+/* a deeper, calmer chamber with more air */
 body {
   background:
-    radial-gradient(1200px 760px at 50% -10%, rgba(63,229,160,0.11), transparent 56%),
-    radial-gradient(900px 560px at 100% -4%, rgba(255,192,98,0.045), transparent 58%),
-    radial-gradient(1500px 950px at 50% 124%, rgba(63,229,160,0.07), transparent 60%),
+    radial-gradient(1300px 820px at 50% -12%, rgba(63,229,160,0.08), transparent 56%),
+    radial-gradient(1000px 600px at 100% -6%, rgba(255,192,98,0.028), transparent 58%),
+    radial-gradient(1600px 1000px at 50% 126%, rgba(63,229,160,0.05), transparent 60%),
     var(--obsidian);
   background-attachment: fixed;
+  font-size: 16px; line-height: 1.6; letter-spacing: -0.006em;
 }
-body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(140% 130% at 50% 36%, transparent 50%, rgba(2,4,5,0.72) 100%);
-}
-/* scanlines EMIT phosphor light (screen), never subtract it — the live screen */
-body::after {
-  content: ""; position: fixed; inset: 0; z-index: 9998; pointer-events: none;
-  background: repeating-linear-gradient(0deg, rgba(125,247,192,0.022) 0 1px, transparent 1px 3px);
-  mix-blend-mode: screen; opacity: 0.6;
-}
-@media (prefers-reduced-motion: no-preference) { body::after { animation: scan 7s linear infinite; } }
-@keyframes scan { from { background-position: 0 0; } to { background-position: 0 600px; } }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(150% 140% at 50% 34%, transparent 54%, rgba(2,4,5,0.64) 100%); }
+/* the faintest static CRT phosphor scanlines — texture, not effect */
+body::after { content: ""; position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(125,247,192,0.012) 0 1px, transparent 1px 5px);
+  mix-blend-mode: screen; opacity: 0.22; }
 
-/* the one accent word RADIATES — 4-stop bloom that spills past its edges */
+/* more breathing room between sections — air is the luxury */
+.section { padding-block: clamp(88px, 11vw, 150px); }
+.wrap { padding-inline: max(28px, env(safe-area-inset-left)); }
+
+/* the one accent word radiates — refined, softer two-stop bloom */
 h1 .go, h2 .go, h3 .go, .hero__h1 .go, .compiler-kicker .go {
   color: var(--reactor-hi); -webkit-text-fill-color: var(--reactor-hi);
-  text-shadow: 0 0 2px var(--reactor-hi), 0 0 14px var(--glow-1), 0 0 40px var(--glow-1), 0 0 92px var(--glow-2);
-}
-@media (prefers-reduced-motion: no-preference) { h1 .go, .hero__h1 .go { animation: reactor-pulse 4.4s var(--ease) infinite; } }
-@keyframes reactor-pulse {
-  0%,100% { text-shadow: 0 0 2px var(--reactor-hi), 0 0 12px var(--glow-2), 0 0 34px var(--glow-3); }
-  50%     { text-shadow: 0 0 3px var(--reactor-core-c), 0 0 22px var(--glow-1), 0 0 60px var(--glow-1), 0 0 112px var(--glow-2); }
+  text-shadow: 0 0 8px var(--glow-1), 0 0 24px var(--glow-2);
 }
 
-/* ---- THE REACTOR CORE: the page's glowing centerpiece (CSS-only DOM object) ---- */
+/* ---- REACTOR CORE: an elegant glowing well + fine containment rings ---- */
 .reactor-core {
   position: absolute; z-index: -1; pointer-events: none;
-  width: clamp(320px, 40vw, 560px); aspect-ratio: 1;
-  top: 40%; left: 66%; transform: translate(-50%,-50%);
+  width: clamp(340px, 40vw, 600px); aspect-ratio: 1; top: 42%; left: 66%; transform: translate(-50%,-50%);
   background:
-    radial-gradient(circle, var(--reactor-core-c) 0%, rgba(200,255,236,0.9) 3.4%, transparent 6.4%),
-    radial-gradient(circle, transparent 56%, rgba(125,247,192,0.24) 58% 60.5%, transparent 62%),
-    radial-gradient(circle, transparent 69%, rgba(63,229,160,0.16) 71% 72.5%, transparent 75%),
-    radial-gradient(circle, rgba(125,247,192,0.30) 0%, rgba(63,229,160,0.12) 30%, rgba(63,229,160,0.03) 50%, transparent 66%);
+    radial-gradient(circle, transparent 51.5%, rgba(125,247,192,0.16) 53% 54%, transparent 56%),
+    radial-gradient(circle, transparent 65%, rgba(63,229,160,0.10) 66.5% 67.5%, transparent 70%),
+    radial-gradient(circle, rgba(125,247,192,0.22) 0%, rgba(63,229,160,0.09) 26%, rgba(63,229,160,0.025) 46%, transparent 62%);
 }
-.reactor-core::after {
-  content: ""; position: absolute; inset: -28%; border-radius: 50%;
-  background: radial-gradient(circle, rgba(63,229,160,0.20), transparent 60%); filter: blur(64px);
-}
-@media (prefers-reduced-motion: no-preference) { .reactor-core { animation: breathe 8s ease-in-out infinite; } }
-@keyframes breathe { 0%,100% { transform: translate(-50%,-50%) scale(0.97); opacity: .9; } 50% { transform: translate(-50%,-50%) scale(1.03); opacity: 1; } }
-.hero--core .reactor-core { left: 84%; top: 28%; width: clamp(240px, 26vw, 400px); }
-/* boot-on: the core ignites once when the page powers up */
-@media (prefers-reduced-motion: no-preference) {
-  .js-reveal .hero .reactor-core { animation: breathe 8s ease-in-out infinite, core-ignite 1100ms var(--ease-enter) both; }
-}
-@keyframes core-ignite { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.35); } 55% { opacity: 1; } 100% { opacity: .9; transform: translate(-50%,-50%) scale(0.97); } }
+.reactor-core::after { content: ""; position: absolute; inset: -22%; border-radius: 50%; background: radial-gradient(circle, rgba(63,229,160,0.08), transparent 60%); filter: blur(58px); }
+@media (prefers-reduced-motion: no-preference) { .reactor-core { animation: breathe 9s ease-in-out infinite; } }
+@keyframes breathe { 0%,100% { transform: translate(-50%,-50%) scale(0.98); opacity: .9; } 50% { transform: translate(-50%,-50%) scale(1.02); opacity: 1; } }
+.hero--core .reactor-core { left: 86%; top: 26%; width: clamp(240px, 26vw, 400px); }
+@media (prefers-reduced-motion: no-preference) { .js-reveal .hero .reactor-core { animation: breathe 9s ease-in-out infinite, ignite 1200ms var(--ease-enter) both; } }
+@keyframes ignite { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); } 60% { opacity: 1; } 100% { opacity: .9; transform: translate(-50%,-50%) scale(0.98); } }
 
-/* ---- THE REACTOR READOUT: a CRT control instrument (replaces flat slabs) ---- */
+/* ---- REACTOR READOUT: hairline frame, generous air, fine dividers ---- */
 .reactor-readout {
-  position: relative; border-radius: 14px; overflow: hidden; isolation: isolate;
-  background: radial-gradient(120% 120% at 50% 0%, rgba(63,229,160,0.07), transparent 60%), #0B0D0C;
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: var(--bezel-ring), 0 0 0 1px rgba(0,0,0,0.6), 0 40px 90px -34px #000, 0 0 70px -34px var(--glow-1);
+  position: relative; border-radius: 16px; overflow: hidden; isolation: isolate;
+  background: radial-gradient(140% 130% at 50% 0%, rgba(63,229,160,0.05), transparent 56%), rgba(255,255,255,0.014);
+  border: 1px solid var(--edge); box-shadow: var(--lift), var(--shadow-soft);
 }
-.reactor-readout::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 4;
-  background:
-    repeating-linear-gradient(0deg, rgba(125,247,192,0.03) 0 1px, transparent 1px 3px),
-    radial-gradient(120% 120% at 50% 50%, transparent 58%, rgba(0,0,0,0.5) 100%);
-  mix-blend-mode: screen;
-}
-.reactor-readout__bar {
-  display: flex; align-items: center; gap: 10px; padding: 13px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-3);
-}
-.reactor-readout__led { width: 8px; height: 8px; border-radius: 50%; background: var(--reactor-hi); box-shadow: 0 0 10px var(--glow-1), 0 0 22px var(--glow-2); }
-.reactor-readout__led--amber { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber-glow), 0 0 18px var(--amber-glow); margin-left: auto; }
-@media (prefers-reduced-motion: no-preference) { .reactor-readout__led { animation: pilot 2.4s ease-in-out infinite; } }
-.reactor-readout__row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 15px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.reactor-readout::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 4; border-radius: 16px;
+  background: radial-gradient(130% 130% at 50% 50%, transparent 62%, rgba(0,0,0,0.30) 100%); }
+.reactor-readout__bar { display: flex; align-items: center; gap: 10px; padding: 16px 22px; border-bottom: 1px solid var(--edge-soft);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-4); }
+.reactor-readout__led { width: 6px; height: 6px; border-radius: 50%; background: var(--reactor-hi); box-shadow: 0 0 8px var(--glow-1); }
+.reactor-readout__led--amber { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 7px var(--amber-glow); margin-left: auto; }
+@media (prefers-reduced-motion: no-preference) { .reactor-readout__led { animation: pilot 2.6s ease-in-out infinite; } }
+.reactor-readout__row { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.045); }
 .reactor-readout__row:last-child { border-bottom: 0; }
-.reactor-readout__row b { font-family: var(--mono); font-weight: var(--weight-ui); font-size: 12.5px; letter-spacing: 0.04em; color: var(--ink); }
-.reactor-readout__row em { display: block; margin-top: 3px; font-style: normal; font-size: 12px; color: var(--ink-3); letter-spacing: 0; }
+.reactor-readout__row b { font-family: var(--sans); font-weight: var(--weight-ui); font-size: 14px; letter-spacing: -0.01em; color: var(--ink); }
+.reactor-readout__row em { display: block; margin-top: 4px; font-style: normal; font-size: 12.5px; line-height: 1.4; color: var(--ink-3); letter-spacing: -0.004em; }
 .reactor-readout__row > div { min-width: 0; }
-.reactor-readout__val { font-family: var(--mono); font-size: 13px; color: var(--reactor-hi); text-shadow: 0 0 16px var(--glow-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.reactor-readout__row--live .reactor-readout__val { color: var(--reactor-core-c); text-shadow: 0 0 4px var(--reactor-hi), 0 0 22px var(--glow-1); }
+.reactor-readout__val { font-family: var(--mono); font-size: 12px; letter-spacing: 0.02em; color: var(--reactor-hi); text-shadow: 0 0 14px var(--glow-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.reactor-readout__row--live .reactor-readout__val { color: var(--reactor-core-c); text-shadow: 0 0 4px var(--reactor-hi), 0 0 18px var(--glow-1); }
 
-/* ---- gauge cluster: the hero command strip becomes a graphite instrument bar ---- */
-.hero-command-strip {
-  display: inline-grid; grid-auto-flow: column; gap: 0; margin-top: var(--s6);
-  border-radius: 12px; overflow: hidden; width: fit-content;
-  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01)) padding-box, var(--bezel) border-box;
-  border: 1px solid transparent; box-shadow: var(--bezel-ring), 0 18px 50px -28px #000;
-}
-.hero-command-strip span {
-  display: flex; flex-direction: column-reverse; gap: 5px; padding: 13px 22px;
-  border-right: 1px solid rgba(255,255,255,0.06);
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ink-3);
-}
-.hero-command-strip span:last-child { border-right: 0; }
-.hero-command-strip b {
-  font-family: var(--mono); font-weight: var(--weight-ui); font-size: clamp(24px, 2.6vw, 34px); line-height: 1;
-  color: var(--reactor-hi); text-shadow: 0 0 18px var(--glow-2); font-variant-numeric: tabular-nums;
-}
+/* ---- command strip: a fine instrument row, hairline ticks, no boxes ---- */
+.hero-command-strip { display: flex; gap: 0; margin-top: var(--s7); width: fit-content;
+  border-top: 1px solid var(--edge-soft); padding-top: var(--s4); }
+.hero-command-strip span { display: flex; flex-direction: column-reverse; gap: 7px; padding: 0 28px; margin: 0;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ink-4); }
+.hero-command-strip span:first-child { padding-left: 0; }
+.hero-command-strip span:last-child { border-right: 0; padding-right: 0; }
+.hero-command-strip b { font-family: var(--mono); font-weight: 400; font-size: clamp(22px, 2.4vw, 30px); line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
 
-/* ---- chrome/graphite bezel as a real material on the instruments ---- */
+/* ---- cards: refined hairline surface, soft lift, NO heavy bezel ---- */
 .card, .plate {
-  background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)) padding-box, var(--bezel) border-box;
-  border: 1px solid transparent;
-  box-shadow: var(--bezel-ring), 0 1px 0 rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--edge); border-top-color: var(--edge-top);
+  box-shadow: var(--lift);
 }
-.card:hover, .plate:hover {
-  border-color: transparent;
-  box-shadow: var(--bezel-ring), 0 0 0 1px var(--accent-edge), 0 22px 56px -20px #000, 0 0 46px -16px var(--glow-1);
-}
+.card:hover, .plate:hover { border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.04); box-shadow: var(--lift), 0 20px 50px -28px rgba(0,0,0,0.7); transform: translateY(-2px); }
 
-/* ---- the primary action: the single hottest control on the page ---- */
+/* ---- primary CTA: a precise hot control, refined glow ---- */
+.btn { min-height: 42px; padding: 11px 18px; }
 .btn--primary, .nav__cta, .nav__cta.is-solid {
-  background: linear-gradient(180deg, var(--reactor-hi), var(--reactor) 62%);
-  color: var(--on-accent);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 0 0 1px var(--accent-edge), 0 8px 30px -8px var(--glow-1);
+  background: var(--reactor); color: var(--on-accent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.40);
 }
 .btn--primary:hover, .nav__cta:hover, .nav__cta.is-solid:hover {
-  background: linear-gradient(180deg, #9DFAD0, var(--reactor-hi) 62%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 0 0 1px var(--accent), 0 0 0 5px var(--glow-3), 0 10px 46px -6px var(--glow-1);
+  background: var(--reactor-hi); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 0 0 3px var(--glow-3), 0 0 34px -8px var(--glow-1);
 }
 
-/* the eyebrow's dot is a live reactor pilot-light */
-.eyebrow::before, .compiler-kicker::before { background: var(--reactor-hi); box-shadow: 0 0 10px var(--glow-1), 0 0 22px var(--glow-2); }
-@media (prefers-reduced-motion: no-preference) { .eyebrow::before { animation: pilot 2.6s ease-in-out infinite; } }
-@keyframes pilot { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+/* ---- finer eyebrow pilot light ---- */
+.eyebrow { gap: 9px; color: var(--ink-3); }
+.eyebrow::before, .compiler-kicker::before { width: 5px; height: 5px; background: var(--reactor-hi); box-shadow: 0 0 8px var(--glow-1); }
+@media (prefers-reduced-motion: no-preference) { .eyebrow::before { animation: pilot 2.8s ease-in-out infinite; } }
+@keyframes pilot { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
 
-/* mono instrument readouts emit a crisp-cored phosphor */
+.metric__n { color: var(--reactor-hi); text-shadow: 0 0 18px var(--glow-2); font-variant-numeric: tabular-nums; }
 .card__k { color: var(--reactor-hi); }
-.metric__n { color: var(--reactor-hi); text-shadow: 0 0 2px var(--reactor-hi), 0 0 22px var(--glow-2); font-variant-numeric: tabular-nums; }
 
-/* an amber warning pill — the rare second light (interior heroes / armed states) */
-.armed-pill {
-  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--amber);
-  border: 1px solid rgba(255,192,98,0.30); background: rgba(255,192,98,0.06);
-}
-.armed-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber-glow), 0 0 16px var(--amber-glow); }
+/* the rare amber warning pill (interior heroes / armed states) */
+.armed-pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--amber);
+  border: 1px solid rgba(255,192,98,0.26); background: rgba(255,192,98,0.05); }
+.armed-pill::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 7px var(--amber-glow); }
 
-::selection { background: rgba(63,229,160,0.30); color: #fff; }
-
-@media (prefers-reduced-motion: reduce) {
-  body::after, h1 .go, .hero__h1 .go, .eyebrow::before, .reactor-core, .reactor-readout__led { animation: none; }
-}
-/* ===================== /THE REACTOR v2 ===================== */
+::selection { background: rgba(63,229,160,0.28); color: #fff; }
+@media (prefers-reduced-motion: reduce) { body::after, .hero__h1 .go, .eyebrow::before, .reactor-core, .reactor-readout__led { animation: none; } }
+/* ===================== /THE REACTOR v3 ===================== */
