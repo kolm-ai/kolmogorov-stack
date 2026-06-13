@@ -9,7 +9,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 <title>Kolm Enterprise Control Center</title>
 <meta name="description" content="Enterprise control plane for Kolm API behavior capture, policy, eval gates, signed artifacts, runtime targets, evidence exports, and readiness-gated buyer workflows.">
-<meta name="theme-color" content="#090C0D">
+<meta name="theme-color" content="#E4ECE7">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -17,11 +17,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:description" content="API behavior in, signed runtime artifact out, with enterprise controls around every source, policy, eval, export, and readiness gate.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/enterprise">
-<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Kolm Enterprise Control Center">
 <meta name="twitter:description" content="Enterprise API control, evidence export, and buyer workflow for Kolm's AI compiler.">
-<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/enterprise">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -44,7 +44,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 }
 </script>
 </head>
-<body class="compiler-site">
+<body class="compiler-site compiler-site--paper" data-design-reference="image-2">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -54,17 +54,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/#pipeline">Pipeline</a>
-      <a href="/account/api-control-center">Control</a>
-      <a href="/integrations">Integrations</a>
-      <a href="/runtimes">Runtimes</a>
-      <a href="/compare">Compare</a>
-      <a href="/docs">Docs</a>
+      <a href="/#pipeline" aria-current="page">Solutions</a>
+      <a href="/docs">Developers</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/docs/api">API docs</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/account/api-control-center">Open control</a>
+      <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
+      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get API key -></a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -149,13 +146,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <div>
           <span class="idx">03 / Object Model</span>
           <h2>Enterprise quality means every claim has a backing object.</h2>
-          <p class="lede">Durable infrastructure unicorns win by exposing the real object. Kolm's object model should make capture, eval, artifact, receipt, target, export, and audit state impossible to miss.</p>
+          <p class="lede">Durable infrastructure wins by exposing the real object. Kolm's object model makes capture, eval, artifact, receipt, target, export, and audit state impossible to miss.</p>
           <div class="hero__cta">
             <a class="btn btn--primary" href="/docs/api">Inspect API reference</a>
             <a class="btn btn--ghost" href="/openapi.json">OpenAPI JSON</a>
           </div>
         </div>
-        <div class="unicorn-proof-grid">
+        <div class="proof-grid">
           <div class="proof-card"><h3>Account objects</h3><p>Organization, workspace, project, environment, API key, service account, connector, role, and policy.</p></div>
           <div class="proof-card"><h3>Behavior objects</h3><p>Source, capture, trace, prompt version, tool version, schema version, dataset, label set, eval, failure, and regression set.</p></div>
           <div class="proof-card"><h3>Compiler objects</h3><p>Compile run, artifact, manifest, runtime target, target recipe, verification receipt, and release gate.</p></div>
@@ -172,7 +169,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="section__head">
         <span class="idx">04 / Procurement Gates</span>
         <h2>The enterprise packet should separate shipped controls from open gates.</h2>
-        <p class="lede">This is how Kolm stays credible against better-funded platforms: make every risk and missing proof visible before the buyer asks.</p>
+        <p class="lede">This is how Kolm stays credible in enterprise review: make every risk and missing proof visible before the buyer asks.</p>
       </div>
       <div class="surface-table surface-table--dense">
         <div class="surface-row"><div class="surface-row__key">shipped control evidence</div><div class="surface-row__body">Route, schema, test, static asset, API payload, screenshot, generated JSON, or verifier output that proves a feature exists in the current product.</div><div class="surface-row__route">inspectable</div></div>

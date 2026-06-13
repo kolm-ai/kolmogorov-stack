@@ -9,7 +9,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 <title>Kolm Compiler Pricing</title>
 <meta name="description" content="Pricing for Kolm compiler plans: Free, Indie, Pro, Team, Business, and Enterprise tiers for gateway calls, compile credits, seats, API controls, artifacts, and runtime rollout.">
-<meta name="theme-color" content="#090C0D">
+<meta name="theme-color" content="#E4ECE7">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
@@ -17,11 +17,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:description" content="Plan catalog for the behavior-to-artifact control plane: gateway calls, compile credits, seats, artifacts, receipts, runtime targets, and enterprise controls.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/pricing">
-<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Kolm Compiler Pricing">
 <meta name="twitter:description" content="Choose the Kolm plan for API capture, compile credits, artifacts, receipts, runtime targets, and enterprise controls.">
-<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/pricing">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -46,13 +46,50 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <style>
   .pricing-hero .hero__h1{max-width:13ch;text-wrap:balance}
   .pricing-hero .lede{max-width:66ch}
-  .pricing-ledger{min-width:0;padding:clamp(18px,2.6vw,26px);border:1px solid var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.048),rgba(255,255,255,.014)),var(--paper-2);box-shadow:inset 0 1px 0 var(--light-top),0 30px 96px rgba(0,0,0,.36)}
+  .pricing-hero__link{display:inline-flex;align-items:center;min-height:44px;color:var(--ink-2);font:700 12px/1.2 var(--mono);text-decoration:none}
+  .pricing-hero__link:hover{color:var(--accent)}
+  .pricing-action-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .pricing-command{position:relative;min-width:0;padding:clamp(16px,2.1vw,22px);border:1px solid rgba(16,19,18,.12);border-radius:8px;background:#101619;color:#eaf2ec;box-shadow:0 34px 90px rgba(16,19,18,.24);overflow:hidden}
+  .pricing-command::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(236,246,240,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(236,246,240,.03) 1px,transparent 1px);background-size:26px 26px;opacity:.46;pointer-events:none}
+  .pricing-command>*{position:relative;z-index:1}
+  .pricing-image-two{height:clamp(178px,15.5vw,218px);margin:-6px -6px 16px;border:1px solid rgba(236,246,240,.12);border-radius:6px;background:#e4ece7;overflow:hidden}
+  .pricing-image-two img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top;filter:saturate(.98) contrast(1.02)}
+  .pricing-command__bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 0 14px;margin-bottom:14px;border-bottom:1px solid rgba(236,246,240,.10);font-family:var(--mono);font-size:11.5px;color:#aeb8b2}
+  .pricing-command__bar b{color:#f2f6f1}
+  .pricing-command__bar span:last-child{color:#75d19f;text-align:right}
+  .pricing-ledger{min-width:0}
   .pricing-ledger__head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
   .pricing-ledger__head b{color:var(--ink)}
   .pricing-ledger__rows{display:grid;gap:10px;margin-top:14px}
-  .pricing-ledger__row{display:grid;grid-template-columns:100px minmax(0,1fr) max-content;gap:12px;align-items:center;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:rgba(9,12,13,.52);color:var(--ink-2);font:500 11.5px var(--mono)}
-  .pricing-ledger__row b{color:var(--ink)}
+  .pricing-ledger__row{display:grid;grid-template-columns:100px minmax(0,1fr) max-content;gap:12px;align-items:center;min-height:42px;padding:10px 12px;border:1px solid rgba(236,246,240,.10);border-radius:6px;background:rgba(7,11,12,.58);color:#aeb8b2;font:500 11.5px var(--mono)}
+  .pricing-ledger__row b{color:#f2f6f1}
   .pricing-ledger__row i{height:5px;border-radius:999px;background:linear-gradient(90deg,var(--accent) var(--fill,60%),rgba(229,240,234,.13) 0);box-shadow:0 0 18px rgba(63,229,160,.15)}
+  .pricing-ledger__row:nth-child(2) i{background:linear-gradient(90deg,var(--compile-blue,#255fbd) var(--fill,60%),rgba(229,240,234,.13) 0)}
+  .pricing-ledger__row:nth-child(5) i{background:linear-gradient(90deg,#c69f34 var(--fill,60%),rgba(229,240,234,.13) 0)}
+  .pricing-estimator-section{border-top:1px solid rgba(7,16,13,.08);border-bottom:1px solid rgba(7,16,13,.08);background:linear-gradient(180deg,rgba(247,255,250,.54),rgba(216,229,222,.48))}
+  .pricing-estimator-shell{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:clamp(24px,5vw,70px);align-items:start}
+  .pricing-estimator{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0}
+  .pricing-estimator-card{grid-column:span 2;display:grid;gap:14px;padding:18px;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:rgba(255,255,255,.70);box-shadow:0 24px 70px rgba(16,19,18,.06)}
+  .pricing-field{display:grid;gap:7px;min-width:0}
+  .pricing-field label,.pricing-toggle span{color:var(--ink-3);font:700 11px/1.35 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .pricing-field input,.pricing-field select{width:100%;min-height:46px;padding:11px 12px;border:1px solid var(--line-2);border-radius:6px;background:var(--paper-2);color:var(--ink);font:650 13px/1.2 var(--mono)}
+  .pricing-field input:focus,.pricing-field select:focus{outline:2px solid var(--accent);outline-offset:2px}
+  .pricing-estimator__controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .pricing-estimator__toggles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .pricing-toggle{display:flex;align-items:center;gap:9px;min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:rgba(247,255,250,.54);cursor:pointer}
+  .pricing-toggle input{width:18px;height:18px;accent-color:var(--accent);flex:0 0 auto}
+  .pricing-estimator__submit{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .pricing-estimator__route{color:var(--compile-blue);font:700 11.5px/1.35 var(--mono)}
+  .pricing-result{grid-column:span 1;display:grid;align-content:stretch;gap:12px;min-height:100%;padding:18px;border:1px solid rgba(236,246,240,.12);border-radius:8px;background:#101619;color:#eaf2ec;box-shadow:0 28px 76px rgba(16,19,18,.20)}
+  .pricing-result__top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid rgba(236,246,240,.10);color:#aeb8b2;font:12px/1.2 var(--mono)}
+  .pricing-result__top b{color:#75d19f}
+  .pricing-result__plan{font:800 clamp(34px,5vw,58px)/.95 var(--display);letter-spacing:0;color:#f8fbf6}
+  .pricing-result__price{color:#75d19f;font:800 17px/1.2 var(--mono)}
+  .pricing-result__reason{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+  .pricing-result__reason li{min-height:34px;padding:9px 10px;border:1px solid rgba(236,246,240,.10);border-radius:5px;background:rgba(7,11,12,.56);color:#aeb8b2;font:12px/1.35 var(--mono)}
+  .pricing-result__cta{align-self:end;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid rgba(117,209,159,.36);border-radius:6px;background:#75d19f;color:#07110d;text-decoration:none;font-weight:800}
+  .pricing-result__boundary{color:#aeb8b2;font-size:12px;line-height:1.5}
+  .pricing-result__boundary code{color:#75d19f}
   .pricing-plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch}
   .pricing-card{min-width:0;display:grid;grid-template-rows:auto auto auto 1fr auto;gap:16px;min-height:466px;padding:20px;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.012)),var(--paper-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
   .pricing-card--hot{border-color:var(--accent-edge);box-shadow:inset 0 1px 0 var(--light-top),0 20px 70px rgba(63,229,160,.08)}
@@ -78,12 +115,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   .pricing-compare{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
   .pricing-compare .proof-card{min-height:190px}
   .pricing-compare .card__k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
-  @media (max-width:1080px){.pricing-plans{grid-template-columns:repeat(2,minmax(0,1fr))}.pricing-contract{grid-template-columns:1fr}.pricing-compare{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media (max-width:680px){.pricing-plans,.pricing-compare{grid-template-columns:1fr}.pricing-ledger__head{display:grid}.pricing-ledger__row,.pricing-row{grid-template-columns:1fr}.pricing-ledger__row i{width:100%}.pricing-card{min-height:auto}.pricing-card__stats{grid-template-columns:1fr 1fr}}
+  @media (max-width:1080px){.pricing-plans{grid-template-columns:repeat(2,minmax(0,1fr))}.pricing-contract,.pricing-estimator-shell{grid-template-columns:1fr}.pricing-compare{grid-template-columns:repeat(2,minmax(0,1fr))}.pricing-estimator-card,.pricing-result{grid-column:auto}.pricing-estimator{grid-template-columns:1fr}}
+  @media (max-width:780px){.pricing-estimator__controls,.pricing-estimator__toggles{grid-template-columns:1fr}.pricing-action-row{display:grid;grid-template-columns:1fr}.pricing-action-row .btn{width:100%;justify-content:center}.pricing-hero__link{justify-content:center}.pricing-command__bar{display:grid}.pricing-command__bar span:last-child{text-align:left}}
+  @media (max-width:680px){.pricing-plans,.pricing-compare{grid-template-columns:1fr}.pricing-ledger__head{display:grid}.pricing-ledger__row,.pricing-row{grid-template-columns:1fr}.pricing-ledger__row i{width:100%}.pricing-card{min-height:auto}.pricing-card__stats{grid-template-columns:1fr 1fr}.pricing-image-two{margin:0 0 14px}.pricing-result__plan{font-size:38px}}
   @media (prefers-reduced-motion:reduce){.pricing-card{transition:none}}
 </style>
 </head>
-<body class="compiler-site">
+<body class="compiler-site compiler-site--paper" data-design-reference="image-2">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -93,17 +131,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/#pipeline">Pipeline</a>
-      <a href="/account/api-control-center">Control</a>
-      <a href="/integrations">Integrations</a>
-      <a href="/runtimes">Runtimes</a>
-      <a href="/compare">Compare</a>
-      <a href="/docs">Docs</a>
-      <a href="/pricing">Pricing</a>
+      <a href="/#pipeline">Solutions</a>
+      <a href="/docs">Developers</a>
+      <a href="/pricing" aria-current="page">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/v1/plans">Plan JSON</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Create Workspace</a>
+      <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
+      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get API key -></a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -119,10 +154,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="compiler-kicker" data-enter="1">Pricing / Plan Catalog</p>
         <h1 class="hero__h1" data-enter="2">Price the controlled loop, not generic AI seats.</h1>
         <p class="lede" data-enter="3">API behavior in. Device-fit models out. Kolm plans meter the workflow buyers can inspect: gateway calls, compile credits, seats, policies, artifacts, receipts, runtime targets, and enterprise exports.</p>
-        <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="#plans">Compare Plans</a>
+        <div class="pricing-action-row" data-enter="4">
+          <a class="btn btn--primary" href="#estimate">Estimate Plan</a>
           <a class="btn btn--ghost" href="/v1/plans">Open Plan JSON</a>
-          <a class="btn btn--ghost" href="/account/api-control-center">Open Control Center</a>
+          <a class="pricing-hero__link" href="/account/api-control-center">API Control Center -></a>
         </div>
         <div class="compiler-proof" data-enter="5">
           <span><b>6</b> catalog tiers</span>
@@ -131,10 +166,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span><b>17%</b> annual savings on paid self-serve</span>
         </div>
       </div>
-      <aside class="pricing-ledger kolm-surface-media" aria-label="Pricing work ledger">
+      <aside class="pricing-command kolm-surface-media" aria-label="Pricing work ledger">
+        <div class="pricing-image-two">
+          <img src="/compiler-brand-hero.png" alt="Kolm API Control Center artifact used to price gateway calls, compile credits, policies, and evidence exports." width="1200" height="630" loading="eager" decoding="async">
+        </div>
+        <div class="pricing-command__bar">
+          <b>price control plane</b>
+          <span>from /v1/plans + /v1/pricing/estimate</span>
+        </div>
+        <div class="pricing-ledger">
         <div class="pricing-ledger__head">
           <span><b>meters</b> / compiler work</span>
-          <span>from /v1/plans</span>
+          <span>live catalog</span>
         </div>
         <div class="pricing-ledger__rows">
           <div class="pricing-ledger__row"><b>calls</b><i style="--fill:92%"></i><span>gateway caps</span></div>
@@ -144,7 +187,81 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <div class="pricing-ledger__row"><b>output</b><i style="--fill:64%"></i><span>artifacts</span></div>
           <div class="pricing-ledger__row"><b>export</b><i style="--fill:58%"></i><span>evidence</span></div>
         </div>
+        </div>
       </aside>
+    </div>
+  </section>
+
+  <section class="section pricing-estimator-section" id="estimate">
+    <div class="wrap pricing-estimator-shell">
+      <div class="section__head">
+        <span class="idx">00 / Workload Estimator</span>
+        <h2>Price the source-to-proof loop before procurement does.</h2>
+        <p class="lede">The estimator calls <span class="mono">GET /v1/pricing/estimate</span> and returns a plan from the same backend catalog as the signup flow. It treats gateway volume, compile work, seats, governance, SSO, and private deployment as first-class product objects.</p>
+      </div>
+      <div class="pricing-estimator" aria-label="Kolm pricing workload estimator">
+        <form class="pricing-estimator-card" data-pricing-estimator>
+          <div class="pricing-estimator__controls">
+            <div class="pricing-field">
+              <label for="estimateCalls">Gateway calls / month</label>
+              <input id="estimateCalls" name="gateway_calls" type="number" inputmode="numeric" min="0" step="1000" value="500000">
+            </div>
+            <div class="pricing-field">
+              <label for="estimateCredits">Compile credits / month</label>
+              <input id="estimateCredits" name="compile_credits" type="number" inputmode="numeric" min="0" step="1" value="50">
+            </div>
+            <div class="pricing-field">
+              <label for="estimateSeats">Seats</label>
+              <input id="estimateSeats" name="seats" type="number" inputmode="numeric" min="1" step="1" value="1">
+            </div>
+          </div>
+          <div class="pricing-estimator__controls">
+            <div class="pricing-field">
+              <label for="estimateControls">Control profile</label>
+              <select id="estimateControls" name="controls">
+                <option value="standard">Standard</option>
+                <option value="governed">Governed business</option>
+                <option value="enterprise">Enterprise review</option>
+              </select>
+            </div>
+            <div class="pricing-field">
+              <label for="estimateCompliance">Compliance posture</label>
+              <select id="estimateCompliance" name="compliance_level">
+                <option value="">None declared</option>
+                <option value="regulated">Regulated workload</option>
+                <option value="private">Private cloud</option>
+                <option value="sovereign">Sovereign data boundary</option>
+              </select>
+            </div>
+            <div class="pricing-field">
+              <label for="estimateMode">Estimator source</label>
+              <select id="estimateMode" name="mode">
+                <option value="catalog">Backend catalog</option>
+              </select>
+            </div>
+          </div>
+          <div class="pricing-estimator__toggles">
+            <label class="pricing-toggle"><input type="checkbox" name="private_deployment" value="true"><span>Private deployment</span></label>
+            <label class="pricing-toggle"><input type="checkbox" name="sso" value="true"><span>SSO / SCIM required</span></label>
+          </div>
+          <div class="pricing-estimator__submit">
+            <button class="btn btn--primary" type="submit">Estimate Plan</button>
+            <span class="pricing-estimator__route">GET /v1/pricing/estimate</span>
+          </div>
+        </form>
+        <aside class="pricing-result" data-estimate-result aria-live="polite" aria-label="Recommended pricing plan">
+          <div class="pricing-result__top"><span>recommended plan</span><b>catalog ready</b></div>
+          <div class="pricing-result__plan" data-estimate-plan>Pro</div>
+          <div class="pricing-result__price" data-estimate-price>$49/mo</div>
+          <ul class="pricing-result__reason" data-estimate-reasons>
+            <li>500,000 gateway calls/month</li>
+            <li>50 compile credits/month</li>
+            <li>1 seat</li>
+          </ul>
+          <p class="pricing-result__boundary">Backend source: <code>PLAN_CATALOG</code>. Public recommendation is local-contract-ready; production-final claims still respect the readiness closeout gates.</p>
+          <a class="pricing-result__cta" data-estimate-cta href="/signup?plan=pro">Create workspace</a>
+        </aside>
+      </div>
     </div>
   </section>
 
@@ -276,6 +393,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <div class="pricing-row__route">/v1/route</div>
         </div>
         <div class="pricing-row">
+          <div class="pricing-row__key">Estimate</div>
+          <div class="pricing-row__body">Secret-safe workload recommendation from gateway calls, compile credits, seats, governance, SSO, and private deployment flags.</div>
+          <div class="pricing-row__route">/v1/pricing/estimate</div>
+        </div>
+        <div class="pricing-row">
           <div class="pricing-row__key">Compile</div>
           <div class="pricing-row__body">Preview, estimate, build, K-score checks, artifact packaging, manifests, and receipts.</div>
           <div class="pricing-row__route">/v1/compile</div>
@@ -371,5 +493,70 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </div>
 </footer>
+<script>
+(function(){
+  var form = document.querySelector('[data-pricing-estimator]');
+  var result = document.querySelector('[data-estimate-result]');
+  if (!form || !result || !window.fetch || !window.URLSearchParams) return;
+  var planEl = result.querySelector('[data-estimate-plan]');
+  var priceEl = result.querySelector('[data-estimate-price]');
+  var reasonsEl = result.querySelector('[data-estimate-reasons]');
+  var ctaEl = result.querySelector('[data-estimate-cta]');
+
+  function value(name) {
+    var field = form.elements[name];
+    if (!field) return '';
+    if (field.type === 'checkbox') return field.checked ? 'true' : '';
+    return field.value;
+  }
+
+  function render(data) {
+    var plan = data && data.recommended_plan ? data.recommended_plan : {};
+    var label = plan.label || data.recommended_plan_id || 'Pro';
+    planEl.textContent = label;
+    priceEl.textContent = plan.price_label || '$49/mo';
+    reasonsEl.innerHTML = '';
+    (data.reasons || []).slice(0, 5).forEach(function(reason){
+      var li = document.createElement('li');
+      li.textContent = reason;
+      reasonsEl.appendChild(li);
+    });
+    if (!reasonsEl.children.length) {
+      ['500,000 gateway calls/month','50 compile credits/month','1 seat'].forEach(function(reason){
+        var li = document.createElement('li');
+        li.textContent = reason;
+        reasonsEl.appendChild(li);
+      });
+    }
+    ctaEl.textContent = data.next_step && data.next_step.label ? data.next_step.label : 'Create workspace';
+    ctaEl.href = data.next_step && data.next_step.href ? data.next_step.href : ('/signup?plan=' + encodeURIComponent(data.recommended_plan_id || 'pro'));
+  }
+
+  function estimate() {
+    var params = new URLSearchParams();
+    ['gateway_calls','compile_credits','seats','controls','compliance_level','private_deployment','sso'].forEach(function(name){
+      var v = value(name);
+      if (v) params.set(name, v);
+    });
+    fetch('/v1/pricing/estimate?' + params.toString(), { headers: { accept: 'application/json' } })
+      .then(function(res){ return res.ok ? res.json() : Promise.reject(new Error('estimate failed')); })
+      .then(render)
+      .catch(function(){
+        render({
+          recommended_plan_id: 'pro',
+          recommended_plan: { label: 'Pro', price_label: '$49/mo' },
+          reasons: ['Backend estimate unavailable in this browser session', 'Fallback keeps the Pro catalog default visible'],
+          next_step: { label: 'Create workspace', href: '/signup?plan=pro' }
+        });
+      });
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    estimate();
+  });
+  form.addEventListener('change', estimate);
+})();
+</script>
 </body>
 </html>

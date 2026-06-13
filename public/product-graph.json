@@ -9,7 +9,7 @@
     "readiness_requirements": 57,
     "route_groups": 214,
     "route_surfaces": 7,
-    "routes": 922,
+    "routes": 929,
     "tui_views": 32
   },
   "definition": {
@@ -2862,7 +2862,7 @@
       "route_groups": [
         {
           "id": "account",
-          "routes": 38
+          "routes": 43
         },
         {
           "id": "anon",
@@ -2902,7 +2902,7 @@
         },
         {
           "id": "pricing",
-          "routes": 1
+          "routes": 3
         },
         {
           "id": "stripe",
@@ -2965,7 +2965,7 @@
           "routes": 6
         }
       ],
-      "routes": 148,
+      "routes": 155,
       "status": "certified"
     },
     {
@@ -3107,10 +3107,12 @@
         {
           "auth": "none",
           "checks": [
-            "json"
+            "json",
+            "readiness-gated"
           ],
           "expect": [
-            200
+            200,
+            503
           ],
           "id": "evidence-readiness",
           "method": "GET",
@@ -4137,10 +4139,12 @@
         {
           "auth": "none",
           "checks": [
-            "json"
+            "json",
+            "readiness-gated"
           ],
           "expect": [
-            200
+            200,
+            503
           ],
           "id": "benchmark-evidence-public",
           "method": "GET",

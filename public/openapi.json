@@ -1606,6 +1606,46 @@
         }
       }
     },
+    "/v1/account/api-control-center/events": {
+      "post": {
+        "tags": [
+          "account"
+        ],
+        "operationId": "postV1AccountApicontrolcenterEvents",
+        "summary": "Enterprise control-center intake alias. This exposes the advertised",
+        "description": "Enterprise control-center intake alias. This exposes the advertised canonical event envelope directly from the account surface.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericRequest"
+              },
+              "example": {
+                "ok": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
     "/v1/account/audit-log": {
       "get": {
         "tags": [
@@ -23265,6 +23305,71 @@
         "operationId": "getV1Pricing",
         "summary": "Pricing - public price catalog in USD per billable unit (tokens, compile,",
         "description": "Pricing - public price catalog in USD per billable unit (tokens, compile, replay, bakeoff, redact). Read by /pricing and the SDK shapers.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/v1/pricing/estimate": {
+      "get": {
+        "tags": [
+          "pricing"
+        ],
+        "operationId": "getV1PricingEstimate",
+        "summary": "Pricing estimator - public, secret-safe workload calculator backed by the",
+        "description": "Pricing estimator - public, secret-safe workload calculator backed by the same compiler PLAN_CATALOG as /v1/plans and /v1/billing/tiers.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/JsonEnvelope"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "pricing"
+        ],
+        "operationId": "postV1PricingEstimate",
+        "summary": "(source-indexed route; contract generated from route source)",
+        "x-kolm-source-indexed": true,
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericRequest"
+              },
+              "example": {
+                "ok": true
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "$ref": "#/components/responses/JsonEnvelope"

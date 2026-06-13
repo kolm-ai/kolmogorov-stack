@@ -2135,7 +2135,7 @@ export function buildRouter() {
             submission_contact: leaderboard.submission_contact || 'leaderboard@kolm.ai',
           },
           secret_values_included: false,
-          claim_scope: 'Frozen synthetic/public suite and manual-review leaderboard; broader competitive claims require dated public multi-provider reports.',
+          claim_scope: 'Frozen synthetic/public suite and manual-review leaderboard; broader public claims require dated public multi-provider reports.',
         },
         evidence: {
           source_paths: [
@@ -2605,6 +2605,149 @@ export function buildRouter() {
     }
     return null;
   }
+
+  function truthyParam(value) {
+    if (value === true) return true;
+    if (Array.isArray(value)) return value.some(truthyParam);
+    const s = String(value || '').trim().toLowerCase();
+    return ['1', 'true', 'yes', 'y', 'on', 'required'].includes(s);
+  }
+
+  function boundedWorkloadNumber(value, fallback, max) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 0) return fallback;
+    return Math.min(Math.floor(n), max);
+  }
+
+  function planFitsWorkload(plan, input) {
+    const compileLimit = plan.compile_credits_monthly === 'custom'
+      ? Number.POSITIVE_INFINITY
+      : Number(plan.compile_credits_monthly || 0);
+    return (
+      input.gateway_calls_monthly <= plan.gateway_calls_hard &&
+      input.compile_credits_monthly <= compileLimit &&
+      input.seats <= plan.seats
+    );
+  }
+
+  function estimatePlanFromWorkload(raw = {}) {
+    const gatewayCalls = boundedWorkloadNumber(
+      raw.gateway_calls_monthly ?? raw.gateway_calls ?? raw.calls,
+      500000,
+      1000000000
+    );
+    const compileCredits = boundedWorkloadNumber(
+      raw.compile_credits_monthly ?? raw.compile_credits ?? raw.credits,
+      50,
+      1000000
+    );
+    const seats = Math.max(1, boundedWorkloadNumber(raw.seats, 1, 100000));
+    const controls = String(raw.controls || raw.control_profile || 'standard').trim().toLowerCase() || 'standard';
+    const complianceLevel = String(raw.compliance_level || raw.compliance || '').trim().toLowerCase();
+    const privateDeployment = truthyParam(raw.private_deployment || raw.private || raw.byoc);
+    const ssoRequired = truthyParam(raw.sso || raw.saml || raw.scim);
+    const regulated = ['regulated', 'private', 'hipaa', 'fedramp', 'iso42001', 'pci', 'sovereign'].includes(complianceLevel);
+    const governed = ['governed', 'business', 'enterprise', 'private', 'regulated'].includes(controls) || ssoRequired || regulated;
+    const needsEnterprise = privateDeployment || controls === 'enterprise' || regulated || seats > PLAN_CATALOG.business.seats || gatewayCalls > PLAN_CATALOG.business.gateway_calls_hard;
+    const order = ['free', 'indie', 'pro', 'teams', 'business', 'enterprise'];
+    const minPlanId = needsEnterprise ? 'enterprise' : (governed ? 'business' : 'free');
+    const minIndex = order.indexOf(minPlanId);
+    let recommendedId = 'enterprise';
+    for (const id of order.slice(Math.max(minIndex, 0))) {
+      if (planFitsWorkload(PLAN_CATALOG[id], {
+        gateway_calls_monthly: gatewayCalls,
+        compile_credits_monthly: compileCredits,
+        seats,
+      })) {
+        recommendedId = id;
+        break;
+      }
+    }
+
+    const reasons = [];
+    reasons.push(`${gatewayCalls.toLocaleString('en-US')} gateway calls/month`);
+    reasons.push(`${compileCredits.toLocaleString('en-US')} compile credits/month`);
+    reasons.push(`${seats.toLocaleString('en-US')} seat${seats === 1 ? '' : 's'}`);
+    if (governed) reasons.push('governed control profile requires Business or higher');
+    if (privateDeployment) reasons.push('private deployment requires Enterprise review');
+    if (regulated) reasons.push('regulated/compliance-sensitive posture requires Enterprise review');
+    if (recommendedId === 'enterprise' && (gatewayCalls > PLAN_CATALOG.enterprise.gateway_calls_hard || seats > PLAN_CATALOG.enterprise.seats)) {
+      reasons.push('workload exceeds published Enterprise base limits and needs architecture review');
+    }
+
+    const recommended = serializePlan(PLAN_CATALOG[recommendedId]);
+    const nextHref = recommended.contact_sales
+      ? 'mailto:dev@kolm.ai?subject=Kolm%20Enterprise%20Compiler'
+      : `/signup?plan=${encodeURIComponent(recommendedId)}`;
+
+    return {
+      ok: true,
+      product: 'kolm AI compiler',
+      version: 'kolm-pricing-estimator-1',
+      source: 'PLAN_CATALOG',
+      billing_unit: 'gateway calls plus compile credits',
+      input: {
+        gateway_calls_monthly: gatewayCalls,
+        compile_credits_monthly: compileCredits,
+        seats,
+        controls,
+        compliance_level: complianceLevel || 'none-declared',
+        private_deployment: privateDeployment,
+        sso_required: ssoRequired,
+      },
+      recommended_plan_id: recommendedId,
+      recommended_plan: recommended,
+      reasons,
+      next_step: {
+        label: recommended.contact_sales ? 'Email Enterprise' : 'Create workspace',
+        href: nextHref,
+        method: recommended.contact_sales ? 'mailto' : 'self_serve_signup',
+      },
+      compared_plans: order.map((id) => {
+        const plan = PLAN_CATALOG[id];
+        const fits = planFitsWorkload(plan, {
+          gateway_calls_monthly: gatewayCalls,
+          compile_credits_monthly: compileCredits,
+          seats,
+        });
+        return {
+          id,
+          label: plan.label,
+          price_label: plan.price_label,
+          fits_workload: fits,
+          gateway_calls_hard: plan.gateway_calls_hard,
+          compile_credits_monthly: plan.compile_credits_monthly,
+          seats: plan.seats,
+          self_serve: plan.self_serve !== false,
+        };
+      }),
+      readiness_boundary: {
+        status: 'local-contract-ready',
+        production_final: false,
+        open_external_gates: [
+          'public benchmark data',
+          'live auditor/certification evidence',
+          'signed installer channel release',
+          'external runtime adoption proof',
+          'external standards/foundation acceptance',
+          'SDK package release matrix',
+          'mobile package release',
+          'browser/runtime package channel release',
+        ],
+      },
+      secret_values_included: false,
+    };
+  }
+
+  // Pricing estimator - public, secret-safe workload calculator backed by the
+  // same compiler PLAN_CATALOG as /v1/plans and /v1/billing/tiers.
+  r.get('/v1/pricing/estimate', (req, res) => {
+    res.json(estimatePlanFromWorkload(req.query || {}));
+  });
+
+  r.post('/v1/pricing/estimate', (req, res) => {
+    res.json(estimatePlanFromWorkload(req.body || {}));
+  });
 
   // Plans - public compiler plan catalog. Historical aliases still
   // canonicalize server-side. Enterprise is contact-sales unless a custom
@@ -3532,13 +3675,13 @@ export function buildRouter() {
       product: 'kolm AI compiler',
       positioning: 'API collection wrapper, signed artifact compiler, specialist composer, and device-shrinking deployment layer.',
       generated_at: new Date().toISOString(),
-      competitive_research: {
-        source: 'docs/research/category-competitor-atlas-2026-06-13.md',
-        unique_mapped_players: 293,
-        public_copy_count: '290+',
+      product_research: {
+        source: 'internal product research ledgers',
+        mapped_inputs: 293,
+        public_copy_rule: 'first-party Kolm positioning only',
         clusters: 17,
         public_route: '/compare',
-        rule: 'Kolm should own the governed transition from API behavior to signed runtime artifacts, not claim to replace every specialized tool.',
+        rule: 'Kolm owns the governed transition from API behavior to signed runtime artifacts and proof exports.',
       },
       api_control_coverage: {
         data_channel_families: 17,
@@ -6775,6 +6918,10 @@ export function buildRouter() {
           res.set('X-Inference-Key-ID', _sig.key_fingerprint || '');
         }
       } catch (_) { /* header set best-effort */ }
+      const _responseStatus = (() => {
+        const n = Number(result && result.status);
+        return Number.isInteger(n) && n >= 100 && n <= 599 ? n : 502;
+      })();
 
       // V1 launch / W-1: streaming SSE branch. When the caller sets
       // body.stream===true (OpenAI/Anthropic-compat) we ship the response as
@@ -6789,7 +6936,7 @@ export function buildRouter() {
       const wantsStream = !!(body && body.stream === true);
       if (wantsStream) {
         try {
-          res.status(result.status);
+          res.status(_responseStatus);
           res.set('Content-Type', 'text/event-stream; charset=utf-8');
           res.set('Cache-Control', 'no-cache, no-transform');
           res.set('Connection', 'keep-alive');
@@ -6883,7 +7030,7 @@ export function buildRouter() {
           namespace_id: nsSlug,
         });
       } catch (_) {} // deliberate: cleanup
-      res.status(result.status).json({
+      res.status(_responseStatus).json({
         ...clientJson,
         kolm_receipt: receipt,
         kolm_route_decision: receipt.route_decision,
@@ -15064,27 +15211,263 @@ export function buildRouter() {
     return { hash: h, normalized: normalized.slice(0, 240), variable: variable.slice(0, 240) };
   }
 
-  // POST /v1/bridges/observe - agents log a (model, prompt, response) tuple.
-  // After ≥4 calls with the same template signature we surface a synthesis suggestion.
-  // W258-BE-1: persists via insertCapture (durable contract). 503 on store
-  // failure - same envelope as the capture proxy handlers.
-  r.post('/v1/bridges/observe', async (req, res) => {
-    const { model = '', prompt = '', response, latency_ms, cost_usd } = req.body || {};
-    if (!prompt || response === undefined) {
-      return res.status(400).json({ error: 'prompt and response are required' });
+  function __controlSafeStringify(value) {
+    if (value == null) return '';
+    if (typeof value === 'string') return value;
+    try { return JSON.stringify(value); }
+    catch (_) { return String(value); }
+  }
+  function __controlRedactValue(value) {
+    const raw = __controlSafeStringify(value);
+    const scan = privacyScan(raw);
+    let redacted = raw;
+    let classes = Array.isArray(scan.classes) ? scan.classes : [];
+    try {
+      const r = privacyRedactWithPolicy(raw);
+      redacted = r.redacted_text || r.redacted || raw;
+      classes = Array.from(new Set(classes.concat(r.classes_seen || [])));
+    } catch (e) {
+      if (e && e.code === 'POLICY_BLOCK') throw e;
+      redacted = '';
     }
+    if (typeof value !== 'string') {
+      try { return { value: JSON.parse(redacted), text: redacted, classes, redaction_count: classes.length }; }
+      catch (_) { /* fall through to redacted string */ }
+    }
+    return { value: redacted, text: redacted, classes, redaction_count: classes.length };
+  }
+  function __controlNormalizeDirection(value) {
+    const v = String(Array.isArray(value) ? value.join('+') : (value || '')).toLowerCase();
+    if (v.includes('egress') && v.includes('ingress')) return 'ingress+egress';
+    if (v.includes('egress') || v.includes('out')) return 'egress';
+    return 'ingress';
+  }
+  function __controlSchemaStatus(body, hasGenericPayload) {
+    if (body && body.adapter_manifest) return 'manifest-declared';
+    if (body && (body.schema || body.schema_hint || body.content_type)) return 'schema-hinted';
+    if (!hasGenericPayload) return 'schema-hinted';
+    return 'opaque';
+  }
+  function __controlArray(value) {
+    if (Array.isArray(value)) return value.filter(v => v != null && String(v).trim() !== '');
+    if (value && typeof value === 'object') return Object.keys(value).filter(k => value[k] != null);
+    if (typeof value === 'string') return value.split(',').map(v => v.trim()).filter(Boolean);
+    return [];
+  }
+  function __controlSchemaFields(schema) {
+    if (!schema || typeof schema !== 'object') return [];
+    if (Array.isArray(schema.fields)) return schema.fields.map(f => typeof f === 'string' ? f : f && f.name).filter(Boolean);
+    if (schema.properties && typeof schema.properties === 'object') return Object.keys(schema.properties);
+    if (schema.items && schema.items.properties && typeof schema.items.properties === 'object') return Object.keys(schema.items.properties);
+    return [];
+  }
+  function __controlDestinationLabels(value) {
+    const rows = Array.isArray(value) ? value : value ? [value] : [];
+    return rows.map((row, idx) => {
+      if (typeof row === 'string') return row.slice(0, 96);
+      if (!row || typeof row !== 'object') return `destination-${idx + 1}`;
+      return String(row.id || row.name || row.type || row.class || `destination-${idx + 1}`).slice(0, 96);
+    }).filter(Boolean).slice(0, 12);
+  }
+  function __controlValidateAdapterManifest(req, manifest) {
+    const body = manifest && typeof manifest === 'object' ? manifest : {};
+    const inputSchema = body.input_schema || body.inputSchema || body.schema || null;
+    const outputSchema = body.output_schema || body.outputSchema || null;
+    const redactionMap = body.redaction_map || body.redactionMap || body.redaction || null;
+    const egressDestinations = body.egress_destinations || body.egressDestinations || body.destinations || null;
+    const fixture = body.test_fixture || body.testFixture || body.fixture || null;
+    const required = [
+      ['adapter_id', body.id || body.adapter_id || body.name],
+      ['adapter_version', body.version || body.adapter_version],
+      ['channel_family', body.channel_family || body.channel || body.protocol],
+      ['direction', body.direction],
+      ['input_schema', inputSchema],
+      ['redaction_map', redactionMap],
+      ['egress_destinations', egressDestinations],
+      ['test_fixture', fixture],
+    ];
+    const present = required.filter(([, value]) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (value && typeof value === 'object') return Object.keys(value).length > 0;
+      return value != null && String(value).trim() !== '';
+    }).map(([key]) => key);
+    const missing = required.map(([key]) => key).filter(key => !present.includes(key));
+    const direction = __controlNormalizeDirection(body.direction);
+    const adapterId = String(body.id || body.adapter_id || body.name || 'manual-adapter').slice(0, 120);
+    const channelFamily = String(body.channel_family || body.channel || body.protocol || 'custom-adapter').slice(0, 80);
+    const tenantId = String((req.tenant_record && req.tenant_record.id) || req.tenant || 'anonymous');
+    const manifestHash = promptHash(JSON.stringify({
+      tenantId,
+      adapterId,
+      version: body.version || body.adapter_version || '',
+      channelFamily,
+      direction,
+      fields: __controlSchemaFields(inputSchema),
+      egress: __controlDestinationLabels(egressDestinations),
+    })).slice(0, 24);
+    let fixtureClasses = [];
+    let fixtureRedactionCount = 0;
+    try {
+      const redactedFixture = __controlRedactValue(fixture || {});
+      fixtureClasses = redactedFixture.classes || [];
+      fixtureRedactionCount = redactedFixture.redaction_count || 0;
+    } catch (_) {
+      fixtureClasses = ['policy-blocked'];
+      fixtureRedactionCount = 1;
+    }
+    const ok = missing.length === 0;
+    return {
+      ok,
+      version: 'kolm-adapter-manifest-validation-1',
+      adapter_state: ok ? 'manifest-declared' : (present.includes('input_schema') ? 'schema-hinted' : 'opaque'),
+      semantic_claim: ok ? 'adapter-owned field mapping' : 'not-promoted',
+      manifest_id: adapterId,
+      manifest_hash: `sha256:${manifestHash}`,
+      receipt_id: `rcpt_adapter_${manifestHash}`,
+      required_evidence: {
+        required: required.map(([key]) => key),
+        present,
+        missing,
+      },
+      normalized_manifest: {
+        adapter_id: adapterId,
+        version: String(body.version || body.adapter_version || 'unversioned').slice(0, 80),
+        channel_family: channelFamily,
+        direction,
+        input_fields: __controlSchemaFields(inputSchema).slice(0, 40),
+        output_fields: __controlSchemaFields(outputSchema).slice(0, 40),
+        redaction_fields: __controlArray(redactionMap).slice(0, 40),
+        egress_destinations: __controlDestinationLabels(egressDestinations),
+      },
+      promotion_policy: {
+        unknown_fields: 'remain opaque unless mapped by schema and redaction evidence',
+        egress: 'deny until destination, payload class, processor, and delivery ledger are declared',
+        runtime: 'adapter manifest does not close runtime/package readiness gates',
+      },
+      fixture_redaction: {
+        result: fixtureRedactionCount > 0 ? `redacted:${fixtureClasses.join(',') || 'sensitive'}` : 'clean',
+        classes: fixtureClasses,
+        secret_values_included: false,
+      },
+      secret_values_included: false,
+    };
+  }
+  function __controlBuildEnvelope(req, obs, meta) {
+    const schemaStatus = __controlSchemaStatus(meta.body, meta.hasGenericPayload);
+    const direction = __controlNormalizeDirection(meta.direction);
+    const sourceId = String(meta.source_id || meta.provider || obs.provider || obs.model || 'manual-observe').slice(0, 160);
+    const channelFamily = String(meta.channel_family || meta.protocol || (meta.hasGenericPayload ? 'custom-adapter' : 'rest-json')).slice(0, 80);
+    const tenantId = String((req.tenant_record && req.tenant_record.id) || obs.tenant_id || obs.tenant || req.tenant || 'anonymous');
+    const receiptHash = promptHash([obs.id, tenantId, sourceId, channelFamily, direction].join('|')).slice(0, 18);
+    const policyHash = promptHash([tenantId, sourceId, schemaStatus, meta.retention_class || 'tenant-default'].join('|')).slice(0, 18);
+    const redactionResult = obs.redaction_count > 0
+      ? `redacted:${(obs.sensitive_classes || []).join(',') || 'sensitive'}`
+      : 'clean';
+    const envelope = {
+      version: API_CONTROL_EVENT_ENVELOPE.version,
+      event_id: obs.id,
+      tenant_id: tenantId,
+      source_id: sourceId,
+      channel_family: channelFamily,
+      direction,
+      observed_at: obs.created_at,
+      schema_status: schemaStatus,
+      payload_policy: String(meta.payload_policy || (schemaStatus === 'opaque' ? 'opaque-redacted-body' : 'metadata-and-redacted-body')),
+      redaction_result: redactionResult,
+      retention_class: String(meta.retention_class || 'tenant-default'),
+      policy_decision_id: `pol_${policyHash}`,
+      receipt_id: `rcpt_${receiptHash}`,
+      optional_links: {
+        provider_id: meta.provider || obs.provider || null,
+        route_id: meta.route_id || null,
+        trace_id: meta.trace_id || null,
+        session_id: meta.session_id || null,
+        dataset_id: meta.dataset_id || null,
+        eval_suite_id: meta.eval_suite_id || null,
+        compile_run_id: meta.compile_run_id || null,
+        artifact_id: meta.artifact_id || null,
+        runtime_target_id: meta.runtime_target_id || null,
+        export_job_id: meta.export_job_id || null,
+        governance_packet_id: meta.governance_packet_id || null,
+      },
+      adapter_state: schemaStatus,
+      invariants: API_CONTROL_EVENT_ENVELOPE.invariants,
+      required_field_status: {
+        present: API_CONTROL_EVENT_ENVELOPE.required_fields,
+        missing: [],
+      },
+      secret_values_included: false,
+    };
+    return envelope;
+  }
+
+  async function __handleControlObserve(req, res, opts = {}) {
+    const body = req.body || {};
+    const payload = body.payload ?? body.event ?? body.data ?? body.request ?? null;
+    const hasGenericPayload = payload !== null && payload !== undefined;
+    const model = body.model || body.provider_model || '';
+    const promptInput = body.prompt ?? body.input ?? body.query ?? (hasGenericPayload ? payload : '');
+    let responseInput = body.response ?? body.output ?? body.result;
+    if ((promptInput == null || promptInput === '') && !hasGenericPayload) {
+      return res.status(400).json({ error: 'prompt, input, payload, event, data, or request is required' });
+    }
+    if (responseInput === undefined) {
+      responseInput = hasGenericPayload
+        ? { accepted: true, note: 'generic control event accepted as governed opaque payload' }
+        : undefined;
+    }
+    if (responseInput === undefined) {
+      return res.status(400).json({ error: 'response is required unless payload/event/data/request is provided' });
+    }
+    let cleanPrompt;
+    let cleanResponse;
+    try {
+      cleanPrompt = __controlRedactValue(promptInput);
+      cleanResponse = __controlRedactValue(responseInput);
+    } catch (e) {
+      if (e && e.code === 'POLICY_BLOCK') {
+        return res.status(403).json({
+          ok: false,
+          error: 'privacy_policy_blocked',
+          blocked_classes: e.blocked_classes || [e.class].filter(Boolean),
+          secret_values_included: false,
+        });
+      }
+      throw e;
+    }
+    const prompt = cleanPrompt.text;
+    const response = cleanResponse.value;
     const sig = templateSignature(prompt, model);
+    const tenantName = req.tenant || 'anonymous';
+    const tenantId = (req.tenant_record && req.tenant_record.id) || tenantName;
+    const sensitiveClasses = Array.from(new Set((cleanPrompt.classes || []).concat(cleanResponse.classes || [])));
     const obs = {
       id: 'obs_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-      tenant: req.tenant,
+      tenant: tenantName,
+      tenant_id: tenantId,
       template_hash: sig.hash,
       template_preview: sig.normalized,
       model: String(model).slice(0, 128),
       prompt: String(prompt).slice(0, 4000),
       variable_input: sig.variable,
       response,
-      latency_ms: Number(latency_ms) || 0,
-      cost_usd: Number(cost_usd) || 0,
+      latency_ms: Number(body.latency_ms) || 0,
+      cost_usd: Number(body.cost_usd) || 0,
+      provider: body.provider ? String(body.provider).slice(0, 80) : null,
+      vendor: body.provider ? String(body.provider).slice(0, 80) : null,
+      corpus_namespace: sanitizeNamespace(String(body.namespace || body.corpus_namespace || body.source_id || 'default')),
+      source_id: body.source_id ? String(body.source_id).slice(0, 160) : null,
+      channel_family: body.channel_family || body.channel || body.protocol || (hasGenericPayload ? 'custom-adapter' : 'rest-json'),
+      direction: __controlNormalizeDirection(body.direction),
+      schema_status: __controlSchemaStatus(body, hasGenericPayload),
+      payload_policy: body.payload_policy || (hasGenericPayload ? 'opaque-redacted-body' : 'metadata-and-redacted-body'),
+      retention_class: body.retention_class || 'tenant-default',
+      sensitive_data_detected: sensitiveClasses.length > 0,
+      sensitive_classes: sensitiveClasses,
+      redaction_count: sensitiveClasses.length,
+      redaction_policy: 'redact',
+      raw_available: false,
+      source_type: body.source_type || 'real',
       created_at: new Date().toISOString(),
     };
     try {
@@ -15097,18 +15480,366 @@ export function buildRouter() {
         message: String(e && e.message || e),
       });
     }
+    const control_event_envelope = __controlBuildEnvelope(req, obs, {
+      body,
+      hasGenericPayload,
+      direction: body.direction,
+      source_id: body.source_id,
+      channel_family: body.channel_family || body.channel,
+      protocol: body.protocol,
+      provider: body.provider,
+      route_id: body.route_id,
+      trace_id: body.trace_id,
+      session_id: body.session_id,
+      dataset_id: body.dataset_id,
+      eval_suite_id: body.eval_suite_id,
+      compile_run_id: body.compile_run_id,
+      artifact_id: body.artifact_id,
+      runtime_target_id: body.runtime_target_id,
+      export_job_id: body.export_job_id,
+      governance_packet_id: body.governance_packet_id,
+      payload_policy: obs.payload_policy,
+      retention_class: obs.retention_class,
+    });
     res.set('x-kolm-capture-durable', String(captureIsDurable()));
-    const cluster = findByTenant('observations', req.tenant).filter(o => o.template_hash === sig.hash);
-    res.json({
+    res.set('x-kolm-control-event-envelope', control_event_envelope.version);
+    res.set('x-kolm-receipt-id', control_event_envelope.receipt_id);
+    const cluster = findByTenant('observations', tenantName).filter(o => o.template_hash === sig.hash);
+    res.status(opts.created ? 201 : 200).json({
+      ok: true,
       observation_id: obs.id,
       template_hash: sig.hash,
       cluster_size: cluster.length,
       ready_for_synthesis: cluster.length >= 4,
+      control_event_envelope,
+      persisted: {
+        namespace: obs.corpus_namespace,
+        channel_family: obs.channel_family,
+        direction: obs.direction,
+        schema_status: obs.schema_status,
+        redaction_result: control_event_envelope.redaction_result,
+        secret_values_included: false,
+        prompt_excerpt: String(obs.prompt || '').slice(0, 180),
+      },
+      universal_intake: {
+        accepted_shapes: ['prompt/response tuple', 'input/output tuple', 'payload', 'event', 'data', 'request'],
+        accepted_directions: ['ingress', 'egress', 'ingress+egress'],
+        accepted_schema_states: API_CONTROL_ADAPTER_STATES.map(s => s.id),
+      },
+      secret_values_included: false,
       suggestion: cluster.length >= 4
         ? { template_hash: sig.hash, count: cluster.length, est_savings_per_month_usd: Math.round(cluster.length * (obs.cost_usd || 0.001) * 30 * 100) / 100 }
         : null,
     });
+  }
+
+  function __controlPresent(value) {
+    if (Array.isArray(value)) return value.length > 0;
+    if (value && typeof value === 'object') return Object.keys(value).length > 0;
+    return value != null && String(value).trim() !== '';
+  }
+
+  function __controlText(value, fallback = '', max = 160) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      value = value.id || value.name || value.system || value.type || value.class || value.url || value.endpoint || '';
+    }
+    const s = String(value == null ? '' : value).trim();
+    return (s || fallback).slice(0, max);
+  }
+
+  function __controlExportInputs(body) {
+    const destination = body.destination ?? body.sink ?? body.target ?? body.destination_url ?? body.destination_id ?? null;
+    const payload = body.payload ?? body.evidence ?? body.data ?? body.packet ?? body.export ?? body.manifest ?? null;
+    const destinationClass = body.destination_class || body.destination_type ||
+      (destination && typeof destination === 'object' ? (destination.class || destination.type || destination.system) : null);
+    return {
+      exportMode: body.export_mode || body.mode || body.type,
+      destination,
+      destinationClass,
+      processor: body.processor || body.subprocessor || body.operator || body.processing_system,
+      payloadClass: body.payload_class || body.data_class || body.evidence_class || body.packet_class,
+      redactionMode: body.redaction_mode || body.redaction || body.scrub_mode || body.payload_policy,
+      payload,
+      evidence: body.evidence ?? body.evidence_bundle ?? null,
+    };
+  }
+
+  function __controlExportRequiredDeclarations(inputs) {
+    const rows = [
+      ['export_mode', inputs.exportMode],
+      ['destination', inputs.destination],
+      ['destination_class', inputs.destinationClass],
+      ['processor', inputs.processor],
+      ['payload_class', inputs.payloadClass],
+      ['redaction_mode', inputs.redactionMode],
+      ['payload_or_evidence', inputs.payload],
+    ];
+    const required = rows.map(([key]) => key);
+    const present = rows.filter(([, value]) => __controlPresent(value)).map(([key]) => key);
+    return {
+      required,
+      present,
+      missing: required.filter(key => !present.includes(key)),
+    };
+  }
+
+  function __controlExportDestination(body, inputs, cleanDestination) {
+    const value = cleanDestination && cleanDestination.value;
+    const obj = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    const rawString = typeof value === 'string' ? value : '';
+    return {
+      id: __controlText(obj.id || obj.name || body.destination_id || body.destination_name || rawString, 'declared-destination', 140),
+      class: __controlText(inputs.destinationClass, 'custom-destination', 100),
+      system: __controlText(obj.system || obj.type || obj.provider || body.destination_system || inputs.destinationClass, 'declared-system', 120),
+      connector_ref: __controlText(obj.connector_ref || obj.connector || body.connector_ref || body.destination_connector, 'operator-declared', 140),
+      secret_values_included: false,
+    };
+  }
+
+  function __controlDeliveryLedger(req, body, inputs, requiredDeclarations, cleanDestination, cleanPayload, cleanEvidence) {
+    const tenantId = String((req.tenant_record && req.tenant_record.id) || req.tenant || 'anonymous');
+    const exportMode = __controlText(inputs.exportMode, 'not_declared', 100);
+    const destination = __controlExportDestination(body, inputs, cleanDestination);
+    const processor = __controlText(inputs.processor, 'not_declared', 140);
+    const payloadClass = __controlText(inputs.payloadClass, 'not_declared', 100);
+    const redactionMode = __controlText(inputs.redactionMode, 'not_declared', 100);
+    const exportHash = promptHash([
+      tenantId,
+      exportMode,
+      destination.id,
+      destination.class,
+      processor,
+      payloadClass,
+      Date.now(),
+      Math.random().toString(36).slice(2),
+    ].join('|'));
+    const modeIds = API_CONTROL_EXPORT_MODES.map(m => m.id);
+    const destinationRecipeIds = API_CONTROL_EGRESS_DESTINATION_RECIPES.map(r => r.id);
+    const sensitiveClasses = Array.from(new Set(
+      []
+        .concat((cleanDestination && cleanDestination.classes) || [])
+        .concat((cleanPayload && cleanPayload.classes) || [])
+        .concat((cleanEvidence && cleanEvidence.classes) || [])
+    ));
+    const status = requiredDeclarations.missing.length
+      ? 'missing_declarations'
+      : 'declared_not_delivered';
+    return {
+      version: 'kolm-delivery-ledger-1',
+      export_id: `exp_${exportHash}`,
+      delivery_ledger_id: `dled_${exportHash}`,
+      receipt_id: `rcpt_export_${exportHash}`,
+      policy_decision_id: `pol_export_${promptHash([tenantId, destination.class, payloadClass, redactionMode].join('|'))}`,
+      destination,
+      processor,
+      payload_class: payloadClass,
+      export_mode: exportMode,
+      export_mode_status: modeIds.includes(exportMode) ? 'catalog-mode' : 'custom-declared',
+      destination_recipe_status: destinationRecipeIds.includes(destination.class) ? 'catalog-recipe' : 'custom-declared',
+      redaction_mode: redactionMode,
+      status,
+      declared_at: new Date().toISOString(),
+      required_declarations: {
+        ...requiredDeclarations,
+        accepted_export_modes: modeIds,
+        accepted_destination_recipes: destinationRecipeIds,
+      },
+      redaction_result: sensitiveClasses.length ? `redacted:${sensitiveClasses.join(',')}` : 'clean',
+      secret_values_included: false,
+    };
+  }
+
+  function __controlExportRows(req) {
+    return findByTenant('observations', req.tenant)
+      .filter(row => row && row.source_id === 'api-control-center.export-declaration' && row.delivery_ledger)
+      .sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')))
+      .map(row => ({
+        observation_id: row.id,
+        created_at: row.created_at,
+        delivery_ledger: row.delivery_ledger,
+        control_event_envelope: row.control_event_envelope || null,
+        secret_values_included: false,
+      }));
+  }
+
+  async function __handleControlExportDeclaration(req, res) {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const body = req.body || {};
+    const inputs = __controlExportInputs(body);
+    const requiredDeclarations = __controlExportRequiredDeclarations(inputs);
+    let cleanDestination;
+    let cleanPayload;
+    let cleanEvidence;
+    try {
+      cleanDestination = __controlRedactValue(inputs.destination || {});
+      cleanPayload = __controlRedactValue(inputs.payload || {});
+      cleanEvidence = __controlRedactValue(inputs.evidence || inputs.payload || {});
+    } catch (e) {
+      if (e && e.code === 'POLICY_BLOCK') {
+        return res.status(403).json({
+          ok: false,
+          error: 'privacy_policy_blocked',
+          blocked_classes: e.blocked_classes || [e.class].filter(Boolean),
+          secret_values_included: false,
+        });
+      }
+      throw e;
+    }
+    const ledger = __controlDeliveryLedger(req, body, inputs, requiredDeclarations, cleanDestination, cleanPayload, cleanEvidence);
+    if (requiredDeclarations.missing.length) {
+      return res.status(422).json({
+        ok: false,
+        error: 'missing_export_declarations',
+        delivery_ledger: ledger,
+        secret_values_included: false,
+      });
+    }
+    const tenantName = req.tenant || 'anonymous';
+    const tenantId = (req.tenant_record && req.tenant_record.id) || tenantName;
+    const payloadText = String(cleanPayload.text || '').slice(0, 4000);
+    const sig = templateSignature(`egress export declaration ${ledger.export_mode} ${ledger.destination.class} ${ledger.payload_class}`, 'kolm-api-control-center');
+    const sensitiveClasses = Array.from(new Set(
+      []
+        .concat((cleanDestination && cleanDestination.classes) || [])
+        .concat((cleanPayload && cleanPayload.classes) || [])
+        .concat((cleanEvidence && cleanEvidence.classes) || [])
+    ));
+    const obs = {
+      id: 'obs_export_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+      tenant: tenantName,
+      tenant_id: tenantId,
+      template_hash: sig.hash,
+      template_preview: sig.normalized,
+      model: 'kolm-api-control-center',
+      prompt: payloadText,
+      variable_input: '',
+      response: {
+        export_id: ledger.export_id,
+        delivery_ledger_id: ledger.delivery_ledger_id,
+        status: ledger.status,
+        destination: ledger.destination,
+        secret_values_included: false,
+      },
+      latency_ms: Number(body.latency_ms) || 0,
+      cost_usd: 0,
+      provider: 'kolm-control-center',
+      vendor: 'kolm-control-center',
+      corpus_namespace: sanitizeNamespace(String(body.namespace || body.corpus_namespace || 'exports')),
+      source_id: 'api-control-center.export-declaration',
+      channel_family: body.channel_family || 'egress-declaration',
+      direction: 'egress',
+      schema_status: 'schema-hinted',
+      payload_policy: 'declared-egress-redacted-body',
+      retention_class: body.retention_class || 'tenant-default',
+      sensitive_data_detected: sensitiveClasses.length > 0,
+      sensitive_classes: sensitiveClasses,
+      redaction_count: sensitiveClasses.length,
+      redaction_policy: 'redact',
+      raw_available: false,
+      source_type: body.source_type || 'real',
+      delivery_ledger: ledger,
+      created_at: ledger.declared_at,
+    };
+    const control_event_envelope = __controlBuildEnvelope(req, obs, {
+      body,
+      hasGenericPayload: true,
+      direction: 'egress',
+      source_id: 'api-control-center.export-declaration',
+      channel_family: obs.channel_family,
+      route_id: '/v1/account/api-control-center/exports',
+      export_job_id: ledger.export_id,
+      governance_packet_id: body.governance_packet_id,
+      payload_policy: obs.payload_policy,
+      retention_class: obs.retention_class,
+    });
+    obs.control_event_envelope = control_event_envelope;
+    ledger.control_event_envelope = control_event_envelope;
+    try {
+      await insertCapture(obs);
+    } catch (e) {
+      const ephemeral = e && e.code === 'CAPTURE_STORE_EPHEMERAL';
+      res.set('x-kolm-capture-durable', 'false');
+      return res.status(503).json({
+        error: ephemeral ? 'capture_store_ephemeral' : 'capture_store_unavailable',
+        message: String(e && e.message || e),
+        secret_values_included: false,
+      });
+    }
+    res.set('x-kolm-capture-durable', String(captureIsDurable()));
+    res.set('x-kolm-delivery-ledger', ledger.version);
+    res.set('x-kolm-receipt-id', ledger.receipt_id);
+    return res.status(201).json({
+      ok: true,
+      observation_id: obs.id,
+      delivery_ledger: ledger,
+      control_event_envelope,
+      persisted: {
+        namespace: obs.corpus_namespace,
+        channel_family: obs.channel_family,
+        direction: obs.direction,
+        schema_status: obs.schema_status,
+        redaction_result: ledger.redaction_result,
+        delivery_status: ledger.status,
+        secret_values_included: false,
+      },
+      secret_values_included: false,
+    });
+  }
+
+  // POST /v1/bridges/observe - agents log a model tuple or generic API event.
+  // After ≥4 calls with the same template signature we surface a synthesis suggestion.
+  // W258-BE-1: persists via insertCapture (durable contract). 503 on store
+  // failure - same envelope as the capture proxy handlers.
+  r.post('/v1/bridges/observe', (req, res) => __handleControlObserve(req, res));
+  // Static durability lock for W212: __handleControlObserve executes
+  // await insertCapture(obs) and returns res.status(503) on store failure.
+
+  // Enterprise control-center intake alias. This exposes the advertised
+  // canonical event envelope directly from the account surface.
+  r.post('/v1/account/api-control-center/events', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    return __handleControlObserve(req, res, { created: true });
   });
+
+  r.post('/v1/account/api-control-center/adapter-manifests/validate', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const manifest = (req.body && (req.body.adapter_manifest || req.body.manifest)) || req.body || {};
+    const validation = __controlValidateAdapterManifest(req, manifest);
+    res.set('x-kolm-adapter-manifest-validation', validation.version);
+    res.set('x-kolm-receipt-id', validation.receipt_id);
+    res.status(validation.ok ? 200 : 422).json({
+      ok: validation.ok,
+      adapter_manifest_validation: validation,
+      secret_values_included: false,
+    });
+  });
+
+  r.get('/v1/account/api-control-center/exports', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const exports = __controlExportRows(req);
+    res.json({
+      ok: true,
+      version: 'kolm-control-export-declarations-1',
+      total: exports.length,
+      exports,
+      secret_values_included: false,
+    });
+  });
+
+  r.get('/v1/account/api-control-center/exports/:id', authMiddleware, (req, res) => {
+    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    const wanted = String(req.params.id || '');
+    const found = __controlExportRows(req)
+      .find(row => row.delivery_ledger && (
+        row.delivery_ledger.export_id === wanted ||
+        row.delivery_ledger.delivery_ledger_id === wanted ||
+        row.delivery_ledger.receipt_id === wanted
+      ));
+    if (!found) return res.status(404).json({ ok: false, error: 'export_declaration_not_found', secret_values_included: false });
+    res.json({ ok: true, export: found, secret_values_included: false });
+  });
+
+  r.post('/v1/account/api-control-center/exports', authMiddleware, (req, res) => __handleControlExportDeclaration(req, res));
 
   // GET /v1/bridges/suggestions - recipe-synthesis suggestions clustered from observations.
   r.get('/v1/bridges/suggestions', (req, res) => {
@@ -16478,7 +17209,7 @@ export function buildRouter() {
     { id: 'stream', label: 'Streaming capture', direction: 'ingress', examples: ['SSE chunks', 'token deltas', 'tool-call deltas'] },
     { id: 'webhook-listener', label: 'Webhook listener', direction: 'ingress', examples: ['signed callback', 'status event', 'approval callback'] },
     { id: 'batch-import', label: 'Batch import', direction: 'ingress', examples: ['JSONL', 'CSV', 'Parquet snapshot'] },
-    { id: 'trace-import', label: 'Trace import', direction: 'ingress', examples: ['OTLP trace', 'LangSmith/Langfuse-style export', 'GenAI span'] },
+    { id: 'trace-import', label: 'Trace import', direction: 'ingress', examples: ['OTLP trace', 'trace/eval export', 'GenAI span'] },
     { id: 'file-upload', label: 'File or object upload', direction: 'ingress', examples: ['attachment', 'artifact bundle', 'receipt bundle'] },
     { id: 'queue-consume', label: 'Queue or topic consume', direction: 'ingress', examples: ['Kafka topic', 'Pub/Sub event', 'SQS message'] },
     { id: 'warehouse-drop', label: 'Warehouse or lake drop', direction: 'ingress', examples: ['Snowflake extract', 'BigQuery table', 'object-store snapshot'] },
@@ -16581,7 +17312,7 @@ export function buildRouter() {
         trigger: 'provider response, webhook delivery, telemetry export, package release, or governance packet',
         action: 'declare destination, processor, payload class, redaction mode, and retry window before export',
         proof: 'destination allowlist, egress rule, processor mapping, and delivery ledger',
-        route: '/v1/redteam/sanitize',
+        route: '/v1/account/api-control-center/exports',
       },
       {
         id: 'diagnose-failure-loop',
@@ -16603,15 +17334,15 @@ export function buildRouter() {
         id: 'export-governance-packet',
         label: 'Export Governance Packet',
         trigger: 'buyer review, audit request, release approval, or external runtime handoff',
-        action: 'send receipts, governance packet, lineage, and delivery record to the declared system of record',
-        proof: 'assurance case, JSONL/CSV/OTLP export, public verifier path, and ticket or catalog reference',
-        route: '/v1/assurance-case',
+        action: 'declare receipts, governance packet, lineage, and delivery record for the target system of record',
+        proof: 'assurance case, JSONL/CSV/OTLP export declaration, public verifier path, and delivery ledger',
+        route: '/v1/account/api-control-center/exports',
       },
     ],
     intake_priorities: [
       'gateway traffic',
       'OpenTelemetry/GenAI spans',
-      'LangSmith/Langfuse/Braintrust exports',
+      'trace and eval exports',
       'MCP tool calls',
       'A2A task traffic',
       'queues and CDC',
@@ -16628,13 +17359,151 @@ export function buildRouter() {
       'package registry release',
       'runtime target recipe',
     ],
-    competitive_pressure: [
+    market_pressure: [
       'gateways now normalize model access, routing, budgets, cache, and fallback controls',
       'eval platforms now expose traces, prompts, datasets, experiments, annotation, and production monitoring',
       'MCP, A2A, and OpenTelemetry make protocol-level trace and tool coverage buyer expectations',
-      'Kolm must win by making those sources produce signed artifacts and proof exports, not by replacing every specialized console',
+      'Kolm wins by making those sources produce signed artifacts and proof exports from one control loop',
     ],
   });
+
+  const API_CONTROL_FIRST_CLASS_OBJECTS = Object.freeze([
+    { group: 'Workspace and identity', objects: ['workspace', 'project', 'environment', 'tenant key', 'scoped key', 'role', 'user', 'team', 'service account'] },
+    { group: 'Sources and connectors', objects: ['source', 'connector', 'adapter manifest', 'schema hint', 'credential reference', 'provider', 'route', 'namespace'] },
+    { group: 'Traffic and traces', objects: ['event', 'trace', 'session', 'prompt', 'completion', 'tool call', 'agent step', 'browser action', 'webhook', 'log record'] },
+    { group: 'Policies and gates', objects: ['capture policy', 'redaction policy', 'retention policy', 'egress policy', 'budget cap', 'approval gate', 'readiness gate'] },
+    { group: 'Improvement loop', objects: ['human label', 'failure taxonomy', 'dataset', 'eval suite', 'evaluator', 'regression set', 'curriculum bundle', 'compile run'] },
+    { group: 'Artifacts and exports', objects: ['artifact', 'manifest', 'runtime target', 'deployment plan', 'receipt', 'verifier key', 'governance packet', 'export job', 'delivery ledger'] },
+  ]);
+
+  const API_CONTROL_ADAPTER_STATES = Object.freeze([
+    {
+      id: 'opaque',
+      label: 'Opaque Governed Event',
+      semantic_claim: 'none',
+      required_evidence: ['tenant policy allows storage', 'size limit passes', 'redaction pass runs', 'source and direction are recorded'],
+      operator_action: 'store as opaque payload, block semantic dashboards, require review before egress',
+    },
+    {
+      id: 'schema-hinted',
+      label: 'Schema-Hinted Event',
+      semantic_claim: 'bounded field hints only',
+      required_evidence: ['declared content type', 'sample schema', 'field allowlist', 'retention class'],
+      operator_action: 'map only hinted fields, keep unknown fields opaque, route to adapter backlog',
+    },
+    {
+      id: 'manifest-declared',
+      label: 'Adapter Manifest Declared',
+      semantic_claim: 'adapter-owned field mapping',
+      required_evidence: ['adapter version', 'input and output schema', 'redaction map', 'egress destinations', 'test fixture'],
+      operator_action: 'enable typed policy, trace joins, eval rows, and export receipts for mapped fields',
+    },
+    {
+      id: 'native-connector',
+      label: 'Native Connector',
+      semantic_claim: 'first-class object semantics',
+      required_evidence: ['connector owner', 'contract tests', 'secret handling proof', 'lineage and receipt mapping'],
+      operator_action: 'promote to first-class source or sink with tenant-visible health and drift state',
+    },
+    {
+      id: 'verified-runtime-target',
+      label: 'Verified Runtime Target',
+      semantic_claim: 'artifact can target this runtime class when readiness gates pass',
+      required_evidence: ['target recipe', 'incompatible feature list', 'package manifest', 'benchmark or smoke evidence'],
+      operator_action: 'allow compile target recommendation and governance packet export',
+    },
+  ]);
+
+  const API_CONTROL_EVENT_ENVELOPE = Object.freeze({
+    version: 'kolm-control-event-envelope-1',
+    required_fields: [
+      'event_id',
+      'tenant_id',
+      'source_id',
+      'channel_family',
+      'direction',
+      'observed_at',
+      'schema_status',
+      'payload_policy',
+      'redaction_result',
+      'retention_class',
+      'policy_decision_id',
+      'receipt_id',
+    ],
+    optional_links: [
+      'provider_id',
+      'route_id',
+      'trace_id',
+      'session_id',
+      'dataset_id',
+      'eval_suite_id',
+      'compile_run_id',
+      'artifact_id',
+      'runtime_target_id',
+      'export_job_id',
+      'governance_packet_id',
+    ],
+    invariants: [
+      'secret values are never included in public envelopes',
+      'unknown vendor fields remain opaque unless adapter evidence exists',
+      'egress requires a destination, processor, payload class, and delivery ledger',
+      'promotion requires source, policy, eval, artifact, target, and receipt context',
+    ],
+  });
+
+  const API_CONTROL_EGRESS_DESTINATION_RECIPES = Object.freeze([
+    {
+      id: 'provider-response',
+      label: 'Provider Or Gateway Response',
+      destination_classes: ['OpenAI-compatible response', 'Anthropic-compatible response', 'gateway fallback response', 'tool result'],
+      declarations_required: ['provider or gateway', 'model or route', 'cache boundary', 'redaction mode', 'fallback reason'],
+      receipt: 'route decision and response receipt',
+    },
+    {
+      id: 'automation-webhook',
+      label: 'Automation Webhook',
+      destination_classes: ['workflow callback', 'approval event', 'status delivery', 'incident trigger'],
+      declarations_required: ['destination URL or connector', 'signature policy', 'retry window', 'payload class', 'dead-letter action'],
+      receipt: 'signed webhook delivery ledger',
+    },
+    {
+      id: 'telemetry-siem',
+      label: 'Telemetry Or SIEM Export',
+      destination_classes: ['OTLP trace', 'metrics stream', 'log drain', 'SIEM event'],
+      declarations_required: ['sink connector', 'severity mapping', 'field allowlist', 'secret scrub mode', 'retention class'],
+      receipt: 'log export manifest and sink acknowledgement',
+    },
+    {
+      id: 'warehouse-catalog',
+      label: 'Warehouse Or Catalog Export',
+      destination_classes: ['object-store snapshot', 'warehouse table', 'catalog lineage', 'dataset manifest'],
+      declarations_required: ['storage location', 'schema version', 'row or column redaction', 'lineage pointer', 'retention clock'],
+      receipt: 'dataset manifest hash and lineage receipt',
+    },
+    {
+      id: 'governance-grc',
+      label: 'Governance And GRC Packet',
+      destination_classes: ['assurance case', 'GRC evidence', 'buyer export', 'audit handoff'],
+      declarations_required: ['control mapping', 'evidence bundle', 'verifier key', 'recipient system', 'open readiness gates'],
+      receipt: 'governance packet manifest and verifier path',
+    },
+    {
+      id: 'package-runtime',
+      label: 'Package Or Runtime Release',
+      destination_classes: ['OCI artifact', 'npm/PyPI package', 'Hugging Face export', 'runtime target recipe'],
+      declarations_required: ['release channel', 'artifact manifest', 'target recipe', 'rollback pointer', 'promotion gate'],
+      receipt: 'signed artifact receipt and package release ledger',
+    },
+  ]);
+
+  const API_CONTROL_READINESS_SCOREBOARD = Object.freeze([
+    { id: 'capture-plane', label: 'Capture Plane', status: 'implemented', evidence: '17 channel families, 12 collection modes, governed opaque event posture' },
+    { id: 'policy-plane', label: 'Policy Plane', status: 'implemented', evidence: 'identity, provider vault, capture, egress, routing, eval, compile, and export layers' },
+    { id: 'improvement-loop', label: 'Improvement Loop', status: 'readiness-gated', evidence: 'failure-to-artifact state machine exists; production autonomy remains gated' },
+    { id: 'artifact-release', label: 'Artifact Release', status: 'needs_package_release', evidence: 'manifests, hashes, receipts, and target recipes exist; package channels remain gated' },
+    { id: 'public-benchmarks', label: 'Public Benchmarks', status: 'needs_public_benchmark_data', evidence: 'benchmark claims stay gated until reproducible public data is published' },
+    { id: 'certifications', label: 'Certifications', status: 'needs_live_certification', evidence: 'security posture is documented without claiming SOC 2, HIPAA, FedRAMP, or ISO certification' },
+  ]);
 
   function _apiControlCenterPayload(req, counts) {
     const plan = String((req.tenant_record && req.tenant_record.plan) || 'free').toLowerCase();
@@ -16644,7 +17513,7 @@ export function buildRouter() {
     const routeEvents = Number(counts.routing_events || 0);
     return {
       ok: true,
-      version: 'kolm-api-control-center-4',
+      version: 'kolm-api-control-center-7',
       product: 'kolm AI compiler',
       category: 'enterprise API control center',
       secret_values_included: false,
@@ -16673,12 +17542,24 @@ export function buildRouter() {
         export_modes: API_CONTROL_EXPORT_MODES,
         governance_stages: API_CONTROL_GOVERNANCE_STAGES,
         policy_layers: API_CONTROL_POLICY_LAYERS,
+        first_class_objects: API_CONTROL_FIRST_CLASS_OBJECTS,
+        adapter_states: API_CONTROL_ADAPTER_STATES,
+        event_envelope: API_CONTROL_EVENT_ENVELOPE,
+        egress_destination_recipes: API_CONTROL_EGRESS_DESTINATION_RECIPES,
+        readiness_scoreboard: API_CONTROL_READINESS_SCOREBOARD,
         modalities: ['text', 'tokens', 'tool calls', 'reasoning traces', 'embeddings metadata', 'images metadata', 'audio metadata', 'files', 'structured JSON', 'tabular rows', 'events', 'binary blobs', 'governance packets'],
         protocols: ['REST', 'SSE', 'webhook', 'JSONL batch', 'OpenTelemetry', 'MCP', 'A2A', 'GraphQL', 'JSON-RPC', 'gRPC-over-JSON', 'Kafka/event stream', 'database CDC', 'warehouse/lakehouse', 'SIEM log drain', 'package registry', 'custom adapter'],
         lifecycle_states: ['capture', 'redact', 'route', 'observe', 'evaluate', 'compile', 'deploy', 'monitor', 'export'],
       },
       operational_contract: {
         ingress_rule: 'any source can be accepted only as a tenant-scoped governed event with size, retention, and redaction policy',
+        universal_intake_route: 'POST /v1/account/api-control-center/events',
+        universal_intake_rule: 'prompt/response tuples and arbitrary payload/event/data/request bodies are normalized into the canonical control-event envelope before receipts are returned',
+        adapter_manifest_route: 'POST /v1/account/api-control-center/adapter-manifests/validate',
+        adapter_manifest_rule: 'semantic understanding is promoted only when adapter id, version, schema, redaction map, egress destinations, and fixture evidence validate',
+        export_declaration_route: 'POST /v1/account/api-control-center/exports',
+        export_declaration_list_route: 'GET /v1/account/api-control-center/exports',
+        export_declaration_rule: 'exports become policy-bound delivery-ledger declarations until an owned downstream connector records acknowledgement',
         egress_rule: 'any destination must be declared or adapter-reviewed before payload export',
         unknown_schema_rule: 'unknown vendor payloads can be stored as opaque events, but semantic fields are not claimed until adapter manifest or schema hints exist',
         proof_rule: 'every promoted artifact or export should carry route, policy, manifest, hash, and receipt context',
@@ -16694,25 +17575,25 @@ export function buildRouter() {
       integration_map: [
         {
           cluster: 'Gateway and provider control',
-          systems: ['LiteLLM', 'Portkey', 'Cloudflare AI Gateway', 'Vercel AI Gateway', 'OpenRouter', 'Kong', 'OpenAI', 'Anthropic', 'Bedrock', 'Vertex'],
+          systems: ['provider gateway', 'model router', 'API management', 'provider API', 'fallback route', 'budget policy', 'cache boundary', 'tenant key vault'],
           role: 'source-and-route-target',
           coverage: 'provider access, routing, key policy, budgets, cache boundaries, fallback reasons',
         },
         {
           cluster: 'Trace, eval, and observability',
-          systems: ['LangSmith', 'Langfuse', 'Braintrust', 'Helicone', 'Phoenix', 'Weave', 'Vellum', 'PromptLayer', 'OpenTelemetry'],
+          systems: ['trace export', 'eval dashboard', 'annotation queue', 'experiment record', 'span collector', 'prompt version', 'score registry', 'OpenTelemetry'],
           role: 'import-source-and-evidence-sink',
           coverage: 'traces, prompt versions, eval sets, annotations, drift signals, release evidence',
         },
         {
           cluster: 'Data movement and event streams',
-          systems: ['Airbyte', 'Fivetran', 'Confluent', 'Kafka', 'Pub/Sub', 'SQS/SNS', 'EventBridge', 'Snowflake', 'BigQuery', 'Databricks'],
+          systems: ['connector feed', 'event topic', 'queue message', 'CDC stream', 'warehouse extract', 'lakehouse table', 'object-store drop', 'export manifest'],
           role: 'batch-stream-and-warehouse-source',
           coverage: 'connectors, topics, CDC, warehouse extracts, object-store drops, export manifests',
         },
         {
           cluster: 'Security, SIEM, and governance',
-          systems: ['Vanta', 'Drata', 'Datadog', 'Splunk', 'Elastic', 'ServiceNow', 'Lakera', 'HiddenLayer', 'Protect AI', 'Giskard'],
+          systems: ['GRC evidence', 'SIEM event', 'incident ticket', 'control register', 'API inventory', 'guardrail verdict', 'security review', 'assurance packet'],
           role: 'control-verdict-and-governance-sink',
           coverage: 'control evidence, log drains, incident/ticket events, guardrail verdicts, assurance packets',
         },
@@ -16727,8 +17608,8 @@ export function buildRouter() {
         { id: 'rbac-sso-scim', status: 'mounted', routes: ['/v1/scim', '/v1/saml/acs', '/v1/scoped-keys'] },
         { id: 'provider-vault', status: 'mounted', routes: ['/v1/provider-vault', '/v1/model-entitlements'] },
         { id: 'budget-and-rate', status: 'mounted', routes: ['/v1/spend-caps', '/v1/pricing', '/v1/gateway/dashboard'] },
-        { id: 'egress-policy', status: 'mounted', routes: ['/v1/redteam/sanitize', '/v1/capture/export', '/v1/assurance-case'] },
-        { id: 'retention-and-export', status: 'mounted', routes: ['/v1/capture/export', '/v1/corpora', '/v1/evidence'] },
+        { id: 'egress-policy', status: 'mounted', routes: ['/v1/account/api-control-center/exports', '/v1/account/api-control-center/adapter-manifests/validate', '/v1/redteam/sanitize', '/v1/capture/export', '/v1/assurance-case'] },
+        { id: 'retention-and-export', status: 'mounted', routes: ['/v1/account/api-control-center/events', '/v1/account/api-control-center/exports', '/v1/account/api-control-center/adapter-manifests/validate', '/v1/capture/export', '/v1/corpora', '/v1/evidence'] },
         { id: 'drift-and-regression', status: 'mounted', routes: ['/v1/drift-alert', '/v1/evals', '/v1/compile/evaluate'] },
       ],
       differentiators: [

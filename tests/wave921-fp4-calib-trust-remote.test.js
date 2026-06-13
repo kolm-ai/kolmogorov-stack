@@ -151,6 +151,11 @@ test('NEXT3 #6 — full python test suite (math + safetensors driver) passes', (
 });
 
 test('NEXT3 #7 — quantize.py --help advertises both new flags', () => {
+  const probe = runPy(['--version'], { timeout: 10_000 });
+  if (probe.status !== 0 && probe.error && probe.error.code === 'ENOENT') {
+    console.error(`[wave921-fp4] ${PY} unavailable; skipping quantize.py --help probe`);
+    return;
+  }
   const r = runPy([path.join(SCRIPTS, 'quantize.py'), '--help']);
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /--trust-remote-code/);

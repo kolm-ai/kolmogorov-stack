@@ -174,6 +174,15 @@ async function main() {
   try {
     fs.mkdirSync(env.KOLM_DATA_DIR, { recursive: true });
     fs.mkdirSync(env.KOLM_ARTIFACT_DIR, { recursive: true });
+    const sdkBuild = spawnSync(process.execPath, [path.join('scripts', 'build-sdk-version.js')], {
+      cwd: ROOT,
+      env,
+      encoding: 'utf8',
+      windowsHide: true,
+    });
+    if (sdkBuild.status !== 0) {
+      throw new Error(`failed to stamp SDK assets before local smoke: ${sdkBuild.stderr || sdkBuild.stdout || `exit ${sdkBuild.status}`}`);
+    }
     const tenant = await provisionTenant(env);
     if (!tenant || !tenant.api_key) throw new Error('failed to provision local smoke tenant');
 

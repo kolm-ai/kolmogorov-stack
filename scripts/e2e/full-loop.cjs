@@ -212,7 +212,10 @@ const SCRIPT_START = Date.now();
           // Rule_class artifacts do not have weights to quantize; the export
           // verb may decline gracefully or emit a passport-only stub.
           const combined = (r.stdout || '') + (r.stderr || '');
-          if (/rule.?class|no weights|not[ -]applicable|not supported|stub|unknown.{0,20}backend|skip/i.test(combined)) {
+          if (/failed to spawn python|spawnSync python ENOENT|set KOLM_PY/i.test(combined)) {
+            lib.stepSkip(s, 'python unavailable for GGUF export', 'set KOLM_PY to your python interpreter');
+            ggufPath = null;
+          } else if (/rule.?class|no weights|not[ -]applicable|not supported|stub|unknown.{0,20}backend|skip/i.test(combined)) {
             lib.stepSkip(s, 'rule_class artifact has no weights to quantize', 'use a weight-bearing artifact for full GGUF export');
             ggufPath = null;
           } else {

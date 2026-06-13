@@ -451,6 +451,14 @@ function renderRouteSection(route) {
   const anchorId = slugForRoute(route.method, route.path);
   const shortDesc = shortDescriptionFor(route);
   const fullDesc = fullDescriptionFor(route);
+  const searchText = [
+    route.method,
+    route.path,
+    route.source,
+    route.stub ? 'source-indexed' : 'reference-ready',
+    shortDesc,
+    fullDesc,
+  ].filter(Boolean).join(' ');
   const stubBadge = route.stub
       ? ' <span class="route-stub" title="Wired route indexed directly from source.">source-indexed</span>'
     : ' <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span>';
@@ -473,7 +481,11 @@ function renderRouteSection(route) {
         '</p></details>'
       : '';
   return [
-    '<section class="api-route" id="' + anchorId + '">',
+    '<section class="api-route" id="' + anchorId + '" data-api-route data-route-status="' +
+      (route.stub ? 'source-indexed' : 'reference-ready') +
+      '" data-route-search="' +
+      escapeHtml(searchText.toLowerCase()) +
+      '">',
     '  <h3><span class="m m-' +
       route.method.toLowerCase() +
       '">' +
@@ -499,8 +511,9 @@ function renderGroup(key, routes) {
   const groupId = 'group-' + key.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
   const intro = renderGroupIntro(key, routes);
   const routeBlocks = routes.map(renderRouteSection).join('\n\n');
+  const groupSearch = [label, key, routes.map((r) => r.path).join(' ')].join(' ').toLowerCase();
   return [
-    '<section class="api-group" id="' + groupId + '">',
+    '<section class="api-group" id="' + groupId + '" data-api-group data-group-search="' + escapeHtml(groupSearch) + '">',
     '<h2>' + escapeHtml(label) + ' <span class="group-count">(' + routes.length + ')</span></h2>',
     intro,
     routeBlocks,
@@ -536,13 +549,16 @@ function canonicalNavBlockForApi() {
   } catch (_) {} // deliberate: cleanup
   return [
     begin,
-    '<nav class="site-nav" aria-label="Primary">',
-    '<a href="/compiler-product">Product</a>',
-    '<a href="/platform">Platform</a>',
-    '<a href="/docs">Docs</a>',
+    '<nav class="nav__links" id="navLinks" aria-label="Primary">',
+    '<a href="/#pipeline">Solutions</a>',
+    '<a href="/docs" aria-current="page">Developers</a>',
     '<a href="/pricing">Pricing</a>',
-    '<a href="https://audit.kolm.ai">Audit</a>',
     '</nav>',
+    '<div class="nav__actions">',
+    '<a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>',
+    '<a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>',
+    '<a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get API key -></a>',
+    '</div>',
     end,
   ].join('\n');
 }
@@ -578,8 +594,8 @@ function renderPage(grouped, totalCount, unparseable) {
     .map((k) => renderGroup(k, grouped.get(k)))
     .join('\n\n');
   const navBlock = canonicalNavBlockForApi();
-  const title = 'API reference · kolm.ai';
-  const titleEntity = 'API reference &middot; kolm.ai';
+  const title = 'API reference - kolm.ai';
+  const titleEntity = 'API reference - kolm.ai';
   const description =
     'Auto-generated REST API reference for kolm.ai. ' +
     totalCount +
@@ -616,27 +632,26 @@ function renderPage(grouped, totalCount, unparseable) {
       : '';
 
   return `<!DOCTYPE html>
-<html lang="en" style="background:#08090c;color-scheme:dark">
+<html lang="en" style="background:#e4ece7;color-scheme:light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){try{var t=localStorage.getItem('kolm-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');document.documentElement.style.background='#f7f4ec';document.documentElement.style.colorScheme='light';}}catch(e){}})();</script>
-<style>html,body{background:#08090c;color:#faf2e1}html{color-scheme:dark}</style>
+<style>html,body{background:#e4ece7;color:#07100d}html{color-scheme:light}</style>
 <title>${title}</title>
 <meta name="description" content="${escapeHtml(description)}">
-<meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f7f4ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#E4ECE7">
 <meta property="og:title" content="${titleEntity}">
 <meta property="og:description" content="${escapeHtml(description)}">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://kolm.ai/docs/api">
-<meta property="og:image" content="https://kolm.ai/og/docs-api.svg">
+<meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${titleEntity}">
 <meta name="twitter:description" content="${escapeHtml(description)}">
-<meta name="twitter:image" content="https://kolm.ai/og/docs-api.svg">
+<meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/api">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/kolm-2026.css">
 <link rel="stylesheet" href="/kolm-main.css">
 <script type="application/ld+json">${jsonLd}</script>
 <script type="application/ld+json">${breadcrumbLd}</script>
@@ -687,6 +702,51 @@ li{margin:4px 0}
 .route-live{display:inline-block;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase}
 .partition-toolbar{display:flex;gap:14px;align-items:center;margin:10px 0 22px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)}
 .partition-toolbar label{min-height:44px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.api-hero{display:grid;grid-template-columns:minmax(0,.92fr) minmax(360px,.58fr);gap:clamp(28px,5vw,76px);align-items:start;margin:0 0 28px}
+.api-hero__copy{min-width:0}
+.api-cockpit{min-width:0;border:1px solid rgba(236,246,240,.14);border-radius:8px;background:#101619;color:#eaf2ec;box-shadow:0 34px 88px rgba(16,19,18,.2);overflow:hidden}
+.api-cockpit__bar{min-height:46px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:0 16px;border-bottom:1px solid rgba(236,246,240,.11);font:12px/1.25 var(--mono);color:#aeb8b2}
+.api-cockpit__bar b{color:#f2f6f1}
+.api-cockpit__bar span:last-child{color:#75d19f;text-align:right}
+.api-cockpit__body{display:grid;gap:12px;padding:16px}
+.api-cockpit__metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.api-cockpit__metric{min-width:0;min-height:68px;padding:11px;border:1px solid rgba(236,246,240,.11);border-radius:6px;background:rgba(7,11,12,.52)}
+.api-cockpit__metric b{display:block;color:#f2f6f1;font:700 22px/1 var(--mono)}
+.api-cockpit__metric span{display:block;margin-top:6px;color:#aeb8b2;font-size:12px;line-height:1.35}
+.api-command{display:grid;gap:8px;padding:12px;border:1px solid rgba(236,246,240,.11);border-radius:6px;background:rgba(7,11,12,.58)}
+.api-command label,.api-cockpit__toggles label{font:700 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#c7d0ca}
+.api-command__row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.api-command input{min-width:0;min-height:44px;width:100%;border:1px solid rgba(236,246,240,.16);border-radius:6px;background:#070b0c;color:#f2f6f1;padding:0 12px;font:13px/1.35 var(--mono)}
+.api-command input::placeholder{color:#728078}
+.api-command input:focus-visible,.api-command__clear:focus-visible,.api-cockpit__toggles input:focus-visible{outline:2px solid #75d19f;outline-offset:2px}
+.api-command__clear{min-height:44px;border:1px solid rgba(236,246,240,.16);border-radius:6px;background:rgba(255,255,255,.05);color:#f2f6f1;padding:0 12px;font:700 12px/1 var(--mono);cursor:pointer}
+.api-command__clear:hover{background:rgba(255,255,255,.09)}
+.api-command__hint,.api-command__status{margin:0;color:#aeb8b2;font:12px/1.5 var(--mono)}
+.api-command__status{color:#75d19f}
+.api-cockpit__toggles{display:grid;gap:10px;padding:12px;border:1px solid rgba(236,246,240,.11);border-radius:6px;background:rgba(7,11,12,.44)}
+.api-cockpit__toggles label{min-height:44px;display:flex;align-items:center;gap:9px;cursor:pointer}
+.api-cockpit__toggles input{width:18px;height:18px;accent-color:#75d19f}
+.api-proof-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:6px 0 28px}
+.api-proof-card{min-width:0;min-height:148px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);color:inherit;text-decoration:none}
+.api-proof-card:hover{border-color:rgba(236,231,220,.22);background:rgba(255,255,255,.035)}
+.api-proof-card b{display:block;color:var(--ink);font-size:13px;line-height:1.35}
+.api-proof-card span{display:block;color:var(--ink-mute);font-size:12.5px;line-height:1.45}
+.api-proof-card code{align-self:flex-start;font-size:11.5px}
+.api-proof-card--green{box-shadow:inset 3px 0 0 #22c55e}
+.api-proof-card--blue{box-shadow:inset 3px 0 0 #60a5fa}
+.api-proof-card--amber{box-shadow:inset 3px 0 0 #f59e0b}
+.api-proof-card--rose{box-shadow:inset 3px 0 0 #fb7185}
+.api-bridge{margin:-4px 0 18px;font-size:14px;color:var(--ink-faint,#737c73)}
+.api-bridge a{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line)}
+.api-jump-links a{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line)}
+.api-runbook-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0 28px}
+.api-runbook-step{min-width:0;min-height:176px;padding:14px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.024)}
+.api-runbook-step span{display:block;color:var(--ink-faint);font-family:var(--mono);font-size:11px;margin-bottom:8px}
+.api-runbook-step strong{display:block;color:var(--ink);font-size:13px;line-height:1.35;margin-bottom:8px}
+.api-runbook-step p{font-size:12.5px;line-height:1.5;margin:9px 0 0;color:var(--ink-mute)}
+.api-runbook-step code{font-size:11px}
+@media(max-width:980px){.api-proof-board{grid-template-columns:repeat(2,minmax(0,1fr))}.api-runbook-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.api-proof-board,.api-runbook-grid{grid-template-columns:1fr}.api-proof-card,.api-runbook-step{min-height:auto}}
 .surface-media-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-height:132px;margin:22px 0 30px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
 .surface-media-panel div{min-width:0;padding:12px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.026)}
 .surface-media-panel b{display:block;color:var(--ink);font-family:var(--mono);font-size:11px;line-height:1.35}
@@ -694,34 +754,106 @@ li{margin:4px 0}
 @media(max-width:820px){.surface-media-panel{grid-template-columns:1fr}}
 body[data-api-filter="live"] .api-route:has(.route-stub){display:none}
 body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
+.api-route[hidden],.api-group[hidden]{display:none!important}
 .group-count,.toc-count{color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;font-weight:400;margin-left:6px}
 .toc-grid{column-count:3;column-gap:24px;list-style:none;padding:0;margin:18px 0 32px;font-size:13.5px;font-family:var(--mono)}
 @media(max-width:820px){.toc-grid{column-count:1}}
 .toc-grid li{margin:2px 0;break-inside:avoid}
 .toc-grid a{color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line)}
 .group-intro{margin:6px 0 14px;font-size:13.5px}
-.group-intro summary,.route-detail summary{min-height:38px;display:flex;align-items:center;cursor:pointer;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
+.group-intro summary,.route-detail summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
 .totals{font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);margin:0 0 24px}
 .legacy{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);max-width:780px;line-height:1.65}
 .legacy code{font-size:11.5px}
 footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
 footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
 @media(max-width:640px){header.site-header .wrap{grid-template-columns:1fr;gap:8px}header.site-header nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:stretch}header.site-header nav a{border:1px solid var(--line);background:rgba(255,255,255,.018)}.wrap{padding:0 20px}main{padding:38px 0 80px}h1{font-size:38px}.lede{font-size:17px}}
+:root{--ink:#07100d;--ink-mute:#26342e;--ink-faint:#5b6c62;--line:rgba(7,16,13,.14);--line-2:rgba(7,16,13,.24);--bg:#e4ece7;--bg-elev:#f3faf5;--paper-sink:#d8e5de;--accent:#087a52;--accent-soft:rgba(117,255,157,.1);--mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+body.api-reference-page{background:radial-gradient(920px 420px at 18% 12%,rgba(247,255,250,.78),transparent 74%),radial-gradient(760px 330px at 82% 0%,rgba(117,255,157,.13),transparent 72%),radial-gradient(700px 300px at 100% 25%,rgba(111,166,232,.07),transparent 72%),linear-gradient(rgba(7,16,13,.036) 1px,transparent 1px),linear-gradient(90deg,rgba(7,16,13,.03) 1px,transparent 1px),var(--bg);background-size:auto,auto,auto,72px 72px,72px 72px,auto;color:var(--ink);font-family:"Switzer",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.api-reference-page .wrap{max-width:1160px}
+.api-reference-page header.site-header{position:sticky;top:0;z-index:50;padding:0;background:rgba(216,229,222,.86);border-bottom:1px solid rgba(7,16,13,.1);backdrop-filter:saturate(140%) blur(12px);-webkit-backdrop-filter:saturate(140%) blur(12px);box-shadow:0 1px 0 rgba(247,255,250,.72)}
+.api-reference-page header.site-header .wrap{min-height:62px;display:flex;gap:24px;align-items:center}
+.api-reference-page header.site-header .logo{gap:9px;color:var(--ink);font-family:"Cabinet Grotesk",var(--display),sans-serif;font-size:18.5px;font-weight:640}
+.api-reference-page header.site-header .logo::before{content:"";width:18px;height:18px;display:inline-block;background:linear-gradient(90deg,var(--accent) 0 22%,transparent 22% 38%,var(--accent) 38% 60%,transparent 60% 76%,var(--accent) 76% 100%);clip-path:polygon(0 22%,22% 22%,22% 86%,0 86%,0 22%,38% 12%,60% 12%,60% 78%,38% 78%,38% 12%,76% 32%,100% 32%,100% 68%,76% 68%,76% 32%)}
+.api-reference-page header.site-header nav{margin-left:auto;display:flex;gap:22px;font:500 14px/1 "Switzer",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.api-reference-page header.site-header nav a{min-width:44px;min-height:44px;padding:0;color:var(--ink-mute);border:0;border-radius:0;background:transparent}
+.api-reference-page header.site-header nav a:hover{color:var(--ink);background:transparent;text-decoration:underline;text-underline-offset:10px;text-decoration-thickness:1px}
+.api-reference-page main{padding:clamp(68px,9vw,108px) 0 96px}
+.api-reference-page .crumbs{display:inline-flex;gap:8px;align-items:center;padding:7px 12px;border:1px solid rgba(7,16,13,.18);border-radius:999px;background:rgba(247,255,250,.58);box-shadow:inset 0 1px 0 rgba(255,255,255,.74),0 10px 28px rgba(7,16,13,.055);color:var(--ink-mute);letter-spacing:.13em}
+.api-reference-page .crumbs::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--accent)}
+.api-reference-page .crumbs a{border:0}
+.api-reference-page h1{max-width:760px;margin-top:28px;color:var(--ink);font-family:"Cabinet Grotesk",var(--display),sans-serif;font-size:clamp(58px,7vw,84px);font-weight:640;line-height:.98;text-wrap:balance}
+.api-reference-page .lede{max-width:780px;color:var(--ink-mute);font-size:18px;line-height:1.58}
+.api-reference-page .api-cockpit{margin-top:28px}
+.api-reference-page .api-cockpit code{background:rgba(255,255,255,.06);border-color:rgba(236,246,240,.14);color:#75d19f}
+.api-reference-page .surface-media-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-height:164px;margin:28px 0 22px;padding:14px;border:1px solid rgba(236,246,240,.14);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.014)),#101619;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 28px 72px rgba(16,19,18,.18);color:#f2f6f1}
+.api-reference-page .surface-media-panel div{border-color:rgba(236,246,240,.12);background:rgba(8,12,13,.66)}
+.api-reference-page .surface-media-panel b{color:#f2f6f1}
+.api-reference-page .surface-media-panel span{color:#b9c5be}
+.api-reference-page .api-proof-board{gap:14px;margin:24px 0 28px}
+.api-reference-page .api-proof-card,.api-reference-page .api-runbook-step,.api-reference-page .api-route{background:radial-gradient(300px 180px at 100% 0%,rgba(117,255,157,.07),transparent 72%),linear-gradient(180deg,rgba(247,255,250,.68),rgba(231,243,236,.42)),rgba(247,255,250,.56);border-color:var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 14px 42px rgba(7,16,13,.05)}
+.api-reference-page .api-proof-card:hover{border-color:var(--line-2);background:rgba(247,255,250,.84)}
+.api-reference-page .api-proof-card b,.api-reference-page .api-runbook-step strong{font-family:"Cabinet Grotesk",var(--display),sans-serif;color:var(--ink);font-size:17px;font-weight:640}
+.api-reference-page .api-proof-card span,.api-reference-page .api-runbook-step p,.api-reference-page .route-desc,.api-reference-page .route-detail p{color:var(--ink-mute)}
+.api-reference-page code{background:rgba(247,255,250,.58);border-color:var(--line);color:var(--ink)}
+.api-reference-page pre{background:#101619;color:#dce7df;border-color:rgba(236,246,240,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.api-reference-page pre code{background:none;border:0;color:inherit}
+.api-reference-page .route-live{background:rgba(10,123,83,.1);color:var(--accent)}
+.api-reference-page .route-stub{background:rgba(16,19,18,.05);color:var(--ink-faint)}
+.api-reference-page .m{color:#06120b}
+.api-reference-page .m-get{background:#74c69d}.api-reference-page .m-post{background:#90bde8}.api-reference-page .m-put{background:#dcbf73}.api-reference-page .m-patch{background:#c9b0e7}.api-reference-page .m-delete{background:#e6a19d}
+.api-reference-page .api-group{border-top-color:rgba(7,16,13,.12)}
+.api-reference-page .toc-grid a,.api-reference-page .api-bridge a,.api-reference-page .api-jump-links a{color:var(--ink)}
+.api-reference-page footer{background:rgba(216,229,222,.74);border-top-color:rgba(7,16,13,.12)}
+@media(max-width:980px){.api-hero{grid-template-columns:1fr}.api-reference-page .api-cockpit{margin-top:0}}
+@media(max-width:820px){.api-reference-page .surface-media-panel{grid-template-columns:1fr 1fr}.api-reference-page header.site-header nav{gap:12px}}
+@media(max-width:640px){.api-reference-page header.site-header .wrap{display:flex;flex-wrap:wrap;gap:4px 14px;padding-block:8px}.api-reference-page header.site-header .logo{min-height:38px}.api-reference-page header.site-header nav{width:100%;margin-left:0;display:flex;gap:18px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}.api-reference-page header.site-header nav::-webkit-scrollbar{display:none}.api-reference-page header.site-header nav a{flex:0 0 auto;min-height:44px;border:0;border-radius:0;background:transparent}.api-reference-page main{padding:52px 0 80px}.api-reference-page h1{font-size:clamp(44px,12vw,58px)}.api-cockpit__metrics,.api-command__row{grid-template-columns:1fr}.api-reference-page .surface-media-panel{grid-template-columns:1fr}.api-reference-page .api-proof-board,.api-reference-page .api-runbook-grid{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
+<body class="compiler-site compiler-site--paper api-reference-page" data-design-reference="image-2">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header"><div class="wrap">
-  <a class="logo" href="/">kolm.ai</a>
+<header class="nav"><div class="wrap nav__in">
+  <a class="nav__brand" href="/" aria-label="kolm home"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg><span>kolm</span></a>
 ${navBlock}
+  <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
 </div></header>
 <script defer src="/kolm-main.js"></script>
 
 <main id="main" tabindex="-1"><div class="wrap">
 
-<div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / api</div>
-<h1>API reference</h1>
-<p class="lede">The kolm.ai REST surface. ${totalCount} wired routes across ${groupKeys.length} groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
+<section class="api-hero" aria-labelledby="api-title">
+  <div class="api-hero__copy">
+    <div class="crumbs"><a href="/">kolm.ai</a> / <a href="/docs">docs</a> / api</div>
+    <h1 id="api-title">API operating reference</h1>
+    <p class="lede">The kolm.ai REST surface. ${totalCount} wired routes across ${groupKeys.length} groups, auto-extracted from route source files and re-rendered on every wave. Every endpoint is JSON in, JSON out, bearer-auth on protected routes, and rate-limited per tenant.</p>
+  </div>
+  <aside class="api-cockpit" aria-label="API reference command center">
+    <div class="api-cockpit__bar">
+      <span><b>API command center</b> / source indexed</span>
+      <span>no hand-written drift</span>
+    </div>
+    <div class="api-cockpit__body">
+      <div class="api-cockpit__metrics" aria-label="Generated route counts">
+        <div class="api-cockpit__metric"><b>${totalCount}</b><span>wired routes from source</span></div>
+        <div class="api-cockpit__metric"><b>${groupKeys.length}</b><span>route groups</span></div>
+        <div class="api-cockpit__metric"><b>${liveCount}</b><span>reference-ready routes</span></div>
+        <div class="api-cockpit__metric"><b>${previewCount}</b><span>source-indexed routes</span></div>
+      </div>
+      <form class="api-command" role="search" data-api-search-form>
+        <label for="apiRouteSearch">Search Route Surface</label>
+        <div class="api-command__row">
+          <input id="apiRouteSearch" name="api_route_search" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="/v1/compile, evidence, device&hellip;" data-api-search>
+          <button class="api-command__clear" type="button" data-api-search-clear>Clear</button>
+        </div>
+        <p class="api-command__hint">Try <code>POST</code>, <code>capture</code>, <code>readiness</code>, <code>/v1/route</code>, or <code>warehouse</code>.</p>
+        <p class="api-command__status" data-api-search-status aria-live="polite">${totalCount} routes visible.</p>
+      </form>
+      <div class="api-cockpit__toggles">
+        <label><input type="checkbox" id="hide-preview" aria-label="Show reference-ready routes only" data-api-live-only> Show Reference-Ready Routes Only</label>
+      </div>
+    </div>
+  </aside>
+</section>
 <div class="kolm-surface-media surface-media-panel" aria-label="API reference surface map">
   <div><b>capture and route</b><span>Provider-compatible chat, messages, responses, gateway dispatch and capture ingestion endpoints.</span></div>
   <div><b>compile and verify</b><span>Build jobs, artifacts, receipts, signatures, OpenAPI references and verifier routes.</span></div>
@@ -729,16 +861,31 @@ ${navBlock}
   <div><b>deploy and govern</b><span>Devices, fleets, trust links, transparency logs, usage controls and enterprise governance routes.</span></div>
 </div>
 
-<p data-w704="api-landing-bridge" style="margin:-8px 0 14px;font-size:14px;color:var(--ink-faint,#737c73)">Looking for a high-level surface map, curl-friendly examples, and the auth-flow walkthrough? Start at <a href="/api">/api</a>. This page is the exhaustive endpoint catalog.</p>
+<div class="api-proof-board" aria-label="API operating proof surface">
+  <a class="api-proof-card api-proof-card--green" href="/signup"><span><b>Create a tenant workspace</b><span>Issue the first tenant-scoped key, select plan context, and land operators in the control center.</span></span><code>POST /v1/signup</code></a>
+  <a class="api-proof-card api-proof-card--blue" href="/account/api-control-center"><span><b>Govern ingress and egress</b><span>Inspect capture channels, egress policy, opaque payload posture, compile targets, and exports.</span></span><code>GET /v1/account/api-control-center</code></a>
+  <a class="api-proof-card api-proof-card--amber" href="/openapi.json"><span><b>Export the machine contract</b><span>Use the generated OpenAPI and route manifest as CI inputs instead of trusting hand-written docs.</span></span><code>GET /openapi.json</code></a>
+  <a class="api-proof-card api-proof-card--rose" href="/product-readiness-closeout.json"><span><b>Verify claim limits</b><span>Read the readiness ledger before making benchmark, package, certification, or adoption claims.</span></span><code>GET /product-readiness-closeout.json</code></a>
+</div>
+
+<p data-w704="api-landing-bridge" class="api-bridge">Need the guided path? Start at <a href="/docs#quickstart">/docs#quickstart</a>. Need the tenant console? Open <a href="/account/api-control-center">/account/api-control-center</a>. This page is the exhaustive endpoint catalog generated from source.</p>
 
 <p class="totals"><strong>${totalCount} wired routes</strong> &middot; <span class="route-live">${liveCount} reference-ready</span> &middot; <span class="route-stub">${previewCount} source-indexed</span> &middot; ${groupKeys.length} groups &middot; generated ${TODAY} &middot; source <code>src/router.js</code></p>
 
-<div class="partition-toolbar"><label><input type="checkbox" id="hide-preview" aria-label="Show reference-ready routes only" onclick="document.body.setAttribute('data-api-filter', this.checked ? 'live' : 'all')"> Show reference-ready routes only</label></div>
-
 ${unparseableNote}
 
+<h2 id="operate">Source-to-proof API runbook</h2>
+<p>Use this sequence when checking whether the backend and public site describe the same product. It starts with a tenant, moves live traffic through the gateway, applies enterprise controls, compiles behavior, then exports verifiable proof.</p>
+<div class="api-runbook-grid" aria-label="source-to-proof API runbook">
+  <div class="api-runbook-step"><span>01</span><strong>Create workspace and key</strong><code>POST /v1/signup</code><p>Returns the first workspace envelope, selected plan, API key once, and control-center destination.</p></div>
+  <div class="api-runbook-step"><span>02</span><strong>Route model traffic</strong><code>POST /v1/route/chat/completions</code><p>OpenAI-compatible traffic enters the capture and confidence-aware routing path.</p></div>
+  <div class="api-runbook-step"><span>03</span><strong>Control data movement</strong><code>GET /v1/account/api-control-center</code><p>Operators declare sources, policy, egress, redaction, routing, eval gates, targets, and exports.</p></div>
+  <div class="api-runbook-step"><span>04</span><strong>Compile portable behavior</strong><code>POST /v1/compile</code><p>Stable behavior turns into artifacts, manifests, hashes, receipts, and runtime target metadata.</p></div>
+  <div class="api-runbook-step"><span>05</span><strong>Export proof and limits</strong><code>GET /v1/evidence/readiness</code><p>Read receipts and readiness gates before promoting production-final claims.</p></div>
+</div>
+
 <h2 id="base">Base URL &amp; auth</h2>
-<p>Start with the guided setup at <a href="/docs#quickstart">/docs#quickstart</a>, then keep this API reference open for exact endpoints and payloads. Runtime behavior and acceptance gates are covered from <a href="/docs">/docs</a> and <a href="/platform">/platform</a>.</p>
+<p class="api-jump-links">Start with the guided setup at <a href="/docs#quickstart">/docs#quickstart</a>, then keep this API reference open for exact endpoints and payloads. Runtime behavior and acceptance gates are covered from <a href="/docs">/docs</a> and <a href="/platform">/platform</a>.</p>
 <p>Local proxy: <code>http://localhost:8787</code>. Hosted: <code>https://kolm.ai</code>. Self-hosted enterprise: your domain.</p>
 <p>Public routes (such as <code>/health</code>, <code>/v1/loop/try</code>, <code>/v1/anon/bootstrap</code>) need no auth header. Every other <code>/v1/*</code> route accepts either:</p>
 <ul>
@@ -765,6 +912,56 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 </p>
 
 ${groupsHtml}
+
+<script>
+(function () {
+  'use strict';
+  function ready(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
+    else fn();
+  }
+  ready(function () {
+    var form = document.querySelector('[data-api-search-form]');
+    var search = document.querySelector('[data-api-search]');
+    var clear = document.querySelector('[data-api-search-clear]');
+    var liveOnly = document.querySelector('[data-api-live-only]');
+    var status = document.querySelector('[data-api-search-status]');
+    var routes = Array.prototype.slice.call(document.querySelectorAll('[data-api-route]'));
+    var groups = Array.prototype.slice.call(document.querySelectorAll('[data-api-group]'));
+    if (!search || !routes.length) return;
+    function applyFilter() {
+      var q = search.value.trim().toLowerCase();
+      var onlyReady = !!(liveOnly && liveOnly.checked);
+      var visible = 0;
+      document.body.setAttribute('data-api-filter', onlyReady ? 'live' : 'all');
+      routes.forEach(function (route) {
+        var haystack = route.getAttribute('data-route-search') || '';
+        var matchesText = !q || haystack.indexOf(q) !== -1;
+        var matchesStatus = !onlyReady || route.getAttribute('data-route-status') === 'reference-ready';
+        var show = matchesText && matchesStatus;
+        route.hidden = !show;
+        if (show) visible++;
+      });
+      groups.forEach(function (group) {
+        var anyVisible = Array.prototype.some.call(group.querySelectorAll('[data-api-route]'), function (route) {
+          return !route.hidden;
+        });
+        group.hidden = !anyVisible;
+      });
+      if (status) status.textContent = visible + ' of ' + routes.length + ' routes visible.';
+    }
+    if (form) form.addEventListener('submit', function (event) { event.preventDefault(); applyFilter(); });
+    search.addEventListener('input', applyFilter);
+    if (liveOnly) liveOnly.addEventListener('change', applyFilter);
+    if (clear) clear.addEventListener('click', function () {
+      search.value = '';
+      search.focus();
+      applyFilter();
+    });
+    applyFilter();
+  });
+})();
+</script>
 
 <h2 id="errors-envelope">Error envelope</h2>
 <p>Every 4xx and 5xx response carries the same shape.</p>

@@ -6,7 +6,7 @@
 <title>Compiler Overview - kolm.ai</title>
 <meta name="description" content="Your kolm compiler workspace: API wrapper capture, compile jobs, specialists, device targets, and next actions.">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#090C0D">
+<meta name="theme-color" content="#E4ECE7">
 <link rel="canonical" href="https://kolm.ai/account/overview">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -15,16 +15,76 @@
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/kolm-2026.css">
 <style>
+  :root{
+    color-scheme:light;
+    --paper:#e4ece7;
+    --paper-2:#f3faf5;
+    --paper-sink:#d8e5de;
+    --ink:#101312;
+    --ink-2:#34403a;
+    --ink-3:#66716a;
+    --line:rgba(16,19,18,.12);
+    --line-2:rgba(16,19,18,.24);
+    --line-top:rgba(255,255,255,.88);
+    --accent:#0a7b53;
+    --accent-soft:rgba(10,123,83,.10);
+    --accent-edge:rgba(10,123,83,.28);
+    --r-md:6px;
+    --r-lg:8px;
+  }
+  html{background:var(--paper)}
+  body{
+    background:
+      radial-gradient(900px 430px at 16% 8%,rgba(255,255,255,.86),transparent 72%),
+      radial-gradient(680px 300px at 88% 0%,rgba(10,123,83,.075),transparent 72%),
+      radial-gradient(circle at center,rgba(16,19,18,.10) .65px,transparent .82px),
+      var(--paper);
+    background-size:auto,auto,22px 22px,auto;
+    color:var(--ink);
+  }
+  body::before,body::after{display:none}
   .mono{font-family:var(--mono)}
-  .app{max-width:1120px;margin:0 auto;padding:clamp(36px,6vw,70px) max(22px,env(safe-area-inset-right)) 90px max(22px,env(safe-area-inset-left))}
-  .app h1{font-size:clamp(32px,4vw,52px);letter-spacing:0;margin:10px 0 10px;max-width:900px}
-  .app>.lede{max-width:72ch;margin:0 0 26px}
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px}
-  .brandlink{display:inline-flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none;font-weight:700}
-  .brandlink svg{width:24px;height:24px;fill:currentColor}
+  .app{max-width:1240px;margin:0 auto;padding:clamp(28px,5vw,58px) max(22px,env(safe-area-inset-right)) 90px max(22px,env(safe-area-inset-left))}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:clamp(34px,6vw,68px)}
+  .brandlink{display:inline-flex;align-items:center;gap:9px;min-height:44px;color:var(--ink);text-decoration:none;font-weight:700}
+  .brandlink svg{width:24px;height:24px;fill:var(--accent)}
   .navrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .navrow .btn,.auth .btn,.grid .btn{border-radius:6px}
+  .navrow .btn--ghost{background:rgba(255,255,255,.58);border-color:var(--line);color:var(--ink)}
+  .btn--primary{background:var(--ink);border-color:var(--ink);color:#f6fff8;box-shadow:0 18px 44px rgba(16,19,18,.18)}
+  .btn--primary:hover{background:#050706;border-color:#050706}
+  .btn--ghost{background:rgba(255,255,255,.58);color:var(--ink);border-color:var(--line-2)}
+  .btn--ghost:hover{background:#f3faf5;border-color:rgba(16,19,18,.34)}
+  .app h1,.app h2,.app h3,.section-title{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:currentColor!important;color:var(--ink)}
+  .hero-shell{display:grid;grid-template-columns:minmax(0,.9fr) minmax(420px,.9fr);gap:clamp(28px,5vw,72px);align-items:center;margin:0 0 28px}
+  .hero-copy{min-width:0}
+  .hero-copy h1{font-size:clamp(54px,7.3vw,90px);letter-spacing:0;line-height:.96;max-width:10ch;margin:12px 0 18px;text-wrap:balance}
+  .hero-copy .lede{max-width:720px;margin:0;color:var(--ink-2);font-size:clamp(17px,1.65vw,21px);line-height:1.55}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .hero-actions .btn{border-radius:6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;min-height:30px;width:max-content;max-width:100%;padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.62);color:var(--ink-2);font:11px/1.25 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .workspace-console{position:relative;min-width:0;border:1px solid rgba(236,246,240,.13);border-radius:8px;background:#101619;color:#eaf2ec;box-shadow:0 34px 90px rgba(16,19,18,.22);overflow:hidden}
+  .workspace-console::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(236,246,240,.034) 1px,transparent 1px),linear-gradient(90deg,rgba(236,246,240,.03) 1px,transparent 1px);background-size:28px 28px;opacity:.46;pointer-events:none}
+  .workspace-console__bar,.workspace-console__body,.workspace-console__footer{position:relative;z-index:1}
+  .workspace-console__bar{min-height:46px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:0 16px;border-bottom:1px solid rgba(236,246,240,.10);font:12px/1 var(--mono);color:#aeb8b2}
+  .workspace-console__bar b{color:#f2f6f1}
+  .workspace-console__bar span:last-child{color:#75d19f;text-align:right}
+  .workspace-console__body{display:grid;gap:10px;padding:16px}
+  .console-row{display:grid;grid-template-columns:92px minmax(0,1fr) minmax(72px,.2fr);gap:14px;align-items:center;min-height:70px;padding:12px 14px;border:1px solid rgba(236,246,240,.10);border-radius:6px;background:rgba(7,11,12,.54)}
+  .console-row:first-child{border-color:rgba(37,95,189,.45)}
+  .console-row:nth-child(3){border-color:rgba(10,123,83,.54)}
+  .console-row span{color:#8f9b94;font:700 10.5px/1.3 var(--mono);letter-spacing:.10em;text-transform:uppercase}
+  .console-row b{display:block;margin-bottom:5px;color:#f2f6f1;font-size:14px;line-height:1.25}
+  .console-row p{margin:0;color:#aeb8b2;font-size:12.5px;line-height:1.42}
+  .console-row code{color:#75d19f;font:700 11px/1.3 var(--mono);text-align:right;white-space:normal;overflow-wrap:anywhere}
+  .workspace-console__footer{display:grid;grid-template-columns:1fr auto;gap:12px;padding:14px 16px;border-top:1px solid rgba(236,246,240,.10);background:rgba(7,11,12,.72);color:#aeb8b2;font:12px/1.45 var(--mono)}
+  .workspace-console__footer b{color:#75d19f}
+  .proof-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:24px 0 0;max-width:760px}
+  .proof-strip span{min-height:46px;display:block;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.62);color:var(--ink-2);font:11px/1.35 var(--mono)}
+  .proof-strip b{color:var(--ink);font-weight:700}
+  .panel{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-md);background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(255,255,255,.50)),var(--paper-2);box-shadow:0 22px 64px rgba(16,19,18,.055);padding:18px;min-width:0}
   .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
-  .panel{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-md);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.006));padding:18px}
   .metric b{display:block;font:600 clamp(24px,3vw,36px)/1 var(--mono);color:var(--ink);margin-top:8px}
   .metric span,.muted{color:var(--ink-3);font-size:13px;line-height:1.55}
   .section-title{font-size:18px;margin:30px 0 12px}
@@ -33,23 +93,52 @@
   .surface p,.job p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.55}
   .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
   .chip{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border:1px solid var(--line-2);border-radius:4px;background:var(--paper-2);color:var(--ink-2);font:11px/1.2 var(--mono)}
-  .auth{max-width:520px;margin:26px 0;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:24px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.006))}
-  .auth input{width:100%;margin:14px 0 12px;padding:12px;border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--paper-sink);color:var(--ink);font:14px var(--mono)}
+  .preview-gate{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.34fr);gap:14px;align-items:end;border:1px solid rgba(37,95,189,.22);border-top-color:var(--line-top);border-radius:8px;background:linear-gradient(135deg,rgba(37,95,189,.10),rgba(10,123,83,.08) 54%,rgba(255,255,255,.66));box-shadow:0 24px 70px rgba(16,19,18,.07);padding:18px;margin:18px 0 24px}
+  .preview-gate h2{font-size:clamp(22px,2.8vw,34px);line-height:1.05;margin:8px 0 8px;text-wrap:balance}
+  .preview-gate p{max-width:76ch;margin:0;color:var(--ink-2);font-size:14px;line-height:1.6}
+  .preview-gate__status{display:grid;gap:8px}
+  .preview-gate__status span{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:36px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.70);padding:7px 9px;color:var(--ink-3);font:11px/1.35 var(--mono)}
+  .preview-gate__status b{color:var(--ink);text-align:right}
+  .auth{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.58fr);gap:18px;align-items:end;max-width:none;margin:22px 0 26px;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:20px;background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(255,255,255,.54)),var(--paper-2);box-shadow:0 22px 64px rgba(16,19,18,.07)}
+  .auth__copy h2{margin:0 0 8px}
+  .auth__copy p{max-width:68ch;margin:0}
+  .auth__form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px 10px;align-items:end}
+  .auth__form label{grid-column:1/-1}
+  .auth input{width:100%;min-height:44px;margin:0;padding:12px;border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--paper-sink);color:var(--ink);font:14px var(--mono)}
   .auth input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .auth input::placeholder{color:#6b756f}
+  .auth .btn{min-height:44px;white-space:nowrap}
   .banner{border:1px solid var(--line-2);border-radius:var(--r-md);padding:12px 14px;margin:14px 0;font-size:14px;line-height:1.55;background:var(--paper-2);color:var(--ink-2)}
-  .banner.warn{border-color:rgba(227,195,104,.38);background:rgba(227,195,104,.08);color:var(--ink)}
+  .banner.warn{border-color:rgba(138,101,12,.34);background:rgba(138,101,12,.08);color:var(--ink)}
   pre{white-space:pre-wrap;word-break:break-word;overflow:auto;border:1px solid var(--line);border-radius:var(--r-md);background:var(--paper-sink);padding:14px;color:var(--ink-2);font:12px/1.65 var(--mono)}
   .jobs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .empty{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
   .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
   [hidden]{display:none!important}
-  @media (max-width:820px){
-    .topbar{align-items:flex-start;flex-direction:column}
-    .grid,.surfaces,.jobs{grid-template-columns:1fr}
+  @media (max-width:920px){
+    .hero-shell,.grid,.surfaces,.jobs,.proof-strip,.preview-gate,.auth{grid-template-columns:1fr}
+    .topbar{align-items:flex-start;flex-direction:column;margin-bottom:34px}
+    .workspace-console__bar{grid-template-columns:auto minmax(0,1fr)}
+    .workspace-console__bar span:last-child{display:none}
+    .auth__form{grid-template-columns:1fr}
+    .auth .btn{width:100%;justify-content:center}
+  }
+  @media (max-width:680px){
+    .app{padding-top:22px}
+    .hero-copy h1{font-size:clamp(44px,15vw,64px)}
+    .hero-actions{display:grid;grid-template-columns:1fr;margin-top:16px}
+    .hero-actions .btn{width:100%;justify-content:center}
+    .proof-strip{grid-template-columns:1fr 1fr}
+    .console-row{grid-template-columns:1fr;gap:7px;min-height:0;padding:10px 12px}
+    .console-row code{text-align:left}
+    .workspace-console__body{gap:8px;padding:12px}
+    .workspace-console__footer{grid-template-columns:1fr;padding:11px 12px}
+    .navrow{width:100%}
+    .navrow .btn{flex:1 1 auto;justify-content:center}
   }
 </style>
 </head>
-<body>
+<body data-design-reference="image-2">
 <a class="skip-link" href="#main">Skip to content</a>
 <main id="main" class="app">
   <div class="topbar">
@@ -61,26 +150,78 @@
       <a class="btn btn--ghost btn--sm" href="/account/api-control-center">API control</a>
       <a class="btn btn--ghost btn--sm" href="/docs">Docs</a>
       <a class="btn btn--ghost btn--sm" href="/pricing">Pricing</a>
-      <a class="btn btn--ghost btn--sm" href="https://audit.kolm.ai/">Audit module</a>
+      <a class="btn btn--ghost btn--sm" href="https://audit.kolm.ai/">Evidence archive</a>
     </div>
   </div>
 
-  <p class="eyebrow">Account / Compiler</p>
-  <h1>Your compiler overview</h1>
-  <p class="lede">Capture traffic through the API wrapper, compile task-specific artifacts, compose specialist models, and choose deployment targets without making the audit product the default workspace.</p>
+  <section class="hero-shell" aria-label="Compiler workspace command surface">
+    <div class="hero-copy">
+      <p class="eyebrow">Account / Compiler</p>
+      <h1>Compiler Workspace</h1>
+      <p class="lede">Run the behavior-to-artifact loop: capture one production API path, keep policy and failures attached, compile signed artifacts, and export proof to the systems buyers already inspect.</p>
+      <div class="hero-actions">
+        <a class="btn btn--primary" href="/account/api-control-center">Open API Control Center</a>
+        <a class="btn btn--ghost" href="/docs/api">Read API Contract</a>
+      </div>
+      <div class="proof-strip" aria-label="Workspace contract">
+        <span><b>925</b> owned routes</span>
+        <span><b>214</b> route groups</span>
+        <span><b>7</b> certified surfaces</span>
+        <span><b>8</b> open gates</span>
+      </div>
+    </div>
+    <aside class="workspace-console" aria-label="Compiler workspace source-to-artifact console">
+      <div class="workspace-console__bar">
+        <b>compiler plane</b>
+        <span>workspace/default</span>
+        <span>readiness gated</span>
+      </div>
+      <div class="workspace-console__body">
+        <div class="console-row">
+          <span>Capture</span>
+          <div><b>Route one production loop</b><p>Provider-compatible calls become tenant-scoped traces with redaction, policy, and receipt context.</p></div>
+          <code>/v1/route</code>
+        </div>
+        <div class="console-row">
+          <span>Evaluate</span>
+          <div><b>Keep failures and regressions visible</b><p>Labels, eval suites, protected slices, and readiness requirements stay attached before promotion.</p></div>
+          <code>gates</code>
+        </div>
+        <div class="console-row">
+          <span>Compile</span>
+          <div><b>Promote behavior into an artifact</b><p>Manifests, examples, evaluators, target recipes, hashes, and verifier receipts ship together.</p></div>
+          <code>.kolm</code>
+        </div>
+        <div class="console-row">
+          <span>Deploy</span>
+          <div><b>Choose the smallest credible runtime</b><p>Local, hosted, fleet, and edge target recipes remain readiness-scoped until external gates close.</p></div>
+          <code>targets</code>
+        </div>
+      </div>
+      <div class="workspace-console__footer">
+        <span><b>ok</b> behavior-to-artifact workspace</span>
+        <span>secret_values_included: false</span>
+      </div>
+    </aside>
+  </section>
   <section class="panel" data-product-readiness aria-label="Product readiness">
     <p class="muted">Compiler readiness is tracked from <a href="/v1/product/graph">/v1/product/graph</a>, <a href="/product-readiness-closeout.json">/product-readiness-closeout.json</a>, and the local <span class="mono">readiness-counts</span> ledger. The <span class="mono">readiness-closeout</span> state names remaining package, benchmark, partner, and certification gates explicitly.</p>
   </section>
 
   <div id="banner"></div>
-  <div id="auth" class="auth" hidden>
-    <h2 class="section-title" style="margin-top:0">Open your workspace</h2>
-    <p class="muted">Use the session from signup, or paste a kolm API key that starts with <span class="mono">ks_</span>.</p>
-    <input id="keyInput" aria-label="API key" placeholder="ks_..." autocomplete="off" spellcheck="false">
-    <button class="btn btn--primary" id="keyBtn" style="width:100%">Open compiler overview</button>
+  <div id="auth" class="auth" hidden aria-label="Compiler workspace access gate">
+    <div class="auth__copy">
+      <h2 class="section-title">Open Compiler Workspace</h2>
+      <p class="muted" id="keyHelp">Preview the workspace contract below. Paste a kolm API key that starts with <span class="mono">ks_</span> to load tenant data and persist actions.</p>
+    </div>
+    <div class="auth__form">
+      <label class="muted" for="keyInput">API Key</label>
+      <input id="keyInput" name="api_key" type="password" inputmode="text" placeholder="ks_…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="keyHelp">
+      <button class="btn btn--primary" id="keyBtn" type="button">Open Compiler Workspace</button>
+    </div>
   </div>
 
-  <div id="content"><div class="banner">Loading compiler workspace...</div></div>
+  <div id="content"><div class="banner">Loading compiler workspace…</div></div>
 </main>
 
 <script>
@@ -96,9 +237,44 @@
     if (KEY) h.Authorization = 'Bearer ' + KEY;
     return h;
   }
-  function showAuth(){
-    document.getElementById('content').hidden = true;
+  function demoCompilerOverviewPayload(){
+    return {
+      ok: true,
+      preview: true,
+      tenant: { name: 'preview-workspace', plan: 'preview' },
+      namespaces: ['prod-ai-loop', 'support-cases', 'release-gates'],
+      counts: {
+        observed_captures: 1284,
+        compile_jobs: 38,
+        artifacts: 19,
+        devices: 12
+      },
+      onboarding: {
+        next_url: '/docs#quickstart'
+      },
+      empty_state: {
+        title: 'Route one namespace through Kolm',
+        curl: 'curl -X POST https://kolm.ai/v1/route/chat/completions \\\n  -H "authorization: Bearer ks_..." \\\n  -H "content-type: application/json" \\\n  -d "{\\"namespace\\":\\"prod-ai-loop\\",\\"model\\":\\"openai:gpt-4.1-mini\\",\\"messages\\":[{\\"role\\":\\"user\\",\\"content\\":\\"resolve CASE-100\\"}]}"'
+      },
+      primary_surfaces: [
+        { id:'capture', status:'mounted', routes:['/v1/route/chat/completions','/v1/capture/log','/v1/account/api-control-center/events','/v1/bridges/observe'] },
+        { id:'evaluate', status:'mounted', routes:['/v1/evals','/v1/drift-alert','/v1/label-queue/stats','/v1/compile/evaluate'] },
+        { id:'compile', status:'mounted', routes:['/v1/compile','/v1/artifacts','/v1/receipts/verify','/v1/packages/release-readiness/template'] },
+        { id:'deploy', status:'readiness-gated', routes:['/v1/devices/recommend','/v1/runtime/decide','/v1/byoc/targets','/v1/runtime/adoption-packets'] }
+      ],
+      recent_compile_jobs: [
+        { id:'job_preview_1', task:'support-case-specialist', status:'readiness-gated', namespace:'prod-ai-loop', artifact_ready:true },
+        { id:'job_preview_2', task:'policy-redaction-regression', status:'queued', namespace:'release-gates', artifact_ready:false }
+      ]
+    };
+  }
+  function showAuth(message){
     document.getElementById('auth').hidden = false;
+    document.getElementById('banner').innerHTML = '';
+    render(demoCompilerOverviewPayload(), {
+      preview: true,
+      message: message || 'Preview data is local and not persisted. Paste a workspace API key to load tenant counts, jobs, namespaces, and actions.'
+    });
   }
   function metric(label, value){
     return '<div class="panel metric"><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>';
@@ -113,7 +289,9 @@
       + (j.artifact_ready ? ' - artifact ready' : '')
       + '</p></div>';
   }
-  function render(data){
+  function render(data, options){
+    options = options || {};
+    var isPreview = options.preview === true || data.preview === true;
     var c = data.counts || {};
     var onboarding = data.onboarding || {};
     var surfaces = data.primary_surfaces || [];
@@ -121,6 +299,12 @@
     var ns = data.namespaces || [];
     var empty = data.empty_state;
     var html = '';
+    if (isPreview) {
+      html += '<section class="preview-gate" role="status" aria-label="Compiler workspace preview state">'
+        + '<div><p class="eyebrow">Preview mode</p><h2>Workspace visible. Tenant actions stay locked.</h2><p>'+esc(options.message || 'Preview data is local and not persisted. Paste a workspace API key to load tenant counts, jobs, namespaces, and actions.')+'</p></div>'
+        + '<div class="preview-gate__status"><span>read model <b>public preview</b></span><span>workspace data <b>API key required</b></span><span>secrets <b>never included</b></span></div>'
+        + '</section>';
+    }
     html += '<div class="grid">'
       + metric('Captured events', c.observed_captures || 0)
       + metric('Compile jobs', c.compile_jobs || 0)
@@ -138,8 +322,8 @@
     html += '<h2 class="section-title">Compiler surfaces</h2><div class="surfaces">'+surfaces.map(renderSurface).join('')+'</div>';
     html += '<h2 class="section-title">Recent compile jobs</h2>';
     html += jobs.length ? '<div class="jobs">'+jobs.map(renderJob).join('')+'</div>' : '<div class="panel"><p class="muted">No compile jobs yet. Capture traffic first, then run <span class="mono">POST /v1/compile</span>.</p></div>';
-    html += '<h2 class="section-title">Audit module</h2><div class="panel"><p class="muted">Signed review evidence remains available as a secondary module at <a href="https://audit.kolm.ai/">audit.kolm.ai</a>. It is not the default compiler workspace.</p></div>';
-    document.getElementById('auth').hidden = true;
+    html += '<h2 class="section-title">Evidence archive</h2><div class="panel"><p class="muted">Signed review evidence remains available as a secondary archive at <a href="https://audit.kolm.ai/">audit.kolm.ai</a>. The default workspace is the API capture, compile, runtime, and proof-export loop.</p></div>';
+    document.getElementById('auth').hidden = isPreview ? false : true;
     var content = document.getElementById('content');
     content.hidden = false;
     content.innerHTML = html;
@@ -148,7 +332,7 @@
     if (!KEY) { showAuth(); return; }
     fetch('/v1/account/compiler-overview', { credentials:'same-origin', headers: headers() })
       .then(function(res){
-        if (res.status === 401) { showAuth(); return null; }
+        if (res.status === 401) { showAuth('API key rejected or expired. Preview mode remains available while you paste a current workspace key.'); return null; }
         return res.json().then(function(j){ return { ok: res.ok, status: res.status, body: j }; });
       })
       .then(function(o){
@@ -160,7 +344,7 @@
         render(o.body);
       })
       .catch(function(){
-        document.getElementById('banner').innerHTML = '<div class="banner warn">Network error. Try refreshing, or email dev@kolm.ai.</div>';
+        showAuth('Network error while loading tenant data. Preview mode remains available; retry after the account API is reachable.');
       });
   }
   document.getElementById('keyBtn').onclick = function(){
@@ -169,7 +353,7 @@
     KEY = v;
     try { sessionStorage.setItem('kolm_account_key', v); } catch(e) {}
     document.getElementById('content').hidden = false;
-    document.getElementById('content').innerHTML = '<div class="banner">Loading compiler workspace...</div>';
+    document.getElementById('content').innerHTML = '<div class="banner">Loading compiler workspace…</div>';
     load();
   };
   document.getElementById('keyInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('keyBtn').click(); });

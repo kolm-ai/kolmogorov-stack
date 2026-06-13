@@ -10,14 +10,14 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Docs: Connect Logs, Verify Signed Reports · kolm.ai</title>
-<meta name="description" content="Connect the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference or gateway logs), run the audit, verify signed reports offline.">
+<meta name="description" content="Connect the traces, gateway logs, provider logs, evaluation records, and workflow events you already have, run the audit, verify signed reports offline.">
 <meta name="theme-color" content="#090C0D">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Docs: Connect Logs, Verify Signed Reports">
-<meta property="og:description" content="Connect the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference or gateway logs), run the audit, verify signed reports offline.">
+<meta property="og:description" content="Connect the traces, gateway logs, provider logs, evaluation records, and workflow events you already have, run the audit, verify signed reports offline.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://audit.kolm.ai/docs">
 <meta property="og:image" content="https://kolm.ai/brand-hero.png">
@@ -26,7 +26,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
 <meta name="twitter:title" content="Docs: Connect Logs, Verify Signed Reports">
-<meta name="twitter:description" content="Connect the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference or gateway logs), run the audit, verify signed reports offline.">
+<meta name="twitter:description" content="Connect the traces, gateway logs, provider logs, evaluation records, and workflow events you already have, run the audit, verify signed reports offline.">
 <link rel="canonical" href="https://audit.kolm.ai/docs">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -43,7 +43,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "@context": "https://schema.org",
   "@type": "TechArticle",
   "headline": "Docs: Connect Logs, Verify Signed Reports",
-  "description": "Connect the logs you already have (OpenTelemetry, Datadog, Langfuse, LangSmith, OpenInference or gateway logs), run the audit, verify signed reports offline.",
+  "description": "Connect the traces, gateway logs, provider logs, evaluation records, and workflow events you already have, run the audit, verify signed reports offline.",
   "url": "https://kolm.ai/docs",
   "inLanguage": "en",
   "author": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
@@ -323,8 +323,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <tr><td><b>OpenTelemetry</b></td><td>OTLP exports: <span style="font-family:var(--mono)">resourceSpans</span> / <span style="font-family:var(--mono)">scopeSpans</span>, span attributes under <span style="font-family:var(--mono)">gen_ai.*</span>, <span style="font-family:var(--mono)">http.*</span>, <span style="font-family:var(--mono)">url.*</span>.</td></tr>
         <tr><td><b>OpenInference</b></td><td>OTLP spans carrying <span style="font-family:var(--mono)">openinference.span.kind</span>, <span style="font-family:var(--mono)">llm.model_name</span>, <span style="font-family:var(--mono)">tool.parameters</span>, <span style="font-family:var(--mono)">retrieval.documents</span>. Checked before plain OTel.</td></tr>
         <tr><td><b>Datadog</b></td><td>LLM Observability spans: <span style="font-family:var(--mono)">meta.kind</span> of llm / tool / agent / workflow / task / embedding / retrieval, <span style="font-family:var(--mono)">ml_app</span>, <span style="font-family:var(--mono)">start_ns</span>.</td></tr>
-        <tr><td><b>Langfuse</b></td><td>Traces with <span style="font-family:var(--mono)">observations[]</span> of type GENERATION / SPAN / EVENT, or bare observations with <span style="font-family:var(--mono)">traceId</span> / <span style="font-family:var(--mono)">modelParameters</span> / <span style="font-family:var(--mono)">usage</span>.</td></tr>
-        <tr><td><b>LangSmith</b></td><td>Runs with <span style="font-family:var(--mono)">run_type</span>, <span style="font-family:var(--mono)">child_runs</span>, <span style="font-family:var(--mono)">dotted_order</span>, or <span style="font-family:var(--mono)">extra.metadata.ls_model_name</span>.</td></tr>
+        <tr><td><b>Trace observation exports</b></td><td>Traces with <span style="font-family:var(--mono)">observations[]</span> of type GENERATION / SPAN / EVENT, or bare observations with <span style="font-family:var(--mono)">traceId</span> / <span style="font-family:var(--mono)">modelParameters</span> / <span style="font-family:var(--mono)">usage</span>.</td></tr>
+        <tr><td><b>Run tree exports</b></td><td>Runs with <span style="font-family:var(--mono)">run_type</span>, <span style="font-family:var(--mono)">child_runs</span>, <span style="font-family:var(--mono)">dotted_order</span>, or provider metadata such as model name and token usage.</td></tr>
         <tr><td><b>MCP server logs</b></td><td>JSON-RPC 2.0 rows: <span style="font-family:var(--mono)">tools/call</span> requests paired with results by id, <span style="font-family:var(--mono)">tools/list</span> declared tool surfaces, <span style="font-family:var(--mono)">initialize</span> <span style="font-family:var(--mono)">serverInfo</span>, and kolm mcp-gateway receipts (<span style="font-family:var(--mono)">mcp-tool-call-1</span>).</td></tr>
         <tr><td><b>OpenAI Agents SDK</b></td><td>Trace exports: <span style="font-family:var(--mono)">object</span> of trace / trace.span with <span style="font-family:var(--mono)">span_data.type</span> of agent, generation, function, handoff or guardrail. Handoffs land as explicit delegation edges.</td></tr>
         <tr><td><b>Gateway logs</b></td><td>LiteLLM, Helicone, Portkey and OpenRouter rows read natively: <span style="font-family:var(--mono)">request</span> / <span style="font-family:var(--mono)">request_body</span>, <span style="font-family:var(--mono)">response</span> / <span style="font-family:var(--mono)">response_body</span>, <span style="font-family:var(--mono)">api_base</span>, provider-prefixed model names.</td></tr>

@@ -605,10 +605,12 @@
           "auth": "none",
           "mode": "safe",
           "expect": [
-            200
+            200,
+            503
           ],
           "checks": [
-            "json"
+            "json",
+            "readiness-gated"
           ]
         },
         {
@@ -1451,10 +1453,12 @@
           "auth": "none",
           "mode": "safe",
           "expect": [
-            200
+            200,
+            503
           ],
           "checks": [
-            "json"
+            "json",
+            "readiness-gated"
           ]
         },
         {

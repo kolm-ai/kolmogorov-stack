@@ -71,6 +71,10 @@
   function wireNavCta() {
     var cta = document.querySelector('.nav__cta');
     if (!cta) return;
+    if (document.body && document.body.classList.contains('compiler-site--paper')) {
+      cta.classList.add('is-solid');
+      return;
+    }
     var hero = document.querySelector('.hero');
     if (!hero || !('IntersectionObserver' in window)) { cta.classList.add('is-solid'); return; }
     var io = new IntersectionObserver(function (entries) {

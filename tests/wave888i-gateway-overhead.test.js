@@ -81,6 +81,24 @@ function p50(xs) {
   return s.length % 2 === 0 ? (s[mid - 1] + s[mid]) / 2 : s[mid];
 }
 
+async function timedJsonFetch(url, options, label, attempts = 3) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const t0 = Date.now();
+    const r = await fetch(url, options);
+    const body = await r.text();
+    const elapsed = Date.now() - t0;
+    try {
+      JSON.parse(body);
+      return elapsed;
+    } catch (e) {
+      lastError = `${label} attempt=${attempt} status=${r.status} invalid JSON: ${e.message}; body=${body.slice(0, 160)}`;
+      await new Promise((resolve) => setTimeout(resolve, 25 * attempt));
+    }
+  }
+  assert.fail(lastError || `${label} did not return JSON`);
+}
+
 test('W888-I #51 — gateway overhead vs direct provider mock < 500ms mean (local)', async (t) => {
   const MOCK_PORT = await freePort();
   const KOLM_PORT = await freePort();
@@ -165,27 +183,23 @@ test('W888-I #51 — gateway overhead vs direct provider mock < 500ms mean (loca
   // Direct baseline.
   const directTimings = [];
   for (let i = 0; i < N; i++) {
-    const t0 = Date.now();
-    const r = await fetch(MOCK_BASE + '/v1/chat/completions', {
+    const elapsed = await timedJsonFetch(MOCK_BASE + '/v1/chat/completions', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ messages: [{ role: 'user', content: 'hello ' + i }], model: 'gpt-4o-mini' }),
-    });
-    await r.json();
-    directTimings.push(Date.now() - t0);
+    }, `direct ${i}`);
+    directTimings.push(elapsed);
   }
 
   // Gateway-wrapped.
   const gwTimings = [];
   for (let i = 0; i < N; i++) {
-    const t0 = Date.now();
-    const r = await fetch(KOLM_BASE + '/v1/gateway/dispatch', {
+    const elapsed = await timedJsonFetch(KOLM_BASE + '/v1/gateway/dispatch', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + apiKey },
       body: JSON.stringify({ messages: [{ role: 'user', content: 'hello ' + i }], model: 'gpt-4o-mini' }),
-    });
-    await r.json();
-    gwTimings.push(Date.now() - t0);
+    }, `gateway ${i}`);
+    gwTimings.push(elapsed);
   }
 
   const directMean = mean(directTimings);

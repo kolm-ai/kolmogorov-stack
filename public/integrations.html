@@ -9,18 +9,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 <title>Kolm Integrations and API Data Plane</title>
 <meta name="description" content="Kolm integration map for API gateways, traces, evals, data movement, warehouses, SIEM, ticketing, governance, runtimes, package targets, and source-to-proof exports.">
-<meta name="theme-color" content="#090C0D">
+<meta name="theme-color" content="#E4ECE7">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:title" content="Kolm Integrations and API Data Plane">
 <meta property="og:description" content="Connect AI API behavior to governed capture, policy gates, signed artifacts, runtime targets, and exportable evidence.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/integrations">
-<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Kolm Integrations and API Data Plane">
 <meta name="twitter:description" content="17 API data-channel families across gateways, traces, streams, warehouses, logs, tickets, governance, runtimes, release paths, and proof exports.">
-<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/integrations">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -33,7 +33,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <script defer src="/kolm-field.js"></script>
 <script defer src="/kolm-main.js"></script>
 </head>
-<body class="compiler-site">
+<body class="compiler-site compiler-site--paper compiler-site--paper-integrations" data-design-reference="image-2">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -43,17 +43,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/#pipeline">Pipeline</a>
-      <a href="/account/api-control-center">Control</a>
-      <a href="/integrations">Integrations</a>
-      <a href="/runtimes">Runtimes</a>
-      <a href="/compare">Compare</a>
-      <a href="/docs">Docs</a>
+      <a href="/#pipeline" aria-current="page">Solutions</a>
+      <a href="/docs">Developers</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/docs/api">API docs</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/account/api-control-center">Open control</a>
+      <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
+      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get API key -></a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -62,36 +59,73 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-  <section class="section section--flush hero compiler-hero">
+  <section class="section section--flush hero compiler-hero integration-hero">
     <div class="field" aria-hidden="true"><canvas></canvas></div>
     <div class="wrap compiler-hero__grid">
       <div>
-        <p class="compiler-kicker" data-enter="1">Integration fabric</p>
+        <p class="compiler-kicker" data-enter="1">API / data command fabric</p>
         <h1 class="hero__h1" data-enter="2">Every API signal becomes governed proof.</h1>
-        <p class="lede" data-enter="3">Kolm does not ask teams to replace gateways, observability, warehouses, SIEM, GRC, workflow, catalog, or runtime platforms. It makes those systems source, control, evidence, or target nodes for one compiler loop: capture, redact, evaluate, compile, sign, deploy, and export.</p>
+        <p class="lede" data-enter="3">Connect gateways, traces, queues, warehouses, files, tickets, telemetry, approval flows, runtime targets, and custom API events. Kolm captures every credible signal as governed state, keeps unknown payloads opaque, promotes semantics only with adapter evidence, and exports signed proof.</p>
         <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="/account/api-control-center">Open API control</a>
-          <a class="btn btn--ghost" href="/docs#quickstart">Start with the API</a>
+          <a class="btn btn--primary" href="/account/api-control-center">Open API Control Center</a>
+          <a class="btn btn--ghost" href="/docs/api">Inspect API Contract</a>
         </div>
-        <div class="compiler-proof" data-enter="5">
-          <span><b>17</b> data-channel families</span>
-          <span><b>16</b> protocol/export families</span>
+        <div class="integration-signal-strip" data-enter="5" aria-label="Integration command fabric summary">
+          <span><b>17</b> channel families</span>
+          <span><b>12</b> ingress modes</span>
+          <span><b>10</b> export modes</span>
           <span><b>8</b> policy layers</span>
           <span>source-to-proof map</span>
           <span>opaque until adapter-proven</span>
         </div>
       </div>
-      <aside class="control-plane kolm-surface-media" aria-label="Kolm integration control plane">
-        <div class="control-plane__head">
-          <span><b>kolm data plane</b> / source to proof</span>
-          <span>v2</span>
+      <aside class="integration-switchboard kolm-surface-media" aria-label="Kolm enterprise API data switchboard">
+        <div class="integration-switchboard__top">
+          <span><b>kolm switchboard</b> / source -> control -> proof</span>
+          <span>readiness gated</span>
         </div>
-        <div class="control-plane__grid">
-          <div class="control-tile control-tile--wide"><b>Ingress</b><span>REST, streaming, webhooks, OTEL, MCP, A2A, GraphQL/RPC, queues, CDC, warehouses, logs, browser events, files, and adapters.</span></div>
-          <div class="control-tile"><b>Controls</b><span>Tenant keys, provider vault, redaction, retention, egress allowlists, eval gates, budgets, and export policy.</span></div>
-          <div class="control-tile"><b>Outputs</b><span>Signed .kolm packages, receipts, manifests, eval reports, OTEL, SIEM, warehouse export, GRC packets, and release channels.</span></div>
-          <div class="control-tile"><b>Rule</b><span>Unknown vendor payloads stay opaque until schema hints or adapter manifests prove semantics.</span></div>
-          <div class="control-tile"><b>Moat</b><span>The artifact and evidence chain, not another isolated dashboard.</span></div>
+        <div class="integration-switchboard__spine" aria-hidden="true">
+          <span>source systems</span>
+          <span>kolm kernel</span>
+          <span>proof outputs</span>
+        </div>
+        <div class="integration-switchboard__map">
+          <div class="integration-node">
+            <b>orchestrate</b>
+            <span>Workflow engines, OpenAPI assets, MCP tools, recipes, approvals, callbacks.</span>
+          </div>
+          <div class="integration-node integration-node--kernel">
+            <b>canonical event</b>
+            <span><code translate="no">POST /v1/account/api-control-center/events</code></span>
+          </div>
+          <div class="integration-node">
+            <b>receipt</b>
+            <span>Secret-safe envelope, policy decision, schema confidence, retention class.</span>
+          </div>
+          <div class="integration-node">
+            <b>move &amp; stream</b>
+            <span>CDC, queues, topics, warehouses, lakehouses, object stores, files.</span>
+          </div>
+          <div class="integration-node integration-node--kernel">
+            <b>semantic gate</b>
+            <span><code translate="no">/adapter-manifests/validate</code></span>
+          </div>
+          <div class="integration-node">
+            <b>artifact</b>
+            <span>Signed <code translate="no">.kolm</code> package, manifest, eval report, target recipe.</span>
+          </div>
+          <div class="integration-node">
+            <b>trust &amp; risk</b>
+            <span>Lineage, API inventory, SIEM, GRC, incident review, control evidence.</span>
+          </div>
+          <div class="integration-node integration-node--kernel">
+            <b>promotion rule</b>
+            <span>Opaque until schema hints or manifest evidence prove adapter-owned meaning.</span>
+          </div>
+          <div class="integration-node">
+            <b>export</b>
+            <span>Governance packet, verifier receipt, OTLP/JSONL, warehouse and ticket sinks.</span>
+          </div>
         </div>
       </aside>
     </div>
@@ -130,12 +164,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">The integration strategy is additive: import signals from existing systems, make them policy-scoped, then emit artifacts and evidence that can be verified outside the Kolm UI.</p>
       </div>
       <div class="surface-table">
-        <div class="surface-row"><div class="surface-row__key">gateway/provider</div><div class="surface-row__body"><b>LiteLLM, Portkey, Cloudflare, Vercel, OpenRouter, Kong, OpenAI, Anthropic, Bedrock, Vertex.</b> Provider access, routing, keys, fallback, budgets, cache and usage signals.</div><div class="surface-row__route">source + route target</div></div>
-        <div class="surface-row"><div class="surface-row__key">trace/eval</div><div class="surface-row__body"><b>LangSmith, Langfuse, Braintrust, Helicone, Phoenix, Weave, Vellum, PromptLayer, OpenTelemetry.</b> Traces, prompt versions, eval sets, annotations, drift signals and release evidence.</div><div class="surface-row__route">import + evidence sink</div></div>
-        <div class="surface-row"><div class="surface-row__key">data movement</div><div class="surface-row__body"><b>Airbyte, Fivetran, Confluent, Kafka, Pub/Sub, SQS/SNS, EventBridge, Snowflake, BigQuery, Databricks.</b> Connectors, topics, CDC, warehouse extracts, object-store drops, transforms, dead-letter context and export manifests.</div><div class="surface-row__route">batch + stream source</div></div>
-        <div class="surface-row"><div class="surface-row__key">workflow/api</div><div class="surface-row__body"><b>Workato, MuleSoft, Boomi, Tray.io, n8n, Tines, Pipedream, GraphQL/RPC, OpenAPI, SOAP.</b> Triggers, actions, universal connectors, API management, agent-ready assets and approval callbacks.</div><div class="surface-row__route">automation handoff</div></div>
-        <div class="surface-row"><div class="surface-row__key">catalog/lineage</div><div class="surface-row__body"><b>Atlan, Collibra, Alation, DataHub, OpenMetadata, OpenLineage, Purview, Dataplex.</b> Asset context, dataset ownership, lineage metadata, job/run facets and catalog references for evidence exports.</div><div class="surface-row__route">lineage sink</div></div>
-        <div class="surface-row"><div class="surface-row__key">security/grc</div><div class="surface-row__body"><b>Vanta, Drata, Datadog, Splunk, Elastic, ServiceNow, Akto, Lakera, HiddenLayer, Protect AI, Giskard.</b> Control evidence, API discovery signals, log drains, incidents, guardrail verdicts and assurance packets.</div><div class="surface-row__route">verdict + governance sink</div></div>
+        <div class="surface-row"><div class="surface-row__key">gateway/provider</div><div class="surface-row__body"><b>Provider gateways, routers, model APIs, and API management layers.</b> Provider access, routing, keys, fallback, budgets, cache and usage signals.</div><div class="surface-row__route">source + route target</div></div>
+        <div class="surface-row"><div class="surface-row__key">trace/eval</div><div class="surface-row__body"><b>Trace stores, eval dashboards, annotation queues, and OpenTelemetry spans.</b> Traces, prompt versions, eval sets, annotations, drift signals and release evidence.</div><div class="surface-row__route">import + evidence sink</div></div>
+        <div class="surface-row"><div class="surface-row__key">data movement</div><div class="surface-row__body"><b>Connectors, queues, topics, warehouses, lakehouses, and object-store drops.</b> Connectors, topics, CDC, warehouse extracts, transforms, dead-letter context and export manifests.</div><div class="surface-row__route">batch + stream source</div></div>
+        <div class="surface-row"><div class="surface-row__key">workflow/api</div><div class="surface-row__body"><b>Workflow engines, API platforms, typed RPC systems, and approval callbacks.</b> Triggers, actions, universal connectors, API management, agent-ready assets and approval callbacks.</div><div class="surface-row__route">automation handoff</div></div>
+        <div class="surface-row"><div class="surface-row__key">catalog/lineage</div><div class="surface-row__body"><b>Catalog, ownership, lineage, job metadata, and data-quality systems.</b> Asset context, dataset ownership, lineage metadata, job/run facets and catalog references for evidence exports.</div><div class="surface-row__route">lineage sink</div></div>
+        <div class="surface-row"><div class="surface-row__key">security/grc</div><div class="surface-row__body"><b>SIEM, GRC, incident, API inventory, security review, and assurance systems.</b> Control evidence, API discovery signals, log drains, incidents, guardrail verdicts and assurance packets.</div><div class="surface-row__route">verdict + governance sink</div></div>
         <div class="surface-row"><div class="surface-row__key">runtime/release</div><div class="surface-row__body"><b>vLLM, SGLang, TensorRT-LLM, llama.cpp, Ollama, Core ML, LiteRT, ExecuTorch, ONNX, RunPod, Hugging Face.</b> Target instructions, release gates, package manifests and runtime receipts.</div><div class="surface-row__route">deployment target</div></div>
       </div>
     </div>
@@ -144,15 +178,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section section--tint reveal" id="market-pressure">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">03 / Market pressure</span>
-        <h2>Specialized platforms set buyer expectations. Kolm turns them into proof.</h2>
-        <p class="lede">The category is not short on connectors or dashboards. The gap is the artifact and evidence chain between them.</p>
+        <span class="idx">03 / Control fabric</span>
+        <h2>Your systems stay useful. Kolm makes the AI loop governable.</h2>
+        <p class="lede">The buyer does not need another disconnected dashboard. They need a single chain from source event to policy decision, artifact, runtime target, and exportable proof.</p>
       </div>
       <div class="compiler-card-grid">
-        <div class="proof-card"><h3>Workflow platforms</h3><p>Workato and MuleSoft normalize connectors, triggers, actions, universal APIs, API governance, and agent-ready assets. Kolm should receive approval callbacks and emit verifier receipts, not rebuild enterprise automation.</p></div>
-        <div class="proof-card"><h3>Data movers</h3><p>Airbyte, Fivetran, and Confluent normalize sources, destinations, stream connectors, schema changes, transforms, and dead-letter handling. Kolm should attach AI behavior policy, eval gates, and artifact lineage.</p></div>
-        <div class="proof-card"><h3>Catalog and lineage</h3><p>OpenLineage and catalog tools normalize dataset, job, run, and facet metadata. Kolm should export artifact lineage and governance packets to those systems of record.</p></div>
-        <div class="proof-card"><h3>Security and GRC</h3><p>Akto, Vanta, Drata, SIEM, and guardrail systems normalize API discovery, risk, evidence, questionnaires, and remediation. Kolm should make AI behavior evidence verifiable outside its UI.</p></div>
+        <div class="proof-card"><h3>Workflow handoff</h3><p>Triggers, actions, approvals, and automation callbacks become governed source or sink events with delivery receipts.</p></div>
+        <div class="proof-card"><h3>Data plane coverage</h3><p>Connectors, streams, schema drift, warehouse extracts, and dead-letter context attach to AI behavior policy and artifact lineage.</p></div>
+        <div class="proof-card"><h3>Lineage export</h3><p>Dataset, job, run, owner, and catalog metadata stay connected to the artifact, receipt, and governance packet.</p></div>
+        <div class="proof-card"><h3>Assurance packet</h3><p>API discovery, security review, incidents, controls, questionnaires, and remediation evidence leave as verifiable exports.</p></div>
       </div>
     </div>
   </section>
@@ -185,7 +219,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <a class="btn btn--ghost" href="/security">Security scope</a>
           </div>
         </div>
-        <div class="unicorn-proof-grid">
+        <div class="proof-grid">
           <div class="proof-card"><h3>Identity and vault</h3><p>Tenant keys, scoped keys, RBAC, SSO/SAML/SCIM hooks, central provider keys, BYOK/BYOC paths and model entitlements.</p></div>
           <div class="proof-card"><h3>Capture and egress</h3><p>Sample rate, body retention, namespace windows, redaction-before-persistence, destination allowlists and PII/secret blocking.</p></div>
           <div class="proof-card"><h3>Eval and compile</h3><p>Production evals, drift alerts, regression gates, human review queues, corpus selection, evidence DAGs and artifact receipts.</p></div>

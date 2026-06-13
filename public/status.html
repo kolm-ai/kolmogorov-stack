@@ -3,82 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
+<script>
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>System Status: Verifier, API, Audit Pipeline · kolm.ai</title>
-<meta name="description" content="Live health of kolm.ai infrastructure: public verifier, API, transparency log, audit pipeline and website. Incidents are posted with impact and resolution.">
-<meta name="theme-color" content="#090C0D">
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
+<title>Kolm Status - API Control Center, Compiler, Exports</title>
+<meta name="description" content="Operational status and readiness posture for Kolm's API Control Center, capture routes, compiler artifacts, runtime targets, governance exports, and secondary audit evidence surface.">
+<meta name="theme-color" content="#E4ECE7">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:locale" content="en_US">
-<meta property="og:title" content="System Status: Verifier, API, Audit Pipeline">
-<meta property="og:description" content="Live health of kolm.ai infrastructure: public verifier, API, transparency log, audit pipeline and website. Incidents are posted with impact and resolution.">
+<meta property="og:title" content="Kolm Status - API Control Center, Compiler, Exports">
+<meta property="og:description" content="API behavior in. Device-fit models out. Current status for the control plane, compiler, runtime target matrix, and governance export surface.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/status">
-<meta property="og:image" content="https://kolm.ai/brand-hero.png">
+<meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="System Status: Verifier, API, Audit Pipeline">
-<meta name="twitter:description" content="Live health of kolm.ai infrastructure: public verifier, API, transparency log, audit pipeline and website. Incidents are posted with impact and resolution.">
-<meta name="twitter:image" content="https://kolm.ai/brand-hero.png">
+<meta name="twitter:title" content="Kolm Status - API Control Center, Compiler, Exports">
+<meta name="twitter:description" content="Current operational and readiness posture for Kolm's source-to-proof platform.">
+<meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/status">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
+<script defer src="/kolm-field.js"></script>
+<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "System Status: Verifier, API, Audit Pipeline",
+  "name": "Kolm Status",
   "url": "https://kolm.ai/status",
-  "description": "Live health of kolm.ai infrastructure: public verifier, API, transparency log, audit pipeline and website. Incidents are posted with impact and resolution.",
-  "publisher": {
-    "@type": "Organization",
-    "name": "kolm.ai",
-    "url": "https://kolm.ai/",
-    "@id": "https://kolm.ai/#org"
-  }
+  "description": "Operational status and readiness posture for Kolm's API Control Center, capture routes, compiler artifacts, runtime targets, governance exports, and secondary audit evidence surface.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
+<style>
+  .status-command-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(18px,4vw,38px);align-items:start}
+  .status-live{min-width:0;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:rgba(255,255,255,.68);box-shadow:0 24px 70px rgba(16,19,18,.06);padding:clamp(18px,2.6vw,26px)}
+  .status-live__head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .status-live__head b{font:800 12px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+  .status-live__state{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--accent);font:800 11px/1.2 var(--mono)}
+  .status-live__state::before{content:"";width:7px;height:7px;margin-right:7px;border-radius:99px;background:currentColor}
+  .status-live__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+  .status-live__metric{min-width:0;min-height:82px;border:1px solid var(--line);border-radius:6px;background:rgba(247,255,250,.54);padding:12px}
+  .status-live__metric span{display:block;color:var(--ink-3);font:700 10.5px/1.35 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .status-live__metric b{display:block;margin-top:9px;color:var(--ink);font:800 clamp(24px,3vw,34px)/1 var(--mono);letter-spacing:0;overflow-wrap:anywhere}
+  .status-live__metric em{display:block;margin-top:7px;color:var(--ink-3);font-style:normal;font-size:12px;line-height:1.45}
+  .status-live__checks{display:grid;gap:8px;margin-top:14px}
+  .status-live__check{display:grid;grid-template-columns:minmax(112px,.32fr) minmax(0,1fr) max-content;gap:10px;align-items:center;min-height:42px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.58);font:12px/1.35 var(--mono);color:var(--ink-2)}
+  .status-live__check b{color:var(--ink)}
+  .status-live__check span{overflow-wrap:anywhere}
+  .status-live__check code{color:var(--compile-blue)}
+  .status-live__check[data-ok="false"] code{color:#996f12}
+  .status-console{min-width:0;border:1px solid rgba(236,246,240,.12);border-radius:8px;background:#101619;color:#eaf2ec;box-shadow:0 30px 82px rgba(16,19,18,.22);overflow:hidden}
+  .status-console__bar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:0 16px;border-bottom:1px solid rgba(236,246,240,.10);font:12px/1 var(--mono);color:#aeb8b2}
+  .status-console__bar b{color:#f2f6f1}
+  .status-console__bar span:last-child{color:#75d19f;text-align:right}
+  .status-console pre{margin:0;padding:18px;overflow:auto;white-space:pre-wrap;color:#cdd7d2;font:12px/1.62 var(--mono)}
+  .status-console .ok{color:#75d19f}
+  .status-console .warn{color:#f2c66d}
+  .status-command-note{margin:14px 0 0;color:var(--ink-3);font-size:13px;line-height:1.6}
+  @media (max-width:980px){.status-command-grid{grid-template-columns:1fr}.status-live__check{grid-template-columns:1fr}.status-live__check code{text-align:left}}
+  @media (max-width:620px){.status-live__grid{grid-template-columns:1fr}.status-live__head{display:grid}.status-console pre{font-size:11px;padding:15px}}
+</style>
 </head>
-<body>
+<body class="compiler-site compiler-site--paper" data-design-reference="image-2">
 <a class="skip-link" href="#main">Skip to content</a>
-
-<hr class="foil-strip" aria-hidden="true">
 
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
       <span>kolm<b>.ai</b></span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/platform">Platform</a>
+      <a href="/#pipeline" aria-current="page">Solutions</a>
+      <a href="/docs">Developers</a>
       <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
-      <a href="/docs">Docs</a>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="https://audit.kolm.ai/verify">Audit verifier</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Get an API key</a>
+      <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
+      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get API key -></a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -87,264 +101,272 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
+  <section class="section section--flush hero compiler-hero">
+    <div class="wrap compiler-hero__grid">
+      <div>
+        <p class="compiler-kicker" data-enter="1">Source-to-proof status</p>
+        <h1 class="hero__h1" data-enter="2">Status for the control plane that turns API behavior into artifacts.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. This page tracks the public posture for capture, policy, eval gates, compile jobs, runtime targets, receipts, governance exports, and the secondary audit evidence surface.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="/account/api-control-center">Open API Control Center</a>
+          <a class="btn btn--ghost" href="/trust">Read Trust Gates</a>
+        </div>
+        <div class="compiler-proof" aria-label="Current status summary">
+          <span><b>Operational</b> public site</span>
+          <span><b>Operational</b> API reference</span>
+          <span><b>Readiness-gated</b> release claims</span>
+        </div>
+      </div>
 
-<!-- hero -->
-<section class="section section--flush hero">
-  <div class="wrap">
-    <p class="eyebrow">Infrastructure</p>
-    <h1>Audit infrastructure status. <span class="go">Evidence stays verifiable.</span></h1>
-    <p class="lede">The live health of every public surface behind the kolm.ai evidence pipeline. Incidents are posted here as dated, plain-language entries; questions go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. Evidence reports already in your hands are not affected by infrastructure events; they verify offline against our public Ed25519 key with no dependency on our servers.</p>
-    <div class="hero__proof" aria-label="Status at a glance">
-      <span><i class="dot" aria-hidden="true"></i>All systems operational</span>
-      <span><i class="dot" aria-hidden="true"></i>No incidents active</span>
-      <span><i class="dot" aria-hidden="true"></i>Reports verify offline · Ed25519</span>
+      <aside class="control-plane kolm-surface-media" aria-label="Current Kolm platform state">
+        <div class="control-plane__head">
+          <span><b>status</b> / public product contract</span>
+          <span>secret-safe</span>
+        </div>
+        <div class="control-rail">
+          <div class="control-rail__row"><b>capture</b><i style="--fill:94%"></i><span>routes, SDKs, gateways, webhooks, batches, queues</span></div>
+          <div class="control-rail__row"><b>policy</b><i style="--fill:88%"></i><span>provider vault, redaction, retention, egress controls</span></div>
+          <div class="control-rail__row"><b>eval</b><i style="--fill:82%"></i><span>labels, failure clusters, regression gates</span></div>
+          <div class="control-rail__row"><b>compile</b><i style="--fill:70%"></i><span>signed .kolm manifests, recipes, examples, receipts</span></div>
+          <div class="control-rail__row"><b>targets</b><i style="--fill:64%"></i><span>WASM, GGUF, vLLM, ONNX target matrix</span></div>
+          <div class="control-rail__row"><b>exports</b><i style="--fill:78%"></i><span>governance packets, SIEM, GRC, catalog evidence</span></div>
+        </div>
+      </aside>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- overall banner -->
-<section class="section sect--dense reveal" style="border-top:0;padding-top:0">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">01 / Current status</span></div>
-      <div class="sect-rail__body">
-    <div class="band" style="margin-bottom:0" role="status" aria-live="polite">
-      <div class="band__item">
-        <span class="badge badge--ok">All systems operational</span>
+  <section class="section section--lit reveal" id="deploy-readiness" data-deploy-readiness>
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">00 / Deploy command center</span>
+        <h2>Ship only when health, readiness, graph, and claim scope agree.</h2>
+        <p class="lede">The status surface reads the same public contracts an operator should check before deployment: uptime health, production readiness, route graph, and the closeout ledger for external proof gates.</p>
       </div>
-      <div class="band__item" style="color:var(--ink-3);font-size:13.5px">
-        Per-component detail below. No incidents active.
-      </div>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
+      <div class="status-command-grid">
+        <article class="status-live" aria-label="Live deploy readiness checks">
+          <div class="status-live__head">
+            <b>Live readiness gate</b>
+            <span class="status-live__state" data-status-live-state>checking</span>
+          </div>
+          <div class="status-live__grid">
+            <div class="status-live__metric"><span>Health</span><b data-status-health>loading</b><em>/health</em></div>
+            <div class="status-live__metric"><span>Readiness</span><b data-status-ready>loading</b><em>/ready</em></div>
+            <div class="status-live__metric"><span>Routes</span><b data-status-routes>925</b><em>/v1/product/graph</em></div>
+            <div class="status-live__metric"><span>Open gates</span><b data-status-gates>8</b><em>/product-readiness-closeout.json</em></div>
+          </div>
+          <div class="status-live__checks" data-status-checks>
+            <div class="status-live__check" data-ok="false"><b>/health</b><span>waiting for response</span><code>pending</code></div>
+            <div class="status-live__check" data-ok="false"><b>/ready</b><span>waiting for response</span><code>pending</code></div>
+            <div class="status-live__check" data-ok="false"><b>/v1/product/graph</b><span>route graph not loaded yet</span><code>pending</code></div>
+            <div class="status-live__check" data-ok="false"><b>readiness closeout</b><span>open gates not loaded yet</span><code>pending</code></div>
+          </div>
+        </article>
+        <aside class="status-console kolm-surface-media" aria-label="Deployment commands">
+          <div class="status-console__bar">
+            <b>deploy sequence</b>
+            <span>backend first, frontend second</span>
+          </div>
+          <pre translate="no"><span class="ok"># from repo root</span>
+npm.cmd run lint:refs
+npm.cmd run verify:claims-scope
+npm.cmd run ui:audit:critical
+npm.cmd run local:surfaces:deep -- --json
 
-<!-- component table -->
-<section class="section reveal">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">02 / Components</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>What we monitor.</h2>
-      <p style="max-width:60ch;color:var(--ink-3)">Each component is checked continuously and the status here updates on a rolling basis. When a component degrades or goes down, an incident is opened and posted to this page; for anything urgent, write to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>.</p>
-    </div>
-    <div class="tbl-wrap" tabindex="0" role="region" aria-label="Monitored components">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>Component</th>
-            <th>Description</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Public verifier</strong><br><span class="mono" style="font-size:12px">/verify</span></td>
-            <td>In-browser WebCrypto verification of Ed25519-signed evidence reports. No account required. Offline-capable against our published public key.</td>
-            <td><span class="badge badge--ok">Operational</span></td>
-          </tr>
-          <tr>
-            <td><strong>API</strong><br><span class="mono" style="font-size:12px">/v1</span></td>
-            <td>REST control plane for audit initiation, report retrieval, and key publication. Used by the verifier, integrations, and the audit pipeline.</td>
-            <td><span class="badge badge--ok">Operational</span></td>
-          </tr>
-          <tr>
-            <td><strong>Transparency log</strong><br><span class="mono" style="font-size:12px">/v1/log</span></td>
-            <td>Ed25519/SHA-256 Merkle append log (RFC 6962-style) of every issued evidence report. Any report can be confirmed against the log without contacting kolm's servers.</td>
-            <td><span class="badge badge--ok">Operational</span></td>
-          </tr>
-          <tr>
-            <td><strong>Audit pipeline</strong><br><span class="mono" style="font-size:12px">internal</span></td>
-            <td>Automated check runners, signing service, and report assembly. Degradation here may delay report issuance; already-issued reports are not affected.</td>
-            <td><span class="badge badge--ok">Operational</span></td>
-          </tr>
-          <tr>
-            <td><strong>Website</strong><br><span class="mono" style="font-size:12px">kolm.ai</span></td>
-            <td>Public marketing, documentation, and trust pages including /trust, /security, /checks, and /research.</td>
-            <td><span class="badge badge--ok">Operational</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
+<span class="ok"># deploy backend API target used by Vercel rewrites</span>
+railway up
 
-<!-- incident history -->
-<section class="section sect--dense reveal">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">03 / Incidents</span></div>
-      <div class="sect-rail__body" style="max-width:78ch">
-    <div class="section__head">
-      <h2>No incidents on record.</h2>
-    </div>
-    <p style="color:var(--ink-3)">When an incident occurs, a dated entry is posted here with a plain-language description of the affected component, the impact, and the resolution. Questions go to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. There are no incidents to report at this time.</p>
-      </div>
-    </div>
-  </div>
-</section>
+<span class="ok"># deploy public site shell and static assets</span>
+npx.cmd vercel --prod
 
-<!-- what is verified, and the offline guarantee -->
-<section class="section section--ink reveal">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">04 / Offline verification</span></div>
-      <div class="sect-rail__body">
-  <div class="split" style="align-items:flex-start">
-    <div>
-      <h2>Evidence reports survive any outage.</h2>
-      <p class="lede" style="margin-bottom:16px">Every evidence report issued by kolm is signed with an Ed25519 key whose public counterpart is published and pinned. Verification runs on in-browser WebCrypto against that key, so our uptime is never in the trust path. A buyer's security team can confirm the signature, the scope, and the timestamp of any report even when this status page is unreachable.</p>
-      <div class="hero__cta" style="margin-top:8px">
-        <a class="btn btn--primary" href="/docs">Compiler docs</a>
-        <a class="btn btn--ghost" href="https://audit.kolm.ai/verify">Audit verifier</a>
+<span class="warn"># post-deploy gate</span>
+curl https://kolm.ai/ready
+curl https://kolm.ai/v1/product/graph</pre>
+        </aside>
       </div>
+      <p class="status-command-note">A green uptime check does not close public benchmark, certification, package-channel, standards, or external adoption gates. The closeout ledger remains the source of truth for production-final claims.</p>
     </div>
-    <div class="grid" style="gap:14px">
-      <div class="card">
-        <p class="card__k">Signature</p>
-        <h3>Ed25519, published key</h3>
-        <p>Reports carry a detached Ed25519 signature verifiable against a key pinned at <span class="mono">/v1/pubkey</span>. Infrastructure availability does not affect this check.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Log inclusion</p>
-        <h3>Merkle inclusion proof</h3>
-        <p>Each report ships a Merkle inclusion proof against the RFC 6962-style transparency log. The log root is published separately and can be checked offline.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Scope</p>
-        <h3>Cryptographically bound</h3>
-        <p>The agent name, version, capability scope, and audit date are embedded in the signed payload; they cannot be altered without invalidating the signature.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">No account</p>
-        <h3>No login required to verify</h3>
-        <p>The public verifier at <a href="/verify" style="color:var(--ok)">/verify</a> runs entirely in the browser using the WebCrypto API. No credentials, no session, no server round-trip.</p>
-      </div>
-    </div>
-  </div>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- cross-links -->
-<section class="section sect--dense reveal">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">05 / Related</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>More on infrastructure and trust.</h2>
-    </div>
-    <div class="grid grid--3">
-      <div class="card">
-        <p class="card__k">Trust center</p>
-        <h3><a href="/trust" style="color:inherit;text-decoration:none">/trust</a></h3>
-        <p>Security policies, sub-processor list, data handling, how findings map to recognized control frameworks, and the full verifiability guarantee.</p>
+  <section class="section section--lit reveal" id="components">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">01 / Components</span>
+        <h2>Status is organized by source-to-proof stage.</h2>
+        <p class="lede">The page avoids false live-health claims. It shows the public operational posture for static surfaces and the readiness gates that still limit what Kolm can market as fully shipped.</p>
       </div>
-      <div class="card">
-        <p class="card__k">Security</p>
-        <h3><a href="/security" style="color:inherit;text-decoration:none">/security</a></h3>
-        <p>Cryptographic architecture, key management, and our responsible disclosure process.</p>
-      </div>
-      <div class="card">
-        <p class="card__k">Verify</p>
-        <h3><a href="/verify" style="color:inherit;text-decoration:none">/verify</a></h3>
-        <p>Upload any kolm evidence report and confirm its Ed25519 signature, scope, and log inclusion in-browser. No account needed.</p>
-      </div>
-    </div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- final CTA -->
-<section class="section reveal cta-final">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <div class="wrap">
-    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-    <h2>Reach us directly.</h2>
-    <p style="max-width:52ch;margin:0 auto 24px;color:var(--ink-3);text-align:center">For incident reports, infrastructure questions, or anything related to the audit pipeline, write to <a href="mailto:dev@kolm.ai" style="color:var(--ok)">dev@kolm.ai</a>. We aim to respond within one business day.</p>
-    <div class="hero__cta">
-      <a class="btn btn--primary" href="mailto:dev@kolm.ai">dev@kolm.ai</a>
-      <a class="btn btn--ghost" href="/contact">Start an audit</a>
+      <div class="surface-table surface-table--dense" aria-label="Kolm status components">
+        <div class="surface-row">
+          <div class="surface-row__key">public site <span>operational</span></div>
+          <div class="surface-row__body"><b>Primary compiler surface.</b> Main pages, product docs, pricing, trust gates, and route-level API reference are available.</div>
+          <div class="surface-row__route">/</div>
+        </div>
+        <div class="surface-row">
+          <div class="surface-row__key">API reference <span>operational</span></div>
+          <div class="surface-row__body"><b>Generated operating surface.</b> Public route inventory is generated from backend route metadata and checked by tests.</div>
+          <div class="surface-row__route">/docs/api</div>
+        </div>
+        <div class="surface-row">
+          <div class="surface-row__key">control center <span>mounted</span></div>
+          <div class="surface-row__body"><b>Tenant control loop.</b> Channel policy, opaque-event handling, compile state, readiness, and export posture are visible in the account UI contract.</div>
+          <div class="surface-row__route">/account/api-control-center</div>
+        </div>
+        <div class="surface-row">
+          <div class="surface-row__key">compiler artifacts <span>gated</span></div>
+          <div class="surface-row__body"><b>Artifact proof path.</b> Manifests, examples, evaluators, hashes, target recipes, and receipts are represented; package-release and benchmark gates remain explicit.</div>
+          <div class="surface-row__route">/compiler-product</div>
+        </div>
+        <div class="surface-row">
+          <div class="surface-row__key">governance exports <span>mounted</span></div>
+          <div class="surface-row__body"><b>Proof outside the UI.</b> Export modes cover governance packets, SIEM/GRC handoff, catalogs, and verifier receipts without exposing secret values.</div>
+          <div class="surface-row__route">/integrations</div>
+        </div>
+        <div class="surface-row">
+          <div class="surface-row__key">audit evidence <span>secondary</span></div>
+          <div class="surface-row__body"><b>Signed audit evidence remains separate.</b> The audit verifier and signed report workflow stay available on the audit module, but they are not the primary product status model.</div>
+          <div class="surface-row__route">audit.kolm.ai</div>
+        </div>
+      </div>
     </div>
-    <div class="band" style="justify-content:center;padding-bottom:0;margin-top:var(--s5)">
-      <span class="badge badge--ok">Compiler-ready</span>
-      <span class="badge">Signed artifacts</span>
-      <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
-    </div>
-    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-  </div>
-</section>
+  </section>
 
+  <section class="section reveal" id="readiness">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="idx">02 / Readiness gates</span>
+        <h2>Open gates are visible instead of being hidden behind status green.</h2>
+        <p class="lede">A serious infrastructure page separates uptime from product maturity. Kolm still treats external partner proof, live certification, public benchmark evidence, and package release as open readiness work.</p>
+      </div>
+      <div class="pipeline-grid">
+        <article class="pipeline-card">
+          <span class="pipeline-card__n">01</span>
+          <h3>Implemented controls</h3>
+          <p>Capture routes, product graph, account control-center UI contracts, API reference generation, claim-scope audit, and route inventory checks are represented in source and tests.</p>
+        </article>
+        <article class="pipeline-card">
+          <span class="pipeline-card__n">02</span>
+          <h3>Readiness-gated claims</h3>
+          <p>Public copy stays bounded until external partner, live certification, package release, and public benchmark evidence gates have proof in the readiness closeout.</p>
+        </article>
+        <article class="pipeline-card">
+          <span class="pipeline-card__n">03</span>
+          <h3>Secret-safe status</h3>
+          <p>Status and public API responses must expose posture, counts, routes, and gates without dumping credentials, provider payloads, or unknown vendor semantics.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--cta reveal">
+    <div class="wrap">
+      <div class="compiler-rail">
+        <div>
+          <span class="idx">03 / Escalation</span>
+          <h2>For incidents or status questions, contact the platform owner.</h2>
+          <p class="lede">Use the API Control Center for tenant-specific capture or export posture. For public incidents, product readiness evidence, or status corrections, email dev@kolm.ai.</p>
+        </div>
+        <div class="compiler-code" translate="no" aria-label="Status endpoints">
+<span class="prompt">$</span> curl /v1/product/graph
+<span class="ok">ok</span> routes, journeys, readiness
+<span class="prompt">$</span> curl /v1/evidence/readiness
+<span class="ok">ok</span> open gates + proof requirements
+<span class="prompt">$</span> curl /v1/account/api-control-center
+<span class="ok">ok</span> tenant control-center contract</div>
+      </div>
+    </div>
+  </section>
 </main>
 
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
-  <div class="wrap">
-    <div class="foot__grid">
-      <div class="foot__col">
-        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
-          <span>kolm<b>.ai</b></span>
-        </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The API wrapper and compiler for signed artifacts, specialist composition and device deployment.</p>
-      </div>
-      <div class="foot__col">
-        <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
-        <a href="/platform">Platform</a>
-        <a href="https://audit.kolm.ai/checks">Audit checks</a>
-        <a href="https://audit.kolm.ai/report">Audit report</a>
-        <a href="/docs">Docs</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
-      </div>
-      <div class="foot__col">
-        <h3>Trust</h3>
-        <a href="/verify">Verify</a>
-        <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="https://audit.kolm.ai/regulatory-clock">Regulatory clock</a>
-        <a href="/status">Status</a>
-        <a href="https://audit.kolm.ai/transparency-log">Transparency log</a>
-      </div>
-      <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
-      </div>
-      <div class="foot__col">
-        <h3>Company</h3>
-        <a href="/research">Research</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
-        <a href="/contact">Contact</a>
-      </div>
+  <div class="wrap foot__grid">
+    <div class="foot__col">
+      <a class="nav__brand" href="/" aria-label="kolm.ai home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
+        <span>kolm<b>.ai</b></span>
+      </a>
+      <p>API behavior in. Device-fit models out.</p>
     </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
-    <div class="foot__bottom">
-      <span class="badge badge--ok">Compiler-ready</span>
-      <span class="badge">Signed artifacts</span>
-      <span class="badge"><a href="/docs">API docs</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
-    </div>
+    <div class="foot__col"><h3>Product</h3><a href="/compiler-product">Compiler</a><a href="/account/api-control-center">API Control Center</a><a href="/integrations">Integrations</a></div>
+    <div class="foot__col"><h3>Developers</h3><a href="/docs">Docs</a><a href="/docs/api">API Reference</a><a href="/status">Status</a></div>
+    <div class="foot__col"><h3>Trust</h3><a href="/trust">Readiness Gates</a><a href="/security">Security</a><a href="https://audit.kolm.ai/">Audit Module</a></div>
   </div>
 </footer>
+<script>
+(function(){
+  var stateEl = document.querySelector('[data-status-live-state]');
+  var healthEl = document.querySelector('[data-status-health]');
+  var readyEl = document.querySelector('[data-status-ready]');
+  var routesEl = document.querySelector('[data-status-routes]');
+  var gatesEl = document.querySelector('[data-status-gates]');
+  var checksEl = document.querySelector('[data-status-checks]');
+  if (!stateEl || !healthEl || !readyEl || !routesEl || !gatesEl || !checksEl || !window.fetch) return;
+
+  function short(value) {
+    if (value == null || value === '') return 'unknown';
+    return String(value).slice(0, 80);
+  }
+  function fmtNumber(value) {
+    var n = Number(value);
+    if (!Number.isFinite(n)) return short(value);
+    try { return new Intl.NumberFormat('en-US').format(n); }
+    catch (_) { return String(n); }
+  }
+  function checkRow(label, detail, status, ok) {
+    return '<div class="status-live__check" data-ok="'+(ok ? 'true' : 'false')+'"><b>'+escapeHtml(label)+'</b><span>'+escapeHtml(detail)+'</span><code>'+escapeHtml(status)+'</code></div>';
+  }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];
+    });
+  }
+  function getJson(path) {
+    return fetch(path, { headers: { accept: 'application/json' }, credentials: 'same-origin' })
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(body){
+          return { ok: res.ok, status: res.status, body: body };
+        });
+      })
+      .catch(function(err){
+        return { ok: false, status: 0, body: { error: String(err && err.message || err) } };
+      });
+  }
+
+  Promise.all([
+    getJson('/health'),
+    getJson('/ready'),
+    getJson('/v1/product/graph'),
+    getJson('/product-readiness-closeout.json')
+  ]).then(function(results){
+    var health = results[0];
+    var ready = results[1];
+    var graph = results[2];
+    var closeout = results[3];
+    var routeCount = graph.body && graph.body.data && graph.body.data.graph && graph.body.data.graph.counts
+      ? graph.body.data.graph.counts.routes
+      : graph.body && graph.body.counts
+        ? graph.body.counts.routes
+        : 925;
+    var openGates = closeout.body && closeout.body.counts
+      ? closeout.body.counts.open_requirements
+      : Array.isArray(closeout.body && closeout.body.open_requirements)
+        ? closeout.body.open_requirements.length
+        : 8;
+    var readyStatus = ready.body && (ready.body.status || ready.body.ok || ready.body.error);
+    var healthStatus = health.body && (health.body.status || health.body.ok || health.body.error);
+    var allRuntimeOk = health.ok && ready.ok && graph.ok && closeout.ok;
+    healthEl.textContent = health.ok ? 'ok' : 'blocked';
+    readyEl.textContent = ready.ok ? short(readyStatus || 'ready') : 'blocked';
+    routesEl.textContent = fmtNumber(routeCount);
+    gatesEl.textContent = fmtNumber(openGates);
+    stateEl.textContent = allRuntimeOk ? 'runtime ready' : 'gated';
+    checksEl.innerHTML = [
+      checkRow('/health', short(healthStatus || 'health response loaded'), String(health.status), health.ok),
+      checkRow('/ready', short(readyStatus || 'readiness response loaded'), String(ready.status), ready.ok),
+      checkRow('/v1/product/graph', fmtNumber(routeCount) + ' routes mapped across product surfaces', String(graph.status), graph.ok),
+      checkRow('readiness closeout', fmtNumber(openGates) + ' external readiness gates remain open', String(closeout.status), closeout.ok)
+    ].join('');
+  });
+})();
+</script>
 </body>
 </html>

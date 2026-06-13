@@ -138,6 +138,16 @@ function parseJson(text) {
   catch (e) { return { ok: false, error: e.message }; }
 }
 
+function parsedJsonForCheck(check, response, parsed, failures) {
+  if (parsed) return parsed;
+  const p = parseJson(response.text);
+  if (!p.ok) {
+    failures.push(`json parse failed for ${check}: ${p.error}`);
+    return null;
+  }
+  return p.json;
+}
+
 function sha12(buffer) {
   return crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 12);
 }
@@ -160,13 +170,9 @@ async function validateChecks(probe, response) {
       if (!/<html|<!doctype html/i.test(response.text)) failures.push('html document marker missing');
       continue;
     }
-    if (!parsed && ['openapi', 'api-routes', 'sdk-current', 'plans', 'whoami', 'health', 'ready'].includes(check)) {
-      const p = parseJson(response.text);
-      if (!p.ok) {
-        failures.push(`json parse failed for ${check}: ${p.error}`);
-        continue;
-      }
-      parsed = p.json;
+    if (!parsed && ['openapi', 'api-routes', 'sdk-current', 'plans', 'whoami', 'health', 'ready', 'readiness-gated'].includes(check)) {
+      parsed = parsedJsonForCheck(check, response, parsed, failures);
+      if (!parsed) continue;
     }
     if (check === 'openapi') {
       if (!parsed.openapi || !parsed.paths || typeof parsed.paths !== 'object') failures.push('openapi envelope missing openapi/paths');
@@ -194,6 +200,27 @@ async function validateChecks(probe, response) {
           if (parsed.sha !== assetSha) failures.push(`sdk sha ${parsed.sha} != ${assetSha}`);
           if (parsed.sri !== assetSri) failures.push('sdk sri mismatch');
           if (parsed.bytes !== asset.body.length) failures.push(`sdk bytes ${parsed.bytes} != ${asset.body.length}`);
+        }
+      }
+    } else if (check === 'readiness-gated') {
+      if (!parsed || parsed.ok !== true || !parsed.readiness || typeof parsed.readiness !== 'object') {
+        failures.push('readiness-gated envelope missing ok/readiness');
+      } else if (response.status === 503) {
+        const status = String(parsed.readiness.status || parsed.status || '');
+        const scope = String(parsed.claim_scope || parsed.readiness.claim_scope || '');
+        const external = [
+          ...(Array.isArray(parsed.readiness.external_requirements) ? parsed.readiness.external_requirements : []),
+          ...(Array.isArray(parsed.external_requirements) ? parsed.external_requirements : []),
+        ];
+        if (!status || status === 'ready' || status === 'implemented') {
+          failures.push(`readiness-gated 503 reported non-blocking status ${status || '(missing)'}`);
+        }
+        if (!external.length && !/\b(blocked|gated|needs_)/i.test(scope + ' ' + status)) {
+          failures.push('readiness-gated 503 did not include blocked/gated proof requirements');
+        }
+      } else if (response.status === 200) {
+        if (!['ready', 'implemented'].includes(String(parsed.readiness.status || parsed.status || ''))) {
+          failures.push(`readiness-gated 200 reported non-ready status ${parsed.readiness.status || parsed.status || '(missing)'}`);
         }
       }
     }

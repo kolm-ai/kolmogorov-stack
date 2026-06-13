@@ -6,7 +6,7 @@
 <title>API Control Center - kolm.ai</title>
 <meta name="description" content="Enterprise API control center for Kolm gateway capture, egress policy, routing, evaluation, compile, deployment, and export coverage.">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#090C0D">
+<meta name="theme-color" content="#07100D">
 <link rel="canonical" href="https://kolm.ai/account/api-control-center">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -15,35 +15,103 @@
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/kolm-2026.css">
 <style>
+  :root{
+    color-scheme:dark;
+    --paper:#07100d;
+    --paper-2:#0d1716;
+    --paper-sink:#0a1110;
+    --ink:#f3fbf5;
+    --ink-2:#c2d2ca;
+    --ink-3:#81958b;
+    --ink-faint:#66776e;
+    --line:rgba(236,246,240,.13);
+    --line-2:rgba(117,255,157,.30);
+    --line-top:rgba(236,246,240,.22);
+    --accent:#75ff9d;
+    --accent-deep:#3fe58f;
+    --accent-soft:rgba(117,255,157,.10);
+    --accent-edge:rgba(117,255,157,.34);
+    --compile-blue:#6fa6e8;
+    --compile-blue-soft:rgba(111,166,232,.13);
+    --r-md:6px;
+    --r-lg:8px;
+  }
+  html{scroll-padding-top:86px}
+  html{background:var(--paper)}
+  body{
+    background:
+      radial-gradient(900px 430px at 16% 4%,rgba(117,255,157,.13),transparent 70%),
+      radial-gradient(720px 300px at 92% 0%,rgba(111,166,232,.10),transparent 72%),
+      linear-gradient(180deg,#07100d 0%,#0b1312 52%,#101815 100%);
+    color:var(--ink);
+  }
+  body::before{background-image:radial-gradient(rgba(117,255,157,.26) .55px,transparent .55px);background-size:22px 22px;filter:none;opacity:.16;inset:62px 0 0;transform:none;animation:none}
+  body::after{opacity:.045;mix-blend-mode:screen}
   .mono{font-family:var(--mono)}
-  .app{max-width:1180px;margin:0 auto;padding:clamp(32px,5vw,64px) max(22px,env(safe-area-inset-right)) 88px max(22px,env(safe-area-inset-left))}
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}
+  .app{max-width:1240px;margin:0 auto;padding:clamp(28px,5vw,58px) max(22px,env(safe-area-inset-right)) 88px max(22px,env(safe-area-inset-left));overflow-x:clip}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:clamp(28px,4vw,42px)}
   .brandlink{display:inline-flex;align-items:center;gap:9px;min-height:44px;color:var(--ink);text-decoration:none;font-weight:700}
   .brandlink svg{width:24px;height:24px;fill:var(--accent)}
   .navrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .app h1{font-size:clamp(32px,4.2vw,56px);letter-spacing:0;max-width:980px;margin:10px 0 10px}
-  .app>.lede{max-width:78ch;margin:0 0 24px}
-  .hero-panel{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:16px;align-items:stretch;margin:22px 0}
+  .navrow .btn,.auth .btn,.grid .btn{border-radius:6px}
+  .navrow .btn--ghost{background:rgba(236,246,240,.045);border-color:var(--line);color:var(--ink)}
+  .app .btn{touch-action:manipulation}
+  .app .btn--primary{background:var(--accent);border-color:var(--accent);color:#07100d;box-shadow:0 18px 44px rgba(117,255,157,.16)}
+  .app .btn--primary:hover{background:#9cffb8;border-color:#9cffb8}
+  .app .btn--ghost{background:rgba(236,246,240,.045);border-color:var(--line);color:var(--ink)}
+  .app .btn--ghost:hover{background:rgba(236,246,240,.08);border-color:var(--accent-edge)}
+  .app h1,.app h2,.app h3,.section-title,.intake-copy h2{background:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:currentColor!important;color:var(--ink)}
+  .app h1{font-size:clamp(52px,7.2vw,84px);letter-spacing:0;line-height:.96;max-width:1060px;margin:10px 0 18px;color:var(--ink)}
+  .app>.lede,.control-hero__copy .lede{max-width:780px;margin:0 0 34px;color:var(--ink-2);font-size:clamp(17px,1.65vw,21px);line-height:1.55}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;min-height:30px;width:max-content;max-width:100%;padding:5px 10px;border:1px solid var(--accent-edge);border-radius:999px;background:rgba(117,255,157,.055);color:var(--ink-2);font:11px/1.25 var(--mono);text-transform:uppercase;letter-spacing:0}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .control-hero-shell{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,.96fr) minmax(420px,.88fr);grid-template-areas:"copy system" "summary system";gap:18px clamp(30px,5.4vw,72px);align-items:center;min-height:min(590px,calc(100dvh - 240px));margin:0 0 26px}
+  .control-hero-shell::before{content:"";position:absolute;z-index:-1;top:clamp(42px,6vw,76px);right:clamp(-120px,-9vw,-48px);width:min(48vw,620px);height:clamp(260px,36vw,430px);border:1px solid rgba(117,255,157,.20);border-radius:8px;background:url('/compiler-brand-hero.png') 88% 50%/cover no-repeat;box-shadow:0 30px 84px rgba(0,0,0,.28);opacity:.26;transform:rotate(-.45deg);pointer-events:none}
+  .control-hero__copy{min-width:0}
+  .control-hero__copy{grid-area:copy}
+  .control-hero__copy h1{max-width:11ch;text-wrap:balance}
+  .control-hero__summary{grid-area:summary;align-self:start}
+  .control-hero__proof{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0;max-width:760px}
+  .control-hero__proof span{min-height:46px;display:block;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:rgba(236,246,240,.045);color:var(--ink-2);font:11px/1.35 var(--mono)}
+  .control-hero__proof b{color:var(--ink);font-weight:700}
+  .control-hero__actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .control-system{grid-area:system;position:relative;min-width:0;border:1px solid rgba(236,246,240,.13);border-radius:8px;background:#101619;color:#eaf2ec;box-shadow:0 36px 96px rgba(16,19,18,.26);overflow:hidden}
+  .control-system::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(236,246,240,.034) 1px,transparent 1px),linear-gradient(90deg,rgba(236,246,240,.03) 1px,transparent 1px);background-size:28px 28px;opacity:.42;pointer-events:none}
+  .control-system__bar,.control-system__flow,.control-system__footer{position:relative;z-index:1}
+  .control-system__bar{min-height:46px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:0 16px;border-bottom:1px solid rgba(236,246,240,.10);font:12px/1 var(--mono);color:#aeb8b2}
+  .control-system__bar b{color:#f2f6f1}
+  .control-system__bar span:last-child{color:#75d19f;text-align:right}
+  .control-system__flow{display:grid;gap:8px;padding:14px}
+  .control-system__lane{display:grid;grid-template-columns:90px minmax(0,1fr) minmax(72px,.2fr);gap:13px;align-items:center;min-height:64px;padding:11px 13px;border:1px solid rgba(236,246,240,.10);border-radius:6px;background:rgba(7,11,12,.54)}
+  .control-system__lane:first-child{border-color:rgba(37,95,189,.45)}
+  .control-system__lane:nth-child(3){border-color:rgba(10,123,83,.54)}
+  .control-system__lane span{color:#8f9b94;font:700 10.5px/1.3 var(--mono);letter-spacing:0;text-transform:uppercase}
+  .control-system__lane b{display:block;margin-bottom:5px;color:#f2f6f1;font-size:14px;line-height:1.25}
+  .control-system__lane p{margin:0;color:#aeb8b2;font-size:12px;line-height:1.38}
+  .control-system__lane code{color:#75d19f;font:700 11px/1.3 var(--mono);text-align:right;white-space:normal;overflow-wrap:anywhere}
+  .control-system__footer{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 14px;border-top:1px solid rgba(236,246,240,.10);background:rgba(7,11,12,.72);color:#aeb8b2;font:12px/1.45 var(--mono)}
+  .control-system__footer b{color:#75d19f}
+  .hero-panel{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(340px,.98fr);gap:18px;align-items:stretch;margin:32px 0 18px}
   .hero-stack{display:grid;gap:12px}
-  .control-statement{font-size:15px;line-height:1.65;color:var(--ink-2);margin:0}
+  .control-statement{font-size:17px;line-height:1.62;color:var(--ink-2);margin:0;max-width:66ch}
   .coverage-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-  .coverage-strip span{display:block;border:1px solid var(--line);border-radius:6px;background:var(--paper-2);padding:10px;color:var(--ink-3);font:11px/1.35 var(--mono)}
-  .coverage-strip b{display:block;color:var(--ink);font-size:18px;line-height:1;margin-bottom:5px}
+  .coverage-strip span{display:block;border:1px solid var(--line);border-radius:6px;background:rgba(236,246,240,.045);padding:12px;color:var(--ink-3);font:11px/1.35 var(--mono)}
+  .coverage-strip b{display:block;color:var(--ink);font-size:24px;line-height:1;margin-bottom:6px}
   .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}
   .grid--2{grid-template-columns:repeat(2,minmax(0,1fr))}
   .grid--3{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .panel{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-md);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.006));padding:18px;min-width:0}
+  .panel{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-md);background:radial-gradient(220px 120px at 100% 0%,rgba(117,255,157,.075),transparent 72%),linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018)),var(--paper-2);box-shadow:0 24px 70px rgba(0,0,0,.18);padding:18px;min-width:0}
   .metric b{display:block;margin-top:8px;color:var(--ink);font:600 clamp(24px,3vw,34px)/1 var(--mono)}
   .metric span,.muted{color:var(--ink-3);font-size:13px;line-height:1.55}
   .posture-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
-  .posture-item{min-width:0;border:1px solid var(--line);border-radius:6px;background:var(--paper-2);padding:12px}
+  .posture-item{min-width:0;border:1px solid var(--line);border-radius:6px;background:rgba(236,246,240,.045);padding:12px}
   .posture-item span{display:block;color:var(--ink-3);font-size:12px;margin-bottom:7px}
   .posture-item code{display:block;color:var(--ink);font:12px/1.45 var(--mono);white-space:normal;overflow-wrap:anywhere}
   .section-title{font-size:18px;margin:32px 0 12px;letter-spacing:0}
   .policy h3,.channel h3,.control h3{font-size:15px;margin:0 0 8px;letter-spacing:0}
   .policy p,.channel p,.control p{font-size:13.5px;line-height:1.55;color:var(--ink-2);margin:0}
   .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-  .chip{display:inline-flex;align-items:center;min-height:26px;padding:4px 8px;border:1px solid var(--line-2);border-radius:4px;background:var(--paper-2);color:var(--ink-2);font:11px/1.25 var(--mono)}
+  .chip{display:inline-flex;align-items:center;min-height:26px;padding:4px 8px;border:1px solid var(--line-2);border-radius:4px;background:rgba(117,255,157,.055);color:var(--ink-2);font:11px/1.25 var(--mono)}
   .channel{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}
   .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
   .flow span{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border-radius:4px;border:1px solid var(--line);color:var(--ink-2);font:11px/1.2 var(--mono)}
@@ -54,10 +122,10 @@
   .stage-card{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;align-items:start}
   .stage-card b{color:var(--ink);font-size:14px}
   .stage-card p{margin:0;color:var(--ink-2);font-size:13px;line-height:1.55}
-  .workbench{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:14px;margin:22px 0}
+  .workbench{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:clamp(14px,2vw,22px);margin:28px 0}
   .workbench__lead{display:grid;align-content:start;gap:12px}
   .workbench__lead p{margin:0;color:var(--ink-2);font-size:13.5px;line-height:1.62}
-  .workbench__rule{padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper-2);color:var(--ink);font:12px/1.55 var(--mono)}
+  .workbench__rule{padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:rgba(236,246,240,.045);color:var(--ink);font:12px/1.55 var(--mono)}
   .workbench-steps{display:grid;gap:10px}
   .workbench-step{display:grid;grid-template-columns:minmax(170px,.48fr) minmax(0,1fr);gap:10px 12px;align-items:start}
   .workbench-step b{display:block;color:var(--ink);font-size:14px;margin-bottom:6px}
@@ -66,6 +134,64 @@
   .workbench-step code{grid-column:1/-1;display:block;color:var(--compile-blue,#6fa6e8);font:11px/1.45 var(--mono);white-space:normal;overflow-wrap:anywhere}
   .summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   .summary-grid .panel{min-height:100%}
+  .object-ledger{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .object-group{display:grid;grid-template-columns:minmax(150px,.46fr) minmax(0,1fr);gap:12px;align-items:start}
+  .object-group b{display:block;color:var(--ink);font-size:14px}
+  .object-group .chips{margin-top:0}
+  .adapter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  .adapter-card{display:grid;gap:9px}
+  .adapter-card h3{font-size:14px;margin:0;letter-spacing:0}
+  .adapter-card p{margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.5}
+  .adapter-card code{display:block;color:var(--compile-blue,#6fa6e8);font:11px/1.45 var(--mono);white-space:normal;overflow-wrap:anywhere}
+  .envelope-grid{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:12px;align-items:start}
+  .envelope-grid code{display:block;padding:11px;border:1px solid var(--line);border-radius:5px;background:var(--paper-sink);color:var(--ink);font:11px/1.55 var(--mono);white-space:normal;overflow-wrap:anywhere}
+  .intake-panel{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(16px,2.4vw,26px);align-items:start;margin:30px 0}
+  .intake-copy{display:grid;align-content:start;gap:12px}
+  .intake-copy h2{font-size:clamp(28px,3.8vw,48px);line-height:1.02;margin:0;letter-spacing:0}
+  .intake-copy p{margin:0;color:var(--ink-2);font-size:15px;line-height:1.6}
+  .intake-console{min-width:0;border:1px solid rgba(236,246,240,.12);border-radius:8px;background:#101619;color:#eaf0ed;overflow:hidden;box-shadow:0 32px 72px rgba(16,19,18,.22)}
+  .intake-console__bar{min-height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid rgba(236,246,240,.10);background:#171f22;color:#a6b0a9;font:12px/1 var(--mono)}
+  .intake-console__bar::before{content:"";width:10px;height:10px;border-radius:99px;background:#3fe5a0;box-shadow:18px 0 0 rgba(255,255,255,.18),36px 0 0 rgba(255,255,255,.12);margin-right:36px}
+  .intake-console pre{margin:0;padding:20px;overflow:auto;color:#cdd7d2;font:12px/1.62 var(--mono);white-space:pre-wrap}
+  .intake-console .ok{color:#3fe5a0}
+  .intake-console .key{color:#6fa6e8}
+  .intake-workbench{display:grid;align-content:start;gap:14px;padding:0 0 16px}
+  .intake-workbench .intake-console__bar{margin-bottom:0}
+  .intake-form__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:16px 16px 0}
+  .intake-field{display:grid;gap:7px;min-width:0;color:#a6b0a9;font:700 10.5px/1.35 var(--mono);letter-spacing:0;text-transform:uppercase}
+  .intake-field--wide{padding:0 16px}
+  .intake-field input,.intake-field select,.intake-field textarea{width:100%;min-height:44px;border:1px solid rgba(236,246,240,.14);border-radius:6px;background:#0a1012;color:#eef5f1;font:12px/1.5 var(--mono);padding:10px 11px;text-transform:none;letter-spacing:0;box-sizing:border-box}
+  .intake-field textarea{min-height:132px;resize:vertical;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+  .intake-field input:focus,.intake-field select:focus,.intake-field textarea:focus{outline:2px solid #75d19f;outline-offset:2px;border-color:rgba(117,209,159,.36)}
+  .intake-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:0 16px}
+  .intake-actions .btn{border-radius:6px}
+  .intake-route{min-width:0;color:#75d19f;font:700 11px/1.35 var(--mono);overflow-wrap:anywhere}
+  .intake-result{display:grid;gap:10px;margin:0 16px;padding:12px;border:1px solid rgba(236,246,240,.10);border-radius:6px;background:rgba(7,11,12,.62);color:#cdd7d2}
+  .intake-result__top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#a6b0a9;font:11px/1.35 var(--mono)}
+  .intake-result__top b{color:#75d19f}
+  .intake-result__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .intake-result__grid span{min-width:0;border:1px solid rgba(236,246,240,.10);border-radius:5px;background:#0a1012;padding:8px;color:#a6b0a9;font:11px/1.4 var(--mono);overflow-wrap:anywhere}
+  .intake-result__grid b{display:block;margin-bottom:4px;color:#f3f7f4}
+  .intake-result pre{padding:0;max-height:260px;font-size:11px;color:#cdd7d2}
+  .intake-error{color:#f2c66d}
+  .intake-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .intake-list span{display:block;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:6px;background:rgba(236,246,240,.045);padding:9px 10px;color:var(--ink-2);font:11px/1.35 var(--mono);overflow-wrap:anywhere}
+  .manifest-panel{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:clamp(16px,2.4vw,26px);align-items:start;margin:30px 0}
+  .manifest-copy{display:grid;align-content:start;gap:12px}
+  .manifest-copy h2{font-size:clamp(28px,3.8vw,48px);line-height:1.02;margin:0;letter-spacing:0}
+  .manifest-copy p{margin:0;color:var(--ink-2);font-size:15px;line-height:1.6}
+  .manifest-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .manifest-list span{display:block;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:6px;background:rgba(236,246,240,.045);padding:9px 10px;color:var(--ink-2);font:11px/1.35 var(--mono);overflow-wrap:anywhere}
+  .egress-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .egress-card{display:grid;gap:9px}
+  .egress-card h3{font-size:14px;margin:0;letter-spacing:0}
+  .egress-card p{margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.5}
+  .scoreboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .score{display:grid;gap:8px}
+  .score b{font-size:14px;color:var(--ink)}
+  .score span{display:inline-flex;width:max-content;max-width:100%;min-height:26px;align-items:center;padding:3px 8px;border:1px solid var(--line-2);border-radius:4px;color:var(--accent);background:var(--accent-soft);font:11px/1.3 var(--mono)}
+  .score span[data-status*="needs"]{color:var(--compile-blue,#6fa6e8);background:rgba(111,166,232,.08)}
+  .score p{margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.5}
   .loop-head{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);gap:12px;align-items:start}
   .loop-head p{margin:0;color:var(--ink-2);font-size:13.5px;line-height:1.6}
   .loop-rail{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:12px}
@@ -75,36 +201,51 @@
   .loop-step p{margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.5}
   .loop-step code{display:block;color:var(--ink-3);font:11px/1.45 var(--mono);white-space:normal;overflow-wrap:anywhere}
   .integration-list{display:grid;gap:10px}
-  .integration-card{display:grid;grid-template-columns:minmax(190px,.75fr) minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start;border:1px solid var(--line);border-radius:var(--r-md);background:var(--paper-2);padding:14px;min-width:0}
+  .integration-card{display:grid;grid-template-columns:minmax(190px,.75fr) minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start;border:1px solid var(--line);border-radius:var(--r-md);background:rgba(236,246,240,.045);padding:14px;min-width:0}
   .integration-card b{display:block;color:var(--ink);font-size:14px}
   .integration-card span{display:block;color:var(--ink-3);font:11px/1.45 var(--mono);margin-top:5px}
   .integration-card p{margin:0;color:var(--ink-2);font-size:13px;line-height:1.55}
   .channel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:32px 0 12px}
   .channel-head .section-title{margin:0}
   .channel-toolbar{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}
-  .filter-button{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:5px;background:var(--paper-2);color:var(--ink-2);font:11px/1.25 var(--mono);cursor:pointer}
+  .filter-button{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:5px;background:rgba(236,246,240,.045);color:var(--ink-2);font:11px/1.25 var(--mono);cursor:pointer}
   .filter-button:hover{border-color:var(--line-2);color:var(--ink)}
   .filter-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   .filter-button[aria-pressed="true"]{border-color:var(--accent-edge);background:var(--accent-soft);color:var(--accent)}
   .scope-note{margin-top:12px;color:var(--ink-3);font-size:12.5px;line-height:1.55}
-  .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--r-md);background:var(--paper-2)}
+  .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--r-md);background:rgba(236,246,240,.045)}
   table{width:100%;border-collapse:collapse;min-width:720px}
   th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{font:600 10.5px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);background:var(--paper-sink)}
+  th{font:600 10.5px/1.3 var(--mono);letter-spacing:0;text-transform:uppercase;color:var(--ink-3);background:var(--paper-sink)}
   td{font-size:13px;line-height:1.5;color:var(--ink-2)}
   tr:last-child td{border-bottom:0}
+  .preview-gate{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.34fr);gap:14px;align-items:end;border:1px solid rgba(117,255,157,.24);border-top-color:rgba(236,246,240,.22);border-radius:8px;background:linear-gradient(135deg,rgba(111,166,232,.12),rgba(117,255,157,.10) 54%,rgba(236,246,240,.035));box-shadow:0 28px 74px rgba(0,0,0,.22);padding:18px;margin:18px 0 30px}
+  .preview-gate h2{font-size:clamp(22px,2.8vw,34px);line-height:1.05;margin:8px 0 8px;letter-spacing:0;text-wrap:balance}
+  .preview-gate p{max-width:76ch;margin:0;color:var(--ink-2);font-size:14px;line-height:1.6}
+  .preview-gate__status{display:grid;gap:8px}
+  .preview-gate__status span{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:36px;border:1px solid var(--line);border-radius:6px;background:rgba(236,246,240,.05);padding:7px 9px;color:var(--ink-3);font:11px/1.35 var(--mono)}
+  .preview-gate__status b{color:var(--ink);font-weight:700;text-align:right}
   .banner{border:1px solid var(--line-2);border-radius:var(--r-md);padding:13px 16px;margin:16px 0;font-size:14px;line-height:1.55;background:var(--paper-2);color:var(--ink-2)}
   .banner.warn{border-color:rgba(227,195,104,.38);background:rgba(227,195,104,.08);color:var(--ink)}
-  .auth{max-width:520px;margin:26px 0;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:24px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.006))}
-  .auth input{width:100%;margin:14px 0 12px;padding:12px;border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--paper-sink);color:var(--ink);font:14px var(--mono)}
+  .auth{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.58fr);gap:18px;align-items:end;max-width:none;margin:22px 0 18px;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:20px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018)),var(--paper-2);box-shadow:0 24px 68px rgba(0,0,0,.18)}
+  .auth__copy h2{margin:0 0 8px}
+  .auth__copy p{max-width:68ch;margin:0}
+  .auth__form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px 10px;align-items:end}
+  .auth__form label{grid-column:1/-1}
+  .auth input{width:100%;min-height:44px;margin:0;padding:12px;border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--paper-sink);color:var(--ink);font:14px var(--mono)}
   .auth input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .auth .btn{min-height:44px;white-space:nowrap}
+  .control-hero__summary .auth{margin:16px 0 0;padding:16px}
+  .control-hero__summary .auth__copy h2{font-size:16px;line-height:1.15}
+  .control-hero__summary .auth__copy p{font-size:12.5px;line-height:1.5}
   [hidden]{display:none!important}
-  @media (max-width:1120px){.loop-rail{grid-template-columns:repeat(3,minmax(0,1fr))}}
-  @media (max-width:920px){.hero-panel,.grid,.grid--2,.grid--3,.posture-grid,.summary-grid,.coverage-strip,.integration-card,.loop-head,.workbench,.workbench-step{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.channel-head{display:grid;align-items:start}.channel-toolbar{justify-content:flex-start}}
-  @media (max-width:680px){.loop-rail{grid-template-columns:1fr}}
+  @media (max-width:1120px){.loop-rail{grid-template-columns:repeat(3,minmax(0,1fr))}.adapter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.egress-grid,.scoreboard{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:920px){.control-hero-shell,.hero-panel,.grid,.grid--2,.grid--3,.posture-grid,.summary-grid,.coverage-strip,.integration-card,.loop-head,.workbench,.workbench-step,.object-ledger,.object-group,.adapter-grid,.envelope-grid,.egress-grid,.scoreboard,.intake-panel,.intake-list,.intake-form__grid,.intake-result__grid,.manifest-panel,.manifest-list,.preview-gate,.auth{grid-template-columns:1fr}.control-hero-shell{grid-template-areas:"copy" "summary" "system";min-height:0;margin-bottom:28px}.control-hero-shell::before{right:-42vw;width:96vw;height:300px;opacity:.09}.topbar{align-items:flex-start;flex-direction:column;margin-bottom:34px}.channel-head{display:grid;align-items:start}.channel-toolbar{justify-content:flex-start}.auth__form{grid-template-columns:1fr}.auth .btn{width:100%;justify-content:center}}
+  @media (max-width:680px){.loop-rail{grid-template-columns:1fr}.app{padding-top:22px}.app h1{font-size:clamp(44px,15vw,64px);margin-bottom:14px}.app>.lede,.control-hero__copy .lede{margin-bottom:20px}.control-hero-shell{gap:18px}.control-hero-shell::before{display:none}.control-hero__proof{grid-template-columns:1fr 1fr}.control-hero__actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}.control-hero__actions .btn{justify-content:center;width:100%}.control-system__bar{grid-template-columns:auto minmax(0,1fr)}.control-system__bar span:last-child{display:none}.control-system__flow{gap:8px;padding:12px}.control-system__lane{grid-template-columns:1fr;gap:7px;min-height:0;padding:10px 12px}.control-system__lane code{text-align:left}.control-system__footer{grid-template-columns:1fr;padding:11px 12px}.preview-gate{padding:15px;margin-bottom:24px}.intake-console pre{font-size:11px;padding:16px}.intake-field--wide{padding:0 12px}.intake-form__grid{padding:14px 12px 0}.intake-actions{display:grid;grid-template-columns:1fr;padding:0 12px}.intake-actions .btn{width:100%;justify-content:center}.intake-result{margin:0 12px}.table-wrap{overflow:visible}.table-wrap table,.table-wrap thead,.table-wrap tbody,.table-wrap tr,.table-wrap td{display:block;width:100%;min-width:0}.table-wrap thead{display:none}.table-wrap tr{padding:10px 0;border-bottom:1px solid var(--line)}.table-wrap tr:last-child{border-bottom:0}.table-wrap td{display:grid;grid-template-columns:88px minmax(0,1fr);gap:9px;border-bottom:0;padding:8px 12px;overflow-wrap:anywhere}.table-wrap td::before{content:attr(data-label);color:var(--ink-3);font:700 10px/1.35 var(--mono);letter-spacing:0;text-transform:uppercase}.table-wrap td strong,.table-wrap td span{overflow-wrap:anywhere}}
+  @media (max-width:460px){.navrow{width:100%}.navrow .btn{flex:1 1 auto;justify-content:center}}
 </style>
 </head>
-<body>
+<body data-design-reference="image-2">
 <a class="skip-link" href="#main">Skip to content</a>
 <main id="main" class="app">
   <div class="topbar">
@@ -119,19 +260,71 @@
     </div>
   </div>
 
-  <p class="eyebrow">Enterprise / API Control</p>
-  <h1>API control center</h1>
-  <p class="lede">One tenant-scoped console for AI API ingress, egress, provider routing, capture retention, redaction, evaluation, compile artifacts, device targets, and exports.</p>
-
-  <div id="banner"></div>
-  <section id="auth" class="auth" hidden>
-    <h2 class="section-title" style="margin-top:0">Open control center</h2>
-    <p class="muted">Use your active session, or paste a Kolm API key that starts with <span class="mono">ks_</span>.</p>
-    <label class="muted" for="keyInput">API key</label>
-    <input id="keyInput" name="api_key" placeholder="ks_&hellip;" autocomplete="off" spellcheck="false">
-    <button class="btn btn--primary" id="keyBtn" type="button" style="width:100%">Open control center</button>
+  <section class="control-hero-shell" aria-label="API Control Center command surface">
+    <div class="control-hero__copy">
+      <p class="eyebrow">Enterprise / API Control</p>
+      <h1>API Control Center</h1>
+      <p class="lede">One tenant-scoped console for AI API ingress, egress, provider routing, capture retention, redaction, evaluation, compile artifacts, device targets, and exports.</p>
+    </div>
+    <aside class="control-system" aria-label="Source-to-proof API control plane visual">
+      <div class="control-system__bar">
+        <b>API plane</b>
+        <span>workspace/prod-ai-loop</span>
+        <span>readiness gated</span>
+      </div>
+      <div class="control-system__flow">
+        <div class="control-system__lane">
+          <span>Ingest</span>
+          <div><b>Every credible source</b><p>REST, SDK, gateway, OpenTelemetry, webhook, queue, MCP, A2A, warehouse, file, and custom adapter events.</p></div>
+          <code>17 families</code>
+        </div>
+        <div class="control-system__lane">
+          <span>Govern</span>
+          <div><b>Policy before interpretation</b><p>Unknown payloads stay opaque until schema evidence, retention class, redaction, purpose, and egress policy are declared.</p></div>
+          <code>8 stages</code>
+        </div>
+        <div class="control-system__lane">
+          <span>Compile</span>
+          <div><b>Behavior becomes an artifact</b><p>Promoted examples, evaluator gates, hashes, target recipes, and verifier receipts travel with the signed package.</p></div>
+          <code>.kolm</code>
+        </div>
+        <div class="control-system__lane">
+          <span>Export</span>
+          <div><b>Proof leaves the dashboard</b><p>SIEM, GRC, warehouse, ticketing, docs, OpenAPI, webhooks, and auditor packets carry destination context.</p></div>
+          <code>10 modes</code>
+        </div>
+      </div>
+      <div class="control-system__footer">
+        <span><b>ok</b> canonical event envelope</span>
+        <span>secret_values_included: false</span>
+      </div>
+    </aside>
+    <div class="control-hero__summary">
+      <div class="control-hero__proof" aria-label="Control center coverage">
+        <span><b>17</b> data channel families</span>
+        <span><b>12</b> collection modes</span>
+        <span><b>10</b> export modes</span>
+        <span><b>8</b> governance stages</span>
+      </div>
+      <div class="control-hero__actions">
+        <a class="btn btn--primary" href="/docs/api">Read API Contract</a>
+        <a class="btn btn--ghost" href="/trust">View Readiness Gates</a>
+      </div>
+      <section id="auth" class="auth" hidden aria-label="API key access gate">
+        <div class="auth__copy">
+          <h2 class="section-title">Open Control Center</h2>
+          <p class="muted" id="keyHelp">Preview the operating surface below. Paste a workspace key that starts with <span class="mono">ks_</span> to load tenant data and run writes.</p>
+        </div>
+        <div class="auth__form">
+          <label class="muted" for="keyInput">API Key</label>
+          <input id="keyInput" name="api_key" type="password" inputmode="text" placeholder="ks_&hellip;" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="keyHelp">
+          <button class="btn btn--primary" id="keyBtn" type="button">Open Control Center</button>
+        </div>
+      </section>
+    </div>
   </section>
 
+  <div id="banner"></div>
   <div id="content" aria-live="polite"><div class="banner">Loading API control center&hellip;</div></div>
 </main>
 
@@ -148,7 +341,204 @@
   function headers(){ var h = {}; if (KEY) h.Authorization = 'Bearer ' + KEY; return h; }
   function chip(x){ return '<span class="chip">'+esc(x)+'</span>'; }
   function metric(label, value){ return '<div class="panel metric"><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>'; }
-  function showAuth(){ document.getElementById('content').hidden = true; document.getElementById('auth').hidden = false; }
+  function channel(id,label,directions,styles,routes,controls){ return { id:id, label:label, directions:directions, styles:styles, routes:routes, controls:controls }; }
+  function mode(id,label,direction,examples){ return { id:id, label:label, direction:direction, examples:examples }; }
+  function demoControlCenterPayload(){
+    return {
+      ok: true,
+      version: 'kolm-api-control-center-preview',
+      product: 'kolm AI compiler',
+      category: 'enterprise API control center',
+      preview: true,
+      secret_values_included: false,
+      tenant: { id: 'preview-workspace', name: 'preview-workspace', plan: 'preview' },
+      posture: {
+        default_capture_mode: 'metadata-and-redacted-body',
+        default_egress_mode: 'deny-until-provider-or-destination-is-declared',
+        cache_policy: 'tenant-isolated-cache-keys-only',
+        unknown_payload_policy: 'accept-as-opaque-event-when-size-and-tenant-policy-allow',
+        production_claim: 'preview contract; tenant data and persisted writes require a workspace API key'
+      },
+      counters: { observed_captures: 1284, routing_events: 927, compile_jobs: 38, artifacts: 19, devices: 12 },
+      coverage: {
+        data_channels: [
+          channel('rest-json','REST JSON APIs',['ingress','egress'],['OpenAI-compatible chat','Anthropic messages','generic JSON request/response','tool-call payloads'],['/v1/route/chat/completions','/v1/gateway/dispatch','/v1/responses'],['tenant key','namespace','provider vault','redaction','capture policy','budget cap']),
+          channel('streaming','Streaming APIs',['ingress','egress'],['SSE chunks','token deltas','reasoning traces','tool-call deltas'],['/v1/route/chat/completions','/v1/streaming/capabilities'],['chunk normalization','trace correlation','redaction before persistence','latency accounting']),
+          channel('webhooks','Webhook and event callbacks',['ingress','egress'],['signed webhooks','automation triggers','status callbacks','delivery receipts'],['/v1/webhooks','/v1/automations','/v1/notifications'],['signature verification','retry policy','event ledger','tenant fence']),
+          channel('batch-jsonl','Batch files and JSONL',['ingress','egress'],['JSONL corpora','CSV exports','capture exports','dataset snapshots'],['/v1/capture/export','/v1/corpora','/v1/datasets'],['retention policy','schema validation','redaction pass','receipt hash']),
+          channel('otel','OpenTelemetry and trace spans',['ingress','egress'],['OTLP traces','GenAI spans','metrics','distributed trace context'],['/v1/otel','/v1/gateway/dashboard','/v1/product/experience'],['span attributes','trace joins','metrics rollup','no secret values in public envelopes']),
+          channel('mcp','MCP tool traffic',['ingress','egress'],['tool discovery','tool calls','context resources','tool results'],['/v1/mcp','/v1/tools','/v1/automations'],['scoped keys','tool approval policy','audit trail','recoverable error metadata']),
+          channel('a2a','Agent-to-agent traffic',['ingress','egress'],['agent messages','handoffs','delegated tool calls','status events'],['/v1/a2a','/v1/agents','/v1/automations'],['agent identity','least privilege','handoff evidence','policy escalation']),
+          channel('browser-events','Browser and client events',['ingress'],['client errors','feedback events','session markers','user-visible state'],['/v1/client-error','/v1/feedback','/v1/sessions'],['PII minimization','origin-bound session','tenant fence','rate limit']),
+          channel('file-blob','Files and blobs',['ingress','egress'],['attachments','model artifacts','receipts','signed reports','bundle downloads'],['/v1/artifacts','/v1/receipts','/v1/export'],['content hash','signature verification','lifecycle state','download gate']),
+          channel('custom-adapter','Custom adapters',['ingress','egress'],['custom headers','opaque JSON envelopes','vendor-specific payloads','legacy API bridges'],['/v1/bridges/observe','/v1/connectors','/v1/gateway/dispatch'],['adapter manifest','schema hints','default deny egress','operator review']),
+          channel('graphql-rpc','GraphQL, RPC, and typed operations',['ingress','egress'],['GraphQL queries and mutations','GraphQL subscriptions','JSON-RPC envelopes','gRPC-over-JSON payloads'],['/v1/bridges/observe','/v1/connectors','/v1/gateway/dispatch'],['operation signature','schema hints','query/body redaction','adapter manifest']),
+          channel('message-queues','Queues, topics, and event streams',['ingress','egress'],['Kafka topics','Pub/Sub events','SQS/SNS messages','EventBridge events','RabbitMQ deliveries'],['/v1/bridges/observe','/v1/notifications/settings','/v1/connectors'],['topic allowlist','partition/window metadata','dead-letter receipt','tenant event fence']),
+          channel('warehouse-lakehouse','Warehouses, lakes, and object stores',['ingress','egress'],['Snowflake/BigQuery/Databricks extracts','S3/GCS/Azure Blob drops','Iceberg/Delta tables','Parquet snapshots'],['/v1/capture/export','/v1/exports','/v1/evidence'],['dataset manifest','retention clock','row/column redaction','receipt hash']),
+          channel('database-cdc','Database and CDC feeds',['ingress'],['SQL extracts','PostgreSQL/MySQL CDC','MongoDB/DynamoDB change events','Redis streams'],['/v1/bridges/observe','/v1/datasets','/v1/corpora'],['source cursor','schema drift flag','PII minimization','replay window']),
+          channel('siem-log-drain','SIEM, log drains, and telemetry sinks',['ingress','egress'],['Datadog/Splunk/Elastic events','Cloudflare Logpush','Filebeat/Fluent/Logstash drains','OTLP log records'],['/v1/otel','/v1/notifications/log','/v1/capture/export'],['secret scrub','severity mapping','trace correlation','export receipt']),
+          channel('collab-ticketing','Collaboration and ticketing systems',['ingress','egress'],['Slack/Teams alerts','Jira/Linear issues','GitHub events','ServiceNow incidents','approval callbacks'],['/v1/notifications/settings','/v1/webhooks','/v1/connectors/notify'],['approval gate','least-privilege webhook','delivery ledger','human review marker']),
+          channel('registry-packages','Registries, packages, and release channels',['egress'],['OCI artifacts','Sigstore/Rekor-style provenance','npm/PyPI packages','Hugging Face/Ollama/R2/GitHub exports'],['/v1/exports','/v1/artifacts','/v1/receipts/verify'],['package manifest','signing policy','release gate','external verifier path'])
+        ],
+        collection_modes: [
+          mode('proxy','Provider-compatible proxy','ingress',['OpenAI-compatible chat','Anthropic messages','generic JSON']),
+          mode('sdk-log','SDK or direct log call','ingress',['capture log','feedback event','manual trace marker']),
+          mode('stream','Streaming capture','ingress',['SSE chunks','token deltas','tool-call deltas']),
+          mode('webhook-listener','Webhook listener','ingress',['signed callback','status event','approval callback']),
+          mode('batch-import','Batch import','ingress',['JSONL','CSV','Parquet snapshot']),
+          mode('trace-import','Trace import','ingress',['OTLP trace','trace/eval export','GenAI span']),
+          mode('file-upload','File or object upload','ingress',['attachment','artifact bundle','receipt bundle']),
+          mode('queue-consume','Queue or topic consume','ingress',['Kafka topic','Pub/Sub event','SQS message']),
+          mode('warehouse-drop','Warehouse or lake drop','ingress',['Snowflake extract','BigQuery table','object-store snapshot']),
+          mode('cdc-feed','Database CDC feed','ingress',['PostgreSQL CDC','MongoDB change event','Redis stream']),
+          mode('browser-beacon','Browser/client beacon','ingress',['client error','session marker','feedback event']),
+          mode('custom-observe','Custom adapter observe','ingress',['opaque vendor envelope','legacy API bridge','adapter manifest'])
+        ],
+        export_modes: [
+          mode('provider-response','Provider-compatible response','egress',['chat completion','tool result','fallback reason']),
+          mode('stream-response','Streaming response','egress',['SSE delta','normalized chunk','latency marker']),
+          mode('webhook-delivery','Webhook delivery','egress',['automation callback','status delivery','approval event']),
+          mode('batch-export','Batch export','egress',['JSONL','CSV','Parquet-style snapshot']),
+          mode('otel-export','Telemetry export','egress',['OTLP traces','metrics','log records']),
+          mode('warehouse-export','Warehouse/object-store export','egress',['S3/R2 drop','warehouse table','dataset manifest']),
+          mode('ticketing-export','Ticketing and approval export','egress',['Jira issue','Linear issue','ServiceNow incident']),
+          mode('package-release','Package or registry release','egress',['OCI artifact','npm/PyPI package','Hugging Face export']),
+          mode('governance-packet','Governance packet','egress',['assurance case','control evidence','buyer export']),
+          mode('verifier-receipt','Verifier receipt','egress',['manifest hash','signature','public verifier link'])
+        ],
+        governance_stages: [
+          { id:'accept', label:'Accept', proof:'tenant identity, source, namespace, size, and route are recorded before payload handling' },
+          { id:'classify', label:'Classify', proof:'channel family, direction, schema hints, and adapter status are attached to the event' },
+          { id:'redact', label:'Redact', proof:'secret and PII handling runs before persistence or outbound export' },
+          { id:'route', label:'Route', proof:'provider, destination, fallback reason, cache boundary, and budget decision are recorded' },
+          { id:'evaluate', label:'Evaluate', proof:'eval gates, regression checks, drift markers, and human review state can block promotion' },
+          { id:'compile', label:'Compile', proof:'accepted examples and evaluator context can become signed artifact inputs' },
+          { id:'target', label:'Target', proof:'runtime fit, incompatible features, package files, and promotion state are explicit' },
+          { id:'export', label:'Export', proof:'receipts, manifests, hashes, governance packets, and delivery ledgers leave the UI' }
+        ],
+        policy_layers: [
+          { id:'identity', label:'Identity and tenant fence', controls:['tenant API keys','scoped keys','RBAC','SSO/SAML/SCIM hooks'] },
+          { id:'provider-vault', label:'Provider vault', controls:['central provider keys','BYOK/BYOC paths','model entitlements','secret-safe envelopes'] },
+          { id:'capture', label:'Capture policy', controls:['sample rate','body retention mode','namespace capture windows','redaction before persistence'] },
+          { id:'egress', label:'Egress policy', controls:['destination allowlist','subprocessor mapping','PII/secret block','response redaction'] },
+          { id:'routing', label:'Routing and cost', controls:['provider fallback','budget caps','latency policy','cache isolation'] },
+          { id:'evaluation', label:'Evaluation and gates', controls:['production evals','drift alerts','regression gates','human review queue'] },
+          { id:'compile', label:'Compile and artifact', controls:['corpus selection','artifact receipt','evidence DAG','production-ready gate'] },
+          { id:'export', label:'Export and auditability', controls:['OpenAPI','JSONL/CSV','OTLP metrics','signed receipts','assurance case'] }
+        ],
+        first_class_objects: [
+          { group:'Workspace and identity', objects:['workspace','project','environment','tenant key','scoped key','role','user','team','service account'] },
+          { group:'Sources and connectors', objects:['source','connector','adapter manifest','schema hint','credential reference','provider','route','namespace'] },
+          { group:'Traffic and traces', objects:['event','trace','session','prompt','completion','tool call','agent step','browser action','webhook','log record'] },
+          { group:'Policies and gates', objects:['capture policy','redaction policy','retention policy','egress policy','budget cap','approval gate','readiness gate'] },
+          { group:'Improvement loop', objects:['human label','failure taxonomy','dataset','eval suite','evaluator','regression set','curriculum bundle','compile run'] },
+          { group:'Artifacts and exports', objects:['artifact','manifest','runtime target','deployment plan','receipt','verifier key','governance packet','export job','delivery ledger'] }
+        ],
+        adapter_states: [
+          { id:'opaque', label:'Opaque Governed Event', semantic_claim:'none', required_evidence:['tenant policy allows storage','size limit passes','redaction pass runs','source and direction are recorded'], operator_action:'store as opaque payload, block semantic dashboards, require review before egress' },
+          { id:'schema-hinted', label:'Schema-Hinted Event', semantic_claim:'bounded field hints only', required_evidence:['declared content type','sample schema','field allowlist','retention class'], operator_action:'map only hinted fields, keep unknown fields opaque, route to adapter backlog' },
+          { id:'manifest-declared', label:'Adapter Manifest Declared', semantic_claim:'adapter-owned field mapping', required_evidence:['adapter version','input and output schema','redaction map','egress destinations','test fixture'], operator_action:'enable typed policy, trace joins, eval rows, and export receipts for mapped fields' },
+          { id:'native-connector', label:'Native Connector', semantic_claim:'first-class object semantics', required_evidence:['connector owner','contract tests','secret handling proof','lineage and receipt mapping'], operator_action:'promote to first-class source or sink with tenant-visible health and drift state' },
+          { id:'verified-runtime-target', label:'Verified Runtime Target', semantic_claim:'artifact can target this runtime class when readiness gates pass', required_evidence:['target recipe','incompatible feature list','package manifest','benchmark or smoke evidence'], operator_action:'allow compile target recommendation and governance packet export' }
+        ],
+        event_envelope: {
+          version:'kolm-control-event-envelope-1',
+          required_fields:['event_id','tenant_id','source_id','channel_family','direction','observed_at','schema_status','payload_policy','redaction_result','retention_class','policy_decision_id','receipt_id'],
+          optional_links:['provider_id','route_id','trace_id','session_id','dataset_id','eval_suite_id','compile_run_id','artifact_id','runtime_target_id','export_job_id','governance_packet_id'],
+          invariants:['secret values are never included in public envelopes','unknown vendor fields remain opaque unless adapter evidence exists','egress requires a destination, processor, payload class, and delivery ledger','promotion requires source, policy, eval, artifact, target, and receipt context']
+        },
+        egress_destination_recipes: [
+          { id:'provider-response', label:'Provider Or Gateway Response', destination_classes:['OpenAI-compatible response','Anthropic-compatible response','gateway fallback response','tool result'], declarations_required:['provider or gateway','model or route','cache boundary','redaction mode','fallback reason'], receipt:'route decision and response receipt' },
+          { id:'automation-webhook', label:'Automation Webhook', destination_classes:['workflow callback','approval event','status delivery','incident trigger'], declarations_required:['destination URL or connector','signature policy','retry window','payload class','dead-letter action'], receipt:'signed webhook delivery ledger' },
+          { id:'telemetry-siem', label:'Telemetry Or SIEM Export', destination_classes:['OTLP trace','metrics stream','log drain','SIEM event'], declarations_required:['sink connector','severity mapping','field allowlist','secret scrub mode','retention class'], receipt:'log export manifest and sink acknowledgement' },
+          { id:'warehouse-catalog', label:'Warehouse Or Catalog Export', destination_classes:['object-store snapshot','warehouse table','catalog lineage','dataset manifest'], declarations_required:['storage location','schema version','row or column redaction','lineage pointer','retention clock'], receipt:'dataset manifest hash and lineage receipt' },
+          { id:'governance-grc', label:'Governance And GRC Packet', destination_classes:['assurance case','GRC evidence','buyer export','audit handoff'], declarations_required:['control mapping','evidence bundle','verifier key','recipient system','open readiness gates'], receipt:'governance packet manifest and verifier path' },
+          { id:'package-runtime', label:'Package Or Runtime Release', destination_classes:['OCI artifact','npm/PyPI package','Hugging Face export','runtime target recipe'], declarations_required:['release channel','artifact manifest','target recipe','rollback pointer','promotion gate'], receipt:'signed artifact receipt and package release ledger' }
+        ],
+        readiness_scoreboard: [
+          { id:'capture-plane', label:'Capture Plane', status:'implemented', evidence:'17 channel families, 12 collection modes, governed opaque event posture' },
+          { id:'policy-plane', label:'Policy Plane', status:'implemented', evidence:'identity, provider vault, capture, egress, routing, eval, compile, and export layers' },
+          { id:'improvement-loop', label:'Improvement Loop', status:'readiness-gated', evidence:'failure-to-artifact state machine exists; production autonomy remains gated' },
+          { id:'artifact-release', label:'Artifact Release', status:'needs_package_release', evidence:'manifests, hashes, receipts, and target recipes exist; package channels remain gated' },
+          { id:'public-benchmarks', label:'Public Benchmarks', status:'needs_public_benchmark_data', evidence:'benchmark claims stay gated until reproducible public data is published' },
+          { id:'certifications', label:'Certifications', status:'needs_live_certification', evidence:'security posture is documented without claiming SOC 2, HIPAA, FedRAMP, or ISO certification' }
+        ],
+        modalities: ['text','tokens','tool calls','reasoning traces','embeddings metadata','images metadata','audio metadata','files','structured JSON','tabular rows','events','binary blobs','governance packets'],
+        protocols: ['REST','SSE','webhook','JSONL batch','OpenTelemetry','MCP','A2A','GraphQL','JSON-RPC','gRPC-over-JSON','Kafka/event stream','database CDC','warehouse/lakehouse','SIEM log drain','package registry','custom adapter'],
+        lifecycle_states: ['capture','redact','route','observe','evaluate','compile','deploy','monitor','export']
+      },
+      operational_contract: {
+        ingress_rule: 'any source can be accepted only as a tenant-scoped governed event with size, retention, and redaction policy',
+        universal_intake_route: 'POST /v1/account/api-control-center/events',
+        universal_intake_rule: 'prompt/response tuples and arbitrary payload/event/data/request bodies are normalized into the canonical control-event envelope before receipts are returned',
+        adapter_manifest_route: 'POST /v1/account/api-control-center/adapter-manifests/validate',
+        adapter_manifest_rule: 'semantic understanding is promoted only when adapter id, version, schema, redaction map, egress destinations, and fixture evidence validate',
+        export_declaration_route: 'POST /v1/account/api-control-center/exports',
+        export_declaration_list_route: 'GET /v1/account/api-control-center/exports',
+        export_declaration_rule: 'exports become policy-bound delivery-ledger declarations until an owned downstream connector records acknowledgement',
+        egress_rule: 'any destination must be declared or adapter-reviewed before payload export',
+        unknown_schema_rule: 'unknown vendor payloads can be stored as opaque events, but semantic fields are not claimed until adapter manifest or schema hints exist',
+        proof_rule: 'every promoted artifact or export should carry route, policy, manifest, hash, and receipt context'
+      },
+      closed_loop_improvement: {
+        status:'readiness-gated',
+        summary:'Captured API failures can move through taxonomy, curriculum, regression replay, compile, target, and export without leaving the tenant control plane.',
+        minimum_inputs:['production traces','judged failures','human feedback','eval scores','runtime incidents','protected regression set'],
+        promotion_gates:['tenant fence','redaction policy','human review for high-risk labels','no protected-slice degradation','target-fit check','declared egress destination'],
+        stages:[
+          { id:'observe-failures', label:'Observe Failures', trigger:'production traces, user feedback, eval scores, incident tickets, and rejected routes', evidence:'capture id, route id, namespace, model, prompt version, failure label, severity, and reviewer', output:'failure queue', gate:'tenant fence and redaction policy' },
+          { id:'taxonomize', label:'Taxonomize', trigger:'clustered failures, drift windows, regression slices, and weak namespaces', evidence:'failure family, affected capability, suspected data gap, labeling confidence, and adapter schema status', output:'failure taxonomy', gate:'human review on high-risk labels' },
+          { id:'build-curriculum', label:'Build Curriculum', trigger:'confirmed weakness with enough safe examples or approved synthetic augmentation', evidence:'corrected examples, hard negatives, replay rows, holdout split, and provenance manifest', output:'training and eval bundle', gate:'data rights, retention, and PII rules' },
+          { id:'replay-regression', label:'Replay Regression', trigger:'candidate improvement run or prompt/model change', evidence:'baseline result, candidate result, protected slices, delta thresholds, and reviewer verdict', output:'promotion decision', gate:'no protected-slice degradation' },
+          { id:'compile-artifact', label:'Compile Artifact', trigger:'approved improvement with target runtime requirements', evidence:'compile run, K-score, manifest hash, runtime target, incompatible feature list, and receipt', output:'signed .kolm artifact', gate:'readiness and target-fit checks' },
+          { id:'promote-export', label:'Promote & Export', trigger:'artifact approved for deployment or external review', evidence:'release channel, rollback pointer, export destination, governance packet, and delivery ledger', output:'deployment or evidence export', gate:'declared destination and egress policy' }
+        ]
+      },
+      operator_workbench: {
+        label:'Operator workbench',
+        summary:'Run one production AI/API loop from source declaration to policy gates, failure replay, artifact compile, and proof export without switching consoles.',
+        source_to_proof_rule:'every next action must name a source, policy gate, output object, and verifier path before it can promote',
+        intake_priorities:['gateway traffic','OpenTelemetry/GenAI spans','trace and eval exports','MCP tool calls','A2A task traffic','queues and CDC','warehouse/lakehouse drops','SIEM/log drains','custom opaque adapters'],
+        export_priorities:['governance packet','verifier receipt','ticketing approval','warehouse manifest','OTLP log export','package registry release','runtime target recipe'],
+        next_actions:[
+          { id:'declare-source-schema', label:'Declare Source & Schema', trigger:'new gateway route, trace import, webhook, queue, warehouse drop, or custom adapter', action:'select a channel family, attach schema hints or adapter manifest, and set retention/redaction policy', proof:'source envelope, adapter status, tenant fence, and opaque-event marker', route:'/v1/bridges/observe' },
+          { id:'set-egress-policy', label:'Set Egress Policy', trigger:'provider response, webhook delivery, telemetry export, package release, or governance packet', action:'declare destination, processor, payload class, redaction mode, and retry window before export', proof:'destination allowlist, egress rule, processor mapping, and delivery ledger', route:'/v1/account/api-control-center/exports' },
+          { id:'diagnose-failure-loop', label:'Diagnose Failure Loop', trigger:'judged failure, incident ticket, drift alert, eval score drop, or rejected route', action:'assign taxonomy, reviewer, severity, protected slice, and candidate improvement bundle', proof:'failure family, reviewer marker, eval baseline, and regression replay set', route:'/v1/drift-alert' },
+          { id:'compile-target-receipt', label:'Compile Target Receipt', trigger:'approved examples and eval gates for a runtime target', action:'compile a signed .kolm package with manifest, examples, evaluators, target fit, hashes, and rollback pointer', proof:'artifact id, manifest hash, target matrix, K-score, and verifier receipt', route:'/v1/compile' },
+          { id:'export-governance-packet', label:'Export Governance Packet', trigger:'buyer review, audit request, release approval, or external runtime handoff', action:'declare receipts, governance packet, lineage, and delivery record for the target system of record', proof:'assurance case, JSONL/CSV/OTLP export declaration, public verifier path, and delivery ledger', route:'/v1/account/api-control-center/exports' }
+        ]
+      },
+      integration_map: [
+        { cluster:'Gateway and provider control', systems:['provider gateway','model router','API management','provider API','fallback route','budget policy','cache boundary','tenant key vault'], role:'source-and-route-target', coverage:'provider access, routing, key policy, budgets, cache boundaries, fallback reasons' },
+        { cluster:'Trace, eval, and observability', systems:['trace export','eval dashboard','annotation queue','experiment record','span collector','prompt version','score registry','OpenTelemetry'], role:'import-source-and-evidence-sink', coverage:'traces, prompt versions, eval sets, annotations, drift signals, release evidence' },
+        { cluster:'Data movement and event streams', systems:['connector feed','event topic','queue message','CDC stream','warehouse extract','lakehouse table','object-store drop','export manifest'], role:'batch-stream-and-warehouse-source', coverage:'connectors, topics, CDC, warehouse extracts, object-store drops, export manifests' },
+        { cluster:'Security, SIEM, and governance', systems:['GRC evidence','SIEM event','incident ticket','control register','API inventory','guardrail verdict','security review','assurance packet'], role:'control-verdict-and-governance-sink', coverage:'control evidence, log drains, incident/ticket events, guardrail verdicts, assurance packets' },
+        { cluster:'Runtime and package targets', systems:['vLLM','SGLang','TensorRT-LLM','llama.cpp','Ollama','Core ML','LiteRT','ExecuTorch','ONNX','RunPod','Hugging Face'], role:'deployment-target-and-release-channel', coverage:'target instructions, artifact manifests, release gates, runtime receipts, external verifier links' }
+      ],
+      enterprise_controls: [
+        { id:'rbac-sso-scim', status:'mounted', routes:['/v1/scim','/v1/saml/acs','/v1/scoped-keys'] },
+        { id:'provider-vault', status:'mounted', routes:['/v1/provider-vault','/v1/model-entitlements'] },
+        { id:'budget-and-rate', status:'mounted', routes:['/v1/spend-caps','/v1/pricing','/v1/gateway/dashboard'] },
+        { id:'egress-policy', status:'mounted', routes:['/v1/account/api-control-center/exports','/v1/account/api-control-center/adapter-manifests/validate','/v1/redteam/sanitize','/v1/capture/export','/v1/assurance-case'] },
+        { id:'retention-and-export', status:'mounted', routes:['/v1/account/api-control-center/events','/v1/account/api-control-center/exports','/v1/account/api-control-center/adapter-manifests/validate','/v1/capture/export','/v1/corpora','/v1/evidence'] },
+        { id:'drift-and-regression', status:'mounted', routes:['/v1/drift-alert','/v1/evals','/v1/compile/evaluate'] }
+      ],
+      differentiators: [
+        'captures production API behavior and turns it into portable signed artifacts',
+        'keeps gateway control, evals, evidence, compile, and device targeting in one contract',
+        'treats audit as a module while the core system optimizes runtime cost and owned deployment',
+        'exports proof artifacts instead of only dashboards'
+      ]
+    };
+  }
+  function showAuth(message){
+    document.getElementById('auth').hidden = false;
+    document.getElementById('banner').innerHTML = '';
+    render(demoControlCenterPayload(), {
+      preview: true,
+      message: message || 'Preview receipts are local and not persisted. Paste a workspace API key to load tenant data and run protected writes.'
+    });
+  }
   function channelFilterText(c){
     return [c.id, c.label].concat(c.directions || [], c.styles || [], c.routes || [], c.controls || []).join(' ').toLowerCase();
   }
@@ -181,6 +571,372 @@
   function renderSummary(label, rows){
     return '<div class="panel"><h3 class="section-title" style="margin-top:0">'+esc(label)+'</h3><div class="chips">'+(rows || []).map(chip).join('')+'</div></div>';
   }
+  function renderObjectGroup(x){
+    return '<div class="panel object-group"><b>'+esc(x.group)+'</b><div class="chips">'+(x.objects || []).map(chip).join('')+'</div></div>';
+  }
+  function renderAdapterState(x){
+    return '<div class="panel adapter-card"><h3>'+esc(x.label)+'</h3><code>semantic claim: '+esc(x.semantic_claim)+'</code><p>'+esc(x.operator_action)+'</p><div class="chips">'+(x.required_evidence || []).map(chip).join('')+'</div></div>';
+  }
+  function renderEnvelope(env){
+    var required = env && env.required_fields ? env.required_fields : [];
+    var links = env && env.optional_links ? env.optional_links : [];
+    var invariants = env && env.invariants ? env.invariants : [];
+    return '<div class="envelope-grid"><div class="panel"><p class="eyebrow">Canonical event envelope</p><code>'+esc((env && env.version) || 'kolm-control-event-envelope')+'</code><h3 class="section-title">Required fields</h3><div class="chips">'+required.map(chip).join('')+'</div></div><div class="panel"><h3 class="section-title" style="margin-top:0">Linked objects</h3><div class="chips">'+links.map(chip).join('')+'</div><h3 class="section-title">Invariants</h3><div class="chips">'+invariants.map(chip).join('')+'</div></div></div>';
+  }
+  function renderUniversalIntake(contract, env){
+    var route = contract.universal_intake_route || 'POST /v1/account/api-control-center/events';
+    var version = env && env.version ? env.version : 'kolm-control-event-envelope-1';
+    var samplePayload = '{\n  "case_id": "CASE-100",\n  "summary": "Need refund for account contact",\n  "priority": "high"\n}';
+    return '<section class="intake-panel" aria-label="Universal API data intake">'
+      + '<div class="panel intake-copy"><p class="eyebrow">Universal intake</p><h2>Every source enters as a governed event.</h2><p>'+esc(contract.universal_intake_rule || 'Prompt/response tuples and arbitrary payload/event/data/request bodies are normalized into a canonical control-event envelope before receipts are returned.')+'</p><div class="intake-list"><span>'+esc(route)+'</span><span>'+esc(version)+'</span><span>secret_values_included: false</span></div><div class="chips">'+['payload','event','data','request','prompt/response','input/output','ingress','egress'].map(chip).join('')+'</div></div>'
+      + '<form class="intake-console intake-workbench" data-control-intake-form aria-label="Send governed API control event">'
+      + '<div class="intake-console__bar">live canonical event workbench</div>'
+      + '<div class="intake-form__grid">'
+      + '<label class="intake-field" for="intakeSource">Source ID<input id="intakeSource" name="source_id" value="salesforce.case.updated" autocomplete="off" spellcheck="false"></label>'
+      + '<label class="intake-field" for="intakeChannel">Channel family<select id="intakeChannel" name="channel_family"><option value="webhooks">webhooks</option><option value="rest-json">rest-json</option><option value="otel">OpenTelemetry</option><option value="mcp">MCP</option><option value="a2a">A2A</option><option value="warehouse-lakehouse">warehouse/lakehouse</option><option value="custom-adapter">custom adapter</option></select></label>'
+      + '<label class="intake-field" for="intakeDirection">Direction<select id="intakeDirection" name="direction"><option value="ingress">ingress</option><option value="egress">egress</option><option value="ingress+egress">ingress+egress</option></select></label>'
+      + '<label class="intake-field" for="intakeRetention">Retention class<input id="intakeRetention" name="retention_class" value="tenant-default" autocomplete="off" spellcheck="false"></label>'
+      + '</div>'
+      + '<label class="intake-field intake-field--wide" for="intakePayload">Payload JSON<textarea id="intakePayload" name="payload" spellcheck="false">'+esc(samplePayload)+'</textarea></label>'
+      + '<div class="intake-actions"><button class="btn btn--primary" type="submit">Send Control Event</button><span class="intake-route">'+esc(route)+'</span></div>'
+      + '<output class="intake-result" data-control-intake-result aria-live="polite"><div class="intake-result__top"><span>receipt envelope</span><b>ready</b></div><div class="intake-result__grid"><span><b>schema</b>waiting for payload</span><span><b>policy</b>metadata-and-redacted-body</span><span><b>redaction</b>secret-safe</span><span><b>receipt</b>generated on submit</span></div><pre>{"secret_values_included": false}</pre></output>'
+      + '</form>'
+      + '</section>';
+  }
+  function renderAdapterManifestWorkbench(contract){
+    var route = contract.adapter_manifest_route || 'POST /v1/account/api-control-center/adapter-manifests/validate';
+    var sampleManifest = '{\n  "id": "salesforce-case-webhook",\n  "version": "2026.06.13",\n  "channel_family": "webhooks",\n  "direction": "ingress",\n  "input_schema": {\n    "type": "object",\n    "properties": {\n      "case_id": { "type": "string" },\n      "summary": { "type": "string" },\n      "priority": { "type": "string" }\n    }\n  },\n  "redaction_map": ["summary", "customer_email"],\n  "egress_destinations": [\n    { "id": "governance-packet", "type": "grc" }\n  ],\n  "test_fixture": {\n    "payload": { "case_id": "CASE-100", "summary": "refund request" }\n  }\n}';
+    return '<section class="manifest-panel" aria-label="Adapter manifest validation">'
+      + '<div class="panel manifest-copy"><p class="eyebrow">Adapter evidence</p><h2>Promote semantics only when a manifest proves them.</h2><p>'+esc(contract.adapter_manifest_rule || 'Semantic understanding is promoted only when adapter evidence validates required schema, redaction, egress, and fixture fields.')+'</p><div class="manifest-list"><span>'+esc(route)+'</span><span>adapter-owned field mapping</span><span>unknown fields stay opaque</span><span>secret_values_included: false</span></div></div>'
+      + '<form class="intake-console intake-workbench" data-control-adapter-form aria-label="Validate adapter manifest evidence">'
+      + '<div class="intake-console__bar">live adapter manifest validator</div>'
+      + '<label class="intake-field intake-field--wide" for="adapterManifest">Manifest JSON<textarea id="adapterManifest" name="manifest" spellcheck="false">'+esc(sampleManifest)+'</textarea></label>'
+      + '<div class="intake-actions"><button class="btn btn--primary" type="submit">Validate Manifest</button><span class="intake-route">'+esc(route)+'</span></div>'
+      + '<output class="intake-result" data-control-adapter-result aria-live="polite"><div class="intake-result__top"><span>manifest receipt</span><b>ready</b></div><div class="intake-result__grid"><span><b>state</b>waiting for manifest</span><span><b>claim</b>not promoted</span><span><b>egress</b>deny until declared</span><span><b>secrets</b>false</span></div><pre>{"secret_values_included": false}</pre></output>'
+      + '</form>'
+      + '</section>';
+  }
+  function renderExportDeclarationWorkbench(contract, egressRecipes, exportModes){
+    var route = contract.export_declaration_route || 'POST /v1/account/api-control-center/exports';
+    var sampleDestination = '{\n  "id": "grc-evidence-vault",\n  "type": "governance-grc",\n  "system": "assurance-case"\n}';
+    var sampleEvidence = '{\n  "summary": "policy reviewed for account contact",\n  "control": "egress-policy",\n  "open_readiness_gates": ["certifications", "public-benchmarks"]\n}';
+    var modeOptions = (exportModes || []).map(function(x){
+      return '<option value="'+esc(x.id)+'"'+(x.id === 'governance-packet' ? ' selected' : '')+'>'+esc(x.label || x.id)+'</option>';
+    }).join('');
+    var recipeOptions = (egressRecipes || []).map(function(x){
+      return '<option value="'+esc(x.id)+'"'+(x.id === 'governance-grc' ? ' selected' : '')+'>'+esc(x.label || x.id)+'</option>';
+    }).join('');
+    if (!modeOptions) modeOptions = '<option value="governance-packet">Governance packet</option>';
+    if (!recipeOptions) recipeOptions = '<option value="governance-grc">Governance and GRC packet</option>';
+    return '<section class="manifest-panel export-panel" aria-label="Export declaration workbench">'
+      + '<div class="panel manifest-copy export-copy"><p class="eyebrow">Egress control</p><h2>Declare every export before data leaves.</h2><p>'+esc(contract.export_declaration_rule || 'Exports become policy-bound delivery-ledger declarations before any downstream delivery is claimed.')+'</p><div class="manifest-list"><span>'+esc(route)+'</span><span>delivery-ledger receipt</span><span>declared_not_delivered until acknowledged</span><span>secret_values_included: false</span></div></div>'
+      + '<form class="intake-console intake-workbench" data-control-export-form aria-label="Declare governed export">'
+      + '<div class="intake-console__bar">live export declaration workbench</div>'
+      + '<div class="intake-form__grid">'
+      + '<label class="intake-field" for="exportMode">Export mode<select id="exportMode" name="export_mode">'+modeOptions+'</select></label>'
+      + '<label class="intake-field" for="destinationClass">Destination class<select id="destinationClass" name="destination_class">'+recipeOptions+'</select></label>'
+      + '<label class="intake-field" for="exportProcessor">Processor<input id="exportProcessor" name="processor" value="security-review" autocomplete="off" spellcheck="false"></label>'
+      + '<label class="intake-field" for="payloadClass">Payload class<input id="payloadClass" name="payload_class" value="governance_packet" autocomplete="off" spellcheck="false"></label>'
+      + '<label class="intake-field" for="redactionMode">Redaction mode<select id="redactionMode" name="redaction_mode"><option value="redacted-fields-only">redacted fields only</option><option value="metadata-only">metadata only</option><option value="hash-only">hash only</option></select></label>'
+      + '<label class="intake-field" for="exportNamespace">Namespace<input id="exportNamespace" name="namespace" value="prod-ai-loop" autocomplete="off" spellcheck="false"></label>'
+      + '</div>'
+      + '<label class="intake-field intake-field--wide" for="exportDestination">Destination JSON<textarea id="exportDestination" name="destination" spellcheck="false">'+esc(sampleDestination)+'</textarea></label>'
+      + '<label class="intake-field intake-field--wide" for="exportEvidence">Evidence JSON<textarea id="exportEvidence" name="evidence" spellcheck="false">'+esc(sampleEvidence)+'</textarea></label>'
+      + '<div class="intake-actions"><button class="btn btn--primary" type="submit">Declare Export</button><span class="intake-route">'+esc(route)+'</span></div>'
+      + '<output class="intake-result" data-control-export-result aria-live="polite"><div class="intake-result__top"><span>delivery ledger</span><b>ready</b></div><div class="intake-result__grid"><span><b>status</b>waiting for declaration</span><span><b>mode</b>governance-packet</span><span><b>destination</b>governance-grc</span><span><b>secrets</b>false</span></div><pre>{"secret_values_included": false}</pre></output>'
+      + '</form>'
+      + '</section>';
+  }
+  function renderExportDeclarationResult(target, data){
+    var ledger = data && data.delivery_ledger ? data.delivery_ledger : {};
+    var env = ledger.control_event_envelope || (data && data.control_event_envelope) || {};
+    var destination = ledger.destination || {};
+    var declarations = ledger.required_declarations || {};
+    var ok = data && data.ok === true;
+    var fields = [
+      ['receipt', ledger.receipt_id || 'not issued'],
+      ['status', ledger.status || 'not declared'],
+      ['mode', ledger.export_mode || 'unknown'],
+      ['destination', destination.id || destination.class || 'unknown'],
+      ['processor', ledger.processor || 'unknown'],
+      ['missing', (declarations.missing || []).join(', ') || 'none']
+    ];
+    target.innerHTML = '<div class="intake-result__top"><span>delivery ledger</span><b>'+(ok ? 'declared' : 'needs declaration')+'</b></div>'
+      + '<div class="intake-result__grid">'+fields.map(function(row){ return '<span><b>'+esc(row[0])+'</b>'+esc(row[1])+'</span>'; }).join('')+'</div>'
+      + '<pre>'+esc(JSON.stringify({
+        export_id: ledger.export_id || null,
+        delivery_ledger_id: ledger.delivery_ledger_id || null,
+        policy_decision_id: ledger.policy_decision_id || null,
+        event_id: env.event_id || null,
+        direction: env.direction || 'egress',
+        secret_values_included: false
+      }, null, 2))+'</pre>';
+  }
+  function renderAdapterManifestResult(target, data){
+    var validation = data && data.adapter_manifest_validation ? data.adapter_manifest_validation : {};
+    var evidence = validation.required_evidence || {};
+    var normalized = validation.normalized_manifest || {};
+    var ok = data && data.ok === true;
+    var fields = [
+      ['receipt', validation.receipt_id || 'not issued'],
+      ['state', validation.adapter_state || 'opaque'],
+      ['claim', validation.semantic_claim || 'not-promoted'],
+      ['missing', (evidence.missing || []).join(', ') || 'none'],
+      ['fields', (normalized.input_fields || []).join(', ') || 'none'],
+      ['egress', (normalized.egress_destinations || []).join(', ') || 'none']
+    ];
+    target.innerHTML = '<div class="intake-result__top"><span>manifest receipt</span><b>'+(ok ? 'validated' : 'missing evidence')+'</b></div>'
+      + '<div class="intake-result__grid">'+fields.map(function(row){ return '<span><b>'+esc(row[0])+'</b>'+esc(row[1])+'</span>'; }).join('')+'</div>'
+      + '<pre>'+esc(JSON.stringify({
+        manifest_id: validation.manifest_id || null,
+        manifest_hash: validation.manifest_hash || null,
+        adapter_state: validation.adapter_state || null,
+        semantic_claim: validation.semantic_claim || null,
+        fixture_redaction: validation.fixture_redaction ? validation.fixture_redaction.result : null,
+        secret_values_included: false
+      }, null, 2))+'</pre>';
+  }
+  function renderControlIntakeResult(target, data){
+    var env = data && data.control_event_envelope ? data.control_event_envelope : {};
+    var persisted = data && data.persisted ? data.persisted : {};
+    var ok = data && data.ok === true;
+    var fields = [
+      ['receipt', env.receipt_id || 'not issued'],
+      ['schema', env.schema_status || persisted.schema_status || 'unknown'],
+      ['policy', env.payload_policy || 'metadata-and-redacted-body'],
+      ['redaction', env.redaction_result || persisted.redaction_result || 'unknown'],
+      ['direction', env.direction || persisted.direction || 'unknown'],
+      ['channel', env.channel_family || persisted.channel_family || 'unknown']
+    ];
+    target.innerHTML = '<div class="intake-result__top"><span>receipt envelope</span><b>'+(ok ? 'accepted' : 'blocked')+'</b></div>'
+      + '<div class="intake-result__grid">'+fields.map(function(row){ return '<span><b>'+esc(row[0])+'</b>'+esc(row[1])+'</span>'; }).join('')+'</div>'
+      + '<pre>'+esc(JSON.stringify({
+        event_id: env.event_id || null,
+        receipt_id: env.receipt_id || null,
+        policy_decision_id: env.policy_decision_id || null,
+        schema_status: env.schema_status || null,
+        adapter_state: env.adapter_state || null,
+        secret_values_included: env.secret_values_included === false ? false : data.secret_values_included === false ? false : null
+      }, null, 2))+'</pre>';
+  }
+  function previewId(prefix){ return prefix + '_' + Date.now().toString(36).slice(-6); }
+  function previewControlIntakeResponse(form, payload){
+    var fieldCount = payload && typeof payload === 'object' && !Array.isArray(payload) ? Object.keys(payload).length : 1;
+    var channelFamily = form.elements.channel_family.value || 'custom-adapter';
+    var direction = form.elements.direction.value || 'ingress';
+    return {
+      ok: true,
+      preview: true,
+      persisted: {
+        schema_status: fieldCount > 0 ? 'schema-hinted-preview' : 'opaque-preview',
+        redaction_result: 'preview-secret-safe',
+        channel_family: channelFamily,
+        direction: direction
+      },
+      control_event_envelope: {
+        event_id: previewId('preview_evt'),
+        receipt_id: previewId('preview_rcpt'),
+        policy_decision_id: 'preview_policy_dry_run',
+        schema_status: fieldCount > 0 ? 'schema-hinted-preview' : 'opaque-preview',
+        adapter_state: 'preview-not-persisted',
+        payload_policy: 'metadata-and-redacted-body',
+        redaction_result: 'preview-secret-safe',
+        direction: direction,
+        channel_family: channelFamily,
+        secret_values_included: false
+      },
+      secret_values_included: false
+    };
+  }
+  function previewAdapterManifestResponse(manifest){
+    var missing = [];
+    if (!manifest.id) missing.push('adapter_id');
+    if (!manifest.version) missing.push('adapter_version');
+    if (!manifest.input_schema) missing.push('input_schema');
+    if (!manifest.redaction_map || !manifest.redaction_map.length) missing.push('redaction_map');
+    if (!manifest.egress_destinations || !manifest.egress_destinations.length) missing.push('egress_destinations');
+    if (!manifest.test_fixture) missing.push('test_fixture');
+    return {
+      ok: missing.length === 0,
+      preview: true,
+      adapter_manifest_validation: {
+        version: 'kolm-adapter-manifest-validation-preview',
+        receipt_id: previewId('preview_adapter_rcpt'),
+        manifest_id: manifest.id || null,
+        manifest_hash: missing.length === 0 ? previewId('preview_manifest_hash') : null,
+        adapter_state: missing.length === 0 ? 'manifest-declared-preview' : 'opaque-preview',
+        semantic_claim: missing.length === 0 ? 'adapter-owned field mapping' : 'not-promoted',
+        required_evidence: { missing: missing },
+        normalized_manifest: {
+          input_fields: manifest.input_schema && manifest.input_schema.properties ? Object.keys(manifest.input_schema.properties) : [],
+          redaction_fields: manifest.redaction_map || [],
+          egress_destinations: (manifest.egress_destinations || []).map(function(x){ return x && (x.id || x.type) || 'declared-destination'; })
+        },
+        fixture_redaction: { result: 'preview-secret-safe', secret_values_included: false }
+      },
+      secret_values_included: false
+    };
+  }
+  function previewExportDeclarationResponse(form, destination, evidence){
+    var missing = [];
+    if (!form.elements.export_mode.value) missing.push('export_mode');
+    if (!destination || !Object.keys(destination).length) missing.push('destination');
+    if (!form.elements.destination_class.value) missing.push('destination_class');
+    if (!form.elements.processor.value) missing.push('processor');
+    if (!form.elements.payload_class.value) missing.push('payload_class');
+    if (!form.elements.redaction_mode.value) missing.push('redaction_mode');
+    if (!evidence || !Object.keys(evidence).length) missing.push('payload_or_evidence');
+    var exportId = previewId('preview_export');
+    var receipt = previewId('preview_export_rcpt');
+    return {
+      ok: missing.length === 0,
+      preview: true,
+      delivery_ledger: {
+        version: 'kolm-delivery-ledger-preview',
+        export_id: exportId,
+        delivery_ledger_id: previewId('preview_dled'),
+        receipt_id: receipt,
+        policy_decision_id: 'preview_policy_export',
+        destination: {
+          id: destination.id || destination.name || 'declared-destination',
+          class: form.elements.destination_class.value || destination.type || 'custom-destination',
+          system: destination.system || destination.type || 'declared-system',
+          secret_values_included: false
+        },
+        processor: form.elements.processor.value || 'not_declared',
+        payload_class: form.elements.payload_class.value || 'not_declared',
+        export_mode: form.elements.export_mode.value || 'not_declared',
+        redaction_mode: form.elements.redaction_mode.value || 'not_declared',
+        status: missing.length ? 'missing_declarations' : 'declared_not_delivered',
+        required_declarations: {
+          required: ['export_mode','destination','destination_class','processor','payload_class','redaction_mode','payload_or_evidence'],
+          present: ['export_mode','destination','destination_class','processor','payload_class','redaction_mode','payload_or_evidence'].filter(function(x){ return missing.indexOf(x) < 0; }),
+          missing: missing
+        },
+        control_event_envelope: {
+          event_id: previewId('preview_evt'),
+          receipt_id: receipt,
+          direction: 'egress',
+          schema_status: 'schema-hinted-preview',
+          secret_values_included: false
+        },
+        secret_values_included: false
+      },
+      secret_values_included: false
+    };
+  }
+  function setupControlIntake(root){
+    var form = root.querySelector('[data-control-intake-form]');
+    if (!form) return;
+    var result = form.querySelector('[data-control-intake-result]');
+    var button = form.querySelector('button[type="submit"]');
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var payload;
+      try {
+        payload = JSON.parse(form.elements.payload.value || '{}');
+      } catch (e) {
+        result.innerHTML = '<div class="intake-result__top"><span>receipt envelope</span><b class="intake-error">invalid JSON</b></div><p class="intake-error">Fix the payload JSON, then send the event again.</p>';
+        form.elements.payload.focus();
+        return;
+      }
+      if (!KEY) {
+        renderControlIntakeResult(result, previewControlIntakeResponse(form, payload));
+        result.insertAdjacentHTML('afterbegin', '<p class="intake-error">Preview receipt only. Paste a workspace API key to persist this event.</p>');
+        return;
+      }
+      var h = headers();
+      h['content-type'] = 'application/json';
+      h.accept = 'application/json';
+      var body = {
+        source_id: form.elements.source_id.value || 'manual.observe',
+        channel_family: form.elements.channel_family.value || 'custom-adapter',
+        direction: form.elements.direction.value || 'ingress',
+        retention_class: form.elements.retention_class.value || 'tenant-default',
+        schema: { type: 'object' },
+        payload: payload
+      };
+      button.disabled = true;
+      button.textContent = 'Sending Event\u2026';
+      result.innerHTML = '<div class="intake-result__top"><span>receipt envelope</span><b>sending</b></div><pre>POST /v1/account/api-control-center/events</pre>';
+      fetch('/v1/account/api-control-center/events', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: h,
+        body: JSON.stringify(body)
+      })
+        .then(function(res){ return res.json().then(function(j){ return { ok: res.ok, status: res.status, body: j }; }); })
+        .then(function(o){
+          if (!o.ok || !o.body || !o.body.ok) {
+            result.innerHTML = '<div class="intake-result__top"><span>receipt envelope</span><b class="intake-error">'+esc(o.status)+'</b></div><p class="intake-error">'+esc((o.body && (o.body.message || o.body.error)) || 'Control event was not accepted.')+'</p>';
+            return;
+          }
+          renderControlIntakeResult(result, o.body);
+        })
+        .catch(function(){
+          result.innerHTML = '<div class="intake-result__top"><span>receipt envelope</span><b class="intake-error">network error</b></div><p class="intake-error">Retry after the account API is reachable.</p>';
+        })
+        .finally(function(){
+          button.disabled = false;
+          button.textContent = 'Send Control Event';
+        });
+    });
+  }
+  function setupAdapterManifest(root){
+    var form = root.querySelector('[data-control-adapter-form]');
+    if (!form) return;
+    var result = form.querySelector('[data-control-adapter-result]');
+    var button = form.querySelector('button[type="submit"]');
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var manifest;
+      try {
+        manifest = JSON.parse(form.elements.manifest.value || '{}');
+      } catch (e) {
+        result.innerHTML = '<div class="intake-result__top"><span>manifest receipt</span><b class="intake-error">invalid JSON</b></div><p class="intake-error">Fix the manifest JSON, then validate again.</p>';
+        form.elements.manifest.focus();
+        return;
+      }
+      if (!KEY) {
+        renderAdapterManifestResult(result, previewAdapterManifestResponse(manifest));
+        result.insertAdjacentHTML('afterbegin', '<p class="intake-error">Preview validation only. Paste a workspace API key to persist adapter evidence.</p>');
+        return;
+      }
+      var h = headers();
+      h['content-type'] = 'application/json';
+      h.accept = 'application/json';
+      button.disabled = true;
+      button.textContent = 'Validating Manifest\u2026';
+      result.innerHTML = '<div class="intake-result__top"><span>manifest receipt</span><b>validating</b></div><pre>POST /v1/account/api-control-center/adapter-manifests/validate</pre>';
+      fetch('/v1/account/api-control-center/adapter-manifests/validate', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: h,
+        body: JSON.stringify({ adapter_manifest: manifest })
+      })
+        .then(function(res){ return res.json().then(function(j){ return { ok: res.ok, status: res.status, body: j }; }); })
+        .then(function(o){
+          if (!o.body || (!o.ok && !o.body.adapter_manifest_validation)) {
+            result.innerHTML = '<div class="intake-result__top"><span>manifest receipt</span><b class="intake-error">'+esc(o.status)+'</b></div><p class="intake-error">'+esc((o.body && (o.body.message || o.body.error)) || 'Adapter manifest could not be validated.')+'</p>';
+            return;
+          }
+          renderAdapterManifestResult(result, o.body);
+        })
+        .catch(function(){
+          result.innerHTML = '<div class="intake-result__top"><span>manifest receipt</span><b class="intake-error">network error</b></div><p class="intake-error">Retry after the account API is reachable.</p>';
+        })
+        .finally(function(){
+          button.disabled = false;
+          button.textContent = 'Validate Manifest';
+        });
+    });
+  }
+  function renderEgressRecipe(x){
+    return '<div class="panel egress-card"><h3>'+esc(x.label)+'</h3><p>Receipt: <span class="mono">'+esc(x.receipt)+'</span></p><div class="chips">'+(x.destination_classes || []).map(chip).join('')+'</div><p class="muted">Required declaration</p><div class="chips">'+(x.declarations_required || []).map(chip).join('')+'</div></div>';
+  }
+  function renderReadinessItem(x){
+    return '<div class="panel score"><b>'+esc(x.label)+'</b><span data-status="'+esc(x.status)+'">'+esc(x.status)+'</span><p>'+esc(x.evidence)+'</p></div>';
+  }
   function renderIntegration(x){
     return '<div class="integration-card"><div><b>'+esc(x.cluster)+'</b><span>'+esc(x.role)+'</span></div><p>'+esc((x.systems || []).join(', '))+'</p><p>'+esc(x.coverage)+'</p></div>';
   }
@@ -189,7 +945,7 @@
   }
   function renderTable(rows){
     return '<div class="table-wrap" tabindex="0" role="region" aria-label="API data channel matrix"><table><thead><tr><th>Channel</th><th>Directions</th><th>Styles</th><th>Routes</th></tr></thead><tbody>'
-      + rows.map(function(c){ return '<tr data-channel-row data-channel-directions="'+esc((c.directions || []).join(' '))+'" data-channel-text="'+esc(channelFilterText(c))+'"><td><strong>'+esc(c.label)+'</strong><br><span class="mono">'+esc(c.id)+'</span></td><td>'+esc((c.directions || []).join(', '))+'</td><td>'+esc((c.styles || []).join(', '))+'</td><td>'+esc((c.routes || []).join(', '))+'</td></tr>'; }).join('')
+      + rows.map(function(c){ return '<tr data-channel-row data-channel-directions="'+esc((c.directions || []).join(' '))+'" data-channel-text="'+esc(channelFilterText(c))+'"><td data-label="Channel"><strong>'+esc(c.label)+'</strong><br><span class="mono">'+esc(c.id)+'</span></td><td data-label="Directions">'+esc((c.directions || []).join(', '))+'</td><td data-label="Styles">'+esc((c.styles || []).join(', '))+'</td><td data-label="Routes">'+esc((c.routes || []).join(', '))+'</td></tr>'; }).join('')
       + '</tbody></table></div>';
   }
   function renderChannelFilters(){
@@ -228,7 +984,79 @@
       });
     });
   }
-  function render(data){
+  function setupExportDeclaration(root){
+    var form = root.querySelector('[data-control-export-form]');
+    if (!form) return;
+    var result = form.querySelector('[data-control-export-result]');
+    var button = form.querySelector('button[type="submit"]');
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var destination;
+      var evidence;
+      try {
+        destination = JSON.parse(form.elements.destination.value || '{}');
+      } catch (e) {
+        result.innerHTML = '<div class="intake-result__top"><span>delivery ledger</span><b class="intake-error">invalid destination JSON</b></div><p class="intake-error">Fix the destination JSON, then declare the export again.</p>';
+        form.elements.destination.focus();
+        return;
+      }
+      try {
+        evidence = JSON.parse(form.elements.evidence.value || '{}');
+      } catch (e) {
+        result.innerHTML = '<div class="intake-result__top"><span>delivery ledger</span><b class="intake-error">invalid evidence JSON</b></div><p class="intake-error">Fix the evidence JSON, then declare the export again.</p>';
+        form.elements.evidence.focus();
+        return;
+      }
+      if (!KEY) {
+        renderExportDeclarationResult(result, previewExportDeclarationResponse(form, destination, evidence));
+        result.insertAdjacentHTML('afterbegin', '<p class="intake-error">Preview declaration only. Paste a workspace API key to persist the delivery ledger.</p>');
+        return;
+      }
+      var h = headers();
+      h['content-type'] = 'application/json';
+      h.accept = 'application/json';
+      var body = {
+        export_mode: form.elements.export_mode.value || 'governance-packet',
+        destination_class: form.elements.destination_class.value || 'governance-grc',
+        destination: destination,
+        processor: form.elements.processor.value || 'security-review',
+        payload_class: form.elements.payload_class.value || 'governance_packet',
+        redaction_mode: form.elements.redaction_mode.value || 'redacted-fields-only',
+        evidence: evidence,
+        namespace: form.elements.namespace.value || 'exports'
+      };
+      button.disabled = true;
+      button.textContent = 'Declaring Export\u2026';
+      result.innerHTML = '<div class="intake-result__top"><span>delivery ledger</span><b>declaring</b></div><pre>POST /v1/account/api-control-center/exports</pre>';
+      fetch('/v1/account/api-control-center/exports', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: h,
+        body: JSON.stringify(body)
+      })
+        .then(function(res){ return res.json().then(function(j){ return { ok: res.ok, status: res.status, body: j }; }); })
+        .then(function(o){
+          if (!o.body || (!o.ok && !o.body.delivery_ledger)) {
+            result.innerHTML = '<div class="intake-result__top"><span>delivery ledger</span><b class="intake-error">'+esc(o.status)+'</b></div><p class="intake-error">'+esc((o.body && (o.body.message || o.body.error)) || 'Export declaration was not accepted.')+'</p>';
+            return;
+          }
+          renderExportDeclarationResult(result, o.body);
+          if (!o.ok || !o.body.ok) {
+            result.insertAdjacentHTML('afterbegin', '<p class="intake-error">'+esc((o.body && o.body.error) || 'Missing export declarations.')+'</p>');
+          }
+        })
+        .catch(function(){
+          result.innerHTML = '<div class="intake-result__top"><span>delivery ledger</span><b class="intake-error">network error</b></div><p class="intake-error">Retry after the account API is reachable.</p>';
+        })
+        .finally(function(){
+          button.disabled = false;
+          button.textContent = 'Declare Export';
+        });
+    });
+  }
+  function render(data, options){
+    options = options || {};
+    var isPreview = options.preview === true || data.preview === true;
     var coverage = data.coverage || {};
     var counters = data.counters || {};
     var posture = data.posture || {};
@@ -241,7 +1069,17 @@
     var protocolCount = (coverage.protocols || []).length;
     var policyCount = (coverage.policy_layers || []).length;
     var lifecycleCount = (coverage.lifecycle_states || []).length;
+    var firstClassObjects = coverage.first_class_objects || [];
+    var adapterStates = coverage.adapter_states || [];
+    var egressRecipes = coverage.egress_destination_recipes || [];
+    var readinessScoreboard = coverage.readiness_scoreboard || [];
     var html = '';
+    if (isPreview) {
+      html += '<section class="preview-gate" role="status" aria-label="Control center preview state">'
+        + '<div><p class="eyebrow">Preview mode</p><h2>Full console visible. Tenant writes stay locked.</h2><p>'+esc(options.message || 'Preview receipts are local and not persisted. Paste a workspace API key to load tenant data and run protected writes.')+'</p></div>'
+        + '<div class="preview-gate__status"><span>read model <b>public preview</b></span><span>write routes <b>API key required</b></span><span>secrets <b>never included</b></span></div>'
+        + '</section>';
+    }
     html += '<div class="hero-panel"><div class="panel hero-stack">'
       + '<p class="eyebrow">Control promise</p>'
       + '<p class="control-statement">Kolm treats API data collection as an enterprise data plane: every source enters as a governed event, every export leaves with policy, provenance, and receipt context, and unknown vendor payloads stay opaque until an adapter manifest declares their schema.</p>'
@@ -258,6 +1096,7 @@
       + '<div class="posture-item"><span>Cache</span><code>'+esc(posture.cache_policy)+'</code></div>'
       + '<div class="posture-item"><span>Unknown payloads</span><code>'+esc(posture.unknown_payload_policy)+'</code></div>'
       + '</div></div></div>';
+    html += renderUniversalIntake(contract, coverage.event_envelope || {});
     html += '<div class="grid">'
       + metric('Captured events', counters.observed_captures || 0)
       + metric('Routing events', counters.routing_events || 0)
@@ -270,6 +1109,13 @@
       + renderSummary('Modalities', coverage.modalities || [])
       + renderSummary('Lifecycle', coverage.lifecycle_states || [])
       + '</div>';
+    html += '<h2 class="section-title">First-class control objects</h2><div class="object-ledger">'+firstClassObjects.map(renderObjectGroup).join('')+'</div>';
+    html += '<h2 class="section-title">Adapter confidence states</h2><div class="adapter-grid">'+adapterStates.map(renderAdapterState).join('')+'</div>';
+    html += renderAdapterManifestWorkbench(contract);
+    html += renderExportDeclarationWorkbench(contract, egressRecipes, exportModes);
+    html += '<h2 class="section-title">Event envelope</h2>'+renderEnvelope(coverage.event_envelope || {});
+    html += '<h2 class="section-title">Egress destination recipes</h2><div class="egress-grid">'+egressRecipes.map(renderEgressRecipe).join('')+'</div>';
+    html += '<h2 class="section-title">Readiness scoreboard</h2><div class="scoreboard">'+readinessScoreboard.map(renderReadinessItem).join('')+'</div>';
     html += '<h2 class="section-title">Collection and export modes</h2><div class="grid grid--2">'
       + '<div><h3 class="section-title" style="margin-top:0">Ingress collection</h3><div class="grid grid--2">'+collectionModes.map(renderMode).join('')+'</div></div>'
       + '<div><h3 class="section-title" style="margin-top:0">Egress and exports</h3><div class="grid grid--2">'+exportModes.map(renderMode).join('')+'</div></div>'
@@ -291,17 +1137,20 @@
     html += '<h2 class="section-title">Enterprise controls</h2><div class="grid grid--3">'+(data.enterprise_controls || []).map(renderControl).join('')+'</div>';
     html += '<h2 class="section-title">Differentiators</h2><div class="panel"><div class="chips">'+(data.differentiators || []).map(chip).join('')+'</div></div>';
     html += '<div class="grid grid--2"><a class="btn btn--primary" href="/docs#quickstart">Open quickstart</a><a class="btn btn--ghost" href="/account/overview">Compiler overview</a></div>';
-    document.getElementById('auth').hidden = true;
+    document.getElementById('auth').hidden = isPreview ? false : true;
     var content = document.getElementById('content');
     content.hidden = false;
     content.innerHTML = html;
     setupChannelFilters(content);
+    setupControlIntake(content);
+    setupAdapterManifest(content);
+    setupExportDeclaration(content);
   }
   function load(){
     if (!KEY) { showAuth(); return; }
     fetch('/v1/account/api-control-center', { credentials:'same-origin', headers: headers() })
       .then(function(res){
-        if (res.status === 401) { showAuth(); return null; }
+        if (res.status === 401) { showAuth('API key rejected or expired. Preview mode remains available while you paste a current workspace key.'); return null; }
         return res.json().then(function(j){ return { ok: res.ok, body: j }; });
       })
       .then(function(o){
@@ -313,7 +1162,7 @@
         render(o.body);
       })
       .catch(function(){
-        document.getElementById('banner').innerHTML = '<div class="banner warn">Network error. Try refreshing, or email dev@kolm.ai.</div>';
+        showAuth('Network error while loading tenant data. Preview mode remains available; retry after the account API is reachable.');
       });
   }
   document.getElementById('keyBtn').onclick = function(){

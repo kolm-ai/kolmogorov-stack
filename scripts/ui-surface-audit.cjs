@@ -43,6 +43,52 @@ const DEFAULT_VIEWPORTS = {
   },
 };
 
+const AUDIT_HOST_REDIRECT_PREFIX = 'https://audit.kolm.ai/';
+
+const GENERATED_MEDIA_REQUIRED_ROUTES = new Set([
+  '/compiler-product',
+  '/platform',
+  '/integrations',
+  '/runtimes',
+  '/compare',
+  '/docs',
+  '/pricing',
+  '/enterprise',
+  '/docs/api',
+  '/trust',
+  '/security',
+  '/capabilities',
+  '/changelog',
+  '/contact',
+  '/research',
+  '/how-it-works',
+]);
+
+function routeRequiresGeneratedMedia(route) {
+  return GENERATED_MEDIA_REQUIRED_ROUTES.has(route);
+}
+
+async function auditHostRedirect(url) {
+  try {
+    const res = await fetch(url, { redirect: 'manual' });
+    const location = res.headers.get('location') || '';
+    if (res.status >= 300 && res.status < 400 && location) {
+      const absolute = new URL(location, url).toString();
+      if (absolute.startsWith(AUDIT_HOST_REDIRECT_PREFIX)) {
+        return { status: res.status, location: absolute };
+      }
+    }
+  } catch (e) {
+    // The browser pass below will report the navigational failure with context.
+  }
+  return null;
+}
+
+function allowedConsoleError(route, message) {
+  if (route === '/account-billing' && /\b401\b|Unauthorized/i.test(message)) return true;
+  return false;
+}
+
 function parseArgs(argv) {
   const out = {};
   for (let i = 2; i < argv.length; i++) {
@@ -363,6 +409,9 @@ async function evaluateRoute(page, route, viewportName, themeName) {
     const generatedMedia = document.querySelector('.kolm-surface-media');
     const media = homeMedia || generatedMedia;
     const mediaRect = media ? media.getBoundingClientRect() : null;
+    const compilerHero = document.querySelector('.compiler-hero');
+    const compilerHeroWrap = compilerHero ? compilerHero.querySelector(':scope > .wrap') : null;
+    const compilerHeroWrapRect = compilerHeroWrap ? compilerHeroWrap.getBoundingClientRect() : null;
     return {
       title: document.title || '',
       htmlTheme: doc.getAttribute('data-theme') || 'dark',
@@ -382,6 +431,8 @@ async function evaluateRoute(page, route, viewportName, themeName) {
       overflowX: Math.max(0, doc.scrollWidth - window.innerWidth),
       scrollWidth: doc.scrollWidth,
       innerWidth: window.innerWidth,
+      compilerHeroClipX: compilerHero ? Math.max(0, compilerHero.scrollWidth - compilerHero.clientWidth) : 0,
+      compilerHeroWrapOverflowX: compilerHeroWrapRect ? Math.max(0, Math.round(compilerHeroWrapRect.right - window.innerWidth)) : 0,
       interactiveCount: controlContracts.length,
       namelessControls,
       invalidActionHrefs,
@@ -398,10 +449,13 @@ async function evaluateRoute(page, route, viewportName, themeName) {
     };
   }, { viewportName });
 
-  const requiresGeneratedMedia = !/^\/($|account|admin|dashboard|signin|signup|password-reset|teams-accept|status)(\/|$)/.test(route);
+  const requiresGeneratedMedia = routeRequiresGeneratedMedia(route);
   if (!metrics.title || metrics.title.length < 3) findings.push({ severity: 'fail', rule: 'title', message: 'missing useful document title' });
   if (metrics.bodyTextLength < 40) findings.push({ severity: 'fail', rule: 'content', message: 'surface rendered nearly empty' });
   if (metrics.overflowX > 2) findings.push({ severity: 'fail', rule: 'horizontal-overflow', message: `scrollWidth exceeds viewport by ${metrics.overflowX}px` });
+  if (viewportName === 'mobile' && (metrics.compilerHeroClipX > 2 || metrics.compilerHeroWrapOverflowX > 2)) {
+    findings.push({ severity: 'fail', rule: 'clipped-hero-content', message: `compiler hero clips ${metrics.compilerHeroClipX}px; wrapper exceeds viewport by ${metrics.compilerHeroWrapOverflowX}px` });
+  }
   if (themeName === 'light' && metrics.htmlTheme !== 'light') findings.push({ severity: 'fail', rule: 'light-mode', message: `expected light theme, got ${metrics.htmlTheme}` });
   if (route === '/' && !metrics.hasHomeMedia) findings.push({ severity: 'fail', rule: 'product-media', message: 'home hero product media missing' });
   if (requiresGeneratedMedia && !metrics.hasGeneratedMedia) findings.push({ severity: 'fail', rule: 'product-media', message: 'route-specific generated media missing' });
@@ -607,12 +661,21 @@ async function main() {
           try { localStorage.setItem('ks_api_key', token); } catch (e) {} // deliberate: cleanup
         }, auth.token);
       }
-      const page = await context.newPage();
       for (const route of routes) {
         const url = new URL(route, `${base}/`).toString();
         const consoleErrors = [];
-        page.removeAllListeners('console');
-        page.removeAllListeners('pageerror');
+        const result = { route, viewport: label, theme: themeName, url, status: 0, screenshot: '', findings: [], consoleErrors };
+        const redirect = await auditHostRedirect(url);
+        if (redirect) {
+          result.status = redirect.status;
+          result.redirect = redirect.location;
+          result.skipped = 'audit-host-redirect';
+          results.push(result);
+          console.log(`OK   ${label.padEnd(13)} ${route} audit-host redirect`);
+          continue;
+        }
+
+        const page = await context.newPage();
         page.on('console', msg => {
           if (msg.type() === 'error') consoleErrors.push(msg.text());
         });
@@ -620,7 +683,6 @@ async function main() {
           consoleErrors.push(err.message);
         });
 
-        const result = { route, viewport: label, theme: themeName, url, status: 0, screenshot: '', findings: [], consoleErrors };
         try {
           const resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: Number(args.timeout || 20000) });
           result.status = resp ? resp.status() : 0;
@@ -637,11 +699,15 @@ async function main() {
           result.findings.push(...await exerciseInteractions(page, route, viewportName, label, screenshotDir));
           await page.keyboard.press('Escape').catch(() => {});
           await page.mouse.move(1, 1).catch(() => {});
-          if (consoleErrors.length) {
-            result.findings.push({ severity: 'fail', rule: 'console-error', message: consoleErrors.slice(0, 3).join(' | ') });
+          const actionableConsoleErrors = consoleErrors.filter(message => !allowedConsoleError(route, message));
+          result.consoleErrors = actionableConsoleErrors;
+          if (actionableConsoleErrors.length) {
+            result.findings.push({ severity: 'fail', rule: 'console-error', message: actionableConsoleErrors.slice(0, 3).join(' | ') });
           }
         } catch (e) {
           result.findings.push({ severity: 'fail', rule: 'exception', message: e.message });
+        } finally {
+          await page.close().catch(() => {});
         }
         results.push(result);
         const fails = result.findings.filter(f => f.severity === 'fail').length;

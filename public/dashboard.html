@@ -3,362 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
- * observer never initializes (script 404/parse error), strip the class so nothing
- * stays hidden, so the page is never blank. Keys off the observer's own "armed"
- * marker, not on whether anything has scrolled into view yet. */
-(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
-setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
-<title>Your reports · kolm.ai</title>
-<meta name="description" content="Your signed Agent Security-Review reports, Trust links, and Continuous subscription.">
-<meta name="theme-color" content="#090C0D">
+<title>Compiler Workspace - kolm.ai</title>
+<meta name="description" content="Kolm compiler workspace for API capture, compile artifacts, runtime targets, and governance exports.">
 <meta name="robots" content="noindex,nofollow">
-<link rel="canonical" href="https://kolm.ai/dashboard">
+<meta name="theme-color" content="#E4ECE7">
+<meta http-equiv="refresh" content="0;url=/account/overview">
+<link rel="canonical" href="https://kolm.ai/account/overview">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-500.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
-<script defer src="/kolm-2026.js"></script>
 <style>
-  /* Page-scoped chrome for the reports console. Dark Evidence Room tokens only.
-   * Class names below are load-bearing: the inline script generates markup with
-   * .card .pill(.scan/.report) .banner(.ok/.info/.warn) .num .muted .mono
-   * .btn.primary/.ghost/.sm .row-actions .empty - do not rename. */
-  .mono{font-family:var(--mono)}
-  .app-wrap{max-width:1020px;margin:0 auto;padding:clamp(44px,6vw,72px) max(24px,env(safe-area-inset-right)) 96px max(24px,env(safe-area-inset-left))}
-  .app-wrap h1{font-size:clamp(30px,3.6vw,42px);margin:14px 0 0;max-width:none}
-  .app-wrap>.lede{margin:14px 0 32px;max-width:62ch}
-  .app-wrap h2{font-size:20px;margin:40px 0 14px;max-width:none}
-  .app-wrap .card{margin:0 0 16px}
-  .app-wrap .card:hover{transform:none;box-shadow:none;border-color:var(--line)}
-  .app-wrap table{width:100%;border-collapse:collapse;font-size:14px}
-  .app-wrap th,.app-wrap td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
-  .app-wrap thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;background:var(--paper-sink)}
-  .app-wrap tbody tr:last-child td{border-bottom:0}
-  .app-wrap td{color:var(--ink-2)}
-  .app-wrap td strong{color:var(--ink);font-weight:600}
-  .num{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:.95em}
-  .app-wrap .pill{display:inline-flex;align-items:center;margin:0;padding:3px 10px;border-radius:3px;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-2)}
-  .app-wrap .pill.scan{background:rgba(227,195,104,.10);color:var(--sev-med);border-color:rgba(227,195,104,.38)}
-  .app-wrap .pill.report{background:var(--accent-soft);color:var(--accent);border-color:var(--accent-edge)}
-  .banner{border:1px solid var(--line-2);border-radius:var(--r-md);padding:13px 16px;margin:0 0 20px;font-size:14px;line-height:1.55;background:var(--paper-2);color:var(--ink-2)}
-  .banner.ok{background:var(--accent-soft);border-color:var(--accent-edge);color:var(--ink)}
-  .banner.info{background:var(--paper-2);border-color:var(--line-2);color:var(--ink-2)}
-  .banner.warn{background:rgba(227,195,104,.08);border-color:rgba(227,195,104,.38);color:var(--ink)}
-  .app-wrap .btn{font-size:14px;padding:11px 18px;min-height:42px;border-radius:var(--r-md);text-decoration:none}
-  .app-wrap .btn.primary{background:linear-gradient(180deg,#FBFCFA,var(--sheet) 70%);color:#0C100E;border-color:rgba(243,245,242,.92);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 10px 28px var(--shadow-tint)}
-  .app-wrap .btn.primary:hover{background:#FFFFFF;border-color:#FFFFFF}
-  .app-wrap .btn.ghost{background:rgba(255,255,255,.015);color:var(--ink);border-color:var(--line-2);font-weight:500}
-  .app-wrap .btn.ghost:hover{border-color:rgba(229,240,234,.34);background:rgba(255,255,255,.04)}
-  .app-wrap .btn[disabled]{opacity:.45;cursor:not-allowed}
-  .app-wrap .btn.sm{padding:7px 13px;min-height:33px;font-size:13px}
-  .empty{padding:28px 18px;text-align:center;color:var(--ink-3);font-size:14px}
-  .auth-box{max-width:440px;margin:28px auto 40px;text-align:center;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:30px 26px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.005))}
-  .auth-box h2{margin:0 0 8px;font-size:20px}
-  .auth-box .muted{font-size:14px}
-  .auth-box input{width:100%;padding:11px 12px;border:1px solid var(--line-2);border-radius:var(--r-md);font-family:var(--mono);font-size:14px;margin:16px 0;background:var(--paper-sink);color:var(--ink)}
-  .auth-box input::placeholder{color:var(--ink-faint)}
-  .auth-box input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-  .row-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-  .app-wrap .tiers{grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));max-width:760px}
-  .app-wrap .tier__price{font-size:clamp(26px,2.6vw,32px)}
-  .app-wrap .tier__price small{font-size:13px;color:var(--ink-3);font-family:var(--sans);font-weight:400;letter-spacing:0}
-  .app-wrap .tier__sub{min-height:0;font-size:13.5px;color:var(--ink-2);margin:6px 0 16px}
+  :root{color-scheme:light;--paper:#e4ece7;--ink:#07100d;--ink-2:#26342e;--line:rgba(7,16,13,.14);--accent:#087a52}
+  html,body{background:var(--paper);color:var(--ink)}
+  body{margin:0;font-family:var(--sans);background:radial-gradient(820px 360px at 18% 8%,rgba(255,255,255,.86),transparent 72%),radial-gradient(circle at center,rgba(16,19,18,.10) .65px,transparent .82px),var(--paper);background-size:auto,22px 22px,auto}
+  main{max-width:760px;margin:0 auto;padding:72px 22px}
+  a{color:var(--ink);text-underline-offset:4px}
+  .brand{display:inline-flex;align-items:center;gap:9px;margin-bottom:42px;color:var(--ink);text-decoration:none;font-weight:700}
+  .brand svg{width:24px;height:24px;fill:var(--accent)}
+  h1{font-family:var(--display);font-size:clamp(44px,8vw,72px);line-height:.98;letter-spacing:0;margin:0 0 18px;text-wrap:balance}
+  p{max-width:58ch;color:var(--ink-2);font-size:17px;line-height:1.58}
+  .panel{margin-top:28px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.62);padding:18px}
 </style>
-</head>
-<body>
-<a class="skip-link" href="#main">Skip to content</a>
-
-<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
-<hr class="foil-strip" aria-hidden="true">
-
-<!-- ============================================================ NAV -->
-<header class="nav">
-  <div class="wrap nav__in">
-    <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
-      <span>kolm<b>.ai</b></span>
-    </a>
-    <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/how-it-works">How it works</a>
-      <a href="/checks">What we test</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/trust">Trust</a>
-      <a href="/docs">Docs</a>
-    </nav>
-    <div class="nav__actions">
-      <a class="btn btn--ghost btn--sm" href="/verify">Verify a report</a>
-      <a class="btn btn--ghost btn--sm nav__cta" href="/signup">Run the free scan</a>
-    </div>
-    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-    </button>
-  </div>
-</header>
-
-<main id="main">
-
-<div class="app-wrap">
-  <span class="idx">Account / Reports</span>
-  <h1>Your reports</h1>
-  <p class="lede">Every Agent Security-Review you have run, the shareable Trust link your buyer's review group verifies offline, and your Continuous subscription. To see who opened each link, visit your <a href="/trust-center">Trust Center</a>.</p>
-
-  <div id="banner"></div>
-  <div id="content"><div class="empty">Loading your reports...</div></div>
-
-  <div id="auth" class="auth-box" style="display:none">
-    <h2>View your reports</h2>
-    <p class="muted">Sign in, or paste your API key (starts with <span class="mono">ks_</span>) to see your reports and Trust links. Do not have one yet? <a href="/signup">Run the free scan</a>.</p>
-    <input id="keyInput" class="mono" aria-label="API key" placeholder="ks_..." autocomplete="off" spellcheck="false">
-    <button class="btn primary" id="keyBtn" style="width:100%">View my reports</button>
-  </div>
-
-  <h2 id="contTitle" style="display:none">Continuous re-attestation</h2>
-  <div id="continuous" class="tiers" style="display:none">
-    <div class="tier">
-      <span class="tier__name">Starter</span>
-      <div class="tier__price">$299<small> /mo</small></div>
-      <p class="tier__sub">Weekly re-attestation. An always-current Trust link that refreshes the signed report so a month-old audit never blocks a deal.</p>
-      <button class="btn primary sm" data-plan="starter">Subscribe to Starter</button>
-    </div>
-    <div class="tier">
-      <span class="tier__name">Growth</span>
-      <div class="tier__price">$999<small> /mo</small></div>
-      <p class="tier__sub">Re-attest on every deploy plus injection regression. Hand any buyer a link that is never stale.</p>
-      <button class="btn primary sm" data-plan="growth">Subscribe to Growth</button>
-    </div>
-  </div>
-</div>
-
-</main>
-
-<!-- ============================================================ FOOTER -->
-<hr class="foil-line" aria-hidden="true">
-<footer class="foot">
-  <div class="wrap">
-    <div class="foot__grid">
-      <div class="foot__col">
-        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
-            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-          </svg>
-          <span>kolm<b>.ai</b></span>
-        </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Signed security evidence for AI agents entering the enterprise.</p>
-      </div>
-      <div class="foot__col">
-        <h3>Product</h3>
-        <a href="/how-it-works">How it works</a>
-        <a href="/platform">Platform</a>
-        <a href="/checks">Checks</a>
-        <a href="/report">Report</a>
-        <a href="/docs">Docs</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/solutions/ai-vendors">For AI vendors</a>
-        <a href="/solutions/enterprise-buyers">For security reviewers</a>
-      </div>
-      <div class="foot__col">
-        <h3>Trust</h3>
-        <a href="/verify">Verify</a>
-        <a href="/security">Security</a>
-        <a href="/trust">Trust center</a>
-        <a href="/regulatory-clock">Regulatory clock</a>
-        <a href="/status">Status</a>
-        <a href="/transparency-log">Transparency log</a>
-      </div>
-      <div class="foot__col">
-        <h3>Legal</h3>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
-        <a href="/dpa">DPA</a>
-        <a href="/baa">BAA</a>
-        <a href="/subprocessors">Subprocessors</a>
-      </div>
-      <div class="foot__col">
-        <h3>Company</h3>
-        <a href="/research">Research</a>
-        <a href="/changelog">Changelog</a>
-        <a href="/careers">Careers</a>
-        <a href="/contact">Contact</a>
-      </div>
-    </div>
-    <div class="microprint" style="margin-top:var(--s6)" aria-hidden="true">KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE · SIGNED · SCOPED · OFFLINE-VERIFIABLE · KOLM · AGENT SECURITY EVIDENCE · ED25519 · VERIFIED OFFLINE ·</div>
-    <div class="foot__bottom">
-      <span class="badge badge--ok">Ed25519-signed</span>
-      <span class="badge">Offline-verifiable</span>
-      <span class="badge"><a href="/kolm-audit-verify.js">Inspectable verifier</a></span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">© 2026 kolm.ai · <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
-    </div>
-  </div>
-</footer>
-
 <script>
-(function(){
-  var KEY = null;
-  try { KEY = sessionStorage.getItem('kolm_dash_key') || null; } catch(e){}
-
-  function authHeaders(){
-    var h = {};
-    if (KEY) h['Authorization'] = 'Bearer ' + KEY;
-    return h;
-  }
-  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
-
-  function showBanner(){
-    var q = new URLSearchParams(location.search);
-    var asr = q.get('asr');
-    var el = document.getElementById('banner');
-    if (asr === 'report') { el.innerHTML = '<div class="banner ok">Payment received. Your Signed Readiness Report is ready below. The watermark is gone and the Trust link is live to share.</div>'; }
-    else if (asr === 'starter' || asr === 'growth') { el.innerHTML = '<div class="banner ok">Subscription active. Your Continuous Trust link refreshes automatically and is ready to share.</div>'; }
-    else if (asr === 'cancelled') { el.innerHTML = '<div class="banner info">Checkout cancelled. Nothing was charged.</div>'; }
-  }
-
-  function fmtDate(s){ try { return new Date(s).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); } catch(e){ return s||''; } }
-
-  function render(data){
-    var billing = data.billing || { ready:false, products:{} };
-    var reports = data.reports || [];
-    var content = document.getElementById('content');
-
-    document.getElementById('contTitle').style.display='';
-    document.getElementById('continuous').style.display='';
-
-    // Wire continuous + reflect configured state.
-    var contBtns = document.querySelectorAll('#continuous [data-plan]');
-    contBtns.forEach(function(b){
-      var p = b.getAttribute('data-plan');
-      var configured = billing.products && billing.products[p];
-      if (!configured) { b.textContent = 'Contact to enable'; b.classList.remove('primary'); b.classList.add('ghost'); b.onclick = function(){ location.href='/contact'; }; }
-      else { b.onclick = function(){ startCheckout('/v1/audit/continuous/checkout', { plan: p }, b); }; }
-    });
-
-    if (!reports.length){
-      content.innerHTML = '<div class="card"><div class="empty">No reports yet. Run a free Agent Exposure Scan to generate your first signed snapshot, then purchase the full report when a buyer asks for evidence.<br><br><a class="btn primary" href="/how-it-works">See how it works</a></div></div>';
-      return;
-    }
-
-    var reportConfigured = billing.products && billing.products.report;
-    var rows = reports.map(function(r){
-      var tierPill = r.paid ? '<span class="pill report">REPORT</span>' : '<span class="pill scan">SCAN</span>';
-      var readiness = (r.readiness_pct==null) ? '<span class="muted">n/a</span>' : ('<span class="num">'+esc(r.readiness_pct)+'%</span>');
-      var actions;
-      if (r.paid && r.trust_url){
-        actions = '<a class="btn ghost sm" href="'+esc(r.trust_url)+'" target="_blank" rel="noopener">Open Trust link</a>'
-                + '<button class="btn primary sm" data-copy="'+esc(r.trust_url)+'">Copy link</button>';
-      } else if (reportConfigured) {
-        actions = '<button class="btn ghost sm" data-preview="'+esc(r.id)+'">View preview report</button>'
-                + '<button class="btn primary sm" data-buy="'+esc(r.id)+'">Buy full report ($750)</button>';
-      } else {
-        actions = '<button class="btn ghost sm" data-preview="'+esc(r.id)+'">View preview report</button>'
-                + '<a class="btn ghost sm" href="/contact">Contact to purchase</a>';
-      }
-      return '<tr>'
-        + '<td><strong>'+esc(r.subject||'Agent fleet')+'</strong><br><span class="mono muted" style="font-size:12px">'+esc(r.report_id||'')+'</span></td>'
-        + '<td>'+tierPill+'</td>'
-        + '<td>'+readiness+'</td>'
-        + '<td class="muted num">'+esc(r.blocking_count==null?'-':r.blocking_count)+'</td>'
-        + '<td class="muted">'+esc(fmtDate(r.created_at))+'</td>'
-        + '<td><div class="row-actions">'+actions+'</div></td>'
-        + '</tr>';
-    }).join('');
-
-    content.innerHTML = '<div class="card" style="padding:0;overflow:hidden">'
-      + '<table><thead><tr><th>Subject</th><th>Tier</th><th>Readiness</th><th>Blocking</th><th>Generated</th><th></th></tr></thead>'
-      + '<tbody>'+rows+'</tbody></table></div>'
-      + '<p class="muted" style="font-size:13.5px;margin:-4px 0 20px">The free scan is the full analysis, watermarked. The Signed Readiness Report ($750) removes the watermark, adds a trusted timestamp, and mints the shareable Trust link your buyer verifies.</p>'
-      + (reportConfigured ? '' : '<div class="banner warn">Purchasing is not enabled on this deployment yet. Email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> to buy a report.</div>');
-
-    // Wire row actions.
-    content.querySelectorAll('[data-preview]').forEach(function(b){ b.onclick = function(){ openPreview(b.getAttribute('data-preview'), b); }; });
-    content.querySelectorAll('[data-buy]').forEach(function(b){ b.onclick = function(){ startCheckout('/v1/audit/report/checkout', { audit_id: b.getAttribute('data-buy') }, b); }; });
-    content.querySelectorAll('[data-copy]').forEach(function(b){ b.onclick = function(){ navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function(){ b.textContent='Copied'; setTimeout(function(){ b.textContent='Copy link'; },1500); }); }; });
-  }
-
-  // Open the stored watermarked scan-tier report in a new tab. Works for both
-  // auth modes: the kolm_session cookie rides on credentials:'same-origin' and
-  // a pasted ks_ key rides on authHeaders(). Blob URL keeps the page's own
-  // route untouched and is revoked once the new tab has had time to load.
-  function openPreview(id, btn){
-    var prev = btn.textContent; btn.disabled = true; btn.textContent = 'Loading...';
-    fetch('/v1/audit/sessions/' + encodeURIComponent(id) + '/report?format=html', { credentials:'same-origin', headers: authHeaders() })
-      .then(function(res){
-        if (!res.ok){
-          btn.disabled = false;
-          btn.textContent = (res.status === 401 || res.status === 404) ? 'Sign in again to view' : 'Preview unavailable';
-          setTimeout(function(){ btn.textContent = prev; }, 4000);
-          return null;
-        }
-        return res.text();
-      })
-      .then(function(html){
-        if (html == null) return;
-        btn.disabled = false; btn.textContent = prev;
-        var objUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-        window.open(objUrl, '_blank');
-        setTimeout(function(){ URL.revokeObjectURL(objUrl); }, 60000);
-      })
-      .catch(function(){
-        btn.disabled = false; btn.textContent = 'Preview unavailable';
-        setTimeout(function(){ btn.textContent = prev; }, 4000);
-      });
-  }
-
-  function startCheckout(url, body, btn){
-    var prev = btn.textContent; btn.disabled = true; btn.textContent = 'Starting...';
-    fetch(url, { method:'POST', credentials:'same-origin', headers: Object.assign({'Content-Type':'application/json'}, authHeaders()), body: JSON.stringify(body) })
-      .then(function(res){ return res.json().then(function(j){ return { ok: res.ok, status: res.status, j: j }; }).catch(function(){ return { ok: res.ok, status: res.status, j: null }; }); })
-      .then(function(o){
-        if (o.j && o.j.already_paid && o.j.trust_url){ location.href = o.j.trust_url; return; }
-        if (o.ok && o.j && o.j.url){ location.href = o.j.url; return; }
-        btn.disabled=false; btn.textContent=prev;
-        // Surface the failure with real detail instead of a dead end. Env NAMES
-        // in o.j.missing are operator-facing only: console, never the banner.
-        if (o.j && Array.isArray(o.j.missing)) { console.warn('Checkout not configured. Missing server env names:', o.j.missing); }
-        var banner = document.getElementById('banner');
-        if ((o.j && o.j.error === 'billing_not_configured') || o.status === 503){
-          banner.innerHTML = '<div class="banner warn">Purchasing is temporarily unavailable on this deployment. Email <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> and we will invoice you directly.</div>';
-        } else {
-          var detail = o.j && (o.j.detail || o.j.error);
-          banner.innerHTML = '<div class="banner warn">' + esc(detail || 'Could not start checkout. Email dev@kolm.ai.') + '</div>';
-        }
-        banner.scrollIntoView({ block: 'nearest' });
-      })
-      .catch(function(){ btn.disabled=false; btn.textContent=prev; alert('Network error. Try again or email dev@kolm.ai.'); });
-  }
-
-  function load(){
-    fetch('/v1/audit/reports', { credentials:'same-origin', headers: authHeaders() })
-      .then(function(res){
-        if (res.status === 401){ document.getElementById('content').style.display='none'; document.getElementById('auth').style.display='block'; return null; }
-        return res.json();
-      })
-      .then(function(data){ if (data && data.ok){ render(data); } })
-      .catch(function(){ document.getElementById('content').innerHTML = '<div class="banner warn">Could not load your reports. Try refreshing, or email dev@kolm.ai.</div>'; });
-  }
-
-  document.getElementById('keyBtn').onclick = function(){
-    var v = (document.getElementById('keyInput').value||'').trim();
-    if (!v){ return; }
-    KEY = v; try { sessionStorage.setItem('kolm_dash_key', v); } catch(e){}
-    document.getElementById('auth').style.display='none';
-    document.getElementById('content').style.display='block';
-    document.getElementById('content').innerHTML = '<div class="empty">Loading your reports...</div>';
-    load();
-  };
-
-  showBanner();
-  load();
-})();
+  location.replace('/account/overview');
 </script>
+</head>
+<body data-design-reference="image-2">
+<main>
+  <a class="brand" href="/" aria-label="kolm.ai home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
+    <span>kolm.ai</span>
+  </a>
+  <h1>Opening Compiler Workspace</h1>
+  <p>The main dashboard now resolves to the compiler workspace for API capture, signed artifacts, runtime targets, and governance exports.</p>
+  <div class="panel"><a href="/account/overview">Open Compiler Workspace</a></div>
+</main>
 </body>
 </html>
