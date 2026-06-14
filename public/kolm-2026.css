@@ -1685,57 +1685,71 @@ p a:not([class]):hover { border-bottom-color: var(--accent); }
 .proof__cell b.is-mono { font-family: var(--mono); font-size: clamp(22px, 2.2vw, 30px); background: none; -webkit-text-fill-color: var(--ink); color: var(--ink); }
 
 /* ============================================================
-   RICH ATMOSPHERE — the background Liquid Glass lives on.
-   Layered gradient-mesh light zones + slow aurora + grain, so the
-   glass has color & light to refract. Dark + green, premium, alive.
+   CORRECT LIQUID GLASS — foreground paneling over a distinct ROOM.
+   Supersedes the RICH ATMOSPHERE inversion. Three layers (spec §1):
+   L1 room (never glass) · L2 glass chrome (nav/.ui real; cards fake)
+   · L3 content (never glass). Glass over flat black = invisible, so
+   real backdrop-filter only where distinct content passes under it.
    ============================================================ */
-:root { --bg: #05060A; }
+:root {
+  --glass-tint: rgba(16,18,20,.60);
+  --surface-1: #0E0F12; --surface-2: #16181C; --surface-3: #1C1E22; --code-well: #050608;
+  --line: rgba(255,255,255,.08); --line-2: rgba(255,255,255,.13); --line-top: rgba(255,255,255,.14); --line-soft: rgba(255,255,255,.05);
+  --ring-inset: inset 0 1px 0 0 rgba(255,255,255,.06);
+  --shadow-lift: 0 1px 1px rgba(0,0,0,.30), 0 8px 24px rgba(0,0,0,.36), 0 24px 64px rgba(0,0,0,.30);
+  --accent-glow: rgba(63,229,160,.16);
+  --bg: #08090A;
+}
+/* ---- L1: THE ROOM — calm near-black + ONE faint phosphor glow. Not busy. ---- */
 body {
-  background:
-    radial-gradient(980px 800px at 14% -8%, rgba(63,229,160,0.28), transparent 58%),
-    radial-gradient(900px 720px at 86% 2%, rgba(64,150,255,0.22), transparent 60%),
-    radial-gradient(1100px 900px at 50% 112%, rgba(63,229,160,0.18), transparent 62%),
-    radial-gradient(760px 640px at 97% 70%, rgba(150,96,255,0.10), transparent 60%),
-    radial-gradient(680px 560px at 3% 62%, rgba(64,150,255,0.09), transparent 60%),
-    var(--bg) !important;
+  background: radial-gradient(1200px 720px at 50% -320px, rgba(63,229,160,.05), transparent 70%), #08090A !important;
   background-attachment: fixed !important;
 }
-/* slow aurora drift — premium, never frantic */
-body::before {
-  content: "" !important; display: block !important; position: fixed !important; inset: -25% !important;
-  z-index: -2 !important; pointer-events: none !important; opacity: 1 !important;
+body::before, body::after, html::after { content: none !important; display: none !important; background: none !important; animation: none !important; }
+/* remove the per-section glows + the hero gradient backdrop (banned) */
+.feat::after, .feat--rev::after, .cta::after, .proof::after { content: none !important; display: none !important; background: none !important; }
+.home .hero::before { content: none !important; display: none !important; background: none !important; }
+/* the hero ROOM: a masked dot/line grid + one glow BEHIND the hero, so the .ui glass has something distinct to refract */
+.home .hero { position: relative; isolation: isolate; }
+.home .hero::after {
+  content: "" !important; display: block !important; position: absolute !important; inset: 0 !important; bottom: -10% !important; z-index: -1 !important; pointer-events: none !important;
   background:
-    radial-gradient(48% 42% at 26% 14%, rgba(63,229,160,0.28), transparent 68%),
-    radial-gradient(46% 40% at 80% 28%, rgba(64,150,255,0.22), transparent 70%),
-    radial-gradient(40% 34% at 58% 82%, rgba(150,96,255,0.11), transparent 72%) !important;
-  filter: blur(48px) !important;
-  animation: aurora 26s ease-in-out infinite alternate !important;
+    radial-gradient(720px 480px at 50% -4%, var(--accent-glow), transparent 70%),
+    radial-gradient(circle 1.3px at 1px 1px, rgba(255,255,255,.06) 1px, transparent 1.6px),
+    linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px) !important;
+  background-size: auto, 32px 32px, 32px 32px, 32px 32px !important;
+  -webkit-mask-image: radial-gradient(82% 74% at 50% 8%, #000 0%, transparent 76%) !important;
+          mask-image: radial-gradient(82% 74% at 50% 8%, #000 0%, transparent 76%) !important;
+  opacity: 1 !important;
 }
-@keyframes aurora { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(5%,4%) scale(1.14); } }
-/* fine film grain over everything */
-body::after {
-  content: "" !important; display: block !important; position: fixed !important; inset: 0 !important;
-  z-index: 9999 !important; pointer-events: none !important; mix-blend-mode: overlay !important;
-  background-image: var(--grain) !important; background-size: 200px 200px !important; opacity: 0.05 !important; animation: none !important;
+/* ---- L2: REAL glass — ONLY nav + .ui (they overlap moving/lit content) ---- */
+.nav {
+  background: rgba(8,9,10,.72) !important;
+  backdrop-filter: blur(14px) saturate(160%) !important; -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
+  border-bottom: 1px solid var(--line) !important; box-shadow: inset 0 1px 0 0 rgba(255,255,255,.06) !important;
 }
-/* make the glass VISIBLE: translucent, strong blur, so it refracts the mesh */
-.ui { background: rgba(11,13,17,0.40) !important; backdrop-filter: blur(30px) saturate(180%) brightness(1.08) !important; -webkit-backdrop-filter: blur(30px) saturate(180%) !important; }
-.card, .plate, .panel { background: rgba(13,15,19,0.46) !important; backdrop-filter: blur(24px) saturate(175%) !important; -webkit-backdrop-filter: blur(24px) saturate(175%) !important; }
-.nav { background: rgba(7,8,11,0.52) !important; backdrop-filter: blur(22px) saturate(175%) !important; -webkit-backdrop-filter: blur(22px) saturate(175%) !important; }
-@media (prefers-reduced-motion: reduce) { body::before { animation: none !important; } }
-@media (prefers-reduced-transparency: reduce) { .ui, .card, .plate, .panel, .nav { backdrop-filter: none !important; background: var(--surface-3) !important; } }
-/* ===================== /RICH ATMOSPHERE ===================== */
-
-/* per-section atmosphere — every section gets its own light moment so the glass
-   refracts color the whole way down, not just in the hero */
-.feat, .proof, .cta, .home .hero { position: relative; isolation: isolate; }
-.feat::after, .cta::after {
-  content: ""; position: absolute; inset: -8% -18%; z-index: -1; pointer-events: none; display: block;
-  background: radial-gradient(46% 56% at 22% 42%, rgba(63,229,160,0.13), transparent 70%);
-  filter: blur(44px);
+.ui {
+  background: var(--glass-tint) !important;
+  backdrop-filter: blur(20px) saturate(165%) !important; -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
+  border: 1px solid var(--line) !important; border-top-color: var(--line-top) !important; border-radius: var(--r-xl) !important;
+  box-shadow: var(--ring-inset), inset 0 -1px 0 rgba(0,0,0,.30), var(--shadow-lift) !important;
 }
-.feat--rev::after { background: radial-gradient(46% 56% at 78% 42%, rgba(64,150,255,0.12), transparent 70%); }
-.cta::after { inset: -22% -12%; background: radial-gradient(60% 80% at 50% 50%, rgba(63,229,160,0.16), rgba(64,150,255,0.06) 50%, transparent 72%); }
-.proof { position: relative; }
-.proof::after { content: ""; position: absolute; inset: -30% -10%; z-index: -1; pointer-events: none;
-  background: radial-gradient(50% 90% at 50% 50%, rgba(150,96,255,0.08), transparent 72%); filter: blur(40px); }
+@supports (backdrop-filter:url(#glass-refract)) { .ui { backdrop-filter: url(#glass-refract) blur(20px) saturate(165%) !important; } }
+/* ---- L2: FAKE glass — every below-fold card/panel/tier. Solid +1 step + rim + lift, NO backdrop-filter ---- */
+.card, .plate, .panel, .tier {
+  background: var(--surface-1) !important;
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  border: 1px solid var(--line) !important; border-top-color: var(--line-top) !important; border-radius: var(--r-lg) !important;
+  box-shadow: var(--ring-inset), inset 0 -1px 0 rgba(0,0,0,.30), var(--shadow-lift) !important;
+}
+.card::before, .plate::before, .panel::before { content: none !important; display: none !important; }
+.card:hover, .plate:hover, .panel:hover {
+  background: var(--surface-2) !important; border-color: var(--line-2) !important; transform: translateY(-2px) !important;
+  box-shadow: var(--ring-inset), inset 0 -1px 0 rgba(0,0,0,.30), var(--shadow-lift) !important;
+}
+/* ---- L3: content inside glass = solid vibrant fill, no second blur (no glass-on-glass) ---- */
+.ui__step.is-on { background: rgba(255,255,255,.05) !important; }
+.ui__code { background: var(--code-well) !important; }
+@media (prefers-reduced-transparency: reduce){ .nav, .ui { backdrop-filter: none !important; background: var(--surface-3) !important; } }
+/* ===================== /CORRECT LIQUID GLASS ===================== */
