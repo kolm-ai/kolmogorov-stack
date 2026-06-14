@@ -30,8 +30,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Why Kolm: AI API Control Center, Compiler, and Proof Layer",
+  "url": "https://kolm.ai/compare",
+  "description": "Kolm turns AI/API behavior into governed state, signed artifacts, runtime targets, and proof exports in one enterprise control loop.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
+}
+</script>
 </head>
-<body class="marketing">
+<body class="t-marketing">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -62,40 +72,70 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <main id="main">
 
-  <section class="hero section--flush">
-    <div class="wrap hero__in">
-      <p class="eyebrow">Why Kolm</p>
-      <h1 class="hero__h1">One control loop from API behavior to signed proof.</h1>
-      <p class="lede">Kolm is the enterprise surface for teams that need AI/API traffic, traces, policies, evals, artifacts, runtime targets, and proof exports to move as one governed system instead of scattered dashboard state.</p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="/signup">Get an API key</a>
-        <a class="btn btn--ghost" href="/account/api-control-center">Open API Control</a>
+  <!-- s-hero [req] — asymmetric 1fr 1.2fr grid; the artifact arms the one Calibration Sweep -->
+  <section class="hero section--flush" data-sweep>
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow" data-enter="1">Why Kolm</p>
+        <h1 class="hero__h1" data-enter="2">One control loop from API behavior to signed proof.</h1>
+        <p class="lede" data-enter="3">Kolm is the enterprise surface for teams that need AI/API traffic, traces, policies, evals, artifacts, runtime targets, and proof exports to move as one governed system instead of scattered dashboard state.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="/signup">Get an API key</a>
+          <a class="btn btn--ghost" href="/account/api-control-center">Open API Control</a>
+        </div>
+        <div class="hero__proof" data-enter="5">
+          <span><i class="dot"></i>17 API data channels</span>
+          <span><i class="dot"></i>8 policy layers</span>
+          <span><i class="dot"></i>5 runtime targets</span>
+          <span><i class="dot"></i>Ed25519-signed artifacts</span>
+        </div>
       </div>
+
+      <!-- the one lit --paper object; ships sealed (calm fallback), sweep re-fires it once -->
+      <figure class="artifact is-sealed" data-artifact data-art-reveal aria-label="Signed .kolm control-loop datasheet, in spec">
+        <i class="regmark regmark--tl"></i><i class="regmark regmark--tr"></i>
+        <i class="regmark regmark--bl"></i><i class="regmark regmark--br"></i>
+        <header class="artifact__head">
+          <span class="ctrl-id"><b>REG-01</b> control-loop.kolm</span>
+          <span class="ctrl-id">ONE LOOP &middot; v3.3</span>
+        </header>
+        <dl class="register">
+          <div class="register__row"><dt class="register__k">Channels</dt><dd class="register__v" data-val><b>17</b> API data</dd></div>
+          <div class="register__row"><dt class="register__k">Policies</dt><dd class="register__v" data-val><b>8</b> layers</dd></div>
+          <div class="register__row"><dt class="register__k">Targets</dt><dd class="register__v" data-val><b>5</b> runtimes</dd></div>
+          <div class="register__row"><dt class="register__k">Signature</dt><dd class="register__v" data-val>Ed25519</dd></div>
+        </dl>
+        <footer class="artifact__verdict"><span data-verdict>In spec</span>
+          <svg class="artifact__check" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4"/></svg></footer>
+        <span class="artifact__scan" aria-hidden="true"></span>
+      </figure>
     </div>
   </section>
 
-  <section class="section">
+  <!-- s-proof-strip -->
+  <section class="section section--band">
     <div class="wrap">
       <p class="eyebrow">Operating reality</p>
       <h2>Enterprise AI breaks when each layer keeps its own truth.</h2>
       <p class="lede">A strong product does not force teams to rebuild their stack. It gives source systems, policy gates, improvement loops, artifacts, runtime targets, and proof exports one shared state model.</p>
-      <div class="proof" style="margin-top:var(--s7)">
-        <div class="proof__row">
-          <div class="proof__cell"><b>17</b><span>API data channels</span></div>
-          <div class="proof__cell"><b>8</b><span>policy layers</span></div>
-          <div class="proof__cell"><b>5</b><span>runtime targets</span></div>
-          <div class="proof__cell"><b class="is-mono">Ed25519</b><span>signed artifacts</span></div>
-        </div>
+      <div class="proof__row" style="margin-top:var(--s7)">
+        <div class="proof__cell reveal"><b data-count>17</b><span>API data channels</span></div>
+        <div class="proof__cell reveal"><b data-count>8</b><span>policy layers</span></div>
+        <div class="proof__cell reveal"><b data-count>5</b><span>runtime targets</span></div>
+        <div class="proof__cell reveal"><b class="is-mono">Ed25519</b><span>signed artifacts</span></div>
       </div>
     </div>
   </section>
 
+  <!-- s-bento — operator scorecard read as a compare table -->
   <section class="section">
     <div class="wrap">
-      <p class="eyebrow">Operator scorecard</p>
-      <h2>The buyer decision should be an operating checklist, not a surface tour.</h2>
-      <p class="lede">Most teams assemble this loop from separate point tools &mdash; a gateway, an eval dashboard, a training service, a serving host, a GRC packet. Kolm&rsquo;s position is that those are intake layers and deployment targets for one compiler loop, not the destination. The table reads each buyer pressure as its own row: what a point tool delivers, and how Kolm folds it into capture &rarr; eval &rarr; compile &rarr; target &rarr; receipt &rarr; export.</p>
-      <div class="tbl-wrap" style="margin-top:var(--s6)">
+      <div class="section__head">
+        <p class="eyebrow">Operator scorecard</p>
+        <h2>The buyer decision should be an operating checklist, not a surface tour.</h2>
+        <p class="lede">Most teams assemble this loop from separate point tools &mdash; a gateway, an eval dashboard, a training service, a serving host, a GRC packet. Kolm&rsquo;s position is that those are intake layers and deployment targets for one compiler loop, not the destination. The table reads each buyer pressure as its own row: what a point tool delivers, and how Kolm folds it into capture &rarr; eval &rarr; compile &rarr; target &rarr; receipt &rarr; export.</p>
+      </div>
+      <div class="tbl-wrap">
         <table class="tbl">
           <thead>
             <tr>
@@ -110,88 +150,100 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
               <th scope="row"><b>Gateway and routing</b></th>
               <td>Provider access, fallbacks, model routing, cache, budgets, rate limits, retries, and canary routing are baseline gateway expectations.</td>
               <td><b>Gateway events become governed compiler inputs.</b> Routing is the intake layer for capture, eval, compile, target, receipt, and export &mdash; not the endpoint.</td>
-              <td><span class="map">/v1/route</span><br><span class="map">17 channels</span></td>
+              <td><span class="map">/v1/route</span><br><span class="muted">17 channels</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Observability and evals</b></th>
               <td>Traces, sessions, prompt versions, datasets, annotations, experiments, production evals, custom scores, and dashboards.</td>
               <td><b>Traces become promotable.</b> Imported traces turn into regression slices, eval bundles, compile inputs, and signed artifact evidence.</td>
-              <td><span class="map">/v1/evals</span><br><span class="map">regression replay</span></td>
+              <td><span class="map">/v1/evals</span><br><span class="muted">regression replay</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Closed-loop improvement</b></th>
               <td>Failure diagnosis, data curation, targeted supervision, retraining, and regression verification &mdash; valuable only if the enterprise owns the controls.</td>
               <td><b>The loop stays enterprise-owned.</b> Failure queue, taxonomy, replay gates, compiled artifact, target policy, and export ledger stay inside tenant controls.</td>
-              <td><span class="map">compile-artifact</span><br><span class="map">readiness-gated</span></td>
+              <td><span class="map">compile-artifact</span><br><span class="muted">readiness-gated</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Training and serving</b></th>
               <td>Model customization, LoRA/adapters, hosted endpoints, GPU scheduling, autoscaling, and serving performance &mdash; mature specialist surfaces.</td>
               <td><b>Kolm does not become another endpoint host.</b> It packages behavior into portable artifacts with manifests, receipts, and target-fit metadata.</td>
-              <td><span class="map">/v1/compile</span><br><span class="map">target matrix</span></td>
+              <td><span class="map">/v1/compile</span><br><span class="muted">target matrix</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Security and GRC</b></th>
               <td>Risk controls, prompt/security testing, model scanning, DLP, AI firewall behavior, compliance packets, and vendor trust workflows.</td>
               <td><b>Proof exports without overclaiming certification.</b> Security is a module and evidence layer; production claims stay readiness-gated until live proof exists.</td>
-              <td><span class="map">/v1/receipts/verify</span><br><span class="map">open gates visible</span></td>
+              <td><span class="map">/v1/receipts/verify</span><br><span class="muted">open gates visible</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Data and ops plane</b></th>
               <td>Batch, streaming, warehouses, queues, CDC, SIEM drains, tickets, approvals, webhooks, browser events, and custom adapter paths.</td>
               <td><b>Every credible API data path is a governed event.</b> Schemas can be opaque, but direction, owner, retention, redaction, and export scope must be explicit.</td>
-              <td><span class="map">12 ingress modes</span><br><span class="map">10 export modes</span></td>
+              <td><span class="map">12 ingress modes</span><br><span class="muted">10 export modes</span></td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="lede" style="margin-top:var(--s5);font-size:13.5px;color:var(--ink-3)">This scorecard is a product requirement, not a benchmark claim. Kolm should be judged by whether the controls are wired, visible, exportable, and readiness-scoped.</p>
+      <p class="scope">This scorecard is a product requirement, not a benchmark claim. Kolm should be judged by whether the controls are wired, visible, exportable, and readiness-scoped.</p>
     </div>
   </section>
 
+  <!-- s-feature-rows — eight rules as register cards -->
   <section class="section">
-    <div class="wrap">
-      <p class="eyebrow">How Kolm wins</p>
-      <h2>Eight rules that beat category sprawl.</h2>
-      <p class="lede">This is the product standard. Any feature that does not strengthen one of these should be treated as noise.</p>
-      <div class="grid grid--4" style="margin-top:var(--s6)">
-        <div class="card">
-          <h3>1. API control center first</h3>
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">How Kolm wins</p>
+        <h2>Eight rules that beat category sprawl.</h2>
+        <p class="lede">This is the product standard. Any feature that does not strengthen one of these should be treated as noise.</p>
+      </div>
+      <div class="grid grid--4">
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; 01</span>
+          <h3>API control center first</h3>
           <p>Ingress, egress, capture, redaction, provider vault, budgets, retention, evals, compile state, targets, and export policy in one console.</p>
         </div>
-        <div class="card">
-          <h3>2. Import every trace source</h3>
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; 02</span>
+          <h3>Import every trace source</h3>
           <p>Trace exports, eval dashboards, OpenTelemetry spans, gateway logs, JSONL, webhooks, GraphQL/RPC, queues, warehouses, SIEM drains, MCP, A2A, browser events, files, and custom adapters.</p>
         </div>
-        <div class="card">
-          <h3>3. Compile to an artifact</h3>
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; 03</span>
+          <h3>Compile to an artifact</h3>
           <p>The output is not just a dashboard score. It is a signed <code>.kolm</code> package with manifests, examples, evaluators, hashes, receipts, and target instructions.</p>
         </div>
-        <div class="card">
-          <h3>4. Verify without us</h3>
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; 04</span>
+          <h3>Verify without us</h3>
           <p>Receipts, public keys, hashes, and exported packets stay useful when a buyer, auditor, or platform team checks them outside the Kolm UI.</p>
         </div>
-        <div class="card">
-          <h3>5. Runtime-neutral targets</h3>
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; 05</span>
+          <h3>Runtime-neutral targets</h3>
           <p>Kolm does not pretend every deployment target is the same. It packages clean target recipes for hosted, local, edge, mobile, and restricted fleets.</p>
         </div>
-        <div class="card">
-          <h3>6. Honest readiness scope</h3>
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; 06</span>
+          <h3>Honest readiness scope</h3>
           <p>The site says what is shipped, local-certified, partner-gated, benchmark-gated, and package-release-gated. Overclaiming weakens trust.</p>
         </div>
-        <div class="card">
-          <h3>7. Product UI over marketing</h3>
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; 07</span>
+          <h3>Product UI over marketing</h3>
           <p>Every main page shows the actual machine: routes, data channels, policies, jobs, receipts, targets, and next actions. No generic AI fluff.</p>
         </div>
-        <div class="card">
-          <h3>8. One loop, many integrations</h3>
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; 08</span>
+          <h3>One loop, many integrations</h3>
           <p>Gateways, evals, security, GRC, training, RAG, and runtime tools become sources, controls, or deployment targets for the compiler loop.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="feat">
+  <!-- s-feature-rows (alt L/R) — closed-loop ownership with operating-map plate -->
+  <section class="section feat">
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Closed-loop systems</p>
@@ -205,8 +257,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>operating map</span><span class="m">scoped</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">OPERATING MAP &middot; <span class="ok">scoped</span></div>
           <div class="panel__rows">
             <div class="prow"><span class="m">gateway</span> provider routes &middot; budgets &middot; policy <span class="prow__r m">route</span></div>
             <div class="prow"><span class="m">eval</span> traces &middot; prompt versions &middot; drift <span class="prow__r m">observe</span></div>
@@ -215,17 +267,20 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="prow"><span class="m">deploy</span> local &middot; edge &middot; mobile fleets <span class="prow__r m">deploy</span></div>
             <div class="prow"><span class="m">grc</span> assurance packets &middot; framework maps <span class="prow__r a">prove</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">Enterprise-owned</span><span>control plane never leaves the tenant</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="cta-final">
+  <!-- s-cta [req] — the one inverted primary on the page-end band -->
+  <section class="cta-band section--flush">
     <div class="wrap cta__in">
+      <p class="eyebrow">CTA &middot; readiness-gated claims</p>
       <h2>Start where the loop is breaking.</h2>
       <p class="lede">Put one AI API namespace through Kolm. Capture it, govern it, compile it, sign it, and point the result at the runtime that actually fits.</p>
       <div class="hero__cta">
-        <a class="btn btn--ghost" href="/signup">Start compiling</a>
+        <a class="btn btn--primary" href="/signup">Start compiling</a>
         <a class="btn btn--ghost" href="/pricing">See pricing</a>
       </div>
     </div>
@@ -233,7 +288,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 </main>
 
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
@@ -246,12 +300,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
-        <a href="#pipeline">Pipeline</a>
-        <a href="#contract">Backend contract</a>
+        <a href="/#pipeline">Pipeline</a>
         <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
         <a href="/compare">Compare</a>
@@ -294,9 +347,40 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">API control center</span>
       <span class="badge">Apache-2.0</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
+
+<!-- THE SIGNATURE — Calibration Sweep (design system §7). Fail-open + reduced-motion-safe:
+     the artifact ships class="artifact is-sealed"; JS only un-seals to re-fire the sweep once. -->
+<script>
+(function(){
+  var sweeps = document.querySelectorAll('[data-sweep]');
+  if (!sweeps.length || !('IntersectionObserver' in window)) return;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (reduce) return; /* sealed end-state already shipped */
+  var io = new IntersectionObserver(function(es, o){
+    es.forEach(function(e){
+      if (!e.isIntersecting) return;
+      var a = e.target.querySelector('.artifact');
+      if (!a) { o.unobserve(e.target); return; }
+      var scan = a.querySelector('.artifact__scan');
+      o.unobserve(e.target);
+      a.classList.remove('is-sealed');
+      if (scan && scan.animate) {
+        scan.animate(
+          [{transform:'scaleX(1)',opacity:1,top:'0'},{top:'100%',opacity:0}],
+          {duration:600,easing:'cubic-bezier(.165,.84,.44,1)'});
+      }
+      a.querySelectorAll('[data-val]').forEach(function(v,i){
+        setTimeout(function(){ v.style.opacity = 1; }, 80*i + 120);
+      });
+      setTimeout(function(){ a.classList.add('is-sealed'); }, 560);
+    });
+  }, { threshold: 0.4 });
+  sweeps.forEach(function(s){ io.observe(s); });
+})();
+</script>
 </body>
 </html>

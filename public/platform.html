@@ -41,8 +41,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 }
 </script>
 </head>
-<body class="marketing">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="glass-refract" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="42" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="s"/><feDisplacementMap in="SourceGraphic" in2="s" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<body class="t-marketing">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -56,7 +55,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span>kolm</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="#pipeline" aria-current="page">Product</a>
+      <a href="/#pipeline" aria-current="page">Product</a>
       <a href="/docs">Docs</a>
       <a href="/pricing">Pricing</a>
     </nav>
@@ -73,48 +72,114 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <main id="main">
 
-  <section class="hero section--flush">
-    <div class="wrap hero__in">
-      <p class="eyebrow">Platform / Architecture</p>
-      <h1 class="hero__h1">The platform is the behavior-to-artifact control plane.</h1>
-      <p class="lede">API behavior in. Device-fit models out. Kolm turns real traces, tool calls, policies, eval gates, and runtime requirements into signed artifacts, receipts, exports, and readiness-gated evidence that a buyer can inspect.</p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="/account/api-control-center">Open API Control</a>
-        <a class="btn btn--ghost" href="/docs/api">Read API Docs</a>
-      </div>
-      <div class="ui" aria-hidden="true">
-        <div class="ui__bar"><span class="ui__live"></span><span class="ui__name">kolm &middot; workspace / prod-ai-loop</span><span class="ui__meta"><span class="ui__tick-from">compiling&hellip;</span><span class="ui__tick-to">signed &middot; Ed25519</span></span></div>
-        <div class="ui__grid">
-          <aside class="ui__rail">
-            <span class="ui__step is-on">Capture</span>
-            <span class="ui__step">Compile</span>
-            <span class="ui__step">Compose</span>
-            <span class="ui__step">Deploy</span>
-          </aside>
-          <pre class="ui__code"><span class="m">$</span> kolm source register --bind prod
-<span class="m"># 17 channels &middot; 12 ingress modes &middot; policy v4</span>
-
-<span class="a">&#10003;</span> compiled <span class="s">claims-redactor.kolm</span>
-<span class="m">  artifact + manifest + evals + verifier receipt</span>
-<span class="a">&#10003;</span> exported <span class="s">10 export modes</span> &middot; <span class="s">8 governance stages</span>
-<span class="m">  same object IDs across receipt, SIEM/GRC, warehouse, CI</span></pre>
+  <!-- s-hero [req] — asymmetric 1fr 1.2fr grid; the artifact arms the one Calibration Sweep -->
+  <section class="hero section--flush" data-sweep>
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow" data-enter="1">Platform / Architecture</p>
+        <h1 class="hero__h1" data-enter="2">The platform is the behavior-to-artifact control plane.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Kolm turns real traces, tool calls, policies, eval gates, and runtime requirements into signed artifacts, receipts, exports, and readiness-gated evidence that a buyer can inspect.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="/account/api-control-center">Open API Control</a>
+          <a class="btn btn--ghost" href="/docs/api">Read API Docs</a>
+        </div>
+        <div class="hero__proof" data-enter="5">
+          <span><i class="dot"></i>17 API data channel families</span>
+          <span><i class="dot"></i>12 ingress modes</span>
+          <span><i class="dot"></i>10 export modes</span>
+          <span><i class="dot"></i>8 governance stages</span>
         </div>
       </div>
+
+      <!-- the one lit --paper object; ships sealed (calm fallback), sweep re-fires it once -->
+      <figure class="artifact is-sealed" data-artifact data-art-reveal aria-label="Signed .kolm datasheet, in spec">
+        <i class="regmark regmark--tl"></i><i class="regmark regmark--tr"></i>
+        <i class="regmark regmark--bl"></i><i class="regmark regmark--br"></i>
+        <header class="artifact__head">
+          <span class="ctrl-id"><b>REG-04</b> claims-redactor.kolm</span>
+          <span class="ctrl-id">TOL &plusmn;0.2 &middot; v3.3</span>
+        </header>
+        <dl class="register">
+          <div class="register__row"><dt class="register__k">Source</dt><dd class="register__v" data-val>prod-ai-loop</dd></div>
+          <div class="register__row"><dt class="register__k">Targets</dt><dd class="register__v" data-val><b>7</b> runtimes</dd></div>
+          <div class="register__row"><dt class="register__k">Release gate</dt><dd class="register__v" data-val>passed</dd></div>
+          <div class="register__row"><dt class="register__k">Signature</dt><dd class="register__v" data-val>sha256:a1f0&hellip;</dd></div>
+        </dl>
+        <footer class="artifact__verdict"><span data-verdict>In spec</span>
+          <svg class="artifact__check" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4"/></svg></footer>
+        <span class="artifact__scan" aria-hidden="true"></span>
+      </figure>
     </div>
   </section>
 
-  <section class="proof">
+  <!-- s-proof-strip -->
+  <section class="section section--band">
     <div class="wrap">
+      <p class="eyebrow">In production</p>
       <div class="proof__row">
-        <div class="proof__cell"><b>17</b><span>API data channel families</span></div>
-        <div class="proof__cell"><b>12</b><span>ingress modes</span></div>
-        <div class="proof__cell"><b>10</b><span>export modes</span></div>
-        <div class="proof__cell"><b>8</b><span>governance stages</span></div>
+        <div class="proof__cell reveal"><b data-count>17</b><span>API data channel families</span></div>
+        <div class="proof__cell reveal"><b data-count>12</b><span>ingress modes</span></div>
+        <div class="proof__cell reveal"><b data-count>10</b><span>export modes</span></div>
+        <div class="proof__cell reveal"><b data-count>8</b><span>governance stages</span></div>
       </div>
     </div>
   </section>
 
-  <section class="feat" id="pipeline" style="scroll-margin-top:80px">
+  <!-- s-bento — the platform planes, at a glance -->
+  <section class="section" id="platform-layers" style="scroll-margin-top:80px">
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">Platform Layers</p>
+        <h2>Each plane has a job, a state boundary, and an exportable proof trail.</h2>
+        <p class="lede">This is how Kolm stays more useful than an agent demo, an eval dashboard, or a model gateway: the platform owns the lifecycle between behavior and runtime.</p>
+      </div>
+      <div class="grid bento">
+        <article class="card bento__main reveal">
+          <span class="card__k">Plane &middot; data</span>
+          <h3>Data Plane &middot; capture without assuming shape</h3>
+          <p>Accept structured, semi-structured, and opaque inputs. Store provenance, source hash, schema state, tenant, environment, and retention window with every capture.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card__k">Plane &middot; policy</span>
+          <h3>Policy Plane</h3>
+          <p>Apply redaction, provider routing, data boundary, export scope, budget, allowlist, and purge rules before a trace can become training or eval material.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card__k">Plane &middot; evaluation</span>
+          <h3>Evaluation Plane</h3>
+          <p>Convert labels, edge cases, regressions, and policy violations into evals with thresholds, owners, versions, and release-blocking status.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card__k">Plane &middot; compiler</span>
+          <h3>Compiler Plane</h3>
+          <p>Compile behavior and eval constraints into artifact, manifest, checksums, runtime target, verifier receipt, and approval state.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card__k">Plane &middot; runtime</span>
+          <h3>Runtime Plane</h3>
+          <p>Target hosted, local, browser, edge, BYOC, offline, and restricted fleet paths with explicit compatibility and readiness caveats.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card__k">Plane &middot; evidence</span>
+          <h3>Evidence Plane</h3>
+          <p>Emit audit events, evidence bundles, SIEM/GRC records, warehouse exports, webhooks, CI status, and readiness-gated claim state.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card__k">Plane &middot; admin</span>
+          <h3>Admin Plane</h3>
+          <p>Manage API keys, connector health, RBAC, environments, provider policy, cost limits, rate limits, retention, export destinations, and owner assignments.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card__k">Plane &middot; integration</span>
+          <h3>Integration Plane</h3>
+          <p>Support inbound APIs, webhooks, streams, batches, queues, object storage, warehouses, CLI imports, and outbound evidence/export channels.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- s-feature-rows (alt L/R) -->
+  <section class="section feat" id="pipeline" style="scroll-margin-top:80px">
     <div class="wrap" id="capture" style="scroll-margin-top:80px"></div>
     <div class="wrap feat__in">
       <div class="feat__copy">
@@ -128,20 +193,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>capture log</span><span class="m">live</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">CAPTURE LOG &middot; <span class="ok">live</span></div>
           <div class="panel__rows">
             <div class="prow"><span class="m">source</span> registered &middot; prod-ai-loop <span class="prow__r a">bound</span></div>
             <div class="prow"><span class="m">capture</span> provider logs &middot; agent traces <span class="prow__r m">12,408</span></div>
             <div class="prow"><span class="m">schema</span> unknown &middot; held opaque <span class="prow__r m">3</span></div>
             <div class="prow"><span class="m">policy</span> retention &middot; v4 <span class="prow__r a">attached</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">Bound</span><span>17 channels &middot; schema held opaque</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="feat feat--rev" id="compile" style="scroll-margin-top:80px">
+  <section class="section feat feat--rev" id="compile" style="scroll-margin-top:80px">
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Compile</p>
@@ -154,20 +220,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>claims-redactor.kolm</span><span class="a">signed</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">claims-redactor.kolm &middot; <span class="ok">signed</span></div>
           <div class="panel__rows">
             <div class="prow">redaction &middot; export scope <span class="prow__r a">enforced</span></div>
             <div class="prow">eval gates &middot; regression set <span class="prow__r m">6 / locked</span></div>
             <div class="prow">artifact + manifest + checksum <span class="prow__r m">sha-256</span></div>
             <div class="prow">release gate <span class="prow__r a">passed</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">Signed</span><span>artifact + manifest + receipt</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="feat" id="compose" style="scroll-margin-top:80px">
+  <section class="section feat" id="compose" style="scroll-margin-top:80px">
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Compose</p>
@@ -180,20 +247,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>object model</span><span class="m">queryable</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">OBJECT MODEL &middot; <span class="ok">queryable</span></div>
           <div class="panel__rows">
             <div class="prow">account objects <span class="prow__r m">10</span></div>
             <div class="prow">behavior objects <span class="prow__r m">11</span></div>
             <div class="prow">compiler objects <span class="prow__r m">9</span></div>
             <div class="prow">evidence objects <span class="prow__r a">8</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">Queryable</span><span>each layer carries a proof trail</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="feat feat--rev" id="deploy" style="scroll-margin-top:80px">
+  <section class="section feat feat--rev" id="deploy" style="scroll-margin-top:80px">
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Deploy</p>
@@ -206,63 +274,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>runtime &amp; evidence</span><span class="m">ranked</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">RUNTIME &amp; EVIDENCE &middot; <span class="ok">ranked</span></div>
           <div class="panel__rows">
             <div class="prow">hosted &middot; local &middot; edge <span class="prow__r a">7 targets</span></div>
             <div class="prow">verifier receipt &middot; eval report <span class="prow__r m">exported</span></div>
             <div class="prow">SIEM/GRC &middot; webhook &middot; warehouse <span class="prow__r m">same IDs</span></div>
             <div class="prow">readiness gate <span class="prow__r a">tracked</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">7 targets</span><span>same object IDs across every export</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section" id="platform-layers" style="scroll-margin-top:80px">
-    <div class="wrap">
-      <div class="section__head">
-        <p class="eyebrow">Platform Layers</p>
-        <h2>Each plane has a job, a state boundary, and an exportable proof trail.</h2>
-        <p class="lede">This is how Kolm stays more useful than an agent demo, an eval dashboard, or a model gateway: the platform owns the lifecycle between behavior and runtime.</p>
-      </div>
-      <div class="grid bento">
-        <article class="card bento__main">
-          <h3>Data Plane &middot; capture without assuming shape</h3>
-          <p>Accept structured, semi-structured, and opaque inputs. Store provenance, source hash, schema state, tenant, environment, and retention window with every capture.</p>
-        </article>
-        <article class="card">
-          <h3>Policy Plane</h3>
-          <p>Apply redaction, provider routing, data boundary, export scope, budget, allowlist, and purge rules before a trace can become training or eval material.</p>
-        </article>
-        <article class="card">
-          <h3>Evaluation Plane</h3>
-          <p>Convert labels, edge cases, regressions, and policy violations into evals with thresholds, owners, versions, and release-blocking status.</p>
-        </article>
-        <article class="card">
-          <h3>Compiler Plane</h3>
-          <p>Compile behavior and eval constraints into artifact, manifest, checksums, runtime target, verifier receipt, and approval state.</p>
-        </article>
-        <article class="card">
-          <h3>Runtime Plane</h3>
-          <p>Target hosted, local, browser, edge, BYOC, offline, and restricted fleet paths with explicit compatibility and readiness caveats.</p>
-        </article>
-        <article class="card">
-          <h3>Evidence Plane</h3>
-          <p>Emit audit events, evidence bundles, SIEM/GRC records, warehouse exports, webhooks, CI status, and readiness-gated claim state.</p>
-        </article>
-        <article class="card">
-          <h3>Admin Plane</h3>
-          <p>Manage API keys, connector health, RBAC, environments, provider policy, cost limits, rate limits, retention, export destinations, and owner assignments.</p>
-        </article>
-        <article class="card">
-          <h3>Integration Plane</h3>
-          <p>Support inbound APIs, webhooks, streams, batches, queues, object storage, warehouses, CLI imports, and outbound evidence/export channels.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
+  <!-- integration coverage -->
   <section class="section" id="integration-coverage" style="scroll-margin-top:80px">
     <div class="wrap">
       <div class="section__head">
@@ -271,19 +297,26 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Enterprise control requires breadth with maturity states: supported, gated, adapter-ready, or not claimable.</p>
       </div>
       <div class="grid grid--2">
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Channels &middot; 17</span>
           <h3>17 API data channel families</h3>
-          <p>Provider logs, application events, gateway records, agent tool calls, observability spans, eval data, human labels, product analytics, warehouses, CI/CD, repositories, support tools, GRC systems, files, runtime telemetry, cost events, and customer-system actions. <a href="/integrations">Integrations &rarr;</a></p>
+          <p>Provider logs, application events, gateway records, agent tool calls, observability spans, eval data, human labels, product analytics, warehouses, CI/CD, repositories, support tools, GRC systems, files, runtime telemetry, cost events, and customer-system actions.</p>
+          <p class="card__map"><a href="/integrations">Integrations &rarr;</a></p>
         </article>
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Ingress &middot; 12</span>
           <h3>12 ingress modes</h3>
-          <p>REST, GraphQL, gRPC, webhooks, streaming, batch files, object storage, warehouse queries, queues, browser events, local CLI, and custom adapter manifests. <a href="/account/api-control-center">API control &rarr;</a></p>
+          <p>REST, GraphQL, gRPC, webhooks, streaming, batch files, object storage, warehouse queries, queues, browser events, local CLI, and custom adapter manifests.</p>
+          <p class="card__map"><a href="/account/api-control-center">API control &rarr;</a></p>
         </article>
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Export &middot; 10</span>
           <h3>10 export modes</h3>
-          <p>Signed artifact, verifier receipt, eval report, evidence bundle, JSON API, warehouse export, webhook, CI status, SIEM/GRC event, and admin analytics. <a href="/docs/api">API reference &rarr;</a></p>
+          <p>Signed artifact, verifier receipt, eval report, evidence bundle, JSON API, warehouse export, webhook, CI status, SIEM/GRC event, and admin analytics.</p>
+          <p class="card__map"><a href="/docs/api">API reference &rarr;</a></p>
         </article>
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Governance &middot; 8</span>
           <h3>8 governance stages</h3>
           <p>Register source, capture event, classify schema, apply redaction, build eval, lock regression set, compile artifact, and export evidence.</p>
         </article>
@@ -291,35 +324,42 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
+  <!-- backend invariants -->
   <section class="section" id="backend-invariants" style="scroll-margin-top:80px">
-    <div class="wrap">
+    <div class="wrap wrap--wide">
       <div class="section__head">
         <p class="eyebrow">Backend Invariants</p>
         <h2>The backend standard is stricter than the website copy.</h2>
         <p class="lede">These invariants keep the platform credible when buyers inspect model gateways, observability stacks, agent tools, and enterprise control workflows.</p>
       </div>
       <div class="grid grid--3">
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Invariant &middot; audit</span>
           <h3>Auditability</h3>
           <p>Every write emits an audit event: object ID, actor, tenant, environment, source, policy version, before/after state, and timestamp must be queryable and exportable.</p>
         </article>
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Invariant &middot; evidence</span>
           <h3>Evidence</h3>
           <p>Every claim-bearing object has proof: artifacts, receipts, reports, exports, readiness gates, and control mappings need source hashes, output hashes, versions, and owner state.</p>
         </article>
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Invariant &middot; exports</span>
           <h3>Exports</h3>
           <p>Every export records destination, payload class, policy scope, delivery status, checksum, retry state, and recipient context.</p>
         </article>
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Invariant &middot; schemas</span>
           <h3>Schemas</h3>
           <p>Unknown schemas stay opaque. Unmapped or sensitive payloads are stored with provenance and retention controls, but are not promoted into reusable datasets until classified.</p>
         </article>
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Invariant &middot; readiness</span>
           <h3>Readiness</h3>
           <p>Every open claim remains gated. Benchmark, certification, package, partner, standards, and adoption claims are visible as open gates until proof exists.</p>
         </article>
-        <article class="card">
+        <article class="card reveal">
+          <span class="card__k">Invariant &middot; operations</span>
           <h3>Operations</h3>
           <p>Every runtime target is explicit. Hosted, local, browser, edge, BYOC, offline, and restricted fleet targets carry compatibility, limits, and verification status.</p>
         </article>
@@ -327,6 +367,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
+  <!-- category standard -->
   <section class="section" id="category-standard" style="scroll-margin-top:80px">
     <div class="wrap">
       <div class="section__head">
@@ -337,26 +378,28 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="tbl-wrap">
         <table class="tbl">
           <thead>
-            <tr><th>Adjacent tool</th><th>Where Kolm wins</th><th>Durable object</th></tr>
+            <tr><th scope="col">Adjacent tool</th><th scope="col">Where Kolm wins</th><th scope="col">Durable object</th></tr>
           </thead>
           <tbody>
-            <tr><th><b>agent tools</b></th><td>Kolm should win after execution &mdash; capture what agents did, gate failures, produce artifacts, and export receipts instead of stopping at task automation.</td><td><a href="/compare">compare</a></td></tr>
-            <tr><th><b>observability</b></th><td>Kolm should convert logs into artifacts &mdash; dashboards explain behavior; Kolm compiles it into portable outputs with evaluation and evidence.</td><td>artifact</td></tr>
-            <tr><th><b>model gateways</b></th><td>Kolm should control the lifecycle around providers &mdash; routing matters, but policy, eval, runtime target, receipt, and export state are the durable objects.</td><td>lifecycle</td></tr>
-            <tr><th><b>eval tools</b></th><td>Kolm should make evals release gates &mdash; scores are useful only when they block regressions, create receipts, and move into deployment decisions.</td><td>gate</td></tr>
-            <tr><th><b>fine-tuning</b></th><td>Kolm should stay runtime-neutral &mdash; the artifact, manifest, target, and receipt should survive provider and deployment changes.</td><td>portable</td></tr>
+            <tr><th scope="row"><b>agent tools</b></th><td>Kolm should win after execution &mdash; capture what agents did, gate failures, produce artifacts, and export receipts instead of stopping at task automation.</td><td class="map"><a href="/compare">compare</a></td></tr>
+            <tr><th scope="row"><b>observability</b></th><td>Kolm should convert logs into artifacts &mdash; dashboards explain behavior; Kolm compiles it into portable outputs with evaluation and evidence.</td><td class="map">artifact</td></tr>
+            <tr><th scope="row"><b>model gateways</b></th><td>Kolm should control the lifecycle around providers &mdash; routing matters, but policy, eval, runtime target, receipt, and export state are the durable objects.</td><td class="map">lifecycle</td></tr>
+            <tr><th scope="row"><b>eval tools</b></th><td>Kolm should make evals release gates &mdash; scores are useful only when they block regressions, create receipts, and move into deployment decisions.</td><td class="map">gate</td></tr>
+            <tr><th scope="row"><b>fine-tuning</b></th><td>Kolm should stay runtime-neutral &mdash; the artifact, manifest, target, and receipt should survive provider and deployment changes.</td><td class="map">portable</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </section>
 
+  <!-- s-cta [req] — the one inverted primary on the page-end band -->
   <section class="cta section--flush">
     <div class="wrap cta__in">
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
       <h2>Put one behavior loop through the platform.</h2>
       <p class="lede">Start with one source, one policy, one eval gate, one artifact, one runtime target, and one evidence export. Expansion should follow proof.</p>
       <div class="hero__cta">
-        <a class="btn btn--ghost" href="/account/api-control-center">Open Control Center</a>
+        <a class="btn btn--primary" href="/account/api-control-center">Open Control Center</a>
         <a class="btn btn--ghost" href="/docs/api">Read API Docs</a>
       </div>
     </div>
@@ -377,11 +420,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
-        <a href="#pipeline">Pipeline</a>
+        <a href="/#pipeline">Pipeline</a>
         <a href="#backend-invariants">Backend contract</a>
         <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
@@ -425,9 +468,40 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">API control center</span>
       <span class="badge">Apache-2.0</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
+
+<!-- THE SIGNATURE — Calibration Sweep (design system §7). Fail-open + reduced-motion-safe:
+     the artifact ships class="artifact is-sealed"; JS only un-seals to re-fire the sweep once. -->
+<script>
+(function(){
+  var sweeps = document.querySelectorAll('[data-sweep]');
+  if (!sweeps.length || !('IntersectionObserver' in window)) return;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (reduce) return; /* sealed end-state already shipped */
+  var io = new IntersectionObserver(function(es, o){
+    es.forEach(function(e){
+      if (!e.isIntersecting) return;
+      var a = e.target.querySelector('.artifact');
+      if (!a) { o.unobserve(e.target); return; }
+      var scan = a.querySelector('.artifact__scan');
+      o.unobserve(e.target);
+      a.classList.remove('is-sealed');
+      if (scan && scan.animate) {
+        scan.animate(
+          [{transform:'scaleX(1)',opacity:1,top:'0'},{top:'100%',opacity:0}],
+          {duration:600,easing:'cubic-bezier(.165,.84,.44,1)'});
+      }
+      a.querySelectorAll('[data-val]').forEach(function(v,i){
+        setTimeout(function(){ v.style.opacity = 1; }, 80*i + 120);
+      });
+      setTimeout(function(){ a.classList.add('is-sealed'); }, 560);
+    });
+  }, { threshold: 0.4 });
+  sweeps.forEach(function(s){ io.observe(s); });
+})();
+</script>
 </body>
 </html>

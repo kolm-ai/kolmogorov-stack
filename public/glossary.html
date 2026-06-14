@@ -37,7 +37,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
-<script defer src="/kolm-field.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -80,14 +79,34 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   ]
 }
 </script>
+<style>
+/* Legal/reference typesetting layer (page-scoped, token-only — candidate for
+   .legal-doc in kolm-2026.css). One measured column, mono term indices,
+   hairlines between definitions. No hardcoded hex; every value is a token. */
+.legal-doc h2{font-size:var(--fs-h2);letter-spacing:var(--track-h2);line-height:var(--lh-head);
+  max-width:none;margin:var(--s7) 0 var(--s4);padding-top:var(--s6);border-top:1px solid var(--line);}
+.legal-doc > h2:first-of-type,.legal-doc .idx + h2{border-top:0;padding-top:0;}
+.legal-doc > h2:first-of-type{margin-top:var(--s5);}
+.legal-doc .idx + h2{margin-top:0;}
+.legal-doc dl{margin:0;}
+.legal-doc dt{margin:var(--s6) 0 0;padding-top:var(--s5);border-top:1px solid var(--line);}
+.legal-doc dl > dt:first-of-type{border-top:0;padding-top:0;margin-top:var(--s5);}
+.legal-doc .term-k{display:flex;align-items:center;gap:12px;font:600 10.5px/1 var(--font-mono);
+  letter-spacing:var(--track-label);text-transform:uppercase;color:var(--ink-3);margin-bottom:9px;}
+.legal-doc .term-k::after{content:"";flex:1;height:1px;background:var(--line);min-width:16px;}
+.legal-doc h3{margin:0;font:var(--w-display) var(--fs-h3)/1.2 var(--font-sans);
+  letter-spacing:var(--track-h3);color:var(--ink);}
+.legal-doc dd{margin:var(--s3) 0 0;}
+.legal-doc p,.legal-doc dd{font-size:15px;line-height:1.75;color:var(--ink-2);max-width:var(--measure);}
+.legal-doc .term-map{margin-top:13px;font:var(--w-ui) 11px/1.6 var(--font-mono);
+  color:var(--ink-3);letter-spacing:.02em;}
+.legal-doc .term-map a{color:var(--ink);border-bottom:1px solid var(--line-2);}
+.legal-doc .term-map a:hover{border-color:var(--accent);}
+</style>
 </head>
-<body class="marketing">
+<body class="t-legal">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- retired anti-forgery thread (kept for markup parity, renders as nothing) -->
-<hr class="foil-strip" aria-hidden="true">
-
-<!-- ============================================================ NAV -->
 <header class="nav">
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm home">
@@ -116,272 +135,205 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <main id="main">
 
-<!-- ============================================================ 1. HERO -->
+<!-- ============================================================ s-legaltop -->
 <section class="section section--flush hero">
-  <div class="field" aria-hidden="true" data-intensity="0.18"><canvas></canvas></div>
   <div class="wrap">
-    <div class="section__head" style="max-width:72ch">
-      <p class="eyebrow">Reference · Glossary</p>
-      <h1>The vocabulary of an <span class="go">agent security review</span>.</h1>
-      <p class="lede">
-        When a buyer's security team vets an autonomous agent, both sides reach for the
-        same words: signed evidence, offline verification, least privilege, prompt
-        injection, provenance. Here is what each one means, defined plainly and linked to
-        the page that shows it in practice. Start with <a href="/how-it-works">how it
-        works</a>, see <a href="/checks">what we test</a>, then
-        <a href="/verify">verify a sample report</a> yourself.
-      </p>
-      <div class="band" aria-label="Jump to a term">
-        <a class="ctrlid" href="#agent-security-review">Agent Security Review</a>
-        <a class="ctrlid" href="#signed-evidence-report">Signed Evidence Report</a>
-        <a class="ctrlid" href="#offline-verification">Offline Verification</a>
-        <a class="ctrlid" href="#ed25519-attestation">Ed25519 Attestation</a>
-        <a class="ctrlid" href="#signed-agent-security-record">Signed agent security record</a>
-        <a class="ctrlid" href="#asr-1-least-privilege">ASR-1</a>
-        <a class="ctrlid" href="#asr-2-audit-trail">ASR-2</a>
-        <a class="ctrlid" href="#asr-3-data-egress">ASR-3</a>
-        <a class="ctrlid" href="#asr-4-injection">ASR-4</a>
-        <a class="ctrlid" href="#asr-5-provenance">ASR-5</a>
-        <a class="ctrlid" href="#asr-7-memory-retrieval">ASR-7</a>
-        <a class="ctrlid" href="#asr-8-multi-agent">ASR-8</a>
-        <a class="ctrlid" href="#transparency-log">Transparency Log</a>
-        <a class="ctrlid" href="#rfc-3161-timestamp">RFC 3161</a>
-        <a class="ctrlid" href="#soc2-ai-agents">SOC 2</a>
-        <a class="ctrlid" href="#eu-ai-act-article-12">EU AI Act Art.12</a>
-        <a class="ctrlid" href="#nist-ai-rmf">NIST AI RMF</a>
-        <a class="ctrlid" href="#owasp-llm-top-10">OWASP LLM</a>
-        <a class="ctrlid" href="#mitre-atlas">MITRE ATLAS</a>
-      </div>
+    <p class="eyebrow">Reference · Glossary</p>
+    <h1>The vocabulary of an <span class="go">agent security review</span>.</h1>
+    <p class="lede" style="max-width:72ch">
+      When a buyer's security team vets an autonomous agent, both sides reach for the
+      same words: signed evidence, offline verification, least privilege, prompt
+      injection, provenance. Here is what each one means, defined plainly and linked to
+      the page that shows it in practice. Start with <a href="/how-it-works">how it
+      works</a>, see <a href="/checks">what we test</a>, then
+      <a href="/verify">verify a sample report</a> yourself.
+    </p>
+    <div class="band" aria-label="Jump to a term">
+      <a class="ctrlid" href="#agent-security-review">Agent Security Review</a>
+      <a class="ctrlid" href="#signed-evidence-report">Signed Evidence Report</a>
+      <a class="ctrlid" href="#offline-verification">Offline Verification</a>
+      <a class="ctrlid" href="#ed25519-attestation">Ed25519 Attestation</a>
+      <a class="ctrlid" href="#signed-agent-security-record">Signed agent security record</a>
+      <a class="ctrlid" href="#asr-1-least-privilege">ASR-1</a>
+      <a class="ctrlid" href="#asr-2-audit-trail">ASR-2</a>
+      <a class="ctrlid" href="#asr-3-data-egress">ASR-3</a>
+      <a class="ctrlid" href="#asr-4-injection">ASR-4</a>
+      <a class="ctrlid" href="#asr-5-provenance">ASR-5</a>
+      <a class="ctrlid" href="#asr-7-memory-retrieval">ASR-7</a>
+      <a class="ctrlid" href="#asr-8-multi-agent">ASR-8</a>
+      <a class="ctrlid" href="#transparency-log">Transparency Log</a>
+      <a class="ctrlid" href="#rfc-3161-timestamp">RFC 3161</a>
+      <a class="ctrlid" href="#soc2-ai-agents">SOC 2</a>
+      <a class="ctrlid" href="#eu-ai-act-article-12">EU AI Act Art.12</a>
+      <a class="ctrlid" href="#nist-ai-rmf">NIST AI RMF</a>
+      <a class="ctrlid" href="#owasp-llm-top-10">OWASP LLM</a>
+      <a class="ctrlid" href="#mitre-atlas">MITRE ATLAS</a>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 2. CORE TERMS -->
-<section class="section sect--dense reveal" id="core">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">01 / Core terms</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>The artifact, and how it is trusted.</h2>
-      <p class="lede">The five terms that describe what kolm produces and why a reviewer can believe it without taking anyone's word.</p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="grid grid--2">
-      <div class="card" id="agent-security-review">
-        <p class="card__k">Term · Core</p>
-        <h3>Agent Security Review</h3>
+<!-- ============================================================ s-legal-body · 01 -->
+<section class="section reveal" id="core">
+  <div class="wrap legal-doc">
+    <span class="idx">01 / Core terms</span>
+    <h2>The artifact, and how it is trusted.</h2>
+    <p class="lede">The five terms that describe what kolm produces and why a reviewer can believe it without taking anyone's word.</p>
+    <dl>
+      <dt id="agent-security-review"><span class="term-k">Term · Core</span><h3>Agent Security Review</h3></dt>
+      <dd>
         <p>The process by which an enterprise buyer's security team evaluates an autonomous AI agent before approving it for production or signing a contract. It examines what the agent can access, what it records, where data flows, and how it resists manipulation, and it now asks agent-specific questions that a standard SOC 2 report or vendor questionnaire does not answer. kolm runs the same checks a reviewer runs and ships the results as signed evidence.</p>
-        <p class="card__map">Related: <a href="/platform">Platform</a> · <a href="/how-it-works">How it works</a></p>
-      </div>
-      <div class="card" id="signed-evidence-report">
-        <p class="card__k">Term · Core</p>
-        <h3>Signed Evidence Report</h3>
+        <p class="term-map">Related: <a href="/platform">Platform</a> · <a href="/how-it-works">How it works</a></p>
+      </dd>
+
+      <dt id="signed-evidence-report"><span class="term-k">Term · Core</span><h3>Signed Evidence Report</h3></dt>
+      <dd>
         <p>A single canonical JSON artifact that records an agent's audit findings, each mapped to a named control, and sealed with an Ed25519 signature over its exact bytes. Because the signature covers the canonical payload, a downgraded finding or an inflated score breaks the seal in front of the reviewer. The buyer verifies it offline against the issuer's public key, so trust rests on the math, not on a vendor's claim.</p>
-        <p class="card__map">Related: <a href="/report">The report</a> · <a href="/verify">Verify</a></p>
-      </div>
-      <div class="card" id="offline-verification">
-        <p class="card__k">Term · Core</p>
-        <h3>Offline Verification</h3>
+        <p class="term-map">Related: <a href="/report">The report</a> · <a href="/verify">Verify</a></p>
+      </dd>
+
+      <dt id="offline-verification"><span class="term-k">Term · Core</span><h3>Offline Verification</h3></dt>
+      <dd>
         <p>Checking a signed report's authenticity entirely in the verifier's own browser, using WebCrypto, with no account, no upload, and no kolm server in the trust path. The public key needed to verify travels inside the report, so the buyer needs nothing from the vendor or from us to confirm it. A first tier checks the signature against the bytes; a second tier confirms the signing key is the one the buyer expects.</p>
-        <p class="card__map">Related: <a href="/verify">Verify a report</a> · <a href="/trust">Trust center</a></p>
-      </div>
-      <div class="card" id="ed25519-attestation">
-        <p class="card__k">Term · Core</p>
-        <h3>Ed25519 Attestation</h3>
+        <p class="term-map">Related: <a href="/verify">Verify a report</a> · <a href="/trust">Trust center</a></p>
+      </dd>
+
+      <dt id="ed25519-attestation"><span class="term-k">Term · Core</span><h3>Ed25519 Attestation</h3></dt>
+      <dd>
         <p>A statement of audit results signed with the Ed25519 elliptic-curve signature scheme (Curve25519, defined in RFC 8032). The signature is computed over the report's canonical, key-sorted, whitespace-free bytes, so any change to the content invalidates it. Verification is fast, deterministic, and runs without contacting an issuer, which is what makes a report checkable offline.</p>
-        <p class="card__map">Related: <a href="/how-it-works">How it works</a> · <a href="/security">Security</a></p>
-      </div>
-      <div class="card" id="signed-agent-security-record">
-        <p class="card__k">Term · Core wedge</p>
-        <h3>Signed agent security record</h3>
+        <p class="term-map">Related: <a href="/how-it-works">How it works</a> · <a href="/security">Security</a></p>
+      </dd>
+
+      <dt id="signed-agent-security-record"><span class="term-k">Term · Core wedge</span><h3>Signed agent security record</h3></dt>
+      <dd>
         <p>A signed, timestamped, witnessed record that binds an agent's identity and provenance to its assessed security posture at a point in time. It carries the agent's control findings, the issuer's public key, an append-only log entry, and a trusted timestamp, so a buyer can confirm both what was attested and when. It is the durable evidence an agent presents when its security has already been reviewed, rather than re-answering a questionnaire for every deal.</p>
-        <p class="card__map">Related: <a href="/research">Research</a> · <a href="/trust">Trust center</a> · <a href="https://audit.kolm.ai/transparency-log">Transparency log</a></p>
-      </div>
-    </div>
-    <figure class="diag reveal" role="img" aria-label="Verification loop: the buyer's browser fetches the report and the public keyring, verifies with WebCrypto, and reaches VALID or VOID with no kolm server in the trust path">
-    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect class="dg-box" x="8" y="28" width="160" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="48">Artifact</text>
-      <text class="dg-t" x="22" y="68">report.json</text>
-      <text class="dg-mono" x="22" y="84">signed envelope</text>
-      <rect class="dg-box" x="8" y="104" width="160" height="40" rx="9"/>
-      <text class="dg-t" x="22" y="122">issuer keyring</text>
-      <text class="dg-mono" x="22" y="137">public keys only</text>
-      <path class="dg-flow" d="M168 60 H276 M168 124 H236 V78"/>
-      <polygon class="dg-ok" points="276,60 268,55.5 268,64.5"/>
-      <rect class="dg-box" x="278" y="28" width="190" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="292" y="48">Buyer's browser</text>
-      <text class="dg-t" x="292" y="68">WebCrypto verify</text>
-      <text class="dg-mono" x="292" y="84">offline &#183; no upload</text>
-      <path class="dg-line" d="M468 48 H516 M468 76 H516"/>
-      <polygon class="dg-ok" points="516,48 508,43.5 508,52.5"/>
-      <polygon points="516,76 508,71.5 508,80.5" fill="#E0A89F"/>
-      <rect class="dg-box--ok" x="518" y="30" width="194" height="34" rx="9"/>
-      <text class="dg-t" x="532" y="51">VALID</text>
-      <text class="dg-mono" x="590" y="51">seal intact</text>
-      <rect class="dg-box--void" x="518" y="72" width="194" height="34" rx="9"/>
-      <text class="dg-void-t dg-k" x="532" y="93">VOID</text>
-      <text class="dg-mono" x="590" y="93">tampered bytes</text>
-      <text class="dg-mono" x="292" y="140">no account &#183; no kolm server in the trust path</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Trust path</b> verification runs in the buyer's own browser against pinned public keys</figcaption>
-    </figure>
-      </div>
-    </div>
+        <p class="term-map">Related: <a href="/research">Research</a> · <a href="/trust">Trust center</a> · <a href="https://audit.kolm.ai/transparency-log">Transparency log</a></p>
+      </dd>
+    </dl>
   </div>
 </section>
 
-<!-- ============================================================ 3. THE ASR CONTROL CATALOG (the ledger) -->
-<section class="section section--ink reveal" id="controls">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: quantized light enters the chamber -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.10"><canvas></canvas></div>
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">02 / The ASR control catalog</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>The controls a reviewer flags, named and tested.</h2>
-      <p class="lede">
-        Each ASR control is one thing a security reviewer checks, with the standard it maps
-        to. Every finding in a signed report points back to one of these, so a reviewer
-        traces each result to a framework, not to our word. The full catalog and crosswalk
-        live on <a href="/checks">what we test</a>.
-      </p>
-    </div>
-    <div class="grid grid--2">
-      <div class="card" id="asr-1-least-privilege">
-        <p class="card__k">ASR-1 · Permissions</p>
-        <h3>Least-Privilege Audit</h3>
+<!-- ============================================================ s-legal-body · 02 -->
+<section class="section reveal" id="controls">
+  <div class="wrap legal-doc">
+    <span class="idx">02 / The ASR control catalog</span>
+    <h2>The controls a reviewer flags, named and tested.</h2>
+    <p class="lede">
+      Each ASR control is one thing a security reviewer checks, with the standard it maps
+      to. Every finding in a signed report points back to one of these, so a reviewer
+      traces each result to a framework, not to our word. The full catalog and crosswalk
+      live on <a href="/checks">what we test</a>.
+    </p>
+    <dl>
+      <dt id="asr-1-least-privilege"><span class="term-k">ASR-1 · Permissions</span><h3>Least-Privilege Audit</h3></dt>
+      <dd>
         <p>Compares the scopes an agent holds against the scopes it uses, and surfaces shared keys, standing grants, and high-impact actions reachable without a confirmation. Over-permissioning is the first thing a reviewer circles, so each finding ships with the calls that prove it.</p>
-        <p class="card__map">Maps to SOC 2 CC6 · OWASP ASI03 · <a href="#nist-ai-rmf">NIST MANAGE-1</a></p>
-      </div>
-      <div class="card" id="asr-2-audit-trail">
-        <p class="card__k">ASR-2 · Audit trail</p>
-        <h3>Audit-Trail Integrity</h3>
+        <p class="term-map">Maps to SOC 2 CC6 · OWASP ASI03 · <a href="#nist-ai-rmf">NIST MANAGE-1</a></p>
+      </dd>
+
+      <dt id="asr-2-audit-trail"><span class="term-k">ASR-2 · Audit trail</span><h3>Audit-Trail Integrity</h3></dt>
+      <dd>
         <p>Tests whether agent activity is logged append-only, hash-chained, and retained, so the record a reviewer reads is the record that happened and not one rewritten after the fact. An editable log is not evidence, and this control is the regulatory anchor most reviewers cite first.</p>
-        <p class="card__map">Maps to <a href="#eu-ai-act-article-12">EU AI Act Art.12</a> · SOC 2 CC7</p>
-      </div>
-      <div class="card" id="asr-3-data-egress">
-        <p class="card__k">ASR-3 · Data egress</p>
-        <h3>Data Egress Control</h3>
+        <p class="term-map">Maps to <a href="#eu-ai-act-article-12">EU AI Act Art.12</a> · SOC 2 CC7</p>
+      </dd>
+
+      <dt id="asr-3-data-egress"><span class="term-k">ASR-3 · Data egress</span><h3>Data Egress Control</h3></dt>
+      <dd>
         <p>Enumerates every destination the agent can reach, the approved sub-processors behind them, and proof that sensitive fields are redacted before they cross the boundary. Where data goes, and what is masked before it goes, decides whether a reviewer signs off.</p>
-        <p class="card__map">Maps to <a href="#owasp-llm-top-10">OWASP LLM02</a> · EU AI Act Art.10</p>
-      </div>
-      <div class="card" id="asr-4-injection">
-        <p class="card__k">ASR-4 · Injection</p>
-        <h3>Prompt-Injection and Red-Team Testing</h3>
+        <p class="term-map">Maps to <a href="#owasp-llm-top-10">OWASP LLM02</a> · EU AI Act Art.10</p>
+      </dd>
+
+      <dt id="asr-4-injection"><span class="term-k">ASR-4 · Injection</span><h3>Prompt-Injection and Red-Team Testing</h3></dt>
+      <dd>
         <p>Runs a battery of direct and indirect prompt injection, guardrail bypass, and system-prompt extraction against the agent, with reproductions a reviewer can replay. Results are tested and reported, not warranted: the report states what held and what did not, scoped to exactly what was examined.</p>
-        <p class="card__map">Maps to <a href="#owasp-llm-top-10">OWASP LLM01</a> · <a href="#mitre-atlas">MITRE ATLAS</a></p>
-      </div>
-      <div class="card" id="asr-5-provenance">
-        <p class="card__k">ASR-5 · Provenance</p>
-        <h3>Model Provenance</h3>
+        <p class="term-map">Maps to <a href="#owasp-llm-top-10">OWASP LLM01</a> · <a href="#mitre-atlas">MITRE ATLAS</a></p>
+      </dd>
+
+      <dt id="asr-5-provenance"><span class="term-k">ASR-5 · Provenance</span><h3>Model Provenance</h3></dt>
+      <dd>
         <p>Records the origin of the model and its dependencies: which base model, which version, and which supply-chain components the agent relies on. Provenance lets a reviewer trace a model back to a known source and detect an unvetted substitution before it reaches production.</p>
-        <p class="card__map">Maps to ISO 42001 · <a href="#nist-ai-rmf">NIST MAP-1</a></p>
-      </div>
-      <div class="card" id="asr-7-memory-retrieval">
-        <p class="card__k">ASR-7 · Memory and retrieval</p>
-        <h3>Memory and Retrieval Integrity</h3>
+        <p class="term-map">Maps to ISO 42001 · <a href="#nist-ai-rmf">NIST MAP-1</a></p>
+      </dd>
+
+      <dt id="asr-7-memory-retrieval"><span class="term-k">ASR-7 · Memory and retrieval</span><h3>Memory and Retrieval Integrity</h3></dt>
+      <dd>
         <p>Examines an agent's long-term memory and retrieval-augmented (RAG) sources for poisoning, stale or unauthorized context, and untrusted content that can steer behavior. Because retrieved text can carry indirect injection, the integrity of what an agent remembers and retrieves is part of its security posture, not a separate concern.</p>
-        <p class="card__map">Maps to <a href="#owasp-llm-top-10">OWASP LLM08</a> · relates to <a href="#asr-4-injection">ASR-4</a></p>
-      </div>
-      <div class="card" id="asr-8-multi-agent">
-        <p class="card__k">ASR-8 · Delegation</p>
-        <h3>Multi-Agent Delegation</h3>
+        <p class="term-map">Maps to <a href="#owasp-llm-top-10">OWASP LLM08</a> · relates to <a href="#asr-4-injection">ASR-4</a></p>
+      </dd>
+
+      <dt id="asr-8-multi-agent"><span class="term-k">ASR-8 · Delegation</span><h3>Multi-Agent Delegation</h3></dt>
+      <dd>
         <p>Assesses how an agent hands work to sub-agents or tools: whether delegated authority is scoped and revocable, whether a sub-agent can escalate beyond the caller's permissions, and whether the delegation chain is logged end to end. As agents call other agents, a single over-trusted hop can defeat least privilege everywhere upstream.</p>
-        <p class="card__map">Relates to <a href="#asr-1-least-privilege">ASR-1</a> · <a href="#asr-2-audit-trail">ASR-2</a></p>
-      </div>
-    </div>
+        <p class="term-map">Relates to <a href="#asr-1-least-privilege">ASR-1</a> · <a href="#asr-2-audit-trail">ASR-2</a></p>
+      </dd>
+    </dl>
     <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
-      </div>
-    </div>
   </div>
 </section>
 
-<!-- ============================================================ 4. PROVENANCE, LOGGING AND TIME -->
-<section class="section sect--dense reveal" id="provenance">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">03 / Logging and time</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>How a report proves it was issued, and when.</h2>
-      <p class="lede">A signature proves the bytes are intact. These two mechanisms add a public record and a trusted clock, so a buyer can also confirm a report was issued, never quietly replaced, and not back-dated.</p>
-    </div>
-    <div class="grid grid--2">
-      <div class="card" id="transparency-log">
-        <p class="card__k">Term · Provenance</p>
-        <h3>Transparency Log and Inclusion Proof</h3>
+<!-- ============================================================ s-legal-body · 03 -->
+<section class="section reveal" id="provenance">
+  <div class="wrap legal-doc">
+    <span class="idx">03 / Logging and time</span>
+    <h2>How a report proves it was issued, and when.</h2>
+    <p class="lede">A signature proves the bytes are intact. These two mechanisms add a public record and a trusted clock, so a buyer can also confirm a report was issued, never quietly replaced, and not back-dated.</p>
+    <dl>
+      <dt id="transparency-log"><span class="term-k">Term · Provenance</span><h3>Transparency Log and Inclusion Proof</h3></dt>
+      <dd>
         <p>A transparency log is an append-only, tamper-evident record of every report kolm issues. An inclusion proof is a compact cryptographic path showing that one specific report is recorded in the log without revealing the rest, the same idea behind certificate-transparency and Sigstore-style logs. Together they let a buyer confirm a report was issued and that the log it sits in cannot be silently rewritten.</p>
-        <p class="card__map">Related: <a href="https://audit.kolm.ai/transparency-log">Transparency log</a> · <a href="/trust">Trust center</a></p>
-      </div>
-      <div class="card" id="rfc-3161-timestamp">
-        <p class="card__k">Term · Provenance</p>
-        <h3>RFC 3161 Timestamp</h3>
+        <p class="term-map">Related: <a href="https://audit.kolm.ai/transparency-log">Transparency log</a> · <a href="/trust">Trust center</a></p>
+      </dd>
+
+      <dt id="rfc-3161-timestamp"><span class="term-k">Term · Provenance</span><h3>RFC 3161 Timestamp</h3></dt>
+      <dd>
         <p>A trusted timestamp issued by a time-stamping authority under RFC 3161, which binds a hash of the report to a specific time so the attestation cannot be back-dated. Combined with the Ed25519 signature and the transparency-log entry, it answers not just who signed and what, but when. This matters when a buyer needs evidence that a posture was attested before a given deploy or deadline.</p>
-        <p class="card__map">Related: <a href="/how-it-works">How it works</a> · <a href="https://audit.kolm.ai/transparency-log">Transparency log</a></p>
-      </div>
-    </div>
-      </div>
-    </div>
+        <p class="term-map">Related: <a href="/how-it-works">How it works</a> · <a href="https://audit.kolm.ai/transparency-log">Transparency log</a></p>
+      </dd>
+    </dl>
   </div>
 </section>
 
-<!-- ============================================================ 5. FRAMEWORKS AND STANDARDS -->
+<!-- ============================================================ s-legal-body · 04 -->
 <section class="section reveal" id="frameworks">
-  <div class="wrap">
-    <div class="sect-rail">
-      <div class="sect-rail__rail"><span class="idx">04 / Frameworks and standards</span></div>
-      <div class="sect-rail__body">
-    <div class="section__head">
-      <h2>The standards a reviewer already cites.</h2>
-      <p class="lede">Every control maps to a framework a buyer's review group uses. kolm does not replace these; it produces the agent-specific evidence that slots into the work a team is already doing. See the full mapping on <a href="/checks">what we test</a>.</p>
-    </div>
-    <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <div class="grid grid--2">
-      <div class="card" id="soc2-ai-agents">
-        <p class="card__k">Standard · Attestation</p>
-        <h3>SOC 2 for AI Agents</h3>
+  <div class="wrap legal-doc">
+    <span class="idx">04 / Frameworks and standards</span>
+    <h2>The standards a reviewer already cites.</h2>
+    <p class="lede">Every control maps to a framework a buyer's review group uses. kolm does not replace these; it produces the agent-specific evidence that slots into the work a team is already doing. See the full mapping on <a href="/checks">what we test</a>.</p>
+    <dl>
+      <dt id="soc2-ai-agents"><span class="term-k">Standard · Attestation</span><h3>SOC 2 for AI Agents</h3></dt>
+      <dd>
         <p>Shorthand for the agent-specific evidence buyers now ask for on top of a SOC 2 report. SOC 2 attests an organization's controls, but not an autonomous agent's permissions, egress, or injection resistance, so reviewers ask a separate set of questions. kolm fills that gap and maps each finding back into the SOC 2, ISO 42001, and NIST AI RMF work a team is already doing. It complements a SOC 2 audit; it does not replace one.</p>
-        <p class="card__map">Related: <a href="/platform">Platform</a> · <a href="/how-it-works">How it works</a></p>
-      </div>
-      <div class="card" id="eu-ai-act-article-12">
-        <p class="card__k">Standard · Regulation</p>
-        <h3>EU AI Act Article 12</h3>
+        <p class="term-map">Related: <a href="/platform">Platform</a> · <a href="/how-it-works">How it works</a></p>
+      </dd>
+
+      <dt id="eu-ai-act-article-12"><span class="term-k">Standard · Regulation</span><h3>EU AI Act Article 12</h3></dt>
+      <dd>
         <p>The Article of Regulation (EU) 2024/1689 that requires high-risk AI systems to automatically record events (record-keeping, or logging) over their lifetime, so the operation of the system is traceable. It is the regulatory anchor for ASR-2 audit-trail integrity: append-only, retained, and reviewable. A reviewer working an EU mandate looks here first.</p>
-        <p class="card__map">Related: <a href="#asr-2-audit-trail">ASR-2 audit-trail</a> · <a href="/platform">Platform</a></p>
-      </div>
-      <div class="card" id="nist-ai-rmf">
-        <p class="card__k">Standard · Framework</p>
-        <h3>NIST AI RMF</h3>
+        <p class="term-map">Related: <a href="#asr-2-audit-trail">ASR-2 audit-trail</a> · <a href="/platform">Platform</a></p>
+      </dd>
+
+      <dt id="nist-ai-rmf"><span class="term-k">Standard · Framework</span><h3>NIST AI RMF</h3></dt>
+      <dd>
         <p>The U.S. National Institute of Standards and Technology AI Risk Management Framework (AI RMF 1.0), organized around four functions: Govern, Map, Measure, and Manage. kolm maps controls such as least privilege (Manage) and provenance (Map) to its subcategories, so a finding traces to a recognized risk function rather than to a vendor's own scheme.</p>
-        <p class="card__map">Related: <a href="#asr-1-least-privilege">ASR-1</a> · <a href="#asr-5-provenance">ASR-5</a> · <a href="/platform">Platform</a></p>
-      </div>
-      <div class="card" id="owasp-llm-top-10">
-        <p class="card__k">Standard · Risk catalog</p>
-        <h3>OWASP LLM Top 10</h3>
+        <p class="term-map">Related: <a href="#asr-1-least-privilege">ASR-1</a> · <a href="#asr-5-provenance">ASR-5</a> · <a href="/platform">Platform</a></p>
+      </dd>
+
+      <dt id="owasp-llm-top-10"><span class="term-k">Standard · Risk catalog</span><h3>OWASP LLM Top 10</h3></dt>
+      <dd>
         <p>The Open Worldwide Application Security Project list of the most critical security risks for large-language-model and generative-AI applications, including prompt injection (LLM01), sensitive-information disclosure, supply-chain risks, and vector and embedding weaknesses (LLM08). kolm's injection, egress, and retrieval checks map directly to its entries.</p>
-        <p class="card__map">Related: <a href="#asr-4-injection">ASR-4</a> · <a href="#asr-3-data-egress">ASR-3</a> · <a href="/research">Research</a></p>
-      </div>
-      <div class="card" id="mitre-atlas">
-        <p class="card__k">Standard · Adversary model</p>
-        <h3>MITRE ATLAS</h3>
+        <p class="term-map">Related: <a href="#asr-4-injection">ASR-4</a> · <a href="#asr-3-data-egress">ASR-3</a> · <a href="/research">Research</a></p>
+      </dd>
+
+      <dt id="mitre-atlas"><span class="term-k">Standard · Adversary model</span><h3>MITRE ATLAS</h3></dt>
+      <dd>
         <p>The Adversarial Threat Landscape for Artificial-Intelligence Systems, a MITRE knowledge base of real-world tactics and techniques used against machine-learning systems, structured the same way as ATT&amp;CK. kolm's red-team battery references ATLAS techniques so a reviewer can place each finding inside a shared, recognized adversary model.</p>
-        <p class="card__map">Related: <a href="#asr-4-injection">ASR-4</a> · <a href="/research">Research</a></p>
-      </div>
-    </div>
-      </div>
-    </div>
+        <p class="term-map">Related: <a href="#asr-4-injection">ASR-4</a> · <a href="/research">Research</a></p>
+      </dd>
+    </dl>
   </div>
 </section>
 
-<!-- ============================================================ 6. FINAL CTA -->
-<section class="section reveal cta-final">
-  <div class="dither-edge" aria-hidden="true"></div>
-  <!-- band volume of the Evidence Field: the doorway light is quantized too -->
-  <div class="field field--band" aria-hidden="true" data-intensity="0.12"><canvas></canvas></div>
+<!-- ============================================================ s-legal-foot · CTA -->
+<section class="section reveal cta-band">
   <div class="wrap">
     <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>From the words to the evidence.</h2>
@@ -395,14 +347,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">Signed artifacts</span>
       <span class="badge"><a href="/sample-audit-report.json" download>Sample report</a></span>
     </div>
-    <p class="cta-caveats">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+    <p class="scope" style="margin-inline:auto">Caveats: Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
   </div>
 </section>
 
 </main>
 
-<!-- ============================================================ FOOTER -->
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
@@ -415,7 +365,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
@@ -462,10 +412,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">API control center</span>
       <span class="badge">Apache-2.0</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
-
 </body>
 </html>

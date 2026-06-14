@@ -25,9 +25,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="canonical" href="https://kolm.ai/security">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
@@ -42,8 +41,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 }
 </script>
 </head>
-<body class="evidence">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="glass-refract" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="42" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="s"/><feDisplacementMap in="SourceGraphic" in2="s" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<body class="t-evidence">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -74,30 +72,52 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <main id="main">
 
-  <section class="hero section--flush">
-    <div class="wrap hero__in">
-      <p class="eyebrow">Security / Control posture</p>
-      <h1 class="hero__h1">Security starts at the API boundary.</h1>
-      <p class="lede">API behavior in. Device-fit models out. Kolm&rsquo;s security posture is the control layer around that loop: capture boundaries, redaction policy, tenant-scoped events, explicit exports, verifier receipts, hosted security headers, and readiness gates that stay visible until certification or package evidence exists.</p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="/account/api-control-center">Open API control</a>
-        <a class="btn btn--ghost" href="/trust">Read readiness gates</a>
+  <!-- s-evtop — part-no header -->
+  <section class="hero section--flush" data-sweep>
+    <div class="wrap split">
+      <div class="hero__copy">
+        <p class="eyebrow">SEC · CONTROL POSTURE</p>
+        <h1 class="hero__h1">Security starts at the API boundary.</h1>
+        <p class="lede">API behavior in. Device-fit models out. Kolm&rsquo;s security posture is the control layer around that loop: capture boundaries, redaction policy, tenant-scoped events, explicit exports, verifier receipts, hosted security headers, and readiness gates that stay visible until certification or package evidence exists.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="/account/api-control-center">Open API control</a>
+          <a class="btn btn--ghost" href="/trust">Read readiness gates</a>
+        </div>
+        <ul class="ledger">
+          <li><b>Boundary</b> &middot; inputs enter as governed API events; unknown schemas stay opaque until an adapter manifest declares structure</li>
+          <li><b>Hosted headers</b> &middot; CSP, HSTS, frame denial, nosniff, referrer policy, and limited browser permissions</li>
+          <li><b>Evidence</b> &middot; compile receipts, policy decisions, target recipes, manifests, and governance exports</li>
+          <li><b>Disclosure</b> &middot; issues route to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> with reproduction steps and impact</li>
+          <li><b>Gate</b> &middot; formal compliance and package-channel claims wait for readiness promotion</li>
+        </ul>
       </div>
 
-      <div class="register" aria-label="Security posture summary">
-        <div class="register__row"><span class="register__k">Boundary</span><span class="register__v">Inputs enter as governed API events. Unknown schemas stay opaque until an adapter manifest declares structure.</span></div>
-        <div class="register__row"><span class="register__k">Hosted headers</span><span class="register__v">CSP, HSTS, frame denial, nosniff, referrer policy, and limited browser permissions.</span></div>
-        <div class="register__row"><span class="register__k">Evidence</span><span class="register__v">Compile receipts, policy decisions, target recipes, manifests, and governance exports.</span></div>
-        <div class="register__row"><span class="register__k">Disclosure</span><span class="register__v">Issues route to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> with reproduction steps and impact.</span></div>
-        <div class="register__row"><span class="register__k">Gate</span><span class="register__v">Formal compliance and package-channel claims wait for readiness promotion.</span></div>
-      </div>
+      <!-- s-artifact — the one lit --paper sheet; fires the Calibration Sweep once -->
+      <figure class="artifact is-sealed" data-artifact aria-label="Signed security posture datasheet" data-art-reveal>
+        <i class="regmark regmark--tl"></i><i class="regmark regmark--tr"></i>
+        <i class="regmark regmark--bl"></i><i class="regmark regmark--br"></i>
+        <header class="artifact__head">
+          <span class="ctrl-id"><b>SEC-01</b> control-posture.kolm</span>
+          <span class="ctrl-id">HOSTED · v3.3</span>
+        </header>
+        <dl class="register">
+          <div class="register__row"><dt class="register__k">CHANNELS</dt><dd class="register__v" data-val>17 families</dd></div>
+          <div class="register__row"><dt class="register__k">GOVERNANCE</dt><dd class="register__v" data-val>8 stages</dd></div>
+          <div class="register__row"><dt class="register__k">HEADERS</dt><dd class="register__v" data-val>5 controls</dd></div>
+          <div class="register__row"><dt class="register__k">DISCLOSURE</dt><dd class="register__v" data-val>dev@kolm.ai</dd></div>
+        </dl>
+        <footer class="artifact__verdict"><span data-verdict>IN SPEC</span>
+          <svg class="artifact__check" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4"/></svg></footer>
+        <span class="artifact__scan" aria-hidden="true"></span>
+      </figure>
     </div>
   </section>
 
-  <section class="feat" id="data-boundary">
+  <!-- s-register-grid — data boundary -->
+  <section class="section feat" id="data-boundary">
     <div class="wrap feat__in">
       <div class="feat__copy">
-        <p class="eyebrow">01 / Data boundary</p>
+        <p class="eyebrow">01 / DATA BOUNDARY</p>
         <h2>Kolm secures the transition from live API behavior to governed artifact.</h2>
         <p class="lede">The important security object is not a screenshot. It is the path each event takes through capture, classification, redaction, routing, evaluation, compile, target selection, and export.</p>
         <ul class="feat__list">
@@ -107,8 +127,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>event path</span><span class="m">governed</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">EVENT PATH &middot; <span class="ok">governed</span></div>
           <div class="panel__rows">
             <div class="prow"><span class="m">accept</span> tenant-scoped intake <span class="prow__r m">ingress scope</span></div>
             <div class="prow"><span class="m">classify</span> known schema or opaque <span class="prow__r m">schema rule</span></div>
@@ -116,44 +136,48 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="prow"><span class="m">route</span> declared destinations <span class="prow__r m">egress rule</span></div>
             <div class="prow"><span class="m">prove</span> evidence outside the UI <span class="prow__r a">receipt path</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">Governed</span><span>capture &rarr; compile &rarr; export</span></div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- s-register-grid — hosted controls -->
   <section class="section">
-    <div class="wrap">
-      <p class="eyebrow">02 / Hosted controls</p>
-      <h2>The public app ships with browser and transport guardrails by default.</h2>
-      <p class="lede">These are current web-app controls in the Express and Vercel configuration. They do not replace formal certification; they reduce obvious browser, framing, content-type, and permission risk.</p>
-      <div class="grid grid--3" style="margin-top:var(--s7)">
-        <div class="card">
-          <p class="eyebrow">Content Security Policy</p>
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">02 / HOSTED CONTROLS</p>
+        <h2>The public app ships with browser and transport guardrails by default.</h2>
+        <p class="lede">These are current web-app controls in the Express and Vercel configuration. They do not replace formal certification; they reduce obvious browser, framing, content-type, and permission risk.</p>
+      </div>
+      <div class="grid grid--3">
+        <div class="card reveal">
+          <span class="card__k">REG &middot; CSP</span>
           <h3>Default-src self</h3>
           <p>Scripts, styles, images, fonts, connections, frames, base URI, and form actions are constrained through the configured CSP for the hosted site.</p>
         </div>
-        <div class="card">
-          <p class="eyebrow">Transport</p>
+        <div class="card reveal">
+          <span class="card__k">REG &middot; TRANSPORT</span>
           <h3>Strict Transport Security</h3>
           <p>HSTS is configured with a long max age, includeSubDomains, and preload on the Express path and mirrored in deploy headers.</p>
         </div>
-        <div class="card">
-          <p class="eyebrow">Clickjacking</p>
+        <div class="card reveal">
+          <span class="card__k">REG &middot; CLICKJACKING</span>
           <h3>Frame ancestors none</h3>
           <p>The CSP and X-Frame-Options deny framing of the public app by default.</p>
         </div>
-        <div class="card">
-          <p class="eyebrow">Content type</p>
+        <div class="card reveal">
+          <span class="card__k">REG &middot; CONTENT TYPE</span>
           <h3>Nosniff</h3>
           <p>X-Content-Type-Options prevents MIME sniffing where browsers might otherwise execute mislabeled content.</p>
         </div>
-        <div class="card">
-          <p class="eyebrow">Referrers</p>
+        <div class="card reveal">
+          <span class="card__k">REG &middot; REFERRERS</span>
           <h3>Strict origin when cross-origin</h3>
           <p>The referrer policy limits what leaves the site when a user follows an external link.</p>
         </div>
-        <div class="card">
-          <p class="eyebrow">Permissions</p>
+        <div class="card reveal">
+          <span class="card__k">REG &middot; PERMISSIONS</span>
           <h3>No camera, mic, or geolocation</h3>
           <p>The permissions policy disables sensitive browser capabilities the compiler site does not need.</p>
         </div>
@@ -161,10 +185,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <section class="feat feat--rev" id="enterprise">
+  <!-- s-register-grid — enterprise security model -->
+  <section class="section feat feat--rev" id="enterprise">
     <div class="wrap feat__in">
       <div class="feat__copy">
-        <p class="eyebrow">03 / Enterprise security model</p>
+        <p class="eyebrow">03 / ENTERPRISE SECURITY MODEL</p>
         <h2>Security has to be visible to platform, AI, and compliance owners at the same time.</h2>
         <p class="lede">The API control center is the operational security console: it exposes channel coverage, collection modes, export modes, governance stages, policy layers, integration coverage, and unknown-schema behavior.</p>
         <ul class="feat__list">
@@ -175,42 +200,46 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>control center</span><span class="m">console</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">CONTROL CENTER &middot; <span class="ok">console</span></div>
           <div class="panel__rows">
             <div class="prow"><span class="m">access</span> keys &middot; sessions &middot; tenant scope <span class="prow__r m">control objects</span></div>
             <div class="prow"><span class="m">policy</span> retention &middot; redaction &middot; gates <span class="prow__r m">first-class</span></div>
             <div class="prow"><span class="m">observe</span> capture &middot; compile &middot; integrations <span class="prow__r m">inspectable</span></div>
             <div class="prow"><span class="m">export</span> SIEM &middot; GRC &middot; warehouse <span class="prow__r a">receipt context</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">Console</span><span>platform &middot; AI &middot; compliance</span></div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- s-listing — certification and package gates -->
   <section class="section" id="gates">
-    <div class="wrap">
-      <p class="eyebrow">04 / Certification and package gates</p>
-      <h2>Security copy must not outrun the readiness ledger.</h2>
-      <p class="lede">Security controls can be described as implemented controls. Formal compliance, package-channel, SDK-release, benchmark, and partner-adoption claims remain gated until the readiness ledger is promoted with evidence.</p>
-      <div class="grid grid--2" style="margin-top:var(--s7)">
-        <div class="card">
-          <p class="eyebrow">Formal certification</p>
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">04 / CERTIFICATION AND PACKAGE GATES</p>
+        <h2>Security copy must not outrun the readiness ledger.</h2>
+        <p class="lede">Security controls can be described as implemented controls. Formal compliance, package-channel, SDK-release, benchmark, and partner-adoption claims remain gated until the readiness ledger is promoted with evidence.</p>
+      </div>
+      <div class="grid grid--2">
+        <div class="card reveal">
+          <span class="card__k">GATE &middot; FORMAL CERTIFICATION</span>
           <h3>Needs live certification</h3>
           <p>SOC 2, ISO 27001, HIPAA, GDPR, FedRAMP, SBOM, and SLSA evidence require a live auditor, certification, or signed attestation artifact before public promotion.</p>
         </div>
-        <div class="card">
-          <p class="eyebrow">Package channels</p>
+        <div class="card reveal">
+          <span class="card__k">GATE &middot; PACKAGE CHANNELS</span>
           <h3>Needs package release</h3>
           <p>Installers, SDK packages, browser package metadata, checksums, and release artifacts remain package-release gates until published and verified.</p>
         </div>
-        <div class="card">
-          <p class="eyebrow">Benchmark claims</p>
+        <div class="card reveal">
+          <span class="card__k">GATE &middot; BENCHMARK CLAIMS</span>
           <h3>Needs public benchmark data</h3>
           <p>Public leaderboard claims require reproducible public runs, raw JSON, commands, model versions, hardware, latency, cost, and scoring method.</p>
         </div>
-        <div class="card">
-          <p class="eyebrow">External adoption</p>
+        <div class="card reveal">
+          <span class="card__k">GATE &middot; EXTERNAL ADOPTION</span>
           <h3>Needs external partner</h3>
           <p>Third-party runtime support and neutral stewardship stay unclaimed until outside projects, vendors, or venues publish acceptance evidence.</p>
         </div>
@@ -218,10 +247,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <section class="feat" id="disclosure">
+  <!-- s-listing — responsible disclosure -->
+  <section class="section feat" id="disclosure">
     <div class="wrap feat__in">
       <div class="feat__copy">
-        <p class="eyebrow">05 / Responsible disclosure</p>
+        <p class="eyebrow">05 / RESPONSIBLE DISCLOSURE</p>
         <h2>Report security issues with reproduction steps and impact.</h2>
         <p class="lede">Send hosted-service, API, signing, CLI, evidence-format, or control-plane issues to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>. Include affected route or object, reproduction steps, expected behavior, actual behavior, and assessed impact.</p>
         <ul class="feat__list">
@@ -232,26 +262,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>disclosure flow</span><span class="m">dev@kolm.ai</span></div>
-          <div class="panel__rows">
-            <div class="prow"><span class="m">1</span> acknowledge credible report <span class="prow__r m">triage</span></div>
-            <div class="prow"><span class="m">2</span> contain at the boundary <span class="prow__r m">scope</span></div>
-            <div class="prow"><span class="m">3</span> fix with a regression check <span class="prow__r m">test + artifact</span></div>
-            <div class="prow"><span class="m">4</span> communicate scoped impact <span class="prow__r a">evidence</span></div>
-          </div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">DISCLOSURE FLOW &middot; <span class="ok">dev@kolm.ai</span></div>
+          <pre class="well"><span class="ln">01</span> acknowledge credible report      <span class="hdr">triage</span>
+<span class="ln">02</span> contain at the boundary           <span class="hdr">scope</span>
+<span class="ln">03</span> fix with a regression check       <span class="hdr">test + artifact</span>
+<span class="ln">04</span> communicate scoped impact         <span class="hdr">evidence</span></pre>
+          <div class="plate__foot"><span class="badge badge--ok">Triaged</span><a class="go" href="mailto:dev@kolm.ai">dev@kolm.ai</a></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="proof">
+  <!-- s-verdict — IN SPEC -->
+  <section class="section section--band">
     <div class="wrap">
+      <p class="eyebrow">VERDICT &middot; IN SPEC</p>
       <div class="proof__row">
-        <div class="proof__cell"><b>17</b><span>API data channel families</span></div>
-        <div class="proof__cell"><b>8</b><span>governance stages</span></div>
-        <div class="proof__cell"><b>5</b><span>hosted header controls</span></div>
-        <div class="proof__cell"><b class="is-mono">explicit</b><span>certification gates</span></div>
+        <div class="proof__cell reveal"><b data-count>17</b><span>API data channel families</span></div>
+        <div class="proof__cell reveal"><b data-count>8</b><span>governance stages</span></div>
+        <div class="proof__cell reveal"><b data-count>5</b><span>hosted header controls</span></div>
+        <div class="proof__cell reveal"><b class="is-mono">explicit</b><span>certification gates</span></div>
       </div>
       <div class="foot__bottom" style="margin-top:var(--s6);border:0;padding:0">
         <span class="badge badge--ok">Control-plane security</span>
@@ -264,6 +295,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
   <section class="cta section--flush">
     <div class="wrap cta__in">
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
       <h2>Put one API namespace under control.</h2>
       <p class="lede">Inspect the channel map, capture policy, egress rule, governance path, compile receipt, and export destinations before trusting any security claim.</p>
       <div class="hero__cta">
@@ -288,12 +320,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
-        <a href="#pipeline">Pipeline</a>
-        <a href="#contract">Backend contract</a>
+        <a href="/#pipeline">Pipeline</a>
         <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
         <a href="/compare">Compare</a>
@@ -336,7 +367,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">API control center</span>
       <span class="badge">Apache-2.0</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>

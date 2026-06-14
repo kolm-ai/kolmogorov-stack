@@ -53,35 +53,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <style>
 /* Legal typesetting layer (page-scoped, identical across the legal group).
    Typeset, not designed: one measured column, mono article numbers,
-   hairlines between articles. Candidate for kolm-2026.css as .legal-doc. */
+   hairlines between articles. All values pull design-system tokens. */
 .legal-doc { max-width: 64ch; }
 .legal-doc h2 { font-size: clamp(21px, 2.1vw, 25px); letter-spacing: -0.016em; line-height: 1.18; max-width: none; margin: var(--s7) 0 var(--s4); padding-top: var(--s6); border-top: 1px solid var(--line); }
 .legal-doc > h2:first-of-type, .legal-doc .idx + h2, .legal-doc .section__head h2 { border-top: 0; padding-top: 0; }
 .legal-doc > h2:first-of-type { margin-top: var(--s5); }
 .legal-doc .idx + h2, .legal-doc .section__head h2 { margin-top: 0; }
 .legal-doc h3 { margin: var(--s6) 0 10px; }
-.legal-doc .n, .section--ink h2 .n { display: block; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
+.legal-doc .n, .section--ink h2 .n { display: block; font-family: var(--font-mono); font-weight: 500; font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); margin-bottom: 9px; font-variant-numeric: tabular-nums; }
 .legal-doc h3 .n { margin-bottom: 5px; }
 .legal-doc p, .legal-doc li { font-size: 15px; line-height: 1.75; color: var(--ink-2); }
 .legal-doc li { margin-bottom: 8px; }
 .legal-doc li::marker { color: var(--ink-3); }
 .legal-doc .art-rule { border: 0; border-top: 1px solid var(--line); margin: var(--s7) 0; }
 .legal-doc--wide { max-width: none; }
-.legal-meta { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-3); margin-top: var(--s4); font-variant-numeric: tabular-nums; }
-.legal-meta b, .legal-meta strong { color: var(--ink-2); font-weight: 500; }
 .legal-toc { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px 2px 20px; margin: var(--s5) 0 var(--s3); }
-.legal-toc .k { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
+.legal-toc .k { font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px; }
 .legal-toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 36px; font-size: 13.5px; line-height: 2.05; color: var(--ink-3); }
 .legal-toc a { color: var(--ink-2); }
-.legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.legal-card { border: 1px solid var(--line); background: var(--sheen), var(--panel); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); border-radius: var(--r-md); }
 .legal-card b, .legal-card strong { color: var(--ink); }
+.legal-related { margin-top: var(--s7); padding-top: var(--s5); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: var(--s3); }
 @media (max-width: 640px) { .legal-toc ol { columns: 1; } }
 </style>
 </head>
-<body class="marketing">
+<body class="t-legal">
 <a class="skip-link" href="#main">Skip to content</a>
-
-<hr class="foil-strip" aria-hidden="true">
 
 <header class="nav">
   <div class="wrap nav__in">
@@ -111,22 +108,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <main id="main">
 
-<!-- Hero -->
-<section class="section section--flush hero">
+<!-- s-legaltop -->
+<section class="section section--flush">
   <div class="wrap">
-    <p class="eyebrow">Legal · Terms of Service</p>
-    <h1>Terms of Service</h1>
-    <p class="lede" style="max-width:72ch">These terms govern your use of kolm.ai for agent-security audits and signed evidence reports. They are the agreement between you and Kolmogorov Stack, Inc., written so a developer, a procurement reviewer, or legal counsel can read it once. The evidence report at the center of the service is a cryptographically signed (Ed25519), offline-verifiable document your security team checks against kolm's public key, with no account and no trust in kolm's servers.</p>
-    <p class="legal-meta">Last updated: <strong>2026-06-07</strong> (supersedes 2026-05-22)</p>
+    <div style="max-width:72ch">
+      <p class="eyebrow">Legal · Terms of Service</p>
+      <h1>Terms of Service</h1>
+      <p class="lede" style="max-width:72ch">These terms govern your use of kolm.ai for agent-security audits and signed evidence reports. They are the agreement between you and Kolmogorov Stack, Inc., written so a developer, a procurement reviewer, or legal counsel can read it once. The evidence report at the center of the service is a cryptographically signed (Ed25519), offline-verifiable document your security team checks against kolm's public key, with no account and no trust in kolm's servers.</p>
+      <p class="legal-meta">Last updated: <strong>2026-06-07</strong> (supersedes 2026-05-22)</p>
+    </div>
   </div>
 </section>
 
-<!-- Long-form legal prose -->
+<!-- s-legal-body · Sections 1 to 8 -->
 <section class="section reveal">
   <div class="wrap legal-doc">
     <span class="idx">01 / The agreement</span>
 
-    <!-- TOC -->
+    <!-- s-legal-meta · contents -->
     <nav class="legal-toc" aria-label="Table of contents">
       <p class="k">Contents</p>
       <ol>
@@ -231,6 +230,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </section>
 
+<!-- s-legal-body · Sections 9 to 16 -->
 <section class="section reveal">
   <div class="wrap legal-doc">
     <span class="idx">02 / Sections 9 to 16</span>
@@ -296,8 +296,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </p>
     <p>For verification of a signed Evidence Report, use the open-source verifier at <a href="/verify">/verify</a> or run the verifier tool locally against kolm's published public key. Verification requires no account and no connection to kolm's servers.</p>
 
-    <!-- Related legal pages -->
-    <div style="margin-top:40px;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px">
+    <!-- s-legal-foot · related legal pages -->
+    <div class="legal-related">
       <a class="btn btn--ghost btn--sm" href="/privacy">Privacy policy</a>
       <a class="btn btn--ghost btn--sm" href="/security">Security</a>
       <a class="btn btn--ghost btn--sm" href="/subprocessors">Sub-processors</a>
@@ -310,6 +310,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <section class="section reveal cta-final">
   <div class="wrap">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
     <h2>Questions about these terms?</h2>
     <p class="lede">Reach the team for engagement, billing, or legal questions. Or verify a signed report against kolm's public key, with no account.</p>
     <div class="hero__cta">
@@ -327,7 +328,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 </main>
 
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
@@ -340,7 +340,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
@@ -387,7 +387,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">API control center</span>
       <span class="badge">Apache-2.0</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>

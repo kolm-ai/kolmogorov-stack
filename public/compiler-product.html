@@ -10,15 +10,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <title>Kolm Compiler Platform</title>
 <meta name="description" content="Kolm is the API collection wrapper and AI compiler for capturing model traffic, compiling signed artifacts, composing specialists, and targeting devices.">
 <meta name="theme-color" content="#08090A">
+<meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:title" content="Kolm Compiler Platform">
 <meta property="og:description" content="Capture API behavior, compile signed model artifacts, compose specialists, and deploy to the smallest viable device runtime.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://kolm.ai/compiler-product">
 <meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Kolm Compiler Platform">
 <meta name="twitter:description" content="API wrapper, AI compiler, specialist composer, and device targeter.">
+<meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
+<link rel="canonical" href="https://kolm.ai/compiler-product">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin>
@@ -26,9 +30,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Kolm Compiler Platform",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows, web",
+  "url": "https://kolm.ai/compiler-product",
+  "description": "API collection wrapper and AI compiler for capturing model traffic, compiling signed .kolm artifacts, composing specialists, and targeting the smallest viable device runtime.",
+  "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
+  "softwareHelp": "https://kolm.ai/docs"
+}
+</script>
 </head>
-<body class="marketing">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="glass-refract" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="42" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="s"/><feDisplacementMap in="SourceGraphic" in2="s" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<body class="t-marketing">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -42,7 +58,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span>kolm</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="#pipeline" aria-current="page">Product</a>
+      <a href="/#pipeline" aria-current="page">Product</a>
       <a href="/docs">Docs</a>
       <a href="/pricing">Pricing</a>
     </nav>
@@ -59,58 +75,84 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <main id="main">
 
-  <section class="hero section--flush">
-    <div class="wrap hero__in">
-      <p class="eyebrow">Compiler platform</p>
-      <h1 class="hero__h1">API behavior in. Device-fit models out.</h1>
-      <p class="lede">Kolm is the collection wrapper and compiler layer for teams that already have model traffic. Capture production behavior, curate the corpus, compile a signed <code>.kolm</code> artifact, and move the workload to the smallest runtime that can carry it.</p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="/signup">Get an API key</a>
-        <a class="btn btn--ghost" href="/docs#quickstart">Start with the API</a>
-      </div>
-      <div class="ui" aria-hidden="true">
-        <div class="ui__bar"><span class="ui__live"></span><span class="ui__name">kolm &middot; enterprise / control-plane</span><span class="ui__meta"><span class="ui__tick-from">compiling&hellip;</span><span class="ui__tick-to">signed &middot; Ed25519</span></span></div>
-        <div class="ui__grid">
-          <aside class="ui__rail">
-            <span class="ui__step is-on">Capture</span>
-            <span class="ui__step">Compile</span>
-            <span class="ui__step">Compose</span>
-            <span class="ui__step">Deploy</span>
-          </aside>
-          <pre class="ui__code"><span class="m">$</span> kolm route --capture
-<span class="m"># 12,408 calls &middot; 17 channels &middot; redacted</span>
-
-<span class="a">&#10003;</span> compiled <span class="s">claims-redactor.kolm</span>
-<span class="m">  142 MB &middot; examples + recipes + evals + receipts</span>
-<span class="a">&#10003;</span> fit <span class="s">rtx-4090</span> &rarr; <span class="s">jetson</span> &rarr; <span class="s">edge</span>
-<span class="m">  ranked by cost &amp; latency</span></pre>
+  <!-- s-hero [req] — asymmetric 1fr 1.2fr grid; the artifact arms the one Calibration Sweep -->
+  <section class="hero section--flush" data-sweep>
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow" data-enter="1">Compiler platform</p>
+        <h1 class="hero__h1" data-enter="2">API behavior in. Device-fit models out.</h1>
+        <p class="lede" data-enter="3">Kolm is the collection wrapper and compiler layer for teams that already have model traffic. Capture production behavior, curate the corpus, compile a signed <code>.kolm</code> artifact, and move the workload to the smallest runtime that can carry it.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="/signup">Get an API key</a>
+          <a class="btn btn--ghost" href="/docs#quickstart">Start with the API</a>
         </div>
+        <div class="hero__proof" data-enter="5">
+          <span><i class="dot"></i>12,408 calls captured &middot; 17 channels</span>
+          <span><i class="dot"></i>Redacted before persistence</span>
+          <span><i class="dot"></i>Ed25519-signed artifacts</span>
+          <span><i class="dot"></i>Ranked by cost &amp; latency</span>
+        </div>
+      </div>
+
+      <!-- the one lit --paper object; ships sealed (calm fallback), sweep re-fires it once -->
+      <figure class="artifact is-sealed" data-artifact data-art-reveal aria-label="Signed .kolm datasheet, in spec">
+        <i class="regmark regmark--tl"></i><i class="regmark regmark--tr"></i>
+        <i class="regmark regmark--bl"></i><i class="regmark regmark--br"></i>
+        <header class="artifact__head">
+          <span class="ctrl-id"><b>REG-04</b> claims-redactor.kolm</span>
+          <span class="ctrl-id">TOL &plusmn;0.2 &middot; v3.3</span>
+        </header>
+        <dl class="register">
+          <div class="register__row"><dt class="register__k">Capture</dt><dd class="register__v" data-val><b>12,408</b> calls</dd></div>
+          <div class="register__row"><dt class="register__k">Artifact</dt><dd class="register__v" data-val><b>142</b> MB</dd></div>
+          <div class="register__row"><dt class="register__k">Targets</dt><dd class="register__v" data-val>rtx-4090 &rarr; jetson &rarr; edge</dd></div>
+          <div class="register__row"><dt class="register__k">Signature</dt><dd class="register__v" data-val>sha256:a1f0&hellip;</dd></div>
+        </dl>
+        <footer class="artifact__verdict"><span data-verdict>In spec</span>
+          <svg class="artifact__check" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4"/></svg></footer>
+        <span class="artifact__scan" aria-hidden="true"></span>
+      </figure>
+    </div>
+  </section>
+
+  <!-- s-proof-strip -->
+  <section class="section section--band">
+    <div class="wrap">
+      <p class="eyebrow">In production</p>
+      <div class="proof__row">
+        <div class="proof__cell reveal"><b data-count>17</b><span>API data channels</span></div>
+        <div class="proof__cell reveal"><b data-count>8</b><span>policy layers</span></div>
+        <div class="proof__cell reveal"><b data-count>925</b><span>product routes</span></div>
+        <div class="proof__cell reveal"><b class="is-mono">Ed25519</b><span>signed artifacts</span></div>
       </div>
     </div>
   </section>
 
+  <!-- s-bento — the Kolm loop, at a glance -->
   <section class="section" id="pipeline">
-    <div class="wrap">
-      <p class="eyebrow">The Kolm loop</p>
-      <h2>Bring back the original Kolm loop.</h2>
-      <p class="lede">The core product is not an audit report. It is a repeatable loop for turning real API behavior into portable, signed, smaller model systems &mdash; capture, compile, compose, deploy.</p>
-      <div class="steps" style="margin-top:var(--s7)">
-        <div class="step">
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">The Kolm loop &middot; capture &rarr; compile &rarr; compose &rarr; deploy</p>
+        <h2>Bring back the original Kolm loop.</h2>
+        <p class="lede">The core product is not an audit report. It is a repeatable loop for turning real API behavior into portable, signed, smaller model systems &mdash; capture, compile, compose, deploy.</p>
+      </div>
+      <div class="grid grid--4">
+        <div class="step reveal">
           <span class="step__n">01 &middot; /v1/route</span>
           <h3>Capture</h3>
           <p>API collection wrapper. Keep the traces, prompts, tool calls, outcomes and receipts that describe the behavior you care about.</p>
         </div>
-        <div class="step">
+        <div class="step reveal">
           <span class="step__n">02 &middot; /v1/compile</span>
           <h3>Compile</h3>
           <p>Artifact builder. Convert curated examples into a deployable <code>.kolm</code> package with manifests, evals and signatures.</p>
         </div>
-        <div class="step">
+        <div class="step reveal">
           <span class="step__n">03 &middot; /v1/compose</span>
           <h3>Compose</h3>
           <p>Model composition. Train and route specialist behaviors so one system can combine narrow experts cleanly.</p>
         </div>
-        <div class="step">
+        <div class="step reveal">
           <span class="step__n">04 &middot; /v1/devices</span>
           <h3>Deploy</h3>
           <p>Device shrinking. Choose the smallest viable target, then serve, install or export for the runtime.</p>
@@ -119,7 +161,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <section class="feat" id="control">
+  <!-- s-feature-rows (alt L/R) -->
+  <section class="section feat" id="control">
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">API control center</p>
@@ -136,20 +179,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </div>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>kolm control / tenant policy</span><span class="m">secrets hidden</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">kolm control / tenant policy &middot; <span class="ok">secrets hidden</span></div>
           <div class="panel__rows">
             <div class="prow"><span class="m">capture</span> redacted <span class="prow__r m">92%</span></div>
             <div class="prow"><span class="m">routing</span> declared <span class="prow__r m">84%</span></div>
             <div class="prow"><span class="m">compile</span> gated <span class="prow__r m">76%</span></div>
             <div class="prow"><span class="m">export</span> jsonl &middot; receipts &middot; evidence <span class="prow__r a">ready</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">Signed</span><span>17 channels &middot; tenant-fenced</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="feat feat--rev">
+  <section class="section feat feat--rev">
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Enterprise</p>
@@ -167,38 +211,46 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </div>
       </div>
       <div class="feat__ui">
-        <div class="panel">
-          <div class="panel__head"><span>tenant contract</span><span class="a">enforced</span></div>
+        <div class="plate plate--rows">
+          <div class="plate__hd">tenant contract &middot; <span class="ok">enforced</span></div>
           <div class="panel__rows">
             <div class="prow">scoped keys &middot; spend controls <span class="prow__r m">per workspace</span></div>
             <div class="prow">capture retention <span class="prow__r m">policy-set</span></div>
             <div class="prow">compile receipts <span class="prow__r m">sha-256</span></div>
             <div class="prow">deployment state <span class="prow__r a">tracked</span></div>
           </div>
+          <div class="plate__foot"><span class="badge badge--ok">Tenant-fenced</span><span>one backend contract</span></div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- s-bento — honest device scope -->
   <section class="section" id="trust">
-    <div class="wrap">
-      <p class="eyebrow">Honest scope</p>
-      <h2>Honest scope, signed artifacts.</h2>
-      <p class="lede">Kolm does not claim that every workload can become a phone-native model today. It exposes fit, target limits, manifests and receipts so teams can see what is real for each device class.</p>
-      <div class="grid grid--4" style="margin-top:var(--s7)">
-        <div class="card">
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">Honest scope</p>
+        <h2>Honest scope, signed artifacts.</h2>
+        <p class="lede">Kolm does not claim that every workload can become a phone-native model today. It exposes fit, target limits, manifests and receipts so teams can see what is real for each device class.</p>
+      </div>
+      <div class="grid grid--4">
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; local cpu</span>
           <h3>Local CPU</h3>
           <p>Small specialists and routing logic that fit on commodity hardware.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; gpu</span>
           <h3>GPU workstation</h3>
           <p>Larger artifacts and retraining loops on a dedicated workstation.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; edge</span>
           <h3>Edge box</h3>
           <p>Private serving near the workflow, with the data staying on your hardware.</p>
         </div>
-        <div class="card">
+        <div class="card reveal">
+          <span class="card__k">Reg &middot; cloud</span>
           <h3>Cloud GPU</h3>
           <p>Teacher and compile workloads when the build needs more headroom.</p>
         </div>
@@ -206,23 +258,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <section class="proof">
-    <div class="wrap">
-      <div class="proof__row">
-        <div class="proof__cell"><b>17</b><span>API data channels</span></div>
-        <div class="proof__cell"><b>8</b><span>policy layers</span></div>
-        <div class="proof__cell"><b>925</b><span>product routes</span></div>
-        <div class="proof__cell"><b class="is-mono">Ed25519</b><span>signed artifacts</span></div>
-      </div>
-    </div>
-  </section>
-
+  <!-- s-cta [req] — the one inverted primary on the page-end band -->
   <section class="cta section--flush">
     <div class="wrap cta__in">
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
       <h2>Route one namespace through Kolm.</h2>
       <p class="lede">That is the smallest useful start: capture the behavior, compile the artifact, then decide where it should run.</p>
       <div class="hero__cta">
-        <a class="btn btn--ghost" href="/signup">Get an API key</a>
+        <a class="btn btn--primary" href="/signup">Get an API key</a>
         <a class="btn btn--ghost" href="/docs">Read the docs</a>
       </div>
     </div>
@@ -243,12 +286,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
-        <a href="#pipeline">Pipeline</a>
-        <a href="#contract">Backend contract</a>
+        <a href="/#pipeline">Pipeline</a>
         <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
         <a href="/compare">Compare</a>
@@ -291,9 +333,40 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">API control center</span>
       <span class="badge">Apache-2.0</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
+
+<!-- THE SIGNATURE — Calibration Sweep (design system §7). Fail-open + reduced-motion-safe:
+     the artifact ships class="artifact is-sealed"; JS only un-seals to re-fire the sweep once. -->
+<script>
+(function(){
+  var sweeps = document.querySelectorAll('[data-sweep]');
+  if (!sweeps.length || !('IntersectionObserver' in window)) return;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (reduce) return; /* sealed end-state already shipped */
+  var io = new IntersectionObserver(function(es, o){
+    es.forEach(function(e){
+      if (!e.isIntersecting) return;
+      var a = e.target.querySelector('.artifact');
+      if (!a) { o.unobserve(e.target); return; }
+      var scan = a.querySelector('.artifact__scan');
+      o.unobserve(e.target);
+      a.classList.remove('is-sealed');
+      if (scan && scan.animate) {
+        scan.animate(
+          [{transform:'scaleX(1)',opacity:1,top:'0'},{top:'100%',opacity:0}],
+          {duration:600,easing:'cubic-bezier(.165,.84,.44,1)'});
+      }
+      a.querySelectorAll('[data-val]').forEach(function(v,i){
+        setTimeout(function(){ v.style.opacity = 1; }, 80*i + 120);
+      });
+      setTimeout(function(){ a.classList.add('is-sealed'); }, 560);
+    });
+  }, { threshold: 0.4 });
+  sweeps.forEach(function(s){ io.observe(s); });
+})();
+</script>
 </body>
 </html>

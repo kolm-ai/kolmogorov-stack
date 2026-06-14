@@ -41,7 +41,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 }
 </script>
 </head>
-<body class="marketing">
+<body class="t-marketing">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -56,7 +56,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
       <a href="/#pipeline">Product</a>
-      <a href="/docs" aria-current="page">Docs</a>
+      <a href="/docs">Docs</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
@@ -72,22 +72,28 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <main id="main">
 
+  <!-- s-hero [req] -->
   <section class="hero section--flush">
     <div class="wrap hero__in">
-      <p class="eyebrow">Release ledger / product cutover</p>
-      <h1 class="hero__h1">A changelog should show what changed and what is still gated.</h1>
-      <p class="lede">API behavior in. Device-fit models out. This ledger tracks public surface rebuilds, route cutovers, API control center scope, verification gates, and the readiness requirements that must remain visible until proof exists.</p>
-      <div class="hero__cta">
+      <p class="eyebrow" data-enter="1">Release ledger &middot; product cutover</p>
+      <h1 class="hero__h1" data-enter="2">A changelog should show what changed and what is still gated.</h1>
+      <p class="lede" data-enter="3">API behavior in. Device-fit models out. This ledger tracks public surface rebuilds, route cutovers, API control center scope, verification gates, and the readiness requirements that must remain visible until proof exists.</p>
+      <div class="hero__cta" data-enter="4">
         <a class="btn btn--primary" href="/trust">Review readiness</a>
         <a class="btn btn--ghost" href="/account/api-control-center">Open API control</a>
       </div>
-      <div class="proof">
-        <div class="proof__row">
-          <div class="proof__cell"><b>8</b><span>product surfaces tracked</span></div>
-          <div class="proof__cell"><b>13</b><span>route tests</span></div>
-          <div class="proof__cell"><b>8</b><span>open readiness gates</span></div>
-          <div class="proof__cell"><b>0</b><span>broken static refs</span></div>
-        </div>
+    </div>
+  </section>
+
+  <!-- s-proof-strip -->
+  <section class="section section--band">
+    <div class="wrap">
+      <p class="eyebrow">In this release</p>
+      <div class="proof__row">
+        <div class="proof__cell reveal"><b>8</b><span>product surfaces tracked</span></div>
+        <div class="proof__cell reveal"><b>13</b><span>route tests</span></div>
+        <div class="proof__cell reveal"><b>8</b><span>open readiness gates</span></div>
+        <div class="proof__cell reveal"><b>0</b><span>broken static refs</span></div>
       </div>
     </div>
   </section>
@@ -95,12 +101,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="current-cutover">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">01 / Current Cutover</span>
+        <p class="idx">01 &mdash; Current Cutover</p>
         <h2>The public product surface is moving from audit packaging to platform objects.</h2>
         <p class="lede">Each entry records what changed, why it matters, and which buyer proof path it supports.</p>
       </div>
       <div class="ledger-rows">
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">2026-06-13 <span class="sev-d">/ surfaces</span></div>
           <div class="lrow__t">
             <h3>Public product surfaces rebuilt</h3>
@@ -108,7 +114,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
           <div class="lrow__f"><em>pages</em></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">2026-06-13 <span class="sev-d">/ control</span></div>
           <div class="lrow__t">
             <h3>API control center scope surfaced</h3>
@@ -116,7 +122,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
           <div class="lrow__f"><a href="/account/api-control-center">control</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">2026-06-13 <span class="sev-d">/ routing</span></div>
           <div class="lrow__t">
             <h3>Routes hardened</h3>
@@ -124,7 +130,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
           <div class="lrow__f"><em>routes</em></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">2026-06-13 <span class="sev-d">/ claims</span></div>
           <div class="lrow__t">
             <h3>Claim scope hardened</h3>
@@ -132,7 +138,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
           <div class="lrow__f"><a href="/trust">trust</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">2026-06-13 <span class="sev-d">/ product</span></div>
           <div class="lrow__t">
             <h3>Research became product scope</h3>
@@ -147,38 +153,38 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="verification-gates">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">02 / Verification Gates</span>
+        <p class="idx">02 &mdash; Verification Gates</p>
         <h2>Release confidence comes from checks that target the actual failure modes.</h2>
         <p class="lede">A green page load is not enough. The release path checks routing, stale copy, broken references, claim scope, kernel readiness, and real screenshots.</p>
       </div>
       <div class="steps">
-        <div class="step">
-          <p class="eyebrow">Site tests</p>
+        <div class="step reveal">
+          <p class="step__n">Site tests</p>
           <h3>Routes render the intended pages</h3>
           <p>Direct route fetches assert titles and current product copy for trust, security, enterprise, contact, platform, capabilities, research, and changelog.</p>
         </div>
-        <div class="step">
-          <p class="eyebrow">Rewrite tests</p>
+        <div class="step reveal">
+          <p class="step__n">Rewrite tests</p>
           <h3>Aliases cannot hide stale pages</h3>
           <p>Vercel rewrite assertions prevent product surfaces from resolving to the generic compiler-product page by accident.</p>
         </div>
-        <div class="step">
-          <p class="eyebrow">Stale-copy tests</p>
+        <div class="step reveal">
+          <p class="step__n">Stale-copy tests</p>
           <h3>Old packaging cannot return silently</h3>
           <p>Forbidden copy searches block old scan, package, pricing, verifier, overclaiming, and mojibake fragments from rebuilt pages.</p>
         </div>
-        <div class="step">
-          <p class="eyebrow">Reference lint</p>
+        <div class="step reveal">
+          <p class="step__n">Reference lint</p>
           <h3>Static links and assets resolve</h3>
           <p>The refs audit checks internal links, images, manifests, docs paths, public JSON, and route references across the static site.</p>
         </div>
-        <div class="step">
-          <p class="eyebrow">Claim scope</p>
+        <div class="step reveal">
+          <p class="step__n">Claim scope</p>
           <h3>Marketing cannot outrun proof</h3>
           <p>Claim verification keeps certification, benchmark, package, partner, and adoption statements tied to explicit evidence or open gates.</p>
         </div>
-        <div class="step">
-          <p class="eyebrow">UI screenshots</p>
+        <div class="step reveal">
+          <p class="step__n">UI screenshots</p>
           <h3>Desktop and mobile must be readable</h3>
           <p>Full-page screenshots check spacing, stacking, footer integrity, hero density, and absence of smushing across desktop and mobile viewports.</p>
         </div>
@@ -189,33 +195,33 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="still-gated">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">03 / Still Gated</span>
+        <p class="idx">03 &mdash; Still Gated</p>
         <h2>The release ledger is useful only if unfinished proof stays visible.</h2>
         <p class="lede">These gates should remain explicit in public trust and security surfaces until there is stronger evidence.</p>
       </div>
       <div class="ledger-rows">
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Needs external partner</div>
           <div class="lrow__t">
             <p>Partner-backed claims, marketplace claims, and external validation need named evidence before they become public certainty.</p>
           </div>
           <div class="lrow__f"><em>partner</em></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Needs live certification</div>
           <div class="lrow__t">
             <p>Certification language must remain gated until live, reviewable evidence exists and can be routed from the trust surface.</p>
           </div>
           <div class="lrow__f"><em>cert</em></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Needs package release</div>
           <div class="lrow__t">
             <p>Package, SDK, CLI, and distribution claims must match a released artifact, install path, version, and verification command.</p>
           </div>
           <div class="lrow__f"><em>package</em></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Needs public benchmark data</div>
           <div class="lrow__t">
             <p>Performance or superiority claims require public benchmark data, method, sample, limitations, and repeatable evidence.</p>
@@ -229,12 +235,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="buyer-delta">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">04 / What Changed For Buyers</span>
+        <p class="idx">04 &mdash; What Changed For Buyers</p>
         <h2>The site now explains the system a buyer has to approve.</h2>
         <p class="lede">The product narrative is stronger when it shows objects, owners, controls, and evidence instead of category adjectives.</p>
       </div>
       <div class="ledger-rows">
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Product owner</div>
           <div class="lrow__t">
             <h3>Clear object model</h3>
@@ -242,7 +248,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
           <div class="lrow__f"><a href="/platform">objects</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Enterprise admin</div>
           <div class="lrow__t">
             <h3>Control center path</h3>
@@ -250,7 +256,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
           <div class="lrow__f"><a href="/enterprise">control</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Security reviewer</div>
           <div class="lrow__t">
             <h3>Boundary posture</h3>
@@ -258,7 +264,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
           <div class="lrow__f"><a href="/security">security</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Developer</div>
           <div class="lrow__t">
             <h3>Implementation path</h3>
@@ -266,7 +272,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
           <div class="lrow__f"><a href="/docs/api">api</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">Procurement</div>
           <div class="lrow__t">
             <h3>Proof discipline</h3>
@@ -281,28 +287,28 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="next-release-work">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">05 / Next Release Work</span>
+        <p class="idx">05 &mdash; Next Release Work</p>
         <h2>The next release should keep moving from website clarity into working product control.</h2>
         <p class="lede">The public surface is useful only if the backend, account UI, API docs, and tests keep converging on the same object model.</p>
       </div>
       <div class="steps">
-        <div class="step">
-          <p class="eyebrow">Control center</p>
+        <div class="step reveal">
+          <p class="step__n">Control center</p>
           <h3>Make every control inspectable</h3>
           <p>Expose source scopes, connector health, provider policy, retention, eval gates, exports, usage, cost, and audit event search as usable account surfaces.</p>
         </div>
-        <div class="step">
-          <p class="eyebrow">Docs</p>
+        <div class="step reveal">
+          <p class="step__n">Docs</p>
           <h3>Show implementation paths</h3>
           <p>Add examples for capture trace, classify schema, create eval, compile artifact, fetch receipt, export evidence, and verify runtime target.</p>
         </div>
-        <div class="step">
-          <p class="eyebrow">Routing</p>
+        <div class="step reveal">
+          <p class="step__n">Routing</p>
           <h3>Finish unmasking stale surfaces</h3>
           <p>Continue removing old aliases and copy across docs, pricing, signup, dashboard, compare, integrations, and runtimes where evidence shows drift.</p>
         </div>
-        <div class="step">
-          <p class="eyebrow">Verification</p>
+        <div class="step reveal">
+          <p class="step__n">Verification</p>
           <h3>Broaden screenshot coverage</h3>
           <p>Add research and changelog to the critical UI audit route list so spacing regressions fail automatically on desktop and mobile.</p>
         </div>
@@ -310,9 +316,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <section class="cta-final section--flush">
+  <!-- s-cta [req] -->
+  <section class="cta section--flush">
     <div class="wrap cta__in">
-      <div class="bars" aria-hidden="true"><i></i><i></i><i></i></div>
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
       <h2>Read the ledger before trusting the claim.</h2>
       <p class="lede">The product should be judged by route evidence, API objects, screenshots, generated artifacts, receipts, and open readiness gates.</p>
       <div class="hero__cta">
@@ -337,12 +344,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
         <a href="/#pipeline">Pipeline</a>
-        <a href="/#contract">Backend contract</a>
         <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
         <a href="/compare">Compare</a>
@@ -385,7 +391,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">API control center</span>
       <span class="badge">Apache-2.0</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>

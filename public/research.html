@@ -27,6 +27,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
@@ -40,7 +41,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 }
 </script>
 </head>
-<body class="marketing">
+<body class="t-marketing">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
@@ -71,61 +72,95 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 <main id="main">
 
-  <section class="hero section--flush">
-    <div class="wrap hero__in">
-      <p class="eyebrow">Product Lab</p>
-      <h1 class="hero__h1">Evidence should ship as product, not decorate the website.</h1>
-      <p class="lede">API behavior in. Device-fit models out. The Kolm product lab maps customer needs, backend readiness, enterprise controls, API data movement, and website quality into route-level product requirements.</p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="/compare">Review why Kolm</a>
-        <a class="btn btn--ghost" href="/account/api-control-center">Open API control</a>
-      </div>
-      <div class="proof" style="margin-top:clamp(40px,5vw,64px)">
-        <div class="proof__row">
-          <div class="proof__cell"><b>17</b><span>customer clusters</span></div>
-          <div class="proof__cell"><b>17</b><span>channel families</span></div>
-          <div class="proof__cell"><b>11</b><span>product standards</span></div>
-          <div class="proof__cell"><b>8</b><span>readiness gates kept explicit</span></div>
+  <!-- s-hero [req] — asymmetric 1fr 1.2fr grid; the artifact arms the one Calibration Sweep -->
+  <section class="hero" data-sweep>
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow" data-enter="1">Product Lab</p>
+        <h1 class="hero__h1" data-enter="2">Evidence should ship as product, not decorate the website.</h1>
+        <p class="lede" data-enter="3">API behavior in. Device-fit models out. The Kolm product lab maps customer needs, backend readiness, enterprise controls, API data movement, and website quality into route-level product requirements.</p>
+        <div class="hero__cta" data-enter="4">
+          <a class="btn btn--primary" href="/compare">Review why Kolm</a>
+          <a class="btn btn--ghost" href="/account/api-control-center">Open API control</a>
         </div>
+        <div class="hero__proof" data-enter="5">
+          <span><i class="dot"></i>17 customer clusters</span>
+          <span><i class="dot"></i>17 channel families</span>
+          <span><i class="dot"></i>11 product standards</span>
+          <span><i class="dot"></i>8 readiness gates kept explicit</span>
+        </div>
+      </div>
+
+      <!-- the one lit --paper object; ships sealed (calm fallback), sweep re-fires it once -->
+      <figure class="artifact is-sealed" data-artifact data-art-reveal aria-label="Signed product-lab datasheet, in spec">
+        <i class="regmark regmark--tl"></i><i class="regmark regmark--tr"></i>
+        <i class="regmark regmark--bl"></i><i class="regmark regmark--br"></i>
+        <header class="artifact__head">
+          <span class="ctrl-id"><b>REG-LAB</b> evidence-to-product.kolm</span>
+          <span class="ctrl-id">OPEN &middot; v3.3</span>
+        </header>
+        <dl class="register">
+          <div class="register__row"><dt class="register__k">Clusters</dt><dd class="register__v" data-val><b>17</b> tracked</dd></div>
+          <div class="register__row"><dt class="register__k">Standards</dt><dd class="register__v" data-val><b>11</b> product</dd></div>
+          <div class="register__row"><dt class="register__k">Streams</dt><dd class="register__v" data-val><b>6</b> dated notes</dd></div>
+          <div class="register__row"><dt class="register__k">Gates</dt><dd class="register__v" data-val><b>8</b> kept explicit</dd></div>
+        </dl>
+        <footer class="artifact__verdict"><span data-verdict>In spec</span>
+          <svg class="artifact__check" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4"/></svg></footer>
+        <span class="artifact__scan" aria-hidden="true"></span>
+      </figure>
+    </div>
+  </section>
+
+  <!-- s-proof-strip -->
+  <section class="section section--band">
+    <div class="wrap">
+      <p class="eyebrow">In the backlog</p>
+      <div class="proof__row">
+        <div class="proof__cell reveal"><b data-count>17</b><span>customer clusters</span></div>
+        <div class="proof__cell reveal"><b data-count>17</b><span>channel families</span></div>
+        <div class="proof__cell reveal"><b data-count>11</b><span>product standards</span></div>
+        <div class="proof__cell reveal"><b data-count>8</b><span>readiness gates kept explicit</span></div>
       </div>
     </div>
   </section>
 
+  <!-- s-bento — the product streams, at a glance -->
   <section class="section" id="research-streams">
-    <div class="wrap">
+    <div class="wrap wrap--wide">
       <div class="section__head">
-        <span class="idx">Product streams</span>
+        <p class="eyebrow">Product streams</p>
         <h2>The backlog is a product operating system.</h2>
         <p class="lede">The goal is not more notes. It is to turn market and customer evidence into the controls, APIs, pages, and tests that make Kolm sharper.</p>
       </div>
       <div class="grid grid--3">
-        <div class="card">
-          <p class="card__k">Customer stack</p>
+        <div class="card reveal">
+          <span class="card__k">Customer stack</span>
           <h3>17 operating clusters</h3>
           <p>Agent platforms, model gateways, eval suites, observability, training, data infrastructure, GRC, developer tools, runtime systems, vertical AI, and workflow products.</p>
         </div>
-        <div class="card">
-          <p class="card__k">Product standard</p>
+        <div class="card reveal">
+          <span class="card__k">Product standard</span>
           <h3>Durable product traits</h3>
           <p>Control objects, enterprise admin, docs quality, proof exports, data gravity, workflow ownership, usage economics, and procurement readiness.</p>
         </div>
-        <div class="card">
-          <p class="card__k">API control surface</p>
+        <div class="card reveal">
+          <span class="card__k">API control surface</span>
           <h3>Data movement in and out</h3>
           <p>Every source, channel family, ingress mode, export mode, credential boundary, provider policy, and audit event needs a visible owner and maturity state.</p>
         </div>
-        <div class="card">
-          <p class="card__k">Website audit</p>
+        <div class="card reveal">
+          <span class="card__k">Website audit</span>
           <h3>Product machinery first</h3>
           <p>Pages must show inputs, controls, outputs, proof, readiness, and next action. Generic AI adjectives are not enough.</p>
         </div>
-        <div class="card">
-          <p class="card__k">Backend readiness</p>
+        <div class="card reveal">
+          <span class="card__k">Backend readiness</span>
           <h3>Claims tied to invariants</h3>
           <p>Tenant boundaries, audit events, schema handling, compile state, export receipts, artifact checksums, and readiness gates define what can be claimed.</p>
         </div>
-        <div class="card">
-          <p class="card__k">UI surface audit</p>
+        <div class="card reveal">
+          <span class="card__k">UI surface audit</span>
           <h3>Design verified by screenshots</h3>
           <p>Desktop and mobile pages need stable spacing, readable density, no overlap, no horizontal scroll, and product evidence visible above the fold.</p>
         </div>
@@ -133,10 +168,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
+  <!-- s-feature-rows — research notes ledger -->
   <section class="section" id="research-notes">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">Research notes</span>
+        <p class="eyebrow">Research notes</p>
         <h2>Each pass leaves a note the product can answer to.</h2>
         <p class="lede">Streams are tracked as dated notes. Every note resolves into a control object, route, page, or readiness gate &mdash; not an idea that floats.</p>
       </div>
@@ -178,32 +214,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="operating-map">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">Operating map</span>
+        <p class="eyebrow">Operating map</p>
         <h2>Kolm should not read like a generic AI platform.</h2>
         <p class="lede">The customer stack already contains agents, connectors, workflow automation, model routing, evaluation, and enterprise controls. Kolm owns the lifecycle between observed behavior and portable artifact.</p>
       </div>
       <div class="ledger-rows">
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">agent tools</div>
           <div class="lrow__t"><h3>Capture what happened, then prove it</h3><p>Customer need: fast execution and demos. Kolm job: capture what happened, gate failures, compile stable behavior, and export proof.</p></div>
           <div class="lrow__f"><a href="/compare">why kolm</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">model gateways</div>
           <div class="lrow__t"><h3>Policy, eval, artifact, receipt</h3><p>Customer need: provider routing and cost control. Kolm job: policy, eval, artifact, runtime target, receipt, and downstream evidence state.</p></div>
           <div class="lrow__f">provider</div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">eval platforms</div>
           <div class="lrow__t"><h3>Evals as release gates</h3><p>Customer need: test suites and scorecards. Kolm job: evals as release gates that create receipts, regression sets, and runtime decisions.</p></div>
           <div class="lrow__f">gate</div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">observability</div>
           <div class="lrow__t"><h3>Behavior into signed outputs</h3><p>Customer need: logs, traces, dashboards, and alerts. Kolm job: behavior converted into signed, portable outputs with proof.</p></div>
           <div class="lrow__f">artifact</div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">data and AI infra</div>
           <div class="lrow__t"><h3>A lifecycle that exports</h3><p>Customer need: storage, lineage, serving, governance, and scale. Kolm job: a behavior-to-artifact lifecycle that can export into those systems.</p></div>
           <div class="lrow__f">export</div>
@@ -212,31 +248,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
+  <!-- s-evidence — evidence-to-product objects -->
   <section class="section" id="research-to-product">
-    <div class="wrap">
+    <div class="wrap wrap--wide">
       <div class="section__head">
-        <span class="idx">Evidence to product</span>
+        <p class="eyebrow">Evidence to product</p>
         <h2>Every insight must move into a product object.</h2>
         <p class="lede">A useful insight becomes stronger only when it changes a route, schema, page, control, test, screenshot, or readiness record.</p>
       </div>
       <div class="grid grid--4">
-        <div class="card">
-          <p class="card__k">Source</p>
+        <div class="card reveal">
+          <span class="card__k">Source</span>
           <h3>Where it starts</h3>
           <p>Customer request, official docs, market report, internal spec, screenshot, route output, or generated JSON.</p>
         </div>
-        <div class="card">
-          <p class="card__k">Pattern</p>
+        <div class="card reveal">
+          <span class="card__k">Pattern</span>
           <h3>What it means</h3>
           <p>Control object, workflow expectation, enterprise requirement, risk, pricing motion, docs pattern, or implementation gap.</p>
         </div>
-        <div class="card">
-          <p class="card__k">Product object</p>
+        <div class="card reveal">
+          <span class="card__k">Product object</span>
           <h3>What it becomes</h3>
           <p>Source, trace, dataset, eval, policy, compile run, artifact, runtime target, receipt, export, audit event, or readiness gate.</p>
         </div>
-        <div class="card">
-          <p class="card__k">Verification</p>
+        <div class="card reveal">
+          <span class="card__k">Verification</span>
           <h3>How it is proven</h3>
           <p>Route test, copy test, OpenAPI object, screenshot, claim-scope check, ref lint, kernel verifier, or manual browser inspection.</p>
         </div>
@@ -247,32 +284,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="current-findings">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">Current findings</span>
+        <p class="eyebrow">Current findings</p>
         <h2>The strongest path is narrower than generic AI and deeper than a demo.</h2>
         <p class="lede">Kolm does not need to look like every category. It needs to connect observed AI/API behavior, governance, artifact creation, runtime fit, and exportable evidence.</p>
       </div>
       <div class="ledger-rows">
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">own the middle layer</div>
           <div class="lrow__t"><h3>Own the behavior-to-artifact path</h3><p>Agent tools execute, gateways route, evals score, observability shows, and data platforms govern. Kolm owns the behavior-to-artifact path that spans them.</p></div>
           <div class="lrow__f">position</div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">make control visible</div>
           <div class="lrow__t"><h3>Expose the control center</h3><p>The API control center should expose source scopes, provider rules, connector health, retention, eval gates, runtime targets, cost, usage, exports, and audit events.</p></div>
           <div class="lrow__f"><a href="/account/api-control-center">control</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">cover data movement</div>
           <div class="lrow__t"><h3>Broad ingress coverage</h3><p>The product supports broad coverage: REST, GraphQL, gRPC, webhooks, streams, batch files, object storage, warehouses, queues, browser events, CLI, and adapter manifests.</p></div>
           <div class="lrow__f"><a href="/integrations">ingress</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">export proof</div>
           <div class="lrow__t"><h3>Evidence leaves the dashboard</h3><p>Receipts, eval reports, evidence bundles, admin analytics, CI status, warehouse exports, webhooks, and SIEM/GRC events must leave the dashboard.</p></div>
           <div class="lrow__f"><a href="/docs/api">export</a></div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">gate claims</div>
           <div class="lrow__t"><h3>Readiness-gated claims</h3><p>Readiness-gated claims keep the website credible. Unsupported certification, benchmark, package, partner, and adoption claims stay visibly open.</p></div>
           <div class="lrow__f"><a href="/trust">trust</a></div>
@@ -281,35 +318,36 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
+  <!-- s-faq — buyer inspection path -->
   <section class="section" id="buyer-questions">
     <div class="wrap">
       <div class="section__head">
-        <span class="idx">Buyer questions</span>
+        <p class="eyebrow">Buyer questions</p>
         <h2>Product work only matters if it answers the buyer's inspection path.</h2>
         <p class="lede">Each buyer should find a concrete product answer, not a broad positioning claim.</p>
       </div>
       <div class="ledger-rows">
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">platform</div>
           <div class="lrow__t"><h3>Can this connect to our systems?</h3><p>Sources, adapters, environments, API keys, quotas, runtime targets, and exports need an owner and a state.</p></div>
           <div class="lrow__f">connect</div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">ai</div>
           <div class="lrow__t"><h3>Can this improve behavior without hiding risk?</h3><p>Traces, labels, evals, regressions, drift checks, compile runs, and gates must be inspectable.</p></div>
           <div class="lrow__f">evaluate</div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">security</div>
           <div class="lrow__t"><h3>Can this protect boundaries?</h3><p>Redaction, unknown-schema handling, retention, purge, provider policy, and audit events must be explicit.</p></div>
           <div class="lrow__f">govern</div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">compliance</div>
           <div class="lrow__t"><h3>Can this produce evidence?</h3><p>Receipts, evidence bundles, object versions, readiness gates, and export destinations must be available.</p></div>
           <div class="lrow__f">prove</div>
         </div>
-        <div class="lrow">
+        <div class="lrow reveal">
           <div class="lrow__k">developer</div>
           <div class="lrow__t"><h3>Can this be integrated quickly?</h3><p>Docs, OpenAPI, examples, error codes, local verification, and route stability matter as much as the pitch.</p></div>
           <div class="lrow__f">build</div>
@@ -318,8 +356,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <section class="cta section--flush">
+  <!-- s-cta [req] — one inverted primary -->
+  <section class="cta-band">
     <div class="wrap cta__in">
+      <p class="eyebrow">CTA &middot; one verified loop</p>
       <h2>Turn evidence into one verified product loop.</h2>
       <p class="lede">Start with one source, one policy, one eval gate, one artifact, one runtime target, and one export. That is the practical standard for a serious enterprise product.</p>
       <div class="hero__cta">
@@ -331,7 +371,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 </main>
 
-<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
@@ -344,12 +383,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
         <a href="/#pipeline">Pipeline</a>
-        <a href="/#contract">Backend contract</a>
         <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
         <a href="/compare">Compare</a>
@@ -374,7 +412,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
       <div class="foot__col">
         <h3>Company</h3>
-        <a href="/research">Research</a>
+        <a href="/research" aria-current="page">Research</a>
         <a href="/changelog">Changelog</a>
         <a href="mailto:dev@kolm.ai">Contact</a>
       </div>
@@ -392,7 +430,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <span class="badge">API control center</span>
       <span class="badge">Apache-2.0</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
