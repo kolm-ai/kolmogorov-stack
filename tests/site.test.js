@@ -568,7 +568,11 @@ test('account workspace uses compiler-first product shell instead of stale audit
   const dashboard = fs.readFileSync(path.join('public', 'dashboard.html'), 'utf8');
 
   assert.match(overview, /Compiler Workspace/);
-  assert.match(overview, /data-design-reference="image-2"/);
+  // Dark canonical shell (was the retired image-2 light paper design).
+  assert.match(overview, /\/kolm-2026\.css/);
+  assert.doesNotMatch(overview, /data-design-reference="image-2"/);
+  assert.doesNotMatch(overview, /color-scheme:light/);
+  assert.doesNotMatch(overview, /kolm-main\.css/);
   assert.match(overview, /Compiler workspace source-to-artifact console/);
   assert.match(overview, /behavior-to-artifact workspace/);
   assert.match(overview, /secret_values_included: false/);
