@@ -266,7 +266,49 @@
     });
   }
 
-  function init() { wireBackdrop(); syncThemeColor(); wireReveal(); wireNav(); wirePointerLight(); wireField(); wireCount(); wireKdef(); }
+  // ---- KMotion: the SOTA motion engine (graphics-100x wave 2026-06-15) --------
+  // Drives the five motion primitives (flow / draw / settle / stamp / breathe)
+  // on any element carrying [data-km]. Idempotent (data-km-wired guard),
+  // reduced-motion-aware (under reduce we just paint the static end-state, which
+  // the CSS already is, and never add .km-run), IO-triggered, GPU-only.
+  //
+  // Contract: when a [data-km] host scrolls into view, KMotion adds the .km-run
+  // class. The CSS keyframes (km-flow / km-draw / km-grow / km-settle / km-stamp
+  // / km-breathe) key off [data-km~="..."] .km-run. Finite primitives (draw,
+  // settle, stamp) run once; idle loops (flow, breathe) persist. Per-child
+  // stagger is read from --i (set in markup), so JS adds zero per-frame work.
+  //
+  // Fail-open: with JS off, nothing gets .km-run, and every component's resting
+  // CSS state IS its final legible frame (rings drawn, bars full, seals stamped,
+  // values shown). No information is ever conveyed by motion alone.
+  function wireMotion() {
+    var hosts = document.querySelectorAll('[data-km]:not([data-km-wired])');
+    if (!hosts.length) return;
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) {
+      // mark wired so a later call is a no-op; static end-state is the CSS resting state
+      hosts.forEach(function (h) { h.setAttribute('data-km-wired', '1'); });
+      return;
+    }
+    // idle-loop primitives keep .km-run while on screen; one-shots keep it forever
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var h = e.target;
+        var km = h.getAttribute('data-km') || '';
+        var idle = /\b(flow|breathe)\b/.test(km);
+        if (e.isIntersecting) {
+          h.classList.add('km-run');
+          if (!idle) io.unobserve(h); // one-shot motions never need re-running
+        } else if (idle) {
+          // pause idle loops off-screen to save the compositor; resume on return
+          h.classList.remove('km-run');
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.18 });
+    hosts.forEach(function (h) { h.setAttribute('data-km-wired', '1'); io.observe(h); });
+  }
+
+  function init() { wireBackdrop(); syncThemeColor(); wireReveal(); wireNav(); wirePointerLight(); wireField(); wireCount(); wireKdef(); wireMotion(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

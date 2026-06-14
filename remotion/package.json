@@ -1,0 +1,21 @@
+{
+  "name": "kolm-remotion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Isolated Remotion subproject for kolm.ai cinematic pipeline explainer. Not part of the root app.",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.jsx",
+    "render:test": "node render.mjs test remotion/out/test.webm",
+    "render:pipeline": "node render.mjs Pipeline ../public/media/pipeline.webm",
+    "still:poster": "node still.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.443",
+    "@remotion/cli": "4.0.443",
+    "@remotion/renderer": "4.0.443",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.443"
+  }
+}
