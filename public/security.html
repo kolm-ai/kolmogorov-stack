@@ -145,17 +145,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="plate plate--rows">
-          <div class="plate__hd">EVENT PATH &middot; <span class="ok">governed</span></div>
-          <div class="panel__rows">
-            <div class="prow"><span class="m">accept</span> tenant-scoped intake <span class="prow__r m">ingress scope</span></div>
-            <div class="prow"><span class="m">classify</span> known schema or opaque <span class="prow__r m">schema rule</span></div>
-            <div class="prow"><span class="m">redact</span> policy before reuse <span class="prow__r m">policy gate</span></div>
-            <div class="prow"><span class="m">route</span> declared destinations <span class="prow__r m">egress rule</span></div>
-            <div class="prow"><span class="m">prove</span> evidence outside the UI <span class="prow__r a">receipt path</span></div>
-          </div>
-          <div class="plate__foot"><span class="badge badge--ok">Governed</span><span>capture &rarr; compile &rarr; export</span></div>
-        </div>
+        <figure class="instrument vloop" data-vl="valid" data-art-reveal
+          aria-label="Verify loop: a .kolm artifact plus a public key are hashed; the hash is checked against the embedded Ed25519 signature. The result is a single verdict — valid, or void.">
+          <div class="instrument__bar"><b>verify loop</b><span class="live">Ed25519</span></div>
+          <svg class="pipe vl" viewBox="0 0 440 232" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+            <rect class="nd" x="22"  y="14" width="150" height="40" rx="5"/>
+            <text class="lbl" x="38" y="32">.kolm</text><text class="sub" x="38" y="46">142 mb · sealed artifact</text>
+            <rect class="nd" x="268" y="14" width="150" height="40" rx="5"/>
+            <text class="lbl" x="284" y="32">public key</text><text class="sub" x="284" y="46">ed25519 · 32 b</text>
+            <path class="spine" d="M97 54 L220 84 M343 54 L220 84"/>
+            <rect class="nd" x="150" y="84" width="140" height="40" rx="5"/>
+            <text class="lbl" x="166" y="102">hash</text><text class="sub" x="166" y="116">blake3 · 256-bit digest</text>
+            <text class="tag" x="270" y="100" text-anchor="end">Σ</text>
+            <path class="spine" d="M220 124 L220 148"/>
+            <rect class="nd" x="150" y="148" width="140" height="40" rx="5"/>
+            <text class="lbl" x="166" y="166">signature check</text><text class="sub" x="166" y="180">compare · constant-time</text>
+            <path class="spine" d="M220 188 L220 206"/>
+            <g class="vl-verdict">
+              <rect class="vl-band" x="158" y="206" width="124" height="22" rx="11"/>
+              <path class="vl-mark vl-ok"   d="M196 217 l4 4 l8 -9"/>
+              <path class="vl-mark vl-void" d="M196 212 l8 8 m0 -8 l-8 8"/>
+              <text class="vl-text" x="216" y="221">valid</text>
+            </g>
+            <path class="vl-trace" d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
+            <path class="vl-flow"  d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
+          </svg>
+        </figure>
       </div>
     </div>
   </section>
@@ -169,32 +184,68 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">These are current web-app controls in the Express and Vercel configuration. They do not replace formal certification; they reduce obvious browser, framing, content-type, and permission risk.</p>
       </div>
       <div class="grid grid--3">
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">REG &middot; CSP</span>
           <h3>Default-src self</h3>
           <p>Scripts, styles, images, fonts, connections, frames, base URI, and form actions are constrained through the configured CSP for the hosted site.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">REG &middot; TRANSPORT</span>
           <h3>Strict Transport Security</h3>
           <p>HSTS is configured with a long max age, includeSubDomains, and preload on the Express path and mirrored in deploy headers.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">REG &middot; CLICKJACKING</span>
           <h3>Frame ancestors none</h3>
           <p>The CSP and X-Frame-Options deny framing of the public app by default.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">REG &middot; CONTENT TYPE</span>
           <h3>Nosniff</h3>
           <p>X-Content-Type-Options prevents MIME sniffing where browsers might otherwise execute mislabeled content.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">REG &middot; REFERRERS</span>
           <h3>Strict origin when cross-origin</h3>
           <p>The referrer policy limits what leaves the site when a user follows an external link.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">REG &middot; PERMISSIONS</span>
           <h3>No camera, mic, or geolocation</h3>
           <p>The permissions policy disables sensitive browser capabilities the compiler site does not need.</p>
@@ -241,22 +292,42 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Security controls can be described as implemented controls. Formal compliance, package-channel, SDK-release, benchmark, and partner-adoption claims remain gated until the readiness ledger is promoted with evidence.</p>
       </div>
       <div class="grid grid--2">
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Pending evidence">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">GATE &middot; FORMAL CERTIFICATION</span>
           <h3>Needs live certification</h3>
           <p>SOC 2, ISO 27001, HIPAA, GDPR, FedRAMP, SBOM, and SLSA evidence require a live auditor, certification, or signed attestation artifact before public promotion.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Pending evidence">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">GATE &middot; PACKAGE CHANNELS</span>
           <h3>Needs package release</h3>
           <p>Installers, SDK packages, browser package metadata, checksums, and release artifacts remain package-release gates until published and verified.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Pending evidence">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">GATE &middot; BENCHMARK CLAIMS</span>
           <h3>Needs public benchmark data</h3>
           <p>Public leaderboard claims require reproducible public runs, raw JSON, commands, model versions, hardware, latency, cost, and scoring method.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Pending evidence">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">GATE &middot; EXTERNAL ADOPTION</span>
           <h3>Needs external partner</h3>
           <p>Third-party runtime support and neutral stewardship stay unclaimed until outside projects, vendors, or venues publish acceptance evidence.</p>

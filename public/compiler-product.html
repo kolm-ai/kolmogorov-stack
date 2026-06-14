@@ -197,16 +197,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
       </div>
       <div class="feat__ui">
-        <div class="plate plate--rows">
-          <div class="plate__hd">kolm control / workspace &middot; <span class="ok">secrets hidden</span></div>
-          <div class="panel__rows">
-            <div class="prow"><span class="m">capture</span> redacted <span class="prow__r m">92%</span></div>
-            <div class="prow"><span class="m">routing</span> declared <span class="prow__r m">84%</span></div>
-            <div class="prow"><span class="m">compile</span> gated <span class="prow__r m">76%</span></div>
-            <div class="prow"><span class="m">export</span> jsonl &middot; receipts &middot; evidence <span class="prow__r a">ready</span></div>
-          </div>
-          <div class="plate__foot"><span class="badge badge--ok">Signed</span><span>17 channels &middot; per workspace</span></div>
-        </div>
+        <figure class="instrument" data-art-reveal aria-label="Live API traffic is captured and compiled into governed, signed .kolm ledger entries.">
+          <div class="instrument__bar"><span>capture &middot; <b>stream.kolm</b></span><span class="live">live</span></div>
+          <svg class="cap" viewBox="0 0 440 196" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <path class="cap-flow" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
+            <path class="cap-stream" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
+            <rect class="cap-gate" x="138" y="18" width="32" height="32" rx="6"/>
+            <circle class="cap-eye" cx="154" cy="34" r="3.5"/>
+            <text class="cap-tag" x="138" y="62">CAPTURE</text>
+            <g class="cap-led" transform="translate(192,18)">
+              <text class="cap-tag" x="0" y="-4">GOVERNED &middot; EXAMPLES</text>
+              <g class="cap-r" style="--i:0"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-01</text><rect class="cap-fill" x="58" y="7" width="120" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+              <g class="cap-r" style="--i:1" transform="translate(0,28)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-02</text><rect class="cap-fill" x="58" y="7" width="148" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+              <g class="cap-r" style="--i:2" transform="translate(0,56)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-03</text><rect class="cap-fill" x="58" y="7" width="96" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+              <g class="cap-r" style="--i:3" transform="translate(0,84)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-04</text><rect class="cap-fill" x="58" y="7" width="134" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+              <g class="cap-r" style="--i:4" transform="translate(0,112)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-05</text><rect class="cap-fill" x="58" y="7" width="70" height="8" rx="2"/><path class="cap-seal" d="M222 11 l4 4 l8 -9"/></g>
+            </g>
+          </svg>
+        </figure>
       </div>
     </div>
   </section>
@@ -229,16 +237,38 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </div>
       </div>
       <div class="feat__ui">
-        <div class="plate plate--rows">
-          <div class="plate__hd">workspace contract &middot; <span class="ok">enforced</span></div>
-          <div class="panel__rows">
-            <div class="prow">scoped keys &middot; spend controls <span class="prow__r m">per workspace</span></div>
-            <div class="prow">capture retention <span class="prow__r m">policy-set</span></div>
-            <div class="prow">compile receipts <span class="prow__r m">sha-256</span></div>
-            <div class="prow">deployment state <span class="prow__r a">tracked</span></div>
-          </div>
-          <div class="plate__foot"><span class="badge badge--ok">Per workspace</span><span>one clear contract</span></div>
-        </div>
+        <figure class="anat" data-art-reveal aria-label="Exploded view of one .kolm file: four signed layers — a distilled model, the exact build recipe, six eval gates, and a sha256 receipt — bound by one Ed25519 signature you can verify offline.">
+          <div class="anat__hd"><span>Inside a .kolm</span><span>exploded view</span></div>
+          <svg viewBox="0 0 360 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+            <path class="reg" d="M8 8h10 M8 8v10 M352 292h-10 M352 292v-10"/>
+            <!-- LAYER block — repeat 4×: model(y0) · recipe(y14) · evals(y28) · receipt(y42) -->
+            <g class="layer"><path class="face" d="M70 30 L250 30 L290 52 L110 52 Z"/>
+              <path class="bevel" d="M70 30 L250 30 L290 52"/>
+              <path class="lead" d="M290 41 L330 41"/>
+              <text class="lbl" x="78" y="46">model</text>
+              <text class="sub" x="334" y="38">your behavior</text>
+              <text class="sub" x="334" y="48">distilled</text></g>
+            <g class="layer"><path class="face" d="M70 72 L250 72 L290 94 L110 94 Z"/>
+              <path class="bevel" d="M70 72 L250 72 L290 94"/>
+              <path class="lead" d="M290 83 L330 83"/>
+              <text class="lbl" x="78" y="88">recipe</text>
+              <text class="sub" x="334" y="84">exact build + sources</text></g>
+            <g class="layer"><path class="face" d="M70 114 L250 114 L290 136 L110 136 Z"/>
+              <path class="bevel" d="M70 114 L250 114 L290 136"/>
+              <path class="lead" d="M290 125 L330 125"/>
+              <text class="lbl" x="78" y="130">evals</text>
+              <text class="sub" x="334" y="126">6 gates it must pass</text></g>
+            <g class="layer"><path class="face" d="M70 156 L250 156 L290 178 L110 178 Z"/>
+              <path class="bevel" d="M70 156 L250 156 L290 178"/>
+              <path class="lead" d="M290 167 L330 167"/>
+              <text class="lbl" x="78" y="172">receipt</text>
+              <text class="sub" x="334" y="168">sha256 + capture trace</text></g>
+            <line class="scan" x1="70" y1="200" x2="250" y2="200"/>
+            <circle class="seal-ring" cx="180" cy="230" r="20"/>
+            <path class="seal" d="M172 230 l5 5 l11 -11" stroke="currentColor" stroke-width="2" fill="none"/>
+            <text class="sub" x="180" y="268" text-anchor="middle" style="fill:var(--accent)">Ed25519 signed · verify yourself</text>
+          </svg>
+        </figure>
       </div>
     </div>
   </section>
@@ -251,28 +281,42 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Run it on the laptop you have, the cloud you trust.</h2>
         <p class="lede">Pick the smallest runtime that carries the workload &mdash; with the real limits shown. Kolm tells you what each target can hold, so you choose where it runs on facts, not hope.</p>
       </div>
-      <div class="grid grid--4">
-        <div class="card reveal">
-          <span class="card__k">Reg &middot; local cpu</span>
-          <h3>Local CPU</h3>
-          <p>Small specialists and routing that run on the commodity hardware you already own.</p>
-        </div>
-        <div class="card reveal">
-          <span class="card__k">Reg &middot; gpu</span>
-          <h3>GPU workstation</h3>
-          <p>Bigger models and retraining on a dedicated workstation &mdash; yours, not rented by the call.</p>
-        </div>
-        <div class="card reveal">
-          <span class="card__k">Reg &middot; edge</span>
-          <h3>Edge box</h3>
-          <p>Serve right next to the workflow, on hardware you control.</p>
-        </div>
-        <div class="card reveal">
-          <span class="card__k">Reg &middot; cloud</span>
-          <h3>Cloud GPU</h3>
-          <p>More headroom for teacher and compile jobs when a build needs it.</p>
-        </div>
-      </div>
+      <figure class="instrument runtime-ramp" data-art-reveal
+        aria-label="Runtime fit: the same claims-redactor.kolm ranked across four runtimes. Phone: 142 MB, $0.00 per thousand calls, 96 ms — selected, in spec. Laptop: 142 MB, $0.04, 71 ms. Edge: 142 MB, $0.21, 39 ms. Server: 142 MB, $0.90, 12 ms. Kolm runs it on the smallest runtime that fits.">
+        <div class="instrument__bar"><span>runtime &middot; <b>claims-redactor.kolm</b></span><span class="live">fit</span></div>
+        <svg class="pipe ramp" viewBox="0 0 440 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <text class="tag" x="22" y="14">smallest runtime that fits &middot; 142 mb</text>
+          <text class="tag" x="418" y="14" text-anchor="end">cost/1k &middot; p50</text>
+          <g class="rung is-fit" transform="translate(0 24)">
+            <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+            <rect class="bar" x="22" y="0" width="44"  height="54" rx="6"/>
+            <text class="rl" x="38" y="24">phone</text>
+            <text class="rs" x="38" y="40">142 MB &middot; on-device</text>
+            <text class="rc" x="404" y="24" text-anchor="end">$0.00</text>
+            <text class="rt" x="404" y="40" text-anchor="end">96 ms</text>
+            <path class="tick" d="M380 21 l4 4 l8 -9"/>
+          </g>
+          <g class="rung" transform="translate(0 88)">
+            <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+            <rect class="bar" x="22" y="0" width="120" height="54" rx="6"/>
+            <text class="rl" x="38" y="24">laptop</text>
+            <text class="rs" x="38" y="40">142 MB &middot; local</text>
+            <text class="rc" x="404" y="24" text-anchor="end">$0.04</text><text class="rt" x="404" y="40" text-anchor="end">71 ms</text>
+          </g>
+          <g class="rung" transform="translate(0 152)">
+            <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+            <rect class="bar" x="22" y="0" width="248" height="54" rx="6"/>
+            <text class="rl" x="38" y="24">edge</text><text class="rs" x="38" y="40">142 MB &middot; regional</text>
+            <text class="rc" x="404" y="24" text-anchor="end">$0.21</text><text class="rt" x="404" y="40" text-anchor="end">39 ms</text>
+          </g>
+          <g class="rung" transform="translate(0 216)">
+            <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+            <rect class="bar" x="22" y="0" width="396" height="54" rx="6"/>
+            <text class="rl" x="38" y="24">server</text><text class="rs" x="38" y="40">142 MB &middot; hosted</text>
+            <text class="rc" x="404" y="24" text-anchor="end">$0.90</text><text class="rt" x="404" y="40" text-anchor="end">12 ms</text>
+          </g>
+        </svg>
+      </figure>
     </div>
   </section>
 

@@ -152,14 +152,67 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Every step does real work and leaves proof behind &mdash; so you can trace exactly how your traffic became a model on your own hardware.</p>
       </div>
       <div class="grid grid--4">
-        <div class="card reveal"><span class="card__k">Reg &middot; 1 capture</span><h3>Bring in what you already use</h3><p>Point your traffic at Kolm and it captures the real behavior: provider logs, gateway events, app traces, agent tool calls, labels, failures, warehouse rows, CI events, and custom API records.</p></div>
-        <div class="card reveal"><span class="card__k">Reg &middot; 2 classify</span><h3>Know exactly what you captured</h3><p>See the source, schema, tenant, environment, sensitivity, retention window, and owner of every record &mdash; and catch anything with an unknown shape before it moves on.</p></div>
-        <div class="card reveal"><span class="card__k">Reg &middot; 3 set the rules</span><h3>Decide what&rsquo;s allowed before it runs</h3><p>Set redaction, retention, and purge rules, pick which providers and models you allow, draw export boundaries, scope keys, and cap budgets and rate limits.</p></div>
-        <div class="card reveal"><span class="card__k">Reg &middot; 4 evaluate</span><h3>Catch regressions before your users do</h3><p>Build evals, threshold checks, and drift checks, route edge cases to human review, lock a regression set, and block any release that doesn&rsquo;t pass.</p></div>
-        <div class="card reveal"><span class="card__k">Reg &middot; 5 compile</span><h3>Get one portable file you own</h3><p>Compile your behavior into a signed artifact &mdash; model, recipe, evals, and receipt &mdash; with source hash, output hash, approval state, and the runtime it fits.</p></div>
-        <div class="card reveal"><span class="card__k">Reg &middot; 6 run</span><h3>Run it on the hardware you have</h3><p>Ship to a laptop, your private cloud, the edge, a server, or a managed host &mdash; the smallest runtime that fits, with the limits shown up front.</p></div>
-        <div class="card reveal"><span class="card__k">Reg &middot; 7 verify</span><h3>Prove what you shipped</h3><p>Every release carries a verifier receipt, checksum, artifact and policy version, eval result, and runtime target &mdash; so anyone can check it without trusting us.</p></div>
-        <div class="card reveal"><span class="card__k">Reg &middot; 8 operate</span><h3>Stay in control after launch</h3><p>Keep audit events, admin analytics, connector health, cost and usage controls, exports, owner assignments, and incident-ready logs at hand.</p></div>
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
+          <span class="card__k">Reg &middot; 1 capture</span><h3>Bring in what you already use</h3><p>Point your traffic at Kolm and it captures the real behavior: provider logs, gateway events, app traces, agent tool calls, labels, failures, warehouse rows, CI events, and custom API records.</p></div>
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
+          <span class="card__k">Reg &middot; 2 classify</span><h3>Know exactly what you captured</h3><p>See the source, schema, tenant, environment, sensitivity, retention window, and owner of every record &mdash; and catch anything with an unknown shape before it moves on.</p></div>
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
+          <span class="card__k">Reg &middot; 3 set the rules</span><h3>Decide what&rsquo;s allowed before it runs</h3><p>Set redaction, retention, and purge rules, pick which providers and models you allow, draw export boundaries, scope keys, and cap budgets and rate limits.</p></div>
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
+          <span class="card__k">Reg &middot; 4 evaluate</span><h3>Catch regressions before your users do</h3><p>Build evals, threshold checks, and drift checks, route edge cases to human review, lock a regression set, and block any release that doesn&rsquo;t pass.</p></div>
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
+          <span class="card__k">Reg &middot; 5 compile</span><h3>Get one portable file you own</h3><p>Compile your behavior into a signed artifact &mdash; model, recipe, evals, and receipt &mdash; with source hash, output hash, approval state, and the runtime it fits.</p></div>
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
+          <span class="card__k">Reg &middot; 6 run</span><h3>Run it on the hardware you have</h3><p>Ship to a laptop, your private cloud, the edge, a server, or a managed host &mdash; the smallest runtime that fits, with the limits shown up front.</p></div>
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
+          <span class="card__k">Reg &middot; 7 verify</span><h3>Prove what you shipped</h3><p>Every release carries a verifier receipt, checksum, artifact and policy version, eval result, and runtime target &mdash; so anyone can check it without trusting us.</p></div>
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
+          <span class="card__k">Reg &middot; 8 operate</span><h3>Stay in control after launch</h3><p>Keep audit events, admin analytics, connector health, cost and usage controls, exports, owner assignments, and incident-ready logs at hand.</p></div>
       </div>
     </div>
   </section>
@@ -255,26 +308,76 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
       <div class="grid grid--2">
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; identity</span>
           <h3>Hand out access, take it back</h3>
           <p>Create, scope, rotate, expire, and revoke API keys and service accounts by tenant, workspace, project, environment, and connector.</p>
         </div>
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="dim" d="M10 18h22M10 42h22"/>
+            <rect class="fill" x="40" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M32 18h6q4 0 4 4v4M32 42h6q4 0 4-4v-4"/>
+            <path class="ln" d="M68 30h22"/><circle class="seal" cx="90" cy="30" r="2.2"/>
+            <text class="t" x="40" y="49">proxy</text>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; source</span>
           <h3>Know who owns every source</h3>
           <p>See source health, connector owner, allowed source type, ingress mode, retention window, redaction rule, and export scope at a glance.</p>
         </div>
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="ln" d="M14 20h26M14 30h26M14 40h26"/>
+            <path class="flow" d="M42 30h12"/>
+            <rect class="fill" x="58" y="20" width="28" height="20" rx="2"/>
+            <path class="ok" d="M66 31l4 4 8-9"/>
+            <text class="t" x="58" y="48">.kolm</text>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; policy</span>
           <h3>Set the rules for every call</h3>
           <p>Pick which providers and models you allow, route traffic, cap budgets and rate limits, draw data-use boundaries, and set fallback behavior.</p>
         </div>
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; export</span>
           <h3>Send your proof where it lives</h3>
           <p>Push to webhooks, your warehouse, SIEM/GRC events, CI status, admin analytics, evidence bundles, and verifier receipts.</p>
         </div>
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="ln" d="M14 20h26M14 30h26M14 40h26"/>
+            <path class="flow" d="M42 30h12"/>
+            <rect class="fill" x="58" y="20" width="28" height="20" rx="2"/>
+            <path class="ok" d="M66 31l4 4 8-9"/>
+            <text class="t" x="58" y="48">.kolm</text>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; trust</span>
           <h3>An audit trail for every change</h3>
           <p>Every write leaves an audit event, every claim ships with proof, and anything still in progress is shown plainly &mdash; never hidden.</p>
@@ -293,26 +396,76 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
       <div class="grid grid--2">
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="dim" d="M10 18h22M10 42h22"/>
+            <rect class="fill" x="40" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M32 18h6q4 0 4 4v4M32 42h6q4 0 4-4v-4"/>
+            <path class="ln" d="M68 30h22"/><circle class="seal" cx="90" cy="30" r="2.2"/>
+            <text class="t" x="40" y="49">proxy</text>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; connect</span>
           <h3>Platform engineering</h3>
           <p><b>You wire it up and keep it running.</b> Sources, keys, environments, quotas, connector health, ingress modes, and runtime targets.</p>
         </div>
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="ln" d="M14 20h26M14 30h26M14 40h26"/>
+            <path class="flow" d="M42 30h12"/>
+            <rect class="fill" x="58" y="20" width="28" height="20" rx="2"/>
+            <path class="ok" d="M66 31l4 4 8-9"/>
+            <text class="t" x="58" y="48">.kolm</text>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; evaluate</span>
           <h3>AI &amp; ML teams</h3>
           <p><b>You make sure the behavior holds.</b> Traces, labels, evals, regression sets, drift checks, compile runs, and release gates.</p>
         </div>
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="dim" d="M10 18h22M10 42h22"/>
+            <rect class="fill" x="40" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M32 18h6q4 0 4 4v4M32 42h6q4 0 4-4v-4"/>
+            <path class="ln" d="M68 30h22"/><circle class="seal" cx="90" cy="30" r="2.2"/>
+            <text class="t" x="40" y="49">proxy</text>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; govern</span>
           <h3>Security</h3>
           <p><b>You draw the boundaries.</b> Retention, redaction, unknown-schema handling, provider policy, access scope, audit events, and purge workflows.</p>
         </div>
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; export</span>
           <h3>Compliance</h3>
           <p><b>You need proof you can hand over.</b> Receipts, evidence bundles, versions, audit trail, status, and anything still in progress, stated plainly.</p>
         </div>
         <div class="card reveal">
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">Reg &middot; build</span>
           <h3>Developers</h3>
           <p><b>You want to ship fast.</b> API docs, OpenAPI, examples, test payloads, a CLI path, clear errors, and verification you can repeat locally.</p>

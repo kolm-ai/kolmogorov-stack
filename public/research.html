@@ -143,7 +143,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <!-- s-bento — the product streams, at a glance -->
+  <!-- s-bento — the product streams, at a glance — card-system: milled rail + tick + crafted 40px glyph -->
   <section class="section" id="research-streams">
     <div class="wrap wrap--wide">
       <div class="section__head">
@@ -152,32 +152,72 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">We don't collect notes. We turn what we learn from the market and from customers into the controls, APIs, pages, and tests that make owning your model real.</p>
       </div>
       <div class="grid grid--3">
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <!-- Capture (funnel + caught signal mote) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Customer stack</span>
           <h3>17 clusters we build for</h3>
           <p>Agent platforms, model gateways, eval suites, observability, training, data infrastructure, GRC, developer tools, runtimes, vertical AI, and workflow products — the teams that pay the API bill.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <!-- Compile (stacked layers fused to one) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">Product standard</span>
           <h3>What a serious tool owes you</h3>
           <p>Controls you can open, admin your enterprise needs, docs that work, proof you can export, your data kept yours, usage you can read, and procurement that clears.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <!-- Deploy (signed core radiating to targets) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">API control surface</span>
           <h3>Your data, in and out</h3>
           <p>Every source, channel, way in, way out, credential boundary, provider rule, and audit event has a named owner and a clear state — so you always know where your traffic goes.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <!-- Capture (funnel + caught signal mote) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Website audit</span>
           <h3>Show the machine, not adjectives</h3>
           <p>Every page has to show what goes in, the controls, what comes out, the proof, and your next move. "Powerful AI" isn't an answer.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <!-- Compile (stacked layers fused to one) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">Backend</span>
           <h3>We only claim what holds</h3>
           <p>Tenant boundaries, audit events, schema handling, compile state, export receipts, and artifact checksums decide what we say on the site — not the other way around.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <!-- Deploy (signed core radiating to targets) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">UI audit</span>
           <h3>Checked on real screens</h3>
           <p>Desktop and mobile, verified by screenshot: stable spacing, readable density, no overlap, no sideways scroll, and the proof in view before you scroll.</p>
@@ -266,7 +306,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <!-- s-evidence — evidence-to-product objects -->
+  <!-- s-evidence — evidence-to-product objects. capture-stream = the page's one animated diagram organ
+       (renders Source -> governed, signed .kolm rows), then card-system on the path cards below. -->
   <section class="section" id="research-to-product">
     <div class="wrap wrap--wide">
       <div class="section__head">
@@ -274,23 +315,70 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>A finding only counts when it ships.</h2>
         <p class="lede">An insight earns its keep the moment it changes a route, a schema, a page, a control, a test, a screenshot, or what we're willing to claim. Here's the path every one of them takes.</p>
       </div>
+
+      <figure class="instrument" data-art-reveal aria-label="Live research and API traffic is captured and compiled into governed, signed .kolm ledger entries.">
+        <div class="instrument__bar"><span>capture &middot; <b>stream.kolm</b></span><span class="live">live</span></div>
+        <svg class="cap" viewBox="0 0 440 196" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <path class="cap-flow" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
+          <path class="cap-stream" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
+          <rect class="cap-gate" x="138" y="18" width="32" height="32" rx="6"/>
+          <circle class="cap-eye" cx="154" cy="34" r="3.5"/>
+          <text class="cap-tag" x="138" y="62">CAPTURE</text>
+          <g class="cap-led" transform="translate(192,18)">
+            <text class="cap-tag" x="0" y="-4">GOVERNED &middot; EXAMPLES</text>
+            <g class="cap-r" style="--i:0"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-01</text><rect class="cap-fill" x="58" y="7" width="120" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+            <g class="cap-r" style="--i:1" transform="translate(0,28)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-02</text><rect class="cap-fill" x="58" y="7" width="148" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+            <g class="cap-r" style="--i:2" transform="translate(0,56)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-03</text><rect class="cap-fill" x="58" y="7" width="96" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+            <g class="cap-r" style="--i:3" transform="translate(0,84)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-04</text><rect class="cap-fill" x="58" y="7" width="134" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+            <g class="cap-r" style="--i:4" transform="translate(0,112)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-05</text><rect class="cap-fill" x="58" y="7" width="70" height="8" rx="2"/><path class="cap-seal" d="M222 11 l4 4 l8 -9"/></g>
+          </g>
+        </svg>
+      </figure>
+
       <div class="grid grid--4">
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <!-- Capture (funnel + caught signal mote) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Source</span>
           <h3>Where it starts</h3>
           <p>A customer ask, official docs, a market report, an internal spec, a screenshot, route output, or generated JSON.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <!-- Compile (stacked layers fused to one) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">Pattern</span>
           <h3>What it means</h3>
           <p>A control to build, a workflow to support, an enterprise must-have, a risk, a pricing move, a docs fix, or a gap to close.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <!-- Deploy (signed core radiating to targets) -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">What ships</span>
           <h3>What it becomes</h3>
           <p>A source, trace, dataset, eval, policy, compile run, artifact, runtime target, receipt, export, or audit event &mdash; something you can use.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <!-- Deploy/verify (signed core radiating to targets) — the verified, signed-proof moment -->
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Proof">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">Proof</span>
           <h3>How we prove it</h3>
           <p>A route test, a copy test, an OpenAPI object, a screenshot, a claim check, a ref lint, the artifact verifier, or a real browser pass.</p>

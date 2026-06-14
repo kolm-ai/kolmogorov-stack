@@ -148,32 +148,72 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <p class="lede">Every page here points to something you can run, test, or verify &mdash; not a screenshot. Generate clients, wire up tests, and check our work straight from the source.</p>
         </div>
         <div class="grid grid--3">
-          <a class="card" href="/docs/api">
+          <a class="card reveal" data-state="ok" href="/docs/api">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+              <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path class="edge" d="M6 8h28"/>
+              <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+            </svg>
             <span class="card__k">API REFERENCE</span>
             <h3>Every route, documented</h3>
             <p>Full reference for authenticated and public endpoints &mdash; generated from the live API, so it never drifts.</p>
           </a>
-          <a class="card" href="/openapi.json">
+          <a class="card reveal" data-state="ok" href="/openapi.json">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+              <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+              <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+              <path class="edge gleam" d="M8 14l12-6 12 6"/>
+            </svg>
             <span class="card__k">OPENAPI JSON</span>
             <h3>OpenAPI 3 contract</h3>
             <p>Generate clients and SDKs, wire up gateway tests, and review the surface in your own tooling.</p>
           </a>
-          <a class="card" href="/docs/api-routes.json">
+          <a class="card reveal" href="/docs/api-routes.json">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+              <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+              <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+              <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+              <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+            </svg>
             <span class="card__k">ROUTE INVENTORY</span>
             <h3>929 routes</h3>
             <p>929 routes across 214 groups, with source files, methods, paths, and comments &mdash; the whole API in one file.</p>
           </a>
-          <a class="card" href="/product-graph.json">
+          <a class="card reveal" href="/product-graph.json">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+              <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path class="edge" d="M6 8h28"/>
+              <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+            </svg>
             <span class="card__k">PRODUCT GRAPH</span>
             <h3>The product, mapped</h3>
             <p>Journeys, route surfaces, runtime targets, and feature states in one machine-readable map.</p>
           </a>
-          <a class="card" href="/v1/product/capabilities">
+          <a class="card reveal" data-state="ok" href="/v1/product/capabilities">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+              <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+              <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+              <path class="edge gleam" d="M8 14l12-6 12 6"/>
+            </svg>
             <span class="card__k">CAPABILITY JSON</span>
             <h3>What your account can do</h3>
             <p>The live capabilities available to your workspace right now &mdash; query it instead of guessing.</p>
           </a>
-          <a class="card" href="/product-readiness-closeout.json">
+          <a class="card reveal" href="/product-readiness-closeout.json">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+              <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+              <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+              <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+              <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+            </svg>
             <span class="card__k">READINESS LEDGER</span>
             <h3>Shipped vs. in progress</h3>
             <p>What is live today and what is still landing, stated plainly so you can plan against it.</p>
@@ -190,6 +230,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <li>Decide what gets kept and how it is tested: <code>capture policy</code>, <code>redaction policy</code>, <code>retention policy</code>, <code>eval suite</code>, <code>failure taxonomy</code>, and <code>regression set</code>.</li>
           <li>Ship the result: <code>compile run</code>, <code>artifact</code>, <code>manifest</code>, <code>target runtime</code>, <code>receipt</code>, <code>export</code>, and release checks.</li>
         </ul>
+        <figure class="instrument" aria-label="Live API traffic is captured and compiled into governed, signed .kolm ledger entries.">
+          <div class="instrument__bar"><span>capture &middot; <b>stream.kolm</b></span><span class="live">live</span></div>
+          <svg class="cap" viewBox="0 0 440 196" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <path class="cap-flow" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
+            <path class="cap-stream" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
+            <rect class="cap-gate" x="138" y="18" width="32" height="32" rx="6"/>
+            <circle class="cap-eye" cx="154" cy="34" r="3.5"/>
+            <text class="cap-tag" x="138" y="62">CAPTURE</text>
+            <g class="cap-led" transform="translate(192,18)">
+              <text class="cap-tag" x="0" y="-4">GOVERNED &middot; EXAMPLES</text>
+              <g class="cap-r" style="--i:0"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-01</text><rect class="cap-fill" x="58" y="7" width="120" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+              <g class="cap-r" style="--i:1" transform="translate(0,28)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-02</text><rect class="cap-fill" x="58" y="7" width="148" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+              <g class="cap-r" style="--i:2" transform="translate(0,56)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-03</text><rect class="cap-fill" x="58" y="7" width="96" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+              <g class="cap-r" style="--i:3" transform="translate(0,84)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-04</text><rect class="cap-fill" x="58" y="7" width="134" height="8" rx="2"/><path class="cap-ok" d="M222 11 l4 4 l8 -9"/></g>
+              <g class="cap-r" style="--i:4" transform="translate(0,112)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-05</text><rect class="cap-fill" x="58" y="7" width="70" height="8" rx="2"/><path class="cap-seal" d="M222 11 l4 4 l8 -9"/></g>
+            </g>
+          </svg>
+        </figure>
         <div class="plate plate--rows">
           <div class="plate__hd">api-control-center · contract</div>
           <div class="panel__rows">
@@ -206,22 +264,49 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <p class="lede">Capture from the tools you already use, and export the result in formats your stack already speaks. Nothing locks in &mdash; what comes out is a file you own.</p>
         </div>
         <div class="grid grid--2">
-          <div class="card">
+          <div class="card reveal">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+              <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path class="edge" d="M6 8h28"/>
+              <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+            </svg>
             <span class="card__k">CAPTURE IN</span>
             <h3>12+ ways in</h3>
             <p>REST proxy, SDK capture, CLI upload, JSONL/CSV/parquet, webhooks, streams, OTEL, gateway logs, trace imports, warehouse import, browser traces, and human labels.</p>
           </div>
-          <div class="card">
+          <div class="card reveal">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+              <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+              <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+              <path class="edge gleam" d="M8 14l12-6 12 6"/>
+            </svg>
             <span class="card__k">WORKS WITH YOUR STACK</span>
             <h3>Your trace tools and agents</h3>
             <p>Trace exports, eval dashboards, OpenTelemetry spans, MCP/tool calls, agent handoffs, support tickets, CRM records, and red-team cases.</p>
           </div>
-          <div class="card">
+          <div class="card reveal">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+              <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+              <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+              <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+              <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+            </svg>
             <span class="card__k">EXPORT OUT</span>
             <h3>10+ ways out</h3>
             <p>Signed artifacts, manifests, receipts, eval reports, event streams, SIEM/log export, warehouse export, webhook callbacks, CLI/SDK pull, and runtime packages.</p>
           </div>
-          <div class="card">
+          <div class="card reveal" data-state="ok">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+              <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+              <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+              <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+              <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+            </svg>
             <span class="card__k">YOUR RULES STICK</span>
             <h3>Your rules travel with the data</h3>
             <p>Source identity, scope, redaction, retention, provider policy, budget, rate limits, approvals, export permissions, and release state &mdash; all enforced wherever the data goes.</p>
@@ -257,22 +342,49 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <p class="lede">We document the hard parts, not just the happy path &mdash; auth, rate limits, idempotency, unsupported targets, and what is still landing &mdash; so you can build with confidence and never get surprised in production.</p>
         </div>
         <div class="grid grid--2">
-          <div class="card">
+          <div class="card reveal" data-state="ok">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+              <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+              <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+              <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+              <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+            </svg>
             <span class="card__k">AUTH</span>
             <h3>One bearer key</h3>
             <p>Authenticate with <code>Authorization: Bearer $KOLM_API_KEY</code>. Create a key at <a href="/signup">/signup</a> or from the CLI.</p>
           </div>
-          <div class="card">
+          <div class="card reveal">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+              <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path class="edge" d="M6 8h28"/>
+              <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+            </svg>
             <span class="card__k">ERRORS</span>
             <h3>Codes you can act on</h3>
             <p>Every error returns a stable code and a clear next step &mdash; so you fix it fast instead of guessing.</p>
           </div>
-          <div class="card">
+          <div class="card reveal">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+              <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+              <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+              <path class="edge gleam" d="M8 14l12-6 12 6"/>
+            </svg>
             <span class="card__k">IDEMPOTENCY</span>
             <h3>Retry without fear</h3>
             <p>Write routes accept an idempotency key or expose a status lookup, so retries never double up your work.</p>
           </div>
-          <div class="card">
+          <div class="card reveal">
+            <span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+              <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+              <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+              <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+              <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+            </svg>
             <span class="card__k">WHAT'S LIVE</span>
             <h3>No guessing on scope</h3>
             <p>We say plainly what ships today and what is still landing &mdash; so you can plan against real limits, not promises.</p>
@@ -302,6 +414,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <a class="btn btn--ghost btn--sm" href="/checks">Browse checks</a>
           </div>
         </div>
+        <figure class="instrument vloop" data-vl="valid" data-art-reveal
+          aria-label="Verify loop: a .kolm artifact plus a public key are hashed; the hash is checked against the embedded Ed25519 signature. The result is a single verdict — valid, or void.">
+          <div class="instrument__bar"><b>verify loop</b><span class="live">Ed25519</span></div>
+          <svg class="pipe vl" viewBox="0 0 440 232" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+            <rect class="nd" x="22"  y="14" width="150" height="40" rx="5"/>
+            <text class="lbl" x="38" y="32">.kolm</text><text class="sub" x="38" y="46">142 mb · sealed artifact</text>
+            <rect class="nd" x="268" y="14" width="150" height="40" rx="5"/>
+            <text class="lbl" x="284" y="32">public key</text><text class="sub" x="284" y="46">ed25519 · 32 b</text>
+            <path class="spine" d="M97 54 L220 84 M343 54 L220 84"/>
+            <rect class="nd" x="150" y="84" width="140" height="40" rx="5"/>
+            <text class="lbl" x="166" y="102">hash</text><text class="sub" x="166" y="116">blake3 · 256-bit digest</text>
+            <text class="tag" x="270" y="100" text-anchor="end">Σ</text>
+            <path class="spine" d="M220 124 L220 148"/>
+            <rect class="nd" x="150" y="148" width="140" height="40" rx="5"/>
+            <text class="lbl" x="166" y="166">signature check</text><text class="sub" x="166" y="180">compare · constant-time</text>
+            <path class="spine" d="M220 188 L220 206"/>
+            <g class="vl-verdict">
+              <rect class="vl-band" x="158" y="206" width="124" height="22" rx="11"/>
+              <path class="vl-mark vl-ok"   d="M196 217 l4 4 l8 -9"/>
+              <path class="vl-mark vl-void" d="M196 212 l8 8 m0 -8 l-8 8"/>
+              <text class="vl-text" x="216" y="221">valid</text>
+            </g>
+            <path class="vl-trace" d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
+            <path class="vl-flow"  d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
+          </svg>
+        </figure>
 
         <div class="section__head" id="cli-sdk">
           <p class="eyebrow">08 · CLI AND SDK</p>

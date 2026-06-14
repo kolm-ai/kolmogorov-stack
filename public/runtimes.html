@@ -231,16 +231,47 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="plate plate--rows">
-          <div class="plate__hd">DEVICE FIT &middot; <span class="ok">ranked</span></div>
-          <div class="panel__rows">
-            <div class="prow">hosted GPU pod <span class="prow__r a">best fit</span></div>
-            <div class="prow">self-hosted vLLM <span class="prow__r m">recipe ready</span></div>
-            <div class="prow">core ml &middot; device <span class="prow__r m">constraints set</span></div>
-            <div class="prow">llama.cpp &middot; local <span class="prow__r m">context blocked</span></div>
-          </div>
-          <div class="plate__foot"><span class="badge badge--ok">Ranked</span><span>scored against the receipt</span></div>
-        </div>
+        <figure class="instrument runtime-ramp" data-art-reveal
+          aria-label="Runtime fit: the same claims-redactor.kolm ranked across four runtimes. Phone: 142 MB, $0.00 per thousand calls, 96 ms — selected, in spec. Laptop: 142 MB, $0.04, 71 ms. Edge: 142 MB, $0.21, 39 ms. Server: 142 MB, $0.90, 12 ms. Kolm runs it on the smallest runtime that fits.">
+          <div class="instrument__bar"><span>runtime &middot; <b>claims-redactor.kolm</b></span><span class="live">fit</span></div>
+          <svg class="pipe ramp" viewBox="0 0 440 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+            <text class="tag" x="22" y="14">smallest runtime that fits &middot; 142 mb</text>
+            <text class="tag" x="418" y="14" text-anchor="end">cost/1k &middot; p50</text>
+            <g class="rung is-fit" transform="translate(0 24)">
+              <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+              <rect class="bar" x="22" y="0" width="44"  height="54" rx="6"/>
+              <text class="rl" x="38" y="24">phone</text>
+              <text class="rs" x="38" y="40">142 MB &middot; on-device</text>
+              <text class="rc" x="404" y="24" text-anchor="end">$0.00</text>
+              <text class="rt" x="404" y="40" text-anchor="end">96 ms</text>
+              <path class="tick" d="M380 21 l4 4 l8 -9"/>
+            </g>
+            <g class="rung" transform="translate(0 88)">
+              <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+              <rect class="bar" x="22" y="0" width="120" height="54" rx="6"/>
+              <text class="rl" x="38" y="24">laptop</text>
+              <text class="rs" x="38" y="40">142 MB &middot; local</text>
+              <text class="rc" x="404" y="24" text-anchor="end">$0.04</text>
+              <text class="rt" x="404" y="40" text-anchor="end">71 ms</text>
+            </g>
+            <g class="rung" transform="translate(0 152)">
+              <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+              <rect class="bar" x="22" y="0" width="248" height="54" rx="6"/>
+              <text class="rl" x="38" y="24">edge</text>
+              <text class="rs" x="38" y="40">142 MB &middot; regional</text>
+              <text class="rc" x="404" y="24" text-anchor="end">$0.21</text>
+              <text class="rt" x="404" y="40" text-anchor="end">39 ms</text>
+            </g>
+            <g class="rung" transform="translate(0 216)">
+              <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+              <rect class="bar" x="22" y="0" width="396" height="54" rx="6"/>
+              <text class="rl" x="38" y="24">server</text>
+              <text class="rs" x="38" y="40">142 MB &middot; hosted</text>
+              <text class="rc" x="404" y="24" text-anchor="end">$0.90</text>
+              <text class="rt" x="404" y="40" text-anchor="end">12 ms</text>
+            </g>
+          </svg>
+        </figure>
       </div>
     </div>
   </section>
@@ -260,16 +291,38 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="plate plate--rows">
-          <div class="plate__hd">claims-redactor.kolm &middot; <span class="ok">signed</span></div>
-          <div class="panel__rows">
-            <div class="prow">artifact manifest <span class="prow__r m">sha-256</span></div>
-            <div class="prow">eval gate <span class="prow__r a">passed</span></div>
-            <div class="prow">target recipe <span class="prow__r m">vllm</span></div>
-            <div class="prow">verifier receipt <span class="prow__r m">Ed25519</span></div>
-          </div>
-          <div class="plate__foot"><span class="badge badge--ok">Signed</span><span>recipe + receipt travel together</span></div>
-        </div>
+        <figure class="anat" data-art-reveal aria-label="Exploded view of one .kolm file: four signed layers — a distilled model, the exact build recipe, six eval gates, and a sha256 receipt — bound by one Ed25519 signature you can verify offline.">
+          <div class="anat__hd"><span>Inside a .kolm</span><span>exploded view</span></div>
+          <svg viewBox="0 0 360 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+            <path class="reg" d="M8 8h10 M8 8v10 M352 292h-10 M352 292v-10"/>
+            <!-- LAYER block — repeat 4×: model(y0) · recipe(y14) · evals(y28) · receipt(y42) -->
+            <g class="layer"><path class="face" d="M70 30 L250 30 L290 52 L110 52 Z"/>
+              <path class="bevel" d="M70 30 L250 30 L290 52"/>
+              <path class="lead" d="M290 41 L330 41"/>
+              <text class="lbl" x="78" y="46">model</text>
+              <text class="sub" x="334" y="38">your behavior</text>
+              <text class="sub" x="334" y="48">distilled</text></g>
+            <g class="layer"><path class="face" d="M70 72 L250 72 L290 94 L110 94 Z"/>
+              <path class="bevel" d="M70 72 L250 72 L290 94"/>
+              <path class="lead" d="M290 83 L330 83"/>
+              <text class="lbl" x="78" y="88">recipe</text>
+              <text class="sub" x="334" y="84">exact build + sources</text></g>
+            <g class="layer"><path class="face" d="M70 114 L250 114 L290 136 L110 136 Z"/>
+              <path class="bevel" d="M70 114 L250 114 L290 136"/>
+              <path class="lead" d="M290 125 L330 125"/>
+              <text class="lbl" x="78" y="130">evals</text>
+              <text class="sub" x="334" y="126">6 gates it must pass</text></g>
+            <g class="layer"><path class="face" d="M70 156 L250 156 L290 178 L110 178 Z"/>
+              <path class="bevel" d="M70 156 L250 156 L290 178"/>
+              <path class="lead" d="M290 167 L330 167"/>
+              <text class="lbl" x="78" y="172">receipt</text>
+              <text class="sub" x="334" y="168">sha256 + capture trace</text></g>
+            <line class="scan" x1="70" y1="200" x2="250" y2="200"/>
+            <circle class="seal-ring" cx="180" cy="230" r="20"/>
+            <path class="seal" d="M172 230 l5 5 l11 -11" stroke="currentColor" stroke-width="2" fill="none"/>
+            <text class="sub" x="180" y="268" text-anchor="middle" style="fill:var(--accent)">Ed25519 signed · verify yourself</text>
+          </svg>
+        </figure>
       </div>
     </div>
   </section>

@@ -143,7 +143,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <!-- s-bento — the buyer workflow, by stakeholder -->
+  <!-- s-bento — the buyer workflow, by stakeholder. cards get card-system tick + section-illustration glyph -->
   <section class="section" id="buyer-workflow">
     <div class="wrap wrap--wide">
       <div class="section__head">
@@ -152,31 +152,81 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Platform, AI, security, and compliance all ask the same five questions: what went in, what changed, what came out, who approved it, and what proof can leave the room. Kolm answers all five from one place — and the answer is a signed model you own.</p>
       </div>
       <div class="grid grid--3">
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="dim" d="M10 18h22M10 42h22"/>
+            <rect class="fill" x="40" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M32 18h6q4 0 4 4v4M32 42h6q4 0 4-4v-4"/>
+            <path class="ln" d="M68 30h22"/><circle class="seal" cx="90" cy="30" r="2.2"/>
+            <text class="t" x="40" y="49">proxy</text>
+           </svg>
+          </figure>
           <span class="card__k">PLATFORM OWNER</span>
           <h3>Connect your traffic in minutes.</h3>
           <p>Point your existing calls at Kolm with scoped keys, service accounts, webhooks, limits, quotas, provider allowlists, environments, and clean export paths. No SDK rewrite to get here.</p>
           <p class="card__map"><a href="/account/api-control-center">control</a></p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="ln" d="M14 20h26M14 30h26M14 40h26"/>
+            <path class="flow" d="M42 30h12"/>
+            <rect class="fill" x="58" y="20" width="28" height="20" rx="2"/>
+            <path class="ok" d="M66 31l4 4 8-9"/>
+            <text class="t" x="58" y="48">.kolm</text>
+           </svg>
+          </figure>
           <span class="card__k">AI OWNER</span>
           <h3>Compile the behavior you already use.</h3>
           <p>Import traces, build evals, compare versions, catch drift, and track prompt, tool, and schema lineage — then compile it all into a model you run yourself instead of renting per call.</p>
           <p class="card__map"><a href="/platform#pipeline">pipeline</a></p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">SECURITY OWNER</span>
           <h3>Keep your data on your terms.</h3>
           <p>Set retention, redaction, unknown-schema handling, vault policy, and least-privilege connectors. The model runs on hardware you control, with an immutable audit trail you can export.</p>
           <p class="card__map"><a href="/security">security</a></p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">COMPLIANCE OWNER</span>
           <h3>Hand over proof anyone can check.</h3>
           <p>Export signed receipts, control mappings, exception records, audit trail, data lineage, and change history — proof your reviewers verify themselves, no trust required.</p>
           <p class="card__map"><a href="/trust">trust</a></p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="ln" d="M14 20h26M14 30h26M14 40h26"/>
+            <path class="flow" d="M42 30h12"/>
+            <rect class="fill" x="58" y="20" width="28" height="20" rx="2"/>
+            <path class="ok" d="M66 31l4 4 8-9"/>
+            <text class="t" x="58" y="48">.kolm</text>
+           </svg>
+          </figure>
           <span class="card__k">DEVELOPER</span>
           <h3>Ship from capture to artifact fast.</h3>
           <p>Quickstart, OpenAPI, examples, a local test path, clear error objects, sample artifacts, verifier output, and CI gates. From live calls to a signed model without leaving your stack.</p>
@@ -186,7 +236,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <!-- s-feature-rows — control coverage -->
+  <!-- s-feature-rows — control coverage. INTERCEPT renders the drop-in-proxy / no-rewrite thesis -->
   <section class="section" id="control-coverage">
     <div class="wrap wrap--wide">
       <div class="section__head">
@@ -194,33 +244,118 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Capture from the tools you already use. Run on the hardware you already have.</h2>
         <p class="lede">Kolm meets your AI behavior wherever it already flows — in through the channels you run today, out as a signed model and the proof to back it. Real limits, no logo padding.</p>
       </div>
+
+      <figure class="instrument" data-art-reveal aria-label="Kolm is a drop-in proxy: your app's OpenAI and Anthropic API calls pass straight through to the provider unchanged — no rewrite — while Kolm captures the behavior off the wire and compiles it into one signed .kolm artifact.">
+        <div class="instrument__bar"><span>intercept &middot; <b>drop-in proxy</b></span><span class="live">capturing</span></div>
+        <svg class="icpt" viewBox="0 0 440 176" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <path class="spine" d="M70 56 H370"/>
+          <rect class="nd" x="22" y="38" width="96" height="36" rx="5"/>
+          <text class="lbl" x="70" y="60" text-anchor="middle">your app</text>
+          <text class="sub" x="70" y="74" text-anchor="middle">SDK unchanged</text>
+          <rect class="icpt-kolm" x="178" y="34" width="84" height="44" rx="6"/>
+          <text class="lbl" x="220" y="54" text-anchor="middle">Kolm</text>
+          <text class="tag" x="220" y="67" text-anchor="middle">no rewrite</text>
+          <rect class="nd" x="322" y="38" width="96" height="36" rx="5"/>
+          <text class="lbl" x="370" y="60" text-anchor="middle">provider</text>
+          <text class="sub" x="370" y="74" text-anchor="middle">OpenAI &middot; Anthropic</text>
+          <path class="flow" d="M70 56 H370"/>
+          <path class="icpt-tap" d="M220 78 V104 q0 8 8 8 H300"/>
+          <circle class="icpt-pip" cx="220" cy="78" r="2.4"/>
+          <rect class="nd-art" x="300" y="98" width="118" height="50" rx="5"/>
+          <text class="lbl-art" x="316" y="120">behavior.kolm</text>
+          <text class="sub-art" x="316" y="135">model + recipe + evals + receipt</text>
+          <path class="icpt-seal" d="M384 113 l4 4 l8 -9"/>
+          <text class="tag" x="160" y="128">captured off the wire</text>
+        </svg>
+      </figure>
+
       <div class="grid grid--3">
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="dim" d="M10 18h22M10 42h22"/>
+            <rect class="fill" x="40" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M32 18h6q4 0 4 4v4M32 42h6q4 0 4-4v-4"/>
+            <path class="ln" d="M68 30h22"/><circle class="seal" cx="90" cy="30" r="2.2"/>
+            <text class="t" x="40" y="49">proxy</text>
+           </svg>
+          </figure>
           <span class="card__k">CAPTURE SOURCES</span>
           <h3>17 source families</h3>
           <p>Provider logs, app events, agent traces, observability spans, eval data, human labels, product analytics, warehouses, CI/CD, repositories, support tools, GRC, files, runtime telemetry, cost events, and customer-system actions.</p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="dim" d="M10 18h22M10 42h22"/>
+            <rect class="fill" x="40" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M32 18h6q4 0 4 4v4M32 42h6q4 0 4-4v-4"/>
+            <path class="ln" d="M68 30h22"/><circle class="seal" cx="90" cy="30" r="2.2"/>
+            <text class="t" x="40" y="49">proxy</text>
+           </svg>
+          </figure>
           <span class="card__k">CONNECT</span>
           <h3>12 ways to connect</h3>
           <p>REST, GraphQL, gRPC, webhooks, streaming, batch files, object storage, warehouse queries, queues, browser events, local CLI, and custom adapter manifests.</p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">EXPORT</span>
           <h3>10 ways to export proof</h3>
           <p>Signed artifact, verifier receipt, eval report, evidence bundle, JSON API, warehouse export, webhook, CI status, SIEM/GRC event, and admin analytics.</p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <path class="ln" d="M14 20h26M14 30h26M14 40h26"/>
+            <path class="flow" d="M42 30h12"/>
+            <rect class="fill" x="58" y="20" width="28" height="20" rx="2"/>
+            <path class="ok" d="M66 31l4 4 8-9"/>
+            <text class="t" x="58" y="48">.kolm</text>
+           </svg>
+          </figure>
           <span class="card__k">CAPTURE TO ARTIFACT</span>
           <h3>8 steps to an owned model</h3>
           <p>Register a source, capture an event, classify the schema, apply redaction, build an eval, lock the regression set, compile the artifact, and export the proof.</p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">SET THE RULES</span>
           <h3>Your boundaries, enforced</h3>
           <p>Tenant isolation, environment separation, scoped keys, connector allowlists, retention windows, purge workflows, redaction, budgets, and an audit trail — set once, applied every run.</p>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <figure class="card__glyph" aria-hidden="true">
+           <svg class="kglyph" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid meet">
+            <path class="reg" d="M4 9V4h5M91 4h5v5M96 51v5h-5M9 56H4v-5"/>
+            <rect class="fill" x="12" y="22" width="20" height="16" rx="2"/>
+            <path class="flow" d="M34 30h10"/>
+            <rect class="ln" x="48" y="18" width="16" height="24" rx="2" fill="none"/>
+            <rect class="ln" x="70" y="24" width="12" height="12" rx="2" fill="none"/>
+            <path class="ok" d="M85 22l3 3 5-6"/><circle class="seal" cx="89" cy="40" r="2"/>
+           </svg>
+          </figure>
           <span class="card__k">NO LOCK-IN</span>
           <h3>Export it and walk</h3>
           <p>Your model is one portable file — model, recipe, evals, and receipt. Move it to another runtime, another cloud, or off Kolm entirely. It's yours to keep.</p>
@@ -229,7 +364,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <!-- s-feature-rows — object model -->
+  <!-- s-feature-rows — object model. KOLM-ANATOMY = the exploded view of what you get -->
   <section class="section" id="object-model">
     <div class="wrap">
       <div class="section__head">
@@ -237,8 +372,41 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Every claim backed by something you can inspect.</h2>
         <p class="lede">Nothing here is a black box. Capture, eval, artifact, receipt, runtime target, export, and audit state are real records you can open, hash, and verify — so your reviewers never take a number on faith.</p>
       </div>
+
+      <figure class="anat" data-art-reveal aria-label="Exploded view of one .kolm file: four signed layers — a distilled model, the exact build recipe, six eval gates, and a sha256 receipt — bound by one Ed25519 signature you can verify offline.">
+        <div class="anat__hd"><span>Inside a .kolm</span><span>exploded view</span></div>
+        <svg viewBox="0 0 360 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <path class="reg" d="M8 8h10 M8 8v10 M352 292h-10 M352 292v-10"/>
+          <g class="layer"><path class="face" d="M70 30 L250 30 L290 52 L110 52 Z"/>
+            <path class="bevel" d="M70 30 L250 30 L290 52"/>
+            <path class="lead" d="M290 41 L330 41"/>
+            <text class="lbl" x="78" y="46">model</text>
+            <text class="sub" x="334" y="38">your behavior</text>
+            <text class="sub" x="334" y="48">distilled</text></g>
+          <g class="layer"><path class="face" d="M70 72 L250 72 L290 94 L110 94 Z"/>
+            <path class="bevel" d="M70 72 L250 72 L290 94"/>
+            <path class="lead" d="M290 83 L330 83"/>
+            <text class="lbl" x="78" y="88">recipe</text>
+            <text class="sub" x="334" y="84">exact build + sources</text></g>
+          <g class="layer"><path class="face" d="M70 114 L250 114 L290 136 L110 136 Z"/>
+            <path class="bevel" d="M70 114 L250 114 L290 136"/>
+            <path class="lead" d="M290 125 L330 125"/>
+            <text class="lbl" x="78" y="130">evals</text>
+            <text class="sub" x="334" y="126">6 gates it must pass</text></g>
+          <g class="layer"><path class="face" d="M70 156 L250 156 L290 178 L110 178 Z"/>
+            <path class="bevel" d="M70 156 L250 156 L290 178"/>
+            <path class="lead" d="M290 167 L330 167"/>
+            <text class="lbl" x="78" y="172">receipt</text>
+            <text class="sub" x="334" y="168">sha256 + capture trace</text></g>
+          <line class="scan" x1="70" y1="200" x2="250" y2="200"/>
+          <circle class="seal-ring" cx="180" cy="230" r="20"/>
+          <path class="seal" d="M172 230 l5 5 l11 -11" stroke="currentColor" stroke-width="2" fill="none"/>
+          <text class="sub" x="180" y="268" text-anchor="middle" style="fill:var(--accent)">Ed25519 signed · verify yourself</text>
+        </svg>
+      </figure>
+
       <div class="grid grid--2">
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
           <span class="card__k">ACCOUNT</span>
           <ul class="ledger">
             <li>Organization, workspace, project, environment</li>
@@ -246,7 +414,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <li>Role, policy</li>
           </ul>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
           <span class="card__k">BEHAVIOR</span>
           <ul class="ledger">
             <li>Source, capture, trace</li>
@@ -254,7 +422,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <li>Dataset, label set, eval, failure, regression set</li>
           </ul>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
           <span class="card__k">COMPILER</span>
           <ul class="ledger">
             <li>Compile run, artifact, manifest</li>
@@ -262,7 +430,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <li>Verification receipt, release gate</li>
           </ul>
         </article>
-        <article class="card reveal">
+        <article class="card reveal"><span class="tick" aria-hidden="true"></span>
           <span class="card__k">PROOF</span>
           <ul class="ledger">
             <li>Export, evidence bundle, audit event</li>
@@ -278,7 +446,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <!-- s-evidence — procurement gates, the readiness ledger panel -->
+  <!-- s-evidence — procurement gates. VERIFY-LOOP = the page's trust-kernel signature moment -->
   <section class="section section--lit" id="procurement-gates">
     <div class="wrap">
       <div class="section__head">
@@ -286,6 +454,34 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Give your buyers proof, not promises.</h2>
         <p class="lede">Every model you compile ships with a signed packet your reviewers can verify themselves — source hashes, policy versions, eval results, artifact checksums, runtime targets, and receipt IDs. Every claim on this page ships with proof you can check.</p>
       </div>
+
+      <figure class="instrument vloop" data-vl="valid" data-art-reveal
+        aria-label="Verify loop: a .kolm artifact plus a public key are hashed; the hash is checked against the embedded Ed25519 signature. The result is a single verdict — valid, or void.">
+        <div class="instrument__bar"><b>verify loop</b><span class="live">Ed25519</span></div>
+        <svg class="pipe vl" viewBox="0 0 440 232" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <rect class="nd" x="22"  y="14" width="150" height="40" rx="5"/>
+          <text class="lbl" x="38" y="32">.kolm</text><text class="sub" x="38" y="46">142 mb · sealed artifact</text>
+          <rect class="nd" x="268" y="14" width="150" height="40" rx="5"/>
+          <text class="lbl" x="284" y="32">public key</text><text class="sub" x="284" y="46">ed25519 · 32 b</text>
+          <path class="spine" d="M97 54 L220 84 M343 54 L220 84"/>
+          <rect class="nd" x="150" y="84" width="140" height="40" rx="5"/>
+          <text class="lbl" x="166" y="102">hash</text><text class="sub" x="166" y="116">blake3 · 256-bit digest</text>
+          <text class="tag" x="270" y="100" text-anchor="end">Σ</text>
+          <path class="spine" d="M220 124 L220 148"/>
+          <rect class="nd" x="150" y="148" width="140" height="40" rx="5"/>
+          <text class="lbl" x="166" y="166">signature check</text><text class="sub" x="166" y="180">compare · constant-time</text>
+          <path class="spine" d="M220 188 L220 206"/>
+          <g class="vl-verdict">
+            <rect class="vl-band" x="158" y="206" width="124" height="22" rx="11"/>
+            <path class="vl-mark vl-ok"   d="M196 217 l4 4 l8 -9"/>
+            <path class="vl-mark vl-void" d="M196 212 l8 8 m0 -8 l-8 8"/>
+            <text class="vl-text" x="216" y="221">valid</text>
+          </g>
+          <path class="vl-trace" d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
+          <path class="vl-flow"  d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
+        </svg>
+      </figure>
+
       <div class="panel">
         <div class="panel__head"><span>evidence packet</span><span class="m">capture to proof</span></div>
         <div class="panel__rows">
@@ -301,11 +497,64 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
+  <!-- s-feature-rows — runtime fit + implementation path. RUNTIME-RAMP = smallest runtime that fits -->
+  <section class="section" id="runtime-fit">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="eyebrow">05 &middot; RUNS ON YOUR HARDWARE</p>
+        <h2>One model, ranked across every runtime you own.</h2>
+        <p class="lede">The signed model is one portable file. Kolm runs it on the smallest runtime that meets your latency and cost target — phone, laptop, edge, or your own servers. Same artifact, your hardware, no per-call rent.</p>
+      </div>
+
+      <figure class="instrument runtime-ramp" data-art-reveal
+        aria-label="Runtime fit: the same claims-redactor.kolm ranked across four runtimes. Phone: 142 MB, $0.00 per thousand calls, 96 ms — selected, in spec. Laptop: 142 MB, $0.04, 71 ms. Edge: 142 MB, $0.21, 39 ms. Server: 142 MB, $0.90, 12 ms. Kolm runs it on the smallest runtime that fits.">
+        <div class="instrument__bar"><span>runtime &middot; <b>claims-redactor.kolm</b></span><span class="live">fit</span></div>
+        <svg class="pipe ramp" viewBox="0 0 440 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <text class="tag" x="22" y="14">smallest runtime that fits &middot; 142 mb</text>
+          <text class="tag" x="418" y="14" text-anchor="end">cost/1k &middot; p50</text>
+          <g class="rung is-fit" transform="translate(0 24)">
+            <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+            <rect class="bar" x="22" y="0" width="44"  height="54" rx="6"/>
+            <text class="rl" x="38" y="24">phone</text>
+            <text class="rs" x="38" y="40">142 MB &middot; on-device</text>
+            <text class="rc" x="404" y="24" text-anchor="end">$0.00</text>
+            <text class="rt" x="404" y="40" text-anchor="end">96 ms</text>
+            <path class="tick" d="M380 21 l4 4 l8 -9"/>
+          </g>
+          <g class="rung" transform="translate(0 88)">
+            <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+            <rect class="bar" x="22" y="0" width="120" height="54" rx="6"/>
+            <text class="rl" x="38" y="24">laptop</text>
+            <text class="rs" x="38" y="40">142 MB &middot; local</text>
+            <text class="rc" x="404" y="24" text-anchor="end">$0.04</text>
+            <text class="rt" x="404" y="40" text-anchor="end">71 ms</text>
+          </g>
+          <g class="rung" transform="translate(0 152)">
+            <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+            <rect class="bar" x="22" y="0" width="248" height="54" rx="6"/>
+            <text class="rl" x="38" y="24">edge</text>
+            <text class="rs" x="38" y="40">142 MB &middot; regional</text>
+            <text class="rc" x="404" y="24" text-anchor="end">$0.21</text>
+            <text class="rt" x="404" y="40" text-anchor="end">39 ms</text>
+          </g>
+          <g class="rung" transform="translate(0 216)">
+            <rect class="rng" x="22" y="0" width="396" height="54" rx="6"/>
+            <rect class="bar" x="22" y="0" width="396" height="54" rx="6"/>
+            <text class="rl" x="38" y="24">server</text>
+            <text class="rs" x="38" y="40">142 MB &middot; hosted</text>
+            <text class="rc" x="404" y="24" text-anchor="end">$0.90</text>
+            <text class="rt" x="404" y="40" text-anchor="end">12 ms</text>
+          </g>
+        </svg>
+      </figure>
+    </div>
+  </section>
+
   <!-- s-feature-rows — implementation path -->
   <section class="section" id="implementation-path">
     <div class="wrap wrap--wide">
       <div class="section__head">
-        <p class="eyebrow">05 &middot; FIRST FOUR DAYS</p>
+        <p class="eyebrow">06 &middot; FIRST FOUR DAYS</p>
         <h2>One model owned in four days. Then scale it.</h2>
         <p class="lede">Prove the whole path on one source before you roll it out — capture, compile, sign, export. Expansion follows what works.</p>
       </div>

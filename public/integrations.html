@@ -264,22 +264,45 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Each family spells out direction, payload style, product routes, and controls. Kolm keeps a payload sealed until a schema or adapter proves what it means — so nothing moves before you know what it is.</p>
       </div>
       <div class="grid grid--4">
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Reg &middot; request</span>
           <h3>Request APIs</h3>
           <p>REST JSON, streaming/SSE, webhooks, OpenTelemetry GenAI spans, MCP tool calls, A2A handoffs, GraphQL/RPC and custom adapters.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Reg &middot; batch</span>
           <h3>Batch and streams</h3>
           <p>JSONL, CSV, Parquet, files/blobs, warehouse and object-store drops, queues/topics, database CDC and lakehouse snapshots.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">Reg &middot; security</span>
           <h3>Security and operations</h3>
           <p>SIEM/log drains, collaboration and ticketing callbacks, approval events, guardrail verdicts and incident review markers.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">Reg &middot; release</span>
           <h3>Release and evidence</h3>
           <p>Signed artifacts, registry/package releases, receipts, manifests, eval reports, proof packets, runtime instructions and verifier links.</p>
@@ -297,22 +320,45 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">You don't need another dashboard. You need one path from a live source event to a signed model on your hardware — with the rules you set and proof you can hand to anyone. That's what Kolm adds, without taking anything away.</p>
       </div>
       <div class="grid grid--4">
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Reg &middot; handoff</span>
           <h3>Workflow handoff</h3>
           <p>Triggers, actions, approvals, and automation callbacks plug in as source or sink events, each with a delivery receipt.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Reg &middot; data</span>
           <h3>Connectors and streams</h3>
           <p>Connectors, streams, schema drift, warehouse extracts, and dead-letter context tie straight to your model's rules and lineage.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">Reg &middot; lineage</span>
           <h3>Lineage you can trace</h3>
           <p>Dataset, job, run, owner, and catalog metadata stay attached to the model, the receipt, and the signed proof packet.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">Reg &middot; assurance</span>
           <h3>Assurance packet</h3>
           <p>API discovery, security review, incidents, controls, questionnaires, and remediation evidence export as proof anyone can verify.</p>
@@ -340,22 +386,45 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
       <div class="feat__ui">
         <div class="grid grid--2">
-          <div class="card">
+          <div class="card"><span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+              <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path class="edge" d="M6 8h28"/>
+              <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+            </svg>
             <span class="card__k">Reg &middot; identity</span>
             <h3>Identity and vault</h3>
             <p>Tenant keys, scoped keys, RBAC, SSO/SAML/SCIM hooks, central provider keys, BYOK/BYOC paths and model entitlements.</p>
           </div>
-          <div class="card">
+          <div class="card"><span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+              <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+              <path class="edge" d="M6 8h28"/>
+              <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+            </svg>
             <span class="card__k">Reg &middot; capture</span>
             <h3>Capture and routing</h3>
             <p>Sample rate, body retention, namespace windows, redaction before storage, destination allowlists and PII/secret blocking.</p>
           </div>
-          <div class="card">
+          <div class="card"><span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+              <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+              <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+              <path class="edge gleam" d="M8 14l12-6 12 6"/>
+            </svg>
             <span class="card__k">Reg &middot; eval</span>
             <h3>Eval and compile</h3>
             <p>Production evals, drift alerts, regression gates, human review queues, corpus selection, evidence DAGs and artifact receipts.</p>
           </div>
-          <div class="card">
+          <div class="card" data-state="ok"><span class="tick" aria-hidden="true"></span>
+            <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+              <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+              <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+              <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+              <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+            </svg>
             <span class="card__k">Reg &middot; export</span>
             <h3>Export you can verify</h3>
             <p>OpenAPI, JSONL/CSV, OTLP metrics, signed receipts, assurance cases — exports that stay useful long after they leave the UI.</p>

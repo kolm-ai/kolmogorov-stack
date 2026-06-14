@@ -216,42 +216,87 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Each one earns its place by getting you to the same outcome: a model you own, run cheaper, and can prove. If a feature doesn't move you toward that, it isn't here.</p>
       </div>
       <div class="grid grid--4">
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">Reg &middot; 01</span>
           <h3>One console for the whole job</h3>
           <p>Capture, redaction, provider keys, budgets, retention, evals, compile, targets, and export &mdash; one place to take live traffic all the way to a model you own.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Reg &middot; 02</span>
           <h3>Bring your behavior from anywhere</h3>
           <p>Trace exports, eval dashboards, OpenTelemetry spans, gateway logs, JSONL, webhooks, GraphQL/RPC, queues, warehouses, SIEM drains, MCP, A2A, browser events, files, and custom adapters &mdash; capture it all.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">Reg &middot; 03</span>
           <h3>Walk away with a model</h3>
           <p>You don't get a dashboard score &mdash; you get a signed <code>.kolm</code> file: model, recipe, evaluators, hashes, receipt, and run instructions, all in one portable artifact.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">Reg &middot; 04</span>
           <h3>Verify it yourself</h3>
           <p>Receipts, public keys, and hashes check out anywhere &mdash; a buyer, auditor, or platform team can confirm exactly what a model is without trusting Kolm or logging into our UI.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
+            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
+            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
+            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
+            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          </svg>
           <span class="card__k">Reg &middot; 05</span>
           <h3>Run it where it fits</h3>
           <p>Take your model and go &mdash; laptop, your private cloud, the edge, or a server. Kolm ships a clean recipe for each target, with the real limits shown up front.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">Reg &middot; 06</span>
           <h3>No lock-in, ever</h3>
           <p>Your model is one file you can export and move whenever you want. Switch hardware, switch clouds, take it with you &mdash; nothing about Kolm holds your behavior hostage.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
+            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
+            <path class="edge" d="M6 8h28"/>
+            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
           <span class="card__k">Reg &middot; 07</span>
           <h3>See the real machine</h3>
           <p>Every page shows the actual product &mdash; routes, captured channels, jobs, receipts, targets, and your next action. What you see is what you run.</p>
         </div>
-        <div class="card reveal">
+        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
+            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
+            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
+            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          </svg>
           <span class="card__k">Reg &middot; 08</span>
           <h3>Keep the tools you have</h3>
           <p>Gateways, evals, security, training, and RAG tools all plug in as sources, controls, or run targets. Kolm adds the model you own &mdash; it doesn't ask you to rip anything out.</p>
