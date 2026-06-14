@@ -118,26 +118,36 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
 
       <!-- the one lit --paper object; ships sealed (calm fallback), sweep re-fires it once -->
-      <figure class="artifact is-sealed" data-artifact data-art-reveal aria-label="Signed .kolm datasheet, in spec">
-        <i class="regmark regmark--tl"></i><i class="regmark regmark--tr"></i>
-        <i class="regmark regmark--bl"></i><i class="regmark regmark--br"></i>
-        <header class="artifact__head">
-          <span class="ctrl-id"><b>REG-04</b> claims-redactor.kolm</span>
-          <span class="ctrl-id">TOL &plusmn;0.2 &middot; v3.3</span>
-        </header>
-        <dl class="register">
-          <div class="register__row"><dt class="register__k">Latency</dt>
-            <dd class="register__v" data-val><b>388</b><span class="register__u">ms</span><i class="register__pip"></i></dd></div>
-          <div class="register__row"><dt class="register__k">Artifact</dt>
-            <dd class="register__v" data-val><b>142</b><span class="register__u">MB</span><i class="register__pip"></i></dd></div>
-          <div class="register__row"><dt class="register__k">Targets</dt>
-            <dd class="register__v" data-val><b>5</b><span class="register__u">runtimes ranked</span><i class="register__pip"></i></dd></div>
-          <div class="register__row register__row--sig"><dt class="register__k">Signature</dt>
-            <dd class="register__v" data-val><b>sha256</b><span class="register__u">:a1f0&hellip;</span><i class="register__pip"></i></dd></div>
-        </dl>
-        <footer class="artifact__verdict"><span data-verdict>In spec</span>
-          <svg class="artifact__check" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4"/></svg></footer>
-        <span class="artifact__scan" aria-hidden="true"></span>
+      <!-- signature instrument: the product as a live pipeline on real liquid glass -->
+      <figure class="instrument" data-art-reveal aria-label="How Kolm works: your OpenAI and Anthropic API calls are captured, compiled into one signed .kolm model, and run on the hardware that fits — laptop, edge, server, or phone — and anyone can verify the signature.">
+        <div class="instrument__bar"><span>compiler &middot; <b>claims-redactor.kolm</b></span><span class="live">live</span></div>
+        <svg class="pipe" viewBox="0 0 440 372" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <text class="tag" x="220" y="9" text-anchor="middle">your api calls &middot; openai &middot; anthropic</text>
+          <path class="spine" d="M120 16 L220 38 M220 16 L220 38 M320 16 L220 38"/>
+          <rect class="nd" x="62" y="42" width="316" height="46" rx="5"/>
+          <text class="lbl" x="82" y="64">Capture</text>
+          <text class="sub" x="82" y="79">POST /v1/route &middot; secrets stripped before write</text>
+          <text class="tag" x="358" y="60" text-anchor="end">01</text>
+          <path class="spine" d="M220 88 L220 106"/>
+          <rect class="nd" x="62" y="106" width="316" height="46" rx="5"/>
+          <text class="lbl" x="82" y="128">Compile</text>
+          <text class="sub" x="82" y="143">evals 6/6 &middot; recipe + receipt &middot; Ed25519 sign</text>
+          <text class="tag" x="358" y="124" text-anchor="end">02</text>
+          <path class="spine" d="M220 152 L220 170"/>
+          <rect class="nd-art" x="78" y="170" width="284" height="54" rx="5"/>
+          <text class="lbl-art" x="98" y="194">claims-redactor.kolm</text>
+          <text class="sub-art" x="98" y="210">signed &middot; 142 mb &middot; one portable file</text>
+          <path class="ok-stroke" d="M326 189 l4 4 l8 -9" style="stroke:var(--sheet-accent)"/>
+          <path class="spine" d="M220 224 L220 250 M220 250 L63 270 M220 250 L161 270 M220 250 L279 270 M220 250 L377 270"/>
+          <text class="tag" x="220" y="245" text-anchor="middle">runs on the hardware that fits</text>
+          <rect class="chip" x="22" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="63" y="293" text-anchor="middle">laptop</text>
+          <rect class="chip" x="120" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="161" y="293" text-anchor="middle">edge</text>
+          <rect class="chip" x="238" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="279" y="293" text-anchor="middle">server</text>
+          <rect class="chip" x="336" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="377" y="293" text-anchor="middle">phone</text>
+          <path class="ok-stroke" d="M104 337 l4 4 l8 -9"/>
+          <text x="122" y="343" style="fill:var(--accent);font-size:10px;letter-spacing:.02em;font-family:var(--font-mono)">verify it yourself &mdash; no trust required</text>
+          <path class="flow" d="M220 38 L220 250"/>
+        </svg>
       </figure>
     </div>
   </section>
@@ -227,16 +237,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <div class="plate plate--rows">
-          <div class="plate__hd">claims-redactor.kolm &middot; <span class="ok">signed</span></div>
-          <div class="panel__rows">
-            <div class="prow">examples <span class="prow__r m">2,140</span></div>
-            <div class="prow">recipes &middot; evals <span class="prow__r m">18 / 6</span></div>
-            <div class="prow">tokenizer + receipts <span class="prow__r m">sha-256</span></div>
-            <div class="prow">evals before ship <span class="prow__r a">passed</span></div>
-          </div>
-          <div class="plate__foot"><span class="badge badge--ok">Ed25519</span><span>142 MB &middot; reproducible build</span></div>
-        </div>
+        <figure class="kolm-art" aria-label="Inside one .kolm file: a distilled model, the exact build recipe, the eval gates it must pass, and a tamper-evident receipt — all wrapped in an Ed25519 signature you can verify offline.">
+          <div class="kolm-art__hd"><span>Inside a .kolm</span><span>one file</span></div>
+<pre aria-hidden="true"><span class="rail">┌</span> <span class="f">claims-redactor.kolm</span>     <span class="u">142 MB</span>
+<span class="rail">│</span>  <span class="u">one signed file &middot; runs anywhere</span>
+<span class="rail">│</span>
+<span class="rail">├─</span> <span class="k">model  </span>  <span class="u">your behavior, distilled</span>
+<span class="rail">├─</span> <span class="k">recipe </span>  <span class="u">the exact build + sources</span>
+<span class="rail">├─</span> <span class="k">evals  </span>  <span class="u">the 6 gates it must pass</span>
+<span class="rail">├─</span> <span class="k">receipt</span>  <span class="u">sha256 + capture trace</span>
+<span class="rail">│</span>
+<span class="rail">└─</span> <span class="seal">Ed25519 signed &middot; verify it yourself</span></pre>
+        </figure>
       </div>
     </div>
   </section>
