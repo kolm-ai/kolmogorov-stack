@@ -130,24 +130,26 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <svg class="nav__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="nav__pop" id="m-platform" role="menu">
           <a role="menuitem" href="/platform"><b>Overview</b><span>The compiler, end to end</span></a>
-          <a role="menuitem" href="/how-it-works"><b>How it works</b><span>Capture &middot; Compile &middot; Compose &middot; Deploy</span></a>
-          <a role="menuitem" href="/runtimes"><b>Runtime targets</b><span>Where artifacts deploy</span></a>
-          <a role="menuitem" href="/integrations"><b>Integrations</b><span>Pipelines &amp; SDKs</span></a>
+          <a role="menuitem" href="/runtimes"><b>Runtime targets</b><span>Where the signed model runs</span></a>
+          <a role="menuitem" href="/integrations"><b>Integrations</b><span>Capture from your stack</span></a>
           <a role="menuitem" href="/spec"><b>Spec</b><span>The .kolm format</span></a>
+          <a role="menuitem" href="/verify"><b>Verify</b><span>Check any signed model offline</span></a>
         </div>
       </div>
       <div class="nav__group" data-menu>
         <button class="nav__top" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="m-dev">Developers
           <svg class="nav__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="nav__pop" id="m-dev" role="menu">
-          <a role="menuitem" href="/docs"><b>Docs</b><span>Guides &amp; API reference</span></a>
+          <a role="menuitem" href="/docs"><b>Docs</b><span>Guides and API reference</span></a>
           <a role="menuitem" href="/account/api-control-center"><b>API control</b><span>Keys, usage, limits</span></a>
-          <a role="menuitem" href="/verify"><b>Verify</b><span>Check any .kolm artifact</span></a>
           <a role="menuitem" href="/changelog"><b>Changelog</b><span>Shipped this cycle</span></a>
         </div>
       </div>
-      <a class="nav__top" href="/pricing">Pricing</a>
-      <a class="nav__top" href="/trust">Trust</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
     </nav>
     <div class="nav__actions">
       <a class="nav__status" href="/status"><i></i>Operational</a>
@@ -169,18 +171,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p class="eyebrow">Reference · Glossary</p>
     <h1>The vocabulary of an <span class="go">agent security review</span>.</h1>
     <p class="lede" style="max-width:72ch">
-      When a buyer's security team vets an autonomous agent, both sides reach for the
-      same words: signed evidence, offline verification, least privilege, prompt
-      injection, provenance. Here is what each one means, defined plainly and linked to
-      the page that shows it in practice. Start with <a href="/how-it-works">how it
-      works</a>, see <a href="/checks">what we test</a>, then
-      <a href="/verify">verify a sample report</a> yourself.
+      Two vocabularies meet on kolm. The compiler turns the behavior you already run on
+      a frontier API into one portable signed .kolm model: capture, compile, deploy. The
+      audit surface turns a review into signed evidence: signed reports, offline
+      verification, least privilege, prompt injection, provenance. Here is what each word
+      means, defined plainly and linked to the page that shows it in practice. Start with
+      <a href="/platform">the compiler</a> or <a href="/how-it-works">how it works</a>,
+      see <a href="/checks">what we test</a>, then <a href="/verify">verify a sample
+      report</a> yourself.
     </p>
     <div class="hero__cta">
       <a class="btn btn--primary" href="/verify">Verify a sample report</a>
       <a class="btn btn--ghost" href="/checks">See what we test</a>
     </div>
     <div class="band" aria-label="Jump to a term">
+      <a class="ctrlid" href="#kolm-model">.kolm model</a>
+      <a class="ctrlid" href="#capture">Capture</a>
+      <a class="ctrlid" href="#compile">Compile</a>
+      <a class="ctrlid" href="#compose">Compose</a>
+      <a class="ctrlid" href="#deploy">Deploy</a>
+      <a class="ctrlid" href="#drop-in-proxy">Drop-in proxy</a>
+      <a class="ctrlid" href="#verify-offline">Verify offline</a>
       <a class="ctrlid" href="#agent-security-review">Agent Security Review</a>
       <a class="ctrlid" href="#signed-evidence-report">Signed Evidence Report</a>
       <a class="ctrlid" href="#offline-verification">Offline Verification</a>
@@ -201,6 +212,58 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <a class="ctrlid" href="#owasp-llm-top-10">OWASP LLM</a>
       <a class="ctrlid" href="#mitre-atlas">MITRE ATLAS</a>
     </div>
+  </div>
+</section>
+
+<!-- ============================================================ s-legal-body · 00 -->
+<section class="section reveal" id="compiler">
+  <div class="wrap legal-doc">
+    <span class="idx">00 / The compiler</span>
+    <h2>Own the AI you're renting.</h2>
+    <p class="lede">The words that describe what kolm compiles and how it attaches. kolm sits in front of your live OpenAI or Anthropic calls, captures the behavior you already use, and compiles it into one portable signed model you run on your own hardware.</p>
+    <dl>
+      <dt id="kolm-model"><span class="term-k">Term · Compiler</span><h3>.kolm model</h3></dt>
+      <dd>
+        <p>The compiled output, and the primary name for it. One portable file that bundles the model, the recipe that produced it, its evals, and a receipt, sealed with an Ed25519 signature. Because it is signed, anyone can verify offline that the model they run is the model that was compiled. The signed model is the approved synonym when the point is the signature.</p>
+        <p class="term-map">Related: <a href="/spec">Spec</a> · <a href="/platform">Platform</a></p>
+      </dd>
+
+      <dt id="capture"><span class="term-k">Term · Compiler</span><h3>Capture</h3></dt>
+      <dd>
+        <p>The first verb. A drop-in proxy records the behavior you already run against a frontier API, with no SDK rewrite. Secrets are stripped before anything is written, so the capture holds the behavior, not your keys. Capture is what gives the compiler something real to compile, drawn from production traffic rather than a synthetic sample.</p>
+        <p class="term-map">Related: <a href="/integrations">Integrations</a> · <a href="/how-it-works">How it works</a></p>
+      </dd>
+
+      <dt id="compile"><span class="term-k">Term · Compiler</span><h3>Compile</h3></dt>
+      <dd>
+        <p>The second verb. Captured behavior is compiled into one portable signed .kolm model that carries the model, recipe, evals, and receipt together. Compiling is where rented behavior becomes an asset you own, so you stop paying frontier prices to re-run behavior you have already established.</p>
+        <p class="term-map">Related: <a href="/platform">Platform</a> · <a href="/spec">Spec</a></p>
+      </dd>
+
+      <dt id="compose"><span class="term-k">Term · Compiler</span><h3>Compose</h3></dt>
+      <dd>
+        <p>The secondary verb. Captured behaviors are combined into a single .kolm model where that composition is already shown, so one signed artifact can cover more than one task. Compose builds on capture and compile rather than replacing them.</p>
+        <p class="term-map">Related: <a href="/platform">Platform</a> · <a href="/how-it-works">How it works</a></p>
+      </dd>
+
+      <dt id="deploy"><span class="term-k">Term · Compiler</span><h3>Deploy</h3></dt>
+      <dd>
+        <p>The fourth verb. The same .kolm model runs on the hardware that fits, ranked by cost, latency, and fit. Because the artifact is portable and signed, deploying it on your own hardware changes where it runs without changing what runs.</p>
+        <p class="term-map">Related: <a href="/runtimes">Runtime targets</a> · <a href="/platform">Platform</a></p>
+      </dd>
+
+      <dt id="drop-in-proxy"><span class="term-k">Term · Compiler</span><h3>Drop-in proxy</h3></dt>
+      <dd>
+        <p>How kolm attaches. It sits in front of your existing OpenAI or Anthropic calls and needs no rewrite: point your base URL at kolm and the calls flow through. The proxy is what makes capture possible without touching your application code.</p>
+        <p class="term-map">Related: <a href="/integrations">Integrations</a> · <a href="/docs">Docs</a></p>
+      </dd>
+
+      <dt id="verify-offline"><span class="term-k">Term · Compiler</span><h3>Verify offline</h3></dt>
+      <dd>
+        <p>The canonical verification phrase, used for both the .kolm model and the signed audit report. Anyone can confirm a signed artifact in their own browser with no account, no upload, and no kolm server in the trust path. It is never described as verify online or validate, because the proof rests on the math, not on a live service.</p>
+        <p class="term-map">Related: <a href="/verify">Verify</a> · <a href="/spec">Spec</a></p>
+      </dd>
+    </dl>
   </div>
 </section>
 
@@ -436,6 +499,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
 </main>
 
+<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
@@ -448,54 +512,56 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p class="foot__tag">Own the AI you&rsquo;re renting - a signed model from your live API calls, run on your own hardware.</p>
+        <p class="foot__tag">Own the AI you're renting. A signed model compiled from your live API calls, run on your own hardware.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
-        <a href="/#pipeline">Pipeline</a>
-        <a href="/account/api-control-center">API control</a>
-        <a href="/integrations">Integrations</a>
-        <a href="/compare">Compare</a>
+        <a href="/platform">Overview</a>
+        <a href="/how-it-works">How it works</a>
         <a href="/runtimes">Runtime targets</a>
-        <a href="/docs">Docs</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/spec">Spec</a>
         <a href="/pricing">Pricing</a>
       </div>
       <div class="foot__col">
-        <h3>Surfaces</h3>
-        <a href="/docs#capture">Capture</a>
-        <a href="/docs#compile">Compile</a>
-        <a href="/docs#compose">Compose</a>
-        <a href="/docs#deploy">Deploy</a>
-        <a href="/audit">Audit</a>
+        <h3>Developers</h3>
+        <a href="/docs">Docs</a>
+        <a href="/account/api-control-center">API control</a>
+        <a href="/verify">Verify offline</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="foot__col">
+        <h3>Audit</h3>
+        <a href="/audit">Signed evidence</a>
+        <a href="/checks">What we test</a>
+        <a href="/report">Sample report</a>
+        <a href="/audit-pricing">Audit plans</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For reviewers</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
-        <a href="/verify">Verify</a>
-        <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/security">Security</a>
+        <a href="/transparency-log">Transparency log</a>
         <a href="/status">Status</a>
       </div>
       <div class="foot__col">
         <h3>Company</h3>
         <a href="/research">Research</a>
-        <a href="/changelog">Changelog</a>
         <a href="mailto:dev@kolm.ai">Contact</a>
-      </div>
-      <div class="foot__col">
-        <h3>Legal</h3>
         <a href="/terms">Terms</a>
         <a href="/privacy">Privacy</a>
         <a href="/dpa">DPA</a>
         <a href="/subprocessors">Subprocessors</a>
-        <a href="/sla">SLA</a>
       </div>
     </div>
     <div class="foot__bottom">
       <span class="badge badge--ok">Signed artifacts</span>
-      <span class="badge">API control center</span>
-      <span class="badge">Apache-2.0</span>
+      <span class="badge">Verify offline</span>
       <span class="badge">Open API contract</span>
-      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge">Apache-2.0</span>
+      <span class="foot__copy">2026 kolm.ai &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>

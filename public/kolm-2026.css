@@ -561,6 +561,16 @@ textarea.fld{min-height:120px;resize:vertical;line-height:1.55;}
   font:var(--w-ui) 14px/1 var(--font-sans);letter-spacing:-.006em;color:var(--ink-2);
   transition:color var(--dur-micro) var(--ease-mat),background var(--dur-micro) var(--ease-mat);}
 .nav__links>a:not(.nav__top):not(.nav__cta):not(.btn):hover{color:var(--ink);background:rgba(255,255,255,.05);}
+/* Active flat canonical link (page agents set aria-current="page"). Mirrors the
+   .nav__top[aria-current] underline so the dropdown bar and the flat bar agree. */
+.nav__links>a:not(.nav__top):not(.nav__cta):not(.btn)[aria-current="page"]{color:var(--ink);position:relative;}
+.nav__links>a:not(.nav__top):not(.nav__cta):not(.btn)[aria-current="page"]::after{content:"";position:absolute;
+  left:12px;right:12px;bottom:-2px;height:1.5px;background:var(--accent);border-radius:2px;}
+/* Secondary surface link (Audit). Compiler stays primary: this reads quieter,
+   reachable but not co-equal. A hairline lead-in marks it as a separate group. */
+.nav__sec{color:var(--ink-3);}
+.nav__sec::before{content:"";width:1px;height:18px;background:var(--line-2);margin-right:6px;align-self:center;}
+@media(max-width:880px){.nav__sec::before{display:none;}}
 .nav__icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-bottom:0;
   border:1px solid var(--line-2);border-radius:var(--r-md);color:var(--ink-2);
   transition:color var(--dur-micro) var(--ease-mat),border-color var(--dur-micro) var(--ease-mat);}

@@ -1218,11 +1218,11 @@ test('vercel routing keeps compiler pages primary and audit pages on audit host'
     rule.destination === '/terms' &&
     hasHost(rule, 'kolm.ai')
   ));
-  assert.ok(config.redirects.some(rule =>
-    rule.source === '/:auditPath(verify|checks|report|report-viewer|badge|roi|regulatory-clock|transparency-log|trust-center|buyer|spec).html' &&
-    rule.destination === 'https://audit.kolm.ai/:auditPath.html' &&
-    hasHost(rule, 'kolm.ai')
-  ));
+  // The audit.kolm.ai split was reversed (2026-06-14): the audit surface is served
+  // directly on kolm.ai, so audit paths must NOT redirect off-domain to audit.kolm.ai.
+  assert.ok(!config.redirects.some(rule =>
+    typeof rule.destination === 'string' && rule.destination.startsWith('https://audit.kolm.ai')
+  ), 'audit pages must be served on kolm.ai, not redirected to audit.kolm.ai');
   assert.ok(config.rewrites.some(rule =>
     rule.source === '/platform' &&
     rule.destination === '/platform.html' &&

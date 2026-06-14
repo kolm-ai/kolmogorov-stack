@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>/* Arm scroll-reveal before first paint (no FOUC). Fail open: if the reveal
+ * observer never initializes (script 404/parse error), strip the class so nothing
+ * stays hidden, so the page is never blank. Keys off the observer's own "armed"
+ * marker, not on whether anything has scrolled into view yet. */
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);</script>
 <title>Not found · kolm.ai</title>
 <meta name="description" content="That route is not in the compiler graph. Start from the Kolm home, open the docs, or go to your workspace.">
 <meta name="robots" content="noindex,nofollow">
@@ -47,24 +53,26 @@
           <svg class="nav__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="nav__pop" id="m-platform" role="menu">
           <a role="menuitem" href="/platform"><b>Overview</b><span>The compiler, end to end</span></a>
-          <a role="menuitem" href="/how-it-works"><b>How it works</b><span>Capture &middot; Compile &middot; Compose &middot; Deploy</span></a>
-          <a role="menuitem" href="/runtimes"><b>Runtime targets</b><span>Where artifacts deploy</span></a>
-          <a role="menuitem" href="/integrations"><b>Integrations</b><span>Pipelines &amp; SDKs</span></a>
+          <a role="menuitem" href="/runtimes"><b>Runtime targets</b><span>Where the signed model runs</span></a>
+          <a role="menuitem" href="/integrations"><b>Integrations</b><span>Capture from your stack</span></a>
           <a role="menuitem" href="/spec"><b>Spec</b><span>The .kolm format</span></a>
+          <a role="menuitem" href="/verify"><b>Verify</b><span>Check any signed model offline</span></a>
         </div>
       </div>
       <div class="nav__group" data-menu>
         <button class="nav__top" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="m-dev">Developers
           <svg class="nav__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="nav__pop" id="m-dev" role="menu">
-          <a role="menuitem" href="/docs"><b>Docs</b><span>Guides &amp; API reference</span></a>
+          <a role="menuitem" href="/docs"><b>Docs</b><span>Guides and API reference</span></a>
           <a role="menuitem" href="/account/api-control-center"><b>API control</b><span>Keys, usage, limits</span></a>
-          <a role="menuitem" href="/verify"><b>Verify</b><span>Check any .kolm artifact</span></a>
           <a role="menuitem" href="/changelog"><b>Changelog</b><span>Shipped this cycle</span></a>
         </div>
       </div>
-      <a class="nav__top" href="/pricing">Pricing</a>
-      <a class="nav__top" href="/trust">Trust</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
     </nav>
     <div class="nav__actions">
       <a class="nav__status" href="/status"><i></i>Operational</a>
@@ -84,7 +92,7 @@
       <div style="max-width:64ch">
         <p class="eyebrow">Error · 404</p>
         <h1>That route is not in the compiler graph.</h1>
-        <p class="lede">The page you asked for does not exist or has moved. Start from the Kolm home, read the docs, or open your workspace. Audit reports and verification live on the audit property.</p>
+        <p class="lede">The page you asked for does not exist or has moved. Start from the Kolm home, read the docs, or open your workspace. The compiler, signed reports, and offline verify all live on kolm.ai.</p>
         <div class="hero__cta">
           <a class="btn btn--primary" href="/">Back to home</a>
           <a class="btn btn--ghost" href="/docs">Read the docs</a>
@@ -93,10 +101,10 @@
 
         <p class="nf-maplbl">Where to start</p>
         <nav class="nf-map" aria-label="Where to start">
-          <a class="nf-card" href="/how-it-works">
-            <span class="nf-card__k" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><circle cx="3.5" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="12.5" cy="8" r="1.6" fill="currentColor"/></svg>Learn</span>
-            <b>How it works</b>
-            <span>Capture, compile, compose, and deploy, end to end.</span>
+          <a class="nf-card" href="/platform">
+            <span class="nf-card__k" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><circle cx="3.5" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="12.5" cy="8" r="1.6" fill="currentColor"/></svg>Compiler</span>
+            <b>The compiler</b>
+            <span>Capture, compile, and deploy one signed .kolm model, end to end.</span>
           </a>
           <a class="nf-card" href="/docs">
             <span class="nf-card__k" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><rect x="3" y="2.5" width="10" height="11" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Build</span>
@@ -113,6 +121,7 @@
     </div>
   </section>
 </main>
+<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
@@ -125,54 +134,56 @@
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Own the AI you&rsquo;re renting - a signed model from your live API calls, run on your own hardware.</p>
+        <p class="foot__tag">Own the AI you're renting. A signed model compiled from your live API calls, run on your own hardware.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
-        <a href="/#pipeline">Pipeline</a>
-        <a href="/account/api-control-center">API control</a>
-        <a href="/integrations">Integrations</a>
-        <a href="/compare">Compare</a>
+        <a href="/platform">Overview</a>
+        <a href="/how-it-works">How it works</a>
         <a href="/runtimes">Runtime targets</a>
-        <a href="/docs">Docs</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/spec">Spec</a>
         <a href="/pricing">Pricing</a>
       </div>
       <div class="foot__col">
-        <h3>Surfaces</h3>
-        <a href="/docs#capture">Capture</a>
-        <a href="/docs#compile">Compile</a>
-        <a href="/docs#compose">Compose</a>
-        <a href="/docs#deploy">Deploy</a>
-        <a href="/audit">Audit</a>
+        <h3>Developers</h3>
+        <a href="/docs">Docs</a>
+        <a href="/account/api-control-center">API control</a>
+        <a href="/verify">Verify offline</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="foot__col">
+        <h3>Audit</h3>
+        <a href="/audit">Signed evidence</a>
+        <a href="/checks">What we test</a>
+        <a href="/report">Sample report</a>
+        <a href="/audit-pricing">Audit plans</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For reviewers</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
-        <a href="/verify">Verify</a>
-        <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/security">Security</a>
+        <a href="/transparency-log">Transparency log</a>
         <a href="/status">Status</a>
       </div>
       <div class="foot__col">
         <h3>Company</h3>
         <a href="/research">Research</a>
-        <a href="/changelog">Changelog</a>
         <a href="mailto:dev@kolm.ai">Contact</a>
-      </div>
-      <div class="foot__col">
-        <h3>Legal</h3>
         <a href="/terms">Terms</a>
         <a href="/privacy">Privacy</a>
         <a href="/dpa">DPA</a>
         <a href="/subprocessors">Subprocessors</a>
-        <a href="/sla">SLA</a>
       </div>
     </div>
     <div class="foot__bottom">
       <span class="badge badge--ok">Signed artifacts</span>
-      <span class="badge">API control center</span>
-      <span class="badge">Apache-2.0</span>
+      <span class="badge">Verify offline</span>
       <span class="badge">Open API contract</span>
-      <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge">Apache-2.0</span>
+      <span class="foot__copy">2026 kolm.ai &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>

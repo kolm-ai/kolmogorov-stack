@@ -72,24 +72,26 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <svg class="nav__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="nav__pop" id="m-platform" role="menu">
           <a role="menuitem" href="/platform"><b>Overview</b><span>The compiler, end to end</span></a>
-          <a role="menuitem" href="/how-it-works"><b>How it works</b><span>Capture &middot; Compile &middot; Compose &middot; Deploy</span></a>
-          <a role="menuitem" href="/runtimes"><b>Runtime targets</b><span>Where artifacts deploy</span></a>
-          <a role="menuitem" href="/integrations"><b>Integrations</b><span>Pipelines &amp; SDKs</span></a>
+          <a role="menuitem" href="/runtimes"><b>Runtime targets</b><span>Where the signed model runs</span></a>
+          <a role="menuitem" href="/integrations"><b>Integrations</b><span>Capture from your stack</span></a>
           <a role="menuitem" href="/spec"><b>Spec</b><span>The .kolm format</span></a>
+          <a role="menuitem" href="/verify"><b>Verify</b><span>Check any signed model offline</span></a>
         </div>
       </div>
       <div class="nav__group" data-menu>
         <button class="nav__top" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="m-dev">Developers
           <svg class="nav__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="nav__pop" id="m-dev" role="menu">
-          <a role="menuitem" href="/docs"><b>Docs</b><span>Guides &amp; API reference</span></a>
+          <a role="menuitem" href="/docs"><b>Docs</b><span>Guides and API reference</span></a>
           <a role="menuitem" href="/account/api-control-center"><b>API control</b><span>Keys, usage, limits</span></a>
-          <a role="menuitem" href="/verify"><b>Verify</b><span>Check any .kolm artifact</span></a>
           <a role="menuitem" href="/changelog"><b>Changelog</b><span>Shipped this cycle</span></a>
         </div>
       </div>
-      <a class="nav__top" href="/pricing" aria-current="page">Pricing</a>
-      <a class="nav__top" href="/trust">Trust</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/checks">What we test</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/trust">Trust</a>
+      <a href="/docs">Docs</a>
     </nav>
     <div class="nav__actions">
       <a class="nav__status" href="/status"><i></i>Operational</a>
@@ -376,6 +378,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
         <p class="prc-bill__note">Worked from the prices already listed above. On Pro, up to 500K captured calls and up to 50 model builds are inside the flat $49/mo, so a month that stays under both caps is just the plan price. Cross a cap and you step up to the next plan whose numbers fit; nothing meters past the limit silently. Move to yearly and the same plan is 17% off.</p>
       </div>
+
+      <div class="grid grid--2" style="margin-top:var(--s6)">
+        <article class="card">
+          <span class="card__k">WHICH PLAN AM I</span>
+          <h3>Read it in one line.</h3>
+          <p>Solo and proving it on your own calls: <b>Free</b>. One production app, one owner: <b>Indie</b> at $29/mo. Real workloads you want to move onto your own hardware: <b>Pro</b> at $49/mo. A team building and reviewing models together: <b>Team</b> at $99/mo. A fleet running owned models in production: <b>Business</b> at $499/mo. Private cloud, regulated, or high volume: <b>Enterprise</b>. Two meters decide it: how many calls you capture, and how many models you compile.</p>
+        </article>
+      </div>
     </div>
   </section>
 
@@ -464,16 +474,17 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap cta__in">
       <p class="eyebrow">CTA · START FREE</p>
       <h2>Ready to own what you're renting?</h2>
-      <p class="lede">Point a few calls at Kolm, watch it capture, compile one model, and check the receipt yourself. Prove it on one workload, then scale when you're ready - free to start.</p>
+      <p class="lede">Point a few calls at Kolm, watch it capture, compile one model, and check the receipt yourself. Prove it on one workload, then scale when you're ready - the Free plan costs nothing and needs no card.</p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="/signup">Get an API key</a>
-        <a class="btn btn--ghost" href="/docs">Read the docs</a>
+        <a class="btn btn--primary" href="/signup">Start free, own your first model</a>
+        <a class="btn btn--ghost" href="/docs">Read the quickstart</a>
       </div>
     </div>
   </section>
 
 </main>
 
+<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
@@ -486,54 +497,56 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p class="foot__tag">Own the AI you&rsquo;re renting - a signed model from your live API calls, run on your own hardware.</p>
+        <p class="foot__tag">Own the AI you're renting. A signed model compiled from your live API calls, run on your own hardware.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
-        <a href="/#pipeline">Pipeline</a>
-        <a href="/account/api-control-center">API control</a>
-        <a href="/integrations">Integrations</a>
-        <a href="/compare">Compare</a>
+        <a href="/platform">Overview</a>
+        <a href="/how-it-works">How it works</a>
         <a href="/runtimes">Runtime targets</a>
-        <a href="/docs">Docs</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/spec">Spec</a>
         <a href="/pricing">Pricing</a>
       </div>
       <div class="foot__col">
-        <h3>Surfaces</h3>
-        <a href="/docs#capture">Capture</a>
-        <a href="/docs#compile">Compile</a>
-        <a href="/docs#compose">Compose</a>
-        <a href="/docs#deploy">Deploy</a>
-        <a href="/audit">Audit</a>
+        <h3>Developers</h3>
+        <a href="/docs">Docs</a>
+        <a href="/account/api-control-center">API control</a>
+        <a href="/verify">Verify offline</a>
+        <a href="/changelog">Changelog</a>
+      </div>
+      <div class="foot__col">
+        <h3>Audit</h3>
+        <a href="/audit">Signed evidence</a>
+        <a href="/checks">What we test</a>
+        <a href="/report">Sample report</a>
+        <a href="/audit-pricing">Audit plans</a>
+        <a href="/solutions/ai-vendors">For AI vendors</a>
+        <a href="/solutions/enterprise-buyers">For reviewers</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
-        <a href="/verify">Verify</a>
-        <a href="/security">Security</a>
         <a href="/trust">Trust center</a>
+        <a href="/security">Security</a>
+        <a href="/transparency-log">Transparency log</a>
         <a href="/status">Status</a>
       </div>
       <div class="foot__col">
         <h3>Company</h3>
         <a href="/research">Research</a>
-        <a href="/changelog">Changelog</a>
         <a href="mailto:dev@kolm.ai">Contact</a>
-      </div>
-      <div class="foot__col">
-        <h3>Legal</h3>
         <a href="/terms">Terms</a>
         <a href="/privacy">Privacy</a>
         <a href="/dpa">DPA</a>
         <a href="/subprocessors">Subprocessors</a>
-        <a href="/sla">SLA</a>
       </div>
     </div>
     <div class="foot__bottom">
       <span class="badge badge--ok">Signed artifacts</span>
-      <span class="badge">API control center</span>
-      <span class="badge">Apache-2.0</span>
+      <span class="badge">Verify offline</span>
       <span class="badge">Open API contract</span>
-      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+      <span class="badge">Apache-2.0</span>
+      <span class="foot__copy">2026 kolm.ai &middot; <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
 </footer>
