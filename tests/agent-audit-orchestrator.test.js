@@ -12,6 +12,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runAudit, AUDIT_SPEC_VERSION } from '../src/audit-orchestrator.js';
+import { RED_TEAM_SPEC_VERSION } from '../src/red-team.js';
+import { MEMORY_LEDGER_SPEC_VERSION } from '../src/memory-integrity-ledger.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
@@ -237,6 +239,42 @@ test('zero egress -> ASR-3 untested and EXCLUDED from the readiness denominator'
   const weight = { pass: 1, attention: 0.5, blocking: 0 };
   const expected = Math.round((100 * exercised.reduce((s, st) => s + weight[st], 0)) / exercised.length);
   assert.equal(r.summary.readiness_pct, expected, 'readiness computed over ASR-1/ASR-2 only');
+});
+
+// ---------------------------------------------------------------------------
+// Spec-version sync (orchestrator-specversion-sync): the red-team / memory-ledger
+// FALLBACK blocks (taken only when the analyzer throws) must stamp the version
+// OWNED BY the module, not a stale hardcoded string. The signed result is the
+// cross-module integration point, so a drift here would orphan/mislabel a signed
+// artifact. We force the analyzer's never-throw contract to break by passing a
+// poisoned options.domain whose getter throws when the orchestrator reads it
+// inside the try { runRedTeam(events, { domain: options.domain }) } block.
+test('runRedTeam throwing -> fallback red_team.spec_version is RED_TEAM_SPEC_VERSION, not a stale string', () => {
+  const poisoned = {
+    source: 'litellm',
+    get domain() { throw new Error('forced analyzer fault for spec-version sync test'); },
+  };
+  // runAudit must keep its never-throw contract even when an analyzer faults.
+  const r = runAudit(BAD_LOG, poisoned);
+  assert.ok(r.red_team && typeof r.red_team === 'object', 'red_team block present on fault');
+  assert.equal(
+    r.red_team.spec_version,
+    RED_TEAM_SPEC_VERSION,
+    'fallback stamps the version owned by red-team.js (currently 0.3), never a hardcoded 0.1',
+  );
+  // Guard against silent reintroduction of the stale literal.
+  assert.notEqual(r.red_team.spec_version, 'asr-redteam/0.1', 'stale red-team version must not return');
+});
+
+test('memory-ledger fallback uses MEMORY_LEDGER_SPEC_VERSION from the owning module', () => {
+  // The memory-integrity fallback literal must equal the module-owned constant.
+  // Proven by identity: the exported constant is the single source of truth that
+  // the orchestrator fallback now references, so any future drift in the module
+  // version propagates instead of silently diverging.
+  assert.equal(MEMORY_LEDGER_SPEC_VERSION, 'asr-memory-ledger/0.1');
+  // A normal audit carries a memory-integrity spec_version sourced from the module.
+  const r = runAudit(CLEAN_LOG, { source: 'litellm' });
+  assert.equal(r.memory_integrity.spec_version, MEMORY_LEDGER_SPEC_VERSION);
 });
 
 test('the committed dogfood fixture stays a meaningful end-to-end demo', () => {

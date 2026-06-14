@@ -34,7 +34,7 @@ import { createJob, getJob, listJobs, runJob } from './compile.js';
 import { cidFromManifestHashes, verifyCidAgainstManifestHashes, canonicalJson as cidCanonicalJson } from './cid.js';
 import * as recall from './recall.js';
 import { verifyStripeSignature, planFromAmount, appendCheckoutParams, createBillingPortalSession, prorataCreditFromEvent, applyStripeCustomerCredit, retrieveStripeInvoice, createStripeRefund, stripeSecretKeyFromEnv } from './stripe.js';
-import { parseAsrRef } from './asr-billing.js';
+import { parseAsrRef, ASR_PRODUCTS } from './asr-billing.js';
 import { fulfillReportPurchase, fulfillPackagePurchase, activateSubscription, setSubscriptionStatus, SUBSCRIPTIONS as ASR_SUBSCRIPTIONS, PACKAGES as ASR_PACKAGES } from './asr-fulfillment.js';
 import { recordInvoiceFromStripe, recordRefund as recordTenantRefund, listInvoices as listTenantInvoices, publicInvoice } from './invoices.js';
 import { scheduleDunning, resolveDunning, listDunning } from './dunning.js';
@@ -172,7 +172,7 @@ import { AUDIT_OPS, tryAppendAudit, listAuditEvents, verifyAuditChain } from './
 // caller can't dump a tenant secret through a debug log.
 import { log as wclog } from './log.js';
 import { verifyCredential, PROVENANCE_SPEC } from './provenance.js';
-import { verifySignatureBlock as verifyEd25519Block, keyFingerprint as ed25519Fingerprint, verify as ed25519Verify } from './ed25519.js';
+import { verifySignatureBlock as verifyEd25519Block, keyFingerprint as ed25519Fingerprint, verify as ed25519Verify, loadOrCreateDefaultSigner as __loadDefaultSigner } from './ed25519.js';
 import * as pubkeyDir from './pubkey-directory.js';
 import { verifySigstoreBundle, attestWithRekor, fetchRekorEntryByLogIndex, rekorUrl as sigstoreRekorUrl, isDisabled as isSigstoreDisabled, submitToRekor } from './sigstore.js';
 import { saveCorpus as saveTenantCorpus, loadCorpus as loadTenantCorpus, listCorpora as listTenantCorpora, deleteCorpus as deleteTenantCorpus, hashCorpusFile as hashTenantCorpusFile } from './tenant-holdout.js';
@@ -477,6 +477,10 @@ import { registerRegRoutes as __registerRegRoutes_w834 } from './reg-routes.js';
 import { registerAccountUiRoutes as __registerAccountUiRoutes_w921 } from './account-ui-routes.js';
 import { registerWebsiteStatusRoutes as __registerWebsiteStatusRoutes_w921 } from './website-status-routes.js';
 import { register as __registerGovernRoutes_w921 } from './govern-routes.js';
+// W384 - PUBLIC transparency-log read routes (RFC 9162 style: size, entries,
+// inclusion proof, signed checkpoints). Module owns the handler bodies; mounted
+// BEFORE authMiddleware so the GET endpoints stay public per auth.js:557.
+import { register as __registerTransparencyLogRoutes } from './transparency-log-routes.js';
 import { register as __registerIntotoReceiptRoutes_w921 } from './intoto-receipt-routes.js';
 import { register as __registerMcpGatewayRoutes_w921 } from './mcp-gateway-routes.js';
 // Agent Security-Review audit - signed evidence report API (sessions/scan/verify).
@@ -6106,6 +6110,11 @@ export function buildRouter() {
       uptime_s: Math.floor(process.uptime()),
     });
   });
+
+  // W384 - PUBLIC transparency-log read routes. Mounted BEFORE authMiddleware
+  // so the read-only GET endpoints (size / entries / proof / checkpoints) stay
+  // reachable with no kolm account per auth.js:557. No tenant data is served.
+  __registerTransparencyLogRoutes(r);
 
   r.use(authMiddleware);
 
@@ -13138,7 +13147,14 @@ export function buildRouter() {
           }
           if (asrKind === 'asr_report') {
             const auditId = (s.metadata && s.metadata.audit_id) || (asrRef && asrRef.audit_id) || null;
-            const fr = fulfillReportPurchase({ audit_id: auditId, stripe_session_id: s.id });
+            // W384 - thread an EXPLICIT signer through the $750 report fulfilment
+            // so the signed artifact is produced with the live default Ed25519
+            // key. Loaded synchronously (this runs inside a sync withTransaction
+            // callback); null on load failure preserves the existing in-fulfiller
+            // fallback (behaviour identical when no signer is available).
+            let __signer = null;
+            try { __signer = __loadDefaultSigner(); } catch { __signer = null; }
+            const fr = fulfillReportPurchase({ audit_id: auditId, stripe_session_id: s.id, signer: __signer });
             // Write not confirmed (e.g. ephemeral-store failure): throw so the
             // whole txn (incl. the stripe_events idempotency row) rolls back and
             // Stripe re-delivers the event rather than losing the purchase.
@@ -13152,6 +13168,13 @@ export function buildRouter() {
           }
           if (asrKind === 'asr_continuous') {
             const product = (s.metadata && s.metadata.product_key) || (asrRef && asrRef.product) || null;
+            // W384 - validate the product_key against the catalog BEFORE
+            // activating. An unknown / injected product_key must never create a
+            // subscription; mirror the missing-tenant guard (ok 200, no write).
+            if (!product || !ASR_PRODUCTS[product]) {
+              console.error('[webhook] asr_continuous invalid product_key', JSON.stringify(s.metadata || {}));
+              return { kind: 'ok', body: { received: true, asr: 'continuous', warning: 'invalid_product', activated: false, id: event.id } };
+            }
             const asrTenant = (s.metadata && s.metadata.tenant_id) || (asrRef && asrRef.tenant_id) || null;
             if (!asrTenant || !product) {
               // Cannot bind the subscription to a tenant: do not silently swallow.

@@ -42,6 +42,12 @@ import { getPublicTransparencyLog } from './transparency-log-routes.js';
 // (coverage-declaration.js imports this module's canonicalize; both sides only
 // reference each other inside function bodies, so the cycle is benign.)
 import { declarationCaveat } from './coverage-declaration.js';
+// report-revocation-parity: consult the persisted issuer-key revocation store
+// from the PURE verifier so a revoked-key report cannot verify true anywhere -
+// the route, the CLI, and the browser bridge all flow through verifyReport().
+// Static import is cycle-safe: key-revocation.js imports only store.js, never
+// this module, so no import cycle is introduced (unlike coverage-declaration).
+import { status as issuerKeyStatus } from './key-revocation.js';
 
 // Versioned so a re-attestation is a comparable delta and a signed report
 // records exactly which builder shape produced it.
@@ -922,6 +928,28 @@ export function verifyReport(envelope, opts = {}) {
         key_fingerprint: ok ? cv.key_fingerprint : (cs && cs.key_fingerprint != null ? String(cs.key_fingerprint) : null),
       };
     });
+  }
+
+  // report-revocation-parity: a signature can verify (tier 1) and STILL be
+  // untrustworthy if the issuer key has since been revoked (compromised /
+  // withdrawn). The PURE verifier must close this gap so a revoked-key report
+  // fails everywhere verifyReport runs (route, CLI, SDK bridge) - not only on
+  // the route that bolted revocation on separately. Consult the persisted store
+  // synchronously (issuerKeyStatus is pure + never throws on a bad fp, but guard
+  // anyway so a store outage degrades to informational, never throws/flips a
+  // clean signature to a hard failure). Runs last: only a fully-verified,
+  // canonicalization-sound report with a resolved fingerprint reaches here.
+  if (issuerKeyStatus && v.key_fingerprint) {
+    try {
+      const st = issuerKeyStatus(v.key_fingerprint);
+      if (st && st.status === 'revoked') {
+        checks.push({ name: 'issuer key not revoked', ok: false, detail: 'key ' + st.fingerprint + ' revoked at ' + st.revoked_at + ': ' + (st.reason || '') });
+        return { ok: false, reason: 'issuer_key_revoked', key_fingerprint: v.key_fingerprint, checks };
+      }
+      checks.push({ name: 'issuer key not revoked', ok: true, detail: 'key ' + v.key_fingerprint + ' is ' + (st && st.status ? st.status : 'live') });
+    } catch {
+      checks.push({ name: 'issuer key not revoked', ok: null, detail: 'revocation_check_unavailable' });
+    }
   }
 
   const out = { ok: true, key_fingerprint: v.key_fingerprint, checks };

@@ -1548,7 +1548,7 @@ export function register(r, deps = {}) {
   // EXTERNAL scheduler hitting this with x-kolm-cron-secret (containers restart,
   // so no in-process timer). Idempotent: claim-then-run, never double-signs.
   // -------------------------------------------------------------------------
-  r.post('/v1/audit/continuous/tick', (req, res) => {
+  r.post('/v1/audit/continuous/tick', async (req, res) => {
     const secret = process.env.KOLM_CRON_SECRET;
     if (!secret) return _err(res, 503, 'cron_not_configured', 'set KOLM_CRON_SECRET to enable scheduled re-attestation');
     // Header-only: never accept the secret via query string (it would leak into
@@ -1557,8 +1557,13 @@ export function register(r, deps = {}) {
     if (!_safeEq(provided, secret)) {
       return res.status(403).json({ ok: false, error: 'forbidden', detail: 'missing or invalid x-kolm-cron-secret' });
     }
+    // Thread an explicit signer the same way the Stripe webhook now does, so the
+    // scheduled re-attestation signs with the canonical per-machine key rather
+    // than relying on the fulfillment default. null preserves current behavior.
+    let __signer = null;
+    try { const ed = await import('./ed25519.js'); __signer = ed.loadOrCreateDefaultSigner(); } catch { __signer = null; }
     let out;
-    try { out = runDueReattestations({}); }
+    try { out = runDueReattestations({ signer: __signer }); }
     catch (e) { return _err(res, 500, 'tick_failed', e && e.message); }
     return res.json({ ok: true, ...out });
   });
@@ -1568,11 +1573,15 @@ export function register(r, deps = {}) {
   // immediate re-attestation for the caller's active subscription(s). Auth-gated
   // by the tenant's own API key (call it from CI after a deploy).
   // -------------------------------------------------------------------------
-  r.post('/v1/audit/continuous/deploy-hook', (req, res) => {
+  r.post('/v1/audit/continuous/deploy-hook', async (req, res) => {
     const trec = _authOrReject(req, res);
     if (!trec) return;
+    // Thread an explicit signer (mirrors the webhook + scheduled tick wiring).
+    // null preserves current behavior.
+    let __signer = null;
+    try { const ed = await import('./ed25519.js'); __signer = ed.loadOrCreateDefaultSigner(); } catch { __signer = null; }
     let out;
-    try { out = forceReattest({ tenant_id: trec.id }); }
+    try { out = forceReattest({ tenant_id: trec.id, signer: __signer }); }
     catch (e) { return _err(res, 500, 'reattest_failed', e && e.message); }
     if (!out.ok && out.reason === 'no_active_subscription') {
       return _err(res, 409, 'no_active_subscription', 'no active Continuous subscription for this tenant');

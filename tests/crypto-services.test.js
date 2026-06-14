@@ -37,6 +37,7 @@ const keyrev = await import('../src/key-revocation.js');
 const ed = await import('../src/ed25519.js');
 const reportBuilder = await import('../src/attestation-report-builder.js');
 const auditRoutes = await import('../src/audit-routes.js');
+const gwReceipt = await import('../src/gateway-receipt.js');
 const verifier = await import('../public/kolm-audit-verify.js');
 
 const sha256hex = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -299,6 +300,42 @@ test('M5 key-revocation: default live, revoke -> revoked, rotate -> rotated', ()
   assert.equal(keyrev.isRevoked(oldFp), false);
 });
 
+test('M5 verifyReceipt parity: a receipt signed by a revoked key fails offline too', () => {
+  keyrev._resetKeyStatusForTests();
+  const signer = ed.loadOrCreateDefaultSigner();
+
+  // build + sign a real receipt with the default signer
+  const { receipt, key_fingerprint } = gwReceipt.buildAndSignReceipt({
+    namespace_id: 'ns_revoke_parity',
+    provider: 'anthropic',
+    model: 'claude-opus-4-8',
+    input_text: 'hello',
+    output_text: 'world',
+    signer,
+  });
+
+  // before revocation: verifyReceipt accepts it
+  const before = gwReceipt.verifyReceipt(receipt);
+  assert.equal(before.ok, true, JSON.stringify(before));
+  assert.equal(before.key_fingerprint, key_fingerprint);
+
+  // revoke the signing key
+  keyrev.revoke(key_fingerprint, 'parity test revocation');
+  assert.equal(keyrev.isRevoked(key_fingerprint), true);
+
+  // after revocation: the SAME (mathematically valid) receipt is rejected,
+  // matching the HTTP route's verdict. 'verified' means the same offline+online.
+  const after = gwReceipt.verifyReceipt(receipt);
+  assert.equal(after.ok, false);
+  assert.equal(after.reason, 'issuer_key_revoked');
+  assert.equal(after.key_fingerprint, key_fingerprint);
+
+  // and a clean (un-revoked) key still verifies after reset
+  keyrev._resetKeyStatusForTests();
+  const restored = gwReceipt.verifyReceipt(receipt);
+  assert.equal(restored.ok, true, JSON.stringify(restored));
+});
+
 // =============================================================================
 // Integration - a report signed by a revoked key FAILS verification
 //  (a) server route POST /v1/audit/report/verify, and
@@ -338,9 +375,14 @@ test('integration: server verify route flips trusted:false when the issuer key i
   // revoke the embedded signing key
   keyrev.revoke(signer.key_fingerprint, 'integration revocation');
 
-  // after revocation: signature still verifies but trust is withdrawn
+  // after revocation: trust is withdrawn. report-revocation-parity moved the
+  // revocation check INTO the pure verifyReport(), so a revoked-key report now
+  // fails verification OFFLINE too (verify.ok === false, reason
+  // 'issuer_key_revoked') - it can no longer verify true anywhere. The
+  // mathematical signature is unchanged; the verdict now refuses a revoked key.
   res = await r.call('POST', '/v1/audit/report/verify', { body: { report: envelope } });
-  assert.equal(res.body.verify.ok, true);
+  assert.equal(res.body.verify.ok, false);
+  assert.equal(res.body.verify.reason, 'issuer_key_revoked');
   assert.equal(res.body.trusted, false);
   assert.equal(res.body.reason, 'issuer_key_revoked');
   assert.equal(res.body.revocation.status, 'revoked');

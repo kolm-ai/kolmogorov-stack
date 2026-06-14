@@ -818,3 +818,39 @@ test('W384 #27 — GET /v1/connectors returns providers + summary', async () => 
     assert.ok(body.summary, 'summary envelope must be present');
   });
 });
+
+// =====================================================================
+// W384 #28 — transparency-log routes are REGISTERED and PUBLIC.
+//
+// Pre-fix these GETs were permanently 404 (the module was never mounted).
+// After wiring register() into the PUBLIC section of buildRouter() they must
+// resolve WITHOUT an api_key (mounted before authMiddleware per auth.js:557).
+// We assert status != 404 (the bug signature) and a well-formed envelope.
+// =====================================================================
+test('W384 #28 — GET /v1/transparency-log/size is registered + public (!=404)', async () => {
+  const { app } = await makeAppAndTenant();
+  await withServer(app, async (base) => {
+    // No Authorization header — this read must be reachable with no account.
+    const r = await fetch(base + '/v1/transparency-log/size');
+    assert.notEqual(r.status, 404, 'transparency-log/size must be mounted (was 404 pre-fix)');
+    assert.equal(r.status, 200, 'size endpoint should serve 200');
+    const body = await r.json();
+    assert.equal(body.ok, true);
+    assert.equal(typeof body.tree_size, 'number', 'tree_size must be a number');
+    assert.ok('root_hash' in body, 'root_hash must be present');
+  });
+});
+
+test('W384 #29 — transparency-log entries + checkpoints/latest are public (!=404 + !=401)', async () => {
+  const { app } = await makeAppAndTenant();
+  await withServer(app, async (base) => {
+    for (const p of ['/v1/transparency-log/entries', '/v1/transparency-log/checkpoints/latest']) {
+      const r = await fetch(base + p);
+      assert.notEqual(r.status, 404, `${p} must be mounted (was 404 pre-fix)`);
+      assert.notEqual(r.status, 401, `${p} must stay public (no auth) per auth.js:557`);
+      assert.equal(r.status, 200, `${p} should serve 200`);
+      const body = await r.json();
+      assert.equal(body.ok, true, `${p} must return ok envelope`);
+    }
+  });
+});

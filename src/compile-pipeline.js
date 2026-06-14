@@ -678,7 +678,13 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   // sees exactly the train half of the workbench split. Fallback to
   // corpusPairs only when stubAllowed branch hydrated trainPairs from the
   // full corpus (W409c stub path).
-  const distillPairs = (trainPairs && trainPairs.length) ? trainPairs : corpusPairs;
+  if (!(trainPairs && trainPairs.length)) {
+    if (!allowStub) {
+      throw new Error('distill: trainPairs empty and allowStub is false — refusing to distill on full corpus (W411 train/holdout boundary)');
+    }
+    trainPairs = corpusPairs.slice();
+  }
+  const distillPairs = trainPairs;
   const distillIter = distill({
     teacher_namespace: namespace,
     student_base: studentBase,

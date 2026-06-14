@@ -33,6 +33,9 @@ import {
   buildSignatureBlock,
   verifySignatureBlock,
 } from './ed25519.js';
+// key-revocation is leaf-level on store.js (no cycle with gateway-receipt).
+// Static import is safe and keeps verifyReceipt() synchronous.
+import { status as issuerKeyStatus } from './key-revocation.js';
 
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
@@ -181,7 +184,25 @@ export function verifyReceipt(receipt) {
   const stripped = { ...receipt };
   delete stripped.signature_ed25519;
   const canonical = canonicalForSigning(stripped);
-  return verifySignatureBlock(sigBlock, canonical);
+  const result = verifySignatureBlock(sigBlock, canonical);
+  // Parity with the HTTP verify route: a mathematically-valid signature made by
+  // a REVOKED issuer key must NOT be treated as verified. Consult the (sync)
+  // revocation store so 'verified' means the same thing offline and online.
+  if (result.ok) {
+    const fp = sigBlock.key_fingerprint;
+    if (fp) {
+      try {
+        const st = issuerKeyStatus(fp);
+        if (st && st.valid === false) {
+          return { ok: false, reason: 'issuer_key_revoked', key_fingerprint: fp };
+        }
+      } catch {
+        // store unavailable: do not silently pass - surface the gap to the caller.
+        return { ...result, revocation_check: 'unavailable' };
+      }
+    }
+  }
+  return result;
 }
 
 export { RECEIPT_SCHEMA, ALL_FIELDS };

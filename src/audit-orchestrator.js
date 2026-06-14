@@ -19,14 +19,14 @@ import { ingestForAudit, KOLM_CAPTURE_SOURCE } from './audit-ingest.js';
 import { analyzePermissions } from './permission-analyzer.js';
 import { analyzeAuditTrail } from './audit-trail-analyzer.js';
 import { mapControls } from './control-mapper.js';
-import { runRedTeam } from './red-team.js';
+import { runRedTeam, RED_TEAM_SPEC_VERSION } from './red-team.js';
 import { analyzeModelProvenance } from './model-provenance-analyzer.js';
 import { analyzeAgentIdentity } from './agent-identity-analyzer.js';
 import { analyzeRagMemory } from './rag-memory-analyzer.js';
 import { analyzeDelegation } from './delegation-analyzer.js';
 import { analyzeEgress } from './egress-analyzer.js';
 import { detectorCoverage } from './sensitive-data.js';
-import { analyzeMemoryIntegrity } from './memory-integrity-ledger.js';
+import { analyzeMemoryIntegrity, MEMORY_LEDGER_SPEC_VERSION } from './memory-integrity-ledger.js';
 import { buildSubprocessorInventory } from './subprocessor-inventory.js';
 
 // Versioned so a re-attestation is a cheap, comparable delta and so a signed
@@ -203,7 +203,7 @@ export function runAudit(logs, opts = {}) {
   // belt-and-braces like the other analyzers.
   const memoryIntegrity = _safeAnalyze(
     () => analyzeMemoryIntegrity(ragMemory),
-    () => ({ spec_version: 'asr-memory-ledger/0.1', ledger: [], chain_intact: null, findings: [], summary: { writes: 0, untested: true, by_severity: { critical: 0, high: 0, medium: 0, low: 0, info: 0 } } })
+    () => ({ spec_version: MEMORY_LEDGER_SPEC_VERSION, ledger: [], chain_intact: null, findings: [], summary: { writes: 0, untested: true, by_severity: { critical: 0, high: 0, medium: 0, low: 0, info: 0 } } })
   );
 
   // 3. Map every finding onto the ASR controls + the buyer's frameworks. The
@@ -229,7 +229,7 @@ export function runAudit(logs, opts = {}) {
   try {
     redTeam = runRedTeam(events, { domain: options.domain });
   } catch (_e) {
-    redTeam = { spec_version: 'asr-redteam/0.1', domain: 'generic', red_team_score: null, probes: [], summary: { domain: 'generic', red_team_score: null, probes_total: 0, tested: 0, resisted: 0, exposed: 0, untested: 0 } };
+    redTeam = { spec_version: RED_TEAM_SPEC_VERSION, domain: 'generic', red_team_score: null, probes: [], summary: { domain: 'generic', red_team_score: null, probes_total: 0, tested: 0, resisted: 0, exposed: 0, untested: 0 } };
   }
 
   // 4. Readiness rollup - explicit about coverage, never inflated.
