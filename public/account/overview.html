@@ -125,7 +125,7 @@
       <a class="btn btn--ghost btn--sm" href="/account/api-control-center">API control</a>
       <a class="btn btn--ghost btn--sm" href="/docs">Docs</a>
       <a class="btn btn--ghost btn--sm" href="/pricing">Pricing</a>
-      <a class="btn btn--ghost btn--sm" href="https://audit.kolm.ai/">Evidence archive</a>
+      <a class="btn btn--ghost btn--sm" href="/">Evidence archive</a>
     </div>
   </div>
 
@@ -304,7 +304,7 @@
     html += '<h2 class="section-title">What\'s live in your workspace</h2><div class="surfaces">'+surfaces.map(renderSurface).join('')+'</div>';
     html += '<h2 class="section-title">Recent compile jobs</h2>';
     html += jobs.length ? '<div class="jobs">'+jobs.map(renderJob).join('')+'</div>' : '<div class="panel"><p class="muted">No models compiled yet. Point traffic at Kolm first, then run <span class="mono">POST /v1/compile</span> to turn it into a model you own.</p></div>';
-    html += '<h2 class="section-title">Evidence archive</h2><div class="panel"><p class="muted">Every signed artifact has a receipt anyone can verify - browse the full archive at <a href="https://audit.kolm.ai/">audit.kolm.ai</a>. Your workspace here is where you capture calls, compile them, run them, and export the proof.</p></div>';
+    html += '<h2 class="section-title">Evidence archive</h2><div class="panel"><p class="muted">Every signed artifact has a receipt anyone can verify - browse the full archive at <a href="/transparency-log">the evidence archive</a>. Your workspace here is where you capture calls, compile them, run them, and export the proof.</p></div>';
     document.getElementById('auth').hidden = isPreview ? false : true;
     var content = document.getElementById('content');
     content.hidden = false;
