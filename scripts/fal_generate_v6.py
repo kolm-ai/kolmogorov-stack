@@ -27,63 +27,78 @@ HEADERS = {
     "Content-Type": "application/json",
 }
 
-# Six renders. Each has (slug, size, prompt).
-# Prompts target: monolithic, single periwinkle accent, deep midnight, editorial photography.
+# Universal style suffix (KOLM_BLACK_UNICORN_SPEC.md §6.3) appended to every prompt.
+SUFFIX = (
+    "Photoreal product render, medium-format studio capture, 5600K cool key + soft 2:1 fill to hold detail in the blacks, "
+    "single phosphor-green rim light tracing the edges. Deep obsidian field #08090A, rich true blacks, no banding. "
+    "Phosphor/uranium green #3FE5A0 used surgically as the ONLY chroma — a glow, not a flood. Brushed graphite and gunmetal "
+    "hardware, satin not glossy. Premium, expensive, buttoned-up, restrained. No text, no letters, no numbers, no logos, "
+    "no UI labels, no watermark, no people. Atomic-age retro-futurist instrument character, editorial, monolithic."
+)
+
+# Six renders. Each has (slug, image_size, prompt) where prompt = scene + SUFFIX.
+# Brand: near-black obsidian, ONE phosphor-green #3FE5A0 accent (no blue/purple), blank/unlabeled
+# panels (gpt-image-2 renders text accurately, so any instrument noun risks a legible label).
+# image_size is a named enum OR a {"width","height"} dict (the hero uses a custom OG size).
 RENDERS = [
     (
-        "v6-monolith",
-        "landscape_16_9",
-        "A single matte-black monolithic slab the size of a tombstone, photographed from a low angle in a vast dim concrete hall. "
-        "Dust-soft volumetric light from a single overhead source. The slab is engraved with one micro-thin periwinkle (#7C8CFF) glowing seal "
-        "near the top edge — a small geometric mark, no text, no letters. The seal emits a faint cool glow. "
-        "Rich blacks (#0a0a0a) dominate. Architectural, sacred, monolithic. No people. No props. No text. "
-        "Editorial fine-art photography, large-format film aesthetic, Lynchian gravity. "
-        "Crisp focus on the slab, shallow falloff into a void. Negative space carries the frame.",
+        "kn-hero-reactor-panel",
+        {"width": 1200, "height": 632},  # custom OG/hero size (§6.5); promote -> crop 2px -> 1200x630
+        "A machined obsidian instrument panel photographed dead-on in a near-black studio, hairline-thin gunmetal seams "
+        "dividing four stacked horizontal data lanes that are blank and unlabeled — no text, no characters, no engraved words, "
+        "a single phosphor-green #3FE5A0 rim light tracing the top edge and one glowing green pilot LED at the upper left, "
+        "the lanes lit only by faint green indicator dots, deep field #08090A to #0F1011 to #191A1B, satin not glossy, one soft "
+        "volumetric green bloom behind the panel's right shoulder, fine containment grooves milled into the bezel, expensive and restrained. "
+        + SUFFIX,
     ),
     (
-        "v6-compile",
-        "landscape_16_9",
-        "A long horizontal exposure: ten thin vertical light beams of warm white converging into a single periwinkle (#7C8CFF) point of light "
-        "that fuses into a small dense matte-black cube the size of a fist on a polished black plinth. "
-        "The cube is the only solid object in frame; the beams are pure photons. Deep midnight (#0a0a0a) field. "
-        "Cinematic dolly-zoom geometry. No text, no letters, no UI. "
-        "Editorial product photography, monolithic, restrained, single accent of periwinkle.",
+        "kn-artifact-core",
+        "square_hd",
+        "A single small dense matte-black artifact the size of a fist resting on a polished obsidian plinth in a void, its faces "
+        "milled with concentric containment rings and one phosphor-green #3FE5A0 core seam glowing from a hairline gap as if sealed "
+        "under pressure, a tiny abstract geometric core-mark embossed at center — a glyph, not letters, not a logo, no text, "
+        "deep field #08090A to #0F1011 to #191A1B, rich true blacks, satin gunmetal edge catching a single green rim light, "
+        "monolithic, watch-movement precision. "
+        + SUFFIX,
     ),
     (
-        "v6-anatomy",
+        "kn-runtime-shrink",
         "landscape_16_9",
-        "A precision exploded-view illustration of a small black sealed artifact opened in cross-section — five horizontal paper-thin "
-        "layers floating with knife-edge spacing, each a different microtexture (woven, etched, gridded, pierced, foil-stamped). "
-        "One single periwinkle (#7C8CFF) thread runs vertically through all five layers like a binding stitch. "
-        "Deep midnight (#0a0a0a) background. Studio macro photography, top-light, soft shadows. "
-        "No text, no labels, no letters. Editorial restraint, watch-movement precision.",
+        "A black architectural diptych in one frame: on the left a large machined obsidian instrument slab, on the right the "
+        "identical object shrunk to a small handheld matte-black device, both in the same satin gunmetal material with blank "
+        "unlabeled faces — no text, no buttons with writing, no screens with characters, connected by a single thin glowing "
+        "phosphor-green #3FE5A0 line of light tracing from the large object to the small one, deep field #08090A to #0F1011 to "
+        "#191A1B, single key light, deep shadows, the same artifact at two scales, monolithic minimalism. "
+        + SUFFIX,
     ),
     (
-        "v6-verify",
-        "landscape_16_9",
-        "A macro photograph of a single matte-black wax seal pressed into deep-midnight paper, with one periwinkle (#7C8CFF) "
-        "geometric mark embossed at its center — a tiny abstract glyph, not letters. The wax has a soft satin sheen. "
-        "Light rakes from the upper left, casting long delicate shadow grain. "
-        "Frame composition: the seal sits dead center, surrounded by an enormous field of texture-rich black paper. "
-        "No text, no logo. Fine-art still life, museum-grade, contemplative.",
+        "kn-anatomy-stack",
+        "portrait_16_9",
+        "A precision exploded-view of a small black sealed artifact opened in cross-section — five horizontal paper-thin obsidian "
+        "layers floating with knife-edge spacing, each a different microtexture (woven, etched, gridded, pierced, brushed), all "
+        "faces blank and unlabeled with no engraved text, no numbers, no callouts, no annotation marks, one single phosphor-green "
+        "#3FE5A0 thread of light running vertically through all five layers like a binding line, deep field #08090A to #0F1011 to "
+        "#191A1B, studio macro, top light, soft shadows, watch-movement precision, editorial restraint. "
+        + SUFFIX,
     ),
     (
-        "v6-runtime",
+        "kn-containment-texture",
         "landscape_16_9",
-        "A black architectural diptych: on the left, a small handheld matte-black device the size of a phone; on the right, a "
-        "continental landscape rendered as a mirrored matte-black slab ridge, both connected by a single thin glowing periwinkle (#7C8CFF) line. "
-        "Both objects identical in surface material. Deep midnight (#0a0a0a) background. "
-        "Editorial fashion-photography lighting, single key, deep shadows. "
-        "No text, no UI, no people. Monolithic minimalism, the same artifact in two scales.",
+        "A full-bleed near-black field of finely machined obsidian — softly milled concentric containment rings and a faint "
+        "scanline grain, lit by one low phosphor-green #3FE5A0 glow rising from the lower edge like reactor light through a vent, "
+        "no focal object, pure texture and atmosphere, deep field #08090A to #0F1011 to #191A1B, true blacks with no banding, "
+        "the green a faint rim not a flood, restrained, monolithic, used as an ambient band behind a CTA. "
+        + SUFFIX,
     ),
     (
-        "v6-horizon",
-        "landscape_16_9",
-        "An infinite horizon at twilight: a flat black mirror lake stretching to a vanishing line, where the water meets a vast "
-        "deep-midnight sky. A single thin periwinkle (#7C8CFF) line of light traces the horizon — the only chromatic element. "
-        "No moon, no stars, no land. Glassy, primordial stillness. "
-        "Large-format landscape photography, contemplative scale, sublime. "
-        "No text, no objects, no people. Pure geometry of black and one accent.",
+        "kn-verify-seal",
+        "square_hd",
+        "A macro of a single matte-black pressed seal in satin obsidian, a tiny abstract geometric proof-mark embossed dead "
+        "center — a glyph, not letters, not a logo, no text, no readable characters — its recessed channels glowing with one thin "
+        "phosphor-green #3FE5A0 line as if freshly verified, light raking from the upper left casting fine shadow grain across an "
+        "enormous surrounding field of texture-rich black, deep field #08090A to #0F1011 to #191A1B, museum-grade still life, "
+        "contemplative, precise. "
+        + SUFFIX,
     ),
 ]
 

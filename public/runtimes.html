@@ -20,37 +20,38 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Kolm Runtime Target Matrix">
 <meta name="twitter:description" content="Runtime-neutral target guidance for signed AI behavior artifacts.">
-<meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/runtimes">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
-<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
-<script defer src="/kolm-field.js"></script>
-<script defer src="/kolm-main.js"></script>
 </head>
-<body class="compiler-site compiler-site--paper" data-design-reference="image-2">
+<body class="marketing">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="glass-refract" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="42" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="s"/><feDisplacementMap in="SourceGraphic" in2="s" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
   <div class="wrap nav__in">
-    <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
-      <span>kolm<b>.ai</b></span>
+    <a class="nav__brand" href="/" aria-label="kolm home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/#pipeline" aria-current="page">Solutions</a>
-      <a href="/docs">Developers</a>
+      <a href="/#pipeline">Product</a>
+      <a href="/docs">Docs</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
       <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
       <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
-      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get an API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -59,147 +60,232 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-  <section class="section section--flush hero compiler-hero">
-    <div class="field" aria-hidden="true"><canvas></canvas></div>
-    <div class="wrap compiler-hero__grid">
-      <div>
-        <p class="compiler-kicker" data-enter="1">Runtime target matrix</p>
-        <h1 class="hero__h1" data-enter="2">Aim each artifact at the smallest runtime that can carry the behavior.</h1>
-        <p class="lede" data-enter="3">Kolm does not replace serving engines, GPU clouds, local runners, or device frameworks. It keeps the behavior evidence, fit constraints, deployment recipe, caveats, and receipts with the signed artifact so platform teams can choose the right target.</p>
-        <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="/account/api-control-center">Open target policy</a>
-          <a class="btn btn--ghost" href="/docs#quickstart">Start with a compile</a>
-        </div>
-        <div class="compiler-proof" data-enter="5">
-          <span><b>6</b> target families</span>
-          <span><b>18</b> named runtimes and platforms</span>
-          <span>Receipts before promotion</span>
-          <span>External adoption proof still gated</span>
-        </div>
-      </div>
-      <aside class="control-plane kolm-surface-media" aria-label="Kolm runtime target control plane">
-        <div class="control-plane__head">
-          <span><b>runtime targeter</b> / fit to receipt</span>
-          <span>matrix-1</span>
-        </div>
-        <div class="control-plane__grid">
-          <div class="control-tile control-tile--wide"><b>Inputs</b><span>Signed artifact manifest, eval gates, latency/cost budget, context length, tool shape, model size, quantization hints, data boundary, and deployment policy.</span></div>
-          <div class="control-tile"><b>Targets</b><span>Hosted GPU, self-hosted serving, local runner, edge/device framework, browser/WASM target, or restricted fleet export.</span></div>
-          <div class="control-tile"><b>Outputs</b><span>Target recipe, required files, incompatible features, fallback reasons, verifier command, promotion gate, and governance packet.</span></div>
-          <div class="control-tile"><b>Rule</b><span>Kolm recommends and proves fit. Runtime engines keep owning execution, scheduling, acceleration, and hardware support.</span></div>
-          <div class="control-tile"><b>Caveat</b><span>Package-channel release, public benchmark data, and external runtime adoption stay unclaimed until the readiness ledger closes them.</span></div>
-        </div>
-      </aside>
-    </div>
-  </section>
 
-  <section class="section reveal" id="matrix">
-    <div class="wrap">
-      <div class="section__head">
-        <span class="idx">01 / Target families</span>
-        <h2>The matrix separates runtime ownership from artifact proof.</h2>
-        <p class="lede">Each target family gets a fit signal, not a blanket promise. Kolm should emit target instructions and receipts, then record when a feature does not fit.</p>
+  <section class="hero section--flush">
+    <div class="wrap hero__in">
+      <p class="eyebrow">Runtime target matrix</p>
+      <h1 class="hero__h1">Aim each artifact at the smallest runtime that can carry the behavior.</h1>
+      <p class="lede">Kolm does not replace serving engines, GPU clouds, local runners, or device frameworks. It keeps the behavior evidence, fit constraints, deployment recipe, caveats, and receipts with the signed <code>.kolm</code> artifact so platform teams can choose the right target.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="/account/api-control-center">Open target policy</a>
+        <a class="btn btn--ghost" href="/docs#quickstart">Start with a compile</a>
       </div>
-      <div class="surface-table">
-        <div class="surface-row"><div class="surface-row__key">serving engine</div><div class="surface-row__body"><b>vLLM, SGLang, TensorRT-LLM, NVIDIA Triton, Hugging Face TGI.</b> Best when the workload needs high-throughput OpenAI-compatible serving, batching, tensor parallelism, observability, or GPU-tuned execution.</div><div class="surface-row__route">recipe + receipt</div></div>
-        <div class="surface-row"><div class="surface-row__key">hosted GPU</div><div class="surface-row__body"><b>Baseten, Modal, Runpod, Replicate, Hugging Face Inference Endpoints.</b> Best when teams want managed endpoints, autoscaling, job execution, hosted packaging, or a faster path from artifact to deployed endpoint.</div><div class="surface-row__route">target manifest</div></div>
-        <div class="surface-row"><div class="surface-row__key">local runner</div><div class="surface-row__body"><b>llama.cpp, Ollama, LM Studio, MLX, MLC LLM.</b> Best for small, quantized, local, demo, support, or offline-adjacent workflows where the compiled behavior can fit local model and memory constraints.</div><div class="surface-row__route">fit caveats</div></div>
-        <div class="surface-row"><div class="surface-row__key">portable inference</div><div class="surface-row__body"><b>ONNX Runtime, OpenVINO, TVM, Triton model repository.</b> Best for model-format portability, CPU/GPU/accelerator paths, model repository packaging, and enterprise deployment controls.</div><div class="surface-row__route">files + hashes</div></div>
-        <div class="surface-row"><div class="surface-row__key">device edge</div><div class="surface-row__body"><b>Core ML, LiteRT, ExecuTorch.</b> Best when a target-specific model format, memory ceiling, energy budget, OS/runtime version, and privacy posture are explicitly declared.</div><div class="surface-row__route">target constraints</div></div>
-        <div class="surface-row"><div class="surface-row__key">enterprise fleet</div><div class="surface-row__body"><b>KServe, Ray Serve, BentoML, Kubernetes, BYOC, restricted networks.</b> Best for platform teams that need policy-controlled rollout, liveness checks, audit logs, canaries, internal registries, and governance export.</div><div class="surface-row__route">promotion gate</div></div>
+      <div class="ui" aria-hidden="true">
+        <div class="ui__bar"><span class="ui__live"></span><span class="ui__name">kolm &middot; runtime targeter / fit to receipt</span><span class="ui__meta"><span class="ui__tick-from">scoring fit&hellip;</span><span class="ui__tick-to">matrix-1 &middot; ranked</span></span></div>
+        <div class="ui__grid">
+          <aside class="ui__rail">
+            <span class="ui__step">Capture</span>
+            <span class="ui__step">Compile</span>
+            <span class="ui__step">Compose</span>
+            <span class="ui__step is-on">Deploy</span>
+          </aside>
+          <pre class="ui__code"><span class="m">$</span> kolm target --fit claims-redactor.kolm
+<span class="m"># inputs: eval gates &middot; latency/cost budget &middot; data boundary</span>
+
+<span class="a">&#10003;</span> target <span class="s">vllm</span> &middot; hosted GPU <span class="m">recipe + receipt</span>
+<span class="a">&#10003;</span> target <span class="s">core ml</span> &middot; device <span class="m">target constraints</span>
+<span class="m">! blocked </span><span class="s">llama.cpp</span> &middot; context length over ceiling</pre>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section section--tint reveal" id="readiness">
+  <section class="section" id="matrix">
     <div class="wrap">
-      <div class="section__head">
-        <span class="idx">02 / Readiness states</span>
-        <h2>Every target is a state machine, not a logo list.</h2>
-        <p class="lede">Runtime fit should be inspectable by platform engineers before promotion. The same artifact can be ready for one target and blocked for another.</p>
-      </div>
-      <div class="compiler-card-grid">
-        <div class="proof-card"><h3>Fit candidate</h3><p>Inputs are present, target class is plausible, and Kolm can generate a recipe, but required runtime files or external proof may still be missing.</p></div>
-        <div class="proof-card"><h3>Recipe generated</h3><p>Artifact manifest, model hints, eval gates, environment requirements, launch command, health check, and rollback policy are assembled.</p></div>
-        <div class="proof-card"><h3>Receipt verified</h3><p>The target package has hashes, verifier output, eval result, policy decision, promotion identity, and exportable evidence.</p></div>
-        <div class="proof-card"><h3>Blocked with reason</h3><p>Kolm records why promotion is blocked: context length, unsupported tools, missing quantization, data boundary, package gate, or runtime mismatch.</p></div>
+      <p class="eyebrow">01 / Target families</p>
+      <h2>The matrix separates runtime ownership from artifact proof.</h2>
+      <p class="lede">Each target family gets a fit signal, not a blanket promise. Kolm emits target instructions and receipts, then records when a feature does not fit. Runtime engines keep owning execution, scheduling, acceleration, and hardware support.</p>
+      <div class="grid grid--3" style="margin-top:var(--s7)">
+        <div class="card">
+          <span class="badge">recipe + receipt</span>
+          <h3>Serving engine</h3>
+          <p><b>vLLM, SGLang, TensorRT-LLM, NVIDIA Triton, Hugging Face TGI.</b> Best when the workload needs high-throughput OpenAI-compatible serving, batching, tensor parallelism, observability, or GPU-tuned execution.</p>
+        </div>
+        <div class="card">
+          <span class="badge">target manifest</span>
+          <h3>Hosted GPU</h3>
+          <p><b>Baseten, Modal, Runpod, Replicate, Hugging Face Inference Endpoints.</b> Best when teams want managed endpoints, autoscaling, job execution, hosted packaging, or a faster path from artifact to deployed endpoint.</p>
+        </div>
+        <div class="card">
+          <span class="badge">fit caveats</span>
+          <h3>Local runner</h3>
+          <p><b>llama.cpp, Ollama, LM Studio, MLX, MLC LLM.</b> Best for small, quantized, local, demo, support, or offline-adjacent workflows where the compiled behavior can fit local model and memory constraints.</p>
+        </div>
+        <div class="card">
+          <span class="badge">files + hashes</span>
+          <h3>Portable inference</h3>
+          <p><b>ONNX Runtime, OpenVINO, TVM, Triton model repository.</b> Best for model-format portability, CPU/GPU/accelerator paths, model repository packaging, and enterprise deployment controls.</p>
+        </div>
+        <div class="card">
+          <span class="badge">target constraints</span>
+          <h3>Device edge</h3>
+          <p><b>Core ML, LiteRT, ExecuTorch.</b> Best when a target-specific model format, memory ceiling, energy budget, OS/runtime version, and privacy posture are explicitly declared.</p>
+        </div>
+        <div class="card">
+          <span class="badge">promotion gate</span>
+          <h3>Enterprise fleet</h3>
+          <p><b>KServe, Ray Serve, BentoML, Kubernetes, BYOC, restricted networks.</b> Best for platform teams that need policy-controlled rollout, liveness checks, audit logs, canaries, internal registries, and governance export.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section reveal" id="evidence">
+  <section class="section" id="readiness">
     <div class="wrap">
-      <div class="compiler-rail">
-        <div>
-          <span class="idx">03 / Evidence packet</span>
-          <h2>The target decision travels with the artifact.</h2>
-          <p class="lede">A runtime target is only credible when the buyer can inspect the proof outside the UI: what was compiled, what was tested, why the target was selected, and what still blocks release.</p>
-          <div class="hero__cta">
-            <a class="btn btn--primary" href="/docs/api">Inspect API reference</a>
-            <a class="btn btn--ghost" href="/compare">Compare the stack</a>
+      <p class="eyebrow">02 / Readiness states</p>
+      <h2>Every target is a state machine, not a logo list.</h2>
+      <p class="lede">Runtime fit is inspectable by platform engineers before promotion. The same artifact can be ready for one target and blocked for another.</p>
+      <div class="grid grid--4" style="margin-top:var(--s7)">
+        <div class="card">
+          <h3>Fit candidate</h3>
+          <p>Inputs are present, target class is plausible, and Kolm can generate a recipe, but required runtime files or external proof may still be missing.</p>
+        </div>
+        <div class="card">
+          <h3>Recipe generated</h3>
+          <p>Artifact manifest, model hints, eval gates, environment requirements, launch command, health check, and rollback policy are assembled.</p>
+        </div>
+        <div class="card">
+          <h3>Receipt verified</h3>
+          <p>The target package has hashes, verifier output, eval result, policy decision, promotion identity, and exportable evidence.</p>
+        </div>
+        <div class="card">
+          <h3>Blocked with reason</h3>
+          <p>Kolm records why promotion is blocked: context length, unsupported tools, missing quantization, data boundary, package gate, or runtime mismatch.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feat" id="device-fit">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">03 / Device fit</p>
+        <h2>Rank every device path by what the behavior actually needs.</h2>
+        <p class="lede">Kolm scores the compiled behavior against each target's model format, memory ceiling, context length, and data boundary, then ranks the device paths it fits and names the reason for anything it blocks.</p>
+        <ul class="feat__list">
+          <li>Model size and quantization hints checked against the target ceiling</li>
+          <li>Context length, tool shape, and data boundary enforced per target</li>
+          <li>Blocked paths return a reason, not a silent failure</li>
+        </ul>
+      </div>
+      <div class="feat__ui">
+        <div class="panel">
+          <div class="panel__head"><span>device fit</span><span class="m">ranked</span></div>
+          <div class="panel__rows">
+            <div class="prow">hosted GPU pod <span class="prow__r a">best fit</span></div>
+            <div class="prow">self-hosted vLLM <span class="prow__r m">recipe ready</span></div>
+            <div class="prow">core ml &middot; device <span class="prow__r m">constraints set</span></div>
+            <div class="prow">llama.cpp &middot; local <span class="prow__r m">context blocked</span></div>
           </div>
         </div>
-        <div class="proof-grid">
-          <div class="proof-card"><h3>Artifact manifest</h3><p>Recipe, examples, evaluators, tokenizer metadata, policy scope, dependency hashes, and compatible target classes.</p></div>
-          <div class="proof-card"><h3>Eval gate</h3><p>Regression threshold, failure set, human review state, replay window, fallback rule, and release decision.</p></div>
-          <div class="proof-card"><h3>Target recipe</h3><p>Runtime family, launch shape, package files, required environment, health check, logging path, and incompatible features.</p></div>
-          <div class="proof-card"><h3>Verifier receipt</h3><p>Signature, manifest hash, build identity, promotion actor, timestamp, export destination, and governance packet reference.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feat feat--rev" id="evidence">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">04 / Evidence packet</p>
+        <h2>The target decision travels with the artifact.</h2>
+        <p class="lede">A runtime target is only credible when the buyer can inspect the proof outside the UI: what was compiled, what was tested, why the target was selected, and what still blocks release.</p>
+        <ul class="feat__list">
+          <li><b>Artifact manifest</b> &middot; recipe, examples, evaluators, tokenizer metadata, policy scope, dependency hashes, and compatible target classes</li>
+          <li><b>Eval gate</b> &middot; regression threshold, failure set, human review state, replay window, fallback rule, and release decision</li>
+          <li><b>Target recipe</b> &middot; runtime family, launch shape, package files, required environment, health check, logging path, and incompatible features</li>
+          <li><b>Verifier receipt</b> &middot; signature, manifest hash, build identity, promotion actor, timestamp, export destination, and governance packet reference</li>
+        </ul>
+      </div>
+      <div class="feat__ui">
+        <div class="panel">
+          <div class="panel__head"><span>claims-redactor.kolm</span><span class="a">signed</span></div>
+          <div class="panel__rows">
+            <div class="prow">artifact manifest <span class="prow__r m">sha-256</span></div>
+            <div class="prow">eval gate <span class="prow__r a">passed</span></div>
+            <div class="prow">target recipe <span class="prow__r m">vllm</span></div>
+            <div class="prow">verifier receipt <span class="prow__r m">Ed25519</span></div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section section--cta reveal">
-    <div class="wrap cta-band">
-      <div>
-        <h2>Compile once, then prove where it can safely run.</h2>
-        <p class="lede">Start with one repeated API behavior, generate a signed artifact, and let the target matrix show which serving path is ready, blocked, or waiting on external proof.</p>
+  <section class="proof">
+    <div class="wrap">
+      <div class="proof__row">
+        <div class="proof__cell"><b>6</b><span>target families</span></div>
+        <div class="proof__cell"><b>18</b><span>named runtimes and platforms</span></div>
+        <div class="proof__cell"><b class="is-mono">receipts</b><span>before promotion</span></div>
+        <div class="proof__cell"><b class="is-mono">gated</b><span>external adoption proof</span></div>
       </div>
+    </div>
+  </section>
+
+  <section class="cta section--flush">
+    <div class="wrap cta__in">
+      <h2>Compile once, then prove where it can safely run.</h2>
+      <p class="lede">Start with one repeated API behavior, generate a signed artifact, and let the target matrix show which serving path is ready, blocked, or waiting on external proof.</p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="/account/api-control-center">Open control center</a>
+        <a class="btn btn--primary" href="/signup">Get an API key</a>
         <a class="btn btn--ghost" href="/integrations">See integrations</a>
       </div>
     </div>
   </section>
+
 </main>
 
+<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, enterprise control, signed artifacts, runtime targeting, and governance export.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
-        <a href="/compiler-product">Product</a>
+        <a href="/#pipeline">Pipeline</a>
+        <a href="/#contract">Backend contract</a>
         <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
-        <a href="/runtimes">Runtimes</a>
         <a href="/compare">Compare</a>
+        <a href="/runtimes">Runtime targets</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
       </div>
       <div class="foot__col">
-        <h3>Runtime Matrix</h3>
-        <a href="#matrix">Target families</a>
-        <a href="#readiness">Readiness states</a>
-        <a href="#evidence">Evidence packet</a>
-        <a href="/docs/api">API reference</a>
+        <h3>Surfaces</h3>
+        <a href="/docs#capture">Capture</a>
+        <a href="/docs#compile">Compile</a>
+        <a href="/docs#compose">Compose</a>
+        <a href="/docs#deploy">Deploy</a>
+        <a href="https://audit.kolm.ai">Audit</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
+        <a href="/verify">Verify</a>
         <a href="/security">Security</a>
-        <a href="/trust">Trust</a>
+        <a href="/trust">Trust center</a>
         <a href="/status">Status</a>
-        <a href="https://audit.kolm.ai">Audit module</a>
+      </div>
+      <div class="foot__col">
+        <h3>Company</h3>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="mailto:dev@kolm.ai">Contact</a>
       </div>
     </div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Runtime-neutral targeter</span>
-      <span class="badge">Receipts before promotion</span>
-      <span class="badge">Readiness-gated claims</span>
+      <span class="badge badge--ok">Signed artifacts</span>
+      <span class="badge">API control center</span>
+      <span class="badge">Apache-2.0</span>
+      <span class="badge">Open API contract</span>
       <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>

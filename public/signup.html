@@ -28,11 +28,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
-<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
-<script defer src="/kolm-field.js"></script>
-<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -44,69 +42,67 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 }
 </script>
 <style>
-  .signup-hero .hero__h1{max-width:14ch}
-  .signup-hero .lede{max-width:62ch}
-  .signup-panel{min-width:0;padding:clamp(20px,3vw,28px);border:1px solid var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),var(--paper-2);box-shadow:inset 0 1px 0 var(--light-top),0 26px 84px rgba(0,0,0,.34)}
-  .signup-panel h2{font-size:clamp(26px,3vw,38px);margin-bottom:10px}
-  .signup-panel p{color:var(--ink-2)}
-  .signup-form{display:grid;gap:12px;margin-top:22px}
-  .signup-form label{display:block;color:var(--ink);font-size:13px;font-weight:650}
-  .signup-form input[type=email]{width:100%;min-height:48px;padding:13px 14px;border:1px solid var(--line-2);border-radius:6px;background:var(--paper-sink);color:var(--ink);font:500 16px var(--sans);touch-action:manipulation}
-  .signup-form input[type=email]::placeholder{color:var(--ink-3)}
-  .signup-form input[type=email]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .signup-helper{margin:0;color:var(--ink-3);font-size:13px;line-height:1.55}
-  .signup-fine{margin:2px 0 0;color:var(--ink-3);font-size:12.5px;line-height:1.65}
-  #banner:not(:empty){margin:0 0 14px}
-  .signup-plan{display:grid;gap:6px;margin:14px 0 16px;padding:12px 14px;border:1px solid var(--accent-edge);border-radius:6px;background:var(--accent-soft);color:var(--accent-text)}
-  .signup-plan b{font-size:13px}
-  .signup-plan span{color:var(--ink-2);font-size:12.5px;line-height:1.55}
-  .btn--block{width:100%;min-height:48px}
-  .signup-panel>.btn--block{margin-top:14px}
-  .signup-panel>.btn--block+.btn--block{margin-top:10px}
-  .signup-banner{border-radius:6px;padding:12px 14px;font-size:13px;line-height:1.55}
-  .signup-banner.ok{border:1px solid var(--accent-edge);background:var(--accent-soft);color:var(--accent-text)}
-  .signup-banner.warn{border:1px solid rgba(224,168,159,.36);background:rgba(224,168,159,.12);color:#f3c2bb}
-  .keybox{display:grid;grid-template-columns:minmax(0,1fr) max-content;gap:10px;align-items:center;margin-top:10px;padding:13px;border:1px solid var(--accent-edge);border-radius:6px;background:var(--paper-sink);color:var(--accent-text);font:500 12px var(--mono);word-break:break-all}
-  .keybox button{min-height:36px;border:1px solid var(--accent-edge);border-radius:5px;background:var(--accent-soft);color:var(--accent-text);font:650 12px var(--sans);cursor:pointer;touch-action:manipulation}
-  .keybox button:hover{background:var(--accent-tint)}
-  .keybox button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .signup-code{margin:14px 0 0;padding:14px;border:1px solid var(--line);border-radius:6px;background:var(--paper-sink);color:var(--ink-2);font:500 12px/1.65 var(--mono);overflow-x:auto;white-space:pre}
-  .signup-steps{display:grid;gap:9px;margin:18px 0 0;padding:0;list-style:none}
-  .signup-steps li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018);color:var(--ink-2);font-size:14px;line-height:1.55}
-  .signup-steps b{display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--line-2);border-radius:4px;color:var(--ink);font:650 11px var(--mono)}
-  .signup-matrix{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-  .signup-matrix .proof-card{min-height:190px}
-  .signup-matrix .card__k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
-  .signup-contract{display:grid;grid-template-columns:minmax(0,.82fr) minmax(320px,1.18fr);gap:clamp(22px,4vw,52px);align-items:start}
-  .signup-contract pre{margin:0;padding:18px;border:1px solid var(--line-top);border-radius:8px;background:var(--paper-sink);box-shadow:inset 0 1px 0 var(--light-top);overflow-x:auto;color:var(--ink-2);font:500 12px/1.72 var(--mono)}
-  .signup-route-table{display:grid;gap:8px;margin-top:22px}
-  .signup-route-table div{display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018);font-size:13px;color:var(--ink-2)}
-  .signup-route-table b{color:var(--ink);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
-  .mono{font-family:var(--mono)}
-  [hidden]{display:none!important}
-  @media (max-width:1080px){.signup-matrix{grid-template-columns:repeat(2,minmax(0,1fr))}.signup-contract{grid-template-columns:1fr}}
-  @media (max-width:680px){.signup-matrix{grid-template-columns:1fr}.keybox{grid-template-columns:1fr}.signup-route-table div{grid-template-columns:1fr}.signup-steps li{grid-template-columns:24px minmax(0,1fr)}}
-  @media (prefers-reduced-motion:reduce){.signup-panel,.keybox button{transition:none}}
+  /* Scoped form primitives only — inputs / key reveal / snippet are not in the §5 atom kit.
+     No canonical component (.btn/.card/.nav/.panel/etc.) is redefined here. */
+  .signup__card { padding: clamp(22px, 3vw, 30px); }
+  .signup__card h2 { margin: 0 0 8px; }
+  .signup__lede { margin: 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.6; }
+  #banner:not(:empty) { margin: 0 0 14px; }
+  .signup-plan { display: grid; gap: 6px; margin: 14px 0 16px; padding: 12px 14px; border: 1px solid var(--accent-edge); border-radius: var(--r-sm); background: var(--accent-soft); color: var(--accent-text); }
+  .signup-plan b { font-size: 13px; }
+  .signup-plan span { color: var(--ink-2); font-size: 12.5px; line-height: 1.55; }
+  .signup-form { display: grid; gap: 12px; margin-top: 22px; }
+  .signup-form label { display: block; color: var(--ink); font-size: 13px; font-weight: 510; }
+  .signup-form input[type=email] { width: 100%; min-height: 48px; padding: 13px 14px; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--paper-sink); color: var(--ink); font: 400 16px var(--sans); touch-action: manipulation; }
+  .signup-form input[type=email]::placeholder { color: var(--ink-3); }
+  .signup-form input[type=email]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .signup-helper { margin: 0; color: var(--ink-3); font-size: 13px; line-height: 1.55; }
+  .signup-fine { margin: 2px 0 0; color: var(--ink-3); font-size: 12.5px; line-height: 1.65; }
+  .btn--block { width: 100%; min-height: 48px; }
+  .signup-form > .btn--block { margin-top: 2px; }
+  .signup__card > .btn--block { margin-top: 14px; }
+  .signup__card > .btn--block + .btn--block { margin-top: 10px; }
+  .signup-banner { border-radius: var(--r-sm); padding: 12px 14px; font-size: 13px; line-height: 1.55; }
+  .signup-banner.ok { border: 1px solid var(--accent-edge); background: var(--accent-soft); color: var(--accent-text); }
+  .signup-banner.warn { border: 1px solid var(--void-edge); background: rgba(224,168,159,.12); color: #f3c2bb; }
+  .keybox { display: grid; grid-template-columns: minmax(0,1fr) max-content; gap: 10px; align-items: center; margin: 10px 0 0; padding: 13px; border: 1px solid var(--accent-edge); border-radius: var(--r-sm); background: var(--paper-sink); color: var(--accent-text); font: 500 12px var(--mono); word-break: break-all; }
+  .keybox button { min-height: 36px; padding: 0 12px; border: 1px solid var(--accent-edge); border-radius: var(--r-sm); background: var(--accent-soft); color: var(--accent-text); font: 510 12px var(--sans); cursor: pointer; touch-action: manipulation; }
+  .keybox button:hover { background: var(--accent-tint); }
+  .keybox button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .signup-code { margin: 14px 0 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--code-well, #050608); color: var(--ink-2); font: 500 12px/1.65 var(--mono); overflow-x: auto; white-space: pre; }
+  .signup-steps { display: grid; gap: 9px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .signup-steps li { display: grid; grid-template-columns: 28px minmax(0,1fr); gap: 10px; align-items: start; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: rgba(255,255,255,.018); color: var(--ink-2); font-size: 14px; line-height: 1.55; }
+  .signup-steps b { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink); font: 600 11px var(--mono); }
+  .signup__grid { display: grid; grid-template-columns: minmax(0,.92fr) minmax(320px,1.08fr); gap: clamp(24px,4vw,52px); align-items: start; }
+  .signup__rail .register { margin-top: var(--s5); }
+  @media (max-width: 980px) { .signup__grid { grid-template-columns: 1fr; } }
+  @media (max-width: 680px) { .keybox { grid-template-columns: 1fr; } .signup-steps li { grid-template-columns: 24px minmax(0,1fr); } }
+  @media (prefers-reduced-motion: reduce) { .keybox button { transition: none; } }
+  [hidden] { display: none; }
 </style>
 </head>
-<body class="compiler-site compiler-site--paper" data-design-reference="image-2">
+<body class="app">
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
   <div class="wrap nav__in">
-    <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
-      <span>kolm<b>.ai</b></span>
+    <a class="nav__brand" href="/" aria-label="kolm home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/#pipeline" aria-current="page">Solutions</a>
-      <a href="/docs">Developers</a>
+      <a href="/#pipeline">Product</a>
+      <a href="/docs">Docs</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
       <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
       <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
-      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get an API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -115,79 +111,58 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-  <section class="section section--flush hero compiler-hero signup-hero">
-    <div class="field" aria-hidden="true"><canvas></canvas></div>
-    <div class="wrap compiler-hero__grid">
-      <div>
-        <p class="compiler-kicker" data-enter="1">Signup / Workspace</p>
-        <h1 class="hero__h1" data-enter="2">Create the workspace that controls one AI/API loop.</h1>
-        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Use one work email to issue a key, route one namespace, capture real behavior, and open the control plane that tracks policy, evals, compile runs, artifacts, receipts, runtime targets, and exports.</p>
-        <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="#create-workspace">Create Workspace</a>
-          <a class="btn btn--ghost" href="/docs/api">Read API Docs</a>
-        </div>
-        <div class="compiler-proof" data-enter="5">
-          <span><b>1</b> API key issued once</span>
-          <span><b>1</b> namespace first</span>
-          <span><b>17</b> data channel families</span>
-          <span><b>8</b> readiness gates visible</span>
-        </div>
+
+  <section class="hero section--flush">
+    <div class="wrap hero__in">
+      <p class="eyebrow">Signup / Workspace</p>
+      <h1 class="hero__h1">Create the workspace that controls one AI/API loop.</h1>
+      <p class="lede">API behavior in. Device-fit models out. Use one work email to issue a key, route one namespace, capture real behavior, and open the control plane that tracks policy, evals, compile runs, artifacts, receipts, runtime targets, and exports.</p>
+      <div class="hero__cta">
+        <a class="btn btn--ghost" href="#create-workspace">Create workspace</a>
+        <a class="btn btn--ghost" href="/docs/api">Read API docs</a>
       </div>
-      <aside class="control-plane kolm-surface-media" aria-label="Workspace setup loop">
-        <div class="control-plane__head">
-          <span><b>workspace loop</b> / first 10 minutes</span>
-          <span>key to control</span>
-        </div>
-        <div class="control-plane__grid">
-          <div class="control-tile control-tile--wide"><b>01 Identity</b><span>Create a tenant with one work email. The server sets the session cookie and returns the key once.</span></div>
-          <div class="control-tile"><b>02 Key</b><span>Store the API key or let the browser session carry you into account controls.</span></div>
-          <div class="control-tile"><b>03 Route</b><span>Point one OpenAI-compatible namespace at Kolm before broad migration.</span></div>
-          <div class="control-tile"><b>04 Capture</b><span>Keep prompts, completions, tool calls, labels, and failure cases attached to source policy.</span></div>
-          <div class="control-tile"><b>05 Compile</b><span>Turn stable behavior into a signed artifact with target-fit metadata.</span></div>
-          <div class="control-tile"><b>06 Export</b><span>Move receipts, manifests, reports, logs, and runtime packages out through governed channels.</span></div>
-        </div>
-      </aside>
     </div>
   </section>
 
-  <section class="section" id="create-workspace">
-    <div class="wrap signup-contract">
-      <div class="section__head">
-        <span class="idx">01 / Workspace</span>
+  <section class="section section--flush" id="create-workspace">
+    <div class="wrap signup__grid">
+
+      <div class="signup__rail">
+        <p class="eyebrow">01 / Workspace</p>
         <h2>Start with a key, not a sales maze.</h2>
         <p class="lede">The self-serve flow is intentionally narrow: create the workspace, save the key, run one route, then inspect the same lifecycle in the API Control Center.</p>
-        <div class="signup-route-table" aria-label="Signup contract">
-          <div><b>Endpoint</b><span><span class="mono">POST /v1/signup</span></span></div>
-          <div><b>Returns</b><span><span class="mono">api_key</span>, tenant metadata, onboarding guidance, and billing state when relevant.</span></div>
-          <div><b>Session</b><span>The server sets <span class="mono">kolm_session</span> so the account console opens without pasting the key.</span></div>
+        <div class="register">
+          <div class="register__row"><span class="register__k">Endpoint</span><span class="register__v"><span class="mono">POST /v1/signup</span></span></div>
+          <div class="register__row"><span class="register__k">Returns</span><span class="register__v"><span class="mono">api_key</span>, tenant metadata, onboarding guidance, and billing state when relevant.</span></div>
+          <div class="register__row"><span class="register__k">Session</span><span class="register__v">The server sets <span class="mono">kolm_session</span> so the account console opens without pasting the key.</span></div>
         </div>
       </div>
 
-      <div class="signup-panel" id="form-card" data-enter="1">
-        <h2>Create Workspace</h2>
-        <p>Use a work email. You can move into provider policy, source capture, eval gates, compile runs, artifacts, receipts, and exports after the key is issued.</p>
+      <div class="card glass--solid signup__card" id="form-card">
+        <h2>Create workspace</h2>
+        <p class="signup__lede">Use a work email. You can move into provider policy, source capture, eval gates, compile runs, artifacts, receipts, and exports after the key is issued.</p>
         <div id="banner" aria-live="polite"></div>
         <div class="signup-plan" id="plan-note" hidden>
           <b id="plan-name">Selected plan</b>
           <span id="plan-detail">The workspace starts on Free while billing state stays explicit.</span>
         </div>
         <div class="signup-form">
-          <label for="email">Work Email</label>
+          <label for="email">Work email</label>
           <input id="email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" aria-describedby="email-help">
           <p class="signup-helper" id="email-help">Example: you@company.com. Existing workspaces should use account recovery or OAuth sign-in.</p>
-          <button class="btn btn--primary btn--block" id="go" type="button">Create Workspace</button>
+          <button class="btn btn--primary btn--block" id="go" type="button">Create workspace</button>
           <p class="signup-fine">By creating a workspace you agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>. Already active? <a href="/account/api-control-center">Open API Control Center</a>.</p>
         </div>
       </div>
 
-      <div class="signup-panel" id="done-card" tabindex="-1" hidden>
-        <h2>Workspace Created</h2>
+      <div class="card glass--solid signup__card" id="done-card" tabindex="-1" hidden>
+        <h2>Workspace created</h2>
         <div class="signup-banner ok">Save your API key now. It is shown once.</div>
         <p class="signup-helper" id="workspace-status">Workspace active on Free.</p>
-        <label for="apikey">Your API Key</label>
-        <div class="keybox"><span id="apikey" class="mono"></span><button id="copy" type="button">Copy Key</button></div>
-        <a class="btn btn--primary btn--block" href="/account/api-control-center">Open API Control Center</a>
-        <a class="btn btn--ghost btn--block" id="billing-link" href="/pricing" hidden>Continue to Checkout</a>
+        <label class="signup-helper" for="apikey" style="color:var(--ink);font-weight:510;margin-top:14px;display:block">Your API key</label>
+        <div class="keybox"><span id="apikey" class="mono"></span><button id="copy" type="button">Copy key</button></div>
+        <a class="btn btn--ghost btn--block" href="/account/api-control-center">Open API Control Center</a>
+        <a class="btn btn--ghost btn--block" id="billing-link" href="/pricing" hidden>Continue to checkout</a>
         <ol class="signup-steps">
           <li><b>1</b><span>Route one namespace through the API wrapper with your key.</span></li>
           <li><b>2</b><span>Capture enough real behavior to form eval and regression sets.</span></li>
@@ -195,49 +170,66 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ol>
         <pre id="snippet" class="signup-code mono"></pre>
       </div>
+
     </div>
   </section>
 
-  <section class="section section--tint">
+  <section class="proof">
     <div class="wrap">
-      <div class="section__head">
-        <span class="idx">02 / First 10 Minutes</span>
+      <div class="proof__row">
+        <div class="proof__cell"><b>1</b><span>API key issued once</span></div>
+        <div class="proof__cell"><b>1</b><span>namespace to route first</span></div>
+        <div class="proof__cell"><b>17</b><span>data channel families</span></div>
+        <div class="proof__cell"><b>8</b><span>readiness gates visible</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feat" id="first-run">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">First 10 minutes</p>
         <h2>The first run should prove the whole loop.</h2>
-        <p class="lede">The best onboarding path does not ask teams to migrate everything. It proves one controlled route end to end.</p>
+        <p class="lede">The best onboarding path does not ask teams to migrate everything. It proves one controlled route end to end &mdash; key, route, capture, compile.</p>
+        <ul class="feat__list">
+          <li>Issue a scoped credential &middot; keep the key in account controls, not scattered env notes</li>
+          <li>Send one OpenAI-compatible namespace before broad migration</li>
+          <li>Attach prompts, completions, tool calls, labels and failures to source policy</li>
+          <li>Ship a signed artifact &mdash; manifest, eval evidence, runtime target, receipt</li>
+        </ul>
       </div>
-      <div class="compiler-card-grid">
-        <div class="proof-card"><p class="card__k">Key</p><h3>Issue a scoped credential</h3><p>Create the tenant, keep the key, and move credential handling into account controls instead of scattered environment notes.</p></div>
-        <div class="proof-card"><p class="card__k">Route</p><h3>Send one namespace</h3><p>Use an OpenAI-compatible route first, then expand to SDK, CLI, webhook, stream, trace, log, warehouse, and browser sources.</p></div>
-        <div class="proof-card"><p class="card__k">Capture</p><h3>Attach policy to behavior</h3><p>Prompts, completions, tool calls, labels, failures, redaction, retention, and source identity stay together.</p></div>
-        <div class="proof-card"><p class="card__k">Compile</p><h3>Ship an artifact, not a promise</h3><p>The output path is a signed artifact with manifest, eval evidence, runtime target metadata, receipt, and export bundle.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap">
-      <div class="section__head">
-        <span class="idx">03 / Enterprise Controls</span>
-        <h2>The control center is the product surface buyers inspect.</h2>
-        <p class="lede">Enterprise-grade software exposes the objects administrators need to govern, not just the model call that developers need to run.</p>
-      </div>
-      <div class="signup-matrix">
-        <div class="proof-card"><p class="card__k">Identity</p><h3>Roles and service accounts</h3><p>Workspace, project, environment, credential, key scope, user role, and account lifecycle state.</p></div>
-        <div class="proof-card"><p class="card__k">Sources</p><h3>Every credible data path</h3><p>API routes, SDKs, CLI uploads, webhooks, streams, logs, traces, browser events, warehouse imports, labels, and runtime receipts.</p></div>
-        <div class="proof-card"><p class="card__k">Policy</p><h3>Provider and data controls</h3><p>Model allowlists, connector state, redaction, retention, rate limits, cost controls, and risky-action approvals.</p></div>
-        <div class="proof-card"><p class="card__k">Evidence</p><h3>Portable exports</h3><p>Receipts, manifests, eval reports, event streams, warehouse exports, webhook callbacks, runtime packages, and readiness ledgers.</p></div>
+      <div class="feat__ui">
+        <div class="panel">
+          <div class="panel__head"><span>workspace loop</span><span class="m">first 10 min</span></div>
+          <div class="panel__rows">
+            <div class="prow"><span class="m">01</span> identity &middot; tenant + key <span class="prow__r a">issued</span></div>
+            <div class="prow"><span class="m">02</span> route &middot; one namespace <span class="prow__r m">openai</span></div>
+            <div class="prow"><span class="m">03</span> capture &middot; behavior + policy <span class="prow__r m">attached</span></div>
+            <div class="prow"><span class="m">04</span> compile &middot; signed .kolm <span class="prow__r a">target-fit</span></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section section--tint">
-    <div class="wrap signup-contract">
-      <div class="section__head">
-        <span class="idx">04 / Developer Contract</span>
-        <h2>One route should map to every later product object.</h2>
-        <p class="lede">The signup snippet starts with a single route, but the contract is bigger: every write should emit lifecycle state that an admin can inspect or export.</p>
+  <section class="feat feat--rev" id="controls">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">Enterprise controls</p>
+        <h2>The control center is the surface buyers inspect.</h2>
+        <p class="lede">Enterprise-grade software exposes the objects administrators need to govern, not just the model call developers need to run.</p>
+        <ul class="feat__list">
+          <li><b>Identity</b> &middot; workspace, project, environment, credential, key scope, user role, account lifecycle</li>
+          <li><b>Sources</b> &middot; API routes, SDKs, CLI uploads, webhooks, streams, logs, traces, browser events, warehouse imports, labels, receipts</li>
+          <li><b>Policy</b> &middot; model allowlists, connector state, redaction, retention, rate limits, cost controls, risky-action approvals</li>
+          <li><b>Evidence</b> &middot; receipts, manifests, eval reports, event streams, warehouse exports, webhook callbacks, runtime packages, readiness ledgers</li>
+        </ul>
       </div>
-      <pre aria-label="Signup API example">curl -s https://kolm.ai/v1/signup \
+      <div class="feat__ui">
+        <div class="card glass--solid">
+          <p class="card__k">Developer contract</p>
+          <p style="color:var(--ink-2);font-size:14px;line-height:1.6;margin:14px 0 0">One route should map to every later product object. Every write emits lifecycle state an admin can inspect or export.</p>
+          <pre class="signup-code mono">curl -s https://kolm.ai/v1/signup \
   -H "Content-Type: application/json" \
   -d '{"email":"you@company.com"}'
 
@@ -249,69 +241,77 @@ curl -s https://kolm.ai/v1/route/chat/completions \
     "model":"openai:gpt-4.1-mini",
     "messages":[{"role":"user","content":"hello"}]
   }'</pre>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="section section--cta">
-    <div class="wrap cta-final">
-      <p class="compiler-kicker">Readiness-Gated Claims</p>
+  <section class="cta section--flush">
+    <div class="wrap cta__in">
       <h2>Create one controlled loop, then prove it before expanding.</h2>
-      <p class="lede">Kolm should win by making the real objects visible: source, route, policy, trace, eval, compile run, artifact, target, receipt, export, and open readiness gate.</p>
-      <div class="hero__cta" style="justify-content:center">
-        <a class="btn btn--primary" href="#create-workspace">Create Workspace</a>
+      <p class="lede">Make the real objects visible: source, route, policy, trace, eval, compile run, artifact, target, receipt, export, and open readiness gate.</p>
+      <div class="hero__cta">
+        <a class="btn btn--ghost" href="#create-workspace">Create workspace</a>
         <a class="btn btn--ghost" href="/account/api-control-center">Open Control Center</a>
       </div>
     </div>
   </section>
+
 </main>
 
+<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The behavior-to-artifact control plane for AI/API routes, policies, evals, artifacts, receipts, runtime targets, and exports.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
-        <h3>Product</h3>
+        <h3>Compiler</h3>
         <a href="/#pipeline">Pipeline</a>
-        <a href="/platform">Platform</a>
+        <a href="/#contract">Backend contract</a>
+        <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
-        <a href="/runtimes">Runtimes</a>
         <a href="/compare">Compare</a>
+        <a href="/runtimes">Runtime targets</a>
+        <a href="/docs">Docs</a>
         <a href="/pricing">Pricing</a>
       </div>
       <div class="foot__col">
-        <h3>Control</h3>
-        <a href="/account/api-control-center">API Control Center</a>
-        <a href="/account/overview">Account Overview</a>
-        <a href="/docs/api">API Docs</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/capabilities">Capabilities</a>
+        <h3>Surfaces</h3>
+        <a href="/docs#capture">Capture</a>
+        <a href="/docs#compile">Compile</a>
+        <a href="/docs#compose">Compose</a>
+        <a href="/docs#deploy">Deploy</a>
+        <a href="https://audit.kolm.ai">Audit</a>
       </div>
       <div class="foot__col">
-        <h3>Evidence</h3>
-        <a href="/trust">Readiness Center</a>
+        <h3>Trust</h3>
+        <a href="/verify">Verify</a>
         <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
         <a href="/status">Status</a>
-        <a href="/research">Research</a>
-        <a href="/changelog">Changelog</a>
       </div>
       <div class="foot__col">
         <h3>Company</h3>
-        <a href="/contact">Contact</a>
-        <a href="/careers">Careers</a>
-        <a href="/privacy">Privacy</a>
-        <a href="/terms">Terms</a>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="mailto:dev@kolm.ai">Contact</a>
       </div>
     </div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Workspace setup</span>
-      <span class="badge">API key issued once</span>
-      <span class="badge"><a href="/docs/api">API docs</a></span>
+      <span class="badge badge--ok">Signed artifacts</span>
+      <span class="badge">API control center</span>
+      <span class="badge">Apache-2.0</span>
+      <span class="badge">Open API contract</span>
       <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
@@ -339,7 +339,7 @@ curl -s https://kolm.ai/v1/route/chat/completions \
     planNote.hidden=false;
   }
   function showErr(msg){ banner.innerHTML='<div class="signup-banner warn" role="alert">'+msg+'</div>'; }
-  function resetButton(){ go.disabled=false; go.textContent='Create Workspace'; }
+  function resetButton(){ go.disabled=false; go.textContent='Create workspace'; }
   function submit(){
     var v=(email.value||'').trim();
     if(!v || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ showErr('Enter a valid work email, for example you@company.com.'); email.focus(); return; }

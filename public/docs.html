@@ -28,11 +28,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/CabinetGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/SplineSansMono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
-<link rel="stylesheet" href="/kolm-main.css">
 <script defer src="/kolm-2026.js"></script>
-<script defer src="/kolm-field.js"></script>
-<script defer src="/kolm-main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -43,65 +41,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
-<style>
-  .docs-hero .hero__h1{max-width:14ch;text-wrap:balance}
-  .docs-hero .lede{max-width:64ch}
-  .docs-panel{min-width:0;padding:clamp(18px,2.6vw,26px);border:1px solid var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.048),rgba(255,255,255,.014)),var(--paper-2);box-shadow:inset 0 1px 0 var(--light-top),0 30px 96px rgba(0,0,0,.36)}
-  .docs-panel__head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
-  .docs-panel__head b{color:var(--ink)}
-  .docs-flow{display:grid;gap:10px;margin-top:14px}
-  .docs-flow__row{display:grid;grid-template-columns:120px minmax(0,1fr) max-content;gap:12px;align-items:center;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:rgba(9,12,13,.52);color:var(--ink-2);font:500 11.5px var(--mono)}
-  .docs-flow__row b{color:var(--ink)}
-  .docs-flow__row i{height:5px;border-radius:999px;background:linear-gradient(90deg,var(--accent) var(--fill,60%),rgba(229,240,234,.13) 0);box-shadow:0 0 18px rgba(63,229,160,.15)}
-  .docs-grid{min-width:0;display:grid;grid-template-columns:minmax(180px,.28fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:start}
-  .docs-grid > *{min-width:0}
-  .docs-nav{position:sticky;top:94px;min-width:0;max-width:100%;display:grid;gap:2px;font-family:var(--mono);font-size:12px}
-  .docs-nav a{min-width:0;min-height:38px;display:flex;align-items:center;padding:7px 10px;border-left:1px solid var(--line);color:var(--ink-3);touch-action:manipulation;overflow-wrap:anywhere}
-  .docs-nav a:hover{color:var(--ink);border-left-color:var(--accent);background:rgba(255,255,255,.024)}
-  .docs-nav a:focus-visible{color:var(--ink);border-left-color:var(--accent);background:rgba(255,255,255,.024);outline:2px solid var(--accent);outline-offset:2px}
-  .docs-block{scroll-margin-top:96px;padding:34px 0;border-top:1px solid var(--line)}
-  .docs-block:first-child{padding-top:0;border-top:0}
-  .docs-block h2{max-width:24ch;text-wrap:balance}
-  .docs-copy{max-width:72ch;color:var(--ink-2);font-size:15px;line-height:1.68}
-  .docs-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
-  .docs-link{min-height:158px;display:grid;align-content:start;gap:10px;padding:18px;border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.038),rgba(255,255,255,.012)),var(--paper-2);color:var(--ink-2)}
-  .docs-link:hover{border-color:var(--accent-edge);color:var(--ink)}
-  .docs-link:focus-visible{border-color:var(--accent-edge);color:var(--ink);outline:2px solid var(--accent);outline-offset:2px}
-  .docs-link b{color:var(--ink);font-family:var(--display);font-size:21px;line-height:1.15}
-  .docs-link span{font-size:13.5px;line-height:1.55}
-  .docs-list{display:grid;gap:10px;margin:22px 0 0;padding:0;list-style:none}
-  .docs-list li{padding:14px 16px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018);color:var(--ink-2);font-size:14px;line-height:1.62;overflow-wrap:anywhere}
-  .docs-list code,.docs-copy code{font-family:var(--mono);font-size:.92em;color:var(--accent-text);background:rgba(63,229,160,.08);border:1px solid rgba(63,229,160,.18);border-radius:4px;padding:1px 4px}
-  .docs-code{max-width:100%;margin:22px 0 0;padding:18px;border:1px solid var(--line-top);border-radius:8px;background:var(--paper-sink);box-shadow:inset 0 1px 0 var(--light-top);overflow-x:auto;color:var(--ink-2);font:500 12px/1.72 var(--mono);tab-size:2}
-  .docs-matrix{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:22px}
-  .docs-matrix .proof-card{min-height:196px}
-  .docs-matrix .card__k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
-  .docs-table{display:grid;gap:8px;margin-top:22px}
-  .docs-table div{display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.018);font-size:13px;color:var(--ink-2)}
-  .docs-table b{color:var(--ink);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
-  @media (max-width:1080px){.docs-grid{grid-template-columns:1fr}.docs-nav{position:static;grid-template-columns:repeat(3,minmax(0,1fr))}.docs-links,.docs-matrix{grid-template-columns:repeat(2,minmax(0,1fr))}.docs-flow__row{grid-template-columns:104px minmax(0,1fr) max-content}}
-  @media (max-width:680px){.docs-nav,.docs-links,.docs-matrix{grid-template-columns:1fr}.docs-table div,.docs-flow__row{grid-template-columns:1fr}.docs-panel__head{display:grid}.docs-flow__row i{width:100%}}
-  @media (prefers-reduced-motion:reduce){.docs-link{transition:none}}
-</style>
 </head>
-<body class="compiler-site compiler-site--paper" data-design-reference="image-2">
+<body class="marketing">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="glass-refract" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="42" result="n"/><feGaussianBlur in="n" stdDeviation="2" result="s"/><feDisplacementMap in="SourceGraphic" in2="s" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="nav">
   <div class="wrap nav__in">
-    <a class="nav__brand" href="/" aria-label="kolm.ai home">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
-      <span>kolm<b>.ai</b></span>
+    <a class="nav__brand" href="/" aria-label="kolm home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/#pipeline">Solutions</a>
-      <a href="/docs" aria-current="page">Developers</a>
+      <a href="/#pipeline">Product</a>
+      <a href="/docs" aria-current="page">Docs</a>
       <a href="/pricing">Pricing</a>
     </nav>
     <div class="nav__actions">
       <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
       <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
-      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get an API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -110,203 +73,305 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </header>
 
 <main id="main">
-  <section class="section section--flush hero compiler-hero docs-hero">
-    <div class="field" aria-hidden="true"><canvas></canvas></div>
-    <div class="wrap compiler-hero__grid">
-      <div>
-        <p class="compiler-kicker" data-enter="1">Docs / API Contract</p>
-        <h1 class="hero__h1" data-enter="2">Docs should show the product contract.</h1>
-        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Use these docs to route production calls, capture behavior, govern sources, evaluate regressions, compile signed artifacts, target runtimes, issue receipts, and export evidence.</p>
-        <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="#quickstart">Start Quickstart</a>
-          <a class="btn btn--ghost" href="/docs/api">Open API Reference</a>
-          <a class="btn btn--ghost" href="/openapi.json">OpenAPI JSON</a>
-        </div>
-        <div class="compiler-proof" data-enter="5">
-          <span><b>929</b> route inventory</span>
-          <span><b>214</b> route groups</span>
-          <span><b>17</b> data channel families</span>
-          <span><b>8</b> readiness groups</span>
-        </div>
+
+  <section class="hero section--flush">
+    <div class="wrap hero__in">
+      <p class="eyebrow">Developer docs / API contract</p>
+      <h1 class="hero__h1">API behavior in. Device-fit models out.</h1>
+      <p class="lede">Use these docs to route production calls, capture behavior, govern sources, evaluate regressions, compile signed <code>.kolm</code> artifacts, target runtimes, issue receipts, and export evidence &mdash; every page points to a machine-readable contract or a route you can verify.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="#quickstart">Start the quickstart</a>
+        <a class="btn btn--ghost" href="/docs/api">Open API reference</a>
       </div>
-      <aside class="docs-panel kolm-surface-media" aria-label="Documentation route map">
-        <div class="docs-panel__head">
-          <span><b>docs map</b> / behavior to artifact</span>
-          <span>route first</span>
-        </div>
-        <div class="docs-flow">
-          <div class="docs-flow__row"><b>route</b><i style="--fill:92%"></i><span>/v1/route</span></div>
-          <div class="docs-flow__row"><b>capture</b><i style="--fill:84%"></i><span>/v1/capture</span></div>
-          <div class="docs-flow__row"><b>govern</b><i style="--fill:76%"></i><span>policies</span></div>
-          <div class="docs-flow__row"><b>evaluate</b><i style="--fill:68%"></i><span>eval gates</span></div>
-          <div class="docs-flow__row"><b>compile</b><i style="--fill:62%"></i><span>.kolm</span></div>
-          <div class="docs-flow__row"><b>export</b><i style="--fill:56%"></i><span>receipts</span></div>
-        </div>
-      </aside>
     </div>
   </section>
 
-  <section class="section">
-    <div class="wrap docs-grid">
-      <nav class="docs-nav" aria-label="Docs Sections">
-        <a href="#quickstart">Quickstart</a>
-        <a href="#references">References</a>
-        <a href="#control-center">Control Center</a>
-        <a href="#data-movement">Data Movement</a>
-        <a href="#lifecycle">Lifecycle</a>
-        <a href="#errors">Errors</a>
-        <a href="#cli-sdk">CLI & SDK</a>
-      </nav>
-
-      <div>
-        <section class="docs-block" id="quickstart">
-          <span class="idx">01 / Quickstart</span>
-          <h2>Start by routing one namespace.</h2>
-          <p class="docs-copy">Keep the first integration small. Route one OpenAI-compatible namespace, export captured examples, then compile only after the behavior has enough eval and regression coverage.</p>
-          <pre class="docs-code"><span class="prompt">$</span> curl https://kolm.ai/v1/route/chat/completions \
+  <section class="section" id="quickstart">
+    <div class="wrap">
+      <p class="eyebrow">01 / Quickstart</p>
+      <h2>Start by routing one namespace.</h2>
+      <p class="lede" style="max-width:64ch">Keep the first integration small. Route one OpenAI-compatible namespace, export captured examples, then compile only after the behavior has enough eval and regression coverage.</p>
+      <div class="panel" style="margin-top:28px">
+        <div class="panel__head"><span>quickstart.sh</span><span class="m">route &middot; capture &middot; compile</span></div>
+        <pre class="ui__code"><span class="m">$</span> curl https://kolm.ai/v1/route/chat/completions \
   -H "Authorization: Bearer $KOLM_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"namespace":"billing-agent","model":"openai:gpt-4.1-mini","messages":[{"role":"user","content":"classify this ticket"}]}'
 
-<span class="prompt">$</span> curl https://kolm.ai/v1/capture/export \
+<span class="m">$</span> curl https://kolm.ai/v1/capture/export \
   -H "Authorization: Bearer $KOLM_API_KEY" \
   -o billing-agent.jsonl
 
-<span class="prompt">$</span> curl https://kolm.ai/v1/compile \
+<span class="m">$</span> curl https://kolm.ai/v1/compile \
   -H "Authorization: Bearer $KOLM_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"task":"billing-agent","examples_file":"billing-agent.jsonl","target":"local-cpu"}'</pre>
-        </section>
-
-        <section class="docs-block" id="references">
-          <span class="idx">02 / Reference Surfaces</span>
-          <h2>Use the generated contracts, not screenshot docs.</h2>
-          <p class="docs-copy">Kolm docs should behave like infrastructure docs: every page points to a machine-readable contract or a route that can be verified.</p>
-          <div class="docs-links">
-            <a class="docs-link" href="/docs/api"><b>API Reference</b><span>Generated route documentation for authenticated and public endpoints.</span></a>
-            <a class="docs-link" href="/openapi.json"><b>OpenAPI JSON</b><span>OpenAPI 3 contract for clients, gateway tests, SDK generation, and review.</span></a>
-            <a class="docs-link" href="/docs/api-routes.json"><b>Route Inventory</b><span>929 routes, 214 route groups, source files, methods, paths, and comments.</span></a>
-            <a class="docs-link" href="/product-graph.json"><b>Product Graph</b><span>Journey counts, route surfaces, readiness groups, runtime dimensions, and category spine.</span></a>
-            <a class="docs-link" href="/v1/product/capabilities"><b>Capability JSON</b><span>Live product capabilities for the current tenant-facing platform surface.</span></a>
-            <a class="docs-link" href="/product-readiness-closeout.json"><b>Readiness Ledger</b><span>Implemented and open readiness states kept explicit for claims discipline.</span></a>
-          </div>
-        </section>
-
-        <section class="docs-block" id="control-center">
-          <span class="idx">03 / API Control Center</span>
-          <h2>Every dashboard control needs an API contract.</h2>
-          <p class="docs-copy">The API Control Center is the enterprise surface for source registration, provider policy, credentials, retention, redaction, eval gates, compile state, runtime targets, exports, and readiness gates.</p>
-          <div class="docs-table">
-            <div><b>Console</b><span><a href="/account/api-control-center">/account/api-control-center</a></span></div>
-            <div><b>Contract</b><span><code>GET /v1/account/api-control-center</code></span></div>
-            <div><b>Principle</b><span>Every write should leave an event, every export should be replayable, and every claim-bearing object should reference evidence.</span></div>
-          </div>
-          <ul class="docs-list">
-            <li><code>workspace</code>, <code>project</code>, <code>environment</code>, <code>source</code>, <code>connector</code>, <code>credential</code>, and <code>provider</code> define the enterprise boundary.</li>
-            <li><code>capture policy</code>, <code>redaction policy</code>, <code>retention policy</code>, <code>eval suite</code>, <code>failure taxonomy</code>, and <code>regression set</code> define the governance boundary.</li>
-            <li><code>compile run</code>, <code>artifact</code>, <code>manifest</code>, <code>target runtime</code>, <code>receipt</code>, <code>export</code>, and <code>readiness gate</code> define the release boundary.</li>
-          </ul>
-        </section>
-
-        <section class="docs-block" id="data-movement">
-          <span class="idx">04 / Data Movement</span>
-          <h2>Every credible API data path in and out.</h2>
-          <p class="docs-copy">A docs page should make ingestion and export coverage legible before an enterprise buyer asks. Unknown schemas stay opaque until a connector declares ownership.</p>
-          <div class="docs-matrix">
-            <div class="proof-card"><p class="card__k">Ingress</p><h3>12+ ways in</h3><p>REST proxy, SDK capture, CLI upload, JSONL/CSV/parquet, webhooks, streams, OTEL, gateway logs, trace imports, warehouse import, browser traces, and human labels.</p></div>
-            <div class="proof-card"><p class="card__k">Interop</p><h3>Trace tools and agents</h3><p>Trace exports, eval dashboards, OpenTelemetry spans, MCP/tool calls, agent handoffs, support tickets, CRM records, and red-team cases.</p></div>
-            <div class="proof-card"><p class="card__k">Egress</p><h3>10+ ways out</h3><p>Signed artifacts, manifests, receipts, eval reports, event streams, SIEM/log export, warehouse export, webhook callbacks, CLI/SDK pull, and runtime packages.</p></div>
-            <div class="proof-card"><p class="card__k">Controls</p><h3>Policy travels with data</h3><p>Source identity, scope, redaction, retention, provider policy, budget, rate limits, approvals, export permissions, and readiness state.</p></div>
-          </div>
-        </section>
-
-        <section class="docs-block" id="lifecycle">
-          <span class="idx">05 / Lifecycle Routes</span>
-          <h2>The loop is the API surface.</h2>
-          <ul class="docs-list">
-            <li><code>POST /v1/route/chat/completions</code> sends OpenAI-compatible traffic through a controlled route.</li>
-            <li><code>POST /v1/gateway/dispatch</code> dispatches to configured providers with capture, cache, fallback, and quality-router controls.</li>
-            <li><code>POST /v1/capture/log</code>, <code>GET /v1/captures/list</code>, <code>GET /v1/capture/export</code>, and <code>POST /v1/capture/bulk</code> move behavior into review and training workflows.</li>
-            <li><code>POST /v1/compile/estimate</code>, <code>POST /v1/compile/preview</code>, <code>POST /v1/compile</code>, and <code>GET /v1/compile/:id/.kolm</code> move from data to signed artifact.</li>
-            <li><code>GET /v1/devices/detect</code>, <code>POST /v1/devices/recommend</code>, <code>POST /v1/devices/:id/install</code>, and <code>POST /v1/serve</code> move artifact state into runtime targets.</li>
-          </ul>
-        </section>
-
-        <section class="docs-block" id="errors">
-          <span class="idx">06 / Errors And Readiness</span>
-          <h2>Docs should show failure paths.</h2>
-          <p class="docs-copy">A serious enterprise API documents the edges: authentication, rate limits, idempotency, readiness states, unsupported targets, connector ownership, and recovery hints.</p>
-          <div class="docs-table">
-            <div><b>Auth</b><span>Use <code>Authorization: Bearer $KOLM_API_KEY</code>. Create a key at <a href="/signup">/signup</a> or through the CLI.</span></div>
-            <div><b>Errors</b><span>Error responses should include stable error codes and a fix or next step.</span></div>
-            <div><b>Idempotency</b><span>Write routes that can create work should accept idempotency or provide status lookup.</span></div>
-            <div><b>Readiness</b><span>Open gates remain explicit for external partners, live certification, package release, and public benchmark data.</span></div>
-          </div>
-        </section>
-
-        <section class="docs-block" id="cli-sdk">
-          <span class="idx">07 / CLI And SDK</span>
-          <h2>Local tools should match hosted docs.</h2>
-          <p class="docs-copy">Developers should be able to move between API, CLI, SDK, account console, and static contracts without learning a second product language.</p>
-          <pre class="docs-code"><span class="prompt">$</span> kolm signup --email you@company.com
-<span class="prompt">$</span> kolm login --key ks_...
-<span class="prompt">$</span> kolm compile "billing-agent" --target local-cpu
-<span class="prompt">$</span> kolm verify artifact.kolm
-<span class="prompt">$</span> kolm serve artifact.kolm</pre>
-          <div class="hero__cta">
-            <a class="btn btn--primary" href="/signup">Create Workspace</a>
-            <a class="btn btn--ghost" href="/account/api-control-center">Open API Control Center</a>
-            <a class="btn btn--ghost" href="/compare">Compare Category</a>
-          </div>
-        </section>
       </div>
     </div>
   </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">02 / Reference surfaces</p>
+      <h2>Use the generated contracts, not screenshot docs.</h2>
+      <p class="lede" style="max-width:64ch">Kolm docs behave like infrastructure docs: every page points to a machine-readable contract or a route that can be verified.</p>
+      <div class="grid grid--3" style="margin-top:28px">
+        <a class="card" href="/docs/api">
+          <p class="card__k">API reference</p>
+          <h3>Generated route docs</h3>
+          <p>Generated route documentation for authenticated and public endpoints.</p>
+        </a>
+        <a class="card" href="/openapi.json">
+          <p class="card__k">OpenAPI JSON</p>
+          <h3>OpenAPI 3 contract</h3>
+          <p>For clients, gateway tests, SDK generation, and review.</p>
+        </a>
+        <a class="card" href="/docs/api-routes.json">
+          <p class="card__k">Route inventory</p>
+          <h3>929 routes</h3>
+          <p>929 routes, 214 route groups, source files, methods, paths, and comments.</p>
+        </a>
+        <a class="card" href="/product-graph.json">
+          <p class="card__k">Product graph</p>
+          <h3>Surface map</h3>
+          <p>Journey counts, route surfaces, readiness groups, runtime dimensions, and category spine.</p>
+        </a>
+        <a class="card" href="/v1/product/capabilities">
+          <p class="card__k">Capability JSON</p>
+          <h3>Live capabilities</h3>
+          <p>Live product capabilities for the current tenant-facing platform surface.</p>
+        </a>
+        <a class="card" href="/product-readiness-closeout.json">
+          <p class="card__k">Readiness ledger</p>
+          <h3>Open + closed states</h3>
+          <p>Implemented and open readiness states kept explicit for claims discipline.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="control-center">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">03 / API control center</p>
+        <h2>Every dashboard control needs an API contract.</h2>
+        <p class="lede">The API Control Center is the enterprise surface for source registration, provider policy, credentials, retention, redaction, eval gates, compile state, runtime targets, exports, and readiness gates.</p>
+        <ul class="feat__list">
+          <li><code>workspace</code>, <code>project</code>, <code>environment</code>, <code>source</code>, <code>connector</code>, <code>credential</code>, and <code>provider</code> define the enterprise boundary.</li>
+          <li><code>capture policy</code>, <code>redaction policy</code>, <code>retention policy</code>, <code>eval suite</code>, <code>failure taxonomy</code>, and <code>regression set</code> define the governance boundary.</li>
+          <li><code>compile run</code>, <code>artifact</code>, <code>manifest</code>, <code>target runtime</code>, <code>receipt</code>, <code>export</code>, and <code>readiness gate</code> define the release boundary.</li>
+        </ul>
+      </div>
+      <div class="feat__ui">
+        <div class="panel">
+          <div class="panel__head"><span>api-control-center</span><span class="m">contract</span></div>
+          <div class="panel__rows">
+            <div class="prow">console <span class="prow__r m"><a href="/account/api-control-center">/account/api-control-center</a></span></div>
+            <div class="prow">contract <span class="prow__r m">GET /v1/account/api-control-center</span></div>
+            <div class="prow">every write <span class="prow__r a">leaves an event</span></div>
+            <div class="prow">every export <span class="prow__r a">replayable</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="data-movement">
+    <div class="wrap">
+      <p class="eyebrow">04 / Data movement</p>
+      <h2>Every credible API data path in and out.</h2>
+      <p class="lede" style="max-width:64ch">A docs page should make ingestion and export coverage legible before an enterprise buyer asks. Unknown schemas stay opaque until a connector declares ownership.</p>
+      <div class="grid grid--4" style="margin-top:28px">
+        <div class="card">
+          <p class="card__k">Ingress</p>
+          <h3>12+ ways in</h3>
+          <p>REST proxy, SDK capture, CLI upload, JSONL/CSV/parquet, webhooks, streams, OTEL, gateway logs, trace imports, warehouse import, browser traces, and human labels.</p>
+        </div>
+        <div class="card">
+          <p class="card__k">Interop</p>
+          <h3>Trace tools and agents</h3>
+          <p>Trace exports, eval dashboards, OpenTelemetry spans, MCP/tool calls, agent handoffs, support tickets, CRM records, and red-team cases.</p>
+        </div>
+        <div class="card">
+          <p class="card__k">Egress</p>
+          <h3>10+ ways out</h3>
+          <p>Signed artifacts, manifests, receipts, eval reports, event streams, SIEM/log export, warehouse export, webhook callbacks, CLI/SDK pull, and runtime packages.</p>
+        </div>
+        <div class="card">
+          <p class="card__k">Controls</p>
+          <h3>Policy travels with data</h3>
+          <p>Source identity, scope, redaction, retention, provider policy, budget, rate limits, approvals, export permissions, and readiness state.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="lifecycle">
+    <div class="wrap">
+      <p class="eyebrow">05 / Lifecycle routes</p>
+      <h2>The loop is the API surface.</h2>
+      <div class="panel" style="margin-top:28px">
+        <div class="panel__head"><span>lifecycle routes</span><span class="m">behavior &rarr; artifact &rarr; runtime</span></div>
+        <div class="panel__rows">
+          <div class="prow"><span class="m">POST</span> /v1/route/chat/completions <span class="prow__r m">OpenAI-compatible traffic</span></div>
+          <div class="prow"><span class="m">POST</span> /v1/gateway/dispatch <span class="prow__r m">capture &middot; cache &middot; fallback</span></div>
+          <div class="prow"><span class="m">GET</span> /v1/capture/export <span class="prow__r m">log &middot; list &middot; bulk</span></div>
+          <div class="prow"><span class="m">POST</span> /v1/compile <span class="prow__r a">.kolm</span></div>
+          <div class="prow"><span class="m">POST</span> /v1/serve <span class="prow__r m">detect &middot; recommend &middot; install</span></div>
+        </div>
+      </div>
+      <ul class="ledger" style="margin-top:22px">
+        <li><b><code>POST /v1/route/chat/completions</code></b> sends OpenAI-compatible traffic through a controlled route.</li>
+        <li><b><code>POST /v1/gateway/dispatch</code></b> dispatches to configured providers with capture, cache, fallback, and quality-router controls.</li>
+        <li><b><code>POST /v1/capture/log</code>, <code>GET /v1/captures/list</code>, <code>GET /v1/capture/export</code>, <code>POST /v1/capture/bulk</code></b> move behavior into review and training workflows.</li>
+        <li><b><code>POST /v1/compile/estimate</code>, <code>POST /v1/compile/preview</code>, <code>POST /v1/compile</code>, <code>GET /v1/compile/:id/.kolm</code></b> move from data to signed artifact.</li>
+        <li><b><code>GET /v1/devices/detect</code>, <code>POST /v1/devices/recommend</code>, <code>POST /v1/devices/:id/install</code>, <code>POST /v1/serve</code></b> move artifact state into runtime targets.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="errors">
+    <div class="wrap">
+      <p class="eyebrow">06 / Errors and readiness</p>
+      <h2>Docs should show failure paths.</h2>
+      <p class="lede" style="max-width:64ch">A serious enterprise API documents the edges: authentication, rate limits, idempotency, readiness states, unsupported targets, connector ownership, and recovery hints.</p>
+      <div class="grid grid--2" style="margin-top:28px">
+        <div class="card">
+          <p class="card__k">Auth</p>
+          <h3>Bearer keys</h3>
+          <p>Use <code>Authorization: Bearer $KOLM_API_KEY</code>. Create a key at <a href="/signup">/signup</a> or through the CLI.</p>
+        </div>
+        <div class="card">
+          <p class="card__k">Errors</p>
+          <h3>Stable codes</h3>
+          <p>Error responses should include stable error codes and a fix or next step.</p>
+        </div>
+        <div class="card">
+          <p class="card__k">Idempotency</p>
+          <h3>Safe writes</h3>
+          <p>Write routes that can create work should accept idempotency or provide status lookup.</p>
+        </div>
+        <div class="card">
+          <p class="card__k">Readiness</p>
+          <h3>Explicit gates</h3>
+          <p>Open gates remain explicit for external partners, live certification, package release, and public benchmark data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="evidence">
+    <div class="wrap feat__in">
+      <div class="feat__copy">
+        <p class="eyebrow">07 / Evidence and verify</p>
+        <h2>Every artifact ships a receipt you can check.</h2>
+        <p class="lede">Compiled artifacts are signed and content-addressed. Export the receipts, hand them to a buyer, and let anyone verify the artifact against the public verifier &mdash; no access to your workspace required.</p>
+        <ul class="feat__list">
+          <li>Signed <code>.kolm</code> artifacts with Ed25519 signatures and content-addressed receipts</li>
+          <li>Export eval reports, manifests, and receipts as governance evidence</li>
+          <li>Verify any artifact at <a href="/verify">/verify</a>; browse the checks the compiler runs at <a href="/checks">/checks</a></li>
+        </ul>
+        <div class="hero__cta" style="margin-top:8px">
+          <a class="btn btn--ghost" href="/verify">Verify an artifact</a>
+          <a class="btn btn--ghost" href="/checks">Browse checks</a>
+        </div>
+      </div>
+      <div class="feat__ui">
+        <div class="panel">
+          <div class="panel__head"><span>billing-agent.kolm</span><span class="a">signed</span></div>
+          <div class="panel__rows">
+            <div class="prow">signature <span class="prow__r m">Ed25519</span></div>
+            <div class="prow">receipts <span class="prow__r m">sha-256</span></div>
+            <div class="prow">eval report <span class="prow__r a">attached</span></div>
+            <div class="prow">readiness gate <span class="prow__r a">passed</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="cli-sdk">
+    <div class="wrap">
+      <p class="eyebrow">08 / CLI and SDK</p>
+      <h2>Local tools should match hosted docs.</h2>
+      <p class="lede" style="max-width:64ch">Developers should be able to move between API, CLI, SDK, account console, and static contracts without learning a second product language.</p>
+      <div class="panel" style="margin-top:28px">
+        <div class="panel__head"><span>kolm-cli</span><span class="m">signup &rarr; compile &rarr; serve</span></div>
+        <pre class="ui__code"><span class="m">$</span> kolm signup --email you@company.com
+<span class="m">$</span> kolm login --key ks_...
+<span class="m">$</span> kolm compile "billing-agent" --target local-cpu
+<span class="m">$</span> kolm verify artifact.kolm
+<span class="m">$</span> kolm serve artifact.kolm</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta section--flush">
+    <div class="wrap cta__in">
+      <h2>Route one namespace and compile your first artifact.</h2>
+      <p class="lede">Create a key, route a single OpenAI-compatible namespace, and follow the quickstart from capture to signed artifact.</p>
+      <div class="hero__cta">
+        <a class="btn btn--ghost" href="/signup">Get an API key</a>
+        <a class="btn btn--ghost" href="/account/api-control-center">Open API Control Center</a>
+      </div>
+    </div>
+  </section>
+
 </main>
 
+<hr class="foil-line" aria-hidden="true">
 <footer class="foot">
   <div class="wrap">
     <div class="foot__grid">
       <div class="foot__col">
         <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
-          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Developer docs for the behavior-to-artifact control plane.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
-        <h3>Docs</h3>
-        <a href="/docs/api">API Reference</a>
-        <a href="/openapi.json">OpenAPI</a>
-        <a href="/docs/api-routes.json">Route Inventory</a>
-        <a href="/product-graph.json">Product Graph</a>
-      </div>
-      <div class="foot__col">
-        <h3>Product</h3>
-        <a href="/platform">Platform</a>
+        <h3>Compiler</h3>
+        <a href="/#pipeline">Pipeline</a>
+        <a href="/#contract">Backend contract</a>
+        <a href="/account/api-control-center">API control</a>
         <a href="/integrations">Integrations</a>
-        <a href="/runtimes">Runtimes</a>
-        <a href="/capabilities">Capabilities</a>
+        <a href="/compare">Compare</a>
+        <a href="/runtimes">Runtime targets</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
       </div>
       <div class="foot__col">
-        <h3>Control</h3>
-        <a href="/account/api-control-center">API Control Center</a>
-        <a href="/account/overview">Account Overview</a>
-        <a href="/trust">Readiness Center</a>
+        <h3>Surfaces</h3>
+        <a href="/docs#capture">Capture</a>
+        <a href="/docs#compile">Compile</a>
+        <a href="/docs#compose">Compose</a>
+        <a href="/docs#deploy">Deploy</a>
+        <a href="https://audit.kolm.ai">Audit</a>
+      </div>
+      <div class="foot__col">
+        <h3>Trust</h3>
+        <a href="/verify">Verify</a>
         <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
       </div>
       <div class="foot__col">
         <h3>Company</h3>
         <a href="/research">Research</a>
         <a href="/changelog">Changelog</a>
-        <a href="/contact">Contact</a>
-        <a href="/pricing">Pricing</a>
+        <a href="mailto:dev@kolm.ai">Contact</a>
       </div>
     </div>
     <div class="foot__bottom">
-      <span class="badge badge--ok">Developer docs</span>
-      <span class="badge">OpenAPI ready</span>
-      <span class="badge">Route inventory</span>
+      <span class="badge badge--ok">Signed artifacts</span>
+      <span class="badge">API control center</span>
+      <span class="badge">Apache-2.0</span>
+      <span class="badge">Open API contract</span>
       <span style="margin-left:auto;color:var(--ink-3);font-size:13px">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
     </div>
   </div>
