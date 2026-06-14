@@ -190,7 +190,38 @@
     els.forEach(function (el) { io.observe(el); });
   }
 
-  function init() { syncThemeColor(); wireReveal(); wireNav(); wirePointerLight(); wireField(); wireCount(); }
+  // ---- Premium backdrop: inject the fixed "Captured Signal" volumetric field
+  // once, site-wide (atmosphere + shafts are CSS; we only add the drifting capture
+  // motes). Fail-open: no JS = the page's dark floor; CSS carries the static field.
+  // Reduced-motion = a calm lit still (frozen shafts + scattered motes). ----
+  function wireBackdrop() {
+    if (document.querySelector('.bg')) return;
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var bg = document.createElement('div');
+    bg.className = 'bg'; bg.setAttribute('aria-hidden', 'true');
+    bg.innerHTML = '<div class="bg__haze"></div><div class="bg__shaft bg__shaft--a"></div><div class="bg__shaft bg__shaft--b"></div><div class="bg__motes"></div>';
+    var grain = document.createElement('div');
+    grain.className = 'bg__grain'; grain.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(grain, document.body.firstChild);
+    document.body.insertBefore(bg, document.body.firstChild);
+    var host = bg.querySelector('.bg__motes'); if (!host) return;
+    var N = reduce ? 12 : (window.innerWidth < 640 ? 20 : 38);
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < N; i++) {
+      var m = document.createElement('span');
+      m.className = 'bg__mote' + (Math.random() < 0.22 ? ' lg' : '') + (Math.random() < 0.16 ? ' pkt' : '');
+      var dur = 14 + Math.random() * 22;
+      m.style.left = (Math.random() * 100) + 'vw';
+      m.style.setProperty('--dx', (Math.random() * 120 - 60) + 'px');
+      m.style.setProperty('--dy', '-' + (90 + Math.random() * 60) + 'vh');
+      if (reduce) { m.style.top = (Math.random() * 100) + 'vh'; m.style.opacity = '.4'; m.style.animation = 'none'; }
+      else { m.style.top = (60 + Math.random() * 55) + 'vh'; m.style.animationDuration = dur + 's'; m.style.animationDelay = '-' + (Math.random() * dur) + 's'; }
+      frag.appendChild(m);
+    }
+    host.appendChild(frag);
+  }
+
+  function init() { wireBackdrop(); syncThemeColor(); wireReveal(); wireNav(); wirePointerLight(); wireField(); wireCount(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
