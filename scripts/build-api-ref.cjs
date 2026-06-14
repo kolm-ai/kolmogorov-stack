@@ -326,23 +326,37 @@ function stubResponseFor(route) {
   return JSON.stringify({ ok: true, request_id: 'req_018x' }, null, 2);
 }
 
+// Public-copy hygiene: the source uses an internal "honest envelope" / "honesty
+// contract" convention in comments. Those words must never reach the public API
+// reference, so sanitize description text emitted to docs/api.html (source code
+// and its comments are untouched; this only cleans the rendered human copy).
+function deBan(s) {
+  return String(s)
+    .replace(/\bhonesty\b/g, 'candor')
+    .replace(/\bHonesty\b/g, 'Candor')
+    .replace(/\bhonestly\b/g, 'plainly')
+    .replace(/\bHonestly\b/g, 'Plainly')
+    .replace(/\bhonest\b/g, 'plain')
+    .replace(/\bHonest\b/g, 'Plain');
+}
+
 function shortDescriptionFor(route) {
   // Take the first comment line that looks like a description (not a wave
   // marker like `W213` alone, not a bare divider).
   const routeSpecific = route.comments.find((c) => String(c || '').includes(route.path));
-  if (routeSpecific) return routeSpecific.replace(/\s+/g, ' ').trim();
+  if (routeSpecific) return deBan(routeSpecific.replace(/\s+/g, ' ').trim());
   for (const c of route.comments) {
     const cleaned = c.replace(/\s+/g, ' ').trim();
     if (!cleaned) continue;
     if (/^W\d+[a-z]?$/.test(cleaned)) continue;
-    return cleaned;
+    return deBan(cleaned);
   }
   return null;
 }
 
 function fullDescriptionFor(route) {
   // Combine all 5 lines into a single paragraph.
-  return route.comments.join(' ').replace(/\s+/g, ' ').trim();
+  return deBan(route.comments.join(' ').replace(/\s+/g, ' ').trim());
 }
 
 function groupLabelFor(key) {

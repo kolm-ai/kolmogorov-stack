@@ -116,17 +116,6 @@ body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
 .group-intro summary,.route-detail summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink-3);font-family:var(--font-mono);font-size:12px}
 .legacy{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);max-width:var(--measure);line-height:1.65}
 .legacy code{font-size:11.5px}
-/* how-to-read legend for the generated catalog */
-.api-legend{margin:var(--rhy-2) 0 var(--s5);padding:var(--s4);border-radius:var(--r);background:var(--sheen),var(--panel);box-shadow:var(--plate)}
-.api-legend h2{margin-top:0}
-.api-legend p{font-size:14px;color:var(--ink-2);max-width:var(--measure)}
-.api-legend__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3);margin-top:var(--s4)}
-@media(max-width:760px){.api-legend__grid{grid-template-columns:1fr}}
-.api-legend__row{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:11px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--well)}
-.api-legend__row b{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
-.api-legend__row span.ex{color:var(--ink-2);font-size:12.5px;line-height:1.5}
-.api-legend__key{flex:none;align-self:start;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
-.api-legend__methods{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 </style>
 </head>
 <body class="t-docs">
@@ -462,32 +451,6 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <code>#messages</code> &rarr; Anthropic-compatible messages group.
   <code>#capture</code>, <code>#lake</code>, <code>#optimize</code>, <code>#datasets</code>, <code>#labels</code>, <code>#synth</code>, <code>#sim</code>, <code>#bakeoff</code>, <code>#training</code>, <code>#runtime</code>, <code>#devices</code>, <code>#sync</code>, <code>#team</code> jump to the matching group below.
 </p>
-
-<section class="api-legend" aria-labelledby="api-legend-title">
-  <h2 id="api-legend-title">How to read this reference</h2>
-  <p>Every entry below is generated from a route source file, so it never drifts from the running API. Each route shows an HTTP method, a path, a status tag, a sample <code>curl</code>, and a sample response. Here is what those parts mean.</p>
-  <div class="api-legend__grid">
-    <div class="api-legend__row">
-      <span class="api-legend__key" aria-hidden="true">
-        <span class="m m-get">GET</span><span class="m m-post">POST</span>
-      </span>
-      <span class="ex"><b>HTTP method</b>The verb the route expects. <span class="m m-get" style="vertical-align:middle">GET</span> reads, <span class="m m-post" style="vertical-align:middle">POST</span> creates or runs, <span class="m m-put" style="vertical-align:middle">PUT</span> and <span class="m m-patch" style="vertical-align:middle">PATCH</span> update, <span class="m m-delete" style="vertical-align:middle">DELETE</span> removes. Color is backed by the label text, so the verb reads without relying on color.</span>
-    </div>
-    <div class="api-legend__row">
-      <span class="api-legend__key" aria-hidden="true"><span class="route-live">reference-ready</span><span class="route-stub">source-indexed</span></span>
-      <span class="ex"><b>Status tag</b><span class="route-live" style="vertical-align:middle">reference-ready</span> routes carry source comments describing the request body and behavior. <span class="route-stub" style="vertical-align:middle">source-indexed</span> routes are confirmed wired from source but use the shared JSON envelope without a hand-written body. Tick <em>Show Reference-Ready Routes Only</em> above to hide the source-indexed ones.</span>
-    </div>
-    <div class="api-legend__row">
-      <span class="api-legend__key" aria-hidden="true"><code class="route-stub" style="border-style:dashed">group (n)</code></span>
-      <span class="ex"><b>Group</b>Routes are bucketed by their first path segment, for example everything under <code>/v1/compile/*</code> sits in the <em>Compile</em> group. The number in parentheses is how many routes that group holds. Use the <em>Groups</em> index above to jump.</span>
-    </div>
-    <div class="api-legend__row">
-      <span class="api-legend__key" aria-hidden="true"><code>{ }</code></span>
-      <span class="ex"><b>Body and envelope</b>A route's <span class="kdef">envelope<span class="kdef__plain"> (the shared JSON wrapper every reply uses)</span></span><span class="kdef-tip">The <b>envelope</b> is the shared JSON wrapper around every reply: it always carries <code>ok</code> and <code>request_id</code>, with the route-specific payload alongside. Knowing it lets you write one parser for all routes.</span> always returns <code>ok</code> and a <code>request_id</code>. Where a route documents a request body, it appears under the path as <code>{ field, field? }</code>; a trailing <code>?</code> marks an optional field. <span class="kdef">Idempotent<span class="kdef__plain"> (safe to retry without doubling the work)</span></span><span class="kdef-tip"><b>Idempotent</b> means sending the same request twice has the same effect as sending it once. Write routes accept an <code>idempotency_key</code> so a retry after a timeout never double-charges or double-creates.</span> write routes accept an <code>idempotency_key</code>.</span>
-    </div>
-  </div>
-  <p style="margin-top:var(--s4)">Auth in one line: send <code>Authorization: Bearer &lt;key&gt;</code> (or the <code>x-api-key</code> alias) on every <code>/v1/*</code> route except the public ones noted under <a href="#base">Base URL &amp; auth</a>. Prefer the machine contract? Pull <a href="/openapi.json">/openapi.json</a> and generate a client instead of copying by hand.</p>
-</section>
 
 <section class="api-group" id="group-ab" data-api-group data-group-search="ab ab /v1/ab/configure /v1/ab/feedback /v1/ab/metrics /v1/ab/promote /v1/ab/status">
 <h2>Ab <span class="group-count">(5)</span></h2>
@@ -1182,10 +1145,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-group" id="group-active-learning" data-api-group data-group-search="active learning active-learning /v1/active-learning/summary">
 <h2>Active Learning <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
-<section class="api-route" id="GET-v1-active-learning-summary" data-api-route data-route-status="reference-ready" data-route-search="get /v1/active-learning/summary src/router.js reference-ready honest empty-state: if active-learning-queue.js isn&#39;t on disk yet honest empty-state: if active-learning-queue.js isn&#39;t on disk yet (sibling agent still building, or this is a fresh deploy), return ok:true with module_missing:true so the dashboard can render a useful empty state instead of a 500.">
+<section class="api-route" id="GET-v1-active-learning-summary" data-api-route data-route-status="reference-ready" data-route-search="get /v1/active-learning/summary src/router.js reference-ready plain empty-state: if active-learning-queue.js isn&#39;t on disk yet plain empty-state: if active-learning-queue.js isn&#39;t on disk yet (sibling agent still building, or this is a fresh deploy), return ok:true with module_missing:true so the dashboard can render a useful empty state instead of a 500.">
   <h3><span class="m m-get">GET</span> <code>/v1/active-learning/summary</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
-  <p class="route-desc">Honest empty-state: if active-learning-queue.js isn&#39;t on disk yet</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Honest empty-state: if active-learning-queue.js isn&#39;t on disk yet (sibling agent still building, or this is a fresh deploy), return ok:true with module_missing:true so the dashboard can render a useful empty state instead of a 500.</p></details>
+  <p class="route-desc">Plain empty-state: if active-learning-queue.js isn&#39;t on disk yet</p>
+  <details class="route-detail"><summary>Full comment</summary><p>Plain empty-state: if active-learning-queue.js isn&#39;t on disk yet (sibling agent still building, or this is a fresh deploy), return ok:true with module_missing:true so the dashboard can render a useful empty state instead of a 500.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/active-learning/summary&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -1618,10 +1581,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-approvals-request" data-api-route data-route-status="reference-ready" data-route-search="post /v1/approvals/request src/router.js reference-ready tenant fence: tenant_id forced from req.tenant_record.id. status tenant fence: tenant_id forced from req.tenant_record.id. status transitions return honest invalid_transition envelopes - never silently re-write state. version stamp matches /^w782-/.">
+<section class="api-route" id="POST-v1-approvals-request" data-api-route data-route-status="reference-ready" data-route-search="post /v1/approvals/request src/router.js reference-ready tenant fence: tenant_id forced from req.tenant_record.id. status tenant fence: tenant_id forced from req.tenant_record.id. status transitions return plain invalid_transition envelopes - never silently re-write state. version stamp matches /^w782-/.">
   <h3><span class="m m-post">POST</span> <code>/v1/approvals/request</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Tenant fence: tenant_id forced from req.tenant_record.id. Status</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id. Status transitions return honest invalid_transition envelopes - never silently re-write state. version stamp matches /^w782-/.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id. Status transitions return plain invalid_transition envelopes - never silently re-write state. version stamp matches /^w782-/.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/approvals/request&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1852,10 +1815,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-audio-capture-detect" data-api-route data-route-status="reference-ready" data-route-search="post /v1/audio/capture-detect src/router.js reference-ready stamped by captureaudiomessage (never the raw audio bytes). stamped by captureaudiomessage (never the raw audio bytes). all three are tenant-fenced via req.tenant_record.id (w411). honest envelopes on bad input - no silent passthrough.">
+<section class="api-route" id="POST-v1-audio-capture-detect" data-api-route data-route-status="reference-ready" data-route-search="post /v1/audio/capture-detect src/router.js reference-ready stamped by captureaudiomessage (never the raw audio bytes). stamped by captureaudiomessage (never the raw audio bytes). all three are tenant-fenced via req.tenant_record.id (w411). plain envelopes on bad input - no silent passthrough.">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/capture-detect</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">stamped by captureAudioMessage (NEVER the raw audio bytes).</p>
-  <details class="route-detail"><summary>Full comment</summary><p>stamped by captureAudioMessage (NEVER the raw audio bytes). All three are tenant-fenced via req.tenant_record.id (W411). Honest envelopes on bad input - no silent passthrough.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>stamped by captureAudioMessage (NEVER the raw audio bytes). All three are tenant-fenced via req.tenant_record.id (W411). Plain envelopes on bad input - no silent passthrough.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/audio/capture-detect&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1877,10 +1840,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-audio-speech" data-api-route data-route-status="reference-ready" data-route-search="post /v1/audio/speech src/router.js reference-ready audio routes. real proxy when configured; fixture returns deterministic audio routes. real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so sdks see something better than 404. these concrete audio endpoints use the openai connector when a key is present.">
+<section class="api-route" id="POST-v1-audio-speech" data-api-route data-route-status="reference-ready" data-route-search="post /v1/audio/speech src/router.js reference-ready audio routes. real proxy when configured; fixture returns deterministic audio routes. real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so sdks see something better than 404. these concrete audio endpoints use the openai connector when a key is present.">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/speech</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/audio/speech&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1916,10 +1879,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-audio-transcriptions" data-api-route data-route-status="reference-ready" data-route-search="post /v1/audio/transcriptions src/router.js reference-ready audio routes. real proxy when configured; fixture returns deterministic audio routes. real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so sdks see something better than 404. these concrete audio endpoints use the openai connector when a key is present.">
+<section class="api-route" id="POST-v1-audio-transcriptions" data-api-route data-route-status="reference-ready" data-route-search="post /v1/audio/transcriptions src/router.js reference-ready audio routes. real proxy when configured; fixture returns deterministic audio routes. real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so sdks see something better than 404. these concrete audio endpoints use the openai connector when a key is present.">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/transcriptions</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/audio/transcriptions&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -1930,10 +1893,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-audio-translations" data-api-route data-route-status="reference-ready" data-route-search="post /v1/audio/translations src/router.js reference-ready audio routes. real proxy when configured; fixture returns deterministic audio routes. real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so sdks see something better than 404. these concrete audio endpoints use the openai connector when a key is present.">
+<section class="api-route" id="POST-v1-audio-translations" data-api-route data-route-status="reference-ready" data-route-search="post /v1/audio/translations src/router.js reference-ready audio routes. real proxy when configured; fixture returns deterministic audio routes. real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so sdks see something better than 404. these concrete audio endpoints use the openai connector when a key is present.">
   <h3><span class="m m-post">POST</span> <code>/v1/audio/translations</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span> <span class="route-stub">array-literal expansion</span></h3>
   <p class="route-desc">audio routes. Real proxy when configured; fixture returns deterministic</p>
-  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise honest 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>audio routes. Real proxy when configured; fixture returns deterministic bodies; otherwise plain 501 with a structured &quot;not yet supported&quot; envelope so SDKs see something better than 404. These concrete audio endpoints use the OpenAI connector when a key is present.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/audio/translations&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -2026,10 +1989,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="GET-v1-audit-export" data-api-route data-route-status="reference-ready" data-route-search="get /v1/audit/export src/router.js reference-ready preview without offering a backdoor full dump. preview without offering a backdoor full dump. all three routes auth-gate on req.tenant_record. honest envelope on bad format / missing tenant - no silent passthrough.">
+<section class="api-route" id="GET-v1-audit-export" data-api-route data-route-status="reference-ready" data-route-search="get /v1/audit/export src/router.js reference-ready preview without offering a backdoor full dump. preview without offering a backdoor full dump. all three routes auth-gate on req.tenant_record. plain envelope on bad format / missing tenant - no silent passthrough.">
   <h3><span class="m m-get">GET</span> <code>/v1/audit/export</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">preview without offering a backdoor full dump.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>preview without offering a backdoor full dump. All three routes auth-gate on req.tenant_record. Honest envelope on bad format / missing tenant - no silent passthrough.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>preview without offering a backdoor full dump. All three routes auth-gate on req.tenant_record. Plain envelope on bad format / missing tenant - no silent passthrough.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/audit/export&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -3483,10 +3446,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-group" id="group-carbon" data-api-group data-group-search="carbon carbon /v1/carbon/estimate">
 <h2>Carbon <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
-<section class="api-route" id="GET-v1-carbon-estimate" data-api-route data-route-status="reference-ready" data-route-search="get /v1/carbon/estimate src/router.js reference-ready → savingsreport envelope comparing local run vs frontier baseline. → savingsreport envelope comparing local run vs frontier baseline. auth required (same pattern as billing/breakdown). every envelope carries methodology=&#39;public-research-estimate&#39; so a downstream consumer cannot mistake the estimate for a measured value. w786 honesty contract.">
+<section class="api-route" id="GET-v1-carbon-estimate" data-api-route data-route-status="reference-ready" data-route-search="get /v1/carbon/estimate src/router.js reference-ready → savingsreport envelope comparing local run vs frontier baseline. → savingsreport envelope comparing local run vs frontier baseline. auth required (same pattern as billing/breakdown). every envelope carries methodology=&#39;public-research-estimate&#39; so a downstream consumer cannot mistake the estimate for a measured value. w786 candor contract.">
   <h3><span class="m m-get">GET</span> <code>/v1/carbon/estimate</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">→ savingsReport envelope comparing local run vs frontier baseline.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>→ savingsReport envelope comparing local run vs frontier baseline. Auth required (same pattern as billing/breakdown). Every envelope carries methodology=&#39;public-research-estimate&#39; so a downstream consumer cannot mistake the estimate for a measured value. W786 honesty contract.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>→ savingsReport envelope comparing local run vs frontier baseline. Auth required (same pattern as billing/breakdown). Every envelope carries methodology=&#39;public-research-estimate&#39; so a downstream consumer cannot mistake the estimate for a measured value. W786 candor contract.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/carbon/estimate&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -3730,10 +3693,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-cloud-distill-submit" data-api-route data-route-status="reference-ready" data-route-search="post /v1/cloud/distill/submit src/router.js reference-ready tenant fence: tenant_id forced from req.tenant_record.id; body/path never tenant fence: tenant_id forced from req.tenant_record.id; body/path never override. backend honesty: when kolm_cloud_distill_endpoint is unset, the submit response carries cloud_backend_status=&#39;no_pool_configured&#39; so the caller knows the work is queued but not yet executing. version stamp /^w785-/.">
+<section class="api-route" id="POST-v1-cloud-distill-submit" data-api-route data-route-status="reference-ready" data-route-search="post /v1/cloud/distill/submit src/router.js reference-ready tenant fence: tenant_id forced from req.tenant_record.id; body/path never tenant fence: tenant_id forced from req.tenant_record.id; body/path never override. backend candor: when kolm_cloud_distill_endpoint is unset, the submit response carries cloud_backend_status=&#39;no_pool_configured&#39; so the caller knows the work is queued but not yet executing. version stamp /^w785-/.">
   <h3><span class="m m-post">POST</span> <code>/v1/cloud/distill/submit</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Tenant fence: tenant_id forced from req.tenant_record.id; body/path never</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id; body/path never override. Backend honesty: when KOLM_CLOUD_DISTILL_ENDPOINT is unset, the submit response carries cloud_backend_status=&#39;no_pool_configured&#39; so the caller knows the work is queued but not yet executing. version stamp /^w785-/.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id; body/path never override. Backend candor: when KOLM_CLOUD_DISTILL_ENDPOINT is unset, the submit response carries cloud_backend_status=&#39;no_pool_configured&#39; so the caller knows the work is queued but not yet executing. version stamp /^w785-/.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/cloud/distill/submit&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -4158,10 +4121,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-copyright-scan" data-api-route data-route-status="reference-ready" data-route-search="post /v1/copyright/scan src/router.js reference-ready heuristic (flag_reason starts with `copyright_heuristic:`). heuristic (flag_reason starts with `copyright_heuristic:`). honest contract: this is heuristic, not legal advice. the route stamps version:&#39;w750-followup-vn.m&#39; on every envelope so consumers can version-pin via regex (/^w750-followup-/).">
+<section class="api-route" id="POST-v1-copyright-scan" data-api-route data-route-status="reference-ready" data-route-search="post /v1/copyright/scan src/router.js reference-ready heuristic (flag_reason starts with `copyright_heuristic:`). heuristic (flag_reason starts with `copyright_heuristic:`). plain contract: this is heuristic, not legal advice. the route stamps version:&#39;w750-followup-vn.m&#39; on every envelope so consumers can version-pin via regex (/^w750-followup-/).">
   <h3><span class="m m-post">POST</span> <code>/v1/copyright/scan</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">heuristic (flag_reason starts with `copyright_heuristic:`).</p>
-  <details class="route-detail"><summary>Full comment</summary><p>heuristic (flag_reason starts with `copyright_heuristic:`). Honest contract: this is HEURISTIC, not legal advice. The route stamps version:&#39;w750-followup-vN.M&#39; on every envelope so consumers can version-pin via regex (/^w750-followup-/).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>heuristic (flag_reason starts with `copyright_heuristic:`). Plain contract: this is HEURISTIC, not legal advice. The route stamps version:&#39;w750-followup-vN.M&#39; on every envelope so consumers can version-pin via regex (/^w750-followup-/).</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/copyright/scan&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -4920,10 +4883,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-drift-alert-snapshot" data-api-route data-route-status="reference-ready" data-route-search="post /v1/drift-alert/snapshot src/router.js reference-ready tie-in: when shouldalert() fires the route calls tie-in: when shouldalert() fires the route calls driftalertstore.registerdriftwarning() so the next w709 routing decision can stamp `drift_warning:true`. honest fallback: if the w709 routing-events module is not loaded, the warning is still registered (it is in-memory) and the w709 hook simply never reads it.">
+<section class="api-route" id="POST-v1-drift-alert-snapshot" data-api-route data-route-status="reference-ready" data-route-search="post /v1/drift-alert/snapshot src/router.js reference-ready tie-in: when shouldalert() fires the route calls tie-in: when shouldalert() fires the route calls driftalertstore.registerdriftwarning() so the next w709 routing decision can stamp `drift_warning:true`. plain fallback: if the w709 routing-events module is not loaded, the warning is still registered (it is in-memory) and the w709 hook simply never reads it.">
   <h3><span class="m m-post">POST</span> <code>/v1/drift-alert/snapshot</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">tie-in: when shouldAlert() fires the route calls</p>
-  <details class="route-detail"><summary>Full comment</summary><p>tie-in: when shouldAlert() fires the route calls driftAlertStore.registerDriftWarning() so the NEXT W709 routing decision can stamp `drift_warning:true`. Honest fallback: if the W709 routing-events module is not loaded, the warning is still registered (it is in-memory) and the W709 hook simply never reads it.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>tie-in: when shouldAlert() fires the route calls driftAlertStore.registerDriftWarning() so the NEXT W709 routing decision can stamp `drift_warning:true`. Plain fallback: if the W709 routing-events module is not loaded, the warning is still registered (it is in-memory) and the W709 hook simply never reads it.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/drift-alert/snapshot&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -5405,10 +5368,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-federated-consortium-verify-mia" data-api-route data-route-status="reference-ready" data-route-search="post /v1/federated/consortium/verify-mia src/federated-consortium-routes.js reference-ready body: { artifact_id, test_inputs:[...], shadow_models?:[...], body: { artifact_id, test_inputs:[...], shadow_models?:[...], train_set?:[...], holdout_set?:[...], p_threshold? } honest stub when shadow_models empty (returns mia_requires_shadow_models).">
+<section class="api-route" id="POST-v1-federated-consortium-verify-mia" data-api-route data-route-status="reference-ready" data-route-search="post /v1/federated/consortium/verify-mia src/federated-consortium-routes.js reference-ready body: { artifact_id, test_inputs:[...], shadow_models?:[...], body: { artifact_id, test_inputs:[...], shadow_models?:[...], train_set?:[...], holdout_set?:[...], p_threshold? } plain stub when shadow_models empty (returns mia_requires_shadow_models).">
   <h3><span class="m m-post">POST</span> <code>/v1/federated/consortium/verify-mia</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Body: { artifact_id, test_inputs:[...], shadow_models?:[...],</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Body: { artifact_id, test_inputs:[...], shadow_models?:[...], train_set?:[...], holdout_set?:[...], p_threshold? } Honest stub when shadow_models empty (returns mia_requires_shadow_models).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Body: { artifact_id, test_inputs:[...], shadow_models?:[...], train_set?:[...], holdout_set?:[...], p_threshold? } Plain stub when shadow_models empty (returns mia_requires_shadow_models).</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/federated/consortium/verify-mia&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -6414,10 +6377,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="GET-v1-kolmbench-spec" data-api-route data-route-status="reference-ready" data-route-search="get /v1/kolmbench/spec src/router.js reference-ready only + safe to cache. both post routes require auth via the standard only + safe to cache. both post routes require auth via the standard middleware path; submit additionally requires body.confirm:true as a spend-protection gate (the w411 confirm-pattern). honest envelopes on every degraded path.">
+<section class="api-route" id="GET-v1-kolmbench-spec" data-api-route data-route-status="reference-ready" data-route-search="get /v1/kolmbench/spec src/router.js reference-ready only + safe to cache. both post routes require auth via the standard only + safe to cache. both post routes require auth via the standard middleware path; submit additionally requires body.confirm:true as a spend-protection gate (the w411 confirm-pattern). plain envelopes on every degraded path.">
   <h3><span class="m m-get">GET</span> <code>/v1/kolmbench/spec</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">only + safe to cache. Both POST routes require auth via the standard</p>
-  <details class="route-detail"><summary>Full comment</summary><p>only + safe to cache. Both POST routes require auth via the standard middleware path; submit additionally requires body.confirm:true as a spend-protection gate (the W411 confirm-pattern). Honest envelopes on every degraded path.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>only + safe to cache. Both POST routes require auth via the standard middleware path; submit additionally requires body.confirm:true as a spend-protection gate (the W411 confirm-pattern). Plain envelopes on every degraded path.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/kolmbench/spec&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6456,10 +6419,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-group" id="group-kscore" data-api-group data-group-search="kscore kscore /v1/kscore/series">
 <h2>Kscore <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
-<section class="api-route" id="GET-v1-kscore-series" data-api-route data-route-status="reference-ready" data-route-search="get /v1/kscore/series src/router.js reference-ready k-score time series for the namespaces flywheel chart (recorded by k-score time series for the namespaces flywheel chart (recorded by the autopilot lifecycle). tenant-fenced; honest empty series when none.">
+<section class="api-route" id="GET-v1-kscore-series" data-api-route data-route-status="reference-ready" data-route-search="get /v1/kscore/series src/router.js reference-ready k-score time series for the namespaces flywheel chart (recorded by k-score time series for the namespaces flywheel chart (recorded by the autopilot lifecycle). tenant-fenced; plain empty series when none.">
   <h3><span class="m m-get">GET</span> <code>/v1/kscore/series</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">K-score time series for the namespaces flywheel chart (recorded by</p>
-  <details class="route-detail"><summary>Full comment</summary><p>K-score time series for the namespaces flywheel chart (recorded by the autopilot lifecycle). Tenant-fenced; honest empty series when none.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>K-score time series for the namespaces flywheel chart (recorded by the autopilot lifecycle). Tenant-fenced; plain empty series when none.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/kscore/series&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6842,10 +6805,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="GET-v1-lingual-manifest-artifact-id" data-api-route data-route-status="reference-ready" data-route-search="get /v1/lingual/manifest/:artifact_id src/lingual-routes.js reference-ready reads the per-language k-score block off an artifact&#39;s manifest. reads the per-language k-score block off an artifact&#39;s manifest. looks up the manifest via src/artifact.js (or registry.js) when available; falls back to an honest &quot;no_manifest_found&quot; envelope when the artifact isn&#39;t registered.">
+<section class="api-route" id="GET-v1-lingual-manifest-artifact-id" data-api-route data-route-status="reference-ready" data-route-search="get /v1/lingual/manifest/:artifact_id src/lingual-routes.js reference-ready reads the per-language k-score block off an artifact&#39;s manifest. reads the per-language k-score block off an artifact&#39;s manifest. looks up the manifest via src/artifact.js (or registry.js) when available; falls back to an plain &quot;no_manifest_found&quot; envelope when the artifact isn&#39;t registered.">
   <h3><span class="m m-get">GET</span> <code>/v1/lingual/manifest/:artifact_id</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Reads the per-language K-Score block off an artifact&#39;s manifest.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Reads the per-language K-Score block off an artifact&#39;s manifest. Looks up the manifest via src/artifact.js (or registry.js) when available; falls back to an honest &quot;no_manifest_found&quot; envelope when the artifact isn&#39;t registered.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Reads the per-language K-Score block off an artifact&#39;s manifest. Looks up the manifest via src/artifact.js (or registry.js) when available; falls back to an plain &quot;no_manifest_found&quot; envelope when the artifact isn&#39;t registered.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/lingual/manifest/&lt;artifact_id&gt;&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -6897,10 +6860,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="GET-v1-long-context-p90" data-api-route data-route-status="reference-ready" data-route-search="get /v1/long-context/p90 src/router.js reference-ready tenant fence: tenant_id forced from req.tenant_record.id; query/body tenant fence: tenant_id forced from req.tenant_record.id; query/body never override. returns honest envelope (no_captures, insufficient_samples) rather than throwing. version stamp matches /^w781-/.">
+<section class="api-route" id="GET-v1-long-context-p90" data-api-route data-route-status="reference-ready" data-route-search="get /v1/long-context/p90 src/router.js reference-ready tenant fence: tenant_id forced from req.tenant_record.id; query/body tenant fence: tenant_id forced from req.tenant_record.id; query/body never override. returns plain envelope (no_captures, insufficient_samples) rather than throwing. version stamp matches /^w781-/.">
   <h3><span class="m m-get">GET</span> <code>/v1/long-context/p90</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">Tenant fence: tenant_id forced from req.tenant_record.id; query/body</p>
-  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id; query/body never override. Returns honest envelope (no_captures, insufficient_samples) rather than throwing. version stamp matches /^w781-/.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>Tenant fence: tenant_id forced from req.tenant_record.id; query/body never override. Returns plain envelope (no_captures, insufficient_samples) rather than throwing. version stamp matches /^w781-/.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/long-context/p90&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -8065,10 +8028,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-numeric-eval" data-api-route data-route-status="reference-ready" data-route-search="post /v1/numeric/eval src/router.js reference-ready contract - a stray request must not fire an evaluation by accident. contract - a stray request must not fire an evaluation by accident. honest envelope on every error path: ok:false + structured error + version stamp `w759-vn.m`. consumers must version-pin via regex (/^w759-/), not literal equality (w604 anti-brittleness).">
+<section class="api-route" id="POST-v1-numeric-eval" data-api-route data-route-status="reference-ready" data-route-search="post /v1/numeric/eval src/router.js reference-ready contract - a stray request must not fire an evaluation by accident. contract - a stray request must not fire an evaluation by accident. plain envelope on every error path: ok:false + structured error + version stamp `w759-vn.m`. consumers must version-pin via regex (/^w759-/), not literal equality (w604 anti-brittleness).">
   <h3><span class="m m-post">POST</span> <code>/v1/numeric/eval</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">contract - a stray request must not fire an evaluation by accident.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>contract - a stray request must not fire an evaluation by accident. Honest envelope on every error path: ok:false + structured error + version stamp `w759-vN.M`. Consumers MUST version-pin via regex (/^w759-/), not literal equality (W604 anti-brittleness).</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>contract - a stray request must not fire an evaluation by accident. Plain envelope on every error path: ok:false + structured error + version stamp `w759-vN.M`. Consumers MUST version-pin via regex (/^w759-/), not literal equality (W604 anti-brittleness).</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/numeric/eval&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -10109,10 +10072,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="GET-v1-scim-v2-ServiceProviderConfig" data-api-route data-route-status="reference-ready" data-route-search="get /v1/scim/v2/serviceproviderconfig src/router.js reference-ready scim 2.0 service provider configuration - rfc 7644 §5. idps read this scim 2.0 service provider configuration - rfc 7644 §5. idps read this to discover what scim operations the sp supports. empty/false flags are honest signals to the idp that bulk/patch/etag are not yet implemented.">
+<section class="api-route" id="GET-v1-scim-v2-ServiceProviderConfig" data-api-route data-route-status="reference-ready" data-route-search="get /v1/scim/v2/serviceproviderconfig src/router.js reference-ready scim 2.0 service provider configuration - rfc 7644 §5. idps read this scim 2.0 service provider configuration - rfc 7644 §5. idps read this to discover what scim operations the sp supports. empty/false flags are plain signals to the idp that bulk/patch/etag are not yet implemented.">
   <h3><span class="m m-get">GET</span> <code>/v1/scim/v2/ServiceProviderConfig</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">SCIM 2.0 Service Provider Configuration - RFC 7644 §5. IdPs read this</p>
-  <details class="route-detail"><summary>Full comment</summary><p>SCIM 2.0 Service Provider Configuration - RFC 7644 §5. IdPs read this to discover what SCIM operations the SP supports. Empty/false flags are honest signals to the IdP that bulk/patch/etag are not yet implemented.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>SCIM 2.0 Service Provider Configuration - RFC 7644 §5. IdPs read this to discover what SCIM operations the SP supports. Empty/false flags are plain signals to the IdP that bulk/patch/etag are not yet implemented.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/scim/v2/ServiceProviderConfig&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -10863,10 +10826,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-group" id="group-sso" data-api-group data-group-search="sso sso /v1/sso/status">
 <h2>Sso <span class="group-count">(1)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
-<section class="api-route" id="GET-v1-sso-status" data-api-route data-route-status="reference-ready" data-route-search="get /v1/sso/status src/router.js reference-ready w869+ persona d admin status aggregators. w869+ persona d admin status aggregators. thin read-only composers for /account/enterprise. each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. honest when state is missing: empty fields, no 404s.">
+<section class="api-route" id="GET-v1-sso-status" data-api-route data-route-status="reference-ready" data-route-search="get /v1/sso/status src/router.js reference-ready w869+ persona d admin status aggregators. w869+ persona d admin status aggregators. thin read-only composers for /account/enterprise. each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. plain when state is missing: empty fields, no 404s.">
   <h3><span class="m m-get">GET</span> <code>/v1/sso/status</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">W869+ Persona D admin status aggregators.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>W869+ Persona D admin status aggregators. Thin read-only composers for /account/enterprise. Each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. Honest when state is missing: empty fields, no 404s.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>W869+ Persona D admin status aggregators. Thin read-only composers for /account/enterprise. Each one stitches data from individual surfaces (sso/status, byoc/deployments, compliance/*, audit) into the shape the admin dashboard expects. Plain when state is missing: empty fields, no 404s.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/sso/status&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -11340,10 +11303,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="GET-metrics" data-api-route data-route-status="reference-ready" data-route-search="get /metrics src/router.js reference-ready authmiddleware so a prometheus scraper can reach it without an api authmiddleware so a prometheus scraper can reach it without an api key, optionally gated by kolm_metrics_bearer for prod deployments. the honest-dev-default is public; setting the env var requires `authorization: bearer &lt;token&gt;` and returns a structured 401 envelope on mismatch so misconfigured scrapers fail loud.">
+<section class="api-route" id="GET-metrics" data-api-route data-route-status="reference-ready" data-route-search="get /metrics src/router.js reference-ready authmiddleware so a prometheus scraper can reach it without an api authmiddleware so a prometheus scraper can reach it without an api key, optionally gated by kolm_metrics_bearer for prod deployments. the plain-dev-default is public; setting the env var requires `authorization: bearer &lt;token&gt;` and returns a structured 401 envelope on mismatch so misconfigured scrapers fail loud.">
   <h3><span class="m m-get">GET</span> <code>/metrics</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">authMiddleware so a Prometheus scraper can reach it without an API</p>
-  <details class="route-detail"><summary>Full comment</summary><p>authMiddleware so a Prometheus scraper can reach it without an API key, optionally gated by KOLM_METRICS_BEARER for prod deployments. The honest-dev-default is public; setting the env var requires `Authorization: Bearer &lt;token&gt;` and returns a structured 401 envelope on mismatch so misconfigured scrapers fail loud.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>authMiddleware so a Prometheus scraper can reach it without an API key, optionally gated by KOLM_METRICS_BEARER for prod deployments. The plain-dev-default is public; setting the env var requires `Authorization: Bearer &lt;token&gt;` and returns a structured 401 envelope on mismatch so misconfigured scrapers fail loud.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/metrics&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -12092,10 +12055,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="GET-v1-training-token-dpo" data-api-route data-route-status="reference-ready" data-route-search="get /v1/training/token-dpo src/router.js reference-ready /v1/training/token-dpo - collection get listing tenant token-dpo jobs. /v1/training/token-dpo - collection get listing tenant token-dpo jobs. honest envelope: no token-dpo module is wired into the request path yet, so the items[] is empty + status=&#39;pending&#39;. the operator still gets a real envelope rather than a 404 from the tui view.">
+<section class="api-route" id="GET-v1-training-token-dpo" data-api-route data-route-status="reference-ready" data-route-search="get /v1/training/token-dpo src/router.js reference-ready /v1/training/token-dpo - collection get listing tenant token-dpo jobs. /v1/training/token-dpo - collection get listing tenant token-dpo jobs. plain envelope: no token-dpo module is wired into the request path yet, so the items[] is empty + status=&#39;pending&#39;. the operator still gets a real envelope rather than a 404 from the tui view.">
   <h3><span class="m m-get">GET</span> <code>/v1/training/token-dpo</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">/v1/training/token-dpo - collection GET listing tenant token-DPO jobs.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>/v1/training/token-dpo - collection GET listing tenant token-DPO jobs. Honest envelope: no token-DPO module is wired into the request path yet, so the items[] is empty + status=&#39;pending&#39;. The operator still gets a real envelope rather than a 404 from the TUI view.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>/v1/training/token-dpo - collection GET listing tenant token-DPO jobs. Plain envelope: no token-DPO module is wired into the request path yet, so the items[] is empty + status=&#39;pending&#39;. The operator still gets a real envelope rather than a 404 from the TUI view.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/training/token-dpo&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -12398,10 +12361,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-group" id="group-verticals" data-api-group data-group-search="verticals verticals /v1/verticals /v1/verticals/:id /v1/verticals/:id/fingerprint /v1/verticals/register-stubs">
 <h2>Verticals <span class="group-count">(4)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
-<section class="api-route" id="GET-v1-verticals" data-api-route data-route-status="reference-ready" data-route-search="get /v1/verticals src/router.js reference-ready from a human workspace, not a ci api_only key. from a human workspace, not a ci api_only key. the fingerprint surface is intentionally non-404 - the route exists, it returns an honest &quot;w757_not_shipped&quot; envelope so callers can branch on the error code instead of probing for the url.">
+<section class="api-route" id="GET-v1-verticals" data-api-route data-route-status="reference-ready" data-route-search="get /v1/verticals src/router.js reference-ready from a human workspace, not a ci api_only key. from a human workspace, not a ci api_only key. the fingerprint surface is intentionally non-404 - the route exists, it returns an plain &quot;w757_not_shipped&quot; envelope so callers can branch on the error code instead of probing for the url.">
   <h3><span class="m m-get">GET</span> <code>/v1/verticals</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">from a human workspace, not a CI api_only key.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>from a human workspace, not a CI api_only key. The fingerprint surface is intentionally non-404 - the route exists, it returns an honest &quot;w757_not_shipped&quot; envelope so callers can branch on the error code instead of probing for the URL.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>from a human workspace, not a CI api_only key. The fingerprint surface is intentionally non-404 - the route exists, it returns an plain &quot;w757_not_shipped&quot; envelope so callers can branch on the error code instead of probing for the URL.</p></details>
   <pre><code>curl -X GET &quot;https://kolm.ai/v1/verticals&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot;</code></pre>
   <pre><code>{
@@ -12530,10 +12493,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-vision-capture-detect" data-api-route data-route-status="reference-ready" data-route-search="post /v1/vision/capture-detect src/router.js reference-ready {ok, count, captures[]} envelope. {ok, count, captures[]} envelope. all three are tenant-fenced via req.tenant_record.id (w411). honest envelopes on bad input - no silent passthrough.">
+<section class="api-route" id="POST-v1-vision-capture-detect" data-api-route data-route-status="reference-ready" data-route-search="post /v1/vision/capture-detect src/router.js reference-ready {ok, count, captures[]} envelope. {ok, count, captures[]} envelope. all three are tenant-fenced via req.tenant_record.id (w411). plain envelopes on bad input - no silent passthrough.">
   <h3><span class="m m-post">POST</span> <code>/v1/vision/capture-detect</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">{ok, count, captures[]} envelope.</p>
-  <details class="route-detail"><summary>Full comment</summary><p>{ok, count, captures[]} envelope. All three are tenant-fenced via req.tenant_record.id (W411). Honest envelopes on bad input - no silent passthrough.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>{ok, count, captures[]} envelope. All three are tenant-fenced via req.tenant_record.id (W411). Plain envelopes on bad input - no silent passthrough.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/vision/capture-detect&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -12588,10 +12551,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 <section class="api-group" id="group-vlm-distill" data-api-group data-group-search="vlm distill vlm-distill /v1/vlm-distill/run /v1/vlm-distill/runs">
 <h2>Vlm Distill <span class="group-count">(2)</span></h2>
 <details class="group-intro"><summary>About this group</summary><p>Authenticated surface. Send <code>Authorization: Bearer &lt;key&gt;</code> or <code>x-api-key: &lt;key&gt;</code>. Base URL: <code>https://kolm.ai</code> (prod) or <code>http://localhost:8787</code> (self-host).</p></details>
-<section class="api-route" id="POST-v1-vlm-distill-run" data-api-route data-route-status="reference-ready" data-route-search="post /v1/vlm-distill/run src/multimodal-pipeline-routes.js reference-ready { teacher, student_model, dataset_captures } - see src/vlm-distill.js { teacher, student_model, dataset_captures } - see src/vlm-distill.js when kolm_vlm_teacher_api_key is unset the response envelope still has ok:true (because the job was enqueued honestly) but real_run:false + missing_env:&#39;kolm_vlm_teacher_api_key&#39; so the caller knows nothing was actually trained.">
+<section class="api-route" id="POST-v1-vlm-distill-run" data-api-route data-route-status="reference-ready" data-route-search="post /v1/vlm-distill/run src/multimodal-pipeline-routes.js reference-ready { teacher, student_model, dataset_captures } - see src/vlm-distill.js { teacher, student_model, dataset_captures } - see src/vlm-distill.js when kolm_vlm_teacher_api_key is unset the response envelope still has ok:true (because the job was enqueued plainly) but real_run:false + missing_env:&#39;kolm_vlm_teacher_api_key&#39; so the caller knows nothing was actually trained.">
   <h3><span class="m m-post">POST</span> <code>/v1/vlm-distill/run</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">{ teacher, student_model, dataset_captures } - see src/vlm-distill.js</p>
-  <details class="route-detail"><summary>Full comment</summary><p>{ teacher, student_model, dataset_captures } - see src/vlm-distill.js When KOLM_VLM_TEACHER_API_KEY is unset the response envelope still has ok:true (because the job was enqueued honestly) but real_run:false + missing_env:&#39;KOLM_VLM_TEACHER_API_KEY&#39; so the caller knows nothing was actually trained.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>{ teacher, student_model, dataset_captures } - see src/vlm-distill.js When KOLM_VLM_TEACHER_API_KEY is unset the response envelope still has ok:true (because the job was enqueued plainly) but real_run:false + missing_env:&#39;KOLM_VLM_TEACHER_API_KEY&#39; so the caller knows nothing was actually trained.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/vlm-distill/run&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -12755,10 +12718,10 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
 }</code></pre>
 </section>
 
-<section class="api-route" id="POST-v1-xlang-balanced-sample" data-api-route data-route-status="reference-ready" data-route-search="post /v1/xlang/balanced-sample src/router.js reference-ready * hosted route has no runonartifact/judge wired by default * hosted route has no runonartifact/judge wired by default production injects via req.app.locals._w774_run_on_artifact + ._w774_judge. the honest envelope on missing wiring is the contract, not a 500. * all four routes are w411 tenant-fenced.">
+<section class="api-route" id="POST-v1-xlang-balanced-sample" data-api-route data-route-status="reference-ready" data-route-search="post /v1/xlang/balanced-sample src/router.js reference-ready * hosted route has no runonartifact/judge wired by default * hosted route has no runonartifact/judge wired by default production injects via req.app.locals._w774_run_on_artifact + ._w774_judge. the plain envelope on missing wiring is the contract, not a 500. * all four routes are w411 tenant-fenced.">
   <h3><span class="m m-post">POST</span> <code>/v1/xlang/balanced-sample</code> <span class="route-live" title="Reference includes route-specific source comments.">reference-ready</span></h3>
   <p class="route-desc">* Hosted route has NO runOnArtifact/judge wired by default</p>
-  <details class="route-detail"><summary>Full comment</summary><p>* Hosted route has NO runOnArtifact/judge wired by default production injects via req.app.locals._w774_run_on_artifact + ._w774_judge. The honest envelope on missing wiring is the contract, not a 500. * All four routes are W411 tenant-fenced.</p></details>
+  <details class="route-detail"><summary>Full comment</summary><p>* Hosted route has NO runOnArtifact/judge wired by default production injects via req.app.locals._w774_run_on_artifact + ._w774_judge. The plain envelope on missing wiring is the contract, not a 500. * All four routes are W411 tenant-fenced.</p></details>
   <pre><code>curl -X POST &quot;https://kolm.ai/v1/xlang/balanced-sample&quot; \
   -H &quot;Authorization: Bearer kolm-demo-key&quot; \
   -H &quot;Content-Type: application/json&quot; \
@@ -12887,7 +12850,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p class="foot__tag">Own the AI you&rsquo;re renting - a signed model from your live API calls, run on your own hardware.</p>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
@@ -12905,7 +12868,7 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
         <a href="/docs#compile">Compile</a>
         <a href="/docs#compose">Compose</a>
         <a href="/docs#deploy">Deploy</a>
-        <a href="/audit">Audit</a>
+        <a href="https://audit.kolm.ai">Audit</a>
       </div>
       <div class="foot__col">
         <h3>Trust</h3>
