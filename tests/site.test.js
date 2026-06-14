@@ -717,17 +717,19 @@ test('generated API reference is an operating surface, not a route dump', () => 
   const api = fs.readFileSync(path.join('public', 'docs', 'api.html'), 'utf8');
 
   assert.match(api, /<title>API reference - kolm\.ai<\/title>/);
-  assert.match(api, /<meta name="theme-color" content="#06080A">/);
-  assert.match(api, /compiler-brand-hero\.png/);
+  assert.match(api, /<meta name="theme-color" content="#08090A">/);
   assert.match(api, /kolm-2026\.css/);
-  assert.match(api, /compiler-site--paper api-reference-page/);
-  assert.match(api, /data-design-reference="image-2"/);
+  // Canonical dark shell — not the retired paper/image-2/kolm-main cascade.
+  assert.match(api, /class="api-reference-page"/);
+  assert.doesNotMatch(api, /compiler-site--paper/);
+  assert.doesNotMatch(api, /data-design-reference="image-2"/);
+  assert.doesNotMatch(api, /kolm-main\.css/);
   const apiHeader = api.match(/<header class="nav">[\s\S]*?<\/header>/)?.[0] || '';
-  assert.match(apiHeader, />Solutions<\/a>/);
-  assert.match(apiHeader, /href="\/docs" aria-current="page">Developers<\/a>/);
+  assert.match(apiHeader, />Product<\/a>/);
+  assert.match(apiHeader, /href="\/docs" aria-current="page">Docs<\/a>/);
   assert.match(apiHeader, /href="\/pricing">Pricing<\/a>/);
   assert.match(apiHeader, /class="nav__icon" href="\/status" aria-label="System status"/);
-  assert.match(apiHeader, /href="\/signup">Get API key/);
+  assert.match(apiHeader, /href="\/signup">Get an API key/);
   assert.doesNotMatch(apiHeader, /site-nav|https:\/\/audit\.kolm\.ai|>Audit<\/a>/i);
   assert.match(api, /API operating reference/);
   assert.match(api, /API reference command center/);
