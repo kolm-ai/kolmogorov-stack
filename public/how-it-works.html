@@ -44,7 +44,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 </script>
 <style>
 /* page-scoped: how-it-works ingress buckets + flow readouts. Datasheet idiom only. */
-#hiw-flow .kstep__read .u{color:var(--ink-3,#8a8d86)}
+#hiw-flow .kpstage__read .u{color:var(--ink-3,#8a8d86)}
+/* eight-stage pipeline: 4-up on wide, 2-up on mid, stacks on narrow (engine handles <=760) */
+#hiw-flow .kpipe{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1040px){#hiw-flow .kpipe{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){#hiw-flow .kpipe{grid-template-columns:1fr}}
 .hiw-buckets{display:grid;gap:14px;grid-template-columns:repeat(4,1fr);margin-top:8px}
 @media(max-width:920px){.hiw-buckets{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.hiw-buckets{grid-template-columns:1fr}}
@@ -175,17 +179,25 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">The four-verb loop expands into eight concrete steps, each with the kind of readout you actually see. The numbers below come from one worked example: a redaction model compiled from one week of <code>claims-redactor</code> traffic. Every step leaves you something you can open, check, and keep.</p>
       </div>
 
-      <!-- detailed numbered flow with concrete readouts -->
-      <div class="kflow reveal" id="hiw-flow" style="--kn:4" aria-label="The eight-step compile loop with a worked example readout at each step">
-        <div class="kstep"><span class="kstep__n">Capture</span><h3 class="kstep__t">Point your calls in</h3><p class="kstep__d">Drop Kolm in front of your OpenAI- or Anthropic-compatible calls; traffic streams in with secrets stripped before write.</p><span class="kstep__read"><b class="n mono" data-count>12,400</b> <span class="u">calls in, 1 week</span></span></div>
-        <div class="kstep"><span class="kstep__n">Classify</span><h3 class="kstep__t">Sort what came in</h3><p class="kstep__d">Calls are grouped by request shape so you can see what your agents actually do, and what does not fit a known pattern.</p><span class="kstep__read"><b class="n mono">3 schemas</b> <span class="u">1 unknown flagged</span></span></div>
-        <div class="kstep"><span class="kstep__n">Rules</span><h3 class="kstep__t">Set the policy once</h3><p class="kstep__d">Choose redaction, retention, and which providers are allowed. The rules then follow every captured call.</p><span class="kstep__read"><b class="n mono">redact PII</b> <span class="u">allow GPT-4 only</span></span></div>
-        <div class="kstep"><span class="kstep__n">Evaluate</span><h3 class="kstep__t">Replay and grade</h3><p class="kstep__d">A held-back sample is rerun against your evals; anything that drops below the bar is flagged before it can ship.</p><span class="kstep__read"><b class="n mono">99% pass</b> <span class="u">rerun 100, 1 regression</span></span></div>
-        <div class="kstep"><span class="kstep__n">Compile</span><h3 class="kstep__t">Pack one file</h3><p class="kstep__d">Model, recipe, evals, hashes and a verifier receipt compile into one portable <code>.kolm</code> you own.</p><span class="kstep__read"><b class="n mono">one .kolm</b> <span class="u">142 MB</span></span></div>
-        <div class="kstep"><span class="kstep__n">Run</span><h3 class="kstep__t">Fit the hardware</h3><p class="kstep__d">The same file is ranked across runtimes by cost and latency, then runs on the smallest target that fits.</p><span class="kstep__read"><b class="n mono">laptop / edge</b> <span class="u">server / phone</span></span></div>
-        <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Seal and check</h3><p class="kstep__d">The file is hashed and signed; anyone can re-hash it and check the signature without contacting Kolm.</p><span class="kstep__read"><b class="n mono">hash + signature</b> <span class="u">Ed25519</span></span></div>
-        <div class="kstep"><span class="kstep__n">Operate</span><h3 class="kstep__t">Deploy and export</h3><p class="kstep__d">Promote, roll back, and export the proof straight into the systems your team already runs.</p><span class="kstep__read"><b class="n mono">deploy</b> <span class="u">+ export proof</span></span></div>
-      </div>
+      <!-- detailed numbered flow with concrete readouts - connected KPIPE pipeline in a KINST frame -->
+      <figure class="kinst kinst--marks kfig is-verified reveal" id="hiw-flow" role="group" aria-label="The eight-step compile loop with a worked example readout at each step: capture, classify, rules, evaluate, compile, run, verify, operate.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>COMPILE LOOP / claims-redactor.kolm</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+          <div class="kpipe" style="--kn:8" data-km="flow breathe">
+            <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Capture</span><h3 class="kpstage__t">Point your calls in</h3><p class="kpstage__d">Drop Kolm in front of your OpenAI- or Anthropic-compatible calls; traffic streams in with secrets stripped before write.</p><span class="kpstage__read"><span class="n" data-count>12,400</span><span class="u">calls in, 1 week</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Classify</span><h3 class="kpstage__t">Sort what came in</h3><p class="kpstage__d">Calls are grouped by request shape so you can see what your agents actually do, and what does not fit a known pattern.</p><span class="kpstage__read"><span class="n">3 schemas</span><span class="u">1 unknown flagged</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Rules</span><h3 class="kpstage__t">Set the policy once</h3><p class="kpstage__d">Choose redaction, retention, and which providers are allowed. The rules then follow every captured call.</p><span class="kpstage__read"><span class="n">redact PII</span><span class="u">allow GPT-4 only</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Evaluate</span><h3 class="kpstage__t">Replay and grade</h3><p class="kpstage__d">A held-back sample is rerun against your evals; anything that drops below the bar is flagged before it can ship.</p><span class="kpstage__read"><span class="n">99% pass</span><span class="u">rerun 100, 1 regression</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Compile</span><h3 class="kpstage__t">Pack one file</h3><p class="kpstage__d">Model, recipe, evals, hashes and a verifier receipt compile into one portable <code>.kolm</code> you own.</p><span class="kpstage__read"><span class="n">one .kolm</span><span class="u">142 MB</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Run</span><h3 class="kpstage__t">Fit the hardware</h3><p class="kpstage__d">The same file is ranked across runtimes by cost and latency, then runs on the smallest target that fits.</p><span class="kpstage__read"><span class="n">laptop / edge</span><span class="u">server / phone</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Verify</span><h3 class="kpstage__t">Seal and check</h3><p class="kpstage__d">The file is hashed and signed; anyone can re-hash it and check the signature without contacting Kolm.</p><span class="kpstage__read"><span class="n">hash + signature</span><span class="u">Ed25519</span></span></div>
+            <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Operate</span><h3 class="kpstage__t">Deploy and export</h3><p class="kpstage__d">Promote, roll back, and export the proof straight into the systems your team already runs.</p><span class="kpstage__read"><span class="n">deploy</span><span class="u">+ export proof</span></span></div>
+          </div>
+        </div>
+        <div class="kinst__foot"><b>OUTCOME</b> one portable .kolm <span class="go">verified</span></div>
+      </figure>
       <p class="lede" style="margin-top:18px;font-size:14px">Go deeper: the <a href="/platform">platform overview</a>, the <a href="/runtimes">runtime targets</a> the model can deploy to, the <a href="/spec">.kolm spec</a>, the <a href="/integrations">capture integrations</a>, and <a href="/pricing">pricing</a>.</p>
     </div>
   </section>
@@ -204,32 +216,39 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <li>Set retention, budget and provider rules once &middot; they follow every call</li>
         </ul>
 
-        <div class="hiw-buckets" role="group" aria-label="Twelve ingress methods grouped into four buckets">
-          <div class="hiw-bucket">
-            <div class="hiw-bucket__k"><span class="hiw-bucket__n">01</span>Real-time</div>
-            <h4 class="hiw-bucket__t">Live agent traffic</h4>
-            <p class="hiw-bucket__use">For calls you make right now and want captured as they happen.</p>
-            <ul class="hiw-bucket__list"><li>REST</li><li>GraphQL</li><li>gRPC</li><li>streaming</li></ul>
+        <figure class="kinst kinst--marks kfig reveal" role="group" aria-label="Twelve ingress methods grouped into four buckets: real-time, batch, observability, and custom" data-km="settle">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>INGRESS / FOUR BUCKETS</span><span class="kinst__live">live</span></div>
+          <div class="kinst__body">
+            <div class="hiw-buckets">
+              <div class="hiw-bucket ksettle" style="--i:0">
+                <div class="hiw-bucket__k"><span class="hiw-bucket__n">01</span>Real-time</div>
+                <h4 class="hiw-bucket__t">Live agent traffic</h4>
+                <p class="hiw-bucket__use">For calls you make right now and want captured as they happen.</p>
+                <ul class="hiw-bucket__list"><li>REST</li><li>GraphQL</li><li>gRPC</li><li>streaming</li></ul>
+              </div>
+              <div class="hiw-bucket ksettle" style="--i:1">
+                <div class="hiw-bucket__k"><span class="hiw-bucket__n">02</span>Batch</div>
+                <h4 class="hiw-bucket__t">History in bulk</h4>
+                <p class="hiw-bucket__use">For backfilling behavior you already logged or stored.</p>
+                <ul class="hiw-bucket__list"><li>batch</li><li>object storage</li><li>warehouse</li></ul>
+              </div>
+              <div class="hiw-bucket ksettle" style="--i:2">
+                <div class="hiw-bucket__k"><span class="hiw-bucket__n">03</span>Observability</div>
+                <h4 class="hiw-bucket__t">Signals you already emit</h4>
+                <p class="hiw-bucket__use">For traffic that already shows up in your traces and events.</p>
+                <ul class="hiw-bucket__list"><li>OTEL</li><li>webhooks</li><li>queues</li></ul>
+              </div>
+              <div class="hiw-bucket ksettle" style="--i:3">
+                <div class="hiw-bucket__k"><span class="hiw-bucket__n">04</span>Custom</div>
+                <h4 class="hiw-bucket__t">Your own path in</h4>
+                <p class="hiw-bucket__use">For anything bespoke, scripted from a terminal or wired by hand.</p>
+                <ul class="hiw-bucket__list"><li>browser</li><li>CLI</li><li>adapters</li></ul>
+              </div>
+            </div>
           </div>
-          <div class="hiw-bucket">
-            <div class="hiw-bucket__k"><span class="hiw-bucket__n">02</span>Batch</div>
-            <h4 class="hiw-bucket__t">History in bulk</h4>
-            <p class="hiw-bucket__use">For backfilling behavior you already logged or stored.</p>
-            <ul class="hiw-bucket__list"><li>batch</li><li>object storage</li><li>warehouse</li></ul>
-          </div>
-          <div class="hiw-bucket">
-            <div class="hiw-bucket__k"><span class="hiw-bucket__n">03</span>Observability</div>
-            <h4 class="hiw-bucket__t">Signals you already emit</h4>
-            <p class="hiw-bucket__use">For traffic that already shows up in your traces and events.</p>
-            <ul class="hiw-bucket__list"><li>OTEL</li><li>webhooks</li><li>queues</li></ul>
-          </div>
-          <div class="hiw-bucket">
-            <div class="hiw-bucket__k"><span class="hiw-bucket__n">04</span>Custom</div>
-            <h4 class="hiw-bucket__t">Your own path in</h4>
-            <p class="hiw-bucket__use">For anything bespoke, scripted from a terminal or wired by hand.</p>
-            <ul class="hiw-bucket__list"><li>browser</li><li>CLI</li><li>adapters</li></ul>
-          </div>
-        </div>
+          <div class="kinst__foot"><b>TWELVE WAYS IN</b> one boundary, one ruleset <span class="go">applied</span></div>
+        </figure>
       </div>
       <div class="feat__ui">
         <figure class="instrument" data-art-reveal aria-label="Live API traffic is captured and compiled into governed, signed .kolm ledger entries.">

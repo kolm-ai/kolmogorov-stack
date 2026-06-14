@@ -195,30 +195,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <p class="lede">We test what the reviewer tests. Each pillar carries a control id that traces to the crosswalk below. The method behind the catalog is published on the <a href="/research">research page</a>.</p>
     </div>
     <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <figure class="diag reveal" role="img" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
-    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="dg-flow" d="M158 68 H198 M380 68 H420 M602 68 H630"/>
-      <rect class="dg-box" x="8" y="36" width="150" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="56">Input</text>
-      <text class="dg-t" x="22" y="76">Agent logs</text>
-      <text class="dg-mono" x="22" y="92">import or sidecar</text>
-      <polygon class="dg-ok" points="198,68 190,63.5 190,72.5"/>
-      <rect class="dg-box" x="200" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="214" y="56">Engine</text>
-      <text class="dg-t" x="214" y="76">Audit run</text>
-      <text class="dg-mono" x="214" y="92">ASR-01 .. ASR-08</text>
-      <polygon class="dg-ok" points="420,68 412,63.5 412,72.5"/>
-      <rect class="dg-box--ok" x="422" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="436" y="56">Output</text>
-      <text class="dg-t" x="436" y="76">Signed report</text>
-      <text class="dg-mono" x="436" y="92">Ed25519 envelope</text>
-      <polygon class="dg-ok" points="630,68 622,63.5 622,72.5"/>
-      <circle class="dg-dot" cx="646" cy="68" r="4"/>
-      <text class="dg-label" x="658" y="72">verify</text>
-      <path class="dg-line" d="M290 100 V128"/>
-      <text class="dg-mono" x="208" y="146">permissions &#183; audit trail &#183; egress &#183; injection</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Pipeline</b> every pillar below runs inside this audit and lands in the signed report</figcaption>
+    <figure class="kinst kinst--marks kfig" role="group" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out, then the buyer verifies">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>AUDIT PIPELINE / PILLAR x CONTROL</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+        <div class="kpipe" style="--kn:4" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Input</span><h3 class="kpstage__t">Agent logs</h3><p class="kpstage__d">Import a log or attach the sidecar proxy. The pillars are read from what the agent did.</p><span class="kpstage__read"><span class="n">import</span><span class="u">or sidecar</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Engine</span><h3 class="kpstage__t">Audit run</h3><p class="kpstage__d">Permissions, audit trail, egress and injection: every pillar runs inside this audit.</p><span class="kpstage__read"><span class="n">ASR-01</span><span class="u">.. ASR-08</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Output</span><h3 class="kpstage__t">Signed report</h3><p class="kpstage__d">The findings are canonicalized and sealed. Every pillar lands in the signed object.</p><span class="kpstage__read"><span class="n">Ed25519</span><span class="u">envelope</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Verify</span><h3 class="kpstage__t">Buyer checks it</h3><p class="kpstage__d">Offline, against the key inside the report. kolm is never in the trust path.</p><span class="kpstage__read"><span class="n">VALID</span><span class="u">offline</span></span></div>
+        </div>
+      </div>
+      <div class="kinst__foot"><b>PIPELINE</b> permissions, audit trail, egress, injection <span class="go">in the signed report</span></div>
     </figure>
     <div class="grid grid--2">
       <div class="card">
@@ -337,7 +326,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p class="how__foot"><b>Eight controls</b> · <b>Six frameworks</b> · the mapping travels inside the signed object: follow any finding to its control, and that control to the clause the reviewer reads from. kolm maps findings to standards, it never certifies compliance.</p>
 
     <p class="cx-matrix__lead">The same controls, read a second way: which <b>pillar</b> each one sits under, and <b>how</b> it is evaluated. <span class="kdef">Assessed<span class="kdef__plain"> (a posture is examined and stated)</span></span><span class="kdef-tip"><b>Assessed</b> means we examine a posture, for example scopes held versus scopes used, and state what we find. It is a measured fact about the setup.</span> means a posture is examined and stated as a fact. <span class="kdef">Tested<span class="kdef__plain"> (probes are run and the outcome is reported)</span></span><span class="kdef-tip"><b>Tested</b> means we run live probes, for example injection attempts, and report exactly what held and what did not. It is reported, not warranted.</span> means probes are run and the outcome is reported, never warranted.</p>
-    <div class="cx-matrix kmatrix-wrap">
+    <figure class="kinst kinst--marks kfig cx-matrix is-verified" role="group" aria-label="The eight ASR controls by pillar and how each is evaluated, with what lands in the signed report">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>CONTROL MATRIX / PILLAR x METHOD</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body kmatrix-wrap">
       <table class="kmatrix kmatrix--sticky" aria-label="Each control by pillar and how it is evaluated">
         <thead>
           <tr>
@@ -359,7 +351,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <tr><th scope="row"><b>ASR-8</b> Multi-agent delegation</th><td><span class="cx-pill">Permissions</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--part">partial</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
         </tbody>
       </table>
-    </div>
+      </div>
+      <div class="kinst__foot"><b>EIGHT CONTROLS</b> mapped, assessed, tested <span class="go">in the signed report</span></div>
+    </figure>
       </div>
     </div>
   </div>

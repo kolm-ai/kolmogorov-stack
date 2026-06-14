@@ -34,7 +34,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 /* docs.html scoped layer: architecture mental-model + annotated quickstart.
    Reuses kolm-2026.css tokens only; no new palette, fonts, or CDNs. */
 .dx-arch{margin:var(--s5) 0 var(--s2)}
-.dx-arch svg text{font-family:var(--font-mono)}
+.dx-arch .kpipe{margin-top:4px}
 .dx-qs{margin-top:var(--s4)}
 .dx-qs__step{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
 .dx-qs__step:first-child{border-top:0}
@@ -210,47 +210,20 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
         </div>
 
-        <figure class="kspec dx-arch" role="group" aria-label="Platform architecture: provider calls enter the kolm gateway, the compiler turns captured behavior into a signed .kolm artifact, and that artifact runs on your own runtimes">
-          <svg viewBox="0 0 720 220" data-art-reveal aria-hidden="true">
-            <!-- providers -->
-            <rect class="ks-node" x="14" y="24" width="150" height="36" rx="3"/>
-            <text class="ks-lbl-art" x="30" y="46">OpenAI API</text>
-            <rect class="ks-node" x="14" y="72" width="150" height="36" rx="3"/>
-            <text class="ks-lbl-art" x="30" y="94">Anthropic API</text>
-            <!-- gateway -->
-            <rect class="ks-node" x="232" y="48" width="120" height="60" rx="3"/>
-            <text class="ks-lbl-art" x="248" y="74">kolm</text>
-            <text class="ks-sub" x="248" y="92">gateway</text>
-            <!-- compiler -->
-            <rect class="ks-node" x="404" y="48" width="120" height="60" rx="3"/>
-            <text class="ks-lbl-art" x="420" y="74">compiler</text>
-            <text class="ks-sub" x="420" y="92">capture to model</text>
-            <!-- artifact (the one lit paper part) -->
-            <rect class="ks-node is-key" x="576" y="48" width="130" height="60" rx="3"/>
-            <text class="ks-lbl-art" x="592" y="74" style="fill:var(--room)">.kolm</text>
-            <text class="ks-sub" x="592" y="92" style="fill:var(--room)">signed artifact</text>
-            <!-- runtimes -->
-            <rect class="ks-node" x="576" y="150" width="40" height="30" rx="3"/>
-            <text class="ks-sub" x="586" y="169">laptop</text>
-            <rect class="ks-node" x="624" y="150" width="40" height="30" rx="3"/>
-            <text class="ks-sub" x="630" y="169">cloud</text>
-            <rect class="ks-node" x="672" y="150" width="36" height="30" rx="3"/>
-            <text class="ks-sub" x="680" y="169">edge</text>
-            <!-- connectors -->
-            <line class="ks-lead" x1="164" y1="42" x2="232" y2="66"/>
-            <line class="ks-lead" x1="164" y1="90" x2="232" y2="86"/>
-            <line class="ks-lead" x1="352" y1="78" x2="404" y2="78"/>
-            <line class="ks-lead" x1="524" y1="78" x2="576" y2="78"/>
-            <line class="ks-lead" x1="641" y1="108" x2="641" y2="150"/>
-            <circle class="ks-dot" cx="641" cy="108" r="3"/>
-          </svg>
-          <ol class="kspec__legend">
-            <li><span class="ks-num">01</span><span><b>Your provider calls</b> keep their OpenAI- or Anthropic-compatible shape. You change the base URL, not your SDK.</span></li>
-            <li><span class="ks-num">02</span><span>The <b>kolm gateway</b> forwards each call and captures the request and reply as a governed example.</span></li>
-            <li><span class="ks-num">03</span><span>The <b>compiler</b> turns captured behavior, once your evals cover it, into a model.</span></li>
-            <li><span class="ks-num">04</span><span>The <b>.kolm artifact</b> is Ed25519-signed and portable. It is the one thing you own and carry out.</span></li>
-            <li><span class="ks-num">05</span><span><b>Runtimes</b> are wherever you run it: a laptop CPU, your private cloud, or the edge.</span></li>
-          </ol>
+        <figure class="kinst kinst--marks kfig is-verified dx-arch" role="group" aria-label="Platform architecture: provider calls enter the kolm gateway, the compiler turns captured behavior into a signed .kolm artifact, and that artifact runs on your own runtimes">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>PLATFORM ARCHITECTURE / CAPTURE TO RUN</span><span class="kinst__live">live</span></div>
+          <div class="kinst__body">
+            <div class="kpipe" style="--kn:5" data-km="flow breathe">
+              <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+              <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Providers</span><h3 class="kpstage__t">Your provider calls</h3><p class="kpstage__d">OpenAI- or Anthropic-compatible calls keep their shape. You change the base URL, not your SDK.</p><span class="kpstage__read"><span class="n">OpenAI</span><span class="u">+ Anthropic</span></span></div>
+              <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Gateway</span><h3 class="kpstage__t">kolm gateway</h3><p class="kpstage__d">Forwards each call and captures the request and reply as a governed example.</p><span class="kpstage__read"><span class="n">capture</span><span class="u">governed</span></span></div>
+              <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Compiler</span><h3 class="kpstage__t">capture to model</h3><p class="kpstage__d">Turns captured behavior, once your evals cover it, into a model.</p><span class="kpstage__read"><span class="n">compile</span><span class="u">to model</span></span></div>
+              <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Artifact</span><h3 class="kpstage__t">.kolm signed artifact</h3><p class="kpstage__d">Ed25519-signed and portable. It is the one thing you own and carry out.</p><span class="kpstage__read"><span class="n">Ed25519</span><span class="u">signed</span></span></div>
+              <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Runtimes</span><h3 class="kpstage__t">Run it where it fits</h3><p class="kpstage__d">Wherever you run it: a laptop CPU, your private cloud, or the edge.</p><span class="kpstage__read"><span class="n">laptop</span><span class="u">cloud / edge</span></span></div>
+            </div>
+          </div>
+          <div class="kinst__foot"><b>ARTIFACT</b> one signed .kolm you own <span class="go">verify offline</span></div>
         </figure>
         <p style="color:var(--ink-2);max-width:72ch;margin-top:var(--s4)">Want the bigger picture before you build? See the whole compiler on <a href="/platform">/platform</a>, the exact <code>.kolm</code> format and its Ed25519 signature on <a href="/spec">/spec</a>, where artifacts run on <a href="/runtimes">/runtimes</a>, and check any signed model offline at <a href="/verify">/verify</a>.</p>
 

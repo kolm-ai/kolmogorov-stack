@@ -68,6 +68,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 #mechanics{isolation:isolate}
 /* page-local: the Trust Link lifecycle flow inside the mechanics chapter */
 #mechanics .tcflow{margin:var(--s5) 0}
+#mechanics .tcflow__seal{display:flex;align-items:center;gap:var(--s4);margin-bottom:var(--s4);padding-bottom:var(--s4);border-bottom:1px solid var(--line)}
+#mechanics .tcflow__sealk{margin:0;font-size:13px;line-height:1.55;color:var(--ink-2)}
 </style>
 </head>
 <body class="tc">
@@ -177,40 +179,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>What a Trust Link is, and what we count.</h2>
     </div>
     <div class="seam" data-art-reveal aria-hidden="true"></div>
-    <figure class="diag reveal" role="img" aria-label="Verification loop: the buyer's browser fetches the report and the public keyring, verifies with WebCrypto, and reaches VALID or VOID with no kolm server in the trust path">
-    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect class="dg-box" x="8" y="28" width="160" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="48">Artifact</text>
-      <text class="dg-t" x="22" y="68">report.json</text>
-      <text class="dg-mono" x="22" y="84">signed envelope</text>
-      <rect class="dg-box" x="8" y="104" width="160" height="40" rx="9"/>
-      <text class="dg-t" x="22" y="122">issuer keyring</text>
-      <text class="dg-mono" x="22" y="137">public keys only</text>
-      <path class="dg-flow" d="M168 60 H276 M168 124 H236 V78"/>
-      <polygon class="dg-ok" points="276,60 268,55.5 268,64.5"/>
-      <rect class="dg-box" x="278" y="28" width="190" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="292" y="48">Buyer's browser</text>
-      <text class="dg-t" x="292" y="68">WebCrypto verify</text>
-      <text class="dg-mono" x="292" y="84">offline &#183; no upload</text>
-      <path class="dg-line" d="M468 48 H516 M468 76 H516"/>
-      <polygon class="dg-ok" points="516,48 508,43.5 508,52.5"/>
-      <polygon points="516,76 508,71.5 508,80.5" fill="#E0A89F"/>
-      <rect class="dg-box--ok" x="518" y="30" width="194" height="34" rx="9"/>
-      <text class="dg-t" x="532" y="51">VALID</text>
-      <text class="dg-mono" x="590" y="51">seal intact</text>
-      <rect class="dg-box--void" x="518" y="72" width="194" height="34" rx="9"/>
-      <text class="dg-void-t dg-k" x="532" y="93">VOID</text>
-      <text class="dg-mono" x="590" y="93">tampered bytes</text>
-      <text class="dg-mono" x="292" y="140">no account &#183; no kolm server in the trust path</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Trust path</b> what the viewer opens: verification runs in the buyer's own browser against pinned public keys</figcaption>
+    <figure class="kinst kinst--marks kfig is-verified tcflow" role="group" aria-label="Trust Link lifecycle: mint the link, share it, count the opens, and the viewer verifies offline in their own browser against pinned public keys with no kolm server in the trust path">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>TRUST LINK / LIFECYCLE AND TRUST PATH</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+        <div class="tcflow__seal">
+          <span class="kseal is-verified" data-km="stamp" style="--kseal-sz:80px" aria-hidden="true"><svg viewBox="0 0 80 80"><circle class="kse-track" cx="40" cy="40" r="32"></circle><circle class="kse-ring" cx="40" cy="40" r="32" style="--kse-len:201"></circle><path class="kse-tick" d="M27 41 l9 9 l18 -20" style="--kse-tlen:42"></path><circle class="kse-pip" cx="40" cy="68" r="2.5"></circle></svg></span>
+          <p class="tcflow__sealk">What the viewer opens: verification runs in the buyer's own browser against pinned public keys. VALID on a seal intact, VOID on tampered bytes.</p>
+        </div>
+        <div class="kpipe" style="--kn:4" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Mint</span><h3 class="kpstage__t">Generate the link</h3><p class="kpstage__d">A signed report mints an unguessable Trust Link. Possession of the slug is the grant.</p><span class="kpstage__read"><span class="n">1</span><span class="u">capability token</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Share</span><h3 class="kpstage__t">Send it to a buyer</h3><p class="kpstage__d">No account is created for the viewer. The link opens the signed report directly.</p><span class="kpstage__read"><span class="n">0</span><span class="u">logins required</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Open</span><h3 class="kpstage__t">Count the engagement</h3><p class="kpstage__d">Each open is a view; repeat opens by one viewer collapse to one distinct viewer.</p><span class="kpstage__read"><span class="n">views</span><span class="u">+ distinct</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Verify</span><h3 class="kpstage__t">Check it offline</h3><p class="kpstage__d">The viewer verifies the signature in their own browser, with no kolm server in the trust path.</p><span class="kpstage__read"><span class="n">Ed25519</span><span class="u">verified</span></span></div>
+        </div>
+      </div>
+      <div class="kinst__foot"><b>Trust path</b> what the viewer opens: verification in the buyer's own browser against pinned public keys <span class="go">no kolm server in the trust path</span></div>
     </figure>
-    <div class="kflow reveal tcflow" style="--kn:4" aria-label="Trust Link lifecycle: mint, share, open, verify">
-      <div class="kstep"><span class="kstep__n">Mint</span><h3 class="kstep__t">Generate the link</h3><p class="kstep__d">A signed report mints an unguessable Trust Link. Possession of the slug is the grant.</p><span class="kstep__read"><b class="n mono">1</b> <span class="u">capability token</span></span></div>
-      <div class="kstep"><span class="kstep__n">Share</span><h3 class="kstep__t">Send it to a buyer</h3><p class="kstep__d">No account is created for the viewer. The link opens the signed report directly.</p><span class="kstep__read"><b class="n mono">0</b> <span class="u">logins required</span></span></div>
-      <div class="kstep"><span class="kstep__n">Open</span><h3 class="kstep__t">Count the engagement</h3><p class="kstep__d">Each open is a view; repeat opens by one viewer collapse to one distinct viewer.</p><span class="kstep__read"><b class="n mono">views</b> <span class="u">+ distinct</span></span></div>
-      <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Check it offline</h3><p class="kstep__d">The viewer verifies the signature in their own browser, with no kolm server in the trust path.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">verified</span></span></div>
-    </div>
     <div class="grid grid--3">
       <div class="card">
         <p class="card__k">Capability token</p>

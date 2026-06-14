@@ -31,13 +31,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
 <style id="cap-scope">
-  /* capabilities.html scoped: lifecycle flow handoff readouts + distinct glyphs */
-  #cap-lifecycle .kflow{--kn:4}
-  #cap-lifecycle .kstep__read .feeds{display:block;margin-top:6px;font-size:11px;line-height:1.45;color:var(--ink-3,#9aa0a6)}
-  #cap-lifecycle .kstep__read .feeds b{color:var(--accent)}
-  #cap-lifecycle .cap-handoff{margin-top:10px;font:600 10px/1 var(--mono,ui-monospace,monospace);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3,#9aa0a6)}
-  #cap-lifecycle .cap-handoff b{color:var(--accent);font-weight:700}
-  @media (min-width:761px){#cap-lifecycle .kflow{grid-template-columns:repeat(4,1fr)}}
+  /* capabilities.html scoped: lifecycle pipeline handoff readouts + distinct glyphs */
+  #cap-lifecycle .kpipe{grid-template-columns:repeat(4,minmax(0,1fr))}
+  @media(max-width:1040px){#cap-lifecycle .kpipe{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:560px){#cap-lifecycle .kpipe{grid-template-columns:1fr}}
+  #cap-lifecycle .kpstage__read{flex-direction:column;align-items:flex-start;gap:3px}
+  #cap-lifecycle .kpstage__read .feeds{display:block;margin-top:6px;font-size:11px;line-height:1.45;color:var(--ink-3,#9aa0a6)}
+  #cap-lifecycle .kpstage__read .feeds b{color:var(--accent)}
   .cta-band .cta__links{margin-top:18px;font:600 12px/1.6 var(--mono,ui-monospace,monospace);letter-spacing:.02em;color:var(--ink-3,#9aa0a6)}
   .cta-band .cta__links a{color:var(--ink-2,#c7ccd1);text-decoration:none;border-bottom:1px solid transparent}
   .cta-band .cta__links a:hover{color:var(--accent);border-bottom-color:var(--accent)}
@@ -165,16 +165,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>From your live calls to a model you own, in eight moves.</h2>
         <p class="lede">Each stage takes the stage before it as input and hands its output to the next, so you can trace one record end to end. Below, follow a single capture - one production redaction call - as it moves through all eight stages.</p>
       </div>
-      <div class="kflow reveal" aria-label="Eight-stage lifecycle: each stage's output is the next stage's input">
-        <div class="kstep"><span class="kstep__n">Capture</span><h3 class="kstep__t">Bring in what you use</h3><p class="kstep__d">Point your traffic at Kolm; it records the real call - prompt, tool calls, outcome.</p><span class="kstep__read"><b class="n mono" data-count>12408</b> <span class="u">calls recorded</span><span class="feeds">feeds &rarr; <b>1 raw record</b> with source + timestamp</span></span></div>
-        <div class="kstep"><span class="kstep__n">Classify</span><h3 class="kstep__t">Know what you captured</h3><p class="kstep__d">Tag each record's source, schema, tenant, environment, and sensitivity.</p><span class="kstep__read"><b class="n mono">PII</b> <span class="u">field flagged</span><span class="feeds">feeds &rarr; a <b>labeled record</b> the rules can act on</span></span></div>
-        <div class="kstep"><span class="kstep__n">Set rules</span><h3 class="kstep__t">Decide what is allowed</h3><p class="kstep__d">Redaction, retention, allowed providers, export boundaries, budgets.</p><span class="kstep__read"><b class="n mono">redact</b> <span class="u">on PII field</span><span class="feeds">feeds &rarr; a <b>governed record</b>, safe to reuse</span></span></div>
-        <div class="kstep"><span class="kstep__n">Evaluate</span><h3 class="kstep__t">Catch regressions first</h3><p class="kstep__d">Build evals and drift checks; lock a regression set; block bad releases.</p><span class="kstep__read"><b class="n mono">98%</b> <span class="u">pass, 1 held</span><span class="feeds">feeds &rarr; a <b>locked eval gate</b> the compile must clear</span></span></div>
-        <div class="kstep"><span class="kstep__n">Compile</span><h3 class="kstep__t">Get one portable file</h3><p class="kstep__d">Bundle model, recipe, evals, and receipt into one signed artifact.</p><span class="kstep__read"><b class="n mono">142</b> <span class="u">MB .kolm</span><span class="feeds">feeds &rarr; a <b>signed artifact</b> ready to run</span></span></div>
-        <div class="kstep"><span class="kstep__n">Run</span><h3 class="kstep__t">Run on the hardware you have</h3><p class="kstep__d">Ship to the smallest runtime that fits - laptop, edge, server.</p><span class="kstep__read"><b class="n mono">71</b> <span class="u">ms p50, laptop</span><span class="feeds">feeds &rarr; a <b>live endpoint</b> plus its receipt</span></span></div>
-        <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Prove what you shipped</h3><p class="kstep__d">Each release carries a receipt, checksum, version, and eval result.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">verified</span><span class="feeds">feeds &rarr; a <b>receipt</b> anyone can check offline</span></span></div>
-        <div class="kstep"><span class="kstep__n">Operate</span><h3 class="kstep__t">Stay in control after launch</h3><p class="kstep__d">Audit events, connector health, cost controls, exports, owners.</p><span class="kstep__read"><b class="n mono">100%</b> <span class="u">changes logged</span><span class="feeds">feeds &rarr; back to <b>Capture</b> as drift is found</span></span></div>
-      </div>
+      <figure class="kinst kinst--marks kfig is-verified reveal" role="group" aria-label="Eight-stage lifecycle where each stage's output is the next stage's input: capture, classify, set rules, evaluate, compile, run, verify, operate.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>LIFECYCLE / OUTPUT FEEDS NEXT INPUT</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+          <div class="kpipe" style="--kn:8" data-km="flow breathe">
+            <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Capture</span><h3 class="kpstage__t">Bring in what you use</h3><p class="kpstage__d">Point your traffic at Kolm; it records the real call - prompt, tool calls, outcome.</p><span class="kpstage__read"><span class="n" data-count>12408</span><span class="u">calls recorded</span><span class="feeds">feeds &rarr; <b>1 raw record</b> with source + timestamp</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Classify</span><h3 class="kpstage__t">Know what you captured</h3><p class="kpstage__d">Tag each record's source, schema, tenant, environment, and sensitivity.</p><span class="kpstage__read"><span class="n">PII</span><span class="u">field flagged</span><span class="feeds">feeds &rarr; a <b>labeled record</b> the rules can act on</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Set rules</span><h3 class="kpstage__t">Decide what is allowed</h3><p class="kpstage__d">Redaction, retention, allowed providers, export boundaries, budgets.</p><span class="kpstage__read"><span class="n">redact</span><span class="u">on PII field</span><span class="feeds">feeds &rarr; a <b>governed record</b>, safe to reuse</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Evaluate</span><h3 class="kpstage__t">Catch regressions first</h3><p class="kpstage__d">Build evals and drift checks; lock a regression set; block bad releases.</p><span class="kpstage__read"><span class="n">98%</span><span class="u">pass, 1 held</span><span class="feeds">feeds &rarr; a <b>locked eval gate</b> the compile must clear</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Compile</span><h3 class="kpstage__t">Get one portable file</h3><p class="kpstage__d">Bundle model, recipe, evals, and receipt into one signed artifact.</p><span class="kpstage__read"><span class="n">142</span><span class="u">MB .kolm</span><span class="feeds">feeds &rarr; a <b>signed artifact</b> ready to run</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Run</span><h3 class="kpstage__t">Run on the hardware you have</h3><p class="kpstage__d">Ship to the smallest runtime that fits - laptop, edge, server.</p><span class="kpstage__read"><span class="n">71</span><span class="u">ms p50, laptop</span><span class="feeds">feeds &rarr; a <b>live endpoint</b> plus its receipt</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Verify</span><h3 class="kpstage__t">Prove what you shipped</h3><p class="kpstage__d">Each release carries a receipt, checksum, version, and eval result.</p><span class="kpstage__read"><span class="n">Ed25519</span><span class="u">verified</span><span class="feeds">feeds &rarr; a <b>receipt</b> anyone can check offline</span></span></div>
+            <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Operate</span><h3 class="kpstage__t">Stay in control after launch</h3><p class="kpstage__d">Audit events, connector health, cost controls, exports, owners.</p><span class="kpstage__read"><span class="n">100%</span><span class="u">changes logged</span><span class="feeds">feeds &rarr; back to <b>Capture</b> as drift is found</span></span></div>
+          </div>
+        </div>
+        <div class="kinst__foot"><b>END TO END</b> one record, traced through eight stages <span class="go">verified</span></div>
+      </figure>
     </div>
   </section>
 

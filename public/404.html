@@ -37,6 +37,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   .nf-card span{display:block;font-size:12.5px;line-height:1.5;color:var(--ink-3);}
   .nf-maplbl{margin-top:var(--s6);font:600 10.5px/1 var(--font-mono);
     letter-spacing:var(--track-label);text-transform:uppercase;color:var(--ink-3);}
+  .nf-frame{margin-top:var(--s7);max-width:72ch;}
+  .nf-frame .nf-map{margin-top:var(--s4);}
 </style>
 </head>
 <body class="t-marketing">
@@ -99,7 +101,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <a class="btn btn--ghost" href="/account/overview">Open workspace</a>
         </div>
 
-        <p class="nf-maplbl">Where to start</p>
+        <figure class="kinst kinst--marks kfig is-verified nf-frame" role="group" aria-label="Where to start: the compiler, docs and API, or pricing" data-km="settle">
+         <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+         <div class="kinst__bar"><span>WHERE TO START / COMPILER GRAPH</span><span class="kinst__live">live</span></div>
+         <div class="kinst__body">
+        <p class="nf-maplbl" style="margin-top:0">Where to start</p>
         <nav class="nf-map" aria-label="Where to start">
           <a class="nf-card" href="/platform">
             <span class="nf-card__k" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><circle cx="3.5" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="12.5" cy="8" r="1.6" fill="currentColor"/></svg>Compiler</span>
@@ -117,6 +123,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <span>Plans and what each tier includes, no surprises.</span>
           </a>
         </nav>
+         </div>
+         <div class="kinst__foot"><b>ROUTES</b> three ways in <span class="go">live</span></div>
+        </figure>
       </div>
     </div>
   </section>

@@ -74,6 +74,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   .add-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   /* Page-scoped: role decision flow + grade legend for buyer.html only (.bp-*). */
   .bp-guide{margin:0 0 36px}
+  .bp-flow{margin:18px 0 0}
   .bp-guide h2{font-size:20px;margin:0 0 6px}
   .bp-guide>p{color:var(--ink-2);font-size:14px;line-height:1.6;margin:0 0 18px;max-width:64ch}
   .bp-grades{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 0}
@@ -147,26 +148,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="bp-guide" aria-labelledby="bpGuideTitle">
     <h2 id="bpGuideTitle">Pick your path</h2>
     <p>Three jobs land here. Find the row that matches yours, then take the one action under it. Each path ends in a concrete artifact you can act on, not a status page.</p>
-    <div class="kflow reveal" style="--kn:3">
-      <div class="kstep">
-        <span class="kstep__n">Reviewing one vendor</span>
-        <h3 class="kstep__t">Verify a single report</h3>
-        <p class="kstep__d">You have a signed report in hand and want to confirm it is intact and from the issuer you expect. Skip the portfolio.</p>
-        <span class="kstep__read"><b class="n mono"><a href="/verify" style="color:inherit">Verify</a></b> <span class="u">offline check</span></span>
+    <figure class="kinst kinst--marks kfig bp-flow" role="group" aria-label="Pick your path: reviewing one vendor leads to an offline verify check; watching many vendors leads to one live portfolio pane; no seat yet leads to enabling the buyer seat under Continuous.">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>PICK YOUR PATH / THREE JOBS</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+        <div class="kpipe" style="--kn:3" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Reviewing one vendor</span><h3 class="kpstage__t">Verify a single report</h3><p class="kpstage__d">You have a signed report in hand and want to confirm it is intact and from the issuer you expect. Skip the portfolio.</p><span class="kpstage__read"><span class="n"><a href="/verify" style="color:inherit">Verify</a></span><span class="u">offline check</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Watching many vendors</span><h3 class="kpstage__t">Open your portfolio</h3><p class="kpstage__d">You track several vendors and want one pane that resolves each live Trust link and flags staleness. Add a slug below to start.</p><span class="kpstage__read"><span class="n">1 pane</span><span class="u">all vendors, live</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">No seat yet</span><h3 class="kpstage__t">Enable the buyer seat</h3><p class="kpstage__d">The portfolio is part of Continuous. If you do not have a seat, this is the step that turns the pane on for your team.</p><span class="kpstage__read"><span class="n"><a href="/contact" style="color:inherit">Talk to us</a></span><span class="u">under Continuous</span></span></div>
+        </div>
       </div>
-      <div class="kstep">
-        <span class="kstep__n">Watching many vendors</span>
-        <h3 class="kstep__t">Open your portfolio</h3>
-        <p class="kstep__d">You track several vendors and want one pane that resolves each live Trust link and flags staleness. Add a slug below to start.</p>
-        <span class="kstep__read"><b class="n mono">1 pane</b> <span class="u">all vendors, live</span></span>
-      </div>
-      <div class="kstep">
-        <span class="kstep__n">No seat yet</span>
-        <h3 class="kstep__t">Enable the buyer seat</h3>
-        <p class="kstep__d">The portfolio is part of Continuous. If you do not have a seat, this is the step that turns the pane on for your team.</p>
-        <span class="kstep__read"><b class="n mono"><a href="/contact" style="color:inherit">Talk to us</a></b> <span class="u">under Continuous</span></span>
-      </div>
-    </div>
+      <div class="kinst__foot"><b>EACH PATH ENDS</b> in a concrete artifact <span class="go">act on it</span></div>
+    </figure>
   </section>
 
   <div id="banner"></div>

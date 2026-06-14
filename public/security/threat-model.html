@@ -41,7 +41,6 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <style>
   /* page-local: ownership map under the attacker cards. Scoped to #attackers. */
   #attackers .tm-map { margin-top: var(--s7); }
-  #attackers .tm-map__cap { margin: 0 0 var(--s3); font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
 </style>
 <script type="application/ld+json">
 {
@@ -317,9 +316,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
     </div>
 
-    <div class="tm-map">
-      <p class="tm-map__cap">Attack surface ownership &middot; attacker to runtime</p>
-      <div class="kthreat" role="table" aria-label="Attack surface ownership for a signed report, from attacker to runtime">
+    <figure class="tm-map kinst kinst--marks kfig is-verified" role="group" aria-label="Attack surface ownership for a signed report, one path from attacker to runtime, marking where kolm carries the control and where it stays with you">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>ATTACK SURFACE OWNERSHIP / ATTACKER TO RUNTIME</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+      <div class="kthreat" data-km="settle" role="table" aria-label="Attack surface ownership for a signed report, from attacker to runtime">
         <div class="kthreat__hd" role="row"><span role="columnheader">Surface on the path</span><span role="columnheader">Mitigated by</span></div>
         <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Tamper in transit</b><span>A changed byte between vendor and buyer. The Ed25519 signature covers the canonical bytes, so any edit fails verification.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">kolm</span></div>
         <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Forged report, rogue key</b><span>A fabricated report signed with a fresh key. Tier 2 checks the issuer against the keyring, where the key is not a kolm issuer.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">kolm</span></div>
@@ -327,7 +328,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Verify the report you hold</b><span>The buyer recomputes the signature and issuer in their own browser, offline. Nothing for kolm to return green after the fact.</span></span><span class="kthreat__own kthreat__own--you" role="cell">you</span></div>
         <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Runtime defense in production</b><span>Live monitoring of the deployed application. A report describes a moment and a fixed scope, not runtime defense.</span></span><span class="kthreat__own kthreat__own--you" role="cell">you</span></div>
       </div>
-    </div>
+      </div>
+      <div class="kinst__foot"><b>Shared boundary</b> kolm carries tamper, forgery and replay, you carry verification and runtime <span class="go">marked by glyph and label, not color alone</span></div>
+    </figure>
 
     <p class="hero__claim" style="margin-top:var(--s7)">
       Every check above runs in the buyer's own browser, against the key inside the report,

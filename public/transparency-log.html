@@ -241,12 +241,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Each report is a leaf, appended in order, never rewritten.</h2>
       <p class="lede">An illustration of how the log grows. Every entry records its position (the leaf sequence number), the type of event, and the tree root it sealed. Because the roots chain, removing or reordering any past entry changes every root after it, so the tampering shows.</p>
     </div>
+    <figure class="kinst kinst--marks kfig tl-inst" role="group" aria-label="The transparency log as a timeline: each report is a leaf appended in order, newest first, never rewritten">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>TRANSPARENCY LOG / APPEND-ONLY</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
     <ol class="ktl ktl--row reveal" aria-label="Transparency log entries, newest first">
       <li class="ktl__item is-now"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">seq 4128</span><span class="ktl__head"><span class="ktl__t">Signed report appended</span><span class="ktl__tag">leaf</span></span><p class="ktl__d">Latest entry. Its inclusion proof is the audit path from this leaf to the current root, shipped inside the report.</p></li>
       <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">seq 4127</span><span class="ktl__head"><span class="ktl__t">Re-attestation delta</span><span class="ktl__tag">supersede</span></span><p class="ktl__d">A fresh signed delta supersedes an earlier report. The old leaf stays in the log; it is never deleted.</p></li>
       <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">seq 4126</span><span class="ktl__head"><span class="ktl__t">Checkpoint root published</span><span class="ktl__tag">root</span></span><p class="ktl__d">A signed tree head fixes the root over every leaf so far. Each new root is chained to the one before it.</p></li>
       <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">seq 4125</span><span class="ktl__head"><span class="ktl__t">Signed report appended</span><span class="ktl__tag">leaf</span></span><p class="ktl__d">An earlier report. A reviewer holding it can recompute its audit path to this point and confirm it was logged exactly when it claims.</p></li>
     </ol>
+      </div>
+      <div class="kinst__foot"><b>APPEND-ONLY</b> chained roots, per-report inclusion proof <span class="go">verifies offline</span></div>
+    </figure>
     <p class="tl-note">Sequence numbers above are illustrative. The live tree size is published at <span class="mono">/v1/transparency-log/size</span>, and each report's own inclusion proof verifies offline against the root it cites.</p>
       </div>
     </div>

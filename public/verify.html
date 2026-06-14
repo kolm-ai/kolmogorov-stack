@@ -75,6 +75,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   #vrf-jargon .vj__t { margin: 0 0 6px; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink); }
   #vrf-jargon .vj__p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
   #vrf-jargon .vj__eg { display: block; margin-top: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); line-height: 1.5; word-break: break-word; }
+  /* page-local: the verify-loop seal sits beside the pipeline that feeds it */
+  .vrf-loop { margin-top: var(--s5); }
+  .vrf-loop__seal { display: flex; align-items: center; gap: var(--s4); margin-bottom: var(--s4); padding-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+  .vrf-loop__sealk { margin: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink); line-height: 1.5; }
+  .vrf-loop__void { display: block; margin-top: 4px; font-weight: 500; color: var(--ink-3); letter-spacing: 0.02em; }
 </style>
 <script type="application/ld+json">
 {
@@ -294,33 +299,23 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
         <p>The embedded key is matched against kolm's published keyring. Re-sign an edited report with an attacker's own key and tier 1 passes, but tier 2 exposes it. Try <span class="mono">Forge with a rogue key</span>.</p>
       </div>
     </div>
-    <figure class="diag reveal" role="img" aria-label="Verification loop: the buyer's browser fetches the report and the public keyring, verifies with WebCrypto, and reaches VALID or VOID with no kolm server in the trust path">
-    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect class="dg-box" x="8" y="28" width="160" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="48">Artifact</text>
-      <text class="dg-t" x="22" y="68">report.json</text>
-      <text class="dg-mono" x="22" y="84">signed envelope</text>
-      <rect class="dg-box" x="8" y="104" width="160" height="40" rx="9"/>
-      <text class="dg-t" x="22" y="122">issuer keyring</text>
-      <text class="dg-mono" x="22" y="137">public keys only</text>
-      <path class="dg-flow" d="M168 60 H276 M168 124 H236 V78"/>
-      <polygon class="dg-ok" points="276,60 268,55.5 268,64.5"/>
-      <rect class="dg-box" x="278" y="28" width="190" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="292" y="48">Buyer's browser</text>
-      <text class="dg-t" x="292" y="68">WebCrypto verify</text>
-      <text class="dg-mono" x="292" y="84">offline &#183; no upload</text>
-      <path class="dg-line" d="M468 48 H516 M468 76 H516"/>
-      <polygon class="dg-ok" points="516,48 508,43.5 508,52.5"/>
-      <polygon points="516,76 508,71.5 508,80.5" fill="#E0A89F"/>
-      <rect class="dg-box--ok" x="518" y="30" width="194" height="34" rx="9"/>
-      <text class="dg-t" x="532" y="51">VALID</text>
-      <text class="dg-mono" x="590" y="51">seal intact</text>
-      <rect class="dg-box--void" x="518" y="72" width="194" height="34" rx="9"/>
-      <text class="dg-void-t dg-k" x="532" y="93">VOID</text>
-      <text class="dg-mono" x="590" y="93">tampered bytes</text>
-      <text class="dg-mono" x="292" y="140">no account &#183; no kolm server in the trust path</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Trust path</b> verification runs in the buyer's own browser against pinned public keys</figcaption>
+    <figure class="kinst kinst--marks kfig is-verified vrf-loop" role="group" aria-label="Trust path: the buyer's browser reads the report, rebuilds the canonical bytes, checks the Ed25519 signature, matches the issuer keyring, and reaches VALID or VOID with no kolm server in the trust path">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>TRUST PATH / VERIFICATION LOOP</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+        <div class="vrf-loop__seal">
+          <span class="kseal is-verified" data-km="stamp" style="--kseal-sz:88px" aria-hidden="true"><svg viewBox="0 0 80 80"><circle class="kse-track" cx="40" cy="40" r="32"></circle><circle class="kse-ring" cx="40" cy="40" r="32" style="--kse-len:201"></circle><path class="kse-tick" d="M27 41 l9 9 l18 -20" style="--kse-tlen:42"></path><circle class="kse-pip" cx="40" cy="68" r="2.5"></circle></svg></span>
+          <p class="vrf-loop__sealk">VALID &middot; seal intact <span class="vrf-loop__void">VOID on tampered bytes</span></p>
+        </div>
+        <div class="kpipe" style="--kn:4" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Read</span><h3 class="kpstage__t">report.json</h3><p class="kpstage__d">The signed envelope is read in the buyer's browser. Offline, no upload.</p><span class="kpstage__read"><span class="n">0</span><span class="u">bytes sent</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Canonical</span><h3 class="kpstage__t">Rebuild the bytes</h3><p class="kpstage__d">Signed fields are put back in one fixed order so the exact signed bytes return.</p><span class="kpstage__read"><span class="n">1</span><span class="u">canonical form</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Signature</span><h3 class="kpstage__t">WebCrypto verify</h3><p class="kpstage__d">The embedded public key checks the Ed25519 signature. One changed byte fails.</p><span class="kpstage__read"><span class="n">Ed25519</span><span class="u">checked</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Issuer</span><h3 class="kpstage__t">Match the keyring</h3><p class="kpstage__d">The key is matched against kolm's published issuer keyring. Public keys only.</p><span class="kpstage__read"><span class="n">2</span><span class="u">tiers held</span></span></div>
+        </div>
+      </div>
+      <div class="kinst__foot"><b>Trust path</b> verification runs in the buyer's own browser against pinned public keys <span class="go">no kolm server in the trust path</span></div>
     </figure>
     <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
       </div>

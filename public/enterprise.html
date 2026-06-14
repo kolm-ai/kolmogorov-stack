@@ -34,6 +34,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   /* Page-scoped: multitenancy isolation diagram for enterprise.html only.
      Namespaced .ent-* to avoid clashes. Reuses kspec/gy-* idiom from the kit. */
   .ent-iso{margin:var(--s6) 0 0}
+  .ent-iso__body{position:relative}
+  .ent-iso__body>.kseal{position:absolute;top:var(--s3);right:var(--s3);z-index:2}
+  .ent-iso .kspec{width:100%;height:auto;display:block;background:transparent;border:0;box-shadow:none;padding:0}
   .ent-iso svg{width:100%;height:auto;display:block}
   .ent-iso .cmp{fill:var(--panel);stroke:var(--line-2);stroke-width:1}
   .ent-iso .wall{stroke:var(--accent);stroke-width:1.4;stroke-dasharray:3 4;opacity:.6}
@@ -260,8 +263,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Kolm meets your AI behavior wherever it already flows - in through the channels you run today, out as a signed model and the proof to back it. Real limits, no logo padding.</p>
       </div>
 
-      <figure class="instrument" data-art-reveal aria-label="Kolm is a drop-in proxy: your app's OpenAI and Anthropic API calls pass straight through to the provider unchanged - no rewrite - while Kolm captures the behavior off the wire and compiles it into one signed .kolm artifact.">
-        <div class="instrument__bar"><span>intercept &middot; <b>drop-in proxy</b></span><span class="live">capturing</span></div>
+      <figure class="kinst kinst--marks kfig is-verified" data-art-reveal role="group" aria-label="Kolm is a drop-in proxy: your app's OpenAI and Anthropic API calls pass straight through to the provider unchanged - no rewrite - while Kolm captures the behavior off the wire and compiles it into one signed .kolm artifact.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>INTERCEPT / DROP-IN PROXY</span><span class="kinst__live">capturing</span></div>
+        <div class="kinst__body">
         <svg class="icpt" viewBox="0 0 440 176" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
           <path class="spine" d="M70 56 H370"/>
           <rect class="nd" x="22" y="38" width="96" height="36" rx="5"/>
@@ -283,6 +288,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <text class="tag" x="160" y="128">captured off the wire</text>
         </svg>
         <figcaption class="kfig__cap" style="padding:0 var(--s4) var(--s4)">Read it left to right: your app calls the provider as it always has (the <b>SDK is unchanged</b>), the request passes straight through, and Kolm taps a copy off the wire to build one signed <b>behavior.kolm</b>. Nothing in your code path is rewritten.</figcaption>
+        </div>
+        <div class="kinst__foot"><b>INTERCEPT</b> SDK unchanged, captured off the wire <span class="go">no rewrite</span></div>
       </figure>
 
       <div class="grid grid--3">
@@ -389,9 +396,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Nothing here is a black box. Capture, eval, artifact, receipt, runtime target, export, and audit state are real records you can open, hash, and verify - so your reviewers never take a number on faith.</p>
       </div>
 
-      <figure class="anat" data-art-reveal aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates, and a sha256 receipt - bound by one Ed25519 signature you can verify offline.">
-        <div class="anat__hd"><span>Inside a .kolm</span><span>exploded view</span></div>
-        <svg viewBox="0 0 360 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+      <figure class="kinst kinst--marks kfig is-verified" data-km="settle stamp" data-art-reveal role="group" aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates, and a sha256 receipt - bound by one Ed25519 signature you can verify offline.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>INSIDE A .kolm / EXPLODED VIEW</span><span class="kinst__live">signed</span></div>
+        <div class="kinst__body">
+        <svg class="anat" viewBox="0 0 360 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
           <path class="reg" d="M8 8h10 M8 8v10 M352 292h-10 M352 292v-10"/>
           <g class="layer"><path class="face" d="M70 30 L250 30 L290 52 L110 52 Z"/>
             <path class="bevel" d="M70 30 L250 30 L290 52"/>
@@ -419,6 +428,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <path class="seal" d="M172 230 l5 5 l11 -11" stroke="currentColor" stroke-width="2" fill="none"/>
           <text class="sub" x="180" y="268" text-anchor="middle" style="fill:var(--accent)">Ed25519 signed · verify yourself</text>
         </svg>
+        </div>
+        <div class="kinst__foot"><b>FOUR LAYERS</b> model, recipe, evals, receipt <span class="go">Ed25519 signed</span></div>
       </figure>
 
       <div class="grid grid--2">
@@ -471,8 +482,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">A <span class="kdef">tenant<span class="kdef__plain"> (one isolated customer space)</span></span><span class="kdef-tip">A <b>tenant</b> is one isolated customer workspace. Every artifact, key, and log lives inside it; another tenant cannot read in or write out.</span> is the boundary that keeps one customer's data, keys, and telemetry from ever touching another's. Each captured artifact, each signing key, and each audit event is scoped to a single compartment. There is no shared store a neighbor can read, and no cross-tenant query path. The diagram below traces what stays inside and what is blocked at the wall.</p>
       </div>
 
-      <figure class="kspec ent-iso" role="group" aria-label="Multitenancy isolation: tenant A and tenant B each hold their own artifacts, signing keys, and telemetry inside sealed compartments; a cross-tenant read attempt is blocked at the boundary wall.">
-        <svg viewBox="0 0 360 220" aria-hidden="true">
+      <figure class="kinst kinst--marks kfig is-verified ent-iso" data-km="settle stamp" role="group" aria-label="Multitenancy isolation: tenant A and tenant B each hold their own artifacts, signing keys, and telemetry inside sealed compartments; a cross-tenant read attempt is blocked at the boundary wall.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>ISOLATION / SEALED COMPARTMENTS</span><span class="kinst__live">enforced</span></div>
+        <div class="kinst__body ent-iso__body">
+        <span class="kseal is-verified" data-km="stamp" style="--kseal-sz:64px" aria-hidden="true"><svg viewBox="0 0 80 80"><circle class="kse-track" cx="40" cy="40" r="32"></circle><circle class="kse-ring" cx="40" cy="40" r="32" style="--kse-len:201"></circle><path class="kse-tick" d="M27 41 l9 9 l18 -20" style="--kse-tlen:42"></path><circle class="kse-pip" cx="40" cy="68" r="2.5"></circle></svg></span>
+        <svg class="kspec" viewBox="0 0 360 220" aria-hidden="true">
           <!-- tenant A compartment -->
           <rect class="cmp" x="14" y="20" width="150" height="118" rx="4"/>
           <text class="cl-k" x="24" y="38">tenant A</text>
@@ -505,6 +520,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <li><span class="ks-num">02</span><span><b>Signing keys</b> are per-tenant. A's key cannot sign or verify against B's data, so a leaked key cannot reach across the wall.</span></li>
           <li><span class="ks-num">03</span><span><b>Telemetry and audit logs</b> are isolated and append-only. There is no shared table, and the cross-tenant read path returns nothing.</span></li>
         </ol>
+        </div>
+        <div class="kinst__foot"><b>BOUNDARY</b> nothing crosses the wall <span class="go">cross-tenant read blocked</span></div>
       </figure>
     </div>
   </section>
@@ -518,9 +535,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">Every model you compile ships with a signed packet your reviewers can verify themselves: source hashes, policy versions, eval results, artifact checksums, runtime targets, and receipt IDs. The seal uses <span class="kdef">Ed25519<span class="kdef__plain"> (a public-key signature)</span></span><span class="kdef-tip"><b>Ed25519</b> is a public-key signature scheme. We sign the file with a private key; anyone with the matching public key can confirm the bytes were not changed, without contacting us.</span>, so a buyer with the public key can confirm the bytes were not altered. Every claim on this page ships with proof you can check.</p>
       </div>
 
-      <figure class="instrument vloop" data-vl="valid" data-art-reveal
-        aria-label="Verify loop: a .kolm artifact plus a public key are hashed; the hash is checked against the embedded Ed25519 signature. The result is a single verdict - valid, or void.">
-        <div class="instrument__bar"><b>verify loop</b><span class="live">Ed25519</span></div>
+      <figure class="kinst kinst--marks kfig vloop is-verified" data-vl="valid" data-art-reveal
+        role="group" aria-label="Verify loop: a .kolm artifact plus a public key are hashed; the hash is checked against the embedded Ed25519 signature. The result is a single verdict - valid, or void.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>VERIFY LOOP / Ed25519</span><span class="kinst__live">Ed25519</span></div>
+        <div class="kinst__body">
         <svg class="pipe vl" viewBox="0 0 440 232" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
           <rect class="nd" x="22"  y="14" width="150" height="40" rx="5"/>
           <text class="lbl" x="38" y="32">.kolm</text><text class="sub" x="38" y="46">142 mb · sealed artifact</text>
@@ -544,6 +563,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <path class="vl-flow"  d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
         </svg>
         <figcaption class="kfig__cap" style="padding:0 var(--s4) var(--s4)">The artifact and its public key are both hashed, the hash is compared against the embedded signature, and the loop returns one verdict: <b>valid</b> or void. A single changed byte flips it to void.</figcaption>
+        </div>
+        <div class="kinst__foot"><b>VERDICT</b> one changed byte flips it <span class="go">valid</span></div>
       </figure>
 
       <div class="panel">
@@ -570,9 +591,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">The signed model is one portable file. Kolm runs it on the smallest runtime that meets your latency and cost target - phone, laptop, edge, or your own servers. Same artifact, your hardware, no per-call rent.</p>
       </div>
 
-      <figure class="instrument runtime-ramp" data-art-reveal
-        aria-label="Runtime fit: the same claims-redactor.kolm ranked across four runtimes. Phone: 142 MB, $0.00 per thousand calls, 96 ms - selected, in spec. Laptop: 142 MB, $0.04, 71 ms. Edge: 142 MB, $0.21, 39 ms. Server: 142 MB, $0.90, 12 ms. Kolm runs it on the smallest runtime that fits.">
-        <div class="instrument__bar"><span>runtime &middot; <b>claims-redactor.kolm</b></span><span class="live">fit</span></div>
+      <figure class="kinst kinst--marks kfig is-verified runtime-ramp" data-km="draw breathe" data-art-reveal
+        role="group" aria-label="Runtime fit: the same claims-redactor.kolm ranked across four runtimes. Phone: 142 MB, $0.00 per thousand calls, 96 ms - selected, in spec. Laptop: 142 MB, $0.04, 71 ms. Edge: 142 MB, $0.21, 39 ms. Server: 142 MB, $0.90, 12 ms. Kolm runs it on the smallest runtime that fits.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>RUNTIME / claims-redactor.kolm</span><span class="kinst__live">fit</span></div>
+        <div class="kinst__body">
         <svg class="pipe ramp" viewBox="0 0 440 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
           <text class="tag" x="22" y="14">smallest runtime that fits &middot; 142 mb</text>
           <text class="tag" x="418" y="14" text-anchor="end">cost/1k &middot; p50</text>
@@ -610,6 +633,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <text class="rt" x="404" y="40" text-anchor="end">12 ms</text>
           </g>
         </svg>
+        </div>
+        <div class="kinst__foot"><b>SELECTED</b> phone, 142 MB, $0.00, 96 ms <span class="go">in spec</span></div>
       </figure>
     </div>
   </section>

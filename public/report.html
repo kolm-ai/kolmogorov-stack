@@ -45,6 +45,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 /* page-local (report.html): a plain-language "what verifying does" flow and a
    first-reader glossary affordance. Reuses the shared kflow/kdef kit. Tokens only. */
 .rep-note{color:var(--ink-2);font-size:13px;line-height:1.6;margin-top:var(--s4)}
+.rep-spec{margin-top:var(--s6)}
+.rep-spec__body{display:flex;align-items:center;justify-content:center;gap:var(--s6);flex-wrap:wrap}
+.rep-spec__body .kspec3d{max-width:380px;flex:1 1 320px}
+.rep-spec__seal{flex:none}
+@media (max-width:560px){.rep-spec__body{gap:var(--s4)}}
 </style>
 <script type="application/ld+json">
 {
@@ -246,35 +251,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p>A Merkle inclusion proof from an RFC 6962 style log confirms the report was recorded when it claims and was never quietly replaced. Not a chain, an append-only transparency log.</p>
       </div>
     </div>
-    <figure class="diag reveal" role="img" aria-label="Signature chain: canonical report bytes are hashed with SHA-256 and signed with Ed25519; altering any byte voids the seal">
-    <svg viewBox="0 0 720 176" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="dg-flow" d="M150 60 H186 M330 60 H366 M548 60 H584"/>
-      <rect class="dg-box" x="8" y="28" width="142" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="48">Bytes</text>
-      <text class="dg-t" x="22" y="68">Report JSON</text>
-      <text class="dg-mono" x="22" y="84">canonicalized</text>
-      <polygon class="dg-ok" points="186,60 178,55.5 178,64.5"/>
-      <rect class="dg-box" x="188" y="28" width="142" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="202" y="48">Digest</text>
-      <text class="dg-t" x="202" y="68">SHA-256</text>
-      <text class="dg-mono" x="202" y="84">32-byte hash</text>
-      <polygon class="dg-ok" points="366,60 358,55.5 358,64.5"/>
-      <rect class="dg-box" x="368" y="28" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="382" y="48">Signature</text>
-      <text class="dg-t" x="382" y="68">Ed25519 sign</text>
-      <text class="dg-mono" x="382" y="84">kid kolm-prod-2026</text>
-      <polygon class="dg-ok" points="584,60 576,55.5 576,64.5"/>
-      <rect class="dg-box--ok" x="586" y="28" width="126" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="600" y="48">Seal</text>
-      <text class="dg-t" x="600" y="68">SEALED</text>
-      <path class="dg-ok" d="M600 78 l3.5 3.5 L611 74" fill="none" stroke="#3FE5A0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path class="dg-line" d="M79 92 V140 H520" stroke-dasharray="3 5"/>
-      <polygon points="520,140 512,135.5 512,144.5" fill="#E0A89F"/>
-      <rect class="dg-box--void" x="522" y="120" width="190" height="40" rx="9"/>
-      <text class="dg-void-t dg-k" x="536" y="138">VOID</text>
-      <text class="dg-mono" x="536" y="152">one changed byte breaks it</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Why it holds</b> the signature covers the exact bytes, so the report cannot be quietly edited</figcaption>
+    <figure class="kinst kinst--marks kfig is-verified rep-spec" role="group" aria-label="The signed object as stacked layers: canonical payload, the Ed25519 signature over the exact bytes with its embedded key, and the append-only inclusion proof, sealed">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>SIGNED OBJECT / WHY IT HOLDS</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body rep-spec__body">
+        <svg class="kspec3d" viewBox="0 0 380 280" data-km="settle stamp" role="img" aria-label="One canonical object in three layers: the canonical payload at the base, the Ed25519 signature with embedded key over the exact bytes, and the append-only inclusion proof on top">
+          <defs aria-hidden="true">
+            <linearGradient id="k3plate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A1D21"/><stop offset="1" stop-color="#101316"/></linearGradient>
+            <linearGradient id="k3paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F2EC"/><stop offset="1" stop-color="#E7E5DD"/></linearGradient>
+          </defs>
+          <g class="k3-layer" style="--i:0"><polygon class="k3-side" points="56,206 224,206 258,188 90,188"/><rect class="k3-plate" x="56" y="170" width="168" height="36" rx="3"/><text class="k3-lbl-art" x="70" y="186">Canonical payload</text><text class="k3-sub-art" x="70" y="198">key-sorted, whitespace-free</text></g>
+          <g class="k3-layer" style="--i:1"><polygon class="k3-side" points="56,148 224,148 258,130 90,130"/><rect class="k3-plate is-key" x="56" y="112" width="168" height="36" rx="3"/><text class="k3-lbl-art" x="70" y="128">Ed25519 signature</text><text class="k3-sub-art" x="70" y="140">embedded key, over exact bytes</text></g>
+          <g class="k3-layer" style="--i:2"><polygon class="k3-side" points="56,90 224,90 258,72 90,72"/><rect class="k3-plate" x="56" y="54" width="168" height="36" rx="3"/><text class="k3-lbl-art" x="70" y="70">Inclusion proof</text><text class="k3-sub-art" x="70" y="82">append-only Merkle path</text></g>
+          <path class="k3-lead" d="M224 72 H300"/><circle class="k3-dot" cx="300" cy="72" r="2.5"/><text class="k3-num" x="308" y="69">03</text><text class="k3-sub" x="308" y="80">tlog</text>
+          <path class="k3-lead" d="M224 130 H300"/><circle class="k3-dot" cx="300" cy="130" r="2.5"/><text class="k3-num" x="308" y="127">02</text><text class="k3-sub" x="308" y="138">sig</text>
+          <path class="k3-lead" d="M224 188 H300"/><circle class="k3-dot" cx="300" cy="188" r="2.5"/><text class="k3-num" x="308" y="185">01</text><text class="k3-sub" x="308" y="196">payload</text>
+          <path class="k3-bracket" d="M44 56 q-8 0 -8 8 V196 q0 8 8 8"/>
+          <text class="k3-sub" x="26" y="130" transform="rotate(-90 26 130)">one byte breaks it</text>
+        </svg>
+        <span class="kseal is-verified rep-spec__seal" data-km="stamp" style="--kseal-sz:84px" aria-hidden="true"><svg viewBox="0 0 80 80"><circle class="kse-track" cx="40" cy="40" r="32"></circle><circle class="kse-ring" cx="40" cy="40" r="32" style="--kse-len:201"></circle><path class="kse-tick" d="M27 41 l9 9 l18 -20" style="--kse-tlen:42"></path><circle class="kse-pip" cx="40" cy="68" r="2.5"></circle></svg></span>
+      </div>
+      <div class="kinst__foot"><b>WHY IT HOLDS</b> the signature covers the exact bytes <span class="go">SEALED</span></div>
     </figure>
     <p class="hero__claim" style="margin-top:var(--s6)">
       Every line above is part of the signed bytes. Edit one character and the signature, and the seal, stop matching. The byte-level format is public in the <a href="/spec">signed report spec</a>.

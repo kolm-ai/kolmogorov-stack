@@ -162,27 +162,34 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
       <!-- Visualize the four mapped totals from the proof strip as one chart pair -->
       <div class="rl-figrow">
-        <figure class="kfig" role="img" aria-label="What the research lab has mapped: 17 customer clusters, 17 channel families, 11 product standards held, and 8 streams stated plainly.">
-          <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
-          <svg class="kchart" viewBox="0 0 320 180" data-art-reveal aria-hidden="true">
-            <line class="k-axis" x1="44" y1="16" x2="44" y2="150"/><line class="k-base" x1="44" y1="150" x2="312" y2="150"/>
-            <rect class="k-bar" x="62"  y="32"  width="40" height="118"/><text class="k-tick" x="64" y="166">clusters</text><text class="k-val" x="66" y="24">17</text>
-            <rect class="k-bar" x="124" y="32"  width="40" height="118"/><text class="k-tick" x="124" y="166">channels</text><text class="k-val" x="128" y="24">17</text>
-            <rect class="k-bar" x="186" y="74"  width="40" height="76"/><text class="k-tick" x="186" y="166">standards</text><text class="k-val" x="190" y="66">11</text>
-            <rect class="k-bar is-best" x="248" y="93" width="40" height="57"/><text class="k-tick" x="252" y="166">shipped</text><text class="k-val" x="252" y="85">8</text>
-          </svg>
-          <figcaption class="kfig__cap">Counts behind the lab: <b>17</b> customer clusters and channel families mapped, <b>11</b> product standards held, <b>8</b> shipped lines stated plainly.</figcaption>
+        <figure class="kinst kinst--marks kfig" role="group" aria-label="What the research lab has mapped: 17 customer clusters, 17 channel families, 11 product standards held, and 8 streams stated plainly.">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>MAPPED / COUNTS BEHIND THE LAB</span><span class="kinst__live">live</span></div>
+          <div class="kinst__body">
+            <svg class="kbars" viewBox="0 0 320 200" data-km="draw" role="img" aria-label="Mapped counts: 17 customer clusters, 17 channel families, 11 product standards held, 8 shipped lines stated plainly.">
+              <defs aria-hidden="true"><linearGradient id="kbarGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,255,255,.16)"/><stop offset="1" stop-color="rgba(255,255,255,.05)"/></linearGradient><linearGradient id="kbarGradAcc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3FE5A0"/><stop offset="1" stop-color="#23493B"/></linearGradient></defs>
+              <line class="kb-grid" x1="40" y1="40" x2="312" y2="40"/><line class="kb-grid" x1="40" y1="90" x2="312" y2="90"/><line class="kb-grid" x1="40" y1="140" x2="312" y2="140"/><line class="kb-grid" x1="40" y1="168" x2="312" y2="168"/>
+              <rect class="kb-bar" x="58"  y="40"  width="44" height="128" style="--i:0"></rect><text class="kb-val" x="80" y="32" text-anchor="middle">17</text><text class="kb-lbl" x="80" y="184" text-anchor="middle">clusters</text>
+              <rect class="kb-bar" x="122" y="40"  width="44" height="128" style="--i:1"></rect><text class="kb-val" x="144" y="32" text-anchor="middle">17</text><text class="kb-lbl" x="144" y="184" text-anchor="middle">channels</text>
+              <rect class="kb-bar" x="186" y="85"  width="44" height="83"  style="--i:2"></rect><text class="kb-val" x="208" y="77" text-anchor="middle">11</text><text class="kb-lbl" x="208" y="184" text-anchor="middle">standards</text>
+              <rect class="kb-bar is-best" x="250" y="108" width="44" height="60" style="--i:3"></rect><text class="kb-val" x="272" y="100" text-anchor="middle">8</text><text class="kb-lbl" x="272" y="184" text-anchor="middle">shipped</text>
+            </svg>
+          </div>
+          <div class="kinst__foot"><b>COUNTS</b> 17 clusters, 17 channels, 11 standards, 8 shipped <span class="go">stated plainly</span></div>
         </figure>
-        <figure class="kfig" role="img" aria-label="Where research effort sits across the six streams, by share of the current cycle.">
-          <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
-          <ul class="kmeter reveal" aria-label="Research effort by stream">
-            <li class="kmeter__row"><span class="kmeter__k">Customer stack</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:82%"></span></span><span class="kmeter__v">82%</span></li>
-            <li class="kmeter__row is-best"><span class="kmeter__k">Backend</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:94%"></span></span><span class="kmeter__v">94%</span></li>
-            <li class="kmeter__row"><span class="kmeter__k">API control</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:78%"></span></span><span class="kmeter__v">78%</span></li>
-            <li class="kmeter__row"><span class="kmeter__k">Website audit</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:66%"></span></span><span class="kmeter__v">66%</span></li>
-            <li class="kmeter__row"><span class="kmeter__k">UI audit</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:71%"></span></span><span class="kmeter__v">71%</span></li>
-          </ul>
-          <figcaption class="kfig__cap">How far each stream has hardened into shipped product, this cycle. <b>Backend</b> leads because nothing reaches the site until the data behind it holds.</figcaption>
+        <figure class="kinst kinst--marks kfig" role="group" aria-label="Where research effort sits across the streams, by share of the current cycle: customer stack 82%, backend 94%, API control 78%, website audit 66%, UI audit 71%.">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>EFFORT / HARDENED INTO PRODUCT</span><span class="kinst__live">this cycle</span></div>
+          <div class="kinst__body">
+            <ul class="kmeter reveal" aria-label="Research effort by stream">
+              <li class="kmeter__row"><span class="kmeter__k">Customer stack</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:82%"></span></span><span class="kmeter__v">82%</span></li>
+              <li class="kmeter__row is-best"><span class="kmeter__k">Backend</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:94%"></span></span><span class="kmeter__v">94%</span></li>
+              <li class="kmeter__row"><span class="kmeter__k">API control</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:78%"></span></span><span class="kmeter__v">78%</span></li>
+              <li class="kmeter__row"><span class="kmeter__k">Website audit</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:66%"></span></span><span class="kmeter__v">66%</span></li>
+              <li class="kmeter__row"><span class="kmeter__k">UI audit</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:71%"></span></span><span class="kmeter__v">71%</span></li>
+            </ul>
+          </div>
+          <div class="kinst__foot"><b>BACKEND</b> leads at 94% <span class="go">data holds first</span></div>
         </figure>
       </div>
 
@@ -269,14 +276,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Every pass ends in something you can use.</h2>
         <p class="lede">We track each pass as a dated note, and each one resolves into a control you can open, a route you can call, a page, or a clear line on what ships today - never an idea left floating.</p>
       </div>
-      <ol class="ktl reveal" aria-label="Research passes, in order, each resolving into shipped product">
-        <li class="ktl__item is-now"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 06</span><span class="ktl__head"><span class="ktl__t">Checked on real screens</span><span class="ktl__tag">ui audit</span></span><p class="ktl__d">Desktop and mobile, verified by screenshot: stable spacing, readable density, no overlap, no sideways scroll.</p></li>
-        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 05</span><span class="ktl__head"><span class="ktl__t">We only claim what holds</span><span class="ktl__tag">backend</span></span><p class="ktl__d">Tenant boundaries, schema handling, compile state, export receipts, and artifact checksums decide what the site is allowed to say.</p></li>
-        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 04</span><span class="ktl__head"><span class="ktl__t">Show the machine, not adjectives</span><span class="ktl__tag">website audit</span></span><p class="ktl__d">Every page has to prove inputs, controls, outputs, proof, and your next move.</p></li>
-        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 03</span><span class="ktl__head"><span class="ktl__t">Your data, in and out</span><span class="ktl__tag">api control</span></span><p class="ktl__d">Every source, way in, way out, credential boundary, and audit event gets a named owner and a visible state.</p></li>
-        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 02</span><span class="ktl__head"><span class="ktl__t">What a serious tool owes you</span><span class="ktl__tag">product standard</span></span><p class="ktl__d">Controls you can open, enterprise admin, proof you can export, usage you can read, and procurement that clears.</p></li>
-        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 01</span><span class="ktl__head"><span class="ktl__t">17 clusters we build for</span><span class="ktl__tag">customer stack</span></span><p class="ktl__d">Where capturing your calls and compiling them into a model fits between agents, gateways, evals, and your data.</p></li>
-      </ol>
+      <figure class="kinst kinst--marks kfig" role="group" aria-label="Research passes, in order, each resolving into shipped product, from stream 01 to the current stream 06.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>STREAM LEDGER / PASS TO SHIPPED</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+          <ol class="ktl reveal" aria-label="Research passes, in order, each resolving into shipped product">
+            <li class="ktl__item is-now"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 06</span><span class="ktl__head"><span class="ktl__t">Checked on real screens</span><span class="ktl__tag">ui audit</span></span><p class="ktl__d">Desktop and mobile, verified by screenshot: stable spacing, readable density, no overlap, no sideways scroll.</p></li>
+            <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 05</span><span class="ktl__head"><span class="ktl__t">We only claim what holds</span><span class="ktl__tag">backend</span></span><p class="ktl__d">Tenant boundaries, schema handling, compile state, export receipts, and artifact checksums decide what the site is allowed to say.</p></li>
+            <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 04</span><span class="ktl__head"><span class="ktl__t">Show the machine, not adjectives</span><span class="ktl__tag">website audit</span></span><p class="ktl__d">Every page has to prove inputs, controls, outputs, proof, and your next move.</p></li>
+            <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 03</span><span class="ktl__head"><span class="ktl__t">Your data, in and out</span><span class="ktl__tag">api control</span></span><p class="ktl__d">Every source, way in, way out, credential boundary, and audit event gets a named owner and a visible state.</p></li>
+            <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 02</span><span class="ktl__head"><span class="ktl__t">What a serious tool owes you</span><span class="ktl__tag">product standard</span></span><p class="ktl__d">Controls you can open, enterprise admin, proof you can export, usage you can read, and procurement that clears.</p></li>
+            <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 01</span><span class="ktl__head"><span class="ktl__t">17 clusters we build for</span><span class="ktl__tag">customer stack</span></span><p class="ktl__d">Where capturing your calls and compiling them into a model fits between agents, gateways, evals, and your data.</p></li>
+          </ol>
+        </div>
+        <div class="kinst__foot"><b>EACH PASS</b> resolves into shipped product <span class="go">never left floating</span></div>
+      </figure>
     </div>
   </section>
 
@@ -327,8 +341,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="lede">An insight earns its keep the moment it changes a route, a schema, a page, a control, a test, a screenshot, or what we're willing to claim. Here's the path every one of them takes.</p>
       </div>
 
-      <figure class="instrument" data-art-reveal aria-label="Live research and API traffic is captured and compiled into governed, signed .kolm ledger entries.">
-        <div class="instrument__bar"><span>capture &middot; <b>stream.kolm</b></span><span class="live">live</span></div>
+      <figure class="kinst kinst--marks kfig is-verified" data-art-reveal role="group" aria-label="Live research and API traffic is captured and compiled into governed, signed .kolm ledger entries.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>CAPTURE / stream.kolm</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
         <svg class="cap" viewBox="0 0 440 196" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
           <path class="cap-flow" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
           <path class="cap-stream" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
@@ -344,6 +360,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <g class="cap-r" style="--i:4" transform="translate(0,112)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-05</text><rect class="cap-fill" x="58" y="7" width="70" height="8" rx="2"/><path class="cap-seal" d="M222 11 l4 4 l8 -9"/></g>
           </g>
         </svg>
+        </div>
+        <div class="kinst__foot"><b>CAPTURE</b> stream to governed, signed rows <span class="go">verified</span></div>
       </figure>
 
       <div class="grid grid--4">

@@ -57,6 +57,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .home-why__pts li{display:flex;gap:9px;font-size:13.5px;line-height:1.5;color:var(--ink-2,#b9bcb4)}
 .home-why__pts li b{color:var(--ink,#eef0ea);font-weight:600}
 .home-why__pts svg{flex:none;width:15px;height:15px;margin-top:2px;color:var(--accent,#3FE5A0)}
+/* hero cinematic pipeline film - fills its column; poster shown only under reduced motion */
+.kolm-pipeline-film{position:relative;margin:0;width:100%;border-radius:var(--r-lg,14px);overflow:hidden;
+  box-shadow:var(--ring,inset 0 0 0 1px rgba(255,255,255,.07)),0 18px 48px -24px rgba(0,0,0,.7);
+  background:var(--well,#0c0e0f);line-height:0;aspect-ratio:16/9}
+.kolm-pipeline-film__video,.kolm-pipeline-film__poster{display:block;width:100%;height:100%;object-fit:cover}
+.kolm-pipeline-film__poster{position:absolute;inset:0;display:none}
+@media (prefers-reduced-motion:reduce){
+  .kolm-pipeline-film__video{display:none}
+  .kolm-pipeline-film__poster{display:block}
+}
 </style>
 </head>
 <body class="t-marketing home">
@@ -129,56 +139,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </div>
       </div>
 
-      <!-- the one lit --paper object; ships sealed (calm fallback), sweep re-fires it once -->
-      <!-- signature instrument: the product as a live pipeline on real liquid glass -->
-      <figure class="instrument" data-art-reveal aria-label="How Kolm works: your OpenAI and Anthropic API calls are captured, compiled into one signed .kolm model, and run on the hardware that fits - laptop, edge, server, or phone - and anyone can verify the signature.">
-        <div class="instrument__bar"><span>compiler &middot; <b>claims-redactor.kolm</b></span><span class="live">live</span></div>
-        <svg class="pipe" viewBox="0 0 440 372" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
-          <defs>
-            <linearGradient id="ndFace" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#FFFFFF" stop-opacity=".055"/>
-              <stop offset="1" stop-color="#FFFFFF" stop-opacity=".014"/>
-            </linearGradient>
-            <linearGradient id="ndArt" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#F8F6F0"/><stop offset="1" stop-color="#E9E6DD"/>
-            </linearGradient>
-            <radialGradient id="flowGlow"><stop offset="0" stop-color="#3FE5A0" stop-opacity=".9"/>
-              <stop offset="1" stop-color="#3FE5A0" stop-opacity="0"/></radialGradient>
-            <filter id="ndShadow" x="-20%" y="-20%" width="140%" height="160%">
-              <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity=".5"/></filter>
-          </defs>
-          <text class="tag" x="220" y="9" text-anchor="middle">your api calls &middot; openai &middot; anthropic</text>
-          <path class="spine" d="M120 16 L220 38 M220 16 L220 38 M320 16 L220 38"/>
-          <rect class="nd" x="62" y="42" width="316" height="46" rx="5"/>
-          <path class="nd-hi" d="M63 43 h314"/>
-          <path class="reg" d="M62 48 v-6 h6"/>
-          <text class="lbl" x="82" y="64">1 &middot; Capture your live calls</text>
-          <text class="sub" x="82" y="79">point your traffic in &middot; secrets stripped before write</text>
-          <text class="tag" x="358" y="60" text-anchor="end">01</text>
-          <path class="spine" d="M220 88 L220 106"/>
-          <rect class="nd" x="62" y="106" width="316" height="46" rx="5"/>
-          <path class="nd-hi" d="M63 107 h314"/>
-          <path class="reg" d="M62 112 v-6 h6"/>
-          <text class="lbl" x="82" y="128">2 &middot; Compile into one signed file</text>
-          <text class="sub" x="82" y="143">evals 6/6 pass &middot; recipe + receipt &middot; Ed25519 sign</text>
-          <text class="tag" x="358" y="124" text-anchor="end">02</text>
-          <path class="spine" d="M220 152 L220 170"/>
-          <rect class="nd-art" x="78" y="170" width="284" height="54" rx="5"/>
-          <text class="lbl-art" x="98" y="194">claims-redactor.kolm</text>
-          <text class="sub-art" x="98" y="210">the model you own &middot; signed &middot; 142 mb &middot; one file</text>
-          <path class="ok-stroke" d="M326 189 l4 4 l8 -9" style="stroke:var(--sheet-accent)"/>
-          <path class="spine" d="M220 224 L220 250 M220 250 L63 270 M220 250 L161 270 M220 250 L279 270 M220 250 L377 270"/>
-          <text class="tag" x="220" y="245" text-anchor="middle">3 &middot; run it on the hardware that fits</text>
-          <rect class="chip" x="22" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="63" y="293" text-anchor="middle">laptop</text>
-          <rect class="chip" x="120" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="161" y="293" text-anchor="middle">edge</text>
-          <rect class="chip" x="238" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="279" y="293" text-anchor="middle">server</text>
-          <rect class="chip" x="336" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="377" y="293" text-anchor="middle">phone</text>
-          <path class="ok-stroke" d="M104 337 l4 4 l8 -9"/>
-          <text x="122" y="343" style="fill:var(--accent);font-size:10px;letter-spacing:.02em;font-family:var(--font-mono)">verify it yourself - no trust required</text>
-          <path class="flow" d="M220 38 L220 250"/>
-          <path class="flow-pulse" d="M220 38 L220 250"/>
-        </svg>
-      </figure>
+      <!-- hero showpiece: self-hosted Remotion cinematic pipeline film; poster only under reduced-motion -->
+      <figure class="kolm-pipeline-film" aria-label="kolm pipeline: live OpenAI and Anthropic API calls are captured through a drop-in proxy with secrets stripped, compiled into one signed .kolm model of about 142 megabytes, run on laptop, edge, server or phone, and verified by its Ed25519 signature."><video class="kolm-pipeline-film__video" autoplay muted loop playsinline preload="metadata" poster="/media/pipeline-poster.png" width="1600" height="900"><source src="/media/pipeline.webm" type="video/webm" /></video><img class="kolm-pipeline-film__poster" src="/media/pipeline-poster.png" alt="kolm pipeline diagram: LIVE API to CAPTURE to COMPILE to RUN to VERIFY, signature valid." width="1600" height="900" /></figure>
     </div>
   </section>
 
@@ -208,18 +170,23 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>See the worked path:</b> follow capture to deploy step by step in <a href="/how-it-works">how it works</a>, or read the <a href="/spec">.kolm spec</a>.</span></li>
         </ul>
       </div>
-      <figure class="kfig" role="img" aria-label="Ownership versus recurring cost: renting a frontier API keeps recurring cost high; owning a compiled .kolm puts you in the low recurring-cost, high-ownership corner, the best quadrant.">
-        <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
-        <svg class="kchart" viewBox="0 0 320 200" data-art-reveal aria-hidden="true">
-          <line class="k-grid" x1="40" y1="50" x2="300" y2="50"/><line class="k-grid" x1="40" y1="110" x2="300" y2="110"/>
-          <line class="k-axis" x1="40" y1="20" x2="40" y2="170"/><line class="k-axis" x1="40" y1="170" x2="300" y2="170"/>
-          <text class="k-axlbl" x="40" y="190">ownership -&gt;</text><text class="k-axlbl" x="6" y="30">recurring cost</text>
-          <circle class="k-pt" cx="90" cy="55" r="6" style="--i:0"/><text class="k-lbl" x="102" y="59">frontier API</text>
-          <circle class="k-pt" cx="150" cy="100" r="6" style="--i:1"/><text class="k-lbl" x="162" y="104">self-host raw</text>
-          <line class="k-cross" x1="40" y1="148" x2="248" y2="148"/><line class="k-cross" x1="248" y1="148" x2="248" y2="170"/>
-          <circle class="k-pt is-best" cx="248" cy="148" r="7" style="--i:2"/><circle class="k-ring" cx="248" cy="148" r="12"/>
-          <text class="k-val" x="214" y="138">a .kolm</text>
-        </svg>
+      <figure class="kinst kinst--marks kfig is-verified" role="group" aria-label="Ownership versus recurring cost: renting a frontier API keeps recurring cost high; owning a compiled .kolm puts you in the low recurring-cost, high-ownership corner, the best quadrant.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>OWN vs RENT / RECURRING COST</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+          <svg class="kscatter" viewBox="0 0 320 200" data-km="settle" role="img" aria-label="Position plot: a frontier API sits high on recurring cost and low on ownership; raw self-hosting sits in the middle; a compiled .kolm holds the high-ownership, low recurring-cost corner.">
+            <line class="ks-grid" x1="40" y1="50" x2="300" y2="50"/><line class="ks-grid" x1="40" y1="110" x2="300" y2="110"/>
+            <line class="ks-axis" x1="40" y1="20" x2="40" y2="170"/><line class="ks-axis" x1="40" y1="170" x2="300" y2="170"/>
+            <text class="ks-axlbl" x="40" y="190">ownership &rarr;</text><text class="ks-axlbl" x="6" y="30">recurring cost</text>
+            <circle class="ks-pt ksettle" cx="90" cy="55" r="5" style="--i:0"/><text class="ks-lbl ksettle" x="102" y="59" style="--i:0">frontier API</text>
+            <circle class="ks-pt ksettle" cx="150" cy="100" r="5" style="--i:1"/><text class="ks-lbl ksettle" x="162" y="104" style="--i:1">self-host raw</text>
+            <line class="ks-cross" x1="40" y1="148" x2="248" y2="148"/><line class="ks-cross" x1="248" y1="148" x2="248" y2="170"/>
+            <circle class="ks-ring" cx="248" cy="148" r="11"/>
+            <circle class="ks-pt is-best ksettle" cx="248" cy="148" r="5.5" style="--i:2"/>
+            <text class="ks-best-lbl ksettle" x="214" y="138" style="--i:2">a .kolm</text>
+          </svg>
+        </div>
+        <div class="kinst__foot"><b>BEST QUADRANT</b> high ownership, low recurring cost <span class="go">verified</span></div>
         <figcaption class="kfig__cap">A compiled <b>.kolm</b> holds the high-ownership, low-recurring-cost corner.</figcaption>
       </figure>
     </div>
@@ -233,43 +200,20 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>From your live API calls to a model you own.</h2>
         <p class="lede">Point your traffic at Kolm. It captures the behavior you already use, compiles it into a signed <code>.kolm</code> file, and runs it on the hardware that fits - with a receipt you can verify at every step.</p>
       </div>
-      <div class="grid grid--3">
-        <div class="card reveal"><span class="tick" aria-hidden="true"></span>
-          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
-            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
-            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
-            <path class="edge" d="M6 8h28"/>
-            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
-          </svg>
-          <span class="card__k">Reg &middot; capture</span>
-          <h3>Point your existing calls. No rewrite.</h3>
-          <p>One drop-in endpoint sees every call - replay it, export it to JSONL, OTLP, or a signed receipt. Your provider keys stay in one vault; secrets are stripped before anything is written to disk.</p>
-          <p class="card__map"><a href="/docs#capture">/v1/route</a></p>
+      <figure class="kinst kinst--marks is-verified" role="group" aria-label="The Kolm loop as a connected pipeline: Capture your live calls, Compile them into one signed file, Compose the model, recipe, evals and receipt, then Deploy to the hardware that fits.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>COMPILER LOOP / CAPTURE &rarr; COMPILE &rarr; COMPOSE &rarr; DEPLOY</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+          <div class="kpipe" style="--kn:4" data-km="flow breathe">
+            <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Capture</span><h3 class="kpstage__t">Point your existing calls. No rewrite.</h3><p class="kpstage__d">One drop-in endpoint sees every call - replay it, export it to JSONL, OTLP, or a signed receipt. Your provider keys stay in one vault; secrets are stripped before anything is written to disk.</p><span class="kpstage__read"><span class="n">12,408</span><span class="u">calls</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Compile</span><h3 class="kpstage__t">Turn that behavior into one signed file.</h3><p class="kpstage__d">Model, recipe, evals, and receipt pack into one portable <code>.kolm</code> - Ed25519-signed and reproducible, so anyone can check exactly what it is and how it behaves.</p><span class="kpstage__read"><span class="n">6/6</span><span class="u">evals pass</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Compose</span><h3 class="kpstage__t">Pack it into one portable file.</h3><p class="kpstage__d">The model, recipe, evals and receipt compose into a single signed <code>.kolm</code> - small enough to move, open to inspect layer by layer, with no provider lock-in.</p><span class="kpstage__read"><span class="n">142 MB</span><span class="u">one file</span></span></div>
+            <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Deploy</span><h3 class="kpstage__t">Run it on the hardware you already have.</h3><p class="kpstage__d">Kolm ranks hosted, server, laptop, edge and phone by cost, latency and fit, then serves the same file wherever you choose - with the limits shown up front, and rollback built in.</p><span class="kpstage__read"><span class="n">5</span><span class="u">places to run</span></span></div>
+          </div>
         </div>
-        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
-          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
-            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
-            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
-            <path class="edge gleam" d="M8 14l12-6 12 6"/>
-          </svg>
-          <span class="card__k">Reg &middot; compile</span>
-          <h3>Turn that behavior into one signed file.</h3>
-          <p>Model, recipe, evals, and receipt pack into one portable <code>.kolm</code> - Ed25519-signed and reproducible, so anyone can check exactly what it is and how it behaves.</p>
-          <p class="card__map"><a href="/docs#compile">/v1/compile</a></p>
-        </div>
-        <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
-          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
-            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
-            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
-            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
-            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
-          </svg>
-          <span class="card__k">Reg &middot; deploy</span>
-          <h3>Run it on the hardware you already have.</h3>
-          <p>Kolm ranks hosted, server, laptop, edge and phone by cost, latency and fit, then serves the same file wherever you choose - with the limits shown up front, and rollback built in.</p>
-          <p class="card__map"><a href="/docs#deploy">/v1/devices</a></p>
-        </div>
-      </div>
+        <div class="kinst__foot"><b>RECEIPT</b> signed at every step <span class="go">verified</span></div>
+      </figure>
     </div>
   </section>
 
@@ -287,9 +231,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <figure class="instrument" data-art-reveal aria-label="Live API traffic is captured and compiled into signed .kolm ledger entries.">
-          <div class="instrument__bar"><span>capture &middot; <b>stream.kolm</b></span><span class="live">live</span></div>
-          <svg class="cap" viewBox="0 0 440 196" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <figure class="kinst kinst--marks instrument is-verified" role="group" aria-label="Live API traffic is captured and compiled into signed .kolm ledger entries.">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>CAPTURE / STREAM.KOLM</span><span class="kinst__live">live</span></div>
+          <div class="kinst__body">
+          <svg class="cap" viewBox="0 0 440 196" preserveAspectRatio="xMidYMid meet" data-art-reveal aria-hidden="true">
             <path class="cap-flow" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
             <path class="cap-stream" d="M0 34 H150 q14 0 14 14 V160 q0 14 14 14 H180"/>
             <rect class="cap-gate" x="138" y="18" width="32" height="32" rx="6"/>
@@ -304,6 +250,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
               <g class="cap-r" style="--i:4" transform="translate(0,112)"><rect class="cap-bg" width="248" height="22" rx="4"/><text class="cap-id" x="10" y="15">REG-05</text><rect class="cap-fill" x="58" y="7" width="70" height="8" rx="2"/><path class="cap-seal" d="M222 11 l4 4 l8 -9"/></g>
             </g>
           </svg>
+          </div>
+          <div class="kinst__foot"><b>CAPTURE</b> secrets stripped before write <span class="go">verified</span></div>
         </figure>
       </div>
     </div>
@@ -322,36 +270,52 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <figure class="anat" data-art-reveal aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates, and a sha256 receipt - bound by one Ed25519 signature you can verify offline.">
-          <div class="anat__hd"><span>Inside a .kolm</span><span>exploded view</span></div>
-          <svg viewBox="0 0 360 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
-            <path class="reg" d="M8 8h10 M8 8v10 M352 292h-10 M352 292v-10"/>
-            <g class="layer"><path class="face" d="M70 30 L250 30 L290 52 L110 52 Z"/>
-              <path class="bevel" d="M70 30 L250 30 L290 52"/>
-              <path class="lead" d="M290 41 L330 41"/>
-              <text class="lbl" x="78" y="46">model</text>
-              <text class="sub" x="334" y="38">your behavior</text>
-              <text class="sub" x="334" y="48">distilled</text></g>
-            <g class="layer"><path class="face" d="M70 72 L250 72 L290 94 L110 94 Z"/>
-              <path class="bevel" d="M70 72 L250 72 L290 94"/>
-              <path class="lead" d="M290 83 L330 83"/>
-              <text class="lbl" x="78" y="88">recipe</text>
-              <text class="sub" x="334" y="84">exact build + sources</text></g>
-            <g class="layer"><path class="face" d="M70 114 L250 114 L290 136 L110 136 Z"/>
-              <path class="bevel" d="M70 114 L250 114 L290 136"/>
-              <path class="lead" d="M290 125 L330 125"/>
-              <text class="lbl" x="78" y="130">evals</text>
-              <text class="sub" x="334" y="126">6 gates it must pass</text></g>
-            <g class="layer"><path class="face" d="M70 156 L250 156 L290 178 L110 178 Z"/>
-              <path class="bevel" d="M70 156 L250 156 L290 178"/>
-              <path class="lead" d="M290 167 L330 167"/>
-              <text class="lbl" x="78" y="172">receipt</text>
-              <text class="sub" x="334" y="168">sha256 + capture trace</text></g>
-            <line class="scan" x1="70" y1="200" x2="250" y2="200"/>
-            <circle class="seal-ring" cx="180" cy="230" r="20"/>
-            <path class="seal" d="M172 230 l5 5 l11 -11" stroke="currentColor" stroke-width="2" fill="none"/>
-            <text class="sub" x="180" y="268" text-anchor="middle" style="fill:var(--accent)">Ed25519 signed · verify yourself</text>
-          </svg>
+        <figure class="kinst kinst--marks is-verified" role="group" aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates, and a sha256 receipt - bound by one Ed25519 signature you can verify offline.">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>INSIDE A .KOLM / EXPLODED VIEW</span><span class="kinst__live">live</span></div>
+          <div class="kinst__body">
+            <svg class="kspec3d" viewBox="0 0 560 300" data-km="settle stamp" role="img" aria-label="Four stacked signed layers - model (your behavior distilled), recipe (exact build and sources), evals (6 gates it must pass), and a receipt (sha256 plus capture trace) - are the bytes one Ed25519 signature covers, verifiable offline.">
+              <defs aria-hidden="true">
+                <linearGradient id="k3plate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,255,255,.10)"/><stop offset="1" stop-color="rgba(255,255,255,.02)"/></linearGradient>
+                <linearGradient id="k3paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f3ee"/><stop offset="1" stop-color="#d9d8d0"/></linearGradient>
+              </defs>
+              <text class="k3-num" x="40" y="26">SIGNATURE COVERS THESE BYTES</text>
+              <g class="k3-layer" style="--i:0">
+                <polygon class="k3-side" points="56,46 308,46 320,58 68,58"/>
+                <rect class="k3-plate is-key" x="56" y="46" width="252" height="40" rx="3"/>
+                <text class="k3-lbl-art" x="72" y="64">model</text>
+                <text class="k3-sub-art" x="72" y="78">your behavior distilled</text>
+              </g>
+              <g class="k3-layer" style="--i:1">
+                <polygon class="k3-side" points="56,100 308,100 320,112 68,112"/>
+                <rect class="k3-plate" x="56" y="100" width="252" height="40" rx="3"/>
+                <text class="k3-lbl" x="72" y="118">recipe</text>
+                <text class="k3-sub" x="72" y="132">exact build + sources</text>
+              </g>
+              <g class="k3-layer" style="--i:2">
+                <polygon class="k3-side" points="56,154 308,154 320,166 68,166"/>
+                <rect class="k3-plate" x="56" y="154" width="252" height="40" rx="3"/>
+                <text class="k3-lbl" x="72" y="172">evals</text>
+                <text class="k3-sub" x="72" y="186">6 gates it must pass</text>
+              </g>
+              <g class="k3-layer" style="--i:3">
+                <polygon class="k3-side" points="56,208 308,208 320,220 68,220"/>
+                <rect class="k3-plate" x="56" y="208" width="252" height="40" rx="3"/>
+                <text class="k3-lbl" x="72" y="226">receipt</text>
+                <text class="k3-sub" x="72" y="240">sha256 + capture trace</text>
+              </g>
+              <path class="k3-bracket" d="M332 46 h12 v202 h-12"/>
+              <line class="k3-lead" x1="344" y1="147" x2="398" y2="147"/>
+              <circle class="k3-dot" cx="398" cy="147" r="3"/>
+              <g class="k3-layer kstamp" style="--i:4">
+                <circle class="k3-seal" cx="466" cy="147" r="30"/>
+                <path class="k3-seal" d="M453 148 l9 9 l18 -20"/>
+                <text class="k3-num" x="508" y="142">Ed25519 signed</text>
+                <text class="k3-sub" x="508" y="156">verify yourself</text>
+              </g>
+            </svg>
+          </div>
+          <div class="kinst__foot"><b>Ed25519</b> one signature over four layers <span class="go">verified</span></div>
         </figure>
       </div>
     </div>
@@ -371,10 +335,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="card__map"><a href="/runtimes">See every runtime target</a></p>
       </div>
       <div class="feat__ui">
-        <figure class="instrument runtime-ramp" data-art-reveal
+        <figure class="kinst kinst--marks instrument runtime-ramp is-verified" role="group"
           aria-label="Runtime fit: the same claims-redactor.kolm ranked across four runtimes. Phone: 142 MB, $0.00 per thousand calls, 96 ms - selected, in spec. Laptop: 142 MB, $0.04, 71 ms. Edge: 142 MB, $0.21, 39 ms. Server: 142 MB, $0.90, 12 ms. Kolm runs it on the smallest runtime that fits.">
-          <div class="instrument__bar"><span>runtime &middot; <b>claims-redactor.kolm</b></span><span class="live">fit</span></div>
-          <svg class="pipe ramp" viewBox="0 0 440 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>RUNTIME / CLAIMS-REDACTOR.KOLM</span><span class="kinst__live">fit</span></div>
+          <div class="kinst__body">
+          <svg class="pipe ramp" viewBox="0 0 440 300" preserveAspectRatio="xMidYMin meet" data-art-reveal aria-hidden="true">
             <text class="tag" x="22" y="14">smallest runtime that fits &middot; 142 mb</text>
             <text class="tag" x="418" y="14" text-anchor="end">cost/1k &middot; p50</text>
             <g class="rung is-fit" transform="translate(0 24)">
@@ -405,6 +371,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
               <text class="rc" x="404" y="24" text-anchor="end">$0.90</text><text class="rt" x="404" y="40" text-anchor="end">12 ms</text>
             </g>
           </svg>
+          </div>
+          <div class="kinst__foot"><b>SELECTED</b> phone &middot; smallest runtime that fits <span class="go">in spec</span></div>
         </figure>
       </div>
     </div>
@@ -460,10 +428,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="sig__row"><span class="sig__k">sig</span><span class="sig__v">9c2e7b41a0f5d83e6b1c&hellip;</span></div>
           </div>
         </div>
-        <figure class="instrument vloop" data-vl="valid" data-art-reveal
+        <figure class="kinst kinst--marks instrument vloop is-verified" data-vl="valid" role="group"
           aria-label="Verify loop: a .kolm artifact plus a public key are hashed; the hash is checked against the embedded Ed25519 signature. The result is a single verdict - valid, or void.">
-          <div class="instrument__bar"><b>verify loop</b><span class="live">Ed25519</span></div>
-          <svg class="pipe vl" viewBox="0 0 440 232" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>VERIFY LOOP / Ed25519</span><span class="kinst__live">live</span></div>
+          <div class="kinst__body">
+          <svg class="pipe vl" viewBox="0 0 440 232" preserveAspectRatio="xMidYMin meet" data-art-reveal aria-hidden="true">
             <rect class="nd" x="22"  y="14" width="150" height="40" rx="5"/>
             <text class="lbl" x="38" y="32">.kolm</text><text class="sub" x="38" y="46">142 mb · sealed artifact</text>
             <rect class="nd" x="268" y="14" width="150" height="40" rx="5"/>
@@ -485,6 +455,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <path class="vl-trace" d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
             <path class="vl-flow"  d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
           </svg>
+          </div>
+          <div class="kinst__foot"><b>VERDICT</b> signature checked offline <span class="go">valid</span></div>
         </figure>
       </div>
     </div>

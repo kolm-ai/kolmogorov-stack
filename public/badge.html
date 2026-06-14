@@ -281,28 +281,48 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
     </div>
     <!-- anatomy of the badge artwork itself: what each part says -->
-    <figure class="kspec" id="bdg-anat" role="group" aria-label="Anatomy of the verify badge: a brand mark on the left, a verifiable-evidence claim on the right, the whole thing a link to your Trust Link">
-      <svg viewBox="0 0 600 150" aria-hidden="true">
-        <!-- the badge artwork, scaled up -->
-        <rect class="ba-dark" x="150" y="55" width="118" height="40" rx="6"/>
-        <rect class="ba-green" x="268" y="55" width="182" height="40" rx="0"/>
-        <rect class="ba-green" x="438" y="55" width="12" height="40"/>
-        <g class="ba-mark"><rect x="166" y="65" width="4" height="20" rx=".4"/><rect x="175" y="68" width="4" height="14" rx=".4"/><rect x="184" y="71" width="4" height="8" rx=".4"/></g>
-        <text class="ba-tx" x="194" y="80">kolm</text>
-        <path d="M285 76l4 4 8-8.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-        <text class="ba-tx2" x="304" y="79">verifiable evidence</text>
+    <figure class="kinst kinst--marks kfig is-verified" id="bdg-anat" role="group" aria-label="Anatomy of the verify badge: a brand mark on the left, a verifiable-evidence claim on the right, the whole thing a link to your Trust Link">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>VERIFY BADGE / ANATOMY</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+      <svg class="kspec3d" viewBox="0 0 600 200" data-km="settle stamp" role="img" aria-label="The verify badge exploded: the kolm three-bar brand mark, the verifiable-evidence claim, and the whole badge as a link to your Trust Link">
+        <defs aria-hidden="true">
+          <linearGradient id="k3plate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A1D21"/><stop offset="1" stop-color="#101316"/></linearGradient>
+          <linearGradient id="k3paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F2EC"/><stop offset="1" stop-color="#E7E5DD"/></linearGradient>
+        </defs>
+        <!-- the badge artwork, scaled up and exploded -->
+        <g class="k3-layer" style="--i:0">
+          <rect class="ba-dark" x="150" y="80" width="118" height="40" rx="6"/>
+          <g class="ba-mark"><rect x="166" y="90" width="4" height="20" rx=".4"/><rect x="175" y="93" width="4" height="14" rx=".4"/><rect x="184" y="96" width="4" height="8" rx=".4"/></g>
+          <text class="ba-tx" x="194" y="105">kolm</text>
+        </g>
+        <g class="k3-layer" style="--i:1">
+          <rect class="ba-green" x="268" y="80" width="182" height="40" rx="0"/>
+          <rect class="ba-green" x="438" y="80" width="12" height="40"/>
+          <path d="M285 101l4 4 8-8.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <text class="ba-tx2" x="304" y="104">verifiable evidence</text>
+        </g>
         <!-- callout 01: the mark -->
-        <line class="ks-lead" x1="200" y1="55" x2="200" y2="30"/><circle class="ks-dot" cx="200" cy="30" r="3"/><text class="ks-num" x="170" y="22">01</text><text class="ks-sub" x="170" y="34">brand mark</text>
+        <path class="k3-lead" d="M200 80 V52"/><circle class="k3-dot" cx="200" cy="52" r="3"/><text class="k3-num" x="170" y="44">01</text><text class="k3-sub" x="170" y="56">brand mark</text>
         <!-- callout 02: the claim -->
-        <line class="ks-lead" x1="360" y1="55" x2="360" y2="30"/><circle class="ks-dot" cx="360" cy="30" r="3"/><text class="ks-num" x="330" y="22">02</text><text class="ks-sub" x="330" y="34">the claim</text>
+        <path class="k3-lead" d="M360 80 V52"/><circle class="k3-dot" cx="360" cy="52" r="3"/><text class="k3-num" x="330" y="44">02</text><text class="k3-sub" x="330" y="56">the claim</text>
         <!-- callout 03: the link target -->
-        <line class="ks-lead" x1="300" y1="95" x2="300" y2="124"/><circle class="ks-dot" cx="300" cy="124" r="3"/><text class="ks-num" x="270" y="120">03</text><text class="ks-sub" x="270" y="132">links out</text>
+        <path class="k3-lead" d="M300 120 V150"/><circle class="k3-dot" cx="300" cy="150" r="3"/><text class="k3-num" x="270" y="166">03</text><text class="k3-sub" x="270" y="178">links out</text>
+        <!-- the whole badge is one link: bracket beneath -->
+        <path class="k3-bracket" d="M150 134 V142 H450 V134"/>
+        <!-- verify seal stamps onto the claim -->
+        <g class="kstamp" transform="translate(470 100)">
+          <circle class="k3-seal" cx="0" cy="0" r="18"/>
+          <path class="k3-seal" d="M-8 1 l5 5 l11 -13"/>
+        </g>
       </svg>
       <ol class="kspec__legend">
         <li><span class="ks-num">01</span><span><b>The three-bar mark</b> tells a reviewer this is a real kolm badge, not a look-alike image.</span></li>
         <li><span class="ks-num">02</span><span><b>Verifiable evidence</b> is the only claim the badge makes: signed and checkable, never certified secure.</span></li>
         <li><span class="ks-num">03</span><span><b>The whole badge is a link</b> to your Trust Link, where the signature is checked in the visitor's browser.</span></li>
       </ol>
+      </div>
+      <div class="kinst__foot"><b>ONE LINK</b> brand mark, the claim, the link target <span class="go">verifiable evidence</span></div>
     </figure>
 
     <p class="hero__claim" style="margin-top:var(--s5)">

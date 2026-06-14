@@ -254,6 +254,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   .muted { color:var(--ink-3); }
   .hidden { display:none !important; }
 
+  /* page-local: the document-layers anatomy figure (KSPEC3D + KSEAL) */
+  .rv-spec { margin:var(--s5) 0 var(--s6); }
+  .rv-spec__body { display:flex; align-items:center; justify-content:center; gap:var(--s6); flex-wrap:wrap; }
+  .rv-spec__body .kspec3d { max-width:380px; flex:1 1 320px; }
+  .rv-spec__seal { flex:none; }
+
   /* ---- print: the document prints as the artifact ---- */
   @media print {
     .nav, .foot, .foil-strip, .foil-line, .rv__chrome, .rv__json, #rvLoaderSec, .section--ink, .cta-final { display:none !important; }
@@ -431,6 +437,30 @@ Paste a signed report here, press "Open report", or drop a .json file.'></textar
       <h2>The page is a lens. The JSON is the source.</h2>
       <p class="lede">Nothing on this page is the evidence. The signed JSON is. The viewer verifies it in your browser, then renders it without editing it. Two terms you will meet in the document: the <span class="kdef">evidence tier<span class="kdef__plain"> (how the logs were obtained)</span></span><span class="kdef-tip">The <b>evidence tier</b> grades how the underlying logs were obtained: grade A is first-party capture by kolm, grade B is your hash-chained logs, grade C is plain vendor logs. It rates the source, not the result.</span>, and the <span class="kdef">posture grid<span class="kdef__plain"> (the eight-control status board)</span></span><span class="kdef-tip">The <b>posture grid</b> is the board of eight controls. Each tile is grey until evidence supports it, then turns green on a pass or an earth tone when findings map to it.</span> below the masthead.</p>
     </div>
+    <figure class="kinst kinst--marks kfig is-verified rv-spec" role="group" aria-label="The rendered document, top to bottom: verification masthead, evidence tier, scope before findings, the eight-control posture grid, and the signature block, all from one signed object">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>THE LENS / DOCUMENT LAYERS</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body rv-spec__body">
+        <svg class="kspec3d" viewBox="0 0 380 312" data-km="settle stamp" role="img" aria-label="One signed object rendered as five stacked sheet layers: verification masthead, evidence tier, scope before findings, the eight-control posture grid, and the signature block">
+          <defs aria-hidden="true">
+            <linearGradient id="k3plate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A1D21"/><stop offset="1" stop-color="#101316"/></linearGradient>
+            <linearGradient id="k3paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F2EC"/><stop offset="1" stop-color="#E7E5DD"/></linearGradient>
+          </defs>
+          <g class="k3-layer" style="--i:0"><polygon class="k3-side" points="56,238 224,238 258,220 90,220"/><rect class="k3-plate" x="56" y="202" width="168" height="36" rx="3"/><text class="k3-lbl-art" x="70" y="223">Signature block</text></g>
+          <g class="k3-layer" style="--i:1"><polygon class="k3-side" points="56,190 224,190 258,172 90,172"/><rect class="k3-plate" x="56" y="154" width="168" height="36" rx="3"/><text class="k3-lbl-art" x="70" y="175">Posture grid, eight controls</text></g>
+          <g class="k3-layer" style="--i:2"><polygon class="k3-side" points="56,142 224,142 258,124 90,124"/><rect class="k3-plate is-key" x="56" y="106" width="168" height="36" rx="3"/><text class="k3-lbl-art" x="70" y="127">Scope before findings</text></g>
+          <g class="k3-layer" style="--i:3"><polygon class="k3-side" points="56,94 224,94 258,76 90,76"/><rect class="k3-plate" x="56" y="58" width="168" height="36" rx="3"/><text class="k3-lbl-art" x="70" y="79">Evidence tier</text></g>
+          <g class="k3-layer" style="--i:4"><polygon class="k3-side" points="56,46 224,46 258,28 90,28"/><rect class="k3-plate" x="56" y="10" width="168" height="36" rx="3"/><text class="k3-lbl-art" x="70" y="31">Verification masthead</text></g>
+          <path class="k3-lead" d="M224 28 H300"/><circle class="k3-dot" cx="300" cy="28" r="2.5"/><text class="k3-num" x="308" y="25">01</text><text class="k3-sub" x="308" y="36">masthead</text>
+          <path class="k3-lead" d="M224 124 H300"/><circle class="k3-dot" cx="300" cy="124" r="2.5"/><text class="k3-num" x="308" y="121">03</text><text class="k3-sub" x="308" y="132">scope</text>
+          <path class="k3-lead" d="M224 220 H300"/><circle class="k3-dot" cx="300" cy="220" r="2.5"/><text class="k3-num" x="308" y="217">05</text><text class="k3-sub" x="308" y="228">signature</text>
+          <path class="k3-bracket" d="M44 12 q-8 0 -8 8 V228 q0 8 8 8"/>
+          <text class="k3-sub" x="26" y="124" transform="rotate(-90 26 124)">one signed object</text>
+        </svg>
+        <span class="kseal is-verified rv-spec__seal" data-km="stamp" style="--kseal-sz:84px" aria-hidden="true"><svg viewBox="0 0 80 80"><circle class="kse-track" cx="40" cy="40" r="32"></circle><circle class="kse-ring" cx="40" cy="40" r="32" style="--kse-len:201"></circle><path class="kse-tick" d="M27 41 l9 9 l18 -20" style="--kse-tlen:42"></path><circle class="kse-pip" cx="40" cy="68" r="2.5"></circle></svg></span>
+      </div>
+      <div class="kinst__foot"><b>ONE OBJECT</b> verified in your browser, rendered as a document <span class="go">VALID</span></div>
+    </figure>
     <div class="grid grid--3">
       <div class="card">
         <p class="card__k">Grey by default</p>

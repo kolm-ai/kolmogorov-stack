@@ -151,18 +151,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
   .noscript-note { margin-top: var(--s4); padding: var(--s4) var(--s5); border: 1px solid var(--void-edge); border-radius: var(--r-md); background: var(--void-soft); font-family: var(--sans); font-size: 13.5px; color: var(--ink-2); }
 
-  /* page-local: cumulative cost-over-12-months chart, reusing the shared kit */
+  /* page-local: cumulative cost-over-12-months chart, reusing the shared KBARS + KINST kit */
   .roi-trend { margin-top: var(--s6); }
   .roi-trend .kfig { margin: 0; }
   .roi-trend__legend { display: flex; flex-wrap: wrap; gap: var(--s4); margin-top: var(--s4); font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
   .roi-trend__legend span { display: inline-flex; align-items: center; gap: 8px; }
-  .roi-trend__legend i { width: 14px; height: 0; border-top: 2px solid var(--void); display: inline-block; }
-  .roi-trend__legend i.is-kolm { border-top-color: var(--accent); }
-  .roi-axlbl { font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; fill: var(--ink-3); }
-  .roi-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-  .roi-line--today { stroke: var(--ink-3); }
-  .roi-line--kolm { stroke: var(--accent); }
-  .roi-area--gap { fill: var(--accent-soft); }
+  .roi-trend__legend i { width: 14px; height: 10px; border-radius: 2px; background: var(--ink-3); display: inline-block; }
+  .roi-trend__legend i.is-kolm { background: var(--accent); }
 </style>
 </head>
 <body>
@@ -448,26 +443,37 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
     <!-- cumulative cost over a year: keep paying review friction vs adopt kolm once -->
     <div class="roi-trend">
-      <figure class="kfig" role="img" aria-label="Cumulative review cost over twelve months. Keeping the current manual review process accrues friction every month and the running total climbs in a straight steep line. Adopting kolm pays the published fee up front, then accrues only the compressed friction, so its running total stays far below and the shaded gap between the two lines is the cumulative saving.">
-        <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
-        <svg class="kchart" viewBox="0 0 360 210" data-art-reveal aria-hidden="true">
-          <line class="k-grid" x1="44" y1="40" x2="340" y2="40"/>
-          <line class="k-grid" x1="44" y1="80" x2="340" y2="80"/>
-          <line class="k-grid" x1="44" y1="120" x2="340" y2="120"/>
-          <line class="k-axis" x1="44" y1="20" x2="44" y2="160"/>
-          <line class="k-axis" x1="44" y1="160" x2="340" y2="160"/>
-          <text class="roi-axlbl" x="44" y="182">month 1</text>
-          <text class="roi-axlbl" x="312" y="182">month 12</text>
-          <text class="roi-axlbl" x="6" y="30">cost to date</text>
-          <!-- the saving gap, between the two running totals -->
-          <path class="roi-area--gap" d="M44 152 L92 138 L140 124 L188 110 L236 96 L284 82 L332 70 L332 156 L284 150 L236 145 L188 139 L140 134 L92 158 Z"/>
-          <!-- keep the manual process: friction recurs, total climbs steeply -->
-          <polyline class="roi-line roi-line--today" points="44,152 92,138 140,124 188,110 236,96 284,82 332,70"/>
-          <!-- adopt kolm: pay the fee up front (higher month 1), then climb slowly -->
-          <polyline class="roi-line roi-line--kolm" points="44,152 92,158 140,156 188,153 236,151 284,150 332,148"/>
-          <circle class="k-pt is-best" cx="332" cy="148" r="6"/><circle class="k-ring" cx="332" cy="148" r="11"/>
+      <figure class="kinst kinst--marks kfig is-verified" role="group" aria-label="Cumulative review cost over twelve months. Keeping the current manual review process accrues friction every month and the running total climbs steeply. Adopting kolm pays the published fee up front, then accrues only the compressed friction, so its running total stays far below and the gap between the two is the cumulative saving.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>CUMULATIVE COST / 12 MONTHS</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+        <svg class="kbars" viewBox="0 0 360 210" data-km="draw" role="img" aria-label="Cost to date by month. For four checkpoints across the year, the current manual process bar climbs steeply while the with-kolm bar, paid up front then flat, stays far below; the difference is the cumulative saving.">
+          <defs aria-hidden="true"><linearGradient id="kbarGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,255,255,.16)"/><stop offset="1" stop-color="rgba(255,255,255,.05)"/></linearGradient><linearGradient id="kbarGradAcc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3FE5A0"/><stop offset="1" stop-color="#23493B"/></linearGradient></defs>
+          <line class="kb-grid" x1="44" y1="40" x2="340" y2="40"/>
+          <line class="kb-grid" x1="44" y1="80" x2="340" y2="80"/>
+          <line class="kb-grid" x1="44" y1="120" x2="340" y2="120"/>
+          <line class="kb-axis" x1="44" y1="20" x2="44" y2="160"/>
+          <line class="kb-axis" x1="44" y1="160" x2="340" y2="160"/>
+          <text class="kb-axlbl" x="6" y="30">cost to date</text>
+          <!-- four month checkpoints; each shows current-process (climbing) vs kolm (flat) -->
+          <rect class="kb-bar" x="58"  y="132" width="22" height="28"  style="--i:0"/>
+          <rect class="kb-bar is-best" x="82"  y="150" width="22" height="10"  style="--i:1"/>
+          <text class="kb-lbl" x="64"  y="176">M3</text>
+          <rect class="kb-bar" x="138" y="104" width="22" height="56"  style="--i:2"/>
+          <rect class="kb-bar is-best" x="162" y="148" width="22" height="12"  style="--i:3"/>
+          <text class="kb-lbl" x="144" y="176">M6</text>
+          <rect class="kb-bar" x="218" y="74"  width="22" height="86"  style="--i:4"/>
+          <rect class="kb-bar is-best" x="242" y="146" width="22" height="14"  style="--i:5"/>
+          <text class="kb-lbl" x="224" y="176">M9</text>
+          <rect class="kb-bar" x="298" y="44"  width="22" height="116" style="--i:6"/>
+          <rect class="kb-bar is-best" x="322" y="144" width="22" height="16"  style="--i:7"/>
+          <text class="kb-lbl" x="300" y="176">M12</text>
+          <text class="kb-val" x="58" y="124">current process</text>
+          <text class="kb-val is-best" x="298" y="136">with kolm</text>
         </svg>
-        <figcaption class="kfig__cap"><b>Pay once, climb slowly.</b> Staying on the manual review accrues friction every month; with kolm the running total flattens after the up-front fee, and the shaded gap is the cumulative saving.</figcaption>
+        </div>
+        <div class="kinst__foot"><b>PAY ONCE</b> fee up front, then flat <span class="go">gap = cumulative saving</span></div>
+        <figcaption class="kfig__cap"><b>Pay once, climb slowly.</b> Staying on the manual review accrues friction every month; with kolm the running total flattens after the up-front fee, and the gap is the cumulative saving.</figcaption>
       </figure>
       <div class="roi-trend__legend" aria-hidden="true">
         <span><i></i>Current process &middot; friction recurs monthly</span>

@@ -31,14 +31,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
 <style id="plat-scope">
-  /* platform.html scoped: data-boundary spec figure */
-  #plat-boundary .kspec svg{width:100%;height:auto}
-  #plat-boundary .pb-perim{fill:none;stroke:var(--accent);stroke-width:1;stroke-dasharray:5 4;opacity:.55}
-  #plat-boundary .pb-perim-lbl{fill:var(--accent);font:600 9px/1 var(--mono,ui-monospace,monospace);letter-spacing:.08em;text-transform:uppercase}
-  #plat-boundary .pb-flow{stroke:var(--accent);stroke-width:1.4;fill:none;opacity:.7}
-  #plat-boundary .pb-node-lbl{fill:var(--ink-2,#c7ccd1);font:600 10px/1 var(--mono,ui-monospace,monospace)}
-  #plat-boundary .pb-sub{fill:var(--ink-3,#9aa0a6);font:500 8px/1 var(--mono,ui-monospace,monospace)}
-  #plat-boundary .pb-gate{fill:var(--accent-soft,#3fe5a014);stroke:var(--accent);stroke-width:1.2}
+  /* platform.html scoped: data-boundary pipeline figure */
+  #plat-boundary .pb-pipe{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media(max-width:980px){#plat-boundary .pb-pipe{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:560px){#plat-boundary .pb-pipe{grid-template-columns:1fr}}
+  #plat-boundary .kspec__legend{margin-top:16px}
   #plat-boundary .kspec__legend b{color:var(--ink-1,#e9edf0)}
   .cta .cta__links{margin-top:18px;font:600 12px/1.6 var(--mono,ui-monospace,monospace);letter-spacing:.02em;color:var(--ink-3,#9aa0a6)}
   .cta .cta__links a{color:var(--ink-2,#c7ccd1);text-decoration:none;border-bottom:1px solid transparent}
@@ -254,38 +251,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Where your data crosses, and where it cannot.</h2>
         <p class="lede">Every captured call enters one workspace, passes the policy gate once, and only then reaches your dataset, evals, compile, and exports. Nothing crosses the tenant perimeter, and nothing skips the gate.</p>
       </div>
-      <figure class="kspec" role="group" aria-label="Data boundary: live calls enter one tenant workspace, pass through a single policy gate, then reach the dataset, evals, compile, and export. The dashed perimeter marks the tenant boundary that data never crosses.">
-        <svg viewBox="0 0 360 230" aria-hidden="true">
-          <!-- tenant perimeter -->
-          <rect class="pb-perim" x="78" y="14" width="274" height="206" rx="6"/>
-          <text class="pb-perim-lbl" x="86" y="28">tenant perimeter</text>
-          <!-- intake (outside boundary edge) -->
-          <rect class="ks-node" x="6" y="92" width="56" height="40" rx="3"/>
-          <text class="pb-node-lbl" x="14" y="110">intake</text>
-          <text class="pb-sub" x="14" y="122">live calls</text>
-          <path class="pb-flow" d="M62 112 H104"/>
-          <!-- policy gate (the one lit part) -->
-          <rect class="ks-node is-key pb-gate" x="104" y="86" width="60" height="52" rx="3"/>
-          <text class="pb-node-lbl" x="114" y="108" style="fill:var(--sheet-accent,#0A6E45)">policy</text>
-          <text class="pb-node-lbl" x="114" y="120" style="fill:var(--sheet-accent,#0A6E45)">gate</text>
-          <!-- fan out to four governed destinations -->
-          <path class="pb-flow" d="M164 112 H196"/>
-          <path class="pb-flow" d="M196 112 V40 H266"/>
-          <path class="pb-flow" d="M196 112 V78 H266"/>
-          <path class="pb-flow" d="M196 112 H266"/>
-          <path class="pb-flow" d="M196 112 V184 H266"/>
-          <rect class="ks-node" x="266" y="26" width="78" height="28" rx="3"/><text class="pb-node-lbl" x="276" y="44">dataset</text>
-          <rect class="ks-node" x="266" y="64" width="78" height="28" rx="3"/><text class="pb-node-lbl" x="276" y="82">evals</text>
-          <rect class="ks-node" x="266" y="98" width="78" height="28" rx="3"/><text class="pb-node-lbl" x="276" y="116">compile</text>
-          <rect class="ks-node" x="266" y="170" width="78" height="28" rx="3"/><text class="pb-node-lbl" x="276" y="188">export</text>
-          <text class="pb-sub" x="276" y="156">redaction + scope applied</text>
-        </svg>
-        <ol class="kspec__legend">
-          <li><span class="ks-num">01</span><span><b>Intake</b> takes your live calls in as raw records, each tagged with source and timestamp.</span></li>
-          <li><span class="ks-num">02</span><span><b>Policy gate</b> is the one checkpoint. Redaction, retention, and export scope run here before anything moves on.</span></li>
-          <li><span class="ks-num">03</span><span><b>Dataset, evals, compile</b> only ever see records that already cleared the gate.</span></li>
-          <li><span class="ks-num">04</span><span><b>Export</b> leaves the perimeter only with the scope the gate allowed, carrying its own receipt.</span></li>
-        </ol>
+      <figure class="kinst kinst--marks kfig is-verified reveal" role="group" aria-label="Data boundary: live calls enter one tenant workspace, pass through a single policy gate, then reach the dataset, evals, compile, and export. Nothing crosses the tenant perimeter and nothing skips the gate.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>DATA BOUNDARY / TENANT PERIMETER</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+          <div class="kpipe pb-pipe" style="--kn:6" data-km="flow breathe">
+            <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Intake</span><h3 class="kpstage__t">Live calls in</h3><p class="kpstage__d">Takes your live calls in as raw records, each tagged with source and timestamp.</p><span class="kpstage__read"><span class="n">raw record</span><span class="u">source + timestamp</span></span></div>
+            <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Policy gate</span><h3 class="kpstage__t">The one checkpoint</h3><p class="kpstage__d">Redaction, retention, and export scope run here before anything moves on. Nothing skips the gate.</p><span class="kpstage__read"><span class="n">redaction + scope</span><span class="u">applied</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Dataset</span><h3 class="kpstage__t">Cleared records only</h3><p class="kpstage__d">Only ever sees records that already cleared the gate.</p><span class="kpstage__read"><span class="n">governed</span><span class="u">tenant-scoped</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Evals</span><h3 class="kpstage__t">Graded behind the gate</h3><p class="kpstage__d">Only ever sees records that already cleared the gate.</p><span class="kpstage__read"><span class="n">graded</span><span class="u">behind perimeter</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Compile</span><h3 class="kpstage__t">Built behind the gate</h3><p class="kpstage__d">Only ever sees records that already cleared the gate.</p><span class="kpstage__read"><span class="n">one .kolm</span><span class="u">inside perimeter</span></span></div>
+            <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Export</span><h3 class="kpstage__t">Leaves with scope only</h3><p class="kpstage__d">Leaves the perimeter only with the scope the gate allowed, carrying its own receipt.</p><span class="kpstage__read"><span class="n">scoped</span><span class="u">+ receipt</span></span></div>
+          </div>
+          <ol class="kspec__legend">
+            <li><span class="ks-num">01</span><span><b>Intake</b> takes your live calls in as raw records, each tagged with source and timestamp.</span></li>
+            <li><span class="ks-num">02</span><span><b>Policy gate</b> is the one checkpoint. Redaction, retention, and export scope run here before anything moves on.</span></li>
+            <li><span class="ks-num">03</span><span><b>Dataset, evals, compile</b> only ever see records that already cleared the gate.</span></li>
+            <li><span class="ks-num">04</span><span><b>Export</b> leaves the perimeter only with the scope the gate allowed, carrying its own receipt.</span></li>
+          </ol>
+        </div>
+        <div class="kinst__foot"><b>PERIMETER</b> nothing crosses, nothing skips the gate <span class="go">enforced</span></div>
       </figure>
     </div>
   </section>
@@ -298,23 +284,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>What comes out is one file, and it is yours.</h2>
         <p class="lede">Compile produces a single signed .kolm model: your distilled behavior, the exact build recipe, the eval gates it cleared, and a receipt. Plain terms, no jargon - and the full layout lives in the <a href="/spec">.kolm spec</a>.</p>
       </div>
-      <div class="kdef-row">
-        <div class="kdef-card">
-          <span class="k">Yours</span>
-          <h3>You own it outright</h3>
-          <p>The .kolm model is data you hold, not a subscription. Export it any time and run it with no provider to call and no per-token bill - own the AI you're renting.</p>
+      <figure class="kinst kinst--marks kfig is-verified reveal" role="group" aria-label="What the .kolm artifact is: yours to own outright, Ed25519 signed end to end, and portable across the hardware that fits." data-km="settle">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>THE ARTIFACT / claims-redactor.kolm</span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+          <div class="kdef-row">
+            <div class="kdef-card ksettle" style="--i:0">
+              <span class="k">Yours</span>
+              <h3>You own it outright</h3>
+              <p>The .kolm model is data you hold, not a subscription. Export it any time and run it with no provider to call and no per-token bill - own the AI you're renting.</p>
+            </div>
+            <div class="kdef-card ksettle" style="--i:1">
+              <span class="k">Signed</span>
+              <h3>Ed25519 signed, end to end</h3>
+              <p>Model, recipe, evals, and receipt are bound under one signature with sha256 checksums. Anyone can <a href="/verify">verify it offline</a> without trusting us or being online.</p>
+            </div>
+            <div class="kdef-card ksettle" style="--i:2">
+              <span class="k">Portable</span>
+              <h3>Runs on the hardware that fits</h3>
+              <p>One artifact, many targets. The same file moves from laptop to edge to server with its IDs and receipts intact - see the ranked <a href="/runtimes">runtime targets</a>.</p>
+            </div>
+          </div>
         </div>
-        <div class="kdef-card">
-          <span class="k">Signed</span>
-          <h3>Ed25519 signed, end to end</h3>
-          <p>Model, recipe, evals, and receipt are bound under one signature with sha256 checksums. Anyone can <a href="/verify">verify it offline</a> without trusting us or being online.</p>
-        </div>
-        <div class="kdef-card">
-          <span class="k">Portable</span>
-          <h3>Runs on the hardware that fits</h3>
-          <p>One artifact, many targets. The same file moves from laptop to edge to server with its IDs and receipts intact - see the ranked <a href="/runtimes">runtime targets</a>.</p>
-        </div>
-      </div>
+        <div class="kinst__foot"><b>ONE FILE</b> yours, signed, portable <span class="go">verified</span></div>
+      </figure>
     </div>
   </section>
 
@@ -368,37 +361,43 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <figure class="anat" data-art-reveal aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates, and a sha256 receipt - bound by one Ed25519 signature you can verify offline.">
-          <div class="anat__hd"><span>Inside a .kolm</span><span>exploded view</span></div>
+        <figure class="kinst kinst--marks kfig is-verified reveal" data-art-reveal data-km="settle stamp" role="group" aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates, and a sha256 receipt - bound by one Ed25519 signature you can verify offline.">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>INSIDE A .KOLM / EXPLODED VIEW</span><span class="kinst__live">live</span></div>
+          <div class="kinst__body">
+          <div class="anat">
           <svg viewBox="0 0 360 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
             <path class="reg" d="M8 8h10 M8 8v10 M352 292h-10 M352 292v-10"/>
-            <!-- LAYER block - repeat 4×: model(y0) · recipe(y14) · evals(y28) · receipt(y42) -->
-            <g class="layer"><path class="face" d="M70 30 L250 30 L290 52 L110 52 Z"/>
+            <!-- LAYER block - repeat 4x: model(y0) recipe(y14) evals(y28) receipt(y42) -->
+            <g class="layer ksettle" style="--i:0"><path class="face" d="M70 30 L250 30 L290 52 L110 52 Z"/>
               <path class="bevel" d="M70 30 L250 30 L290 52"/>
               <path class="lead" d="M290 41 L330 41"/>
               <text class="lbl" x="78" y="46">model</text>
               <text class="sub" x="334" y="38">your behavior</text>
               <text class="sub" x="334" y="48">distilled</text></g>
-            <g class="layer"><path class="face" d="M70 72 L250 72 L290 94 L110 94 Z"/>
+            <g class="layer ksettle" style="--i:1"><path class="face" d="M70 72 L250 72 L290 94 L110 94 Z"/>
               <path class="bevel" d="M70 72 L250 72 L290 94"/>
               <path class="lead" d="M290 83 L330 83"/>
               <text class="lbl" x="78" y="88">recipe</text>
               <text class="sub" x="334" y="84">exact build + sources</text></g>
-            <g class="layer"><path class="face" d="M70 114 L250 114 L290 136 L110 136 Z"/>
+            <g class="layer ksettle" style="--i:2"><path class="face" d="M70 114 L250 114 L290 136 L110 136 Z"/>
               <path class="bevel" d="M70 114 L250 114 L290 136"/>
               <path class="lead" d="M290 125 L330 125"/>
               <text class="lbl" x="78" y="130">evals</text>
               <text class="sub" x="334" y="126">6 gates it must pass</text></g>
-            <g class="layer"><path class="face" d="M70 156 L250 156 L290 178 L110 178 Z"/>
+            <g class="layer ksettle" style="--i:3"><path class="face" d="M70 156 L250 156 L290 178 L110 178 Z"/>
               <path class="bevel" d="M70 156 L250 156 L290 178"/>
               <path class="lead" d="M290 167 L330 167"/>
               <text class="lbl" x="78" y="172">receipt</text>
               <text class="sub" x="334" y="168">sha256 + capture trace</text></g>
             <line class="scan" x1="70" y1="200" x2="250" y2="200"/>
-            <circle class="seal-ring" cx="180" cy="230" r="20"/>
-            <path class="seal" d="M172 230 l5 5 l11 -11" stroke="currentColor" stroke-width="2" fill="none"/>
-            <text class="sub" x="180" y="268" text-anchor="middle" style="fill:var(--accent)">Ed25519 signed · verify yourself</text>
+            <g class="kstamp"><circle class="seal-ring" cx="180" cy="230" r="20"/>
+            <path class="seal" d="M172 230 l5 5 l11 -11" stroke="currentColor" stroke-width="2" fill="none"/></g>
+            <text class="sub" x="180" y="268" text-anchor="middle" style="fill:var(--accent)">Ed25519 signed - verify yourself</text>
           </svg>
+          </div>
+          </div>
+          <div class="kinst__foot"><b>FOUR LAYERS</b> one signature <span class="go">verified</span></div>
         </figure>
       </div>
     </div>

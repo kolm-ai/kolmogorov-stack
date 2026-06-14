@@ -157,30 +157,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
     </div>
 
-    <figure class="diag reveal" role="img" aria-label="Audit pipeline: application logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
-    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="dg-flow" d="M158 68 H198 M380 68 H420 M602 68 H630"/>
-      <rect class="dg-box" x="8" y="36" width="150" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="56">Input</text>
-      <text class="dg-t" x="22" y="76">App telemetry</text>
-      <text class="dg-mono" x="22" y="92">import or capture</text>
-      <polygon class="dg-ok" points="198,68 190,63.5 190,72.5"/>
-      <rect class="dg-box" x="200" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="214" y="56">Engine</text>
-      <text class="dg-t" x="214" y="76">Audit run</text>
-      <text class="dg-mono" x="214" y="92">ASR-01 .. ASR-08</text>
-      <polygon class="dg-ok" points="420,68 412,63.5 412,72.5"/>
-      <rect class="dg-box--ok" x="422" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="436" y="56">Output</text>
-      <text class="dg-t" x="436" y="76">Signed report</text>
-      <text class="dg-mono" x="436" y="92">Ed25519 envelope</text>
-      <polygon class="dg-ok" points="630,68 622,63.5 622,72.5"/>
-      <circle class="dg-dot" cx="646" cy="68" r="4"/>
-      <text class="dg-label" x="658" y="72">verify</text>
-      <path class="dg-line" d="M290 100 V128"/>
-      <text class="dg-mono" x="208" y="146">permissions &#183; audit trail &#183; egress &#183; injection</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Pipeline</b> same logs in, same signature out: the run is reproducible end to end</figcaption>
+    <figure class="kinst kinst--marks kfig reveal" role="group" aria-label="Audit pipeline: application telemetry goes into the audit engine, controls ASR-01 to ASR-08 run, a signed report comes out, then the reviewer verifies">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>AUDIT PIPELINE / LOGS -&gt; SIGNATURE</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+        <div class="kpipe" style="--kn:4" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Input</span><h3 class="kpstage__t">App telemetry</h3><p class="kpstage__d">The observability your application already emits, imported or captured at the gateway.</p><span class="kpstage__read"><span class="n">import</span><span class="u">or capture</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Engine</span><h3 class="kpstage__t">Audit run</h3><p class="kpstage__d">Permissions, audit trail, egress and injection graded against scope.</p><span class="kpstage__read"><span class="n">ASR-01</span><span class="u">.. ASR-08</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Output</span><h3 class="kpstage__t">Signed report</h3><p class="kpstage__d">One canonical object, sealed over the exact bytes: same logs in, same signature out.</p><span class="kpstage__read"><span class="n">Ed25519</span><span class="u">envelope</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Verify</span><h3 class="kpstage__t">Reviewer checks</h3><p class="kpstage__d">Offline against the key inside the report. The run is reproducible end to end.</p><span class="kpstage__read"><span class="n">VALID</span><span class="u">offline</span></span></div>
+        </div>
+      </div>
+      <div class="kinst__foot"><b>PIPELINE</b> same logs in, same signature out <span class="go">reproducible</span></div>
     </figure>
   </div>
 </section>
@@ -239,13 +228,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
     </div>
 
-    <!-- audit lifecycle as a numbered flow with a concrete readout at each step -->
-    <div class="kflow reveal" style="--kn:4;margin-top:var(--s6)" aria-label="The audit lifecycle: send logs, run controls, sign, verify, with a readout at each step">
-      <div class="kstep"><span class="kstep__n">Send</span><h3 class="kstep__t">POST your logs</h3><p class="kstep__d">One call to <span style="font-family:var(--mono);font-size:0.92em">/v1/audit/scan</span> with the telemetry you already emit.</p><span class="kstep__read"><b class="n mono" data-count>1</b> <span class="u">curl, free tier</span></span></div>
-      <div class="kstep"><span class="kstep__n">Assess</span><h3 class="kstep__t">Controls run</h3><p class="kstep__d">ASR-01 through ASR-08 grade against scope. Unassessed controls are named, not guessed.</p><span class="kstep__read"><b class="n mono">8</b> <span class="u">controls graded</span></span></div>
-      <div class="kstep"><span class="kstep__n">Sign</span><h3 class="kstep__t">Envelope sealed</h3><p class="kstep__d">The report is canonicalized and signed with Ed25519 over the exact bytes.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">over canonical bytes</span></span></div>
-      <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Reviewer checks</h3><p class="kstep__d">Offline in the browser, in a script, or against the public API.</p><span class="kstep__read"><b class="n mono">VALID</b> <span class="u">no account needed</span></span></div>
-    </div>
+    <!-- audit lifecycle as a connected pipeline with a concrete readout at each step -->
+    <figure class="kinst kinst--marks kfig reveal" style="margin-top:var(--s6)" role="group" aria-label="The audit lifecycle: send logs, run controls, sign, verify, with a readout at each step">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>AUDIT LIFECYCLE / SEND -&gt; VERIFY</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+        <div class="kpipe" style="--kn:4" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Send</span><h3 class="kpstage__t">POST your logs</h3><p class="kpstage__d">One call to <span style="font-family:var(--mono);font-size:0.92em">/v1/audit/scan</span> with the telemetry you already emit.</p><span class="kpstage__read"><b class="n mono" data-count>1</b> <span class="u">curl, free tier</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Assess</span><h3 class="kpstage__t">Controls run</h3><p class="kpstage__d">ASR-01 through ASR-08 grade against scope. Unassessed controls are named, not guessed.</p><span class="kpstage__read"><b class="n mono">8</b> <span class="u">controls graded</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Sign</span><h3 class="kpstage__t">Envelope sealed</h3><p class="kpstage__d">The report is canonicalized and signed with Ed25519 over the exact bytes.</p><span class="kpstage__read"><b class="n mono">Ed25519</b> <span class="u">over canonical bytes</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Verify</span><h3 class="kpstage__t">Reviewer checks</h3><p class="kpstage__d">Offline in the browser, in a script, or against the public API.</p><span class="kpstage__read"><b class="n mono">VALID</b> <span class="u">no account needed</span></span></div>
+        </div>
+      </div>
+      <div class="kinst__foot"><b>READOUT</b> 1 curl, 8 controls graded, Ed25519 sealed <span class="go">verified offline</span></div>
+    </figure>
     <p class="adoc-note">The run is <span class="kdef">reproducible<span class="kdef__plain"> (same input, same output)</span></span><span class="kdef-tip">A run is <b>reproducible</b> when the same logs always produce the same report and the same signature, so a reviewer can re-run the check and get the identical result.</span>: the same logs in produce the same signature out.</p>
 
     <div class="split" style="align-items:flex-start;margin-top:var(--s7)">

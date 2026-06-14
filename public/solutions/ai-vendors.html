@@ -40,8 +40,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
 <style>
-  /* Page-scoped for ai-vendors.html only (.av-*). Reuses the shared kflow kit. */
+  /* Page-scoped for ai-vendors.html only (.av-*). Reuses the shared kinst/kpipe kit. */
   .av-flow{margin:var(--s5) 0 0}
+  .av-pipe{margin:var(--s6) 0 0}
 </style>
 <script type="application/ld+json">
 {
@@ -192,26 +193,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Your situation, what kolm does, the proof to check.</h2>
       <p class="lede">One line of sight from the stalled deal to the signed artifact the buyer can verify. Each step carries the concrete output it produces.</p>
     </div>
-    <div class="kflow reveal av-flow" style="--kn:3">
-      <div class="kstep">
-        <span class="kstep__n">Your situation</span>
-        <h3 class="kstep__t">The CISO wants proof</h3>
-        <p class="kstep__d">Your agent works, but a security team will not sign off on a questionnaire. The six-figure deal is parked in review while they ask for something testable.</p>
-        <span class="kstep__read"><b class="n mono">4 to 8 wks</b> <span class="u">a from-scratch review</span></span>
+    <figure class="kinst kinst--marks kfig av-flow" role="group" aria-label="Your path: a stalled review (4 to 8 weeks from scratch) is captured and compiled by kolm into one Ed25519-signed report the buyer verifies offline, compressing the review back to days.">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>YOUR PATH / STALL TO SIGNATURE</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+        <div class="kpipe" style="--kn:3" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Your situation</span><h3 class="kpstage__t">The CISO wants proof</h3><p class="kpstage__d">Your agent works, but a security team will not sign off on a questionnaire. The six-figure deal is parked in review while they ask for something testable.</p><span class="kpstage__read"><span class="n">4 to 8 wks</span><span class="u">a from-scratch review</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">What kolm does</span><h3 class="kpstage__t">Audits the agent, signs the result</h3><p class="kpstage__d">kolm reads the logs you already have, runs the controls across permissions, audit trail, egress and injection, and seals the findings into one signed report.</p><span class="kpstage__read"><span class="n">Ed25519</span><span class="u">one signed report</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Proof to check</span><h3 class="kpstage__t">The buyer verifies it offline</h3><p class="kpstage__d">They open the report, check the signature against your public key in their own browser, and trace each finding to a control they enforce. No kolm server in the path.</p><span class="kpstage__read"><span class="n">Days</span><span class="u">review compresses</span></span></div>
+        </div>
       </div>
-      <div class="kstep">
-        <span class="kstep__n">What kolm does</span>
-        <h3 class="kstep__t">Audits the agent, signs the result</h3>
-        <p class="kstep__d">kolm reads the logs you already have, runs the controls across permissions, audit trail, egress and injection, and seals the findings into one signed report.</p>
-        <span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">one signed report</span></span>
-      </div>
-      <div class="kstep">
-        <span class="kstep__n">Proof to check</span>
-        <h3 class="kstep__t">The buyer verifies it offline</h3>
-        <p class="kstep__d">They open the report, check the signature against your public key in their own browser, and trace each finding to a control they enforce. No kolm server in the path.</p>
-        <span class="kstep__read"><b class="n mono">Days</b> <span class="u">review compresses</span></span>
-      </div>
-    </div>
+      <div class="kinst__foot"><b>OUTCOME</b> review compresses to days <span class="go">verified</span></div>
+    </figure>
       </div>
     </div>
   </div>
@@ -387,30 +381,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p>When a CISO wants a person to stand behind the finding, a named co-signer reviews and signs alongside the math. Days, bounded by an SLA, against the four to eight weeks a from-scratch review takes.</p>
       </div>
     </div>
-    <figure class="diag reveal" role="img" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run, and a signed report comes out">
-    <svg viewBox="0 0 720 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="dg-flow" d="M158 68 H198 M380 68 H420 M602 68 H630"/>
-      <rect class="dg-box" x="8" y="36" width="150" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="22" y="56">Input</text>
-      <text class="dg-t" x="22" y="76">Agent logs</text>
-      <text class="dg-mono" x="22" y="92">import or sidecar</text>
-      <polygon class="dg-ok" points="198,68 190,63.5 190,72.5"/>
-      <rect class="dg-box" x="200" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="214" y="56">Engine</text>
-      <text class="dg-t" x="214" y="76">Audit run</text>
-      <text class="dg-mono" x="214" y="92">ASR-01 .. ASR-08</text>
-      <polygon class="dg-ok" points="420,68 412,63.5 412,72.5"/>
-      <rect class="dg-box--ok" x="422" y="36" width="180" height="64" rx="9"/>
-      <text class="dg-label dg-label--up" x="436" y="56">Output</text>
-      <text class="dg-t" x="436" y="76">Signed report</text>
-      <text class="dg-mono" x="436" y="92">Ed25519 envelope</text>
-      <polygon class="dg-ok" points="630,68 622,63.5 622,72.5"/>
-      <circle class="dg-dot" cx="646" cy="68" r="4"/>
-      <text class="dg-label" x="658" y="72">verify</text>
-      <path class="dg-line" d="M290 100 V128"/>
-      <text class="dg-mono" x="208" y="146">permissions &#183; audit trail &#183; egress &#183; injection</text>
-    </svg>
-    <figcaption class="diag__cap"><b>Pipeline</b> same logs in, same signature out: the machine clock is reproducible end to end</figcaption>
+    <figure class="kinst kinst--marks kfig is-verified av-pipe" role="group" aria-label="Audit pipeline: agent logs go into the audit engine, controls ASR-01 to ASR-08 run across permissions, audit trail, egress and injection, and an Ed25519-signed report comes out, ready to verify. Same logs in, same signature out.">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>PIPELINE / MACHINE CLOCK</span><span class="kinst__live">reproducible</span></div>
+      <div class="kinst__body">
+        <div class="kpipe" style="--kn:4" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Input</span><h3 class="kpstage__t">Agent logs</h3><p class="kpstage__d">Import or sidecar. The same logs you already keep, read in without a rewrite.</p><span class="kpstage__read"><span class="n">logs</span><span class="u">in</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Engine</span><h3 class="kpstage__t">Audit run</h3><p class="kpstage__d">Controls ASR-01 .. ASR-08 run across permissions, audit trail, egress and injection.</p><span class="kpstage__read"><span class="n">ASR-01..08</span><span class="u">controls</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Output</span><h3 class="kpstage__t">Signed report</h3><p class="kpstage__d">One Ed25519 envelope. Same logs in, same signature out, every run.</p><span class="kpstage__read"><span class="n">Ed25519</span><span class="u">envelope</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Buyer</span><h3 class="kpstage__t">Verify</h3><p class="kpstage__d">The buyer checks the bytes against the embedded public key, offline.</p><span class="kpstage__read"><span class="n">offline</span><span class="u">check</span></span></div>
+        </div>
+      </div>
+      <div class="kinst__foot"><b>PIPELINE</b> same logs in, same signature out <span class="go">reproducible end to end</span></div>
     </figure>
     <p class="how__foot">The crypto proves the bytes were not altered. The name proves a person reviewed them. Most deals clear on the automated report alone. <a href="/compare" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">How this differs from Vanta, Drata and runtime guardrails</a>.</p>
       </div>

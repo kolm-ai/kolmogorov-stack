@@ -207,11 +207,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>One real workflow gets a real answer.</h2>
         <p class="lede">Name the source, risk, gate, target, and export. This composes an email to <span translate="no">dev@kolm.ai</span> - nothing is stored client-side.</p>
       </div>
-      <div class="kflow reveal ct-flow" style="--kn:3">
-        <div class="kstep"><span class="kstep__n">You send</span><h3 class="kstep__t">Send opens in your mail app</h3><p class="kstep__d">The form fills a draft to dev@kolm.ai in your own mail client. You review it and hit send. Nothing is stored here.</p><span class="kstep__read"><b class="n mono">0</b> <span class="u">data kept client-side</span></span></div>
-        <div class="kstep"><span class="kstep__n">We reply</span><h3 class="kstep__t">A real engineer answers</h3><p class="kstep__d">No bot, no generic sales sequence. You hear back from someone who can map your workflow.</p><span class="kstep__read"><b class="n mono">1</b> <span class="u">business day, typical</span></span></div>
-        <div class="kstep"><span class="kstep__n">First call</span><h3 class="kstep__t">We map the path together</h3><p class="kstep__d">We walk one workflow from your live calls to a signed model, and name anything we cannot promise yet.</p><span class="kstep__read"><b class="n mono">1</b> <span class="u">workflow, end to end</span></span></div>
-      </div>
+      <figure class="kinst kinst--marks kfig is-verified ct-flow" role="group" aria-label="After you send: you send, we reply, then we map the path together on a first call" data-km="flow breathe">
+       <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+       <div class="kinst__bar"><span>AFTER YOU SEND / WHAT HAPPENS NEXT</span><span class="kinst__live">live</span></div>
+       <div class="kinst__body">
+        <div class="kpipe" style="--kn:3">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">You send</span><h3 class="kpstage__t">Send opens in your mail app</h3><p class="kpstage__d">The form fills a draft to dev@kolm.ai in your own mail client. You review it and hit send. Nothing is stored here.</p><span class="kpstage__read"><span class="n">0</span> <span class="u">data kept client-side</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">We reply</span><h3 class="kpstage__t">A real engineer answers</h3><p class="kpstage__d">No bot, no generic sales sequence. You hear back from someone who can map your workflow.</p><span class="kpstage__read"><span class="n">1</span> <span class="u">business day, typical</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">First call</span><h3 class="kpstage__t">We map the path together</h3><p class="kpstage__d">We walk one workflow from your live calls to a signed model, and name anything we cannot promise yet.</p><span class="kpstage__read"><span class="n">1</span> <span class="u">workflow, end to end</span></span></div>
+        </div>
+       </div>
+       <div class="kinst__foot"><b>REPLY</b> from a real engineer <span class="go">verified</span></div>
+      </figure>
       <div class="panel">
         <div class="panel__head"><span>what to send</span><span class="m">dev@kolm.ai</span></div>
         <form class="panel__rows" style="padding:var(--s6)" action="mailto:dev@kolm.ai" method="post" enctype="text/plain">

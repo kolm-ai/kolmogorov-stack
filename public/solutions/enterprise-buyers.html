@@ -41,7 +41,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
 <style>
-  /* Page-scoped for enterprise-buyers.html only (.eb-*). Reuses the shared kflow kit. */
+  /* Page-scoped for enterprise-buyers.html only (.eb-*). Reuses the shared kinst/kpipe kit. */
   .eb-flow{margin:var(--s5) 0 0}
 </style>
 <script type="application/ld+json">
@@ -252,26 +252,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>Your situation, what kolm does, the proof to check.</h2>
       <p class="lede">One line of sight from a vendor asking for access to a verdict you ran yourself. Each step carries the concrete output it produces.</p>
     </div>
-    <div class="kflow reveal eb-flow" style="--kn:3">
-      <div class="kstep">
-        <span class="kstep__n">Your situation</span>
-        <h3 class="kstep__t">An agent wants in</h3>
-        <p class="kstep__d">A vendor's AI application asks for access to your environment and hands you a questionnaire. That moves the burden of proof onto your team, with nothing you can test.</p>
-        <span class="kstep__read"><b class="n mono">0 lines</b> <span class="u">you can verify</span></span>
+    <figure class="kinst kinst--marks kfig eb-flow" role="group" aria-label="Your path: a vendor agent wants access and offers a questionnaire you cannot test; kolm turns that into one signed object carrying the issuer key, which you verify offline to reach a VALID verdict you ran yourself.">
+      <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+      <div class="kinst__bar"><span>YOUR PATH / REQUEST TO VERDICT</span><span class="kinst__live">live</span></div>
+      <div class="kinst__body">
+        <div class="kpipe" style="--kn:3" data-km="flow breathe">
+          <svg class="kpipe__conn" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true"><line class="kflowline" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowtrail" x1="0" y1="2" x2="1000" y2="2"></line><line class="kflowpkt" x1="0" y1="2" x2="1000" y2="2" style="--kpk-dash:60 940;--kpk-off:1000;--kpk-dur:3.4s"></line></svg>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Your situation</span><h3 class="kpstage__t">An agent wants in</h3><p class="kpstage__d">A vendor's AI application asks for access to your environment and hands you a questionnaire. That moves the burden of proof onto your team, with nothing you can test.</p><span class="kpstage__read"><span class="n">0 lines</span><span class="u">you can verify</span></span></div>
+          <div class="kpstage"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">What kolm does</span><h3 class="kpstage__t">Turns claims into a signed object</h3><p class="kpstage__d">Require the vendor's signed kolm report instead. It carries the findings, the scope, and the issuer's public key inside one object you can open.</p><span class="kpstage__read"><span class="n">1 object</span><span class="u">key travels inside</span></span></div>
+          <div class="kpstage is-active"><span class="kpstage__pip" aria-hidden="true"></span><span class="kpstage__n">Proof to check</span><h3 class="kpstage__t">You run the check</h3><p class="kpstage__d">Verify the signature in your own browser, confirm the key against your pinned keyring, then read each finding in the frameworks you already enforce.</p><span class="kpstage__read"><span class="n">VALID</span><span class="u">offline, no account</span></span></div>
+        </div>
       </div>
-      <div class="kstep">
-        <span class="kstep__n">What kolm does</span>
-        <h3 class="kstep__t">Turns claims into a signed object</h3>
-        <p class="kstep__d">Require the vendor's signed kolm report instead. It carries the findings, the scope, and the issuer's public key inside one object you can open.</p>
-        <span class="kstep__read"><b class="n mono">1 object</b> <span class="u">key travels inside</span></span>
-      </div>
-      <div class="kstep">
-        <span class="kstep__n">Proof to check</span>
-        <h3 class="kstep__t">You run the check</h3>
-        <p class="kstep__d">Verify the signature in your own browser, confirm the key against your pinned keyring, then read each finding in the frameworks you already enforce.</p>
-        <span class="kstep__read"><b class="n mono">VALID</b> <span class="u">offline, no account</span></span>
-      </div>
-    </div>
+      <div class="kinst__foot"><b>VERDICT</b> VALID, offline, no account <span class="go">verified</span></div>
+    </figure>
       </div>
     </div>
   </div>

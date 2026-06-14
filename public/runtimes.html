@@ -259,8 +259,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </div>
       </div>
       <div class="feat__ui">
-        <figure class="instrument runtime-ramp" data-art-reveal
+        <figure class="kinst kinst--marks instrument runtime-ramp" data-art-reveal role="group"
           aria-label="Runtime fit: the same claims-redactor.kolm ranked across four runtimes. Phone: 142 MB, $0.00 per thousand calls, 96 ms - selected, in spec. Laptop: 142 MB, $0.04, 71 ms. Edge: 142 MB, $0.21, 39 ms. Server: 142 MB, $0.90, 12 ms. Kolm runs it on the smallest runtime that fits.">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
           <div class="instrument__bar"><span>runtime &middot; <b>claims-redactor.kolm</b></span><span class="live">fit</span></div>
           <svg class="pipe ramp" viewBox="0 0 440 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
             <text class="tag" x="22" y="14">smallest runtime that fits &middot; 142 mb</text>
@@ -312,27 +313,28 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Cheaper or faster - read the curve, then pick.</h2>
         <p class="lede">The same numbers from the ramp, plotted as cost against latency. Moving down and right buys speed for money; moving up and left saves money for speed. The laptop runtime sits at the knee: near-zero cost with latency most workloads can live with.</p>
       </div>
-      <figure class="kfig" role="img" aria-label="Cost versus latency across four runtimes. Phone: lowest cost, highest latency at 96 ms. Server: highest cost at 0.90 per 1k, lowest latency at 12 ms. Laptop sits at the knee with 0.04 per 1k and 71 ms, the best cost-to-speed balance.">
-        <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
-        <svg class="kchart" viewBox="0 0 320 210" data-art-reveal aria-hidden="true">
-          <line class="k-grid" x1="44" y1="40" x2="300" y2="40"/>
-          <line class="k-grid" x1="44" y1="90" x2="300" y2="90"/>
-          <line class="k-grid" x1="44" y1="140" x2="300" y2="140"/>
-          <line class="k-axis" x1="44" y1="24" x2="44" y2="180"/>
-          <line class="k-axis" x1="44" y1="180" x2="300" y2="180"/>
-          <text class="k-axlbl" x="170" y="200" text-anchor="middle">cost / 1k -&gt;</text>
-          <text class="k-axlbl" x="10" y="30">latency (ms)</text>
-          <!-- phone: cheapest, slowest (top-left) -->
-          <circle class="k-pt" cx="56" cy="48" r="6" style="--i:0"/><text class="k-lbl" x="66" y="44">phone &middot; $0.00 &middot; 96 ms</text>
-          <!-- edge -->
-          <circle class="k-pt" cx="160" cy="118" r="6" style="--i:2"/><text class="k-lbl" x="170" y="114">edge &middot; $0.21 &middot; 39 ms</text>
-          <!-- server: priciest, fastest (bottom-right) -->
-          <circle class="k-pt" cx="282" cy="160" r="6" style="--i:3"/><text class="k-lbl" x="218" y="172">server &middot; $0.90 &middot; 12 ms</text>
-          <!-- laptop: the knee, best balance -->
-          <line class="k-cross" x1="44" y1="74" x2="74" y2="74"/><line class="k-cross" x1="74" y1="74" x2="74" y2="180"/>
-          <circle class="k-pt is-best" cx="74" cy="74" r="7" style="--i:1"/><circle class="k-ring" cx="74" cy="74" r="12"/>
-          <text class="k-val" x="88" y="70">laptop &middot; $0.04 &middot; 71 ms</text>
-        </svg>
+      <figure class="kinst kinst--marks kfig is-verified" role="group" aria-label="Cost versus latency across four runtimes. Phone: lowest cost, highest latency at 96 ms. Server: highest cost at 0.90 per 1k, lowest latency at 12 ms. Laptop sits at the knee with 0.04 per 1k and 71 ms, the best cost-to-speed balance.">
+        <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+        <div class="kinst__bar"><span>COST / LATENCY &middot; <b>claims-redactor.kolm</b></span><span class="kinst__live">live</span></div>
+        <div class="kinst__body">
+          <svg class="kscatter" viewBox="0 0 320 200" data-km="settle" role="img" aria-label="Cost versus latency across four runtimes. Phone: lowest cost, highest latency at 96 ms. Edge: 0.21 per 1k, 39 ms. Server: highest cost at 0.90 per 1k, lowest latency at 12 ms. Laptop holds the knee at 0.04 per 1k and 71 ms, the best cost-to-speed balance.">
+            <line class="ks-grid" x1="44" y1="40" x2="300" y2="40"/>
+            <line class="ks-grid" x1="44" y1="86" x2="300" y2="86"/>
+            <line class="ks-grid" x1="44" y1="132" x2="300" y2="132"/>
+            <line class="ks-axis" x1="44" y1="24" x2="44" y2="172"/>
+            <line class="ks-axis" x1="44" y1="172" x2="300" y2="172"/>
+            <text class="ks-axlbl" x="172" y="190" text-anchor="middle">cost / 1k &rarr;</text>
+            <text class="ks-axlbl" x="10" y="30">latency (ms)</text>
+            <circle class="ks-pt ksettle" cx="58" cy="46" r="5" style="--i:0"></circle><text class="ks-lbl ksettle" x="68" y="42" style="--i:0">phone &middot; $0.00 &middot; 96 ms</text>
+            <circle class="ks-pt ksettle" cx="162" cy="110" r="5" style="--i:2"></circle><text class="ks-lbl ksettle" x="172" y="106" style="--i:2">edge &middot; $0.21 &middot; 39 ms</text>
+            <circle class="ks-pt ksettle" cx="284" cy="152" r="5" style="--i:3"></circle><text class="ks-lbl ksettle" x="220" y="164" style="--i:3">server &middot; $0.90 &middot; 12 ms</text>
+            <line class="ks-cross" x1="44" y1="72" x2="78" y2="72"></line><line class="ks-cross" x1="78" y1="72" x2="78" y2="172"></line>
+            <circle class="ks-ring" cx="78" cy="72" r="11"></circle>
+            <circle class="ks-pt is-best ksettle" cx="78" cy="72" r="5.5" style="--i:1"></circle>
+            <text class="ks-best-lbl ksettle" x="92" y="68" style="--i:1">laptop &middot; $0.04 &middot; 71 ms</text>
+          </svg>
+        </div>
+        <div class="kinst__foot"><b>BEST FIT</b> laptop holds the knee <span class="go">$0.04 / 1k &middot; 71 ms</span></div>
         <figcaption class="kfig__cap"><b>laptop</b> holds the knee: almost free per call, fast enough for most paths.</figcaption>
       </figure>
     </div>
@@ -353,37 +355,52 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </ul>
       </div>
       <div class="feat__ui">
-        <figure class="anat" data-art-reveal aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates, and a sha256 receipt - bound by one Ed25519 signature you can verify offline.">
-          <div class="anat__hd"><span>Inside a .kolm</span><span>exploded view</span></div>
-          <svg viewBox="0 0 360 300" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
-            <path class="reg" d="M8 8h10 M8 8v10 M352 292h-10 M352 292v-10"/>
-            <!-- LAYER block - repeat 4×: model(y0) · recipe(y14) · evals(y28) · receipt(y42) -->
-            <g class="layer"><path class="face" d="M70 30 L250 30 L290 52 L110 52 Z"/>
-              <path class="bevel" d="M70 30 L250 30 L290 52"/>
-              <path class="lead" d="M290 41 L330 41"/>
-              <text class="lbl" x="78" y="46">model</text>
-              <text class="sub" x="334" y="38">your behavior</text>
-              <text class="sub" x="334" y="48">distilled</text></g>
-            <g class="layer"><path class="face" d="M70 72 L250 72 L290 94 L110 94 Z"/>
-              <path class="bevel" d="M70 72 L250 72 L290 94"/>
-              <path class="lead" d="M290 83 L330 83"/>
-              <text class="lbl" x="78" y="88">recipe</text>
-              <text class="sub" x="334" y="84">exact build + sources</text></g>
-            <g class="layer"><path class="face" d="M70 114 L250 114 L290 136 L110 136 Z"/>
-              <path class="bevel" d="M70 114 L250 114 L290 136"/>
-              <path class="lead" d="M290 125 L330 125"/>
-              <text class="lbl" x="78" y="130">evals</text>
-              <text class="sub" x="334" y="126">6 gates it must pass</text></g>
-            <g class="layer"><path class="face" d="M70 156 L250 156 L290 178 L110 178 Z"/>
-              <path class="bevel" d="M70 156 L250 156 L290 178"/>
-              <path class="lead" d="M290 167 L330 167"/>
-              <text class="lbl" x="78" y="172">receipt</text>
-              <text class="sub" x="334" y="168">sha256 + capture trace</text></g>
-            <line class="scan" x1="70" y1="200" x2="250" y2="200"/>
-            <circle class="seal-ring" cx="180" cy="230" r="20"/>
-            <path class="seal" d="M172 230 l5 5 l11 -11" stroke="currentColor" stroke-width="2" fill="none"/>
-            <text class="sub" x="180" y="268" text-anchor="middle" style="fill:var(--accent)">Ed25519 signed · verify yourself</text>
-          </svg>
+        <figure class="kinst kinst--marks kfig is-verified" role="group" aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates, and a sha256 receipt - bound by one Ed25519 signature you can verify offline.">
+          <span class="kinst__mark kinst__mark--tl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--tr" aria-hidden="true"></span><span class="kinst__mark kinst__mark--bl" aria-hidden="true"></span><span class="kinst__mark kinst__mark--br" aria-hidden="true"></span>
+          <div class="kinst__bar"><span>INSIDE A .KOLM / EXPLODED VIEW</span><span class="kinst__live">live</span></div>
+          <div class="kinst__body">
+            <svg class="kspec3d" viewBox="0 0 560 290" data-km="settle stamp" role="img" aria-label="Exploded view of one .kolm file: four signed layers - a distilled model, the exact build recipe, six eval gates it must pass, and a sha256 receipt with capture trace - bound by one Ed25519 signature you can verify offline.">
+              <defs aria-hidden="true">
+                <linearGradient id="k3plate" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,255,255,.10)"/><stop offset="1" stop-color="rgba(255,255,255,.02)"/></linearGradient>
+                <linearGradient id="k3paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f3ee"/><stop offset="1" stop-color="#d9d8d0"/></linearGradient>
+              </defs>
+              <text class="k3-num" x="40" y="26">SIGNATURE COVERS THESE BYTES</text>
+              <g class="k3-layer" style="--i:0">
+                <polygon class="k3-side" points="64,52 380,52 392,64 76,64"/>
+                <rect class="k3-plate is-key" x="64" y="52" width="316" height="40" rx="3"/>
+                <text class="k3-lbl-art" x="80" y="70">model</text>
+                <text class="k3-sub-art" x="80" y="84">your behavior distilled</text>
+              </g>
+              <g class="k3-layer" style="--i:1">
+                <polygon class="k3-side" points="64,106 380,106 392,118 76,118"/>
+                <rect class="k3-plate" x="64" y="106" width="316" height="40" rx="3"/>
+                <text class="k3-lbl" x="80" y="124">recipe</text>
+                <text class="k3-sub" x="80" y="138">exact build + sources</text>
+              </g>
+              <g class="k3-layer" style="--i:2">
+                <polygon class="k3-side" points="64,160 380,160 392,172 76,172"/>
+                <rect class="k3-plate" x="64" y="160" width="316" height="40" rx="3"/>
+                <text class="k3-lbl" x="80" y="178">evals</text>
+                <text class="k3-sub" x="80" y="192">6 gates it must pass</text>
+              </g>
+              <g class="k3-layer" style="--i:3">
+                <polygon class="k3-side" points="64,214 380,214 392,226 76,226"/>
+                <rect class="k3-plate" x="64" y="214" width="316" height="40" rx="3"/>
+                <text class="k3-lbl" x="80" y="232">receipt</text>
+                <text class="k3-sub" x="80" y="246">sha256 + capture trace</text>
+              </g>
+              <path class="k3-bracket" d="M404 52 h12 v202 h-12"/>
+              <line class="k3-lead" x1="416" y1="153" x2="458" y2="153"/>
+              <circle class="k3-dot" cx="458" cy="153" r="3"/>
+              <g class="k3-layer kstamp" style="--i:4">
+                <circle class="k3-seal" cx="500" cy="153" r="28"/>
+                <path class="k3-seal" d="M488 154 l8 8 l16 -18"/>
+                <text class="k3-num" x="468" y="206">Ed25519 signed</text>
+                <text class="k3-sub" x="468" y="220">verify yourself</text>
+              </g>
+            </svg>
+          </div>
+          <div class="kinst__foot"><b>FOUR LAYERS</b> model + recipe + evals + receipt <span class="go">Ed25519-sealed</span></div>
         </figure>
       </div>
     </div>
