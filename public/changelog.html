@@ -30,6 +30,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+  /* PAGE-LOCAL: changelog timeline trimmings only. Pulls design tokens; adds no palette. */
+  .cl-tlwrap{margin-top:var(--s6);}
+  .cl-legend{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s5);margin:0 0 var(--s5);
+    font-family:var(--font-mono);font-size:12px;color:var(--ink-3);letter-spacing:.02em;}
+  .cl-legend span{display:inline-flex;align-items:center;gap:7px;}
+  .cl-legend i{width:9px;height:9px;border-radius:2px;background:var(--line-2);box-shadow:inset 0 0 0 1px var(--line-top);}
+  .cl-legend i.is-now{background:var(--accent);box-shadow:0 0 0 3px var(--accent-wash);}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -123,47 +132,49 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>A shorter path from your live calls to a model you own.</h2>
         <p class="lede">Each release leads with what you get: lower cost, a model you keep, a deploy target that fits, proof anyone can check.</p>
       </div>
-      <div class="ledger-rows">
-        <div class="lrow reveal">
-          <div class="lrow__k">2026-06-13 <span class="sev-d">/ product</span></div>
-          <div class="lrow__t">
-            <h3>The whole site now says what you get</h3>
-            <p>Trust, Security, Enterprise, Contact, Platform, Capabilities, Research, and Changelog now lead with one promise: turn the AI you rent into a signed model you own and run on your own hardware.</p>
-          </div>
-          <div class="lrow__f"><em>pages</em></div>
+      <div class="kflow reveal" style="--kn:4;margin-bottom:var(--s7)">
+        <div class="kstep"><span class="kstep__n">Capture</span><h3 class="kstep__t">Point your calls at Kolm</h3><p class="kstep__d">Your live OpenAI and Anthropic traffic is recorded as it happens. No SDK rewrite.</p><span class="kstep__read"><b class="n mono" data-count>12400</b> <span class="u">calls captured</span></span></div>
+        <div class="kstep"><span class="kstep__n">Compile</span><h3 class="kstep__t">Turn behavior into a model</h3><p class="kstep__d">Captured behavior compiles into one portable file you keep.</p><span class="kstep__read"><b class="n mono">1</b> <span class="u">.kolm file out</span></span></div>
+        <div class="kstep"><span class="kstep__n">Deploy</span><h3 class="kstep__t">Run it on your hardware</h3><p class="kstep__d">Deploy to a target that fits, from a laptop to a private fleet.</p><span class="kstep__read"><b class="n mono">yours</b> <span class="u">to run anywhere</span></span></div>
+        <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Prove what it is</h3><p class="kstep__d">A signed receipt anyone on your team can check, offline.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">signed</span></span></div>
+      </div>
+      <div class="cl-tlwrap">
+        <div class="cl-legend" aria-hidden="true">
+          <span><i class="is-now"></i>shipped this cycle (newest)</span>
+          <span><i></i>earlier entries</span>
         </div>
-        <div class="lrow reveal">
-          <div class="lrow__k">2026-06-13 <span class="sev-d">/ control</span></div>
-          <div class="lrow__t">
-            <h3>One place to capture, compile, deploy, and export</h3>
-            <p>The API Control Center is in your hands &mdash; capture from the tools you already use, set the rules, run the evals, compile the model, deploy it, and export the file. It's yours to move.</p>
-          </div>
-          <div class="lrow__f"><a href="/account/api-control-center">control</a></div>
-        </div>
-        <div class="lrow reveal">
-          <div class="lrow__k">2026-06-13 <span class="sev-d">/ routing</span></div>
-          <div class="lrow__t">
-            <h3>Every page loads fast and on its own</h3>
-            <p>Each product page now serves its own HTML directly, so what you click is what you get &mdash; quicker loads, no detours.</p>
-          </div>
-          <div class="lrow__f"><em>routes</em></div>
-        </div>
-        <div class="lrow reveal">
-          <div class="lrow__k">2026-06-13 <span class="sev-d">/ claims</span></div>
-          <div class="lrow__t">
-            <h3>We only say what we can prove</h3>
-            <p>If a claim isn't backed by evidence you can check today, you won't read it here. What's true ships; what isn't waits. No surprises in procurement.</p>
-          </div>
-          <div class="lrow__f"><a href="/trust">trust</a></div>
-        </div>
-        <div class="lrow reveal">
-          <div class="lrow__k">2026-06-13 <span class="sev-d">/ research</span></div>
-          <div class="lrow__t">
-            <h3>What buyers need, built into the product</h3>
-            <p>What AI and platform teams told us they need &mdash; clear controls, a model they own, evidence they can export &mdash; now shapes the product, not just the pitch.</p>
-          </div>
-          <div class="lrow__f"><a href="/research">research</a></div>
-        </div>
+        <ol class="ktl reveal" aria-label="Shipped this cycle, newest first">
+          <li class="ktl__item is-now">
+            <span class="ktl__dot" aria-hidden="true"></span>
+            <span class="ktl__date">2026-06-13</span>
+            <span class="ktl__head"><span class="ktl__t">The whole site now says what you get</span><span class="ktl__tag">product</span></span>
+            <p class="ktl__d">Trust, Security, Enterprise, Contact, Platform, Capabilities, Research, and Changelog now lead with one promise: turn the AI you rent into a signed model you own and run on your own hardware.</p>
+          </li>
+          <li class="ktl__item">
+            <span class="ktl__dot" aria-hidden="true"></span>
+            <span class="ktl__date">2026-06-13</span>
+            <span class="ktl__head"><span class="ktl__t">One place to capture, compile, deploy, and export</span><span class="ktl__tag">control</span></span>
+            <p class="ktl__d">The API Control Center is in your hands. Capture from the tools you already use, set the rules, run the evals, compile the model, deploy it, and export the file. It is yours to move. <a href="/account/api-control-center">Open control center</a>.</p>
+          </li>
+          <li class="ktl__item">
+            <span class="ktl__dot" aria-hidden="true"></span>
+            <span class="ktl__date">2026-06-13</span>
+            <span class="ktl__head"><span class="ktl__t">Every page loads fast and on its own</span><span class="ktl__tag">routing</span></span>
+            <p class="ktl__d">Each product page now serves its own HTML directly, so what you click is what you get. Quicker loads, no detours.</p>
+          </li>
+          <li class="ktl__item">
+            <span class="ktl__dot" aria-hidden="true"></span>
+            <span class="ktl__date">2026-06-13</span>
+            <span class="ktl__head"><span class="ktl__t">We only say what we can prove</span><span class="ktl__tag">claims</span></span>
+            <p class="ktl__d">If a claim is not backed by evidence you can check today, you will not read it here. What is true ships; what is not waits. No surprises in procurement. <a href="/trust">See the trust center</a>.</p>
+          </li>
+          <li class="ktl__item">
+            <span class="ktl__dot" aria-hidden="true"></span>
+            <span class="ktl__date">2026-06-13</span>
+            <span class="ktl__head"><span class="ktl__t">What buyers need, built into the product</span><span class="ktl__tag">research</span></span>
+            <p class="ktl__d">What AI and platform teams told us they need, clear controls, a model they own, evidence they can export, now shapes the product, not just the pitch. <a href="/research">Read the research</a>.</p>
+          </li>
+        </ol>
       </div>
     </div>
   </section>

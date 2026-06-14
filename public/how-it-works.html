@@ -42,6 +42,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
+<style>
+/* page-scoped: how-it-works ingress buckets + flow readouts. Datasheet idiom only. */
+#hiw-flow .kstep__read .u{color:var(--ink-3,#8a8d86)}
+.hiw-buckets{display:grid;gap:14px;grid-template-columns:repeat(4,1fr);margin-top:8px}
+@media(max-width:920px){.hiw-buckets{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.hiw-buckets{grid-template-columns:1fr}}
+.hiw-bucket{position:relative;border:1px solid var(--line,#21241f);background:var(--panel,#0F1011);border-radius:3px;padding:16px 16px 14px}
+.hiw-bucket__k{display:flex;align-items:baseline;gap:8px;font:600 11px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#3FE5A0)}
+.hiw-bucket__n{color:var(--ink-3,#8a8d86)}
+.hiw-bucket__t{margin:10px 0 4px;font-size:15px;font-weight:600}
+.hiw-bucket__use{margin:0 0 10px;font-size:12.5px;line-height:1.5;color:var(--ink-2,#b9bcb4)}
+.hiw-bucket__list{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:5px}
+.hiw-bucket__list li{font:500 11px/1 var(--font-mono);letter-spacing:.02em;color:var(--ink-2,#b9bcb4);border:1px solid var(--line,#21241f);border-radius:2px;padding:3px 6px}
+.hiw-bucket::before{content:"";position:absolute;top:7px;right:7px;width:7px;height:7px;border-top:1px solid var(--line,#2c2f29);border-right:1px solid var(--line,#2c2f29)}
+</style>
 </head>
 <body class="t-marketing">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -149,35 +164,25 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <!-- s-bento — the four-stage loop, each producing an inspectable object -->
+  <!-- s-bento - the full loop, each step with a concrete readout -->
   <section class="section" id="pipeline">
     <div class="wrap wrap--wide">
       <div class="section__head">
         <p class="eyebrow">Capture, compile, sign, deploy</p>
-        <h2>Four steps from your API traffic to a model on your own hardware.</h2>
-        <p class="lede">No rewrite to get here, no lock-in once you have it. Point your live calls at Kolm, let it compile the behavior you already use into a signed model, keep only what passes your evals, and run it on the hardware that fits. Each step leaves you something you can open, check, and keep.</p>
+        <h2>Eight steps from your API traffic to a model on your own hardware.</h2>
+        <p class="lede">No rewrite to get here, no lock-in once you have it. Each step below shows the kind of readout you actually see, from a worked example: a redaction model built from one week of <code>claims-redactor</code> traffic. Every step leaves you something you can open, check, and keep.</p>
       </div>
-      <div class="grid grid--4">
-        <div class="step reveal">
-          <div class="step__n">01 / Capture</div>
-          <h3>Point your calls at Kolm.</h3>
-          <p>Keep your SDK exactly as it is &mdash; drop Kolm in front of your OpenAI- or Anthropic-compatible calls. REST, streaming, webhooks, OTEL, MCP, A2A, GraphQL/RPC, queues, warehouse drops and logs all flow in, with secrets stripped before anything is written to disk.</p>
-        </div>
-        <div class="step reveal">
-          <div class="step__n">02 / Compile</div>
-          <h3>Get a model in one file.</h3>
-          <p>Examples, recipes, evals, tokenizer metadata, hashes and a verifier receipt compile into one portable <code>.kolm</code> &mdash; signed with Ed25519, reproducible, and inspectable layer by layer. One file you own and can move anywhere.</p>
-        </div>
-        <div class="step reveal">
-          <div class="step__n">03 / Compose</div>
-          <h3>Ship only what passes.</h3>
-          <p>Your evals decide what makes the cut: human labels, a failure taxonomy, protected slices, drift checks and regression replay. The model is built from the behavior that actually passed &mdash; nothing else.</p>
-        </div>
-        <div class="step reveal">
-          <div class="step__n">04 / Deploy</div>
-          <h3>Run it where it fits.</h3>
-          <p>Laptop, your private cloud, the edge, or a server &mdash; pick the smallest runtime that fits, with the real limits shown for each. Every target ships with a runtime recipe and the receipts to prove what you deployed.</p>
-        </div>
+
+      <!-- detailed numbered flow with concrete readouts -->
+      <div class="kflow reveal" id="hiw-flow" style="--kn:4" aria-label="The eight-step compile loop with a worked example readout at each step">
+        <div class="kstep"><span class="kstep__n">Capture</span><h3 class="kstep__t">Point your calls in</h3><p class="kstep__d">Drop Kolm in front of your OpenAI- or Anthropic-compatible calls; traffic streams in with secrets stripped before write.</p><span class="kstep__read"><b class="n mono" data-count>12,400</b> <span class="u">calls in, 1 week</span></span></div>
+        <div class="kstep"><span class="kstep__n">Classify</span><h3 class="kstep__t">Sort what came in</h3><p class="kstep__d">Calls are grouped by request shape so you can see what your agents actually do, and what does not fit a known pattern.</p><span class="kstep__read"><b class="n mono">3 schemas</b> <span class="u">1 unknown flagged</span></span></div>
+        <div class="kstep"><span class="kstep__n">Rules</span><h3 class="kstep__t">Set the policy once</h3><p class="kstep__d">Choose redaction, retention, and which providers are allowed. The rules then follow every captured call.</p><span class="kstep__read"><b class="n mono">redact PII</b> <span class="u">allow GPT-4 only</span></span></div>
+        <div class="kstep"><span class="kstep__n">Evaluate</span><h3 class="kstep__t">Replay and grade</h3><p class="kstep__d">A held-back sample is rerun against your evals; anything that drops below the bar is flagged before it can ship.</p><span class="kstep__read"><b class="n mono">99% pass</b> <span class="u">rerun 100, 1 regression</span></span></div>
+        <div class="kstep"><span class="kstep__n">Compile</span><h3 class="kstep__t">Pack one file</h3><p class="kstep__d">Model, recipe, evals, hashes and a verifier receipt compile into one portable <code>.kolm</code> you own.</p><span class="kstep__read"><b class="n mono">one .kolm</b> <span class="u">142 MB</span></span></div>
+        <div class="kstep"><span class="kstep__n">Run</span><h3 class="kstep__t">Fit the hardware</h3><p class="kstep__d">The same file is ranked across runtimes by cost and latency, then runs on the smallest target that fits.</p><span class="kstep__read"><b class="n mono">laptop / edge</b> <span class="u">server / phone</span></span></div>
+        <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Seal and check</h3><p class="kstep__d">The file is hashed and signed; anyone can re-hash it and check the signature without contacting Kolm.</p><span class="kstep__read"><b class="n mono">hash + signature</b> <span class="u">Ed25519</span></span></div>
+        <div class="kstep"><span class="kstep__n">Operate</span><h3 class="kstep__t">Deploy and export</h3><p class="kstep__d">Promote, roll back, and export the proof straight into the systems your team already runs.</p><span class="kstep__read"><b class="n mono">deploy</b> <span class="u">+ export proof</span></span></div>
       </div>
     </div>
   </section>
@@ -189,11 +194,39 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p class="eyebrow">Capture</p>
         <h2>Point your existing calls at Kolm. No rewrite.</h2>
         <p class="lede">Keep your SDK as it is. Set your boundary once &mdash; workspace, project, environment, source, owner and retention &mdash; and every call after that flows in with its rules attached. The behavior you already pay for becomes the model you'll own.</p>
+        <p style="font-size:13.5px;line-height:1.6;color:var(--ink-2,#b9bcb4)">There are twelve ways in, and they sort into four buckets. Whether you speak <span class="kdef">MCP<span class="kdef__plain"> (the Model Context Protocol)</span></span><span class="kdef-tip"><b>MCP</b> is the Model Context Protocol, a standard way for an agent to call out to tools and data sources.</span>, <span class="kdef">A2A<span class="kdef__plain"> (agent-to-agent)</span></span><span class="kdef-tip"><b>A2A</b> is agent-to-agent messaging, where one agent hands work to another over a shared protocol.</span>, or emit <span class="kdef">OTEL<span class="kdef__plain"> (OpenTelemetry traces)</span></span><span class="kdef-tip"><b>OTEL</b> is OpenTelemetry, the open standard for traces and metrics that most observability stacks already produce.</span>, the same boundary and rules apply.</p>
         <ul class="feat__list">
           <li>Drop-in proxy &middot; keep your provider keys in one vault</li>
           <li>Secrets stripped before anything is written to disk</li>
           <li>Set retention, budget and provider rules once &middot; they follow every call</li>
         </ul>
+
+        <div class="hiw-buckets" role="group" aria-label="Twelve ingress methods grouped into four buckets">
+          <div class="hiw-bucket">
+            <div class="hiw-bucket__k"><span class="hiw-bucket__n">01</span>Real-time</div>
+            <h4 class="hiw-bucket__t">Live agent traffic</h4>
+            <p class="hiw-bucket__use">For calls you make right now and want captured as they happen.</p>
+            <ul class="hiw-bucket__list"><li>REST</li><li>GraphQL</li><li>gRPC</li><li>streaming</li></ul>
+          </div>
+          <div class="hiw-bucket">
+            <div class="hiw-bucket__k"><span class="hiw-bucket__n">02</span>Batch</div>
+            <h4 class="hiw-bucket__t">History in bulk</h4>
+            <p class="hiw-bucket__use">For backfilling behavior you already logged or stored.</p>
+            <ul class="hiw-bucket__list"><li>batch</li><li>object storage</li><li>warehouse</li></ul>
+          </div>
+          <div class="hiw-bucket">
+            <div class="hiw-bucket__k"><span class="hiw-bucket__n">03</span>Observability</div>
+            <h4 class="hiw-bucket__t">Signals you already emit</h4>
+            <p class="hiw-bucket__use">For traffic that already shows up in your traces and events.</p>
+            <ul class="hiw-bucket__list"><li>OTEL</li><li>webhooks</li><li>queues</li></ul>
+          </div>
+          <div class="hiw-bucket">
+            <div class="hiw-bucket__k"><span class="hiw-bucket__n">04</span>Custom</div>
+            <h4 class="hiw-bucket__t">Your own path in</h4>
+            <p class="hiw-bucket__use">For anything bespoke, scripted from a terminal or wired by hand.</p>
+            <ul class="hiw-bucket__list"><li>browser</li><li>CLI</li><li>adapters</li></ul>
+          </div>
+        </div>
       </div>
       <div class="feat__ui">
         <figure class="instrument" data-art-reveal aria-label="Live API traffic is captured and compiled into governed, signed .kolm ledger entries.">

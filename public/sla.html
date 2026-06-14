@@ -77,6 +77,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
 .legal-card b, .legal-card strong { color: var(--ink); }
 @media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+/* Page-scoped: uptime budget readout for the SLA commitment visual. */
+#sla-up{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0 4px;width:min(720px,100%)}
+#sla-up .u{border:1px solid var(--line);background:var(--paper-2);padding:16px 16px 14px}
+#sla-up .u b{display:block;font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-0.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+#sla-up .u .k{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);margin-top:6px}
+#sla-up .u .d{display:block;font-size:13px;color:var(--ink-2);margin-top:8px;line-height:1.55}
+@media (max-width:640px){#sla-up{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="t-legal">
@@ -159,6 +166,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <li><strong>The hosted verification endpoint and transparency log</strong> carry a target monthly availability of 99.9%, measured as successful responses over total valid requests in a calendar month, excluding scheduled maintenance announced at least 48 hours in advance.</li>
     </ul>
     <p>Because verification can be performed offline, a hosted-endpoint outage never invalidates a report you already hold.</p>
+
+    <p style="margin-top:var(--s5)">What a 99.9% target means in practice, as a downtime budget over a 30-day month:</p>
+    <div id="sla-up" role="group" aria-label="What a 99.9% monthly availability target means as a downtime budget">
+      <div class="u"><b>99.9%</b><span class="k">Target uptime</span><span class="d">Successful responses over total valid requests in a calendar month.</span></div>
+      <div class="u"><b>~43m</b><span class="k">Allowed downtime / month</span><span class="d">About 43 minutes across a 30-day month before the target is missed.</span></div>
+      <div class="u"><b>0m</b><span class="k">Effect on held reports</span><span class="d">Offline verification keeps working, so a report you already hold is unaffected.</span></div>
+    </div>
+    <p style="font-size:13px;color:var(--ink-3);margin-top:10px">Scheduled maintenance announced at least 48 hours in advance is excluded from the calculation.</p>
   </div>
 </section>
 
@@ -186,7 +201,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <div class="wrap legal-doc">
     <span class="idx">04 / Remedies</span>
     <h2><span class="n">4.</span> Remedies</h2>
-    <p>If we miss the verification-availability target in a calendar month, you may request a service credit against the next invoice, proportional to the shortfall, up to one month of the applicable recurring fee. If we miss a committed audit-turnaround window for reasons within our control, the remedy is set out in your order form, typically a fee adjustment on that engagement. Service credits are the sole and exclusive remedy for missed targets, and are requested in writing to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> within 30 days of the affected period.</p>
+    <p>If we miss the verification-availability target in a calendar month, you may request a <span class="kdef">service credit<span class="kdef__plain"> (a reduction on your next bill)</span></span><span class="kdef-tip">A <b>service credit</b> is money taken off your next invoice, not a cash refund. The amount is proportional to how far we fell short, capped at one month of your recurring fee.</span> against the next invoice, proportional to the shortfall, up to one month of the applicable recurring fee. If we miss a committed audit-turnaround window for reasons within our control, the remedy is set out in your order form, typically a fee adjustment on that engagement. Service credits are the sole and exclusive remedy for missed targets, and are requested in writing to <a href="mailto:dev@kolm.ai">dev@kolm.ai</a> within 30 days of the affected period.</p>
   </div>
 </section>
 

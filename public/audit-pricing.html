@@ -56,6 +56,22 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .tier--feat .btn--primary{background:var(--sheet-ink);color:var(--sheet);border-color:var(--sheet-ink);box-shadow:none}
 .tier--feat .btn--primary:hover{background:#1C2420;border-color:#1C2420}
 .tier--feat .btn--primary::after{background:linear-gradient(105deg,transparent 38%,rgba(243,245,242,.10) 50%,transparent 62%)}
+/* worked example bill + stale-evidence explainer */
+.apr-bill{margin-top:var(--s6);border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--paper-sink);padding:clamp(16px,2.4vw,24px);max-width:560px}
+.apr-bill__hd{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 var(--s4)}
+.apr-bill__hd b{color:var(--accent);font-weight:500}
+.apr-bill ul{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:13px;
+  color:var(--ink-2);font-variant-numeric:tabular-nums}
+.apr-bill li{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.apr-bill li:last-child{border-bottom:0}
+.apr-bill li b{color:var(--ink);font-weight:600}
+.apr-bill li.apr-bill__tot{padding-top:14px;border-top:1px solid var(--line-2);border-bottom:0}
+.apr-bill li.apr-bill__tot span{color:var(--ink)}
+.apr-bill__note{font-family:var(--sans);font-size:12.5px;color:var(--ink-3);line-height:1.6;margin:var(--s4) 0 0}
+.apr-scope{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--s4);margin-top:var(--s5)}
+.apr-scope .card__k{margin-bottom:var(--s2)}
 </style>
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
@@ -227,7 +243,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="sect-rail__body">
     <div class="section__head">
       <h2>Start free. Sign when the deal needs it.</h2>
-      <p class="lede">Four plans you can buy without talking to anyone. The free scan needs&nbsp;no&nbsp;card.</p>
+      <p class="lede">Four plans you can buy without talking to anyone. The free scan needs&nbsp;no&nbsp;card. A one-time report is a snapshot; <span class="kdef">re-attestation<span class="kdef__plain"> (re-signing on a schedule)</span></span><span class="kdef-tip">A <b>re-attestation</b> is a fresh signed report produced on a schedule, weekly on Starter and on every deploy on Growth. The same Trust link always serves the newest one, so a buyer never opens stale evidence.</span> is what keeps Continuous current.</p>
     </div>
     <div class="seam" data-art-reveal aria-hidden="true"></div>
     <div class="tiers">
@@ -302,6 +318,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <p class="hero__claim">
       All prices flat and final. The figure on this page is the figure at checkout. <a href="/roi">Estimate what a stalled review costs</a>.
     </p>
+
+    <div class="apr-scope">
+      <div class="card">
+        <p class="card__k">Who it is for &middot; Scan</p>
+        <p>The team that wants to see a real finding before paying. Upload redacted logs, get watermarked findings in minutes.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Who it is for &middot; Report</p>
+        <p>One deal that needs proof now. A single signed report, tied to a stable ID, that your buyer verifies offline.</p>
+      </div>
+      <div class="card">
+        <p class="card__k">Who it is for &middot; Continuous</p>
+        <p>Anyone who ships often. Evidence is re-signed on a cadence so the Trust link your buyer pins never goes stale.</p>
+      </div>
+    </div>
+
+    <div class="apr-bill" role="group" aria-label="Worked example: a one-time report versus monthly Continuous Starter">
+      <p class="apr-bill__hd"><b>Worked example</b> &middot; why monthly, not once</p>
+      <ul>
+        <li><span>Signed Readiness Report (one-time)</span><b>$750</b></li>
+        <li><span>Each deploy after it</span><b>not covered</b></li>
+        <li><span>Continuous Starter, re-signed weekly</span><b>$299/mo</b></li>
+        <li class="apr-bill__tot"><span>Always-current evidence, per month</span><b>$299/mo</b></li>
+      </ul>
+      <p class="apr-bill__note">Worked from the prices listed above. The $750 report is correct the day it is signed and goes stale on your next deploy. If you ship weekly, a snapshot is out of date within days; Continuous Starter at $299/mo re-signs on schedule so the buyer always opens current evidence behind one stable link. Evidence that goes stale stops being evidence.</p>
+    </div>
       </div>
     </div>
   </div>

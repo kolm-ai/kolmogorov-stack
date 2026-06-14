@@ -30,6 +30,17 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style id="plat-scope">
+  /* platform.html scoped: data-boundary spec figure */
+  #plat-boundary .kspec svg{width:100%;height:auto}
+  #plat-boundary .pb-perim{fill:none;stroke:var(--accent);stroke-width:1;stroke-dasharray:5 4;opacity:.55}
+  #plat-boundary .pb-perim-lbl{fill:var(--accent);font:600 9px/1 var(--mono,ui-monospace,monospace);letter-spacing:.08em;text-transform:uppercase}
+  #plat-boundary .pb-flow{stroke:var(--accent);stroke-width:1.4;fill:none;opacity:.7}
+  #plat-boundary .pb-node-lbl{fill:var(--ink-2,#c7ccd1);font:600 10px/1 var(--mono,ui-monospace,monospace)}
+  #plat-boundary .pb-sub{fill:var(--ink-3,#9aa0a6);font:500 8px/1 var(--mono,ui-monospace,monospace)}
+  #plat-boundary .pb-gate{fill:var(--accent-soft,#3fe5a014);stroke:var(--accent);stroke-width:1.2}
+  #plat-boundary .kspec__legend b{color:var(--ink-1,#e9edf0)}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -187,7 +198,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <article class="card reveal">
           <span class="card__k">Set the rules</span>
           <h3>Decide what's reusable before it's reused.</h3>
-          <p>Redact sensitive fields, set data boundaries, scope exports, cap budgets, and purge what you don't want — applied before a single call becomes training or eval material.</p>
+          <p>Redact sensitive fields, set data boundaries, scope exports, cap budgets, and purge what you don't want. Every captured call passes through a <span class="kdef">policy gate<span class="kdef__plain"> (a single checkpoint your rules run at)</span></span><span class="kdef-tip">A <b>policy gate</b> is the one checkpoint every captured call must pass before it can be reused. Your redaction, retention, and export rules run there, so nothing becomes training or eval material until it clears the rules you set.</span> before it can become training or eval material.</p>
         </article>
         <article class="card reveal">
           <span class="card__k">Test the behavior</span>
@@ -220,6 +231,50 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <p>Inbound APIs, webhooks, streams, batches, queues, object storage, warehouses, and CLI imports come in; signed artifacts and proof go out.</p>
         </article>
       </div>
+    </div>
+  </section>
+
+  <!-- data boundary diagram: intake -> policy gate -> dataset/eval/compile/export, inside one tenant -->
+  <section class="section" id="plat-boundary" style="scroll-margin-top:80px">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="eyebrow">The data boundary</p>
+        <h2>Where your data crosses, and where it cannot.</h2>
+        <p class="lede">Every captured call enters one workspace, passes the policy gate once, and only then reaches your dataset, evals, compile, and exports. Nothing crosses the tenant perimeter, and nothing skips the gate.</p>
+      </div>
+      <figure class="kspec" role="group" aria-label="Data boundary: live calls enter one tenant workspace, pass through a single policy gate, then reach the dataset, evals, compile, and export. The dashed perimeter marks the tenant boundary that data never crosses.">
+        <svg viewBox="0 0 360 230" aria-hidden="true">
+          <!-- tenant perimeter -->
+          <rect class="pb-perim" x="78" y="14" width="274" height="206" rx="6"/>
+          <text class="pb-perim-lbl" x="86" y="28">tenant perimeter</text>
+          <!-- intake (outside boundary edge) -->
+          <rect class="ks-node" x="6" y="92" width="56" height="40" rx="3"/>
+          <text class="pb-node-lbl" x="14" y="110">intake</text>
+          <text class="pb-sub" x="14" y="122">live calls</text>
+          <path class="pb-flow" d="M62 112 H104"/>
+          <!-- policy gate (the one lit part) -->
+          <rect class="ks-node is-key pb-gate" x="104" y="86" width="60" height="52" rx="3"/>
+          <text class="pb-node-lbl" x="114" y="108" style="fill:var(--sheet-accent,#0A6E45)">policy</text>
+          <text class="pb-node-lbl" x="114" y="120" style="fill:var(--sheet-accent,#0A6E45)">gate</text>
+          <!-- fan out to four governed destinations -->
+          <path class="pb-flow" d="M164 112 H196"/>
+          <path class="pb-flow" d="M196 112 V40 H266"/>
+          <path class="pb-flow" d="M196 112 V78 H266"/>
+          <path class="pb-flow" d="M196 112 H266"/>
+          <path class="pb-flow" d="M196 112 V184 H266"/>
+          <rect class="ks-node" x="266" y="26" width="78" height="28" rx="3"/><text class="pb-node-lbl" x="276" y="44">dataset</text>
+          <rect class="ks-node" x="266" y="64" width="78" height="28" rx="3"/><text class="pb-node-lbl" x="276" y="82">evals</text>
+          <rect class="ks-node" x="266" y="98" width="78" height="28" rx="3"/><text class="pb-node-lbl" x="276" y="116">compile</text>
+          <rect class="ks-node" x="266" y="170" width="78" height="28" rx="3"/><text class="pb-node-lbl" x="276" y="188">export</text>
+          <text class="pb-sub" x="276" y="156">redaction + scope applied</text>
+        </svg>
+        <ol class="kspec__legend">
+          <li><span class="ks-num">01</span><span><b>Intake</b> takes your live calls in as raw records, each tagged with source and timestamp.</span></li>
+          <li><span class="ks-num">02</span><span><b>Policy gate</b> is the one checkpoint. Redaction, retention, and export scope run here before anything moves on.</span></li>
+          <li><span class="ks-num">03</span><span><b>Dataset, evals, compile</b> only ever see records that already cleared the gate.</span></li>
+          <li><span class="ks-num">04</span><span><b>Export</b> leaves the perimeter only with the scope the gate allowed, carrying its own receipt.</span></li>
+        </ol>
+      </figure>
     </div>
   </section>
 
@@ -314,7 +369,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="feat__copy">
         <p class="eyebrow">Compose</p>
         <h2>Every claim traces back to something you can open.</h2>
-        <p class="lede">Every capture, rule, eval, compile, runtime, and export is a real record you can query — pull up any claim and see exactly what backs it and where it came from.</p>
+        <p class="lede">Every capture, rule, eval, compile, runtime, and export is a real record you can query - pull up any claim and see exactly what backs it and where it came from. Every record is <span class="kdef">tenant-scoped<span class="kdef__plain"> (walled off to one workspace)</span></span><span class="kdef-tip">A <b>tenant</b> is one isolated workspace, usually one team or customer. <b>Tenant-scoped</b> means a record belongs to exactly one tenant and is never visible to, or mixed with, another. One team's captures cannot leak into another team's datasets.</span>, so one team's data never bleeds into another's.</p>
         <ul class="feat__list">
           <li><b>Your account</b> &middot; organization, workspace, project, environment, key, service account, connector, role, policy, owner</li>
           <li><b>Your behavior</b> &middot; source, capture, trace, prompt/tool/schema version, dataset, label set, eval, failure, regression set</li>

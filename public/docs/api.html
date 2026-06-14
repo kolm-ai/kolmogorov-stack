@@ -116,6 +116,17 @@ body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
 .group-intro summary,.route-detail summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink-3);font-family:var(--font-mono);font-size:12px}
 .legacy{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);max-width:var(--measure);line-height:1.65}
 .legacy code{font-size:11.5px}
+/* how-to-read legend for the generated catalog */
+.api-legend{margin:var(--rhy-2) 0 var(--s5);padding:var(--s4);border-radius:var(--r);background:var(--sheen),var(--panel);box-shadow:var(--plate)}
+.api-legend h2{margin-top:0}
+.api-legend p{font-size:14px;color:var(--ink-2);max-width:var(--measure)}
+.api-legend__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3);margin-top:var(--s4)}
+@media(max-width:760px){.api-legend__grid{grid-template-columns:1fr}}
+.api-legend__row{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:11px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--well)}
+.api-legend__row b{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
+.api-legend__row span.ex{color:var(--ink-2);font-size:12.5px;line-height:1.5}
+.api-legend__key{flex:none;align-self:start;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.api-legend__methods{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
 </style>
 </head>
 <body class="t-docs">
@@ -451,6 +462,32 @@ curl -s "$KOLM_BASE/v1/lake/stats" -H "Authorization: Bearer $KOLM_KEY"</code></
   <code>#messages</code> &rarr; Anthropic-compatible messages group.
   <code>#capture</code>, <code>#lake</code>, <code>#optimize</code>, <code>#datasets</code>, <code>#labels</code>, <code>#synth</code>, <code>#sim</code>, <code>#bakeoff</code>, <code>#training</code>, <code>#runtime</code>, <code>#devices</code>, <code>#sync</code>, <code>#team</code> jump to the matching group below.
 </p>
+
+<section class="api-legend" aria-labelledby="api-legend-title">
+  <h2 id="api-legend-title">How to read this reference</h2>
+  <p>Every entry below is generated from a route source file, so it never drifts from the running API. Each route shows an HTTP method, a path, a status tag, a sample <code>curl</code>, and a sample response. Here is what those parts mean.</p>
+  <div class="api-legend__grid">
+    <div class="api-legend__row">
+      <span class="api-legend__key" aria-hidden="true">
+        <span class="m m-get">GET</span><span class="m m-post">POST</span>
+      </span>
+      <span class="ex"><b>HTTP method</b>The verb the route expects. <span class="m m-get" style="vertical-align:middle">GET</span> reads, <span class="m m-post" style="vertical-align:middle">POST</span> creates or runs, <span class="m m-put" style="vertical-align:middle">PUT</span> and <span class="m m-patch" style="vertical-align:middle">PATCH</span> update, <span class="m m-delete" style="vertical-align:middle">DELETE</span> removes. Color is backed by the label text, so the verb reads without relying on color.</span>
+    </div>
+    <div class="api-legend__row">
+      <span class="api-legend__key" aria-hidden="true"><span class="route-live">reference-ready</span><span class="route-stub">source-indexed</span></span>
+      <span class="ex"><b>Status tag</b><span class="route-live" style="vertical-align:middle">reference-ready</span> routes carry source comments describing the request body and behavior. <span class="route-stub" style="vertical-align:middle">source-indexed</span> routes are confirmed wired from source but use the shared JSON envelope without a hand-written body. Tick <em>Show Reference-Ready Routes Only</em> above to hide the source-indexed ones.</span>
+    </div>
+    <div class="api-legend__row">
+      <span class="api-legend__key" aria-hidden="true"><code class="route-stub" style="border-style:dashed">group (n)</code></span>
+      <span class="ex"><b>Group</b>Routes are bucketed by their first path segment, for example everything under <code>/v1/compile/*</code> sits in the <em>Compile</em> group. The number in parentheses is how many routes that group holds. Use the <em>Groups</em> index above to jump.</span>
+    </div>
+    <div class="api-legend__row">
+      <span class="api-legend__key" aria-hidden="true"><code>{ }</code></span>
+      <span class="ex"><b>Body and envelope</b>A route's <span class="kdef">envelope<span class="kdef__plain"> (the shared JSON wrapper every reply uses)</span></span><span class="kdef-tip">The <b>envelope</b> is the shared JSON wrapper around every reply: it always carries <code>ok</code> and <code>request_id</code>, with the route-specific payload alongside. Knowing it lets you write one parser for all routes.</span> always returns <code>ok</code> and a <code>request_id</code>. Where a route documents a request body, it appears under the path as <code>{ field, field? }</code>; a trailing <code>?</code> marks an optional field. <span class="kdef">Idempotent<span class="kdef__plain"> (safe to retry without doubling the work)</span></span><span class="kdef-tip"><b>Idempotent</b> means sending the same request twice has the same effect as sending it once. Write routes accept an <code>idempotency_key</code> so a retry after a timeout never double-charges or double-creates.</span> write routes accept an <code>idempotency_key</code>.</span>
+    </div>
+  </div>
+  <p style="margin-top:var(--s4)">Auth in one line: send <code>Authorization: Bearer &lt;key&gt;</code> (or the <code>x-api-key</code> alias) on every <code>/v1/*</code> route except the public ones noted under <a href="#base">Base URL &amp; auth</a>. Prefer the machine contract? Pull <a href="/openapi.json">/openapi.json</a> and generate a client instead of copying by hand.</p>
+</section>
 
 <section class="api-group" id="group-ab" data-api-group data-group-search="ab ab /v1/ab/configure /v1/ab/feedback /v1/ab/metrics /v1/ab/promote /v1/ab/status">
 <h2>Ab <span class="group-count">(5)</span></h2>

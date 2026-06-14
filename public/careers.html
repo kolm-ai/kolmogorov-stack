@@ -36,6 +36,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+  /* PAGE-LOCAL: careers spacing trims only. Tokens only, no new palette. */
+  .cr-flow{margin-top:var(--s6);}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -155,6 +159,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="section__head">
       <p class="eyebrow">02 · RESEARCH NETWORK</p>
       <h2>Your name goes on the evidence.</h2>
+      <p class="lede">Here is the loop you would join, from picking up an engagement to a signed report that carries your name.</p>
+    </div>
+    <div class="kflow reveal cr-flow" style="--kn:3">
+      <div class="kstep"><span class="kstep__n">Review</span><h3 class="kstep__t">Take an engagement</h3><p class="kstep__d">Pick up a real audit and probe the agent: prompt injection, tool abuse, exfiltration.</p><span class="kstep__read"><b class="n mono">1</b> <span class="u">engagement at a time</span></span></div>
+      <div class="kstep"><span class="kstep__n">Co-sign</span><h3 class="kstep__t">Put your name on it</h3><p class="kstep__d">Findings are scoped and recorded, then sealed with a cryptographic signature alongside ours.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">signed</span></span></div>
+      <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Anyone can check it</h3><p class="kstep__d">The buyer verifies the report offline, in their own browser, against the key inside it.</p><span class="kstep__read"><b class="n mono">0</b> <span class="u">accounts needed</span></span></div>
     </div>
     <div class="split" style="align-items:center">
       <div>
@@ -188,7 +198,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="plate plate--rows">
       <div class="prow prow--hot">
         <div class="prow__name">AI-agent security researcher<span class="chip chip--ok">network</span></div>
-        <div class="prow__d">Co-review and co-sign audits. Help shape the ASR checklist and the red-team methodology.</div>
+        <div class="prow__d">Co-review and co-sign audits. Help shape the <span class="kdef">ASR<span class="kdef__plain"> (agent-security review)</span></span><span class="kdef-tip"><b>ASR</b> stands for agent-security review: the structured set of controls, like permission posture, redaction, and audit-trail integrity, that an autonomous agent is checked against before it is trusted with sensitive systems.</span> checklist and the red-team methodology.</div>
         <div class="prow__p">R-01<small>research</small></div>
       </div>
       <div class="prow">

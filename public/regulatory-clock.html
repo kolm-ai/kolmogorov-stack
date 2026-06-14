@@ -49,6 +49,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   #clock .tbl th:nth-child(2) { width: 22%; min-width: 180px; }
   #clock .tbl th:nth-child(3) { width: 37%; min-width: 260px; }
   #clock .tbl th:nth-child(4) { width: 25%; min-width: 200px; }
+  /* page-local: a one-glance status ring grid above the framework spine, and a
+     small legend so the three states read without color. Tokens only. */
+  #rc-cal { margin: var(--s5) 0 var(--s6); }
+  #rc-cal .kcal__state { text-transform: none; }
+  .rc-legend { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5);
+    margin: var(--s4) 0 0; padding: 0; list-style: none;
+    font: var(--w-ui) 12px/1.5 var(--font-mono); color: var(--ink-3); letter-spacing: .02em; }
+  .rc-legend li { display: inline-flex; align-items: center; gap: 8px; }
+  .rc-legend i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .rc-legend .l-ship { background: var(--accent); }
+  .rc-legend .l-prog { background: var(--ink-3); }
+  .rc-legend .l-open { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ink-faint); }
 </style>
 <script type="application/ld+json">
 {
@@ -196,6 +208,22 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </p>
     </div>
     <div class="seam" data-art-reveal aria-hidden="true"></div>
+
+    <!-- one-glance status rings: each framework's state, scannable in seconds -->
+    <ul class="kcal" id="rc-cal" data-art-reveal aria-label="Framework readiness at a glance, as of 2026-06-10">
+      <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">EU AI Act</span><span class="kcal__state">deferred to 2027</span></span></li>
+      <li class="kcal__item" data-state="shipped"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:0"/></svg></span><span class="kcal__b"><span class="kcal__std">ISO/IEC 42001</span><span class="kcal__state">certifiable now</span></span></li>
+      <li class="kcal__item" data-state="shipped"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:11"/></svg></span><span class="kcal__b"><span class="kcal__std">CSA AICM / STAR</span><span class="kcal__state">live</span></span></li>
+      <li class="kcal__item" data-state="progress"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:62"/></svg></span><span class="kcal__b"><span class="kcal__std">NIST COSAiS</span><span class="kcal__state">in draft</span></span></li>
+      <li class="kcal__item" data-state="shipped"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:0"/></svg></span><span class="kcal__b"><span class="kcal__std">OWASP Agentic</span><span class="kcal__state">published</span></span></li>
+      <li class="kcal__item" data-state="shipped"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:11"/></svg></span><span class="kcal__b"><span class="kcal__std">HITRUST AI</span><span class="kcal__state">available now</span></span></li>
+    </ul>
+    <ul class="rc-legend" aria-label="What the ring states mean">
+      <li><i class="l-ship" aria-hidden="true"></i><span>Live or certifiable: a full arc with a filled dot</span></li>
+      <li><i class="l-prog" aria-hidden="true"></i><span>In progress or draft: a partial arc with a hollow dot</span></li>
+      <li><i class="l-open" aria-hidden="true"></i><span>Open gate, date not yet in force: a faint arc with an outline dot</span></li>
+    </ul>
+
     <div class="spine" role="list" aria-label="Framework statuses as of 2026-06-10">
       <div role="listitem">
         <p class="card__k">EU AI Act · Art.12 / Art.14</p>

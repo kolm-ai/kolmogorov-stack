@@ -40,6 +40,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
+<style>
+/* Page-scoped: plain-language "in short" orientation box (compiler terms). */
+#ct-tldr{max-width:var(--measure);margin-top:var(--s5);border:1px solid var(--line);background:var(--paper-2);padding:18px 22px}
+#ct-tldr .k{display:block;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+#ct-tldr p{margin:0;font-size:15px;line-height:1.7;color:var(--ink-2)}
+#ct-tldr b{color:var(--ink)}
+</style>
 </head>
 <body class="t-legal">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -96,6 +103,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h1 class="hero__h1">Compiler workspace terms.</h1>
       <p class="lede">These terms govern use of the Kolm API wrapper, compiler workspace, signed artifacts, specialist composition, deployment tooling, account surfaces, and related hosted services. Audit report engagements have their own surface at <a href="https://audit.kolm.ai/terms">audit.kolm.ai/terms</a>.</p>
       <p class="legal-meta">REV · COMPILER-TERMS · EFFECTIVE 2026-06-14</p>
+      <div id="ct-tldr" role="note" aria-label="In short, what these terms cover">
+        <span class="k">In short</span>
+        <p>You own your content; we use it only to run the workspace. You are responsible for your API keys, the providers and devices you connect, and reviewing artifacts before production. Signed artifacts prove <b>integrity</b>, not that a model is safe or fit for a given use. Audit report engagements are governed separately at <a href="https://audit.kolm.ai/terms">audit.kolm.ai/terms</a>. The ten articles below are the binding detail.</p>
+      </div>
     </div>
   </section>
 

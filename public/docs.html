@@ -30,6 +30,26 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+/* docs.html scoped layer: architecture mental-model + annotated quickstart.
+   Reuses kolm-2026.css tokens only; no new palette, fonts, or CDNs. */
+.dx-arch{margin:var(--s5) 0 var(--s2)}
+.dx-arch svg text{font-family:var(--font-mono)}
+.dx-qs{margin-top:var(--s4)}
+.dx-qs__step{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
+.dx-qs__step:first-child{border-top:0}
+.dx-qs__n{flex:none;width:30px;height:30px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;border:1px solid var(--line-2);background:var(--well);color:var(--accent);font-family:var(--font-mono);font-size:13px;font-variant-numeric:tabular-nums}
+.dx-qs__b{min-width:0}
+.dx-qs__call{font-family:var(--font-mono);font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.dx-qs__call b{color:var(--accent)}
+.dx-qs__d{margin:4px 0 8px;font-size:13.5px;color:var(--ink-2);max-width:none}
+.dx-qs__meta{display:flex;flex-wrap:wrap;gap:8px}
+.dx-qs__chip{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;color:var(--ink-3);border:1px solid var(--line);border-radius:var(--r-sm);padding:2px 8px;background:var(--well)}
+.dx-qs__chip b{color:var(--ink)}
+.dx-qs__resp{margin-top:8px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--well);padding:8px 10px;font-family:var(--font-mono);font-size:12px;line-height:1.6;color:var(--ink-2);overflow-x:auto}
+.dx-qs__resp .k{color:var(--accent)}
+@media(max-width:620px){.dx-qs__step{grid-template-columns:1fr}.dx-qs__n{margin-bottom:-4px}}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -141,6 +161,95 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   -H "Content-Type: application/json" \
   -d '{"task":"billing-agent","examples_file":"billing-agent.jsonl","target":"local-cpu"}'</pre>
         </div>
+
+        <p style="color:var(--ink-2);max-width:72ch;margin-top:var(--s4)">Here is what each of those three calls does, the response you should see, and roughly how long it takes. A <span class="kdef">namespace<span class="kdef__plain"> (a named bucket for one agent's traffic)</span></span><span class="kdef-tip">A <b>namespace</b> is a label you attach to one agent's calls, for example <code>billing-agent</code>. Captures, evals, and the compiled model are all scoped to it, so two agents never mix.</span> keeps each agent's traffic, examples, and compiled model separate.</p>
+        <div class="dx-qs">
+          <div class="dx-qs__step">
+            <span class="dx-qs__n">1</span>
+            <div class="dx-qs__b">
+              <p class="dx-qs__call"><b>POST</b> /v1/route/chat/completions</p>
+              <p class="dx-qs__d">Route one live, OpenAI-compatible call through Kolm instead of straight to the provider. Kolm forwards it to <code>openai:gpt-4.1-mini</code>, returns the same response shape your code already parses, and quietly records the request and reply as a captured example under the <code>billing-agent</code> namespace.</p>
+              <div class="dx-qs__meta">
+                <span class="dx-qs__chip">returns <b>200</b></span>
+                <span class="dx-qs__chip">chat completion JSON</span>
+                <span class="dx-qs__chip">typical <b>0.4 to 2 s</b></span>
+                <span class="dx-qs__chip">adds <b>1</b> captured example</span>
+              </div>
+              <pre class="dx-qs__resp" aria-label="Example response from the route call">{ "id": "chatcmpl-...", <span class="k">"choices"</span>: [ { "message": { "role": "assistant", "content": "refund_request" } } ], <span class="k">"x_kolm"</span>: { "captured": true, "namespace": "billing-agent" } }</pre>
+            </div>
+          </div>
+          <div class="dx-qs__step">
+            <span class="dx-qs__n">2</span>
+            <div class="dx-qs__b">
+              <p class="dx-qs__call"><b>GET</b> /v1/capture/export</p>
+              <p class="dx-qs__d">Pull every example captured so far for the namespace as a <span class="kdef">JSONL<span class="kdef__plain"> (one JSON record per line)</span></span><span class="kdef-tip"><b>JSONL</b> is a plain text file with one JSON object per line. It streams and appends well, which is why it is the standard shape for training and eval example sets.</span> file you own and can inspect. The <code>-o</code> flag writes it to <code>billing-agent.jsonl</code> on disk.</p>
+              <div class="dx-qs__meta">
+                <span class="dx-qs__chip">returns <b>200</b></span>
+                <span class="dx-qs__chip">file: billing-agent.jsonl</span>
+                <span class="dx-qs__chip">typical <b>under 1 s</b> per 1k rows</span>
+              </div>
+              <pre class="dx-qs__resp" aria-label="Example exported JSONL line">{"namespace":"billing-agent","input":"classify this ticket","output":"refund_request","ts":"2026-06-14T10:02:11Z"}
+{"namespace":"billing-agent","input":"where is my order","output":"order_status","ts":"2026-06-14T10:02:14Z"}</pre>
+            </div>
+          </div>
+          <div class="dx-qs__step">
+            <span class="dx-qs__n">3</span>
+            <div class="dx-qs__b">
+              <p class="dx-qs__call"><b>POST</b> /v1/compile</p>
+              <p class="dx-qs__d">Turn the captured examples into a signed, portable <code>.kolm</code> model built for <code>local-cpu</code>. Compile runs as a job, so the call returns a job id right away and the artifact is ready when the job reports <code>done</code>. The result is Ed25519-signed, so anyone can verify it later.</p>
+              <div class="dx-qs__meta">
+                <span class="dx-qs__chip">returns <b>202</b></span>
+                <span class="dx-qs__chip">job id, then .kolm artifact</span>
+                <span class="dx-qs__chip">typical <b>2 to 20 min</b></span>
+                <span class="dx-qs__chip">output is <b>signed</b></span>
+              </div>
+              <pre class="dx-qs__resp" aria-label="Example response from the compile call">{ "id": "cmp_018x", <span class="k">"status"</span>: "queued", "target": "local-cpu", "artifact_url": "/v1/compile/cmp_018x/.kolm" }</pre>
+            </div>
+          </div>
+        </div>
+
+        <figure class="kspec dx-arch" role="group" aria-label="Platform architecture: provider calls enter the kolm gateway, the compiler turns captured behavior into a signed .kolm artifact, and that artifact runs on your own runtimes">
+          <svg viewBox="0 0 720 220" data-art-reveal aria-hidden="true">
+            <!-- providers -->
+            <rect class="ks-node" x="14" y="24" width="150" height="36" rx="3"/>
+            <text class="ks-lbl-art" x="30" y="46">OpenAI API</text>
+            <rect class="ks-node" x="14" y="72" width="150" height="36" rx="3"/>
+            <text class="ks-lbl-art" x="30" y="94">Anthropic API</text>
+            <!-- gateway -->
+            <rect class="ks-node" x="232" y="48" width="120" height="60" rx="3"/>
+            <text class="ks-lbl-art" x="248" y="74">kolm</text>
+            <text class="ks-sub" x="248" y="92">gateway</text>
+            <!-- compiler -->
+            <rect class="ks-node" x="404" y="48" width="120" height="60" rx="3"/>
+            <text class="ks-lbl-art" x="420" y="74">compiler</text>
+            <text class="ks-sub" x="420" y="92">capture to model</text>
+            <!-- artifact (the one lit paper part) -->
+            <rect class="ks-node is-key" x="576" y="48" width="130" height="60" rx="3"/>
+            <text class="ks-lbl-art" x="592" y="74" style="fill:var(--room)">.kolm</text>
+            <text class="ks-sub" x="592" y="92" style="fill:var(--room)">signed artifact</text>
+            <!-- runtimes -->
+            <rect class="ks-node" x="576" y="150" width="40" height="30" rx="3"/>
+            <text class="ks-sub" x="586" y="169">laptop</text>
+            <rect class="ks-node" x="624" y="150" width="40" height="30" rx="3"/>
+            <text class="ks-sub" x="630" y="169">cloud</text>
+            <rect class="ks-node" x="672" y="150" width="36" height="30" rx="3"/>
+            <text class="ks-sub" x="680" y="169">edge</text>
+            <!-- connectors -->
+            <line class="ks-lead" x1="164" y1="42" x2="232" y2="66"/>
+            <line class="ks-lead" x1="164" y1="90" x2="232" y2="86"/>
+            <line class="ks-lead" x1="352" y1="78" x2="404" y2="78"/>
+            <line class="ks-lead" x1="524" y1="78" x2="576" y2="78"/>
+            <line class="ks-lead" x1="641" y1="108" x2="641" y2="150"/>
+            <circle class="ks-dot" cx="641" cy="108" r="3"/>
+          </svg>
+          <ol class="kspec__legend">
+            <li><span class="ks-num">01</span><span><b>Your provider calls</b> keep their OpenAI- or Anthropic-compatible shape. You change the base URL, not your SDK.</span></li>
+            <li><span class="ks-num">02</span><span>The <b>kolm gateway</b> forwards each call and captures the request and reply as a governed example.</span></li>
+            <li><span class="ks-num">03</span><span>The <b>compiler</b> turns captured behavior, once your evals cover it, into a model.</span></li>
+            <li><span class="ks-num">04</span><span>The <b>.kolm artifact</b> is Ed25519-signed and portable. It is the one thing you own and carry out.</span></li>
+            <li><span class="ks-num">05</span><span><b>Runtimes</b> are wherever you run it: a laptop CPU, your private cloud, or the edge.</span></li>
+          </ol>
+        </figure>
 
         <div class="section__head" id="reference">
           <p class="eyebrow">02 · REFERENCE</p>

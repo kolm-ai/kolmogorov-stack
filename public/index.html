@@ -48,6 +48,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "softwareHelp": "https://kolm.ai/docs"
 }
 </script>
+<style>
+/* page-scoped: home positioning figure. Datasheet idiom only. */
+#home-why{display:grid;grid-template-columns:1.05fr .95fr;gap:32px;align-items:center}
+@media(max-width:820px){#home-why{grid-template-columns:1fr;gap:20px}}
+#home-why .kfig{margin:0}
+.home-why__pts{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.home-why__pts li{display:flex;gap:9px;font-size:13.5px;line-height:1.5;color:var(--ink-2,#b9bcb4)}
+.home-why__pts li b{color:var(--ink,#eef0ea);font-weight:600}
+.home-why__pts svg{flex:none;width:15px;height:15px;margin-top:2px;color:var(--accent,#3FE5A0)}
+</style>
 </head>
 <body class="t-marketing home">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -140,23 +150,23 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <rect class="nd" x="62" y="42" width="316" height="46" rx="5"/>
           <path class="nd-hi" d="M63 43 h314"/>
           <path class="reg" d="M62 48 v-6 h6"/>
-          <text class="lbl" x="82" y="64">Capture</text>
-          <text class="sub" x="82" y="79">POST /v1/route &middot; secrets stripped before write</text>
+          <text class="lbl" x="82" y="64">1 &middot; Capture your live calls</text>
+          <text class="sub" x="82" y="79">point your traffic in &middot; secrets stripped before write</text>
           <text class="tag" x="358" y="60" text-anchor="end">01</text>
           <path class="spine" d="M220 88 L220 106"/>
           <rect class="nd" x="62" y="106" width="316" height="46" rx="5"/>
           <path class="nd-hi" d="M63 107 h314"/>
           <path class="reg" d="M62 112 v-6 h6"/>
-          <text class="lbl" x="82" y="128">Compile</text>
-          <text class="sub" x="82" y="143">evals 6/6 &middot; recipe + receipt &middot; Ed25519 sign</text>
+          <text class="lbl" x="82" y="128">2 &middot; Compile into one signed file</text>
+          <text class="sub" x="82" y="143">evals 6/6 pass &middot; recipe + receipt &middot; Ed25519 sign</text>
           <text class="tag" x="358" y="124" text-anchor="end">02</text>
           <path class="spine" d="M220 152 L220 170"/>
           <rect class="nd-art" x="78" y="170" width="284" height="54" rx="5"/>
           <text class="lbl-art" x="98" y="194">claims-redactor.kolm</text>
-          <text class="sub-art" x="98" y="210">signed &middot; 142 mb &middot; one portable file</text>
+          <text class="sub-art" x="98" y="210">the model you own &middot; signed &middot; 142 mb &middot; one file</text>
           <path class="ok-stroke" d="M326 189 l4 4 l8 -9" style="stroke:var(--sheet-accent)"/>
           <path class="spine" d="M220 224 L220 250 M220 250 L63 270 M220 250 L161 270 M220 250 L279 270 M220 250 L377 270"/>
-          <text class="tag" x="220" y="245" text-anchor="middle">runs on the hardware that fits</text>
+          <text class="tag" x="220" y="245" text-anchor="middle">3 &middot; run it on the hardware that fits</text>
           <rect class="chip" x="22" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="63" y="293" text-anchor="middle">laptop</text>
           <rect class="chip" x="120" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="161" y="293" text-anchor="middle">edge</text>
           <rect class="chip" x="238" y="270" width="82" height="38" rx="4"/><text class="chip-t" x="279" y="293" text-anchor="middle">server</text>
@@ -180,6 +190,35 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <div class="proof__cell reveal"><b class="is-mono">Ed25519</b><span>signed &mdash; verify it yourself</span></div>
         <div class="proof__cell reveal"><b>142 MB</b><span>median model &mdash; small enough to move</span></div>
       </div>
+    </div>
+  </section>
+
+  <!-- s-why - the one-line case for owning vs renting, as a 2-axis position -->
+  <section class="section" id="why">
+    <div class="wrap" id="home-why">
+      <div>
+        <p class="eyebrow">Why own it</p>
+        <h2>You already paid to establish this behavior. Stop renting it back.</h2>
+        <p class="lede">Calling a frontier API charges you every time you re-run behavior you have already proven works. Kolm captures that behavior once and compiles it into a model you run yourself, so repeat calls cost what your own hardware costs, not a frontier rate, forever.</p>
+        <ul class="home-why__pts">
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Rent (frontier API):</b> low effort to start, but you pay a per-call rate on every repeat, with no artifact to keep.</span></li>
+          <li><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Own (a .kolm):</b> one capture, one signed file, then run it on hardware you already have at your own cost.</span></li>
+        </ul>
+      </div>
+      <figure class="kfig" role="img" aria-label="Ownership versus recurring cost: renting a frontier API keeps recurring cost high; owning a compiled .kolm puts you in the low recurring-cost, high-ownership corner, the best quadrant.">
+        <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
+        <svg class="kchart" viewBox="0 0 320 200" data-art-reveal aria-hidden="true">
+          <line class="k-grid" x1="40" y1="50" x2="300" y2="50"/><line class="k-grid" x1="40" y1="110" x2="300" y2="110"/>
+          <line class="k-axis" x1="40" y1="20" x2="40" y2="170"/><line class="k-axis" x1="40" y1="170" x2="300" y2="170"/>
+          <text class="k-axlbl" x="40" y="190">ownership -&gt;</text><text class="k-axlbl" x="6" y="30">recurring cost</text>
+          <circle class="k-pt" cx="90" cy="55" r="6" style="--i:0"/><text class="k-lbl" x="102" y="59">frontier API</text>
+          <circle class="k-pt" cx="150" cy="100" r="6" style="--i:1"/><text class="k-lbl" x="162" y="104">self-host raw</text>
+          <line class="k-cross" x1="40" y1="148" x2="248" y2="148"/><line class="k-cross" x1="248" y1="148" x2="248" y2="170"/>
+          <circle class="k-pt is-best" cx="248" cy="148" r="7" style="--i:2"/><circle class="k-ring" cx="248" cy="148" r="12"/>
+          <text class="k-val" x="214" y="138">a .kolm</text>
+        </svg>
+        <figcaption class="kfig__cap">A compiled <b>.kolm</b> holds the high-ownership, low-recurring-cost corner.</figcaption>
+      </figure>
     </div>
   </section>
 

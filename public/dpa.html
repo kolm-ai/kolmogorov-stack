@@ -77,6 +77,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
 .legal-card b, .legal-card strong { color: var(--ink); }
 @media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+/* Page-scoped: controller / processor relationship diagram (DPA). */
+#dpa-roles{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:0;margin:20px 0 6px;max-width:640px}
+#dpa-roles .role{border:1px solid var(--line);background:var(--paper-2);padding:16px 18px}
+#dpa-roles .role .t{display:block;font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent-on-ink,var(--accent));margin-bottom:6px}
+#dpa-roles .role b{display:block;font-size:16px;color:var(--ink);margin-bottom:6px}
+#dpa-roles .role span.d{display:block;font-size:13px;line-height:1.55;color:var(--ink-2)}
+#dpa-roles .arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 6px;min-width:96px}
+#dpa-roles .arrow svg{width:90px;height:14px;color:var(--ink-3)}
+#dpa-roles .arrow .lbl{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--ink-3);margin-top:6px;text-align:center}
+@media (max-width:640px){#dpa-roles{grid-template-columns:1fr}#dpa-roles .arrow{min-width:0;padding:8px 0}#dpa-roles .arrow svg{display:none}}
 </style>
 </head>
 <body class="t-legal">
@@ -151,6 +161,23 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <h2>The short version</h2>
     </div>
     <p>kolm.ai processes only the agent audit data and redacted log material you submit for review. We act as your processor; you remain the controller. All data is tenant-isolated. We notify you in writing within 72 hours of any confirmed breach. Sub-processors are listed in Section 6. We provide at least 30 days' written notice before adding any new sub-processor.</p>
+    <p style="margin-top:var(--s4)">Controller and processor are GDPR roles. The controller decides why and how data is processed; the processor only acts on the controller's instructions. In plain terms:</p>
+    <div id="dpa-roles" role="group" aria-label="You are the controller and decide what is processed; kolm is the processor and acts on your instructions">
+      <div class="role">
+        <span class="t">You</span>
+        <b>Controller</b>
+        <span class="d">You decide what data is in scope and why. You stay in control of it.</span>
+      </div>
+      <div class="arrow" aria-hidden="true">
+        <svg viewBox="0 0 90 14" fill="none"><path d="M2 7h78" stroke="currentColor" stroke-width="1.4"/><path d="M78 3l6 4-6 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="lbl">instructs</span>
+      </div>
+      <div class="role">
+        <span class="t">kolm</span>
+        <b>Processor</b>
+        <span class="d">We act only on your documented instructions, and never for our own purposes.</span>
+      </div>
+    </div>
   </div>
 </section>
 

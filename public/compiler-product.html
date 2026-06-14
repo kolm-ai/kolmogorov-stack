@@ -30,6 +30,20 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style id="cmp-scope">
+  /* compiler-product.html scoped: compile vs compose contrast + build loop */
+  #cmp-vs .cmp-pair{display:grid;gap:18px;grid-template-columns:1fr 1fr;margin-top:8px}
+  @media (max-width:720px){#cmp-vs .cmp-pair{grid-template-columns:1fr}}
+  #cmp-vs .cmp-card{border:1px solid var(--line,#23262a);border-radius:4px;padding:20px;background:var(--panel,#0F1011)}
+  #cmp-vs .cmp-card h3{margin:0 0 4px}
+  #cmp-vs .cmp-card .cmp-eq{font:600 11px/1.4 var(--mono,ui-monospace,monospace);color:var(--accent);letter-spacing:.04em;margin:0 0 10px}
+  #cmp-vs .cmp-card .cmp-ex{margin:12px 0 0;font:500 12px/1.5 var(--mono,ui-monospace,monospace);color:var(--ink-3,#9aa0a6);border-top:1px solid var(--line,#23262a);padding-top:10px}
+  #cmp-vs .cmp-card .cmp-ex b{color:var(--ink-2,#c7ccd1);font-weight:600}
+  #cmp-loop .kflow{--kn:4}
+  #cmp-loop .kstep.is-fail .kstep__n{color:#e0a13a}
+  #cmp-loop .cmp-back{margin-top:14px;font:600 11px/1.4 var(--mono,ui-monospace,monospace);color:var(--ink-3,#9aa0a6);text-align:center}
+  #cmp-loop .cmp-back b{color:var(--accent)}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -163,12 +177,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <div class="step reveal">
           <span class="step__n">02 &middot; /v1/compile</span>
           <h3>Compile</h3>
-          <p>Turn that behavior into a deployable <code>.kolm</code> file &mdash; model, recipe, evals and signature in one package you can move anywhere.</p>
+          <p><b>One behavior in, one signed model out.</b> <span class="kdef">Compile<span class="kdef__plain"> (build one captured behavior into a model)</span></span><span class="kdef-tip">To <b>compile</b> is to take one captured behavior and build it into a single deployable <code>.kolm</code> model: model weights, recipe, evals, and signature in one file. One behavior in, one model out.</span> bundles the model, recipe, evals and signature into one <code>.kolm</code> file you can move anywhere.</p>
         </div>
         <div class="step reveal">
           <span class="step__n">03 &middot; /v1/compose</span>
           <h3>Compose</h3>
-          <p>Combine your narrow specialists into one system, with routing that picks the right expert for each call.</p>
+          <p><b>Many models in, one system out.</b> <span class="kdef">Compose<span class="kdef__plain"> (combine several models into one router)</span></span><span class="kdef-tip">To <b>compose</b> is to combine several compiled models into one system. A router picks the right specialist per call, for example a redactor for one request and a classifier for the next. Compile makes the parts; compose assembles them.</span> joins your narrow specialists, with routing that picks the right expert for each call.</p>
         </div>
         <div class="step reveal">
           <span class="step__n">04 &middot; /v1/devices</span>
@@ -176,6 +190,49 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <p>Run it on the smallest runtime that fits, then serve, install or export &mdash; on the hardware you already have.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- compile vs compose, made concrete -->
+  <section class="section" id="cmp-vs">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="eyebrow">Compile vs compose</p>
+        <h2>Two different jobs, in plain terms.</h2>
+        <p class="lede">People mix these up. Compile builds one model from one behavior. Compose wires several compiled models into one routed system. You compile first, then compose.</p>
+      </div>
+      <div class="cmp-pair">
+        <div class="cmp-card">
+          <h3>Compile</h3>
+          <p class="cmp-eq">one behavior &rarr; one signed model</p>
+          <p>Take a single captured behavior and build it into one deployable <code>.kolm</code> file: model, recipe, evals, and signature together. The output is a part you can run on its own.</p>
+          <p class="cmp-ex"><b>Example:</b> 12,408 captured redaction calls compile into one <code>claims-redactor.kolm</code>, 142 MB, signed.</p>
+        </div>
+        <div class="cmp-card">
+          <h3>Compose</h3>
+          <p class="cmp-eq">many models &rarr; one routed system</p>
+          <p>Combine several compiled models into one system with a router that picks the right specialist per call. The output is an assembly of the parts compile produced.</p>
+          <p class="cmp-ex"><b>Example:</b> route claims to <code>redactor.kolm</code>, intent to <code>classifier.kolm</code>, summaries to <code>summarizer.kolm</code> - one endpoint.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- the build loop: test -> fail -> triage -> rebuild -> retest -> pass -> compile -->
+  <section class="section" id="cmp-loop">
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">Inside a compile</p>
+        <h2>A compile is a loop, not a button.</h2>
+        <p class="lede">A behavior does not become a signed model on the first try. Kolm runs your evals, and any failure routes back through triage and a rebuild until every gate passes. Only then does it sign and seal the file.</p>
+      </div>
+      <div class="kflow reveal" style="--kn:4" aria-label="Build loop: test, fail, triage, rebuild, retest, pass, compile">
+        <div class="kstep is-fail"><span class="kstep__n">Test</span><h3 class="kstep__t">Run the eval gates</h3><p class="kstep__d">The candidate model is scored against your locked regression set.</p><span class="kstep__read"><b class="n mono">6/8</b> <span class="u">gates pass</span></span></div>
+        <div class="kstep is-fail"><span class="kstep__n">Fail &amp; triage</span><h3 class="kstep__t">See exactly what broke</h3><p class="kstep__d">Each failing case is named with its expected and actual output.</p><span class="kstep__read"><b class="n mono">2</b> <span class="u">cases flagged</span></span></div>
+        <div class="kstep"><span class="kstep__n">Rebuild</span><h3 class="kstep__t">Fix and rebuild</h3><p class="kstep__d">Adjust the recipe or examples; Kolm rebuilds the candidate.</p><span class="kstep__read"><b class="n mono">v2</b> <span class="u">candidate</span></span></div>
+        <div class="kstep"><span class="kstep__n">Retest &amp; pass</span><h3 class="kstep__t">Pass, then compile</h3><p class="kstep__d">All gates clear, so Kolm signs and seals one portable file.</p><span class="kstep__read"><b class="n mono">8/8</b> <span class="u">pass &middot; sealed</span></span></div>
+      </div>
+      <p class="cmp-back">A failed gate loops back to <b>rebuild</b> automatically. Nothing compiles until every gate is green.</p>
     </div>
   </section>
 

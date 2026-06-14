@@ -72,6 +72,16 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   .add-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 24px}
   .add-row input{flex:1;min-width:220px;padding:11px 12px;border:1px solid var(--line-2);border-radius:var(--r-md);font-family:var(--mono);font-size:14px;background:var(--paper-sink);color:var(--ink)}
   .add-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  /* Page-scoped: role decision flow + grade legend for buyer.html only (.bp-*). */
+  .bp-guide{margin:0 0 36px}
+  .bp-guide h2{font-size:20px;margin:0 0 6px}
+  .bp-guide>p{color:var(--ink-2);font-size:14px;line-height:1.6;margin:0 0 18px;max-width:64ch}
+  .bp-grades{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 0}
+  @media (max-width:680px){.bp-grades{grid-template-columns:1fr}}
+  .bp-grade{border:1px solid var(--line-2);border-radius:var(--r-md);padding:13px 15px;background:var(--paper-2)}
+  .bp-grade b{font-family:var(--mono);font-size:13px;color:var(--ink);display:block;margin:0 0 4px}
+  .bp-grade span{color:var(--ink-2);font-size:13px;line-height:1.5}
+  .bp-grade .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}
 </style>
 </head>
 <body>
@@ -115,6 +125,32 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <h1>Buyer portfolio</h1>
   <p class="lede">The other side of the trust link. Track every AI vendor's signed readiness, evidence grade, attestation freshness and the delta since you last looked, in one pane. Each row resolves the vendor's live Trust link and shows its own staleness, so you read current evidence, never a stale PDF. This is a buyer-side seat under Continuous.</p>
 
+  <!-- Role-based decision flow: a buyer self-selects the right next step. Static, always visible. -->
+  <section class="bp-guide" aria-labelledby="bpGuideTitle">
+    <h2 id="bpGuideTitle">Pick your path</h2>
+    <p>Three jobs land here. Find the row that matches yours, then take the one action under it. Each path ends in a concrete artifact you can act on, not a status page.</p>
+    <div class="kflow reveal" style="--kn:3">
+      <div class="kstep">
+        <span class="kstep__n">Reviewing one vendor</span>
+        <h3 class="kstep__t">Verify a single report</h3>
+        <p class="kstep__d">You have a signed report in hand and want to confirm it is intact and from the issuer you expect. Skip the portfolio.</p>
+        <span class="kstep__read"><b class="n mono"><a href="/verify" style="color:inherit">Verify</a></b> <span class="u">offline check</span></span>
+      </div>
+      <div class="kstep">
+        <span class="kstep__n">Watching many vendors</span>
+        <h3 class="kstep__t">Open your portfolio</h3>
+        <p class="kstep__d">You track several vendors and want one pane that resolves each live Trust link and flags staleness. Add a slug below to start.</p>
+        <span class="kstep__read"><b class="n mono">1 pane</b> <span class="u">all vendors, live</span></span>
+      </div>
+      <div class="kstep">
+        <span class="kstep__n">No seat yet</span>
+        <h3 class="kstep__t">Enable the buyer seat</h3>
+        <p class="kstep__d">The portfolio is part of Continuous. If you do not have a seat, this is the step that turns the pane on for your team.</p>
+        <span class="kstep__read"><b class="n mono"><a href="/contact" style="color:inherit">Talk to us</a></b> <span class="u">under Continuous</span></span>
+      </div>
+    </div>
+  </section>
+
   <div id="banner"></div>
 
   <div id="addRow" class="add-row" style="display:none">
@@ -133,7 +169,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
   <h2 id="howTitle" style="display:none">How a row reads</h2>
   <div id="howCard" class="card" style="display:none;padding:18px 20px">
-    <p style="color:var(--ink-2);margin:0 0 10px;font-size:14px;line-height:1.6">Each vendor row is resolved from its live Trust link: <strong>readiness</strong> is the signed percentage over assessed controls only, <strong>grade</strong> is the evidence tier (A capture, B hash-verified, C asserted), <strong>freshness</strong> states when the report last re-attested, and <strong>delta</strong> is the movement since the prior signed report. A vendor older than its cadence shows a <span class="pill stale">STALE</span> marker; a lapsed subscription shows <span class="pill lapsed">LAPSED</span> while staying verifiable. kolm maps findings to standards; it does not certify a vendor.</p>
+    <p style="color:var(--ink-2);margin:0 0 10px;font-size:14px;line-height:1.6">Each vendor row is resolved from its live Trust link: <strong>readiness</strong> is the signed percentage over assessed controls only (for example <span class="mono">86%</span> means 86% of the controls in scope passed, not 86% of every possible control), <strong>grade</strong> is the <span class="kdef">evidence tier<span class="kdef__plain"> (how the proof was obtained)</span></span><span class="kdef-tip">The <b>evidence tier</b> says how the finding was proven: <b>A</b> captured from live logs, <b>B</b> hash-verified against an artifact, <b>C</b> asserted by the vendor. A is the strongest.</span>, <strong>freshness</strong> states when the report last re-attested, and <strong>delta</strong> is the movement since the prior signed report (for example <span class="mono">+4 pts</span> means readiness rose four points since you last looked). A vendor older than its cadence shows a <span class="pill stale">STALE</span> marker; a lapsed subscription shows <span class="pill lapsed">LAPSED</span> while staying verifiable. kolm maps findings to standards; it does not certify a vendor.</p>
+    <div class="bp-grades" role="list" aria-label="Evidence grades explained">
+      <div class="bp-grade" role="listitem"><span class="tag">strongest</span><b>Grade A &middot; capture</b><span>The finding was read straight from the vendor's live logs. Nothing was taken on assertion.</span></div>
+      <div class="bp-grade" role="listitem"><span class="tag">verified</span><b>Grade B &middot; hash</b><span>The finding is backed by an artifact whose hash the report verifies, so the bytes are pinned.</span></div>
+      <div class="bp-grade" role="listitem"><span class="tag">weakest</span><b>Grade C &middot; asserted</b><span>The vendor stated it and signed the statement. Signed, but not independently captured.</span></div>
+    </div>
     <p class="card__map" style="margin-top:14px">Backed by <span class="mono">GET /v1/buyer/portfolio</span> and <span class="mono">POST /v1/buyer/watchlist</span> · read the <a href="/capabilities">capabilities</a></p>
   </div>
 </div>

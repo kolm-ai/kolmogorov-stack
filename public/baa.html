@@ -92,6 +92,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
 .legal-card b, .legal-card strong { color: var(--ink); }
 @media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+/* Page-scoped: "does this apply to you?" orientation for the BAA. */
+#baa-when{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 4px;max-width:720px}
+#baa-when .c{border:1px solid var(--line);background:var(--paper-2);padding:16px 18px}
+#baa-when .c .k{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+#baa-when .c b{display:block;font-size:15px;color:var(--ink);margin-bottom:6px}
+#baa-when .c p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+@media (max-width:640px){#baa-when{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="t-legal">
@@ -154,6 +161,28 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="hero__cta">
       <a class="btn btn--primary" href="mailto:dev@kolm.ai">Request the BAA</a>
       <a class="btn btn--ghost" href="/trust">Trust center</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ORIENTATION (does this apply?) -->
+<section class="section sect--dense reveal">
+  <div class="wrap">
+    <span class="idx">Orientation / Does this apply to you?</span>
+    <div class="legal legal-doc">
+      <p>PHI is Protected Health Information: individually identifiable health data such as patient records or clinical notes. This agreement only switches on when an engagement actually involves PHI. The two cases below show when it does and does not apply.</p>
+      <div id="baa-when" role="group" aria-label="When the Business Associate Agreement applies and when it does not">
+        <div class="c">
+          <span class="k">Applies</span>
+          <b>PHI is in the audit scope</b>
+          <p>You are a healthcare provider, plan, or clearinghouse, and the agent under review processes patient data you include in the evidence scope. A countersigned BAA is required before any PHI-bearing data enters scope.</p>
+        </div>
+        <div class="c">
+          <span class="k">Does not apply</span>
+          <b>No PHI is in scope</b>
+          <p>The standard kolm audit does not require PHI. If no PHI is included, this agreement has no operative effect and the standard Terms and DPA govern the engagement.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>

@@ -14,6 +14,24 @@
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+  /* PAGE-LOCAL: 404 start-here mini-map. Tokens only, no new palette. */
+  .nf-map{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);
+    margin-top:var(--s7);max-width:62ch;}
+  @media (max-width:640px){.nf-map{grid-template-columns:1fr;}}
+  .nf-card{display:block;padding:16px;border-radius:var(--r-md);
+    background:var(--sheen),var(--panel);box-shadow:var(--plate);
+    color:var(--ink-2);transition:box-shadow var(--dur-micro) var(--ease-mat),transform var(--dur-micro) var(--ease-mat);}
+  .nf-card:hover{box-shadow:var(--plate),inset 0 0 0 1px var(--accent-edge);transform:translateY(-1px);}
+  .nf-card__k{display:flex;align-items:center;gap:8px;margin:0 0 7px;
+    font:600 10.5px/1 var(--font-mono);letter-spacing:var(--track-label);
+    text-transform:uppercase;color:var(--accent);}
+  .nf-card__k svg{width:13px;height:13px;flex:none;}
+  .nf-card b{display:block;color:var(--ink);font-size:14.5px;line-height:1.3;margin-bottom:4px;}
+  .nf-card span{display:block;font-size:12.5px;line-height:1.5;color:var(--ink-3);}
+  .nf-maplbl{margin-top:var(--s6);font:600 10.5px/1 var(--font-mono);
+    letter-spacing:var(--track-label);text-transform:uppercase;color:var(--ink-3);}
+</style>
 </head>
 <body class="t-marketing">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -72,6 +90,25 @@
           <a class="btn btn--ghost" href="/docs">Read the docs</a>
           <a class="btn btn--ghost" href="/account/overview">Open workspace</a>
         </div>
+
+        <p class="nf-maplbl">Where to start</p>
+        <nav class="nf-map" aria-label="Where to start">
+          <a class="nf-card" href="/how-it-works">
+            <span class="nf-card__k" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><circle cx="3.5" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="12.5" cy="8" r="1.6" fill="currentColor"/></svg>Learn</span>
+            <b>How it works</b>
+            <span>Capture, compile, compose, and deploy, end to end.</span>
+          </a>
+          <a class="nf-card" href="/docs">
+            <span class="nf-card__k" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><rect x="3" y="2.5" width="10" height="11" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Build</span>
+            <b>Docs and API</b>
+            <span>Guides, the OpenAPI spec, and worked examples.</span>
+          </a>
+          <a class="nf-card" href="/pricing">
+            <span class="nf-card__k" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M2.5 6h11M5 9.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><rect x="2.5" y="3.5" width="11" height="9" rx="1.2" stroke="currentColor" stroke-width="1.3"/></svg>Compare</span>
+            <b>Pricing</b>
+            <span>Plans and what each tier includes, no surprises.</span>
+          </a>
+        </nav>
       </div>
     </div>
   </section>

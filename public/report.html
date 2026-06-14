@@ -41,6 +41,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <script defer src="/kolm-field.js"></script>
 <script defer src="/kolm-cinema.js"></script>
 <script type="module" src="/verify-widget.js"></script>
+<style>
+/* page-local (report.html): a plain-language "what verifying does" flow and a
+   first-reader glossary affordance. Reuses the shared kflow/kdef kit. Tokens only. */
+.rep-note{color:var(--ink-2);font-size:13px;line-height:1.6;margin-top:var(--s4)}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -118,7 +123,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h1 class="hero__h1">One object your buyer can check, <span class="go">not a PDF</span> they have to trust.</h1>
         <p class="lede">
           When a deal stalls in security review, the buyer's group will not take your word, or a slide.
-          A kolm report is a single canonical object: a scope, content hashes, an Ed25519 signature over
+          A kolm report is a single <span class="kdef">canonical<span class="kdef__plain"> (one fixed byte ordering)</span></span><span class="kdef-tip">A <b>canonical</b> object is written one fixed way - keys sorted, no stray whitespace - so the same report always produces the same exact bytes and the signature can cover them.</span> object: a scope, content hashes, an Ed25519 signature over
           the exact bytes, and an append-only inclusion proof. Here is the object, line by line, then a
           real one you can verify in this browser.
         </p>
@@ -312,6 +317,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         The check needs only the report file and the key inside it.
       </p>
     </div>
+
+    <!-- first-reader walkthrough: what the verifier actually does, step by step -->
+    <div class="kflow reveal" style="--kn:4;margin-bottom:var(--s6)" aria-label="What verifying a report does, in four steps">
+      <div class="kstep"><span class="kstep__n">Open</span><h3 class="kstep__t">Load the file</h3><p class="kstep__d">The reviewer drops the one report file into the verifier. No account, no upload to us.</p><span class="kstep__read"><b class="n mono">1</b> <span class="u">file, self-contained</span></span></div>
+      <div class="kstep"><span class="kstep__n">Re-serialize</span><h3 class="kstep__t">Rebuild the bytes</h3><p class="kstep__d">The verifier re-derives the canonical bytes from the report, the same way every time.</p><span class="kstep__read"><b class="n mono">SHA-256</b> <span class="u">content digest</span></span></div>
+      <div class="kstep"><span class="kstep__n">Check seal</span><h3 class="kstep__t">Test the signature</h3><p class="kstep__d">Ed25519 confirms the bytes match the signature, using the public key inside the report.</p><span class="kstep__read"><b class="n mono">WebCrypto</b> <span class="u">in the browser</span></span></div>
+      <div class="kstep"><span class="kstep__n">Verdict</span><h3 class="kstep__t">VALID or VOID</h3><p class="kstep__d">A clean match reads VALID. One altered byte reads VOID, in front of the reviewer.</p><span class="kstep__read"><b class="n mono">VALID</b> <span class="u">or VOID, no grey</span></span></div>
+    </div>
+
     <div class="split">
       <div class="artifact">
         <span class="tryit">Live · runs in your browser</span>

@@ -117,6 +117,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .badge-stage--dark .badge-stage__tag { color: var(--on-ink-3); }
 .badge-stage a { display: inline-flex; }
 .badge-stage img { display: block; width: 300px; height: 40px; max-width: 100%; }
+/* page-local: anatomy figure for the badge artwork, token-only */
+#bdg-anat { margin: var(--s5) auto 0; max-width: 640px; }
+#bdg-anat svg { width: 100%; height: auto; }
+#bdg-anat .ba-dark { fill: var(--ink-deep); }
+#bdg-anat .ba-green { fill: var(--sheet-accent); }
+#bdg-anat .ba-mark { fill: var(--accent); }
+#bdg-anat .ba-tx { fill: var(--on-ink); font: 700 13px/1 var(--font-sans); }
+#bdg-anat .ba-tx2 { fill: var(--on-ink); font: 600 11px/1 var(--font-sans); }
 </style>
 </head>
 <body>
@@ -165,8 +173,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h1 class="hero__h1">Put the proof <span class="go">where buyers already look.</span></h1>
         <p class="lede">
           You have a signed evidence report. Now make it findable. The kolm verify badge
-          sits on your site, docs, or README and links straight to your Trust Link, where
-          anyone checks your report offline against kolm's published key. The click lands
+          sits on your site, docs, or <span class="kdef">README<span class="kdef__plain"> (a project's front-page text file)</span></span><span class="kdef-tip">A <b>README</b> is the front-page document of a code repository on a host like GitHub, the first thing a visitor reads.</span>
+          and links straight to your <span class="kdef">Trust Link<span class="kdef__plain"> (your public evidence page)</span></span><span class="kdef-tip">Your <b>Trust Link</b> is the public page kolm hosts for your signed report, for example kolm.ai/v1/trust/your-slug. Anyone with the link can open and check it.</span>,
+          where anyone checks your report offline against kolm's published key. The click lands
           on proof, not a marketing page.
         </p>
         <div class="hero__cta">
@@ -253,6 +262,31 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p>A reviewer needs no kolm login and uploads nothing. The report carries the key it was signed with, so the check needs nothing from us.</p>
       </div>
     </div>
+    <!-- anatomy of the badge artwork itself: what each part says -->
+    <figure class="kspec" id="bdg-anat" role="group" aria-label="Anatomy of the verify badge: a brand mark on the left, a verifiable-evidence claim on the right, the whole thing a link to your Trust Link">
+      <svg viewBox="0 0 600 150" aria-hidden="true">
+        <!-- the badge artwork, scaled up -->
+        <rect class="ba-dark" x="150" y="55" width="118" height="40" rx="6"/>
+        <rect class="ba-green" x="268" y="55" width="182" height="40" rx="0"/>
+        <rect class="ba-green" x="438" y="55" width="12" height="40"/>
+        <g class="ba-mark"><rect x="166" y="65" width="4" height="20" rx=".4"/><rect x="175" y="68" width="4" height="14" rx=".4"/><rect x="184" y="71" width="4" height="8" rx=".4"/></g>
+        <text class="ba-tx" x="194" y="80">kolm</text>
+        <path d="M285 76l4 4 8-8.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text class="ba-tx2" x="304" y="79">verifiable evidence</text>
+        <!-- callout 01: the mark -->
+        <line class="ks-lead" x1="200" y1="55" x2="200" y2="30"/><circle class="ks-dot" cx="200" cy="30" r="3"/><text class="ks-num" x="170" y="22">01</text><text class="ks-sub" x="170" y="34">brand mark</text>
+        <!-- callout 02: the claim -->
+        <line class="ks-lead" x1="360" y1="55" x2="360" y2="30"/><circle class="ks-dot" cx="360" cy="30" r="3"/><text class="ks-num" x="330" y="22">02</text><text class="ks-sub" x="330" y="34">the claim</text>
+        <!-- callout 03: the link target -->
+        <line class="ks-lead" x1="300" y1="95" x2="300" y2="124"/><circle class="ks-dot" cx="300" cy="124" r="3"/><text class="ks-num" x="270" y="120">03</text><text class="ks-sub" x="270" y="132">links out</text>
+      </svg>
+      <ol class="kspec__legend">
+        <li><span class="ks-num">01</span><span><b>The three-bar mark</b> tells a reviewer this is a real kolm badge, not a look-alike image.</span></li>
+        <li><span class="ks-num">02</span><span><b>Verifiable evidence</b> is the only claim the badge makes: signed and checkable, never certified secure.</span></li>
+        <li><span class="ks-num">03</span><span><b>The whole badge is a link</b> to your Trust Link, where the signature is checked in the visitor's browser.</span></li>
+      </ol>
+    </figure>
+
     <p class="hero__claim" style="margin-top:var(--s5)">
       The badge is a signpost. The proof is the signed report it points to. <a href="/report" style="border-bottom:1px solid var(--line-2)">See the anatomy of a report.</a>
     </p>

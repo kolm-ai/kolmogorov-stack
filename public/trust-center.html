@@ -66,6 +66,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 /* #mechanics hosts a .field--band; a non-ink host needs its own stacking
    context or the z:-3 canvas paints behind the section background */
 #mechanics{isolation:isolate}
+/* page-local: the Trust Link lifecycle flow inside the mechanics chapter */
+#mechanics .tcflow{margin:var(--s5) 0}
 </style>
 </head>
 <body class="tc">
@@ -185,6 +187,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </svg>
     <figcaption class="diag__cap"><b>Trust path</b> what the viewer opens: verification runs in the buyer's own browser against pinned public keys</figcaption>
     </figure>
+    <div class="kflow reveal tcflow" style="--kn:4" aria-label="Trust Link lifecycle: mint, share, open, verify">
+      <div class="kstep"><span class="kstep__n">Mint</span><h3 class="kstep__t">Generate the link</h3><p class="kstep__d">A signed report mints an unguessable Trust Link. Possession of the slug is the grant.</p><span class="kstep__read"><b class="n mono">1</b> <span class="u">capability token</span></span></div>
+      <div class="kstep"><span class="kstep__n">Share</span><h3 class="kstep__t">Send it to a buyer</h3><p class="kstep__d">No account is created for the viewer. The link opens the signed report directly.</p><span class="kstep__read"><b class="n mono">0</b> <span class="u">logins required</span></span></div>
+      <div class="kstep"><span class="kstep__n">Open</span><h3 class="kstep__t">Count the engagement</h3><p class="kstep__d">Each open is a view; repeat opens by one viewer collapse to one distinct viewer.</p><span class="kstep__read"><b class="n mono">views</b> <span class="u">+ distinct</span></span></div>
+      <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Check it offline</h3><p class="kstep__d">The viewer verifies the signature in their own browser, with no kolm server in the trust path.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">verified</span></span></div>
+    </div>
     <div class="grid grid--3">
       <div class="card">
         <p class="card__k">Capability token</p>

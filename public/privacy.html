@@ -50,6 +50,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   }
 }
 </script>
+<style>
+/* Page-scoped: plain-language "what this covers" orientation box (privacy). */
+#pv-tldr{max-width:var(--measure);margin-top:var(--s5);border:1px solid var(--line);background:var(--paper-2);padding:18px 22px}
+#pv-tldr .k{display:block;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+#pv-tldr p{margin:0;font-size:15px;line-height:1.7;color:var(--ink-2)}
+#pv-tldr b{color:var(--ink)}
+</style>
 </head>
 <body class="t-legal">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -106,6 +113,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <h1>Privacy Policy</h1>
     <p class="lede">kolm.ai issues cryptographically signed, offline-verifiable evidence reports for AI application security reviews. This policy explains, in plain terms, what personal and organisational data we collect to deliver that service, why we collect it, how long we keep it, who we share it with, and how you exercise your rights under GDPR, CCPA, and equivalent laws.</p>
     <p class="legal-meta">Last updated: <strong>2026-06-07</strong> (supersedes 2026-05-22)</p>
+    <div id="pv-tldr" role="note" aria-label="What this policy covers, in plain language">
+      <span class="k">What this covers, in plain language</span>
+      <p>We collect only what running the service needs: your account and billing contact, the redacted material you submit for an audit, and basic request logs. We <b>do not</b> sell your data, use it to train any model, or buy data about you from brokers. Audit material is deleted within 90 days of report delivery. You can ask to access, correct, or delete your data at <a href="mailto:dev@kolm.ai">dev@kolm.ai</a>. The sections below are the binding detail.</p>
+    </div>
   </div>
 </section>
 

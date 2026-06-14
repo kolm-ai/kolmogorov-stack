@@ -221,7 +221,52 @@
     host.appendChild(frag);
   }
 
-  function init() { wireBackdrop(); syncThemeColor(); wireReveal(); wireNav(); wirePointerLight(); wireField(); wireCount(); }
+  // ---- EXPLAINER + DIAGRAM KIT (visuals wave 2026-06-14) ----------------------
+  // kdef: inline definition affordance. Each .kdef term reveals a short plain-
+  // language definition on hover AND keyboard focus. Fully accessible (button-
+  // semantics, aria-describedby, aria-expanded, Esc to dismiss) and idempotent
+  // (data-kdef-wired guard). Fail-open: with JS off, the .kdef__plain parenthetical
+  // stays visible inline and the .kdef-tip never appears, so no information is lost.
+  function wireKdef() {
+    var defs = document.querySelectorAll('.kdef:not([data-kdef-wired])');
+    if (!defs.length) return;
+    var uid = 0;
+    defs.forEach(function (term) {
+      var tip = term.nextElementSibling;
+      if (!tip || !tip.classList || !tip.classList.contains('kdef-tip')) return;
+      term.setAttribute('data-kdef-wired', '1');
+      // promote to a real control without changing the tag
+      if (!term.hasAttribute('tabindex') && term.tagName !== 'BUTTON' && term.tagName !== 'A') {
+        term.setAttribute('tabindex', '0');
+      }
+      if (!term.hasAttribute('role') && term.tagName !== 'BUTTON') term.setAttribute('role', 'button');
+      if (!tip.id) tip.id = 'kdef-tip-' + (++uid);
+      term.setAttribute('aria-describedby', tip.id);
+      term.setAttribute('aria-expanded', 'false');
+      tip.setAttribute('role', 'tooltip');
+      // JS is present: hide the no-JS inline parenthetical (it lives only in the tip now)
+      var plain = term.querySelector('.kdef__plain');
+      if (plain) plain.hidden = true;
+
+      var open = function () { term.setAttribute('aria-expanded', 'true'); };
+      var close = function () { term.setAttribute('aria-expanded', 'false'); };
+      term.addEventListener('mouseenter', open);
+      term.addEventListener('mouseleave', close);
+      term.addEventListener('focus', open);
+      term.addEventListener('blur', close);
+      term.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (term.getAttribute('aria-expanded') === 'true') close(); else open();
+      });
+      term.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { close(); term.blur(); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault();
+          if (term.getAttribute('aria-expanded') === 'true') close(); else open(); }
+      });
+    });
+  }
+
+  function init() { wireBackdrop(); syncThemeColor(); wireReveal(); wireNav(); wirePointerLight(); wireField(); wireCount(); wireKdef(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

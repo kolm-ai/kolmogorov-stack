@@ -69,6 +69,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   .vrf .ok-text { color: var(--sheet-accent); }
   .vrf .vw__check a { color: var(--sheet-ink); border-bottom: 1px solid var(--sheet-line-2); }
   .vrf .vw__check a:hover { border-color: var(--sheet-accent); }
+  /* page-local: plain-language glossary block for the crypto terms. Scoped to #vrf-jargon. */
+  #vrf-jargon .vj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s4); margin-top: var(--s5); }
+  #vrf-jargon .vj { background: var(--paper-2); border: 1px solid var(--line); border-top-color: var(--line-top); border-radius: 12px; padding: var(--s4); }
+  #vrf-jargon .vj__t { margin: 0 0 6px; font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink); }
+  #vrf-jargon .vj__p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+  #vrf-jargon .vj__eg { display: block; margin-top: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); line-height: 1.5; word-break: break-word; }
 </style>
 <script type="application/ld+json">
 {
@@ -140,7 +146,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <p class="lede" data-enter="3">
         Paste a kolm report. Verification runs in your browser. Nothing uploads.
         Load the sample or drop a <span class="mono">.json</span> file. Two things
-        are checked: the Ed25519 signature proves the bytes are untampered, and the
+        are checked: the <span class="kdef">Ed25519<span class="kdef__plain"> (the digital-signature math)</span></span><span class="kdef-tip"><b>Ed25519</b> is a widely used public-key signature scheme. The signer holds a private key; anyone can check the signature with the matching public key. It is the same family of math used to sign software releases.</span> signature proves the bytes are untampered, and the
         signing key is matched against kolm's published issuer keyring, so a report
         re-signed with someone else's key cannot pass as ours. No account, no kolm
         server in the path.
@@ -296,6 +302,51 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
     <figcaption class="diag__cap"><b>Trust path</b> verification runs in the buyer's own browser against pinned public keys</figcaption>
     </figure>
     <p class="scope">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 2b. PLAIN LANGUAGE: the words behind the checks -->
+<section class="section reveal" id="vrf-jargon">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">02 / In plain language</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>The four words behind the green check.</h2>
+      <p class="lede">No cryptography background needed. Here is what each term means, with a concrete example, and the order the checks run in.</p>
+    </div>
+
+    <div class="kflow reveal" style="--kn:4" aria-label="What verification does, step by step">
+      <div class="kstep"><span class="kstep__n">Read</span><h3 class="kstep__t">Parse the report</h3><p class="kstep__d">The pasted JSON is read in your browser. Nothing is uploaded.</p><span class="kstep__read"><b class="n mono">0</b> <span class="u">bytes sent</span></span></div>
+      <div class="kstep"><span class="kstep__n">Canonical</span><h3 class="kstep__t">Re-serialize the bytes</h3><p class="kstep__d">The signed fields are put back in one fixed order so the exact signed bytes can be reproduced.</p><span class="kstep__read"><b class="n mono">1</b> <span class="u">canonical form</span></span></div>
+      <div class="kstep"><span class="kstep__n">Signature</span><h3 class="kstep__t">Check Ed25519</h3><p class="kstep__d">The embedded public key checks the signature over those bytes. One changed byte fails.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">verified</span></span></div>
+      <div class="kstep"><span class="kstep__n">Issuer</span><h3 class="kstep__t">Match the keyring</h3><p class="kstep__d">The key is matched against kolm's published issuers, so a rogue key cannot pass as ours.</p><span class="kstep__read"><b class="n mono">2</b> <span class="u">tiers held</span></span></div>
+    </div>
+
+    <div class="vj-grid">
+      <div class="vj">
+        <h3 class="vj__t">Ed25519</h3>
+        <p class="vj__p">The digital-signature math. The signer holds a secret private key; anyone can check the result with the matching public key. The same family of math used to sign software releases.</p>
+        <span class="vj__eg">private key signs &middot; public key checks</span>
+      </div>
+      <div class="vj">
+        <h3 class="vj__t">Hash</h3>
+        <p class="vj__p">A short fixed-length fingerprint of a file. Change one character anywhere and the fingerprint changes completely, so it is an exact tamper detector.</p>
+        <span class="vj__eg">"report" then "Report" gives a wholly different digest</span>
+      </div>
+      <div class="vj">
+        <h3 class="vj__t">Canonical bytes</h3>
+        <p class="vj__p">One fixed way to write out the report's fields. Because the order and spacing are pinned, the signer and the verifier hash the exact same bytes and reach the same answer.</p>
+        <span class="vj__eg">same fields, one and only one byte sequence</span>
+      </div>
+      <div class="vj">
+        <h3 class="vj__t">Offline, in your browser</h3>
+        <p class="vj__p">Every check runs locally on this page. The report never leaves your machine and no kolm server sits in the trust path, so there is no back end that could quietly return a green check.</p>
+        <span class="vj__eg">unplug the network and it still verifies</span>
+      </div>
+    </div>
       </div>
     </div>
   </div>

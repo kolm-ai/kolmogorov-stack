@@ -30,11 +30,17 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "Kolm Security and Control Posture",
+<style>
+  /* page-local: attack-surface map + plain-language control notes. Scoped to
+     #sec-surface so nothing leaks into the shared system. */
+  #sec-surface .sec-why { margin-top: var(--s3); padding-top: var(--s3); border-top: 1px dashed var(--line-2); }
+  #sec-surface .sec-why b { color: var(--ink); }
+  #sec-surface .sec-eg { display: block; margin-top: 6px; font-family: var(--mono); font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+  #sec-surface .kthreat { margin-top: var(--s5); }
+  #sec-hosted .sec-why { margin-top: var(--s3); padding-top: var(--s3); border-top: 1px dashed var(--line-2); font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+  #sec-hosted .sec-why b { color: var(--ink); }
+  #sec-hosted .sec-eg { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
+
   "url": "https://kolm.ai/security",
   "description": "Security posture for Kolm's AI compiler, API control center, capture boundaries, evidence exports, hosted headers, disclosure policy, and open certification gates.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
@@ -176,7 +182,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </section>
 
   <!-- s-register-grid — hosted controls -->
-  <section class="section">
+  <section class="section" id="sec-hosted">
     <div class="wrap wrap--wide">
       <div class="section__head">
         <p class="eyebrow">02 / HOSTED CONTROLS</p>
@@ -194,6 +200,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="card__k">REG &middot; CSP</span>
           <h3>Default-src self</h3>
           <p>Scripts, styles, images, fonts, connections, frames, base URI, and form actions are constrained through the configured CSP for the hosted site.</p>
+          <p class="sec-why"><b>Why it matters.</b> CSP (Content Security Policy) is a browser rule that lists which origins a page may load code from. If an attacker injects a tag pointing at their server, the browser refuses to run it.<span class="sec-eg">e.g. &lt;script src="evil.example/x.js"&gt; is blocked before it executes</span></p>
         </div>
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
           <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
@@ -205,6 +212,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="card__k">REG &middot; TRANSPORT</span>
           <h3>Strict Transport Security</h3>
           <p>HSTS is configured with a long max age, includeSubDomains, and preload on the Express path and mirrored in deploy headers.</p>
+          <p class="sec-why"><b>Why it matters.</b> HSTS (HTTP Strict Transport Security) tells the browser to only ever reach the site over encrypted HTTPS, even if a link or a network downgrades it to plain HTTP.<span class="sec-eg">e.g. http://kolm.ai is upgraded to https before any byte leaves your machine</span></p>
         </div>
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
           <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
@@ -216,6 +224,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="card__k">REG &middot; CLICKJACKING</span>
           <h3>Frame ancestors none</h3>
           <p>The CSP and X-Frame-Options deny framing of the public app by default.</p>
+          <p class="sec-why"><b>Why it matters.</b> Clickjacking hides the real site inside an invisible frame on an attacker page so a click you think lands on a harmless button actually lands on a sensitive control. Denying framing makes that impossible.<span class="sec-eg">e.g. evil.example cannot embed the control center in a hidden iframe</span></p>
         </div>
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
           <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
@@ -227,6 +236,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="card__k">REG &middot; CONTENT TYPE</span>
           <h3>Nosniff</h3>
           <p>X-Content-Type-Options prevents MIME sniffing where browsers might otherwise execute mislabeled content.</p>
+          <p class="sec-why"><b>Why it matters.</b> MIME sniffing is when a browser guesses a file's type instead of trusting the declared one. An attacker can disguise a script as an image to slip past filters; nosniff forces the browser to honor the declared type.<span class="sec-eg">e.g. a file served as image/png is never run as JavaScript</span></p>
         </div>
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
           <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
@@ -238,6 +248,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="card__k">REG &middot; REFERRERS</span>
           <h3>Strict origin when cross-origin</h3>
           <p>The referrer policy limits what leaves the site when a user follows an external link.</p>
+          <p class="sec-why"><b>Why it matters.</b> The referrer is the address of the page you came from, sent automatically to the next site. A full address can leak a private path or token. This policy sends only the bare origin off-site.<span class="sec-eg">e.g. kolm.ai/trust/abc123 is shared off-site as just kolm.ai</span></p>
         </div>
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
           <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Enforced control">
@@ -249,8 +260,31 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="card__k">REG &middot; PERMISSIONS</span>
           <h3>No camera, mic, or geolocation</h3>
           <p>The permissions policy disables sensitive browser capabilities the compiler site does not need.</p>
+          <p class="sec-why"><b>Why it matters.</b> A permissions policy is a per-feature allow list the browser enforces. The compiler site never needs your camera, microphone, or location, so those capabilities are switched off outright rather than left to a prompt.<span class="sec-eg">e.g. a camera or location request from this origin is denied automatically</span></p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- s-surface - attack-surface ownership map + plain-language control notes -->
+  <section class="section" id="sec-surface">
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">02b / ATTACK SURFACE</p>
+        <h2>Who mitigates what, from the attacker to the running model.</h2>
+        <p class="lede">Security is shared. The map below follows one path - attacker, supply chain, the kolm boundary, the signed artifact, and your runtime - and marks, with a glyph and a label rather than color alone, where kolm carries the control and where it stays with you.</p>
+      </div>
+      <div class="kthreat" role="table" aria-label="Attack surface ownership, from attacker to runtime">
+        <div class="kthreat__hd" role="row"><span role="columnheader">Surface on the path</span><span role="columnheader">Mitigated by</span></div>
+        <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>1 &middot; Attacker edits the artifact in transit</b><span>A man-in-the-middle changes a field after kolm signs it. The Ed25519 signature covers the canonical bytes, so a single changed byte fails verification in the buyer's browser.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">kolm</span></div>
+        <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>2 &middot; Supply chain forges a kolm-styled report</b><span>An attacker re-signs a fake report with their own key. The published issuer keyring exposes it: the embedded key is not one kolm issues.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">kolm</span></div>
+        <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>3 &middot; The kolm boundary itself (capture and compile)</b><span>Inputs enter as governed API events; unknown schemas stay opaque until an adapter manifest declares structure, and policy gates run before dataset, eval, compile, and export.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">kolm</span></div>
+        <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>4 &middot; The hosted web app (browser surface)</b><span>The default web controls below (CSP, HSTS, frame denial, nosniff, referrer policy, permissions policy) reduce obvious browser, framing, and content-type risk.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">kolm</span></div>
+        <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>5 &middot; The artifact you receive, verified offline</b><span>A buyer checks the signature and issuer in their own browser. There is no kolm server in the trust path, so there is nothing for kolm to quietly return green.</span></span><span class="kthreat__own kthreat__own--you" role="cell">you</span></div>
+        <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>6 &middot; Your production secrets and key custody</b><span>Your API keys, vault, and rotation policy. kolm only ever holds the public half of its own signing key; your secrets stay on your side.</span></span><span class="kthreat__own kthreat__own--you" role="cell">you</span></div>
+        <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>7 &middot; Runtime defense of the deployed model</b><span>Live monitoring and incident response for the model once it runs on your hardware. A report describes a moment and a fixed scope, not runtime defense.</span></span><span class="kthreat__own kthreat__own--you" role="cell">you</span></div>
+      </div>
+      <p class="scope" style="margin-top:var(--s4)">Scope is contractual. Permission posture, redaction and audit-trail integrity are assessed. Injection is tested and reported, not warranted.</p>
     </div>
   </section>
 

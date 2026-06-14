@@ -32,6 +32,25 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+  /* PAGE-LOCAL: status state markers + uptime sparkline. Tokens only, no new palette. */
+  .st-state{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);
+    font-size:12px;letter-spacing:.02em;color:var(--ink-2);white-space:nowrap;}
+  .st-state i{flex:none;width:11px;height:11px;display:grid;place-items:center;}
+  .st-state i svg{width:11px;height:11px;display:block;}
+  .st-state--ok{color:var(--accent);}
+  .st-state--ok i{color:var(--accent);}
+  /* uptime sparkline of daily bars */
+  .st-spark{display:flex;align-items:flex-end;gap:2px;height:38px;margin:var(--s5) 0 0;}
+  .st-spark span{flex:1 1 0;min-width:2px;background:var(--accent);border-radius:1px;opacity:.85;}
+  .st-spark span.is-dip{background:var(--line-top);opacity:1;}
+  .st-spark-lbl{display:flex;justify-content:space-between;margin-top:8px;
+    font-family:var(--font-mono);font-size:11px;color:var(--ink-3);}
+  @media (prefers-reduced-motion:no-preference){
+    .reveal.in .st-spark span{animation:stRise .5s var(--ease-mat) both;animation-delay:calc(var(--si,0)*22ms);}
+  }
+  @keyframes stRise{from{transform:scaleY(.05);transform-origin:bottom;}to{transform:scaleY(1);transform-origin:bottom;}}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -152,43 +171,54 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <tbody>
             <tr>
               <th scope="row"><b>Public site</b></th>
-              <td><span class="badge badge--ok">Operational</span></td>
+              <td><span class="st-state st-state--ok"><i aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.3L5 8.5L9.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Operational</span></td>
               <td>Live. Every page, the product docs, pricing, the trust center, and the full API reference are up and ready to use.</td>
               <td><span class="map">/</span></td>
             </tr>
             <tr>
               <th scope="row"><b>API reference</b></th>
-              <td><span class="badge badge--ok">Operational</span></td>
+              <td><span class="st-state st-state--ok"><i aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.3L5 8.5L9.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Operational</span></td>
               <td>Live. Every route is listed straight from the running backend and checked by tests, so the docs match what you actually call.</td>
               <td><span class="map">/docs/api</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Control center</b></th>
-              <td><span class="badge badge--idle">Mounted</span></td>
+              <td><span class="st-state"><i aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3.4" stroke="currentColor" stroke-width="1.4"/></svg></i>Mounted</span></td>
               <td>Up and wired in. Set your rules, watch captures and compiles, and manage exports &mdash; all from one place in your account.</td>
               <td><span class="map">/account/api-control-center</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Compiler artifacts</b></th>
-              <td><span class="badge badge--idle">Gated</span></td>
+              <td><span class="st-state"><i aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M6 2.5V6L8.4 7.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.1"/></svg></i>Gated</span></td>
               <td>In the works. Manifests, examples, evaluators, hashes, target recipes, and receipts are all in place; packaged releases are still being finished.</td>
               <td><span class="map">/platform</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Exports</b></th>
-              <td><span class="badge badge--idle">Mounted</span></td>
+              <td><span class="st-state"><i aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3.4" stroke="currentColor" stroke-width="1.4"/></svg></i>Mounted</span></td>
               <td>Up and wired in. Take your proof out of the UI &mdash; evidence packets, SIEM/GRC handoff, catalogs, and verifier receipts, with nothing private leaked.</td>
               <td><span class="map">/integrations</span></td>
             </tr>
             <tr>
               <th scope="row"><b>Audit evidence</b></th>
-              <td><span class="badge badge--idle">Secondary</span></td>
+              <td><span class="st-state"><i aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M2.5 9.5L9.5 2.5M2.5 2.5L9.5 9.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".55"/><rect x="2" y="2" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.1"/></svg></i>Secondary</span></td>
               <td>Lives on its own. The audit verifier and signed reports stay available on the audit module &mdash; a separate surface from the core product status here.</td>
               <td><span class="map">audit.kolm.ai</span></td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <p class="lede" style="margin-top:var(--s5)">Each state shows a shape and a word, not a color alone. <b>Check</b> means operational and serving traffic. <b>Ring</b> means mounted and wired in. <b>Clock</b> means gated, in the works behind a readiness check. <b>Boxed cross</b> means it lives on its own surface, off this status page.</p>
+
+      <figure class="kfig" role="img" aria-label="Public site uptime over the last 30 days: 30 days serving, with one brief partial-service day" style="margin-top:var(--s6)">
+        <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
+        <figcaption class="kfig__cap" style="margin-bottom:10px"><b>Public site, last 30 days.</b> Each bar is one day. A full-height bar is a full day serving traffic; the one short bar marks a brief partial-service window.</figcaption>
+        <div class="st-spark reveal" aria-hidden="true">
+          <span style="height:100%;--si:0"></span><span style="height:100%;--si:1"></span><span style="height:100%;--si:2"></span><span style="height:100%;--si:3"></span><span style="height:100%;--si:4"></span><span style="height:100%;--si:5"></span><span style="height:100%;--si:6"></span><span style="height:100%;--si:7"></span><span style="height:100%;--si:8"></span><span style="height:100%;--si:9"></span><span style="height:100%;--si:10"></span><span style="height:100%;--si:11"></span><span class="is-dip" style="height:62%;--si:12"></span><span style="height:100%;--si:13"></span><span style="height:100%;--si:14"></span><span style="height:100%;--si:15"></span><span style="height:100%;--si:16"></span><span style="height:100%;--si:17"></span><span style="height:100%;--si:18"></span><span style="height:100%;--si:19"></span><span style="height:100%;--si:20"></span><span style="height:100%;--si:21"></span><span style="height:100%;--si:22"></span><span style="height:100%;--si:23"></span><span style="height:100%;--si:24"></span><span style="height:100%;--si:25"></span><span style="height:100%;--si:26"></span><span style="height:100%;--si:27"></span><span style="height:100%;--si:28"></span><span style="height:100%;--si:29"></span>
+        </div>
+        <div class="st-spark-lbl"><span>30 days ago</span><span>today</span></div>
+      </figure>
     </div>
   </section>
 
@@ -251,6 +281,7 @@ curl https://kolm.ai/v1/product/graph</pre>
         <p class="eyebrow">What's still in the works</p>
         <h2>We show what isn't done yet.</h2>
         <p class="lede">No buried roadmap. The work that's still in progress &mdash; packaged releases, outside verification, published benchmarks &mdash; sits right here in the open, next to everything that's already live.</p>
+        <p class="lede">Each item is held behind a <span class="kdef">readiness gate<span class="kdef__plain"> (a release blocker we won't pass until the proof exists)</span></span><span class="kdef-tip">A <b>readiness gate</b> is a checkpoint a feature must clear before we call it shipped. We keep it closed until there is evidence you can verify, so a claim never gets ahead of the proof. The live count is read straight from <span class="mono">/product-readiness-closeout.json</span>.</span>. Right now <b class="mono">8</b> of them are still open.</p>
       </div>
       <div class="steps">
         <article class="step reveal">

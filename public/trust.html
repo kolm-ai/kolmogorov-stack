@@ -31,6 +31,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+  /* page-local: gate-state legend + reviewer flow framing. Scoped to namespaced ids. */
+  #gate-rings .gr-legend { display: flex; flex-wrap: wrap; gap: var(--s4); margin-top: var(--s4); font-size: 13px; color: var(--ink-3); }
+  #gate-rings .gr-legend b { color: var(--ink); font-weight: 600; }
+  #gate-rings .kcal { margin-top: var(--s5); }
+  #reviewer-flow .kflow { margin-top: var(--s5); }
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -163,8 +170,21 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap">
       <div class="section__head">
         <p class="eyebrow">02 / Open readiness gates</p>
-        <h2>The strongest trust copy is honest about what is not done.</h2>
+        <h2>The strongest trust copy is clear about what is not done.</h2>
         <p class="lede">The closeout ledger has 8 open requirements. Marketing and product UI must not describe these as fully shipped until the status is promoted by evidence and verification commands.</p>
+      </div>
+      <div id="gate-rings">
+        <ul class="kcal" data-art-reveal aria-label="Readiness gate status: every gate below is open and not yet claimable">
+          <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">Benchmarks</span><span class="kcal__state">open gate</span></span></li>
+          <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">Certifications</span><span class="kcal__state">open gate</span></span></li>
+          <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">Install channels</span><span class="kcal__state">open gate</span></span></li>
+          <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">Runtime adoption</span><span class="kcal__state">open gate</span></span></li>
+          <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">Format stewardship</span><span class="kcal__state">open gate</span></span></li>
+          <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">SDK release</span><span class="kcal__state">open gate</span></span></li>
+          <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">Mobile packages</span><span class="kcal__state">open gate</span></span></li>
+          <li class="kcal__item" data-state="open"><span class="kcal__ring" aria-hidden="true"><svg viewBox="0 0 42 42"><circle class="kc-track" cx="21" cy="21" r="18"/><circle class="kc-arc" cx="21" cy="21" r="18" style="--kc-dash:113;--kc-off:96"/></svg></span><span class="kcal__b"><span class="kcal__std">Browser channel</span><span class="kcal__state">open gate</span></span></li>
+        </ul>
+        <p class="gr-legend"><span><b>Open gate</b> &middot; an outline ring marks a requirement that is built locally but not yet proven in public. None of the gates below are claimable as shipped until their evidence is published.</span></p>
       </div>
       <div class="grid grid--4">
         <div class="card">
@@ -240,12 +260,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <section class="section" id="reviewer-path">
+  <section class="section" id="reviewer-flow">
     <div class="wrap">
       <div class="section__head">
         <p class="eyebrow">04 / Reviewer path</p>
         <h2>A reviewer should be able to disprove us quickly.</h2>
-        <p class="lede">If a claim cannot survive inspection, it should be removed or moved to the readiness ledger.</p>
+        <p class="lede">If a claim cannot survive inspection, it should be removed or moved to the readiness ledger. Five surfaces, in order, each ending in something you can open and check.</p>
+      </div>
+      <div class="kflow reveal" style="--kn:5" aria-label="Reviewer path: five surfaces to inspect, in order">
+        <div class="kstep"><span class="kstep__n">Controls</span><h3 class="kstep__t">Open API control</h3><p class="kstep__d">Confirm channel, policy, governance, and export coverage in the account payload.</p><span class="kstep__read"><b class="n mono">17</b> <span class="u">channel families</span></span></div>
+        <div class="kstep"><span class="kstep__n">Docs</span><h3 class="kstep__t">Read the API reference</h3><p class="kstep__d">Check the objects behind capture, compile, artifacts, receipts, and exports.</p><span class="kstep__read"><b class="n mono">OpenAPI</b> <span class="u">JSON</span></span></div>
+        <div class="kstep"><span class="kstep__n">Caveats</span><h3 class="kstep__t">Read the readiness JSON</h3><p class="kstep__d">See which benchmark, certification, package, and partner items stay unclaimable.</p><span class="kstep__read"><b class="n mono">8</b> <span class="u">open gates</span></span></div>
+        <div class="kstep"><span class="kstep__n">Position</span><h3 class="kstep__t">See the control path</h3><p class="kstep__d">How kolm connects source systems, policy gates, compile state, and proof exports.</p><span class="kstep__read"><b class="n mono">290+</b> <span class="u">mapped players</span></span></div>
+        <div class="kstep"><span class="kstep__n">Runtime</span><h3 class="kstep__t">Confirm target fit</h3><p class="kstep__d">The runtime matrix separates targets by fit, recipe, receipt, and release gate.</p><span class="kstep__read"><b class="n mono">8</b> <span class="u">target paths</span></span></div>
       </div>
       <div class="grid grid--2">
         <div class="card">

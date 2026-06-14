@@ -82,6 +82,14 @@
   .empty{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
   .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
   [hidden]{display:none!important}
+  /* page-local: a static legend explaining the four workspace meters the JS
+     renders below. System tokens only. */
+  .meter-legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 8px}
+  .meter-legend>div{padding:12px 13px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+  .meter-legend dt{color:var(--ink);font-size:12.5px;font-weight:600;margin:0 0 4px}
+  .meter-legend dd{margin:0;color:var(--ink-2);font-size:12px;line-height:1.5}
+  @media (max-width:760px){.meter-legend{grid-template-columns:1fr 1fr}}
+  @media (max-width:460px){.meter-legend{grid-template-columns:1fr}}
   @media (max-width:920px){
     .hero-shell,.grid,.surfaces,.jobs,.proof-strip,.preview-gate,.auth{grid-template-columns:1fr}
     .topbar{align-items:flex-start;flex-direction:column;margin-bottom:34px}
@@ -174,6 +182,13 @@
   <section class="panel" data-product-readiness aria-label="What's live and what's in progress">
     <p class="muted">See exactly what's shipping and what's still in progress - live, from <a href="/v1/product/graph">/v1/product/graph</a>, <a href="/product-readiness-closeout.json">/product-readiness-closeout.json</a>, and the local <span class="mono">readiness-counts</span> ledger. The <span class="mono">readiness-closeout</span> view names every remaining package, benchmark, and partner step by name, so you always know where each runtime stands.</p>
   </section>
+
+  <dl class="meter-legend" aria-label="What the workspace meters below mean">
+    <div><dt>Calls captured</dt><dd>Live API calls recorded into your workspace, ready to compile from.</dd></div>
+    <div><dt>Compile jobs</dt><dd>Runs that turn your captured behavior into a model you own.</dd></div>
+    <div><dt>Models you own</dt><dd>Finished signed .kolm artifacts, each one portable and verifiable.</dd></div>
+    <div><dt>Runtimes ready</dt><dd>Hardware targets a model can deploy to right now, from laptop to fleet.</dd></div>
+  </dl>
 
   <div id="banner"></div>
   <div id="auth" class="auth" hidden aria-label="Open your workspace">

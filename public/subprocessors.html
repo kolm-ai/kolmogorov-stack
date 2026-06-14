@@ -45,6 +45,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .legal p{color:var(--ink-2);line-height:1.7;text-wrap:pretty}
 .legal .tbl-wrap{margin:18px 0 6px;width:min(880px,calc(100vw - 48px));margin-left:50%;transform:translateX(-50%)}
 .updated{margin-top:var(--s5);padding-top:14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);max-width:72ch}
+/* Page-scoped: where-data-goes orientation diagram (sub-processors). */
+#sp-flow{margin:22px auto 6px;width:min(880px,calc(100vw - 48px))}
+#sp-flow .kthreat__surface b{display:block}
 </style>
 <script type="application/ld+json">
 {
@@ -145,6 +148,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <h1>Sub-processors</h1>
     <p class="lede" style="max-width:62ch">kolm's audits run on a small set of infrastructure providers, and customer data stays out of any system that does not need it. This page lists sub-processors by the role they play. It is referenced by our <a href="/dpa">Data Processing Addendum</a> and kept current as the list changes.</p>
     <p class="legal-meta">Last updated 1 June 2026</p>
+  </div>
+</section>
+
+<!-- ============================================================ ORIENTATION (where data goes) -->
+<section class="section sect--dense reveal">
+  <div class="wrap legal-doc legal-doc--wide">
+    <span class="idx">Orientation / Where your data goes</span>
+    <h2>Where your data goes</h2>
+    <p>A sub-processor is a third party we rely on to run part of the service, for example the cloud that hosts our servers. The map below shows which categories of data reach a sub-processor and which never leave kolm. As a concrete example: a single signed report (around 40 KB of findings text) is stored with our hosting and object-storage providers, while the private signing key that makes it verifiable stays inside our key-management service and is never sent to any other role.</p>
+    <div id="sp-flow" class="kthreat" role="table" aria-label="Which data categories reach a sub-processor and which stay inside kolm">
+      <div class="kthreat__hd" role="row"><span role="columnheader">Data category</span><span role="columnheader">Where it lives</span></div>
+      <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Signed report contents</b><span>The findings text and integrity records, around 40 KB per report.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">sub-processor</span></div>
+      <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Contact name and email</b><span>Used only to coordinate the engagement and send delivery notices.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">sub-processor</span></div>
+      <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Billing contact</b><span>Card data is handled by the payment processor, never by kolm.</span></span><span class="kthreat__own kthreat__own--kolm" role="cell">sub-processor</span></div>
+      <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Private signing key</b><span>Held in a key-management service; makes every report verifiable.</span></span><span class="kthreat__own kthreat__own--you" role="cell">stays in kolm</span></div>
+      <div class="kthreat__row" role="row"><span class="kthreat__surface" role="cell"><b>Un-redacted source logs</b><span>Redaction is applied before storage; raw material is not retained.</span></span><span class="kthreat__own kthreat__own--you" role="cell">stays in kolm</span></div>
+    </div>
+    <p style="font-size:13.5px;color:var(--ink-3);margin-top:14px">Marker reads: <b>sub-processor</b> means the category reaches one of the roles in the table below; <b>stays in kolm</b> means it never leaves our own systems.</p>
   </div>
 </section>
 

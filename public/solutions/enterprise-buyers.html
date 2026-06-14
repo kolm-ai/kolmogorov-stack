@@ -40,6 +40,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<style>
+  /* Page-scoped for enterprise-buyers.html only (.eb-*). Reuses the shared kflow kit. */
+  .eb-flow{margin:var(--s5) 0 0}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -220,6 +224,41 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   </div>
 </section>
 
+<!-- ============================================================ 1b. YOUR PATH (kflow) -->
+<section class="section reveal" id="reviewer-path">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">01b / Your path</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>Your situation, what kolm does, the proof to check.</h2>
+      <p class="lede">One line of sight from a vendor asking for access to a verdict you ran yourself. Each step carries the concrete output it produces.</p>
+    </div>
+    <div class="kflow reveal eb-flow" style="--kn:3">
+      <div class="kstep">
+        <span class="kstep__n">Your situation</span>
+        <h3 class="kstep__t">An agent wants in</h3>
+        <p class="kstep__d">A vendor's AI application asks for access to your environment and hands you a questionnaire. That moves the burden of proof onto your team, with nothing you can test.</p>
+        <span class="kstep__read"><b class="n mono">0 lines</b> <span class="u">you can verify</span></span>
+      </div>
+      <div class="kstep">
+        <span class="kstep__n">What kolm does</span>
+        <h3 class="kstep__t">Turns claims into a signed object</h3>
+        <p class="kstep__d">Require the vendor's signed kolm report instead. It carries the findings, the scope, and the issuer's public key inside one object you can open.</p>
+        <span class="kstep__read"><b class="n mono">1 object</b> <span class="u">key travels inside</span></span>
+      </div>
+      <div class="kstep">
+        <span class="kstep__n">Proof to check</span>
+        <h3 class="kstep__t">You run the check</h3>
+        <p class="kstep__d">Verify the signature in your own browser, confirm the key against your pinned keyring, then read each finding in the frameworks you already enforce.</p>
+        <span class="kstep__read"><b class="n mono">VALID</b> <span class="u">offline, no account</span></span>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============================================================ 3. WHAT TO REQUIRE -->
 <section class="section sect--air reveal" id="evidence">
   <div class="wrap">
@@ -274,7 +313,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="num-ghost" aria-hidden="true">03</span>
     <div class="section__head">
       <h2>Two checks. Your browser. No server.</h2>
-      <p class="lede">Both run on WebCrypto in your own browser. One confirms the bytes are intact, the other confirms who signed them. kolm is never in the path.</p>
+      <p class="lede">Both run on <span class="kdef">WebCrypto<span class="kdef__plain"> (the browser's built-in crypto)</span></span><span class="kdef-tip"><b>WebCrypto</b> is the cryptography built into every modern browser. The signature check runs there locally, so no code or data leaves your machine.</span> in your own browser. One confirms the bytes are intact, the other confirms who signed them by matching the key against your <span class="kdef">pinned keyring<span class="kdef__plain"> (the issuer keys you trust)</span></span><span class="kdef-tip">A <b>pinned keyring</b> is the short list of issuer public keys your team has decided to trust. A report signed by a key outside that list fails the issuer check even if its signature is valid.</span>. kolm is never in the path.</p>
     </div>
     <div class="grid grid--2" style="align-items:start">
       <div class="card">

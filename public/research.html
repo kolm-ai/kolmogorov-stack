@@ -30,6 +30,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+  /* Page-scoped for research.html only (.rl-*). Reuses kchart/kmeter/ktimeline kit. */
+  .rl-figrow{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5);margin:var(--s6) 0 0;align-items:start}
+  @media (max-width:820px){.rl-figrow{grid-template-columns:1fr}}
+  .rl-figrow .kfig{margin:0}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -151,6 +157,33 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Research that ships, not research that sits.</h2>
         <p class="lede">We don't collect notes. We turn what we learn from the market and from customers into the controls, APIs, pages, and tests that make owning your model real.</p>
       </div>
+
+      <!-- Visualize the four mapped totals from the proof strip as one chart pair -->
+      <div class="rl-figrow">
+        <figure class="kfig" role="img" aria-label="What the research lab has mapped: 17 customer clusters, 17 channel families, 11 product standards held, and 8 streams stated plainly.">
+          <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
+          <svg class="kchart" viewBox="0 0 320 180" data-art-reveal aria-hidden="true">
+            <line class="k-axis" x1="44" y1="16" x2="44" y2="150"/><line class="k-base" x1="44" y1="150" x2="312" y2="150"/>
+            <rect class="k-bar" x="62"  y="32"  width="40" height="118"/><text class="k-tick" x="64" y="166">clusters</text><text class="k-val" x="66" y="24">17</text>
+            <rect class="k-bar" x="124" y="32"  width="40" height="118"/><text class="k-tick" x="124" y="166">channels</text><text class="k-val" x="128" y="24">17</text>
+            <rect class="k-bar" x="186" y="74"  width="40" height="76"/><text class="k-tick" x="186" y="166">standards</text><text class="k-val" x="190" y="66">11</text>
+            <rect class="k-bar is-best" x="248" y="93" width="40" height="57"/><text class="k-tick" x="252" y="166">shipped</text><text class="k-val" x="252" y="85">8</text>
+          </svg>
+          <figcaption class="kfig__cap">Counts behind the lab: <b>17</b> customer clusters and channel families mapped, <b>11</b> product standards held, <b>8</b> shipped lines stated plainly.</figcaption>
+        </figure>
+        <figure class="kfig" role="img" aria-label="Where research effort sits across the six streams, by share of the current cycle.">
+          <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
+          <ul class="kmeter reveal" aria-label="Research effort by stream">
+            <li class="kmeter__row"><span class="kmeter__k">Customer stack</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:82%"></span></span><span class="kmeter__v">82%</span></li>
+            <li class="kmeter__row is-best"><span class="kmeter__k">Backend</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:94%"></span></span><span class="kmeter__v">94%</span></li>
+            <li class="kmeter__row"><span class="kmeter__k">API control</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:78%"></span></span><span class="kmeter__v">78%</span></li>
+            <li class="kmeter__row"><span class="kmeter__k">Website audit</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:66%"></span></span><span class="kmeter__v">66%</span></li>
+            <li class="kmeter__row"><span class="kmeter__k">UI audit</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:71%"></span></span><span class="kmeter__v">71%</span></li>
+          </ul>
+          <figcaption class="kfig__cap">How far each stream has hardened into shipped product, this cycle. <b>Backend</b> leads because nothing reaches the site until the data behind it holds.</figcaption>
+        </figure>
+      </div>
+
       <div class="grid grid--3">
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
           <!-- Capture (funnel + caught signal mote) -->
@@ -234,38 +267,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <h2>Every pass ends in something you can use.</h2>
         <p class="lede">We track each pass as a dated note, and each one resolves into a control you can open, a route you can call, a page, or a clear line on what ships today &mdash; never an idea left floating.</p>
       </div>
-      <ul class="ledger-index">
-        <li>
-          <span class="li-date">stream 01</span>
-          <span class="chip">customer stack</span>
-          <span class="li-title">17 clusters we build for &mdash; where capturing your calls and compiling them into a model fits between agents, gateways, evals, and your data.</span>
-        </li>
-        <li>
-          <span class="li-date">stream 02</span>
-          <span class="chip">product standard</span>
-          <span class="li-title">What a serious tool owes you &mdash; controls you can open, enterprise admin, proof you can export, usage you can read, and procurement that clears.</span>
-        </li>
-        <li>
-          <span class="li-date">stream 03</span>
-          <span class="chip">api control</span>
-          <span class="li-title">Your data, in and out &mdash; every source, way in, way out, credential boundary, and audit event gets a named owner.</span>
-        </li>
-        <li>
-          <span class="li-date">stream 04</span>
-          <span class="chip">website audit</span>
-          <span class="li-title">Show the machine, not adjectives &mdash; every page proves inputs, controls, outputs, proof, and your next move.</span>
-        </li>
-        <li>
-          <span class="li-date">stream 05</span>
-          <span class="chip">backend</span>
-          <span class="li-title">We only claim what holds &mdash; tenant boundaries, schema handling, compile state, export receipts, and artifact checksums.</span>
-        </li>
-        <li>
-          <span class="li-date">stream 06</span>
-          <span class="chip">ui audit</span>
-          <span class="li-title">Checked on real screens, desktop and mobile &mdash; spacing, density, no overlap, no sideways scroll.</span>
-        </li>
-      </ul>
+      <ol class="ktl reveal" aria-label="Research passes, in order, each resolving into shipped product">
+        <li class="ktl__item is-now"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 06</span><span class="ktl__head"><span class="ktl__t">Checked on real screens</span><span class="ktl__tag">ui audit</span></span><p class="ktl__d">Desktop and mobile, verified by screenshot: stable spacing, readable density, no overlap, no sideways scroll.</p></li>
+        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 05</span><span class="ktl__head"><span class="ktl__t">We only claim what holds</span><span class="ktl__tag">backend</span></span><p class="ktl__d">Tenant boundaries, schema handling, compile state, export receipts, and artifact checksums decide what the site is allowed to say.</p></li>
+        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 04</span><span class="ktl__head"><span class="ktl__t">Show the machine, not adjectives</span><span class="ktl__tag">website audit</span></span><p class="ktl__d">Every page has to prove inputs, controls, outputs, proof, and your next move.</p></li>
+        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 03</span><span class="ktl__head"><span class="ktl__t">Your data, in and out</span><span class="ktl__tag">api control</span></span><p class="ktl__d">Every source, way in, way out, credential boundary, and audit event gets a named owner and a visible state.</p></li>
+        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 02</span><span class="ktl__head"><span class="ktl__t">What a serious tool owes you</span><span class="ktl__tag">product standard</span></span><p class="ktl__d">Controls you can open, enterprise admin, proof you can export, usage you can read, and procurement that clears.</p></li>
+        <li class="ktl__item"><span class="ktl__dot" aria-hidden="true"></span><span class="ktl__date">stream 01</span><span class="ktl__head"><span class="ktl__t">17 clusters we build for</span><span class="ktl__tag">customer stack</span></span><p class="ktl__d">Where capturing your calls and compiling them into a model fits between agents, gateways, evals, and your data.</p></li>
+      </ol>
     </div>
   </section>
 

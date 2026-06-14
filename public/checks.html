@@ -39,6 +39,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<style>
+/* checks.html scoped layer: control matrix view. Reuses the shared kmatrix kit
+   and kolm-2026.css tokens only. No price or count phrase is changed here. */
+.cx-matrix{margin-top:var(--s5)}
+.cx-matrix .kmatrix th[scope=row] b{color:var(--ink)}
+.cx-matrix__lead{color:var(--ink-2);max-width:74ch;margin:var(--s5) 0 var(--s3)}
+.cx-matrix__lead b{color:var(--ink)}
+.cx-pill{display:inline-block;font-family:var(--font-mono);font-size:11px;letter-spacing:.03em;color:var(--ink-3)}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -308,6 +317,31 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </table>
     </div>
     <p class="how__foot"><b>Eight controls</b> · <b>Six frameworks</b> · the mapping travels inside the signed object: follow any finding to its control, and that control to the clause the reviewer reads from. kolm maps findings to standards, it never certifies compliance.</p>
+
+    <p class="cx-matrix__lead">The same controls, read a second way: which <b>pillar</b> each one sits under, and <b>how</b> it is evaluated. <span class="kdef">Assessed<span class="kdef__plain"> (a posture is examined and stated)</span></span><span class="kdef-tip"><b>Assessed</b> means we examine a posture, for example scopes held versus scopes used, and state what we find. It is a measured fact about the setup.</span> means a posture is examined and stated as a fact. <span class="kdef">Tested<span class="kdef__plain"> (probes are run and the outcome is reported)</span></span><span class="kdef-tip"><b>Tested</b> means we run live probes, for example injection attempts, and report exactly what held and what did not. It is reported, not warranted.</span> means probes are run and the outcome is reported, never warranted.</p>
+    <div class="cx-matrix kmatrix-wrap">
+      <table class="kmatrix kmatrix--sticky" aria-label="Each control by pillar and how it is evaluated">
+        <thead>
+          <tr>
+            <th scope="col">Control</th>
+            <th scope="col">Pillar</th>
+            <th scope="col">Assessed posture</th>
+            <th scope="col">Tested and reported</th>
+            <th scope="col">In the signed report</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row"><b>ASR-1</b> Least privilege</th><td><span class="cx-pill">Permissions</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--none">no</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row"><b>ASR-2</b> Audit trail</th><td><span class="cx-pill">Audit trail</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--none">no</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row"><b>ASR-3</b> Data egress</th><td><span class="cx-pill">Data egress</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--part">partial</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row"><b>ASR-4</b> Injection</th><td><span class="cx-pill">Injection</span></td><td><span class="kcell kcell--none">no</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row"><b>ASR-5</b> Provenance</th><td><span class="cx-pill">Permissions</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--none">no</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row"><b>ASR-6</b> Evidence</th><td><span class="cx-pill">Audit trail</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--none">no</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row"><b>ASR-7</b> Memory and retrieval</th><td><span class="cx-pill">Data egress</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--part">partial</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row"><b>ASR-8</b> Multi-agent delegation</th><td><span class="cx-pill">Permissions</span></td><td><span class="kcell kcell--full">yes</span></td><td><span class="kcell kcell--part">partial</span></td><td><span class="kcell kcell--full">yes</span></td></tr>
+        </tbody>
+      </table>
+    </div>
       </div>
     </div>
   </div>

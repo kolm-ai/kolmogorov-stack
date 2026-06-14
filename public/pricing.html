@@ -29,6 +29,22 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<style id="prc-style">
+  /* page-scoped: compile-credit explainer + worked example bill for pricing.html */
+  .prc-bill{margin-top:var(--s6);border:1px solid var(--line);border-radius:var(--r-md);
+    background:var(--paper-sink);padding:clamp(16px,2.4vw,24px);max-width:560px}
+  .prc-bill__hd{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-3);margin:0 0 var(--s4)}
+  .prc-bill__hd b{color:var(--accent);font-weight:500}
+  .prc-bill ul{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:13px;
+    color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .prc-bill li{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .prc-bill li:last-child{border-bottom:0}
+  .prc-bill li b{color:var(--ink);font-weight:600}
+  .prc-bill li.prc-bill__tot{padding-top:14px;border-top:1px solid var(--line-2);border-bottom:0}
+  .prc-bill li.prc-bill__tot span{color:var(--ink)}
+  .prc-bill__note{font-family:var(--sans);font-size:12.5px;color:var(--ink-3);line-height:1.6;margin:var(--s4) 0 0}
+</style>
 <script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
@@ -136,7 +152,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="section__head">
         <p class="eyebrow">PLANS · GET /V1/PLANS</p>
         <h2>Every plan, with real limits.</h2>
-        <p class="lede">Pick where you are today and grow when you need to. These are the same plans served at <code>GET /v1/plans</code> &mdash; the numbers you see here are the numbers you get. Start a workspace and you're provisioned right away, with billing you can read in full at any time.</p>
+        <p class="lede">Pick where you are today and grow when you need to. These are the same plans served at <code>GET /v1/plans</code>; the numbers you see here are the numbers you get. Start a workspace and you're provisioned right away, with billing you can read in full at any time. Two meters do the work: <b>gateway calls</b>, the live API requests Kolm captures, and <span class="kdef">compile credits<span class="kdef__plain"> (one credit builds one model)</span></span><span class="kdef-tip">A <b>compile credit</b> is one model build. Spend one credit and Kolm turns your captured traffic into a single portable <code>.kolm</code> file: model, recipe, evals, manifest, and signed receipt. Routing your live calls spends gateway calls; building a model from them spends a compile credit.</span>.</p>
       </div>
       <div class="tiers">
 
@@ -286,6 +302,79 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="eyebrow">FIT · WHO EACH PLAN IS FOR</p>
+        <h2>Which plan, and what you get in it.</h2>
+        <p class="lede">Same two meters across every plan; the difference is scale and who is in the workspace. The matrix marks each capability with a word, not just a tint, so it scans without color. Then a worked example shows how the meters add up on a real month, using only the prices already on this page.</p>
+      </div>
+      <div class="kmatrix-wrap">
+        <table class="kmatrix kmatrix--sticky" aria-label="What is included by plan">
+          <thead>
+            <tr>
+              <th scope="col">Capability</th>
+              <th scope="col">Free</th>
+              <th scope="col">Indie</th>
+              <th scope="col" class="is-feat">Pro</th>
+              <th scope="col">Team</th>
+              <th scope="col">Business</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Capture live traffic</th>
+              <td><span class="kcell kcell--part">try</span></td>
+              <td><span class="kcell kcell--full">yes</span></td>
+              <td class="is-feat"><span class="kcell kcell--full">yes</span></td>
+              <td><span class="kcell kcell--full">yes</span></td>
+              <td><span class="kcell kcell--full">yes</span></td></tr>
+            <tr><th scope="row">Compile a model you own</th>
+              <td><span class="kcell kcell--part">1</span></td>
+              <td><span class="kcell kcell--full">10</span></td>
+              <td class="is-feat"><span class="kcell kcell--full">50</span></td>
+              <td><span class="kcell kcell--full">50</span></td>
+              <td><span class="kcell kcell--full">200</span></td></tr>
+            <tr><th scope="row">Export and download artifacts</th>
+              <td><span class="kcell kcell--none">no</span></td>
+              <td><span class="kcell kcell--full">yes</span></td>
+              <td class="is-feat"><span class="kcell kcell--full">yes</span></td>
+              <td><span class="kcell kcell--full">yes</span></td>
+              <td><span class="kcell kcell--full">yes</span></td></tr>
+            <tr><th scope="row">Shared workspace and seats</th>
+              <td><span class="kcell kcell--none">1</span></td>
+              <td><span class="kcell kcell--none">1</span></td>
+              <td class="is-feat"><span class="kcell kcell--none">1</span></td>
+              <td><span class="kcell kcell--full">5</span></td>
+              <td><span class="kcell kcell--full">20</span></td></tr>
+            <tr><th scope="row">Role-based access control</th>
+              <td><span class="kcell kcell--none">no</span></td>
+              <td><span class="kcell kcell--none">no</span></td>
+              <td class="is-feat"><span class="kcell kcell--none">no</span></td>
+              <td><span class="kcell kcell--part">team</span></td>
+              <td><span class="kcell kcell--full">yes</span></td></tr>
+            <tr><th scope="row">Fleet rollout or hosted serve</th>
+              <td><span class="kcell kcell--none">no</span></td>
+              <td><span class="kcell kcell--none">no</span></td>
+              <td class="is-feat"><span class="kcell kcell--part">self</span></td>
+              <td><span class="kcell kcell--part">self</span></td>
+              <td><span class="kcell kcell--full">yes</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prc-bill" role="group" aria-label="Worked example bill for the Pro plan">
+        <p class="prc-bill__hd"><b>Worked example</b> &middot; one month on Pro</p>
+        <ul>
+          <li><span>Pro plan</span><b>$49/mo</b></li>
+          <li><span>Gateway calls used (within 500K cap)</span><b>included</b></li>
+          <li><span>Models compiled this month (within 50 credits)</span><b>included</b></li>
+          <li class="prc-bill__tot"><span>Total this month</span><b>$49/mo</b></li>
+        </ul>
+        <p class="prc-bill__note">Worked from the prices already listed above. On Pro, up to 500K captured calls and up to 50 model builds are inside the flat $49/mo, so a month that stays under both caps is just the plan price. Cross a cap and you step up to the next plan whose numbers fit; nothing meters past the limit silently. Move to yearly and the same plan is 17% off.</p>
       </div>
     </div>
   </section>

@@ -29,6 +29,20 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<style id="cmp-style">
+  /* page-scoped: positioning chart + meter-never-stops figure for compare.html.
+     Reuses the shared diagram kit; only layout glue lives here. */
+  .cmp-figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--s6);margin-top:var(--s7)}
+  .cmp-figs .kfig{margin:0}
+  .cmp-quad{font-family:var(--mono);font-size:10px;letter-spacing:.04em;fill:var(--ink-3)}
+  .cmp-band{margin-top:var(--s7);border:1px solid var(--line);border-radius:var(--r-md);
+    background:var(--paper-sink);padding:clamp(16px,2.4vw,24px)}
+  .cmp-band__hd{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-3);margin:0 0 var(--s4)}
+  .cmp-band__hd b{color:var(--accent);font-weight:500}
+  .cmp-take{font-family:var(--sans);font-size:13.5px;color:var(--ink-2);line-height:1.6;margin:var(--s4) 0 0;max-width:62ch}
+  .cmp-take b{color:var(--ink)}
+</style>
 <script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">
 {
@@ -204,6 +218,75 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </table>
       </div>
       <p class="scope">No benchmark claims here &mdash; judge Kolm on what it lets you walk away with: a portable, signed model you own, run cheaper, and can verify yourself.</p>
+    </div>
+  </section>
+
+  <!-- s-position : rent-the-endpoint vs own-the-file, drawn as a tradeoff + a meter that stops -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="eyebrow">The shape of the choice</p>
+        <h2>Rent the endpoint, or own the file.</h2>
+        <p class="lede">Renting means you pay a per-call price for the same behavior on every request, forever, and the endpoint sits wherever the vendor put it. Owning means you compile that behavior once into a portable file and run it on your own hardware. Two pictures make the difference plain: where each option lands on cost and latency, and what happens to the bill once the model is yours.</p>
+      </div>
+
+      <div class="cmp-figs">
+        <!-- scatter: cost per 1k calls (x) vs latency (y); bubble size = model footprint -->
+        <figure class="kfig" role="img" aria-label="Cost per one thousand calls versus latency. Rented frontier endpoints sit at high cost; rented small endpoints cut cost but add a network round trip; a kolm model you own and run locally lands in the low-cost, low-latency corner. Bubble size shows model footprint.">
+          <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
+          <svg class="kchart" viewBox="0 0 340 220" data-art-reveal aria-hidden="true">
+            <line class="k-grid" x1="46" y1="56" x2="318" y2="56"/>
+            <line class="k-grid" x1="46" y1="104" x2="318" y2="104"/>
+            <line class="k-grid" x1="46" y1="152" x2="318" y2="152"/>
+            <line class="k-axis" x1="46" y1="24" x2="46" y2="188"/>
+            <line class="k-axis" x1="46" y1="188" x2="318" y2="188"/>
+            <text class="k-axlbl" x="46" y="208">cost per 1k calls -&gt;</text>
+            <text class="k-axlbl" x="8" y="34">latency</text>
+            <text class="cmp-quad" x="250" y="40">rent &middot; pay per call</text>
+            <text class="cmp-quad" x="56" y="180">own &middot; run it yourself</text>
+            <!-- rented frontier endpoint: dear, network-bound -->
+            <circle class="k-pt" cx="276" cy="64" r="9" style="--i:0"/><text class="k-lbl" x="232" y="86">rent: frontier</text>
+            <!-- rented small endpoint: cheaper call, still a round trip -->
+            <circle class="k-pt" cx="206" cy="92" r="6" style="--i:1"/><text class="k-lbl" x="218" y="96">rent: small</text>
+            <!-- kolm owned, local: low cost, no round trip -->
+            <line class="k-cross" x1="46" y1="156" x2="92" y2="156"/><line class="k-cross" x1="92" y1="156" x2="92" y2="188"/>
+            <circle class="k-pt is-best" cx="92" cy="156" r="7" style="--i:2"/><circle class="k-ring" cx="92" cy="156" r="13"/>
+            <text class="k-val" x="106" y="160">own: your .kolm</text>
+          </svg>
+          <figcaption class="kfig__cap"><b>Own the file</b> and you hold the low-cost, low-latency corner: no per-call price, no network hop to a rented endpoint.</figcaption>
+        </figure>
+
+        <!-- bars: monthly bill while renting (flat, forever) vs after you compile and own -->
+        <figure class="kfig" role="img" aria-label="Monthly cost while renting stays flat every month, shown as four equal bars. After you compile the behavior into a model you own, the same workload runs on hardware you already pay for and the recurring bill drops to a fraction.">
+          <svg class="kchart" viewBox="0 0 340 200" data-art-reveal aria-hidden="true">
+            <line class="k-axis" x1="40" y1="20" x2="40" y2="160"/>
+            <line class="k-base" x1="40" y1="160" x2="324" y2="160"/>
+            <text class="k-axlbl" x="40" y="182">renting: the meter never stops</text>
+            <rect class="k-bar" x="60"  y="60" width="30" height="100"/><text class="k-tick" x="64"  y="176">M1</text>
+            <rect class="k-bar" x="98"  y="60" width="30" height="100"/><text class="k-tick" x="102" y="176">M2</text>
+            <rect class="k-bar" x="136" y="60" width="30" height="100"/><text class="k-tick" x="140" y="176">M3</text>
+            <rect class="k-bar" x="174" y="60" width="30" height="100"/><text class="k-tick" x="178" y="176">M4</text>
+            <text class="k-val" x="60" y="52">same bill</text>
+            <!-- the compile event -->
+            <line class="k-cross" x1="222" y1="28" x2="222" y2="160" stroke-dasharray="3 4"/>
+            <text class="cmp-quad" x="214" y="24">compile</text>
+            <rect class="k-bar is-best" x="240" y="134" width="30" height="26"/><text class="k-tick" x="244" y="176">M5</text>
+            <rect class="k-bar is-best" x="278" y="134" width="30" height="26"/><text class="k-tick" x="282" y="176">M6</text>
+            <text class="k-val" x="240" y="126">you own it</text>
+          </svg>
+          <figcaption class="kfig__cap"><b>The meter stops</b> at the compile step: after that you run the model you own on hardware you already pay for.</figcaption>
+        </figure>
+      </div>
+
+      <div class="cmp-band">
+        <p class="cmp-band__hd"><b>Read it row by row</b> &middot; what each line of the table above buys you</p>
+        <ul class="kmeter reveal" aria-label="Share of the job each option leaves you owning at the end">
+          <li class="kmeter__row"><span class="kmeter__k">Rent the endpoint</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:0%"></span></span><span class="kmeter__v">you own 0</span></li>
+          <li class="kmeter__row"><span class="kmeter__k">Stitch point tools</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:35%"></span></span><span class="kmeter__v">scattered</span></li>
+          <li class="kmeter__row is-best"><span class="kmeter__k">Compile with Kolm</span><span class="kmeter__track"><span class="kmeter__bar" style="--kv:100%"></span></span><span class="kmeter__v">one file, yours</span></li>
+        </ul>
+        <p class="cmp-take">Concrete example: a workflow that runs <b>500,000 calls a month</b> keeps paying the per-call rate every month you rent it. Compile that same behavior once and the next 500,000 calls run on the hardware you already have. The endpoint route never hands you a thing to keep; the compile route hands you a signed <code>.kolm</code> file: model, recipe, evals, and receipt in one artifact you can verify yourself.</p>
+      </div>
     </div>
   </section>
 

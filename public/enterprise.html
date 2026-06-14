@@ -30,6 +30,19 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style>
+  /* Page-scoped: multitenancy isolation diagram for enterprise.html only.
+     Namespaced .ent-* to avoid clashes. Reuses kspec/gy-* idiom from the kit. */
+  .ent-iso{margin:var(--s6) 0 0}
+  .ent-iso svg{width:100%;height:auto;display:block}
+  .ent-iso .cmp{fill:var(--panel);stroke:var(--line-2);stroke-width:1}
+  .ent-iso .wall{stroke:var(--accent);stroke-width:1.4;stroke-dasharray:3 4;opacity:.6}
+  .ent-iso .seal-d{fill:var(--accent)}
+  .ent-iso .cl{font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;fill:var(--ink-2)}
+  .ent-iso .cl-k{font-family:var(--font-mono);font-size:8px;letter-spacing:.10em;text-transform:uppercase;fill:var(--ink-3)}
+  .ent-iso .blocked{stroke:var(--sev-high);stroke-width:1.3}
+  .ent-iso .x-mark{stroke:var(--sev-high);stroke-width:1.4}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -267,6 +280,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <path class="icpt-seal" d="M384 113 l4 4 l8 -9"/>
           <text class="tag" x="160" y="128">captured off the wire</text>
         </svg>
+        <figcaption class="kfig__cap" style="padding:0 var(--s4) var(--s4)">Read it left to right: your app calls the provider as it always has (the <b>SDK is unchanged</b>), the request passes straight through, and Kolm taps a copy off the wire to build one signed <b>behavior.kolm</b>. Nothing in your code path is rewritten.</figcaption>
       </figure>
 
       <div class="grid grid--3">
@@ -446,13 +460,60 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
+  <!-- s-isolation: multitenancy / sealed compartments (kspec). NEW: shows each tenant siloed -->
+  <section class="section" id="tenant-isolation">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="eyebrow">03b &middot; SEALED COMPARTMENTS</p>
+        <h2>Your tenant is a sealed compartment. Nothing crosses the wall.</h2>
+        <p class="lede">A <span class="kdef">tenant<span class="kdef__plain"> (one isolated customer space)</span></span><span class="kdef-tip">A <b>tenant</b> is one isolated customer workspace. Every artifact, key, and log lives inside it; another tenant cannot read in or write out.</span> is the boundary that keeps one customer's data, keys, and telemetry from ever touching another's. Each captured artifact, each signing key, and each audit event is scoped to a single compartment. There is no shared store a neighbor can read, and no cross-tenant query path. The diagram below traces what stays inside and what is blocked at the wall.</p>
+      </div>
+
+      <figure class="kspec ent-iso" role="group" aria-label="Multitenancy isolation: tenant A and tenant B each hold their own artifacts, signing keys, and telemetry inside sealed compartments; a cross-tenant read attempt is blocked at the boundary wall.">
+        <svg viewBox="0 0 360 220" aria-hidden="true">
+          <!-- tenant A compartment -->
+          <rect class="cmp" x="14" y="20" width="150" height="118" rx="4"/>
+          <text class="cl-k" x="24" y="38">tenant A</text>
+          <rect class="ks-node is-key" x="24" y="48" width="130" height="22" rx="3"/>
+          <text class="cl" x="32" y="62">artifacts.kolm</text>
+          <rect class="cmp" x="24" y="76" width="130" height="22" rx="3"/>
+          <text class="cl" x="32" y="90">signing key (A only)</text>
+          <rect class="cmp" x="24" y="104" width="130" height="22" rx="3"/>
+          <text class="cl" x="32" y="118">telemetry + audit log</text>
+          <!-- boundary wall -->
+          <line class="wall" x1="180" y1="14" x2="180" y2="206"/>
+          <text class="cl-k" x="172" y="200" text-anchor="end">wall</text>
+          <!-- tenant B compartment -->
+          <rect class="cmp" x="196" y="20" width="150" height="118" rx="4"/>
+          <text class="cl-k" x="206" y="38">tenant B</text>
+          <rect class="ks-node is-key" x="206" y="48" width="130" height="22" rx="3"/>
+          <text class="cl" x="214" y="62">artifacts.kolm</text>
+          <rect class="cmp" x="206" y="76" width="130" height="22" rx="3"/>
+          <text class="cl" x="214" y="90">signing key (B only)</text>
+          <rect class="cmp" x="206" y="104" width="130" height="22" rx="3"/>
+          <text class="cl" x="214" y="118">telemetry + audit log</text>
+          <!-- blocked cross-tenant read -->
+          <path class="blocked" d="M154 158 H206" stroke-dasharray="4 4" fill="none"/>
+          <line class="x-mark" x1="174" y1="151" x2="186" y2="165"/>
+          <line class="x-mark" x1="186" y1="151" x2="174" y2="165"/>
+          <text class="cl-k" x="180" y="184" text-anchor="middle">cross-tenant read blocked</text>
+        </svg>
+        <ol class="kspec__legend">
+          <li><span class="ks-num">01</span><span><b>Artifacts</b> compiled in tenant A never appear in tenant B's index. Each lit sheet is scoped to one compartment.</span></li>
+          <li><span class="ks-num">02</span><span><b>Signing keys</b> are per-tenant. A's key cannot sign or verify against B's data, so a leaked key cannot reach across the wall.</span></li>
+          <li><span class="ks-num">03</span><span><b>Telemetry and audit logs</b> are isolated and append-only. There is no shared table, and the cross-tenant read path returns nothing.</span></li>
+        </ol>
+      </figure>
+    </div>
+  </section>
+
   <!-- s-evidence — procurement gates. VERIFY-LOOP = the page's trust-kernel signature moment -->
   <section class="section section--lit" id="procurement-gates">
     <div class="wrap">
       <div class="section__head">
         <p class="eyebrow">04 &middot; PASS PROCUREMENT</p>
         <h2>Give your buyers proof, not promises.</h2>
-        <p class="lede">Every model you compile ships with a signed packet your reviewers can verify themselves — source hashes, policy versions, eval results, artifact checksums, runtime targets, and receipt IDs. Every claim on this page ships with proof you can check.</p>
+        <p class="lede">Every model you compile ships with a signed packet your reviewers can verify themselves: source hashes, policy versions, eval results, artifact checksums, runtime targets, and receipt IDs. The seal uses <span class="kdef">Ed25519<span class="kdef__plain"> (a public-key signature)</span></span><span class="kdef-tip"><b>Ed25519</b> is a public-key signature scheme. We sign the file with a private key; anyone with the matching public key can confirm the bytes were not changed, without contacting us.</span>, so a buyer with the public key can confirm the bytes were not altered. Every claim on this page ships with proof you can check.</p>
       </div>
 
       <figure class="instrument vloop" data-vl="valid" data-art-reveal
@@ -480,6 +541,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <path class="vl-trace" d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
           <path class="vl-flow"  d="M97 54 L220 84 L220 124 L220 148 L220 188 L220 206"/>
         </svg>
+        <figcaption class="kfig__cap" style="padding:0 var(--s4) var(--s4)">The artifact and its public key are both hashed, the hash is compared against the embedded signature, and the loop returns one verdict: <b>valid</b> or void. A single changed byte flips it to void.</figcaption>
       </figure>
 
       <div class="panel">

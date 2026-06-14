@@ -72,6 +72,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   .auth-box input{width:100%;padding:11px 12px;border:1px solid var(--line-2);border-radius:var(--r-md);font-family:var(--mono);font-size:14px;margin:16px 0;background:var(--paper-sink);color:var(--ink)}
   .auth-box input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .row-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  /* page-local: a static legend clarifying the five billing readouts below.
+     System tokens only; mirrors the .card register idiom. */
+  .bill-legend{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0 0 24px}
+  .bill-legend>div{padding:12px 13px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--paper-2)}
+  .bill-legend dt{color:var(--ink);font-size:12.5px;font-weight:600;margin:0 0 4px}
+  .bill-legend dd{margin:0;color:var(--ink-2);font-size:12px;line-height:1.5}
+  @media (max-width:900px){.bill-legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:480px){.bill-legend{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="t-app">
@@ -130,6 +138,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <span class="idx">Account / Billing</span>
   <h1>Billing &amp; receipts</h1>
   <p class="lede">Your subscription, payment method, invoices, tax details, and the Full Readiness package. Update your card or cancel any time from the Stripe billing portal.</p>
+
+  <dl class="bill-legend" aria-label="What the five billing readouts below mean">
+    <div><dt>Subscription</dt><dd>Your current plan, its status, and when it renews or ends.</dd></div>
+    <div><dt>Continuous re-attestation</dt><dd>Each monitoring product, its cadence, and its last signed run.</dd></div>
+    <div><dt>Full Readiness</dt><dd>The one-time guided audit package, and whether you own it.</dd></div>
+    <div><dt>Invoices &amp; receipts</dt><dd>Every payment, with a hosted invoice and PDF to download.</dd></div>
+    <div><dt>Tax details</dt><dd>The VAT number, tax ID, and company name printed on your invoices.</dd></div>
+  </dl>
 
   <div id="banner"></div>
   <div id="content"><div class="empty">Loading your billing details...</div></div>

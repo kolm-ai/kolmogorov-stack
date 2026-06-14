@@ -77,6 +77,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .legal-card { border: 1px solid var(--line); background: var(--paper-2); padding: 18px 22px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
 .legal-card b, .legal-card strong { color: var(--ink); }
 @media (max-width: 640px) { .legal-toc ol { columns: 1; } }
+/* Page-scoped: allowed / not-allowed orientation table. */
+#aup-rules{margin-top:18px}
+#aup-rules .kcell{white-space:nowrap}
 </style>
 </head>
 <body class="t-legal">
@@ -136,6 +139,31 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <h1>Acceptable Use Policy</h1>
     <p class="lede">This policy governs how kolm's audit tooling, evidence reports, and verification services may be used. Our work tests live systems, so authorization and scope are not optional. They are the foundation of everything we sign.</p>
     <p class="legal-meta">Last updated 1 June 2026 · applies to all kolm services</p>
+  </div>
+</section>
+
+<!-- ============================================================ ORIENTATION (allowed / not allowed) -->
+<section class="section sect--dense reveal">
+  <div class="wrap legal-doc">
+    <div class="section__head">
+      <span class="idx">Orientation / At a glance</span>
+      <h2>Allowed and not allowed, at a glance</h2>
+    </div>
+    <p>The full policy is below; this table is a quick orientation, not a substitute for it. Each row uses a mark plus a word so the answer reads without relying on color.</p>
+    <div id="aup-rules" class="kmatrix-wrap">
+      <table class="kmatrix kmatrix--sticky">
+        <thead><tr><th scope="col">Activity</th><th scope="col" class="is-feat">Allowed</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Test a system you own or are authorized to assess</th><td class="is-feat"><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row">Verify a signed report offline at /verify</th><td class="is-feat"><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row">Share an unaltered report with your buyers</th><td class="is-feat"><span class="kcell kcell--full">yes</span></td></tr>
+          <tr><th scope="row">Test a system you do not own or are not authorized to assess</th><td><span class="kcell kcell--none">no</span></td></tr>
+          <tr><th scope="row">Alter a signed report and present it as genuine</th><td><span class="kcell kcell--none">no</span></td></tr>
+          <tr><th scope="row">Misrepresent a report's scope, date, or findings</th><td><span class="kcell kcell--none">no</span></td></tr>
+          <tr><th scope="row">Build malware, ransomware, or denial-of-service capability</th><td><span class="kcell kcell--none">no</span></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 

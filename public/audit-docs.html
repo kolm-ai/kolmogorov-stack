@@ -170,6 +170,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <style>
 @media (max-width:720px){ .toc-rail{display:none} }
 .report pre{margin:0;font:inherit;color:inherit;white-space:pre}
+/* page-local (audit-docs.html): a process checklist for the audit lifecycle,
+   reusing the shared kflow/kdef kit. Tokens only. */
+.adoc-note{color:var(--ink-2);font-size:13px;line-height:1.6;margin-top:var(--s4)}
 </style>
 
 <!-- ============================================================ 01 QUICKSTART (STATEMENT) -->
@@ -217,6 +220,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         <p>The response carries a summary, the evidence grade, and the full signed envelope. Paste the envelope into <a href="/verify">/verify</a> to see the check pass.</p>
       </div>
     </div>
+
+    <!-- audit lifecycle as a numbered flow with a concrete readout at each step -->
+    <div class="kflow reveal" style="--kn:4;margin-top:var(--s6)" aria-label="The audit lifecycle: send logs, run controls, sign, verify, with a readout at each step">
+      <div class="kstep"><span class="kstep__n">Send</span><h3 class="kstep__t">POST your logs</h3><p class="kstep__d">One call to <span style="font-family:var(--mono);font-size:0.92em">/v1/audit/scan</span> with the telemetry you already emit.</p><span class="kstep__read"><b class="n mono" data-count>1</b> <span class="u">curl, free tier</span></span></div>
+      <div class="kstep"><span class="kstep__n">Assess</span><h3 class="kstep__t">Controls run</h3><p class="kstep__d">ASR-01 through ASR-08 grade against scope. Unassessed controls are named, not guessed.</p><span class="kstep__read"><b class="n mono">8</b> <span class="u">controls graded</span></span></div>
+      <div class="kstep"><span class="kstep__n">Sign</span><h3 class="kstep__t">Envelope sealed</h3><p class="kstep__d">The report is canonicalized and signed with Ed25519 over the exact bytes.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">over canonical bytes</span></span></div>
+      <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Reviewer checks</h3><p class="kstep__d">Offline in the browser, in a script, or against the public API.</p><span class="kstep__read"><b class="n mono">VALID</b> <span class="u">no account needed</span></span></div>
+    </div>
+    <p class="adoc-note">The run is <span class="kdef">reproducible<span class="kdef__plain"> (same input, same output)</span></span><span class="kdef-tip">A run is <b>reproducible</b> when the same logs always produce the same report and the same signature, so a reviewer can re-run the check and get the identical result.</span>: the same logs in produce the same signature out.</p>
 
     <div class="split" style="align-items:flex-start;margin-top:var(--s7)">
       <div class="report"><pre>curl -s https://kolm.ai/v1/audit/scan \

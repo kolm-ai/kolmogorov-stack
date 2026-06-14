@@ -28,6 +28,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style id="rt-scope">
+  /* runtimes.html scoped: cost/1k worked example + cost-vs-latency note */
+  #device-fit .rt-worked{margin-top:18px;border:1px solid var(--line,#23262a);border-radius:4px;background:var(--panel,#0F1011);padding:16px 18px}
+  #device-fit .rt-worked h3{margin:0 0 10px;font-size:14px}
+  #device-fit .rt-worked table{width:100%;border-collapse:collapse;font:500 12px/1.4 var(--mono,ui-monospace,monospace)}
+  #device-fit .rt-worked th,#device-fit .rt-worked td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line,#23262a)}
+  #device-fit .rt-worked th:first-child,#device-fit .rt-worked td:first-child{text-align:left}
+  #device-fit .rt-worked thead th{color:var(--ink-3,#9aa0a6);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:10px}
+  #device-fit .rt-worked tr.is-best td{color:var(--accent)}
+  #device-fit .rt-worked .rt-foot{margin:10px 0 0;font-size:11px;color:var(--ink-3,#9aa0a6)}
+  #rt-tradeoff .kfig{margin:0 auto}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -223,12 +235,25 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       <div class="feat__copy">
         <p class="eyebrow">03 &middot; Best fit, ranked</p>
         <h2>Kolm tells you the best place to run it.</h2>
-        <p class="lede">No more guessing whether your model fits the box. Kolm scores it against each runtime's model format, memory ceiling, context length, and data boundary — then ranks the targets it fits and names the reason for any it blocks. You ship to the best option on day one.</p>
+        <p class="lede">No more guessing whether your model fits the box. Kolm scores it against each runtime's model format, memory ceiling, context length, and data boundary, then ranks the targets it fits and names the reason for any it blocks. The ramp below shows each runtime's <span class="kdef">cost / 1k<span class="kdef__plain"> (dollars per 1,000 calls)</span></span><span class="kdef-tip">"<b>cost / 1k</b>" is the runtime cost to serve 1,000 calls, at the median (p50) speed. On-device runtimes read $0.00 because you run on hardware you already own. Multiply by your monthly call volume to get a monthly figure.</span> and its p50 latency, so you choose on facts.</p>
         <ul class="feat__list">
           <li>Model size and quantization checked against each target's ceiling</li>
           <li>Context length, tool shape, and data boundary enforced per target</li>
           <li>If a path is blocked, you get the reason — never a silent failure</li>
         </ul>
+        <div class="rt-worked" role="group" aria-label="Worked monthly example at 2 million calls per month, using the cost per thousand calls shown on the ramp">
+          <h3>Worked example &middot; 2,000,000 calls / month</h3>
+          <table>
+            <thead><tr><th scope="col">Runtime</th><th scope="col">cost / 1k</th><th scope="col">x 2,000 (1k blocks)</th><th scope="col">per month</th></tr></thead>
+            <tbody>
+              <tr class="is-best"><th scope="row">phone (on-device)</th><td>$0.00</td><td>2,000</td><td>$0</td></tr>
+              <tr><th scope="row">laptop (local)</th><td>$0.04</td><td>2,000</td><td>$80</td></tr>
+              <tr><th scope="row">edge (regional)</th><td>$0.21</td><td>2,000</td><td>$420</td></tr>
+              <tr><th scope="row">server (hosted)</th><td>$0.90</td><td>2,000</td><td>$1,800</td></tr>
+            </tbody>
+          </table>
+          <p class="rt-foot">2,000,000 calls is 2,000 blocks of 1,000. Cost per month = cost / 1k x 2,000. Figures use the same per-1k numbers shown on the ramp; faster runtimes cost more per call but cut latency.</p>
+        </div>
       </div>
       <div class="feat__ui">
         <figure class="instrument runtime-ramp" data-art-reveal
@@ -273,6 +298,40 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
         </figure>
       </div>
+    </div>
+  </section>
+
+  <!-- cost vs latency tradeoff scatter -->
+  <section class="section" id="rt-tradeoff">
+    <div class="wrap">
+      <div class="section__head">
+        <p class="eyebrow">The tradeoff</p>
+        <h2>Cheaper or faster - read the curve, then pick.</h2>
+        <p class="lede">The same numbers from the ramp, plotted as cost against latency. Moving down and right buys speed for money; moving up and left saves money for speed. The laptop runtime sits at the knee: near-zero cost with latency most workloads can live with.</p>
+      </div>
+      <figure class="kfig" role="img" aria-label="Cost versus latency across four runtimes. Phone: lowest cost, highest latency at 96 ms. Server: highest cost at 0.90 per 1k, lowest latency at 12 ms. Laptop sits at the knee with 0.04 per 1k and 71 ms, the best cost-to-speed balance.">
+        <span class="k-reg k-reg--tl" aria-hidden="true"></span><span class="k-reg k-reg--br" aria-hidden="true"></span>
+        <svg class="kchart" viewBox="0 0 320 210" data-art-reveal aria-hidden="true">
+          <line class="k-grid" x1="44" y1="40" x2="300" y2="40"/>
+          <line class="k-grid" x1="44" y1="90" x2="300" y2="90"/>
+          <line class="k-grid" x1="44" y1="140" x2="300" y2="140"/>
+          <line class="k-axis" x1="44" y1="24" x2="44" y2="180"/>
+          <line class="k-axis" x1="44" y1="180" x2="300" y2="180"/>
+          <text class="k-axlbl" x="170" y="200" text-anchor="middle">cost / 1k -&gt;</text>
+          <text class="k-axlbl" x="10" y="30">latency (ms)</text>
+          <!-- phone: cheapest, slowest (top-left) -->
+          <circle class="k-pt" cx="56" cy="48" r="6" style="--i:0"/><text class="k-lbl" x="66" y="44">phone &middot; $0.00 &middot; 96 ms</text>
+          <!-- edge -->
+          <circle class="k-pt" cx="160" cy="118" r="6" style="--i:2"/><text class="k-lbl" x="170" y="114">edge &middot; $0.21 &middot; 39 ms</text>
+          <!-- server: priciest, fastest (bottom-right) -->
+          <circle class="k-pt" cx="282" cy="160" r="6" style="--i:3"/><text class="k-lbl" x="218" y="172">server &middot; $0.90 &middot; 12 ms</text>
+          <!-- laptop: the knee, best balance -->
+          <line class="k-cross" x1="44" y1="74" x2="74" y2="74"/><line class="k-cross" x1="74" y1="74" x2="74" y2="180"/>
+          <circle class="k-pt is-best" cx="74" cy="74" r="7" style="--i:1"/><circle class="k-ring" cx="74" cy="74" r="12"/>
+          <text class="k-val" x="88" y="70">laptop &middot; $0.04 &middot; 71 ms</text>
+        </svg>
+        <figcaption class="kfig__cap"><b>laptop</b> holds the knee: almost free per call, fast enough for most paths.</figcaption>
+      </figure>
     </div>
   </section>
 

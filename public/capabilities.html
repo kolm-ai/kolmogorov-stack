@@ -30,6 +30,15 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
+<style id="cap-scope">
+  /* capabilities.html scoped: lifecycle flow handoff readouts + distinct glyphs */
+  #cap-lifecycle .kflow{--kn:4}
+  #cap-lifecycle .kstep__read .feeds{display:block;margin-top:6px;font-size:11px;line-height:1.45;color:var(--ink-3,#9aa0a6)}
+  #cap-lifecycle .kstep__read .feeds b{color:var(--accent)}
+  #cap-lifecycle .cap-handoff{margin-top:10px;font:600 10px/1 var(--mono,ui-monospace,monospace);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3,#9aa0a6)}
+  #cap-lifecycle .cap-handoff b{color:var(--accent);font-weight:700}
+  @media (min-width:761px){#cap-lifecycle .kflow{grid-template-columns:repeat(4,1fr)}}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -143,12 +152,33 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
   </section>
 
-  <!-- s-bento — eight lifecycle domains -->
-  <section class="section" id="capability-domains">
+  <!-- s-flow - eight lifecycle stages as a connected pipeline (output feeds next input) -->
+  <section class="section" id="cap-lifecycle">
     <div class="wrap wrap--wide">
       <div class="section__head">
         <p class="eyebrow">01 &middot; The path</p>
         <h2>From your live calls to a model you own, in eight moves.</h2>
+        <p class="lede">Each stage takes the stage before it as input and hands its output to the next, so you can trace one record end to end. Below, follow a single capture - one production redaction call - as it moves through all eight stages.</p>
+      </div>
+      <div class="kflow reveal" aria-label="Eight-stage lifecycle: each stage's output is the next stage's input">
+        <div class="kstep"><span class="kstep__n">Capture</span><h3 class="kstep__t">Bring in what you use</h3><p class="kstep__d">Point your traffic at Kolm; it records the real call - prompt, tool calls, outcome.</p><span class="kstep__read"><b class="n mono" data-count>12408</b> <span class="u">calls recorded</span><span class="feeds">feeds &rarr; <b>1 raw record</b> with source + timestamp</span></span></div>
+        <div class="kstep"><span class="kstep__n">Classify</span><h3 class="kstep__t">Know what you captured</h3><p class="kstep__d">Tag each record's source, schema, tenant, environment, and sensitivity.</p><span class="kstep__read"><b class="n mono">PII</b> <span class="u">field flagged</span><span class="feeds">feeds &rarr; a <b>labeled record</b> the rules can act on</span></span></div>
+        <div class="kstep"><span class="kstep__n">Set rules</span><h3 class="kstep__t">Decide what is allowed</h3><p class="kstep__d">Redaction, retention, allowed providers, export boundaries, budgets.</p><span class="kstep__read"><b class="n mono">redact</b> <span class="u">on PII field</span><span class="feeds">feeds &rarr; a <b>governed record</b>, safe to reuse</span></span></div>
+        <div class="kstep"><span class="kstep__n">Evaluate</span><h3 class="kstep__t">Catch regressions first</h3><p class="kstep__d">Build evals and drift checks; lock a regression set; block bad releases.</p><span class="kstep__read"><b class="n mono">98%</b> <span class="u">pass, 1 held</span><span class="feeds">feeds &rarr; a <b>locked eval gate</b> the compile must clear</span></span></div>
+        <div class="kstep"><span class="kstep__n">Compile</span><h3 class="kstep__t">Get one portable file</h3><p class="kstep__d">Bundle model, recipe, evals, and receipt into one signed artifact.</p><span class="kstep__read"><b class="n mono">142</b> <span class="u">MB .kolm</span><span class="feeds">feeds &rarr; a <b>signed artifact</b> ready to run</span></span></div>
+        <div class="kstep"><span class="kstep__n">Run</span><h3 class="kstep__t">Run on the hardware you have</h3><p class="kstep__d">Ship to the smallest runtime that fits - laptop, edge, server.</p><span class="kstep__read"><b class="n mono">71</b> <span class="u">ms p50, laptop</span><span class="feeds">feeds &rarr; a <b>live endpoint</b> plus its receipt</span></span></div>
+        <div class="kstep"><span class="kstep__n">Verify</span><h3 class="kstep__t">Prove what you shipped</h3><p class="kstep__d">Each release carries a receipt, checksum, version, and eval result.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">verified</span><span class="feeds">feeds &rarr; a <b>receipt</b> anyone can check offline</span></span></div>
+        <div class="kstep"><span class="kstep__n">Operate</span><h3 class="kstep__t">Stay in control after launch</h3><p class="kstep__d">Audit events, connector health, cost controls, exports, owners.</p><span class="kstep__read"><b class="n mono">100%</b> <span class="u">changes logged</span><span class="feeds">feeds &rarr; back to <b>Capture</b> as drift is found</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- s-bento : eight lifecycle domains (detail cards) -->
+  <section class="section" id="capability-domains">
+    <div class="wrap wrap--wide">
+      <div class="section__head">
+        <p class="eyebrow">01b &middot; Each stage, in detail</p>
+        <h2>What each of the eight stages actually does.</h2>
         <p class="lede">Every step does real work and leaves proof behind &mdash; so you can trace exactly how your traffic became a model on your own hardware.</p>
       </div>
       <div class="grid grid--4">
@@ -161,25 +191,28 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span class="card__k">Reg &middot; 1 capture</span><h3>Bring in what you already use</h3><p>Point your traffic at Kolm and it captures the real behavior: provider logs, gateway events, app traces, agent tool calls, labels, failures, warehouse rows, CI events, and custom API records.</p></div>
         <div class="card reveal"><span class="tick" aria-hidden="true"></span>
-          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Capture">
-            <path class="face" d="M6 8h28l-9 13v9l-10 4v-13z"/>
-            <path stroke d="M6 8h28l-9 13v9l-10 4v-13z"/>
-            <path class="edge" d="M6 8h28"/>
-            <circle class="gleam" cx="20" cy="14" r="1.6" fill="currentColor" stroke="none"/>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Classify">
+            <rect class="face" x="7" y="9" width="13" height="9" rx="1.5"/>
+            <rect stroke x="7" y="9" width="13" height="9" rx="1.5"/>
+            <rect stroke x="7" y="22" width="13" height="9" rx="1.5"/>
+            <path stroke d="M24 13h10M24 26h10"/>
+            <circle class="gleam" cx="13" cy="13.5" r="1.4" fill="currentColor" stroke="none"/>
           </svg>
           <span class="card__k">Reg &middot; 2 classify</span><h3>Know exactly what you captured</h3><p>See the source, schema, tenant, environment, sensitivity, retention window, and owner of every record &mdash; and catch anything with an unknown shape before it moves on.</p></div>
         <div class="card reveal"><span class="tick" aria-hidden="true"></span>
-          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
-            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
-            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
-            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Set the rules">
+            <path class="face" d="M8 8h24l-8 11v9l-8 4v-13z"/>
+            <path stroke d="M8 8h24l-8 11v9l-8 4v-13z"/>
+            <path class="edge gleam" d="M8 8h24"/>
+            <path stroke d="M16 19h8"/>
           </svg>
           <span class="card__k">Reg &middot; 3 set the rules</span><h3>Decide what&rsquo;s allowed before it runs</h3><p>Set redaction, retention, and purge rules, pick which providers and models you allow, draw export boundaries, scope keys, and cap budgets and rate limits.</p></div>
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
-          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Compile">
-            <path class="face" d="M8 14l12-6 12 6-12 6z"/>
-            <path stroke d="M8 14l12-6 12 6-12 6zM8 21l12 6 12-6M8 28l12 6 12-6"/>
-            <path class="edge gleam" d="M8 14l12-6 12 6"/>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Evaluate">
+            <rect class="face" x="9" y="7" width="22" height="26" rx="2"/>
+            <rect stroke x="9" y="7" width="22" height="26" rx="2"/>
+            <path class="gleam" d="M13 14l2 2 4-5" stroke="currentColor"/>
+            <path stroke d="M13 23l2 2 4-5M23 14h5M23 23h5"/>
           </svg>
           <span class="card__k">Reg &middot; 4 evaluate</span><h3>Catch regressions before your users do</h3><p>Build evals, threshold checks, and drift checks, route edge cases to human review, lock a regression set, and block any release that doesn&rsquo;t pass.</p></div>
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
@@ -198,19 +231,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span class="card__k">Reg &middot; 6 run</span><h3>Run it on the hardware you have</h3><p>Ship to a laptop, your private cloud, the edge, a server, or a managed host &mdash; the smallest runtime that fits, with the limits shown up front.</p></div>
         <div class="card reveal" data-state="ok"><span class="tick" aria-hidden="true"></span>
-          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
-            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
-            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
-            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
-            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Verify">
+            <path class="face" d="M20 6l11 4v9c0 8-6 12-11 15-5-3-11-7-11-15v-9z"/>
+            <path stroke d="M20 6l11 4v9c0 8-6 12-11 15-5-3-11-7-11-15v-9z"/>
+            <path class="gleam" d="M15 20l3.5 3.5L26 16" stroke="currentColor"/>
           </svg>
           <span class="card__k">Reg &middot; 7 verify</span><h3>Prove what you shipped</h3><p>Every release carries a verifier receipt, checksum, artifact and policy version, eval result, and runtime target &mdash; so anyone can check it without trusting us.</p></div>
         <div class="card reveal"><span class="tick" aria-hidden="true"></span>
-          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Deploy">
-            <rect class="face" x="15" y="15" width="10" height="10" rx="1.5"/>
-            <rect stroke x="15" y="15" width="10" height="10" rx="1.5"/>
-            <path stroke d="M20 15V6M20 25v9M15 20H6M25 20h9"/>
-            <path class="gleam" d="M17.5 20l2 2 3.5-4" stroke="currentColor"/>
+          <svg class="card__glyph" viewBox="0 0 40 40" role="img" aria-label="Operate">
+            <rect class="face" x="7" y="9" width="26" height="18" rx="2"/>
+            <rect stroke x="7" y="9" width="26" height="18" rx="2"/>
+            <path class="gleam" d="M11 21l4-5 4 4 5-7 5 6" stroke="currentColor" fill="none"/>
+            <path stroke d="M15 31h10M20 27v4"/>
           </svg>
           <span class="card__k">Reg &middot; 8 operate</span><h3>Stay in control after launch</h3><p>Keep audit events, admin analytics, connector health, cost and usage controls, exports, owner assignments, and incident-ready logs at hand.</p></div>
       </div>

@@ -81,6 +81,22 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   ]
 }
 </script>
+<style>
+/* page-local (audit.html): the audit-process timeline and the
+   "what a signed readiness report contains" anatomy. Reuses the shared
+   diagram/explainer kit (kflow, kspec) plus a small scoped layout for the
+   contents checklist. Tokens only; no new palette. */
+  .au-contents{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:var(--s5)}
+  @media (max-width:680px){ .au-contents{grid-template-columns:minmax(0,1fr)} }
+  .au-item{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;
+    padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--paper-2)}
+  .au-item__mk{width:22px;height:22px;flex:none;border:1px solid var(--accent-edge);border-radius:3px;
+    display:grid;place-items:center;color:var(--accent-text);background:var(--accent-soft)}
+  .au-item__mk svg{width:13px;height:13px}
+  .au-item b{display:block;color:var(--ink);font-size:13.5px;line-height:1.3}
+  .au-item span{display:block;color:var(--ink-2);font-size:12.5px;line-height:1.5;margin-top:3px}
+  .au-item code{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+</style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -282,6 +298,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
     </div>
     <p class="how__foot"><span class="spark" aria-hidden="true"><i class="on" style="--v:.5"></i><i class="on" style="--v:.8"></i><i class="on" style="--v:.65"></i><i class="on" style="--v:.95"></i><i class="on" style="--v:.7"></i><i class="on" style="--v:.85"></i><i class="on" style="--v:.6"></i><i class="on" style="--v:1"></i></span> <b>Eight controls</b> read from your own logs · <b>Six frameworks</b> in the crosswalk · mapped to the controls your buyer already cites · <a href="/how-it-works" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">the full lifecycle</a></p>
+
+    <!-- audit-process timeline: scan -> findings -> signed report -> buyer verifies -->
+    <div class="kflow reveal" style="--kn:4;margin-top:var(--s6)" aria-label="The audit process, four steps with a concrete readout at each">
+      <div class="kstep"><span class="kstep__n">Scan</span><h3 class="kstep__t">Read your logs</h3><p class="kstep__d">Import a log file or attach the sidecar proxy. Nothing leaves your runtime to start.</p><span class="kstep__read"><b class="n mono" data-count>12400</b> <span class="u">calls read</span></span></div>
+      <div class="kstep"><span class="kstep__n">Findings</span><h3 class="kstep__t">The controls run</h3><p class="kstep__d">The controls are graded against scope. Each finding cites a control and a framework clause.</p><span class="kstep__read"><b class="n mono">13</b> <span class="u">findings, 7 high</span></span></div>
+      <div class="kstep"><span class="kstep__n">Signed report</span><h3 class="kstep__t">The seal goes on</h3><p class="kstep__d">The findings are canonicalized and signed with Ed25519. Change one byte and the seal breaks.</p><span class="kstep__read"><b class="n mono">Ed25519</b> <span class="u">one signed object</span></span></div>
+      <div class="kstep"><span class="kstep__n">Buyer verifies</span><h3 class="kstep__t">They check it offline</h3><p class="kstep__d">Your reviewer opens the report in their own browser and checks the signature against the key inside it.</p><span class="kstep__read"><b class="n mono">VALID</b> <span class="u">no server of ours</span></span></div>
+    </div>
       </div>
     </div>
   </div>
@@ -382,6 +406,48 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     .catch(function(){});
 })();
 </script>
+
+<!-- ============================================================ 4b. WHAT THE REPORT CONTAINS -->
+<section class="section sect--air reveal" id="contains">
+  <div class="wrap">
+    <div class="sect-rail">
+      <div class="sect-rail__rail"><span class="idx">03b / The deliverable</span></div>
+      <div class="sect-rail__body">
+    <div class="section__head">
+      <h2>What a Signed Readiness Report actually contains.</h2>
+      <p class="lede">Not a PDF and not a slide. One <span class="kdef">canonical<span class="kdef__plain"> (one fixed, byte-for-byte ordering)</span></span><span class="kdef-tip">A <b>canonical</b> object is serialized one fixed way - keys sorted, no stray whitespace - so the same report always produces the same exact bytes, and the signature can cover those bytes.</span> JSON object that carries its own scope, its own findings, and the key needed to check it. Here is every part, and what each part is for.</p>
+    </div>
+    <div class="au-contents">
+      <div class="au-item">
+        <span class="au-item__mk" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>Scope and subject</b><span>What was assessed, named in plain words, plus the log window and record count. Example: <code>Helpwise support &amp; billing agents</code>, 12,400 calls.</span></div>
+      </div>
+      <div class="au-item">
+        <span class="au-item__mk" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>Readiness, assessed controls only</b><span>One labeled percentage over the controls that had evidence. A control with no evidence is listed as not assessed, never counted as a silent pass.</span></div>
+      </div>
+      <div class="au-item">
+        <span class="au-item__mk" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>Findings, with evidence</b><span>Each finding states severity, the exact observation, and the control plus framework clause it maps to. Example: <code>grants 10 tools, uses 4</code> on one shared key.</span></div>
+      </div>
+      <div class="au-item">
+        <span class="au-item__mk" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>Caveats, bounded and signed</b><span>The exact PII classes and secret shapes the scan covered, so a clean result is never read wider than the detectors that produced it.</span></div>
+      </div>
+      <div class="au-item">
+        <span class="au-item__mk" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>Embedded public key</b><span>The Ed25519 public key the report was signed with travels inside the file, so your buyer needs nothing from us to check it.</span></div>
+      </div>
+      <div class="au-item">
+        <span class="au-item__mk" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>Signature and inclusion proof</b><span>An Ed25519 <span class="kdef">signature<span class="kdef__plain"> (a cryptographic seal)</span></span><span class="kdef-tip">A <b>signature</b> is a cryptographic seal computed from the report bytes and a private key. Anyone with the matching public key can confirm the bytes were not altered.</span> over the canonical bytes, plus an append-only log proof that the report was recorded when it claims.</span></div>
+      </div>
+    </div>
+    <p class="how__foot" style="margin-top:var(--s5)">The free Scan signs the same object with a watermark inside the signed bytes; the $750 Signed Readiness Report re-signs the same audit with the watermark removed. <a href="/report" style="color:var(--ink-2);border-bottom:1px solid var(--line-2)">Walk the object field by field</a></p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ============================================================ 5. PRICING -->
 <section class="section sect--dense reveal" id="pricing">
