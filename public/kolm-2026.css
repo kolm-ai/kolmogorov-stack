@@ -1941,11 +1941,13 @@ body{position:relative;z-index:0;}
 }
 
 /* (a) FLOW - packets travel a connector with an animated dash trail ----------- */
-.kflowline{stroke:var(--kp-conn);stroke-width:1.6;fill:none;stroke-linecap:round;}
-.kflowtrail{stroke:var(--accent);stroke-width:1.8;fill:none;stroke-linecap:round;opacity:.34;}
-.kflowpkt{stroke:var(--accent);stroke-width:2.4;fill:none;stroke-linecap:round;
+/* non-scaling-stroke: the connector SVG is stretched (preserveAspectRatio none)
+   so without this the tiny viewBox blows the stroke into a giant bar. Keep px. */
+.kflowline{stroke:var(--kp-conn);stroke-width:1.6;fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+.kflowtrail{stroke:var(--accent);stroke-width:1.8;fill:none;stroke-linecap:round;opacity:.34;vector-effect:non-scaling-stroke;}
+.kflowpkt{stroke:var(--accent);stroke-width:2.4;fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke;
   stroke-dasharray:var(--kpk-dash,14 200);stroke-dashoffset:var(--kpk-off,214);
-  filter:drop-shadow(0 0 5px var(--accent-glow));}
+  filter:drop-shadow(0 0 4px var(--accent-glow));}
 @media (prefers-reduced-motion:no-preference){
   [data-km~="flow"].km-run .kflowpkt{animation:km-flow var(--kpk-dur,3.4s) cubic-bezier(.45,0,.55,1) infinite;}
   [data-km~="flow"].km-run .kflowtrail{animation:km-flow-breathe 3.4s ease-in-out infinite;}
@@ -2030,9 +2032,10 @@ body{position:relative;z-index:0;}
 @media (prefers-reduced-motion:no-preference){
   [data-km~="breathe"].km-run .kpstage.is-active .kpstage__pip{animation:inst-pulse 2.4s ease-in-out infinite;}
 }
-/* the connector SVG strip between stages (absolute overlay, decorative) */
-.kpipe__conn{position:absolute;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
-.kpipe>.kpstage{z-index:1;}
+/* the connector SVG: a thin rail threaded through the stage-number row (NOT a
+   full-height overlay - that stretched the viewBox and blew up the stroke). */
+.kpipe__conn{position:absolute;left:14px;right:14px;top:34px;height:2px;z-index:0;pointer-events:none;overflow:visible;}
+.kpipe>.kpstage{z-index:1;background:var(--kp-node);}
 @media (max-width:760px){
   .kpipe{grid-template-columns:1fr;}
   .kpipe__conn{display:none;}
