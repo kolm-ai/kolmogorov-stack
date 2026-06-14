@@ -535,34 +535,6 @@ function renderGroupIntro(key, routes) {
   );
 }
 
-function canonicalNavBlockForApi() {
-  const begin = '<!-- KOLM_NAV_BEGIN (W221) -->';
-  const end = '<!-- KOLM_NAV_END (W221) -->';
-  try {
-    const home = fs.readFileSync(path.join(ROOT, 'public', 'index.html'), 'utf8');
-    const start = home.indexOf(begin);
-    const finish = home.indexOf(end, start);
-    if (start >= 0 && finish > start) {
-      const lineStart = home.lastIndexOf('\n', start) + 1;
-      return home.slice(lineStart, finish + end.length);
-    }
-  } catch (_) {} // deliberate: cleanup
-  return [
-    begin,
-    '<nav class="nav__links" id="navLinks" aria-label="Primary">',
-    '<a href="/#pipeline">Product</a>',
-    '<a href="/docs" aria-current="page">Docs</a>',
-    '<a href="/pricing">Pricing</a>',
-    '</nav>',
-    '<div class="nav__actions">',
-    '<a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>',
-    '<a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>',
-    '<a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get an API key</a>',
-    '</div>',
-    end,
-  ].join('\n');
-}
-
 function renderPage(grouped, totalCount, unparseable) {
   const groupKeys = Array.from(grouped.keys()).sort();
   // P0-7 partition counts: surface reference-ready vs source-indexed routes at
@@ -593,7 +565,6 @@ function renderPage(grouped, totalCount, unparseable) {
   const groupsHtml = groupKeys
     .map((k) => renderGroup(k, grouped.get(k)))
     .join('\n\n');
-  const navBlock = canonicalNavBlockForApi();
   const title = 'API reference - kolm.ai';
   const titleEntity = 'API reference - kolm.ai';
   const description =
@@ -632,14 +603,20 @@ function renderPage(grouped, totalCount, unparseable) {
       : '';
 
   return `<!DOCTYPE html>
-<html lang="en" style="background:#08090A;color-scheme:dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>html,body{background:#08090A;color:#C3C8D0}html{color-scheme:dark}</style>
+<script>
+(function(h){h.classList.add('js-reveal');addEventListener('load',function(){
+setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
+</script>
 <title>${title}</title>
 <meta name="description" content="${escapeHtml(description)}">
 <meta name="theme-color" content="#08090A">
+<meta name="author" content="kolm.ai">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:site_name" content="kolm.ai">
 <meta property="og:title" content="${titleEntity}">
 <meta property="og:description" content="${escapeHtml(description)}">
 <meta property="og:type" content="article">
@@ -651,174 +628,128 @@ function renderPage(grouped, totalCount, unparseable) {
 <meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs/api">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="preload" href="/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/kolm-2026.css" as="style">
 <link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
 <script type="application/ld+json">${jsonLd}</script>
 <script type="application/ld+json">${breadcrumbLd}</script>
 <style>
-:root{--ink:#ece7dc;--ink-mute:#b5bdb1;--ink-faint:#737c73;--line:rgba(236,231,220,0.08);--bg:#0b0d10;--bg-elev:#101316;--accent:#2563eb;--accent-soft:rgba(16,185,129,0.10);--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-[data-theme=light]{--ink:#1f2429;--ink-mute:#4b5158;--ink-faint:#737c73;--line:rgba(0,0,0,0.08);--bg:#fdfcf8;--bg-elev:#ffffff;--accent:#2563eb;--accent-soft:rgba(5,150,105,0.10)}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,Inter,system-ui,sans-serif;margin:0}
-main,.wrap,.api-route,.api-group,pre,code{max-width:100%}
-.skip-link{position:absolute;left:12px;top:12px;z-index:9999;transform:translateY(-160%);border:1px solid var(--accent);border-radius:999px;background:var(--accent);color:#06120b;padding:10px 14px;font:700 13px/1 var(--mono);text-decoration:none}
-.skip-link:focus{transform:translateY(0)}
-.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-header.site-header{padding:18px 0;border-bottom:1px solid var(--line)}
-header.site-header .wrap{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center}
-header.site-header nav{display:flex;justify-content:flex-end;gap:8px;font-family:var(--mono);font-size:12px;flex-wrap:wrap}
-header.site-header nav a{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 10px;color:inherit;text-decoration:none;border-radius:6px}
-header.site-header nav a:hover{background:rgba(255,255,255,.04)}
-header.site-header .logo{min-height:44px;display:inline-flex;align-items:center;font-family:var(--mono);font-size:13px;color:inherit;text-decoration:none}
-main{padding:48px 0 96px}
-.crumbs{font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 18px}
-.crumbs a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-h1{font-size:42px;line-height:1.08;font-weight:500;letter-spacing:0;margin:0 0 18px;max-width:920px}
-.lede{font-size:18px;line-height:1.55;color:var(--ink-mute);max-width:780px;margin:0 0 36px}
-h2{font-size:24px;font-weight:500;letter-spacing:0;margin:48px 0 12px;max-width:780px;scroll-margin-top:80px}
-h3{font-size:15px;font-weight:500;letter-spacing:0;margin:28px 0 8px;max-width:840px;font-family:var(--mono);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-p{color:var(--ink-mute);font-size:15px;line-height:1.65;max-width:780px}
-pre{background:#06080a;color:#e9eef3;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:hidden;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font:12.5px/1.55 var(--mono);margin:10px 0 14px}
-pre code{background:none;border:none;padding:0;color:inherit;font:inherit;white-space:inherit;overflow-wrap:anywhere;word-break:break-word}
-code{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--bg-elev);padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
-.api-route,.api-group{min-width:0;overflow:hidden}
-.api-route h3,.api-route code,.api-route p,.api-route li,.api-route summary,.route-desc,.route-detail,.group-intro p{min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
-ul,ol{color:var(--ink-mute);font-size:15px;line-height:1.7;max-width:780px}
-li{margin:4px 0}
-.api-group{margin:48px 0 32px;padding-top:8px;border-top:1px solid var(--line)}
-.api-group h2{margin-top:24px}
-.api-route{margin:18px 0 22px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
-.api-route h3{margin:0 0 8px}
-.api-route .route-desc{margin:0 0 8px;font-size:14px;color:var(--ink-mute)}
+/* Page-specific layer for the generated API reference. All values pull the
+   canonical kolm-2026.css tokens (the one design system). No per-page palette
+   fork, no second hue, no legacy fonts/light theme. */
+.api-hero{display:grid;grid-template-columns:minmax(0,.92fr) minmax(360px,.58fr);gap:clamp(28px,5vw,76px);align-items:start;margin:0 0 var(--rhy-1)}
+.api-hero__copy{min-width:0}
+@media(max-width:980px){.api-hero{grid-template-columns:1fr}}
+.crumbs{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin:0 0 16px}
+.crumbs a{color:inherit;border-bottom:0}
+.api-cockpit{min-width:0;border-radius:var(--r);background:var(--sheen),var(--panel);box-shadow:var(--plate);overflow:hidden}
+.api-cockpit__bar{min-height:46px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:0 16px;border-bottom:1px solid var(--line);font:12px/1.25 var(--font-mono);color:var(--ink-3)}
+.api-cockpit__bar b{color:var(--ink)}
+.api-cockpit__bar span:last-child{color:var(--accent);text-align:right}
+.api-cockpit__body{display:grid;gap:12px;padding:16px}
+.api-cockpit__metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.api-cockpit__metric{min-width:0;min-height:68px;padding:11px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--well)}
+.api-cockpit__metric b{display:block;color:var(--ink);font:var(--w-display) 22px/1 var(--font-mono);font-variant-numeric:tabular-nums}
+.api-cockpit__metric span{display:block;margin-top:6px;color:var(--ink-3);font-size:12px;line-height:1.35}
+.api-command{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--well)}
+.api-command label,.api-cockpit__toggles label{font:var(--w-ui) 11px/1.3 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.api-command__row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.api-command input{min-width:0;min-height:44px;width:100%;border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--well);color:var(--ink);padding:0 12px;font:13px/1.35 var(--font-mono);box-shadow:inset 0 1px 0 rgba(0,0,0,.25)}
+.api-command input::placeholder{color:var(--ink-4)}
+.api-command input:focus-visible,.api-command__clear:focus-visible,.api-cockpit__toggles input:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.api-command__clear{min-height:44px;border:1px solid var(--line-2);border-radius:var(--r-md);background:rgba(255,255,255,.02);color:var(--ink);padding:0 12px;font:var(--w-ui) 12px/1 var(--font-mono);cursor:pointer}
+.api-command__clear:hover{background:rgba(255,255,255,.05);border-color:var(--line-top)}
+.api-command__hint,.api-command__status{margin:0;color:var(--ink-3);font:12px/1.5 var(--font-mono)}
+.api-command__status{color:var(--accent)}
+.api-cockpit__toggles{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--well)}
+.api-cockpit__toggles label{min-height:44px;display:flex;align-items:center;gap:9px;cursor:pointer}
+.api-cockpit__toggles input{width:18px;height:18px;accent-color:var(--accent)}
+.api-proof-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin:var(--s2) 0 var(--rhy-1)}
+.api-proof-card{min-width:0;min-height:148px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding:var(--s4);border-radius:var(--r);background:var(--sheen),var(--panel);box-shadow:var(--plate);color:inherit;border-bottom:0;transition:background var(--dur-micro) var(--ease-mat),box-shadow var(--dur-micro) var(--ease-mat)}
+.api-proof-card:hover{background:var(--sheen),var(--register);box-shadow:inset 0 0 0 1px var(--line-top),0 1px 0 var(--line-top)}
+.api-proof-card b{display:block;color:var(--ink);font-size:13px;line-height:1.35}
+.api-proof-card span{display:block;color:var(--ink-2);font-size:12.5px;line-height:1.45}
+.api-proof-card code{align-self:flex-start;font-size:11.5px}
+.api-bridge{margin:-4px 0 18px;font-size:14px;color:var(--ink-3)}
+.api-bridge a,.api-jump-links a{min-height:44px;display:inline;color:var(--ink)}
+.api-runbook-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s3);margin:var(--s4) 0 var(--rhy-1)}
+.api-runbook-step{min-width:0;min-height:176px;padding:var(--s4);border-radius:var(--r);background:var(--sheen),var(--panel);box-shadow:var(--plate)}
+.api-runbook-step span{display:block;color:var(--accent);font-family:var(--font-mono);font-size:11px;letter-spacing:var(--track-label);margin-bottom:8px}
+.api-runbook-step strong{display:block;color:var(--ink);font-size:13px;line-height:1.35;margin-bottom:8px}
+.api-runbook-step p{font-size:12.5px;line-height:1.5;margin:9px 0 0;color:var(--ink-2);max-width:none}
+.api-runbook-step code{font-size:11px}
+@media(max-width:980px){.api-proof-board{grid-template-columns:repeat(2,minmax(0,1fr))}.api-runbook-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.api-proof-board,.api-runbook-grid{grid-template-columns:1fr}.api-proof-card,.api-runbook-step{min-height:auto}}
+.surface-media-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3);min-height:132px;margin:var(--s5) 0 var(--rhy-1);padding:var(--s4);border-radius:var(--r);background:var(--sheen),var(--panel);box-shadow:var(--plate)}
+.surface-media-panel div{min-width:0;padding:12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--well)}
+.surface-media-panel b{display:block;color:var(--ink);font-family:var(--font-mono);font-size:11px;letter-spacing:var(--track-label);text-transform:uppercase;line-height:1.35}
+.surface-media-panel span{display:block;margin-top:7px;color:var(--ink-2);font-size:12px;line-height:1.45}
+@media(max-width:820px){.surface-media-panel{grid-template-columns:1fr}}
+.totals{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-3);margin:0 0 var(--s5)}
+.api-jump-links{max-width:var(--measure)}
+/* API route catalog */
+.api-group{margin:var(--rhy-2) 0 var(--s6);padding-top:var(--s2);border-top:1px solid var(--line)}
+.api-group h2{margin-top:var(--s5)}
+.api-route{margin:18px 0 22px;padding:var(--s4);border-radius:var(--r);background:var(--sheen),var(--panel);box-shadow:var(--plate);min-width:0;overflow:hidden}
+.api-route h3{margin:0 0 8px;font-family:var(--font-mono);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.api-route h3 code,.api-route p,.api-route li,.api-route summary,.route-desc,.route-detail,.group-intro p{min-width:0;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.api-route .route-desc{margin:0 0 8px;font-size:14px;color:var(--ink-2);max-width:none}
 .api-route .route-detail{margin:6px 0 10px;font-size:13.5px}
-.api-route .route-detail summary{cursor:pointer;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
-.m{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11.5px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:#0b0d10}
+.api-route .route-detail summary{cursor:pointer;color:var(--ink-3);font-family:var(--font-mono);font-size:12px}
+.api-route .route-detail p{max-width:none}
+.m{display:inline-block;padding:2px 8px;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--room)}
 .m-get{background:#5eb88b}
 .m-post{background:#7faedc}
 .m-put{background:#d6b15e}
 .m-patch{background:#c89fdc}
 .m-delete{background:#dc8a8a}
-.route-stub{display:inline-block;padding:2px 8px;border-radius:4px;background:rgba(236,231,220,0.06);color:var(--ink-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase}
-.route-live{display:inline-block;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;text-transform:uppercase}
-.partition-toolbar{display:flex;gap:14px;align-items:center;margin:10px 0 22px;font-family:var(--mono);font-size:12.5px;color:var(--ink-mute)}
-.partition-toolbar label{min-height:44px;cursor:pointer;display:flex;gap:8px;align-items:center}
-.api-hero{display:grid;grid-template-columns:minmax(0,.92fr) minmax(360px,.58fr);gap:clamp(28px,5vw,76px);align-items:start;margin:0 0 28px}
-.api-hero__copy{min-width:0}
-.api-cockpit{min-width:0;border:1px solid rgba(236,246,240,.14);border-radius:8px;background:#101619;color:#eaf2ec;box-shadow:0 34px 88px rgba(16,19,18,.2);overflow:hidden}
-.api-cockpit__bar{min-height:46px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:0 16px;border-bottom:1px solid rgba(236,246,240,.11);font:12px/1.25 var(--mono);color:#aeb8b2}
-.api-cockpit__bar b{color:#f2f6f1}
-.api-cockpit__bar span:last-child{color:#75d19f;text-align:right}
-.api-cockpit__body{display:grid;gap:12px;padding:16px}
-.api-cockpit__metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.api-cockpit__metric{min-width:0;min-height:68px;padding:11px;border:1px solid rgba(236,246,240,.11);border-radius:6px;background:rgba(7,11,12,.52)}
-.api-cockpit__metric b{display:block;color:#f2f6f1;font:700 22px/1 var(--mono)}
-.api-cockpit__metric span{display:block;margin-top:6px;color:#aeb8b2;font-size:12px;line-height:1.35}
-.api-command{display:grid;gap:8px;padding:12px;border:1px solid rgba(236,246,240,.11);border-radius:6px;background:rgba(7,11,12,.58)}
-.api-command label,.api-cockpit__toggles label{font:700 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#c7d0ca}
-.api-command__row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
-.api-command input{min-width:0;min-height:44px;width:100%;border:1px solid rgba(236,246,240,.16);border-radius:6px;background:#070b0c;color:#f2f6f1;padding:0 12px;font:13px/1.35 var(--mono)}
-.api-command input::placeholder{color:#728078}
-.api-command input:focus-visible,.api-command__clear:focus-visible,.api-cockpit__toggles input:focus-visible{outline:2px solid #75d19f;outline-offset:2px}
-.api-command__clear{min-height:44px;border:1px solid rgba(236,246,240,.16);border-radius:6px;background:rgba(255,255,255,.05);color:#f2f6f1;padding:0 12px;font:700 12px/1 var(--mono);cursor:pointer}
-.api-command__clear:hover{background:rgba(255,255,255,.09)}
-.api-command__hint,.api-command__status{margin:0;color:#aeb8b2;font:12px/1.5 var(--mono)}
-.api-command__status{color:#75d19f}
-.api-cockpit__toggles{display:grid;gap:10px;padding:12px;border:1px solid rgba(236,246,240,.11);border-radius:6px;background:rgba(7,11,12,.44)}
-.api-cockpit__toggles label{min-height:44px;display:flex;align-items:center;gap:9px;cursor:pointer}
-.api-cockpit__toggles input{width:18px;height:18px;accent-color:#75d19f}
-.api-proof-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:6px 0 28px}
-.api-proof-card{min-width:0;min-height:148px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg-elev);color:inherit;text-decoration:none}
-.api-proof-card:hover{border-color:rgba(236,231,220,.22);background:rgba(255,255,255,.035)}
-.api-proof-card b{display:block;color:var(--ink);font-size:13px;line-height:1.35}
-.api-proof-card span{display:block;color:var(--ink-mute);font-size:12.5px;line-height:1.45}
-.api-proof-card code{align-self:flex-start;font-size:11.5px}
-.api-proof-card--green{box-shadow:inset 3px 0 0 #22c55e}
-.api-proof-card--blue{box-shadow:inset 3px 0 0 #60a5fa}
-.api-proof-card--amber{box-shadow:inset 3px 0 0 #f59e0b}
-.api-proof-card--rose{box-shadow:inset 3px 0 0 #fb7185}
-.api-bridge{margin:-4px 0 18px;font-size:14px;color:var(--ink-faint,#737c73)}
-.api-bridge a{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line)}
-.api-jump-links a{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line)}
-.api-runbook-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0 28px}
-.api-runbook-step{min-width:0;min-height:176px;padding:14px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.024)}
-.api-runbook-step span{display:block;color:var(--ink-faint);font-family:var(--mono);font-size:11px;margin-bottom:8px}
-.api-runbook-step strong{display:block;color:var(--ink);font-size:13px;line-height:1.35;margin-bottom:8px}
-.api-runbook-step p{font-size:12.5px;line-height:1.5;margin:9px 0 0;color:var(--ink-mute)}
-.api-runbook-step code{font-size:11px}
-@media(max-width:980px){.api-proof-board{grid-template-columns:repeat(2,minmax(0,1fr))}.api-runbook-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:640px){.api-proof-board,.api-runbook-grid{grid-template-columns:1fr}.api-proof-card,.api-runbook-step{min-height:auto}}
-.surface-media-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-height:132px;margin:22px 0 30px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg-elev)}
-.surface-media-panel div{min-width:0;padding:12px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.026)}
-.surface-media-panel b{display:block;color:var(--ink);font-family:var(--mono);font-size:11px;line-height:1.35}
-.surface-media-panel span{display:block;margin-top:7px;color:var(--ink-mute);font-size:12px;line-height:1.45}
-@media(max-width:820px){.surface-media-panel{grid-template-columns:1fr}}
+.route-stub{display:inline-block;padding:2px 8px;border-radius:var(--r-sm);border:1px solid var(--line-2);background:rgba(255,255,255,.022);color:var(--ink-3);font-family:var(--font-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase}
+.route-live{display:inline-block;padding:2px 8px;border-radius:var(--r-sm);border:1px solid var(--accent-edge);background:var(--accent-soft);color:var(--accent);font-family:var(--font-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase}
 body[data-api-filter="live"] .api-route:has(.route-stub){display:none}
 body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
 .api-route[hidden],.api-group[hidden]{display:none!important}
-.group-count,.toc-count{color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;font-weight:400;margin-left:6px}
-.toc-grid{column-count:3;column-gap:24px;list-style:none;padding:0;margin:18px 0 32px;font-size:13.5px;font-family:var(--mono)}
+.group-count,.toc-count{color:var(--ink-3);font-family:var(--font-mono);font-size:11.5px;font-weight:400;margin-left:6px}
+.toc-grid{column-count:3;column-gap:24px;list-style:none;padding:0;margin:18px 0 var(--s6);font-size:13.5px;font-family:var(--font-mono)}
 @media(max-width:820px){.toc-grid{column-count:1}}
 .toc-grid li{margin:2px 0;break-inside:avoid}
-.toc-grid a{color:var(--ink);text-decoration:none;border-bottom:1px dashed var(--line)}
+.toc-grid a{color:var(--ink)}
 .group-intro{margin:6px 0 14px;font-size:13.5px}
-.group-intro summary,.route-detail summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink-faint);font-family:var(--mono);font-size:12px}
-.totals{font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);margin:0 0 24px}
-.legacy{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);max-width:780px;line-height:1.65}
+.group-intro summary,.route-detail summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink-3);font-family:var(--font-mono);font-size:12px}
+.legacy{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);max-width:var(--measure);line-height:1.65}
 .legacy code{font-size:11.5px}
-footer{padding:32px 0;color:var(--ink-faint);font-family:var(--mono);font-size:11.5px;border-top:1px solid var(--line)}
-footer a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--line)}
-@media(max-width:640px){header.site-header .wrap{grid-template-columns:1fr;gap:8px}header.site-header nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:stretch}header.site-header nav a{border:1px solid var(--line);background:rgba(255,255,255,.018)}.wrap{padding:0 20px}main{padding:38px 0 80px}h1{font-size:38px}.lede{font-size:17px}}
-:root{--ink:#F7F8F8;--ink-mute:#C3C8D0;--ink-faint:#868B94;--line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.13);--bg:#08090A;--bg-elev:#0E0F12;--paper-sink:#0B0C0E;--accent:#3FE5A0;--accent-soft:rgba(63,229,160,.12);--mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-body.api-reference-page{background:radial-gradient(920px 420px at 18% 12%,rgba(247,255,250,.78),transparent 74%),radial-gradient(760px 330px at 82% 0%,rgba(117,255,157,.13),transparent 72%),radial-gradient(700px 300px at 100% 25%,rgba(111,166,232,.07),transparent 72%),linear-gradient(rgba(7,16,13,.036) 1px,transparent 1px),linear-gradient(90deg,rgba(7,16,13,.03) 1px,transparent 1px),var(--bg);background-size:auto,auto,auto,72px 72px,72px 72px,auto;color:var(--ink);font-family:"Switzer",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.api-reference-page .wrap{max-width:1160px}
-.api-reference-page header.site-header{position:sticky;top:0;z-index:50;padding:0;background:rgba(216,229,222,.86);border-bottom:1px solid rgba(7,16,13,.1);backdrop-filter:saturate(140%) blur(12px);-webkit-backdrop-filter:saturate(140%) blur(12px);box-shadow:0 1px 0 rgba(247,255,250,.72)}
-.api-reference-page header.site-header .wrap{min-height:62px;display:flex;gap:24px;align-items:center}
-.api-reference-page header.site-header .logo{gap:9px;color:var(--ink);font-family:"Cabinet Grotesk",var(--display),sans-serif;font-size:18.5px;font-weight:640}
-.api-reference-page header.site-header .logo::before{content:"";width:18px;height:18px;display:inline-block;background:linear-gradient(90deg,var(--accent) 0 22%,transparent 22% 38%,var(--accent) 38% 60%,transparent 60% 76%,var(--accent) 76% 100%);clip-path:polygon(0 22%,22% 22%,22% 86%,0 86%,0 22%,38% 12%,60% 12%,60% 78%,38% 78%,38% 12%,76% 32%,100% 32%,100% 68%,76% 68%,76% 32%)}
-.api-reference-page header.site-header nav{margin-left:auto;display:flex;gap:22px;font:500 14px/1 "Switzer",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.api-reference-page header.site-header nav a{min-width:44px;min-height:44px;padding:0;color:var(--ink-mute);border:0;border-radius:0;background:transparent}
-.api-reference-page header.site-header nav a:hover{color:var(--ink);background:transparent;text-decoration:underline;text-underline-offset:10px;text-decoration-thickness:1px}
-.api-reference-page main{padding:clamp(68px,9vw,108px) 0 96px}
-.api-reference-page .crumbs{display:inline-flex;gap:8px;align-items:center;padding:7px 12px;border:1px solid rgba(7,16,13,.18);border-radius:999px;background:rgba(247,255,250,.58);box-shadow:inset 0 1px 0 rgba(255,255,255,.74),0 10px 28px rgba(7,16,13,.055);color:var(--ink-mute);letter-spacing:.13em}
-.api-reference-page .crumbs::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--accent)}
-.api-reference-page .crumbs a{border:0}
-.api-reference-page h1{max-width:760px;margin-top:28px;color:var(--ink);font-family:"Cabinet Grotesk",var(--display),sans-serif;font-size:clamp(58px,7vw,84px);font-weight:640;line-height:.98;text-wrap:balance}
-.api-reference-page .lede{max-width:780px;color:var(--ink-mute);font-size:18px;line-height:1.58}
-.api-reference-page .api-cockpit{margin-top:28px}
-.api-reference-page .api-cockpit code{background:rgba(255,255,255,.06);border-color:rgba(236,246,240,.14);color:#75d19f}
-.api-reference-page .surface-media-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-height:164px;margin:28px 0 22px;padding:14px;border:1px solid rgba(236,246,240,.14);border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.014)),#101619;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 28px 72px rgba(16,19,18,.18);color:#f2f6f1}
-.api-reference-page .surface-media-panel div{border-color:rgba(236,246,240,.12);background:rgba(8,12,13,.66)}
-.api-reference-page .surface-media-panel b{color:#f2f6f1}
-.api-reference-page .surface-media-panel span{color:#b9c5be}
-.api-reference-page .api-proof-board{gap:14px;margin:24px 0 28px}
-.api-reference-page .api-proof-card,.api-reference-page .api-runbook-step,.api-reference-page .api-route{background:radial-gradient(300px 180px at 100% 0%,rgba(117,255,157,.07),transparent 72%),linear-gradient(180deg,rgba(247,255,250,.68),rgba(231,243,236,.42)),rgba(247,255,250,.56);border-color:var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 14px 42px rgba(7,16,13,.05)}
-.api-reference-page .api-proof-card:hover{border-color:var(--line-2);background:rgba(247,255,250,.84)}
-.api-reference-page .api-proof-card b,.api-reference-page .api-runbook-step strong{font-family:"Cabinet Grotesk",var(--display),sans-serif;color:var(--ink);font-size:17px;font-weight:640}
-.api-reference-page .api-proof-card span,.api-reference-page .api-runbook-step p,.api-reference-page .route-desc,.api-reference-page .route-detail p{color:var(--ink-mute)}
-.api-reference-page code{background:rgba(247,255,250,.58);border-color:var(--line);color:var(--ink)}
-.api-reference-page pre{background:#101619;color:#dce7df;border-color:rgba(236,246,240,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
-.api-reference-page pre code{background:none;border:0;color:inherit}
-.api-reference-page .route-live{background:rgba(10,123,83,.1);color:var(--accent)}
-.api-reference-page .route-stub{background:rgba(16,19,18,.05);color:var(--ink-faint)}
-.api-reference-page .m{color:#06120b}
-.api-reference-page .m-get{background:#74c69d}.api-reference-page .m-post{background:#90bde8}.api-reference-page .m-put{background:#dcbf73}.api-reference-page .m-patch{background:#c9b0e7}.api-reference-page .m-delete{background:#e6a19d}
-.api-reference-page .api-group{border-top-color:rgba(7,16,13,.12)}
-.api-reference-page .toc-grid a,.api-reference-page .api-bridge a,.api-reference-page .api-jump-links a{color:var(--ink)}
-.api-reference-page footer{background:rgba(216,229,222,.74);border-top-color:rgba(7,16,13,.12)}
-@media(max-width:980px){.api-hero{grid-template-columns:1fr}.api-reference-page .api-cockpit{margin-top:0}}
-@media(max-width:820px){.api-reference-page .surface-media-panel{grid-template-columns:1fr 1fr}.api-reference-page header.site-header nav{gap:12px}}
-@media(max-width:640px){.api-reference-page header.site-header .wrap{display:flex;flex-wrap:wrap;gap:4px 14px;padding-block:8px}.api-reference-page header.site-header .logo{min-height:38px}.api-reference-page header.site-header nav{width:100%;margin-left:0;display:flex;gap:18px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}.api-reference-page header.site-header nav::-webkit-scrollbar{display:none}.api-reference-page header.site-header nav a{flex:0 0 auto;min-height:44px;border:0;border-radius:0;background:transparent}.api-reference-page main{padding:52px 0 80px}.api-reference-page h1{font-size:clamp(44px,12vw,58px)}.api-cockpit__metrics,.api-command__row{grid-template-columns:1fr}.api-reference-page .surface-media-panel{grid-template-columns:1fr}.api-reference-page .api-proof-board,.api-reference-page .api-runbook-grid{grid-template-columns:1fr}}
 </style>
 </head>
-<body class="api-reference-page">
+<body class="t-docs">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="nav"><div class="wrap nav__in">
-  <a class="nav__brand" href="/" aria-label="kolm home"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx="0.4"/><rect x="13" y="9" width="4.5" height="14" rx="0.4"/><rect x="22" y="12" width="4.5" height="8" rx="0.4"/></svg><span>kolm</span></a>
-${navBlock}
-  <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
-</div></header>
-<script defer src="/kolm-2026.js"></script>
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm home">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+      </svg>
+      <span>kolm</span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/#pipeline">Product</a>
+      <a href="/docs" aria-current="page">Docs</a>
+      <a href="/pricing">Pricing</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
+      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get an API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
 
 <main id="main" tabindex="-1"><div class="wrap">
 
@@ -855,7 +786,7 @@ ${navBlock}
     </div>
   </aside>
 </section>
-<div class="kolm-surface-media surface-media-panel" aria-label="API reference surface map">
+<div class="surface-media-panel" aria-label="API reference surface map">
   <div><b>capture and route</b><span>Provider-compatible chat, messages, responses, gateway dispatch and capture ingestion endpoints.</span></div>
   <div><b>compile and verify</b><span>Build jobs, artifacts, receipts, signatures, OpenAPI references and verifier routes.</span></div>
   <div><b>train and evaluate</b><span>Datasets, labels, bakeoffs, quality prediction, K-score and distillation workflows.</span></div>
@@ -977,10 +908,69 @@ ${groupsHtml}
 
 </div></main>
 
-<footer><div class="wrap">
-  kolm.ai &middot; the AI compiler
-</div></footer>
-
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__col">
+        <a class="nav__brand" href="/" aria-label="kolm.ai home" style="margin-bottom:12px">
+          <svg viewBox="0 0 32 32" aria-hidden="true" style="width:22px;height:22px">
+            <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
+            <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
+            <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
+          </svg>
+          <span>kolm<b>.ai</b></span>
+        </a>
+        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+      </div>
+      <div class="foot__col">
+        <h3>Compiler</h3>
+        <a href="/#pipeline">Pipeline</a>
+        <a href="/account/api-control-center">API control</a>
+        <a href="/integrations">Integrations</a>
+        <a href="/compare">Compare</a>
+        <a href="/runtimes">Runtime targets</a>
+        <a href="/docs">Docs</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+      <div class="foot__col">
+        <h3>Surfaces</h3>
+        <a href="/docs#capture">Capture</a>
+        <a href="/docs#compile">Compile</a>
+        <a href="/docs#compose">Compose</a>
+        <a href="/docs#deploy">Deploy</a>
+        <a href="https://audit.kolm.ai">Audit</a>
+      </div>
+      <div class="foot__col">
+        <h3>Trust</h3>
+        <a href="/verify">Verify</a>
+        <a href="/security">Security</a>
+        <a href="/trust">Trust center</a>
+        <a href="/status">Status</a>
+      </div>
+      <div class="foot__col">
+        <h3>Company</h3>
+        <a href="/research">Research</a>
+        <a href="/changelog">Changelog</a>
+        <a href="mailto:dev@kolm.ai">Contact</a>
+      </div>
+      <div class="foot__col">
+        <h3>Legal</h3>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/dpa">DPA</a>
+        <a href="/subprocessors">Subprocessors</a>
+        <a href="/sla">SLA</a>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span class="badge badge--ok">Signed artifacts</span>
+      <span class="badge">API control center</span>
+      <span class="badge">Apache-2.0</span>
+      <span class="badge">Open API contract</span>
+      <span class="foot__copy">2026 kolm.ai - <a href="mailto:dev@kolm.ai">dev@kolm.ai</a></span>
+    </div>
+  </div>
+</footer>
 </body>
 </html>
 `;

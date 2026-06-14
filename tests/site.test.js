@@ -527,9 +527,10 @@ test('homepage exposes control-plane loop without overclaiming', () => {
   assert.doesNotMatch(home, /FedRAMP Moderate/i);
 });
 
-// Pages migrated onto the kolm-2026 design system. 404.html + compiler-terms.html
-// are intentionally absent — they are queued for the same migration and still
-// carry the retired paper cascade until then.
+// Pages migrated onto the kolm-2026 design system. Every entry must carry the
+// canonical glass nav + footer, load the single system stylesheet, and keep none
+// of the retired paper/image-2/kolm-main cascade. 404.html + compiler-terms.html
+// completed the migration and are now locked in here too.
 const CANONICAL_SYSTEM_FILES = [
   'index.html',
   'compiler-product.html',
@@ -549,6 +550,8 @@ const CANONICAL_SYSTEM_FILES = [
   'security.html',
   'trust.html',
   'status.html',
+  '404.html',
+  'compiler-terms.html',
 ];
 
 test('migrated product pages share the kolm-2026 design-system shell', () => {
@@ -719,8 +722,11 @@ test('generated API reference is an operating surface, not a route dump', () => 
   assert.match(api, /<title>API reference - kolm\.ai<\/title>/);
   assert.match(api, /<meta name="theme-color" content="#08090A">/);
   assert.match(api, /kolm-2026\.css/);
-  // Canonical dark shell — not the retired paper/image-2/kolm-main cascade.
-  assert.match(api, /class="api-reference-page"/);
+  // Canonical dark shell — the kolm-2026 docs page type, glass nav, and shared
+  // footer. NOT the retired paper/image-2/kolm-main cascade.
+  assert.match(api, /<body class="t-docs">/);
+  assert.match(api, /<header class="nav">/);
+  assert.match(api, /<footer class="foot">/);
   assert.doesNotMatch(api, /compiler-site--paper/);
   assert.doesNotMatch(api, /data-design-reference="image-2"/);
   assert.doesNotMatch(api, /kolm-main\.css/);
@@ -865,9 +871,9 @@ test('api control center UI exposes enterprise data-plane and improvement-loop c
 
   assert.match(control, /API Control Center - kolm\.ai/);
   assert.match(control, /One tenant-scoped console for AI API ingress, egress/);
-  assert.match(control, /control-hero-shell/);
-  assert.match(control, /control-hero__summary/);
-  assert.match(control, /Source-to-proof API control plane visual/);
+  assert.match(control, /control-hero__copy/);
+  assert.match(control, /control-hero__proof/);
+  assert.match(control, /aria-label="Source-to-proof API control plane"/);
   assert.match(control, /workspace\/prod-ai-loop/);
   assert.match(control, /Every credible source/);
   assert.match(control, /Preview mode/);
@@ -882,8 +888,8 @@ test('api control center UI exposes enterprise data-plane and improvement-loop c
   assert.match(control, /Policy before interpretation/);
   assert.match(control, /Behavior becomes an artifact/);
   assert.match(control, /Proof leaves the dashboard/);
-  assert.match(control, /Read API Contract/);
-  assert.match(control, /View Readiness Gates/);
+  assert.match(control, /Read API contract/);
+  assert.match(control, /View readiness gates/);
   assert.match(control, /API data channel matrix/);
   assert.match(control, /Collection and export modes/);
   assert.match(control, /First-class control objects/);

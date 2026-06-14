@@ -5,12 +5,16 @@
 (function () {
   'use strict';
 
-  // ---- browser chrome color tracks the live --paper token (one theme, dark) ----
+  // ---- browser chrome color tracks the live --room token (the page floor;
+  // one theme, dark). Note: under KOLM_DESIGN_SYSTEM.md the floor is --room and
+  // --paper is now the lit artifact sheet, so we read --room here. Falls back to
+  // --paper for any page still on the legacy token. ----
   function syncThemeColor() {
     var meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) return;
-    var paper = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
-    if (paper && paper.charAt(0) === '#') meta.setAttribute('content', paper);
+    var cs = getComputedStyle(document.documentElement);
+    var room = (cs.getPropertyValue('--room') || cs.getPropertyValue('--paper')).trim();
+    if (room && room.charAt(0) === '#') meta.setAttribute('content', room);
   }
 
   // ---- reveal-on-scroll (gated by prefers-reduced-motion via the CSS rule) ----
