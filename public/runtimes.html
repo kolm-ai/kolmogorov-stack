@@ -7,19 +7,19 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
 </script>
-<title>Kolm Runtime Target Matrix</title>
-<meta name="description" content="Kolm runtime target matrix for vLLM, SGLang, TensorRT-LLM, Triton, ONNX Runtime, Core ML, LiteRT, ExecuTorch, OpenVINO, hosted GPU, BYOC, and restricted fleets.">
+<title>Kolm Runtimes — Run Your Model Anywhere It Fits</title>
+<meta name="description" content="Run your signed .kolm model on the hardware you already have. One portable file ships to vLLM, SGLang, TensorRT-LLM, Triton, ONNX Runtime, Core ML, hosted GPU, your private cloud, and more — no rewrite, no lock-in.">
 <meta name="theme-color" content="#08090A">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Kolm Runtime Target Matrix">
-<meta property="og:description" content="Target signed .kolm artifacts toward serving engines, hosted GPUs, local runtimes, and device paths with receipts, caveats, and promotion policy.">
+<meta property="og:title" content="Kolm Runtimes — Run Your Model Anywhere It Fits">
+<meta property="og:description" content="One signed model, one portable file. Run it on a laptop, your private cloud, the edge, or a GPU fleet — Kolm ranks the runtimes it fits and names the reason for any it blocks.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/runtimes">
 <meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kolm Runtime Target Matrix">
-<meta name="twitter:description" content="Runtime-neutral target guidance for signed AI behavior artifacts.">
+<meta name="twitter:title" content="Kolm Runtimes — Run Your Model Anywhere It Fits">
+<meta name="twitter:description" content="Run the model you own on the hardware you already have — laptop, private cloud, edge, or GPU fleet.">
 <link rel="canonical" href="https://kolm.ai/runtimes">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -32,9 +32,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Kolm Runtime Target Matrix",
+  "name": "Kolm Runtimes — Run Your Model Anywhere It Fits",
   "url": "https://kolm.ai/runtimes",
-  "description": "Kolm runtime target matrix for vLLM, SGLang, TensorRT-LLM, Triton, ONNX Runtime, Core ML, LiteRT, ExecuTorch, OpenVINO, hosted GPU, BYOC, and restricted fleets.",
+  "description": "Run your signed .kolm model on the hardware you already have. One portable file ships to vLLM, SGLang, TensorRT-LLM, Triton, ONNX Runtime, Core ML, hosted GPU, your private cloud, and more — no rewrite, no lock-in.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
@@ -92,23 +92,23 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="field" aria-hidden="true"></span>
     <div class="wrap hero__grid">
       <div class="hero__copy">
-        <p class="eyebrow" data-enter="1">Runtime target matrix</p>
-        <h1 class="hero__h1" data-enter="2">Aim each artifact at the smallest runtime that can carry the behavior.</h1>
-        <p class="lede" data-enter="3">Kolm does not replace serving engines, GPU clouds, local runners, or device frameworks. It keeps the behavior evidence, fit constraints, deployment recipe, caveats, and receipts with the signed <code>.kolm</code> artifact so platform teams can choose the right target.</p>
+        <p class="eyebrow" data-enter="1">Runs anywhere it fits</p>
+        <h1 class="hero__h1" data-enter="2">Run your model on the hardware you already have.</h1>
+        <p class="lede" data-enter="3">Your behavior compiles into one signed <code>.kolm</code> file — model, recipe, evals, and receipt together. Kolm ranks the runtimes it fits, from a laptop to your private cloud to a GPU fleet, and ships it there with the launch recipe and proof in the box. Pick where it runs based on where it actually fits.</p>
         <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="/account/api-control-center">Open target policy</a>
-          <a class="btn btn--ghost" href="/docs#quickstart">Start with a compile</a>
+          <a class="btn btn--primary" href="/account/api-control-center">See where your model runs</a>
+          <a class="btn btn--ghost" href="/docs#quickstart">Compile your first model</a>
         </div>
         <div class="hero__proof" data-enter="5">
-          <span><i class="dot"></i>6 target families</span>
+          <span><i class="dot"></i>6 runtime families</span>
           <span><i class="dot"></i>18 named runtimes</span>
-          <span><i class="dot"></i>Recipe + receipt per target</span>
-          <span><i class="dot"></i>Blocked paths name the reason</span>
+          <span><i class="dot"></i>One file, recipe and receipt included</span>
+          <span><i class="dot"></i>Blocked paths tell you why</span>
         </div>
       </div>
 
       <!-- the one lit --paper object; ships sealed (calm fallback), sweep re-fires it once -->
-      <figure class="artifact is-sealed" data-artifact data-art-reveal aria-label="Signed .kolm runtime target datasheet, in spec">
+      <figure class="artifact is-sealed" data-artifact data-art-reveal aria-label="Signed .kolm model showing the runtimes it fits, in spec">
         <i class="regmark regmark--tl"></i><i class="regmark regmark--tr"></i>
         <i class="regmark regmark--bl"></i><i class="regmark regmark--br"></i>
         <header class="artifact__head">
@@ -131,12 +131,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <!-- s-proof-strip -->
   <section class="section section--band">
     <div class="wrap">
-      <p class="eyebrow">Runtime-neutral</p>
+      <p class="eyebrow">One file, every runtime</p>
       <div class="proof__row">
-        <div class="proof__cell reveal"><b data-count>6</b><span>target families</span></div>
+        <div class="proof__cell reveal"><b data-count>6</b><span>runtime families</span></div>
         <div class="proof__cell reveal"><b data-count>18</b><span>named runtimes and platforms</span></div>
-        <div class="proof__cell reveal"><b class="is-mono">receipts</b><span>before promotion</span></div>
-        <div class="proof__cell reveal"><b class="is-mono">gated</b><span>external adoption proof</span></div>
+        <div class="proof__cell reveal"><b class="is-mono">receipts</b><span>ship with every target</span></div>
+        <div class="proof__cell reveal"><b class="is-mono">no rewrite</b><span>to get here, no lock-in to leave</span></div>
       </div>
     </div>
   </section>
@@ -145,40 +145,40 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="matrix">
     <div class="wrap wrap--wide">
       <div class="section__head">
-        <p class="eyebrow">01 &middot; Target families</p>
-        <h2>The matrix separates runtime ownership from artifact proof.</h2>
-        <p class="lede">Each target family gets a fit signal, not a blanket promise. Kolm emits target instructions and receipts, then records when a feature does not fit. Runtime engines keep owning execution, scheduling, acceleration, and hardware support.</p>
+        <p class="eyebrow">01 &middot; Runtime families</p>
+        <h2>Six places your model can run. Pick the one that fits.</h2>
+        <p class="lede">Kolm doesn't replace your serving engine, GPU cloud, or device framework — it ships your model to them, with the launch recipe and proof attached. Each family gets a real fit signal, so you deploy where the behavior actually runs, not where a logo promises it might.</p>
       </div>
       <div class="grid grid--3">
         <div class="card reveal">
           <span class="card__k">Reg &middot; recipe + receipt</span>
           <h3>Serving engine</h3>
-          <p><b>vLLM, SGLang, TensorRT-LLM, NVIDIA Triton, Hugging Face TGI.</b> Best when the workload needs high-throughput OpenAI-compatible serving, batching, tensor parallelism, observability, or GPU-tuned execution.</p>
+          <p><b>vLLM, SGLang, TensorRT-LLM, NVIDIA Triton, Hugging Face TGI.</b> For high-throughput, OpenAI-compatible serving at scale — batching, tensor parallelism, and GPU-tuned execution when your traffic demands it.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; target manifest</span>
           <h3>Hosted GPU</h3>
-          <p><b>Baseten, Modal, Runpod, Replicate, Hugging Face Inference Endpoints.</b> Best when teams want managed endpoints, autoscaling, job execution, hosted packaging, or a faster path from artifact to deployed endpoint.</p>
+          <p><b>Baseten, Modal, Runpod, Replicate, Hugging Face Inference Endpoints.</b> The fastest path from a compiled model to a live endpoint — managed scaling, no infrastructure to stand up yourself.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; fit caveats</span>
           <h3>Local runner</h3>
-          <p><b>llama.cpp, Ollama, LM Studio, MLX, MLC LLM.</b> Best for small, quantized, local, demo, support, or offline-adjacent workflows where the compiled behavior can fit local model and memory constraints.</p>
+          <p><b>llama.cpp, Ollama, LM Studio, MLX, MLC LLM.</b> Run it on the laptop you already have — ideal for small, quantized models, demos, support tooling, and local workflows that fit your machine's limits.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; files + hashes</span>
           <h3>Portable inference</h3>
-          <p><b>ONNX Runtime, OpenVINO, TVM, Triton model repository.</b> Best for model-format portability, CPU/GPU/accelerator paths, model repository packaging, and enterprise deployment controls.</p>
+          <p><b>ONNX Runtime, OpenVINO, TVM, Triton model repository.</b> Move one model across CPU, GPU, and accelerators — standard formats and repository packaging that drop into the stack you run.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; target constraints</span>
           <h3>Device edge</h3>
-          <p><b>Core ML, LiteRT, ExecuTorch.</b> Best when a target-specific model format, memory ceiling, energy budget, OS/runtime version, and privacy posture are explicitly declared.</p>
+          <p><b>Core ML, LiteRT, ExecuTorch.</b> Ship to the device when the model format, memory ceiling, energy budget, and OS version all line up — Kolm checks the fit before you commit.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; promotion gate</span>
-          <h3>Enterprise fleet</h3>
-          <p><b>KServe, Ray Serve, BentoML, Kubernetes, BYOC, restricted networks.</b> Best for platform teams that need policy-controlled rollout, liveness checks, audit logs, canaries, internal registries, and governance export.</p>
+          <h3>Your own fleet</h3>
+          <p><b>KServe, Ray Serve, BentoML, Kubernetes, your private cloud, restricted networks.</b> For platform teams that need controlled rollout, liveness checks, audit logs, canaries, and an internal registry — running inside your own perimeter.</p>
         </div>
       </div>
     </div>
@@ -188,30 +188,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="readiness">
     <div class="wrap wrap--wide">
       <div class="section__head">
-        <p class="eyebrow">02 &middot; Readiness states</p>
-        <h2>Every target is a state machine, not a logo list.</h2>
-        <p class="lede">Runtime fit is inspectable by platform engineers before promotion. The same artifact can be ready for one target and blocked for another.</p>
+        <p class="eyebrow">02 &middot; Knowing it's ready</p>
+        <h2>Know it runs before you ship it.</h2>
+        <p class="lede">No logo list, no guesswork. You see exactly where your model stands for each runtime — and the same model can be ready for one target and blocked for another, with the reason spelled out either way.</p>
       </div>
       <div class="grid grid--4">
         <div class="card reveal">
           <span class="card__k">State &middot; candidate</span>
           <h3>Fit candidate</h3>
-          <p>Inputs are present, target class is plausible, and Kolm can generate a recipe, but required runtime files or external proof may still be missing.</p>
+          <p>The inputs are in, the runtime looks plausible, and Kolm can write a recipe — but some runtime files or proof may still be missing.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">State &middot; recipe</span>
-          <h3>Recipe generated</h3>
-          <p>Artifact manifest, model hints, eval gates, environment requirements, launch command, health check, and rollback policy are assembled.</p>
+          <h3>Recipe ready</h3>
+          <p>Everything you need to launch is assembled: manifest, model hints, eval gates, environment, start command, health check, and rollback.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">State &middot; receipt</span>
           <h3>Receipt verified</h3>
-          <p>The target package has hashes, verifier output, eval result, policy decision, promotion identity, and exportable evidence.</p>
+          <p>The package carries hashes, verifier output, eval results, and the identity of who shipped it — proof you can hand to anyone.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">State &middot; blocked</span>
-          <h3>Blocked with reason</h3>
-          <p>Kolm records why promotion is blocked: context length, unsupported tools, missing quantization, data boundary, package gate, or runtime mismatch.</p>
+          <h3>Blocked, with the reason</h3>
+          <p>If it can't run somewhere, Kolm tells you why — context length, unsupported tools, missing quantization, data boundary, or a runtime mismatch. Never a silent failure.</p>
         </div>
       </div>
     </div>
@@ -221,13 +221,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section feat" id="device-fit">
     <div class="wrap feat__in">
       <div class="feat__copy">
-        <p class="eyebrow">03 &middot; Device fit</p>
-        <h2>Rank every device path by what the behavior actually needs.</h2>
-        <p class="lede">Kolm scores the compiled behavior against each target's model format, memory ceiling, context length, and data boundary, then ranks the device paths it fits and names the reason for anything it blocks.</p>
+        <p class="eyebrow">03 &middot; Best fit, ranked</p>
+        <h2>Kolm tells you the best place to run it.</h2>
+        <p class="lede">No more guessing whether your model fits the box. Kolm scores it against each runtime's model format, memory ceiling, context length, and data boundary — then ranks the targets it fits and names the reason for any it blocks. You ship to the best option on day one.</p>
         <ul class="feat__list">
-          <li>Model size and quantization hints checked against the target ceiling</li>
+          <li>Model size and quantization checked against each target's ceiling</li>
           <li>Context length, tool shape, and data boundary enforced per target</li>
-          <li>Blocked paths return a reason, not a silent failure</li>
+          <li>If a path is blocked, you get the reason — never a silent failure</li>
         </ul>
       </div>
       <div class="feat__ui">
@@ -249,14 +249,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section feat feat--rev" id="evidence">
     <div class="wrap feat__in">
       <div class="feat__copy">
-        <p class="eyebrow">04 &middot; Evidence packet</p>
-        <h2>The target decision travels with the artifact.</h2>
-        <p class="lede">A runtime target is only credible when the buyer can inspect the proof outside the UI: what was compiled, what was tested, why the target was selected, and what still blocks release.</p>
+        <p class="eyebrow">04 &middot; Proof in the box</p>
+        <h2>Every model ships with proof of where it runs.</h2>
+        <p class="lede">The deployment decision lives inside the file, not in our dashboard. Open it and see exactly what was compiled, what was tested, why this runtime, and what still blocks release — proof anyone can check, no trust required.</p>
         <ul class="feat__list">
-          <li><b>Artifact manifest</b> &middot; recipe, examples, evaluators, tokenizer metadata, policy scope, dependency hashes, and compatible target classes</li>
+          <li><b>Artifact manifest</b> &middot; recipe, examples, evaluators, tokenizer metadata, policy scope, dependency hashes, and compatible runtimes</li>
           <li><b>Eval gate</b> &middot; regression threshold, failure set, human review state, replay window, fallback rule, and release decision</li>
           <li><b>Target recipe</b> &middot; runtime family, launch shape, package files, required environment, health check, logging path, and incompatible features</li>
-          <li><b>Verifier receipt</b> &middot; signature, manifest hash, build identity, promotion actor, timestamp, export destination, and governance packet reference</li>
+          <li><b>Verifier receipt</b> &middot; signature, manifest hash, build identity, who shipped it, timestamp, export destination, and the full audit reference</li>
         </ul>
       </div>
       <div class="feat__ui">
@@ -279,8 +279,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="field" aria-hidden="true"></span>
     <div class="wrap cta__in">
       <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-      <h2>Compile once, then prove where it can safely run.</h2>
-      <p class="lede">Start with one repeated API behavior, generate a signed artifact, and let the target matrix show which serving path is ready, blocked, or waiting on external proof.</p>
+      <h2>Compile it once. Run it anywhere it fits.</h2>
+      <p class="lede">Point your existing calls at Kolm, compile one repeated behavior into a signed model, and see every runtime it can run on — laptop, your private cloud, the edge, or a GPU fleet. No rewrite to get here, no lock-in once you own it.</p>
       <div class="hero__cta">
         <a class="btn btn--primary" href="/signup">Get an API key</a>
         <a class="btn btn--ghost" href="/integrations">See integrations</a>
@@ -303,7 +303,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">Own the AI you&rsquo;re renting &mdash; a signed model from your live API calls, run on your own hardware.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>

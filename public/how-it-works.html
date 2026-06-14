@@ -7,14 +7,14 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
 </script>
-<title>How Kolm Works - API Behavior To Device-Fit Artifacts</title>
-<meta name="description" content="How Kolm turns production AI/API behavior into governed datasets, eval gates, signed artifacts, runtime targets, receipts, and enterprise exports.">
+<title>How Kolm Works - From Your API Calls To a Model You Own</title>
+<meta name="description" content="Four steps from your live OpenAI and Anthropic calls to a signed model you run on your own hardware. Point your traffic in, own a portable .kolm artifact - no SDK rewrite, no lock-in.">
 <meta name="theme-color" content="#08090A">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:title" content="How Kolm Works">
-<meta property="og:description" content="API behavior in. Device-fit models out. The source-to-proof lifecycle behind Kolm's compiler and API Control Center.">
+<meta property="og:description" content="Point your API calls at Kolm and own the model they make. Four steps: capture, compile, sign, deploy - a portable .kolm artifact you run anywhere.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/how-it-works">
 <meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
@@ -22,7 +22,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="How Kolm Works">
-<meta name="twitter:description" content="Route behavior in, govern it, compile signed artifacts, target runtimes, and export proof.">
+<meta name="twitter:description" content="Point your calls in. Own the model out. Capture, compile, sign, deploy - a portable model you run on your own hardware, verifiable by anyone.">
 <meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/how-it-works">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -38,7 +38,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "@type": "WebPage",
   "name": "How Kolm Works",
   "url": "https://kolm.ai/how-it-works",
-  "description": "How Kolm turns production AI/API behavior into governed datasets, eval gates, signed artifacts, runtime targets, receipts, and enterprise exports.",
+  "description": "Four steps from your live OpenAI and Anthropic calls to a signed model you run on your own hardware: capture, compile, sign, deploy - one portable .kolm artifact, no SDK rewrite, no lock-in.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
@@ -96,18 +96,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="field" aria-hidden="true"></span>
     <div class="wrap hero__grid">
       <div class="hero__copy">
-        <p class="eyebrow" data-enter="1">How Kolm works</p>
-        <h1 class="hero__h1" data-enter="2">Turn API behavior into governed runtime artifacts.</h1>
-        <p class="lede" data-enter="3">API behavior in. Device-fit models out. Kolm starts from real model calls and adjacent API data, then makes the source, policy, eval, compile, target, receipt and export state explicit before any team claims the behavior is ready.</p>
+        <p class="eyebrow" data-enter="1">Drop-in proxy &mdash; no SDK rewrite</p>
+        <h1 class="hero__h1" data-enter="2">Four steps from your API calls to a model you own.</h1>
+        <p class="lede" data-enter="3">Point your live OpenAI and Anthropic traffic at Kolm. It captures the behavior you already use, compiles it into a signed model in one portable file, and runs it on your own hardware. Capture, compile, sign, deploy &mdash; no rewrite to get here, no lock-in once you have it.</p>
         <div class="hero__cta" data-enter="4">
-          <a class="btn btn--primary" href="/signup">Get an API key</a>
+          <a class="btn btn--primary" href="/signup">Run a capture</a>
           <a class="btn btn--ghost" href="/account/api-control-center">Open Control Center</a>
         </div>
         <div class="hero__proof" data-enter="5">
-          <span><i class="dot"></i>12 ingress modes &middot; redacted before persistence</span>
-          <span><i class="dot"></i>8 governance stages &middot; eval-gated</span>
-          <span><i class="dot"></i>Ed25519-signed artifacts</span>
-          <span><i class="dot"></i>10 export modes &middot; receipts and packets</span>
+          <span><i class="dot"></i>Point your existing calls &middot; 12 ways to capture them</span>
+          <span><i class="dot"></i>Compile a signed model in one file</span>
+          <span><i class="dot"></i>Ed25519-signed &middot; verify it yourself</span>
+          <span><i class="dot"></i>Run it on the hardware you already have</span>
         </div>
       </div>
 
@@ -139,12 +139,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <!-- s-proof-strip -->
   <section class="section section--band">
     <div class="wrap">
-      <p class="eyebrow">In production</p>
+      <p class="eyebrow">Capture from the tools you use. Run on the hardware you have.</p>
       <div class="proof__row">
-        <div class="proof__cell reveal"><b data-count>12</b><span>ingress modes</span></div>
-        <div class="proof__cell reveal"><b data-count>8</b><span>governance stages</span></div>
-        <div class="proof__cell reveal"><b class="is-mono">Ed25519</b><span>signed artifacts</span></div>
-        <div class="proof__cell reveal"><b data-count>10</b><span>export modes</span></div>
+        <div class="proof__cell reveal"><b data-count>12</b><span>ways to capture your calls</span></div>
+        <div class="proof__cell reveal"><b data-count>5</b><span>runtimes to run it on</span></div>
+        <div class="proof__cell reveal"><b class="is-mono">Ed25519</b><span>signed &middot; verify it yourself</span></div>
+        <div class="proof__cell reveal"><b data-count>10</b><span>ways to export your proof</span></div>
       </div>
     </div>
   </section>
@@ -153,30 +153,30 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="pipeline">
     <div class="wrap wrap--wide">
       <div class="section__head">
-        <p class="eyebrow">The pipeline</p>
-        <h2>Four stages, each producing an object an operator can inspect.</h2>
-        <p class="lede">The strongest infra products make invisible workflow state concrete. Kolm's lifecycle is designed around operator-owned objects, not marketing promises &mdash; capture behavior, compile a signed artifact, compose specialists, then deploy to the runtime that fits.</p>
+        <p class="eyebrow">Capture, compile, sign, deploy</p>
+        <h2>Four steps from your API traffic to a model on your own hardware.</h2>
+        <p class="lede">No rewrite to get here, no lock-in once you have it. Point your live calls at Kolm, let it compile the behavior you already use into a signed model, keep only what passes your evals, and run it on the hardware that fits. Each step leaves you something you can open, check, and keep.</p>
       </div>
       <div class="grid grid--4">
         <div class="step reveal">
           <div class="step__n">01 / Capture</div>
-          <h3>Route your model traffic.</h3>
-          <p>Point your existing OpenAI- or Anthropic-compatible calls at Kolm. REST, streaming, webhooks, OTEL, MCP, A2A, GraphQL/RPC, queues, warehouse drops, browser events and logs enter as governed events &mdash; redacted before persistence.</p>
+          <h3>Point your calls at Kolm.</h3>
+          <p>Keep your SDK exactly as it is &mdash; drop Kolm in front of your OpenAI- or Anthropic-compatible calls. REST, streaming, webhooks, OTEL, MCP, A2A, GraphQL/RPC, queues, warehouse drops and logs all flow in, with secrets stripped before anything is written to disk.</p>
         </div>
         <div class="step reveal">
           <div class="step__n">02 / Compile</div>
-          <h3>Sign captured behavior.</h3>
-          <p>Examples, recipes, evaluator references, tokenizer metadata, hashes and a verifier receipt are packaged into one portable <code>.kolm</code> &mdash; signed with Ed25519, reproducible and inspectable layer by layer.</p>
+          <h3>Get a model in one file.</h3>
+          <p>Examples, recipes, evals, tokenizer metadata, hashes and a verifier receipt compile into one portable <code>.kolm</code> &mdash; signed with Ed25519, reproducible, and inspectable layer by layer. One file you own and can move anywhere.</p>
         </div>
         <div class="step reveal">
           <div class="step__n">03 / Compose</div>
-          <h3>Assemble specialists.</h3>
-          <p>Eval gates decide what advances: human labels, failure taxonomy, protected slices, drift checks and regression replay compose the artifact from the behavior that actually passed.</p>
+          <h3>Ship only what passes.</h3>
+          <p>Your evals decide what makes the cut: human labels, a failure taxonomy, protected slices, drift checks and regression replay. The model is built from the behavior that actually passed &mdash; nothing else.</p>
         </div>
         <div class="step reveal">
           <div class="step__n">04 / Deploy</div>
-          <h3>Target an honest runtime.</h3>
-          <p>Hosted GPU, self-hosted serving, local runner, portable inference, device edge, browser/WASM and restricted fleet targets each get fit evidence, caveats and a runtime recipe. Your data never leaves your hardware.</p>
+          <h3>Run it where it fits.</h3>
+          <p>Laptop, your private cloud, the edge, or a server &mdash; pick the smallest runtime that fits, with the real limits shown for each. Every target ships with a runtime recipe and the receipts to prove what you deployed.</p>
         </div>
       </div>
     </div>
@@ -187,12 +187,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Capture</p>
-        <h2>Bring behavior into one governed ledger.</h2>
-        <p class="lede">Declare the boundary first &mdash; workspace, project, environment, source, connector, credential, schema state, owner and retention policy are registered before reuse. Then every call enters as a governed event with policy travelling alongside it.</p>
+        <h2>Point your existing calls at Kolm. No rewrite.</h2>
+        <p class="lede">Keep your SDK as it is. Set your boundary once &mdash; workspace, project, environment, source, owner and retention &mdash; and every call after that flows in with its rules attached. The behavior you already pay for becomes the model you'll own.</p>
         <ul class="feat__list">
           <li>Drop-in proxy &middot; keep your provider keys in one vault</li>
-          <li>Redaction before persistence &middot; secrets never stored</li>
-          <li>Policy travels with the event &middot; retention, budget, egress allowlists</li>
+          <li>Secrets stripped before anything is written to disk</li>
+          <li>Set retention, budget and provider rules once &middot; they follow every call</li>
         </ul>
       </div>
       <div class="feat__ui">
@@ -204,7 +204,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="prow"><span class="m">tool</span> redact() &middot; 3 spans <span class="prow__r a">redacted</span></div>
             <div class="prow"><span class="m">POST</span> /v1/capture/export &middot; jsonl <span class="prow__r m">12 modes</span></div>
           </div>
-          <div class="plate__foot"><span class="badge badge--ok">Signed</span><span>12 ingress modes &middot; secrets never stored</span></div>
+          <div class="plate__foot"><span class="badge badge--ok">Signed</span><span>12 ways to capture &middot; secrets stripped before write</span></div>
         </div>
       </div>
     </div>
@@ -214,12 +214,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Compile &amp; compose</p>
-        <h2>Turn failures into gates, then sign the artifact.</h2>
-        <p class="lede">Human labels, a failure taxonomy, protected slices, drift checks and regression replay decide whether a compile can advance. The compile run then emits a <code>.kolm</code> artifact, manifest, examples, evaluator references, hashes, target hints and a verifier receipt.</p>
+        <h2>Buy the model once. Run it forever.</h2>
+        <p class="lede">Your evals decide what ships &mdash; human labels, a failure taxonomy, protected slices, drift checks and regression replay. What passes compiles into one <code>.kolm</code> file: the model, recipes, examples, evals, hashes and a verifier receipt. One portable artifact you own and can move anywhere.</p>
         <ul class="feat__list">
-          <li>Deterministic build &middot; content-addressed receipts</li>
-          <li>Protected-slice gates before promotion &middot; replay must not degrade</li>
-          <li>Open the artifact &mdash; every layer is governed state</li>
+          <li>Reproducible build &middot; content-addressed receipts</li>
+          <li>Nothing ships until your evals pass &middot; replay must not degrade</li>
+          <li>Open the file &mdash; every layer is yours to inspect</li>
         </ul>
       </div>
       <div class="feat__ui">
@@ -229,7 +229,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="prow">examples <span class="prow__r m">2,140</span></div>
             <div class="prow">recipes &middot; evals <span class="prow__r m">18 / 6</span></div>
             <div class="prow">tokenizer + receipts <span class="prow__r m">sha-256</span></div>
-            <div class="prow">readiness gate <span class="prow__r a">passed</span></div>
+            <div class="prow">evals <span class="prow__r a">passed</span></div>
           </div>
           <div class="plate__foot"><span class="badge badge--ok">Ed25519</span><span>reproducible build &middot; content-addressed</span></div>
         </div>
@@ -241,12 +241,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Deploy</p>
-        <h2>Choose a runtime honestly, then export proof.</h2>
-        <p class="lede">Every target gets fit evidence and blockers, not a marketing promise. Receipts, manifests, eval reports, event streams, SIEM/log drains, warehouse exports, webhook callbacks and governance packets stay useful outside the UI.</p>
+        <h2>Run it on the laptop you have, the cloud you trust.</h2>
+        <p class="lede">Pick the smallest runtime that fits, with the real limits shown for each &mdash; not a marketing promise. Receipts, manifests, eval reports, event streams, log drains, warehouse exports and webhook callbacks all stay useful outside the UI, in the systems your team already runs.</p>
         <ul class="feat__list">
-          <li>Device detection &middot; quantization oracle &middot; ranked by cost &amp; latency</li>
-          <li>One artifact, many targets &middot; hosted or self-managed</li>
-          <li>Rollback, receipts and 10 governance export modes included</li>
+          <li>Detects your device &middot; ranks targets by cost and latency</li>
+          <li>One file, many targets &middot; hosted or run it yourself</li>
+          <li>Rollback, receipts and 10 export modes included</li>
         </ul>
       </div>
       <div class="feat__ui">
@@ -254,44 +254,44 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <div class="plate__hd">RUNTIME TARGETS &middot; <span class="ok">ranked</span></div>
           <div class="panel__rows">
             <div class="prow">hosted GPU &middot; 24GB <span class="prow__r a">best fit</span></div>
-            <div class="prow">self-hosted serving <span class="prow__r m">cluster</span></div>
+            <div class="prow">your private cloud <span class="prow__r m">cluster</span></div>
             <div class="prow">device edge <span class="prow__r m">jetson</span></div>
-            <div class="prow">browser / WASM <span class="prow__r m">portable</span></div>
+            <div class="prow">local runner <span class="prow__r m">laptop</span></div>
           </div>
-          <div class="plate__foot"><span class="badge badge--ok">10 export modes</span><span>receipts, packets, log drains</span></div>
+          <div class="plate__foot"><span class="badge badge--ok">10 export modes</span><span>receipts, reports, log drains</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- s-feature-rows (cont.) — operator workbench register cards -->
+  <!-- s-feature-rows (cont.) — API Control Center register cards -->
   <section class="section" id="operator-workbench">
     <div class="wrap wrap--wide">
       <div class="section__head">
-        <p class="eyebrow">Operator workbench</p>
-        <h2>The API Control Center turns coverage into a runbook.</h2>
-        <p class="lede">Broad API/data collection only matters when an operator can move one source to one proof artifact without losing policy or evidence. The account contract exposes that runbook directly &mdash; register, control, improve, release.</p>
+        <p class="eyebrow">API Control Center</p>
+        <h2>Capture, compile, and ship from one place.</h2>
+        <p class="lede">Take one source all the way to a signed model you own &mdash; without losing the rules or the proof along the way. Capture, control, improve, release: the whole path is in front of you, and every step leaves you something you can keep.</p>
       </div>
       <div class="grid grid--4">
         <div class="card reveal">
-          <span class="card__k">Reg &middot; register</span>
-          <h3>Source and schema</h3>
-          <p>Declare the source, owner, environment, connector, adapter manifest, schema hints and opaque-event policy.</p>
+          <span class="card__k">Reg &middot; capture</span>
+          <h3>Connect your source</h3>
+          <p>Set the source, owner, environment and connector, plus how to handle the data Kolm can't read &mdash; once, up front.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; control</span>
-          <h3>Policy before egress</h3>
-          <p>Set redaction, retention, provider allowlists, export destinations, budget, approvals and tenant-isolated cache keys.</p>
+          <h3>Set the rules once</h3>
+          <p>Choose redaction, retention, which providers are allowed, export destinations, budget, approvals and per-tenant cache isolation.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; improve</span>
-          <h3>Failure to eval gate</h3>
-          <p>Cluster failures, add labels, build protected regression slices and block promotion when replay degrades.</p>
+          <h3>Ship only what passes</h3>
+          <p>Cluster failures, add labels, build protected regression slices, and hold a model back the moment replay degrades.</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; release</span>
-          <h3>Artifact to proof export</h3>
-          <p>Compile target receipts, generate runtime recipes and export governance packets to the systems buyers already use.</p>
+          <h3>Own it and prove it</h3>
+          <p>Compile target receipts, generate runtime recipes, and export the proof straight into the systems your team already runs.</p>
         </div>
       </div>
     </div>
@@ -301,33 +301,33 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="category-position">
     <div class="wrap">
       <div class="section__head">
-        <p class="eyebrow">Category position</p>
-        <h2>Kolm connects the control loop &mdash; it does not replace your stack.</h2>
-        <p class="lede">Gateways route, workflow systems orchestrate, data planes move, eval tools score, trust systems govern and runtimes execute. Kolm owns the transition from captured behavior into governed, signed, portable runtime artifacts.</p>
+        <p class="eyebrow">Where Kolm fits</p>
+        <h2>Keep your stack. Kolm turns its traffic into a model you own.</h2>
+        <p class="lede">Your gateways still route, your workflow tools still orchestrate, your pipelines still move data, your eval tools still score, and your runtimes still run. Kolm does the one thing none of them do: turn the behavior they carry into a signed, portable model you can run anywhere.</p>
       </div>
       <div class="grid grid--2">
         <div class="card reveal">
           <span class="card__k">Reg &middot; gateway</span>
-          <h3>Provider gateways and route controls</h3>
-          <p>Keep their routing strength; promote their events into compiler inputs.</p>
+          <h3>Your provider gateways and routing</h3>
+          <p>Keep them routing exactly as they do; Kolm turns the calls they carry into model inputs.</p>
           <p class="card__map">source + route</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; workflow</span>
-          <h3>Workflow engines and approval systems</h3>
-          <p>Keep their triggers and approvals; export receipts and callbacks back into the workflow layer.</p>
+          <h3>Your workflow and approval tools</h3>
+          <p>Keep your triggers and approvals; Kolm sends receipts and callbacks right back into them.</p>
           <p class="card__map">approval + callback</p>
         </div>
         <div class="card reveal">
-          <span class="card__k">Reg &middot; data plane</span>
-          <h3>Data movers, streams and warehouses</h3>
-          <p>Keep the movement layer; bind AI behavior policy, lineage and export manifests to the moved data.</p>
+          <span class="card__k">Reg &middot; pipeline</span>
+          <h3>Your pipelines, streams and warehouses</h3>
+          <p>Keep moving data as you do; Kolm binds policy, lineage and export manifests to what you move.</p>
           <p class="card__map">lineage</p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; trust</span>
-          <h3>GRC, API inventory, SIEM and assurance</h3>
-          <p>Keep control systems current; send governed packets, logs and evidence instead of screenshots.</p>
+          <h3>Your inventory, SIEM and assurance tools</h3>
+          <p>Keep them current with signed receipts, logs and verifiable proof &mdash; not screenshots.</p>
           <p class="card__map">evidence</p>
         </div>
       </div>
@@ -339,10 +339,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="field" aria-hidden="true"></span>
     <div class="wrap cta__in">
       <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-      <h2>Prove one controlled loop before scaling the surface.</h2>
-      <p class="lede">Start with one namespace, declare policy, capture real behavior, evaluate failures, compile a signed artifact, target the runtime, and export proof.</p>
+      <h2>Run one capture. Own the model it makes.</h2>
+      <p class="lede">Start with one namespace: point your calls at Kolm, set your rules, capture real behavior, keep what passes your evals, compile a signed model, and run it on your own hardware. Ready to own what you're renting?</p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="/signup">Start compiling</a>
+        <a class="btn btn--primary" href="/signup">Get an API key</a>
         <a class="btn btn--ghost" href="/docs#quickstart">Read the docs</a>
       </div>
     </div>
@@ -363,7 +363,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">Own the AI you&rsquo;re renting &mdash; a signed model from your live API calls, run on your own hardware.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>

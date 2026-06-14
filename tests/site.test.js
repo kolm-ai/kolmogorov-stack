@@ -493,15 +493,16 @@ test('security page exposes control posture without overclaiming', () => {
 
 });
 
-test('homepage exposes control-plane loop without overclaiming', () => {
+test('homepage sells the ownership story without overclaiming', () => {
   const home = fs.readFileSync(path.join('public', 'index.html'), 'utf8');
 
-  // clean linear-grade homepage: the compiler loop, told simply
-  assert.match(home, /Compile your API behavior into a model that runs anywhere/);
-  assert.match(home, /The AI compiler/);
-  assert.match(home, /Route your model traffic through one endpoint/);
-  assert.match(home, /Turn captured behavior into a signed artifact/);
-  assert.match(home, /Run it on the smallest runtime that fits/);
+  // commercial Series-C homepage: ownership hero, capture->compile->deploy, told as buyer outcomes
+  assert.match(home, /Point your API calls\. Own the model\./);
+  assert.match(home, /Own the AI you(?:'|&rsquo;)re renting/);
+  assert.match(home, /Point your existing calls at Kolm\. No rewrite\./);
+  assert.match(home, /Your API calls, compiled into a model you own\./);
+  assert.match(home, /Run it on the laptop you have, the cloud you trust\./);
+  assert.match(home, /Verify it yourself\. No trust required\./);
   assert.match(home, /Capture/);
   assert.match(home, /Compile/);
   assert.match(home, /Compose/);
@@ -510,11 +511,20 @@ test('homepage exposes control-plane loop without overclaiming', () => {
   assert.match(home, /Ed25519/);
   assert.match(home, /Get an API key/);
   assert.match(home, /Read the docs/);
-  assert.match(home, /Own the behavior you/);
-  assert.match(home, /runtime targets/);
-  assert.match(home, /your hardware/);
+  assert.match(home, /Ready to own what you(?:'|&rsquo;)re renting\?/);
+  assert.match(home, /Runtime targets/);
+  assert.match(home, /own hardware/);
   // clean standalone homepage — no kolm-main.css, no heavy product renders inline
   assert.doesNotMatch(home, /kolm-main.css/);
+
+  // banned jargon must never appear as customer-facing homepage copy
+  assert.doesNotMatch(home, /control plane/i);
+  assert.doesNotMatch(home, /behavior-to-artifact/i);
+  assert.doesNotMatch(home, /the loop/i);
+  assert.doesNotMatch(home, /\bgovern(ed|ance|s)\b/i);
+  // honesty: no data-never-leaves / air-gapped absolutes on the homepage
+  assert.doesNotMatch(home, /data never leaves/i);
+  assert.doesNotMatch(home, /never leaves your hardware/i);
 
   assert.doesNotMatch(home, /better than every/i);
   assert.doesNotMatch(home, /objectively better/i);
@@ -570,29 +580,33 @@ test('account workspace uses compiler-first product shell instead of stale audit
   const overview = fs.readFileSync(path.join('public', 'account', 'overview.html'), 'utf8');
   const dashboard = fs.readFileSync(path.join('public', 'dashboard.html'), 'utf8');
 
-  assert.match(overview, /Compiler Workspace/);
+  // Commercial Series-C copy (2026 rewrite): outcome-led prose, no internal jargon.
+  assert.match(overview, /Point your calls\. Own the model\./);
   // Dark canonical shell (was the retired image-2 light paper design).
   assert.match(overview, /\/kolm-2026\.css/);
   assert.doesNotMatch(overview, /data-design-reference="image-2"/);
   assert.doesNotMatch(overview, /color-scheme:light/);
   assert.doesNotMatch(overview, /kolm-main\.css/);
-  assert.match(overview, /Compiler workspace source-to-artifact console/);
-  assert.match(overview, /behavior-to-artifact workspace/);
+  assert.match(overview, /From your live calls to a model you own/);
+  assert.match(overview, /capture - compile - deploy/);
   assert.match(overview, /secret_values_included: false/);
-  assert.match(overview, /Open Compiler Workspace/);
-  assert.match(overview, /Open API Control Center/);
-  assert.match(overview, /Read API Contract/);
+  assert.match(overview, /Open your workspace/);
+  assert.match(overview, /Open API control/);
+  assert.match(overview, /Read the API/);
   assert.match(overview, /Preview mode/);
-  assert.match(overview, /Workspace visible\. Tenant actions stay locked\./);
+  assert.match(overview, /Look around now\. Sign in to make it yours\./);
   assert.match(overview, /demoCompilerOverviewPayload/);
   assert.match(overview, /render\(demoCompilerOverviewPayload\(\), \{/);
   assert.match(overview, /type="password"/);
   assert.match(overview, /Evidence archive/);
-  assert.match(overview, /925<\/b> owned routes/);
-  assert.match(overview, /8<\/b> open gates/);
+  assert.match(overview, /925<\/b> routes you own/);
+  assert.match(overview, /1 file<\/b> you can move/);
   assert.doesNotMatch(overview, /Your reports/);
   assert.doesNotMatch(overview, /Run the free scan/);
   assert.doesNotMatch(overview, /Audit module/);
+  // Banned internal jargon must not return to this in-product surface.
+  assert.doesNotMatch(overview, /behavior-to-artifact/);
+  assert.doesNotMatch(overview, /control plane/i);
 
   assert.match(dashboard, /location\.replace\('\/account\/overview'\)/);
   assert.match(dashboard, /Opening Compiler Workspace/);
@@ -870,14 +884,14 @@ test('api control center UI exposes enterprise data-plane and improvement-loop c
   const control = fs.readFileSync(path.join('public', 'account', 'api-control-center.html'), 'utf8');
 
   assert.match(control, /API Control Center - kolm\.ai/);
-  assert.match(control, /One tenant-scoped console for AI API ingress, egress/);
+  assert.match(control, /capture your live API calls, set the rules, compile what you actually use into a signed model/);
   assert.match(control, /control-hero__copy/);
   assert.match(control, /control-hero__proof/);
-  assert.match(control, /aria-label="Source-to-proof API control plane"/);
+  assert.match(control, /aria-label="From your live calls to a signed model"/);
   assert.match(control, /workspace\/prod-ai-loop/);
-  assert.match(control, /Every credible source/);
+  assert.match(control, /Bring in the traffic you already have\./);
   assert.match(control, /Preview mode/);
-  assert.match(control, /Full console visible\. Tenant writes stay locked\./);
+  assert.match(control, /See the whole console\. Your data stays untouched\./);
   assert.match(control, /demoControlCenterPayload/);
   assert.match(control, /render\(demoControlCenterPayload\(\), \{/);
   assert.match(control, /previewControlIntakeResponse/);
@@ -885,17 +899,17 @@ test('api control center UI exposes enterprise data-plane and improvement-loop c
   assert.match(control, /Preview receipt only/);
   assert.match(control, /Preview validation only/);
   assert.match(control, /type="password"/);
-  assert.match(control, /Policy before interpretation/);
-  assert.match(control, /Behavior becomes an artifact/);
-  assert.match(control, /Proof leaves the dashboard/);
-  assert.match(control, /Read API contract/);
-  assert.match(control, /View readiness gates/);
+  assert.match(control, /You decide what gets kept and where it goes\./);
+  assert.match(control, /Your behavior becomes a model you own\./);
+  assert.match(control, /Send proof anywhere your team works\./);
+  assert.match(control, /Read the API contract/);
+  assert.match(control, /See what's shipping today/);
   assert.match(control, /API data channel matrix/);
-  assert.match(control, /Collection and export modes/);
-  assert.match(control, /First-class control objects/);
-  assert.match(control, /Adapter confidence states/);
-  assert.match(control, /Adapter evidence/);
-  assert.match(control, /Promote semantics only when a manifest proves them/);
+  assert.match(control, /Bring traffic in, send proof out/);
+  assert.match(control, /Everything you can manage here/);
+  assert.match(control, /How much we trust a source/);
+  assert.match(control, /Teach it a new source/);
+  assert.match(control, /Map a source once\. Trust it everywhere after\./);
   assert.match(control, /\/v1\/account\/api-control-center\/adapter-manifests\/validate/);
   assert.match(control, /live adapter manifest validator/);
   assert.match(control, /data-control-adapter-form/);
@@ -904,11 +918,11 @@ test('api control center UI exposes enterprise data-plane and improvement-loop c
   assert.match(control, /renderAdapterManifestWorkbench/);
   assert.match(control, /renderAdapterManifestResult/);
   assert.match(control, /setupAdapterManifest/);
-  assert.match(control, /Event envelope/);
-  assert.match(control, /Egress destination recipes/);
-  assert.match(control, /Readiness scoreboard/);
-  assert.match(control, /Universal intake/);
-  assert.match(control, /Every source enters as a governed event/);
+  assert.match(control, /One event format, end to end/);
+  assert.match(control, /Where your data can go/);
+  assert.match(control, /What\\?'s shipping today/);
+  assert.match(control, /One way in/);
+  assert.match(control, /Send any source\. Get a receipt back\./);
   assert.match(control, /\/v1\/account\/api-control-center\/events/);
   assert.match(control, /live canonical event workbench/);
   assert.match(control, /data-control-intake-form/);
@@ -920,20 +934,20 @@ test('api control center UI exposes enterprise data-plane and improvement-loop c
   assert.match(control, /renderControlIntakeResult/);
   assert.match(control, /setupControlIntake/);
   assert.match(control, /secret_values_included: false/);
-  assert.match(control, /Operational contract/);
-  assert.match(control, /Closed-loop improvement/);
-  assert.match(control, /Failure to artifact/);
-  assert.match(control, /Promotion gates/);
-  assert.match(control, /Operator workbench/);
-  assert.match(control, /Source-to-proof runbook/);
-  assert.match(control, /High-priority intake/);
-  assert.match(control, /Proof exports/);
+  assert.match(control, /The rules, in plain terms/);
+  assert.match(control, /Turn a failure into a better model/);
+  assert.match(control, /Failure to fix/);
+  assert.match(control, /What it takes to ship/);
+  assert.match(control, /Your runbook/);
+  assert.match(control, /From live calls to a model you can prove/);
+  assert.match(control, /Capture these first/);
+  assert.match(control, /Ship proof out/);
   assert.match(control, /renderLoopStep/);
   assert.match(control, /renderWorkbench/);
   assert.match(control, /renderObjectGroup/);
   assert.match(control, /renderAdapterState/);
   assert.match(control, /adapter-owned field mapping/);
-  assert.match(control, /unknown fields stay opaque/);
+  assert.match(control, /your adapter owns the field mapping/);
   assert.match(control, /renderEnvelope/);
   assert.match(control, /renderUniversalIntake/);
   assert.match(control, /renderEgressRecipe/);
@@ -943,14 +957,14 @@ test('api control center UI exposes enterprise data-plane and improvement-loop c
   assert.match(control, /Required declaration/);
   assert.match(control, /Evidence:/);
   assert.match(control, /Gate:/);
-  assert.match(control, /Data channels/);
+  assert.match(control, /Sources you can capture from/);
   assert.match(control, /Filter API data channels/);
   assert.match(control, /\['ingress', 'Ingress'\]/);
   assert.match(control, /applyChannelFilter/);
-  assert.match(control, /Integration map/);
-  assert.match(control, /Policy layers/);
-  assert.match(control, /Enterprise controls/);
-  assert.match(control, /Differentiators/);
+  assert.match(control, /Connects to what you already run/);
+  assert.match(control, /The rules you can set/);
+  assert.match(control, /Controls for larger teams/);
+  assert.match(control, /Why teams run on this/);
   assert.match(control, /fetch\('\/v1\/account\/api-control-center'/);
 
   assert.doesNotMatch(control, /Run the free scan/i);

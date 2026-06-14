@@ -8,7 +8,7 @@
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
 </script>
 <title>API Control Center - kolm.ai</title>
-<meta name="description" content="Enterprise API control center for Kolm gateway capture, egress policy, routing, evaluation, compile, deployment, and export coverage.">
+<meta name="description" content="One console to capture your live API traffic, set the rules, and compile it into a signed model you own and run anywhere. Every action leaves a receipt you can verify.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#08090A">
 <link rel="canonical" href="https://kolm.ai/account/api-control-center">
@@ -59,7 +59,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   @media (max-width:560px){.control-hero__proof{grid-template-columns:1fr;}
     .control-hero__actions{display:grid;}.control-hero__actions .btn{width:100%;}}
 
-  /* the source-to-proof control plane — real glass HUD (rationed .hud) */
+  /* the live-calls-to-signed-model HUD — real glass (rationed .hud) */
   .control-plane{min-width:0;border-radius:var(--r-xl);overflow:hidden;position:relative;isolation:isolate;}
   .control-plane__bar{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
     min-height:46px;padding:0 16px;border-bottom:1px solid var(--line);
@@ -137,7 +137,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     font:var(--w-display) clamp(24px,3vw,34px)/1 var(--font-mono);
     letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
 
-  /* operator workbench (s-workspace) */
+  /* runbook workspace (s-workspace) */
   .workbench{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);
     gap:clamp(var(--s4),2vw,var(--s5));margin:var(--rhy-2) 0;}
   @media (max-width:920px){.workbench{grid-template-columns:1fr;}}
@@ -374,51 +374,51 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
       <div class="control-hero">
         <div class="control-hero__copy reveal">
-          <p class="eyebrow">Enterprise &middot; API control</p>
-          <h1 class="h1">API Control Center</h1>
-          <p class="lede">One tenant-scoped console for AI API ingress, egress, provider routing, capture retention, redaction, evaluation, compile artifacts, device targets, and exports.</p>
+          <p class="eyebrow">Your workspace &middot; API control</p>
+          <h1 class="h1">Run it. Own it.</h1>
+          <p class="lede">One console for the whole job: capture your live API calls, set the rules, compile what you actually use into a signed model, and ship it to your own hardware. Every step leaves a receipt anyone can verify.</p>
           <div class="control-hero__proof" aria-label="Control center coverage">
-            <span><b>17</b> data channel families</span>
-            <span><b>12</b> collection modes</span>
-            <span><b>10</b> export modes</span>
-            <span><b>8</b> governance stages</span>
+            <span><b>17</b> sources you can capture from</span>
+            <span><b>12</b> ways to bring traffic in</span>
+            <span><b>10</b> ways to ship proof out</span>
+            <span><b>8</b> checks before anything moves</span>
           </div>
           <div class="control-hero__actions">
-            <a class="btn btn--primary" href="/docs/api">Read API contract</a>
-            <a class="btn btn--ghost" href="/trust">View readiness gates</a>
+            <a class="btn btn--primary" href="/docs/api">Read the API contract</a>
+            <a class="btn btn--ghost" href="/trust">See what's shipping today</a>
           </div>
         </div>
 
-        <aside class="hud control-plane reveal" aria-label="Source-to-proof API control plane">
+        <aside class="hud control-plane reveal" aria-label="From your live calls to a signed model">
           <div class="control-plane__bar">
-            <b>API plane</b>
+            <b>Workspace</b>
             <span>workspace/prod-ai-loop</span>
-            <span class="ok">readiness gated</span>
+            <span class="ok">checks passing</span>
           </div>
           <div class="control-plane__flow">
             <div class="control-plane__lane">
-              <span>Ingest</span>
-              <div><b>Every credible source</b><p>REST, SDK, gateway, OpenTelemetry, webhook, queue, MCP, A2A, warehouse, file, and custom adapter events.</p></div>
+              <span>Capture</span>
+              <div><b>Bring in the traffic you already have.</b><p>REST, SDK, gateway, OpenTelemetry, webhooks, queues, MCP, A2A, warehouse, files, and custom adapters.</p></div>
               <code>17 families</code>
             </div>
             <div class="control-plane__lane">
-              <span>Govern</span>
-              <div><b>Policy before interpretation</b><p>Unknown payloads stay opaque until schema evidence, retention class, redaction, purpose, and egress policy are declared.</p></div>
+              <span>Set rules</span>
+              <div><b>You decide what gets kept and where it goes.</b><p>Unknown payloads stay sealed until you declare the schema, retention, redaction, purpose, and destination.</p></div>
               <code>8 stages</code>
             </div>
             <div class="control-plane__lane">
               <span>Compile</span>
-              <div><b>Behavior becomes an artifact</b><p>Promoted examples, evaluator gates, hashes, target recipes, and verifier receipts travel with the signed package.</p></div>
+              <div><b>Your behavior becomes a model you own.</b><p>Examples, eval gates, hashes, runtime recipes, and a verifiable receipt all travel inside one signed file.</p></div>
               <code>.kolm</code>
             </div>
             <div class="control-plane__lane">
               <span>Export</span>
-              <div><b>Proof leaves the dashboard</b><p>SIEM, GRC, warehouse, ticketing, docs, OpenAPI, webhooks, and auditor packets carry destination context.</p></div>
+              <div><b>Send proof anywhere your team works.</b><p>SIEM, GRC, warehouse, ticketing, docs, OpenAPI, webhooks, and audit packets all carry their destination.</p></div>
               <code>10 modes</code>
             </div>
           </div>
           <div class="control-plane__foot">
-            <span><b class="ok">ok</b> canonical event envelope</span>
+            <span><b class="ok">ok</b> one event format end to end</span>
             <span>secret_values_included: false</span>
           </div>
         </aside>
@@ -426,18 +426,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
       <section id="auth" class="card auth" hidden aria-label="API key access gate">
         <div class="auth__copy">
-          <h2 class="h3">Open Control Center</h2>
-          <p id="keyHelp">Preview the operating surface below. Paste a workspace key that starts with <span class="mono">ks_</span> to load tenant data and run writes.</p>
+          <h2 class="h3">Open your control center</h2>
+          <p id="keyHelp">Look around the full console below. Paste a workspace key that starts with <span class="mono">ks_</span> to load your data and start running real work.</p>
         </div>
         <div class="auth__form">
           <label for="keyInput">API Key</label>
           <input class="fld fld--mono" id="keyInput" name="api_key" type="password" inputmode="text" placeholder="ks_&hellip;" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="keyHelp">
-          <button class="btn btn--primary" id="keyBtn" type="button">Open Control Center</button>
+          <button class="btn btn--primary" id="keyBtn" type="button">Open my control center</button>
         </div>
       </section>
 
       <div id="banner"></div>
-      <div id="content" aria-live="polite"><div class="banner">Loading API control center&hellip;</div></div>
+      <div id="content" aria-live="polite"><div class="banner">Loading your control center&hellip;</div></div>
 
     </div>
   </section>
@@ -455,7 +455,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p style="color:var(--ink-3);font-size:13px;max-width:34ch">Capture your live API calls, compile them into a signed model you own, and run it on your own hardware.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
@@ -536,7 +536,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         default_egress_mode: 'deny-until-provider-or-destination-is-declared',
         cache_policy: 'tenant-isolated-cache-keys-only',
         unknown_payload_policy: 'accept-as-opaque-event-when-size-and-tenant-policy-allow',
-        production_claim: 'preview contract; tenant data and persisted writes require a workspace API key'
+        production_claim: 'This is the preview contract. Your real data and saved work load once you paste a workspace API key.'
       },
       counters: { observed_captures: 1284, routing_events: 927, compile_jobs: 38, artifacts: 19, devices: 12 },
       coverage: {
@@ -550,7 +550,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           channel('a2a','Agent-to-agent traffic',['ingress','egress'],['agent messages','handoffs','delegated tool calls','status events'],['/v1/a2a','/v1/agents','/v1/automations'],['agent identity','least privilege','handoff evidence','policy escalation']),
           channel('browser-events','Browser and client events',['ingress'],['client errors','feedback events','session markers','user-visible state'],['/v1/client-error','/v1/feedback','/v1/sessions'],['PII minimization','origin-bound session','tenant fence','rate limit']),
           channel('file-blob','Files and blobs',['ingress','egress'],['attachments','model artifacts','receipts','signed reports','bundle downloads'],['/v1/artifacts','/v1/receipts','/v1/export'],['content hash','signature verification','lifecycle state','download gate']),
-          channel('custom-adapter','Custom adapters',['ingress','egress'],['custom headers','opaque JSON envelopes','vendor-specific payloads','legacy API bridges'],['/v1/bridges/observe','/v1/connectors','/v1/gateway/dispatch'],['adapter manifest','schema hints','default deny egress','operator review']),
+          channel('custom-adapter','Custom adapters',['ingress','egress'],['custom headers','opaque JSON envelopes','vendor-specific payloads','legacy API bridges'],['/v1/bridges/observe','/v1/connectors','/v1/gateway/dispatch'],['adapter manifest','schema hints','default deny outbound','manual review']),
           channel('graphql-rpc','GraphQL, RPC, and typed operations',['ingress','egress'],['GraphQL queries and mutations','GraphQL subscriptions','JSON-RPC envelopes','gRPC-over-JSON payloads'],['/v1/bridges/observe','/v1/connectors','/v1/gateway/dispatch'],['operation signature','schema hints','query/body redaction','adapter manifest']),
           channel('message-queues','Queues, topics, and event streams',['ingress','egress'],['Kafka topics','Pub/Sub events','SQS/SNS messages','EventBridge events','RabbitMQ deliveries'],['/v1/bridges/observe','/v1/notifications/settings','/v1/connectors'],['topic allowlist','partition/window metadata','dead-letter receipt','tenant event fence']),
           channel('warehouse-lakehouse','Warehouses, lakes, and object stores',['ingress','egress'],['Snowflake/BigQuery/Databricks extracts','S3/GCS/Azure Blob drops','Iceberg/Delta tables','Parquet snapshots'],['/v1/capture/export','/v1/exports','/v1/evidence'],['dataset manifest','retention clock','row/column redaction','receipt hash']),
@@ -596,35 +596,35 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           { id:'export', label:'Export', proof:'receipts, manifests, hashes, governance packets, and delivery ledgers leave the UI' }
         ],
         policy_layers: [
-          { id:'identity', label:'Identity and tenant fence', controls:['tenant API keys','scoped keys','RBAC','SSO/SAML/SCIM hooks'] },
-          { id:'provider-vault', label:'Provider vault', controls:['central provider keys','BYOK/BYOC paths','model entitlements','secret-safe envelopes'] },
-          { id:'capture', label:'Capture policy', controls:['sample rate','body retention mode','namespace capture windows','redaction before persistence'] },
-          { id:'egress', label:'Egress policy', controls:['destination allowlist','subprocessor mapping','PII/secret block','response redaction'] },
-          { id:'routing', label:'Routing and cost', controls:['provider fallback','budget caps','latency policy','cache isolation'] },
-          { id:'evaluation', label:'Evaluation and gates', controls:['production evals','drift alerts','regression gates','human review queue'] },
-          { id:'compile', label:'Compile and artifact', controls:['corpus selection','artifact receipt','evidence DAG','production-ready gate'] },
-          { id:'export', label:'Export and auditability', controls:['OpenAPI','JSONL/CSV','OTLP metrics','signed receipts','assurance case'] }
+          { id:'identity', label:'Who can get in', controls:['tenant API keys','scoped keys','RBAC','SSO/SAML/SCIM hooks'] },
+          { id:'provider-vault', label:'Your provider keys', controls:['central provider keys','BYOK/BYOC paths','model entitlements','secret-safe envelopes'] },
+          { id:'capture', label:'What you keep', controls:['sample rate','body retention mode','namespace capture windows','redaction before persistence'] },
+          { id:'egress', label:'What can leave', controls:['destination allowlist','subprocessor mapping','PII/secret block','response redaction'] },
+          { id:'routing', label:'Where calls go and what they cost', controls:['provider fallback','budget caps','latency policy','cache isolation'] },
+          { id:'evaluation', label:'What has to pass', controls:['production evals','drift alerts','regression gates','human review queue'] },
+          { id:'compile', label:'How the model is built', controls:['corpus selection','artifact receipt','evidence DAG','production-ready gate'] },
+          { id:'export', label:'Proof you can hand off', controls:['OpenAPI','JSONL/CSV','OTLP metrics','signed receipts','assurance case'] }
         ],
         first_class_objects: [
           { group:'Workspace and identity', objects:['workspace','project','environment','tenant key','scoped key','role','user','team','service account'] },
           { group:'Sources and connectors', objects:['source','connector','adapter manifest','schema hint','credential reference','provider','route','namespace'] },
           { group:'Traffic and traces', objects:['event','trace','session','prompt','completion','tool call','agent step','browser action','webhook','log record'] },
           { group:'Policies and gates', objects:['capture policy','redaction policy','retention policy','egress policy','budget cap','approval gate','readiness gate'] },
-          { group:'Improvement loop', objects:['human label','failure taxonomy','dataset','eval suite','evaluator','regression set','curriculum bundle','compile run'] },
+          { group:'Failure-to-fix', objects:['human label','failure taxonomy','dataset','eval suite','evaluator','regression set','curriculum bundle','compile run'] },
           { group:'Artifacts and exports', objects:['artifact','manifest','runtime target','deployment plan','receipt','verifier key','governance packet','export job','delivery ledger'] }
         ],
         adapter_states: [
-          { id:'opaque', label:'Opaque Governed Event', semantic_claim:'none', required_evidence:['tenant policy allows storage','size limit passes','redaction pass runs','source and direction are recorded'], operator_action:'store as opaque payload, block semantic dashboards, require review before egress' },
-          { id:'schema-hinted', label:'Schema-Hinted Event', semantic_claim:'bounded field hints only', required_evidence:['declared content type','sample schema','field allowlist','retention class'], operator_action:'map only hinted fields, keep unknown fields opaque, route to adapter backlog' },
-          { id:'manifest-declared', label:'Adapter Manifest Declared', semantic_claim:'adapter-owned field mapping', required_evidence:['adapter version','input and output schema','redaction map','egress destinations','test fixture'], operator_action:'enable typed policy, trace joins, eval rows, and export receipts for mapped fields' },
-          { id:'native-connector', label:'Native Connector', semantic_claim:'first-class object semantics', required_evidence:['connector owner','contract tests','secret handling proof','lineage and receipt mapping'], operator_action:'promote to first-class source or sink with tenant-visible health and drift state' },
-          { id:'verified-runtime-target', label:'Verified Runtime Target', semantic_claim:'artifact can target this runtime class when readiness gates pass', required_evidence:['target recipe','incompatible feature list','package manifest','benchmark or smoke evidence'], operator_action:'allow compile target recommendation and governance packet export' }
+          { id:'opaque', label:'Sealed event', semantic_claim:'none', required_evidence:['tenant policy allows storage','size limit passes','redaction pass runs','source and direction are recorded'], operator_action:'We keep it sealed, hold back any read of its fields, and ask for review before it can leave.' },
+          { id:'schema-hinted', label:'Schema-hinted', semantic_claim:'bounded field hints only', required_evidence:['declared content type','sample schema','field allowlist','retention class'], operator_action:'We read only the fields you hinted, keep the rest sealed, and queue it for full mapping.' },
+          { id:'manifest-declared', label:'Mapped by your adapter', semantic_claim:'adapter-owned field mapping', required_evidence:['adapter version','input and output schema','redaction map','egress destinations','test fixture'], operator_action:'Mapped fields get typed rules, trace joins, eval rows, and export receipts.' },
+          { id:'native-connector', label:'Built-in connector', semantic_claim:'first-class object semantics', required_evidence:['connector owner','contract tests','secret handling proof','lineage and receipt mapping'], operator_action:'It becomes a first-class source or destination with health and drift you can watch.' },
+          { id:'verified-runtime-target', label:'Verified runtime', semantic_claim:'artifact can target this runtime class when readiness gates pass', required_evidence:['target recipe','incompatible feature list','package manifest','benchmark or smoke evidence'], operator_action:'You can compile to this runtime and export the audit packet to go with it.' }
         ],
         event_envelope: {
           version:'kolm-control-event-envelope-1',
           required_fields:['event_id','tenant_id','source_id','channel_family','direction','observed_at','schema_status','payload_policy','redaction_result','retention_class','policy_decision_id','receipt_id'],
           optional_links:['provider_id','route_id','trace_id','session_id','dataset_id','eval_suite_id','compile_run_id','artifact_id','runtime_target_id','export_job_id','governance_packet_id'],
-          invariants:['secret values are never included in public envelopes','unknown vendor fields remain opaque unless adapter evidence exists','egress requires a destination, processor, payload class, and delivery ledger','promotion requires source, policy, eval, artifact, target, and receipt context']
+          invariants:['secret values are never included in public envelopes','fields from a source you haven\'t mapped stay sealed','anything leaving names a destination, processor, payload class, and delivery ledger','shipping a model carries its source, policy, eval, artifact, target, and receipt']
         },
         egress_destination_recipes: [
           { id:'provider-response', label:'Provider Or Gateway Response', destination_classes:['OpenAI-compatible response','Anthropic-compatible response','gateway fallback response','tool result'], declarations_required:['provider or gateway','model or route','cache boundary','redaction mode','fallback reason'], receipt:'route decision and response receipt' },
@@ -635,38 +635,38 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           { id:'package-runtime', label:'Package Or Runtime Release', destination_classes:['OCI artifact','npm/PyPI package','Hugging Face export','runtime target recipe'], declarations_required:['release channel','artifact manifest','target recipe','rollback pointer','promotion gate'], receipt:'signed artifact receipt and package release ledger' }
         ],
         readiness_scoreboard: [
-          { id:'capture-plane', label:'Capture Plane', status:'implemented', evidence:'17 channel families, 12 collection modes, governed opaque event posture' },
-          { id:'policy-plane', label:'Policy Plane', status:'implemented', evidence:'identity, provider vault, capture, egress, routing, eval, compile, and export layers' },
-          { id:'improvement-loop', label:'Improvement Loop', status:'readiness-gated', evidence:'failure-to-artifact state machine exists; production autonomy remains gated' },
-          { id:'artifact-release', label:'Artifact Release', status:'needs_package_release', evidence:'manifests, hashes, receipts, and target recipes exist; package channels remain gated' },
-          { id:'public-benchmarks', label:'Public Benchmarks', status:'needs_public_benchmark_data', evidence:'benchmark claims stay gated until reproducible public data is published' },
-          { id:'certifications', label:'Certifications', status:'needs_live_certification', evidence:'security posture is documented without claiming SOC 2, HIPAA, FedRAMP, or ISO certification' }
+          { id:'capture-plane', label:'Capture', status:'implemented', evidence:'17 source families, 12 ways to bring traffic in, and unmapped payloads sealed by default' },
+          { id:'policy-plane', label:'Rules and controls', status:'implemented', evidence:'identity, provider vault, capture, outbound, routing, eval, compile, and export, all in one place' },
+          { id:'improvement-loop', label:'Failure-to-fix loop', status:'gated rollout', evidence:'the failure-to-model path runs today; fully automatic production promotion stays gated' },
+          { id:'artifact-release', label:'Model release', status:'needs_package_release', evidence:'manifests, hashes, receipts, and runtime recipes ship today; package release channels stay gated' },
+          { id:'public-benchmarks', label:'Public benchmarks', status:'needs_public_benchmark_data', evidence:'we hold benchmark claims until we can publish reproducible public data' },
+          { id:'certifications', label:'Certifications', status:'needs_live_certification', evidence:'our security posture is documented; we do not claim SOC 2, HIPAA, FedRAMP, or ISO certification' }
         ],
         modalities: ['text','tokens','tool calls','reasoning traces','embeddings metadata','images metadata','audio metadata','files','structured JSON','tabular rows','events','binary blobs','governance packets'],
         protocols: ['REST','SSE','webhook','JSONL batch','OpenTelemetry','MCP','A2A','GraphQL','JSON-RPC','gRPC-over-JSON','Kafka/event stream','database CDC','warehouse/lakehouse','SIEM log drain','package registry','custom adapter'],
         lifecycle_states: ['capture','redact','route','observe','evaluate','compile','deploy','monitor','export']
       },
       operational_contract: {
-        ingress_rule: 'any source can be accepted only as a tenant-scoped governed event with size, retention, and redaction policy',
+        ingress_rule: 'Every source comes in scoped to your workspace, with size, retention, and redaction already applied -- no exceptions.',
         universal_intake_route: 'POST /v1/account/api-control-center/events',
-        universal_intake_rule: 'prompt/response tuples and arbitrary payload/event/data/request bodies are normalized into the canonical control-event envelope before receipts are returned',
+        universal_intake_rule: 'Send a prompt/response pair, or any payload, event, data, or request body, and we normalize it into one event format and hand you back a receipt.',
         adapter_manifest_route: 'POST /v1/account/api-control-center/adapter-manifests/validate',
-        adapter_manifest_rule: 'semantic understanding is promoted only when adapter id, version, schema, redaction map, egress destinations, and fixture evidence validate',
+        adapter_manifest_rule: 'We only start reading a source\'s fields once your manifest proves its id, version, schema, redaction map, destinations, and a working test fixture.',
         export_declaration_route: 'POST /v1/account/api-control-center/exports',
         export_declaration_list_route: 'GET /v1/account/api-control-center/exports',
-        export_declaration_rule: 'exports become policy-bound delivery-ledger declarations until an owned downstream connector records acknowledgement',
-        egress_rule: 'any destination must be declared or adapter-reviewed before payload export',
-        unknown_schema_rule: 'unknown vendor payloads can be stored as opaque events, but semantic fields are not claimed until adapter manifest or schema hints exist',
+        export_declaration_rule: 'An export is a declared, policy-bound delivery with a receipt -- it stays declared, not delivered, until the destination confirms it arrived.',
+        egress_rule: 'No destination gets data until you have declared it or reviewed its adapter.',
+        unknown_schema_rule: 'A source you haven\'t mapped can be stored, but stays sealed -- we never claim to read its fields until a manifest or schema hint says we can.',
         proof_rule: 'every promoted artifact or export should carry route, policy, manifest, hash, and receipt context'
       },
       closed_loop_improvement: {
-        status:'readiness-gated',
-        summary:'Captured API failures can move through taxonomy, curriculum, regression replay, compile, target, and export without leaving the tenant control plane.',
+        status:'available, promotion gated',
+        summary:'A captured failure can go from labeled, to a fix, to replay, to a compiled model, to a shipped export -- all in your workspace, without the data leaving your control.',
         minimum_inputs:['production traces','judged failures','human feedback','eval scores','runtime incidents','protected regression set'],
         promotion_gates:['tenant fence','redaction policy','human review for high-risk labels','no protected-slice degradation','target-fit check','declared egress destination'],
         stages:[
           { id:'observe-failures', label:'Observe Failures', trigger:'production traces, user feedback, eval scores, incident tickets, and rejected routes', evidence:'capture id, route id, namespace, model, prompt version, failure label, severity, and reviewer', output:'failure queue', gate:'tenant fence and redaction policy' },
-          { id:'taxonomize', label:'Taxonomize', trigger:'clustered failures, drift windows, regression slices, and weak namespaces', evidence:'failure family, affected capability, suspected data gap, labeling confidence, and adapter schema status', output:'failure taxonomy', gate:'human review on high-risk labels' },
+          { id:'taxonomize', label:'Group & label', trigger:'clustered failures, drift windows, regression slices, and weak namespaces', evidence:'failure family, affected capability, suspected data gap, labeling confidence, and adapter schema status', output:'failure taxonomy', gate:'human review on high-risk labels' },
           { id:'build-curriculum', label:'Build Curriculum', trigger:'confirmed weakness with enough safe examples or approved synthetic augmentation', evidence:'corrected examples, hard negatives, replay rows, holdout split, and provenance manifest', output:'training and eval bundle', gate:'data rights, retention, and PII rules' },
           { id:'replay-regression', label:'Replay Regression', trigger:'candidate improvement run or prompt/model change', evidence:'baseline result, candidate result, protected slices, delta thresholds, and reviewer verdict', output:'promotion decision', gate:'no protected-slice degradation' },
           { id:'compile-artifact', label:'Compile Artifact', trigger:'approved improvement with target runtime requirements', evidence:'compile run, K-score, manifest hash, runtime target, incompatible feature list, and receipt', output:'signed .kolm artifact', gate:'readiness and target-fit checks' },
@@ -674,24 +674,24 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         ]
       },
       operator_workbench: {
-        label:'Operator workbench',
-        summary:'Run one production AI/API loop from source declaration to policy gates, failure replay, artifact compile, and proof export without switching consoles.',
-        source_to_proof_rule:'every next action must name a source, policy gate, output object, and verifier path before it can promote',
+        label:'Your runbook',
+        summary:'Run one production AI loop end to end in this console: declare a source, set the rules, replay failures, compile a signed model, and export proof. No tab-switching.',
+        source_to_proof_rule:'Before anything ships, it names its source, the rules it passed, what it produced, and how anyone can verify it.',
         intake_priorities:['gateway traffic','OpenTelemetry/GenAI spans','trace and eval exports','MCP tool calls','A2A task traffic','queues and CDC','warehouse/lakehouse drops','SIEM/log drains','custom opaque adapters'],
         export_priorities:['governance packet','verifier receipt','ticketing approval','warehouse manifest','OTLP log export','package registry release','runtime target recipe'],
         next_actions:[
-          { id:'declare-source-schema', label:'Declare Source & Schema', trigger:'new gateway route, trace import, webhook, queue, warehouse drop, or custom adapter', action:'select a channel family, attach schema hints or adapter manifest, and set retention/redaction policy', proof:'source envelope, adapter status, tenant fence, and opaque-event marker', route:'/v1/bridges/observe' },
-          { id:'set-egress-policy', label:'Set Egress Policy', trigger:'provider response, webhook delivery, telemetry export, package release, or governance packet', action:'declare destination, processor, payload class, redaction mode, and retry window before export', proof:'destination allowlist, egress rule, processor mapping, and delivery ledger', route:'/v1/account/api-control-center/exports' },
-          { id:'diagnose-failure-loop', label:'Diagnose Failure Loop', trigger:'judged failure, incident ticket, drift alert, eval score drop, or rejected route', action:'assign taxonomy, reviewer, severity, protected slice, and candidate improvement bundle', proof:'failure family, reviewer marker, eval baseline, and regression replay set', route:'/v1/drift-alert' },
-          { id:'compile-target-receipt', label:'Compile Target Receipt', trigger:'approved examples and eval gates for a runtime target', action:'compile a signed .kolm package with manifest, examples, evaluators, target fit, hashes, and rollback pointer', proof:'artifact id, manifest hash, target matrix, K-score, and verifier receipt', route:'/v1/compile' },
-          { id:'export-governance-packet', label:'Export Governance Packet', trigger:'buyer review, audit request, release approval, or external runtime handoff', action:'declare receipts, governance packet, lineage, and delivery record for the target system of record', proof:'assurance case, JSONL/CSV/OTLP export declaration, public verifier path, and delivery ledger', route:'/v1/account/api-control-center/exports' }
+          { id:'declare-source-schema', label:'Add a source', trigger:'A new gateway route, trace import, webhook, queue, warehouse drop, or custom adapter shows up.', action:'Pick a channel family, attach a schema hint or adapter manifest, and set how long you keep it and what gets redacted.', proof:'source envelope, adapter status, tenant fence, and opaque-event marker', route:'/v1/bridges/observe' },
+          { id:'set-egress-policy', label:'Set the rules for what leaves', trigger:'A provider response, webhook delivery, telemetry export, package release, or audit packet needs to go out.', action:'Name the destination, processor, payload class, redaction mode, and retry window before anything is sent.', proof:'destination allowlist, outbound rule, processor mapping, and delivery ledger', route:'/v1/account/api-control-center/exports' },
+          { id:'diagnose-failure-loop', label:'Track down a failure', trigger:'A judged failure, incident ticket, drift alert, dropped eval score, or rejected route comes in.', action:'Tag the failure, assign a reviewer and severity, protect the slice that matters, and line up the fix to test.', proof:'failure family, reviewer marker, eval baseline, and regression replay set', route:'/v1/drift-alert' },
+          { id:'compile-target-receipt', label:'Compile the model', trigger:'You have approved examples and eval gates for a runtime you want to ship to.', action:'Compile a signed .kolm file with its manifest, examples, evaluators, runtime fit, hashes, and a rollback pointer.', proof:'artifact id, manifest hash, target matrix, K-score, and verifier receipt', route:'/v1/compile' },
+          { id:'export-governance-packet', label:'Hand off the proof', trigger:'A buyer review, audit, release sign-off, or runtime handoff needs evidence.', action:'Bundle the receipts, audit packet, lineage, and delivery record for the system that needs them.', proof:'assurance case, JSONL/CSV/OTLP export declaration, public verifier path, and delivery ledger', route:'/v1/account/api-control-center/exports' }
         ]
       },
       integration_map: [
         { cluster:'Gateway and provider control', systems:['provider gateway','model router','API management','provider API','fallback route','budget policy','cache boundary','tenant key vault'], role:'source-and-route-target', coverage:'provider access, routing, key policy, budgets, cache boundaries, fallback reasons' },
         { cluster:'Trace, eval, and observability', systems:['trace export','eval dashboard','annotation queue','experiment record','span collector','prompt version','score registry','OpenTelemetry'], role:'import-source-and-evidence-sink', coverage:'traces, prompt versions, eval sets, annotations, drift signals, release evidence' },
         { cluster:'Data movement and event streams', systems:['connector feed','event topic','queue message','CDC stream','warehouse extract','lakehouse table','object-store drop','export manifest'], role:'batch-stream-and-warehouse-source', coverage:'connectors, topics, CDC, warehouse extracts, object-store drops, export manifests' },
-        { cluster:'Security, SIEM, and governance', systems:['GRC evidence','SIEM event','incident ticket','control register','API inventory','guardrail verdict','security review','assurance packet'], role:'control-verdict-and-governance-sink', coverage:'control evidence, log drains, incident/ticket events, guardrail verdicts, assurance packets' },
+        { cluster:'Security, SIEM, and audit', systems:['GRC evidence','SIEM event','incident ticket','control register','API inventory','guardrail verdict','security review','assurance packet'], role:'control-verdict-and-governance-sink', coverage:'control evidence, log drains, incident/ticket events, guardrail verdicts, assurance packets' },
         { cluster:'Runtime and package targets', systems:['vLLM','SGLang','TensorRT-LLM','llama.cpp','Ollama','Core ML','LiteRT','ExecuTorch','ONNX','RunPod','Hugging Face'], role:'deployment-target-and-release-channel', coverage:'target instructions, artifact manifests, release gates, runtime receipts, external verifier links' }
       ],
       enterprise_controls: [
@@ -703,10 +703,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         { id:'drift-and-regression', status:'mounted', routes:['/v1/drift-alert','/v1/evals','/v1/compile/evaluate'] }
       ],
       differentiators: [
-        'captures production API behavior and turns it into portable signed artifacts',
-        'keeps gateway control, evals, evidence, compile, and device targeting in one contract',
-        'treats audit as a module while the core system optimizes runtime cost and owned deployment',
-        'exports proof artifacts instead of only dashboards'
+        'turns your live API behavior into a signed model you own and move',
+        'gateway, evals, evidence, compile, and runtime targets in one place',
+        'cuts what you pay to run AI by shipping it to your own hardware',
+        'hands you verifiable proof, not just another dashboard'
       ]
     };
   }
@@ -715,7 +715,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     document.getElementById('banner').innerHTML = '';
     render(demoControlCenterPayload(), {
       preview: true,
-      message: message || 'Preview receipts are local and not persisted. Paste a workspace API key to load tenant data and run protected writes.'
+      message: message || 'You are in preview: receipts are generated locally and nothing is saved. Paste a workspace API key to load your data and run real work.'
     });
   }
   function channelFilterText(c){
@@ -742,9 +742,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   }
   function renderWorkbench(workbench){
     if (!workbench || !workbench.next_actions) return '';
-    return '<section class="workbench" aria-label="Operator workbench">'
-      + '<div class="panel workbench__lead"><p class="eyebrow">'+esc(workbench.label || 'Operator workbench')+'</p><p>'+esc(workbench.summary || '')+'</p><div class="workbench__rule">'+esc(workbench.source_to_proof_rule || '')+'</div><div><p class="muted">High-priority intake</p><div class="chips">'+(workbench.intake_priorities || []).map(chip).join('')+'</div></div><div><p class="muted">Proof exports</p><div class="chips">'+(workbench.export_priorities || []).map(chip).join('')+'</div></div></div>'
-      + '<div class="workbench-steps"><h2 class="section-title" style="margin:0">Source-to-proof runbook</h2>'+(workbench.next_actions || []).map(renderWorkbenchStep).join('')+'</div>'
+    return '<section class="workbench" aria-label="Your runbook">'
+      + '<div class="panel workbench__lead"><p class="eyebrow">'+esc(workbench.label || 'Your runbook')+'</p><p>'+esc(workbench.summary || '')+'</p><div class="workbench__rule">'+esc(workbench.source_to_proof_rule || '')+'</div><div><p class="muted">Capture these first</p><div class="chips">'+(workbench.intake_priorities || []).map(chip).join('')+'</div></div><div><p class="muted">Ship proof out</p><div class="chips">'+(workbench.export_priorities || []).map(chip).join('')+'</div></div></div>'
+      + '<div class="workbench-steps"><h2 class="section-title" style="margin:0">From live calls to a model you can prove</h2>'+(workbench.next_actions || []).map(renderWorkbenchStep).join('')+'</div>'
       + '</section>';
   }
   function renderSummary(label, rows){
@@ -767,8 +767,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     var version = env && env.version ? env.version : 'kolm-control-event-envelope-1';
     var samplePayload = '{\n  "case_id": "CASE-100",\n  "summary": "Need refund for account contact",\n  "priority": "high"\n}';
     return '<section class="intake-panel" aria-label="Universal API data intake">'
-      + '<div class="panel intake-copy"><p class="eyebrow">Universal intake</p><h2>Every source enters as a governed event.</h2><p>'+esc(contract.universal_intake_rule || 'Prompt/response tuples and arbitrary payload/event/data/request bodies are normalized into a canonical control-event envelope before receipts are returned.')+'</p><div class="intake-list"><span>'+esc(route)+'</span><span>'+esc(version)+'</span><span>secret_values_included: false</span></div><div class="chips">'+['payload','event','data','request','prompt/response','input/output','ingress','egress'].map(chip).join('')+'</div></div>'
-      + '<form class="panel intake-console intake-workbench" data-control-intake-form aria-label="Send governed API control event">'
+      + '<div class="panel intake-copy"><p class="eyebrow">One way in</p><h2>Send any source. Get a receipt back.</h2><p>'+esc(contract.universal_intake_rule || 'Prompt/response tuples and arbitrary payload/event/data/request bodies are normalized into a canonical control-event envelope before receipts are returned.')+'</p><div class="intake-list"><span>'+esc(route)+'</span><span>'+esc(version)+'</span><span>secret_values_included: false</span></div><div class="chips">'+['payload','event','data','request','prompt/response','input/output','ingress','egress'].map(chip).join('')+'</div></div>'
+      + '<form class="panel intake-console intake-workbench" data-control-intake-form aria-label="Send an API control event">'
       + '<div class="intake-console__bar">live canonical event workbench</div>'
       + '<div class="intake-form__grid">'
       + '<label class="intake-field" for="intakeSource">Source ID<input id="intakeSource" name="source_id" value="salesforce.case.updated" autocomplete="off" spellcheck="false"></label>'
@@ -786,12 +786,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     var route = contract.adapter_manifest_route || 'POST /v1/account/api-control-center/adapter-manifests/validate';
     var sampleManifest = '{\n  "id": "salesforce-case-webhook",\n  "version": "2026.06.13",\n  "channel_family": "webhooks",\n  "direction": "ingress",\n  "input_schema": {\n    "type": "object",\n    "properties": {\n      "case_id": { "type": "string" },\n      "summary": { "type": "string" },\n      "priority": { "type": "string" }\n    }\n  },\n  "redaction_map": ["summary", "customer_email"],\n  "egress_destinations": [\n    { "id": "governance-packet", "type": "grc" }\n  ],\n  "test_fixture": {\n    "payload": { "case_id": "CASE-100", "summary": "refund request" }\n  }\n}';
     return '<section class="manifest-panel" aria-label="Adapter manifest validation">'
-      + '<div class="panel manifest-copy"><p class="eyebrow">Adapter evidence</p><h2>Promote semantics only when a manifest proves them.</h2><p>'+esc(contract.adapter_manifest_rule || 'Semantic understanding is promoted only when adapter evidence validates required schema, redaction, egress, and fixture fields.')+'</p><div class="manifest-list"><span>'+esc(route)+'</span><span>adapter-owned field mapping</span><span>unknown fields stay opaque</span><span>secret_values_included: false</span></div></div>'
+      + '<div class="panel manifest-copy"><p class="eyebrow">Teach it a new source</p><h2>Map a source once. Trust it everywhere after.</h2><p>'+esc(contract.adapter_manifest_rule || 'Semantic understanding is promoted only when adapter evidence validates required schema, redaction, egress, and fixture fields.')+'</p><div class="manifest-list"><span>'+esc(route)+'</span><span>your adapter owns the field mapping</span><span>fields you haven\'t mapped stay sealed</span><span>secret_values_included: false</span></div></div>'
       + '<form class="panel intake-console intake-workbench" data-control-adapter-form aria-label="Validate adapter manifest evidence">'
       + '<div class="intake-console__bar">live adapter manifest validator</div>'
       + '<label class="intake-field intake-field--wide" for="adapterManifest">Manifest JSON<textarea id="adapterManifest" name="manifest" spellcheck="false">'+esc(sampleManifest)+'</textarea></label>'
       + '<div class="intake-actions"><button class="btn btn--primary" type="submit">Validate Manifest</button><span class="intake-route">'+esc(route)+'</span></div>'
-      + '<output class="intake-result" data-control-adapter-result aria-live="polite"><div class="intake-result__top"><span>manifest receipt</span><b>ready</b></div><div class="intake-result__grid"><span><b>state</b>waiting for manifest</span><span><b>claim</b>not promoted</span><span><b>egress</b>deny until declared</span><span><b>secrets</b>false</span></div><pre>{"secret_values_included": false}</pre></output>'
+      + '<output class="intake-result" data-control-adapter-result aria-live="polite"><div class="intake-result__top"><span>manifest receipt</span><b>ready</b></div><div class="intake-result__grid"><span><b>state</b>waiting for manifest</span><span><b>claim</b>not promoted</span><span><b>Outbound</b>deny until declared</span><span><b>secrets</b>false</span></div><pre>{"secret_values_included": false}</pre></output>'
       + '</form>'
       + '</section>';
   }
@@ -808,8 +808,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     if (!modeOptions) modeOptions = '<option value="governance-packet">Governance packet</option>';
     if (!recipeOptions) recipeOptions = '<option value="governance-grc">Governance and GRC packet</option>';
     return '<section class="manifest-panel export-panel" aria-label="Export declaration workbench">'
-      + '<div class="panel manifest-copy export-copy"><p class="eyebrow">Egress control</p><h2>Declare every export before data leaves.</h2><p>'+esc(contract.export_declaration_rule || 'Exports become policy-bound delivery-ledger declarations before any downstream delivery is claimed.')+'</p><div class="manifest-list"><span>'+esc(route)+'</span><span>delivery-ledger receipt</span><span>declared_not_delivered until acknowledged</span><span>secret_values_included: false</span></div></div>'
-      + '<form class="panel intake-console intake-workbench" data-control-export-form aria-label="Declare governed export">'
+      + '<div class="panel manifest-copy export-copy"><p class="eyebrow">Nothing leaves by surprise</p><h2>You declare every export before data moves.</h2><p>'+esc(contract.export_declaration_rule || 'Exports become policy-bound delivery-ledger declarations before any downstream delivery is claimed.')+'</p><div class="manifest-list"><span>'+esc(route)+'</span><span>signed delivery receipt</span><span>declared_not_delivered until acknowledged</span><span>secret_values_included: false</span></div></div>'
+      + '<form class="panel intake-console intake-workbench" data-control-export-form aria-label="Declare an export before data leaves">'
       + '<div class="intake-console__bar">live export declaration workbench</div>'
       + '<div class="intake-form__grid">'
       + '<label class="intake-field" for="exportMode">Export mode<select id="exportMode" name="export_mode">'+modeOptions+'</select></label>'
@@ -862,7 +862,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       ['claim', validation.semantic_claim || 'not-promoted'],
       ['missing', (evidence.missing || []).join(', ') || 'none'],
       ['fields', (normalized.input_fields || []).join(', ') || 'none'],
-      ['egress', (normalized.egress_destinations || []).join(', ') || 'none']
+      ['Outbound', (normalized.egress_destinations || []).join(', ') || 'none']
     ];
     target.innerHTML = '<div class="intake-result__top"><span>manifest receipt</span><b>'+(ok ? 'validated' : 'missing evidence')+'</b></div>'
       + '<div class="intake-result__grid">'+fields.map(function(row){ return '<span><b>'+esc(row[0])+'</b>'+esc(row[1])+'</span>'; }).join('')+'</div>'
@@ -1135,7 +1135,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       ['protocol', 'Protocol'],
       ['opaque', 'Opaque']
     ];
-    return '<div class="channel-head"><h2 class="section-title">Data channels</h2><div class="channel-toolbar" role="group" aria-label="Filter API data channels">'
+    return '<div class="channel-head"><h2 class="section-title">Sources you can capture from</h2><div class="channel-toolbar" role="group" aria-label="Filter API data channels">'
       + filters.map(function(f){ return '<button class="filter-button" type="button" data-channel-filter="'+esc(f[0])+'" aria-pressed="'+(f[0] === 'all' ? 'true' : 'false')+'">'+esc(f[1])+'</button>'; }).join('')
       + '</div></div>';
   }
@@ -1255,25 +1255,25 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     var html = '';
     if (isPreview) {
       html += '<section class="card preview-gate" role="status" aria-label="Control center preview state">'
-        + '<div><p class="eyebrow">Preview mode</p><h2>Full console visible. Tenant writes stay locked.</h2><p>'+esc(options.message || 'Preview receipts are local and not persisted. Paste a workspace API key to load tenant data and run protected writes.')+'</p></div>'
-        + '<div class="preview-gate__status"><span>read model <b>public preview</b></span><span>write routes <b>API key required</b></span><span>secrets <b>never included</b></span></div>'
+        + '<div><p class="eyebrow">Preview mode</p><h2>See the whole console. Your data stays untouched.</h2><p>'+esc(options.message || 'You are in preview: receipts are generated locally and nothing is saved. Paste a workspace API key to load your data and run real work.')+'</p></div>'
+        + '<div class="preview-gate__status"><span>browsing <b>open preview</b></span><span>saving work <b>API key required</b></span><span>secrets <b>never included</b></span></div>'
         + '</section>';
     }
     html += '<div class="hero-panel"><div class="panel hero-stack">'
-      + '<p class="eyebrow">Control promise</p>'
-      + '<p class="control-statement">Kolm treats API data collection as an enterprise data plane: every source enters as a governed event, every export leaves with policy, provenance, and receipt context, and unknown vendor payloads stay opaque until an adapter manifest declares their schema.</p>'
+      + '<p class="eyebrow">What you get here</p>'
+      + '<p class="control-statement">Capture the API traffic you already pay for, set the rules for what gets kept and where it goes, and compile it into a signed model you own. Every source comes in the same way, every export carries its own proof, and a payload you haven\'t mapped yet stays sealed until you say otherwise.</p>'
       + '<div class="coverage-strip">'
-      + '<span><b>'+channelCount+'</b>data channel families</span>'
-      + '<span><b>'+collectionModes.length+'</b>collection modes</span>'
-      + '<span><b>'+exportModes.length+'</b>export modes</span>'
-      + '<span><b>'+stages.length+'</b>governance stages</span>'
+      + '<span><b>'+channelCount+'</b>sources you can capture from</span>'
+      + '<span><b>'+collectionModes.length+'</b>ways to bring traffic in</span>'
+      + '<span><b>'+exportModes.length+'</b>ways to ship proof out</span>'
+      + '<span><b>'+stages.length+'</b>checks before anything moves</span>'
       + '</div>'
       + '<p class="scope-note">'+esc(posture.production_claim || '')+'</p>'
-      + '</div><div class="panel"><p class="eyebrow">Secure default posture</p><div class="posture-grid">'
+      + '</div><div class="panel"><p class="eyebrow">Safe by default</p><div class="posture-grid">'
       + '<div class="posture-item"><span>Capture</span><code>'+esc(posture.default_capture_mode)+'</code></div>'
-      + '<div class="posture-item"><span>Egress</span><code>'+esc(posture.default_egress_mode)+'</code></div>'
+      + '<div class="posture-item"><span>Outbound</span><code>'+esc(posture.default_egress_mode)+'</code></div>'
       + '<div class="posture-item"><span>Cache</span><code>'+esc(posture.cache_policy)+'</code></div>'
-      + '<div class="posture-item"><span>Unknown payloads</span><code>'+esc(posture.unknown_payload_policy)+'</code></div>'
+      + '<div class="posture-item"><span>Unmapped payloads</span><code>'+esc(posture.unknown_payload_policy)+'</code></div>'
       + '</div></div></div>';
     html += renderUniversalIntake(contract, coverage.event_envelope || {});
     html += '<div class="grid">'
@@ -1283,39 +1283,39 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       + metric('Artifacts', counters.artifacts || 0)
       + '</div>';
     html += renderWorkbench(data.operator_workbench || {});
-    html += '<h2 class="section-title">Coverage summary</h2><div class="summary-grid">'
+    html += '<h2 class="section-title">What this works with</h2><div class="summary-grid">'
       + renderSummary('Protocols', coverage.protocols || [])
       + renderSummary('Modalities', coverage.modalities || [])
       + renderSummary('Lifecycle', coverage.lifecycle_states || [])
       + '</div>';
-    html += '<h2 class="section-title">First-class control objects</h2><div class="object-ledger">'+firstClassObjects.map(renderObjectGroup).join('')+'</div>';
-    html += '<h2 class="section-title">Adapter confidence states</h2><div class="adapter-grid">'+adapterStates.map(renderAdapterState).join('')+'</div>';
+    html += '<h2 class="section-title">Everything you can manage here</h2><div class="object-ledger">'+firstClassObjects.map(renderObjectGroup).join('')+'</div>';
+    html += '<h2 class="section-title">How much we trust a source</h2><div class="adapter-grid">'+adapterStates.map(renderAdapterState).join('')+'</div>';
     html += renderAdapterManifestWorkbench(contract);
     html += renderExportDeclarationWorkbench(contract, egressRecipes, exportModes);
-    html += '<h2 class="section-title">Event envelope</h2>'+renderEnvelope(coverage.event_envelope || {});
-    html += '<h2 class="section-title">Egress destination recipes</h2><div class="egress-grid">'+egressRecipes.map(renderEgressRecipe).join('')+'</div>';
-    html += '<h2 class="section-title">Readiness scoreboard</h2><div class="scoreboard">'+readinessScoreboard.map(renderReadinessItem).join('')+'</div>';
-    html += '<h2 class="section-title">Collection and export modes</h2><div class="grid grid--2">'
-      + '<div><h3 class="section-title" style="margin-top:0">Ingress collection</h3><div class="grid grid--2">'+collectionModes.map(renderMode).join('')+'</div></div>'
-      + '<div><h3 class="section-title" style="margin-top:0">Egress and exports</h3><div class="grid grid--2">'+exportModes.map(renderMode).join('')+'</div></div>'
+    html += '<h2 class="section-title">One event format, end to end</h2>'+renderEnvelope(coverage.event_envelope || {});
+    html += '<h2 class="section-title">Where your data can go</h2><div class="egress-grid">'+egressRecipes.map(renderEgressRecipe).join('')+'</div>';
+    html += '<h2 class="section-title">What\'s shipping today</h2><div class="scoreboard">'+readinessScoreboard.map(renderReadinessItem).join('')+'</div>';
+    html += '<h2 class="section-title">Bring traffic in, send proof out</h2><div class="grid grid--2">'
+      + '<div><h3 class="section-title" style="margin-top:0">Capture it</h3><div class="grid grid--2">'+collectionModes.map(renderMode).join('')+'</div></div>'
+      + '<div><h3 class="section-title" style="margin-top:0">Ship it out</h3><div class="grid grid--2">'+exportModes.map(renderMode).join('')+'</div></div>'
       + '</div>';
-    html += '<h2 class="section-title">Governance path</h2><div class="grid grid--2">'+stages.map(renderStage).join('')+'</div>';
-    html += '<h2 class="section-title">Operational contract</h2><div class="summary-grid">'
-      + renderSummary('Ingress rule', [contract.ingress_rule || ''])
-      + renderSummary('Egress rule', [contract.egress_rule || ''])
-      + renderSummary('Unknown schema rule', [contract.unknown_schema_rule || ''])
+    html += '<h2 class="section-title">Every event takes the same path</h2><div class="grid grid--2">'+stages.map(renderStage).join('')+'</div>';
+    html += '<h2 class="section-title">The rules, in plain terms</h2><div class="summary-grid">'
+      + renderSummary('Coming in', [contract.ingress_rule || ''])
+      + renderSummary('Going out', [contract.egress_rule || ''])
+      + renderSummary('Sources you haven\'t mapped', [contract.unknown_schema_rule || ''])
       + '</div>';
-    html += '<h2 class="section-title">Closed-loop improvement</h2><div class="loop-head">'
-      + '<div class="panel"><p class="eyebrow">Failure to artifact</p><p>'+esc(loop.summary || '')+'</p><div class="chips">'+(loop.minimum_inputs || []).map(chip).join('')+'</div></div>'
-      + '<div class="panel"><p class="eyebrow">Promotion gates</p><div class="chips">'+(loop.promotion_gates || []).map(chip).join('')+'</div><p class="scope-note">Status: <span class="mono">'+esc(loop.status || 'readiness-gated')+'</span></p></div>'
+    html += '<h2 class="section-title">Turn a failure into a better model</h2><div class="loop-head">'
+      + '<div class="panel"><p class="eyebrow">Failure to fix</p><p>'+esc(loop.summary || '')+'</p><div class="chips">'+(loop.minimum_inputs || []).map(chip).join('')+'</div></div>'
+      + '<div class="panel"><p class="eyebrow">What it takes to ship</p><div class="chips">'+(loop.promotion_gates || []).map(chip).join('')+'</div><p class="scope-note">Status: <span class="mono">'+esc(loop.status || 'available, promotion gated')+'</span></p></div>'
       + '</div><div class="loop-rail">'+(loop.stages || []).map(renderLoopStep).join('')+'</div>';
     html += renderChannelFilters()+'<div class="grid grid--2">'+(coverage.data_channels || []).map(renderChannel).join('')+'</div>';
-    html += '<h2 class="section-title">Matrix</h2>'+renderTable(coverage.data_channels || []);
-    html += '<h2 class="section-title">Integration map</h2><div class="integration-list">'+(data.integration_map || []).map(renderIntegration).join('')+'</div>';
-    html += '<h2 class="section-title">Policy layers</h2><div class="grid grid--2">'+(coverage.policy_layers || []).map(renderPolicy).join('')+'</div>';
-    html += '<h2 class="section-title">Enterprise controls</h2><div class="grid grid--3">'+(data.enterprise_controls || []).map(renderControl).join('')+'</div>';
-    html += '<h2 class="section-title">Differentiators</h2><div class="panel"><div class="chips">'+(data.differentiators || []).map(chip).join('')+'</div></div>';
-    html += '<div class="grid grid--2" style="margin-top:var(--rhy-1)"><a class="btn btn--primary" href="/docs#quickstart">Open quickstart</a><a class="btn btn--ghost" href="/account/overview">Compiler overview</a></div>';
+    html += '<h2 class="section-title">The full channel matrix</h2>'+renderTable(coverage.data_channels || []);
+    html += '<h2 class="section-title">Connects to what you already run</h2><div class="integration-list">'+(data.integration_map || []).map(renderIntegration).join('')+'</div>';
+    html += '<h2 class="section-title">The rules you can set</h2><div class="grid grid--2">'+(coverage.policy_layers || []).map(renderPolicy).join('')+'</div>';
+    html += '<h2 class="section-title">Controls for larger teams</h2><div class="grid grid--3">'+(data.enterprise_controls || []).map(renderControl).join('')+'</div>';
+    html += '<h2 class="section-title">Why teams run on this</h2><div class="panel"><div class="chips">'+(data.differentiators || []).map(chip).join('')+'</div></div>';
+    html += '<div class="grid grid--2" style="margin-top:var(--rhy-1)"><a class="btn btn--primary" href="/docs#quickstart">Run your first capture</a><a class="btn btn--ghost" href="/account/overview">Back to overview</a></div>';
     document.getElementById('auth').hidden = isPreview ? false : true;
     var content = document.getElementById('content');
     content.hidden = false;

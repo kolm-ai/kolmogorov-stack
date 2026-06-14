@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Compiler Overview - kolm.ai</title>
-<meta name="description" content="Your kolm compiler workspace: API wrapper capture, compile jobs, specialists, device targets, and next actions.">
+<title>Your workspace - kolm.ai</title>
+<meta name="description" content="Turn your live API calls into a model you own. Capture, compile, and ship signed artifacts to your own hardware - track captures, jobs, and runtimes here.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#08090A">
 <link rel="canonical" href="https://kolm.ai/account/overview">
@@ -121,74 +121,74 @@
     </div>
   </div>
 
-  <section class="hero-shell" aria-label="Compiler workspace command surface">
+  <section class="hero-shell" aria-label="Your workspace overview">
     <div class="hero-copy">
-      <p class="eyebrow">Account / Compiler</p>
-      <h1>Compiler Workspace</h1>
-      <p class="lede">Run the behavior-to-artifact loop: capture one production API path, keep policy and failures attached, compile signed artifacts, and export proof to the systems buyers already inspect.</p>
+      <p class="eyebrow">Your workspace</p>
+      <h1>Point your calls. Own the model.</h1>
+      <p class="lede">Capture one live API path, compile the behavior you already use into a signed model in a single portable file, and run it on your own hardware. Pay to run what you've already established - not frontier prices to rent it again, forever.</p>
       <div class="hero-actions">
-        <a class="btn btn--primary" href="/account/api-control-center">Open API Control Center</a>
-        <a class="btn btn--ghost" href="/docs/api">Read API Contract</a>
+        <a class="btn btn--primary" href="/account/api-control-center">Open API control</a>
+        <a class="btn btn--ghost" href="/docs/api">Read the API</a>
       </div>
-      <div class="proof-strip" aria-label="Workspace contract">
-        <span><b>925</b> owned routes</span>
+      <div class="proof-strip" aria-label="Workspace at a glance">
+        <span><b>925</b> routes you own</span>
         <span><b>214</b> route groups</span>
-        <span><b>7</b> certified surfaces</span>
-        <span><b>8</b> open gates</span>
+        <span><b>7</b> surfaces live</span>
+        <span><b>1 file</b> you can move</span>
       </div>
     </div>
-    <aside class="workspace-console" aria-label="Compiler workspace source-to-artifact console">
+    <aside class="workspace-console" aria-label="From your live calls to a model you own">
       <div class="workspace-console__bar">
-        <b>compiler plane</b>
+        <b>your workspace</b>
         <span>workspace/default</span>
-        <span>readiness gated</span>
+        <span>four steps</span>
       </div>
       <div class="workspace-console__body">
         <div class="console-row">
           <span>Capture</span>
-          <div><b>Route one production loop</b><p>Provider-compatible calls become tenant-scoped traces with redaction, policy, and receipt context.</p></div>
+          <div><b>Point one live path at Kolm</b><p>Your OpenAI- and Anthropic-shaped calls flow through unchanged - no SDK rewrite - captured with redaction and policy attached.</p></div>
           <code>/v1/route</code>
         </div>
         <div class="console-row">
           <span>Evaluate</span>
-          <div><b>Keep failures and regressions visible</b><p>Labels, eval suites, protected slices, and readiness requirements stay attached before promotion.</p></div>
+          <div><b>Catch failures before you ship</b><p>Test the behavior with eval suites, labels, and protected slices so regressions surface before they reach production.</p></div>
           <code>gates</code>
         </div>
         <div class="console-row">
           <span>Compile</span>
-          <div><b>Promote behavior into an artifact</b><p>Manifests, examples, evaluators, target recipes, hashes, and verifier receipts ship together.</p></div>
+          <div><b>Compile it into one file you own</b><p>Model, recipe, evals, hashes, and a verifiable receipt ship together in a single portable artifact.</p></div>
           <code>.kolm</code>
         </div>
         <div class="console-row">
           <span>Deploy</span>
-          <div><b>Choose the smallest credible runtime</b><p>Local, hosted, fleet, and edge target recipes remain readiness-scoped until external gates close.</p></div>
+          <div><b>Run it on the hardware you have</b><p>Laptop, your private cloud, a fleet, or the edge - pick the smallest runtime that fits, with the limits shown.</p></div>
           <code>targets</code>
         </div>
       </div>
       <div class="workspace-console__footer">
-        <span><b>ok</b> behavior-to-artifact workspace</span>
+        <span><b>ok</b> capture - compile - deploy</span>
         <span>secret_values_included: false</span>
       </div>
     </aside>
   </section>
-  <section class="panel" data-product-readiness aria-label="Product readiness">
-    <p class="muted">Compiler readiness is tracked from <a href="/v1/product/graph">/v1/product/graph</a>, <a href="/product-readiness-closeout.json">/product-readiness-closeout.json</a>, and the local <span class="mono">readiness-counts</span> ledger. The <span class="mono">readiness-closeout</span> state names remaining package, benchmark, partner, and certification gates explicitly.</p>
+  <section class="panel" data-product-readiness aria-label="What's live and what's in progress">
+    <p class="muted">See exactly what's shipping and what's still in progress - live, from <a href="/v1/product/graph">/v1/product/graph</a>, <a href="/product-readiness-closeout.json">/product-readiness-closeout.json</a>, and the local <span class="mono">readiness-counts</span> ledger. The <span class="mono">readiness-closeout</span> view names every remaining package, benchmark, and partner step by name, so you always know where each runtime stands.</p>
   </section>
 
   <div id="banner"></div>
-  <div id="auth" class="auth" hidden aria-label="Compiler workspace access gate">
+  <div id="auth" class="auth" hidden aria-label="Open your workspace">
     <div class="auth__copy">
-      <h2 class="section-title">Open Compiler Workspace</h2>
-      <p class="muted" id="keyHelp">Preview the workspace contract below. Paste a kolm API key that starts with <span class="mono">ks_</span> to load tenant data and persist actions.</p>
+      <h2 class="section-title">Open your workspace</h2>
+      <p class="muted" id="keyHelp">Look around first - the preview below is live. Paste a kolm API key that starts with <span class="mono">ks_</span> to load your own data and save what you do here.</p>
     </div>
     <div class="auth__form">
       <label class="muted" for="keyInput">API Key</label>
       <input id="keyInput" name="api_key" type="password" inputmode="text" placeholder="ks_…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="keyHelp">
-      <button class="btn btn--primary" id="keyBtn" type="button">Open Compiler Workspace</button>
+      <button class="btn btn--primary" id="keyBtn" type="button">Open your workspace</button>
     </div>
   </div>
 
-  <div id="content"><div class="banner">Loading compiler workspace…</div></div>
+  <div id="content"><div class="banner">Loading your workspace…</div></div>
 </main>
 
 <script>
@@ -220,17 +220,17 @@
         next_url: '/docs#quickstart'
       },
       empty_state: {
-        title: 'Route one namespace through Kolm',
+        title: 'Point one namespace at Kolm',
         curl: 'curl -X POST https://kolm.ai/v1/route/chat/completions \\\n  -H "authorization: Bearer ks_..." \\\n  -H "content-type: application/json" \\\n  -d "{\\"namespace\\":\\"prod-ai-loop\\",\\"model\\":\\"openai:gpt-4.1-mini\\",\\"messages\\":[{\\"role\\":\\"user\\",\\"content\\":\\"resolve CASE-100\\"}]}"'
       },
       primary_surfaces: [
         { id:'capture', status:'mounted', routes:['/v1/route/chat/completions','/v1/capture/log','/v1/account/api-control-center/events','/v1/bridges/observe'] },
         { id:'evaluate', status:'mounted', routes:['/v1/evals','/v1/drift-alert','/v1/label-queue/stats','/v1/compile/evaluate'] },
         { id:'compile', status:'mounted', routes:['/v1/compile','/v1/artifacts','/v1/receipts/verify','/v1/packages/release-readiness/template'] },
-        { id:'deploy', status:'readiness-gated', routes:['/v1/devices/recommend','/v1/runtime/decide','/v1/byoc/targets','/v1/runtime/adoption-packets'] }
+        { id:'deploy', status:'mounted', routes:['/v1/devices/recommend','/v1/runtime/decide','/v1/byoc/targets','/v1/runtime/adoption-packets'] }
       ],
       recent_compile_jobs: [
-        { id:'job_preview_1', task:'support-case-specialist', status:'readiness-gated', namespace:'prod-ai-loop', artifact_ready:true },
+        { id:'job_preview_1', task:'support-case-specialist', status:'in progress', namespace:'prod-ai-loop', artifact_ready:true },
         { id:'job_preview_2', task:'policy-redaction-regression', status:'queued', namespace:'release-gates', artifact_ready:false }
       ]
     };
@@ -240,7 +240,7 @@
     document.getElementById('banner').innerHTML = '';
     render(demoCompilerOverviewPayload(), {
       preview: true,
-      message: message || 'Preview data is local and not persisted. Paste a workspace API key to load tenant counts, jobs, namespaces, and actions.'
+      message: message || 'This preview is sample data, kept on your device and not saved. Paste a workspace API key to load your own counts, jobs, namespaces, and actions.'
     });
   }
   function metric(label, value){
@@ -267,29 +267,29 @@
     var empty = data.empty_state;
     var html = '';
     if (isPreview) {
-      html += '<section class="preview-gate" role="status" aria-label="Compiler workspace preview state">'
-        + '<div><p class="eyebrow">Preview mode</p><h2>Workspace visible. Tenant actions stay locked.</h2><p>'+esc(options.message || 'Preview data is local and not persisted. Paste a workspace API key to load tenant counts, jobs, namespaces, and actions.')+'</p></div>'
-        + '<div class="preview-gate__status"><span>read model <b>public preview</b></span><span>workspace data <b>API key required</b></span><span>secrets <b>never included</b></span></div>'
+      html += '<section class="preview-gate" role="status" aria-label="Workspace preview state">'
+        + '<div><p class="eyebrow">Preview mode</p><h2>Look around now. Sign in to make it yours.</h2><p>'+esc(options.message || 'This preview is sample data, kept on your device and not saved. Paste a workspace API key to load your own counts, jobs, namespaces, and actions.')+'</p></div>'
+        + '<div class="preview-gate__status"><span>view <b>open preview</b></span><span>your data <b>API key required</b></span><span>secrets <b>never included</b></span></div>'
         + '</section>';
     }
     html += '<div class="grid">'
-      + metric('Captured events', c.observed_captures || 0)
+      + metric('Calls captured', c.observed_captures || 0)
       + metric('Compile jobs', c.compile_jobs || 0)
-      + metric('Artifacts', c.artifacts || 0)
-      + metric('Device targets', c.devices || 0)
+      + metric('Models you own', c.artifacts || 0)
+      + metric('Runtimes ready', c.devices || 0)
       + '</div>';
       html += '<div class="panel empty"><div><p class="eyebrow">Workspace</p><h2 class="section-title" style="margin-top:4px">'+esc((data.tenant && data.tenant.name) || 'tenant')+'</h2>'
         + '<p class="muted">Plan: <span class="mono">'+esc((data.tenant && data.tenant.plan) || 'free')+'</span>'
         + (ns.length ? ' / Namespaces: '+esc(ns.join(', ')) : ' / Namespace: default') + '</p></div>'
-      + '<div class="btnrow"><a class="btn btn--primary" href="'+esc(onboarding.next_url || '/docs#quickstart')+'">Open quickstart</a><a class="btn btn--ghost" href="/account/api-control-center">API control</a><a class="btn btn--ghost" href="/pricing">Change plan</a></div></div>';
+      + '<div class="btnrow"><a class="btn btn--primary" href="'+esc(onboarding.next_url || '/docs#quickstart')+'">Start in 5 minutes</a><a class="btn btn--ghost" href="/account/api-control-center">API control</a><a class="btn btn--ghost" href="/pricing">Change plan</a></div></div>';
     if (empty) {
-      html += '<h2 class="section-title">'+esc(empty.title || 'Route one namespace through Kolm')+'</h2>';
+      html += '<h2 class="section-title">'+esc(empty.title || 'Point one namespace at Kolm')+'</h2>';
       html += '<pre>'+esc(empty.curl || '')+'</pre>';
     }
-    html += '<h2 class="section-title">Compiler surfaces</h2><div class="surfaces">'+surfaces.map(renderSurface).join('')+'</div>';
+    html += '<h2 class="section-title">What\'s live in your workspace</h2><div class="surfaces">'+surfaces.map(renderSurface).join('')+'</div>';
     html += '<h2 class="section-title">Recent compile jobs</h2>';
-    html += jobs.length ? '<div class="jobs">'+jobs.map(renderJob).join('')+'</div>' : '<div class="panel"><p class="muted">No compile jobs yet. Capture traffic first, then run <span class="mono">POST /v1/compile</span>.</p></div>';
-    html += '<h2 class="section-title">Evidence archive</h2><div class="panel"><p class="muted">Signed review evidence remains available as a secondary archive at <a href="https://audit.kolm.ai/">audit.kolm.ai</a>. The default workspace is the API capture, compile, runtime, and proof-export loop.</p></div>';
+    html += jobs.length ? '<div class="jobs">'+jobs.map(renderJob).join('')+'</div>' : '<div class="panel"><p class="muted">No models compiled yet. Point traffic at Kolm first, then run <span class="mono">POST /v1/compile</span> to turn it into a model you own.</p></div>';
+    html += '<h2 class="section-title">Evidence archive</h2><div class="panel"><p class="muted">Every signed artifact has a receipt anyone can verify - browse the full archive at <a href="https://audit.kolm.ai/">audit.kolm.ai</a>. Your workspace here is where you capture calls, compile them, run them, and export the proof.</p></div>';
     document.getElementById('auth').hidden = isPreview ? false : true;
     var content = document.getElementById('content');
     content.hidden = false;
@@ -299,19 +299,19 @@
     if (!KEY) { showAuth(); return; }
     fetch('/v1/account/compiler-overview', { credentials:'same-origin', headers: headers() })
       .then(function(res){
-        if (res.status === 401) { showAuth('API key rejected or expired. Preview mode remains available while you paste a current workspace key.'); return null; }
+        if (res.status === 401) { showAuth('That key was rejected or has expired. Paste a current workspace key - the live preview stays open in the meantime.'); return null; }
         return res.json().then(function(j){ return { ok: res.ok, status: res.status, body: j }; });
       })
       .then(function(o){
         if (!o) return;
         if (!o.ok || !o.body || !o.body.ok) {
-          document.getElementById('banner').innerHTML = '<div class="banner warn">'+esc((o.body && (o.body.detail || o.body.error)) || 'Could not load compiler overview.')+'</div>';
+          document.getElementById('banner').innerHTML = '<div class="banner warn">'+esc((o.body && (o.body.detail || o.body.error)) || 'We could not load your workspace just now.')+'</div>';
           return;
         }
         render(o.body);
       })
       .catch(function(){
-        showAuth('Network error while loading tenant data. Preview mode remains available; retry after the account API is reachable.');
+        showAuth('Network hiccup while loading your data. The live preview stays open - try again once the account API is reachable.');
       });
   }
   document.getElementById('keyBtn').onclick = function(){
@@ -320,7 +320,7 @@
     KEY = v;
     try { sessionStorage.setItem('kolm_account_key', v); } catch(e) {}
     document.getElementById('content').hidden = false;
-    document.getElementById('content').innerHTML = '<div class="banner">Loading compiler workspace…</div>';
+    document.getElementById('content').innerHTML = '<div class="banner">Loading your workspace…</div>';
     load();
   };
   document.getElementById('keyInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('keyBtn').click(); });

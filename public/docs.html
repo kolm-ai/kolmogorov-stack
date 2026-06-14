@@ -7,20 +7,20 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
 </script>
-<title>Kolm Developer Docs</title>
-<meta name="description" content="Developer docs for Kolm: API routes, OpenAPI, API Control Center, data ingress, exports, eval gates, compile runs, artifacts, receipts, runtime targets, and readiness.">
+<title>Docs — Point your API calls, own the model | Kolm</title>
+<meta name="description" content="Everything you need to turn live OpenAI- and Anthropic-compatible calls into a signed model you run anywhere. Quickstart, API reference, OpenAPI, CLI, and verifiable receipts.">
 <meta name="theme-color" content="#08090A">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
-<meta property="og:title" content="Kolm Developer Docs">
-<meta property="og:description" content="Build the behavior-to-artifact loop with route docs, OpenAPI, API Control Center contracts, data channels, artifacts, receipts, and readiness gates.">
+<meta property="og:title" content="Docs — Point your API calls, own the model | Kolm">
+<meta property="og:description" content="Ship in an afternoon: route one namespace, capture the behavior you already use, and compile a signed model you run on your own hardware. Quickstart, API reference, and CLI.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/docs">
 <meta property="og:image" content="https://kolm.ai/compiler-brand-hero.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kolm Developer Docs">
-<meta name="twitter:description" content="Route behavior in, govern it, compile artifacts, target runtimes, and export evidence through documented APIs.">
+<meta name="twitter:title" content="Docs — Point your API calls, own the model | Kolm">
+<meta name="twitter:description" content="Route your calls, capture behavior, compile a signed model you own and run anywhere. No SDK rewrite. Quickstart, API reference, OpenAPI, and CLI.">
 <meta name="twitter:image" content="https://kolm.ai/compiler-brand-hero.png">
 <link rel="canonical" href="https://kolm.ai/docs">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -36,7 +36,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "@type": "TechArticle",
   "name": "Kolm Developer Docs",
   "url": "https://kolm.ai/docs",
-  "description": "Developer docs for Kolm: API routes, OpenAPI, API Control Center, data ingress, exports, eval gates, compile runs, artifacts, receipts, runtime targets, and readiness.",
+  "description": "Everything you need to turn live OpenAI- and Anthropic-compatible calls into a signed model you run anywhere. Quickstart, API reference, OpenAPI, CLI, and verifiable receipts.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" }
 }
 </script>
@@ -93,11 +93,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="hero section--flush">
     <span class="field" aria-hidden="true"></span>
     <div class="wrap hero__in">
-      <p class="eyebrow">DOCS · API CONTRACT</p>
-      <h1 class="hero__h1">API behavior in. Device-fit models out.</h1>
-      <p class="lede">Use these docs to route production calls, capture behavior, govern sources, evaluate regressions, compile signed <code>.kolm</code> artifacts, target runtimes, issue receipts, and export evidence &mdash; every page points to a machine-readable contract or a route you can verify.</p>
+      <p class="eyebrow">DOCS · DROP-IN PROXY, NO SDK REWRITE</p>
+      <h1 class="hero__h1">Point your API calls. Own the model.</h1>
+      <p class="lede">Everything you need to turn your live OpenAI- and Anthropic-compatible calls into a signed model you run on your own hardware. Route a namespace, capture the behavior you already use, compile a portable <code>.kolm</code> artifact, and ship it to a laptop, your private cloud, or the edge. Every route here is one you can run and verify yourself.</p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="#quickstart">Start the quickstart</a>
+        <a class="btn btn--primary" href="/signup">Get an API key</a>
         <a class="btn btn--ghost" href="/docs/api">Open API reference</a>
       </div>
     </div>
@@ -122,8 +122,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
         <div class="section__head" id="quickstart">
           <p class="eyebrow">01 · QUICKSTART</p>
-          <h2>Start by routing one namespace.</h2>
-          <p class="lede">Keep the first integration small. Route one OpenAI-compatible namespace, export captured examples, then compile only after the behavior has enough eval and regression coverage.</p>
+          <h2>Ship your first model in an afternoon.</h2>
+          <p class="lede">Start small and prove it fast. Point one OpenAI-compatible namespace at Kolm, export the examples it captures, then compile once the behavior is covered by your evals. Three calls take you from live traffic to a signed model you own.</p>
         </div>
         <div class="plate plate--rows">
           <div class="plate__hd">quickstart.sh · route · capture · compile</div>
@@ -143,97 +143,98 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
         </div>
 
         <div class="section__head" id="reference">
-          <p class="eyebrow">02 · REFERENCE SURFACES</p>
-          <h2>Use the generated contracts, not screenshot docs.</h2>
-          <p class="lede">Kolm docs behave like infrastructure docs: every page points to a machine-readable contract or a route that can be verified.</p>
+          <p class="eyebrow">02 · REFERENCE</p>
+          <h2>Build against the real contract.</h2>
+          <p class="lede">Every page here points to something you can run, test, or verify &mdash; not a screenshot. Generate clients, wire up tests, and check our work straight from the source.</p>
         </div>
         <div class="grid grid--3">
           <a class="card" href="/docs/api">
             <span class="card__k">API REFERENCE</span>
-            <h3>Generated route docs</h3>
-            <p>Generated route documentation for authenticated and public endpoints.</p>
+            <h3>Every route, documented</h3>
+            <p>Full reference for authenticated and public endpoints &mdash; generated from the live API, so it never drifts.</p>
           </a>
           <a class="card" href="/openapi.json">
             <span class="card__k">OPENAPI JSON</span>
             <h3>OpenAPI 3 contract</h3>
-            <p>For clients, gateway tests, SDK generation, and review.</p>
+            <p>Generate clients and SDKs, wire up gateway tests, and review the surface in your own tooling.</p>
           </a>
           <a class="card" href="/docs/api-routes.json">
             <span class="card__k">ROUTE INVENTORY</span>
             <h3>929 routes</h3>
-            <p>929 routes, 214 route groups, source files, methods, paths, and comments.</p>
+            <p>929 routes across 214 groups, with source files, methods, paths, and comments &mdash; the whole API in one file.</p>
           </a>
           <a class="card" href="/product-graph.json">
             <span class="card__k">PRODUCT GRAPH</span>
-            <h3>Surface map</h3>
-            <p>Journey counts, route surfaces, readiness groups, runtime dimensions, and category spine.</p>
+            <h3>The product, mapped</h3>
+            <p>Journeys, route surfaces, runtime targets, and feature states in one machine-readable map.</p>
           </a>
           <a class="card" href="/v1/product/capabilities">
             <span class="card__k">CAPABILITY JSON</span>
-            <h3>Live capabilities</h3>
-            <p>Live product capabilities for the current tenant-facing platform surface.</p>
+            <h3>What your account can do</h3>
+            <p>The live capabilities available to your workspace right now &mdash; query it instead of guessing.</p>
           </a>
           <a class="card" href="/product-readiness-closeout.json">
             <span class="card__k">READINESS LEDGER</span>
-            <h3>Open + closed states</h3>
-            <p>Implemented and open readiness states kept explicit for claims discipline.</p>
+            <h3>Shipped vs. in progress</h3>
+            <p>What is live today and what is still landing, stated plainly so you can plan against it.</p>
           </a>
         </div>
 
         <div class="section__head" id="control-center">
           <p class="eyebrow">03 · API CONTROL CENTER</p>
-          <h2>Every dashboard control needs an API contract.</h2>
-          <p class="lede">The API Control Center is the enterprise surface for source registration, provider policy, credentials, retention, redaction, eval gates, compile state, runtime targets, exports, and readiness gates.</p>
+          <h2>Run the whole pipeline from one place.</h2>
+          <p class="lede">Capture, set your rules, test the behavior, compile, deploy, and export &mdash; all driven by the same API, all visible in one console. Anything you can click, you can script.</p>
         </div>
         <ul class="ledger">
-          <li><code>workspace</code>, <code>project</code>, <code>environment</code>, <code>source</code>, <code>connector</code>, <code>credential</code>, and <code>provider</code> define the enterprise boundary.</li>
-          <li><code>capture policy</code>, <code>redaction policy</code>, <code>retention policy</code>, <code>eval suite</code>, <code>failure taxonomy</code>, and <code>regression set</code> define the governance boundary.</li>
-          <li><code>compile run</code>, <code>artifact</code>, <code>manifest</code>, <code>target runtime</code>, <code>receipt</code>, <code>export</code>, and <code>readiness gate</code> define the release boundary.</li>
+          <li>Set up your accounts and connections: <code>workspace</code>, <code>project</code>, <code>environment</code>, <code>source</code>, <code>connector</code>, <code>credential</code>, and <code>provider</code>.</li>
+          <li>Decide what gets kept and how it is tested: <code>capture policy</code>, <code>redaction policy</code>, <code>retention policy</code>, <code>eval suite</code>, <code>failure taxonomy</code>, and <code>regression set</code>.</li>
+          <li>Ship the result: <code>compile run</code>, <code>artifact</code>, <code>manifest</code>, <code>target runtime</code>, <code>receipt</code>, <code>export</code>, and release checks.</li>
         </ul>
         <div class="plate plate--rows">
           <div class="plate__hd">api-control-center · contract</div>
           <div class="panel__rows">
             <div class="prow">console <span class="prow__r"><a href="/account/api-control-center">/account/api-control-center</a></span></div>
             <div class="prow">contract <span class="prow__r m">GET /v1/account/api-control-center</span></div>
-            <div class="prow">every write <span class="prow__r a">leaves an event</span></div>
+            <div class="prow">every change <span class="prow__r a">logged</span></div>
             <div class="prow">every export <span class="prow__r a">replayable</span></div>
           </div>
         </div>
 
         <div class="section__head" id="data-movement">
-          <p class="eyebrow">04 · DATA MOVEMENT</p>
-          <h2>Every credible API data path in and out.</h2>
-          <p class="lede">A docs page should make ingestion and export coverage legible before an enterprise buyer asks. Unknown schemas stay opaque until a connector declares ownership.</p>
+          <p class="eyebrow">04 · DATA IN AND OUT</p>
+          <h2>Bring your traffic from anywhere. Take your model with you.</h2>
+          <p class="lede">Capture from the tools you already use, and export the result in formats your stack already speaks. Nothing locks in &mdash; what comes out is a file you own.</p>
         </div>
         <div class="grid grid--2">
           <div class="card">
-            <span class="card__k">INGRESS</span>
+            <span class="card__k">CAPTURE IN</span>
             <h3>12+ ways in</h3>
             <p>REST proxy, SDK capture, CLI upload, JSONL/CSV/parquet, webhooks, streams, OTEL, gateway logs, trace imports, warehouse import, browser traces, and human labels.</p>
           </div>
           <div class="card">
-            <span class="card__k">INTEROP</span>
-            <h3>Trace tools and agents</h3>
+            <span class="card__k">WORKS WITH YOUR STACK</span>
+            <h3>Your trace tools and agents</h3>
             <p>Trace exports, eval dashboards, OpenTelemetry spans, MCP/tool calls, agent handoffs, support tickets, CRM records, and red-team cases.</p>
           </div>
           <div class="card">
-            <span class="card__k">EGRESS</span>
+            <span class="card__k">EXPORT OUT</span>
             <h3>10+ ways out</h3>
             <p>Signed artifacts, manifests, receipts, eval reports, event streams, SIEM/log export, warehouse export, webhook callbacks, CLI/SDK pull, and runtime packages.</p>
           </div>
           <div class="card">
-            <span class="card__k">CONTROLS</span>
-            <h3>Policy travels with data</h3>
-            <p>Source identity, scope, redaction, retention, provider policy, budget, rate limits, approvals, export permissions, and readiness state.</p>
+            <span class="card__k">YOUR RULES STICK</span>
+            <h3>Your rules travel with the data</h3>
+            <p>Source identity, scope, redaction, retention, provider policy, budget, rate limits, approvals, export permissions, and release state &mdash; all enforced wherever the data goes.</p>
           </div>
         </div>
 
         <div class="section__head" id="lifecycle">
           <p class="eyebrow">05 · LIFECYCLE ROUTES</p>
-          <h2>The loop is the API surface.</h2>
+          <h2>From live calls to a shipped model, in routes.</h2>
+          <p class="lede">The whole path &mdash; capture, compile, deploy &mdash; is just API calls you can run today. Here is the spine end to end.</p>
         </div>
         <div class="plate plate--rows">
-          <div class="plate__hd">lifecycle routes · behavior &rarr; artifact &rarr; runtime</div>
+          <div class="plate__hd">lifecycle routes · capture &rarr; compile &rarr; deploy</div>
           <div class="panel__rows">
             <div class="prow"><span class="m">POST</span> /v1/route/chat/completions <span class="prow__r m">OpenAI-compatible traffic</span></div>
             <div class="prow"><span class="m">POST</span> /v1/gateway/dispatch <span class="prow__r m">capture · cache · fallback</span></div>
@@ -243,50 +244,50 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </div>
         </div>
         <ul class="ledger">
-          <li><b><code>POST /v1/route/chat/completions</code></b> sends OpenAI-compatible traffic through a controlled route.</li>
-          <li><b><code>POST /v1/gateway/dispatch</code></b> dispatches to configured providers with capture, cache, fallback, and quality-router controls.</li>
-          <li><b><code>POST /v1/capture/log</code>, <code>GET /v1/captures/list</code>, <code>GET /v1/capture/export</code>, <code>POST /v1/capture/bulk</code></b> move behavior into review and training workflows.</li>
-          <li><b><code>POST /v1/compile/estimate</code>, <code>POST /v1/compile/preview</code>, <code>POST /v1/compile</code>, <code>GET /v1/compile/:id/.kolm</code></b> move from data to signed artifact.</li>
-          <li><b><code>GET /v1/devices/detect</code>, <code>POST /v1/devices/recommend</code>, <code>POST /v1/devices/:id/install</code>, <code>POST /v1/serve</code></b> move artifact state into runtime targets.</li>
+          <li><b><code>POST /v1/route/chat/completions</code></b> &mdash; point your existing OpenAI-compatible traffic at Kolm, no SDK rewrite.</li>
+          <li><b><code>POST /v1/gateway/dispatch</code></b> &mdash; send calls to your providers with capture, caching, fallback, and quality routing built in.</li>
+          <li><b><code>POST /v1/capture/log</code>, <code>GET /v1/captures/list</code>, <code>GET /v1/capture/export</code>, <code>POST /v1/capture/bulk</code></b> &mdash; pull the behavior you captured into review and training.</li>
+          <li><b><code>POST /v1/compile/estimate</code>, <code>POST /v1/compile/preview</code>, <code>POST /v1/compile</code>, <code>GET /v1/compile/:id/.kolm</code></b> &mdash; turn that behavior into a signed model you own.</li>
+          <li><b><code>GET /v1/devices/detect</code>, <code>POST /v1/devices/recommend</code>, <code>POST /v1/devices/:id/install</code>, <code>POST /v1/serve</code></b> &mdash; run your model on the hardware you already have.</li>
         </ul>
 
         <div class="section__head" id="errors">
-          <p class="eyebrow">06 · ERRORS AND READINESS</p>
-          <h2>Docs should show failure paths.</h2>
-          <p class="lede">A serious enterprise API documents the edges: authentication, rate limits, idempotency, readiness states, unsupported targets, connector ownership, and recovery hints.</p>
+          <p class="eyebrow">06 · ERRORS AND EDGES</p>
+          <h2>Know exactly what to expect when something breaks.</h2>
+          <p class="lede">We document the hard parts, not just the happy path &mdash; auth, rate limits, idempotency, unsupported targets, and what is still landing &mdash; so you can build with confidence and never get surprised in production.</p>
         </div>
         <div class="grid grid--2">
           <div class="card">
             <span class="card__k">AUTH</span>
-            <h3>Bearer keys</h3>
-            <p>Use <code>Authorization: Bearer $KOLM_API_KEY</code>. Create a key at <a href="/signup">/signup</a> or through the CLI.</p>
+            <h3>One bearer key</h3>
+            <p>Authenticate with <code>Authorization: Bearer $KOLM_API_KEY</code>. Create a key at <a href="/signup">/signup</a> or from the CLI.</p>
           </div>
           <div class="card">
             <span class="card__k">ERRORS</span>
-            <h3>Stable codes</h3>
-            <p>Error responses should include stable error codes and a fix or next step.</p>
+            <h3>Codes you can act on</h3>
+            <p>Every error returns a stable code and a clear next step &mdash; so you fix it fast instead of guessing.</p>
           </div>
           <div class="card">
             <span class="card__k">IDEMPOTENCY</span>
-            <h3>Safe writes</h3>
-            <p>Write routes that can create work should accept idempotency or provide status lookup.</p>
+            <h3>Retry without fear</h3>
+            <p>Write routes accept an idempotency key or expose a status lookup, so retries never double up your work.</p>
           </div>
           <div class="card">
-            <span class="card__k">READINESS</span>
-            <h3>Explicit gates</h3>
-            <p>Open gates remain explicit for external partners, live certification, package release, and public benchmark data.</p>
+            <span class="card__k">WHAT'S LIVE</span>
+            <h3>No guessing on scope</h3>
+            <p>We say plainly what ships today and what is still landing &mdash; so you can plan against real limits, not promises.</p>
           </div>
         </div>
 
         <div class="section__head" id="evidence">
-          <p class="eyebrow">07 · EVIDENCE AND VERIFY</p>
-          <h2>Every artifact ships a receipt you can check.</h2>
-          <p class="lede">Compiled artifacts are signed and content-addressed. Export the receipts, hand them to a buyer, and let anyone verify the artifact against the public verifier &mdash; no access to your workspace required.</p>
+          <p class="eyebrow">07 · PROOF YOU CAN HAND OVER</p>
+          <h2>Verify it yourself. No trust required.</h2>
+          <p class="lede">Every artifact is signed and carries its own receipt. Hand the receipt to a customer, an auditor, or your security team, and they can confirm exactly what it is and how it behaves &mdash; without ever touching your workspace.</p>
         </div>
         <ul class="ledger">
-          <li>Signed <code>.kolm</code> artifacts with Ed25519 signatures and content-addressed receipts.</li>
-          <li>Export eval reports, manifests, and receipts as governance evidence.</li>
-          <li>Verify any artifact at <a href="/verify">/verify</a>; browse the checks the compiler runs at <a href="/checks">/checks</a>.</li>
+          <li>Every <code>.kolm</code> artifact is Ed25519-signed with content-addressed receipts &mdash; signed so anyone can verify it.</li>
+          <li>Export the eval reports, manifests, and receipts and attach them to your release as proof.</li>
+          <li>Verify any artifact at <a href="/verify">/verify</a>, and see every check we run at <a href="/checks">/checks</a>.</li>
         </ul>
         <div class="plate plate--rows">
           <div class="plate__hd">billing-agent.kolm · <span class="ok">SIGNED</span></div>
@@ -294,7 +295,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="prow">signature <span class="prow__r m">Ed25519</span></div>
             <div class="prow">receipts <span class="prow__r m">sha-256</span></div>
             <div class="prow">eval report <span class="prow__r a">attached</span></div>
-            <div class="prow">readiness gate <span class="prow__r a">passed</span></div>
+            <div class="prow">release checks <span class="prow__r a">passed</span></div>
           </div>
           <div class="plate__foot">
             <a class="btn btn--ghost btn--sm" href="/verify">Verify an artifact</a>
@@ -304,8 +305,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
         <div class="section__head" id="cli-sdk">
           <p class="eyebrow">08 · CLI AND SDK</p>
-          <h2>Local tools should match hosted docs.</h2>
-          <p class="lede">Developers should be able to move between API, CLI, SDK, account console, and static contracts without learning a second product language.</p>
+          <h2>Same workflow, from the terminal.</h2>
+          <p class="lede">The CLI and SDK speak the same language as the API and the console &mdash; move between them freely. Sign up, compile, verify, and serve a model without leaving your shell.</p>
         </div>
         <div class="plate plate--rows">
           <div class="plate__hd">kolm-cli · signup &rarr; compile &rarr; serve</div>
@@ -325,9 +326,9 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="cta-band">
     <span class="field" aria-hidden="true"></span>
     <div class="wrap cta__in">
-      <p class="eyebrow">RELATED · ROUTE ONE NAMESPACE</p>
-      <h2>Route one namespace and compile your first artifact.</h2>
-      <p class="lede">Create a key, route a single OpenAI-compatible namespace, and follow the quickstart from capture to signed artifact.</p>
+      <p class="eyebrow">READY TO OWN WHAT YOU'RE RENTING?</p>
+      <h2>Point one namespace. Own your first model.</h2>
+      <p class="lede">Grab a key, route a single OpenAI-compatible namespace, and follow the quickstart from live calls to a signed model you run on your own hardware.</p>
       <div class="hero__cta">
         <a class="btn btn--primary" href="/signup">Get an API key</a>
         <a class="btn btn--ghost" href="/account/api-control-center">Open API Control Center</a>
@@ -349,7 +350,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">Own the AI you&rsquo;re renting &mdash; a signed model from your live API calls, run on your own hardware.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>

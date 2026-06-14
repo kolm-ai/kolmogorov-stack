@@ -7,15 +7,15 @@
 (function(h){h.classList.add('js-reveal');addEventListener('load',function(){
 setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove('js-reveal');},1400);});})(document.documentElement);
 </script>
-<title>kolm.ai - API behavior in. Device-fit models out.</title>
-<meta name="description" content="Kolm is the behavior-to-artifact control plane for enterprise AI/API systems: capture traffic, enforce policy, evaluate failures, compile signed .kolm artifacts, and export proof.">
+<title>kolm.ai - Own the AI you're renting.</title>
+<meta name="description" content="Kolm turns your live OpenAI and Anthropic calls into a signed model you run on your own hardware. Drop-in, no SDK rewrite. Stop paying frontier prices to re-run behavior you've already established.">
 <meta name="theme-color" content="#08090A">
 <meta name="author" content="kolm.ai">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
 <meta property="og:site_name" content="kolm.ai">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="kolm.ai - API behavior in. Device-fit models out.">
-<meta property="og:description" content="Capture AI/API traffic, enforce policy, evaluate failures, compile signed artifacts, target runtimes, and export governance evidence.">
+<meta property="og:title" content="kolm.ai - Own the AI you're renting.">
+<meta property="og:description" content="Point your existing API calls at Kolm and own the model. It captures the behavior you already use, compiles it into a signed file, and runs it on your own hardware. No rewrite. No lock-in.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://kolm.ai/">
 <meta property="og:image" content="https://kolm.ai/img/kn-hero-reactor.png">
@@ -24,8 +24,8 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <meta property="og:image:alt" content="kolm.ai compiler pipeline from API calls to signed device artifacts.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@kolm_ai">
-<meta name="twitter:title" content="kolm.ai - API behavior in. Device-fit models out.">
-<meta name="twitter:description" content="The behavior-to-artifact control plane for real AI/API traffic, signed artifacts, runtime targets, and governance exports.">
+<meta name="twitter:title" content="kolm.ai - Own the AI you're renting.">
+<meta name="twitter:description" content="Turn your live OpenAI and Anthropic calls into a signed model you run on your own hardware. Drop-in, verifiable, yours. Stop renting behavior you've already paid for.">
 <meta name="twitter:image" content="https://kolm.ai/img/kn-hero-reactor.png">
 <link rel="canonical" href="https://kolm.ai/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -43,7 +43,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows, web",
   "url": "https://kolm.ai/",
-  "description": "Behavior-to-artifact control plane for capturing model and API traffic, enforcing policy, evaluating failures, compiling signed .kolm artifacts, and exporting governance evidence.",
+  "description": "Kolm turns your live OpenAI and Anthropic calls into a signed model you run on your own hardware. Drop-in proxy, no SDK rewrite: capture the behavior you already use, compile it into a portable .kolm file, and run it anywhere. Every artifact is Ed25519-signed and independently verifiable.",
   "publisher": { "@type": "Organization", "name": "kolm.ai", "url": "https://kolm.ai/" },
   "softwareHelp": "https://kolm.ai/docs"
 }
@@ -102,18 +102,18 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="field" aria-hidden="true"></span>
     <div class="wrap hero__grid">
       <div class="hero__copy">
-        <p class="eyebrow" data-enter="1">The AI compiler</p>
-        <h1 class="hero__h1" data-enter="2">Compile your API behavior into a model that runs anywhere.</h1>
-        <p class="lede" data-enter="3">Point your existing OpenAI- or Anthropic-compatible calls at Kolm. It captures the traffic, signs it into a portable <code>.kolm</code> artifact, and runs it on the smallest device that fits.</p>
+        <p class="eyebrow" data-enter="1">Drop-in proxy &middot; no SDK rewrite</p>
+        <h1 class="hero__h1" data-enter="2">Point your API calls. Own the model.</h1>
+        <p class="lede" data-enter="3">Kolm sits in front of your OpenAI and Anthropic calls &mdash; no SDK rewrite. It captures the behavior you already use, compiles it into a signed model in one portable <code>.kolm</code> file, and runs it on your own hardware. Pay to run the behavior you&rsquo;ve already established &mdash; not frontier prices to rent it again, forever.</p>
         <div class="hero__cta" data-enter="4">
           <a class="btn btn--primary" href="/signup">Get an API key</a>
           <a class="btn btn--ghost" href="/docs">Read the docs</a>
         </div>
         <div class="hero__proof" data-enter="5">
-          <span><i class="dot"></i>Drop-in proxy &middot; no SDK rewrite</span>
-          <span><i class="dot"></i>Redaction before persistence</span>
-          <span><i class="dot"></i>Ed25519-signed artifacts</span>
-          <span><i class="dot"></i>5 ranked runtime targets</span>
+          <span><i class="dot"></i>No SDK rewrite to get here</span>
+          <span><i class="dot"></i>Secrets stripped before anything is written to disk</span>
+          <span><i class="dot"></i>Every model signed &mdash; verify it yourself</span>
+          <span><i class="dot"></i>Runs on the hardware you already have</span>
         </div>
       </div>
 
@@ -145,12 +145,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <!-- s-proof-strip -->
   <section class="section section--band">
     <div class="wrap">
-      <p class="eyebrow">In production</p>
+      <p class="eyebrow">Shipping today</p>
       <div class="proof__row">
-        <div class="proof__cell reveal"><b data-count>17</b><span>capture channels</span></div>
-        <div class="proof__cell reveal"><b data-count>5</b><span>runtime targets</span></div>
-        <div class="proof__cell reveal"><b class="is-mono">Ed25519</b><span>signed artifacts</span></div>
-        <div class="proof__cell reveal"><b>142 MB</b><span>median signed artifact</span></div>
+        <div class="proof__cell reveal"><b data-count>17</b><span>ways in &mdash; capture from the tools you already use</span></div>
+        <div class="proof__cell reveal"><b data-count>5</b><span>places to run it &mdash; laptop to server</span></div>
+        <div class="proof__cell reveal"><b class="is-mono">Ed25519</b><span>signed &mdash; verify it yourself</span></div>
+        <div class="proof__cell reveal"><b>142 MB</b><span>median model &mdash; small enough to move</span></div>
       </div>
     </div>
   </section>
@@ -159,27 +159,27 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section" id="pipeline">
     <div class="wrap wrap--wide">
       <div class="section__head">
-        <p class="eyebrow">The loop &middot; capture &rarr; compile &rarr; deploy</p>
-        <h2>One controlled path from rented API calls to an artifact you own.</h2>
-        <p class="lede">Every prompt, completion, tool call and routing decision is captured, redacted, compiled into a signed <code>.kolm</code>, and ranked against the smallest runtime that fits &mdash; with receipts at each step.</p>
+        <p class="eyebrow">Capture &rarr; compile &rarr; deploy</p>
+        <h2>From your live API calls to a model you own.</h2>
+        <p class="lede">Point your traffic at Kolm. It captures the behavior you already use, compiles it into a signed <code>.kolm</code> file, and runs it on the hardware that fits &mdash; with a receipt you can verify at every step.</p>
       </div>
       <div class="grid grid--3">
         <div class="card reveal">
           <span class="card__k">Reg &middot; capture</span>
-          <h3>Route traffic through one endpoint.</h3>
-          <p>A drop-in proxy governs every call &mdash; redacted, replayable, exportable to JSONL, OTLP, or a signed receipt. Your provider keys stay in one vault.</p>
+          <h3>Point your existing calls. No rewrite.</h3>
+          <p>One drop-in endpoint sees every call &mdash; replay it, export it to JSONL, OTLP, or a signed receipt. Your provider keys stay in one vault; secrets are stripped before anything is written to disk.</p>
           <p class="card__map"><a href="/docs#capture">/v1/route</a></p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; compile</span>
-          <h3>Sign captured behavior into one artifact.</h3>
-          <p>Examples, recipes, evaluators, tokenizer metadata and receipts pack into one portable <code>.kolm</code> &mdash; Ed25519-signed, reproducible, inspectable layer by layer.</p>
+          <h3>Turn that behavior into one signed file.</h3>
+          <p>Model, recipe, evals, and receipt pack into one portable <code>.kolm</code> &mdash; Ed25519-signed and reproducible, so anyone can check exactly what it is and how it behaves.</p>
           <p class="card__map"><a href="/docs#compile">/v1/compile</a></p>
         </div>
         <div class="card reveal">
           <span class="card__k">Reg &middot; deploy</span>
-          <h3>Run it on the smallest runtime that fits.</h3>
-          <p>Kolm ranks hosted, server, laptop, edge and phone by cost, latency and fit, then serves the same artifact wherever you choose. Data never leaves your hardware.</p>
+          <h3>Run it on the hardware you already have.</h3>
+          <p>Kolm ranks hosted, server, laptop, edge and phone by cost, latency and fit, then serves the same file wherever you choose &mdash; with the limits shown up front, and rollback built in.</p>
           <p class="card__map"><a href="/docs#deploy">/v1/devices</a></p>
         </div>
       </div>
@@ -191,11 +191,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Capture</p>
-        <h2>Route your model traffic through one endpoint.</h2>
-        <p class="lede">One endpoint governs every prompt, completion, tool call and routing decision &mdash; each one redacted, replayable, and exportable, with no SDK rewrite.</p>
+        <h2>Point your existing calls at Kolm. No rewrite.</h2>
+        <p class="lede">Keep your SDK exactly as it is. One drop-in endpoint sees every prompt, completion, tool call and routing decision &mdash; ready to replay, export, and compile.</p>
         <ul class="feat__list">
           <li>Drop-in proxy &middot; keep your provider keys in one vault</li>
-          <li>Redaction before persistence &middot; secrets never stored</li>
+          <li>Secrets stripped before anything is written to disk</li>
           <li>Export to JSONL, OTLP, or a signed receipt</li>
         </ul>
       </div>
@@ -208,7 +208,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="prow"><span class="m">tool</span> redact() &middot; 3 spans <span class="prow__r a">redacted</span></div>
             <div class="prow"><span class="m">POST</span> /v1/capture/export &middot; jsonl <span class="prow__r m">12,408</span></div>
           </div>
-          <div class="plate__foot"><span class="badge badge--ok">Signed</span><span>17 channels &middot; secrets never stored</span></div>
+          <div class="plate__foot"><span class="badge badge--ok">Signed</span><span>17 ways in &middot; secrets stripped before write</span></div>
         </div>
       </div>
     </div>
@@ -218,12 +218,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Compile</p>
-        <h2>Turn captured behavior into a signed artifact.</h2>
-        <p class="lede">Kolm packages your examples, recipes, evaluators, tokenizer metadata and receipts into one portable <code>.kolm</code> &mdash; signed with Ed25519, reproducible, and inspectable layer by layer.</p>
+        <h2>Your API calls, compiled into a model you own.</h2>
+        <p class="lede">Model, recipe, evals, and receipt pack into one portable <code>.kolm</code> file &mdash; signed with Ed25519, reproducible, and open to inspect layer by layer. Export it, move it, keep it. No provider lock-in.</p>
         <ul class="feat__list">
-          <li>Deterministic build &middot; content-addressed receipts</li>
-          <li>Evals and protected-slice gates before promotion</li>
-          <li>Open the artifact &mdash; every layer is governed state</li>
+          <li>Reproducible build &middot; content-addressed receipts</li>
+          <li>Evals run before any model ships</li>
+          <li>Open the file &mdash; read exactly what&rsquo;s inside</li>
         </ul>
       </div>
       <div class="feat__ui">
@@ -233,7 +233,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="prow">examples <span class="prow__r m">2,140</span></div>
             <div class="prow">recipes &middot; evals <span class="prow__r m">18 / 6</span></div>
             <div class="prow">tokenizer + receipts <span class="prow__r m">sha-256</span></div>
-            <div class="prow">readiness gate <span class="prow__r a">passed</span></div>
+            <div class="prow">evals before ship <span class="prow__r a">passed</span></div>
           </div>
           <div class="plate__foot"><span class="badge badge--ok">Ed25519</span><span>142 MB &middot; reproducible build</span></div>
         </div>
@@ -245,12 +245,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap feat__in">
       <div class="feat__copy">
         <p class="eyebrow">Deploy</p>
-        <h2>Run it on the smallest runtime that fits.</h2>
-        <p class="lede">Kolm ranks every target &mdash; hosted, server, laptop, edge, phone &mdash; by cost, latency and fit, then installs and serves the same artifact wherever you choose. Your data never leaves your hardware.</p>
+        <h2>Run it on the laptop you have, the cloud you trust.</h2>
+        <p class="lede">Kolm ranks every target &mdash; hosted, server, laptop, edge, phone &mdash; by cost, latency and fit, then serves the same file wherever you pick. Pay to run the behavior you&rsquo;ve already established, not frontier prices to rent it again.</p>
         <ul class="feat__list">
-          <li>Device detection &middot; quantization oracle</li>
-          <li>One artifact, many targets &middot; hosted or self-managed</li>
-          <li>Rollback, receipts and governance exports included</li>
+          <li>Picks the runtime that fits &middot; with the limits shown</li>
+          <li>One file, many targets &middot; hosted or run it yourself</li>
+          <li>Rollback, receipts, and exports included</li>
         </ul>
       </div>
       <div class="feat__ui">
@@ -272,14 +272,14 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   <section class="section section--lit" id="evidence">
     <div class="wrap split">
       <div>
-        <p class="eyebrow">Evidence &middot; the receipt</p>
-        <h2>Every compile leaves a signed receipt you can verify.</h2>
-        <p class="lede">Open the artifact and read the governed state: which checks ran, what the readiness gate decided, and the signature that ties the report to the build. The same receipt exports for procurement and audit.</p>
+        <p class="eyebrow">Proof &middot; the receipt</p>
+        <h2>Verify it yourself. No trust required.</h2>
+        <p class="lede">Every model ships with a signed receipt: which checks ran, what passed, and the signature that ties the report to the build. Anyone can check it without trusting us &mdash; and the same receipt exports clean for procurement and audit.</p>
         <ul class="ledger">
           <li><b>Content-addressed</b> &middot; sha-256 over every layer</li>
           <li><b>Ed25519 signature</b> &middot; report binds to the build</li>
-          <li><b>Readiness gate</b> &middot; promotion is explicit, not implied</li>
-          <li><b>Portable</b> &middot; verify offline at <a href="/verify">/verify</a></li>
+          <li><b>Nothing ships silently</b> &middot; every promotion is on the record</li>
+          <li><b>Portable</b> &middot; check it yourself at <a href="/verify">/verify</a></li>
         </ul>
         <div class="hero__cta">
           <a class="btn btn--ghost" href="/verify">Verify a receipt</a>
@@ -299,7 +299,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="find">
               <span class="pill pill--ok">Pass</span>
               <div>
-                <div class="find__t">Readiness gate &middot; protected slices held</div>
+                <div class="find__t">Behavior held &middot; checked before ship</div>
                 <div class="find__e">6 evaluators &middot; 0 regressions &middot; 2,140 examples</div>
                 <div class="find__m">Recipe 18 / 18 reproduced</div>
               </div>
@@ -307,7 +307,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="find">
               <span class="pill pill--ok">Pass</span>
               <div>
-                <div class="find__t">Redaction &middot; secrets never persisted</div>
+                <div class="find__t">Secrets stripped before write</div>
                 <div class="find__e">3 spans redacted before write &middot; vault-held keys</div>
                 <div class="find__m">Capture export &middot; 12,408 calls</div>
               </div>
@@ -327,25 +327,25 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <div class="wrap">
       <div class="section__head">
         <p class="eyebrow">Frequently asked</p>
-        <h2>What the compiler actually owns.</h2>
-        <p class="lede">One product should own the path from real API behavior to governed, portable runtime artifacts &mdash; here is what that means in practice.</p>
+        <h2>Straight answers before you start.</h2>
+        <p class="lede">The questions a platform team asks first &mdash; answered the way they&rsquo;d want to hear them.</p>
       </div>
       <div class="grid grid--2">
         <article class="card reveal">
           <h3>Do I have to rewrite my SDK calls?</h3>
-          <p>No. Point your existing OpenAI- or Anthropic-compatible calls at the Kolm endpoint. The gateway captures, redacts, and routes without an SDK rewrite.</p>
+          <p>No. Point your existing OpenAI- or Anthropic-compatible calls at Kolm and keep your SDK exactly as it is. It captures and routes everything for you &mdash; no rewrite to get here.</p>
         </article>
         <article class="card reveal">
           <h3>Where do my secrets live?</h3>
-          <p>Redaction happens before persistence, so secrets are never stored. Provider keys stay in one vault and never enter the captured record.</p>
+          <p>Secrets are stripped before anything is written, so they never reach the captured record. Your provider keys stay in one vault.</p>
         </article>
         <article class="card reveal">
-          <h3>What is inside a <code>.kolm</code> artifact?</h3>
-          <p>Examples, recipes, evaluators, tokenizer metadata and receipts &mdash; signed with Ed25519, reproducible, and inspectable layer by layer.</p>
+          <h3>What do I actually own?</h3>
+          <p>One portable <code>.kolm</code> file &mdash; model, recipe, evals, and receipt. Ed25519-signed and yours to export, move, and keep. No provider lock-in.</p>
         </article>
         <article class="card reveal">
-          <h3>Where can I run the artifact?</h3>
-          <p>Anywhere it fits. Kolm ranks hosted, server, laptop, edge and phone by cost, latency and fit, then serves the same artifact on the target you choose.</p>
+          <h3>Where can I run it?</h3>
+          <p>Wherever it fits. Kolm ranks hosted, server, laptop, edge and phone by cost, latency and fit, then runs the same file on the target you pick &mdash; with the limits shown.</p>
         </article>
       </div>
     </div>
@@ -356,10 +356,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     <span class="field" aria-hidden="true"></span>
     <div class="wrap cta__in">
       <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
-      <h2>Own the behavior you&rsquo;re renting.</h2>
-      <p class="lede">Route one namespace through Kolm and compile your first artifact in an afternoon.</p>
+      <h2>Ready to own what you&rsquo;re renting?</h2>
+      <p class="lede">Point one namespace at Kolm and compile your first model this afternoon &mdash; no rewrite, no lock-in.</p>
       <div class="hero__cta">
-        <a class="btn btn--primary" href="/signup">Start compiling</a>
+        <a class="btn btn--primary" href="/signup">Run a capture</a>
         <a class="btn btn--ghost" href="/contact">Talk to an engineer</a>
       </div>
     </div>
@@ -380,7 +380,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           </svg>
           <span>kolm<b>.ai</b></span>
         </a>
-        <p class="foot__tag">The AI compiler for API capture, signed artifacts, specialist composition and device deployment.</p>
+        <p class="foot__tag">Own the AI you&rsquo;re renting &mdash; a signed model from your live API calls, run on your own hardware.</p>
       </div>
       <div class="foot__col">
         <h3>Compiler</h3>
