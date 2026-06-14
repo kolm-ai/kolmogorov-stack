@@ -1683,3 +1683,59 @@ p a:not([class]):hover { border-bottom-color: var(--accent); }
 /* ===================== /LIQUID GLASS ===================== */
 
 .proof__cell b.is-mono { font-family: var(--mono); font-size: clamp(22px, 2.2vw, 30px); background: none; -webkit-text-fill-color: var(--ink); color: var(--ink); }
+
+/* ============================================================
+   RICH ATMOSPHERE — the background Liquid Glass lives on.
+   Layered gradient-mesh light zones + slow aurora + grain, so the
+   glass has color & light to refract. Dark + green, premium, alive.
+   ============================================================ */
+:root { --bg: #05060A; }
+body {
+  background:
+    radial-gradient(980px 800px at 14% -8%, rgba(63,229,160,0.28), transparent 58%),
+    radial-gradient(900px 720px at 86% 2%, rgba(64,150,255,0.22), transparent 60%),
+    radial-gradient(1100px 900px at 50% 112%, rgba(63,229,160,0.18), transparent 62%),
+    radial-gradient(760px 640px at 97% 70%, rgba(150,96,255,0.10), transparent 60%),
+    radial-gradient(680px 560px at 3% 62%, rgba(64,150,255,0.09), transparent 60%),
+    var(--bg) !important;
+  background-attachment: fixed !important;
+}
+/* slow aurora drift — premium, never frantic */
+body::before {
+  content: "" !important; display: block !important; position: fixed !important; inset: -25% !important;
+  z-index: -2 !important; pointer-events: none !important; opacity: 1 !important;
+  background:
+    radial-gradient(48% 42% at 26% 14%, rgba(63,229,160,0.28), transparent 68%),
+    radial-gradient(46% 40% at 80% 28%, rgba(64,150,255,0.22), transparent 70%),
+    radial-gradient(40% 34% at 58% 82%, rgba(150,96,255,0.11), transparent 72%) !important;
+  filter: blur(48px) !important;
+  animation: aurora 26s ease-in-out infinite alternate !important;
+}
+@keyframes aurora { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(5%,4%) scale(1.14); } }
+/* fine film grain over everything */
+body::after {
+  content: "" !important; display: block !important; position: fixed !important; inset: 0 !important;
+  z-index: 9999 !important; pointer-events: none !important; mix-blend-mode: overlay !important;
+  background-image: var(--grain) !important; background-size: 200px 200px !important; opacity: 0.05 !important; animation: none !important;
+}
+/* make the glass VISIBLE: translucent, strong blur, so it refracts the mesh */
+.ui { background: rgba(11,13,17,0.40) !important; backdrop-filter: blur(30px) saturate(180%) brightness(1.08) !important; -webkit-backdrop-filter: blur(30px) saturate(180%) !important; }
+.card, .plate, .panel { background: rgba(13,15,19,0.46) !important; backdrop-filter: blur(24px) saturate(175%) !important; -webkit-backdrop-filter: blur(24px) saturate(175%) !important; }
+.nav { background: rgba(7,8,11,0.52) !important; backdrop-filter: blur(22px) saturate(175%) !important; -webkit-backdrop-filter: blur(22px) saturate(175%) !important; }
+@media (prefers-reduced-motion: reduce) { body::before { animation: none !important; } }
+@media (prefers-reduced-transparency: reduce) { .ui, .card, .plate, .panel, .nav { backdrop-filter: none !important; background: var(--surface-3) !important; } }
+/* ===================== /RICH ATMOSPHERE ===================== */
+
+/* per-section atmosphere — every section gets its own light moment so the glass
+   refracts color the whole way down, not just in the hero */
+.feat, .proof, .cta, .home .hero { position: relative; isolation: isolate; }
+.feat::after, .cta::after {
+  content: ""; position: absolute; inset: -8% -18%; z-index: -1; pointer-events: none; display: block;
+  background: radial-gradient(46% 56% at 22% 42%, rgba(63,229,160,0.13), transparent 70%);
+  filter: blur(44px);
+}
+.feat--rev::after { background: radial-gradient(46% 56% at 78% 42%, rgba(64,150,255,0.12), transparent 70%); }
+.cta::after { inset: -22% -12%; background: radial-gradient(60% 80% at 50% 50%, rgba(63,229,160,0.16), rgba(64,150,255,0.06) 50%, transparent 72%); }
+.proof { position: relative; }
+.proof::after { content: ""; position: absolute; inset: -30% -10%; z-index: -1; pointer-events: none;
+  background: radial-gradient(50% 90% at 50% 50%, rgba(150,96,255,0.08), transparent 72%); filter: blur(40px); }
