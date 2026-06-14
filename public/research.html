@@ -44,25 +44,42 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <body class="t-marketing">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<header class="nav">
+<header class="nav" data-nav>
   <div class="wrap nav__in">
     <a class="nav__brand" href="/" aria-label="kolm home">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="4" y="6" width="4.5" height="20" rx="0.4"/>
-        <rect x="13" y="9" width="4.5" height="14" rx="0.4"/>
-        <rect x="22" y="12" width="4.5" height="8" rx="0.4"/>
-      </svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx=".4"/><rect x="13" y="9" width="4.5" height="14" rx=".4"/><rect x="22" y="12" width="4.5" height="8" rx=".4"/></svg>
       <span>kolm</span>
     </a>
     <nav class="nav__links" id="navLinks" aria-label="Primary">
-      <a href="/#pipeline">Product</a>
-      <a href="/docs">Docs</a>
-      <a href="/pricing">Pricing</a>
+      <div class="nav__group" data-menu>
+        <button class="nav__top" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="m-platform">Platform
+          <svg class="nav__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="nav__pop" id="m-platform" role="menu">
+          <a role="menuitem" href="/platform"><b>Overview</b><span>The compiler, end to end</span></a>
+          <a role="menuitem" href="/how-it-works"><b>How it works</b><span>Capture &middot; Compile &middot; Compose &middot; Deploy</span></a>
+          <a role="menuitem" href="/runtimes"><b>Runtime targets</b><span>Where artifacts deploy</span></a>
+          <a role="menuitem" href="/integrations"><b>Integrations</b><span>Pipelines &amp; SDKs</span></a>
+          <a role="menuitem" href="/spec"><b>Spec</b><span>The .kolm format</span></a>
+        </div>
+      </div>
+      <div class="nav__group" data-menu>
+        <button class="nav__top" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="m-dev">Developers
+          <svg class="nav__caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div class="nav__pop" id="m-dev" role="menu">
+          <a role="menuitem" href="/docs"><b>Docs</b><span>Guides &amp; API reference</span></a>
+          <a role="menuitem" href="/account/api-control-center"><b>API control</b><span>Keys, usage, limits</span></a>
+          <a role="menuitem" href="/verify"><b>Verify</b><span>Check any .kolm artifact</span></a>
+          <a role="menuitem" href="/changelog"><b>Changelog</b><span>Shipped this cycle</span></a>
+        </div>
+      </div>
+      <a class="nav__top" href="/pricing">Pricing</a>
+      <a class="nav__top" href="/trust">Trust</a>
     </nav>
     <div class="nav__actions">
-      <a class="nav__icon" href="/status" aria-label="System status"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2M12 18.5v2M4.5 12h2M17.5 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
-      <a class="btn btn--ghost btn--sm" href="/account/overview">sign in</a>
-      <a class="btn btn--ghost btn--sm nav__cta is-solid" href="/signup">Get an API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="nav__status" href="/status"><i></i>Operational</a>
+      <span class="nav__rule" aria-hidden="true"></span>
+      <a class="btn btn--ghost btn--sm" href="/account/overview">Sign in</a>
+      <a class="btn nav__cta" href="/signup">Get an API key <svg viewBox="0 0 16 16" width="13" height="13" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
     <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -74,6 +91,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
   <!-- s-hero [req] — asymmetric 1fr 1.2fr grid; the artifact arms the one Calibration Sweep -->
   <section class="hero" data-sweep>
+    <span class="field" aria-hidden="true"></span>
     <div class="wrap hero__grid">
       <div class="hero__copy">
         <p class="eyebrow" data-enter="1">Product Lab</p>
@@ -100,10 +118,10 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
           <span class="ctrl-id">OPEN &middot; v3.3</span>
         </header>
         <dl class="register">
-          <div class="register__row"><dt class="register__k">Clusters</dt><dd class="register__v" data-val><b>17</b> tracked</dd></div>
-          <div class="register__row"><dt class="register__k">Standards</dt><dd class="register__v" data-val><b>11</b> product</dd></div>
-          <div class="register__row"><dt class="register__k">Streams</dt><dd class="register__v" data-val><b>6</b> dated notes</dd></div>
-          <div class="register__row"><dt class="register__k">Gates</dt><dd class="register__v" data-val><b>8</b> kept explicit</dd></div>
+          <div class="register__row"><dt class="register__k">Clusters</dt><dd class="register__v" data-val><b>17</b><span class="register__u">tracked</span><i class="register__pip"></i></dd></div>
+          <div class="register__row"><dt class="register__k">Standards</dt><dd class="register__v" data-val><b>11</b><span class="register__u">product</span><i class="register__pip"></i></dd></div>
+          <div class="register__row"><dt class="register__k">Streams</dt><dd class="register__v" data-val><b>6</b><span class="register__u">dated notes</span><i class="register__pip"></i></dd></div>
+          <div class="register__row"><dt class="register__k">Gates</dt><dd class="register__v" data-val><b>8</b><span class="register__u">kept explicit</span><i class="register__pip"></i></dd></div>
         </dl>
         <footer class="artifact__verdict"><span data-verdict>In spec</span>
           <svg class="artifact__check" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4"/></svg></footer>
@@ -358,6 +376,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 
   <!-- s-cta [req] — one inverted primary -->
   <section class="cta-band">
+    <span class="field" aria-hidden="true"></span>
     <div class="wrap cta__in">
       <p class="eyebrow">CTA &middot; one verified loop</p>
       <h2>Turn evidence into one verified product loop.</h2>
