@@ -90,22 +90,6 @@
       "permanent": true
     },
     {
-      "source": "/audit",
-      "destination": "https://audit.kolm.ai/",
-      "permanent": true
-    },
-    {
-      "source": "/audit.html",
-      "has": [
-        {
-          "type": "host",
-          "value": "kolm.ai"
-        }
-      ],
-      "destination": "https://audit.kolm.ai/",
-      "permanent": false
-    },
-    {
       "source": "/dashboard.html",
       "has": [
         {
@@ -136,72 +120,6 @@
         }
       ],
       "destination": "/terms",
-      "permanent": false
-    },
-    {
-      "source": "/:auditPath(verify|checks|report|report-viewer|badge|roi|regulatory-clock|transparency-log|trust-center|buyer|spec)",
-      "has": [
-        {
-          "type": "host",
-          "value": "kolm.ai"
-        }
-      ],
-      "destination": "https://audit.kolm.ai/:auditPath",
-      "permanent": false
-    },
-    {
-      "source": "/:auditPath(verify|checks|report|report-viewer|badge|roi|regulatory-clock|transparency-log|trust-center|buyer|spec).html",
-      "has": [
-        {
-          "type": "host",
-          "value": "kolm.ai"
-        }
-      ],
-      "destination": "https://audit.kolm.ai/:auditPath.html",
-      "permanent": false
-    },
-    {
-      "source": "/security/threat-model",
-      "has": [
-        {
-          "type": "host",
-          "value": "kolm.ai"
-        }
-      ],
-      "destination": "https://audit.kolm.ai/security/threat-model",
-      "permanent": false
-    },
-    {
-      "source": "/security/threat-model.html",
-      "has": [
-        {
-          "type": "host",
-          "value": "kolm.ai"
-        }
-      ],
-      "destination": "https://audit.kolm.ai/security/threat-model.html",
-      "permanent": false
-    },
-    {
-      "source": "/solutions/:auditSolution(ai-vendors|enterprise-buyers)",
-      "has": [
-        {
-          "type": "host",
-          "value": "kolm.ai"
-        }
-      ],
-      "destination": "https://audit.kolm.ai/solutions/:auditSolution",
-      "permanent": false
-    },
-    {
-      "source": "/solutions/:auditSolution(ai-vendors|enterprise-buyers).html",
-      "has": [
-        {
-          "type": "host",
-          "value": "kolm.ai"
-        }
-      ],
-      "destination": "https://audit.kolm.ai/solutions/:auditSolution.html",
       "permanent": false
     },
     {
