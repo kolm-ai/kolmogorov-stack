@@ -247,7 +247,7 @@ function visibleText(html) {
 // carry none of the retired paper/image-2 cascade. Content varies per page;
 // the SHELL must not. Page-specific overclaiming guards live alongside this.
 function assertCanonicalShell(html, label) {
-  assert.match(html, /<header class="nav">/, `${label} should use the canonical glass nav`);
+  assert.match(html, /<header class="nav"[ >]/, `${label} should use the canonical glass nav`);
   assert.match(html, /<footer class="foot">/, `${label} should use the canonical footer`);
   assert.match(html, /\/kolm-2026\.css/, `${label} should load the kolm-2026 design system`);
   assert.doesNotMatch(html, /kolm-main\.css/, `${label} should not load the retired kolm-main cascade`);
@@ -559,7 +559,7 @@ test('migrated product pages share the kolm-2026 design-system shell', () => {
     const html = fs.readFileSync(path.join('public', file), 'utf8');
     assertCanonicalShell(html, file);
 
-    const header = html.match(/<header class="nav">[\s\S]*?<\/header>/)?.[0] || '';
+    const header = html.match(/<header class="nav"[ >][\s\S]*?<\/header>/)?.[0] || '';
     assert.ok(header, `${file} should expose the canonical glass nav`);
     assert.doesNotMatch(header, /https:\/\/audit\.kolm\.ai/i, `${file} should not put audit in the primary header`);
     assert.doesNotMatch(header, />Audit<\/a>/i, `${file} should not put Audit in the primary header`);

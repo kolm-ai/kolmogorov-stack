@@ -38,6 +38,31 @@
       });
     }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
     els.forEach(function (el) { io.observe(el); });
+
+    // ---- artifact sweep: stagger the register values "in" on enter (motion-allowed
+    // only; fail-open end-state is CSS - opacity:1 + lit pip + .is-sealed). The CSS
+    // only hides [data-val] while a parent [data-sweep] artifact is NOT sealed, so we
+    // briefly unseal, stagger each value into view in read order, then re-seal. ----
+    var sweeps = document.querySelectorAll('[data-sweep] .artifact, .artifact[data-sweep]');
+    if (!sweeps.length || reduce) return;
+    var sio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        sio.unobserve(e.target);
+        var art = e.target;
+        art.classList.remove('is-sealed');
+        var vals = art.querySelectorAll('.register__v[data-val]');
+        vals.forEach(function (v, i) {
+          v.style.opacity = '';
+          setTimeout(function () { v.style.opacity = '1'; }, 120 + i * 70);
+        });
+        setTimeout(function () {
+          art.classList.add('is-sealed');
+          vals.forEach(function (v) { v.style.opacity = ''; });
+        }, 120 + vals.length * 70 + 160);
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.2 });
+    sweeps.forEach(function (a) { sio.observe(a); });
   }
 
   // ---- mobile nav (hamburger panel; desktop unaffected) ----
@@ -67,27 +92,48 @@
         nav.classList.remove('is-open');
         toggle.setAttribute('aria-expanded', 'false');
       }
+      // outside click also collapses any open desktop dropdown
+      if (!nav.contains(e.target)) {
+        nav.querySelectorAll('.nav__top[aria-expanded="true"]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+      }
     });
+
+    // dropdown a11y: click toggles aria-expanded; Esc & focus-out close
+    nav.querySelectorAll('[data-menu]').forEach(function (g) {
+      var btn = g.querySelector('.nav__top'); if (!btn) return;
+      btn.addEventListener('click', function () {
+        var open = btn.getAttribute('aria-expanded') === 'true';
+        nav.querySelectorAll('.nav__top[aria-expanded]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      });
+      g.addEventListener('keydown', function (e) { if (e.key === 'Escape') { btn.setAttribute('aria-expanded', 'false'); btn.focus(); } });
+      g.addEventListener('focusout', function () { requestAnimationFrame(function () { if (!g.contains(document.activeElement)) btn.setAttribute('aria-expanded', 'false'); }); });
+    });
+    // glass thickens on scroll
+    var onScroll = function () { nav.classList.toggle('is-scrolled', window.scrollY > 8); };
+    addEventListener('scroll', onScroll, { passive: true }); onScroll();
   }
 
-  // ---- nav CTA fill: ghost while the hero is in view, solid green once it scrolls
-  // past (and solid on pages with no hero), so exactly one green action is in view. ----
-  function wireNavCta() {
-    var cta = document.querySelector('.nav__cta');
-    if (!cta) return;
-    if (document.body && document.body.classList.contains('compiler-site--paper')) {
-      cta.classList.add('is-solid');
-      return;
-    }
-    var hero = document.querySelector('.hero');
-    if (!hero || !('IntersectionObserver' in window)) { cta.classList.add('is-solid'); return; }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) cta.classList.remove('is-solid');
-        else cta.classList.add('is-solid');
-      });
-    }, { threshold: 0 });
-    io.observe(hero);
+  // ---- Phosphor Field: feed --mx/--my (fine pointer + motion-allowed only).
+  // No render loop - drift is pure CSS; JS only writes two vars, rAF-throttled.
+  // Fail-open: with JS off the field renders its static CSS end-state (drift +
+  // masked layers); the reactive depth glow is the only thing this adds. ----
+  function wireField() {
+    var mqMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)');
+    var mqFine = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)');
+    if (!mqFine || !mqFine.matches || (mqMotion && mqMotion.matches)) return;
+    document.querySelectorAll('.field').forEach(function (f) {
+      var sec = f.parentElement; if (!sec) return; var raf = 0;
+      sec.addEventListener('pointermove', function (e) {
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          var r = sec.getBoundingClientRect();
+          f.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+          f.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+          raf = 0;
+        });
+      }, { passive: true });
+    });
   }
 
   // ---- pointer-tracked card light (CSS renders it; we only feed --mx/--my).
@@ -144,7 +190,7 @@
     els.forEach(function (el) { io.observe(el); });
   }
 
-  function init() { syncThemeColor(); wireReveal(); wireNav(); wireNavCta(); wirePointerLight(); wireCount(); }
+  function init() { syncThemeColor(); wireReveal(); wireNav(); wirePointerLight(); wireField(); wireCount(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
