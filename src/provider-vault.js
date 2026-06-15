@@ -69,6 +69,14 @@ function rowsForTenant(tenantId) {
   return findByField(TABLE, 'tenant_id', tenantId).filter((r) => r && !r._deleted);
 }
 
+// Team keys are SHARED across the team, so they're queried by team_id - not by
+// the caller's tenant. A team key stored by the owner/admin must resolve for
+// every active member (the route authorizes membership before passing teamId).
+function rowsForTeam(teamId) {
+  if (!teamId) return [];
+  return findByField(TABLE, 'team_id', teamId).filter((r) => r && !r._deleted);
+}
+
 // Store (upsert) a provider key. One row per (tenant, team|null, actor|scope, provider).
 export function putProviderKey({ tenantId, teamId = null, actorId = null, provider, scope = 'member', value, label = '' } = {}) {
   if (!tenantId) throw Object.assign(new Error('tenant required'), { code: 'no_tenant' });
@@ -102,9 +110,15 @@ export function putProviderKey({ tenantId, teamId = null, actorId = null, provid
 export function resolveProviderKey({ tenantId, teamId = null, actorId = null, provider } = {}) {
   if (!tenantId || !provider) return null;
   const prov = cleanProvider(provider);
-  const rows = rowsForTenant(tenantId).filter((r) => r.provider === prov);
-  const member = actorId ? rows.find((r) => r.scope === 'member' && r.actor_id === actorId) : null;
-  const team = teamId ? rows.find((r) => r.scope === 'team' && r.team_id === teamId) : null;
+  // Member key: the caller's own, scoped to their tenant + actor.
+  const member = actorId
+    ? rowsForTenant(tenantId).find((r) => r.provider === prov && r.scope === 'member' && r.actor_id === actorId)
+    : null;
+  // Team key: shared across the team — looked up by team_id (it may have been
+  // stored under a different member's tenant).
+  const team = teamId
+    ? rowsForTeam(teamId).find((r) => r.provider === prov && r.scope === 'team')
+    : null;
   const pick = member || team;
   if (!pick || !pick.enc) return null;
   try {
@@ -117,12 +131,11 @@ export function resolveProviderKey({ tenantId, teamId = null, actorId = null, pr
 // List redacted keys visible to the caller. A member sees their own member-keys
 // plus the team's team-keys; an admin sees all team-keys for the team.
 export function listProviderKeys({ tenantId, teamId = null, actorId = null, isAdmin = false } = {}) {
-  const rows = rowsForTenant(tenantId);
-  const visible = rows.filter((r) => {
-    if (r.scope === 'member') return r.actor_id === actorId || isAdmin;
-    if (r.scope === 'team') return teamId ? r.team_id === teamId : false;
-    return false;
-  });
+  // Member keys: the caller's own (or all member-keys for an admin), scoped to
+  // the caller's tenant. Team keys: shared, looked up by team_id across tenants.
+  const memberRows = rowsForTenant(tenantId).filter((r) => r.scope === 'member' && (r.actor_id === actorId || isAdmin));
+  const teamRows = teamId ? rowsForTeam(teamId).filter((r) => r.scope === 'team') : [];
+  const visible = [...memberRows, ...teamRows];
   return visible.map(redactProviderKey).sort((a, b) => String(a.provider).localeCompare(String(b.provider)));
 }
 
