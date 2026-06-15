@@ -84,6 +84,20 @@ if (!['json', 'sqlite'].includes(STORE_DRIVER)) {
   throw new Error(`Unsupported KOLM_STORE_DRIVER "${STORE_DRIVER}". Use "json" or "sqlite".`);
 }
 
+// Fail-closed: never silently run a production-like instance on the JSON store.
+// JSON tables are per-process flat files - not durable/consistent across
+// multi-node or restart, so a prod deploy that falls back to json would lose
+// billing + audit state. Mirrors the env.js readiness stance. Opt out only with
+// an explicit KOLM_ALLOW_JSON_STORE=true.
+{
+  const _prodLike = process.env.NODE_ENV === 'production'
+    || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.VERCEL
+    || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+  if (_prodLike && STORE_DRIVER === 'json' && process.env.KOLM_ALLOW_JSON_STORE !== 'true') {
+    throw new Error('[store] FATAL: KOLM_STORE_DRIVER=json (or defaulted) in a production environment. JSON files are per-process and not durable for restart/multi-node state. Set KOLM_STORE_DRIVER=sqlite (recommended), or KOLM_ALLOW_JSON_STORE=true to explicitly accept it.');
+  }
+}
+
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(path.join(DATA_DIR, 'cache'), { recursive: true });
 if (STORE_DRIVER === 'sqlite') fs.mkdirSync(path.dirname(SQLITE_PATH), { recursive: true });
