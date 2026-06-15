@@ -1273,6 +1273,24 @@ export function _resetAssistantChatRateForTests() {
   _assistantChatHits.clear();
 }
 
+// W-5 - the canonical record of a captured inference is the `observations`
+// table (where the proxy writes via captureWithSignature). The compiler-overview
+// count previously omitted it and maxed over auxiliary tables incl.
+// `routing_events`, so real proxy traffic showed "0 captured" while routing
+// telemetry could inflate the number. Truth = observations; the legacy tables
+// are only a fallback for historical tenants that have no observations yet, and
+// `routing_events` (routing telemetry, not captures) never drives the headline.
+export function computeObservedCaptures(tables = {}) {
+  const n = (v) => (Number.isFinite(v) && v > 0 ? v : 0);
+  const observations = n(tables.observations);
+  if (observations > 0) return observations;
+  // Fallback for historical tenants with no observations: only the
+  // capture-specific tables. `events` (general event-store log) and
+  // `routing_events` (routing telemetry) are NOT captures and must never
+  // inflate the headline number.
+  return Math.max(0, n(tables.captures), n(tables.capture_events));
+}
+
 export function buildRouter() {
   const r = express.Router();
 
@@ -17678,12 +17696,13 @@ export function buildRouter() {
       .filter(j => j && !j._deleted && !j._bootstrap);
     const completedJobs = jobs.filter(j => j.status === 'completed');
     const captureTables = {
+      observations: _tableCount('observations', tenantName, tenantId),
       captures: _tableCount('captures', tenantName, tenantId),
       capture_events: _tableCount('capture_events', tenantName, tenantId),
       routing_events: _tableCount('routing_events', tenantName, tenantId),
       events: _tableCount('events', tenantName, tenantId),
     };
-    const observedCaptures = Math.max(0, ...Object.values(captureTables));
+    const observedCaptures = computeObservedCaptures(captureTables);
     const devices = _tableCount('devices', tenantName, tenantId) +
       _tableCount('device_registry', tenantName, tenantId);
     const specialists = _tableCount('specialists', tenantName, tenantId);
