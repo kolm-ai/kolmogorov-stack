@@ -99,6 +99,116 @@ export async function streamCompile(req, res, jobId, opts = {}) {
   if (!cancelled) res.end();
 }
 
+// =============================================================================
+// W-3 (Path to 100%) - REAL compile streaming. The functions above are the
+// legacy deterministic STUB (fabricated k_scores, GPU-training-themed steps that
+// never run). The functions below stream an actual compile job (compile.js
+// createJob + runJob): real W283 holdout split, real synthesized recipe, the
+// REAL holdout K-score, and a link to the real signed .kolm. A failed job emits
+// an honest `error` event - never a fake `done`. The overlay renders steps from
+// the `hello` event, so emitting the real pipeline's steps needs no UI change.
+// =============================================================================
+
+export const REAL_COMPILE_STEPS = [
+  { id: 'prepare', label: 'Prepare + hold out evaluation set' },
+  { id: 'synthesize', label: 'Synthesize recipe (train split only)' },
+  { id: 'evaluate', label: 'Score on unseen holdout' },
+  { id: 'package', label: 'Package + sign .kolm' },
+];
+
+// Map a real compile job to the wizard SSE contract using REAL data only. Pure:
+// no I/O, no Date.now(). The only score emitted is the holdout K-score the
+// pipeline actually measured (job.k_score); artifact_url points at the real
+// signed .kolm. A non-completed job ends in `error`, not `done`.
+export function buildRealEventLog(job) {
+  const events = [];
+  let seq = 0;
+  const push = (event, data) => { events.push({ seq: ++seq, event, data }); };
+  const reached = new Set((job.stages || []).map((s) => s && s.name).filter(Boolean));
+
+  push('hello', { job: job.id, steps: REAL_COMPILE_STEPS.map((s) => ({ id: s.id, label: s.label, status: 'pending' })) });
+
+  const done = {
+    prepare: reached.has('split.done'),
+    synthesize: reached.has('distill.done'),
+    evaluate: reached.has('package.done'),
+    package: job.status === 'completed',
+  };
+  for (const step of REAL_COMPILE_STEPS) {
+    push('step.start', { step: step.id, status: 'running' });
+    if (step.id === 'evaluate' && typeof job.k_score === 'number') {
+      // The REAL holdout K-score - not a fabricated per-pass progression.
+      push('metric', { step: step.id, k_score: job.k_score, source: 'holdout' });
+    }
+    push('step.end', { step: step.id, status: done[step.id] ? 'done' : 'skipped' });
+    if (!done[step.id] && job.status !== 'completed') break; // stop at the failure point
+  }
+
+  if (job.status === 'completed') {
+    push('done', {
+      job: job.id,
+      slug: job.cid || `art_${String(job.id).slice(0, 12)}`,
+      artifact_url: `/v1/compile/${job.id}/.kolm`,
+      k_score: typeof job.k_score === 'number' ? job.k_score : null,
+      k_source: 'holdout',
+      holdout_count: (job.seed_provenance && job.seed_provenance.holdout_count) || null,
+      artifact_class: (job.manifest && job.manifest.artifact_class) || null,
+    });
+  } else {
+    push('error', {
+      job: job.id,
+      error_code: job.error_code || 'KOLM_E_COMPILE_FAILED',
+      error: job.error || 'compile failed',
+    });
+  }
+  return events;
+}
+
+// Stream a real compile job. `getJob` is injected (compile.js) to avoid a
+// circular import. Waits for the job to reach a terminal state (heartbeats
+// meanwhile), then emits the real event log. Reload-safe via ?cursor.
+export async function streamRealCompile(req, res, jobId, getJob, opts = {}) {
+  const cadenceMs = Math.max(50, Math.min(5000, Number(opts.cadenceMs) || 250));
+  const cursor = Math.max(0, parseInt(req.query.cursor || '0', 10) || 0);
+  const maxWaitMs = Math.max(1000, Number(opts.maxWaitMs) || 120000);
+
+  res.set({
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+  res.write(': kolm-compile-stream ' + jobId + '\n\n');
+
+  let cancelled = false;
+  req.on('close', () => { cancelled = true; });
+
+  const t0 = Date.now();
+  let job = getJob(jobId);
+  while (job && job.status !== 'completed' && job.status !== 'failed' && (Date.now() - t0) < maxWaitMs) {
+    if (cancelled) return;
+    res.write(': working\n\n');
+    await delay(200);
+    job = getJob(jobId);
+  }
+  if (!job) {
+    res.write('event: error\n');
+    res.write('data: ' + JSON.stringify({ error: 'job_not_found', job: jobId }) + '\n\n');
+    return res.end();
+  }
+
+  for (const ev of buildRealEventLog(job)) {
+    if (cancelled) return;
+    if (ev.seq <= cursor) continue;
+    res.write(`event: ${ev.event}\n`);
+    res.write(`id: ${ev.seq}\n`);
+    res.write(`data: ${JSON.stringify({ seq: ev.seq, ...ev.data })}\n\n`);
+    if (typeof res.flush === 'function') { try { res.flush(); } catch (_) { /* optional */ } }
+    await delay(ev.event === 'hello' ? 80 : cadenceMs);
+  }
+  if (!cancelled) res.end();
+}
+
 // Estimate dollars + minutes for a describe-tab payload. Pure heuristic so
 // the cost-confirm modal has a number to render before a real estimator
 // is wired in. Token count is rough: chars/4. Cost rolls up describe

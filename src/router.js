@@ -1402,18 +1402,52 @@ export function buildRouter() {
     });
   });
 
-  // POST /v1/compile/start - wizard "Compile" CTA. Returns a job id the
-  // overlay opens an SSE stream against. Stubbed for the no-code path.
-  r.post('/v1/compile/start', freeChatLimiter, (req, res) => {
+  // POST /v1/compile/start - wizard "Compile" CTA. Runs a REAL compile
+  // (createJob + runJob: W283 holdout split, synthesized recipe, real holdout
+  // K-score, signed .kolm) and returns the real job id the overlay streams
+  // against. W-3: replaces the deterministic stub. Refuses empty examples (no
+  // fabricated eval set) per W282.
+  r.post('/v1/compile/start', freeChatLimiter, async (req, res) => {
     const body = req.body || {};
-    const jobId = 'cj_' + crypto.randomBytes(8).toString('hex');
+    const rawExamples = Array.isArray(body.examples) ? body.examples
+      : Array.isArray(body.pairs) ? body.pairs.map(p => ({ input: p.q ?? p.input, output: p.a ?? p.output }))
+        : [];
+    const examples = rawExamples
+      .filter(e => e && e.input != null)
+      .map(e => ({ input: e.input, output: e.output ?? e.expected, kind: e.kind }));
+    if (examples.length === 0) {
+      return res.status(400).json({
+        ok: false,
+        error: 'no_examples',
+        error_code: 'KOLM_E_NO_SEEDS',
+        hint: 'Add at least one {input, output} example so the artifact has a real evaluation set.',
+      });
+    }
+    const job = createJob({
+      task: String(body.describe || body.task || 'compiled task').slice(0, 400),
+      examples,
+      tenant: req.tenant || 'anon-wizard',
+      tenant_id: (req.tenant_record && req.tenant_record.id) || null,
+    });
+    const ctx = {
+      synthesize,
+      examples,
+      recall: { query: () => [] },
+      registry: { createConcept: registry.createConcept, publishVersion: registry.publishVersion },
+      outDir: process.env.KOLM_ARTIFACT_DIR,
+    };
+    const ON_SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+    if (ON_SERVERLESS || req.query.sync === '1') {
+      try { await runJob(job, ctx); } catch (_) { /* runJob persists its own error state */ }
+    } else {
+      setImmediate(() => { runJob(job, ctx).catch(() => {}); });
+    }
     res.json({
       ok: true,
-      job: jobId,
-      stream_url: `/v1/compile/stream/${jobId}`,
+      job: job.id,
+      stream_url: `/v1/compile/stream/${job.id}`,
       reattach_hint: 'Append ?cursor=<last seq> to resume after a reload.',
-      submitted: { tab: body.tab || 'describe', recipe: body.recipe || 'default', target_vram_gb: Number(body.target_vram_gb || 24) },
-      note: 'Stub job - emits deterministic progress events for the wizard overlay.',
+      method: 'real_v1',
     });
   });
 
@@ -1422,8 +1456,10 @@ export function buildRouter() {
   // event contract.
   r.get('/v1/compile/stream/:job', async (req, res) => {
     try {
-      const { streamCompile } = await import('./compile-stream.js');
-      await streamCompile(req, res, String(req.params.job || 'cj_stub'));
+      // W-3: stream the REAL job (real stages, real holdout K-score, real .kolm
+      // URL, honest `error` on failure) instead of the deterministic stub.
+      const { streamRealCompile } = await import('./compile-stream.js');
+      await streamRealCompile(req, res, String(req.params.job || ''), (id) => getJob(id, req.tenant), {});
     } catch (e) {
       if (!res.headersSent) {
         res.status(500).json({ ok: false, error: String(e.message || e) });
