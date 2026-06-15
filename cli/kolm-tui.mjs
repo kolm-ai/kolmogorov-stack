@@ -258,46 +258,60 @@ function renderCard(art) {
   wln('');
 }
 
-// ---------- :run REPL (mock inference) ----------------------------------
+// ---------- :run REPL (real artifact inference) -------------------------
 //
-// In wave 122 the TUI ships with a *local-only* deterministic mock that
-// replays manifest.examples or computes a templated response from the
-// loaded recipe. Wave 123 will wire it to /v1/wrap/verified when a
-// network is available; for now the TUI never silently calls the cloud
-// (per the offline-first stance).
-function mockInfer(art, prompt) {
-  const m = art.manifest || {};
-  const examples = (m.examples || (art.recipes && art.recipes.examples) || []).slice(0, 200);
-  // Lazy nearest-input lookup: substring scoring.
-  const p = String(prompt).toLowerCase();
-  let best = null, bestScore = 0;
-  for (const ex of examples) {
-    if (!ex || !ex.input) continue;
-    const i = String(ex.input).toLowerCase();
-    let score = 0;
-    for (const word of p.split(/\s+/)) {
-      if (word.length > 2 && i.includes(word)) score += word.length;
+// The TUI runs the loaded artifact through the SAME signed runtime the CLI
+// and server use (src/artifact-runner.js `runArtifact`): it loads the .kolm,
+// verifies its signature, and executes the real `generate(input, lib)` recipe
+// in the node:vm sandbox. No mock, no substring matching — `:run` and `:serve`
+// return exactly what the artifact computes, or an HONEST error if the runtime
+// is unavailable (e.g. a gguf bundle with no llama-cli, or an invalid
+// signature). The runner is imported lazily so TUI startup stays instant.
+let _runArtifact = null;
+async function getRunner() {
+  if (!_runArtifact) {
+    ({ runArtifact: _runArtifact } = await import('../src/artifact-runner.js'));
+  }
+  return _runArtifact;
+}
+
+export async function realInfer(art, prompt) {
+  const runArtifact = await getRunner();
+  try {
+    const r = await runArtifact(art.filePath, prompt);
+    let text = r.output;
+    if (typeof text !== 'string') {
+      try { text = JSON.stringify(text); } catch (e) { text = String(text); } // deliberate: cleanup
     }
-    if (score > bestScore) { bestScore = score; best = ex; }
+    return {
+      text,
+      ok: true,
+      source: 'runtime:' + (r.runtime || 'js'),
+      latency_us: r.latency_us,
+      k_score: r.k_score,
+    };
+  } catch (e) {
+    // Honest failure: surface the runtime error code, never a fake success.
+    return {
+      text: 'run failed: ' + ((e && (e.code || e.message)) || 'unknown error'),
+      ok: false,
+      source: 'error',
+      error_code: (e && e.code) || 'KOLM_E_RUN_FAILED',
+    };
   }
-  if (best && best.output) {
-    return { text: String(best.output), source: 'examples', match_score: bestScore };
-  }
-  // No matched example: produce a templated stub.
-  return {
-    text: '(local mock) — no matching example in this artifact. Plug in the cloud with `kolm tui --cloud` to use /v1/wrap/verified.',
-    source: 'stub',
-    match_score: 0,
-  };
 }
 
 async function runPrompt(art, prompt) {
-  const t0 = Date.now();
-  const r = mockInfer(art, prompt);
-  const ms = Date.now() - t0;
+  const r = await realInfer(art, prompt);
   wln('');
-  wln('  ' + C.good + '› ' + RESET + r.text);
-  wln('  ' + C.mute + r.source + ' · ' + ms + 'ms' + (r.match_score ? ' · score=' + r.match_score : '') + RESET);
+  if (r.ok) {
+    wln('  ' + C.good + '› ' + RESET + r.text);
+    const ms = r.latency_us != null ? Math.max(1, Math.round(r.latency_us / 1000)) + 'ms' : '';
+    wln('  ' + C.mute + r.source + (ms ? ' · ' + ms : '') + (r.k_score != null ? ' · K=' + r.k_score : '') + RESET);
+  } else {
+    wln('  ' + C.bad + '✗ ' + RESET + r.text);
+    wln('  ' + C.mute + r.source + RESET);
+  }
   wln('');
 }
 
@@ -333,11 +347,28 @@ function startServe(art, port) {
             || (Array.isArray(body.messages) && body.messages[body.messages.length - 1] && body.messages[body.messages.length - 1].content)
             || '';
           if (!prompt) { setJson(400, { error: 'input or messages required' }); return; }
-          const r = mockInfer(art, prompt);
-          setJson(200, {
-            output: r.text,
-            model: (art.manifest || {}).base_model || 'local-mock',
-            _kolm: { artifact: art.fileName, cid: (art.manifest || {}).cid || null, source: r.source },
+          // Real artifact execution — byte-identical to `:run` and the CLI.
+          realInfer(art, prompt).then(function (r) {
+            if (!r.ok) {
+              setJson(500, {
+                error: r.text,
+                error_code: r.error_code || 'KOLM_E_RUN_FAILED',
+                _kolm: { artifact: art.fileName, cid: (art.manifest || {}).cid || null },
+              });
+              return;
+            }
+            setJson(200, {
+              output: r.text,
+              model: (art.manifest || {}).base_model || (art.manifest || {}).runtime_target || 'kolm',
+              _kolm: {
+                artifact: art.fileName,
+                cid: (art.manifest || {}).cid || null,
+                source: r.source,
+                latency_us: r.latency_us,
+              },
+            });
+          }).catch(function (e) {
+            setJson(500, { error: String((e && e.message) || e), error_code: 'KOLM_E_RUN_FAILED' });
           });
         });
         return;
