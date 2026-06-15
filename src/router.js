@@ -4566,6 +4566,22 @@ export function buildRouter() {
     const tenantAuthKey = String(req.api_key || '');
     if (req.headers['x-upstream-api-key']) upstreamKey = String(req.headers['x-upstream-api-key']);
     if (!upstreamKey && bearerKey && bearerKey !== tenantAuthKey && !bearerKey.startsWith('ks_') && !bearerKey.startsWith('kao_')) upstreamKey = bearerKey;
+    // W-4a - a tenant who stored a provider key in the vault gets their OWN traffic
+    // routed on their OWN key, strictly tenant-isolated (resolveProviderKey is keyed
+    // to this request's tenant/actor and can never return another tenant's key), and
+    // preferred over the shared server env key so "store your key -> we route your
+    // traffic" is actually true. Mirrors the /v1/gateway vault path (~line 6743).
+    if (!upstreamKey && req.tenant_record) {
+      const _vaultCtx = {
+        tenantId: req.tenant_record.id || req.tenant || null,
+        teamId: req.headers['x-kolm-team'] || req.tenant_record.active_team_id || null,
+        actorId: req.tenant_record.id || req.tenant || null,
+      };
+      try {
+        const _vaultKey = providerVault.resolveProviderKey({ ..._vaultCtx, provider });
+        if (_vaultKey) upstreamKey = String(_vaultKey);
+      } catch (_) { /* vault is best-effort; fall through to env */ }
+    }
     if (!upstreamKey && pcfg.env_key && process.env[pcfg.env_key]) upstreamKey = process.env[pcfg.env_key];
     const fixtureMode = (process.env.KOLM_CONNECTOR_FIXTURE === '1' || process.env.KOLM_CONNECTOR_FIXTURE === 'true');
     if (!upstreamKey && !fixtureMode) {
