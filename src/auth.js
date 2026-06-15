@@ -398,6 +398,7 @@ const PUBLIC_API = (p) =>
   /^\/v1\/target-profiles\/[A-Za-z0-9_\-]+$/.test(p) ||                 // single profile lookup
   /^\/v1\/teams\/invites\/[A-Za-z0-9_\-]+$/.test(p) ||                  // preview is public; /accept is its own path
   /^\/v1\/oauth\/(google|github)\/(start|callback)$/.test(p) ||
+  /^\/v1\/auth\/email\/(start|verify)$/.test(p) ||                       // passwordless magic-link sign-in
   // W889-8.4 - short OAuth aliases. /v1/auth/github + /v1/auth/github/callback
   // are 302 redirects to the canonical /v1/oauth/github/* routes above. They
   // must be public so the redirect itself does not need an API key.

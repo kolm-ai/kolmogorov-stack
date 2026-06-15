@@ -20,6 +20,7 @@ import * as runtime from './runtime.js';
 import * as cache from './cache.js';
 import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan, isGeoFenced, mintScopedKey, listScopedKeys, revokeScopedKey, keyHasScope } from './auth.js';
 import { mountOAuth, oauthConfigured } from './oauth.js';
+import { mountAuthEmail } from './auth-email.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert, tEmailReportReady } from './email.js';
 import { compileJs, verify } from './verifier.js';
 import { LIBRARY_VERSION, libraryDescription } from './library.js';
@@ -2870,6 +2871,8 @@ export function buildRouter() {
   // Each provider is a no-op until its CLIENT_ID/CLIENT_SECRET pair is
   // configured. /v1/oauth/providers reports which are live.
   mountOAuth(r);
+  // Passwordless email magic-link sign-in (works without OAuth apps).
+  mountAuthEmail(r);
 
   // W889-8.4 - short OAuth aliases: GET /v1/auth/github redirects to the
   // canonical /v1/oauth/github/start (preserving any ?redirect= query). Same
