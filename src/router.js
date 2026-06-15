@@ -199,6 +199,7 @@ import {
   countCaptures,
   health as captureHealth,
 } from './capture-store.js';
+import { insertStagedCapture as storeInsertStagedCapture } from './store.js';
 import {
   subscribe as subscribeCapture,
   subscribe as subscribeCaptureStream,
@@ -1280,6 +1281,24 @@ export function _resetAssistantChatRateForTests() {
 // telemetry could inflate the number. Truth = observations; the legacy tables
 // are only a fallback for historical tenants that have no observations yet, and
 // `routing_events` (routing telemetry, not captures) never drives the headline.
+// W-5 - the proxy's capture-routing decision, extracted so it is unit-tested
+// against the SAME code the proxy runs. Default (staging off): await the durable
+// observation write. Staging on: quarantine via insertStaged (sync); on a
+// staging-write failure, fall back to the durable write so a capture is NEVER
+// dropped. Returns 'staged' | 'passthrough'.
+export async function routeCaptureWrite(row, { stagingOn, insertStaged, insertObservation }) {
+  if (stagingOn) {
+    try {
+      insertStaged(row);
+      return 'staged';
+    } catch (_) {
+      // staging failed - fall through to the durable passthrough, never drop.
+    }
+  }
+  await insertObservation(row);
+  return 'passthrough';
+}
+
 export function computeObservedCaptures(tables = {}) {
   const n = (v) => (Number.isFinite(v) && v > 0 ? v : 0);
   const observations = n(tables.observations);
@@ -4592,6 +4611,18 @@ export function buildRouter() {
   }
 
   async function __connectorProxy(provider, upstreamPath, req, res) {
+    // W-5 - route every capture write through the quarantine fork. Default
+    // (KOLM_W808_STAGING unset/0) awaits insertCapture straight into
+    // observations (historical behavior). When staging is on, the row is
+    // quarantined in staged_captures instead, reaching observations only via
+    // review/promote. A capture is never dropped (routeCaptureWrite falls back
+    // to the durable write on a staging failure). Same row objects, same try/
+    // catch + durable-header logic at the call sites below.
+    const __routeCapture = (captureRow) => routeCaptureWrite(captureRow, {
+      stagingOn: process.env.KOLM_W808_STAGING === '1' || process.env.KOLM_W808_STAGING === 'true',
+      insertStaged: storeInsertStagedCapture,
+      insertObservation: insertCapture,
+    });
     // W418 - defense-in-depth: every connector-proxy entry MUST carry a
     // resolved tenant_record by the time we reach this point. The W411
     // hosted-auth gate (__w411HostedAuthGate) stamps req.tenant_record on
@@ -4890,7 +4921,7 @@ export function buildRouter() {
         });
         let errDurable = true;
         try {
-          await insertCapture({
+          await __routeCapture({
             id: evErr.event_id,
             tenant: (req && req.tenant) || 'local',
             // W411 - propagate canonical tenant_id through capture-store so the
@@ -5029,7 +5060,7 @@ export function buildRouter() {
     // response to the SDK; we surface via x-kolm-event-durable header.
     let durable = true;
     try {
-      await insertCapture({
+      await __routeCapture({
         id: ev.event_id,
         tenant: (req && req.tenant) || 'local',
         // W411 - propagate canonical tenant_id through capture-store so the
