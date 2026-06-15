@@ -730,6 +730,13 @@ export async function* distill({
         k_score: Math.round(kAccum * 1000) / 1000,
         ts: new Date().toISOString(),
         attempt: attemptIdx + 1,
+        // W-6 - these per-step values are PROJECTED (interpolated toward the
+        // target), NOT measured by the trainer. Mark them structurally so no
+        // consumer renders them as a real training-loss curve. The only real
+        // loss is the trainer-emitted loss in the run manifest (see
+        // resolveDistillFinalLoss).
+        loss_source: 'synthetic',
+        k_source: 'projected',
       };
       if (progressFd !== null) {
         try { fs.writeSync(progressFd, JSON.stringify(evt) + '\n'); } catch (_) {} // deliberate: cleanup
@@ -911,6 +918,27 @@ export async function* distill({
 // Tenant scoping: listDistillRuns({tenant_id}) ALWAYS filters by tenant_id
 // - never returns a cross-tenant view. The audit-2026-05-19 tenant-leak
 // rule applies (canonical key is `tenant_id`).
+
+// W-6 - the display contract for a distill run's final loss. The per-step
+// progress curve is PROJECTED (interpolated, see the distill generator), so it
+// must never be shown as a measured result. Prefer the trainer's real measured
+// loss from the run manifest; if absent, return null with an explicit source
+// rather than promoting a synthetic step's loss to "final". This is what kills
+// the "synthetic loss curve presented as training telemetry" theater.
+export function resolveDistillFinalLoss(manifest, lastStep) {
+  // Only an actual finite number counts as measured. (Number(null)===0, so
+  // coercing would fabricate a 0.0 loss for a run that has no manifest.)
+  const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+  const measured =
+    num(manifest && manifest.loss_final) ??
+    num(manifest && manifest.final_loss) ??
+    num(manifest && manifest.metrics && manifest.metrics.loss) ??
+    num(manifest && manifest.eval && manifest.eval.loss);
+  if (Number.isFinite(measured)) return { loss: measured, source: 'measured' };
+  if (lastStep && Number.isFinite(Number(lastStep.loss))) return { loss: null, source: 'synthetic_suppressed' };
+  return { loss: null, source: 'unavailable' };
+}
+
 export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = null } = {}) {
   const base = path.join(_kolmDir(), 'distill-runs');
   let entries = [];
@@ -954,8 +982,15 @@ export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = 
       teacher: meta.teacher,
       created_at: meta.created_at,
       step_count: stepCount,
-      loss_final: last ? last.loss : null,
+      // W-6 - measured final loss from the trainer manifest, or null. NEVER the
+      // synthetic last-step loss. `k_final` stays available but is explicitly
+      // marked projected so the UI does not render it as a measured score.
+      ...(() => {
+        const { loss, source } = resolveDistillFinalLoss(manifest, last);
+        return { loss_final: loss, loss_source: source };
+      })(),
       k_final: last ? last.k_score : null,
+      k_source: last ? 'projected' : null,
       manifest_present: !!manifest,
     });
   }
