@@ -293,9 +293,11 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
             <div class="fld-group">
               <label class="fld-label" for="email">Work email</label>
               <input class="fld" id="email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" placeholder="you@company.com" aria-describedby="email-help">
-              <p class="fld-msg" id="email-help">Example: you@company.com. Already have an account? Use account recovery or OAuth sign-in.</p>
+              <p class="fld-msg" id="email-help">Example: you@company.com. New here? Get a key. Returning? Email yourself a one-time sign-in link.</p>
             </div>
             <button class="btn btn--primary btn--block" id="go" type="button">Get my API key</button>
+            <button class="btn btn--ghost btn--block" id="emaillink" type="button" style="margin-top:8px">Email me a sign-in link</button>
+            <p class="fld-msg" id="emaillink-msg" role="status" hidden></p>
             <p class="signup-fine">By creating an account you agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>. Already set up? <a href="/account/api-control-center">Open the API Control Center</a>.</p>
           </div>
         </div>
@@ -501,6 +503,27 @@ curl -s https://kolm.ai/v1/route/chat/completions \
   }
   go.addEventListener('click',submit);
   email.addEventListener('keydown',function(e){ if(e.key==='Enter') submit(); });
+
+  // Passwordless email sign-in (magic link) — the returning-user path.
+  var emaillink=document.getElementById('emaillink');
+  var emaillinkMsg=document.getElementById('emaillink-msg');
+  if(emaillink){
+    emaillink.addEventListener('click',function(){
+      var v=(email.value||'').trim();
+      if(!v || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ showErr('Enter your email above, then click "Email me a sign-in link".'); email.focus(); return; }
+      emaillink.disabled=true; emaillink.textContent='Sending';
+      fetch('/v1/auth/email/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})})
+        .then(function(res){ return res.json().catch(function(){ return {}; }); })
+        .then(function(j){
+          emaillink.disabled=false; emaillink.textContent='Email me a sign-in link';
+          if(emaillinkMsg){ emaillinkMsg.hidden=false; emaillinkMsg.textContent=(j&&j.message)||'Check your email for a sign-in link.'; }
+        })
+        .catch(function(){
+          emaillink.disabled=false; emaillink.textContent='Email me a sign-in link';
+          if(emaillinkMsg){ emaillinkMsg.hidden=false; emaillinkMsg.textContent='Could not send right now — try again in a moment.'; }
+        });
+    });
+  }
 })();
 </script>
 </body>
