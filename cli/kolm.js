@@ -32325,6 +32325,28 @@ async function cmdCloudTrain(args) {
     process.exit(EXIT.BAD_ARGS);
   }
 
+  // RunPod GPU burst training — delegate to the real scripts/cloud-runpod-train.mjs
+  // (spin up an H100 pod, rsync the run dir, train_lora.py, rsync the adapter
+  // back, terminate). Dry-run by default; a real pod spins up only with --confirm.
+  // Needs RUNPOD_API_KEY. This replaces the old stub adapter that returned a
+  // generic run-envelope and failed with a confusing "use --backend=together".
+  if (backend === 'runpod') {
+    const hasKey = !!(process.env.RUNPOD_API_KEY || process.env.KOLM_RUNPOD_TOKEN);
+    if (!hasKey && confirm) {
+      console.error('error: --backend runpod needs RUNPOD_API_KEY (or KOLM_RUNPOD_TOKEN).');
+      console.error('  create one free at https://runpod.io/console/user/settings, then: export RUNPOD_API_KEY=<key>');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const runDir = specDir || path.dirname(seedsPath);
+    const base = pickFlag(args, '--base') || pickFlag(args, '--student-base') || 'Qwen/Qwen2.5-0.5B-Instruct';
+    const rpScript = fileURLToPath(new URL('../scripts/cloud-runpod-train.mjs', import.meta.url));
+    const rpArgs = [rpScript, `--run-dir=${runDir}`, `--student-base=${base}`];
+    if (!confirm) rpArgs.push('--dry-run');
+    console.log(`[runpod] ${confirm ? 'launching real H100 burst train' : 'dry-run plan (add --confirm to spin up a real pod)'} on ${runDir}`);
+    const r = spawnSync(process.execPath, rpArgs, { stdio: 'inherit' });
+    process.exit(r.status == null ? 1 : r.status);
+  }
+
   let spec = null;
   if (specPath) {
     try { spec = JSON.parse(fs.readFileSync(specPath, 'utf-8')); }
