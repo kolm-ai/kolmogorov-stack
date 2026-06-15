@@ -21,6 +21,44 @@ async function client() {
   return anthropicClient;
 }
 
+// fal-ai/any-llm serves Claude (and other frontier models). It's the teacher
+// path when there's no direct ANTHROPIC_API_KEY — same Claude model, billed via
+// fal with a FAL_KEY. So the compiler's real (LLM-authored) synthesis works on a
+// fal key alone.
+const FAL_KEY = process.env.FAL_KEY || process.env.KOLM_FAL_TOKEN;
+const FAL_LLM_MODEL = process.env.KOLM_FAL_LLM_MODEL || 'anthropic/claude-3.5-sonnet';
+
+function teacherConfigured() {
+  return !!(ANTHROPIC_KEY || FAL_KEY);
+}
+
+// One teacher completion. Prefers the direct Anthropic SDK; falls back to
+// fal-ai/any-llm (Claude) when only FAL_KEY is set. Returns the raw text.
+async function teacherComplete({ system, user, temperature }) {
+  if (ANTHROPIC_KEY) {
+    const c = await client();
+    const resp = await c.messages.create({
+      model: MODEL,
+      max_tokens: 1500,
+      temperature,
+      system,
+      messages: [{ role: 'user', content: user }],
+    });
+    return resp.content.map((b) => b.text || '').join('');
+  }
+  if (FAL_KEY) {
+    const resp = await fetch('https://fal.run/fal-ai/any-llm', {
+      method: 'POST',
+      headers: { authorization: `Key ${FAL_KEY}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ model: FAL_LLM_MODEL, system_prompt: system, prompt: user, temperature }),
+    });
+    if (!resp.ok) throw new Error(`fal any-llm HTTP ${resp.status}`);
+    const j = await resp.json();
+    return String(j.output ?? '');
+  }
+  return null;
+}
+
 const SYSTEM_PROMPT = `You synthesize tiny, deterministic JavaScript "generators" that map an input to a concept's full output.
 
 CONTRACT
@@ -48,7 +86,7 @@ export async function synthesizeStream({ positives, negatives = [], output_spec,
   const attempts = [];
 
   const strategies = [];
-  if (await client()) strategies.push('claude');
+  if (teacherConfigured()) strategies.push('claude');
   strategies.push('pattern');
   emit('plan', { strategies });
 
@@ -131,8 +169,7 @@ async function produceCandidates(strategy, ctx, emit = () => {}) {
 }
 
 async function claudeCandidates({ positives, negatives, output_spec, priors }, emit = () => {}) {
-  const c = await client();
-  if (!c) return [];
+  if (!teacherConfigured()) return [];
   const userMsg = `OUTPUT_SPEC:
 ${JSON.stringify(output_spec, null, 2)}
 
@@ -149,16 +186,10 @@ Synthesize a generator that satisfies all positives and rejects all negatives.`;
   const candidates = [];
   for (const temperature of [0, 0.4]) {
     try {
-      emit('claude_request', { temperature, model: MODEL });
-      const resp = await c.messages.create({
-        model: MODEL,
-        max_tokens: 1500,
-        temperature,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userMsg }],
-      });
-      const text = resp.content.map(b => b.text || '').join('');
-      const source = stripFences(text).trim();
+      emit('claude_request', { temperature, model: ANTHROPIC_KEY ? MODEL : FAL_LLM_MODEL });
+      const text = await teacherComplete({ system: SYSTEM_PROMPT, user: userMsg, temperature });
+      if (text == null) break;
+      const source = extractGenerator(text);
       if (source.includes('function generate')) {
         candidates.push({ source, prompt: userMsg });
         emit('claude_response', { temperature, size_bytes: Buffer.byteLength(source, 'utf8') });
@@ -172,6 +203,29 @@ Synthesize a generator that satisfies all positives and rejects all negatives.`;
 
 function stripFences(s) {
   return s.replace(/^```(?:javascript|js)?\s*/i, '').replace(/```\s*$/, '').trim();
+}
+
+// Extract the `function generate(...) {...}` body from a teacher response, even
+// when the model wraps it in prose ("Here is the function...") or trailing
+// commentary. Some teacher routes (e.g. fal-ai/any-llm) are chattier than the
+// raw Anthropic SDK, so we balance-match the function braces and drop the rest.
+export function extractGenerator(raw) {
+  const s = stripFences(String(raw || '')).trim();
+  const i = s.indexOf('function generate');
+  if (i < 0) return s;
+  let depth = 0;
+  let start = -1;
+  for (let k = i; k < s.length; k++) {
+    const ch = s[k];
+    if (ch === '{') {
+      if (start < 0) start = k;
+      depth++;
+    } else if (ch === '}') {
+      depth--;
+      if (depth === 0 && start >= 0) return s.slice(i, k + 1);
+    }
+  }
+  return s.slice(i);
 }
 
 // Pattern-based synthesizer: detects common generator shapes from examples.

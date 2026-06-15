@@ -171,10 +171,12 @@ export function runtimeReadiness() {
     },
     {
       name: 'model_provider',
-      ok: !!process.env.ANTHROPIC_API_KEY,
+      // A frontier teacher is configured via a direct Anthropic key OR fal
+      // (fal-ai/any-llm serves Claude). Either powers real LLM synthesis.
+      ok: !!(process.env.ANTHROPIC_API_KEY || process.env.FAL_KEY || process.env.KOLM_FAL_TOKEN),
       required: false,
       public: 'frontier model provider configured',
-      hint: 'set ANTHROPIC_API_KEY for verified inference and cloud teacher calls',
+      hint: 'set ANTHROPIC_API_KEY or FAL_KEY (fal-ai/any-llm serves Claude) for LLM-authored synthesis + cloud teacher calls',
     },
     {
       name: 'store_driver',
