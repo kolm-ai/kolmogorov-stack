@@ -129,6 +129,22 @@ def main():
         sys.stderr.write("[train_lora] no usable pairs; aborting.\n")
         sys.exit(5)
 
+    # Resolve friendly short names to canonical HF repo ids so a --student-base
+    # like "qwen2.5-0.5b" works out of the box (a bare short name is not a valid
+    # HF identifier and would fail the download).
+    _MODEL_ALIASES = {
+        "qwen2.5-0.5b": "Qwen/Qwen2.5-0.5B-Instruct",
+        "qwen2.5-0.5b-instruct": "Qwen/Qwen2.5-0.5B-Instruct",
+        "qwen2.5-1.5b": "Qwen/Qwen2.5-1.5B-Instruct",
+        "qwen2.5-3b": "Qwen/Qwen2.5-3B-Instruct",
+        "llama-3.2-1b": "meta-llama/Llama-3.2-1B-Instruct",
+        "llama-3.2-3b": "meta-llama/Llama-3.2-3B-Instruct",
+    }
+    resolved = _MODEL_ALIASES.get(str(args.student_base).lower(), args.student_base)
+    if resolved != args.student_base:
+        print(f"[train_lora] resolved student base '{args.student_base}' -> '{resolved}'")
+    args.student_base = resolved
+
     tok = AutoTokenizer.from_pretrained(args.student_base)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
