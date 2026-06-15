@@ -55,6 +55,29 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { loadArtifact, runArtifact } from './artifact-runner.js';
+import { resolveProviderKey } from './provider-vault.js';
+
+// W-4a (completions bridge) - resolve the upstream provider key the same way the
+// main proxy does: an explicit opts.upstreamKey wins, then the caller-tenant's
+// vaulted key (tenant-isolated via resolveProviderKey - can never return another
+// tenant's key), then the shared server env key. Backward-compatible: when no
+// opts.tenantId is supplied (e.g. the local TUI), it resolves to env exactly as
+// before. So "store your key -> we route your traffic" holds on this path too.
+export function resolveBridgeKey(opts = {}, provider, envVar) {
+  if (opts && opts.upstreamKey) return String(opts.upstreamKey);
+  if (opts && opts.tenantId) {
+    try {
+      const k = resolveProviderKey({
+        tenantId: opts.tenantId,
+        teamId: opts.teamId || null,
+        actorId: opts.actorId || opts.tenantId,
+        provider,
+      });
+      if (k) return String(k);
+    } catch (_) { /* vault is best-effort; fall through to env */ }
+  }
+  return (envVar && process.env[envVar]) || null;
+}
 
 const DEFAULT_REGISTRY_DIRS = [
   // Search paths for "kolm:<name>" lookup. First match wins.
@@ -322,9 +345,9 @@ async function runKolmCompletion(req, resolved, _opts) {
 // ---------------------------------------------------------------------------
 // Anthropic bridge (non-streaming).
 // ---------------------------------------------------------------------------
-async function runAnthropicCompletion(req, resolved, _opts) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw apiError(503, 'upstream_unavailable', 'ANTHROPIC_API_KEY not set; cannot bridge to anthropic');
+async function runAnthropicCompletion(req, resolved, opts = {}) {
+  const apiKey = resolveBridgeKey(opts, 'anthropic', 'ANTHROPIC_API_KEY');
+  if (!apiKey) throw apiError(503, 'upstream_unavailable', 'no anthropic key: set ANTHROPIC_API_KEY or store one in your provider vault');
   let Anthropic;
   try { ({ default: Anthropic } = await import('@anthropic-ai/sdk')); }
   catch (e) { throw apiError(503, 'upstream_unavailable', `@anthropic-ai/sdk not loadable: ${e.message}`); }
@@ -353,9 +376,9 @@ async function runAnthropicCompletion(req, resolved, _opts) {
   };
 }
 
-async function* streamAnthropicCompletion(req, resolved, _opts, id, created) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw apiError(503, 'upstream_unavailable', 'ANTHROPIC_API_KEY not set');
+async function* streamAnthropicCompletion(req, resolved, opts, id, created) {
+  const apiKey = resolveBridgeKey(opts || {}, 'anthropic', 'ANTHROPIC_API_KEY');
+  if (!apiKey) throw apiError(503, 'upstream_unavailable', 'no anthropic key: set ANTHROPIC_API_KEY or store one in your provider vault');
   let Anthropic;
   try { ({ default: Anthropic } = await import('@anthropic-ai/sdk')); }
   catch (e) { throw apiError(503, 'upstream_unavailable', `@anthropic-ai/sdk not loadable: ${e.message}`); }
