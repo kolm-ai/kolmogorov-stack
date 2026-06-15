@@ -776,6 +776,38 @@ export function autoAllowSinceQuarantine({ tenant_id, since_ms = W808_DEFAULT_QU
   return { promoted, skipped, blocked, anomalous };
 }
 
+// W-5 - the single capture-routing decision the proxy makes, and the call site
+// that was missing (insertStagedCapture had ZERO callers, so quarantine was dead
+// for proxy traffic). Default (staging disabled) is the historical behavior:
+// write straight to `observations` via the caller's insertObservation. When
+// KOLM_W808_STAGING is enabled the row is quarantined in staged_captures instead,
+// carrying any anomaly/copyright/manual flags, and only reaches observations via
+// promoteStagedCapture / the auto-allow sweep. Gating on KOLM_W808_STAGING keeps
+// enabling quarantine a deliberate operator choice, never a silent default.
+export function stageOrPassthrough({
+  row,
+  stagingEnabled = false,
+  anomalyFlagged = false,
+  anomalyReasons = [],
+  manualBlockReason = null,
+  insertObservation,
+} = {}) {
+  if (!row || typeof row !== 'object') {
+    throw new Error('stageOrPassthrough: row must be an object');
+  }
+  if (stagingEnabled) {
+    const staged = insertStagedCapture({
+      ...row,
+      anomaly_flagged: anomalyFlagged === true,
+      anomaly_reasons: Array.isArray(anomalyReasons) ? anomalyReasons : [],
+      manual_block_reason: manualBlockReason || null,
+    });
+    return { staged: true, row: staged };
+  }
+  if (typeof insertObservation === 'function') insertObservation(row);
+  return { staged: false, row };
+}
+
 // Reset hook for tests - empties the staged_captures table.
 export function _resetStagedCapturesForTests() {
   remove(W808_STAGED_TABLE, () => true);
