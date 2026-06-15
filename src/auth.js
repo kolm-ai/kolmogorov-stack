@@ -206,32 +206,38 @@ export function claimAnonTenant(anonToken, { email, name }) {
 // callbacks: a Google/GitHub login should sign you in if you've signed up
 // before, or sign you up if you haven't. Returns { tenant, api_key, created }.
 //
-// Note: api_key is only returned on first creation (the OAuth path replaces
-// "remember an API key" with "remember to log in via Google/GitHub"). For
-// existing tenants we mint a fresh session token by rotating the key, so the
-// browser cookie is the new key - old keys still work for CLI/server callers.
+// Note: api_key is only returned on first creation. For an EXISTING tenant an
+// OAuth sign-in mints a 30-day full-scope SESSION key (a row in the api_keys
+// table) for the browser cookie, and leaves the tenant's PRIMARY key untouched.
+// This is the fix for the key-rotation footgun: previously every web OAuth login
+// rotated the primary key, silently invalidating any ks_*** key the user had
+// stored in their CLI / CI / server integration. Now those keep working; the
+// cookie carries a separate, revocable, auto-expiring session credential.
 export function findOrCreateTenantByEmail({ email, name, provider, provider_id }) {
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     throw new Error('valid email required');
   }
   const existing = all('tenants').find(t => !t._deleted && t.email === email && t.kind !== 'anon');
   if (existing) {
-    // Existing tenant signs in via OAuth: rotate the key so the session
-    // cookie has a usable credential (we only store the hash, never the raw
-    // key after signup). Old API keys are invalidated - that's the cost of
-    // mixing OAuth signin with API-key auth. CLI users keeping a stored
-    // ks_*** key should sign in with that key, not OAuth.
-    const newKey = mintApiKey('user');
+    // Non-credential update only — record the provider id + login time. The
+    // primary api_key_hash is NOT touched, so every out-of-band caller's key
+    // survives the web login.
     update('tenants', x => x.id === existing.id, {
-      ...keyFields(newKey),
-      api_key: undefined,
-      key_rotated_at: new Date().toISOString(),
       [`${provider}_id`]: provider_id || existing[`${provider}_id`] || null,
       last_login_at: new Date().toISOString(),
     });
+    // Mint a full-scope, 30-day session key for the cookie. It authenticates
+    // through the api_keys-table fallback in findTenantByApiKey and resolves to
+    // this same tenant; '*' scope passes every route gate. Auto-expires; can be
+    // listed/revoked via the scoped-keys surface.
+    const sessionKey = mintScopedKey(existing.id, {
+      scopes: ['*'],
+      label: `oauth:${provider}`,
+      ttl_days: 30,
+    }).key;
     return {
       tenant: existing,
-      api_key: newKey,
+      api_key: sessionKey,
       created: false,
     };
   }
