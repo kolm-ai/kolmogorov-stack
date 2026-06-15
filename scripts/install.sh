@@ -97,12 +97,28 @@ ensure_path_hint() {
   esac
 }
 
+install_deps() {
+  # A fresh clone has no node_modules; the kolm entrypoint needs express et al.
+  # at runtime, so install production deps or the CLI fails on first run.
+  if command -v npm >/dev/null 2>&1; then
+    log "installing production dependencies (npm ci --omit=dev)"
+    if ( cd "$KOLM_INSTALL_DIR" && { npm ci --omit=dev --no-audit --no-fund 2>/dev/null || npm install --omit=dev --no-audit --no-fund; } ); then
+      log "dependencies installed"
+    else
+      warn "dependency install failed; kolm will not run without node_modules in $KOLM_INSTALL_DIR"
+      exit 1
+    fi
+  else
+    warn "npm not found — run 'npm ci --omit=dev' in $KOLM_INSTALL_DIR before using kolm"
+  fi
+}
+
 post_install_check() {
-  if "$KOLM_BIN_DIR/kolm" version >/dev/null 2>&1; then
-    VER="$("$KOLM_BIN_DIR/kolm" version 2>/dev/null | head -1)"
+  if "$KOLM_BIN_DIR/kolm" --version >/dev/null 2>&1; then
+    VER="$("$KOLM_BIN_DIR/kolm" --version 2>/dev/null | grep -i kolm | head -1)"
     log "kolm installed: $VER"
   else
-    warn "kolm symlinked but 'kolm version' failed — investigate $KOLM_INSTALL_DIR"
+    warn "kolm symlinked but 'kolm --version' failed — investigate $KOLM_INSTALL_DIR"
   fi
   if "$KOLM_BIN_DIR/kolm" doctor --quick >/dev/null 2>&1; then
     log "kolm doctor: pass"
@@ -121,6 +137,7 @@ main() {
   require_node
   require_git
   clone_or_update
+  install_deps
   install_link
   ensure_path_hint
   post_install_check

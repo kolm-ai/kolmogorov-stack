@@ -64,6 +64,26 @@ function Get-OrUpdateRepo {
   }
 }
 
+function Install-Deps {
+  # A fresh clone has no node_modules; the kolm entrypoint requires express et al.
+  # at runtime, so install production deps or the shim will fail on first run.
+  Push-Location $KolmInstallDir
+  try {
+    if (Get-Command npm -ErrorAction SilentlyContinue) {
+      Write-Log "installing production dependencies (npm ci --omit=dev)"
+      & npm ci --omit=dev --no-audit --no-fund
+      if ($LASTEXITCODE -ne 0) {
+        Write-Warn "npm ci failed; retrying with npm install --omit=dev"
+        & npm install --omit=dev --no-audit --no-fund
+        if ($LASTEXITCODE -ne 0) { Throw-Err "dependency install failed; kolm will not run without node_modules in $KolmInstallDir" }
+      }
+      Write-Log "dependencies installed"
+    } else {
+      Write-Warn "npm not found - skipping dependency install; run 'npm ci --omit=dev' in $KolmInstallDir before using kolm"
+    }
+  } finally { Pop-Location }
+}
+
 function Install-Shim {
   if (-not (Test-Path $KolmBinDir)) { New-Item -ItemType Directory -Force -Path $KolmBinDir | Out-Null }
   $entry = Join-Path $KolmInstallDir 'cli\kolm.js'
@@ -91,7 +111,7 @@ function Add-PathHint {
 function Test-Install {
   $kolm = Join-Path $KolmBinDir 'kolm.cmd'
   try {
-    $ver = (& $kolm version 2>$null | Select-Object -First 1)
+    $ver = (& $kolm --version 2>$null | Where-Object { $_ -match 'kolm' } | Select-Object -First 1)
     if ($ver) { Write-Log "kolm installed: $ver" } else { Write-Warn "kolm shim ran but did not report version" }
   } catch {
     Write-Warn "kolm shim test failed: $($_.Exception.Message)"
@@ -120,6 +140,7 @@ function Main {
   Test-Node
   Test-Git
   Get-OrUpdateRepo
+  Install-Deps
   Install-Shim
   Add-PathHint
   Test-Install
