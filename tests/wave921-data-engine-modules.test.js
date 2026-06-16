@@ -632,7 +632,10 @@ test('curate-integration: detectErrors review flags + routes, drops zero', async
   rows[4].output = topics[1] + ' detailed answer foreign';
   rows[22].output = topics[0] + ' detailed answer foreign';
   const before = rows.length;
-  const r = await curatePairs({ namespace: 'de', pairs: rows, opts: { quality: false, dedup: false, cluster: false, cot: false, pii: false, detectErrors: true, errorAction: 'review' } });
+  // semdedup:false isolates the detectErrors stage - these synthetic rows are
+  // near-identical templates the now-default-on SemDeDup stage would collapse,
+  // confounding the exact n_kept assertion for the stage under test.
+  const r = await curatePairs({ namespace: 'de', pairs: rows, opts: { quality: false, dedup: false, semdedup: false, cluster: false, cot: false, pii: false, detectErrors: true, errorAction: 'review' } });
   assert.equal(r.ok, true);
   assert.ok(r.report.label_errors.flagged >= 2);
   assert.equal(r.n_kept, before, 'review action drops zero pairs');
@@ -645,7 +648,8 @@ test('curate-integration: detectErrors filter drops the flagged set', async () =
   for (let c = 0; c < 3; c++) for (let k = 0; k < 10; k++) rows.push({ input: topics[c] + ' q ' + k, output: topics[c] + ' detailed answer ' + k, cluster_id: 'c' + c });
   rows[4].output = topics[1] + ' detailed answer foreign';
   rows[22].output = topics[0] + ' detailed answer foreign';
-  const r = await curatePairs({ namespace: 'df', pairs: rows, opts: { quality: false, dedup: false, cluster: false, cot: false, pii: false, detectErrors: true, errorAction: 'filter' } });
+  // semdedup:false isolates detectErrors (see the review test above).
+  const r = await curatePairs({ namespace: 'df', pairs: rows, opts: { quality: false, dedup: false, semdedup: false, cluster: false, cot: false, pii: false, detectErrors: true, errorAction: 'filter' } });
   assert.equal(r.ok, true);
   const flagged = r.report.label_errors.flagged;
   assert.ok(flagged >= 2);

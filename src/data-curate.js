@@ -62,7 +62,23 @@ import { spawnSync } from 'node:child_process';
 import * as eventStore from './event-store.js';
 import activeLearning, { _bucketKey as _bucketKeyImported } from './active-learning.js';
 import { minhashPredup } from './minhash-dedup.js';
+import { semDedup } from './data-semdedup.js';
+import { valuePairsByInfluence } from './data-value-influence.js';
+import { valuePairsByShapley } from './data-shapley.js';
+import { selectByDSIR } from './data-dsir.js';
 import { selectInformativeSubset } from './data-select.js';
+
+// Genuine DSIR (src/data-dsir.js) is the DEFAULT 'dsir' SELECT path when a target
+// corpus is supplied. The v1 seeded-uniform calibration defect (multiplier 2^22 and
+// divisor 2^53 -> draws averaged ~1.0/0.25 and clamped, biasing the Gumbel-top-k
+// importance-resampling draw) is FIXED: data-dsir._seededUniform now assembles a
+// 32-bit hi + 20-bit lo mantissa over 2^52 (verified uniform, chi-square pass, no
+// clamping). An operator can force the centroid-cosine proxy instead by setting
+// KOLM_DSIR_DISABLE=1 (escape hatch; the real module stays the default).
+function _dsirRealEnabled() {
+  const v = process.env.KOLM_DSIR_DISABLE;
+  return !(v === '1' || v === 'true');
+}
 // The INGEST stage (data-ingest.js) is the single authority on where a namespace's
 // raw-pairs.jsonl lives. Reuse its path so curate reads exactly where ingest wrote,
 // in every KOLM_DATA_DIR config (data-ingest treats KOLM_DATA_DIR as the data root
@@ -408,12 +424,38 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       //          Catches paraphrases/near-dups the coarse 3-gram dedup misses.
       minhash: true,
       minhashThreshold: 0.85, // true-Jaccard floor for the verify pass
+      // semdedup: SemDeDup (Abbas et al. 2023) embedding-cluster SEMANTIC dedup,
+      //          runs AFTER the surface MinHash pre-pass and BEFORE the python
+      //          embedding dedup. Catches PARAPHRASE near-dups that share few
+      //          shingles (MinHash is blind to them). Pure JS, deterministic,
+      //          embeds LOCALLY (no hyperscaler) -> safe to default ON. Gated to
+      //          work.length > 1 (n<=1 is a recorded no-op). The single knob is
+      //          `epsilon`: a member is a semantic dup of a kept neighbor when
+      //          cosine > (1 - epsilon); bigger epsilon = looser = fewer removed.
+      semdedup: true,
+      epsilon: 0.05,          // SemDeDup cosine slack (sim_threshold = 1 - epsilon)
+      semdedupKeep: 'low-density', // keep policy: paper's keep-low-density default
+      semdedupEmbedder: null, // optional injected real embedder (else local hash-bag)
       // target_size: when set (>0), run an informative-subset SELECTION stage
       //          after the filter stages. >1 = absolute count, 0<x<=1 = fraction.
       target_size: 0,
       select_strategy: 'diversity', // 'diversity' (self-coverage) | 'dsir' (target-matched)
       diversity_tau: 0.9,
       target_items: null, // reference distribution for the 'dsir' strategy
+      // ── OPT-IN targeted-VALUATION score source for the SELECT stage ──
+      // valueStrategy: 'quality' (default; pointwise informativeness) | 'influence'
+      //   (LESS/TracIn/EK-FAC gradient-influence vs the holdout, from a gradient
+      //   store the env-gated GPU worker writes) | 'shapley' (KNN/MC marginal
+      //   value vs a small val set). When set, the resulting per-pair scores feed
+      //   the EXISTING selectInformativeSubset/reprFilterSelect `scores` param -
+      //   the selection ALGORITHM is unchanged; only the score SOURCE changes.
+      //   Both default OFF -> zero behavior change unless explicitly requested.
+      valueStrategy: 'quality',
+      gradStoreDir: null,         // override for the influence gradient-store root
+      influenceMethod: 'less',    // 'less' | 'tracin' | 'ekfac'
+      shapleyVal: null,           // holdout val_pairs defining Shapley utility
+      shapleyMethod: 'knn',       // 'knn' | 'mc' | 'auto'
+      shapleyK: null,             // KNN neighborhood size (default min(5,N))
       // ── W921 frontier stages are OPT-IN on the base curatePairs() API ──
       // These ADDITIVE stages surface new report blocks (report.quality,
       // report.topics, report.label_errors). They are DEFAULT-OFF here to
@@ -470,8 +512,13 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       n_clusters: null,
       // minhash: the MinHash pre-pass report block (null if not run).
       minhash: null,
+      // semdedup: the SemDeDup semantic-dedup report block (null if not run).
+      semdedup: null,
       // selection: the SELECT-stage report block (null if no target_size).
       selection: null,
+      // valuation: the OPT-IN targeted-valuation report (influence/shapley) that
+      //   sourced the SELECT scores (null unless valueStrategy != 'quality').
+      valuation: null,
       // ── W921 opt-in report blocks (null/absent unless the new stages run) ──
       // quality: learned-classifier report {backend, mode, threshold_used, kept,
       //   dropped, score_p50, score_p10} (null when qualityClassifier off).
@@ -536,17 +583,59 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           verify: true,
         });
         if (pre && Array.isArray(pre.kept)) {
-          report.deduped += Math.max(0, work.length - pre.kept.length);
+          const minhashRemoved = Math.max(0, work.length - pre.kept.length);
+          report.deduped += minhashRemoved;
           report.minhash = pre.report;
           report.n_clusters = (pre.report && typeof pre.report.n_clusters === 'number')
             ? pre.report.n_clusters
             : (Array.isArray(pre.clusters) ? pre.clusters.length : null);
-          report.backend_used = 'minhash-js';
+          // Only stamp backend_used when the pre-pass actually REMOVED a row. A
+          // default-on pass that collapses nothing did no dedup work and must not
+          // claim the slot (keeps backend_used:'none' meaningful when every
+          // removing stage is a no-op). The report.minhash block still records
+          // that the pass ran.
+          if (minhashRemoved > 0) report.backend_used = 'minhash-js';
           work = pre.kept;
         }
       } catch (e) {
         // minhash pre-pass is best-effort - never fails curate.
         report.minhash = { skipped: 'error:' + String((e && e.message) || e) };
+      }
+    }
+
+    // b1. semdedup - SemDeDup (Abbas et al. 2023) embedding-cluster SEMANTIC
+    //     dedup. Runs AFTER the surface MinHash pre-pass (b0) and BEFORE the
+    //     python embedding dedup (b), so the costly python pass / SELECT stage
+    //     only ever sees the semantic survivors. Catches PARAPHRASE near-dups
+    //     that share too few shingles for MinHash to see. Pure JS, deterministic,
+    //     embeds LOCALLY (no hyperscaler). DEFAULT-ON; gated to work.length > 1
+    //     (a single row is a recorded no-op). Never throws - degrades to a no-op
+    //     and records the reason via report.semdedup.backend_used.
+    if (o.semdedup && work.length > 1) {
+      try {
+        const sd = semDedup(work, {
+          epsilon: Number.isFinite(Number(o.epsilon)) ? Number(o.epsilon) : 0.05,
+          keep: o.semdedupKeep || 'low-density',
+          embedder: typeof o.semdedupEmbedder === 'function' ? o.semdedupEmbedder : undefined,
+          seed: Number.isFinite(Number(o.semdedupSeed)) ? Number(o.semdedupSeed) : undefined,
+          k: Number.isFinite(Number(o.semdedupK)) ? Number(o.semdedupK) : undefined,
+        });
+        if (sd && Array.isArray(sd.kept) && sd.report) {
+          const semRemoved = Math.max(0, work.length - sd.kept.length);
+          report.deduped += semRemoved;
+          report.semdedup = sd.report;
+          // Compose backend_used: semdedup ALWAYS records that the JS semantic
+          // dedup ran (even when it removed 0 - the stage executed and the
+          // report carries its result), chaining onto any prior minhash slot.
+          const semBackend = sd.report.backend_used || 'semdedup-js';
+          report.backend_used = report.backend_used === 'none'
+            ? semBackend
+            : report.backend_used + '+' + semBackend;
+          work = sd.kept;
+        }
+      } catch (e) {
+        // semantic dedup is best-effort - never fails curate.
+        report.semdedup = { skipped: 'error:' + String((e && e.message) || e) };
       }
     }
 
@@ -704,6 +793,61 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
     const targetSize = Number(o.target_size);
     if (Number.isFinite(targetSize) && targetSize > 0 && work.length > 0) {
       try {
+        // OPT-IN targeted valuation: compute a per-pair score vector from a
+        // gradient-influence store (LESS/TracIn/EK-FAC) or Data Shapley and feed
+        // it as the `scores` source for the EXISTING selection algorithm. The
+        // selection math is unchanged; only the order/weights source changes from
+        // pointwise quality to targeted value. Default OFF (valueStrategy quality).
+        let valueScores = null;
+        if (o.valueStrategy === 'influence') {
+          const inf = valuePairsByInfluence({
+            pairs: work,
+            namespace: ns,
+            gradStoreDir: o.gradStoreDir || null,
+            method: o.influenceMethod || 'less',
+          });
+          if (inf && inf.ok && Array.isArray(inf.scores)) {
+            // null (unmatched) -> floor to the pair's pointwise quality score so a
+            // partially-covered store still orders every survivor.
+            valueScores = inf.scores.map((s, i) => (
+              Number.isFinite(Number(s)) ? Number(s)
+                : (Number.isFinite(Number(work[i] && work[i].quality_score)) ? Number(work[i].quality_score) : 0.5)
+            ));
+            report.valuation = {
+              basis: 'influence',
+              method: inf.method,
+              backend_used: inf.report ? inf.report.backend_used : null,
+              proj_dim: inf.report ? inf.report.proj_dim : null,
+              proj_seed: inf.report ? inf.report.proj_seed : null,
+              model_fingerprint: inf.report ? inf.report.model_fingerprint : null,
+              n_scored: inf.n_scored,
+              n_unmatched: inf.n_unmatched,
+              version: inf.version,
+            };
+          } else if (inf && inf.ok === false) {
+            // fail-closed read (e.g. holdout_disjointness_unattested): do NOT fall
+            // back to a fabricated order - record the refusal, keep pointwise path.
+            report.valuation = { basis: 'influence', skipped: 'refused:' + (inf.error || 'unreadable'), version: inf.version };
+          }
+        } else if (o.valueStrategy === 'shapley' && Array.isArray(o.shapleyVal) && o.shapleyVal.length) {
+          const shap = valuePairsByShapley({
+            pairs: work,
+            val_pairs: o.shapleyVal,
+            method: o.shapleyMethod || 'knn',
+            K: Number.isFinite(Number(o.shapleyK)) ? Number(o.shapleyK) : undefined,
+          });
+          if (shap && shap.ok && Array.isArray(shap.values)) {
+            valueScores = shap.values.map((v) => (Number.isFinite(Number(v)) ? Number(v) : 0));
+            report.valuation = {
+              basis: 'shapley',
+              method: shap.method,
+              n_negative: Array.isArray(shap.harmful_indices) ? shap.harmful_indices.length : 0,
+              backend_used: 'shapley-js',
+              version: shap.version,
+            };
+          }
+        }
+
         if (o.diversitySelect) {
           // OPT-IN: embedding-native diversity algorithm (k-center / facility-
           // location / badge) from src/data-diversity-select.js.
@@ -725,13 +869,63 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
               version: sel.version,
             };
           }
+        } else if (
+          (o.select_strategy === 'dsir' || o.select_strategy === 'dsir-real')
+          && _dsirRealEnabled()
+          && Array.isArray(o.target_items) && o.target_items.length
+        ) {
+          // DEFAULT genuine DSIR (hashed n-gram importance resampling, src/data-dsir.js)
+          // whenever a target corpus is present. The v1 seeded-uniform calibration
+          // defect is fixed (see _dsirRealEnabled note); KOLM_DSIR_DISABLE=1 forces the
+          // centroid-cosine proxy below. Routes through the real module end-to-end and
+          // reports the true basis + KL-toward-target diagnostics.
+          const dres = selectByDSIR({
+            pairs: work,
+            target_items: o.target_items,
+            target_size: targetSize,
+            buckets: Number.isFinite(Number(o.dsir_buckets)) ? Number(o.dsir_buckets) : undefined,
+            ngrams: Number.isFinite(Number(o.dsir_ngrams)) ? Number(o.dsir_ngrams) : undefined,
+            alpha: Number.isFinite(Number(o.dsir_alpha)) ? Number(o.dsir_alpha) : undefined,
+            seed: Number.isFinite(Number(o.dsir_seed)) ? Number(o.dsir_seed) : undefined,
+          });
+          if (dres && dres.ok && Array.isArray(dres.kept)) {
+            const beforeSel = work.length;
+            work = dres.kept;
+            report.selection = {
+              strategy: 'dsir',
+              target_size: targetSize,
+              n_in: beforeSel,
+              n_selected: work.length,
+              dropped: Math.max(0, beforeSel - work.length),
+              basis: dres.basis || 'dsir-hashed-ngram-importance-resampling',
+              kl_improvement: (dres.diagnostics && dres.diagnostics.kl_improvement) != null
+                ? dres.diagnostics.kl_improvement : dres.kl_improvement,
+              diagnostics: dres.diagnostics,
+              version: dres.version,
+            };
+          } else {
+            // real DSIR refused (e.g. no usable target) -> record + fall through
+            // to the proxy on the next compile; here we leave work unchanged.
+            report.selection = { strategy: 'dsir', skipped: 'dsir_real:' + ((dres && dres.error) || 'unusable') };
+          }
         } else {
-          const strategy = o.select_strategy === 'dsir' ? 'dsir' : 'diversity';
+          // 'dsir' here means the real module refused or was disabled (fall through);
+          // 'dsir-lite' is the explicit centroid-cosine target proxy. Both feed the
+          // target corpus into selectInformativeSubset; bare 'diversity' is self-coverage.
+          const isTargeted = o.select_strategy === 'dsir' || o.select_strategy === 'dsir-lite';
+          const strategy = o.select_strategy === 'dsir'
+            ? 'dsir'
+            : (o.select_strategy === 'dsir-lite' ? 'dsir-lite' : 'diversity');
           const selOpts = {
             diversity_tau: Number.isFinite(Number(o.diversity_tau)) ? Number(o.diversity_tau) : 0.9,
           };
-          if (strategy === 'dsir' && Array.isArray(o.target_items) && o.target_items.length) {
+          if (isTargeted && Array.isArray(o.target_items) && o.target_items.length) {
             selOpts.target_items = o.target_items;
+          }
+          // targeted valuation scores (influence/shapley) plug into the EXISTING
+          // scores-capable selection seam; null leaves the pointwise default.
+          if (Array.isArray(valueScores) && valueScores.length === work.length) {
+            selOpts.scores = valueScores;
           }
           const sel = selectInformativeSubset(work, targetSize, selOpts);
           if (sel && Array.isArray(sel.kept)) {
@@ -739,6 +933,8 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
             work = sel.kept;
             report.selection = {
               strategy,
+              value_strategy: (o.valueStrategy === 'influence' || o.valueStrategy === 'shapley') && Array.isArray(valueScores)
+                ? o.valueStrategy : 'quality',
               target_size: targetSize,
               diversity_tau: selOpts.diversity_tau,
               n_in: beforeSel,
