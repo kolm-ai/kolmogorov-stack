@@ -22,11 +22,23 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+// C4 - frontier-completion knobs (DAPO/GSPO/vLLM) + proven run-meta. These are
+// additive: the trainer-arg + run-meta-arg builders both emit an EMPTY array
+// for a default (non-frontier) config, so importing them cannot change the
+// legacy GRPO spawn or any existing-test outcome.
+import { buildTrainerArgs as buildFrontierArgs } from './distill-grpo-frontier.js';
+import {
+  buildRunMetaArgs,
+  foldRunMetaIntoReceipt,
+} from './distill-grpo-runmeta.js';
+
 const _here = path.dirname(fileURLToPath(import.meta.url));
 const _repoRoot = path.resolve(_here, '..');
 
 export const REWARD_FAMILIES = ['code_exec', 'math_checker', 'schema_validator', 'format', 'kolm_verifier'];
-export const LOSS_TYPES = ['grpo', 'bnpo', 'dr_grpo'];
+// C4 adds 'dapo' so a frontier GRPO run (DAPO objective) resolves through the
+// shared trainer entry. Unknown loss types still reject (unknown_loss_type).
+export const LOSS_TYPES = ['grpo', 'bnpo', 'dr_grpo', 'dapo'];
 
 const INSTALL_HINT = [
   'GRPO / RLVR requires trl (>=0.12.0) + torch + transformers + peft.',
@@ -128,6 +140,16 @@ export function trainGrpo({
   namespace = 'default',
   tenant_id = 'local',
   timeoutMs = 60 * 60 * 1000,
+  // C4 - optional frontier-completion config. When omitted (the default), NO
+  // new trainer flags are emitted and the spawn is byte-identical to before, so
+  // every existing GRPO test outcome is unchanged. When supplied, the DAPO/GSPO/
+  // vLLM knobs (dynamic sampling, sequence-level IS, clip-higher, soft overlong
+  // punishment) + run-meta recording are forwarded to train_grpo.py and the
+  // proven run_meta is folded into the returned envelope. frontierClaims names
+  // which mechanisms the caller wants PROVEN before the (downstream) receipt is
+  // signed; the run_meta gate fail-closes if any claim is un-backed.
+  frontier = null,
+  frontierClaims = null,
 } = {}) {
   if (!promptsPath || !fs.existsSync(promptsPath)) {
     return { ok: false, error: 'prompts_missing', detail: `prompts file not found: ${promptsPath}` };
@@ -178,6 +200,24 @@ export function trainGrpo({
   ];
   if (sftWarmupAdapter) args.push('--sft-warmup-adapter', sftWarmupAdapter);
 
+  // C4 - append the frontier + run-meta flags. With frontier=null both builders
+  // return [], so the spawn argv is unchanged from the legacy path. When a
+  // frontier config is supplied the DAPO/GSPO/vLLM knobs + (optional) run-meta
+  // recording are forwarded to train_grpo.py. buildFrontierArgs validates its
+  // own enums (loss_type/IS-level/scale-rewards/vllm) and throws fail-loud on a
+  // bad knob BEFORE any GPU spend.
+  let _frontierArgs = [];
+  let _runMetaArgs = [];
+  if (frontier && typeof frontier === 'object') {
+    try {
+      _frontierArgs = buildFrontierArgs(frontier);
+      _runMetaArgs = buildRunMetaArgs(frontier);
+    } catch (e) {
+      return { ok: false, error: 'frontier_config_invalid', detail: e.message, run_dir: runDir };
+    }
+    args.push(..._frontierArgs, ..._runMetaArgs);
+  }
+
   let result;
   try {
     result = spawnSync(_pythonBin(), args, { stdio: 'pipe', timeout: timeoutMs });
@@ -202,7 +242,7 @@ export function trainGrpo({
   if (fs.existsSync(manifestPath)) {
     try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch (_) { /* tolerate */ }
   }
-  return {
+  const envelope = {
     ok: true,
     kind: 'distill_grpo',
     reward_functions: rewards,
@@ -211,6 +251,25 @@ export function trainGrpo({
     manifest,
     stdout: stdout.slice(-2000),
   };
+
+  // C4 - when the caller requested specific frontier mechanisms be PROVEN, fold
+  // the trainer's emitted run_meta into the envelope via the fail-CLOSED gate:
+  // foldRunMetaIntoReceipt THROWS rather than write an un-backed frontier claim.
+  // This carries the proven run_meta onto the envelope the receipt chain signs.
+  // No claims => no fold => byte-identical to before.
+  if (frontierClaims && manifest && manifest.schema) {
+    try {
+      foldRunMetaIntoReceipt(envelope, manifest, frontierClaims);
+    } catch (e) {
+      return {
+        ok: false,
+        error: 'run_meta_claim_unbacked',
+        detail: e.message,
+        run_dir: runDir,
+      };
+    }
+  }
+  return envelope;
 }
 
 export default {

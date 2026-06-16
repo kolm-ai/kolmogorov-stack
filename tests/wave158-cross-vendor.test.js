@@ -140,12 +140,18 @@ test('catalog: student-base catalog covers both western + chinese origins', asyn
   assert.equal(isKnownStudentBase('totally-fake-base'), false);
 });
 
-test('catalog: distillation methods are the four canonical ones', async () => {
+test('catalog: distillation methods include the canonical four + rejection_sampling', async () => {
   const { DISTILLATION_METHODS, isKnownDistillationMethod } = await import('../workers/distill/catalog.mjs');
+  // The four canonical SFT/KD methods plus the C4 best-of-N trainer are always
+  // advertised. The cross-tokenizer methods (seq-level-kd, uld) are env-gated
+  // behind KOLM_CROSS_TOKENIZER_KD and are absent here by default.
   assert.deepEqual([...DISTILLATION_METHODS].sort(),
-    ['full-ft', 'lora', 'prompt-distill', 'qlora']);
+    ['full-ft', 'lora', 'prompt-distill', 'qlora', 'rejection_sampling']);
   assert.equal(isKnownDistillationMethod('lora'), true);
+  assert.equal(isKnownDistillationMethod('rejection_sampling'), true);
   assert.equal(isKnownDistillationMethod('rlhf'), false);
+  // Gated methods are not accepted unless the operator arms the flag.
+  assert.equal(isKnownDistillationMethod('uld'), false);
 });
 
 // ---------------------------------------------------------------------------

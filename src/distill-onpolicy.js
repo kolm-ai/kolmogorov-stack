@@ -128,6 +128,14 @@ export function trainOnPolicy({
   beta = 0.5,                // GKD JSD interpolation
   lmbda = 0.5,               // on-policy data fraction (final)
   temperature = 1.0,
+  // C4 - the rebuilt in-repo GKD trainer (train_gkd.py) accepts a determinism
+  // seed + an on-policy warmup fraction + a generation length for the student
+  // rollouts inside the JSD loop. They default to the trainer's own defaults
+  // (42 / 0.1 / 256), so forwarding them does NOT change behavior for callers
+  // that omit them; it only lets the receipt chain pin what was actually run.
+  seed = 42,
+  warmupFrac = 0.1,
+  maxNewTokens = 256,
   timeoutMs = 30 * 60 * 1000,
 } = {}) {
   if (!pairsPath || !fs.existsSync(pairsPath)) {
@@ -177,6 +185,9 @@ export function trainOnPolicy({
       '--beta', String(beta),
       '--lmbda', String(lmbda),
       '--temperature', String(temperature),
+      '--seed', String(seed),
+      '--warmup-frac', String(warmupFrac),
+      '--max-new-tokens', String(maxNewTokens),
       '--namespace', namespace,
     ];
   } else {
@@ -217,6 +228,16 @@ export function trainOnPolicy({
       try { manifest = JSON.parse(fs.readFileSync(mp, 'utf8')); break; } catch (_) {} // deliberate: cleanup
     }
   }
+  // C4 - surface the REALIZED on-policy fraction the trainer measured from the
+  // actual student rollouts inside the JSD loop (manifest.realized_on_policy_
+  // fraction.overall), so a caller / receipt chain can assert what truly ran
+  // instead of trusting the SCHEDULED lmbda. Null when the (older/external)
+  // trainer did not emit it.
+  const realizedOnPolicyFraction = (manifest
+    && manifest.realized_on_policy_fraction
+    && typeof manifest.realized_on_policy_fraction.overall === 'number')
+    ? manifest.realized_on_policy_fraction.overall
+    : null;
   return {
     ok: true,
     kind: 'distill_onpolicy',
@@ -224,6 +245,7 @@ export function trainOnPolicy({
     teacher: t.source === 'in_repo' ? teacher : (teacher || null),
     run_dir: runDir,
     manifest,
+    realized_on_policy_fraction: realizedOnPolicyFraction,
     stdout: stdout.slice(-2000),
   };
 }

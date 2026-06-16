@@ -1,0 +1,67 @@
+{
+  "$schema": "https://kolm.ai/schemas/distill-recipe/v1.json",
+  "name": "dapo-rlvr-frontier",
+  "description": "Frontier RLVR recipe: DAPO token-level loss + GSPO sequence importance sampling + Clip-Higher asymmetric clip + DAPO dynamic sampling (drop zero-variance groups, oversample to refill). The verifiable reward is code_exec (sandboxed unit tests) which IS the K-score verifier -- train-eval mismatch is a hard error. vLLM rollouts are env-gated (KOLM_VLLM=1 + import vllm). Citations: DAPO arXiv:2503.14476, GSPO arXiv:2507.18071, Dr.GRPO arXiv:2503.20783.",
+  "version": "1.0.0",
+
+  "seeds": {
+    "target": 512,
+    "generator": "scripts/trinity-2000-v2-seed-gen.mjs",
+    "buckets": {
+      "code_easy": 128,
+      "code_medium": 256,
+      "code_hard": 128
+    }
+  },
+
+  "teachers": [
+    { "slug": "local:qwen2.5-coder-7b", "weight": 1.0, "rows": 512, "source": "local" }
+  ],
+
+  "scrub": {
+    "cot": {
+      "markers_path": "workers/distill/scripts/cot_markers.json",
+      "strategy": "rsplit_close_tag",
+      "drop_if_no_close_tag": true
+    }
+  },
+
+  "train": {
+    "method": "qlora",
+    "student_base": "Qwen/Qwen2.5-Coder-3B-Instruct",
+    "lora": { "r": 32, "alpha": 64, "dropout": 0.05 },
+    "max_seq_len": 1024,
+    "epochs": 1,
+    "batch_size": 2,
+    "lr": 1.0e-4,
+    "warmup_ratio": 0.05
+  },
+
+  "grpo": {
+    "reward": "code_exec",
+    "rewards": ["code_exec"],
+    "loss_type": "dapo",
+    "importance_sampling_level": "sequence",
+    "scale_rewards": "none",
+    "epsilon_high": 0.28,
+    "mask_truncated_completions": true,
+    "dynamic_sampling": true,
+    "target_groups": 64,
+    "max_resample_factor": 3,
+    "use_vllm": true,
+    "vllm_mode": "colocate",
+    "num_generations": 8,
+    "max_completion_length": 1024,
+    "sft_warmup": true,
+    "note": "code_exec reward = the K-score verifier; train-eval mismatch is a hard error. Dynamic sampling drops zero-variance groups (sd(r)=0 -> A_i=0). use_vllm is env-gated (KOLM_VLLM=1); falls back LOUD to HF otherwise."
+  },
+
+  "eval": {
+    "strict_cot": false,
+    "holdout_n": 64,
+    "bench": "none",
+    "out_path": "student/eval-dapo-frontier-64.jsonl"
+  },
+
+  "system_prompt": "You are a coding model. Reason step by step inside <think>...</think>, then return ONLY the final Python solution in a ```python ... ``` block. The solution must pass the hidden unit tests."
+}

@@ -2380,6 +2380,19 @@ DISTILL MODES (wave 918)
                    prompt→completion pair; the teacher's tool calls + tool
                    results + final answer are captured so the student learns
                    the whole agent loop, not just the final message.
+  --mode=rejection_sampling
+                   best-of-N (RAFT/STaR/ReST). For each prompt sample N
+                   candidates, score every candidate with the SAME verifier
+                   path the K-score gate uses, keep the best (or above-floor)
+                   one, then SFT on the accepted set only. Drives
+                   workers/distill/scripts/train_rejection.py via
+                   src/distill-rejection-sampling.js. Run-meta surfaces
+                   accept_rate, mean_candidate_score, N, threshold + a ledger
+                   hash so accept/reject decisions are reproducible.
+                   RS flags: --rs-n <N> --rs-temperature <t>
+                   --rs-threshold <0..1> --rs-threshold-mode best|threshold
+                   --rs-reward <kolm_verifier|math_checker|schema_validator|code_exec>
+                   --rs-reward-cmd <cmd> (custom reward program).
 
 FLAGS
   --json     deterministic JSON envelope for scripts ({job_id, status, ...})

@@ -987,6 +987,62 @@ export async function compileSpec(spec, opts = {}) {
     }
   }
 
+  // C4 - close the speculative-decoding loop with a MEASURED acceptance/speedup
+  // eval. This is opt-in and env-gated: it only runs when the operator has armed
+  // an external speculative runtime bridge (KOLM_SPECEVAL_RUNTIME). On the
+  // default path the gate is off, so the compile-time block keeps its null
+  // acceptance_rate/throughput_speedup and the build is byte-identical (no
+  // existing-test outcome changes). When armed, the harness runs the REAL
+  // draft-propose + target-verify loop over the holdout, fails CLOSED on holdout
+  // overlap, auto-tunes tree_depth, and substitutes the measured block so the
+  // manifest carries acceptance_length + throughput_speedup instead of nulls.
+  if (speculativeDecodingBlock && process.env.KOLM_SPECEVAL_RUNTIME) {
+    try {
+      const { evalSpeculativeDecoding, applyAcceptanceToServeSpec, hashPrompt } = await import('./spec-decode-eval.js');
+      const _salt = spec.job_id || 'kolm-speceval';
+      // The harness evals over the HELD-OUT prompts only and fails CLOSED unless
+      // it can prove they are disjoint from the train set (moat: holdout
+      // disjointness). Derive both sets from the same seedSplit the rest of the
+      // build trusts; when no seed split exists there is nothing provably-held-
+      // out to eval, so skip (keeping the null compile block).
+      const _holdoutRows = (seedSplit && Array.isArray(seedSplit.holdout)) ? seedSplit.holdout : [];
+      const _trainRows = (seedSplit && Array.isArray(seedSplit.train)) ? seedSplit.train : [];
+      const _promptOf = (row) => (typeof row.input === 'string' ? row.input
+        : (typeof row.prompt === 'string' ? row.prompt : JSON.stringify(row.input ?? row.prompt ?? row)));
+      const _evalHoldout = _holdoutRows.map((row) => ({ prompt: _promptOf(row) }));
+      const _trainHashes = _trainRows.length
+        ? _trainRows.map((row) => hashPrompt(_promptOf(row), _salt))
+        : null;
+      const _headKind = process.env.KOLM_SPECEVAL_HEAD_KIND
+        || (/eagle/i.test(String(speculativeDecodingBlock.draft_model || '')) ? 'eagle3'
+          : /medusa/i.test(String(speculativeDecodingBlock.draft_model || '')) ? 'medusa'
+          : 'draft_model');
+      const _treeDepth = speculativeDecodingBlock.num_speculative_tokens;
+      const _evalRes = await evalSpeculativeDecoding({
+        holdout: _evalHoldout,
+        head_kind: _headKind,
+        tree_depth: _treeDepth,
+        trainHashes: _trainHashes,
+        salt: _salt,
+      });
+      if (_evalRes && _evalRes.ok) {
+        // applyAcceptanceToServeSpec is pure (does not mutate the input block).
+        speculativeDecodingBlock = applyAcceptanceToServeSpec(speculativeDecodingBlock, _evalRes);
+      } else {
+        // Fail LOUD but NEVER break the build: keep the compile-time (null) block
+        // and stamp why the measured numbers are absent so the receipt chain is
+        // not silently downgraded.
+        speculativeDecodingBlock = {
+          ...speculativeDecodingBlock,
+          eval_skipped_reason: (_evalRes && _evalRes.error) || 'speceval_failed',
+        };
+        console.error(`[kolm compile] speculative-decoding eval did not produce measured numbers: ${(_evalRes && _evalRes.error) || 'unknown'}`);
+      }
+    } catch (e) {
+      console.error(`[kolm compile] speculative-decoding eval skipped: ${e.message}`);
+    }
+  }
+
   // W916-I3 - prompt cache compile-time fingerprint. Surfaces the operator's
   // intent so a verifier can confirm the serve env matches. Read by serve.py
   // build_engine when KOLM_PROMPT_CACHE env override is absent.

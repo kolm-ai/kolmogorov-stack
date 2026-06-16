@@ -54,6 +54,12 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
+// C4 - pure, dependency-free closed-enum validators for the frontier (DAPO/GSPO/
+// vLLM) + run-meta grpo knobs. Both return [] for a recipe that carries none of
+// the new keys, so importing them cannot change validation of existing recipes.
+import { validateFrontierGrpo } from './distill-grpo-frontier.js';
+import { validateRunMetaGrpo } from './distill-grpo-runmeta.js';
+
 const _here = path.dirname(fileURLToPath(import.meta.url));
 const _repoRoot = path.resolve(_here, '..');
 
@@ -84,9 +90,13 @@ const VALID_OPTIMS = new Set([
   'adamw_torch', 'adamw_8bit', 'paged_adamw_8bit',
   'galore_adamw', 'galore_adamw_8bit', 'galore_adamw_layerwise', 'galore_adafactor',
 ]);
-// GRPO loss variants (trl).
-const VALID_GRPO_LOSS_TYPES = new Set(['grpo', 'bnpo', 'dr_grpo']);
+// GRPO loss variants (trl). C4 adds 'dapo' (the DAPO objective: clip-higher +
+// dynamic sampling + soft overlong punishment) so the frontier recipe validates
+// through the shared loader. 'bogus'/unknown still reject.
+const VALID_GRPO_LOSS_TYPES = new Set(['grpo', 'bnpo', 'dr_grpo', 'dapo']);
 const VALID_GRPO_IS_LEVELS = new Set(['token', 'sequence']);
+// C4 - scale_rewards may be a boolean (legacy) OR one of the trl string modes.
+const VALID_GRPO_SCALE_REWARDS = new Set(['group', 'batch', 'none']);
 const VALID_GRPO_REWARDS = new Set(['code_exec', 'math_checker', 'schema_validator', 'format', 'kolm_verifier']);
 // Preference objectives (kept in sync with src/distill-preference.js).
 const VALID_PREFERENCE_OBJECTIVES = new Set(['dpo', 'simpo', 'orpo', 'kto', 'sppo']);
@@ -343,9 +353,18 @@ function _validateGrpo(grpo) {
   if (grpo.max_completion_length !== undefined && (typeof grpo.max_completion_length !== 'number' || grpo.max_completion_length <= 0)) {
     issues.push('grpo.max_completion_length must be a positive number');
   }
-  if (grpo.scale_rewards !== undefined && typeof grpo.scale_rewards !== 'boolean') {
-    issues.push('grpo.scale_rewards must be a boolean');
+  if (grpo.scale_rewards !== undefined
+    && typeof grpo.scale_rewards !== 'boolean'
+    && !VALID_GRPO_SCALE_REWARDS.has(grpo.scale_rewards)) {
+    issues.push(`grpo.scale_rewards must be a boolean or one of: ${Array.from(VALID_GRPO_SCALE_REWARDS).join(', ')}`);
   }
+  // C4 - validate the frontier (DAPO/GSPO/vLLM) + run-meta knobs via the same
+  // closed-enum, fail-before-spend validators the trainer-arg builders use, so
+  // a malformed frontier recipe is rejected by the SHARED loader before any GPU
+  // spend. Both validators are additive: a recipe with none of these keys
+  // returns no issues, so existing recipes validate exactly as before.
+  for (const i of validateFrontierGrpo(grpo)) issues.push(i);
+  for (const i of validateRunMetaGrpo(grpo)) issues.push(i);
   return issues;
 }
 

@@ -195,7 +195,21 @@ export const STUDENT_BASES = {
 // stack is available (worker collects pairs but doesn't train); "lora" is the
 // default real-training method; "qlora" pairs quantization with LoRA; "full-ft"
 // is full-parameter fine-tune (rare for small bases but legal to record).
-export const DISTILLATION_METHODS = ['lora', 'qlora', 'full-ft', 'prompt-distill'];
+// C4: "rejection_sampling" (RAFT/STaR/ReST best-of-N) selects+SFTs an accepted
+// set scored by the SAME verifier path the K-score gate uses; the trainer is
+// the in-repo workers/distill/scripts/train_rejection.py driven by
+// src/distill-rejection-sampling.js. The cross-tokenizer KD methods
+// ("seq-level-kd", "uld") ship gated behind KOLM_CROSS_TOKENIZER_KD=1 because
+// they are a DISTINCT objective requiring teacher cross-vocab logit access (not
+// because the math is unfinished - the ULD readout is a correct semi-relaxed
+// entropic-OT transport; see src/distill-cross-tokenizer.js uldAlignDistribution).
+// When the flag is OFF they are not advertised and not accepted, so the green
+// path / default artifact hash is unchanged.
+const _CROSS_TOKENIZER_KD = process.env.KOLM_CROSS_TOKENIZER_KD === '1';
+export const DISTILLATION_METHODS = [
+  'lora', 'qlora', 'full-ft', 'prompt-distill', 'rejection_sampling',
+  ...(_CROSS_TOKENIZER_KD ? ['seq-level-kd', 'uld'] : []),
+];
 
 // ----- Helpers -------------------------------------------------------------
 
