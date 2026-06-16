@@ -34,6 +34,11 @@
 
 import { appendEvent, listEvents } from './event-store.js';
 import crypto from 'node:crypto';
+import dns from 'node:dns';
+import net from 'node:net';
+import { promisify } from 'node:util';
+
+const dnsLookup = promisify(dns.lookup);
 
 // ---------------------------------------------------------------------------
 // Event types we know how to emit. Frozen allow-list so a typo in a caller
@@ -139,6 +144,84 @@ function validateEventsList(events) {
   return { ok: true };
 }
 
+// GW - SSRF hardening. A robust private/loopback/link-local/ULA/IPv4-mapped
+// range check over a normalized numeric IP string. Covers the encodings the old
+// dotted-quad regex missed (decimal/octal/hex IPv4, IPv6 ULA/link-local,
+// ::ffff:127.0.0.1 mapped, CGNAT, metadata 169.254.169.254). Returns true when
+// the address is one a tenant-controlled URL must never be allowed to reach.
+function _allowLocal() {
+  return process.env.KOLM_WEBHOOKS_ALLOW_LOCAL === '1';
+}
+
+// Normalize a host that is a numeric IPv4 in decimal/octal/hex form (e.g.
+// "2130706433", "0x7f000001", "0177.0.0.1") to dotted-quad, so the range check
+// below sees a canonical address. Returns the normalized string, or the input
+// unchanged when it is not a recognizable numeric IPv4 encoding.
+function normalizeNumericHost(host) {
+  if (typeof host !== 'string' || !host) return host;
+  let h = host.trim();
+  // Strip IPv6 brackets if present.
+  if (h.startsWith('[') && h.endsWith(']')) h = h.slice(1, -1);
+  if (net.isIP(h)) return h;
+  // Single-integer forms: decimal, 0x-hex, or 0-octal.
+  const single = h.match(/^(0x[0-9a-fA-F]+|0[0-7]*|[1-9][0-9]*)$/);
+  if (single) {
+    let n;
+    try { n = h.toLowerCase().startsWith('0x') ? parseInt(h, 16) : (h[0] === '0' && h.length > 1 ? parseInt(h, 8) : parseInt(h, 10)); } catch { n = NaN; }
+    if (Number.isFinite(n) && n >= 0 && n <= 0xffffffff) {
+      return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+    }
+  }
+  // Dotted forms where octets may be octal/hex (e.g. 0x7f.0.0.1, 0177.0.0.1).
+  const parts = h.split('.');
+  if (parts.length === 4 && parts.every((p) => /^(0x[0-9a-fA-F]+|0[0-7]*|[0-9]+)$/.test(p))) {
+    const octets = parts.map((p) => p.toLowerCase().startsWith('0x') ? parseInt(p, 16) : (p[0] === '0' && p.length > 1 ? parseInt(p, 8) : parseInt(p, 10)));
+    if (octets.every((o) => Number.isFinite(o) && o >= 0 && o <= 255)) return octets.join('.');
+  }
+  return h;
+}
+
+function ipv4ToInt(ip) {
+  const m = ip.split('.').map(Number);
+  if (m.length !== 4 || m.some((o) => !Number.isFinite(o) || o < 0 || o > 255)) return null;
+  return ((m[0] << 24) >>> 0) + (m[1] << 16) + (m[2] << 8) + m[3];
+}
+
+function isPrivateIp(ip) {
+  if (typeof ip !== 'string' || !ip) return true; // unresolved => treat as unsafe
+  const v = net.isIP(ip);
+  if (v === 4) {
+    const n = ipv4ToInt(ip);
+    if (n == null) return true;
+    const inRange = (cidrBase, bits) => (n >>> (32 - bits)) === (ipv4ToInt(cidrBase) >>> (32 - bits));
+    return (
+      inRange('0.0.0.0', 8) ||        // 0.0.0.0/8
+      inRange('10.0.0.0', 8) ||       // private
+      inRange('100.64.0.0', 10) ||    // CGNAT
+      inRange('127.0.0.0', 8) ||      // loopback
+      inRange('169.254.0.0', 16) ||   // link-local (incl. 169.254.169.254 metadata)
+      inRange('172.16.0.0', 12) ||    // private
+      inRange('192.168.0.0', 16) ||   // private
+      inRange('192.0.0.0', 24) ||     // IETF protocol assignments
+      n >= ipv4ToInt('224.0.0.0')     // multicast + reserved (>=224.0.0.0)
+    );
+  }
+  if (v === 6) {
+    let a = ip.toLowerCase();
+    if (a === '::1' || a === '::') return true;
+    // IPv4-mapped (::ffff:127.0.0.1) and IPv4-compatible: extract trailing v4.
+    const mapped = a.match(/(?:::ffff:|::)(\d+\.\d+\.\d+\.\d+)$/);
+    if (mapped) return isPrivateIp(mapped[1]);
+    // fc00::/7 (ULA), fe80::/10 (link-local), ::/8 reserved.
+    const first = a.split(':')[0] || '';
+    const hi = parseInt(first.padStart(4, '0').slice(0, 2), 16);
+    if ((hi & 0xfe) === 0xfc) return true;           // fc00::/7
+    if (a.startsWith('fe8') || a.startsWith('fe9') || a.startsWith('fea') || a.startsWith('feb')) return true; // fe80::/10
+    return false;
+  }
+  return true; // not a valid IP literal => unsafe
+}
+
 function validateUrl(url) {
   if (typeof url !== 'string' || !url) return { ok: false, error: 'url is required' };
   let u;
@@ -150,19 +233,39 @@ function validateUrl(url) {
   if (u.protocol !== 'https:' && u.protocol !== 'http:') {
     return { ok: false, error: 'url must be http(s)' };
   }
-  // Block obvious SSRF targets unless explicitly allowed (e.g. local dev/tests).
-  if (process.env.KOLM_WEBHOOKS_ALLOW_LOCAL !== '1') {
-    const host = u.hostname;
-    const isLocal =
-      host === 'localhost' ||
-      host === '0.0.0.0' ||
-      host === '::1' ||
-      /^127\./.test(host) ||
-      /^10\./.test(host) ||
-      /^192\.168\./.test(host) ||
-      /^169\.254\./.test(host) ||
-      /^172\.(1[6-9]|2\d|3[01])\./.test(host);
-    if (isLocal) return { ok: false, error: 'url resolves to a private/loopback address' };
+  // Block obvious SSRF targets at create time (a fast literal check). Real
+  // protection happens at delivery time (assertPublicUrlAtDelivery) which
+  // resolves DNS, defeating rebinding.
+  if (!_allowLocal()) {
+    const host = normalizeNumericHost(u.hostname);
+    if (host === 'localhost') return { ok: false, error: 'url resolves to a private/loopback address' };
+    if (net.isIP(host) && isPrivateIp(host)) {
+      return { ok: false, error: 'url resolves to a private/loopback address' };
+    }
+  }
+  return { ok: true };
+}
+
+// GW - delivery-time SSRF guard. Resolve the hostname to ALL its addresses and
+// reject if ANY is private/loopback/link-local/ULA/mapped. This defeats DNS
+// rebinding (a public name that later points at 169.254.169.254 or 10.x) which
+// a create-time literal check cannot catch. Returns { ok } or { ok:false, error }.
+export async function assertPublicUrlAtDelivery(rawUrl) {
+  if (_allowLocal()) return { ok: true };
+  let u;
+  try { u = new URL(rawUrl); } catch { return { ok: false, error: 'invalid url' }; }
+  const host = normalizeNumericHost(u.hostname);
+  if (host === 'localhost') return { ok: false, error: 'host resolves to a private address' };
+  // Literal IP host: check directly (no DNS).
+  if (net.isIP(host)) {
+    return isPrivateIp(host) ? { ok: false, error: 'host resolves to a private address' } : { ok: true };
+  }
+  // Named host: resolve every address and reject if ANY is private.
+  let addrs = [];
+  try { addrs = await dnsLookup(host, { all: true }); } catch (e) { return { ok: false, error: 'dns lookup failed: ' + String((e && e.message) || e) }; }
+  if (!addrs.length) return { ok: false, error: 'host did not resolve' };
+  for (const a of addrs) {
+    if (isPrivateIp(a.address)) return { ok: false, error: 'host resolves to a private address' };
   }
   return { ok: true };
 }
@@ -260,6 +363,10 @@ function sign(secret, timestamp, body) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function deliverOnce(sub, event, body) {
+  // GW - re-validate at delivery time (defeats DNS rebinding). Reject before any
+  // socket is opened to a private/metadata address.
+  const guard = await assertPublicUrlAtDelivery(sub.url);
+  if (!guard.ok) return { status: 0, ok: false, error: 'ssrf_blocked: ' + guard.error };
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = sign(sub.secret, timestamp, body);
   const controller = new AbortController();
@@ -276,6 +383,9 @@ async function deliverOnce(sub, event, body) {
         'x-kolm-signature': `t=${timestamp},v1=${signature}`,
       },
       body,
+      // GW - never auto-follow a redirect: a public URL could 302 to a private
+      // one, bypassing the resolve-and-check above. A 3xx is surfaced as-is.
+      redirect: 'manual',
       signal: controller.signal,
     });
     return { status: res.status, ok: res.status >= 200 && res.status < 300 };
@@ -355,6 +465,10 @@ export async function sendTestEvent(tenant, id) {
   return { ok: record.delivered, delivery: record };
 }
 
+// Exposed for tests + any caller that wants to pre-validate a URL the same way
+// delivery does.
+export { isPrivateIp, normalizeNumericHost };
+
 export default {
   WEBHOOK_EVENTS,
   listWebhooks,
@@ -365,4 +479,7 @@ export default {
   listDeliveries,
   sendTestEvent,
   emit,
+  assertPublicUrlAtDelivery,
+  isPrivateIp,
+  normalizeNumericHost,
 };

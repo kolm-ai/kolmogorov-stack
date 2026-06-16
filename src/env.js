@@ -288,3 +288,60 @@ export function envSecret(name) {
   const s = String(v).trim();
   return s.length > 0 ? s : null;
 }
+
+// GW - documented operator env catalog. A single machine-readable registry of
+// the optional env vars the gateway + trainer + webhook surfaces read, so an
+// operator (and the /v1/diagnostics surface) has one place to discover them
+// instead of grepping the source. This is documentation-as-data: it does NOT set
+// defaults (each call site still owns its own default), it only describes them.
+// ASCII-only by repo convention.
+export const KNOWN_ENV_DOCS = Object.freeze({
+  // --- auth / credential lifecycle ---
+  KOLM_KEY_LAST_USED_FLUSH_MS: 'cadence (ms) for the scoped-key last_used_at flush interval (default 30000)',
+  KOLM_KEY_LAST_USED_TRACKING: 'set 1 to track scoped-key last_used_at (opt-in; off by default for hot-path cost)',
+  KOLM_MAGICLINK_GC_MS: 'cadence (ms) for the magic-link dead-token GC sweep (default 3600000 = hourly)',
+  KOLM_MAGICLINK_RETENTION_DAYS: 'audit-retention window (days) before a dead magic-link row is GC\'d (default 7)',
+  KOLM_MAGICLINK_IP_LIMIT: 'magic-link start/recover per-IP cap per 15min (default 5)',
+  KOLM_MAGICLINK_EMAIL_LIMIT: 'magic-link start/recover per-email cap per hour (default 5)',
+  KOLM_MAGICLINK_COOLDOWN_S: 'per-email cooldown (s) before a second magic link is minted (default 45; 0 disables)',
+  KOLM_INVITE_TOKEN_LIMIT: 'team invite preview/accept per-IP cap per 15min (default 60)',
+  // --- teams / store ---
+  KOLM_ALLOW_NONTXN_TEAMS: "set 'true' to permit a teams-enabled prod deploy on the json core driver instead of hard-failing; leave unset in prod",
+  // --- compute / DoS guards ---
+  KOLM_COMPUTE_SPAWN_PER_MIN: 'per-tenant compute-job starts allowed per minute across auto-distill/from-captures/compile (default 12)',
+  KOLM_MAX_CONCURRENT_DISTILL: 'override the plan-derived running distill/compile job ceiling (applies as the floor for every plan)',
+  // --- backups / vault ---
+  KOLM_BACKUP_INCLUDE_VAULT_KEY: "default on; set '0'/'false' to exclude the raw secrets-vault.key from co-located backup snapshots",
+  // --- event store ---
+  KOLM_EVENT_STORE_NO_AUTOCOMPACT: "set '1' to disable opportunistic JSONL compaction in the append hot path",
+  // --- distill ordering / sampling ---
+  KOLM_DISTILL_CURRICULUM: 'ascending|descending|1 - activates curriculum ordering on the default distill path (off by default)',
+  KOLM_DISTILL_IMPORTANCE: 'set 1 to activate importance-weighted sampling on the default distill path',
+  // --- trainer opt-out seams (test/operator) ---
+  KOLM_PREFERENCE_NO_TRAINER: 'set 1 to force the durable no-tool path for preference training',
+  KOLM_ONPOLICY_NO_TRAINER: 'set 1 to force the no-trainer path for white-box on-policy (GKD)',
+  KOLM_ONPOLICY_TEACHER: 'local teacher model path/id for white-box GKD (required for the in_repo on-policy path)',
+  KOLM_SPECDECODE_NO_TRAINER: 'set 1 to force the no-trainer path for the speculative-decoding draft-head trainer',
+  KOLM_PREFERENCE_HANDROLLED: 'set 1 to force the hand-rolled in-repo preference loop over trl',
+  KOLM_GKD_HANDROLLED: 'set 1 to force the hand-rolled in-repo GKD loop over trl',
+  // --- spec-decode backends (OpenAI-compatible) ---
+  KOLM_SPEC_DECODE_BACKEND: 'selects the speculative-decoding backend (llama|vllm|sglang|tgi) for acceleratedChatCompletion',
+  KOLM_LLAMA_DRAFT_URL: 'llama.cpp draft (student) OpenAI-compatible base URL',
+  KOLM_LLAMA_TARGET_URL: 'llama.cpp target (teacher) OpenAI-compatible base URL',
+  KOLM_LLAMA_DRAFT_MODEL: 'optional llama.cpp draft model id',
+  KOLM_LLAMA_TARGET_MODEL: 'optional llama.cpp target model id',
+  KOLM_LLAMA_API_KEY: 'optional bearer for both llama-server endpoints',
+  KOLM_LLAMA_TIMEOUT_MS: 'optional per-call timeout for llama-server (default 60000)',
+  KOLM_VLLM_URL: 'vLLM OpenAI-compatible spec-decode endpoint',
+  KOLM_SGLANG_URL: 'SGLang OpenAI-compatible spec-decode endpoint',
+  KOLM_TGI_URL: 'TGI OpenAI-compatible spec-decode endpoint',
+  KOLM_SGLANG_API_KEY: 'optional bearer for the SGLang endpoint',
+  KOLM_TGI_API_KEY: 'optional bearer for the TGI endpoint',
+  KOLM_SPEC_DECODE_TIMEOUT_MS: 'optional timeout (ms) for the vllm/sglang/tgi spec-decode bridge',
+  // --- quantization / compile ---
+  KOLM_QUANT_OPTIMIZERS: 'opt-in flag for installing workers/quantize/requirements-optimizers.txt (aqlm/quip/qat pinned optimizers)',
+  KOLM_COMPILE_STREAM_DEMO: "set 1 to re-export the demo-only fabricated-metric compile stream for UI prototyping; UNSET in all production/CI",
+  KOLM_ED25519_DISABLE: 'set 1 to disable the compile-pipeline Ed25519 sidecar (ships HMAC-only); see also KOLM_ED25519_PRIVATE_KEY / _PATH / _KEY_STORE',
+  // --- webhooks ---
+  KOLM_WEBHOOKS_ALLOW_LOCAL: 'set 1 to permit webhook delivery to private/loopback URLs (dev/test escape hatch; never set in prod)',
+});

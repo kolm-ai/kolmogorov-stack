@@ -170,7 +170,11 @@ function _extractTimestamp(capture) {
 // We use a 3-gram word-shingle prefix so prompts that share an opening phrase
 // (which is usually the most diagnostic part of intent) cluster together
 // even when the rest differs.
-function _bucketKey(capture) {
+// Public named export (CD-004): data-curate.js imports this directly instead of
+// reaching through the __internals hack, so a refactor of __internals can no
+// longer silently degrade curate's cluster stage to the 3-gram fallback. The
+// __internals._bucketKey alias below is preserved for back-compat.
+export function _bucketKey(capture) {
   // Prefer explicit W811 cluster_id if present (forward-compat).
   if (capture && typeof capture === 'object') {
     if (typeof capture.cluster_id === 'string' && capture.cluster_id.length > 0) {

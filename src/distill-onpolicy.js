@@ -57,7 +57,19 @@ function whichSync(name) {
   return null;
 }
 
+// W713 - resolve the WHITE-BOX on-policy (GKD) trainer. The white-box path's
+// real in-repo trainer IS workers/distill/scripts/train_gkd.py (the GKD
+// hand-rolled / trl JSD loop). It was never wired as the default, so the path
+// was dark. Resolution order:
+//   1. KOLM_ONPOLICY_NO_TRAINER=1 forces the durable no-tool path (test seam,
+//      mirrors src/distill-grpo.js's KOLM_GRPO_NO_TRAINER).
+//   2. $KOLM_ONPOLICY_TRAINER override (JSON array or PATH name) - an override
+//      that points nowhere is "no trainer", not a silent in-repo fallback.
+//   3. A `kolm-onpolicy-distill` / `onpolicy-distill` on PATH.
+//   4. The in-repo train_gkd.py (the genuine white-box trainer). This is the
+//      default that lights up the path.
 function resolveTrainer() {
+  if (process.env.KOLM_ONPOLICY_NO_TRAINER === '1') return null;
   const envCmd = process.env.KOLM_ONPOLICY_TRAINER;
   if (envCmd) {
     try {
@@ -75,6 +87,9 @@ function resolveTrainer() {
     const r = whichSync(name);
     if (r) return { argv: [r], source: 'path' };
   }
+  // In-repo white-box GKD trainer (mirrors distill-grpo.js in_repo fallback).
+  const inRepo = path.join(_repoRoot, 'workers', 'distill', 'scripts', 'train_gkd.py');
+  if (fs.existsSync(inRepo)) return { argv: [_pythonBin(), inRepo], source: 'in_repo' };
   return null;
 }
 
@@ -93,18 +108,26 @@ export function doctor() {
     ok: true,
     ready: true,
     kind: 'distill_onpolicy',
-    trainer: t.argv[0],
+    // For the in_repo GKD path argv is [python, script]; surface the script so
+    // doctor names the actual trainer, not the interpreter.
+    trainer: t.source === 'in_repo' && t.argv.length > 1 ? t.argv[1] : t.argv[0],
     trainer_source: t.source,
+    // White-box GKD needs a local teacher; advertise the requirement.
+    requires_local_teacher: t.source === 'in_repo',
   };
 }
 
 export function trainOnPolicy({
   pairsPath,
   studentPath,
+  teacherPath = null,        // W713 - GKD requires a LOCAL teacher (logits)
   outDir = null,
   tenant_id = 'local',
   namespace = 'default',
   maxSteps = 100,
+  beta = 0.5,                // GKD JSD interpolation
+  lmbda = 0.5,               // on-policy data fraction (final)
+  temperature = 1.0,
   timeoutMs = 30 * 60 * 1000,
 } = {}) {
   if (!pairsPath || !fs.existsSync(pairsPath)) {
@@ -123,16 +146,50 @@ export function trainOnPolicy({
       install_hint: INSTALL_HINT,
     };
   }
+  // W713 - the in-repo white-box trainer is train_gkd.py, which REQUIRES a
+  // local teacher (it computes JSD over teacher logits). Fail loud + actionable
+  // rather than spawning a trainer that will exit 7 with no context. External
+  // / PATH trainers define their own contract, so the teacher gate applies
+  // only to the in_repo GKD path.
+  const teacher = teacherPath || process.env.KOLM_ONPOLICY_TEACHER || null;
+  if (t.source === 'in_repo' && !teacher) {
+    return {
+      ok: false,
+      error: 'teacher_required',
+      kind: 'distill_onpolicy',
+      detail: 'white-box on-policy distillation (GKD) needs a LOCAL teacher for logits. '
+        + 'Pass teacherPath or set $KOLM_ONPOLICY_TEACHER to a local model path/id. '
+        + '(For black-box API teachers, use the ROPD path: trainRopd().)',
+    };
+  }
   const runDir = outDir || path.join(os.homedir(), '.kolm', 'onpolicy-runs', `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
   fs.mkdirSync(runDir, { recursive: true });
-  const args = [...t.argv.slice(1),
-    '--pairs', pairsPath,
-    '--student', studentPath,
-    '--out', runDir,
-    '--max-steps', String(maxSteps),
-    '--namespace', namespace,
-    '--tenant', tenant_id,
-  ];
+  // W713 - the in-repo GKD trainer's CLI uses --prompts/--teacher/--beta/--lmbda
+  // (not the generic --pairs/--max-steps shape the external plugin expects).
+  // Build the argv per source so the in-repo default is invoked correctly.
+  let args;
+  if (t.source === 'in_repo') {
+    args = [...t.argv.slice(1),
+      '--prompts', pairsPath,
+      '--student', studentPath,
+      '--teacher', teacher,
+      '--out', runDir,
+      '--beta', String(beta),
+      '--lmbda', String(lmbda),
+      '--temperature', String(temperature),
+      '--namespace', namespace,
+    ];
+  } else {
+    args = [...t.argv.slice(1),
+      '--pairs', pairsPath,
+      '--student', studentPath,
+      '--out', runDir,
+      '--max-steps', String(maxSteps),
+      '--namespace', namespace,
+      '--tenant', tenant_id,
+    ];
+    if (teacher) args.push('--teacher', teacher);
+  }
   const result = spawnSync(t.argv[0], args, {
     stdio: 'pipe',
     timeout: timeoutMs,
@@ -150,14 +207,21 @@ export function trainOnPolicy({
       run_dir: runDir,
     };
   }
-  const manifestPath = path.join(runDir, 'manifest.json');
+  // W713 - the in-repo GKD trainer writes run-meta.json (parity with
+  // GRPO/preference); external plugins write manifest.json. Read whichever
+  // exists so the receipt is captured for both.
   let manifest = null;
-  if (fs.existsSync(manifestPath)) {
-    try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch (_) {} // deliberate: cleanup
+  for (const name of ['run-meta.json', 'manifest.json']) {
+    const mp = path.join(runDir, name);
+    if (fs.existsSync(mp)) {
+      try { manifest = JSON.parse(fs.readFileSync(mp, 'utf8')); break; } catch (_) {} // deliberate: cleanup
+    }
   }
   return {
     ok: true,
     kind: 'distill_onpolicy',
+    trainer_source: t.source,
+    teacher: t.source === 'in_repo' ? teacher : (teacher || null),
     run_dir: runDir,
     manifest,
     stdout: stdout.slice(-2000),

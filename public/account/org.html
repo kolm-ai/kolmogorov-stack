@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your team - kolm.ai</title>
+<meta name="description" content="Manage your workspace: members, seats, invites, roles, and shared provider keys - all from the product.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#08090A">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/kolm-2026.css">
+<style>
+  /* W-org team panel. Colors come only from kolm-2026.css system tokens
+     (--room page floor, --ink, --accent, --panel, --line, --font-mono).
+     Mirrors public/account/dashboard.html's local primitives 1:1. */
+  body{background:var(--room);color:var(--ink)}
+  body::before,body::after{display:none}
+  .mono{font-family:var(--font-mono)}
+  .app{max-width:1240px;margin:0 auto;padding:clamp(28px,5vw,58px) max(22px,env(safe-area-inset-right)) 90px max(22px,env(safe-area-inset-left))}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:clamp(28px,5vw,52px)}
+  .brandlink{display:inline-flex;align-items:center;gap:9px;min-height:44px;color:var(--ink);text-decoration:none;font-weight:600;letter-spacing:-.01em}
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+  .section-title{font-size:clamp(20px,3vw,26px);letter-spacing:-.02em;margin:34px 0 14px}
+  .grid{display:grid;gap:14px}
+  .grid.metrics{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .grid.cols2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .panel{background:var(--panel,#101314);border:1px solid var(--line,#1d2224);border-radius:14px;padding:18px 20px}
+  .hero{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;padding:26px 28px}
+  .hero b{font-size:clamp(36px,7vw,60px);line-height:1;letter-spacing:-.03em;font-family:var(--font-mono)}
+  .metric span{display:block;font-size:12px;color:var(--ink-mute,#8b9498);margin-bottom:8px;letter-spacing:.02em}
+  .metric b{font-size:30px;font-family:var(--font-mono);letter-spacing:-.02em}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line,#1d2224)}
+  .row:last-child{border-bottom:0}
+  .row .who{min-width:0}
+  .row .who b{display:block;font-size:14px}
+  .row .who span{display:block;font-size:11.5px;color:var(--ink-mute,#8b9498);font-family:var(--font-mono);overflow-wrap:anywhere}
+  .row .act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .chip{display:inline-block;font-family:var(--font-mono);font-size:12px;padding:3px 9px;border:1px solid var(--line,#1d2224);border-radius:999px;color:var(--ink-mute,#8b9498)}
+  .chip.role{color:var(--ink)}
+  .muted{color:var(--ink-mute,#8b9498)}
+  .authbox{max-width:560px;margin:8vh auto;text-align:center}
+  .authbox input,.fld{width:100%;margin:14px 0;padding:13px 15px;border-radius:11px;border:1px solid var(--line,#1d2224);background:#0c0f10;color:var(--ink);font-family:var(--font-mono);box-sizing:border-box}
+  select.fld{margin:0}
+  .btn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 14px;border-radius:11px;text-decoration:none;font-weight:600;cursor:pointer;border:1px solid var(--line,#1d2224);background:transparent;color:var(--ink);font:inherit;font-size:13px}
+  .btn--primary{background:var(--accent,#3FE5A0);color:#06140d;border-color:transparent}
+  .btn--sm{min-height:32px;padding:0 11px;font-size:12px}
+  .btn--danger{border-color:var(--accent-dead,#c2554a);color:var(--accent-dead,#e07a6e)}
+  .banner{border:1px solid var(--line,#1d2224);border-radius:11px;padding:12px 15px;margin-bottom:16px}
+  .banner.warn{border-color:var(--accent-dead,#c2554a)}
+  .banner.rotate{border-color:var(--accent,#3FE5A0);display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .banner.rotate p{margin:0;max-width:70ch}
+  .banner.rotate b{color:var(--accent,#3FE5A0)}
+  .invrow{display:grid;grid-template-columns:minmax(0,1fr) 130px auto;gap:10px;align-items:center}
+  @media (max-width:560px){.invrow{grid-template-columns:1fr}}
+  .seatbar{height:8px;border-radius:999px;background:#0c0f10;border:1px solid var(--line,#1d2224);overflow:hidden;margin:10px 0 4px}
+  .seatbar>i{display:block;height:100%;background:var(--accent,#3FE5A0)}
+  .seatbar.full>i{background:var(--accent-dead,#c2554a)}
+  pre{background:#0c0f10;border:1px solid var(--line,#1d2224);border-radius:11px;padding:14px;overflow:auto;font-size:12.5px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <a class="brandlink" href="/"><span class="mono">kolm</span></a>
+    <nav><a class="chip" href="/account/dashboard" style="text-decoration:none">dashboard</a> <a class="chip" href="/account/overview" style="text-decoration:none">overview</a> <a class="chip" href="/account/train" style="text-decoration:none">train</a> <a class="chip" href="/account/api-control-center" style="text-decoration:none">API control</a></nav>
+  </div>
+  <div id="banner"></div>
+  <main id="main" data-testid="org-root"></main>
+</div>
+<script>
+(function(){
+  'use strict';
+  var KEY = null;
+  try { KEY = sessionStorage.getItem('kolm_account_key') || sessionStorage.getItem('kolm_dash_key') || null; } catch(e) {}
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function headers(extra){ var h = extra ? Object.assign({}, extra) : {}; h.Accept='application/json'; if (KEY) h.Authorization = 'Bearer ' + KEY; return h; }
+  function num(n){ return (typeof n==='number' && isFinite(n)) ? n.toLocaleString() : '0'; }
+
+  // The resolved org. 'current' resolves server-side to the signed-in tenant's
+  // primary org (or a personal-workspace view for a solo tenant).
+  var ORG_ID = 'current';
+  var STATE = { org:null, role:'member', members:[], invites:[], detail:null, providerKeys:[], captures:null };
+  var ROLES = ['viewer','member','admin','owner'];
+  function isAdmin(){ return STATE.role === 'admin' || STATE.role === 'owner'; }
+
+  function showAuth(message){
+    document.getElementById('main').innerHTML =
+      '<div class="authbox panel">'
+      + '<p class="eyebrow">Team</p>'
+      + '<h2 class="section-title" style="margin-top:0">Paste your workspace API key</h2>'
+      + '<p class="muted">' + esc(message || 'Manage members, seats, invites, roles, and shared provider keys here. The key stays on your device.') + '</p>'
+      + '<input id="keyin" type="password" placeholder="ks_..." autocomplete="off" data-testid="key-input">'
+      + '<button class="btn btn--primary" id="keybtn" data-testid="key-submit">Load my team</button>'
+      + '</div>';
+    document.getElementById('keybtn').onclick = function(){
+      var v = (document.getElementById('keyin').value || '').trim();
+      if (!v) return;
+      try { sessionStorage.setItem('kolm_account_key', v); } catch(e) {}
+      KEY = v; load();
+    };
+  }
+
+  function metric(label, value){ return '<div class="panel metric"><span>'+esc(label)+'</span><b data-testid="m-'+esc(label.toLowerCase().replace(/[^a-z0-9]+/g,'-'))+'">'+esc(value)+'</b></div>'; }
+
+  function banner(msg, kind){
+    document.getElementById('banner').innerHTML = '<div class="banner'+(kind?(' '+kind):'')+'" data-testid="org-banner">'+esc(msg)+'</div>';
+  }
+
+  // Rotate shared provider keys banner. The team detail envelope carries
+  // rotate_shared_keys.recommended=true when a member was removed or had their
+  // role lowered, so a shared key they could have read should be rotated. The
+  // dismiss action acknowledges the recommendation via the ack route.
+  function renderRotateBanner(){
+    var d = STATE.detail || {};
+    var rot = d.rotate_shared_keys || {};
+    if (!rot.recommended) return '';
+    var reasonText = { member_removed:'a member was removed from this team', member_role_lowered:'a member\'s role was lowered' }[rot.reason] || 'a membership change';
+    return '<div class="banner rotate" data-testid="rotate-banner">'
+      + '<p><b>Rotate shared provider keys.</b> Because '+esc(reasonText)+', any provider key shared at team scope may still be readable from a cached credential. Rotate team-scoped keys to be safe.</p>'
+      + '<div class="row act" style="padding:0;border:0">'
+      + '<button class="btn btn--sm" data-act="dismiss-rotate" data-event-id="'+esc(rot.event_id||'')+'" data-testid="rotate-dismiss">Dismiss</button>'
+      + '</div></div>';
+  }
+
+  function seatBlock(){
+    var d = STATE.detail || {};
+    var team = STATE.org || {};
+    var ceiling = (d.seat_ceiling != null) ? d.seat_ceiling : (team.seats_max != null ? team.seats_max : null);
+    var used = STATE.members.length || team.member_count || 1;
+    var pct = ceiling ? Math.min(100, Math.round(used / ceiling * 100)) : 0;
+    var full = ceiling != null && used >= ceiling;
+    var line = ceiling != null
+      ? (esc(num(used)) + ' / ' + esc(num(ceiling)) + ' seats' + (full ? ' - upgrade to add more' : ''))
+      : (esc(num(used)) + ' seats');
+    return '<div class="panel" data-testid="panel-seats"><p class="eyebrow">Seats</p>'
+      + '<h3 class="section-title" style="margin:2px 0 8px;font-size:18px">Workspace seats</h3>'
+      + '<div class="row" style="border:0;padding:0"><span class="muted">In use</span><span class="mono" data-testid="seat-line">'+line+'</span></div>'
+      + (ceiling != null ? '<div class="seatbar'+(full?' full':'')+'"><i style="width:'+pct+'%"></i></div>' : '')
+      + (full ? '<p class="muted" style="margin:8px 0 0">You are at your plan ceiling. <a href="/pricing">Upgrade your plan</a> to add more seats.</p>' : '')
+      + '</div>';
+  }
+
+  function memberRow(m){
+    var role = m.role || 'member';
+    var who = m.email || m.tenant_name || m.tenant_id || 'member';
+    var canEdit = isAdmin() && role !== 'owner';
+    var roleSel = canEdit
+      ? '<select class="fld btn--sm" data-act="role" data-tenant="'+esc(m.tenant_id||'')+'" style="width:auto;padding:5px 8px;margin:0" aria-label="Member role">'
+          + ROLES.filter(function(r){ return r!=='owner'; }).map(function(r){ return '<option value="'+r+'"'+(r===role?' selected':'')+'>'+r+'</option>'; }).join('')
+          + '</select>'
+      : '<span class="chip role">'+esc(role)+'</span>';
+    var rm = canEdit ? '<button class="btn btn--sm btn--danger" data-act="remove-member" data-tenant="'+esc(m.tenant_id||'')+'" data-name="'+esc(who)+'">Remove</button>' : '';
+    return '<div class="row" data-testid="member-row"><div class="who"><b>'+esc(who)+'</b><span>'+esc(m.tenant_id||'')+'</span></div><div class="act">'+roleSel+rm+'</div></div>';
+  }
+
+  function inviteRow(iv){
+    var rm = isAdmin() ? '<button class="btn btn--sm btn--danger" data-act="revoke-invite" data-id="'+esc(iv.id||iv.invite_id||'')+'">Revoke</button>' : '';
+    return '<div class="row" data-testid="invite-row"><div class="who"><b>'+esc(iv.email||'pending invite')+'</b><span>role '+esc(iv.role||'member')+(iv.expires_at?' / expires '+esc(iv.expires_at):'')+'</span></div><div class="act"><span class="chip">pending</span>'+rm+'</div></div>';
+  }
+
+  function providerKeyRow(k){
+    var who = (k.provider||'?') + (k.scope ? ' ('+k.scope+')' : '');
+    var canDel = isAdmin() || k.scope !== 'team';
+    var rm = canDel ? '<button class="btn btn--sm btn--danger" data-act="remove-key" data-id="'+esc(k.id||'')+'">Remove</button>' : '';
+    return '<div class="row" data-testid="provider-key-row"><div class="who"><b>'+esc(who)+'</b><span>'+esc(k.key_prefix||k.label||'stored')+'</span></div><div class="act"><span class="chip">'+esc(k.scope||'member')+'</span>'+rm+'</div></div>';
+  }
+
+  function render(){
+    var org = STATE.org || {};
+    var personal = !!org.personal;
+    var html = '';
+
+    html += '<div class="grid"><div class="panel hero" data-testid="hero-org">'
+      + '<p class="eyebrow">Your workspace</p>'
+      + '<b>' + esc(org.name || 'workspace') + '</b>'
+      + '<p class="muted">plan <span class="mono">'+esc(org.plan||'free')+'</span> / your role <span class="mono">'+esc(STATE.role)+'</span>'
+      + (personal ? ' / personal workspace' : '') + '</p>'
+      + '</div></div>';
+
+    if (personal) {
+      html += '<div class="panel" data-testid="personal-note" style="margin-top:14px"><p class="muted">This is a personal workspace - you are not in a shared team yet. '
+        + '<a href="/pricing">Upgrade to a Team plan</a> to invite members, share models, and manage seats. You can still manage your own provider keys below.</p></div>';
+    }
+
+    html += '<div class="grid metrics" style="margin-top:14px">'
+      + metric('Members', num(STATE.members.length || (personal ? 1 : 0)))
+      + metric('Pending invites', num(STATE.invites.length))
+      + metric('Shared keys', num(STATE.providerKeys.length))
+      + '</div>';
+
+    html += '<div class="grid cols2" style="margin-top:14px">';
+    html += seatBlock();
+
+    // Provider keys (member + team scope).
+    html += '<div class="panel" data-testid="panel-keys"><p class="eyebrow">Provider keys</p>'
+      + '<h3 class="section-title" style="margin:2px 0 10px;font-size:18px">Shared and member keys</h3>';
+    if (STATE.providerKeys.length){
+      html += STATE.providerKeys.map(providerKeyRow).join('');
+    } else {
+      html += '<p class="muted">No provider keys stored. Add one below so traffic routes on your own key.</p>';
+    }
+    // Add-key form.
+    html += '<div style="margin-top:14px"><div class="invrow">'
+      + '<input class="fld" id="pkVal" type="password" placeholder="provider api key (sk_... )" autocomplete="off" style="margin:0">'
+      + '<select class="fld" id="pkProvider" aria-label="Provider"><option value="openai">openai</option><option value="anthropic">anthropic</option><option value="google">google</option><option value="azure">azure</option><option value="mistral">mistral</option></select>'
+      + '<button class="btn btn--primary" data-act="add-key">Store key</button>'
+      + '</div>'
+      + (!personal ? '<label class="muted" style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px"><input type="checkbox" id="pkTeamScope"'+(isAdmin()?'':' disabled')+'> Share at team scope'+(isAdmin()?'':' (admins only)')+'</label>' : '')
+      + '</div>';
+    html += '</div>'; // panel-keys
+    html += '</div>'; // cols2
+
+    if (!personal) {
+      // Team captures rollup - attributed AI traffic across the team.
+      var cap = STATE.captures;
+      if (cap) {
+        html += '<h2 class="section-title">Team activity</h2><div class="panel" data-testid="panel-captures">'
+          + '<div class="row" style="border:0;padding:2px 0"><span class="muted">Calls captured</span><span class="mono">'+esc(num(cap.total_calls||0))+'</span></div>'
+          + '<div class="row" style="border:0;padding:2px 0"><span class="muted">Total cost (USD)</span><span class="mono">'+esc((cap.total_cost_usd!=null?cap.total_cost_usd:0).toLocaleString(undefined,{maximumFractionDigits:4}))+'</span></div>';
+        var byMember = cap.by_member || {};
+        var keys = Object.keys(byMember);
+        if (keys.length) {
+          html += '<div class="row" style="border:0;padding:8px 0 2px"><span class="muted">By member</span><span></span></div>';
+          html += keys.slice(0,20).map(function(k){ return '<div class="row"><span class="mono">'+esc(k)+'</span><span class="chip">'+esc(num(byMember[k]))+'</span></div>'; }).join('');
+        }
+        html += '</div>';
+      }
+
+      // Members.
+      html += '<h2 class="section-title">Members</h2><div class="panel" data-testid="panel-members">';
+      html += STATE.members.length ? STATE.members.map(memberRow).join('') : '<p class="muted">No members loaded.</p>';
+      html += '</div>';
+
+      // Invites.
+      html += '<h2 class="section-title">Invites</h2><div class="panel" data-testid="panel-invites">';
+      if (isAdmin()){
+        html += '<div class="invrow" style="margin-bottom:14px">'
+          + '<input class="fld" id="invEmail" type="email" placeholder="teammate@company.com" autocomplete="off" style="margin:0">'
+          + '<select class="fld" id="invRole" aria-label="Invite role"><option value="viewer">viewer</option><option value="member" selected>member</option><option value="admin">admin</option></select>'
+          + '<button class="btn btn--primary" data-act="invite" data-testid="invite-submit">Send invite</button>'
+          + '</div>';
+      }
+      html += STATE.invites.length ? STATE.invites.map(inviteRow).join('') : '<p class="muted">No pending invites.</p>';
+      html += '</div>';
+
+      // Membership actions.
+      html += '<h2 class="section-title">Membership</h2><div class="panel" data-testid="panel-membership">'
+        + '<div class="row"><span class="muted">Leave this workspace</span><button class="btn btn--sm btn--danger" data-act="leave">Leave team</button></div>'
+        + '</div>';
+    }
+
+    document.getElementById('main').innerHTML = html;
+    document.getElementById('banner').innerHTML = renderRotateBanner();
+    wire();
+  }
+
+  function postJSON(url, body, method){
+    return fetch(url, { method: method || 'POST', credentials:'same-origin', headers: headers({ 'content-type':'application/json' }), body: body!=null ? JSON.stringify(body) : undefined })
+      .then(function(res){ return res.json().then(function(j){ return { ok: res.ok, status: res.status, body: j }; }).catch(function(){ return { ok: res.ok, status: res.status, body: {} }; }); });
+  }
+  function delJSON(url){ return postJSON(url, null, 'DELETE'); }
+
+  function wire(){
+    var root = document.getElementById('main');
+    root.querySelectorAll('[data-act]').forEach(function(el){
+      var act = el.getAttribute('data-act');
+      if (el.tagName === 'SELECT') {
+        el.addEventListener('change', function(){ handle(act, el); });
+      } else {
+        el.addEventListener('click', function(){ handle(act, el); });
+      }
+    });
+    var br = document.querySelector('[data-act="dismiss-rotate"]');
+    if (br) br.addEventListener('click', function(){ handle('dismiss-rotate', br); });
+  }
+
+  function handle(act, el){
+    if (act === 'invite'){
+      var email = (document.getElementById('invEmail').value||'').trim();
+      var role = document.getElementById('invRole').value || 'member';
+      if (!email){ banner('Enter an email to invite.', 'warn'); return; }
+      postJSON('/v1/orgs/'+encodeURIComponent(ORG_ID)+'/invites', { email: email, role: role }).then(function(o){
+        if (o.status === 402){ banner('No free seats - upgrade your plan to invite more members.', 'warn'); return; }
+        if (!o.ok){ banner((o.body && (o.body.error||o.body.message)) || 'Could not send the invite.', 'warn'); return; }
+        banner('Invite sent to '+email+'.'); load();
+      });
+    } else if (act === 'revoke-invite'){
+      delJSON('/v1/teams/invites/'+encodeURIComponent(el.getAttribute('data-id'))).then(function(o){
+        if (!o.ok){ banner((o.body && o.body.error) || 'Could not revoke the invite.', 'warn'); return; }
+        banner('Invite revoked.'); load();
+      });
+    } else if (act === 'role'){
+      var teamRef = (STATE.org && STATE.org.id) || ORG_ID;
+      postJSON('/v1/teams/'+encodeURIComponent(teamRef)+'/members/'+encodeURIComponent(el.getAttribute('data-tenant')), { role: el.value }, 'PATCH').then(function(o){
+        if (!o.ok){ banner((o.body && o.body.error) || 'Could not change the role.', 'warn'); load(); return; }
+        banner('Role updated to '+el.value+'.'); load();
+      });
+    } else if (act === 'remove-member'){
+      if (!window.confirm('Remove '+(el.getAttribute('data-name')||'this member')+' from the team?')) return;
+      var ref = (STATE.org && STATE.org.id) || ORG_ID;
+      delJSON('/v1/teams/'+encodeURIComponent(ref)+'/members/'+encodeURIComponent(el.getAttribute('data-tenant'))).then(function(o){
+        if (!o.ok){ banner((o.body && o.body.error) || 'Could not remove the member.', 'warn'); return; }
+        banner('Member removed. Consider rotating any team-shared provider keys.'); load();
+      });
+    } else if (act === 'leave'){
+      if (!window.confirm('Leave this workspace? You will lose access to its members, models, and shared keys.')) return;
+      postJSON('/v1/orgs/'+encodeURIComponent(ORG_ID)+'/leave', {}).then(function(o){
+        if (!o.ok){ banner((o.body && o.body.error) || 'Could not leave the workspace.', 'warn'); return; }
+        banner('You left the workspace.'); load();
+      });
+    } else if (act === 'add-key'){
+      var val = (document.getElementById('pkVal').value||'').trim();
+      var provider = document.getElementById('pkProvider').value || 'openai';
+      var teamScope = document.getElementById('pkTeamScope') && document.getElementById('pkTeamScope').checked;
+      if (!val){ banner('Paste a provider key to store.', 'warn'); return; }
+      var body = { provider: provider, value: val };
+      if (teamScope && STATE.org && STATE.org.id){ body.scope = 'team'; body.team_id = STATE.org.id; }
+      postJSON('/v1/account/provider-keys', body).then(function(o){
+        if (!o.ok){ banner((o.body && o.body.error) || 'Could not store the key.', 'warn'); return; }
+        banner('Provider key stored for '+provider+'.'); loadProviderKeys().then(render);
+      });
+    } else if (act === 'remove-key'){
+      if (!window.confirm('Remove this provider key? Traffic that depended on it will fall back to the platform key.')) return;
+      var url = '/v1/account/provider-keys/'+encodeURIComponent(el.getAttribute('data-id'));
+      if (STATE.org && STATE.org.id) url += '?team_id='+encodeURIComponent(STATE.org.id);
+      delJSON(url).then(function(o){
+        if (!o.ok){ banner((o.body && o.body.error) || 'Could not remove the key.', 'warn'); return; }
+        banner('Provider key removed.'); loadProviderKeys().then(render);
+      });
+    } else if (act === 'dismiss-rotate'){
+      var ref2 = (STATE.org && STATE.org.id) || ORG_ID;
+      var evId = el.getAttribute('data-event-id');
+      // Ack route acknowledges the rotation recommendation so it stops surfacing.
+      postJSON('/v1/teams/'+encodeURIComponent(ref2)+'/events/'+encodeURIComponent(evId)+'/ack', {}).then(function(o){
+        if (!o.ok){ banner('Could not dismiss the rotation reminder right now.', 'warn'); return; }
+        if (STATE.detail) STATE.detail.rotate_shared_keys = { recommended:false };
+        document.getElementById('banner').innerHTML = '';
+        banner('Rotation reminder dismissed.');
+      });
+    }
+  }
+
+  function loadProviderKeys(){
+    var url = '/v1/account/provider-keys';
+    if (STATE.org && STATE.org.id) url += '?team_id='+encodeURIComponent(STATE.org.id);
+    return fetch(url, { credentials:'same-origin', headers: headers() })
+      .then(function(r){ return r.status===200 ? r.json() : { keys: [] }; })
+      .then(function(j){ STATE.providerKeys = (j && j.keys) || []; })
+      .catch(function(){ STATE.providerKeys = []; });
+  }
+
+  function load(){
+    fetch('/v1/orgs/'+encodeURIComponent(ORG_ID), { credentials:'same-origin', headers: headers() })
+      .then(function(r){ if (r.status === 401){ showAuth('That key was rejected or expired. Paste a current workspace key.'); return null; } return r.json().then(function(j){ return { status:r.status, body:j }; }); })
+      .then(function(o){
+        if (!o) return null;
+        if (o.status !== 200 || !o.body || !o.body.org){ banner('Could not load your workspace just now.', 'warn'); return null; }
+        STATE.org = o.body.org;
+        STATE.role = o.body.role || 'member';
+        var ref = STATE.org.id && !STATE.org.personal ? STATE.org.id : null;
+        var members = ref ? fetch('/v1/orgs/'+encodeURIComponent(ORG_ID)+'/members', { credentials:'same-origin', headers: headers() }).then(function(r){ return r.status===200?r.json():{members:[]}; }).catch(function(){ return {members:[]}; }) : Promise.resolve({ members: STATE.org.members_preview || [] });
+        var invites = ref ? fetch('/v1/orgs/'+encodeURIComponent(ORG_ID)+'/invites', { credentials:'same-origin', headers: headers() }).then(function(r){ return r.status===200?r.json():{invites:[]}; }).catch(function(){ return {invites:[]}; }) : Promise.resolve({ invites: [] });
+        // Team detail carries seat_ceiling + rotate_shared_keys when the org maps to a real team.
+        var detail = ref ? fetch('/v1/teams/'+encodeURIComponent(ref), { credentials:'same-origin', headers: headers() }).then(function(r){ return r.status===200?r.json():null; }).catch(function(){ return null; }) : Promise.resolve(null);
+        // Team captures rollup (attributed AI traffic) - viewer+ may read.
+        var captures = ref ? fetch('/v1/teams/'+encodeURIComponent(ref)+'/captures', { credentials:'same-origin', headers: headers() }).then(function(r){ return r.status===200?r.json():null; }).catch(function(){ return null; }) : Promise.resolve(null);
+        return Promise.all([members, invites, detail, loadProviderKeys(), captures]).then(function(res){
+          STATE.members = (res[0] && res[0].members) || [];
+          STATE.invites = (res[1] && res[1].invites) || [];
+          STATE.captures = res[4] || null;
+          // The detail route may return { team, members, invites } or the
+          // decorated teamDetail() envelope directly; accept either.
+          var d = res[2] || {};
+          STATE.detail = d.team ? Object.assign({}, d.team, { seat_ceiling: d.seat_ceiling != null ? d.seat_ceiling : (d.team && d.team.seat_ceiling), rotate_shared_keys: d.rotate_shared_keys || (d.team && d.team.rotate_shared_keys) }) : d;
+          if (STATE.members.length === 0 && d.members) STATE.members = d.members;
+          if (STATE.invites.length === 0 && d.invites) STATE.invites = d.invites;
+          render();
+        });
+      })
+      .catch(function(e){ banner('Network error: '+(e&&e.message||e), 'warn'); });
+  }
+
+  if (KEY) load(); else showAuth();
+})();
+</script>
+</body>
+</html>

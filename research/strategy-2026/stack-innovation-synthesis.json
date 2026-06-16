@@ -1,0 +1,361 @@
+{
+  "executiveSummary": "The kolm.ai stack is two surfaces sharing one cryptographic spine. Surface A (Agent Security Evidence: free Scan -> $750 Signed Readiness Report -> $299/$999 Continuous -> $25,000 Reviewed Attestation) is commercially live and is the revenue engine. Surface B (compile/distil/train/quantize/serve/registry) is the technical moat that makes the evidence credible. The spine is Ed25519 + SHA-256 Merkle (RFC 6962/9162), offline browser/Python/Go verifiers, and a transparency log. The single biggest leverage truth: the trust path has integrity bugs that an adversary could exploit to forge a passing report, which is existential for a company whose entire value proposition is verifiable evidence. Three of these are P0 ship-now and surgical. First, src/sigstore.js lines 467-468 zero-pad/truncate both the computed root and the claimed root to 32 bytes via Buffer.alloc(32,0).fill(slice(0,32)) before comparing, producing a false-ACCEPTING Merkle inclusion check that is live on the report path through binder.js; delegate to the already-correct src/merkle.js verifyInclusion. Second, src/keys.js lines 208 and 239 emit the field name honest_scope, which violates the hard no-forbidden-word constraint and leaks to customers via cli/kolm.js keys rotate --json; rename to scope_note. Third, src/store-backup.js runs VACUUM INTO with no PRAGMA integrity_check, so a corrupt snapshot can silently become the disaster-recovery copy for the signing DB. Beyond the fixes, the highest-value INVENTION is to converge every artifact (scan, report, distilled checkpoint, quantized weights, training run, registry entry, backup) onto one signed + Merkle-anchored receipt format with a single offline verifier, turning the existing crypto into a category-defining product spine rather than a per-component feature. The stack is mature and shippable; the work is hardening the trust path and unifying the evidence format, not rebuilding.",
+  "topInventions": [
+    {
+      "title": "One signed, Merkle-anchored receipt format across every artifact",
+      "component": "crypto-spine",
+      "why": "Scan, report, distilled checkpoint, quantized weights, training run, registry entry and backup each emit ad hoc metadata today. A single canonical signed envelope (Ed25519 + SHA-256, anchored in the existing RFC 6962 log) verified by one offline tool turns the moat into a category-defining product spine and lets every Surface B output carry Surface A evidence.",
+      "effort": "L",
+      "impact": "high"
+    },
+    {
+      "title": "Forge-resistant Merkle verifier as the only inclusion-check path",
+      "component": "sigstore",
+      "why": "src/merkle.js already has a correct constant-length verifyInclusion. Routing every caller (sigstore.js, binder.js, the offline verifiers) through it and deleting bespoke compares eliminates the entire class of root-compare bugs and makes the verifier the single audited surface.",
+      "effort": "M",
+      "impact": "high"
+    },
+    {
+      "title": "Consistency-proof support in the transparency log",
+      "component": "merkle",
+      "why": "merkle.js verifies inclusion but has no consistency proof (RFC 6962 section 2.1.2). Without it, an auditor cannot prove the log is append-only between two signed reports, which is the core promise of a transparency log. Adds split-knowledge auditability to Continuous tier.",
+      "effort": "M",
+      "impact": "high"
+    },
+    {
+      "title": "Reproducible-build attestation for distilled and quantized checkpoints",
+      "component": "distill+quantize",
+      "why": "Bind each output checkpoint hash to its inputs (base model hash, dataset hash, recipe hash) in the signed envelope so a buyer can independently reproduce and verify the artifact. Directly upgrades the $25,000 Reviewed Attestation deliverable.",
+      "effort": "L",
+      "impact": "high"
+    },
+    {
+      "title": "Continuous-tier drift receipts",
+      "component": "asr-fulfillment",
+      "why": "The $299/$999 Continuous tier resigns reports on a schedule but does not emit a signed delta between consecutive attestations. A signed drift receipt (what changed, what regressed) is the recurring-value artifact that justifies the subscription and reduces churn.",
+      "effort": "M",
+      "impact": "high"
+    },
+    {
+      "title": "Backup integrity gate before promotion",
+      "component": "store-backup",
+      "why": "Every snapshot of the signing DB should pass PRAGMA integrity_check and a signed manifest before it is eligible as a restore source. Protects the one database whose corruption would invalidate all issued evidence.",
+      "effort": "S",
+      "impact": "high"
+    },
+    {
+      "title": "Single offline verifier binary covering all artifact types",
+      "component": "verifiers",
+      "why": "Today browser/Python/Go verifiers target the report. Generalizing them to the unified receipt format (one verify command for scan, report, checkpoint, registry entry) is the strongest trust message: anyone can verify any kolm artifact with no kolm service in the path.",
+      "effort": "M",
+      "impact": "high"
+    },
+    {
+      "title": "Registry entries as signed, queryable attestations",
+      "component": "registry",
+      "why": "Make every model-registry record a signed receipt linking weights hash to its training and evaluation receipts, so the registry becomes a verifiable supply-chain ledger rather than a metadata table.",
+      "effort": "M",
+      "impact": "med"
+    },
+    {
+      "title": "Serving-time attestation header",
+      "component": "serving",
+      "why": "Have the inference server return the signed receipt hash of the exact weights it loaded, so a caller can confirm the deployed artifact matches the attested one. Closes the gap between attested and served.",
+      "effort": "S",
+      "impact": "med"
+    },
+    {
+      "title": "Dunning email amount binding",
+      "component": "dunning",
+      "why": "tEmailDunning renders amount_cents/currency but scheduleDunning never receives them, so every dunning email shows a null amount. Threading the invoice amount through restores correct billing communication and protects recovered revenue.",
+      "effort": "S",
+      "impact": "med"
+    },
+    {
+      "title": "Recipe-pinned compile receipts",
+      "component": "compile",
+      "why": "Emit a signed receipt for each compile that pins toolchain version and flags to the output hash, making compiled artifacts reproducible and attestable on the same spine as everything else.",
+      "effort": "M",
+      "impact": "med"
+    },
+    {
+      "title": "Key-rotation receipt chain",
+      "component": "keys",
+      "why": "Chain each rotation receipt to the prior key fingerprint so verifiers can build an unbroken signer history. Strengthens long-lived evidence validity across rotations without any KMS dependency.",
+      "effort": "S",
+      "impact": "med"
+    }
+  ],
+  "shipNowWins": [
+    {
+      "title": "Fix false-accepting Merkle root compare",
+      "component": "sigstore",
+      "files": "src/sigstore.js lines 467-468",
+      "change": "Remove the Buffer.alloc(32,0).fill(...slice(0,32)) truncation on both computed and claimedRoot and delegate the inclusion check to src/merkle.js verifyInclusion, which compares full-length roots. This closes a live report-path forgery vector."
+    },
+    {
+      "title": "Rename honest_scope to scope_note",
+      "component": "keys",
+      "files": "src/keys.js lines 208 and 239 (plus any reader)",
+      "change": "Rename the object key honest_scope to scope_note so the forbidden word stops leaking through cli/kolm.js keys rotate --json. Pure field rename; keep the verbatim scope sentence elsewhere untouched."
+    },
+    {
+      "title": "Add integrity_check to backup",
+      "component": "store-backup",
+      "files": "src/store-backup.js around line 91",
+      "change": "After VACUUM INTO and before reporting ok, open the snapshot and run PRAGMA integrity_check; fail the backup (ok:false) if it does not return 'ok'. Prevents a corrupt snapshot becoming the restore source for the signing DB."
+    },
+    {
+      "title": "Thread invoice amount into dunning",
+      "component": "dunning",
+      "files": "src/dunning.js line 51 and src/router.js line 13455",
+      "change": "Add amount_cents and currency params to scheduleDunning and pass inv.amount_due/inv.currency from router.js, so tEmailDunning renders a real amount instead of null."
+    },
+    {
+      "title": "Route all inclusion checks through merkle.verifyInclusion",
+      "component": "verifiers",
+      "files": "src/sigstore.js, src/binder.js",
+      "change": "Replace any inline root comparison in the binder/report path with a call to the single audited merkle.verifyInclusion, removing duplicate verification logic."
+    }
+  ],
+  "backlog": [
+    {
+      "rank": 1,
+      "title": "Fix false-accepting Merkle root compare in sigstore.js",
+      "component": "sigstore",
+      "type": "gap",
+      "priority": "P0",
+      "recommendation": "ship-now"
+    },
+    {
+      "rank": 2,
+      "title": "Rename honest_scope field to scope_note",
+      "component": "keys",
+      "type": "gap",
+      "priority": "P0",
+      "recommendation": "ship-now"
+    },
+    {
+      "rank": 3,
+      "title": "Add PRAGMA integrity_check before backup promotion",
+      "component": "store-backup",
+      "type": "gap",
+      "priority": "P0",
+      "recommendation": "ship-now"
+    },
+    {
+      "rank": 4,
+      "title": "Route all inclusion checks through merkle.verifyInclusion",
+      "component": "verifiers",
+      "type": "improvement",
+      "priority": "P0",
+      "recommendation": "ship-now"
+    },
+    {
+      "rank": 5,
+      "title": "Thread invoice amount through scheduleDunning to email",
+      "component": "dunning",
+      "type": "gap",
+      "priority": "P1",
+      "recommendation": "ship-now"
+    },
+    {
+      "rank": 6,
+      "title": "One signed Merkle-anchored receipt format across all artifacts",
+      "component": "crypto-spine",
+      "type": "invention",
+      "priority": "P1",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 7,
+      "title": "Consistency-proof support in transparency log",
+      "component": "merkle",
+      "type": "invention",
+      "priority": "P1",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 8,
+      "title": "Reproducible-build attestation for distilled/quantized checkpoints",
+      "component": "distill",
+      "type": "invention",
+      "priority": "P1",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 9,
+      "title": "Continuous-tier signed drift receipts",
+      "component": "asr-fulfillment",
+      "type": "invention",
+      "priority": "P1",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 10,
+      "title": "Single offline verifier covering all artifact types",
+      "component": "verifiers",
+      "type": "invention",
+      "priority": "P1",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 11,
+      "title": "Backup integrity gate with signed manifest",
+      "component": "store-backup",
+      "type": "invention",
+      "priority": "P1",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 12,
+      "title": "Registry entries as signed queryable attestations",
+      "component": "registry",
+      "type": "invention",
+      "priority": "P2",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 13,
+      "title": "Serving-time attestation header",
+      "component": "serving",
+      "type": "invention",
+      "priority": "P2",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 14,
+      "title": "Recipe-pinned compile receipts",
+      "component": "compile",
+      "type": "invention",
+      "priority": "P2",
+      "recommendation": "plan"
+    },
+    {
+      "rank": 15,
+      "title": "Key-rotation receipt chain",
+      "component": "keys",
+      "type": "invention",
+      "priority": "P2",
+      "recommendation": "plan"
+    }
+  ],
+  "stackMaturity": [
+    {
+      "component": "sigstore",
+      "score": 6,
+      "headline": "Correct primitives undermined by a live false-accepting root compare; one fix away from solid."
+    },
+    {
+      "component": "merkle",
+      "score": 7,
+      "headline": "Inclusion proofs correct; missing consistency proofs for append-only auditability."
+    },
+    {
+      "component": "verifiers",
+      "score": 7,
+      "headline": "Three offline verifiers work for reports; should converge on one audited inclusion path and one artifact format."
+    },
+    {
+      "component": "keys",
+      "score": 7,
+      "headline": "Rotation and revocation present; forbidden-word field name leaks and no rotation receipt chain yet."
+    },
+    {
+      "component": "asr-fulfillment",
+      "score": 8,
+      "headline": "Reattestation and resign sweeps are wired in-process; lacks signed drift receipts for Continuous value."
+    },
+    {
+      "component": "store-backup",
+      "score": 6,
+      "headline": "Consistent VACUUM INTO snapshots but no integrity gate before they become restore sources."
+    },
+    {
+      "component": "dunning",
+      "score": 7,
+      "headline": "Sweep is wired and live; email amount is never threaded so it renders null."
+    },
+    {
+      "component": "billing",
+      "score": 8,
+      "headline": "Stripe links live, pricing locked; solid revenue plumbing."
+    },
+    {
+      "component": "distill",
+      "score": 7,
+      "headline": "Distillation works; outputs not yet reproducibility-attested on the spine."
+    },
+    {
+      "component": "quantize",
+      "score": 7,
+      "headline": "Quantization functional; checkpoints lack signed input-binding receipts."
+    },
+    {
+      "component": "compile",
+      "score": 7,
+      "headline": "Compile path functional; needs recipe-pinned receipts for reproducibility."
+    },
+    {
+      "component": "train",
+      "score": 7,
+      "headline": "Training runs execute; run provenance not yet a signed receipt."
+    },
+    {
+      "component": "serving",
+      "score": 7,
+      "headline": "Inference serving stable; no attestation header tying served weights to attested hash."
+    },
+    {
+      "component": "registry",
+      "score": 7,
+      "headline": "Registry stores metadata; not yet a signed verifiable supply-chain ledger."
+    },
+    {
+      "component": "marketplace",
+      "score": 6,
+      "headline": "Listings exist; artifacts not uniformly carrying signed receipts."
+    },
+    {
+      "component": "model-export",
+      "score": 7,
+      "headline": "Export works; should emit the unified signed envelope."
+    },
+    {
+      "component": "runtime",
+      "score": 7,
+      "headline": "Runtime stable; placement claims correctly not over-asserted."
+    },
+    {
+      "component": "cli",
+      "score": 8,
+      "headline": "kolm CLI is the proven control surface; surfaces the honest_scope leak that must be renamed upstream."
+    },
+    {
+      "component": "sdk",
+      "score": 7,
+      "headline": "SDKs cover core flows; should expose the unified verify call."
+    },
+    {
+      "component": "router",
+      "score": 8,
+      "headline": "Express monolith routing is comprehensive; dunning amount omission is the notable wiring gap."
+    },
+    {
+      "component": "server",
+      "score": 8,
+      "headline": "In-process sweeps for reattestation/resign/dunning confirmed wired; healthy."
+    },
+    {
+      "component": "frontend",
+      "score": 8,
+      "headline": "Dark Evidence Room site is on-brand and locked; only inline graphics may improve."
+    },
+    {
+      "component": "crypto-spine",
+      "score": 7,
+      "headline": "Strong Ed25519+SHA-256 foundation; biggest upside is unifying every artifact onto one signed receipt."
+    }
+  ],
+  "memoMarkdown": "# kolm.ai Stack Innovation Memo\n\n## Where the stack stands\n\nkolm is two surfaces on one cryptographic spine. Surface A is Agent Security Evidence: a free Scan funnels to a $750 Signed Readiness Report, then Continuous monitoring at $299 and $999 a month, then a $25,000 Reviewed Attestation with an optional Deep Red-Team at plus $10,000. Surface B is the model platform: compile, distil, train, quantize, serve, and registry. The spine is Ed25519 signatures with SHA-256 Merkle transparency (RFC 6962 and 9162), offline browser, Python, and Go verifiers, and a canonical signed envelope. No blockchain is in the trust path and none is proposed.\n\nThe stack is mature and shippable. The work ahead is hardening the trust path and unifying the evidence format, not rebuilding.\n\n## The single biggest leverage truth\n\nFor a company whose entire promise is verifiable evidence, integrity bugs in the trust path are existential. Three are confirmed in the live tree and are surgical to fix.\n\n1. src/sigstore.js lines 467 and 468 wrap both the computed root and the claimed root in Buffer.alloc(32, 0).fill(value.slice(0, 32)) before comparing. This truncates and zero-pads, producing a false-accepting Merkle inclusion check that is live on the report path via binder.js. An attacker who controls a prefix could forge a passing report. The fix is to delegate to src/merkle.js verifyInclusion, which already compares full-length roots correctly.\n\n2. src/keys.js lines 208 and 239 emit a field named honest_scope. This violates the hard constraint against the forbidden word and it leaks to customers through cli/kolm.js keys rotate --json. Rename the field to scope_note. The verbatim contractual scope sentence elsewhere is untouched.\n\n3. src/store-backup.js runs VACUUM INTO with no PRAGMA integrity_check, so a corrupt snapshot of the signing database can silently become the disaster-recovery source. Add an integrity check and fail the backup if it does not return ok.\n\n## Highest-value invention\n\nConverge every artifact onto one signed, Merkle-anchored receipt format verified by a single offline tool. Scan, report, distilled checkpoint, quantized weights, training run, registry entry, and backup would all carry the same envelope and anchor in the existing transparency log. This turns per-component crypto into a category-defining product spine: every Surface B output ships with Surface A evidence, and anyone can verify any kolm artifact with no kolm service in the path.\n\n## Ship-now wins\n\n- Fix the false-accepting root compare in src/sigstore.js by routing through src/merkle.js verifyInclusion.\n- Rename honest_scope to scope_note in src/keys.js.\n- Add PRAGMA integrity_check to src/store-backup.js before a snapshot is reported ok.\n- Thread amount_cents and currency through scheduleDunning in src/dunning.js and the call site in src/router.js line 13455 so dunning emails stop showing a null amount.\n- Replace any inline root comparison in the binder and report path with the single audited merkle.verifyInclusion.\n\n## Rejected during verification\n\nSeveral proposals were dropped as false premises after reading the code. The dunning sweep and resignPendingReports are already wired in-process in server.js (lines 521 and 528), so the orphaned-sweep proposals are not real. Runtime placement claims are correctly not over-asserted, so the placement-enforcement proposal was rejected. HTTP verify parity already exists. These are excluded from the backlog.\n\n## Constraints honored\n\nNo blockchain. Ed25519 and SHA-256 Merkle only. Dark site backdrop untouched; only inline graphics may improve. No new fonts or CDNs. Pricing is flag-only and unchanged. The verbatim scope sentence and dev@kolm.ai as the only contact are preserved. The honest_scope rename is itself a constraint fix. ASCII-safe punctuation throughout. No git push."
+}

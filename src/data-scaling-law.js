@@ -424,6 +424,118 @@ export function recommendDataBudget({
   };
 }
 
+// ── planner-facing budget block (CD-02 / CD-08) ───────────────────────────────
+//
+// planDataBudget - the single entry the training PLANNER calls to ground its
+// data-budget recommendation in the fitted per-(tenant,namespace) curve instead
+// of a fixed heuristic. It fits the rectified law to the observed (n_pairs, K)
+// anchors and, when the fit clears the gate, returns a planner-shaped block:
+//
+//   {
+//     basis: 'rectified' | 'insufficient',
+//     verdict: 'acquire' | 'stop' | 'switch',          (rectified only)
+//     required_examples,        // closed-form rows to hit target_k
+//     pairs_remaining,          // required_examples - current_n (>=0)
+//     marginal_dk_per_row,      // analytic dK/dD at current_n (the econ signal)
+//     expected_k_at_current,    // K_hat(current_n)
+//     achievable_k_max,         // K as D->inf (the ceiling)
+//     target_k, current_n, n_points, rmsd,
+//     curve: [{ n, k_hat }, ...]   // sampled expected K-vs-rows curve
+//   }
+//
+// On cold start (< min_points) or a junk fit (rmsd > gate) it returns
+// basis:'insufficient' so the planner FALLS THROUGH to its existing fixed
+// heuristic - never a fabricated number. Determinism: identical points + the
+// shared seed grid => identical block (the fit is seed-deterministic). Never
+// throws across the public API.
+export async function planDataBudget({
+  tenant,
+  namespace,
+  points = null,
+  loadPoints = null,
+  current_n = 0,
+  target_k = 0.80,
+  min_points = 4,
+  rmsd_gate = 0.05,
+  expected_batch_rows = 100,
+  min_delta_k = 0.01,
+  cost_per_row_usd = 0,
+  budget_headroom_usd = Infinity,
+  curve_points = 6,
+} = {}) {
+  try {
+    const target = Number.isFinite(Number(target_k)) ? Number(target_k) : 0.80;
+    const cur = Math.max(0, Number(current_n) || 0);
+    const fit = await fitDataScalingLaw({ tenant, namespace, points, loadPoints, min_points, rmsd_gate });
+
+    if (!fit || !fit.ok || fit.basis !== 'rectified') {
+      return {
+        ok: true,
+        version: SCALING_LAW_VERSION,
+        basis: (fit && fit.basis) || 'insufficient',
+        verdict: null,
+        target_k: target,
+        current_n: cur,
+        n_points: (fit && fit.n_points) || 0,
+        required_examples: null,
+        pairs_remaining: null,
+        marginal_dk_per_row: null,
+        expected_k_at_current: null,
+        achievable_k_max: (fit && fit.achievable_k_max != null) ? fit.achievable_k_max : null,
+        reason: (fit && (fit.reason || fit.error)) || 'no_scaling_points_available',
+        hint: 'provide >=' + Math.max(2, min_points | 0) + ' (n_pairs,K) observations for this namespace to ground the plan in the fitted scaling curve',
+      };
+    }
+
+    const rec = recommendDataBudget({
+      fit,
+      current_pairs: cur,
+      target_kscore: target,
+      min_delta_k,
+      expected_batch_rows,
+      budget_headroom_usd,
+      cost_per_row_usd,
+    });
+    const required = rec.pairs_to_target;
+    const pairsRemaining = (required != null && Number.isFinite(required))
+      ? Math.max(0, required - cur) : null;
+    const verdict = rec.recommend === 'switch_strategy' ? 'switch' : rec.recommend; // acquire | stop | switch
+    const expectedKCur = kHatAtSize(fit, cur);
+
+    // Sampled expected-K-vs-rows curve for the plan / dashboard. Anchor at the
+    // current size and the required size (when reachable), filling in between.
+    const curve = [];
+    const hi = (required != null && Number.isFinite(required)) ? Math.max(required, cur + 1) : Math.max(cur * 2, cur + 100, 100);
+    const lo = Math.max(1, Math.min(cur, hi));
+    const steps = Math.max(2, Math.trunc(Number(curve_points) || 6));
+    for (let i = 0; i < steps; i++) {
+      const n = Math.round(lo + (hi - lo) * (i / (steps - 1)));
+      curve.push({ n, k_hat: Number(kHatAtSize(fit, n).toFixed(6)) });
+    }
+
+    return {
+      ok: true,
+      version: SCALING_LAW_VERSION,
+      basis: 'rectified',
+      verdict,
+      target_k: target,
+      current_n: cur,
+      n_points: fit.n_points,
+      rmsd: fit.rmsd,
+      required_examples: (required != null && Number.isFinite(required)) ? required : null,
+      pairs_remaining: pairsRemaining,
+      marginal_dk_per_row: rec.marginal_dk_per_row,
+      expected_k_at_current: Number.isFinite(expectedKCur) ? Number(expectedKCur.toFixed(6)) : null,
+      achievable_k_max: fit.achievable_k_max,
+      projected_cost_to_target_usd: rec.projected_cost_to_target_usd,
+      curve,
+      reason: rec.reason,
+    };
+  } catch (e) {
+    return { ok: true, version: SCALING_LAW_VERSION, basis: 'insufficient', verdict: null, reason: String((e && e.message) || e) };
+  }
+}
+
 export const __internals = {
   _unpack,
   _pack,
@@ -439,6 +551,7 @@ export default {
   marginalDkPerRow,
   pairsToTarget,
   recommendDataBudget,
+  planDataBudget,
   _kToPseudoLoss,
   _pseudoLossToK,
   _huberLogResidualLoss,

@@ -18,9 +18,51 @@ import { isProductionRuntime } from './env.js';
 
 const STATE_COOKIE = 'kolm_oauth_state';
 const RETURN_COOKIE = 'kolm_oauth_return';
+const PKCE_COOKIE = 'kolm_oauth_pkce';
 
+// AUTH-05 - unified base-URL resolution. Same precedence as auth-email.js so
+// magic-link and OAuth never disagree: OAUTH_REDIRECT_BASE > KOLM_PUBLIC_URL >
+// (prod ? https://kolm.ai : localhost). On a preview/staging/self-host deploy
+// where OAUTH_REDIRECT_BASE is unset, this used to ALWAYS resolve to prod, so
+// the provider called back to kolm.ai and the local instance never completed
+// sign-in (a silent cross-environment auth break). Honouring KOLM_PUBLIC_URL
+// (which magic-link already honoured) and only defaulting to prod when actually
+// in a production runtime fixes that.
 function baseUrl() {
-  return process.env.OAUTH_REDIRECT_BASE || 'https://kolm.ai';
+  const b = process.env.OAUTH_REDIRECT_BASE
+    || process.env.KOLM_PUBLIC_URL
+    || (isProductionRuntime() ? 'https://kolm.ai' : 'http://localhost:8787');
+  return String(b).replace(/\/+$/, '');
+}
+
+// AUTH-05 - loud misconfig surface. In production, if NEITHER OAUTH_REDIRECT_BASE
+// NOR KOLM_PUBLIC_URL is set, OAuth silently falls back to the hardcoded
+// https://kolm.ai callback - correct for the real prod host, but a self-hosted
+// production deploy on another domain would ship users to kolm.ai and never
+// complete sign-in. Surface it so an operator notices at startup / via /health
+// rather than via a stream of failed logins. Returns null when fine.
+export function oauthRedirectBaseWarning() {
+  if (!isProductionRuntime()) return null;
+  if (process.env.OAUTH_REDIRECT_BASE || process.env.KOLM_PUBLIC_URL) return null;
+  const anyProvider = oauthConfigured('google') || oauthConfigured('github');
+  if (!anyProvider) return null;
+  return {
+    warning: 'oauth_redirect_base_unset',
+    base: 'https://kolm.ai',
+    hint: 'set OAUTH_REDIRECT_BASE (or KOLM_PUBLIC_URL) to this deploy\'s public origin so the OAuth callback returns to THIS instance, not https://kolm.ai',
+  };
+}
+
+// AUTH-05 - startup hook. server.js calls this at boot; logs a single WARNING
+// line when the OAuth callback base is ambiguous in production. Never throws.
+export function oauthStartupCheck(logger = console) {
+  const w = oauthRedirectBaseWarning();
+  try {
+    if (w) {
+      logger.warn(`[oauth] WARNING: ${w.hint} (currently defaulting to ${w.base}).`);
+    }
+  } catch { /* deliberate: cleanup */ }
+  return w;
 }
 
 function safeReturn(req) {
@@ -62,6 +104,10 @@ const PROVIDERS = {
     scope: 'openid email profile',
     clientIdEnv: 'GOOGLE_OAUTH_CLIENT_ID',
     clientSecretEnv: 'GOOGLE_OAUTH_CLIENT_SECRET',
+    // AUTH-07 - Google supports PKCE on the web auth-code flow. Enabling it
+    // means an intercepted authorization code cannot be exchanged without the
+    // matching code_verifier (which never leaves this server's httpOnly cookie).
+    pkce: true,
     extractEmail: (u) => u.email,
     extractName: (u) => u.name || (u.email && u.email.split('@')[0]),
   },
@@ -73,10 +119,63 @@ const PROVIDERS = {
     scope: 'read:user user:email',
     clientIdEnv: 'GITHUB_OAUTH_CLIENT_ID',
     clientSecretEnv: 'GITHUB_OAUTH_CLIENT_SECRET',
+    // GitHub's OAuth app flow does not support PKCE (S256); we rely on the
+    // state cookie + client_secret. Left explicit so the asymmetry is visible.
+    pkce: false,
     extractEmail: (u) => u.email,
     extractName: (u) => u.name || u.login,
   },
 };
+
+// AUTH-04 - verified-email enforcement on the trusted OAuth path. Pure
+// email-equality account resolution means any provider that asserts an email
+// signs the caller into the matching tenant; an attacker who controls a
+// provider account claiming victim@co.com would be signed into the victim's
+// tenant. We require provider-asserted email VERIFICATION before trusting the
+// email as an ownership proof:
+//   - Google: userinfo carries email_verified (boolean, sometimes string
+//     'true'); require it true. Email-only logins with email_verified:false are
+//     rejected.
+//   - GitHub: the primary email from /user/emails carries primary+verified
+//     flags; accept ONLY primary && verified. The /user.email field has no
+//     verification flag, so it is NOT trusted on its own - we always confirm
+//     against /user/emails.
+// Returns { email } on success or { error } (oauth_error code) on rejection.
+function _googleVerifiedEmail(userJson) {
+  const email = userJson && userJson.email;
+  const ev = userJson && userJson.email_verified;
+  const verified = ev === true || ev === 'true';
+  if (!email) return { error: 'no_email_returned' };
+  if (!verified) return { error: 'email_unverified' };
+  return { email };
+}
+
+async function _githubVerifiedEmail(accessToken, emailUrl) {
+  let emails = [];
+  try {
+    const emailRes = await fetch(emailUrl, {
+      headers: { authorization: `Bearer ${accessToken}`, accept: 'application/json', 'user-agent': 'kolm-oauth' },
+    });
+    emails = await emailRes.json().catch(() => []);
+  } catch { emails = []; }
+  if (!Array.isArray(emails)) return { error: 'no_email_returned' };
+  const primary = emails.find((e) => e && e.primary && e.verified);
+  if (primary && primary.email) return { email: primary.email };
+  // No primary verified email - do NOT silently fall back to any verified
+  // address; require an explicit primary+verified so a secondary, attacker-added
+  // address can never be the sign-in identity.
+  return { error: 'email_unverified' };
+}
+
+// AUTH-07 - PKCE (RFC 7636, S256). code_verifier is a high-entropy random
+// string; code_challenge is base64url(sha256(verifier)). The verifier is stored
+// server-side (httpOnly cookie) and replayed at token exchange; the challenge
+// goes to the provider in the authorize redirect.
+function _pkcePair() {
+  const verifier = crypto.randomBytes(32).toString('base64url');
+  const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
+  return { verifier, challenge };
+}
 
 export function oauthConfigured(providerName) {
   const p = PROVIDERS[providerName];
@@ -104,6 +203,18 @@ export function mountOAuth(router) {
     u.searchParams.set('response_type', 'code');
     u.searchParams.set('scope', p.scope);
     u.searchParams.set('state', state);
+    // AUTH-07 - PKCE for providers that support it (Google). The verifier is
+    // kept in an httpOnly cookie (never exposed to JS / the URL); only the S256
+    // challenge is sent to the provider. An intercepted code is then useless
+    // without the verifier we replay at token exchange.
+    if (p.pkce) {
+      const { verifier, challenge } = _pkcePair();
+      setCookie(res, PKCE_COOKIE, verifier, 10 * 60 * 1000);
+      u.searchParams.set('code_challenge', challenge);
+      u.searchParams.set('code_challenge_method', 'S256');
+    } else {
+      clearCookie(res, PKCE_COOKIE);
+    }
     if (name === 'google') {
       u.searchParams.set('access_type', 'online');
       u.searchParams.set('prompt', 'select_account');
@@ -121,9 +232,16 @@ export function mountOAuth(router) {
 
     const { code, state, error: providerError } = req.query || {};
     const cookieState = req.cookies && req.cookies[STATE_COOKIE];
-    const ret = (req.cookies && req.cookies[RETURN_COOKIE]) || '/dashboard';
+    const pkceVerifier = (req.cookies && req.cookies[PKCE_COOKIE]) || '';
+    // AUTH-07 - re-run safeReturn() on the cookie-sourced return path before we
+    // ever trust it for the final 302. Defense in depth: even if the
+    // RETURN_COOKIE were tampered to an off-site or protocol-relative value, the
+    // redirect target is re-validated to a same-origin path here.
+    const rawRet = (req.cookies && req.cookies[RETURN_COOKIE]) || '/dashboard';
+    const ret = safeReturn({ query: { redirect: rawRet } });
     clearCookie(res, STATE_COOKIE);
     clearCookie(res, RETURN_COOKIE);
+    clearCookie(res, PKCE_COOKIE);
 
     if (providerError) {
       return res.redirect(302, `/signup?oauth_error=${encodeURIComponent(String(providerError))}`);
@@ -140,6 +258,10 @@ export function mountOAuth(router) {
         redirect_uri: `${baseUrl()}/v1/oauth/${name}/callback`,
         grant_type: 'authorization_code',
       });
+      // AUTH-07 - replay the PKCE verifier at token exchange for PKCE providers.
+      if (p.pkce && pkceVerifier) {
+        tokenBody.set('code_verifier', pkceVerifier);
+      }
       const tokenRes = await fetch(p.tokenUrl, {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded', accept: 'application/json' },
@@ -155,29 +277,47 @@ export function mountOAuth(router) {
         headers: { authorization: `Bearer ${accessToken}`, accept: 'application/json', 'user-agent': 'kolm-oauth' },
       });
       const userJson = await userRes.json().catch(() => ({}));
-      let email = p.extractEmail(userJson);
       const displayName = p.extractName(userJson);
 
-      // GitHub may not expose primary email on /user - fall back to /user/emails.
-      if (!email && p.emailUrl) {
-        const emailRes = await fetch(p.emailUrl, {
-          headers: { authorization: `Bearer ${accessToken}`, accept: 'application/json', 'user-agent': 'kolm-oauth' },
-        });
-        const emails = await emailRes.json().catch(() => []);
-        const primary = Array.isArray(emails) ? emails.find(e => e.primary && e.verified) : null;
-        email = primary && primary.email;
+      // AUTH-04 - resolve a VERIFIED email per provider. Never trust a bare
+      // provider-asserted email; require the provider's verification flag.
+      let email = null;
+      if (name === 'google') {
+        const r = _googleVerifiedEmail(userJson);
+        if (r.error) return res.redirect(302, `/signup?oauth_error=${encodeURIComponent(r.error)}`);
+        email = r.email;
+      } else if (name === 'github') {
+        // Always confirm against /user/emails: /user.email carries no
+        // verification flag, so it is not trustworthy on its own.
+        const r = await _githubVerifiedEmail(accessToken, p.emailUrl);
+        if (r.error) return res.redirect(302, `/signup?oauth_error=${encodeURIComponent(r.error)}`);
+        email = r.email;
+      } else {
+        email = p.extractEmail(userJson);
       }
 
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         return res.redirect(302, `/signup?oauth_error=no_email_returned`);
       }
 
-      const { tenant, api_key, created } = findOrCreateTenantByEmail({
-        email,
-        name: displayName,
-        provider: name,
-        provider_id: String(userJson.id || userJson.sub || ''),
-      });
+      let result;
+      try {
+        result = findOrCreateTenantByEmail({
+          email,
+          name: displayName,
+          provider: name,
+          provider_id: String(userJson.id || userJson.sub || ''),
+        });
+      } catch (linkErr) {
+        // AUTH-04 - a provider_id mismatch means this email's tenant is already
+        // bound to a different provider account. Refuse silent sign-in and tell
+        // the user to link from an authenticated session instead of overwriting.
+        if (linkErr && linkErr.code === 'provider_id_mismatch') {
+          return res.redirect(302, `/signup?oauth_error=account_link_required`);
+        }
+        throw linkErr;
+      }
+      const { tenant, api_key, created } = result;
 
       setSessionCookie(res, api_key);
       const sep = ret.includes('?') ? '&' : '?';

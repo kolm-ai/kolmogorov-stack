@@ -105,7 +105,6 @@ export function isDurable() {
 export function observationToCanonicalEvent(row, opts = {}) {
   if (!row || typeof row !== 'object') return null;
   const provenance = String(opts.provenance || 'capture-store');
-  const event_id = String(row.event_id || row.id || ('evt_' + Date.now().toString(36)));
   const tenant_id = String(row.tenant_id || row.tenant || 'local');
   const namespace = String(row.corpus_namespace || row.namespace || 'default');
   const created_at = row.created_at || new Date().toISOString();
@@ -113,6 +112,18 @@ export function observationToCanonicalEvent(row, opts = {}) {
   const responseText = row.response != null
     ? (typeof row.response === 'string' ? row.response : JSON.stringify(row.response))
     : '';
+  // W409a P2 - deterministic fallback event_id. When the capture row carries no
+  // explicit event_id/id, a timestamp-based nonce (evt_+Date.now()) would mint a
+  // DIFFERENT id for the same observation inserted twice (proxy mirror + direct
+  // API), defeating the event-store's INSERT-OR-REPLACE dedupe and silently
+  // duplicating canonical events. Hash input+output+tenant+namespace bucketed to
+  // 1-minute precision instead, so the same observation collapses to one row.
+  // created_at.slice(0,16) = 'YYYY-MM-DDTHH:MM' (minute bucket).
+  const minuteBucket = String(created_at).slice(0, 16);
+  const fallbackEventId = 'evt_' + hashContent(
+    promptText + '|' + responseText + '|' + tenant_id + '|' + namespace + '|' + minuteBucket,
+  );
+  const event_id = String(row.event_id || row.id || fallbackEventId);
   const request_hash = row.template_hash
     || row.request_hash
     || (promptText ? hashContent(promptText + '|' + (row.model || '')) : null);

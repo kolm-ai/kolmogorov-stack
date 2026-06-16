@@ -1,4 +1,5 @@
 import { objectStorageReadiness } from './object-storage.js';
+import { rankQuantizationStrategies } from './quantization-oracle.js';
 
 const WORKLOADS = Object.freeze(['train', 'distill', 'compile', 'quantize', 'inference', 'serve']);
 const PRIVACY_MODES = Object.freeze(['standard', 'regulated', 'zero_retention', 'airgap']);
@@ -289,11 +290,52 @@ function storageFit(lane, storage, profile) {
   return { ok: true, reason: null, storage_required: false };
 }
 
-function commandFor(lane, profile) {
+// Resolve the quantization worker method the oracle recommends for this
+// profile, so the broker's quantize command and the quantization oracle agree
+// on worker_method. Best-effort: if the oracle has no executable worker_method
+// (e.g. only baselines fit) we fall back to int4 (the always-on default the
+// worker accepts). The full ranked report is also returned for observability.
+function resolveQuantizeMethod(profile, env = process.env) {
+  try {
+    const ranked = rankQuantizationStrategies({
+      params_b: profile.params_b,
+      context_tokens: profile.context_tokens,
+      // Privacy maps through so airgap profiles don't recommend an external repo.
+      privacy_mode: profile.privacy,
+    });
+    const m = ranked
+      && ranked.recommendation
+      && ranked.recommendation.primary
+      && ranked.recommendation.primary.worker_method;
+    return { method: m || 'int4', oracle: ranked || null };
+  } catch (_) {
+    return { method: 'int4', oracle: null };
+  }
+}
+
+function commandFor(lane, profile, env = process.env) {
   const seeds = cleanPath(profile.dataset, 'seeds.jsonl');
   const base = cleanModel(profile.base_model);
   const name = cleanName(profile.name);
   const artifact = cleanName(profile.artifact);
+  // Atom: quantize workload must emit a `kolm quantize` invocation, not a
+  // train/compile command. Branch BEFORE command_kind so every lane (local,
+  // remote-ssh, cloud) routes quantize correctly. The method is sourced from
+  // the quantization oracle so the broker + oracle agree on worker_method.
+  if (profile.workload === 'quantize') {
+    const { method } = resolveQuantizeMethod(profile, env);
+    const inDir = cleanPath(profile.base_model || '<model-dir>', '<model-dir>');
+    const outDir = `${artifact}-${cleanName(method, 'q')}`;
+    if (lane.execution === 'local') {
+      return `kolm quantize --local-worker --method ${method} --in ${inDir} --out ${outDir}`;
+    }
+    if (lane.command_kind === 'ssh-train' || lane.execution === 'self_hosted') {
+      return `kolm remote quantize --provider=remote-ssh --method=${method} --in=${inDir} --out=${outDir}`;
+    }
+    // Hosted/rented/managed cloud lanes: the cloud quantize equivalent.
+    const backendTag = lane.backend || lane.id;
+    return `kolm cloud quantize ${name} --backend ${backendTag} --method ${method} --in ${inDir} --out ${outDir}`;
+  }
   if (lane.command_kind === 'local-train') {
     if (profile.requires_training) return `kolm train --namespace ${name} --base-model ${base}`;
     return `kolm compile --spec ${seeds} --out ${artifact}.kolm`;
@@ -341,7 +383,10 @@ function scoreLane(lane, profile, storage, env) {
   if (profile.budget_usd > 0 && lane.cost_rank >= 5) score -= 5;
   if (!configured && missing.length) score -= 8;
   const state = feasible && configured ? 'ready' : feasible ? 'needs_configuration' : 'infeasible';
-  const quoteCommand = feasible ? commandFor(lane, profile) : null;
+  const quoteCommand = feasible ? commandFor(lane, profile, env) : null;
+  const workerMethod = profile.workload === 'quantize'
+    ? resolveQuantizeMethod(profile, env).method
+    : null;
   return {
     id: lane.id,
     label: lane.label,
@@ -361,6 +406,9 @@ function scoreLane(lane, profile, storage, env) {
     storage_required: store.storage_required === true,
     quote_command: quoteCommand,
     run_command: state === 'ready' ? quoteCommand : null,
+    worker_method: workerMethod,
+    command_kind: lane.command_kind,
+    backend: lane.backend || null,
     secret_values_included: false,
   };
 }
@@ -442,7 +490,138 @@ export function planCloudCompute(input = {}, env = process.env) {
   };
 }
 
+// Map a broker lane to the src/compute backend name used by rent()/run().
+// Hosted/rented lanes carry an explicit lane.backend; local + self-hosted
+// lanes map by lane id. Returns null for lanes with no compute adapter
+// (deploy-plan-only enterprise/edge lanes), which the bridge surfaces honestly.
+function laneComputeBackend(lane) {
+  if (!lane) return null;
+  const byBackend = {
+    runpod: 'runpod', modal: 'modal', lambda: 'lambda', together: 'together',
+  };
+  if (lane.backend && byBackend[lane.backend]) return byBackend[lane.backend];
+  const byId = {
+    'local-cuda': 'local-cuda',
+    'local-mlx': 'local-mlx',
+    'local-cpu': 'local-cpu',
+    'remote-ssh': 'remote-ssh',
+  };
+  return byId[lane.id] || null;
+}
+
+// Build the spec the chosen compute adapter expects. For local lanes (run())
+// we hand the adapter the resolved command argv; for rented/hosted lanes
+// (rent()) we pass the training/quantize profile so the estimator + adapter
+// can quote + provision.
+function buildExecutionSpec(lane, profile, command) {
+  const spec = {
+    base_model: profile.base_model,
+    examples: profile.rows,
+    workload: profile.workload,
+    name: profile.name,
+    artifact: profile.artifact,
+    dataset: profile.dataset,
+    params_b: profile.params_b,
+    context_tokens: profile.context_tokens,
+  };
+  if (lane.execution === 'local' && command) {
+    // Local adapters (local-cpu/local-cuda/local-mlx) run an argv. We pass the
+    // recommended command split into argv so run() can spawn it directly.
+    spec.command = String(command).split(/\s+/).filter(Boolean);
+  }
+  return spec;
+}
+
+/**
+ * Execution bridge from a broker recommendation to a live compute job.
+ *
+ * planCloudCompute() stays the dry-run quote path. runCloudCompute() takes the
+ * SAME input, plans it, then EXECUTES the winning lane against the real compute
+ * layer:
+ *
+ *   - hosted/rented/managed lanes  -> src/compute/rent.js rent(spec, {confirm})
+ *   - local lanes                  -> src/compute/index.js run(backend, spec)
+ *
+ * Real spend is gated behind opts.confirm===true (mirroring rent(): without it
+ * rent() returns a dry-run quote and run() is not invoked). Returns a live job
+ * handle/result object, never a bare command string.
+ *
+ * Returns:
+ *   { ok:false, reason, plan }                      no actionable recommendation
+ *   { ok:true, dry_run:true, mode, backend, ... }   confirm not set
+ *   { ok:true, mode:'local'|'rented', backend, job } executed
+ */
+export async function runCloudCompute(input = {}, opts = {}) {
+  const env = opts.env || process.env;
+  const confirm = opts.confirm === true;
+  const plan = planCloudCompute(input, env);
+  const rec = plan.recommendation;
+  if (!rec) {
+    return { ok: false, reason: 'no_recommendation', plan };
+  }
+  if (rec.state === 'infeasible') {
+    return { ok: false, reason: 'recommended_lane_infeasible', blockers: rec.blockers || [], plan };
+  }
+  const lane = LANES.find((l) => l.id === rec.id) || null;
+  const backend = laneComputeBackend(lane);
+  const command = rec.run_command || rec.quote_command || null;
+
+  if (!backend) {
+    // Enterprise/edge deploy-plan lanes have no compute adapter to execute
+    // against. Surface the actionable plan command instead of a fake job.
+    return {
+      ok: false,
+      reason: 'lane_has_no_compute_adapter',
+      lane: rec.id,
+      execution: rec.execution,
+      next_command: command,
+      plan,
+    };
+  }
+
+  const spec = buildExecutionSpec(lane, plan.profile, command);
+
+  // Local lanes execute through run(); they own no rental lifecycle.
+  if (lane.execution === 'local') {
+    if (!confirm) {
+      return {
+        ok: true, dry_run: true, mode: 'local', backend, lane: rec.id,
+        command, spec, plan,
+      };
+    }
+    const { run } = await import('./compute/index.js');
+    const job = await run(backend, spec, { on_progress: opts.on_progress });
+    return { ok: true, mode: 'local', backend, lane: rec.id, command, job, plan };
+  }
+
+  // Hosted/rented/managed/self-hosted lanes execute through rent(), which
+  // itself enforces confirm:true before spending. We thread confirm + budget.
+  const { rent } = await import('./compute/rent.js');
+  const job = await rent(spec, {
+    backend,
+    confirm,
+    budget_usd: opts.budget_usd ?? (plan.profile.budget_usd || null),
+    on_progress: opts.on_progress,
+    byoc: opts.byoc,
+    airgap: opts.airgap,
+    training_samples: opts.training_samples,
+    data_classification: opts.data_classification,
+    allow_sensitive_on_pod: opts.allow_sensitive_on_pod,
+  });
+  return {
+    ok: job && job.ok !== false,
+    mode: 'rented',
+    backend,
+    lane: rec.id,
+    command,
+    dry_run: job && job.dry_run === true,
+    job,
+    plan,
+  };
+}
+
 export default {
   cloudComputeBrokerCatalog,
   planCloudCompute,
+  runCloudCompute,
 };

@@ -163,6 +163,73 @@ def fail(code, msg, extra=None):
     sys.exit(code)
 
 
+# Experimental quantization gate. These methods drive external research repos or
+# heavier toolchains (ExLlamaV2, AQLM/QuIP# upstream optimizers, EfficientQAT
+# training loop, HQQ). They are real + wired below, but the catalog advertises
+# them as experimental: a plain run would mislead a customer who has not
+# installed the upstream pieces. So unless the operator opts in via
+# KOLM_ENABLE_EXPERIMENTAL_QUANTS=1, we refuse them up front with an actionable
+# hint instead of failing deep inside the (possibly missing) toolchain. The
+# four stable worker methods (int4/int8/gptq/awq) are always allowed. Mirrors
+# the experimental flag in src/quantization-oracle.js METHOD_CATALOG.
+_EXPERIMENTAL_METHODS = frozenset(("hqq", "exl2", "exl3", "aqlm", "quip", "qat"))
+
+
+def _experimental_quants_enabled():
+    v = str(os.environ.get("KOLM_ENABLE_EXPERIMENTAL_QUANTS", "")).strip().lower()
+    return v in ("1", "true", "yes", "on")
+
+
+def guard_experimental_method(method):
+    """Fail loud (exit 2) when an experimental method is requested without the
+    KOLM_ENABLE_EXPERIMENTAL_QUANTS opt-in. No-op for stable methods."""
+    if method in _EXPERIMENTAL_METHODS and not _experimental_quants_enabled():
+        fail(2,
+             f"{method} is an experimental quantization method requiring external "
+             f"toolchains; it is gated off by default",
+             {"hint": "set KOLM_ENABLE_EXPERIMENTAL_QUANTS=1 to enable it, or use "
+                      "one of int4/int8/gptq/awq",
+              "experimental": True,
+              "method": method,
+              "stable_methods": ["int4", "int8", "gptq", "awq"]})
+
+
+def _resolve_optimizer(repo_env, repo_script, module_name, module_args_fn,
+                       env_args_fn, install_hint):
+    """Resolve the calibration-time/training-time optimizer launch command for
+    aqlm/quip/qat. Precedence:
+
+      1. $<repo_env> is set + the operator's checkout has <repo_script> ->
+         drive their script (operator override always wins).
+      2. The pinned package's CLI module is importable ($python -m <module>)
+         -> drive it. This is the turnkey path enabled when the operator opts
+         in via the requirements-optimizers.txt extras group.
+      3. Neither -> fail(2) with the actionable install hint.
+
+    Returns (cmd:list[str], source:str). Never silently no-ops.
+    """
+    import importlib.util
+
+    repo = os.environ.get(repo_env)
+    if repo and os.path.isdir(repo):
+        main_py = os.path.join(repo, repo_script)
+        if not os.path.exists(main_py):
+            fail(2, f"{repo_env} set but {repo_script} not found at {main_py}")
+        return ([sys.executable, main_py] + list(env_args_fn(main_py)), f"env:{repo_env}")
+
+    # Fall back to the pinned package's CLI module when no env path is set.
+    if importlib.util.find_spec(module_name) is not None:
+        return ([sys.executable, "-m", module_name] + list(module_args_fn()),
+                f"pinned-module:{module_name}")
+
+    fail(2,
+         f"{module_name} optimizer not available: set {repo_env} to a checkout, "
+         f"or install the pinned optimizer extras",
+         {"install": install_hint,
+          "env_override": repo_env,
+          "pinned_module": module_name})
+
+
 def run_int_bnb(method, src, dst, device, trust_remote_code=False):
     """int4/int8 via bitsandbytes — load with quantization config, save sharded."""
     try:
@@ -281,36 +348,42 @@ def run_aqlm(src, dst, calib, bits, group_size, device, trust_remote_code=False)
         fail(2, f"missing python deps for aqlm: {e}",
              {"install": "pip install aqlm[gpu] torch transformers accelerate"})
 
-    repo = os.environ.get("AQLM_REPO_PATH")
-    if not repo or not os.path.isdir(repo):
-        fail(2, "AQLM quantization requires the upstream repo (optimizer is not in the pip package)",
-             {"install": "git clone https://github.com/Vahe1994/AQLM && "
-                         "export AQLM_REPO_PATH=$PWD/AQLM"})
-    main_py = os.path.join(repo, "main.py")
-    if not os.path.exists(main_py):
-        fail(2, f"AQLM_REPO_PATH set but main.py not found at {main_py}")
-
     import subprocess
     tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     tok.save_pretrained(dst)
-    cmd = [sys.executable, main_py, src,
-           "--nbits_per_codebook=16", "--num_codebooks=2",
-           "--in_group_size=8", "--out_group_size=1",
-           f"--save={dst}"]
+
+    common = [
+        "--nbits_per_codebook=16", "--num_codebooks=2",
+        "--in_group_size=8", "--out_group_size=1",
+        f"--save={dst}",
+    ]
     if trust_remote_code:
-        cmd.append("--trust_remote_code")
+        common.append("--trust_remote_code")
     if calib and os.path.exists(calib):
-        cmd.append(f"--dataset={calib}")
+        common.append(f"--dataset={calib}")
+
+    # Operator checkout drives main.py with src as first positional; the pinned
+    # `python -m aqlm.main` module mirrors that argument layout.
+    cmd, source = _resolve_optimizer(
+        repo_env="AQLM_REPO_PATH",
+        repo_script="main.py",
+        module_name="aqlm.main",
+        module_args_fn=lambda: [src] + common,
+        env_args_fn=lambda main_py: [src] + common,
+        install_hint=("git clone https://github.com/Vahe1994/AQLM && "
+                      "export AQLM_REPO_PATH=$PWD/AQLM   # or: "
+                      "KOLM_QUANT_OPTIMIZERS=1 pip install -r requirements-optimizers.txt"),
+    )
     res = subprocess.run(cmd, check=False)
     if res.returncode != 0:
-        fail(4, f"AQLM main.py exited {res.returncode}")
+        fail(4, f"AQLM optimizer ({source}) exited {res.returncode}")
     return {
         "lib": "aqlm",
         "lib_version": _ver("aqlm"),
         "torch_version": _ver("torch"),
         "transformers_version": _ver("transformers"),
         "scheme": "additive-2x16",
-        "repo_used": repo,
+        "optimizer_source": source,
         "trust_remote_code": bool(trust_remote_code),
     }
 
@@ -330,34 +403,37 @@ def run_quip(src, dst, calib, bits, group_size, device, trust_remote_code=False)
              {"install": "pip install torch transformers accelerate "
                          "(quip-sharp also needs the repo checkout)"})
 
-    repo = os.environ.get("QUIP_SHARP_REPO_PATH")
-    if not repo or not os.path.isdir(repo):
-        fail(2, "QuIP# quantization requires the upstream repo",
-             {"install": "git clone https://github.com/Cornell-RelaxML/quip-sharp && "
-                         "export QUIP_SHARP_REPO_PATH=$PWD/quip-sharp"})
-    main_py = os.path.join(repo, "quantize_llama.py")
-    if not os.path.exists(main_py):
-        fail(2, f"QUIP_SHARP_REPO_PATH set but quantize_llama.py not found at {main_py}")
-
     import subprocess
     tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     tok.save_pretrained(dst)
-    cmd = [sys.executable, main_py,
-           f"--save_path={dst}",
-           f"--base_model={src}",
-           "--codebook=E8P12",
-           "--scale_override=0.9",
-           "--ft_epochs=0"]
+
+    common = [
+        f"--save_path={dst}",
+        f"--base_model={src}",
+        "--codebook=E8P12",
+        "--scale_override=0.9",
+        "--ft_epochs=0",
+    ]
+    cmd, source = _resolve_optimizer(
+        repo_env="QUIP_SHARP_REPO_PATH",
+        repo_script="quantize_llama.py",
+        module_name="quip_sharp.quantize_llama",
+        module_args_fn=lambda: list(common),
+        env_args_fn=lambda main_py: list(common),
+        install_hint=("git clone https://github.com/Cornell-RelaxML/quip-sharp && "
+                      "export QUIP_SHARP_REPO_PATH=$PWD/quip-sharp   # or: "
+                      "KOLM_QUANT_OPTIMIZERS=1 pip install -r requirements-optimizers.txt"),
+    )
     res = subprocess.run(cmd, check=False)
     if res.returncode != 0:
-        fail(4, f"QuIP# quantize_llama.py exited {res.returncode}")
+        fail(4, f"QuIP# optimizer ({source}) exited {res.returncode}")
     return {
         "lib": "quip-sharp",
         "lib_version": _ver("quip_sharp"),
         "torch_version": _ver("torch"),
         "transformers_version": _ver("transformers"),
         "scheme": "E8P12-incoherence",
-        "repo_used": repo,
+        "optimizer_source": source,
         "trust_remote_code": bool(trust_remote_code),
     }
 
@@ -465,27 +541,30 @@ def run_qat(src, dst, calib, bits, group_size, device, trust_remote_code=False):
              {"install": "pip install torch transformers accelerate "
                          "(EfficientQAT also needs the repo checkout)"})
 
-    repo = os.environ.get("EFFICIENT_QAT_REPO_PATH")
-    if not repo or not os.path.isdir(repo):
-        fail(2, "EfficientQAT needs the upstream repo's training loop",
-             {"install": "git clone https://github.com/OpenGVLab/EfficientQAT && "
-                         "export EFFICIENT_QAT_REPO_PATH=$PWD/EfficientQAT"})
-    main_py = os.path.join(repo, "main_block_ap.py")
-    if not os.path.exists(main_py):
-        fail(2, f"EFFICIENT_QAT_REPO_PATH set but main_block_ap.py not found at {main_py}")
-
     import subprocess
     tok = AutoTokenizer.from_pretrained(src, trust_remote_code=trust_remote_code)
     tok.save_pretrained(dst)
-    cmd = [sys.executable, main_py,
-           f"--model={src}", f"--save_quant_dir={dst}",
-           f"--wbits={bits}", f"--group_size={group_size}",
-           "--epochs=2", "--quant_lr=1e-4"]
+
+    common = [
+        f"--model={src}", f"--save_quant_dir={dst}",
+        f"--wbits={bits}", f"--group_size={group_size}",
+        "--epochs=2", "--quant_lr=1e-4",
+    ]
     if calib and os.path.exists(calib):
-        cmd.append(f"--calib_dataset={calib}")
+        common.append(f"--calib_dataset={calib}")
+    cmd, source = _resolve_optimizer(
+        repo_env="EFFICIENT_QAT_REPO_PATH",
+        repo_script="main_block_ap.py",
+        module_name="efficient_qat.main_block_ap",
+        module_args_fn=lambda: list(common),
+        env_args_fn=lambda main_py: list(common),
+        install_hint=("git clone https://github.com/OpenGVLab/EfficientQAT && "
+                      "export EFFICIENT_QAT_REPO_PATH=$PWD/EfficientQAT   # or: "
+                      "KOLM_QUANT_OPTIMIZERS=1 pip install -r requirements-optimizers.txt"),
+    )
     res = subprocess.run(cmd, check=False)
     if res.returncode != 0:
-        fail(4, f"EfficientQAT main_block_ap.py exited {res.returncode}")
+        fail(4, f"EfficientQAT optimizer ({source}) exited {res.returncode}")
     return {
         "lib": "efficient_qat",
         "lib_version": _ver("efficient_qat"),
@@ -494,7 +573,7 @@ def run_qat(src, dst, calib, bits, group_size, device, trust_remote_code=False):
         "bits": bits,
         "group_size": group_size,
         "scheme": f"qat-block-{bits}bit-g{group_size}",
-        "repo_used": repo,
+        "optimizer_source": source,
         "trust_remote_code": bool(trust_remote_code),
     }
 
@@ -1420,6 +1499,10 @@ def main():
     moe_run_meta = None
     if moe_detection.get("is_moe"):
         moe_run_meta = build_moe_run_meta(str(src), daq_profile, args.method)
+
+    # Experimental-method gate: refuse hqq/exl2/exl3/aqlm/quip/qat up front
+    # unless KOLM_ENABLE_EXPERIMENTAL_QUANTS=1. Stable methods pass through.
+    guard_experimental_method(args.method)
 
     trc = bool(args.trust_remote_code)
     try:

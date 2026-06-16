@@ -56,10 +56,11 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 
 import * as eventStore from './event-store.js';
-import activeLearning from './active-learning.js';
+import activeLearning, { _bucketKey as _bucketKeyImported } from './active-learning.js';
 import { minhashPredup } from './minhash-dedup.js';
 import { selectInformativeSubset } from './data-select.js';
 // The INGEST stage (data-ingest.js) is the single authority on where a namespace's
@@ -81,14 +82,18 @@ export const CURATE_VERSION = 'curate-v1';
 
 const PROVIDER = 'kolm_data_curate';
 
-// _bucketKey lives behind active-learning's __internals export. Pull it out
-// once; fall back to a local 3-word-prefix bucket if the shape ever changes so
-// clustering never hard-fails the curate run.
-const _bucketKeyExternal = (activeLearning
-  && activeLearning.__internals
-  && typeof activeLearning.__internals._bucketKey === 'function')
-  ? activeLearning.__internals._bucketKey
-  : null;
+// _bucketKey is now a PUBLIC named export of active-learning.js (CD-004), so we
+// import it directly and no longer reach through the __internals hack. The
+// __internals path is kept as a defensive fallback (and the local 3-word-prefix
+// bucket below as a last resort) so clustering never hard-fails the curate run
+// even if the export shape ever changes.
+const _bucketKeyExternal = (typeof _bucketKeyImported === 'function')
+  ? _bucketKeyImported
+  : ((activeLearning
+      && activeLearning.__internals
+      && typeof activeLearning.__internals._bucketKey === 'function')
+    ? activeLearning.__internals._bucketKey
+    : null);
 
 // ── helpers (pure) ──────────────────────────────────────────────────────────
 
@@ -384,11 +389,13 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       cluster: true,
       pii: true,
       cot: true,
-      // ── opt-in W921 additions (default OFF → default curate path unchanged) ──
+      // ── W921 stages now DEFAULT-ON in the standard compile path (CD-001) ──
       // minhash: run a Node-native MinHash/LSH near-dup PRE-PASS before the
       //          existing python dedup. Catches exact + near-exact dups off-GPU
       //          (the python pass stays as the tier-2 paraphrase catcher).
-      minhash: false,
+      //          Pure JS, no external deps, deterministic -> safe to default ON.
+      //          Catches paraphrases/near-dups the coarse 3-gram dedup misses.
+      minhash: true,
       minhashThreshold: 0.85, // true-Jaccard floor for the verify pass
       // target_size: when set (>0), run an informative-subset SELECTION stage
       //          after the filter stages. >1 = absolute count, 0<x<=1 = fraction.
@@ -396,13 +403,22 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       select_strategy: 'diversity', // 'diversity' (self-coverage) | 'dsir' (target-matched)
       diversity_tau: 0.9,
       target_items: null, // reference distribution for the 'dsir' strategy
-      // ── W921 frontier opt-ins (default OFF → default curate path unchanged) ──
-      // qualityClassifier: use the learned per-pair quality classifier in stage a.
+      // ── W921 frontier stages are OPT-IN on the base curatePairs() API ──
+      // These ADDITIVE stages surface new report blocks (report.quality,
+      // report.topics, report.label_errors). They are DEFAULT-OFF here to
+      // preserve back-compat: a direct curatePairs() caller that does not ask
+      // for them gets the historical behavior (null report blocks). The standard
+      // compile path turns them on explicitly via curateDefault() (CD-001).
+      // qualityClassifier: learned per-pair quality classifier in stage a.
+      //   Pure JS (FineWeb-Edu/DCLM/AlpaGasus feature lineage), no external deps;
+      //   degrades to the output-only heuristic on any failure.
       qualityClassifier: false,
       quality_mode: 'percentile', // 'percentile' (DCLM top keep_fraction) | 'absolute'
       keep_fraction: 0.9,         // percentile retain ratio
       quality_model: null,        // optional fitted model {w,feature_names,...}
       // semanticCluster: replace stage c with embedding k-means + c-TF-IDF labels.
+      //   Pure JS, deterministic, no python; only re-labels cluster_id/topics
+      //   (drops no pairs).
       semanticCluster: false,
       n_clusters: null,           // override auto-k
       cluster_labeler: null,      // optional injectable teacher labeler fn
@@ -768,9 +784,102 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
   }
 }
 
+// ── curateDefault (CD-01/CD-06): default-on "light curate" entry ─────────────
+//
+// The standard distill corpus-prep boundary calls THIS, not the heavy
+// curatePairs(...) orchestration. It runs ONLY the pure-JS, graceful-degrade
+// stages that are safe to default ON for every compile:
+//
+//   * minhash near-dedup    (minhashPredup @ jaccardThreshold ~0.85)
+//   * learned-quality       (percentile/absolute classifier, degrades to heuristic)
+//   * semantic cluster      (embedding k-means + c-TF-IDF, degrades to 3-gram)
+//   * label-error FLAG      (Confident-Learning, stamps provenance.error_flag +
+//                            routes flagged pairs to the human review queue)
+//   * COT + PII             (drop leaked reasoning; redact PII)
+//
+// The GPU/python-heavy semantic dedup (dedup_pairs.py embedding pass) and the
+// diversity/facility-location SELECT stage stay OFF here - they remain behind
+// the explicit --auto path via curatePairs(...). curateDefault NEVER spawns
+// python, NEVER hits the network, and NEVER throws across its API.
+//
+// Returns {ok:true, version:'curate-v1', pairs:[...curated], report, ...} so the
+// caller gets the curated rows in hand AND a manifest-stampable report of what
+// ran (so the receipt records the default curation method). On any internal
+// failure it degrades to the input pairs unchanged with ok:true + a recorded
+// reason, so a default-path compile is never blocked by curation.
+export async function curateDefault(pairs, opts = {}) {
+  const input = Array.isArray(pairs) ? pairs : [];
+  // Force curatePairs to materialize the curated rows to a unique temp file we
+  // then read back in-memory; collision-safe per call.
+  const tmpOut = opts.out_path || path.join(
+    os.tmpdir(),
+    'kolm-curate-default-' + crypto.randomBytes(6).toString('hex') + '.jsonl',
+  );
+  try {
+    const res = await curatePairs({
+      tenant: opts.tenant || 'tenant_local',
+      namespace: opts.namespace || 'default',
+      // Pass the pairs inline so curate FILTERS in-memory and writes nothing to
+      // disk unless the caller explicitly asks (out_path). The default-path
+      // caller (prepareDistillCorpus) consumes the returned pairs directly.
+      pairs: input,
+      in_path: null,
+      out_path: tmpOut,
+      opts: Object.assign({
+        // light, default-on, pure-JS / graceful-degrade stages only:
+        quality: true,
+        qualityClassifier: true,
+        quality_mode: opts.quality_mode || 'percentile',
+        keep_fraction: Number.isFinite(Number(opts.keep_fraction)) ? Number(opts.keep_fraction) : 0.9,
+        minhash: true,
+        minhashThreshold: Number.isFinite(Number(opts.minhashThreshold)) ? Number(opts.minhashThreshold) : 0.85,
+        cluster: true,
+        semanticCluster: true,
+        cot: true,
+        pii: true,
+        // FLAG label errors + route to review on the default path (CD-05) - never
+        // drops by default (action 'review'); operator opts into 'filter'.
+        detectErrors: opts.detectErrors !== false,
+        errorAction: opts.errorAction === 'filter' ? 'filter' : 'review',
+        routeErrors: opts.routeErrors !== false,
+        // heavy stages stay OFF here (opt-in via curatePairs/--auto):
+        dedup: false,            // python embedding pass - opt-in
+        target_size: 0,          // diversity SELECT - opt-in
+        diversitySelect: false,  // facility-location/k-center - opt-in
+      }, opts.curateOpts || {}),
+    });
+    if (!res || res.ok !== true) {
+      return { ok: true, version: CURATE_VERSION, pairs: input, report: null, n_in: input.length, n_kept: input.length, degraded: true, reason: (res && res.error) || 'curate_failed' };
+    }
+    // Read the curated rows back from the temp file curatePairs materialized.
+    // We clean it up unless the caller asked to keep an explicit out_path.
+    let curated = input;
+    try {
+      if (res.out_path && fs.existsSync(res.out_path)) {
+        curated = _readJsonl(res.out_path);
+        // best-effort cleanup of the temp file we forced curate to write.
+        if (!opts.out_path) { try { fs.rmSync(res.out_path, { force: true }); } catch (_) { /* ignore */ } }
+      }
+    } catch (_) { curated = input; }
+    return {
+      ok: true,
+      version: CURATE_VERSION,
+      pairs: curated,
+      report: res.report || null,
+      n_in: res.n_in,
+      n_kept: res.n_kept,
+      n_removed: res.n_removed,
+      method: 'curate-default-light',
+    };
+  } catch (e) {
+    return { ok: true, version: CURATE_VERSION, pairs: input, report: null, n_in: input.length, n_kept: input.length, degraded: true, reason: String((e && e.message) || e) };
+  }
+}
+
 export default {
   CURATE_VERSION,
   curatePairs,
+  curateDefault,
   scoreCandidateLocal,
   flagCot,
   flagPii,

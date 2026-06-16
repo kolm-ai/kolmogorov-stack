@@ -81,6 +81,18 @@ the async, opt-in capture path**, never on the core synchronous store:
   an operator sets `KOLM_STORE_DRIVER=vercel_postgres` /
   `KOLM_CAPTURE_POSTGRES_URL`; with those unset, `pg` is never touched.
 
+> **`KOLM_STORE_DRIVER` is a shared env var across two namespaces.** Values
+> `json` / `sqlite` steer the **core synchronous row store** (`src/store.js`);
+> values `vercel_postgres` / `vercel_kv` steer the **pluggable async capture
+> driver** (`src/capture-store.js`). Setting it to `vercel_postgres` /
+> `vercel_kv` does NOT crash the core store: `src/store.js` treats those as "not
+> a core-store driver", logs a one-line notice, and keeps the core store on its
+> detected `json`/`sqlite` driver. Only a genuinely unknown string is a hard
+> boot error. Teams seat-billing transactionality (`withTransaction` =
+> `BEGIN IMMEDIATE`) is **sqlite-only**; a production teams-enabled deploy is
+> asserted onto sqlite at boot (`assertTeamsTransactionality()`), overridable
+> only with `KOLM_ALLOW_NONTXN_TEAMS=true`.
+
 That capture path is **already async by design**, so Postgres fits it naturally —
 and it is precisely the surface that would scale horizontally first (many writers,
 huge append volume). The core transactional store (tenants, API keys,
@@ -150,9 +162,43 @@ single, immediately-openable `.sqlite` file.
 Snapshots are written under `KOLM_DATA_DIR/backups/`:
 
 ```
-$KOLM_DATA_DIR/backups/kolm-2026-06-09T12-34-56-789Z.sqlite   # sqlite driver
-$KOLM_DATA_DIR/backups/kolm-2026-06-09T12-34-56-789Z/         # json driver (dir of *.json)
+$KOLM_DATA_DIR/backups/kolm-2026-06-09T12-34-56-789Z.sqlite        # sqlite driver
+$KOLM_DATA_DIR/backups/kolm-2026-06-09T12-34-56-789Z-vault/        # encrypted secrets-vault sidecar (sqlite driver)
+$KOLM_DATA_DIR/backups/kolm-2026-06-09T12-34-56-789Z/              # json driver (dir of *.json + secrets/ sidecar)
 ```
+
+### The encrypted secrets vault is snapshotted in every driver mode
+
+`src/secrets-vault.js` holds tenant RunPod/provider API keys **encrypted at
+rest** (`secrets-vault.json`) under an AES-256-GCM key in `secrets-vault.key`.
+`backupNow()` snapshots BOTH as first-class artifacts in every driver mode:
+
+- **SQLite driver:** a `kolm-<ts>-vault/` sidecar dir next to the `.sqlite`
+  snapshot containing `secrets-vault.json`, `secrets-vault.json.bak`, and
+  `secrets-vault.key`.
+- **JSON driver:** a `secrets/` sidecar inside the timestamped snapshot dir with
+  the same three files (the `.key` is **not** captured by the `*.json` table
+  copy, so backing it up here is what makes the ciphertext recoverable).
+
+The key copy is gated by `KOLM_BACKUP_INCLUDE_VAULT_KEY` (default on). Set it to
+`0` to EXCLUDE the raw key from co-located snapshots when you follow the off-box
+encryption guidance below (encrypt the key separately, store it apart from the
+ciphertext). `listBackups()` lists vault sidecars with `kind: 'vault'` and a
+`vault_files` array.
+
+**Restoring the vault:** copy `secrets-vault.json`, `secrets-vault.json.bak`,
+and `secrets-vault.key` from the sidecar back into `$KOLM_DATA_DIR` (or `~/.kolm`
+when `KOLM_DATA_DIR` is unset), preserving `0o600` permissions:
+
+```bash
+cp "$KOLM_DATA_DIR/backups/<snapshot>-vault/secrets-vault.json"     "$KOLM_DATA_DIR/"
+cp "$KOLM_DATA_DIR/backups/<snapshot>-vault/secrets-vault.json.bak" "$KOLM_DATA_DIR/"
+cp "$KOLM_DATA_DIR/backups/<snapshot>-vault/secrets-vault.key"      "$KOLM_DATA_DIR/"
+chmod 600 "$KOLM_DATA_DIR/secrets-vault."* "$KOLM_DATA_DIR/secrets-vault.key"
+```
+
+Without the `.key`, the ciphertext is unrecoverable - which is exactly why the
+key is captured alongside it (and why you should encrypt the off-box copy).
 
 Because backups live **on the same persistent volume** as the live DB, they
 protect against logical corruption / accidental writes / bad deploys. They do
@@ -201,7 +247,11 @@ stop write traffic first.
    ts=$(date -u +%Y%m%dT%H%M%SZ)
    mv "$KOLM_DB_PATH"        "$KOLM_DB_PATH.pre-restore-$ts"     2>/dev/null || true
    # WAL/SHM sidecars MUST be removed/moved or they will be replayed on top of
-   # the restored file and undo the restore:
+   # the restored file and undo the restore. NOTE: a graceful shutdown now runs
+   # `PRAGMA wal_checkpoint(TRUNCATE)` (src/store.js close() + a SIGTERM/exit
+   # hook), so a cleanly-stopped instance leaves these sidecars empty or absent.
+   # Move them anyway - a hard-killed (SIGKILL / OOM) process can still leave a
+   # non-empty WAL:
    mv "$KOLM_DB_PATH-wal"    "$KOLM_DB_PATH-wal.pre-restore-$ts" 2>/dev/null || true
    mv "$KOLM_DB_PATH-shm"    "$KOLM_DB_PATH-shm.pre-restore-$ts" 2>/dev/null || true
    ```
@@ -230,6 +280,35 @@ cp "$KOLM_DATA_DIR/backups/<snapshot-dir>/"*.json "$KOLM_DATA_DIR/"
 
 Restart. (The store also keeps `*.json.bak` mirrors and quarantines corrupt
 files as `*.corrupt-*` for finer-grained recovery — see `src/store.js`.)
+
+### SQLite self-recovery (fail-soft parity with the JSON driver)
+
+The SQLite driver now matches the JSON driver's resilience. On open,
+`src/store.js` runs `PRAGMA integrity_check`; if `kolm.sqlite` fails to open or
+fails the integrity check, it **quarantines** the corrupt file (and its
+`-wal`/`-shm` sidecars) to `kolm.sqlite.corrupt-<ts>`, **restores the newest
+`backups/kolm-*.sqlite` snapshot** if one exists, and re-opens — logging loudly
+at each step. If no snapshot is present it starts a fresh empty DB and re-imports
+any `*.json` seed tables. This means a corrupt production DB degrades softly
+instead of throwing at the first query.
+
+### One-shot migrations
+
+Historical capture traffic is backfilled into the canonical event-store by the
+`2026-05-19-capture-to-events` migration. It is registered in
+`src/migrations/index.js` with an idempotency ledger (`kolm_migrations` store
+table). Run pending migrations explicitly:
+
+```bash
+kolm migrate            # apply pending migrations (records each in the ledger)
+kolm migrate --dry-run  # show what WOULD migrate without writing
+kolm migrate --status   # list registered migrations + applied state
+```
+
+The runner skips already-applied migrations (ledger lookup), and the underlying
+event-store insert is `INSERT OR REPLACE` so a re-run is safe even if the ledger
+is lost. Only `src/migrations/*` is canonical; any copy under `tmp/` is a
+launch-time artifact and is never in the runner's import path.
 
 ### Off-box copies (protect against volume loss)
 

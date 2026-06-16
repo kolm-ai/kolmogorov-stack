@@ -190,8 +190,14 @@ export function canonicalizeReport(envelope) {
   //     Excluding co_signatures keeps the primary signature (and every prior
   //     co-signature) stable as more co-signers are appended - a co-signer can
   //     never invalidate the issuer's signature.
-  const { signature_ed25519, timestamp_evidence, log_checkpoint, co_signatures, ...rest } = envelope;
-  void signature_ed25519; void timestamp_evidence; void log_checkpoint; void co_signatures;
+  //   - _full_payload: the SERVER-SIDE-ONLY carry-over that stashes the withheld
+  //     paid-tier sections for a scan envelope (so the paid upgrade can restore
+  //     them without re-running the audit). It is excluded from the signed bytes
+  //     and stripped before the envelope reaches any HTTP client
+  //     (stripWirePayload), so the wire-stripped scan envelope verifies against
+  //     the SAME signature the in-memory envelope carries.
+  const { signature_ed25519, timestamp_evidence, log_checkpoint, co_signatures, _full_payload, ...rest } = envelope;
+  void signature_ed25519; void timestamp_evidence; void log_checkpoint; void co_signatures; void _full_payload;
   return canonicalize(rest);
 }
 
@@ -431,6 +437,17 @@ export function buildReportEnvelope(auditResult, opts = {}) {
   const tier = options.tier === 'report' ? 'report' : 'scan';
   const watermark = options.watermark != null ? !!options.watermark : (tier !== 'report');
 
+  // PAYWALL REDUCTION opt-in. The summary-only reduction (stub findings + withold
+  // the paid-tier sections, with the carry-over stashed for the paid upgrade) is
+  // applied ONLY when the caller EXPLICITLY requests the free Scan tier
+  // (opts.tier === 'scan'). Building an envelope WITHOUT an explicit tier yields
+  // the full report shape (the legacy default a direct caller / a paid upgrade
+  // expects); only the revenue-gated self-serve scan path passes tier:'scan'.
+  // opts.reduceScan can force the reduction on/off independently when needed.
+  const reduceScan = options.reduceScan != null
+    ? !!options.reduceScan
+    : (options.tier === 'scan');
+
   // Evidence tier (A/B/C). Bound INSIDE the signed payload, so the evidence-
   // quality grade is as tamper-evident as the findings themselves: a report
   // built from vendor-asserted logs cannot be upgraded to "captured by the
@@ -583,7 +600,79 @@ export function buildReportEnvelope(auditResult, opts = {}) {
   if (options.includeRedTeam !== false) {
     envelope.red_team = buildRedTeamBlock(auditResult);
   }
+
+  // PAYWALL REDUCTION (revenue gate). The free Scan tier is a watermarked
+  // SUMMARY-ONLY preview: the verdict band (summary rollup) stays, but the
+  // paid-only sections - detailed findings, the frameworks crosswalk, the
+  // remediation roadmap, the evidence_tier grade and the asr_checklist body -
+  // are WITHHELD. Findings collapse to bare {severity,title} stubs so a buyer
+  // cannot read the actual finding bodies from a free scan. The reduction
+  // happens HERE, before signReport, so the Ed25519 signature covers exactly
+  // the reduced payload a buyer receives (a buyer cannot forge entitlement by
+  // flipping tier->report on a signed scan; that breaks the signature).
+  //
+  // The withheld sections are stashed under the detached _full_payload carry-
+  // over so the paid upgrade (resignAsTier) can restore them WITHOUT re-running
+  // the audit. _full_payload is SERVER-SIDE ONLY: it is excluded from the signed
+  // canonical bytes (canonicalizeReport) AND must be stripped before the
+  // envelope reaches any HTTP client (stripWirePayload).
+  if (reduceScan && tier === 'scan') {
+    reduceToScanTier(envelope);
+  }
   return envelope;
+}
+
+// Top-level sections that the paid Signed Readiness Report carries but the free
+// Scan tier withholds. Order is the restore order used by the paid upgrade.
+const PAID_ONLY_SECTIONS = ['frameworks', 'remediation', 'evidence_tier', 'asr_checklist'];
+
+// Collapse an in-place envelope to the watermarked Scan (summary-only) tier:
+// stub the findings, withhold the paid-only sections, and stash everything
+// withheld under the detached _full_payload carry-over. Idempotent-safe: only
+// runs when _full_payload is not already present.
+function reduceToScanTier(envelope) {
+  if (!envelope || typeof envelope !== 'object' || envelope._full_payload) return envelope;
+  const carry = {};
+  // Full (detailed) findings are stashed; the wire findings become severity+
+  // title stubs (sorted highest-severity first, same order as the full list).
+  const fullFindings = Array.isArray(envelope.findings) ? envelope.findings : [];
+  carry.findings = fullFindings;
+  envelope.findings = fullFindings.map((f) => ({ severity: f.severity, title: f.title || f.id || '' }));
+  // Withhold the paid-only top-level sections (stash, then delete).
+  for (const key of PAID_ONLY_SECTIONS) {
+    if (key in envelope) {
+      carry[key] = envelope[key];
+      delete envelope[key];
+    }
+  }
+  envelope._full_payload = carry;
+  return envelope;
+}
+
+// Restore the full report-tier sections from the detached _full_payload carry-
+// over (the inverse of reduceToScanTier). Used by the paid upgrade so the
+// deterministic audit is never re-run. Returns the same object.
+function restoreFullPayload(envelope) {
+  const carry = envelope && envelope._full_payload;
+  if (!carry || typeof carry !== 'object') return envelope;
+  if (Array.isArray(carry.findings)) envelope.findings = carry.findings;
+  for (const key of PAID_ONLY_SECTIONS) {
+    if (key in carry) envelope[key] = carry[key];
+  }
+  delete envelope._full_payload;
+  return envelope;
+}
+
+// stripWirePayload(envelope) -> a SHALLOW copy with the server-side-only
+// _full_payload carry-over removed. The wire form is what reaches an HTTP
+// client: it must NEVER carry the withheld paid-tier sections. Because
+// _full_payload is excluded from the signed canonical bytes, stripping it does
+// not disturb the signature - the stripped wire form still verifies.
+export function stripWirePayload(envelope) {
+  if (!envelope || typeof envelope !== 'object') return envelope;
+  const { _full_payload, ...wire } = envelope;
+  void _full_payload;
+  return wire;
 }
 
 // ---------------------------------------------------------------------------
@@ -738,6 +827,15 @@ export function resignAsTier(envelope, tier, signer) {
   const next = { ...rest };
   next.tier = tier === 'report' ? 'report' : 'scan';
   next.watermark = next.tier !== 'report';
+  if (next.tier === 'report') {
+    // Paid upgrade: restore the full report-tier sections from the detached
+    // scan-tier carry-over (no audit re-run), then re-sign over the full payload.
+    restoreFullPayload(next);
+  } else if (next._full_payload) {
+    // Re-signing as scan: the carry-over is server-side-only and must not be
+    // signed; drop it (the wire/stripped form already excludes it).
+    delete next._full_payload;
+  }
   signReport(next, signer);
   return next;
 }

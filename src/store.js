@@ -75,14 +75,39 @@ function detectDefaultDriver() {
   }
 }
 
-const STORE_DRIVER = (process.env.KOLM_STORE_DRIVER || detectDefaultDriver()).toLowerCase();
+// Atom2 - KOLM_STORE_DRIVER is a SHARED env var across two namespaces:
+//   - the core synchronous row store (this module): json | sqlite
+//   - the async, pluggable capture/durable driver (src/capture-store.js):
+//     vercel_postgres | vercel_kv
+// Both are documented valid values (docs/durability.md, the store-drivers/*.js
+// headers, capture-store.js:44-45). Before this fix, setting
+// KOLM_STORE_DRIVER=vercel_postgres in a real deploy boot-CRASHED the whole
+// server here (the core store rejected the same env var the capture path
+// requires) before any route loaded. The capture-store consumes the pluggable
+// value; the core store must treat it as "not one of MY drivers" and fall back
+// to the detected json/sqlite core driver instead of throwing. We keep the hard
+// throw ONLY for genuinely unknown strings.
+const CAPTURE_ONLY_DRIVERS = new Set(['vercel_postgres', 'vercel_kv']);
+const RAW_STORE_DRIVER = (process.env.KOLM_STORE_DRIVER || '').toLowerCase();
+let STORE_DRIVER;
+if (!RAW_STORE_DRIVER) {
+  STORE_DRIVER = detectDefaultDriver();
+} else if (CAPTURE_ONLY_DRIVERS.has(RAW_STORE_DRIVER)) {
+  // The operator selected a pluggable capture/durable driver. That driver is
+  // owned by capture-store.js; the core row store keeps running on its own
+  // detected json/sqlite driver. Emit a one-line notice (not an error) so the
+  // operator understands which subsystem the env var actually steers.
+  STORE_DRIVER = detectDefaultDriver();
+  console.error(`[store] notice: KOLM_STORE_DRIVER=${RAW_STORE_DRIVER} selects the pluggable capture driver (src/capture-store.js); the core row store runs on "${STORE_DRIVER}".`);
+} else if (['json', 'sqlite'].includes(RAW_STORE_DRIVER)) {
+  STORE_DRIVER = RAW_STORE_DRIVER;
+} else {
+  throw new Error(`Unsupported KOLM_STORE_DRIVER "${RAW_STORE_DRIVER}". Core-store values: "json" or "sqlite". Pluggable capture-driver values: "vercel_postgres" or "vercel_kv".`);
+}
+
 const SQLITE_PATH = process.env.KOLM_DB_PATH
   ? path.resolve(process.env.KOLM_DB_PATH)
   : path.join(DATA_DIR, 'kolm.sqlite');
-
-if (!['json', 'sqlite'].includes(STORE_DRIVER)) {
-  throw new Error(`Unsupported KOLM_STORE_DRIVER "${STORE_DRIVER}". Use "json" or "sqlite".`);
-}
 
 // Fail-closed: never silently run a production-like instance on the JSON store.
 // JSON tables are per-process flat files - not durable/consistent across
@@ -289,6 +314,44 @@ function flushJsonTable(name) {
   }
 }
 
+// Atom6 (2) - quarantine a corrupt SQLite main DB and try to recover from the
+// newest store-backup snapshot, giving the production SQLite driver the same
+// fail-soft posture the JSON driver already has (.bak/quarantine). Returns true
+// if a usable DB file is in place at SQLITE_PATH afterwards, false otherwise.
+// Never throws across its boundary; logs loudly.
+function quarantineAndRecoverSqlite(reason) {
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const corruptDest = `${SQLITE_PATH}.corrupt-${stamp}-${process.pid}`;
+  // Move the corrupt primary + its WAL/SHM sidecars aside so a fresh open does
+  // not replay a poisoned WAL on top of any restored file.
+  for (const suffix of ['', '-wal', '-shm']) {
+    const f = SQLITE_PATH + suffix;
+    try { if (fs.existsSync(f)) fs.renameSync(f, corruptDest + suffix); } catch { /* best-effort */ }
+  }
+  console.error(`[store] FATAL recoverable: kolm.sqlite ${reason}; quarantined at ${corruptDest}. Attempting restore from newest store-backup snapshot.`);
+  // Find the newest VACUUM-INTO snapshot under DATA_DIR/backups and copy it in.
+  try {
+    const backupsDir = path.join(DATA_DIR, 'backups');
+    if (fs.existsSync(backupsDir)) {
+      const snaps = fs.readdirSync(backupsDir)
+        .filter(n => n.startsWith('kolm-') && n.endsWith('.sqlite'))
+        .sort(); // ISO timestamps sort chronologically
+      const newest = snaps[snaps.length - 1];
+      if (newest) {
+        const src = path.join(backupsDir, newest);
+        fs.copyFileSync(src, SQLITE_PATH);
+        console.error(`[store] recovered kolm.sqlite from backup snapshot ${newest}`);
+        return true;
+      }
+    }
+  } catch (e) {
+    console.error(`[store] backup restore failed after quarantine: ${e.message}; starting with a fresh empty DB.`);
+  }
+  // No snapshot available: a fresh DatabaseSync open will create an empty DB at
+  // SQLITE_PATH. Seed re-import from the *.json table files still applies.
+  return false;
+}
+
 function getSqliteDb() {
   if (sqliteDb) return sqliteDb;
   let DatabaseSync;
@@ -297,7 +360,34 @@ function getSqliteDb() {
   } catch (err) {
     throw new Error(`KOLM_STORE_DRIVER=sqlite requires Node with node:sqlite support: ${err.message}`);
   }
-  sqliteDb = new DatabaseSync(SQLITE_PATH);
+  try {
+    sqliteDb = new DatabaseSync(SQLITE_PATH);
+  } catch (openErr) {
+    // Atom6 - a corrupt/unopenable kolm.sqlite must not hard-throw at first
+    // query with no degrade path. Quarantine + restore + retry once.
+    sqliteDb = null;
+    quarantineAndRecoverSqlite(`failed to open (${openErr.message})`);
+    sqliteDb = new DatabaseSync(SQLITE_PATH);
+  }
+  // Atom6 - integrity gate. A silently-corrupt page set would otherwise throw
+  // mid-transaction much later. Check once at open; on failure quarantine the
+  // file, restore the newest snapshot, and re-open.
+  try {
+    const ic = sqliteDb.prepare('PRAGMA integrity_check').get();
+    const result = ic && (ic.integrity_check || ic['integrity_check'] || Object.values(ic)[0]);
+    if (result && String(result).toLowerCase() !== 'ok') {
+      try { sqliteDb.close(); } catch { /* */ }
+      sqliteDb = null;
+      quarantineAndRecoverSqlite(`failed PRAGMA integrity_check (${String(result).slice(0, 120)})`);
+      sqliteDb = new DatabaseSync(SQLITE_PATH);
+    }
+  } catch (icErr) {
+    // integrity_check itself threw -> treat the file as corrupt.
+    try { if (sqliteDb) sqliteDb.close(); } catch { /* */ }
+    sqliteDb = null;
+    quarantineAndRecoverSqlite(`integrity_check threw (${icErr.message})`);
+    sqliteDb = new DatabaseSync(SQLITE_PATH);
+  }
   sqliteDb.exec(`
     PRAGMA journal_mode = WAL;
     PRAGMA synchronous = FULL;
@@ -561,11 +651,44 @@ export function backendInfo() {
 
 export function close() {
   if (sqliteDb) {
-    sqliteDb.close();
+    // Atom6 (1) - checkpoint + truncate the WAL before closing so shutdown
+    // leaves a fully-checkpointed main DB and small (ideally zero-byte) -wal/
+    // -shm sidecars. Without this the on-disk main DB lags committed state until
+    // SQLite's own auto-checkpoint runs, and operators had to delete sidecars by
+    // hand during a restore (durability.md). Best-effort: never let a checkpoint
+    // failure block a graceful close.
+    try { sqliteDb.exec('PRAGMA wal_checkpoint(TRUNCATE)'); } catch { /* best-effort */ }
+    try { sqliteDb.close(); } catch { /* best-effort */ }
     sqliteDb = null;
   }
   jsonTables.clear();
   sqliteTables.clear();
+}
+
+// Atom6 (1) - checkpoint the WAL on graceful shutdown even when the caller does
+// not explicitly close the store. Registered once per process. The handler does
+// NOT call process.exit() (other shutdown hooks own that); it only flushes the
+// WAL into the main DB so a snapshot/restart sees committed state on disk.
+let _shutdownHookInstalled = false;
+export function installShutdownCheckpoint() {
+  if (_shutdownHookInstalled) return;
+  _shutdownHookInstalled = true;
+  const checkpoint = () => {
+    try {
+      if (sqliteDb) sqliteDb.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+    } catch { /* best-effort */ }
+  };
+  // 'exit' is synchronous - safe for the synchronous node:sqlite PRAGMA.
+  process.once('exit', checkpoint);
+  // SIGTERM/SIGINT: checkpoint, then re-emit default behavior is left to other
+  // handlers; we do not exit here so we don't pre-empt graceful drain.
+  process.once('SIGTERM', checkpoint);
+  process.once('SIGINT', checkpoint);
+}
+// Install automatically so the checkpoint runs even if cli/kolm.js does not
+// wire an explicit close() into its shutdown path. Guarded + idempotent.
+if (STORE_DRIVER === 'sqlite') {
+  try { installShutdownCheckpoint(); } catch { /* best-effort */ }
 }
 
 // Wrap `fn` in a single transactional unit. In sqlite mode this is BEGIN
@@ -594,6 +717,42 @@ export function withTransaction(fn) {
 
 export function storeDriver() {
   return STORE_DRIVER;
+}
+
+// Atom1 - the Teams seat-accounting TOCTOU-safety narrative (teams.js
+// removeMember/inviteToTeam/acceptInvite use withTransaction = BEGIN IMMEDIATE
+// for serialized seat writes) ONLY holds on the sqlite driver. In json mode
+// withTransaction is a synchronous pass-through (writes are serial within one
+// tick, which is correct for a single in-process writer but NOT a real
+// serialization barrier). This returns true when the active core driver gives
+// withTransaction real transactional isolation. Teams + billing code can assert
+// on it; capture-only pluggable drivers never steer the core store, so this is
+// purely a function of json|sqlite.
+export function isTransactional() {
+  return STORE_DRIVER === 'sqlite';
+}
+
+// Atom1 - assert at boot that a production teams-enabled deployment runs on a
+// transactional core driver (sqlite today; the future pg txn path would also
+// qualify). Called by the Teams/Gateway boot path. Fails LOUD with an
+// actionable hint rather than silently letting seat billing run without the
+// serialization guarantee it depends on. Returns { ok, driver, transactional }
+// when teams are not enabled or the guarantee holds; throws otherwise unless
+// KOLM_ALLOW_NONTXN_TEAMS=true explicitly accepts the risk.
+export function assertTeamsTransactionality({ teamsEnabled = true } = {}) {
+  const info = { ok: true, driver: STORE_DRIVER, transactional: isTransactional() };
+  if (!teamsEnabled) return info;
+  const prodLike = process.env.NODE_ENV === 'production'
+    || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.VERCEL
+    || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+  if (prodLike && !isTransactional() && process.env.KOLM_ALLOW_NONTXN_TEAMS !== 'true') {
+    throw new Error(
+      `[store] FATAL: Teams seat billing requires a transactional core store, but KOLM_STORE_DRIVER resolved to "${STORE_DRIVER}". `
+      + 'withTransaction (BEGIN IMMEDIATE) is sqlite-only; on json the seat TOCTOU guard is not a real serialization barrier. '
+      + 'Set KOLM_STORE_DRIVER=sqlite, or set KOLM_ALLOW_NONTXN_TEAMS=true to explicitly accept non-serialized seat accounting.',
+    );
+  }
+  return info;
 }
 
 // True when the store fell back to ephemeral /tmp (non-production only; in
@@ -753,7 +912,8 @@ export function promoteStagedCapture(staged_capture_id, { tenant_id, reviewer = 
     }
   }
   update(W808_STAGED_TABLE,
-    (r) => r.staged_capture_id === staged_capture_id,
+    (r) => r.staged_capture_id === staged_capture_id
+      && (!tenant_id || String(r.tenant_id) === String(tenant_id)),
     {
       quarantine_state: 'promoted',
       manual_review_at: new Date().toISOString(),

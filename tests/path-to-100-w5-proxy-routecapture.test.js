@@ -1,3 +1,9 @@
+// @unauthed-test — this is a PURE UNIT test. It imports the exported helper
+// routeCaptureWrite from src/router.js but never calls buildRouter() and never
+// issues an HTTP request, so there is no route to authenticate against. The
+// W409bb #5 guard flags the src/router.js import; this marker declares the
+// (accurate) intent: no router is mounted.
+//
 // W-5 part 3 (Path to 100%) — the proxy capture path is wired to the quarantine.
 //
 // __connectorProxy's two insertCapture sites now go through routeCaptureWrite

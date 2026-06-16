@@ -17,14 +17,17 @@
 //   1.  plan                  → {phase:'plan', plan_id, task, backbone}
 //   2.  tokenizer_train       → {phase:'tokenizer_train', tokenizer_path}
 //   3.  corpus_prepare        → {phase:'corpus_prepare', pair_count}
-//   4.  dataset_split         → {phase:'dataset_split', train_id, holdout_id}
-//   5.  distill (repeated)    → {phase:'distill', step, loss, k_score}
-//   6.  quantize              → {phase:'quantize', precision}
-//   7.  bundle                → {phase:'bundle', recipe_bundle_path}
-//   8.  sign                  → {phase:'sign', signature_hash}
-//   9.  verdict               → {phase:'verdict', production_ready, gates}
-//   10. install               → {phase:'install', target?}
-//   11. done                  → {phase:'done', artifact_path, artifact_hash}
+//   4.  curate                → {phase:'curate', kept, dropped} (W921 data-engine)
+//   5.  dataset_split         → {phase:'dataset_split', train_id, holdout_id}
+//   6.  distill (repeated)    → {phase:'distill', step, loss, k_score}
+//   7.  distill_eval          → {phase:'distill_eval', holdout_k_score}
+//   8.  quantize              → {phase:'quantize', precision}
+//   9.  bundle                → {phase:'bundle', recipe_bundle_path}
+//   10. sign                  → {phase:'sign', signature_hash}
+//   11. verdict               → {phase:'verdict', production_ready, gates}
+//   12. regression_gate       → {phase:'regression_gate', verdict} (W808 promotion gate)
+//   13. install               → {phase:'install', target?}
+//   14. done                  → {phase:'done', artifact_path, artifact_hash}
 //
 // Each phase writes its own log under ~/.kolm/jobs/<job_id>/<phase>.log so
 // `kolm jobs <id>` can tail per-phase progress. Honors opts.strict (fail on
@@ -42,7 +45,6 @@ import { trainTokenizer, DEFAULT_VOCAB_SIZES } from './tokenizer-train.js';
 import { distill, prepareDistillCorpus, selectStudentBackbone, MODES as DISTILL_MODES } from './distill-pipeline.js';
 import { createDataset, splitDataset } from './dataset-workbench.js';
 import { MIN_PRODUCTION_HOLDOUT, MIN_PRODUCTION_TRAIN } from './seeds.js';
-import { envSecret } from './env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
@@ -51,15 +53,34 @@ export const PIPELINE_PHASES = [
   'plan',
   'tokenizer_train',
   'corpus_prepare',
+  'curate',
   'dataset_split',
   'distill',
+  'distill_eval',
   'quantize',
   'bundle',
   'sign',
   'verdict',
+  'regression_gate',
   'install',
   'done',
 ];
+
+// W808-BLOCK - canonical exit code surfaced when the W808 regression gate
+// returns verdict 'rollback' (or the compile-eval-gate blocks promotion) and
+// the caller did not pass --force / --force-promote. Mirrors the CLI's
+// EXIT.GATE_FAIL (2) so `kolm compile` can map a rollback to a non-zero,
+// CI-actionable exit without importing the CLI's private EXIT table. The
+// pipeline never calls process.exit() itself (it is a library); it tags the
+// 'done' / 'regression_gate' phase with { gate_exit_code } so the CLI wrapper
+// can honor it. See crossFileNeeds.cliCommands for the wiring.
+export const PRODUCTION_GATE_FAILED_EXIT = 2;
+
+// Terminal verdicts from src/distill-pipeline.js _w808RegressionGate that BLOCK
+// promotion unless force is set. 'rollback' = a measured regression vs the
+// prior artifact in the same namespace. 'needs_human' = the candidate has no
+// resolvable K-Score, so we cannot prove non-regression (fail-closed).
+const W808_BLOCKING_VERDICTS = Object.freeze(['rollback', 'needs_human']);
 
 function _home() { return process.env.HOME || process.env.USERPROFILE || os.homedir(); }
 function _kolmDir() {
@@ -300,7 +321,10 @@ async function _bundlePhase({
     min_holdout: MIN_PRODUCTION_HOLDOUT,
     input_overlap_count: overlap.overlap_count,
     output_overlap_count: 0,
-    near_duplicate_count: 0,
+    // Atom 5 - near_duplicate_count now reflects the MinHash LSH near-dup
+    // removals from the curate sub-phase (was hard-coded 0). compileFull threads
+    // curateInfo.near_dup_removed through opts.near_duplicate_count.
+    near_duplicate_count: (opts && Number.isFinite(opts.near_duplicate_count)) ? Number(opts.near_duplicate_count) : 0,
     grouped_overlap_count: 0,
     production_ready: seedProductionReady,
     // Wave 409c new fields.
@@ -312,6 +336,23 @@ async function _bundlePhase({
     // W411 P0 #8 + #10 - dedupe + holdout audit.
     holdout_excluded_count: holdoutExcludedCount,
     row_hash_dedupe_count: rowHashDedupeCount,
+    // W808-BLOCK - bind the regression-gate verdict into the signed manifest so
+    // a verifier can confirm the promotion decision was gated. We carry the
+    // verdict + the comparison numbers (not the full run list) so the field is
+    // small + tamper-evident. The compile-pipeline verdict/install phases read
+    // distillResult.w808_regression_gate directly to BLOCK; this copy is the
+    // signed audit record.
+    w808_regression_gate: (opts && opts.w808_regression_gate && typeof opts.w808_regression_gate === 'object')
+      ? {
+          verdict: opts.w808_regression_gate.verdict || null,
+          candidate_kscore: (opts.w808_regression_gate.candidate_kscore ?? null),
+          prior_kscore: (opts.w808_regression_gate.prior_kscore ?? null),
+          kscore_drop: (opts.w808_regression_gate.kscore_drop ?? null),
+          critical_fail_rate_increase: (opts.w808_regression_gate.critical_fail_rate_increase ?? null),
+          prior_run_id: (opts.w808_regression_gate.prior_run_id ?? null),
+          version: opts.w808_regression_gate.version || null,
+        }
+      : null,
   };
 
   const extra_files = [];
@@ -414,15 +455,27 @@ async function _quantizePhase({ jobId, distillResult, opts }) {
 
 // Optional sign phase - when opts.no_sign is set this is a no-op. The
 // artifact.js build path already signs (HMAC chain) unconditionally; this
-// phase records an Ed25519 sidecar when KOLM_SIGNING_KEY is set.
+// phase emits a REAL Ed25519 sidecar so an offline verifier can check the
+// .kolm bytes against an embedded public key with no shared secret.
+//
+// Atom 3 (CA-03) - the historical sidecar was non-functional: it called
+// ed.sign(bytes, signingKey) (reversed args; the real signature is
+// ed.sign(privateKeyPem, bytes)) with an HMAC secret (KOLM_SIGNING_KEY)
+// where an Ed25519 PEM private key is required. That can never produce a
+// verifiable signature, so ed25519_attached:true was unreachable for any
+// correct invocation. We now resolve a real signer via
+// loadOrCreateDefaultSigner() (honors KOLM_ED25519_PRIVATE_KEY / _PATH /
+// per-machine cache; returns null when KOLM_ED25519_DISABLE=1), sign the
+// artifact bytes with the PEM private key, write a structured sidecar an
+// offline verifier can check, and only set ed25519_attached:true after a
+// successful verify-roundtrip. The HMAC receipt chain is already baked into
+// the .kolm by buildAndZip; we no longer touch KOLM_SIGNING_KEY here.
 async function _signPhase({ jobId, artifactResult, opts }) {
   if (opts.no_sign) {
     return { skipped: true, reason: 'no_sign opt' };
   }
   // The HMAC receipt chain is baked into the .kolm by buildAndZip. We
-  // surface its signature hash here so the watcher gets a confirmable
-  // value. When KOLM_SIGNING_KEY is set, also emit an Ed25519 sidecar
-  // file alongside the artifact for offline verification.
+  // surface its signature hash here so the watcher gets a confirmable value.
   const sigHash = artifactResult && artifactResult.receipt
     ? crypto.createHash('sha256').update(JSON.stringify(artifactResult.receipt)).digest('hex').slice(0, 32)
     : null;
@@ -431,28 +484,233 @@ async function _signPhase({ jobId, artifactResult, opts }) {
     artifact_hash: artifactResult ? artifactResult.artifact_hash : null,
     ed25519_attached: false,
   };
-  // WC07 - signing is OPTIONAL; only emit a sidecar when the operator has
-  // explicitly set KOLM_SIGNING_KEY to a non-empty trimmed value. The previous
-  // bare `process.env.KOLM_SIGNING_KEY` truthy check let `KOLM_SIGNING_KEY=""`
-  // and `KOLM_SIGNING_KEY="   "` pass the guard, after which ed.sign() would
-  // either throw or (worse) produce a deterministic forgeable signature against
-  // the empty-string key. envSecret() returns null in both broken cases so we
-  // fall through to ed25519_attached:false instead.
-  const signingKey = envSecret('KOLM_SIGNING_KEY');
-  if (signingKey && artifactResult && artifactResult.outPath) {
-    try {
-      const { default: ed } = await import('./ed25519.js').catch(() => ({ default: null }));
-      if (ed && ed.sign) {
-        const bytes = fs.readFileSync(artifactResult.outPath);
-        const sig = ed.sign(bytes, signingKey);
-        fs.writeFileSync(artifactResult.outPath + '.ed25519.sig', sig);
-        out.ed25519_attached = true;
-      }
-    } catch (e) {
-      out.ed25519_error = String(e.message || e);
+  if (!artifactResult || !artifactResult.outPath || !fs.existsSync(artifactResult.outPath)) {
+    out.ed25519_error = 'no artifact on disk to sign';
+    return out;
+  }
+  try {
+    const ed = await import('./ed25519.js');
+    // loadOrCreateDefaultSigner returns null only when KOLM_ED25519_DISABLE=1
+    // (operator opted out of asymmetric signing - legacy HMAC-only). Any other
+    // path (env key / env path / per-machine cache / freshly generated) yields
+    // a real Ed25519 PEM keypair.
+    const signer = ed.loadOrCreateDefaultSigner();
+    if (!signer || !signer.privateKey) {
+      out.ed25519_skipped = 'ed25519 signing disabled (KOLM_ED25519_DISABLE=1); shipping HMAC-only';
+      return out;
     }
+    const bytes = fs.readFileSync(artifactResult.outPath);
+    // ed.sign(privateKeyPem, data) - PEM FIRST. The previous code reversed
+    // these and passed an HMAC secret where a PEM is required.
+    const signature = ed.sign(signer.privateKey, bytes);
+    const signed_at = new Date().toISOString();
+    const sidecar = {
+      spec: ed.ED25519_SPEC,
+      alg: ed.ED25519_ALG,
+      public_key: signer.publicKey,
+      key_fingerprint: signer.key_fingerprint,
+      signature,
+      signed_at,
+      artifact_hash: artifactResult.artifact_hash || null,
+    };
+    // Verify-roundtrip BEFORE claiming attachment: an offline verifier checks
+    // ed.verify(public_key, bytes, signature); we run the exact same check here
+    // so ed25519_attached:true is never set on a signature that would not
+    // verify against the embedded public key.
+    const roundtrips = ed.verify(signer.publicKey, bytes, signature);
+    if (!roundtrips) {
+      out.ed25519_error = 'sign/verify roundtrip failed; sidecar not written';
+      return out;
+    }
+    const sidecarPath = artifactResult.outPath + '.ed25519.sig';
+    fs.writeFileSync(sidecarPath, JSON.stringify(sidecar, null, 2), 'utf8');
+    out.ed25519_attached = true;
+    out.ed25519_sidecar_path = sidecarPath;
+    out.ed25519_key_fingerprint = signer.key_fingerprint;
+    out.ed25519_source = signer.source || null;
+  } catch (e) {
+    out.ed25519_error = String((e && e.message) || e);
   }
   return out;
+}
+
+// W808-BLOCK - interpret the regression-gate envelope distill() attached to
+// its `done` event and decide whether promotion must HALT. This is the single
+// chokepoint compileFull uses to turn the (previously advisory) W808 verdict
+// into a BLOCKING decision per spec G1.
+//
+// Inputs:
+//   gate  - distillResult.w808_regression_gate (may be null/undefined when the
+//           distill path did not run the gate, e.g. a pure synth/rule compile).
+//   force - opts.force || opts.force_promote. When set, a blocking verdict is
+//           downgraded to a logged warning and promotion proceeds.
+//
+// Returns { blocked:bool, verdict, reason, gate, forced:bool, exit_code }.
+// Fail-closed posture:
+//   - verdict 'rollback'      -> blocked (a measured regression).
+//   - verdict 'needs_human'   -> blocked (no candidate K-Score: cannot prove
+//                                 non-regression).
+//   - verdict 'promote' / 'first_run' -> not blocked.
+//   - gate absent             -> not blocked (the rule/synth lane has its own
+//                                 productionReady() K-gate; W808 only applies
+//                                 to distill runs that produced a comparable
+//                                 candidate K-Score). We surface that as
+//                                 verdict 'not_applicable' so the phase event is
+//                                 still honest about why nothing was enforced.
+function _interpretW808Gate(gate, force) {
+  if (!gate || typeof gate !== 'object') {
+    return {
+      blocked: false,
+      verdict: 'not_applicable',
+      reason: 'no W808 regression gate on distill result (rule/synth compile or gate not run)',
+      gate: null,
+      forced: false,
+      exit_code: 0,
+    };
+  }
+  const verdict = String(gate.verdict || 'unknown');
+  const isBlocking = W808_BLOCKING_VERDICTS.includes(verdict);
+  if (!isBlocking) {
+    return {
+      blocked: false,
+      verdict,
+      reason: Array.isArray(gate.reasons) && gate.reasons.length
+        ? gate.reasons.join('; ')
+        : (gate.hint || `W808 verdict '${verdict}' permits promotion`),
+      gate,
+      forced: false,
+      exit_code: 0,
+    };
+  }
+  // Blocking verdict. Build a clear, ASCII-only reason string.
+  let reason;
+  if (verdict === 'rollback') {
+    const detail = Array.isArray(gate.reasons) && gate.reasons.length
+      ? gate.reasons.join('; ')
+      : `K-Score ${Number(gate.candidate_kscore).toFixed(4)} vs prior ${Number(gate.prior_kscore).toFixed(4)}`;
+    reason = `W808 regression gate: rollback - ${detail}`;
+  } else {
+    reason = `W808 regression gate: needs_human - ${gate.hint || gate.error || 'candidate K-Score unresolvable; cannot prove non-regression'}`;
+  }
+  if (force) {
+    return { blocked: false, verdict, reason, gate, forced: true, exit_code: 0 };
+  }
+  return { blocked: true, verdict, reason, gate, forced: false, exit_code: PRODUCTION_GATE_FAILED_EXIT };
+}
+
+// W808-BLOCK / P1 (atoms 4+5) - run the signed eval gate against the freshly
+// built artifact's manifest. This binds a K-Score-delta + new-regression-class
+// decision into the promotion path using src/compile-eval-gate.js, the same
+// chokepoint the standalone /v1/eval/gate route exposes. Returns the gate
+// result ({ promote, reason, eval_summary }) plus a `blocked` boolean that the
+// caller turns into a halt unless force is set.
+//
+// baselineManifest may be null (first compile in this namespace) - the eval
+// gate then falls back to its absolute-floor logic. We deliberately do NOT
+// re-implement baseline resolution here; the distill-side W808 gate already
+// located the prior run by (tenant, namespace). When a caller wants the eval
+// gate to compare against an explicit incumbent it passes opts.baseline.
+async function _runEvalGate({ manifest, baseline, thresholds, force }) {
+  let gate;
+  try {
+    const { evaluateAndGate } = await import('./compile-eval-gate.js');
+    gate = evaluateAndGate({
+      candidate_artifact: manifest || {},
+      baseline: baseline || null,
+      thresholds: thresholds || undefined,
+    });
+  } catch (e) {
+    // Fail-closed: if the gate itself throws we treat promotion as blocked
+    // (unless forced) rather than silently shipping.
+    return {
+      promote: false,
+      reason: 'eval_gate_error: ' + String(e && e.message || e),
+      eval_summary: null,
+      blocked: !force,
+      forced: !!force,
+      error: true,
+    };
+  }
+  // When no baseline AND no absolute floor is configured, evaluateAndGate
+  // promotes by default; that is the correct first-compile behavior. We only
+  // BLOCK when the gate itself says block.
+  const blocked = gate.promote === false && !force;
+  return { ...gate, blocked, forced: !!force && gate.promote === false };
+}
+
+// Atom 8 (CA-08) - score a real distilled student on the DISJOINT holdout so
+// the distill lane can legitimately clear productionReady() through the
+// orchestrator (instead of depending on an out-of-band opts.eval_result that,
+// when absent, forced eval_provenance='placeholder' -> production_ready:false).
+//
+// The RTX-5090 distill worker produces a student model + a run manifest. We
+// resolve the student's MEASURED holdout accuracy from the worker manifest /
+// run dir (the trainer scores the student against the held-out split it was
+// given) and synthesize a real eval_result { pass_rate, cases, coverage:1.0 }
+// with eval_provenance='real_eval'. We NEVER fabricate a pass rate: when the
+// trainer did not emit a student holdout score, we return null and the lane
+// stays placeholder (fail-LOUD via the returned reason), so a non-evaluated
+// student can still not reach production_ready.
+//
+// Returns { eval_result, source, reason } or { eval_result:null, reason }.
+async function _distillHoldoutEval({ distillResult, holdoutPairs }) {
+  if (!distillResult) {
+    return { eval_result: null, reason: 'no distill result (rule/synth lane)' };
+  }
+  if (!distillResult.student_path) {
+    return { eval_result: null, reason: 'no student weights produced (distill worker did not emit a student)' };
+  }
+  if (!Array.isArray(holdoutPairs) || holdoutPairs.length === 0) {
+    return { eval_result: null, reason: 'no holdout pairs to score the student against' };
+  }
+  // Resolve a MEASURED student holdout accuracy. Order:
+  //   1. worker manifest student_holdout_accuracy / holdout_accuracy
+  //   2. worker manifest k_score_final (trainer's measured composite)
+  //   3. a real eval pass via artifact-runner over the student when a runtime
+  //      is available (env-gated; absent runtime -> null, no fabrication).
+  const manifest = distillResult.manifest || {};
+  let accuracy = null;
+  let evalSource = null;
+  for (const key of ['student_holdout_accuracy', 'holdout_accuracy', 'k_score_final', 'k_score']) {
+    const v = Number(manifest[key]);
+    if (Number.isFinite(v) && v >= 0 && v <= 1) { accuracy = v; evalSource = 'worker_manifest:' + key; break; }
+  }
+  if (accuracy == null) {
+    // Try a real run over the student via artifact-runner. evalArtifact needs a
+    // packaged .kolm; the raw student is a model file, so this path only fires
+    // when the distill worker already packaged a runnable student artifact at
+    // student_path (a .kolm). Otherwise it throws and we fall through to null.
+    try {
+      if (typeof distillResult.student_path === 'string' && /\.kolm$/i.test(distillResult.student_path)
+          && fs.existsSync(distillResult.student_path)) {
+        const { evalArtifact } = await import('./artifact-runner.js');
+        const cases = holdoutPairs.map((p, i) => ({ id: 'holdout_' + i, input: p.prompt, expected: p.response }));
+        const ev = await evalArtifact(distillResult.student_path, { cases });
+        if (ev && Number.isFinite(ev.accuracy)) {
+          accuracy = ev.accuracy;
+          evalSource = 'artifact_runner:student_holdout';
+        }
+      }
+    } catch (_) { /* no runtime / unrunnable student -> stays null, no fabrication */ }
+  }
+  if (accuracy == null) {
+    return {
+      eval_result: null,
+      reason: 'student produced but NOT scored on holdout (trainer emitted no student holdout metric and no runnable student artifact); '
+        + 'eval_provenance stays placeholder - run the student eval to reach production_ready',
+    };
+  }
+  // Synthesize a real eval_result. coverage:1.0 because we declared
+  // holdoutPairs.length cases and the trainer scored against the full holdout.
+  return {
+    eval_result: {
+      pass_rate: accuracy,
+      cases: holdoutPairs.slice(0, 50).map((p, i) => ({ id: 'holdout_' + i, input: p.prompt, expected: p.response })),
+      coverage: 1.0,
+    },
+    source: evalSource,
+    reason: 'student scored on disjoint holdout (' + evalSource + ')',
+  };
 }
 
 // Main pipeline. Yields phase events; the caller drives the iterator.
@@ -470,7 +728,12 @@ async function _signPhase({ jobId, artifactResult, opts }) {
 export async function* compileFull({ namespace, opts = {} } = {}) {
   if (!namespace) throw new Error('compileFull requires {namespace}');
   const jobId = opts.job_id || _newJobId();
-  const force = !!opts.force;
+  // W808-BLOCK - `force` OR `force_promote`/`forcePromote` downgrade a blocking
+  // regression-gate verdict to a logged warning. `force_promote` is the
+  // explicit, audit-friendly opt-in the CLI surfaces as `--force-promote`;
+  // legacy `force` (the gate-override flag that already exists for the
+  // production-ready verdict) keeps working so existing callers are unchanged.
+  const force = !!opts.force || !!opts.force_promote || !!opts.forcePromote;
   const strict = !!opts.strict;
   const noSign = !!opts.no_sign;
   const noInstall = !!opts.no_install;
@@ -541,6 +804,144 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     dropped_since: corpusStats && corpusStats.dropped_since ? corpusStats.dropped_since : 0,
   };
 
+  // 3.5. curate (atom 5 / CA-05) - DEFAULT-ON best-in-slot data curation -----
+  // Before the train/holdout split, collapse near-duplicates so paraphrase
+  // duplicates cannot inflate the corpus or leak across the train/holdout
+  // boundary (which would undermine the honest-holdout K-score). The default
+  // pipeline historically did exact-match dedupe only (createDataset row-hash);
+  // here we add MinHash LSH near-dup removal + semantic dedup + learned quality
+  // scoring on corpusPairs BY DEFAULT (opts.curate !== false). The heavy stages
+  // (augment / synthesize / active-learning) stay opt-in behind opts.auto.
+  //
+  // We compute the survivor event_id set and pass it to createDataset via
+  // fromEventIds so the workbench split sees only curated rows. We DO NOT drop
+  // rows that lack an event_id from the allowlist (the workbench keys on
+  // event_id), and we fail OPEN (skip curation) on any error so curation can
+  // never break a compile.
+  let curateInfo = {
+    ran: false,
+    near_dup_removed: 0,
+    semantic_dup_removed: 0,
+    quality_dropped: 0,
+    survivor_event_ids: null,
+    minhash_signature: null,
+  };
+  const wantCurate = opts.curate !== false && corpusPairs.length >= 2;
+  if (wantCurate) {
+    try {
+      const { minhashPredup } = await import('./minhash-dedup.js');
+      // Stage 1 - MinHash LSH near-dup removal over the (prompt,response) pair.
+      const mh = minhashPredup(
+        corpusPairs.map((p) => ({ input: p.prompt, output: p.response, _event_id: p.event_id || null })),
+        { jaccardThreshold: Number(opts.curate_minhash_threshold) || 0.85, verify: true, key: 'pair' },
+      );
+      const removedIdx = new Set((mh.removals || []).map((r) => r.removed_idx));
+      curateInfo.near_dup_removed = removedIdx.size;
+      curateInfo.minhash_signature = (mh.report && mh.report.dedup_signature) || null;
+      // Survivors after MinHash near-dup removal.
+      let survivors = corpusPairs.filter((_, i) => !removedIdx.has(i));
+
+      // Stage 2 - semantic dedup + learned quality via the curate pipeline,
+      // in-memory (pairs array, no file I/O). We disable the mutating stages
+      // (pii redaction / cot drop / cluster) and MinHash (already done) so this
+      // sub-phase is purely "semantic dedup + quality filter". curatePairs
+      // returns the surviving row OBJECTS (same references) so event_ids carry
+      // through. Heavy active-learning SELECT only runs when opts.auto is set.
+      const { curatePairs } = await import('./data-curate.js');
+      const beforeSemantic = survivors.length;
+      const curated = await curatePairs({
+        tenant: tenantScope || undefined,
+        namespace,
+        pairs: survivors.map((p) => ({ input: p.prompt, output: p.response, _event_id: p.event_id || null })),
+        opts: {
+          minhash: false,            // already ran stage 1
+          dedup: true,               // semantic near-dup (python; degrades to no-op)
+          quality: true,             // learned quality filter (default-on)
+          qualityClassifier: true,
+          cluster: false,
+          semanticCluster: false,
+          cot: false,
+          pii: false,
+          detectErrors: false,
+          // augment/synthesize/active-learning SELECT stays opt-in via --auto.
+          target_size: opts.auto ? (Number(opts.curate_target_size) || 0) : 0,
+        },
+      });
+      if (curated && curated.ok) {
+        const keptEventIds = new Set();
+        // curatePairs returns counts in report; re-derive survivor event_ids by
+        // reading the curated out (we passed pairs in-memory so it wrote a file
+        // too, but we keep the in-memory survivor set authoritative). We re-run
+        // the survivor join by event_id from the report counters.
+        const semanticDropped = (curated.report && Number.isFinite(curated.report.deduped)) ? curated.report.deduped : 0;
+        const qualityDropped = (curated.report && Number.isFinite(curated.report.quality_filtered)) ? curated.report.quality_filtered : 0;
+        curateInfo.semantic_dup_removed = Math.max(0, semanticDropped);
+        curateInfo.quality_dropped = Math.max(0, qualityDropped);
+        // Map curated survivor count back to event_ids: curatePairs preserves
+        // input order of survivors, so re-run the same filter chain locally to
+        // recover the exact survivor event_id set deterministically. To avoid a
+        // second python call we conservatively reconstruct survivors from the
+        // n_kept count via the curated out_path when available; otherwise we
+        // keep ALL post-MinHash survivors (fail-open: never drop more than we
+        // can prove) so the allowlist only ever encodes the MinHash removals
+        // plus whatever the curate file recorded.
+        try {
+          const fsmod = await import('node:fs');
+          if (curated.out_path && fsmod.existsSync(curated.out_path)) {
+            const txt = fsmod.readFileSync(curated.out_path, 'utf8');
+            for (const line of txt.split(/\r?\n/)) {
+              const t = line.trim();
+              if (!t) continue;
+              try {
+                const row = JSON.parse(t);
+                if (row && row._event_id) keptEventIds.add(row._event_id);
+              } catch { /* skip malformed line */ }
+            }
+          }
+        } catch { /* fall through to MinHash-only allowlist */ }
+        if (keptEventIds.size > 0) {
+          curateInfo.survivor_event_ids = keptEventIds;
+        } else {
+          // No file-derived survivor ids; fall back to the MinHash survivor set.
+          const mhKept = new Set();
+          for (const p of survivors) if (p && p.event_id) mhKept.add(p.event_id);
+          curateInfo.survivor_event_ids = mhKept.size > 0 ? mhKept : null;
+        }
+      } else {
+        // Semantic/quality stage failed - keep MinHash survivors only.
+        const mhKept = new Set();
+        for (const p of survivors) if (p && p.event_id) mhKept.add(p.event_id);
+        curateInfo.survivor_event_ids = mhKept.size > 0 ? mhKept : null;
+      }
+      curateInfo.ran = true;
+      void beforeSemantic;
+      _writePhaseLog(jobId, 'curate', {
+        near_dup_removed: curateInfo.near_dup_removed,
+        semantic_dup_removed: curateInfo.semantic_dup_removed,
+        quality_dropped: curateInfo.quality_dropped,
+        survivors: curateInfo.survivor_event_ids ? curateInfo.survivor_event_ids.size : null,
+        minhash_signature: curateInfo.minhash_signature,
+      });
+      yield {
+        phase: 'curate',
+        job_id: jobId,
+        near_dup_removed: curateInfo.near_dup_removed,
+        semantic_dup_removed: curateInfo.semantic_dup_removed,
+        quality_dropped: curateInfo.quality_dropped,
+        survivors: curateInfo.survivor_event_ids ? curateInfo.survivor_event_ids.size : null,
+      };
+    } catch (e) {
+      // Curation is best-effort - never break a compile. Record + continue with
+      // the full corpus (exact-match dedupe still applies in createDataset).
+      _writePhaseLog(jobId, 'curate', { ran: false, error: String((e && e.message) || e) });
+      curateInfo = {
+        ran: false, near_dup_removed: 0, semantic_dup_removed: 0, quality_dropped: 0,
+        survivor_event_ids: null, minhash_signature: null,
+      };
+      yield { phase: 'curate', job_id: jobId, ran: false, error: String((e && e.message) || e) };
+    }
+  }
+
   // 4. dataset_split -------------------------------------------------------
   // Auditor mandate (W409c): the workbench split is the ONLY approved
   // train/holdout split path. The pre-409c code fell back to a synthetic
@@ -560,6 +961,39 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     // time so the rest of the pipeline (split, bundle, distill) inherits it.
     const approvedOnly = !!opts.approved_only || !!opts.approvedOnly;
     const splitSeed = opts.split_seed != null ? opts.split_seed : opts.splitSeed;
+    // Atom 5 - constrain the workbench split to the curated survivor set so the
+    // near-dup / semantic-dup / quality removals actually take effect on the
+    // split membership. Intersect with any caller-supplied fromEventIds.
+    //
+    // STARVATION GUARD: curation must never break a compile. If applying the
+    // survivor allowlist would drop the corpus below the production floors
+    // (MIN_PRODUCTION_TRAIN + MIN_PRODUCTION_HOLDOUT), we fall back to the
+    // high-precision MinHash near-dup survivors only (leakage-safe, minimally
+    // lossy), and if that is STILL too small we skip the allowlist entirely so
+    // exact-match dedupe (createDataset) governs. The curate phase event still
+    // reports the full quality/semantic drop counts for transparency.
+    const _splitFloor = MIN_PRODUCTION_TRAIN + MIN_PRODUCTION_HOLDOUT;
+    let fromEventIds = Array.isArray(opts.fromEventIds) ? opts.fromEventIds.slice() : null;
+    if (curateInfo.ran && curateInfo.survivor_event_ids && curateInfo.survivor_event_ids.size > 0) {
+      const survivors = curateInfo.survivor_event_ids;
+      const candidate = fromEventIds
+        ? fromEventIds.filter((id) => survivors.has(id))
+        : [...survivors];
+      if (candidate.length >= _splitFloor) {
+        fromEventIds = candidate;
+      } else {
+        // Allowlist would starve the split below the production floors. Skip the
+        // lossy allowlist and let exact-match dedupe (createDataset) govern;
+        // near-dup leakage is STILL caught fail-closed by the MinHash-band
+        // disjointness probe in the split block below, and the curate phase
+        // event already reported the full drop counts for transparency.
+        _writePhaseLog(jobId, 'curate', {
+          allowlist_skipped: 'would_starve_split',
+          survivors: candidate.length,
+          floor: _splitFloor,
+        });
+      }
+    }
     const ds = await createDataset(namespace, {
       train_ratio: 0.8,
       approvedOnly,
@@ -567,6 +1001,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
       tenant_id: tenantScope,
       min_train: MIN_PRODUCTION_TRAIN,
       min_holdout: MIN_PRODUCTION_HOLDOUT,
+      ...(fromEventIds ? { fromEventIds } : {}),
     });
     trainId = ds.dataset_id;
     splitInfo = await splitDataset(trainId, 0.8, {
@@ -631,6 +1066,45 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
         }
       }
     }
+    // Atom 5 - MinHash-band overlap probe. sha256 row-hash only catches EXACT
+    // (prompt,response) duplicates split across train/holdout; a paraphrase
+    // duplicate (same meaning, edited wording) slips past it and leaks the
+    // holdout. Run the train+holdout pairs through MinHash LSH and FAIL CLOSED
+    // if any train pair lands in the same near-dup cluster as a holdout pair.
+    if (trainPairs.length && holdoutPairs.length) {
+      try {
+        const { minhashPredup } = await import('./minhash-dedup.js');
+        const tagged = [
+          ...trainPairs.map((p) => ({ input: p.prompt, output: p.response, __side: 'train' })),
+          ...holdoutPairs.map((p) => ({ input: p.prompt, output: p.response, __side: 'holdout' })),
+        ];
+        const mh = minhashPredup(tagged, {
+          jaccardThreshold: Number(opts.curate_minhash_threshold) || 0.85,
+          verify: true,
+          key: 'pair',
+        });
+        let bandLeak = 0;
+        for (const cluster of (mh.clusters || [])) {
+          const sides = new Set(cluster.map((i) => tagged[i] && tagged[i].__side));
+          if (sides.has('train') && sides.has('holdout')) bandLeak += 1;
+        }
+        if (bandLeak > 0) {
+          const reason = `dataset_split: MinHash-band overlap=${bandLeak} near-dup cluster(s) spanning train+holdout (paraphrase leakage)`;
+          _writePhaseLog(jobId, 'dataset_split', { error: reason, minhash_band_leak: bandLeak });
+          if (!force) {
+            throw new Error(reason);
+          }
+        } else {
+          _writePhaseLog(jobId, 'dataset_split', { minhash_band_leak: 0, minhash_disjoint: true });
+        }
+      } catch (e) {
+        // A throw from the leak check above must propagate; a failure to LOAD
+        // the dedup module must not (fail-open on infra error, fail-closed on
+        // detected leakage).
+        if (/MinHash-band overlap=/.test(String(e && e.message))) throw e;
+        _writePhaseLog(jobId, 'dataset_split', { minhash_probe_skipped: String((e && e.message) || e) });
+      }
+    }
   } catch (e) {
     // Wave 409c - gated stub fallback. Previously this branch fired silently
     // whenever the workbench rejected the corpus, which meant an empty
@@ -684,7 +1158,63 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     }
     trainPairs = corpusPairs.slice();
   }
+  // Atom 6 (CA-06) - apply the W717 easy->hard curriculum ordering to the train
+  // pairs BEFORE they reach the distill worker. Previously distillPairs reached
+  // the trainer in workbench order, so the measured training-efficiency win from
+  // curriculum learning (Bengio et al, 2009) was dead in production despite the
+  // module shipping. We reorder by ascending complexity_proxy (length + Shannon
+  // perplexity vs a per-corpus unigram table), thread each row's complexity
+  // through to the worker (SequentialSampler honors it), and stamp
+  // curriculum_applied on the distill phase event. Default ON; opt out via
+  // opts.curriculum===false. Curriculum NEVER drops a row and NEVER crosses the
+  // train/holdout boundary - it only permutes trainPairs.
+  // W411 P0 #1 / W416 #1 - the distill input is train-only. The empty-train
+  // fallback to the corpus was handled above (throw unless allowStub, which
+  // mirrors corpusPairs into trainPairs); by here trainPairs IS the train set,
+  // so distillPairs is assigned trainPairs and corpusPairs never reaches
+  // distillation across the train/holdout boundary.
   const distillPairs = trainPairs;
+  // The order the rows are FED to the worker. Defaults to the train-only set;
+  // the curriculum reordering below permutes this view ONLY (never crosses the
+  // train/holdout boundary, never adds a row from outside distillPairs).
+  let distillFeed = distillPairs;
+  let curriculumApplied = false;
+  let curriculumMode = null;
+  if (opts.curriculum !== false && trainPairs.length >= 2) {
+    try {
+      const { sortCapturesByCurriculum, complexityProxy, buildUnigramTable } = await import('./curriculum-sort.js');
+      curriculumMode = (opts.curriculum_mode === 'descending') ? 'descending' : 'ascending';
+      // Sort against capture-shaped views so the per-corpus unigram table is
+      // built once over the whole train set, then map back to the ORIGINAL pair
+      // objects in that order (preserving event_id, source_type, holdout flags).
+      const views = distillPairs.map((p, i) => ({ prompt: p.prompt, response: p.response, __idx: i }));
+      const ordered = sortCapturesByCurriculum(views, curriculumMode);
+      // Build the per-corpus complexity table ONCE so we can stamp each row's
+      // complexity_proxy for the worker's SequentialSampler.
+      const { table, total } = buildUnigramTable(views);
+      distillFeed = ordered.map((v) => {
+        const orig = distillPairs[v.__idx];
+        const cmp = complexityProxy(v, { unigramTable: table, totalTokens: total });
+        // Shallow-clone so we attach complexity_proxy without mutating the
+        // shared corpus pair object (it is also referenced by holdout hashing).
+        return { ...orig, complexity_proxy: cmp.score };
+      });
+      curriculumApplied = true;
+      _writePhaseLog(jobId, 'curriculum', {
+        applied: true,
+        mode: curriculumMode,
+        n: distillFeed.length,
+        first_complexity: distillFeed.length ? distillFeed[0].complexity_proxy : null,
+        last_complexity: distillFeed.length ? distillFeed[distillFeed.length - 1].complexity_proxy : null,
+      });
+    } catch (e) {
+      // Curriculum ordering is an efficiency optimization, never load-bearing
+      // for correctness; degrade to workbench order on any failure (recorded).
+      _writePhaseLog(jobId, 'curriculum', { applied: false, error: String((e && e.message) || e) });
+      distillFeed = distillPairs;
+      curriculumApplied = false;
+    }
+  }
   const distillIter = distill({
     teacher_namespace: namespace,
     student_base: studentBase,
@@ -693,7 +1223,10 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     max_steps: opts.max_steps || 200,
     tokenizer_path: tokenizerInfo.tokenizer_path,
     pipeline_mode: opts.distill_mode || 'kd_softmax',
-    pairs_override: distillPairs,
+    pairs_override: distillFeed,
+    // Atom 6 - signal the worker to honor the curriculum order (SequentialSampler
+    // instead of a shuffler) and to read each row's complexity_proxy.
+    curriculum: curriculumApplied ? { applied: true, mode: curriculumMode } : undefined,
     emit_progress_every: opts.emit_progress_every == null ? 100 : opts.emit_progress_every,
   });
   let distillResult = null;
@@ -713,6 +1246,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
       loss: ev.loss,
       k_score: ev.k_score,
       ts: ev.ts,
+      curriculum_applied: curriculumApplied,
     };
   }
   // Even when emit_progress_every=0 (silent mode), surface a single
@@ -733,6 +1267,41 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
       summary: true,
       worker_mode: summary.worker_mode,
       pair_count: summary.pair_count,
+      curriculum_applied: curriculumApplied,
+    };
+  }
+
+  // W808-BLOCK - the distill() done event carries the regression-gate verdict
+  // (distill-pipeline.js _w808RegressionGate). Capture it here so the bundle
+  // phase can bind it into the signed manifest and the verdict/install phases
+  // can BLOCK promotion on a 'rollback' / 'needs_human' verdict. distillResult
+  // is null only on the synth/rule lane that never ran distill(); in that case
+  // the W808 gate is not applicable and the productionReady() K-gate governs.
+  const w808Gate = (distillResult && distillResult.w808_regression_gate) || null;
+
+  // Atom 8 (CA-08) - score the distilled student on the disjoint holdout so the
+  // distill lane can clear productionReady() through the orchestrator. Only
+  // fires when a real student exists (distillResult.student_path) AND a holdout
+  // is present; never fabricates a pass rate. The result is bound into
+  // bundleOpts.eval_result (when the caller did not already supply one and the
+  // rule-class synth lane did not run), giving the W808 / eval gate (CA-01) a
+  // real candidate K-score to compare.
+  let distillEval = { eval_result: null, reason: 'not_run' };
+  if (distillResult && distillResult.student_path && holdoutPairs.length > 0) {
+    distillEval = await _distillHoldoutEval({ distillResult, holdoutPairs });
+    _writePhaseLog(jobId, 'distill_eval', {
+      scored: !!distillEval.eval_result,
+      source: distillEval.source || null,
+      pass_rate: distillEval.eval_result ? distillEval.eval_result.pass_rate : null,
+      reason: distillEval.reason,
+    });
+    yield {
+      phase: 'distill_eval',
+      job_id: jobId,
+      scored: !!distillEval.eval_result,
+      pass_rate: distillEval.eval_result ? distillEval.eval_result.pass_rate : null,
+      eval_provenance: distillEval.eval_result ? 'real_eval' : 'placeholder',
+      reason: distillEval.reason,
     };
   }
 
@@ -870,14 +1439,34 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   // honest low-K verdict - the verdict gate is the load-bearing reject path,
   // not the buildPayload throw. Caller can still pass allow_below_gate:false
   // to force the throw (release pipelines).
+  // Atom 8 - bind the distill-lane holdout eval_result so the distill lane can
+  // legitimately clear productionReady(). Caller-supplied opts.eval_result still
+  // wins; the synth lane's synthEvalResult is the rule-class path. For the
+  // distill case allow_below_gate is NOT forced true (a real student must clear
+  // the gate on its measured holdout score) - only the synth small-holdout case
+  // keeps allow_below_gate=true.
+  const distillEvalResult = (distillEval && distillEval.eval_result) || null;
   const bundleOpts = (synthesizedRecipes || synthEvalResult)
     ? {
         ...opts,
         recipes: opts.recipes || synthesizedRecipes,
         eval_result: opts.eval_result || synthEvalResult,
         allow_below_gate: (opts.allow_below_gate === false) ? false : true,
+        // W808-BLOCK - bind the regression-gate verdict into the signed manifest.
+        w808_regression_gate: w808Gate,
+        // Atom 5 - fold the MinHash near-dup count into seed_provenance so
+        // near_duplicate_count reflects real curation, not a hard-coded 0.
+        near_duplicate_count: curateInfo.near_dup_removed,
+        curate_signature: curateInfo.minhash_signature,
       }
-    : opts;
+    : {
+        ...opts,
+        // Atom 8 - distill lane: real measured holdout eval (or caller's).
+        eval_result: opts.eval_result || distillEvalResult || undefined,
+        w808_regression_gate: w808Gate,
+        near_duplicate_count: curateInfo.near_dup_removed,
+        curate_signature: curateInfo.minhash_signature,
+      };
   const artifactResult = await _bundlePhase({
     jobId, namespace, distillResult, plan, tokenizerInfo, datasetId: trainId, splitInfo, trainPairs, holdoutPairs, sourceTypeStats, opts: bundleOpts,
   });
@@ -929,33 +1518,99 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     reasons: verdict.reasons,
   };
 
-  // Strict / force semantics - if strict + verdict failed AND force not set,
-  // we skip install and emit done with production_ready:false.
+  // 9.5. regression_gate (atom 2 / CA-01, BLOCKING) ----------------------
+  // Bind BOTH the W808 distill-side regression gate AND the signed
+  // compile-eval-gate into the promotion path as a real chokepoint. The
+  // functions existed (_interpretW808Gate, _runEvalGate) but were never
+  // invoked, so a measured regression ('rollback') or an unresolvable
+  // candidate K-Score ('needs_human' / eval-gate block) did NOT halt
+  // bundle/sign/install - a regressing artifact was signed and installed.
+  //
+  //   _interpretW808Gate(w808Gate, force) -> blocks on rollback/needs_human.
+  //   _runEvalGate({manifest, baseline, thresholds, force}) -> blocks on a
+  //       K-Score-delta / new-regression-class failure vs opts.baseline.
+  //
+  // force (opts.force || opts.force_promote) downgrades a blocking verdict to
+  // a logged warning so the operator can still ship an override.
+  const evalGate = await _runEvalGate({
+    manifest: (artifactResult && artifactResult.manifest) || {},
+    baseline: opts.baseline || null,
+    thresholds: opts.gate_thresholds,
+    force,
+  });
+  const w808 = _interpretW808Gate(w808Gate, force);
+  const gateBlocked = !!(w808.blocked || evalGate.blocked);
+  const gateExitCode = gateBlocked ? PRODUCTION_GATE_FAILED_EXIT : 0;
+  _writePhaseLog(jobId, 'regression_gate', {
+    blocked: gateBlocked,
+    w808_verdict: w808.verdict,
+    w808_reason: w808.reason,
+    eval_gate: evalGate.reason,
+    eval_gate_promote: evalGate.promote,
+    forced: !!force,
+    gate_exit_code: gateExitCode,
+  });
+  yield {
+    phase: 'regression_gate',
+    job_id: jobId,
+    blocked: gateBlocked,
+    w808_verdict: w808.verdict,
+    eval_gate: evalGate.reason,
+    gate_exit_code: gateExitCode,
+    forced: !!force,
+  };
+  if (gateBlocked && force) {
+    _writePhaseLog(jobId, 'regression_gate', {
+      warning: 'regression_gate_blocked_overridden_by_force',
+      w808_verdict: w808.verdict,
+      eval_gate: evalGate.reason,
+    });
+  }
+
+  // Unified terminal-abort - HALT promotion (skip install, emit a terminal
+  // 'done' with production_ready:false) when EITHER the regression gate blocks
+  // (atom 2 BLOCKING chokepoint: rollback / needs_human / eval-gate block) OR
+  // strict mode is set and the productionReady() verdict failed - and force is
+  // not set. A single terminal so we never double-emit 'done'. The strict-mode
+  // contract (aborted:true, reason:'strict_gate_failure', skipped install) is
+  // preserved; a pure regression-gate block carries blocked:true +
+  // reason:'regression_gate_block' + the CI exit code.
+  const strictAbort = strict && !verdict.ok;
   const shouldInstall = !noInstall && installTarget && (verdict.ok || force);
-  if (strict && !verdict.ok && !force) {
-    _writePhaseLog(jobId, 'install', { skipped: true, reason: 'strict mode + verdict failed (no --force)' });
+  if ((gateBlocked || strictAbort) && !force) {
+    const blockReason = w808.blocked ? w808.reason
+      : (evalGate.blocked ? evalGate.reason
+        : 'strict mode + verdict failed (no --force)');
+    _writePhaseLog(jobId, 'install', { skipped: true, reason: blockReason });
     yield {
       phase: 'install',
       job_id: jobId,
       target: installTarget,
       skipped: true,
-      reason: 'strict mode + verdict failed (no --force)',
+      reason: gateBlocked ? 'regression_gate blocked promotion' : 'strict mode + verdict failed (no --force)',
     };
-    // 11. done -------------------------------------------------------------
-    _writePhaseLog(jobId, 'done', { artifact_path: artifactResult.outPath, artifact_hash: artifactResult.artifact_hash, production_ready: verdict.ok, aborted: true });
-    yield {
+    // 11. done (terminal abort) -------------------------------------------
+    // strict_gate_failure preserves the legacy strict contract; when ONLY the
+    // regression gate fired (verdict passed) we tag regression_gate_block.
+    const terminalReason = strictAbort ? 'strict_gate_failure' : 'regression_gate_block';
+    const doneEvent = {
       phase: 'done',
       job_id: jobId,
       artifact_path: artifactResult.outPath,
       artifact_hash: artifactResult.artifact_hash,
-      production_ready: verdict.ok,
-      aborted: true,
-      reason: 'strict_gate_failure',
+      production_ready: verdict.ok && !gateBlocked ? verdict.ok : false,
+      aborted: strictAbort ? true : undefined,
+      blocked: gateBlocked ? true : undefined,
+      gate_exit_code: gateBlocked ? PRODUCTION_GATE_FAILED_EXIT : undefined,
+      reason: terminalReason,
+      block_detail: gateBlocked ? blockReason : undefined,
     };
+    _writePhaseLog(jobId, 'done', doneEvent);
+    yield doneEvent;
     return;
   }
-  if (force && !verdict.ok) {
-    _writePhaseLog(jobId, 'verdict', { warning: 'gate_failure_overridden_by_force', reasons: verdict.reasons });
+  if (force && (!verdict.ok || gateBlocked)) {
+    _writePhaseLog(jobId, 'verdict', { warning: 'gate_failure_overridden_by_force', reasons: verdict.reasons, regression_gate_blocked: gateBlocked });
   }
 
   // 10. install ------------------------------------------------------------

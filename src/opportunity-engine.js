@@ -25,6 +25,15 @@ import crypto from 'node:crypto';
 import { listEvents } from './event-store.js';
 import { clusterRepeatedPrompts } from './lake.js';
 import { templateSignature } from './event-schema.js';
+// CD-002 / CD-008: the Chinchilla-style data-budget model. When a namespace has
+// enough prior (n_pairs, K) observations, a training_ready opportunity carries a
+// fitted data-budget recommendation (pairs_to_target, marginal_dk_per_row) so
+// the /v1/opportunities API can answer "how many MORE pairs to reach target K?".
+import {
+  fitDataScalingLaw,
+  marginalDkPerRow,
+  pairsToTarget,
+} from './data-scaling-law.js';
 
 function _home() {
   return process.env.HOME || process.env.USERPROFILE || os.homedir();
@@ -408,6 +417,21 @@ export async function findOpportunities(opts = {}) {
     }
   }
 
+  // CD-002 / CD-008: enrich every training_ready opportunity with a fitted
+  // data-budget recommendation. Best-effort and additive - on insufficient data
+  // it attaches a basis:'insufficient' block (no fabricated number) and never
+  // throws, so the rest of the scan is unaffected.
+  for (const o of opps) {
+    if (o.type === 'training_ready') {
+      await attachDataBudget(o, {
+        tenant: tenant_id,
+        namespace: o.namespace || opts.namespace,
+        loadScalingPoints: typeof opts.loadScalingPoints === 'function' ? opts.loadScalingPoints : null,
+        target_k: opts.target_k,
+      });
+    }
+  }
+
   // sort: privacy_leak first (high risk), then by savings desc.
   opps.sort((a, b) => {
     if (a.type === 'privacy_leak' && b.type !== 'privacy_leak') return -1;
@@ -415,6 +439,59 @@ export async function findOpportunities(opts = {}) {
     return (b.estimated_savings_usd || 0) - (a.estimated_savings_usd || 0);
   });
   return opps;
+}
+
+// CD-002 / CD-008: attach a data-budget recommendation to a training_ready
+// opportunity. Fits the rectified data-scaling law to the namespace's observed
+// (n_pairs, K) history, then surfaces the closed-form pairs-to-target and the
+// analytic marginal dK/row. INJECTABLE: opts.loadScalingPoints({tenant,namespace})
+// returns the (n_pairs, K) observations. With no loader (or < min_points) we set
+// basis:'insufficient' and attach NO fabricated number - the API simply omits the
+// budget block, never guesses. target_k defaults to 0.80 (overridable per call).
+//
+// Returns the enriched opp (mutated in place and returned for chaining).
+export async function attachDataBudget(opp, { tenant, namespace, loadScalingPoints, target_k = 0.80 } = {}) {
+  try {
+    if (!opp || opp.type !== 'training_ready') return opp;
+    const target = Number.isFinite(Number(target_k)) ? Number(target_k) : 0.80;
+    let points = null;
+    if (typeof loadScalingPoints === 'function') {
+      try { points = await loadScalingPoints({ tenant, namespace: namespace || opp.namespace }); }
+      catch (_) { points = null; }
+    }
+    const fit = await fitDataScalingLaw({ tenant, namespace: namespace || opp.namespace, points });
+    if (!fit || !fit.ok || fit.basis !== 'rectified') {
+      opp.data_budget = {
+        basis: (fit && fit.basis) || 'insufficient',
+        target_k: target,
+        reason: (fit && (fit.reason || fit.error)) || 'no_scaling_points_available',
+        pairs_to_target: null,
+        marginal_dk_per_row: null,
+        achievable_k_max: (fit && fit.achievable_k_max != null) ? fit.achievable_k_max : null,
+        hint: 'provide >=4 (n_pairs,K) observations for this namespace to enable a data-budget recommendation',
+      };
+      return opp;
+    }
+    const cur = Number(opp.call_count) || 0;
+    const ptt = pairsToTarget(fit, target);
+    const marginal = marginalDkPerRow(fit, cur);
+    opp.data_budget = {
+      basis: 'rectified',
+      target_k: target,
+      n_points: fit.n_points,
+      rmsd: fit.rmsd,
+      achievable_k_max: fit.achievable_k_max,
+      reachable: ptt.reachable === true,
+      pairs_to_target: ptt.reachable ? ptt.pairs_to_target : null,
+      pairs_remaining: (ptt.reachable && Number.isFinite(ptt.pairs_to_target))
+        ? Math.max(0, ptt.pairs_to_target - cur) : null,
+      marginal_dk_per_row: Number.isFinite(marginal) ? _round(marginal, 6) : null,
+      reason: ptt.reachable ? 'fitted_rectified_scaling_law' : 'target_above_achievable_k_max',
+    };
+    return opp;
+  } catch (_) {
+    return opp;
+  }
 }
 
 function _finalize(opp, state) {

@@ -18,7 +18,7 @@ import { effectiveReceiptSecret, isProductionRuntime, runtimeReadiness, tenantRe
 import * as registry from './registry.js';
 import * as runtime from './runtime.js';
 import * as cache from './cache.js';
-import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan, isGeoFenced, mintScopedKey, listScopedKeys, revokeScopedKey, keyHasScope } from './auth.js';
+import { authMiddleware, provisionTenant, provisionAnonTenant, claimAnonTenant, chargeUsage, rotateTenantKey, rotateTenantReceiptSecret, listTenantReceiptSecrets, pruneTenantReceiptSecret, adminApiKey, findTenantByApiKey, findTenantByEmail, constantTimeEqual as constantTimeEq, requirePlan, isGeoFenced, mintScopedKey, listScopedKeys, revokeScopedKey, renewScopedKey, keyHasScope } from './auth.js';
 import { mountOAuth, oauthConfigured } from './oauth.js';
 import { mountAuthEmail } from './auth-email.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert, tEmailReportReady } from './email.js';
@@ -36,7 +36,7 @@ import { cidFromManifestHashes, verifyCidAgainstManifestHashes, canonicalJson as
 import * as recall from './recall.js';
 import { verifyStripeSignature, planFromAmount, appendCheckoutParams, createBillingPortalSession, prorataCreditFromEvent, applyStripeCustomerCredit, retrieveStripeInvoice, createStripeRefund, stripeSecretKeyFromEnv } from './stripe.js';
 import { parseAsrRef, ASR_PRODUCTS } from './asr-billing.js';
-import { fulfillReportPurchase, fulfillPackagePurchase, activateSubscription, setSubscriptionStatus, SUBSCRIPTIONS as ASR_SUBSCRIPTIONS, PACKAGES as ASR_PACKAGES } from './asr-fulfillment.js';
+import { fulfillReportPurchase, fulfillPackagePurchase, fulfillEntitlementPurchase, activateSubscription, setSubscriptionStatus, SUBSCRIPTIONS as ASR_SUBSCRIPTIONS, PACKAGES as ASR_PACKAGES } from './asr-fulfillment.js';
 import { recordInvoiceFromStripe, recordRefund as recordTenantRefund, listInvoices as listTenantInvoices, publicInvoice } from './invoices.js';
 import { scheduleDunning, resolveDunning, listDunning } from './dunning.js';
 import {
@@ -566,6 +566,7 @@ const exportLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited - registry export caps at 60/min/ip' },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -575,6 +576,7 @@ const verifiedLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited - verified inference caps at 30/min/ip' },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -633,6 +635,7 @@ const anonLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'too many anon workspaces from this IP - try again tomorrow' },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -642,6 +645,7 @@ const waitlistLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited - waitlist caps at 10/hr/ip' },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -656,6 +660,7 @@ const marketplaceInterestLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited - marketplace interest caps at 10/IP/24h' },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -665,6 +670,7 @@ const statusSubscribeLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited - status subscribe caps at 60/hr/ip' },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -674,6 +680,7 @@ const signinLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited - sign-in caps at 30/5min/ip' },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -683,6 +690,7 @@ const publishLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'rate-limited - publish/verify caps at 20/min/ip' },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -702,6 +710,7 @@ const freeChatLimiter = rateLimit({
     message: 'Free tier caps at 20 messages/day. Sign up for unlimited.',
     cta: { label: 'Create a free account', href: '/signup' },
   },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -722,6 +731,7 @@ const docsAssistantLimiter = rateLimit({
     message: 'Docs search caps at 60 queries/day. Sign in for unlimited.',
     cta: { label: 'Create a free account', href: '/signup' },
   },
+  keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
 
@@ -829,6 +839,49 @@ const publicRunLimiter = rateLimit({
     detail: 'too many anonymous /v1/public/run calls from this network in the last hour',
     hint: 'sign up for a free key to lift the cap - https://kolm.ai/signup',
   },
+  keyGenerator: ipKey,
+  validate: { trustProxy: false },
+});
+
+// GW (compute DoS guard) - the compute-spawning routes (auto-distill,
+// from-captures, compile) are the most expensive route class in the product and
+// were the LEAST guarded: a single authenticated tenant could fire them in a
+// tight loop and spawn unbounded detached worker processes (a fork-bomb on the
+// compute host). This limiter keys on the TENANT (req.tenant_record.id), not IP,
+// so a tenant cannot evade it by rotating egress IPs. A hard running-job
+// concurrency ceiling is enforced separately in-handler (_assertComputeSlot).
+function _tenantKey(req) {
+  return (req.tenant_record && req.tenant_record.id) || req.tenant || ipKey(req);
+}
+const computeSpawnLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: parseInt(process.env.KOLM_COMPUTE_SPAWN_PER_MIN || '12', 10), // per tenant per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate_limited', detail: 'too many compute jobs started in the last minute; slow down or poll your running jobs' },
+  keyGenerator: _tenantKey,
+  validate: { trustProxy: false },
+});
+// Plan-derived running-job ceiling. free=1, pro=3, teams/business=6,
+// enterprise=12; env-overridable via KOLM_MAX_CONCURRENT_DISTILL (applies as the
+// floor for every plan so an operator can widen it). Returns { ok } or
+// { ok:false, running, max } so the handler can 429.
+function _computeCeilingForPlan(plan) {
+  const env = parseInt(process.env.KOLM_MAX_CONCURRENT_DISTILL || '0', 10);
+  const base = { free: 1, pro: 3, teams: 6, business: 6, enterprise: 12 }[String(plan || 'free').toLowerCase()] || 1;
+  return Math.max(base, Number.isFinite(env) && env > 0 ? env : 0);
+}
+
+// GW (invite throttle) - the public invite preview/accept endpoints take a token
+// in the URL and were unthrottled. Token entropy makes brute force impractical
+// (hence p2), but a per-IP cap removes the enumeration-amplification surface.
+// ipKey coalesces /24-/48 so a rotating egress subnet is still bounded.
+const inviteTokenLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.KOLM_INVITE_TOKEN_LIMIT || '60', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'rate_limited', detail: 'too many invite lookups from this network; try again shortly' },
   keyGenerator: ipKey,
   validate: { trustProxy: false },
 });
@@ -1313,6 +1366,43 @@ export function computeObservedCaptures(tables = {}) {
 
 export function buildRouter() {
   const r = express.Router();
+
+  // GW-2 - fire-and-forget outbound-webhook emit. Kept off the request hot path:
+  // we never await it inside a handler (the caller has already res.json'd), and a
+  // delivery failure is self-audited inside webhooksModule.emit + swallowed here so
+  // it can never break a lifecycle handler. This is the ONLY thing that makes a
+  // tenant's webhook subscription actually deliver.
+  function _emitWebhook(tenant, event, payload) {
+    if (!tenant) return;
+    try {
+      Promise.resolve(webhooksModule.emit(tenant, event, payload || {})).catch(() => {});
+    } catch (_) { /* never throw from a lifecycle source */ }
+  }
+
+  // GW (compute DoS guard) - hard running-job concurrency ceiling before we spawn
+  // another worker. Counts THIS tenant's distill/compile jobs in (queued|running)
+  // across the disk registry and returns false (+ writes a 429) when at/over the
+  // plan ceiling. Best-effort: a registry read error never blocks a legitimate
+  // job (fail-open on the COUNT, never on the limiter). Returns true when a slot
+  // is available.
+  async function _assertComputeSlot(req, res) {
+    const tenantId = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
+    if (!tenantId) return true;
+    const max = _computeCeilingForPlan(req.tenant_record && req.tenant_record.plan);
+    let running = 0;
+    try {
+      const { listAll } = await import('./jobs.js');
+      const recs = listAll() || [];
+      running = recs.filter((j) => j && j.meta && j.meta.tenant === tenantId
+        && (j.kind === 'distill' || j.kind === 'compile')
+        && (j.status === 'queued' || j.status === 'running')).length;
+    } catch (_) { running = 0; }
+    if (running >= max) {
+      res.status(429).json({ error: 'too_many_running_jobs', running, max, hint: 'wait for a running job to finish or upgrade your plan for more concurrency' });
+      return false;
+    }
+    return true;
+  }
 
   // CORS - allow SDKs from any origin to hit the API
   r.use((req, res, next) => {
@@ -4614,6 +4704,21 @@ export function buildRouter() {
   }
 
   async function __connectorProxy(provider, upstreamPath, req, res) {
+    // W418 - defense-in-depth, FIRST at the boundary (before any capture/upstream
+    // machinery): every connector-proxy entry MUST carry a resolved tenant_record
+    // by the time we reach this point. The W411 hosted-auth gate
+    // (__w411HostedAuthGate) stamps req.tenant_record on every legitimate path
+    // (real tenant in hosted mode, sentinel 'local:<host>' in local-daemon mode).
+    // If a future route wires this proxy without the gate, fail CLOSED in hosted
+    // mode rather than forwarding an anonymous request to the upstream provider.
+    // Audit 2026-05-19 P0 Core Truth #3: "No anonymous proxy slip."
+    if (!req.tenant_record && !__w411IsLocalDaemonMode()) {
+      return res.status(401).json({
+        error: 'unauthorized',
+        reason: 'kolm_api_key_required',
+        hint: 'hosted /v1/* inference requires a kolm tenant key (ks_*/kao_*)',
+      });
+    }
     // W-5 - route every capture write through the quarantine fork. Default
     // (KOLM_W808_STAGING unset/0) awaits insertCapture straight into
     // observations (historical behavior). When staging is on, the row is
@@ -4626,21 +4731,6 @@ export function buildRouter() {
       insertStaged: storeInsertStagedCapture,
       insertObservation: insertCapture,
     });
-    // W418 - defense-in-depth: every connector-proxy entry MUST carry a
-    // resolved tenant_record by the time we reach this point. The W411
-    // hosted-auth gate (__w411HostedAuthGate) stamps req.tenant_record on
-    // every legitimate path (real tenant in hosted mode, sentinel
-    // 'local:<host>' in local-daemon mode). If a future route wires this
-    // proxy without the gate, fail CLOSED in hosted mode rather than
-    // forwarding an anonymous request to the upstream provider. Audit
-    // 2026-05-19 P0 Core Truth #3: "No anonymous proxy slip."
-    if (!req.tenant_record && !__w411IsLocalDaemonMode()) {
-      return res.status(401).json({
-        error: 'unauthorized',
-        reason: 'kolm_api_key_required',
-        hint: 'hosted /v1/* inference requires a kolm tenant key (ks_*/kao_*)',
-      });
-    }
     const pcfg = CONNECTOR_PROVIDERS[provider];
     if (!pcfg) return res.status(400).json({ error: { type: 'unknown_provider', message: provider } });
     // Resolve upstream key. A hosted request carries the kolm tenant key in
@@ -4660,13 +4750,21 @@ export function buildRouter() {
     // preferred over the shared server env key so "store your key -> we route your
     // traffic" is actually true. Mirrors the /v1/gateway vault path (~line 6743).
     if (!upstreamKey && req.tenant_record) {
+      // P0-1 - a caller can spoof x-kolm-team to a victim team to spend their
+      // shared provider credits. Gate the team branch on ACTIVE membership at the
+      // call site before passing teamId into the vault. membershipOf already
+      // filters status==='active'; a removed/non-member resolves only their own
+      // member-scope key (teamId=null).
+      const _tenantId = req.tenant_record.id || req.tenant || null;
+      let _teamId = req.headers['x-kolm-team'] || req.tenant_record.active_team_id || null;
+      if (_teamId && !(_tenantId && teams.membershipOf(_teamId, _tenantId))) _teamId = null;
       const _vaultCtx = {
-        tenantId: req.tenant_record.id || req.tenant || null,
-        teamId: req.headers['x-kolm-team'] || req.tenant_record.active_team_id || null,
-        actorId: req.tenant_record.id || req.tenant || null,
+        tenantId: _tenantId,
+        teamId: _teamId,
+        actorId: _tenantId,
       };
       try {
-        const _vaultKey = providerVault.resolveProviderKey({ ..._vaultCtx, provider });
+        const _vaultKey = providerVault.resolveProviderKey({ ..._vaultCtx, provider, memberOf: (tid) => !!teams.membershipOf(tid, _tenantId) });
         if (_vaultKey) upstreamKey = String(_vaultKey);
       } catch (_) { /* vault is best-effort; fall through to env */ }
     }
@@ -5551,8 +5649,12 @@ export function buildRouter() {
         accelerate: true,
         n_draft_tokens: nDraft,
         tenant_id: req.tenant_record.id,
-        // Production: no in-process backend bridge yet. The honest
-        // no_kernel envelope below + fallback path keep callers working.
+        // The in-process spec-decode bridge now exists: acceleratedChatCompletion
+        // auto-builds it from env via buildSpecDecodeBackend when backend is null,
+        // so this runs against a LIVE engine once KOLM_SPEC_DECODE_BACKEND + the
+        // backend's *_URL envs (KOLM_VLLM_URL / KOLM_LLAMA_DRAFT_URL+TARGET_URL /
+        // KOLM_SGLANG_URL / KOLM_TGI_URL) are set. With nothing configured it
+        // returns an honest no_kernel envelope and the fallback path below runs.
         backend: null,
       });
     } catch (e) {
@@ -5575,6 +5677,7 @@ export function buildRouter() {
         env.accelerated = false;
         env.fallback_reason = accel.error || 'no_kernel';
         env.fallback_hint = accel.hint || null;
+        env.detected_backend = accel.detected_backend || accel.backend || null;
         env.acceptance_rate = 0;
         env.draft_tokens_proposed = 0;
         env.draft_tokens_accepted = 0;
@@ -6837,14 +6940,19 @@ export function buildRouter() {
       // Provider-key vault: a team member can store their own OpenAI/Anthropic/etc.
       // key so their traffic routes under it and lands in the team lake attributed
       // to them. Precedence: this member's key -> the team key -> env -> proxy.
+      // P0-1 - gate the team branch on ACTIVE membership before passing teamId to
+      // the vault, so a spoofed x-kolm-team cannot resolve a victim team's shared key.
+      const _vaultTenantId = (req.tenant_record && req.tenant_record.id) || req.tenant || null;
+      let _vaultTeamId = req.headers['x-kolm-team'] || (req.tenant_record && req.tenant_record.active_team_id) || null;
+      if (_vaultTeamId && !(_vaultTenantId && teams.membershipOf(_vaultTeamId, _vaultTenantId))) _vaultTeamId = null;
       const _vaultCtx = {
-        tenantId: (req.tenant_record && req.tenant_record.id) || req.tenant || null,
-        teamId: req.headers['x-kolm-team'] || (req.tenant_record && req.tenant_record.active_team_id) || null,
-        actorId: (req.tenant_record && req.tenant_record.id) || req.tenant || null,
+        tenantId: _vaultTenantId,
+        teamId: _vaultTeamId,
+        actorId: _vaultTenantId,
       };
       for (const entry of chain) {
         let _vaultKey = null;
-        try { _vaultKey = providerVault.resolveProviderKey({ ..._vaultCtx, provider: entry.provider }); } catch (_) { /* vault is best-effort */ }
+        try { _vaultKey = providerVault.resolveProviderKey({ ..._vaultCtx, provider: entry.provider, memberOf: (tid) => !!teams.membershipOf(tid, _vaultTenantId) }); } catch (_) { /* vault is best-effort */ }
         entry.upstreamKey = _vaultKey || upstreamKeys[entry.provider] || null;
         if (!entry.upstreamKey && _proxyBearer) {
           entry.proxyBearer = _proxyBearer;
@@ -8376,7 +8484,9 @@ export function buildRouter() {
   ]);
   // Compile job creation - queues a tenant-scoped build and returns job_id, status, and poll URL.
   // Validates task/model/output options, bills usage, and writes the compile audit record.
-  r.post('/v1/compile', async (req, res) => {
+  r.post('/v1/compile', computeSpawnLimiter, async (req, res) => {
+    // GW (compute DoS guard) - per-tenant running-job ceiling before any spawn.
+    if (!(await _assertComputeSlot(req, res))) return;
     const { task, examples = [], corpus_namespace, base_model, deploy_hook, preset, lora_rank, k_threshold,
             chat_template, thinking_mode, recipe_class, hw_tier, output_target, multi_device,
             allow_below_gate } = req.body || {};
@@ -8509,6 +8619,7 @@ export function buildRouter() {
           op: AUDIT_OPS.COMPILE_COMPLETED,
           payload: { job_id: fresh.id, k_score: fresh.k_score ?? null, artifact_hash: fresh.artifact_hash || null, cid: fresh.cid || null, version_id: fresh.version_id || null },
         });
+        _emitWebhook(req.tenant_record?.id || req.tenant, 'compile.completed', { job_id: fresh.id, k_score: fresh.k_score ?? null, artifact_hash: fresh.artifact_hash || null, cid: fresh.cid || null, version_id: fresh.version_id || null });
       } else if (fresh.status === 'failed') {
         tryAppendAudit({
           tenant_id: req.tenant_record?.id || req.tenant,
@@ -8552,6 +8663,22 @@ export function buildRouter() {
             .catch(() => {});
         }
       } catch (_) { /* email path must never break the compile response */ }
+      // CD - regression gate: when the compile completed but the artifact
+      // REGRESSES against the incumbent/floor (the pipeline carries blocked:true /
+      // gate_exit_code:2), surface a 409 with the block reason instead of handing
+      // back a signed-but-regressing artifact as success. Never weakens the gate;
+      // this is purely how the HTTP surface reports the existing block.
+      const _gateBlocked = fresh && (fresh.blocked === true || fresh.gate_exit_code === 2);
+      if (_gateBlocked) {
+        return res.status(409).json({
+          job_id: fresh.id,
+          status: 'blocked',
+          error: 'regression_gate_blocked',
+          block_detail: fresh.block_detail || fresh.gate || { reason: fresh.gate_reason || 'artifact regresses against the incumbent baseline' },
+          k_score: fresh.k_score ?? null,
+          poll: `/v1/compile/${fresh.id}`,
+        });
+      }
       return res.status(202).json({ job_id: fresh.id, status: fresh.status, poll: `/v1/compile/${fresh.id}` });
     }
     // LM-8 - on the long-running (setImmediate) branch we don't have a fresh
@@ -10730,34 +10857,73 @@ export function buildRouter() {
   // that reality. When a true multi-key model lands these should grow to
   // list/insert/delete rows from a dedicated table.
 
-  // Account API key list - returns the tenant primary key metadata without the raw secret.
+  // Account API key list - the single source of truth: the tenant-primary key row
+  // PLUS every scoped key. M5 - report the REAL picture (no synthesized last_used,
+  // no fabricated scope array on the primary, which is full/null-scope = ['*']).
   r.get('/v1/account/keys', (req, res) => {
     if (!req.tenant_record) return res.json({ keys: [] });
     const t = req.tenant_record;
-    res.json({
-      keys: [{
-        prefix: t.api_key_prefix || (req.api_key || '').slice(0, 10),
-        label: 'tenant primary key',
-        scopes: ['read', 'write', 'compile', 'capture'],
-        created_at: t.created_at || null,
-        last_used_at: t.last_used_at || new Date().toISOString(),
-        active: true,
-      }],
-    });
+    const primary = {
+      prefix: t.api_key_prefix || (req.api_key || '').slice(0, 10),
+      label: 'tenant primary',
+      scopes: ['*'],
+      created_at: t.created_at || null,
+      last_used_at: t.last_used_at || null,   // never synthesized; null = unknown/never
+      primary: true,
+      active: true,
+    };
+    let scoped = [];
+    try {
+      scoped = listScopedKeys(t.id).map((k) => ({
+        id: k.id, prefix: k.key_prefix, label: k.label || '', scopes: k.scopes || [],
+        created_at: k.created_at || null, last_used_at: k.last_used_at || null,
+        expires_at: k.expires_at || null, expires_in_days: k.expires_in_days,
+        expired: !!k.expired, primary: false, active: !!k.active,
+      }));
+    } catch (_) { scoped = []; }
+    res.json({ keys: [primary, ...scoped] });
   });
 
-  // Account API key create - rotates the tenant primary key and audits the requested label.
+  // Account API key create - mints a SCOPED key by default (create != destroy).
+  // Rotating the live primary - which invalidates every existing integration - is
+  // a deliberate, destructive op that now requires explicit ?rotate_primary=true.
   r.post('/v1/account/keys', (req, res) => {
     if (!req.tenant_record) return res.status(403).json({ error: 'cannot mint keys without a tenant context' });
-    const k = rotateTenantKey(req.tenant_record.id);
+    const b = req.body || {};
+    const rotatePrimary = req.query.rotate_primary === 'true' || b.rotate_primary === true;
+    if (rotatePrimary) {
+      const k = rotateTenantKey(req.tenant_record.id);
+      tryAppendAudit({
+        tenant_id: req.tenant_record.id,
+        tenant_name: req.tenant_record.name || null,
+        actor: 'tenant',
+        op: AUDIT_OPS.KEY_ROTATED,
+        payload: { source: 'POST /v1/account/keys?rotate_primary=true', label: b.label || null },
+      });
+      return res.json({ api_key: k, rotated_primary: true, label: b.label || null, warning: 'the previous primary key is now invalid; update every integration' });
+    }
+    // default: mint a new scoped key without touching the primary.
+    if (!keyHasScope(req, '*')) return res.status(403).json({ error: 'a scoped key cannot mint keys' });
+    let ttl_days = null, expires_at = null;
+    if (b.ttl_days != null) {
+      const d = Number(b.ttl_days);
+      if (!Number.isFinite(d) || d <= 0) return res.status(400).json({ error: 'ttl_days must be a positive finite number', code: 'bad_request' });
+      ttl_days = d;
+    }
+    if (b.expires_at != null) {
+      const dt = new Date(b.expires_at);
+      if (Number.isNaN(dt.getTime())) return res.status(400).json({ error: 'expires_at must be a parseable ISO date', code: 'bad_request' });
+      expires_at = dt.toISOString();
+    }
+    const out = mintScopedKey(req.tenant_record.id, { scopes: b.scopes || [], label: b.label || '', ttl_days, expires_at });
     tryAppendAudit({
       tenant_id: req.tenant_record.id,
       tenant_name: req.tenant_record.name || null,
       actor: 'tenant',
-      op: AUDIT_OPS.KEY_ROTATED,
-      payload: { source: 'POST /v1/account/keys', label: (req.body && req.body.label) || null },
+      op: 'scoped_key.minted',
+      payload: { source: 'POST /v1/account/keys', key_prefix: out.key_prefix, scopes: b.scopes || [], expires_at: out.expires_at },
     });
-    res.json({ api_key: k, label: (req.body && req.body.label) || null });
+    res.json({ api_key: out.key, key_prefix: out.key_prefix, scopes: b.scopes || [], expires_at: out.expires_at, rotated_primary: false, recommended_ttl_days: 90, note: 'store this now; it is not shown again. To rotate the primary key instead, pass ?rotate_primary=true' });
   });
 
   // --- Provider-key vault: per-employee / per-team upstream provider keys ---
@@ -10770,6 +10936,10 @@ export function buildRouter() {
     const tenantId = req.tenant_record.id;
     const teamId = req.query.team_id || req.headers['x-kolm-team'] || null;
     const m = teamId ? teams.membershipOf(teamId, tenantId) : null;
+    // P0-2 - a non-member must not enumerate another team's stored provider-key
+    // metadata (provider/label/prefix/sha256 fingerprint) by passing an arbitrary
+    // team_id. membershipOf filters status==='active'.
+    if (teamId && !m) return res.status(403).json({ error: 'not a team member' });
     const isAdmin = !!(m && ['admin', 'owner'].includes(m.role));
     res.json({
       keys: providerVault.listProviderKeys({ tenantId, teamId, actorId: tenantId, isAdmin }),
@@ -10805,6 +10975,8 @@ export function buildRouter() {
     const tenantId = req.tenant_record.id;
     const teamId = req.query.team_id || req.headers['x-kolm-team'] || null;
     const m = teamId ? teams.membershipOf(teamId, tenantId) : null;
+    // P0-2 - non-member cannot target a team's keys for deletion.
+    if (teamId && !m) return res.status(403).json({ error: 'not a team member' });
     const isAdmin = !!(m && ['admin', 'owner'].includes(m.role));
     const out = providerVault.deleteProviderKey({ tenantId, id: req.params.id, actorId: tenantId, isAdmin });
     if (!out.ok) return res.status(out.reason === 'forbidden' ? 403 : 400).json(out);
@@ -10824,9 +10996,49 @@ export function buildRouter() {
     // minting a key cannot escalate: a scoped caller cannot mint a broader key.
     if (!keyHasScope(req, '*')) return res.status(403).json({ error: 'a scoped key cannot mint keys' });
     const b = req.body || {};
-    const out = mintScopedKey(req.tenant_record.id, { scopes: b.scopes || [], label: b.label || '' });
-    tryAppendAudit({ tenant_id: req.tenant_record.id, actor: 'tenant', op: 'scoped_key.minted', payload: { key_prefix: out.key_prefix, scopes: b.scopes || [] } });
-    res.json({ ok: true, api_key: out.key, key_prefix: out.key_prefix, scopes: b.scopes || [], note: 'store this now; it is not shown again' });
+    // AUTH-01 - credential TTL. Validate any caller-supplied expiry up front so a
+    // typo'd ttl_days/expires_at fails loud instead of silently minting a
+    // never-expiring key. null (never expire) is allowed only when neither is sent.
+    let ttl_days = null, expires_at = null;
+    if (b.ttl_days != null) {
+      const d = Number(b.ttl_days);
+      if (!Number.isFinite(d) || d <= 0) return res.status(400).json({ error: 'ttl_days must be a positive finite number', code: 'bad_request' });
+      ttl_days = d;
+    }
+    if (b.expires_at != null) {
+      const t = new Date(b.expires_at);
+      if (Number.isNaN(t.getTime())) return res.status(400).json({ error: 'expires_at must be a parseable ISO date', code: 'bad_request' });
+      expires_at = t.toISOString();
+    }
+    const out = mintScopedKey(req.tenant_record.id, { scopes: b.scopes || [], label: b.label || '', ttl_days, expires_at });
+    const policyHint = (ttl_days == null && expires_at == null)
+      ? 'recommend setting ttl_days (e.g. 90) so a leaked or forgotten CI key auto-revokes'
+      : null;
+    tryAppendAudit({ tenant_id: req.tenant_record.id, actor: 'tenant', op: 'scoped_key.minted', payload: { key_prefix: out.key_prefix, scopes: b.scopes || [], expires_at: out.expires_at } });
+    res.json({ ok: true, api_key: out.key, key_prefix: out.key_prefix, scopes: b.scopes || [], expires_at: out.expires_at, recommended_ttl_days: 90, policy_hint: policyHint, note: 'store this now; it is not shown again' });
+  });
+  // AUTH-02 - renew (extend) a scoped key's TTL before it dies, so the lifecycle is
+  // rotate/renew/revoke without re-deploying a brand-new key everywhere. A scoped
+  // caller (non-'*') cannot extend keys.
+  r.patch('/v1/account/scoped-keys/:id', (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
+    if (!keyHasScope(req, '*')) return res.status(403).json({ error: 'a scoped key cannot extend keys' });
+    const b = req.body || {};
+    let ttl_days = null, expires_at = null;
+    if (b.ttl_days != null) {
+      const d = Number(b.ttl_days);
+      if (!Number.isFinite(d) || d <= 0) return res.status(400).json({ error: 'ttl_days must be a positive finite number', code: 'bad_request' });
+      ttl_days = d;
+    }
+    if (b.expires_at != null) {
+      const t = new Date(b.expires_at);
+      if (Number.isNaN(t.getTime())) return res.status(400).json({ error: 'expires_at must be a parseable ISO date', code: 'bad_request' });
+      expires_at = t.toISOString();
+    }
+    const out = renewScopedKey(req.tenant_record.id, req.params.id, { ttl_days, expires_at });
+    if (!out.ok) return res.status(out.reason === 'not_found' ? 404 : 400).json({ error: out.reason || 'could not renew key' });
+    tryAppendAudit({ tenant_id: req.tenant_record.id, actor: 'tenant', op: 'scoped_key.renewed', payload: { id: req.params.id, expires_at: out.expires_at } });
+    res.json({ ok: true, expires_at: out.expires_at });
   });
   r.delete('/v1/account/scoped-keys/:id', (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ error: 'auth required' });
@@ -12025,6 +12237,25 @@ export function buildRouter() {
       tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'webhook.deleted', payload: { webhook_id: req.params.id } });
       res.json(out && typeof out === 'object' ? out : { deleted: true });
     } catch (e) { res.status(500).json({ error: 'webhook_delete_failed', detail: String(e && e.message) }); }
+  });
+  // GW - "Send test event": tenant verifies a subscription delivers end-to-end.
+  r.post('/v1/webhooks/:id/test', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const out = await webhooksModule.sendTestEvent(tenant.id, req.params.id);
+      if (out && out.error === 'not_found') { res.status(404).json({ error: 'not_found' }); return; }
+      tryAppendAudit({ tenant_id: tenant.id, tenant_name: tenant.name || null, actor: 'tenant', op: 'webhook.tested', payload: { webhook_id: req.params.id, delivered: !!(out && out.ok) } });
+      res.json(out);
+    } catch (e) { res.status(500).json({ error: 'webhook_test_failed', detail: String(e && e.message) }); }
+  });
+  // GW - delivery history for a subscription (or all), so the dashboard can show
+  // whether real events have been delivered.
+  r.get('/v1/webhooks/:id/deliveries', async (req, res) => {
+    const tenant = _integTenant(req, res); if (!tenant) return;
+    try {
+      const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 50));
+      res.json({ tenant: tenant.id, deliveries: await webhooksModule.listDeliveries(tenant.id, { id: req.params.id, limit }) });
+    } catch (e) { res.status(500).json({ error: 'webhook_deliveries_failed', detail: String(e && e.message) }); }
   });
   // ---- Compile/promote eval gate (standalone evaluation endpoint) ----
   r.post('/v1/eval/gate', (req, res) => {
@@ -13227,7 +13458,33 @@ export function buildRouter() {
           // tenants.plan. Returns before the gateway plan logic below.
           const asrRef = parseAsrRef(s.client_reference_id);
           const asrKind = (s.metadata && s.metadata.kolm_product)
-            || (asrRef ? (asrRef.kind === 'one_time' ? 'asr_report' : asrRef.kind === 'package' ? 'asr_package' : 'asr_continuous') : null);
+            || (asrRef ? (
+                  asrRef.kind === 'entitlement' ? (asrRef.product === 'redteam' ? 'asr_redteam' : 'asr_reviewed')
+                : asrRef.kind === 'one_time' ? 'asr_report'
+                : asrRef.kind === 'package' ? 'asr_package'
+                : 'asr_continuous'
+              ) : null);
+          if (asrKind === 'asr_redteam' || asrKind === 'asr_reviewed') {
+            // Deep Red-Team ($10k) / Reviewed Attestation ($25k): a durable,
+            // tenant-bound ENTITLEMENT (asr_entitlements). Bind on metadata
+            // (Checkout-API path) or the asrent_ ref (Payment-Link path).
+            const asrName = asrKind === 'asr_redteam' ? 'redteam' : 'reviewed';
+            const entKind = asrKind === 'asr_redteam' ? 'deep_redteam' : 'reviewed_attestation';
+            const entTenant = (s.metadata && s.metadata.tenant_id) || (asrRef && asrRef.tenant_id) || null;
+            if (!entTenant) {
+              console.error(`[webhook] ${asrKind} missing tenant; cannot fulfill. metadata:`, JSON.stringify(s.metadata || {}), 'ref:', s.client_reference_id);
+              return { kind: 'ok', body: { received: true, asr: asrName, warning: 'missing_tenant', fulfilled: false, id: event.id } };
+            }
+            const fe = fulfillEntitlementPurchase({ tenant_id: entTenant, kind: entKind, kolm_product: asrKind, stripe_session_id: s.id });
+            // Unconfirmed write: throw so the whole txn (incl. the idempotency
+            // row) rolls back and Stripe re-delivers rather than losing the sale.
+            if (fe && fe.retryable) throw new Error(`${asrKind} fulfillment unconfirmed for ${entTenant}; requesting Stripe redelivery`);
+            if (!fe || !fe.ok) console.error(`[webhook] ${asrKind} fulfillment failed:`, fe && fe.reason, 'tenant:', entTenant);
+            return {
+              kind: 'ok',
+              body: { received: true, asr: asrName, tenant: entTenant, fulfilled: !!(fe && fe.ok), id: event.id },
+            };
+          }
           if (asrKind === 'asr_package') {
             // $15k Full Readiness (or any tenant-bound package). Bind on
             // metadata (Checkout-API path) or the asrpkg_ ref (Payment-Link
@@ -14786,6 +15043,36 @@ export function buildRouter() {
         if (rec.meta?.tenant && rec.meta.tenant !== req.tenant && !req.is_admin) {
           return res.status(403).json({ error: 'not your job' });
         }
+        // GW - ?since=<byte-offset> cursor so the CLI/dashboard can pull the log
+        // incrementally without filesystem access. Returns the new bytes from the
+        // offset plus next_cursor (the log size) for the next poll. Without
+        // ?since, behaves as before (a 2KB tail).
+        const sinceRaw = req.query.since;
+        if (sinceRaw !== undefined) {
+          const since = Math.max(0, Number(sinceRaw) || 0);
+          let chunk = '', size = since;
+          try {
+            if (rec.log_path && fs.existsSync(rec.log_path)) {
+              const stat = fs.statSync(rec.log_path);
+              size = stat.size;
+              if (stat.size > since) {
+                const fd = fs.openSync(rec.log_path, 'r');
+                try {
+                  const len = stat.size - since;
+                  const buf = Buffer.alloc(len);
+                  fs.readSync(fd, buf, 0, len, since);
+                  chunk = buf.toString('utf8');
+                } finally { fs.closeSync(fd); }
+              }
+            }
+          } catch (_) { /* best-effort */ }
+          return res.json({
+            id: rec.id, kind: rec.kind, status: rec.status,
+            started_at: rec.started_at, updated_at: rec.updated_at, pid: rec.pid,
+            log_path: rec.log_path, log_delta: chunk, since, next_cursor: size,
+            tenant: rec.meta?.tenant || null, namespace: rec.meta?.namespace || null, source: rec.meta?.source || null,
+          });
+        }
         const log = tailLog(id, { bytes: 2048 }) || '';
         return res.json({
           id: rec.id,
@@ -14796,6 +15083,7 @@ export function buildRouter() {
           pid: rec.pid,
           log_path: rec.log_path,
           log_tail: log,
+          stream_url: `/v1/jobs/${rec.id}/stream`,
           tenant: rec.meta?.tenant || null,
           namespace: rec.meta?.namespace || null,
           source: rec.meta?.source || null,
@@ -14804,6 +15092,135 @@ export function buildRouter() {
     } catch (_) {} // deliberate: cleanup
     return res.status(404).json({ error: 'job not found' });
   });
+
+  // GW-1 / GW (jobs observability) - SSE progress stream for any background job
+  // (distill/compile/eval). Mirrors the capture-stream pattern: text/event-stream
+  // + X-Accel-Buffering:no (exempt from compression by the server.js filter),
+  // replays the persisted log + any progress.jsonl, then tails the worker log
+  // file (fs.watch) parsing structured progress lines into `event: progress`
+  // frames, ending with a terminal `event: done`/`event: error` frame on the
+  // job's terminal status. Tenant-fenced identically to GET /v1/jobs/:id.
+  // Wired at three paths so the dashboard/CLI can use whichever id surface it has.
+  async function _streamJob(req, res) {
+    const id = req.params.id || req.params.job;
+    let rec = null;
+    try {
+      const { get: getDiskJob } = await import('./jobs.js');
+      rec = getDiskJob(id);
+    } catch (_) { rec = null; }
+    if (!rec) return res.status(404).json({ error: 'job not found' });
+    if (rec.meta?.tenant && rec.meta.tenant !== req.tenant && !req.is_admin) {
+      return res.status(403).json({ error: 'not your job' });
+    }
+    res.set({
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+    try { req.socket?.setTimeout?.(3600000); } catch {} // deliberate: cleanup
+    const TERMINAL = new Set(['completed', 'failed', 'cancelled']);
+    const logPath = rec.log_path;
+    const progressPath = (rec.meta && rec.meta.out_dir) ? path.join(rec.meta.out_dir, 'progress.jsonl') : null;
+    let cleaned = false, watcher = null, poller = null, keepAlive = null, progPos = 0, logPos = 0;
+    const writeFrame = (event, data) => {
+      try { res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`); return true; } catch (_) { return false; }
+    };
+    const cleanup = () => {
+      if (cleaned) return; cleaned = true;
+      try { watcher && watcher.close(); } catch {} // deliberate: cleanup
+      try { poller && clearInterval(poller); } catch {} // deliberate: cleanup
+      try { keepAlive && clearInterval(keepAlive); } catch {} // deliberate: cleanup
+      try { res.end(); } catch {} // deliberate: cleanup
+    };
+    req.on('close', cleanup); req.on('error', cleanup);
+
+    writeFrame('hello', { job_id: rec.id, kind: rec.kind, status: rec.status, namespace: rec.meta?.namespace || null, ts: new Date().toISOString() });
+
+    // Parse a worker log/progress line into a structured progress object, or null.
+    const parseProgress = (line) => {
+      const s = String(line || '').trim();
+      if (!s) return null;
+      // Preferred: a JSON object the worker emits (progress.jsonl or a json log line).
+      if (s.startsWith('{') && s.endsWith('}')) {
+        try {
+          const o = JSON.parse(s);
+          if (o && (o.step !== undefined || o.train_loss !== undefined || o.loss !== undefined || o.phase || o.k_score !== undefined || o.pct !== undefined)) {
+            return { step: o.step, train_loss: (o.train_loss ?? o.loss), phase: o.phase || null, pct: o.pct, k_score: o.k_score };
+          }
+        } catch (_) { /* not json */ }
+      }
+      // Fallback: "step=N loss=X" style lines.
+      const m = s.match(/step[=:\s]+(\d+).*?loss[=:\s]+([0-9.eE+-]+)/i);
+      if (m) return { step: Number(m[1]), train_loss: Number(m[2]), phase: null };
+      return null;
+    };
+    const drainFile = (p, fromPos, emitRaw) => {
+      let next = fromPos;
+      try {
+        if (!fs.existsSync(p)) return fromPos;
+        const stat = fs.statSync(p);
+        if (stat.size <= fromPos) return fromPos;
+        const fd = fs.openSync(p, 'r');
+        try {
+          const len = stat.size - fromPos;
+          const buf = Buffer.alloc(len);
+          fs.readSync(fd, buf, 0, len, fromPos);
+          next = stat.size;
+          const text = buf.toString('utf8');
+          for (const ln of text.split(/\r?\n/)) {
+            const prog = parseProgress(ln);
+            if (prog) writeFrame('progress', prog);
+            else if (emitRaw && ln.trim()) writeFrame('log', { line: ln });
+          }
+        } finally { fs.closeSync(fd); }
+      } catch (_) { /* best-effort */ }
+      return next;
+    };
+
+    // Replay anything already persisted.
+    if (progressPath) progPos = drainFile(progressPath, 0, false);
+    if (logPath) logPos = drainFile(logPath, 0, true);
+
+    let terminalSent = false;
+    const checkTerminal = async () => {
+      let fresh = rec;
+      try { const { get: getDiskJob } = await import('./jobs.js'); fresh = getDiskJob(id) || rec; } catch (_) { fresh = rec; }
+      if (fresh && TERMINAL.has(fresh.status) && !terminalSent) {
+        terminalSent = true;
+        // Final drain so no trailing progress line is lost.
+        if (progressPath) progPos = drainFile(progressPath, progPos, false);
+        if (logPath) logPos = drainFile(logPath, logPos, true);
+        if (fresh.status === 'completed') {
+          writeFrame('done', { job_id: fresh.id, status: fresh.status, k_score: fresh.k_score ?? fresh.meta?.k_score ?? null, artifact_url: fresh.artifact_url || fresh.meta?.manifest_path || null, manifest_path: fresh.meta?.manifest_path || null });
+          if (fresh.kind === 'distill') _emitWebhook(fresh.meta?.tenant || req.tenant, 'distill.completed', { job_id: fresh.id, namespace: fresh.meta?.namespace || null, manifest_path: fresh.meta?.manifest_path || null });
+        } else {
+          writeFrame('error', { job_id: fresh.id, status: fresh.status, error: fresh.error || fresh.meta?.error || 'job ' + fresh.status });
+        }
+        cleanup();
+      }
+    };
+
+    // Tail via fs.watch when possible, plus a low-frequency poll as a fallback
+    // (fs.watch is unreliable on some platforms / network FS).
+    try {
+      if (logPath && fs.existsSync(logPath)) {
+        watcher = fs.watch(logPath, () => {
+          if (logPath) logPos = drainFile(logPath, logPos, true);
+        });
+      }
+    } catch (_) { watcher = null; }
+    poller = setInterval(() => {
+      if (progressPath) progPos = drainFile(progressPath, progPos, false);
+      if (logPath) logPos = drainFile(logPath, logPos, true);
+      checkTerminal();
+    }, 1000);
+    keepAlive = setInterval(() => { try { res.write(': keep-alive\n\n'); } catch {} /* deliberate */ }, 25000);
+    // Fire an immediate terminal check in case the job already finished.
+    checkTerminal();
+  }
+  r.get('/v1/jobs/:id/stream', authMiddleware, _streamJob);
+  r.get('/v1/specialists/auto-distill/:id/stream', authMiddleware, _streamJob);
 
   // ---------- Specialists ----------
 
@@ -16111,6 +16528,34 @@ export function buildRouter() {
       .slice(0, 10)
       .map(([template_hash, count]) => ({ template_hash, count }));
     const total = captures.length;
+    // CD-02 - fitted data-budget block. Surface "you need ~N more pairs for a +X
+    // K-score" grounded in the fitted per-namespace scaling curve. Loads the
+    // (n_pairs,K) anchors from the kscore series (same loader pattern as
+    // opportunity-engine); when fewer than min_points exist the block returns
+    // basis:'insufficient' with an actionable hint - never a fabricated number.
+    let data_budget = null;
+    try {
+      const { planDataBudget } = await import('./data-scaling-law.js');
+      const target_k = Number(req.query?.target_k);
+      const loadPoints = async () => {
+        try {
+          const series = await getKScoreSeries({ tenant: req.tenant, namespace });
+          const pts = (series && Array.isArray(series.points)) ? series.points : [];
+          // Anchor only when a point carries an explicit n_pairs; otherwise omit
+          // (we never invent the rows axis from timestamps).
+          return pts
+            .filter((p) => p && Number.isFinite(Number(p.n_pairs)) && Number.isFinite(Number(p.kscore)))
+            .map((p) => ({ n_pairs: Number(p.n_pairs), k: Number(p.kscore) }));
+        } catch (_) { return []; }
+      };
+      data_budget = await planDataBudget({
+        tenant: req.tenant,
+        namespace,
+        loadPoints,
+        current_n: total,
+        target_k: Number.isFinite(target_k) ? target_k : 0.80,
+      });
+    } catch (_) { data_budget = null; }
     res.json({
       namespace,
       total_captures: total,
@@ -16118,6 +16563,7 @@ export function buildRouter() {
       mode_hint: total >= 1000 ? 'specialist' : 'recipe',
       recipe_eligible: top.length > 0 && top[0].count >= 4,
       specialist_eligible: total >= 1000,
+      data_budget,
     });
   });
 
@@ -16293,8 +16739,10 @@ export function buildRouter() {
   // total captures >=1000 or mode='specialist' is forced). Returns the synth
   // result for recipes, {job_id, poll_url, bridge_source} (202) for specialists.
   // Body: { namespace, min_pairs, mode, name }.
-  r.post('/v1/distill/from-captures', authMiddleware, async (req, res) => {
+  r.post('/v1/distill/from-captures', authMiddleware, computeSpawnLimiter, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    // GW (compute DoS guard) - per-tenant running-job ceiling before any spawn.
+    if (!(await _assertComputeSlot(req, res))) return;
     const body = req.body || {};
     const namespace = sanitizeNamespace(String(body.namespace || 'default'));
     const minPairs = Math.max(4, Number(body.min_pairs) || 4);
@@ -16403,6 +16851,7 @@ export function buildRouter() {
         job_id: job.id,
         status: job.status,
         poll_url: `/v1/jobs/${job.id}`,
+        stream_url: `/v1/jobs/${job.id}/stream`,
         bridge_source: 'local_worker',
       });
     } catch (e) {
@@ -16456,47 +16905,69 @@ export function buildRouter() {
   // W480 - Run an on-policy distillation against a teacher-student pair via the
   // tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path,
   // out_dir, namespace, max_steps }. Returns trainer envelope or no_trainer_installed.
-  r.post('/v1/distill/onpolicy', authMiddleware, async (req, res) => {
+  // GW (async trainer contract) - run a synchronous trainer as a background job
+  // and return 202 immediately, so a real (multi-minute) training run is never
+  // killed by the Vercel/Railway proxy timeout the way an inline-blocking handler
+  // would be. Registers a jobs.js record, runs the trainer on a background fiber
+  // (writing stdout/result into the job log so the GW-1 SSE stream surfaces it),
+  // and emits the distill.completed webhook on success. Mirrors the auto-distill
+  // async contract. Kind 'distill' so the existing /v1/jobs/:id + /stream work.
+  async function _runTrainerAsync(req, res, { label, importer, build, eventNs }) {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    if (!(await _assertComputeSlot(req, res))) return;
+    const tenant_id = req.tenant_record?.id || req.tenant || 'local';
+    const body = req.body || {};
+    const namespace = body.namespace || 'default';
+    let jobsMod, rec;
     try {
-      const { trainOnPolicy } = await import('./distill-onpolicy.js');
-      const tenant_id = req.tenant_record?.id || req.tenant || 'local';
-      const body = req.body || {};
-      const out = trainOnPolicy({
-        pairsPath: body.pairs_path,
-        studentPath: body.student_path,
-        outDir: body.out_dir || null,
-        tenant_id,
-        namespace: body.namespace || 'default',
-        maxSteps: Number(body.max_steps) || 100,
-      });
-      return res.json(out);
+      jobsMod = await import('./jobs.js');
+      rec = jobsMod.create({ kind: 'distill', pid: 0, meta: { tenant: tenant_id, namespace, source: label } });
     } catch (e) {
-      return res.status(500).json({ error: 'onpolicy_failed', message: String(e.message || e) });
+      return res.status(500).json({ error: label + '_job_create_failed', message: String(e.message || e) });
     }
+    res.status(202).json({
+      ok: true, job_id: rec.id, status: 'running', kind: label,
+      poll_url: `/v1/jobs/${rec.id}`, status_url: `/v1/jobs/${rec.id}`, stream_url: `/v1/jobs/${rec.id}/stream`,
+      namespace,
+    });
+    // Background fiber. setImmediate so the 202 is flushed first. Any throw is
+    // captured into the job record + log, never crashes the process.
+    setImmediate(async () => {
+      try { jobsMod.update(rec.id, { status: 'running' }); } catch (_) { /* best-effort */ }
+      try {
+        const fn = await importer();
+        const out = await Promise.resolve(build(fn, { tenant_id, namespace, body }));
+        try { jobsMod.appendLog(rec.id, JSON.stringify({ phase: 'done', result: out }) + '\n'); } catch (_) { /* best-effort */ }
+        try { jobsMod.update(rec.id, { status: 'completed', meta: { ...rec.meta, result: out, finished_at: new Date().toISOString() } }); } catch (_) { /* best-effort */ }
+        _emitWebhook(tenant_id, 'distill.completed', { job_id: rec.id, namespace, kind: label });
+      } catch (e) {
+        try { jobsMod.appendLog(rec.id, JSON.stringify({ phase: 'error', error: String(e.message || e) }) + '\n'); } catch (_) { /* best-effort */ }
+        try { jobsMod.update(rec.id, { status: 'failed', meta: { ...rec.meta, error: String(e.message || e), finished_at: new Date().toISOString() } }); } catch (_) { /* best-effort */ }
+      }
+    });
+  }
+  r.post('/v1/distill/onpolicy', authMiddleware, computeSpawnLimiter, async (req, res) => {
+    return _runTrainerAsync(req, res, {
+      label: 'onpolicy',
+      importer: () => import('./distill-onpolicy.js').then((m) => m.trainOnPolicy),
+      build: (trainOnPolicy, { tenant_id, namespace, body }) => trainOnPolicy({
+        pairsPath: body.pairs_path, studentPath: body.student_path, outDir: body.out_dir || null,
+        tenant_id, namespace, maxSteps: Number(body.max_steps) || 100,
+      }),
+    });
   });
   // W480 - Train a preference-pair objective (dpo/simpo/orpo/kto) via the tenant-
   // installed trainer plug-in. Auth-gated. Body: { pairs_path, student_path,
-  // objective, out_dir, namespace, beta }. Returns trainer envelope.
-  r.post('/v1/distill/preference', authMiddleware, async (req, res) => {
-    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
-    try {
-      const { trainPreference } = await import('./distill-preference.js');
-      const tenant_id = req.tenant_record?.id || req.tenant || 'local';
-      const body = req.body || {};
-      const out = trainPreference({
-        pairsPath: body.pairs_path,
-        studentPath: body.student_path,
-        objective: body.objective || 'dpo',
-        outDir: body.out_dir || null,
-        tenant_id,
-        namespace: body.namespace || 'default',
-        beta: Number(body.beta) || 0.1,
-      });
-      return res.json(out);
-    } catch (e) {
-      return res.status(500).json({ error: 'preference_failed', message: String(e.message || e) });
-    }
+  // objective, out_dir, namespace, beta }. Returns a 202 job envelope.
+  r.post('/v1/distill/preference', authMiddleware, computeSpawnLimiter, async (req, res) => {
+    return _runTrainerAsync(req, res, {
+      label: 'preference',
+      importer: () => import('./distill-preference.js').then((m) => m.trainPreference),
+      build: (trainPreference, { tenant_id, namespace, body }) => trainPreference({
+        pairsPath: body.pairs_path, studentPath: body.student_path, objective: body.objective || 'dpo',
+        outDir: body.out_dir || null, tenant_id, namespace, beta: Number(body.beta) || 0.1,
+      }),
+    });
   });
   // W480 - Speculative decoding draft-head trainer doctor (EAGLE-2/3, Medusa).
   // Reports whether $KOLM_SPECDECODE_TRAINER is resolvable; install_hint when not.
@@ -16511,24 +16982,15 @@ export function buildRouter() {
   // W480 - Train a speculative-decoding draft head (eagle/eagle2/eagle3/medusa)
   // via the tenant-installed trainer plug-in. Auth-gated. Body: { pairs_path,
   // base_path, draft_kind, out_dir, namespace }. Returns trainer envelope.
-  r.post('/v1/spec-decode', authMiddleware, async (req, res) => {
-    if (!req.tenant) return res.status(401).json({ error: 'auth required' });
-    try {
-      const { trainSpecDecode } = await import('./spec-decode.js');
-      const tenant_id = req.tenant_record?.id || req.tenant || 'local';
-      const body = req.body || {};
-      const out = trainSpecDecode({
-        pairsPath: body.pairs_path,
-        basePath: body.base_path,
-        draftKind: body.draft_kind || 'eagle3',
-        outDir: body.out_dir || null,
-        tenant_id,
-        namespace: body.namespace || 'default',
-      });
-      return res.json(out);
-    } catch (e) {
-      return res.status(500).json({ error: 'specdecode_failed', message: String(e.message || e) });
-    }
+  r.post('/v1/spec-decode', authMiddleware, computeSpawnLimiter, async (req, res) => {
+    return _runTrainerAsync(req, res, {
+      label: 'spec-decode',
+      importer: () => import('./spec-decode.js').then((m) => m.trainSpecDecode),
+      build: (trainSpecDecode, { tenant_id, namespace, body }) => trainSpecDecode({
+        pairsPath: body.pairs_path, basePath: body.base_path, draftKind: body.draft_kind || 'eagle3',
+        outDir: body.out_dir || null, tenant_id, namespace,
+      }),
+    });
   });
 
   // ===== W216: replay captured prompts against a compiled artifact ===========
@@ -17733,7 +18195,7 @@ export function buildRouter() {
       ],
       enterprise_controls: [
         { id: 'rbac-sso-scim', status: 'mounted', routes: ['/v1/scim', '/v1/saml/acs', '/v1/scoped-keys'] },
-        { id: 'provider-vault', status: 'mounted', routes: ['/v1/provider-vault', '/v1/model-entitlements'] },
+        { id: 'provider-vault', status: 'mounted', routes: ['/v1/account/provider-keys', '/v1/model-entitlements'] },
         { id: 'budget-and-rate', status: 'mounted', routes: ['/v1/spend-caps', '/v1/pricing', '/v1/gateway/dashboard'] },
         { id: 'egress-policy', status: 'mounted', routes: ['/v1/account/api-control-center/exports', '/v1/account/api-control-center/adapter-manifests/validate', '/v1/redteam/sanitize', '/v1/capture/export', '/v1/assurance-case'] },
         { id: 'retention-and-export', status: 'mounted', routes: ['/v1/account/api-control-center/events', '/v1/account/api-control-center/exports', '/v1/account/api-control-center/adapter-manifests/validate', '/v1/capture/export', '/v1/corpora', '/v1/evidence'] },
@@ -18127,8 +18589,10 @@ export function buildRouter() {
 
   // Specialist auto-distill - turns 1,000+ kept namespace captures into a distill job.
   // Returns a job id and poll URL from the trainer bridge or the local distill worker.
-  r.post('/v1/specialists/auto-distill', authMiddleware, async (req, res) => {
+  r.post('/v1/specialists/auto-distill', authMiddleware, computeSpawnLimiter, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
+    // GW (compute DoS guard) - per-tenant running-job ceiling before any spawn.
+    if (!(await _assertComputeSlot(req, res))) return;
     const namespace = sanitizeNamespace((req.body || {}).namespace || req.query?.namespace || 'default');
     const base_model = String((req.body || {}).base_model || 'Qwen/Qwen2.5-3B-Instruct').slice(0, 128);
     const target_size = String((req.body || {}).target_size || 'phi-3-mini').slice(0, 64);
@@ -18244,6 +18708,7 @@ export function buildRouter() {
         status: job.status,
         status_url: `/v1/jobs/${job.id}`,
         poll_url: `/v1/jobs/${job.id}`,
+        stream_url: `/v1/jobs/${job.id}/stream`,
         namespace,
         base_model,
         target_size,
@@ -18323,7 +18788,28 @@ export function buildRouter() {
     }
     const members = teams.listMembers(team.id);
     const invites = (() => { try { return teams.listInvites(team.id, t.id); } catch { return []; } })();
-    res.json({ team, members, invites });
+    // GW - return the enriched detail (seat_ceiling, pending_events,
+    // rotate_shared_keys banner) so the dashboard/CLI can prompt key rotation
+    // after a member is removed or demoted.
+    const detail = (() => { try { return teams.teamDetail(team.id) || team; } catch { return team; } })();
+    res.json({ team: detail, members, invites });
+  });
+
+  // GW - acknowledge (dismiss) a team event, e.g. the rotate-shared-keys banner
+  // after an admin has actually rotated the keys. acknowledgeTeamEvent enforces
+  // requireRole admin internally.
+  r.post('/v1/teams/:idOrSlug/events/:eventId/ack', (req, res) => {
+    const t = tenantOf(req);
+    if (!t.id) return res.status(401).json({ error: 'tenant required' });
+    const team = teams.getTeam(req.params.idOrSlug);
+    if (!team) return res.status(404).json({ error: 'team not found' });
+    try {
+      const out = teams.acknowledgeTeamEvent(team.id, req.params.eventId, t.id);
+      res.json(out || { ok: true });
+    } catch (e) {
+      const code = e && e.code === 'forbidden' ? 403 : (e && e.code === 'not_found' ? 404 : 400);
+      res.status(code).json({ error: String(e.message || e) });
+    }
   });
 
   // W936 - team activity dashboard. Every member's captured AI traffic,
@@ -18432,6 +18918,7 @@ export function buildRouter() {
     const tnl = tunnel.registerTunnel({ tenantId: t.id, tenantName: req.tenant, teamId: team.id, name: 'team-model-' + row.id, stable: true });
     store.update('team_models', (x) => x.id === row.id, { endpoint_url: tnl.public_url, endpoint_tunnel_id: tnl.id });
     res.json({ ok: true, endpoint: tnl.public_url, tunnel_id: tnl.id, note: 'a stable team endpoint; it does not expire on the idle TTL' });
+    _emitWebhook(t.id, 'model.deployed', { team_id: team.id, model_id: row.id, endpoint: tnl.public_url, tunnel_id: tnl.id });
   });
 
   // W936 - team-scoped data export (admin + lake:export scope). Streams the
@@ -18452,6 +18939,7 @@ export function buildRouter() {
       res.set('Content-Type', format === 'csv' ? 'text/csv' : format === 'json' ? 'application/json' : 'application/x-ndjson');
       res.set('Content-Disposition', `attachment; filename="team-${team.id}-export.${ext}"`);
       res.send(out);
+      _emitWebhook(t.id, 'export.completed', { team_id: team.id, format, bytes: typeof out === 'string' ? out.length : null });
     } catch (e) { res.status(400).json({ error: String(e.message || e) }); }
   });
 
@@ -18599,9 +19087,32 @@ export function buildRouter() {
     }
   });
   r.get('/v1/orgs/:id/audit', (req, res) => {
-    // Org-scoped audit ledger. The signed-in tenant's audit feed scoped to the
-    // org context; returns an honest empty envelope when nothing is recorded.
-    res.json({ entries: [], total: 0, scope: 'org' });
+    // Org-scoped audit ledger. Reads the REAL team-events store filtered by the
+    // org's team_id (team_model.shared, retention.set, provider_key.stored,
+    // member/role/invite changes), newest-first, paginated. Membership required.
+    const t = tenantOf(req);
+    const org = _w920ResolveOrg(req);
+    if (!org) {
+      // Personal workspace has no team-events store; return an empty envelope.
+      return res.json({ entries: [], total: 0, scope: 'org', limit: 0, offset: 0 });
+    }
+    if (!teams.isMember(org.id, t.id) && !req.is_admin) {
+      return res.status(403).json({ error: 'not a team member' });
+    }
+    const limit = Math.min(500, Math.max(1, Number(req.query.limit) || 100));
+    const offset = Math.max(0, Number(req.query.offset) || 0);
+    let events = [];
+    try { events = teams.listTeamEvents(org.id, { includeAcknowledged: true }) || []; } catch (_) { events = []; }
+    const entries = events.map((e) => ({
+      id: e.id,
+      at: e.created_at || null,
+      type: e.type || e.kind || null,
+      actor: e.actor_id || e.created_by || null,
+      payload: e.payload || {},
+      acknowledged_at: e.acknowledged_at || null,
+    }));
+    const total = entries.length;
+    res.json({ entries: entries.slice(offset, offset + limit), total, scope: 'org', limit, offset });
   });
   r.post('/v1/orgs/:id/leave', (req, res) => {
     const t = tenantOf(req);
@@ -18631,7 +19142,7 @@ export function buildRouter() {
   });
 
   // Team invite preview - public token lookup with invite role, expiry, and team summary.
-  r.get('/v1/teams/invites/:token', (req, res) => {
+  r.get('/v1/teams/invites/:token', inviteTokenLimiter, (req, res) => {
     const inv = teams.findInvite(req.params.token);
     if (!inv) return res.status(404).json({ error: 'invite not found or already used' });
     const team = teams.getTeam(inv.team_id);
@@ -18642,7 +19153,7 @@ export function buildRouter() {
   });
 
   // Team invite acceptance - signed-in tenant accepts a valid invite for their email.
-  r.post('/v1/teams/invites/:token/accept', (req, res) => {
+  r.post('/v1/teams/invites/:token/accept', inviteTokenLimiter, (req, res) => {
     const t = tenantOf(req);
     if (!t.id) return res.status(401).json({ error: 'sign in to accept the invite' });
     const result = teams.acceptInvite(req.params.token, t.id, t.email);
@@ -28957,6 +29468,26 @@ res.json({
       const target = String(body.target || '');
       if (!target) return res.status(400).json({ ok: false, error: 'target required (e.g. gguf-q4km, exl2-4bpw, nvfp4)' });
       if (!body.model_id) return res.status(400).json({ ok: false, error: 'model_id required' });
+      // ComputeQuant gate - parse the method from the target shortcut and run it
+      // through the quantization oracle's experimental/availability gate BEFORE
+      // createJob, so we never enqueue a job the worker will refuse (e.g. an
+      // experimental aqlm/quip method that needs KOLM_EXPERIMENTAL_QUANTS=1). This
+      // makes the API consistent with the CLI gate. Unknown/stable formats
+      // (gguf-q4km, exl2-4bpw) are not in the method catalog and pass through.
+      try {
+        const { methodAvailability } = await import('./quantization-oracle.js');
+        const t = target.toLowerCase();
+        // Candidate method tokens we explicitly gate (the experimental + worker
+        // methods the catalog knows). Pick the first that appears in the target.
+        const KNOWN_METHODS = ['aqlm', 'quip', 'gptq', 'awq', 'smoothquant', 'nvfp4', 'mxfp4', 'int8', 'int4', 'hqq', 'eetq', 'fp8'];
+        const method = body.method || KNOWN_METHODS.find((m) => t.includes(m)) || null;
+        if (method) {
+          const avail = methodAvailability(method);
+          if (avail && avail.known && avail.available === false) {
+            return res.status(422).json({ ok: false, error: 'quant_method_unavailable', method, reason: avail.reason, hint: avail.hint });
+          }
+        }
+      } catch (_) { /* oracle unavailable: fall through (do not block stable formats) */ }
       const spec = {
         job_id: body.job_id || `job_${crypto.randomBytes(6).toString('hex')}`,
         base_model: body.model_id,

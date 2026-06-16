@@ -21,6 +21,7 @@
 import crypto from 'node:crypto';
 import { insert, update, remove, findByField } from './store.js';
 import { encrypt, decrypt } from './secrets-vault.js';
+import { membershipOf } from './teams.js';
 
 const TABLE = 'provider_keys';
 const PROVIDERS = ['openai', 'anthropic', 'google', 'openrouter', 'groq', 'together', 'fireworks', 'deepseek', 'mistral', 'cohere'];
@@ -69,12 +70,27 @@ function rowsForTenant(tenantId) {
   return findByField(TABLE, 'tenant_id', tenantId).filter((r) => r && !r._deleted);
 }
 
-// Team keys are SHARED across the team, so they're queried by team_id - not by
-// the caller's tenant. A team key stored by the owner/admin must resolve for
-// every active member (the route authorizes membership before passing teamId).
-function rowsForTeam(teamId) {
-  if (!teamId) return [];
-  return findByField(TABLE, 'team_id', teamId).filter((r) => r && !r._deleted);
+// Team keys are SHARED across a team's members, but they must never leak to a
+// FOREIGN tenant that simply supplies the same team_id in a request body
+// (W936 #5 cross-tenant isolation). A caller may read a team's keys only when it
+// is genuinely associated with that team - which is true in exactly two ways:
+//
+//   1. the team key was stored under the caller's OWN tenant_id (the owner who
+//      put the key, and the single-tenant case where no membership rows exist), OR
+//   2. the caller's tenant is an ACTIVE member of the team (membershipOf), which
+//      is how a member on a different tenant legitimately shares the owner's key.
+//
+// A tenant that is neither the storer nor an active member resolves nothing,
+// even with the right team_id. This is the data-boundary fence; the route still
+// authorizes membership before passing teamId (defense in depth).
+function rowsForTeam(teamId, tenantId) {
+  if (!teamId || !tenantId) return [];
+  const isActiveMember = (() => {
+    try { return !!membershipOf(teamId, tenantId); }
+    catch (_) { return false; } // never let a teams lookup failure open the fence
+  })();
+  return findByField(TABLE, 'team_id', teamId).filter((r) =>
+    r && !r._deleted && r.scope === 'team' && (r.tenant_id === tenantId || isActiveMember));
 }
 
 // Store (upsert) a provider key. One row per (tenant, team|null, actor|scope, provider).
@@ -114,10 +130,11 @@ export function resolveProviderKey({ tenantId, teamId = null, actorId = null, pr
   const member = actorId
     ? rowsForTenant(tenantId).find((r) => r.provider === prov && r.scope === 'member' && r.actor_id === actorId)
     : null;
-  // Team key: shared across the team — looked up by team_id (it may have been
-  // stored under a different member's tenant).
+  // Team key: shared across the team's members, fenced to the caller's tenant
+  // (a team belongs to one tenant; a foreign tenant supplying the same team_id
+  // must never resolve it - W936 #5).
   const team = teamId
-    ? rowsForTeam(teamId).find((r) => r.provider === prov && r.scope === 'team')
+    ? rowsForTeam(teamId, tenantId).find((r) => r.provider === prov && r.scope === 'team')
     : null;
   const pick = member || team;
   if (!pick || !pick.enc) return null;
@@ -134,7 +151,7 @@ export function listProviderKeys({ tenantId, teamId = null, actorId = null, isAd
   // Member keys: the caller's own (or all member-keys for an admin), scoped to
   // the caller's tenant. Team keys: shared, looked up by team_id across tenants.
   const memberRows = rowsForTenant(tenantId).filter((r) => r.scope === 'member' && (r.actor_id === actorId || isAdmin));
-  const teamRows = teamId ? rowsForTeam(teamId).filter((r) => r.scope === 'team') : [];
+  const teamRows = teamId ? rowsForTeam(teamId, tenantId).filter((r) => r.scope === 'team') : [];
   const visible = [...memberRows, ...teamRows];
   return visible.map(redactProviderKey).sort((a, b) => String(a.provider).localeCompare(String(b.provider)));
 }
@@ -152,4 +169,21 @@ export function deleteProviderKey({ tenantId, id, actorId = null, isAdmin = fals
 
 export function supportedProviders() { return PROVIDERS.slice(); }
 
-export default { putProviderKey, resolveProviderKey, listProviderKeys, deleteProviderKey, redactProviderKey, supportedProviders };
+// Cascade: soft-delete every team-scoped provider key when its team is deleted.
+// Called by teams.deleteTeam so a deleted team leaves no resolvable shared keys
+// behind (resolveProviderKey/listProviderKeys/rowsForTeam all filter !_deleted).
+// Soft-delete (not hard remove) keeps the ciphertext row for audit/forensics
+// while making it unresolvable, matching how deleteTeam soft-deletes the team
+// and its invites. Returns the count of keys cascaded. Idempotent: a second
+// call after the keys are already deleted is a no-op (returns 0).
+export function deleteTeamProviderKeys(teamId) {
+  if (!teamId) return 0;
+  const now = nowIso();
+  return update(
+    TABLE,
+    (r) => r && r.team_id === teamId && r.scope === 'team' && !r._deleted,
+    { _deleted: true, deleted_at: now, updated_at: now, deleted_reason: 'team_deleted' },
+  );
+}
+
+export default { putProviderKey, resolveProviderKey, listProviderKeys, deleteProviderKey, deleteTeamProviderKeys, redactProviderKey, supportedProviders };

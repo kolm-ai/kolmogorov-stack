@@ -3,6 +3,9 @@
 
 import 'dotenv/config';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { findOne, insert, all, update, withTransaction } from './store.js';
 import { isProductionRuntime } from './env.js';
 
@@ -13,12 +16,114 @@ const buckets = new Map();
 const DEFAULT_RATE = parseInt(process.env.RATE_LIMIT_PER_SEC || '20'); // req/s sustained
 const DEFAULT_BURST = parseInt(process.env.RATE_LIMIT_BURST || '60');
 
-// W708-5 - Export-control geo-fence. ISO 3166-1 alpha-2 country codes
-// corresponding to US OFAC comprehensive-sanctions jurisdictions
-// (Cuba, Iran, North Korea, Syria, Russia, Belarus). This is a baseline list
-// and admins MUST adjust per their own legal counsel - sanctions programs
-// change, and your obligations depend on the products/services you ship.
-export const EXPORT_CONTROL_DENYLIST = ['CU', 'IR', 'KP', 'SY', 'RU', 'BY'];
+// W708-5 - Export-control geo-fence. The list of US OFAC comprehensive-sanctions
+// jurisdictions (ISO 3166-1 alpha-2) is no longer hardcoded: it lives in a
+// versioned config file, src/ofac-denylist.json, which carries a `version_date`,
+// `source_url`, `review_cadence_days`, and the `countries` array. This makes the
+// list auditable (when was it last reviewed?) and refreshable without a code
+// change, and lets ofacDenylistStaleness() warn operators when the list has not
+// been reviewed inside the cadence window. A baseline fallback is kept inline so
+// the geo-fence never silently fails open if the file is missing/corrupt.
+//
+// Operators MUST review the list against current OFAC programs with their own
+// legal counsel - sanctions change, and obligations depend on what you ship.
+const _OFAC_FALLBACK = ['CU', 'IR', 'KP', 'SY', 'RU', 'BY'];
+
+// Load src/ofac-denylist.json once at module load. Resolved relative to this
+// file so it works from any cwd / bundler layout. On any failure (missing file,
+// bad JSON, empty countries) we fall back to the inline baseline and record the
+// reason so ofacDenylistStaleness() can surface it - we never leave the
+// geo-fence empty (which would let every sanctioned jurisdiction through).
+function _loadOfacDenylist() {
+  try {
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const raw = fs.readFileSync(path.join(here, 'ofac-denylist.json'), 'utf8');
+    const cfg = JSON.parse(raw);
+    const countries = Array.isArray(cfg.countries)
+      ? cfg.countries.map(c => String(c || '').trim().toUpperCase()).filter(c => c.length === 2)
+      : [];
+    if (!countries.length) throw new Error('ofac-denylist.json has no valid countries');
+    return {
+      countries,
+      version_date: typeof cfg.version_date === 'string' ? cfg.version_date : null,
+      source_url: typeof cfg.source_url === 'string' ? cfg.source_url : null,
+      review_cadence_days: Number.isFinite(cfg.review_cadence_days) ? cfg.review_cadence_days : 90,
+      loaded: true,
+      error: null,
+    };
+  } catch (e) {
+    return {
+      countries: _OFAC_FALLBACK.slice(),
+      version_date: null,
+      source_url: null,
+      review_cadence_days: 90,
+      loaded: false,
+      error: (e && e.message) || 'load_failed',
+    };
+  }
+}
+
+const _OFAC = _loadOfacDenylist();
+
+// Public, frozen view of the active denylist. Kept as a plain string[] so all
+// existing callers (isGeoFenced, signup handler, tests) keep working unchanged.
+export const EXPORT_CONTROL_DENYLIST = Object.freeze(_OFAC.countries.slice());
+
+// Metadata + staleness verdict for the active OFAC denylist. Surfaced at startup
+// (see ofacDenylistStartupCheck) and consumable by /health so operators can see
+// when the list was last reviewed. `stale` is true when version_date is older
+// than review_cadence_days (default 90), or when the file failed to load.
+export function ofacDenylistStaleness(nowMs = Date.now()) {
+  const cadence = _OFAC.review_cadence_days || 90;
+  let ageDays = null;
+  let stale = false;
+  let reason = null;
+  if (!_OFAC.loaded) {
+    stale = true;
+    reason = `ofac-denylist.json failed to load (${_OFAC.error}); using inline baseline`;
+  } else if (!_OFAC.version_date) {
+    stale = true;
+    reason = 'ofac-denylist.json has no version_date';
+  } else {
+    const vd = new Date(_OFAC.version_date).getTime();
+    if (!Number.isFinite(vd)) {
+      stale = true;
+      reason = `ofac-denylist.json version_date is not a valid date: ${_OFAC.version_date}`;
+    } else {
+      ageDays = Math.floor((nowMs - vd) / (24 * 3600 * 1000));
+      if (ageDays > cadence) {
+        stale = true;
+        reason = `OFAC denylist last reviewed ${ageDays}d ago (> ${cadence}d cadence) - review against current sanctions programs`;
+      }
+    }
+  }
+  return {
+    loaded: _OFAC.loaded,
+    version_date: _OFAC.version_date,
+    source_url: _OFAC.source_url,
+    review_cadence_days: cadence,
+    country_count: _OFAC.countries.length,
+    age_days: ageDays,
+    stale,
+    reason,
+  };
+}
+
+// Startup hook: log a WARNING when the denylist is stale or failed to load so an
+// operator notices a 2-year-old list in the boot logs. Returns the staleness
+// object so the caller (server.js) can also expose it. Never throws.
+export function ofacDenylistStartupCheck(logger = console) {
+  const s = ofacDenylistStaleness();
+  try {
+    if (s.stale) {
+      logger.warn(`[auth] WARNING: OFAC export-control denylist is stale: ${s.reason}. ` +
+        `Edit src/ofac-denylist.json (bump version_date) per ${s.source_url || 'your OFAC source'}.`);
+    } else {
+      logger.log(`[auth] OFAC denylist v${s.version_date} ok (${s.country_count} jurisdictions, reviewed ${s.age_days}d ago)`);
+    }
+  } catch { /* deliberate: cleanup */ }
+  return s;
+}
 
 // True if the given ISO 3166-1 alpha-2 country code is on the export-control
 // denylist. Comparison is case-insensitive; null/undefined/empty returns false
@@ -71,14 +176,18 @@ function tenantKeyMatches(tenant, key) {
 export function findTenantByApiKey(key) {
   const direct = findOne('tenants', x => !x._deleted && tenantKeyMatches(x, key)) || null;
   if (direct) return direct;
-  // W888-L fallback: tests + multi-key flows can store keys in a separate
-  // `api_keys` table with rows shaped { tenant_id, hash, revoked_at }. The
-  // hash column is a raw sha256 hex digest (no 'sha256:' prefix). If the
-  // tenant row itself carries no api_key_hash, walk the api_keys table.
+  // W888-L fallback: scoped keys minted via mintScopedKey() and OAuth/magic-link
+  // session keys live in a separate `api_keys` table. The authoritative row
+  // shape is exactly { id, tenant_id, hash, key_prefix, scopes[], label,
+  // created_at, last_used_at, revoked_at, expires_at } (see mintScopedKey).
+  // `hash` is the raw sha256 hex digest of the key (no 'sha256:' prefix); the
+  // 'sha256:'-prefixed comparison is a defensive accommodation for any legacy
+  // fixture that stored the prefixed form. There is NO `api_key_hash` column on
+  // this table - that was dead copy-paste from the tenants schema and is gone.
   try {
     const rawHex = crypto.createHash('sha256').update(String(key || '')).digest('hex');
     const row = findOne('api_keys', x => x && !x._deleted && !x.revoked_at && !_scopedKeyExpired(x) && (
-      x.hash === rawHex || x.hash === ('sha256:' + rawHex) || x.api_key_hash === rawHex || x.api_key_hash === ('sha256:' + rawHex)
+      x.hash === rawHex || x.hash === ('sha256:' + rawHex)
     ));
     if (row && row.tenant_id) {
       const t = findOne('tenants', x => x && !x._deleted && x.id === row.tenant_id);
@@ -120,31 +229,39 @@ export function migrateAllPlainKeysOnce() {
 migrateAllPlainKeysOnce();
 
 export function provisionTenant(name, { quota = 10000, plan = 'free', kind = 'user', expires_at = null, email = null, country_code = null, geo_check = null } = {}) {
-  const existing = all('tenants').find(t => t.name === name);
-  if (existing) return existing;
-  const key = mintApiKey(kind);
-  const t = {
-    id: 'tenant_' + crypto.randomBytes(6).toString('hex'),
-    name,
-    ...keyFields(key),
-    kind,                 // 'user' | 'anon'
-    expires_at,           // ISO string for anon tenants; null otherwise
-    email,                // null until claimed
-    plan,
-    quota,
-    used: 0,
-    rate_per_sec: DEFAULT_RATE,
-    burst: DEFAULT_BURST,
-    // W708-5 - export-control attribution. country_code is the ISO 3166-1
-    // alpha-2 code provided at signup (header or body), null if unknown.
-    // geo_check is one of: 'allowed' | 'unknown' | 'denied' (denied tenants
-    // never reach provisionTenant - they're rejected upstream with HTTP 451).
-    country_code: country_code || null,
-    geo_check: geo_check || (country_code ? 'allowed' : 'unknown'),
-    created_at: new Date().toISOString(),
-  };
-  insert('tenants', t);
-  return { ...t, api_key: key };
+  // P2 (Auth): the name-collision check and the insert must be one atomic unit.
+  // Two concurrent provisionTenant(same_name) calls could both pass the
+  // `.find()` and both insert, producing duplicate tenant rows (the JSON store
+  // has no UNIQUE constraint). withTransaction (BEGIN IMMEDIATE in sqlite mode)
+  // serializes the check+insert so the second caller re-reads the now-committed
+  // row and returns it instead of inserting a duplicate.
+  return withTransaction(() => {
+    const existing = all('tenants').find(t => t.name === name);
+    if (existing) return existing;
+    const key = mintApiKey(kind);
+    const t = {
+      id: 'tenant_' + crypto.randomBytes(6).toString('hex'),
+      name,
+      ...keyFields(key),
+      kind,                 // 'user' | 'anon'
+      expires_at,           // ISO string for anon tenants; null otherwise
+      email,                // null until claimed
+      plan,
+      quota,
+      used: 0,
+      rate_per_sec: DEFAULT_RATE,
+      burst: DEFAULT_BURST,
+      // W708-5 - export-control attribution. country_code is the ISO 3166-1
+      // alpha-2 code provided at signup (header or body), null if unknown.
+      // geo_check is one of: 'allowed' | 'unknown' | 'denied' (denied tenants
+      // never reach provisionTenant - they're rejected upstream with HTTP 451).
+      country_code: country_code || null,
+      geo_check: geo_check || (country_code ? 'allowed' : 'unknown'),
+      created_at: new Date().toISOString(),
+    };
+    insert('tenants', t);
+    return { ...t, api_key: key };
+  });
 }
 
 // Mint an anonymous tenant. No email required. 30-day TTL. Lower quota.
@@ -160,46 +277,81 @@ export function provisionAnonTenant({ ttl_days = 30, quota = 1000 } = {}) {
 //   then deletes the anon tenant. Returns existing tenant.
 // - Otherwise upgrades the anon tenant in-place: rotates key to ks_*, clears expiry, raises quota,
 //   marks as 'user'.
+//
+// P1 (Auth): the multi-step merge/upgrade below MUST be atomic. Two concurrent
+// claimAnonTenant calls on the same anon token (or a claim racing a
+// findOrCreateTenantByEmail that creates the email tenant mid-flight) could
+// otherwise double-reassign concepts/observations, soft-delete an anon tenant
+// without migrating its rows, or rotate the existing tenant's key twice. The
+// real work now lives in claimAnonTenantAtomic(), which re-reads `anon` and
+// `existing` INSIDE the transaction and bails (no-op) if a concurrent caller
+// already claimed the anon tenant. claimAnonTenant() stays as the validated
+// public entry point and delegates the write to the atomic helper.
 export function claimAnonTenant(anonToken, { email, name }) {
   const anon = findTenantByApiKey(anonToken);
   if (!anon || anon.kind !== 'anon') return { ok: false, reason: 'anon token not found or already claimed' };
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return { ok: false, reason: 'valid email required' };
   }
-  // Look for an existing real tenant with this email
-  const existing = all('tenants').find(t => t.email === email && t.kind !== 'anon');
-  if (existing) {
+  return claimAnonTenantAtomic(anon.id, { email, name });
+}
+
+// Atomic claim-and-merge. All store mutations run inside a single
+// withTransaction (BEGIN IMMEDIATE serializes writers in sqlite mode), and the
+// anon row + existing-tenant row are RE-READ inside the transaction so a
+// concurrent claim that already flipped `kind` away from 'anon' or set
+// `_deleted` is detected and turned into a clean no-op rather than a
+// double-migration. anonId is the tenant id (not the raw token) so the
+// re-read is a stable primary-key lookup.
+export function claimAnonTenantAtomic(anonId, { email, name }) {
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    return { ok: false, reason: 'valid email required' };
+  }
+  return withTransaction(() => {
+    // Re-read inside the txn: a concurrent claim may have already consumed it.
+    const anon = findOne('tenants', x => x.id === anonId);
+    if (!anon || anon._deleted || anon.kind !== 'anon') {
+      return { ok: false, reason: 'anon token not found or already claimed' };
+    }
+    // Re-read the email-owner inside the txn so we observe a tenant that a
+    // racing findOrCreateTenantByEmail/provisionTenant committed just before us.
+    const existing = all('tenants').find(t => !t._deleted && t.email === email && t.kind !== 'anon' && t.id !== anon.id);
+    if (existing) {
+      const newKey = mintApiKey('user');
+      // Reassign concepts/observations from anon -> existing, THEN soft-delete
+      // the anon row, THEN rotate the existing tenant's key. Ordering matters:
+      // the soft-delete is the last gate that proves the migration finished, and
+      // because the whole block is one transaction a crash rolls all of it back.
+      update('concepts', c => c.tenant === anon.name, { tenant: existing.name });
+      update('observations', o => o.tenant === anon.name, { tenant: existing.name });
+      update('tenants', x => x.id === anon.id, { _deleted: true, claimed_into: existing.id, claimed_at: new Date().toISOString() });
+      update('tenants', x => x.id === existing.id, {
+        ...keyFields(newKey),
+        api_key: undefined,
+        key_rotated_at: new Date().toISOString(),
+      });
+      return { ok: true, mode: 'merged', api_key: newKey, tenant: { ...existing, api_key: newKey } };
+    }
+    // Otherwise upgrade in place.
     const newKey = mintApiKey('user');
-    // Reassign concepts from anon → existing
-    update('concepts', c => c.tenant === anon.name, { tenant: existing.name });
-    update('observations', o => o.tenant === anon.name, { tenant: existing.name });
-    update('tenants', x => x.id === anon.id, { _deleted: true });
-    update('tenants', x => x.id === existing.id, {
+    const slug = (name || email.split('@')[0]).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 32) || 'user';
+    const uniq = `${slug}-${Date.now().toString(36).slice(-4)}`;
+    update('tenants', x => x.id === anon.id, {
       ...keyFields(newKey),
       api_key: undefined,
-      key_rotated_at: new Date().toISOString(),
+      name: uniq,
+      kind: 'user',
+      plan: 'free',
+      quota: 10000,
+      expires_at: null,
+      email,
+      claimed_at: new Date().toISOString(),
     });
-    return { ok: true, mode: 'merged', api_key: newKey, tenant: { ...existing, api_key: newKey } };
-  }
-  // Otherwise upgrade in place
-  const newKey = mintApiKey('user');
-  const slug = (name || email.split('@')[0]).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 32) || 'user';
-  const uniq = `${slug}-${Date.now().toString(36).slice(-4)}`;
-  update('tenants', x => x.id === anon.id, {
-    ...keyFields(newKey),
-    api_key: undefined,
-    name: uniq,
-    kind: 'user',
-    plan: 'free',
-    quota: 10000,
-    expires_at: null,
-    email,
-    claimed_at: new Date().toISOString(),
+    // Reassign tenant-tagged rows to the new name (concepts, observations).
+    update('concepts', c => c.tenant === anon.name, { tenant: uniq });
+    update('observations', o => o.tenant === anon.name, { tenant: uniq });
+    return { ok: true, mode: 'upgraded', api_key: newKey, tenant: { ...anon, name: uniq, api_key: newKey } };
   });
-  // Reassign tenant-tagged rows to the new name (concepts, observations)
-  update('concepts', c => c.tenant === anon.name, { tenant: uniq });
-  update('observations', o => o.tenant === anon.name, { tenant: uniq });
-  return { ok: true, mode: 'upgraded', api_key: newKey, tenant: { ...anon, name: uniq, api_key: newKey } };
 }
 
 // Find an existing tenant by email or create a fresh one. Used by OAuth
@@ -219,11 +371,35 @@ export function findOrCreateTenantByEmail({ email, name, provider, provider_id }
   }
   const existing = all('tenants').find(t => !t._deleted && t.email === email && t.kind !== 'anon');
   if (existing) {
+    // P1 (Auth) account-linking / provider_id trust. Pure email-equality is not
+    // sufficient: a provider asserting an email signs the caller into the
+    // matching tenant. We require the trusted path (OAuth verified-email checks
+    // in oauth.js + the magic-link ownership proof) to have already vetted the
+    // email, and we ADDITIONALLY refuse to silently sign in when the existing
+    // tenant is already bound to a DIFFERENT provider account id under the same
+    // provider. That binding mismatch means a different provider account is
+    // claiming an email this tenant already established under another identity -
+    // it must go through an explicit link step (a logged-in user adds the
+    // provider), not an implicit overwrite.
+    //
+    // provider:'email' (magic-link) is treated as the email-ownership proof it
+    // is - it can sign into any tenant for that email and never trips the
+    // binding check (there is no email_id to mismatch). An OAuth provider whose
+    // id differs from the one already pinned on the tenant is refused.
+    const incomingId = provider_id ? String(provider_id) : '';
+    const boundId = existing[`${provider}_id`] ? String(existing[`${provider}_id`]) : '';
+    if (provider && provider !== 'email' && boundId && incomingId && boundId !== incomingId) {
+      const err = new Error(`account already linked to a different ${provider} identity`);
+      err.code = 'provider_id_mismatch';
+      err.provider = provider;
+      throw err;
+    }
     // Non-credential update only — record the provider id + login time. The
     // primary api_key_hash is NOT touched, so every out-of-band caller's key
-    // survives the web login.
+    // survives the web login. Never DOWNGRADE an existing binding to null: keep
+    // the pinned id when this sign-in did not carry one (e.g. magic-link).
     update('tenants', x => x.id === existing.id, {
-      [`${provider}_id`]: provider_id || existing[`${provider}_id`] || null,
+      [`${provider}_id`]: incomingId || boundId || null,
       last_login_at: new Date().toISOString(),
     });
     // Mint a full-scope, 30-day session key for the cookie. It authenticates
@@ -285,6 +461,48 @@ export function rotateTenantKey(tenant_id) {
     key_rotated_at: new Date().toISOString(),
   });
   return newKey;
+}
+
+// P2 (Auth) plain-key lockout detection. A tenant is "locked out" when it has
+// NO usable authoritative credential: api_key_hash is unset (a pre-migration
+// row whose plain key was lost, or a migration that cleared api_key without
+// computing the hash). Such a tenant cannot authenticate and so cannot reach
+// rotate-key the normal way. recoverKeyByEmail() is the self-serve escape hatch
+// (driven by the email-verified magic-link primitive in auth-email.js); for
+// email-less legacy tenants an operator must use the ADMIN_KEY path.
+export function tenantIsLockedOut(tenant) {
+  if (!tenant || tenant._deleted) return false;
+  return !tenant.api_key_hash;
+}
+
+// P2 (Auth) email-verified key recovery. Called ONLY after the caller has
+// proven ownership of `email` (the magic-link verify flow in auth-email.js).
+// Resolves the real (non-anon) tenant for that email and rotates its key,
+// returning a fresh ks_ key. This makes the lockout-recovery path documented in
+// tenantKeyMatches()/migrateAllPlainKeysOnce real instead of vapor: a tenant
+// whose plain key was lost before migration can verify their email and get a
+// new working key. Returns { ok:false, reason } when no eligible tenant exists.
+//
+// Atomic: the resolve + rotate run inside one withTransaction so a concurrent
+// recovery (double-click on the recovery link) re-reads the committed row and
+// both land on the SAME final key for the same tenant rather than racing two
+// rotations against a stale snapshot.
+export function recoverKeyByEmail(email) {
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    return { ok: false, reason: 'valid email required' };
+  }
+  return withTransaction(() => {
+    const tenant = all('tenants').find(t => !t._deleted && t.email === email && t.kind !== 'anon');
+    if (!tenant) return { ok: false, reason: 'no account for that email' };
+    const newKey = mintApiKey('user');
+    update('tenants', x => x.id === tenant.id, {
+      ...keyFields(newKey),
+      api_key: undefined,
+      key_rotated_at: new Date().toISOString(),
+      key_recovered_at: new Date().toISOString(),
+    });
+    return { ok: true, api_key: newKey, tenant: { id: tenant.id, name: tenant.name, plan: tenant.plan } };
+  });
 }
 
 // Rotate a tenant's receipt-signing secret. The previous secret is preserved
@@ -399,6 +617,7 @@ const PUBLIC_API = (p) =>
   /^\/v1\/teams\/invites\/[A-Za-z0-9_\-]+$/.test(p) ||                  // preview is public; /accept is its own path
   /^\/v1\/oauth\/(google|github)\/(start|callback)$/.test(p) ||
   /^\/v1\/auth\/email\/(start|verify)$/.test(p) ||                       // passwordless magic-link sign-in
+  p === '/v1/auth/email/recover-key' ||                                  // AUTH-06 email-verified key recovery (lockout escape)
   // W889-8.4 - short OAuth aliases. /v1/auth/github + /v1/auth/github/callback
   // are 302 redirects to the canonical /v1/oauth/github/* routes above. They
   // must be public so the redirect itself does not need an API key.
@@ -682,10 +901,100 @@ export function renewScopedKey(tenant_id, id, { ttl_days = null, expires_at = nu
 export function scopesForKey(key) {
   try {
     const rawHex = crypto.createHash('sha256').update(String(key || '')).digest('hex');
-    const row = findOne('api_keys', (x) => x && !x._deleted && !x.revoked_at && !_scopedKeyExpired(x) && (x.hash === rawHex || x.hash === 'sha256:' + rawHex || x.api_key_hash === rawHex));
+    const row = findOne('api_keys', (x) => x && !x._deleted && !x.revoked_at && !_scopedKeyExpired(x) && (x.hash === rawHex || x.hash === 'sha256:' + rawHex));
     return row ? (Array.isArray(row.scopes) ? row.scopes : []) : null;
   } catch (_) { return null; }
 }
+// --- M-AUDIT scoped-key last_used_at tracking (opt-in) ---------------------
+// Writing last_used_at on every authenticated request is expensive on the hot
+// path (a store write per call), so by default we do NOT track it. Operators who
+// need an audit trail (which keys are active vs abandoned, for rotation /
+// compliance) can opt in with KOLM_KEY_LAST_USED_TRACKING=1. When enabled, the
+// raw key hash is queued and a coalesced batch is flushed by
+// flushKeyLastUsed() - called on a low-frequency background interval from
+// server.js startup, NOT inline - so the request never pays the write latency.
+//
+// The queue is a Map(hash -> latest-iso) so repeated calls with the same key
+// collapse to a single write per flush. Bounded at 5000 distinct keys per window
+// to cap memory; beyond that we drop new entries (the existing ones still flush).
+const _lastUsedQueue = new Map();
+const _LAST_USED_QUEUE_MAX = 5000;
+
+export function keyLastUsedTrackingEnabled() {
+  return process.env.KOLM_KEY_LAST_USED_TRACKING === '1';
+}
+
+// Record that the scoped key with sha256-hex `rawHex` was used at `at` (ISO).
+// No-op unless tracking is enabled. Cheap: an in-memory Map.put, no store write.
+export function recordKeyLastUsed(rawHex, at = new Date().toISOString()) {
+  if (!keyLastUsedTrackingEnabled()) return;
+  if (!rawHex) return;
+  if (!_lastUsedQueue.has(rawHex) && _lastUsedQueue.size >= _LAST_USED_QUEUE_MAX) return;
+  _lastUsedQueue.set(rawHex, at);
+}
+
+// Flush the coalesced last_used_at queue to the api_keys table in one
+// transaction. Returns { flushed } (number of distinct keys updated). Safe to
+// call when the queue is empty (returns { flushed: 0 }). Intended to be driven
+// by a background interval in server.js, e.g. every KOLM_KEY_LAST_USED_FLUSH_MS.
+export function flushKeyLastUsed() {
+  if (_lastUsedQueue.size === 0) return { flushed: 0 };
+  const batch = Array.from(_lastUsedQueue.entries());
+  _lastUsedQueue.clear();
+  let flushed = 0;
+  withTransaction(() => {
+    for (const [rawHex, at] of batch) {
+      const n = update('api_keys', (k) => k && !k._deleted && !k.revoked_at && (k.hash === rawHex || k.hash === 'sha256:' + rawHex), { last_used_at: at });
+      if (n > 0) flushed += 1;
+    }
+  });
+  return { flushed };
+}
+
+// AUTH-03 - background flusher wiring. The flush is USELESS unless something
+// drives it on an interval; previously nothing did, so last_used_at stayed null
+// forever and the queue grew unbounded in memory (a false 'never used' signal,
+// worse than absent). server.js calls startKeyLastUsedFlusher() once at startup
+// (only when tracking is enabled) and stopKeyLastUsedFlusher() on graceful
+// shutdown so the final window is not lost. Kept here, in the auth lane, so the
+// interval/shutdown semantics live next to the queue they drain.
+let _lastUsedTimer = null;
+
+// Start the background flush interval. No-op (returns null) unless tracking is
+// enabled. The timer is unref'd so it never holds the event loop open. Flush
+// cadence is KOLM_KEY_LAST_USED_FLUSH_MS (default 30000). Idempotent: a second
+// call returns the existing timer rather than stacking a second interval.
+export function startKeyLastUsedFlusher(logger = console) {
+  if (!keyLastUsedTrackingEnabled()) return null;
+  if (_lastUsedTimer) return _lastUsedTimer;
+  const ms = Number(process.env.KOLM_KEY_LAST_USED_FLUSH_MS || 30000);
+  const everyMs = Number.isFinite(ms) && ms >= 1000 ? ms : 30000;
+  const tick = () => {
+    try {
+      const { flushed } = flushKeyLastUsed();
+      if (flushed > 0 && logger && typeof logger.debug === 'function') {
+        logger.debug(`[auth] flushed last_used_at for ${flushed} scoped key(s)`);
+      }
+    } catch (e) {
+      try { (logger || console).error('[auth] last_used flush error:', e && e.message); } catch { /* deliberate: cleanup */ }
+    }
+  };
+  _lastUsedTimer = setInterval(tick, everyMs);
+  if (_lastUsedTimer.unref) _lastUsedTimer.unref();
+  return _lastUsedTimer;
+}
+
+// Stop the flusher and drain the final window so the last batch is not lost on
+// a graceful shutdown (SIGTERM/SIGINT). Returns { flushed } from the final
+// flush. Safe to call when the flusher was never started.
+export function stopKeyLastUsedFlusher() {
+  if (_lastUsedTimer) {
+    clearInterval(_lastUsedTimer);
+    _lastUsedTimer = null;
+  }
+  try { return flushKeyLastUsed(); } catch { return { flushed: 0 }; }
+}
+
 // Convenience for routes: a full (null-scope) key passes everything; a scoped
 // key passes only when '*' or the exact action scope is present.
 export function keyHasScope(req, action) {
@@ -788,6 +1097,13 @@ export function authMiddleware(req, res, next) {
   // of scopes for keys minted via mintScopedKey. Routes gate with keyHasScope /
   // authorizeCaptureAction({ keyScopes: req.key_scopes || ['*'] }).
   req.key_scopes = scopesForKey(key);
+  // M-AUDIT: opt-in last_used_at tracking. Only does in-memory work when a
+  // scoped key authenticated (req.key_scopes != null) AND tracking is enabled;
+  // the actual store write is deferred to flushKeyLastUsed() on a background
+  // interval, so the hot path never pays a per-request write.
+  if (req.key_scopes != null && keyLastUsedTrackingEnabled()) {
+    try { recordKeyLastUsed(crypto.createHash('sha256').update(String(key)).digest('hex')); } catch { /* deliberate: cleanup */ }
+  }
   next();
 }
 

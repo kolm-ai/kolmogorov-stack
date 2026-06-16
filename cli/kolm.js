@@ -475,10 +475,15 @@ function authHeaders(c) {
 // walkLoop (W311); fixing it once at the api() chokepoint protects every
 // CLI verb (ask, status, login, run, compile, list, ...).
 async function api(c, method, path_, body) {
+  return apiH(c, method, path_, body, {});
+}
+
+// api() with extra request headers (e.g. x-kolm-team for team-scoped routes).
+async function apiH(c, method, path_, body, extraHeaders = {}) {
   const url = c.base.replace(/\/+$/, '') + path_;
   const parsed = new URL(url);
   const lib = parsed.protocol === 'https:' ? https : http;
-  const headers = { 'Content-Type': 'application/json', ...authHeaders(c) };
+  const headers = { 'Content-Type': 'application/json', ...authHeaders(c), ...(extraHeaders || {}) };
   const payload = body ? JSON.stringify(body) : null;
   if (payload) headers['Content-Length'] = Buffer.byteLength(payload).toString();
   const { status, text } = await new Promise((resolve, reject) => {
@@ -3679,8 +3684,14 @@ USAGE
   kolm team remove <slug> <tenant_id>                remove a member
   kolm team transfer <slug> <new_owner_tenant_id>    transfer ownership
   kolm team delete <slug>                            delete a team
+  kolm team events <slug>                            pending team events (incl. key-rotation prompt)
+  kolm team rotate-keys <slug>                        act on a shared-key rotation recommendation
 
 All forms require a logged-in session (kolm login).
+
+Cloud team roles are viewer|member|admin. reviewer/contributor are
+local-workspace roles (kolm team invite <email> --role reviewer); passing them
+to a cloud op is rejected rather than silently coerced to 'member'.
 
 FLAGS
   --json     deterministic team envelope ({teams:[...]} / {members:[...]}) for scripts
@@ -3693,6 +3704,34 @@ EXAMPLES
   kolm team show acme
   kolm team invite acme alice@example.com --role admin
   kolm team queue list --json
+`,
+  vault: `kolm vault - provider-key vault (store provider keys centrally; the
+gateway routes your traffic under them and the call lands in the team lake).
+
+USAGE
+  kolm vault list [--team <slug>] [--json]                list stored provider keys (redacted)
+  kolm vault set <provider> <key> [--scope member|team]   store a provider key
+                 [--team <slug>] [--label <text>]
+  kolm vault rm <id> [--team <slug>]                       remove a stored key
+
+The raw key may be piped via stdin (use '-' for the key arg) so it never lands
+in shell history:  kolm vault set openai - < key.txt
+
+PROVIDERS
+  openai, anthropic, google, openrouter, groq, together, fireworks, deepseek,
+  mistral, cohere
+
+SCOPES
+  member  usable only by you (default)
+  team    usable by any active team member; only admins rotate/delete (needs --team)
+
+EXIT CODES
+  0 ok   1 user error   3 auth required
+
+EXAMPLES
+  kolm vault set openai sk-... --label "prod"
+  kolm vault set anthropic - --scope team --team acme < anthropic.key
+  kolm vault list --team acme --json
 `,
   org: `kolm org - organization workspace management. An organization is the
 workspace; \`kolm org\` is an alias of \`kolm team\` and shares the same backend.
@@ -18141,8 +18180,52 @@ async function cmdJobs(args) {
     return;
   }
   // Otherwise treat sub as a job id.
+  const wantFollow = args.includes('--follow') || args.includes('-f');
   const j = jobs.get(sub);
-  if (!j) { console.error('unknown job: ' + sub); process.exit(EXIT.NOT_FOUND); }
+  // --follow: tail a job (local or server-side) to terminal status. Distill /
+  // compile jobs enqueued via the cloud live on the server, so when the id is
+  // not in the local registry we follow the server job (SSE, then polling).
+  if (wantFollow) {
+    if (!j) {
+      const c = loadConfig();
+      const st = await followJob(c, sub);
+      if (st === 'failed') process.exit(EXIT.EXECUTION);
+      return;
+    }
+    // Local job — tail its log file until the status record goes terminal.
+    const TERMINAL = new Set(['completed', 'failed', 'cancelled']);
+    console.log('# ' + j.id + '  (' + j.kind + ', following...)');
+    let lastLen = 0;
+    let lastStatus = null;
+    while (true) {
+      const cur = jobs.get(sub);
+      if (!cur) break;
+      if (cur.status !== lastStatus) { console.log('# status: ' + cur.status); lastStatus = cur.status; }
+      const tail = jobs.tailLog(sub, { bytes: 1 << 20 }) || '';
+      if (tail.length > lastLen) {
+        process.stdout.write(tail.slice(lastLen));
+        if (!tail.endsWith('\n')) process.stdout.write('\n');
+        lastLen = tail.length;
+      }
+      if (cur.status && TERMINAL.has(cur.status)) { console.log('# job ' + cur.status + '.'); if (cur.status === 'failed') process.exit(EXIT.EXECUTION); return; }
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    return;
+  }
+  if (!j) {
+    // Not in the local registry — it may be a server-side job id. Look it up.
+    const c = loadConfig();
+    try {
+      const rec = await api(c, 'GET', '/v1/jobs/' + encodeURIComponent(sub));
+      if (args.includes('--json')) { console.log(JSON.stringify(rec, null, 2)); return; }
+      console.log('# ' + (rec.id || sub) + '  (' + (rec.kind || '?') + ', ' + (rec.status || '?') + ')  [server]');
+      if (rec.log_tail) { console.log('---'); console.log(String(rec.log_tail).trimEnd()); }
+      return;
+    } catch (e) {
+      console.error('unknown job: ' + sub);
+      process.exit(EXIT.NOT_FOUND);
+    }
+  }
   if (args.includes('--json')) { console.log(JSON.stringify(j, null, 2)); return; }
   console.log('# ' + j.id + '  (' + j.kind + ', ' + j.status + ')');
   console.log('# log:   ' + j.log_path);
@@ -20385,8 +20468,14 @@ async function cmdRemote(args) {
     console.log(p.auth_env + '=');
     return;
   }
+  // `kolm remote quantize` - the non-local quantize lane commandFor() emits.
+  // Maps to the same worker as local quantize (cmdQuantizeLocalWorker); the
+  // remote framing routes the workload off the local box.
+  if (sub === 'quantize') {
+    return cmdQuantizeLocalWorker(args.slice(1));
+  }
   console.error('unknown subcommand: kolm remote ' + sub);
-  console.error('try: kolm remote {list, info, rank, recommend, plan, env}');
+  console.error('try: kolm remote {list, info, rank, recommend, plan, env, quantize}');
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -20523,9 +20612,44 @@ async function cmdMesh(args) {
 async function cmdMigrate(args) {
   if (maybeHelp('migrate', args)) return;
   const inPath = args.find(a => !a.startsWith('--'));
-  if (!inPath) {
-    console.error('usage: kolm migrate <spec.json> --out <out.json>');
-    process.exit(EXIT.BAD_ARGS);
+  const wantStatus = args.includes('--status');
+  const wantDryRun = args.includes('--dry-run');
+  const wantJson = args.includes('--json');
+  // Data-store migration runner. `kolm migrate` (no spec positional), plus the
+  // explicit --status / --dry-run flags, drive the first-class migration runner
+  // (src/migrations/index.js: runPendingMigrations / migrationStatus). The
+  // legacy `kolm migrate <spec.json> --out <out.json>` spec-rewrite path is
+  // preserved below and is selected whenever a spec file positional is given.
+  if (!inPath || wantStatus || wantDryRun) {
+    let mig;
+    try { mig = await import('../src/migrations/index.js'); }
+    catch (e) {
+      if (wantJson) { console.log(JSON.stringify({ ok: false, error: 'migrations_module_missing', detail: String(e && e.message || e) }, null, 2)); }
+      else console.error('error: migrations module unavailable: ' + (e && e.message || e));
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (wantStatus) {
+      const st = mig.migrationStatus();
+      if (wantJson) { console.log(JSON.stringify(st, null, 2)); return; }
+      console.log('migrations (' + st.migrations.length + '):');
+      for (const m of st.migrations) {
+        console.log('  ' + (m.applied ? '[applied]' : '[pending]') + ' ' + m.id);
+        console.log('      ' + m.description);
+      }
+      console.log('ledger rows: ' + st.ledger_rows);
+      return;
+    }
+    const result = await mig.runPendingMigrations({ dryRun: wantDryRun });
+    if (wantJson) { console.log(JSON.stringify(result, null, 2)); return; }
+    console.log(wantDryRun ? 'migrate --dry-run (no writes):' : 'migrate:');
+    for (const r of result.ran) {
+      if (r.error) console.log('  [error]   ' + r.id + ' - ' + r.error);
+      else console.log('  ' + (wantDryRun ? '[would-run]' : '[ran]    ') + ' ' + r.id + (r.stats ? '  ' + JSON.stringify(r.stats) : ''));
+    }
+    for (const id of result.skipped) console.log('  [skipped] ' + id + ' (already applied)');
+    if (!result.ran.length && !result.skipped.length) console.log('  (no migrations registered)');
+    if (result.ran.some((r) => r.error)) process.exit(EXIT.EXECUTION);
+    return;
   }
   if (!fs.existsSync(inPath)) {
     console.error('not found: ' + inPath + '\nhint: pass the full path to a kolm spec.json or .kolm file. Docs: /docs/cli/migrate');
@@ -22121,12 +22245,32 @@ async function cmdDistill(args) {
       process.exit(EXIT.BAD_ARGS);
     }
   }
+  // Ergonomic ordering knobs surfaced on the main distill verb. The default
+  // distill() path reads KOLM_DISTILL_CURRICULUM / KOLM_DISTILL_IMPORTANCE as a
+  // fallback, so env activation works today; these flags are the explicit CLI
+  // surface that thread through the request body to distill({curriculum,
+  // importance, ...}). The bare `--curriculum` flag is intercepted earlier (it
+  // routes to the dedicated curriculum subverb), so the ordering MODE is taken
+  // here from `--curriculum-mode <ascending|descending>`.
+  const curriculumModeFlag = pickFlag(args, '--curriculum-mode');
+  if (curriculumModeFlag && !['ascending', 'descending'].includes(curriculumModeFlag)) {
+    console.error(`error: --curriculum-mode must be one of: ascending, descending (got '${curriculumModeFlag}')`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const importanceFlag = args.includes('--importance');
+  // `--follow` (or a TTY) renders live progress after enqueue; `--no-follow`
+  // and `--json` keep the immediate-return behavior for scripting.
+  const wantJson = args.includes('--json');
+  const noFollow = args.includes('--no-follow') || wantJson;
+  const wantFollow = !noFollow && (args.includes('--follow') || (process.stdout && process.stdout.isTTY));
   const url = c.base.replace(/\/+$/, '') + '/v1/specialists/auto-distill';
   const body = { namespace: ns, base_model, target_size };
   if (classFlag) body.recipe_class = classFlag;
   if (tierFlag) body.hw_tier = tierFlag;
   if (targetFlag) body.output_target = targetFlag;
   if (multiDeviceArr) body.multi_device = multiDeviceArr;
+  if (curriculumModeFlag) body.curriculum = curriculumModeFlag;
+  if (importanceFlag) body.importance = true;
   // W787 — efficiency block in request body; the server's distill-pipeline
   // call passes these through normalizeEfficiencyOptions.
   if (precisionFlag) body.precision_mode = precisionFlag;
@@ -22148,20 +22292,47 @@ async function cmdDistill(args) {
   let j;
   try { j = JSON.parse(text); } catch { j = { _raw: text }; }
   if (!res.ok) {
-    if (res.status === 503 && j.error === 'distill_bridge_not_configured') {
-      console.error('distill is not yet enabled on this kolm cloud.');
-      console.error('  ' + (j.message || ''));
-      if (j.next_steps) console.error('  next: ' + j.next_steps);
-      process.exit(2);
-    }
+    // Real server contract for POST /v1/specialists/auto-distill. The distill
+    // path is always wired (the in-tree worker is the default), so there is no
+    // "distillation is gated / not enabled" state. The errors the route CAN
+    // return:
+    //   400 not enough captures   - real prerequisite (router.js ~18261)
+    //   422 VRAM preflight         - the chosen base/tier won't fit the GPU
+    //   503 trainer_bridge_not_configured - KOLM_TRAINER_BRIDGE_URL is set but
+    //                                        the bearer token env is missing
+    //   500 distill_bridge_spawn_failed   - the in-tree worker failed to spawn
     if (res.status === 400 && (j.error || '').startsWith('not enough')) {
       console.error(`namespace ${j.namespace}: ${j.count}/${j.threshold} pairs captured`);
       console.error(`  ${j.message || 'capture more before distill'}`);
-      process.exit(3);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (res.status === 422) {
+      // VRAM preflight envelope carries a human hint + the fitting detail.
+      console.error('error: this base model + hardware tier will not fit in VRAM.');
+      if (j.detail || j.message) console.error('  ' + (j.detail || j.message));
+      if (j.hint) console.error('  hint: ' + j.hint);
+      if (j.required_vram_gb != null) console.error(`  required ~${j.required_vram_gb} GB, tier provides ~${j.available_vram_gb != null ? j.available_vram_gb : '?'} GB`);
+      console.error('  try a smaller --target, a different --tier, or --precision int4.');
+      process.exit(EXIT.EXECUTION);
+    }
+    if (res.status === 503 && j.error === 'trainer_bridge_not_configured') {
+      console.error('error: the remote trainer bridge is configured but missing its bearer token.');
+      if (j.detail) console.error('  ' + j.detail);
+      if (j.hint) console.error('  hint: ' + j.hint);
+      process.exit(EXIT.EXECUTION);
+    }
+    if (res.status === 500 && j.error === 'distill_bridge_spawn_failed') {
+      console.error('error: the in-tree distill worker failed to start.');
+      if (j.message) console.error('  ' + j.message);
+      console.error('  hint: check `kolm doctor` and the worker logs under ~/.kolm/jobs/');
+      process.exit(EXIT.EXECUTION);
     }
     console.error(`error: http ${res.status} ${text.slice(0, 400)}`);
     process.exit(EXIT.EXECUTION);
   }
+  // 202 Accepted - the job was enqueued. The route returns
+  // {job_id, status, status_url/poll_url, bridge_source, ...}.
+  if (wantJson) { console.log(JSON.stringify(j, null, 2)); return; }
   console.log('distill job started.');
   console.log('  job_id:    ' + (j.job_id || '?'));
   console.log('  namespace: ' + j.namespace);
@@ -22170,6 +22341,105 @@ async function cmdDistill(args) {
   if (j.pair_count !== undefined) console.log('  pairs:     ' + j.pair_count);
   if (j.status_url || j.poll_url) console.log('  status:    ' + (j.status_url || j.poll_url));
   if (j.bridge_source) console.log('  source:    ' + j.bridge_source);
+  if (curriculumModeFlag) console.log('  curriculum: ' + curriculumModeFlag);
+  if (importanceFlag) console.log('  importance: on');
+  // Live progress: open the SSE stream (when the gateway exposes it) and render
+  // phase/loss lines, falling back to a poll loop on GET /v1/jobs/:id when SSE
+  // is unavailable. Scriptable callers (--json / --no-follow) skip this and get
+  // the immediate-return envelope above.
+  if (wantFollow && j.job_id) {
+    console.log('');
+    console.log('following job ' + j.job_id + ' (Ctrl-C to detach; job keeps running)...');
+    await followJob(c, j.job_id);
+  } else if (j.job_id) {
+    console.log('  follow:    kolm jobs ' + j.job_id + ' --follow');
+  }
+}
+
+// GW-1 consumer — follow a server-side distill/compile job to completion.
+// Tries the SSE stream first (GET /v1/jobs/:id/stream, text/event-stream); on
+// any failure (route absent, transport error) it falls back to polling
+// GET /v1/jobs/:id until the job reaches a terminal status. Renders phase/loss
+// lines as they arrive. Returns the final status string (or null on give-up).
+async function followJob(c, jobId, { pollMs = 2500, maxMs = 6 * 60 * 60 * 1000 } = {}) {
+  const base = c.base.replace(/\/+$/, '');
+  const TERMINAL = new Set(['completed', 'failed', 'cancelled']);
+  // 1) Attempt SSE.
+  try {
+    const streamUrl = base + '/v1/jobs/' + encodeURIComponent(jobId) + '/stream';
+    const res = await fetch(streamUrl, { headers: { Accept: 'text/event-stream', ...authHeaders(c) } });
+    const ctype = (res.headers.get('content-type') || '').toLowerCase();
+    if (res.ok && ctype.includes('text/event-stream') && res.body) {
+      let buf = '';
+      const decoder = new TextDecoder();
+      for await (const chunk of res.body) {
+        buf += typeof chunk === 'string' ? chunk : decoder.decode(chunk, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf('\n\n')) >= 0) {
+          const frame = buf.slice(0, nl);
+          buf = buf.slice(nl + 2);
+          const dataLine = frame.split(/\r?\n/).find((l) => l.startsWith('data:'));
+          if (!dataLine) continue;
+          const payload = dataLine.slice(5).trim();
+          if (!payload || payload === '[DONE]') continue;
+          let ev;
+          try { ev = JSON.parse(payload); } catch { continue; }
+          _renderJobEvent(ev);
+          const st = ev.status || ev.phase;
+          if (st && TERMINAL.has(st)) {
+            console.log('job ' + st + '.');
+            return st;
+          }
+        }
+      }
+      // Stream ended without a terminal frame — fall through to a final poll.
+    }
+  } catch (_) { /* SSE unavailable — fall back to polling */ }
+  // 2) Poll loop on GET /v1/jobs/:id.
+  let lastLogLen = 0;
+  let lastStatus = null;
+  const deadline = Date.now() + maxMs;
+  while (Date.now() < deadline) {
+    let rec;
+    try { rec = await api(c, 'GET', '/v1/jobs/' + encodeURIComponent(jobId)); }
+    catch (e) {
+      if (e && e.status === 404) { console.error('job not found: ' + jobId); return null; }
+      // transient network blip — keep polling.
+      await new Promise((r) => setTimeout(r, pollMs));
+      continue;
+    }
+    const status = rec.status || rec.state || null;
+    if (status && status !== lastStatus) { console.log('status: ' + status); lastStatus = status; }
+    const tail = rec.log_tail || '';
+    if (tail.length > lastLogLen) {
+      process.stdout.write(tail.slice(lastLogLen));
+      if (!tail.endsWith('\n')) process.stdout.write('\n');
+      lastLogLen = tail.length;
+    }
+    if (status && TERMINAL.has(status)) {
+      console.log('job ' + status + '.');
+      return status;
+    }
+    await new Promise((r) => setTimeout(r, pollMs));
+  }
+  console.error('follow timed out after ' + Math.round(maxMs / 60000) + 'm; check: kolm jobs ' + jobId);
+  return lastStatus;
+}
+
+// Render one SSE job event line (phase/loss/step or a status transition).
+function _renderJobEvent(ev) {
+  if (!ev || typeof ev !== 'object') return;
+  if (ev.phase === 'distill' || ev.loss != null || ev.step != null) {
+    const parts = [];
+    if (ev.step != null) parts.push('step=' + ev.step);
+    if (ev.loss != null) parts.push('loss=' + ev.loss);
+    if (ev.k_score != null) parts.push('k=' + ev.k_score);
+    console.log('  ' + (ev.phase || 'train') + ' ' + parts.join(' '));
+    return;
+  }
+  if (ev.phase) { console.log('  phase: ' + ev.phase + (ev.skipped ? ' (skipped)' : '')); return; }
+  if (ev.status) { console.log('  status: ' + ev.status); return; }
+  if (ev.log) { process.stdout.write(String(ev.log)); }
 }
 
 // W718 — kolm distill --teachers a,b,c --weights auto|equal|domain
@@ -22352,16 +22622,31 @@ async function cmdDistillOnPolicy(args) {
     const student = pickFlag(rest, '--student');
     const ns = pickFlag(rest, '--namespace') || 'default';
     const maxSteps = Number(pickFlag(rest, '--max-steps')) || 100;
+    // W713 - the in-repo white-box GKD trainer (train_gkd.py) REQUIRES a LOCAL
+    // teacher (it computes JSD over teacher logits). Surface --teacher so the
+    // operator can point at the teacher; without it (and no $KOLM_ONPOLICY_TEACHER)
+    // trainOnPolicy returns {ok:false, error:'teacher_required'} with a hint.
+    const teacherPath = pickFlag(rest, '--teacher') || null;
     if (!pairs || !student) {
-      console.error('usage: kolm distill onpolicy train --pairs <jsonl> --student <path> [--namespace ns] [--max-steps N] [--json]');
+      console.error('usage: kolm distill onpolicy train --pairs <jsonl> --student <path> [--teacher <path|id>] [--namespace ns] [--max-steps N] [--json]');
+      console.error('  --teacher: LOCAL teacher model (path/id) required for white-box GKD; for black-box API teachers use --ropd.');
       process.exit(EXIT.BAD_ARGS);
     }
     const { trainOnPolicy } = await import('../src/distill-onpolicy.js');
-    const out = trainOnPolicy({ pairsPath: pairs, studentPath: student, namespace: ns, maxSteps });
+    const out = trainOnPolicy({ pairsPath: pairs, studentPath: student, teacherPath, namespace: ns, maxSteps });
     console.log(JSON.stringify(out, null, 2));
+    if (!out.ok && out.error === 'teacher_required') {
+      console.error('');
+      console.error('error: white-box on-policy distillation (GKD) needs a LOCAL teacher.');
+      console.error('  pass --teacher <path|id> or set $KOLM_ONPOLICY_TEACHER.');
+      console.error('  for black-box API teachers (text only, no logits), use: kolm distill onpolicy --ropd ...');
+    } else if (out.ok && !rest.includes('--json')) {
+      if (out.trainer_source) console.error('  trainer_source: ' + out.trainer_source);
+      if (out.teacher) console.error('  teacher:        ' + out.teacher);
+    }
     process.exit(out.ok ? 0 : 3);
   }
-  console.error(`usage: kolm distill onpolicy {doctor|train [--pairs <jsonl> --student <path>]}`);
+  console.error(`usage: kolm distill onpolicy {doctor|train [--pairs <jsonl> --student <path> --teacher <path|id>]}`);
   console.error(`       kolm distill onpolicy --ropd {doctor|train --seeds <jsonl> --student <path>}  (black-box on-policy KD, arXiv:2605.07396)`);
   process.exit(EXIT.BAD_ARGS);
 }
@@ -22449,13 +22734,28 @@ async function cmdDistillPreference(args, verbName = 'preference') {
     const objective = pickFlag(train_args, '--objective') || (verbName === 'dpo' || verbName === 'simpo' ? verbName : 'dpo');
     const ns = pickFlag(train_args, '--namespace') || 'default';
     const beta = Number(pickFlag(train_args, '--beta')) || 0.1;
+    // W713 - the in-repo K-score trainer defaults to kscoreReward=true (the
+    // reward used at train time IS the K-score gate used at eval time -
+    // train-eval parity). `--reward-source kscore|trl_default` is the explicit
+    // knob; trl_default falls back to TRL's built-in preference reward.
+    const rewardSourceFlag = (pickFlag(train_args, '--reward-source') || '').toLowerCase();
+    if (rewardSourceFlag && !['kscore', 'trl_default'].includes(rewardSourceFlag)) {
+      console.error("error: --reward-source must be one of: kscore, trl_default (got '" + rewardSourceFlag + "')");
+      process.exit(EXIT.BAD_ARGS);
+    }
     if (!pairs || !student) {
-      console.error(`usage: kolm distill ${verbName === 'preference' ? 'preference train' : verbName} --pairs <jsonl> --student <path> [--objective dpo|simpo|orpo|kto] [--beta 0.1] [--namespace ns] [--json]`);
+      console.error(`usage: kolm distill ${verbName === 'preference' ? 'preference train' : verbName} --pairs <jsonl> --student <path> [--objective dpo|simpo|orpo|kto] [--beta 0.1] [--reward-source kscore|trl_default] [--namespace ns] [--json]`);
       process.exit(EXIT.BAD_ARGS);
     }
     const { trainPreference } = await import('../src/distill-preference.js');
-    const out = trainPreference({ pairsPath: pairs, studentPath: student, objective, namespace: ns, beta });
+    const prefOpts = { pairsPath: pairs, studentPath: student, objective, namespace: ns, beta };
+    if (rewardSourceFlag) prefOpts.kscoreReward = (rewardSourceFlag === 'kscore');
+    const out = trainPreference(prefOpts);
     console.log(JSON.stringify(out, null, 2));
+    if (out.ok && !train_args.includes('--json')) {
+      if (out.reward_source) console.error('  reward_source:  ' + out.reward_source + (out.reward_source === 'kscore' ? '  (train-eval parity)' : ''));
+      if (out.trainer_source) console.error('  trainer_source: ' + out.trainer_source);
+    }
     process.exit(out.ok ? 0 : 3);
   }
   console.error(`usage: kolm distill preference {doctor|mine [--in <rows.jsonl> --out <pairs.jsonl>]|train [--pairs <jsonl> --student <path> --objective dpo|simpo|orpo|kto]}`);
@@ -22708,13 +23008,33 @@ async function cmdSpecDecode(args) {
     const base = pickFlag(rest, '--base');
     const draft = pickFlag(rest, '--draft-kind') || 'eagle3';
     const ns = pickFlag(rest, '--namespace') || 'default';
+    // W713 - in-repo train_specdecode.py default. --draft-model pins the EAGLE
+    // draft (auto-picked from DRAFT_PAIRINGS when omitted); --medusa-heads sets
+    // the Medusa head count.
+    const draftModel = pickFlag(rest, '--draft-model') || null;
+    const medusaHeadsRaw = pickFlag(rest, '--medusa-heads');
+    let medusaHeads;
+    if (medusaHeadsRaw != null) {
+      medusaHeads = Number(medusaHeadsRaw);
+      if (!Number.isInteger(medusaHeads) || medusaHeads <= 0) {
+        console.error("error: --medusa-heads must be a positive integer (got '" + medusaHeadsRaw + "')");
+        process.exit(EXIT.BAD_ARGS);
+      }
+    }
     if (!pairs || !base) {
-      console.error('usage: kolm spec-decode train --pairs <jsonl> --base <path> [--draft-kind eagle|eagle2|eagle3|medusa] [--namespace ns] [--json]');
+      console.error('usage: kolm spec-decode train --pairs <jsonl> --base <path> [--draft-kind eagle|eagle2|eagle3|medusa] [--draft-model <id>] [--medusa-heads N] [--namespace ns] [--json]');
       process.exit(EXIT.BAD_ARGS);
     }
     const { trainSpecDecode } = await import('../src/spec-decode.js');
-    const out = trainSpecDecode({ pairsPath: pairs, basePath: base, draftKind: draft, namespace: ns });
+    const sdOpts = { pairsPath: pairs, basePath: base, draftKind: draft, namespace: ns };
+    if (draftModel) sdOpts.draftModel = draftModel;
+    if (medusaHeads != null) sdOpts.medusaHeads = medusaHeads;
+    const out = trainSpecDecode(sdOpts);
     console.log(JSON.stringify(out, null, 2));
+    if (out.ok && !rest.includes('--json')) {
+      if (out.trainer_source) console.error('  trainer_source: ' + out.trainer_source);
+      if (out.manifest && out.manifest.draft_model) console.error('  draft_model:    ' + out.manifest.draft_model);
+    }
     process.exit(out.ok ? 0 : 3);
   }
   console.error('usage: kolm spec-decode {doctor|train [--pairs <jsonl> --base <path>]}');
@@ -23009,24 +23329,31 @@ async function cmdDistillFromCaptures(args) {
   const text = await res.text();
   let j; try { j = JSON.parse(text); } catch { j = { _raw: text }; }
   if (!res.ok) {
-    if (res.status === 503 && j.error === 'capture_store_unavailable') {
+    // Real server contract for POST /v1/distill/from-captures. The route always
+    // produces a job (the in-tree worker is the fall-through), so there is no
+    // "bridge not configured / gated" state. The errors it CAN return:
+    //   503 capture_store_unavailable | capture_store_ephemeral
+    //   400 not_enough_captures (real prerequisite, router.js ~16684)
+    //   400 no_cluster (recipe mode: best cluster < 4)
+    //   400 synthesize_failed (recipe synthesis error)
+    if (res.status === 503 && (j.error === 'capture_store_unavailable' || j.error === 'capture_store_ephemeral')) {
       console.error('capture store unavailable (set KOLM_STORE_DRIVER + durable storage).');
+      if (j.message) console.error('  ' + j.message);
       process.exit(EXIT.EXECUTION);
-    }
-    if (res.status === 503 && j.error === 'distill_bridge_not_configured') {
-      console.error('specialist bridge not configured (KOLM_TRAINER_BRIDGE_URL unset).');
-      console.error('  ' + (j.message || ''));
-      process.exit(2);
     }
     if (res.status === 400 && j.error === 'not_enough_captures') {
       console.error(`namespace ${ns}: ${j.count || 0}/${j.min_pairs || 4} pairs captured`);
       console.error('  ' + (j.message || 'capture more before distill'));
-      process.exit(3);
+      process.exit(EXIT.MISSING_PREREQ);
     }
     if (res.status === 400 && j.error === 'no_cluster') {
       console.error(`namespace ${ns}: best template-hash cluster has < 4 pairs`);
       console.error('  ' + (j.message || 'increase capture variety or capture more'));
-      process.exit(3);
+      process.exit(EXIT.MISSING_PREREQ);
+    }
+    if (res.status === 400 && j.error === 'synthesize_failed') {
+      console.error('recipe synthesis failed: ' + (j.message || 'unknown'));
+      process.exit(EXIT.EXECUTION);
     }
     console.error(`error: http ${res.status} ${text.slice(0, 400)}`);
     process.exit(EXIT.EXECUTION);
@@ -25891,7 +26218,57 @@ async function cmdTrainPlan(args) {
   if (!positional) { console.error('error: kolm train plan <dataset_id|path|ds_*>'); process.exit(EXIT.BAD_ARGS); }
   const wantJson = args.includes('--json');
   const includeStrategy = args.includes('--strategy') || args.includes('--distill-strategy');
-  const p = await planner.plan(positional);
+  // Data-budget projection inputs. planner.plan() renders the scaling-law budget
+  // (data_budget_recommended / projected_kscore_at_current_n /
+  // marginal_gain_per_1k_examples) when given >=4 (n_pairs, K) observations and a
+  // target K. History can be passed inline (--kscore-history n:k,n:k,...) OR
+  // sourced from the K-score time-series via an injectable loadScalingPoints; the
+  // target comes from --target-kscore (else the planner default).
+  const planOpts = {};
+  const targetKFlag = pickFlag(args, '--target-kscore') || pickFlag(args, '--target-k');
+  if (targetKFlag != null) {
+    const tk = Number(targetKFlag);
+    if (!Number.isFinite(tk) || tk <= 0 || tk > 1) {
+      console.error("error: --target-kscore must be in (0,1] (got '" + targetKFlag + "')");
+      process.exit(EXIT.BAD_ARGS);
+    }
+    planOpts.target_kscore = tk;
+  }
+  const historyFlag = pickFlag(args, '--kscore-history');
+  if (historyFlag) {
+    // Parse "n:k,n:k,..." into [{n_pairs, k}, ...]. A bad pair fails loud.
+    const pts = [];
+    for (const tok of String(historyFlag).split(',').map((s) => s.trim()).filter(Boolean)) {
+      const [nRaw, kRaw] = tok.split(':');
+      const n = Number(nRaw); const k = Number(kRaw);
+      if (!Number.isFinite(n) || !Number.isFinite(k)) {
+        console.error("error: --kscore-history entries must be n:k (got '" + tok + "')");
+        process.exit(EXIT.BAD_ARGS);
+      }
+      pts.push({ n_pairs: n, k });
+    }
+    planOpts.kscore_history = pts;
+  } else {
+    // No inline history: provide an injectable loader that sources points from
+    // the K-score time-series (src/kscore-timeseries.getKScoreSeries). The
+    // namespace n_pairs join (CaptureData lane) is best-effort here - when a
+    // point carries no n_pairs the planner treats the series as insufficient
+    // and falls through to the basis:'rectified'/'insufficient' budget block.
+    planOpts.tenant = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || 'local';
+    planOpts.namespace = pickFlag(args, '--namespace') || positional;
+    planOpts.loadScalingPoints = async ({ tenant, namespace }) => {
+      try {
+        const ts = await import('../src/kscore-timeseries.js');
+        const series = await ts.getKScoreSeries({ tenant, namespace });
+        if (!series || !series.ok || !Array.isArray(series.points)) return [];
+        // Map to the planner shape; carry n_pairs when the point recorded it.
+        return series.points
+          .map((pt) => ({ n_pairs: pt.n_pairs != null ? Number(pt.n_pairs) : null, k: Number(pt.kscore) }))
+          .filter((pt) => Number.isFinite(pt.k) && Number.isFinite(pt.n_pairs));
+      } catch { return []; }
+    };
+  }
+  const p = await planner.plan(positional, planOpts);
   if (includeStrategy) {
     const strategy = await import('../src/distill-strategy.js');
     const s = strategy.planDistillStrategy({
@@ -30927,6 +31304,48 @@ async function cmdOrg(args) {
   return cmdTeam(args);
 }
 
+// Cloud team role fence. The cloud /v1/teams backend accepts only
+// {viewer, member, admin}; {reviewer, contributor} are local-workspace roles.
+// Returns true when the role is valid for a cloud op; prints an actionable
+// message and returns false otherwise (caller exits BAD_ARGS).
+const CLOUD_TEAM_ROLES = ['viewer', 'member', 'admin'];
+function assertCloudTeamRole(role) {
+  if (CLOUD_TEAM_ROLES.includes(role)) return true;
+  if (role === 'reviewer' || role === 'contributor') {
+    console.error(`error: '${role}' is a local-workspace role; cloud team roles are ${CLOUD_TEAM_ROLES.join('|')}.`);
+    console.error("  hint: use --role admin for write/approve access, or run the local workspace path");
+    console.error("        (kolm team invite <email> --role " + role + ") which understands reviewer/contributor.");
+    return false;
+  }
+  console.error(`error: unknown cloud team role '${role}'. valid: ${CLOUD_TEAM_ROLES.join(', ')}.`);
+  return false;
+}
+
+// Print the departed-member key-rotation prompt + pending team events from a
+// teamDetail() envelope (the cloud GET /v1/teams/:slug response merges
+// rotate_shared_keys + pending_events). Surfaces the rotation recommendation in
+// the terminal so an operator sees it right after a member is removed.
+function printTeamEvents(detail) {
+  if (!detail || typeof detail !== 'object') return;
+  const rot = detail.rotate_shared_keys;
+  if (rot && rot.recommended) {
+    console.log('');
+    console.log('!  shared provider key rotation recommended');
+    if (rot.reason) console.log('   reason: ' + rot.reason);
+    if (rot.since) console.log('   since:  ' + rot.since);
+    console.log('   run:    kolm team rotate-keys ' + (detail.slug || '<slug>'));
+  }
+  const pending = Array.isArray(detail.pending_events) ? detail.pending_events : [];
+  if (pending.length) {
+    console.log('');
+    console.log('pending events (' + pending.length + '):');
+    for (const e of pending.slice(0, 10)) {
+      console.log('  - ' + (e.type || 'event').padEnd(36) + ' ' + (e.created_at || ''));
+    }
+    if (pending.length > 10) console.log('  ... and ' + (pending.length - 10) + ' more');
+  }
+}
+
 async function cmdTeam(args) {
   // W384 — accept flags before the sub: scan for the first positional.
   const sub = args.find(a => !a.startsWith('-')) ?? args[0];
@@ -31002,11 +31421,62 @@ async function cmdTeam(args) {
     console.log(JSON.stringify(r, null, 2));
     return;
   }
+  // `kolm team events <slug>` - the pending team events (incl. the departed-
+  // member key-rotation prompt) the dashboard shows, surfaced in the terminal.
+  if (sub === 'events') {
+    const slug = rest[0];
+    if (!slug) { console.error('error: slug required'); process.exit(EXIT.BAD_ARGS); }
+    const r = await api(c, 'GET', '/v1/teams/' + encodeURIComponent(slug));
+    if (rest.includes('--json')) {
+      console.log(JSON.stringify({ slug, rotate_shared_keys: r.rotate_shared_keys || null, pending_events: r.pending_events || [] }, null, 2));
+      return;
+    }
+    const pending = Array.isArray(r.pending_events) ? r.pending_events : [];
+    const rot = r.rotate_shared_keys;
+    if (!(rot && rot.recommended) && !pending.length) { console.log('(no pending team events)'); return; }
+    printTeamEvents(r);
+    return;
+  }
+  // `kolm team rotate-keys <slug>` - act on the rotation recommendation. Routes
+  // to the team-scoped provider-key delete (team admins clear shared keys so
+  // members re-store fresh ones), then acknowledges the rotation event so the
+  // prompt clears. The recommendation itself is computed server-side; this verb
+  // surfaces + actions it.
+  if (sub === 'rotate-keys') {
+    const slug = rest[0];
+    if (!slug) { console.error('error: slug required'); process.exit(EXIT.BAD_ARGS); }
+    const detail = await api(c, 'GET', '/v1/teams/' + encodeURIComponent(slug));
+    const rot = detail.rotate_shared_keys;
+    if (!(rot && rot.recommended)) {
+      console.log('no key rotation is currently recommended for ' + slug + '.');
+      return;
+    }
+    console.log('shared provider key rotation recommended for ' + slug + '.');
+    if (rot.reason) console.log('  reason: ' + rot.reason);
+    console.log('  to rotate: list the team keys and re-store fresh ones:');
+    console.log('    kolm vault list --team ' + slug);
+    console.log('    kolm vault rm <id> --team ' + slug + '   # remove the exposed shared key(s)');
+    console.log('    kolm vault set <provider> <new-key> --scope team --team ' + slug);
+    if (rot.event_id) {
+      // Acknowledge the rotation event so the dashboard/CLI prompt clears once
+      // the operator has been shown the steps. Best-effort: a missing ack route
+      // must not fail the command.
+      try { await api(c, 'POST', '/v1/teams/' + encodeURIComponent(slug) + '/events/' + encodeURIComponent(rot.event_id) + '/ack', {}); console.log('  (rotation prompt acknowledged)'); }
+      catch (_) { /* ack route optional; recommendation re-surfaces until acted on */ }
+    }
+    return;
+  }
   if (sub === 'invite') {
     const slug = rest[0];
     const email = rest[1];
     const role = flag(rest, '--role') || 'member';
     if (!slug || !email) { console.error('error: slug + email required'); process.exit(EXIT.BAD_ARGS); }
+    // Role vocabulary fence: the cloud /v1/teams backend understands only
+    // {viewer, member, admin}. The local workspace (W384, cmdTeamLocal) adds
+    // {reviewer, contributor}. Reject the local-only roles here with a clear
+    // message rather than letting the server silently coerce an unknown role to
+    // 'member' (an invisible privilege misconfiguration).
+    if (!assertCloudTeamRole(role)) process.exit(EXIT.BAD_ARGS);
     const r = await api(c, 'POST', `/v1/teams/${encodeURIComponent(slug)}/invite`, { email, role });
     console.log(`invited ${email} as ${r.role}`);
     console.log(`send this link:  ${r.accept_url}`);
@@ -31028,11 +31498,15 @@ async function cmdTeam(args) {
     for (const m of r.members || []) {
       console.log(`${(m.tenant_id || '').padEnd(28)} ${(m.role || '').padEnd(8)} joined ${m.joined_at || ''}`);
     }
+    // Surface the rotation recommendation + pending events alongside the roster
+    // so an operator sees the departed-member prompt without a separate poll.
+    printTeamEvents(r);
     return;
   }
   if (sub === 'role') {
     const [slug, tenantId, newRole] = rest;
     if (!slug || !tenantId || !newRole) { console.error('error: slug + tenant_id + role required'); process.exit(EXIT.BAD_ARGS); }
+    if (!assertCloudTeamRole(newRole)) process.exit(EXIT.BAD_ARGS);
     await api(c, 'PATCH', `/v1/teams/${encodeURIComponent(slug)}/members/${encodeURIComponent(tenantId)}`, { role: newRole });
     console.log(`role updated: ${tenantId} -> ${newRole}`);
     return;
@@ -31042,6 +31516,12 @@ async function cmdTeam(args) {
     if (!slug || !tenantId) { console.error('error: slug + tenant_id required'); process.exit(EXIT.BAD_ARGS); }
     await api(c, 'DELETE', `/v1/teams/${encodeURIComponent(slug)}/members/${encodeURIComponent(tenantId)}`);
     console.log(`removed: ${tenantId}`);
+    // Re-read the team so a key-rotation recommendation triggered by the
+    // departure is shown immediately in the terminal.
+    try {
+      const detail = await api(c, 'GET', '/v1/teams/' + encodeURIComponent(slug));
+      printTeamEvents(detail);
+    } catch (_) { /* best-effort surfacing; removal already succeeded */ }
     return;
   }
   if (sub === 'transfer') {
@@ -31059,7 +31539,123 @@ async function cmdTeam(args) {
     return;
   }
   console.error('unknown team subcommand:', sub);
+  console.error('  cloud: create|list|show|invite|accept|members|role|remove|transfer|delete|events|rotate-keys');
   process.exit(EXIT.BAD_ARGS);
+}
+
+// ---------- kolm vault (provider-key vault) ----------
+// Scriptable surface over the provider-key vault: store your OpenAI/Anthropic/
+// etc. key centrally (member- or team-scoped), the gateway routes your traffic
+// under it, and the call lands in the team lake attributed to you. Delegates to
+// /v1/account/provider-keys with the x-kolm-team header for team scope. Without
+// this, the flagship Teams capability could only be driven via raw HTTP.
+//
+// Supported providers are validated CLI-side against the same list the server
+// advertises (providerVault.supportedProviders()) so a typo dies before the
+// round-trip. The raw secret is read from argv/stdin and never written to a file
+// by the CLI.
+const VAULT_PROVIDERS = ['openai', 'anthropic', 'google', 'openrouter', 'groq', 'together', 'fireworks', 'deepseek', 'mistral', 'cohere'];
+async function cmdVault(args) {
+  if (args.includes('--help') || args.includes('-h') || args[0] === 'help') {
+    console.log('usage: kolm vault <list|set|rm> [options]');
+    console.log('  list [--team <slug>] [--json]');
+    console.log('  set <provider> <key> [--scope member|team --team <slug> --label <text>]');
+    console.log('  rm <id> [--team <slug>]');
+    console.log('  providers: ' + VAULT_PROVIDERS.join(', '));
+    return;
+  }
+  const c = loadConfig();
+  const sub = args.find((a) => !a.startsWith('-')) || 'list';
+  const subIdx = sub ? args.indexOf(sub) : -1;
+  const rest = subIdx >= 0 ? args.slice(subIdx + 1) : args.slice(1);
+  const wantJson = args.includes('--json');
+  const team = pickFlag(args, '--team') || null;
+  const teamHeader = team ? { 'x-kolm-team': team } : {};
+  if (!c.api_key) { console.error('not logged in. run: kolm login'); process.exit(EXIT.MISSING_PREREQ); }
+
+  if (sub === 'list' || sub === 'ls') {
+    const qs = team ? ('?team_id=' + encodeURIComponent(team)) : '';
+    const r = await apiH(c, 'GET', '/v1/account/provider-keys' + qs, null, teamHeader);
+    if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+    const keys = r.keys || [];
+    if (!keys.length) { console.log('(no provider keys' + (team ? ' for team ' + team : '') + '; add one with `kolm vault set <provider> <key>`)'); return; }
+    for (const k of keys) {
+      console.log(
+        (k.provider || '?').padEnd(12) +
+        ' ' + (k.scope || 'member').padEnd(7) +
+        ' ' + (k.key_prefix || '').padEnd(14) +
+        ' ' + (k.id || '').padEnd(24) +
+        ' ' + (k.label || ''));
+    }
+    return;
+  }
+
+  if (sub === 'set' || sub === 'add') {
+    const provider = (rest.find((a) => !a.startsWith('-')) || '').toLowerCase();
+    const posAfterProvider = rest.filter((a) => !a.startsWith('-'));
+    let value = posAfterProvider[1] || null;
+    const scope = (pickFlag(args, '--scope') || 'member').toLowerCase();
+    const label = pickFlag(args, '--label') || '';
+    if (!provider) {
+      console.error('usage: kolm vault set <provider> <key> [--scope member|team --team <slug> --label <text>]');
+      console.error('  providers: ' + VAULT_PROVIDERS.join(', '));
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!VAULT_PROVIDERS.includes(provider)) {
+      console.error(`error: unknown provider '${provider}'. valid: ${VAULT_PROVIDERS.join(', ')}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!['member', 'team'].includes(scope)) {
+      console.error("error: --scope must be one of: member, team (got '" + scope + "')");
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (scope === 'team' && !team) {
+      console.error('error: --scope team requires --team <slug>');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    // Read the secret from stdin when not on argv, so it never lands in shell
+    // history. `kolm vault set openai - --scope member < key.txt` or piped.
+    if (!value || value === '-') {
+      value = await readStdinSecret();
+      if (!value) { console.error('error: no key provided (pass on argv or pipe via stdin)'); process.exit(EXIT.BAD_ARGS); }
+    }
+    const body = { provider, value, scope, label };
+    if (team) body.team_id = team;
+    const r = await apiH(c, 'POST', '/v1/account/provider-keys', body, teamHeader);
+    if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+    const k = r.key || {};
+    console.log('stored ' + (k.provider || provider) + ' key (' + (k.scope || scope) + ') ' + (k.key_prefix || ''));
+    console.log('  id: ' + (k.id || '?'));
+    if (scope === 'team') console.log('  team: ' + team + ' (any active member routes under this key)');
+    return;
+  }
+
+  if (sub === 'rm' || sub === 'remove' || sub === 'delete') {
+    const id = rest.find((a) => !a.startsWith('-'));
+    if (!id) { console.error('usage: kolm vault rm <id> [--team <slug>]'); process.exit(EXIT.BAD_ARGS); }
+    const qs = team ? ('?team_id=' + encodeURIComponent(team)) : '';
+    const r = await apiH(c, 'DELETE', '/v1/account/provider-keys/' + encodeURIComponent(id) + qs, null, teamHeader);
+    if (wantJson) { console.log(JSON.stringify(r, null, 2)); return; }
+    console.log('removed key ' + id);
+    return;
+  }
+
+  console.error('unknown vault subcommand: ' + sub);
+  console.error('  usage: kolm vault <list|set|rm> [--team <slug>]');
+  process.exit(EXIT.BAD_ARGS);
+}
+
+// Read a single-line secret from stdin (for `kolm vault set <provider> -`). Returns
+// the trimmed value, or '' when stdin is a TTY / empty.
+function readStdinSecret() {
+  return new Promise((resolve) => {
+    if (process.stdin.isTTY) { resolve(''); return; }
+    let buf = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (d) => { buf += d; });
+    process.stdin.on('end', () => resolve(buf.split(/\r?\n/)[0].trim()));
+    process.stdin.on('error', () => resolve(''));
+  });
 }
 
 // ---------- kolm tunnel ----------
@@ -31811,7 +32407,58 @@ async function cmdCloud(args) {
     console.error('unknown cloud distill subcommand:', sub2);
     process.exit(EXIT.BAD_ARGS);
   }
+  // `kolm cloud run` - the EXECUTION path behind the broker. planCloudCompute
+  // (via `kolm cloud broker`) is the dry-run quote; this verb hands the plan to
+  // runCloudCompute, which actually spends only when --confirm is passed
+  // (mirrors rent(): no --confirm -> dry-run handle, never a fake job).
+  if (sub === 'run') {
+    const wantJson = rest.includes('--json');
+    const broker = await import('../src/cloud-compute-broker.js');
+    const profile = {
+      workload: flag(rest, '--workload') || flag(rest, '--mode') || 'train',
+      privacy: flag(rest, '--privacy') || 'standard',
+      name: flag(rest, '--name') || 'kolm-job',
+      artifact: flag(rest, '--artifact') || 'artifact',
+      base_model: flag(rest, '--base') || flag(rest, '--base-model') || flag(rest, '--model') || 'Qwen/Qwen2.5-7B-Instruct',
+      dataset: flag(rest, '--seeds') || flag(rest, '--dataset') || 'seeds.jsonl',
+      params_b: Number(flag(rest, '--params-b') || 7),
+      rows: Number(flag(rest, '--rows') || 1000),
+      budget_usd: Number(flag(rest, '--budget') || flag(rest, '--budget-usd') || 0),
+      context_tokens: Number(flag(rest, '--context') || 8192),
+      no_local_gpu: rest.includes('--no-local-gpu'),
+    };
+    const confirm = rest.includes('--confirm');
+    const out = await broker.runCloudCompute(profile, {
+      env: process.env,
+      confirm,
+      budget_usd: profile.budget_usd || null,
+    });
+    if (wantJson) { console.log(JSON.stringify(out, null, 2)); process.exit(out.ok ? 0 : EXIT.EXECUTION); }
+    if (!out.ok) {
+      console.error('cloud run: ' + (out.reason || 'failed'));
+      if (Array.isArray(out.blockers) && out.blockers.length) console.error('  blockers: ' + out.blockers.join(', '));
+      if (out.next_command) console.error('  next: ' + out.next_command);
+      process.exit(EXIT.EXECUTION);
+    }
+    console.log('cloud run: ' + (out.dry_run ? 'dry-run quote (pass --confirm to spend)' : 'submitted'));
+    console.log('  lane:    ' + (out.lane || '(none)'));
+    console.log('  backend: ' + (out.backend || '(none)'));
+    console.log('  mode:    ' + (out.mode || '(none)'));
+    if (out.command) console.log('  command: ' + out.command);
+    if (out.job && out.job.id) console.log('  job:     ' + out.job.id);
+    if (out.dry_run) console.log('  (no spend - add --confirm to execute)');
+    return;
+  }
+  // `kolm cloud quantize` / `kolm remote quantize` - the non-local quantize
+  // lane that commandFor() emits. Maps to the same worker as local quantize
+  // (cmdQuantizeLocalWorker); the cloud/remote framing is for routing the
+  // workload off the local box via the broker-selected backend.
+  if (sub === 'quantize') {
+    return cmdQuantizeLocalWorker(rest);
+  }
   console.error('unknown cloud subcommand:', sub);
+  console.error('  run [--workload train|quantize --confirm]  execute the broker-recommended lane (dry-run without --confirm)');
+  console.error('  quantize ...                                non-local quantize lane');
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -33690,7 +34337,7 @@ function looksLikeNaturalLanguage(cmd, rest) {
 const COMPLETION_VERBS = [
   'init', 'signup', 'login', 'logout', 'whoami', 'artifacts', 'artifact', 'status', 'health', 'metrics', 'changelog', 'billing', 'support-bundle', 'key', 'new', 'build', 'compile', 'train', 'make', 'ship', 'run', 'eval', 'benchmark', 'bench',
   'score', 'list', 'ls', 'inspect', 'eject', 'diff', 'verify', 'serve', 'tui', 'repl', 'publish', 'pull', 'hub', 'capture', 'labels', 'distill', 'moe', 'tokenize',
-  'config', 'hmac', 'install', 'tune', 'rag', 'team', 'tunnel', 'cloud', 'airgap',
+  'config', 'hmac', 'install', 'tune', 'rag', 'team', 'vault', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
   'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'media', 'reinject', 'improve', 'instant', 'extract', 'doc',
   'surfaces',
@@ -34673,9 +35320,21 @@ async function cmdPipeline(args) {
         console.log('--since-last-compile: no prior artifact found for namespace ' + namespace + '; running full compile');
       }
     }
+    // --curriculum-mode validation (ascending|descending) before the pipeline.
+    const curriculumModeRaw = pickFlag(rest, '--curriculum-mode') || pickFlagEq(rest, '--curriculum-mode') || null;
+    if (curriculumModeRaw && !['ascending', 'descending'].includes(curriculumModeRaw)) {
+      if (wantJson) { jsonErr("--curriculum-mode must be ascending|descending (got '" + curriculumModeRaw + "')", 'bad_args'); process.exit(EXIT.BAD_ARGS); }
+      console.error("error: --curriculum-mode must be ascending|descending (got '" + curriculumModeRaw + "')");
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const minhashRaw = pickFlag(rest, '--curate-minhash-threshold') || pickFlagEq(rest, '--curate-minhash-threshold') || null;
     const opts = {
       strict: args.includes('--strict'),
       force: args.includes('--force'),
+      // W808-BLOCK - --force-promote downgrades a blocking regression_gate
+      // verdict to a logged warning (distinct from the legacy --force which
+      // also relaxes the productionReady verdict). compileFull reads both.
+      force_promote: args.includes('--force-promote'),
       no_sign: args.includes('--no-sign'),
       no_install: args.includes('--no-install'),
       // Wave 409c — explicit overrides for the no-stub / no-synthetic defaults.
@@ -34687,26 +35346,71 @@ async function cmdPipeline(args) {
       max_steps: parseInt(pickFlag(rest, '--max-steps') || pickFlagEq(rest, '--max-steps') || '200', 10) || 200,
       // W439 — incremental retrain window (null = full namespace).
       since: sinceIso,
+      // CA-01 eval-gate baseline: compare the candidate against the real
+      // incumbent (artifact path or a bare K-score).
+      baseline: pickFlag(rest, '--baseline') || pickFlagEq(rest, '--baseline') || null,
+      // Default curation sub-phase is ON; --no-curate skips it. Curriculum
+      // ordering of the train split is ON; --no-curriculum skips it. --auto
+      // unlocks the heavy curate stages (augment / synthesize / active-learning).
+      curate: !args.includes('--no-curate'),
+      curriculum: !args.includes('--no-curriculum'),
+      auto: args.includes('--auto'),
     };
+    if (curriculumModeRaw) opts.curriculum_mode = curriculumModeRaw;
+    if (minhashRaw != null) {
+      const mh = Number(minhashRaw);
+      if (!Number.isFinite(mh) || mh <= 0 || mh > 1) {
+        if (wantJson) { jsonErr('--curate-minhash-threshold must be in (0,1]', 'bad_args'); process.exit(EXIT.BAD_ARGS); }
+        console.error('error: --curate-minhash-threshold must be in (0,1] (got ' + minhashRaw + ')');
+        process.exit(EXIT.BAD_ARGS);
+      }
+      opts.curate_minhash_threshold = mh;
+    }
+    const forced = opts.force || opts.force_promote;
     const phases = [];
     let done = null;
+    let regressionGate = null;
     try {
       for await (const ev of pipe.compileFull({ namespace, opts })) {
         phases.push(ev);
         if (ev.phase === 'done') done = ev;
+        if (ev.phase === 'regression_gate') regressionGate = ev;
         if (!wantJson) {
           const summary = ev.phase === 'distill'
             ? 'distill step=' + ev.step + ' loss=' + ev.loss + ' k=' + ev.k_score
-            : ev.phase + (ev.skipped ? ' (skipped)' : '');
+            : ev.phase + (ev.skipped ? ' (skipped)' : '')
+              + (ev.phase === 'regression_gate' ? ' verdict=' + (ev.w808_verdict || ev.eval_gate || '?') + (ev.blocked ? ' BLOCKED' : '') : '');
           console.log(summary);
         }
       }
-      if (wantJson) { jsonOk({ phases, done, pipeline_phases: pipe.PIPELINE_PHASES }); return; }
+      // CA-01 — map the pipeline's blocking gate verdict to a non-zero process
+      // exit so CI can fail-fast on a regression. The decision is made by the
+      // pipeline (gate_exit_code === PRODUCTION_GATE_FAILED_EXIT); the CLI only
+      // reads done.gate_exit_code (or the regression_gate phase) and exits with
+      // it. --force / --force-promote downgrade the block to a logged warning.
+      const gateExit = (done && done.gate_exit_code) || (regressionGate && regressionGate.gate_exit_code) || 0;
+      const blocked = !!((done && done.blocked) || (regressionGate && regressionGate.blocked));
+      const gateVerdict = (regressionGate && (regressionGate.w808_verdict || regressionGate.eval_gate)) || (done && done.reason) || null;
+      if (wantJson) {
+        jsonOk({ phases, done, regression_gate: regressionGate, blocked, gate_verdict: gateVerdict, gate_exit_code: gateExit, forced: !!forced, pipeline_phases: pipe.PIPELINE_PHASES });
+        if (gateExit === EXIT.GATE_FAIL && !forced) process.exit(EXIT.GATE_FAIL);
+        return;
+      }
       if (done) {
         console.log('');
         console.log('artifact_path:    ' + done.artifact_path);
         console.log('artifact_hash:    ' + (done.artifact_hash || '').slice(0, 16));
         console.log('production_ready: ' + done.production_ready);
+      }
+      if (gateExit === EXIT.GATE_FAIL) {
+        if (forced) {
+          console.error('warning: regression_gate BLOCKED (' + (gateVerdict || 'regression') + ') but --force/--force-promote overrode it; promoted anyway.');
+        } else {
+          console.error('regression_gate BLOCKED: ' + (gateVerdict || 'regression') + ((done && done.block_detail) ? ' - ' + done.block_detail : ''));
+          console.error('  the candidate did not pass the production gate (W808 rollback / needs_human / eval-gate regression).');
+          console.error('  re-run with --force-promote to ship anyway, or --baseline <artifact|kscore> to compare against the right incumbent.');
+          process.exit(EXIT.GATE_FAIL);
+        }
       }
     } catch (e) {
       if (wantJson) { jsonErr(e.message, 'pipeline_error'); process.exit(EXIT.EXECUTION); }
@@ -47958,6 +48662,7 @@ async function main() {
       // (line ~37395, cmdW734RagCapture). The legacy local-lookup arm that
       // used to sit here was unreachable (duplicate case label) and removed.
       case 'team':     await withErrorContext('team',     () => cmdTeam(rest)); break;
+      case 'vault':    await withErrorContext('vault',    () => cmdVault(rest)); break;
       case 'org':      await withErrorContext('org',      () => cmdOrg(rest)); break;
       case 'tunnel':   await withErrorContext('tunnel',   () => cmdTunnel(rest)); break;
       case 'cloud':    await withErrorContext('cloud',    () => cmdCloud(rest)); break;

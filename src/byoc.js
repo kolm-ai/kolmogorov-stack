@@ -16,6 +16,7 @@ import crypto from 'node:crypto';
 import { id, insert, find, findOne, update, all } from './store.js';
 import { effectiveReceiptSecret } from './env.js';
 import { parseAttestation } from '../packages/attestation/src/index.js';
+import { verifyAttestation as verifyCcAttestation, KINDS as CC_KINDS, STATES as CC_STATES } from './confidential-compute.js';
 
 const TARGETS = ['fly', 'aws-nitro', 'gcp-cvm', 'azure-cvm', 'docker'];
 
@@ -83,7 +84,38 @@ export function listDeploymentsForTenant(tenantId, { teamId = null } = {}) {
   return find('byoc_deployments', d => !d._deleted && (d.tenant_id === tenantId || (teamId && d.team_id === teamId)));
 }
 
-export function recordAttestation(enrollToken, { public_url, attestation, measurement }) {
+// Verify a GPU-TEE (NVIDIA Confidential Compute / NRAS) attestation report and
+// return a state object safe to persist on the deployment row alongside the CPU
+// docker measurement. Routes the NRAS report through confidential-compute's
+// verifyAttestation: shape-only by default (verified:false), flipping
+// verified:true only when a tenant has registered a real NRAS crypto verifier.
+//
+// Returns a compact { kind, shape_ok, verified, verifier, report_hash, state,
+// reason } projection. NEVER throws and NEVER claims crypto verification on the
+// shape-only path.
+export async function verifyGpuAttestation(report, opts = {}) {
+  const kind = CC_KINDS.NRAS;
+  let state;
+  try {
+    state = await verifyCcAttestation(kind, report, opts);
+  } catch (e) {
+    state = { kind, state: CC_STATES.REJECTED, verifier: 'none', verified: false, reason: `verify_threw:${e && e.message}` };
+  }
+  const shape_ok = state.state !== CC_STATES.REJECTED;
+  return {
+    kind,
+    shape_ok,
+    verified: state.verified === true,
+    verifier: state.verifier || (shape_ok ? 'shape_v1' : 'none'),
+    report_hash: state.report_hash || null,
+    state: state.state || null,
+    reason: state.reason || null,
+    trust_root: state.trust_root || null,
+    timestamp: state.timestamp || new Date().toISOString(),
+  };
+}
+
+export function recordAttestation(enrollToken, { public_url, attestation, measurement, gpu = null }) {
   const d = getDeployment(enrollToken);
   if (!d) return { ok: false, error: 'deployment not found' };
   const now = new Date().toISOString();
@@ -113,11 +145,16 @@ export function recordAttestation(enrollToken, { public_url, attestation, measur
     // Parser failures should never block the record - we still capture the
     // raw blob so an operator can debug downstream.
   }
+  // GPU-TEE state (NRAS): an already-verified state object the caller obtained
+  // via verifyGpuAttestation. CPU-only deployments pass no gpu and the field
+  // stays null - we never invent a GPU state from a missing report.
+  const gpuState = (gpu && typeof gpu === 'object') ? gpu : null;
   const att = {
     public_url: String(public_url || '').slice(0, 400),
     measurement: extractedMeasurement ? extractedMeasurement.slice(0, 256) : null,
     vendor,
     parsed,
+    gpu: gpuState,
     raw: typeof attestation === 'string' ? attestation.slice(0, 8192) : null,
     received_at: now,
   };
@@ -127,7 +164,7 @@ export function recordAttestation(enrollToken, { public_url, attestation, measur
     attestation: att,
     last_attested_at: now,
   });
-  return { ok: true, vendor, measurement: att.measurement };
+  return { ok: true, vendor, measurement: att.measurement, gpu: gpuState };
 }
 
 export function teardownDeployment(deployId, byTenantId) {

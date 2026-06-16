@@ -106,8 +106,10 @@ test('W708 #3 — attachCopyrightFlag stamps copyright_flagged + copyright_reaso
 // =============================================================================
 
 test('W708 #4 — isGeoFenced blocks CU/IR/KP/SY/RU/BY and allows US/CA/DE/JP/GB', () => {
-  // Denylist baseline matches the orchestrator spec.
-  assert.deepEqual(EXPORT_CONTROL_DENYLIST.sort(),
+  // Denylist baseline matches the orchestrator spec. EXPORT_CONTROL_DENYLIST is
+  // Object.freeze'd (the sanctions list must be tamper-proof at runtime), so sort
+  // a COPY for the order-independent content comparison rather than mutating it.
+  assert.deepEqual([...EXPORT_CONTROL_DENYLIST].sort(),
     ['BY', 'CU', 'IR', 'KP', 'RU', 'SY'].sort(),
     'denylist should be the OFAC comprehensive-sanctions baseline');
 

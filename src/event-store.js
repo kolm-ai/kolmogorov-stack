@@ -22,6 +22,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import { createRequire } from 'node:module';
 
@@ -36,6 +37,23 @@ let _dbPath = null;
 let _jsonlPath = null;
 const _emitter = new EventEmitter();
 _emitter.setMaxListeners(0);
+
+// W411 P2 - last JSONL read diagnostics. _jsonlAll() writes here on every read
+// so operators can surface "parsed N events, M lines failed" instead of silently
+// dropping malformed lines. Reset on _resetForTests().
+let _lastJsonlDiag = { parsed: 0, failed: 0, total_lines: 0, failed_lines: [], distinct_events: 0 };
+
+// W409a-durability - last JSONL write diagnostics. The append path records
+// duplicate rejections (same event_id as the tail line) + truncated-tail
+// repairs here so /health and operator dashboards see write-time integrity
+// events without KOLM_DEBUG=1. Reset on _resetForTests().
+let _lastJsonlWriteDiag = {
+  appends: 0,
+  duplicates_rejected: 0,
+  truncated_tail_repaired: 0,
+  last_truncated_tail: null,
+  last_event_id: null,
+};
 
 function _home() {
   return process.env.HOME || process.env.USERPROFILE || os.homedir();
@@ -56,6 +74,79 @@ function _dirWritable(d) {
 // True if the path can be opened for append (creates it app-owned if absent).
 function _appendable(p) {
   try { const fd = fs.openSync(p, 'a'); fs.closeSync(fd); return true; } catch { return false; }
+}
+
+// Atom3 - JSONL durability primitives, mirroring src/store.js writeFileDurably.
+// The JSONL fallback is the path taken on Node <22.5 without --experimental-sqlite
+// (many prod images), so it must be as crash-safe as the SQLite driver. Any
+// FULL REWRITE of the append-only log (purge, compaction) routes through here:
+// temp file in the same dir -> fsync fd -> atomic rename -> fsync dir, so a
+// crash/power-loss mid-write never leaves a half-written or truncated log.
+function _fsyncDir(dir) {
+  try {
+    const fd = fs.openSync(dir, 'r');
+    try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
+  } catch { /* dir fsync best-effort; not uniformly supported on Windows */ }
+}
+
+function _writeFileDurably(file, text) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const tmp = `${file}.${process.pid}.${Date.now()}.${crypto.randomBytes(4).toString('hex')}.tmp`;
+  let fd = null;
+  try {
+    fd = fs.openSync(tmp, 'w');
+    fs.writeFileSync(fd, text, 'utf8');
+    fs.fsyncSync(fd);
+    fs.closeSync(fd);
+    fd = null;
+    // Windows can briefly hold the destination open (AV/indexing); retry rename
+    // then fall back to copy, matching store.js replaceFileWithRetry intent.
+    let renamed = false;
+    for (let attempt = 0; attempt < 6 && !renamed; attempt += 1) {
+      try { fs.renameSync(tmp, file); renamed = true; }
+      catch (err) {
+        if (!['EPERM', 'EACCES', 'EBUSY'].includes(err && err.code)) throw err;
+        const until = Date.now() + 10 * (2 ** attempt);
+        while (Date.now() < until) { /* brief spin */ }
+      }
+    }
+    if (!renamed) { fs.copyFileSync(tmp, file); try { fs.rmSync(tmp, { force: true }); } catch { /* */ } }
+    _fsyncDir(path.dirname(file));
+  } catch (err) {
+    if (fd !== null) { try { fs.closeSync(fd); } catch { /* */ } }
+    try { fs.rmSync(tmp, { force: true }); } catch { /* */ }
+    throw err;
+  }
+}
+
+// Atom3 (3) - keep a .jsonl.bak mirror so a corrupt primary can be recovered
+// the way the JSON store recovers tables. Best-effort; a mirror failure must
+// not block the primary rewrite.
+function _bakPath() { return _jsonlPath + '.bak'; }
+function _mirrorJsonlBak(text) {
+  try { _writeFileDurably(_bakPath(), text); }
+  catch (e) { if (process.env.KOLM_DEBUG) console.error('[event-store] jsonl .bak mirror failed:', e.message); }
+}
+
+// Atom3 (3) - quarantine a corrupt primary JSONL (rename to .corrupt-<ts>) and
+// recover from the .bak mirror if present. Returns the recovered text or null.
+function _recoverJsonlFromBak() {
+  const bak = _bakPath();
+  if (!fs.existsSync(bak)) return null;
+  let text;
+  try { text = fs.readFileSync(bak, 'utf8'); } catch { return null; }
+  // Validate the backup parses to at least one usable event before trusting it.
+  let usable = false;
+  for (const line of text.split('\n')) {
+    if (!line.trim()) continue;
+    try { const r = JSON.parse(line); if (r && r.event_id) { usable = true; break; } } catch { /* */ }
+  }
+  if (!usable) return null;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  try { fs.renameSync(_jsonlPath, `${_jsonlPath}.corrupt-${stamp}-${process.pid}`); } catch { /* */ }
+  try { _writeFileDurably(_jsonlPath, text); } catch { return null; }
+  console.error('[event-store] recovered events.jsonl from .bak mirror after primary read failure');
+  return text;
 }
 
 function _ensureDirs() {
@@ -107,7 +198,7 @@ function _openSqlite() {
     _db = new DatabaseSync(_dbPath);
     _db.exec(`
       PRAGMA journal_mode = WAL;
-      PRAGMA synchronous = NORMAL;
+      PRAGMA synchronous = FULL;
       PRAGMA busy_timeout = 30000;
       CREATE TABLE IF NOT EXISTS events (
         event_id TEXT PRIMARY KEY,
@@ -196,6 +287,8 @@ export function _resetForTests() {
   _eventsDir = null;
   _dbPath = null;
   _jsonlPath = null;
+  _lastJsonlDiag = { parsed: 0, failed: 0, total_lines: 0, failed_lines: [], distinct_events: 0 };
+  _appendsSinceCompactCheck = 0;
   _emitter.removeAllListeners();
 }
 
@@ -206,7 +299,24 @@ export function storeInfo() {
     events_dir: _eventsDir,
     db_path: _driver === 'sqlite' ? _dbPath : null,
     jsonl_path: _driver === 'jsonl' ? _jsonlPath : null,
+    jsonl_bak_path: _driver === 'jsonl' ? _bakPath() : null,
+    // W411 P2 - last JSONL read accounting (null for the sqlite driver, which
+    // has no line-parse failure surface). Forces a read so the diag is current.
+    jsonl_diagnostics: _driver === 'jsonl' ? jsonlDiagnostics() : null,
   };
+}
+
+// W411 P2 - jsonlDiagnostics(): returns { parsed, failed, total_lines,
+// failed_lines } from the most recent JSONL read, performing a read if none has
+// happened yet. Operators / route handlers call this to surface "parsed N
+// events, M lines failed" instead of silently losing rows. Returns a clean
+// zeroed report for the sqlite driver (no JSONL parsing involved).
+export function jsonlDiagnostics() {
+  if (_ensureDriver() !== 'jsonl') {
+    return { driver: _driver, parsed: 0, failed: 0, total_lines: 0, failed_lines: [] };
+  }
+  _jsonlAll(); // refresh _lastJsonlDiag against the current file
+  return { driver: 'jsonl', ..._lastJsonlDiag, failed_lines: _lastJsonlDiag.failed_lines.slice() };
 }
 
 // appendEvent(partial): validate, canonicalize, write. Returns the persisted
@@ -252,6 +362,12 @@ export async function appendEvent(partial = {}) {
     // preserves the public INSERT-OR-REPLACE contract without turning every
     // production capture into a full-file rewrite.
     fs.appendFileSync(_jsonlPath, JSON.stringify(ev) + '\n', 'utf8');
+    // Atom3 (3) - keep the .bak mirror append-in-sync so a corrupt primary can
+    // be recovered. Append (not full rewrite) preserves O(1) writes.
+    try { fs.appendFileSync(_bakPath(), JSON.stringify(ev) + '\n', 'utf8'); }
+    catch (e) { if (process.env.KOLM_DEBUG) console.error('[event-store] .bak append failed:', e.message); }
+    // Atom3 (2) - self-heal JSONL dedupe bloat opportunistically.
+    _maybeCompactJsonl();
   }
   _emitter.emit('event', ev);
   return ev;
@@ -259,29 +375,91 @@ export async function appendEvent(partial = {}) {
 
 function _jsonlAll() {
   _ensureDirs();
-  if (!fs.existsSync(_jsonlPath)) return [];
-  const text = fs.readFileSync(_jsonlPath, 'utf8');
-  // W411 P0 #6 - last-write-wins dedupe by event_id when reading back. Defends
-  // against legacy JSONL files (pre-W411) that contain duplicate event_id
-  // lines from blind appends. listEvents/getEvent/countEvents all funnel
-  // through here, so dedupe at the read layer guarantees idempotent semantics
-  // regardless of file age.
-  const seen = new Map();
-  const order = [];
-  for (const line of text.split('\n')) {
-    if (!line.trim()) continue;
+  let text;
+  if (!fs.existsSync(_jsonlPath)) {
+    // Atom3 (3) - primary missing: try to recover from the .bak mirror before
+    // returning empty (e.g. a crash truncated/removed the primary).
+    const recovered = _recoverJsonlFromBak();
+    if (recovered == null) return [];
+    text = recovered;
+  } else {
     try {
-      const row = JSON.parse(line);
-      if (!row || !row.event_id) continue;
-      if (!seen.has(row.event_id)) order.push(row.event_id);
-      seen.set(row.event_id, row);
-    } catch {} // deliberate: cleanup
+      text = fs.readFileSync(_jsonlPath, 'utf8');
+    } catch (readErr) {
+      // Atom3 (3) - unreadable primary: recover from .bak or surface loudly.
+      const recovered = _recoverJsonlFromBak();
+      if (recovered == null) {
+        console.error('[event-store] events.jsonl unreadable and no usable .bak mirror: ' + readErr.message);
+        return [];
+      }
+      text = recovered;
+    }
+  }
+  // Atom3 (3) - parse the primary; if it is non-empty but yields ZERO usable
+  // events (every line failed), try to recover from the .bak mirror before
+  // accepting "no events". The mirror is only trusted when it yields at least
+  // one usable event; _recoverJsonlFromBak quarantines the corrupt primary.
+  const parsedPrimary = _parseJsonlText(text);
+  _lastJsonlDiag = parsedPrimary.diag;
+  if (parsedPrimary.order.length === 0 && parsedPrimary.diag.total_lines > 0 && parsedPrimary.diag.failed > 0) {
+    const recovered = _recoverJsonlFromBak();
+    if (recovered != null) {
+      const reparsed = _parseJsonlText(recovered);
+      if (reparsed.order.length > 0) {
+        _lastJsonlDiag = reparsed.diag;
+        return reparsed.order.map(id => backfillLegacy(reparsed.seen.get(id)));
+      }
+    }
   }
   // W411 addendum #9 - apply backfillLegacy to every read so legacy JSONL rows
   // (pre-W411, missing tenant_id/source_type/review_state/production_eligible)
   // surface as canonical events with safe defaults. Idempotent on already-
   // canonical rows.
-  return order.map(id => backfillLegacy(seen.get(id)));
+  return parsedPrimary.order.map(id => backfillLegacy(parsedPrimary.seen.get(id)));
+}
+
+// Atom3 - pure JSONL parser with last-write-wins dedupe + parse diagnostics.
+// Shared by the primary read and the .bak recovery path. Returns
+// { order:[event_id], seen:Map, diag:{parsed, failed, total_lines, failed_lines,
+// distinct_events} }.
+function _parseJsonlText(text) {
+  // W411 P0 #6 - last-write-wins dedupe by event_id. Defends against legacy
+  // JSONL files (pre-W411) with duplicate event_id lines from blind appends.
+  const seen = new Map();
+  const order = [];
+  // W411 P2 - track parse failures so silent data loss is observable.
+  let parsed = 0, failed = 0, totalLines = 0;
+  const failedLines = [];
+  let lineNo = 0;
+  for (const line of text.split('\n')) {
+    lineNo += 1;
+    if (!line.trim()) continue;
+    totalLines += 1;
+    try {
+      const row = JSON.parse(line);
+      if (!row || !row.event_id) {
+        failed += 1;
+        if (failedLines.length < 50) failedLines.push({ line: lineNo, reason: 'missing_event_id' });
+        continue;
+      }
+      if (!seen.has(row.event_id)) order.push(row.event_id);
+      seen.set(row.event_id, row);
+      parsed += 1;
+    } catch (e) {
+      failed += 1;
+      if (failedLines.length < 50) failedLines.push({ line: lineNo, reason: String(e && e.message || e).slice(0, 120) });
+      if (process.env.KOLM_DEBUG) {
+        console.error('[event-store] JSONL parse error at line', lineNo, ':', String(line).slice(0, 100));
+      }
+    }
+  }
+  if (failed > 0 && process.env.KOLM_DEBUG) {
+    console.error('[event-store] parsed ' + order.length + ' events, ' + failed + ' line(s) failed in ' + _jsonlPath);
+  }
+  return {
+    order, seen,
+    diag: { parsed, failed, total_lines: totalLines, failed_lines: failedLines, distinct_events: order.length },
+  };
 }
 
 function _matchEvent(ev, q) {
@@ -393,8 +571,66 @@ export async function purgeEvents(opts = {}) {
     keep.push(ev);
   }
   if (dryRun) return { deleted: 0, would_delete: dropped };
-  fs.writeFileSync(_jsonlPath, keep.map(e => JSON.stringify(e)).join('\n') + (keep.length ? '\n' : ''), 'utf8');
+  // Atom3 (1) - route the full-file rewrite through the durable write helper
+  // (temp -> fsync -> atomic rename -> fsync dir) instead of a non-atomic
+  // fs.writeFileSync that could truncate/corrupt the whole append-only log on a
+  // crash mid-write. _jsonlAll() above already deduped last-write-wins, so this
+  // rewrite ALSO compacts the file to one row per surviving event_id.
+  const out = keep.map(e => JSON.stringify(e)).join('\n') + (keep.length ? '\n' : '');
+  _writeFileDurably(_jsonlPath, out);
+  _mirrorJsonlBak(out);
   return { deleted: dropped, would_delete: dropped };
+}
+
+// Atom3 (2) - compactJsonl(): durably rewrite the JSONL log keeping only the
+// last-write-wins row per event_id (the same semantics _jsonlAll() applies on
+// read), collapsing the unbounded blind-append growth into one row per event.
+// Routes through the durable write helper + .bak mirror. Returns
+// { ok, before_lines, after_lines, distinct_events, compacted }.
+//
+// `opts.minRatio` (default 2): only compact when total_lines >= minRatio *
+// distinct_events (i.e. at least 2x dedupe bloat) AND total_lines exceeds
+// `opts.minLines` (default 1000). Pass opts.force=true to compact regardless.
+export function compactJsonl(opts = {}) {
+  if (_ensureDriver() !== 'jsonl') {
+    return { ok: true, driver: _driver, compacted: false, reason: 'not_jsonl_driver' };
+  }
+  _ensureDirs();
+  // _jsonlAll() refreshes _lastJsonlDiag (total_lines, distinct_events) and
+  // returns the deduped, ordered, backfilled event set.
+  const events = _jsonlAll();
+  const diag = _lastJsonlDiag;
+  const before = diag.total_lines || 0;
+  const distinct = diag.distinct_events != null ? diag.distinct_events : events.length;
+  const minRatio = Number.isFinite(opts.minRatio) && opts.minRatio > 1 ? opts.minRatio : 2;
+  const minLines = Number.isFinite(opts.minLines) && opts.minLines >= 0 ? opts.minLines : 1000;
+  const due = !!opts.force
+    || (before > minLines && distinct > 0 && before >= minRatio * distinct);
+  if (!due) {
+    return { ok: true, compacted: false, before_lines: before, after_lines: before, distinct_events: distinct };
+  }
+  // Re-serialize the deduped canonical rows. We persist the raw stored shape
+  // (events as returned, already backfilled) - idempotent on re-read.
+  const out = events.map(e => JSON.stringify(e)).join('\n') + (events.length ? '\n' : '');
+  _writeFileDurably(_jsonlPath, out);
+  _mirrorJsonlBak(out);
+  return { ok: true, compacted: true, before_lines: before, after_lines: events.length, distinct_events: distinct };
+}
+
+// Atom3 (2) - opportunistic compaction trigger. Called from the append hot path
+// at a coarse cadence so a long-lived process self-heals JSONL bloat without an
+// operator running `compactJsonl()`. Cheap guard: only inspect the file once per
+// _COMPACT_CHECK_EVERY appends, then defer to compactJsonl()'s ratio gate.
+let _appendsSinceCompactCheck = 0;
+const _COMPACT_CHECK_EVERY = 500;
+function _maybeCompactJsonl() {
+  _appendsSinceCompactCheck += 1;
+  if (_appendsSinceCompactCheck < _COMPACT_CHECK_EVERY) return;
+  _appendsSinceCompactCheck = 0;
+  if (process.env.KOLM_EVENT_STORE_NO_AUTOCOMPACT === '1') return;
+  try { compactJsonl(); } catch (e) {
+    if (process.env.KOLM_DEBUG) console.error('[event-store] opportunistic compaction failed:', e.message);
+  }
 }
 
 // streamEvents(cb): subscribe to live appendEvent emissions. Returns an

@@ -38,6 +38,7 @@ import {
   MCP_RECEIPT_SCHEMA,
   MCP_GATEWAY_VERSION,
 } from './mcp-gateway.js';
+import { anchorLeafHash } from './transparency-anchor.js';
 
 export const MCP_GATEWAY_ROUTES_VERSION = 'w921-mcp-gateway-routes-v1';
 const MCP_RECEIPT_TABLE = 'mcp_tool_receipts';
@@ -125,6 +126,16 @@ export function register(r, deps = {}) {
     ? deps.getSigner
     : () => (deps.signer || null);
 
+  // OPTIONAL Merkle anchoring batcher (off the hot path). When injected, each
+  // signed receipt's canonical leaf is enqueued for batch anchoring; absent it,
+  // dispatch behaves exactly as before (anchor_enqueued:false).
+  const anchorBatcher = (deps.anchorBatcher && typeof deps.anchorBatcher.enqueue === 'function')
+    ? deps.anchorBatcher : null;
+
+  // OPTIONAL per-tenant guardrail config resolver. guardrailFor(tenant) -> a
+  // guardrail config ({mode, threshold, ...}) or null. Absent it, no screening.
+  const guardrailFor = typeof deps.guardrailFor === 'function' ? deps.guardrailFor : null;
+
   const persist = _makePersistence(deps);
 
   // ── POST /v1/mcp/dispatch ──────────────────────────────────────────────────
@@ -154,6 +165,13 @@ export function register(r, deps = {}) {
     const args = (body.arguments != null) ? body.arguments
       : (body.args != null ? body.args : {});
 
+    // Resolve the per-tenant guardrail config (opt-in). A thrown resolver must
+    // never take down dispatch - degrade to no screening.
+    let guardrail = null;
+    if (guardrailFor) {
+      try { guardrail = guardrailFor(tenant) || null; } catch { guardrail = null; }
+    }
+
     try {
       const out = await wrapToolCall({
         tool,
@@ -168,20 +186,47 @@ export function register(r, deps = {}) {
         call_id: body.call_id ? String(body.call_id) : undefined,
         transport: body.transport != null ? String(body.transport) : null,
         server_id: body.server_id != null ? String(body.server_id) : null,
+        guardrail,
       });
 
       // Persist the signed receipt so GET /v1/mcp/verify/:id can return it.
       const persisted = persist.save(tenant, out.receipt);
 
+      // Off the hot path: enqueue the canonical receipt leaf for Merkle batch
+      // anchoring. enqueue() is bounded + non-blocking + never throws.
+      let anchor_enqueued = false;
+      if (anchorBatcher) {
+        try {
+          anchor_enqueued = anchorBatcher.enqueue({
+            receipt_id: out.receipt.call_id,
+            leaf: anchorLeafHash(out.receipt),
+            receipt: out.receipt,
+          }) === true;
+        } catch { anchor_enqueued = false; }
+      }
+
       return res.status(201).json({
         ok: true,
         receipt: out.receipt,
         result_passthrough_contract: out.result_passthrough_contract,
+        guardrail: out.guardrail,
+        anchor_enqueued,
         verify_url: `/v1/mcp/verify/${out.receipt.call_id}`,
         persisted,
         version: MCP_GATEWAY_ROUTES_VERSION,
       });
     } catch (e) {
+      // A guardrail block is a 400 (the caller sent a poisoned input/output),
+      // not a server error. Surface the stage so the caller knows which side.
+      if (e && e.code === 'mcp_guardrail_blocked') {
+        return res.status(400).json({
+          ok: false,
+          error: 'mcp_guardrail_blocked',
+          stage: e.stage || null,
+          verdict: e.verdict || null,
+          version: MCP_GATEWAY_ROUTES_VERSION,
+        });
+      }
       const code = (e && e.code === 'mcp_no_signer') ? 503 : 500;
       return res.status(code).json({
         ok: false,

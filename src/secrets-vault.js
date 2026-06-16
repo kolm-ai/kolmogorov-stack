@@ -60,13 +60,11 @@ function ensureDir() {
   }
 }
 
-// Write a file containing secret material with owner-only permissions, then
-// VERIFY the resulting mode on POSIX. A secrets vault that silently leaves its
-// key world-readable is a real vulnerability, so this fails loudly rather than
-// swallowing a chmod error (the old `try { chmod } catch {}` did the latter).
-// On win32 POSIX modes don't apply; we rely on the user-profile ACL and skip.
-function writePrivateFile(p, data) {
-  fs.writeFileSync(p, data, { mode: 0o600 });
+// Verify owner-only permissions on a freshly-written secret file. A secrets
+// vault that silently leaves its key world-readable is a real vulnerability, so
+// this fails loudly rather than swallowing a chmod error. On win32 POSIX modes
+// don't apply; we rely on the user-profile ACL and skip.
+function verifyPrivateMode(p) {
   if (IS_WIN32) return;
   try {
     fs.chmodSync(p, 0o600);
@@ -86,6 +84,70 @@ function writePrivateFile(p, data) {
   }
 }
 
+function bakPath(p) { return `${p}.bak`; }
+
+function fsyncDir(dir) {
+  try {
+    const fd = fs.openSync(dir, 'r');
+    try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
+  } catch { /* dir fsync best-effort (not uniform on Windows) */ }
+}
+
+// Atom4 - ATOMIC DURABLE write of secret material, mirroring src/store.js
+// writeFileDurably. The vault holds tenant provider API keys encrypted at rest;
+// a plain in-place fs.writeFileSync could truncate/corrupt secrets-vault.json on
+// a crash mid-write, and readVault would then silently return an empty vault
+// (every stored secret vanishing). We write to `<path>.<pid>.<rand>.tmp` at
+// mode 0o600, fsync the fd, atomically rename over the target, fsync the dir,
+// then refresh a `<path>.bak` mirror - so a crash never leaves a half-written
+// vault and a corrupt primary can be recovered from .bak. Preserves the 0o600 +
+// chmod-verify guarantee on every file we create.
+function writePrivateFile(p, data) {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  const tmp = `${p}.${process.pid}.${crypto.randomBytes(6).toString('hex')}.tmp`;
+  let fd = null;
+  try {
+    fd = fs.openSync(tmp, 'w', 0o600);
+    fs.writeFileSync(fd, data, 'utf8');
+    fs.fsyncSync(fd);
+    fs.closeSync(fd);
+    fd = null;
+    verifyPrivateMode(tmp);
+    fs.renameSync(tmp, p);
+    verifyPrivateMode(p);
+    fsyncDir(path.dirname(p));
+  } catch (err) {
+    if (fd !== null) { try { fs.closeSync(fd); } catch { /* */ } }
+    try { fs.rmSync(tmp, { force: true }); } catch { /* */ }
+    throw err;
+  }
+  // Best-effort .bak mirror (also durable + 0o600). A mirror failure must not
+  // fail the primary write.
+  try {
+    const bak = bakPath(p);
+    const btmp = `${bak}.${process.pid}.${crypto.randomBytes(6).toString('hex')}.tmp`;
+    let bfd = null;
+    try {
+      bfd = fs.openSync(btmp, 'w', 0o600);
+      fs.writeFileSync(bfd, data, 'utf8');
+      fs.fsyncSync(bfd);
+      fs.closeSync(bfd);
+      bfd = null;
+      verifyPrivateMode(btmp);
+      fs.renameSync(btmp, bak);
+      verifyPrivateMode(bak);
+      fsyncDir(path.dirname(bak));
+    } catch (e) {
+      if (bfd !== null) { try { fs.closeSync(bfd); } catch { /* */ } }
+      try { fs.rmSync(btmp, { force: true }); } catch { /* */ }
+      throw e;
+    }
+  } catch (e) {
+    // Surface in debug; do not fail the write that already landed durably.
+    if (process.env.KOLM_DEBUG) console.error(`[secrets-vault] .bak mirror failed for ${p}: ${e.message}`);
+  }
+}
+
 function getOrCreateKey() {
   ensureDir();
   const p = keyPath();
@@ -99,19 +161,82 @@ function getOrCreateKey() {
   return key;
 }
 
+function parseVaultText(text) {
+  const parsed = JSON.parse(text);
+  if (!parsed || typeof parsed !== 'object') throw new Error('vault is not an object');
+  if (!parsed.secrets || typeof parsed.secrets !== 'object') parsed.secrets = {};
+  parsed.spec = parsed.spec || SPEC;
+  return parsed;
+}
+
+// Atom4 - read the vault from the primary, falling back to the .bak mirror, and
+// on a corrupt primary QUARANTINE it (rename to .corrupt-<ts>) and log LOUDLY
+// instead of silently returning an empty vault (which would make every stored
+// tenant provider key appear to vanish with zero error surfaced). A truly
+// absent vault (never written) still returns the clean empty shape.
 function readVault() {
   ensureDir();
   const p = vaultPath();
-  if (!fs.existsSync(p)) return { spec: SPEC, secrets: {} };
+  const bak = bakPath(p);
+  const primaryExists = fs.existsSync(p);
+  if (!primaryExists && !fs.existsSync(bak)) return { spec: SPEC, secrets: {} };
+
+  if (primaryExists) {
+    try {
+      return parseVaultText(fs.readFileSync(p, 'utf8'));
+    } catch (primaryErr) {
+      // Primary corrupt. Try the .bak mirror before degrading.
+      if (fs.existsSync(bak)) {
+        try {
+          const recovered = parseVaultText(fs.readFileSync(bak, 'utf8'));
+          // Quarantine the corrupt primary and restore it from the mirror.
+          quarantineCorruptVault(p, primaryErr);
+          try { writePrivateFile(p, JSON.stringify(recovered, null, 2)); }
+          catch (we) { console.error(`[secrets-vault] recovered from .bak but flush to primary failed: ${we.message}`); }
+          console.error('[secrets-vault] recovered secrets-vault.json from .bak mirror after primary read failure');
+          return recovered;
+        } catch (bakErr) {
+          quarantineCorruptVault(p, primaryErr);
+          quarantineCorruptVault(bak, bakErr);
+          console.error(`[secrets-vault] FATAL recoverable: secrets-vault.json AND .bak both unreadable; refusing to silently drop secrets. primary: ${primaryErr.message}; backup: ${bakErr.message}`);
+          throw Object.assign(
+            new Error('secrets vault primary + backup are both corrupt; quarantined for forensic recovery. Refusing to return an empty vault that would mask lost provider keys.'),
+            { code: 'vault_corrupt_unrecoverable' },
+          );
+        }
+      }
+      // No mirror: quarantine the corrupt primary and surface loudly.
+      quarantineCorruptVault(p, primaryErr);
+      console.error(`[secrets-vault] FATAL recoverable: secrets-vault.json unreadable and no .bak mirror; quarantined. primary: ${primaryErr.message}`);
+      throw Object.assign(
+        new Error('secrets vault is corrupt and no backup exists; quarantined for forensic recovery. Refusing to return an empty vault that would mask lost provider keys.'),
+        { code: 'vault_corrupt_no_backup' },
+      );
+    }
+  }
+
+  // Primary absent but a .bak mirror exists (e.g. crash between primary rename
+  // and a later read): recover from the mirror.
   try {
-    const parsed = JSON.parse(fs.readFileSync(p, 'utf8'));
-    if (!parsed || typeof parsed !== 'object') return { spec: SPEC, secrets: {} };
-    if (!parsed.secrets || typeof parsed.secrets !== 'object') parsed.secrets = {};
-    parsed.spec = parsed.spec || SPEC;
-    return parsed;
+    const recovered = parseVaultText(fs.readFileSync(bak, 'utf8'));
+    try { writePrivateFile(p, JSON.stringify(recovered, null, 2)); }
+    catch (we) { console.error(`[secrets-vault] restored primary from .bak failed to flush: ${we.message}`); }
+    console.error('[secrets-vault] restored secrets-vault.json from .bak mirror (primary was missing)');
+    return recovered;
   } catch {
     return { spec: SPEC, secrets: {} };
   }
+}
+
+// Rename a corrupt vault file aside so it is preserved for forensics instead of
+// being overwritten by the next write. Best-effort; never throws.
+function quarantineCorruptVault(p, err) {
+  try {
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const dest = `${p}.corrupt-${stamp}-${process.pid}`;
+    fs.renameSync(p, dest);
+    if (process.env.KOLM_DEBUG) console.error(`[secrets-vault] quarantined ${p} -> ${dest} (${err && err.message})`);
+  } catch { /* best-effort */ }
 }
 
 function writeVault(vault) {
@@ -291,6 +416,19 @@ export function redactSecretEnvelope(envelope) {
   };
 }
 
+// Atom5 - expose the concrete on-disk locations so src/store-backup.js can
+// snapshot the encrypted vault + its key as first-class backup artifacts.
+// vaultFilePaths() returns every file a complete vault restore needs: the
+// ciphertext JSON, its .bak mirror, and the AES key. Paths are resolved against
+// the live KOLM_DATA_DIR so they track the running store.
+export function vaultFilePaths() {
+  return {
+    vault: vaultPath(),
+    vault_bak: bakPath(vaultPath()),
+    key: keyPath(),
+  };
+}
+
 export function secretVaultStatus() {
   const vault = readVault();
   return {
@@ -315,4 +453,5 @@ export default {
   isExternalSecretRef,
   redactSecretEnvelope,
   secretVaultStatus,
+  vaultFilePaths,
 };

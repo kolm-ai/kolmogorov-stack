@@ -459,6 +459,30 @@ curl -s https://kolm.ai/v1/route/chat/completions \
   }
   function showErr(msg){ banner.innerHTML='<div class="banner signup-banner warn" role="alert">'+msg+'</div>'; }
   function resetButton(){ go.disabled=false; go.textContent='Get my API key'; }
+
+  // OAuth callback error surfacing. The provider sign-in callback
+  // (src/oauth.js) redirects back to /signup?oauth_error=<code> when it cannot
+  // complete the link. Two codes carry product-specific recovery copy; any
+  // other code falls back to a generic, actionable message so the user is
+  // never stranded on a silent redirect.
+  (function(){
+    var code=(params.get('oauth_error')||'').toLowerCase().replace(/[^a-z0-9_-]+/g,'');
+    if(!code) return;
+    var msg, action='';
+    if(code==='email_unverified'){
+      msg='Your provider returned an email it has not verified, so we can\'t open a workspace with it. Verify your email with that provider, then sign in again - or get a key with a work email below.';
+    } else if(code==='account_link_required'){
+      msg='That email is already linked to a different sign-in method on kolm. Sign in with your existing method first, then link this provider from your account settings - linking from a fresh sign-in is blocked on purpose.';
+      action='<a class="btn btn--ghost btn--block" href="/account/overview" style="margin-top:10px">Sign in with your existing method</a>';
+    } else if(code==='state_mismatch'||code==='token_exchange_failed'){
+      msg='That sign-in attempt expired or could not be completed. Start the provider sign-in again, or get a key with a work email below.';
+    } else if(code==='no_email_returned'){
+      msg='Your provider did not share an email address, so we can\'t open a workspace. Allow email access for kolm, or get a key with a work email below.';
+    } else {
+      msg='Sign-in with your provider could not be completed ('+code.replace(/_/g,' ')+'). Try again, or get a key with a work email below.';
+    }
+    banner.innerHTML='<div class="banner signup-banner warn" role="alert">'+msg+action+'</div>';
+  })();
   function submit(){
     var v=(email.value||'').trim();
     if(!v || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ showErr('Enter a valid work email, for example you@company.com.'); email.focus(); return; }

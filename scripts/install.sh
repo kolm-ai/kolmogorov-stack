@@ -48,11 +48,21 @@ require_node() {
   if ! command -v node >/dev/null 2>&1; then
     die "node not found. install Node.js >=${KOLM_REQUIRE_NODE_MAJOR} from https://nodejs.org and re-run."
   fi
-  NODE_MAJOR="$(node -e 'process.stdout.write(String(process.versions.node.split(\".\")[0]))')"
+  # Derive the major version purely in shell so there is no inner-quote escaping
+  # to break under `sh`. `node -v` prints e.g. "v22.3.0"; strip the leading 'v'
+  # and everything from the first dot onward.
+  NODE_VER="$(node -v 2>/dev/null || true)"
+  NODE_MAJOR="${NODE_VER#v}"
+  NODE_MAJOR="${NODE_MAJOR%%.*}"
+  case "$NODE_MAJOR" in
+    ''|*[!0-9]*)
+      die "could not determine Node.js major version from '$NODE_VER'. ensure 'node -v' works and re-run."
+      ;;
+  esac
   if [ "$NODE_MAJOR" -lt "$KOLM_REQUIRE_NODE_MAJOR" ]; then
     die "node version $NODE_MAJOR found, need >=${KOLM_REQUIRE_NODE_MAJOR}. upgrade Node.js and re-run."
   fi
-  log "node $(node -v) OK"
+  log "node $NODE_VER OK"
 }
 
 require_git() {

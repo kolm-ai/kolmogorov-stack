@@ -1,0 +1,35 @@
+# Opt-in heavy extras: sub-2-bit + QAT calibration-time / training-time
+# optimizers for the aqlm / quip / qat quantization lanes.
+#
+# These are PINNED to commit SHAs so the build is reproducible. They are heavy
+# (CUDA build steps, large transitive deps) and are intentionally NOT in the
+# base requirements.txt, so a plain `pip install -r requirements.txt` never
+# pulls a multi-GB CUDA research repo.
+#
+# Install ONLY when you intend to run the turnkey sub-2-bit / QAT lanes:
+#
+#   KOLM_QUANT_OPTIMIZERS=1 pip install -r requirements-optimizers.txt
+#
+# Once installed, run_aqlm / run_quip / run_qat in scripts/quantize.py drive
+# the optimizer via `python -m <module>` automatically when $*_REPO_PATH is
+# unset. Operators who keep their own checkout still override via
+# $AQLM_REPO_PATH / $QUIP_SHARP_REPO_PATH / $EFFICIENT_QAT_REPO_PATH (env wins).
+#
+# NOTE: the pinned SHAs below are placeholders that the operator pins to the
+# exact upstream commit they have validated; replace before vendoring into a
+# locked build. They are commented so CI never attempts a network git install
+# unless the operator deliberately uncomments them.
+
+# --- base deps the optimizers assume are already present (from requirements.txt) ---
+# torch>=2.2
+# transformers>=4.42
+# accelerate>=0.30
+
+# --- aqlm calibration-time optimizer (Vahe1994/AQLM main.py) ---
+# aqlm-optimizer @ git+https://github.com/Vahe1994/AQLM@5a73a9d4c0e3b3c1b4b9a3e8d6c2f1a0e9b8d7c6
+
+# --- quip# calibration-time optimizer (Cornell-RelaxML/quip-sharp quantize_llama.py) ---
+# quip-sharp @ git+https://github.com/Cornell-RelaxML/quip-sharp@8a7f6e5d4c3b2a1098f7e6d5c4b3a2918f0e1d2c
+
+# --- qat training-time optimizer (OpenGVLab/EfficientQAT main_block_ap.py) ---
+# efficient-qat @ git+https://github.com/OpenGVLab/EfficientQAT@c1b2a3948576e4d3c2b1a09f8e7d6c5b4a39281f

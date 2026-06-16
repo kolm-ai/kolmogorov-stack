@@ -7,7 +7,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildRouter } from './src/router.js';
-import { provisionTenant } from './src/auth.js';
+import { provisionTenant, startKeyLastUsedFlusher } from './src/auth.js';
+import { startMagicLinkGc } from './src/auth-email.js';
 import { isProductionRuntime } from './src/env.js';
 import { init as initOtel, expressMiddleware as otelMiddleware } from './src/otel.js';
 import { initSentry } from './src/sentry-init.js';
@@ -568,6 +569,24 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
     if (bkick.unref) bkick.unref();
     console.log(`  backup:     snapshot every ${everyH}h -> ${backupDir() || 'data/backups'}`);
   }
+
+  // AUTH-03 - background flush of scoped-key last_used_at (no-op unless
+  // KOLM_KEY_LAST_USED_TRACKING=1; cadence KOLM_KEY_LAST_USED_FLUSH_MS, default
+  // 30000). Without this the coalesced queue never drains and last_used_at stays
+  // a false 'never used' signal. unref'd so it never holds the event loop open.
+  try {
+    const flusher = startKeyLastUsedFlusher(console);
+    if (flusher) console.log('  keyflush:   scoped-key last_used flusher armed');
+  } catch (e) { console.error('[auth] key last_used flusher start error:', e && e.message); }
+
+  // AUTH-03 (email lane) - hourly GC of dead magic-link rows (cadence
+  // KOLM_MAGICLINK_GC_MS, default 3600000; retention KOLM_MAGICLINK_RETENTION_DAYS,
+  // default 7). Keeps the magic_link_tokens full-scan from degrading with sign-in
+  // volume. unref'd, self-driving, no external cron.
+  try {
+    const gc = startMagicLinkGc(console);
+    if (gc) console.log('  magiclink:  dead-token GC armed');
+  } catch (e) { console.error('[auth] magic-link gc start error:', e && e.message); }
 }
 
 export { app };

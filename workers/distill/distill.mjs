@@ -267,6 +267,11 @@ for (let i = 0; i < Math.min(maxRows, split.train.length); i++) {
       input: row.input,
       teacher_output: r.response,
       seed_output: row.output,
+      // W713 - carry the per-row complexity_proxy stamped by
+      // src/distill-pipeline.js so the Python trainer's SequentialSampler can
+      // order the rows simple->complex (only present when --curriculum was set
+      // on the staged seeds; absent rows fall back to neutral in the trainer).
+      ...(typeof row.complexity_proxy === 'number' ? { complexity_proxy: row.complexity_proxy } : {}),
     }) + '\n');
     logOut.write(JSON.stringify(r.teacher_call_log_entry) + '\n');
     // wave 157 — capture per-row reinjection metadata so an auditor can replay
@@ -321,12 +326,19 @@ if (mode === 'full') {
       console.error(`[distill-worker] expected scripts/train_lora.py; not found.`);
     } else {
       console.log('[distill-worker] invoking Python LoRA trainer (this may take a while)...');
-      const res = spawnSync('python3', [
+      const pyArgs = [
         pyScript,
         '--pairs', pairsPath,
         '--out', path.join(outDir, 'student'),
         '--student-base', args['student-base'] || 'Qwen/Qwen2.5-0.5B',
-      ], { stdio: 'inherit' });
+      ];
+      // W713/W711 - forward the data-ordering flags so train_lora.py engages a
+      // SequentialSampler (curriculum) or WeightedRandomSampler (importance).
+      // The pairs file already carries complexity_proxy per row (W713); the
+      // importance-weights JSONL lives next to the staged seeds.jsonl (W711).
+      if (args.curriculum) pyArgs.push('--curriculum', String(args.curriculum));
+      if (args['importance-weights']) pyArgs.push('--importance-weights', String(args['importance-weights']));
+      const res = spawnSync('python3', pyArgs, { stdio: 'inherit' });
       mlRun = res.status === 0;
       mlReport = { exit_code: res.status, signal: res.signal || null };
     }

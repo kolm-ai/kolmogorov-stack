@@ -1,0 +1,130 @@
+[
+  {
+    "id": "A1",
+    "track": "billing-revenue-loop",
+    "title": "Free scan POST /v1/audit/scan returns full paid report envelope (revenue leak)",
+    "file": "src/audit-routes.js:1063-1166 (return at :1163)",
+    "fix": "Gate before returning envelope; unpaid+no-active-subscription returns summary stub only (readiness_pct, blocking_count, by_severity), zero findings/frameworks/evidence_tier. Force report checkout ($750) or Continuous subscription.",
+    "effort": "M"
+  },
+  {
+    "id": "A2",
+    "track": "billing-revenue-loop",
+    "title": "GET /v1/audit/sessions/:id/report returns ungated envelope (json/html/pdf)",
+    "file": "src/audit-routes.js:814-855",
+    "fix": "Apply same tier/payment gate as A1; unpaid -> 403 directing to checkout or Continuous.",
+    "effort": "S"
+  },
+  {
+    "id": "A3",
+    "track": "billing-revenue-loop",
+    "title": "GET /v1/audit/sessions/:id/export returns ungated GRC artifacts (csv/xlsx/drata/vanta)",
+    "file": "src/audit-routes.js:864-874 (_sendExport at :873)",
+    "fix": "Apply tier/payment gate before _sendExport; enforce paid tier=='report' or active Continuous.",
+    "effort": "S"
+  },
+  {
+    "id": "A4",
+    "track": "billing-revenue-loop",
+    "title": "Envelope content not differentiated by tier (watermark is cosmetic only)",
+    "file": "src/attestation-report-builder.js:476-510",
+    "fix": "When tier=='scan', emit summary-only envelope BEFORE signing (omit findings/evidence detail); keep signature valid over reduced payload. Paid path emits full envelope.",
+    "effort": "M"
+  },
+  {
+    "id": "A5",
+    "track": "billing-revenue-loop",
+    "title": "Deep Red-Team ($10,000) product missing from catalog and webhook fulfillment",
+    "file": "src/asr-billing.js:36-70; src/router.js:13117-13192",
+    "fix": "Add redteam product {amount_cents:1000000, kolm_product:'asr_redteam', price_env:'KOLM_STRIPE_PRICE_ASR_DEEP_REDTEAM'} and webhook branch for asrKind=='asr_redteam'.",
+    "effort": "M"
+  },
+  {
+    "id": "A6",
+    "track": "billing-revenue-loop",
+    "title": "Reviewed Attestation ($25,000) product missing from catalog and webhook fulfillment",
+    "file": "src/asr-billing.js:36-70; src/router.js:13117-13192; src/attestation-report-builder.js:186,746",
+    "fix": "Add reviewed product {amount_cents:2500000, kolm_product:'asr_reviewed', price_env:'KOLM_STRIPE_PRICE_ASR_REVIEWED'} and webhook branch for asrKind=='asr_reviewed' activating co-signer entitlement.",
+    "effort": "M"
+  },
+  {
+    "id": "B1",
+    "track": "auth-console",
+    "title": "Timing attack on admin key comparison (strict equality)",
+    "file": "src/auth.js:734",
+    "fix": "Change `key === adminKey` to `constantTimeEqual(key, adminKey)`.",
+    "effort": "S"
+  },
+  {
+    "id": "B2",
+    "track": "auth-console",
+    "title": "Missing GET /v1/audit/sessions list endpoint (customers cannot view purchased audits)",
+    "file": "src/audit-routes.js; src/router.js (~:28459)",
+    "fix": "Implement GET /v1/audit/sessions (auth-gated, tenant-fenced) returning sessions[] {id,tenant_id,product_key,status,created_at,last_run_at,public_slug}; register in router.js.",
+    "effort": "M"
+  },
+  {
+    "id": "B3",
+    "track": "auth-console",
+    "title": "Automations use in-memory Map in production (data loss on restart)",
+    "file": "src/account-ui-routes.js:223-225; src/router.js:28459",
+    "fix": "Register account UI routes with deps {authMiddleware, eventStore:{appendEvent,listEvents}, runRecipe, cronSecret:process.env.KOLM_CRON_SECRET}.",
+    "effort": "M"
+  },
+  {
+    "id": "D1",
+    "track": "storage-persistence",
+    "title": "storeEphemeral() not surfaced in /health (silent paid-data-loss blind spot)",
+    "file": "src/router.js:26 imports, :1583-1596 /health; src/store.js:585-589",
+    "fix": "Import storeEphemeral; add store_ephemeral field to /health body. Live deploy currently durable (volume mounted /app/data), so this is a fail-loudly safety-net blocker.",
+    "effort": "S"
+  },
+  {
+    "id": "E1",
+    "track": "env-deploy-infra",
+    "title": "Forbidden 'honesty' terminology exposed via public GET /v1/changelog",
+    "file": "src/changelog.js (tags + text, lines 7,16,23,35-37 et al)",
+    "fix": "Replace 'honesty' tags with 'transparency'/'full-disclosure'; rewrite 'honesty:' footer and 'honesty contract'; re-render built changelog HTML.",
+    "effort": "S"
+  },
+  {
+    "id": "E2",
+    "track": "website-commercial",
+    "title": "Forbidden 'honest'/'honesty' in customer-facing public docs (api-routes.json, openapi.json)",
+    "file": "public/docs/api-routes.json (14); public/openapi.json (14)",
+    "fix": "Replace 'honest'/'honesty' in generating source (router.js route comments + build-api-ref.cjs/build-openapi.cjs) with accurate/correct/candid/transparent; regenerate; add build-time BANNED check.",
+    "effort": "M"
+  },
+  {
+    "id": "E4",
+    "track": "security",
+    "title": "Personal email rodneyyesep@gmail.com in operator-visible Cloudflare config doc",
+    "file": ".agent/docs/cloudflare-waf-setup-2026-05-16.md:37",
+    "fix": "Replace with dev@kolm.ai; sweep repo for any other rodneyyesep occurrence.",
+    "effort": "S"
+  },
+  {
+    "id": "F1",
+    "track": "security",
+    "title": "Forbidden contact emails returned in API responses (sales@/hello@/leaderboard@)",
+    "file": "src/router.js:11332,11351,11451,11640,11791,12717,2139",
+    "fix": "Replace all with dev@kolm.ai; extract to CONFIG.SUPPORT_EMAIL; add CI grep gate.",
+    "effort": "S"
+  },
+  {
+    "id": "H1",
+    "track": "email-notifications",
+    "title": "Setup-token reveal feature unwired; signup welcome emails ship raw API keys in plaintext",
+    "file": "src/email.js:125-145 (defined, never called); no /v1/setup/reveal route",
+    "fix": "Implement /v1/setup/reveal (one-shot key reveal) and /v1/forgot-key; change tEmailSignup to link /setup?token=<tok> instead of embedding raw key.",
+    "effort": "M"
+  },
+  {
+    "id": "G1",
+    "track": "tests",
+    "title": "Missing integration test proving revenue gate (regression lock for A1-A3)",
+    "file": "tests/asr-revenue-gate.test.js (new)",
+    "fix": "Verify unpaid tenant cannot see findings/frameworks via scan/report/export; paid tenant can; Continuous subscriber can export.",
+    "effort": "M"
+  }
+]

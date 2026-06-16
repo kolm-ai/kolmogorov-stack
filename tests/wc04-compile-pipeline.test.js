@@ -29,19 +29,27 @@ test('WC04-cp #1 PIPELINE_PHASES is exported as an Array of strings', () => {
   for (const p of PIPELINE_PHASES) assert.equal(typeof p, 'string');
 });
 
-test('WC04-cp #2 PIPELINE_PHASES pins the canonical 11-phase ordering', () => {
+test('WC04-cp #2 PIPELINE_PHASES pins the canonical phase ordering', () => {
   // The phase names + ordering are part of the public contract — watchers
-  // (CLI --watch, websocket, log tail) parse on these exact strings.
+  // (CLI --watch, websocket, log tail) parse on these exact strings. The
+  // original 11-phase chain grew by three emitted phases: 'curate' (W921 data-
+  // engine curation, between corpus_prepare and dataset_split), 'distill_eval'
+  // (holdout K-score eval, after distill) and 'regression_gate' (W808 promotion
+  // gate, before install). Each yields its own {phase:...} event, so the
+  // contract must enumerate all 14 in emission order.
   assert.deepEqual(PIPELINE_PHASES, [
     'plan',
     'tokenizer_train',
     'corpus_prepare',
+    'curate',
     'dataset_split',
     'distill',
+    'distill_eval',
     'quantize',
     'bundle',
     'sign',
     'verdict',
+    'regression_gate',
     'install',
     'done',
   ]);
@@ -170,9 +178,10 @@ test('WC04-cp #16 PIPELINE_PHASES contains the optional skip-able phases (quanti
   assert.ok(PIPELINE_PHASES.includes('install'));
 });
 
-test('WC04-cp #17 PIPELINE_PHASES has exactly 11 entries (W381 docblock invariant)', () => {
-  // The docblock at the top of compile-pipeline.js enumerates 11 phases
-  // (1.plan through 11.done). If a phase is added or removed, the
-  // docblock + downstream watchers + this test must move together.
-  assert.equal(PIPELINE_PHASES.length, 11);
+test('WC04-cp #17 PIPELINE_PHASES has exactly 14 entries (W381 docblock invariant)', () => {
+  // The original W381 docblock enumerated 11 phases (plan through done); the
+  // chain since grew by three emitted phases (curate, distill_eval,
+  // regression_gate). If a phase is added or removed, the docblock + downstream
+  // watchers + this test must move together.
+  assert.equal(PIPELINE_PHASES.length, 14);
 });

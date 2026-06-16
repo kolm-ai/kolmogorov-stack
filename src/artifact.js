@@ -69,6 +69,13 @@ import { hashIr } from './workflow-ir.js';
 import { computeKScore as computeKScoreFromKscoreModule } from './kscore.js';
 import { verifyAttestation, manifestBlock as ccManifestBlock, STATES as CC_STATES } from './confidential-compute.js';
 import { loadSignerKeyFromEnv as loadEd25519SignerFromEnv, loadOrCreateDefaultSigner as loadEd25519DefaultSigner, buildSignatureBlock as buildEd25519Block } from './ed25519.js';
+// Model-signing sidecars (model-signing-standards). emitArtifactAttestation
+// writes a signed SLSA Provenance v1 DSSE envelope; toOmsArtifactManifest writes
+// an OpenSSF Model-Signing (OMS) file manifest. Both seal over the ACTUAL
+// bundled member bytes and are EMITTED AFTER artifact_hash (excluded from it,
+// like signature.sig), gated behind the Ed25519 signer.
+import { emitArtifactAttestation } from './intoto-slsa.js';
+import { toOmsArtifactManifest } from './intoto-receipt.js';
 import { buildSigstoreBundle, isDisabled as isSigstoreDisabled, attestArtifactWithRekor, rekorUrl as sigstoreRekorUrl } from './sigstore.js';
 import { canonicalizeOutputSchemaSpec, validateOutputSchemaSpec, OUTPUT_SCHEMA_VERSION } from './output-schema.js';
 // W736 - Guardrail Compilation. Hard-constraint rules ride INSIDE the .kolm
@@ -1901,7 +1908,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // Wave 144 - append extra files (e.g. tokenizer.json) last so they don't
   // shift offsets of the load-bearing files above. Filename collisions with
   // the reserved set would silently shadow; we guard here.
-  const RESERVED_FILENAMES = new Set(['manifest.json', 'recipes.json', 'signature.sig', 'evals.json', 'receipt.json', 'credential.json', 'model.gguf', 'lora.bin', 'index.sqlite-vec', 'workflow_ir.json', 'attestation_report.json', 'recipe.bundle.mjs']);
+  const RESERVED_FILENAMES = new Set(['manifest.json', 'recipes.json', 'signature.sig', 'evals.json', 'receipt.json', 'credential.json', 'model.gguf', 'lora.bin', 'index.sqlite-vec', 'workflow_ir.json', 'attestation_report.json', 'recipe.bundle.mjs', 'provenance.intoto.dsse.json', 'model.sig.bundle']);
   // W457 - also reserve the bundled model_weights filename so an extra_files
   // entry can't silently shadow real weights with a tampered payload.
   if (_modelWeightsRecord) RESERVED_FILENAMES.add(_modelWeightsRecord.filename);
@@ -1915,6 +1922,64 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       files.push({ filename: f.filename, absPath: f.absPath });
     } else {
       files.push({ filename: f.filename, content: f.content });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Model-signing sidecars (model-signing-standards). EMITTED LAST, over the
+  // ACTUAL bundled member bytes, gated behind the Ed25519 signer:
+  //
+  //   provenance.intoto.dsse.json - a signed SLSA Provenance v1 DSSE envelope
+  //     (cosign verify-attestation / slsa-verifier consume it offline).
+  //   model.sig.bundle            - an OpenSSF Model-Signing (OMS) file manifest
+  //     (`model-signing verify` accepts a kolm artifact).
+  //
+  // Both are SEALS over the bytes, exactly like signature.sig: they are added
+  // AFTER artifact_hash and are NOT folded into manifest.hashes nor into
+  // receipt.artifact_files, so they do NOT change artifact_hash / the CID. Their
+  // subjects are the (member path, sha256-over-real-bytes) pairs of the members
+  // already in `files` - NOT the lineage-folded manifest slots - so a model
+  // verifier pins the runnable artifact's actual bytes. signature.sig /
+  // receipt.json / credential.json are themselves seals, so they are not
+  // subjects of the seal.
+  if (ed25519Signer) {
+    const SEAL_FILES = new Set(['signature.sig', 'receipt.json', 'credential.json', 'provenance.intoto.dsse.json', 'model.sig.bundle']);
+    const memberDigests = {};
+    for (const f of files) {
+      if (!f || typeof f.filename !== 'string' || SEAL_FILES.has(f.filename)) continue;
+      let digest = null;
+      try {
+        if (Buffer.isBuffer(f.content)) digest = sha256(f.content);
+        else if (f.absPath) digest = sha256File(f.absPath);
+      } catch { digest = null; }
+      if (digest) memberDigests[f.filename] = digest;
+    }
+    const memberList = Object.keys(memberDigests).sort().map((name) => ({ name, sha256: memberDigests[name] }));
+
+    // SLSA Provenance v1 DSSE sidecar over the real member byte digests.
+    try {
+      const dsseJson = emitArtifactAttestation({
+        ed25519Signer,
+        manifest,
+        hashes,
+        lineage: lineage || null,
+        artifact_hash,
+        cid,
+        jobId: job_id,
+        issued_at,
+        subjectDigests: memberDigests,
+      });
+      files.push({ filename: 'provenance.intoto.dsse.json', content: Buffer.from(dsseJson) });
+    } catch (e) {
+      console.error(`[artifact] WARNING: SLSA DSSE sidecar skipped: ${e.message}`);
+    }
+
+    // OMS file-manifest bundle over the same real member byte digests.
+    try {
+      const omsBundle = toOmsArtifactManifest(memberList, ed25519Signer);
+      files.push({ filename: 'model.sig.bundle', content: Buffer.from(JSON.stringify(omsBundle, null, 2)) });
+    } catch (e) {
+      console.error(`[artifact] WARNING: OMS bundle sidecar skipped: ${e.message}`);
     }
   }
 

@@ -43,6 +43,7 @@ import { tryAppendAudit, AUDIT_OPS } from './audit.js';
 const AUDITS = 'agent_audits';
 export const SUBSCRIPTIONS = 'asr_subscriptions';
 export const PACKAGES = 'asr_packages';
+export const ENTITLEMENTS = 'asr_entitlements';
 
 // Weekly cadence as a fixed interval. The tick is external + idempotent, so an
 // interval-from-claim model is more robust here than wall-clock cron alignment
@@ -325,6 +326,69 @@ export function fulfillPackagePurchase({ tenant_id, product, stripe_session_id }
         actor: 'system',
         op: 'agent_audit.checkout_completed',
         payload: { product, tenant_id, package_id: result.pkg ? result.pkg.id : null },
+      });
+    } catch { /* telemetry is best-effort, never the webhook's problem */ }
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Entitlement: grant a durable, tenant-bound ENTITLEMENT (Deep Red-Team /
+// Reviewed Attestation) from a one-time charge. Writes one asr_entitlements row
+// per (tenant, kind), idempotent on that pair so a replayed webhook never
+// double-grants. Tenant-fenced exactly like fulfillPackagePurchase: the
+// tenant_id predicate guarantees a forged/reused session can never read or
+// mutate another tenant's entitlement.
+//
+//   tenant_id       the owning tenant
+//   kind            durable entitlement kind ('deep_redteam' | 'reviewed_attestation')
+//   kolm_product    the SKU that granted it ('asr_redteam' | 'asr_reviewed')
+//   stripe_session_id  the Stripe checkout session id (recorded on the row)
+// ---------------------------------------------------------------------------
+export function fulfillEntitlementPurchase({ tenant_id, kind, kolm_product, stripe_session_id } = {}) {
+  if (!tenant_id || !kind) return { ok: false, reason: 'missing_fields' };
+  const result = withTransaction(() => {
+    const existing = findOne(ENTITLEMENTS, (e) => e && e.tenant_id === tenant_id && e.kind === kind && e.status === 'active');
+    if (existing) {
+      // Backfill the session id on the first webhook to carry it, but report
+      // `already` so no confirmation side-effect re-fires (idempotent replay).
+      if (stripe_session_id && !existing.stripe_session_id) {
+        update(ENTITLEMENTS, (e) => e.id === existing.id, { stripe_session_id, updated_at: nowIso() });
+      }
+      return { ok: true, already: true, entitlement: findOne(ENTITLEMENTS, (e) => e.id === existing.id) };
+    }
+    const ts = nowIso();
+    const row = {
+      id: storeId('asrent'),
+      tenant_id,
+      kind,
+      kolm_product: kolm_product || null,
+      status: 'active',
+      purchased_at: ts,
+      stripe_session_id: stripe_session_id || null,
+      created_at: ts,
+      updated_at: ts,
+    };
+    insert(ENTITLEMENTS, row);
+    const fresh = findOne(ENTITLEMENTS, (e) => e.id === row.id);
+    if (!fresh || fresh.status !== 'active') {
+      return { ok: false, reason: 'write_unconfirmed', retryable: true };
+    }
+    tryAppendAudit({
+      tenant_id,
+      actor: 'system',
+      op: AUDIT_OPS.STRIPE_EVENT,
+      payload: { kind: 'asr_entitlement_fulfilled', entitlement_kind: kind, kolm_product: kolm_product || null, entitlement_id: fresh.id, stripe_session_id: stripe_session_id || null },
+    });
+    return { ok: true, entitlement: fresh };
+  });
+  if (result && result.ok && !result.already) {
+    try {
+      tryAppendAudit({
+        tenant_id,
+        actor: 'system',
+        op: 'agent_audit.checkout_completed',
+        payload: { kolm_product: kolm_product || null, entitlement_kind: kind, tenant_id, entitlement_id: result.entitlement ? result.entitlement.id : null },
       });
     } catch { /* telemetry is best-effort, never the webhook's problem */ }
   }

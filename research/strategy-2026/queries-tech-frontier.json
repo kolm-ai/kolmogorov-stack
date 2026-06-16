@@ -1,0 +1,98 @@
+[
+  {
+    "id": "tf1-distillation-sota",
+    "track": "tech-distill",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art in LLM knowledge distillation, especially DISTILLING FROM A BLACK-BOX API TEACHER (OpenAI/Anthropic, no logits) into a small open student? Cover: on-policy distillation (GKD, on-policy KD), black-box / sequence-level KD, reverse-KL (MiniLLM), rejection sampling / best-of-n distillation, distilling reasoning/CoT from reasoning models, and any 2025-2026 methods that beat plain SFT-on-teacher-outputs. Cite specific papers (arXiv id + date), GitHub repos, and benchmark deltas. Rank the approaches. Then state concretely: for a startup that captures a customer's real OpenAI/Anthropic API traffic and distills it into their own small model, which 2-3 methods give the biggest quality jump and are implementable without teacher logits? Be specific and numeric."
+  },
+  {
+    "id": "tf2-quantization-fp4-sota",
+    "track": "tech-quant",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art in LLM weight quantization at 4-bit and SUB-4-bit? Cover and rank: NVFP4 / MXFP4 (Blackwell FP4 formats), FP4 PTQ calibration methods (BATQuant, block-granular scaling), GPTQ, AWQ, SpinQuant, QuIP#, AQLM, HQQ, and Quantization-Aware Training/Distillation (QAT/QAD). Give measured accuracy-loss numbers vs FP16 per method at 4-bit and 2-3 bit, and which runtimes (vLLM, TensorRT-LLM, llama.cpp, MLX) support each. Cite papers (arXiv id + date) and repos. Then: for a platform that auto-selects a quantization method per model+hardware and must avoid silent accuracy degradation, what should it adopt in 2026, and what is the single biggest risk on NVFP4? Be specific and numeric."
+  },
+  {
+    "id": "tf3-kvcache-compression-sota",
+    "track": "tech-kv",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art in KV-cache compression for long-context LLM inference? Cover and rank: quantization (KIVI, KVQuant, FP8 KV), eviction/sparsity (H2O, SnapKV, PyramidKV, StreamingLLM sinks), low-rank (Palu, Eigen attention), structural (Shard: PCA+VQ), and importance-tiered/mixed-precision KV. Give compression ratios and quality deltas, and which are integrated in vLLM PagedAttention / SGLang radix cache. Cite papers (arXiv id + date) and repos. Then: for an inference platform that already has an importance-tiered KV profiler (token classes -> precision tiers) plus a PCA+VQ structural compressor but has NOT wired runtime dispatch, what is the highest-leverage integration to ship, and what compression ratio is realistically achievable at parity quality in 2026?"
+  },
+  {
+    "id": "tf4-speculative-decoding-sota",
+    "track": "tech-serving",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art in speculative decoding / inference acceleration for LLM serving? Cover and rank: EAGLE-3 and successors, Medusa, Hydra, lookahead decoding, self-speculative, draft-model vs draft-head approaches, and any 2025-2026 methods. Give measured speedups (tokens/sec, acceptance rate) and vLLM/TensorRT-LLM/SGLang support status. Cite papers (arXiv id + date) and repos. Then: for a platform serving small distilled models with vLLM, which speculative method gives the best latency win with least training cost, and how should a draft model be auto-trained from the same distillation data?"
+  },
+  {
+    "id": "tf5-small-llm-frontier",
+    "track": "tech-models",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what are the BEST small open-weight base/instruct models for fine-tuning and on-device deployment in these size classes: under 1B, 1-2B, 3-4B, 7-9B? Name specific models with release dates and licenses: Qwen3 family, MiniCPM (4/5), Gemma 3 / Gemma 4 (incl E2B/E4B), LFM2 / LFM2.5 (Liquid), SmolLM3, Phi-4-mini, Llama 3.x small, DeepSeek-distill small. Give benchmark scores (MMLU, IFEval, GSM8K, coding) and note which are MoE. Cite sources with dates. Then: for a distillation platform whose headline is 'smallest signed artifact that passes your evals', which 3-4 student backbones should be in the default catalog in mid-2026, and which current defaults (Qwen2.5 family) are now outdated?"
+  },
+  {
+    "id": "tf6-ondevice-inference-sota",
+    "track": "tech-edge",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art for ON-DEVICE and IN-BROWSER LLM inference? Cover and rank runtimes: WebGPU (web-llm/MLC), MLX (Apple), llama.cpp, ONNX Runtime Web, ExecuTorch, and any 2025-2026 entrants. Give realistic tokens/sec for a ~1-3B 4-bit model on a laptop/phone/browser, and what model formats each needs (GGUF, MLX, ONNX). Cite repos and benchmarks with dates. Then: for a platform that signs model artifacts and wants a compelling 'verify the model runs and is the signed one, entirely in your browser' demo, what is the best WebGPU/MLX path to ship, and what are the gotchas (model download size, first-token latency)?"
+  },
+  {
+    "id": "tf7-verifiable-inference-sota",
+    "track": "tech-verify",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art in VERIFIABLE INFERENCE / proof that a specific model produced a specific output? Cover and rank: zkML (EZKL, zkLLM), opML (optimistic), sampling-based / probabilistic proof-of-inference, and HARDWARE attestation via GPU TEE (NVIDIA H100/H200 confidential computing, Hopper CC, NVTrust), plus startups (Tinfoil, Inference Labs, etc.). Give what is actually practical at LLM scale in 2026 (latency/cost overhead) vs research-only. Cite papers, repos, vendor docs with dates. Then: for a company whose moat is Ed25519-signed evidence ('the artifact is authentic') but that does NOT prove 'this output came from running that artifact', what is the most credible, shippable way in 2026 to extend from signed-artifact to proven-compute, and what should be honestly disclaimed?"
+  },
+  {
+    "id": "tf8-model-signing-standards",
+    "track": "tech-supplychain",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what are the standards and tools for ML MODEL SUPPLY-CHAIN security and signing? Cover: Sigstore model-signing (model-transparency / OpenSSF Model Signing), in-toto + SLSA for ML, Hugging Face safetensors signing, model cards + EU AI Act technical documentation (Art. 11/53, GPAI Code of Practice), and any registry/attestation standards. Give the actual artifact/envelope formats and adoption status with dates. Cite specs and repos. Then: for a platform that already ships a custom Ed25519 + RFC6962 Merkle + RFC3161 signed ZIP envelope for its model artifacts, exactly how should it align with Sigstore/OpenSSF Model Signing and in-toto/SLSA to be interoperable and 'first-class supply-chain artifact', without abandoning offline verification? Name the concrete format mappings."
+  },
+  {
+    "id": "tf9-moe-distill-quant-sota",
+    "track": "tech-moe",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art for MIXTURE-OF-EXPERTS (MoE) models in three areas: (1) distilling FROM a large MoE teacher (DeepSeek V3/R1, Qwen3-MoE, Ring-1T, Llama4) into a small dense student; (2) quantizing MoE weights (expert-aware quant, low-bit experts); (3) serving MoE efficiently (expert parallelism, offloading). Give methods, numbers, and repos with dates. Cite sources. Then: for a distillation platform whose teachers are increasingly large open MoE reasoners, what is the best way to distill a 1T-class MoE reasoner down to a laptop-runnable dense student in 2026, and what quality is realistically retained on reasoning benchmarks?"
+  },
+  {
+    "id": "tf10-llm-routing-sota",
+    "track": "tech-routing",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art in LLM REQUEST ROUTING (deciding per-request which model to call to optimize cost and quality)? Cover and rank: RouteLLM, vLLM Semantic Router, NotDiamond, Martian, multi-signal routers, and cascade/escalation approaches. Give how they measure and trade off cost vs quality, what signals they use (embedding, classifier, predicted-quality), and any 2025-2026 work. Cite papers and repos with dates. Then: for a gateway that currently routes by intent/namespace to a primary+fallback and wants to become 'cheapest model that still meets a measured quality bar', what signals and labels must it persist, and what is the simplest router design that beats static routing in 2026?"
+  },
+  {
+    "id": "tf11-finetune-frameworks-sota",
+    "track": "tech-train",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what are the best frameworks and techniques for efficient LoRA/QLoRA and full fine-tuning of LLMs? Compare: Unsloth, Liger Kernel, torchtune, Axolotl, LLaMA-Factory, HF PEFT/TRL, and FSDP2 / DeepSpeed for multi-GPU. Give measured speed/memory deltas, max model size on a single 24-48GB GPU, and 2025-2026 advances (e.g. better LoRA variants: DoRA, PiSSA, LoRA+, rsLoRA). Cite repos and papers with dates. Then: for a platform offering one-click distillation on consumer (RTX 5090 32GB) and cloud (H100) GPUs, what training stack and LoRA variant should be the default in 2026 to maximize quality-per-GPU-dollar, and what is the fastest path to >32B and MoE fine-tuning?"
+  },
+  {
+    "id": "tf12-synthetic-data-distill-sota",
+    "track": "tech-data",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art in SYNTHETIC DATA GENERATION and DATA CURATION for fine-tuning/distillation? Cover and rank: instruction synthesis (Evol-Instruct successors, Magpie, self-instruct variants), data selection/quality scoring (DEITA, deduplication via embeddings, difficulty/diversity sampling), active learning for distillation, and using a strong teacher to generate + filter. Give methods, measured gains, and repos with dates. Cite sources. Then: for a data engine that ingests a customer's real API traffic and must curate + augment it into a high-quality distillation set, which curation and augmentation methods give the biggest K-score / eval lift per dollar in 2026, and what is the right dedup + quality-filter pipeline?"
+  },
+  {
+    "id": "tf13-agent-security-eval-sota",
+    "track": "tech-agenteval",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art in EVALUATING AI AGENT SECURITY: prompt injection, tool/permission misuse, data exfiltration, and audit-trail integrity? Cover benchmarks and tools: AgentDojo, InjecAgent, AgentHarm, Gray Swan / arena results, OWASP LLM Top 10 + Agentic threats, MITRE ATLAS, NIST work, Lakera/Gandalf, and any 2025-2026 agent-security benchmarks. Give what each measures and known SOTA defense/attack numbers. Cite sources with dates. Then: for a company that sells a signed 'Agent Security Readiness' report testing least-privilege, audit-trail tamper-evidence, data-egress, and injection-resistance, which public benchmarks should it map its checks to for credibility, and what test is most defensible to include vs honestly exclude?"
+  },
+  {
+    "id": "tf14-compile-api-to-model-competitors",
+    "track": "tech-compete",
+    "sources": "x,web",
+    "prompt": "As of June 2026, who else lets a company turn their OpenAI/Anthropic API usage into their OWN smaller fine-tuned/distilled model (capture API traffic -> distill -> self-host)? Profile and compare: OpenPipe, Predibase, Together fine-tuning, Fireworks, Lamini, Modal, Baseten/Truss, Unsloth (as a product), and any 2025-2026 entrants. For each: exact product, pricing model, whether they capture/proxy traffic, whether they distill from API teachers, whether the output is portable/self-hostable, and traction signals. Cite sources with dates. Then: for a platform positioned as 'point your API calls at us, own the resulting model, with a signed evidence artifact', what is genuinely differentiated vs these competitors in 2026, and where are we behind on features or DX?"
+  },
+  {
+    "id": "tf15-mcp-tool-gateway-receipts",
+    "track": "tech-mcp",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the MCP (Model Context Protocol) ecosystem and TOOL-CALL GOVERNANCE / gateways? Cover: MCP adoption and security issues (tool poisoning, prompt injection via tools), MCP gateways/proxies (governance, auth, logging), signed tool-call audit trails, and any standards for verifiable tool invocation. Cite sources, repos, vendor docs with dates. Then: for a company with an Ed25519+Merkle signed-receipt spine, is there a real product in 'a governed MCP tool-gateway that issues signed, tamper-evident receipts for every tool call', who is already doing it, and what would the minimal credible v1 look like?"
+  },
+  {
+    "id": "tf16-confidential-compute-distill-privacy",
+    "track": "tech-privacy",
+    "sources": "x,web",
+    "prompt": "As of June 2026, what is the state of the art for PRIVACY-PRESERVING fine-tuning/distillation and confidential inference on customer data? Cover: GPU TEE / confidential computing (H100/H200 CC, Azure/GCP confidential GPUs), differential privacy for fine-tuning, PII redaction pipelines for training data, and 'your data never leaves' architectures (without using that exact phrase). Give what is practical in 2026 (overhead, availability) and cite vendor docs/papers with dates. Then: for a platform that proxies a customer's API traffic and distills a model from it, what is the strongest credible privacy posture to offer in 2026 (redaction + tenant fencing + optional confidential GPU), and what must be honestly disclaimed about data handling?"
+  }
+]

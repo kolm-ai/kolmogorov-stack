@@ -307,6 +307,53 @@ export function toOmsBundle(receipt, signer, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// toOmsArtifactManifest(members, signer, opts) -> bundle (OpenSSF Model-Signing
+// shape) whose subjects are the ACTUAL bundled artifact members.
+//
+// `members` is an array of { name, sha256 } over the real bytes that ship in the
+// .kolm (a weight member, the recipe bundle, etc). Each member must carry a
+// 64-hex sha256 over its actual bytes and a non-empty name; entries that fail
+// either check are DROPPED (never silently signed as a placeholder). Throws when
+// `members` is not an array, or when NO member survives validation (we never
+// sign an empty manifest - an OMS bundle with zero subjects attests nothing).
+//
+// Unlike toOmsBundle (which derives subjects from a kolm inference receipt),
+// this binds a plain (path, byte-sha256) file list, so `model-signing verify`
+// (and any in-toto verifier) accepts a kolm artifact directly.
+// ---------------------------------------------------------------------------
+export function toOmsArtifactManifest(members, signer, opts = {}) {
+  if (!Array.isArray(members)) {
+    throw new Error('toOmsArtifactManifest: members must be an array of { name, sha256 }');
+  }
+  if (!signer || !signer.privateKey) {
+    throw new Error('toOmsArtifactManifest: signer with privateKey required');
+  }
+  const subjects = [];
+  for (const m of members) {
+    if (!m || typeof m !== 'object') continue;
+    const name = typeof m.name === 'string' ? m.name : null;
+    const sha256 = typeof m.sha256 === 'string' ? m.sha256.toLowerCase() : null;
+    if (!name) continue;                      // dropped: no name
+    if (!sha256 || !/^[0-9a-f]{64}$/.test(sha256)) continue; // dropped: not 64-hex
+    subjects.push({ name, digest: { sha256 } });
+  }
+  if (subjects.length === 0) {
+    throw new Error('toOmsArtifactManifest: no members with a valid 64-hex sha256; refusing to sign an empty manifest');
+  }
+  const predicate = opts.predicate || {
+    resources: subjects.map((s) => ({ name: s.name, digest: s.digest })),
+    model_signing_version: '1.0',
+    note: 'kolm artifact members expressed as an OpenSSF Model-Signing-compatible manifest',
+  };
+  const signed = signInTotoBundle({ /* placeholder receipt, subjects override */ }, signer, {
+    subjects,
+    predicateType: OMS_SIGNATURE_PREDICATE_TYPE,
+    predicate,
+  });
+  return signed.bundle;
+}
+
+// ---------------------------------------------------------------------------
 // verifyInTotoBundle(bundleOrEnvelope, opts) -> verdict. NEVER throws.
 //
 // Accepts either a full bundle ({ dsseEnvelope, verificationMaterial }) or a

@@ -20,8 +20,27 @@
 
 import { setTimeout as delay } from 'node:timers/promises';
 
-// step labels exposed in the UI - keep in sync with create-model.html
-export const COMPILE_STEPS = [
+// =============================================================================
+// Atom 4 (CA-04) - the legacy fabricated-metric stub is DEMO-ONLY and gated.
+//
+// The functions below stream INVENTED per-pass K-scores (0.71/0.83/0.91) with
+// no real training. That directly contradicts the holdout-eval contract the
+// rest of CompileArtifact enforces, so they must never be reachable from a
+// production import path. Per the no-delete rule we keep the capability (a
+// deterministic demo stream for UI prototyping) but:
+//   1. rename it to demoEventLog / streamDemoCompile so no caller binding the
+//      production symbol (streamRealCompile) can resolve it by mistake;
+//   2. ONLY export it when process.env.KOLM_COMPILE_STREAM_DEMO === '1'. When
+//      the flag is unset the exports are undefined, so router.js / the wizard
+//      cannot import a fabricated-metric streamer.
+// The REAL path is streamRealCompile (below), which only ever emits the holdout
+// K-score the pipeline actually measured (job.k_score).
+// =============================================================================
+
+const COMPILE_STREAM_DEMO_ENABLED = process.env.KOLM_COMPILE_STREAM_DEMO === '1';
+
+// step labels for the demo stream - keep in sync with create-model.html
+const _DEMO_COMPILE_STEPS = [
   { id: 'preparing',   label: 'Preparing dataset' },
   { id: 'train.pass1', label: 'Train pass 1' },
   { id: 'train.pass2', label: 'Train pass 2' },
@@ -30,31 +49,36 @@ export const COMPILE_STEPS = [
   { id: 'sign',        label: 'Sign + receipt' },
 ];
 
-// Deterministic K-Score progression per pass - keeps the stub UI legible.
-const K_SCORE_BY_PASS = { 1: 0.71, 2: 0.83, 3: 0.91 };
+// Deterministic K-Score progression per pass - FABRICATED, demo legibility only.
+const _DEMO_K_SCORE_BY_PASS = { 1: 0.71, 2: 0.83, 3: 0.91 };
 
-// Build the canonical event log for a job id. Used both for SSE replay AND
-// reattach (cursor skip). Pure - no I/O, no Date.now() - so the same job
-// always produces the same log shape.
-export function buildEventLog(jobId) {
+// Build the canonical demo event log for a job id. Used both for SSE replay AND
+// reattach (cursor skip). Pure - no I/O, no Date.now(). The emitted k_scores are
+// FABRICATED; this function is demo-only and not exported unless
+// KOLM_COMPILE_STREAM_DEMO=1.
+function demoEventLog(jobId) {
   const events = [];
   let seq = 0;
   const push = (event, data) => { events.push({ seq: ++seq, event, data }); };
 
-  push('hello', { job: jobId, steps: COMPILE_STEPS.map(s => ({ id: s.id, label: s.label, status: 'pending' })) });
-  for (const step of COMPILE_STEPS) {
+  push('hello', { job: jobId, demo: true, steps: _DEMO_COMPILE_STEPS.map(s => ({ id: s.id, label: s.label, status: 'pending' })) });
+  for (const step of _DEMO_COMPILE_STEPS) {
     push('step.start', { step: step.id, status: 'running' });
     if (step.id.startsWith('train.pass')) {
       const passNum = parseInt(step.id.split('pass')[1], 10);
-      push('metric', { step: step.id, k_score: K_SCORE_BY_PASS[passNum] || 0 });
+      // demo:true + k_source:'demo' so any consumer can see the score is NOT a
+      // real holdout metric.
+      push('metric', { step: step.id, k_score: _DEMO_K_SCORE_BY_PASS[passNum] || 0, demo: true, k_source: 'demo' });
     }
     push('step.end', { step: step.id, status: 'done' });
   }
   push('done', {
     job: jobId,
+    demo: true,
     slug: `art_${jobId.slice(0, 12)}`,
     artifact_url: `/account/artifacts/art_${jobId.slice(0, 12)}`,
     k_score: 0.91,
+    k_source: 'demo',
     duration_s: 6.6,
     quant: 'int4',
     file_size_gb: 1.9,
@@ -62,11 +86,9 @@ export function buildEventLog(jobId) {
   return events;
 }
 
-// Write SSE headers + emit deterministic events at the requested cadence.
-// `cursor` (int) skips events whose seq <= cursor so the browser can
-// resume after a reload. Returns when the stream completes or the client
-// disconnects.
-export async function streamCompile(req, res, jobId, opts = {}) {
+// Write SSE headers + emit deterministic DEMO events at the requested cadence.
+// Demo-only; not exported unless KOLM_COMPILE_STREAM_DEMO=1.
+async function streamDemoCompile(req, res, jobId, opts = {}) {
   const cadenceMs = Math.max(50, Math.min(5000, Number(opts.cadenceMs) || 300));
   const cursor = Math.max(0, parseInt(req.query.cursor || '0', 10) || 0);
 
@@ -77,9 +99,9 @@ export async function streamCompile(req, res, jobId, opts = {}) {
     'X-Accel-Buffering': 'no', // disable nginx/Vercel buffering
   });
   // First chunk so the browser knows the stream is open.
-  res.write(': kolm-compile-stream ' + jobId + '\n\n');
+  res.write(': kolm-compile-stream-demo ' + jobId + '\n\n');
 
-  const log = buildEventLog(jobId);
+  const log = demoEventLog(jobId);
   let cancelled = false;
   req.on('close', () => { cancelled = true; });
 
@@ -98,6 +120,13 @@ export async function streamCompile(req, res, jobId, opts = {}) {
   }
   if (!cancelled) res.end();
 }
+
+// Demo-only exports. These names resolve to `undefined` unless the operator
+// explicitly sets KOLM_COMPILE_STREAM_DEMO=1, so no production import path can
+// pull a fabricated-metric stream. The production streamer is streamRealCompile.
+export const COMPILE_STREAM_DEMO = COMPILE_STREAM_DEMO_ENABLED
+  ? { demoEventLog, streamDemoCompile, DEMO_COMPILE_STEPS: _DEMO_COMPILE_STEPS }
+  : null;
 
 // =============================================================================
 // W-3 (Path to 100%) - REAL compile streaming. The functions above are the

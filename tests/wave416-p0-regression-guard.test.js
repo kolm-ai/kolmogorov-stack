@@ -22,14 +22,24 @@ const compileSrc = fs.readFileSync(COMPILE_PATH, 'utf8');
 const distillSrc = fs.readFileSync(DISTILL_PATH, 'utf8');
 
 test('W416 #1 — compile-pipeline passes trainPairs (not corpusPairs) to distill()', () => {
-  // The fix at compile-pipeline.js: distillPairs hydrated from trainPairs,
-  // corpusPairs ONLY as fallback when trainPairs is empty (W409c stub path).
-  assert.match(compileSrc, /distillPairs\s*=\s*\(\s*trainPairs\s*&&\s*trainPairs\.length\s*\)\s*\?\s*trainPairs\s*:\s*corpusPairs/,
-    'distillPairs must prefer trainPairs over corpusPairs');
-  // The distill() call must use distillPairs (not raw corpusPairs).
+  // W411 hardened this guarantee: distillPairs is train-ONLY. The empty-train
+  // corpus fallback now fails closed (throw unless allow_stub mirrors corpusPairs
+  // INTO trainPairs above), so by the time distillPairs is assigned it is exactly
+  // the train set - corpusPairs never reaches distillation across the holdout
+  // boundary. Assert the current, stronger train-only form rather than the
+  // superseded `: corpusPairs` ternary (which W411 forbids).
+  assert.match(compileSrc, /const\s+distillPairs\s*=\s*trainPairs\s*;/,
+    'distillPairs must be assigned trainPairs (train-only), not corpusPairs');
+  assert.ok(
+    !/distillPairs\s*=\s*\([^)]*\)\s*\?\s*trainPairs\s*:\s*corpusPairs/.test(compileSrc),
+    'the silent (trainPairs ? trainPairs : corpusPairs) corpus fallback must be gone (W411)');
+  // The distill() call must be fed from the train-only set (distillPairs or the
+  // curriculum-ordered view of it, distillFeed) - never raw corpusPairs.
   const distillCall = compileSrc.match(/distill\(\s*\{[\s\S]{0,800}?pairs_override:\s*(\w+)/);
   assert.ok(distillCall, 'distill() call with pairs_override must exist');
-  assert.equal(distillCall[1], 'distillPairs', 'pairs_override must be distillPairs, not corpusPairs');
+  assert.ok(
+    ['distillPairs', 'distillFeed'].includes(distillCall[1]),
+    'pairs_override must be the train-only distillPairs/distillFeed, not corpusPairs');
 });
 
 test('W416 #2 — prepareDistillCorpus preserves source_type metadata', () => {

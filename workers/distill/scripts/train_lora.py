@@ -36,6 +36,100 @@ def _require(mod_name, install_hint):
         sys.exit(3)
 
 
+def _row_id(row):
+    """Stable id for a pair row, matching the JS capture_id contract."""
+    for k in ("id", "capture_id", "event_id", "trace_id"):
+        v = row.get(k) if isinstance(row, dict) else None
+        if isinstance(v, str) and v:
+            return v
+    return None
+
+
+def curriculum_sort_rows(rows, mode):
+    """Sort rows ascending (default) / descending by complexity_proxy. Rows
+    missing the field get a neutral 0.5 so the sort stays well-defined. STABLE
+    (Python sort is stable) so equal-complexity rows keep input order. Returns
+    (sorted_rows, meta). Mirrors apps/trainer/distill.py::_curriculum_sort_rows."""
+    direction = "descending" if str(mode).lower() == "descending" else "ascending"
+    n_missing = 0
+
+    def _key(r):
+        nonlocal n_missing
+        cp = r.get("complexity_proxy") if isinstance(r, dict) else None
+        if not isinstance(cp, (int, float)):
+            n_missing += 1
+            return 0.5
+        return max(0.0, min(1.0, float(cp)))
+
+    keyed = [(_key(r), i, r) for i, r in enumerate(rows)]
+    reverse = direction == "descending"
+    keyed.sort(key=lambda t: (t[0], t[1]), reverse=reverse)
+    # reverse=True also flips the stable index tiebreak; re-stabilize.
+    if reverse:
+        keyed.sort(key=lambda t: t[1])
+        keyed.sort(key=lambda t: -t[0])
+    out = [t[2] for t in keyed]
+    return out, {"mode": direction, "rows": len(rows), "rows_missing_proxy": n_missing}
+
+
+def load_importance_weights(path):
+    """Load a {capture_id, importance} JSONL into a dict. Malformed rows are
+    skipped (never aborts). Mirrors apps/trainer/distill.py::
+    _load_importance_weights_jsonl."""
+    weights = {}
+    if not path:
+        return weights
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for ln, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                cid = obj.get("capture_id")
+                imp = obj.get("importance")
+                if not isinstance(cid, str) or not isinstance(imp, (int, float)):
+                    continue
+                weights[cid] = max(0.0, min(1.0, float(imp)))
+    except FileNotFoundError:
+        sys.stderr.write(f"[train_lora] --importance-weights file not found: {path}\n")
+        return {}
+    except OSError as e:
+        sys.stderr.write(f"[train_lora] --importance-weights read failed: {path}: {e}\n")
+        return {}
+    return weights
+
+
+def build_weighted_sampler(rows, weights):
+    """Map per-row importance to a torch WeightedRandomSampler. Returns
+    (sampler, n_matched). Unmatched rows get a neutral 0.5 weight so they stay
+    in the sample. Returns (None, 0) when nothing matched (caller falls back to
+    default sampling). Mirrors apps/trainer/distill.py::_build_weighted_sampler."""
+    import torch
+    from torch.utils.data import WeightedRandomSampler
+
+    if not weights or not rows:
+        return None, 0
+    per_row = []
+    matched = 0
+    for r in rows:
+        cid = _row_id(r)
+        if cid and cid in weights:
+            per_row.append(float(weights[cid]))
+            matched += 1
+        else:
+            per_row.append(0.5)
+    if matched == 0:
+        return None, 0
+    if sum(per_row) <= 0:
+        per_row = [1e-6 for _ in per_row]
+    w = torch.as_tensor(per_row, dtype=torch.double)
+    return WeightedRandomSampler(weights=w, num_samples=len(per_row), replacement=True), matched
+
+
 def main():
     p = argparse.ArgumentParser(description="kolm distillation LoRA fine-tune")
     p.add_argument("--pairs", required=True, help="training-pairs.jsonl from distill.mjs")
@@ -47,6 +141,18 @@ def main():
     p.add_argument("--batch-size", type=int, default=4)
     p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--max-length", type=int, default=512)
+    # W713 — curriculum ordering. When set (ascending|descending|1), sort the
+    # training rows by their complexity_proxy field (stamped JS-side by
+    # src/curriculum-sort.js + carried through distill.mjs) and walk them with a
+    # SequentialSampler so the student sees the easy distribution first. A
+    # shuffler / WeightedRandomSampler defeats the order, so --curriculum WINS
+    # over --importance-weights when both are passed.
+    p.add_argument("--curriculum", default=None,
+                   help="ascending|descending|1 — order rows by complexity_proxy")
+    # W711 — importance weighting. When set to a weights JSONL ({capture_id,
+    # importance}), oversample high-value captures via a WeightedRandomSampler.
+    p.add_argument("--importance-weights", dest="importance_weights", default=None,
+                   help="path to {capture_id, importance} JSONL for weighted sampling")
     # W921 — dry-run / preflight: construct the variant config + probe deps and
     # exit WITHOUT loading models or training. GPU-free; used by --self-test and
     # the orchestrator preflight gate.
@@ -128,6 +234,26 @@ def main():
     if not rows:
         sys.stderr.write("[train_lora] no usable pairs; aborting.\n")
         sys.exit(5)
+
+    # ── W713/W711 data-ordering resolution. --curriculum WINS over
+    # --importance-weights (deterministic curriculum order is incompatible with
+    # weighted random sampling). We record what actually engaged in
+    # ordering_meta so the training-summary documents it. ──
+    ordering_meta = {"curriculum": None, "importance_weights": False}
+    curriculum_active = bool(args.curriculum) and str(args.curriculum).lower() not in ("0", "false", "off", "")
+    if curriculum_active:
+        rows, cmeta = curriculum_sort_rows(rows, args.curriculum)
+        ordering_meta["curriculum"] = cmeta
+        print(f"[train_lora] curriculum sort active ({cmeta['mode']}); "
+              f"{cmeta['rows_missing_proxy']}/{cmeta['rows']} rows lacked complexity_proxy (neutral 0.5)")
+    importance_weights = {}
+    if args.importance_weights and not curriculum_active:
+        importance_weights = load_importance_weights(args.importance_weights)
+        if importance_weights:
+            print(f"[train_lora] importance weighting active: {len(importance_weights)} weights loaded")
+    elif args.importance_weights and curriculum_active:
+        sys.stderr.write("[train_lora] --curriculum set; ignoring --importance-weights "
+                         "(curriculum order wins over weighted sampling)\n")
 
     # Resolve friendly short names to canonical HF repo ids so a --student-base
     # like "qwen2.5-0.5b" works out of the box (a bare short name is not a valid
@@ -283,6 +409,39 @@ def main():
         except Exception as e:
             sys.stderr.write(f"[train_lora] KOLM_EARLY_STOP=1 but EarlyStoppingCallback unavailable: {e}\n")
 
+    # ── W713/W711 — sampler override. We subclass Trainer to install either a
+    # SequentialSampler (curriculum: walk the pre-ordered rows in order) or a
+    # WeightedRandomSampler (importance: oversample high-value captures). Rows
+    # in `ds` are index-aligned to `rows`, so the weighted sampler built from
+    # `rows` maps cleanly onto the dataset. When neither is active the override
+    # returns None so the stock Trainer sampler (shuffle) is used unchanged. ──
+    from torch.utils.data import SequentialSampler
+    _curriculum_active = curriculum_active
+    _weighted_sampler = None
+    _weighted_matched = 0
+    if importance_weights:
+        _weighted_sampler, _weighted_matched = build_weighted_sampler(rows, importance_weights)
+        if _weighted_sampler is not None:
+            ordering_meta["importance_weights"] = {
+                "weights_loaded": len(importance_weights),
+                "rows_matched": _weighted_matched,
+                "rows_total": len(rows),
+            }
+        else:
+            sys.stderr.write("[train_lora] no rows matched the importance weights; "
+                             "falling back to default sampling\n")
+
+    class _KolmOrderedTrainer(Trainer):
+        def _get_train_sampler(self, *a, **k):
+            if _curriculum_active:
+                # Deterministic simple->complex walk over the pre-ordered rows.
+                return SequentialSampler(self.train_dataset)
+            if _weighted_sampler is not None:
+                return _weighted_sampler
+            return super()._get_train_sampler(*a, **k)
+
+    TrainerCls = _KolmOrderedTrainer if (_curriculum_active or _weighted_sampler is not None) else Trainer
+
     trainer_kwargs = dict(
         model=model,
         args=training,
@@ -294,7 +453,7 @@ def main():
     # to the Trainer default by passing (optim, None)).
     if custom_optimizer is not None:
         trainer_kwargs["optimizers"] = (custom_optimizer, None)
-    trainer = Trainer(**trainer_kwargs)
+    trainer = TrainerCls(**trainer_kwargs)
 
     trainer.train()
     # W921 — PiSSA conversion at save: rewrite the residual-relative adapter to
@@ -343,6 +502,11 @@ def main():
                 "packing": packing_enabled,
                 "pissa_converted": pissa_converted,
             },
+            # W713/W711 — data-ordering provenance so the .kolm receipt chain
+            # documents whether the student was trained under a curriculum
+            # (SequentialSampler) or importance-weighted (WeightedRandomSampler)
+            # regime. Both null/false on the default shuffle path.
+            "ordering": ordering_meta,
         }, f, indent=2)
 
     print(f"[train_lora] done. adapter at {args.out}")

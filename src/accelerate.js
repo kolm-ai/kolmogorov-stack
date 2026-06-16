@@ -77,15 +77,25 @@ const TASK_CLASS_BASELINES = Object.freeze({
 });
 
 /**
- * Detect a configured speculative-decoding backend. Detection precedence:
+ * Detect a configured speculative-decoding backend AND construct the real
+ * in-process bridge for it when its endpoints are configured. Detection
+ * precedence:
  *
  *   1. process.env.KOLM_SPEC_DECODE_BACKEND  (explicit operator opt-in)
- *   2. src/spec-decode.js trainer presence    (W480 reused - if the trainer
- *      is on PATH the operator has at least built a pair, so a server-side
- *      inference path is plausible)
  *
- * Returns {ok:true, backend, source} or {ok:false, error, hint}. NEVER
- * throws.
+ * When the named backend has its runtime endpoints configured (llama-cpp:
+ * KOLM_LLAMA_DRAFT_URL + KOLM_LLAMA_TARGET_URL; vllm/sglang/tgi: KOLM_*_URL)
+ * we build the adapter from src/accelerate-backends/ and return it as
+ * `backend`. The router (and any caller) can pass that object straight into
+ * acceleratedChatCompletion, so the SOTA student-as-draft/teacher-verify
+ * orchestration actually runs against a live engine in production.
+ *
+ * Returns:
+ *   { ok:true, backend, bridge?, source }   bridge present when constructed
+ *   { ok:false, error, hint }               named-but-unconfigured / unknown
+ *
+ * NEVER throws - a bridge that cannot be constructed (missing endpoints)
+ * downgrades to the honest no_kernel envelope with an actionable hint.
  */
 export function detectSpecDecodeBackend(env = process.env) {
   const explicit = String(env && env.KOLM_SPEC_DECODE_BACKEND || '').trim().toLowerCase();
@@ -109,6 +119,60 @@ export function detectSpecDecodeBackend(env = process.env) {
     hint: 'set KOLM_SPEC_DECODE_BACKEND=<llama-cpp|vllm|tgi|sglang>',
     version: ACCELERATE_VERSION,
   };
+}
+
+/**
+ * Construct (and return) the real in-process spec-decode bridge for the
+ * configured backend. This is the production wiring the router calls instead
+ * of passing backend:null. Returns:
+ *
+ *   { ok:true, backend, bridge, source }     bridge is the live adapter object
+ *   { ok:false, error, hint, version }       honest no_kernel / unconfigured
+ *
+ * Detection: the named backend must (a) be a KNOWN_BACKENDS name AND (b) have
+ * its runtime endpoints configured in env. If the name is set but the
+ * endpoints are missing we return a loud, actionable hint rather than a stub.
+ * NEVER throws; bridge-construction errors are caught and surfaced as the
+ * honest envelope.
+ */
+export async function buildSpecDecodeBackend(env = process.env) {
+  const det = detectSpecDecodeBackend(env);
+  if (!det.ok) return { ...det, version: ACCELERATE_VERSION };
+  let mod;
+  try {
+    mod = await import('./accelerate-backends/index.js');
+  } catch (e) {
+    return {
+      ok: false,
+      error: 'backend_module_load_failed',
+      hint: 'src/accelerate-backends/index.js failed to import',
+      detail: (e && e.message) || String(e),
+      version: ACCELERATE_VERSION,
+    };
+  }
+  if (typeof mod.backendConfigured === 'function' && !mod.backendConfigured(det.backend, env)) {
+    return {
+      ok: false,
+      error: 'no_kernel',
+      hint: det.backend === 'llama-cpp'
+        ? 'set KOLM_LLAMA_DRAFT_URL and KOLM_LLAMA_TARGET_URL to two llama-server OpenAI-compatible endpoints'
+        : `set KOLM_${det.backend.toUpperCase()}_URL to your ${det.backend} OpenAI-compatible endpoint`,
+      detected_backend: det.backend,
+      version: ACCELERATE_VERSION,
+    };
+  }
+  try {
+    const bridge = mod.createSpecDecodeBackend(det.backend, env);
+    return { ok: true, backend: det.backend, bridge, source: det.source };
+  } catch (e) {
+    return {
+      ok: false,
+      error: (e && e.code) || 'backend_construct_failed',
+      hint: (e && e.message) || String(e),
+      detected_backend: det.backend,
+      version: ACCELERATE_VERSION,
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -238,28 +302,23 @@ export async function acceleratedChatCompletion(opts = {}) {
 
   const n = Math.max(1, Math.min(64, Math.trunc(Number(n_draft_tokens) || 4)));
 
-  // Resolve the backend. Explicit injection wins; otherwise detection.
+  // Resolve the backend. Explicit injection wins; otherwise build the real
+  // in-process bridge from env (llama.cpp draft+target or vLLM/SGLang/TGI).
   let chosenBackend = backend;
   if (!chosenBackend) {
-    const det = detectSpecDecodeBackend(env);
-    if (!det.ok) {
+    const built = await buildSpecDecodeBackend(env);
+    if (!built.ok || !built.bridge) {
       return {
         ok: false,
-        error: det.error || 'no_kernel',
-        hint: det.hint,
+        error: built.error || 'no_kernel',
+        hint: built.hint,
         version: ACCELERATE_VERSION,
+        detected_backend: built.detected_backend || built.backend || null,
       };
     }
-    // The router supplies the real backend at production wiring time. When
-    // detect says "ok" but no backend was injected we still refuse - we'd
-    // rather honestly say "no backend bridge" than fabricate token counts.
-    return {
-      ok: false,
-      error: 'no_kernel',
-      hint: `backend ${det.backend} detected via ${det.source} but no in-process bridge supplied; pass opts.backend or wire src/router.js bridge`,
-      version: ACCELERATE_VERSION,
-      detected_backend: det.backend,
-    };
+    // Real bridge constructed against a live engine. From here the per-token
+    // acceptance math is computed from the backend's actual verify outcomes.
+    chosenBackend = built.bridge;
   }
 
   // W709/W807 compose - high-confidence student path skips teacher verify.
@@ -421,17 +480,19 @@ export async function benchAcceptanceRate(opts = {}) {
     };
   }
   const N = Math.max(1, Math.trunc(Number(samples) || 1));
-  if (!backend) {
-    const det = detectSpecDecodeBackend(env);
-    if (!det.ok) {
+  let benchBackend = backend;
+  if (!benchBackend) {
+    const built = await buildSpecDecodeBackend(env);
+    if (!built.ok || !built.bridge) {
       return {
         ok: false,
-        error: det.error || 'no_kernel',
-        hint: det.hint,
+        error: built.error || 'no_kernel',
+        hint: built.hint,
         task_class,
         version: ACCELERATE_VERSION,
       };
     }
+    benchBackend = built.bridge;
   }
 
   let accSum = 0;
@@ -448,7 +509,7 @@ export async function benchAcceptanceRate(opts = {}) {
       namespace: 'bench_w727',
       accelerate: true,
       n_draft_tokens,
-      backend,
+      backend: benchBackend,
       env,
     });
     if (!r.ok) {
@@ -509,6 +570,7 @@ export default {
   TASK_CLASSES,
   BASELINES,
   detectSpecDecodeBackend,
+  buildSpecDecodeBackend,
   acceleratedChatCompletion,
   benchAcceptanceRate,
 };

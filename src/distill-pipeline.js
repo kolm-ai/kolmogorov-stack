@@ -45,6 +45,13 @@ import { fileURLToPath } from 'node:url';
 import { listEvents } from './event-store.js';
 // W787 - compute-efficiency knobs (precision mode, grad checkpointing, early stop).
 import { normalizeEfficiencyOptions, buildEfficiencyEnv } from './distill-efficiency.js';
+// W713 (curriculum ordering) + W711 (importance weighting). These were
+// previously reachable ONLY through a side CLI command; the main distill()
+// path now threads them when a curriculum/importance knob is set so the
+// student's sampler (SequentialSampler / WeightedRandomSampler in the Python
+// trainer) actually engages. See _resolveOrderingPolicy + the staging block.
+import { complexityProxy, sortCapturesByCurriculum, buildUnigramTable } from './curriculum-sort.js';
+import { createScorerWindow } from './capture-importance.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
@@ -426,8 +433,64 @@ function _resolveWorkerMode() {
   return { mode: 'collect', teacher };
 }
 
+// W713/W711 - resolve whether the default distill path should engage curriculum
+// ordering and/or importance weighting. Activation sources (any one trips it):
+//   - explicit per-call opts.curriculum / opts.importance (recipe knob)
+//   - env KOLM_DISTILL_CURRICULUM (any of: '1','ascending','descending')
+//   - env KOLM_DISTILL_IMPORTANCE === '1'
+// Returns a normalized policy { curriculum: 'ascending'|'descending'|null,
+// importance: boolean }. When neither is set, returns the all-off policy so the
+// existing default path (plain shuffle) is byte-identical to before.
+//
+// curriculum + importance are MUTUALLY adjustable but the Python trainer
+// resolves the conflict (curriculum wins over importance when both are set,
+// because a deterministic curriculum order is incompatible with weighted
+// random sampling - see apps/trainer/distill.py). We still stamp both files so
+// the trainer can record the conflict in run-meta.
+export function _resolveOrderingPolicy(opts = {}) {
+  const envCur = String(process.env.KOLM_DISTILL_CURRICULUM || '').trim().toLowerCase();
+  let curriculum = null;
+  if (opts && opts.curriculum != null) {
+    const c = String(opts.curriculum).trim().toLowerCase();
+    if (c === 'descending') curriculum = 'descending';
+    else if (c === '1' || c === 'true' || c === 'ascending' || c === 'on') curriculum = 'ascending';
+  } else if (envCur) {
+    if (envCur === 'descending') curriculum = 'descending';
+    else if (envCur === '1' || envCur === 'true' || envCur === 'ascending' || envCur === 'on') curriculum = 'ascending';
+  }
+  let importance = false;
+  if (opts && opts.importance != null) {
+    const i = String(opts.importance).trim().toLowerCase();
+    importance = (i === '1' || i === 'true' || i === 'on');
+  } else {
+    importance = process.env.KOLM_DISTILL_IMPORTANCE === '1';
+  }
+  return { curriculum, importance };
+}
+
+// W713 - map a pipeline pair {prompt,response,event_id} into the capture shape
+// the W711/W713 scorers expect ({prompt, response, capture_id}). Pure.
+function _pairToCapture(p, i) {
+  return {
+    prompt: typeof p.prompt === 'string' ? p.prompt : '',
+    response: typeof p.response === 'string' ? p.response : '',
+    capture_id: p.event_id || `pair_${i + 1}`,
+  };
+}
+
 // Write spec.json + seeds.jsonl into the worker's input dir.
-function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId }) {
+//
+// W713/W711 - when `ordering` requests curriculum and/or importance, we:
+//   (a) stamp complexity_proxy on each staged seed row (the trainer's
+//       SequentialSampler reads it directly),
+//   (b) emit importance-weights.jsonl alongside seeds.jsonl (one
+//       {capture_id, importance} row per pair) for the WeightedRandomSampler,
+//   (c) order the seed rows ascending-by-complexity when curriculum is set so
+//       even a trainer that ignores --curriculum still sees the easy
+//       distribution first.
+// The returned `ordering_meta` records what was actually stamped so distill()
+// can put it on run-meta.json (auditable).
+function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId, ordering = null }) {
   fs.mkdirSync(runDir, { recursive: true });
   const specPath = path.join(runDir, 'spec.json');
   const seedsPath = path.join(runDir, 'seeds.jsonl');
@@ -439,12 +502,77 @@ function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId }) {
     student_base: baseModel,
     system: '',
   }, null, 2));
-  fs.writeFileSync(seedsPath, pairs.map((p, i) => JSON.stringify({
-    id: p.event_id || `pair_${i + 1}`,
-    input: p.prompt,
-    output: p.response,
-  })).join('\n') + '\n');
-  return { specPath, seedsPath, outDir };
+
+  const wantCurriculum = !!(ordering && ordering.curriculum);
+  const wantImportance = !!(ordering && ordering.importance);
+  let importanceWeightsPath = null;
+  const ordering_meta = {
+    curriculum_mode: wantCurriculum ? ordering.curriculum : null,
+    importance_weights: false,
+    complexity_stamped: false,
+    rows: pairs.length,
+  };
+
+  // Build the (possibly reordered) list of pairs + their capture views once so
+  // complexity is computed against the same corpus reference table.
+  let orderedPairs = pairs;
+  if (wantCurriculum && pairs.length >= 2) {
+    // Decorate pairs with their capture view, sort the captures, then map the
+    // sorted order back onto the original pairs by capture_id.
+    const captures = pairs.map(_pairToCapture);
+    const sortedCaptures = sortCapturesByCurriculum(captures, ordering.curriculum);
+    const byId = new Map();
+    pairs.forEach((p, i) => byId.set(_pairToCapture(p, i).capture_id, p));
+    orderedPairs = sortedCaptures.map((c) => byId.get(c.capture_id)).filter(Boolean);
+    // Defensive: if the join lost rows (duplicate ids), fall back to the input.
+    if (orderedPairs.length !== pairs.length) orderedPairs = pairs;
+  }
+
+  // Stamp complexity_proxy on each staged row when curriculum is active.
+  // complexityProxy is per-corpus, so reuse one unigram table built from all
+  // captures (sortCapturesByCurriculum already built one internally; here we
+  // recompute against the full set for the stamp - cheap, O(N*tokens)).
+  let complexityById = null;
+  if (wantCurriculum) {
+    complexityById = new Map();
+    const allCaptures = orderedPairs.map(_pairToCapture);
+    // Build the shared table so every stamp scores against the same corpus.
+    const { table, total } = buildUnigramTable(allCaptures);
+    for (let i = 0; i < orderedPairs.length; i++) {
+      const cap = _pairToCapture(orderedPairs[i], i);
+      const score = complexityProxy(cap, { unigramTable: table, totalTokens: total }).score;
+      complexityById.set(cap.capture_id, score);
+    }
+    ordering_meta.complexity_stamped = true;
+  }
+
+  fs.writeFileSync(seedsPath, orderedPairs.map((p, i) => {
+    const id = p.event_id || `pair_${i + 1}`;
+    const row = { id, input: p.prompt, output: p.response };
+    if (complexityById && complexityById.has(id)) {
+      row.complexity_proxy = complexityById.get(id);
+    }
+    return JSON.stringify(row);
+  }).join('\n') + '\n');
+
+  // Emit the importance-weights JSONL (one row per pair) when importance is
+  // active. Uses the rolling-window novelty scorer so the contract matches
+  // src/capture-importance.js::buildImportanceJsonlRows exactly.
+  if (wantImportance) {
+    importanceWeightsPath = path.join(runDir, 'importance-weights.jsonl');
+    const win = createScorerWindow(Math.max(1000, orderedPairs.length));
+    const lines = [];
+    for (let i = 0; i < orderedPairs.length; i++) {
+      const cap = _pairToCapture(orderedPairs[i], i);
+      const r = win.score(cap);
+      const importance = Math.max(0, Math.min(1, r.score));
+      lines.push(JSON.stringify({ capture_id: cap.capture_id, importance }));
+    }
+    fs.writeFileSync(importanceWeightsPath, lines.join('\n') + (lines.length ? '\n' : ''), 'utf8');
+    ordering_meta.importance_weights = true;
+  }
+
+  return { specPath, seedsPath, outDir, importanceWeightsPath, ordering_meta };
 }
 
 // Main distill iterator. Yields progress events as the worker runs and a
@@ -482,12 +610,16 @@ export async function* distill({
   emit_progress_every = 100,
   tenant_id = null,                // W422 P0-4 - canonical tenant scope
   tenant = null,                   // W422 P0-4 - shorthand alias for tenant_id
-  teacher_fallback = true,         // W459 - auto-retry with next teacher on worker_error
-  resume_from = null,              // W459 - resume a prior run_<id>: replay seeds + skip completed steps
-  // W787 - compute-efficiency knobs (default "off"). See normalizeEfficiencyOptions.
+  teacher_fallback = true,         // W459 - auto-retry with next teacher
+  resume_from = null,              // W459 - resume a prior run_<id>
+  // W787 - compute-efficiency knobs (default off; see normalizeEfficiencyOptions).
   precision_mode = null,
   gradient_checkpointing = null,
   early_stop_config = null,
+  // W713/W711 - curriculum ordering + importance weighting knobs (default off);
+  // resolved by _resolveOrderingPolicy (see the body for the full contract).
+  curriculum = null,
+  importance = null,
 } = {}) {
   if (!MODES.includes(pipeline_mode)) {
     throw new Error(`pipeline_mode must be one of [${MODES.join(', ')}]`);
@@ -505,6 +637,9 @@ export async function* distill({
       })
     : null;
   const _efficiencyEnv = _efficiency ? buildEfficiencyEnv(_efficiency) : {};
+  // W713/W711 - resolve the data-ordering policy ONCE up front (env or recipe
+  // knob). Off by default; see _resolveOrderingPolicy.
+  const _ordering = _resolveOrderingPolicy({ curriculum, importance });
   const jobId = 'distill_' + Date.now().toString(36) + '_' + crypto.randomBytes(3).toString('hex');
   // W422 P0-4 - resolve the tenant scope BEFORE any corpus read. The audit
   // (2026-05-19) flagged that direct distill({teacher_namespace, ...}) calls
@@ -638,6 +773,9 @@ export async function* distill({
       // used on this run?" without reading the worker log. Null when no
       // efficiency knobs were passed (existing-caller compat).
       efficiency: _efficiency,
+      // W713/W711 - the resolved data-ordering policy for this run.
+      // curriculum is null|'ascending'|'descending'; importance is boolean.
+      ordering: { curriculum: _ordering.curriculum, importance: _ordering.importance },
       created_at: new Date().toISOString(),
     }, null, 2));
   } catch (_) {} // deliberate: cleanup
@@ -651,20 +789,32 @@ export async function* distill({
   // verbatim (the prior run already paid the IO cost). Otherwise stage fresh
   // worker inputs from this run's pairs.
   let specPath, seedsPath, outDir;
+  let importanceWeightsPath = null;
+  let orderingMeta = null;
   if (resume_from) {
     specPath = path.join(runDir, 'spec.json');
     seedsPath = path.join(runDir, 'seeds.jsonl');
     outDir = path.join(runDir, 'out');
     fs.mkdirSync(outDir, { recursive: true });
+    // W711 - a resumed run reuses the prior seeds + importance-weights.jsonl
+    // verbatim (the prior run already staged them). Re-resolve the path so the
+    // worker argv below still points the trainer at it.
+    if (_ordering.importance) {
+      const iw = path.join(runDir, 'importance-weights.jsonl');
+      if (fs.existsSync(iw)) importanceWeightsPath = iw;
+    }
     // Yield resume marker so iterator consumers can show "resumed from X".
     yield { resume: true, prev_steps: resumePriorSteps, run_id: resume_from };
   } else {
     const staged = _writeWorkerInputs({
       runDir, namespace: teacher_namespace, pairs, baseModel: student_base, jobId,
+      ordering: _ordering,
     });
     specPath = staged.specPath;
     seedsPath = staged.seedsPath;
     outDir = staged.outDir;
+    importanceWeightsPath = staged.importanceWeightsPath;
+    orderingMeta = staged.ordering_meta;
   }
   const worker = worker_cmd || process.env.KOLM_DISTILL_WORKER_CMD || DEFAULT_WORKER;
   const logPath = path.join(runDir, 'distill.log');
@@ -702,6 +852,15 @@ export async function* distill({
     if (teacher) args.push(`--teacher=${teacher}`);
     if (pipeline_mode !== 'kd_softmax') args.push(`--distillation-method=${pipeline_mode}`);
     if (tokenizer_path) args.push(`--tokenizer-path=${tokenizer_path}`);
+    // W713 - tell the worker (and the Python trainer it spawns) to walk the
+    // staged rows in curriculum order via a SequentialSampler. The staged
+    // seeds.jsonl already carries complexity_proxy + is pre-ordered.
+    if (_ordering.curriculum) args.push(`--curriculum=${_ordering.curriculum}`);
+    // W711 - point the trainer's WeightedRandomSampler at the sibling
+    // importance-weights.jsonl we staged next to seeds.jsonl.
+    if (_ordering.importance && importanceWeightsPath) {
+      args.push(`--importance-weights=${importanceWeightsPath}`);
+    }
     // Spawn detached so the parent can move on while the worker runs.
     const logFd = fs.openSync(logPath, 'a');
     const child = spawn(process.execPath, args, {
@@ -901,6 +1060,11 @@ export async function* distill({
     // block of the .kolm receipt so a verifier can confirm the chokepoint
     // fired.
     holdout_excluded_count,
+    // W713/W711 - what the staging step actually stamped. ordering_meta is
+    // null on a resumed run (seeds were staged by the prior run); the resolved
+    // policy still lives on run-meta.json's `ordering` block.
+    ordering: { curriculum: _ordering.curriculum, importance: _ordering.importance },
+    ordering_meta: orderingMeta,
     exit: exitInfo,
     manifest: workerManifest,
     duration_ms: Date.now() - start,
@@ -1188,4 +1352,4 @@ function _w808ExtractCriticalFailRate(run_dir, manifest) {
   return 0;
 }
 
-export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, listDistillRuns, readDistillRun, classifyTeacher, TEACHER_SOURCE_CLASSIFICATION, _w808RegressionGate, W808_KSCORE_DROP_THRESHOLD, W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD, W808_REGRESSION_GATE_VERSION };
+export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, _resolveOrderingPolicy, listDistillRuns, readDistillRun, classifyTeacher, TEACHER_SOURCE_CLASSIFICATION, _w808RegressionGate, W808_KSCORE_DROP_THRESHOLD, W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD, W808_REGRESSION_GATE_VERSION };

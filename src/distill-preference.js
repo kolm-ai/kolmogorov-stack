@@ -14,6 +14,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+const _here = path.dirname(fileURLToPath(import.meta.url));
+const _repoRoot = path.resolve(_here, '..');
+
+function _pythonBin() {
+  return process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+}
 
 export const OBJECTIVES = ['dpo', 'simpo', 'orpo', 'kto'];
 
@@ -53,7 +61,18 @@ function whichSync(name) {
   return null;
 }
 
+// W713 - resolve the preference trainer. Order of precedence:
+//   1. KOLM_PREFERENCE_NO_TRAINER=1 forces the durable no-tool path (test seam,
+//      mirrors src/distill-grpo.js's KOLM_GRPO_NO_TRAINER).
+//   2. $KOLM_PREFERENCE_TRAINER override (JSON array or PATH name) - an
+//      explicit override that points nowhere is "no trainer", NOT a silent
+//      fallback to the in-repo script.
+//   3. A `kolm-preference-distill` / `preference-distill` on PATH.
+//   4. The in-repo workers/distill/scripts/train_preference.py (the first-class
+//      K-score-aligned trainer). This is the default that makes the preference
+//      path reachable through the product shell (the prior dark-by-default gap).
 function resolveTrainer() {
+  if (process.env.KOLM_PREFERENCE_NO_TRAINER === '1') return null;
   const envCmd = process.env.KOLM_PREFERENCE_TRAINER;
   if (envCmd) {
     try {
@@ -71,6 +90,9 @@ function resolveTrainer() {
     const r = whichSync(name);
     if (r) return { argv: [r], source: 'path' };
   }
+  // In-repo first-class trainer (mirrors distill-grpo.js in_repo fallback).
+  const inRepo = path.join(_repoRoot, 'workers', 'distill', 'scripts', 'train_preference.py');
+  if (fs.existsSync(inRepo)) return { argv: [_pythonBin(), inRepo], source: 'in_repo' };
   return null;
 }
 
@@ -91,7 +113,9 @@ export function doctor() {
     ready: true,
     kind: 'distill_preference',
     objectives: OBJECTIVES,
-    trainer: t.argv[0],
+    // For the in_repo path argv is [python, script]; surface the script so
+    // doctor names the actual trainer, not the interpreter.
+    trainer: t.source === 'in_repo' && t.argv.length > 1 ? t.argv[1] : t.argv[0],
     trainer_source: t.source,
   };
 }
@@ -104,6 +128,13 @@ export function trainPreference({
   tenant_id = 'local',
   namespace = 'default',
   beta = 0.1,
+  // W713 - K-score reward shaping. When true (default), the in-repo trainer
+  // weights the DPO/SimPO/ORPO loss by the K-score margin derived from each
+  // pair's chosen/rejected scores (if the pairs JSONL carries chosen_score /
+  // rejected_score or a `margin` field), and records reward_source='kscore' in
+  // run-meta.json so the receipt chain proves train-eval scoring parity. Set
+  // false to fall back to the vanilla trl loss (no margin weighting).
+  kscoreReward = true,
   timeoutMs = 30 * 60 * 1000,
 } = {}) {
   if (!OBJECTIVES.includes(objective)) {
@@ -137,6 +168,10 @@ export function trainPreference({
     '--namespace', namespace,
     '--tenant', tenant_id,
   ];
+  // W713 - engage the K-score-aligned reward shaping on the in-repo trainer.
+  // The external override / PATH trainers may not accept this flag, so only
+  // pass it for the in_repo source.
+  if (kscoreReward && t.source === 'in_repo') args.push('--reward-source', 'kscore');
   const result = spawnSync(t.argv[0], args, {
     stdio: 'pipe',
     timeout: timeoutMs,
@@ -165,6 +200,10 @@ export function trainPreference({
     kind: 'distill_preference',
     objective,
     run_dir: runDir,
+    trainer_source: t.source,
+    // W713 - the reward authority the trainer actually used (echoed from the
+    // manifest so callers can prove train-eval parity without re-reading disk).
+    reward_source: (manifest && manifest.reward_source) || (kscoreReward && t.source === 'in_repo' ? 'kscore' : 'trl_default'),
     manifest,
     stdout: stdout.slice(-2000),
   };

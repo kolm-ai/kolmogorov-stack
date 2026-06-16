@@ -44,7 +44,7 @@
 <div class="app">
   <div class="topbar">
     <a class="brandlink" href="/"><span class="mono">kolm</span></a>
-    <nav><a class="chip" href="/account/overview" style="text-decoration:none">overview</a> <a class="chip" href="/account/api-control-center" style="text-decoration:none">API control</a></nav>
+    <nav><a class="chip" href="/account/overview" style="text-decoration:none">overview</a> <a class="chip" href="/account/train" style="text-decoration:none">train</a> <a class="chip" href="/account/org" style="text-decoration:none">team</a> <a class="chip" href="/account/api-control-center" style="text-decoration:none">API control</a></nav>
   </div>
   <div id="banner"></div>
   <main id="main" data-testid="dashboard-root"></main>
@@ -55,6 +55,23 @@
   var KEY = null;
   try { KEY = sessionStorage.getItem('kolm_account_key') || sessionStorage.getItem('kolm_dash_key') || null; } catch(e) {}
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  // Key-recovery confirmation. The recovery flow redirects to
+  // /account/dashboard?recovered=1 once a new workspace key has been issued and
+  // the session re-established; surface a clear, one-time confirmation so the
+  // user knows their old key is now rotated out.
+  (function(){
+    try {
+      var p = new URLSearchParams(window.location.search);
+      if (p.get('recovered') === '1') {
+        document.getElementById('banner').innerHTML =
+          '<div class="banner" data-testid="recovered-banner" style="border-color:var(--accent,#3FE5A0)">'
+          + 'Your workspace key was recovered. The previous key is now rotated out - update any stored copies with the key shown on the recovery screen.'
+          + '</div>';
+        try { p.delete('recovered'); var qs = p.toString(); history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : '')); } catch(e) {}
+      }
+    } catch(e) {}
+  })();
   function headers(){ var h = {'Accept':'application/json'}; if (KEY) h.Authorization = 'Bearer ' + KEY; return h; }
   function num(n){ return (typeof n==='number' && isFinite(n)) ? n.toLocaleString() : '0'; }
 

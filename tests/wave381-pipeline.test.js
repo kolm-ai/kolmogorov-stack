@@ -386,9 +386,10 @@ test('W381 #9 — compileFull emits all 11 phases in order', async () => {
     await _seedNamespace('w381-compile-9', 30);
     const { compileFull, PIPELINE_PHASES } = await import('../src/compile-pipeline.js');
     assert.deepEqual(PIPELINE_PHASES, [
-      'plan', 'tokenizer_train', 'corpus_prepare', 'dataset_split',
-      'distill', 'quantize', 'bundle', 'sign', 'verdict', 'install', 'done',
-    ], 'PIPELINE_PHASES must be the 11-phase canonical list');
+      'plan', 'tokenizer_train', 'corpus_prepare', 'curate', 'dataset_split',
+      'distill', 'distill_eval', 'quantize', 'bundle', 'sign', 'verdict',
+      'regression_gate', 'install', 'done',
+    ], 'PIPELINE_PHASES must be the canonical phase list (incl. curate / distill_eval / regression_gate)');
     const phasesSeen = [];
     for await (const ev of compileFull({
       namespace: 'w381-compile-9',
@@ -397,7 +398,12 @@ test('W381 #9 — compileFull emits all 11 phases in order', async () => {
       phasesSeen.push(ev.phase);
     }
     // Each canonical phase must appear at least once. distill may repeat.
+    // distill_eval is CONDITIONAL (only when a real student + holdout exist; the
+    // stub/CPU lane produces no student weights) so it is exempt from the
+    // must-appear check.
+    const CONDITIONAL_PHASES = new Set(['distill_eval']);
     for (const expected of PIPELINE_PHASES) {
+      if (CONDITIONAL_PHASES.has(expected)) continue;
       assert.ok(phasesSeen.includes(expected),
         `expected phase '${expected}' in [${phasesSeen.join(', ')}]`);
     }

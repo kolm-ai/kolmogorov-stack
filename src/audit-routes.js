@@ -26,7 +26,7 @@
 //   POST /v1/audit/scan                       one-shot scan → signed report
 //   POST /v1/audit/report/verify  (PUBLIC)    verify a posted signed report
 
-import { insert, update, findByField, withTransaction, id as storeId } from './store.js';
+import { insert, update, find, findByField, withTransaction, id as storeId } from './store.js';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -37,6 +37,7 @@ import {
   renderReportHtml,
   renderReportPdf,
   verifyReport,
+  stripWirePayload,
   AUDIT_REPORT_SCHEMA,
   AUDIT_REPORT_VERSION,
 } from './attestation-report-builder.js';
@@ -48,7 +49,7 @@ import { register as registerTrustCenter, recordTrustView } from './trust-center
 import { revoke as revokeIssuerKey, status as issuerKeyStatus, KEY_REVOCATION_VERSION } from './key-revocation.js';
 import { tryAppendAudit } from './audit.js';
 import { createAsrCheckout, asrBillingReady } from './asr-billing.js';
-import { resolveTrust, resolvePriorReport, runDueReattestations, forceReattest } from './asr-fulfillment.js';
+import { resolveTrust, resolvePriorReport, runDueReattestations, forceReattest, SUBSCRIPTIONS as ASR_SUBSCRIPTIONS } from './asr-fulfillment.js';
 import { computeAuditDelta } from './audit-delta.js';
 import { runFixRetest } from './fix-retest.js';
 import { autofillQuestionnaire, toQuestionnaireCsv, QUESTIONNAIRE_TEMPLATES } from './questionnaire-autofill.js';
@@ -65,6 +66,36 @@ import { notify } from './notifications.js';
 export const AUDIT_ROUTES_VERSION = 'asr-audit-routes/0.1';
 
 const TABLE = 'agent_audits';
+
+// ---------------------------------------------------------------------------
+// tenantHasReportEntitlement(tenantId, auditRow?) -> Promise<boolean>
+//
+// The REVENUE GATE the report routes call to decide summary-vs-report (and
+// 403-vs-deliverable). A tenant is entitled to the FULL signed report when
+// EITHER:
+//   (a) the specific audit row was PAID for - paid:true, or tier:'report'
+//       (the one-off Signed Readiness Report purchase flips both), OR
+//   (b) the tenant holds an ACTIVE Continuous subscription (an asr_subscriptions
+//       row with status:'active') - the subscription entitles every deliverable
+//       the tenant fetches/exports, even off an unpaid scan row.
+//
+// A cancelled / lapsed subscription does NOT entitle. A null/empty tenant id
+// never accidentally entitles. Async so the gate can later consult an external
+// billing source without changing call sites; the current implementation reads
+// the local store synchronously.
+// ---------------------------------------------------------------------------
+export async function tenantHasReportEntitlement(tenantId, auditRow = null) {
+  // (a) the audit row itself was paid.
+  if (auditRow && typeof auditRow === 'object') {
+    if (auditRow.paid === true) return true;
+    if (auditRow.tier === 'report') return true;
+  }
+  // (b) an active Continuous subscription on this tenant.
+  const tid = tenantId == null ? '' : String(tenantId);
+  if (!tid) return false;
+  const activeSub = find(ASR_SUBSCRIPTIONS, (s) => s && s.tenant_id === tid && s.status === 'active');
+  return Array.isArray(activeSub) ? activeSub.length > 0 : !!activeSub;
+}
 
 // Defensive cap so a single tenant cannot accumulate an unbounded session in
 // the JSON store. 20k records is far above any real agent export a buyer hands
@@ -819,7 +850,11 @@ export function register(r, deps = {}) {
     if (!sess) return _err(res, 404, 'session_not_found', `no audit session ${id} for this tenant`);
     if (!sess.report) return _err(res, 409, 'report_not_ready', 'run the session before fetching its report');
 
-    const envelope = sess.report;
+    // Strip the server-side-only _full_payload carry-over before the envelope
+    // reaches the client (the scan tier stashes its withheld paid-tier sections
+    // there for the paid upgrade; it must never go out on the wire). Stripping a
+    // non-signature-covered field leaves the signature valid.
+    const envelope = stripWirePayload(sess.report);
     const format = (req.query && String(req.query.format || 'json')).toLowerCase();
     const fname = (sess.report_id || 'agent-security-report');
 
@@ -870,7 +905,7 @@ export function register(r, deps = {}) {
     if (!sess.report) return _err(res, 409, 'report_not_ready', 'run the session before exporting its report');
     const format = (req.query && req.query.format) || 'csv';
     tryAppendAudit({ tenant_id: trec.id, actor: trec.id, op: 'agent_audit.export', payload: { id, report_id: sess.report_id, format: String(format).toLowerCase() } });
-    return _sendExport(res, sess.report, format);
+    return _sendExport(res, stripWirePayload(sess.report), format);
   });
 
   // -------------------------------------------------------------------------
@@ -1111,6 +1146,11 @@ export function register(r, deps = {}) {
       source, subject,
       retentionDays,
       sign,
+      // The kolm-capture bridge is a FIRST-PARTY grade-A attestation over the
+      // tenant's own gateway captures (not a paywalled vendor preview), so it
+      // builds the full report tier - keeping the signature-covered evidence_tier
+      // grade INSIDE the envelope rather than withholding it as a scan-tier stub.
+      tier: isCaptureBridge ? 'report' : 'scan',
       allowedHosts: hostsNorm.hosts,
       coverageDeclaration: covNorm.declaration,
     });
@@ -1486,6 +1526,8 @@ export function register(r, deps = {}) {
     }
     const { audit, report, signError, auditError } = _runAndSign(text, {
       source: srcLabel, subject, retentionDays, sign,
+      // First-party capture bridge -> full report tier (see scan route note).
+      tier: isCaptureBridge ? 'report' : 'scan',
       allowedHosts: hostsNorm.hosts,
       coverageDeclaration: covNorm.declaration,
     });
@@ -1624,7 +1666,11 @@ export function register(r, deps = {}) {
       res.setHeader('Cache-Control', 'no-store');
       return res.send(_trustPendingHtml());
     }
-    const envelope = hit.envelope;
+    // Defense-in-depth: strip the server-side-only _full_payload carry-over if
+    // any resolved envelope ever carries it (resolveTrust yields paid/report-tier
+    // envelopes, which already drop it on the paid upgrade; this keeps the public
+    // Trust surface free of the carry-over regardless).
+    const envelope = stripWirePayload(hit.envelope);
     const format = (req.query && String(req.query.format || 'html')).toLowerCase();
     const fname = hit.report_id || 'agent-security-report';
 

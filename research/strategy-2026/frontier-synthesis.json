@@ -1,0 +1,387 @@
+{
+  "surgicalNow": [
+    {
+      "category": "kv-cache",
+      "title": "Wire the real KV policy dispatcher into `kolm serve`",
+      "where": "cli/kolm.js serve handler ~:14302-14347; import selectKvCachePolicy from src/serve-config.js",
+      "what": "Replace the legacy binary selectKvCache call (sets only KOLM_KV_CACHE_BACKEND) with selectKvCachePolicy(...) and set KOLM_KV_POLICY JSON (serve.py already reads it). Expand --kv-cache to {auto,off,streaming,h2o,snapkv,pyramidkv,kivi2,kivi4,shard} + add --kv-budget/--kv-sink/--kv-window/--kv-group/--kv-residual. Keep KOLM_KV_CACHE_BACKEND=shard back-compat. Makes the already-tested kvpress/KIVI dispatcher reachable end-to-end.",
+      "effort": "M",
+      "risk": "low",
+      "value": 10
+    },
+    {
+      "category": "llm-routing",
+      "title": "Load trained ClusterRouterStats in the live dispatch path (turn the dead router on)",
+      "where": "src/router.js ~6740-6748; add a memoized loader calling route-quality-store.getClusterQualityStats then ClusterRouterStats.restore, pass as scoreRoute({...,stats})",
+      "what": "Replace the hardcoded stats:null (which forces cold_start static routing) with a per-(tenant,namespace) stats load, best-effort try/catch, falling back to null when empty. Un-trained namespaces unchanged; trained namespaces go live. Gate behind existing route_mode opt-in.",
+      "effort": "M",
+      "risk": "med",
+      "value": 9
+    },
+    {
+      "category": "llm-routing",
+      "title": "Close the routing flywheel: call recordRouteOutcome after dispatch",
+      "where": "src/router.js after dispatch+output (~6807) and receipt assembly (~6898), same best-effort style as existing lake writes",
+      "what": "On each served cost_quality/semantic request, compute cluster_id via stats.assign and call route-quality-store.recordRouteOutcome with chosen model/provider/realized_quality (reuse K-Score/acceptance signal)/cost/latency. Only missing link to make trainClustersFromLake/getClusterQualityStats produce real stats from live traffic.",
+      "effort": "M",
+      "risk": "med",
+      "value": 9
+    },
+    {
+      "category": "distillation",
+      "title": "Add ROPD/GKD/DistiLLM-2/CoT to the recommender + stop recommending logit-KD vs API teachers",
+      "where": "src/distill-strategy.js STRATEGIES table (4-116), commandFor (175), scoreStrategy (188-211)",
+      "what": "Add ropd/gkd_onpolicy/distillm2/cot_distill strategy entries; map ropd-blackbox -> `kolm distill onpolicy --ropd`. When classifyTeacher==='proprietary' (import from distill-pipeline.js) heavily penalize kd_softmax/kd_top_k (need logits) and boost ropd; boost cot_distill for reasoning. Aligns the oracle's advice with the engine kolm already ships.",
+      "effort": "M",
+      "risk": "low",
+      "value": 9
+    },
+    {
+      "category": "quantization",
+      "title": "Add NVFP4/MXFP4 method entries + Blackwell device preset to the oracle",
+      "where": "src/quantization-oracle.js METHOD_CATALOG, DEVICE_PRESETS, runtimeCompatible/RUNTIME_ALIASES",
+      "what": "Insert nvfp4 (size-aware quality_loss, calibration_required, runtimes tensorrt/vllm, execution_status export_nvfp4) + mxfp4; add b200-180gb + rtx-5090-32gb presets. Prefer nvfp4 when device runtime is Blackwell+tensorrt/vllm and emit the export-nvfp4 command. Oracle never recommends the research #1 4-bit format today even though export/calib code exists.",
+      "effort": "M",
+      "risk": "med",
+      "value": 9
+    },
+    {
+      "category": "quantization",
+      "title": "Add an enforced post-quant accuracy gate to bakeoff + oracle proof",
+      "where": "src/quantize-bakeoff.js (new enforceAccuracyFloor) + quantization-oracle.js recommendation.proof",
+      "what": "Compute relative kscore drop vs the highest-bit baseline profile; mark profiles over max_rel_drop (default 0.03) accepted:false reason accuracy_below_floor. Turn the oracle's advisory 'run holdout eval' string into a structured gate {required:true,max_rel_drop:0.03,metric:'kscore'}. Closes the research's named #1 risk (silent accuracy degradation).",
+      "effort": "M",
+      "risk": "low",
+      "value": 9
+    },
+    {
+      "category": "mcp-tool-gateway-receipts",
+      "title": "Wire MCP gateway to durable store + signer in prod",
+      "where": "src/router.js L28624 __registerMcpGatewayRoutes_w921 call; also L28623 intoto-receipt-routes",
+      "what": "Pass {authMiddleware, store, getSigner} so MCP receipts persist to store.js (route already supports store.insert/findByTenant) and GET /v1/mcp/verify/:id survives restart instead of a process-local Map that 404s after redeploy. Same store/getReceipt seam for intoto-receipt-routes.",
+      "effort": "S",
+      "risk": "low",
+      "value": 9
+    },
+    {
+      "category": "mcp-tool-gateway-receipts",
+      "title": "Anchor MCP receipts into the existing Merkle transparency log",
+      "where": "src/mcp-gateway-routes.js dispatch handler after persist.save (~L174); call transparency-anchor.enqueueReceipt off hot path",
+      "what": "Enqueue mcp-tool-call-1 receipt leaves so the batcher stamps {batch_id,leaf_index,audit_path,batch_root,checkpoint}. anchorLeafHash already canonicalizes any receipt shape. Delivers the rare differentiator (Ed25519 per-call + Merkle batch proof) to the tool path, not just inference. Add one MCP-anchor round-trip test.",
+      "effort": "M",
+      "risk": "low",
+      "value": 9
+    },
+    {
+      "category": "small-llm-students",
+      "title": "Add 2026 frontier students to the default registry",
+      "where": "src/models.js MODELS array (after ~511) + TIER_BY_USE (515-555)",
+      "what": "Add SmolLM3-3B (Apache, 128K), microsoft/Phi-4-mini-instruct (3.8B MIT), Qwen3-4B-Instruct (Apache), LiquidAI/LFM2.5-1.2B (Apache, mobile). Mirror existing row shape; recommend()/fitsOn()/list() consume with zero code change. Catalog is currently Qwen2.5-vintage which the research explicitly names outdated.",
+      "effort": "S",
+      "risk": "low",
+      "value": 9
+    },
+    {
+      "category": "ondevice-inference",
+      "title": "Fix phantom WebGPU-runner evidence in platform-capabilities",
+      "where": "src/platform-capabilities.js lines 113-125 (wasm-webgpu row) + echo in public/product-graph.json",
+      "what": "Remove the non-existent public/device/webgpu-runner.js/.html from the evidence array (keep only files that exist) and rewrite the note to stop claiming a runner shipped. Integrity bug: a capability-claim audit following the evidence path hits 404. Pure honesty fix.",
+      "effort": "S",
+      "risk": "low",
+      "value": 8
+    },
+    {
+      "category": "verifiable-inference",
+      "title": "Migrate sigstore inclusion verification to the audited merkle.js",
+      "where": "src/sigstore.js verifyRekorInclusionProof (400-480); remove local rfc6962LeafHash/rfc6962InnerHash + lone-right-edge walk (441-458)",
+      "what": "Replace the hand-rolled tree walk (which reuses the exact lone-right-edge pattern merkle.js was written to fix) with merkle.verifyInclusion using proof.logIndex/treeSize/hashes vs proof.rootHash. One audited Merkle implementation; removes a branch flagged as broken.",
+      "effort": "S",
+      "risk": "low",
+      "value": 8
+    },
+    {
+      "category": "quantization",
+      "title": "Wire the FP4 calibration plan into the oracle recommendation",
+      "where": "src/quantization-oracle.js rankQuantizationStrategies recommendation block (359-371); import buildFp4CalibPlan from src/fp4-calib-plan.js",
+      "what": "When primary method is FP4-family, attach buildFp4CalibPlan(...) and surface plan.python_flags in proof/command so the recommended command actually runs --calib-fp4. Today oracle and fp4-calib-plan never meet. Both modules already pure.",
+      "effort": "S",
+      "risk": "low",
+      "value": 8
+    },
+    {
+      "category": "compile-api-to-model-competitors",
+      "title": "Label synthetic vs measured progress in distill telemetry",
+      "where": "src/distill-pipeline.js synthetic-step loop (~722-738), done envelope (~869-902), listDistillRuns/readDistillRun (914-995)",
+      "what": "Stamp every synthesized progress event + run-meta with telemetry_source:'synthetic' (stub/collect) vs 'measured' (full mode). Add k_source/loss_source so /v1/distill/runs never presents a fabricated loss curve as measured. Protects the evidence/trust positioning.",
+      "effort": "S",
+      "risk": "low",
+      "value": 8
+    },
+    {
+      "category": "model-signing-standards",
+      "title": "Write a build-time OMS/SLSA DSSE sidecar into the .kolm container",
+      "where": "src/artifact.js build path (~1784-1900); call intoto-slsa.emitArtifactAttestation with per-member SHA-256 from manifest.hashes; push provenance.intoto.dsse.json into files[] + RESERVED_FILENAMES, exclude from artifact_hash_input like signature.sig",
+      "what": "Emit the already-implemented, already-tested signed SLSA Provenance v1 DSSE envelope as a ZIP member so a .kolm is self-describing to cosign verify-attestation / slsa-verifier offline. The promised sidecar is never appended today; only an API route reaches it. Gate behind existing sigstore/ed25519 flags.",
+      "effort": "M",
+      "risk": "med",
+      "value": 9
+    },
+    {
+      "category": "finetune-frameworks",
+      "title": "Wire --backend=auto|unsloth dispatch in the production worker",
+      "where": "workers/distill/scripts/train_lora.py argparse (~49); add _exec_unsloth_backend os.execv to existing train_lora_unsloth.py mirror",
+      "what": "Honor the already-documented contract: add --backend, an import-probe auto-detector (unsloth present + family in {qwen,llama,gemma,phi,mistral}), exec the mirror that already reads identical env. Pure dispatch glue unlocking the 2-5x single-GPU speedup on the main distill path (currently only via apps/trainer/standalone).",
+      "effort": "M",
+      "risk": "med",
+      "value": 9
+    },
+    {
+      "category": "confidential-compute",
+      "title": "Redact the training corpus before distillation",
+      "where": "src/airgap-distill.js offlineDistill (write sibling *.redacted.jsonl) and/or src/secure-training.js (add redactTrainingData); import redactWithPolicy from src/privacy-membrane.js",
+      "what": "Stream training JSONL, run redactWithPolicy on prompt+response, write redacted copy, point distill at it. Stamp redaction_applied/classes_redacted/detector_version into the queued spec. The frontier #1 pillar (mandatory redaction before training) is missing: we detect+flag+block but never strip.",
+      "effort": "M",
+      "risk": "med",
+      "value": 9
+    },
+    {
+      "category": "agent-security-eval",
+      "title": "Add an explicit public-benchmark cross-walk table to the signed report",
+      "where": "src/red-team.js (new BENCHMARK_MAP by probe id) + attestation-report-builder.js buildRedTeamBlock (386-394); render in red-team sections",
+      "what": "For each of 12 probes add public-benchmark references (e.g. data-exfil -> AgentDojo workspace exfil, InjecAgent data-exfil, MITRE AML.T0057). Delivers the research's core credibility recommendation with no new execution. Extends cleanly under existing red-team.test.js framework-array assertions.",
+      "effort": "S",
+      "risk": "low",
+      "value": 8
+    },
+    {
+      "category": "distillation",
+      "title": "Expose a --bon (best-of-N) rejection-sampling curation flag",
+      "where": "src/distill-preference.js (reuse scoreCandidateLocal/tokenOverlap, new buildBonTargets) + cli/kolm.js distill rejection path + apps/trainer/distill.py SFT loader",
+      "what": "buildBonTargets(seeds,{n,judge}) samples N teacher/student responses per prompt and selects top by the existing scorer, emitting curated SeqKD JSONL. The BOND/BoN +2-4pt layer; reuses already-real scoring + existing SFT trainer; gated by existing distill tests.",
+      "effort": "M",
+      "risk": "low",
+      "value": 7
+    },
+    {
+      "category": "small-llm-students",
+      "title": "Re-point default/3-4B tier picks off Qwen2.5",
+      "where": "src/models.js DEFAULT_MODEL (513) + TIER_BY_USE default/reasoning keys",
+      "what": "After the new rows exist, set DEFAULT_MODEL + default/chat/agent to Qwen3-4B (or SmolLM3-3B for the Apache small-artifact story) and reasoning to Phi-4-mini. Keep Qwen2.5 rows for back-compat, demoted. Add wave409rs assertions so the swap is test-gated.",
+      "effort": "S",
+      "risk": "med",
+      "value": 8
+    },
+    {
+      "category": "mcp-tool-gateway-receipts",
+      "title": "Screen MCP tool args+output through the existing guardrail",
+      "where": "src/mcp-gateway.js wrapToolCall (around execute, L331-340); reuse gateway-guardrail.applyGuardrail + buildGuardrailReceiptField",
+      "what": "Run applyGuardrail over JSON.stringify(args) on input and over the tool result text on output (CyberArk output-poisoning). detect_only default (no behavior change); block opt-in per tenant. Adds the #1 frontier MCP defense (tool poisoning) to the tool path. New test mirrors wave921-gateway-guardrail.",
+      "effort": "M",
+      "risk": "low",
+      "value": 8
+    },
+    {
+      "category": "kv-cache",
+      "title": "Fuse the ITKV importance profile into the dispatched policy params",
+      "where": "src/serve-config.js selectKvCachePolicy (:550) + src/itkv-profile.js (consume sink_anchor/recent_window_size/hashItkvProfile)",
+      "what": "When workload/modelMeta carries an ITKV profile, derive sink_tokens from sink_anchor and window_tokens from recent_window_size, pass kv_profile_hash into params so the chosen policy is profile-aware and the passport binds the profile. Realizes the research's named highest-leverage move without a new executor.",
+      "effort": "M",
+      "risk": "low",
+      "value": 7
+    },
+    {
+      "category": "compile-api-to-model-competitors",
+      "title": "Expose teacher-source TOS-risk verdict on the capture+distill API surface",
+      "where": "src/router.js /v1/distill/from-captures + /preview responses; reuse classifyTeacher from distill-pipeline.js",
+      "what": "Return teacher_source (open-weights|proprietary|unknown) + policy_enforced in preview and job responses so the compliance differentiator (no competitor surfaces this) is visible at the API edge, not buried in the manifest. Pure read of existing classifier.",
+      "effort": "S",
+      "risk": "low",
+      "value": 7
+    },
+    {
+      "category": "finetune-frameworks",
+      "title": "Plumb Liger Kernel into the production worker train_lora.py",
+      "where": "workers/distill/scripts/train_lora.py (after base load ~152, before get_peft_model)",
+      "what": "Lift _maybe_apply_liger (qwen2/llama/gemma/phi3) from apps/trainer/trainer_real.py into the worker gated on KOLM_USE_LIGER, so the 15-60% memory/throughput win lands on the main distill path. Record liger_applied in training-summary.efficiency.",
+      "effort": "S",
+      "risk": "low",
+      "value": 7
+    },
+    {
+      "category": "finetune-frameworks",
+      "title": "Default rsLoRA on (free strict win) in the worker",
+      "where": "workers/distill/scripts/train_lora.py:58 KOLM_LORA_VARIANT default + src/distill-efficiency.js normalizeTrainerVariantOptions default",
+      "what": "Apply rsLoRA unless operator explicitly opts to plain lora. rsLoRA is strictly >= LoRA, no downside. Record in provenance. Update wave921 JS test expected default so nothing silently regresses.",
+      "effort": "S",
+      "risk": "low",
+      "value": 7
+    },
+    {
+      "category": "speculative-decoding",
+      "title": "Thread EAGLE draft-tree params (eagle_topk/num_steps/num_draft_tokens) through to vLLM",
+      "where": "src/serve-config.js buildServeConfig env (1261-1267) + apps/runtime/eagle3.py build_vllm_speculative_config + serve.py _try_vllm (440-448)",
+      "what": "Export KOLM_SPEC_EAGLE_TOPK/NUM_STEPS/NUM_DRAFT_TOKENS when head_kind is eagle*; add them to the cfg dict; read in serve.py. resolveEagleHead already computes these but they are silently dropped, so vLLM runs with engine defaults losing EAGLE-2/3's headline confidence-tree win. Extend wave921 + eagle3 _self_test.",
+      "effort": "S",
+      "risk": "low",
+      "value": 7
+    },
+    {
+      "category": "verifiable-inference",
+      "title": "Ship an explicit proof-scope caveat in the signed report",
+      "where": "src/attestation-report-builder.js buildCaveats (313-334)",
+      "what": "Add a caveat stating the report proves artifact authenticity, timestamp and tamper-evident log inclusion, and does NOT prove a specific inference output was computed by this model unless a cryptographically verified TEE/opML/zkML attestation is present; gate stronger wording on whether any registered verifier returned verified:true. Prevents over-reading as proof-of-inference.",
+      "effort": "S",
+      "risk": "low",
+      "value": 7
+    },
+    {
+      "category": "model-signing-standards",
+      "title": "Add an OMS file-manifest bundle over the artifact's actual weight members",
+      "where": "new toOmsArtifactManifest in src/intoto-receipt.js reusing signInTotoBundle; call from src/artifact.js, ship as ZIP member model.sig.bundle",
+      "what": "Produce a true OMS manifest whose subjects are (member path, sha256) for model.gguf/safetensors/onnx with predicateType https://model_signing/signature/v1.0, so `model-signing verify` accepts a kolm artifact. Closes the 'OMS-compatible but only for receipts' gap.",
+      "effort": "M",
+      "risk": "low",
+      "value": 8
+    },
+    {
+      "category": "confidential-compute",
+      "title": "Wire NRAS / GPU-TEE attestation into BYOC recordAttestation",
+      "where": "src/byoc.js recordAttestation (86-131); import verifyAttestation/KINDS from src/confidential-compute.js",
+      "what": "Route NRAS/GPU reports through confidential-compute.verifyAttestation('nras',report) alongside the existing CPU-TEE parser, storing shape_ok + report_hash + verifier:'shape_v1'. Makes the documented GPU-TEE shape check + pluggable crypto interface reachable on the live enrollment path. Keep verified:false honest default.",
+      "effort": "M",
+      "risk": "low",
+      "value": 7
+    },
+    {
+      "category": "data-curation",
+      "title": "Default quality stage to the learned classifier + percentile keep",
+      "where": "src/data-curate.js:379-421 default opts (flip qualityClassifier default true with percentile keep_fraction)",
+      "what": "The learned logistic classifier uses input+output relevance (a fluent off-topic answer scores low) where the heuristic is output-only. Make it default with DCLM-style percentile retention; ships cold-start weights, immediately closes part of the DEITA-quality gap. Gated by wave921-data-curate-modules + curate tests.",
+      "effort": "S",
+      "risk": "low",
+      "value": 6
+    },
+    {
+      "category": "moe-distill-quant",
+      "title": "Add MoE-aware strategies + frontier method names to distill-strategy oracle",
+      "where": "src/distill-strategy.js STRATEGIES (add moe_to_dense_distill) + scoreStrategy MoE bonus + commandFor moe-distill",
+      "what": "Add moe_to_dense_distill scoring highest when teacher resolves to a known MoE family (cross-ref src/moe-registry.js); cite krafton-ai/moe-to-dense + SlimMoE in references. Pure catalog/scoring change, no execution. Stops the planner under-recommending for MoE inputs.",
+      "effort": "S",
+      "risk": "low",
+      "value": 6
+    },
+    {
+      "category": "speculative-decoding",
+      "title": "Capture vLLM spec-decode acceptance metrics into the runtime passport",
+      "where": "apps/runtime/serve.py _vllm_prometheus_metrics (874-886) + /info; src/serve-config.js speculativeHeadPassportEntry (877-908)",
+      "what": "Parse vllm:spec_decode_num_accepted_tokens_total / num_draft_tokens_total + mean acceptance length from the already-scraped Prometheus text and surface as measured.acceptance_rate/accepted_length so the passport flips estimated->tested. Pure parse+plumb, unit-testable with a canned metrics string.",
+      "effort": "M",
+      "risk": "low",
+      "value": 6
+    }
+  ],
+  "bets": [
+    {
+      "theme": "Real measurement / accuracy-gate harness (boot-and-measure on GPU)",
+      "description": "A shared 'probe-harness' that boots an artifact under a config and measures real numbers recurs as the missing piece across at least five categories: quantization post-quant accuracy floor (kscore drop vs baseline), KV-cache measure_kv_policy (compression_ratio/retained/evicted/peak_kv_mb/quality_delta to flip passport rows estimated->tested), spec-decode serve-time acceptance-rate/speedup, distillation method bake-off (SeqKD vs ROPD vs GAD with a teacher judge), and agent-security benign-utility/utility-under-attack ASR. Build ONE boot-and-measure load driver in apps/export/probe.py and reuse it; without it, all 'receipt is the proof' claims on these axes stay synthetic/estimated.",
+      "categories": [
+        "quantization",
+        "kv-cache",
+        "speculative-decoding",
+        "distillation",
+        "agent-security-eval"
+      ]
+    },
+    {
+      "theme": "Pluggable real semantic embedding (lexical -> learned)",
+      "description": "Multiple curation/routing capabilities are silently capped because they run on the 256-d hash-bag lexical embedder. A single pluggable real-embedding provider behind embed() (env-selected, default unchanged) simultaneously lifts data-curation dedup/clustering/diversity/DSIR/label-error AND enables the calibrated meets-bar quality predictor for routing and per-model similarity discrimination. High-leverage single change touching many consumers.",
+      "categories": [
+        "synthetic-data-curation",
+        "llm-routing"
+      ]
+    },
+    {
+      "theme": "Frontier trainers that are entirely absent (the headline #1 methods)",
+      "description": "Three top-ranked frontier methods have zero code and warrant full specs with cost caps: GAD (Generative Adversarial Distillation, arXiv:2511.10643) the #1 black-box distillation method; MoE-teacher->dense-student collapse (krafton moe-to-dense, DO-ACP expert scoring + FFN merge + staged forward-KL) plus actually executing expert pruning; and EAGLE-3 draft-head auto-training from the same distillation data (SpecForge/vLLM speculators v0.3) so kolm-distilled models are self-accelerating instead of depending on 3 third-party heads. Each reuses existing GRPO/KD/distill cores.",
+      "categories": [
+        "distillation",
+        "moe-distill-quant",
+        "speculative-decoding"
+      ]
+    },
+    {
+      "theme": "Privacy execution path (the honest stubs that never run)",
+      "description": "The privacy story is architecturally complete but does not execute end-to-end: air-gap distill writes a queue that no worker consumes, cloud-distill is a no_pool_configured stub, and there is no confidential-GPU (H100/H200 CC) infra generated. Compounds with the hosted-fleet bet. Stand up the trainer-queue consumer (apps/trainer worker scanning ~/.kolm/airgap-distill-runs and a managed/bridged GPU pool over the existing Modal/RunPod/Together runner scaffolds), then add DP-SGD (Opacus + epsilon accountant) and GPU-TEE BYOC scripts with NRAS attestation capture.",
+      "categories": [
+        "confidential-compute",
+        "compile-api-to-model-competitors"
+      ]
+    },
+    {
+      "theme": "Proven-compute: real attestation crypto-chain verification",
+      "description": "Every TEE/GPU attestation path is shape-only/TOFU; no vendor cert chain is walked anywhere. Specs: a real NRAS verifier (validate token sig, walk NVIDIA device-identity chain to pinned root, bind nonce to output digest) registered via the existing pluggable seam; real TDX/SEV-SNP/Nitro cert-chain verification ending pure TOFU; and a Proven-Compute Receipt binding the Ed25519-signed artifact to a GPU-TEE attestation anchored in the transparency log. This is the only path from 'signed artifact + tamper-evident log' to 'proven compute'.",
+      "categories": [
+        "verifiable-inference",
+        "confidential-compute"
+      ]
+    },
+    {
+      "theme": "In-browser verify-then-run (WebGPU) demo + signed weights digest",
+      "description": "The flagship on-device demo (verify the model runs AND is the signed one, entirely in-browser) is unbuilt; the browser layer only checks JSON signatures. Spec: a WebGPU runner (WebLLM/LlamaWeb) that SHA-256s downloaded weight bytes in-browser and checks an Ed25519-signed weights_sha256 from the manifest BEFORE handing bytes to the engine. Requires the prerequisite bet of pinning+signing a weights SHA-256 in the manifest/artifact (the puller already computes the hash).",
+      "categories": [
+        "ondevice-inference",
+        "model-signing-standards"
+      ]
+    },
+    {
+      "theme": "Hosted managed distill+serve fleet + continuous-RL (competitive parity)",
+      "description": "The single biggest DX gap vs every named competitor (OpenPipe/Together/Fireworks/Modal/Baseten): no Kolm-hosted training/inference fleet, so 'upload captures -> we distill -> download signed .kolm' cannot execute without the customer bringing a GPU. Pair with a continuous-RL loop (OpenPipe ART parity) re-distilling from production captures gated by the existing W808 regression gate and signed into superseding .kolm artifacts. Reuses existing runner scaffolds, CLOUD_METER_RATES, grpo/online_dpo.",
+      "categories": [
+        "compile-api-to-model-competitors",
+        "confidential-compute"
+      ]
+    },
+    {
+      "theme": "Per-expert mixed-precision quant + size-aware quality curves",
+      "description": "MoE quant is uniform-bit per group (byte-accounting only, not real per-expert precision); sub-2-bit expert methods (MC-MoE/GEMQ) are oracle-listed external_repo but never run; and FP4 oracle quality_loss is a flat scalar that cannot express small-model sensitivity (the research's named #1 NVFP4 risk). Specs: a real per-expert quant loop assigning bits by activation hotness (router fp16), a paramsB-dependent FP4 quality curve, and fusing the BATQuant calibration plan into the NVFP4 export instead of modelopt's trivial forward_loop.",
+      "categories": [
+        "moe-distill-quant",
+        "quantization"
+      ]
+    },
+    {
+      "theme": "Registry/source-of-truth consolidation + benchmark fields",
+      "description": "Recurring drift: three speculative-decoding draft registries disagree; student-arch-recommender slugs are unlinked to real pullable backbones; FRONTIER_MODELS verified tier is a year stale; no registry carries benchmark scores (MMLU-Pro/IFEval/BFCL) so ranking is VRAM/license-only. Consolidate into single sources of truth with cross-file equality tests, refresh verified rows, and add a sourced/dated benchmark table to enable score-aware recommend().",
+      "categories": [
+        "speculative-decoding",
+        "small-llm-students"
+      ]
+    }
+  ],
+  "alreadyFrontier": [
+    "Distillation engine is genuinely at frontier and logit-free: ROPD (arXiv:2605.07396) as a real GPU GRPO loop, DistiLLM-2 contrastive SKL/SRKL (ICML2025 oral), GKD via trl, MiniLLM reverse-KL/JSD, CoT distill, on-policy student-sample generation, and honest no-trainer envelopes. Do not rebuild these — only GAD and the stale recommender are gaps.",
+    "BATQuant-style FP4 calibration (arXiv:2603.16590) with real E2M1 grid + block-wise learnable clipping + per-column affine transform, plus NVFP4 export with a correct Blackwell-native gate (compute_cap>=10) and MoE-aware router-fp16/expert-aggressive grouping. The FP4 math exists and is self-tested; the gap is purely wiring it into the oracle and fusing the two halves.",
+    "KV-cache breadth is frontier: importance-tiered 7-class profiler, Shard PCA+Hadamard+VQ structural contract, full StreamingLLM/H2O/SnapKV/PyramidKV/KIVI-2/4 policy registry with honest per-runtime gates, real kvpress + HQQQuantizedCache Python dispatch, vLLM FP8 KV. Everything is built and unit-tested — the only gap is the CLI dead-end.",
+    "Serving-side speculative decoding correctly uses the MODERN vLLM speculative_config dict (avoids the deprecated flat speculative_model kwarg removed in vLLM>=0.10), EAGLE-3 default with real verified head repos, multi-backend dispatch (vLLM/SGLang/llama.cpp), and a real n-gram LookaheadCache. Null-until-measured discipline avoids fabricated speedups.",
+    "Crypto/transparency primitives are frontier and correct: RFC 6962/9162 Merkle inclusion with the lone-right-edge bug fixed + timingSafeEqual, append-only transparency log with C2SP signed-note checkpoints and witness co-signing, RFC 3161 timestamping with full offline re-verification, third-party Ed25519 auditor attestation with enforced distinct-key separation.",
+    "Model-signing standards alignment is correct where wired: byte-exact DSSE PAE (the #1 cosign interop trap), in-toto v1 Statement + SLSA Provenance v1 with required fields and honest 'Build L2 shape' conformance, OMS predicateType with embedded RFC 8037 OKP JWK, zero-heavy-deps. Gaps are emission/scope, not correctness.",
+    "Per-tool-call Ed25519 signed MCP receipts binding {tool,args_hash,result_hash,tenant,ts,transport} with deterministic offline verify, result-passthrough contract, and 19 tamper tests — matches/exceeds Signet & KYA/Vouched. Combined with Merkle anchoring this is the rare differentiator almost no competitor has.",
+    "Agent-security audit-trail tamper-evidence (per-tenant HMAC-SHA256 append-only chain with deterministic canonicalization + verifier) is ahead-of-benchmark — the research confirms no defensible public benchmark covers it. OWASP-LLM/Agentic + MITRE-ATLAS taxonomy mapping and untested/non-inflation scoring discipline are exactly right.",
+    "Data-curation algorithms are frontier-grade: real Broder MinHash+LSH with optimal banding + true-Jaccard verify, k-center-greedy/facility-location/BADGE/DSIR selection, Confident-Learning label-error detection, c-TF-IDF cluster labeling. Only the lexical hash-bag embedder caps quality — swap the embedder, keep the algorithms.",
+    "Fine-tune variant stack is complete and correct: DoRA + rsLoRA + LoRA+ + PiSSA/OLoRA (with the subtle mandatory two-phase snapshot/convert save) + NEFTune + GaLore with correct incompatible-combo refusals, plus Unsloth+Liger+FlashAttention single-GPU path, single-5090 32B QLoRA, and an FSDP multi-node launcher with memory estimator. Gaps are worker defaults/dispatch, not capability.",
+    "Capture->distill->signed-evidence loop differentiators are real and rare: drop-in Anthropic/OpenAI/OpenRouter/Gemini capture proxies with reasoning-trace extraction, teacher-source TOS-risk classification with hard-deny of proprietary teachers, and the cryptographic signed .kolm provenance artifact (5-step HMAC chain + holdout-measured accuracy + full lineage) that the research says no competitor combines.",
+    "Privacy detectors and fences are frontier-quality: 19 PII classes + 11 secret shapes with Luhn-checked PANs and a policy engine, tight loopback/unix local-teacher allow-list with egress block under KOLM_AIRGAP, tenant fencing with LOCAL/THIRD_PARTY partition, and fail-closed shape-only attestation honesty. Gaps are applying redaction to training + executing the queued runs, not detection."
+  ],
+  "dependencies": [
+    "Routing: 'Load trained ClusterRouterStats' (surgical) is inert without 'Close the flywheel: recordRouteOutcome' (surgical) populating stats AND a 'kolm route train' CLI (surgical) persisting a snapshot the gateway loads. Ship all three together or the dead router stays dead. The calibrated meets-bar predictor (spec) further depends on the real-embedding swap (bet).",
+    "KV-cache: 'Fuse ITKV profile into dispatched policy' (surgical) requires 'Wire the dispatcher into kolm serve' (surgical) to land first — the profile has no dispatch path to feed until the CLI calls selectKvCachePolicy. The measure_kv_policy spec depends on the shared boot-and-measure probe harness bet.",
+    "Small-LLM students: 'Re-point default tier off Qwen2.5' (surgical) must follow 'Add 2026 frontier students to the registry' (surgical) — DEFAULT_MODEL cannot point at rows that do not yet exist. Same ordering for promoting a current row into FRONTIER_MODELS.",
+    "On-device WebGPU demo (bet) depends on first pinning+signing a weights SHA-256 in the model-weights manifest/artifact (bet/spec) — the 'is-the-signed-one' half is only cryptographically real once a signed weights digest exists for the browser to check.",
+    "Quantization accuracy gate, KV 'tested' passport rows, spec-decode acceptance metrics, and the distillation method bake-off ALL depend on the single shared boot-and-measure probe harness (bet). Building it once avoids four divergent measurement implementations; the spec deltas explicitly note this overlap.",
+    "MoE-to-dense distillation (bet) depends on first executing expert pruning to a smaller checkpoint (spec) — pruning/merge is the prerequisite stage before the FFN-collapse + forward-KL recovery can run. Both reuse the existing distill.py compute_loss.",
+    "Privacy execution: DP-SGD, confidential-GPU BYOC scripts, and the air-gap worker (all confidential-compute) compound with the hosted managed fleet (compile-api). The air-gap queue consumer and the hosted fleet both need the same trainer-queue + runner-pool plumbing — design one orchestrator over the existing Modal/RunPod/Together runner scaffolds rather than two.",
+    "Model-signing: the build-time DSSE sidecar and the OMS file-manifest bundle (both surgical) both write into src/artifact.js using the per-member SHA-256 map already computed into manifest.hashes — sequence them in one artifact-build change to share that digest computation and avoid double iteration.",
+    "No hard contradictions found across the 16 deltas; the recurring tension is breadth-of-honest-stubs vs depth-of-execution — many categories are 'built and tested but unwired,' so prioritize wiring (surgical-now) before net-new frontier trainers (bets), since wiring unlocks already-paid-for capability at low risk.",
+    "MCP: the in-toto export for mcp-tool-call-1 (surgical) and the Merkle anchoring of MCP receipts (surgical) both assume the durable store+signer wiring (surgical, value 9) is in place first — without persistence the receipts they reference are process-local and lost on restart."
+  ]
+}

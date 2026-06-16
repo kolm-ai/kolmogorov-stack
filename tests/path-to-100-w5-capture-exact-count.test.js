@@ -1,3 +1,9 @@
+// @unauthed-test — this is a PURE UNIT test. It imports the exported helper
+// computeObservedCaptures from src/router.js but never calls buildRouter() and
+// never issues an HTTP request, so there is no route to authenticate against.
+// The W409bb #5 guard flags the src/router.js import; this marker declares the
+// (accurate) intent: no router is mounted.
+//
 // W-5 (Path to 100%) — the account overview reports the EXACT number of
 // captured inferences.
 //

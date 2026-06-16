@@ -51,6 +51,11 @@ const __dirname  = path.dirname(__filename);
 
 const VALID_METHODS = ['int4', 'int8', 'gptq', 'awq', 'aqlm', 'quip', 'exl2', 'exl3', 'hqq', 'qat'];
 
+// Per-spawn timeout (ms) for every python probe in doctor(). Module-scope so it
+// is initialized before the top-level `await doctor()` runs (a const declared
+// lower in the file would be in its temporal dead zone at that point).
+const PROBE_TIMEOUT_MS = 4000;
+
 // W784 — third-party quant-method plugin discovery hook. Returns the array of
 // extra method names contributed by ~/.kolm/plugins/<name>/ with kind
 // "quantization". Caller treats them as opaque (the plugin's entry script is
@@ -112,6 +117,37 @@ if (args.doctor) {
 const method = args.method || 'int4';
 if (!VALID_METHODS.includes(method)) {
   fail(`unknown --method=${method}; expected one of [${VALID_METHODS.join(', ')}]`);
+}
+
+// Catalog-vs-shippable reconciliation at the Node entrypoint (W614 fix): the
+// quantization oracle owns the experimental-method gate (methodAvailability).
+// We consult it HERE - after parsing --method, before doctor()/spawnSync(python3)
+// - so an experimental method (hqq/exl2/exl3/aqlm/quip/qat) requested WITHOUT
+// the KOLM_ENABLE_EXPERIMENTAL_QUANTS opt-in refuses cleanly without ever
+// spawning python. The python-side guard_experimental_method stays as
+// defense-in-depth. Best-effort import: if the oracle module is unavailable
+// the python guard still catches it (we never weaken the gate, only move it
+// one layer up so the refusal is fast + loud).
+{
+  let availability = null;
+  try {
+    const oracle = await import('../../src/quantization-oracle.js');
+    if (oracle && typeof oracle.methodAvailability === 'function') {
+      availability = oracle.methodAvailability(method, process.env);
+    }
+  } catch (e) {
+    if (process.env.KOLM_PLUGIN_DEBUG) {
+      process.stderr.write(`[${WORKER_NAME}] quantization-oracle import failed: ${(e && e.message) || e}\n`);
+    }
+  }
+  if (availability && availability.available === false) {
+    // reason is 'experimental_gated' or 'unknown_method'. Reuse the existing
+    // exit-2 path (fail) so CI sees a non-zero exit and the operator sees the
+    // actionable hint, with NO python process spawned.
+    const hint = availability.hint
+      || `method ${method} is not available (${availability.reason})`;
+    fail(`${availability.reason}: ${hint}`);
+  }
 }
 
 const inDir  = args.in  ? path.resolve(process.cwd(), args.in)  : null;
@@ -198,7 +234,7 @@ process.exit(res.status ?? 1);
 // Helpers
 // ---------------------------------------------------------------------------
 async function doctor() {
-  const python = spawnSync('python3', ['--version'], { encoding: 'utf8' });
+  const python = spawnSync('python3', ['--version'], { encoding: 'utf8', timeout: PROBE_TIMEOUT_MS });
   const python_ok = python.status === 0;
   const torch = probePythonModule('torch', '__version__', python_ok);
   const transformers = probePythonModule('transformers', '__version__', python_ok);
@@ -340,10 +376,30 @@ async function doctor() {
   };
 }
 
+// Probe a python module's AVAILABILITY (and best-effort version) WITHOUT
+// importing it. Importing heavy deps (torch, transformers) actually loads the
+// library, which is slow and can stall the doctor past the caller's timeout
+// (the doctor runs ~13 of these serially). importlib.util.find_spec resolves a
+// module's spec without executing it, and importlib.metadata.version reads the
+// installed package version from metadata - both are fast and cannot hang on a
+// module's import side effects. A per-spawn timeout is the final guard: a probe
+// that wedges returns {ok:false} rather than blocking the whole doctor.
 function probePythonModule(moduleName, versionAttr, python_ok) {
   if (!python_ok) return { ok: false, version: null };
-  const code = `import ${moduleName}; print(getattr(${moduleName}, '${versionAttr}', 'unknown'))`;
-  const res = spawnSync('python3', ['-c', code], { encoding: 'utf8' });
+  void versionAttr; // version now comes from package metadata, not the module attr
+  const code = [
+    'import importlib.util, importlib.metadata as M',
+    `spec = importlib.util.find_spec(${JSON.stringify(moduleName)})`,
+    'if spec is None:',
+    '    raise SystemExit(1)',
+    'v = "unknown"',
+    'try:',
+    `    v = M.version(${JSON.stringify(moduleName)})`,
+    'except Exception:',
+    '    pass',
+    'print(v)',
+  ].join('\n');
+  const res = spawnSync('python3', ['-c', code], { encoding: 'utf8', timeout: PROBE_TIMEOUT_MS });
   return {
     ok: res.status === 0,
     version: res.status === 0 ? (res.stdout || '').trim() : null,

@@ -54,6 +54,23 @@ export const ASR_PRODUCTS = Object.freeze({
   // checkout mode keys off `kind` ('one_time' -> mode:'payment'); the FULFILLMENT
   // routing keys off kolm_product:'asr_package' (-> an 'asrpkg_<tenant>' ref and
   // fulfillPackagePurchase), so it never touches the per-audit report path.
+  // Deep Red-Team ($10k) and Reviewed Attestation ($25k) are one-time CHARGES
+  // (mode:'payment') that grant a DURABLE, tenant-bound ENTITLEMENT (an
+  // asr_entitlements row), not an upgrade of one specific audit and not a
+  // recurring subscription. The checkout mode keys off `kind` ('one_time' ->
+  // mode:'payment'); the FULFILLMENT routing keys off kolm_product
+  // ('asr_redteam' / 'asr_reviewed' -> an 'asrent_<kind>_<tenant>' ref +
+  // fulfillEntitlementPurchase). entitlement_kind is the row's durable `kind`.
+  redteam: {
+    kind: 'one_time', amount_cents: 1000000, label: 'Deep Red-Team',
+    price_env: 'KOLM_STRIPE_PRICE_ASR_DEEP_REDTEAM', link_env: 'STRIPE_PAYMENT_LINK_ASR_DEEP_REDTEAM',
+    kolm_product: 'asr_redteam', entitlement_kind: 'deep_redteam', ref_kind: 'redteam',
+  },
+  reviewed: {
+    kind: 'one_time', amount_cents: 2500000, label: 'Reviewed Attestation',
+    price_env: 'KOLM_STRIPE_PRICE_ASR_REVIEWED', link_env: 'STRIPE_PAYMENT_LINK_ASR_REVIEWED',
+    kolm_product: 'asr_reviewed', entitlement_kind: 'reviewed_attestation', ref_kind: 'reviewed',
+  },
   full: {
     kind: 'one_time', amount_cents: 1500000, label: 'Full Readiness',
     price_env: 'KOLM_STRIPE_PRICE_ASR_FULL_READINESS', link_env: 'STRIPE_PAYMENT_LINK_ASR_FULL_READINESS',
@@ -74,6 +91,13 @@ export const ASR_PRODUCTS = Object.freeze({
 // ref/checkout logic stays declarative as more packages are added.
 function _isPackage(def) { return !!def && def.kolm_product === 'asr_package'; }
 
+// Products whose fulfillment is a durable tenant ENTITLEMENT (asr_entitlements):
+// Deep Red-Team / Reviewed Attestation. Keyed by entitlement_kind on the def.
+function _isEntitlement(def) { return !!def && !!def.entitlement_kind; }
+
+// Map an 'asrent_' ref kind (redteam|reviewed) back to its product key.
+const _ENTITLEMENT_PRODUCT_BY_REF_KIND = Object.freeze({ redteam: 'redteam', reviewed: 'reviewed' });
+
 // Encode the binding into client_reference_id (alphanumeric + _ only - within
 // Stripe's allowed charset). audit_id is "audses_<hex>"; tenant_id is
 // "tenant_<hex>"; product is "starter"|"growth" (no underscore), so the
@@ -81,6 +105,9 @@ function _isPackage(def) { return !!def && def.kolm_product === 'asr_package'; }
 export function encodeAsrRef({ product, audit_id, tenant_id }) {
   const def = ASR_PRODUCTS[product];
   if (!def) return null;
+  // A tenant-bound entitlement (Deep Red-Team / Reviewed Attestation): bind to
+  // the tenant via the 'asrent_<ref_kind>_<tenant>' ref.
+  if (_isEntitlement(def)) return tenant_id ? `asrent_${def.ref_kind}_${tenant_id}` : null;
   // A tenant-bound package (Full Readiness): bind to the tenant, not an audit.
   if (_isPackage(def)) return tenant_id ? `asrpkg_${tenant_id}` : null;
   if (def.kind === 'one_time') return audit_id ? `asrrep_${audit_id}` : null;
@@ -92,6 +119,19 @@ export function encodeAsrRef({ product, audit_id, tenant_id }) {
 // plan handling). Pure, never throws.
 export function parseAsrRef(ref) {
   if (!ref || typeof ref !== 'string') return null;
+  if (ref.startsWith('asrent_')) {
+    // 'asrent_<ref_kind>_<tenant_id>' - a tenant-bound entitlement (Deep
+    // Red-Team / Reviewed Attestation). ref_kind ('redteam'|'reviewed') has no
+    // underscore, so the FIRST '_' after the prefix splits kind from tenant.
+    const rest = ref.slice('asrent_'.length);
+    const us = rest.indexOf('_');
+    if (us <= 0) return null;
+    const refKind = rest.slice(0, us);
+    const tenant_id = rest.slice(us + 1);
+    const product = _ENTITLEMENT_PRODUCT_BY_REF_KIND[refKind];
+    if (!product || !tenant_id || !ASR_PRODUCTS[product]) return null;
+    return { product, kind: 'entitlement', tenant_id, entitlement_kind: ASR_PRODUCTS[product].entitlement_kind };
+  }
   if (ref.startsWith('asrpkg_')) {
     // 'asrpkg_<tenant_id>' - a tenant-bound package. There is one package
     // product (Full Readiness); the Checkout-API path also carries product_key

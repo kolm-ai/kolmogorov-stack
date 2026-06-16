@@ -83,6 +83,7 @@ const METHOD_CATALOG = Object.freeze({
     label: 'HQQ calibration-free 4/3/2-bit',
     worker_method: 'hqq',
     execution_status: 'worker',
+    experimental: true,
     bits: 4,
     compression: 0.25,
     quality_loss: 0.04,
@@ -95,6 +96,7 @@ const METHOD_CATALOG = Object.freeze({
     label: 'EXL2 variable-bit runtime quant',
     worker_method: 'exl2',
     execution_status: 'worker',
+    experimental: true,
     bits: 4,
     compression: 0.25,
     quality_loss: 0.03,
@@ -103,10 +105,24 @@ const METHOD_CATALOG = Object.freeze({
     runtimes: ['cuda', 'exllama'],
     sources: ['ExLlamaV2'],
   },
+  exl3: {
+    label: 'EXL3 next-gen variable-bit quant',
+    worker_method: 'exl3',
+    execution_status: 'worker',
+    experimental: true,
+    bits: 4,
+    compression: 0.23,
+    quality_loss: 0.028,
+    latency_gain: 2.5,
+    calibration_required: true,
+    runtimes: ['cuda', 'exllama'],
+    sources: ['ExLlamaV2'],
+  },
   aqlm: {
     label: 'AQLM additive low-bit',
     worker_method: 'aqlm',
     execution_status: 'worker_external_repo',
+    experimental: true,
     bits: 2,
     compression: 0.16,
     quality_loss: 0.055,
@@ -119,6 +135,7 @@ const METHOD_CATALOG = Object.freeze({
     label: 'QuIP# sub-2-bit',
     worker_method: 'quip',
     execution_status: 'worker_external_repo',
+    experimental: true,
     bits: 2,
     compression: 0.14,
     quality_loss: 0.06,
@@ -131,6 +148,7 @@ const METHOD_CATALOG = Object.freeze({
     label: 'EfficientQAT',
     worker_method: 'qat',
     execution_status: 'worker_external_repo',
+    experimental: true,
     bits: 4,
     compression: 0.27,
     quality_loss: 0.018,
@@ -195,6 +213,26 @@ const RUNTIME_ALIASES = Object.freeze({
   rocm: ['rocm'],
 });
 
+// Experimental quantization gate. Methods flagged experimental in the catalog
+// (hqq, exl2, exl3, aqlm, quip, qat) drive external toolchains/research repos
+// that the customer must install themselves, so advertising them as run-now
+// creates an expectation mismatch (the catalog lists them, but a plain
+// `--quantize aqlm` cannot ship without the upstream optimizer). They stay in
+// the catalog for planning + documentation, but the planner only recommends an
+// EXECUTABLE command for them when the operator has explicitly opted in via
+// KOLM_ENABLE_EXPERIMENTAL_QUANTS=1. Default-off keeps the always-on set to the
+// four pip-only worker methods (int4, int8, gptq, awq) plus the baselines.
+const EXPERIMENTAL_ENV = 'KOLM_ENABLE_EXPERIMENTAL_QUANTS';
+
+export function experimentalQuantsEnabled(env = process.env) {
+  const v = String((env && env[EXPERIMENTAL_ENV]) || '').trim().toLowerCase();
+  return v === '1' || v === 'true' || v === 'yes' || v === 'on';
+}
+
+function isExperimental(method) {
+  return method.experimental === true;
+}
+
 function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, Number(n)));
 }
@@ -257,12 +295,23 @@ function estimateLatencyMs(method, device, paramsB) {
   return round(base / method.latency_gain, 2);
 }
 
-function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens, calibrationRows, qualityFloor, privacyMode, preferenceTuned }) {
+function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens, calibrationRows, qualityFloor, privacyMode, preferenceTuned, experimentalEnabled }) {
   const quality = estimateQuality(method, task, calibrationRows, preferenceTuned);
   const memory = estimateMemoryGb(method, paramsB, contextTokens);
   const latency = estimateLatencyMs(method, device, paramsB);
   const warnings = [];
   let hardFail = false;
+
+  const experimental = isExperimental(method);
+  // Experimental methods stay listed for planning, but unless the operator has
+  // opted in they are NOT recommendable as an executable command. We mark them
+  // gated and (when gated off) hard-fail so feasibility never picks one as the
+  // primary worker command. This is the catalog-vs-shippable reconciliation.
+  const experimentalGatedOff = experimental && !experimentalEnabled;
+  if (experimentalGatedOff) {
+    warnings.push(`experimental_requires_${EXPERIMENTAL_ENV}=1`);
+    hardFail = true;
+  }
 
   if (!runtimeCompatible(method, device.runtime)) {
     warnings.push(`runtime_mismatch:${device.runtime}`);
@@ -295,6 +344,8 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
     label: method.label,
     worker_method: method.worker_method,
     execution_status: method.execution_status,
+    experimental,
+    experimental_gated: experimentalGatedOff,
     score,
     feasible: !hardFail && quality >= qualityFloor,
     estimates: {
@@ -318,6 +369,10 @@ export function rankQuantizationStrategies(input = {}) {
   const qualityFloor = qualityFloorFor(task, input.quality_floor ?? input.qualityFloor);
   const privacyMode = String(input.privacy_mode || input.privacyMode || 'standard').toLowerCase();
   const preferenceTuned = !!(input.preference_tuned ?? input.preferenceTuned);
+  // Explicit boolean override wins (used by callers/tests); otherwise read env.
+  const experimentalEnabled = (input.experimental_enabled ?? input.experimentalEnabled) != null
+    ? Boolean(input.experimental_enabled ?? input.experimentalEnabled)
+    : experimentalQuantsEnabled();
 
   const candidates = Object.entries(METHOD_CATALOG)
     .map(([methodId, method]) => scoreCandidate({
@@ -331,6 +386,7 @@ export function rankQuantizationStrategies(input = {}) {
       qualityFloor,
       privacyMode,
       preferenceTuned,
+      experimentalEnabled,
     }))
     .sort((a, b) => b.score - a.score || Number(b.feasible) - Number(a.feasible) || a.method.localeCompare(b.method));
 
@@ -354,7 +410,18 @@ export function rankQuantizationStrategies(input = {}) {
       calibration_rows: calibrationRows,
       quality_floor: qualityFloor,
       privacy_mode: privacyMode,
+      experimental_enabled: experimentalEnabled,
       device,
+    },
+    experimental_gate: {
+      enabled: experimentalEnabled,
+      env: EXPERIMENTAL_ENV,
+      gated_methods: Object.entries(METHOD_CATALOG)
+        .filter(([, m]) => isExperimental(m))
+        .map(([id]) => id),
+      hint: experimentalEnabled
+        ? null
+        : `experimental methods (hqq/exl2/exl3/aqlm/quip/qat) need ${EXPERIMENTAL_ENV}=1 and their external toolchains; default recommendation stays within int4/int8/gptq/awq`,
     },
     recommendation: primary ? {
       primary,
@@ -373,16 +440,69 @@ export function rankQuantizationStrategies(input = {}) {
   };
 }
 
-export function quantizationOracleCatalog() {
+export function quantizationOracleCatalog(env = process.env) {
+  const experimentalEnabled = experimentalQuantsEnabled(env);
   return {
     spec: 'kolm-quantization-oracle-catalog-1',
     methods: METHOD_CATALOG,
     devices: DEVICE_PRESETS,
     task_sensitivity: TASK_SENSITIVITY,
+    experimental_gate: {
+      enabled: experimentalEnabled,
+      env: EXPERIMENTAL_ENV,
+      gated_methods: Object.entries(METHOD_CATALOG)
+        .filter(([, m]) => isExperimental(m))
+        .map(([id]) => id),
+      always_on_worker_methods: Object.entries(METHOD_CATALOG)
+        .filter(([, m]) => m.execution_status === 'worker' && !isExperimental(m))
+        .map(([id]) => id),
+    },
+  };
+}
+
+// methodAvailability(methodId) — single-method gate verdict for CLI/router so
+// `kolm quantize --method <m>` can fail loud BEFORE spawning the worker when an
+// experimental method is requested without the opt-in env. Returns:
+//   { method, known, experimental, available, reason, hint }
+// available=false with reason='experimental_gated' is the actionable refusal.
+export function methodAvailability(methodId, env = process.env) {
+  const id = String(methodId || '').toLowerCase();
+  const method = METHOD_CATALOG[id];
+  if (!method) {
+    return {
+      method: id,
+      known: false,
+      experimental: false,
+      available: false,
+      reason: 'unknown_method',
+      hint: `unknown quantization method ${JSON.stringify(id)}; see quantizationOracleCatalog()`,
+    };
+  }
+  const experimental = isExperimental(method);
+  const enabled = experimentalQuantsEnabled(env);
+  if (experimental && !enabled) {
+    return {
+      method: id,
+      known: true,
+      experimental: true,
+      available: false,
+      reason: 'experimental_gated',
+      hint: `${id} is an experimental quantization method requiring external toolchains; set ${EXPERIMENTAL_ENV}=1 to enable it, or use one of int4/int8/gptq/awq`,
+    };
+  }
+  return {
+    method: id,
+    known: true,
+    experimental,
+    available: true,
+    reason: experimental ? 'experimental_enabled' : 'stable',
+    hint: null,
   };
 }
 
 export default {
   rankQuantizationStrategies,
   quantizationOracleCatalog,
+  methodAvailability,
+  experimentalQuantsEnabled,
 };

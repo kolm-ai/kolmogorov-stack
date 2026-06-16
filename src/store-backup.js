@@ -28,6 +28,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { backendInfo } from './store.js';
+import { vaultFilePaths } from './secrets-vault.js';
 
 const require = createRequire(import.meta.url);
 
@@ -67,6 +68,62 @@ function uniquePath(base, ext) {
   return candidate;
 }
 
+// Atom5 - copy a single file durably while preserving 0o600 on POSIX. Used for
+// the encrypted vault + its key so the ciphertext is unrecoverable-without-key
+// problem is solved (we copy BOTH). Best-effort: returns true on success.
+function copyPrivateFile(src, dest) {
+  fs.copyFileSync(src, dest);
+  if (process.platform !== 'win32') {
+    try { fs.chmodSync(dest, 0o600); } catch { /* best-effort */ }
+  }
+  return true;
+}
+
+// Atom5 - snapshot the encrypted secrets vault as a first-class backup artifact
+// in EVERY driver mode. Under the SQLite driver backupNow only VACUUMs
+// kolm.sqlite and never touches the vault; under JSON the .key was excluded
+// (only *.json copied) leaving the ciphertext unrecoverable. This copies
+// secrets-vault.json (+ its .bak) AND secrets-vault.key into a `<snapshot>-vault/`
+// sidecar dir next to the DB/JSON snapshot, so a point-in-time restore recovers
+// every tenant provider API key. The key copy is gated behind
+// KOLM_BACKUP_INCLUDE_VAULT_KEY (default on) so an operator following the
+// off-box-encryption runbook can exclude the raw key from co-located snapshots.
+//
+// `snapshotBase` is the snapshot path WITHOUT extension; the sidecar dir is
+// `<snapshotBase>-vault/`. Returns { ok, files:[names], dir } or { ok:false }.
+// Never throws across its boundary.
+function backupVault(dir, snapshotBase) {
+  try {
+    let paths;
+    try { paths = vaultFilePaths(); }
+    catch (e) { return { ok: false, error: `cannot resolve vault paths: ${e.message}` }; }
+    const sidecar = `${snapshotBase}-vault`;
+    const out = [];
+    let any = false;
+    // Only create the sidecar if at least the vault json exists.
+    const includeKey = process.env.KOLM_BACKUP_INCLUDE_VAULT_KEY !== '0'
+      && process.env.KOLM_BACKUP_INCLUDE_VAULT_KEY !== 'false';
+    const candidates = [
+      ['secrets-vault.json', paths.vault],
+      ['secrets-vault.json.bak', paths.vault_bak],
+    ];
+    if (includeKey) candidates.push(['secrets-vault.key', paths.key]);
+    // Resolve sidecar relative to the backups dir (snapshotBase is absolute).
+    const sidecarDir = path.isAbsolute(sidecar) ? sidecar : path.join(dir, path.basename(sidecar));
+    for (const [name, src] of candidates) {
+      if (!src || !fs.existsSync(src)) continue;
+      try { if (!fs.statSync(src).isFile()) continue; } catch { continue; }
+      if (!any) { fs.mkdirSync(sidecarDir, { recursive: true }); any = true; }
+      try { copyPrivateFile(src, path.join(sidecarDir, name)); out.push(name); }
+      catch { /* best-effort per file */ }
+    }
+    if (!any) return { ok: true, files: [], dir: null, vault_present: false };
+    return { ok: true, files: out, dir: sidecarDir, vault_present: true, key_included: includeKey && out.includes('secrets-vault.key') };
+  } catch (err) {
+    return { ok: false, error: `vault snapshot failed: ${String((err && err.message) || err)}` };
+  }
+}
+
 function backupSqlite(info, dir) {
   let DatabaseSync;
   try { ({ DatabaseSync } = require('node:sqlite')); }
@@ -98,7 +155,11 @@ function backupSqlite(info, dir) {
 
   let bytes = 0;
   try { bytes = fs.statSync(target).size; } catch { /* size is informational */ }
-  return { ok: true, path: target, driver: 'sqlite', bytes };
+  // Atom5 - snapshot the secrets vault alongside the DB. snapshotBase is the
+  // target minus the .sqlite extension.
+  const snapshotBase = target.replace(/\.sqlite$/, '');
+  const vault = backupVault(dir, snapshotBase);
+  return { ok: true, path: target, driver: 'sqlite', bytes, vault };
 }
 
 function backupJson(info, dir) {
@@ -117,7 +178,13 @@ function backupJson(info, dir) {
       fs.copyFileSync(from, path.join(target, name));
       files += 1;
     }
-    return { ok: true, path: target, driver: 'json', files };
+    // Atom5 - snapshot the secrets vault + key into the SAME timestamped dir.
+    // Under JSON the vault json may already have been copied above if it lives
+    // in data_dir, but its .key was excluded (only *.json) - backupVault adds
+    // the key (and .bak) so the ciphertext is recoverable. We write into the
+    // snapshot dir itself (target) rather than a sidecar for the JSON driver.
+    const vault = backupVault(target, path.join(target, 'secrets'));
+    return { ok: true, path: target, driver: 'json', files, vault };
   } catch (err) {
     try { if (fs.existsSync(target)) fs.rmSync(target, { recursive: true, force: true }); } catch { /* best-effort cleanup */ }
     return { ok: false, error: `json snapshot failed: ${err.message}` };
@@ -171,10 +238,21 @@ export function listBackups(opts = {}) {
     try { stat = fs.statSync(full); }
     catch { continue; }
     let kind = null;
-    if (stat.isDirectory()) kind = 'json';
+    // Atom5 - a `kolm-<ts>-vault` directory is the secrets-vault sidecar for the
+    // SQLite snapshot of the same timestamp, NOT a json snapshot. Classify it as
+    // its own kind so it is listed (and pruned with the snapshot) but never
+    // mistaken for a restorable DB snapshot.
+    if (stat.isDirectory() && name.endsWith('-vault')) kind = 'vault';
+    else if (stat.isDirectory()) kind = 'json';
     else if (name.endsWith('.sqlite')) kind = 'sqlite';
     if (!kind) continue;
-    out.push({ name, path: full, kind, size: stat.size, mtime_ms: stat.mtimeMs });
+    let vault_files = null;
+    if (kind === 'vault') {
+      try { vault_files = fs.readdirSync(full); } catch { vault_files = []; }
+    }
+    const entry = { name, path: full, kind, size: stat.size, mtime_ms: stat.mtimeMs };
+    if (vault_files) entry.vault_files = vault_files;
+    out.push(entry);
   }
   // ISO timestamps sort lexically == chronologically, so a name sort is a
   // stable oldest-first ordering across both file (sqlite) and dir (json) kinds.

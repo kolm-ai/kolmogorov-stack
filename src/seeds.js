@@ -49,6 +49,26 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
+// W713 leakage upgrade (CD-03/CD-06): the holdout-leakage near-dup detector now
+// uses the project-standard MinHash module (src/minhash-dedup.js) instead of an
+// ad-hoc bigram shingler. MinHash 5-gram shingles + LSH banding catch reordered
+// / reworded paraphrases that surface-bigram Jaccard misses, and the LSH index
+// keeps the scan sub-O(n*m) so it no longer has to bail out above the 50k cap.
+// An optional embedding-cosine tier (graceful-degrade to MinHash when no
+// embedder) raises recall on heavily-reworded leaks. Pure JS, zero new deps.
+import {
+  shingleSet as _shingleSet,
+  minhashSignature as _minhashSignature,
+  makePermutations as _makePermutations,
+  lshBuckets as _lshBuckets,
+  estimateJaccard as _estimateJaccard,
+} from './minhash-dedup.js';
+// Optional embedding-cosine tier for the near-dup detector. embedding.js is
+// pure-JS + deterministic (hash-bag, no network), so importing it is cheap and
+// side-effect-free; the tier still only runs when opts.use_embedding is set so
+// the default report stays MinHash-only + bit-reproducible.
+import { embed as _embedText } from './embedding.js';
+
 export const DEFAULT_HOLDOUT_RATIO = 0.2;
 export const DEFAULT_SPLIT_SEED = 'kolm-default-split-seed-v1';
 export const MIN_PRODUCTION_HOLDOUT = 10;
@@ -334,6 +354,121 @@ function jaccardBigrams(a, b) {
   return inter / (A.size + B.size - inter);
 }
 
+// Flatten any input value (string / number / object) to the text MinHash
+// shingles over. Objects are canonicalized so {a:1,b:2} == {b:2,a:1}, matching
+// the bigram detector's contract so the report stays stable.
+function _leakText(v) {
+  if (v == null) return '';
+  if (typeof v === 'string') return v;
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  try { return canonicalJson(v); } catch { return String(v); }
+}
+
+// Resolve the embedding-cosine tier function. Returns the real embedder only
+// when the caller opts in (use_embedding) AND the module loaded; otherwise null
+// so the detector degrades to MinHash-only. Wrapping the import in a guard keeps
+// the default path bit-reproducible and free of the (small) embed cost.
+function _getEmbedder(enabled) {
+  if (!enabled) return null;
+  return (typeof _embedText === 'function') ? _embedText : null;
+}
+
+function _cosine(a, b) {
+  if (!a || !b || a.length !== b.length) return 0;
+  let dot = 0;
+  for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
+  return dot; // embedding.js returns L2-normalized vectors => dot == cosine
+}
+
+// MinHash/LSH-backed near-duplicate leakage detector. Replaces the O(n*m)
+// bigram double-loop: builds a MinHash signature + LSH band index over the
+// TRAIN side once, then probes each HOLDOUT row against only its colliding
+// train rows (sub-O(n*m) in practice). Each LSH candidate is confirmed with the
+// MinHash Jaccard estimate; an optional embedding-cosine tier (when an embedder
+// is registered) recovers heavily-reworded paraphrases the shingle estimate
+// scores just under threshold. Returns the same {holdout_index, train_index,
+// similarity} record shape the bigram detector produced so the report + its
+// hash stay stable; `method` distinguishes the tier that fired.
+function minhashNearDuplicates(holdout, train, opts = {}) {
+  const threshold = Number.isFinite(Number(opts.threshold)) ? Number(opts.threshold) : 0.85;
+  const cap = Number.isFinite(Number(opts.cap)) ? Number(opts.cap) : 21;
+  const numHashes = 128;
+  const k = 5; // 5-gram shingles - LLM-dedup standard, matches minhash-dedup.
+  const perms = _makePermutations(numHashes);
+  const embed = _getEmbedder(opts.use_embedding === true);
+  const embCosTier = Number.isFinite(Number(opts.embedding_threshold))
+    ? Number(opts.embedding_threshold) : 0.92;
+
+  // Build per-train signatures + LSH buckets + (optional) embeddings once.
+  const trainSig = new Array(train.length);
+  const trainEmb = embed ? new Array(train.length) : null;
+  const bucketMap = new Map(); // bucketKey -> train indices[]
+  for (let j = 0; j < train.length; j++) {
+    const text = _leakText(train[j].input);
+    const sh = _shingleSet(text, k);
+    const sig = _minhashSignature(sh, perms);
+    trainSig[j] = sig;
+    if (embed) { try { trainEmb[j] = embed(text); } catch { trainEmb[j] = null; } }
+    for (const bk of _lshBuckets(sig)) {
+      let arr = bucketMap.get(bk);
+      if (!arr) { arr = []; bucketMap.set(bk, arr); }
+      arr.push(j);
+    }
+  }
+
+  const out = [];
+  const seen = new Set(); // "i,j" - one record per pair across both tiers
+  for (let i = 0; i < holdout.length && out.length <= cap; i++) {
+    const text = _leakText(holdout[i].input);
+    const sh = _shingleSet(text, k);
+    const sig = _minhashSignature(sh, perms);
+    const hEmb = embed ? (() => { try { return embed(text); } catch { return null; } })() : null;
+
+    // Tier 1 - MinHash/LSH: only the train rows colliding in >=1 band are
+    // candidates, so this is sub-O(n*m). Confirm each with the Jaccard estimate.
+    const cand = new Set();
+    for (const bk of _lshBuckets(sig)) {
+      const arr = bucketMap.get(bk);
+      if (arr) for (const j of arr) cand.add(j);
+    }
+    for (const j of cand) {
+      const est = _estimateJaccard(sig, trainSig[j]);
+      if (est >= threshold) {
+        const key = i + ',' + j;
+        if (!seen.has(key)) {
+          seen.add(key);
+          out.push({ holdout_index: i, train_index: j, similarity: Number(est.toFixed(3)), method: 'minhash' });
+        }
+      }
+      if (out.length > cap) break;
+    }
+    if (out.length > cap) break;
+
+    // Tier 2 - embedding cosine (opt-in): a heavily-reworded paraphrase may not
+    // collide in ANY LSH band, so when an embedder is available we scan the FULL
+    // train side by cosine (256-d dot products on precomputed vectors). This is
+    // O(n*m) but runs ONLY under use_embedding, recovering reordered / reworded
+    // leakage the shingle tier structurally cannot bucket.
+    if (embed && hEmb) {
+      for (let j = 0; j < train.length; j++) {
+        const key = i + ',' + j;
+        if (seen.has(key)) continue;
+        const te = trainEmb[j];
+        if (!te) continue;
+        const cos = _cosine(hEmb, te);
+        if (cos >= embCosTier) {
+          seen.add(key);
+          out.push({ holdout_index: i, train_index: j, similarity: Number(cos.toFixed(3)), method: 'embedding' });
+          if (out.length > cap) break;
+        }
+      }
+    }
+    if (out.length > cap) break;
+  }
+  out.sort((a, b) => (a.holdout_index - b.holdout_index) || (a.train_index - b.train_index));
+  return out;
+}
+
 // Grouping key for leakage detection. Tries to extract a stable identifier
 // from row.metadata.tags (e.g., a member_id or claim_id tag) so two rows
 // referring to the same underlying entity can be flagged even with different
@@ -375,19 +510,54 @@ export function leakageReport(train, holdout, opts = {}) {
     if (trainOutputHashes.has(oh)) outputOverlap.push({ holdout_index: i, output_hash: oh.slice(0, 16) });
   });
 
-  // Near-duplicate by Jaccard bigrams. O(n*m); fine for typical seed sizes.
-  // For larger sets a MinHash sketch would be better; defer until needed.
-  const nearDuplicates = [];
-  if (train.length * holdout.length <= 50_000) {
-    for (let i = 0; i < holdout.length; i++) {
-      for (let j = 0; j < train.length; j++) {
-        const s = jaccardBigrams(holdout[i].input, train[j].input);
-        if (s >= similarityThreshold) {
-          nearDuplicates.push({ holdout_index: i, train_index: j, similarity: Number(s.toFixed(3)) });
+  // Near-duplicate detection. DEFAULT (CD-03/CD-06): the project-standard
+  // MinHash + LSH near-dup estimator (5-gram shingles, LSH-bucketed so the scan
+  // is sub-O(n*m)) with an optional embedding-cosine tier, so reordered /
+  // reworded paraphrase leakage is caught - not just lexical bigram overlap.
+  // The LSH index lifts the old 50k product cap. opts.near_dup_method:'bigram'
+  // restores the legacy surface-bigram detector for back-compat / determinism
+  // pinning. The record shape ({holdout_index, train_index, similarity}) is
+  // identical so the leakage_report hash recorded in the manifest stays stable.
+  let nearDuplicates = [];
+  const nearDupMethod = opts.near_dup_method === 'bigram' ? 'bigram' : 'minhash';
+  if (train.length && holdout.length) {
+    if (nearDupMethod === 'bigram') {
+      if (train.length * holdout.length <= 50_000) {
+        for (let i = 0; i < holdout.length; i++) {
+          for (let j = 0; j < train.length; j++) {
+            const s = jaccardBigrams(holdout[i].input, train[j].input);
+            if (s >= similarityThreshold) {
+              nearDuplicates.push({ holdout_index: i, train_index: j, similarity: Number(s.toFixed(3)) });
+              if (nearDuplicates.length > 20) break;
+            }
+          }
           if (nearDuplicates.length > 20) break;
         }
       }
-      if (nearDuplicates.length > 20) break;
+    } else {
+      try {
+        nearDuplicates = minhashNearDuplicates(holdout, train, {
+          threshold: similarityThreshold,
+          cap: 21,
+          use_embedding: opts.use_embedding === true,
+          embedding_threshold: typeof opts.embedding_threshold === 'number' ? opts.embedding_threshold : 0.92,
+        });
+      } catch {
+        // degrade to bigram on any MinHash failure - never break the gate.
+        nearDuplicates = [];
+        if (train.length * holdout.length <= 50_000) {
+          for (let i = 0; i < holdout.length; i++) {
+            for (let j = 0; j < train.length; j++) {
+              const s = jaccardBigrams(holdout[i].input, train[j].input);
+              if (s >= similarityThreshold) {
+                nearDuplicates.push({ holdout_index: i, train_index: j, similarity: Number(s.toFixed(3)) });
+                if (nearDuplicates.length > 20) break;
+              }
+            }
+            if (nearDuplicates.length > 20) break;
+          }
+        }
+      }
     }
   }
 
@@ -406,8 +576,21 @@ export function leakageReport(train, holdout, opts = {}) {
     if (g && trainGroups.has(g)) groupedOverlap.push({ holdout_index: i, grouping_key: g });
   });
 
+  // Sample records keep the exact legacy {holdout_index, train_index, similarity}
+  // shape so a manifest consumer that reads sample fields is unaffected. The
+  // tier that fired is summarized once at the report level (near_dup_method)
+  // rather than per-record, keeping the per-record shape stable.
+  const nearDupSamples = nearDuplicates.slice(0, 10).map((d) => ({
+    holdout_index: d.holdout_index,
+    train_index: d.train_index,
+    similarity: d.similarity,
+  }));
+  const embeddingHits = nearDuplicates.filter((d) => d.method === 'embedding').length;
+
   return {
     similarity_threshold: similarityThreshold,
+    near_dup_method: nearDupMethod,
+    near_dup_embedding_hits: embeddingHits,
     input_overlap_count: inputOverlap.length,
     output_overlap_count: outputOverlap.length,
     near_duplicate_count: nearDuplicates.length,
@@ -415,7 +598,7 @@ export function leakageReport(train, holdout, opts = {}) {
     samples: {
       input_overlap: inputOverlap.slice(0, 10),
       output_overlap: outputOverlap.slice(0, 10),
-      near_duplicates: nearDuplicates.slice(0, 10),
+      near_duplicates: nearDupSamples,
       grouped_overlap: groupedOverlap.slice(0, 10),
     },
   };

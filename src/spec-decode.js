@@ -17,6 +17,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+const _here = path.dirname(fileURLToPath(import.meta.url));
+const _repoRoot = path.resolve(_here, '..');
+
+function _pythonBin() {
+  return process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+}
 
 export const DRAFT_KINDS = ['eagle', 'eagle2', 'eagle3', 'medusa'];
 
@@ -56,7 +64,18 @@ function whichSync(name) {
   return null;
 }
 
+// W713 - resolve the speculative-decoding draft-head trainer. The real in-repo
+// trainer is workers/distill/scripts/train_specdecode.py (EAGLE draft head +
+// Medusa head pack). It was catalog-only with no runnable path; this default
+// wires it. Resolution order:
+//   1. KOLM_SPECDECODE_NO_TRAINER=1 forces the durable no-tool path (test seam,
+//      mirrors src/distill-grpo.js's KOLM_GRPO_NO_TRAINER).
+//   2. $KOLM_SPECDECODE_TRAINER override (JSON array or PATH name) - an
+//      override that points nowhere is "no trainer", not a silent fallback.
+//   3. A `kolm-spec-decode-train` / `spec-decode-train` on PATH.
+//   4. The in-repo train_specdecode.py (the genuine EAGLE/Medusa trainer).
 function resolveTrainer() {
+  if (process.env.KOLM_SPECDECODE_NO_TRAINER === '1') return null;
   const envCmd = process.env.KOLM_SPECDECODE_TRAINER;
   if (envCmd) {
     try {
@@ -74,6 +93,9 @@ function resolveTrainer() {
     const r = whichSync(name);
     if (r) return { argv: [r], source: 'path' };
   }
+  // In-repo trainer (mirrors distill-grpo.js in_repo fallback).
+  const inRepo = path.join(_repoRoot, 'workers', 'distill', 'scripts', 'train_specdecode.py');
+  if (fs.existsSync(inRepo)) return { argv: [_pythonBin(), inRepo], source: 'in_repo' };
   return null;
 }
 
@@ -94,7 +116,8 @@ export function doctor() {
     ready: true,
     kind: 'spec_decode',
     draft_kinds: DRAFT_KINDS,
-    trainer: t.argv[0],
+    // For the in_repo path argv is [python, script]; surface the script.
+    trainer: t.source === 'in_repo' && t.argv.length > 1 ? t.argv[1] : t.argv[0],
     trainer_source: t.source,
   };
 }
@@ -103,6 +126,8 @@ export function trainSpecDecode({
   pairsPath,
   basePath,
   draftKind = 'eagle3',
+  draftModel = null,        // W713 - explicit EAGLE draft model; auto-picked when null
+  medusaHeads = 4,
   outDir = null,
   tenant_id = 'local',
   namespace = 'default',
@@ -138,6 +163,13 @@ export function trainSpecDecode({
     '--namespace', namespace,
     '--tenant', tenant_id,
   ];
+  // W713 - thread the in-repo trainer's extra knobs (the external plugin keeps
+  // the generic shape above). draft-model auto-picks from DRAFT_PAIRINGS when
+  // omitted; medusa-heads sizes the Medusa head pack.
+  if (t.source === 'in_repo') {
+    if (draftModel) args.push('--draft-model', String(draftModel));
+    if (Number.isFinite(medusaHeads)) args.push('--medusa-heads', String(medusaHeads));
+  }
   const result = spawnSync(t.argv[0], args, {
     stdio: 'pipe',
     timeout: timeoutMs,
@@ -156,19 +188,25 @@ export function trainSpecDecode({
       run_dir: runDir,
     };
   }
-  const manifestPath = path.join(runDir, 'manifest.json');
+  // W713 - the in-repo trainer writes run-meta.json (parity with the other
+  // trainers); external plugins write manifest.json. Read whichever exists.
   let manifest = null;
-  if (fs.existsSync(manifestPath)) {
-    try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch (_) {} // deliberate: cleanup
+  for (const name of ['run-meta.json', 'manifest.json']) {
+    const mp = path.join(runDir, name);
+    if (fs.existsSync(mp)) {
+      try { manifest = JSON.parse(fs.readFileSync(mp, 'utf8')); break; } catch (_) {} // deliberate: cleanup
+    }
   }
   return {
     ok: true,
     kind: 'spec_decode',
     draft_kind: draftKind,
+    trainer_source: t.source,
     run_dir: runDir,
     manifest,
     stdout: stdout.slice(-2000),
   };
 }
 
-export default { doctor, trainSpecDecode, DRAFT_KINDS, INSTALL_HINT };
+export { resolveTrainer };
+export default { doctor, trainSpecDecode, resolveTrainer, DRAFT_KINDS, INSTALL_HINT };

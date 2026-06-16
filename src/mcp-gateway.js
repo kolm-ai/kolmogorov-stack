@@ -52,6 +52,76 @@ import {
   verifySignatureBlock,
   loadOrCreateDefaultSigner,
 } from './ed25519.js';
+import { applyGuardrail } from './gateway-guardrail.js';
+
+// Flatten an MCP CallToolResult (or arbitrary tool output) to the text the
+// guardrail screens for an output-poisoning attempt. Concatenates every text
+// content block plus a canonical projection of structuredContent so an
+// injection hidden in a structured field is still seen. Never throws.
+function _resultScreenText(result) {
+  try {
+    if (result == null) return '';
+    if (typeof result === 'string') return result;
+    const parts = [];
+    const content = Array.isArray(result) ? result : (Array.isArray(result.content) ? result.content : []);
+    for (const block of content) {
+      if (block && typeof block === 'object' && typeof block.text === 'string') parts.push(block.text);
+      else if (typeof block === 'string') parts.push(block);
+    }
+    if (result && typeof result === 'object' && !Array.isArray(result) && result.structuredContent != null) {
+      parts.push(canonicalJson(result.structuredContent));
+    }
+    return parts.join('\n');
+  } catch { return ''; }
+}
+
+// Normalize the guardrail option into { mode, threshold, categories_block,
+// detector } or null when screening is not opted in. A bare string is treated
+// as a mode.
+function _normalizeGuardrail(g) {
+  if (!g) return null;
+  if (typeof g === 'string') return { mode: g };
+  if (typeof g !== 'object') return null;
+  if (g.mode == null && g.enabled == null) return null;
+  return {
+    mode: g.mode || (g.enabled ? 'detect_only' : 'off'),
+    threshold: g.threshold,
+    categories_block: g.categories_block || null,
+    detector: typeof g.detector === 'function' ? g.detector : null,
+  };
+}
+
+// A guardrail verdict for one stage (input|output): the applyGuardrail envelope
+// projected to the fields the receipt stamps + a `blocked` flag computed for the
+// active mode. detect_only/flag never set blocked; block sets it when action is
+// 'block'.
+function _stageVerdict(text, cfg) {
+  const v = applyGuardrail({
+    text: typeof text === 'string' ? text : '',
+    mode: cfg.mode,
+    threshold: cfg.threshold,
+    categories_block: cfg.categories_block,
+    detector: cfg.detector,
+  });
+  return {
+    mode: v.mode,
+    action: v.action,
+    blocked: cfg.mode === 'block' && v.action === 'block',
+    is_adversarial: !!v.is_adversarial,
+    categories: v.categories || [],
+    score: typeof v.score === 'number' ? v.score : 0,
+    detector: v.detector,
+    version: v.version,
+  };
+}
+
+function _guardrailBlockError(stage, verdict) {
+  const e = new Error(`mcp guardrail blocked the ${stage} (score ${verdict.score})`);
+  e.code = 'mcp_guardrail_blocked';
+  e.stage = stage;
+  e.verdict = verdict;
+  return e;
+}
 
 export const MCP_RECEIPT_SCHEMA = 'mcp-tool-call-1';
 export const MCP_GATEWAY_VERSION = 'w921-mcp-gateway-v1';
@@ -326,6 +396,19 @@ export async function wrapToolCall(opts = {}) {
   const tenant = String(opts.tenant == null ? '' : opts.tenant);
   const args = opts.args == null ? {} : opts.args;
 
+  // OPT-IN guardrail screening (mirrors the gateway's applyGuardrail). When no
+  // config is supplied the legacy path runs untouched (out.guardrail === null,
+  // no guardrail field on the receipt).
+  const guardrailCfg = _normalizeGuardrail(opts.guardrail);
+
+  // INPUT screen (over the tool arguments) - runs BEFORE the tool executes so a
+  // 'block' verdict costs zero tool invocation.
+  let inputVerdict = null;
+  if (guardrailCfg) {
+    inputVerdict = _stageVerdict(canonicalJson(args), guardrailCfg);
+    if (inputVerdict.blocked) throw _guardrailBlockError('input', inputVerdict);
+  }
+
   // Resolve the result: precomputed wins; otherwise invoke the injected tool.
   let result = opts.result;
   if (result === undefined) {
@@ -334,6 +417,14 @@ export async function wrapToolCall(opts = {}) {
     } else {
       result = { content: [], isError: false };
     }
+  }
+
+  // OUTPUT screen (over the tool result text) - runs AFTER execution; a 'block'
+  // verdict rejects an output-poisoning attempt before the bytes reach the model.
+  let outputVerdict = null;
+  if (guardrailCfg) {
+    outputVerdict = _stageVerdict(_resultScreenText(result), guardrailCfg);
+    if (outputVerdict.blocked) throw _guardrailBlockError('output', outputVerdict);
   }
 
   const args_hash = hashMcpArgs(args);
@@ -352,6 +443,13 @@ export async function wrapToolCall(opts = {}) {
   });
   const receipt = signMcpReceipt(unsigned, opts.signer, { signed_at: opts.signed_at });
 
+  // Stamp the (NON-signed) guardrail verdicts onto the receipt. The signature
+  // covers only MCP_SIGNED_FIELDS, so this field is outside the signed bytes -
+  // verifyMcpReceipt is unaffected, exactly like latency_breakdown.
+  if (guardrailCfg) {
+    receipt.guardrail = { screened: true, mode: guardrailCfg.mode, input: inputVerdict, output: outputVerdict };
+  }
+
   return {
     result_passthrough_contract: {
       result,            // unmodified - the gateway is a pass-through for bytes
@@ -361,6 +459,7 @@ export async function wrapToolCall(opts = {}) {
       args_hash,
     },
     receipt,
+    guardrail: guardrailCfg ? { input: inputVerdict, output: outputVerdict } : null,
   };
 }
 
