@@ -404,6 +404,16 @@ async function _bundlePhase({
     // records ship_gate_overridden=true so a downstream consumer can see the
     // override was applied at build time.
     allow_below_gate: !hasRealEvalResult ? true : !!opts.allow_below_gate,
+    // C5 - thread the per-layer importance signal + mixed-precision schedule
+    // receipt into the artifact so buildPayload embeds them AND binds their
+    // SHA-256 into the artifact hash chain (tamper-evidence). Produced upstream
+    // by `kolm daq auto --importance-stats <real layer stats>` (GPU/operator -
+    // the real signal needs a model forward pass); absent -> null -> no block is
+    // written (never a fabricated uniform allocation). This closes the missing
+    // build-path seam the C5 deep-dive found (buildAndZip never forwarded them,
+    // so a real build could not embed the signal).
+    mixed_precision_proof: opts.mixed_precision_proof || null,
+    importance_signal: opts.importance_signal || null,
   });
   // Annotate the in-memory result so compileFull's caller can log the honest
   // reasons even before the productionReady() verdict runs.

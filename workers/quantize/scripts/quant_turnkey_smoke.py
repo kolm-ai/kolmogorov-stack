@@ -28,11 +28,23 @@ Exit codes:
 
 Caveat: the actual upstream optimizers (AQLM main.py, QuIP# 3-phase,
 exllamav2/3 convert, EfficientQAT training) require CUDA + the operator's
-repo checkout. This smoke drives the SAME verified command surface that
-src/quant-turnkey-runners.js buildTurnkeyCommand() emits, so a green smoke
-proves the command surface is accepted by the pinned upstream CLI. When no
-GPU/repo is present the caller's doctor gate keeps this script unrun and the
-method stays experimental with a loud install hint - never a fake pass.
+repo checkout. When no GPU/repo is present the caller's doctor gate keeps this
+script unrun and the method stays experimental with a loud install hint - never
+a fake pass.
+
+TRUTHFULNESS NOTE (C5 deep-dive): this smoke dispatches through
+workers/quantize/scripts/quantize.py (run_aqlm/run_quip/run_exl3/...), which is
+the LIVE command surface. It does NOT yet drive the DE-DRIFTED surface that
+src/quant-turnkey-runners.js buildTurnkeyCommand() emits - those two surfaces
+currently DISAGREE (quantize.py still uses AQLM --dataset= flag, QuIP# top-level
+quantize_llama.py, EXL3 --exl3 flag, which the de-drifted table marks as upstream
+drift). buildTurnkeyCommand is the DOCUMENTED TARGET surface + the place the
+pinned upstream commits must be validated against; it is NOT the runnable driver
+until quantize.py is reconciled to it (or the pins verified). Until then these
+experimental methods stay verified=false (see quant-turnkey-runners.js
+turnkey_status_advisory) and are gated default-off - a green smoke here proves
+only that quantize.py's (possibly-drifted) surface ran, NOT that the de-drifted
+surface is upstream-correct.
 """
 
 import argparse

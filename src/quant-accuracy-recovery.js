@@ -721,6 +721,35 @@ export function recoverAndGate(args = {}) {
   const quantPpx = quantRows.length
     ? perplexityFromLogits(quantRows)
     : { perplexity: fp16Ppx.perplexity, mean_nll: fp16Ppx.mean_nll, n_tokens: fp16Ppx.n_tokens };
+  // (5b) Fail-CLOSED on UNMEASURED accuracy - BEFORE the KL step (which needs
+  // paired rows). The dominant axis of the gate is the holdout perplexity/KL
+  // between fp16 and quant. If the holdout yielded no measurable QUANT tokens (the
+  // GPU/runtime-absent case), quantPpx was copied from fp16 above (assumed equal)
+  // -- shipping on that would sign a 'pass' verdict NO measurement backs (the moat
+  // violation the C5 deep-dive found). So we refuse: verdict 'gate_unrun', does
+  // NOT ship, mirroring the disjointness fail-closed. A real eval must supply
+  // holdout.fp16_rows + holdout.quant_rows.
+  const measuredFp16 = fp16Rows.length > 0 && fp16Ppx.n_tokens > 0 && Number.isFinite(fp16Ppx.perplexity);
+  const measuredQuant = quantRows.length > 0 && quantPpx.n_tokens > 0 && Number.isFinite(quantPpx.perplexity);
+  if (!measuredFp16 || !measuredQuant) {
+    out.steps.perplexity = { fp16: fp16Ppx, quant: quantPpx };
+    out.ships = false;
+    out.verdict = 'gate_unrun';
+    out.gate = {
+      ships: false,
+      verdict: 'gate_unrun',
+      reason: 'fail-closed: quantized-model accuracy is UNMEASURED (no fp16/quant holdout tokens). '
+        + 'The K-score accuracy gate cannot run without a real perplexity/KL measurement; refusing to '
+        + 'ship a pass verdict no measurement backs. Provide holdout.fp16_rows + holdout.quant_rows (logits) '
+        + 'from a real eval run.',
+      measured: {
+        fp16_rows: fp16Rows.length, quant_rows: quantRows.length,
+        fp16_tokens: fp16Ppx.n_tokens, quant_tokens: quantRows.length ? quantPpx.n_tokens : 0,
+      },
+    };
+    return out;
+  }
+
   // KL needs paired rows: { teacher_logits/logits, quant_logits }.
   const klRows = fp16Rows.map((r, i) => ({
     teacher_logits: r.logits,

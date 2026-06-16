@@ -436,6 +436,24 @@ export function doctorTurnkey(method, opts = {}) {
       if (!fs.existsSync(entryPath)) {
         reasons.push(`${m.repo_env} set but entry ${m.entry} not found (commit drift?)`);
         hints.push(`cd ${repo} && git checkout ${m.pinned_commit}  # restores ${m.entry}`);
+      } else if (m.pinned_commit) {
+        // C5 fix - VALIDATE the checkout is actually AT the pinned commit, not
+        // merely that the entry file exists. The prior doctor only checked file
+        // existence, so a checkout on the WRONG commit (real upstream drift, the
+        // thing the pin is meant to prevent) falsely reported ready. Resolve
+        // HEAD and prefix-compare against the pin; a mismatch fails the gate.
+        let head = null;
+        try {
+          const r = spawnSync('git', ['-C', repo, 'rev-parse', 'HEAD'], { encoding: 'utf8', timeout: 15000 });
+          if (r.status === 0) head = String(r.stdout || '').trim();
+        } catch (_) { head = null; } // git unavailable -> cannot verify (handled below)
+        if (head === null) {
+          reasons.push(`${m.repo_env} checkout commit unverifiable (git rev-parse failed); cannot confirm pin ${m.pinned_commit}`);
+          hints.push(`cd ${repo} && git rev-parse HEAD  # must start with ${m.pinned_commit}`);
+        } else if (!head.startsWith(m.pinned_commit)) {
+          reasons.push(`${m.repo_env} checkout is at ${head.slice(0, 12)}, expected pinned ${m.pinned_commit} (upstream drift)`);
+          hints.push(`cd ${repo} && git checkout ${m.pinned_commit}  # match the verified pin`);
+        }
       }
     }
   }
