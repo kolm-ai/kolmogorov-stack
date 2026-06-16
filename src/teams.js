@@ -15,8 +15,9 @@
 // display name only; slug is permanent unless owner asks for a new slug.
 
 import crypto from 'node:crypto';
-import { id, insert, find, findOne, update, remove, all, withTransaction } from './store.js';
+import { id, insert, find, findOne, findByField, update, remove, all, withTransaction } from './store.js';
 import { deleteTeamProviderKeys } from './provider-vault.js';
+import { deactivateTunnel } from './tunnel.js';
 import { PLAN_CATALOG, canonicalPlanId } from './plan-catalog.js';
 
 const ROLE_RANK = { viewer: 1, member: 2, admin: 3, owner: 4 };
@@ -268,8 +269,18 @@ export function deleteTeam(teamId, byTenantId) {
     deleteTeamProviderKeys(teamId);
     // Completeness: tombstone team-owned resources so they stop appearing in
     // listings and stop billing/holding endpoints. team_models also carries an
-    // endpoint_tunnel_id; tunnel teardown is owned by another lane (see
-    // crossFileNeeds) so we only tombstone the rows here.
+    // endpoint_tunnel_id; deactivate each model's tunnel BEFORE tombstoning the
+    // rows so a deleted team leaves no live shared endpoint resolvable. We read
+    // the live rows first (the tombstone update below clears them), deactivate
+    // each tunnel by its id (tunnel.deactivateTunnel is idempotent + a no-op for
+    // a missing/already-torn-down id), then tombstone the model rows.
+    const teamModels = find('team_models', m => m.team_id === teamId && !m._deleted);
+    for (const m of teamModels) {
+      if (m && m.endpoint_tunnel_id) {
+        try { deactivateTunnel(m.endpoint_tunnel_id); }
+        catch (_) { /* tunnel teardown must never abort the team-delete cascade */ }
+      }
+    }
     update('team_models', m => m.team_id === teamId && !m._deleted, { _deleted: true, deleted_at: now, deleted_reason: 'team_deleted' });
     update('team_retention', x => x.team_id === teamId && !x._deleted, { _deleted: true, deleted_at: now, deleted_reason: 'team_deleted' });
     // Tombstone outstanding operational prompts for a dead team.
@@ -357,7 +368,10 @@ function reclaimExpiredReservations(teamId) {
 
 export function inviteToTeam(teamId, email, role, byTenantId) {
   requireRole(teamId, byTenantId, 'admin');
-  if (!ROLES.includes(role)) role = 'member';
+  // Reject an unknown role rather than silently coercing it to 'member' - a
+  // typo'd role ('admon', 'wizard') must surface as a 400, not quietly downgrade
+  // the invitee's intended access. The routes map code:'bad_request' -> 400.
+  if (!ROLES.includes(role)) throw Object.assign(new Error('bad role'), { code: 'bad_request' });
   if (role === 'owner') throw Object.assign(new Error('cannot invite directly as owner'), { code: 'bad_request' });
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     throw Object.assign(new Error('valid email required'), { code: 'bad_request' });
@@ -401,7 +415,14 @@ export function inviteToTeam(teamId, email, role, byTenantId) {
 
 export function findInvite(token) {
   if (!token) return null;
-  return findOne('team_invites', i => i.token === token && !i._deleted && !i.accepted_at);
+  // Indexed lookup by token (findByField issues a json_extract($.token)=?
+  // equality query in sqlite mode, served by an expression index, instead of
+  // the linear all('team_invites').filter scan findOne degrades to). Tokens are
+  // 24 random bytes so the result set is effectively a single row; we still
+  // filter out tombstoned / already-accepted invites in JS to preserve the
+  // exact predicate findOne enforced.
+  const rows = findByField('team_invites', 'token', token);
+  return rows.find(i => i && !i._deleted && !i.accepted_at) || null;
 }
 
 export function acceptInvite(token, tenantId, tenantEmail) {

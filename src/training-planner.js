@@ -33,16 +33,11 @@ import os from 'node:os';
 // to reach K=x"), reports the marginal-data ROI, and biases the path
 // recommendation on whether the corpus clears the law's recommended budget. The
 // law was authored (src/data-scaling-law.js) but never called by the planner;
-// only opportunity-engine consumed it. fitDataScalingLaw gates on
+// only opportunity-engine consumed it. planDataBudget gates on
 // min_points / rmsd_gate itself and never throws across its public API, so a
 // cold-start namespace simply falls through to basis:'insufficient' and the
 // plan keeps its existing static path baseline.
-import {
-  fitDataScalingLaw,
-  kHatAtSize,
-  marginalDkPerRow,
-  pairsToTarget,
-} from './data-scaling-law.js';
+import { planDataBudget } from './data-scaling-law.js';
 
 function sha(s) { return crypto.createHash('sha256').update(String(s)).digest('hex'); }
 
@@ -210,46 +205,88 @@ const DEFAULT_SCALING_TARGET_K = 0.85;
 //     marginal_gain_per_1k_examples,     // dK from acquiring +1000 more pairs
 //     reachable, reason }
 async function _projectDataBudget({ points, currentN, targetK, minPoints, rmsdGate }) {
-  const fit = await fitDataScalingLaw({
+  // CD-02 / CD-08 - delegate to the planner-facing budget block in
+  // data-scaling-law.js rather than re-deriving the projection from the
+  // primitives here. planDataBudget() fits the rectified law, runs the
+  // acquire/stop/switch recommendation, and returns a planner-shaped block
+  // (basis, verdict, required_examples, pairs_remaining, marginal_dk_per_row,
+  // expected_k_at_current, achievable_k_max, curve). It NEVER throws across its
+  // public API and returns basis:'insufficient' on cold start / junk fit, so the
+  // planner still falls through to its static baseline. We keep this function's
+  // historical return shape (data_budget_recommended / projected_kscore_at_current_n
+  // / marginal_gain_per_1k_examples / reachable) so pickPath, the warnings, and
+  // planReport are unchanged, and additionally surface the block's verdict +
+  // required_examples + curve so callers can display the data-acquisition call.
+  const block = await planDataBudget({
     points: Array.isArray(points) ? points : null,
+    current_n: currentN,
+    target_k: targetK,
     min_points: Number.isFinite(minPoints) ? minPoints : 4,
     rmsd_gate: Number.isFinite(rmsdGate) ? rmsdGate : 0.05,
   });
-  if (!fit || !fit.ok || fit.basis !== 'rectified') {
+  if (!block || block.basis !== 'rectified') {
     return {
-      basis: (fit && fit.basis) || 'insufficient',
+      basis: (block && block.basis) || 'insufficient',
+      verdict: null,
       target_k: targetK,
       data_budget_recommended: null,
+      required_examples: null,
       projected_kscore_at_current_n: null,
+      expected_k_at_current: null,
       marginal_gain_per_1k_examples: null,
+      marginal_dk_per_row: null,
+      pairs_remaining: null,
       reachable: false,
-      reason: (fit && (fit.reason || fit.error)) || 'no_scaling_history',
+      curve: null,
+      reason: (block && (block.reason || block.error)) || 'no_scaling_history',
       hint: 'provide >=4 (n_pairs,K) observations (opts.kscore_history or opts.loadScalingPoints) to enable a data-budget projection',
     };
   }
-  const ptt = pairsToTarget(fit, targetK);
-  const kNow = kHatAtSize(fit, currentN);
-  const marginalNow = marginalDkPerRow(fit, currentN);
+  // The block's required_examples is the closed-form rows-to-target. A 'switch'
+  // verdict (target above the achievable ceiling) leaves required_examples null;
+  // we mirror that into reachable so pickPath's below/above-budget logic only
+  // unlocks distill when a reachable budget exists.
+  const reachable = block.required_examples != null && Number.isFinite(block.required_examples);
   // marginal_gain_per_1k_examples is the realized K-gain from the next 1000
   // pairs: K_hat(N+1000) - K_hat(N) (the integral, not just 1000*dK/dD, so it
-  // stays meaningful in the saturating tail). Fall back to the analytic
-  // 1000*dK/dD when the discrete delta is degenerate.
-  const kPlus1k = kHatAtSize(fit, currentN + 1000);
-  let gainPer1k = Number.isFinite(kPlus1k) && Number.isFinite(kNow) ? (kPlus1k - kNow) : NaN;
-  if (!Number.isFinite(gainPer1k)) gainPer1k = Number.isFinite(marginalNow) ? marginalNow * 1000 : null;
+  // stays meaningful in the saturating tail). The block already carries the
+  // analytic dK/dD at the current size (marginal_dk_per_row); we re-derive the
+  // per-1k integral from the sampled curve / a follow-up fit point for the
+  // human-facing "needs more data" copy, falling back to 1000*dK/dD.
+  let gainPer1k = null;
+  const kNow = Number.isFinite(block.expected_k_at_current) ? block.expected_k_at_current : null;
+  if (kNow != null && Array.isArray(block.curve) && block.curve.length) {
+    const ahead = block.curve.find((pt) => pt && pt.n >= currentN + 1000);
+    if (ahead && Number.isFinite(ahead.k_hat)) gainPer1k = ahead.k_hat - kNow;
+  }
+  if (gainPer1k == null && Number.isFinite(block.marginal_dk_per_row)) {
+    gainPer1k = block.marginal_dk_per_row * 1000;
+  }
   return {
     basis: 'rectified',
-    target_k: targetK,
-    n_points: fit.n_points,
-    rmsd: fit.rmsd,
-    achievable_k_max: fit.achievable_k_max,
-    reachable: ptt.reachable === true,
-    data_budget_recommended: ptt.reachable ? ptt.pairs_to_target : null,
-    pairs_remaining: (ptt.reachable && Number.isFinite(ptt.pairs_to_target))
-      ? Math.max(0, ptt.pairs_to_target - currentN) : null,
-    projected_kscore_at_current_n: Number.isFinite(kNow) ? Math.round(kNow * 1e6) / 1e6 : null,
+    // CD-08 - surface the acquire | stop | switch verdict so callers (CLI /
+    // dashboard) can render the data-acquisition recommendation directly.
+    verdict: block.verdict || null,
+    target_k: block.target_k != null ? block.target_k : targetK,
+    n_points: block.n_points,
+    rmsd: block.rmsd,
+    achievable_k_max: block.achievable_k_max,
+    reachable,
+    // When the fit is rectified, the recommended train-row count IS the law's
+    // required_examples (the closed-form rows to hit target_k), replacing the
+    // fixed heuristic. data_budget_recommended is kept as the legacy alias the
+    // pickPath / warnings / report already read.
+    required_examples: reachable ? block.required_examples : null,
+    data_budget_recommended: reachable ? block.required_examples : null,
+    pairs_remaining: (block.pairs_remaining != null && Number.isFinite(block.pairs_remaining))
+      ? block.pairs_remaining
+      : (reachable ? Math.max(0, block.required_examples - currentN) : null),
+    expected_k_at_current: kNow,
+    projected_kscore_at_current_n: kNow,
+    marginal_dk_per_row: Number.isFinite(block.marginal_dk_per_row) ? block.marginal_dk_per_row : null,
     marginal_gain_per_1k_examples: Number.isFinite(gainPer1k) ? Math.round(gainPer1k * 1e6) / 1e6 : null,
-    reason: ptt.reachable ? 'fitted_rectified_scaling_law' : 'target_above_achievable_k_max',
+    curve: Array.isArray(block.curve) ? block.curve : null,
+    reason: reachable ? 'fitted_rectified_scaling_law' : (block.reason || 'target_above_achievable_k_max'),
   };
 }
 
@@ -275,8 +312,9 @@ export async function plan(datasetId, opts = {}) {
       holdout_size: 0,
       estimated_latency_ms: 0,
       estimated_training_cost_usd: 0,
-      data_budget: { basis: 'insufficient', target_k: DEFAULT_SCALING_TARGET_K, data_budget_recommended: null, projected_kscore_at_current_n: null, marginal_gain_per_1k_examples: null, reachable: false, reason: 'dataset_empty' },
+      data_budget: { basis: 'insufficient', verdict: null, target_k: DEFAULT_SCALING_TARGET_K, data_budget_recommended: null, required_examples: null, projected_kscore_at_current_n: null, expected_k_at_current: null, marginal_gain_per_1k_examples: null, marginal_dk_per_row: null, reachable: false, curve: null, reason: 'dataset_empty' },
       data_budget_recommended: null,
+      data_budget_verdict: null,
       projected_kscore_at_current_n: null,
       marginal_gain_per_1k_examples: null,
       warnings,
@@ -370,6 +408,10 @@ export async function plan(datasetId, opts = {}) {
     // fields are null (no fabrication).
     data_budget: dataBudget,
     data_budget_recommended: dataBudget.data_budget_recommended,
+    // CD-08 - surface the acquire | stop | switch verdict from planDataBudget()
+    // at the top level so callers can render the data-acquisition call without
+    // reaching into the nested block. null when basis:'insufficient'.
+    data_budget_verdict: dataBudget.verdict || null,
     projected_kscore_at_current_n: dataBudget.projected_kscore_at_current_n,
     marginal_gain_per_1k_examples: dataBudget.marginal_gain_per_1k_examples,
     warnings,
@@ -401,6 +443,7 @@ export function planReport(plan) {
   if (db && db.basis === 'rectified') {
     lines.push('');
     lines.push('  Data budget (scaling law, ' + db.n_points + ' pts, rmsd ' + db.rmsd + '):');
+    if (db.verdict) lines.push('    Verdict:                ' + db.verdict);
     lines.push('    Target K-Score:         ' + db.target_k);
     lines.push('    Projected K at current: ' + (db.projected_kscore_at_current_n != null ? db.projected_kscore_at_current_n : 'n/a'));
     if (db.reachable && db.data_budget_recommended != null) {

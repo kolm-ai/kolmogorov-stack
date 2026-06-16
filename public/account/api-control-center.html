@@ -717,7 +717,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       ],
       enterprise_controls: [
         { id:'rbac-sso-scim', status:'mounted', routes:['/v1/scim','/v1/saml/acs','/v1/scoped-keys'] },
-        { id:'provider-vault', status:'mounted', routes:['/v1/provider-vault','/v1/model-entitlements'] },
+        { id:'provider-vault', status:'mounted', routes:['/v1/account/provider-keys','/v1/model-entitlements'] },
         { id:'budget-and-rate', status:'mounted', routes:['/v1/spend-caps','/v1/pricing','/v1/gateway/dashboard'] },
         { id:'egress-policy', status:'mounted', routes:['/v1/account/api-control-center/exports','/v1/account/api-control-center/adapter-manifests/validate','/v1/redteam/sanitize','/v1/capture/export','/v1/assurance-case'] },
         { id:'retention-and-export', status:'mounted', routes:['/v1/account/api-control-center/events','/v1/account/api-control-center/exports','/v1/account/api-control-center/adapter-manifests/validate','/v1/capture/export','/v1/corpora','/v1/evidence'] },

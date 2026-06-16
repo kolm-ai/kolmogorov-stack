@@ -7,8 +7,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildRouter } from './src/router.js';
-import { provisionTenant, startKeyLastUsedFlusher } from './src/auth.js';
-import { startMagicLinkGc } from './src/auth-email.js';
+import { provisionTenant, keyLastUsedTrackingEnabled, startKeyLastUsedFlusher, stopKeyLastUsedFlusher } from './src/auth.js';
+import { startMagicLinkGc, stopMagicLinkGc } from './src/auth-email.js';
+import { oauthStartupCheck } from './src/oauth.js';
 import { isProductionRuntime } from './src/env.js';
 import { init as initOtel, expressMiddleware as otelMiddleware } from './src/otel.js';
 import { initSentry } from './src/sentry-init.js';
@@ -407,6 +408,12 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   // requests on rolling restarts.
   const onSig = (sig) => () => {
     console.log(`[${sig}] graceful shutdown initiated`);
+    // AUTH-03 - stop the background timers and drain their final windows before
+    // we begin closing connections, so the last scoped-key last_used batch and a
+    // pending magic-link GC tick are not lost on a rolling restart. Both are
+    // synchronous + no-throw and no-ops when never started.
+    try { stopKeyLastUsedFlusher(); } catch (e) { console.error('[auth] stopKeyLastUsedFlusher error:', e && e.message); }
+    try { stopMagicLinkGc(); } catch (e) { console.error('[auth] stopMagicLinkGc error:', e && e.message); }
     // Best-effort durable snapshot before exit so every deploy / rolling
     // restart leaves behind a fresh, consistent recovery point. backupNow() is
     // synchronous and never throws (store-backup contract), so it completes
@@ -470,6 +477,12 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   const stripePresent = stripeLinks.filter(v => !!process.env[v]).length;
   const webhookOk = !!process.env.STRIPE_WEBHOOK_SECRET;
   const stripeStatus = stripePresent === 5 && webhookOk ? 'wired' : `degraded (${stripePresent}/5 links, webhook ${webhookOk ? 'ok' : 'missing'})`;
+
+  // AUTH-05 - OAuth callback-base sanity check. Logs a single WARNING line at
+  // boot when a production deploy on a non-kolm.ai host has OAuth configured but
+  // no OAUTH_REDIRECT_BASE / KOLM_PUBLIC_URL set (so callbacks would return to
+  // https://kolm.ai instead of this instance). No-op + null in dev. Never throws.
+  try { oauthStartupCheck(console); } catch (e) { console.error('[oauth] startup check error:', e && e.message); }
 
   // W890-3 — keep a handle to the http.Server so graceful-shutdown hooks
   // above can call .close() and let in-flight requests drain on SIGTERM /
@@ -574,10 +587,12 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   // KOLM_KEY_LAST_USED_TRACKING=1; cadence KOLM_KEY_LAST_USED_FLUSH_MS, default
   // 30000). Without this the coalesced queue never drains and last_used_at stays
   // a false 'never used' signal. unref'd so it never holds the event loop open.
-  try {
-    const flusher = startKeyLastUsedFlusher(console);
-    if (flusher) console.log('  keyflush:   scoped-key last_used flusher armed');
-  } catch (e) { console.error('[auth] key last_used flusher start error:', e && e.message); }
+  if (keyLastUsedTrackingEnabled()) {
+    try {
+      const flusher = startKeyLastUsedFlusher(console);
+      if (flusher) console.log('  keyflush:   scoped-key last_used flusher armed');
+    } catch (e) { console.error('[auth] key last_used flusher start error:', e && e.message); }
+  }
 
   // AUTH-03 (email lane) - hourly GC of dead magic-link rows (cadence
   // KOLM_MAGICLINK_GC_MS, default 3600000; retention KOLM_MAGICLINK_RETENTION_DAYS,

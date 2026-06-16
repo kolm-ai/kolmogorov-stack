@@ -99,8 +99,13 @@ if (!RAW_STORE_DRIVER) {
   // operator understands which subsystem the env var actually steers.
   STORE_DRIVER = detectDefaultDriver();
   console.error(`[store] notice: KOLM_STORE_DRIVER=${RAW_STORE_DRIVER} selects the pluggable capture driver (src/capture-store.js); the core row store runs on "${STORE_DRIVER}".`);
-} else if (['json', 'sqlite'].includes(RAW_STORE_DRIVER)) {
-  STORE_DRIVER = RAW_STORE_DRIVER;
+} else if (['json', 'jsonl', 'sqlite'].includes(RAW_STORE_DRIVER)) {
+  // 'jsonl' is a historical alias for the dependency-free JSON file store
+  // (JSON-Lines-era naming). It maps to the 'json' core driver. Kept as a valid
+  // value so the W381/W397/W409/W411 corpus + train/holdout suites - which select
+  // it explicitly to force the file store over sqlite - run against a real backend
+  // instead of boot-throwing on a fresh module load.
+  STORE_DRIVER = RAW_STORE_DRIVER === 'jsonl' ? 'json' : RAW_STORE_DRIVER;
 } else {
   throw new Error(`Unsupported KOLM_STORE_DRIVER "${RAW_STORE_DRIVER}". Core-store values: "json" or "sqlite". Pluggable capture-driver values: "vercel_postgres" or "vercel_kv".`);
 }

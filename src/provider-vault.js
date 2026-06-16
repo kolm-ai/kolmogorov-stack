@@ -7,8 +7,10 @@
 //
 // Storage split (deliberate):
 //   - ciphertext + metadata rows live in the multi-tenant `provider_keys` table
-//     via store.js, so they persist on the deployed DB (SQLite / Postgres) and
-//     are tenant/team scoped like every other row.
+//     via store.js, so they persist on the deployed DB (SQLite (production) /
+//     JSON (dev)) and are tenant/team scoped like every other row. Transactional
+//     guarantees (atomic upsert/cascade) hold in SQLite mode only; the JSON dev
+//     backend is a single-process file store with no real transaction boundary.
 //   - the AES-256-GCM key lives in the secrets-vault.key file (under
 //     KOLM_DATA_DIR - the Railway volume), reused from secrets-vault.js.
 //
@@ -123,17 +125,33 @@ export function putProviderKey({ tenantId, teamId = null, actorId = null, provid
 
 // Resolve plaintext for the gateway ONLY. Precedence: this member's key, then
 // the team key. Returns null if neither is configured. Stamps last_used_at.
-export function resolveProviderKey({ tenantId, teamId = null, actorId = null, provider } = {}) {
+//
+// memberOf (optional) - a defense-in-depth predicate ({tenantId,teamId}) => bool
+// the gateway can pass to assert the caller is genuinely a member of the team
+// BEFORE a team-scoped key is resolved. The router already nulls teamId for a
+// non-member, so this is belt-and-suspenders: even if a teamId leaks into this
+// call for a non-member, a provided memberOf that returns falsy forces the
+// team branch to resolve nothing. Omitting memberOf preserves the prior
+// behavior exactly (rowsForTeam's own tenant/membership fence still applies).
+export function resolveProviderKey({ tenantId, teamId = null, actorId = null, provider, memberOf = null } = {}) {
   if (!tenantId || !provider) return null;
   const prov = cleanProvider(provider);
   // Member key: the caller's own, scoped to their tenant + actor.
   const member = actorId
     ? rowsForTenant(tenantId).find((r) => r.provider === prov && r.scope === 'member' && r.actor_id === actorId)
     : null;
+  // Team-membership gate (defense-in-depth). When memberOf is supplied and
+  // reports the caller is NOT a member, the team branch resolves nothing even
+  // if teamId leaked in. A throwing predicate fails CLOSED (no team key).
+  let teamAllowed = true;
+  if (teamId && typeof memberOf === 'function') {
+    try { teamAllowed = !!memberOf({ tenantId, teamId }); }
+    catch (_) { teamAllowed = false; }
+  }
   // Team key: shared across the team's members, fenced to the caller's tenant
   // (a team belongs to one tenant; a foreign tenant supplying the same team_id
   // must never resolve it - W936 #5).
-  const team = teamId
+  const team = (teamId && teamAllowed)
     ? rowsForTeam(teamId, tenantId).find((r) => r.provider === prov && r.scope === 'team')
     : null;
   const pick = member || team;

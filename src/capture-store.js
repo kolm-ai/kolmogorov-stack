@@ -31,6 +31,10 @@ import { appendEvent } from './event-store.js';
 import { hashContent, normalizeVendor } from './event-schema.js';
 import { attachCopyrightFlag } from './capture-copyright-filter.js';
 import { classifyForQuarantine as classifyCopyrightForQuarantine } from './copyright-detector.js';
+// Lifecycle webhook emit. Same module + event the router fires for
+// distill.completed / compile.completed; 'capture.created' is already in the
+// frozen WEBHOOK_EVENTS allow-list. Fire-and-forget (see _emitCaptureCreated).
+import * as webhooksModule from './webhooks.js';
 
 const ON_VERCEL = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
@@ -221,6 +225,28 @@ export async function bridgeToEventStore(row, opts = {}) {
   }
 }
 
+// Fire-and-forget 'capture.created' lifecycle emit. Mirrors the router's
+// _emitWebhook: never on the request hot path (we never await it), and a
+// delivery failure is swallowed so it can never break the capture write - the
+// customer already got their upstream answer. webhooksModule.emit(tenant, ...)
+// requires a tenant; we resolve it the same way the canonical-event bridge does
+// (tenant_id || tenant), and no-op when neither is present. Payload mirrors the
+// distill.completed/compile.completed shape (small, id-bearing scalars only).
+function _emitCaptureCreated(row) {
+  try {
+    const tenant = (row && (row.tenant_id || row.tenant)) || null;
+    if (!tenant) return;
+    const namespace = (row && (row.corpus_namespace || row.namespace)) || 'default';
+    const payload = {
+      capture_id: (row && (row.id || row.event_id)) || null,
+      namespace,
+      provider: (row && row.provider) || null,
+      model: (row && row.model) || null,
+    };
+    Promise.resolve(webhooksModule.emit(tenant, 'capture.created', payload)).catch(() => {});
+  } catch (_) { /* never throw from the capture-store insert path */ }
+}
+
 // Throws on write failure so the caller returns 503. The Pablo W211
 // silent-swallow pattern is structurally impossible from here.
 export async function insertCapture(row) {
@@ -271,6 +297,8 @@ export async function insertCapture(row) {
     // W409a - mirror into the canonical event-store so the lake + optimizer
     // see it. Best-effort, post-insert.
     await bridgeToEventStore(row);
+    // Lifecycle: announce the recorded capture (fire-and-forget, never blocks).
+    _emitCaptureCreated(row);
     return row;
   }
   // Legacy path: refuse to silently lose data when the deploy is on
@@ -289,6 +317,8 @@ export async function insertCapture(row) {
   store.insert('observations', row);
   // W409a - same bridge for the legacy synchronous path.
   await bridgeToEventStore(row);
+  // Lifecycle: announce the recorded capture (fire-and-forget, never blocks).
+  _emitCaptureCreated(row);
   return row;
 }
 

@@ -2895,8 +2895,14 @@ PRODUCT LOOP
   -> storage -> agents -> audit -> billing -> settings
 
 USAGE
-  kolm tui                             launch the REPL
+  kolm tui                             launch the operator dashboard
+  kolm tui --workbench [file.kolm]     launch the REAL workbench (:tune/:distill/:curate/:eval/:run)
   kolm tui --views [--json] [--closeout]  print the canonical TUI/product surface map
+
+  Inside the dashboard, training is reachable via keys L/X/Y/Z or command-mode
+  :tune / :distill / :preference / :onpolicy / :from-captures / :curate / :eval.
+  Press 't' on a training view to launch + follow the job; :follow <id> [run]
+  follows any job/run; 'r' refreshes the active view or re-polls the follower.
 
 COMMANDS (inside the REPL)
   open <path>                          load an artifact (drag-drop a .kolm into the terminal works)
@@ -2911,6 +2917,19 @@ COMMANDS (inside the REPL)
 NOTES
   Each successful local action prints the equivalent REST call beneath the
   result, so the TUI doubles as a one-click "show me the API call" tool.
+`,
+  play: `kolm play - open the workbench TUI on a .kolm artifact.
+
+USAGE
+  kolm play [file.kolm]                launch the workbench (optionally on a file)
+
+The workbench is the real training surface: :tune / :distill / :curate / :eval
+drive src/tune.js, src/data-curate.js and src/artifact-runner.js, and :run
+gives rich local inference rendering. Equivalent to \`kolm tui --workbench\`.
+
+NOTES
+  Requires an interactive terminal (TTY). For non-interactive inspection use
+  \`kolm inspect <file>\` or \`kolm run <file>\`.
 `,
   surfaces: `kolm surfaces - product journey map for users and operators.
 
@@ -26269,6 +26288,40 @@ async function cmdTrainPlan(args) {
     };
   }
   const p = await planner.plan(positional, planOpts);
+  // W487/data-scaling-law — surface the server/planner data-budget VERDICT when
+  // present. The planner's planReport() already renders the projection numbers
+  // (target K, projected K at current N, pairs-to-target, marginal gain). The
+  // verdict (acquire|stop|switch) is the one-line "what should I do next?"
+  // call the scaling-law block resolves to. We render it from p.data_budget
+  // (or the legacy top-level alias) without re-deriving it, so the CLI, the
+  // server route, and the web panel all read the same decision. Defensive:
+  // only prints when the field is present so an older planner stays silent.
+  function renderDataBudgetVerdict(plan) {
+    const db = (plan && plan.data_budget) || null;
+    const verdict = db && db.verdict != null ? db.verdict
+      : (plan && plan.data_budget_verdict != null ? plan.data_budget_verdict : null);
+    if (verdict == null) return;
+    const VERDICT_LABEL = {
+      acquire: 'ACQUIRE more data (the scaling law says it still pays off)',
+      stop: 'STOP acquiring (you are in the saturating tail; more data barely moves K)',
+      switch: 'SWITCH approach (target is above the achievable K max for this data)',
+    };
+    const required = db && db.required_examples != null ? db.required_examples
+      : (db && db.data_budget_recommended != null ? db.data_budget_recommended : null);
+    const remaining = db && db.pairs_remaining != null ? db.pairs_remaining : null;
+    const kNow = db && db.expected_k_at_current != null ? db.expected_k_at_current
+      : (db && db.projected_kscore_at_current_n != null ? db.projected_kscore_at_current_n : null);
+    const kMax = db && db.achievable_k_max != null ? db.achievable_k_max : null;
+    console.log('');
+    console.log('Data-budget verdict: ' + String(verdict).toUpperCase()
+      + (VERDICT_LABEL[verdict] ? '  -- ' + VERDICT_LABEL[verdict] : ''));
+    if (db && db.basis) console.log('  basis:               ' + db.basis);
+    if (required != null) console.log('  required examples:   ' + required
+      + (remaining != null ? ' (' + remaining + ' more to acquire)' : ''));
+    else if (remaining != null) console.log('  pairs remaining:     ' + remaining);
+    if (kNow != null) console.log('  expected K (current):' + ' ' + kNow);
+    if (kMax != null) console.log('  achievable K max:    ' + kMax);
+  }
   if (includeStrategy) {
     const strategy = await import('../src/distill-strategy.js');
     const s = strategy.planDistillStrategy({
@@ -26282,6 +26335,7 @@ async function cmdTrainPlan(args) {
     const out = { ...p, distill_strategy: s };
     if (wantJson) { console.log(JSON.stringify(out, null, 2)); return; }
     console.log(planner.planReport(p));
+    renderDataBudgetVerdict(p);
     console.log('');
     console.log('Distill strategy: ' + (s.recommendation?.id || 'none') + (s.ok ? ' (ready)' : ' (needs configuration)'));
     if (s.recommendation?.command) console.log('  run: ' + s.recommendation.command);
@@ -26290,6 +26344,7 @@ async function cmdTrainPlan(args) {
   }
   if (wantJson) { console.log(JSON.stringify(p, null, 2)); return; }
   console.log(planner.planReport(p));
+  renderDataBudgetVerdict(p);
 }
 
 // Wave 157 — `--redact <class>` maps to the worker's `--redact-class <class>`
@@ -34336,7 +34391,7 @@ function looksLikeNaturalLanguage(cmd, rest) {
 // scripts consume. Keep this in sync with the dispatch switch below.
 const COMPLETION_VERBS = [
   'init', 'signup', 'login', 'logout', 'whoami', 'artifacts', 'artifact', 'status', 'health', 'metrics', 'changelog', 'billing', 'support-bundle', 'key', 'new', 'build', 'compile', 'train', 'make', 'ship', 'run', 'eval', 'benchmark', 'bench',
-  'score', 'list', 'ls', 'inspect', 'eject', 'diff', 'verify', 'serve', 'tui', 'repl', 'publish', 'pull', 'hub', 'capture', 'labels', 'distill', 'moe', 'tokenize',
+  'score', 'list', 'ls', 'inspect', 'eject', 'diff', 'verify', 'serve', 'tui', 'play', 'repl', 'publish', 'pull', 'hub', 'capture', 'labels', 'distill', 'moe', 'tokenize',
   'config', 'hmac', 'install', 'tune', 'rag', 'team', 'vault', 'tunnel', 'cloud', 'airgap',
   'compute', 'doctor', 'loop', 'logs', 'ask', 'nl', 'chat', 'chat-tui', 'version', 'help', 'completion', 'upgrade', 'update', 'self-update',
   'models', 'gpu', 'export', 'seeds', 'anonymize', 'redact', 'media', 'reinject', 'improve', 'instant', 'extract', 'doc',
@@ -41938,8 +41993,38 @@ const TUI_ALT_EXIT  = '\x1b[?1049l';
 const TUI_CURSOR_HIDE = '\x1b[?25l';
 const TUI_CURSOR_SHOW = '\x1b[?25h';
 
+// W487 — kolm play <file>.kolm: launch the REAL workbench TUI from
+// cli/kolm-tui.mjs (the :tune/:distill/:curate/:eval/:run surface that drives
+// src/tune.js + src/data-curate.js + src/artifact-runner.js). This is the
+// discoverable entry point into the workbench from the main CLI; `kolm tui
+// --workbench` reaches the same surface. The older `kolm tui` operator
+// dashboard (cmdTui) stays the default so existing muscle memory + tests hold.
+async function cmdPlay(args) {
+  if (maybeHelp('play', args)) return;
+  const startPath = args.find((a) => !a.startsWith('-')) || null;
+  if (startPath && !fs.existsSync(startPath)) {
+    console.error('error: not found: ' + startPath);
+    process.exit(EXIT.NOT_FOUND);
+    return;
+  }
+  if (!process.stdout.isTTY) {
+    process.stderr.write('kolm play requires a TTY (interactive terminal).\n');
+    process.stderr.write('  non-interactive alternatives: kolm inspect <file> / kolm run <file>\n');
+    process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+  const { runTui } = await import('./kolm-tui.mjs');
+  await runTui({ startPath });
+}
+
 async function cmdTui(args) {
   if (maybeHelp('tui', args)) return;
+  // W487 — `kolm tui --workbench [file]` opens the REAL workbench TUI
+  // (cli/kolm-tui.mjs) instead of the operator dashboard below. Same surface
+  // as `kolm play`; provided here so `tui` discoverers reach the workbench too.
+  if (args.includes('--workbench') || args.includes('--play')) {
+    return cmdPlay(args.filter((a) => a !== '--workbench' && a !== '--play'));
+  }
   if (args.includes('--views')) {
     const { tuiViews, validateProductExperience } = await import('../src/product-experience.js');
     function bundledJson(rel) {
@@ -42153,6 +42238,28 @@ async function cmdTui(args) {
     // route the various Forge entry-points onto this view so the operator has
     // a single TUI surface for the whole W866 namespace.
     { id: 'hardware',           key: 'H', endpoint: '/v1/hardware',              kind: 'get',   label: 'hardware (GPU + supported quants)' },
+    // W487 — self-serve TRAINING surfaces. These close the workbench triangle in
+    // the operator TUI: the same POST routes `kolm tune` / `kolm distill` drive
+    // (/v1/distill/onpolicy, /v1/distill/preference, /v1/distill/from-captures)
+    // and the GET runs index (/v1/distill/runs) that lists recent jobs. The view
+    // rows themselves read the GET runs index so the operator can see active +
+    // recent training runs; the 't'/'d' launch keys (handled in onKey) POST to
+    // the matching route. Keys L/X/Y/Z are the only free letters after the
+    // BEMNOPQRSTUVWH run, so they carry the four training entry points. The
+    // launch verbs are also reachable via :tune / :distill / :preference /
+    // :onpolicy / :from-captures command-mode aliases below.
+    { id: 'training-runs',      key: 'L', endpoint: '/v1/distill/runs',          kind: 'get',   label: 'training runs (recent distill/tune jobs)' },
+    { id: 'distill-onpolicy',   key: 'X', endpoint: '/v1/distill/runs',          kind: 'get',   label: 'on-policy distill (POST /v1/distill/onpolicy)' },
+    { id: 'distill-preference', key: 'Y', endpoint: '/v1/distill/runs',          kind: 'get',   label: 'preference distill (POST /v1/distill/preference)' },
+    { id: 'distill-captures',   key: 'Z', endpoint: '/v1/distill/runs',          kind: 'get',   label: 'distill from captures (POST /v1/distill/from-captures)' },
+    // W487 — curate + eval reachability (alias-only — no hotkey). The curate
+    // view reads the datasets index (the corpus the :curate launch acts on);
+    // the eval view reads the artifacts index (what :eval grades). The actual
+    // local curate/eval engines (src/data-curate.js + src/artifact-runner.js)
+    // are driven by the real workbench (`kolm play` -> kolm-tui.mjs); these
+    // rows keep both surfaces discoverable from this operator TUI too.
+    { id: 'curate',             key: null, endpoint: '/v1/datasets',             kind: 'get',   label: 'curate (dataset corpus for :curate)' },
+    { id: 'eval',               key: null, endpoint: '/v1/artifacts',            kind: 'get',   label: 'eval (artifacts graded by :eval)' },
   ];
   // Also expose simulations under view 'simulations' (alias for one of the
   // workflow rows so the W384 14-view test grep finds the literal). We list
@@ -42183,10 +42290,36 @@ async function cmdTui(args) {
         res.setEncoding('utf8');
         res.on('data', (chunk) => { buf += chunk; });
         res.on('end', () => {
+          // W487 — graceful auth/error status handling. A 401/403/404 must not
+          // poison the pane with a raw parse error or [empty] row; surface a
+          // short actionable hint in the status bar and leave prior data intact.
+          const sc = res.statusCode || 0;
+          if (sc === 401 || sc === 403) {
+            state.status = 'view ' + viewId + ': ' + sc
+              + (sc === 401 ? ' unauthorized (run `kolm login` / set KOLM_API_KEY)' : ' forbidden (tenant lacks access)');
+            state.viewData = [];
+            render();
+            return;
+          }
+          if (sc === 404) {
+            state.status = 'view ' + viewId + ': 404 not available on this server';
+            state.viewData = [];
+            render();
+            return;
+          }
+          if (sc >= 400) {
+            let msg = '';
+            try { const j = JSON.parse(buf); msg = j.error || j.error_code || j.detail || ''; } catch {} // deliberate: cleanup
+            state.status = 'view ' + viewId + ': HTTP ' + sc + (msg ? ' (' + String(msg).slice(0, 60) + ')' : '');
+            state.viewData = [];
+            render();
+            return;
+          }
           try {
             const data = JSON.parse(buf);
             // Common envelope shapes: array, {items}, {rows}, {data}, {<id>:[...]}.
             // W414 also unwraps {recommendations:[...]} from /v1/intent/next.
+            // W487 also unwraps {runs:[...]} from /v1/distill/runs + /v1/jobs.
             const rows = viewId === 'connectors' && data && data.connectors
               ? ['openai', 'anthropic', 'openrouter'].map((provider) => ({
                 provider: provider === 'anthropic' ? 'Claude' : provider === 'openrouter' ? 'OpenRouter' : 'OpenAI',
@@ -42203,6 +42336,8 @@ async function cmdTui(args) {
               : Array.isArray(data.namespaces) ? data.namespaces
               : Array.isArray(data.members) ? data.members
               : Array.isArray(data.contestants) ? data.contestants
+              : Array.isArray(data.runs) ? data.runs
+              : Array.isArray(data.jobs) ? data.jobs
               : Array.isArray(data[viewId]) ? data[viewId]
               : [data];
             state.viewData = rows;
@@ -42264,6 +42399,127 @@ async function cmdTui(args) {
     } catch (e) {
       state.status = 'sse: ' + (e && e.message);
     }
+  }
+
+  // W487 — generalized progress follower. The same node:http(s)-only consumer
+  // as startSSE(), but pointed at a job/run progress source instead of the
+  // capture stream:
+  //   - jobs:  GET /v1/jobs/:id/stream  (SSE)   + GET /v1/jobs/:id        (poll)
+  //   - runs:  GET /v1/distill/runs/:id (poll, single-shot per tick)
+  // It tries SSE first; if the server does not speak text/event-stream it
+  // falls back to an interval poll that re-reads the record and re-renders.
+  // followState holds the active follower so 'r' (refresh) re-pokes it and a
+  // view switch / quit tears it down. TERMINAL statuses stop the poll loop.
+  const FOLLOW_TERMINAL = new Set(['completed', 'failed', 'cancelled', 'succeeded', 'error']);
+  let followState = null; // { id, kind, sse, timer }
+  function stopFollow() {
+    if (followState) {
+      if (followState.sse) { try { followState.sse.destroy(); } catch {} } // deliberate: cleanup
+      if (followState.timer) { try { clearInterval(followState.timer); } catch {} } // deliberate: cleanup
+      followState = null;
+    }
+  }
+  // Single GET tick against the record endpoint; updates the status bar with the
+  // current phase/step/loss/k and stops the follower on a terminal status.
+  function pollFollowOnce(id, kind) {
+    const path = kind === 'run'
+      ? '/v1/distill/runs/' + encodeURIComponent(id)
+      : '/v1/jobs/' + encodeURIComponent(id);
+    try {
+      const u = new URL(c.base.replace(/\/+$/, '') + path);
+      const lib = u.protocol === 'https:' ? https : http;
+      const req = lib.request({
+        hostname: u.hostname,
+        port: u.port || (u.protocol === 'https:' ? 443 : 80),
+        path: u.pathname + (u.search || ''),
+        method: 'GET',
+        headers: { accept: 'application/json', ...(c.api_key ? { authorization: 'Bearer ' + c.api_key } : {}) },
+      }, (res) => {
+        let buf = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => { buf += chunk; });
+        res.on('end', () => {
+          const sc = res.statusCode || 0;
+          if (sc === 401 || sc === 403) { state.status = 'follow ' + id + ': ' + sc + ' (auth)'; stopFollow(); render(); return; }
+          if (sc === 404) { state.status = 'follow ' + id + ': 404 (gone)'; stopFollow(); render(); return; }
+          let rec;
+          try { rec = JSON.parse(buf); } catch { state.status = 'follow ' + id + ': parse error'; render(); return; }
+          const st = rec.status || rec.state || rec.phase || '?';
+          const parts = ['follow ' + (kind === 'run' ? 'run ' : 'job ') + id, st];
+          if (rec.step != null) parts.push('step=' + rec.step);
+          if (rec.loss != null) parts.push('loss=' + rec.loss);
+          if (rec.k_score != null) parts.push('k=' + rec.k_score);
+          state.status = parts.join(' ');
+          if (FOLLOW_TERMINAL.has(String(st))) { stopFollow(); }
+          render();
+        });
+      });
+      req.on('error', (e) => { state.status = 'follow ' + id + ': ' + e.message; render(); });
+      req.end();
+    } catch (e) { state.status = 'follow ' + id + ': ' + (e && e.message); }
+  }
+  // Begin following a job/run. Tries SSE on /v1/jobs/:id/stream first; on any
+  // non-event-stream response it falls back to the interval poll. Runs only
+  // poll (the runs index has no per-id SSE shape).
+  function followProgress(id, kind) {
+    stopFollow();
+    if (!id) { state.status = 'follow: no id'; render(); return; }
+    followState = { id, kind, sse: null, timer: null };
+    const startPoll = () => {
+      if (!followState || followState.id !== id) return;
+      pollFollowOnce(id, kind);
+      followState.timer = setInterval(() => {
+        if (!followState || followState.id !== id) return;
+        pollFollowOnce(id, kind);
+      }, 2500);
+    };
+    if (kind === 'run') { startPoll(); return; }
+    // Job: attempt SSE, fall back to poll on a non-stream response or error.
+    try {
+      const u = new URL(c.base.replace(/\/+$/, '') + '/v1/jobs/' + encodeURIComponent(id) + '/stream');
+      const lib = u.protocol === 'https:' ? https : http;
+      const req = lib.request({
+        hostname: u.hostname,
+        port: u.port || (u.protocol === 'https:' ? 443 : 80),
+        path: u.pathname + (u.search || ''),
+        method: 'GET',
+        headers: { accept: 'text/event-stream', ...(c.api_key ? { authorization: 'Bearer ' + c.api_key } : {}) },
+      });
+      req.on('response', (res) => {
+        const ctype = String(res.headers['content-type'] || '').toLowerCase();
+        if (!ctype.includes('text/event-stream') || (res.statusCode || 0) >= 400) {
+          res.resume(); // drain
+          startPoll();
+          return;
+        }
+        if (followState) followState.sse = req;
+        res.setEncoding('utf8');
+        let buf = '';
+        res.on('data', (chunk) => {
+          buf += chunk;
+          const lines = buf.split(/\r?\n/);
+          buf = lines.pop() || '';
+          for (const ln of lines) {
+            const m = ln.match(/^data:\s*(.*)$/);
+            if (!m) continue;
+            try {
+              const ev = JSON.parse(m[1]);
+              const st = ev.status || ev.phase || '?';
+              const parts = ['follow job ' + id, st];
+              if (ev.step != null) parts.push('step=' + ev.step);
+              if (ev.loss != null) parts.push('loss=' + ev.loss);
+              if (ev.k_score != null) parts.push('k=' + ev.k_score);
+              state.status = parts.join(' ');
+              if (FOLLOW_TERMINAL.has(String(st))) stopFollow();
+              render();
+            } catch {} // deliberate: cleanup
+          }
+        });
+        res.on('end', () => { if (followState && followState.id === id) startPoll(); });
+      });
+      req.on('error', () => { startPoll(); });
+      req.end();
+    } catch { startPoll(); }
   }
 
   function pad(s, n) {
@@ -42395,6 +42651,39 @@ async function cmdTui(args) {
     out.push('-'.repeat(W) + '\x1b[K\n');
     out.push(pad(color('1', bar) + '   tenant: ' + (c.api_key ? c.api_key.slice(0, 8) + '...' : '(none)') + '   base: ' + c.base, W) + '\x1b[K');
     process.stdout.write(out.join(''));
+  }
+
+  // W487 — self-serve training launch. POSTs to the real distill route for the
+  // active training view (or an explicit objective) and, on a queued job_id /
+  // run_id, immediately begins following its progress via followProgress().
+  // The route map is the one `kolm tune` / `kolm distill` already drive, so the
+  // TUI launch and the CLI verb enqueue identical jobs against the same server.
+  const TRAINING_ROUTE = {
+    'distill-onpolicy':   '/v1/distill/onpolicy',
+    'distill-preference': '/v1/distill/preference',
+    'distill-captures':   '/v1/distill/from-captures',
+    'training-runs':      '/v1/distill/from-captures', // default launch = from-captures
+  };
+  async function launchTraining(viewId, extra) {
+    const route = TRAINING_ROUTE[viewId];
+    if (!route) { state.status = 'launch: ' + viewId + ' is not a training surface'; render(); return; }
+    // Default body: distill the current namespace from captures. The operator
+    // refines per-objective knobs from the CLI (`kolm distill ...`); the TUI
+    // launch is the discoverable one-key "start it" entry point.
+    const body = Object.assign({ namespace: 'default', limit: 1000 }, extra || {});
+    state.status = 'launch ' + route + ' ...';
+    render();
+    try {
+      const out = await api(c, 'POST', route, body);
+      const id = out.run_id || out.job_id || out.id || null;
+      if (id) {
+        state.status = 'launched ' + route + ' -> ' + id + ' (following)';
+        followProgress(id, out.run_id ? 'run' : 'job');
+      } else {
+        state.status = 'launch ' + route + ': ' + (out.status || out.error || 'queued');
+      }
+    } catch (e) { state.status = 'launch ' + route + ': ' + e.message; }
+    render();
   }
 
   // Backwards-compat: pre-W222 verbs reachable through `:<verb>` so the older
@@ -42616,7 +42905,53 @@ async function cmdTui(args) {
       'serve-wizard':     'hardware',
       'export-jobs':      'hardware',
       'export-wizard':    'hardware',
+      // W487 — self-serve training aliases. `:tune` and `:distill` land on the
+      // training-runs index; the per-objective aliases land on the matching
+      // launch view (where 't'/'d' POST to the real route). `:curate` / `:eval`
+      // surface the corpus + artifacts the workbench engines act on.
+      'tune':             'training-runs',
+      'training':         'training-runs',
+      'training-runs':    'training-runs',
+      'runs':             'training-runs',
+      'distill':          'training-runs',
+      'onpolicy':         'distill-onpolicy',
+      'on-policy':        'distill-onpolicy',
+      'distill-onpolicy': 'distill-onpolicy',
+      'preference':       'distill-preference',
+      'dpo-preference':   'distill-preference',
+      'distill-preference':'distill-preference',
+      'from-captures':    'distill-captures',
+      'distill-from-captures':'distill-captures',
+      'distill-captures': 'distill-captures',
+      'captures-distill': 'distill-captures',
+      'curate':           'curate',
+      'curation':         'curate',
+      'eval':             'eval',
+      'evaluate':         'eval',
+      'evals':            'eval',
     };
+    // W487 — :launch [onpolicy|preference|from-captures] starts a training job
+    // (defaults to the active training view); :follow <id> [run] follows a
+    // job/run by id. Both reuse the same followProgress() the launch path uses.
+    if (verb === 'launch' || verb === 'train') {
+      const obj = (arg || '').trim();
+      const objMap = {
+        '': state.view, 'onpolicy': 'distill-onpolicy', 'on-policy': 'distill-onpolicy',
+        'preference': 'distill-preference', 'dpo': 'distill-preference',
+        'from-captures': 'distill-captures', 'captures': 'distill-captures',
+      };
+      const target = objMap[obj] != null ? objMap[obj] : obj;
+      await launchTraining(target);
+      return;
+    }
+    if (verb === 'follow') {
+      const a = (arg || '').trim().split(/\s+/);
+      const id = a[0];
+      const kind = a[1] === 'run' ? 'run' : 'job';
+      if (!id) { state.status = 'follow: usage :follow <id> [run]'; return; }
+      followProgress(id, kind);
+      return;
+    }
     if (VIEW_ALIAS[verb]) {
       const id = VIEW_ALIAS[verb];
       state.view = id;
@@ -42633,6 +42968,7 @@ async function cmdTui(args) {
     try { process.stdin.setRawMode?.(false); } catch {} // deliberate: cleanup
     try { process.stdout.write(TUI_CURSOR_SHOW + TUI_ALT_EXIT); } catch {} // deliberate: cleanup
     if (sseReq) { try { sseReq.destroy(); } catch {} sseReq = null; } // deliberate: cleanup
+    stopFollow(); // W487 — tear down any active job/run follower.
   }
 
   // Keypress dispatcher. Every key from the plan is checked as a strict
@@ -42714,8 +43050,43 @@ async function cmdTui(args) {
     }
     if (k === '/') { state.mode = 'filter'; state.pending = ''; render(); return; }
     if (k === ':') { state.mode = 'command'; state.pending = ''; render(); return; }
-    if (k === 'r') { state.status = 'refresh: requested'; render(); return; }
+    // W487 — 'r' refresh. If a job/run follower is active, re-poll it now;
+    // else if a GET view is showing, reload it; else fall back to the SSE
+    // capture-stream semantics of the legacy refresh.
+    if (k === 'r') {
+      if (followState) {
+        state.status = 'refresh: re-poll ' + followState.id;
+        pollFollowOnce(followState.id, followState.kind);
+      } else if (state.leftSource === 'view' && state.view) {
+        state.status = 'refresh: reloading ' + state.view;
+        loadViewGet(state.view);
+      } else {
+        state.status = 'refresh: requested';
+      }
+      render(); return;
+    }
+    // W487 — 't' launches the active training surface (or, on a runs row,
+    // follows that run/job). When the current view is a training surface the
+    // launch POSTs to the matching distill route and starts following the job.
+    if (k === 't') {
+      if (state.leftSource === 'view' && TRAINING_ROUTE[state.view]) {
+        await launchTraining(state.view);
+        return;
+      }
+      // On any view row that carries an id, follow it as a job/run.
+      const sel = (state.viewData || [])[state.selectedIdx];
+      const id = sel && (sel.run_id || sel.job_id || sel.id);
+      if (id) { followProgress(id, sel.run_id ? 'run' : 'job'); render(); return; }
+      state.status = 't: switch to a training view (L/X/Y/Z or :tune/:distill) to launch';
+      render(); return;
+    }
     if (k === '\r' || k === '\n') {
+      // W487 — on a training/runs view, Enter follows the selected run/job.
+      if (state.leftSource === 'view') {
+        const sel = (state.viewData || [])[state.selectedIdx];
+        const id = sel && (sel.run_id || sel.job_id || sel.id);
+        if (id) { followProgress(id, sel.run_id ? 'run' : 'job'); render(); return; }
+      }
       const items = state.leftSource === 'captures' ? state.captures : state.artifacts;
       const sel = items[state.selectedIdx];
       state.status = sel ? 'open: ' + (sel.path || sel.capture_id || sel.id || '(row ' + state.selectedIdx + ')') : 'open: empty';
@@ -48281,6 +48652,7 @@ async function main() {
       case 'test':     await withErrorContext('test',     () => cmdTest(rest)); break;
       case 'serve':    await withErrorContext('serve',    () => cmdServe(rest)); break;
       case 'tui':      await withErrorContext('tui',      () => cmdTui(rest)); break;
+      case 'play':     await withErrorContext('play',     () => cmdPlay(rest)); break;
       case 'repl':     await withErrorContext('repl',     () => cmdRepl(rest)); break;
       case 'publish':  await withErrorContext('publish',  () => cmdPublish(rest)); break;
       case 'pull':     await withErrorContext('pull',     () => cmdPull(rest)); break;

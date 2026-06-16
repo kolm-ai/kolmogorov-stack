@@ -33,6 +33,22 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import * as jobs from './jobs.js';
+// CD-07 - curriculum ordering for the bridge train rows. The bridge's whole
+// corpus IS the train split (holdout_only rows are stripped below), so ordering
+// the surviving rows simple->complex never touches a holdout row. Off-by-knob
+// via {curriculum:false}; defaults to ascending.
+import { sortCapturesByCurriculum } from './curriculum-sort.js';
+// CD-01 - default-on light curation at the REAL product distill entry point.
+// The router distill routes (/v1/distill/from-captures specialist arm +
+// /v1/specialists/auto-distill) flow through startDistillJob, which assembles
+// the bridge's train corpus here. prepareDistillCorpus no longer curates by
+// default (its events->pairs round-trip + exact-count contracts are pinned), so
+// curation is applied at this product boundary instead. curateDefault() runs the
+// pure-JS, graceful-degrade stages (minhash near-dedup + learned-quality +
+// semantic cluster + label-error FLAG->review + COT/PII), never throws, and
+// degrades to the input rows unchanged on any internal failure. It runs on the
+// TRAIN rows ONLY - holdout_only rows are already stripped above it.
+import { curateDefault } from './data-curate.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
@@ -66,7 +82,7 @@ function pickTeacher() {
 // the train split (there is no holdout/train split here - the bridge is the
 // curated train side), so we strip holdout_only rows defensively before the
 // JSONL write. Counted on the job record meta so the receipt is honest.
-function writeWorkerInputs({ tmpDir, namespace, captures, baseModel }) {
+async function writeWorkerInputs({ tmpDir, namespace, captures, baseModel, curriculum = 'ascending', curate = true }) {
   fs.mkdirSync(tmpDir, { recursive: true });
   const seedsPath = path.join(tmpDir, 'seeds.jsonl');
   const specPath  = path.join(tmpDir, 'spec.json');
@@ -98,6 +114,46 @@ function writeWorkerInputs({ tmpDir, namespace, captures, baseModel }) {
     if (r.holdout_only === true) { holdout_excluded += 1; return false; }
     return true;
   });
+  // CD-01 - default-on light curation of the TRAIN rows (holdout already
+  // stripped above). curateDefault preserves the {id,input,output,...metadata}
+  // row shape (it returns the surviving rows with their extra fields intact),
+  // never throws, and degrades to the input rows unchanged on any internal
+  // failure - so a bridge distill is never blocked by curation. Disable via
+  // {curate:false}. The provenance receipt curateDefault writes lands in the
+  // `<namespace>::curate-provenance` audit namespace (see data-curate.js), never
+  // back into the training namespace.
+  let curate_report = null;
+  if (curate !== false && rows.length > 0) {
+    try {
+      const cd = await curateDefault(rows, { tenant: captures[0] && (captures[0].tenant_id || captures[0].tenant) || 'tenant_local', namespace });
+      if (cd && Array.isArray(cd.pairs)) {
+        rows.splice(0, rows.length, ...cd.pairs);
+        curate_report = {
+          method: cd.method || (cd.degraded ? 'degraded' : null),
+          n_in: cd.n_in,
+          n_kept: cd.n_kept,
+          n_removed: cd.n_removed != null ? cd.n_removed : null,
+          degraded: !!cd.degraded,
+        };
+      }
+    } catch (_) { /* curation is best-effort - never block a distill */ }
+  }
+  // CD-07 - order the surviving TRAIN rows by curriculum (simple->complex by
+  // default) so the student's early steps see the easy distribution first.
+  // sortCapturesByCurriculum scores on each row's `output` text, is a
+  // non-mutating stable sort, and is identity-safe for <2 rows. Holdout rows
+  // were already stripped above, so this never reorders/leaks holdout. Pass
+  // curriculum:false (or 'off'/'none') to keep the raw insertion order.
+  let curriculum_order = null;
+  const curMode = String(curriculum == null ? 'ascending' : curriculum).trim().toLowerCase();
+  if (rows.length >= 2 && !['off', 'none', 'false', '0', ''].includes(curMode)) {
+    const direction = curMode === 'descending' ? 'descending' : 'ascending';
+    const ordered = sortCapturesByCurriculum(rows, direction);
+    if (Array.isArray(ordered) && ordered.length === rows.length) {
+      rows.splice(0, rows.length, ...ordered);
+      curriculum_order = direction;
+    }
+  }
   fs.writeFileSync(seedsPath, rows.map(r => JSON.stringify(r)).join('\n') + '\n');
   fs.writeFileSync(specPath, JSON.stringify({
     job_id: `distill_${Date.now()}_${namespace}`,
@@ -105,7 +161,7 @@ function writeWorkerInputs({ tmpDir, namespace, captures, baseModel }) {
     student_base: baseModel,
     system: '',
   }, null, 2));
-  return { seedsPath, specPath, outDir, pair_count: rows.length, holdout_excluded };
+  return { seedsPath, specPath, outDir, pair_count: rows.length, holdout_excluded, curriculum_order, curate_report };
 }
 
 // Public entrypoint. Spawns the worker, returns the job record (queued -> running).
@@ -118,6 +174,11 @@ export async function startDistillJob({
   source = 'distill_bridge',
   spawnOverride = null,
   workerCmd = null,
+  // CD-07 - curriculum ordering of the train seeds. Defaults to ascending
+  // (simple->complex); pass false / 'off' / 'none' to keep raw insertion order.
+  curriculum = 'ascending',
+  // CD-01 - default-on light curation of the train rows. Pass false to skip.
+  curate = true,
 } = {}) {
   if (!Array.isArray(captures) || captures.length === 0) {
     throw new Error('startDistillJob: captures required');
@@ -137,8 +198,8 @@ export async function startDistillJob({
   else if (teacher) mode = 'collect';
   else mode = 'stub';
 
-  const { seedsPath, specPath, outDir, pair_count, holdout_excluded } = writeWorkerInputs({
-    tmpDir, namespace, captures, baseModel,
+  const { seedsPath, specPath, outDir, pair_count, holdout_excluded, curriculum_order, curate_report } = await writeWorkerInputs({
+    tmpDir, namespace, captures, baseModel, curriculum, curate,
   });
 
   // Register the job FIRST so the log path exists before we spawn.
@@ -157,6 +218,12 @@ export async function startDistillJob({
       teacher: teacher || null,
       pair_count,
       holdout_excluded: holdout_excluded || 0,
+      // CD-07 - the curriculum direction actually applied to the train seeds
+      // (null when fewer than 2 rows or the knob was disabled).
+      curriculum_order: curriculum_order || null,
+      // CD-01 - what the default-on light curation actually ran on the train
+      // rows (null when disabled). Surfaces n_in/n_kept/n_removed for the receipt.
+      curate: curate_report || null,
       tmp_dir: tmpDir,
       out_dir: outDir,
     },

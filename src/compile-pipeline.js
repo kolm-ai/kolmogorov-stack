@@ -376,6 +376,12 @@ async function _bundlePhase({
     job_id: jobId,
     task: { id: 'wave409c_pipeline', kind: taskType, type: taskType },
     base_model: plan.backbone || 'qwen-0.5b',
+    // Atom 2 (CA-01) - stamp the compile namespace into the manifest's recall
+    // block so a LATER compile in the same namespace can resolve THIS artifact
+    // as its incumbent baseline (_resolveNamespaceBaseline reads
+    // manifest.recall.namespace). Without this the namespace incumbent was
+    // unresolvable and the eval gate always compared against null.
+    recall_namespace: namespace || null,
     recipes,
     training_stats: {
       // Wave 409c - was hard-coded to 0.95. Now 0 unless a real eval ran.
@@ -596,6 +602,90 @@ function _interpretW808Gate(gate, force) {
     return { blocked: false, verdict, reason, gate, forced: true, exit_code: 0 };
   }
   return { blocked: true, verdict, reason, gate, forced: false, exit_code: PRODUCTION_GATE_FAILED_EXIT };
+}
+
+// Atom 2 (CA-01) - resolve the namespace INCUMBENT .kolm so the blocking
+// regression gate (W808 / compile-eval-gate) compares the candidate against the
+// real prior artifact instead of always seeing baseline:null (which makes the
+// gate fall back to its first-compile/absolute-floor path on every run).
+//
+// Resolution: scan the artifacts output dir for .kolm files, read each
+// manifest.json (cheaply, no signature verify - this is a read-only baseline
+// lookup, not an execution path), keep those whose manifest.recall.namespace
+// matches AND that carry a resolvable composite K-Score, exclude the freshly
+// built candidate (by artifact path + hash), and return the NEWEST by
+// manifest.created_at as the incumbent. Returns null when no prior artifact
+// exists (first compile in this namespace) - baseline stays null and the eval
+// gate's first-compile behavior is preserved.
+//
+// Deterministic + fail-open: any read/parse error on a single file is skipped;
+// a failure to load AdmZip or read the dir returns null (no baseline) rather
+// than breaking the compile - the W808 distill-side gate is the other,
+// run-dir-based incumbent check, so a missing artifact-dir baseline is not the
+// only regression fence.
+async function _resolveNamespaceBaseline({ namespace, outDir, excludeHash, excludePath, opts }) {
+  if (!namespace) return null;
+  const dir = (opts && opts.out_dir) || outDir || path.join(_kolmDir(), 'artifacts');
+  let AdmZip;
+  try {
+    AdmZip = (await import('adm-zip')).default;
+  } catch (_) {
+    return null; // adm-zip unavailable - no artifact-dir baseline
+  }
+  let files;
+  try {
+    files = fs.readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.kolm'));
+  } catch (_) {
+    return null; // no artifacts dir yet
+  }
+  const exclPath = excludePath ? path.resolve(excludePath) : null;
+  let best = null;
+  for (const f of files) {
+    const full = path.join(dir, f);
+    if (exclPath && path.resolve(full) === exclPath) continue;
+    let manifest = null;
+    try {
+      const zip = new AdmZip(full);
+      const entry = zip.getEntry('manifest.json');
+      if (!entry) continue;
+      manifest = JSON.parse(entry.getData().toString('utf8'));
+    } catch (_) {
+      continue; // unreadable / malformed .kolm - skip, never throw
+    }
+    if (!manifest || typeof manifest !== 'object') continue;
+    // Namespace match: the recall block carries { namespace } (artifact.js).
+    const ns = manifest.recall && manifest.recall.namespace;
+    if (ns !== namespace) continue;
+    // Exclude the candidate by its artifact hash when supplied.
+    if (excludeHash && manifest.artifact_hash && manifest.artifact_hash === excludeHash) continue;
+    // Require a resolvable composite K-Score so the gate has something to
+    // compare against; a manifest without one is not a usable incumbent.
+    const k = manifest.k_score;
+    const composite = k && typeof k === 'object' ? Number(k.composite)
+      : (typeof k === 'number' ? k : NaN);
+    if (!Number.isFinite(composite)) continue;
+    const createdAt = manifest.created_at || '';
+    if (!best || String(createdAt).localeCompare(String(best.created_at)) > 0) {
+      best = {
+        id: manifest.id || manifest.cid || manifest.artifact_hash || f,
+        // Expose the composite as a top-level NUMERIC k_score so the eval gate's
+        // resolveKScore() reads it directly (it does num(ref.k_score) first; the
+        // raw manifest.k_score is the {composite,ships,...} envelope object, which
+        // num() cannot read). regression_classes are lifted alongside so the
+        // gate's new-regression delta sees the incumbent's known classes.
+        k_score: composite,
+        regression_classes: Array.isArray(manifest.regression_classes)
+          ? manifest.regression_classes.slice()
+          : (manifest.eval_results && Array.isArray(manifest.eval_results.regressions)
+              ? manifest.eval_results.regressions.slice()
+              : []),
+        manifest,
+        artifact_path: full,
+        created_at: createdAt,
+      };
+    }
+  }
+  return best;
 }
 
 // W808-BLOCK / P1 (atoms 4+5) - run the signed eval gate against the freshly
@@ -1532,9 +1622,34 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   //
   // force (opts.force || opts.force_promote) downgrades a blocking verdict to
   // a logged warning so the operator can still ship an override.
+  //
+  // Atom 2 (CA-01) - resolve the namespace incumbent .kolm as the baseline when
+  // the caller did not pass an explicit one. With a real incumbent the eval gate
+  // compares candidate-vs-incumbent K-Score (a measured regression BLOCKS); with
+  // no incumbent (first compile) baseline stays null and the gate keeps its
+  // first-compile / absolute-floor behavior.
+  let resolvedBaseline = opts.baseline || null;
+  if (!resolvedBaseline) {
+    try {
+      resolvedBaseline = await _resolveNamespaceBaseline({
+        namespace,
+        outDir: opts.out_dir,
+        excludeHash: artifactResult && artifactResult.artifact_hash,
+        excludePath: artifactResult && artifactResult.outPath,
+        opts,
+      });
+    } catch (_) {
+      resolvedBaseline = null; // baseline resolution must never break a compile
+    }
+    _writePhaseLog(jobId, 'regression_gate', {
+      baseline_resolved: !!resolvedBaseline,
+      baseline_artifact_id: resolvedBaseline ? resolvedBaseline.id : null,
+      baseline_source: resolvedBaseline ? 'namespace_incumbent' : 'none_first_compile',
+    });
+  }
   const evalGate = await _runEvalGate({
     manifest: (artifactResult && artifactResult.manifest) || {},
-    baseline: opts.baseline || null,
+    baseline: resolvedBaseline,
     thresholds: opts.gate_thresholds,
     force,
   });

@@ -280,11 +280,22 @@ function _writeJsonl(file, rows) {
 
 // ── persistence (best-effort, exact pattern) ────────────────────────────────
 
+// Provenance receipts MUST live in a sibling AUDIT namespace, never in the data
+// namespace being curated. This event carries no (prompt,response) - it is a
+// curation receipt, not a training pair. Writing it into `namespace` would
+// inject a phantom empty-IO row into the event store that prepareDistillCorpus
+// drops (no prompt/response) but createDataset's namespace scan would still
+// include, splitting it 80/20 across train/holdout and breaking the W411
+// train+holdout==corpus + exact-train_count invariants. The `::curate-provenance`
+// suffix keeps the receipt durable + auditable while fencing it out of every
+// training corpus read for the data namespace.
+const CURATE_PROVENANCE_SUFFIX = '::curate-provenance';
 async function _persist({ tenant, namespace, workflow, payload }) {
   try {
+    const provenanceNs = String(namespace || 'default') + CURATE_PROVENANCE_SUFFIX;
     const ev = await eventStore.appendEvent({
       tenant_id: tenant,
-      namespace: namespace || 'default',
+      namespace: provenanceNs,
       provider: PROVIDER,
       vendor: 'kolm',
       model: 'data-curate/v1',
@@ -294,7 +305,7 @@ async function _persist({ tenant, namespace, workflow, payload }) {
       completion_tokens: 0,
       feedback: JSON.stringify(payload || {}),
     });
-    return { persisted: true, event_id: ev && ev.event_id };
+    return { persisted: true, event_id: ev && ev.event_id, namespace: provenanceNs };
   } catch (e) {
     return { persisted: false, error: String((e && e.message) || e) };
   }

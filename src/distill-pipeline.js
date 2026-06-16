@@ -52,6 +52,12 @@ import { normalizeEfficiencyOptions, buildEfficiencyEnv } from './distill-effici
 // trainer) actually engages. See _resolveOrderingPolicy + the staging block.
 import { complexityProxy, sortCapturesByCurriculum, buildUnigramTable } from './curriculum-sort.js';
 import { createScorerWindow } from './capture-importance.js';
+// CD-01 - default-on light curation. curateDefault() runs the pure-JS,
+// graceful-degrade stages (minhash near-dedup + learned-quality + semantic
+// cluster + label-error FLAG->review + COT/PII) on EVERY compile; the heavy
+// python dedup + diversity SELECT stages stay opt-in behind curatePairs/--auto.
+// It never throws across its API and degrades to the input pairs unchanged.
+import { curateDefault } from './data-curate.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
@@ -173,7 +179,7 @@ export function selectStudentBackbone({ task_type, hw_tier } = {}) {
 // only events with created_at strictly greater than `since` are returned.
 // Used by --since-last-compile to retrain on the delta of new approvals
 // since the previous artifact's created_at.
-export async function prepareDistillCorpus({ namespace, split = 'train', limit = 100000, approvedOnly = false, tenant = null, tenant_id = null, since = null } = {}) {
+export async function prepareDistillCorpus({ namespace, split = 'train', limit = 100000, approvedOnly = false, tenant = null, tenant_id = null, since = null, curate = false, curriculum = null, mode = null } = {}) {
   if (!namespace) throw new Error('prepareDistillCorpus requires {namespace}');
   const tenantScope = tenant_id || tenant || null;
   let sinceMs = null;
@@ -283,6 +289,67 @@ export async function prepareDistillCorpus({ namespace, split = 'train', limit =
     filtered = filtered.filter((p) => !p.holdout_only);
     holdout_excluded_from_train = before - filtered.length;
   }
+  // CD-01 - OPT-IN light curation. prepareDistillCorpus is the faithful
+  // events->pairs funnel whose round-trip fidelity + exact train_count are
+  // pinned, security-relevant contracts (W381 #5 round-trip 1:1, W411 train-only
+  // exact-count). Curation drops/redacts/reorders rows, so running it here BY
+  // DEFAULT silently mutated those pinned counts. It is therefore OFF by default
+  // ({curate:false}) and the real PRODUCT entry points opt in explicitly
+  // ({curate:true}): compile-pipeline.js runs the CA-05 curate phase on the
+  // corpus, and src/distill-bridge.js curates the bridge train rows. When a
+  // caller DOES pass {curate:true}, curateDefault() runs the pure-JS,
+  // graceful-degrade stages (minhash near-dedup + learned-quality + semantic
+  // cluster + label-error FLAG->review + COT/PII); heavy python dedup +
+  // diversity SELECT stay opt-in behind curatePairs/--auto. curateDefault()
+  // never throws and degrades to the input pairs unchanged on any internal
+  // failure. Curation runs AFTER the holdout split + holdout_only strip, so it
+  // only ever touches the rows in THIS split: a holdout_only row already routed
+  // to the holdout bucket can never be moved back into train by curation
+  // (curation filters/redacts/reorders, it never re-splits).
+  let curate_report = null;
+  if (curate === true && filtered.length > 0) {
+    const cd = await curateDefault(filtered, {
+      tenant: tenantScope || 'tenant_local',
+      namespace,
+    });
+    if (cd && Array.isArray(cd.pairs)) {
+      filtered = cd.pairs;
+      curate_report = {
+        method: cd.method || (cd.degraded ? 'degraded' : null),
+        n_in: cd.n_in,
+        n_kept: cd.n_kept,
+        n_removed: cd.n_removed != null ? cd.n_removed : null,
+        degraded: !!cd.degraded,
+        report: cd.report || null,
+      };
+    }
+  }
+  // CD-07 - OPT-IN curriculum ordering of the TRAIN rows. Order simple->complex
+  // (or descending) so the student's early epochs see the easy distribution
+  // first. ONLY applies to the train split: the holdout split must keep its
+  // sampling order untouched (reordering it would be a no-op for leakage but we
+  // never touch holdout to keep the discipline explicit). OFF by default so
+  // prepareDistillCorpus stays a faithful events->pairs funnel (W411 train-only
+  // exact-count is order-independent, but we keep this off-by-default alongside
+  // curation so the unit contract is a pure pass-through). Real product callers
+  // that want curriculum order thread {curriculum:'ascending'|'descending'}
+  // explicitly (compile-pipeline.js applies its own CA-06 curriculum on the
+  // train pairs; src/distill-bridge.js orders the bridge train rows).
+  // sortCapturesByCurriculum is a non-mutating stable sort, identity-safe <2 rows.
+  let curriculum_applied = null;
+  if (split === 'train' && filtered.length >= 2 && (curriculum != null || mode != null)) {
+    const wantMode = String(curriculum != null ? curriculum : mode)
+      .trim().toLowerCase();
+    // 'off'/'none'/'false'/'0' explicitly disable; anything else picks a
+    // direction (descending when asked, otherwise ascending).
+    if (!['off', 'none', 'false', '0', ''].includes(wantMode)) {
+      const direction = wantMode === 'descending' ? 'descending' : 'ascending';
+      // The pipeline pairs are {prompt,response,...}; sortCapturesByCurriculum
+      // scores on the response text and is verified working on these rows.
+      filtered = sortCapturesByCurriculum(filtered, direction);
+      curriculum_applied = direction;
+    }
+  }
   return {
     pairs: filtered,
     stats: {
@@ -296,6 +363,10 @@ export async function prepareDistillCorpus({ namespace, split = 'train', limit =
       dropped_unapproved,
       dropped_since,
       holdout_excluded_from_train,
+      // CD-01/CD-07 - what the default corpus-prep path actually ran, so the
+      // receipt records the curation method + curriculum order.
+      curate: curate_report,
+      curriculum: curriculum_applied,
       since: sinceMs != null ? new Date(sinceMs).toISOString() : null,
     },
   };

@@ -85,6 +85,34 @@ export function closeTunnel(token, byTenantId) {
   return true;
 }
 
+// Deactivate / tear down a tunnel by its durable id (the `tnl_...` value teams
+// store as team_models.endpoint_tunnel_id). Unlike closeTunnel (token-scoped,
+// owner-authorized, user-initiated), this is a SYSTEM teardown used by the
+// cascade in teams.deleteTeam: when a team is deleted every team-model tunnel
+// must be deactivated so no shared endpoint stays resolvable. It looks the
+// tunnel up by id, drops any live SSE agent + rejects in-flight requests, and
+// marks the row inactive (status:'deactivated', _deleted) so getTunnelByToken /
+// forwardRequest / listTunnelsForTenant stop resolving it. Idempotent: a second
+// call (or an unknown / already-deactivated id) is a no-op returning false.
+export function deactivateTunnel(tunnelId) {
+  if (!tunnelId) return false;
+  const t = findOne('tunnels', x => x.id === tunnelId && !x._deleted);
+  if (!t) return false;
+  const ent = live.get(t.token);
+  if (ent) {
+    try { ent.agent.end(); } catch {} // deliberate: cleanup
+    for (const p of ent.pending.values()) p.reject(new Error('tunnel deactivated'));
+    if (ent.pingTimer) clearInterval(ent.pingTimer);
+    live.delete(t.token);
+  }
+  update('tunnels', x => x.id === tunnelId, {
+    status: 'deactivated',
+    _deleted: true,
+    deactivated_at: new Date().toISOString(),
+  });
+  return true;
+}
+
 export function attachAgent(token, res) {
   const t = getTunnelByToken(token);
   if (!t) return { ok: false, status: 404, error: 'tunnel not found' };
