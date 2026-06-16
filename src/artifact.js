@@ -365,7 +365,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region, runtime_passports, evidence_dag, speculative_decoding, prompt_cache, continuous_batching }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, mixed_precision_proof, importance_signal, calibration_provenance, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region, runtime_passports, evidence_dag, speculative_decoding, prompt_cache, continuous_batching }) {
   const secret = requireSignSecret();
   // W252 - K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -1294,6 +1294,30 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     // any post-build profile mutation breaks the receipt chain.
     mixed_precision_profile: Array.isArray(daq_profile) && daq_profile.length > 0
       ? daq_profile : null,
+    // finalized-c5 (layer-importance atom) - the falsifiable "applied == requested"
+    // schedule read-back proof (src/layer-sensitivity-allocator.js
+    // buildScheduleReceipt) and the REAL per-layer importance signal that drove the
+    // allocation (computeCohortSensitivities). Conditional spread per the W460
+    // byte-stability law: absent / null / {} all collapse to the empty spread so
+    // pre-finalized-c5 artifacts rebuilt without these blocks remain byte-identical
+    // to their original manifest_hash + artifact_hash. Bound into artifact_hash
+    // below via mixed_precision_proof_hash / importance_signal_hash so any post-build
+    // tamper of the read-back proof or the importance signal breaks the receipt chain.
+    ...(mixed_precision_proof && typeof mixed_precision_proof === 'object'
+        && Object.keys(mixed_precision_proof).length > 0
+      ? { mixed_precision_proof } : {}),
+    ...(importance_signal && typeof importance_signal === 'object'
+        && Object.keys(importance_signal).length > 0
+      ? { importance_signal } : {}),
+    // finalized-c5 (calibration-set atom) - the reproducible calibration regime
+    // (src/calibration-set.js calibrationReceiptBlock): method/regime/seqlen/rows,
+    // provenance_hash, source fingerprints, dedup counts, language/kind distribution,
+    // ordered window hashes - NO raw tenant text. Conditional spread per W460 so a
+    // verifier can re-derive the exact calibration corpus from (seeds, params)
+    // without changing hashes of artifacts that omit it.
+    ...(calibration_provenance && typeof calibration_provenance === 'object'
+        && Object.keys(calibration_provenance).length > 0
+      ? { calibration_provenance } : {}),
     // W721 - Task-Specific Attention Compiler (TSAC) per-(layer,head)
     // sparsity profile. When the build was driven by `kolm distill
     // sparse-attention compile`, the resolved profile rides here so a
@@ -1556,6 +1580,27 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // ship a DAQ profile remain byte-stable.
   if (Array.isArray(daq_profile) && daq_profile.length > 0) {
     artifact_hash_input.mixed_precision_profile_hash = sha256(canonicalJson(daq_profile));
+  }
+  // finalized-c5 - bind the mixed-precision read-back proof + importance signal +
+  // calibration provenance into artifact_hash. Same W460 conditional-slot pattern
+  // as mixed_precision_profile_hash: keyed ONLY when the corresponding block is a
+  // non-empty object so pre-finalized-c5 artifacts that never carried these blocks
+  // remain byte-identical when rebuilt. This extends the moat chain to cover the
+  // applied==requested schedule proof, the per-layer importance signal that drove
+  // the allocation, and the reproducible calibration regime - so a tamper of any
+  // of them (e.g. flipping schedule_honored, swapping a sensitivity, editing the
+  // calibration provenance_hash) breaks every signature down the chain.
+  if (mixed_precision_proof && typeof mixed_precision_proof === 'object'
+      && Object.keys(mixed_precision_proof).length > 0) {
+    artifact_hash_input.mixed_precision_proof_hash = sha256(canonicalJson(mixed_precision_proof));
+  }
+  if (importance_signal && typeof importance_signal === 'object'
+      && Object.keys(importance_signal).length > 0) {
+    artifact_hash_input.importance_signal_hash = sha256(canonicalJson(importance_signal));
+  }
+  if (calibration_provenance && typeof calibration_provenance === 'object'
+      && Object.keys(calibration_provenance).length > 0) {
+    artifact_hash_input.calibration_provenance_hash = sha256(canonicalJson(calibration_provenance));
   }
   // W721 - bind the TSAC sparsity_profile into artifact_hash so any
   // post-build tamper of the per-(layer,head) kernel selection (added

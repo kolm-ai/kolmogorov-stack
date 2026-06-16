@@ -428,7 +428,7 @@ async function _bundlePhase({
 // worker via spawnSync. Skipped when opts.quantize is falsy. Honest exit:
 // emits {phase:'quantize', precision, skipped:true} when the worker doctor
 // reports the python stack is missing.
-async function _quantizePhase({ jobId, distillResult, opts }) {
+async function _quantizePhase({ jobId, distillResult, opts, trainPairs }) {
   if (!opts.quantize) {
     return { skipped: true, reason: 'quantize disabled' };
   }
@@ -444,11 +444,45 @@ async function _quantizePhase({ jobId, distillResult, opts }) {
   const { spawnSync } = await import('node:child_process');
   const outDir = path.join(_jobsDir(), jobId, 'quantize');
   fs.mkdirSync(outDir, { recursive: true });
+
+  // finalized-c5 (calibration-set atom): for calibration-REQUIRED methods, build a
+  // REAL domain-matched calibration corpus from the TRAIN split (NEVER the holdout -
+  // preserves holdout-disjointness) and pass it as --calib so the worker calibrates
+  // on real tenant data instead of the toy _FALLBACK_CALIB prose. Default-on but
+  // fully fallback-safe: calibration-FREE methods (int4/int8/hqq - the default
+  // precision) skip this entirely, and when no train rows / no builder result exist
+  // we omit --calib and the worker runs exactly as before. The build stays local
+  // (no hyperscaler); only the {text} JSONL the worker re-tokenizes is written.
+  let calibration = null;
+  const extraArgs = [];
+  try {
+    const { buildCalibrationSet, calibrationReceiptBlock, METHOD_REGIME } = await import('./calibration-set.js');
+    const regime = METHOD_REGIME[String(precision).toLowerCase()];
+    const tp = Array.isArray(trainPairs) ? trainPairs : [];
+    if (regime && regime.calibration_required && tp.length > 0) {
+      const built = buildCalibrationSet({
+        method: String(precision).toLowerCase(),
+        sources: [{
+          kind: 'tenant-capture',
+          label: 'distill-train-split',
+          items: tp.map((p) => ({ input: p.prompt, output: p.response })),
+        }],
+      });
+      if (built && built.ok && built.calibration_required && built.jsonl) {
+        const calibPath = path.join(outDir, 'calibration.jsonl');
+        fs.writeFileSync(calibPath, built.jsonl);
+        extraArgs.push(`--calib=${calibPath}`);
+        calibration = calibrationReceiptBlock(built);
+      }
+    }
+  } catch { /* fallback: omit --calib, worker behaves exactly as before */ }
+
   const r = spawnSync(process.execPath, [
     workerCmd,
     `--method=${precision}`,
     `--in=${distillResult.student_path}`,
     `--out=${outDir}`,
+    ...extraArgs,
     '--json',
   ], { encoding: 'utf8', timeout: 60_000 });
   return {
@@ -456,6 +490,7 @@ async function _quantizePhase({ jobId, distillResult, opts }) {
     exit_code: r.status,
     out_dir: outDir,
     ml_pipeline_run: r.status === 0,
+    ...(calibration ? { calibration } : {}),
   };
 }
 
@@ -1396,7 +1431,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   }
 
   // 6. quantize ------------------------------------------------------------
-  const quantizeInfo = await _quantizePhase({ jobId, distillResult, opts });
+  const quantizeInfo = await _quantizePhase({ jobId, distillResult, opts, trainPairs });
   _writePhaseLog(jobId, 'quantize', quantizeInfo);
   yield {
     phase: 'quantize',

@@ -170,6 +170,28 @@ const distillMethodArg = args['distillation-method'] || null;
 if (distillMethodArg && !isKnownDistillationMethod(distillMethodArg)) {
   fail(`unknown --distillation-method "${distillMethodArg}"; expected one of [${DISTILLATION_METHODS.join(', ')}]`);
 }
+// C4 truthfulness guard (cross-tokenizer KD): 'uld' / 'seq-level-kd' have a real,
+// tested alignment module (src/distill-cross-tokenizer.js) but NO trainer in this
+// worker yet consumes cross-vocab aligned targets (ULD needs a soft-target
+// trainer; seq-KD needs student-retokenized rows fed to SFT). In --mode=full they
+// would fall through to train_lora.py and the manifest would stamp a FALSE
+// distillation_method='uld'. Rather than sign an artifact that lies about the
+// objective, FAIL LOUD. (collect/stub modes only gather pairs and never claim a
+// training objective, so they are unaffected.)
+if (mode === 'full' && (distillMethodArg === 'uld' || distillMethodArg === 'seq-level-kd')) {
+  fail(`distillation_method='${distillMethodArg}' (cross-tokenizer KD) is not yet runnable in --mode=full: the alignment math is built + tested (src/distill-cross-tokenizer.js) but no soft-target / retokenized-SFT trainer consumes it here. Refusing to train a DIFFERENT objective under a '${distillMethodArg}' label (that would sign a false receipt). Use --distillation-method=lora for plain SFT-KD until the cross-vocab trainer lands.`);
+}
+// C4 truthfulness guard (logit-level objectives): the collect worker's
+// train_lora.py is sequence-level SFT and does NOT implement the logit objectives
+// (forward_kl / reverse_kl / jsd / distillm2 / gkd), which need teacher LOGITS +
+// the on-policy GKD trainer. The CLI advertises --objective=<logit>; honor it
+// truthfully by failing loud here (it would otherwise be a silent no-op that runs
+// LoRA) and point at the real entry point.
+const _objectiveArg = args.objective || process.env.KOLM_DISTILL_OBJECTIVE || null;
+const _LOGIT_OBJECTIVES = new Set(['forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd']);
+if (mode === 'full' && _objectiveArg && _LOGIT_OBJECTIVES.has(_objectiveArg)) {
+  fail(`--objective=${_objectiveArg} is a logit-level objective the --local-worker --mode=full SFT path cannot run (it needs teacher logits + the on-policy GKD trainer). Use \`kolm distill onpolicy train --objective=${_objectiveArg} ...\` (src/distill-onpolicy.js -> train_gkd.py). The collect worker supports sequence-level SFT only (--objective=seqkd / --distillation-method=lora|qlora|full-ft|rejection_sampling).`);
+}
 
 // Wave 158 — optional --teacher-version + --student-base-revision pin the
 // vendor's response version + the HF commit hash so a verifier can rebuild

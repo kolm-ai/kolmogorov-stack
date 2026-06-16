@@ -25065,6 +25065,68 @@ async function cmdDistillMixedPrecision(args) {
       }
     } catch { /* fall through to honest envelope */ }
   }
+  // finalized-c5 (layer-importance atom) - when no distill run-meta.layer_telemetry
+  // exists, fall back to a freshly-computed REAL importance signal from calibration
+  // statistics (src/layer-sensitivity-allocator.js planLayerSchedule) instead of the
+  // hard no_telemetry dead-end. This fallback is ADDITIVE + opt-in: it only fires
+  // when an importance-stats source is actually present (an explicit
+  // --importance-stats <path>, or an importance-stats.json / importance_signal.json
+  // in the namespace's distill run dir). When NO stats source exists we preserve the
+  // historical no_telemetry exit-3 envelope (fail-loud, never fabricate a signal).
+  let importanceSchedule = null;
+  if (!telemetry) {
+    let statsPath = pickFlag(args, '--importance-stats');
+    if (!statsPath && fs.existsSync(distillRoot)) {
+      try {
+        const runs = fs.readdirSync(distillRoot)
+          .map((f) => ({ name: f, full: path.join(distillRoot, f) }))
+          .filter((e) => { try { return fs.statSync(e.full).isDirectory(); } catch { return false; } })
+          .sort((a, b) => fs.statSync(b.full).mtimeMs - fs.statSync(a.full).mtimeMs);
+        for (const r of runs) {
+          for (const cand of ['importance-stats.json', 'importance_signal.json']) {
+            const p = path.join(r.full, cand);
+            if (fs.existsSync(p)) { statsPath = p; break; }
+          }
+          if (statsPath) break;
+        }
+      } catch { /* fall through to no_telemetry */ }
+    }
+    if (statsPath && fs.existsSync(statsPath)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
+        const layerStats = Array.isArray(raw) ? raw : (Array.isArray(raw.layer_stats) ? raw.layer_stats : null);
+        if (layerStats && layerStats.length > 0) {
+          const { planLayerSchedule } = await import('../src/layer-sensitivity-allocator.js');
+          const method = pickFlag(args, '--method') || 'gptq';
+          const targetAvg = Number(pickFlag(args, '--target-avg-bits'));
+          const plan = planLayerSchedule(layerStats, {
+            method,
+            target_avg_bits: Number.isFinite(targetAvg) ? targetAvg : 4.0,
+          });
+          telemetry = plan.daq_telemetry;
+          importanceSchedule = {
+            source: statsPath,
+            method,
+            sensitivities: plan.sensitivities,
+            allocation: plan.allocation,
+            schedule_receipt: plan.receipt,
+          };
+        }
+      } catch (e) {
+        emit({
+          ok: false,
+          error: 'importance_signal_failed',
+          namespace,
+          daq_version: DAQ_VERSION,
+          detail: e && e.message ? e.message : String(e),
+          hint: 'importance-stats source present but could not be parsed into a layer_stats[] '
+            + 'array of per-layer calibration summaries (input_sq_mean / fisher_diag / kl / '
+            + 'channel_abs_mean). See src/layer-sensitivity-allocator.js planLayerSchedule.',
+        });
+        process.exit(3);
+      }
+    }
+  }
   if (!telemetry) {
     emit({
       ok: false,
@@ -25074,7 +25136,9 @@ async function cmdDistillMixedPrecision(args) {
       hint: 'no run-meta.json with layer_telemetry[] under '
         + distillRoot
         + ' for namespace=' + namespace
-        + '. Run a distill pass first OR pass --mixed-precision <profile.json> explicitly.',
+        + '. Run a distill pass first, drop an importance-stats.json (per-layer '
+        + 'calibration summaries) in the run dir / pass --importance-stats <path>, '
+        + 'OR pass --mixed-precision <profile.json> explicitly.',
     });
     process.exit(3);
   }
@@ -25086,6 +25150,20 @@ async function cmdDistillMixedPrecision(args) {
     mode: 'auto',
     namespace,
     source_telemetry_layers: telemetry.length,
+    // finalized-c5: when the auto path computed the schedule from a real importance
+    // signal (no distill run-meta telemetry), surface the signal + the
+    // applied==requested schedule receipt so the caller can bind it into the
+    // artifact (manifest.importance_signal + manifest.mixed_precision_proof).
+    ...(importanceSchedule ? {
+      telemetry_source: 'importance_signal',
+      importance_signal: {
+        method: importanceSchedule.method,
+        source: importanceSchedule.source,
+        sensitivities: importanceSchedule.sensitivities,
+        allocation: importanceSchedule.allocation,
+      },
+      mixed_precision_proof: importanceSchedule.schedule_receipt,
+    } : { telemetry_source: 'distill_run_meta' }),
     profile,
     summary,
   });

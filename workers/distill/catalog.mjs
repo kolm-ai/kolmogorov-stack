@@ -199,12 +199,15 @@ export const STUDENT_BASES = {
 // set scored by the SAME verifier path the K-score gate uses; the trainer is
 // the in-repo workers/distill/scripts/train_rejection.py driven by
 // src/distill-rejection-sampling.js. The cross-tokenizer KD methods
-// ("seq-level-kd", "uld") ship gated behind KOLM_CROSS_TOKENIZER_KD=1 because
-// they are a DISTINCT objective requiring teacher cross-vocab logit access (not
-// because the math is unfinished - the ULD readout is a correct semi-relaxed
-// entropic-OT transport; see src/distill-cross-tokenizer.js uldAlignDistribution).
-// When the flag is OFF they are not advertised and not accepted, so the green
-// path / default artifact hash is unchanged.
+// ("seq-level-kd", "uld") ship gated behind KOLM_CROSS_TOKENIZER_KD=1. The
+// alignment MATH is real + tested (src/distill-cross-tokenizer.js: the ULD readout
+// is a correct semi-relaxed entropic-OT transport), and admitting the methods here
+// lets lineage/labeling recognize them for when their trainer lands. BUT no trainer
+// in workers/distill/distill.mjs yet consumes cross-vocab aligned targets, so the
+// worker FAILS LOUD if either method is requested in --mode=full (it will NOT run a
+// different objective under a uld/seq-level-kd label - no false receipt). When the
+// flag is OFF they are not advertised or accepted, so the green path / default
+// artifact hash is unchanged.
 const _CROSS_TOKENIZER_KD = process.env.KOLM_CROSS_TOKENIZER_KD === '1';
 export const DISTILLATION_METHODS = [
   'lora', 'qlora', 'full-ft', 'prompt-distill', 'rejection_sampling',

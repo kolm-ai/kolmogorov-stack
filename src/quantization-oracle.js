@@ -457,6 +457,43 @@ export function quantizationOracleCatalog(env = process.env) {
         .filter(([, m]) => m.execution_status === 'worker' && !isExperimental(m))
         .map(([id]) => id),
     },
+    // finalized-c5 (turnkey-runners atom) - FLAGGED / DEFAULT-OFF. The turnkey
+    // experimental-quant runner surface (src/quant-turnkey-runners.js, AQLM /
+    // QuIP# / EXL2 / EXL3 / EfficientQAT) did NOT pass independent verify: its
+    // buildTurnkeyCommand() argv is not yet the surface the heavy-dep smoke
+    // (quant_turnkey_smoke.py -> quantize.py) actually drives, and the pinned
+    // commits are not validated against the checkout. It is therefore exposed
+    // ONLY as advisory status, ONLY when BOTH the experimental gate AND the
+    // heavy-dep smoke marker are armed, and it NEVER flips a catalog default,
+    // never changes a recommendation, and never auto-promotes a method to
+    // worker. Operators arming KOLM_QUANT_TURNKEY_SMOKE=1 must reconcile
+    // quantize.py's argv with buildTurnkeyCommand() before trusting promotion.
+    turnkey_status_advisory: turnkeyAdvisory(env),
+  };
+}
+
+// FLAGGED helper. Returns a null-ish advisory unless the operator has explicitly
+// armed both the experimental gate and the turnkey smoke marker. Dynamically
+// imported so the FAILED-verify turnkey module never loads on the green path.
+function turnkeyAdvisory(env = process.env) {
+  const smokeArmed = String((env && env.KOLM_QUANT_TURNKEY_SMOKE) || '').trim() === '1';
+  if (!experimentalQuantsEnabled(env) || !smokeArmed) {
+    return {
+      enabled: false,
+      verified: false,
+      env: ['KOLM_ENABLE_EXPERIMENTAL_QUANTS=1', 'KOLM_QUANT_TURNKEY_SMOKE=1'],
+      note: 'turnkey runner surface is experimental + UNVERIFIED (independent verify failed: '
+        + 'buildTurnkeyCommand argv not yet driven by the heavy-dep smoke; pinned commits '
+        + 'unvalidated). Advisory disabled by default; arm both env vars to inspect.',
+    };
+  }
+  return {
+    enabled: true,
+    verified: false,
+    warning: 'EXPERIMENTAL + UNVERIFIED: do not auto-promote based on this advisory; '
+      + 'reconcile quantize.py argv with src/quant-turnkey-runners.js buildTurnkeyCommand first.',
+    hint: 'import promotionStatus / doctorTurnkey from src/quant-turnkey-runners.js to inspect '
+      + 'per-method doctor status under your pinned repo checkouts.',
   };
 }
 

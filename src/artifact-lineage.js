@@ -180,12 +180,13 @@ export const VALID_MERGE_METHODS = new Set([
 // C4: 'rejection_sampling' (best-of-N RAFT/STaR/ReST SFT on the verifier-accepted
 // set) is a first-class distilled-model objective and hashes distinctly. The
 // cross-tokenizer KD objectives ('seq-level-kd', 'uld') are admitted only when
-// the operator arms KOLM_CROSS_TOKENIZER_KD=1 - not because the math is unfinished
-// (the ULD readout is a correct semi-relaxed entropic-OT transport: see
-// src/distill-cross-tokenizer.js uldAlignDistribution) but because cross-tokenizer
-// KD is a DISTINCT objective requiring teacher cross-vocab logit access, and a
-// different objective SHOULD hash differently. Admitting these only when armed
-// keeps the default artifact_hash for distilled_model unchanged. T0/rule-class
+// the operator arms KOLM_CROSS_TOKENIZER_KD=1. The ULD math is real + tested (a
+// correct semi-relaxed entropic-OT transport: see src/distill-cross-tokenizer.js
+// uldAlignDistribution) and a distinct objective SHOULD hash differently, so
+// admitting these only when armed keeps the default distilled_model artifact_hash
+// unchanged. NOTE: admission here is for lineage/labeling only - no trainer yet
+// consumes cross-vocab aligned targets, so workers/distill/distill.mjs FAILS LOUD
+// rather than training a different objective under these labels. T0/rule-class
 // unaffected.
 const VALID_DISTILL_METHODS = new Set([
   'lora', 'full-ft', 'qlora', 'prompt-distill', 'rejection_sampling',

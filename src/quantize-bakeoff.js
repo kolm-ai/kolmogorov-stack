@@ -34,6 +34,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { hashDaqProfile, validateProfile } from './daq-profile.js';
+import { gateQuantKScore } from './quant-accuracy-recovery.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WORKER_PATH = path.resolve(__dirname, '..', 'workers', 'quantize', 'scripts', 'quantize.py');
@@ -58,7 +59,7 @@ const WORKER_PATH = path.resolve(__dirname, '..', 'workers', 'quantize', 'script
  *   }> | null,
  * }>}
  */
-export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, eval_set) {
+export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, eval_set, opts = {}) {
   // Honesty gate #1 - worker not on disk → unavailable envelope.
   if (!fs.existsSync(WORKER_PATH)) {
     return {
@@ -173,14 +174,44 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
       continue;
     }
 
-    // Cheap-fast kscore: Jaccard token overlap against eval_set output strings.
-    // Heavy ML scoring is opt-in via KOLM_BAKEOFF_SCORE_CMD (out-of-band python).
-    const kscore = scoreJaccard(profile, eval_set);
+    // finalized-c5 (accuracy-recovery atom): when REAL measured metrics exist for
+    // this candidate - either supplied by the caller (opts.measured[profile_id])
+    // or recorded by the worker in the receipt (receipt.accuracy_gate with
+    // fp16/quant perplexity + KL) - score the candidate with the REAL K-score
+    // harness (gateQuantKScore -> kscore-v2, not Jaccard) and carry the verdict.
+    // When NO measured metrics exist we fall back to the Jaccard/avg-bits surrogate
+    // exactly as before (default path; no behavior change for callers that do not
+    // run a real model). This is the moat replacement the atom names: the quant
+    // verdict becomes a measured K-score delta when the data is there.
+    let kscore;
+    let kscore_gate = null;
+    let scorer = 'jaccard-surrogate';
+    const measured = (opts.measured && (opts.measured[profile_id] || opts.measured[i]))
+      || readMeasuredFromReceipt(outDir);
+    if (measured && measured.fp16 && measured.quant) {
+      try {
+        const gate = gateQuantKScore({
+          fp16: measured.fp16,
+          quant: measured.quant,
+          maxDeltaDrop: opts.maxDeltaDrop,
+          maxKL: opts.maxKL,
+        });
+        kscore = gate.quant_kscore;
+        kscore_gate = gate;
+        scorer = gate.scorer;
+      } catch {
+        kscore = scoreJaccard(profile, eval_set);
+      }
+    } else {
+      kscore = scoreJaccard(profile, eval_set);
+    }
     results.push({
       profile_id,
       kscore: Number(kscore.toFixed(4)),
       vram_gb,
       latency_ms,
+      scorer,
+      ...(kscore_gate ? { kscore_gate } : {}),
       accepted: true, // pareto pass happens after the loop
     });
   }
@@ -205,6 +236,21 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
   // W350-style cleanup - drop the per-profile out dirs but KEEP the receipt
   // chain by leaving tmpRoot to OS GC. Bakeoff is informational, not signed.
   return { ok: true, results };
+}
+
+// finalized-c5: read measured fp16/quant accuracy metrics from the worker's
+// quantize-receipt.json when present. The worker records an accuracy_gate block
+// { fp16:{perplexity,accuracy,size_bytes,...}, quant:{perplexity,kl_mean,...} }
+// only when it actually ran the fp16 + quantized model on a holdout. Absent (the
+// common case in a GPU-free bakeoff) -> null -> the surrogate path runs. We never
+// fabricate measured metrics; the gate only fires on real recorded values.
+function readMeasuredFromReceipt(outDir) {
+  try {
+    const receipt = JSON.parse(fs.readFileSync(path.join(outDir, 'quantize-receipt.json'), 'utf8'));
+    const g = receipt && receipt.accuracy_gate;
+    if (g && g.fp16 && g.quant) return { fp16: g.fp16, quant: g.quant };
+  } catch { /* no measured metrics recorded */ }
+  return null;
 }
 
 function scoreJaccard(profile, eval_set) {
