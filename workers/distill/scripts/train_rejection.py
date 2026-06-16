@@ -8,7 +8,9 @@
 #      candidates + the verifiable column).
 #   2. Score every candidate with apps.trainer.reject_sample.select_accepted,
 #      which reuses apps.trainer.grpo.REWARD_FUNCTIONS + the kolm_verifier
-#      reward (SAME code path as the K-score gate).
+#      reward (the SAME reward path the GRPO/RLVR trainer uses - NOT the K-score
+#      ship gate, whose accuracy axis is eval_adapter._judge_local recall
+#      overlap; the two are different functions, do not conflate them).
 #   3. Keep the best (or first above-threshold) candidate per prompt; reject
 #      prompts whose best candidate misses the floor.
 #   4. SFT the student on the ACCEPTED set only (same instruction format as

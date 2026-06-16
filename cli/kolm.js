@@ -2382,8 +2382,8 @@ DISTILL MODES (wave 918)
                    the whole agent loop, not just the final message.
   --mode=rejection_sampling
                    best-of-N (RAFT/STaR/ReST). For each prompt sample N
-                   candidates, score every candidate with the SAME verifier
-                   path the K-score gate uses, keep the best (or above-floor)
+                   candidates, score every candidate with the SAME reward
+                   path the GRPO/RLVR trainer uses, keep the best (or above-floor)
                    one, then SFT on the accepted set only. Drives
                    workers/distill/scripts/train_rejection.py via
                    src/distill-rejection-sampling.js. Run-meta surfaces
@@ -26522,7 +26522,15 @@ async function cmdDistillLocalWorker(args) {
     const eq = args.find(a => a.startsWith(n + '='));
     return eq ? eq.slice(n.length + 1) : null;
   };
-  const mode = pick('--mode') || 'stub';
+  const modeRaw = pick('--mode') || 'stub';
+  // C4 - `--mode=rejection_sampling` is sugar for a full-mode run whose objective
+  // is best-of-N rejection sampling. Normalize to the worker's contract (--mode=full
+  // + --distillation-method=rejection_sampling) so the real train_rejection.py path
+  // runs (and the manifest is labeled truthfully). `--distillation-method=
+  // rejection_sampling` with `--mode=full` works equivalently.
+  const rejectionSampling = (modeRaw === 'rejection_sampling')
+    || (pick('--distillation-method') === 'rejection_sampling');
+  const mode = (modeRaw === 'rejection_sampling') ? 'full' : modeRaw;
   const spec = pick('--spec');
   const seeds = pick('--seeds');
   const out = pick('--out');
@@ -26534,7 +26542,13 @@ async function cmdDistillLocalWorker(args) {
   // wave 158 — Q+3b cross-vendor distillation provenance flags.
   const teacherVersion = pick('--teacher-version');
   const studentBaseRevision = pick('--student-base-revision');
-  const distillationMethod = pick('--distillation-method');
+  const distillationMethod = rejectionSampling ? 'rejection_sampling' : pick('--distillation-method');
+  // C4 - rejection_sampling (best-of-N) knobs; forwarded only for that method.
+  const rsN = pick('--rs-n');
+  const rsTemperature = pick('--rs-temperature');
+  const rsThreshold = pick('--rs-threshold');
+  const rsThresholdMode = pick('--rs-threshold-mode');
+  const rsReward = pick('--rs-reward');
   const allowUnknownStudentBase = args.includes('--allow-unknown-student-base');
   const listCatalog = args.includes('--list-catalog');
   const doctor = mode === 'doctor' || args.includes('--doctor');
@@ -26577,10 +26591,24 @@ async function cmdDistillLocalWorker(args) {
   }
   // wave 158 — validate distillation method early so a typo doesn't survive
   // the worker spawn and land as a fail at verifier check #15.
-  const VALID_METHOD = ['lora', 'qlora', 'full-ft', 'prompt-distill'];
+  const VALID_METHOD = ['lora', 'qlora', 'full-ft', 'prompt-distill', 'rejection_sampling'];
   if (distillationMethod && !VALID_METHOD.includes(distillationMethod)) {
     console.error(`error: --distillation-method must be one of [${VALID_METHOD.join(', ')}]; got ${distillationMethod}`);
     process.exit(EXIT.MISSING_PREREQ);
+  }
+  // C4 - validate the rejection_sampling enums on the CLI side for a clean error
+  // before the worker spawn (the worker re-derives defaults regardless).
+  if (rejectionSampling) {
+    const VALID_RS_MODE = ['best', 'threshold'];
+    if (rsThresholdMode && !VALID_RS_MODE.includes(rsThresholdMode)) {
+      console.error(`error: --rs-threshold-mode must be one of [${VALID_RS_MODE.join(', ')}]; got ${rsThresholdMode}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const VALID_RS_REWARD = ['kolm_verifier', 'math_checker', 'schema_validator', 'code_exec', 'format'];
+    if (rsReward && !VALID_RS_REWARD.includes(rsReward)) {
+      console.error(`error: --rs-reward must be one of [${VALID_RS_REWARD.join(', ')}]; got ${rsReward}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
   }
 
   const passthru = [];
@@ -26604,6 +26632,14 @@ async function cmdDistillLocalWorker(args) {
     if (teacherVersion) passthru.push(`--teacher-version=${teacherVersion}`);
     if (studentBaseRevision) passthru.push(`--student-base-revision=${studentBaseRevision}`);
     if (distillationMethod) passthru.push(`--distillation-method=${distillationMethod}`);
+    // C4 - forward the rejection_sampling knobs to the worker for that method only.
+    if (rejectionSampling) {
+      if (rsN) passthru.push(`--rs-n=${rsN}`);
+      if (rsTemperature) passthru.push(`--rs-temperature=${rsTemperature}`);
+      if (rsThreshold) passthru.push(`--rs-threshold=${rsThreshold}`);
+      if (rsThresholdMode) passthru.push(`--rs-threshold-mode=${rsThresholdMode}`);
+      if (rsReward) passthru.push(`--rs-reward=${rsReward}`);
+    }
     if (allowUnknownStudentBase) passthru.push('--allow-unknown-student-base');
     if (localEndpoint) passthru.push(`--local-endpoint=${localEndpoint}`);
     if (localApiKey) passthru.push(`--local-api-key=${localApiKey}`);

@@ -1,13 +1,14 @@
 // FINALIZED-C4 — Rejection-sampling / best-of-N distillation trainer tests.
 //
 // Proves the atom: for each prompt, sample N candidates, score every candidate
-// with the SAME verifier code path the K-score gate uses (grpo.py
-// REWARD_FUNCTIONS + kolm_verifier), keep the best (or above-threshold)
-// candidate, fine-tune on the accepted set only, and surface accept-rate, mean
-// candidate score, N + threshold into run-meta. The selection half is GPU-free
-// and tested here; the SFT half is the durable-envelope + trainer-resolution
-// path; and a parity test confirms the Python select_accepted picks the SAME
-// candidate as the JS path (the one-scoring-path guarantee).
+// with the SAME reward path the GRPO/RLVR trainer uses (grpo.py
+// REWARD_FUNCTIONS + kolm_verifier) - NOT the K-score ship gate's accuracy axis
+// (_judge_local), which is a different function - keep the best (or above-
+// threshold) candidate, fine-tune on the accepted set only, and surface accept-
+// rate, mean candidate score, N + threshold into run-meta. The selection half is
+// GPU-free and tested here; the SFT half is the durable-envelope + trainer-
+// resolution path; and a parity test confirms the Python select_accepted picks
+// the SAME candidate as the JS path (the one-scoring-path guarantee, JS<->Python).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -315,11 +315,89 @@ const reinjectionLogHash = fileSha256(reinjectionLogPath);
 
 let mlRun = false;
 let mlReport = null;
+let rejectionRan = false;   // C4 - true ONLY when the real best-of-N trainer ran
 if (mode === 'full') {
   const ready = await doctor();
   if (!ready.python_ok || !ready.torch_ok) {
     console.error('[distill-worker] python+torch required for --mode=full; falling back to collect-only.');
     console.error('  install hint: pip install torch transformers peft bitsandbytes accelerate datasets sentencepiece');
+  } else if (distillMethodArg === 'rejection_sampling') {
+    // C4 - REAL best-of-N rejection sampling (RAFT/STaR/ReST). The default LoRA
+    // path makes the student imitate the teacher's single sampled answer; here we
+    // instead sample N candidates per prompt at temperature, score every candidate
+    // with the reward family, keep the best (or first above threshold), and SFT the
+    // student on the ACCEPTED set only. The worker PREVIOUSLY ran train_lora.py for
+    // this method while still stamping distillation_method=rejection_sampling -> a
+    // SIGNED MANIFEST THAT LIED about the objective. Fixed: run the real trainer
+    // and label truthfully (distillMethod below is rejection_sampling ONLY when
+    // rejectionRan).
+    const rsN = Math.max(1, Math.trunc(Number(args['rs-n']) || 4));
+    const rsTemp = Number.isFinite(Number(args['rs-temperature'])) ? Number(args['rs-temperature']) : 0.8;
+    const rsThreshold = Number.isFinite(Number(args['rs-threshold'])) ? Number(args['rs-threshold']) : 0.5;
+    const rsSelection = (args['rs-threshold-mode'] === 'threshold') ? 'threshold' : 'best';
+    const rsReward = args['rs-reward'] || 'kolm_verifier';
+    const pyScript = path.join(__dirname, 'scripts', 'train_rejection.py');
+    if (!fs.existsSync(pyScript)) {
+      console.error('[distill-worker] expected scripts/train_rejection.py; not found - cannot run rejection_sampling.');
+    } else {
+      // 1. sample N diverse candidates per training prompt from the teacher
+      //    (temperature drives diversity; without it best-of-N degenerates to N=1).
+      const candPath = path.join(outDir, 'rs-candidates.jsonl');
+      const candOut = fs.createWriteStream(candPath, { flags: 'w' });
+      const nPrompts = Math.min(maxRows, split.train.length);
+      let candPrompts = 0, candTotal = 0;
+      console.log(`[distill-worker] rejection-sampling: sampling ${rsN} candidates/prompt over ${nPrompts} prompts (temp=${rsTemp}, reward=${rsReward})`);
+      for (let i = 0; i < nPrompts; i++) {
+        const row = split.train[i];
+        const inputText = typeof row.input === 'string' ? row.input : JSON.stringify(row.input);
+        const reference = typeof row.output === 'string' ? row.output : JSON.stringify(row.output);
+        const candidates = [];
+        for (let k = 0; k < rsN; k++) {
+          try {
+            const r = await callTeacher({
+              vendor, model, input: inputText, system: spec.system || '',
+              redact, maxTokens: Number(args['max-tokens'] || 1024),
+              temperature: rsTemp,
+              localEndpoint: args['local-endpoint'], localApiKey: args['local-api-key'],
+            });
+            if (r && typeof r.response === 'string' && r.response.length) candidates.push(r.response);
+          } catch (e) {
+            process.stderr.write(`  [rs sample ${i + 1}.${k + 1}] ${e.message}\n`);
+          }
+        }
+        if (candidates.length === 0) continue;
+        candOut.write(JSON.stringify({ id: row.id || `train_${i + 1}`, prompt: inputText, candidates, reference }) + '\n');
+        candPrompts++; candTotal += candidates.length;
+      }
+      candOut.end();
+      await new Promise((res) => candOut.on('finish', res));
+      if (candPrompts === 0) {
+        console.error('[distill-worker] rejection_sampling produced ZERO candidate groups (teacher returned nothing); cannot train. Falling back to collect-only (method will record as prompt-distill, NOT rejection_sampling).');
+      } else {
+        // 2. score every candidate + select best-of-N + SFT on the accepted set only.
+        console.log(`[distill-worker] invoking rejection-sampling trainer on ${candPrompts} prompts / ${candTotal} candidates...`);
+        const pyArgs = [
+          pyScript,
+          '--candidates', candPath,
+          '--student', args['student-base'] || 'Qwen/Qwen2.5-0.5B',
+          '--out', path.join(outDir, 'student'),
+          '--reward', rsReward,
+          '--num-candidates', String(rsN),
+          '--threshold', String(rsThreshold),
+          '--selection', rsSelection,
+          '--temperature', String(rsTemp),
+        ];
+        const res = spawnSync('python3', pyArgs, { stdio: 'inherit' });
+        mlRun = res.status === 0;
+        rejectionRan = mlRun;
+        mlReport = {
+          exit_code: res.status, signal: res.signal || null,
+          trainer: 'train_rejection.py', rs_n: rsN, rs_threshold: rsThreshold,
+          rs_selection: rsSelection, rs_reward: rsReward,
+          candidate_prompts: candPrompts, candidates_total: candTotal,
+        };
+      }
+    }
   } else {
     const pyScript = path.join(__dirname, 'scripts', 'train_lora.py');
     if (!fs.existsSync(pyScript)) {
@@ -400,10 +478,17 @@ if (args['teacher-holdout'] && split.holdout.length > 0) {
   console.log(`[distill-worker] teacher holdout accuracy: ${(teacherHoldoutAccuracy * 100).toFixed(1)}% on ${counted} rows`);
 }
 
-// Wave 158 — compute the authoritative distillation_method. CLI arg wins;
-// fallback derives from ml_pipeline_run (lora when trained, prompt-distill
-// when only pairs collected).
-const distillMethod = distillMethodArg || (mlRun ? 'lora' : 'prompt-distill');
+// Wave 158 / C4 — compute the authoritative distillation_method. The label must
+// reflect what ACTUALLY ran, never merely what was requested: stamping
+// rejection_sampling while the LoRA trainer ran (or while nothing trained) would
+// sign a manifest that lies about the objective. So: rejection_sampling ONLY when
+// the real best-of-N trainer ran; otherwise the requested LoRA-family label when
+// train_lora ran; else prompt-distill (collect-only).
+const distillMethod = rejectionRan
+  ? 'rejection_sampling'
+  : (mlRun
+    ? ((distillMethodArg && distillMethodArg !== 'rejection_sampling') ? distillMethodArg : 'lora')
+    : 'prompt-distill');
 const sbEntryFull = studentBaseArg && isKnownStudentBase(studentBaseArg) ? studentBaseEntry(studentBaseArg) : null;
 
 const manifest = {

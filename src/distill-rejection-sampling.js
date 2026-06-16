@@ -8,9 +8,12 @@
 //
 //   1. sample N candidates from the teacher (or the student, for self-
 //      distillation) at a temperature,
-//   2. score EVERY candidate with the SAME verifier code path the K-score
-//      gate uses (the reward families in apps/trainer/grpo.py REWARD_FUNCTIONS
-//      + the kolm_verifier reward), so train-eval scoring stays ONE path,
+//   2. score EVERY candidate with the SAME reward path the GRPO/RLVR trainer
+//      uses (the reward families in apps/trainer/grpo.py REWARD_FUNCTIONS + the
+//      kolm_verifier reward), so the accept-scorer and the GRPO reward stay ONE
+//      path. (NOTE: this is the GRPO *training* reward, NOT the K-score *ship
+//      gate*'s accuracy axis - the gate scores accuracy via eval_adapter.py
+//      _judge_local recall-overlap; do not conflate the two.)
 //   3. keep the best (or first above-threshold) candidate per prompt,
 //   4. fine-tune the student on the ACCEPTED set only.
 //
@@ -243,12 +246,21 @@ export function selectAcceptedSet(groups, opts = {}) {
       }
     }
 
-    // When every candidate for this prompt is Python-deferred, we cannot make a
-    // JS accept/reject decision; record the group as deferred and move on. The
-    // Python trainer makes the call with the real reward.
     const jsScored = scored.filter(x => x.score != null);
     if (jsScored.length === 0) {
-      ledger.push({ id: g.id, decision: 'deferred', best_score: null, n: cands.length });
+      // A TRULY-EMPTY candidate group has nothing to accept AND nothing to
+      // defer, so it is a REJECT (zero training rows) - identical to the Python
+      // trainer (apps/trainer/reject_sample.py select_accepted, empty branch),
+      // keeping the cross-language ledger_hash byte-identical. A NON-empty group
+      // whose candidates are all Python-deferred (e.g. the code_exec family,
+      // which JS cannot score) stays 'deferred': the Python trainer makes that
+      // call with the real reward. (The hash-parity guarantee covers families
+      // JS scores in-process; code_exec is authoritatively scored by Python.)
+      if (cands.length === 0) {
+        ledger.push({ id: g.id, decision: 'reject', best_score: null, n: 0 });
+      } else {
+        ledger.push({ id: g.id, decision: 'deferred', best_score: null, n: cands.length });
+      }
       continue;
     }
 

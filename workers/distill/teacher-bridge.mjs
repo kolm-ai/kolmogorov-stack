@@ -108,6 +108,7 @@ export async function callTeacher(opts) {
   const {
     vendor, model, input, system = '',
     redact = true, maxTokens = 1024,
+    temperature,              // C4 - optional sampling temperature; undefined => vendor default
     localEndpoint, localApiKey,
     encryptionKey,            // W292 — encrypt redaction map at rest
     redactorOverride,         // test seam — function(string) -> redactPhi result
@@ -176,17 +177,17 @@ export async function callTeacher(opts) {
 
   let response = '';
   if (transportOverride) {
-    response = await transportOverride({ vendor, model, system: redactedSystem, input: redactedInput, maxTokens, localEndpoint, localApiKey });
+    response = await transportOverride({ vendor, model, system: redactedSystem, input: redactedInput, maxTokens, temperature, localEndpoint, localApiKey });
   } else if (vendor === 'anthropic') {
-    response = await callAnthropic({ model, system: redactedSystem, input: redactedInput, maxTokens });
+    response = await callAnthropic({ model, system: redactedSystem, input: redactedInput, maxTokens, temperature });
   } else if (vendor === 'openai') {
-    response = await callOpenAI({ model, system: redactedSystem, input: redactedInput, maxTokens });
+    response = await callOpenAI({ model, system: redactedSystem, input: redactedInput, maxTokens, temperature });
   } else if (vendor === 'google') {
-    response = await callGoogle({ model, system: redactedSystem, input: redactedInput, maxTokens });
+    response = await callGoogle({ model, system: redactedSystem, input: redactedInput, maxTokens, temperature });
   } else if (vendor === 'xai') {
-    response = await callXAI({ model, system: redactedSystem, input: redactedInput, maxTokens });
+    response = await callXAI({ model, system: redactedSystem, input: redactedInput, maxTokens, temperature });
   } else if (vendor === 'local') {
-    response = await callLocal({ endpoint: localEndpoint, apiKey: localApiKey, model, system: redactedSystem, input: redactedInput, maxTokens });
+    response = await callLocal({ endpoint: localEndpoint, apiKey: localApiKey, model, system: redactedSystem, input: redactedInput, maxTokens, temperature });
   } else {
     throw new Error(`unknown teacher vendor: ${vendor}`);
   }
@@ -233,7 +234,7 @@ export async function callTeacher(opts) {
 function _proxyConfigured() {
   return !!(process.env.KOLM_BASE_URL && process.env.KOLM_API_KEY);
 }
-async function callViaKolmProxy({ vendor, model, system, input, maxTokens }) {
+async function callViaKolmProxy({ vendor, model, system, input, maxTokens, temperature }) {
   const base = String(process.env.KOLM_BASE_URL || '').replace(/\/+$/, '');
   const key  = String(process.env.KOLM_API_KEY || '');
   if (!base || !key) throw new Error('KOLM_BASE_URL + KOLM_API_KEY required for proxy fallback');
@@ -245,6 +246,7 @@ async function callViaKolmProxy({ vendor, model, system, input, maxTokens }) {
       system: system || undefined,
       messages: [{ role: 'user', content: input }],
       max_tokens: maxTokens,
+      ...(temperature != null ? { temperature } : {}),
     }),
   });
   if (!res.ok) {
@@ -258,11 +260,11 @@ async function callViaKolmProxy({ vendor, model, system, input, maxTokens }) {
   return (j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
 }
 
-async function callAnthropic({ model, system, input, maxTokens }) {
+async function callAnthropic({ model, system, input, maxTokens, temperature }) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
     if (_proxyConfigured()) {
-      return callViaKolmProxy({ vendor: 'anthropic', model, system, input, maxTokens });
+      return callViaKolmProxy({ vendor: 'anthropic', model, system, input, maxTokens, temperature });
     }
     throw new Error('ANTHROPIC_API_KEY required for vendor=anthropic (or set KOLM_BASE_URL+KOLM_API_KEY to proxy through kolm.ai)');
   }
@@ -273,16 +275,17 @@ async function callAnthropic({ model, system, input, maxTokens }) {
     max_tokens: maxTokens,
     system: system || undefined,
     messages: [{ role: 'user', content: input }],
+    ...(temperature != null ? { temperature } : {}),
   });
   const block = (resp.content || []).find(b => b.type === 'text');
   return block ? block.text : '';
 }
 
-async function callOpenAI({ model, system, input, maxTokens }) {
+async function callOpenAI({ model, system, input, maxTokens, temperature }) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) {
     if (_proxyConfigured()) {
-      return callViaKolmProxy({ vendor: 'openai', model, system, input, maxTokens });
+      return callViaKolmProxy({ vendor: 'openai', model, system, input, maxTokens, temperature });
     }
     throw new Error('OPENAI_API_KEY required for vendor=openai (or set KOLM_BASE_URL+KOLM_API_KEY to proxy through kolm.ai)');
   }
@@ -295,7 +298,7 @@ async function callOpenAI({ model, system, input, maxTokens }) {
       'authorization': `Bearer ${key}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens }),
+    body: JSON.stringify({ model, messages, max_tokens: maxTokens, ...(temperature != null ? { temperature } : {}) }),
   });
   if (!res.ok) {
     const txt = await res.text();
@@ -308,17 +311,17 @@ async function callOpenAI({ model, system, input, maxTokens }) {
 // Google Gemini native API. The generateContent endpoint takes a different
 // shape from OpenAI-chat. System is folded into systemInstruction; user
 // message becomes the single content part. Auth is x-goog-api-key header.
-async function callGoogle({ model, system, input, maxTokens }) {
+async function callGoogle({ model, system, input, maxTokens, temperature }) {
   const key = process.env.GOOGLE_API_KEY;
   if (!key) {
     if (_proxyConfigured()) {
-      return callViaKolmProxy({ vendor: 'google', model, system, input, maxTokens });
+      return callViaKolmProxy({ vendor: 'google', model, system, input, maxTokens, temperature });
     }
     throw new Error('GOOGLE_API_KEY required for vendor=google (or set KOLM_BASE_URL+KOLM_API_KEY to proxy through kolm.ai)');
   }
   const body = {
     contents: [{ role: 'user', parts: [{ text: input }] }],
-    generationConfig: { maxOutputTokens: maxTokens },
+    generationConfig: { maxOutputTokens: maxTokens, ...(temperature != null ? { temperature } : {}) },
   };
   if (system) body.systemInstruction = { role: 'system', parts: [{ text: system }] };
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
@@ -337,11 +340,11 @@ async function callGoogle({ model, system, input, maxTokens }) {
 }
 
 // xAI Grok ships an OpenAI-compatible /v1/chat/completions at api.x.ai.
-async function callXAI({ model, system, input, maxTokens }) {
+async function callXAI({ model, system, input, maxTokens, temperature }) {
   const key = process.env.XAI_API_KEY;
   if (!key) {
     if (_proxyConfigured()) {
-      return callViaKolmProxy({ vendor: 'xai', model, system, input, maxTokens });
+      return callViaKolmProxy({ vendor: 'xai', model, system, input, maxTokens, temperature });
     }
     throw new Error('XAI_API_KEY required for vendor=xai (or set KOLM_BASE_URL+KOLM_API_KEY to proxy through kolm.ai)');
   }
@@ -354,7 +357,7 @@ async function callXAI({ model, system, input, maxTokens }) {
       'authorization': `Bearer ${key}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens }),
+    body: JSON.stringify({ model, messages, max_tokens: maxTokens, ...(temperature != null ? { temperature } : {}) }),
   });
   if (!res.ok) {
     const txt = await res.text();
@@ -364,7 +367,7 @@ async function callXAI({ model, system, input, maxTokens }) {
   return j.choices?.[0]?.message?.content || '';
 }
 
-async function callLocal({ endpoint, apiKey, model, system, input, maxTokens }) {
+async function callLocal({ endpoint, apiKey, model, system, input, maxTokens, temperature }) {
   if (!endpoint) throw new Error('localEndpoint required for vendor=local');
   const messages = [];
   if (system) messages.push({ role: 'system', content: system });
@@ -375,7 +378,7 @@ async function callLocal({ endpoint, apiKey, model, system, input, maxTokens }) 
   const res = await fetch(`${base}/v1/chat/completions`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens }),
+    body: JSON.stringify({ model, messages, max_tokens: maxTokens, ...(temperature != null ? { temperature } : {}) }),
   });
   if (!res.ok) {
     const txt = await res.text();

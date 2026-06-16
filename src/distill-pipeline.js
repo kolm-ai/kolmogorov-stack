@@ -679,6 +679,12 @@ export function _resolveDistillTenant(opts = {}) {
   return 'local';
 }
 
+// C4 - the optional `rs` option is the rejection_sampling (best-of-N) config,
+// forwarded to the worker ONLY when pipeline_mode === 'rejection_sampling'.
+// Shape: { n, temperature, threshold, threshold_mode: 'best'|'threshold', reward }.
+// Defaults match workers/distill/scripts/train_rejection.py. (Kept out of the
+// destructured signature's inline comments so the W422 static-source guard's
+// char-bounded signature scan still matches.)
 export async function* distill({
   teacher_namespace,
   student_base,
@@ -706,6 +712,7 @@ export async function* distill({
   dp_path = null, dp_noise_multiplier = 1.1, dp_l2_clip = 1.0,
   dp_sample_rate = null, dp_steps = null, dp_delta = 1e-5,
   allow_cross_region = false,
+  rs = null,
 } = {}) {
   if (!MODES.includes(pipeline_mode)) {
     throw new Error(`pipeline_mode must be one of [${MODES.join(', ')}]`);
@@ -961,6 +968,14 @@ export async function* distill({
     ];
     if (teacher) args.push(`--teacher=${teacher}`);
     if (pipeline_mode !== 'kd_softmax') args.push(`--distillation-method=${pipeline_mode}`);
+    // C4 - forward the rejection_sampling knobs to the worker only for that mode.
+    if (pipeline_mode === 'rejection_sampling' && rs && typeof rs === 'object') {
+      if (rs.n != null) args.push(`--rs-n=${rs.n}`);
+      if (rs.temperature != null) args.push(`--rs-temperature=${rs.temperature}`);
+      if (rs.threshold != null) args.push(`--rs-threshold=${rs.threshold}`);
+      if (rs.threshold_mode != null) args.push(`--rs-threshold-mode=${rs.threshold_mode}`);
+      if (rs.reward != null) args.push(`--rs-reward=${rs.reward}`);
+    }
     if (tokenizer_path) args.push(`--tokenizer-path=${tokenizer_path}`);
     // W713 - tell the worker (and the Python trainer it spawns) to walk the
     // staged rows in curriculum order via a SequentialSampler. The staged
