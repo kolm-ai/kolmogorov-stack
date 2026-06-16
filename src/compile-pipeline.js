@@ -256,6 +256,76 @@ async function _bundlePhase({
   // distinct event_ids happen to carry the same (prompt, response) pair.
   const overlap = _rowOverlap(tp, hp);
 
+  // finalized-c6 - Transitive cross-corpus holdout-disjointness ledger.
+  // The row-hash probe above is the per-pair fast check; this builds the full
+  // N x M pairwise + group-transitive ledger across EVERY train-side corpus and
+  // EVERY holdout-side corpus (exact / near-dup MinHash / shared group-key) and
+  // emits ONE signed block. It is the load-bearing fail-closed disjointness gate
+  // (gateKScoreWithDisjointness ANDs `disjoint` into ships and NEVER widens).
+  //
+  // DEFAULT-ON, with a graceful fallback: the ledger requires at least one
+  // train-side AND one holdout-side corpus. When the split produced only one
+  // side (or no pairs at all - empty corpus, echo/stub builds, many existing
+  // tests), we skip the ledger build (disjointnessLedger=null) and the existing
+  // row-hash overlap probe remains the load-bearing check, so no existing-test
+  // outcome changes. KOLM_DISABLE_DISJOINTNESS_LEDGER=1 forces the legacy path.
+  let disjointnessLedger = null;
+  let disjointnessLedgerError = null;
+  try {
+    const { envBool: _envBool } = await import('./env.js');
+    const ledgerDisabled = _envBool('KOLM_DISABLE_DISJOINTNESS_LEDGER', false);
+    if (!ledgerDisabled && tp.length > 0 && hp.length > 0) {
+      const { buildDisjointnessLedger } = await import('./holdout-disjointness-ledger.js');
+      const corpora = [
+        // Train side: the real seed split's train corpus (post-curate rows the
+        // student actually learned from).
+        { side: 'real_seed', name: 'train_seed', rows: tp },
+        // Holdout side: the seed split's holdout corpus.
+        { side: 'seed_holdout', name: 'holdout_seed', rows: hp },
+      ];
+      // When the caller threads the eval-decontam eval_universe (hash-only or
+      // plaintext) it becomes an additional holdout-side corpus so synthetic-vs
+      // eval (existing) and corpus-vs-corpus (new) are both covered in one block.
+      if (opts && opts.eval_universe_corpus && typeof opts.eval_universe_corpus === 'object') {
+        const eu = opts.eval_universe_corpus;
+        corpora.push({
+          side: 'external',
+          name: String(eu.name || 'eval_universe'),
+          privacy: eu.privacy || (Array.isArray(eu.rowHashes) ? 'hash_only' : 'plaintext_committed'),
+          group_key: eu.group_key || null,
+          rows: Array.isArray(eu.rows) ? eu.rows : undefined,
+          rowHashes: Array.isArray(eu.rowHashes) ? eu.rowHashes : undefined,
+          signatures: Array.isArray(eu.signatures) ? eu.signatures : undefined,
+          groupHashes: Array.isArray(eu.groupHashes) ? eu.groupHashes : undefined,
+        });
+      }
+      // Tenant shadow corpus (privacy boundary): passed hash-only so plaintext
+      // never enters this build. Same fail-closed coverage, zero plaintext.
+      if (opts && opts.tenant_shadow_corpus_commit && typeof opts.tenant_shadow_corpus_commit === 'object') {
+        const ts = opts.tenant_shadow_corpus_commit;
+        if (Array.isArray(ts.rowHashes) && Array.isArray(ts.signatures)) {
+          corpora.push({
+            side: 'tenant_shadow',
+            name: String(ts.name || 'tenant_shadow'),
+            privacy: 'hash_only',
+            group_key: ts.group_key || null,
+            rowHashes: ts.rowHashes,
+            signatures: ts.signatures,
+            groupHashes: Array.isArray(ts.groupHashes) ? ts.groupHashes : undefined,
+          });
+        }
+      }
+      const ledgerOpts = (opts && opts.disjointness_ledger_opts && typeof opts.disjointness_ledger_opts === 'object')
+        ? opts.disjointness_ledger_opts : {};
+      disjointnessLedger = buildDisjointnessLedger(corpora, ledgerOpts);
+    }
+  } catch (e) {
+    // Fail-LOUD into the audit record but do not crash the build: the existing
+    // row-hash overlap probe + productionReady() gate remain load-bearing. A
+    // non-null error is surfaced on seed_provenance so an operator sees it.
+    disjointnessLedgerError = String((e && e.message) || e);
+  }
+
   // Eval provenance. Real eval result → 'real_eval'. Stub injection (the
   // wave381 hard-coded 0.95) → 'placeholder', which the productionReady()
   // gate rejects.
@@ -287,6 +357,22 @@ async function _bundlePhase({
   if (overlap.overlap_count > 0) {
     seedProductionReady = false;
     seedReasons.push('train/holdout row-hash overlap=' + overlap.overlap_count);
+  }
+  // finalized-c6 - fail-closed on any cross-corpus disjointness violation the
+  // transitive ledger found (exact / near-dup / group-key) above its recorded
+  // tolerance. This only ever LOWERS production_ready (never raises it). When
+  // the ledger was skipped (one-sided/empty corpus) this branch is inert and the
+  // row-hash probe above remains the load-bearing check (no behavior change).
+  if (disjointnessLedger && disjointnessLedger.disjoint !== true) {
+    seedProductionReady = false;
+    seedReasons.push('cross-corpus holdout-disjointness violations=' + disjointnessLedger.n_violations
+      + ' (transitive ledger ' + disjointnessLedger.spec + ')');
+  }
+  if (disjointnessLedgerError) {
+    // The ledger could not be built/validated. Fail LOUD on the audit record but
+    // do not auto-reject the build (the row-hash probe is still load-bearing);
+    // an operator/verifier sees the reason and can require the ledger explicitly.
+    seedReasons.push('disjointness-ledger build error: ' + disjointnessLedgerError);
   }
   if (splitWasStub) {
     seedProductionReady = false;
@@ -326,6 +412,15 @@ async function _bundlePhase({
     // curateInfo.near_dup_removed through opts.near_duplicate_count.
     near_duplicate_count: (opts && Number.isFinite(opts.near_duplicate_count)) ? Number(opts.near_duplicate_count) : 0,
     grouped_overlap_count: 0,
+    // finalized-c6 - transitive cross-corpus holdout-disjointness ledger. The
+    // full signed block rides in seed_provenance so it is hashed into the .kolm
+    // manifest (tamper-evident); the *_hash + verdict are the at-a-glance audit
+    // fields a verifier reads without re-running the matrix. Null when skipped
+    // (one-sided/empty corpus) - then the row-hash probe above is the gate.
+    disjointness_ledger: disjointnessLedger || null,
+    disjointness_ledger_hash: (disjointnessLedger && disjointnessLedger.hash) || null,
+    disjointness_disjoint: disjointnessLedger ? (disjointnessLedger.disjoint === true) : null,
+    disjointness_n_violations: disjointnessLedger ? disjointnessLedger.n_violations : null,
     production_ready: seedProductionReady,
     // Wave 409c new fields.
     source_seed_count: sourceCounts.source_seed_count,

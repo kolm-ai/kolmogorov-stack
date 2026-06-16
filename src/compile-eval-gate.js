@@ -44,6 +44,12 @@
 
 import { computeKScore } from './kscore.js';
 import { buildAndSignReceipt, verifyReceipt, hashOutput } from './gateway-receipt.js';
+// finalized-c6 - significance-bounded gate (multiplicity-controlled). Imported
+// statically (it only depends on stat-sig.js -> no import cycle). evaluateAndGate
+// delegates to it ONLY when per_case vectors are present AND the flag is armed;
+// the point-delta path below stays the default + fallback.
+import { buildTestFamily as sigBuildTestFamily, significanceBoundedGate } from './significance-bounded-gate.js';
+import { envBool as sigEnvBool } from './env.js';
 
 export const EVAL_GATE_VERSION = 'w-eval-gate-v1';
 
@@ -159,6 +165,52 @@ export function hashEvalSummary(eval_summary) {
 // responsible for having RUN the eval and attached results before calling, so
 // the decision is deterministic and the receipt is reproducible.
 export function evaluateAndGate({ candidate_artifact, baseline, thresholds } = {}) {
+  // finalized-c6 - delegate to the significance-bounded, multiplicity-controlled
+  // gate when BOTH artifacts carry index-aligned per_case score vectors and the
+  // operator armed KOLM_EVAL_GATE_SIGNIFICANCE=1 (or thresholds.significance is
+  // explicitly set). This turns an N-axis/N-subgroup report into a single
+  // corrected go/no-go (BH/Holm + paired bootstrap + mSPRT) instead of N
+  // independent claims. When per_case vectors are absent OR the flag is off, the
+  // point-delta path below runs unchanged (the load-bearing fallback), so no
+  // existing caller / test outcome changes.
+  const _wantSig = (thresholds && thresholds.significance != null)
+    ? !!thresholds.significance
+    : sigEnvBool('KOLM_EVAL_GATE_SIGNIFICANCE', false);
+  const _hasPerCase = !!(candidate_artifact && candidate_artifact.per_case
+    && baseline && baseline.per_case);
+  if (_wantSig && _hasPerCase) {
+    const sigOpts = (thresholds && typeof thresholds.significance === 'object') ? thresholds.significance : {};
+    const family = sigBuildTestFamily({ candidate: candidate_artifact, baseline });
+    const g = significanceBoundedGate({
+      family,
+      alpha: sigOpts.alpha,
+      min_kscore_delta: (sigOpts.min_kscore_delta != null) ? sigOpts.min_kscore_delta
+        : (thresholds && thresholds.min_kscore_delta),
+      correction: sigOpts.correction,
+      bootstrap_method: sigOpts.bootstrap_method,
+      bootstrap_iters: sigOpts.bootstrap_iters,
+      min_samples: sigOpts.min_samples,
+      regression_min_drop: sigOpts.regression_min_drop,
+      seed: sigOpts.seed,
+    });
+    // fail-closed: only an explicit 'promote' promotes; block/abstain do not.
+    const promote = g.decision === 'promote';
+    return {
+      promote,
+      reason: `significance-bounded gate: ${g.decision} (${g.reason})`,
+      eval_summary: {
+        schema: 'kolm.eval_gate.significance.v1',
+        eval_gate_version: EVAL_GATE_VERSION,
+        decision: g.decision,
+        promote,
+        mode: 'significance_bounded',
+        significance: g,
+        candidate_artifact_id: artifactId(candidate_artifact),
+        baseline_artifact_id: artifactId(baseline),
+        evaluated_at: new Date().toISOString(),
+      },
+    };
+  }
   const th = { ...DEFAULT_THRESHOLDS, ...(thresholds || {}) };
   const minDelta = num(th.min_kscore_delta) ?? DEFAULT_THRESHOLDS.min_kscore_delta;
   const maxRegress = num(th.max_regression_classes) ?? DEFAULT_THRESHOLDS.max_regression_classes;

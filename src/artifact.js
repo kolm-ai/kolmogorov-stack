@@ -365,7 +365,7 @@ function normalizeLicense(license) {
   };
 }
 
-export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, mixed_precision_proof, importance_signal, calibration_provenance, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region, runtime_passports, evidence_dag, speculative_decoding, prompt_cache, continuous_batching }) {
+export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, k_score, judge_id, eval_score, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, contamination_impact: contaminationImpactInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, mixed_precision_proof, importance_signal, calibration_provenance, sparsity_profile, kv_profile, output_schema, guardrails, parent_cid, region, runtime_passports, evidence_dag, speculative_decoding, prompt_cache, continuous_batching }) {
   const secret = requireSignSecret();
   // W252 - K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
@@ -406,10 +406,81 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       if (k_score.ships !== false) k_score = { ...k_score, ships: false, conformal_abstain_reason: 'harness_error' };
     }
   }
+  // finalized-c6 - OPT-IN contamination-impact gate overlay (KOLM_KSCORE_CONTAM_IMPACT=1).
+  // Decomposes holdout accuracy into clean vs contaminated and recomputes a
+  // contamination-corrected K-score. It is wired into the SAME stricter-only
+  // overlay chain as the conformal gate: it can ONLY lower a ship to false,
+  // NEVER widen.
+  //
+  // SAFETY CLAMP (load-bearing): the contamination-impact module's verify pass
+  // flagged that its raw correctedA = accuracy_clean is NOT downward-only - when
+  // contaminated rows score LOWER than clean rows, accuracy_clean > reported and
+  // the correction is UPWARD, which could FLIP a non-shipping model to ship
+  // (more lenient). To preserve the fail-closed moat regardless of that atom's
+  // direction bug, we clamp the corrected accuracy to min(reported, clean) here
+  // at the integration site and re-derive the gate decision from the CLAMPED
+  // number. The overlay therefore can never raise the score, so the ship gate
+  // only ever gets stricter. (Follow-up: fix the atom to clamp internally.)
+  // Default OFF => byte-identical output. The block, when emitted, is bound into
+  // the artifact hash via the contamination_impact manifest slot below.
+  let contamination_impact_block = null;
+  if (k_score && contaminationImpactInput && String(process.env.KOLM_KSCORE_CONTAM_IMPACT || '') === '1') {
+    try {
+      const ci = contaminationImpactInput;
+      // The caller (compile/binder) supplies the already-built block OR the raw
+      // inputs. We re-derive the clamped corrected composite defensively.
+      const reportedA = (ci.decomposition && typeof ci.decomposition.accuracy_reported === 'number')
+        ? ci.decomposition.accuracy_reported
+        : (typeof k_score.accuracy === 'number' ? k_score.accuracy : null);
+      const cleanA = (ci.decomposition && typeof ci.decomposition.accuracy_clean === 'number')
+        ? ci.decomposition.accuracy_clean : null;
+      // Genuinely downward-only: never let the corrected number exceed reported.
+      const safeCorrectedA = (reportedA != null && cleanA != null)
+        ? Math.min(reportedA, cleanA)
+        : reportedA;
+      // Re-derive a corrected composite via the same kscore module, clamped.
+      let correctedComposite = null;
+      let correctedShips = null;
+      if (safeCorrectedA != null && typeof k_score.composite === 'number') {
+        try {
+          const kc = computeKScoreFromKscoreModule({
+            accuracy: safeCorrectedA,
+            holdout_accuracy: safeCorrectedA,
+            calibration_disabled: true,
+          });
+          correctedComposite = typeof kc.composite === 'number' ? kc.composite : null;
+          correctedShips = kc.ships === true;
+        } catch { /* fall through: no recompute => no downgrade */ }
+      }
+      contamination_impact_block = {
+        spec: 'contamination-impact-gate-v1',
+        accuracy_reported: reportedA,
+        accuracy_clean: cleanA,
+        accuracy_corrected_clamped: safeCorrectedA,
+        corrected_composite: correctedComposite,
+        corrected_ships: correctedShips,
+        // pass the source block hash through for the verifier to re-anchor.
+        source_block_hash: (ci && typeof ci.content_hash === 'string') ? ci.content_hash : null,
+        source_block: (ci && ci.spec) ? ci : null,
+      };
+      // Stricter-only: if the CLAMPED corrected gate does NOT ship, downgrade.
+      if (k_score.ships !== false && correctedShips === false) {
+        k_score = { ...k_score, ships: false, contamination_abstain_reason: 'corrected_below_gate' };
+      }
+    } catch (e) {
+      // Fail-closed: a gate error must not silently ship when the operator
+      // explicitly armed the contamination overlay.
+      contamination_impact_block = { spec: 'contamination-impact-gate-v1', error: String((e && e.message) || e) };
+      if (k_score && k_score.ships !== false) {
+        k_score = { ...k_score, ships: false, contamination_abstain_reason: 'gate_error' };
+      }
+    }
+  }
   if (k_score && k_score.ships === false && !allow_below_gate) {
     const composite = typeof k_score.composite === 'number' ? k_score.composite : 0;
     const gate = typeof k_score.gate === 'number' ? k_score.gate : 0.85;
-    const why = k_score.conformal_abstain_reason ? ` (conformal gate: ${k_score.conformal_abstain_reason})` : '';
+    const why = k_score.conformal_abstain_reason ? ` (conformal gate: ${k_score.conformal_abstain_reason})`
+      : (k_score.contamination_abstain_reason ? ` (contamination gate: ${k_score.contamination_abstain_reason})` : '');
     throw new Error(`k_score below ship gate: composite=${composite}, gate=${gate}${why}. ` +
       `Pass allow_below_gate=true to override; the manifest will record ship_gate_overridden=true.`);
   }
@@ -1058,6 +1129,29 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     eval_provenance: 'unknown',
   };
 
+  // finalized-c6 - transitive cross-corpus holdout-disjointness ledger.
+  // ADDITIVE + CONDITIONAL: attached ONLY when the compile path actually built a
+  // ledger (both train + holdout corpora present). Default output is byte-
+  // identical to pre-c6 manifests (no field added), so existing artifact hashes
+  // and golden fixtures are unchanged. When present, the full signed block + its
+  // hash + verdict ride inside seed_provenance, which is hashed into
+  // manifest_hash and thus the artifact_hash chain - any tamper with a matrix
+  // cell, tolerance, or the disjoint verdict drifts the ledger hash -> manifest
+  // hash -> the receipt chain breaks. A verifier re-runs validateDisjointness
+  // Ledger(seed_provenance.disjointness_ledger) and (when commitments published)
+  // reVerifyFromCommitments to confirm the fail-closed verdict from Merkle roots
+  // without any plaintext.
+  if (seed_provenance && seed_provenance.disjointness_ledger
+    && typeof seed_provenance.disjointness_ledger === 'object'
+    && typeof seed_provenance.disjointness_ledger_hash === 'string') {
+    seed_provenance_block.disjointness_ledger = seed_provenance.disjointness_ledger;
+    seed_provenance_block.disjointness_ledger_hash = seed_provenance.disjointness_ledger_hash;
+    seed_provenance_block.disjointness_disjoint = (seed_provenance.disjointness_disjoint === true);
+    seed_provenance_block.disjointness_n_violations =
+      typeof seed_provenance.disjointness_n_violations === 'number'
+        ? seed_provenance.disjointness_n_violations : null;
+  }
+
   // Compiled-targets manifest block. Only present for compiled_rule artifacts.
   // The source bodies themselves live on disk as native.c / native.rs entries
   // in the zip (added to `files` below). The manifest carries the hashes so a
@@ -1284,6 +1378,11 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     auditor_attestation_provenance: auditor_attestation_blocks,
     supersession_provenance: supersession_block,
     drift_report: drift_report_block,
+    // finalized-c6 - contamination-impact gate block. CONDITIONAL: only present
+    // when the operator armed KOLM_KSCORE_CONTAM_IMPACT=1 (else byte-identical
+    // manifest). Bound into artifact_hash_input below so any raw->corrected
+    // tamper drifts the artifact hash.
+    ...(contamination_impact_block ? { contamination_impact: contamination_impact_block } : {}),
     confidential_compute: confidential_compute_block,
     // W719 - Distillation-Aware Quantization (DAQ) per-layer bit budget.
     // When the build was driven by a DAQ profile (kolm distill / kolm
@@ -1562,6 +1661,13 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // the block hash drifts → artifact hash drifts → all signatures break.
   if (drift_report_block) {
     artifact_hash_input.drift_report_hash = drift_report_block.hash;
+  }
+  // finalized-c6 - bind the contamination-impact gate block into artifact_hash.
+  // Conditional: only when the overlay was armed AND produced a block, so the
+  // default chain is byte-identical. Tamper with the corrected accuracy/composite
+  // and the canonical hash drifts -> artifact hash drifts -> signatures break.
+  if (contamination_impact_block) {
+    artifact_hash_input.contamination_impact_hash = sha256(canonicalJson(contamination_impact_block));
   }
   if (workflow_ir_json) {
     artifact_hash_input.workflow_ir_hash = manifest.hashes.workflow_ir;
@@ -2115,7 +2221,7 @@ export function packageArtifact({ job_id, payload, outPath }) {
 // with the size-aware K-score patched into the manifest. The double-zip is
 // cheap (≤10ms for 5KB artifacts) and keeps the K-score honest - the size
 // axis includes the K-score bytes themselves.
-export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports, speculative_decoding, prompt_cache, continuous_batching, mixed_precision_proof, importance_signal }) {
+export async function buildAndZip({ job_id, task, base_model, recipes, lora_pointer, recall_namespace, training_stats, evals, outDir, outPath: outPathOverride, judge_id, tier, pack, index, target_device, train_device, license, artifact_class, seed_provenance, compiled_targets, capability, lineage, workflow_ir, attestation_report, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, contamination_impact: contaminationImpactInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports, speculative_decoding, prompt_cache, continuous_batching, mixed_precision_proof, importance_signal }) {
   requireSignSecret();
   // W457b (build-honors-out) - when an explicit outPath is supplied, write
   // the .kolm directly at the user-requested filename. Otherwise fall back
@@ -2150,7 +2256,7 @@ export async function buildAndZip({ job_id, task, base_model, recipes, lora_poin
     confidential_compute = await verifyAttestation(kind, attestation_report);
   }
 
-  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports, speculative_decoding, prompt_cache, continuous_batching, mixed_precision_proof, importance_signal };
+  const sharedBlocks = { capability, lineage, workflow_ir, attestation_report, confidential_compute, extra_files, export: exportInput, moe: moeInput, pretokenize: pretokenizeInput, external_holdout: externalHoldoutInput, tenant_shadow_corpus: tenantShadowInput, auditor_attestation: auditorAttestationInput, supersession: supersessionInput, drift_report: driftReportInput, contamination_impact: contaminationImpactInput, allow_below_gate, binaries, compiled_binary, native_skip_reasons, runtime_target, runtime_target_config, model_weights, entrypoint, daq_profile, sparsity_profile, kv_profile, guardrails, parent_cid, region, runtime_passports, speculative_decoding, prompt_cache, continuous_batching, mixed_precision_proof, importance_signal };
 
   // W350 - temp-file cleanup registry. The two-pass build writes a probe zip
   // to measure its size before the K-score is embedded; on success the probe

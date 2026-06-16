@@ -389,3 +389,11 @@ function _attachW810Calibration(envelope, input) {
 // Exposed for tests + the methodology page renderer.
 export { CALIBRATION_VERSION };
 
+// finalized-c6 - expose the FROZEN K-score weight/gate literals as named exports
+// so analysis modules (src/kscore-axis-theory.js) can import them directly
+// instead of source-parsing this funnel. These are the SAME module-private const
+// literals declared above (V1_WEIGHTS/V2_WEIGHTS/GATE) - NOT copies, NOT mutated.
+// They remain byte-identical frozen literals; a test asserts the exported values
+// deep-equal the literals and the ships decision is unchanged.
+export { V1_WEIGHTS, V2_WEIGHTS, GATE };
+

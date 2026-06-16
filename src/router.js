@@ -70,6 +70,14 @@ import { handleMcpRequest } from './mcp-server.js';
 import * as webhooksModule from './webhooks.js';
 import * as modelEntitlements from './model-entitlements.js';
 import { evaluateAndGate as compileEvaluateAndGate } from './compile-eval-gate.js';
+// finalized-c6 - significance-bounded, multiplicity-controlled promotion gate.
+// Opt-in path on /v1/eval/gate: when the request carries per_case score vectors
+// (and KOLM_EVAL_GATE_SIGNIFICANCE=1, or body.significance is explicitly set),
+// the gate routes through the BH/Holm + paired-bootstrap + mSPRT engine. The
+// point-delta compileEvaluateAndGate stays the default + fallback so no existing
+// caller changes behavior.
+import { buildTestFamily as sigBuildTestFamily, significanceBoundedGate } from './significance-bounded-gate.js';
+import { embedSignificanceReceipt } from './significance-bounded-receipt.js';
 // W-INTEG-3 - wave-3 modules (on-device update, inference bench, billing activation, connectors).
 import * as modelUpdateChannel from './model-update-channel.js';
 import * as inferenceBench from './inference-bench.js';
@@ -12267,9 +12275,49 @@ export function buildRouter() {
     const tenant = _integTenant(req, res); if (!tenant) return;
     const body = req.body || {};
     try {
+      // finalized-c6 - significance-bounded path. Engaged ONLY when the request
+      // carries index-aligned per_case score vectors AND the operator armed the
+      // flag (or body.significance is explicitly truthy). Otherwise fall through
+      // to the existing point-delta gate (default + fallback) so no existing
+      // caller's behavior changes.
+      const cand = body.candidate_artifact || body.candidate;
+      const base = body.baseline;
+      const hasPerCase = !!(cand && cand.per_case && base && base.per_case);
+      const wantSignificance = body.significance != null
+        ? !!body.significance
+        : envBool('KOLM_EVAL_GATE_SIGNIFICANCE', false);
+      if (hasPerCase && wantSignificance) {
+        const family = sigBuildTestFamily({ candidate: cand, baseline: base });
+        const sigOpts = (body.significance && typeof body.significance === 'object') ? body.significance : {};
+        const gate = significanceBoundedGate({
+          family,
+          alpha: sigOpts.alpha,
+          min_kscore_delta: sigOpts.min_kscore_delta,
+          correction: sigOpts.correction,
+          bootstrap_method: sigOpts.bootstrap_method,
+          bootstrap_iters: sigOpts.bootstrap_iters,
+          min_samples: sigOpts.min_samples,
+          regression_min_drop: sigOpts.regression_min_drop,
+          seed: sigOpts.seed,
+        });
+        // Sign the verdict into a tamper-evident receipt (same binding the
+        // point-delta path uses). Receipt errors must not 500 the gate decision.
+        let receipt = null; let eval_summary = null;
+        try {
+          const bound = embedSignificanceReceipt({
+            gate,
+            candidate_artifact_id: cand.id || cand.cid || null,
+            baseline_artifact_id: base.id || base.cid || null,
+            namespace_id: body.namespace_id || tenant.id,
+          });
+          receipt = bound.receipt; eval_summary = bound.eval_summary;
+        } catch { /* receipt is additive; the decision still stands */ }
+        res.json({ tenant: tenant.id, mode: 'significance_bounded', gate, receipt, eval_summary });
+        return;
+      }
       const gate = compileEvaluateAndGate({
-        candidate_artifact: body.candidate_artifact || body.candidate,
-        baseline: body.baseline,
+        candidate_artifact: cand,
+        baseline: base,
         thresholds: body.thresholds,
       });
       res.json({ tenant: tenant.id, ...gate });

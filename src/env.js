@@ -314,6 +314,11 @@ export const KNOWN_ENV_DOCS = Object.freeze({
   KOLM_BACKUP_INCLUDE_VAULT_KEY: "default on; set '0'/'false' to exclude the raw secrets-vault.key from co-located backup snapshots",
   // --- event store ---
   KOLM_EVENT_STORE_NO_AUTOCOMPACT: "set '1' to disable opportunistic JSONL compaction in the append hot path",
+  // --- finalized-c6: eval / holdout / leakage / K-score overlays ---
+  KOLM_KSCORE_CONFORMAL: "set 1 to arm the conformal-bounded ship-gate overlay (stricter-only; requires a calibration-residual pool; an undercalibrated pool fails closed to abstain)",
+  KOLM_KSCORE_CONTAM_IMPACT: "set 1 to arm the contamination-impact gate overlay (stricter-only). Clamps the corrected accuracy to min(reported, clean) at the gate so it can only LOWER ships; emits a contamination_impact manifest block bound into the artifact hash. Off by default (output byte-identical)",
+  KOLM_DISABLE_DISJOINTNESS_LEDGER: "set 1 to disable the default-on transitive cross-corpus holdout-disjointness ledger and fall back to the legacy per-pair row-hash overlap probe (the ledger is default-on whenever both a train-side and holdout-side corpus are present)",
+  KOLM_EVAL_GATE_SIGNIFICANCE: "set 1 to route the eval promotion/regression gate through the significance-bounded, multiplicity-controlled path when the candidate/baseline carry per_case score vectors (BH/Holm + paired bootstrap + mSPRT). Falls back to the point-delta gate when no per_case vectors exist or the flag is unset",
   // --- distill ordering / sampling ---
   KOLM_DISTILL_CURRICULUM: 'ascending|descending|1 - activates curriculum ordering on the default distill path (off by default)',
   KOLM_DISTILL_IMPORTANCE: 'set 1 to activate importance-weighted sampling on the default distill path',
