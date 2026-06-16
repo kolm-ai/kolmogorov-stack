@@ -22963,9 +22963,38 @@ async function cmdDistillGrpo(args) {
   const ns = pickFlag(train_args, '--namespace') || 'default';
   const outDir = pickFlag(train_args, '--out') || null;
   const wantJson = train_args.includes('--json');
+  // C4 - frontier-completion knobs (DAPO dynamic sampling / GSPO sequence IS /
+  // vLLM rollouts). Present only when the user opts in; they flow into trainGrpo's
+  // `frontier` config (forwarded to train_grpo.py, which reads back the engaged
+  // map from the real trl). --prove names mechanisms the run-meta gate must back
+  // before the receipt is signed (fail-closed). loss-type=dapo alone turns it on.
+  const isLevel = pickFlag(train_args, '--importance-sampling-level');
+  const scaleRewards = pickFlag(train_args, '--scale-rewards');
+  const epsilonHigh = pickFlag(train_args, '--epsilon-high');
+  const useVllm = train_args.includes('--use-vllm');
+  const vllmMode = pickFlag(train_args, '--vllm-mode');
+  const dynamicSampling = train_args.includes('--dynamic-sampling');
+  const maskTruncated = train_args.includes('--mask-truncated-completions');
+  const proveFlag = pickFlag(train_args, '--prove'); // comma list: clipHigher,dynamicSampling,overlongShaping,vllmSpeedup
+  const _frontierOn = lossType === 'dapo' || isLevel != null || scaleRewards != null
+    || epsilonHigh != null || useVllm || dynamicSampling || maskTruncated;
+  const frontier = _frontierOn ? {
+    lossType: lossType === 'dapo' ? 'dapo' : undefined,
+    importanceSamplingLevel: isLevel || undefined,
+    scaleRewards: scaleRewards != null ? scaleRewards : undefined,
+    epsilonHigh: epsilonHigh != null ? Number(epsilonHigh) : undefined,
+    maskTruncatedCompletions: maskTruncated || undefined,
+    dynamicSampling: dynamicSampling || undefined,
+    useVllm: useVllm || undefined,
+    vllmMode: vllmMode || undefined,
+  } : null;
+  const frontierClaims = proveFlag
+    ? String(proveFlag).split(',').map((s) => s.trim()).filter(Boolean)
+    : null;
   const { REWARD_FAMILIES, LOSS_TYPES, buildPromptsJsonl, trainGrpo } = await import('../src/distill-grpo.js');
   if (!seedsFile || !student) {
-    console.error('usage: kolm distill grpo --seeds <jsonl> --student <path> [--reward code_exec,math_checker,...] [--loss-type grpo|bnpo|dr_grpo] [--num-generations 8] [--sft-warmup-adapter <dir>] [--max-completion-length 512] [--namespace ns] [--out <dir>] [--json]');
+    console.error('usage: kolm distill grpo --seeds <jsonl> --student <path> [--reward code_exec,math_checker,...] [--loss-type grpo|bnpo|dr_grpo|dapo] [--num-generations 8] [--sft-warmup-adapter <dir>] [--max-completion-length 512] [--namespace ns] [--out <dir>] [--json]');
+    console.error('  frontier (DAPO/GSPO/vLLM): --loss-type dapo [--importance-sampling-level token|sequence] [--scale-rewards group|batch|none] [--epsilon-high 0.28] [--mask-truncated-completions] [--dynamic-sampling] [--use-vllm (needs KOLM_VLLM=1 + vllm installed)] [--vllm-mode colocate|server] [--prove clipHigher,dynamicSampling,overlongShaping,vllmSpeedup]');
     console.error('  rewards: ' + REWARD_FAMILIES.join(', '));
     console.error('  also: kolm distill grpo doctor');
     process.exit(EXIT.BAD_ARGS);
@@ -23009,6 +23038,8 @@ async function cmdDistillGrpo(args) {
     maxCompletionLength: maxComp != null ? Number(maxComp) : 512,
     outDir: runRoot,
     namespace: ns,
+    frontier,
+    frontierClaims,
   });
   if (wantJson) {
     console.log(JSON.stringify({ ...out, prompts: built }, null, 2));
