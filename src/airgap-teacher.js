@@ -58,6 +58,24 @@ export class PolicyBlockError extends Error {
 // before comparison so '[::1]' and '::1' both match.
 const LOCAL_HOSTS = Object.freeze(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
 
+// Strict 127.0.0.0/8 IPv4 loopback test. The hostname MUST be a complete dotted
+// quad whose first octet is 127 and whose remaining octets are 0-255 - NOT a
+// string that merely starts with "127.". The naive host.startsWith('127.') check
+// classifies an attacker-registrable PUBLIC DNS name like "127.0.0.1.evil.com"
+// as loopback (it is a valid label-prefixed hostname), which defeats the
+// residency fence: a non-local sink gets admitted as local with no attestation.
+// We anchor on a full 4-octet match so only genuine 127.x.y.z addresses pass.
+function isLoopbackIpv4(host) {
+  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  if (!m) return false;
+  const octets = [m[1], m[2], m[3], m[4]].map((s) => Number(s));
+  if (octets.some((o) => !Number.isInteger(o) || o < 0 || o > 255)) return false;
+  // Reject leading-zero / ambiguous octets like "127.000.000.001" that some
+  // resolvers parse octally; require the canonical decimal form round-trips.
+  if (host !== octets.join('.')) return false;
+  return octets[0] === 127;
+}
+
 // Verify the teacher URL is local. Throws PolicyBlockError on violation.
 // Returns {ok:true, host, scheme, port, kind, version} on accept so callers
 // have a structured ack to log.
@@ -118,7 +136,7 @@ export function verifyTeacherIsLocal(opts = {}) {
   }
 
   let kind;
-  if (host === '127.0.0.1' || host.startsWith('127.')) kind = 'loopback-ipv4';
+  if (isLoopbackIpv4(host)) kind = 'loopback-ipv4';
   else if (host === '::1') kind = 'loopback-ipv6';
   else if (host === 'localhost') kind = 'localhost';
   else if (host === '0.0.0.0' || host === '::') kind = 'bind-all';

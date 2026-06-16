@@ -121,6 +121,54 @@ export function compileJs(source) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// runRecipeContained(source, opts) - Finalized C2 (Privacy / Untrusted-Code
+// Containment).
+//
+// ADDED export (compileJs left untouched as the default + back-compat path).
+//
+// When KOLM_SECURE_SANDBOX=1 is set, untrusted generator execution is routed
+// through src/secure-sandbox.js::runSecure - a vm-hardened backend (codegen
+// disabled, constructor-chain severed, hard timeout; optional isolated-vm via
+// KOLM_SANDBOX_BACKEND=isolated-vm) whose boundary is gated by the adversarial
+// escape-probe suite (tests/finalized-c2-real-escape-probe-test-suite.test.js).
+//
+// DEFAULT (env unset): falls back to the existing compileJs path verbatim, so
+// every existing caller and test sees byte-identical behaviour. assertSafeSource
+// is documented as a NON-AUTHORITATIVE pre-filter (cheap defense-in-depth); the
+// authoritative boundary is the secure-sandbox backend when armed.
+//
+// CAVEAT: the secure-sandbox backend is opt-in, NOT the audited default. The
+// "make hard-sandbox the default" containment work did not pass independent
+// verification (the os-subprocess rung has a process.report.writeReport gap and
+// no kernel wall on Windows by default), so flipping the live default is held
+// behind this env flag until an OS-sandbox wrapper lands. The real code path is
+// preserved and fails LOUD if isolated-vm is requested-but-absent.
+//
+// Returns the generator output (same shape compileJs's returned fn produces).
+// ---------------------------------------------------------------------------
+export async function runRecipeContained({ source, input, opts = {} } = {}) {
+  const secure = String(process.env.KOLM_SECURE_SANDBOX || '').trim();
+  if (secure === '1' || secure === 'true' || secure === 'on') {
+    const { runSecure } = await import('./secure-sandbox.js');
+    // vm-hardened backend runs in-process so the function-valued `lib` helpers
+    // cross fine. (isolated-vm/subprocess backends require JSON-serializable lib;
+    // recipes that only touch plain-data lib fields work across all backends.)
+    const lib = (opts.pack || opts.index || opts.params)
+      ? Object.freeze({
+          ...subroutines,
+          pack: opts.pack || null,
+          index: opts.index || null,
+          params: opts.params || null,
+        })
+      : subroutines;
+    return runSecure(source, { input, lib, timeout: opts.timeout || DEFAULT_TIMEOUT_MS });
+  }
+  // Default / fallback: preserved compileJs path (unchanged behaviour).
+  const fn = compileJs(source);
+  return fn(input, opts);
+}
+
 function runWithTimeout(fn, ms) {
   // Cooperative timeout - JS generators are short and side-effect-free.
   // Real isolation: isolated-vm with hard CPU limit.

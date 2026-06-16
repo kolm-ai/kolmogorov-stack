@@ -38,6 +38,14 @@ import * as jobs from './jobs.js';
 // the surviving rows simple->complex never touches a holdout row. Off-by-knob
 // via {curriculum:false}; defaults to ascending.
 import { sortCapturesByCurriculum } from './curriculum-sort.js';
+// Finalized C2 - DP-training budget + trainer env. Default OFF (dp_path=null):
+// 'none' stamp + no DP env, so the bridge spawn is byte-identical.
+import {
+  buildPrivacyBudgetBlock,
+  computeDpSgdBudget,
+  pateBudget,
+  buildDpTrainerEnv,
+} from './dp-training.js';
 // CD-01 - default-on light curation at the REAL product distill entry point.
 // The router distill routes (/v1/distill/from-captures specialist arm +
 // /v1/specialists/auto-distill) flow through startDistillJob, which assembles
@@ -179,9 +187,34 @@ export async function startDistillJob({
   curriculum = 'ascending',
   // CD-01 - default-on light curation of the train rows. Pass false to skip.
   curate = true,
+  // Finalized C2 - DP-training knobs (default OFF). When dp_path is set the
+  // bridge spawn env carries the DP knobs to the worker (Python trainer must
+  // FAIL LOUD if Opacus absent) and the job record stamps the (eps, delta).
+  dp_path = null,
+  dp_noise_multiplier = 1.1,
+  dp_l2_clip = 1.0,
+  dp_sample_rate = null,
+  dp_steps = null,
+  dp_delta = 1e-5,
+  allow_cross_region = false,
 } = {}) {
   if (!Array.isArray(captures) || captures.length === 0) {
     throw new Error('startDistillJob: captures required');
+  }
+  // Finalized C2 - resolve the DP budget + trainer env up front. Throws LOUD
+  // (DP_ZERO_NOISE) on a zero-noise config BEFORE any worker spawn.
+  let _dpBudget;
+  let _dpEnv = {};
+  if (dp_path === 'dp_sgd' || dp_path === 'pate') {
+    const _priced = dp_path === 'pate'
+      ? pateBudget({ n_queries: dp_steps != null ? dp_steps : captures.length, noise_multiplier: dp_noise_multiplier, delta: dp_delta })
+      : computeDpSgdBudget({ noise_multiplier: dp_noise_multiplier, sample_rate: dp_sample_rate != null ? dp_sample_rate : 0, steps: dp_steps != null ? dp_steps : 0, delta: dp_delta });
+    _dpBudget = buildPrivacyBudgetBlock({ path: dp_path, budget: _priced, cross_region: !!allow_cross_region });
+    _dpEnv = buildDpTrainerEnv({ enabled: true, l2_clip: dp_l2_clip, noise_multiplier: dp_noise_multiplier, sample_rate: dp_sample_rate, steps: dp_steps, delta: dp_delta }).env;
+  } else if (dp_path != null) {
+    throw new Error(`startDistillJob dp_path must be one of [dp_sgd, pate, null], got: ${dp_path}`);
+  } else {
+    _dpBudget = buildPrivacyBudgetBlock({ path: 'none' });
   }
   const worker = workerCmd
     || process.env.KOLM_DISTILL_WORKER_CMD
@@ -224,6 +257,10 @@ export async function startDistillJob({
       // CD-01 - what the default-on light curation actually ran on the train
       // rows (null when disabled). Surfaces n_in/n_kept/n_removed for the receipt.
       curate: curate_report || null,
+      // Finalized C2 - the (eps, delta) privacy budget for this run, on the job
+      // record so the receipt/audit can prove the DP guarantee (or its explicit
+      // 'none' absence). Always present.
+      privacy_budget: _dpBudget,
       tmp_dir: tmpDir,
       out_dir: outDir,
     },
@@ -251,7 +288,7 @@ export async function startDistillJob({
     child = spawnFn(process.execPath, args, {
       detached: true,
       stdio: ['ignore', logOut, logOut],
-      env: { ...process.env, KOLM_JOB_ID: rec.id },
+      env: { ...process.env, ..._dpEnv, KOLM_JOB_ID: rec.id },
       windowsHide: true,
     });
   } catch (e) {

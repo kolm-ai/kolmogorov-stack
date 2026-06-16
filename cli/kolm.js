@@ -22391,6 +22391,21 @@ async function cmdDistill(args) {
     process.exit(EXIT.BAD_ARGS);
   }
   const importanceFlag = args.includes('--importance');
+  // Finalized C2 - differential-privacy TRAINING flags (default OFF). When
+  // --dp-path is set the server's distill() composes a real (eps, delta) budget
+  // via RDP and the worker spawn env carries the DP knobs to the Python trainer
+  // (which must FAIL LOUD if Opacus is absent rather than train without DP).
+  const dpPathFlag = pickFlag(args, '--dp-path');
+  if (dpPathFlag && !['dp_sgd', 'pate'].includes(dpPathFlag)) {
+    console.error(`error: --dp-path must be one of: dp_sgd, pate (got '${dpPathFlag}')`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const dpNoiseFlag = pickFlag(args, '--dp-noise-multiplier');
+  const dpClipFlag = pickFlag(args, '--dp-l2-clip');
+  const dpSampleRateFlag = pickFlag(args, '--dp-sample-rate');
+  const dpStepsFlag = pickFlag(args, '--dp-steps');
+  const dpDeltaFlag = pickFlag(args, '--dp-delta');
+  const allowCrossRegionFlag = args.includes('--allow-cross-region');
   // `--follow` (or a TTY) renders live progress after enqueue; `--no-follow`
   // and `--json` keep the immediate-return behavior for scripting.
   const wantJson = args.includes('--json');
@@ -22415,6 +22430,18 @@ async function cmdDistill(args) {
       process.exit(EXIT.BAD_ARGS);
     }
     body.early_stop_config = { enabled: true, patience: Math.floor(p) };
+  }
+  // Finalized C2 - thread DP-training knobs through the request body. Default
+  // OFF: when --dp-path is unset, none of these are added and the server run is
+  // byte-identical (manifest gets a 'none' privacy_budget stamp).
+  if (dpPathFlag) {
+    body.dp_path = dpPathFlag;
+    if (dpNoiseFlag != null) body.dp_noise_multiplier = Number(dpNoiseFlag);
+    if (dpClipFlag != null) body.dp_l2_clip = Number(dpClipFlag);
+    if (dpSampleRateFlag != null) body.dp_sample_rate = Number(dpSampleRateFlag);
+    if (dpStepsFlag != null) body.dp_steps = Number(dpStepsFlag);
+    if (dpDeltaFlag != null) body.dp_delta = Number(dpDeltaFlag);
+    if (allowCrossRegionFlag) body.allow_cross_region = true;
   }
   const res = await fetch(url, {
     method: 'POST',

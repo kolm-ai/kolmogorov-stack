@@ -45,6 +45,17 @@ import { fileURLToPath } from 'node:url';
 import { listEvents } from './event-store.js';
 // W787 - compute-efficiency knobs (precision mode, grad checkpointing, early stop).
 import { normalizeEfficiencyOptions, buildEfficiencyEnv } from './distill-efficiency.js';
+// Finalized C2 - differential-privacy TRAINING path (DP-SGD / PATE). Default OFF
+// (dp_path=null) => buildPrivacyBudgetBlock stamps a "none" record and NO env is
+// added, so the existing no-DP run is byte-identical. When dp_path is set, a real
+// (eps, delta) budget is composed via RDP and the worker spawn env carries the
+// DP knobs. buildDpTrainerEnv throws LOUD (DP_ZERO_NOISE) on a zero-noise config.
+import {
+  buildPrivacyBudgetBlock,
+  computeDpSgdBudget,
+  pateBudget,
+  buildDpTrainerEnv,
+} from './dp-training.js';
 // W713 (curriculum ordering) + W711 (importance weighting). These were
 // previously reachable ONLY through a side CLI command; the main distill()
 // path now threads them when a curriculum/importance knob is set so the
@@ -691,6 +702,10 @@ export async function* distill({
   // resolved by _resolveOrderingPolicy (see the body for the full contract).
   curriculum = null,
   importance = null,
+  // Finalized C2 - DP-TRAINING knobs (default OFF; _dpBudget block below).
+  dp_path = null, dp_noise_multiplier = 1.1, dp_l2_clip = 1.0,
+  dp_sample_rate = null, dp_steps = null, dp_delta = 1e-5,
+  allow_cross_region = false,
 } = {}) {
   if (!MODES.includes(pipeline_mode)) {
     throw new Error(`pipeline_mode must be one of [${MODES.join(', ')}]`);
@@ -708,6 +723,26 @@ export async function* distill({
       })
     : null;
   const _efficiencyEnv = _efficiency ? buildEfficiencyEnv(_efficiency) : {};
+  // Finalized C2 - resolve the differential-privacy training path ONCE up front.
+  // Default (dp_path=null): _dpBudget is the 'none' stamp, _dpEnv is empty, so
+  // the worker spawn + manifest are byte-identical to the pre-DP run. When the
+  // caller opts in, buildDpTrainerEnv throws LOUD (DP_ZERO_NOISE) on a zero-noise
+  // config BEFORE any worker spawn - we never silently degrade to a non-DP run.
+  let _dpBudget;
+  let _dpEnv = {};
+  if (dp_path === 'dp_sgd' || dp_path === 'pate') {
+    const _dpPriced = dp_path === 'pate'
+      ? pateBudget({ n_queries: dp_steps != null ? dp_steps : pairs_override?.length || 0, noise_multiplier: dp_noise_multiplier, delta: dp_delta })
+      : computeDpSgdBudget({ noise_multiplier: dp_noise_multiplier, sample_rate: dp_sample_rate != null ? dp_sample_rate : 0, steps: dp_steps != null ? dp_steps : 0, delta: dp_delta });
+    _dpBudget = buildPrivacyBudgetBlock({ path: dp_path, budget: _dpPriced, cross_region: !!allow_cross_region });
+    // Throws DP_ZERO_NOISE before any spawn when noise_multiplier <= 0.
+    const _dpTrainer = buildDpTrainerEnv({ enabled: true, l2_clip: dp_l2_clip, noise_multiplier: dp_noise_multiplier, sample_rate: dp_sample_rate, steps: dp_steps, delta: dp_delta });
+    _dpEnv = _dpTrainer.env;
+  } else if (dp_path != null) {
+    throw new Error(`distill dp_path must be one of [dp_sgd, pate, null], got: ${dp_path}`);
+  } else {
+    _dpBudget = buildPrivacyBudgetBlock({ path: 'none' });
+  }
   // W713/W711 - resolve the data-ordering policy ONCE up front (env or recipe
   // knob). Off by default; see _resolveOrderingPolicy.
   const _ordering = _resolveOrderingPolicy({ curriculum, importance });
@@ -847,6 +882,10 @@ export async function* distill({
       // W713/W711 - the resolved data-ordering policy for this run.
       // curriculum is null|'ascending'|'descending'; importance is boolean.
       ordering: { curriculum: _ordering.curriculum, importance: _ordering.importance },
+      // Finalized C2 - the (eps, delta) privacy budget for this run. Always
+      // present: 'none' stamp (dp_effective:false) when no DP path was opted in,
+      // so the manifest is never ambiguous about whether a guarantee was carried.
+      privacy_budget: _dpBudget,
       created_at: new Date().toISOString(),
     }, null, 2));
   } catch (_) {} // deliberate: cleanup
@@ -941,7 +980,7 @@ export async function* distill({
       // KOLM_EARLY_STOP_* so the worker (and the Python trainer it spawns)
       // pick up the caller's compute-efficiency choice. Empty object when
       // no efficiency knobs were passed, so the spread is a no-op.
-      env: { ...process.env, ..._efficiencyEnv, KOLM_JOB_ID: jobId, KOLM_DISTILL_ATTEMPT: String(attemptIdx + 1) },
+      env: { ...process.env, ..._efficiencyEnv, ..._dpEnv, KOLM_JOB_ID: jobId, KOLM_DISTILL_ATTEMPT: String(attemptIdx + 1) },
       windowsHide: true,
     });
     if (typeof child.unref === 'function') child.unref();
@@ -1030,6 +1069,10 @@ export async function* distill({
   if (workerManifest && typeof workerManifest === 'object') {
     workerManifest.teacher_source = teacher_source_final;
     workerManifest.policy_enforced = policy_enforced;
+    // Finalized C2 - carry the (eps, delta) privacy budget into the .kolm receipt
+    // chain so an offline verifier sees the DP guarantee (or its explicit 'none'
+    // absence) inline with teacher_source. Part of the moat: privacy is provable.
+    workerManifest.privacy_budget = _dpBudget;
     try {
       const manifestPath = path.join(outDir, 'manifest.json');
       fs.writeFileSync(manifestPath, JSON.stringify(workerManifest, null, 2));
@@ -1120,6 +1163,10 @@ export async function* distill({
     // envelope so callers reading the iterator output (without re-reading the
     // worker manifest from disk) see the policy verdict inline.
     teacher_source: teacher_source_final,
+    // Finalized C2 - inline the privacy budget block so callers reading the
+    // iterator output (without re-reading run-meta.json) see the (eps, delta)
+    // guarantee verdict. 'none' stamp when no DP path was opted in.
+    privacy_budget: _dpBudget,
     policy_enforced,
     teacher_attempts,
     teacher_attempted_count: teacher_attempts.length,

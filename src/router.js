@@ -18621,6 +18621,13 @@ export function buildRouter() {
         if (!VALID_MD.includes(d)) return res.status(400).json({ error: `multi_device entry '${d}' must be one of ${VALID_MD.join(', ')}` });
       }
     }
+    // Finalized C2 - validate the DP-training path enum (default OFF). Invalid
+    // values are rejected here before any spawn; a zero-noise config is caught
+    // LOUD downstream by buildDpTrainerEnv (DP_ZERO_NOISE).
+    const _dpPath = (req.body || {}).dp_path;
+    if (_dpPath != null && !['dp_sgd', 'pate'].includes(_dpPath)) {
+      return res.status(400).json({ error: "dp_path must be one of 'dp_sgd', 'pate'" });
+    }
     // W869+ Persona A.7 - VRAM pre-flight gate (same shared helper as /v1/compile).
     const _vramPreflight = _checkVramPreflight(base_model, hw_tier);
     if (_vramPreflight && !_vramPreflight.fits) {
@@ -18699,6 +18706,9 @@ export function buildRouter() {
         variable_input: o.variable_input || o.prompt || o.input || '',
         response: o.response || o.output || '',
       }));
+      // Finalized C2 - DP-training knobs from the request body (default OFF;
+      // when dp_path is unset none are passed and the run is byte-identical).
+      const _dpBody = req.body || {};
       const job = await startDistillJob({
         tenant: req.tenant,
         namespace,
@@ -18706,6 +18716,15 @@ export function buildRouter() {
         baseModel: base_model,
         targetSize: target_size,
         source: 'auto_distill',
+        ...( _dpBody.dp_path ? {
+          dp_path: _dpBody.dp_path,
+          dp_noise_multiplier: _dpBody.dp_noise_multiplier,
+          dp_l2_clip: _dpBody.dp_l2_clip,
+          dp_sample_rate: _dpBody.dp_sample_rate,
+          dp_steps: _dpBody.dp_steps,
+          dp_delta: _dpBody.dp_delta,
+          allow_cross_region: !!_dpBody.allow_cross_region,
+        } : {} ),
       });
       return res.status(202).json({
         ok: true,

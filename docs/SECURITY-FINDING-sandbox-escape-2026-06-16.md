@@ -51,5 +51,42 @@ violating the "sensitive data never leaves / untrusted code is contained" princi
    OS sandbox so `process.binding` cannot exfiltrate.
 
 ## Status
-Open. To be fixed in finalized-pass component #2 (Privacy / Sensitive-Info Isolation).
+PARTIALLY ADDRESSED in finalized-pass component #2 (run wf_8ff5a84c-0a9, 2026-06-16).
 Captured 2026-06-16 from workflow wf_8947ff82-b94 verify panel.
+
+### What shipped (component #2)
+- `src/secure-sandbox.js` (NEW, default backend `vm-hardened`, no native dep): executes
+  untrusted generators with `codeGeneration:{strings:false,wasm:false}` (engine-level kill
+  of every `Function()`/`eval()`/constructor-chain code-gen escape) AND re-homes `input`/`lib`
+  as JSON into the sandbox realm (so untrusted code never holds a HOST object whose
+  prototype chain reaches the host `Function`). Optional `KOLM_SANDBOX_BACKEND=isolated-vm`
+  (separate V8 isolate, hard CPU/heap limit) fails LOUD with an install hint if requested
+  but absent. Gated by a real adversarial battery: `ESCAPE_PROBES` (12 families) +
+  `tests/finalized-c2-real-escape-probe-test-suite.test.js` (26 probes, all pass) — this
+  REPLACES the false "escape-denied" test (requirement #3 above, DONE).
+- `src/verifier.js::runRecipeContained()` (NEW entry point): routes to the hardened backend
+  when `KOLM_SECURE_SANDBOX=1`; default unset → existing `compileJs` verbatim (byte-identical
+  back-compat). `compileJs` untouched.
+
+### Why the hardened backend is env-gated, not the live default (the frontier limit)
+The default `compileJs` path passes `lib = subroutines` — HOST FUNCTIONS recipes call
+directly. The hardened backend's JSON re-homing (the very thing that severs the host-prototype
+escape) DROPS those function helpers, so flipping it on unconditionally would break every
+recipe that uses `lib`. And `codeGeneration:{strings:false}` on `compileJs` alone does NOT
+close the hole, because the escape runs through the HOST `Function` reached via the passed-in
+host objects' prototype chain (host code-gen, not governed by the context flag). A genuinely
+HARD, in-process, dependency-free untrusted-code boundary does not exist in Node — the frontier
+answer is `isolated-vm` (separate isolate + reference-bridged lib) or an OS sandbox, both of
+which legitimately require operator setup. Hence: real hardened path SHIPPED + fail-loud
+env-gate is the correct frontier posture, not a stub.
+
+### Still open (default-path residual + operator follow-up)
+- DEFAULT `compileJs` remains regex-pre-filtered `node:vm` (the constructor-chain escape is
+  still reachable there if the regex is bypassed). REMAINING FIX-FORWARD: make `vm-hardened`
+  the default by bridging the `subroutines` FUNCTION helpers into the sandbox realm without
+  re-introducing the host-prototype escape (inject a frozen, realm-local facade rather than
+  JSON-dropping `lib`), then flip `runRecipeContained` to default-on.
+- The separate `os-subprocess` rung (in the unshipped, verify-FAILED `hard-sandbox.js` island,
+  left in the worktree) has a `process.report.writeReport` host-FS-write escape and no kernel
+  wall on Windows by default; it was NOT shipped. If pursued, patch the entire `process.*`
+  native surface AND require an OS wrapper (bubblewrap/landlock / Job Object / sandbox-exec).
