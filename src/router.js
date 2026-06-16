@@ -453,6 +453,11 @@ import { registerMetaRoutes as __registerMetaRoutes_w832 } from './meta-routes.j
 // down to one import + one call line; the route bodies live in
 // src/lingual-routes.js so parallel-wave merges don't collide here.
 import { registerLingualRoutes as __registerLingualRoutes_w833 } from './lingual-routes.js';
+// Sensitive-data-aware GATED synthesis route (POST /v1/lingual/synthesize/gated).
+// ENV-GATED at the mount call site below (KOLM_GATED_SYNTH) so it never changes
+// existing route behavior unless the operator opts in. See
+// src/lingual-routes-gated.js + src/synthesize-gated.js.
+import { registerGatedLingualSynthRoute as __registerGatedLingualSynthRoute } from './lingual-routes-gated.js';
 // W831 - offline / air-gapped routes (distill run+status, sneakernet
 // bundle+verify, bakeoff, doctor). Modular mount.
 import { registerAirgapRoutes as __registerAirgapRoutes_w831 } from './airgap-routes.js';
@@ -27559,6 +27564,90 @@ res.json({
     }
   });
 
+  // ---------------------------------------------------------------------
+  // Verifier-gated, student-loss-driven ACTIVE SYNTHESIS LOOP (confirmed atom
+  // src/active-synthesis-loop.js). Previously had no production caller; this
+  // mounts it as a reachable, auth-gated, DI endpoint. The loop is pure control
+  // flow - the caller owns `generate` (egress + redaction boundary). When no
+  // generate seam is supplied the loop returns its own loud {ok:false} envelope,
+  // so this route never fabricates. dynamic import + try/catch keep it fail-open.
+  // ---------------------------------------------------------------------
+  r.post('/v1/synthesis/active-loop', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./active-synthesis-loop.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      // `generate`/`studentLossFn`/`evalFn` are function seams - not JSON-passable.
+      // Over HTTP we accept only the declarative knobs; an in-process caller uses
+      // the module directly with its function seams. Without a generate seam the
+      // loop returns {ok:false, error:'no_generate_fn'} (200-shaped 400 here).
+      const env = await mod.runActiveSynthesisLoop({
+        seeds: Array.isArray(body.seeds) ? body.seeds : [],
+        taskType: body.taskType,
+        verify: body.verify,
+        selectFraction: body.selectFraction,
+        diversityTau: body.diversityTau,
+        maxIterations: body.maxIterations,
+        plateauEps: body.plateauEps,
+        plateauPatience: body.plateauPatience,
+        seedBudget: body.seedBudget,
+      });
+      return res.status(env && env.ok === false ? 400 : 200).json(env);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'active_synthesis_loop_error',
+        detail: String(e && e.message || e),
+        version: 'asl-v1',
+      });
+    }
+  });
+
+  // ---------------------------------------------------------------------
+  // EVAL-DECONTAM stage (confirmed atom src/eval-decontam.js). Standalone
+  // AUGMENT->TRAIN stage with no prior caller; mounted here as a reachable,
+  // auth-gated endpoint that runs the synthetic-vs-eval membership cascade and
+  // returns the signed eval-decontam-v1 provenance block + contamination-gated
+  // K-score. The compile-pipeline in-line wiring is sequenced separately
+  // (structural holdout-disjointness boundary the suite enforces); this route
+  // makes the stage runnable + observable today without touching that boundary.
+  // ---------------------------------------------------------------------
+  r.post('/v1/eval/decontam', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./eval-decontam.js');
+      const body = (req.body && typeof req.body === 'object') ? req.body : {};
+      const out = mod.runEvalDecontamStage({
+        rows: Array.isArray(body.rows) ? body.rows : [],
+        evalIndexArgs: body.evalIndexArgs,
+        cascadeOpts: body.cascadeOpts,
+        predicateOpts: body.predicateOpts,
+        gateOpts: body.gateOpts,
+        k_score: body.k_score,
+        generated_at: body.generated_at,
+      });
+      // Return the provable block + gated score + cascade summary (drop the bulky
+      // Merkle trees from the HTTP envelope; the block carries the root hashes).
+      return res.status(200).json({
+        ok: true,
+        version: mod.EVAL_DECONTAM_SPEC_VERSION,
+        block: out.block,
+        k_score: out.k_score,
+        predicate: out.predicate,
+        synthetic_count: out.synthetic.length,
+        real_count: out.real.length,
+        passed_synthetic_count: out.passed_synthetic.length,
+      });
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'eval_decontam_error',
+        detail: String(e && e.message || e),
+        version: 'eval-decontam-v1',
+      });
+    }
+  });
+
   r.post('/v1/eval/adversarial/generate', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
@@ -29061,6 +29150,18 @@ res.json({
   // router.js diff to a single call site so parallel-wave merges don't
   // collide. See src/lingual-routes.js + src/lingual-*.js.
   __registerLingualRoutes_w833(r);
+
+  // Sensitive-data-aware GATED synthesis route. ENV-GATED: only exposed when
+  // KOLM_GATED_SYNTH is truthy so it cannot change existing route behavior or
+  // test outcomes. The handler itself is real (never-to-hyperscaler boundary +
+  // per-row provenance stamp); the flag only controls exposure of the net-new
+  // surface while the legacy /v1/lingual/synthesize redirect is sequenced.
+  try {
+    const __gatedSynthOn = String(process.env.KOLM_GATED_SYNTH || '').trim();
+    if (__gatedSynthOn && __gatedSynthOn !== '0' && __gatedSynthOn.toLowerCase() !== 'false') {
+      __registerGatedLingualSynthRoute(r);
+    }
+  } catch (_e) { /* mount is best-effort; never block router boot */ }
 
   // W834 - Regulatory compliance toolkit routes (7 routes: EU AI Act docs,
   // risk classify, HIL get/set, data-governance report, extended model card,

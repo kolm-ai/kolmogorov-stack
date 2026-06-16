@@ -72,9 +72,15 @@ Then (main loop): full suite -> commit -> FF merge to main -> update this ledger
 - Launch component K: `Workflow({ scriptPath, args: { n: K, name: "<component name>", focus: "<focus text>", researchers: 36 } })`
 - Each shard: atomize -> 36 researchers/atom -> synth fan-in -> 10 deep-dives/atom -> derive(+critic) -> build (worktree-isolated, disjoint new modules) -> 3-lens adversarial verify -> integrate. Returns {atoms, atomStatus, builtFiles, flagged, integrate}.
 
+## CRITICAL TEST-RUNNING LESSON (cost hours on 2026-06-16)
+- The single mega-process `node --test tests/*.test.js` SILENTLY DIES mid-run on node v24 (parent accumulates 590 files of results in memory -> OOM, NO error/summary, looks like a crash). It is NOT a test failure. 0 actual failures were ever seen.
+- ALSO: NEVER run two `node --test` suites concurrently — they share test data dirs + compete for RAM, causing false crashes.
+- ALWAYS verify in BATCHES, one at a time, alone:
+  `node --test --test-concurrency=1 tests/[a-v]*.test.js` ; then `tests/wave[0-3]*.test.js` ; then `tests/wave[4-9]*.test.js`. Each batch completes (has `ℹ duration_ms`); sum the `ℹ fail` counts. This is the real arbiter.
+
 ## PER-COMPONENT CHAINING PROTOCOL (do this on EVERY shard completion)
 1. Read the shard result. Note builtFiles + flagged atoms + integrate test result.
-2. Run the FULL suite: `node --test --test-concurrency=1 tests/*.test.js` (background). Arbiter — never trust a sub-report.
+2. Verify in 3 BATCHES (see lesson above) — NOT the mega-process. Sum fails across batches = true result.
 3. If GREEN: `git add -A && git commit` (component K) on kolm-finalized-pass; FF-merge to main; update the status table row K -> DONE with commit; launch component K+1.
 4. If RED: dispatch a focused repair agent (root cause, no skips), re-run full suite. If green -> commit+merge. If still red after 2 repair rounds: keep work on branch (do NOT merge red to main), `git revert`/reset the regressing piece if it blocks others, mark row K -> PARTIAL with the reason, and STILL launch component K+1 (continue-log-finish).
 5. After component 13 (cohesion+completeness-critic): run full suite, final commit+merge, write the morning summary in this file, STOP (no deploy).

@@ -42,6 +42,7 @@ import {
 } from './data-ingest.js';
 import { curatePairs } from './data-curate.js';
 import { augment } from './data-augment.js';
+import { selfSynthesize } from './self-synthesis-engine.js';
 import { evaluateRun } from './data-evaluate.js';
 import { identifyProdGaps, proposeRecompile } from './data-feedback.js';
 import { summarizeProvenance } from './data-provenance.js';
@@ -177,6 +178,54 @@ async function _runCurate({ tenant, namespace, pairs, opts }) {
 // Strategy defaults to 'evol' (seed-driven complexity escalation) unless the
 // caller picks one via opts.augment_strategy.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Strategy dispatch. The DEFAULT path is data-augment.js augment(). The
+// 'self-synthesis' strategy routes to the LIVE Magpie / Auto-Evol-Instruct
+// engine instead, which returns the IDENTICAL augment envelope shape
+// (ok / cost_preview.est_cost_usd / wrote / n_candidates / candidates) and
+// honors opts.apply, so the preview-only-by-default + approve_cost_usd cost
+// gate below works UNCHANGED. teacher_caller / completion_caller / redactor /
+// generator_family are threaded through opts so the operator owns the live
+// PHI-redacted teacher or local-generator wiring; tests inject a stub caller
+// and never egress.
+// ---------------------------------------------------------------------------
+async function _runStrategy({ strategy, tenant, namespace, seedPairs, userAugOpts, opts, apply }) {
+  if (strategy === 'self-synthesis') {
+    const synthBlock = (opts.augment && typeof opts.augment === 'object' && opts.augment.self_synthesis
+      && typeof opts.augment.self_synthesis === 'object') ? opts.augment.self_synthesis : {};
+    const mode = (typeof synthBlock.mode === 'string' && synthBlock.mode)
+      || (typeof userAugOpts.mode === 'string' && userAugOpts.mode)
+      || 'auto';
+    return selfSynthesize({
+      tenant,
+      namespace,
+      mode,
+      seedPairs,
+      opts: {
+        ...userAugOpts,
+        ...synthBlock,
+        apply,
+        teacher_caller: opts.teacher_caller || userAugOpts.teacher_caller || synthBlock.teacher_caller,
+        completion_caller: opts.completion_caller || userAugOpts.completion_caller || synthBlock.completion_caller,
+        redactor: opts.redactor || userAugOpts.redactor || synthBlock.redactor,
+        generator_family: opts.generator_family || userAugOpts.generator_family || synthBlock.generator_family,
+      },
+    });
+  }
+  return augment({
+    tenant,
+    namespace,
+    strategy,
+    seedPairs,
+    opts: {
+      ...userAugOpts,
+      apply,
+      teacher_caller: opts.teacher_caller || userAugOpts.teacher_caller,
+      completion_caller: opts.completion_caller || userAugOpts.completion_caller,
+    },
+  });
+}
+
 async function _runAugment({ tenant, namespace, seedPairs, opts }) {
   const strategy = (typeof opts.augment_strategy === 'string' && opts.augment_strategy)
     ? opts.augment_strategy
@@ -184,12 +233,8 @@ async function _runAugment({ tenant, namespace, seedPairs, opts }) {
   const userAugOpts = (opts.augment && typeof opts.augment === 'object') ? opts.augment : {};
 
   // 1) PREVIEW: force apply:false so nothing is written regardless of caller opts.
-  const preview = await augment({
-    tenant,
-    namespace,
-    strategy,
-    seedPairs,
-    opts: { ...userAugOpts, apply: false },
+  const preview = await _runStrategy({
+    strategy, tenant, namespace, seedPairs, userAugOpts, opts, apply: false,
   });
 
   if (!preview || preview.ok !== true) {
@@ -217,12 +262,8 @@ async function _runAugment({ tenant, namespace, seedPairs, opts }) {
     };
   }
 
-  const applied = await augment({
-    tenant,
-    namespace,
-    strategy,
-    seedPairs,
-    opts: { ...userAugOpts, apply: true },
+  const applied = await _runStrategy({
+    strategy, tenant, namespace, seedPairs, userAugOpts, opts, apply: true,
   });
 
   if (!applied || applied.ok !== true) {

@@ -350,6 +350,23 @@ export async function augment({ tenant, namespace, strategy, pairs, seedPairs, o
     const tn = (typeof tenant === 'string' && tenant.trim()) ? tenant.trim() : 'tenant_local';
     const o = (opts && typeof opts === 'object') ? opts : {};
 
+    // 'self-synthesis' is a PEER augment()-shaped callable (the LIVE Magpie /
+    // Auto-Evol-Instruct engine), not a generic _dispatch candidate generator:
+    // it owns its own 2-call/row Magpie cost model + parent_seed_cids
+    // provenance, so it must NOT be funneled through this generic envelope
+    // (that would mis-price + drop provenance). Route it through the data-engine
+    // ('augment_strategy: self-synthesis') or call selfSynthesize() directly.
+    if (strategy === 'self-synthesis') {
+      return {
+        ok: false,
+        version: AUGMENT_VERSION,
+        error: "strategy 'self-synthesis' routes through the data-engine "
+          + "(opts.augment_strategy='self-synthesis') or selfSynthesize() in "
+          + 'src/self-synthesis-engine.js, not the generic augment() dispatch.',
+        redirect: 'self-synthesis-engine.selfSynthesize',
+      };
+    }
+
     if (!STRATEGIES.has(strategy)) {
       return {
         ok: false,
