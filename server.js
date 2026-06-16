@@ -484,6 +484,23 @@ if (process.argv[1] && process.argv[1].endsWith('server.js')) {
   // https://kolm.ai instead of this instance). No-op + null in dev. Never throws.
   try { oauthStartupCheck(console); } catch (e) { console.error('[oauth] startup check error:', e && e.message); }
 
+  // finalized-c1 — NVIDIA NRAS confidential-compute attestation verifier.
+  // Env-gated (KOLM_NRAS_VERIFIER=1 + KOLM_NRAS_ROOT_CERT). When OFF this is a
+  // no-op and confidential_compute attestations stay shape-only (verified=false).
+  // When ON but misconfigured, registerNrasVerifier() throws a LOUD install hint
+  // (pinned NVIDIA root cert + python nv-attestation-sdk/cryptography/PyJWT); we
+  // FAIL the boot rather than ship a deploy that claims CC-verified without a
+  // registered crypto chain. The privacy boundary holds: only digests + the NRAS
+  // token cross the worker, never plaintext.
+  try {
+    const { registerNrasVerifier } = await import('./src/nras-verifier.js');
+    const reg = registerNrasVerifier({});
+    if (reg.registered) console.log(`  nras:       registered (${reg.version}, root=${reg.root_cert})`);
+  } catch (e) {
+    console.error('[nras] FATAL: KOLM_NRAS_VERIFIER=1 but verifier could not register:', e && e.message);
+    throw e;
+  }
+
   // W890-3 — keep a handle to the http.Server so graceful-shutdown hooks
   // above can call .close() and let in-flight requests drain on SIGTERM /
   // uncaughtException.

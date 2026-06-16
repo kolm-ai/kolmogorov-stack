@@ -38,7 +38,10 @@ Then (main loop): full suite -> commit -> FF merge to main -> update this ledger
 - 90 atoms (9 p0 / 49 p1 / 32 p2), 88 fixed, 6466/6466 tests green. Commit `dd869331` on `kolm-finalized-pass`.
 - Report: see prior workflow result + docs/KOLM_WORKBENCH_AUDIT_2026-06-16.md.
 
-### Pass 0.5 — Close cross-lane wiring seams (SEAMS DONE; VERIFYING)
+### Pass 0.5 — Close cross-lane wiring seams (DONE + MERGED)
+- Seams closed, jsonl alias restored, curation-vs-lineage fixed, corpus-pollution bug fixed. Full suite (self-run) 6466 tests / 6430 pass / 0 fail / 36 skip. Commit `b0c5c42d`, FF-merged to main.
+
+### Pass 0.5 (archived note)
 - 4 agents closed all deferred seams (boot+gateway / distill default-path / planner+teams+vault+tunnel / CLI+TUI). All self-tests green.
 - First full-suite arbiter run FAILED (32 failures). First-pass "6466 green" was an import-order ARTIFACT, not reliable — always run the full suite myself.
 - FIX 1 (DONE): store.js rejected `KOLM_STORE_DRIVER='jsonl'` (dropped by Persistence rewrite; even main threw on it). Restored 'jsonl' as a valid alias -> 'json' core driver. Cleared 30/32 failures.
@@ -64,7 +67,41 @@ Then (main loop): full suite -> commit -> FF merge to main -> update this ledger
 
 ---
 
+## COMPONENT-SHARD WORKFLOW (reuse for every component 1-13)
+- Reusable scriptPath: `C:\Users\user\.claude\projects\C--Users-user-Desktop-kolmogorov-stack\f1860207-fd32-46f1-97d4-2c0721448483\workflows\scripts\kolm-finalized-component-wf_8947ff82-b94.js`
+- Launch component K: `Workflow({ scriptPath, args: { n: K, name: "<component name>", focus: "<focus text>", researchers: 36 } })`
+- Each shard: atomize -> 36 researchers/atom -> synth fan-in -> 10 deep-dives/atom -> derive(+critic) -> build (worktree-isolated, disjoint new modules) -> 3-lens adversarial verify -> integrate. Returns {atoms, atomStatus, builtFiles, flagged, integrate}.
+
+## PER-COMPONENT CHAINING PROTOCOL (do this on EVERY shard completion)
+1. Read the shard result. Note builtFiles + flagged atoms + integrate test result.
+2. Run the FULL suite: `node --test --test-concurrency=1 tests/*.test.js` (background). Arbiter — never trust a sub-report.
+3. If GREEN: `git add -A && git commit` (component K) on kolm-finalized-pass; FF-merge to main; update the status table row K -> DONE with commit; launch component K+1.
+4. If RED: dispatch a focused repair agent (root cause, no skips), re-run full suite. If green -> commit+merge. If still red after 2 repair rounds: keep work on branch (do NOT merge red to main), `git revert`/reset the regressing piece if it blocks others, mark row K -> PARTIAL with the reason, and STILL launch component K+1 (continue-log-finish).
+5. After component 13 (cohesion+completeness-critic): run full suite, final commit+merge, write the morning summary in this file, STOP (no deploy).
+
+## RATE-LIMIT TUNING (user decision 2026-06-16)
+- 36 researchers/atom x 5 atoms exceeded the API tokens-per-minute ceiling -> heavy backoff/throttle on component 1. Run stayed live and self-healing (retries, not crashes), just slow.
+- USER CHOSE: **24 researchers/atom** for components 2-13 (rate-safe; ~40 min/component). Keep DEEP=10.
+- ACTION: the script clamp is `Math.max(30, ...)` which FORCES >=30 — must change to allow 24 before launching component 2. Edit the reusable script: `NRESEARCH = Math.max(8, Math.min(50, C.researchers || 24))`. Do this AFTER component 1 is fully handled (editing it now would invalidate component 1's resume cache). Pass `researchers: 24` in args for 2-13.
+
+## V2 (args-free, rate-safe) — USE THIS GOING FORWARD
+- Bug found: `args` did NOT propagate to the workflow (component 1 ran as "Unnamed component" -> atomize wandered to generic kolm pillars instead of synthetic-data). Also hit rate limits at 36/atom.
+- FIX: new script `C:\Users\user\.claude\projects\C--Users-user-Desktop-kolmogorov-stack\f1860207-fd32-46f1-97d4-2c0721448483\workflows\scripts\kolm-finalized-component-v2.js` — args-free (component chosen by `const CIDX` near top, 1-based), 24 researchers/atom, atomize strictly scoped, 13 components embedded with focus.
+- Launch component K: Edit the file's `const CIDX = K`, then `Workflow({ scriptPath: <v2 path> })`. (resume with resumeFromRunId if a shard dies.)
+
+## COMPONENT 1 (off-spec) RESOLUTION (user: "review the work and add it if useful")
+- c1 ran off-topic (args bug): built recipe-synthesis-engine, kscore-gate-harness (conformal), sandbox-isolation/worker (ESCAPABLE - see docs/SECURITY-FINDING-sandbox-escape-2026-06-16.md), distillation-pipeline-c1, kolm-pack/*, nras-verifier(+py), receipt-export-registry. Wired default-ON: synthesis.js synthesizeStream->synthesizeRecipe (HAS legacy fallback via KOLM_SYNTH_ENGINE=0); artifact.js conformal gate (opt-in); server.js NRAS boot (env-gated); cli `distill upgrade`.
+- Review so far: synthesis.js change is well-built w/ fallback + preserved legacy path + maps to legacy shape. Escapable sandbox is NOT wired into any run path (inert). Provenance atom unwired/in-vitro + tautological CID test (low value as-is).
+- GATE: full suite `bdde72qau` running on the c1 tree. If GREEN -> keep useful work, commit c1 as a real component, FF merge. If RED -> fix/revert the offending piece (likely synthesis default-on) -> green -> commit.
+- Security finding captured for v2 component #2 to fix properly.
+
 ## NEXT ACTION
+Component 1 (Data Simulation) shard running at 36/atom: task `wgb9041ts`, run `wf_8947ff82-b94`. It is LIVE + self-healing through rate-limit backoff (~72% done as of 12:39). 
+On completion:
+1. Read result. If most atoms confirmed -> proceed (do NOT re-run component 1 at 24; accept its output). If atoms flagged from exhausted-retry failures -> `Workflow({scriptPath, resumeFromRunId:'wf_8947ff82-b94'})` to re-run ONLY the failed agents (cache returns the rest).
+2. Then PER-COMPONENT CHAINING PROTOCOL (full suite -> commit -> FF merge).
+3. THEN edit the reusable script clamp to allow 24, and launch component 2 (Privacy / Sensitive-Info Isolation from Hyperscalers) with args.researchers=24.
+- Minimize my own Bash/agent calls while a shard runs (they compete for the shared API quota and worsen throttling).
 Waiting on the 4 seam-closing agents (Pass 0.5). When all 4 report:
 1. Run the full suite (`node --test --test-concurrency=1 tests/*.test.js`).
 2. Repair any failures (root cause, no skips).

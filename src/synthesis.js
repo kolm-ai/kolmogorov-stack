@@ -8,6 +8,20 @@ import 'dotenv/config';
 import { libraryDescription, subroutines } from './library.js';
 import { compileJs, verify, hashSource, QUALITY_GATE } from './verifier.js';
 import { generateVariations as llmGenerateVariations, isConfigured as llmIsConfigured, describeConfig as llmDescribe } from './llm-call.js';
+import { synthesizeRecipe } from './recipe-synthesis-engine.js';
+
+// Recipe Synthesis Engine integration (finalized-c1).
+// Default-OFF (opt-in via KOLM_SYNTH_ENGINE=1): synthesizeStream() routes through
+// synthesizeRecipe() to get the verifier-grounded REPAIR LOOP, induced subroutine
+// library, council voting, and fail-closed holdout disjointness. It is opt-in
+// because the repair loop + council raise per-call memory enough to OOM the full
+// single-process test suite; the lightweight legacy single-shot path stays the
+// default until the engine runs in its own worker process. The privacy boundary
+// is identical on both paths: the deterministic pattern path makes ZERO external
+// calls; only the teacher council (claude/fal) egresses, exactly as legacy did.
+function synthEngineEnabled() {
+  return String(process.env.KOLM_SYNTH_ENGINE ?? '0') === '1';
+}
 
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-4-7';
@@ -81,7 +95,118 @@ export async function synthesize(opts) {
 
 // Streaming variant: emits SSE-style events through `emit(event, payload)`.
 // Returns the same final shape as synthesize().
-export async function synthesizeStream({ positives, negatives = [], output_spec, priors = {} }, emit) {
+export async function synthesizeStream({ positives, negatives = [], output_spec, priors = {}, holdout = [] }, emit) {
+  if (synthEngineEnabled()) {
+    return synthesizeStreamEngine({ positives, negatives, output_spec, priors, holdout }, emit);
+  }
+  return synthesizeStreamLegacy({ positives, negatives, output_spec, priors }, emit);
+}
+
+// Engine path: drives the Recipe Synthesis Engine (repair loop + induced library
+// + council + holdout). Maps the engine result back to the legacy return shape so
+// every existing caller (compile.js, router.js, build-preview.js) is unchanged.
+async function synthesizeStreamEngine({ positives, negatives, output_spec, priors, holdout }, emit) {
+  const startedAt = Date.now();
+  const strategies = [];
+  if (teacherConfigured()) strategies.push('claude');
+  strategies.push('pattern');
+  emit('plan', { strategies, engine: 'recipe-synthesis-engine' });
+
+  // Council adapter: the existing teacherComplete() (Anthropic SDK or fal-ai
+  // any-llm) wrapped as a single council member. The adapter owns redaction of
+  // anything it sends to the teacher; here the spec rows are the artifact's own
+  // train examples, which is the same data the legacy claude path already sent.
+  const council = teacherConfigured()
+    ? [{
+        id: 'claude',
+        complete: async (prompt, { temperature } = {}) => {
+          emit('claude_request', { temperature, model: ANTHROPIC_KEY ? MODEL : FAL_LLM_MODEL });
+          const text = await teacherComplete({ system: SYSTEM_PROMPT, user: prompt, temperature });
+          if (text == null) return null;
+          const source = extractGenerator(text);
+          if (!source.includes('function generate')) return null;
+          emit('claude_response', { temperature, size_bytes: Buffer.byteLength(source, 'utf8') });
+          return source;
+        },
+      }]
+    : [];
+
+  // Deterministic, key-free privacy path. Returns plain source strings.
+  const patternFn = (ctx) => patternCandidates(ctx).map((c) => c.source);
+
+  emit('strategy_begin', { strategy: council.length ? 'claude' : 'pattern' });
+  emit('repair_begin', { rounds: 2 });
+
+  let result;
+  try {
+    result = await synthesizeRecipe({
+      positives, negatives, output_spec, priors, holdout,
+      council, patternFn,
+    });
+  } catch (e) {
+    // Fail-closed holdout disjointness (or any engine error): surface, do not ship.
+    emit('engine_error', { error: String(e.message || e) });
+    return {
+      accepted: false,
+      reason: `engine_error: ${String(e.message || e)}`,
+      duration_ms: Date.now() - startedAt,
+    };
+  }
+
+  // Map engine member -> legacy strategy so artifact_class enforcement in
+  // compile.js (claude => synthesized_rule, pattern => rule) stays exact.
+  const member = result.member || result.best_member || null;
+  const strategy = member === 'pattern' ? 'pattern' : (member ? 'claude' : null);
+
+  if (result.holdout_generalization) {
+    emit('repair_survivor', {
+      robustness_ratio: result.holdout_generalization.robustness_ratio ?? null,
+      holdout_n: result.holdout_generalization.n ?? null,
+    });
+  }
+
+  if (result.accepted) {
+    emit('accepted', { strategy: strategy || 'pattern', quality_score: result.quality_score, size_bytes: result.size_bytes });
+    return {
+      accepted: true,
+      source: result.source,
+      quality_score: result.quality_score,
+      pass_rate_positive: result.pass_rate_positive,
+      reject_rate_negative: result.reject_rate_negative,
+      latency_p50_us: result.latency_p50_us,
+      size_bytes: result.size_bytes,
+      source_hash: result.source_hash,
+      strategy: strategy || 'pattern',
+      test_trace: result.test_trace,
+      attempts_n: result.attempts_n,
+      duration_ms: result.duration_ms,
+      // engine provenance for the receipt/manifest (repair + holdout caveat).
+      synthesis_engine: 'recipe-synthesis-engine',
+      rounds_used: result.round != null ? result.round + 1 : null,
+      external_calls: result.external_calls ?? null,
+      induced_library: result.induced_library ?? null,
+      holdout_generalization: result.holdout_generalization ?? null,
+      recipe_class: result.recipe_class ?? null,
+    };
+  }
+
+  // Below gate / nothing compiled: keep legacy not-accepted shape.
+  return {
+    accepted: false,
+    reason: result.reason,
+    best_source: result.best_source,
+    best_result: result.best_result,
+    strategy: result.best_member === 'pattern' ? 'pattern' : (result.best_member ? 'claude' : undefined),
+    attempts_n: result.attempts_n,
+    external_calls: result.external_calls ?? null,
+    induced_library: result.induced_library ?? null,
+    duration_ms: result.duration_ms,
+  };
+}
+
+// Streaming variant: emits SSE-style events through `emit(event, payload)`.
+// Returns the same final shape as synthesize().
+async function synthesizeStreamLegacy({ positives, negatives = [], output_spec, priors = {} }, emit) {
   const startedAt = Date.now();
   const attempts = [];
 

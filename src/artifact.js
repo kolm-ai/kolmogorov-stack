@@ -67,6 +67,9 @@ import { validateSupersessionBlock, validateDriftReport, buildSupersessionBlock,
 import { RECIPE_CLASSES, validateRecipeClass, rollupArtifactClass, validateArtifactClass, CLASS_DESCRIPTIONS, RECIPE_SOURCE_TYPES, inferSourceType, validateRecipeSourceType } from './recipe-class.js';
 import { hashIr } from './workflow-ir.js';
 import { computeKScore as computeKScoreFromKscoreModule } from './kscore.js';
+// finalized-c1 — conformal-bounded ship gate overlay (opt-in, KOLM_KSCORE_CONFORMAL=1).
+// Stricter-only + fail-closed: can never flip ships=false -> true.
+import { conformalBoundedGate } from './kscore-gate-harness.js';
 import { verifyAttestation, manifestBlock as ccManifestBlock, STATES as CC_STATES } from './confidential-compute.js';
 import { loadSignerKeyFromEnv as loadEd25519SignerFromEnv, loadOrCreateDefaultSigner as loadEd25519DefaultSigner, buildSignatureBlock as buildEd25519Block } from './ed25519.js';
 // Model-signing sidecars (model-signing-standards). emitArtifactAttestation
@@ -369,10 +372,45 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // passes allow_below_gate=true (which gets stamped on the manifest so the
   // verifier and downstream procurement gates can flag it). Without this
   // check, the gate is a comment, not a contract.
+  // finalized-c1 — OPT-IN conformal-bounded ship gate overlay (KOLM_KSCORE_CONFORMAL=1).
+  // The kscore-gate-harness can ONLY make the gate STRICTER and FAILS CLOSED:
+  // when a calibration-residual pool is supplied it requires the conformal LOWER
+  // bound (not just the point estimate) to clear the gate; an undercalibrated /
+  // missing pool yields 'abstain' which we treat as a NON-ship. This never flips
+  // a ships=false to true, so the moat is preserved. The decision is stamped on
+  // the k_score so the manifest/receipt records the bounded verdict.
+  let ship_decision = null;
+  if (k_score && String(process.env.KOLM_KSCORE_CONFORMAL || '') === '1') {
+    try {
+      const g = typeof k_score.gate === 'number' ? k_score.gate : 0.85;
+      const cg = conformalBoundedGate({
+        precomputed: { composite: k_score.composite },
+        calibrationResiduals: Array.isArray(k_score.calibration_residuals) ? k_score.calibration_residuals : [],
+        gate: g,
+      });
+      if (cg.ok) {
+        ship_decision = {
+          decision: cg.decision, point_ships: cg.point_ships,
+          interval: cg.interval, n_cal: cg.n_cal,
+          confidence_bounded: cg.confidence_bounded, version: cg.version,
+        };
+        // Stricter-only: if the point gate passed but the bounded gate does not
+        // SHIP, downgrade ships to false (fail-closed) unless overridden.
+        if (k_score.ships !== false && cg.decision !== 'ship') {
+          k_score = { ...k_score, ships: false, conformal_abstain_reason: cg.decision };
+        }
+      }
+    } catch (e) {
+      // Fail-closed: a harness error must not silently ship. Downgrade to a block.
+      ship_decision = { decision: 'abstain', error: String((e && e.message) || e) };
+      if (k_score.ships !== false) k_score = { ...k_score, ships: false, conformal_abstain_reason: 'harness_error' };
+    }
+  }
   if (k_score && k_score.ships === false && !allow_below_gate) {
     const composite = typeof k_score.composite === 'number' ? k_score.composite : 0;
     const gate = typeof k_score.gate === 'number' ? k_score.gate : 0.85;
-    throw new Error(`k_score below ship gate: composite=${composite}, gate=${gate}. ` +
+    const why = k_score.conformal_abstain_reason ? ` (conformal gate: ${k_score.conformal_abstain_reason})` : '';
+    throw new Error(`k_score below ship gate: composite=${composite}, gate=${gate}${why}. ` +
       `Pass allow_below_gate=true to override; the manifest will record ship_gate_overridden=true.`);
   }
   // Default class is 'rule' - the floor. Wave 151 adds 'synthesized_rule' and
@@ -1333,6 +1371,11 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     ...(_w786_badge ? { sustainability_badge: _w786_badge } : {}),
     k_score: k_score || null,  // patched after zipping for the size_bytes axis
     ship_gate_overridden: allow_below_gate === true ? true : undefined,
+    // finalized-c1 — conformal ship-gate verdict. Conditional spread (W460
+    // pattern): absent when the overlay is off so legacy artifacts stay
+    // byte-identical; present only when KOLM_KSCORE_CONFORMAL=1 produced a
+    // bounded decision. Operational metadata, not folded into artifact_hash.
+    ...(ship_decision ? { ship_decision } : {}),
     license: normalizeLicense(license),
     // Wave 161 (Q+8) - signature policy. Every modern artifact ships with
     // Ed25519 by default (Wave 149); the policy field records this stance so

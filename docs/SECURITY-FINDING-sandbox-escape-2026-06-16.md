@@ -1,0 +1,55 @@
+# P0 SECURITY FINDING — Recipe sandbox escape (host filesystem read)
+
+Found by the Component-1 adversarial verify panel (2026-06-16). PRESERVED here so it is
+fixed properly in the Privacy/Security component (#2), independent of whether the
+component-1 build is kept.
+
+## Claim (proven live by the verifier)
+The default recipe sandbox is escapable. `vm` context nulls `Function` but the host
+`Function` constructor is reachable through the prototype chain:
+
+- `({}).constructor.constructor` / `Object.constructor` / `[].constructor.constructor`
+  reach the REAL host `Function` constructor (NOT nulled).
+- `Object.constructor('return globalThis')()` returns the worker realm
+  (keys: global, setImmediate, setTimeout, fetch, crypto, ...).
+- `Object.constructor('return process')()` returns a live `process`:
+  `process.platform`, `process.pid`, `process.cwd()` (real host path), `process.dlopen`,
+  `process._linkedBinding`, `process.binding`.
+- FULL HOST FS READ proven: a recipe ran
+  `process.binding('fs').readFileUtf8(process.cwd()+'/package.json', 0)` and got the
+  real file contents. `process.dlopen` also enables loading arbitrary native addons.
+
+## Why the current defenses do not hold
+- `vm` is NOT a security boundary (Node docs). `worker_threads` is NOT a security boundary
+  against hostile code — same OS process, same filesystem, a real `process`/`require`-capable realm.
+- The egress monitor patches global `fetch` (it DID block an escaped fetch), but
+  `process.binding('fs')` read/write bypasses the egress monitor entirely.
+- The "constructor-escape denied" test gave FALSE assurance: it only passed because the
+  worker was spawned with `env:{}` (empty `process.env`), conflating "env happens to be
+  empty" with "escape denied." It never probed `process.binding`/`process.cwd`.
+- The genuinely-strong `isolated-vm` path is env-gated OFF by default and effectively absent.
+
+## Impact
+Recipes are teacher-LLM-authored or pattern-induced JS executed on the operator's / a
+customer's machine (`kolm run`, compile-time verification). A hostile/poisoned recipe can
+read the host filesystem (secrets, keys, customer data) and load native code — directly
+violating the "sensitive data never leaves / untrusted code is contained" principle.
+
+## Required fix (for component #2 Privacy/Security — build for real, do not stub)
+1. Make `isolated-vm` (separate V8 isolate, real memory/CPU boundary) the DEFAULT execution
+   backend for untrusted recipes; ship it (not env-gated off). Fall back to a hardened
+   subprocess with seccomp/landlock (Linux) / Job Object (Win) / sandbox-exec (mac) only
+   where isolated-vm is unavailable — never to the escapable in-process vm.
+2. If an in-process path must exist, neutralize the constructor chain (freeze
+   `Object/Function/Array .prototype.constructor`, strip `process`/`require`/`binding`
+   from the realm) AND drop OS capabilities so even a successful escape reaches nothing
+   (no fs, no net, no native addon load).
+3. Replace the false "escape-denied" test with real probes:
+   `Object.constructor('return process')()`, `process.binding('fs')`, `process.cwd()`,
+   `process.dlopen` — assert each is unreachable/throws.
+4. Defense-in-depth: keep the egress monitor, but add an fs/syscall monitor or rely on the
+   OS sandbox so `process.binding` cannot exfiltrate.
+
+## Status
+Open. To be fixed in finalized-pass component #2 (Privacy / Sensitive-Info Isolation).
+Captured 2026-06-16 from workflow wf_8947ff82-b94 verify panel.

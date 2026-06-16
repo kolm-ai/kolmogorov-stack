@@ -21902,6 +21902,116 @@ function distillStrategyProfile(args) {
   };
 }
 
+// finalized-c1 — `kolm distill upgrade` : recipe-tier -> model-tier upgrade with
+// the HARD teacher-fidelity ship contract. The student cannot ship until it
+// provably reaches a declared fraction of the teacher's accuracy on the SAME
+// disjoint holdout. Library-only orchestrator (plan/run split) so the contract +
+// privacy boundary are previewed BEFORE any GPU-hour is spent.
+//
+//   --seeds <file.jsonl>     {input,output[,candidates]} rows (required to plan)
+//   --teacher <slug>         teacher model slug (privacy boundary classifies it)
+//   --student-base <name>    student backbone (default qwen-0.5b)
+//   --objective <o>          seq_kd_rejection (default) | logit_kd | on_policy_kd
+//   --min-fidelity <f>       declared T floor (default 0.90; floor 0.50)
+//   --quant-export <t>       awq|gptq|nvfp4|gguf|none (default none)
+//   --student-acc <f> --teacher-acc <f>   measured holdout accuracies -> finalize
+//   --run                    stage a run dir (no GPU spend; fail-loud if deferred)
+//   --json                   machine-readable envelope
+async function cmdDistillUpgrade(args) {
+  const wantJson = args.includes('--json');
+  const {
+    planDistillation, runDistillation, finalizeShip,
+  } = await import('../src/distillation-pipeline-c1.js');
+
+  const seedsPath = pickFlag(args, '--seeds') || pickFlag(args, '-s');
+  let rows = [];
+  if (seedsPath) {
+    try {
+      const raw = fs.readFileSync(seedsPath, 'utf8');
+      rows = raw.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => JSON.parse(l));
+    } catch (e) {
+      console.error(`error: could not read --seeds ${seedsPath}: ${String(e.message || e)}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+  }
+  if (!rows.length) {
+    console.error('error: kolm distill upgrade requires --seeds <file.jsonl> with at least one {input,output} row');
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  const teacher = pickFlag(args, '--teacher') || null;
+  const student_base = pickFlag(args, '--student-base') || 'qwen-0.5b';
+  const objective = pickFlag(args, '--objective') || 'seq_kd_rejection';
+  const minFidRaw = pickFlag(args, '--min-fidelity');
+  const min_fidelity = minFidRaw != null ? Number(minFidRaw) : undefined;
+  const quant_export = pickFlag(args, '--quant-export') || 'none';
+
+  let plan;
+  try {
+    plan = planDistillation({ rows, objective, teacher, student_base, min_fidelity, quant_export });
+  } catch (e) {
+    // Fail-closed holdout disjointness or privacy boundary throw.
+    if (wantJson) console.log(JSON.stringify({ ok: false, error: String(e.message || e) }, null, 2));
+    else console.error(`upgrade blocked: ${String(e.message || e)}`);
+    process.exit(EXIT.EXECUTION);
+  }
+
+  // Print the privacy boundary verdict + fidelity contract BEFORE any spend.
+  if (!wantJson) {
+    console.log(`distill upgrade plan (${plan.version})`);
+    console.log(`  objective:        ${plan.objective}`);
+    console.log(`  teacher:          ${plan.teacher || '(none)'} [${plan.teacher_source}]`);
+    console.log(`  student_base:     ${plan.student_base}`);
+    console.log(`  split:            ${JSON.stringify(plan.split)}`);
+    console.log(`  holdout_disjoint: ${plan.holdout_disjoint_proof?.disjoint ? 'PROVEN' : 'NO'}`);
+    const pb = plan.privacy_boundary || {};
+    console.log(`  privacy_boundary: ${pb.ok ? 'OK' : 'BLOCKED'} (${pb.boundary || 'n/a'}, egress=${pb.external_egress})`);
+    console.log(`  fidelity_floor:   T >= ${plan.fidelity_contract?.min_fidelity} (enforced at ship)`);
+    if (!plan.ok) console.log('  PLAN NOT OK: privacy boundary blocked — fix before GPU spend.');
+  }
+  if (!plan.ok) {
+    if (wantJson) console.log(JSON.stringify({ ok: false, plan }, null, 2));
+    process.exit(EXIT.EXECUTION);
+  }
+
+  let runResult = null;
+  if (args.includes('--run')) {
+    runResult = await runDistillation(plan, {});
+    if (!wantJson) {
+      console.log(`  run_dir:          ${runResult.run_dir}`);
+      if (runResult.deferred) {
+        console.log(`  trainer DEFERRED: ${runResult.install_hint || 'GPU/torch not available here'}`);
+        console.log('  (staged for the worker/compile pipeline; no gradient step ran here)');
+      }
+    }
+  }
+
+  // finalizeShip — enforce the hard T contract when measured accuracies are given.
+  const studentAccRaw = pickFlag(args, '--student-acc');
+  const teacherAccRaw = pickFlag(args, '--teacher-acc');
+  let ship = null;
+  if (studentAccRaw != null && teacherAccRaw != null) {
+    ship = finalizeShip({
+      plan,
+      student_holdout_accuracy: Number(studentAccRaw),
+      teacher_holdout_accuracy: Number(teacherAccRaw),
+      quant_export_result: runResult ? runResult.quant_export : null,
+    });
+    if (!wantJson) {
+      console.log(`ship decision: ${ship.ships ? 'SHIP' : 'BLOCKED'}`);
+      console.log(`  teacher_fidelity: ${ship.fidelity_contract?.teacher_fidelity} (floor ${ship.fidelity_contract?.min_fidelity}) -> ${ship.fidelity_contract?.verdict}`);
+      if (ship.blockers?.length) console.log(`  blockers: ${ship.blockers.join(', ')}`);
+    }
+  } else if (!wantJson) {
+    console.log('ship decision: PENDING — pass --student-acc and --teacher-acc (measured on the SAME holdout) to enforce the T contract.');
+  }
+
+  if (wantJson) {
+    console.log(JSON.stringify({ ok: true, plan, run: runResult, ship }, null, 2));
+  }
+  if (ship && !ship.ships) process.exit(EXIT.EXECUTION);
+}
+
 async function cmdDistillStrategy(args) {
   const wantJson = args.includes('--json');
   const wantSummary = args.includes('--summary');
@@ -22180,6 +22290,10 @@ async function cmdDistill(args) {
     return;
   }
   if (args[0] === 'strategy') return cmdDistillStrategy(args.slice(1));
+  // finalized-c1 recipe-tier -> model-tier UPGRADE with the hard teacher-fidelity
+  // ship contract. plan -> run -> finalizeShip; prints the privacy + fidelity
+  // verdicts BEFORE any GPU spend (the plan/run split is for exactly that preview).
+  if (args[0] === 'upgrade') return cmdDistillUpgrade(args.slice(1));
   // W787 distill efficiency subverb.
   if (args[0] === 'efficiency') return cmdDistillEfficiency(args.slice(1));
   // W720 distill improve subverb (local self-improve loop).
