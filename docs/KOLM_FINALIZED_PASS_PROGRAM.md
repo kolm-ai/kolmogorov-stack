@@ -51,8 +51,8 @@ Then (main loop): full suite -> commit -> FF merge to main -> update this ledger
 ### Finalized pass — component shards (PENDING)
 | # | Component | Status | Commit | Notes/Partials |
 |---|---|---|---|---|
-| 1 | Data Simulation / Synthetic Data Generation | pending | - | self-instruct/evol-instruct/persona/programmatic + verifier-filtered |
-| 2 | Privacy / Sensitive-Info Isolation from Hyperscalers | pending | - | local teacher, NER-PII, DP, policy, confidential-compute, PROOF harness |
+| 1 | Data Simulation / Synthetic Data Generation | DONE (merged be56e917) | be56e917 | 4/4 atoms confirmed; suite 6068/0. gatedSynthesize (fails closed never-to-hyperscaler) + Magpie/Auto-Evol self-synth + verifier-filtered active loop + decontam; routes env-gated KOLM_GATED_SYNTH |
+| 2 | Privacy / Sensitive-Info Isolation from Hyperscalers | BLOCKED — monthly spend limit (run wf_8ff5a84c-0a9, 2026-06-16) | - | Atomize SUCCEEDED (5 atoms below); all research/build/verify/integrate failed on spend cap. 0 files built. Resume with `resumeFromRunId: wf_8ff5a84c-0a9` once limit raised — atomize returns cached. Atoms: (1) default-hard-sandbox-isolated-vm [+FIX P0 escape], (2) real-escape-probe-test-suite, (3) ner-grade-pii-detection-reversible-redaction, (4) dp-training-dp-sgd-pate, (5) provable-no-cross-boundary-with-attestation |
 | 3 | Training-Data Valuation & Selection (real math) | pending | - | DSIR, influence fns, data Shapley, LESS/S2L, SemDeDup, scaling-law budget |
 | 4 | Distillation Theory & Trainers | pending | - | GKD/on-policy/reverse-KL, RLVR/GRPO, seq-KD, spec-decode |
 | 5 | Quantization Frontier | pending | - | GPTQ/AWQ/AQLM/QuIP#/EXL2/EXL3/HQQ/QAT, calib, quant-aware K |
