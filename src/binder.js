@@ -54,6 +54,7 @@ import { hashIr } from './workflow-ir.js';
 import { verifyAttestation, STATES as CC_STATES } from './confidential-compute.js';
 import { verifySignatureBlock as verifyEd25519Block } from './ed25519.js';
 import { verifySigstoreBundle } from './sigstore.js';
+import { verifyArtifactProvenanceSidecarsAsync } from './artifact-provenance-verify.js';
 import { validateArtifactClass, classBadge } from './recipe-class.js';
 import { validateExportBlock } from './export-provenance.js';
 import { validateExternalHoldoutBlock, hashHoldoutFile, resolveHoldoutPath, findInCatalog } from './external-holdout.js';
@@ -398,6 +399,27 @@ async function verifyArtifact(bundle) {
         name: 'Receipt signature (Sigstore bundle)',
         status: 'warn',
         detail: 'no signature_sigstore block - artifact built before Wave 150 or with KOLM_SIGSTORE_DISABLE=1; Ed25519 stands in as the public-key signature',
+      });
+    }
+
+    const sidecarResult = await verifyArtifactProvenanceSidecarsAsync(bundle.artifact_path, { requireSidecars: false });
+    if (sidecarResult.ok && sidecarResult.present) {
+      checks.push({
+        name: 'Provenance sidecars (SLSA/OMS, signer-derived)',
+        status: 'pass',
+        detail: `SLSA + OMS sidecars verify from receipt Ed25519 key (${(sidecarResult.key_fingerprint || '?').slice(0, 12)}...) over ${sidecarResult.subjects_total} artifact member(s)`,
+      });
+    } else if (sidecarResult.ok) {
+      checks.push({
+        name: 'Provenance sidecars (SLSA/OMS, signer-derived)',
+        status: 'warn',
+        detail: sidecarResult.reason || 'artifact has no SLSA/OMS provenance sidecars; build with current C7 artifact path to add them',
+      });
+    } else {
+      checks.push({
+        name: 'Provenance sidecars (SLSA/OMS, signer-derived)',
+        status: 'fail',
+        detail: sidecarResult.reason || 'SLSA/OMS provenance sidecar verification failed',
       });
     }
 
@@ -2411,6 +2433,7 @@ const STRUCTURED_CHECK_MAP = [
   [/^Manifest signature/i,                 'signature_invalid',          'signature.sig'],
   [/^Receipt signature \(Ed25519/i,        'signature_invalid',          'receipt.signature_ed25519'],
   [/^Receipt signature \(Sigstore/i,       'signature_invalid',          'receipt.signature_sigstore'],
+  [/^Provenance sidecars/i,                'signature_invalid',          'provenance.intoto.dsse.json'],
   [/^Audit chain/i,                        'signature_invalid',          'receipt.chain'],
   [/^Content identifier \(CID\)/i,         'manifest_hash_mismatch',     'manifest.cid'],
   [/^Manifest hashes/i,                    'manifest_hash_mismatch',     'manifest.hashes'],

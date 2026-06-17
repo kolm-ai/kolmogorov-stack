@@ -409,7 +409,8 @@ export function emitArtifactAttestation({
 
   const subjects = [];
   if (subjectDigests && typeof subjectDigests === 'object' && Object.keys(subjectDigests).length > 0) {
-    for (const [name, sha256] of Object.entries(subjectDigests)) {
+    for (const name of Object.keys(subjectDigests).sort()) {
+      const sha256 = subjectDigests[name];
       if (typeof sha256 === 'string' && HEX64_RE.test(sha256)) {
         subjects.push({ name, digest: { sha256 } });
       }
