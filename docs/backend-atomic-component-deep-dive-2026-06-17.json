@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 676,
-    "components_without_direct_test_reference": 153,
+    "test_referenced_components": 677,
+    "components_without_direct_test_reference": 152,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -68,7 +68,7 @@
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 399,
       "distribution_or_worker_surface": 169,
-      "environment_configuration_boundary": 307,
+      "environment_configuration_boundary": 308,
       "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
       "large_component_contract_risk": 37,
@@ -24397,24 +24397,27 @@
       "surface": "core-backend",
       "domain": "identity_access",
       "language": "javascript",
-      "sha256": "6184003160a874873fdbb3dceac5c60a7bf1675b36519444dfdc094e57b4ee65",
+      "sha256": "72c5c38ad87939af49a849467e7273548082ba176b0d86d50a422040b70e8153",
       "metrics": {
-        "bytes": 10566,
-        "lines": 252,
-        "imports": 4,
-        "exports": 3,
+        "bytes": 13952,
+        "lines": 352,
+        "imports": 5,
+        "exports": 4,
         "routes": 0,
-        "env_refs": 0,
+        "env_refs": 2,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 2,
         "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave658-forge-inspect-contract.test.js"
+      ],
       "risk_signals": [
         "auth_or_tenant_boundary",
         "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
         "network_or_provider_boundary"
       ],
       "priority_score": 6,
@@ -24442,7 +24445,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
       "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
       "suggested_verification": [
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
@@ -46008,6 +46011,7 @@
       },
       "test_refs": [
         "tests/red-team.test.js",
+        "tests/wave658-forge-inspect-contract.test.js",
         "tests/wave809-structured-output.test.js",
         "tests/wave921-autopilot-stats.test.js"
       ],
@@ -46127,6 +46131,7 @@
       },
       "test_refs": [
         "tests/red-team.test.js",
+        "tests/wave658-forge-inspect-contract.test.js",
         "tests/wave809-structured-output.test.js",
         "tests/wave921-autopilot-stats.test.js"
       ],
@@ -46189,7 +46194,8 @@
       "test_refs": [
         "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
         "tests/offline-inclusion-proof.test.js",
-        "tests/sota-capturedata.test.js"
+        "tests/sota-capturedata.test.js",
+        "tests/wave658-forge-inspect-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",

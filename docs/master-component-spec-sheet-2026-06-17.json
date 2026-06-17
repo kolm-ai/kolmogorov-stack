@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 91.4,
-    "frontier_product_score": 68.8,
+    "local_engineering_score": 91.5,
+    "frontier_product_score": 68.9,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 676,
-    "direct_test_reference_pct": 81.5,
-    "components_without_direct_test_reference": 153,
+    "direct_test_referenced_components": 677,
+    "direct_test_reference_pct": 81.7,
+    "components_without_direct_test_reference": 152,
     "high_priority_components": 47,
     "high_priority_direct_test_referenced": 47,
     "high_priority_direct_test_reference_pct": 100,
@@ -22557,12 +22557,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 10566,
-          "lines": 252,
-          "imports": 4,
-          "exports": 3,
+          "bytes": 13952,
+          "lines": 352,
+          "imports": 5,
+          "exports": 4,
           "routes": 0,
-          "env_refs": 0,
+          "env_refs": 2,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 2,
@@ -22572,11 +22572,12 @@
         "risk_signals": [
           "auth_or_tenant_boundary",
           "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
           "network_or_provider_boundary"
         ],
         "priority_score": 6,
         "priority_band": "medium",
-        "sha256": "6184003160a874873fdbb3dceac5c60a7bf1675b36519444dfdc094e57b4ee65"
+        "sha256": "72c5c38ad87939af49a849467e7273548082ba176b0d86d50a422040b70e8153"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -22584,18 +22585,18 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave658-forge-inspect-contract.test.js"
+        ],
         "category_links": [],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
         "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
         "suggested_verification": [
           "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep policy_as_data_rbac_sso_and_key_lifecycle_tests current."
     },
     {
       "path": "src/format-governance-packet.js",
@@ -41088,6 +41089,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/red-team.test.js",
+          "tests/wave658-forge-inspect-contract.test.js",
           "tests/wave809-structured-output.test.js",
           "tests/wave921-autopilot-stats.test.js"
         ],
@@ -41186,6 +41188,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/red-team.test.js",
+          "tests/wave658-forge-inspect-contract.test.js",
           "tests/wave809-structured-output.test.js",
           "tests/wave921-autopilot-stats.test.js"
         ],
@@ -41238,7 +41241,8 @@
         "direct_test_refs": [
           "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
           "tests/offline-inclusion-proof.test.js",
-          "tests/sota-capturedata.test.js"
+          "tests/sota-capturedata.test.js",
+          "tests/wave658-forge-inspect-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",

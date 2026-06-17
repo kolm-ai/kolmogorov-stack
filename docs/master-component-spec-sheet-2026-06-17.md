@@ -6,11 +6,11 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 
 ## How Close To Perfect
 
-- Local engineering perfection: **91.4/100**
-- Frontier/product perfection: **68.8/100**
+- Local engineering perfection: **91.5/100**
+- Frontier/product perfection: **68.9/100**
 - Atomic components inventoried: **829**
 - Atomic deep dives complete: **100%**
-- Direct test referenced: **676/829 (81.5%)**
+- Direct test referenced: **677/829 (81.7%)**
 - High-priority direct test referenced: **47/47 (100%)**
 - Readiness closed locally: **49/57 (86%)**
 - SOTA categories still carrying critical work: **10/16**

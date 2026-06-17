@@ -21,8 +21,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import https from 'node:https';
+import os from 'node:os';
 
 export const INSPECT_VERSION = 'forge-inspect-v1';
+const MAX_HF_CONFIG_BYTES = 2 * 1024 * 1024;
+const HF_MODEL_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,95}(\/[A-Za-z0-9][A-Za-z0-9._-]{0,95})?$/;
 
 // Known MoE families. Used as fallback when config.json doesn't say "moe"
 // explicitly but the architecture name implies it.
@@ -119,38 +122,110 @@ function activeParamsB(config) {
   return Math.round((attn + activeMlp + embed) / 1e9 * 100) / 100;
 }
 
+function validateHfModelId(modelId) {
+  if (!modelId || typeof modelId !== 'string') {
+    throw new Error('hf_model_id_required');
+  }
+  const id = modelId.trim();
+  if (id.length > 256) throw new Error('hf_model_id_too_long');
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(id)) throw new Error('hf_model_id_must_not_be_url');
+  if (id.includes('\\') || id.startsWith('/') || id.includes('..')) throw new Error('hf_model_id_unsafe_path');
+  if (!HF_MODEL_ID_RE.test(id)) throw new Error('hf_model_id_invalid');
+  return id;
+}
+
+function isTrustedHfHost(hostname) {
+  const host = String(hostname || '').toLowerCase();
+  return host === 'huggingface.co'
+    || host.endsWith('.huggingface.co')
+    || host === 'hf.co'
+    || host.endsWith('.hf.co');
+}
+
+function trustedRedirectUrl(location, baseUrl) {
+  const next = new URL(location, baseUrl);
+  if (next.protocol !== 'https:') throw new Error('hf_redirect_must_be_https');
+  if (!isTrustedHfHost(next.hostname)) throw new Error('hf_untrusted_redirect_host');
+  return next.toString();
+}
+
+function defaultHfCacheDir() {
+  const home = process.env.HOME || process.env.USERPROFILE || os.homedir() || process.cwd();
+  return path.join(home, '.cache', 'huggingface', 'hub');
+}
+
+function findCachedHfConfig(modelId, opts = {}) {
+  const cacheDir = opts.cacheDir ? path.resolve(opts.cacheDir) : defaultHfCacheDir();
+  const modelDir = path.join(cacheDir, `models--${modelId.replace(/\//g, '--')}`, 'snapshots');
+  if (!fs.existsSync(modelDir)) return null;
+  const snapshots = fs.readdirSync(modelDir)
+    .map((name) => {
+      const configPath = path.join(modelDir, name, 'config.json');
+      if (!fs.existsSync(configPath)) return null;
+      const st = fs.statSync(configPath);
+      return { configPath, mtimeMs: st.mtimeMs };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+  if (snapshots.length === 0) return null;
+  return {
+    config: JSON.parse(fs.readFileSync(snapshots[0].configPath, 'utf8')),
+    path: snapshots[0].configPath,
+  };
+}
+
 /**
  * Fetch HuggingFace config.json without depending on `huggingface_hub`.
  * Falls back to local cache at ~/.cache/huggingface/hub if network unavailable.
  */
-function fetchHfConfig(modelId) {
+function fetchHfConfig(modelId, opts = {}) {
+  const safeModelId = validateHfModelId(modelId);
+  const httpsGet = opts.httpsGet || https.get;
+  const maxBytes = opts.maxBytes || MAX_HF_CONFIG_BYTES;
+  const timeoutMs = opts.timeoutMs || 8000;
   // Follow up to 5 redirects (HF can chain main → CDN → blob). All 3xx
   // statuses are treated as redirects (301/302/303/307/308) because HF
   // returns 307 for the main resolve URL when content is on the CDN.
   const fetchOnce = (url, hops) => new Promise((resolve, reject) => {
     if (hops > 5) { reject(new Error('hf_redirect_loop')); return; }
-    const req = https.get(url, { timeout: 8000 }, (res) => {
+    const req = httpsGet(url, { timeout: timeoutMs }, (res) => {
       const sc = res.statusCode;
       if (sc >= 300 && sc < 400 && res.headers.location) {
         // Consume body to free socket before following the redirect
         res.resume();
-        const nextUrl = res.headers.location.startsWith('http')
-          ? res.headers.location
-          : new URL(res.headers.location, url).toString();
+        let nextUrl;
+        try {
+          nextUrl = trustedRedirectUrl(res.headers.location, url);
+        } catch (e) {
+          reject(e);
+          return;
+        }
         fetchOnce(nextUrl, hops + 1).then(resolve, reject);
         return;
       }
       if (sc !== 200) { reject(new Error(`hf_status_${sc}`)); return; }
       let body = '';
-      res.on('data', c => body += c);
+      let bytes = 0;
+      let rejected = false;
+      res.on('data', c => {
+        bytes += Buffer.byteLength(c);
+        if (bytes > maxBytes) {
+          rejected = true;
+          reject(new Error('hf_config_too_large'));
+          if (typeof res.destroy === 'function') res.destroy();
+          return;
+        }
+        body += c;
+      });
       res.on('end', () => {
+        if (rejected) return;
         try { resolve(JSON.parse(body)); } catch (e) { reject(e); }
       });
     });
     req.on('error', reject);
     req.on('timeout', () => { req.destroy(new Error('timeout')); });
   });
-  return fetchOnce(`https://huggingface.co/${modelId}/resolve/main/config.json`, 0);
+  return fetchOnce(`https://huggingface.co/${safeModelId}/resolve/main/config.json`, 0);
 }
 
 /**
@@ -162,7 +237,10 @@ function fetchHfConfig(modelId) {
  *   context_length, chat_template_present, fetched_at
  * }
  */
-export async function inspectModel(modelIdOrPath) {
+export async function inspectModel(modelIdOrPath, opts = {}) {
+  if (!modelIdOrPath || typeof modelIdOrPath !== 'string') {
+    throw new Error('model_id_or_path_required');
+  }
   let config;
   let source = 'huggingface';
   if (fs.existsSync(modelIdOrPath)) {
@@ -181,7 +259,17 @@ export async function inspectModel(modelIdOrPath) {
       throw new Error(`unsupported_local_path_kind: ${modelIdOrPath}`);
     }
   } else {
-    config = await fetchHfConfig(modelIdOrPath);
+    const safeModelId = validateHfModelId(modelIdOrPath);
+    try {
+      config = opts.fetchConfig
+        ? await opts.fetchConfig(safeModelId)
+        : await fetchHfConfig(safeModelId, opts);
+    } catch (e) {
+      const cached = findCachedHfConfig(safeModelId, opts);
+      if (!cached) throw e;
+      config = cached.config;
+      source = 'huggingface_cache';
+    }
   }
   const arch = Array.isArray(config.architectures) ? config.architectures[0] : null;
   return {
@@ -249,3 +337,15 @@ export async function inspectArtifact(kolmPath) {
     forge_inspect_version: INSPECT_VERSION,
   };
 }
+
+export const _internal = {
+  activeParamsB,
+  estimateParamsB,
+  fetchHfConfig,
+  findCachedHfConfig,
+  isMoE,
+  topK,
+  totalExperts,
+  trustedRedirectUrl,
+  validateHfModelId,
+};
