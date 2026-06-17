@@ -17,6 +17,8 @@
 //
 // Errors:
 //   KOLM_E_TARGET_MISSING - onnx_path missing from manifest or zip
+//   KOLM_E_TARGET_INVALID - onnx_path is unsafe or not an .onnx bundle entry
+//   KOLM_E_TARGET_TOO_LARGE - ONNX model bytes exceed the configured cap
 //   KOLM_E_ONNX_RUNTIME_MISSING - onnxruntime-node not installed
 //   KOLM_E_ONNX_RUNTIME - session creation or run threw
 //   KOLM_E_RECIPE_TIMEOUT - wall-clock budget exceeded
@@ -27,7 +29,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
+import { extractEntryToFile } from '../zip-large.js';
+
 const DEFAULT_TIMEOUT_MS = 30_000;
+const MAX_TIMEOUT_MS = 10 * 60 * 1000;
+const MAX_ONNX_MODEL_BYTES_DEFAULT = 8 * 1024 * 1024 * 1024;
+const MAX_OUTPUT_ELEMENTS_DEFAULT = 1_000_000;
 const _onnxRequire = createRequire(import.meta.url);
 
 function kolmError(code, message) {
@@ -36,10 +43,113 @@ function kolmError(code, message) {
   return e;
 }
 
+function positiveInt(value, fallback, field, max = Number.MAX_SAFE_INTEGER) {
+  if (value === undefined || value === null || value === '') return fallback;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 1) {
+    throw kolmError('KOLM_E_ONNX_RUNTIME', `${field} must be a positive integer`);
+  }
+  return Math.min(max, Math.trunc(n));
+}
+
+function validateOnnxEntryPath(value) {
+  const s = String(value || '').trim();
+  if (!s) {
+    throw kolmError('KOLM_E_TARGET_MISSING', 'onnx runtime_target requires manifest.runtime_target_config.onnx_path');
+  }
+  if (s.length > 512 || s.includes('\0') || s.includes('\\')) {
+    throw kolmError('KOLM_E_TARGET_INVALID', `unsafe onnx_path=${JSON.stringify(s)}`);
+  }
+  if (path.posix.isAbsolute(s) || path.win32.isAbsolute(s)) {
+    throw kolmError('KOLM_E_TARGET_INVALID', `onnx_path must be a relative bundle entry (got ${s})`);
+  }
+  const parts = s.split('/');
+  if (parts.some((p) => !p || p === '.' || p === '..')) {
+    throw kolmError('KOLM_E_TARGET_INVALID', `onnx_path contains an unsafe path segment (got ${s})`);
+  }
+  if (!s.toLowerCase().endsWith('.onnx')) {
+    throw kolmError('KOLM_E_TARGET_INVALID', `onnx_path must end in .onnx (got ${s})`);
+  }
+  return s;
+}
+
+function normalizeDtype(dtype) {
+  const d = String(dtype || 'float32').toLowerCase();
+  if (d === 'float32' || d === 'int64' || d === 'string') return d;
+  throw kolmError('KOLM_E_ONNX_RUNTIME', `unsupported ONNX input dtype ${JSON.stringify(dtype)}; supported: float32, int64, string`);
+}
+
+function normalizeNumericInput(input) {
+  if (Array.isArray(input)) return input;
+  if (typeof input === 'number' || typeof input === 'bigint') return [input];
+  if (input && input.data != null) {
+    try { return Array.from(input.data); }
+    catch { return []; }
+  }
+  return [];
+}
+
+function normalizeShape(shape, dataLen) {
+  const dims = shape == null ? [1, dataLen] : shape;
+  if (!Array.isArray(dims) || dims.length < 1 || dims.length > 8) {
+    throw kolmError('KOLM_E_ONNX_RUNTIME', 'ONNX tensor shape must be an array with 1-8 dimensions');
+  }
+  const out = dims.map((x) => Number(x));
+  if (out.some((x) => !Number.isInteger(x) || x < 1)) {
+    throw kolmError('KOLM_E_ONNX_RUNTIME', `ONNX tensor shape must contain positive integer dimensions (got ${JSON.stringify(dims)})`);
+  }
+  const product = out.reduce((a, b) => a * b, 1);
+  if (product !== dataLen) {
+    throw kolmError('KOLM_E_ONNX_RUNTIME', `ONNX tensor shape ${JSON.stringify(out)} expects ${product} values, got ${dataLen}`);
+  }
+  return out;
+}
+
+function buildTensor(ort, dtype, input, shape) {
+  if (dtype === 'string') {
+    const s = typeof input === 'string' ? input : JSON.stringify(input ?? null);
+    return new ort.Tensor('string', [s], [1]);
+  }
+  const arr = normalizeNumericInput(input);
+  if (!arr.length) {
+    throw kolmError('KOLM_E_ONNX_RUNTIME', 'ONNX numeric input requires a non-empty array, typed array, or number');
+  }
+  const dims = normalizeShape(shape, arr.length);
+  if (dtype === 'int64') {
+    let data;
+    try { data = new BigInt64Array(arr.map((x) => BigInt(x))); }
+    catch (e) { throw kolmError('KOLM_E_ONNX_RUNTIME', `ONNX int64 input contains a non-integer value: ${e.message}`); }
+    return new ort.Tensor('int64', data, dims);
+  }
+  const nums = arr.map((x) => Number(x));
+  if (nums.some((x) => !Number.isFinite(x))) {
+    throw kolmError('KOLM_E_ONNX_RUNTIME', 'ONNX float32 input contains a non-finite value');
+  }
+  return new ort.Tensor('float32', new Float32Array(nums), dims);
+}
+
+function plainTensor(v, maxOutputElements) {
+  const dataLen = v && v.data && typeof v.data.length === 'number' ? v.data.length : 0;
+  if (dataLen > maxOutputElements) {
+    throw kolmError('KOLM_E_ONNX_RUNTIME', `ONNX output tensor too large: ${dataLen} elements exceeds cap ${maxOutputElements}`);
+  }
+  const data = Array.from(v?.data || []).map((x) => (typeof x === 'bigint' ? x.toString() : x));
+  return {
+    dims: Array.isArray(v?.dims) ? v.dims.slice() : [],
+    type: v?.type || null,
+    data,
+  };
+}
+
 // Try to load onnxruntime-node. Returns the module or null. Cached so we
 // don't repeatedly pay dynamic-import cost across a long-lived process.
 let _ortCache;
-async function loadOrt() {
+async function loadOrt(opts = {}) {
+  if (Object.prototype.hasOwnProperty.call(opts, 'ort')) return opts.ort;
+  if (typeof opts.loadOrt === 'function') {
+    try { return await opts.loadOrt(); }
+    catch { return null; }
+  }
   if (_ortCache !== undefined) return _ortCache;
   try {
     _ortCache = await import('onnxruntime-node');
@@ -68,27 +178,54 @@ export function onnxRuntimeAvailable() {
   }
 }
 
+export function onnxRuntimeConfigAvailable(manifestOrConfig) {
+  const cfg = manifestOrConfig?.runtime_target_config || manifestOrConfig || {};
+  try {
+    validateOnnxEntryPath(cfg.onnx_path);
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+  return onnxRuntimeAvailable();
+}
+
 export async function runOnnxTarget(bundle, input, opts = {}) {
   const cfg = bundle?.manifest?.runtime_target_config || {};
-  const onnxRel = cfg.onnx_path;
-  if (!onnxRel || typeof onnxRel !== 'string') {
-    throw kolmError('KOLM_E_TARGET_MISSING', 'onnx runtime_target requires manifest.runtime_target_config.onnx_path');
-  }
+  const onnxRel = validateOnnxEntryPath(cfg.onnx_path);
   const onnxBuf = bundle?.entries?.[onnxRel];
-  if (!onnxBuf || !onnxBuf.length) {
+  const largeEntry = !onnxBuf && bundle?.large_entries && bundle.large_entries[onnxRel];
+  if ((!onnxBuf || !onnxBuf.length) && !largeEntry) {
     throw kolmError('KOLM_E_TARGET_MISSING', `onnx runtime_target references onnx_path=${onnxRel} but that entry is missing from the .kolm bundle`);
   }
-  const ort = await loadOrt();
+  const maxModelBytes = positiveInt(opts.maxModelBytes, MAX_ONNX_MODEL_BYTES_DEFAULT, 'maxModelBytes');
+  const declaredBytes = onnxBuf ? onnxBuf.length : Number(largeEntry?.uncompressed_size || 0);
+  if (declaredBytes > maxModelBytes) {
+    throw kolmError('KOLM_E_TARGET_TOO_LARGE', `onnx model ${onnxRel} is ${declaredBytes} bytes; cap is ${maxModelBytes}`);
+  }
+  const ort = await loadOrt(opts);
   if (!ort) {
     throw kolmError('KOLM_E_ONNX_RUNTIME_MISSING', 'onnxruntime-node not installed. Install with: npm i -O onnxruntime-node.');
   }
-  const timeout = opts.timeoutMs || DEFAULT_TIMEOUT_MS;
+  const timeout = positiveInt(opts.timeoutMs, DEFAULT_TIMEOUT_MS, 'timeoutMs', MAX_TIMEOUT_MS);
+  const maxOutputElements = positiveInt(opts.maxOutputElements, MAX_OUTPUT_ELEMENTS_DEFAULT, 'maxOutputElements');
   const workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-onnx-'));
-  const onnxPath = path.join(workdir, path.basename(onnxRel) || 'model.onnx');
-  const onnxSha = crypto.createHash('sha256').update(onnxBuf).digest('hex');
+  const onnxPath = path.join(workdir, 'model.onnx');
+  let onnxSha = null;
 
   try {
-    fs.writeFileSync(onnxPath, onnxBuf);
+    if (largeEntry) {
+      if (!bundle?.artifact_path) {
+        throw kolmError('KOLM_E_TARGET_MISSING', `onnx large-entry ${onnxRel} requires bundle.artifact_path for streaming extraction`);
+      }
+      const ext = await extractEntryToFile(bundle.artifact_path, onnxRel, onnxPath, { computeSha256: true });
+      if (!ext.ok) throw kolmError('KOLM_E_TARGET_MISSING', `onnx large-entry extraction failed: ${ext.reason}`);
+      if (ext.bytes_written > maxModelBytes) {
+        throw kolmError('KOLM_E_TARGET_TOO_LARGE', `onnx model ${onnxRel} is ${ext.bytes_written} bytes; cap is ${maxModelBytes}`);
+      }
+      onnxSha = ext.sha256;
+    } else {
+      fs.writeFileSync(onnxPath, onnxBuf);
+      onnxSha = crypto.createHash('sha256').update(onnxBuf).digest('hex');
+    }
     const t0 = process.hrtime.bigint();
 
     // Session creation + run wrapped in a timeout race. onnxruntime-node does
@@ -101,33 +238,14 @@ export async function runOnnxTarget(bundle, input, opts = {}) {
       if (!inputName) {
         throw kolmError('KOLM_E_ONNX_RUNTIME', 'unable to derive input tensor name (no opts.inputName, no manifest.entrypoint.input_schema.name, no session.inputNames)');
       }
-      const dtype = opts.dtype || bundle?.manifest?.entrypoint?.input_schema?.dtype || 'float32';
-      let tensor;
-      if (dtype === 'string') {
-        const s = typeof input === 'string' ? input : JSON.stringify(input ?? null);
-        tensor = new ort.Tensor('string', [s], [1]);
-      } else {
-        // Numeric tensor. Accept a flat array or a single number.
-        const arr = Array.isArray(input)
-          ? input
-          : (typeof input === 'number' ? [input] : (input?.data || []));
-        const shape = opts.shape || [1, arr.length];
-        const TypedArr = dtype === 'float32' ? Float32Array : (dtype === 'int64' ? BigInt64Array : Float32Array);
-        const data = dtype === 'int64'
-          ? new TypedArr(arr.map(x => BigInt(x)))
-          : new TypedArr(arr);
-        tensor = new ort.Tensor(dtype, data, shape);
-      }
+      const dtype = normalizeDtype(opts.dtype || bundle?.manifest?.entrypoint?.input_schema?.dtype || 'float32');
+      const tensor = buildTensor(ort, dtype, input, opts.shape);
       const feeds = { [inputName]: tensor };
       const out = await session.run(feeds);
       // Return all outputs as plain objects (callers know their model).
       const result = {};
       for (const [k, v] of Object.entries(out)) {
-        result[k] = {
-          dims: v.dims,
-          type: v.type,
-          data: Array.isArray(v.data) ? v.data : Array.from(v.data),
-        };
+        result[k] = plainTensor(v, maxOutputElements);
       }
       return result;
     })();

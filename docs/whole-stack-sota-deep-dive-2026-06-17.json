@@ -201,10 +201,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 151
+        "line": 152
       },
       "local_sota_review": {
-        "line": 151,
+        "line": 152,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -638,10 +638,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 205
+        "line": 206
       },
       "local_sota_review": {
-        "line": 205,
+        "line": 206,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -1077,10 +1077,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 252
+        "line": 253
       },
       "local_sota_review": {
-        "line": 252,
+        "line": 253,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1531,10 +1531,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 297
+        "line": 298
       },
       "local_sota_review": {
-        "line": 297,
+        "line": 298,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -1768,18 +1768,6 @@
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
-            "path": "src/runners/onnx-runner.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "workers/runtime-build/build.mjs",
             "domain": "compile_artifact_runtime",
             "priority_score": 6,
@@ -1823,6 +1811,17 @@
           },
           {
             "path": "packages/runtime-rs/src/lib.rs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 5,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface"
+            ],
+            "test_refs": [],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "packages/runtime-rs/src/tofu.rs",
             "domain": "compile_artifact_runtime",
             "priority_score": 5,
             "risk_signals": [
@@ -1970,10 +1969,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 339
+        "line": 340
       },
       "local_sota_review": {
-        "line": 339,
+        "line": 340,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2380,10 +2379,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 373
+        "line": 374
       },
       "local_sota_review": {
-        "line": 373,
+        "line": 374,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2848,10 +2847,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 414
+        "line": 415
       },
       "local_sota_review": {
-        "line": 414,
+        "line": 415,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -3301,10 +3300,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 457
+        "line": 458
       },
       "local_sota_review": {
-        "line": 457,
+        "line": 458,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3761,10 +3760,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 492
+        "line": 493
       },
       "local_sota_review": {
-        "line": 492,
+        "line": 493,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -4234,10 +4233,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 520
+        "line": 521
       },
       "local_sota_review": {
-        "line": 520,
+        "line": 521,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4707,10 +4706,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 567
+        "line": 568
       },
       "local_sota_review": {
-        "line": 567,
+        "line": 568,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -5177,10 +5176,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 600
+        "line": 601
       },
       "local_sota_review": {
-        "line": 600,
+        "line": 601,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5691,10 +5690,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 631
+        "line": 632
       },
       "local_sota_review": {
-        "line": 631,
+        "line": 632,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6197,10 +6196,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 677
+        "line": 678
       },
       "local_sota_review": {
-        "line": 677,
+        "line": 678,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -6668,10 +6667,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 727
+        "line": 728
       },
       "local_sota_review": {
-        "line": 727,
+        "line": 728,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -7148,10 +7147,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 774
+        "line": 775
       },
       "local_sota_review": {
-        "line": 774,
+        "line": 775,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,

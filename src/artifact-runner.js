@@ -34,7 +34,7 @@ import { scoreCase } from './case-scorer.js';
 import { runWasmTarget } from './runners/wasm-runner.js';
 import { runNativeTarget } from './runners/native-runner.js';
 import { runGgufTarget, ggufRuntimeAvailable } from './runners/gguf-runner.js';
-import { runOnnxTarget, onnxRuntimeAvailable } from './runners/onnx-runner.js';
+import { runOnnxTarget, onnxRuntimeConfigAvailable } from './runners/onnx-runner.js';
 import { verifySignatureBlock as verifyEd25519Block } from './ed25519.js';
 import { canonicalJson } from './cid.js';
 import { ragLibFor } from './rag.js';
@@ -514,11 +514,7 @@ export function runtimeAvailable(manifest) {
     return ggufRuntimeAvailable();
   }
   if (target === 'onnx') {
-    const cfg = manifest.runtime_target_config || {};
-    if (!cfg.onnx_path) {
-      return { ok: false, reason: 'onnx runtime_target requires manifest.runtime_target_config.onnx_path' };
-    }
-    return onnxRuntimeAvailable();
+    return onnxRuntimeConfigAvailable(manifest);
   }
   return { ok: false, reason: `unhandled runtime_target ${JSON.stringify(target)}` };
 }

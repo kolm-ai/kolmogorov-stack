@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 678,
-    "components_without_direct_test_reference": 151,
+    "test_referenced_components": 679,
+    "components_without_direct_test_reference": 150,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -8469,10 +8469,10 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "46aa045129cb5e4dc0d249ee539b9f5adcb80ea715b167eb287ac061c6cd08ec",
+      "sha256": "10763bad2dae6988c0a850d7e8f6884fcd96714796ed60d4d851cdf17aadb115",
       "metrics": {
-        "bytes": 39478,
-        "lines": 838,
+        "bytes": 39303,
+        "lines": 834,
         "imports": 17,
         "exports": 10,
         "routes": 0,
@@ -37682,27 +37682,29 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "413f67d41f3afd7fd8bee2405421745eb9b6547745817ecc7286c43aed248dfb",
+      "sha256": "2415b59c61075591c4d670315ee5870677b0adb849af0a36b23c59663348ec4e",
       "metrics": {
-        "bytes": 6441,
-        "lines": 161,
-        "imports": 6,
-        "exports": 2,
+        "bytes": 11703,
+        "lines": 279,
+        "imports": 7,
+        "exports": 3,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 1,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 5,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave660-onnx-runner-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "execution_or_subprocess_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 6,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -37727,7 +37729,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
       "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
       "suggested_verification": [
         "npm run verify:inventions",
