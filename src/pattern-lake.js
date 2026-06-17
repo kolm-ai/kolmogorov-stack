@@ -10,9 +10,9 @@
 //   - Every contribution stored is a sha256 bigram hash. Raw input text NEVER
 //     enters the lake (tokenizePattern destructures into hashes before any
 //     write path).
-//   - Contributions require explicit consent:true in the contribute call.
-//     A missing or falsy consent throws `consent_not_granted`. There is no
-//     "default opt-in" path; the cli/api surfaces both demand --confirm /
+//   - Contributions require explicit consent:true in the contribute call AND
+//     an active per-namespace opt-in row before tokenization/storage. There is
+//     no "default opt-in" path; the cli/api surfaces both demand --confirm /
 //     {confirm:true} flags on top of the consent flag inside the payload.
 //   - The lake is disabled by default. The KOLM_W757_LAKE_ENABLED env hatch
 //     is read at WRITE time so a pre-W757 install behaves identically.
@@ -51,11 +51,17 @@ const PROVIDER_CONTRIBUTION = 'kolm_pattern_lake_contribution';
 // Privacy floor - never return aggregated data with fewer than 5 distinct
 // contributors. Tests pin this number; auditors can reference it.
 const MIN_CONTRIBUTORS_DEFAULT = 5;
+const MAX_TENANT_ID_BYTES = 256;
+const MAX_NAMESPACE_BYTES = 256;
+const MAX_CAPTURE_ID_BYTES = 256;
+const MAX_PATTERN_INPUT_CHARS = 200000;
+const MAX_BIGRAM_HASHES_PER_CONTRIBUTION = 20000;
 
 // Token regex - Unicode letter/number/underscore runs, dropping punctuation
 // and whitespace. The lake is text-only; binary captures (images, audio)
 // flow through the separate W462/W464 multimodal-redact pipelines.
 const TOKEN_RE = /[\p{L}\p{N}_]+/gu;
+const SHA256_HEX_RE = /^[a-f0-9]{64}$/;
 
 function _sha256Hex(s) {
   return crypto.createHash('sha256').update(String(s)).digest('hex');
@@ -66,6 +72,52 @@ function _sha256Hex(s) {
 function _isLakeEnabled() {
   const v = String(process.env[LAKE_ENABLED_ENV] || '').toLowerCase();
   return v === '1' || v === 'true' || v === 'yes' || v === 'on';
+}
+
+function _byteLen(s) {
+  return Buffer.byteLength(String(s), 'utf8');
+}
+
+function _lakeError(message, code) {
+  const e = new Error(message);
+  e.code = code;
+  return e;
+}
+
+function _requireBoundedId(value, field, maxBytes) {
+  const s = String(value == null ? '' : value).trim();
+  if (!s) throw _lakeError(field + '_required', 'PATTERN_LAKE_BAD_ID');
+  if (/[\u0000-\u001f\u007f]/.test(s)) {
+    throw _lakeError(field + '_contains_control_character', 'PATTERN_LAKE_BAD_ID');
+  }
+  if (_byteLen(s) > maxBytes) {
+    throw _lakeError(field + '_too_large', 'PATTERN_LAKE_BAD_ID');
+  }
+  return s;
+}
+
+function _maybeBoundedId(value, field, maxBytes) {
+  try { return _requireBoundedId(value, field, maxBytes); }
+  catch { return ''; }
+}
+
+function _isSha256Hex(value) {
+  return typeof value === 'string' && SHA256_HEX_RE.test(value);
+}
+
+function _normalizeBigramHashes(values) {
+  if (!Array.isArray(values)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const value of values) {
+    const h = String(value || '').toLowerCase();
+    if (!_isSha256Hex(h)) continue;
+    if (seen.has(h)) continue;
+    seen.add(h);
+    out.push(h);
+    if (out.length >= MAX_BIGRAM_HASHES_PER_CONTRIBUTION) break;
+  }
+  return out;
 }
 
 // tokenizePattern(input) - bigram fingerprint extraction.
@@ -98,14 +150,16 @@ export function tokenizePattern(input) {
 // it. The registry is append-only inside the event-store; opt-in / opt-out
 // rows carry a JSON payload in `feedback` recording the state transition.
 export async function isOptedIn(tenant_id, namespace) {
-  if (!tenant_id || !namespace) return false;
+  const safeTenantId = _maybeBoundedId(tenant_id, 'tenant_id', MAX_TENANT_ID_BYTES);
+  const safeNamespace = _maybeBoundedId(namespace, 'namespace', MAX_NAMESPACE_BYTES);
+  if (!safeTenantId || !safeNamespace) return false;
   // ASC order so the state machine reads oldest-first; the loop's last write
   // wins, which is the latest opt_in/opt_out for this (tenant, namespace).
   // (Default order is DESC, which would invert latest-wins and let an old
   // opt_in shadow a newer opt_out.)
   const rows = await listEvents({
     provider: PROVIDER_OPTIN,
-    tenant_id,
+    tenant_id: safeTenantId,
     limit: 0,
     order: 'asc',
   });
@@ -113,10 +167,10 @@ export async function isOptedIn(tenant_id, namespace) {
   // forgot the listEvents tenant filter; re-fence inside the loop.
   let opted = false;
   for (const r of rows) {
-    if (!r || r.tenant_id !== tenant_id) continue;
+    if (!r || r.tenant_id !== safeTenantId) continue;
     let payload = null;
     try { payload = r.feedback ? JSON.parse(r.feedback) : null; } catch { continue; }
-    if (!payload || payload.namespace !== namespace) continue;
+    if (!payload || payload.namespace !== safeNamespace) continue;
     if (payload.action === 'opt_in') opted = true;
     else if (payload.action === 'opt_out') opted = false;
   }
@@ -126,41 +180,41 @@ export async function isOptedIn(tenant_id, namespace) {
 // optIn(tenant_id, namespace) - durably opt the (tenant, namespace) pair in.
 // Idempotent: a second call updates the timestamp but does not error.
 export async function optIn(tenant_id, namespace) {
-  if (!tenant_id) throw new Error('optIn requires tenant_id');
-  if (!namespace) throw new Error('optIn requires namespace');
+  const safeTenantId = _requireBoundedId(tenant_id, 'tenant_id', MAX_TENANT_ID_BYTES);
+  const safeNamespace = _requireBoundedId(namespace, 'namespace', MAX_NAMESPACE_BYTES);
   await appendEvent({
-    tenant_id,
+    tenant_id: safeTenantId,
     namespace: 'kolm_pattern_lake',
     provider: PROVIDER_OPTIN,
     status: 'ok',
     feedback: JSON.stringify({
       action: 'opt_in',
-      namespace,
+      namespace: safeNamespace,
       version: PATTERN_LAKE_VERSION,
       at: new Date().toISOString(),
     }),
   });
-  return { ok: true, tenant_id, namespace, action: 'opt_in', version: PATTERN_LAKE_VERSION };
+  return { ok: true, tenant_id: safeTenantId, namespace: safeNamespace, action: 'opt_in', version: PATTERN_LAKE_VERSION };
 }
 
 // optOut(tenant_id, namespace) - durably opt out. Append-only; future
 // isOptedIn() reads observe the latest-wins state machine.
 export async function optOut(tenant_id, namespace) {
-  if (!tenant_id) throw new Error('optOut requires tenant_id');
-  if (!namespace) throw new Error('optOut requires namespace');
+  const safeTenantId = _requireBoundedId(tenant_id, 'tenant_id', MAX_TENANT_ID_BYTES);
+  const safeNamespace = _requireBoundedId(namespace, 'namespace', MAX_NAMESPACE_BYTES);
   await appendEvent({
-    tenant_id,
+    tenant_id: safeTenantId,
     namespace: 'kolm_pattern_lake',
     provider: PROVIDER_OPTIN,
     status: 'ok',
     feedback: JSON.stringify({
       action: 'opt_out',
-      namespace,
+      namespace: safeNamespace,
       version: PATTERN_LAKE_VERSION,
       at: new Date().toISOString(),
     }),
   });
-  return { ok: true, tenant_id, namespace, action: 'opt_out', version: PATTERN_LAKE_VERSION };
+  return { ok: true, tenant_id: safeTenantId, namespace: safeNamespace, action: 'opt_out', version: PATTERN_LAKE_VERSION };
 }
 
 // contributePattern({tenant_id, namespace, capture, consent}) - record a
@@ -185,13 +239,16 @@ export async function contributePattern({
     e.code = 'CONSENT_NOT_GRANTED';
     throw e;
   }
-  if (!tenant_id) throw new Error('contributePattern requires tenant_id');
-  if (!namespace) throw new Error('contributePattern requires namespace');
+  const safeTenantId = _requireBoundedId(tenant_id, 'tenant_id', MAX_TENANT_ID_BYTES);
+  const safeNamespace = _requireBoundedId(namespace, 'namespace', MAX_NAMESPACE_BYTES);
   if (!capture || typeof capture !== 'object') {
     throw new Error('contributePattern requires capture object');
   }
-  const capture_id = String(capture.id || capture.capture_id || '').trim();
-  if (!capture_id) throw new Error('contributePattern requires capture.id');
+  const capture_id = _requireBoundedId(
+    capture.id ?? capture.capture_id,
+    'capture_id',
+    MAX_CAPTURE_ID_BYTES,
+  );
   const source_text = capture.input != null ? String(capture.input)
     : (capture.text != null ? String(capture.text)
       : (capture.prompt != null ? String(capture.prompt) : ''));
@@ -207,42 +264,73 @@ export async function contributePattern({
     };
   }
 
+  if (!(await isOptedIn(safeTenantId, safeNamespace))) {
+    return {
+      ok: false,
+      error: 'namespace_not_opted_in',
+      hint: 'call optIn(tenant_id, namespace) or POST /v1/lake/opt-in before contributing',
+      namespace: safeNamespace,
+      version: PATTERN_LAKE_VERSION,
+    };
+  }
+
   // Idempotency - defense-in-depth check before tokenization to avoid
   // re-hashing on duplicate writes. Tenant fence both at listEvents query
   // AND inside the loop (W411 invariant).
   const prior = await listEvents({
     provider: PROVIDER_CONTRIBUTION,
-    tenant_id,
+    tenant_id: safeTenantId,
     limit: 0,
   });
   for (const r of prior) {
-    if (!r || r.tenant_id !== tenant_id) continue;
+    if (!r || r.tenant_id !== safeTenantId) continue;
     let payload = null;
     try { payload = r.feedback ? JSON.parse(r.feedback) : null; } catch { continue; }
     if (!payload) continue;
-    if (payload.capture_id === capture_id && payload.namespace === namespace) {
+    if (payload.capture_id === capture_id && payload.namespace === safeNamespace) {
       return {
         ok: true,
         skipped: true,
         reason: 'already_contributed',
         capture_id,
-        namespace,
+        namespace: safeNamespace,
         version: PATTERN_LAKE_VERSION,
       };
     }
   }
 
+  if (source_text.length > MAX_PATTERN_INPUT_CHARS) {
+    return {
+      ok: false,
+      error: 'pattern_input_too_large',
+      max_chars: MAX_PATTERN_INPUT_CHARS,
+      capture_id,
+      namespace: safeNamespace,
+      version: PATTERN_LAKE_VERSION,
+    };
+  }
+
   const bigram_hashes = tokenizePattern(source_text);
+  if (bigram_hashes.length < 1) {
+    return {
+      ok: false,
+      error: 'insufficient_pattern_signal',
+      hint: 'pattern lake contributions require at least two tokens to form a hash-only bigram',
+      capture_id,
+      namespace: safeNamespace,
+      version: PATTERN_LAKE_VERSION,
+    };
+  }
   // The contribution row carries ONLY the hash list + metadata - never the
   // raw text. tests/wave757 pins that no raw substring survives.
   await appendEvent({
-    tenant_id,
+    tenant_id: safeTenantId,
     namespace: 'kolm_pattern_lake',
     provider: PROVIDER_CONTRIBUTION,
     status: 'ok',
     feedback: JSON.stringify({
       capture_id,
-      namespace,                // the SOURCE namespace, distinct from the
+      namespace: safeNamespace,  // the SOURCE namespace, distinct from the
                                 // event-store routing namespace above.
       bigram_count: bigram_hashes.length,
       bigram_hashes,
@@ -254,7 +342,7 @@ export async function contributePattern({
     ok: true,
     skipped: false,
     capture_id,
-    namespace,
+    namespace: safeNamespace,
     bigram_count: bigram_hashes.length,
     version: PATTERN_LAKE_VERSION,
   };
@@ -276,13 +364,18 @@ async function _readAllContributions() {
     let payload = null;
     try { payload = r.feedback ? JSON.parse(r.feedback) : null; } catch { continue; }
     if (!payload || !Array.isArray(payload.bigram_hashes)) continue;
+    const safeTenantId = _maybeBoundedId(r.tenant_id, 'tenant_id', MAX_TENANT_ID_BYTES);
+    const safeNamespace = _maybeBoundedId(payload.namespace, 'namespace', MAX_NAMESPACE_BYTES);
+    const safeCaptureId = _maybeBoundedId(payload.capture_id || 'unknown', 'capture_id', MAX_CAPTURE_ID_BYTES);
+    const bigram_hashes = _normalizeBigramHashes(payload.bigram_hashes);
+    if (!safeTenantId || !safeNamespace || bigram_hashes.length < 1) continue;
     out.push({
-      tenant_id: r.tenant_id,
+      tenant_id: safeTenantId,
       created_at: r.created_at,
-      namespace: payload.namespace,
-      capture_id: payload.capture_id,
-      bigram_count: payload.bigram_count || payload.bigram_hashes.length,
-      bigram_hashes: payload.bigram_hashes,
+      namespace: safeNamespace,
+      capture_id: safeCaptureId,
+      bigram_count: bigram_hashes.length,
+      bigram_hashes,
     });
   }
   return out;

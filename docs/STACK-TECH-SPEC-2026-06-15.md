@@ -10,7 +10,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 
 **What is genuinely missing at the frontier (net-new, spec-gated):** GAD adversarial distillation (arXiv:2511.10643, the #1 black-box method), a shared boot-and-measure probe harness (flips estimated->tested across 5 categories), a pluggable real embedding provider (uncaps curation + routing), a real attestation cert-chain verifier (ends TOFU), a hosted managed distill+serve fleet (the biggest DX gap vs competitors), and an in-browser verify-then-run WebGPU demo.
 
-**Counts:** 59 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
+**Counts:** 60 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
 
 ## Top surgical-now improvements (ranked)
 
@@ -75,6 +75,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 | 57 | confidential-compute | 6 | S/low | CLOSED W656: tenant-fence and sanitize airgap HTTP routes | `src/airgap-routes.js tenant-owned distill status, tenant-bound sneakernet verify before extract, sanitized doctor readiness; tests/wave656-airgap-routes-contract.test.js; verify:airgap-routes` |
 | 58 | on-device-inference | 6 | S/low | CLOSED W657: harden local device adapter filesystem and spawn boundaries | `src/device-adapters/local-adapter.js safe device ids, install-root containment, port validation, copy sha256 evidence, pidless spawn honesty; tests/wave657-local-adapter-contract.test.js; verify:device-local-adapter` |
 | 59 | identity-access | 6 | S/low | CLOSED W658: harden forge inspect remote model boundary | `src/forge-inspect.js HF model-id validation, trusted HTTPS redirects, config byte cap, offline cache fallback, injected fetch; tests/wave658-forge-inspect-contract.test.js; verify:forge-inspect` |
+| 60 | storage-state | 6 | S/low | CLOSED W659: harden opt-in pattern lake write/read privacy boundary | `src/pattern-lake.js active namespace opt-in before hashing/storage, bounded ids/input, empty-row rejection, read-side sha256 sanitization; tests/wave659-pattern-lake-contract.test.js; verify:pattern-lake` |
 
 ## Cross-cutting bets (spec-followups)
 
