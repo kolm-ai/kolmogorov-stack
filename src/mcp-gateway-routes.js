@@ -90,7 +90,9 @@ function _makePersistence(deps) {
         try {
           const rows = deps.store.findByTenant(MCP_RECEIPT_TABLE, tenant) || [];
           const row = rows.find((x) => x && (x.call_id === callId || x.id === callId));
-          return row && row.receipt ? row.receipt : null;
+          if (!row || !row.receipt) return null;
+          if (row.anchor && !row.receipt.anchor) return { ...row.receipt, anchor: row.anchor };
+          return row.receipt;
         } catch { return null; }
       },
     };

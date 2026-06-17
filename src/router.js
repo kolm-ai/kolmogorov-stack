@@ -24,7 +24,7 @@ import { mountAuthEmail } from './auth-email.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert, tEmailReportReady } from './email.js';
 import { compileJs, verify } from './verifier.js';
 import { LIBRARY_VERSION, libraryDescription } from './library.js';
-import { all, findOne, findByField, findByTenant, insert, update, remove, withTransaction, id as storeId, stats as storeStats } from './store.js';
+import { all, find, findOne, findByField, findByTenant, insert, update, remove, withTransaction, id as storeId, stats as storeStats } from './store.js';
 // LM-7 (V1 launch 2026-05-26) - server-side product metrics. recordEvent is
 // fire-and-forget so a metrics outage NEVER takes down the calling request.
 // See src/metrics.js for the (date,tenant,plan_tier,kind,outcome) bucket
@@ -498,6 +498,7 @@ import { register as __registerGovernRoutes_w921 } from './govern-routes.js';
 import { register as __registerTransparencyLogRoutes } from './transparency-log-routes.js';
 import { register as __registerIntotoReceiptRoutes_w921 } from './intoto-receipt-routes.js';
 import { register as __registerMcpGatewayRoutes_w921 } from './mcp-gateway-routes.js';
+import { startBatcher as __startReceiptAnchorBatcher_w609 } from './transparency-anchor.js';
 // Agent Security-Review audit - signed evidence report API (sessions/scan/verify).
 import { register as __registerAuditRoutes_asr } from './audit-routes.js';
 
@@ -29768,10 +29769,42 @@ res.json({
   __registerAccountUiRoutes_w921(r, { authMiddleware });
   __registerWebsiteStatusRoutes_w921(r, { authMiddleware });
   __registerGovernRoutes_w921(r, { authMiddleware });
+  // W609 - production-wire the W921 receipt modules to durable store.js,
+  // the default Ed25519 signer, and the existing Merkle receipt batcher. The
+  // modules still degrade gracefully if a signer/anchor cannot initialize, but
+  // prod no longer falls back to process-local MCP receipt memory.
+  const __w609ReceiptStore = { all, find, findByTenant, insert, update };
+  const __w609GetReceiptSigner = () => {
+    try { return __loadDefaultSigner(); } catch (_) { return null; }
+  };
+  const __w609McpAnchorBatcher = (() => {
+    try {
+      const intervalRaw = Number(process.env.KOLM_MCP_ANCHOR_INTERVAL_MS || process.env.KOLM_RECEIPT_ANCHOR_INTERVAL_MS || 60000);
+      const maxRaw = Number(process.env.KOLM_MCP_ANCHOR_BATCH_MAX || process.env.KOLM_RECEIPT_ANCHOR_BATCH_MAX || 1024);
+      return __startReceiptAnchorBatcher_w609({
+        signer: __w609GetReceiptSigner(),
+        intervalMs: Number.isFinite(intervalRaw) && intervalRaw > 0 ? intervalRaw : undefined,
+        maxLeaves: Number.isFinite(maxRaw) && maxRaw > 0 ? maxRaw : undefined,
+        origin: 'kolm.ai/mcp-receipts/v1',
+        onBatch: ({ stamps }) => {
+          for (const s of Array.isArray(stamps) ? stamps : []) {
+            if (!s || !s.receipt_id || !s.anchor) continue;
+            try {
+              update('mcp_tool_receipts',
+                (row) => row && (row.call_id === s.receipt_id || row.id === s.receipt_id),
+                { anchor: s.anchor, anchored_at: s.anchor.stamped_at || new Date().toISOString() });
+            } catch (_) { /* anchor stamp-back is best-effort */ }
+          }
+        },
+      });
+    } catch (_) {
+      return null;
+    }
+  })();
   // W921 BET-3/BET-4 - in-toto/SLSA receipt attestation + governed MCP signed
-  // tool-call receipts. Additive; degrade gracefully without optional deps.
-  __registerIntotoReceiptRoutes_w921(r, { authMiddleware });
-  __registerMcpGatewayRoutes_w921(r, { authMiddleware });
+  // tool-call receipts.
+  __registerIntotoReceiptRoutes_w921(r, { authMiddleware, store: __w609ReceiptStore, getSigner: __w609GetReceiptSigner });
+  __registerMcpGatewayRoutes_w921(r, { authMiddleware, store: __w609ReceiptStore, getSigner: __w609GetReceiptSigner, anchorBatcher: __w609McpAnchorBatcher });
 
   // Agent Security-Review audit - the signed evidence-report surface. Mounts
   // POST /v1/audit/sessions[/:id/{ingest,run}], GET /v1/audit/sessions/:id[/report],
