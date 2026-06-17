@@ -14,7 +14,7 @@ print(out.text)  // "Patient [NAME], MRN [ID]."
 
 ```swift
 // Package.swift
-.package(url: "https://github.com/kolm-ai/kolm-sdk-swift", from: "0.1.0"),
+.package(url: "https://github.com/kolm-ai/kolm-sdk-swift", from: "0.2.6"),
 ```
 
 Then add `.product(name: "Kolm", package: "kolm-sdk-swift")` to your
@@ -22,8 +22,7 @@ target dependencies.
 
 ## Bundling artifacts
 
-Drop the `.kolm` file into your app bundle (Xcode → drag into project →
-"Copy items if needed"). `Kolm.load(named:)` resolves against the main
+Drop the `.kolm` file into your app bundle (Xcode -> drag into project -> "Copy items if needed"). `Kolm.load(named:)` resolves against the main
 bundle by default. To load from a URL:
 
 ```swift
@@ -48,7 +47,15 @@ on the desktop to produce each.
 `Kolm.load` verifies the artifact's CID against `manifest.hashes` and
 checks the HMAC signature on `receipt.json` if a secret is configured
 via `Kolm.Configuration.shared.secret = ...`. Verification is on by
-default. Disable for development with `Kolm.Configuration.shared.verify = .off`.
+default. Strict mode also requires `manifest.cid`, `manifest.hashes`, and
+`receipt.json`:
+
+```swift
+Kolm.Configuration.shared.verify = .strict
+Kolm.Configuration.shared.secret = Data("shared-secret".utf8)
+```
+
+Disable for development with `Kolm.Configuration.shared.verify = .off`.
 
 ## License
 

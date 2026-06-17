@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 699,
-    "components_without_direct_test_reference": 130,
+    "test_referenced_components": 700,
+    "components_without_direct_test_reference": 129,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -5220,7 +5220,8 @@
         "tests/wave588-package-release-readiness.test.js",
         "tests/wave591-package-local-build-contract.test.js",
         "tests/wave661-sbom-emit-contract.test.js",
-        "tests/wave671-homebrew-formula-contract.test.js"
+        "tests/wave671-homebrew-formula-contract.test.js",
+        "tests/wave680-sdk-swift-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -5262,10 +5263,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "markdown",
-      "sha256": "da35ffd03166d7d2e783c3f59b48c99f8626f19e2c857e47458846ce8150d112",
+      "sha256": "50508e045176089316e87a9d7c040693b4f68e2d886dd9ef9b34341b763b00fa",
       "metrics": {
-        "bytes": 1568,
-        "lines": 56,
+        "bytes": 1767,
+        "lines": 63,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -5327,10 +5328,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "swift",
-      "sha256": "f95bf3b0ca8e0aeff6a4434b19802fea9da6d824e2f5c3803493ee541e8b1274",
+      "sha256": "4101e009b8238148f70452e6765ab9bf5c6c74846dc131bdf51137de2218891b",
       "metrics": {
-        "bytes": 11490,
-        "lines": 300,
+        "bytes": 18279,
+        "lines": 452,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -5338,15 +5339,17 @@
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 9,
+        "crypto_refs": 11,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave680-sdk-swift-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -5398,7 +5401,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave591-package-local-build-contract.test.js"
+        "tests/wave591-package-local-build-contract.test.js",
+        "tests/wave680-sdk-swift-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -28417,6 +28421,7 @@
         "tests/finalized-c5-turnkey-experimental-quant-runners.test.js",
         "tests/wave199-seeds-new.test.js",
         "tests/wave524-release-verify-helpers.test.js",
+        "tests/wave680-sdk-swift-contract.test.js",
         "tests/wave809-structured-output.test.js",
         "tests/wrapper-s3.test.js"
       ],
@@ -32791,7 +32796,8 @@
         "tests/wave591-package-local-build-contract.test.js",
         "tests/wave671-homebrew-formula-contract.test.js",
         "tests/wave678-sdk-kotlin-contract.test.js",
-        "tests/wave679-sdk-rn-contract.test.js"
+        "tests/wave679-sdk-rn-contract.test.js",
+        "tests/wave680-sdk-swift-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"

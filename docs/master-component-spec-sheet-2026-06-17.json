@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 699,
-    "direct_test_reference_pct": 84.3,
-    "components_without_direct_test_reference": 130,
+    "direct_test_referenced_components": 700,
+    "direct_test_reference_pct": 84.4,
+    "components_without_direct_test_reference": 129,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -5894,7 +5894,8 @@
           "tests/wave588-package-release-readiness.test.js",
           "tests/wave591-package-local-build-contract.test.js",
           "tests/wave661-sbom-emit-contract.test.js",
-          "tests/wave671-homebrew-formula-contract.test.js"
+          "tests/wave671-homebrew-formula-contract.test.js",
+          "tests/wave680-sdk-swift-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -5914,8 +5915,8 @@
       "language": "markdown",
       "composition": {
         "metrics": {
-          "bytes": 1568,
-          "lines": 56,
+          "bytes": 1767,
+          "lines": 63,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -5932,7 +5933,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "da35ffd03166d7d2e783c3f59b48c99f8626f19e2c857e47458846ce8150d112"
+        "sha256": "50508e045176089316e87a9d7c040693b4f68e2d886dd9ef9b34341b763b00fa"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5968,8 +5969,8 @@
       "language": "swift",
       "composition": {
         "metrics": {
-          "bytes": 11490,
-          "lines": 300,
+          "bytes": 18279,
+          "lines": 452,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -5977,16 +5978,16 @@
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 9,
+          "crypto_refs": 11,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "f95bf3b0ca8e0aeff6a4434b19802fea9da6d824e2f5c3803493ee541e8b1274"
+        "sha256": "4101e009b8238148f70452e6765ab9bf5c6c74846dc131bdf51137de2218891b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5994,7 +5995,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave680-sdk-swift-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
@@ -6002,10 +6005,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-swift/Tests/KolmTests/KolmTests.swift",
@@ -6041,7 +6042,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave591-package-local-build-contract.test.js"
+          "tests/wave591-package-local-build-contract.test.js",
+          "tests/wave680-sdk-swift-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -25976,6 +25978,7 @@
           "tests/finalized-c5-turnkey-experimental-quant-runners.test.js",
           "tests/wave199-seeds-new.test.js",
           "tests/wave524-release-verify-helpers.test.js",
+          "tests/wave680-sdk-swift-contract.test.js",
           "tests/wave809-structured-output.test.js",
           "tests/wrapper-s3.test.js"
         ],
@@ -29727,7 +29730,8 @@
           "tests/wave591-package-local-build-contract.test.js",
           "tests/wave671-homebrew-formula-contract.test.js",
           "tests/wave678-sdk-kotlin-contract.test.js",
-          "tests/wave679-sdk-rn-contract.test.js"
+          "tests/wave679-sdk-rn-contract.test.js",
+          "tests/wave680-sdk-swift-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
