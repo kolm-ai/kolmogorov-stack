@@ -201,10 +201,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 138
+        "line": 139
       },
       "local_sota_review": {
-        "line": 138,
+        "line": 139,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -637,10 +637,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 192
+        "line": 193
       },
       "local_sota_review": {
-        "line": 192,
+        "line": 193,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -1068,10 +1068,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 239
+        "line": 240
       },
       "local_sota_review": {
-        "line": 239,
+        "line": 240,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1514,10 +1514,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 284
+        "line": 285
       },
       "local_sota_review": {
-        "line": 284,
+        "line": 285,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -1950,10 +1950,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 326
+        "line": 327
       },
       "local_sota_review": {
-        "line": 326,
+        "line": 327,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2354,10 +2354,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 360
+        "line": 361
       },
       "local_sota_review": {
-        "line": 360,
+        "line": 361,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2811,10 +2811,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 401
+        "line": 402
       },
       "local_sota_review": {
-        "line": 401,
+        "line": 402,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -3263,10 +3263,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 444
+        "line": 445
       },
       "local_sota_review": {
-        "line": 444,
+        "line": 445,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3720,10 +3720,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 479
+        "line": 480
       },
       "local_sota_review": {
-        "line": 479,
+        "line": 480,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -4185,10 +4185,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 507
+        "line": 508
       },
       "local_sota_review": {
-        "line": 507,
+        "line": 508,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4407,18 +4407,6 @@
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           },
           {
-            "path": "src/marketplace-routes.js",
-            "domain": "api_surface",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "http_route_surface",
-              "money_or_entitlement_path"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/transparency-log-routes.js",
             "domain": "api_surface",
             "priority_score": 8,
@@ -4447,6 +4435,20 @@
               "tests/wave777-ab-router.test.js",
               "tests/wave778-stat-sig.test.js",
               "tests/wave822-ab-testing.test.js"
+            ],
+            "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
+          },
+          {
+            "path": "src/marketplace-routes.js",
+            "domain": "api_surface",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "http_route_surface",
+              "money_or_entitlement_path"
+            ],
+            "test_refs": [
+              "tests/wave647-marketplace-routes-contract.test.js"
             ],
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
           },
@@ -4647,10 +4649,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 554
+        "line": 555
       },
       "local_sota_review": {
-        "line": 554,
+        "line": 555,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -5114,10 +5116,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 587
+        "line": 588
       },
       "local_sota_review": {
-        "line": 587,
+        "line": 588,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5621,10 +5623,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 618
+        "line": 619
       },
       "local_sota_review": {
-        "line": 618,
+        "line": 619,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6120,10 +6122,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 664
+        "line": 665
       },
       "local_sota_review": {
-        "line": 664,
+        "line": 665,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -6586,10 +6588,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 714
+        "line": 715
       },
       "local_sota_review": {
-        "line": 714,
+        "line": 715,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -6759,18 +6761,6 @@
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           },
           {
-            "path": "src/marketplace-routes.js",
-            "domain": "api_surface",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "http_route_surface",
-              "money_or_entitlement_path"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/transparency-log-routes.js",
             "domain": "api_surface",
             "priority_score": 8,
@@ -6799,6 +6789,20 @@
               "tests/wave777-ab-router.test.js",
               "tests/wave778-stat-sig.test.js",
               "tests/wave822-ab-testing.test.js"
+            ],
+            "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
+          },
+          {
+            "path": "src/marketplace-routes.js",
+            "domain": "api_surface",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "http_route_surface",
+              "money_or_entitlement_path"
+            ],
+            "test_refs": [
+              "tests/wave647-marketplace-routes-contract.test.js"
             ],
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
           },
@@ -7059,10 +7063,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 761
+        "line": 762
       },
       "local_sota_review": {
-        "line": 761,
+        "line": 762,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,

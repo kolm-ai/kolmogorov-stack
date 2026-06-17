@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 88.9,
-    "frontier_product_score": 68.5,
+    "local_engineering_score": 89.4,
+    "frontier_product_score": 68.6,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,12 +35,12 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 664,
-    "direct_test_reference_pct": 80.1,
-    "components_without_direct_test_reference": 165,
+    "direct_test_referenced_components": 667,
+    "direct_test_reference_pct": 80.5,
+    "components_without_direct_test_reference": 162,
     "high_priority_components": 49,
-    "high_priority_direct_test_referenced": 44,
-    "high_priority_direct_test_reference_pct": 89.8,
+    "high_priority_direct_test_referenced": 45,
+    "high_priority_direct_test_reference_pct": 91.8,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 10,
     "categories_with_major_frontier_work_open": 13,
@@ -1138,41 +1138,6 @@
       ]
     },
     {
-      "path": "src/marketplace-routes.js",
-      "domain": "api_surface",
-      "surface": "api-http",
-      "priority_score": 8,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "http_route_surface",
-        "money_or_entitlement_path"
-      ],
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "high_priority_direct_test_missing",
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "llm-routing",
-          "stack_area": "gateway",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Add a direct contract/security/regression test before expanding this component.",
-      "suggested_verification": [
-        "npm run lint:refs",
-        "npm run verify:surfaces"
-      ]
-    },
-    {
       "path": "workers/compile-server/server.mjs",
       "domain": "compile_artifact_runtime",
       "surface": "worker",
@@ -1828,6 +1793,77 @@
       "suggested_verification": [
         "npm run lint:refs",
         "npm run verify:surfaces"
+      ]
+    },
+    {
+      "path": "src/airgap-distill.js",
+      "domain": "training_model_optimization",
+      "surface": "core-backend",
+      "priority_score": 7,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary",
+        "network_or_provider_boundary",
+        "stateful_storage_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "distillation",
+          "stack_area": "training",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "moe-distill-quant",
+          "stack_area": "training",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "quantization",
+          "stack_area": "compiler-runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "speculative-decoding",
+          "stack_area": "runtime",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "finetune-frameworks",
+          "stack_area": "training",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "synthetic-data-curation",
+          "stack_area": "data",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "small-llm-students",
+          "stack_area": "model-registry",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "confidential-compute",
+          "stack_area": "enterprise",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "required"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
+      "suggested_verification": [
+        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+        "npm run verify:quant-oracle"
       ]
     }
   ],
@@ -26603,7 +26639,7 @@
           "environment_configuration_boundary",
           "money_or_entitlement_path"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
         "sha256": "557ceb243862578071ce6e3e3f657b52d9b216dcc39f816d9c9a6e19919d7c88"
       },
@@ -26613,7 +26649,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave647-marketplace-routes-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
         "innovation_opportunity": "Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.",
@@ -26621,10 +26659,8 @@
           "node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep signed_entitlement_ledger_and_webhook_idempotency_proof current."
     },
     {
       "path": "src/marketplace-routes.js",
@@ -26634,8 +26670,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 17466,
-          "lines": 460,
+          "bytes": 17982,
+          "lines": 479,
           "imports": 8,
           "exports": 1,
           "routes": 8,
@@ -26651,9 +26687,9 @@
           "http_route_surface",
           "money_or_entitlement_path"
         ],
-        "priority_score": 8,
+        "priority_score": 7,
         "priority_band": "high",
-        "sha256": "d13679c6ada80040f4969d41084e449eb3ede13bcff0018f9d1aed38eedf5a55"
+        "sha256": "6cb85b221d30171e2e9599d6a680e3563349c565ddfc8e6cb19dd63ad4069f49"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -26661,7 +26697,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave647-marketplace-routes-contract.test.js"
+        ],
         "category_links": [
           {
             "id": "llm-routing",
@@ -26676,7 +26714,7 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
         "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
         "suggested_verification": [
           "npm run lint:refs",
@@ -26684,11 +26722,9 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing",
-        "high_priority_direct_test_missing",
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Add a direct contract/security/regression test before expanding this component."
+      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
     },
     {
       "path": "src/marketplace-store.js",
@@ -26762,7 +26798,7 @@
           "environment_configuration_boundary",
           "money_or_entitlement_path"
         ],
-        "priority_score": 6,
+        "priority_score": 5,
         "priority_band": "medium",
         "sha256": "73fe6ef2bea437250ef82eb8bec497f40bb14f50f4f63dfa4e8f5811e0705d14"
       },
@@ -26772,18 +26808,18 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave647-marketplace-routes-contract.test.js"
+        ],
         "category_links": [],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
         "innovation_opportunity": "Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.",
         "suggested_verification": [
           "node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep signed_entitlement_ledger_and_webhook_idempotency_proof current."
     },
     {
       "path": "src/marketplace.js",

@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 664,
-    "components_without_direct_test_reference": 165,
+    "test_referenced_components": 667,
+    "components_without_direct_test_reference": 162,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -427,17 +427,6 @@
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
       },
       {
-        "path": "src/marketplace-routes.js",
-        "domain": "api_surface",
-        "priority_score": 8,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "http_route_surface",
-          "money_or_entitlement_path"
-        ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-      },
-      {
         "path": "workers/compile-server/server.mjs",
         "domain": "compile_artifact_runtime",
         "priority_score": 8,
@@ -461,6 +450,18 @@
           "http_route_surface"
         ],
         "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests"
+      },
+      {
+        "path": "src/transparency-log-routes.js",
+        "domain": "api_surface",
+        "priority_score": 8,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "http_route_surface",
+          "network_or_provider_boundary"
+        ],
+        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
       }
     ]
   },
@@ -29208,12 +29209,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave647-marketplace-routes-contract.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary",
         "money_or_entitlement_path"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -29250,10 +29253,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "d13679c6ada80040f4969d41084e449eb3ede13bcff0018f9d1aed38eedf5a55",
+      "sha256": "6cb85b221d30171e2e9599d6a680e3563349c565ddfc8e6cb19dd63ad4069f49",
       "metrics": {
-        "bytes": 17466,
-        "lines": 460,
+        "bytes": 17982,
+        "lines": 479,
         "imports": 8,
         "exports": 1,
         "routes": 8,
@@ -29264,13 +29267,15 @@
         "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave647-marketplace-routes-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "http_route_surface",
         "money_or_entitlement_path"
       ],
-      "priority_score": 8,
+      "priority_score": 7,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -29295,7 +29300,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
       "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
       "suggested_verification": [
         "npm run lint:refs",
@@ -29378,13 +29383,15 @@
         "crypto_refs": 8,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave647-marketplace-routes-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "money_or_entitlement_path"
       ],
-      "priority_score": 6,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -29409,7 +29416,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
       "innovation_opportunity": "Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.",
       "suggested_verification": [
         "node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js"

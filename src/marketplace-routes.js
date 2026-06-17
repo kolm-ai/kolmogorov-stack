@@ -255,33 +255,6 @@ export function registerMarketplaceRoutes(r) {
           version: MARKETPLACE_W825_VERSION,
         });
       }
-      // Record download counter (on the listing) + per-tenant event (for
-      // anti-gaming check on the rate route).
-      recordDownload(listing.id);
-      recordDownloadEvent({ listing_id: listing.id, tenant_id: tenant.id });
-      // Ledger row for revenue share - only paid listings.
-      if (listing.paid && listing.price_micro_usd > 0) {
-        await recordRevenue({
-          listing_id: listing.id,
-          publisher_tenant_id: listing.publisher_tenant_id,
-          micro_usd: listing.price_micro_usd,
-        });
-      }
-      // Audit (best-effort).
-      try {
-        await tryAppendAudit({
-          tenant_id: tenant.id,
-          op: 'marketplace.download',
-          actor: tenant.id,
-          target: listing.id,
-          attributes: {
-            paid: listing.paid,
-            price_micro_usd: listing.price_micro_usd,
-            manifest_sha256: listing.manifest_sha256,
-            version: MARKETPLACE_W825_VERSION,
-          },
-        });
-      } catch (_e) { /* best-effort */ }
       // Stream the bytes. If the artifact_uri is remote, surface as 501 - the
       // MVP only streams local files. (Future revisions can proxy s3:// / https://.)
       const uri = listing.artifact_uri;
@@ -316,7 +289,24 @@ export function registerMarketplaceRoutes(r) {
       res.set('X-Kolm-Manifest-Sha256', listing.manifest_sha256 || '');
       res.set('X-Kolm-Listing-Id', listing.id);
       res.set('X-Kolm-Marketplace-Version', MARKETPLACE_W825_VERSION);
-      return fs.createReadStream(uri).pipe(res);
+      const stream = fs.createReadStream(uri);
+      stream.once('error', (err) => {
+        if (!res.headersSent) {
+          res.status(500).json({
+            ok: false,
+            error: 'artifact_stream_error',
+            detail: String(err && err.message || err),
+            listing_id: listing.id,
+            version: MARKETPLACE_W825_VERSION,
+          });
+        } else {
+          res.destroy(err);
+        }
+      });
+      res.once('finish', () => {
+        _recordSuccessfulDownload({ tenant, listing }).catch(() => {});
+      });
+      return stream.pipe(res);
     } catch (e) {
       return res.status(500).json({
         ok: false,
@@ -456,4 +446,33 @@ function _isLocalPath(uri) {
   if (/^s3:\/\//i.test(uri)) return false;
   if (/^gs:\/\//i.test(uri)) return false;
   return true;
+}
+
+async function _recordSuccessfulDownload({ tenant, listing }) {
+  // Record only after the 200 artifact response has finished. Failed preflight
+  // paths (missing URI, remote URI, missing local file, auth/entitlement) must
+  // never create rating eligibility or marketplace revenue.
+  recordDownload(listing.id);
+  recordDownloadEvent({ listing_id: listing.id, tenant_id: tenant.id });
+  if (listing.paid && listing.price_micro_usd > 0) {
+    await recordRevenue({
+      listing_id: listing.id,
+      publisher_tenant_id: listing.publisher_tenant_id,
+      micro_usd: listing.price_micro_usd,
+    });
+  }
+  try {
+    await tryAppendAudit({
+      tenant_id: tenant.id,
+      op: 'marketplace.download',
+      actor: tenant.id,
+      target: listing.id,
+      attributes: {
+        paid: listing.paid,
+        price_micro_usd: listing.price_micro_usd,
+        manifest_sha256: listing.manifest_sha256,
+        version: MARKETPLACE_W825_VERSION,
+      },
+    });
+  } catch (_e) { /* best-effort */ }
 }
