@@ -21968,13 +21968,20 @@ res.json({
 
       // Best-effort webhook delivery (no retries, 5s timeout).
       if (alert && hooks.length > 0) {
-        const payload = {
-          kolm_alert: 'distribution_shift',
+        const envelope = driftAlert.buildAlertEnvelope({
           namespace,
-          jsd: compare.jsd,
-          top_diverging: compare.top_diverging_tokens,
+          tenant_id,
+          compare,
+          threshold,
+          alert,
           suggestions,
-          ts: new Date().toISOString(),
+          generated_at: new Date().toISOString(),
+        });
+        const payload = {
+          ...envelope,
+          kolm_alert: 'distribution_shift',
+          top_diverging: envelope.top_diverging,
+          ts: envelope.generated_at,
         };
         for (const h of hooks) {
           // Fire-and-forget; do not block the response on webhook latency.

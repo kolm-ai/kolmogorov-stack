@@ -48,6 +48,16 @@ export const DEFAULTS = Object.freeze({
   SUGGESTION_TOP_N: 3,
   // How many tokens the "diverging tokens" list returns to the dashboard.
   TOP_DIVERGING: 20,
+  // Frontier hardening: all public math functions are safe against hostile
+  // sketches and unexpectedly huge text samples.
+  MAX_TOP_K: 2000,
+  MAX_SAMPLES: 10000,
+  MAX_SAMPLE_CHARS: 8192,
+  MAX_WORDS_PER_SAMPLE: 512,
+  MAX_TOKEN_CHARS: 64,
+  MAX_SUPPORT_KEYS: 4096,
+  MAX_SUGGESTIONS: 10,
+  MAX_SUGGESTION_CHARS: 240,
 });
 
 // ---------------------------------------------------------------------------
@@ -68,15 +78,19 @@ export const DEFAULTS = Object.freeze({
  * @param {string} text
  * @returns {string[]}
  */
-export function tokenizeForDistribution(text) {
+export function tokenizeForDistribution(text, opts = {}) {
   if (text == null) return [];
-  const s = String(text).toLowerCase();
+  const maxChars = _boundedInt(opts.max_chars, DEFAULTS.MAX_SAMPLE_CHARS, 1, DEFAULTS.MAX_SAMPLE_CHARS);
+  const maxWords = _boundedInt(opts.max_words, DEFAULTS.MAX_WORDS_PER_SAMPLE, 1, DEFAULTS.MAX_WORDS_PER_SAMPLE);
+  const maxTokenChars = _boundedInt(opts.max_token_chars, DEFAULTS.MAX_TOKEN_CHARS, 1, DEFAULTS.MAX_TOKEN_CHARS);
+  const s = String(text).toLowerCase().slice(0, maxChars);
   // Word-split: [a-z0-9_]+ runs. Punctuation and whitespace are separators.
   const words = [];
   const re = /[a-z0-9_]+/g;
   let m;
   while ((m = re.exec(s)) !== null) {
-    if (m[0]) words.push(m[0]);
+    if (m[0]) words.push(m[0].slice(0, maxTokenChars));
+    if (words.length >= maxWords) break;
   }
   const out = [];
   // monograms
@@ -117,11 +131,12 @@ export function tokenizeForDistribution(text) {
  * @returns {{[token:string]: number, _total: number, _top_k: number}}
  */
 export function buildDistributionSketch(samples, opts = {}) {
-  const topK = Math.max(1, Math.trunc(opts.top_k == null ? DEFAULTS.TOP_K : opts.top_k));
+  const topK = _boundedInt(opts.top_k, DEFAULTS.TOP_K, 1, DEFAULTS.MAX_TOP_K);
+  const maxSamples = _boundedInt(opts.max_samples, DEFAULTS.MAX_SAMPLES, 1, DEFAULTS.MAX_SAMPLES);
   const counts = new Map();
-  const arr = Array.isArray(samples) ? samples : [];
+  const arr = Array.isArray(samples) ? samples.slice(0, maxSamples) : [];
   for (const s of arr) {
-    for (const t of tokenizeForDistribution(s)) {
+    for (const t of tokenizeForDistribution(s, opts)) {
       counts.set(t, (counts.get(t) || 0) + 1);
     }
   }
@@ -149,6 +164,64 @@ export function buildDistributionSketch(samples, opts = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Sketch normalization.
+//
+// Route payloads and stored snapshots can be user-controlled. Before any KL/JSD
+// math, normalize the object into a null-prototype, bounded-support sketch with
+// finite non-negative counts. This prevents prototype-pollution keys, negative
+// probabilities, Infinity, and memory blowups from poisoning the alert result.
+// ---------------------------------------------------------------------------
+
+const META_KEYS = new Set(['_total', '_top_k']);
+const RESERVED_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+export function normalizeSketch(sketch, opts = {}) {
+  const maxSupport = _boundedInt(opts.max_support_keys, DEFAULTS.MAX_SUPPORT_KEYS, 1, DEFAULTS.MAX_SUPPORT_KEYS);
+  const out = Object.create(null);
+  if (!sketch || typeof sketch !== 'object') {
+    out._other = 0;
+    out._total = 0;
+    out._top_k = maxSupport;
+    return out;
+  }
+
+  const counts = new Map();
+  for (const rawKey of Object.keys(sketch)) {
+    if (META_KEYS.has(rawKey)) continue;
+    const key = _normalizeTokenKey(rawKey);
+    if (!key) continue;
+    const count = _safeCount(sketch[rawKey]);
+    if (!(count > 0)) continue;
+    counts.set(key, (counts.get(key) || 0) + count);
+  }
+
+  const entries = [...counts.entries()].sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0);
+  });
+
+  let total = 0;
+  let overflow = 0;
+  for (let i = 0; i < entries.length; i++) {
+    const [token, count] = entries[i];
+    total += count;
+    if (i < maxSupport) {
+      out[token] = count;
+    } else {
+      overflow += count;
+    }
+  }
+  if (overflow > 0) out._other = (out._other || 0) + overflow;
+  if (out._other == null) out._other = 0;
+  out._total = total;
+  out._top_k = Math.min(
+    maxSupport,
+    _boundedInt(sketch._top_k, maxSupport, 1, maxSupport),
+  );
+  return out;
+}
+
+// ---------------------------------------------------------------------------
 // W747-1 - KL divergence on two sketches.
 //
 // We project both sketches onto the UNION of their keys (excluding meta keys
@@ -159,17 +232,16 @@ export function buildDistributionSketch(samples, opts = {}) {
 // Always >= 0, never NaN, never Infinity for valid inputs.
 // ---------------------------------------------------------------------------
 
-const META_KEYS = new Set(['_total', '_top_k']);
-
-function _supportKeys(p, q) {
+function _supportKeys(p, q, opts = {}) {
+  const maxSupport = _boundedInt(opts.max_support_keys, DEFAULTS.MAX_SUPPORT_KEYS, 1, DEFAULTS.MAX_SUPPORT_KEYS);
   const set = new Set();
   for (const k of Object.keys(p)) if (!META_KEYS.has(k)) set.add(k);
   for (const k of Object.keys(q)) if (!META_KEYS.has(k)) set.add(k);
-  return [...set];
+  return [...set].sort().slice(0, maxSupport);
 }
 
 function _probAt(sketch, key, smoothing) {
-  const count = Number(sketch[key] || 0);
+  const count = _safeCount(sketch[key]);
   // Use _total + smoothing*supportSize as the denominator at the call site
   // (we compute it once per pair to keep this hot path branch-free).
   return count + smoothing;
@@ -190,16 +262,18 @@ export function klDivergence(p, q, opts = {}) {
     return 0;
   }
   const smoothing = Math.max(1e-12, Number(opts.smoothing == null ? DEFAULTS.SMOOTHING : opts.smoothing));
-  const keys = _supportKeys(p, q);
+  const pp = normalizeSketch(p, opts);
+  const qq = normalizeSketch(q, opts);
+  const keys = _supportKeys(pp, qq, opts);
   if (keys.length === 0) return 0;
   // Smoothed denominators: total + smoothing * |support|.
-  const pTotal = Number(p._total || 0) + smoothing * keys.length;
-  const qTotal = Number(q._total || 0) + smoothing * keys.length;
+  const pTotal = Number(pp._total || 0) + smoothing * keys.length;
+  const qTotal = Number(qq._total || 0) + smoothing * keys.length;
   if (!(pTotal > 0) || !(qTotal > 0)) return 0;
   let kl = 0;
   for (const k of keys) {
-    const piCount = _probAt(p, k, smoothing);
-    const qiCount = _probAt(q, k, smoothing);
+    const piCount = _probAt(pp, k, smoothing);
+    const qiCount = _probAt(qq, k, smoothing);
     const pi = piCount / pTotal;
     const qi = qiCount / qTotal;
     if (!(pi > 0)) continue;
@@ -217,7 +291,7 @@ export function klDivergence(p, q, opts = {}) {
 //
 // JSD(P, Q) = 0.5 * KL(P || M) + 0.5 * KL(Q || M) where M = 0.5*(P + Q).
 // Bounded in [0, ln(2)] in nats; we clip to [0, 1] for dashboard scaling
-// (the threshold of 0.15 is in nats and well below ln(2)≈0.693).
+// (the threshold of 0.15 is in nats and well below ln(2) ~= 0.693).
 // ---------------------------------------------------------------------------
 
 /**
@@ -232,19 +306,19 @@ export function klDivergence(p, q, opts = {}) {
  */
 export function compareSketches(trainingSketch, productionSketch, opts = {}) {
   const smoothing = Math.max(1e-12, Number(opts.smoothing == null ? DEFAULTS.SMOOTHING : opts.smoothing));
-  const topN = Math.max(1, Math.trunc(opts.top_n == null ? DEFAULTS.TOP_DIVERGING : opts.top_n));
-  const p = trainingSketch && typeof trainingSketch === 'object' ? trainingSketch : Object.create(null);
-  const q = productionSketch && typeof productionSketch === 'object' ? productionSketch : Object.create(null);
+  const topN = _boundedInt(opts.top_n, DEFAULTS.TOP_DIVERGING, 1, DEFAULTS.MAX_SUPPORT_KEYS);
+  const p = normalizeSketch(trainingSketch, opts);
+  const q = normalizeSketch(productionSketch, opts);
 
   // Build the merged sketch M = 0.5 * (P + Q) for JSD.
-  const keys = _supportKeys(p, q);
+  const keys = _supportKeys(p, q, opts);
   const pTotalForP = Number(p._total || 0) + smoothing * keys.length;
   const qTotalForQ = Number(q._total || 0) + smoothing * keys.length;
   const m = Object.create(null);
   let mTotal = 0;
   for (const k of keys) {
-    const pi = ((Number(p[k] || 0)) + smoothing) / (pTotalForP || 1);
-    const qi = ((Number(q[k] || 0)) + smoothing) / (qTotalForQ || 1);
+    const pi = (_safeCount(p[k]) + smoothing) / (pTotalForP || 1);
+    const qi = (_safeCount(q[k]) + smoothing) / (qTotalForQ || 1);
     const mi = 0.5 * (pi + qi);
     // Stash the *probability* directly so we don't have to rebuild totals.
     m[k] = mi;
@@ -266,8 +340,8 @@ export function compareSketches(trainingSketch, productionSketch, opts = {}) {
   // Top diverging tokens by absolute probability delta.
   const diff = [];
   for (const k of keys) {
-    const pTrain = ((Number(p[k] || 0)) + smoothing) / (pTotalForP || 1);
-    const pProd = ((Number(q[k] || 0)) + smoothing) / (qTotalForQ || 1);
+    const pTrain = (_safeCount(p[k]) + smoothing) / (pTotalForP || 1);
+    const pProd = (_safeCount(q[k]) + smoothing) / (qTotalForQ || 1);
     const delta = Math.abs(pTrain - pProd);
     if (delta <= 0) continue;
     diff.push({
@@ -295,7 +369,7 @@ export function compareSketches(trainingSketch, productionSketch, opts = {}) {
 function _klFromProbs(countSketch, probSketch, keys, smoothing, totalDenom) {
   let kl = 0;
   for (const k of keys) {
-    const pi = ((Number(countSketch[k] || 0)) + smoothing) / (totalDenom || 1);
+    const pi = (_safeCount(countSketch[k]) + smoothing) / (totalDenom || 1);
     const qi = Number(probSketch[k] || 0);
     if (!(pi > 0)) continue;
     if (!(qi > 0)) continue;
@@ -325,7 +399,7 @@ function _klFromProbs(countSketch, probSketch, keys, smoothing, totalDenom) {
  * @returns {string[]} suggestions in priority order; empty when no shifts detected
  */
 export function generateShiftSuggestion(compareResult, opts = {}) {
-  const topN = Math.max(1, Math.trunc(opts.top_n == null ? DEFAULTS.SUGGESTION_TOP_N : opts.top_n));
+  const topN = _boundedInt(opts.top_n, DEFAULTS.SUGGESTION_TOP_N, 1, DEFAULTS.MAX_SUGGESTIONS);
   if (!compareResult || !Array.isArray(compareResult.top_diverging_tokens)) return [];
   const items = compareResult.top_diverging_tokens.filter((d) => Number(d.p_prod) > Number(d.p_train));
   if (items.length === 0) return [];
@@ -337,6 +411,8 @@ export function generateShiftSuggestion(compareResult, opts = {}) {
   });
   const out = [];
   for (const it of items.slice(0, topN)) {
+    const token = _safeSuggestionToken(it.token);
+    if (!token) continue;
     const pTrain = Number(it.p_train);
     const pProd = Number(it.p_prod);
     const delta = pProd - pTrain;
@@ -349,10 +425,9 @@ export function generateShiftSuggestion(compareResult, opts = {}) {
     const capCount = Math.max(50, Math.round(delta * 1000));
     // Round to nearest 50 for readability.
     const rounded = Math.max(50, Math.round(capCount / 50) * 50);
-    out.push(
-      `Your student sees ${pct}% more "${it.token}" queries than trained. ` +
-      `Capture ${rounded} more "${it.token}" examples.`
-    );
+    const msg = `Your student sees ${pct}% more "${token}" queries than trained. `
+      + `Capture ${rounded} more "${token}" examples.`;
+    out.push(msg.slice(0, DEFAULTS.MAX_SUGGESTION_CHARS));
   }
   return out;
 }
@@ -371,15 +446,147 @@ export function shouldAlert(compareResult, opts = {}) {
   const thr = Number.isFinite(Number(opts.jsd_threshold))
     ? Number(opts.jsd_threshold)
     : DEFAULTS.JSD_THRESHOLD;
-  return Number(compareResult.jsd) >= thr;
+  const boundedThreshold = Math.max(0, Math.min(1, thr));
+  return Number(compareResult.jsd) >= boundedThreshold;
 }
 
 // ---------------------------------------------------------------------------
-// Convenience: opaque alert id for downstream sinks that key by id.
+// Alert delivery envelope helpers.
 // ---------------------------------------------------------------------------
 
-export function newAlertId() {
+export function buildAlertEnvelope({
+  namespace = 'default',
+  tenant_id = null,
+  compare = null,
+  threshold = DEFAULTS.JSD_THRESHOLD,
+  alert = null,
+  suggestions = [],
+  generated_at = null,
+  alert_id = null,
+} = {}) {
+  const safeCompare = compare && typeof compare === 'object' ? compare : {};
+  const top = Array.isArray(safeCompare.top_diverging_tokens)
+    ? safeCompare.top_diverging_tokens.slice(0, DEFAULTS.TOP_DIVERGING).map((d) => ({
+      token: _safeSuggestionToken(d && d.token),
+      p_train: _safeProbability(d && d.p_train),
+      p_prod: _safeProbability(d && d.p_prod),
+      ratio: _safeRatio(d && d.ratio),
+    })).filter((d) => d.token)
+    : [];
+  const at = _safeIso(generated_at) || new Date().toISOString();
+  const core = {
+    kind: 'distribution_shift',
+    namespace: _normalizeNamespace(namespace),
+    tenant_hash: tenant_id ? _sha256Hex(`tenant:${String(tenant_id)}`) : null,
+    kl: _safeNonNegative(safeCompare.kl),
+    jsd: _safeProbability(safeCompare.jsd),
+    threshold: _safeProbability(threshold),
+    alert: alert == null ? shouldAlert(safeCompare, { jsd_threshold: threshold }) : alert === true,
+    top_diverging: top,
+    suggestions: Array.isArray(suggestions)
+      ? suggestions.slice(0, DEFAULTS.MAX_SUGGESTIONS).map((s) => _safeSuggestion(s)).filter(Boolean)
+      : [],
+    generated_at: at,
+    version: DRIFT_ALERT_VERSION,
+  };
+  const baseHash = _sha256Hex(_stableJson(core));
+  const id = alert_id ? _normalizeAlertId(alert_id) : `driftalert_${baseHash.slice(0, 16)}`;
+  const withId = { ...core, alert_id: id };
+  return {
+    ...withId,
+    payload_sha256: _sha256Hex(_stableJson(withId)),
+  };
+}
+
+// Convenience: opaque alert id for downstream sinks that key by id.
+export function newAlertId(seed = null) {
+  if (seed != null) {
+    return `driftalert_${_sha256Hex(_stableJson(seed)).slice(0, 16)}`;
+  }
   return 'driftalert_' + crypto.randomBytes(8).toString('hex');
+}
+
+function _boundedInt(value, fallback, min, max) {
+  const n = Number(value == null ? fallback : value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, Math.trunc(n)));
+}
+
+function _safeCount(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.min(Number.MAX_SAFE_INTEGER, n);
+}
+
+function _safeNonNegative(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+function _safeProbability(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(1, n));
+}
+
+function _safeRatio(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(1_000_000, n);
+}
+
+function _normalizeNamespace(value) {
+  const s = String(value == null ? 'default' : value)
+    .replace(/[\x00-\x1F\x7F]/g, ' ')
+    .trim()
+    .slice(0, 128);
+  return s || 'default';
+}
+
+function _normalizeTokenKey(value) {
+  const s = String(value || '')
+    .toLowerCase()
+    .replace(/[\x00-\x1F\x7F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, DEFAULTS.MAX_TOKEN_CHARS);
+  if (!s || META_KEYS.has(s) || RESERVED_KEYS.has(s)) return null;
+  return s;
+}
+
+function _safeSuggestionToken(value) {
+  return _normalizeTokenKey(value);
+}
+
+function _safeSuggestion(value) {
+  const s = String(value == null ? '' : value)
+    .replace(/[\x00-\x1F\x7F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, DEFAULTS.MAX_SUGGESTION_CHARS);
+  return s || null;
+}
+
+function _safeIso(value) {
+  const s = value == null ? null : String(value);
+  if (!s || Number.isNaN(Date.parse(s))) return null;
+  return new Date(s).toISOString();
+}
+
+function _normalizeAlertId(value) {
+  const s = String(value || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 96);
+  return s || newAlertId();
+}
+
+function _stableJson(value) {
+  if (value == null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map((v) => _stableJson(v)).join(',')}]`;
+  const keys = Object.keys(value).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${_stableJson(value[k])}`).join(',')}}`;
+}
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value || '')).digest('hex');
 }
 
 export default {
@@ -387,9 +594,11 @@ export default {
   DEFAULTS,
   tokenizeForDistribution,
   buildDistributionSketch,
+  normalizeSketch,
   klDivergence,
   compareSketches,
   generateShiftSuggestion,
   shouldAlert,
+  buildAlertEnvelope,
   newAlertId,
 };

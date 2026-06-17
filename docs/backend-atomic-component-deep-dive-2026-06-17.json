@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 703,
-    "components_without_direct_test_reference": 126,
+    "test_referenced_components": 704,
+    "components_without_direct_test_reference": 125,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -21343,26 +21343,28 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "12ed7ca929693f88161405073c40b8fe3bc3458d1c5d6b86d48f77f9e7a198c3",
+      "sha256": "37dec0a153ba7d4bbff0dc34f119bd009fcd951292e824a97ff765f585722e60",
       "metrics": {
-        "bytes": 16229,
-        "lines": 396,
+        "bytes": 23423,
+        "lines": 605,
         "imports": 1,
-        "exports": 10,
+        "exports": 12,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 1,
         "network_refs": 0,
-        "crypto_refs": 3,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave684-drift-alert-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -37439,10 +37441,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "5658a8e994d0044c864ebf31922e57fe0af15ba09520008477e7f90047d79692",
+      "sha256": "92eafcd2d79c0d85c447704bd09011927d798791dc9e6e053d7ba38ab8238994",
       "metrics": {
-        "bytes": 1466611,
-        "lines": 30760,
+        "bytes": 1466794,
+        "lines": 30767,
         "imports": 535,
         "exports": 8,
         "routes": 810,
