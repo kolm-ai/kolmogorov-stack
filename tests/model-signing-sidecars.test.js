@@ -256,3 +256,17 @@ test('toOmsArtifactManifest: throws when no member has a valid sha256 (never sig
   assert.throws(() => toOmsArtifactManifest([{ name: 'x.bin', sha256: 'nope' }], signer), /no members/);
   assert.throws(() => toOmsArtifactManifest('not-an-array', signer), /must be an array/);
 });
+
+test('W615 closure: backend spec and depth gate include model-signing sidecars', () => {
+  const root = process.cwd();
+  const spec = fs.readFileSync(path.join(root, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
+  const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+
+  assert.match(spec, /CLOSED W615: write a build-time OMS\/SLSA DSSE sidecar into the \.kolm container/);
+  assert.match(spec, /CLOSED W615: add an OMS file-manifest bundle over the artifact's actual weight members/);
+  assert.match(spec, /provenance\.intoto\.dsse\.json/);
+  assert.match(spec, /model\.sig\.bundle/);
+  assert.match(pkg.scripts['verify:model-signing'], /tests\/model-signing-sidecars\.test\.js/);
+  assert.match(pkg.scripts['verify:model-signing'], /tests\/model-signing-build-sidecars\.test\.js/);
+  assert.match(pkg.scripts['verify:depth'], /npm run verify:model-signing/);
+});
