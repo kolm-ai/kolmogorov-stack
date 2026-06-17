@@ -18,7 +18,13 @@ import path from 'node:path';
 import { ingestForAudit } from '../src/audit-ingest.js';
 import { normalizeEvent } from '../src/audit-event.js';
 import { runAudit } from '../src/audit-orchestrator.js';
-import { runRedTeam, mergeActiveResults, RED_TEAM_SPEC_VERSION } from '../src/red-team.js';
+import {
+  BENCHMARK_CROSSWALK_NOTE,
+  BENCHMARK_MAP,
+  runRedTeam,
+  mergeActiveResults,
+  RED_TEAM_SPEC_VERSION,
+} from '../src/red-team.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const FIXTURE = path.join(ROOT, 'examples', 'agent-audit', 'litellm-export.jsonl');
@@ -72,6 +78,7 @@ test('every probe is well-formed and maps to OWASP LLM Top 10 + MITRE ATLAS', ()
     assert.ok(Array.isArray(p.frameworks) && p.frameworks.length >= 2, 'probe carries framework refs');
     assert.ok(p.frameworks.some((f) => /OWASP/.test(f)), `${p.id} maps to OWASP`);
     assert.ok(p.frameworks.some((f) => /MITRE ATLAS/.test(f)), `${p.id} maps to MITRE ATLAS`);
+    assert.ok(Array.isArray(p.benchmark_refs) && p.benchmark_refs.length >= 2, `${p.id} carries public benchmark refs`);
     assert.ok(Array.isArray(p.evidence), 'evidence is an array');
   }
   // The twelve named core probes are all present.
@@ -81,6 +88,27 @@ test('every probe is well-formed and maps to OWASP LLM Top 10 + MITRE ATLAS', ()
   ]) {
     assert.ok(probe(r, id), `core probe ${id} present`);
   }
+});
+
+test('every probe id has a public benchmark task-class cross-walk', () => {
+  const expectedIds = [
+    'system-prompt-override', 'tool-confused-deputy', 'data-exfil-via-tool', 'unicode-homoglyph-smuggling', 'nested-instruction', 'jailbreak-relay',
+    'tool-arg-escalation', 'mcp-discovery', 'runtime-guardrails-absent', 'unbounded-tool-calls', 'credential-in-log', 'exfil-to-untrusted-host',
+    'financial-transaction-injection', 'phi-exfiltration',
+  ];
+  for (const id of expectedIds) {
+    assert.ok(Array.isArray(BENCHMARK_MAP[id]), `BENCHMARK_MAP has ${id}`);
+    assert.ok(BENCHMARK_MAP[id].length >= 2, `${id} has benchmark refs`);
+    assert.ok(
+      BENCHMARK_MAP[id].some((ref) => /AgentDojo|InjecAgent|AgentHarm|Gray Swan|ART/.test(ref)),
+      `${id} maps to a named public agent benchmark family`,
+    );
+  }
+  const r = runRedTeam(fixtureEvents());
+  assert.equal(r.summary.benchmark_crosswalk_note, BENCHMARK_CROSSWALK_NOTE);
+  assert.ok(r.probes.some((p) => p.benchmark_refs.some((ref) => ref.includes('AgentDojo'))), 'result carries AgentDojo refs');
+  assert.ok(r.probes.some((p) => p.benchmark_refs.some((ref) => ref.includes('InjecAgent'))), 'result carries InjecAgent refs');
+  assert.ok(r.probes.some((p) => p.benchmark_refs.some((ref) => ref.includes('AgentHarm'))), 'result carries AgentHarm refs');
 });
 
 test('probe framework refs carry named ids that split cleanly on the last space', () => {
@@ -391,7 +419,7 @@ test('the twelve-probe battery still computes a bounded score with reconciling c
   // that is on no provider allowlist, and runs unguarded destructive tools.
   assert.equal(probe(r, 'exfil-to-untrusted-host').status, 'exposed', 'SSN emailed to an off-allowlist host');
   assert.equal(probe(r, 'runtime-guardrails-absent').status, 'exposed', 'destructive tools ran with no guardrail');
-  assert.equal(r.spec_version, 'asr-redteam/0.3', 'the battery version is bumped for the active-merge capability');
+  assert.equal(r.spec_version, RED_TEAM_SPEC_VERSION, 'the battery version is bumped for the benchmark cross-walk capability');
 });
 
 // ---------------------------------------------------------------------------
@@ -456,7 +484,7 @@ test('mergeActiveResults: untested + active resisted -> resisted with evidence_s
   // The score is recomputed over the now-exercised probe (one resisted -> 100).
   assert.equal(merged.red_team_score, 100);
   assert.equal(merged.summary.resisted, 1);
-  assert.equal(merged.spec_version, 'asr-redteam/0.3');
+  assert.equal(merged.spec_version, RED_TEAM_SPEC_VERSION);
   assert.equal(merged.summary.active.probes_merged, 1);
   assert.equal(merged.summary.active.consent_recorded, true);
   assert.match(merged.summary.note, /ACTIVE/, 'the summary names the active evidence');

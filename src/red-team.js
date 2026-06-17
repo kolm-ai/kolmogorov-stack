@@ -51,7 +51,12 @@ import { classifyScopeTier, isWildcardScope } from './audit-event.js';
 // consented ACTIVE probe outcomes (labeled per probe via evidence_source) next
 // to the passive log-derived ones. The version is recorded in every signed
 // report so a re-attestation pins exactly which battery shape produced it.
-export const RED_TEAM_SPEC_VERSION = 'asr-redteam/0.3';
+// Bumped 0.3 -> 0.4 when public benchmark task-class cross-walk references
+// became part of every probe and signed report block.
+export const RED_TEAM_SPEC_VERSION = 'asr-redteam/0.4';
+
+export const BENCHMARK_CROSSWALK_NOTE =
+  'Benchmark refs are descriptive task-class cross-walks only; this run did not execute those public benchmark suites.';
 
 // Severity weights for the graduated score (mirrors the readiness rollup's
 // pass=1 / blocking=0 idea, but severity-weighted so a critical exposure costs
@@ -461,6 +466,84 @@ function outcome(status, detail, evidence) {
   return { status, detail, evidence: Array.isArray(evidence) ? evidence.slice(0, 6) : [] };
 }
 
+export const BENCHMARK_MAP = Object.freeze({
+  'system-prompt-override': Object.freeze([
+    'AgentDojo: indirect prompt-injection task hijack',
+    'InjecAgent: prompt-injection / instruction-hijack intents',
+    'Gray Swan Arena / ART: jailbreak and instruction-following attacks',
+  ]),
+  'tool-confused-deputy': Object.freeze([
+    'AgentDojo: tool-using agent task hijack against granted tools',
+    'AgentHarm: tool misuse / excessive-agency harmful action classes',
+    'InjecAgent: privilege-escalation via agent tool use',
+  ]),
+  'data-exfil-via-tool': Object.freeze([
+    'AgentDojo: workspace and email data-exfiltration security tasks',
+    'AgentDojo-Inspect: mass-exfiltration task families',
+    'InjecAgent: data-exfiltration intent class',
+  ]),
+  'unicode-homoglyph-smuggling': Object.freeze([
+    'InjecAgent: obfuscated prompt-injection variants',
+    'Gray Swan Arena / ART: adversarial jailbreak obfuscation attacks',
+    'AgentDojo: indirect prompt-injection task variants',
+  ]),
+  'nested-instruction': Object.freeze([
+    'AgentDojo: indirect injection through untrusted tool data',
+    'InjecAgent: nested / indirect prompt-injection intent class',
+    'AgentDojo-Inspect: tool-data attack environments',
+  ]),
+  'jailbreak-relay': Object.freeze([
+    'Gray Swan Arena / ART: jailbreak attack families',
+    'AgentHarm: harmful agent behavior under adversarial instruction',
+    'InjecAgent: jailbreak / role-confusion intent class',
+  ]),
+  'tool-arg-escalation': Object.freeze([
+    'AgentDojo: malicious tool-argument manipulation tasks',
+    'AgentHarm: tool misuse / unauthorized action classes',
+    'InjecAgent: tool-use escalation intent class',
+  ]),
+  'mcp-discovery': Object.freeze([
+    'AgentDojo: tool-surface reconnaissance analog',
+    'AgentDojo-Inspect: expanded tool and environment discovery analog',
+    'AgentHarm: agentic reconnaissance / tool-selection misuse analog',
+  ]),
+  'runtime-guardrails-absent': Object.freeze([
+    'AgentHarm: harmful action without refusal or guardrail',
+    'Gray Swan Arena / ART: harmful-compliance attack families',
+    'AgentDojo: unsafe tool execution after injected instruction',
+  ]),
+  'unbounded-tool-calls': Object.freeze([
+    'AgentHarm: resource-abuse / runaway-agent behavior class',
+    'Gray Swan Arena / ART: cascading harmful-compliance stress analog',
+    'AgentDojo-Inspect: terminal / RCE environment runaway-risk analog',
+  ]),
+  'credential-in-log': Object.freeze([
+    'AgentDojo: secret leakage / workspace data exposure tasks',
+    'InjecAgent: credential and sensitive-data leakage intent classes',
+    'AgentDojo-Inspect: mass-exfiltration sensitive artifact analog',
+  ]),
+  'exfil-to-untrusted-host': Object.freeze([
+    'AgentDojo: external-send / workspace exfiltration tasks',
+    'AgentDojo-Inspect: mass-exfiltration task families',
+    'InjecAgent: data-exfiltration to attacker-controlled destination',
+  ]),
+  'financial-transaction-injection': Object.freeze([
+    'AgentHarm: high-impact financial harm / unauthorized action class',
+    'AgentDojo: tool-use task hijack with irreversible action analog',
+    'InjecAgent: goal-hijack / unauthorized transaction analog',
+  ]),
+  'phi-exfiltration': Object.freeze([
+    'AgentDojo: confidential workspace data-exfiltration task class',
+    'AgentDojo-Inspect: mass-exfiltration sensitive-record analog',
+    'InjecAgent: privacy leakage / data-exfiltration intent class',
+  ]),
+});
+
+export function benchmarkRefsForProbe(probeId) {
+  const refs = BENCHMARK_MAP[String(probeId || '')];
+  return Array.isArray(refs) ? refs.slice() : [];
+}
+
 const CORE_PROBES = [
   {
     id: 'system-prompt-override',
@@ -699,6 +782,7 @@ export function runRedTeam(events, opts = {}) {
         title: p.title,
         detail: r.detail,
         frameworks: [...p.frameworks],
+        benchmark_refs: benchmarkRefsForProbe(p.id),
         evidence: r.evidence,
       };
     });
@@ -714,6 +798,7 @@ export function runRedTeam(events, opts = {}) {
       resisted,
       exposed,
       untested,
+      benchmark_crosswalk_note: BENCHMARK_CROSSWALK_NOTE,
       note: den === 0
         ? 'No probe channel was exercised by the supplied logs; red-team resistance is untested for this export.'
         : undefined,
@@ -768,7 +853,11 @@ export function mergeActiveResults(passiveResult, activeRun) {
 
   const probes = passiveResult.probes.map((p) => {
     const ap = activeById.get(p.id);
-    const merged = { ...p, evidence_source: 'passive' };
+    const merged = {
+      ...p,
+      benchmark_refs: Array.isArray(p.benchmark_refs) ? p.benchmark_refs.slice() : benchmarkRefsForProbe(p.id),
+      evidence_source: 'passive',
+    };
     if (!ap || ap.status === 'untested') return merged;
     // An active outcome replaces untested; an active exposed overrides a
     // passive resisted (worst wins); a passive exposed is never erased.
@@ -800,6 +889,7 @@ export function mergeActiveResults(passiveResult, activeRun) {
       endpoint_digest: typeof activeRun.endpoint_digest === 'string' ? activeRun.endpoint_digest : null,
       consent_recorded: true,
     },
+    benchmark_crosswalk_note: BENCHMARK_CROSSWALK_NOTE,
     note: `Includes consented ACTIVE injection evidence (${activeRun.spec_version || 'active battery'}): `
       + `${probesMerged} probe outcome(s) are determined by live probes against the consented staging endpoint; `
       + `per-probe evidence_source labels active vs passive (log-derived) evidence.`

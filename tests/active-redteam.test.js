@@ -253,7 +253,6 @@ test('a refusal-mode active run merged over empty logs flips the active probes t
   const merged = mergeActiveResults(passive, active);
 
   assert.equal(merged.spec_version, RED_TEAM_SPEC_VERSION);
-  assert.equal(merged.spec_version, 'asr-redteam/0.3');
   for (const id of ACTIVE_PROBE_IDS) {
     const p = merged.probes.find((x) => x.id === id);
     assert.equal(p.status, 'resisted', `${id} merged to resisted`);
@@ -278,7 +277,7 @@ test('the merged block survives buildAndSignReport unchanged and the envelope st
   assert.equal(v.ok, true, 'the signed envelope with merged active evidence verifies');
 
   const rt = envelope.red_team;
-  assert.equal(rt.spec_version, 'asr-redteam/0.3');
+  assert.equal(rt.spec_version, RED_TEAM_SPEC_VERSION);
   assert.match(rt.summary.note, /ACTIVE/, 'the signed block names the active evidence source');
   // The dirty fixture's passive exposures are never erased by active resisted.
   const exfil = rt.probes.find((p) => p.id === 'data-exfil-via-tool');
@@ -325,7 +324,7 @@ test('the Deep Red-Team CLI runs the full path: passive audit + active battery +
 
     const envelope = JSON.parse(fs.readFileSync(out, 'utf8'));
     assert.equal(verifyReport(envelope).ok, true, 'the CLI-written envelope verifies offline');
-    assert.equal(envelope.red_team.spec_version, 'asr-redteam/0.3');
+    assert.equal(envelope.red_team.spec_version, RED_TEAM_SPEC_VERSION);
     assert.match(envelope.red_team.summary.note, /ACTIVE/);
   } finally {
     fs.rmSync(out, { force: true });

@@ -393,3 +393,15 @@ test('red_team probes pass evidence_source through, defaulting to passive', () =
     assert.equal(again.red_team.probes[0].evidence_source, 'active-harness');
   }
 });
+
+test('red_team probes carry signed public-benchmark cross-walk refs and render them', () => {
+  const { envelope } = buildAndSignReport(dirtyAudit(), { subject: 'X' });
+  assert.ok(envelope.red_team && Array.isArray(envelope.red_team.probes), 'red_team block present');
+  assert.ok(envelope.red_team.summary.benchmark_crosswalk_note.includes('did not execute'), 'scope note present');
+  assert.ok(envelope.red_team.probes.every((p) => Array.isArray(p.benchmark_refs) && p.benchmark_refs.length >= 2), 'every probe carries benchmark refs');
+  assert.ok(JSON.stringify(envelope.red_team).includes('AgentDojo'), 'signed JSON carries public benchmark refs');
+  assert.equal(verifyReport(envelope).ok, true, 'benchmark refs are inside the signed payload');
+  const html = renderReportHtml(envelope);
+  assert.ok(html.includes('Benchmark refs'), 'HTML renders the benchmark cross-walk column');
+  assert.ok(html.includes('AgentDojo'), 'HTML renders benchmark refs');
+});

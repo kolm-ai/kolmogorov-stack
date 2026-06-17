@@ -6587,12 +6587,12 @@
         "line": 685,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 6,
-        "improvement_count": 6,
+        "already_at_frontier_count": 7,
+        "improvement_count": 5,
         "gaps": {
           "critical": 1,
           "major": 4,
-          "minor": 2
+          "minor": 1
         }
       },
       "atomic_components": {
@@ -6631,10 +6631,11 @@
           {
             "path": "src/red-team.js",
             "domain": "identity_access",
-            "priority_score": 5,
+            "priority_score": 8,
             "risk_signals": [
               "auth_or_tenant_boundary",
               "cryptographic_or_proof_boundary",
+              "large_component_contract_risk",
               "network_or_provider_boundary"
             ],
             "test_refs": [

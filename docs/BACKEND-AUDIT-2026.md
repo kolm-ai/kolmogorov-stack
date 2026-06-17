@@ -44,7 +44,7 @@ Admin-gated (ADMIN_KEY / cron-secret): `POST /v1/audit/issuer-key/:fp/revoke`, `
 
 5. **`verifyReport()` does not check key revocation** (broken-wiring, tie-together). Same asymmetry in `attestation-report-builder.js`; the route adds the check, the pure verifier does not. *Spec: report revocation parity.*
 
-6. **`RED_TEAM_SPEC_VERSION` mismatch in orchestrator fallback** (broken-wiring, tie-together). `red-team.js` exports `'asr-redteam/0.3'`; `audit-orchestrator.js:232` hardcodes `'asr-redteam/0.1'` in the throw-fallback and never imports the constant. A red-team exception stamps a stale version into the signed audit result. Same pattern at `:206` (`asr-memory-ledger/0.1`). *Spec: orchestrator spec-version sync.*
+6. **CLOSED: spec-version constants are now imported by orchestrator fallbacks** (broken-wiring, tie-together). The red-team fallback now imports `RED_TEAM_SPEC_VERSION` from `red-team.js` (`asr-redteam/0.4` after W618), and the memory-ledger fallback is covered by the same spec-version sync tests. A future version bump should keep these paths constant-backed, never hardcoded. *Spec: orchestrator spec-version sync.*
 
 7. **Webhook accepts unvalidated `product_key` for continuous subscriptions** (auth-gap). `router.js:13154` resolves `product` from `metadata.product_key`/ref and passes it to `activateSubscription` (`asr-fulfillment.js:340`), which only checks `!product || !tenant_id`, never membership in `ASR_PRODUCTS`. A spoofed `product_key` creates a subscription row with an invalid product and can skip the cadence guard. *Spec: webhook fulfillment wiring (validate against `ASR_PRODUCTS`).*
 

@@ -32,7 +32,7 @@ import {
   keyFingerprint,
 } from './ed25519.js';
 import { ASR_CONTROLS } from './control-mapper.js';
-import { runRedTeam } from './red-team.js';
+import { BENCHMARK_CROSSWALK_NOTE, benchmarkRefsForProbe, runRedTeam } from './red-team.js';
 import { buildAgentPassport } from './passport-builder.js';
 import { buildSubprocessorInventory } from './subprocessor-inventory.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
@@ -52,7 +52,7 @@ import { status as issuerKeyStatus } from './key-revocation.js';
 // Versioned so a re-attestation is a comparable delta and a signed report
 // records exactly which builder shape produced it.
 export const AUDIT_REPORT_SCHEMA = 'kolm-audit-report-1';
-export const AUDIT_REPORT_VERSION = 'asr-report/0.1';
+export const AUDIT_REPORT_VERSION = 'asr-report/0.2';
 
 // The single contact surface for the report. dev@kolm.ai is the only address.
 const CONTACT_EMAIL = 'dev@kolm.ai';
@@ -392,6 +392,7 @@ export function buildRedTeamBlock(auditResult) {
       resisted: sum.resisted ?? 0,
       exposed: sum.exposed ?? 0,
       untested: sum.untested ?? 0,
+      benchmark_crosswalk_note: sum.benchmark_crosswalk_note || BENCHMARK_CROSSWALK_NOTE,
       note: sum.note,
     },
     probes: probes.map((p) => ({
@@ -402,6 +403,7 @@ export function buildRedTeamBlock(auditResult) {
       title: p.title || p.id,
       detail: p.detail || null,
       frameworks: Array.isArray(p.frameworks) ? p.frameworks.slice(0, 8) : [],
+      benchmark_refs: Array.isArray(p.benchmark_refs) ? p.benchmark_refs.slice(0, 8) : benchmarkRefsForProbe(p.id).slice(0, 8),
       evidence: Array.isArray(p.evidence) ? p.evidence.slice(0, 6) : [],
       // P3 interface: how the probe's verdict was evidenced. 'passive' is the
       // historical default (observed-traffic analysis); active harness probes
@@ -1263,11 +1265,12 @@ export function renderReportHtml(envelope, opts = {}) {
       <td><span class="sev" style="color:${_sevColor(p.severity)}">${esc((p.severity || '').toUpperCase())}</span></td>
       <td><span class="pill" style="background:${RT_STATUS_COLOR[p.status] || '#555'}">${esc(RT_STATUS_LABEL[p.status] || p.status)}</span></td>
       <td class="mono small">${esc((p.frameworks || []).join(' · '))}</td>
+      <td class="mono small">${esc((p.benchmark_refs || []).join(' | '))}</td>
     </tr>`).join('') : '';
   const rtSection = rt ? `
   <h2>Red-Team Resistance: ${esc(rtScore)}</h2>
-  <p class="sub small">Deterministic injection / agent-abuse battery (${esc(rt.domain || 'generic')} suite) over the ingested events. ${esc(rtSum.resisted ?? 0)} resisted, ${esc(rtSum.exposed ?? 0)} exposed, ${esc(rtSum.untested ?? 0)} untested of ${esc(rtSum.probes_total ?? 0)} probes. The score is a graduated rollup over the exercised probes only; untested probes are marked, never scored as a pass.</p>
-  <table><thead><tr><th>Probe</th><th>Severity</th><th>Observed resistance</th><th>Mapped to</th></tr></thead>
+  <p class="sub small">Deterministic injection / agent-abuse battery (${esc(rt.domain || 'generic')} suite) over the ingested events. ${esc(rtSum.resisted ?? 0)} resisted, ${esc(rtSum.exposed ?? 0)} exposed, ${esc(rtSum.untested ?? 0)} untested of ${esc(rtSum.probes_total ?? 0)} probes. The score is a graduated rollup over the exercised probes only; untested probes are marked, never scored as a pass. ${esc(rtSum.benchmark_crosswalk_note || BENCHMARK_CROSSWALK_NOTE)}</p>
+  <table><thead><tr><th>Probe</th><th>Severity</th><th>Observed resistance</th><th>Mapped to</th><th>Benchmark refs</th></tr></thead>
   <tbody>${rtRows}</tbody></table>` : '';
 
   // Agent identity passport (signature-covered). Rendered as a compact set of
@@ -1629,7 +1632,7 @@ export async function renderReportPdf(envelope, outputStream) {
     if (rt) {
       heading(`Red-team resistance: ${rtScore}`);
       doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.muted).text(
-        `Deterministic injection / agent-abuse battery (${rt.domain || 'generic'} suite) over the ingested events. ${rtSum.resisted ?? 0} resisted, ${rtSum.exposed ?? 0} exposed, ${rtSum.untested ?? 0} untested of ${rtSum.probes_total ?? 0} probes. The score is a graduated rollup over the exercised probes only; untested probes are marked, never scored as a pass.`,
+        `Deterministic injection / agent-abuse battery (${rt.domain || 'generic'} suite) over the ingested events. ${rtSum.resisted ?? 0} resisted, ${rtSum.exposed ?? 0} exposed, ${rtSum.untested ?? 0} untested of ${rtSum.probes_total ?? 0} probes. The score is a graduated rollup over the exercised probes only; untested probes are marked, never scored as a pass. ${rtSum.benchmark_crosswalk_note || BENCHMARK_CROSSWALK_NOTE}`,
         { width: contentWidth },
       );
       doc.moveDown(0.4);
@@ -1640,6 +1643,9 @@ export async function renderReportPdf(envelope, outputStream) {
         doc.fillColor(PDF_COLOR.ink).text(`${p.title || p.id}  `, { continued: true });
         doc.fillColor(_rtStatusColor(p.status)).text(RT_PDF_STATUS[p.status] || (p.status || '').toUpperCase());
         if (p.detail) doc.font('Helvetica').fontSize(9).fillColor(PDF_COLOR.ink).text(p.detail, { width: contentWidth });
+        if ((p.benchmark_refs || []).length) {
+          doc.font('Courier').fontSize(8).fillColor(PDF_COLOR.muted).text('Benchmark refs: ' + (p.benchmark_refs || []).join(' | '), { width: contentWidth });
+        }
         doc.font('Courier').fontSize(8).fillColor(PDF_COLOR.muted).text((p.frameworks || []).join(' · '), { width: contentWidth });
         doc.moveDown(0.4);
       }

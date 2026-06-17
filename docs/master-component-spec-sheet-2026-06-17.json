@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 88.7,
+    "local_engineering_score": 88.8,
     "frontier_product_score": 67.6,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -38,9 +38,9 @@
     "direct_test_referenced_components": 660,
     "direct_test_reference_pct": 79.9,
     "components_without_direct_test_reference": 166,
-    "high_priority_components": 47,
-    "high_priority_direct_test_referenced": 42,
-    "high_priority_direct_test_reference_pct": 89.4,
+    "high_priority_components": 48,
+    "high_priority_direct_test_referenced": 43,
+    "high_priority_direct_test_reference_pct": 89.6,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 10,
     "categories_with_major_frontier_work_open": 14,
@@ -313,11 +313,11 @@
       "id": "agent-security-eval",
       "stack_area": "enterprise",
       "status": "sota_review_complete_critical_frontier_work_open",
-      "already_at_frontier_count": 6,
-      "improvement_count": 6,
+      "already_at_frontier_count": 7,
+      "improvement_count": 5,
       "critical_gaps": 1,
       "major_gaps": 4,
-      "minor_gaps": 2,
+      "minor_gaps": 1,
       "required_components": 3,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -1518,6 +1518,33 @@
       ]
     },
     {
+      "path": "src/red-team.js",
+      "domain": "identity_access",
+      "surface": "core-backend",
+      "priority_score": 8,
+      "risk_signals": [
+        "auth_or_tenant_boundary",
+        "cryptographic_or_proof_boundary",
+        "large_component_contract_risk",
+        "network_or_provider_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "agent-security-eval",
+          "stack_area": "enterprise",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "required"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: policy_as_data_rbac_sso_and_key_lifecycle_tests.",
+      "suggested_verification": [
+        "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
+      ]
+    },
+    {
       "path": "src/transparency-log-routes.js",
       "domain": "api_surface",
       "surface": "api-http",
@@ -1802,77 +1829,6 @@
       "suggested_verification": [
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/compile.js",
-      "domain": "compile_artifact_runtime",
-      "surface": "core-backend",
-      "priority_score": 7,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence"
       ]
     }
   ],
@@ -8171,8 +8127,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 21034,
-          "lines": 561,
+          "bytes": 21037,
+          "lines": 562,
           "imports": 5,
           "exports": 6,
           "routes": 0,
@@ -8192,7 +8148,7 @@
         ],
         "priority_score": 7,
         "priority_band": "high",
-        "sha256": "da6e26c4c3cfb4b174360722170d4fc90b17a66b690ba465bf6752f4ff324d03"
+        "sha256": "e7a295206760822946cbacbf0d328b9729fca5c3c5bde2900b83a6762869e65f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -9194,8 +9150,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 101937,
-          "lines": 1738,
+          "bytes": 102651,
+          "lines": 1744,
           "imports": 12,
           "exports": 25,
           "routes": 0,
@@ -9214,7 +9170,7 @@
         ],
         "priority_score": 8,
         "priority_band": "high",
-        "sha256": "35f37dde7c1a5000fc31aa22a6345de336dd88a0a76011f37bc71ee95fee268f"
+        "sha256": "40a17421137965d7a488d58409828d37c86781f041aecd54371c8e6783403e87"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -10700,14 +10656,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/agent-attestation-report.test.js",
           "tests/artifact-end-to-end.test.js",
           "tests/product-kernel-envelope.test.js",
+          "tests/red-team.test.js",
           "tests/server.test.js",
           "tests/site.test.js",
           "tests/wave144-bench-compare.test.js",
-          "tests/wave144-predibase-demo.test.js",
-          "tests/wave164-external-adversarial.test.js",
-          "tests/wave235-amd-rocm-benchmarks.test.js"
+          "tests/wave144-predibase-demo.test.js"
         ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
@@ -32618,10 +32574,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 46139,
-          "lines": 819,
+          "bytes": 50334,
+          "lines": 909,
           "imports": 1,
-          "exports": 4,
+          "exports": 7,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -32633,11 +32589,12 @@
         "risk_signals": [
           "auth_or_tenant_boundary",
           "cryptographic_or_proof_boundary",
+          "large_component_contract_risk",
           "network_or_provider_boundary"
         ],
-        "priority_score": 5,
-        "priority_band": "medium",
-        "sha256": "258bfa3da709396747e69d025a1ebcec4c12c3bd64333ec0203e5fb9661c6de1"
+        "priority_score": 8,
+        "priority_band": "high",
+        "sha256": "316ad1855d9f7882d7b960a4fae7a57b752341f67d091da7a1c4ae93d0d3a4e4"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
