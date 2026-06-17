@@ -235,12 +235,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     </div>
     <div class="auth__form">
       <label class="muted" for="keyInput">API Key</label>
-      <input id="keyInput" name="api_key" type="password" inputmode="text" placeholder="ks_…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="keyHelp">
+      <input id="keyInput" name="api_key" type="password" inputmode="text" placeholder="ks_..." autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="keyHelp">
       <button class="btn btn--primary" id="keyBtn" type="button">Open your workspace</button>
     </div>
   </div>
 
-  <div id="content"><div class="banner">Loading your workspace…</div></div>
+  <div id="content"><div class="banner">Loading your workspace...</div></div>
 </main>
 
 <hr class="foil-line" aria-hidden="true">
@@ -439,7 +439,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
     KEY = v;
     try { sessionStorage.setItem('kolm_account_key', v); } catch(e) {}
     document.getElementById('content').hidden = false;
-    document.getElementById('content').innerHTML = '<div class="banner">Loading your workspace…</div>';
+    document.getElementById('content').innerHTML = '<div class="banner">Loading your workspace...</div>';
     load();
   };
   document.getElementById('keyInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') document.getElementById('keyBtn').click(); });
