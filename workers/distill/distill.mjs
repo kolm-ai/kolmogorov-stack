@@ -432,6 +432,10 @@ if (mode === 'full') {
         '--out', path.join(outDir, 'student'),
         '--student-base', args['student-base'] || 'Qwen/Qwen2.5-0.5B',
       ];
+      const trainerBackend = args.backend
+        || (spec && spec.train && typeof spec.train.backend === 'string' ? spec.train.backend : null)
+        || (typeof spec.backend === 'string' ? spec.backend : null);
+      if (trainerBackend) pyArgs.push('--backend', String(trainerBackend));
       // W713/W711 - forward the data-ordering flags so train_lora.py engages a
       // SequentialSampler (curriculum) or WeightedRandomSampler (importance).
       // The pairs file already carries complexity_proxy per row (W713); the

@@ -14,6 +14,7 @@
 # WASM target. This file is the shared training entry for both.
 
 import argparse
+import importlib.util
 import json
 import sys
 import os
@@ -34,6 +35,150 @@ def _require(mod_name, install_hint):
         sys.stderr.write(f"[train_lora] missing dependency '{mod_name}'.\n")
         sys.stderr.write(f"             install hint: {install_hint}\n")
         sys.exit(3)
+
+
+UNSLOTH_FAMILIES = (
+    "qwen",
+    "qwen2",
+    "qwen3",
+    "llama",
+    "llama-2",
+    "llama-3",
+    "gemma",
+    "gemma2",
+    "gemma3",
+    "mistral",
+    "phi",
+    "deepseek",
+    "gpt-oss",
+)
+
+_MODEL_ALIASES = {
+    "qwen2.5-0.5b": "Qwen/Qwen2.5-0.5B-Instruct",
+    "qwen2.5-0.5b-instruct": "Qwen/Qwen2.5-0.5B-Instruct",
+    "qwen2.5-1.5b": "Qwen/Qwen2.5-1.5B-Instruct",
+    "qwen2.5-3b": "Qwen/Qwen2.5-3B-Instruct",
+    "llama-3.2-1b": "meta-llama/Llama-3.2-1B-Instruct",
+    "llama-3.2-3b": "meta-llama/Llama-3.2-3B-Instruct",
+}
+
+
+def _resolve_student_base_alias(student_base):
+    return _MODEL_ALIASES.get(str(student_base).lower(), student_base)
+
+
+def _unsloth_importable():
+    try:
+        return importlib.util.find_spec("unsloth") is not None
+    except Exception:
+        return False
+
+
+def _is_unsloth_supported(student_base):
+    base = str(student_base or "").strip().lower()
+    if not base:
+        return False
+    return any(family in base for family in UNSLOTH_FAMILIES)
+
+
+def _select_backend(requested, student_base):
+    backend = str(requested or "auto").strip().lower()
+    if backend == "hf":
+        return ("hf", "requested_hf")
+    if backend == "auto":
+        if not _is_unsloth_supported(student_base):
+            return ("hf", "auto_family_unsupported")
+        if _unsloth_importable():
+            return ("unsloth", "auto_family_match")
+        return ("hf", "auto_family_match_but_unsloth_not_installed")
+    if backend == "unsloth":
+        if not _unsloth_importable():
+            sys.stderr.write("[train_lora] missing dependency 'unsloth'.\n")
+            sys.stderr.write("             install hint: pip install unsloth\n")
+            sys.exit(11)
+        return ("unsloth", "requested_unsloth")
+    raise ValueError(f"unknown backend: {requested}")
+
+
+def _backend_hf_only_features(args, lora_variant, lora_init, trainer_optim, packing_enabled):
+    features = []
+    curriculum_requested = bool(args.curriculum) and str(args.curriculum).lower() not in ("0", "false", "off", "")
+    if curriculum_requested:
+        features.append("curriculum")
+    if args.importance_weights:
+        features.append("importance_weights")
+    if lora_variant != "lora":
+        features.append(f"lora_variant:{lora_variant}")
+    if lora_init != "default":
+        features.append(f"lora_init:{lora_init}")
+    if trainer_optim.startswith("galore"):
+        features.append(f"optim:{trainer_optim}")
+    if packing_enabled:
+        features.append("packing")
+    return features
+
+
+def _backend_plan_for_args(args, lora_variant, lora_init, trainer_optim, packing_enabled):
+    selected, reason = _select_backend(args.backend, args.student_base)
+    hf_only = _backend_hf_only_features(args, lora_variant, lora_init, trainer_optim, packing_enabled)
+    if selected == "unsloth" and hf_only:
+        if str(args.backend).lower() == "unsloth":
+            sys.stderr.write("[train_lora] --backend=unsloth cannot preserve these HF-only features: "
+                             + ", ".join(hf_only) + "\n")
+            sys.stderr.write("             use --backend=hf or remove those knobs.\n")
+            sys.exit(12)
+        selected = "hf"
+        reason = "auto_hf_feature_parity_guard"
+    return {
+        "selected": selected,
+        "reason": reason,
+        "requested": str(args.backend or "auto").lower(),
+        "unsloth_importable": _unsloth_importable(),
+        "unsloth_supported": _is_unsloth_supported(args.student_base),
+        "unsloth_families": list(UNSLOTH_FAMILIES),
+        "hf_only_features": hf_only,
+    }
+
+
+def _exec_unsloth_backend(args, backend_reason, neftune_alpha, trainer_optim):
+    script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "train_lora_unsloth.py")
+    if not os.path.exists(script):
+        sys.stderr.write(f"[train_lora] expected Unsloth backend mirror not found: {script}\n")
+        sys.exit(11)
+    argv = [
+        sys.executable,
+        script,
+        "--pairs", args.pairs,
+        "--out", args.out,
+        "--student-base", args.student_base,
+        "--lora-rank", str(args.lora_rank),
+        "--lora-alpha", str(args.lora_alpha),
+        "--lora-dropout", str(args.lora_dropout),
+        "--epochs", str(args.epochs),
+        "--batch-size", str(args.batch_size),
+        "--lr", str(args.lr),
+        "--max-length", str(args.max_length),
+        "--gradient-accumulation-steps", str(args.gradient_accumulation_steps),
+        "--max-grad-norm", str(args.max_grad_norm),
+        "--warmup-ratio", str(args.warmup_ratio),
+        "--save-total-limit", str(args.save_total_limit),
+        "--backend-reason", backend_reason,
+    ]
+    if args.resume_from_checkpoint:
+        argv.extend(["--resume-from-checkpoint", args.resume_from_checkpoint])
+    if args.save_steps and args.save_steps > 0:
+        argv.extend(["--save-steps", str(args.save_steps)])
+    if args.eval_steps and args.eval_steps > 0:
+        argv.extend(["--eval-steps", str(args.eval_steps)])
+    if args.val_fraction and args.val_fraction > 0:
+        argv.extend(["--val-fraction", str(args.val_fraction)])
+    if args.qlora:
+        argv.append("--qlora")
+    if trainer_optim and trainer_optim != "adamw_torch":
+        argv.extend(["--optim", trainer_optim])
+    if neftune_alpha:
+        argv.extend(["--neftune-noise-alpha", str(neftune_alpha)])
+    os.execv(sys.executable, argv)
 
 
 def _row_id(row):
@@ -132,15 +277,30 @@ def build_weighted_sampler(rows, weights):
 
 def main():
     p = argparse.ArgumentParser(description="kolm distillation LoRA fine-tune")
-    p.add_argument("--pairs", required=True, help="training-pairs.jsonl from distill.mjs")
-    p.add_argument("--out", required=True, help="output directory for the student adapter")
+    p.add_argument("--pairs", required=False, help="training-pairs.jsonl from distill.mjs")
+    p.add_argument("--out", required=False, help="output directory for the student adapter")
     p.add_argument("--student-base", default="Qwen/Qwen2.5-0.5B", help="HF base model id")
-    p.add_argument("--lora-rank", type=int, default=16)
+    p.add_argument("--backend", choices=("auto", "hf", "unsloth"),
+                   default=os.environ.get("KOLM_TRAIN_LORA_BACKEND", "auto"),
+                   help="trainer backend: auto uses Unsloth when supported+installed, hf forces the legacy path")
+    p.add_argument("--lora-rank", "--lora-r", dest="lora_rank", type=int, default=16)
     p.add_argument("--lora-alpha", type=int, default=32)
+    p.add_argument("--lora-dropout", type=float, default=0.05)
     p.add_argument("--epochs", type=int, default=3)
     p.add_argument("--batch-size", type=int, default=4)
     p.add_argument("--lr", type=float, default=2e-4)
-    p.add_argument("--max-length", type=int, default=512)
+    p.add_argument("--max-length", "--max-seq-len", dest="max_length", type=int, default=512)
+    p.add_argument("--gradient-accumulation-steps", type=int, default=1)
+    p.add_argument("--resume-from-checkpoint", default="")
+    p.add_argument("--save-steps", type=int, default=0)
+    p.add_argument("--eval-steps", type=int, default=0)
+    p.add_argument("--val-fraction", type=float, default=0.0)
+    p.add_argument("--max-grad-norm", type=float, default=1.0)
+    p.add_argument("--warmup-ratio", type=float, default=0.03)
+    p.add_argument("--save-total-limit", type=int, default=3)
+    p.add_argument("--qlora", action="store_true",
+                   help="use the Unsloth QLoRA path; HF fallback refuses rather than silently running plain LoRA")
+    p.add_argument("--neftune-noise-alpha", dest="neftune_noise_alpha", type=float, default=None)
     # W713 — curriculum ordering. When set (ascending|descending|1), sort the
     # training rows by their complexity_proxy field (stamped JS-side by
     # src/curriculum-sort.js + carried through distill.mjs) and walk them with a
@@ -159,12 +319,16 @@ def main():
     p.add_argument("--preflight-only", action="store_true",
                    help="construct config + probe variant deps, then exit 0 (no training)")
     args = p.parse_args()
+    requested_student_base = args.student_base
+    args.student_base = _resolve_student_base_alias(args.student_base)
 
     # ── W921 LoRA-variant / GaLore / packing knobs (env-threaded, default-off) ──
     lora_variant = os.environ.get("KOLM_LORA_VARIANT", "lora").lower()
     lora_init = os.environ.get("KOLM_LORA_INIT", "default").lower()
-    neftune_alpha = os.environ.get("KOLM_NEFTUNE_ALPHA")
-    neftune_alpha = float(neftune_alpha) if neftune_alpha else None
+    neftune_alpha = args.neftune_noise_alpha
+    if neftune_alpha is None:
+        neftune_alpha = os.environ.get("KOLM_NEFTUNE_ALPHA")
+        neftune_alpha = float(neftune_alpha) if neftune_alpha else None
     loraplus_ratio = float(os.environ.get("KOLM_LORAPLUS_RATIO", "16"))
     trainer_optim = os.environ.get("KOLM_OPTIM", "adamw_torch").lower()
     galore_args = os.environ.get("KOLM_GALORE_ARGS", "")
@@ -172,6 +336,7 @@ def main():
     packing_enabled = os.environ.get("KOLM_PACKING", "0") == "1"
     variants_active = (lora_variant != "lora" or lora_init != "default" or neftune_alpha
                        or trainer_optim != "adamw_torch" or packing_enabled)
+    backend_plan = _backend_plan_for_args(args, lora_variant, lora_init, trainer_optim, packing_enabled)
 
     # ── W921 preflight: probe variant deps; FAIL LOUD on missing support. ──
     if variants_active and _lv is not None:
@@ -192,9 +357,36 @@ def main():
             "optim": trainer_optim,
             "packing": packing_enabled,
             "galore_args": galore_args if trainer_optim.startswith("galore") else None,
+            "student_base": args.student_base,
+            "student_base_requested": requested_student_base,
         }
-        print(json.dumps({"preflight": "ok", "config": cfg_preview, "ok": True}))
+        print(json.dumps({
+            "preflight": "ok",
+            "config": cfg_preview,
+            "backend": backend_plan,
+            "checks": {
+                "unsloth_importable": backend_plan["unsloth_importable"],
+                "unsloth_supported": backend_plan["unsloth_supported"],
+                "unsloth_families": backend_plan["unsloth_families"],
+                "unsloth_skip_reason": None if backend_plan["selected"] == "unsloth" else backend_plan["reason"],
+            },
+            "ok": True,
+        }))
         sys.exit(0)
+
+    if not args.pairs:
+        p.error("--pairs is required unless --preflight-only")
+    if not args.out:
+        p.error("--out is required unless --preflight-only")
+    if args.student_base != requested_student_base:
+        print(f"[train_lora] resolved student base '{requested_student_base}' -> '{args.student_base}'")
+    if args.qlora and backend_plan["selected"] != "unsloth":
+        sys.stderr.write("[train_lora] --qlora requires the Unsloth backend in this worker.\n")
+        sys.stderr.write(f"             selected backend={backend_plan['selected']} reason={backend_plan['reason']}\n")
+        sys.stderr.write("             install unsloth or remove --qlora for plain HF LoRA.\n")
+        sys.exit(13)
+    if backend_plan["selected"] == "unsloth":
+        _exec_unsloth_backend(args, backend_plan["reason"], neftune_alpha, trainer_optim)
 
     # Hard dependency check — give the operator a single-line install hint
     # instead of a Python traceback.
@@ -255,22 +447,6 @@ def main():
         sys.stderr.write("[train_lora] --curriculum set; ignoring --importance-weights "
                          "(curriculum order wins over weighted sampling)\n")
 
-    # Resolve friendly short names to canonical HF repo ids so a --student-base
-    # like "qwen2.5-0.5b" works out of the box (a bare short name is not a valid
-    # HF identifier and would fail the download).
-    _MODEL_ALIASES = {
-        "qwen2.5-0.5b": "Qwen/Qwen2.5-0.5B-Instruct",
-        "qwen2.5-0.5b-instruct": "Qwen/Qwen2.5-0.5B-Instruct",
-        "qwen2.5-1.5b": "Qwen/Qwen2.5-1.5B-Instruct",
-        "qwen2.5-3b": "Qwen/Qwen2.5-3B-Instruct",
-        "llama-3.2-1b": "meta-llama/Llama-3.2-1B-Instruct",
-        "llama-3.2-3b": "meta-llama/Llama-3.2-3B-Instruct",
-    }
-    resolved = _MODEL_ALIASES.get(str(args.student_base).lower(), args.student_base)
-    if resolved != args.student_base:
-        print(f"[train_lora] resolved student base '{args.student_base}' -> '{resolved}'")
-    args.student_base = resolved
-
     tok = AutoTokenizer.from_pretrained(args.student_base)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
@@ -286,6 +462,14 @@ def main():
         return enc
 
     ds = Dataset.from_list(rows).map(to_example, remove_columns=Dataset.from_list(rows).column_names)
+    eval_ds = None
+    if args.val_fraction > 0:
+        if args.val_fraction >= 0.3:
+            sys.stderr.write(f"[train_lora] --val-fraction must be < 0.3; got {args.val_fraction}\n")
+            sys.exit(6)
+        ds_split = ds.train_test_split(test_size=args.val_fraction, seed=42)
+        ds, eval_ds = ds_split["train"], ds_split["test"]
+        print(f"[train_lora] train={len(ds)} val={len(eval_ds)} (val_fraction={args.val_fraction})")
 
     base = AutoModelForCausalLM.from_pretrained(
         args.student_base,
@@ -300,7 +484,7 @@ def main():
         lvcfg = _lv.LoraVariantConfig(
             r=args.lora_rank,
             lora_alpha=args.lora_alpha,
-            lora_dropout=0.05,
+            lora_dropout=args.lora_dropout,
             bias="none",
             task_type="CAUSAL_LM",
             init_lora_weights=lora_init,
@@ -321,7 +505,7 @@ def main():
             lora_alpha=args.lora_alpha,
             task_type=TaskType.CAUSAL_LM,
             bias="none",
-            lora_dropout=0.05,
+            lora_dropout=args.lora_dropout,
         )
         model = get_peft_model(base, lora_cfg)
     model.print_trainable_parameters()
@@ -340,18 +524,25 @@ def main():
         fp16_flag = False
         bf16_flag = False
     grad_ckpt_flag = os.environ.get("KOLM_GRAD_CHECKPOINT", "0") == "1"
+    save_strategy = "steps" if args.save_steps > 0 else "epoch"
     ta_kwargs = dict(
         output_dir=args.out,
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch_size,
+        gradient_accumulation_steps=args.gradient_accumulation_steps,
         learning_rate=args.lr,
-        save_strategy="epoch",
+        max_grad_norm=args.max_grad_norm,
+        warmup_ratio=args.warmup_ratio,
+        save_strategy=save_strategy,
+        save_total_limit=args.save_total_limit,
         logging_steps=10,
         report_to=[],
         fp16=fp16_flag,
         bf16=bf16_flag,
         gradient_checkpointing=grad_ckpt_flag,
     )
+    if args.save_steps > 0:
+        ta_kwargs["save_steps"] = args.save_steps
     if grad_ckpt_flag:
         ta_kwargs["gradient_checkpointing_kwargs"] = {"use_reentrant": False}
     # W787-1 — early-stop knobs. transformers's EarlyStoppingCallback needs
@@ -360,6 +551,17 @@ def main():
     early_stop_enabled = os.environ.get("KOLM_EARLY_STOP", "0") == "1"
     if early_stop_enabled:
         ta_kwargs["evaluation_strategy"] = "epoch"
+        ta_kwargs["load_best_model_at_end"] = True
+        ta_kwargs["metric_for_best_model"] = "eval_loss"
+        ta_kwargs["greater_is_better"] = False
+    if eval_ds is not None:
+        if args.eval_steps > 0:
+            ta_kwargs["evaluation_strategy"] = "steps"
+            ta_kwargs["eval_steps"] = args.eval_steps
+            if save_strategy == "steps" and args.save_steps != args.eval_steps:
+                ta_kwargs["save_steps"] = args.eval_steps
+        else:
+            ta_kwargs["evaluation_strategy"] = "epoch"
         ta_kwargs["load_best_model_at_end"] = True
         ta_kwargs["metric_for_best_model"] = "eval_loss"
         ta_kwargs["greater_is_better"] = False
@@ -449,13 +651,23 @@ def main():
         data_collator=DataCollatorForLanguageModeling(tok, mlm=False),
         callbacks=callbacks,
     )
+    if eval_ds is not None:
+        trainer_kwargs["eval_dataset"] = eval_ds
     # W921 — inject the hand-built optimizer for LoRA+/LoRA-FA (scheduler left
     # to the Trainer default by passing (optim, None)).
     if custom_optimizer is not None:
         trainer_kwargs["optimizers"] = (custom_optimizer, None)
     trainer = TrainerCls(**trainer_kwargs)
 
-    trainer.train()
+    resume_arg = args.resume_from_checkpoint.strip() or None
+    if resume_arg:
+        if not os.path.isdir(resume_arg):
+            sys.stderr.write(f"[train_lora] --resume-from-checkpoint not found: {resume_arg}\n")
+            sys.exit(8)
+        print(f"[train_lora] resuming from {resume_arg}")
+        trainer.train(resume_from_checkpoint=resume_arg)
+    else:
+        trainer.train()
     # W921 — PiSSA conversion at save: rewrite the residual-relative adapter to
     # standard-base form so it loads on the ORIGINAL published base.
     pissa_converted = False
@@ -476,6 +688,15 @@ def main():
             "lr": args.lr,
             "max_length": args.max_length,
             "pairs": len(rows),
+            "backend": {
+                "selected": "hf",
+                "reason": backend_plan["reason"],
+                "requested": backend_plan["requested"],
+                "unsloth_importable": backend_plan["unsloth_importable"],
+                "unsloth_supported": backend_plan["unsloth_supported"],
+                "hf_only_features": backend_plan["hf_only_features"],
+                "neftune_noise_alpha": float(neftune_alpha) if neftune_alpha else 0.0,
+            },
             # W787 — record the effective compute-efficiency choices so the
             # downstream .kolm receipt chain documents which precision + grad-
             # checkpoint + early-stop config trained this adapter.
@@ -501,6 +722,21 @@ def main():
                 "galore_args": galore_args if trainer_optim.startswith("galore") else None,
                 "packing": packing_enabled,
                 "pissa_converted": pissa_converted,
+            },
+            "massive": {
+                "gradient_accumulation_steps": args.gradient_accumulation_steps,
+                "effective_batch_size": args.batch_size * args.gradient_accumulation_steps,
+                "save_strategy": save_strategy,
+                "save_steps": args.save_steps if args.save_steps > 0 else None,
+                "eval_steps": args.eval_steps if args.eval_steps > 0 else None,
+                "val_fraction": args.val_fraction if args.val_fraction > 0 else None,
+                "val_rows": len(eval_ds) if eval_ds is not None else 0,
+                "resumed_from": resume_arg,
+                "qlora": False,
+                "optim": trainer_optim,
+                "max_grad_norm": args.max_grad_norm,
+                "warmup_ratio": args.warmup_ratio,
+                "save_total_limit": args.save_total_limit,
             },
             # W713/W711 — data-ordering provenance so the .kolm receipt chain
             # documents whether the student was trained under a curriculum

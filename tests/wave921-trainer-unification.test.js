@@ -27,6 +27,7 @@ function astParse(rel) {
 
 const PY_FILES = [
   'workers/distill/scripts/train_lora.py',
+  'workers/distill/scripts/train_lora_unsloth.py',
   'workers/distill/scripts/lora_variants.py',
   'workers/distill/scripts/train_grpo.py',
   'workers/distill/scripts/train_gkd.py',
@@ -57,6 +58,56 @@ test('train_lora.py --help succeeds (GPU-free)', { skip: !HAVE_PY }, () => {
   const r = spawnSync(PY, [path.join(repoRoot, 'workers/distill/scripts/train_lora.py'), '--help'], { stdio: 'pipe', timeout: 60000 });
   assert.equal(r.status, 0);
   assert.match((r.stdout || '').toString(), /--preflight-only/);
+  assert.match((r.stdout || '').toString(), /--backend/);
+});
+
+test('train_lora.py backend selector helpers are GPU-free', { skip: !HAVE_PY }, () => {
+  const scriptDir = path.join(repoRoot, 'workers/distill/scripts');
+  const probe = `
+import importlib.util, json, os, sys
+here = ${JSON.stringify(scriptDir)}
+sys.path.insert(0, here)
+spec = importlib.util.spec_from_file_location("train_lora_probe", os.path.join(here, "train_lora.py"))
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+out = {
+  "families": list(mod.UNSLOTH_FAMILIES),
+  "qwen_supported": mod._is_unsloth_supported("Qwen/Qwen2.5-7B-Instruct"),
+  "llama_supported": mod._is_unsloth_supported("meta-llama/Llama-3.2-3B-Instruct"),
+  "unsupported": mod._is_unsloth_supported("microsoft/DialoGPT-medium"),
+  "unsloth_importable": mod._unsloth_importable(),
+  "hf": list(mod._select_backend("hf", "Qwen/Qwen2.5-7B-Instruct")),
+  "auto_unsupported": list(mod._select_backend("auto", "microsoft/DialoGPT-medium")),
+  "auto_supported": list(mod._select_backend("auto", "Qwen/Qwen2.5-7B-Instruct")),
+}
+print(json.dumps(out))
+`;
+  const r = spawnSync(PY, ['-c', probe], { stdio: 'pipe', timeout: 60000 });
+  assert.equal(r.status, 0, (r.stderr || '').toString());
+  const got = JSON.parse((r.stdout || '').toString());
+  assert.ok(got.families.length >= 5);
+  assert.equal(got.qwen_supported, true);
+  assert.equal(got.llama_supported, true);
+  assert.equal(got.unsupported, false);
+  assert.deepEqual(got.hf, ['hf', 'requested_hf']);
+  assert.deepEqual(got.auto_unsupported, ['hf', 'auto_family_unsupported']);
+  if (got.unsloth_importable) {
+    assert.deepEqual(got.auto_supported, ['unsloth', 'auto_family_match']);
+  } else {
+    assert.deepEqual(got.auto_supported, ['hf', 'auto_family_match_but_unsloth_not_installed']);
+    const forced = `
+import importlib.util, os, sys
+here = ${JSON.stringify(scriptDir)}
+sys.path.insert(0, here)
+spec = importlib.util.spec_from_file_location("train_lora_probe_forced", os.path.join(here, "train_lora.py"))
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+mod._select_backend("unsloth", "Qwen/Qwen2.5-7B-Instruct")
+`;
+    const rf = spawnSync(PY, ['-c', forced], { stdio: 'pipe', timeout: 60000 });
+    assert.equal(rf.status, 11);
+    assert.match((rf.stderr || '').toString(), /install hint: pip install unsloth/);
+  }
 });
 
 test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_PY }, () => {
@@ -66,12 +117,36 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   const script = path.join(repoRoot, 'workers/distill/scripts/train_lora.py');
   const def = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], { stdio: 'pipe', timeout: 60000 });
   assert.equal(def.status, 0, (def.stderr || '').toString());
-  assert.match((def.stdout || '').toString(), /"ok": true/);
+  const defJson = JSON.parse((def.stdout || '').toString());
+  assert.equal(defJson.ok, true);
+  assert.ok(['hf', 'unsloth'].includes(defJson.backend.selected));
+  assert.equal(typeof defJson.checks.unsloth_importable, 'boolean');
+  const forcedHf = spawnSync(PY, [script, '--backend', 'hf', '--preflight-only'], { stdio: 'pipe', timeout: 60000 });
+  assert.equal(forcedHf.status, 0, (forcedHf.stderr || '').toString());
+  assert.equal(JSON.parse((forcedHf.stdout || '').toString()).backend.selected, 'hf');
   const dora = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], {
     stdio: 'pipe', timeout: 60000, env: { ...process.env, KOLM_LORA_VARIANT: 'dora', KOLM_NEFTUNE_ALPHA: '5' },
   });
   assert.equal(dora.status, 0);
-  assert.match((dora.stdout || '').toString(), /"lora_variant": "dora"/);
+  const doraJson = JSON.parse((dora.stdout || '').toString());
+  assert.equal(doraJson.config.lora_variant, 'dora');
+  assert.equal(doraJson.backend.selected, 'hf');
+});
+
+test('W616 trainer backend wiring spans recipe, CLI, worker, and mirror', () => {
+  const train = fs.readFileSync(path.join(repoRoot, 'workers/distill/scripts/train_lora.py'), 'utf8');
+  assert.match(train, /UNSLOTH_FAMILIES/);
+  assert.match(train, /def _exec_unsloth_backend/);
+  assert.match(train, /_exec_unsloth_backend\(args, backend_plan\["reason"\]/);
+  const worker = fs.readFileSync(path.join(repoRoot, 'workers/distill/distill.mjs'), 'utf8');
+  assert.match(worker, /spec\.train\.backend/);
+  assert.match(worker, /pyArgs\.push\('--backend'/);
+  const cli = fs.readFileSync(path.join(repoRoot, 'cli/kolm.js'), 'utf8');
+  assert.match(cli, /const trainerBackend = pick\('--backend'\)/);
+  assert.match(cli, /--backend=\$\{trainerBackend\}/);
+  const loader = fs.readFileSync(path.join(repoRoot, 'src/distill-recipe-loader.js'), 'utf8');
+  assert.match(loader, /VALID_TRAIN_BACKENDS/);
+  assert.match(loader, /train\.backend must be one of/);
 });
 
 test('train_grpo.py + train_gkd.py + train_preference.py preflights GPU-free', { skip: !HAVE_PY }, () => {

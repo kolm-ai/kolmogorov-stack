@@ -39,9 +39,9 @@
   ],
   "summary": {
     "component_count": 826,
-    "test_referenced_components": 659,
-    "components_without_direct_test_reference": 167,
-    "high_priority_components": 48,
+    "test_referenced_components": 660,
+    "components_without_direct_test_reference": 166,
+    "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -878,10 +878,10 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "640981ac7a1aa7d2837c65429055c324ec99b091f09e5d0ecbb5d1e5ed6a0c4a",
+      "sha256": "26c65159c828228c36fdadb05a7adacf8851a44e5f9f03a98f4cca5a3ffcb71d",
       "metrics": {
-        "bytes": 2617461,
-        "lines": 56988,
+        "bytes": 2617575,
+        "lines": 56990,
         "imports": 540,
         "exports": 1,
         "routes": 0,
@@ -20508,10 +20508,10 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "e216dbae3340e6425810fdf705d219d62645b3ae82d47b88651d0e9e557bc027",
+      "sha256": "4a4d3d3cc7e2f6f0076b105af144f01619cde436655b5ac184420ffcd64c4e74",
       "metrics": {
-        "bytes": 24618,
-        "lines": 570,
+        "bytes": 24904,
+        "lines": 574,
         "imports": 6,
         "exports": 2,
         "routes": 0,
@@ -20527,7 +20527,8 @@
         "tests/wave921-grpo-rlvr.test.js",
         "tests/wave921-lora-variants-galore-packing.test.js",
         "tests/wave921-qad.test.js",
-        "tests/wave921-ropd-onpolicy.test.js"
+        "tests/wave921-ropd-onpolicy.test.js",
+        "tests/wave921-trainer-unification.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -46545,10 +46546,10 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "62ecd0bfc6e9cb022b80e615b6d371efb680b6382d1f64c843abadce58be0fbf",
+      "sha256": "6ff40d6d520eaddc7e706c3f4157942c25ada4b73760ea4666f2cd4d87a6f607",
       "metrics": {
-        "bytes": 33533,
-        "lines": 691,
+        "bytes": 33822,
+        "lines": 695,
         "imports": 10,
         "exports": 0,
         "routes": 0,
@@ -47533,14 +47534,16 @@
         "crypto_refs": 2,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave921-trainer-unification.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 7,
+      "priority_score": 6,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -47565,7 +47568,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
       "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
       "suggested_verification": [
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
@@ -47578,14 +47581,14 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "python",
-      "sha256": "4227e8fd247d8c5ed9eafe42e375b3ddfb75b914cf9ef15c252edd0efc90806e",
+      "sha256": "3e05bcfcba12324842b1d8c4f369b0ee98d26bd3957924fe4da8edfd7787ec0d",
       "metrics": {
-        "bytes": 24000,
-        "lines": 517,
+        "bytes": 34578,
+        "lines": 753,
         "imports": 0,
-        "exports": 10,
+        "exports": 17,
         "routes": 1,
-        "env_refs": 15,
+        "env_refs": 16,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,

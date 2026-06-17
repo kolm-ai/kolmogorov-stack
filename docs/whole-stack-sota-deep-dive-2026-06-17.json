@@ -405,19 +405,6 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/scripts/train_lora_unsloth.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "workers/distill/teacher-bridge.mjs",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -531,6 +518,21 @@
               "tests/finalized-c4-distill-method-truthfulness.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "workers/data/scripts/compute_grads.py",
+            "domain": "capture_data_eval",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           }
         ],
         "count": 197,
@@ -919,19 +921,6 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/scripts/train_lora_unsloth.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "workers/distill/teacher-bridge.mjs",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -961,6 +950,24 @@
             ],
             "test_refs": [],
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
+          },
+          {
+            "path": "workers/vision-tokenize/tokenize.mjs",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c1-recipe-synthesis-engine.test.js",
+              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
+              "tests/finalized-c4-distill-method-truthfulness.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 226,
@@ -1343,19 +1350,6 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/scripts/train_lora_unsloth.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "workers/distill/teacher-bridge.mjs",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -1385,6 +1379,24 @@
             ],
             "test_refs": [],
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
+          },
+          {
+            "path": "workers/vision-tokenize/tokenize.mjs",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c1-recipe-synthesis-engine.test.js",
+              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
+              "tests/finalized-c4-distill-method-truthfulness.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 263,
@@ -2105,19 +2117,6 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/scripts/train_lora_unsloth.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "workers/distill/teacher-bridge.mjs",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -2242,6 +2241,21 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "workers/distill/scripts/train_lora_unsloth.py",
+            "domain": "training_model_optimization",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-trainer-unification.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/distill/scripts/train_lora.py",
             "domain": "training_model_optimization",
             "priority_score": 6,
@@ -2348,12 +2362,12 @@
         "line": 335,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 8,
-        "improvement_count": 6,
+        "already_at_frontier_count": 9,
+        "improvement_count": 5,
         "gaps": {
           "critical": 0,
-          "major": 3,
-          "minor": 3
+          "major": 2,
+          "minor": 4
         }
       },
       "atomic_components": {
@@ -2373,15 +2387,17 @@
           {
             "path": "workers/distill/scripts/train_lora_unsloth.py",
             "domain": "training_model_optimization",
-            "priority_score": 7,
+            "priority_score": 6,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary"
             ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
+            "test_refs": [
+              "tests/wave921-trainer-unification.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "workers/distill/scripts/train_lora.py",
@@ -2798,10 +2814,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 375
+        "line": 376
       },
       "local_sota_review": {
-        "line": 375,
+        "line": 376,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -2996,19 +3012,6 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/scripts/train_lora_unsloth.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "workers/distill/teacher-bridge.mjs",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -3122,6 +3125,21 @@
               "tests/finalized-c4-distill-method-truthfulness.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "workers/data/scripts/compute_grads.py",
+            "domain": "capture_data_eval",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           }
         ],
         "count": 198,
@@ -3247,10 +3265,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 416
+        "line": 417
       },
       "local_sota_review": {
-        "line": 416,
+        "line": 417,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3546,19 +3564,6 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/scripts/train_lora_unsloth.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "workers/distill/teacher-bridge.mjs",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -3575,6 +3580,19 @@
               "tests/wave292-teacher-bridge-fail-closed.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "workers/runtime-build/build.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [],
+            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
         "count": 222,
@@ -3701,10 +3719,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 451
+        "line": 452
       },
       "local_sota_review": {
-        "line": 451,
+        "line": 452,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -4166,10 +4184,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 479
+        "line": 480
       },
       "local_sota_review": {
-        "line": 479,
+        "line": 480,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4628,10 +4646,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 526
+        "line": 527
       },
       "local_sota_review": {
-        "line": 526,
+        "line": 527,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,
@@ -5095,10 +5113,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 559
+        "line": 560
       },
       "local_sota_review": {
-        "line": 559,
+        "line": 560,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5602,10 +5620,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 590
+        "line": 591
       },
       "local_sota_review": {
-        "line": 590,
+        "line": 591,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -6101,10 +6119,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 634
+        "line": 635
       },
       "local_sota_review": {
-        "line": 634,
+        "line": 635,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -6377,19 +6395,6 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/scripts/train_lora_unsloth.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "workers/distill/teacher-bridge.mjs",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -6442,6 +6447,18 @@
               "tests/finalized-c4-distill-method-truthfulness.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "src/airgap-bundle.js",
+            "domain": "infra_cloud_device",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [],
+            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
         "count": 253,
@@ -6564,10 +6581,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 684
+        "line": 685
       },
       "local_sota_review": {
-        "line": 684,
+        "line": 685,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -7036,10 +7053,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 735
+        "line": 736
       },
       "local_sota_review": {
-        "line": 735,
+        "line": 736,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,

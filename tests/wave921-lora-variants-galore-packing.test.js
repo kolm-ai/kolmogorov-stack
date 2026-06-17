@@ -75,7 +75,7 @@ test('recipe loader: trinity-2000 still valid; pissa/galore recipe validates; ba
     name: 'lv-test', version: '1',
     seeds: { target: 10, generator: 'x' },
     teachers: [{ slug: 'anthropic:claude', rows: 10 }],
-    train: { method: 'lora', student_base: 'Q', epochs: 1, batch_size: 1, lr: 0.0001, max_seq_len: 512, lora: { r: 16, alpha: 32 }, lora_init: 'pissa_niter_16', lora_variant: 'dora', neftune_alpha: 5, packing: true },
+    train: { method: 'lora', student_base: 'Q', backend: 'auto', epochs: 1, batch_size: 1, lr: 0.0001, max_seq_len: 512, lora: { r: 16, alpha: 32 }, lora_init: 'pissa_niter_16', lora_variant: 'dora', neftune_alpha: 5, packing: true },
   };
   const p = path.join(os.tmpdir(), 'kolm-lv-good-' + Date.now() + '.json');
   fs.writeFileSync(p, JSON.stringify(good));
@@ -95,4 +95,12 @@ test('recipe loader: trinity-2000 still valid; pissa/galore recipe validates; ba
   const pb2 = path.join(os.tmpdir(), 'kolm-lv-bad2-' + Date.now() + '.json');
   fs.writeFileSync(pb2, JSON.stringify(bad2));
   assert.equal(loadRecipe(pb2).ok, false);
+  // bad train backend enum rejected
+  const bad3 = JSON.parse(JSON.stringify(good));
+  bad3.train.backend = 'bogus';
+  const pb3 = path.join(os.tmpdir(), 'kolm-lv-bad3-' + Date.now() + '.json');
+  fs.writeFileSync(pb3, JSON.stringify(bad3));
+  const r3 = loadRecipe(pb3);
+  assert.equal(r3.ok, false);
+  assert.ok(r3.issues.some((i) => /train\.backend/.test(i)));
 });

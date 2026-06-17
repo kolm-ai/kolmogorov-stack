@@ -72,6 +72,7 @@ const ORCHESTRATOR_MAP = {
 };
 
 const VALID_TRAIN_METHODS = new Set(['qlora', 'lora', 'full']);
+const VALID_TRAIN_BACKENDS = new Set(['auto', 'hf', 'unsloth']);
 
 // W921 - additive recipe vocabulary.
 // Distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default; the
@@ -227,6 +228,9 @@ function _validateTrain(train) {
   }
   if (typeof train.student_base !== 'string' || train.student_base.length === 0) {
     issues.push('train.student_base must be a non-empty string (HF repo id)');
+  }
+  if (train.backend !== undefined && !VALID_TRAIN_BACKENDS.has(train.backend)) {
+    issues.push(`train.backend must be one of: ${Array.from(VALID_TRAIN_BACKENDS).join(', ')} (got ${JSON.stringify(train.backend)})`);
   }
   const numericKeys = ['epochs', 'batch_size', 'lr', 'max_seq_len'];
   for (const k of numericKeys) {

@@ -26808,6 +26808,7 @@ async function cmdDistillLocalWorker(args) {
   const localApiKey = pick('--local-api-key');
   const maxRows = pick('--max-rows');
   const maxTokens = pick('--max-tokens');
+  const trainerBackend = pick('--backend');
   // W921 — distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default;
   // the logit-level objectives (forward_kl / distillm2 / gkd) need teacher
   // LOGITS, which API teachers cannot supply. We gate those behind
@@ -26897,6 +26898,7 @@ async function cmdDistillLocalWorker(args) {
     if (localApiKey) passthru.push(`--local-api-key=${localApiKey}`);
     if (maxRows) passthru.push(`--max-rows=${maxRows}`);
     if (maxTokens) passthru.push(`--max-tokens=${maxTokens}`);
+    if (trainerBackend) passthru.push(`--backend=${trainerBackend}`);
     // W921 — thread the distillation objective + teacher-local flag through to
     // the worker (which forwards to the Python trainer via KOLM_DISTILL_OBJECTIVE).
     if (objective) passthru.push(`--objective=${objective}`);
