@@ -97,7 +97,7 @@ test('W921-STUDIO.5 merge rejects an unknown method against the model-merge enum
 
 test('W921-STUDIO.6 local-worker accepts + normalizes the trainer-variant flags', () => {
   const start = SRC.indexOf('async function cmdDistillLocalWorker(args');
-  const body = SRC.slice(start, start + 14000);
+  const body = SRC.slice(start, start + 18000);
   assert.match(body, /pick\('--lora-variant'\)/);
   assert.match(body, /pick\('--lora-init'\)/);
   assert.match(body, /pick\('--neftune'\)/);
@@ -228,6 +228,44 @@ test('W921-STUDIO.19 distill preference mine --format kto writes label rows', ()
 });
 
 // ─────────────────────── (6) gate explain + compile surface ──────────────────
+
+test('W619-BON.1 local-worker exposes --bon as the rejection-sampling N alias', () => {
+  const start = SRC.indexOf('async function cmdDistillLocalWorker(args');
+  const body = SRC.slice(start, start + 13000);
+  assert.match(body, /const bonN = pick\('--bon'\)/, 'reads --bon');
+  assert.match(body, /const rsN = rsNFlag \|\| bonN/, 'uses --bon as --rs-n alias');
+  assert.match(body, /--bon\/--rs-n must be an integer/, 'validates before worker spawn');
+  assert.match(body, /passthru\.push\(`--rs-n=\$\{rsN\}`\)/, 'forwards to worker rs-n contract');
+});
+
+test('W619-BON.2 bad local-worker --bon is rejected before spend', () => {
+  const r = runKolm(['distill', '--local-worker', '--mode', 'rejection_sampling', '--spec', '/tmp/x', '--seeds', '/tmp/y', '--out', '/tmp/z', '--bon', '0']);
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /--bon\/--rs-n must be an integer/);
+});
+
+test('W619-BON.3 distill preference bon writes SeqKD targets end-to-end', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w619bon-'));
+  const rows = path.join(dir, 'rows.jsonl');
+  const out = path.join(dir, 'targets.jsonl');
+  fs.writeFileSync(rows, JSON.stringify({
+    prompt: 'How should support process a refund?',
+    seed_output: 'refund to original payment method with confirmation',
+    candidates: [
+      { text: 'no' },
+      { text: 'Process the refund to the original payment method and send confirmation.' },
+    ],
+  }) + '\n');
+  const r = runKolm(['distill', 'preference', 'bon', '--in', rows, '--out', out, '--bon', '2', '--json']);
+  assert.equal(r.status, 0, r.stderr);
+  assert.ok(r.json && r.json.ok === true, 'bon ok');
+  assert.equal(r.json.written.count, 1);
+  const written = fs.readFileSync(out, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+  assert.equal(written[0].input, 'How should support process a refund?');
+  assert.equal(written[0].output, 'Process the refund to the original payment method and send confirmation.');
+  assert.equal(written[0].teacher_output, written[0].output);
+  assert.equal(written[0].bon.n_requested, 2);
+});
 
 test('W921-STUDIO.20 cmdGate explain routes to judge-calibration attachGateDecision', () => {
   assert.match(SRC, /async function cmdGate\(args\)/);

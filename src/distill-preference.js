@@ -222,6 +222,7 @@ export function trainPreference({
 // =============================================================================
 
 export const PREFERENCE_MINER_VERSION = 'w921-preference-miner-1';
+export const BON_TARGETS_VERSION = 'w619-bon-targets-1';
 
 // tokenOverlap(candidate, reference) -> Jaccard-ish overlap in [0,1] or null.
 // Returns null when either side is empty (no signal). Lowercased word-set
@@ -340,6 +341,136 @@ export function mineDisagreementPairs(rows, opts = {}) {
   };
 }
 
+function _candidateText(candidate) {
+  if (typeof candidate === 'string') return candidate;
+  if (!candidate || typeof candidate !== 'object') return '';
+  for (const key of ['text', 'response', 'completion', 'output', 'teacher_output']) {
+    if (typeof candidate[key] === 'string') return candidate[key];
+  }
+  return '';
+}
+
+function _candidateList(row) {
+  for (const key of ['candidates', 'responses', 'rollouts', 'samples', 'completions']) {
+    if (Array.isArray(row[key])) return row[key];
+  }
+  return null;
+}
+
+function _scoreBonCandidate(text, row, candidate, index, judge) {
+  if (typeof judge === 'function') {
+    const judged = judge(text, row, { candidate, index });
+    if (typeof judged === 'number') return { score: judged, reasons: ['judge'] };
+    if (judged && typeof judged === 'object' && Number.isFinite(judged.score)) {
+      return {
+        score: judged.score,
+        reasons: Array.isArray(judged.reasons) ? judged.reasons.slice(0, 8) : ['judge'],
+      };
+    }
+    return { score: 0, reasons: ['judge_unscored'] };
+  }
+  const seed = row.seed_output != null ? String(row.seed_output)
+    : (row.reference != null ? String(row.reference)
+      : (row.output != null ? String(row.output)
+        : (row.teacher_output != null ? String(row.teacher_output) : undefined)));
+  return scoreCandidateLocal(text, { seed_output: seed });
+}
+
+// buildBonTargets(rows, opts) -> { ok, targets, stats, version, basis }.
+// rows carry one prompt plus N candidate rollouts:
+//   { prompt|input, candidates|responses|rollouts:[{text|response|completion}|string], seed_output? }
+// The best candidate becomes SeqKD/SFT-compatible {input, output, teacher_output}.
+export function buildBonTargets(rows, opts = {}) {
+  if (!Array.isArray(rows)) {
+    return { ok: false, error: 'rows_not_array', targets: [], stats: {}, version: BON_TARGETS_VERSION };
+  }
+  const n = opts.n == null ? 4 : Number(opts.n);
+  if (!Number.isInteger(n) || n < 1 || n > 128) {
+    return { ok: false, error: 'bad_n', detail: 'n must be an integer in [1,128]', targets: [], stats: {}, version: BON_TARGETS_VERSION };
+  }
+  const minScore = opts.min_score == null
+    ? (opts.threshold == null ? 0 : Number(opts.threshold))
+    : Number(opts.min_score);
+  if (!Number.isFinite(minScore) || minScore < 0 || minScore > 1) {
+    return { ok: false, error: 'bad_min_score', detail: 'min_score must be a number in [0,1]', targets: [], stats: {}, version: BON_TARGETS_VERSION };
+  }
+  const judge = opts.judge;
+  if (judge != null && typeof judge !== 'function' && judge !== 'local') {
+    return { ok: false, error: 'unknown_judge', detail: 'judge must be a function or "local"', targets: [], stats: {}, version: BON_TARGETS_VERSION };
+  }
+  const maxTargets = Number.isInteger(opts.max_targets) && opts.max_targets > 0 ? opts.max_targets : Infinity;
+  const targets = [];
+  let considered = 0;
+  let skippedShape = 0;
+  let skippedNoCandidates = 0;
+  let skippedBelowThreshold = 0;
+  let scoreSum = 0;
+
+  for (const row of rows) {
+    if (targets.length >= maxTargets) break;
+    if (!row || typeof row !== 'object') { skippedShape++; continue; }
+    const prompt = row.prompt != null ? String(row.prompt)
+      : (row.input != null ? String(row.input)
+        : (row.instruction != null ? String(row.instruction) : null));
+    const cands = _candidateList(row);
+    if (!prompt || !cands) { skippedShape++; continue; }
+    considered++;
+    const sliced = cands.slice(0, n);
+    if (sliced.length === 0) { skippedNoCandidates++; continue; }
+    const scored = sliced.map((candidate, index) => {
+      const text = _candidateText(candidate);
+      const scoredCandidate = _scoreBonCandidate(text, row, candidate, index, judge === 'local' ? null : judge);
+      const rawScore = Number(scoredCandidate.score);
+      const score = Number.isFinite(rawScore) ? Math.max(0, Math.min(1, rawScore)) : 0;
+      return {
+        index,
+        text,
+        score: Number(score.toFixed(4)),
+        reasons: Array.isArray(scoredCandidate.reasons) ? scoredCandidate.reasons.slice(0, 8) : [],
+      };
+    }).filter((candidate) => candidate.text.trim().length > 0);
+    if (scored.length === 0) { skippedNoCandidates++; continue; }
+    scored.sort((a, b) => (b.score - a.score) || (a.index - b.index));
+    const best = scored[0];
+    if (best.score < minScore) { skippedBelowThreshold++; continue; }
+    scoreSum += best.score;
+    targets.push({
+      input: prompt,
+      prompt,
+      output: best.text,
+      teacher_output: best.text,
+      target_source: 'best_of_n',
+      bon: {
+        version: BON_TARGETS_VERSION,
+        n_requested: n,
+        candidates_seen: sliced.length,
+        selected_index: best.index,
+        selected_score: best.score,
+        reasons: best.reasons,
+        judge: typeof judge === 'function' ? 'custom' : 'local',
+      },
+    });
+  }
+
+  return {
+    ok: true,
+    targets,
+    stats: {
+      rows_in: rows.length,
+      considered,
+      targets_out: targets.length,
+      skipped_shape: skippedShape,
+      skipped_no_candidates: skippedNoCandidates,
+      skipped_below_threshold: skippedBelowThreshold,
+      n,
+      min_score: minScore,
+      mean_selected_score: targets.length ? Number((scoreSum / targets.length).toFixed(4)) : null,
+    },
+    version: BON_TARGETS_VERSION,
+    basis: 'best_of_n_local_score_seqkd_targets',
+  };
+}
+
 // toKtoRows(pairs) -> [{prompt, completion, label}]. Splits each preference
 // pair into a positive (chosen, label=true) then negative (rejected,
 // label=false) KTO row. Deterministic order: all chosen-positives are emitted
@@ -413,9 +544,11 @@ export default {
   INSTALL_HINT,
   // W921 additive
   PREFERENCE_MINER_VERSION,
+  BON_TARGETS_VERSION,
   tokenOverlap,
   scoreCandidateLocal,
   mineDisagreementPairs,
+  buildBonTargets,
   toKtoRows,
   writePreferencePairs,
 };

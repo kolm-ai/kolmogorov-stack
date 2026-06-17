@@ -2390,7 +2390,7 @@ DISTILL MODES (wave 918)
                    src/distill-rejection-sampling.js. Run-meta surfaces
                    accept_rate, mean_candidate_score, N, threshold + a ledger
                    hash so accept/reject decisions are reproducible.
-                   RS flags: --rs-n <N> --rs-temperature <t>
+                   RS flags: --bon <N> (alias: --rs-n <N>) --rs-temperature <t>
                    --rs-threshold <0..1> --rs-threshold-mode best|threshold
                    --rs-reward <kolm_verifier|math_checker|schema_validator|code_exec>
                    --rs-reward-cmd <cmd> (custom reward program).
@@ -2433,6 +2433,9 @@ SUBCOMMANDS — STUDIO ENGINE (wave 921)
                     [--format pref|kto] [--min-gap 0.1] [--max-pairs N] [--json]
                                      mine DPO/KTO preference pairs from council /
                                      eval disagreement rows.
+  kolm distill preference bon --in <rows.jsonl> --out <targets.jsonl>
+                    [--bon N] [--min-score 0.0] [--max-targets N] [--json]
+                                     select best-of-N rollout targets for SeqKD/SFT.
   kolm distill preference train --pairs <jsonl> --student <path>
                     [--objective dpo|simpo|orpo|kto] [--beta 0.1]
 
@@ -23042,6 +23045,75 @@ async function cmdDistillPreference(args, verbName = 'preference') {
     console.log(`  next: kolm distill preference train --pairs ${outFile} --student <path> --objective ${format === 'kto' ? 'kto' : 'dpo'}`);
     return;
   }
+  // W619 - `kolm distill preference bon` turns rows with N candidate rollouts
+  // into SeqKD/SFT targets. This is a GPU-free curation step; actual live
+  // sampling still belongs to the rejection_sampling worker path.
+  if (sub === 'bon') {
+    const inFile = pickFlag(rest, '--in') || pickFlag(rest, '--rows') || pickFlag(rest, '--from');
+    const outFile = pickFlag(rest, '--out');
+    const bonFlag = pickFlag(rest, '--bon') || pickFlag(rest, '--n') || '4';
+    const minScoreFlag = pickFlag(rest, '--min-score') || pickFlag(rest, '--threshold');
+    const maxTargetsFlag = pickFlag(rest, '--max-targets');
+    const wantJson = rest.includes('--json');
+    if (!inFile || !outFile) {
+      console.error('usage: kolm distill preference bon --in <rows.jsonl> --out <targets.jsonl> [--bon N] [--min-score 0.0] [--max-targets N] [--json]');
+      console.error('  --in rows: JSONL of {prompt, candidates:[{text|response|completion}|string], seed_output?}.');
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (!fs.existsSync(inFile)) {
+      console.error('not found: ' + inFile);
+      process.exit(EXIT.NOT_FOUND);
+    }
+    const bonN = Number(bonFlag);
+    if (!Number.isInteger(bonN) || bonN < 1 || bonN > 128) {
+      console.error("error: --bon must be an integer in [1, 128]");
+      process.exit(EXIT.BAD_ARGS);
+    }
+    const bonOpts = { n: bonN };
+    if (minScoreFlag != null) {
+      const minScore = Number(minScoreFlag);
+      if (!Number.isFinite(minScore) || minScore < 0 || minScore > 1) {
+        console.error("error: --min-score must be a number in [0, 1]");
+        process.exit(EXIT.BAD_ARGS);
+      }
+      bonOpts.min_score = minScore;
+    }
+    if (maxTargetsFlag != null) {
+      const maxTargets = Number(maxTargetsFlag);
+      if (!Number.isInteger(maxTargets) || maxTargets <= 0) {
+        console.error("error: --max-targets must be a positive integer");
+        process.exit(EXIT.BAD_ARGS);
+      }
+      bonOpts.max_targets = maxTargets;
+    }
+    let rows;
+    try {
+      rows = fs.readFileSync(inFile, 'utf8').split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l));
+    } catch (e) {
+      console.error('could not parse --in JSONL: ' + (e && e.message ? e.message : e));
+      process.exit(EXIT.EXECUTION);
+    }
+    const { buildBonTargets } = await import('../src/distill-preference.js');
+    const built = buildBonTargets(rows, bonOpts);
+    if (!built.ok) {
+      console.error('bon failed: ' + (built.error || 'unknown'));
+      process.exit(EXIT.EXECUTION);
+    }
+    try {
+      const dir = path.dirname(outFile);
+      if (dir && !fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(outFile, built.targets.map((r) => JSON.stringify(r)).join('\n') + (built.targets.length ? '\n' : ''), 'utf8');
+    } catch (e) {
+      console.error('write failed: ' + (e && e.message ? e.message : e));
+      process.exit(EXIT.EXECUTION);
+    }
+    const out = { ok: true, built: built.stats, written: { ok: true, count: built.targets.length, path: outFile, format: 'seqkd-jsonl' }, in: inFile, version: built.version };
+    if (wantJson) { console.log(JSON.stringify(out, null, 2)); process.exit(0); }
+    console.log(`ok  selected ${built.targets.length} BoN targets from ${built.stats.rows_in} rows -> ${outFile}`);
+    console.log(`  considered: ${built.stats.considered}  skipped_shape: ${built.stats.skipped_shape}  skipped_below_threshold: ${built.stats.skipped_below_threshold}`);
+    console.log(`  next: kolm distill --local-worker --mode full --distillation-method lora --seeds ${outFile} --student-base <model>`);
+    return;
+  }
   // `kolm distill dpo|simpo --pairs ...` is a shortcut for `train --objective dpo|simpo`.
   if (sub === 'train' || sub === undefined || verbName === 'dpo' || verbName === 'simpo') {
     const train_args = (verbName === 'dpo' || verbName === 'simpo') ? args : rest;
@@ -23074,7 +23146,7 @@ async function cmdDistillPreference(args, verbName = 'preference') {
     }
     process.exit(out.ok ? 0 : 3);
   }
-  console.error(`usage: kolm distill preference {doctor|mine [--in <rows.jsonl> --out <pairs.jsonl>]|train [--pairs <jsonl> --student <path> --objective dpo|simpo|orpo|kto]}`);
+  console.error(`usage: kolm distill preference {doctor|mine [--in <rows.jsonl> --out <pairs.jsonl>]|bon [--in <rows.jsonl> --out <targets.jsonl> --bon N]|train [--pairs <jsonl> --student <path> --objective dpo|simpo|orpo|kto]}`);
   process.exit(EXIT.BAD_ARGS);
 }
 
@@ -26795,8 +26867,15 @@ async function cmdDistillLocalWorker(args) {
   const teacherVersion = pick('--teacher-version');
   const studentBaseRevision = pick('--student-base-revision');
   const distillationMethod = rejectionSampling ? 'rejection_sampling' : pick('--distillation-method');
-  // C4 - rejection_sampling (best-of-N) knobs; forwarded only for that method.
-  const rsN = pick('--rs-n');
+  // C4/W619 - rejection_sampling (best-of-N) knobs; forwarded only for that
+  // method. W619 exposes --bon as the public alias for --rs-n.
+  const bonN = pick('--bon');
+  const rsNFlag = pick('--rs-n');
+  if (bonN && rsNFlag && bonN !== rsNFlag) {
+    console.error(`error: --bon (${bonN}) conflicts with --rs-n (${rsNFlag}); use one value`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const rsN = rsNFlag || bonN;
   const rsTemperature = pick('--rs-temperature');
   const rsThreshold = pick('--rs-threshold');
   const rsThresholdMode = pick('--rs-threshold-mode');
@@ -26852,6 +26931,13 @@ async function cmdDistillLocalWorker(args) {
   // C4 - validate the rejection_sampling enums on the CLI side for a clean error
   // before the worker spawn (the worker re-derives defaults regardless).
   if (rejectionSampling) {
+    if (rsN != null) {
+      const parsedRsN = Number(rsN);
+      if (!Number.isInteger(parsedRsN) || parsedRsN < 1 || parsedRsN > 128) {
+        console.error(`error: --bon/--rs-n must be an integer in [1, 128]; got ${rsN}`);
+        process.exit(EXIT.BAD_ARGS);
+      }
+    }
     const VALID_RS_MODE = ['best', 'threshold'];
     if (rsThresholdMode && !VALID_RS_MODE.includes(rsThresholdMode)) {
       console.error(`error: --rs-threshold-mode must be one of [${VALID_RS_MODE.join(', ')}]; got ${rsThresholdMode}`);

@@ -10,6 +10,7 @@ import pref from '../src/distill-preference.js';
 import {
   OBJECTIVES, doctor, tokenOverlap, scoreCandidateLocal,
   mineDisagreementPairs, toKtoRows, writePreferencePairs, PREFERENCE_MINER_VERSION,
+  buildBonTargets, BON_TARGETS_VERSION,
 } from '../src/distill-preference.js';
 
 test('W480 exports intact (additive guarantee)', () => {
@@ -82,4 +83,52 @@ test('toKtoRows + writePreferencePairs (pref + kto formats)', () => {
 
 test('miner version exported', () => {
   assert.match(PREFERENCE_MINER_VERSION, /^w921-/);
+});
+
+test('buildBonTargets selects best-of-N SeqKD targets with the local scorer', () => {
+  const rows = [
+    {
+      prompt: 'How should support process a refund?',
+      seed_output: 'refund to original payment method with confirmation',
+      candidates: [
+        { text: 'no' },
+        { text: 'I cannot help with that request.' },
+        { text: 'Process the refund to the original payment method and send confirmation.' },
+      ],
+    },
+    {
+      input: 'Empty candidate row',
+      candidates: [],
+    },
+  ];
+  const out = buildBonTargets(rows, { n: 3, min_score: 0.1 });
+  assert.equal(out.ok, true);
+  assert.equal(out.version, BON_TARGETS_VERSION);
+  assert.equal(out.targets.length, 1);
+  assert.equal(out.targets[0].input, rows[0].prompt);
+  assert.equal(out.targets[0].output, 'Process the refund to the original payment method and send confirmation.');
+  assert.equal(out.targets[0].teacher_output, out.targets[0].output);
+  assert.equal(out.targets[0].bon.n_requested, 3);
+  assert.equal(out.targets[0].bon.selected_index, 2);
+  assert.equal(out.stats.skipped_no_candidates, 1);
+  assert.ok(out.stats.mean_selected_score > 0);
+});
+
+test('buildBonTargets validates knobs, honors thresholds, and accepts a custom judge', () => {
+  assert.equal(buildBonTargets([], { n: 0 }).error, 'bad_n');
+  assert.equal(buildBonTargets([], { min_score: 2 }).error, 'bad_min_score');
+  const rows = [{ prompt: 'Pick one', candidates: ['alpha', 'bravo winner', 'charlie'] }];
+  const thresholded = buildBonTargets(rows, { n: 3, min_score: 0.99 });
+  assert.equal(thresholded.ok, true);
+  assert.equal(thresholded.targets.length, 0);
+  assert.equal(thresholded.stats.skipped_below_threshold, 1);
+
+  const judged = buildBonTargets(rows, {
+    n: 3,
+    judge: (text) => ({ score: text.includes('charlie') ? 0.9 : 0.1, reasons: ['fixture'] }),
+  });
+  assert.equal(judged.targets.length, 1);
+  assert.equal(judged.targets[0].output, 'charlie');
+  assert.deepEqual(judged.targets[0].bon.reasons, ['fixture']);
+  assert.equal(judged.targets[0].bon.judge, 'custom');
 });
