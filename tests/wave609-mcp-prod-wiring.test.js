@@ -64,16 +64,21 @@ test('1. router mounts MCP and in-toto receipt routes with prod store/signer/anc
   assert.match(src, /const __w609GetReceiptSigner = \(\) =>/);
   assert.match(src, /__startReceiptAnchorBatcher_w609\(\{/);
   assert.match(src, /update\('mcp_tool_receipts'/);
+  assert.match(src, /makeMcpUpstreamExecutorFromEnv as __makeMcpUpstreamExecutor_w641/);
+  assert.match(src, /const __w641McpUpstream = \(\(\) =>/);
   assert.match(src, /__registerIntotoReceiptRoutes_w921\(r, \{ authMiddleware, store: __w609ReceiptStore, getSigner: __w609GetReceiptSigner \}\)/);
-  assert.match(src, /__registerMcpGatewayRoutes_w921\(r, \{ authMiddleware, store: __w609ReceiptStore, getSigner: __w609GetReceiptSigner, anchorBatcher: __w609McpAnchorBatcher \}\)/);
+  assert.match(src, /__registerMcpGatewayRoutes_w921\(r, \{/);
+  assert.match(src, /anchorBatcher: __w609McpAnchorBatcher/);
+  assert.match(src, /execute: __w641McpUpstream\.execute/);
 });
 
-test('1b. backend spec records W609 closure and leaves upstream execution open', () => {
+test('1b. backend spec records W609/W640/W641 closures and leaves remaining policy gaps open', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   assert.match(spec, /CLOSED W609: wire MCP gateway to durable store \+ signer in prod/);
   assert.match(spec, /CLOSED W609: anchor MCP receipts into the existing Merkle transparency log/);
   assert.match(spec, /CLOSED W640: let the in-toto route resolve mcp_tool_receipts by call_id/i);
-  assert.match(spec, /No production upstream MCP client registry\/executor/);
+  assert.match(spec, /CLOSED W641: wire a production upstream MCP executor\/registry/i);
+  assert.doesNotMatch(spec, /\[major\] No production upstream MCP client registry\/executor/);
   assert.doesNotMatch(spec, /\(surgical-now, S\/low, v7\) \*\*Let the in-toto route resolve mcp_tool_receipts by call_id/);
 });
 

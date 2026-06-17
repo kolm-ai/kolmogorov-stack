@@ -8,9 +8,9 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 
 - Local engineering perfection: **88.8/100**
 - Frontier/product perfection: **68.5/100**
-- Atomic components inventoried: **828**
+- Atomic components inventoried: **829**
 - Atomic deep dives complete: **100%**
-- Direct test referenced: **662/828 (80%)**
+- Direct test referenced: **663/829 (80%)**
 - High-priority direct test referenced: **43/48 (89.6%)**
 - Readiness closed locally: **49/57 (86%)**
 - SOTA categories still carrying critical work: **10/16**
@@ -32,7 +32,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=6 open=1/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | ondevice-inference | cross-device | sota_review_complete_critical_frontier_work_open | at=5 open=1/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
 | llm-routing | gateway | sota_review_complete_major_frontier_work_open | at=7 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
-| mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_major_frontier_work_open | at=10 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
+| mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_major_frontier_work_open | at=11 open=0/1/2 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
 | verifiable-inference | trust | sota_review_complete_critical_frontier_work_open | at=8 open=2/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | model-signing-standards | trust | sota_review_complete_external_or_release_gate_open | at=8 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | confidential-compute | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/2/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |

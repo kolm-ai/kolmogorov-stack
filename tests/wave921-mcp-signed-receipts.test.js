@@ -32,7 +32,7 @@ const NOW = 1748476800000; // fixed clock -> deterministic timestamp
 const TENANT = 'tenant_abc123';
 const TOOL = 'get_weather';
 const ARGS = { location: 'New York', units: 'metric' };
-// MCP CallToolResult shape (spec 2025-06-18 server/tools).
+// MCP CallToolResult shape (latest checked spec 2025-11-25 server/tools).
 const RESULT = {
   content: [{ type: 'text', text: 'Current weather in New York: 22C, partly cloudy' }],
   structuredContent: { temperature: 22, conditions: 'partly cloudy' },

@@ -9,11 +9,11 @@
 // the gateway market (Bifrost / Portkey / LiteLLM all gateway tool calls; none
 // emit a signed, third-party-checkable tool-call record).
 //
-// MCP wire shape (web-confirmed against the MCP spec, 2025-06-18 server/tools):
+// MCP wire shape (web-confirmed against the MCP spec, 2025-11-25 server/tools):
 //   tools/call REQUEST  params: { name: string, arguments: object }
 //   tools/call RESULT   { content: [{type,...}], structuredContent?: object,
 //                         isError?: boolean }
-// (Spec: https://modelcontextprotocol.io/specification/2025-06-18/server/tools)
+// (Spec: https://modelcontextprotocol.io/specification/2025-11-25/server/tools)
 //
 // Public surface:
 //   - wrapToolCall({tool,args,tenant,now,signer,result?,execute?,...})
@@ -374,7 +374,8 @@ export function verifyMcpReceipt(receipt) {
  *   - tenant    (string, REQUIRED)
  *   - args      (object) - tools/call params.arguments
  *   - result    (object|array) - precomputed CallToolResult (optional)
- *   - execute   (fn({tool,args}) -> result|Promise) - invoked iff no `result`
+ *   - execute   (fn({tool,args,tenant,server_id,transport}) -> result|Promise)
+ *               - invoked iff no `result`
  *   - signer    (Ed25519 signer) - injected; FALLBACK to default signer
  *   - now       (number|string|Date) - injected clock (determinism)
  *   - call_id   (string) - pin for reproducible ids
@@ -413,7 +414,13 @@ export async function wrapToolCall(opts = {}) {
   let result = opts.result;
   if (result === undefined) {
     if (typeof opts.execute === 'function') {
-      result = await opts.execute({ tool, args, tenant });
+      result = await opts.execute({
+        tool,
+        args,
+        tenant,
+        server_id: opts.server_id == null ? null : String(opts.server_id),
+        transport: opts.transport == null ? null : String(opts.transport),
+      });
     } else {
       result = { content: [], isError: false };
     }

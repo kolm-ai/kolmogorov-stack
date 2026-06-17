@@ -32,10 +32,10 @@
     }
   },
   "summary": {
-    "component_count": 828,
-    "atomic_deep_dive_complete": 828,
+    "component_count": 829,
+    "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 662,
+    "direct_test_referenced_components": 663,
     "direct_test_reference_pct": 80,
     "components_without_direct_test_reference": 166,
     "high_priority_components": 48,
@@ -64,7 +64,7 @@
       "api_surface": 32,
       "billing_marketplace": 22,
       "capture_data_eval": 74,
-      "compile_artifact_runtime": 101,
+      "compile_artifact_runtime": 102,
       "developer_distribution": 67,
       "identity_access": 31,
       "infra_cloud_device": 69,
@@ -77,7 +77,7 @@
     "components_by_surface": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 625,
+      "core-backend": 626,
       "package-distribution": 91,
       "service": 3,
       "worker": 75
@@ -249,10 +249,10 @@
       "id": "mcp-tool-gateway-receipts",
       "stack_area": "agent-integrations",
       "status": "sota_review_complete_major_frontier_work_open",
-      "already_at_frontier_count": 10,
-      "improvement_count": 3,
+      "already_at_frontier_count": 11,
+      "improvement_count": 2,
       "critical_gaps": 0,
-      "major_gaps": 2,
+      "major_gaps": 1,
       "minor_gaps": 2,
       "required_components": 3,
       "suggested_verification": [
@@ -26811,8 +26811,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 11480,
-          "lines": 289,
+          "bytes": 11988,
+          "lines": 299,
           "imports": 2,
           "exports": 3,
           "routes": 2,
@@ -26830,7 +26830,7 @@
         ],
         "priority_score": 7,
         "priority_band": "high",
-        "sha256": "413b2bdc3998d5c4165fde80123d3e750a3f662663631942f0df332780027999"
+        "sha256": "c68c1e3c6d0cc44cbb3b28ca84b1632c88339e6f6453cccf797d13823e4076e1"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -26841,6 +26841,7 @@
         "direct_test_refs": [
           "tests/wave-mcp-anchor-guardrail.test.js",
           "tests/wave609-mcp-prod-wiring.test.js",
+          "tests/wave641-mcp-upstream-registry.test.js",
           "tests/wave921-mcp-signed-receipts.test.js"
         ],
         "category_links": [
@@ -26883,8 +26884,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 19753,
-          "lines": 479,
+          "bytes": 19978,
+          "lines": 486,
           "imports": 4,
           "exports": 11,
           "routes": 0,
@@ -26901,7 +26902,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "d9b965d81ca78333508d8bc018c3fbc787882f18c93a7ee4162b48b288aed5b8"
+        "sha256": "208f523f7fd3d7e109d2e33bbe75e13703a95e098a039ae584d34fe6e9359da5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -26914,6 +26915,7 @@
           "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
           "tests/wave-mcp-anchor-guardrail.test.js",
           "tests/wave609-mcp-prod-wiring.test.js",
+          "tests/wave641-mcp-upstream-registry.test.js",
           "tests/wave921-intoto-attestation.test.js",
           "tests/wave921-mcp-signed-receipts.test.js"
         ],
@@ -26985,6 +26987,54 @@
       },
       "perfection_gaps": [],
       "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
+    },
+    {
+      "path": "src/mcp-upstream-registry.js",
+      "id": "src-mcp-upstream-registry-js",
+      "surface": "core-backend",
+      "domain": "compile_artifact_runtime",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 10863,
+          "lines": 277,
+          "imports": 0,
+          "exports": 8,
+          "routes": 0,
+          "env_refs": 4,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 2,
+          "crypto_refs": 0,
+          "markers": 0
+        },
+        "risk_signals": [
+          "environment_configuration_boundary",
+          "network_or_provider_boundary"
+        ],
+        "priority_score": 2,
+        "priority_band": "normal",
+        "sha256": "e2a052a63baf854c3ef25d68d709649c1959cf6ceecfb0cbfb88142e2877e059"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave641-mcp-upstream-registry.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
+        "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
+        "suggested_verification": [
+          "npm run verify:inventions",
+          "npm run verify:benchmark-evidence"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/media-store.js",
@@ -33405,12 +33455,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1461875,
-          "lines": 30655,
-          "imports": 534,
+          "bytes": 1462281,
+          "lines": 30665,
+          "imports": 535,
           "exports": 8,
           "routes": 810,
-          "env_refs": 195,
+          "env_refs": 196,
           "fs_writes": 1,
           "subprocess_refs": 44,
           "network_refs": 34,
@@ -33428,7 +33478,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "5940ead70b4149837b237951e9339ad61470f697034d5f88fca3f45f1107fa37"
+        "sha256": "b2a1f75b93bc9b2d2f8799ba72c90fe212e87b7c1bbfa7484d8867604440e76b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

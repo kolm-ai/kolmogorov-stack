@@ -499,6 +499,7 @@ import { register as __registerGovernRoutes_w921 } from './govern-routes.js';
 import { register as __registerTransparencyLogRoutes } from './transparency-log-routes.js';
 import { register as __registerIntotoReceiptRoutes_w921 } from './intoto-receipt-routes.js';
 import { register as __registerMcpGatewayRoutes_w921 } from './mcp-gateway-routes.js';
+import { makeMcpUpstreamExecutorFromEnv as __makeMcpUpstreamExecutor_w641 } from './mcp-upstream-registry.js';
 import { startBatcher as __startReceiptAnchorBatcher_w609 } from './transparency-anchor.js';
 // Agent Security-Review audit - signed evidence report API (sessions/scan/verify).
 import { register as __registerAuditRoutes_asr } from './audit-routes.js';
@@ -29890,10 +29891,19 @@ res.json({
       return null;
     }
   })();
+  const __w641McpUpstream = (() => {
+    try { return __makeMcpUpstreamExecutor_w641({ env: process.env }); } catch (_) { return { configured: false }; }
+  })();
   // W921 BET-3/BET-4 - in-toto/SLSA receipt attestation + governed MCP signed
   // tool-call receipts.
   __registerIntotoReceiptRoutes_w921(r, { authMiddleware, store: __w609ReceiptStore, getSigner: __w609GetReceiptSigner });
-  __registerMcpGatewayRoutes_w921(r, { authMiddleware, store: __w609ReceiptStore, getSigner: __w609GetReceiptSigner, anchorBatcher: __w609McpAnchorBatcher });
+  __registerMcpGatewayRoutes_w921(r, {
+    authMiddleware,
+    store: __w609ReceiptStore,
+    getSigner: __w609GetReceiptSigner,
+    anchorBatcher: __w609McpAnchorBatcher,
+    ...(__w641McpUpstream.configured && __w641McpUpstream.execute ? { execute: __w641McpUpstream.execute } : {}),
+  });
 
   // Agent Security-Review audit - the signed evidence-report surface. Mounts
   // POST /v1/audit/sessions[/:id/{ingest,run}], GET /v1/audit/sessions/:id[/report],

@@ -27,7 +27,7 @@
 //   store - { insert(table,row), findByTenant(table,tenant) } from
 //                    src/store.js. FALLBACK: a process-local Map so dispatch +
 //                    verify round-trip works in tests with no DB.
-//   execute - optional ({tool,args,tenant}) -> CallToolResult. When a
+//   execute - optional ({tool,args,tenant,server_id,transport}) -> CallToolResult. When a
 //                    dispatch body carries no precomputed `result`, this invokes
 //                    the registered MCP server. Without it (and without a body
 //                    result) the dispatch records an empty result.
@@ -63,6 +63,14 @@ function _denyUnauth(res) {
     hint: '/v1/mcp/* requires a kolm tenant API key (Authorization: Bearer ks_...)',
     version: MCP_GATEWAY_ROUTES_VERSION,
   });
+}
+
+function _upstreamErrorStatus(code) {
+  if (code === 'mcp_upstream_tool_not_registered') return 404;
+  if (code === 'mcp_upstream_bad_tool_name' || code === 'mcp_upstream_ambiguous_tool') return 400;
+  if (code === 'mcp_upstream_timeout') return 504;
+  if (typeof code === 'string' && code.startsWith('mcp_upstream_')) return 502;
+  return null;
 }
 
 // Build the persistence seam. Prefers an injected store; otherwise a process-
@@ -229,11 +237,13 @@ export function register(r, deps = {}) {
           version: MCP_GATEWAY_ROUTES_VERSION,
         });
       }
-      const code = (e && e.code === 'mcp_no_signer') ? 503 : 500;
+      const upstreamStatus = _upstreamErrorStatus(e && e.code);
+      const code = upstreamStatus || ((e && e.code === 'mcp_no_signer') ? 503 : 500);
       return res.status(code).json({
         ok: false,
         error: (e && e.code) || 'mcp_dispatch_error',
         detail: String((e && e.message) || e),
+        ...(upstreamStatus ? { upstream: true } : {}),
         version: MCP_GATEWAY_ROUTES_VERSION,
       });
     }
