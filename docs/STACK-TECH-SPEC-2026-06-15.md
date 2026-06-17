@@ -10,7 +10,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 
 **What is genuinely missing at the frontier (net-new, spec-gated):** GAD adversarial distillation (arXiv:2511.10643, the #1 black-box method), a shared boot-and-measure probe harness (flips estimated->tested across 5 categories), a pluggable real embedding provider (uncaps curation + routing), a real attestation cert-chain verifier (ends TOFU), a hosted managed distill+serve fleet (the biggest DX gap vs competitors), and an in-browser verify-then-run WebGPU demo.
 
-**Counts:** 51 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
+**Counts:** 52 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
 
 ## Top surgical-now improvements (ranked)
 
@@ -67,6 +67,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 | 49 | compile-api-to-model-competitors | 6 | S/low | CLOSED W648: lock the self-hosted compile server auth/offline validation contract | `workers/compile-server/server.mjs createServer; tests/wave648-compile-server-contract.test.js; verify:compile-server` |
 | 50 | ondevice-inference | 6 | S/low | CLOSED W649: lock edge device update daemon offline verification before install | `src/device-daemon.js verifyLocal/applyUpdate/pollOnce/runDaemon; tests/wave649-device-daemon-contract.test.js; verify:device-daemon` |
 | 51 | billing-marketplace | 7 | S/low | CLOSED W650: fail closed before marketplace fine-tunes queue unverified base artifacts | `src/marketplace-finetune.js local digest-verified queue handoff; tests/wave650-marketplace-finetune-contract.test.js; verify:marketplace-finetune` |
+| 52 | compile-api-to-model-competitors | 7 | S/low | CLOSED W651: make runtime-build planning and receipt hashing directly contract-tested | `workers/runtime-build/build.mjs createBuildPlan/hashRuntimeArtifacts/dry-run JSON; tests/wave651-runtime-build-contract.test.js; verify:runtime-build` |
 
 ## Cross-cutting bets (spec-followups)
 

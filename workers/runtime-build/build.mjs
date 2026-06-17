@@ -25,7 +25,7 @@ import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 
-const DEFAULT_REPO = 'https://github.com/ggerganov/llama.cpp.git';
+export const DEFAULT_REPO = 'https://github.com/ggerganov/llama.cpp.git';
 // W258-ML-6: a date-string label is NOT a git ref. The previous default
 // 'YYYY-MM-DD-frontier-pin' would fail `git checkout` immediately. We pin
 // to a real upstream llama.cpp tag (b3905, the last release reconciled
@@ -37,8 +37,9 @@ const DEFAULT_REPO = 'https://github.com/ggerganov/llama.cpp.git';
 // W219 #10: PINNED_COMMIT is a literal string so the regex-based
 // reproducibility test sees a fixed default; PINNED_REF mirrors it with
 // the env override path so operators can pin a different upstream ref.
-const PINNED_COMMIT = 'b3905';
-const PINNED_REF = process.env.KOLM_LLAMACPP_REF || PINNED_COMMIT;
+export const PINNED_COMMIT = 'b3905';
+export const PINNED_REF = process.env.KOLM_LLAMACPP_REF || PINNED_COMMIT;
+export const MAX_BUILD_JOBS = 256;
 
 // Per-target CMake flag matrix. Keep flags minimal + composable; surface ALL
 // optional features explicitly so build-receipt.json round-trips them.
@@ -150,6 +151,85 @@ export function checkToolchain(slug) {
   return { ok: missing.length === 0, missing, target: slug };
 }
 
+export function normalizeJobs(value, fallback = os.cpus().length) {
+  if (value == null || value === '') {
+    return Math.max(1, Math.min(MAX_BUILD_JOBS, Math.trunc(Number(fallback) || 1)));
+  }
+  const n = Number(value);
+  const base = Number.isFinite(n) && n > 0 ? Math.trunc(n) : 1;
+  return Math.max(1, Math.min(MAX_BUILD_JOBS, base));
+}
+
+export function createBuildPlan({ target, repoUrl = DEFAULT_REPO, commit = PINNED_COMMIT, outDir = null, jobs = null } = {}) {
+  const t = TARGETS[target];
+  if (!t) throw new Error(`unknown target: ${target}`);
+  const resolvedOutDir = path.resolve(outDir || path.join(os.tmpdir(), `kolm-runtime-${target}`));
+  const normalizedJobs = normalizeJobs(jobs == null ? os.cpus().length : jobs);
+  const resolvedRepoUrl = String(repoUrl || DEFAULT_REPO).trim() || DEFAULT_REPO;
+  const resolvedCommit = String(commit || PINNED_COMMIT).trim() || PINNED_COMMIT;
+  const srcDir = path.join(resolvedOutDir, 'src');
+  const buildDir = path.join(resolvedOutDir, 'build');
+  const cmakeArgs = emitCmakeArgs(target, { build_type: 'Release', install_prefix: resolvedOutDir });
+  return {
+    ok: true,
+    target,
+    target_meta: t,
+    repo_url: resolvedRepoUrl,
+    commit: resolvedCommit,
+    ref_requested: resolvedCommit,
+    out_dir: resolvedOutDir,
+    jobs: normalizedJobs,
+    cmake_args: cmakeArgs,
+    steps: [
+      ['git', 'clone', resolvedRepoUrl, srcDir],
+      ['git', '-C', srcDir, 'checkout', resolvedCommit],
+      ['cmake', '-S', srcDir, '-B', buildDir, ...cmakeArgs],
+      ['cmake', '--build', buildDir, '-j', String(normalizedJobs)],
+      ['cmake', '--install', buildDir],
+    ],
+  };
+}
+
+const HASH_EXTS = new Set(['', '.exe', '.so', '.dll', '.dylib', '.a']);
+
+function _hashTree(rootDir, outDir) {
+  const out = {};
+  if (!fs.existsSync(rootDir)) return out;
+  const stack = [rootDir];
+  while (stack.length) {
+    const d = stack.pop();
+    let entries;
+    try { entries = fs.readdirSync(d, { withFileTypes: true }); }
+    catch (_) { continue; }
+    for (const ent of entries) {
+      const p = path.join(d, ent.name);
+      if (ent.isDirectory()) { stack.push(p); continue; }
+      if (!ent.isFile()) continue;
+      const ext = path.extname(ent.name).toLowerCase();
+      if (!HASH_EXTS.has(ext)) continue;
+      try {
+        const buf = fs.readFileSync(p);
+        out[path.relative(outDir, p).replace(/\\/g, '/')] = crypto.createHash('sha256').update(buf).digest('hex');
+      } catch (_) {} // deliberate: cleanup
+    }
+  }
+  return out;
+}
+
+export function hashRuntimeArtifacts(outDir) {
+  const root = path.resolve(outDir);
+  const binary_hashes = {
+    ..._hashTree(path.join(root, 'bin'), root),
+    ..._hashTree(path.join(root, 'lib'), root),
+  };
+  const concat = Object.keys(binary_hashes).sort().map(k => `${k}:${binary_hashes[k]}`).join('\n');
+  return {
+    binary_hashes,
+    binary_tree_sha256: crypto.createHash('sha256').update(concat).digest('hex'),
+    binary_file_count: Object.keys(binary_hashes).length,
+  };
+}
+
 function flag(args, name) {
   const i = args.indexOf(name);
   if (i < 0) return null;
@@ -176,6 +256,10 @@ async function main() {
 
   const target = flag(args, '--target') || flagPrefix(args, '--target');
   if (!target) {
+    if (jsonOut) {
+      console.log(JSON.stringify({ ok: false, error: 'target_required', targets: Object.keys(TARGETS) }, null, 2));
+      process.exit(2);
+    }
     console.error('usage: kolm-runtime-build --target=<slug> [--repo-url=<url>] [--commit=<sha>] [--out=<dir>] [--jobs=<n>] [--dry-run] [--json]');
     console.error('       kolm-runtime-build --doctor');
     console.error('targets: ' + Object.keys(TARGETS).join(', '));
@@ -183,6 +267,10 @@ async function main() {
   }
   const t = TARGETS[target];
   if (!t) {
+    if (jsonOut) {
+      console.log(JSON.stringify({ ok: false, error: 'unknown_target', target, targets: Object.keys(TARGETS) }, null, 2));
+      process.exit(2);
+    }
     console.error(`unknown target: ${target}. try: ${Object.keys(TARGETS).join(', ')}`);
     process.exit(2);
   }
@@ -190,10 +278,27 @@ async function main() {
   const repoUrl = flag(args, '--repo-url') || flagPrefix(args, '--repo-url') || DEFAULT_REPO;
   const commit = flag(args, '--commit') || flagPrefix(args, '--commit') || PINNED_COMMIT;
   const outDir = flag(args, '--out') || flagPrefix(args, '--out') || path.join(os.tmpdir(), `kolm-runtime-${target}`);
-  const jobs = Number(flag(args, '--jobs') || flagPrefix(args, '--jobs') || os.cpus().length);
+  const jobs = normalizeJobs(flag(args, '--jobs') || flagPrefix(args, '--jobs') || os.cpus().length);
   const dryRun = args.includes('--dry-run');
 
+  const plan = createBuildPlan({ target, repoUrl, commit, outDir, jobs });
   const tc = checkToolchain(target);
+  if (dryRun) {
+    const dryPlan = { ...plan, dry_run: true, toolchain: tc };
+    if (jsonOut) console.log(JSON.stringify(dryPlan, null, 2));
+    else {
+      console.log(`target:   ${target}`);
+      console.log(`repo:     ${repoUrl}`);
+      console.log(`commit:   ${commit}`);
+      console.log(`out:      ${plan.out_dir}`);
+      console.log(`jobs:     ${plan.jobs}`);
+      console.log(`toolchain:${tc.ok ? ' present' : ' missing: ' + tc.missing.join(', ')}`);
+      console.log(`cmake:    ${plan.cmake_args.join(' ')}`);
+      console.log(`steps:    ${plan.steps.length}`);
+      for (const s of plan.steps) console.log('  $ ' + s.join(' '));
+    }
+    return;
+  }
   if (!tc.ok) {
     const err = { ok: false, error: 'toolchain_missing', target, missing: tc.missing };
     if (jsonOut) console.log(JSON.stringify(err, null, 2));
@@ -201,36 +306,7 @@ async function main() {
     process.exit(3);
   }
 
-  const plan = {
-    target, target_meta: t,
-    repo_url: repoUrl, commit,
-    out_dir: outDir, jobs,
-    cmake_args: emitCmakeArgs(target, { build_type: 'Release', install_prefix: outDir }),
-    steps: [
-      ['git', 'clone', repoUrl, path.join(outDir, 'src')],
-      ['git', '-C', path.join(outDir, 'src'), 'checkout', commit],
-      ['cmake', '-S', path.join(outDir, 'src'), '-B', path.join(outDir, 'build'), ...emitCmakeArgs(target, { build_type: 'Release', install_prefix: outDir })],
-      ['cmake', '--build', path.join(outDir, 'build'), '-j', String(jobs)],
-      ['cmake', '--install', path.join(outDir, 'build')],
-    ],
-  };
-
-  if (dryRun) {
-    if (jsonOut) console.log(JSON.stringify(plan, null, 2));
-    else {
-      console.log(`target:   ${target}`);
-      console.log(`repo:     ${repoUrl}`);
-      console.log(`commit:   ${commit}`);
-      console.log(`out:      ${outDir}`);
-      console.log(`jobs:     ${jobs}`);
-      console.log(`cmake:    ${plan.cmake_args.join(' ')}`);
-      console.log(`steps:    ${plan.steps.length}`);
-      for (const s of plan.steps) console.log('  $ ' + s.join(' '));
-    }
-    return;
-  }
-
-  fs.mkdirSync(outDir, { recursive: true });
+  fs.mkdirSync(plan.out_dir, { recursive: true });
   const t0 = Date.now();
   for (const step of plan.steps) {
     const r = spawnSync(step[0], step.slice(1), { stdio: 'inherit' });
@@ -249,38 +325,17 @@ async function main() {
   // receipt_kind bumps to /2 so verifiers can dispatch on shape.
   let commit_sha = commit;
   try {
-    const rev = spawnSync('git', ['-C', path.join(outDir, 'src'), 'rev-parse', 'HEAD'], { encoding: 'utf8' });
+    const rev = spawnSync('git', ['-C', path.join(plan.out_dir, 'src'), 'rev-parse', 'HEAD'], { encoding: 'utf8' });
     if (rev.status === 0 && rev.stdout) commit_sha = rev.stdout.trim();
   } catch (_) {} // deliberate: cleanup
-  const binaryDir = path.join(outDir, 'bin');
-  const libDir = path.join(outDir, 'lib');
-  const HASH_EXTS = new Set(['', '.exe', '.so', '.dll', '.dylib', '.a']);
-  function hashTree(rootDir) {
-    const out = {};
-    if (!fs.existsSync(rootDir)) return out;
-    const stack = [rootDir];
-    while (stack.length) {
-      const d = stack.pop();
-      let entries;
-      try { entries = fs.readdirSync(d, { withFileTypes: true }); }
-      catch (_) { continue; }
-      for (const ent of entries) {
-        const p = path.join(d, ent.name);
-        if (ent.isDirectory()) { stack.push(p); continue; }
-        if (!ent.isFile()) continue;
-        const ext = path.extname(ent.name).toLowerCase();
-        if (!HASH_EXTS.has(ext)) continue;
-        try {
-          const buf = fs.readFileSync(p);
-          out[path.relative(outDir, p).replace(/\\/g, '/')] = crypto.createHash('sha256').update(buf).digest('hex');
-        } catch (_) {} // deliberate: cleanup
-      }
-    }
-    return out;
+  const binaryDir = path.join(plan.out_dir, 'bin');
+  const { binary_hashes, binary_tree_sha256, binary_file_count } = hashRuntimeArtifacts(plan.out_dir);
+  if (binary_file_count === 0) {
+    const err = { ok: false, error: 'runtime_artifacts_missing', target, out_dir: plan.out_dir };
+    if (jsonOut) console.log(JSON.stringify(err, null, 2));
+    else console.error(`[FAIL] no runtime artifacts found under ${path.join(plan.out_dir, 'bin')} or ${path.join(plan.out_dir, 'lib')}`);
+    process.exit(5);
   }
-  const binary_hashes = { ...hashTree(binaryDir), ...hashTree(libDir) };
-  const concat = Object.keys(binary_hashes).sort().map(k => `${k}:${binary_hashes[k]}`).join('\n');
-  const binary_tree_sha256 = crypto.createHash('sha256').update(concat).digest('hex');
   const receipt = {
     ok: true, target, repo_url: repoUrl,
     ref_requested: commit,
@@ -291,25 +346,26 @@ async function main() {
     binary_dir: binaryDir,
     binary_hashes,
     binary_tree_sha256,
-    binary_file_count: Object.keys(binary_hashes).length,
+    binary_file_count,
     // Receipt-kind lineage. v1 was the initial shape; v2 added binary_tree_sha256
     // + binary_hashes per W258-ML-7. Verifiers must accept either kind.
     //   receipt_kind: 'kolm-runtime-build/1'    (legacy — no binary tree hash)
     //   receipt_kind: 'kolm-runtime-build/2'    (current — binary tree hash included)
     receipt_kind: 'kolm-runtime-build/2',
   };
-  fs.writeFileSync(path.join(outDir, 'build-receipt.json'), JSON.stringify(receipt, null, 2));
+  fs.writeFileSync(path.join(plan.out_dir, 'build-receipt.json'), JSON.stringify(receipt, null, 2));
   if (jsonOut) console.log(JSON.stringify(receipt, null, 2));
   else {
     console.log(`built  ${target}  ${elapsed_ms}ms`);
-    console.log(`out    ${outDir}`);
+    console.log(`out    ${plan.out_dir}`);
     console.log(`bin    ${receipt.binary_dir}`);
-    console.log(`recpt  ${path.join(outDir, 'build-receipt.json')}`);
+    console.log(`recpt  ${path.join(plan.out_dir, 'build-receipt.json')}`);
   }
 }
 
 // Allow this file to be loaded as a module (for the test) or executed.
-if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` ||
-    process.argv[1].endsWith('build.mjs')) {
+const argvEntry = process.argv[1] || '';
+if (import.meta.url === `file://${argvEntry.replace(/\\/g, '/')}` ||
+    argvEntry.endsWith('build.mjs')) {
   main().catch(e => { console.error(e); process.exit(1); });
 }

@@ -39,9 +39,9 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 670,
-    "components_without_direct_test_reference": 159,
-    "high_priority_components": 48,
+    "test_referenced_components": 671,
+    "components_without_direct_test_reference": 158,
+    "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -49273,12 +49273,12 @@
       "surface": "worker",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "a41622985c8bef587f2ef313671f139eeaf8c0017f7da0a71437aa0fc8cb9bf7",
+      "sha256": "6af10b7498b86aeb97434a3bdc031b4e6ca5b86ffaba4ce8ac0b5bb6eed920dc",
       "metrics": {
-        "bytes": 13371,
-        "lines": 316,
+        "bytes": 15653,
+        "lines": 372,
         "imports": 5,
-        "exports": 5,
+        "exports": 12,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 0,
@@ -49287,14 +49287,16 @@
         "crypto_refs": 8,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave651-runtime-build-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 7,
+      "priority_score": 6,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -49319,7 +49321,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
       "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
       "suggested_verification": [
         "npm run verify:inventions",
