@@ -14,7 +14,8 @@ kolm --version
 ## What this directory contains
 
 - `kolm.rb` &mdash; the Formula. Points at the GitHub release tarball; wraps
-  `cli/kolm.js` with a `bin/kolm` shim that calls Node 20.
+  `cli/kolm.js` with a `bin/kolm` shim that calls Homebrew's supported
+  `node` runtime. The npm package declares `node >=20`.
 
 ## Releasing a new version
 
@@ -28,8 +29,9 @@ kolm --version
 
 ## Notes
 
-- The Formula declares `depends_on "node@20"` because the CLI ships as Node.
-  The runtime trainer (Python) is installed by `kolm doctor` after `brew install`.
+- The Formula declares `depends_on "node"` because the CLI ships as Node and
+  supports `node >=20`. The runtime trainer (Python) is installed by
+  `kolm doctor` after `brew install`.
 - We do not bundle Python here. Mixing Brew Python and pyenv Python in one
   Formula is a quick path to support tickets.
 - No bottle support yet. The Formula compiles from source on install

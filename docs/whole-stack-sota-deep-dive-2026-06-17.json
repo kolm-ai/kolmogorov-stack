@@ -5012,15 +5012,17 @@
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           },
           {
-            "path": "packages/homebrew/kolm.rb",
+            "path": "packages/langchain-kolm/index.js",
             "domain": "developer_distribution",
             "priority_score": 5,
             "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface"
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
             ],
             "test_refs": [],
-            "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
+            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
         "count": 164,

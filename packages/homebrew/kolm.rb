@@ -5,7 +5,7 @@
 #
 # This formula is intentionally minimal. The kolm CLI is a Node entry point
 # (cli/kolm.js) shipped from the GitHub release tarball; the formula wraps it
-# with a stub at bin/kolm and pins Node 20 LTS as the runtime dependency.
+# with a stub at bin/kolm and uses Homebrew's supported Node runtime.
 #
 # We do not vendor binaries here. The verifier and runtime are JS + Python
 # (Python deps are installed lazily on first compile/run via `kolm doctor`).
@@ -18,13 +18,15 @@ class Kolm < Formula
   license "Apache-2.0"
   head "https://github.com/kolm-ai/kolm.git", branch: "main"
 
-  depends_on "node@20"
+  depends_on "node"
 
   def install
     libexec.install Dir["*"]
     (bin/"kolm").write <<~SHIM
       #!/bin/bash
-      exec "#{Formula["node@20"].opt_bin}/node" "#{libexec}/cli/kolm.js" "$@"
+      set -euo pipefail
+      export KOLM_INSTALL_CHANNEL="${KOLM_INSTALL_CHANNEL:-homebrew}"
+      exec "#{Formula["node"].opt_bin}/node" "#{libexec}/cli/kolm.js" "$@"
     SHIM
     (bin/"kolm").chmod 0755
   end

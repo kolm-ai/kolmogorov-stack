@@ -9,7 +9,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 92,
-    "frontier_product_score": 69.1,
+    "frontier_product_score": 69.2,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 689,
-    "direct_test_reference_pct": 83.1,
-    "components_without_direct_test_reference": 140,
+    "direct_test_referenced_components": 690,
+    "direct_test_reference_pct": 83.2,
+    "components_without_direct_test_reference": 139,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -3111,63 +3111,8 @@
       "language": "ruby",
       "composition": {
         "metrics": {
-          "bytes": 1250,
-          "lines": 37,
-          "imports": 0,
-          "exports": 0,
-          "routes": 0,
-          "env_refs": 0,
-          "fs_writes": 0,
-          "subprocess_refs": 0,
-          "network_refs": 0,
-          "crypto_refs": 1,
-          "markers": 0
-        },
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "distribution_or_worker_surface"
-        ],
-        "priority_score": 5,
-        "priority_band": "medium",
-        "sha256": "8d9a912a4dde5e290bf939d4c1b8143f31e3c56faf21cd5929e165966157301e"
-      },
-      "target_state": {
-        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
-        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
-      },
-      "current_state": {
-        "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "mcp-tool-gateway-receipts",
-            "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          }
-        ],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
-        "suggested_verification": [
-          "npm run verify:package-release"
-        ]
-      },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
-    },
-    {
-      "path": "packages/homebrew/README.md",
-      "id": "packages-homebrew-readme-md",
-      "surface": "package-distribution",
-      "domain": "developer_distribution",
-      "language": "markdown",
-      "composition": {
-        "metrics": {
-          "bytes": 1156,
-          "lines": 37,
+          "bytes": 1334,
+          "lines": 39,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -3184,7 +3129,54 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "62d862af4ce565b4491f6d49278f91f1de257975cbf974a8c5ffb019fe0e75f4"
+        "sha256": "39ff612d4f21e35ced6415137be895bf83e5853291ac36ae36da5c5fc323a428"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave671-homebrew-formula-contract.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "suggested_verification": [
+          "npm run verify:package-release"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+    },
+    {
+      "path": "packages/homebrew/README.md",
+      "id": "packages-homebrew-readme-md",
+      "surface": "package-distribution",
+      "domain": "developer_distribution",
+      "language": "markdown",
+      "composition": {
+        "metrics": {
+          "bytes": 1248,
+          "lines": 39,
+          "imports": 0,
+          "exports": 0,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 1,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "distribution_or_worker_surface"
+        ],
+        "priority_score": 4,
+        "priority_band": "medium",
+        "sha256": "a8de20123cfcbe8a20b78a40fd4c4a7fdb3afd6e4208ba1cbf119fcbee8dd81c"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -3303,7 +3295,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "mcp-tool-gateway-receipts",
+            "stack_area": "agent-integrations",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
         "suggested_verification": [
@@ -3311,7 +3310,8 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing"
+        "direct_test_reference_missing",
+        "linked_frontier_work_open"
       ],
       "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
     },
@@ -5909,7 +5909,8 @@
           "tests/finalized-c1-signed-artifact-packaging.test.js",
           "tests/wave588-package-release-readiness.test.js",
           "tests/wave591-package-local-build-contract.test.js",
-          "tests/wave661-sbom-emit-contract.test.js"
+          "tests/wave661-sbom-emit-contract.test.js",
+          "tests/wave671-homebrew-formula-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -29687,8 +29688,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 24671,
-          "lines": 599,
+          "bytes": 25549,
+          "lines": 612,
           "imports": 2,
           "exports": 8,
           "routes": 0,
@@ -29704,7 +29705,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "70dce2fceb333a1ef787c60e6fa37584ec6fcb98394473ab4d46ba919e01c74b"
+        "sha256": "b4783b83b1fd3398fb52a7be784497de81d48bb5bd8486745c9f3650e65e96c4"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -29715,7 +29716,8 @@
         "direct_test_refs": [
           "tests/wave431-source-mojibake-clean.test.js",
           "tests/wave588-package-release-readiness.test.js",
-          "tests/wave591-package-local-build-contract.test.js"
+          "tests/wave591-package-local-build-contract.test.js",
+          "tests/wave671-homebrew-formula-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",

@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 689,
-    "components_without_direct_test_reference": 140,
+    "test_referenced_components": 690,
+    "components_without_direct_test_reference": 139,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -1878,10 +1878,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "ruby",
-      "sha256": "8d9a912a4dde5e290bf939d4c1b8143f31e3c56faf21cd5929e165966157301e",
+      "sha256": "39ff612d4f21e35ced6415137be895bf83e5853291ac36ae36da5c5fc323a428",
       "metrics": {
-        "bytes": 1250,
-        "lines": 37,
+        "bytes": 1334,
+        "lines": 39,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -1892,12 +1892,14 @@
         "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave671-homebrew-formula-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -1934,10 +1936,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "markdown",
-      "sha256": "62d862af4ce565b4491f6d49278f91f1de257975cbf974a8c5ffb019fe0e75f4",
+      "sha256": "a8de20123cfcbe8a20b78a40fd4c4a7fdb3afd6e4208ba1cbf119fcbee8dd81c",
       "metrics": {
-        "bytes": 1156,
-        "lines": 37,
+        "bytes": 1248,
+        "lines": 39,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -5192,7 +5194,8 @@
         "tests/finalized-c1-signed-artifact-packaging.test.js",
         "tests/wave588-package-release-readiness.test.js",
         "tests/wave591-package-local-build-contract.test.js",
-        "tests/wave661-sbom-emit-contract.test.js"
+        "tests/wave661-sbom-emit-contract.test.js",
+        "tests/wave671-homebrew-formula-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -32743,10 +32746,10 @@
       "surface": "core-backend",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "70dce2fceb333a1ef787c60e6fa37584ec6fcb98394473ab4d46ba919e01c74b",
+      "sha256": "b4783b83b1fd3398fb52a7be784497de81d48bb5bd8486745c9f3650e65e96c4",
       "metrics": {
-        "bytes": 24671,
-        "lines": 599,
+        "bytes": 25549,
+        "lines": 612,
         "imports": 2,
         "exports": 8,
         "routes": 0,
@@ -32760,7 +32763,8 @@
       "test_refs": [
         "tests/wave431-source-mojibake-clean.test.js",
         "tests/wave588-package-release-readiness.test.js",
-        "tests/wave591-package-local-build-contract.test.js"
+        "tests/wave591-package-local-build-contract.test.js",
+        "tests/wave671-homebrew-formula-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"

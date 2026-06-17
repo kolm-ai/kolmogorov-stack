@@ -416,9 +416,22 @@ function validateFormula(root, target, failures, blockers, version) {
   for (const token of ['class Kolm < Formula', 'homepage', 'url', 'sha256', 'license']) {
     if (!text.includes(token)) failures.push(`homebrew_missing_${token}`);
   }
+  const nodeDependency = (text.match(/depends_on\s+"(node(?:@\d+)?)"/) || [])[1] || null;
+  if (!nodeDependency) failures.push('homebrew_missing_node_dependency');
+  if (!/Formula\["node(?:@\d+)?"]\.opt_bin/.test(text)) failures.push('homebrew_shim_missing_homebrew_node');
+  if (!text.includes('set -euo pipefail')) failures.push('homebrew_shim_missing_strict_mode');
+  if (!text.includes('KOLM_INSTALL_CHANNEL')) failures.push('homebrew_shim_missing_install_channel_marker');
+  if (!/shell_output\("\#\{bin\}\/kolm --version"\)/.test(text)) failures.push('homebrew_test_missing_version_check');
+  if (!/shell_output\("\#\{bin\}\/kolm --help"\)/.test(text)) failures.push('homebrew_test_missing_help_check');
   if (version && !text.includes(`/v${version}.tar.gz`)) failures.push(`homebrew_version_mismatch:${version}`);
   if (hasZeroSha(text)) blockers.push('release_archive_sha256_placeholder');
-  return { has_test_block: text.includes('test do'), placeholder_sha: hasZeroSha(text) };
+  return {
+    has_test_block: text.includes('test do'),
+    placeholder_sha: hasZeroSha(text),
+    node_dependency: nodeDependency,
+    strict_shim: text.includes('set -euo pipefail'),
+    install_channel_marker: text.includes('KOLM_INSTALL_CHANNEL'),
+  };
 }
 
 function validateApt(root, target, failures, _blockers, version) {
