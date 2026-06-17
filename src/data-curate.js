@@ -67,7 +67,7 @@ import { semDedup } from './data-semdedup.js';
 import { valuePairsByInfluence } from './data-value-influence.js';
 import { valuePairsByShapley } from './data-shapley.js';
 import { selectByDSIR } from './data-dsir.js';
-import { selectInformativeSubset } from './data-select.js';
+import { selectInformativeSubset, __internals as _dataSelectInternals } from './data-select.js';
 
 // Genuine DSIR (src/data-dsir.js) is the DEFAULT 'dsir' SELECT path when a target
 // corpus is supplied. The v1 seeded-uniform calibration defect (multiplier 2^22 and
@@ -96,6 +96,7 @@ import {
 import { detectLabelErrors as _detectLabelErrors, routeErrorsToReview as _routeErrorsToReview } from './data-label-errors.js';
 
 export const CURATE_VERSION = 'curate-v1';
+export const EMBEDDING_NEAR_DUP_VERSION = 'embedding-near-dup-v1';
 
 const PROVIDER = 'kolm_data_curate';
 
@@ -258,6 +259,15 @@ function _pairOutput(p) {
   return '';
 }
 
+function _appendBackend(current, next) {
+  const cur = String(current || 'none');
+  const n = String(next || '');
+  if (!n || n === 'none' || n.startsWith('none:')) return cur;
+  if (cur === 'none' || cur === '') return n;
+  if (cur.split('+').includes(n)) return cur;
+  return cur + '+' + n;
+}
+
 function _setPairOutput(p, value) {
   // Write the redacted value back onto whichever output field the pair uses,
   // so we don't silently change the row's schema mid-pipeline.
@@ -396,6 +406,110 @@ function _dedupViaPython(pairs, namespace, threshold) {
   }
 }
 
+function _embeddingNearDupFallback(pairs, threshold) {
+  const rows = Array.isArray(pairs) ? pairs : [];
+  const tauRaw = Number(threshold);
+  const tau = Number.isFinite(tauRaw)
+    ? Math.max(0.5, Math.min(0.999, tauRaw))
+    : 0.93;
+  if (rows.length <= 1) {
+    return {
+      kept: rows,
+      report: {
+        version: EMBEDDING_NEAR_DUP_VERSION,
+        backend_used: 'none:too_few_rows',
+        threshold: tau,
+        n_in: rows.length,
+        n_kept: rows.length,
+        n_removed: 0,
+        groups: [],
+      },
+    };
+  }
+
+  try {
+    const embedPairs = _dataSelectInternals && typeof _dataSelectInternals._embedPairs === 'function'
+      ? _dataSelectInternals._embedPairs
+      : null;
+    const cosineSim = _dataSelectInternals && typeof _dataSelectInternals._cosineSim === 'function'
+      ? _dataSelectInternals._cosineSim
+      : null;
+    if (!embedPairs || !cosineSim) {
+      return {
+        kept: rows,
+        report: {
+          version: EMBEDDING_NEAR_DUP_VERSION,
+          backend_used: 'none:data_select_internals_missing',
+          threshold: tau,
+          n_in: rows.length,
+          n_kept: rows.length,
+          n_removed: 0,
+          groups: [],
+        },
+      };
+    }
+
+    const embs = embedPairs(rows);
+    const kept = [];
+    const keptIdx = [];
+    const groups = [];
+    let maxRemovedSimilarity = null;
+
+    for (let i = 0; i < rows.length; i++) {
+      let bestSlot = -1;
+      let bestSim = -Infinity;
+      for (let k = 0; k < keptIdx.length; k++) {
+        const sim = cosineSim(embs[i], embs[keptIdx[k]]);
+        if (sim > bestSim) {
+          bestSim = sim;
+          bestSlot = k;
+        }
+      }
+      if (bestSlot >= 0 && bestSim >= tau) {
+        const similarity = Number(bestSim.toFixed(6));
+        maxRemovedSimilarity = maxRemovedSimilarity === null
+          ? similarity
+          : Math.max(maxRemovedSimilarity, similarity);
+        groups.push({
+          kept_idx: keptIdx[bestSlot],
+          removed_idx: i,
+          similarity,
+        });
+      } else {
+        keptIdx.push(i);
+        kept.push(rows[i]);
+      }
+    }
+
+    return {
+      kept,
+      report: {
+        version: EMBEDDING_NEAR_DUP_VERSION,
+        backend_used: 'embedding-near-dup-js',
+        threshold: tau,
+        n_in: rows.length,
+        n_kept: kept.length,
+        n_removed: rows.length - kept.length,
+        max_removed_similarity: maxRemovedSimilarity,
+        groups,
+      },
+    };
+  } catch (e) {
+    return {
+      kept: rows,
+      report: {
+        version: EMBEDDING_NEAR_DUP_VERSION,
+        backend_used: 'none:error:' + String((e && e.message) || e),
+        threshold: tau,
+        n_in: rows.length,
+        n_kept: rows.length,
+        n_removed: 0,
+        groups: [],
+      },
+    };
+  }
+}
+
 // Walk up from this module to the repo root (the dir holding workers/). We are
 // at <root>/src/data-curate.js so the parent of __dirname is the root.
 function _findRepoRoot() {
@@ -437,6 +551,12 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       epsilon: 0.05,          // SemDeDup cosine slack (sim_threshold = 1 - epsilon)
       semdedupKeep: 'low-density', // keep policy: paper's keep-low-density default
       semdedupEmbedder: null, // optional injected real embedder (else local hash-bag)
+      // embeddingNearDup: if the python semantic dedup tier is unavailable,
+      //          fall back to a direct JS embedding-cosine near-dup pass over the
+      //          current survivors. This is narrower than SemDeDup, but it makes
+      //          the python-less path an explicit dedup tier instead of a no-op.
+      embeddingNearDup: true,
+      embeddingNearDupThreshold: 0.93,
       // target_size: when set (>0), run an informative-subset SELECTION stage
       //          after the filter stages. >1 = absolute count, 0<x<=1 = fraction.
       target_size: 0,
@@ -506,7 +626,8 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       dedup: 'not_run',
       // ── opt-in W921 fields (stay null/absent unless the new stages run) ──
       // backend_used: which dedup path actually executed
-      //   ('none' | 'minhash-js' | 'python:<backend>' | 'minhash-js+python:<backend>').
+      //   ('none' | 'minhash-js' | 'semdedup-js' | 'python:<backend>' |
+      //    'embedding-near-dup-js' and '+' chains of those).
       backend_used: 'none',
       // n_clusters: count of MinHash near-dup clusters collapsed (null if not run).
       n_clusters: null,
@@ -514,6 +635,9 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       minhash: null,
       // semdedup: the SemDeDup semantic-dedup report block (null if not run).
       semdedup: null,
+      // embedding_near_dup: direct JS cosine fallback report when python dedup
+      //   is skipped/unavailable (null unless that fallback boundary is hit).
+      embedding_near_dup: null,
       // selection: the SELECT-stage report block (null if no target_size).
       selection: null,
       // valuation: the OPT-IN targeted-valuation report (influence/shapley) that
@@ -594,7 +718,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           // claim the slot (keeps backend_used:'none' meaningful when every
           // removing stage is a no-op). The report.minhash block still records
           // that the pass ran.
-          if (minhashRemoved > 0) report.backend_used = 'minhash-js';
+          if (minhashRemoved > 0) report.backend_used = _appendBackend(report.backend_used, 'minhash-js');
           work = pre.kept;
         }
       } catch (e) {
@@ -628,9 +752,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           // dedup ran (even when it removed 0 - the stage executed and the
           // report carries its result), chaining onto any prior minhash slot.
           const semBackend = sd.report.backend_used || 'semdedup-js';
-          report.backend_used = report.backend_used === 'none'
-            ? semBackend
-            : report.backend_used + '+' + semBackend;
+          report.backend_used = _appendBackend(report.backend_used, semBackend);
           work = sd.kept;
         }
       } catch (e) {
@@ -646,13 +768,22 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
         report.deduped += Math.max(0, work.length - ded.kept.length);
         report.dedup = 'ok';
         const pyBackend = 'python:' + (ded.backend || 'unknown');
-        report.backend_used = report.backend_used === 'minhash-js'
-          ? 'minhash-js+' + pyBackend
-          : pyBackend;
+        report.backend_used = _appendBackend(report.backend_used, pyBackend);
         work = ded.kept;
       } else {
         report.dedup = ded.note; // 'skipped:<reason>'
-        // work unchanged - dedup degraded, pipeline continues.
+        if (o.embeddingNearDup && work.length > 1) {
+          const near = _embeddingNearDupFallback(work, o.embeddingNearDupThreshold);
+          if (near && Array.isArray(near.kept) && near.report) {
+            const nearRemoved = Math.max(0, work.length - near.kept.length);
+            report.deduped += nearRemoved;
+            report.embedding_near_dup = near.report;
+            report.backend_used = _appendBackend(report.backend_used, near.report.backend_used);
+            work = near.kept;
+          }
+        }
+        // If the JS fallback also skips, work remains unchanged and curation
+        // continues with a truthful report.embedding_near_dup block.
       }
     }
 

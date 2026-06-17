@@ -28,7 +28,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | kv-cache | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | speculative-decoding | runtime | sota_review_complete_critical_frontier_work_open | at=7 open=1/1/1 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | finetune-frameworks | training | sota_review_complete_major_frontier_work_open | at=10 open=0/1/4 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
-| synthetic-data-curation | data | sota_review_complete_critical_frontier_work_open | at=6 open=1/2/1 | 3 | npm run verify:stack-sota<br>npm run verify:redaction-benchmark |
+| synthetic-data-curation | data | sota_review_complete_critical_frontier_work_open | at=7 open=1/2/1 | 3 | npm run verify:stack-sota<br>npm run verify:redaction-benchmark |
 | small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=6 open=1/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | ondevice-inference | cross-device | sota_review_complete_critical_frontier_work_open | at=5 open=1/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
 | llm-routing | gateway | sota_review_complete_major_frontier_work_open | at=7 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
@@ -52,7 +52,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | `cli/kolm-tui.mjs` | developer_distribution | 9 | linked_frontier_work_open | Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence. |
 | `src/bench-harness.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards. |
 | `src/binder.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
-| `src/data-curate.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards. |
+| `src/data-curate.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/distill-pipeline.js` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/intent.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/otel.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping. |

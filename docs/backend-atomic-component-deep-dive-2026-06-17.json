@@ -228,6 +228,19 @@
         "improvement_track": "split_or_add_generated_contract_map_before_growth"
       },
       {
+        "path": "src/data-curate.js",
+        "domain": "capture_data_eval",
+        "priority_score": 9,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "execution_or_subprocess_boundary",
+          "large_component_contract_risk",
+          "stateful_storage_boundary"
+        ],
+        "improvement_track": "split_or_add_generated_contract_map_before_growth"
+      },
+      {
         "path": "cli/kolm-tui.mjs",
         "domain": "developer_distribution",
         "priority_score": 9,
@@ -239,19 +252,6 @@
           "network_or_provider_boundary"
         ],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
-      },
-      {
-        "path": "src/data-curate.js",
-        "domain": "capture_data_eval",
-        "priority_score": 9,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "environment_configuration_boundary",
-          "execution_or_subprocess_boundary",
-          "large_component_contract_risk",
-          "stateful_storage_boundary"
-        ],
-        "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
       },
       {
         "path": "src/bench-harness.js",
@@ -17298,12 +17298,12 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "5d8ace1df8dc64d9f52bbf6af8906abd7cc0e1f810cad4137ad903cea5ccd0c8",
+      "sha256": "3a78dad72f464fe9da4bcaa07920582d315169f21fe1520ff1457d3428b73093",
       "metrics": {
-        "bytes": 52081,
-        "lines": 1095,
+        "bytes": 56418,
+        "lines": 1226,
         "imports": 18,
-        "exports": 8,
+        "exports": 9,
         "routes": 0,
         "env_refs": 3,
         "fs_writes": 2,
@@ -17319,8 +17319,8 @@
         "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
         "tests/sota-capturedata.test.js",
         "tests/sota-tui.test.js",
-        "tests/wave921-data-curate-modules.test.js",
-        "tests/wave921-data-engine-modules.test.js"
+        "tests/wave637-data-curate-neardup-fallback.test.js",
+        "tests/wave921-data-curate-modules.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -17354,7 +17354,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
+      "improvement_track": "split_or_add_generated_contract_map_before_growth",
       "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
@@ -26304,6 +26304,7 @@
       },
       "test_refs": [
         "tests/billing-completeness.test.js",
+        "tests/wave637-data-curate-neardup-fallback.test.js",
         "tests/wave921-data-engine-modules.test.js"
       ],
       "risk_signals": [

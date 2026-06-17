@@ -185,8 +185,8 @@
       "id": "synthetic-data-curation",
       "stack_area": "data",
       "status": "sota_review_complete_critical_frontier_work_open",
-      "already_at_frontier_count": 6,
-      "improvement_count": 4,
+      "already_at_frontier_count": 7,
+      "improvement_count": 3,
       "critical_gaps": 1,
       "major_gaps": 2,
       "minor_gaps": 1,
@@ -785,7 +785,7 @@
           "relation": "sampled"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards.",
+      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration"
@@ -16288,10 +16288,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 52081,
-          "lines": 1095,
+          "bytes": 56418,
+          "lines": 1226,
           "imports": 18,
-          "exports": 8,
+          "exports": 9,
           "routes": 0,
           "env_refs": 3,
           "fs_writes": 2,
@@ -16309,7 +16309,7 @@
         ],
         "priority_score": 9,
         "priority_band": "high",
-        "sha256": "5d8ace1df8dc64d9f52bbf6af8906abd7cc0e1f810cad4137ad903cea5ccd0c8"
+        "sha256": "3a78dad72f464fe9da4bcaa07920582d315169f21fe1520ff1457d3428b73093"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -16324,8 +16324,8 @@
           "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
           "tests/sota-capturedata.test.js",
           "tests/sota-tui.test.js",
-          "tests/wave921-data-curate-modules.test.js",
-          "tests/wave921-data-engine-modules.test.js"
+          "tests/wave637-data-curate-neardup-fallback.test.js",
+          "tests/wave921-data-curate-modules.test.js"
         ],
         "category_links": [
           {
@@ -16359,7 +16359,7 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
+        "improvement_track": "split_or_add_generated_contract_map_before_growth",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
@@ -16369,7 +16369,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards."
+      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
     },
     {
       "path": "src/data-diversity-select.js",
@@ -24104,6 +24104,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/billing-completeness.test.js",
+          "tests/wave637-data-curate-neardup-fallback.test.js",
           "tests/wave921-data-engine-modules.test.js"
         ],
         "category_links": [],

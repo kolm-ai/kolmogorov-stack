@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 297,
+    "orphan_tests": 298,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 300,
+    "state_local_green": 301,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 465,
-    "test_only_waves": 297,
-    "waves": 313
+    "test_files": 466,
+    "test_only_waves": 298,
+    "waves": 314
   },
-  "generated_at": "2026-06-17T15:15:37.899Z",
+  "generated_at": "2026-06-17T15:27:11.831Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -311,6 +311,7 @@
       "W622",
       "W635",
       "W636",
+      "W637",
       "W708",
       "W709",
       "W710",
@@ -617,6 +618,7 @@
       "W622",
       "W635",
       "W636",
+      "W637",
       "W708",
       "W709",
       "W710",
@@ -4342,6 +4344,25 @@
       "test_letter_suffixes": []
     },
     {
+      "canonical_wave_id": "W637",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wave921-data-engine-modules.test.js tests/sota-capturedata.test.js tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js tests/wave921-data-curate-modules.test.js tests/wave637-data-curate-neardup-fallback.test.js",
+          "script": "npm:verify:data-curation"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave637-data-curate-neardup-fallback.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
       "canonical_wave_id": "W708",
       "claim_scope": "internal",
       "docs_sources": [],
@@ -5453,11 +5474,11 @@
       ],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave921-data-engine-modules.test.js tests/sota-capturedata.test.js tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js tests/wave921-data-curate-modules.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave921-data-engine-modules.test.js tests/sota-capturedata.test.js tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js tests/wave921-data-curate-modules.test.js tests/wave637-data-curate-neardup-fallback.test.js",
           "script": "npm:verify:data-curation"
         },
         {
-          "command": "node --test --test-concurrency=1 tests/wave921-data-engine-modules.test.js tests/sota-capturedata.test.js tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js tests/wave921-data-curate-modules.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave921-data-engine-modules.test.js tests/sota-capturedata.test.js tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js tests/wave921-data-curate-modules.test.js tests/wave637-data-curate-neardup-fallback.test.js",
           "script": "npm:verify:data-curation"
         },
         {

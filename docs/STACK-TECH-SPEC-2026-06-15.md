@@ -10,7 +10,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 
 **What is genuinely missing at the frontier (net-new, spec-gated):** GAD adversarial distillation (arXiv:2511.10643, the #1 black-box method), a shared boot-and-measure probe harness (flips estimated->tested across 5 categories), a pluggable real embedding provider (uncaps curation + routing), a real attestation cert-chain verifier (ends TOFU), a hosted managed distill+serve fleet (the biggest DX gap vs competitors), and an in-browser verify-then-run WebGPU demo.
 
-**Counts:** 37 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 12 confirmed already-at-frontier capabilities.
+**Counts:** 38 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 12 confirmed already-at-frontier capabilities.
 
 ## Top surgical-now improvements (ranked)
 
@@ -53,6 +53,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 | 35 | speculative-decoding | 6 | S/low | CLOSED W634: route Medusa/EAGLE config helper through the modern vLLM speculative_config builder | `apps/runtime/medusa.py for_vllm/_self_test; tests/wave921-serve-config.test.js` |
 | 36 | speculative-decoding | 6 | S/low | CLOSED W635: lock JS/Python draft-pairing registries together and keep EAGLE heads separate by test | `src/speculative-decoding.js DRAFT_PAIRINGS; apps/trainer/speculative.py DRAFT_PAIRINGS; tests/wave635-speculative-registry-sync.test.js` |
 | 37 | finetune-frameworks | 6 | S/low | CLOSED W636: pin multinode FSDP dry-run plans and memory estimates without GPUs | `apps/trainer/multinode_launch.py --dry-run --json; tests/wave636-multinode-launch.test.js; verify:finetune-frameworks` |
+| 38 | synthetic-data-curation | 6 | M/low | CLOSED W637: add Python-less embedding-cosine near-dup fallback to CURATE dedup | `src/data-curate.js embedding_near_dup report; tests/wave637-data-curate-neardup-fallback.test.js; verify:data-curation` |
 
 ## Cross-cutting bets (spec-followups)
 
@@ -415,6 +416,8 @@ ACTIVE LEARNING: src/active-learning.js scoreCaptureRichness (line 282) blends W
 - Coverage-gap-driven active capture with demand-weighting + recency decay + cost-gated augment preview — src/active-learning.js, src/data-engine.js; closes the loop into the W720 self-improvement sweep
 - Importance-weighted training sampler wired end-to-end (JS scorer → JSONL → torch WeightedRandomSampler) — src/capture-importance.js, apps/trainer/distill.py:695
 
+- W637 Python-less embedding-cosine near-dup fallback: when the optional python dedup tier skips, CURATE now runs a deterministic JS cosine pass at the 0.9-0.95 frontier band, records `report.embedding_near_dup`, and composes backend evidence instead of silently treating the stage as a no-op (`src/data-curate.js`, `tests/wave637-data-curate-neardup-fallback.test.js`).
+
 **Gaps.**
 - [critical] All 'semantic' curation (dedup, clustering, diversity, DSIR, label-error topic-agreement) runs on a 256-d hash-bag lexical embedder (src/embedding.js), not a learned semantic model. Near-paraphrases with low lexical overlap escape dedup; clusters are lexical not topical; DEITA/MIG-style gains are capped because the embedding space does not reflect meaning. This is the single biggest quality ceiling.
 - [major] Active selection uses PROXY uncertainty (routing entropy at capture time + token-density/novelty importance), NOT the student model's actual per-example prediction loss on candidate data. The tf12 key paper (arXiv:2512.00884) shows student-loss argmax selection is the SOTA criterion and beats reward/entropy proxies. We never recompute student loss on candidates to re-rank the next distill batch.
@@ -427,7 +430,7 @@ ACTIVE LEARNING: src/active-learning.js scoreCaptureRichness (line 282) blends W
 - (spec-followup, L/med, v8) **Student-loss active re-ranking stage** - After an initial distill, run the student over candidate pairs, capture per-example loss, and select the next batch by argmax-loss (per arXiv:2512.00884). Replace/augment the entropy-proxy priority in active-learning-queue.js _priorityFromDecision with measured student loss when a checkpoint exists. This is the concrete frontier-closing change for active distillation. _[where: new src/active-loss-select.js + apps/trainer/distill.py (emit per-example eval loss JSONL) + cli resume-from-active-queue (cli/kolm.js:23129) to re-rank consumed rows by student loss before the next distill]_
 - (spec-followup, L/med, v8) **Wire Magpie/Evol teacher synthesis into AUGMENT as a real (cost-gated) stage** - Promote apps/data/synth.py Magpie/Evol generators to engine-callable so AUGMENT can actually produce filled pairs (not empty-output prompts) on the curated, deduped, high-quality prompt subset — the research's top lift-per-dollar move. Keep preview-only default and the cost gate. _[where: src/data-augment.js (new strategy 'magpie' + 'teacher-evol' that call the collect step), bridging to apps/data/synth.py generators; gate with the existing approve_cost_usd path in data-engine.js:202]_
 - (completed-local, W628, S/low, v6) **CLOSED W628: Default quality stage to the learned classifier + percentile keep** - curatePairs now defaults qualityClassifier:true with percentile keep_fraction, scores input+output relevance through the shipped learned-default logistic head, stamps quality_score on kept rows, records report.quality, and preserves the legacy heuristic path via qualityClassifier:false. Gated by tests/wave921-data-engine-modules.test.js plus neighboring curation suites. _[where: src/data-curate.js default opts/quality stage; tests/wave921-data-engine-modules.test.js]_
-- (surgical-now, M/low, v6) **Add embedding-cosine near-dup tier to the dedup stage report** - When python dedup is unavailable (the common python-less box), run a JS embedding-cosine near-dup pass at threshold 0.9-0.95 (the research's recommended band) over minhash survivors instead of a no-op, so the engine still does semantic-tier dedup off-GPU. Reuses _embedPairs/_cosineSim already in data-select.js. _[where: src/data-curate.js dedup stage (after minhash, lines 526-541) using existing src/data-select cosine + embeddings]_
+- (completed-local, W637, M/low, v6) **CLOSED W637: Add embedding-cosine near-dup fallback to the dedup stage report** - When python dedup is unavailable, curatePairs now runs a JS embedding-cosine near-dup pass using data-select's `_embedPairs`/`_cosineSim`, defaults to threshold 0.93, records `report.embedding_near_dup`, increments `report.deduped`, and composes `backend_used` with earlier minhash/SemDeDup tiers. The fallback can be disabled with `embeddingNearDup:false`. Gated by `npm run verify:data-curation`. _[where: src/data-curate.js; tests/wave637-data-curate-neardup-fallback.test.js; package.json]_
 
 ### small-llm-students
 
