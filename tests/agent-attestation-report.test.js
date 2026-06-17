@@ -163,6 +163,7 @@ test('envelope carries every section a reviewer needs', () => {
     'schema', 'report_version', 'spec_version', 'report_id', 'generated_at',
     'subject', 'summary', 'findings', 'frameworks', 'remediation', 'caveats',
     'asr_checklist', 'contact', 'verify_url', 'signature_ed25519', 'evidence_tier',
+    'proof_scope',
   ]) {
     assert.ok(k in envelope, `envelope.${k} present`);
   }
@@ -339,6 +340,56 @@ test('the word "honest"/"honesty" appears nowhere in the deliverable', () => {
   const { envelope } = buildAndSignReport(dirtyAudit(), { subject: 'X' });
   const blob = (JSON.stringify(envelope) + renderReportHtml(envelope)).toLowerCase();
   assert.ok(!blob.includes('honest'), 'no "honest"/"honesty" in the report (use Scope/Limitations)');
+});
+
+// ---------------------------------------------------------------------------
+// GAP-4 - proof-scope caveat: report integrity is not proof-of-compute.
+// ---------------------------------------------------------------------------
+test('signed report carries a default proof-scope caveat excluding proof-of-compute', () => {
+  const { envelope } = buildAndSignReport(dirtyAudit(), { subject: 'X' });
+  const caveat = envelope.caveats.find((c) => c.startsWith('Proof scope:'));
+  assert.ok(caveat, 'proof-scope caveat present');
+  assert.equal(envelope.proof_scope.scope, 'key_custody');
+  assert.equal(envelope.proof_scope.state.verified, false);
+  assert.match(caveat, /does not prove that any specific inference output was computed by the claimed model/);
+  assert.match(caveat, /cryptographically verified TEE, opML, or zkML attestation/);
+  assert.equal(verifyReport(envelope).ok, true, 'proof-scope caveat is inside the signed payload');
+  assert.ok(renderReportHtml(envelope).includes('Proof scope:'), 'HTML renders the caveat');
+});
+
+test('proof-scope wording upgrades only for a real verified compute verifier', () => {
+  const audit = dirtyAudit();
+  audit.confidential_compute = {
+    kind: 'nras',
+    verifier: 'nras',
+    verified: true,
+    state: 'cryptographically_verified',
+  };
+  const { envelope } = buildAndSignReport(audit, { subject: 'X' });
+  const caveat = envelope.caveats.find((c) => c.startsWith('Proof scope:'));
+  assert.equal(envelope.proof_scope.scope, 'proven_compute');
+  assert.equal(envelope.proof_scope.source, 'confidential_compute');
+  assert.equal(envelope.proof_scope.state.verifier, 'nras');
+  assert.match(caveat, /cryptographically verified compute evidence from nras/);
+  assert.match(caveat, /input\/output binding/);
+  assert.match(caveat, /by themselves prove report integrity and evidence binding, not proof-of-compute/);
+  assert.equal(verifyReport(envelope).ok, true);
+});
+
+test('shape-only verified:true does not upgrade proof-scope wording', () => {
+  const audit = dirtyAudit();
+  audit.confidential_compute = {
+    kind: 'pccs',
+    verifier: 'shape_v1',
+    verified: true,
+    state: 'shape_ok',
+  };
+  const { envelope } = buildAndSignReport(audit, { subject: 'X' });
+  const caveat = envelope.caveats.find((c) => c.startsWith('Proof scope:'));
+  assert.equal(envelope.proof_scope.scope, 'key_custody');
+  assert.equal(envelope.proof_scope.state.verifier, 'shape_v1');
+  assert.match(caveat, /does not prove that any specific inference output was computed/);
+  assert.doesNotMatch(caveat, /cryptographically verified compute evidence from shape_v1/);
 });
 
 // ---------------------------------------------------------------------------

@@ -38,6 +38,7 @@ import { buildSubprocessorInventory } from './subprocessor-inventory.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
 import { TransparencyLog, TRANSPARENCY_LOG_VERSION } from './transparency-log.js';
 import { getPublicTransparencyLog } from './transparency-log-routes.js';
+import { PROOF_SCOPE, proofScopeLabel } from './receipt-export-registry.js';
 // GAP-3: the one-line caveat rendered next to a bound coverage declaration.
 // (coverage-declaration.js imports this module's canonicalize; both sides only
 // reference each other inside function bodies, so the cycle is benign.)
@@ -304,10 +305,87 @@ export function deriveRemediation(auditResult) {
 // The caveats - what the report does and does NOT claim. Stated plainly so a
 // reviewer is never misled. (No theater; this is the anti-theater section.)
 // ---------------------------------------------------------------------------
-function buildCaveats(summary, auditResult) {
+const REPORT_PROOF_CANDIDATE_PATHS = Object.freeze([
+  ['proof_scope_state'],
+  ['confidential_compute'],
+  ['runtime_attestation'],
+  ['attestation'],
+  ['runtime_passport', 'confidential_compute'],
+  ['runtime_passport', 'attestation'],
+]);
+
+function readPath(root, pathParts) {
+  let cur = root;
+  for (const part of pathParts) {
+    if (!cur || typeof cur !== 'object') return null;
+    cur = cur[part];
+  }
+  return cur && typeof cur === 'object' && !Array.isArray(cur) ? cur : null;
+}
+
+function proofStateCandidates(auditResult) {
+  const out = [];
+  const root = auditResult && typeof auditResult === 'object' ? auditResult : {};
+  for (const p of REPORT_PROOF_CANDIDATE_PATHS) {
+    const found = readPath(root, p);
+    if (found) out.push({ state: found, source: p.join('.') });
+  }
+  const passports = Array.isArray(root.runtime_passports) ? root.runtime_passports : [];
+  for (let i = 0; i < passports.length; i++) {
+    const row = passports[i];
+    if (!row || typeof row !== 'object') continue;
+    if (row.confidential_compute && typeof row.confidential_compute === 'object') {
+      out.push({ state: row.confidential_compute, source: `runtime_passports[${i}].confidential_compute` });
+    }
+    if (row.attestation && typeof row.attestation === 'object') {
+      out.push({ state: row.attestation, source: `runtime_passports[${i}].attestation` });
+    }
+  }
+  return out;
+}
+
+function compactProofState(state) {
+  const s = state && typeof state === 'object' ? state : {};
+  const out = {
+    verified: s.verified === true,
+    verifier: typeof s.verifier === 'string' && s.verifier.trim() !== '' ? s.verifier.slice(0, 80) : 'none',
+  };
+  if (typeof s.kind === 'string' && s.kind.trim() !== '') out.kind = s.kind.slice(0, 80);
+  if (typeof s.state === 'string' && s.state.trim() !== '') out.state = s.state.slice(0, 120);
+  if (typeof s.reason === 'string' && s.reason.trim() !== '') out.reason = s.reason.slice(0, 240);
+  return out;
+}
+
+export function buildReportProofScope(auditResult) {
+  const candidates = proofStateCandidates(auditResult);
+  const proven = candidates.find((c) => proofScopeLabel(c.state) === PROOF_SCOPE.PROVEN_COMPUTE);
+  const selected = proven || candidates[0] || null;
+  const scope = selected ? proofScopeLabel(selected.state) : PROOF_SCOPE.KEY_CUSTODY;
+  return {
+    scope,
+    source: selected ? selected.source : null,
+    state: selected ? compactProofState(selected.state) : { verified: false, verifier: 'none' },
+    caveat: scope === PROOF_SCOPE.PROVEN_COMPUTE
+      ? 'cryptographically_verified_compute_evidence_present'
+      : 'report_integrity_only_no_proof_of_compute',
+  };
+}
+
+function proofScopeCaveat(proofScope) {
+  const ps = proofScope && typeof proofScope === 'object' ? proofScope : {};
+  const state = ps.state && typeof ps.state === 'object' ? ps.state : {};
+  const verifier = typeof state.verifier === 'string' && state.verifier ? state.verifier : 'registered verifier';
+  if (ps.scope === PROOF_SCOPE.PROVEN_COMPUTE) {
+    return `Proof scope: this signed report includes cryptographically verified compute evidence from ${verifier}; only that verified TEE/opML/zkML attestation, with input/output binding, can support a claim that a specific inference output was computed by the claimed model. The report signature, timestamp, transparency-log inclusion, and input-evidence digest by themselves prove report integrity and evidence binding, not proof-of-compute.`;
+  }
+  return 'Proof scope: this signed report proves report integrity, issuer key custody, input-evidence digest binding, timestamp evidence, and any transparency-log inclusion; it does not prove that any specific inference output was computed by the claimed model. Treat proof-of-compute as absent unless a cryptographically verified TEE, opML, or zkML attestation with input/output binding is present.';
+}
+
+function buildCaveats(summary, auditResult, proofScope = null) {
   const assessed = (summary.assessed_controls || []).join(', ');
   const caveats = [
     `This report assesses ${assessed || 'the deterministic controls'} from the supplied logs. The controls listed under "Not assessed" were not evaluated in this run. Each carries its reason.`,
+    proofScopeCaveat(proofScope || buildReportProofScope(auditResult)),
     'Findings reflect only the activity present in the supplied export. The absence of a finding is not proof that the underlying risk is absent.',
     'The readiness percentage is a graduated rollup over the assessed posture controls (ASR-1/2/3: pass = 1, attention = 0.5, blocking = 0). The supplemental controls (ASR-5 provenance, ASR-7 memory and retrieval, ASR-8 delegation) are assessed and listed, but fold into the percentage only when they surface a hard blocker; a partial, clean, or untested supplemental result is reported without inflating the score. It is not a certification or an attestation of compliance.',
     'Framework references map each finding to the control an enterprise reviewer cites; they do not assert certification against that framework.',
@@ -458,6 +536,7 @@ export function buildReportEnvelope(auditResult, opts = {}) {
     options.evidence_tier != null ? options.evidence_tier : auditResult.evidence_tier,
     auditResult,
   );
+  const proofScope = buildReportProofScope(auditResult);
 
   // Curated, framework-mapped findings (drop the all-clear "info" sentinels so
   // a clean report reads as clean, not as a list of non-findings).
@@ -501,6 +580,7 @@ export function buildReportEnvelope(auditResult, opts = {}) {
     tier,
     watermark,
     evidence_tier: evidenceTier,
+    proof_scope: proofScope,
     subject: {
       name: subjectName,
       source: auditResult.source || null,
@@ -522,7 +602,7 @@ export function buildReportEnvelope(auditResult, opts = {}) {
     findings,
     frameworks,
     remediation: deriveRemediation(auditResult),
-    caveats: buildCaveats(s, auditResult),
+    caveats: buildCaveats(s, auditResult, proofScope),
     asr_checklist: ASR_CONTROLS.map((a) => ({ id: a.id, name: a.name, requires: a.requires })),
     contact: CONTACT_EMAIL,
     verify_url: verifyUrl,

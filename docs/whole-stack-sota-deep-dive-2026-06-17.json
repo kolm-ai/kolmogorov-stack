@@ -1797,9 +1797,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
+              "tests/agent-attestation-report.test.js",
               "tests/agent-audit-routes.test.js",
-              "tests/agent-verify-hardening.test.js",
-              "tests/byoc-gpu-attestation.test.js"
+              "tests/agent-verify-hardening.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -5121,11 +5121,11 @@
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
-        "improvement_count": 4,
+        "improvement_count": 3,
         "gaps": {
           "critical": 2,
           "major": 1,
-          "minor": 2
+          "minor": 1
         }
       },
       "atomic_components": {
@@ -5608,7 +5608,7 @@
           "category_has_verification_commands"
         ]
       },
-      "improvement_track": "surgical_now_plus_spec_followup",
+      "improvement_track": "spec_followup_required",
       "suggested_verification": [
         "npm run verify:stack-sota",
         "npm run verify:compliance-packet",
@@ -6131,7 +6131,7 @@
         "gaps": {
           "critical": 1,
           "major": 3,
-          "minor": 2
+          "minor": 1
         }
       },
       "atomic_components": {
