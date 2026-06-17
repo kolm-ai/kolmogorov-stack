@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 692,
-    "components_without_direct_test_reference": 137,
+    "test_referenced_components": 694,
+    "components_without_direct_test_reference": 135,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -3227,7 +3227,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave482-sdk-catalog-honesty.test.js"
+        "tests/wave482-sdk-catalog-honesty.test.js",
+        "tests/wave674-runtime-rs-cid-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -3582,10 +3583,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "7b04ff16631f3a187e0f3ea61a397f52f18e20a9ba4ffb62c3733aec91a1a3e5",
+      "sha256": "9b6c7eb5f193c774bd253d5bb771156db4a42e8f1b00bb0a96fe48a2020c5f8b",
       "metrics": {
-        "bytes": 5629,
-        "lines": 188,
+        "bytes": 6374,
+        "lines": 202,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3593,15 +3594,17 @@
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 16,
+        "crypto_refs": 21,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave674-runtime-rs-cid-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -3705,10 +3708,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "0bd1e6a9d953c3e434c6c5ded0f4ee017b8d0841a01467903662df0ed6c10ef8",
+      "sha256": "bd0757f3bd3f3df7945f2b89dca50bc701040aa16922def9c24c5b3c49ddfd74",
       "metrics": {
-        "bytes": 13437,
-        "lines": 347,
+        "bytes": 13469,
+        "lines": 350,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3719,12 +3722,14 @@
         "crypto_refs": 19,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave674-runtime-rs-cid-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

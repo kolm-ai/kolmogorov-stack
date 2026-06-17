@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 92.1,
-    "frontier_product_score": 69.2,
+    "local_engineering_score": 92.2,
+    "frontier_product_score": 69.3,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 692,
-    "direct_test_reference_pct": 83.5,
-    "components_without_direct_test_reference": 137,
+    "direct_test_referenced_components": 694,
+    "direct_test_reference_pct": 83.7,
+    "components_without_direct_test_reference": 135,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -4250,7 +4250,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave482-sdk-catalog-honesty.test.js"
+          "tests/wave482-sdk-catalog-honesty.test.js",
+          "tests/wave674-runtime-rs-cid-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -4530,8 +4531,8 @@
       "language": "rust",
       "composition": {
         "metrics": {
-          "bytes": 5629,
-          "lines": 188,
+          "bytes": 6374,
+          "lines": 202,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -4539,16 +4540,16 @@
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 16,
+          "crypto_refs": 21,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "7b04ff16631f3a187e0f3ea61a397f52f18e20a9ba4ffb62c3733aec91a1a3e5"
+        "sha256": "9b6c7eb5f193c774bd253d5bb771156db4a42e8f1b00bb0a96fe48a2020c5f8b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -4556,15 +4557,10 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "kv-cache",
-            "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave674-runtime-rs-cid-contract.test.js"
         ],
+        "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
         "suggested_verification": [
@@ -4572,11 +4568,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "packages/runtime-rs/src/error.rs",
@@ -4641,8 +4634,8 @@
       "language": "rust",
       "composition": {
         "metrics": {
-          "bytes": 13437,
-          "lines": 347,
+          "bytes": 13469,
+          "lines": 350,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -4657,9 +4650,9 @@
           "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "0bd1e6a9d953c3e434c6c5ded0f4ee017b8d0841a01467903662df0ed6c10ef8"
+        "sha256": "bd0757f3bd3f3df7945f2b89dca50bc701040aa16922def9c24c5b3c49ddfd74"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -4667,15 +4660,10 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "kv-cache",
-            "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave674-runtime-rs-cid-contract.test.js"
         ],
+        "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
         "suggested_verification": [
@@ -4683,11 +4671,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "packages/runtime-rs/src/manifest.rs",
@@ -4938,7 +4923,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "kv-cache",
+            "stack_area": "runtime",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
         "suggested_verification": [
@@ -4947,7 +4939,8 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing"
+        "direct_test_reference_missing",
+        "linked_frontier_work_open"
       ],
       "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
     },
@@ -5041,7 +5034,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "kv-cache",
+            "stack_area": "runtime",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
         "suggested_verification": [
@@ -5050,7 +5050,8 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing"
+        "direct_test_reference_missing",
+        "linked_frontier_work_open"
       ],
       "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
     },

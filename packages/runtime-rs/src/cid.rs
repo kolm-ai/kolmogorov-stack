@@ -78,28 +78,34 @@ pub struct ParsedCid {
 
 /// Parse a CID string. Returns `None` on malformed input.
 pub fn parse_cid(s: &str) -> Option<ParsedCid> {
-    let parts: Vec<&str> = s.splitn(3, ':').collect();
-    if parts.len() != 3 {
+    let mut parts = s.split(':');
+    let version = parts.next()?;
+    let digest = parts.next()?;
+    let hex = parts.next()?;
+    if parts.next().is_some() {
         return None;
     }
-    if !parts[0].starts_with("cidv") || parts[0].len() < 5 {
-        return None;
-    }
-    if parts[1].is_empty() || !parts[1].chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
-        return None;
-    }
-    if parts[2].is_empty() || !parts[2].chars().all(|c| c.is_ascii_hexdigit()) {
+    if version != CID_VERSION || digest != CID_DIGEST || !is_lower_hex64(hex) {
         return None;
     }
     Some(ParsedCid {
-        version: parts[0].to_string(),
-        digest: parts[1].to_string(),
-        hex: parts[2].to_string(),
+        version: version.to_string(),
+        digest: digest.to_string(),
+        hex: hex.to_string(),
     })
 }
 
+/// `true` iff `s` is a canonical CID string accepted by [`parse_cid`].
+pub fn is_valid_cid_format(s: &str) -> bool {
+    parse_cid(s).is_some()
+}
+
+fn is_lower_hex64(s: &str) -> bool {
+    s.len() == 64 && s.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+}
+
 fn validate_hex64(field: &str, s: &str) -> Result<(), Error> {
-    if s.len() != 64 || !s.chars().all(|c| c.is_ascii_hexdigit() && !c.is_ascii_uppercase()) {
+    if !is_lower_hex64(s) {
         return Err(Error::MalformedManifest(format!(
             "hashes.{} must be 64-char lowercase hex sha256",
             field
@@ -175,6 +181,8 @@ mod tests {
         let parsed = parse_cid(&cid).unwrap();
         assert_eq!(parsed.version, "cidv1");
         assert_eq!(parsed.digest, "sha256");
+        assert_eq!(parsed.hex.len(), 64);
+        assert!(is_valid_cid_format(&cid));
     }
 
     #[test]
@@ -183,5 +191,11 @@ mod tests {
         assert!(parse_cid("cidv1:sha256:").is_none());
         assert!(parse_cid("bad").is_none());
         assert!(parse_cid("cidv1:sha256:XYZ").is_none());
+        assert!(parse_cid("cidv2:sha256:0000000000000000000000000000000000000000000000000000000000000000").is_none());
+        assert!(parse_cid("cidv1:blake3:0000000000000000000000000000000000000000000000000000000000000000").is_none());
+        assert!(parse_cid("cidv1:sha256:0000").is_none());
+        assert!(parse_cid("cidv1:sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").is_none());
+        assert!(parse_cid("cidv1:sha256:0000000000000000000000000000000000000000000000000000000000000000:extra").is_none());
+        assert!(!is_valid_cid_format("cidv1:sha256:0000"));
     }
 }

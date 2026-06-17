@@ -73,7 +73,10 @@ pub mod zip_reader;
 pub mod wasm;
 
 pub use canonical::canonical_json;
-pub use cid::{cid_from_manifest_hashes, parse_cid, verify_cid, ParsedCid, CID_DIGEST, CID_VERSION};
+pub use cid::{
+    cid_from_manifest_hashes, is_valid_cid_format, parse_cid, verify_cid, ParsedCid, CID_DIGEST,
+    CID_VERSION,
+};
 pub use error::Error;
 pub use manifest::{
     KScore, Manifest, ManifestEvals, ManifestHashes, ManifestRecipes, Receipt, ReceiptChainStep,
