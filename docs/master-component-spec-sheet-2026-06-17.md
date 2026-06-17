@@ -36,7 +36,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | verifiable-inference | trust | sota_review_complete_critical_frontier_work_open | at=8 open=2/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | model-signing-standards | trust | sota_review_complete_external_or_release_gate_open | at=8 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | confidential-compute | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/2/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
-| agent-security-eval | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/3/1 | 3 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
+| agent-security-eval | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/2/1 | 3 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | compile-api-to-model-competitors | compiler-platform | sota_review_complete_critical_frontier_work_open | at=8 open=1/1/4 | 4 | npm run verify:stack-sota<br>npm run verify:inventions |
 
 ## Top Component Gaps

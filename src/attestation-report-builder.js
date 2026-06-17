@@ -460,19 +460,27 @@ export function buildRedTeamBlock(auditResult) {
     : runRedTeam(Array.isArray(auditResult && auditResult.events) ? auditResult.events : []);
   const sum = rt.summary || {};
   const probes = Array.isArray(rt.probes) ? rt.probes : [];
+  const summary = {
+    probes_total: sum.probes_total ?? probes.length,
+    tested: sum.tested ?? 0,
+    resisted: sum.resisted ?? 0,
+    exposed: sum.exposed ?? 0,
+    untested: sum.untested ?? 0,
+    benchmark_crosswalk_note: sum.benchmark_crosswalk_note || BENCHMARK_CROSSWALK_NOTE,
+    note: sum.note,
+  };
+  if (sum.active && typeof sum.active === 'object') {
+    summary.active = {
+      probes_merged: Number.isFinite(sum.active.probes_merged) ? sum.active.probes_merged : 0,
+      endpoint_digest: typeof sum.active.endpoint_digest === 'string' ? sum.active.endpoint_digest : null,
+      consent_recorded: sum.active.consent_recorded === true,
+    };
+  }
   return {
     spec_version: rt.spec_version || null,
     domain: rt.domain || sum.domain || 'generic',
     score: rt.red_team_score == null ? null : rt.red_team_score,
-    summary: {
-      probes_total: sum.probes_total ?? probes.length,
-      tested: sum.tested ?? 0,
-      resisted: sum.resisted ?? 0,
-      exposed: sum.exposed ?? 0,
-      untested: sum.untested ?? 0,
-      benchmark_crosswalk_note: sum.benchmark_crosswalk_note || BENCHMARK_CROSSWALK_NOTE,
-      note: sum.note,
-    },
+    summary,
     probes: probes.map((p) => ({
       id: p.id,
       category: p.category,
@@ -487,6 +495,9 @@ export function buildRedTeamBlock(auditResult) {
       // historical default (observed-traffic analysis); active harness probes
       // stamp their own value, which passes through unchanged.
       evidence_source: p.evidence_source || 'passive',
+      ...(typeof p.transcript_digest === 'string' && /^[0-9a-f]{64}$/i.test(p.transcript_digest)
+        ? { transcript_digest: p.transcript_digest.toLowerCase() }
+        : {}),
     })),
   };
 }

@@ -58,12 +58,14 @@ import { normalizeCoverageDeclaration } from './coverage-declaration.js';
 import { allCapturesForTenant } from './capture-store.js';
 import { KOLM_CAPTURE_SOURCE } from './audit-ingest.js';
 import { addWatch, buildPortfolioView } from './buyer-portfolio.js';
+import { runActiveBattery, ACTIVE_PROBE_IDS, ACTIVE_RED_TEAM_SPEC_VERSION } from './active-redteam.js';
+import { mergeActiveResults } from './red-team.js';
 // One-off run notifications: notify() is async and can throw (unknown event /
 // store hiccup); see _notifyReportReady below for the fire-and-forget wrapper
 // that keeps it out of the response path.
 import { notify } from './notifications.js';
 
-export const AUDIT_ROUTES_VERSION = 'asr-audit-routes/0.1';
+export const AUDIT_ROUTES_VERSION = 'asr-audit-routes/0.2';
 
 const TABLE = 'agent_audits';
 
@@ -150,6 +152,98 @@ function _coverageFromBody(body) {
   const norm = normalizeCoverageDeclaration(body.coverage_declaration);
   if (!norm.ok) return { ok: false, error: norm.error };
   return { ok: true, declaration: norm.declaration };
+}
+
+const MAX_ACTIVE_HEADERS = 50;
+const MAX_ACTIVE_HEADER_VALUE_LEN = 8192;
+const SAFE_HEADER_NAME = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+const BLOCKED_ACTIVE_HEADERS = new Set(['connection', 'content-length', 'host', 'transfer-encoding', 'upgrade']);
+
+function _normalizeActiveHeaders(raw) {
+  if (raw == null) return { ok: true, headers: {} };
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { ok: false, error: 'active headers must be an object of HTTP header names to scalar values' };
+  }
+  const entries = Object.entries(raw);
+  if (entries.length > MAX_ACTIVE_HEADERS) {
+    return { ok: false, error: `active headers are capped at ${MAX_ACTIVE_HEADERS} entries` };
+  }
+  const headers = {};
+  for (const [nameRaw, valueRaw] of entries) {
+    const name = String(nameRaw || '').trim().toLowerCase();
+    if (!name || !SAFE_HEADER_NAME.test(name) || BLOCKED_ACTIVE_HEADERS.has(name)) {
+      return { ok: false, error: `active header "${nameRaw}" is not allowed` };
+    }
+    if (!['string', 'number', 'boolean'].includes(typeof valueRaw)) {
+      return { ok: false, error: `active header "${name}" must have a scalar value` };
+    }
+    const value = String(valueRaw);
+    if (value.length > MAX_ACTIVE_HEADER_VALUE_LEN || /[\r\n]/.test(value)) {
+      return { ok: false, error: `active header "${name}" has an invalid value` };
+    }
+    headers[name] = value;
+  }
+  return { ok: true, headers };
+}
+
+function _normalizeActiveProbeIds(raw) {
+  if (raw == null) return { ok: true, ids: null };
+  if (!Array.isArray(raw) || raw.length === 0 || raw.length > ACTIVE_PROBE_IDS.length) {
+    return { ok: false, error: `active probe_ids must be a non-empty array of at most ${ACTIVE_PROBE_IDS.length} known probe ids` };
+  }
+  const allowed = new Set(ACTIVE_PROBE_IDS);
+  const ids = [];
+  const seen = new Set();
+  for (const item of raw) {
+    if (typeof item !== 'string') return { ok: false, error: 'active probe_ids must contain strings only' };
+    const id = item.trim();
+    if (!allowed.has(id)) return { ok: false, error: `unknown active probe id: ${id}` };
+    if (!seen.has(id)) { seen.add(id); ids.push(id); }
+  }
+  return { ok: true, ids };
+}
+
+function _activeModelFromBody(body) {
+  const raw = body && body.model != null ? body.model : 'staging-agent';
+  const model = String(raw || '').trim();
+  return model ? model.slice(0, 200) : 'staging-agent';
+}
+
+function _activeTimeoutFromBody(body) {
+  const n = Number(body && body.timeout_ms);
+  if (!Number.isFinite(n) || n <= 0) return undefined;
+  return Math.max(250, Math.min(60000, Math.trunc(n)));
+}
+
+function _activeResponseSummary(activeRun, mergedRedTeam) {
+  const probes = activeRun && Array.isArray(activeRun.probes) ? activeRun.probes : [];
+  const counts = { resisted: 0, exposed: 0, untested: 0 };
+  for (const p of probes) {
+    if (p && Object.prototype.hasOwnProperty.call(counts, p.status)) counts[p.status] += 1;
+  }
+  const mergedCount = mergedRedTeam
+    && mergedRedTeam.summary
+    && mergedRedTeam.summary.active
+    && Number.isFinite(mergedRedTeam.summary.active.probes_merged)
+    ? mergedRedTeam.summary.active.probes_merged
+    : 0;
+  return {
+    spec_version: activeRun && activeRun.spec_version ? activeRun.spec_version : ACTIVE_RED_TEAM_SPEC_VERSION,
+    endpoint_digest: activeRun && typeof activeRun.endpoint_digest === 'string' ? activeRun.endpoint_digest : null,
+    consent_recorded: !!(activeRun && activeRun.consent),
+    consent_attestor: activeRun && activeRun.consent && activeRun.consent.attestor ? activeRun.consent.attestor : null,
+    consent_asserted_at: activeRun && activeRun.consent && activeRun.consent.asserted_at ? activeRun.consent.asserted_at : null,
+    probes_total: probes.length,
+    probes_merged: mergedCount,
+    resisted: counts.resisted,
+    exposed: counts.exposed,
+    untested: counts.untested,
+    probes: probes.map((p) => ({
+      id: p.id,
+      status: p.status,
+      transcript_digest: typeof p.transcript_digest === 'string' ? p.transcript_digest : null,
+    })),
+  };
 }
 
 // Normalize a caller-supplied source/source_label EXACTLY as the grading path
@@ -442,6 +536,60 @@ function _runAndSign(logsText, { source, subject, retentionDays, sign, tier, all
     return { audit, report: built };
   } catch (e) {
     return { audit, report: null, signError: e };
+  }
+}
+
+async function _runAndSignWithActive(logsText, {
+  source,
+  subject,
+  retentionDays,
+  sign,
+  tier,
+  allowedHosts,
+  coverageDeclaration,
+  activeEndpoint,
+  activeHeaders,
+  activeModel,
+  activeConsent,
+  activeProbeIds,
+  activeTimeoutMs,
+}) {
+  const base = _runAndSign(logsText, {
+    source,
+    subject,
+    retentionDays,
+    sign: false,
+    allowedHosts,
+    coverageDeclaration,
+  });
+  if (base.auditError) return base;
+  if (!base.audit) return { audit: null, report: null, auditError: new Error('the supplied logs could not be analyzed') };
+
+  let activeRun;
+  try {
+    activeRun = await runActiveBattery({
+      endpoint: activeEndpoint,
+      headers: activeHeaders || {},
+      model: activeModel || 'staging-agent',
+      consent: activeConsent,
+      probeIds: activeProbeIds || undefined,
+      timeoutMs: activeTimeoutMs,
+    });
+  } catch (e) {
+    return { audit: base.audit, report: null, activeRun: null, activeError: e };
+  }
+
+  const mergedRedTeam = mergeActiveResults(base.audit.red_team, activeRun);
+  const audit = { ...base.audit, red_team: mergedRedTeam };
+  if (sign === false) return { audit, report: null, activeRun };
+
+  try {
+    const signOpts = { subject, verify_url: _verifyUrlFor(), tier: tier || 'scan' };
+    if (coverageDeclaration) signOpts.coverage_declaration = coverageDeclaration;
+    const built = buildAndSignReport(audit, signOpts);
+    return { audit, report: built, activeRun };
+  } catch (e) {
+    return { audit, report: null, activeRun, signError: e };
   }
 }
 
@@ -1197,6 +1345,153 @@ export function register(r, deps = {}) {
       report_id: report ? report.report_id : null,
       signed: !!report,
       key_fingerprint: report ? report.key_fingerprint : null,
+      summary: audit.summary,
+      ingest: audit.ingest,
+      evidence_tier: audit.evidence_tier || null,
+      report: report ? report.envelope : null,
+      verify_url: _verifyUrlFor(),
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // POST /v1/redteam/active - one-shot passive audit + CONSENTED active probe
+  // battery + signed report. This is the product route for the Deep Red-Team
+  // tier: the active battery is still guarded by src/active-redteam.js consent
+  // validation before any network probe is sent, and the route only returns
+  // digests/statuses (never prompts, responses, canaries, or consent tokens).
+  // body: { logs|source:"kolm-capture", endpoint, headers?, model?, consent,
+  //         probe_ids?, timeout_ms?, subject?, source?, retention_days?, sign?,
+  //         persist? }
+  // -------------------------------------------------------------------------
+  r.post('/v1/redteam/active', async (req, res) => {
+    const trec = _authOrReject(req, res);
+    if (!trec) return;
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const isCaptureBridge = _claimsCaptureSource(body.source);
+
+    let text;
+    let count;
+    if (isCaptureBridge) {
+      if (body.logs != null) {
+        return _err(res, 400, 'logs_not_allowed', `source "${KOLM_CAPTURE_SOURCE}" audits this tenant's stored gateway captures; do not supply logs (use a vendor source tag for vendor logs)`);
+      }
+      let rows;
+      try { rows = await _loadTenantCaptures(trec); }
+      catch (e) { return _err(res, 500, 'capture_load_failed', e && e.message); }
+      if (!rows.length) {
+        return _err(res, 409, 'no_captures', 'this tenant has no stored gateway captures to audit; route agent traffic through the kolm gateway first, or scan a vendor log export');
+      }
+      ({ text, count } = _toJsonl(rows));
+      if (count === 0) return _err(res, 409, 'no_captures', 'this tenant has no auditable gateway captures');
+      if (Buffer.byteLength(text, 'utf8') > MAX_BYTES_PER_SESSION) {
+        return _err(res, 413, 'captures_too_large', `the stored captures exceed ${Math.floor(MAX_BYTES_PER_SESSION / (1024 * 1024))} MiB; contact dev@kolm.ai for a staged audit`);
+      }
+    } else {
+      const logsInput = body.logs != null ? body.logs : null;
+      if (logsInput == null) return _err(res, 400, 'logs_required', 'POST { "logs": <JSONL text | array of records>, "endpoint": "https://staging.example/v1/chat/completions", "consent": {...} }');
+      ({ text, count } = _toJsonl(logsInput));
+      if (count === 0) return _err(res, 400, 'no_records', 'no parseable log records were supplied');
+    }
+    if (count > MAX_RECORDS_PER_SESSION) {
+      return _err(res, 413, 'too_many_records', `a scan holds at most ${MAX_RECORDS_PER_SESSION} records; split the export`);
+    }
+
+    const headersNorm = _normalizeActiveHeaders(body.headers != null ? body.headers : body.endpoint_headers);
+    if (!headersNorm.ok) return _err(res, 400, 'invalid_active_headers', headersNorm.error);
+    const probeNorm = _normalizeActiveProbeIds(body.probe_ids != null ? body.probe_ids : body.probeIds);
+    if (!probeNorm.ok) return _err(res, 400, 'invalid_active_probe_ids', probeNorm.error);
+    const hostsNorm = _normalizeAllowedHosts(body.allowed_hosts);
+    if (!hostsNorm.ok) {
+      return _err(res, 400, 'invalid_allowed_hosts', `allowed_hosts must be an array of at most ${MAX_ALLOWED_HOSTS} hostname strings (each <=${MAX_HOST_LEN} chars)`);
+    }
+    const covNorm = _coverageFromBody(body);
+    if (!covNorm.ok) return _err(res, 400, 'invalid_coverage_declaration', covNorm.error);
+
+    const consent = body.consent && typeof body.consent === 'object'
+      ? body.consent
+      : {
+        token: body.consent_token,
+        statement: body.consent_statement,
+        attestor: body.consent_attestor,
+        asserted_at: body.consent_asserted_at,
+      };
+    const sign = body.sign !== false;
+    const subject = String(body.subject || 'Agent fleet').slice(0, 200);
+    const source = isCaptureBridge ? KOLM_CAPTURE_SOURCE : (_normalizeSource(body.source) || 'import');
+    const retentionDays = _clampRetentionDays(body.retention_days);
+    const { audit, report, activeRun, activeError, signError, auditError } = await _runAndSignWithActive(text, {
+      source,
+      subject,
+      retentionDays,
+      sign,
+      tier: isCaptureBridge ? 'report' : 'scan',
+      allowedHosts: hostsNorm.hosts,
+      coverageDeclaration: covNorm.declaration,
+      activeEndpoint: body.endpoint,
+      activeHeaders: headersNorm.headers,
+      activeModel: _activeModelFromBody(body),
+      activeConsent: consent,
+      activeProbeIds: probeNorm.ids,
+      activeTimeoutMs: _activeTimeoutFromBody(body),
+    });
+    if (auditError) return _err(res, 422, 'audit_failed', auditError.message || 'the supplied logs could not be analyzed');
+    if (activeError) {
+      const code = activeError.code === 'CONSENT_REQUIRED' ? 'active_consent_required'
+        : activeError.code === 'ENDPOINT_REQUIRED' ? 'active_endpoint_required'
+        : 'active_redteam_error';
+      const status = code === 'active_redteam_error' ? 500 : 400;
+      return _err(res, status, code, activeError.message || 'active red-team battery could not start');
+    }
+    if (sign && signError) return _err(res, 503, 'no_signer_configured', signError.message || 'no Ed25519 signer available');
+
+    const activeSummary = _activeResponseSummary(activeRun, audit && audit.red_team);
+    let id = null;
+    if (body.persist !== false) {
+      const now = new Date().toISOString();
+      id = _newId();
+      try {
+        insert(TABLE, {
+          id, tenant_id: trec.id, subject, source,
+          retention_days: retentionDays,
+          status: 'complete', logs: text, record_count: count,
+          active_redteam: activeSummary,
+          report: report ? report.envelope : null,
+          report_id: report ? report.report_id : null,
+          summary: audit.summary, created_at: now, updated_at: now,
+        });
+      } catch { id = null; /* persistence is best-effort; the report is still returned inline */ }
+    }
+    tryAppendAudit({
+      tenant_id: trec.id, actor: trec.id, op: 'agent_audit.active_redteam',
+      payload: {
+        id,
+        report_id: report ? report.report_id : null,
+        records: count,
+        active_spec_version: activeSummary.spec_version,
+        active_probes_total: activeSummary.probes_total,
+        active_probes_merged: activeSummary.probes_merged,
+        readiness_pct: audit.summary.readiness_pct,
+        blocking: audit.summary.blocking_count,
+        signed: !!report,
+      },
+    });
+    if (report) {
+      _notifyReportReady(trec.id, {
+        id,
+        report_id: report.report_id,
+        subject,
+        readiness_pct: audit.summary ? audit.summary.readiness_pct : null,
+        evidence_tier_grade: audit.evidence_tier ? (audit.evidence_tier.grade || null) : null,
+        active_redteam: { probes_total: activeSummary.probes_total, probes_merged: activeSummary.probes_merged },
+      });
+    }
+    return res.json({
+      ok: true,
+      id,
+      report_id: report ? report.report_id : null,
+      signed: !!report,
+      key_fingerprint: report ? report.key_fingerprint : null,
+      active_redteam: activeSummary,
       summary: audit.summary,
       ingest: audit.ingest,
       evidence_tier: audit.evidence_tier || null,
