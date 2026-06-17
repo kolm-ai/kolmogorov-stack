@@ -15,6 +15,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import {
   SERVE_CONFIG_VERSION,
   parseComputeCapability,
@@ -45,6 +47,19 @@ import {
   formatServeConfigReport,
 } from '../src/serve-config.js';
 import { buildItkvProfile, hashItkvProfile } from '../src/itkv-profile.js';
+
+const SERVE_PY = fileURLToPath(new URL('../apps/runtime/serve.py', import.meta.url));
+
+function pythonBin() {
+  const candidates = [process.env.PYTHON, 'python', 'python3'].filter(Boolean);
+  for (const candidate of candidates) {
+    const r = spawnSync(candidate, ['--version'], { stdio: 'pipe', timeout: 10_000 });
+    if (r.status === 0) return candidate;
+  }
+  return null;
+}
+
+const PY = pythonBin();
 
 // ===========================================================================
 // 0. compute-capability parsing
@@ -457,6 +472,19 @@ test('serve.py resolves the matching EAGLE tree env sidecar', () => {
   assert.match(py, /KOLM_SPEC_NUM_STEPS/);
   assert.match(py, /KOLM_SPEC_NUM_DRAFT_TOKENS/);
   assert.match(py, /speculative_tree_policy/);
+  assert.match(py, /_parse_vllm_spec_decode_metrics/);
+  assert.match(py, /spec_decode_num_accepted_tokens_total/);
+  assert.match(py, /accepted_length/);
+});
+
+test('serve.py self-test parses vLLM speculative Prometheus counters', { skip: PY ? false : 'python not available' }, () => {
+  const r = spawnSync(PY, [SERVE_PY, '--self-test'], {
+    cwd: fileURLToPath(new URL('..', import.meta.url)),
+    encoding: 'utf8',
+    timeout: 60_000,
+  });
+  assert.equal(r.status, 0, `serve.py --self-test failed\nstdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+  assert.match(r.stdout, /apps\.runtime\.serve self-test: OK/);
 });
 
 test('buildVllmSpeculativeConfig: draft_model standard config', () => {
@@ -506,6 +534,9 @@ test('speculativeHeadPassportEntry validates ranges + freezes', () => {
   const est = speculativeHeadPassportEntry({ measured: { head_kind: 'eagle3', head_id: 'h', target_model: 't', runtime: 'vllm', num_speculative_tokens: 5 } });
   assert.equal(est.status, 'estimated');
   assert.equal(est.acceptance_rate, null);
+  const legacy = speculativeHeadPassportEntry({ measured: { head_kind: 'eagle3', head_id: 'h', target_model: 't', runtime: 'vllm', num_speculative_tokens: 5, acceptance_rate: 0.5, mean_accept_length: 5.0 } });
+  assert.equal(legacy.status, 'tested');
+  assert.equal(legacy.accepted_length, 5.0);
   assert.throws(() => speculativeHeadPassportEntry({ measured: { head_kind: 'bogus' } }), /head_kind/);
   assert.throws(() => speculativeHeadPassportEntry({ measured: { head_kind: 'eagle3', acceptance_rate: 1.5 } }), /acceptance_rate/);
 });

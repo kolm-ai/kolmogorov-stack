@@ -968,13 +968,14 @@ export function speculativeHeadPassportEntry({ measured } = {}) {
   }
   const m = measured;
   const numOrNull = (v) => (_isFiniteNumber(v) ? v : null);
+  const acceptedLength = m.accepted_length ?? m.mean_accept_length;
   if (typeof m.head_kind !== 'string' || !EAGLE_HEAD_KINDS.includes(m.head_kind)) {
     throw new TypeError(`measured.head_kind must be one of ${EAGLE_HEAD_KINDS.join('|')}`);
   }
   if (m.acceptance_rate != null && (!_isFiniteNumber(m.acceptance_rate) || m.acceptance_rate < 0 || m.acceptance_rate > 1)) {
     throw new TypeError('measured.acceptance_rate must be in [0,1] or null');
   }
-  if (m.accepted_length != null && (!_isFiniteNumber(m.accepted_length) || m.accepted_length <= 0)) {
+  if (acceptedLength != null && (!_isFiniteNumber(acceptedLength) || acceptedLength <= 0)) {
     throw new TypeError('measured.accepted_length must be > 0 or null');
   }
   return Object.freeze({
@@ -988,7 +989,7 @@ export function speculativeHeadPassportEntry({ measured } = {}) {
     eagle_topk: numOrNull(m.eagle_topk),
     num_steps: numOrNull(m.num_steps),
     acceptance_rate: numOrNull(m.acceptance_rate),
-    accepted_length: numOrNull(m.accepted_length),
+    accepted_length: numOrNull(acceptedLength),
     throughput_speedup: numOrNull(m.throughput_speedup),
     mode: m.mode === 'auto' ? 'auto' : 'explicit',
     status: (_isFiniteNumber(m.acceptance_rate)) ? 'tested' : 'estimated',

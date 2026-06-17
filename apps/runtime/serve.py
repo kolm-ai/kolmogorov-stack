@@ -30,6 +30,7 @@ import argparse
 import base64
 import io
 import json
+import math
 import os
 import sys
 import time
@@ -625,9 +626,39 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
             return None
 
         def info(self):
-            acc_rate, mean_accept_length = self._spec_metrics()
+            prom = _parse_vllm_spec_decode_metrics(_vllm_prometheus_metrics(self))
+            stats_acc_rate, stats_accept_length = self._spec_metrics()
+            acc_rate = prom.get("acceptance_rate")
+            if acc_rate is None:
+                acc_rate = stats_acc_rate
+            accepted_length = prom.get("accepted_length")
+            if accepted_length is None:
+                accepted_length = stats_accept_length
             avg_ttft = (self._ttft_ms_sum / self._req_count) if self._req_count > 0 else None
             avg_tok_s = (self._tok_count / self._gen_s_sum) if self._gen_s_sum > 0 else None
+            spec_passport = None
+            if self.draft is not None:
+                source = "vllm_prometheus" if prom.get("accepted_tokens") is not None else (
+                    "vllm_engine_stats" if acc_rate is not None else "unmeasured"
+                )
+                spec_passport = {
+                    "method": "speculative_decoding",
+                    "head_kind": self.spec_head_kind or "draft_model",
+                    "head_id": self.draft,
+                    "target_model": self.target,
+                    "runtime": "vllm",
+                    "num_speculative_tokens": self.num_spec_tokens,
+                    "acceptance_rate": acc_rate,
+                    "accepted_length": accepted_length,
+                    "throughput_speedup": None,
+                    "status": "tested" if acc_rate is not None else "estimated",
+                    "source": source,
+                    "counters": {
+                        "accepted_tokens": prom.get("accepted_tokens"),
+                        "draft_tokens": prom.get("draft_tokens"),
+                        "drafts": prom.get("drafts"),
+                    },
+                }
             return {
                 "engine": "vllm",
                 "runtime_version": _engine_runtime_version("vllm"),
@@ -649,12 +680,15 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
                 "lora_enabled": bool(self.lora_requests) or bool(lora_dir),
                 "lora_adapters": sorted(self.lora_requests.keys()),
                 "peak_memory_mb": _measure_peak_memory_mb(),
+                "speculative_decoding": spec_passport,
                 "metrics": {
                     "requests": self._req_count,
                     "ttft_ms_avg": avg_ttft,
                     "tok_s_avg": avg_tok_s,
                     "acceptance_rate": acc_rate,
-                    "mean_accept_length": mean_accept_length,
+                    "accepted_length": accepted_length,
+                    "mean_accept_length": accepted_length,
+                    "spec_decode": prom,
                     "prefix_cache_hit_rate": self.prefix_cache_hit_rate(),
                 },
             }
@@ -937,6 +971,76 @@ def _vllm_prometheus_metrics(engine: Optional["Engine"]) -> str:
         return ""
 
 
+def _prometheus_counter_sum(text: str, *metric_names: str) -> Optional[float]:
+    """Sum exact Prometheus metric samples across labels.
+
+    Prometheus text exposition is deliberately simple here: skip comments,
+    strip labels from the sample name, and read the first value column. Returns
+    None when no finite sample was present so callers can preserve nulls.
+    """
+    wanted = {name for name in metric_names if name}
+    if not text or not wanted:
+        return None
+    total = 0.0
+    seen = False
+    for raw in str(text).splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        cols = line.split()
+        if len(cols) < 2:
+            continue
+        sample = cols[0]
+        name = sample.split("{", 1)[0]
+        if name not in wanted:
+            continue
+        try:
+            value = float(cols[1])
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(value):
+            continue
+        total += value
+        seen = True
+    return total if seen else None
+
+
+def _parse_vllm_spec_decode_metrics(text: str) -> Dict[str, Any]:
+    """Parse vLLM speculative-decoding Prometheus counters.
+
+    vLLM documents acceptance_rate as accepted_tokens / draft_tokens and
+    accepted_length as 1 + accepted_tokens / drafts. Counter absence or invalid
+    ratios stay None; this path never invents a measured speedup.
+    """
+    accepted = _prometheus_counter_sum(text, "vllm:spec_decode_num_accepted_tokens_total")
+    draft_tokens = _prometheus_counter_sum(text, "vllm:spec_decode_num_draft_tokens_total")
+    drafts = _prometheus_counter_sum(
+        text,
+        "vllm:spec_decode_num_drafts",
+        "vllm:spec_decode_num_drafts_total",
+    )
+
+    acceptance_rate = None
+    if accepted is not None and draft_tokens is not None and draft_tokens > 0:
+        candidate = accepted / draft_tokens
+        if 0.0 <= candidate <= 1.0 and math.isfinite(candidate):
+            acceptance_rate = candidate
+
+    accepted_length = None
+    if accepted is not None and drafts is not None and drafts > 0:
+        candidate = 1.0 + (accepted / drafts)
+        if candidate > 0 and math.isfinite(candidate):
+            accepted_length = candidate
+
+    return {
+        "accepted_tokens": accepted,
+        "draft_tokens": draft_tokens,
+        "drafts": drafts,
+        "acceptance_rate": acceptance_rate,
+        "accepted_length": accepted_length,
+    }
+
+
 # --------------------------------------------------------------------------
 # HTTP shim (OpenAI-compatible subset)
 # --------------------------------------------------------------------------
@@ -1098,6 +1202,29 @@ def _self_test() -> int:
         "supported": True,
     })
     assert sc == {"method": "eagle3", "model": "h", "num_speculative_tokens": 5}, sc
+    # vLLM Prometheus spec-decode counters: exact metric names, labels summed.
+    metrics = """
+# HELP vllm:spec_decode_num_accepted_tokens_total Number of accepted tokens.
+vllm:spec_decode_num_accepted_tokens_total{model_name="a"} 30
+vllm:spec_decode_num_accepted_tokens_total{model_name="b"} 10
+vllm:spec_decode_num_draft_tokens_total{model_name="a"} 50
+vllm:spec_decode_num_draft_tokens_total{model_name="b"} 30
+vllm:spec_decode_num_drafts{model_name="a"} 8
+vllm:spec_decode_num_drafts{model_name="b"} 2
+"""
+    parsed = _parse_vllm_spec_decode_metrics(metrics)
+    assert parsed["accepted_tokens"] == 40.0, parsed
+    assert parsed["draft_tokens"] == 80.0, parsed
+    assert parsed["drafts"] == 10.0, parsed
+    assert math.isclose(parsed["acceptance_rate"], 0.5), parsed
+    assert math.isclose(parsed["accepted_length"], 5.0), parsed
+    invalid = _parse_vllm_spec_decode_metrics(
+        "vllm:spec_decode_num_accepted_tokens_total 9\n"
+        "vllm:spec_decode_num_draft_tokens_total 3\n"
+        "vllm:spec_decode_num_drafts 0\n"
+    )
+    assert invalid["acceptance_rate"] is None, invalid
+    assert invalid["accepted_length"] is None, invalid
     print("apps.runtime.serve self-test: OK")
     return 0
 

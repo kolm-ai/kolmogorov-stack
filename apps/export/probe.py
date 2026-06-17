@@ -373,13 +373,28 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
         spec = None
         m = info.get("metrics", {}) if isinstance(info, dict) else {}
         if info.get("speculative"):
-            spec = {
-                "head_kind": info.get("speculative_head_kind") or "draft_model",
-                "head_id": info.get("draft_model") or "",
-                "num_speculative_tokens": info.get("num_speculative_tokens"),
-                "acceptance_rate": m.get("acceptance_rate"),
-                "mean_accept_length": m.get("mean_accept_length"),
-            }
+            accepted_length = m.get("accepted_length")
+            if accepted_length is None:
+                accepted_length = m.get("mean_accept_length")
+            if isinstance(info.get("speculative_decoding"), dict):
+                spec = dict(info["speculative_decoding"])
+                if spec.get("accepted_length") is None:
+                    spec["accepted_length"] = accepted_length
+                spec["mean_accept_length"] = spec.get("accepted_length")
+            else:
+                spec = {
+                    "method": "speculative_decoding",
+                    "head_kind": info.get("speculative_head_kind") or "draft_model",
+                    "head_id": info.get("draft_model") or "",
+                    "target_model": info.get("model") or "",
+                    "runtime": info.get("engine") or "",
+                    "num_speculative_tokens": info.get("num_speculative_tokens"),
+                    "acceptance_rate": m.get("acceptance_rate"),
+                    "accepted_length": accepted_length,
+                    "mean_accept_length": accepted_length,
+                    "throughput_speedup": None,
+                    "status": "tested" if m.get("acceptance_rate") is not None else "estimated",
+                }
 
         prompt_cache = _measure_prefix_cache(base_url, prompt) if prefix_cache_probe else None
         batching = (_measure_batching(base_url, info.get("max_num_seqs") or 1,
@@ -501,6 +516,20 @@ def _self_test() -> int:
     assert tested["tok_s"] == 41.0
     assert tested["quality_delta"] == 0.0
     assert tested["runtime"] == "vllm"
+    spec = emit_passport_json({
+        "ok": True,
+        "tested": True,
+        "engine": "vllm",
+        "speculative_decoding": {
+            "head_kind": "eagle3",
+            "head_id": "h",
+            "num_speculative_tokens": 5,
+            "acceptance_rate": 0.5,
+            "accepted_length": 5.0,
+        },
+    })
+    assert spec["speculative_decoding"]["accepted_length"] == 5.0
+    assert spec["speculative_decoding"]["acceptance_rate"] == 0.5
 
     print("apps.export.probe self-test: OK")
     return 0
