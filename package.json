@@ -77,7 +77,7 @@
     "verify:cloud-broker": "node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && node --test --test-concurrency=1 tests/wave644-cloud-distill-bridge.test.js",
     "verify:distill-strategy": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js",
     "verify:distill-telemetry": "node --test --test-concurrency=1 tests/path-to-100-w6-distill-loss-display.test.js tests/wave459-distill-reliability.test.js tests/wave614-distill-telemetry-source.test.js",
-    "verify:distill-captures": "node --test --test-concurrency=1 tests/wave622-teacher-source-api.test.js",
+    "verify:distill-captures": "node --test --test-concurrency=1 tests/wave622-teacher-source-api.test.js tests/wave645-capture-stream-replay.test.js",
     "verify:distill-bon": "node --test --test-concurrency=1 tests/wave921-preference-miner.test.js tests/wave921-studio-cli.test.js",
     "verify:airgap": "node --test --test-concurrency=1 tests/wave779-airgap-sneakernet.test.js tests/wave831-airgap.test.js",
     "verify:finetune-frameworks": "node --test --test-concurrency=1 tests/wave921-trainer-unification.test.js tests/wave921-lora-variants-galore-packing.test.js tests/wave636-multinode-launch.test.js",

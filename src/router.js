@@ -205,6 +205,7 @@ import {
   isDurable as captureIsDurable,
   driverName as captureDriverName,
   listCaptures,
+  allCapturesForTenant,
   countCaptures,
   health as captureHealth,
 } from './capture-store.js';
@@ -17927,15 +17928,38 @@ export function buildRouter() {
   // the in-process publish/subscribe broker (src/capture-stream.js) wired
   // through recordCapture(). Subscriber map is keyed on tenant so
   // cross-tenant fan-out is structurally impossible.
+  // W645: because the broker is intentionally in-process, reconnects may land
+  // on another replica. The route now subscribes first, then emits a bounded
+  // durable replay filtered by ?since / ?last_seen before keeping the live tail
+  // open. This is a replay safety net, not a cross-instance pubsub claim.
   //
   // Payload shape is the CLI/UI contract (W258-BE-6): capture_id /
   // captured_at / namespace / model / provider / latency_us / status /
   // prompt_head / response_head / x_kolm_capture_durable. The raw store row
   // is shimmed here so the dashboard and `kolm tail captures` see the
   // same shape without one of them having to translate.
-  r.get('/v1/capture/stream', authMiddleware, (req, res) => {
+  r.get('/v1/capture/stream', authMiddleware, async (req, res) => {
     if (!req.tenant) return res.status(401).json({ error: 'auth required' });
     const namespaceFilter = req.query?.namespace ? sanitizeNamespace(String(req.query.namespace)) : null;
+    const sinceRaw = req.query?.since || req.query?.last_seen || req.headers['last-event-id'] || null;
+    let sinceMs = null;
+    if (sinceRaw != null && String(sinceRaw).trim()) {
+      const raw = String(sinceRaw).trim();
+      const asNum = Number(raw);
+      if (Number.isFinite(asNum) && asNum > 0) sinceMs = asNum;
+      else {
+        const asDate = Date.parse(raw);
+        if (Number.isFinite(asDate)) sinceMs = asDate;
+      }
+    }
+    const replayLimitRaw = Number(req.query?.replay_limit || req.query?.backfill_limit || 200);
+    const replayLimit = Number.isFinite(replayLimitRaw)
+      ? Math.max(0, Math.min(5000, Math.trunc(replayLimitRaw)))
+      : 200;
+    const replayScanLimitRaw = Number(req.query?.replay_scan_limit || 5000);
+    const replayScanLimit = Number.isFinite(replayScanLimitRaw)
+      ? Math.max(replayLimit, Math.min(50000, Math.trunc(replayScanLimitRaw)))
+      : Math.max(replayLimit, 5000);
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
@@ -17947,12 +17971,13 @@ export function buildRouter() {
       'X-Kolm-Capture-Durable': String(captureIsDurable()),
     });
     try { req.socket?.setTimeout?.(3600000); } catch {} // deliberate: cleanup
-    res.write(`event: hello\ndata: ${JSON.stringify({ tenant: req.tenant, namespace: namespaceFilter, ts: new Date().toISOString(), driver: captureDriverName() })}\n\n`);
+    res.write(`event: hello\ndata: ${JSON.stringify({ tenant: req.tenant, namespace: namespaceFilter, ts: new Date().toISOString(), driver: captureDriverName(), replay_since: sinceMs != null ? new Date(sinceMs).toISOString() : null })}\n\n`);
 
-    // W213/W258: subscribeCaptureStream() and subscribeCapture(req.tenant, ...)
-    // are dual aliases on broker.subscribe; the canonical call below uses
-    // subscribeCapture(req.tenant, namespaceFilter, callback).
-    const unsubscribe = subscribeCapture(req.tenant, namespaceFilter || '*', (obs) => {
+    const emitted = new Set();
+    const sendCaptureEvent = (obs, replayed = false) => {
+      if (!obs) return false;
+      const eventId = obs.id || obs.capture_id || `${obs.created_at || ''}:${obs.template_hash || ''}:${obs.model || ''}`;
+      if (eventId && emitted.has(eventId)) return false;
       const event = {
         capture_id: obs.id,
         captured_at: obs.created_at,
@@ -17964,9 +17989,25 @@ export function buildRouter() {
         prompt_head: typeof obs.prompt === 'string' ? obs.prompt.slice(0, 200) : null,
         response_head: typeof obs.response === 'string' ? obs.response.slice(0, 200) : null,
         x_kolm_capture_durable: obs.durable !== false,
+        replayed: !!replayed,
       };
-      try { res.write(`event: capture\ndata: ${JSON.stringify(event)}\n\n`); } catch (_) { /* socket closed */ }
+      if (eventId) emitted.add(eventId);
+      const sseId = event.captured_at || event.capture_id || '';
+      try {
+        res.write(`${sseId ? `id: ${String(sseId).replace(/[\r\n]/g, '')}\n` : ''}event: capture\ndata: ${JSON.stringify(event)}\n\n`);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+
+    // W213/W258: subscribeCaptureStream() and subscribeCapture(req.tenant, ...)
+    // are dual aliases on broker.subscribe; the canonical call below uses
+    // subscribeCapture(req.tenant, namespaceFilter, callback).
+    const unsubscribe = subscribeCapture(req.tenant, namespaceFilter || '*', (obs) => {
+      sendCaptureEvent(obs, false);
     });
+
     const keepAlive = setInterval(() => {
       try { res.write(': keep-alive\n\n'); } catch {} // deliberate: cleanup
     }, 25000);
@@ -17981,6 +18022,52 @@ export function buildRouter() {
     };
     req.on('close', cleanup);
     req.on('error', cleanup);
+
+    try {
+      let replayed = 0;
+      if (sinceMs != null && replayLimit > 0) {
+        const tenantKeys = Array.from(new Set([
+          req.tenant,
+          req.tenant_record && req.tenant_record.id,
+        ].filter(Boolean)));
+        const byCapture = new Map();
+        for (const tenantKey of tenantKeys) {
+          const rowsForKey = namespaceFilter
+            ? await listCaptures(tenantKey, namespaceFilter, replayScanLimit)
+            : await allCapturesForTenant(tenantKey, replayScanLimit);
+          for (const row of rowsForKey) {
+            const key = row.id || row.capture_id || `${row.created_at || ''}:${row.tenant || ''}:${row.corpus_namespace || ''}`;
+            if (!byCapture.has(key)) byCapture.set(key, row);
+          }
+        }
+        const rows = Array.from(byCapture.values());
+        const filtered = rows
+          .filter((obs) => {
+            const rowNs = obs.corpus_namespace || 'default';
+            if (namespaceFilter && rowNs !== namespaceFilter) return false;
+            const ts = Date.parse(obs.created_at || obs.captured_at || '');
+            return Number.isFinite(ts) && ts > sinceMs;
+          })
+          .sort((a, b) => (Date.parse(a.created_at || '') || 0) - (Date.parse(b.created_at || '') || 0))
+          .slice(-replayLimit);
+        for (const obs of filtered) {
+          if (sendCaptureEvent(obs, true)) replayed++;
+        }
+      }
+      res.write(`event: replay_complete\ndata: ${JSON.stringify({
+        ok: true,
+        replayed,
+        since: sinceMs != null ? new Date(sinceMs).toISOString() : null,
+        replay_limit: replayLimit,
+        replay_scan_limit: replayScanLimit,
+      })}\n\n`);
+    } catch (e) {
+      res.write(`event: replay_error\ndata: ${JSON.stringify({
+        ok: false,
+        error: e && e.code === 'CAPTURE_STORE_EPHEMERAL' ? 'capture_store_ephemeral' : 'capture_replay_failed',
+        message: String((e && e.message) || e),
+      })}\n\n`);
+    }
   });
 
   // ---------- W258-BE-3 + W215: notifications API (threshold alerts opt-in) ----------

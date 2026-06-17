@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 302,
+    "orphan_tests": 303,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 305,
+    "state_local_green": 306,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 470,
-    "test_only_waves": 302,
-    "waves": 318
+    "test_files": 471,
+    "test_only_waves": 303,
+    "waves": 319
   },
-  "generated_at": "2026-06-17T17:02:05.250Z",
+  "generated_at": "2026-06-17T17:10:32.596Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -316,6 +316,7 @@
       "W642",
       "W643",
       "W644",
+      "W645",
       "W708",
       "W709",
       "W710",
@@ -627,6 +628,7 @@
       "W642",
       "W643",
       "W644",
+      "W645",
       "W708",
       "W709",
       "W710",
@@ -4302,7 +4304,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave622-teacher-source-api.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave622-teacher-source-api.test.js tests/wave645-capture-stream-replay.test.js",
           "script": "npm:verify:distill-captures"
         }
       ],
@@ -4443,6 +4445,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave644-cloud-distill-bridge.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W645",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wave622-teacher-source-api.test.js tests/wave645-capture-stream-replay.test.js",
+          "script": "npm:verify:distill-captures"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave645-capture-stream-replay.test.js"
       ],
       "test_letter_suffixes": []
     },
