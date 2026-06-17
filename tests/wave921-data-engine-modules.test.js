@@ -1,7 +1,8 @@
 // W921 — KOLM Data Engine frontier curation modules (the REMAINING specs).
 //
-// Covers the five NEW dependency-free data modules + their ADDITIVE wiring into
-// src/data-curate.js behind opt-in flags:
+// Covers the five dependency-free data modules + their additive wiring into
+// src/data-curate.js. Quality is default-on after W628; the remaining advanced
+// stages still prove explicit opt-in / opt-out behavior:
 //   - src/data-label-errors.js       (Confident Learning + CLEAR/BSDetector)
 //   - src/data-scaling-law.js        (Rectified Scaling Law data-budget model)
 //   - src/data-diversity-select.js   (k-center / facility-location / BADGE)
@@ -599,15 +600,37 @@ function buildCurateCorpus() {
   return rows;
 }
 
-test('curate-integration: default opts leave new report blocks null (back-compat)', async () => {
-  const r = await curatePairs({ namespace: 'bc', pairs: buildCurateCorpus(), opts: { dedup: false } });
+test('curate-integration: default opts use learned percentile quality and stamp rows', async () => {
+  const r = await curatePairs({
+    namespace: 'bc',
+    pairs: buildCurateCorpus(),
+    opts: { dedup: false, minhash: false, semdedup: false, cluster: false, cot: false, pii: false },
+  });
   assert.equal(r.ok, true);
-  assert.equal(r.report.quality, null);
+  assert.ok(r.report.quality && typeof r.report.quality === 'object');
+  assert.match(r.report.quality.backend, /learned/);
+  assert.equal(r.report.quality.mode, 'percentile');
+  assert.equal(r.report.quality.kept, r.n_kept);
+  assert.ok(r.report.quality.dropped > 0, 'default percentile quality should drop the bottom tail');
+  const keptRows = fs.readFileSync(r.out_path, 'utf8').trim().split('\n').filter(Boolean).map((line) => JSON.parse(line));
+  assert.ok(keptRows.every((row) => typeof row.quality_score === 'number'), 'default classifier stamps quality_score');
   assert.equal(r.report.topics, null);
   assert.equal(r.report.label_errors, null);
 });
 
-test('curate-integration: qualityClassifier opt-in surfaces report.quality + quality_score', async () => {
+test('curate-integration: qualityClassifier false preserves legacy heuristic quality', async () => {
+  const r = await curatePairs({
+    namespace: 'bc_legacy',
+    pairs: buildCurateCorpus(),
+    opts: { dedup: false, minhash: false, semdedup: false, cluster: false, cot: false, pii: false, qualityClassifier: false },
+  });
+  assert.equal(r.ok, true);
+  assert.equal(r.report.quality, null);
+  const keptRows = fs.readFileSync(r.out_path, 'utf8').trim().split('\n').filter(Boolean).map((line) => JSON.parse(line));
+  assert.ok(keptRows.every((row) => !Object.hasOwn(row, 'quality_score')), 'legacy heuristic path does not stamp quality_score');
+});
+
+test('curate-integration: explicit qualityClassifier true surfaces report.quality + quality_score', async () => {
   const r = await curatePairs({ namespace: 'qc', pairs: buildCurateCorpus(), opts: { dedup: false, qualityClassifier: true, quality_mode: 'percentile', keep_fraction: 0.9 } });
   assert.equal(r.ok, true);
   assert.ok(r.report.quality && typeof r.report.quality === 'object');

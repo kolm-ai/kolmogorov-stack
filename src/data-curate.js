@@ -5,11 +5,12 @@
 // its own opt and each recording what it dropped/changed so the Data Health
 // panel can show WHY a pair did or did not survive:
 //
-//   a. quality - drop pairs whose teacher output scores below minQuality
-//                  (uses the local scoreCandidateLocal heuristic below).
-//   b0. minhash - OPT-IN (opts.minhash) Node-native MinHash/LSH near-dup
+//   a. quality - drop low-quality pairs with the learned input+output
+//                  classifier by default; qualityClassifier:false uses the
+//                  local scoreCandidateLocal heuristic below.
+//   b0. minhash - DEFAULT-ON Node-native MinHash/LSH near-dup
 //                  pre-pass (src/minhash-dedup.js) that collapses exact + near-
-//                  exact dups off-GPU BEFORE the python pass. Default OFF.
+//                  exact dups off-GPU BEFORE the python pass.
 //   b. dedup - shell to workers/distill/scripts/dedup_pairs.py for
 //                  semantic near-dup removal. DEGRADES to a no-op (recorded)
 //                  if python / the script is unavailable - never fails curate.
@@ -21,14 +22,14 @@
 //                  (src/data-select.js) that caps survivors to a budget-bounded
 //                  diversity-aware / target-matched subset. Default OFF.
 //
-// The opt-in stages (b0, f) are ADDITIVE: with default opts they do not run and
-// the curate result is identical to the original five-stage pipeline. New report
-// fields (backend_used, n_clusters, minhash, selection) stay null/'none' unless
-// the corresponding opt is set.
+// The pure-JS quality/dedup safety stages are default-on and graceful-degrade:
+// learned quality, MinHash, and SemDeDup record their reports without throwing.
+// The budget-shaping SELECT stage remains opt-in unless target_size is set.
 //
-// W921 frontier upgrades (ALL opt-in; default behavior unchanged):
-//   - opts.qualityClassifier - replace the quality stage's output-only heuristic
-//     with the learned per-pair quality CLASSIFIER (src/data-quality-classifier.js,
+// W921 frontier upgrades:
+//   - opts.qualityClassifier - DEFAULT-ON learned per-pair quality CLASSIFIER;
+//     pass qualityClassifier:false to use the legacy output-only heuristic.
+//     Uses src/data-quality-classifier.js,
 //     FineWeb-Edu/DCLM/AlpaGasus lineage). opts.quality_mode 'percentile' (top
 //     keep_fraction, DCLM-style) | 'absolute'. Surfaces report.quality + stamps
 //     p.quality_score. Pure JS.
@@ -85,7 +86,7 @@ function _dsirRealEnabled() {
 // directly: <root>/<ns>/raw-pairs.jsonl; curate's own _nsDir adds .kolm/data and so
 // diverged when KOLM_DATA_DIR was set).
 import { rawPairsPath as _ingestRawPairsPath } from './data-ingest.js';
-// ── opt-in W921 frontier curation modules (additive; default OFF) ─────────────
+// ── W921 frontier curation modules ───────────────────────────────────────────
 import { selectDiverse as _selectDiverse } from './data-diversity-select.js';
 import { clusterAndLabel as _clusterAndLabel } from './data-cluster-label.js';
 import {
@@ -456,16 +457,15 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       shapleyVal: null,           // holdout val_pairs defining Shapley utility
       shapleyMethod: 'knn',       // 'knn' | 'mc' | 'auto'
       shapleyK: null,             // KNN neighborhood size (default min(5,N))
-      // ── W921 frontier stages are OPT-IN on the base curatePairs() API ──
+      // ── W921 frontier stages on the base curatePairs() API ──
       // These ADDITIVE stages surface new report blocks (report.quality,
-      // report.topics, report.label_errors). They are DEFAULT-OFF here to
-      // preserve back-compat: a direct curatePairs() caller that does not ask
-      // for them gets the historical behavior (null report blocks). The standard
-      // compile path turns them on explicitly via curateDefault() (CD-001).
+      // report.topics, report.label_errors). Quality is DEFAULT-ON with a
+      // DCLM-style percentile keep; semantic topics and label-error detection
+      // remain opt-in. Pass qualityClassifier:false for legacy heuristic quality.
       // qualityClassifier: learned per-pair quality classifier in stage a.
       //   Pure JS (FineWeb-Edu/DCLM/AlpaGasus feature lineage), no external deps;
       //   degrades to the output-only heuristic on any failure.
-      qualityClassifier: false,
+      qualityClassifier: true,
       quality_mode: 'percentile', // 'percentile' (DCLM top keep_fraction) | 'absolute'
       keep_fraction: 0.9,         // percentile retain ratio
       quality_model: null,        // optional fitted model {w,feature_names,...}
@@ -530,11 +530,11 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
     };
 
     // a. quality - drop low-scoring teacher outputs.
-    //    DEFAULT: the output-only scoreCandidateLocal heuristic (back-compat).
-    //    OPT-IN (o.qualityClassifier): the learned per-pair quality CLASSIFIER
+    //    DEFAULT: the learned per-pair quality CLASSIFIER
     //    (FineWeb-Edu/DCLM/AlpaGasus lineage) with a percentile-or-absolute
-    //    threshold. Stamps p.quality_score; surfaces report.quality. Never throws
-    // - any failure degrades to the heuristic path.
+    //    threshold. Stamps p.quality_score; surfaces report.quality. Never
+    //    throws - any failure degrades to the heuristic path. Explicit
+    //    qualityClassifier:false preserves the legacy output-only heuristic.
     if (o.quality && o.qualityClassifier) {
       try {
         const scored = _scoreQualityLearned({ rows: work, backend: 'auto', model: o.quality_model || null });
