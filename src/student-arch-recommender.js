@@ -23,6 +23,8 @@
 //   complexity < 0.3 + p95<200  -> 1B-class
 //   else                        -> 3B-class  (default safe pick)
 
+import { info as modelInfo } from './models.js';
+
 export const RECOMMENDER_VERSION = 'w716-v1';
 
 // =============================================================================
@@ -32,9 +34,10 @@ export const RECOMMENDER_VERSION = 'w716-v1';
 // =============================================================================
 
 const ARCH_1B = Object.freeze({
-  family: 'tinyllama-1b-class',
+  family: 'lfm2.5-1.2b-class',
+  backbone_id: 'LiquidAI/LFM2.5-1.2B-Instruct',
   size_label: '1B',
-  depth: 22,
+  depth: 16,
   width: 2048,
   hidden_dim: 2048,
   num_attention_heads: 32,
@@ -42,22 +45,24 @@ const ARCH_1B = Object.freeze({
 });
 
 const ARCH_3B = Object.freeze({
-  family: 'qwen2.5-3b-class',
+  family: 'qwen3-4b-class',
+  backbone_id: 'Qwen/Qwen3-4B-Instruct-2507',
   size_label: '3B',
   depth: 36,
-  width: 2048,
-  hidden_dim: 2048,
-  num_attention_heads: 16,
+  width: 2560,
+  hidden_dim: 2560,
+  num_attention_heads: 32,
   quant: 'int4',
 });
 
 const ARCH_7B = Object.freeze({
-  family: 'qwen2.5-7b-class',
+  family: 'qwen3-8b-class',
+  backbone_id: 'Qwen/Qwen3-8B',
   size_label: '7B',
-  depth: 28,
-  width: 3584,
-  hidden_dim: 3584,
-  num_attention_heads: 28,
+  depth: 36,
+  width: 4096,
+  hidden_dim: 4096,
+  num_attention_heads: 32,
   quant: 'int4',
 });
 
@@ -65,12 +70,13 @@ const ARCH_7B = Object.freeze({
 // backbone); the recipe scaffold in src/compile.js#buildMoeRecipe stamps
 // the routing block.
 const ARCH_MOE_8x3 = Object.freeze({
-  family: 'qwen2.5-3b-class',
+  family: 'qwen3-4b-class',
+  backbone_id: 'Qwen/Qwen3-4B-Instruct-2507',
   size_label: '3B-MoE-8x3',
   depth: 28,
-  width: 2048,
-  hidden_dim: 2048,
-  num_attention_heads: 16,
+  width: 2560,
+  hidden_dim: 2560,
+  num_attention_heads: 32,
   quant: 'int4',
   moe: {
     num_experts: 8,
@@ -85,6 +91,12 @@ const ARCH_MOE_8x3 = Object.freeze({
 export const ARCH_CATALOG = Object.freeze({
   ARCH_1B, ARCH_3B, ARCH_7B, ARCH_MOE_8x3,
 });
+
+export function resolveArchBackbone(arch) {
+  const spec = typeof arch === 'string' ? ARCH_CATALOG[arch] : arch;
+  if (!spec || !spec.backbone_id) return null;
+  return modelInfo(spec.backbone_id);
+}
 
 // =============================================================================
 // Recommender entry point

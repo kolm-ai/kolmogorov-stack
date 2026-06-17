@@ -122,6 +122,7 @@ export function verifyExactSourceUrl(url) {
 
 // Source note shorthand for cite-strings.
 const SRC_W295_AUDIT = 'codebase audit 2026-05-18 (W295 split)';
+const SRC_W610_SMALL_LLM = 'primary-source model-card refresh 2026-06-17 (W610 small-LLM pass)';
 
 // W295 - verification_evidence shape helper. Only the verifier_note is
 // populated by hand; HTTP status fields stay null until a network probe
@@ -146,6 +147,54 @@ function evidence(note) {
 // goes here and revision_pinned flips true.
 // ---------------------------------------------------------------------------
 export const FRONTIER_MODELS = [
+  {
+    id: 'Qwen/Qwen3-4B-Instruct-2507',
+    family: 'qwen3',
+    params: '4B',
+    params_b: 4,
+    active_params_b: 4,
+    arch: 'dense',
+    modality: ['text'],
+    hw_tier: '4090',
+    recommended_quant: 'q4',
+    vram_gb: 5,
+    ctx_k: 262,
+    license: 'apache-2.0',
+    modality_notes: 'Apache 2.0 dense Qwen3 4B; current default student/agent tier with 262K context.',
+    source_url: 'https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507',
+    license_url: 'https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/blob/main/LICENSE',
+    revision_hash: null,
+    revision_pinned: false,
+    source_note: SRC_W610_SMALL_LLM,
+    verified_at: '2026-06-17',
+    verified_backends: ['cuda', 'vulkan', 'rocm', 'metal'],
+    recipe_classes: ['rules', 'extraction', 'classification', 'agent', 'chat', 'rag'],
+    verification_evidence: evidence('exact Qwen3-4B-Instruct-2507 model-card URL and Apache-2.0 license metadata checked against the Hugging Face model card/API on 2026-06-17; revision not pinned (warn-band).'),
+  },
+  {
+    id: 'microsoft/Phi-4-mini-instruct',
+    family: 'phi-4',
+    params: '3.8B',
+    params_b: 3.8,
+    active_params_b: 3.8,
+    arch: 'dense',
+    modality: ['text'],
+    hw_tier: 'cpu-server',
+    recommended_quant: 'q4',
+    vram_gb: 4.5,
+    ctx_k: 128,
+    license: 'mit',
+    modality_notes: 'MIT-licensed dense Phi-4 mini; current small reasoning student tier.',
+    source_url: 'https://huggingface.co/microsoft/Phi-4-mini-instruct',
+    license_url: 'https://huggingface.co/microsoft/Phi-4-mini-instruct/blob/main/LICENSE',
+    revision_hash: null,
+    revision_pinned: false,
+    source_note: SRC_W610_SMALL_LLM,
+    verified_at: '2026-06-17',
+    verified_backends: ['cpu', 'cuda', 'vulkan', 'rocm'],
+    recipe_classes: ['rules', 'extraction', 'classification', 'agent', 'chat', 'reasoning'],
+    verification_evidence: evidence('exact Phi-4-mini-instruct model-card URL and MIT license metadata checked against the Hugging Face model card/API on 2026-06-17; revision not pinned (warn-band).'),
+  },
   {
     id: 'Qwen/Qwen2.5-7B-Instruct',
     family: 'qwen2.5',
@@ -830,6 +879,32 @@ export const BACKBONES = [
 
   // ===== Qwen family =====
   {
+    id: 'Qwen/Qwen3-4B-Instruct-2507',
+    family: 'qwen-3',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 5, gpu_class: 'laptop-igpu', mobile_ok: false },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Qwen3 4B Instruct 2507; current default dense student, 262K ctx, Apache 2.0.',
+  },
+  {
+    id: 'Qwen/Qwen3-8B',
+    family: 'qwen-3',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 9, gpu_class: 'consumer-gpu', mobile_ok: false },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Qwen3 8B dense quality/reasoning student, Apache 2.0.',
+  },
+  {
     id: 'Qwen/Qwen2.5-7B-Instruct',
     family: 'qwen-2.5',
     license: 'Apache-2.0',
@@ -951,6 +1026,19 @@ export const BACKBONES = [
 
   // ===== Phi family (Microsoft) =====
   {
+    id: 'microsoft/Phi-4-mini-instruct',
+    family: 'phi',
+    license: 'MIT',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 5, gpu_class: 'laptop-igpu', mobile_ok: false },
+    quantization_support: ['Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Phi-4 mini 3.8B; current MIT small-reasoning student with 128K context.',
+  },
+  {
     id: 'microsoft/Phi-3.5-mini-instruct',
     family: 'phi',
     license: 'MIT',
@@ -1046,6 +1134,19 @@ export const BACKBONES = [
 
   // ===== SmolLM (Hugging Face) =====
   {
+    id: 'HuggingFaceTB/SmolLM3-3B',
+    family: 'smollm',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 4, gpu_class: 'laptop-igpu', mobile_ok: false },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'SmolLM3 3B; Apache 2.0 compact student with think/no-think control and long-context extension.',
+  },
+  {
     id: 'HuggingFaceTB/SmolLM2-1.7B-Instruct',
     family: 'smollm',
     license: 'Apache-2.0',
@@ -1084,11 +1185,26 @@ export const BACKBONES = [
     verified_at: null,
     notes: 'SmolLM2 135M; the smallest backbone we ship. Tiny enough for browser hot-reload.',
   },
+
+  // ===== Liquid AI / LFM =====
+  {
+    id: 'LiquidAI/LFM2.5-1.2B-Instruct',
+    family: 'lfm',
+    license: 'LFM-1.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 2, gpu_class: 'mobile-npu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8', 'fp16'],
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Liquid LFM2.5 1.2B edge/agentic student; current mobile-friendly tier, LFM-1.0 license.',
+  },
 ];
 
 // --------- W409r - BACKBONES API ---------
 
-const BACKBONE_LICENSES = ['Apache-2.0', 'MIT', 'Llama-3-Community', 'Llama-4-Community', 'Gemma-TOU', 'Qwen-License', 'Mistral-Research'];
+const BACKBONE_LICENSES = ['Apache-2.0', 'MIT', 'Llama-3-Community', 'Llama-4-Community', 'Gemma-TOU', 'Qwen-License', 'Mistral-Research', 'LFM-1.0'];
 const BACKBONE_RUNTIMES = ['js', 'wasm', 'gguf', 'onnx', 'native'];
 const BACKBONE_QUANTS = ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'];
 const BACKBONE_PULL_STATUSES = ['registered', 'metadata_cached', 'pulled_and_verified'];

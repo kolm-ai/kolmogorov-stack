@@ -71,7 +71,7 @@
       "environment_configuration_boundary": 306,
       "execution_or_subprocess_boundary": 231,
       "http_route_surface": 36,
-      "large_component_contract_risk": 34,
+      "large_component_contract_risk": 35,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 162,
       "open_marker_requires_owner_review": 8,
@@ -30712,10 +30712,10 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "f9f197ebe4637ec0543e67c9a2d2aac07be2cdbf11123c63d563070e928bbaaf",
+      "sha256": "a3be2dcb04bad7bb3cd540c699d87c1a7bd25b2f8eed960d8f3abf0def44455c",
       "metrics": {
-        "bytes": 65291,
-        "lines": 1549,
+        "bytes": 69961,
+        "lines": 1665,
         "imports": 6,
         "exports": 30,
         "routes": 0,
@@ -30957,10 +30957,10 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "c3984b397aa4ac0507af2c8b638708d3d4cdb70d207750b5e6ea946396fa0d23",
+      "sha256": "cea1dc0f39e6861b19d56a9dbed0aed648cb4a4db9c55e77a4d31e922416eb71",
       "metrics": {
-        "bytes": 30444,
-        "lines": 826,
+        "bytes": 34174,
+        "lines": 924,
         "imports": 3,
         "exports": 14,
         "routes": 0,
@@ -30983,9 +30983,10 @@
       ],
       "risk_signals": [
         "environment_configuration_boundary",
+        "large_component_contract_risk",
         "stateful_storage_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -41651,12 +41652,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "afd0283ea97c3ddb39f98ff104fa0957a497fa74ac6ff92e01ebb0d22965dac7",
+      "sha256": "7daadfca5d6aeebeeb54df6b64276c86770a8e7decd4c65371973569028904eb",
       "metrics": {
-        "bytes": 9836,
-        "lines": 275,
-        "imports": 2,
-        "exports": 4,
+        "bytes": 10252,
+        "lines": 287,
+        "imports": 3,
+        "exports": 5,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 0,
@@ -41666,6 +41667,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave610-small-llm-frontier-registry.test.js",
         "tests/wave716-taas-arch-search.test.js",
         "tests/wave832-kolm-meta.test.js"
       ],

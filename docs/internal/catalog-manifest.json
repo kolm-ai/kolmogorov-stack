@@ -1227,6 +1227,84 @@
     },
     {
       "capabilities": {
+        "catalog": "baseline",
+        "family": "smollm3",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Apache 2.0 compact 3B student. Prefer when small artifact size and permissive licensing matter more than Qwen tokenizer continuity.",
+        "params_b": 3,
+        "tier": "student-frontier",
+        "tokenizer_vocab": 128256,
+        "tool_use": "good",
+        "use_for": [
+          "default-alternate",
+          "chat",
+          "classifier",
+          "extractor",
+          "frontier-student"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:HuggingFaceTB/SmolLM3-3B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 4,
+        "vram_gb_bf16": 7
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "lfm2.5",
+        "license": "lfm-1.0",
+        "multilingual": true,
+        "notes": "Current 1.2B edge/agentic student. License is LFM-1.0, not Apache/MIT, so permissive filters correctly exclude it.",
+        "params_b": 1.2,
+        "tier": "edge-frontier",
+        "tokenizer_vocab": 65536,
+        "tool_use": "good",
+        "use_for": [
+          "edge",
+          "laptop",
+          "classifier",
+          "extractor",
+          "mobile",
+          "agent",
+          "frontier-student"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:LiquidAI/LFM2.5-1.2B-Instruct",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 32768,
+        "vram_gb_4bit": 1.2,
+        "vram_gb_bf16": 2.6
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
         "active_params_b": 36,
         "arch": "dense",
         "candidate": true,
@@ -1617,6 +1695,103 @@
         "context_tokens": 131072,
         "vram_gb_4bit": 8,
         "vram_gb_bf16": 16
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 4,
+        "arch": "dense",
+        "candidate": false,
+        "family": "qwen3",
+        "license": "apache-2.0",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "Apache 2.0 dense Qwen3 4B; current default student/agent tier with 262K context.",
+        "params": "4B",
+        "params_b": 4,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat",
+          "rag"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "primary-source model-card refresh 2026-06-17 (W610 small-LLM pass)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact Qwen3-4B-Instruct-2507 model-card URL and Apache-2.0 license metadata checked against the Hugging Face model card/API on 2026-06-17; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cuda",
+          "vulkan",
+          "rocm",
+          "metal"
+        ]
+      },
+      "checked_at": "2026-06-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/account/train.html",
+        "public/runtimes.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen3-4B-Instruct-2507",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 262,
+        "hw_tier": "4090",
+        "recommended_quant": "q4",
+        "vram_gb": 5
+      },
+      "source_url": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "qwen3",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Apache 2.0 Qwen3 8B dense student for quality/reasoning tiers where 4B is too small.",
+        "params_b": 8,
+        "tier": "quality-frontier",
+        "tokenizer_vocab": 151936,
+        "tool_use": "native",
+        "use_for": [
+          "quality",
+          "reasoning-quality",
+          "agent",
+          "frontier-student"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:Qwen/Qwen3-8B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 40960,
+        "vram_gb_4bit": 9,
+        "vram_gb_bf16": 18
       },
       "source_url": null,
       "status": "available"
@@ -3053,6 +3228,66 @@
         "vram_gb": 4
       },
       "source_url": "https://huggingface.co/microsoft/Phi-3.5-mini-instruct",
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "active_params_b": 3.8,
+        "arch": "dense",
+        "candidate": false,
+        "family": "phi-4",
+        "license": "mit",
+        "modality": [
+          "text"
+        ],
+        "modality_notes": "MIT-licensed dense Phi-4 mini; current small reasoning student tier.",
+        "params": "3.8B",
+        "params_b": 3.8,
+        "recipe_classes": [
+          "rules",
+          "extraction",
+          "classification",
+          "agent",
+          "chat",
+          "reasoning"
+        ],
+        "revision_hash": null,
+        "revision_pinned": false,
+        "source_note": "primary-source model-card refresh 2026-06-17 (W610 small-LLM pass)",
+        "verification_evidence": {
+          "license_url_status": null,
+          "revision_hash": null,
+          "source_url_checked_at": null,
+          "source_url_status": null,
+          "verifier_note": "exact Phi-4-mini-instruct model-card URL and MIT license metadata checked against the Hugging Face model card/API on 2026-06-17; revision not pinned (warn-band)."
+        },
+        "verified_backends": [
+          "cpu",
+          "cuda",
+          "vulkan",
+          "rocm"
+        ]
+      },
+      "checked_at": "2026-06-17",
+      "consumer_paths": [
+        "src/model-registry.js",
+        "cli/kolm.js (compile, models)",
+        "public/account/train.html",
+        "public/runtimes.html"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:microsoft/Phi-4-mini-instruct",
+      "kind": "local_model",
+      "license_url": "https://huggingface.co/microsoft/Phi-4-mini-instruct/blob/main/LICENSE",
+      "pricing": null,
+      "runtime_fit": {
+        "ctx_k": 128,
+        "hw_tier": "cpu-server",
+        "recommended_quant": "q4",
+        "vram_gb": 4.5
+      },
+      "source_url": "https://huggingface.co/microsoft/Phi-4-mini-instruct",
       "status": "available"
     },
     {
@@ -5435,7 +5670,7 @@
       "status": "available"
     }
   ],
-  "generated_at": "2026-06-17T09:53:55.372Z",
+  "generated_at": "2026-06-17T10:14:27.299Z",
   "schema": "kolm.catalog_manifest.v1",
   "source_evidence": [
     {
@@ -5444,14 +5679,14 @@
       "sha1_short": "1e53e5290552"
     },
     {
-      "bytes": 65291,
+      "bytes": 69961,
       "path": "src/model-registry.js",
-      "sha1_short": "872599acf0f5"
+      "sha1_short": "2070bdc91cb1"
     },
     {
-      "bytes": 30444,
+      "bytes": 34174,
       "path": "src/models.js",
-      "sha1_short": "8f25c518c9a2"
+      "sha1_short": "2fa1479739c1"
     },
     {
       "bytes": 25107,
@@ -5473,15 +5708,15 @@
     "by_kind": {
       "device": 25,
       "hardware": 14,
-      "local_model": 51,
+      "local_model": 56,
       "provider": 12,
       "provider_model": 58,
       "runtime": 4
     },
     "by_status": {
-      "available": 147,
+      "available": 152,
       "candidate": 17
     },
-    "total": 164
+    "total": 169
   }
 }

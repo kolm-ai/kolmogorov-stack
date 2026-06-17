@@ -4,17 +4,18 @@
 //   1. License - Apache 2.0 / MIT / OpenRAIL-M preferred. Llama Community
 //      license has a 700M-MAU clause that scares enterprise; allowed but not
 //      default.
-//   2. Tool/structured-output behavior - Qwen 2.5 family was trained on
-//      tool-call traces; Llama 3.2 was not (only Llama 3.1 70B/405B). For a
-//      compile-once-run-anywhere artifact that has to emit JSON receipts and
-//      function calls, this is load-bearing.
+//   2. Tool/structured-output behavior - Qwen 3 / Qwen 2.5 families were
+//      trained on tool-call traces; Llama 3.2 was not (only Llama 3.1
+//      70B/405B). For a compile-once-run-anywhere artifact that has to emit
+//      JSON receipts and function calls, this is load-bearing.
 //   3. VRAM at 4-bit QLoRA - fits-in-N rules let us match the tier to the
 //      box. 0.5B fits in 1GB, 1.5B in 2GB, 3B in 4GB, 7B in 8GB.
 //   4. Tokenizer quality + multilingual - Qwen tokenizer is BPE w/ 151K vocab
 //      and handles non-Latin scripts cleanly. Llama 3.2 has 128K vocab with
 //      better English compression but weaker on CJK / Cyrillic / Arabic.
-//   5. Healthcare/medical benchmarks at scale - Qwen 2.5 3B sits within 2pp
-//      of Llama 3.2 3B on MedQA / MMLU-medical at its size class.
+//   5. Healthcare/medical benchmarks at scale - domain defaults stay on
+//      current permissive multilingual instruction models unless a dedicated
+//      MedGemma tier is selected.
 //
 // We canonicalize HuggingFace org/name. GGUF aliases (e.g. "qwen2.5:3b") are
 // not in this registry; they belong to the runtime layer (Ollama, llama.cpp).
@@ -24,7 +25,7 @@ import path from 'node:path';
 import { isMobileDevice } from './devices.js';
 
 export const MODELS = [
-  // ----- Qwen 2.5 family (DEFAULT FAMILY) -----
+  // ----- Qwen 2.5 family (legacy/current-compatible baseline) -----
   {
     id: 'Qwen/Qwen2.5-0.5B-Instruct',
     family: 'qwen2.5',
@@ -114,6 +115,100 @@ export const MODELS = [
     multilingual: true,
     notes: 'Server-class. A100-40GB / H100. Best K-score in tests at 14B.',
     use_for: ['server', 'high-stakes'],
+  },
+
+  // ----- 2026 frontier small-student family -----
+  {
+    id: 'Qwen/Qwen3-4B-Instruct-2507',
+    family: 'qwen3',
+    params_b: 4,
+    license: 'apache-2.0',
+    tier: 'default-frontier',
+    vram_gb_4bit: 4.5,
+    vram_gb_bf16: 8.5,
+    context_tokens: 262144,
+    tokenizer_vocab: 151936,
+    tool_use: 'native',
+    multilingual: true,
+    official_source_url: 'https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507',
+    architecture_features: ['agentic tool use', '262K context', 'non-thinking instruction mode'],
+    frontier_student: true,
+    notes: 'DEFAULT. Apache 2.0 Qwen3 4B refresh; stronger agent/tool default than Qwen2.5-3B with 262K context.',
+    use_for: ['default', 'chat', 'agent', 'healthcare', 'finance', 'legal', 'long-context', 'rag', 'frontier-student'],
+  },
+  {
+    id: 'Qwen/Qwen3-8B',
+    family: 'qwen3',
+    params_b: 8,
+    license: 'apache-2.0',
+    tier: 'quality-frontier',
+    vram_gb_4bit: 9.0,
+    vram_gb_bf16: 18.0,
+    context_tokens: 40960,
+    tokenizer_vocab: 151936,
+    tool_use: 'native',
+    multilingual: true,
+    official_source_url: 'https://huggingface.co/Qwen/Qwen3-8B',
+    architecture_features: ['hybrid thinking', 'agentic tool use', 'multilingual reasoning'],
+    frontier_student: true,
+    notes: 'Apache 2.0 Qwen3 8B dense student for quality/reasoning tiers where 4B is too small.',
+    use_for: ['quality', 'reasoning-quality', 'agent', 'frontier-student'],
+  },
+  {
+    id: 'microsoft/Phi-4-mini-instruct',
+    family: 'phi4',
+    params_b: 3.8,
+    license: 'mit',
+    tier: 'reasoning-small-frontier',
+    vram_gb_4bit: 4.5,
+    vram_gb_bf16: 8.0,
+    context_tokens: 131072,
+    tokenizer_vocab: 200064,
+    tool_use: 'good',
+    multilingual: true,
+    official_source_url: 'https://huggingface.co/microsoft/Phi-4-mini-instruct',
+    architecture_features: ['128K context', 'reasoning-optimized small model', 'MIT license'],
+    frontier_student: true,
+    notes: 'MIT-licensed Phi-4 mini 3.8B. Current small reasoning default; supersedes Phi-3.5-mini for new distillation plans.',
+    use_for: ['reasoning', 'classifier', 'extractor', 'mit-only', 'frontier-student'],
+  },
+  {
+    id: 'HuggingFaceTB/SmolLM3-3B',
+    family: 'smollm3',
+    params_b: 3,
+    license: 'apache-2.0',
+    tier: 'student-frontier',
+    vram_gb_4bit: 4.0,
+    vram_gb_bf16: 7.0,
+    context_tokens: 131072,
+    native_context_tokens: 65536,
+    tokenizer_vocab: 128256,
+    tool_use: 'good',
+    multilingual: true,
+    official_source_url: 'https://huggingface.co/HuggingFaceTB/SmolLM3-3B',
+    architecture_features: ['think/no-think control', 'long-context extension', 'compact Apache student'],
+    frontier_student: true,
+    notes: 'Apache 2.0 compact 3B student. Prefer when small artifact size and permissive licensing matter more than Qwen tokenizer continuity.',
+    use_for: ['default-alternate', 'chat', 'classifier', 'extractor', 'frontier-student'],
+  },
+  {
+    id: 'LiquidAI/LFM2.5-1.2B-Instruct',
+    family: 'lfm2.5',
+    params_b: 1.2,
+    license: 'lfm-1.0',
+    tier: 'edge-frontier',
+    vram_gb_4bit: 1.2,
+    vram_gb_bf16: 2.6,
+    context_tokens: 32768,
+    tokenizer_vocab: 65536,
+    tool_use: 'good',
+    multilingual: true,
+    official_source_url: 'https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct',
+    architecture_features: ['liquid foundation model', 'edge optimized', 'hybrid structured output'],
+    frontier_student: true,
+    mobile_friendly: true,
+    notes: 'Current 1.2B edge/agentic student. License is LFM-1.0, not Apache/MIT, so permissive filters correctly exclude it.',
+    use_for: ['edge', 'laptop', 'classifier', 'extractor', 'mobile', 'agent', 'frontier-student'],
   },
 
   // ----- Llama 3.2 family (alternate, English-first) -----
@@ -510,15 +605,15 @@ export const MODELS = [
   },
 ];
 
-export const DEFAULT_MODEL = 'Qwen/Qwen2.5-3B-Instruct';
+export const DEFAULT_MODEL = 'Qwen/Qwen3-4B-Instruct-2507';
 
 export const TIER_BY_USE = {
-  default: 'Qwen/Qwen2.5-3B-Instruct',
-  chat: 'Qwen/Qwen2.5-3B-Instruct',
-  agent: 'Qwen/Qwen2.5-3B-Instruct',
-  healthcare: 'Qwen/Qwen2.5-3B-Instruct',
-  finance: 'Qwen/Qwen2.5-3B-Instruct',
-  legal: 'Qwen/Qwen2.5-3B-Instruct',
+  default: DEFAULT_MODEL,
+  chat: DEFAULT_MODEL,
+  agent: DEFAULT_MODEL,
+  healthcare: DEFAULT_MODEL,
+  finance: DEFAULT_MODEL,
+  legal: DEFAULT_MODEL,
   code: 'Qwen/Qwen2.5-Coder-7B-Instruct',
   edge: 'Qwen/Qwen2.5-0.5B-Instruct',
   // W349: mobile = phone-class on-device. Gemma 3n E2B was designed by
@@ -530,12 +625,12 @@ export const TIER_BY_USE = {
   laptop: 'Qwen/Qwen2.5-1.5B-Instruct',
   classifier: 'Qwen/Qwen2.5-1.5B-Instruct',
   extractor: 'Qwen/Qwen2.5-1.5B-Instruct',
-  quality: 'Qwen/Qwen2.5-7B-Instruct',
-  'long-context': 'Qwen/Qwen2.5-7B-Instruct',
-  rag: 'Qwen/Qwen2.5-7B-Instruct',
+  quality: 'Qwen/Qwen3-8B',
+  'long-context': DEFAULT_MODEL,
+  rag: DEFAULT_MODEL,
   server: 'Qwen/Qwen2.5-14B-Instruct',
   'high-stakes': 'Qwen/Qwen2.5-14B-Instruct',
-  reasoning: 'microsoft/Phi-3.5-mini-instruct',
+  reasoning: 'microsoft/Phi-4-mini-instruct',
   // Healthcare lighthouse tier picks.
   'medical-qa': 'google/medgemma-4b-it',
   'radiology-text': 'google/medgemma-4b-it',
@@ -549,7 +644,7 @@ export const TIER_BY_USE = {
   embedding: 'google/embeddinggemma-300m',
   'similarity-search': 'google/embeddinggemma-300m',
   'on-device-rag': 'google/embeddinggemma-300m',
-  'reasoning-quality': 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B',
+  'reasoning-quality': 'Qwen/Qwen3-8B',
   math: 'deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B',
   'chinese-language': 'Qwen/Qwen2.5-7B-Instruct',
 };
@@ -637,6 +732,9 @@ export function recommend(reqs = {}) {
 
     // explicit-use bonus
     if (m.use_for.includes(use)) s += 0.20;
+
+    // W610: prefer current 2026 student rows over legacy same-size ties.
+    if (m.frontier_student === true) s += 0.04;
 
     // W349: mobile-target boost. When the caller asks for a mobile pick,
     // a phone-verified model (Gemma 3n, etc.) should beat a small generic
