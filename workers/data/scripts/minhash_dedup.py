@@ -35,6 +35,8 @@ self-test failure; exit 2 on argparse error.
 import argparse
 import hashlib
 import json
+import math
+import os
 import re
 import sys
 
@@ -46,6 +48,52 @@ U32 = 0xFFFFFFFF
 
 EXIT_OK = 0
 EXIT_FAIL = 1
+EXIT_INPUT = 20
+
+
+def _env_int(name, default):
+    try:
+        value = int(os.environ.get(name, str(default)))
+    except Exception:
+        return default
+    return value if value > 0 else default
+
+
+MAX_ROWS = _env_int("KOLM_MINHASH_MAX_ROWS", 200000)
+MAX_LINE_CHARS = _env_int("KOLM_MINHASH_MAX_LINE_CHARS", 1000000)
+MAX_NUM_HASHES = _env_int("KOLM_MINHASH_MAX_NUM_HASHES", 4096)
+MAX_BANDS = _env_int("KOLM_MINHASH_MAX_BANDS", 1024)
+MAX_ROWS_PER_BAND = _env_int("KOLM_MINHASH_MAX_ROWS_PER_BAND", 1024)
+MAX_SHINGLE_K = _env_int("KOLM_MINHASH_MAX_SHINGLE_K", 32)
+
+
+class InputLimitError(Exception):
+    def __init__(self, code, detail=None):
+        super().__init__(code)
+        self.code = code
+        self.detail = detail or code
+
+
+def _bounded_int(name, value, default, low, high):
+    try:
+        n = int(value)
+    except Exception:
+        n = int(default)
+    if n < low:
+        return low
+    if n > high:
+        raise InputLimitError(f"{name}_too_large", f"{name} {n} exceeds max {high}")
+    return n
+
+
+def _bounded_threshold(value):
+    try:
+        n = float(value)
+    except Exception:
+        raise InputLimitError("threshold_invalid", "threshold must be a finite number")
+    if not math.isfinite(n):
+        raise InputLimitError("threshold_invalid", "threshold must be finite")
+    return max(0.0, min(1.0, n))
 
 
 def log(msg):
@@ -81,10 +129,7 @@ def shingle_set(text, k=NGRAM_K):
     toks = [t for t in norm.split(" ") if t]
     if not toks:
         return out
-    try:
-        kk = max(1, int(k))
-    except (TypeError, ValueError):
-        kk = NGRAM_K
+    kk = _bounded_int("k", k, NGRAM_K, 1, MAX_SHINGLE_K)
     if len(toks) < kk:
         out.add(fnv1a32(" ".join(toks)))
         return out
@@ -109,11 +154,12 @@ def _lcg(seed):
 def make_permutations(num_hashes=128, seed=DEFAULT_SEED):
     """FIXED seeded universal hash family — mirrors JS makePermutations.
     a_i in [1, P-1] (non-degenerate), b_i in [0, P-1]."""
+    n = _bounded_int("num_perm", num_hashes, 128, 1, MAX_NUM_HASHES)
     try:
-        n = max(1, int(num_hashes))
+        safe_seed = (int(seed) & U32) or DEFAULT_SEED
     except (TypeError, ValueError):
-        n = 128
-    rng = _lcg((int(seed) & U32) or DEFAULT_SEED)
+        safe_seed = DEFAULT_SEED
+    rng = _lcg(safe_seed)
     a = [0] * n
     b = [0] * n
     for i in range(n):
@@ -162,14 +208,8 @@ def _to_base36(n):
 def lsh_buckets(signature, bands=16, rows=8):
     """Band-hashed, band-index-namespaced bucket keys — mirrors JS lshBuckets."""
     sig = signature or []
-    try:
-        b = max(1, int(bands))
-    except (TypeError, ValueError):
-        b = 16
-    try:
-        r = max(1, int(rows))
-    except (TypeError, ValueError):
-        r = 8
+    b = _bounded_int("bands", bands, 16, 1, MAX_BANDS)
+    r = _bounded_int("rows", rows, 8, 1, MAX_ROWS_PER_BAND)
     out = []
     floor_div = len(sig) // r
     usable = min(b, floor_div if floor_div else (1 if len(sig) >= 1 else 0))
@@ -380,16 +420,20 @@ def minhash_predup(pairs, num_hashes=128, bands=16, rows=8, jaccard_threshold=0.
                    seed=DEFAULT_SEED):
     rows_in = pairs if isinstance(pairs, list) else []
     priority = teacher_priority or []
-    num_hashes = max(1, int(num_hashes))
-    bands = max(1, int(bands))
-    rows_pb = max(1, int(rows))
+    num_hashes = _bounded_int("num_perm", num_hashes, 128, 1, MAX_NUM_HASHES)
+    bands = _bounded_int("bands", bands, 16, 1, MAX_BANDS)
+    rows_pb = _bounded_int("rows", rows, 8, 1, MAX_ROWS_PER_BAND)
+    jaccard_threshold = _bounded_threshold(jaccard_threshold)
     # Keep banding consistent with signature length; clamp if misconfigured.
     if bands * rows_pb > num_hashes:
         rows_pb = max(1, num_hashes // bands) if num_hashes // bands else 1
         bands = max(1, num_hashes // rows_pb)
-    k = max(1, int(k))
+    k = _bounded_int("k", k, NGRAM_K, 1, MAX_SHINGLE_K)
     key = key if key in ("input", "output") else "pair"
-    seed = (int(seed) & U32) or DEFAULT_SEED
+    try:
+        seed = (int(seed) & U32) or DEFAULT_SEED
+    except (TypeError, ValueError):
+        seed = DEFAULT_SEED
 
     params = {
         "numHashes": num_hashes, "bands": bands, "rows": rows_pb,
@@ -467,19 +511,32 @@ def minhash_predup(pairs, num_hashes=128, bands=16, rows=8, jaccard_threshold=0.
 
 def _read_pairs(path):
     rows = []
+    close_fh = False
     if path:
-        with open(path, "r", encoding="utf-8") as fh:
-            lines = fh.readlines()
+        fh = open(path, "r", encoding="utf-8")
+        close_fh = True
     else:
-        lines = sys.stdin.readlines()
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            rows.append(json.loads(line))
-        except (ValueError, json.JSONDecodeError):
-            rows.append({})  # malformed row => empty singleton, never crash
+        fh = sys.stdin
+    try:
+        for line_no, line in enumerate(fh, start=1):
+            if len(line) > MAX_LINE_CHARS:
+                raise InputLimitError(
+                    "input_line_too_large",
+                    f"line {line_no} exceeds max {MAX_LINE_CHARS} chars")
+            line = line.strip()
+            if not line:
+                continue
+            if len(rows) >= MAX_ROWS:
+                raise InputLimitError(
+                    "input_too_many_rows",
+                    f"input exceeds max {MAX_ROWS} rows")
+            try:
+                rows.append(json.loads(line))
+            except (ValueError, json.JSONDecodeError):
+                rows.append({})  # malformed row => empty singleton, never crash
+    finally:
+        if close_fh:
+            fh.close()
     return rows
 
 
@@ -606,14 +663,21 @@ def main():
 
     try:
         pairs = _read_pairs(args.pairs)
+    except InputLimitError as e:
+        print(json.dumps({"ok": False, "error": e.code, "detail": e.detail}))
+        sys.exit(EXIT_INPUT)
     except OSError as e:
         print(json.dumps({"ok": False, "error": "read_failed", "detail": str(e)}))
         sys.exit(EXIT_OK)  # graceful: JS side falls back, do not crash the pipeline
 
-    res = minhash_predup(
-        pairs, num_hashes=args.num_perm, bands=args.bands, rows=args.rows,
-        jaccard_threshold=args.threshold, key=args.key, k=args.k,
-        verify=not args.no_verify, teacher_priority=priority, seed=args.seed)
+    try:
+        res = minhash_predup(
+            pairs, num_hashes=args.num_perm, bands=args.bands, rows=args.rows,
+            jaccard_threshold=args.threshold, key=args.key, k=args.k,
+            verify=not args.no_verify, teacher_priority=priority, seed=args.seed)
+    except InputLimitError as e:
+        print(json.dumps({"ok": False, "error": e.code, "detail": e.detail}))
+        sys.exit(EXIT_INPUT)
     payload = _result_payload(res)
     out_str = json.dumps(payload)
     if args.out:

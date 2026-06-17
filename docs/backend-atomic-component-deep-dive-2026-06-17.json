@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 682,
-    "components_without_direct_test_reference": 147,
+    "test_referenced_components": 683,
+    "components_without_direct_test_reference": 146,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -68,7 +68,7 @@
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 399,
       "distribution_or_worker_surface": 169,
-      "environment_configuration_boundary": 309,
+      "environment_configuration_boundary": 310,
       "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
       "large_component_contract_risk": 37,
@@ -46371,24 +46371,27 @@
       "surface": "worker",
       "domain": "capture_data_eval",
       "language": "python",
-      "sha256": "ed20e424d78cc97c6d8d4c1505984c0210ce7643dc80caae59a4aeb065330b03",
+      "sha256": "5a974d1958b3ee9669ce3960e44161f2bae6b43d6cbd2f3c43faf0485860c564",
       "metrics": {
-        "bytes": 23457,
-        "lines": 631,
+        "bytes": 25860,
+        "lines": 695,
         "imports": 0,
-        "exports": 35,
+        "exports": 40,
         "routes": 0,
-        "env_refs": 0,
+        "env_refs": 1,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 15,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave664-minhash-dedup-worker-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
+        "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
       "priority_score": 6,
@@ -46416,7 +46419,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
       "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
