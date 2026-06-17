@@ -938,6 +938,7 @@ export async function* distill({
   const start = Date.now();
   let step = resumePriorSteps;
   let kAccum = 0.5;
+  let lastProgressEvent = null;
   // W459 - try each teacher in attemptList until one succeeds. A "success"
   // means: worker exit code === 0 AND a manifest.json was written without a
   // `teacher_error` field. On failure (rate-limit, transient API error,
@@ -1021,7 +1022,9 @@ export async function* distill({
         // resolveDistillFinalLoss).
         loss_source: 'synthetic',
         k_source: 'projected',
+        telemetry_source: 'synthetic',
       };
+      lastProgressEvent = evt;
       if (progressFd !== null) {
         try { fs.writeSync(progressFd, JSON.stringify(evt) + '\n'); } catch (_) {} // deliberate: cleanup
       }
@@ -1161,6 +1164,18 @@ export async function* distill({
       });
     }
   } catch (_) { /* W832 row emission is best-effort */ }
+  const _telemetry = summarizeDistillTelemetry({
+    workerMode,
+    manifest: workerManifest,
+    lastStep: lastProgressEvent,
+    progressTelemetrySource: 'synthetic',
+  });
+  try {
+    const metaPath = path.join(runDir, 'run-meta.json');
+    const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+    Object.assign(meta, _telemetry);
+    fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
+  } catch (_) {} // deliberate: cleanup
   yield {
     done: true,
     artifact_path: outDir,
@@ -1200,6 +1215,7 @@ export async function* distill({
     ordering_meta: orderingMeta,
     exit: exitInfo,
     manifest: workerManifest,
+    ..._telemetry,
     duration_ms: Date.now() - start,
     // W808-5 - regression-gate verdict block (see _w808RegressionGate below).
     w808_regression_gate: _w808_gate,
@@ -1236,6 +1252,68 @@ export function resolveDistillFinalLoss(manifest, lastStep) {
   return { loss: null, source: 'unavailable' };
 }
 
+function _finiteMetric(v) {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+export function resolveDistillFinalK(manifest, lastStep) {
+  const measured =
+    _finiteMetric(manifest && manifest.k_score_final) ??
+    _finiteMetric(manifest && manifest.k_score) ??
+    _finiteMetric(manifest && manifest.kscore) ??
+    _finiteMetric(manifest && manifest.metrics && manifest.metrics.k_score) ??
+    _finiteMetric(manifest && manifest.eval && manifest.eval.k_score);
+  if (Number.isFinite(measured)) return { k_score: measured, source: 'measured' };
+  if (lastStep && Number.isFinite(Number(lastStep.k_score))) {
+    return {
+      k_score: Number(lastStep.k_score),
+      source: lastStep.k_source || 'projected',
+    };
+  }
+  return { k_score: null, source: 'unavailable' };
+}
+
+function _normalizeProgressEvent(evt) {
+  if (!evt || typeof evt !== 'object') return evt;
+  const lossSource = evt.loss_source || (Number.isFinite(Number(evt.loss)) ? 'synthetic' : 'unavailable');
+  const kSource = evt.k_source || (Number.isFinite(Number(evt.k_score)) ? 'projected' : 'unavailable');
+  const telemetrySource = evt.telemetry_source || (
+    lossSource === 'measured' || kSource === 'measured' ? 'measured' : 'synthetic'
+  );
+  return {
+    ...evt,
+    loss_source: lossSource,
+    k_source: kSource,
+    telemetry_source: telemetrySource,
+  };
+}
+
+export function summarizeDistillTelemetry({
+  workerMode = null,
+  manifest = null,
+  lastStep = null,
+  progressTelemetrySource = null,
+} = {}) {
+  const normalizedLast = _normalizeProgressEvent(lastStep);
+  const loss = resolveDistillFinalLoss(manifest, normalizedLast);
+  const k = resolveDistillFinalK(manifest, normalizedLast);
+  const progressSource = progressTelemetrySource
+    || normalizedLast?.telemetry_source
+    || (normalizedLast ? 'synthetic' : 'unavailable');
+  const resultSource = (loss.source === 'measured' || k.source === 'measured')
+    ? 'measured'
+    : (progressSource === 'unavailable' ? 'unavailable' : 'synthetic');
+  return {
+    telemetry_source: resultSource,
+    progress_telemetry_source: progressSource,
+    loss_final: loss.loss,
+    loss_source: loss.source,
+    k_final: k.k_score,
+    k_source: k.source,
+    worker_mode: workerMode,
+  };
+}
+
 export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = null } = {}) {
   const base = path.join(_kolmDir(), 'distill-runs');
   let entries = [];
@@ -1261,11 +1339,17 @@ export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = 
       const prog = fs.readFileSync(path.join(runDir, 'progress.jsonl'), 'utf8')
         .split('\n').filter(Boolean);
       stepCount = prog.length;
-      if (stepCount > 0) last = JSON.parse(prog[prog.length - 1]);
+      if (stepCount > 0) last = _normalizeProgressEvent(JSON.parse(prog[prog.length - 1]));
     } catch (_) {} // deliberate: cleanup
     // Manifest tells us exit + duration if available.
     let manifest = null;
     try { manifest = JSON.parse(fs.readFileSync(path.join(runDir, 'manifest.json'), 'utf8')); } catch (_) {} // deliberate: cleanup
+    const telemetry = summarizeDistillTelemetry({
+      workerMode: meta.worker_mode || null,
+      manifest,
+      lastStep: last,
+      progressTelemetrySource: meta.progress_telemetry_source || null,
+    });
     runs.push({
       id: name,
       run_dir: runDir,
@@ -1282,12 +1366,7 @@ export function listDistillRuns({ tenant_id = 'local', limit = 100, namespace = 
       // W-6 - measured final loss from the trainer manifest, or null. NEVER the
       // synthetic last-step loss. `k_final` stays available but is explicitly
       // marked projected so the UI does not render it as a measured score.
-      ...(() => {
-        const { loss, source } = resolveDistillFinalLoss(manifest, last);
-        return { loss_final: loss, loss_source: source };
-      })(),
-      k_final: last ? last.k_score : null,
-      k_source: last ? 'projected' : null,
+      ...telemetry,
       manifest_present: !!manifest,
     });
   }
@@ -1311,17 +1390,24 @@ export function readDistillRun(id, { tenant_id = 'local' } = {}) {
     const lines = fs.readFileSync(path.join(runDir, 'progress.jsonl'), 'utf8').split('\n');
     for (const line of lines) {
       if (!line) continue;
-      try { progress.push(JSON.parse(line)); } catch (_) {} // deliberate: cleanup
+      try { progress.push(_normalizeProgressEvent(JSON.parse(line))); } catch (_) {} // deliberate: cleanup
     }
   } catch (_) {} // deliberate: cleanup
   let manifest = null;
   try { manifest = JSON.parse(fs.readFileSync(path.join(runDir, 'manifest.json'), 'utf8')); } catch (_) {} // deliberate: cleanup
+  const telemetry = summarizeDistillTelemetry({
+    workerMode: meta.worker_mode || null,
+    manifest,
+    lastStep: progress.length ? progress[progress.length - 1] : null,
+    progressTelemetrySource: meta.progress_telemetry_source || null,
+  });
   return {
     id,
     run_dir: runDir,
     meta,
     progress,
     manifest,
+    ...telemetry,
     log_tail: _safeTail(path.join(runDir, 'distill.log'), 4096),
   };
 }
@@ -1485,4 +1571,4 @@ function _w808ExtractCriticalFailRate(run_dir, manifest) {
   return 0;
 }
 
-export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, _resolveOrderingPolicy, listDistillRuns, readDistillRun, classifyTeacher, TEACHER_SOURCE_CLASSIFICATION, _w808RegressionGate, W808_KSCORE_DROP_THRESHOLD, W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD, W808_REGRESSION_GATE_VERSION };
+export default { distill, prepareDistillCorpus, selectStudentBackbone, MODES, _resolveDistillTenant, _resolveOrderingPolicy, listDistillRuns, readDistillRun, classifyTeacher, TEACHER_SOURCE_CLASSIFICATION, resolveDistillFinalK, summarizeDistillTelemetry, _w808RegressionGate, W808_KSCORE_DROP_THRESHOLD, W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD, W808_REGRESSION_GATE_VERSION };
