@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 303,
+    "orphan_tests": 304,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 306,
+    "state_local_green": 307,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 471,
-    "test_only_waves": 303,
-    "waves": 319
+    "test_files": 472,
+    "test_only_waves": 304,
+    "waves": 320
   },
-  "generated_at": "2026-06-17T17:10:32.596Z",
+  "generated_at": "2026-06-17T17:17:14.377Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -317,6 +317,7 @@
       "W643",
       "W644",
       "W645",
+      "W646",
       "W708",
       "W709",
       "W710",
@@ -629,6 +630,7 @@
       "W643",
       "W644",
       "W645",
+      "W646",
       "W708",
       "W709",
       "W710",
@@ -4399,7 +4401,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/agent-attestation-report.test.js",
+          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js",
           "script": "npm:verify:agent-security-eval"
         }
       ],
@@ -4418,7 +4420,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/agent-attestation-report.test.js",
+          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js",
           "script": "npm:verify:agent-security-eval"
         }
       ],
@@ -4464,6 +4466,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave645-capture-stream-replay.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W646",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js",
+          "script": "npm:verify:agent-security-eval"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave646-adversarial-calibration.test.js"
       ],
       "test_letter_suffixes": []
     },

@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 663,
-    "components_without_direct_test_reference": 166,
+    "test_referenced_components": 664,
+    "components_without_direct_test_reference": 165,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -7302,12 +7302,12 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "a1f817699cd73448298070ffdf46dad6da9aac7e0b33110b9a6ef9608fac024a",
+      "sha256": "ef819e1da8e5eb25945b1a3335c702da733cab67530d1f38c06e121e22b26871",
       "metrics": {
-        "bytes": 9367,
-        "lines": 301,
+        "bytes": 13097,
+        "lines": 413,
         "imports": 1,
-        "exports": 3,
+        "exports": 6,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -7316,9 +7316,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave646-adversarial-calibration.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
