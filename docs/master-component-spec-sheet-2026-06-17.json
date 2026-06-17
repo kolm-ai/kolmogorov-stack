@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 698,
-    "direct_test_reference_pct": 84.2,
-    "components_without_direct_test_reference": 131,
+    "direct_test_referenced_components": 699,
+    "direct_test_reference_pct": 84.3,
+    "components_without_direct_test_reference": 130,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -5532,8 +5532,8 @@
       "language": "typescript",
       "composition": {
         "metrics": {
-          "bytes": 4544,
-          "lines": 149,
+          "bytes": 7097,
+          "lines": 221,
           "imports": 3,
           "exports": 2,
           "routes": 0,
@@ -5548,9 +5548,9 @@
           "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "e88866b131197394fe03c4f38f35b27caaef832e754d07425320079a39271737"
+        "sha256": "4cd9d7621e6a6d30b986b942cbd1266e76096d6ea62953dde466f241b25a078d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5558,7 +5558,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave679-sdk-rn-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
@@ -5566,10 +5568,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/ios/KolmRN.swift",
@@ -5651,7 +5651,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave591-package-local-build-contract.test.js"
+          "tests/wave591-package-local-build-contract.test.js",
+          "tests/wave679-sdk-rn-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -5717,7 +5718,7 @@
       "language": "markdown",
       "composition": {
         "metrics": {
-          "bytes": 1332,
+          "bytes": 1328,
           "lines": 46,
           "imports": 2,
           "exports": 0,
@@ -5734,7 +5735,7 @@
         ],
         "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "4cf71998f3a05952d493202772649d6a6ee16916e579db2afbe84e8ba8fe746e"
+        "sha256": "72daa129c94cb3b4b52575425b805a383f655627e9bfecf1f2666f73d9b238ea"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -29725,7 +29726,8 @@
           "tests/wave588-package-release-readiness.test.js",
           "tests/wave591-package-local-build-contract.test.js",
           "tests/wave671-homebrew-formula-contract.test.js",
-          "tests/wave678-sdk-kotlin-contract.test.js"
+          "tests/wave678-sdk-kotlin-contract.test.js",
+          "tests/wave679-sdk-rn-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",

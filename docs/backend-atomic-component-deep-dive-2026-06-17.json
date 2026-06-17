@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 698,
-    "components_without_direct_test_reference": 131,
+    "test_referenced_components": 699,
+    "components_without_direct_test_reference": 130,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -4792,10 +4792,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "typescript",
-      "sha256": "e88866b131197394fe03c4f38f35b27caaef832e754d07425320079a39271737",
+      "sha256": "4cd9d7621e6a6d30b986b942cbd1266e76096d6ea62953dde466f241b25a078d",
       "metrics": {
-        "bytes": 4544,
-        "lines": 149,
+        "bytes": 7097,
+        "lines": 221,
         "imports": 3,
         "exports": 2,
         "routes": 0,
@@ -4806,12 +4806,14 @@
         "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave679-sdk-rn-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -4920,7 +4922,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave591-package-local-build-contract.test.js"
+        "tests/wave591-package-local-build-contract.test.js",
+        "tests/wave679-sdk-rn-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -5019,9 +5022,9 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "markdown",
-      "sha256": "4cf71998f3a05952d493202772649d6a6ee16916e579db2afbe84e8ba8fe746e",
+      "sha256": "72daa129c94cb3b4b52575425b805a383f655627e9bfecf1f2666f73d9b238ea",
       "metrics": {
-        "bytes": 1332,
+        "bytes": 1328,
         "lines": 46,
         "imports": 2,
         "exports": 0,
@@ -32787,7 +32790,8 @@
         "tests/wave588-package-release-readiness.test.js",
         "tests/wave591-package-local-build-contract.test.js",
         "tests/wave671-homebrew-formula-contract.test.js",
-        "tests/wave678-sdk-kotlin-contract.test.js"
+        "tests/wave678-sdk-kotlin-contract.test.js",
+        "tests/wave679-sdk-rn-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"

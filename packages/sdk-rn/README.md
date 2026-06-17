@@ -22,11 +22,11 @@ cd ios && pod install
 
 `kolm-rn` is a thin TS wrapper around the native Kolm SDKs:
 
-- **iOS / macOS** → `kolm-sdk-swift` (Core ML / MLX / llama.cpp)
-- **Android**     → `kolm-android` (ExecuTorch / llama.cpp / ONNX)
+- **iOS / macOS** -> `kolm-sdk-swift` (Core ML / MLX / llama.cpp)
+- **Android**     -> `kolm-android` (ExecuTorch / llama.cpp / ONNX)
 
 Same `.kolm` file works on both. The JS layer enforces the same receipt
-checks (CID, optional HMAC body sig) by recomputing them in JS — if the
+checks (CID, optional HMAC body sig) by recomputing them in JS - if the
 native side later catches a mismatch on its own, both halves agree.
 
 ## API
