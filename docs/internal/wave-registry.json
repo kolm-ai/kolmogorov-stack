@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 296,
+    "orphan_tests": 297,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 299,
+    "state_local_green": 300,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 464,
-    "test_only_waves": 296,
-    "waves": 312
+    "test_files": 465,
+    "test_only_waves": 297,
+    "waves": 313
   },
-  "generated_at": "2026-06-17T15:05:55.471Z",
+  "generated_at": "2026-06-17T15:15:37.899Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -310,6 +310,7 @@
       "W616",
       "W622",
       "W635",
+      "W636",
       "W708",
       "W709",
       "W710",
@@ -615,6 +616,7 @@
       "W616",
       "W622",
       "W635",
+      "W636",
       "W708",
       "W709",
       "W710",
@@ -4321,6 +4323,25 @@
       "test_letter_suffixes": []
     },
     {
+      "canonical_wave_id": "W636",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wave921-trainer-unification.test.js tests/wave921-lora-variants-galore-packing.test.js tests/wave636-multinode-launch.test.js",
+          "script": "npm:verify:finetune-frameworks"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave636-multinode-launch.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
       "canonical_wave_id": "W708",
       "claim_scope": "internal",
       "docs_sources": [],
@@ -5448,11 +5469,11 @@
           "script": "npm:verify:distill-bon"
         },
         {
-          "command": "node --test --test-concurrency=1 tests/wave921-trainer-unification.test.js tests/wave921-lora-variants-galore-packing.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave921-trainer-unification.test.js tests/wave921-lora-variants-galore-packing.test.js tests/wave636-multinode-launch.test.js",
           "script": "npm:verify:finetune-frameworks"
         },
         {
-          "command": "node --test --test-concurrency=1 tests/wave921-trainer-unification.test.js tests/wave921-lora-variants-galore-packing.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave921-trainer-unification.test.js tests/wave921-lora-variants-galore-packing.test.js tests/wave636-multinode-launch.test.js",
           "script": "npm:verify:finetune-frameworks"
         },
         {
