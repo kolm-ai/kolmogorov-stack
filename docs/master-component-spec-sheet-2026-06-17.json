@@ -297,9 +297,9 @@
       "id": "confidential-compute",
       "stack_area": "enterprise",
       "status": "sota_review_complete_critical_frontier_work_open",
-      "already_at_frontier_count": 6,
-      "improvement_count": 6,
-      "critical_gaps": 2,
+      "already_at_frontier_count": 7,
+      "improvement_count": 5,
+      "critical_gaps": 1,
       "major_gaps": 3,
       "minor_gaps": 2,
       "required_components": 4,
@@ -8171,16 +8171,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 13099,
-          "lines": 336,
-          "imports": 3,
-          "exports": 4,
+          "bytes": 21034,
+          "lines": 561,
+          "imports": 5,
+          "exports": 6,
           "routes": 0,
           "env_refs": 4,
-          "fs_writes": 1,
-          "subprocess_refs": 1,
+          "fs_writes": 2,
+          "subprocess_refs": 2,
           "network_refs": 6,
-          "crypto_refs": 6,
+          "crypto_refs": 9,
           "markers": 0
         },
         "risk_signals": [
@@ -8192,7 +8192,7 @@
         ],
         "priority_score": 7,
         "priority_band": "high",
-        "sha256": "159227cea308f9d98a05237973b2b7de1a8288697245fe0c041e77a78a777f86"
+        "sha256": "da6e26c4c3cfb4b174360722170d4fc90b17a66b690ba465bf6752f4ff324d03"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -30569,9 +30569,9 @@
           "tests/wave411-redaction-leak.test.js",
           "tests/wave451-multimodal-redact.test.js",
           "tests/wave454-media-redact-worker.test.js",
+          "tests/wave831-airgap.test.js",
           "tests/wc04-cloud-sync.test.js",
-          "tests/wc04-privacy-membrane.test.js",
-          "tests/wc04-runtime-policy.test.js"
+          "tests/wc04-privacy-membrane.test.js"
         ],
         "category_links": [
           {

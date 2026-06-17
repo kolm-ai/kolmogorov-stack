@@ -37,6 +37,11 @@ import {
 } from '../src/airgap-distill.js';
 
 import {
+  setPolicy,
+  _resetCacheForTests as resetPrivacyPolicyCache,
+} from '../src/privacy-membrane.js';
+
+import {
   verifyTeacherIsLocal,
   PolicyBlockError,
   AIRGAP_TEACHER_VERSION,
@@ -556,4 +561,86 @@ test('W831 #14 — offlineDistill round-trip queue + getOfflineDistillStatus', a
   const missing = getOfflineDistillStatus({ run_id: 'nope' });
   assert.equal(missing.ok, false);
   assert.equal(missing.error, 'run_not_found');
+});
+
+test('W831 #15 — offlineDistill redacts the training corpus before queueing', async () => {
+  const tmp = freshDir();
+  const user = path.join(tmp, 'data.jsonl');
+  const teacher = path.join(tmp, 'teacher.bin');
+  const student = path.join(tmp, 'student.bin');
+  const out = path.join(tmp, 'out.kolm');
+  fs.writeFileSync(user, [
+    JSON.stringify({
+      prompt: 'Email jane@example.com about account 123-45-6789',
+      response: 'Call 415-555-1212 after review',
+      messages: [{ role: 'user', content: 'backup contact: ops@example.com' }],
+    }),
+    JSON.stringify({ prompt: 'clean row', response: 'still clean' }),
+  ].join('\n') + '\n');
+  fs.writeFileSync(teacher, 'teacher-bytes');
+  fs.writeFileSync(student, 'student-bytes');
+
+  const queued = await offlineDistill({
+    user_data_path: user,
+    teacher_path_local: teacher,
+    student_path_local: student,
+    output_path: out,
+    fetch: airgappedFetch(),
+  });
+
+  assert.equal(queued.ok, true, `queue envelope: ${JSON.stringify(queued)}`);
+  assert.equal(queued.source_user_data_path, user);
+  assert.match(queued.user_data_path, /\.redacted\.jsonl$/);
+  assert.notEqual(queued.user_data_path, user);
+  assert.deepEqual(queued.redaction_applied, ['email', 'phone', 'ssn']);
+  assert.equal(queued.redaction.rows, 2);
+  assert.equal(queued.redaction.redacted_rows, 1);
+  assert.equal(queued.redaction.redactions_by_class.email, 2);
+  assert.equal(queued.redaction.redactions_by_class.ssn, 1);
+  assert.equal(queued.redaction.redactions_by_class.phone, 1);
+
+  const spec = JSON.parse(fs.readFileSync(queued.spec_path, 'utf8'));
+  assert.equal(spec.user_data_path, queued.user_data_path);
+  assert.equal(spec.source_user_data_path, user);
+  assert.deepEqual(spec.redaction_applied, ['email', 'phone', 'ssn']);
+  assert.equal(spec.redaction.policy, 'mandatory_training_redaction');
+  assert.ok(spec.redaction.detector_version);
+
+  const redactedLines = fs.readFileSync(spec.user_data_path, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+  const redactedText = JSON.stringify(redactedLines);
+  assert.doesNotMatch(redactedText, /jane@example\.com|ops@example\.com|123-45-6789|415-555-1212/);
+  assert.match(redactedText, /VAR_EMAIL_1/);
+  assert.match(redactedText, /VAR_SSN_1/);
+  assert.match(redactedText, /VAR_PHONE_1/);
+  assert.deepEqual(redactedLines[0].redaction_applied, ['email', 'phone', 'ssn']);
+  assert.equal(redactedLines[0].redaction_policy, 'mandatory_training_redaction');
+});
+
+test('W831 #16 — offlineDistill fails closed when policy would allow raw training PII', async () => {
+  const tmp = freshDir();
+  resetPrivacyPolicyCache();
+  setPolicy({ class: 'email', action: 'allow' });
+
+  const user = path.join(tmp, 'data.jsonl');
+  const teacher = path.join(tmp, 'teacher.bin');
+  const student = path.join(tmp, 'student.bin');
+  const out = path.join(tmp, 'out.kolm');
+  fs.writeFileSync(user, '{"prompt":"email jane@example.com","response":"ok"}\n');
+  fs.writeFileSync(teacher, 'teacher-bytes');
+  fs.writeFileSync(student, 'student-bytes');
+
+  const queued = await offlineDistill({
+    user_data_path: user,
+    teacher_path_local: teacher,
+    student_path_local: student,
+    output_path: out,
+    fetch: airgappedFetch(),
+  });
+
+  assert.equal(queued.ok, false);
+  assert.equal(queued.error, 'airgap_redaction_policy_unsafe');
+  assert.match(queued.detail, /mandatory training redaction/);
+  assert.equal(fs.existsSync(path.join(tmp, 'data.redacted.jsonl')), false);
+
+  resetPrivacyPolicyCache();
 });

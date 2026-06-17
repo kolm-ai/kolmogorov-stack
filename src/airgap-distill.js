@@ -9,8 +9,9 @@
 // snapshot, a local student snapshot, an output path on the same disk.
 //
 // The function makes NO inference calls - its job is to verify the air-gap
-// shape and enqueue a deterministic run-id that the local trainer worker
-// (apps/trainer/*.py invoked via spawn) will pick up. This split mirrors
+// shape, write a mandatory-redacted corpus sibling, and enqueue a deterministic
+// run-id that the local trainer worker (apps/trainer/*.py invoked via spawn)
+// will pick up. This split mirrors
 // the W831 contract: the JS layer guarantees no network leak; the Python
 // trainer does the actual gradient steps under the same air-gap.
 //
@@ -34,7 +35,7 @@
 // the route layer can attribute the run to the right tenant. We do NOT read
 // tenant state directly - the route handler does the auth resolution.
 //
-// W604 version stamp: AIRGAP_DISTILL_VERSION = 'w831-v1'. Consumers MUST
+// W604 version stamp: AIRGAP_DISTILL_VERSION matches /^w831-/. Consumers MUST
 // match /^w831-/ - never an explicit equality so a w831-v2 ships without
 // breaking the contract.
 //
@@ -51,8 +52,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import readline from 'node:readline';
 
-export const AIRGAP_DISTILL_VERSION = 'w831-v1';
+import { DETECTOR_VERSION, redactWithPolicy } from './privacy-membrane.js';
+
+export const AIRGAP_DISTILL_VERSION = 'w831-v2';
+export const AIRGAP_TRAINING_REDACTION_VERSION = 'w617-v1';
 
 // Probe URL used by the dial-failure guard. Any reachable host works - the
 // point is "does this Node process have network egress at all". example.com
@@ -196,6 +201,199 @@ function persistQueuedRun(run_id, spec) {
   return target;
 }
 
+function siblingRedactedPath(userDataPath) {
+  const dir = path.dirname(userDataPath);
+  const ext = path.extname(userDataPath);
+  const base = path.basename(userDataPath, ext);
+  const suffix = ext || '.jsonl';
+  return path.join(dir, `${base}.redacted${suffix}`);
+}
+
+function sha256File(filePath) {
+  return new Promise((resolve, reject) => {
+    const h = crypto.createHash('sha256');
+    const stream = fs.createReadStream(filePath);
+    stream.on('data', (chunk) => h.update(chunk));
+    stream.on('error', reject);
+    stream.on('end', () => resolve(h.digest('hex')));
+  });
+}
+
+function placeholderClass(placeholder) {
+  const m = /^VAR_([A-Z0-9_]+)_\d+$/.exec(String(placeholder || ''));
+  if (!m) return null;
+  if (m[1] === 'PATIENT_NAME') return 'name';
+  return m[1].toLowerCase();
+}
+
+function newRedactionStats() {
+  return {
+    classes: new Set(),
+    redactions_by_class: {},
+    redacted_fields: 0,
+  };
+}
+
+function recordRedactionResult(result, original, stats, fieldPath) {
+  const allowed = Array.isArray(result.allowed_classes) ? result.allowed_classes : [];
+  const overridden = Array.isArray(result.overridden_classes) ? result.overridden_classes : [];
+  if (allowed.length > 0 || overridden.length > 0) {
+    const unsafe = [...new Set([...allowed, ...overridden])].sort();
+    const err = new Error(
+      `airgap_redaction_policy_unsafe: mandatory training redaction would pass raw sensitive text at ${fieldPath}: ${unsafe.join(', ')}`
+    );
+    err.code = 'airgap_redaction_policy_unsafe';
+    err.classes = unsafe;
+    err.field_path = fieldPath;
+    throw err;
+  }
+
+  const classes = Array.isArray(result.classes_seen) ? result.classes_seen : [];
+  for (const cls of classes) stats.classes.add(cls);
+  const vault = result.vault && typeof result.vault === 'object' ? result.vault : {};
+  for (const placeholder of Object.keys(vault)) {
+    const cls = placeholderClass(placeholder);
+    if (!cls) continue;
+    stats.classes.add(cls);
+    stats.redactions_by_class[cls] = (stats.redactions_by_class[cls] || 0) + 1;
+  }
+  if (String(result.redacted) !== String(original)) stats.redacted_fields += 1;
+}
+
+function redactTrainingValue(value, stats, fieldPath = '$') {
+  if (typeof value === 'string') {
+    const result = redactWithPolicy(value);
+    recordRedactionResult(result, value, stats, fieldPath);
+    return result.redacted;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item, idx) => redactTrainingValue(item, stats, `${fieldPath}[${idx}]`));
+  }
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [key, nested] of Object.entries(value)) {
+      out[key] = redactTrainingValue(nested, stats, `${fieldPath}.${key}`);
+    }
+    return out;
+  }
+  return value;
+}
+
+async function writeLine(stream, line) {
+  if (stream.write(line)) return;
+  await new Promise((resolve, reject) => {
+    const cleanup = () => {
+      stream.off('drain', onDrain);
+      stream.off('error', onError);
+    };
+    const onDrain = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = (err) => {
+      cleanup();
+      reject(err);
+    };
+    stream.once('drain', onDrain);
+    stream.once('error', onError);
+  });
+}
+
+function finishWriteStream(stream) {
+  return new Promise((resolve, reject) => {
+    stream.once('error', reject);
+    stream.end(resolve);
+  });
+}
+
+export async function redactTrainingJsonl(userDataPath, opts = {}) {
+  const redactedPath = opts.redacted_path || siblingRedactedPath(userDataPath);
+  if (path.resolve(redactedPath) === path.resolve(userDataPath)) {
+    const err = new Error('airgap_redaction_error: redacted path must not overwrite source corpus');
+    err.code = 'airgap_redaction_path_collision';
+    throw err;
+  }
+
+  const inputSha256 = await sha256File(userDataPath);
+  const tmp = `${redactedPath}.tmp.${process.pid}`;
+  const aggregate = newRedactionStats();
+  let rows = 0;
+  let redactedRows = 0;
+  let bytesWritten = 0;
+
+  const input = fs.createReadStream(userDataPath, { encoding: 'utf8' });
+  const lines = readline.createInterface({ input, crlfDelay: Infinity });
+  const output = fs.createWriteStream(tmp, { encoding: 'utf8', flags: 'w' });
+
+  try {
+    for await (const line of lines) {
+      if (!String(line).trim()) continue;
+      rows += 1;
+      let row;
+      try {
+        row = JSON.parse(line);
+      } catch (e) {
+        const err = new Error(`airgap_redaction_jsonl_parse_error: line ${rows}: ${String(e.message || e)}`);
+        err.code = 'airgap_redaction_jsonl_parse_error';
+        err.line = rows;
+        throw err;
+      }
+      if (!row || typeof row !== 'object' || Array.isArray(row)) {
+        const err = new Error(`airgap_redaction_jsonl_row_not_object: line ${rows}`);
+        err.code = 'airgap_redaction_jsonl_row_not_object';
+        err.line = rows;
+        throw err;
+      }
+
+      const rowStats = newRedactionStats();
+      const redacted = redactTrainingValue(row, rowStats);
+      const rowClasses = [...rowStats.classes].sort();
+      if (rowClasses.length > 0) {
+        redacted.redaction_applied = rowClasses;
+        redacted.redaction_policy = 'mandatory_training_redaction';
+        redacted.redaction_detector_version = DETECTOR_VERSION;
+      }
+      if (rowStats.redacted_fields > 0) redactedRows += 1;
+      for (const cls of rowClasses) aggregate.classes.add(cls);
+      for (const [cls, count] of Object.entries(rowStats.redactions_by_class)) {
+        aggregate.redactions_by_class[cls] = (aggregate.redactions_by_class[cls] || 0) + count;
+      }
+      aggregate.redacted_fields += rowStats.redacted_fields;
+
+      const rendered = JSON.stringify(redacted) + '\n';
+      bytesWritten += Buffer.byteLength(rendered);
+      await writeLine(output, rendered);
+    }
+    await finishWriteStream(output);
+    fs.renameSync(tmp, redactedPath);
+  } catch (e) {
+    try { lines.close(); } catch (_) {}
+    try { output.destroy(); } catch (_) {}
+    try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp); } catch (_) {}
+    throw e;
+  }
+
+  const outputSha256 = await sha256File(redactedPath);
+  return {
+    applied: true,
+    version: AIRGAP_TRAINING_REDACTION_VERSION,
+    detector_version: DETECTOR_VERSION,
+    policy: 'mandatory_training_redaction',
+    source_user_data_path: userDataPath,
+    redacted_user_data_path: redactedPath,
+    source_sha256: inputSha256,
+    redacted_sha256: outputSha256,
+    rows,
+    redacted_rows: redactedRows,
+    redacted_fields: aggregate.redacted_fields,
+    bytes_written: bytesWritten,
+    classes_redacted: [...aggregate.classes].sort(),
+    redactions_by_class: Object.fromEntries(
+      Object.entries(aggregate.redactions_by_class).sort(([a], [b]) => a.localeCompare(b))
+    ),
+  };
+}
+
 // Public entry. Returns:
 //   {ok:true, run_id, status:'queued', airgap_verified:true,
 //    verification_method:'no_network_dial', spec_path, version}
@@ -211,6 +409,7 @@ function persistQueuedRun(run_id, spec) {
 //   fetch                 optional injectable fetch (tests use this)
 //
 // Side effects:
+//   Writes a sibling *.redacted.jsonl corpus and points the queued spec at it.
 //   Writes a queued-run spec to ~/.kolm/airgap-distill-runs/<run_id>.json.
 //   No network calls except the dial-failure guard.
 export async function offlineDistill(opts = {}) {
@@ -253,6 +452,20 @@ export async function offlineDistill(opts = {}) {
     };
   }
 
+  let redaction;
+  try {
+    redaction = await redactTrainingJsonl(user_data_path);
+  } catch (e) {
+    return {
+      ok: false,
+      error: (e && e.code) || 'airgap_redaction_error',
+      detail: String((e && e.message) || e),
+      hint: 'Fix the JSONL corpus or privacy policy, then retry the air-gapped distill run',
+      tenant,
+      version: AIRGAP_DISTILL_VERSION,
+    };
+  }
+
   const run_id = deriveRunId({ user_data_path, teacher_path_local, student_path_local, output_path });
   const spec = {
     run_id,
@@ -260,7 +473,12 @@ export async function offlineDistill(opts = {}) {
     queued_at: new Date().toISOString(),
     airgap_verified: true,
     verification_method: 'no_network_dial',
-    user_data_path,
+    user_data_path: redaction.redacted_user_data_path,
+    source_user_data_path: user_data_path,
+    redaction_applied: redaction.classes_redacted,
+    redaction_detector_version: redaction.detector_version,
+    redaction_policy: redaction.policy,
+    redaction,
     teacher_path_local,
     student_path_local,
     output_path,
@@ -287,6 +505,12 @@ export async function offlineDistill(opts = {}) {
     airgap_verified: true,
     verification_method: 'no_network_dial',
     spec_path,
+    user_data_path: redaction.redacted_user_data_path,
+    source_user_data_path: user_data_path,
+    redaction_applied: redaction.classes_redacted,
+    redaction_detector_version: redaction.detector_version,
+    redaction_policy: redaction.policy,
+    redaction,
     tenant,
     version: AIRGAP_DISTILL_VERSION,
   };
@@ -330,6 +554,8 @@ export const _internal = {
   runsDir,
   deriveRunId,
   persistQueuedRun,
+  redactTrainingJsonl,
+  siblingRedactedPath,
   PROBE_URL,
   PROBE_TIMEOUT_MS,
 };
