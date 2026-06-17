@@ -1,6 +1,6 @@
 {
   "schema_version": "kolm-readiness-gate-workorders-1",
-  "updated_at": "2026-05-23",
+  "updated_at": "2026-06-17",
   "purpose": "Executable closure contracts for every readiness item that is not yet shipped or implemented because it requires external partner evidence, package publication, public benchmark data, or live certification.",
   "definition_of_done": [
     "Every open readiness requirement has exactly one work order.",
@@ -20,7 +20,9 @@
       "public_copy_rule": "Say the .kolm spec is published and foundation-ready; do not claim CNCF, Linux Foundation, standards-body, Hugging Face, Ollama, or llama.cpp adoption until accepted by the external party.",
       "local_files": [
         "public/spec.html",
-        "public/spec-grammar.html",
+        "docs/spec/dot-kolm-v1.0.md",
+        "docs/spec/kolm-yaml-schema.md",
+        "docs/spec/CHANGE_PROCESS.md",
         "docs/format-governance-packet.md",
         "scripts/format-governance-packet.mjs",
         "src/format-governance-packet.js"
@@ -176,9 +178,12 @@
       "public_copy_rule": "Say local benchmark harnesses and fixture evidence exist; do not claim public leaderboard superiority or production benchmark numbers until reproducible public runs are published.",
       "local_files": [
         "docs/benchmark-evidence.md",
+        "src/benchmark-evidence.js",
         "scripts/benchmark-evidence.mjs",
-        "public/benchmarks/quality-judge-calibration.json",
-        "public/benchmarks/redaction-public-benchmark.json",
+        "scripts/bench-compare.mjs",
+        "src/benchmark-compare.js",
+        "public/benchmarks/trinity-500-benchmark.json",
+        "tests/wave589-benchmark-evidence-contract.test.js",
         "bench/README.md"
       ],
       "local_commands": [
@@ -258,9 +263,17 @@
         "docs/compliance-certification-packet.md",
         "scripts/compliance-certification-packet.mjs",
         "src/compliance-certification-packet.js",
-        "public/soc2.html",
-        "public/hipaa-mapping.html",
-        "public/slsa.html"
+        "public/security.html",
+        "public/trust.html",
+        "public/baa.html",
+        "public/privacy.html",
+        "public/subprocessors.html",
+        "docs/compliance/SOC2-EVIDENCE.md",
+        "docs/compliance/CONTROLS.md",
+        "docs/kolm-format-v1.md",
+        "src/sbom-emit.js",
+        "src/slsa-provenance.js",
+        "src/intoto-slsa.js"
       ],
       "local_commands": [
         "npm run verify:compliance-packet",

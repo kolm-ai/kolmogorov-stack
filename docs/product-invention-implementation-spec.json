@@ -1,6 +1,6 @@
 {
   "schema_version": "kolm-invention-implementation-spec-1",
-  "updated_at": "2026-05-23",
+  "updated_at": "2026-06-17",
   "purpose": "Implementation-grade invention specs for making Kolm materially better across quantization, compilation, distillation, runtime, privacy, cloud, proof, registry, agents, device, compliance, and developer experience surfaces.",
   "tracked_metrics": [
     "quality",
@@ -187,11 +187,46 @@
       "name": "Kolm-Q Max Mixed-Precision Quantization Compiler",
       "category": "quantization",
       "thesis": "The best quantizer for Kolm is a constrained planner that chooses per-layer weight, activation, and KV-cache precision from task loss sensitivity, activation outliers, runtime kernels, and proof gates.",
-      "research_refs": ["gptq", "smoothquant", "awq", "quarot", "kvquant", "quip-sharp", "aqlm"],
-      "journeys": ["train-distill", "models-backbones", "compile-verify", "runtime-inference", "compute-cloud", "devices-fleet"],
-      "dimensions": ["compute-target", "artifact-runtime", "proof-mode", "privacy-mode"],
-      "readiness": ["export-quantize-targets", "runtime-local-artifact", "compute-openvino-qnn", "benchmarking-infra", "quality-scoring", "runtime-wasm", "ios-android-sdk"],
-      "metrics": ["quality", "latency", "cost", "portability", "proof", "dx"],
+      "research_refs": [
+        "gptq",
+        "smoothquant",
+        "awq",
+        "quarot",
+        "kvquant",
+        "quip-sharp",
+        "aqlm"
+      ],
+      "journeys": [
+        "train-distill",
+        "models-backbones",
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet"
+      ],
+      "dimensions": [
+        "compute-target",
+        "artifact-runtime",
+        "proof-mode",
+        "privacy-mode"
+      ],
+      "readiness": [
+        "export-quantize-targets",
+        "runtime-local-artifact",
+        "compute-openvino-qnn",
+        "benchmarking-infra",
+        "quality-scoring",
+        "runtime-wasm",
+        "ios-android-sdk"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "portability",
+        "proof",
+        "dx"
+      ],
       "expected_metric_lift": {
         "quality": 0.09,
         "latency": 0.34,
@@ -224,8 +259,16 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=quantization --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json", "public/product-graph.json", "docs/product-sota-readiness.json"],
-        "expected": ["all referenced journeys/dimensions/readiness exist", "quality/latency/cost/portability/proof lift is positive", "at least 3 math equations and 5 build phases are present"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json",
+          "public/product-graph.json",
+          "docs/product-sota-readiness.json"
+        ],
+        "expected": [
+          "all referenced journeys/dimensions/readiness exist",
+          "quality/latency/cost/portability/proof lift is positive",
+          "at least 3 math equations and 5 build phases are present"
+        ]
       },
       "acceptance_tests": [
         "Planner is deterministic for fixed calibration hashes.",
@@ -238,7 +281,31 @@
         "Short-holdout K-score passes but adversarial eval fails.",
         "Quantized artifact is smaller but slower because target runtime lacks fused kernels.",
         "Calibration slice includes privacy-denied rows."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "quantization: Kolm-Q Max Mixed-Precision Quantization Compiler",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-kolmir-autotarget",
@@ -246,11 +313,45 @@
       "name": "KolmIR Proof-Preserving AutoTarget Compiler",
       "category": "compilation",
       "thesis": "Kolm should compile evidence, policy, runtime, and receipts into a product-level IR that lowers into GGUF, ONNX, CoreML, MLX, ExecuTorch, TensorRT-LLM, vLLM, SGLang, WASM, and edge bundles without losing proof parity.",
-      "research_refs": ["mlir", "iree", "tensorrt-llm", "vllm-pagedattention", "sglang"],
-      "journeys": ["compile-verify", "runtime-inference", "compute-cloud", "devices-fleet", "agents-registry", "enterprise-governance"],
-      "dimensions": ["artifact-runtime", "deployment-mode", "compute-target", "proof-mode", "governance-mode"],
-      "readiness": ["kolm-format-spec", "standalone-verify", "runtime-edge", "runtime-wasm", "ecosystem-runtime-adoption", "runtime-lts", "deploy-buttons"],
-      "metrics": ["latency", "portability", "proof", "dx", "enterprise", "conversion"],
+      "research_refs": [
+        "mlir",
+        "iree",
+        "tensorrt-llm",
+        "vllm-pagedattention",
+        "sglang"
+      ],
+      "journeys": [
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet",
+        "agents-registry",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "deployment-mode",
+        "compute-target",
+        "proof-mode",
+        "governance-mode"
+      ],
+      "readiness": [
+        "kolm-format-spec",
+        "standalone-verify",
+        "runtime-edge",
+        "runtime-wasm",
+        "ecosystem-runtime-adoption",
+        "runtime-lts",
+        "deploy-buttons"
+      ],
+      "metrics": [
+        "latency",
+        "portability",
+        "proof",
+        "dx",
+        "enterprise",
+        "conversion"
+      ],
       "expected_metric_lift": {
         "latency": 0.2,
         "portability": 0.38,
@@ -283,8 +384,15 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=compilation --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json", "public/openapi.json"],
-        "expected": ["all target lowerers have named proof-preservation requirements", "compiler improves portability/proof/dx", "open runtime-wasm and ecosystem-adoption gates are covered"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json",
+          "public/openapi.json"
+        ],
+        "expected": [
+          "all target lowerers have named proof-preservation requirements",
+          "compiler improves portability/proof/dx",
+          "open runtime-wasm and ecosystem-adoption gates are covered"
+        ]
       },
       "acceptance_tests": [
         "Same source IR lowered to two targets preserves dataset, eval, K-score, and receipt hashes.",
@@ -296,7 +404,31 @@
         "Target lowerer drops a sidecar receipt.",
         "Target runtime changes tokenization and invalidates K-score comparability.",
         "Compiler optimizes latency by silently changing policy semantics."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "compilation: KolmIR Proof-Preserving AutoTarget Compiler",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-distill-forge-max",
@@ -304,11 +436,46 @@
       "name": "Distill Forge Max Teacher-Student Optimizer",
       "category": "distillation",
       "thesis": "The best distillation product optimizes expected K-score lift per dollar by choosing collect, no-train, SFT, KD, rationale, preference, rejection, and on-policy loops from evidence rather than blindly launching fine-tunes.",
-      "research_refs": ["distill-step-by-step", "minillm", "orpo", "kto", "openai-evals", "openai-sft-winddown", "anthropic-prompt-caching"],
-      "journeys": ["gateway-capture", "datasets-labeling", "train-distill", "models-backbones", "compile-verify"],
-      "dimensions": ["model-provider", "compute-target", "privacy-mode", "proof-mode"],
-      "readiness": ["k-score-calibration", "holdout-independence", "incremental-compile", "compile-failure-diagnostics", "distill-strategy-oracle", "async-compile-webhooks", "quality-scoring", "evals-ab", "benchmarking-infra"],
-      "metrics": ["quality", "cost", "proof", "dx", "enterprise"],
+      "research_refs": [
+        "distill-step-by-step",
+        "minillm",
+        "orpo",
+        "kto",
+        "openai-evals",
+        "openai-sft-winddown",
+        "anthropic-prompt-caching"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "datasets-labeling",
+        "train-distill",
+        "models-backbones",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "privacy-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "k-score-calibration",
+        "holdout-independence",
+        "incremental-compile",
+        "compile-failure-diagnostics",
+        "distill-strategy-oracle",
+        "async-compile-webhooks",
+        "quality-scoring",
+        "evals-ab",
+        "benchmarking-infra"
+      ],
+      "metrics": [
+        "quality",
+        "cost",
+        "proof",
+        "dx",
+        "enterprise"
+      ],
       "expected_metric_lift": {
         "quality": 0.28,
         "cost": 0.24,
@@ -340,8 +507,15 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "fixtures": ["docs/product-invention-implementation-spec.json"],
-        "expected": ["strategy is feasible", "teacher is not OpenAI-only", "holdout requirements are cited", "cost and quality tradeoff is explicit"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json"
+        ],
+        "expected": [
+          "strategy is feasible",
+          "teacher is not OpenAI-only",
+          "holdout requirements are cited",
+          "cost and quality tradeoff is explicit"
+        ]
       },
       "acceptance_tests": [
         "Planner recommends no-train when cache/rules/RAG beats fine-tune EV.",
@@ -354,7 +528,31 @@
         "Preference data is sparse and overfits subjective labels.",
         "Rationale supervision leaks hidden chain-of-thought policy or private data.",
         "On-policy loop drifts from tenant distribution."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "distillation: Distill Forge Max Teacher-Student Optimizer",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-active-k-lift",
@@ -362,11 +560,39 @@
       "name": "Active K-Lift Dataset Curriculum",
       "category": "datasets-training",
       "thesis": "Kolm should turn captured calls into a ranked curriculum where each candidate row has expected K-score lift, privacy risk, label cost, and coverage value before it can enter train or holdout splits.",
-      "research_refs": ["helm", "openai-evals", "mt-bench-arena"],
-      "journeys": ["gateway-capture", "privacy-lake", "datasets-labeling", "train-distill", "compile-verify"],
-      "dimensions": ["privacy-mode", "proof-mode", "model-provider"],
-      "readiness": ["capture-filtering", "event-lake-schema", "redaction-quality", "holdout-independence", "incremental-compile", "k-score-calibration", "evals-ab"],
-      "metrics": ["quality", "cost", "proof", "security", "dx"],
+      "research_refs": [
+        "helm",
+        "openai-evals",
+        "mt-bench-arena"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "datasets-labeling",
+        "train-distill",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "privacy-mode",
+        "proof-mode",
+        "model-provider"
+      ],
+      "readiness": [
+        "capture-filtering",
+        "event-lake-schema",
+        "redaction-quality",
+        "holdout-independence",
+        "incremental-compile",
+        "k-score-calibration",
+        "evals-ab"
+      ],
+      "metrics": [
+        "quality",
+        "cost",
+        "proof",
+        "security",
+        "dx"
+      ],
       "expected_metric_lift": {
         "quality": 0.19,
         "cost": 0.15,
@@ -397,8 +623,13 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=datasets-training --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json"],
-        "expected": ["dataset/training journeys covered", "holdout independence and privacy metrics covered"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json"
+        ],
+        "expected": [
+          "dataset/training journeys covered",
+          "holdout independence and privacy metrics covered"
+        ]
       },
       "acceptance_tests": [
         "Duplicate or near-duplicate train/holdout rows are rejected.",
@@ -410,7 +641,31 @@
         "High-frequency rows dominate and reduce tail coverage.",
         "Semantic dedupe misses paraphrases.",
         "Label queue leaks private prompts into UI without redaction."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "datasets-training: Active K-Lift Dataset Curriculum",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-speccache-runtime",
@@ -418,11 +673,46 @@
       "name": "SpecCache Runtime Planner",
       "category": "runtime-serving",
       "thesis": "Kolm should choose exact cache, semantic cache, prompt compression, speculative decoding, fallback routing, and local artifact execution per request from latency/cost/quality constraints.",
-      "research_refs": ["vllm-pagedattention", "sglang", "medusa", "eagle", "otel-genai", "anthropic-prompt-caching"],
-      "journeys": ["gateway-capture", "runtime-inference", "compute-cloud", "devices-fleet", "enterprise-governance"],
-      "dimensions": ["model-provider", "compute-target", "artifact-runtime", "deployment-mode", "proof-mode"],
-      "readiness": ["prompt-compression", "semantic-cache", "fallback-chains", "runtime-telemetry-opt-in", "streaming", "token-budget", "model-routing", "opentelemetry"],
-      "metrics": ["latency", "cost", "quality", "proof", "dx", "enterprise"],
+      "research_refs": [
+        "vllm-pagedattention",
+        "sglang",
+        "medusa",
+        "eagle",
+        "otel-genai",
+        "anthropic-prompt-caching"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "artifact-runtime",
+        "deployment-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "prompt-compression",
+        "semantic-cache",
+        "fallback-chains",
+        "runtime-telemetry-opt-in",
+        "streaming",
+        "token-budget",
+        "model-routing",
+        "opentelemetry"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "quality",
+        "proof",
+        "dx",
+        "enterprise"
+      ],
       "expected_metric_lift": {
         "latency": 0.31,
         "cost": 0.26,
@@ -454,8 +744,14 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=runtime-serving --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json"],
-        "expected": ["latency and cost lift positive", "runtime/gateway journeys covered", "OTEL and fallback readiness covered"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json"
+        ],
+        "expected": [
+          "latency and cost lift positive",
+          "runtime/gateway journeys covered",
+          "OTEL and fallback readiness covered"
+        ]
       },
       "acceptance_tests": [
         "Cache hit receipt never claims model inference occurred.",
@@ -467,7 +763,31 @@
         "Semantic cache returns stale or policy-incompatible answer.",
         "Speculative path changes output distribution when lossless mode is required.",
         "Fallback provider violates data residency policy."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "runtime-serving: SpecCache Runtime Planner",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-adapter-fabric",
@@ -475,11 +795,41 @@
       "name": "Adapter Fabric Multi-Tenant LoRA Runtime",
       "category": "model-serving",
       "thesis": "Kolm should serve many tenant adapters and artifact deltas against shared base models with admission control, proof receipts, and private registry ownership instead of spawning one runtime per artifact.",
-      "research_refs": ["punica", "vllm-pagedattention", "tensorrt-llm"],
-      "journeys": ["models-backbones", "runtime-inference", "compute-cloud", "agents-registry", "enterprise-governance"],
-      "dimensions": ["model-provider", "artifact-runtime", "compute-target", "storage-plane", "governance-mode"],
-      "readiness": ["model-routing", "private-registry", "dependency-graphs", "verified-publishers", "runtime-local-artifact", "cost-attribution", "rate-limits-quotas"],
-      "metrics": ["latency", "cost", "enterprise", "proof", "portability"],
+      "research_refs": [
+        "punica",
+        "vllm-pagedattention",
+        "tensorrt-llm"
+      ],
+      "journeys": [
+        "models-backbones",
+        "runtime-inference",
+        "compute-cloud",
+        "agents-registry",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "model-provider",
+        "artifact-runtime",
+        "compute-target",
+        "storage-plane",
+        "governance-mode"
+      ],
+      "readiness": [
+        "model-routing",
+        "private-registry",
+        "dependency-graphs",
+        "verified-publishers",
+        "runtime-local-artifact",
+        "cost-attribution",
+        "rate-limits-quotas"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "enterprise",
+        "proof",
+        "portability"
+      ],
       "expected_metric_lift": {
         "latency": 0.18,
         "cost": 0.31,
@@ -509,8 +859,13 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=model-serving --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json"],
-        "expected": ["cost/enterprise/proof lift positive", "registry and runtime readiness covered"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json"
+        ],
+        "expected": [
+          "cost/enterprise/proof lift positive",
+          "registry and runtime readiness covered"
+        ]
       },
       "acceptance_tests": [
         "Two tenants sharing a base model cannot see each other's adapter metadata unless policy allows.",
@@ -522,7 +877,31 @@
         "Noisy neighbor adapter consumes KV/cache and hurts p95 latency.",
         "Adapter/base mismatch produces silent quality drop.",
         "Private registry policy bypass leaks adapter listing."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "model-serving: Adapter Fabric Multi-Tenant LoRA Runtime",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-adaptive-eval-fuzzer",
@@ -530,11 +909,41 @@
       "name": "Adaptive Eval Fuzzer",
       "category": "evaluation",
       "thesis": "K-score should become a calibrated, adversarial, task-typed statistical contract that searches for failures instead of only scoring a static holdout.",
-      "research_refs": ["helm", "mt-bench-arena", "g-eval", "openai-evals"],
-      "journeys": ["datasets-labeling", "train-distill", "compile-verify", "runtime-inference", "enterprise-governance"],
-      "dimensions": ["proof-mode", "model-provider", "privacy-mode", "governance-mode"],
-      "readiness": ["k-score-calibration", "redaction-quality", "benchmarking-infra", "quality-scoring", "shadow-mode", "evals-ab", "compile-failure-diagnostics"],
-      "metrics": ["quality", "proof", "security", "enterprise", "dx"],
+      "research_refs": [
+        "helm",
+        "mt-bench-arena",
+        "g-eval",
+        "openai-evals"
+      ],
+      "journeys": [
+        "datasets-labeling",
+        "train-distill",
+        "compile-verify",
+        "runtime-inference",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "model-provider",
+        "privacy-mode",
+        "governance-mode"
+      ],
+      "readiness": [
+        "k-score-calibration",
+        "redaction-quality",
+        "benchmarking-infra",
+        "quality-scoring",
+        "shadow-mode",
+        "evals-ab",
+        "compile-failure-diagnostics"
+      ],
+      "metrics": [
+        "quality",
+        "proof",
+        "security",
+        "enterprise",
+        "dx"
+      ],
       "expected_metric_lift": {
         "quality": 0.24,
         "proof": 0.34,
@@ -561,12 +970,17 @@
         "scripts/benchmark-evidence.mjs",
         "scripts/bench-quality-calibration.mjs",
         "scripts/bench-redaction-fixtures.mjs",
-        "public/benchmarks/quality-judge-calibration.json"
+        "public/benchmarks/trinity-500-benchmark.json"
       ],
       "smoke_simulation": {
         "command": "npm run verify:quality-calibration && npm run verify:benchmark-evidence",
-        "fixtures": ["public/benchmarks/quality-judge-calibration.json"],
-        "expected": ["judge fixture has zero false accepts", "public benchmark claims remain gated without raw report lanes"]
+        "fixtures": [
+          "public/benchmarks/trinity-500-benchmark.json"
+        ],
+        "expected": [
+          "judge fixture has zero false accepts",
+          "public benchmark claims remain gated without raw report lanes"
+        ]
       },
       "acceptance_tests": [
         "Failing adversarial case blocks production-ready promotion.",
@@ -578,7 +992,31 @@
         "Judge model is overconfident on adversarial prompt variants.",
         "Static holdout becomes contaminated by training data.",
         "Benchmark report omits pricing or hardware context."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "evaluation: Adaptive Eval Fuzzer",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-privacy-membrane-max",
@@ -586,11 +1024,40 @@
       "name": "Privacy Membrane Max Policy Compiler",
       "category": "privacy-security",
       "thesis": "Privacy should be compiled as a measurable policy graph across capture, redaction, zero retention, differential privacy, teacher calls, training exports, and receipts.",
-      "research_refs": ["otel-genai", "helm"],
-      "journeys": ["gateway-capture", "privacy-lake", "multimodal-tokenization", "train-distill", "enterprise-governance"],
-      "dimensions": ["privacy-mode", "storage-plane", "governance-mode", "proof-mode"],
-      "readiness": ["zero-retention-mode", "capture-filtering", "redaction-quality", "differential-privacy", "secrets-management", "compliance-certifications", "team-capture-rbac"],
-      "metrics": ["security", "proof", "enterprise", "quality", "cost", "dx"],
+      "research_refs": [
+        "otel-genai",
+        "helm"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "multimodal-tokenization",
+        "train-distill",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "privacy-mode",
+        "storage-plane",
+        "governance-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "zero-retention-mode",
+        "capture-filtering",
+        "redaction-quality",
+        "differential-privacy",
+        "secrets-management",
+        "compliance-certifications",
+        "team-capture-rbac"
+      ],
+      "metrics": [
+        "security",
+        "proof",
+        "enterprise",
+        "quality",
+        "cost",
+        "dx"
+      ],
       "expected_metric_lift": {
         "security": 0.38,
         "proof": 0.22,
@@ -622,8 +1089,13 @@
       ],
       "smoke_simulation": {
         "command": "npm run verify:redaction-benchmark && npm run verify:compliance-packet",
-        "fixtures": ["test/fixtures/redaction-public-benchmark.json"],
-        "expected": ["redaction F1/recall gates pass", "compliance packet stays live-certification gated"]
+        "fixtures": [
+          "test/fixtures/redaction-public-benchmark.json"
+        ],
+        "expected": [
+          "redaction F1/recall gates pass",
+          "compliance packet stays live-certification gated"
+        ]
       },
       "acceptance_tests": [
         "Zero-retention call leaves no capture/event row.",
@@ -636,7 +1108,31 @@
         "ML detector unavailable and system fails open.",
         "DP budget not tenant-scoped.",
         "Account UI shows raw prompt in privacy error."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "privacy-security: Privacy Membrane Max Policy Compiler",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-constraint-cloud-broker",
@@ -644,11 +1140,47 @@
       "name": "Constraint-First Cloud Compute Broker",
       "category": "cloud-compute",
       "thesis": "Users should specify constraints and proof boundary; Kolm should quote, launch, monitor, import, and verify train/distill/quant jobs across local, SSH, rented GPUs, managed train, BYOC, and object storage.",
-      "research_refs": ["cloudflare-r2", "aws-sagemaker", "runpod", "modal", "otel-genai"],
-      "journeys": ["train-distill", "compute-cloud", "devices-fleet", "enterprise-governance", "compile-verify"],
-      "dimensions": ["compute-target", "storage-plane", "deployment-mode", "governance-mode", "proof-mode"],
-      "readiness": ["async-compile-webhooks", "deploy-buttons", "cloud-compute-broker", "private-registry", "cost-attribution", "webhooks-events", "sdk-depth", "one-line-install", "secrets-management"],
-      "metrics": ["cost", "latency", "dx", "enterprise", "portability", "proof", "security"],
+      "research_refs": [
+        "cloudflare-r2",
+        "aws-sagemaker",
+        "runpod",
+        "modal",
+        "otel-genai"
+      ],
+      "journeys": [
+        "train-distill",
+        "compute-cloud",
+        "devices-fleet",
+        "enterprise-governance",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "compute-target",
+        "storage-plane",
+        "deployment-mode",
+        "governance-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "async-compile-webhooks",
+        "deploy-buttons",
+        "cloud-compute-broker",
+        "private-registry",
+        "cost-attribution",
+        "webhooks-events",
+        "sdk-depth",
+        "one-line-install",
+        "secrets-management"
+      ],
+      "metrics": [
+        "cost",
+        "latency",
+        "dx",
+        "enterprise",
+        "portability",
+        "proof",
+        "security"
+      ],
       "expected_metric_lift": {
         "cost": 0.24,
         "latency": 0.15,
@@ -682,8 +1214,15 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready",
-        "fixtures": ["src/platform-capabilities.js", "src/compute/registry.json"],
-        "expected": ["broker returns ready simulated plan", "storage plane is named", "command is spend-safe until user executes"]
+        "fixtures": [
+          "src/platform-capabilities.js",
+          "src/compute/registry.json"
+        ],
+        "expected": [
+          "broker returns ready simulated plan",
+          "storage plane is named",
+          "command is spend-safe until user executes"
+        ]
       },
       "acceptance_tests": [
         "No provider API call occurs in dry-run simulation.",
@@ -696,7 +1235,31 @@
         "Object storage lacks required checksum semantics.",
         "Webhook arrives out of order.",
         "Rented GPU region violates residency policy."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "cloud-compute: Constraint-First Cloud Compute Broker",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-device-fit-autopilot",
@@ -704,11 +1267,41 @@
       "name": "Device Fit Autopilot",
       "category": "device-runtime",
       "thesis": "Kolm should score every artifact/model/export against actual memory, runtime kernels, latency target, battery envelope, privacy mode, and fallback before telling a user it can run on a device.",
-      "research_refs": ["iree", "tensorrt-llm", "quarot", "kvquant"],
-      "journeys": ["models-backbones", "multimodal-tokenization", "compile-verify", "runtime-inference", "devices-fleet"],
-      "dimensions": ["compute-target", "artifact-runtime", "deployment-mode", "proof-mode"],
-      "readiness": ["compute-openvino-qnn", "ios-android-sdk", "runtime-wasm", "runtime-edge", "runtime-telemetry-opt-in", "runtime-lts", "export-quantize-targets"],
-      "metrics": ["latency", "portability", "quality", "dx", "conversion"],
+      "research_refs": [
+        "iree",
+        "tensorrt-llm",
+        "quarot",
+        "kvquant"
+      ],
+      "journeys": [
+        "models-backbones",
+        "multimodal-tokenization",
+        "compile-verify",
+        "runtime-inference",
+        "devices-fleet"
+      ],
+      "dimensions": [
+        "compute-target",
+        "artifact-runtime",
+        "deployment-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "compute-openvino-qnn",
+        "ios-android-sdk",
+        "runtime-wasm",
+        "runtime-edge",
+        "runtime-telemetry-opt-in",
+        "runtime-lts",
+        "export-quantize-targets"
+      ],
+      "metrics": [
+        "latency",
+        "portability",
+        "quality",
+        "dx",
+        "conversion"
+      ],
       "expected_metric_lift": {
         "latency": 0.22,
         "portability": 0.32,
@@ -740,8 +1333,13 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=device-runtime --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json"],
-        "expected": ["device journey covered", "runtime-wasm and ios-android-sdk package gates covered"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json"
+        ],
+        "expected": [
+          "device journey covered",
+          "runtime-wasm and ios-android-sdk package gates covered"
+        ]
       },
       "acceptance_tests": [
         "Low-memory device gets smaller artifact or cloud fallback recommendation.",
@@ -753,7 +1351,31 @@
         "Browser WebGPU availability differs by user setting.",
         "Device thermal throttling invalidates p95 estimate.",
         "Fallback route violates offline-only requirement."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "device-runtime: Device Fit Autopilot",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-agent-tool-compiler",
@@ -761,11 +1383,41 @@
       "name": "Signed Agent Tool Compiler",
       "category": "agents",
       "thesis": "Kolm should compile repeated agent behavior into signed MCP and local tools with permission receipts, dependency graphs, and replay evals instead of only exposing an MCP server.",
-      "research_refs": ["sglang", "otel-genai", "openai-evals"],
-      "journeys": ["gateway-capture", "datasets-labeling", "compile-verify", "runtime-inference", "agents-registry"],
-      "dimensions": ["deployment-mode", "governance-mode", "proof-mode", "model-provider"],
-      "readiness": ["compile-as-mcp", "runtime-local-artifact", "streaming", "team-capture-rbac", "dependency-graphs", "sdk-depth", "standalone-verify"],
-      "metrics": ["dx", "latency", "cost", "security", "proof", "conversion"],
+      "research_refs": [
+        "sglang",
+        "otel-genai",
+        "openai-evals"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "datasets-labeling",
+        "compile-verify",
+        "runtime-inference",
+        "agents-registry"
+      ],
+      "dimensions": [
+        "deployment-mode",
+        "governance-mode",
+        "proof-mode",
+        "model-provider"
+      ],
+      "readiness": [
+        "compile-as-mcp",
+        "runtime-local-artifact",
+        "streaming",
+        "team-capture-rbac",
+        "dependency-graphs",
+        "sdk-depth",
+        "standalone-verify"
+      ],
+      "metrics": [
+        "dx",
+        "latency",
+        "cost",
+        "security",
+        "proof",
+        "conversion"
+      ],
       "expected_metric_lift": {
         "dx": 0.31,
         "latency": 0.14,
@@ -797,8 +1449,13 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=agents --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json"],
-        "expected": ["agent registry journey covered", "compile-as-mcp and sdk-depth readiness covered"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json"
+        ],
+        "expected": [
+          "agent registry journey covered",
+          "compile-as-mcp and sdk-depth readiness covered"
+        ]
       },
       "acceptance_tests": [
         "Compiled tool cannot request permissions absent from permission receipt.",
@@ -810,7 +1467,31 @@
         "Trace mining captures one-off behavior that should not be compiled.",
         "Tool permission inference is over-broad.",
         "Agent sidecar changes behavior without a new receipt."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "agents: Signed Agent Tool Compiler",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-receipt-os-max",
@@ -818,11 +1499,44 @@
       "name": "ReceiptOS Unified Evidence Fabric",
       "category": "proof-governance",
       "thesis": "Every product action should emit a linked, signed, privacy-safe receipt so buyers can verify dataset, eval, compile, quant, runtime, fallback, billing, and compliance claims end to end.",
-      "research_refs": ["sigstore", "slsa", "cyclonedx", "otel-genai"],
-      "journeys": ["gateway-capture", "privacy-lake", "compile-verify", "runtime-inference", "compute-cloud", "enterprise-governance", "agents-registry"],
-      "dimensions": ["proof-mode", "governance-mode", "privacy-mode", "storage-plane"],
-      "readiness": ["artifact-signing-pipeline", "team-capture-rbac", "event-lake-schema", "opentelemetry", "webhooks-events", "secrets-management", "compliance-certifications", "rate-limits-quotas"],
-      "metrics": ["proof", "security", "enterprise", "dx", "conversion"],
+      "research_refs": [
+        "sigstore",
+        "slsa",
+        "cyclonedx",
+        "otel-genai"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "enterprise-governance",
+        "agents-registry"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "governance-mode",
+        "privacy-mode",
+        "storage-plane"
+      ],
+      "readiness": [
+        "artifact-signing-pipeline",
+        "team-capture-rbac",
+        "event-lake-schema",
+        "opentelemetry",
+        "webhooks-events",
+        "secrets-management",
+        "compliance-certifications",
+        "rate-limits-quotas"
+      ],
+      "metrics": [
+        "proof",
+        "security",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
       "expected_metric_lift": {
         "proof": 0.42,
         "security": 0.26,
@@ -853,8 +1567,13 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=proof-governance --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json"],
-        "expected": ["proof metric has maximum lift", "compliance and signing readiness covered"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json"
+        ],
+        "expected": [
+          "proof metric has maximum lift",
+          "compliance and signing readiness covered"
+        ]
       },
       "acceptance_tests": [
         "Verifier fails when any receipt edge is missing.",
@@ -866,7 +1585,31 @@
         "Receipt graph is too verbose and slows runtime path.",
         "Projection accidentally leaks sensitive metadata.",
         "Key epoch metadata is missing for old artifacts."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "proof-governance: ReceiptOS Unified Evidence Fabric",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-market-maker",
@@ -874,11 +1617,42 @@
       "name": "Verified Artifact Market Maker",
       "category": "registry-marketplace",
       "thesis": "The registry should rank artifacts by verified utility per task, runtime, license, device, cost, risk, and evidence depth, not by downloads or stale scalar K-score.",
-      "research_refs": ["helm", "sigstore", "cyclonedx"],
-      "journeys": ["compile-verify", "runtime-inference", "compute-cloud", "agents-registry", "enterprise-governance"],
-      "dimensions": ["artifact-runtime", "storage-plane", "deployment-mode", "governance-mode", "proof-mode"],
-      "readiness": ["registry-search", "version-diff", "verified-publishers", "private-registry", "dependency-graphs", "foundation-standardization", "deploy-buttons"],
-      "metrics": ["conversion", "dx", "proof", "enterprise", "portability", "security"],
+      "research_refs": [
+        "helm",
+        "sigstore",
+        "cyclonedx"
+      ],
+      "journeys": [
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "agents-registry",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "storage-plane",
+        "deployment-mode",
+        "governance-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "registry-search",
+        "version-diff",
+        "verified-publishers",
+        "private-registry",
+        "dependency-graphs",
+        "foundation-standardization",
+        "deploy-buttons"
+      ],
+      "metrics": [
+        "conversion",
+        "dx",
+        "proof",
+        "enterprise",
+        "portability",
+        "security"
+      ],
       "expected_metric_lift": {
         "conversion": 0.24,
         "dx": 0.2,
@@ -909,8 +1683,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-invention-implementation-spec.cjs --category=registry-marketplace --summary",
-        "fixtures": ["docs/product-invention-implementation-spec.json"],
-        "expected": ["registry readiness and conversion metric covered"]
+        "fixtures": [
+          "docs/product-invention-implementation-spec.json"
+        ],
+        "expected": [
+          "registry readiness and conversion metric covered"
+        ]
       },
       "acceptance_tests": [
         "Unverified artifact cannot outrank verified artifact for regulated filter.",
@@ -922,7 +1700,31 @@
         "Ranking becomes pay-to-win.",
         "License metadata is missing or wrong.",
         "Dependency graph misses nested artifact sidecar."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "registry-marketplace: Verified Artifact Market Maker",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     },
     {
       "id": "w593-codegraph-autopilot",
@@ -930,11 +1732,38 @@
       "name": "CodeGraph Product Autopilot",
       "category": "developer-experience",
       "thesis": "A local product code graph should bind source symbols, routes, docs, CLI verbs, tests, readiness gates, and product promises so agents can implement without rediscovering the codebase.",
-      "research_refs": ["otel-genai", "openai-evals"],
-      "journeys": ["compile-verify", "compute-cloud", "enterprise-governance", "agents-registry", "datasets-labeling"],
-      "dimensions": ["proof-mode", "governance-mode", "deployment-mode"],
-      "readiness": ["standalone-verify", "opentelemetry", "webhooks-events", "doctor-diagnostics", "cli-world-class", "sdk-depth", "local-account-ui"],
-      "metrics": ["dx", "proof", "security", "conversion", "cost"],
+      "research_refs": [
+        "otel-genai",
+        "openai-evals"
+      ],
+      "journeys": [
+        "compile-verify",
+        "compute-cloud",
+        "enterprise-governance",
+        "agents-registry",
+        "datasets-labeling"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "governance-mode",
+        "deployment-mode"
+      ],
+      "readiness": [
+        "standalone-verify",
+        "opentelemetry",
+        "webhooks-events",
+        "doctor-diagnostics",
+        "cli-world-class",
+        "sdk-depth",
+        "local-account-ui"
+      ],
+      "metrics": [
+        "dx",
+        "proof",
+        "security",
+        "conversion",
+        "cost"
+      ],
       "expected_metric_lift": {
         "dx": 0.4,
         "proof": 0.16,
@@ -964,8 +1793,13 @@
       ],
       "smoke_simulation": {
         "command": "npm run verify:codegraph && node scripts/simulate-invention-implementation-spec.cjs --category=developer-experience --summary",
-        "fixtures": ["public/product-graph.json"],
-        "expected": ["codegraph check passes", "developer-experience metric lift is highest for this category"]
+        "fixtures": [
+          "public/product-graph.json"
+        ],
+        "expected": [
+          "codegraph check passes",
+          "developer-experience metric lift is highest for this category"
+        ]
       },
       "acceptance_tests": [
         "Every non-stub route maps to product surface and OpenAPI operation.",
@@ -977,7 +1811,31 @@
         "Generated graph drifts from router.",
         "Graph misses dynamic imports or generated docs.",
         "Agent follows stale owner file path."
-      ]
+      ],
+      "deep_dive": {
+        "status": "spec_deep_dive_complete_build_deep_dive_required",
+        "reviewed_at": "2026-06-17",
+        "reviewer_count": 4,
+        "focus": "developer-experience: CodeGraph Product Autopilot",
+        "lenses": [
+          "source_to_route_wiring_trace",
+          "math_and_proof_validity",
+          "privacy_security_and_failure_abuse",
+          "operability_release_and_claim_scope"
+        ],
+        "required_outputs": [
+          "pass_fail_scorecard_with_blocking_findings",
+          "owning_files_routes_cli_and_tests",
+          "claim_scope_and_external_gate_decision",
+          "regression_tests_or_verification_commands"
+        ],
+        "exit_criteria": [
+          "no_orphaned_implementation_surface",
+          "no_synthetic_only_promotion",
+          "failure_modes_have_tests_or_explicit_gates",
+          "external_proof_remains_open_until_evidence_exists"
+        ]
+      }
     }
   ]
 }

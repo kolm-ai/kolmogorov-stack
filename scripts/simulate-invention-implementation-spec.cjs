@@ -36,6 +36,37 @@ function composite(metrics, weights) {
   return Number(Object.entries(weights).reduce((sum, [metric, weight]) => sum + (metrics[metric] || 0) * weight, 0).toFixed(3));
 }
 
+function hasText(value, min) {
+  return typeof value === 'string' && value.trim().length >= min;
+}
+
+function validateDeepDive(invention, failures) {
+  const dive = invention.deep_dive;
+  if (!dive || typeof dive !== 'object' || Array.isArray(dive)) {
+    failures.push(`${invention.id}: missing deep_dive`);
+    return false;
+  }
+  if (dive.status !== 'spec_deep_dive_complete_build_deep_dive_required') failures.push(`${invention.id}: deep_dive status invalid`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dive.reviewed_at || '')) failures.push(`${invention.id}: deep_dive reviewed_at missing`);
+  if (!Number.isInteger(dive.reviewer_count) || dive.reviewer_count < 4) failures.push(`${invention.id}: deep_dive reviewer_count below 4`);
+  if (!hasText(dive.focus, 20)) failures.push(`${invention.id}: deep_dive focus too thin`);
+  const minimums = {
+    lenses: 4,
+    required_outputs: 4,
+    exit_criteria: 4
+  };
+  for (const [field, min] of Object.entries(minimums)) {
+    if (!Array.isArray(dive[field]) || dive[field].length < min || dive[field].some((item) => !hasText(item, 8))) {
+      failures.push(`${invention.id}: deep_dive.${field} too thin`);
+    }
+  }
+  const lenses = new Set(dive.lenses || []);
+  for (const required of ['source_to_route_wiring_trace', 'math_and_proof_validity', 'privacy_security_and_failure_abuse', 'operability_release_and_claim_scope']) {
+    if (!lenses.has(required)) failures.push(`${invention.id}: deep_dive missing lens ${required}`);
+  }
+  return true;
+}
+
 function simulate() {
   const spec = readJson(specPath);
   const portfolio = readJson(portfolioPath);
@@ -77,6 +108,7 @@ function simulate() {
     if (!Array.isArray(invention.math_core) || invention.math_core.length < 3) failures.push(`${invention.id}: math_core needs at least 3 items`);
     if (!invention.smoke_simulation || !invention.smoke_simulation.command || !Array.isArray(invention.smoke_simulation.expected)) failures.push(`${invention.id}: missing smoke_simulation`);
     if (!invention.expected_metric_lift || Object.keys(invention.expected_metric_lift).length < 3) failures.push(`${invention.id}: expected_metric_lift too thin`);
+    validateDeepDive(invention, failures);
 
     for (const ref of invention.research_refs || []) if (!sourceIds.has(ref)) failures.push(`${invention.id}: unknown research_ref ${ref}`);
     for (const journey of invention.journeys || []) if (!graphJourneyIds.has(journey)) failures.push(`${invention.id}: unknown journey ${journey}`);
@@ -173,7 +205,8 @@ function simulate() {
       readiness: i.readiness,
       implementation_files: i.implementation_files,
       smoke_simulation: i.smoke_simulation,
-      acceptance_tests: i.acceptance_tests
+      acceptance_tests: i.acceptance_tests,
+      deep_dive: i.deep_dive
     }));
   }
   return result;

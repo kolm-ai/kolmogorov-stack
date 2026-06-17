@@ -1,6 +1,6 @@
 {
   "schema_version": "kolm-product-frontier-map-1",
-  "updated_at": "2026-05-23",
+  "updated_at": "2026-06-17",
   "purpose": "Research-backed frontier capability map for turning every Kolm product surface into a best-in-class implementation program with verifiable smoke checks.",
   "tracked_metrics": [
     "quality",
@@ -1096,7 +1096,7 @@
         "src/quality-calibration.js",
         "scripts/quantization-oracle.mjs",
         "docs/quantization-oracle.md",
-        "public/benchmarks.html",
+        "docs/benchmark-evidence.md",
         "tests/wave595-quantization-runtime-oracle.test.js"
       ],
       "build_steps": [
@@ -1519,8 +1519,8 @@
         "src/registry-diff.js",
         "src/artifact-signing.js",
         "src/dependency-graph.js",
-        "public/registry.html",
-        "public/marketplace.html",
+        "docs/byo-registry.md",
+        "src/marketplace.js",
         "tests/wave595-registry-network-effects.test.js"
       ],
       "build_steps": [
@@ -1858,9 +1858,8 @@
       "implementation_files": [
         "src/benchmark-evidence.js",
         "scripts/benchmark-evidence.mjs",
-        "public/benchmarks.html",
-        "public/benchmarks/quality-judge-calibration.json",
         "docs/benchmark-evidence.md",
+        "public/benchmarks/trinity-500-benchmark.json",
         "tests/wave589-benchmark-evidence-contract.test.js",
         "tests/wave595-benchmark-evidence-network.test.js"
       ],

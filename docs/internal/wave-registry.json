@@ -1,20 +1,20 @@
 {
   "counts": {
-    "docs_only_waves": 1,
+    "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 275,
+    "orphan_tests": 280,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 278,
+    "state_local_green": 283,
     "state_planned": 5,
-    "state_unknown": 1,
-    "test_files": 442,
-    "test_only_waves": 275,
-    "waves": 292
+    "state_unknown": 0,
+    "test_files": 448,
+    "test_only_waves": 280,
+    "waves": 296
   },
-  "generated_at": "2026-06-17T07:26:34.275Z",
+  "generated_at": "2026-06-17T07:51:31.933Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -26,9 +26,7 @@
     "KOLM_W921_PLAN.md"
   ],
   "reconcile": {
-    "docs_only_waves": [
-      "W598"
-    ],
+    "docs_only_waves": [],
     "multi_test_letter_suffixes": [
       {
         "id": "W407",
@@ -287,9 +285,14 @@
       "W590",
       "W591",
       "W592",
+      "W593",
       "W594",
+      "W595",
       "W596",
       "W597",
+      "W598",
+      "W599",
+      "W600",
       "W601",
       "W708",
       "W709",
@@ -571,9 +574,14 @@
       "W590",
       "W591",
       "W592",
+      "W593",
       "W594",
+      "W595",
       "W596",
       "W597",
+      "W598",
+      "W599",
+      "W600",
       "W601",
       "W708",
       "W709",
@@ -3758,6 +3766,25 @@
       "test_letter_suffixes": []
     },
     {
+      "canonical_wave_id": "W593",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/simulate-invention-implementation-spec.cjs --summary && node --test --test-concurrency=1 tests/wave593-invention-implementation-spec.test.js",
+          "script": "npm:verify:invention-spec"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave593-invention-implementation-spec.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
       "canonical_wave_id": "W594",
       "claim_scope": "internal",
       "docs_sources": [],
@@ -3777,6 +3804,25 @@
       "test_letter_suffixes": []
     },
     {
+      "canonical_wave_id": "W595",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/simulate-product-frontier-map.cjs --summary && node --test --test-concurrency=1 tests/wave595-product-frontier-map.test.js",
+          "script": "npm:verify:frontier-map"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave595-product-frontier-map.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
       "canonical_wave_id": "W596",
       "claim_scope": "internal",
       "docs_sources": [],
@@ -3791,6 +3837,7 @@
       "secondary_sources": [],
       "state": "local_green",
       "test_files": [
+        "tests/wave596-product-math-frontier.test.js",
         "tests/wave596-redactor-template-e2e.test.js"
       ],
       "test_letter_suffixes": []
@@ -3816,11 +3863,11 @@
     },
     {
       "canonical_wave_id": "W598",
-      "claim_scope": "none",
+      "claim_scope": "internal",
       "docs_sources": [
         "docs/product-research-atlas.json"
       ],
-      "owner_lane": null,
+      "owner_lane": "frontend",
       "plan_files": [],
       "proof_commands": [
         {
@@ -3829,8 +3876,48 @@
         }
       ],
       "secondary_sources": [],
-      "state": "unknown",
-      "test_files": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave598-product-invention-buildbook.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W599",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/simulate-readiness-gate-workorders.cjs --summary && node --test --test-concurrency=1 tests/wave599-readiness-gate-workorders.test.js",
+          "script": "npm:verify:readiness-workorders"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave599-readiness-gate-workorders.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W600",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/simulate-product-research-atlas.cjs --summary && node --test --test-concurrency=1 tests/wave600-product-research-atlas.test.js",
+          "script": "npm:verify:research-atlas"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave600-product-research-atlas.test.js"
+      ],
       "test_letter_suffixes": []
     },
     {

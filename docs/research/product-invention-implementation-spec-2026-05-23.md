@@ -40,10 +40,23 @@ Every invention below strengthens that loop and names:
 - the readiness gates it closes or supports
 - the math core
 - the build phases
+- the required deep-dive lenses and build-promotion exit criteria
 - the files an implementation agent should own
 - the smoke simulation
 - the acceptance tests
 - the failure modes that must be handled before production copy can claim it
+
+Deep-dive rule added 2026-06-17:
+
+- Every machine-readable invention in `docs/product-invention-implementation-spec.json`
+  carries a `deep_dive` block with four lenses: source-to-route wiring trace,
+  math/proof validity, privacy/security/failure abuse, and operability/release
+  claim scope.
+- The spec-level review is complete, but build promotion remains blocked until
+  implementation work reruns those lenses against actual code, routes, CLI, UI,
+  tests, and release evidence.
+- `npm run verify:invention-spec` enforces the deep-dive block and fails if an
+  invention loses it.
 
 ## Invention Waves
 

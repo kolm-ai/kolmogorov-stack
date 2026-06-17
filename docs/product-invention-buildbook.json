@@ -1,6 +1,6 @@
 {
   "schema_version": "kolm-product-invention-buildbook-1",
-  "updated_at": "2026-05-23",
+  "updated_at": "2026-06-17",
   "purpose": "Research-backed implementation buildbook for turning Kolm's product-surface map into a finished backend system: build strategy, capture, privacy, distillation, quantization, compilation, runtime, cloud compute, evals, registry, agents, SDKs, and proof.",
   "source_policy": [
     "Prefer primary papers, official runtime/provider documentation, and official security/compliance specifications.",
@@ -210,12 +210,47 @@
       "name": "Adaptive Lattice Quantization Oracle",
       "portfolio_invention_id": "kolm-q-oracle",
       "thesis": "Quantization should be selected by a constrained optimizer over held-out K-score, p95 latency, byte size, memory ceiling, runtime kernel support, and rollback cost; the user should never choose AWQ/GPTQ/SpinQuant/QServe by hand.",
-      "research_refs": ["spinquant", "qserve", "tensorrt-llm", "onnx-runtime-eps"],
-      "journeys": ["train-distill", "models-backbones", "compile-verify", "runtime-inference", "compute-cloud", "devices-fleet"],
-      "dimensions": ["model-provider", "compute-target", "artifact-runtime", "proof-mode"],
-      "readiness": ["export-quantize-targets", "runtime-local-artifact", "benchmarking-infra", "quality-scoring", "runtime-telemetry-opt-in"],
-      "metrics": ["quality", "latency", "cost", "portability", "proof"],
-      "expected_metric_lift": { "quality": 0.13, "latency": 0.24, "cost": 0.22, "portability": 0.13, "proof": 0.08 },
+      "research_refs": [
+        "spinquant",
+        "qserve",
+        "tensorrt-llm",
+        "onnx-runtime-eps"
+      ],
+      "journeys": [
+        "train-distill",
+        "models-backbones",
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "artifact-runtime",
+        "proof-mode"
+      ],
+      "readiness": [
+        "export-quantize-targets",
+        "runtime-local-artifact",
+        "benchmarking-infra",
+        "quality-scoring",
+        "runtime-telemetry-opt-in"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "portability",
+        "proof"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.13,
+        "latency": 0.24,
+        "cost": 0.22,
+        "portability": 0.13,
+        "proof": 0.08
+      },
       "implementation_files": [
         "src/quantization-oracle.js",
         "scripts/quantization-oracle.mjs",
@@ -246,7 +281,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-adaptive-lattice-quantization-oracle --summary",
-        "expected": ["selected_inventions=1", "quality", "latency", "export-quantize-targets"]
+        "expected": [
+          "selected_inventions=1",
+          "quality",
+          "latency",
+          "export-quantize-targets"
+        ]
       }
     },
     {
@@ -255,12 +295,50 @@
       "name": "Compiler Swarm Autotarget",
       "portfolio_invention_id": "kolm-ir-autotarget",
       "thesis": "A real AI compiler needs an explicit lowering matrix from recipe behavior to runtime backends; Kolm should decide between ONNX Runtime EPs, IREE, TensorRT-LLM, GGUF, WASM, edge, and mobile targets with unsupported-feature diagnostics.",
-      "research_refs": ["iree-deploy", "iree-github", "onnx-runtime-eps", "tensorrt-llm"],
-      "journeys": ["multimodal-tokenization", "compile-verify", "runtime-inference", "compute-cloud", "devices-fleet", "enterprise-governance"],
-      "dimensions": ["artifact-runtime", "compute-target", "deployment-mode", "proof-mode"],
-      "readiness": ["runtime-wasm", "runtime-edge", "ios-android-sdk", "compute-openvino-qnn", "runtime-lts", "ecosystem-runtime-adoption"],
-      "metrics": ["latency", "cost", "portability", "proof", "enterprise", "dx"],
-      "expected_metric_lift": { "latency": 0.18, "cost": 0.12, "portability": 0.24, "proof": 0.12, "enterprise": 0.08, "dx": 0.08 },
+      "research_refs": [
+        "iree-deploy",
+        "iree-github",
+        "onnx-runtime-eps",
+        "tensorrt-llm"
+      ],
+      "journeys": [
+        "multimodal-tokenization",
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "deployment-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "runtime-wasm",
+        "runtime-edge",
+        "ios-android-sdk",
+        "compute-openvino-qnn",
+        "runtime-lts",
+        "ecosystem-runtime-adoption"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "portability",
+        "proof",
+        "enterprise",
+        "dx"
+      ],
+      "expected_metric_lift": {
+        "latency": 0.18,
+        "cost": 0.12,
+        "portability": 0.24,
+        "proof": 0.12,
+        "enterprise": 0.08,
+        "dx": 0.08
+      },
       "implementation_files": [
         "src/platform-capabilities.js",
         "src/compile-pipeline.js",
@@ -291,7 +369,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-compiler-swarm-autotarget --summary",
-        "expected": ["runtime-wasm", "ios-android-sdk", "ecosystem-runtime-adoption", "portability"]
+        "expected": [
+          "runtime-wasm",
+          "ios-android-sdk",
+          "ecosystem-runtime-adoption",
+          "portability"
+        ]
       }
     },
     {
@@ -300,12 +383,50 @@
       "name": "Teacher Distillation Forge",
       "portfolio_invention_id": "distill-forge",
       "thesis": "Distillation should be a strategy planner that chooses prompt-only, RAG, synthetic labeling, SFT, preference tuning, reverse-KL distillation, on-policy distillation, or no-train based on data sufficiency, task type, privacy, teacher availability, and holdout risk.",
-      "research_refs": ["black-box-on-policy-distill", "gkd", "predibase-adapters", "openpipe"],
-      "journeys": ["gateway-capture", "privacy-lake", "datasets-labeling", "train-distill", "models-backbones", "compile-verify"],
-      "dimensions": ["model-provider", "privacy-mode", "storage-plane", "proof-mode"],
-      "readiness": ["distill-strategy-oracle", "compile-failure-diagnostics", "openai-anthropic-gateway", "async-compile-webhooks", "compile-cache", "holdout-independence"],
-      "metrics": ["quality", "cost", "proof", "security", "dx", "conversion"],
-      "expected_metric_lift": { "quality": 0.17, "cost": 0.16, "proof": 0.14, "security": 0.08, "dx": 0.1, "conversion": 0.07 },
+      "research_refs": [
+        "black-box-on-policy-distill",
+        "gkd",
+        "predibase-adapters",
+        "openpipe"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "datasets-labeling",
+        "train-distill",
+        "models-backbones",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "model-provider",
+        "privacy-mode",
+        "storage-plane",
+        "proof-mode"
+      ],
+      "readiness": [
+        "distill-strategy-oracle",
+        "compile-failure-diagnostics",
+        "openai-anthropic-gateway",
+        "async-compile-webhooks",
+        "compile-cache",
+        "holdout-independence"
+      ],
+      "metrics": [
+        "quality",
+        "cost",
+        "proof",
+        "security",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.17,
+        "cost": 0.16,
+        "proof": 0.14,
+        "security": 0.08,
+        "dx": 0.1,
+        "conversion": 0.07
+      },
       "implementation_files": [
         "src/distill-strategy.js",
         "scripts/distill-strategy.mjs",
@@ -336,7 +457,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-teacher-distillation-forge --summary",
-        "expected": ["distill-strategy-oracle", "openai-anthropic-gateway", "quality", "proof"]
+        "expected": [
+          "distill-strategy-oracle",
+          "openai-anthropic-gateway",
+          "quality",
+          "proof"
+        ]
       }
     },
     {
@@ -345,12 +471,52 @@
       "name": "Build Strategy Operating System",
       "portfolio_invention_id": "build-strategy-brain",
       "thesis": "The product must guide users through a single decision tree from task to capture, RAG, route, train, distill, quantize, compile, cloud compute, or local runtime; all UI surfaces should call the same backend planner.",
-      "research_refs": ["braintrust-evals", "langsmith-evals", "runpod-api", "cloudflare-r2-presigned"],
-      "journeys": ["gateway-capture", "datasets-labeling", "train-distill", "compile-verify", "compute-cloud", "runtime-inference", "enterprise-governance"],
-      "dimensions": ["model-provider", "compute-target", "storage-plane", "deployment-mode", "privacy-mode"],
-      "readiness": ["cli-world-class", "doctor-diagnostics", "local-account-ui", "one-line-install", "model-routing", "secrets-management"],
-      "metrics": ["quality", "cost", "security", "enterprise", "dx", "conversion"],
-      "expected_metric_lift": { "quality": 0.08, "cost": 0.1, "security": 0.07, "enterprise": 0.08, "dx": 0.22, "conversion": 0.16 },
+      "research_refs": [
+        "braintrust-evals",
+        "langsmith-evals",
+        "runpod-api",
+        "cloudflare-r2-presigned"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "datasets-labeling",
+        "train-distill",
+        "compile-verify",
+        "compute-cloud",
+        "runtime-inference",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "storage-plane",
+        "deployment-mode",
+        "privacy-mode"
+      ],
+      "readiness": [
+        "cli-world-class",
+        "doctor-diagnostics",
+        "local-account-ui",
+        "one-line-install",
+        "model-routing",
+        "secrets-management"
+      ],
+      "metrics": [
+        "quality",
+        "cost",
+        "security",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.08,
+        "cost": 0.1,
+        "security": 0.07,
+        "enterprise": 0.08,
+        "dx": 0.22,
+        "conversion": 0.16
+      },
       "implementation_files": [
         "src/build-strategy-brain.js",
         "scripts/build-strategy-brain.mjs",
@@ -381,7 +547,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-build-strategy-operating-system --summary",
-        "expected": ["build-strategy-brain", "one-line-install", "dx", "conversion"]
+        "expected": [
+          "build-strategy-brain",
+          "one-line-install",
+          "dx",
+          "conversion"
+        ]
       }
     },
     {
@@ -390,12 +561,46 @@
       "name": "ReceiptOS Verifiable Runtime",
       "portfolio_invention_id": "receipt-os",
       "thesis": "Kolm's highest-value backend surface is proof: every artifact, runtime call, compile, quantization, eval, provider call, and registry movement needs a verifiable receipt that works outside the hosted product.",
-      "research_refs": ["sigstore", "slsa", "opentelemetry-genai", "opentelemetry-spans"],
-      "journeys": ["compile-verify", "runtime-inference", "enterprise-governance", "agents-registry"],
-      "dimensions": ["proof-mode", "governance-mode", "deployment-mode", "artifact-runtime"],
-      "readiness": ["standalone-verify", "artifact-signing-pipeline", "compliance-certifications", "opentelemetry", "runtime-lts", "version-diff"],
-      "metrics": ["proof", "security", "enterprise", "dx", "conversion"],
-      "expected_metric_lift": { "proof": 0.26, "security": 0.16, "enterprise": 0.16, "dx": 0.05, "conversion": 0.08 },
+      "research_refs": [
+        "sigstore",
+        "slsa",
+        "opentelemetry-genai",
+        "opentelemetry-spans"
+      ],
+      "journeys": [
+        "compile-verify",
+        "runtime-inference",
+        "enterprise-governance",
+        "agents-registry"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "governance-mode",
+        "deployment-mode",
+        "artifact-runtime"
+      ],
+      "readiness": [
+        "standalone-verify",
+        "artifact-signing-pipeline",
+        "compliance-certifications",
+        "opentelemetry",
+        "runtime-lts",
+        "version-diff"
+      ],
+      "metrics": [
+        "proof",
+        "security",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "proof": 0.26,
+        "security": 0.16,
+        "enterprise": 0.16,
+        "dx": 0.05,
+        "conversion": 0.08
+      },
       "implementation_files": [
         "src/receipt.js",
         "src/runtime.js",
@@ -426,7 +631,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-receiptos-verifiable-runtime --summary",
-        "expected": ["standalone-verify", "artifact-signing-pipeline", "proof", "security"]
+        "expected": [
+          "standalone-verify",
+          "artifact-signing-pipeline",
+          "proof",
+          "security"
+        ]
       }
     },
     {
@@ -435,18 +645,53 @@
       "name": "Privacy Membrane Governor",
       "portfolio_invention_id": "privacy-membrane-max",
       "thesis": "Capture is the data flywheel, but regulated buyers will only trust it if zero-retention, capture filtering, redaction, data lineage, RBAC, and privacy accounting are policy-enforced rather than copy claims.",
-      "research_refs": ["opacus", "opentelemetry-spans", "cloudflare-r2-presigned", "secure-aggregation"],
-      "journeys": ["gateway-capture", "privacy-lake", "datasets-labeling", "enterprise-governance"],
-      "dimensions": ["privacy-mode", "storage-plane", "governance-mode", "proof-mode"],
-      "readiness": ["zero-retention-mode", "capture-filtering", "event-lake-schema", "redaction-quality", "differential-privacy", "team-capture-rbac", "secrets-management"],
-      "metrics": ["quality", "proof", "security", "enterprise", "conversion"],
-      "expected_metric_lift": { "quality": 0.06, "proof": 0.14, "security": 0.22, "enterprise": 0.18, "conversion": 0.09 },
+      "research_refs": [
+        "opacus",
+        "opentelemetry-spans",
+        "cloudflare-r2-presigned",
+        "secure-aggregation"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "datasets-labeling",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "privacy-mode",
+        "storage-plane",
+        "governance-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "zero-retention-mode",
+        "capture-filtering",
+        "event-lake-schema",
+        "redaction-quality",
+        "differential-privacy",
+        "team-capture-rbac",
+        "secrets-management"
+      ],
+      "metrics": [
+        "quality",
+        "proof",
+        "security",
+        "enterprise",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.06,
+        "proof": 0.14,
+        "security": 0.22,
+        "enterprise": 0.18,
+        "conversion": 0.09
+      },
       "implementation_files": [
         "src/phi-redactor.js",
         "src/capture.js",
         "src/event-lake.js",
         "src/federated-learning.js",
-        "public/hipaa-mapping.html",
+        "docs/angle/hipaa-onepager.html",
         "tests/wave586-redaction-public-benchmark-contract.test.js"
       ],
       "build_steps": [
@@ -471,7 +716,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-privacy-membrane-governor --summary",
-        "expected": ["zero-retention-mode", "redaction-quality", "security", "enterprise"]
+        "expected": [
+          "zero-retention-mode",
+          "redaction-quality",
+          "security",
+          "enterprise"
+        ]
       }
     },
     {
@@ -480,19 +730,53 @@
       "name": "Federated Trust Lab",
       "portfolio_invention_id": "privacy-membrane-max",
       "thesis": "Healthcare, finance, legal, and defense buyers need cross-party learning without centralizing raw data; Kolm should make federated compile a receipt-backed workflow with DP accounting, secure aggregation, robust aggregation, and participant policy controls.",
-      "research_refs": ["opacus", "secure-aggregation", "slsa", "sigstore"],
-      "journeys": ["privacy-lake", "datasets-labeling", "train-distill", "enterprise-governance", "compile-verify"],
-      "dimensions": ["privacy-mode", "governance-mode", "storage-plane", "proof-mode"],
-      "readiness": ["differential-privacy", "team-capture-rbac", "compliance-certifications", "secrets-management", "artifact-signing-pipeline"],
-      "metrics": ["quality", "proof", "security", "enterprise", "portability"],
-      "expected_metric_lift": { "quality": 0.08, "proof": 0.14, "security": 0.19, "enterprise": 0.2, "portability": 0.07 },
+      "research_refs": [
+        "opacus",
+        "secure-aggregation",
+        "slsa",
+        "sigstore"
+      ],
+      "journeys": [
+        "privacy-lake",
+        "datasets-labeling",
+        "train-distill",
+        "enterprise-governance",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "privacy-mode",
+        "governance-mode",
+        "storage-plane",
+        "proof-mode"
+      ],
+      "readiness": [
+        "differential-privacy",
+        "team-capture-rbac",
+        "compliance-certifications",
+        "secrets-management",
+        "artifact-signing-pipeline"
+      ],
+      "metrics": [
+        "quality",
+        "proof",
+        "security",
+        "enterprise",
+        "portability"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.08,
+        "proof": 0.14,
+        "security": 0.19,
+        "enterprise": 0.2,
+        "portability": 0.07
+      },
       "implementation_files": [
         "src/federated-learning.js",
         "docs/compliance-certification-packet.md",
         "src/compliance-certification-packet.js",
         "tests/wave409u-federated-foundation.test.js",
         "tests/wave585-federated-robust-aggregation.test.js",
-        "public/soc2.html"
+        "docs/compliance/SOC2-EVIDENCE.md"
       ],
       "build_steps": [
         "Model a federated compile round as participants, commitments, privacy policy, clipping, noise, aggregation, rejection, and promotion.",
@@ -516,7 +800,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-federated-trust-lab --summary",
-        "expected": ["differential-privacy", "compliance-certifications", "enterprise", "security"]
+        "expected": [
+          "differential-privacy",
+          "compliance-certifications",
+          "enterprise",
+          "security"
+        ]
       }
     },
     {
@@ -525,12 +814,53 @@
       "name": "Cloud Compute Control Plane",
       "portfolio_invention_id": "cloud-compute-broker",
       "thesis": "Users without local GPUs still need training, distillation, quantization, compile, benchmark, and deploy; cloud compute must be a typed backend surface spanning local, SSH, BYOC, RunPod, AWS, Kubernetes, R2/S3, provider APIs, and edge runtimes.",
-      "research_refs": ["runpod-api", "aws-batch-gpu", "kueue", "cloudflare-r2-presigned"],
-      "journeys": ["train-distill", "compile-verify", "runtime-inference", "compute-cloud", "devices-fleet"],
-      "dimensions": ["compute-target", "storage-plane", "deployment-mode", "privacy-mode", "proof-mode"],
-      "readiness": ["cloud-compute-broker", "async-compile-webhooks", "compile-cache", "cost-attribution", "rate-limits-quotas", "webhooks-events", "deploy-buttons"],
-      "metrics": ["latency", "cost", "portability", "security", "enterprise", "dx", "conversion"],
-      "expected_metric_lift": { "latency": 0.1, "cost": 0.18, "portability": 0.14, "security": 0.08, "enterprise": 0.13, "dx": 0.15, "conversion": 0.12 },
+      "research_refs": [
+        "runpod-api",
+        "aws-batch-gpu",
+        "kueue",
+        "cloudflare-r2-presigned"
+      ],
+      "journeys": [
+        "train-distill",
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet"
+      ],
+      "dimensions": [
+        "compute-target",
+        "storage-plane",
+        "deployment-mode",
+        "privacy-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "cloud-compute-broker",
+        "async-compile-webhooks",
+        "compile-cache",
+        "cost-attribution",
+        "rate-limits-quotas",
+        "webhooks-events",
+        "deploy-buttons"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "portability",
+        "security",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "latency": 0.1,
+        "cost": 0.18,
+        "portability": 0.14,
+        "security": 0.08,
+        "enterprise": 0.13,
+        "dx": 0.15,
+        "conversion": 0.12
+      },
       "implementation_files": [
         "src/cloud-compute-broker.js",
         "scripts/cloud-compute-broker.mjs",
@@ -561,7 +891,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-cloud-compute-control-plane --summary",
-        "expected": ["cloud-compute-broker", "cost-attribution", "compute-cloud", "conversion"]
+        "expected": [
+          "cloud-compute-broker",
+          "cost-attribution",
+          "compute-cloud",
+          "conversion"
+        ]
       }
     },
     {
@@ -570,16 +905,53 @@
       "name": "Adaptive Eval Lab",
       "portfolio_invention_id": "adaptive-eval-lab",
       "thesis": "K-score must evolve from a scalar to a calibrated promotion system with confidence intervals, abstention, judge calibration, deterministic checks, off-policy replay diagnostics, and benchmark evidence separation.",
-      "research_refs": ["llm-judge-conformal", "doubly-robust-judge", "braintrust-evals", "langsmith-evals"],
-      "journeys": ["datasets-labeling", "train-distill", "compile-verify", "runtime-inference", "enterprise-governance"],
-      "dimensions": ["proof-mode", "model-provider", "privacy-mode", "governance-mode"],
-      "readiness": ["k-score-calibration", "quality-scoring", "evals-ab", "shadow-mode", "benchmarking-infra", "holdout-independence"],
-      "metrics": ["quality", "proof", "security", "enterprise", "dx", "conversion"],
-      "expected_metric_lift": { "quality": 0.18, "proof": 0.2, "security": 0.08, "enterprise": 0.12, "dx": 0.08, "conversion": 0.08 },
+      "research_refs": [
+        "llm-judge-conformal",
+        "doubly-robust-judge",
+        "braintrust-evals",
+        "langsmith-evals"
+      ],
+      "journeys": [
+        "datasets-labeling",
+        "train-distill",
+        "compile-verify",
+        "runtime-inference",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "proof-mode",
+        "model-provider",
+        "privacy-mode",
+        "governance-mode"
+      ],
+      "readiness": [
+        "k-score-calibration",
+        "quality-scoring",
+        "evals-ab",
+        "shadow-mode",
+        "benchmarking-infra",
+        "holdout-independence"
+      ],
+      "metrics": [
+        "quality",
+        "proof",
+        "security",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.18,
+        "proof": 0.2,
+        "security": 0.08,
+        "enterprise": 0.12,
+        "dx": 0.08,
+        "conversion": 0.08
+      },
       "implementation_files": [
         "src/quality-calibration.js",
         "scripts/quality-calibration.mjs",
-        "public/benchmarks/quality-judge-calibration.json",
+        "public/benchmarks/trinity-500-benchmark.json",
         "src/compile-pipeline.js",
         "docs/quality-calibration.md",
         "tests/wave588-quality-calibration-contract.test.js"
@@ -606,7 +978,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-adaptive-eval-lab --summary",
-        "expected": ["k-score-calibration", "benchmarking-infra", "quality", "proof"]
+        "expected": [
+          "k-score-calibration",
+          "benchmarking-infra",
+          "quality",
+          "proof"
+        ]
       }
     },
     {
@@ -615,16 +992,53 @@
       "name": "Artifact Market Maker",
       "portfolio_invention_id": "artifact-market-maker",
       "thesis": "The registry should be Docker Hub plus Model Card plus receipt verifier for .kolm artifacts: searchable, versioned, diffable, deployable, private, license-tagged, dependency-aware, and honest about verification status.",
-      "research_refs": ["sigstore", "slsa", "predibase-adapters", "openpipe"],
-      "journeys": ["runtime-inference", "enterprise-governance", "agents-registry", "compile-verify"],
-      "dimensions": ["artifact-runtime", "deployment-mode", "governance-mode", "proof-mode"],
-      "readiness": ["registry-search", "version-diff", "deploy-buttons", "verified-publishers", "private-registry", "dependency-graphs", "foundation-standardization"],
-      "metrics": ["portability", "proof", "security", "enterprise", "dx", "conversion"],
-      "expected_metric_lift": { "portability": 0.18, "proof": 0.16, "security": 0.1, "enterprise": 0.12, "dx": 0.12, "conversion": 0.2 },
+      "research_refs": [
+        "sigstore",
+        "slsa",
+        "predibase-adapters",
+        "openpipe"
+      ],
+      "journeys": [
+        "runtime-inference",
+        "enterprise-governance",
+        "agents-registry",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "deployment-mode",
+        "governance-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "registry-search",
+        "version-diff",
+        "deploy-buttons",
+        "verified-publishers",
+        "private-registry",
+        "dependency-graphs",
+        "foundation-standardization"
+      ],
+      "metrics": [
+        "portability",
+        "proof",
+        "security",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "portability": 0.18,
+        "proof": 0.16,
+        "security": 0.1,
+        "enterprise": 0.12,
+        "dx": 0.12,
+        "conversion": 0.2
+      },
       "implementation_files": [
         "src/registry.js",
-        "public/registry.html",
-        "public/marketplace.html",
+        "docs/byo-registry.md",
+        "src/marketplace.js",
         "public/spec.html",
         "docs/format-governance-packet.md",
         "tests/wave590-governance-runtime-packets.test.js"
@@ -651,7 +1065,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-artifact-market-maker --summary",
-        "expected": ["registry-search", "foundation-standardization", "conversion", "proof"]
+        "expected": [
+          "registry-search",
+          "foundation-standardization",
+          "conversion",
+          "proof"
+        ]
       }
     },
     {
@@ -660,12 +1079,52 @@
       "name": "Agent Tool Compiler",
       "portfolio_invention_id": "agent-tool-compiler",
       "thesis": "Agents need signed, deterministic, policy-limited tools; Kolm should compile proven behavior into MCP-compatible tools with schema tests, token budgets, rate limits, fallback chains, receipts, and trace semantics.",
-      "research_refs": ["model-context-protocol", "opentelemetry-genai", "sigstore", "braintrust-evals"],
-      "journeys": ["compile-verify", "runtime-inference", "agents-registry", "enterprise-governance"],
-      "dimensions": ["artifact-runtime", "proof-mode", "deployment-mode", "governance-mode", "model-provider"],
-      "readiness": ["compile-as-mcp", "token-budget", "streaming", "fallback-chains", "prompt-compression", "semantic-cache", "opentelemetry"],
-      "metrics": ["quality", "latency", "cost", "proof", "security", "dx", "conversion"],
-      "expected_metric_lift": { "quality": 0.08, "latency": 0.09, "cost": 0.14, "proof": 0.16, "security": 0.13, "dx": 0.14, "conversion": 0.12 },
+      "research_refs": [
+        "model-context-protocol",
+        "opentelemetry-genai",
+        "sigstore",
+        "braintrust-evals"
+      ],
+      "journeys": [
+        "compile-verify",
+        "runtime-inference",
+        "agents-registry",
+        "enterprise-governance"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "proof-mode",
+        "deployment-mode",
+        "governance-mode",
+        "model-provider"
+      ],
+      "readiness": [
+        "compile-as-mcp",
+        "token-budget",
+        "streaming",
+        "fallback-chains",
+        "prompt-compression",
+        "semantic-cache",
+        "opentelemetry"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "proof",
+        "security",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.08,
+        "latency": 0.09,
+        "cost": 0.14,
+        "proof": 0.16,
+        "security": 0.13,
+        "dx": 0.14,
+        "conversion": 0.12
+      },
       "implementation_files": [
         "sdk/mcp/server.mjs",
         "src/mcp.js",
@@ -696,7 +1155,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-agent-tool-compiler --summary",
-        "expected": ["compile-as-mcp", "token-budget", "agent-tool-compiler", "dx"]
+        "expected": [
+          "compile-as-mcp",
+          "token-budget",
+          "agent-tool-compiler",
+          "dx"
+        ]
       }
     },
     {
@@ -705,12 +1169,51 @@
       "name": "Device Fit Autopilot",
       "portfolio_invention_id": "device-fit-autopilot",
       "thesis": "Device support is not a checkbox; Kolm should inspect memory, CPU/GPU/NPU availability, runtime packages, context length, privacy mode, and modality before recommending local, browser, mobile, edge, server, or cloud execution.",
-      "research_refs": ["onnx-runtime-eps", "iree-deploy", "tensorrt-llm", "cloudflare-r2-presigned"],
-      "journeys": ["multimodal-tokenization", "runtime-inference", "compute-cloud", "devices-fleet", "compile-verify"],
-      "dimensions": ["compute-target", "artifact-runtime", "deployment-mode", "privacy-mode", "proof-mode"],
-      "readiness": ["runtime-local-artifact", "runtime-wasm", "ios-android-sdk", "runtime-edge", "compute-openvino-qnn", "runtime-lts", "sdk-depth"],
-      "metrics": ["latency", "cost", "portability", "security", "dx", "conversion"],
-      "expected_metric_lift": { "latency": 0.16, "cost": 0.14, "portability": 0.2, "security": 0.08, "dx": 0.13, "conversion": 0.1 },
+      "research_refs": [
+        "onnx-runtime-eps",
+        "iree-deploy",
+        "tensorrt-llm",
+        "cloudflare-r2-presigned"
+      ],
+      "journeys": [
+        "multimodal-tokenization",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet",
+        "compile-verify"
+      ],
+      "dimensions": [
+        "compute-target",
+        "artifact-runtime",
+        "deployment-mode",
+        "privacy-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "runtime-local-artifact",
+        "runtime-wasm",
+        "ios-android-sdk",
+        "runtime-edge",
+        "compute-openvino-qnn",
+        "runtime-lts",
+        "sdk-depth"
+      ],
+      "metrics": [
+        "latency",
+        "cost",
+        "portability",
+        "security",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "latency": 0.16,
+        "cost": 0.14,
+        "portability": 0.2,
+        "security": 0.08,
+        "dx": 0.13,
+        "conversion": 0.1
+      },
       "implementation_files": [
         "src/platform-capabilities.js",
         "src/product-experience.js",
@@ -741,7 +1244,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-device-fit-autopilot --summary",
-        "expected": ["runtime-wasm", "ios-android-sdk", "sdk-depth", "portability"]
+        "expected": [
+          "runtime-wasm",
+          "ios-android-sdk",
+          "sdk-depth",
+          "portability"
+        ]
       }
     },
     {
@@ -750,12 +1258,59 @@
       "name": "Codegraph Product Indexer",
       "portfolio_invention_id": "codegraph-product-index",
       "thesis": "The codebase has too many routes and surfaces for manual confidence; Kolm needs a product graph that indexes every route, CLI command, TUI view, SDK, readiness gate, claim, package, and smoke probe as an always-failing-on-drift backend contract.",
-      "research_refs": ["braintrust-evals", "langsmith-evals", "opentelemetry-genai", "slsa"],
-      "journeys": ["gateway-capture", "privacy-lake", "datasets-labeling", "train-distill", "compile-verify", "runtime-inference", "compute-cloud", "devices-fleet", "enterprise-governance", "agents-registry"],
-      "dimensions": ["model-provider", "compute-target", "artifact-runtime", "storage-plane", "privacy-mode", "deployment-mode", "governance-mode", "proof-mode"],
-      "readiness": ["sdk-depth", "cli-world-class", "doctor-diagnostics", "local-account-ui", "one-line-install", "event-lake-schema", "webhooks-events"],
-      "metrics": ["quality", "proof", "security", "enterprise", "dx", "conversion"],
-      "expected_metric_lift": { "quality": 0.05, "proof": 0.12, "security": 0.08, "enterprise": 0.09, "dx": 0.2, "conversion": 0.1 },
+      "research_refs": [
+        "braintrust-evals",
+        "langsmith-evals",
+        "opentelemetry-genai",
+        "slsa"
+      ],
+      "journeys": [
+        "gateway-capture",
+        "privacy-lake",
+        "datasets-labeling",
+        "train-distill",
+        "compile-verify",
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet",
+        "enterprise-governance",
+        "agents-registry"
+      ],
+      "dimensions": [
+        "model-provider",
+        "compute-target",
+        "artifact-runtime",
+        "storage-plane",
+        "privacy-mode",
+        "deployment-mode",
+        "governance-mode",
+        "proof-mode"
+      ],
+      "readiness": [
+        "sdk-depth",
+        "cli-world-class",
+        "doctor-diagnostics",
+        "local-account-ui",
+        "one-line-install",
+        "event-lake-schema",
+        "webhooks-events"
+      ],
+      "metrics": [
+        "quality",
+        "proof",
+        "security",
+        "enterprise",
+        "dx",
+        "conversion"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.05,
+        "proof": 0.12,
+        "security": 0.08,
+        "enterprise": 0.09,
+        "dx": 0.2,
+        "conversion": 0.1
+      },
       "implementation_files": [
         "public/product-graph.json",
         "docs/product-surfaces.json",
@@ -786,7 +1341,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-codegraph-product-indexer --summary",
-        "expected": ["sdk-depth", "one-line-install", "dx", "proof"]
+        "expected": [
+          "sdk-depth",
+          "one-line-install",
+          "dx",
+          "proof"
+        ]
       }
     },
     {
@@ -795,12 +1355,51 @@
       "name": "Serving Runtime Optimizer",
       "portfolio_invention_id": "kolm-ir-autotarget",
       "thesis": "High-volume inference quality is decided by batching, KV-cache policy, prefix reuse, streaming semantics, semantic cache, fallback chains, and runtime-specific decoding; Kolm should produce a serving plan with measured constraints and safe fallbacks.",
-      "research_refs": ["sglang-speculative", "sglang-nvidia", "tensorrt-speculative", "opentelemetry-genai"],
-      "journeys": ["runtime-inference", "compute-cloud", "devices-fleet", "enterprise-governance", "agents-registry"],
-      "dimensions": ["artifact-runtime", "compute-target", "deployment-mode", "proof-mode", "governance-mode"],
-      "readiness": ["semantic-cache", "fallback-chains", "streaming", "model-routing", "runtime-telemetry-opt-in", "rate-limits-quotas", "prompt-compression"],
-      "metrics": ["quality", "latency", "cost", "proof", "enterprise", "dx"],
-      "expected_metric_lift": { "quality": 0.07, "latency": 0.22, "cost": 0.19, "proof": 0.1, "enterprise": 0.08, "dx": 0.07 },
+      "research_refs": [
+        "sglang-speculative",
+        "sglang-nvidia",
+        "tensorrt-speculative",
+        "opentelemetry-genai"
+      ],
+      "journeys": [
+        "runtime-inference",
+        "compute-cloud",
+        "devices-fleet",
+        "enterprise-governance",
+        "agents-registry"
+      ],
+      "dimensions": [
+        "artifact-runtime",
+        "compute-target",
+        "deployment-mode",
+        "proof-mode",
+        "governance-mode"
+      ],
+      "readiness": [
+        "semantic-cache",
+        "fallback-chains",
+        "streaming",
+        "model-routing",
+        "runtime-telemetry-opt-in",
+        "rate-limits-quotas",
+        "prompt-compression"
+      ],
+      "metrics": [
+        "quality",
+        "latency",
+        "cost",
+        "proof",
+        "enterprise",
+        "dx"
+      ],
+      "expected_metric_lift": {
+        "quality": 0.07,
+        "latency": 0.22,
+        "cost": 0.19,
+        "proof": 0.1,
+        "enterprise": 0.08,
+        "dx": 0.07
+      },
       "implementation_files": [
         "src/runtime.js",
         "src/model-routing.js",
@@ -831,7 +1430,12 @@
       ],
       "smoke_simulation": {
         "command": "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-serving-runtime-optimizer --summary",
-        "expected": ["semantic-cache", "fallback-chains", "latency", "cost"]
+        "expected": [
+          "semantic-cache",
+          "fallback-chains",
+          "latency",
+          "cost"
+        ]
       }
     }
   ]
