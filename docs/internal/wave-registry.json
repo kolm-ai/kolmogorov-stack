@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 285,
+    "orphan_tests": 286,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 288,
+    "state_local_green": 289,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 453,
-    "test_only_waves": 285,
-    "waves": 301
+    "test_files": 454,
+    "test_only_waves": 286,
+    "waves": 302
   },
-  "generated_at": "2026-06-17T09:12:36.960Z",
+  "generated_at": "2026-06-17T09:26:43.091Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -299,6 +299,7 @@
       "W604",
       "W605",
       "W606",
+      "W607",
       "W708",
       "W709",
       "W710",
@@ -593,6 +594,7 @@
       "W604",
       "W605",
       "W606",
+      "W607",
       "W708",
       "W709",
       "W710",
@@ -2430,7 +2432,7 @@
           "script": "npm:verify:federated"
         },
         {
-          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:quant-oracle && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
+          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:quant-oracle && npm run verify:kv-cache && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
           "script": "npm:verify:depth"
         }
       ],
@@ -3570,7 +3572,7 @@
           "script": "npm:verify:redaction-benchmark"
         },
         {
-          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:quant-oracle && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
+          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:quant-oracle && npm run verify:kv-cache && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
           "script": "npm:verify:depth"
         }
       ],
@@ -3646,7 +3648,7 @@
           "script": "npm:verify:federated"
         },
         {
-          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:quant-oracle && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
+          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:quant-oracle && npm run verify:kv-cache && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
           "script": "npm:verify:depth"
         }
       ],
@@ -3669,7 +3671,7 @@
           "script": "npm:verify:redaction-benchmark"
         },
         {
-          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:quant-oracle && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
+          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:quant-oracle && npm run verify:kv-cache && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
           "script": "npm:verify:depth"
         }
       ],
@@ -4046,6 +4048,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave606-quant-accuracy-floor.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W607",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "cli",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js",
+          "script": "npm:verify:kv-cache"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave607-kv-cache-cli-dispatch.test.js"
       ],
       "test_letter_suffixes": []
     },
@@ -5144,7 +5165,12 @@
       "plan_files": [
         "KOLM_W921_PLAN.md"
       ],
-      "proof_commands": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js",
+          "script": "npm:verify:kv-cache"
+        }
+      ],
       "secondary_sources": [],
       "state": "local_green",
       "test_files": [

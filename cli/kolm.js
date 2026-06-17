@@ -14262,7 +14262,7 @@ spec:
     // First positional arg that's not a flag is the artifact path.
     const artifact = args.find(a => !a.startsWith('--') && a !== 'serve');
     if (!artifact) {
-      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1] [--optimize] [--kv-cache auto|shard|default] [--speculative auto|off|<draft-model>] [--num-speculative-tokens N] [--prompt-cache auto|on|off] [--max-batch N]');
+      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1] [--optimize] [--kv-cache auto|off|streaming|h2o|snapkv|pyramidkv|kivi2|kivi4|shard] [--kv-budget F] [--kv-sink N] [--kv-window N] [--kv-group N] [--kv-residual N] [--speculative auto|off|<draft-model>] [--num-speculative-tokens N] [--prompt-cache auto|on|off] [--max-batch N]');
       nextStep({ run: 'kolm artifacts list', see: 'docs/run/serve.md' });
       process.exit(EXIT.BAD_ARGS);
     }
@@ -14365,28 +14365,38 @@ spec:
       }
     }
 
-    // SHARD — --kv-cache <auto|shard|default> policy gate. Resolves to a
-    // KOLM_KV_CACHE_BACKEND env var the Python serve.py child reads to decide
-    // between the default HuggingFace Cache and the Shard-compressed cache.
-    // Default 'auto' = Shard when (family, runtime, has_rope) all support it.
+    // W607 full KV policy dispatcher. Python serve.py reads KOLM_KV_POLICY;
+    // KOLM_KV_CACHE_BACKEND is retained only for Shard back-compat.
     try {
-      const kvIdx = args.indexOf('--kv-cache');
-      const requested = (kvIdx >= 0 && args[kvIdx + 1]) ? String(args[kvIdx + 1]).toLowerCase() : 'auto';
-      if (!['auto', 'shard', 'default'].includes(requested)) {
-        console.error(`error: --kv-cache must be one of: auto, shard, default (got '${requested}')`);
+      const requestedRaw = pickFlag(args, '--kv-cache') ?? 'auto';
+      const requested = String(requestedRaw).toLowerCase() === 'default'
+        ? 'off'
+        : String(requestedRaw).toLowerCase();
+      const allowedKv = ['auto', 'off', 'streaming', 'h2o', 'snapkv', 'pyramidkv', 'kivi2', 'kivi4', 'shard'];
+      if (!allowedKv.includes(requested)) {
+        console.error(`error: --kv-cache must be one of: ${allowedKv.join(', ')} (got '${requestedRaw}')`);
         process.exit(EXIT.BAD_ARGS);
       }
-      const { selectKvCache, formatPolicyReport } = await import('../src/kv-cache-policy.js');
+      const { selectKvCachePolicy, emitKvPolicyVllmConfig } = await import('../src/serve-config.js');
+      const numFlag = (name) => {
+        const raw = pickFlag(args, name);
+        if (raw === undefined || raw === null) return undefined;
+        const n = Number(raw);
+        if (!Number.isFinite(n)) {
+          console.error(`error: ${name} must be numeric (got '${raw}')`);
+          process.exit(EXIT.BAD_ARGS);
+        }
+        return n;
+      };
       // Best-effort family probe from the artifact manifest. We don't fail if
-      // it's missing — selectKvCache falls back to the SUPPORTED_MODEL_FAMILIES
-      // gate which rejects unknown families cleanly.
-      let family = null;
+      // it's missing; selectKvCachePolicy handles unknown families cleanly.
+      let modelMeta = {};
       try {
         const { loadArtifact } = await import('../src/artifact-runner.js');
         const bundle = loadArtifact(ap);
         const m = bundle?.manifest || {};
         const baseModel = String(m.base_model || m.base || '').toLowerCase();
-        family = m.model_family
+        const family = m.model_family
           || m.family
           || (baseModel.includes('qwen2.5') ? 'qwen2.5'
              : baseModel.includes('qwen3')  ? 'qwen3'
@@ -14398,15 +14408,38 @@ spec:
              : baseModel.includes('gemma')  ? 'gemma'
              : baseModel.includes('deepseek')? 'deepseek'
              : null);
-      } catch { /* artifact unreadable — selectKvCache will report unknown */ }
-      const policy = selectKvCache({
+        modelMeta = {
+          family,
+          has_rope: m.has_rope ?? (family ? true : undefined),
+          num_hidden_layers: m.num_hidden_layers || m.layers || m.config?.num_hidden_layers,
+        };
+      } catch { /* artifact unreadable; selectKvCachePolicy will report unknown */ }
+      const policyInput = {
         format: serveEnv.KOLM_SERVE_RUNTIME || 'vllm',
-        modelMeta: { family, has_rope: family ? true : undefined },
+        modelMeta,
         hardware: hwSummary ? { vram_gb: hwSummary.primary.vram_gb } : {},
+        workload: String(pickFlag(args, '--workload') || 'general'),
         requested,
-      });
-      serveEnv.KOLM_KV_CACHE_BACKEND = policy.backend;
-      console.log(formatPolicyReport(policy));
+        budget: numFlag('--kv-budget'),
+        sink_tokens: numFlag('--kv-sink'),
+        window_tokens: numFlag('--kv-window'),
+        group_size: numFlag('--kv-group'),
+        residual_length: numFlag('--kv-residual'),
+      };
+      const policy = selectKvCachePolicy(policyInput);
+      const applied = (!policy.runtime_can_enforce && policy.fallback && policy.fallback !== policy.policy)
+        ? selectKvCachePolicy({ ...policyInput, requested: policy.fallback })
+        : policy;
+      serveEnv.KOLM_KV_POLICY = JSON.stringify({ policy: applied.policy, kind: applied.kind, params: applied.params });
+      serveEnv.KOLM_KV_CACHE_BACKEND = applied.policy === 'shard' ? 'shard' : 'default';
+      if ((serveEnv.KOLM_SERVE_RUNTIME || '').toLowerCase() === 'vllm') {
+        const vllmKv = emitKvPolicyVllmConfig(applied, serveEnv.KOLM_SERVE_KV_CACHE_DTYPE || 'auto');
+        serveEnv.KOLM_SERVE_KV_CACHE_DTYPE = vllmKv.kv_cache_dtype;
+      }
+      console.log(`kv policy: ${applied.policy} (${applied.kind}, enforce=${applied.runtime_can_enforce})`);
+      console.log(`  ${policy.reason}`);
+      if (applied.policy !== policy.policy) console.log(`  applied fallback: ${applied.policy}`);
+      console.log(`  env: KOLM_KV_POLICY=${serveEnv.KOLM_KV_POLICY}`);
       console.log('');
     } catch (e) {
       console.log(`(kv-cache policy skipped: ${e.message})`);

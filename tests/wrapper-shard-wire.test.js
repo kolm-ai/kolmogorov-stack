@@ -80,18 +80,22 @@ test('shard-wire #4 — cmdServe --http usage line documents --kv-cache', () => 
   // The HTTP-serve usage line must list the --kv-cache flag so `--help` users
   // can discover it. We pin the exact substring.
   assert.match(src,
-    /usage: kolm serve --http <artifact\.kolm>[^']*--kv-cache auto\|shard\|default/,
-    'cmdServe --http usage line must list [--kv-cache auto|shard|default]');
+    /usage: kolm serve --http <artifact\.kolm>[^']*--kv-cache auto\|off\|streaming\|h2o\|snapkv\|pyramidkv\|kivi2\|kivi4\|shard/,
+    'cmdServe --http usage line must list the full KV policy set');
+  assert.match(src, /--kv-budget F/, 'cmdServe --http usage line must expose KV budget tuning');
 });
 
-test('shard-wire #5 — cmdServe wires KOLM_KV_CACHE_BACKEND into serveEnv', () => {
+test('shard-wire #5 — cmdServe wires KOLM_KV_POLICY into serveEnv', () => {
   const src = fs.readFileSync(path.join(REPO_ROOT, 'cli/kolm.js'), 'utf8');
   // The wire must:
-  //   - import selectKvCache from kv-cache-policy.js
-  //   - set serveEnv.KOLM_KV_CACHE_BACKEND = policy.backend
-  assert.match(src, /import\(\s*['"]\.\.\/src\/kv-cache-policy\.js['"]\s*\)/,
-    'must dynamic-import kv-cache-policy');
-  assert.match(src, /selectKvCache/, 'must call selectKvCache');
-  assert.match(src, /serveEnv\.KOLM_KV_CACHE_BACKEND\s*=\s*policy\.backend/,
-    'must set KOLM_KV_CACHE_BACKEND on the env passed to apps.runtime.serve');
+  //   - import selectKvCachePolicy from serve-config.js
+  //   - set KOLM_KV_POLICY for serve.py
+  //   - keep KOLM_KV_CACHE_BACKEND=shard for old Shard back-compat
+  assert.match(src, /import\(\s*['"]\.\.\/src\/serve-config\.js['"]\s*\)/,
+    'must dynamic-import serve-config');
+  assert.match(src, /selectKvCachePolicy/, 'must call selectKvCachePolicy');
+  assert.match(src, /serveEnv\.KOLM_KV_POLICY\s*=\s*JSON\.stringify/,
+    'must set KOLM_KV_POLICY on the env passed to apps.runtime.serve');
+  assert.match(src, /serveEnv\.KOLM_KV_CACHE_BACKEND\s*=\s*applied\.policy === 'shard' \? 'shard' : 'default'/,
+    'must retain KOLM_KV_CACHE_BACKEND shard compatibility');
 });

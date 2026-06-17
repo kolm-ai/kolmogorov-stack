@@ -83,12 +83,12 @@
   ],
   "summary": {
     "category_count": 16,
-    "categories_with_critical_frontier_work_open": 14,
+    "categories_with_critical_frontier_work_open": 13,
     "categories_with_major_frontier_work_open": 15,
     "total_atomic_component_links": 3501,
     "status_counts": {
-      "sota_review_complete_critical_frontier_work_open": 14,
-      "sota_review_complete_major_frontier_work_open": 2
+      "sota_review_complete_critical_frontier_work_open": 13,
+      "sota_review_complete_major_frontier_work_open": 3
     },
     "readiness_open_requirements": [
       {
@@ -1500,7 +1500,7 @@
     {
       "id": "kv-cache",
       "stack_area": "runtime",
-      "status": "sota_review_complete_critical_frontier_work_open",
+      "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
         "line": 263
@@ -1509,10 +1509,10 @@
         "line": 263,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 6,
-        "improvement_count": 5,
+        "already_at_frontier_count": 7,
+        "improvement_count": 4,
         "gaps": {
-          "critical": 1,
+          "critical": 0,
           "major": 2,
           "minor": 3
         }
@@ -1539,7 +1539,6 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wrapper-shard-wire.test.js",
               "tests/wrapper-shard.test.js"
             ],
             "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation"
