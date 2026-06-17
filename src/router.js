@@ -24,7 +24,7 @@ import { mountAuthEmail } from './auth-email.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert, tEmailReportReady } from './email.js';
 import { compileJs, verify } from './verifier.js';
 import { LIBRARY_VERSION, libraryDescription } from './library.js';
-import { all, findOne, findByField, findByTenant, insert, update, withTransaction, id as storeId, stats as storeStats } from './store.js';
+import { all, findOne, findByField, findByTenant, insert, update, remove, withTransaction, id as storeId, stats as storeStats } from './store.js';
 // LM-7 (V1 launch 2026-05-26) - server-side product metrics. recordEvent is
 // fire-and-forget so a metrics outage NEVER takes down the calling request.
 // See src/metrics.js for the (date,tenant,plan_tier,kind,outcome) bucket
@@ -1494,6 +1494,8 @@ export function buildRouter() {
       'X-Kolm-Privacy-Policy',
       'X-Kolm-Raw',
       'X-Kolm-Privacy-Override',
+      'Idempotency-Key',
+      'X-Idempotency-Key',
     ].join(', '));
     res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.set('Access-Control-Max-Age', '86400');
@@ -17355,6 +17357,215 @@ export function buildRouter() {
     }
     return { tool_calls: [], parse_source: 'none' };
   }
+
+  function __captureLogHeaderValue(v) {
+    if (Array.isArray(v)) v = v[0];
+    if (v == null) return '';
+    return String(v).trim();
+  }
+
+  function __captureLogBodyWithoutIdempotency(value) {
+    if (Array.isArray(value)) return value.map((v) => __captureLogBodyWithoutIdempotency(v));
+    if (value && typeof value === 'object') {
+      const out = {};
+      for (const key of Object.keys(value).sort()) {
+        if (key === 'idempotency_key') continue;
+        const next = __captureLogBodyWithoutIdempotency(value[key]);
+        if (next !== undefined) out[key] = next;
+      }
+      return out;
+    }
+    return value;
+  }
+
+  function __captureLogIdempotencyContext(req, body, tenantId) {
+    const key = (
+      __captureLogHeaderValue(req.headers['idempotency-key'])
+      || __captureLogHeaderValue(req.headers['x-idempotency-key'])
+      || __captureLogHeaderValue(body && body.idempotency_key)
+    ).slice(0, 200);
+    if (!key) return null;
+    const route = 'POST /v1/capture/log';
+    const tenant_id = String(tenantId || 'local');
+    const request_hash = 'sha256:' + sha256(canonicalJson(__captureLogBodyWithoutIdempotency(body || {})));
+    return {
+      id: 'idem_' + promptHash([tenant_id, route, key].join('|')).slice(0, 32),
+      tenant_id,
+      route,
+      method: 'POST',
+      path: '/v1/capture/log',
+      key,
+      request_hash,
+    };
+  }
+
+  function __captureLogFindIdempotencyRow(ctx) {
+    if (!ctx) return null;
+    return findOne('api_idempotency', (row) => row
+      && !row._deleted
+      && row.id === ctx.id
+      && row.tenant_id === ctx.tenant_id
+      && row.route === ctx.route);
+  }
+
+  function __captureLogPendingIdempotencyIsStale(row) {
+    const t = Date.parse(row && (row.updated_at || row.created_at));
+    if (!Number.isFinite(t)) return true;
+    return (Date.now() - t) > 15 * 60 * 1000;
+  }
+
+  function __captureLogCheckIdempotency(ctx, opts = {}) {
+    if (!ctx) return { active: false };
+    let out = { active: false, ctx };
+    withTransaction(() => {
+      const existing = __captureLogFindIdempotencyRow(ctx);
+      if (existing) {
+        if (existing.request_hash !== ctx.request_hash) {
+          out = { active: false, conflict: existing, ctx };
+          return;
+        }
+        if (existing.state === 'complete') {
+          out = { active: false, replay: existing, ctx };
+          return;
+        }
+        if (!__captureLogPendingIdempotencyIsStale(existing)) {
+          out = { active: false, pending: existing, ctx };
+          return;
+        }
+        remove('api_idempotency', (row) => row && row.id === ctx.id && row.tenant_id === ctx.tenant_id);
+      }
+      if (opts.reserve === true) {
+        const now = new Date().toISOString();
+        const row = {
+          id: ctx.id,
+          tenant_id: ctx.tenant_id,
+          method: ctx.method,
+          path: ctx.path,
+          route: ctx.route,
+          idempotency_key: ctx.key,
+          request_hash: ctx.request_hash,
+          state: 'pending',
+          created_at: now,
+          updated_at: now,
+        };
+        insert('api_idempotency', row);
+        out = { active: true, ctx, row };
+      }
+    });
+    return out;
+  }
+
+  function __captureLogSendIdempotencyResult(res, idem) {
+    if (!idem) return false;
+    if (idem.conflict) {
+      res.status(409).json({
+        ok: false,
+        error: 'idempotency_key_reused',
+        code: 'idempotency_conflict',
+        idempotency_key: idem.ctx.key,
+        required: 'same request body',
+      });
+      return true;
+    }
+    if (idem.pending) {
+      res.set('retry-after', '1');
+      res.status(409).json({
+        ok: false,
+        error: 'idempotency_key_in_progress',
+        code: 'idempotency_in_progress',
+        idempotency_key: idem.ctx.key,
+        hint: 'retry the same request after the first attempt completes',
+      });
+      return true;
+    }
+    if (idem.replay) {
+      const headers = idem.replay.response_headers && typeof idem.replay.response_headers === 'object'
+        ? idem.replay.response_headers
+        : {};
+      const allowed = new Set([
+        'x-kolm-namespace',
+        'x-kolm-capture-durable',
+        'x-kolm-distill-ready',
+        'x-kolm-distill-threshold',
+        'x-kolm-retention',
+        'x-kolm-no-store',
+        'x-kolm-event-durable',
+      ]);
+      for (const [k, v] of Object.entries(headers)) {
+        const lk = String(k).toLowerCase();
+        if (allowed.has(lk) && v != null) res.set(lk, String(v));
+      }
+      res.set('x-kolm-idempotent-replay', 'true');
+      const body = idem.replay.response_body && typeof idem.replay.response_body === 'object'
+        ? { ...idem.replay.response_body, idempotent_replay: true }
+        : { ok: true, idempotent_replay: true };
+      const statusCode = Number(idem.replay.status_code || idem.replay.status || 200) || 200;
+      res.status(statusCode).json(body);
+      return true;
+    }
+    return false;
+  }
+
+  function __captureLogCompleteIdempotency(idem, statusCode, responseBody, responseHeaders = {}) {
+    if (!idem || idem.active !== true || !idem.ctx) return;
+    const now = new Date().toISOString();
+    withTransaction(() => {
+      const patch = {
+        state: 'complete',
+        status_code: statusCode,
+        response_body: responseBody,
+        response_headers: responseHeaders,
+        updated_at: now,
+      };
+      const n = update('api_idempotency', (row) => row
+        && row.id === idem.ctx.id
+        && row.tenant_id === idem.ctx.tenant_id
+        && row.request_hash === idem.ctx.request_hash, patch);
+      if (!n) {
+        insert('api_idempotency', {
+          id: idem.ctx.id,
+          tenant_id: idem.ctx.tenant_id,
+          method: idem.ctx.method,
+          path: idem.ctx.path,
+          route: idem.ctx.route,
+          idempotency_key: idem.ctx.key,
+          request_hash: idem.ctx.request_hash,
+          created_at: now,
+          ...patch,
+        });
+      }
+    });
+  }
+
+  function __captureLogAbortIdempotency(idem) {
+    if (!idem || idem.active !== true || !idem.ctx) return;
+    withTransaction(() => {
+      remove('api_idempotency', (row) => row
+        && row.id === idem.ctx.id
+        && row.tenant_id === idem.ctx.tenant_id
+        && row.state === 'pending');
+    });
+  }
+
+  function __captureLogSendZeroRetention(res, cleanNs, idemCtx) {
+    const idem = __captureLogCheckIdempotency(idemCtx, { reserve: true });
+    if (__captureLogSendIdempotencyResult(res, idem)) return true;
+    __setZeroRetentionHeaders(res, cleanNs);
+    const responseHeaders = {
+      'x-kolm-retention': 'none',
+      'x-kolm-no-store': 'true',
+      'x-kolm-namespace': cleanNs,
+      'x-kolm-event-durable': 'false',
+    };
+    const responseBody = {
+      ok: true, retention: 'none', namespace: cleanNs, count: 0, ids: [],
+      message: 'zero-retention requested; no capture rows were persisted',
+    };
+    __captureLogCompleteIdempotency(idem, 202, responseBody, responseHeaders);
+    res.status(202).json(responseBody);
+    return true;
+  }
+
   async function recordCapture({ tenant, tenant_id, provider, model, namespace, prompt, response, latency_us, status, cost_usd, tokens_in, tokens_out, files, tool_calls, error: errorMsg, reasoning_trace, retrieved_context, tool_choice, tool_parse_source }) {
     if (!prompt || response === undefined || response === null) return null;
     const hash = promptHash(prompt + '|' + (model || ''));
@@ -17488,22 +17699,23 @@ export function buildRouter() {
     } catch (_) { /* header set failures must not break the capture path */ }
     const __toolChoiceHint = (body && body.tool_choice != null) ? body.tool_choice
       : (body && body.tool_choice_name != null ? body.tool_choice_name : undefined);
+    const __tenantId = (req.tenant_record && req.tenant_record.id) || req.tenant;
+    const __idemCtx = __captureLogIdempotencyContext(req, body, __tenantId);
+    const __idemPreflight = __captureLogCheckIdempotency(__idemCtx);
+    if (__captureLogSendIdempotencyResult(res, __idemPreflight)) return;
     if (__isZeroRetentionRequest(req, body)) {
-      __setZeroRetentionHeaders(res, cleanNs);
-      return res.status(202).json({
-        ok: true, retention: 'none', namespace: cleanNs, count: 0, ids: [],
-        message: 'zero-retention requested; no capture rows were persisted',
-      });
+      return __captureLogSendZeroRetention(res, cleanNs, __idemCtx);
     }
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'items must be a non-empty array of {input, output}' });
     }
     if (items.length > 200) return res.status(400).json({ error: 'items must be ≤200 per request' });
+    const __idem = __captureLogCheckIdempotency(__idemCtx, { reserve: true });
+    if (__captureLogSendIdempotencyResult(res, __idem)) return;
     // Post-loop contract: stored ZERO of N -> res.status(503) capture_store_unavailable.
     const ids = [], failures = [];
     let anyDurable = true;
     const __ragOpt = __ragHeader.retrieved.length > 0 ? __ragHeader.retrieved : undefined;
-    const __tenantId = (req.tenant_record && req.tenant_record.id) || req.tenant;
     for (const it of items) {
       const input = typeof it === 'object' ? (it.input ?? it.prompt ?? '') : String(it);
       const output = typeof it === 'object' ? (it.output ?? it.response ?? '') : '';
@@ -17524,6 +17736,7 @@ export function buildRouter() {
     // Stored ZERO -> 503 capture_store_unavailable; partial -> 207.
     if (ids.length === 0 && failures.length > 0) {
       res.set('x-kolm-capture-durable', 'false');
+      __captureLogAbortIdempotency(__idem);
       // LM-7 - capture_write outcome: failure (all items dropped).
       try {
         recordMetricEvent({
@@ -17539,9 +17752,15 @@ export function buildRouter() {
         count: 0, failures: failures.slice(0, 5),
       });
     }
-    res.set('x-kolm-namespace', cleanNs);
-    res.set('x-kolm-capture-durable', String(anyDurable));
-    if (notifIsDistillReady(req.tenant, cleanNs)) res.set('x-kolm-distill-ready', 'true');
+    const distillReady = notifIsDistillReady(req.tenant, cleanNs);
+    const responseHeaders = {
+      'x-kolm-namespace': cleanNs,
+      'x-kolm-capture-durable': String(anyDurable),
+      ...(distillReady ? { 'x-kolm-distill-ready': 'true' } : {}),
+    };
+    res.set('x-kolm-namespace', responseHeaders['x-kolm-namespace']);
+    res.set('x-kolm-capture-durable', responseHeaders['x-kolm-capture-durable']);
+    if (distillReady) res.set('x-kolm-distill-ready', 'true');
     const status = failures.length > 0 ? 207 : 201;
     // LM-7 - capture_write outcome bucketed: partial (207) vs success (201).
     try {
@@ -17554,10 +17773,12 @@ export function buildRouter() {
         namespace_id: cleanNs,
       });
     } catch (_) {} // deliberate: cleanup
-    res.status(status).json({
+    const responseBody = {
       ok: failures.length === 0, namespace: cleanNs, count: ids.length, ids,
       ...(failures.length > 0 ? { failures: failures.slice(0, 5) } : {}),
-    });
+    };
+    __captureLogCompleteIdempotency(__idem, status, responseBody, responseHeaders);
+    res.status(status).json(responseBody);
   });
 
   // GET /v1/capture/health - operator probe. Honest answer about whether
