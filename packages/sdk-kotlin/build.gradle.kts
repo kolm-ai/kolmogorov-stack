@@ -24,7 +24,7 @@ android {
 
 dependencies {
     implementation("androidx.annotation:annotation:1.8.0")
-    // Optional runtime AARs — declare on the consumer side, not here.
+    // Optional runtime AARs - declare on the consumer side, not here.
     // implementation("com.facebook.executorch:executorch-android:0.3.0")
     // implementation("com.microsoft.onnxruntime:onnxruntime-android:1.18.0")
 }

@@ -28,7 +28,7 @@ dependencies {
 
 Use `kolm export --backend gguf|executorch|onnx` on the desktop to produce
 the right file. Adding ExecuTorch or llama.cpp to your Android project is
-a one-time step (vendored AAR or Gradle dep) — the kolm-android wrapper
+a one-time step (vendored AAR or Gradle dep) - the kolm-android wrapper
 just dispatches.
 
 ## Receipt verification

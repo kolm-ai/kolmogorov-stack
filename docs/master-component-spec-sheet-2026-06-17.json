@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 92.3,
-    "frontier_product_score": 69.3,
+    "local_engineering_score": 92.4,
+    "frontier_product_score": 69.4,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 697,
-    "direct_test_reference_pct": 84.1,
-    "components_without_direct_test_reference": 132,
+    "direct_test_referenced_components": 698,
+    "direct_test_reference_pct": 84.2,
+    "components_without_direct_test_reference": 131,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -5043,7 +5043,7 @@
       "language": "kotlin",
       "composition": {
         "metrics": {
-          "bytes": 974,
+          "bytes": 972,
           "lines": 34,
           "imports": 0,
           "exports": 0,
@@ -5060,7 +5060,7 @@
         ],
         "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "3ccd7725878b7fb3bb5a2929e0467e0600b6ef03d1efa2ac4fad67e438aa534e"
+        "sha256": "2d293a38ae385380171855bdc886350038c20ac0458e57b2e18ca2cce310ac0c"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5069,7 +5069,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave591-package-local-build-contract.test.js"
+          "tests/wave591-package-local-build-contract.test.js",
+          "tests/wave678-sdk-kotlin-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -5089,7 +5090,7 @@
       "language": "markdown",
       "composition": {
         "metrics": {
-          "bytes": 1320,
+          "bytes": 1318,
           "lines": 48,
           "imports": 0,
           "exports": 0,
@@ -5107,7 +5108,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "108b3a52adb1b6c8f7d5b6905adf6f7138c9cca5fac4fe6250733c2527df3a56"
+        "sha256": "45375a2bcd0e445dd68043c858adfed8a234dfe29213a7a5fc1a6742cdea8b2c"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5143,8 +5144,8 @@
       "language": "kotlin",
       "composition": {
         "metrics": {
-          "bytes": 9138,
-          "lines": 238,
+          "bytes": 14058,
+          "lines": 361,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -5152,16 +5153,16 @@
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 7,
+          "crypto_refs": 9,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "1de412931de945fb38e7e2a7b010ee50a54383f0d2ae34a70ee56c824338bc7e"
+        "sha256": "a8040b2ebe455626fee2194d8e2057b2002367c18662288328b44883db7c497e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5169,7 +5170,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave678-sdk-kotlin-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
@@ -5177,10 +5180,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-python/kolm/__init__.py",
@@ -29723,7 +29724,8 @@
           "tests/wave431-source-mojibake-clean.test.js",
           "tests/wave588-package-release-readiness.test.js",
           "tests/wave591-package-local-build-contract.test.js",
-          "tests/wave671-homebrew-formula-contract.test.js"
+          "tests/wave671-homebrew-formula-contract.test.js",
+          "tests/wave678-sdk-kotlin-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",

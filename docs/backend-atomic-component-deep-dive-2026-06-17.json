@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 697,
-    "components_without_direct_test_reference": 132,
+    "test_referenced_components": 698,
+    "components_without_direct_test_reference": 131,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -4195,9 +4195,9 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "kotlin",
-      "sha256": "3ccd7725878b7fb3bb5a2929e0467e0600b6ef03d1efa2ac4fad67e438aa534e",
+      "sha256": "2d293a38ae385380171855bdc886350038c20ac0458e57b2e18ca2cce310ac0c",
       "metrics": {
-        "bytes": 974,
+        "bytes": 972,
         "lines": 34,
         "imports": 0,
         "exports": 0,
@@ -4210,7 +4210,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave591-package-local-build-contract.test.js"
+        "tests/wave591-package-local-build-contract.test.js",
+        "tests/wave678-sdk-kotlin-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -4252,9 +4253,9 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "markdown",
-      "sha256": "108b3a52adb1b6c8f7d5b6905adf6f7138c9cca5fac4fe6250733c2527df3a56",
+      "sha256": "45375a2bcd0e445dd68043c858adfed8a234dfe29213a7a5fc1a6742cdea8b2c",
       "metrics": {
-        "bytes": 1320,
+        "bytes": 1318,
         "lines": 48,
         "imports": 0,
         "exports": 0,
@@ -4317,10 +4318,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "kotlin",
-      "sha256": "1de412931de945fb38e7e2a7b010ee50a54383f0d2ae34a70ee56c824338bc7e",
+      "sha256": "a8040b2ebe455626fee2194d8e2057b2002367c18662288328b44883db7c497e",
       "metrics": {
-        "bytes": 9138,
-        "lines": 238,
+        "bytes": 14058,
+        "lines": 361,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -4328,15 +4329,17 @@
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 7,
+        "crypto_refs": 9,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave678-sdk-kotlin-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -32783,7 +32786,8 @@
         "tests/wave431-source-mojibake-clean.test.js",
         "tests/wave588-package-release-readiness.test.js",
         "tests/wave591-package-local-build-contract.test.js",
-        "tests/wave671-homebrew-formula-contract.test.js"
+        "tests/wave671-homebrew-formula-contract.test.js",
+        "tests/wave678-sdk-kotlin-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
