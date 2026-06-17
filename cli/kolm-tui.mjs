@@ -1056,9 +1056,57 @@ export const __test__ = {
   distillPane,
 };
 
+function workbenchUsage() {
+  return [
+    'kolm workbench TUI',
+    '',
+    'USAGE',
+    '  kolm play [file.kolm]',
+    '  kolm tui --workbench [file.kolm]',
+    '  node cli/kolm-tui.mjs [file.kolm]',
+    '',
+    'COMMANDS',
+    '  :run <text>      run the loaded artifact on text',
+    '  :serve [port]    expose POST /v1/run on localhost',
+    '  :tune <sub>      init | capture-on | capture-off | step | eval | promote | status',
+    '  :distill         curate -> SFT step -> grade',
+    '  :curate [ns]     deduplicate captured pairs',
+    '  :eval [json]     grade embedded eval cases or show eval JSON',
+    '  :exit            quit',
+    '',
+    'NOTES',
+    '  Requires an interactive terminal. For scripts, use `kolm inspect <file>` or `kolm run <file>`.',
+  ].join('\n') + '\n';
+}
+
+function isDirectEntrypoint() {
+  return import.meta.url === 'file://' + process.argv[1]
+    || (process.argv[1] && process.argv[1].endsWith('kolm-tui.mjs'));
+}
+
 // Entry point if invoked directly (node cli/kolm-tui.mjs <path?>)
-if (import.meta.url === 'file://' + process.argv[1] || process.argv[1] && process.argv[1].endsWith('kolm-tui.mjs')) {
-  const startPath = process.argv[2] || null;
+if (isDirectEntrypoint()) {
+  const directArgs = process.argv.slice(2);
+  if (directArgs.includes('--help') || directArgs.includes('-h')) {
+    process.stdout.write(workbenchUsage());
+    process.exit(0);
+  }
+  const unknownFlag = directArgs.find((a) => a.startsWith('-'));
+  if (unknownFlag) {
+    process.stderr.write('error: unknown flag for workbench TUI: ' + unknownFlag + '\n');
+    process.stderr.write(workbenchUsage());
+    process.exit(1);
+  }
+  const startPath = directArgs[0] || null;
+  if (startPath && !fs.existsSync(startPath)) {
+    process.stderr.write('error: not found: ' + startPath + '\n');
+    process.exit(5);
+  }
+  if (!process.stdout.isTTY) {
+    process.stderr.write('kolm workbench requires a TTY (interactive terminal).\n');
+    process.stderr.write('  non-interactive alternatives: kolm inspect <file> / kolm run <file>\n');
+    process.exit(3);
+  }
   runTui({ startPath: startPath }).catch(function (err) {
     process.stdout.write(ALT_BUFFER_OUT + SHOW_CURSOR);
     console.error(err);

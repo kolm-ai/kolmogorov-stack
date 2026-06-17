@@ -741,7 +741,8 @@ COMMANDS
   chat                             kolm-assistant REPL (local GGUF -> api -> gateway fallback; :exit to quit)
   "<natural language>"             quoted multi-word first arg routes through kolm-assistant (--no-assistant to opt out)
   assistant <sub>                  assistant orchestrator (compile | run | chat | bench | publish)
-  tui                              interactive .kolm shell (drag-drop artifacts + REST equivalents)
+  tui                              operator dashboard; use --workbench for artifact training
+  play [file.kolm]                 artifact workbench TUI (:run/:tune/:distill/:curate/:eval)
   config [base|api_key] [value]    inspect or set config
   completion <bash|zsh|fish>       emit a shell completion script for the requested shell
   upgrade                          check for a newer kolm release (does not install)
