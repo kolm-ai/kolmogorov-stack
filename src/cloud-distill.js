@@ -40,6 +40,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {
+  submitSchedulerJob,
+  cancelSchedulerJob,
+  advanceSchedulerJobState,
+  _resetSchedulerForTests,
+} from './compute-scheduler.js';
 
 export const CLOUD_DISTILL_VERSION = 'w785-v1';
 
@@ -253,8 +259,74 @@ export function submitJob(opts) {
 
   const backend = getCloudBackendStatus(o);
   const now = _now();
+  const job_id = _newJobId();
+  const scheduler_idempotency_key = (typeof o.idempotency_key === 'string' && o.idempotency_key)
+    ? o.idempotency_key
+    : null;
+  const scheduler = submitSchedulerJob({
+    tenant,
+    family: 'cloud-distill',
+    operation: 'distill',
+    idempotency_key: scheduler_idempotency_key,
+    priority: o.priority || o.plan_tier,
+    lane: backend.status === 'no_pool_configured' ? 'managed-distill-pool-unconfigured' : 'managed-distill-pool',
+    estimated_cost_usd: o.estimated_cost_usd,
+    budget_usd: o.budget_usd,
+    max_attempts: o.max_attempts || 3,
+    payload: {
+      namespace,
+      capture_window,
+      recipe_id,
+      gpu_sku,
+      vram_tier,
+      cloud_backend_status: backend.status,
+      cloud_backend_endpoint: backend.endpoint,
+    },
+    labels: {
+      source: 'cloud-distill',
+      backend_status: backend.status,
+    },
+    lineage: {
+      cloud_distill_job_id: job_id,
+      meter_ledger: 'training',
+    },
+  });
+  if (!scheduler.ok) {
+    return {
+      ok: false,
+      error: scheduler.error || 'scheduler_rejected',
+      scheduler,
+      version: CLOUD_DISTILL_VERSION,
+    };
+  }
+  if (scheduler.idempotent_replay) {
+    const existing_id = scheduler.job?.lineage?.cloud_distill_job_id || null;
+    const existing = existing_id ? _findOne(tenant, existing_id) : null;
+    if (existing) {
+      return {
+        ok: true,
+        created: false,
+        idempotent_replay: true,
+        job_id: existing.job_id,
+        state: existing.state,
+        cloud_backend_status: existing.cloud_backend_status,
+        cloud_backend_endpoint: existing.cloud_backend_endpoint,
+        scheduler_job_id: scheduler.job_id,
+        scheduler_state: scheduler.job?.state || null,
+        namespace: existing.namespace,
+        capture_window: existing.capture_window,
+        recipe_id: existing.recipe_id,
+        gpu_sku: existing.gpu_sku,
+        vram_tier: existing.vram_tier,
+        rate_per_gpu_hour_usd: CLOUD_METER_RATES.training_per_gpu_hour_usd[existing.gpu_sku]
+          * CLOUD_METER_RATES.vram_tier_multiplier[existing.vram_tier],
+        created_at: existing.created_at,
+        version: CLOUD_DISTILL_VERSION,
+      };
+    }
+  }
   const row = {
-    job_id: _newJobId(),
+    job_id,
     tenant_id: tenant,
     namespace,
     capture_window,
@@ -265,6 +337,8 @@ export function submitJob(opts) {
     state: 'queued',
     cloud_backend_status: backend.status,
     cloud_backend_endpoint: backend.endpoint,
+    scheduler_job_id: scheduler.job_id,
+    scheduler_state: scheduler.job?.state || 'queued',
     artifact_url: null,
     error: null,
     created_at: now,
@@ -301,6 +375,8 @@ export function submitJob(opts) {
     state: 'queued',
     cloud_backend_status: backend.status,
     cloud_backend_endpoint: backend.endpoint,
+    scheduler_job_id: scheduler.job_id,
+    scheduler_state: scheduler.job?.state || 'queued',
     meter_initial,
     namespace,
     capture_window,
@@ -342,6 +418,8 @@ export function getJobStatus(opts) {
     state: row.state,
     cloud_backend_status: row.cloud_backend_status,
     cloud_backend_endpoint: row.cloud_backend_endpoint,
+    scheduler_job_id: row.scheduler_job_id || null,
+    scheduler_state: row.scheduler_state || null,
     artifact_url: row.artifact_url,
     error: row.error,
     gpu_sku: row.gpu_sku,
@@ -394,6 +472,18 @@ export function cancelJob(opts) {
     cancel_reason: reason,
   });
   _appendLine(_jobsPath(), next);
+  if (current.scheduler_job_id) {
+    try {
+      cancelSchedulerJob({
+        tenant,
+        job_id: current.scheduler_job_id,
+        reason,
+      });
+    } catch (_) {
+      // The cloud-distill cancellation remains authoritative for this ledger;
+      // scheduler cancellation is best-effort if the scheduler file was pruned.
+    }
+  }
   return {
     ok: true,
     job_id,
@@ -596,8 +686,29 @@ export function advanceJobState(opts) {
       : current.finished_at,
     artifact_url: typeof o.artifact_url === 'string' ? o.artifact_url : current.artifact_url,
     error: typeof o.error === 'string' ? o.error : current.error,
+    scheduler_state: next_state === 'running'
+      ? 'running'
+      : (next_state === 'succeeded' ? 'succeeded'
+        : (next_state === 'failed' ? 'dead_letter'
+          : (next_state === 'cancelled' ? 'cancelled' : current.scheduler_state))),
   });
   _appendLine(_jobsPath(), next);
+  if (current.scheduler_job_id) {
+    const schedulerState = next_state === 'failed' ? 'dead_letter' : next.scheduler_state;
+    try {
+      advanceSchedulerJobState({
+        tenant,
+        job_id: current.scheduler_job_id,
+        state: schedulerState,
+        result: next_state === 'succeeded' ? { artifact_url: next.artifact_url } : null,
+        error: next.error || null,
+        reason: 'cloud_distill_state_update',
+      });
+    } catch (_) {
+      // Keep the cloud-distill transition append-only even if the scheduler
+      // file was pruned or repaired separately.
+    }
+  }
   return {
     ok: true,
     job_id,
@@ -613,6 +724,7 @@ export function _resetForTests() {
   for (const p of [_jobsPath(), _meterPath()]) {
     try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch { /* ignore */ }
   }
+  try { _resetSchedulerForTests(); } catch { /* ignore */ }
 }
 
 export default {

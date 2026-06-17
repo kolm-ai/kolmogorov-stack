@@ -1,5 +1,7 @@
 import { objectStorageReadiness } from './object-storage.js';
 import { rankQuantizationStrategies } from './quantization-oracle.js';
+import { estimate as estimateComputeCost } from './compute/estimator.js';
+import { submitSchedulerJob } from './compute-scheduler.js';
 
 const WORKLOADS = Object.freeze(['train', 'distill', 'compile', 'quantize', 'inference', 'serve']);
 const PRIVACY_MODES = Object.freeze(['standard', 'regulated', 'zero_retention', 'airgap']);
@@ -532,6 +534,104 @@ function buildExecutionSpec(lane, profile, command) {
   return spec;
 }
 
+function schedulerCostEstimate(lane, backend, spec, opts = {}) {
+  const explicit = Number(opts.estimated_cost_usd);
+  if (Number.isFinite(explicit) && explicit >= 0) return explicit;
+  if (!lane || lane.execution === 'local') return 0;
+  if (!backend) return null;
+  try {
+    const est = estimateComputeCost(spec, backend);
+    return est && est.supported && Number.isFinite(est.cost_usd) ? est.cost_usd : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+export function scheduleCloudCompute(input = {}, opts = {}) {
+  const env = opts.env || process.env;
+  const tenant = opts.tenant || input.tenant || 'local';
+  const plan = planCloudCompute(input, env);
+  const rec = plan.recommendation;
+  if (!rec) {
+    return { ok: false, reason: 'no_recommendation', plan };
+  }
+  if (rec.state === 'infeasible') {
+    return { ok: false, reason: 'recommended_lane_infeasible', blockers: rec.blockers || [], plan };
+  }
+  const lane = LANES.find((l) => l.id === rec.id) || null;
+  const backend = laneComputeBackend(lane);
+  const command = rec.run_command || rec.quote_command || null;
+  if (!backend) {
+    return {
+      ok: false,
+      reason: 'lane_has_no_compute_adapter',
+      lane: rec.id,
+      execution: rec.execution,
+      next_command: command,
+      plan,
+    };
+  }
+  const spec = buildExecutionSpec(lane, plan.profile, command);
+  const estimatedCostUsd = schedulerCostEstimate(lane, backend, spec, opts);
+  const budgetUsd = opts.budget_usd ?? (plan.profile.budget_usd || null);
+  const scheduled = submitSchedulerJob({
+    tenant,
+    family: 'compute',
+    operation: plan.profile.workload,
+    idempotency_key: opts.idempotency_key || input.idempotency_key,
+    priority: opts.priority || input.priority || input.plan_tier,
+    lane: rec.id,
+    estimated_cost_usd: estimatedCostUsd,
+    budget_usd: budgetUsd,
+    max_attempts: opts.max_attempts,
+    lease_ms: opts.lease_ms,
+    retry_base_ms: opts.retry_base_ms,
+    payload: {
+      profile: plan.profile,
+      command,
+      backend,
+      execution: rec.execution,
+      spec,
+    },
+    labels: {
+      source: 'cloud-compute-broker',
+      workload: plan.profile.workload,
+      backend,
+      execution: rec.execution,
+    },
+    lineage: {
+      broker_spec: plan.spec,
+      recommendation_id: rec.id,
+      storage_provider: plan.storage?.selected_provider || null,
+    },
+  });
+  if (!scheduled.ok) {
+    return {
+      ok: false,
+      reason: scheduled.error || 'scheduler_rejected',
+      scheduler: scheduled,
+      lane: rec.id,
+      backend,
+      command,
+      plan,
+    };
+  }
+  return {
+    ok: true,
+    scheduled: true,
+    dry_run: true,
+    mode: 'scheduled',
+    backend,
+    lane: rec.id,
+    command,
+    spec,
+    estimated_cost_usd: estimatedCostUsd,
+    scheduler_job_id: scheduled.job_id,
+    scheduler: scheduled,
+    plan,
+  };
+}
+
 /**
  * Execution bridge from a broker recommendation to a live compute job.
  *
@@ -552,6 +652,9 @@ function buildExecutionSpec(lane, profile, command) {
  *   { ok:true, mode:'local'|'rented', backend, job } executed
  */
 export async function runCloudCompute(input = {}, opts = {}) {
+  if (opts.schedule === true || opts.enqueue === true) {
+    return scheduleCloudCompute(input, opts);
+  }
   const env = opts.env || process.env;
   const confirm = opts.confirm === true;
   const plan = planCloudCompute(input, env);
@@ -623,5 +726,6 @@ export async function runCloudCompute(input = {}, opts = {}) {
 export default {
   cloudComputeBrokerCatalog,
   planCloudCompute,
+  scheduleCloudCompute,
   runCloudCompute,
 };

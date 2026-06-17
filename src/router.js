@@ -260,7 +260,7 @@ import { attachEnvelopeHeaders, okEnvelope } from './envelope.js';
 import { cloudReadinessSummary, listPlatformCapabilities } from './platform-capabilities.js';
 import { objectStorageReadiness } from './object-storage.js';
 import { quantizationOracleCatalog, rankQuantizationStrategies } from './quantization-oracle.js';
-import { cloudComputeBrokerCatalog, planCloudCompute } from './cloud-compute-broker.js';
+import { cloudComputeBrokerCatalog, planCloudCompute, scheduleCloudCompute } from './cloud-compute-broker.js';
 import { distillStrategyCatalog, planDistillStrategy } from './distill-strategy.js';
 import { buildStrategyCatalog, planBuildStrategy } from './build-strategy-brain.js';
 import {
@@ -29189,6 +29189,211 @@ res.json({
         error: 'cloud_distill_cancel_error',
         detail: String((e && e.message) || e),
         version: 'w785-v1',
+      });
+    }
+  });
+
+  // ============================================================================
+  // C8 - durable compute scheduler.
+  //
+  // Worker-facing queue surface for the shared scheduler. These routes are
+  // mounted after authMiddleware; every read/write is fenced to
+  // req.tenant_record.id and delegates to src/compute-scheduler.js.
+  // ============================================================================
+  r.post('/v1/cloud/broker/schedule', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const body = req.body || {};
+      const out = scheduleCloudCompute(body, {
+        env: process.env,
+        tenant: req.tenant_record.id,
+        priority: body.priority || body.plan_tier || req.tenant_record.plan,
+        idempotency_key: req.headers['idempotency-key'] || body.idempotency_key,
+        budget_usd: body.budget_usd,
+        max_attempts: body.max_attempts,
+        lease_ms: body.lease_ms,
+      });
+      return res.status(out.ok ? 200 : 400).json(out);
+    } catch (e) {
+      return res.status(500).json({
+        ok: false,
+        error: 'cloud_broker_schedule_error',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
+  r.get('/v1/compute/scheduler/jobs', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compute-scheduler.js');
+      const out = mod.listSchedulerJobs({
+        tenant: req.tenant_record.id,
+        family: typeof req.query.family === 'string' ? req.query.family : null,
+        state: typeof req.query.state === 'string' ? req.query.state : null,
+        limit: req.query.limit ? Number(req.query.limit) : null,
+      });
+      return res.status(200).json(out);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: 'scheduler_list_error',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
+  r.post('/v1/compute/scheduler/jobs', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compute-scheduler.js');
+      const body = req.body || {};
+      const out = mod.submitSchedulerJob({
+        tenant: req.tenant_record.id,
+        family: body.family,
+        operation: body.operation,
+        idempotency_key: req.headers['idempotency-key'] || body.idempotency_key,
+        priority: body.priority || req.tenant_record.plan,
+        lane: body.lane,
+        estimated_cost_usd: body.estimated_cost_usd,
+        budget_usd: body.budget_usd,
+        max_attempts: body.max_attempts,
+        lease_ms: body.lease_ms,
+        retry_base_ms: body.retry_base_ms,
+        payload: body.payload || {},
+        labels: body.labels || {},
+        lineage: body.lineage || {},
+      });
+      return res.status(out.ok ? 200 : 400).json(out);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: 'scheduler_submit_error',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
+  r.get('/v1/compute/scheduler/jobs/:job_id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compute-scheduler.js');
+      const out = mod.getSchedulerJob({
+        tenant: req.tenant_record.id,
+        job_id: req.params.job_id,
+      });
+      return res.status(out.ok ? 200 : (out.error === 'not_found' ? 404 : 400)).json(out);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: 'scheduler_status_error',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
+  r.post('/v1/compute/scheduler/claim', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compute-scheduler.js');
+      const body = req.body || {};
+      const out = mod.claimNextSchedulerJob({
+        tenant: req.tenant_record.id,
+        worker_id: body.worker_id,
+        worker_lanes: Array.isArray(body.worker_lanes) ? body.worker_lanes : [],
+        families: Array.isArray(body.families) ? body.families : [],
+        lease_ms: body.lease_ms,
+      });
+      return res.status(out.ok ? 200 : 400).json(out);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: 'scheduler_claim_error',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
+  r.post('/v1/compute/scheduler/jobs/:job_id/heartbeat', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compute-scheduler.js');
+      const body = req.body || {};
+      const out = mod.heartbeatSchedulerJob({
+        tenant: req.tenant_record.id,
+        job_id: req.params.job_id,
+        lease_token: body.lease_token,
+        lease_ms: body.lease_ms,
+      });
+      return res.status(out.ok ? 200 : 400).json(out);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: 'scheduler_heartbeat_error',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
+  r.post('/v1/compute/scheduler/jobs/:job_id/complete', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compute-scheduler.js');
+      const body = req.body || {};
+      const out = mod.completeSchedulerJob({
+        tenant: req.tenant_record.id,
+        job_id: req.params.job_id,
+        lease_token: body.lease_token,
+        result: body.result || {},
+      });
+      return res.status(out.ok ? 200 : 400).json(out);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: 'scheduler_complete_error',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
+  r.post('/v1/compute/scheduler/jobs/:job_id/fail', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compute-scheduler.js');
+      const body = req.body || {};
+      const out = mod.failSchedulerJob({
+        tenant: req.tenant_record.id,
+        job_id: req.params.job_id,
+        lease_token: body.lease_token,
+        error: typeof body.error === 'string' ? body.error : 'worker_failed',
+        retryable: body.retryable !== false,
+      });
+      return res.status(out.ok ? 200 : 400).json(out);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: 'scheduler_fail_error',
+        detail: String((e && e.message) || e),
+      });
+    }
+  });
+
+  r.delete('/v1/compute/scheduler/jobs/:job_id', async (req, res) => {
+    if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
+    try {
+      const mod = await import('./compute-scheduler.js');
+      const body = req.body || {};
+      const out = mod.cancelSchedulerJob({
+        tenant: req.tenant_record.id,
+        job_id: req.params.job_id,
+        reason: typeof body.reason === 'string' ? body.reason : '',
+      });
+      return res.status(out.ok ? 200 : (out.error === 'not_found' ? 404 : 400)).json(out);
+    } catch (e) {
+      return res.status(400).json({
+        ok: false,
+        error: 'scheduler_cancel_error',
+        detail: String((e && e.message) || e),
       });
     }
   });
