@@ -30,19 +30,30 @@ caller pick the prompt-lookup path.
 
 from __future__ import annotations
 import os
+import re
 from typing import Optional, Dict, Any
 
 
 # Known good draft / target family pairings. Keys are normalized model ids.
+# Mirrors src/speculative-decoding.js DRAFT_PAIRINGS - keep them in sync.
 DRAFT_PAIRINGS: Dict[str, str] = {
     "qwen/qwen2.5-7b-instruct": "Qwen/Qwen2.5-1.5B-Instruct",
     "qwen/qwen2.5-14b-instruct": "Qwen/Qwen2.5-3B-Instruct",
     "qwen/qwen2.5-32b-instruct": "Qwen/Qwen2.5-7B-Instruct",
+    "qwen/qwen2.5-72b-instruct": "Qwen/Qwen2.5-7B-Instruct",
+    "qwen/qwen3-8b": "Qwen/Qwen3-1.7B",
+    "qwen/qwen3-14b": "Qwen/Qwen3-1.7B",
+    "qwen/qwen3-32b": "Qwen/Qwen3-4B",
     "meta-llama/llama-3.2-3b-instruct": "meta-llama/Llama-3.2-1B-Instruct",
     "meta-llama/meta-llama-3-8b-instruct": "meta-llama/Llama-3.2-1B-Instruct",
+    "meta-llama/llama-3.1-8b-instruct": "meta-llama/Llama-3.2-1B-Instruct",
+    "meta-llama/llama-3.1-70b-instruct": "meta-llama/Llama-3.2-3B-Instruct",
     "google/gemma-3-12b-it": "google/gemma-3-1b-it",
     "google/gemma-3-4b-it": "google/gemma-3-1b-it",
+    "google/gemma-2-9b-it": "google/gemma-2-2b-it",
+    "google/gemma-2-27b-it": "google/gemma-2-2b-it",
     "microsoft/phi-3.5-mini-instruct": "Qwen/Qwen2.5-1.5B-Instruct",
+    "mistralai/mistral-7b-instruct-v0.3": "Qwen/Qwen2.5-1.5B-Instruct",
 }
 
 
@@ -50,7 +61,13 @@ def pick_draft(target_id: str) -> Optional[str]:
     """Return the draft model id for a target, or None if no good pair."""
     if not target_id:
         return None
-    return DRAFT_PAIRINGS.get(target_id.lower())
+    key = target_id.lower().strip()
+    if key in DRAFT_PAIRINGS:
+        return DRAFT_PAIRINGS[key]
+    stripped = re.sub(r"-(awq|gptq|bnb-4bit|nf4|fp8|fp16|bf16|q[0-9]_[a-z][_a-z]*)$", "", key, flags=re.I)
+    if stripped != key:
+        return DRAFT_PAIRINGS.get(stripped)
+    return None
 
 
 def build_assistant_kwargs(

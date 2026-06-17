@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 295,
+    "orphan_tests": 296,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 298,
+    "state_local_green": 299,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 463,
-    "test_only_waves": 295,
-    "waves": 311
+    "test_files": 464,
+    "test_only_waves": 296,
+    "waves": 312
   },
-  "generated_at": "2026-06-17T15:00:00.662Z",
+  "generated_at": "2026-06-17T15:05:55.471Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -309,6 +309,7 @@
       "W614",
       "W616",
       "W622",
+      "W635",
       "W708",
       "W709",
       "W710",
@@ -613,6 +614,7 @@
       "W614",
       "W616",
       "W622",
+      "W635",
       "W708",
       "W709",
       "W710",
@@ -4117,7 +4119,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js",
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js",
           "script": "npm:verify:kv-cache"
         }
       ],
@@ -4296,6 +4298,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave622-teacher-source-api.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W635",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js",
+          "script": "npm:verify:kv-cache"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave635-speculative-registry-sync.test.js"
       ],
       "test_letter_suffixes": []
     },
@@ -5435,7 +5456,7 @@
           "script": "npm:verify:finetune-frameworks"
         },
         {
-          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js",
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js",
           "script": "npm:verify:kv-cache"
         },
         {
