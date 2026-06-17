@@ -39,9 +39,9 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 668,
-    "components_without_direct_test_reference": 161,
-    "high_priority_components": 49,
+    "test_referenced_components": 669,
+    "components_without_direct_test_reference": 160,
+    "high_priority_components": 48,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -19482,14 +19482,16 @@
         "crypto_refs": 75,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave649-device-daemon-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "network_or_provider_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 7,
+      "priority_score": 6,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -19514,7 +19516,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
       "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
       "suggested_verification": [
         "npm run verify:platform",

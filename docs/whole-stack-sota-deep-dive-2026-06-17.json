@@ -201,10 +201,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 140
+        "line": 141
       },
       "local_sota_review": {
-        "line": 140,
+        "line": 141,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -637,10 +637,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 194
+        "line": 195
       },
       "local_sota_review": {
-        "line": 194,
+        "line": 195,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -1070,10 +1070,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 241
+        "line": 242
       },
       "local_sota_review": {
-        "line": 241,
+        "line": 242,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1518,10 +1518,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 286
+        "line": 287
       },
       "local_sota_review": {
-        "line": 286,
+        "line": 287,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -1956,10 +1956,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 328
+        "line": 329
       },
       "local_sota_review": {
-        "line": 328,
+        "line": 329,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2360,10 +2360,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 362
+        "line": 363
       },
       "local_sota_review": {
-        "line": 362,
+        "line": 363,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2543,19 +2543,6 @@
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
           },
           {
-            "path": "src/device-daemon.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/device-install.js",
             "domain": "infra_cloud_device",
             "priority_score": 7,
@@ -2682,6 +2669,23 @@
               "tests/finalized-c8-durable-compute-scheduler.test.js",
               "tests/secure-training.test.js",
               "tests/sota-persistence.test.js"
+            ],
+            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
+          },
+          {
+            "path": "src/cloud-sync.js",
+            "domain": "infra_cloud_device",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave378-cloud-sync.test.js",
+              "tests/wave384-cli-wiring.test.js",
+              "tests/wave384-router-wiring.test.js"
             ],
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
           }
@@ -2817,10 +2821,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 403
+        "line": 404
       },
       "local_sota_review": {
-        "line": 403,
+        "line": 404,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -3269,10 +3273,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 446
+        "line": 447
       },
       "local_sota_review": {
-        "line": 446,
+        "line": 447,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3728,10 +3732,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 481
+        "line": 482
       },
       "local_sota_review": {
-        "line": 481,
+        "line": 482,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -3949,19 +3953,6 @@
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
           },
           {
-            "path": "src/device-daemon.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/device-install.js",
             "domain": "infra_cloud_device",
             "priority_score": 7,
@@ -4052,6 +4043,18 @@
               "tests/research-docs.test.js"
             ],
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
+          },
+          {
+            "path": "packages/sdk-ts/src/index.ts",
+            "domain": "developer_distribution",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [],
+            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
         "count": 241,
@@ -4195,10 +4198,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 509
+        "line": 510
       },
       "local_sota_review": {
-        "line": 509,
+        "line": 510,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4659,10 +4662,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 556
+        "line": 557
       },
       "local_sota_review": {
-        "line": 556,
+        "line": 557,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -5126,10 +5129,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 589
+        "line": 590
       },
       "local_sota_review": {
-        "line": 589,
+        "line": 590,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5635,10 +5638,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 620
+        "line": 621
       },
       "local_sota_review": {
-        "line": 620,
+        "line": 621,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6136,10 +6139,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 666
+        "line": 667
       },
       "local_sota_review": {
-        "line": 666,
+        "line": 667,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -6332,19 +6335,6 @@
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
           },
           {
-            "path": "src/device-daemon.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/device-install.js",
             "domain": "infra_cloud_device",
             "priority_score": 7,
@@ -6480,6 +6470,18 @@
               "tests/finalized-c4-distill-method-truthfulness.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "src/airgap-bundle.js",
+            "domain": "infra_cloud_device",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [],
+            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
         "count": 253,
@@ -6602,10 +6604,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 716
+        "line": 717
       },
       "local_sota_review": {
-        "line": 716,
+        "line": 717,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -7077,10 +7079,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 763
+        "line": 764
       },
       "local_sota_review": {
-        "line": 763,
+        "line": 764,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,
@@ -7341,19 +7343,6 @@
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
           },
           {
-            "path": "src/device-daemon.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/device-install.js",
             "domain": "infra_cloud_device",
             "priority_score": 7,
@@ -7427,6 +7416,23 @@
             ],
             "test_refs": [],
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
+          },
+          {
+            "path": "packages/sdk-ts/README.md",
+            "domain": "developer_distribution",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/path-to-100-w2-truth-in-labeling.test.js",
+              "tests/r4-deploy-generators.test.js",
+              "tests/research-docs.test.js"
+            ],
+            "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           }
         ],
         "count": 328,
