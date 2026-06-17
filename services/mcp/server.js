@@ -22,8 +22,10 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import { runArtifact, inspectArtifact } from '../../src/artifact-runner.js';
 import { findProjectConfig, resolveArtifactPaths } from '../../src/project.js';
+import { canonicalJson } from '../../src/cid.js';
 
 const PROTOCOL_VERSION = '2024-11-05';
+const MAX_HTTP_BODY_BYTES = 1024 * 1024;
 
 function listArtifactsInDir(artifactsDir) {
   if (!fs.existsSync(artifactsDir)) return [];
@@ -32,8 +34,13 @@ function listArtifactsInDir(artifactsDir) {
     .map(f => path.join(artifactsDir, f));
 }
 
-function safeName(filename) {
-  return path.basename(filename, '.kolm').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 64);
+export function safeToolSegment(value, fallback = 'tool') {
+  const raw = String(value ?? '').replace(/[^a-zA-Z0-9_-]/g, '_').replace(/^_+|_+$/g, '');
+  return raw.slice(0, 64) || fallback;
+}
+
+function safeArtifactName(filename) {
+  return safeToolSegment(path.basename(filename, '.kolm'), 'artifact');
 }
 
 function kolmHome() {
@@ -44,9 +51,9 @@ function kolmHome() {
     || path.resolve('.kolm');
 }
 
-function hashJson(value) {
+export function hashJson(value) {
   let s;
-  try { s = JSON.stringify(value ?? null); }
+  try { s = canonicalJson(value ?? null); }
   catch { s = String(value); }
   return crypto.createHash('sha256').update(s).digest('hex');
 }
@@ -113,7 +120,7 @@ function discoverSources(ctx) {
   return sources;
 }
 
-function listTools(ctx) {
+export function listTools(ctx) {
   const sources = discoverSources(ctx);
   const out = [];
   const seen = new Set();
@@ -125,8 +132,8 @@ function listTools(ctx) {
       try { info = inspectArtifact(ap); } catch { continue; }
       const k = info.k_score?.composite;
       if (src.k_min > 0 && typeof k === 'number' && k < src.k_min) continue;
-      const baseName = safeName(ap);
-      const toolName = src.project ? `mcp__${src.project}__${baseName}` : baseName;
+      const baseName = safeArtifactName(ap);
+      const toolName = src.project ? `mcp__${safeToolSegment(src.project, 'project')}__${baseName}` : baseName;
       const desc = src.meta.description
         ? `${src.meta.description} — k=${k ?? '?'}, ${info.signature_valid ? 'signed' : 'UNSIGNED'}`
         : `${info.task || 'compiled kolm skill'} — k=${k ?? '?'}, recipes=${info.recipes_n}, ${info.signature_valid ? 'signed' : 'UNSIGNED'}`;
@@ -163,7 +170,7 @@ function findArtifactByToolName(ctx, name) {
   return hit ? hit._kolm.artifact_path : null;
 }
 
-async function handleRpc(req, ctx) {
+export async function handleRpc(req, ctx) {
   const id = req.id ?? null;
   const reply = (result) => ({ jsonrpc: '2.0', id, result });
   const fail  = (code, message) => ({ jsonrpc: '2.0', id, error: { code, message } });
@@ -290,11 +297,20 @@ function startStdio(ctx) {
 }
 
 // HTTP transport — POST /mcp with a single JSON-RPC body, response in body.
-function startHttp(ctx) {
-  const srv = http.createServer(async (req, res) => {
+function jsonRpcError(id, code, message) {
+  return { jsonrpc: '2.0', id, error: { code, message } };
+}
+
+function writeJson(res, statusCode, payload) {
+  res.statusCode = statusCode;
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify(payload));
+}
+
+export function createMcpHttpServer(ctx) {
+  return http.createServer(async (req, res) => {
     if (req.method === 'GET' && req.url === '/health') {
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ ok: true, tools: listTools(ctx).length }));
+      writeJson(res, 200, { ok: true, tools: listTools(ctx).length });
       return;
     }
     if (req.method !== 'POST' || req.url !== '/mcp') {
@@ -303,24 +319,49 @@ function startHttp(ctx) {
       return;
     }
     let body = '';
-    req.on('data', d => { body += d; });
+    let bytes = 0;
+    let tooLarge = false;
+    req.on('data', d => {
+      bytes += d.length;
+      if (bytes > MAX_HTTP_BODY_BYTES) {
+        tooLarge = true;
+        return;
+      }
+      body += d;
+    });
     req.on('end', async () => {
+      if (tooLarge) {
+        writeJson(res, 413, jsonRpcError(null, -32600, 'request body too large'));
+        return;
+      }
       let parsed;
       try { parsed = JSON.parse(body); }
-      catch { res.statusCode = 400; res.end(JSON.stringify({ error: 'bad json' })); return; }
-      const out = await handleRpc(parsed, ctx);
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(out));
+      catch { writeJson(res, 400, jsonRpcError(null, -32700, 'parse error')); return; }
+      if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
+        writeJson(res, 400, jsonRpcError(null, -32600, 'invalid request'));
+        return;
+      }
+      try {
+        const out = await handleRpc(parsed, ctx);
+        writeJson(res, 200, out);
+      } catch (e) {
+        writeJson(res, 200, jsonRpcError(parsed.id ?? null, -32000, String(e.message || e)));
+      }
     });
   });
+}
+
+function startHttp(ctx) {
+  const srv = createMcpHttpServer(ctx);
   srv.listen(ctx.port, '127.0.0.1', () => {
     printClientConfig(ctx);
   });
+  return srv;
 }
 
 export async function startMcpServer({ artifactsDir, http: useHttp = false, port = 8765, projectCwd = null }) {
   const ctx = { artifactsDir, http: useHttp, port, projectCwd: projectCwd || process.cwd() };
-  if (useHttp) startHttp(ctx);
+  if (useHttp) return startHttp(ctx);
   else { printClientConfig(ctx); startStdio(ctx); }
 }
 
