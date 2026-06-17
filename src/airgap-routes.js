@@ -36,7 +36,7 @@
 // W411 tenant fence: every handler resolves tenant from req.tenant_record
 // BEFORE invoking the underlying module + threads it in.
 //
-// W604 version stamp: 'w831-v1'.
+// W604 version stamp: /^w831-/.
 //
 // Honesty invariants:
 //   - 401 returned on missing auth - never a quiet success.
@@ -44,7 +44,6 @@
 //   - 5xx returned on internal / I/O errors WITH detail strings; never silent.
 
 import fs from 'node:fs';
-import path from 'node:path';
 
 import { offlineDistill, getOfflineDistillStatus, AIRGAP_DISTILL_VERSION } from './airgap-distill.js';
 import { verifyTeacherIsLocal, AIRGAP_TEACHER_VERSION } from './airgap-teacher.js';
@@ -55,7 +54,7 @@ import {
 } from './airgap-sneakernet.js';
 import { airgapBakeoff, AIRGAP_BAKEOFF_VERSION } from './airgap-bakeoff.js';
 
-const ROUTES_VERSION = 'w831-v1';
+const ROUTES_VERSION = 'w831-v2';
 
 // Probe used by GET /v1/airgap/doctor to decide network_reachable. Mirrors
 // the W831 dial-failure guard but reports the result instead of throwing.
@@ -81,14 +80,38 @@ async function probeNetworkReachable(fetchImpl) {
   }
 }
 
+function tenantId(req) {
+  return req && req.tenant_record && req.tenant_record.id
+    ? String(req.tenant_record.id)
+    : null;
+}
+
+function runNotFoundEnvelope(runId) {
+  return {
+    ok: false,
+    error: 'run_not_found',
+    run_id: runId,
+    version: AIRGAP_DISTILL_VERSION,
+  };
+}
+
+function manifestTenant(env) {
+  return env && env.manifest && env.manifest.tenant != null
+    ? String(env.manifest.tenant)
+    : null;
+}
+
 // Both `registerAirgapRoutes` (matches the pipeline/meta-routes pattern) and
 // `mountAirgapRoutes` (historical alias) are exported so future callers can
 // pick either name.
-export function registerAirgapRoutes(app) {
-  return mountAirgapRoutes(app);
+export function registerAirgapRoutes(app, deps = {}) {
+  return mountAirgapRoutes(app, deps);
 }
 
-export function mountAirgapRoutes(r) {
+export function mountAirgapRoutes(r, deps = {}) {
+  const fetchImpl = deps.fetch || null;
+  const doctorFetch = deps.doctorFetch || fetchImpl;
+
   // ---------------- POST /v1/airgap/distill/run ----------------
   r.post('/v1/airgap/distill/run', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
@@ -99,7 +122,8 @@ export function mountAirgapRoutes(r) {
         teacher_path_local: body.teacher_path_local,
         student_path_local: body.student_path_local,
         output_path: body.output_path,
-        tenant: req.tenant_record.id,
+        tenant: tenantId(req),
+        fetch: fetchImpl,
       });
       return res.status(env.ok ? 200 : 400).json(env);
     } catch (e) {
@@ -117,6 +141,9 @@ export function mountAirgapRoutes(r) {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
       const env = getOfflineDistillStatus({ run_id: req.params.id });
+      if (env.ok && env.tenant !== tenantId(req)) {
+        return res.status(404).json(runNotFoundEnvelope(req.params.id));
+      }
       // 404 on unknown run; 200 on found.
       const status = env.ok
         ? 200
@@ -143,7 +170,7 @@ export function mountAirgapRoutes(r) {
         output_usb_path: body.output_usb_path,
         recipient_pubkey_path: body.recipient_pubkey_path || null,
         artifact_id: body.artifact_id,
-        tenant: req.tenant_record.id,
+        tenant: tenantId(req),
       });
       return res.status(env.ok ? 200 : 400).json(env);
     } catch (e) {
@@ -161,11 +188,32 @@ export function mountAirgapRoutes(r) {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
       const body = req.body || {};
-      const env = verifySneakernetBundle({
+      const verifyArgs = {
         bundle_path: body.bundle_path,
         trusted_pubkey_path: body.trusted_pubkey_path,
-        extract_to: body.extract_to || null,
-      });
+      };
+      let env = verifySneakernetBundle(verifyArgs);
+      const trustworthy = env.ok && env.signature_ok === true && env.recipient_ok === true;
+      if (trustworthy) {
+        const bundleTenant = manifestTenant(env);
+        if (bundleTenant !== tenantId(req)) {
+          return res.status(403).json({
+            ok: false,
+            error: 'sneakernet_tenant_mismatch',
+            signature_ok: env.signature_ok,
+            recipient_ok: env.recipient_ok,
+            trustworthy: false,
+            tenant_bound: false,
+            version: AIRGAP_SNEAKERNET_VERSION,
+          });
+        }
+        if (body.extract_to) {
+          env = verifySneakernetBundle({
+            ...verifyArgs,
+            extract_to: body.extract_to,
+          });
+        }
+      }
       // The envelope's `ok` is whether the call succeeded structurally;
       // signature_ok / recipient_ok are independent booleans. We always
       // return 200 on structural ok so the caller can inspect the booleans.
@@ -189,7 +237,8 @@ export function mountAirgapRoutes(r) {
         artifacts: Array.isArray(body.artifacts) ? body.artifacts : [],
         dataset_path_local: body.dataset_path_local,
         metric_name: body.metric_name,
-        tenant: req.tenant_record.id,
+        tenant: tenantId(req),
+        fetch: fetchImpl,
       });
       return res.status(env.ok ? 200 : 400).json(env);
     } catch (e) {
@@ -206,25 +255,29 @@ export function mountAirgapRoutes(r) {
   r.get('/v1/airgap/doctor', async (req, res) => {
     if (!req.tenant_record) return res.status(401).json({ ok: false, error: 'auth_required' });
     try {
-      const network_reachable = await probeNetworkReachable();
+      const network_reachable = await probeNetworkReachable(doctorFetch);
       let teacher_local = false;
+      let teacher_kind = null;
       if (process.env.KOLM_LOCAL_TEACHER_URL) {
         try {
-          verifyTeacherIsLocal({ teacher_url: process.env.KOLM_LOCAL_TEACHER_URL });
+          const teacher = verifyTeacherIsLocal({ teacher_url: process.env.KOLM_LOCAL_TEACHER_URL });
           teacher_local = true;
+          teacher_kind = teacher.kind || 'local';
         } catch (_) {
           teacher_local = false;
         }
       }
       const signing_key_path = process.env.KOLM_AIRGAP_SIGNING_KEY || null;
       const signing_key_present = !!(signing_key_path && fs.existsSync(signing_key_path));
+      const signing_key_configured = !!signing_key_path;
       return res.status(200).json({
         ok: true,
         network_reachable,
         teacher_local,
+        teacher_configured: !!process.env.KOLM_LOCAL_TEACHER_URL,
+        teacher_kind,
+        signing_key_configured,
         signing_key_present,
-        teacher_url: process.env.KOLM_LOCAL_TEACHER_URL || null,
-        signing_key_path,
         teacher_local_version: AIRGAP_TEACHER_VERSION,
         distill_version: AIRGAP_DISTILL_VERSION,
         sneakernet_version: AIRGAP_SNEAKERNET_VERSION,

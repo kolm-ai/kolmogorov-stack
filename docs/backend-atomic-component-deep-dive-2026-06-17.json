@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 674,
-    "components_without_direct_test_reference": 155,
+    "test_referenced_components": 675,
+    "components_without_direct_test_reference": 154,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -7885,6 +7885,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave656-airgap-routes-contract.test.js",
         "tests/wave831-airgap.test.js"
       ],
       "risk_signals": [
@@ -7991,27 +7992,29 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "d161a169453be53aca2c9b343bc7737628487b0b2a5199f4d27ea784ac11e44c",
+      "sha256": "3a82701d2d408fc219137fdbe164084d48facce8fb545564ba4dc2c0a556e9b8",
       "metrics": {
-        "bytes": 9309,
-        "lines": 248,
-        "imports": 6,
+        "bytes": 10899,
+        "lines": 301,
+        "imports": 5,
         "exports": 3,
         "routes": 6,
         "env_refs": 4,
         "fs_writes": 0,
         "subprocess_refs": 0,
-        "network_refs": 1,
+        "network_refs": 4,
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave656-airgap-routes-contract.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary",
         "http_route_surface",
         "network_or_provider_boundary"
       ],
-      "priority_score": 6,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -8036,7 +8039,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
       "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
       "suggested_verification": [
         "npm run lint:refs",
@@ -8064,6 +8067,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave656-airgap-routes-contract.test.js",
         "tests/wave831-airgap.test.js"
       ],
       "risk_signals": [
@@ -40801,6 +40805,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave656-airgap-routes-contract.test.js",
         "tests/wave779-airgap-sneakernet.test.js",
         "tests/wave831-airgap.test.js"
       ],

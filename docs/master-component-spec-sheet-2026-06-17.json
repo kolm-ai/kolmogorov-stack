@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 674,
-    "direct_test_reference_pct": 81.3,
-    "components_without_direct_test_reference": 155,
+    "direct_test_referenced_components": 675,
+    "direct_test_reference_pct": 81.4,
+    "components_without_direct_test_reference": 154,
     "high_priority_components": 47,
     "high_priority_direct_test_referenced": 47,
     "high_priority_direct_test_reference_pct": 100,
@@ -8184,6 +8184,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave656-airgap-routes-contract.test.js",
           "tests/wave831-airgap.test.js"
         ],
         "category_links": [
@@ -8304,15 +8305,15 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 9309,
-          "lines": 248,
-          "imports": 6,
+          "bytes": 10899,
+          "lines": 301,
+          "imports": 5,
           "exports": 3,
           "routes": 6,
           "env_refs": 4,
           "fs_writes": 0,
           "subprocess_refs": 0,
-          "network_refs": 1,
+          "network_refs": 4,
           "crypto_refs": 0,
           "markers": 0
         },
@@ -8321,9 +8322,9 @@
           "http_route_surface",
           "network_or_provider_boundary"
         ],
-        "priority_score": 6,
+        "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "d161a169453be53aca2c9b343bc7737628487b0b2a5199f4d27ea784ac11e44c"
+        "sha256": "3a82701d2d408fc219137fdbe164084d48facce8fb545564ba4dc2c0a556e9b8"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8331,39 +8332,19 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "llm-routing",
-            "stack_area": "gateway",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "confidential-compute",
-            "stack_area": "enterprise",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "agent-security-eval",
-            "stack_area": "enterprise",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave656-airgap-routes-contract.test.js"
         ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "category_links": [],
+        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
         "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
         "suggested_verification": [
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
     },
     {
       "path": "src/airgap-sneakernet.js",
@@ -8399,6 +8380,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave656-airgap-routes-contract.test.js",
           "tests/wave831-airgap.test.js"
         ],
         "category_links": [],
@@ -12633,6 +12615,12 @@
             "id": "llm-routing",
             "stack_area": "gateway",
             "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "confidential-compute",
+            "stack_area": "enterprise",
+            "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
           }
         ],
@@ -17092,6 +17080,12 @@
             "relation": "sampled"
           },
           {
+            "id": "llm-routing",
+            "stack_area": "gateway",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
             "status": "sota_review_complete_critical_frontier_work_open",
@@ -20352,6 +20346,12 @@
             "stack_area": "trust",
             "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
+          },
+          {
+            "id": "agent-security-eval",
+            "stack_area": "enterprise",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
           }
         ],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
@@ -36537,6 +36537,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave656-airgap-routes-contract.test.js",
           "tests/wave779-airgap-sneakernet.test.js",
           "tests/wave831-airgap.test.js"
         ],
