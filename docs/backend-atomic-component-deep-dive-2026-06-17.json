@@ -878,10 +878,10 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "5a9fc7f658f2c56230163eea20e5906f1fb961b270d033c053d5843378b26482",
+      "sha256": "640981ac7a1aa7d2837c65429055c324ec99b091f09e5d0ecbb5d1e5ed6a0c4a",
       "metrics": {
-        "bytes": 2616583,
-        "lines": 56964,
+        "bytes": 2617461,
+        "lines": 56988,
         "imports": 540,
         "exports": 1,
         "routes": 0,
@@ -23206,11 +23206,11 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "75b8f0efb14b02ce7f1dd449d4e39af45596404f8970433af13f57ef460c6b51",
+      "sha256": "e0558339e1f92ea8fefffa97cad2c676cb0c6ec5986e10cd418c26e6da33d3e9",
       "metrics": {
-        "bytes": 11928,
-        "lines": 297,
-        "imports": 3,
+        "bytes": 13936,
+        "lines": 340,
+        "imports": 5,
         "exports": 9,
         "routes": 0,
         "env_refs": 3,
@@ -23222,6 +23222,7 @@
       },
       "test_refs": [
         "tests/wave605-quantization-oracle-frontier.test.js",
+        "tests/wave613-fp4-calib-oracle.test.js",
         "tests/wrapper-s6.test.js"
       ],
       "risk_signals": [
@@ -35446,11 +35447,11 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "a2f9c2cdee155f510b6225f1eedd31812846e25af8ad19f4e2d58a1d080c1fcd",
+      "sha256": "048d1613f224a1efdfc695d3ffb86705327b272279b5df0bfb06b938088e6312",
       "metrics": {
-        "bytes": 22318,
-        "lines": 612,
-        "imports": 0,
+        "bytes": 23446,
+        "lines": 648,
+        "imports": 1,
         "exports": 5,
         "routes": 0,
         "env_refs": 4,
@@ -35464,7 +35465,8 @@
         "tests/sota-computequant.test.js",
         "tests/wave582-quantization-oracle.test.js",
         "tests/wave605-quantization-oracle-frontier.test.js",
-        "tests/wave606-quant-accuracy-floor.test.js"
+        "tests/wave606-quant-accuracy-floor.test.js",
+        "tests/wave613-fp4-calib-oracle.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary"
@@ -48816,6 +48818,8 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave605-quantization-oracle-frontier.test.js",
+        "tests/wave613-fp4-calib-oracle.test.js",
         "tests/wave921-fp4-calib-trust-remote.test.js"
       ],
       "risk_signals": [

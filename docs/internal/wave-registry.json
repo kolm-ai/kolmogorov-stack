@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 291,
+    "orphan_tests": 292,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 294,
+    "state_local_green": 295,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 459,
-    "test_only_waves": 291,
-    "waves": 307
+    "test_files": 460,
+    "test_only_waves": 292,
+    "waves": 308
   },
-  "generated_at": "2026-06-17T10:40:25.167Z",
+  "generated_at": "2026-06-17T10:54:18.272Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -305,6 +305,7 @@
       "W610",
       "W611",
       "W612",
+      "W613",
       "W708",
       "W709",
       "W710",
@@ -605,6 +606,7 @@
       "W610",
       "W611",
       "W612",
+      "W613",
       "W708",
       "W709",
       "W710",
@@ -3636,7 +3638,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js",
+          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js tests/wave613-fp4-calib-oracle.test.js",
           "script": "npm:verify:quant-oracle"
         }
       ],
@@ -4066,7 +4068,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js",
+          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js tests/wave613-fp4-calib-oracle.test.js",
           "script": "npm:verify:quant-oracle"
         }
       ],
@@ -4085,7 +4087,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js",
+          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js tests/wave613-fp4-calib-oracle.test.js",
           "script": "npm:verify:quant-oracle"
         }
       ],
@@ -4207,6 +4209,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave612-sigstore-merkle-reuse.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W613",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js tests/wave613-fp4-calib-oracle.test.js",
+          "script": "npm:verify:quant-oracle"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave613-fp4-calib-oracle.test.js"
       ],
       "test_letter_suffixes": []
     },

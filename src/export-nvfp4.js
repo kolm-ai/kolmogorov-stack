@@ -28,6 +28,8 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { buildFp4CalibPlan } from './fp4-calib-plan.js';
 
 export const NVFP4_EXPORT_VERSION = 'export-nvfp4-v1';
 
@@ -43,6 +45,8 @@ export const QUANT_LEVELS = Object.freeze([
 export const RUNTIME_HINT = 'tensorrt-llm+nvfp4';
 
 const SECONDS_PER_B_PARAM = 130;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FP4_CALIB_SCRIPT_DIR = path.resolve(__dirname, '..', 'workers', 'quantize', 'scripts');
 
 function _normalizeQuant(quant) {
   const s = String(quant || '').toLowerCase().trim();
@@ -52,6 +56,27 @@ function _normalizeQuant(quant) {
   if (s === 'w4a8') { weight_dtype = 'nvfp4'; activation_dtype = 'fp8_e4m3'; }
   if (s === 'w8a8') { weight_dtype = 'fp8_e4m3'; activation_dtype = 'fp8_e4m3'; }
   return { mode: s, weight_dtype, activation_dtype };
+}
+
+function _intOr(value, fallback) {
+  const n = Number(value);
+  return Number.isInteger(n) ? n : fallback;
+}
+
+function _resolveFp4CalibrationPlan(parsed, requested) {
+  const enabled = requested === true || requested?.enabled === true;
+  if (!enabled) return null;
+  const block = _intOr(requested?.block ?? requested?.calib_fp4_block, undefined);
+  const max_layers = _intOr(requested?.max_layers ?? requested?.calib_fp4_max_layers, undefined);
+  const plan = buildFp4CalibPlan({
+    target: {
+      weight_dtype: parsed.weight_dtype,
+      quant_level: parsed.mode,
+    },
+    block,
+    max_layers,
+  });
+  return plan.enabled ? plan : null;
 }
 
 export function locateModeloptPackage() {
@@ -129,7 +154,7 @@ export function probeBlackwellNative() {
   }
 }
 
-export function previewExport({ artifact, quant, target_dir }) {
+export function previewExport({ artifact, quant, target_dir, fp4_calibration = null, fp4_calibration_plan = null }) {
   if (!artifact || typeof artifact !== 'object') {
     throw new Error('previewExport: artifact required');
   }
@@ -139,6 +164,7 @@ export function previewExport({ artifact, quant, target_dir }) {
   if (!parsed) {
     throw new Error(`previewExport: invalid NVFP4 quant ${quant}; one of ${QUANT_LEVELS.join(', ')}`);
   }
+  const fp4Plan = _resolveFp4CalibrationPlan(parsed, fp4_calibration_plan || fp4_calibration);
   const params_b = Number(artifact.params_b) || Number(artifact.params_billion) || 7;
   const fp16_bytes = params_b * 2 * 1e9;
   // NVFP4 weight = 4 bits + per-16-element FP8 scale (8 bits / 16 = 0.5 bits)
@@ -167,12 +193,13 @@ export function previewExport({ artifact, quant, target_dir }) {
     requires_gpu: true,
     runtime_hint: RUNTIME_HINT,
     command,
+    fp4_calibration_plan: fp4Plan,
     blackwell_gate: blackwell,
     notes: 'NVFP4 needs Blackwell (sm_100) for full speedup; on Hopper/Ada it loads via emulation and is slower than FP8.',
   };
 }
 
-export async function runExport({ artifact, quant, target_dir, force = false }) {
+export async function runExport({ artifact, quant, target_dir, force = false, fp4_calibration = null, fp4_calibration_plan = null }) {
   if (!artifact || typeof artifact !== 'object') {
     throw new Error('runExport: artifact required');
   }
@@ -186,6 +213,7 @@ export async function runExport({ artifact, quant, target_dir, force = false }) 
       hint: `accepted: ${QUANT_LEVELS.join(', ')}`,
     };
   }
+  const fp4Plan = _resolveFp4CalibrationPlan(parsed, fp4_calibration_plan || fp4_calibration);
   // W916-I2 - Blackwell gate. Block by default on non-Blackwell silicon
   // (emulation runs slower than FP8 - no point quantizing). Bypass with
   // `force: true` for benchmark sweeps that intentionally measure the
@@ -225,6 +253,15 @@ export async function runExport({ artifact, quant, target_dir, force = false }) 
     'import json, sys, traceback, torch',
     'import modelopt.torch.quantization as mtq',
     'from transformers import AutoModelForCausalLM, AutoTokenizer',
+    'fp4_calibration = None',
+    ...(fp4Plan ? [
+      `sys.path.insert(0, ${JSON.stringify(FP4_CALIB_SCRIPT_DIR)})`,
+      'try:',
+      '    from quantize import run_fp4_calibration',
+      `    fp4_calibration = run_fp4_calibration(${JSON.stringify(artifact.merged_dir)}, block=${JSON.stringify(fp4Plan.block)}, max_layers=${JSON.stringify(fp4Plan.max_layers)})`,
+      'except Exception as e:',
+      '    fp4_calibration = {"ok": False, "error": str(e), "stage": "fp4_calibration"}',
+    ] : []),
     `model = AutoModelForCausalLM.from_pretrained(${JSON.stringify(artifact.merged_dir)}, torch_dtype=torch.float16)`,
     `tok = AutoTokenizer.from_pretrained(${JSON.stringify(artifact.merged_dir)}, trust_remote_code=True)`,
     `cfg = getattr(mtq, ${JSON.stringify(formatCfg)})`,
@@ -235,7 +272,7 @@ export async function runExport({ artifact, quant, target_dir, force = false }) 
     '    mtq.quantize(model, cfg, forward_loop=calibrate)',
     `    model.save_pretrained(${JSON.stringify(target_dir)})`,
     `    tok.save_pretrained(${JSON.stringify(target_dir)})`,
-    `    print(json.dumps({"ok": True, "cfg": ${JSON.stringify(formatCfg)}, "weight_dtype": ${JSON.stringify(parsed.weight_dtype)}, "activation_dtype": ${JSON.stringify(parsed.activation_dtype)}}))`,
+    `    print(json.dumps({"ok": True, "cfg": ${JSON.stringify(formatCfg)}, "weight_dtype": ${JSON.stringify(parsed.weight_dtype)}, "activation_dtype": ${JSON.stringify(parsed.activation_dtype)}, "fp4_calibration": fp4_calibration}))`,
     'except Exception as e:',
     '    print(json.dumps({"ok": False, "error": str(e), "trace": traceback.format_exc()[-2048:]}))',
     '    sys.exit(1)',
@@ -261,6 +298,10 @@ export async function runExport({ artifact, quant, target_dir, force = false }) 
       wall_ms,
     };
   }
+  let detail = null;
+  try {
+    detail = JSON.parse((r.stdout || '').trim().split(/\r?\n/).pop() || '{}');
+  } catch {} // deliberate: cleanup
   let size_bytes = 0;
   try {
     for (const f of fs.readdirSync(target_dir)) {
@@ -281,6 +322,8 @@ export async function runExport({ artifact, quant, target_dir, force = false }) 
     runtime_hint: RUNTIME_HINT,
     blackwell_gate: blackwell,
     forced: force === true && !blackwell.blackwell_native,
+    fp4_calibration_plan: fp4Plan,
+    fp4_calibration: detail?.fp4_calibration || null,
     forge_version: NVFP4_EXPORT_VERSION,
   };
 }

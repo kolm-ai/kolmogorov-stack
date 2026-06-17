@@ -6,6 +6,8 @@
 // context length, calibration availability, privacy mode) into ranked methods
 // the actual quantize/export surfaces can execute or honestly mark external.
 
+import { buildFp4CalibPlan } from './fp4-calib-plan.js';
+
 const METHOD_CATALOG = Object.freeze({
   fp16: {
     label: 'FP16/BF16 baseline',
@@ -274,6 +276,46 @@ function round(n, digits = 4) {
   return Number(Number(n).toFixed(digits));
 }
 
+function buildFp4CalibrationPlan(candidate) {
+  if (!candidate?.feasible || candidate.execution_status !== 'export_nvfp4') return null;
+  const plan = buildFp4CalibPlan({
+    target: {
+      dtype: candidate.method === 'mxfp4' ? 'mxfp4' : 'nvfp4',
+      quant_level: candidate.export_quant,
+      weight_dtype: candidate.export_quant === 'w8a8' ? 'fp8_e4m3' : 'nvfp4',
+    },
+  });
+  return plan.enabled ? plan : null;
+}
+
+function commandForPrimary(primary, fp4CalibrationPlan) {
+  if (!primary?.feasible) return null;
+  if (primary.worker_method) {
+    return `kolm quantize --local-worker --method=${primary.worker_method} --in <model-dir> --out <out-dir>`;
+  }
+  if (!primary.export_format) return null;
+  const fp4Flags = fp4CalibrationPlan?.enabled
+    ? ` ${fp4CalibrationPlan.python_flags.join(' ')}`
+    : '';
+  return `kolm export <artifact.kolm> --format ${primary.export_format} --quant ${primary.export_quant}${fp4Flags} --out <out-dir>`;
+}
+
+function proofForRecommendation(fp4CalibrationPlan) {
+  const proof = [
+    'run method-specific doctor before execution',
+    'record source model hash, calibration hash, method, bits, runtime, and output shard hashes',
+    'enforce post-quant accuracy_gate before promoting quantized artifact',
+  ];
+  if (fp4CalibrationPlan?.enabled) {
+    proof.splice(
+      2,
+      0,
+      `run FP4-aware calibration (${fp4CalibrationPlan.python_flags.join(' ')}) before FP4 export`,
+    );
+  }
+  return proof;
+}
+
 function normalizeTask(task) {
   const key = String(task || 'chat').toLowerCase();
   return TASK_SENSITIVITY[key] ? key : 'chat';
@@ -455,6 +497,7 @@ export function rankQuantizationStrategies(input = {}) {
   const kvCache = contextTokens >= 8192 && runtimeCompatible(METHOD_CATALOG.kivi_kv, device.runtime)
     ? candidates.find((c) => c.method === 'kivi_kv')
     : null;
+  const fp4CalibrationPlan = buildFp4CalibrationPlan(primary);
 
   return {
     spec: 'kolm-quantization-oracle-1',
@@ -483,11 +526,8 @@ export function rankQuantizationStrategies(input = {}) {
       primary,
       fallback,
       kv_cache: kvCache && kvCache.feasible ? kvCache : null,
-      command: primary.feasible && primary.worker_method
-        ? `kolm quantize --local-worker --method=${primary.worker_method} --in <model-dir> --out <out-dir>`
-        : primary.feasible && primary.export_format
-          ? `kolm export <artifact.kolm> --format ${primary.export_format} --quant ${primary.export_quant} --out <out-dir>`
-          : null,
+      command: commandForPrimary(primary, fp4CalibrationPlan),
+      fp4_calibration_plan: fp4CalibrationPlan,
       accuracy_gate: {
         required: true,
         metric: 'kscore',
@@ -496,11 +536,7 @@ export function rankQuantizationStrategies(input = {}) {
         enforcement: 'quantize-bakeoff.enforceAccuracyFloor',
         fail_closed_without_measured_holdout: true,
       },
-      proof: [
-        'run method-specific doctor before execution',
-        'record source model hash, calibration hash, method, bits, runtime, and output shard hashes',
-        'enforce post-quant accuracy_gate before promoting quantized artifact',
-      ],
+      proof: proofForRecommendation(fp4CalibrationPlan),
     } : null,
     candidates,
   };

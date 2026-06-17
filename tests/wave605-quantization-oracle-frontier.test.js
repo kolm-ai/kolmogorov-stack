@@ -47,7 +47,8 @@ test('2. Blackwell TensorRT workload chooses NVFP4 export command', () => {
   assert.equal(plan.recommendation.primary.execution_status, 'export_nvfp4');
   assert.equal(plan.recommendation.primary.export_format, 'nvfp4');
   assert.equal(plan.recommendation.primary.export_quant, 'w4a8');
-  assert.match(plan.recommendation.command, /^kolm export <artifact\.kolm> --format nvfp4 --quant w4a8 --out <out-dir>$/);
+  assert.equal(plan.recommendation.fp4_calibration_plan.enabled, true);
+  assert.match(plan.recommendation.command, /^kolm export <artifact\.kolm> --format nvfp4 --quant w4a8 --calib-fp4 --calib-fp4-block=32 --calib-fp4-max-layers=64 --out <out-dir>$/);
 });
 
 test('3. Hopper TensorRT and Ada CUDA targets do not get Blackwell-only FP4 recommendations', () => {
@@ -78,10 +79,11 @@ test('3. Hopper TensorRT and Ada CUDA targets do not get Blackwell-only FP4 reco
   assert.ok(adaNvfp4.warnings.includes('runtime_mismatch:cuda'));
 });
 
-test('4. backend spec records W605 closure while leaving FP4 calibration-plan work open', () => {
+test('4. backend spec records W605 and W613 closures while leaving FP4 export-fusion work open', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
 
   assert.match(spec, /W605/);
   assert.match(spec, /NVFP4\/MXFP4 oracle routing/);
-  assert.match(spec, /Wire the FP4 calibration plan into the oracle recommendation/);
+  assert.match(spec, /W613/);
+  assert.match(spec, /Fuse the BATQuant calibration plan into the NVFP4 export/);
 });

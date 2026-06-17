@@ -41524,8 +41524,16 @@ function computeExportPreview({ baseKey, quantKey, deviceKey }) {
 async function cmdExport(args) {
   if (maybeHelp('export', args)) return;
   const get = (flag) => {
+    const eq = args.find(a => typeof a === 'string' && a.startsWith(flag + '='));
+    if (eq) return eq.slice(flag.length + 1);
     const i = args.indexOf(flag);
     return i >= 0 ? args[i + 1] : null;
+  };
+  const getInt = (flag) => {
+    const value = get(flag);
+    if (value == null) return undefined;
+    const n = Number(value);
+    return Number.isInteger(n) ? n : undefined;
   };
   const isPreview = args.includes('--preview');
   const artifact = args.find(a => !a.startsWith('--'));
@@ -41723,7 +41731,15 @@ async function cmdExport(args) {
     if (isPreview) {
       let preview;
       try {
-        preview = formatMod.previewExport({ artifact: artifactDesc, quant, target_dir });
+        const previewArgs = { artifact: artifactDesc, quant, target_dir };
+        if (fmt === 'nvfp4' && args.includes('--calib-fp4')) {
+          previewArgs.fp4_calibration = {
+            enabled: true,
+            block: getInt('--calib-fp4-block'),
+            max_layers: getInt('--calib-fp4-max-layers'),
+          };
+        }
+        preview = formatMod.previewExport(previewArgs);
       } catch (pErr) {
         const e = new Error('preview failed: ' + pErr.message);
         e.exitCode = EXIT.BAD_ARGS;
@@ -41735,7 +41751,15 @@ async function cmdExport(args) {
     // Real export path — invokes the external toolchain. Surface the envelope
     // verbatim so the caller (or `--json` consumer) sees the install_hint /
     // wall_ms / size_bytes fields unchanged.
-    const result = await formatMod.runExport({ artifact: artifactDesc, quant, target_dir });
+    const exportArgs = { artifact: artifactDesc, quant, target_dir };
+    if (fmt === 'nvfp4' && args.includes('--calib-fp4')) {
+      exportArgs.fp4_calibration = {
+        enabled: true,
+        block: getInt('--calib-fp4-block'),
+        max_layers: getInt('--calib-fp4-max-layers'),
+      };
+    }
+    const result = await formatMod.runExport(exportArgs);
     process.stdout.write(JSON.stringify(result, null, 2) + '\n');
     if (!result || result.ok === false) {
       const e = new Error(`${fmt} export failed: ${result && result.error ? result.error : 'unknown'}`);
