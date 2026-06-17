@@ -1,10 +1,10 @@
 // src/sigstore.js
 //
-// Wave 150 - sigstore (cosign-compatible) signature bundle for .kolm receipts.
+// Wave 150 - Rekor-backed signature transparency shim for .kolm receipts.
 //
 // Per the Wave 144 plan §Q+9: HMAC (Wave 0) is symmetric integrity; Ed25519
 // (Wave 149) is asymmetric provenance; sigstore is the public-transparency
-// layer. A sigstore bundle is the cosign-compatible witness that the Ed25519
+// layer. A sigstore shim is the local witness that the Ed25519
 // public key + signature were recorded in a publicly-readable, append-only
 // transparency log (Rekor) at a specific moment, so any later observer can
 // prove the artifact existed and was attested to before that moment.
@@ -41,9 +41,10 @@
 //   * If `dry_run: true`, report `warn` rather than `fail` - the build was
 //     offline; user can run `kolm sigstore-attest <artifact>` to publish.
 //
-// Bundle structure mirrors cosign's bundle.json v0.2 with kolm-specific
-// extensions (we use Ed25519 instead of x509 cert chain because we already
-// have the public key in `signature_ed25519` - no Fulcio dependency).
+// Bundle structure intentionally uses a Kolm-namespaced media type. It is a
+// Rekor hashedrekord + messageSignature shim, not a sigstore/protobuf-specs
+// bundle and not directly cosign-ingestible. DSSE/in-toto sidecars cover the
+// cosign-style attestation path.
 
 import crypto from 'node:crypto';
 import { sign as edSign, verify as edVerify, keyFingerprint } from './ed25519.js';
@@ -51,7 +52,9 @@ import { leafHash as merkleLeafHash, verifyInclusion } from './merkle.js';
 
 export const SIGSTORE_SPEC = 'kolm-sigstore-v1';
 export const SIGSTORE_ALG = 'ed25519-sigstore-bundle';
-export const SIGSTORE_BUNDLE_MEDIA_TYPE = 'application/vnd.dev.sigstore.bundle+json;version=0.2';
+export const SIGSTORE_BUNDLE_MEDIA_TYPE = 'application/vnd.kolm.sigstore-shim+json;version=1';
+export const SIGSTORE_LEGACY_BUNDLE_MEDIA_TYPE = 'application/vnd.dev.sigstore.bundle+json;version=0.2';
+export const SIGSTORE_SHIM_PROFILE = 'kolm-rekor-message-signature-shim-v1';
 export const REKOR_TIMEOUT_MS = 8000;
 const REKOR_HASHEDREKORD_KIND = 'hashedrekord';
 const REKOR_HASHEDREKORD_VERSION = '0.0.1';
@@ -192,7 +195,7 @@ export async function fetchRekorEntryByLogIndex(logIndex, { url, timeoutMs } = {
 //   payloadCanonical - the canonical JSON string this bundle attests to
 //   signed_at - ISO8601 timestamp; defaults to now
 //
-// Output: a cosign-compatible bundle plus kolm metadata
+// Output: a Kolm Rekor/messageSignature shim plus metadata
 // (rekor_log_entry: null, dry_run: true).
 // ---------------------------------------------------------------------------
 export function buildSigstoreBundle({ privateKey, publicKey, key_fingerprint, payloadCanonical, signed_at }) {
@@ -228,6 +231,13 @@ export function buildSigstoreBundle({ privateKey, publicKey, key_fingerprint, pa
   return {
     spec: SIGSTORE_SPEC,
     alg: SIGSTORE_ALG,
+    profile: SIGSTORE_SHIM_PROFILE,
+    compatibility: {
+      sigstore_protobuf_bundle: false,
+      cosign_ingestible_bundle: false,
+      rekor_entry_kind: REKOR_HASHEDREKORD_KIND,
+      legacy_mediaType: SIGSTORE_LEGACY_BUNDLE_MEDIA_TYPE,
+    },
     key_fingerprint: fp,
     digest_hex: digestHex,
     bundle,
@@ -281,7 +291,8 @@ export function verifySigstoreBundle(block, payloadCanonical) {
   if (!bundle || typeof bundle !== 'object') {
     return { ok: false, reason: 'bundle missing' };
   }
-  if (bundle.mediaType !== SIGSTORE_BUNDLE_MEDIA_TYPE) {
+  const legacyMediaType = bundle.mediaType === SIGSTORE_LEGACY_BUNDLE_MEDIA_TYPE;
+  if (bundle.mediaType !== SIGSTORE_BUNDLE_MEDIA_TYPE && !legacyMediaType) {
     return { ok: false, reason: `unexpected mediaType: ${bundle.mediaType}` };
   }
   const pkB64 = bundle?.verificationMaterial?.publicKey?.rawBytes;
@@ -372,6 +383,9 @@ export function verifySigstoreBundle(block, payloadCanonical) {
     inclusion_proof_verified: inclusion.verified,
     inclusion_proof_reason: inclusion.reason || null,
     digest_hex: digestHexActual,
+    mediaType: bundle.mediaType,
+    legacy_mediaType: legacyMediaType,
+    profile: block.profile || null,
   };
 }
 
@@ -547,7 +561,7 @@ export async function attestArtifactWithRekor(artifactPath, { url, timeoutMs, ar
   const payloadCanonical = canonicalJson(payloadWithoutSigstore);
   const sanity = verifySigstoreBundle(existing, payloadCanonical);
   if (!sanity.ok) {
-    throw new Error(`attestArtifactWithRekor: existing sigstore bundle does not verify locally: ${sanity.reason}`);
+    throw new Error(`attestArtifactWithRekor: existing sigstore shim does not verify locally: ${sanity.reason}`);
   }
   const pkB64 = existing?.bundle?.verificationMaterial?.publicKey?.rawBytes;
   const sigB64 = existing?.bundle?.messageSignature?.signature;

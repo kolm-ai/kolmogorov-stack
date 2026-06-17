@@ -1,4 +1,4 @@
-// Wave 150 — sigstore (cosign-compatible) bundle + Rekor attestation.
+// Wave 150 — Kolm Sigstore/Rekor shim + Rekor attestation.
 //
 // Per Wave 144 plan §Q+9: HMAC (integrity) + Ed25519 (third-party-verifiable
 // provenance) + sigstore (public transparency log) = defense in depth. This
@@ -7,7 +7,7 @@
 // verifiable in dry-run mode; if KOLM_SIGSTORE_REKOR_URL is set, the build
 // also pins the entry into a public Rekor instance.
 //
-// Coverage (20 tests):
+// Coverage (21 tests):
 //   1.  buildSigstoreBundle returns valid dry-run bundle
 //   2.  buildSigstoreBundle rejects missing key inputs
 //   3.  payloadDigestHex returns 64-char hex
@@ -28,6 +28,7 @@
 //  18.  HMAC still verifies after sigstore + Ed25519 layered on top (strip order)
 //  19.  Ed25519 still verifies after sigstore layered on top (strip order)
 //  20.  buildBinder reports sigstore check as warn for dry-run
+//  21.  W639 backend spec records honest shim mediaType closure
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -47,6 +48,8 @@ import {
   SIGSTORE_SPEC,
   SIGSTORE_ALG,
   SIGSTORE_BUNDLE_MEDIA_TYPE,
+  SIGSTORE_LEGACY_BUNDLE_MEDIA_TYPE,
+  SIGSTORE_SHIM_PROFILE,
 } from '../src/sigstore.js';
 import {
   generateKeyPair,
@@ -120,12 +123,17 @@ test('1. buildSigstoreBundle returns valid dry-run bundle', () => {
   const block = buildSigstoreBundle({ privateKey, publicKey, key_fingerprint: fp, payloadCanonical: payload });
   assert.equal(block.spec, SIGSTORE_SPEC);
   assert.equal(block.alg, SIGSTORE_ALG);
+  assert.equal(block.profile, SIGSTORE_SHIM_PROFILE);
+  assert.equal(block.compatibility.sigstore_protobuf_bundle, false);
+  assert.equal(block.compatibility.cosign_ingestible_bundle, false);
+  assert.equal(block.compatibility.legacy_mediaType, SIGSTORE_LEGACY_BUNDLE_MEDIA_TYPE);
   assert.equal(block.key_fingerprint, fp);
   assert.equal(block.dry_run, true);
   assert.equal(block.rekor_log_entry, null);
   assert.equal(typeof block.signed_at, 'string');
   assert.match(block.signed_at, /^\d{4}-\d{2}-\d{2}T/);
   assert.equal(block.bundle.mediaType, SIGSTORE_BUNDLE_MEDIA_TYPE);
+  assert.notEqual(block.bundle.mediaType, SIGSTORE_LEGACY_BUNDLE_MEDIA_TYPE);
   assert.ok(block.bundle.verificationMaterial.publicKey.rawBytes);
   assert.equal(block.bundle.verificationMaterial.publicKey.hint, fp);
   assert.equal(block.bundle.messageSignature.messageDigest.algorithm, 'SHA2_256');
@@ -229,6 +237,9 @@ test('7. verifySigstoreBundle accepts a valid round-trip', () => {
   assert.equal(r.rekor_log_index, null);
   assert.match(r.digest_hex, /^[0-9a-f]{64}$/);
   assert.match(r.key_fingerprint, /^[0-9a-f]{32}$/);
+  assert.equal(r.mediaType, SIGSTORE_BUNDLE_MEDIA_TYPE);
+  assert.equal(r.legacy_mediaType, false);
+  assert.equal(r.profile, SIGSTORE_SHIM_PROFILE);
 });
 
 // ---------------------------------------------------------------------------
@@ -260,6 +271,11 @@ test('10. verifySigstoreBundle rejects wrong alg', () => {
   const valid = buildSigstoreBundle({ privateKey, publicKey, payloadCanonical: payload });
   const wrongAlg = { ...valid, alg: 'ecdsa-p256' };
   assert.match(verifySigstoreBundle(wrongAlg, payload).reason, /unexpected alg/);
+  const legacyMedia = { ...valid, bundle: { ...valid.bundle, mediaType: SIGSTORE_LEGACY_BUNDLE_MEDIA_TYPE } };
+  const legacy = verifySigstoreBundle(legacyMedia, payload);
+  assert.equal(legacy.ok, true, legacy.reason);
+  assert.equal(legacy.legacy_mediaType, true);
+  assert.equal(legacy.mediaType, SIGSTORE_LEGACY_BUNDLE_MEDIA_TYPE);
   const wrongMedia = { ...valid, bundle: { ...valid.bundle, mediaType: 'application/x-other' } };
   assert.match(verifySigstoreBundle(wrongMedia, payload).reason, /unexpected mediaType/);
 });
@@ -410,4 +426,14 @@ test('20. buildBinder reports sigstore check as warn for dry-run, pass for non-d
   assert.equal(hmac?.status, 'pass', `HMAC: ${hmac?.detail}`);
   const ed = report.checks.find(c => c.name === 'Receipt signature (Ed25519, public-key)');
   assert.equal(ed?.status, 'pass', `Ed25519: ${ed?.detail}`);
+});
+
+// ---------------------------------------------------------------------------
+// 21. W639 backend spec records honest shim mediaType closure
+// ---------------------------------------------------------------------------
+test('21. W639 backend spec records honest shim mediaType closure', () => {
+  const spec = fs.readFileSync(path.join(process.cwd(), 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
+  assert.match(spec, /CLOSED W639: make the receipt Sigstore shim mediaType honest/);
+  assert.match(spec, /application\/vnd\.kolm\.sigstore-shim\+json;version=1/);
+  assert.match(spec, /legacy v0\.2/);
 });

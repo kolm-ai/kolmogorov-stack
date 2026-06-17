@@ -345,11 +345,11 @@ test('11. check #18 passes on require_rekor=true + pinned sigstore', async (t) =
   // Run binder with verifier-side env
   process.env.KOLM_REQUIRE_REKOR = '1';
   const report = await buildBinder(outPath);
-  // Sanity: sigstore bundle check should pass (signature still verifies after only
+  // Sanity: sigstore shim check should pass (signature still verifies after only
   // rekor_log_entry + dry_run were mutated)
   const sigstoreCheck = report.checks.find(c => c.name === 'Receipt signature (Sigstore bundle)');
   assert.equal(sigstoreCheck.status, 'pass',
-    `sigstore bundle check should pass after Rekor pin (got ${sigstoreCheck.status}: ${sigstoreCheck.detail})`);
+    `sigstore shim check should pass after Rekor pin (got ${sigstoreCheck.status}: ${sigstoreCheck.detail})`);
   // Now check #18
   const c18 = report.checks.find(c => c.name === 'Transparency policy (Rekor)');
   assert.equal(c18.status, 'pass', `check #18 should pass: ${c18.detail}`);
@@ -429,7 +429,7 @@ test('14. HMAC + Ed25519 still verify after Rekor pinning mutates signature_sigs
   assert.ok(hmacCheck, `HMAC check must be present (names: ${report.checks.map(c=>c.name).join(', ')})`);
   assert.equal(hmacCheck.status, 'pass',
     `HMAC must still verify after Rekor pin (got ${hmacCheck.status}: ${hmacCheck.detail})`);
-  // And the sigstore bundle itself still verifies (we only added rekor_log_entry)
+  // And the sigstore shim itself still verifies (we only added rekor_log_entry)
   const post2 = await loadArtifact(outPath);
   const { signature_sigstore, ...payloadWithoutSigstore } = post2.receipt;
   void signature_sigstore;
