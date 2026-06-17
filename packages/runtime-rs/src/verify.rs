@@ -270,14 +270,14 @@ fn check_manifest_signature(
     }
     let stored_manifest_hash = match sig.get("manifest_hash").and_then(|v| v.as_str()) {
         Some(s) => s,
-        None => return CheckOutcome::failed("signature.sig missing manifest_hash".into()),
+        None => return CheckOutcome::failed("signature.sig missing manifest_hash"),
     };
     if stored_manifest_hash != manifest_hash {
-        return CheckOutcome::failed("signature.sig manifest_hash mismatch".into());
+        return CheckOutcome::failed("signature.sig manifest_hash mismatch");
     }
     let stored_hmac = match sig.get("hmac").and_then(|v| v.as_str()) {
         Some(s) => s,
-        None => return CheckOutcome::failed("signature.sig missing hmac".into()),
+        None => return CheckOutcome::failed("signature.sig missing hmac"),
     };
     // The Node side accepts either the rich payload (with artifact_hash et al)
     // or the bare payload. Match both.
@@ -299,7 +299,7 @@ fn check_manifest_signature(
         let body = canonical_json(payload);
         let mut mac = match HmacSha256::new_from_slice(secret) {
             Ok(m) => m,
-            Err(_) => return CheckOutcome::failed("hmac key init failed".into()),
+            Err(_) => return CheckOutcome::failed("hmac key init failed"),
         };
         mac.update(body.as_bytes());
         let expected = hex::encode(mac.finalize().into_bytes());
@@ -307,12 +307,12 @@ fn check_manifest_signature(
             return CheckOutcome::passed();
         }
     }
-    CheckOutcome::failed("signature.sig hmac mismatch".into())
+    CheckOutcome::failed("signature.sig hmac mismatch")
 }
 
 fn check_receipt_chain(secret: &[u8], receipt: &Receipt) -> CheckOutcome {
     if receipt.chain.is_empty() {
-        return CheckOutcome::failed("receipt chain empty".into());
+        return CheckOutcome::failed("receipt chain empty");
     }
     for (i, link) in receipt.chain.iter().enumerate() {
         let v = serde_json::json!({
@@ -323,7 +323,7 @@ fn check_receipt_chain(secret: &[u8], receipt: &Receipt) -> CheckOutcome {
         let body = canonical_json(&v);
         let mut mac = match HmacSha256::new_from_slice(secret) {
             Ok(m) => m,
-            Err(_) => return CheckOutcome::failed("hmac key init failed".into()),
+            Err(_) => return CheckOutcome::failed("hmac key init failed"),
         };
         mac.update(body.as_bytes());
         let expected = hex::encode(mac.finalize().into_bytes());
@@ -345,7 +345,7 @@ fn check_receipt_chain(secret: &[u8], receipt: &Receipt) -> CheckOutcome {
 fn check_receipt_body_signature(secret: &[u8], receipt: &Receipt) -> CheckOutcome {
     let signature = match receipt.signature.as_deref() {
         Some(s) => s,
-        None => return CheckOutcome::failed("receipt body signature missing".into()),
+        None => return CheckOutcome::failed("receipt body signature missing"),
     };
     let mut v = match serde_json::to_value(receipt) {
         Ok(v) => v,
@@ -357,14 +357,14 @@ fn check_receipt_body_signature(secret: &[u8], receipt: &Receipt) -> CheckOutcom
     let canon = canonical_json(&v);
     let mut mac = match HmacSha256::new_from_slice(secret) {
         Ok(m) => m,
-        Err(_) => return CheckOutcome::failed("hmac key init failed".into()),
+        Err(_) => return CheckOutcome::failed("hmac key init failed"),
     };
     mac.update(canon.as_bytes());
     let expected = hex::encode(mac.finalize().into_bytes());
     if constant_time_eq(expected.as_bytes(), signature.as_bytes()) {
         CheckOutcome::passed()
     } else {
-        CheckOutcome::failed("receipt body signature mismatch".into())
+        CheckOutcome::failed("receipt body signature mismatch")
     }
 }
 

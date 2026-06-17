@@ -201,10 +201,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 143
+        "line": 145
       },
       "local_sota_review": {
-        "line": 143,
+        "line": 145,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -637,10 +637,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 197
+        "line": 199
       },
       "local_sota_review": {
-        "line": 197,
+        "line": 199,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -1075,10 +1075,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 244
+        "line": 246
       },
       "local_sota_review": {
-        "line": 244,
+        "line": 246,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1528,10 +1528,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 289
+        "line": 291
       },
       "local_sota_review": {
-        "line": 289,
+        "line": 291,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -1968,10 +1968,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 331
+        "line": 333
       },
       "local_sota_review": {
-        "line": 331,
+        "line": 333,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2372,10 +2372,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 365
+        "line": 367
       },
       "local_sota_review": {
-        "line": 365,
+        "line": 367,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2836,10 +2836,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 406
+        "line": 408
       },
       "local_sota_review": {
-        "line": 406,
+        "line": 408,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -3288,10 +3288,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 449
+        "line": 451
       },
       "local_sota_review": {
-        "line": 449,
+        "line": 451,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3747,10 +3747,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 484
+        "line": 486
       },
       "local_sota_review": {
-        "line": 484,
+        "line": 486,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -4047,18 +4047,6 @@
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           },
           {
-            "path": "packages/sdk-ts/src/index.ts",
-            "domain": "developer_distribution",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/airgap-bundle.js",
             "domain": "infra_cloud_device",
             "priority_score": 6,
@@ -4069,6 +4057,21 @@
             ],
             "test_refs": [],
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
+          },
+          {
+            "path": "src/assistant-client.js",
+            "domain": "developer_distribution",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave888p-cli-nl-routing.test.js"
+            ],
+            "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           }
         ],
         "count": 241,
@@ -4212,10 +4215,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 512
+        "line": 514
       },
       "local_sota_review": {
-        "line": 512,
+        "line": 514,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4676,10 +4679,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 559
+        "line": 561
       },
       "local_sota_review": {
-        "line": 559,
+        "line": 561,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -4862,18 +4865,6 @@
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           },
           {
-            "path": "packages/sdk-ts/src/index.ts",
-            "domain": "developer_distribution",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "services/mcp/server.js",
             "domain": "runtime_serving_routing",
             "priority_score": 6,
@@ -4988,6 +4979,22 @@
             ],
             "test_refs": [],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
+          },
+          {
+            "path": "packages/browser-extension/README.md",
+            "domain": "developer_distribution",
+            "priority_score": 5,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/path-to-100-w2-truth-in-labeling.test.js",
+              "tests/r4-deploy-generators.test.js",
+              "tests/research-docs.test.js"
+            ],
+            "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           }
         ],
         "count": 164,
@@ -5143,10 +5150,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 592
+        "line": 594
       },
       "local_sota_review": {
-        "line": 592,
+        "line": 594,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5652,10 +5659,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 623
+        "line": 625
       },
       "local_sota_review": {
-        "line": 623,
+        "line": 625,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5967,18 +5974,6 @@
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           },
           {
-            "path": "packages/sdk-ts/src/index.ts",
-            "domain": "developer_distribution",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/assistant-client.js",
             "domain": "developer_distribution",
             "priority_score": 6,
@@ -5992,6 +5987,21 @@
               "tests/wave888p-cli-nl-routing.test.js"
             ],
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
+          },
+          {
+            "path": "src/dsl.js",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave144-dsl-codegen.test.js",
+              "tests/wave144-native-compile.test.js",
+              "tests/wave438-real-compile.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
         "count": 242,
@@ -6155,10 +6165,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 669
+        "line": 671
       },
       "local_sota_review": {
-        "line": 669,
+        "line": 671,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -6620,10 +6630,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 719
+        "line": 721
       },
       "local_sota_review": {
-        "line": 719,
+        "line": 721,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -7095,10 +7105,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 766
+        "line": 768
       },
       "local_sota_review": {
-        "line": 766,
+        "line": 768,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,
@@ -7438,13 +7448,13 @@
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           },
           {
-            "path": "packages/sdk-ts/src/index.ts",
-            "domain": "developer_distribution",
+            "path": "src/airgap-bundle.js",
+            "domain": "infra_cloud_device",
             "priority_score": 6,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "network_or_provider_boundary"
+              "environment_configuration_boundary",
+              "stateful_storage_boundary"
             ],
             "test_refs": [],
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"

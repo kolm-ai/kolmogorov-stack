@@ -50,6 +50,17 @@ function verifyReceipt(receipt, secret) {
   }
 }
 
+function verifyReceiptManifestBinding(receipt, manifest) {
+  const receiptCid = typeof receipt.manifest_cid === "string" ? receipt.manifest_cid : null;
+  const manifestCid = typeof manifest.cid === "string" ? manifest.cid : null;
+  if (receiptCid && !manifestCid) {
+    throw new VerificationError("receipt manifest_cid present but manifest has no cid");
+  }
+  if (receiptCid && manifestCid && receiptCid !== manifestCid) {
+    throw new VerificationError(`receipt manifest_cid mismatch: receipt=${receiptCid} manifest=${manifestCid}`);
+  }
+}
+
 function readZipEntries(buf) {
   const view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
   const entries = new Map();
@@ -179,6 +190,7 @@ export async function loadBuffer(buf, options = {}) {
         : options.secret
       : undefined;
     verifyReceipt(receipt, secret);
+    verifyReceiptManifestBinding(receipt, manifest);
   }
 
   return new KolmModel(manifest, credential, options.endpoint, options.apiKey);

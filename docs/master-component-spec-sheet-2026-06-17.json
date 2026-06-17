@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 91.2,
+    "local_engineering_score": 91.3,
     "frontier_product_score": 68.7,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 671,
-    "direct_test_reference_pct": 80.9,
-    "components_without_direct_test_reference": 158,
+    "direct_test_referenced_components": 672,
+    "direct_test_reference_pct": 81.1,
+    "components_without_direct_test_reference": 157,
     "high_priority_components": 47,
     "high_priority_direct_test_referenced": 47,
     "high_priority_direct_test_reference_pct": 100,
@@ -3021,15 +3021,24 @@
           "tests/wave442-blessed-test-command.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "mcp-tool-gateway-receipts",
+            "stack_area": "agent-integrations",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
         "suggested_verification": [
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "next_best_action": "Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence."
     },
     {
       "path": "packages/browser-extension/verifier.js",
@@ -4776,7 +4785,7 @@
       "language": "rust",
       "composition": {
         "metrics": {
-          "bytes": 15217,
+          "bytes": 15147,
           "lines": 419,
           "imports": 0,
           "exports": 0,
@@ -4794,7 +4803,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "497113478d80641255325c2a368e38e4667c9801260dd4d28700715bd63c4c17"
+        "sha256": "21b772f8199c63ffa499c13560a5740ed1b2f30d1d79d09700740d26d2bc42ef"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -6173,8 +6182,8 @@
       "language": "typescript",
       "composition": {
         "metrics": {
-          "bytes": 10023,
-          "lines": 262,
+          "bytes": 10645,
+          "lines": 274,
           "imports": 5,
           "exports": 7,
           "routes": 0,
@@ -6190,9 +6199,9 @@
           "distribution_or_worker_surface",
           "network_or_provider_boundary"
         ],
-        "priority_score": 6,
+        "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "8aa96962f666414dff0d5d843581d9b893f9df72ab3b16eef7be12a92c3e4244"
+        "sha256": "3d9b7193846330f1044b4d6b66ba2705ff60ea5622b2a26d702fd1a65cf84a7a"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -6200,44 +6209,18 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "ondevice-inference",
-            "stack_area": "cross-device",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "mcp-tool-gateway-receipts",
-            "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "model-signing-standards",
-            "stack_area": "trust",
-            "status": "sota_review_complete_external_or_release_gate_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "compile-api-to-model-competitors",
-            "stack_area": "compiler-platform",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave652-sdk-ts-contract.test.js"
         ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "category_links": [],
+        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
         "suggested_verification": [
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-ts/tsconfig.json",
@@ -8184,6 +8167,12 @@
             "stack_area": "enterprise",
             "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
+          },
+          {
+            "id": "compile-api-to-model-competitors",
+            "stack_area": "compiler-platform",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
           }
         ],
         "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
@@ -9056,6 +9045,12 @@
           "tests/wave888p-cli-nl-routing.test.js"
         ],
         "category_links": [
+          {
+            "id": "ondevice-inference",
+            "stack_area": "cross-device",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
+          },
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
@@ -20238,6 +20233,12 @@
             "id": "verifiable-inference",
             "stack_area": "trust",
             "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "model-signing-standards",
+            "stack_area": "trust",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],

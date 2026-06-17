@@ -107,6 +107,17 @@ function verifyReceipt(receipt: Receipt, secret: Buffer | undefined): void {
   }
 }
 
+function verifyReceiptManifestBinding(receipt: Receipt, manifest: Manifest): void {
+  const receiptCid = typeof receipt.manifest_cid === "string" ? receipt.manifest_cid : null;
+  const manifestCid = typeof manifest.cid === "string" ? manifest.cid : null;
+  if (receiptCid && !manifestCid) {
+    throw new VerificationError("receipt manifest_cid present but manifest has no cid");
+  }
+  if (receiptCid && manifestCid && receiptCid !== manifestCid) {
+    throw new VerificationError(`receipt manifest_cid mismatch: receipt=${receiptCid} manifest=${manifestCid}`);
+  }
+}
+
 // Minimal ZIP central-directory reader. .kolm artifacts are stored uncompressed
 // or deflate-compressed; we handle both. Pure-stdlib (zlib's `unzipSync` covers
 // deflate). Avoids pulling jszip / adm-zip as runtime deps.
@@ -250,6 +261,7 @@ export async function loadBuffer(buf: Uint8Array, options: LoadOptions = {}): Pr
       ? (typeof options.secret === "string" ? Buffer.from(options.secret, "utf-8") : options.secret)
       : undefined;
     verifyReceipt(receipt, secret);
+    verifyReceiptManifestBinding(receipt, manifest);
   }
 
   return new KolmModel(manifest, credential, options.endpoint, options.apiKey);
