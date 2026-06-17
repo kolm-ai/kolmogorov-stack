@@ -18,7 +18,7 @@
 
 import { all, insert, update, remove, findOne, find } from './store.js';
 import { sendMail, emailConfigured } from './email.js';
-import { sendWebPush, vapidConfigured, vapidPublicKey } from './webpush.js';
+import { normalizePushEndpoint, sendWebPush, vapidConfigured, vapidPublicKey } from './webpush.js';
 
 export const THRESHOLDS = [100, 500, 1000];
 
@@ -58,37 +58,8 @@ export function listPushSubscriptions(tenant) {
   return find(PUSH_TABLE, (r) => r.tenant === tenant);
 }
 
-// W253 sec#3: SSRF mitigation for /v1/notifications/push-subscriptions.
-// Without this, any signed-up tenant could register an `endpoint` pointing at
-// 169.254.169.254 (cloud metadata) or localhost:6379 and trigger the server to
-// POST VAPID-authenticated requests there. WebPush services run on a small,
-// well-known set of hostnames - allowlist them and refuse anything else.
-const PUSH_HOSTS = new Set([
-  'fcm.googleapis.com',
-  'updates.push.services.mozilla.com',
-  'web.push.apple.com',
-]);
-const PUSH_HOST_SUFFIXES = [
-  '.notify.windows.com',
-  '.push.apple.com',
-  '.push.services.mozilla.com',
-  '.googleapis.com',
-];
 function assertSafePushEndpoint(endpoint) {
-  let u;
-  try { u = new URL(endpoint); }
-  catch (_) { throw new Error('subscription.endpoint must be a valid URL'); }
-  if (u.protocol !== 'https:') {
-    throw new Error('subscription.endpoint must be https://');
-  }
-  const host = u.hostname.toLowerCase();
-  // Reject IPs (including v4-mapped v6, link-local, loopback, private).
-  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(host) || host.startsWith('[') || host === 'localhost') {
-    throw new Error('subscription.endpoint hostname must be a public push service');
-  }
-  if (PUSH_HOSTS.has(host)) return endpoint;
-  if (PUSH_HOST_SUFFIXES.some((sfx) => host.endsWith(sfx))) return endpoint;
-  throw new Error(`subscription.endpoint host ${host} is not an allowed push service`);
+  return normalizePushEndpoint(endpoint);
 }
 
 export function addPushSubscription(tenant, subscription) {

@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 680,
-    "components_without_direct_test_reference": 149,
+    "test_referenced_components": 681,
+    "components_without_direct_test_reference": 148,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -31889,10 +31889,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "e4edb364f45b1f89b95bf029bd6a38ff4ee1daf8418215d1d0e7270f2af9a3c7",
+      "sha256": "005abf6148c632e6bcfb0ebd01212a1829133f87d1c6f6315b7470f7d6434c18",
       "metrics": {
-        "bytes": 20272,
-        "lines": 493,
+        "bytes": 18976,
+        "lines": 464,
         "imports": 3,
         "exports": 20,
         "routes": 0,
@@ -45023,27 +45023,29 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "9f1db876f6c405c7d492c6c22a7ba82884eb924c98b6a7064c6d68a880beaab0",
+      "sha256": "a1dd4ea7c38dcb15aefe05eb0f1604c5e9560021b5da03c4d264c840752e235a",
       "metrics": {
-        "bytes": 5493,
-        "lines": 116,
+        "bytes": 11558,
+        "lines": 271,
         "imports": 1,
-        "exports": 4,
+        "exports": 8,
         "routes": 0,
-        "env_refs": 7,
+        "env_refs": 5,
         "fs_writes": 0,
         "subprocess_refs": 0,
-        "network_refs": 1,
-        "crypto_refs": 12,
+        "network_refs": 2,
+        "crypto_refs": 18,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave662-webpush-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 6,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -45068,7 +45070,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
       "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
       "suggested_verification": [
         "npm run verify:codegraph"
