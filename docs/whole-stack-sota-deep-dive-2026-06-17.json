@@ -1067,10 +1067,10 @@
         "line": 220,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 6,
-        "improvement_count": 7,
+        "already_at_frontier_count": 7,
+        "improvement_count": 6,
         "gaps": {
-          "critical": 2,
+          "critical": 1,
           "major": 4,
           "minor": 1
         }
@@ -1086,6 +1086,7 @@
               "execution_or_subprocess_boundary"
             ],
             "test_refs": [
+              "tests/wave605-quantization-oracle-frontier.test.js",
               "tests/wrapper-s6.test.js"
             ],
             "improvement_track": "maintain_contract_tests_and_claim_scope_mapping"
@@ -1099,7 +1100,8 @@
             ],
             "test_refs": [
               "tests/sota-computequant.test.js",
-              "tests/wave582-quantization-oracle.test.js"
+              "tests/wave582-quantization-oracle.test.js",
+              "tests/wave605-quantization-oracle-frontier.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },

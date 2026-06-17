@@ -79,6 +79,36 @@ const METHOD_CATALOG = Object.freeze({
     runtimes: ['cuda', 'tensorrt', 'onnx', 'mobile-gpu'],
     sources: ['AWQ'],
   },
+  nvfp4: {
+    label: 'NVIDIA NVFP4 Blackwell FP4 export',
+    worker_method: null,
+    execution_status: 'export_nvfp4',
+    export_format: 'nvfp4',
+    export_quant: 'w4a8',
+    blackwell_required: true,
+    bits: 4,
+    compression: 0.30,
+    quality_loss: 0.018,
+    latency_gain: 2.85,
+    calibration_required: true,
+    runtimes: ['tensorrt', 'vllm'],
+    sources: ['NVFP4', 'TensorRT-LLM FP4', 'NVIDIA Model Optimizer'],
+  },
+  mxfp4: {
+    label: 'MXFP4 Blackwell FP4 export',
+    worker_method: null,
+    execution_status: 'export_nvfp4',
+    export_format: 'nvfp4',
+    export_quant: 'w4a4',
+    blackwell_required: true,
+    bits: 4,
+    compression: 0.29,
+    quality_loss: 0.026,
+    latency_gain: 2.65,
+    calibration_required: true,
+    runtimes: ['tensorrt', 'vllm'],
+    sources: ['MXFP4', 'TensorRT-LLM FP4', 'NVIDIA Model Optimizer'],
+  },
   hqq: {
     label: 'HQQ calibration-free 4/3/2-bit',
     worker_method: 'hqq',
@@ -178,6 +208,9 @@ const DEVICE_PRESETS = Object.freeze({
   'm3-pro-18gb': { memory_gb: 18, runtime: 'mlx', target_latency_ms: 120, local: true },
   'rtx-4090-24gb': { memory_gb: 24, runtime: 'cuda', target_latency_ms: 80, local: true },
   'h100-80gb': { memory_gb: 80, runtime: 'tensorrt', target_latency_ms: 35, local: false },
+  'b200-180gb': { memory_gb: 180, runtime: 'tensorrt', target_latency_ms: 20, local: false, blackwell: true },
+  'gb200-180gb': { memory_gb: 180, runtime: 'tensorrt', target_latency_ms: 18, local: false, blackwell: true },
+  'rtx-5090-32gb': { memory_gb: 32, runtime: 'tensorrt', target_latency_ms: 45, local: true, blackwell: true },
   'iphone-8gb': { memory_gb: 8, runtime: 'coreml', target_latency_ms: 140, local: true },
   'android-8gb': { memory_gb: 8, runtime: 'onnx', target_latency_ms: 160, local: true },
   'browser-4gb': { memory_gb: 4, runtime: 'wasm', target_latency_ms: 250, local: true },
@@ -254,6 +287,7 @@ function resolveDevice(input = {}) {
     runtime: String(input.runtime || preset.runtime || 'cuda').toLowerCase(),
     target_latency_ms: Number(input.target_latency_ms ?? input.targetLatencyMs ?? preset.target_latency_ms ?? 150),
     local: input.local ?? preset.local ?? true,
+    blackwell: Boolean(input.blackwell ?? input.blackwell_native ?? preset.blackwell ?? false),
   };
 }
 
@@ -317,6 +351,10 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
     warnings.push(`runtime_mismatch:${device.runtime}`);
     hardFail = true;
   }
+  if (method.blackwell_required && !device.blackwell) {
+    warnings.push('blackwell_required');
+    hardFail = true;
+  }
   if (memory > device.memory_gb) {
     warnings.push(`memory_exceeds_device:${round(memory, 2)}>${device.memory_gb}`);
     hardFail = true;
@@ -331,10 +369,25 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
   const qualityScore = Math.max(0, (quality - 0.7) / 0.3);
   const latencyScore = Math.max(0, Math.min(1.5, device.target_latency_ms / Math.max(1, latency))) / 1.5;
   const compressionScore = Math.max(0, 1 - method.compression);
-  const workerScore = method.execution_status === 'worker' ? 1 : method.execution_status === 'baseline' ? 0.55 : 0.35;
+  const workerScore = method.execution_status === 'worker'
+    ? 1
+    : method.execution_status === 'export_nvfp4'
+      ? 0.9
+      : method.execution_status === 'baseline'
+        ? 0.55
+        : 0.35;
+  const nativeHardwareScore = method.blackwell_required && device.blackwell && runtimeCompatible(method, device.runtime)
+    ? 0.06
+    : 0;
   const warningPenalty = warnings.length * 0.045 + (hardFail ? 0.55 : 0);
   const score = round(clamp(
-    fit * 0.28 + qualityScore * 0.3 + latencyScore * 0.17 + compressionScore * 0.15 + workerScore * 0.1 - warningPenalty,
+    fit * 0.28
+      + qualityScore * 0.3
+      + latencyScore * 0.17
+      + compressionScore * 0.15
+      + workerScore * 0.1
+      + nativeHardwareScore
+      - warningPenalty,
     0,
     1,
   ), 4);
@@ -344,6 +397,9 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
     label: method.label,
     worker_method: method.worker_method,
     execution_status: method.execution_status,
+    export_format: method.export_format || null,
+    export_quant: method.export_quant || null,
+    hardware_native: nativeHardwareScore > 0,
     experimental,
     experimental_gated: experimentalGatedOff,
     score,
@@ -429,7 +485,9 @@ export function rankQuantizationStrategies(input = {}) {
       kv_cache: kvCache && kvCache.feasible ? kvCache : null,
       command: primary.feasible && primary.worker_method
         ? `kolm quantize --local-worker --method=${primary.worker_method} --in <model-dir> --out <out-dir>`
-        : null,
+        : primary.feasible && primary.export_format
+          ? `kolm export <artifact.kolm> --format ${primary.export_format} --quant ${primary.export_quant} --out <out-dir>`
+          : null,
       proof: [
         'run method-specific doctor before execution',
         'record source model hash, calibration hash, method, bits, runtime, and output shard hashes',

@@ -23,10 +23,11 @@ function readJson(file) {
 
 test('1. oracle catalog covers worker methods plus external/runtime-only methods', () => {
   const catalog = quantizationOracleCatalog();
-  for (const method of ['fp16', 'int8', 'smoothquant', 'int4', 'gptq', 'awq', 'hqq', 'exl2', 'aqlm', 'quip', 'qat', 'kivi_kv']) {
+  for (const method of ['fp16', 'int8', 'smoothquant', 'int4', 'gptq', 'awq', 'nvfp4', 'mxfp4', 'hqq', 'exl2', 'aqlm', 'quip', 'qat', 'kivi_kv']) {
     assert.ok(catalog.methods[method], `catalog missing ${method}`);
   }
   assert.equal(catalog.methods.awq.worker_method, 'awq');
+  assert.equal(catalog.methods.nvfp4.execution_status, 'export_nvfp4');
   assert.equal(catalog.methods.smoothquant.execution_status, 'external_toolchain');
   assert.equal(catalog.methods.kivi_kv.execution_status, 'runtime_policy');
 });
@@ -93,7 +94,7 @@ test('5. CLI smoke and package gates expose verify:quant-oracle', () => {
 
   const pkg = readJson('package.json');
   assert.ok(pkg.scripts['verify:quant-oracle'].includes('quantization-oracle.mjs'));
-  assert.ok(pkg.scripts['verify:depth'].includes('quantization-oracle.mjs'));
+  assert.ok(pkg.scripts['verify:depth'].includes('verify:quant-oracle'));
 });
 
 test('5b. CLI exposes direct quantization oracle planning before worker install', () => {
