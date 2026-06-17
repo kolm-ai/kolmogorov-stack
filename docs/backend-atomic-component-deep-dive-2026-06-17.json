@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 667,
-    "components_without_direct_test_reference": 162,
+    "test_referenced_components": 668,
+    "components_without_direct_test_reference": 161,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -427,19 +427,6 @@
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
       },
       {
-        "path": "workers/compile-server/server.mjs",
-        "domain": "compile_artifact_runtime",
-        "priority_score": 8,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "distribution_or_worker_surface",
-          "environment_configuration_boundary",
-          "execution_or_subprocess_boundary",
-          "network_or_provider_boundary"
-        ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-      },
-      {
         "path": "src/auth-email.js",
         "domain": "identity_access",
         "priority_score": 8,
@@ -462,6 +449,17 @@
           "network_or_provider_boundary"
         ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
+      },
+      {
+        "path": "src/kscore-axis-theory.js",
+        "domain": "compile_artifact_runtime",
+        "priority_score": 7,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "large_component_contract_risk"
+        ],
+        "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
       }
     ]
   },
@@ -45927,7 +45925,9 @@
         "crypto_refs": 4,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave648-compile-server-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
@@ -45935,7 +45935,7 @@
         "execution_or_subprocess_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 8,
+      "priority_score": 7,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -45960,7 +45960,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
       "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
       "suggested_verification": [
         "npm run verify:inventions",

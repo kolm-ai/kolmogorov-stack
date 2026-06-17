@@ -10,7 +10,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 
 **What is genuinely missing at the frontier (net-new, spec-gated):** GAD adversarial distillation (arXiv:2511.10643, the #1 black-box method), a shared boot-and-measure probe harness (flips estimated->tested across 5 categories), a pluggable real embedding provider (uncaps curation + routing), a real attestation cert-chain verifier (ends TOFU), a hosted managed distill+serve fleet (the biggest DX gap vs competitors), and an in-browser verify-then-run WebGPU demo.
 
-**Counts:** 48 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
+**Counts:** 49 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
 
 ## Top surgical-now improvements (ranked)
 
@@ -64,6 +64,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 | 46 | compile-api-to-model-competitors | 6 | M/low | CLOSED W645: add durable replay fallback to capture SSE tail | `src/router.js /v1/capture/stream replay since/last_seen; tests/wave645-capture-stream-replay.test.js; verify:distill-captures` |
 | 47 | agent-security-eval | 6 | S/low | CLOSED W646: publish fallback adversarial heuristic calibration metrics | `src/adversarial-bakeoff.js calibrateHeuristicJudge; tests/wave646-adversarial-calibration.test.js; verify:agent-security-eval` |
 | 48 | billing-marketplace | 7 | S/low | CLOSED W647: charge marketplace downloads only after a successful artifact stream | `src/marketplace-routes.js successful-stream accounting; tests/wave647-marketplace-routes-contract.test.js; verify:marketplace-routes` |
+| 49 | compile-api-to-model-competitors | 6 | S/low | CLOSED W648: lock the self-hosted compile server auth/offline validation contract | `workers/compile-server/server.mjs createServer; tests/wave648-compile-server-contract.test.js; verify:compile-server` |
 
 ## Cross-cutting bets (spec-followups)
 

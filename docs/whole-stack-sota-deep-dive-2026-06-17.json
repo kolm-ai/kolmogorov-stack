@@ -201,10 +201,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 139
+        "line": 140
       },
       "local_sota_review": {
-        "line": 139,
+        "line": 140,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -637,10 +637,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 193
+        "line": 194
       },
       "local_sota_review": {
-        "line": 193,
+        "line": 194,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -829,20 +829,6 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -917,6 +903,22 @@
             ],
             "test_refs": [
               "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "workers/compile-server/server.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave648-compile-server-contract.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -1068,10 +1070,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 240
+        "line": 241
       },
       "local_sota_review": {
-        "line": 240,
+        "line": 241,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1256,20 +1258,6 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -1344,6 +1332,22 @@
             ],
             "test_refs": [
               "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "workers/compile-server/server.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave648-compile-server-contract.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -1514,10 +1518,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 285
+        "line": 286
       },
       "local_sota_review": {
-        "line": 285,
+        "line": 286,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -1642,20 +1646,6 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -1698,6 +1688,22 @@
             ],
             "test_refs": [
               "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "workers/compile-server/server.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave648-compile-server-contract.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -1950,10 +1956,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 327
+        "line": 328
       },
       "local_sota_review": {
-        "line": 327,
+        "line": 328,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2354,10 +2360,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 361
+        "line": 362
       },
       "local_sota_review": {
-        "line": 361,
+        "line": 362,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2811,10 +2817,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 402
+        "line": 403
       },
       "local_sota_review": {
-        "line": 402,
+        "line": 403,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -3263,10 +3269,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 445
+        "line": 446
       },
       "local_sota_review": {
-        "line": 445,
+        "line": 446,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3468,20 +3474,6 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
             "priority_score": 7,
@@ -3556,6 +3548,22 @@
             ],
             "test_refs": [
               "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "workers/compile-server/server.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave648-compile-server-contract.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -3720,10 +3728,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 480
+        "line": 481
       },
       "local_sota_review": {
-        "line": 480,
+        "line": 481,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -3906,20 +3914,6 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -4010,6 +4004,22 @@
             ],
             "test_refs": [
               "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "workers/compile-server/server.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave648-compile-server-contract.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -4185,10 +4195,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 508
+        "line": 509
       },
       "local_sota_review": {
-        "line": 508,
+        "line": 509,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4649,10 +4659,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 555
+        "line": 556
       },
       "local_sota_review": {
-        "line": 555,
+        "line": 556,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -5116,10 +5126,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 588
+        "line": 589
       },
       "local_sota_review": {
-        "line": 588,
+        "line": 589,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5284,20 +5294,6 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -5373,6 +5369,22 @@
               "tests/trust-center.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
+          },
+          {
+            "path": "workers/compile-server/server.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave648-compile-server-contract.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
             "path": "workers/media-redact/redact.mjs",
@@ -5623,10 +5635,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 619
+        "line": 620
       },
       "local_sota_review": {
-        "line": 619,
+        "line": 620,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5810,20 +5822,6 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -5899,6 +5897,22 @@
               "tests/trust-center.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
+          },
+          {
+            "path": "workers/compile-server/server.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave648-compile-server-contract.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
             "path": "workers/media-redact/redact.mjs",
@@ -6122,10 +6136,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 665
+        "line": 666
       },
       "local_sota_review": {
-        "line": 665,
+        "line": 666,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -6588,10 +6602,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 715
+        "line": 716
       },
       "local_sota_review": {
-        "line": 715,
+        "line": 716,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -7063,10 +7077,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 762
+        "line": 763
       },
       "local_sota_review": {
-        "line": 762,
+        "line": 763,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,
@@ -7292,20 +7306,6 @@
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           },
           {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 8,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -7396,6 +7396,22 @@
             ],
             "test_refs": [
               "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "workers/compile-server/server.mjs",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave648-compile-server-contract.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
