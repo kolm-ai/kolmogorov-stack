@@ -14,8 +14,57 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
 
+const SAFE_DEVICE_ID_RE = /^[A-Za-z0-9._-]{1,128}$/;
+
 function _kolmDir() {
   return process.env.KOLM_DATA_DIR ? path.resolve(process.env.KOLM_DATA_DIR) : path.join(os.homedir(), '.kolm');
+}
+
+function _installedRoot() {
+  return path.join(_kolmDir(), 'installed');
+}
+
+function _safeDeviceId(device) {
+  const id = device && device.id != null ? String(device.id) : '';
+  if (!SAFE_DEVICE_ID_RE.test(id) || id === '.' || id === '..') {
+    throw new Error('local-adapter requires a safe device.id ([A-Za-z0-9._-], 1-128 chars)');
+  }
+  return id;
+}
+
+function _safePort(value) {
+  const port = value === undefined || value === null || value === ''
+    ? 8080
+    : Number(value);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('local-adapter port must be an integer from 1 to 65535');
+  }
+  return port;
+}
+
+function _sha256File(filePath) {
+  const h = crypto.createHash('sha256');
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const buf = Buffer.allocUnsafe(1024 * 1024);
+    let bytes;
+    while ((bytes = fs.readSync(fd, buf, 0, buf.length, null)) > 0) {
+      h.update(buf.subarray(0, bytes));
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
+  return h.digest('hex');
+}
+
+function _resolveInside(root, ...parts) {
+  const rootAbs = path.resolve(root);
+  const target = path.resolve(rootAbs, ...parts);
+  const rel = path.relative(rootAbs, target);
+  if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) {
+    throw new Error('local-adapter install path escaped installed root');
+  }
+  return target;
 }
 
 export async function deploy(device, artifactPath, opts = {}) {
@@ -27,13 +76,21 @@ export async function deploy(device, artifactPath, opts = {}) {
   if (!artifactPath || !fs.existsSync(artifactPath)) {
     return { ok: false, deployment_id, message: `artifact not found: ${artifactPath}`, raw };
   }
+  let deviceId;
+  let port;
+  try {
+    deviceId = _safeDeviceId(device);
+    port = _safePort(opts.port);
+  } catch (e) {
+    return { ok: false, deployment_id, message: e && e.message ? e.message : String(e), raw };
+  }
   const dryRun = !!opts.dryRun;
   const startProcess = opts.startProcess !== false; // default true
   const runtime = opts.runtime || 'llama.cpp';
-  const port = Number(opts.port || 8080);
+  const spawnImpl = opts.spawnImpl || spawn;
 
-  const installRoot = path.join(_kolmDir(), 'installed', device.id);
-  const dst = path.join(installRoot, path.basename(artifactPath));
+  const installRoot = _resolveInside(_installedRoot(), deviceId);
+  const dst = _resolveInside(installRoot, path.basename(artifactPath));
 
   if (dryRun) {
     raw.steps.push({ step: 'dry_run', ok: true });
@@ -43,7 +100,13 @@ export async function deploy(device, artifactPath, opts = {}) {
   try {
     fs.mkdirSync(installRoot, { recursive: true });
     fs.copyFileSync(artifactPath, dst);
-    raw.steps.push({ step: 'copy', ok: true, bytes: fs.statSync(dst).size, dest: dst });
+    raw.steps.push({
+      step: 'copy',
+      ok: true,
+      bytes: fs.statSync(dst).size,
+      dest: dst,
+      sha256: _sha256File(dst),
+    });
   } catch (e) {
     return { ok: false, deployment_id, message: `copy failed: ${e && e.message ? e.message : String(e)}`, raw };
   }
@@ -63,8 +126,22 @@ export async function deploy(device, artifactPath, opts = {}) {
       raw.steps.push({ step: 'start', ok: false, skipped: 'unknown_runtime' });
       return { ok: true, deployment_id, message: `installed ${path.basename(artifactPath)} (runtime=${runtime} start skipped)`, raw };
     }
-    const child = spawn(cmd, args, { detached: true, stdio: 'ignore' });
-    child.unref();
+    const child = spawnImpl(cmd, args, { detached: true, stdio: 'ignore' });
+    if (child && typeof child.once === 'function') {
+      child.once('error', (err) => {
+        raw.steps.push({ step: 'start_error', ok: false, error: err && err.message ? err.message : String(err) });
+      });
+    }
+    if (!child || !Number.isInteger(child.pid) || child.pid <= 0) {
+      raw.steps.push({ step: 'start', ok: false, error: 'spawn_no_pid' });
+      return {
+        ok: true,
+        deployment_id,
+        message: `installed ${path.basename(artifactPath)} (runtime spawn failed: no pid)`,
+        raw,
+      };
+    }
+    if (typeof child.unref === 'function') child.unref();
     raw.steps.push({ step: 'start', ok: true, pid: child.pid });
     return {
       ok: true,

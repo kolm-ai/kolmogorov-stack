@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 675,
-    "direct_test_reference_pct": 81.4,
-    "components_without_direct_test_reference": 154,
+    "direct_test_referenced_components": 676,
+    "direct_test_reference_pct": 81.5,
+    "components_without_direct_test_reference": 153,
     "high_priority_components": 47,
     "high_priority_direct_test_referenced": 47,
     "high_priority_direct_test_reference_pct": 100,
@@ -17974,16 +17974,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 3465,
-          "lines": 88,
+          "bytes": 5750,
+          "lines": 165,
           "imports": 5,
           "exports": 2,
           "routes": 0,
           "env_refs": 2,
           "fs_writes": 0,
-          "subprocess_refs": 6,
+          "subprocess_refs": 7,
           "network_refs": 0,
-          "crypto_refs": 3,
+          "crypto_refs": 7,
           "markers": 0
         },
         "risk_signals": [
@@ -17991,9 +17991,9 @@
           "environment_configuration_boundary",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 6,
+        "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "23fdc73641c715158cbdb4b9a6e1568aabd83cc1d93445b61cb1be49268c7469"
+        "sha256": "fef18efee522d4832d60b0b977273f7aef9cef6ea9f66759cebed892b4336a9b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -18001,27 +18001,19 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "finetune-frameworks",
-            "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave657-local-adapter-contract.test.js"
         ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "category_links": [],
+        "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
         "suggested_verification": [
           "npm run verify:platform",
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/device-adapters/modal-adapter.js",
@@ -18204,7 +18196,14 @@
         "direct_test_refs": [
           "tests/wave888c-devices.test.js"
         ],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "finetune-frameworks",
+            "stack_area": "training",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
         "suggested_verification": [
@@ -18212,8 +18211,10 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "next_best_action": "Execute the linked frontier track: capability_probe_attested_byoc_worker_and_deploy_readiness."
     },
     {
       "path": "src/device-capabilities.js",

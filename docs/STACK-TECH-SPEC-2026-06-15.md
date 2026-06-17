@@ -10,7 +10,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 
 **What is genuinely missing at the frontier (net-new, spec-gated):** GAD adversarial distillation (arXiv:2511.10643, the #1 black-box method), a shared boot-and-measure probe harness (flips estimated->tested across 5 categories), a pluggable real embedding provider (uncaps curation + routing), a real attestation cert-chain verifier (ends TOFU), a hosted managed distill+serve fleet (the biggest DX gap vs competitors), and an in-browser verify-then-run WebGPU demo.
 
-**Counts:** 57 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
+**Counts:** 58 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
 
 ## Top surgical-now improvements (ranked)
 
@@ -73,6 +73,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 | 55 | mcp-tool-gateway-receipts | 6 | S/low | CLOSED W654: harden and directly test the local MCP server boundary | `services/mcp/server.js canonical run-log hashes, sanitized project tool names, JSON-RPC HTTP envelopes; tests/wave654-mcp-server-contract.test.js; verify:mcp-local-server` |
 | 56 | confidential-compute | 6 | S/low | CLOSED W655: harden repo-wide airgap bundles against symlink leakage and self-inclusion | `src/airgap-bundle.js lstat symlink skip, dest-path exclusion, in-bundle models_dir; tests/wave655-airgap-bundle-contract.test.js; verify:airgap-bundle` |
 | 57 | confidential-compute | 6 | S/low | CLOSED W656: tenant-fence and sanitize airgap HTTP routes | `src/airgap-routes.js tenant-owned distill status, tenant-bound sneakernet verify before extract, sanitized doctor readiness; tests/wave656-airgap-routes-contract.test.js; verify:airgap-routes` |
+| 58 | on-device-inference | 6 | S/low | CLOSED W657: harden local device adapter filesystem and spawn boundaries | `src/device-adapters/local-adapter.js safe device ids, install-root containment, port validation, copy sha256 evidence, pidless spawn honesty; tests/wave657-local-adapter-contract.test.js; verify:device-local-adapter` |
 
 ## Cross-cutting bets (spec-followups)
 

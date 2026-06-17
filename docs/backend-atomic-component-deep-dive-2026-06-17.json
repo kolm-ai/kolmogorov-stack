@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 675,
-    "components_without_direct_test_reference": 154,
+    "test_referenced_components": 676,
+    "components_without_direct_test_reference": 153,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -19062,27 +19062,29 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "23fdc73641c715158cbdb4b9a6e1568aabd83cc1d93445b61cb1be49268c7469",
+      "sha256": "fef18efee522d4832d60b0b977273f7aef9cef6ea9f66759cebed892b4336a9b",
       "metrics": {
-        "bytes": 3465,
-        "lines": 88,
+        "bytes": 5750,
+        "lines": 165,
         "imports": 5,
         "exports": 2,
         "routes": 0,
         "env_refs": 2,
         "fs_writes": 0,
-        "subprocess_refs": 6,
+        "subprocess_refs": 7,
         "network_refs": 0,
-        "crypto_refs": 3,
+        "crypto_refs": 7,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave657-local-adapter-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 6,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -19107,7 +19109,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
       "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
       "suggested_verification": [
         "npm run verify:platform",
