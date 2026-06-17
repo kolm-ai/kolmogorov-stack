@@ -37,6 +37,7 @@ Exit codes: 0 ok · 20 input file missing or empty · 2 bad args (argparse).
 """
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -51,9 +52,32 @@ EXIT_OK = 0
 EXIT_NO_INPUT = 20
 
 
+def _env_int(name, default):
+    try:
+        value = int(os.environ.get(name, str(default)))
+    except Exception:
+        return default
+    return value if value > 0 else default
+
+
+MAX_ROWS = _env_int("KOLM_DEDUP_PAIRS_MAX_ROWS", 50000)
+MAX_LINE_CHARS = _env_int("KOLM_DEDUP_PAIRS_MAX_LINE_CHARS", 1000000)
+MAX_TOTAL_CHARS = _env_int("KOLM_DEDUP_PAIRS_MAX_TOTAL_CHARS", 50000000)
+MAX_TEXT_CHARS = _env_int("KOLM_DEDUP_PAIRS_MAX_TEXT_CHARS", 250000)
+MAX_TOTAL_TEXT_CHARS = _env_int("KOLM_DEDUP_PAIRS_MAX_TOTAL_TEXT_CHARS", 50000000)
+MAX_COMPARISONS = _env_int("KOLM_DEDUP_PAIRS_MAX_COMPARISONS", 5000000)
+
+
+class InputLimitError(Exception):
+    def __init__(self, code, detail=None):
+        super().__init__(code)
+        self.code = code
+        self.detail = detail or code
+
+
 def parse_args():
     p = argparse.ArgumentParser(description="Semantic near-duplicate dedup for training pairs.")
-    p.add_argument("--pairs", required=True, help="Input JSONL of training pairs.")
+    p.add_argument("--pairs", default=None, help="Input JSONL of training pairs.")
     p.add_argument("--out", default=None,
                    help="Where to write the deduped JSONL. Required unless --preview.")
     p.add_argument("--threshold", type=float, default=0.92,
@@ -74,12 +98,53 @@ def parse_args():
                    help="Optional path to also write the JSON summary.")
     p.add_argument("--limit", type=int, default=0,
                    help="Cap rows processed (0 = all). Useful for smoke runs.")
+    p.add_argument("--self-test", action="store_true",
+                   help="Run the dependency-free in-process contract check and exit.")
     return p.parse_args()
 
 
 def log(msg):
     sys.stderr.write(msg + "\n")
     sys.stderr.flush()
+
+
+def _emit_error(code, detail=None, **extra):
+    payload = {"ok": False, "error": code}
+    if detail is not None:
+        payload["detail"] = str(detail)
+    payload.update(extra)
+    print(json.dumps(payload, ensure_ascii=False))
+
+
+def _bounded_limit(value):
+    try:
+        n = int(value or 0)
+    except Exception:
+        raise InputLimitError("limit_invalid", "limit must be an integer")
+    if n < 0:
+        raise InputLimitError("limit_invalid", "limit must be >= 0")
+    if n > MAX_ROWS:
+        raise InputLimitError("limit_too_large", f"limit {n} exceeds max {MAX_ROWS}")
+    return n
+
+
+def _bounded_threshold(value):
+    try:
+        n = float(value)
+    except Exception:
+        raise InputLimitError("threshold_invalid", "threshold must be finite")
+    if not math.isfinite(n) or n < 0.0 or n > 1.0:
+        raise InputLimitError("threshold_invalid", "threshold must be in [0,1]")
+    return n
+
+
+def _ensure_comparison_budget(n):
+    comparisons = (int(n) * max(0, int(n) - 1)) // 2
+    if comparisons > MAX_COMPARISONS:
+        raise InputLimitError(
+            "comparison_budget_exceeded",
+            f"dedup would require up to {comparisons} pair comparisons; max {MAX_COMPARISONS}",
+        )
 
 
 # --- CoT markers (shared schema with eval_adapter.py) ------------------------
@@ -158,30 +223,57 @@ def score_quality(text, seed=None):
 
 # --- row IO ------------------------------------------------------------------
 def load_rows(path, limit=0):
+    limit = _bounded_limit(limit)
     rows = []
+    total_chars = 0
     with open(path, "r", encoding="utf-8") as f:
-        for line in f:
+        for line_no, line in enumerate(f, 1):
+            if len(line) > MAX_LINE_CHARS:
+                raise InputLimitError(
+                    "input_line_too_large",
+                    f"line {line_no} exceeds {MAX_LINE_CHARS} chars",
+                )
+            total_chars += len(line)
+            if total_chars > MAX_TOTAL_CHARS:
+                raise InputLimitError(
+                    "input_too_many_chars",
+                    f"input exceeds {MAX_TOTAL_CHARS} total chars",
+                )
             line = line.strip()
             if not line:
                 continue
             try:
-                rows.append(json.loads(line))
+                row = json.loads(line)
             except Exception:  # deliberate: cleanup — skip a single malformed line
                 continue
+            if not isinstance(row, dict):
+                continue
+            if len(rows) >= MAX_ROWS:
+                raise InputLimitError(
+                    "input_too_many_rows",
+                    f"row limit {MAX_ROWS} exceeded",
+                )
+            rows.append(row)
             if limit and len(rows) >= limit:
                 break
     return rows
 
 
 def row_input(r):
+    if not isinstance(r, dict):
+        return ""
     return r.get("input") or r.get("prompt") or ""
 
 
 def row_output(r):
+    if not isinstance(r, dict):
+        return ""
     return r.get("teacher_output") or r.get("output") or r.get("response") or ""
 
 
 def row_teacher(r):
+    if not isinstance(r, dict):
+        return ""
     return (r.get("_teacher_phase") or r.get("teacher")
             or r.get("teacher_spec") or r.get("vendor") or "")
 
@@ -194,15 +286,36 @@ def row_text(r, key):
     return (row_input(r) + "\n\n" + row_output(r)).strip()
 
 
+def build_texts(rows, key):
+    texts = []
+    total = 0
+    for i, r in enumerate(rows):
+        text = row_text(r, key)
+        if len(text) > MAX_TEXT_CHARS:
+            raise InputLimitError(
+                "text_too_large",
+                f"row {i} text exceeds {MAX_TEXT_CHARS} chars",
+            )
+        total += len(text)
+        if total > MAX_TOTAL_TEXT_CHARS:
+            raise InputLimitError(
+                "input_too_many_text_chars",
+                f"embedded text exceeds {MAX_TOTAL_TEXT_CHARS} total chars",
+            )
+        texts.append(text)
+    return texts
+
+
 def row_confidence(r, teacher_rank, seed_key="seed_output"):
     """Survivor preference. Returns a sort key tuple; smaller sorts first (better)."""
-    explicit = r.get("confidence")
-    if isinstance(explicit, (int, float)):
+    explicit = r.get("confidence") if isinstance(r, dict) else None
+    if isinstance(explicit, (int, float)) and math.isfinite(float(explicit)):
         base = float(explicit)
     else:
-        base = score_quality(row_output(r), r.get(seed_key))
+        seed = r.get(seed_key) if isinstance(r, dict) else None
+        base = score_quality(row_output(r), seed)
     rank = teacher_rank.get(_match_teacher(row_teacher(r), teacher_rank), 10_000)
-    return (rank, -base)
+    return (-base, rank)
 
 
 def _match_teacher(teacher, teacher_rank):
@@ -230,17 +343,22 @@ def embed_nomic(texts, model_id):
     return np.asarray(embs, dtype="float32"), f"nomic:{hf_id}"
 
 
+def _stable_hash(s, dim=2048):
+    h = hashlib.blake2b(str(s).encode("utf-8", errors="ignore"), digest_size=8).digest()
+    return int.from_bytes(h, "little") % dim
+
+
 def _ngram_features(text, dim=2048):
     """Hashed word + char-trigram bag, unit-normalized sparse dict."""
     text = (text or "").lower()
     feats = {}
     for w in _WORD.findall(text):
-        h = hash("w:" + w) % dim
+        h = _stable_hash("w:" + w, dim)
         feats[h] = feats.get(h, 0.0) + 1.0
     padded = f" {text} "
     for i in range(len(padded) - 2):
         tri = padded[i:i + 3]
-        h = hash("c:" + tri) % dim
+        h = _stable_hash("c:" + tri, dim)
         feats[h] = feats.get(h, 0.0) + 1.0
     norm = math.sqrt(sum(v * v for v in feats.values())) or 1.0
     return {k: v / norm for k, v in feats.items()}
@@ -298,23 +416,155 @@ def dedup(rows, reprs, backend, threshold):
     return set(kept), removals
 
 
+def _self_test_rows():
+    base = (
+        "Open the billing settings page, review the invoice payment method, "
+        "confirm the billing address, save the changes, and verify the receipt "
+        "history before leaving the account page."
+    )
+    clean = (
+        "Refunds are available from the orders page for eligible purchases. "
+        "Choose the order, select request refund, explain the reason, submit the "
+        "form, and keep the confirmation number for support follow up."
+    )
+    return [
+        {
+            "id": "high-confidence",
+            "input": "How do I update billing?",
+            "teacher_output": base,
+            "_teacher_phase": "gpt4o",
+            "confidence": 0.95,
+        },
+        {
+            "id": "teacher-priority-low-confidence",
+            "input": "How do I update billing?",
+            "teacher_output": base,
+            "_teacher_phase": "claude",
+            "confidence": 0.10,
+        },
+        {
+            "id": "clean-refund",
+            "input": "How do I request a refund?",
+            "teacher_output": clean,
+            "_teacher_phase": "claude",
+        },
+        {
+            "id": "cot-refund",
+            "input": "How do I request a refund?",
+            "teacher_output": "<think>recall refund workflow</think> " + clean,
+            "_teacher_phase": "claude",
+        },
+        {
+            "id": "distinct-auth",
+            "input": "How do I reset a password?",
+            "teacher_output": "Use the security page to request a password reset link, verify the token, and rotate saved sessions.",
+            "_teacher_phase": "gpt4o",
+        },
+        {
+            "id": "distinct-install",
+            "input": "How do I install the desktop app?",
+            "teacher_output": "Download the installer, check the release signature, run the package, and sign in after the first launch.",
+            "_teacher_phase": "deepseek",
+        },
+    ]
+
+
+def _dedup_in_memory(rows, threshold=0.82, key="pair", teacher_priority="claude,gpt4o,deepseek"):
+    local = [dict(r) for r in rows]
+    teacher_rank = {}
+    for i, name in enumerate(s.strip().lower() for s in teacher_priority.split(",")):
+        if name:
+            teacher_rank[name] = i
+    for r in local:
+        r["__conf_key"] = row_confidence(r, teacher_rank)
+    texts = build_texts(local, key)
+    _ensure_comparison_budget(len(local))
+    reprs, _embedder = embed_ngram(texts)
+    kept_set, removals = dedup(local, reprs, "sparse", threshold)
+    return {
+        "kept_ids": [local[i].get("id") for i in sorted(kept_set)],
+        "removed_ids": [local[rm["removed"]].get("id") for rm in removals],
+        "removals": removals,
+    }
+
+
+def self_test():
+    failures = []
+    rows = _self_test_rows()
+    first = _dedup_in_memory(rows)
+    second = _dedup_in_memory(rows)
+    kept = set(first["kept_ids"])
+    removed = set(first["removed_ids"])
+
+    if first != second:
+        failures.append("non_deterministic")
+    if "high-confidence" not in kept or "teacher-priority-low-confidence" not in removed:
+        failures.append("confidence_did_not_beat_teacher_priority")
+    if "clean-refund" not in kept or "cot-refund" not in removed:
+        failures.append("clean_row_did_not_beat_cot_duplicate")
+    if not {"distinct-auth", "distinct-install"}.issubset(kept):
+        failures.append("distinct_rows_not_preserved")
+    if len(first["removals"]) < 2:
+        failures.append("expected_at_least_two_duplicates_removed")
+
+    passed = 5 - len(failures)
+    for f in failures:
+        log("  FAIL: " + f)
+    log(f"[dedup --self-test] PASS {passed}/5 removed={len(first['removals'])}")
+    print(json.dumps({
+        "ok": not failures,
+        "self_test": True,
+        "passed": passed,
+        "total": 5,
+        "kept_ids": sorted(kept),
+        "removed_ids": sorted(removed),
+        "failures": failures,
+    }, ensure_ascii=False))
+    return EXIT_OK if not failures else 1
+
+
 def main():
     args = parse_args()
 
-    if not os.path.isfile(args.pairs):
-        log(f"[dedup] input not found: {args.pairs}")
-        print(json.dumps({"ok": False, "error": "input_not_found", "pairs": args.pairs}))
+    if args.self_test:
+        return self_test()
+
+    try:
+        threshold = _bounded_threshold(args.threshold)
+        limit = _bounded_limit(args.limit)
+    except InputLimitError as e:
+        log(f"[dedup] input rejected: {e.detail}")
+        _emit_error(e.code, e.detail)
         return EXIT_NO_INPUT
 
-    rows = load_rows(args.pairs, args.limit)
+    if not args.pairs:
+        log("[dedup] --pairs is required unless --self-test")
+        _emit_error("pairs_required")
+        return EXIT_NO_INPUT
+
+    if not os.path.isfile(args.pairs):
+        log(f"[dedup] input not found: {args.pairs}")
+        _emit_error("input_not_found", pairs=args.pairs)
+        return EXIT_NO_INPUT
+
+    try:
+        rows = load_rows(args.pairs, limit)
+    except InputLimitError as e:
+        log(f"[dedup] input rejected: {e.detail}")
+        _emit_error(e.code, e.detail)
+        return EXIT_NO_INPUT
+    except OSError as e:
+        log(f"[dedup] read failed: {e}")
+        _emit_error("read_failed", str(e), pairs=args.pairs)
+        return EXIT_NO_INPUT
     if not rows:
         log(f"[dedup] input is empty: {args.pairs}")
-        print(json.dumps({"ok": False, "error": "input_empty", "pairs": args.pairs}))
+        _emit_error("input_empty", pairs=args.pairs)
         return EXIT_NO_INPUT
 
     if not args.preview and not args.out:
         log("[dedup] --out is required unless --preview")
-        print(json.dumps({"ok": False, "error": "out_required"}))
+        _emit_error("out_required")
         return EXIT_OK  # not a data error; surface cleanly to the caller
 
     teacher_rank = {}
@@ -325,7 +575,13 @@ def main():
 
     for r in rows:
         r["__conf_key"] = row_confidence(r, teacher_rank)
-    texts = [row_text(r, args.key) for r in rows]
+    try:
+        texts = build_texts(rows, args.key)
+        _ensure_comparison_budget(len(rows))
+    except InputLimitError as e:
+        log(f"[dedup] input rejected: {e.detail}")
+        _emit_error(e.code, e.detail)
+        return EXIT_NO_INPUT
 
     # Choose backend: explicit 'ngram' forces fallback; otherwise try nomic.
     embedder_used = None
@@ -336,7 +592,7 @@ def main():
         backend = "sparse"
     else:
         try:
-            log(f"[dedup] loading embedder {args.embedder} (first run downloads ~270 MB)…")
+            log(f"[dedup] loading embedder {args.embedder} (first run downloads ~270 MB)")
             reprs, embedder_used = embed_nomic(texts, args.embedder)
             backend = "dense"
         except Exception as e:  # deliberate: cleanup — model/deps absent is expected off-GPU boxes
@@ -348,7 +604,7 @@ def main():
             reprs, embedder_used = embed_ngram(texts)
             backend = "sparse"
 
-    kept_set, removals = dedup(rows, reprs, backend, args.threshold)
+    kept_set, removals = dedup(rows, reprs, backend, threshold)
 
     n_in = len(rows)
     n_kept = len(kept_set)
@@ -369,12 +625,17 @@ def main():
 
     wrote = None
     if not args.preview:
-        os.makedirs(os.path.dirname(os.path.abspath(args.out)) or ".", exist_ok=True)
-        with open(args.out, "w", encoding="utf-8") as f:
-            for i, r in enumerate(rows):
-                if i in kept_set:
-                    r.pop("__conf_key", None)
-                    f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(args.out)) or ".", exist_ok=True)
+            with open(args.out, "w", encoding="utf-8") as f:
+                for i, r in enumerate(rows):
+                    if i in kept_set:
+                        r.pop("__conf_key", None)
+                        f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        except OSError as e:
+            log(f"[dedup] write failed: {e}")
+            _emit_error("write_failed", str(e), out=args.out)
+            return EXIT_NO_INPUT
         wrote = args.out
         log(f"[dedup] wrote {n_kept} kept rows -> {args.out}")
 
@@ -383,7 +644,7 @@ def main():
         "version": "t2.1-v1",
         "embedder_used": embedder_used,
         "backend": backend,
-        "threshold": args.threshold,
+        "threshold": threshold,
         "key": args.key,
         "preview": bool(args.preview),
         "n_in": n_in,
@@ -395,7 +656,7 @@ def main():
     }
 
     log(f"[dedup] {n_removed}/{n_in} near-dups ({frac*100:.1f}%) "
-        f"via {embedder_used} @ cos>={args.threshold}"
+        f"via {embedder_used} @ cos>={threshold}"
         + (" [PREVIEW]" if args.preview else ""))
 
     if args.report:

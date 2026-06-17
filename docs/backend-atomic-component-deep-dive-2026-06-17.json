@@ -39,9 +39,9 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 685,
-    "components_without_direct_test_reference": 144,
-    "high_priority_components": 47,
+    "test_referenced_components": 686,
+    "components_without_direct_test_reference": 143,
+    "high_priority_components": 48,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -66,9 +66,9 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 399,
+      "cryptographic_or_proof_boundary": 400,
       "distribution_or_worker_surface": 169,
-      "environment_configuration_boundary": 311,
+      "environment_configuration_boundary": 312,
       "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
       "large_component_contract_risk": 37,
@@ -293,6 +293,19 @@
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
       },
       {
+        "path": "workers/distill/scripts/dedup_pairs.py",
+        "domain": "training_model_optimization",
+        "priority_score": 9,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "distribution_or_worker_surface",
+          "environment_configuration_boundary",
+          "execution_or_subprocess_boundary",
+          "http_route_surface"
+        ],
+        "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+      },
+      {
         "path": "workers/distill/scripts/train_preference.py",
         "domain": "training_model_optimization",
         "priority_score": 9,
@@ -449,17 +462,6 @@
           "network_or_provider_boundary"
         ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
-      },
-      {
-        "path": "src/kscore-axis-theory.js",
-        "domain": "compile_artifact_runtime",
-        "priority_score": 7,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "environment_configuration_boundary",
-          "large_component_contract_risk"
-        ],
-        "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
       }
     ]
   },
@@ -46991,27 +46993,31 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "python",
-      "sha256": "70b89ef51fb38525e60ca6f60fa9f5f33c987c9a70e9c44fb4d1c30a551323fa",
+      "sha256": "a615eb39716899d9067194ff89ee9a7c012e0a72cccdf57cfb6795480f3f1496",
       "metrics": {
-        "bytes": 15725,
-        "lines": 415,
+        "bytes": 24783,
+        "lines": 676,
         "imports": 0,
-        "exports": 20,
+        "exports": 32,
         "routes": 10,
-        "env_refs": 0,
+        "env_refs": 1,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave667-distill-dedup-worker-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
+        "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
         "http_route_surface"
       ],
-      "priority_score": 6,
+      "priority_score": 9,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -47036,7 +47042,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
       "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
       "suggested_verification": [
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
