@@ -43,11 +43,11 @@
 import crypto from 'node:crypto';
 import { generateAdversarialPrompts } from './adversarial-prompts.js';
 
-export const ACTIVE_RED_TEAM_SPEC_VERSION = 'asr-active-redteam/0.1';
+export const ACTIVE_RED_TEAM_SPEC_VERSION = 'asr-active-redteam/0.2';
 
 // Fixed corpus seed - bump deliberately (and only with the spec version) so a
 // re-attestation can pin exactly which prompt set was sent.
-const CORPUS_SEED = 'asr-active-redteam/0.1';
+const CORPUS_SEED = 'asr-active-redteam/0.2';
 
 const PROMPTS_PER_PROBE = 2;
 const DEFAULT_TIMEOUT_MS = 15000;
@@ -59,10 +59,17 @@ const DEFAULT_TIMEOUT_MS = 15000;
 // smuggling characters are guaranteed present regardless of generator variant.
 export const ACTIVE_PROBES = Object.freeze([
   Object.freeze({ id: 'system-prompt-override', categories: Object.freeze(['prompt_injection', 'system_prompt_leak']), smuggle: false }),
+  Object.freeze({ id: 'tool-confused-deputy', categories: Object.freeze(['tool_hijack', 'role_confusion']), smuggle: false }),
+  Object.freeze({ id: 'data-exfil-via-tool', categories: Object.freeze(['data_extraction']), smuggle: false }),
+  Object.freeze({ id: 'unicode-homoglyph-smuggling', categories: Object.freeze(['prompt_injection']), smuggle: true }),
   Object.freeze({ id: 'nested-instruction', categories: Object.freeze(['role_confusion']), smuggle: false }),
   Object.freeze({ id: 'jailbreak-relay', categories: Object.freeze(['jailbreak']), smuggle: false }),
-  Object.freeze({ id: 'unicode-homoglyph-smuggling', categories: Object.freeze(['prompt_injection']), smuggle: true }),
-  Object.freeze({ id: 'data-exfil-via-tool', categories: Object.freeze(['data_extraction']), smuggle: false }),
+  Object.freeze({ id: 'tool-arg-escalation', categories: Object.freeze(['tool_hijack', 'data_extraction']), smuggle: false }),
+  Object.freeze({ id: 'mcp-discovery', categories: Object.freeze(['tool_hijack', 'data_extraction']), smuggle: false }),
+  Object.freeze({ id: 'runtime-guardrails-absent', categories: Object.freeze(['tool_hijack', 'jailbreak']), smuggle: false }),
+  Object.freeze({ id: 'unbounded-tool-calls', categories: Object.freeze(['context_overflow', 'tool_hijack']), smuggle: false }),
+  Object.freeze({ id: 'credential-in-log', categories: Object.freeze(['data_extraction', 'tool_hijack']), smuggle: false }),
+  Object.freeze({ id: 'exfil-to-untrusted-host', categories: Object.freeze(['data_extraction', 'tool_hijack']), smuggle: false }),
 ]);
 
 export const ACTIVE_PROBE_IDS = Object.freeze(ACTIVE_PROBES.map((p) => p.id));

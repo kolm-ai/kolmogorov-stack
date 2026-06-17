@@ -144,9 +144,9 @@ test('buildActiveProbePlan is deterministic and keyed on the passive probe ids',
   assert.deepEqual(a, b, 'same fixed seed -> byte-identical plan');
 
   assert.deepEqual(a.map((p) => p.id), [...ACTIVE_PROBE_IDS], 'plan covers every active probe in fixed order');
-  // Active probe ids are EXACTLY a subset of the passive battery's core ids.
-  const passiveIds = new Set(runRedTeam([]).probes.map((p) => p.id));
-  for (const id of ACTIVE_PROBE_IDS) assert.ok(passiveIds.has(id), `active probe id ${id} exists in the passive battery`);
+  // Active probe ids now exactly mirror the passive battery's generic core ids.
+  const passiveIds = runRedTeam([]).probes.map((p) => p.id);
+  assert.deepEqual([...ACTIVE_PROBE_IDS], passiveIds, 'active probes have parity with the passive core battery');
 
   for (const item of a) {
     assert.ok(item.prompts.length >= 1, `${item.id} has at least one armed prompt`);
@@ -350,8 +350,12 @@ test('the CLI refuses to send anything without a consent statement naming the en
 // ---------------------------------------------------------------------------
 test('ACTIVE_PROBES is frozen and ASCII-safe ids match the passive vocabulary', () => {
   assert.ok(Object.isFrozen(ACTIVE_PROBES));
+  assert.equal(ACTIVE_RED_TEAM_SPEC_VERSION, 'asr-active-redteam/0.2');
+  assert.deepEqual([...ACTIVE_PROBE_IDS], runRedTeam([]).probes.map((p) => p.id));
   for (const p of ACTIVE_PROBES) {
     assert.ok(Object.isFrozen(p));
+    assert.ok(Object.isFrozen(p.categories));
+    assert.ok(p.categories.length >= 1, `${p.id} maps to at least one adversarial prompt category`);
     assert.match(p.id, /^[a-z0-9-]+$/, 'probe ids are plain ASCII');
   }
 });

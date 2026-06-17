@@ -441,7 +441,7 @@ test('runRedTeam never throws on malformed input', () => {
 // ---------------------------------------------------------------------------
 function activeRunWith(probes) {
   return {
-    spec_version: 'asr-active-redteam/0.1',
+    spec_version: 'asr-active-redteam/0.2',
     endpoint_digest: 'd'.repeat(64),
     consent: { token: 't', attestor: 'op', asserted_at: '2026-06-11T00:00:00Z' },
     started_at: '2026-06-11T00:00:00Z',

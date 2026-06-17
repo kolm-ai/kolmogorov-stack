@@ -314,9 +314,9 @@
       "stack_area": "enterprise",
       "status": "sota_review_complete_critical_frontier_work_open",
       "already_at_frontier_count": 7,
-      "improvement_count": 5,
+      "improvement_count": 4,
       "critical_gaps": 1,
-      "major_gaps": 4,
+      "major_gaps": 3,
       "minor_gaps": 1,
       "required_components": 3,
       "suggested_verification": [
@@ -7559,8 +7559,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 14443,
-          "lines": 295,
+          "bytes": 15330,
+          "lines": 302,
           "imports": 2,
           "exports": 6,
           "routes": 0,
@@ -7578,7 +7578,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "b5bb4c045dbda96a23d4d4f1fb8ead28a56536588715ba4a43f26853645031bd"
+        "sha256": "6f092e6bd1bd912dd2bc0c72897cd3991a53bae286d83c79c5d9446c2b393292"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -7588,7 +7588,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/active-redteam.test.js",
-          "tests/red-team.test.js"
+          "tests/red-team.test.js",
+          "tests/wave642-active-redteam-parity.test.js"
         ],
         "category_links": [],
         "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
