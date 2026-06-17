@@ -59,9 +59,11 @@
 // 2503.01840), KIVI/H2O/SnapKV/PyramidKV/StreamingLLM papers, S-LoRA
 // (arXiv:2311.03285).
 
+import { buildItkvProfile, hashItkvProfile } from './itkv-profile.js';
+
 export const SERVE_CONFIG_VERSION = 'serve-config-v1';
 export const QUANT_KERNEL_ORACLE_VERSION = 'qko-v1';
-export const KV_POLICY_VERSION = 'kv-policy-v1';
+export const KV_POLICY_VERSION = 'kv-policy-v2-itkv';
 export const EAGLE_RESOLVER_VERSION = 'eagle-resolver-v1';
 
 // ===========================================================================
@@ -518,6 +520,58 @@ function _normalizeRuntimeForKv(format) {
   return f || 'transformers';
 }
 
+function _validItkvProfile(profile) {
+  return profile && typeof profile === 'object'
+    && profile.precision_by_class && typeof profile.precision_by_class === 'object'
+    && Number.isInteger(profile.sink_anchor)
+    && Number.isInteger(profile.recent_window_size)
+    && profile.recent_window_size > 0;
+}
+
+function _resolveItkvProfile({ kv_profile, modelMeta = {} } = {}) {
+  const candidate = kv_profile
+    || modelMeta.kv_profile
+    || modelMeta.kvProfile
+    || modelMeta.itkv_profile
+    || modelMeta.itkvProfile
+    || null;
+  if (_validItkvProfile(candidate)) {
+    return { profile: candidate, source: 'provided' };
+  }
+  const artifact_id = String(
+    modelMeta.artifact_id
+    || modelMeta.artifactId
+    || modelMeta.artifact_hash
+    || modelMeta.base_model
+    || modelMeta.model
+    || modelMeta.family
+    || ''
+  );
+  const built = buildItkvProfile({ artifact_id });
+  if (built && built.ok && _validItkvProfile(built.profile)) {
+    return { profile: built.profile, source: candidate ? 'default_invalid_profile' : 'default' };
+  }
+  return null;
+}
+
+function _fuseItkvProfileParams(policy, params, profileInfo, { explicitSink, explicitWindow } = {}) {
+  if (!profileInfo || !_validItkvProfile(profileInfo.profile)) return params;
+  const profile = profileInfo.profile;
+  const fused = {
+    ...params,
+    kv_profile_hash: hashItkvProfile(profile),
+    kv_profile_version: profile.version || null,
+    kv_profile_source: profileInfo.source,
+    precision_by_class: { ...profile.precision_by_class },
+    prefix_cache_enabled: profile.prefix_cache_enabled !== false,
+  };
+  if (policy === 'streaming' || policy === 'shard') {
+    if (!explicitSink) fused.sink_tokens = profile.sink_anchor;
+    if (!explicitWindow) fused.window_tokens = profile.recent_window_size;
+  }
+  return fused;
+}
+
 /**
  * Map a workload hint to a default KV policy.
  *   chat|streaming -> streaming
@@ -559,6 +613,7 @@ export function selectKvCachePolicy({
   kernel_size,
   group_size,
   residual_length,
+  kv_profile,
 } = {}) {
   const runtime = _normalizeRuntimeForKv(format);
   let policy = _lower(requested);
@@ -589,7 +644,12 @@ export function selectKvCachePolicy({
   const spec = KV_POLICIES[policy];
   const defaults = KV_POLICY_DEFAULTS[policy] || {};
   // Merge defaults with explicit caller overrides (only finite/defined values).
-  const params = { ...defaults };
+  let params = { ...defaults };
+  const profileInfo = _resolveItkvProfile({ kv_profile, modelMeta });
+  params = _fuseItkvProfileParams(policy, params, profileInfo, {
+    explicitSink: _isFiniteNumber(sink_tokens),
+    explicitWindow: _isFiniteNumber(window_tokens),
+  });
   if (_isFiniteNumber(budget)) params.budget = budget;
   if (_isFiniteNumber(sink_tokens)) params.sink_tokens = sink_tokens;
   if (_isFiniteNumber(window_tokens)) params.window_tokens = window_tokens;
@@ -1207,7 +1267,14 @@ export function buildServeConfig({
   // 2. KV policy.
   const kv = selectKvCachePolicy({
     format: rt,
-    modelMeta: { family: mf.family, has_rope: mf.has_rope, num_hidden_layers: mf.num_hidden_layers },
+    modelMeta: {
+      family: mf.family,
+      has_rope: mf.has_rope,
+      num_hidden_layers: mf.num_hidden_layers,
+      artifact_id: mf.artifact_id || mf.artifact_hash || mf.id || target,
+      base_model: target,
+      kv_profile: mf.kv_profile,
+    },
     hardware,
     workload,
     requested: requested.kv_policy || 'auto',

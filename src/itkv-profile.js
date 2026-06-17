@@ -26,10 +26,12 @@
 //   - Clear route/event telemetry for cache hits, compression tier, fallback
 //
 // Honesty contract: this module ships the PROFILE SCHEMA + TOKEN-CLASS SCORER.
-// Runtime KV cache tier dispatch is a future wave - the real implementation
-// plugs into vLLM PagedAttention / SGLang radix cache and is out of scope
-// here. The worker stub in workers/itkv/ ships the same classifier so the
-// upstream runtime can call it as a sidecar.
+// W621 threads the profile into src/serve-config.js KV policy params so serve
+// dispatch and passports can bind the profile hash. Token-level runtime tier
+// enforcement still belongs to the upstream cache executor (vLLM PagedAttention,
+// SGLang radix cache, Shard/kvpress sidecars), not this pure classifier. The
+// worker stub in workers/itkv/ ships the same classifier so those runtimes can
+// call it as a sidecar.
 //
 // JS/Python parity: workers/itkv/scripts/itkv.py is a verbatim port of
 // classifyToken. If you must diverge, document the reason in BOTH file

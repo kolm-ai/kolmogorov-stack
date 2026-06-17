@@ -14415,6 +14415,9 @@ spec:
           family,
           has_rope: m.has_rope ?? (family ? true : undefined),
           num_hidden_layers: m.num_hidden_layers || m.layers || m.config?.num_hidden_layers,
+          artifact_id: m.artifact_id || m.artifact_hash || m.id || ap,
+          base_model: baseModel || m.base_model || m.base || null,
+          kv_profile: m.kv_profile || null,
         };
       } catch { /* artifact unreadable; selectKvCachePolicy will report unknown */ }
       const policyInput = {

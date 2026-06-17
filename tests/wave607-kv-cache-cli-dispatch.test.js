@@ -31,6 +31,8 @@ test('2. CLI serve path emits structured KOLM_KV_POLICY and keeps Shard back-com
   assert.match(src, /emitKvPolicyVllmConfig/);
   assert.match(src, /serveEnv\.KOLM_KV_POLICY\s*=\s*JSON\.stringify\(\{ policy: applied\.policy, kind: applied\.kind, params: applied\.params \}\)/);
   assert.match(src, /serveEnv\.KOLM_KV_CACHE_BACKEND\s*=\s*applied\.policy === 'shard' \? 'shard' : 'default'/);
+  assert.match(src, /kv_profile:\s*m\.kv_profile \|\| null/);
+  assert.match(src, /artifact_id:\s*m\.artifact_id \|\| m\.artifact_hash \|\| m\.id \|\| ap/);
 });
 
 test('3. vLLM eviction requests fall back to enforceable KIVI quant policy', () => {

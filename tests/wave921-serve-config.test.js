@@ -42,6 +42,7 @@ import {
   buildServeConfig,
   formatServeConfigReport,
 } from '../src/serve-config.js';
+import { buildItkvProfile, hashItkvProfile } from '../src/itkv-profile.js';
 
 // ===========================================================================
 // 0. compute-capability parsing
@@ -294,6 +295,50 @@ test('selectKvCachePolicy: shard remains selectable', () => {
   assert.equal(r.policy, 'shard');
   assert.equal(r.kind, 'compress');
   assert.equal(r.runtime_can_enforce, true);
+});
+
+test('selectKvCachePolicy: ITKV profile fuses into policy params', () => {
+  const built = buildItkvProfile({
+    artifact_id: 'art_w621_itkv',
+    sink_anchor: 8,
+    recent_window_size: 2048,
+    precision_override: { policy: 'int8' },
+  });
+  assert.equal(built.ok, true);
+  const r = selectKvCachePolicy({
+    format: 'transformers',
+    requested: 'streaming',
+    modelMeta: { kv_profile: built.profile },
+  });
+  assert.equal(r.params.sink_tokens, 8);
+  assert.equal(r.params.window_tokens, 2048);
+  assert.equal(r.params.kv_profile_hash, hashItkvProfile(built.profile));
+  assert.equal(r.params.kv_profile_version, built.profile.version);
+  assert.equal(r.params.kv_profile_source, 'provided');
+  assert.equal(r.params.precision_by_class.policy, 'int8');
+
+  const explicit = selectKvCachePolicy({
+    format: 'transformers',
+    requested: 'shard',
+    modelMeta: { kv_profile: built.profile },
+    sink_tokens: 16,
+    window_tokens: 128,
+  });
+  assert.equal(explicit.params.sink_tokens, 16);
+  assert.equal(explicit.params.window_tokens, 128);
+  assert.equal(explicit.params.kv_profile_hash, hashItkvProfile(built.profile));
+});
+
+test('selectKvCachePolicy: default ITKV profile binds active policies', () => {
+  const r = selectKvCachePolicy({
+    format: 'transformers',
+    requested: 'streaming',
+    modelMeta: { artifact_id: 'art_w621_default_profile' },
+  });
+  assert.equal(r.params.kv_profile_source, 'default');
+  assert.equal(r.params.sink_tokens, 4);
+  assert.equal(r.params.window_tokens, 512);
+  assert.match(r.params.kv_profile_hash, /^[0-9a-f]{64}$/);
 });
 
 test('KV_POLICIES registry has all named policies', () => {
@@ -565,6 +610,28 @@ test('buildServeConfig: end-to-end AWQ Llama-3.1-8B on Ada, agent workload', () 
   const report = formatServeConfigReport(cfg);
   assert.match(report, /awq_marlin/);
   assert.match(report, /eagle3/);
+});
+
+test('buildServeConfig: manifest ITKV profile reaches KOLM_KV_POLICY env', () => {
+  const built = buildItkvProfile({ artifact_id: 'art_w621_cfg', sink_anchor: 6, recent_window_size: 1536 });
+  assert.equal(built.ok, true);
+  const cfg = buildServeConfig({
+    manifest: {
+      base_model: 'some/unknown-7b',
+      kv_profile: built.profile,
+    },
+    hardware: { primary: { vram_gb: 16, compute_capability: '8.6' } },
+    workload: 'chat',
+    runtime: 'transformers',
+  });
+  assert.equal(cfg.kv.policy, 'streaming');
+  assert.equal(cfg.kv.params.kv_profile_hash, hashItkvProfile(built.profile));
+  assert.equal(cfg.kv.params.sink_tokens, 6);
+  assert.equal(cfg.kv.params.window_tokens, 1536);
+  const envKv = JSON.parse(cfg.env.KOLM_KV_POLICY);
+  assert.equal(envKv.params.kv_profile_hash, hashItkvProfile(built.profile));
+  assert.equal(envKv.params.sink_tokens, 6);
+  assert.equal(envKv.params.window_tokens, 1536);
 });
 
 test('buildServeConfig: no quant + no spec head -> clean off states, never throws', () => {
