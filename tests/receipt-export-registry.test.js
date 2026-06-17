@@ -53,6 +53,7 @@ test('kolm-audit-1 generic functions == legacy intoto-receipt functions', () => 
 test('content subjects dropped when hash field absent/unparseable (never fabricate)', () => {
   const r = { schema: 'mcp-tool-call-1', call_id: 'c1', args_hash: 'not-a-hash', result_hash: 'sha256:' + 'b'.repeat(64) };
   const ex = resolveReceiptExport(r);
+  assert.equal(ex.subjects[0].digest.blake2b.length, 128, 'receipt subject carries multi-algorithm digest map');
   // args dropped (unparseable), result kept.
   assert.ok(!ex.subjects.find((s) => s.name === 'args:c1'));
   assert.ok(ex.subjects.find((s) => s.name === 'result:c1'));

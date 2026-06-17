@@ -11,7 +11,8 @@
 // boundary.
 //
 // Routes:
-//   GET  /v1/govern/intoto/:receipt_id - resolve a receipt by id and return
+//   GET  /v1/govern/intoto/:receipt_id - resolve a receipt by receipt_id or
+//        MCP call_id and return
 //        its in-toto attestation (signed DSSE bundle when a signer is present,
 //        else the unsigned Statement). Optional ?format=oms for the OpenSSF
 //        Model-Signing-shaped bundle.
@@ -38,6 +39,8 @@ import {
 
 export const INTOTO_RECEIPT_ROUTES_VERSION = 'w921-intoto-receipt-routes-v1';
 
+const MCP_RECEIPT_TABLE = 'mcp_tool_receipts';
+
 function _authOrReject(req, res) {
   const trec = req && req.tenant_record;
   if (!trec) {
@@ -51,38 +54,75 @@ function _err(res, code, error, detail) {
   return res.status(code).json({ ok: false, error, ...(detail ? { detail: String(detail) } : {}) });
 }
 
-// Resolve a receipt by id for a tenant, via the injectable resolver or the row
-// store fallback. Returns null when not found / no resolver available. Never
-// throws (so a handler can map a clean 404).
+function _receiptIdOf(receipt) {
+  if (!receipt || typeof receipt !== 'object') return null;
+  if (typeof receipt.receipt_id === 'string' && receipt.receipt_id) return receipt.receipt_id;
+  if (typeof receipt.call_id === 'string' && receipt.call_id) return receipt.call_id;
+  if (typeof receipt.id === 'string' && receipt.id) return receipt.id;
+  return null;
+}
+
+function _tenantMatches(row, receipt, tenant_id, tenantScoped) {
+  const want = String(tenant_id);
+  const candidates = [];
+  for (const v of [row && row.tenant_id, row && row.tenant, receipt && receipt.tenant_id, receipt && receipt.tenant]) {
+    if (typeof v === 'string' && v) candidates.push(v);
+  }
+  if (candidates.length === 0) return !!tenantScoped;
+  return candidates.some((v) => String(v) === want);
+}
+
+function _rowReceipt(row) {
+  const receipt = row && (row.receipt || row);
+  if (!receipt || typeof receipt !== 'object') return null;
+  if (row && row.receipt && row.anchor && !receipt.anchor) return { ...receipt, anchor: row.anchor };
+  return receipt;
+}
+
+function _rowMatches(row, tenant_id, lookup_id, tenantScoped) {
+  const receipt = _rowReceipt(row);
+  if (!receipt) return false;
+  if (!_tenantMatches(row, receipt, tenant_id, tenantScoped)) return false;
+  const ids = [
+    _receiptIdOf(receipt),
+    row && typeof row.receipt_id === 'string' ? row.receipt_id : null,
+    row && typeof row.call_id === 'string' ? row.call_id : null,
+    row && typeof row.id === 'string' ? row.id : null,
+  ].filter(Boolean);
+  return ids.some((id) => id === lookup_id);
+}
+
+// Resolve a receipt by id/call_id for a tenant, via the injectable resolver or
+// the row store fallback. Returns null when not found / no resolver available.
+// Never throws (so a handler can map a clean 404).
 function _resolveReceipt(deps, tenant_id, receipt_id) {
   if (typeof deps.getReceipt === 'function') {
     try {
       const r = deps.getReceipt({ tenant_id, receipt_id });
-      return r || null;
+      if (r) return r;
     } catch { return null; }
   }
   const store = deps.store || null;
   if (store) {
-    const match = (rows) => {
+    const match = (rows, tenantScoped) => {
       if (!Array.isArray(rows)) return null;
       for (const row of rows) {
-        const rc = row && (row.receipt || row);
-        if (rc && rc.receipt_id === receipt_id) return rc;
+        if (_rowMatches(row, tenant_id, receipt_id, tenantScoped)) return _rowReceipt(row);
       }
       return null;
     };
     if (typeof store.findByTenant === 'function') {
-      try { const hit = match(store.findByTenant('receipts', tenant_id)); if (hit) return hit; } catch { /* fall through */ }
-      try { const hit = match(store.findByTenant('observations', tenant_id)); if (hit) return hit; } catch { /* fall through */ }
+      try { const hit = match(store.findByTenant('receipts', tenant_id), true); if (hit) return hit; } catch { /* fall through */ }
+      try { const hit = match(store.findByTenant('observations', tenant_id), true); if (hit) return hit; } catch { /* fall through */ }
+      try { const hit = match(store.findByTenant(MCP_RECEIPT_TABLE, tenant_id), true); if (hit) return hit; } catch { /* fall through */ }
     }
     if (typeof store.find === 'function') {
-      try {
-        const hit = match(store.find('receipts', (row) => {
-          const rc = row && (row.receipt || row);
-          return rc && rc.tenant_id === tenant_id && rc.receipt_id === receipt_id;
-        }));
-        if (hit) return hit;
-      } catch { /* ignore */ }
+      for (const table of ['receipts', 'observations', MCP_RECEIPT_TABLE]) {
+        try {
+          const hit = match(store.find(table, (row) => _rowMatches(row, tenant_id, receipt_id, false)), false);
+          if (hit) return hit;
+        } catch { /* ignore */ }
+      }
     }
   }
   return null;

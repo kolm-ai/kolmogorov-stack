@@ -14,11 +14,12 @@
 // today. This module makes the export DESCRIPTOR-DRIVEN and BYTE-IDENTICAL for
 // kolm-audit-1 (the golden-vector contract, AC2).
 //
-// PRIVACY: in-toto subjects carry ONLY sha256 digests (truncated short hashes
-// for receipt fields, full 64-hex for the receipt-body digest). We NEVER
-// fabricate a digest, and we never export raw prompt/output bytes - only the
-// hashes the receipt already records. A subject is dropped when its hash field
-// is absent or unparseable.
+// PRIVACY: in-toto subjects carry cryptographic digest maps (sha256 + BLAKE2b
+// when the receipt-body bytes are available; receipt-carried content hashes are
+// sha256 only unless the receipt explicitly records more). We NEVER fabricate a
+// content digest, and we never export raw prompt/output bytes - only the hashes
+// the receipt already records. A subject is dropped when its hash field is
+// absent or unparseable.
 //
 // DETERMINISM: no wall clock, no global RNG. Timestamps come from the receipt.
 //
@@ -60,6 +61,10 @@ const HEX_RE = /^[0-9a-f]+$/i;
 // ---------------------------------------------------------------------------
 function _sha256Hex(s) {
   return crypto.createHash('sha256').update(String(s ?? ''), 'utf8').digest('hex');
+}
+
+function _blake2bHex(s) {
+  return crypto.createHash('blake2b512').update(String(s ?? ''), 'utf8').digest('hex');
 }
 
 // Pull the hex out of a kolm short hash `sha256:<hex>` (or pass bare hex
@@ -206,11 +211,11 @@ function _genericDescriptorFor(receipt) {
 // genericReceiptSubjects(receipt, descriptor) -> in-toto subject array.
 //
 // Always emits the primary receipt subject (name `${idPrefix}:${id||'unknown'}`,
-// digest = sha256(canonicalReceiptForDigest(receipt)) FULL 64-hex). Then for
-// each contentDigests entry whose hashField resolves to usable hex, push a
-// subject { name:`${nameTag}:${id}`, digest:{sha256:hex},
-// annotations:{kind, truncated:hex.length<64} }. NEVER fabricates a digest;
-// drops content subjects whose hash field is absent or unparseable.
+// digest = sha256 + BLAKE2b(canonicalReceiptForDigest(receipt))). Then for each
+// contentDigests entry whose hashField resolves to usable hex, push a subject
+// { name:`${nameTag}:${id}`, digest:{sha256:hex}, annotations:{kind,
+// truncated:hex.length<64} }. NEVER fabricates a content digest; drops content
+// subjects whose hash field is absent or unparseable.
 // ---------------------------------------------------------------------------
 export function genericReceiptSubjects(receipt, descriptor) {
   const r = receipt && typeof receipt === 'object' ? receipt : {};
@@ -218,10 +223,11 @@ export function genericReceiptSubjects(receipt, descriptor) {
   const idVal = typeof r[d.idField] === 'string' && r[d.idField] ? r[d.idField] : 'unknown';
   const subjects = [];
 
-  const receiptDigest = _sha256Hex(canonicalReceiptForDigest(r));
+  const canonicalReceipt = canonicalReceiptForDigest(r);
+  const receiptDigest = _sha256Hex(canonicalReceipt);
   const receiptSubj = {
     name: `${d.idPrefix}:${idVal}`,
-    digest: { sha256: receiptDigest },
+    digest: { sha256: receiptDigest, blake2b: _blake2bHex(canonicalReceipt) },
   };
   // Annotations match the kolm-audit-1 path exactly (verify_url, timestamp).
   const ann = {};

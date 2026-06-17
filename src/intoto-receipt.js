@@ -43,6 +43,7 @@
 
 import crypto from 'node:crypto';
 import { canonicalJson } from './cid.js';
+import { resolveReceiptExport } from './receipt-export-registry.js';
 import {
   pae,
   buildInTotoStatement,
@@ -87,6 +88,18 @@ function _sha256Hex(s) {
 
 function _blake2bHex(s) {
   return crypto.createHash('blake2b512').update(String(s ?? ''), 'utf8').digest('hex');
+}
+
+function _receiptId(r) {
+  if (!r || typeof r !== 'object') return 'unknown';
+  if (typeof r.receipt_id === 'string' && r.receipt_id) return r.receipt_id;
+  if (typeof r.call_id === 'string' && r.call_id) return r.call_id;
+  if (typeof r.id === 'string' && r.id) return r.id;
+  return 'unknown';
+}
+
+function _receiptExport(receipt) {
+  try { return resolveReceiptExport(receipt); } catch { return null; }
 }
 
 function _normalizeDigestValue(v) {
@@ -144,7 +157,7 @@ export function canonicalReceiptForDigest(receipt) {
 // ---------------------------------------------------------------------------
 export function receiptSubjects(receipt) {
   const r = receipt && typeof receipt === 'object' ? receipt : {};
-  const rid = typeof r.receipt_id === 'string' && r.receipt_id ? r.receipt_id : 'unknown';
+  const rid = _receiptId(r);
   const subjects = [];
 
   const canonicalReceipt = canonicalReceiptForDigest(r);
@@ -231,9 +244,10 @@ export function toInTotoStatement(receipt, opts = {}) {
   if (!receipt || typeof receipt !== 'object') {
     throw new Error('toInTotoStatement: receipt object required');
   }
-  const subjects = opts.subjects || receiptSubjects(receipt);
-  const predicateType = opts.predicateType || KOLM_INFERENCE_PREDICATE_TYPE;
-  const predicate = opts.predicate || buildInferencePredicate(receipt);
+  const ex = _receiptExport(receipt);
+  const subjects = opts.subjects || (ex && ex.subjects) || receiptSubjects(receipt);
+  const predicateType = opts.predicateType || (ex && ex.predicateType) || KOLM_INFERENCE_PREDICATE_TYPE;
+  const predicate = opts.predicate || (ex && ex.predicate) || buildInferencePredicate(receipt);
   return buildInTotoStatement({ subjects, predicateType, predicate });
 }
 
@@ -312,7 +326,8 @@ export function signInTotoBundle(receipt, signer, opts = {}) {
 // signInTotoBundle so there is one signing path.
 // ---------------------------------------------------------------------------
 export function toOmsBundle(receipt, signer, opts = {}) {
-  const subjects = receiptSubjects(receipt).map((s) => ({
+  const ex = _receiptExport(receipt);
+  const subjects = (opts.subjects || (ex && ex.subjects) || receiptSubjects(receipt)).map((s) => ({
     // OMS manifests key files by path; map the receipt subject name to `name`
     // (the in-toto field) and retain it. Verifiers match purely by digest.
     name: s.name,

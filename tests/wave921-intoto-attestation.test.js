@@ -17,6 +17,8 @@ import crypto from 'node:crypto';
 
 import { generateKeyPair, keyFingerprint, verify as ed25519Verify } from '../src/ed25519.js';
 import { pae, INTOTO_DSSE_PAYLOAD_TYPE } from '../src/intoto-slsa.js';
+import { buildMcpReceipt, signMcpReceipt } from '../src/mcp-gateway.js';
+import { KOLM_TOOLCALL_PREDICATE_TYPE } from '../src/receipt-export-registry.js';
 import {
   toInTotoStatement,
   signInTotoBundle,
@@ -113,6 +115,32 @@ test('statement: an output subject carries the receipt output_hash hex', () => {
   const outHex = r.output_hash.replace(/^sha256:/, '');
   assert.equal(outSubj.digest.sha256, outHex);
   assert.equal(outSubj.digest.blake2b, undefined, 'do not fabricate BLAKE2b without output bytes');
+});
+
+test('statement: mcp-tool-call-1 uses call_id subjects and the tool-call predicate descriptor', () => {
+  const signer = freshSigner();
+  const built = buildMcpReceipt({
+    tenant: 'tenant_w640',
+    tool: 'lookup',
+    args: { q: 'status' },
+    result: { content: [{ type: 'text', text: 'ok' }], isError: false },
+    now: '2026-06-17T00:00:00.000Z',
+    transport: 'http',
+    server_id: 'srv_w640',
+    call_id: 'mtc_W6400000000000000000000A',
+  });
+  const receipt = signMcpReceipt(built, signer, { signed_at: built.timestamp });
+  const stmt = toInTotoStatement(receipt);
+
+  assert.equal(stmt.predicateType, KOLM_TOOLCALL_PREDICATE_TYPE);
+  assert.ok(stmt.subject.find((s) => s.name === `receipt:${receipt.call_id}`));
+  assert.ok(stmt.subject.find((s) => s.name === `args:${receipt.call_id}`));
+  assert.ok(stmt.subject.find((s) => s.name === `result:${receipt.call_id}`));
+  assert.ok(!stmt.subject.find((s) => s.name === 'receipt:unknown'));
+  assert.equal(stmt.predicate.tool_call.tool, 'lookup');
+  assert.equal(stmt.predicate.tool_call.args_hash, receipt.args_hash);
+  assert.equal(stmt.predicate.tool_call.result_hash, receipt.result_hash);
+  assert.equal(stmt.predicate.builder.id, 'https://kolm.ai/mcp-gateway');
 });
 
 test('statement: canonical receipt digest excludes the signature blocks (seal does not cover itself)', () => {
@@ -399,6 +427,58 @@ test('routes: GET resolves via the row-store fallback (findByTenant receipts)', 
   });
   assert.equal(res.body.ok, true);
   assert.equal(res.body.signed, true);
+});
+
+test('routes: GET resolves stored mcp_tool_receipts by call_id and emits a tool-call Statement', () => {
+  const r = mockRouter();
+  const signer = freshSigner();
+  const mcpSigner = freshSigner();
+  const built = buildMcpReceipt({
+    tenant: 't1',
+    tool: 'lookup',
+    args: { q: 'route export' },
+    result: { content: [{ type: 'text', text: 'found' }], isError: false },
+    now: '2026-06-17T00:00:00.000Z',
+    transport: 'http',
+    server_id: 'srv_route',
+    call_id: 'mtc_W640ROUTE0000000000000A',
+  });
+  const receipt = signMcpReceipt(built, mcpSigner, { signed_at: built.timestamp });
+  const anchor = {
+    version: 'w921-anchor-v1',
+    batch_id: 'batch_w640',
+    leaf_index: 0,
+    tree_size: 1,
+    audit_path: [],
+    batch_root: '0'.repeat(64),
+    state: 'local',
+    stamped_at: '2026-06-17T00:00:01.000Z',
+  };
+  const store = {
+    findByTenant: (kind, tenant) => (
+      kind === 'mcp_tool_receipts' && tenant === 't1'
+        ? [{ id: receipt.call_id, call_id: receipt.call_id, tenant_id: 't1', tenant: 't1', receipt, anchor }]
+        : []
+    ),
+  };
+  registerIntotoRoutes(r, { getSigner: () => signer, store });
+  const res = r.call('GET', '/v1/govern/intoto/:receipt_id', {
+    tenant_record: { id: 't1' }, params: { receipt_id: receipt.call_id }, query: {},
+  });
+
+  assert.equal(res.body.ok, true);
+  assert.equal(res.body.signed, true);
+  assert.equal(res.body.statement.predicateType, KOLM_TOOLCALL_PREDICATE_TYPE);
+  assert.ok(res.body.statement.subject.find((s) => s.name === `receipt:${receipt.call_id}`));
+  assert.ok(res.body.statement.subject.find((s) => s.name === `args:${receipt.call_id}`));
+  assert.ok(res.body.statement.subject.find((s) => s.name === `result:${receipt.call_id}`));
+  assert.ok(!res.body.statement.subject.find((s) => s.name === 'receipt:unknown'));
+  assert.equal(res.body.statement.predicate.tool_call.tool, 'lookup');
+  assert.equal(res.body.statement.predicate.tool_call.tenant_id, 't1');
+  const receiptSubject = res.body.statement.subject.find((s) => s.name === `receipt:${receipt.call_id}`);
+  assert.equal(receiptSubject.digest.blake2b.length, 128);
+  const v = verifyInTotoBundle(res.body.bundle, { publicKey: signer.publicKey });
+  assert.equal(v.ok, true, v.reason);
 });
 
 test('routes: POST verify confirms a signed bundle (and the tenant cannot inject a key it does not control)', () => {
