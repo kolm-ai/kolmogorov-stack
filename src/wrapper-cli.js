@@ -1482,7 +1482,7 @@ export async function capturesPurge(args) {
   if (!id && !ns) { _die({ ok: false, error: 'missing_target', hint: 'usage: kolm captures purge --capture-id <id> | --namespace <ns> --confirm', version: WRAPPER_CLI_VERSION }, 2); return; }
   if (!id && !confirm) { _die({ ok: false, error: 'bulk_purge_requires_confirm', hint: 'pass --confirm to acknowledge namespace-wide purge', version: WRAPPER_CLI_VERSION }, 2); return; }
   const key = _requireKey(_emit); if (!key) return;
-  const body = id ? { capture_id: id, reason } : { namespace: ns, reason, confirm: true };
+  const body = id ? { capture_id: id, reason, confirm: true } : { namespace: ns, reason, confirm: true };
   const r = await _post(base + '/v1/captures/forget', key, body);
   if (!r.ok) { _die({ ok: false, status: r.status, error: 'purge_failed', detail: r.json, version: WRAPPER_CLI_VERSION }, 1); return; }
   _emit({ ok: true, target: id ? { capture_id: id } : { namespace: ns }, reason, server: r.json, version: WRAPPER_CLI_VERSION });

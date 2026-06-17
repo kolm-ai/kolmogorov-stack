@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 702,
-    "components_without_direct_test_reference": 127,
+    "test_referenced_components": 703,
+    "components_without_direct_test_reference": 126,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -8052,7 +8052,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave656-airgap-routes-contract.test.js"
+        "tests/wave656-airgap-routes-contract.test.js",
+        "tests/wave683-capture-forget-contract.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary",
@@ -11808,26 +11809,28 @@
       "surface": "core-backend",
       "domain": "identity_access",
       "language": "javascript",
-      "sha256": "a51af151ca931c4f9b4b7eddb0f06ea8ea8660f205e7eb9f64f383bf53b229ae",
+      "sha256": "a64db4cdad5eb5442e9a993e8dbf777b6efaa1d5d17ab9f655319e8247d1ad20",
       "metrics": {
-        "bytes": 10762,
-        "lines": 319,
+        "bytes": 22415,
+        "lines": 635,
         "imports": 2,
-        "exports": 6,
+        "exports": 8,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 3,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave683-capture-forget-contract.test.js"
+      ],
       "risk_signals": [
         "auth_or_tenant_boundary",
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -45263,9 +45266,9 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "d5820993343d0a852f4de18fcb0e1e035b1c7b2e5be38bf2d21faf908fc8af45",
+      "sha256": "2c493eb75aac6e614a596218c117066ecfe098f3e97d10078f9eabb6ceae1750",
       "metrics": {
-        "bytes": 91278,
+        "bytes": 91293,
         "lines": 2015,
         "imports": 24,
         "exports": 36,
@@ -45278,6 +45281,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave683-capture-forget-contract.test.js",
         "tests/wave888L-blocker-10-fix.test.js",
         "tests/wave888L-blocker-9-fix.test.js",
         "tests/wave888i-receipt-export.test.js"

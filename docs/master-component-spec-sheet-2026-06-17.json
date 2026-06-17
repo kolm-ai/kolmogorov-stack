@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 92.5,
+    "local_engineering_score": 92.6,
     "frontier_product_score": 69.5,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 702,
-    "direct_test_reference_pct": 84.7,
-    "components_without_direct_test_reference": 127,
+    "direct_test_referenced_components": 703,
+    "direct_test_reference_pct": 84.8,
+    "components_without_direct_test_reference": 126,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -8342,7 +8342,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave656-airgap-routes-contract.test.js"
+          "tests/wave656-airgap-routes-contract.test.js",
+          "tests/wave683-capture-forget-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
@@ -11633,25 +11634,25 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 10762,
-          "lines": 319,
+          "bytes": 22415,
+          "lines": 635,
           "imports": 2,
-          "exports": 6,
+          "exports": 8,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 3,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
           "auth_or_tenant_boundary",
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "a51af151ca931c4f9b4b7eddb0f06ea8ea8660f205e7eb9f64f383bf53b229ae"
+        "sha256": "a64db4cdad5eb5442e9a993e8dbf777b6efaa1d5d17ab9f655319e8247d1ad20"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -11659,7 +11660,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave683-capture-forget-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
         "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
@@ -11667,10 +11670,8 @@
           "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep policy_as_data_rbac_sso_and_key_lifecycle_tests current."
     },
     {
       "path": "src/capture-importance.js",
@@ -40272,7 +40273,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 91278,
+          "bytes": 91293,
           "lines": 2015,
           "imports": 24,
           "exports": 36,
@@ -40293,7 +40294,7 @@
         ],
         "priority_score": 9,
         "priority_band": "high",
-        "sha256": "d5820993343d0a852f4de18fcb0e1e035b1c7b2e5be38bf2d21faf908fc8af45"
+        "sha256": "2c493eb75aac6e614a596218c117066ecfe098f3e97d10078f9eabb6ceae1750"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -40302,6 +40303,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave683-capture-forget-contract.test.js",
           "tests/wave888L-blocker-10-fix.test.js",
           "tests/wave888L-blocker-9-fix.test.js",
           "tests/wave888i-receipt-export.test.js"
