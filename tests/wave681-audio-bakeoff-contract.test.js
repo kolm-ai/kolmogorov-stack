@@ -38,7 +38,7 @@ test('W681 audio bakeoff source pins local-only bounded scoring controls', () =>
 
   const pkg = readJson('package.json');
   assert.equal(pkg.scripts['verify:audio-bakeoff'], 'node --test --test-concurrency=1 tests/wave681-audio-bakeoff-contract.test.js');
-  assert.match(pkg.scripts['verify:depth'], /verify:distill-bon && npm run verify:audio-bakeoff && npm run verify:airgap/);
+  assert.match(pkg.scripts['verify:depth'], /verify:distill-bon && npm run verify:audio-capture && npm run verify:audio-bakeoff && npm run verify:airgap/);
 });
 
 test('W681 audio bakeoff rejects remote artifacts and malformed scopes before store reads', async () => {

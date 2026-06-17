@@ -74,6 +74,10 @@ const MAX_AUDIO_BYTES = 100 * 1024 * 1024;
 // the block honestly but cap the duration estimate at the conservative
 // upper bound so we never claim to have decoded a 10-hour file.
 const MAX_DATA_URL_CHARS = 200 * 1024 * 1024;
+const MAX_INLINE_AUDIO_CHARS = MAX_DATA_URL_CHARS;
+const MAX_AUDIO_BLOCKS = 64;
+const MAX_AUDIO_MESSAGES = 64;
+const MAX_NAMESPACE_CHARS = 256;
 
 // Sample rate we assume for the duration estimate when only the byte
 // count is known. 16 kHz mono 16-bit PCM = 32 kB/s, which is the worst-
@@ -122,12 +126,17 @@ const MAX_TRANSCRIPT_CHARS = 128 * 1024;
  * downstream consumer is the wrapper-mode capture path which folds the
  * detection result onto the capture row.
  */
-export function detectAudioCapture(message) {
+export function detectAudioCapture(message, opts = {}) {
   const empty = { is_audio: false, audio_blocks: [], transcript_present: false, total_audio: 0 };
   if (!message || typeof message !== 'object') return empty;
 
+  const includeRaw = Boolean(opts && opts.includeRaw === true);
   const blocks = [];
   const content = message.content;
+  const pushBlock = (block) => {
+    if (!block || blocks.length >= MAX_AUDIO_BLOCKS) return;
+    blocks.push(block);
+  };
 
   if (Array.isArray(content)) {
     for (const item of content) {
@@ -137,13 +146,15 @@ export function detectAudioCapture(message) {
       if (item.type === 'input_audio' && item.input_audio && typeof item.input_audio === 'object') {
         const fmt = String(item.input_audio.format || '').toLowerCase();
         const data = String(item.input_audio.data || '');
-        if (data) {
-          blocks.push({
+        const mime = _mimeFromFormat(fmt);
+        if (data && mime) {
+          pushBlock(_base64Block({
             kind: 'openai_input_audio',
-            mime: _mimeFromFormat(fmt),
+            mime,
             base64: data,
             format: fmt || null,
-          });
+            includeRaw,
+          }));
         }
         continue;
       }
@@ -152,19 +163,21 @@ export function detectAudioCapture(message) {
       if (item.type === 'audio' && item.source && typeof item.source === 'object') {
         const src = item.source;
         if (src.type === 'base64' && src.data) {
-          blocks.push({
+          pushBlock(_base64Block({
             kind: 'anthropic_audio_base64',
             mime: String(src.media_type || src.mime_type || '').toLowerCase() || 'audio/wav',
             base64: String(src.data),
             format: null,
-          });
+            includeRaw,
+          }));
         } else if (src.type === 'url' && src.url) {
-          blocks.push({
+          pushBlock(_urlBlock({
             kind: 'anthropic_audio_url',
             mime: String(src.media_type || src.mime_type || '').toLowerCase() || _mimeFromUrl(String(src.url)),
             url: String(src.url),
             format: null,
-          });
+            includeRaw,
+          }));
         }
         continue;
       }
@@ -174,12 +187,13 @@ export function detectAudioCapture(message) {
         const dataUrl = item.text.trim();
         const mime = _mimeFromDataUrl(dataUrl);
         if (mime) {
-          blocks.push({
+          pushBlock(_dataUrlBlock({
             kind: 'data_url',
             mime,
             data_url: dataUrl.slice(0, MAX_DATA_URL_CHARS),
             format: null,
-          });
+            includeRaw,
+          }));
         }
       }
     }
@@ -190,12 +204,13 @@ export function detectAudioCapture(message) {
     const dataUrl = content.trim();
     const mime = _mimeFromDataUrl(dataUrl);
     if (mime) {
-      blocks.push({
+      pushBlock(_dataUrlBlock({
         kind: 'data_url',
         mime,
         data_url: dataUrl.slice(0, MAX_DATA_URL_CHARS),
         format: null,
-      });
+        includeRaw,
+      }));
     }
   }
 
@@ -259,8 +274,8 @@ export function normalizeAudioBlock(block) {
   let source = 'unknown';
   let raw_bytes = 0;
 
-  if (typeof block.url === 'string' && block.url) {
-    url = block.url;
+  if ((typeof block.url === 'string' && block.url) || block.url_sha256) {
+    url = typeof block.url === 'string' && block.url ? block.url : null;
     source = 'url';
     // We do not fetch the URL here - byte_count_estimate stays 0 for the
     // url branch. The downstream trainer is responsible for HEAD-probing
@@ -270,22 +285,25 @@ export function normalizeAudioBlock(block) {
     source = 'base64';
     // Base64 expands ~4 chars -> 3 bytes; the trailing padding is at most
     // 2 chars so the byte count is floor(len * 3 / 4).
-    const raw = block.base64.replace(/=+$/, '');
+    const raw = _boundedInlineAudio(block.base64).value.replace(/=+$/, '');
     raw_bytes = Math.floor((raw.length * 3) / 4);
   } else if (typeof block.data_url === 'string' && block.data_url) {
     source = 'base64';
     const idx = block.data_url.indexOf('base64,');
     if (idx >= 0) {
-      const tail = block.data_url.slice(idx + 'base64,'.length).replace(/=+$/, '');
+      const tail = _boundedInlineAudio(block.data_url.slice(idx + 'base64,'.length)).value.replace(/=+$/, '');
       raw_bytes = Math.floor((tail.length * 3) / 4);
     }
+  } else if (Number.isFinite(Number(block.base64_chars)) && Number(block.base64_chars) > 0) {
+    source = 'base64';
+    raw_bytes = Math.floor((Number(block.base64_chars) * 3) / 4);
   }
 
   // Apply the 100 MiB cap. Stamp a `truncated_estimate` flag so the
   // operator can see the harness clamped the byte count.
   let byte_count_estimate = raw_bytes;
   let truncated_estimate = false;
-  if (byte_count_estimate > MAX_AUDIO_BYTES) {
+  if (byte_count_estimate > MAX_AUDIO_BYTES || block.raw_truncated === true) {
     byte_count_estimate = MAX_AUDIO_BYTES;
     truncated_estimate = true;
   }
@@ -384,9 +402,11 @@ export function extractWhisperTranscript(message) {
  */
 export async function captureAudioMessage(args) {
   const a = args || {};
-  const tenant_id = a.tenant_id;
-  const namespace = a.namespace || 'default';
-  const messages = Array.isArray(a.messages) ? a.messages : [];
+  const tenant_id = typeof a.tenant_id === 'string' ? a.tenant_id.trim() : '';
+  const namespaceResult = _normalizeNamespace(a.namespace);
+  const messagesInput = Array.isArray(a.messages) ? a.messages : [];
+  const messages = messagesInput.slice(0, MAX_AUDIO_MESSAGES);
+  const messages_truncated = messagesInput.length > MAX_AUDIO_MESSAGES;
   const response = a.response;
   const opts = a.opts || {};
 
@@ -404,25 +424,48 @@ export async function captureAudioMessage(args) {
       version: AUDIO_CAPTURE_VERSION,
     };
   }
+  if (!namespaceResult.ok) {
+    return {
+      ok: false,
+      error: 'invalid_namespace',
+      hint: namespaceResult.hint,
+      has_audio: false,
+      audio_block_count: 0,
+      transcript_chars: 0,
+      transcript_present: false,
+      audio_urls_hashed: [],
+      row_id: null,
+      version: AUDIO_CAPTURE_VERSION,
+    };
+  }
+  const namespace = namespaceResult.value;
 
   let audio_blocks = [];
   let transcript_present = false;
   let transcript = '';
   let audio_urls_hashed = [];
+  let audio_blocks_truncated = messages_truncated;
 
   for (const msg of messages) {
-    const det = detectAudioCapture(msg);
+    const det = detectAudioCapture(msg, { includeRaw: true });
     if (!det.is_audio) continue;
+    if (det.total_audio >= MAX_AUDIO_BLOCKS) audio_blocks_truncated = true;
     for (const block of det.audio_blocks) {
+      if (audio_blocks.length >= MAX_AUDIO_BLOCKS) {
+        audio_blocks_truncated = true;
+        break;
+      }
       const norm = normalizeAudioBlock(block);
       if (!norm || norm.ok === false) continue;
       audio_blocks.push(norm);
       // Privacy: hash the URL (or data-URL head) so the same clip
       // deduplicates across captures WITHOUT persisting the raw bytes.
-      const hash_seed = norm.url
-        || (typeof block.data_url === 'string' ? block.data_url.slice(0, 256) : null)
-        || (typeof block.base64 === 'string' ? block.base64.slice(0, 256) : '');
-      const h = crypto.createHash('sha256').update(String(hash_seed)).digest('hex');
+      const hash_seed = block.url_sha256
+        || block.audio_sha256
+        || (norm.url ? _sha256Hex(norm.url) : '')
+        || (typeof block.data_url === 'string' ? _sha256Hex(block.data_url) : '')
+        || (typeof block.base64 === 'string' ? _sha256Hex(block.base64) : '');
+      const h = _looksSha256(hash_seed) ? hash_seed : _sha256Hex(String(hash_seed));
       audio_urls_hashed.push(h);
     }
     if (det.transcript_present) {
@@ -453,6 +496,8 @@ export async function captureAudioMessage(args) {
       transcript_present: false,
       audio_urls_hashed: [],
       row_id: null,
+      messages_truncated,
+      audio_blocks_truncated,
       version: AUDIO_CAPTURE_VERSION,
     };
   }
@@ -490,10 +535,14 @@ export async function captureAudioMessage(args) {
         transcript_chars: transcript.length,
         transcript_present,
         transcript_truncated,
+        messages_truncated,
+        audio_blocks_truncated,
         audio_urls_hashed,
         audio_capture_version: AUDIO_CAPTURE_VERSION,
       });
       row_id = (ev && ev.event_id) || null;
+    } else {
+      persist_error = 'event_store_not_wired';
     }
   } catch (e) {
     persist_error = String(e && e.message || e);
@@ -506,6 +555,8 @@ export async function captureAudioMessage(args) {
     transcript_chars: transcript.length,
     transcript_present,
     transcript_truncated,
+    messages_truncated,
+    audio_blocks_truncated,
     audio_urls_hashed,
     row_id,
     persist_error,
@@ -517,6 +568,109 @@ export async function captureAudioMessage(args) {
 // Internal helpers
 // =============================================================================
 
+function _base64Block({ kind, mime, base64, format, includeRaw }) {
+  const safeMime = _supportedMime(mime);
+  if (!safeMime) return null;
+  const bounded = _boundedInlineAudio(base64);
+  const block = {
+    kind,
+    mime: safeMime,
+    source: 'base64',
+    audio_sha256: _sha256Hex(bounded.value),
+    base64_chars: String(base64 || '').length,
+    raw_truncated: bounded.truncated,
+    format: format || null,
+  };
+  if (includeRaw) block.base64 = bounded.value;
+  return block;
+}
+
+function _dataUrlBlock({ kind, mime, data_url, format, includeRaw }) {
+  const safeMime = _supportedMime(mime);
+  if (!safeMime) return null;
+  const boundedUrl = _boundedInlineAudio(data_url);
+  const idx = boundedUrl.value.indexOf('base64,');
+  const payload = idx >= 0 ? boundedUrl.value.slice(idx + 'base64,'.length) : '';
+  const block = {
+    kind,
+    mime: safeMime,
+    source: 'base64',
+    audio_sha256: _sha256Hex(payload),
+    data_url_chars: String(data_url || '').length,
+    base64_chars: payload.length,
+    raw_truncated: boundedUrl.truncated,
+    format: format || null,
+  };
+  if (includeRaw) block.data_url = boundedUrl.value;
+  return block;
+}
+
+function _urlBlock({ kind, mime, url, format, includeRaw }) {
+  const safeMime = _supportedMime(mime);
+  if (!safeMime) return null;
+  const rawUrl = String(url || '').trim();
+  if (!rawUrl) return null;
+  const block = {
+    kind,
+    mime: safeMime,
+    source: 'url',
+    url_sha256: _sha256Hex(rawUrl),
+    url_host: _safeUrlHost(rawUrl),
+    format: format || null,
+  };
+  if (includeRaw) block.url = rawUrl;
+  return block;
+}
+
+function _supportedMime(mime) {
+  const m = String(mime || '').toLowerCase();
+  return SUPPORTED_AUDIO_MIMES.includes(m) ? m : null;
+}
+
+function _boundedInlineAudio(value) {
+  const text = String(value || '');
+  if (text.length <= MAX_INLINE_AUDIO_CHARS) {
+    return { value: text, truncated: false };
+  }
+  return {
+    value: text.slice(0, MAX_INLINE_AUDIO_CHARS),
+    truncated: true,
+  };
+}
+
+function _safeUrlHost(rawUrl) {
+  try {
+    const u = new URL(rawUrl);
+    return u.host || null;
+  } catch {
+    return null;
+  }
+}
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value || '')).digest('hex');
+}
+
+function _looksSha256(value) {
+  return typeof value === 'string' && /^[a-f0-9]{64}$/i.test(value);
+}
+
+function _normalizeNamespace(v) {
+  if (v == null || v === '') return { ok: true, value: 'default' };
+  if (typeof v !== 'string') {
+    return { ok: false, value: null, hint: 'namespace must be a string when provided' };
+  }
+  const s = v.trim();
+  if (!s) return { ok: true, value: 'default' };
+  if (s.length > MAX_NAMESPACE_CHARS) {
+    return { ok: false, value: null, hint: `namespace must be at most ${MAX_NAMESPACE_CHARS} characters` };
+  }
+  if (s.includes('\0') || /[\r\n]/.test(s)) {
+    return { ok: false, value: null, hint: 'namespace must not contain control characters' };
+  }
+  return { ok: true, value: s };
+}
+
 function _mimeFromFormat(fmt) {
   switch (String(fmt || '').toLowerCase()) {
     case 'wav': return 'audio/wav';
@@ -526,7 +680,7 @@ function _mimeFromFormat(fmt) {
     case 'ogg': return 'audio/ogg';
     case 'webm': return 'audio/webm';
     case 'm4a': return 'audio/m4a';
-    default: return 'audio/wav';
+    default: return null;
   }
 }
 

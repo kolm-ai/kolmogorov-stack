@@ -9,7 +9,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 92.5,
-    "frontier_product_score": 69.4,
+    "frontier_product_score": 69.5,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 701,
-    "direct_test_reference_pct": 84.6,
-    "components_without_direct_test_reference": 128,
+    "direct_test_referenced_components": 702,
+    "direct_test_reference_pct": 84.7,
+    "components_without_direct_test_reference": 127,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -9318,7 +9318,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave681-audio-bakeoff-contract.test.js"
+          "tests/wave681-audio-bakeoff-contract.test.js",
+          "tests/wave682-audio-capture-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -9339,8 +9340,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 20862,
-          "lines": 581,
+          "bytes": 25859,
+          "lines": 735,
           "imports": 2,
           "exports": 7,
           "routes": 0,
@@ -9355,9 +9356,9 @@
           "cryptographic_or_proof_boundary",
           "network_or_provider_boundary"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "5f74c318f15849997d9edb81aa0780f83e9bc108a7f0c1144bd79c976e115d70"
+        "sha256": "3d6c531cb2cebbbf4e2da30f0737a7bd30c28d24559f7ed2e765021715f6f1bd"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -9365,7 +9366,10 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave681-audio-bakeoff-contract.test.js",
+          "tests/wave682-audio-capture-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -9374,10 +9378,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "src/audio-tokenize.js",

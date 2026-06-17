@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 701,
-    "components_without_direct_test_reference": 128,
+    "test_referenced_components": 702,
+    "components_without_direct_test_reference": 127,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -9096,7 +9096,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave681-audio-bakeoff-contract.test.js"
+        "tests/wave681-audio-bakeoff-contract.test.js",
+        "tests/wave682-audio-capture-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -9140,10 +9141,10 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "5f74c318f15849997d9edb81aa0780f83e9bc108a7f0c1144bd79c976e115d70",
+      "sha256": "3d6c531cb2cebbbf4e2da30f0737a7bd30c28d24559f7ed2e765021715f6f1bd",
       "metrics": {
-        "bytes": 20862,
-        "lines": 581,
+        "bytes": 25859,
+        "lines": 735,
         "imports": 2,
         "exports": 7,
         "routes": 0,
@@ -9154,12 +9155,15 @@
         "crypto_refs": 7,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave681-audio-bakeoff-contract.test.js",
+        "tests/wave682-audio-capture-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
