@@ -153,7 +153,7 @@ export const PACKAGE_RELEASE_TARGETS = [
     manifests: ['kolm.kolm.yaml', 'kolm.kolm.installer.yaml', 'kolm.kolm.locale.en-US.yaml'],
     docs: ['README.md'],
     requirement_ids: ['one-line-install'],
-    checks: ['winget validate packages/winget'],
+    checks: ['node scripts/validate-winget-manifest.mjs packages/winget'],
   },
   {
     id: 'install-scripts',

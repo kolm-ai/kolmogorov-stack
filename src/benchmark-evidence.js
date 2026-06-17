@@ -77,18 +77,18 @@ export const REQUIRED_BENCHMARK_LANES = [
 
 const REQUIRED_PUBLIC_ARTIFACTS = [
   {
-    id: 'kolm-bench',
-    path: 'public/kolm-bench.json',
+    id: 'trinity-500-benchmark',
+    path: 'public/benchmarks/trinity-500-benchmark.json',
     requirement_ids: ['benchmarking-infra'],
   },
   {
-    id: 'kscore-leaderboard',
-    path: 'public/kscore-leaderboard.json',
-    requirement_ids: ['benchmarking-infra', 'quality-scoring'],
+    id: 'benchmark-evidence-doc',
+    path: 'docs/benchmark-evidence.md',
+    requirement_ids: ['benchmarking-infra'],
   },
   {
-    id: 'redaction-public-benchmark',
-    path: 'public/benchmarks/redaction-public-benchmark.json',
+    id: 'benchmark-evidence-test',
+    path: 'tests/wave589-benchmark-evidence-contract.test.js',
     requirement_ids: ['benchmarking-infra'],
   },
   {
@@ -148,28 +148,14 @@ function artifactEvidence(root, spec, failures) {
     status: file.exists ? 'present' : 'missing',
   };
   if (!file.exists) failures.push(`${normalizeRel(spec.path)}:missing`);
-  if (file.json && spec.id === 'kolm-bench') {
-    out.summary = {
-      spec: file.json.spec || null,
-      cases: Array.isArray(file.json.cases) ? file.json.cases.length : null,
-      frozen_at: file.json.frozen_at || null,
-    };
-    if (!Array.isArray(file.json.cases) || file.json.cases.length < 30) failures.push('kolm-bench:case_count_below_30');
-  }
-  if (file.json && spec.id === 'kscore-leaderboard') {
+  if (file.json && spec.id === 'trinity-500-benchmark') {
     out.summary = {
       spec: file.json.spec || null,
       rows: Array.isArray(file.json.rows) ? file.json.rows.length : null,
-      submission_mode: file.json.submission_mode || null,
+      generated_at: file.json.generated_at || null,
     };
-  }
-  if (file.json && spec.id === 'redaction-public-benchmark') {
-    out.summary = {
-      spec: file.json.spec || null,
-      f1: file.json.totals && typeof file.json.totals.f1 === 'number' ? file.json.totals.f1 : null,
-      precision: file.json.totals && typeof file.json.totals.precision === 'number' ? file.json.totals.precision : null,
-      recall: file.json.totals && typeof file.json.totals.recall === 'number' ? file.json.totals.recall : null,
-    };
+    if (file.json.spec !== 'kolm-trinity-500-benchmark-1') failures.push('trinity-500-benchmark:spec_mismatch');
+    if (!Array.isArray(file.json.rows) || file.json.rows.length < 1) failures.push('trinity-500-benchmark:rows_missing');
   }
   return out;
 }

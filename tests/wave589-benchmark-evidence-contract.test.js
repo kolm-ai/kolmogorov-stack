@@ -94,3 +94,19 @@ test('W589 #1c - complete benchmark provider matrix validates without setting re
   assert.equal(validation.ok, true, validation.failures.join('\n'));
   assert.equal(validation.counts.complete_lanes, REQUIRED_BENCHMARK_LANES.length);
 });
+
+test('W589 #1d - local benchmark evidence contract is current but public claim remains gated', () => {
+  const audit = auditBenchmarkEvidence({ root: ROOT });
+  assert.equal(audit.local_contract_ok, true, audit.blockers.join('\n'));
+  assert.equal(audit.ok, true, audit.blockers.join('\n'));
+  assert.equal(audit.public_claim_ready, false);
+  assert.ok(audit.blockers.some((blocker) => blocker.includes('provider-matrix') || blocker.includes('provider_model') || blocker.includes('raw_output_hash')));
+
+  const r = spawnSync(process.execPath, ['scripts/benchmark-evidence.mjs', '--summary', '--require-local-contract'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 20000,
+  });
+  assert.equal(r.status, 0, r.stderr || r.stdout);
+  assert.match(r.stdout, /ok=true public_claim_ready=false/);
+});

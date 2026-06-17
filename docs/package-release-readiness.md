@@ -43,7 +43,7 @@ Local package checks:
 - `--run-local-checks` executes safe local package commands from the package directory instead of only listing them.
 - npm package checks run with a workspace-local npm cache so Windows and restricted shells do not write to the user profile.
 - Missing toolchains or blocked dependency indexes are reported as explicit skips in normal mode and as failures with `--strict-local-checks`.
-- npm SDK dist verification, npm `pack --dry-run`, browser extension build dry-run, installer `-WhatIf`, and Debian dry-run checks are expected to pass on this Windows shell; Swift, Gradle, Homebrew, winget, POSIX shell, and networked Cargo/Python build paths require their toolchains or dependency caches.
+- npm SDK dist verification, npm `pack --dry-run`, winget manifest validation, browser extension build dry-run, installer `-WhatIf`, and Debian dry-run checks are expected to pass on this Windows shell; Swift, Gradle, Homebrew, POSIX shell, and some Cargo paths may be skipped when the host lacks toolchains, dependency caches, or permission to execute build scripts.
 
 SDK dist verification:
 

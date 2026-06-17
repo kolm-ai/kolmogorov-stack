@@ -33,7 +33,7 @@ winget install --manifest packages/winget --accept-package-agreements
 3. Update the two `InstallerSha256` fields in `kolm.kolm.installer.yaml`.
 4. Validate locally:
    ```powershell
-   winget validate --manifest packages/winget
+   node scripts/validate-winget-manifest.mjs packages/winget
    ```
 5. Fork [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs),
    drop these three files under `manifests/k/kolm/kolm/0.2.6/`, open a PR.
@@ -45,6 +45,6 @@ winget install --manifest packages/winget --accept-package-agreements
 - The package installs as a portable, not an MSI. No registry writes, no
   Add/Remove Programs entry. `winget uninstall kolm.kolm` simply deletes the
   unpacked directory.
-- The CLI shim is `cli\kolm.cmd` which calls `node cli\kolm.js`. The shim is
-  symlinked into the user's WinGet portable path so `kolm` works from any
-  shell.
+- The release zip must expose `kolm.exe` at the archive root. That portable
+  launcher is the winget entrypoint and may delegate to the packaged Node CLI
+  internals; winget does not accept `.cmd` files as portable entries.

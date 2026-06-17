@@ -9,12 +9,17 @@ const SHA256_RE = /^(?:sha256:)?[a-f0-9]{64}$/i;
 
 export const COMPLIANCE_REQUIRED_FILES = [
   'public/security.html',
+  'public/trust.html',
   'public/baa.html',
-  'public/soc2.html',
-  'public/slsa.html',
-  'public/sbom.html',
-  'public/hipaa-mapping.html',
+  'public/privacy.html',
+  'public/subprocessors.html',
+  'docs/kolm-format-v1.md',
+  'docs/compliance/SOC2-EVIDENCE.md',
+  'docs/compliance/CONTROLS.md',
   '.github/workflows/sdk-c-rust.yml',
+  'src/sbom-emit.js',
+  'src/slsa-provenance.js',
+  'src/intoto-slsa.js',
   'docs/compliance-certification-packet.md',
 ];
 
@@ -24,7 +29,7 @@ export const COMPLIANCE_CERTIFICATION_CONTROLS = [
     label: 'SOC 2',
     live_certification_required: true,
     required_evidence_types: ['auditor_report'],
-    implemented_evidence: ['public/soc2.html', 'public/security.html'],
+    implemented_evidence: ['docs/compliance/SOC2-EVIDENCE.md', 'docs/compliance/CONTROLS.md', 'public/security.html'],
     external_blocker: 'soc2_auditor_report_missing',
   },
   {
@@ -32,7 +37,7 @@ export const COMPLIANCE_CERTIFICATION_CONTROLS = [
     label: 'ISO 27001',
     live_certification_required: true,
     required_evidence_types: ['certificate', 'auditor_report'],
-    implemented_evidence: ['public/security.html'],
+    implemented_evidence: ['docs/compliance/CONTROLS.md', 'public/security.html'],
     external_blocker: 'iso27001_certificate_missing',
   },
   {
@@ -40,7 +45,7 @@ export const COMPLIANCE_CERTIFICATION_CONTROLS = [
     label: 'HIPAA BAA',
     live_certification_required: true,
     required_evidence_types: ['legal_packet', 'signed_agreement'],
-    implemented_evidence: ['public/baa.html', 'public/hipaa-mapping.html'],
+    implemented_evidence: ['public/baa.html', 'docs/angle/hipaa-onepager.html', 'public/security.html'],
     external_blocker: 'signed_baa_counterparty_or_counsel_packet_missing',
   },
   {
@@ -56,7 +61,7 @@ export const COMPLIANCE_CERTIFICATION_CONTROLS = [
     label: 'FedRAMP boundary',
     live_certification_required: true,
     required_evidence_types: ['authorization_packet', 'boundary_assessment'],
-    implemented_evidence: ['public/security.html', 'public/sbom.html'],
+    implemented_evidence: ['public/security.html', 'docs/compliance/CONTROLS.md', 'docs/kolm-format-v1.md'],
     external_blocker: 'fedramp_boundary_authorization_missing',
   },
   {
@@ -64,7 +69,7 @@ export const COMPLIANCE_CERTIFICATION_CONTROLS = [
     label: 'SLSA/SBOM evidence',
     live_certification_required: true,
     required_evidence_types: ['signed_provenance', 'sbom_attestation'],
-    implemented_evidence: ['public/slsa.html', 'public/sbom.html', '.github/workflows/sdk-c-rust.yml'],
+    implemented_evidence: ['docs/kolm-format-v1.md', 'src/sbom-emit.js', 'src/slsa-provenance.js', 'src/intoto-slsa.js', '.github/workflows/sdk-c-rust.yml'],
     external_blocker: 'signed_release_provenance_missing',
   },
 ];

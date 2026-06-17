@@ -136,3 +136,18 @@ test('W592 #8 - CLI emits certification manifest template', () => {
   const body = JSON.parse(r.stdout);
   assert.equal(body.template.spec, COMPLIANCE_CERTIFICATION_MANIFEST_SPEC);
 });
+
+test('W592 #9 - local compliance packet evidence contract is current', () => {
+  const audit = auditComplianceCertificationPacket({ root: ROOT });
+  assert.equal(audit.local_contract_ok, true, audit.blockers.join('\n'));
+  assert.equal(audit.ok, true, audit.blockers.join('\n'));
+  assert.equal(audit.live_certification_verified, false);
+
+  const r = spawnSync(process.execPath, ['scripts/compliance-certification-packet.mjs', '--summary', '--require-local-contract'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 20000,
+  });
+  assert.equal(r.status, 0, r.stderr || r.stdout);
+  assert.match(r.stdout, /ok=true live_certification_verified=false/);
+});

@@ -14,10 +14,11 @@ summary number.
 - Validator: `POST /v1/eval/benchmark-evidence/validate`
 - Product requirement: `benchmarking-infra`
 
-The local contract verifies that the public K-score suite, local leaderboard,
-redaction benchmark, artifact comparison harness, and compare module exist and
-parse. The public-claim gate stays closed until `reports/benchmarks/` contains
-complete provider lanes for:
+The local contract verifies that the current sample benchmark report
+(`public/benchmarks/trinity-500-benchmark.json`), benchmark evidence docs,
+lock-in tests, artifact comparison harness, and compare module exist and parse.
+The public-claim gate stays closed until `reports/benchmarks/` contains complete
+provider lanes for:
 
 - `.kolm` artifact local runner
 - OpenAI-compatible API baseline

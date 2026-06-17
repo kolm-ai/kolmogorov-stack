@@ -138,6 +138,7 @@ function classifySkipped(result, command) {
   }
   if (/No module named build/i.test(output)) return 'python_build_module_unavailable';
   if (/Cannot find module|MODULE_NOT_FOUND/i.test(output)) return 'package_dependency_uninstalled';
+  if (/Application Control policy has blocked this file|os error 4551/i.test(output)) return 'host_application_control_blocked';
   if (/Could not connect to server|failed to download from|Updating crates\.io index|crates\.io/i.test(output)) return 'network_unavailable_for_dependency_resolution';
   if (/command not found|not found/i.test(output) && /\b(tsc|gradle|cargo|swift|brew|winget|sh)\b/i.test(output)) return 'toolchain_unavailable';
   return null;

@@ -10,12 +10,12 @@ complete.
 
 | Control | Local evidence | External blocker |
 | --- | --- | --- |
-| SOC 2 | `/security`, `/soc2` | Dated auditor report |
-| ISO 27001 | `/security` | Issued certificate and statement of applicability |
-| HIPAA BAA | `/baa`, `/hipaa-mapping` | Signed BAA or counsel-approved packet |
+| SOC 2 | `/security`, `docs/compliance/SOC2-EVIDENCE.md`, `docs/compliance/CONTROLS.md` | Dated auditor report |
+| ISO 27001 | `/security`, `docs/compliance/CONTROLS.md` | Issued certificate and statement of applicability |
+| HIPAA BAA | `/baa`, `docs/angle/hipaa-onepager.html` | Signed BAA or counsel-approved packet |
 | GDPR DPA | `/privacy`, `/subprocessors` | Legal-reviewed DPA and SCC packet |
-| FedRAMP | `/security`, `/sbom` | Authorized boundary and assessor artifacts |
-| SLSA/SBOM | `/slsa`, `/sbom`, SDK CI | Signed release provenance and package digests |
+| FedRAMP | `/security`, `docs/compliance/CONTROLS.md`, `docs/kolm-format-v1.md` | Authorized boundary and assessor artifacts |
+| SLSA/SBOM | `docs/kolm-format-v1.md`, `src/sbom-emit.js`, `src/slsa-provenance.js`, SDK CI | Signed release provenance and package digests |
 
 ## Verification
 
