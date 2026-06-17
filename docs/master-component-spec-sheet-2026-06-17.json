@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 91.3,
+    "local_engineering_score": 91.4,
     "frontier_product_score": 68.8,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 673,
-    "direct_test_reference_pct": 81.2,
-    "components_without_direct_test_reference": 156,
+    "direct_test_referenced_components": 674,
+    "direct_test_reference_pct": 81.3,
+    "components_without_direct_test_reference": 155,
     "high_priority_components": 47,
     "high_priority_direct_test_referenced": 47,
     "high_priority_direct_test_reference_pct": 100,
@@ -8105,8 +8105,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 15866,
-          "lines": 483,
+          "bytes": 16242,
+          "lines": 493,
           "imports": 9,
           "exports": 2,
           "routes": 0,
@@ -8122,9 +8122,9 @@
           "environment_configuration_boundary",
           "stateful_storage_boundary"
         ],
-        "priority_score": 6,
+        "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "2af985a9d8c74145abcf62633a2d08b98395d2baf0cc246f98866ba4aa7544f4"
+        "sha256": "9271a2b96da831ebcc7c6b519d61cc04138ba9afc3e4ed2acc6f6fb29b7f8a98"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8132,45 +8132,19 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "finetune-frameworks",
-            "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "ondevice-inference",
-            "stack_area": "cross-device",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "confidential-compute",
-            "stack_area": "enterprise",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "compile-api-to-model-competitors",
-            "stack_area": "compiler-platform",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave655-airgap-bundle-contract.test.js"
         ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "category_links": [],
+        "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
         "suggested_verification": [
           "npm run verify:platform",
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/airgap-distill.js",
@@ -8363,6 +8337,12 @@
             "id": "llm-routing",
             "stack_area": "gateway",
             "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "confidential-compute",
+            "stack_area": "enterprise",
+            "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
           },
           {
@@ -9045,6 +9025,12 @@
             "id": "model-signing-standards",
             "stack_area": "trust",
             "status": "sota_review_complete_external_or_release_gate_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "compile-api-to-model-competitors",
+            "stack_area": "compiler-platform",
+            "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
           }
         ],
@@ -12635,6 +12621,12 @@
             "id": "finetune-frameworks",
             "stack_area": "training",
             "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "ondevice-inference",
+            "stack_area": "cross-device",
+            "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
           },
           {
@@ -18016,7 +18008,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "finetune-frameworks",
+            "stack_area": "training",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
         "suggested_verification": [
@@ -18025,7 +18024,8 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing"
+        "direct_test_reference_missing",
+        "linked_frontier_work_open"
       ],
       "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
     },

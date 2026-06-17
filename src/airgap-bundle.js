@@ -86,7 +86,11 @@ function shouldExclude(name) {
 // Walk a directory tree breadth-first, applying exclusions. Returns
 // [{abs, rel, size, mtime}] sorted by `rel` for deterministic ordering
 // (so manifest sha256 is stable across runs on the same tree).
-function walkTree(rootAbs, prefix = '') {
+function normalizeAbs(absPath) {
+  return path.resolve(absPath);
+}
+
+function walkTree(rootAbs, prefix = '', excludeAbs = new Set()) {
   const out = [];
   if (!fs.existsSync(rootAbs)) return out;
   const stack = [{ abs: rootAbs, rel: prefix }];
@@ -101,16 +105,19 @@ function walkTree(rootAbs, prefix = '') {
     for (const ent of entries) {
       if (shouldExclude(ent.name)) continue;
       const absChild = path.join(cur.abs, ent.name);
+      const normalizedChild = normalizeAbs(absChild);
+      if (excludeAbs.has(normalizedChild)) continue;
       const relChild = cur.rel ? cur.rel + '/' + ent.name : ent.name;
-      if (ent.isDirectory()) {
+      let st;
+      try {
+        st = fs.lstatSync(absChild);
+      } catch {
+        continue;
+      }
+      if (st.isSymbolicLink()) continue;
+      if (st.isDirectory()) {
         stack.push({ abs: absChild, rel: relChild });
-      } else if (ent.isFile() || ent.isSymbolicLink()) {
-        let st;
-        try {
-          st = fs.statSync(absChild);
-        } catch {
-          continue;
-        }
+      } else if (st.isFile()) {
         out.push({
           abs: absChild,
           rel: relChild,
@@ -305,7 +312,7 @@ function planContents(repoRoot, opts) {
 }
 
 // Synchronously walk every include and produce a flat manifest.
-function buildManifest({ includes, repoRoot, opts, created_at, git_sha }) {
+function buildManifest({ includes, repoRoot, opts, created_at, git_sha, exclude_abs = new Set() }) {
   const files = [];
   let total_bytes = 0;
   for (const inc of includes) {
@@ -315,7 +322,7 @@ function buildManifest({ includes, repoRoot, opts, created_at, git_sha }) {
       files.push({ path: inc.rel, sha256: sha, bytes: size });
       total_bytes += size;
     } else {
-      const tree = walkTree(inc.abs, inc.rel);
+      const tree = walkTree(inc.abs, inc.rel, exclude_abs);
       for (const t of tree) {
         const sha = sha256File(t.abs);
         files.push({ path: t.rel, sha256: sha, bytes: t.size });
@@ -334,7 +341,7 @@ function buildManifest({ includes, repoRoot, opts, created_at, git_sha }) {
       with_node_modules: !!opts.with_node_modules,
       with_wheels: !!opts.with_wheels,
       with_models: !!opts.with_models,
-      models_dir: opts.models_dir || null,
+      models_dir: opts.with_models ? 'models' : null,
     },
     file_count: files.length,
     total_bytes,
@@ -358,6 +365,8 @@ export async function buildAirgapBundle(opts = {}) {
       version: AIRGAP_BUNDLE_VERSION,
     };
   }
+  const destAbs = path.resolve(destPath);
+  const excludeAbs = new Set([destAbs]);
   if (!destPath.endsWith('.tar.gz') && !destPath.endsWith('.tgz')) {
     return {
       ok: false,
@@ -404,6 +413,7 @@ export async function buildAirgapBundle(opts = {}) {
     opts,
     created_at,
     git_sha,
+    exclude_abs: excludeAbs,
   });
 
   let archiver;
@@ -452,7 +462,7 @@ export async function buildAirgapBundle(opts = {}) {
       // Walk the tree and add files individually so we can apply our
       // exclude rules. archiver.directory() would honor a single glob
       // ignore list, but per-name shouldExclude() is more thorough.
-      const tree = walkTree(inc.abs, inc.rel);
+      const tree = walkTree(inc.abs, inc.rel, excludeAbs);
       for (const t of tree) {
         archive.file(t.abs, { name: t.rel });
       }

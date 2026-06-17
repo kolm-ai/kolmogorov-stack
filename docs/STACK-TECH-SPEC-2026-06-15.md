@@ -10,7 +10,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 
 **What is genuinely missing at the frontier (net-new, spec-gated):** GAD adversarial distillation (arXiv:2511.10643, the #1 black-box method), a shared boot-and-measure probe harness (flips estimated->tested across 5 categories), a pluggable real embedding provider (uncaps curation + routing), a real attestation cert-chain verifier (ends TOFU), a hosted managed distill+serve fleet (the biggest DX gap vs competitors), and an in-browser verify-then-run WebGPU demo.
 
-**Counts:** 55 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
+**Counts:** 56 surgical-now improvements (test-gated, low/med risk), 9 cross-cutting bets (spec-followups), 14 confirmed already-at-frontier capabilities.
 
 ## Top surgical-now improvements (ranked)
 
@@ -71,6 +71,7 @@ kolm is **two products on one stack**: (A) Agent Security Evidence / ASR (audit.
 | 53 | developer-distribution | 6 | S/low | CLOSED W652: bind TypeScript SDK receipt HMACs to the loaded manifest CID | `packages/sdk-ts/src/index.ts receipt manifest_cid binding; packages/sdk-ts/dist/index.js; tests/wave652-sdk-ts-contract.test.js; verify:sdk-ts` |
 | 54 | compile-artifact-runtime | 6 | S/low | CLOSED W653: restore Rust runtime verifier package-release compile health | `packages/runtime-rs/src/verify.rs CheckOutcome::failed string inference; npm run verify:package-release; npm run verify:depth` |
 | 55 | mcp-tool-gateway-receipts | 6 | S/low | CLOSED W654: harden and directly test the local MCP server boundary | `services/mcp/server.js canonical run-log hashes, sanitized project tool names, JSON-RPC HTTP envelopes; tests/wave654-mcp-server-contract.test.js; verify:mcp-local-server` |
+| 56 | confidential-compute | 6 | S/low | CLOSED W655: harden repo-wide airgap bundles against symlink leakage and self-inclusion | `src/airgap-bundle.js lstat symlink skip, dest-path exclusion, in-bundle models_dir; tests/wave655-airgap-bundle-contract.test.js; verify:airgap-bundle` |
 
 ## Cross-cutting bets (spec-followups)
 
