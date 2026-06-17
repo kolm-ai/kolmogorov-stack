@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 705,
-    "components_without_direct_test_reference": 124,
+    "test_referenced_components": 706,
+    "components_without_direct_test_reference": 123,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -22316,7 +22316,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave685-eval-humaneval-contract.test.js"
+        "tests/wave685-eval-humaneval-contract.test.js",
+        "tests/wave686-kolmbench-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -27545,26 +27546,28 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "0d855466a1eaeb5060a9e93e2fdb144279037d2ef7341f74977b8bec5f3fb830",
+      "sha256": "4aae47a0c2ce0f97fbf7972a2df4a1f0ae5b1bf850a0f97edb2067f982a115fb",
       "metrics": {
-        "bytes": 17664,
-        "lines": 400,
-        "imports": 4,
-        "exports": 9,
+        "bytes": 30919,
+        "lines": 691,
+        "imports": 5,
+        "exports": 12,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 2,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 6,
+        "crypto_refs": 13,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave686-kolmbench-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -37444,10 +37447,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "048dafb684757924afdae6f56d6244fa0a0ac32afe7bb08a06e551fb9133fccd",
+      "sha256": "239e3ae374d9ed703c6752d4b49c612add710ef923b40800969a38c8838aab50",
       "metrics": {
-        "bytes": 1467191,
-        "lines": 30771,
+        "bytes": 1467481,
+        "lines": 30777,
         "imports": 535,
         "exports": 8,
         "routes": 810,

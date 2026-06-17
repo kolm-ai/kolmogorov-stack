@@ -25137,6 +25137,10 @@ res.json({
         ok: result.ok,
         errors: result.errors,
         row_count: rows.length,
+        accepted_task_count: result.accepted_task_count,
+        submission_sha256: result.submission_sha256,
+        task_set_sha256: result.task_set_sha256,
+        limits: result.limits,
         version: mod.KOLMBENCH_VERSION,
       });
     } catch (e) {
@@ -25167,6 +25171,8 @@ res.json({
             ok: false,
             error: 'validation_failed',
             errors: v.errors,
+            submission_sha256: v.submission_sha256,
+            task_set_sha256: v.task_set_sha256,
             version: mod.KOLMBENCH_VERSION,
           });
         }
