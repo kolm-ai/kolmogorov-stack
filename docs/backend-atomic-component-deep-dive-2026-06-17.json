@@ -29906,6 +29906,8 @@
         "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
         "tests/finalized-c6-transitive-holdout-disjointness-ledger.test.js",
         "tests/wave168-tlog-verify-and-vault-perms.test.js",
+        "tests/wave258-audit-fixes.test.js",
+        "tests/wave612-sigstore-merkle-reuse.test.js",
         "tests/wave921-govern-crypto.test.js",
         "tests/wave921-govern-receipts-compliance.test.js"
       ],
@@ -30150,7 +30152,7 @@
         "tests/wave255-e2e-compile-distill.test.js",
         "tests/wave409a-canonical-event-store.test.js",
         "tests/wave411-migration-backfill.test.js",
-        "tests/wave888d-deploy-pipeline.test.js"
+        "tests/wave612-sigstore-merkle-reuse.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -40383,18 +40385,18 @@
       "surface": "core-backend",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "84dc5ab016feaa58f9426e35c48923d4828aa5114072169d37a150bfbd3c8f99",
+      "sha256": "81be4fd62715ba70f20c776464ad8be550632303ca8434ae9930486caa0f73dd",
       "metrics": {
-        "bytes": 27681,
-        "lines": 614,
-        "imports": 6,
+        "bytes": 26777,
+        "lines": 597,
+        "imports": 7,
         "exports": 16,
         "routes": 0,
         "env_refs": 2,
         "fs_writes": 1,
         "subprocess_refs": 0,
         "network_refs": 7,
-        "crypto_refs": 54,
+        "crypto_refs": 49,
         "markers": 0
       },
       "test_refs": [

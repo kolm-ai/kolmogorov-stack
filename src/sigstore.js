@@ -47,6 +47,7 @@
 
 import crypto from 'node:crypto';
 import { sign as edSign, verify as edVerify, keyFingerprint } from './ed25519.js';
+import { leafHash as merkleLeafHash, verifyInclusion } from './merkle.js';
 
 export const SIGSTORE_SPEC = 'kolm-sigstore-v1';
 export const SIGSTORE_ALG = 'ed25519-sigstore-bundle';
@@ -338,13 +339,9 @@ export function verifySigstoreBundle(block, payloadCanonical) {
   // W258-SEC-3: previously we only reported inclusion_proof_present (a
   // boolean derived from `!!rekor?.inclusionProof`). A fabricated rekor
   // object trivially passed because the truthy `inclusionProof` could be
-  // any value. Now we actually verify the Merkle inclusion proof:
-  //   * walk the proof's hashes from leaf hash up to the claimed root,
-  //     applying the standard RFC 6962 inner-node hash (0x01||L||R)
-  //     starting from a leaf hash (0x00||entry_bytes),
-  //   * compare the recomputed root against rekor.inclusionProof.rootHash,
-  //   * compare the checkpoint's signed-root (if present) to the same
-  //     value so a forged proof with a fake rootHash is also caught.
+  // any value. Now we actually verify the Merkle inclusion proof by deriving
+  // the RFC 6962 leaf hash and delegating the proof walk/root comparison to
+  // the shared RFC 9162 verifier in merkle.js.
   // The trust root for `logID` is not enforced here (operators may run
   // their own Rekor instance); we surface the logID so callers can pin.
   let inclusion = { present: false, verified: false, reason: 'absent' };
@@ -378,25 +375,34 @@ export function verifySigstoreBundle(block, payloadCanonical) {
   };
 }
 
-// RFC 6962 §2.1 Merkle leaf hash. Concatenates 0x00 byte with the entry
-// canonicalization bytes (here: base64-decoded digest + signature, which
-// uniquely identifies the log entry) and hashes with SHA-256.
-function rfc6962LeafHash(entryBytes) {
-  const h = crypto.createHash('sha256');
-  h.update(Buffer.from([0x00]));
-  h.update(entryBytes);
-  return h.digest();
+// Rekor proof hashes may arrive as hex or base64. Decode them to 32-byte
+// buffers before calling merkle.verifyInclusion so encoding ambiguity cannot
+// change the proof semantics.
+function decodeRekorDigest(value, label) {
+  if (Buffer.isBuffer(value)) return value;
+  if (value instanceof Uint8Array) return Buffer.from(value);
+  if (typeof value !== 'string') {
+    throw new TypeError(`${label} must be a digest string`);
+  }
+  const s = value.trim();
+  let out = null;
+  if (/^[0-9a-fA-F]{64}$/.test(s)) {
+    out = Buffer.from(s, 'hex');
+  } else {
+    let b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4 !== 0) b64 += '=';
+    if (!/^[A-Za-z0-9+/]+={0,2}$/.test(b64)) {
+      throw new Error(`${label} must be hex or base64`);
+    }
+    out = Buffer.from(b64, 'base64');
+  }
+  if (out.length !== 32) {
+    throw new Error(`${label} decoded to ${out.length} bytes, expected 32`);
+  }
+  return out;
 }
 
-// RFC 6962 §2.1 inner-node hash. 0x01 || left || right under SHA-256.
-function rfc6962InnerHash(left, right) {
-  const h = crypto.createHash('sha256');
-  h.update(Buffer.from([0x01]));
-  h.update(left);
-  h.update(right);
-  return h.digest();
-}
-
+// Verify Rekor inclusion with the shared RFC 6962/9162 Merkle implementation.
 export function verifyRekorInclusionProof(rekor, digestB64, sigB64) {
   const proof = rekor && rekor.inclusionProof;
   if (!proof || typeof proof !== 'object') {
@@ -421,57 +427,34 @@ export function verifyRekorInclusionProof(rekor, digestB64, sigB64) {
   } catch (e) {
     return { present: true, verified: false, reason: `entry bytes decode failed: ${e.message}` };
   }
-  let computed = rfc6962LeafHash(entryBytes);
-  // RFC 6962 inclusion proof algorithm (deterministic walk based on
-  // logIndex / treeSize). siblings are consumed in order - left or right
-  // determined by the index bit at each level.
-  let index = Number(proof.logIndex);
-  let size = Number(proof.treeSize);
-  if (!(index >= 0 && size > index)) {
+  const leaf = merkleLeafHash(entryBytes);
+  // The proof walk itself lives in merkle.verifyInclusion; this function only
+  // adapts Rekor's JSON shape and the Kolm hashedrekord leaf bytes.
+  const leafIndex = Number(proof.logIndex);
+  const treeSize = Number(proof.treeSize);
+  if (!Number.isInteger(leafIndex) || !Number.isInteger(treeSize) || !(leafIndex >= 0 && treeSize > leafIndex)) {
     return { present: true, verified: false, reason: 'logIndex must be < treeSize' };
   }
-  let cursor = 0;
-  for (const sibB64 of proof.hashes) {
-    let sib;
-    try { sib = Buffer.from(sibB64, 'base64'); }
-    catch (e) { return { present: true, verified: false, reason: `sibling decode failed: ${e.message}` }; }
-    // RFC 6962 algorithm: at each level, find the index parity in the
-    // sub-tree. If index is even AND not the rightmost incomplete sibling,
-    // the current node is the LEFT child; otherwise it's the RIGHT child.
-    if (index % 2 === 1 || index + 1 === size) {
-      if (index === size - 1 && index % 2 === 0) {
-        // Lone right-edge node - no sibling consumed at this level.
-        index = Math.floor(index / 2);
-        size = Math.ceil(size / 2);
-        // Re-loop without advancing cursor - but the proof.hashes list
-        // already excludes phantom siblings by Rekor's convention, so
-        // skip this iteration by short-circuiting up.
-        cursor = sib; // unused - kept for static analyzer
-        continue;
-      }
-      computed = rfc6962InnerHash(sib, computed);
-    } else {
-      computed = rfc6962InnerHash(computed, sib);
-    }
-    index = Math.floor(index / 2);
-    size = Math.ceil(size / 2);
-  }
+  let inclusionPath;
   let claimedRoot;
-  try { claimedRoot = Buffer.from(proof.rootHash, 'base64'); }
-  catch (e) {
-    // Try hex as a fallback - Rekor v1 emits hex, v2 base64.
-    try { claimedRoot = Buffer.from(proof.rootHash, 'hex'); }
-    catch (_) { return { present: true, verified: false, reason: `rootHash decode failed: ${e.message}` }; }
+  try {
+    // Rekor v1 commonly emits base64 proof hashes/rootHash; some mirrors and
+    // fixtures use hex. Decode to Buffers before handing the audited verifier
+    // the proof so there is no hex/base64 ambiguity.
+    inclusionPath = proof.hashes.map((h, i) => decodeRekorDigest(h, `hashes[${i}]`));
+    claimedRoot = decodeRekorDigest(proof.rootHash, 'rootHash');
+  } catch (e) {
+    return { present: true, verified: false, reason: e.message };
   }
-  if (claimedRoot.length === 0 || !crypto.timingSafeEqual(
-    Buffer.alloc(32, 0).fill(computed.slice(0, 32)),
-    Buffer.alloc(32, 0).fill(claimedRoot.slice(0, 32)),
-  )) {
-    return {
-      present: true,
-      verified: false,
-      reason: `recomputed Merkle root ${computed.toString('hex').slice(0, 12)}… ≠ claimed ${claimedRoot.toString('hex').slice(0, 12)}…`,
-    };
+  const verified = verifyInclusion({
+    leafHash: leaf,
+    leafIndex,
+    treeSize,
+    inclusionPath,
+    root: claimedRoot,
+  });
+  if (!verified.ok) {
+    return { present: true, verified: false, reason: verified.reason || 'inclusion failed' };
   }
   return { present: true, verified: true, reason: 'ok' };
 }

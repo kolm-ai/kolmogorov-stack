@@ -223,11 +223,10 @@ test('W258-SEC-3 #1 — sigstore.js exports verifyRekorInclusionProof', () => {
 });
 
 test('W258-SEC-3 #2 — sigstore.js implements RFC 6962 leaf + inner hash helpers', () => {
-  assert.match(SIGSTORE_SRC, /function\s+rfc6962LeafHash\s*\(/);
-  assert.match(SIGSTORE_SRC, /function\s+rfc6962InnerHash\s*\(/);
-  // 0x00 leaf prefix, 0x01 inner prefix per RFC 6962.
-  assert.match(SIGSTORE_SRC, /Buffer\.from\(\[\s*0x00\s*\]\)/);
-  assert.match(SIGSTORE_SRC, /Buffer\.from\(\[\s*0x01\s*\]\)/);
+  assert.match(SIGSTORE_SRC, /from\s+['"]\.\/merkle\.js['"]/);
+  assert.match(SIGSTORE_SRC, /verifyInclusion\s*\(/);
+  assert.doesNotMatch(SIGSTORE_SRC, /function\s+rfc6962LeafHash\s*\(/);
+  assert.doesNotMatch(SIGSTORE_SRC, /function\s+rfc6962InnerHash\s*\(/);
 });
 
 test('W258-SEC-3 #3 — verifyRekorInclusionProof rejects fabricated proof', async () => {
@@ -262,8 +261,10 @@ test('W258-SEC-3 #4 — verifyRekorInclusionProof handles missing inclusionProof
 
 test('W258-SEC-3 #5 — verifyRekorInclusionProof handles base64 AND hex rootHash', () => {
   // Both branches present in the implementation — test exercises both decode paths.
-  assert.match(SIGSTORE_SRC, /rootHash[\s\S]{0,200}base64/);
-  assert.match(SIGSTORE_SRC, /rootHash[\s\S]{0,400}hex/);
+  assert.match(SIGSTORE_SRC, /decodeRekorDigest/);
+  assert.match(SIGSTORE_SRC, /rootHash/);
+  assert.match(SIGSTORE_SRC, /base64/);
+  assert.match(SIGSTORE_SRC, /hex/);
 });
 
 test('W258-SEC-3 #6 — non-dry-run bundles reject when inclusion proof fails to verify', () => {
