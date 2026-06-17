@@ -35,11 +35,11 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 686,
-    "direct_test_reference_pct": 82.8,
-    "components_without_direct_test_reference": 143,
-    "high_priority_components": 48,
-    "high_priority_direct_test_referenced": 48,
+    "direct_test_referenced_components": 687,
+    "direct_test_reference_pct": 82.9,
+    "components_without_direct_test_reference": 142,
+    "high_priority_components": 49,
+    "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 10,
@@ -1618,6 +1618,35 @@
       ]
     },
     {
+      "path": "api/r2.js",
+      "domain": "api_surface",
+      "surface": "api-http",
+      "priority_score": 7,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
+        "http_route_surface",
+        "network_or_provider_boundary",
+        "stateful_storage_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "agent-security-eval",
+          "stack_area": "enterprise",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix.",
+      "suggested_verification": [
+        "npm run lint:refs",
+        "npm run verify:surfaces"
+      ]
+    },
+    {
       "path": "src/ab-router.js",
       "domain": "api_surface",
       "surface": "api-http",
@@ -1838,53 +1867,6 @@
         "npm run verify:platform",
         "npm run verify:package-release"
       ]
-    },
-    {
-      "path": "src/device-install.js",
-      "domain": "infra_cloud_device",
-      "surface": "core-backend",
-      "priority_score": 7,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: capability_probe_attested_byoc_worker_and_deploy_readiness.",
-      "suggested_verification": [
-        "npm run verify:platform",
-        "npm run verify:package-release"
-      ]
     }
   ],
   "components": [
@@ -1944,27 +1926,28 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 5495,
-          "lines": 126,
-          "imports": 1,
+          "bytes": 8584,
+          "lines": 260,
+          "imports": 2,
           "exports": 1,
           "routes": 0,
-          "env_refs": 7,
+          "env_refs": 9,
           "fs_writes": 0,
           "subprocess_refs": 0,
-          "network_refs": 2,
-          "crypto_refs": 0,
+          "network_refs": 1,
+          "crypto_refs": 6,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "environment_configuration_boundary",
           "http_route_surface",
           "network_or_provider_boundary",
           "stateful_storage_boundary"
         ],
-        "priority_score": 5,
-        "priority_band": "medium",
-        "sha256": "1b0fc66767222ef24a8bc612905ae1557cc9cfd95c61dd90551eb78640e20c85"
+        "priority_score": 7,
+        "priority_band": "high",
+        "sha256": "4e8f72318f5e5efc8cc4b0c7ad5fa28b759461a675065f5f547f3102b39bc07f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -1972,9 +1955,18 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "direct_test_refs": [
+          "tests/wave668-r2-api-contract.test.js"
+        ],
+        "category_links": [
+          {
+            "id": "agent-security-eval",
+            "stack_area": "enterprise",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
+        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
         "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
         "suggested_verification": [
           "npm run lint:refs",
@@ -1982,9 +1974,9 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing"
+        "linked_frontier_work_open"
       ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
     },
     {
       "path": "api/runpod.js",
@@ -20347,12 +20339,6 @@
             "stack_area": "trust",
             "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
-          },
-          {
-            "id": "agent-security-eval",
-            "stack_area": "enterprise",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
           }
         ],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",

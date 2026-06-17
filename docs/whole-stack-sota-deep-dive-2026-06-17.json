@@ -6854,6 +6854,22 @@
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
           },
           {
+            "path": "api/r2.js",
+            "domain": "api_surface",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "http_route_surface",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave668-r2-api-contract.test.js"
+            ],
+            "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
+          },
+          {
             "path": "src/ab-router.js",
             "domain": "api_surface",
             "priority_score": 7,
@@ -6979,23 +6995,6 @@
               "tests/wave921-data-curate-modules.test.js"
             ],
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-          },
-          {
-            "path": "src/ed25519.js",
-            "domain": "trust_security_compliance",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-delta-badge-routes.test.js",
-              "tests/agent-audit-routes.test.js"
-            ],
-            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           }
         ],
         "count": 180,

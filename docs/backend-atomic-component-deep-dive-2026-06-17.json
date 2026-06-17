@@ -39,9 +39,9 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 686,
-    "components_without_direct_test_reference": 143,
-    "high_priority_components": 48,
+    "test_referenced_components": 687,
+    "components_without_direct_test_reference": 142,
+    "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 400,
+      "cryptographic_or_proof_boundary": 401,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 312,
       "execution_or_subprocess_boundary": 233,
@@ -572,28 +572,31 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "1b0fc66767222ef24a8bc612905ae1557cc9cfd95c61dd90551eb78640e20c85",
+      "sha256": "4e8f72318f5e5efc8cc4b0c7ad5fa28b759461a675065f5f547f3102b39bc07f",
       "metrics": {
-        "bytes": 5495,
-        "lines": 126,
-        "imports": 1,
+        "bytes": 8584,
+        "lines": 260,
+        "imports": 2,
         "exports": 1,
         "routes": 0,
-        "env_refs": 7,
+        "env_refs": 9,
         "fs_writes": 0,
         "subprocess_refs": 0,
-        "network_refs": 2,
-        "crypto_refs": 0,
+        "network_refs": 1,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave668-r2-api-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "http_route_surface",
         "network_or_provider_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 7,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -618,7 +621,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
       "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
       "suggested_verification": [
         "npm run lint:refs",
