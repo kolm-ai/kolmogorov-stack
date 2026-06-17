@@ -12,6 +12,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -40,6 +41,20 @@ function validNrasReport() {
     cert_chain: ['-----BEGIN CERTIFICATE-----AAAA-----END CERTIFICATE-----'],
     nonce: 'deadbeefcafebabe',
   };
+}
+
+function withServer(app, fn) {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer(app).listen(0, '127.0.0.1', async () => {
+      try {
+        const { port } = server.address();
+        const out = await fn(`http://127.0.0.1:${port}`);
+        server.close(() => resolve(out));
+      } catch (e) {
+        server.close(() => reject(e));
+      }
+    });
+  });
 }
 
 test('BYOC GPU #1 — verifyGpuAttestation: valid NRAS report -> shape_ok, verified:false', async () => {
@@ -137,4 +152,76 @@ test('BYOC #7 — teardownDeployment enforces tenant ownership', async () => {
   assert.throws(() => byoc.teardownDeployment(deployment.id, 'someone-else'),
     /forbidden/, 'a non-owner must be refused');
   assert.equal(byoc.teardownDeployment(deployment.id, 'owner'), true);
+});
+
+test('BYOC GPU #8 - /v1/byoc/attestation verifies and persists gpu_attestation', async () => {
+  freshEnv();
+  const byoc = await import('../src/byoc.js');
+  const express = (await import('express')).default;
+  const { buildRouter } = await import('../src/router.js');
+  const { deployment } = byoc.createDeployment({
+    tenantId: 't1', tenantName: 'Acme', target: 'docker', artifactId: 'art-1',
+  });
+  const app = express();
+  app.use(express.json({ limit: '4mb' }));
+  app.use(buildRouter());
+
+  await withServer(app, async (base) => {
+    const r = await fetch(base + '/v1/byoc/attestation', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        enroll_token: deployment.enroll_token,
+        public_url: 'http://1.2.3.4:8080',
+        measurement: 'sha256:' + 'c'.repeat(64),
+        gpu_attestation: validNrasReport(),
+        input_digest: 'a'.repeat(64),
+        output_digest: 'b'.repeat(64),
+      }),
+    });
+    assert.equal(r.status, 200, `expected 200; got ${r.status}`);
+    const j = await r.json();
+    assert.equal(j.ok, true);
+    assert.ok(j.gpu, 'route response must include computed gpu state');
+    assert.equal(j.gpu.kind, 'nras');
+    assert.equal(j.gpu.shape_ok, true);
+    assert.equal(j.gpu.verified, false);
+  });
+
+  const stored = byoc.getDeployment(deployment.id);
+  assert.equal(stored.attestation.gpu.kind, 'nras');
+  assert.equal(stored.attestation.gpu.shape_ok, true);
+  assert.equal(stored.attestation.gpu.verifier, 'shape_v1');
+});
+
+test('BYOC GPU #9 - /v1/byoc/attestation ignores caller-supplied gpu state without a report', async () => {
+  freshEnv();
+  const byoc = await import('../src/byoc.js');
+  const express = (await import('express')).default;
+  const { buildRouter } = await import('../src/router.js');
+  const { deployment } = byoc.createDeployment({
+    tenantId: 't1', tenantName: 'Acme', target: 'docker', artifactId: 'art-1',
+  });
+  const app = express();
+  app.use(express.json({ limit: '4mb' }));
+  app.use(buildRouter());
+
+  await withServer(app, async (base) => {
+    const r = await fetch(base + '/v1/byoc/attestation', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        enroll_token: deployment.enroll_token,
+        public_url: 'http://1.2.3.4:8080',
+        measurement: 'sha256:' + 'd'.repeat(64),
+        gpu: { kind: 'nras', shape_ok: true, verified: true, verifier: 'caller-forged' },
+      }),
+    });
+    assert.equal(r.status, 200, `expected 200; got ${r.status}`);
+    const j = await r.json();
+    assert.equal(j.gpu, null, 'route must not trust caller-supplied gpu state');
+  });
+
+  const stored = byoc.getDeployment(deployment.id);
+  assert.equal(stored.attestation.gpu, null);
 });

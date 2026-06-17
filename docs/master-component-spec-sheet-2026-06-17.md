@@ -35,7 +35,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_major_frontier_work_open | at=9 open=0/3/2 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
 | verifiable-inference | trust | sota_review_complete_critical_frontier_work_open | at=8 open=2/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | model-signing-standards | trust | sota_review_complete_major_frontier_work_open | at=7 open=0/1/2 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
-| confidential-compute | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/3/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
+| confidential-compute | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/2/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | agent-security-eval | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/4/1 | 3 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | compile-api-to-model-competitors | compiler-platform | sota_review_complete_critical_frontier_work_open | at=8 open=1/1/4 | 4 | npm run verify:stack-sota<br>npm run verify:inventions |
 

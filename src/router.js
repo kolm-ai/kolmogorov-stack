@@ -19847,12 +19847,17 @@ export function buildRouter() {
   // The token is single-use-equivalent: if an attacker has the token they
   // could spoof the public_url, but the deployment row is owned by a specific
   // tenant_id and the URL is visible in their dashboard - they'll notice.
-  r.post('/v1/byoc/attestation', (req, res) => {
-    const { enroll_token, public_url, measurement, attestation, target } = req.body || {};
+  r.post('/v1/byoc/attestation', async (req, res) => {
+    const body = req.body || {};
+    const { enroll_token, public_url, measurement, attestation } = body;
     if (!enroll_token) return res.status(400).json({ error: 'enroll_token required' });
-    const result = byoc.recordAttestation(enroll_token, { public_url, measurement, attestation });
+    const gpuReport = byoc.normalizeGpuAttestationReport(body);
+    const gpu = gpuReport
+      ? await byoc.verifyGpuAttestation(gpuReport, byoc.gpuAttestationVerifyOptions(body))
+      : null;
+    const result = byoc.recordAttestation(enroll_token, { public_url, measurement, attestation, gpu });
     if (!result.ok) return res.status(404).json({ error: result.error });
-    res.json({ ok: true, registered_at: new Date().toISOString() });
+    res.json({ ok: true, registered_at: new Date().toISOString(), gpu: result.gpu || null });
   });
 
   // BYOC targets - lists supported deploy targets for the public form and CLI.

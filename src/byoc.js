@@ -115,6 +115,45 @@ export async function verifyGpuAttestation(report, opts = {}) {
   };
 }
 
+function _firstString(...values) {
+  for (const v of values) {
+    if (typeof v === 'string' && v.trim() !== '') return v.trim();
+  }
+  return null;
+}
+
+function _firstArray(...values) {
+  for (const v of values) {
+    if (Array.isArray(v)) return v;
+  }
+  return [];
+}
+
+export function normalizeGpuAttestationReport(body) {
+  const b = body && typeof body === 'object' && !Array.isArray(body) ? body : {};
+  const raw = b.gpu_attestation || b.gpu_attestation_report || b.nras_report || b.nras_attestation || null;
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) return raw;
+  if (typeof raw === 'string' && raw.trim() !== '') {
+    return {
+      gpu_id: _firstString(b.gpu_id, b.nras_gpu_id),
+      driver_version: _firstString(b.driver_version, b.nras_driver_version),
+      vbios_version: _firstString(b.vbios_version, b.nras_vbios_version),
+      attestation_report: raw.trim(),
+      cert_chain: _firstArray(b.cert_chain, b.gpu_cert_chain, b.nras_cert_chain),
+      nonce: _firstString(b.nonce, b.gpu_nonce, b.eat_nonce),
+    };
+  }
+  return null;
+}
+
+export function gpuAttestationVerifyOptions(body) {
+  const b = body && typeof body === 'object' && !Array.isArray(body) ? body : {};
+  return {
+    input_digest: _firstString(b.input_digest, b.inputDigest, b.input_hash, b.inputHash),
+    output_digest: _firstString(b.output_digest, b.outputDigest, b.output_hash, b.outputHash),
+  };
+}
+
 export function recordAttestation(enrollToken, { public_url, attestation, measurement, gpu = null }) {
   const d = getDeployment(enrollToken);
   if (!d) return { ok: false, error: 'deployment not found' };
