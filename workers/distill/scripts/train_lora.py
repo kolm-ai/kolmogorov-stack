@@ -430,7 +430,7 @@ def main():
     args.student_base = _resolve_student_base_alias(args.student_base)
 
     # ── W921 LoRA-variant / GaLore / packing knobs (env-threaded, default-off) ──
-    lora_variant = os.environ.get("KOLM_LORA_VARIANT", "lora").lower()
+    lora_variant = os.environ.get("KOLM_LORA_VARIANT", "rslora").lower()
     lora_init = os.environ.get("KOLM_LORA_INIT", "default").lower()
     neftune_alpha = args.neftune_noise_alpha
     if neftune_alpha is None:

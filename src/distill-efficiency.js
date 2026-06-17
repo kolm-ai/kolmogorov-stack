@@ -280,11 +280,10 @@ export function buildEfficiencyEnv(normalized) {
 // =============================================================================
 // W921 - LoRA-variant / GaLore / sample-packing trainer knobs.
 //
-// Additive, opt-in, default-OFF. The SHIPPING worker (workers/distill/scripts/
+// Additive, default-rsLoRA. The SHIPPING worker (workers/distill/scripts/
 // train_lora.py) reads these via KOLM_* env vars (same threading pattern as the
-// W787 precision/grad-checkpoint block). When no variant opts are supplied,
-// buildTrainerVariantEnv returns {} so the default training path is byte-
-// identical to today.
+// W787 precision/grad-checkpoint block). Plain LoRA remains available by
+// explicitly passing lora_variant:'lora'.
 //
 // Levers (each independently provable):
 //   - LoRA variant init/structure: rsLoRA / DoRA / LoRA+ / LoRA-FA + PiSSA/OLoRA
@@ -300,6 +299,7 @@ export function buildEfficiencyEnv(normalized) {
 // =============================================================================
 
 export const LORA_VARIANTS = Object.freeze(['lora', 'rslora', 'dora', 'loraplus', 'lora-fa']);
+export const DEFAULT_LORA_VARIANT = 'rslora';
 export const LORA_INITS = Object.freeze(['default', 'gaussian', 'pissa', 'pissa_niter_16', 'olora']);
 export const TRAINER_OPTIMS = Object.freeze([
   'adamw_torch', 'adamw_8bit', 'paged_adamw_8bit',
@@ -313,7 +313,7 @@ export const TRAINER_OPTIMS = Object.freeze([
 export function normalizeTrainerVariantOptions(opts = {}) {
   const raw = (opts && typeof opts === 'object') ? opts : {};
 
-  const lora_variant = raw.lora_variant == null ? 'lora' : String(raw.lora_variant).toLowerCase();
+  const lora_variant = raw.lora_variant == null ? DEFAULT_LORA_VARIANT : String(raw.lora_variant).toLowerCase();
   if (!LORA_VARIANTS.includes(lora_variant)) {
     const err = new Error(`lora_variant must be one of [${LORA_VARIANTS.join(', ')}]; got ${JSON.stringify(raw.lora_variant)}`);
     err.code = 'invalid_lora_variant';
@@ -399,13 +399,13 @@ export function normalizeTrainerVariantOptions(opts = {}) {
 }
 
 // W921 - buildTrainerVariantEnv: emit the KOLM_* env slice the worker reads.
-// Default (all opts at their no-op values) emits {} so the trainer's existing
-// behavior is unchanged (backward-compat guarantee). Pure helper, exported so
-// tests can assert the exact wire format.
+// Default emits KOLM_LORA_VARIANT=rslora; explicit lora emits
+// KOLM_LORA_VARIANT=lora so operators can opt back to the plain baseline.
+// Pure helper, exported so tests can assert the exact wire format.
 export function buildTrainerVariantEnv(normalized) {
   if (!normalized || typeof normalized !== 'object') return {};
   const out = {};
-  if (normalized.lora_variant && normalized.lora_variant !== 'lora') {
+  if (normalized.lora_variant) {
     out.KOLM_LORA_VARIANT = normalized.lora_variant;
   }
   if (normalized.lora_init && normalized.lora_init !== 'default') {
@@ -436,6 +436,7 @@ export default {
   PRECISION_MODES,
   PRECISION_HINTS,
   LORA_VARIANTS,
+  DEFAULT_LORA_VARIANT,
   LORA_INITS,
   TRAINER_OPTIMS,
   shouldStopEarly,

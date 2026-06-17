@@ -27033,8 +27033,8 @@ async function cmdDistillLocalWorker(args) {
   // KOLM_GALORE_ARGS / KOLM_PACKING. We normalise once via
   // distill-efficiency.normalizeTrainerVariantOptions (fail-before-spend on a
   // bad enum or a galore/qlora conflict) and merge buildTrainerVariantEnv(...)
-  // into the worker spawn env. All flags are optional; with none set the env
-  // slice is {} so the trainer's existing behavior is byte-for-byte unchanged.
+  // into the worker spawn env. The Python worker defaults to rsLoRA; explicit
+  // --lora-variant lora is still forwarded as the plain-LoRA opt-out.
   const _w921LoraVariant = pick('--lora-variant');
   const _w921LoraInit = pick('--lora-init');
   const _w921Neftune = pick('--neftune');

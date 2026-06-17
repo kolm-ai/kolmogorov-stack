@@ -5,7 +5,7 @@
 // Pins:
 //  - normalizeTrainerVariantOptions rejects out-of-enum, accepts valid combos
 //  - refuses galore+qlora and galore_layerwise + grad-accum>1
-//  - buildTrainerVariantEnv emits exactly the expected KOLM_* keys; default {}
+//  - buildTrainerVariantEnv emits exactly the expected KOLM_* keys; default rsLoRA
 //  - recipe-loader accepts trinity-2000 + a pissa/galore recipe; rejects bad enums
 
 import { test } from 'node:test';
@@ -15,12 +15,13 @@ import os from 'node:os';
 import path from 'node:path';
 import {
   normalizeTrainerVariantOptions, buildTrainerVariantEnv,
-  LORA_VARIANTS, LORA_INITS, TRAINER_OPTIMS,
+  LORA_VARIANTS, DEFAULT_LORA_VARIANT, LORA_INITS, TRAINER_OPTIMS,
 } from '../src/distill-efficiency.js';
 import { loadRecipe } from '../src/distill-recipe-loader.js';
 
 test('frozen enums present', () => {
   assert.ok(LORA_VARIANTS.includes('dora'));
+  assert.equal(DEFAULT_LORA_VARIANT, 'rslora');
   assert.ok(LORA_INITS.includes('pissa_niter_16'));
   assert.ok(TRAINER_OPTIMS.includes('galore_adamw'));
   assert.ok(Object.isFrozen(LORA_VARIANTS));
@@ -45,13 +46,18 @@ test('refuses incompatible combos', () => {
   assert.equal(e2.code, 'galore_layerwise_grad_accum_conflict');
 });
 
-test('buildTrainerVariantEnv exact wire format; default {}', () => {
-  assert.deepEqual(buildTrainerVariantEnv(normalizeTrainerVariantOptions({})), {});
+test('buildTrainerVariantEnv exact wire format; default rsLoRA + explicit lora opt-out', () => {
+  assert.deepEqual(buildTrainerVariantEnv(normalizeTrainerVariantOptions({})), {
+    KOLM_LORA_VARIANT: 'rslora',
+  });
+  assert.deepEqual(buildTrainerVariantEnv(normalizeTrainerVariantOptions({ lora_variant: 'lora' })), {
+    KOLM_LORA_VARIANT: 'lora',
+  });
   assert.deepEqual(buildTrainerVariantEnv(normalizeTrainerVariantOptions({ lora_variant: 'dora', neftune_alpha: 5 })), {
     KOLM_LORA_VARIANT: 'dora', KOLM_NEFTUNE_ALPHA: '5',
   });
   assert.deepEqual(buildTrainerVariantEnv(normalizeTrainerVariantOptions({ lora_init: 'pissa_niter_16' })), {
-    KOLM_LORA_INIT: 'pissa_niter_16',
+    KOLM_LORA_VARIANT: 'rslora', KOLM_LORA_INIT: 'pissa_niter_16',
   });
   const galore = buildTrainerVariantEnv(normalizeTrainerVariantOptions({ optim: 'galore_adamw', galore: { rank: 128 }, method: 'full' }));
   assert.equal(galore.KOLM_OPTIM, 'galore_adamw');

@@ -138,7 +138,9 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   assert.equal(def.status, 0, (def.stderr || '').toString());
   const defJson = JSON.parse((def.stdout || '').toString());
   assert.equal(defJson.ok, true);
-  assert.ok(['hf', 'unsloth'].includes(defJson.backend.selected));
+  assert.equal(defJson.config.lora_variant, 'rslora');
+  assert.equal(defJson.backend.selected, 'hf');
+  assert.ok(defJson.backend.hf_only_features.includes('lora_variant:rslora'));
   assert.equal(typeof defJson.checks.unsloth_importable, 'boolean');
   assert.equal(defJson.config.liger.requested, false);
   assert.equal(defJson.config.liger.skipped_reason, 'disabled');
