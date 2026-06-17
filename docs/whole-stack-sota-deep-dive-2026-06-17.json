@@ -84,7 +84,7 @@
   "summary": {
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 15,
-    "categories_with_major_frontier_work_open": 16,
+    "categories_with_major_frontier_work_open": 15,
     "total_atomic_component_links": 3501,
     "status_counts": {
       "sota_review_complete_critical_frontier_work_open": 15,
@@ -206,11 +206,11 @@
         "line": 122,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 9,
-        "improvement_count": 4,
+        "already_at_frontier_count": 10,
+        "improvement_count": 3,
         "gaps": {
           "critical": 1,
-          "major": 1,
+          "major": 0,
           "minor": 2
         }
       },
@@ -243,7 +243,8 @@
             ],
             "test_refs": [
               "tests/wave584-distill-strategy.test.js",
-              "tests/wave602-backend-atomic-deep-dive.test.js"
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave604-distill-strategy-frontier.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },

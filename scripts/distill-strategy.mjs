@@ -40,6 +40,7 @@ function profileFromFlags() {
     target_latency_ms: Number(flag('--target-latency-ms', '120')),
     budget_usd: Number(flag('--budget-usd', '0')),
     existing_artifact: has('--existing-artifact'),
+    teacher_local: has('--teacher-local') || has('--local-teacher') || has('--teacher-logits'),
     teachers: teachers ? teachers.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
   };
 }

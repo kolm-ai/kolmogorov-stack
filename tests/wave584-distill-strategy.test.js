@@ -26,10 +26,27 @@ const CLI = path.join(ROOT, 'cli', 'kolm.js');
 test('W584 #1 - catalog covers no-train, supervised, KD, preference, on-policy, and serving strategies', () => {
   const catalog = distillStrategyCatalog();
   const ids = new Set(catalog.strategies.map((s) => s.id));
-  for (const id of ['collect_more_real_pairs', 'rule_or_cache_first', 'small_classifier', 'lora_sft', 'kd_top_k', 'kd_softmax', 'rejection_sampling', 'preference_optimization', 'onpolicy_distill', 'speculative_decoding_train']) {
+  for (const id of [
+    'collect_more_real_pairs',
+    'rule_or_cache_first',
+    'small_classifier',
+    'lora_sft',
+    'kd_top_k',
+    'kd_softmax',
+    'rejection_sampling',
+    'ropd',
+    'gkd_onpolicy',
+    'distillm2',
+    'reverse_kl_minillm',
+    'cot_distill',
+    'preference_optimization',
+    'onpolicy_distill',
+    'speculative_decoding_train',
+  ]) {
     assert.ok(ids.has(id), `missing strategy ${id}`);
   }
   assert.ok(catalog.tasks.includes('generation'));
+  assert.ok(catalog.tasks.includes('reasoning'));
   assert.ok(catalog.privacy_modes.includes('airgap'));
 });
 
@@ -37,13 +54,14 @@ test('W584 #2 - catalog exposes spec id, family coverage, and teacher_required f
   const catalog = distillStrategyCatalog();
   assert.equal(catalog.spec, 'kolm-distill-strategy/1');
   const families = new Set(catalog.strategies.map((s) => s.family));
-  for (const family of ['data', 'no-train', 'supervised', 'distill', 'preference', 'online', 'serving']) {
+  for (const family of ['data', 'no-train', 'supervised', 'distill', 'preference', 'online', 'serving', 'reasoning']) {
     assert.ok(families.has(family), `missing family ${family}`);
   }
-  assert.ok(catalog.strategies.some((s) => s.id === 'kd_softmax' && s.teacher_required));
+  assert.ok(catalog.strategies.some((s) => s.id === 'kd_softmax' && s.teacher_required && s.requires_teacher_logits));
+  assert.ok(catalog.strategies.some((s) => s.id === 'ropd' && s.teacher_required && !s.requires_teacher_logits));
 });
 
-test('W584 #3 - generation with enough reviewed data and teacher chooses softmax KD', () => {
+test('W584 #3 - API-teacher generation chooses black-box ROPD instead of logit KD', () => {
   const plan = planDistillStrategy({
     task: 'generation',
     real_pairs: 1500,
@@ -52,8 +70,10 @@ test('W584 #3 - generation with enough reviewed data and teacher chooses softmax
     privacy: 'standard',
   }, { ANTHROPIC_API_KEY: 'secret' });
   assert.equal(plan.ok, true);
-  assert.equal(plan.recommendation.id, 'kd_softmax');
-  assert.match(plan.recommendation.command, /kolm distill --namespace default/);
+  assert.equal(plan.recommendation.id, 'ropd');
+  assert.match(plan.recommendation.command, /kolm distill onpolicy --ropd --namespace default/);
+  assert.equal(plan.ranked.find((r) => r.id === 'kd_softmax').feasible, false);
+  assert.ok(plan.ranked.find((r) => r.id === 'kd_softmax').blockers.includes('teacher_logits_required'));
   assert.doesNotMatch(JSON.stringify(plan), /sk-|secret-key|ANTHROPIC_API_KEY_VALUE/);
 });
 
@@ -66,8 +86,8 @@ test('W584 #4 - teacher-backed generation honors caller namespace and gates secr
     base_model: 'Qwen/Qwen2.5-7B-Instruct',
   }, { ANTHROPIC_API_KEY: 'secret-value' });
   assert.equal(plan.ok, true);
-  assert.equal(plan.recommendation.id, 'kd_softmax');
-  assert.match(plan.recommendation.command, /kolm distill --namespace support-copilot/);
+  assert.equal(plan.recommendation.id, 'ropd');
+  assert.match(plan.recommendation.command, /kolm distill onpolicy --ropd --namespace support-copilot/);
   assert.equal(plan.secret_values_included, false);
   assert.doesNotMatch(JSON.stringify(plan), /secret-value/);
 });
@@ -148,7 +168,7 @@ test('W584 #9 - API exposes distill strategy planning without auth-only side eff
   assert.equal(planned.status, 200);
   const body = await planned.json();
   assert.equal(body.data.plan.secret_values_included, false);
-  assert.equal(body.data.plan.recommendation.id, 'kd_softmax');
+  assert.equal(body.data.plan.recommendation.id, 'ropd');
 });
 
 test('W584 #10 - API exposes authenticated catalog and planner envelopes with surface + readiness metadata', async (t) => {
@@ -204,10 +224,10 @@ test('W584 #11 - CLI/script and package gates expose strategy verification', () 
     timeout: 15000,
   });
   assert.equal(r.status, 0, r.stderr || r.stdout);
-  assert.match(r.stdout, /recommendation=kd_softmax/);
+  assert.match(r.stdout, /recommendation=ropd/);
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   assert.match(pkg.scripts['verify:distill-strategy'], /distill-strategy\.mjs/);
-  assert.match(pkg.scripts['verify:depth'], /distill-strategy\.mjs/);
+  assert.match(pkg.scripts['verify:depth'], /npm run verify:distill-strategy/);
 });
 
 test('W584 #12 - CLI exposes direct distill strategy planning and catalog output', () => {
@@ -232,7 +252,7 @@ test('W584 #12 - CLI exposes direct distill strategy planning and catalog output
   assert.equal(planned.status, 0, planned.stderr || planned.stdout);
   const plan = JSON.parse(planned.stdout);
   assert.equal(plan.ok, true);
-  assert.equal(plan.recommendation.id, 'kd_softmax');
+  assert.equal(plan.recommendation.id, 'ropd');
   assert.equal(plan.secret_values_included, false);
 
   const catalog = spawnSync(process.execPath, [CLI, 'distill', 'strategy', '--catalog', '--json'], {
@@ -244,4 +264,32 @@ test('W584 #12 - CLI exposes direct distill strategy planning and catalog output
   const body = JSON.parse(catalog.stdout);
   assert.equal(body.spec, 'kolm-distill-strategy/1');
   assert.ok(body.strategies.some((s) => s.id === 'preference_optimization'));
+});
+
+test('W584 #13 - local teacher access keeps GKD and logit objectives selectable', () => {
+  const plan = planDistillStrategy({
+    task: 'generation',
+    real_pairs: 1500,
+    holdout_pairs: 300,
+    teachers: ['local:qwen'],
+    teacher_local: true,
+  }, {});
+  assert.equal(plan.ok, true);
+  assert.equal(plan.profile.teacher_access.has_teacher_logits, true);
+  assert.equal(plan.recommendation.id, 'gkd_onpolicy');
+  assert.equal(plan.ranked.find((r) => r.id === 'kd_softmax').feasible, true);
+  assert.equal(plan.ranked.find((r) => r.id === 'distillm2').feasible, true);
+  assert.match(plan.recommendation.command, /kolm distill onpolicy train/);
+});
+
+test('W584 #14 - reasoning workloads prefer trace distillation when captures are sufficient', () => {
+  const plan = planDistillStrategy({
+    task: 'reasoning',
+    real_pairs: 600,
+    holdout_pairs: 120,
+    privacy: 'regulated',
+  }, {});
+  assert.equal(plan.ok, true);
+  assert.equal(plan.recommendation.id, 'cot_distill');
+  assert.match(plan.recommendation.command, /reasoning-trace-loss-weight/);
 });

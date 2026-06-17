@@ -21912,6 +21912,7 @@ function distillStrategyProfile(args) {
     target_latency_ms: distillStrategyNumber(args, ['--target-latency-ms', '--latency-ms'], 120),
     budget_usd: distillStrategyNumber(args, ['--budget-usd', '--budget'], 0),
     existing_artifact: args.includes('--existing-artifact'),
+    teacher_local: args.includes('--teacher-local') || args.includes('--local-teacher') || args.includes('--teacher-logits'),
     teachers: teachers ? teachers.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
   };
 }
