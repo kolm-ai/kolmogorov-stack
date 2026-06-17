@@ -10,6 +10,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   DEFAULT_QUANT_ACCURACY_MAX_REL_DROP,
+  __internals,
   enforceAccuracyFloor,
 } from '../src/quantize-bakeoff.js';
 import { rankQuantizationStrategies } from '../src/quantization-oracle.js';
@@ -37,8 +38,8 @@ test('1. measured bakeoff rows below the relative K-score floor are rejected', (
 
 test('2. surrogate-only bakeoff rows fail closed unless explicitly advisory-only', () => {
   const rows = [
-    { profile_id: 'surrogate-8bit', kscore: 0.91, avg_weight_bits: 8, scorer: 'jaccard-surrogate', accepted: true },
-    { profile_id: 'surrogate-4bit', kscore: 0.89, avg_weight_bits: 4, scorer: 'jaccard-surrogate', accepted: true },
+    { profile_id: 'surrogate-8bit', kscore: 0.91, avg_weight_bits: 8, scorer: 'bits_coverage_surrogate', accepted: true },
+    { profile_id: 'surrogate-4bit', kscore: 0.89, avg_weight_bits: 4, scorer: 'bits_coverage_surrogate', accepted: true },
   ];
 
   enforceAccuracyFloor(rows);
@@ -56,7 +57,31 @@ test('2. surrogate-only bakeoff rows fail closed unless explicitly advisory-only
   assert.equal(advisoryRows[0].accuracy_gate.passed, true);
 });
 
-test('3. embedded K-score gate failures reject even when relative score drop is small', () => {
+test('3. bakeoff scorer uses real token-Jaccard when candidate outputs are present', () => {
+  const score = __internals._scoreProfile(
+    [{ layer_id: 'layers.0.mlp', weight_bits: 4, activation_bits: 8, kv_bits: 8 }],
+    [
+      { output: 'the quick brown fox', model_output: 'quick brown dog' },
+      { output: 'alpha beta', model_output: 'alpha beta' },
+    ],
+    { profile_id: 'profile-a' },
+  );
+
+  assert.equal(score.scorer, 'eval_set_token_jaccard');
+  assert.equal(score.details.scored_rows, 2);
+  assert.equal(score.details.missing_rows, 0);
+  assert.ok(Math.abs(score.kscore - 0.7) < 1e-12);
+
+  const fallback = __internals._scoreProfile(
+    [{ layer_id: 'layers.0.mlp', weight_bits: 4, activation_bits: 8, kv_bits: 8 }],
+    [{ output: 'reference only' }],
+    { profile_id: 'profile-a' },
+  );
+  assert.equal(fallback.scorer, 'bits_coverage_surrogate');
+  assert.notEqual(fallback.scorer, 'jaccard-surrogate');
+});
+
+test('4. embedded K-score gate failures reject even when relative score drop is small', () => {
   const rows = [
     { profile_id: 'fp16', method: 'fp16', kscore: 0.9, avg_weight_bits: 16, scorer: 'kscore-v2-harness', accepted: true },
     {
@@ -76,7 +101,7 @@ test('3. embedded K-score gate failures reject even when relative score drop is 
   assert.ok(rows[1].rejection_reasons.includes('kscore_gate_failed'));
 });
 
-test('4. quantization oracle exposes structured post-quant accuracy gate', () => {
+test('5. quantization oracle exposes structured post-quant accuracy gate', () => {
   const plan = rankQuantizationStrategies({
     task: 'extraction',
     device: 'rtx-4090-24gb',
@@ -92,10 +117,12 @@ test('4. quantization oracle exposes structured post-quant accuracy gate', () =>
   assert.ok(plan.recommendation.proof.some((line) => /accuracy_gate/.test(line)));
 });
 
-test('5. backend spec records W606 closure while leaving measurement-harness follow-up open', () => {
+test('6. backend spec records W606 and W632 closures while leaving measurement-harness follow-up open', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
 
   assert.match(spec, /W606/);
+  assert.match(spec, /W632/);
+  assert.match(spec, /bits\/coverage surrogate/);
   assert.match(spec, /post-quant accuracy gate/);
   assert.match(spec, /shared boot-and-measure probe harness/);
 });

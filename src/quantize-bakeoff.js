@@ -16,9 +16,10 @@
 //     contract: surface every candidate's verdict)
 //
 // Scoring:
-//   - kscore: simple Jaccard token overlap against captured eval responses
-//     (heavy ML scoring opt-in via $KOLM_BAKEOFF_SCORE_CMD worker hook, same
-//     pattern as src/multimodal-bakeoff.js)
+//   - kscore: measured K-score when the worker receipt/external scorer supplies
+//     it; token-Jaccard only when eval rows include candidate model output text;
+//     otherwise an explicitly named bits/coverage surrogate that fails closed
+//     under enforceAccuracyFloor.
 //   - vram_gb: read from quantize-receipt.json output_files_sha256 total bytes
 //   - latency_ms: end-to-end wall time the worker recorded
 //
@@ -187,7 +188,8 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
     // the caller explicitly opts out. Surrogate-ranked rows are advisory only.
     let kscore;
     let kscore_gate = null;
-    let scorer = 'jaccard-surrogate';
+    let scorer = 'bits_coverage_surrogate';
+    let score_details = null;
     const measured = (opts.measured && (opts.measured[profile_id] || opts.measured[i]))
       || readMeasuredFromReceipt(outDir);
     if (measured && measured.fp16 && measured.quant) {
@@ -202,14 +204,16 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
         kscore_gate = gate;
         scorer = gate.scorer;
       } catch {
-        const surrogate = scoreProfile(profile, eval_set);
-        kscore = surrogate.kscore;
-        scorer = surrogate.scorer;
+        const profileScore = scoreProfile(profile, eval_set, { profile_id });
+        kscore = profileScore.kscore;
+        scorer = profileScore.scorer;
+        score_details = profileScore.details || null;
       }
     } else {
-      const surrogate = scoreProfile(profile, eval_set);
-      kscore = surrogate.kscore;
-      scorer = surrogate.scorer;
+      const profileScore = scoreProfile(profile, eval_set, { profile_id });
+      kscore = profileScore.kscore;
+      scorer = profileScore.scorer;
+      score_details = profileScore.details || null;
     }
     const avg_weight_bits = averageWeightBits(profile);
     results.push({
@@ -219,6 +223,7 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
       latency_ms,
       scorer,
       avg_weight_bits,
+      ...(score_details ? { score_details } : {}),
       ...(kscore_gate ? { kscore_gate } : {}),
       accepted: true, // pareto pass happens after the loop
     });
@@ -313,11 +318,7 @@ function readMeasuredFromReceipt(outDir) {
   return null;
 }
 
-function scoreJaccard(profile, eval_set) {
-  return scoreProfile(profile, eval_set).kscore;
-}
-
-function scoreProfile(profile, eval_set) {
+function scoreProfile(profile, eval_set, opts = {}) {
   // The profile itself is informational - without an actual student to run, we
   // synthesize a deterministic surrogate score derived from the profile's
   // weighted-avg-bits (higher bits ≈ closer to bf16 baseline ≈ higher score).
@@ -335,14 +336,102 @@ function scoreProfile(profile, eval_set) {
       }
     } catch { /* fall through to surrogate */ }
   }
+  const tokenScore = scoreEvalSetTokenJaccard(eval_set, {
+    profile_id: opts.profile_id || hashDaqProfile(profile).slice(0, 12),
+  });
+  if (tokenScore) return tokenScore;
+  return surrogateBitsCoverageScore(profile, eval_set);
+}
+
+function surrogateBitsCoverageScore(profile, eval_set) {
   // Surrogate: average weight_bits / 8 (uniform-int8 baseline = 1.0).
-  // Eval set length factors in modestly so larger eval sets get a small bump
-  // (reflects coverage credit - same surrogate spirit as W466 multimodal).
+  // Eval set length factors in modestly so larger eval sets get a small bump.
+  // This is not a quality metric; the scorer name is intentionally explicit so
+  // callers do not confuse advisory ordering with measured accuracy.
   const avgBits = averageWeightBits(profile);
   const baseline = avgBits / 8;
   // Coverage credit: log10(1 + n) / 5 caps the bump at ~+0.5 for 10^9 evals.
-  const coverage = Math.log10(1 + eval_set.length) / 5;
-  return { kscore: Math.min(1.0, baseline * 0.9 + coverage * 0.1), scorer: 'jaccard-surrogate' };
+  const coverage = Math.log10(1 + (Array.isArray(eval_set) ? eval_set.length : 0)) / 5;
+  return {
+    kscore: Math.min(1.0, baseline * 0.9 + coverage * 0.1),
+    scorer: 'bits_coverage_surrogate',
+    details: {
+      measured: false,
+      avg_weight_bits: avgBits,
+      eval_rows: Array.isArray(eval_set) ? eval_set.length : 0,
+    },
+  };
+}
+
+function scoreEvalSetTokenJaccard(eval_set, opts = {}) {
+  if (!Array.isArray(eval_set) || eval_set.length === 0) return null;
+  let scored = 0;
+  let missing = 0;
+  let sum = 0;
+  for (const row of eval_set) {
+    const expected = expectedEvalText(row);
+    const actual = candidateEvalText(row, opts.profile_id);
+    if (expected == null || actual == null) {
+      missing += 1;
+      continue;
+    }
+    sum += tokenJaccard(actual, expected);
+    scored += 1;
+  }
+  if (scored === 0) return null;
+  return {
+    kscore: sum / scored,
+    scorer: missing > 0 ? 'eval_set_token_jaccard_partial' : 'eval_set_token_jaccard',
+    details: {
+      measured: false,
+      scored_rows: scored,
+      missing_rows: missing,
+      profile_id: opts.profile_id || null,
+    },
+  };
+}
+
+function expectedEvalText(row) {
+  if (!row || typeof row !== 'object') return null;
+  for (const key of ['output', 'expected', 'expected_output', 'reference_output', 'teacher_output', 'completion']) {
+    if (textPresent(row[key])) return String(row[key]);
+  }
+  return null;
+}
+
+function candidateEvalText(row, profileId) {
+  if (!row || typeof row !== 'object') return null;
+  for (const key of ['model_output', 'candidate_output', 'quant_output', 'student_output', 'prediction', 'got']) {
+    if (textPresent(row[key])) return String(row[key]);
+  }
+  for (const key of ['model_outputs', 'candidate_outputs', 'quant_outputs', 'student_outputs', 'outputs_by_profile']) {
+    const bucket = row[key];
+    if (bucket && typeof bucket === 'object' && profileId && textPresent(bucket[profileId])) {
+      return String(bucket[profileId]);
+    }
+  }
+  return null;
+}
+
+function tokenJaccard(actual, expected) {
+  const a = new Set(tokens(actual));
+  const b = new Set(tokens(expected));
+  if (a.size === 0 && b.size === 0) return 1;
+  if (a.size === 0 || b.size === 0) return 0;
+  let intersection = 0;
+  for (const token of a) if (b.has(token)) intersection += 1;
+  const union = a.size + b.size - intersection;
+  return union > 0 ? intersection / union : 0;
+}
+
+function tokens(value) {
+  return String(value || '')
+    .toLowerCase()
+    .match(/[a-z0-9_]+/g) || [];
+}
+
+function textPresent(value) {
+  return typeof value === 'string' && value.trim().length > 0;
 }
 
 function averageWeightBits(profile) {
@@ -373,3 +462,10 @@ function chooseAccuracyBaseline(rows) {
     : pool;
   return highestBit.slice().sort((a, b) => Number(b.kscore) - Number(a.kscore))[0];
 }
+
+export const __internals = Object.freeze({
+  _scoreProfile: scoreProfile,
+  _scoreEvalSetTokenJaccard: scoreEvalSetTokenJaccard,
+  _surrogateBitsCoverageScore: surrogateBitsCoverageScore,
+  _tokenJaccard: tokenJaccard,
+});
