@@ -5757,14 +5757,16 @@
           {
             "path": "src/sbom-emit.js",
             "domain": "platform_support",
-            "priority_score": 6,
+            "priority_score": 5,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
               "execution_or_subprocess_boundary",
               "network_or_provider_boundary"
             ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
+            "test_refs": [
+              "tests/wave661-sbom-emit-contract.test.js"
+            ],
+            "improvement_track": "maintain_contract_tests_and_claim_scope_mapping"
           }
         ],
         "sampled": [

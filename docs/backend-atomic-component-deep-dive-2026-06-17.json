@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 679,
-    "components_without_direct_test_reference": 150,
+    "test_referenced_components": 680,
+    "components_without_direct_test_reference": 149,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -5179,7 +5179,8 @@
         "tests/asr-packages.test.js",
         "tests/finalized-c1-signed-artifact-packaging.test.js",
         "tests/wave588-package-release-readiness.test.js",
-        "tests/wave591-package-local-build-contract.test.js"
+        "tests/wave591-package-local-build-contract.test.js",
+        "tests/wave661-sbom-emit-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -37371,10 +37372,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "b20b137ca64f2ed8f37ebb37aeaeee44befd14a785860d99779507901f0838ca",
+      "sha256": "acd1783d02f632cdc1eb63c33241e16c021d7c79cae58a6637eb49221382330b",
       "metrics": {
-        "bytes": 1466385,
-        "lines": 30755,
+        "bytes": 1466433,
+        "lines": 30756,
         "imports": 535,
         "exports": 8,
         "routes": 810,
@@ -38690,10 +38691,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "a0fd7296e57c7fb19e7baf5323865e4d17e66466cde7b11dc480a0501c1d3fb8",
+      "sha256": "3abe4a50eadc79d257194c2106006aa77d917ad3fa0a4901ac1dd8abb6cf2b70",
       "metrics": {
-        "bytes": 22981,
-        "lines": 631,
+        "bytes": 25420,
+        "lines": 711,
         "imports": 3,
         "exports": 7,
         "routes": 0,
@@ -38701,16 +38702,18 @@
         "fs_writes": 0,
         "subprocess_refs": 1,
         "network_refs": 1,
-        "crypto_refs": 9,
+        "crypto_refs": 12,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave661-sbom-emit-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "execution_or_subprocess_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 6,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -38735,7 +38738,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
       "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
       "suggested_verification": [
         "npm run verify:codegraph"

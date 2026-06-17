@@ -45,23 +45,98 @@ const SPDX_VERSION = 'SPDX-2.3';
 const CYCLONEDX_SCHEMA_URL = 'http://cyclonedx.org/schema/bom-1.5.schema.json';
 const SPDX_SCHEMA_URL = 'https://spdx.github.io/spdx-spec/v2.3/';
 
+const HASH_ALGORITHMS = Object.freeze({
+  sha256: 'SHA-256',
+  sha384: 'SHA-384',
+  sha512: 'SHA-512',
+});
+
+function _normalizeHashAlgorithm(alg) {
+  const key = String(alg || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  return HASH_ALGORITHMS[key] || null;
+}
+
+function _hexMatchesAlg(alg, hex) {
+  const h = String(hex || '').trim().toLowerCase();
+  if (!/^[a-f0-9]+$/.test(h)) return false;
+  return (
+    (alg === 'SHA-256' && h.length === 64) ||
+    (alg === 'SHA-384' && h.length === 96) ||
+    (alg === 'SHA-512' && h.length === 128)
+  );
+}
+
+function _inferHashAlgorithmFromHex(hex) {
+  const len = String(hex || '').trim().length;
+  if (len === 64) return 'SHA-256';
+  if (len === 96) return 'SHA-384';
+  if (len === 128) return 'SHA-512';
+  return null;
+}
+
+function _strictBase64ToHex(b64) {
+  const raw = String(b64 || '').trim();
+  if (!raw || raw.length % 4 === 1 || !/^[A-Za-z0-9+/]+={0,2}$/.test(raw)) return null;
+  const buf = Buffer.from(raw, 'base64');
+  if (buf.length === 0) return null;
+  const canonical = buf.toString('base64').replace(/=+$/g, '');
+  const provided = raw.replace(/=+$/g, '');
+  if (canonical !== provided) return null;
+  return buf.toString('hex');
+}
+
+function _purl(ecosystem, name, version) {
+  const eco = String(ecosystem || 'npm').trim().toLowerCase().replace(/[^a-z0-9.+-]/g, '') || 'generic';
+  const n = String(name || '').trim();
+  const v = encodeURIComponent(String(version || 'unknown'));
+  if (eco === 'npm' && n.startsWith('@') && n.includes('/')) {
+    const [scope, pkg] = n.split('/', 2);
+    if (scope && pkg) return `pkg:npm/${encodeURIComponent(scope)}/${encodeURIComponent(pkg)}@${v}`;
+  }
+  return `pkg:${eco}/${encodeURIComponent(n)}@${v}`;
+}
+
+function _normalizeManifestHash(hash) {
+  if (typeof hash !== 'string') return null;
+  const text = hash.trim();
+  if (!text) return null;
+
+  const namedHex = text.match(/^(sha256|sha384|sha512):([a-fA-F0-9]+)$/i);
+  if (namedHex) {
+    const alg = _normalizeHashAlgorithm(namedHex[1]);
+    const content = namedHex[2].toLowerCase();
+    return alg && _hexMatchesAlg(alg, content) ? { alg, content } : null;
+  }
+
+  const integrity = text.match(/^(sha256|sha384|sha512)-([A-Za-z0-9+/]+={0,2})$/i);
+  if (integrity) {
+    const alg = _normalizeHashAlgorithm(integrity[1]);
+    const content = _strictBase64ToHex(integrity[2]);
+    return alg && content && _hexMatchesAlg(alg, content) ? { alg, content } : null;
+  }
+
+  if (/^[a-fA-F0-9]+$/.test(text)) {
+    const content = text.toLowerCase();
+    const alg = _inferHashAlgorithmFromHex(content);
+    return alg ? { alg, content } : null;
+  }
+
+  return null;
+}
+
 // =============================================================================
 // Internal: normalize an integrity string into a {alg, hex} pair.
 //   - npm package-lock integrity strings are of shape "sha512-<b64>".
 //   - We convert to the CycloneDX hash shape {alg:'SHA-512', content:<hex>}.
-//   - On parse failure we emit {alg:'SHA-512', content:'unknown'} rather
-//     than throwing - never crash the SBOM emit over one bad row.
+//   - On parse failure we omit the hash rather than inventing a checksum.
 // =============================================================================
 function _normalizeIntegrity(integrity) {
   if (typeof integrity !== 'string' || !integrity.includes('-')) return null;
   const [alg, b64] = integrity.split('-', 2);
-  const algNorm = String(alg || '').toUpperCase().replace(/^SHA/, 'SHA-');
-  let hex;
-  try {
-    hex = Buffer.from(b64, 'base64').toString('hex');
-  } catch (_) {
-    hex = 'unknown';
-  }
+  const algNorm = _normalizeHashAlgorithm(alg);
+  if (!algNorm) return null;
+  const hex = _strictBase64ToHex(b64);
+  if (!hex || !_hexMatchesAlg(algNorm, hex)) return null;
   return { alg: algNorm, content: hex };
 }
 
@@ -180,12 +255,13 @@ function _componentsFromLock(lock) {
     }
     if (!name) continue;
     const hash = _normalizeIntegrity(meta.integrity);
+    const purl = _purl('npm', name, meta.version);
     const component = {
       type: 'library',
-      'bom-ref': 'pkg:npm/' + encodeURIComponent(name) + '@' + meta.version,
+      'bom-ref': purl,
       name,
       version: meta.version,
-      purl: 'pkg:npm/' + encodeURIComponent(name) + '@' + meta.version,
+      purl,
       scope: meta.dev ? 'optional' : 'required',
     };
     if (hash) component.hashes = [hash];
@@ -215,30 +291,20 @@ function _componentsFromManifest(manifest) {
   const seen = new Set();
   function _push(name, version, hash, ecosystem) {
     if (!name || typeof name !== 'string') return;
-    const key = name + '@' + (version || 'unknown');
+    const eco = ecosystem || 'npm';
+    const key = eco + ':' + name + '@' + (version || 'unknown');
     if (seen.has(key)) return;
     seen.add(key);
-    const eco = ecosystem || 'npm';
+    const purl = _purl(eco, name, version || 'unknown');
     const c = {
       type: 'library',
-      'bom-ref': 'pkg:' + eco + '/' + encodeURIComponent(name) + '@' + (version || 'unknown'),
+      'bom-ref': purl,
       name,
       version: version || 'unknown',
-      purl: 'pkg:' + eco + '/' + encodeURIComponent(name) + '@' + (version || 'unknown'),
+      purl,
     };
-    if (typeof hash === 'string' && hash.length > 0) {
-      // Manifest hashes might be raw hex or sha-prefixed. Normalize.
-      let alg = 'SHA-256';
-      let content = hash;
-      if (hash.includes('-')) {
-        const [a, h] = hash.split('-', 2);
-        alg = String(a || '').toUpperCase().replace(/^SHA/, 'SHA-');
-        try {
-          content = Buffer.from(h, 'base64').toString('hex');
-        } catch (_) { content = h || 'unknown'; }
-      }
-      c.hashes = [{ alg, content }];
-    }
+    const normalizedHash = _normalizeManifestHash(hash);
+    if (normalizedHash) c.hashes = [normalizedHash];
     out.push(c);
   }
   if (Array.isArray(manifest.deps)) {
@@ -289,14 +355,17 @@ function _componentsFromRequirements(text) {
     const hashRe = /--hash=([a-z0-9]+):([a-fA-F0-9]+)/g;
     let hm;
     while ((hm = hashRe.exec(line)) !== null) {
-      hashes.push({ alg: String(hm[1]).toUpperCase().replace(/^SHA/, 'SHA-'), content: hm[2] });
+      const alg = _normalizeHashAlgorithm(hm[1]);
+      const content = String(hm[2] || '').toLowerCase();
+      if (alg && _hexMatchesAlg(alg, content)) hashes.push({ alg, content });
     }
+    const purl = _purl('pypi', name, version || 'unknown');
     const c = {
       type: 'library',
-      'bom-ref': 'pkg:pypi/' + encodeURIComponent(name) + '@' + (version || 'unknown'),
+      'bom-ref': purl,
       name,
       version: version || 'unknown',
-      purl: 'pkg:pypi/' + encodeURIComponent(name) + '@' + (version || 'unknown'),
+      purl,
     };
     if (hashes.length > 0) {
       c.hashes = hashes;
@@ -311,11 +380,11 @@ function _componentsFromRequirements(text) {
 }
 
 // =============================================================================
-// PUBLIC: emitSbomFromManifest({manifest, format})
+// PUBLIC: emitSbomFromManifest({manifest, format, allow_path_read})
 //
-// Manifest can be either an object or a string path to a JSON file. We do
-// the path-read here (NOT inside artifact.js - keeps SBOM as a sibling
-// export) and emit the requested shape.
+// Manifest is object-first. A string path is accepted only with
+// allow_path_read:true for trusted local callers; HTTP/API callers must pass
+// the already-parsed object so they cannot trigger local file reads.
 // =============================================================================
 export function emitSbomFromManifest(opts) {
   const o = opts || {};
@@ -329,9 +398,19 @@ export function emitSbomFromManifest(opts) {
     };
   }
   let manifest = o.manifest;
+  let sourcePath = null;
   if (typeof manifest === 'string') {
+    if (o.allow_path_read !== true) {
+      return {
+        ok: false,
+        error: 'manifest_path_read_disabled',
+        hint: 'pass a manifest object; set allow_path_read:true only for trusted local CLI/server-side callers',
+        version: SBOM_VERSION,
+      };
+    }
+    sourcePath = path.resolve(manifest);
     let raw;
-    try { raw = fs.readFileSync(manifest, 'utf8'); }
+    try { raw = fs.readFileSync(sourcePath, 'utf8'); }
     catch (e) {
       return {
         ok: false,
@@ -354,7 +433,7 @@ export function emitSbomFromManifest(opts) {
     return {
       ok: false,
       error: 'manifest_required',
-      hint: 'pass a manifest object or a path to manifest.json',
+      hint: 'pass a manifest object',
       version: SBOM_VERSION,
     };
   }
@@ -380,6 +459,7 @@ export function emitSbomFromManifest(opts) {
     sbom,
     component_count: components.length,
     source: 'manifest',
+    ...(sourcePath ? { source_path: sourcePath } : {}),
   };
 }
 

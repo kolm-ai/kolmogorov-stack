@@ -26423,7 +26423,7 @@ res.json({
       return res.status(400).json({
         ok: false,
         error: 'confirm_required',
-        hint: 'send {"confirm": true} alongside {manifest, format?} - SBOM emit reads files; explicit ack required.',
+        hint: 'send {"confirm": true, "manifest": {...}, "format": "cyclonedx-json"} - API SBOM emit accepts manifest objects only.',
       });
     }
     try {
@@ -26431,6 +26431,7 @@ res.json({
       const result = mod.emitSbomFromManifest({
         manifest: body.manifest,
         format: typeof body.format === 'string' ? body.format : undefined,
+        allow_path_read: false,
       });
       return res.json(result);
     } catch (e) {

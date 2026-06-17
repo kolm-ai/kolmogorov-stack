@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 679,
-    "direct_test_reference_pct": 81.9,
-    "components_without_direct_test_reference": 150,
+    "direct_test_referenced_components": 680,
+    "direct_test_reference_pct": 82,
+    "components_without_direct_test_reference": 149,
     "high_priority_components": 47,
     "high_priority_direct_test_referenced": 47,
     "high_priority_direct_test_reference_pct": 100,
@@ -5910,7 +5910,8 @@
           "tests/asr-packages.test.js",
           "tests/finalized-c1-signed-artifact-packaging.test.js",
           "tests/wave588-package-release-readiness.test.js",
-          "tests/wave591-package-local-build-contract.test.js"
+          "tests/wave591-package-local-build-contract.test.js",
+          "tests/wave661-sbom-emit-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -33580,8 +33581,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1466385,
-          "lines": 30755,
+          "bytes": 1466433,
+          "lines": 30756,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -33603,7 +33604,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "b20b137ca64f2ed8f37ebb37aeaeee44befd14a785860d99779507901f0838ca"
+        "sha256": "acd1783d02f632cdc1eb63c33241e16c021d7c79cae58a6637eb49221382330b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -34691,8 +34692,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 22981,
-          "lines": 631,
+          "bytes": 25420,
+          "lines": 711,
           "imports": 3,
           "exports": 7,
           "routes": 0,
@@ -34700,7 +34701,7 @@
           "fs_writes": 0,
           "subprocess_refs": 1,
           "network_refs": 1,
-          "crypto_refs": 9,
+          "crypto_refs": 12,
           "markers": 0
         },
         "risk_signals": [
@@ -34708,9 +34709,9 @@
           "execution_or_subprocess_boundary",
           "network_or_provider_boundary"
         ],
-        "priority_score": 6,
+        "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "a0fd7296e57c7fb19e7baf5323865e4d17e66466cde7b11dc480a0501c1d3fb8"
+        "sha256": "3abe4a50eadc79d257194c2106006aa77d917ad3fa0a4901ac1dd8abb6cf2b70"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -34718,7 +34719,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave661-sbom-emit-contract.test.js"
+        ],
         "category_links": [
           {
             "id": "model-signing-standards",
@@ -34727,16 +34730,14 @@
             "relation": "required"
           }
         ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
         "suggested_verification": [
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/scim-provisioning.js",
