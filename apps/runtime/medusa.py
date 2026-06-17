@@ -19,9 +19,9 @@ Two newer techniques beat it on the same hardware:
                 dynamic tree of continuations. ~3-4x throughput, requires
                 training the EAGLE head separately.
 
-This module wires both into vLLM 0.6+ via its native --speculative-model
-SPECULATIVE_MODEL_TYPE arg. The kolm runtime config carries the head
-artifact pointer alongside the base.
+This module emits vLLM's modern speculative_config dict through the same
+builder used by apps/runtime/eagle3.py. The kolm runtime config carries the
+head artifact pointer alongside the base.
 
 Selection guide:
 
@@ -49,10 +49,23 @@ from __future__ import annotations
 
 import dataclasses
 import enum
+import json
 import logging
 from typing import Any, Mapping, Optional
 
 logger = logging.getLogger(__name__)
+
+
+def _build_vllm_speculative_config(resolved: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from apps.runtime.eagle3 import build_vllm_speculative_config
+    except Exception:  # pragma: no cover - direct script execution fallback
+        from eagle3 import build_vllm_speculative_config
+
+    cfg = build_vllm_speculative_config(resolved)
+    if cfg is None:
+        raise ValueError(f"unsupported speculative vLLM config: {resolved}")
+    return cfg
 
 
 class SpecMode(str, enum.Enum):
@@ -83,30 +96,33 @@ class SpecConfig:
         if self.mode is SpecMode.DRAFT:
             if not self.draft_model:
                 raise ValueError("DRAFT spec mode requires draft_model")
-            return {
-                "speculative_model": self.draft_model,
+            return _build_vllm_speculative_config({
+                "head_kind": "draft_model",
+                "head_id": self.draft_model,
                 "num_speculative_tokens": self.num_speculative_tokens,
-            }
+                "supported": True,
+            })
 
         if self.mode is SpecMode.MEDUSA:
             if not self.head_artifact:
                 raise ValueError("MEDUSA spec mode requires head_artifact")
-            return {
-                "speculative_model": f"medusa:{self.head_artifact}",
+            return _build_vllm_speculative_config({
+                "head_kind": "medusa",
+                "head_id": self.head_artifact,
                 "num_speculative_tokens": self.num_speculative_tokens,
-            }
+                "supported": True,
+            })
 
         if self.mode in (SpecMode.EAGLE, SpecMode.EAGLE2):
             if not self.head_artifact:
                 raise ValueError(f"{self.mode.value} spec mode requires head_artifact")
             tag = "eagle2" if self.mode is SpecMode.EAGLE2 else "eagle"
-            args: dict[str, Any] = {
-                "speculative_model": f"{tag}:{self.head_artifact}",
+            return _build_vllm_speculative_config({
+                "head_kind": tag,
+                "head_id": self.head_artifact,
                 "num_speculative_tokens": self.num_speculative_tokens,
-            }
-            if self.mode is SpecMode.EAGLE2 and self.dynamic_tree:
-                args["speculative_disable_by_batch_size"] = 32
-            return args
+                "supported": True,
+            })
 
         if self.mode is SpecMode.LOOKAHEAD:
             return {
@@ -208,3 +224,49 @@ __all__ = [
     "DEFAULT_EAGLE_HEADS",
     "DEFAULT_MEDUSA_HEADS",
 ]
+
+
+def _self_test() -> int:
+    legacy_key = "speculative_model"
+
+    draft = SpecConfig(mode=SpecMode.DRAFT, draft_model="Qwen/Qwen2.5-1.5B-Instruct", num_speculative_tokens=4)
+    draft_cfg = draft.for_vllm()
+    assert draft_cfg == {"model": "Qwen/Qwen2.5-1.5B-Instruct", "num_speculative_tokens": 4}, draft_cfg
+    assert legacy_key not in draft_cfg
+
+    medusa = SpecConfig(mode=SpecMode.MEDUSA, head_artifact="registry://kolm/medusa-qwen2.5-7b-v1")
+    medusa_cfg = medusa.for_vllm()
+    assert medusa_cfg == {
+        "method": "medusa",
+        "model": "registry://kolm/medusa-qwen2.5-7b-v1",
+        "num_speculative_tokens": 5,
+    }, medusa_cfg
+    assert legacy_key not in medusa_cfg and not str(medusa_cfg["model"]).startswith("medusa:")
+
+    eagle2 = SpecConfig(
+        mode=SpecMode.EAGLE2,
+        head_artifact="registry://kolm/eagle2-qwen2.5-7b-v1",
+        dynamic_tree=True,
+    )
+    eagle2_cfg = eagle2.for_vllm()
+    assert eagle2_cfg == {
+        "method": "eagle2",
+        "model": "registry://kolm/eagle2-qwen2.5-7b-v1",
+        "num_speculative_tokens": 5,
+    }, eagle2_cfg
+    assert legacy_key not in eagle2_cfg
+    assert "speculative_disable_by_batch_size" not in eagle2_cfg
+
+    lookahead_cfg = SpecConfig(mode=SpecMode.LOOKAHEAD, lookahead_ngram_size=4).for_vllm()
+    assert lookahead_cfg["prompt_lookup_max"] == 4, lookahead_cfg
+    assert legacy_key not in lookahead_cfg
+
+    print(json.dumps({"ok": True, "spec": "kolm-medusa-vllm-config-self-test", "checks": 4}, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+    if "--self-test" in sys.argv:
+        raise SystemExit(_self_test())
+    print("usage: python -m apps.runtime.medusa --self-test")

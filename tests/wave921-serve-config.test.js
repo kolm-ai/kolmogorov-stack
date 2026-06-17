@@ -49,6 +49,7 @@ import {
 import { buildItkvProfile, hashItkvProfile } from '../src/itkv-profile.js';
 
 const SERVE_PY = fileURLToPath(new URL('../apps/runtime/serve.py', import.meta.url));
+const MEDUSA_PY = fileURLToPath(new URL('../apps/runtime/medusa.py', import.meta.url));
 
 function pythonBin() {
   const candidates = [process.env.PYTHON, 'python', 'python3'].filter(Boolean);
@@ -485,6 +486,18 @@ test('serve.py self-test parses vLLM speculative Prometheus counters', { skip: P
   });
   assert.equal(r.status, 0, `serve.py --self-test failed\nstdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
   assert.match(r.stdout, /apps\.runtime\.serve self-test: OK/);
+});
+
+test('medusa.py self-test emits modern vLLM speculative_config', { skip: PY ? false : 'python not available' }, () => {
+  const r = spawnSync(PY, [MEDUSA_PY, '--self-test'], {
+    cwd: fileURLToPath(new URL('..', import.meta.url)),
+    encoding: 'utf8',
+    timeout: 60_000,
+  });
+  assert.equal(r.status, 0, `medusa.py --self-test failed\nstdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+  const payload = JSON.parse(r.stdout.trim());
+  assert.equal(payload.ok, true);
+  assert.equal(payload.spec, 'kolm-medusa-vllm-config-self-test');
 });
 
 test('buildVllmSpeculativeConfig: draft_model standard config', () => {
