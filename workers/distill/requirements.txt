@@ -34,3 +34,6 @@ jsonschema>=4.0
 
 # Sample-packing with boundary-safe attention (optional; FlashAttention-2):
 # flash-attn>=2.5     # uncomment on a CUDA box; packing refuses on plain-eager attn
+
+# Liger Kernel HF monkey patches (optional; required only when KOLM_USE_LIGER=strict):
+# liger-kernel>=0.8   # uncomment on CUDA/ROCm trainer hosts to enable fused kernels

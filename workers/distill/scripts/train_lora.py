@@ -81,6 +81,113 @@ def _is_unsloth_supported(student_base):
     return any(family in base for family in UNSLOTH_FAMILIES)
 
 
+LIGER_KERNEL_APIS = (
+    ("qwen3.5_moe", "apply_liger_kernel_to_qwen3_5_moe", ("qwen3.5-moe", "qwen3_5_moe", "qwen3.5moe")),
+    ("qwen3.5", "apply_liger_kernel_to_qwen3_5", ("qwen3.5", "qwen3_5")),
+    ("qwen3_moe", "apply_liger_kernel_to_qwen3_moe", ("qwen3-moe", "qwen3_moe", "qwen3moe")),
+    ("qwen3", "apply_liger_kernel_to_qwen3", ("qwen3",)),
+    ("qwen2.5_vl", "apply_liger_kernel_to_qwen2_5_vl", ("qwen2.5-vl", "qwen2_5_vl")),
+    ("qwen2_vl", "apply_liger_kernel_to_qwen2_vl", ("qwen2-vl", "qwen2_vl", "qvq")),
+    ("qwen2", "apply_liger_kernel_to_qwen2", ("qwen2", "qwq")),
+    ("llama4", "apply_liger_kernel_to_llama4", ("llama-4", "llama4")),
+    ("llama", "apply_liger_kernel_to_llama", ("llama", "codellama")),
+    ("ministral", "apply_liger_kernel_to_ministral", ("ministral",)),
+    ("mistral", "apply_liger_kernel_to_mistral", ("mistral",)),
+    ("mixtral", "apply_liger_kernel_to_mixtral", ("mixtral",)),
+    ("gemma4", "apply_liger_kernel_to_gemma4_text", ("gemma-4", "gemma4")),
+    ("gemma3", "apply_liger_kernel_to_gemma3_text", ("gemma-3", "gemma3")),
+    ("gemma2", "apply_liger_kernel_to_gemma2", ("gemma-2", "gemma2")),
+    ("gemma", "apply_liger_kernel_to_gemma", ("gemma",)),
+    ("phi3", "apply_liger_kernel_to_phi3", ("phi-3", "phi3", "phi-3.5", "phi3.5")),
+    ("granite", "apply_liger_kernel_to_granite", ("granite",)),
+    ("olmo3", "apply_liger_kernel_to_olmo3", ("olmo-3", "olmo3")),
+    ("olmo2", "apply_liger_kernel_to_olmo2", ("olmo-2", "olmo2")),
+    ("glm4", "apply_liger_kernel_to_glm4", ("glm-4", "glm4")),
+    ("deepseek_v4", "apply_liger_kernel_to_deepseek_v4", ("deepseek-v4", "deepseek_v4")),
+    ("gpt_oss", "apply_liger_kernel_to_gpt_oss", ("gpt-oss", "gpt_oss")),
+    ("hunyuan_v1_moe", "apply_liger_kernel_to_hunyuan_v1_moe", ("hunyuan-v1-moe", "hunyuan_v1_moe")),
+    ("hunyuan_v1_dense", "apply_liger_kernel_to_hunyuan_v1_dense", ("hunyuan-v1", "hunyuan_v1")),
+)
+
+
+def _liger_mode():
+    raw = str(os.environ.get("KOLM_USE_LIGER", "") or "").strip().lower()
+    requested = raw in ("1", "true", "yes", "on", "required", "require", "strict")
+    required = raw in ("required", "require", "strict")
+    return raw, requested, required
+
+
+def _liger_api_for_model(student_base):
+    slug = str(student_base or "").strip().lower().replace("/", "-")
+    for family, api_name, needles in LIGER_KERNEL_APIS:
+        if any(needle in slug for needle in needles):
+            return family, api_name
+    return None, None
+
+
+def _fail_liger_required(plan):
+    sys.stderr.write("[train_lora] KOLM_USE_LIGER strict/required failed: "
+                     + str(plan.get("skipped_reason") or plan.get("error") or "unknown") + "\n")
+    if plan.get("install_hint"):
+        sys.stderr.write(f"             install hint: {plan['install_hint']}\n")
+    sys.exit(14)
+
+
+def _maybe_apply_liger(student_base, apply_patch=False):
+    mode, requested, required = _liger_mode()
+    family, api_name = _liger_api_for_model(student_base)
+    plan = {
+        "requested": requested,
+        "required": required,
+        "mode": mode or "off",
+        "model_family": family,
+        "api": api_name,
+        "available": False,
+        "would_apply": False,
+        "applied": False,
+        "skipped_reason": "disabled" if not requested else None,
+        "install_hint": "pip install liger-kernel",
+    }
+    if not requested:
+        return plan
+    if not api_name:
+        plan["skipped_reason"] = "unsupported_model_family"
+        if required:
+            _fail_liger_required(plan)
+        return plan
+    try:
+        liger_transformers = importlib.import_module("liger_kernel.transformers")
+    except ImportError:
+        plan["skipped_reason"] = "liger_kernel_not_installed"
+        if required:
+            _fail_liger_required(plan)
+        sys.stderr.write("[train_lora] KOLM_USE_LIGER set but liger-kernel not installed; skipping\n")
+        return plan
+    patch_fn = getattr(liger_transformers, api_name, None)
+    if not callable(patch_fn):
+        plan["skipped_reason"] = "liger_api_unavailable"
+        if required:
+            _fail_liger_required(plan)
+        sys.stderr.write(f"[train_lora] liger-kernel installed but {api_name} is unavailable; skipping\n")
+        return plan
+    plan["available"] = True
+    plan["would_apply"] = True
+    plan["skipped_reason"] = None
+    if apply_patch:
+        try:
+            patch_fn()
+            plan["applied"] = True
+            print(f"[train_lora] Liger Kernel applied via {api_name} for {student_base}")
+        except Exception as e:
+            plan["error"] = str(e)
+            plan["skipped_reason"] = "liger_patch_failed"
+            plan["would_apply"] = False
+            if required:
+                _fail_liger_required(plan)
+            sys.stderr.write(f"[train_lora] Liger Kernel patch failed ({e}); continuing without it\n")
+    return plan
+
+
 def _select_backend(requested, student_base):
     backend = str(requested or "auto").strip().lower()
     if backend == "hf":
@@ -337,6 +444,7 @@ def main():
     variants_active = (lora_variant != "lora" or lora_init != "default" or neftune_alpha
                        or trainer_optim != "adamw_torch" or packing_enabled)
     backend_plan = _backend_plan_for_args(args, lora_variant, lora_init, trainer_optim, packing_enabled)
+    liger_plan = _maybe_apply_liger(args.student_base, apply_patch=False)
 
     # ── W921 preflight: probe variant deps; FAIL LOUD on missing support. ──
     if variants_active and _lv is not None:
@@ -359,6 +467,7 @@ def main():
             "galore_args": galore_args if trainer_optim.startswith("galore") else None,
             "student_base": args.student_base,
             "student_base_requested": requested_student_base,
+            "liger": liger_plan,
         }
         print(json.dumps({
             "preflight": "ok",
@@ -369,6 +478,8 @@ def main():
                 "unsloth_supported": backend_plan["unsloth_supported"],
                 "unsloth_families": backend_plan["unsloth_families"],
                 "unsloth_skip_reason": None if backend_plan["selected"] == "unsloth" else backend_plan["reason"],
+                "liger_available": liger_plan["available"],
+                "liger_api": liger_plan["api"],
             },
             "ok": True,
         }))
@@ -471,6 +582,7 @@ def main():
         ds, eval_ds = ds_split["train"], ds_split["test"]
         print(f"[train_lora] train={len(ds)} val={len(eval_ds)} (val_fraction={args.val_fraction})")
 
+    liger_plan = _maybe_apply_liger(args.student_base, apply_patch=True)
     base = AutoModelForCausalLM.from_pretrained(
         args.student_base,
         torch_dtype=torch.float16,
@@ -708,6 +820,8 @@ def main():
                 "early_stop_enabled": early_stop_enabled,
                 "early_stop_patience": int(os.environ.get("KOLM_EARLY_STOP_PATIENCE", "3")) if early_stop_enabled else None,
                 "early_stop_delta": float(os.environ.get("KOLM_EARLY_STOP_DELTA", "0.005")) if early_stop_enabled else None,
+                "liger_kernel": bool(liger_plan.get("applied")),
+                "liger": liger_plan,
             },
             # W921 — LoRA-variant / optimizer / packing provenance so the .kolm
             # receipt chain documents the REAL training objective. Defaults

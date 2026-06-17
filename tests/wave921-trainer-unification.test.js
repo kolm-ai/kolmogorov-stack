@@ -70,6 +70,7 @@ sys.path.insert(0, here)
 spec = importlib.util.spec_from_file_location("train_lora_probe", os.path.join(here, "train_lora.py"))
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
+os.environ["KOLM_USE_LIGER"] = "0"
 out = {
   "families": list(mod.UNSLOTH_FAMILIES),
   "qwen_supported": mod._is_unsloth_supported("Qwen/Qwen2.5-7B-Instruct"),
@@ -79,6 +80,14 @@ out = {
   "hf": list(mod._select_backend("hf", "Qwen/Qwen2.5-7B-Instruct")),
   "auto_unsupported": list(mod._select_backend("auto", "microsoft/DialoGPT-medium")),
   "auto_supported": list(mod._select_backend("auto", "Qwen/Qwen2.5-7B-Instruct")),
+  "liger_qwen": list(mod._liger_api_for_model("Qwen/Qwen2.5-7B-Instruct")),
+  "liger_qwen3": list(mod._liger_api_for_model("Qwen/Qwen3-8B-Instruct")),
+  "liger_llama": list(mod._liger_api_for_model("meta-llama/Llama-3.2-3B-Instruct")),
+  "liger_mistral": list(mod._liger_api_for_model("mistralai/Mistral-7B-Instruct-v0.3")),
+  "liger_gemma": list(mod._liger_api_for_model("google/gemma-3-4b-it")),
+  "liger_phi": list(mod._liger_api_for_model("microsoft/Phi-3-mini-4k-instruct")),
+  "liger_unsupported": list(mod._liger_api_for_model("microsoft/DialoGPT-medium")),
+  "liger_disabled": mod._maybe_apply_liger("Qwen/Qwen2.5-7B-Instruct", apply_patch=False),
 }
 print(json.dumps(out))
 `;
@@ -91,6 +100,15 @@ print(json.dumps(out))
   assert.equal(got.unsupported, false);
   assert.deepEqual(got.hf, ['hf', 'requested_hf']);
   assert.deepEqual(got.auto_unsupported, ['hf', 'auto_family_unsupported']);
+  assert.deepEqual(got.liger_qwen, ['qwen2', 'apply_liger_kernel_to_qwen2']);
+  assert.deepEqual(got.liger_qwen3, ['qwen3', 'apply_liger_kernel_to_qwen3']);
+  assert.deepEqual(got.liger_llama, ['llama', 'apply_liger_kernel_to_llama']);
+  assert.deepEqual(got.liger_mistral, ['mistral', 'apply_liger_kernel_to_mistral']);
+  assert.deepEqual(got.liger_gemma, ['gemma3', 'apply_liger_kernel_to_gemma3_text']);
+  assert.deepEqual(got.liger_phi, ['phi3', 'apply_liger_kernel_to_phi3']);
+  assert.deepEqual(got.liger_unsupported, [null, null]);
+  assert.equal(got.liger_disabled.requested, false);
+  assert.equal(got.liger_disabled.skipped_reason, 'disabled');
   if (got.unsloth_importable) {
     assert.deepEqual(got.auto_supported, ['unsloth', 'auto_family_match']);
   } else {
@@ -115,22 +133,51 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   fs.writeFileSync(pairs, '{"input":"hi","teacher_output":"hello"}\n');
   const out = path.join(os.tmpdir(), 'kolm-tu-out-' + Date.now());
   const script = path.join(repoRoot, 'workers/distill/scripts/train_lora.py');
-  const def = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], { stdio: 'pipe', timeout: 60000 });
+  const noLigerEnv = { ...process.env, KOLM_USE_LIGER: '0' };
+  const def = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], { stdio: 'pipe', timeout: 60000, env: noLigerEnv });
   assert.equal(def.status, 0, (def.stderr || '').toString());
   const defJson = JSON.parse((def.stdout || '').toString());
   assert.equal(defJson.ok, true);
   assert.ok(['hf', 'unsloth'].includes(defJson.backend.selected));
   assert.equal(typeof defJson.checks.unsloth_importable, 'boolean');
-  const forcedHf = spawnSync(PY, [script, '--backend', 'hf', '--preflight-only'], { stdio: 'pipe', timeout: 60000 });
+  assert.equal(defJson.config.liger.requested, false);
+  assert.equal(defJson.config.liger.skipped_reason, 'disabled');
+  const forcedHf = spawnSync(PY, [script, '--backend', 'hf', '--preflight-only'], { stdio: 'pipe', timeout: 60000, env: noLigerEnv });
   assert.equal(forcedHf.status, 0, (forcedHf.stderr || '').toString());
   assert.equal(JSON.parse((forcedHf.stdout || '').toString()).backend.selected, 'hf');
   const dora = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], {
-    stdio: 'pipe', timeout: 60000, env: { ...process.env, KOLM_LORA_VARIANT: 'dora', KOLM_NEFTUNE_ALPHA: '5' },
+    stdio: 'pipe', timeout: 60000, env: { ...process.env, KOLM_USE_LIGER: '0', KOLM_LORA_VARIANT: 'dora', KOLM_NEFTUNE_ALPHA: '5' },
   });
   assert.equal(dora.status, 0);
   const doraJson = JSON.parse((dora.stdout || '').toString());
   assert.equal(doraJson.config.lora_variant, 'dora');
   assert.equal(doraJson.backend.selected, 'hf');
+  const liger = spawnSync(PY, [script, '--student-base', 'Qwen/Qwen2.5-0.5B-Instruct', '--preflight-only'], {
+    stdio: 'pipe', timeout: 60000, env: {
+      ...process.env,
+      KOLM_USE_LIGER: '1',
+      KOLM_LORA_VARIANT: 'lora',
+      KOLM_LORA_INIT: 'default',
+      KOLM_OPTIM: 'adamw_torch',
+      KOLM_PACKING: '0',
+      KOLM_NEFTUNE_ALPHA: '',
+    },
+  });
+  assert.equal(liger.status, 0, (liger.stderr || '').toString());
+  const ligerJson = JSON.parse((liger.stdout || '').toString());
+  assert.equal(ligerJson.config.liger.requested, true);
+  assert.equal(ligerJson.config.liger.model_family, 'qwen2');
+  assert.equal(ligerJson.config.liger.api, 'apply_liger_kernel_to_qwen2');
+  if (ligerJson.config.liger.available) {
+    assert.equal(ligerJson.config.liger.would_apply, true);
+  } else {
+    assert.equal(ligerJson.config.liger.skipped_reason, 'liger_kernel_not_installed');
+  }
+  const strictUnsupported = spawnSync(PY, [script, '--student-base', 'microsoft/DialoGPT-medium', '--preflight-only'], {
+    stdio: 'pipe', timeout: 60000, env: { ...process.env, KOLM_USE_LIGER: 'strict' },
+  });
+  assert.equal(strictUnsupported.status, 14);
+  assert.match((strictUnsupported.stderr || '').toString(), /unsupported_model_family/);
 });
 
 test('W616 trainer backend wiring spans recipe, CLI, worker, and mirror', () => {
@@ -138,6 +185,10 @@ test('W616 trainer backend wiring spans recipe, CLI, worker, and mirror', () => 
   assert.match(train, /UNSLOTH_FAMILIES/);
   assert.match(train, /def _exec_unsloth_backend/);
   assert.match(train, /_exec_unsloth_backend\(args, backend_plan\["reason"\]/);
+  assert.match(train, /LIGER_KERNEL_APIS/);
+  assert.match(train, /def _maybe_apply_liger/);
+  assert.match(train, /_maybe_apply_liger\(args\.student_base, apply_patch=True\)/);
+  assert.match(train, /"liger_kernel": bool\(liger_plan\.get\("applied"\)\)/);
   const worker = fs.readFileSync(path.join(repoRoot, 'workers/distill/distill.mjs'), 'utf8');
   assert.match(worker, /spec\.train\.backend/);
   assert.match(worker, /pyArgs\.push\('--backend'/);
