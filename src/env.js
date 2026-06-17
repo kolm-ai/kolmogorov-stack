@@ -343,6 +343,9 @@ export const KNOWN_ENV_DOCS = Object.freeze({
   KOLM_SGLANG_API_KEY: 'optional bearer for the SGLang endpoint',
   KOLM_TGI_API_KEY: 'optional bearer for the TGI endpoint',
   KOLM_SPEC_DECODE_TIMEOUT_MS: 'optional timeout (ms) for the vllm/sglang/tgi spec-decode bridge',
+  KOLM_SPEC_EAGLE_TOPK: 'resolved EAGLE tree top-k sidecar for serve runtime visibility; SGLang enforces directly, vLLM reports only until upstream exposes supported keys',
+  KOLM_SPEC_NUM_STEPS: 'resolved EAGLE tree step count sidecar for serve runtime visibility; SGLang enforces directly, vLLM reports only until upstream exposes supported keys',
+  KOLM_SPEC_NUM_DRAFT_TOKENS: 'resolved EAGLE draft-token budget sidecar for serve runtime visibility; SGLang enforces directly, vLLM reports only until upstream exposes supported keys',
   // --- quantization / compile ---
   KOLM_QUANT_OPTIMIZERS: 'opt-in flag for installing workers/quantize/requirements-optimizers.txt (aqlm/quip/qat pinned optimizers)',
   KOLM_COMPILE_STREAM_DEMO: "set 1 to re-export the demo-only fabricated-metric compile stream for UI prototyping; UNSET in all production/CI",

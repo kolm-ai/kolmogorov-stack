@@ -14,6 +14,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
   SERVE_CONFIG_VERSION,
   parseComputeCapability,
@@ -30,6 +31,7 @@ import {
   EAGLE_HEAD_REGISTRY,
   resolveEagleHead,
   buildVllmSpeculativeConfig,
+  buildSpeculativeTreePolicy,
   buildSglangSpecArgs,
   buildLlamaCppDraftArgs,
   speculativeHeadPassportEntry,
@@ -380,6 +382,7 @@ test('resolveEagleHead: manifest head wins over registry', () => {
   assert.equal(r.head_kind, 'eagle3');
   assert.equal(r.eagle_topk, 8);
   assert.equal(r.num_steps, 5);
+  assert.equal(r.num_draft_tokens, 32);
   assert.equal(r.supported, true);
 });
 
@@ -425,9 +428,35 @@ test('buildVllmSpeculativeConfig: eagle3 modern dict, NO flat kwargs', () => {
   assert.equal(cfg.model, EAGLE_HEAD_REGISTRY['meta-llama/llama-3.1-8b-instruct']);
   assert.equal(cfg.num_speculative_tokens, 5);
   assert.equal(cfg.draft_tensor_parallel_size, 2);
+  assert.equal('eagle_topk' in cfg, false);
+  assert.equal('num_steps' in cfg, false);
+  assert.equal('num_draft_tokens' in cfg, false);
   // No deprecated flat kwargs:
   assert.equal('speculative_model' in cfg, false);
   assert.equal('draft_model_type' in cfg, false);
+});
+
+test('buildSpeculativeTreePolicy: preserves EAGLE tree knobs outside vLLM config', () => {
+  const r = resolveEagleHead({ target: 'meta-llama/llama-3.1-8b-instruct', runtime: 'vllm', flag: 'auto' });
+  const tree = buildSpeculativeTreePolicy(r, { runtime: 'vllm' });
+  assert.deepEqual(tree, {
+    eagle_topk: 8,
+    num_steps: 5,
+    num_draft_tokens: 32,
+    runtime: 'vllm',
+    engine_configurable: false,
+    note: 'preserved by Kolm; current vLLM SpeculativeConfig does not expose EAGLE tree knobs',
+  });
+  const sglang = buildSpeculativeTreePolicy(r, { runtime: 'sglang' });
+  assert.equal(sglang.engine_configurable, true);
+});
+
+test('serve.py resolves the matching EAGLE tree env sidecar', () => {
+  const py = fs.readFileSync(new URL('../apps/runtime/serve.py', import.meta.url), 'utf8');
+  assert.match(py, /KOLM_SPEC_EAGLE_TOPK/);
+  assert.match(py, /KOLM_SPEC_NUM_STEPS/);
+  assert.match(py, /KOLM_SPEC_NUM_DRAFT_TOKENS/);
+  assert.match(py, /speculative_tree_policy/);
 });
 
 test('buildVllmSpeculativeConfig: draft_model standard config', () => {
@@ -603,9 +632,15 @@ test('buildServeConfig: end-to-end AWQ Llama-3.1-8B on Ada, agent workload', () 
   assert.ok(cfg.vllm.args.includes('awq_marlin'));
   assert.ok(cfg.vllm.args.includes('--enable-prefix-caching'));
   assert.equal(cfg.vllm.speculative_config.method, 'eagle3');
+  assert.equal(cfg.vllm.speculative_config.eagle_topk, undefined);
+  assert.equal(cfg.vllm.speculative_tree_policy.eagle_topk, 8);
+  assert.equal(cfg.vllm.speculative_tree_policy.engine_configurable, false);
   // env contract is populated
   assert.equal(cfg.env.KOLM_SERVE_QUANTIZATION, 'awq_marlin');
   assert.ok(cfg.env.KOLM_KV_POLICY.length > 0);
+  assert.equal(cfg.env.KOLM_SPEC_EAGLE_TOPK, '8');
+  assert.equal(cfg.env.KOLM_SPEC_NUM_STEPS, '5');
+  assert.equal(cfg.env.KOLM_SPEC_NUM_DRAFT_TOKENS, '32');
   // dry-run report renders without throwing
   const report = formatServeConfigReport(cfg);
   assert.match(report, /awq_marlin/);

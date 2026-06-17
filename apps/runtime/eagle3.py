@@ -68,6 +68,7 @@ class Eagle3Config:
     num_steps                 dynamic draft-tree depth (EAGLE-2/3)
     draft_model_id            DEPRECATED alias for head_id (kept for callers
                               that constructed the old shape positionally)
+    num_draft_tokens          dynamic tree token budget recorded in receipts
     """
 
     target_model_id: str
@@ -79,6 +80,7 @@ class Eagle3Config:
     # Back-compat alias. Older call sites passed draft_model_id; if head_id is
     # empty we fall back to it so existing constructors keep working.
     draft_model_id: str = ""
+    num_draft_tokens: int = 32
 
     @property
     def resolved_head_id(self) -> str:
@@ -123,7 +125,10 @@ def build_vllm_speculative_config(resolved: dict, tp: int = 1):
     """
     Pure helper: turn a resolved-head dict (the JS resolveEagleHead() shape, or
     an Eagle3Config-equivalent) into the modern vLLM speculative_config dict, or
-    None when speculation is off/unsupported.
+    None when speculation is off/unsupported. EAGLE tree policy is preserved
+    separately by build_speculative_tree_policy() because current vLLM
+    SpeculativeConfig does not expose eagle_topk, num_steps, or
+    num_draft_tokens as engine knobs.
 
     Mirror of src/serve-config.js buildVllmSpeculativeConfig — keep in sync.
     """
@@ -145,6 +150,30 @@ def build_vllm_speculative_config(resolved: dict, tp: int = 1):
     if isinstance(tp, int) and tp > 1:
         cfg["draft_tensor_parallel_size"] = int(tp)
     return cfg
+
+
+def build_speculative_tree_policy(resolved: dict, runtime: str = "vllm"):
+    """Preserve EAGLE tree knobs as runtime metadata without mutating vLLM cfg."""
+    if not resolved or not isinstance(resolved, dict):
+        return None
+    head_kind = (resolved.get("head_kind") or "").lower()
+    if head_kind not in ("eagle", "eagle2", "eagle3"):
+        return None
+    tree = {}
+    for key in ("eagle_topk", "num_steps", "num_draft_tokens"):
+        if resolved.get(key) is not None:
+            tree[key] = int(resolved[key])
+    if not tree:
+        return None
+    rt = (runtime or "vllm").lower()
+    tree["runtime"] = rt
+    tree["engine_configurable"] = rt == "sglang"
+    tree["note"] = (
+        "preserved by Kolm; current vLLM SpeculativeConfig does not expose EAGLE tree knobs"
+        if rt == "vllm"
+        else "passed to runtime when supported"
+    )
+    return tree
 
 
 def build_sglang_spec_args(resolved: dict) -> list:
@@ -205,6 +234,7 @@ def receipt_block(config: Eagle3Config) -> dict[str, Any]:
         "num_speculative_tokens": int(config.num_speculative_tokens),
         "eagle_topk": int(config.eagle_topk),
         "num_steps": int(config.num_steps),
+        "num_draft_tokens": int(config.num_draft_tokens),
         "papers": [
             "arXiv:2503.01840",  # EAGLE-3
             "arXiv:2406.16858",  # EAGLE-2
@@ -218,6 +248,7 @@ __all__ = [
     "Eagle3Config",
     "attach_eagle3",
     "build_vllm_speculative_config",
+    "build_speculative_tree_policy",
     "build_sglang_spec_args",
     "build_llamacpp_draft_args",
     "hf_eagle3_generate_kwargs",
@@ -247,6 +278,16 @@ def _self_test() -> int:
         "draft_tensor_parallel_size": 2,
     }, cfg
     assert "speculative_model" not in cfg and "draft_model_type" not in cfg
+    assert "eagle_topk" not in cfg and "num_steps" not in cfg and "num_draft_tokens" not in cfg
+    sidecar = build_speculative_tree_policy(resolved_eagle, runtime="vllm")
+    assert sidecar == {
+        "eagle_topk": 8,
+        "num_steps": 5,
+        "num_draft_tokens": 32,
+        "runtime": "vllm",
+        "engine_configurable": False,
+        "note": "preserved by Kolm; current vLLM SpeculativeConfig does not expose EAGLE tree knobs",
+    }, sidecar
 
     sg = build_sglang_spec_args(resolved_eagle)
     assert "EAGLE3" in sg and "--speculative-draft-model-path" in sg, sg

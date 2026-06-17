@@ -882,6 +882,9 @@ export function buildVllmSpeculativeConfig(resolved, { tp = 1 } = {}) {
   }
   const k = Math.max(1, Math.floor(resolved.num_speculative_tokens));
   if (resolved.head_kind === 'eagle' || resolved.head_kind === 'eagle2' || resolved.head_kind === 'eagle3') {
+    // Current vLLM SpeculativeConfig accepts method/model/K/TP, but does not
+    // expose SGLang-style EAGLE tree controls. Keep tree policy in the Kolm
+    // env/report contract instead of passing unknown keys to vLLM.
     const cfg = {
       method: resolved.head_kind,
       model: resolved.head_id,
@@ -897,6 +900,31 @@ export function buildVllmSpeculativeConfig(resolved, { tp = 1 } = {}) {
   const cfg = { model: resolved.head_id, num_speculative_tokens: k };
   if (_isFiniteNumber(tp) && tp > 1) cfg.draft_tensor_parallel_size = Math.floor(tp);
   return cfg;
+}
+
+/**
+ * Build the preserved EAGLE tree-policy sidecar. SGLang can enforce these
+ * knobs directly; vLLM currently cannot, so the vLLM path records them for
+ * audit/runtime visibility without adding unsupported speculative_config keys.
+ */
+export function buildSpeculativeTreePolicy(resolved, { runtime = 'vllm' } = {}) {
+  if (!resolved || !['eagle', 'eagle2', 'eagle3'].includes(resolved.head_kind)) {
+    return null;
+  }
+  const rt = _lower(runtime) || 'vllm';
+  const tree = {};
+  if (_isFiniteNumber(resolved.eagle_topk)) tree.eagle_topk = Math.floor(resolved.eagle_topk);
+  if (_isFiniteNumber(resolved.num_steps)) tree.num_steps = Math.floor(resolved.num_steps);
+  if (_isFiniteNumber(resolved.num_draft_tokens)) tree.num_draft_tokens = Math.floor(resolved.num_draft_tokens);
+  if (Object.keys(tree).length === 0) return null;
+  return Object.freeze({
+    ...tree,
+    runtime: rt,
+    engine_configurable: rt === 'sglang',
+    note: rt === 'vllm'
+      ? 'preserved by Kolm; current vLLM SpeculativeConfig does not expose EAGLE tree knobs'
+      : 'passed to runtime when supported',
+  });
 }
 
 /**
@@ -1290,6 +1318,7 @@ export function buildServeConfig({
     ? resolveEagleHead({ target, manifest: mf, runtime: rt, flag: requested.speculative, numSpeculativeTokens: requested.num_speculative_tokens, draftPicker })
     : null;
   const vllm_spec = speculative ? buildVllmSpeculativeConfig(speculative, { tp }) : null;
+  const speculative_tree_policy = speculative ? buildSpeculativeTreePolicy(speculative, { runtime: rt }) : null;
   const sglang_spec = speculative ? buildSglangSpecArgs(speculative) : [];
   const llamacpp_spec = speculative ? buildLlamaCppDraftArgs(speculative) : [];
 
@@ -1308,6 +1337,7 @@ export function buildServeConfig({
     quantization: kernel.vllm_quantization,
     kv_cache_dtype: kernel.kv_cache_dtype,
     speculative_config: vllm_spec,
+    speculative_tree_policy: rt === 'vllm' ? speculative_tree_policy : null,
     config: features.vllm_config,
     args: [
       ...(kernel.vllm_quantization ? ['--quantization', kernel.vllm_quantization] : []),
@@ -1330,6 +1360,9 @@ export function buildServeConfig({
           KOLM_SPEC_HEAD_KIND: speculative.head_kind,
           KOLM_SERVE_SPECULATIVE_DRAFT: speculative.head_id,
           KOLM_NUM_SPECULATIVE_TOKENS: String(speculative.num_speculative_tokens),
+          ...(_isFiniteNumber(speculative.eagle_topk) ? { KOLM_SPEC_EAGLE_TOPK: String(Math.floor(speculative.eagle_topk)) } : {}),
+          ...(_isFiniteNumber(speculative.num_steps) ? { KOLM_SPEC_NUM_STEPS: String(Math.floor(speculative.num_steps)) } : {}),
+          ...(_isFiniteNumber(speculative.num_draft_tokens) ? { KOLM_SPEC_NUM_DRAFT_TOKENS: String(Math.floor(speculative.num_draft_tokens)) } : {}),
         }
       : {}),
   };
@@ -1339,7 +1372,7 @@ export function buildServeConfig({
     target_model: target,
     runtime: rt,
     compute_capability: cc,
-    kernel, kv, speculative, features, lora,
+    kernel, kv, speculative, speculative_tree_policy, features, lora,
     vllm, sglang, llamacpp, env,
     reason: [kernel.gate.reason, kv.reason, features.reason, lora.reason].filter(Boolean).join(' | '),
   };
@@ -1358,6 +1391,7 @@ export function formatServeConfigReport(cfg) {
     `    est speedup   : ${cfg.kernel.est_speedup_x != null ? cfg.kernel.est_speedup_x + 'x' : 'n/a'}`,
     `  kv policy       : ${cfg.kv.policy} (${cfg.kv.kind}, enforce=${cfg.kv.runtime_can_enforce})`,
     `  speculative     : ${cfg.speculative && cfg.speculative.head_id ? `${cfg.speculative.head_kind} ${cfg.speculative.head_id} K=${cfg.speculative.num_speculative_tokens}` : 'off'}`,
+    `  spec tree       : ${cfg.speculative_tree_policy ? `topk=${cfg.speculative_tree_policy.eagle_topk ?? 'n/a'} steps=${cfg.speculative_tree_policy.num_steps ?? 'n/a'} draft_tokens=${cfg.speculative_tree_policy.num_draft_tokens ?? 'n/a'} enforced=${cfg.speculative_tree_policy.engine_configurable}` : 'off'}`,
     `  prefix_cache    : ${cfg.features.prefix_cache}`,
     `  chunked_prefill : ${cfg.features.chunked_prefill}`,
     `  max_num_batched : ${cfg.features.max_num_batched_tokens}`,
@@ -1389,6 +1423,7 @@ export default {
   EAGLE_HEAD_REGISTRY,
   resolveEagleHead,
   buildVllmSpeculativeConfig,
+  buildSpeculativeTreePolicy,
   buildSglangSpecArgs,
   buildLlamaCppDraftArgs,
   speculativeHeadPassportEntry,

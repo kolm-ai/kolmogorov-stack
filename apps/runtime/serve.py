@@ -139,6 +139,46 @@ def _resolve_max_num_batched_tokens(default: int = 4096) -> int:
         return default
 
 
+def _env_int_or_none(name: str) -> Optional[int]:
+    raw = (os.environ.get(name) or "").strip()
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except (ValueError, TypeError):
+        return None
+
+
+def _resolve_speculative_tree_policy(runtime: str = "vllm") -> Optional[Dict[str, Any]]:
+    """Read the preserved Kolm EAGLE tree policy from env.
+
+    vLLM does not currently expose these as SpeculativeConfig fields; keeping
+    them here makes the runtime contract auditable and lets SGLang enforce the
+    same resolved policy through its CLI flags.
+    """
+    tree: Dict[str, Any] = {}
+    mapping = {
+        "eagle_topk": "KOLM_SPEC_EAGLE_TOPK",
+        "num_steps": "KOLM_SPEC_NUM_STEPS",
+        "num_draft_tokens": "KOLM_SPEC_NUM_DRAFT_TOKENS",
+    }
+    for key, env_name in mapping.items():
+        value = _env_int_or_none(env_name)
+        if value is not None:
+            tree[key] = value
+    if not tree:
+        return None
+    rt = (runtime or "vllm").lower()
+    tree["runtime"] = rt
+    tree["engine_configurable"] = rt == "sglang"
+    tree["note"] = (
+        "preserved by Kolm; current vLLM SpeculativeConfig does not expose EAGLE tree knobs"
+        if rt == "vllm"
+        else "passed to runtime when supported"
+    )
+    return tree
+
+
 def _resolve_kv_policy() -> Dict[str, Any]:
     """Parse KOLM_KV_POLICY JSON env -> policy dict. Default {'policy':'default'}.
 
@@ -432,18 +472,27 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
     # {'method': head_kind, 'model': head, 'num_speculative_tokens': K}; a plain
     # separate draft model omits 'method'. NO deprecated flat speculative_model.
     spec_head_kind = (os.environ.get("KOLM_SPEC_HEAD_KIND") or "").strip().lower()
+    spec_tree_policy = _resolve_speculative_tree_policy("vllm")
     speculative_config = None
     if draft_model:
         try:
-            from apps.runtime.eagle3 import build_vllm_speculative_config
+            try:
+                from apps.runtime.eagle3 import build_vllm_speculative_config
+            except ModuleNotFoundError:
+                from eagle3 import build_vllm_speculative_config
             tp = int(os.environ.get("KOLM_TENSOR_PARALLEL_SIZE", "1"))
+            resolved_spec = {
+                "head_kind": spec_head_kind or "draft_model",
+                "head_id": draft_model,
+                "num_speculative_tokens": num_spec_tokens,
+                "supported": True,
+            }
+            if spec_tree_policy:
+                for key in ("eagle_topk", "num_steps", "num_draft_tokens"):
+                    if key in spec_tree_policy:
+                        resolved_spec[key] = spec_tree_policy[key]
             speculative_config = build_vllm_speculative_config(
-                {
-                    "head_kind": spec_head_kind or "draft_model",
-                    "head_id": draft_model,
-                    "num_speculative_tokens": num_spec_tokens,
-                    "supported": True,
-                },
+                resolved_spec,
                 tp=tp,
             )
         except Exception as exc:
@@ -480,6 +529,7 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
             self.num_spec_tokens = num_spec_tokens if draft_model else 0
             self.spec_head_kind = spec_head_kind if draft_model else None
             self.speculative_config = speculative_config
+            self.speculative_tree_policy = spec_tree_policy if draft_model else None
             self.lora_requests = lora_requests
             # Rolling counters for /info acceptance-rate reporting. vLLM's
             # internal metrics expose accepted tokens; we fall back to a
@@ -586,6 +636,7 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
                 "speculative": self.draft is not None,
                 "speculative_head_kind": self.spec_head_kind,
                 "speculative_config": self.speculative_config,
+                "speculative_tree_policy": self.speculative_tree_policy,
                 "num_speculative_tokens": self.num_spec_tokens,
                 "prefix_cache": prefix_cache_enabled,
                 "chunked_prefill": chunked_prefill,
@@ -1006,6 +1057,7 @@ def resolve_serve_config_env() -> Dict[str, Any]:
         "speculative_head_kind": (os.environ.get("KOLM_SPEC_HEAD_KIND") or "").strip() or None,
         "speculative_draft": (os.environ.get("KOLM_SERVE_SPECULATIVE_DRAFT") or "").strip() or None,
         "num_speculative_tokens": int(os.environ.get("KOLM_NUM_SPECULATIVE_TOKENS", "5")),
+        "speculative_tree_policy": _resolve_speculative_tree_policy("vllm"),
         "lora_modules": _resolve_lora_modules(),
     }
 
@@ -1017,18 +1069,34 @@ def _self_test() -> int:
     os.environ["KOLM_CHUNKED_PREFILL"] = "on"
     os.environ["KOLM_MAX_NUM_BATCHED_TOKENS"] = "8192"
     os.environ["KOLM_LORA_MODULES"] = "refund=/a,pii=/b"
+    os.environ["KOLM_SPEC_EAGLE_TOPK"] = "8"
+    os.environ["KOLM_SPEC_NUM_STEPS"] = "5"
+    os.environ["KOLM_SPEC_NUM_DRAFT_TOKENS"] = "32"
     cfg = resolve_serve_config_env()
     assert cfg["chunked_prefill"] is True, cfg
     assert cfg["max_num_batched_tokens"] == 8192, cfg
     assert cfg["kv_policy"]["policy"] == "snapkv", cfg
+    assert cfg["speculative_tree_policy"]["eagle_topk"] == 8, cfg
+    assert cfg["speculative_tree_policy"]["engine_configurable"] is False, cfg
     assert resolve_lora_modules() == [{"id": "refund", "path": "/a"}, {"id": "pii", "path": "/b"}]
     # KV policy builders return None without optional deps (soft) — never raise.
     press, qfn, active = _build_kv_cache_for_policy(None, {"policy": "off"})
     assert (press, qfn, active) == (None, None, "default")
     _build_kv_cache_for_policy(None, {"policy": "kivi2", "params": {"nbits": 2}})  # must not raise
     # modern speculative_config (no flat kwargs) via eagle3 helper.
-    from apps.runtime.eagle3 import build_vllm_speculative_config
-    sc = build_vllm_speculative_config({"head_kind": "eagle3", "head_id": "h", "num_speculative_tokens": 5, "supported": True})
+    try:
+        from apps.runtime.eagle3 import build_vllm_speculative_config
+    except ModuleNotFoundError:
+        from eagle3 import build_vllm_speculative_config
+    sc = build_vllm_speculative_config({
+        "head_kind": "eagle3",
+        "head_id": "h",
+        "num_speculative_tokens": 5,
+        "eagle_topk": 8,
+        "num_steps": 5,
+        "num_draft_tokens": 32,
+        "supported": True,
+    })
     assert sc == {"method": "eagle3", "model": "h", "num_speculative_tokens": 5}, sc
     print("apps.runtime.serve self-test: OK")
     return 0
