@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 681,
-    "components_without_direct_test_reference": 148,
+    "test_referenced_components": 682,
+    "components_without_direct_test_reference": 147,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -68,7 +68,7 @@
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 399,
       "distribution_or_worker_surface": 169,
-      "environment_configuration_boundary": 308,
+      "environment_configuration_boundary": 309,
       "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
       "large_component_contract_risk": 37,
@@ -46310,23 +46310,26 @@
       "surface": "worker",
       "domain": "capture_data_eval",
       "language": "python",
-      "sha256": "e657aa287111846af293def90fb14294e86dd07cffbc155c9e7ef72faa8205e0",
+      "sha256": "54098ebf0aef49037d9b313676fa31df52150608f1b84c6f28cce3ce7d421d48",
       "metrics": {
-        "bytes": 17393,
-        "lines": 446,
+        "bytes": 19732,
+        "lines": 507,
         "imports": 0,
-        "exports": 20,
+        "exports": 24,
         "routes": 2,
-        "env_refs": 0,
+        "env_refs": 1,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave663-dsir-resample-worker-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
+        "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
         "http_route_surface"
       ],
@@ -46355,7 +46358,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
       "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
       "suggested_verification": [
         "npm run verify:redaction-benchmark",

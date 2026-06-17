@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 91.6,
-    "frontier_product_score": 68.9,
+    "local_engineering_score": 91.7,
+    "frontier_product_score": 69,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 681,
-    "direct_test_reference_pct": 82.1,
-    "components_without_direct_test_reference": 148,
+    "direct_test_referenced_components": 682,
+    "direct_test_reference_pct": 82.3,
+    "components_without_direct_test_reference": 147,
     "high_priority_components": 47,
     "high_priority_direct_test_referenced": 47,
     "high_priority_direct_test_reference_pct": 100,
@@ -41314,12 +41314,12 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 17393,
-          "lines": 446,
+          "bytes": 19732,
+          "lines": 507,
           "imports": 0,
-          "exports": 20,
+          "exports": 24,
           "routes": 2,
-          "env_refs": 0,
+          "env_refs": 1,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
@@ -41328,12 +41328,13 @@
         },
         "risk_signals": [
           "distribution_or_worker_surface",
+          "environment_configuration_boundary",
           "execution_or_subprocess_boundary",
           "http_route_surface"
         ],
         "priority_score": 6,
         "priority_band": "medium",
-        "sha256": "e657aa287111846af293def90fb14294e86dd07cffbc155c9e7ef72faa8205e0"
+        "sha256": "54098ebf0aef49037d9b313676fa31df52150608f1b84c6f28cce3ce7d421d48"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -41341,19 +41342,19 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave663-dsir-resample-worker-contract.test.js"
+        ],
         "category_links": [],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "workers/data/scripts/minhash_dedup.py",

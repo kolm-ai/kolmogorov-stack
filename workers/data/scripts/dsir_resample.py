@@ -72,8 +72,28 @@ EXIT_NO_INPUT = 20
 DEFAULT_SEED = 0x6B6F6C6D  # "kolm" — the canonical kolm worker seed
 DEFAULT_DIM = 4096
 
+
+def _env_int(name, default):
+    try:
+        value = int(os.environ.get(name, str(default)))
+    except Exception:
+        return default
+    return value if value > 0 else default
+
+
+MAX_DIM = _env_int("KOLM_DSIR_MAX_DIM", 262144)
+MAX_ROWS = _env_int("KOLM_DSIR_MAX_ROWS", 200000)
+MAX_LINE_CHARS = _env_int("KOLM_DSIR_MAX_LINE_CHARS", 1000000)
+
 _WORD = re.compile(r"[a-z0-9]+")
 _MASK64 = (1 << 64) - 1
+
+
+class InputLimitError(Exception):
+    def __init__(self, code, detail=None):
+        super().__init__(code)
+        self.code = code
+        self.detail = detail or code
 
 
 def log(msg):
@@ -140,7 +160,11 @@ def _row_text(r):
 def load_rows(path):
     rows = []
     with open(path, "r", encoding="utf-8") as f:
-        for line in f:
+        for line_no, line in enumerate(f, start=1):
+            if len(line) > MAX_LINE_CHARS:
+                raise InputLimitError("input_line_too_large", f"line {line_no} exceeds {MAX_LINE_CHARS} chars")
+            if len(rows) >= MAX_ROWS:
+                raise InputLimitError("input_too_many_rows", f"row limit {MAX_ROWS} exceeded")
             line = line.strip()
             if not line:
                 continue
@@ -153,7 +177,11 @@ def load_rows(path):
 
 def load_rows_stdin():
     rows = []
-    for line in sys.stdin:
+    for line_no, line in enumerate(sys.stdin, start=1):
+        if len(line) > MAX_LINE_CHARS:
+            raise InputLimitError("input_line_too_large", f"stdin line {line_no} exceeds {MAX_LINE_CHARS} chars")
+        if len(rows) >= MAX_ROWS:
+            raise InputLimitError("input_too_many_rows", f"row limit {MAX_ROWS} exceeded")
         line = line.strip()
         if not line:
             continue
@@ -199,6 +227,18 @@ def aggregate_distribution(feature_dicts, dim):
             grand += c
     inv = 1.0 / grand
     return [t * inv for t in totals]
+
+
+def normalize_dim(dim):
+    try:
+        d = int(dim)
+    except Exception:
+        raise InputLimitError("dim_invalid", "dim must be an integer")
+    if d < 64:
+        return 64
+    if d > MAX_DIM:
+        raise InputLimitError("dim_too_large", f"dim {d} exceeds max {MAX_DIM}")
+    return d
 
 
 def importance_weights(raw_feats, p_target, q_raw, dim):
@@ -265,6 +305,7 @@ def _try_numpy_weights(raw_feats, p_target, q_raw, dim):
 # --- core --------------------------------------------------------------------
 def dsir_select(raw_rows, target_rows, target_size, seed, dim):
     """Run DSIR end to end. Returns (selected_indices, weights, backend)."""
+    dim = normalize_dim(dim)
     raw_feats = [feature_counts(_row_text(r), dim) for r in raw_rows]
     q_raw = aggregate_distribution(raw_feats, dim)
 
@@ -394,9 +435,19 @@ def main():
             log(f"[dsir] input not found: {args.pairs}")
             print(json.dumps({"ok": False, "error": "input_not_found", "pairs": args.pairs}))
             return EXIT_NO_INPUT
-        raw_rows = load_rows(args.pairs)
+        try:
+            raw_rows = load_rows(args.pairs)
+        except InputLimitError as e:
+            log(f"[dsir] input rejected: {e.detail}")
+            print(json.dumps({"ok": False, "error": e.code, "detail": e.detail}))
+            return EXIT_NO_INPUT
     else:
-        raw_rows = load_rows_stdin()
+        try:
+            raw_rows = load_rows_stdin()
+        except InputLimitError as e:
+            log(f"[dsir] stdin rejected: {e.detail}")
+            print(json.dumps({"ok": False, "error": e.code, "detail": e.detail}))
+            return EXIT_NO_INPUT
 
     if not raw_rows:
         log("[dsir] raw pool is empty")
@@ -409,9 +460,19 @@ def main():
             log(f"[dsir] target not found: {args.target}")
             print(json.dumps({"ok": False, "error": "target_not_found", "target": args.target}))
             return EXIT_NO_INPUT
-        target_rows = load_rows(args.target)
+        try:
+            target_rows = load_rows(args.target)
+        except InputLimitError as e:
+            log(f"[dsir] target rejected: {e.detail}")
+            print(json.dumps({"ok": False, "error": e.code, "detail": e.detail}))
+            return EXIT_NO_INPUT
 
-    dim = max(64, int(args.dim) if args.dim else DEFAULT_DIM)
+    try:
+        dim = normalize_dim(args.dim if args.dim else DEFAULT_DIM)
+    except InputLimitError as e:
+        log(f"[dsir] invalid dim: {e.detail}")
+        print(json.dumps({"ok": False, "error": e.code, "detail": e.detail}))
+        return EXIT_NO_INPUT
     selected, weights, backend = dsir_select(
         raw_rows, target_rows, args.target_size, args.seed & _MASK64, dim)
 
