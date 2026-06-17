@@ -37,6 +37,7 @@ test('W584 #1 - catalog covers no-train, supervised, KD, preference, on-policy, 
     'ropd',
     'gkd_onpolicy',
     'distillm2',
+    'moe_to_dense_distill',
     'reverse_kl_minillm',
     'cot_distill',
     'preference_optimization',
@@ -59,6 +60,10 @@ test('W584 #2 - catalog exposes spec id, family coverage, and teacher_required f
   }
   assert.ok(catalog.strategies.some((s) => s.id === 'kd_softmax' && s.teacher_required && s.requires_teacher_logits));
   assert.ok(catalog.strategies.some((s) => s.id === 'ropd' && s.teacher_required && !s.requires_teacher_logits));
+  const moe = catalog.strategies.find((s) => s.id === 'moe_to_dense_distill');
+  assert.equal(moe.execution_status, 'plan_only');
+  assert.equal(moe.requires_moe, true);
+  assert.ok(moe.references.some((r) => /moe-to-dense/i.test(r.name)));
 });
 
 test('W584 #3 - API-teacher generation chooses black-box ROPD instead of logit KD', () => {
@@ -292,4 +297,60 @@ test('W584 #14 - reasoning workloads prefer trace distillation when captures are
   assert.equal(plan.ok, true);
   assert.equal(plan.recommendation.id, 'cot_distill');
   assert.match(plan.recommendation.command, /reasoning-trace-loss-weight/);
+});
+
+test('W584 #15 - local MoE teacher routes to the MoE-to-dense plan-only strategy', () => {
+  const plan = planDistillStrategy({
+    task: 'reasoning',
+    namespace: 'moe-laptop',
+    real_pairs: 2000,
+    holdout_pairs: 400,
+    teachers: ['local:Qwen/Qwen3-30B-A3B-MoE'],
+    teacher_local: true,
+    teacher_model: 'Qwen/Qwen3-30B-A3B-MoE',
+    base_model: 'Qwen/Qwen3-8B',
+  }, {});
+  assert.equal(plan.ok, true);
+  assert.equal(plan.profile.moe.teacher_is_moe, true);
+  assert.equal(plan.profile.moe.teacher_family, 'qwen3-moe-a3b');
+  assert.equal(plan.recommendation.id, 'moe_to_dense_distill');
+  assert.equal(plan.recommendation.execution_status, 'plan_only');
+  assert.match(plan.recommendation.command, /kolm distill moe-to-dense/);
+  assert.match(plan.recommendation.command, /--plan-only/);
+});
+
+test('W584 #16 - text-only MoE signal does not bypass the local-logit requirement', () => {
+  const plan = planDistillStrategy({
+    task: 'generation',
+    real_pairs: 2000,
+    holdout_pairs: 400,
+    teachers: ['openrouter:qwen3-moe'],
+    teacher_model: 'Qwen/Qwen3-30B-A3B-MoE',
+  }, {});
+  assert.equal(plan.ok, true);
+  assert.equal(plan.recommendation.id, 'ropd');
+  const row = plan.ranked.find((r) => r.id === 'moe_to_dense_distill');
+  assert.equal(row.feasible, false);
+  assert.ok(row.blockers.includes('teacher_logits_required'));
+});
+
+test('W584 #17 - strategy script accepts MoE flags and emits the MoE-to-dense plan', () => {
+  const r = spawnSync(process.execPath, [
+    'scripts/distill-strategy.mjs',
+    '--simulate', 'local',
+    '--task', 'reasoning',
+    '--teacher-is-moe',
+    '--teacher-model', 'Qwen/Qwen3-30B-A3B-MoE',
+    '--real-pairs', '2000',
+    '--holdout-pairs', '400',
+    '--summary',
+    '--require-ready',
+  ], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 15000,
+  });
+  assert.equal(r.status, 0, r.stderr || r.stdout);
+  assert.match(r.stdout, /recommendation=moe_to_dense_distill/);
+  assert.match(r.stdout, /moe-to-dense/);
 });

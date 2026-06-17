@@ -41,6 +41,11 @@ function profileFromFlags() {
     budget_usd: Number(flag('--budget-usd', '0')),
     existing_artifact: has('--existing-artifact'),
     teacher_local: has('--teacher-local') || has('--local-teacher') || has('--teacher-logits'),
+    teacher_model: flag('--teacher-model', ''),
+    teacher_architecture: flag('--teacher-architecture', ''),
+    teacher_moe_family: flag('--teacher-moe-family', flag('--moe-family', '')),
+    teacher_is_moe: has('--teacher-is-moe') || has('--moe-teacher'),
+    base_is_moe: has('--base-is-moe') || has('--model-is-moe'),
     teachers: teachers ? teachers.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
   };
 }

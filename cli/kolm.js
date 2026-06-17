@@ -22060,6 +22060,11 @@ function distillStrategyProfile(args) {
     budget_usd: distillStrategyNumber(args, ['--budget-usd', '--budget'], 0),
     existing_artifact: args.includes('--existing-artifact'),
     teacher_local: args.includes('--teacher-local') || args.includes('--local-teacher') || args.includes('--teacher-logits'),
+    teacher_model: distillStrategyFlag(args, '--teacher-model', ''),
+    teacher_architecture: distillStrategyFlag(args, '--teacher-architecture', ''),
+    teacher_moe_family: distillStrategyFlag(args, '--teacher-moe-family', distillStrategyFlag(args, '--moe-family', '')),
+    teacher_is_moe: args.includes('--teacher-is-moe') || args.includes('--moe-teacher'),
+    base_is_moe: args.includes('--base-is-moe') || args.includes('--model-is-moe'),
     teachers: teachers ? teachers.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
   };
 }

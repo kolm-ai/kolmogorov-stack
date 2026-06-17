@@ -1,4 +1,5 @@
 import { classifyTeacher } from './distill-pipeline.js';
+import { MOE_FAMILIES, familyForArchitecture, getFamily } from './moe-registry.js';
 
 const TASKS = Object.freeze(['classification', 'extraction', 'generation', 'redaction', 'code', 'chat', 'reasoning', 'unknown']);
 const PRIVACY_MODES = Object.freeze(['standard', 'regulated', 'zero_retention', 'airgap']);
@@ -121,6 +122,25 @@ const STRATEGIES = Object.freeze([
     best_for: ['generation', 'chat', 'open-weights-teacher'],
   },
   {
+    id: 'moe_to_dense_distill',
+    label: 'MoE-to-dense distillation plan',
+    family: 'distill',
+    command_kind: 'moe-distill',
+    execution_status: 'plan_only',
+    objective: 'forward_kl',
+    min_real_pairs: 1000,
+    min_holdout_pairs: 200,
+    teacher_required: true,
+    requires_teacher_logits: true,
+    requires_moe: true,
+    privacy: ['standard', 'regulated', 'zero_retention', 'airgap'],
+    best_for: ['generation', 'reasoning', 'moe-teacher', 'large-moe-reasoner', 'moe-to-dense', 'expert-prune-then-distill'],
+    references: [
+      { name: 'krafton-ai/moe-to-dense', method: 'expert-score-prune-merge-forward-kl', status: 'frontier_reference' },
+      { name: 'SlimMoE', method: 'multi-stage-expert-slimming-and-distill', status: 'frontier_reference' },
+    ],
+  },
+  {
     id: 'reverse_kl_minillm',
     label: 'Reverse-KL MiniLLM distillation',
     family: 'distill',
@@ -195,6 +215,97 @@ function clean(value, fallback = 'default') {
   return String(value || fallback).replace(/[^a-zA-Z0-9_.:/@+-]/g, '-').slice(0, 180) || fallback;
 }
 
+function _boolish(value) {
+  return value === true || truthy(value);
+}
+
+function _familyFromString(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+  const exact = getFamily(raw);
+  if (exact) return exact;
+  const arch = familyForArchitecture(raw);
+  if (arch) return arch;
+  const lower = raw.toLowerCase();
+  for (const family of Object.values(MOE_FAMILIES)) {
+    if (lower === family.id || lower.includes(family.id)) return family;
+    if (lower.includes(String(family.display_name || '').toLowerCase())) return family;
+    for (const a of (family.architectures || [])) {
+      if (lower.includes(String(a).toLowerCase())) return family;
+    }
+  }
+  if (/qwen3.*moe|qwen.*30b.*a3b.*moe/.test(lower)) return getFamily('qwen3-moe-a3b');
+  if (/qwen2.*moe|qwen.*a14b.*moe/.test(lower)) return getFamily('qwen2-moe-a14b');
+  if (/deepseek.*v3/.test(lower)) return getFamily('deepseek-v3');
+  if (/deepseek.*v2.*lite/.test(lower)) return getFamily('deepseek-v2-lite');
+  if (/mixtral.*8x22/.test(lower)) return getFamily('mixtral-8x22b');
+  if (/mixtral|8x7b/.test(lower)) return getFamily('mixtral-8x7b');
+  if (/llama[-_ ]?4|maverick/.test(lower)) return getFamily('llama4-maverick');
+  return /\bmoe\b|mixture[-_ ]?of[-_ ]?experts/.test(lower) ? { id: 'unknown-moe', display_name: 'Unknown MoE' } : null;
+}
+
+function _firstFamily(...values) {
+  for (const value of values) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      const fam = _familyFromString(value.family || value.moe_family || value.id || value.architecture);
+      if (fam) return fam;
+      if (_boolish(value.is_moe)) return { id: 'unknown-moe', display_name: 'Unknown MoE' };
+    } else {
+      const fam = _familyFromString(value);
+      if (fam) return fam;
+    }
+  }
+  return null;
+}
+
+function moeProfileFrom(input, teacherModels) {
+  const teacherFamily = _firstFamily(
+    input.teacher_moe_family,
+    input.moe_teacher_family,
+    input.teacher_moe_info,
+    input.teacher_model,
+    input.teacher_base_model,
+    input.teacher_architecture,
+    ...(Array.isArray(teacherModels) ? teacherModels : []),
+  );
+  const baseFamily = _firstFamily(
+    input.base_moe_family,
+    input.moe_family,
+    input.base_moe_info,
+    input.model_moe_info,
+    input.base_model,
+    input.model,
+    input.model_architecture,
+    input.architecture,
+  );
+  const teacherExplicit = _boolish(input.teacher_is_moe)
+    || _boolish(input.teacher_moe)
+    || _boolish(input.moe_teacher)
+    || _boolish(input.teacher_moe_info && input.teacher_moe_info.is_moe);
+  const baseExplicit = _boolish(input.base_is_moe)
+    || _boolish(input.model_is_moe)
+    || _boolish(input.student_is_moe)
+    || _boolish(input.is_moe)
+    || _boolish(input.base_moe_info && input.base_moe_info.is_moe)
+    || _boolish(input.model_moe_info && input.model_moe_info.is_moe);
+  const teacherModel = clean(input.teacher_model || input.teacher_base_model || teacherModels[0] || 'local-moe-teacher', 'local-moe-teacher');
+  const signals = [];
+  if (teacherExplicit) signals.push('teacher_flag');
+  if (baseExplicit) signals.push('base_flag');
+  if (teacherFamily) signals.push('teacher_family:' + teacherFamily.id);
+  if (baseFamily) signals.push('base_family:' + baseFamily.id);
+  return {
+    teacher_is_moe: teacherExplicit || !!teacherFamily,
+    base_is_moe: baseExplicit || !!baseFamily,
+    has_moe_signal: teacherExplicit || baseExplicit || !!teacherFamily || !!baseFamily,
+    teacher_family: teacherFamily ? teacherFamily.id : null,
+    base_family: baseFamily ? baseFamily.id : null,
+    family: (teacherFamily || baseFamily || null)?.id || null,
+    teacher_model: teacherModel,
+    signals,
+  };
+}
+
 function normalizeTask(value) {
   const v = String(value || 'unknown').toLowerCase().trim();
   return TASKS.includes(v) ? v : 'unknown';
@@ -265,6 +376,7 @@ function profileFrom(input = {}, env = process.env) {
     teachers: teacherModels,
     teacher_classes: access.classes,
     teacher_access: access,
+    moe: moeProfileFrom(input, teacherModels),
   };
 }
 
@@ -278,6 +390,7 @@ function commandFor(strategy, profile) {
   if (strategy.command_kind === 'ropd-blackbox') return `kolm distill onpolicy --ropd --namespace ${ns}`;
   if (strategy.command_kind === 'onpolicy-gkd') return `kolm distill onpolicy train --namespace ${ns} --pairs <pairs.jsonl> --student <student-path> --teacher <local-teacher>`;
   if (strategy.command_kind === 'local-worker-objective') return `kolm distill --local-worker --mode full --teacher-local --objective=${strategy.objective} --spec <spec.json> --seeds <pairs.jsonl> --out <out-dir>`;
+  if (strategy.command_kind === 'moe-distill') return `kolm distill moe-to-dense --namespace ${ns} --teacher ${clean(profile.moe.teacher_model, 'local-moe-teacher')} --student-base ${base} --plan-only`;
   if (strategy.command_kind === 'cot-distill') return `kolm distill --namespace ${ns} --reasoning-trace-loss-weight 0.2`;
   if (strategy.command_kind === 'preference') return `kolm distill preference --namespace ${ns} --objective dpo`;
   if (strategy.command_kind === 'onpolicy') return `kolm distill onpolicy --namespace ${ns}`;
@@ -293,6 +406,7 @@ function scoreStrategy(strategy, profile) {
   if ((strategy.min_preference_pairs || 0) > profile.preference_pairs) blockers.push(`preference_pairs_below_min:${profile.preference_pairs}<${strategy.min_preference_pairs}`);
   if (strategy.teacher_required && !profile.teachers.length) blockers.push('teacher_not_configured');
   if (strategy.requires_teacher_logits && !profile.teacher_access.has_teacher_logits) blockers.push('teacher_logits_required');
+  if (strategy.requires_moe && !profile.moe.has_moe_signal) blockers.push('moe_teacher_or_base_required');
   if (profile.synthetic_pairs > 0 && profile.real_pairs === 0 && strategy.family !== 'data' && strategy.id !== 'rule_or_cache_first') blockers.push('synthetic_only_not_trainable');
   const feasible = blockers.length === 0;
   let score = 0;
@@ -308,6 +422,12 @@ function scoreStrategy(strategy, profile) {
   if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'gkd_onpolicy') score += 24;
   if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'distillm2') score += 14;
   if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'reverse_kl_minillm') score += 12;
+  if (strategy.id === 'moe_to_dense_distill') {
+    if (profile.moe.teacher_is_moe) score += 48;
+    if (profile.moe.base_is_moe) score += 22;
+    if (profile.teacher_access.has_open_weights_teacher) score += 10;
+    if (profile.task === 'reasoning') score += 10;
+  }
   if (profile.task === 'reasoning' && strategy.id === 'cot_distill') score += 30;
   if (profile.task === 'reasoning' && strategy.id === 'ropd') score += 10;
   if (profile.preference_pairs >= 50 && strategy.id === 'preference_optimization') score += 22;
@@ -329,8 +449,10 @@ function scoreStrategy(strategy, profile) {
     command,
     teacher_required: strategy.teacher_required,
     requires_teacher_logits: strategy.requires_teacher_logits === true,
+    execution_status: strategy.execution_status || 'available',
     privacy_modes: strategy.privacy,
     best_for: strategy.best_for,
+    references: strategy.references || [],
   };
 }
 
@@ -348,8 +470,11 @@ export function distillStrategyCatalog() {
       min_preference_pairs: s.min_preference_pairs || 0,
       teacher_required: s.teacher_required,
       requires_teacher_logits: s.requires_teacher_logits === true,
+      requires_moe: s.requires_moe === true,
+      execution_status: s.execution_status || 'available',
       privacy_modes: s.privacy,
       best_for: s.best_for,
+      references: s.references || [],
     })),
   };
 }
